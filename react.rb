@@ -114,6 +114,7 @@ module React
     end
   end
 
+  # Stores (and caches) a single dependent value in a context
   class ObservableValue
     def initialize(&valueProc)
       @valueProc = valueProc
@@ -148,6 +149,22 @@ module React
           @dependencies.each_value {|dep_ctx| dep_ctx.invalidate}
         end
       end
+  end
+
+  # Runs the given proc whenever its dependencies change
+  class Observer
+    def initialize(&proc)
+      @proc = proc
+      run
+    end
+
+    def run
+      ctx = React::Context.new
+      ctx.on_invalidate do
+        run
+      end
+      ctx.run &@proc
+    end
   end
 
 end

@@ -1,26 +1,15 @@
 require './react'
 
-class Observer
-  def initialize(&proc)
-    @proc = proc
-    run
-  end
+include React
 
-  def run
-    ctx = React::Context.new
-    ctx.on_invalidate do
-      run
-    end
-    ctx.run &@proc
-  end
-end
+sess = Session.new
+sess.set('user', '')
 
-sess = React::Session.new
-user = React::ObservableValue.new { sess.get('user') }
-upUser = React::ObservableValue.new { (user.get||'').upcase }
+user = ObservableValue.new { sess.get('user') }
+upUser = ObservableValue.new { user.get.upcase }
 Observer.new { puts upUser.get }
 
 sess.set('user', 'jcheng')
-React::Context.flush
+Context.flush
 sess.set('user', 'jjallaire')
-React::Context.flush
+Context.flush

@@ -85,23 +85,30 @@ def run_shiny_app(shinyapp)
       shinyapp.websocket = ws
       ws.onclose { exit(0) }
       ws.onmessage do |msg|
-        puts "RECV: #{msg}"
+        begin
+          puts "RECV: #{msg}"
 
-        msg_obj = JSON.parse(msg)
-        case msg_obj['method']
-        when 'init'
-          msg_obj['data'].each do |k, v|
-            shinyapp.session.set(k, v)
+          msg_obj = JSON.parse(msg)
+          case msg_obj['method']
+          when 'init'
+            msg_obj['data'].each do |k, v|
+              shinyapp.session.set(k, v)
+            end
+            React::Context.flush
+            shinyapp.instantiate_outputs
+          when 'update'
+            msg_obj['data'].each do |k, v|
+              shinyapp.session.set(k, v)
+            end
           end
+
           React::Context.flush
-          shinyapp.instantiate_outputs
-        when 'update'
-          msg_obj['data'].each do |k, v|
-            shinyapp.session.set(k, v)
-          end
+          shinyapp.flush_output
+        rescue Exception => e
+          puts "ERROR: #{e}"
+          puts e.backtrace.collect {|x| "\t#{x}"}
+          raise
         end
-
-        React::Context.flush
       end
     end
   end
@@ -113,6 +120,7 @@ class ShinyApp
   def initialize
     @session = React::Session.new
     @outputs = {}
+    @invalidated_output_values = Hash.new
   end
 
   def websocket=(value)
@@ -128,16 +136,21 @@ class ShinyApp
       proc = @outputs.delete(name)
       React::Observer.new do
         value = proc.call
-        msg = {}
-        msg[name] = value
-        puts "SEND: #{JSON.generate(msg)}"
-        @websocket.send(JSON.generate(msg))
+        @invalidated_output_values[name] = value
       end
     end
+  end
+
+  def flush_output
+    return if @invalidated_output_values.empty?
+
+    data = @invalidated_output_values
+    @invalidated_output_values = Hash.new
+    puts "SEND: #{JSON.generate(data)}"
+    @websocket.send(JSON.generate(data))
   end
 
   def run
     run_shiny_app self
   end
 end
-

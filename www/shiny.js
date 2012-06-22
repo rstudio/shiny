@@ -124,13 +124,15 @@
       // TODO: If submit button is present, don't send anything
       //   until submit button is pressed
       initialValues[name] = value;
-      var onChange = function() {
-        var data = {};
-        data[name] = elementToValue(input);
-        shinyapp.sendInput(data);
-      };
-      $(input).keyup(onChange);
-      $(input).change(onChange);
+      $(input).bind('change keyup input', function() {
+        var newValue = elementToValue(input);
+        if (value !== newValue) {
+          value = newValue;
+          var data = {};
+          data[name] = value;
+          shinyapp.sendInput(data);
+        }
+      });
     });
 
     shinyapp.connect(initialValues);

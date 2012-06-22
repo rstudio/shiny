@@ -10,8 +10,6 @@ module React
 
     public
 
-      attr_reader :callbacks
-
       def self.current!
         return current || raise("No current context")
       end
@@ -65,6 +63,10 @@ module React
         end
       end
 
+      def execute_callbacks
+        @callbacks.each {|callback| callback.call(self)}
+      end
+
       # Execute all callbacks on invalidated contexts. Will do this
       # repeatedly if the callbacks themselves cause more invalidations.
       def self.flush
@@ -72,11 +74,7 @@ module React
           contexts = @@pending_invalidate
           @@pending_invalidate = []
 
-          contexts.each do |context|
-            context.callbacks.each do |callback|
-              callback.call(self)
-            end
-          end
+          contexts.each {|context| context.execute_callbacks}
         end
       end
   end

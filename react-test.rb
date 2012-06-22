@@ -1,4 +1,4 @@
-require './react'
+require 'react'
 
 include React
 

@@ -1,3 +1,5 @@
 #!/bin/sh
 
-bundle exec ruby server.rb
+SCRIPT=${1:-hash.rb}
+
+bundle exec ruby -Ilib "$SCRIPT"

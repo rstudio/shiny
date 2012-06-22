@@ -3,7 +3,7 @@ require 'evma_httpserver'
 require 'em-websocket'
 require 'pathname'
 require 'json'
-require './react'
+require 'react'
 
 
 class WebServer < EM::Connection

@@ -1,4 +1,4 @@
-require './shiny'
+require 'shiny'
 require 'digest/sha1'
 require 'digest/md5'
 

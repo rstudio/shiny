@@ -108,20 +108,29 @@
       shinyapp.bind(this.id, new LiveTextBinding(this));
     });
 
+    function elementToValue(el) {
+      if (el.type == 'checkbox')
+        return el.checked ? true : false;
+      else
+        return $(el).val();
+    }
+
     var initialValues = {};
     $('input').each(function() {
       var input = this;
       var name = input.name;
-      var value = $(input).val();
+      var value = elementToValue(input);
       // TODO: validate name is non-blank, and no duplicates
       // TODO: If submit button is present, don't send anything
       //   until submit button is pressed
       initialValues[name] = value;
-      $(input).keyup(function() {
+      var onChange = function() {
         var data = {};
-        data[name] = $(input).val();
+        data[name] = elementToValue(input);
         shinyapp.sendInput(data);
-      });
+      };
+      $(input).keyup(onChange);
+      $(input).change(onChange);
     });
 
     shinyapp.connect(initialValues);

@@ -120,11 +120,15 @@ module React
       @valueProc = valueProc
       
       @dependencies = Hash.new
-      
-      update_value
+      @initialized = false
     end
 
     def value
+      if !@initialized
+        @initialized = true
+        update_value
+      end
+
       cur_ctx = React::Context.current!
       @dependencies[cur_ctx.id] = cur_ctx
       cur_ctx.on_invalidate do

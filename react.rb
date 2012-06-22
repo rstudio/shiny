@@ -124,7 +124,7 @@ module React
       update_value
     end
 
-    def get
+    def value
       cur_ctx = React::Context.current!
       @dependencies[cur_ctx.id] = cur_ctx
       cur_ctx.on_invalidate do

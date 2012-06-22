@@ -1,22 +1,17 @@
-require 'em-websocket'
-require 'rack'
+require './shiny'
+require 'digest/sha1'
+require 'digest/md5'
 
-class RapportApp
+shinyapp = ShinyApp.new
 
-  # Rack entry point
-  def call(env)
-    return [
-      200,
-      {'Content-Type' => 'text/html'},
-      ["Hi"]
-    ]
-  end
+input1 = React::ObservableValue.new { shinyapp.session.get('input1') }
 
+shinyapp.define_output('md5_hash') do
+  Digest::MD5.hexdigest(input1.value)
 end
 
-rapp = RapportApp.new
+shinyapp.define_output('sha1_hash') do
+  Digest::SHA1.hexdigest(input1.value)
+end
 
-Rack::Server.new(
-  :app => rapp,
-  :Port => 8113,
-  :server => 'webrick').start
+shinyapp.run

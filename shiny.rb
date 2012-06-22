@@ -61,6 +61,8 @@ class WebServer < EM::Connection
         'text/html'
       when /\.js$/
         'text/javascript'
+      when /\.css$/
+        'text/css'
       when /\.png$/
         'image/png'
       when /\.jpg$/
@@ -77,6 +79,7 @@ end
 def run_shiny_app(shinyapp)
   EventMachine.run do
     EventMachine.start_server '0.0.0.0', 8100, WebServer
+    puts "Listening on port 8100"
     
     EventMachine::WebSocket.start(:host => '0.0.0.0', :port => 8101) do |ws|
       shinyapp.websocket = ws

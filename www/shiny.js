@@ -24,8 +24,6 @@
 
       var socket = new WebSocket('ws://' + window.location.hostname + ':8101/events');
       socket.onopen = function() {
-        console.log('connected to websocket');
-
         socket.send(JSON.stringify({
           method: 'init',
           data: self.$initialInput

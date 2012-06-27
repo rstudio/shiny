@@ -2,3 +2,4 @@ vendor/ruby
 \.bundle/
 \.DS_Store
 .Rproj.user
+.Rhistory

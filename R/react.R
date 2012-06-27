@@ -26,13 +26,15 @@ Map <- setRefClass(
     },
     set = function(key, value) {
       assign(key, value, pos=.env, inherits=F)
+      return(value)
     },
     remove = function(key) {
-      if (contains.key(key)) {
+      if (.self$contains.key(key)) {
+        result <- .self$get(key)
         rm(list = key, pos=.env, inherits=F)
-        return(T)
+        return(result)
       }
-      return(F)
+      return(NULL)
     },
     contains.key = function(key) {
       exists(key, where=.env, inherits=F)
@@ -45,9 +47,22 @@ Map <- setRefClass(
     },
     clear = function() {
       .env <<- new.env(parent=emptyenv())
+      invisible(NULL)
+    },
+    size = function() {
+      length(.env)
     }
   )
 )
+
+as.list.Map <- function(map) {
+  sapply(map$keys(),
+         map$get,
+         simplify=F)
+}
+length.Map <- function(map) {
+  map$size()
+}
 
 Context <- setRefClass(
   'Context',
@@ -174,6 +189,12 @@ Values <- setRefClass(
         }
       )
       invisible()
+    },
+    mset = function(lst) {
+      lapply(names(lst),
+             function(name) {
+               .self$set(name, lst[[name]])
+             })
     }
   )
 )
@@ -276,5 +297,7 @@ test <- function () {
   obs2 <- Observer$new(function() {print(paste0('a+b: ', observable$get.value()))})
   flush.react()
   values$set('b', 300)
+  flush.react()
+  values$mset(list(a = 10, b = 20))
   flush.react()
 }

@@ -92,20 +92,47 @@
   var LiveTextBinding = function(el) {
     this.el = el;
   };
-
   (function() {
     this.onValueChange = function(data) {
       $(this.el).text(data);
     };
   }).call(LiveTextBinding.prototype);
 
+  var LivePlotBinding = function(el) {
+    this.el = el;
+  };
+  (function() {
+    this.onValueChange = function(data) {
+      $(this.el).empty();
+      if (!data)
+        return;
+      var img = document.createElement('img');
+      img.src = data;
+      this.el.appendChild(img);
+    };
+  }).call(LivePlotBinding.prototype);
 
+  var LiveHTMLBinding = function(el) {
+    this.el = el;
+  };
+  (function() {
+    this.onValueChange = function(data) {
+      $(this.el).html(data)
+    };
+  }).call(LiveHTMLBinding.prototype);
+  
   $(function() {
 
     var shinyapp = window.shinyapp = new ShinyApp();
 
     $('.live-text').each(function() {
       shinyapp.bind(this.id, new LiveTextBinding(this));
+    });
+    $('.live-plot').each(function() {
+      shinyapp.bind(this.id, new LivePlotBinding(this));
+    });
+    $('.live-html').each(function() {
+      shinyapp.bind(this.id, new LiveHTMLBinding(this));
     });
 
     function elementToValue(el) {

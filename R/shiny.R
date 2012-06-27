@@ -38,10 +38,15 @@ ShinyApp <- setRefClass(
         return(paste("data:image/png;base64,", b64, sep=''))
       })
     },
-    define.table.output = function(name, func) {
+    define.table.output = function(name, func, ...) {
       .outputs$set(name, function() {
         data <- func()
-        return(paste(capture.output(print(xtable(data), type='html')), collapse="\n"))
+        return(paste(
+          capture.output(
+            print(xtable(data, ...), 
+                  type='html', 
+                  html.table.attributes='class="data"')),
+          collapse="\n"))
       })
     },
     instantiate.outputs = function() {
@@ -147,8 +152,8 @@ start.app <- function(app, www.root, sys.www.root=NULL, port=8101L) {
           define.shiny.plot <- function(name, func, ...) {
             shinyapp$define.plot.output(name, func, ...)
           }
-          define.shiny.table <- function(name, func) {
-            shinyapp$define.table.output(name, func)
+          define.shiny.table <- function(name, func, ...) {
+            shinyapp$define.table.output(name, func, ...)
           }
           get.shiny.input <- function(name) {
             shinyapp$session$get(name)

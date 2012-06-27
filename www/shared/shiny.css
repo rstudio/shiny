@@ -2,3 +2,14 @@ body.disconnected {
   background-color: #999;
   opacity: 0.5;
 }
+
+table.data {
+  border-collapse: collapse;
+}
+table.data td, table th {
+  border: 1px solid #CCC;
+  padding: 3pt 8pt;
+}
+table.data td[align=right] {
+  font-family: monospace;
+}

@@ -103,12 +103,17 @@
   };
   (function() {
     this.onValueChange = function(data) {
-      $(this.el).empty();
-      if (!data)
-        return;
-      var img = document.createElement('img');
-      img.src = data;
-      this.el.appendChild(img);
+      if (this.el.tagName == 'IMG') {
+        this.el.src = data ? data : '';
+      }
+      else {
+        $(this.el).empty();
+        if (!data)
+          return;
+        var img = document.createElement('img');
+        img.src = data;
+        this.el.appendChild(img);
+      }
     };
   }).call(LivePlotBinding.prototype);
 

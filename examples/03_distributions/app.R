@@ -22,3 +22,7 @@ define.shiny.plot('plot1', function() {
 define.shiny.table('table1', function() {
   data.frame(x=data$get.value())
 })
+
+define.shiny.output('summary1', function() {
+  paste(capture.output(print(summary(data$get.value()))), collapse="\n")
+})

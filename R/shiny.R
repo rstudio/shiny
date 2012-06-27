@@ -91,11 +91,10 @@ statics <- function(root, sys.root=NULL) {
   }
   
   return(function(ws, header) {
-    # TODO: Stop using websockets' internal methods
     path <- header$RESOURCE
     
     if (is.null(path))
-      return(websockets:::.http_400(ws))
+      return(http_response(ws, 400, content="<h1>Bad Request</h1>"))
     
     if (path == '/')
       path <- '/index.html'
@@ -104,7 +103,7 @@ statics <- function(root, sys.root=NULL) {
     if (is.null(abs.path) && !is.null(sys.root))
       abs.path <- resolve(sys.root, path)
     if (is.null(abs.path))
-      return(websockets:::.http_400(ws))
+      return(http_response(ws, 404, content="<h1>Not Found</h1>"))
     
     ext <- tools::file_ext(abs.path)
     content.type <- switch(ext,
@@ -118,7 +117,7 @@ statics <- function(root, sys.root=NULL) {
                            gif='image/gif',
                            'application/octet-stream')
     response.content <- readBin(abs.path, 'raw', n=file.info(abs.path)$size)
-    return(websockets:::.http_200(ws, content.type, response.content))
+    return(http_response(ws, 200, content.type, response.content))
   })
 }
 

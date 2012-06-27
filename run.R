@@ -11,5 +11,6 @@ app.path <- args[1]
 
 app <- start.app(app=file.path(app.path, 'app.R'),
                  www.root=file.path(app.path, 'www'),
-                 sys.www.root='./www')
+                 sys.www.root='./www',
+                 port=8100L)
 run.app(app)

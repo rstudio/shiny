@@ -2,7 +2,7 @@
 
   var $ = jQuery;
 
-  var ShinyApp = function() {
+  var ShinyApp = window.ShinyApp = function() {
     this.$socket = null;
     this.$bindings = {};
     this.$values = {};
@@ -22,7 +22,7 @@
     this.createSocket = function () {
       var self = this;
 
-      var socket = new WebSocket('ws://' + window.location.hostname + ':8101/events');
+      var socket = new WebSocket('ws://' + window.location.host, 'shiny');
       socket.onopen = function() {
         socket.send(JSON.stringify({
           method: 'init',

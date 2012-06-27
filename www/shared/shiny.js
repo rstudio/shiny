@@ -143,7 +143,7 @@
     }
 
     var initialValues = {};
-    $('input').each(function() {
+    $('input, select').each(function() {
       var input = this;
       var name = input.name;
       var value = elementToValue(input);

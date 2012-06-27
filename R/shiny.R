@@ -1,7 +1,9 @@
-library(websockets)
-library(RJSONIO)
-library(caTools)
-library(xtable)
+suppressPackageStartupMessages({
+  library(websockets)
+  library(RJSONIO)
+  library(caTools)
+  library(xtable)
+})
 
 ShinyApp <- setRefClass(
   'ShinyApp',
@@ -36,6 +38,12 @@ ShinyApp <- setRefClass(
         return(paste("data:image/png;base64,", b64, sep=''))
       })
     },
+    define.table.output = function(name, func) {
+      .outputs$set(name, function() {
+        data <- func()
+        return(paste(capture.output(print(xtable(data), type='html')), collapse="\n"))
+      })
+    },
     instantiate.outputs = function() {
       lapply(.outputs$keys(),
              function(key) {
@@ -52,14 +60,30 @@ ShinyApp <- setRefClass(
       
       data <- .invalidated.output.values
       .invalidated.output.values <<- Map$new()
-      cat(c("SEND", toJSON(as.list(data)), "\n"))
+      # cat(c("SEND", toJSON(as.list(data)), "\n"))
       websocket_write(toJSON(as.list(data)), .websocket)
     }
   )
 )
 
-statics <- function(root) {
+statics <- function(root, sys.root=NULL) {
   root <- normalizePath(root, mustWork=T)
+  if (!is.null(sys.root))
+    sys.root <- normalizePath(sys.root, mustWork=T)
+  
+  resolve <- function(dir, relpath) {
+    abs.path <- file.path(dir, relpath)
+    if (!file.exists(abs.path))
+      return(NULL)
+    abs.path <- normalizePath(abs.path, mustWork=T)
+    if (nchar(abs.path) <= nchar(dir) + 1)
+      return(NULL)
+    if (substr(abs.path, 1, nchar(dir)) != dir ||
+        !(substr(abs.path, nchar(dir)+1, nchar(dir)+1) %in% c('/', '\\'))) {
+      return(NULL)
+    }
+    return(abs.path)
+  }
   
   return(function(ws, header) {
     # TODO: Stop using websockets' internal methods
@@ -71,23 +95,11 @@ statics <- function(root) {
     if (path == '/')
       path <- '/index.html'
     
-    abs.path <- file.path(root, path)
-    
-    if (!file.exists(abs.path)) {
-      # TODO: This should be 404, not 400
+    abs.path <- resolve(root, path)
+    if (is.null(abs.path) && !is.null(sys.root))
+      abs.path <- resolve(sys.root, path)
+    if (is.null(abs.path))
       return(websockets:::.http_400(ws))
-    }
-    
-    abs.path <- normalizePath(abs.path, mustWork=T)
-    
-    if (nchar(abs.path) <= nchar(root) + 1) {
-      return(websockets:::.http_400(ws))
-    }
-    
-    if (substr(abs.path, 1, nchar(root)) != root ||
-        !(substr(abs.path, nchar(root)+1, nchar(root)+1) %in% c('/', '\\'))) {
-      return(websockets:::.http_400(ws))
-    }
     
     ext <- tools::file_ext(abs.path)
     content.type <- switch(ext,
@@ -105,51 +117,19 @@ statics <- function(root) {
   })
 }
 
-start.app <- function(port = 8101L) {
+start.app <- function(app, www.root, sys.www.root=NULL, port=8101L) {
   
-  ws_env <- create_server(port=port, webpage=statics('./www'))
+  ws_env <- create_server(port=port, webpage=statics(www.root, sys.www.root))
   
   set_callback('established', function(WS, ...) {
     shinyapp <<- ShinyApp$new(WS)
-    
-    input <- Observable$new(function() {
-      str <- shinyapp$session$get('input1')
-      if (shinyapp$session$get('addnewline'))
-        str <- paste(str, "\n", sep='')
-      return(str)
-    })
-    input.df <- Observable$new(function() {
-      varname <- shinyapp$session$get('input1')
-      if (nchar(varname) > 0 && exists(varname, where=.GlobalEnv)) {
-        df <- get(varname, pos=.GlobalEnv)
-        if (is.data.frame(df)) {
-          return(df)
-        }
-      }
-      return(NULL)
-    })
-    shinyapp$define.output('md5_hash', function() {
-      digest(input$get.value(), algo='md5', serialize=F)
-    })
-    shinyapp$define.output('sha1_hash', function() {
-      digest(input$get.value(), algo='sha1', serialize=F)
-    })
-    shinyapp$define.output('table1', function() {
-      if (!is.null(input.df$get.value()))
-        print(xtable(input.df$get.value()), type='html')
-    })
-    shinyapp$define.plot.output('plot1', function() {
-      if (!is.null(input.df$get.value()))
-        plot(input.df$get.value())
-    }, width=800, height=600)
-    
   }, ws_env)
   
    set_callback('closed', function(WS, ...) {
    }, ws_env)
   
   set_callback('receive', function(DATA, WS, ...) {
-    cat(c("RECV", rawToChar(DATA), "\n"))
+    # cat(c("RECV", rawToChar(DATA), "\n"))
     
     if (identical(charToRaw("\003\xe9"), DATA))
       return()
@@ -160,6 +140,27 @@ start.app <- function(port = 8101L) {
       init = {
         shinyapp$session$mset(msg$data)
         flush.react()
+        local({
+          define.shiny.output <- function(name, func) {
+            shinyapp$define.output(name, func)
+          }
+          define.shiny.plot <- function(name, func, ...) {
+            shinyapp$define.plot.output(name, func, ...)
+          }
+          define.shiny.table <- function(name, func) {
+            shinyapp$define.table.output(name, func)
+          }
+          get.shiny.input <- function(name) {
+            shinyapp$session$get(name)
+          }
+          
+          if (is.function(app))
+            app()
+          else if (is.character(app))
+            source(app, local=T)
+          else
+            warning("Don't know how to configure app; it's neither a function or filename!")
+        })
         shinyapp$instantiate.outputs()
       },
       update = {
@@ -168,6 +169,8 @@ start.app <- function(port = 8101L) {
     flush.react()
     shinyapp$flush.output()
   }, ws_env)
+  
+  cat(paste('Listening on http://0.0.0.0:', port, "\n", sep=''))
   
   return(ws_env)
 }

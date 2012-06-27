@@ -1,0 +1,30 @@
+<html>
+<head>
+  <script src="shared/jquery-1.7.2.js" type="text/javascript"></script>
+  <script src="shared/shiny.js" type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>
+</head>
+<body>
+  <h1>Example 3: Distributions</h1>
+
+  <p>
+    <label>Distribution type:</label><br />
+    <select name="dist">
+      <option value="norm">Normal</option>
+      <option value="unif">Uniform</option>
+      <option value="lnorm">Log-normal</option>
+      <option value="exp">Exponential</option>
+    </select>
+  </p>
+
+  <p>
+    <label>Number of observations:</label><br />
+    <input type="numeric" name="n" value="500" />
+  </p>
+
+  <div id="plot1" class="live-plot"></div>
+  
+  <div id="table1" class="live-html"></div>
+  
+</body>
+</html>

@@ -145,16 +145,16 @@ start.app <- function(app, www.root, sys.www.root=NULL, port=8101L) {
         shinyapp$session$mset(msg$data)
         flush.react()
         local({
-          define.shiny.output <- function(name, func) {
+          define.output <- function(name, func) {
             shinyapp$define.output(name, func)
           }
-          define.shiny.plot <- function(name, func, ...) {
+          define.plot <- function(name, func, ...) {
             shinyapp$define.plot.output(name, func, ...)
           }
-          define.shiny.table <- function(name, func, ...) {
+          define.table <- function(name, func, ...) {
             shinyapp$define.table.output(name, func, ...)
           }
-          get.shiny.input <- function(name) {
+          get.input <- function(name) {
             shinyapp$session$get(name)
           }
           

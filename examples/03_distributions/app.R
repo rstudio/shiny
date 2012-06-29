@@ -1,6 +1,6 @@
 data <- Observable$new(function() {
   # Choose a distribution function
-  dist <- switch(get.shiny.input('dist'),
+  dist <- switch(get.input('dist'),
                  norm = rnorm,
                  unif = runif,
                  lnorm = rlnorm,
@@ -8,21 +8,21 @@ data <- Observable$new(function() {
                  rnorm)
   
   # Generate n values from the distribution function
-  dist(max(1, get.shiny.input('n')))
+  dist(max(1, get.input('n')))
 })
 
-define.shiny.plot('plot1', function() {
-  dist <- get.shiny.input('dist')
-  n <- get.shiny.input('n')
+define.plot('plot1', function() {
+  dist <- get.input('dist')
+  n <- get.input('n')
   
   hist(data$get.value(), 
        main=paste('r', dist, '(', n, ')', sep=''))
 }, width=600, height=300)
 
-define.shiny.table('table1', function() {
+define.table('table1', function() {
   data.frame(x=data$get.value())
 })
 
-define.shiny.output('summary1', function() {
+define.output('summary1', function() {
   paste(capture.output(print(summary(data$get.value()))), collapse="\n")
 })

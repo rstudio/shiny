@@ -157,6 +157,7 @@ start.app <- function(app, www.root, sys.www.root=NULL, port=8101L) {
           get.input <- function(name) {
             shinyapp$session$get(name)
           }
+          input <- make.values.accessor(shinyapp$session)
           
           if (is.function(app))
             app()

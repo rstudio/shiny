@@ -1,6 +1,6 @@
-data <- Observable$new(function() {
+data <- observable(function() {
   # Choose a distribution function
-  dist <- switch(get.input('dist'),
+  dist <- switch(input$dist,
                  norm = rnorm,
                  unif = runif,
                  lnorm = rlnorm,
@@ -8,12 +8,12 @@ data <- Observable$new(function() {
                  rnorm)
   
   # Generate n values from the distribution function
-  dist(as.integer(get.input('n')))
+  dist(as.integer(input$n))
 })
 
 define.plot('plot1', function() {
-  dist <- get.input('dist')
-  n <- get.input('n')
+  dist <- input$dist
+  n <- input$n
   
   hist(data$get.value(), 
        main=paste('r', dist, '(', n, ')', sep=''))

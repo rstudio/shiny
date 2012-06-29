@@ -55,6 +55,15 @@ Map <- setRefClass(
   )
 )
 
+`[.Map` <- function(map, name) {
+  map$get(name)
+}
+
+`[<-.Map` <- function(map, name, value) {
+  map$set(name, value)
+  return(map)
+}
+
 as.list.Map <- function(map) {
   sapply(map$keys(),
          map$get,
@@ -207,6 +216,24 @@ Values <- setRefClass(
   )
 )
 
+`[.Values` <- function(values, name) {
+  values$get(name)
+}
+
+`[<-.Values` <- function(values, name, value) {
+  values$set(name, value)
+  return(values)
+}
+
+make.values.accessor <- function(values) {
+  acc <- list(impl=values)
+  class(acc) <- 'ValuesAccessor'
+  acc
+}
+`$.ValuesAccessor` <- function(acc, name) {
+  acc[['impl']]$get(name)
+}
+
 Observable <- setRefClass(
   'Observable',
   fields = c(
@@ -258,6 +285,10 @@ Observable <- setRefClass(
     }
   )
 )
+
+observable <- function(func) {
+  Observable$new(func)
+}
 
 Observer <- setRefClass(
   'Observer',

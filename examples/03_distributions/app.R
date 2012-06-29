@@ -8,7 +8,7 @@ data <- Observable$new(function() {
                  rnorm)
   
   # Generate n values from the distribution function
-  dist(max(1, get.input('n')))
+  dist(as.integer(get.input('n')))
 })
 
 define.plot('plot1', function() {

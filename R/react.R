@@ -100,7 +100,15 @@ Context <- setRefClass(
     },
     execute.callbacks = function() {
       lapply(.callbacks, function(func) {
-        func()
+        tryCatch({
+          func()
+        }, warning = function(e) {
+          # TODO: Callbacks in app
+          print(e)
+        }, error = function(e) {
+          # TODO: Callbacks in app
+          print(e)
+        })
       })
     }
   )

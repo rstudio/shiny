@@ -23,32 +23,6 @@ ShinyApp <- setRefClass(
     define.output = function(name, func) {
       .outputs$set(name, func)
     },
-    define.plot.output = function(name, func, ...) {
-      .outputs$set(name, function() {
-        png.file <- tempfile(fileext='.png')
-        png(filename=png.file, ...)
-        func()
-        dev.off()
-
-        bytes <- file.info(png.file)$size
-        if (is.na(bytes))
-          return(NULL)
-        
-        b64 <- base64encode(readBin(png.file, 'raw', n=bytes))
-        return(paste("data:image/png;base64,", b64, sep=''))
-      })
-    },
-    define.table.output = function(name, func, ...) {
-      .outputs$set(name, function() {
-        data <- func()
-        return(paste(
-          capture.output(
-            print(xtable(data, ...), 
-                  type='html', 
-                  html.table.attributes='class="data"')),
-          collapse="\n"))
-      })
-    },
     instantiate.outputs = function() {
       lapply(.outputs$keys(),
              function(key) {
@@ -70,6 +44,16 @@ ShinyApp <- setRefClass(
     }
   )
 )
+
+.createOutputWriter <- function(shinyapp) {
+  ow <- list(impl=shinyapp)
+  class(ow) <- 'shinyoutput'
+  return(ow)
+}
+`$<-.shinyoutput` <- function(x, name, value) {
+  x[['impl']]$define.output(name, value)
+  return(invisible(x))
+}
 
 statics <- function(root, sys.root=NULL) {
   root <- normalizePath(root, mustWork=T)
@@ -145,19 +129,8 @@ start.app <- function(app, www.root, sys.www.root=NULL, port=8101L) {
         shinyapp$session$mset(msg$data)
         flush.react()
         local({
-          define.output <- function(name, func) {
-            shinyapp$define.output(name, func)
-          }
-          define.plot <- function(name, func, ...) {
-            shinyapp$define.plot.output(name, func, ...)
-          }
-          define.table <- function(name, func, ...) {
-            shinyapp$define.table.output(name, func, ...)
-          }
-          get.input <- function(name) {
-            shinyapp$session$get(name)
-          }
-          input <- make.values.accessor(shinyapp$session)
+          input <- .createValuesReader(shinyapp$session)
+          output <- .createOutputWriter(shinyapp)
           
           if (is.function(app))
             app()

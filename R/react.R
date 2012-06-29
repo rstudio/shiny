@@ -225,13 +225,13 @@ Values <- setRefClass(
   return(values)
 }
 
-make.values.accessor <- function(values) {
+.createValuesReader <- function(values) {
   acc <- list(impl=values)
-  class(acc) <- 'ValuesAccessor'
-  acc
+  class(acc) <- 'reactvaluesreader'
+  return(acc)
 }
-`$.ValuesAccessor` <- function(acc, name) {
-  acc[['impl']]$get(name)
+`$.reactvaluesreader` <- function(x, name) {
+  x[['impl']]$get(name)
 }
 
 Observable <- setRefClass(
@@ -286,8 +286,14 @@ Observable <- setRefClass(
   )
 )
 
-observable <- function(func) {
-  Observable$new(func)
+reactive <- function(x) {
+  UseMethod("reactive")
+}
+reactive.function <- function(func) {
+  return(Observable$new(func)$get.value)
+}
+reactive.default <- function(x) {
+  stop("Don't know how to make this value reactive!")
 }
 
 Observer <- setRefClass(

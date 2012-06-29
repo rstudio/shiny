@@ -1,4 +1,4 @@
-data <- observable(function() {
+data <- reactive(function() {
   # Choose a distribution function
   dist <- switch(input$dist,
                  norm = rnorm,
@@ -11,18 +11,18 @@ data <- observable(function() {
   dist(as.integer(input$n))
 })
 
-define.plot('plot1', function() {
+output$plot1 <- reactivePlot(function() {
   dist <- input$dist
   n <- input$n
   
-  hist(data$get.value(), 
+  hist(data(), 
        main=paste('r', dist, '(', n, ')', sep=''))
 }, width=600, height=300)
 
-define.table('table1', function() {
-  data.frame(x=data$get.value())
+output$table1 <- reactiveTable(function() {
+  data.frame(x=data())
 })
 
-define.output('summary1', function() {
-  paste(capture.output(print(summary(data$get.value()))), collapse="\n")
+output$summary1 <- reactiveText(function() {
+  summary(data())
 })

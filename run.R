@@ -1,5 +1,6 @@
 source('R/react.R');
 source('R/shiny.R');
+source('R/shinywrappers.R');
 
 args <- commandArgs(trailingOnly=T)
 

@@ -1,15 +1,16 @@
 library(digest)
 
-text <- observable(function() {
+text <- reactive(function() {
   str <- input$input1
   if (input$addnewline)
     str <- paste(str, "\n", sep='')
   return(str)
 })
 
-define.output('md5_hash', function() {
-  digest(text$get.value(), algo='md5', serialize=F)
+output$md5_hash <- reactive(function() {
+  digest(text(), algo='md5', serialize=F)
 })
-define.output('sha1_hash', function() {
-  digest(text$get.value(), algo='sha1', serialize=F)
+
+output$sha1_hash <- reactive(function() {
+  digest(text(), algo='sha1', serialize=F)
 })

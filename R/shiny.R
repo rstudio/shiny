@@ -1,8 +1,6 @@
 suppressPackageStartupMessages({
   library(websockets)
   library(RJSONIO)
-  library(caTools)
-  library(xtable)
 })
 
 ShinyApp <- setRefClass(
@@ -10,35 +8,35 @@ ShinyApp <- setRefClass(
   fields = list(
     .websocket = 'list',
     .outputs = 'Map',
-    .invalidated.output.values = 'Map',
+    .invalidatedOutputValues = 'Map',
     session = 'Values'
   ),
   methods = list(
     initialize = function(ws) {
       .websocket <<- ws
       .outputs <<- Map$new()
-      .invalidated.output.values <<- Map$new()
+      .invalidatedOutputValues <<- Map$new()
       session <<- Values$new()
     },
-    define.output = function(name, func) {
+    defineOutput = function(name, func) {
       .outputs$set(name, func)
     },
-    instantiate.outputs = function() {
+    instantiateOutputs = function() {
       lapply(.outputs$keys(),
              function(key) {
                func <- .outputs$remove(key)
                Observer$new(function() {
                  value <- func()
-                 .invalidated.output.values$set(key, value)
+                 .invalidatedOutputValues$set(key, value)
                })
              })
     },
-    flush.output = function() {
-      if (length(.invalidated.output.values) == 0)
+    flushOutput = function() {
+      if (length(.invalidatedOutputValues) == 0)
         return(invisible())
       
-      data <- .invalidated.output.values
-      .invalidated.output.values <<- Map$new()
+      data <- .invalidatedOutputValues
+      .invalidatedOutputValues <<- Map$new()
       # cat(c("SEND", toJSON(as.list(data)), "\n"))
       websocket_write(toJSON(as.list(data)), .websocket)
     }
@@ -51,7 +49,7 @@ ShinyApp <- setRefClass(
   return(ow)
 }
 `$<-.shinyoutput` <- function(x, name, value) {
-  x[['impl']]$define.output(name, value)
+  x[['impl']]$defineOutput(name, value)
   return(invisible(x))
 }
 
@@ -105,7 +103,7 @@ statics <- function(root, sys.root=NULL) {
   })
 }
 
-start.app <- function(app, www.root, sys.www.root=NULL, port=8101L) {
+startApp <- function(app, www.root, sys.www.root=NULL, port=8101L) {
   
   ws_env <- create_server(port=port, webpage=statics(www.root, sys.www.root))
   
@@ -139,13 +137,13 @@ start.app <- function(app, www.root, sys.www.root=NULL, port=8101L) {
           else
             warning("Don't know how to configure app; it's neither a function or filename!")
         })
-        shinyapp$instantiate.outputs()
+        shinyapp$instantiateOutputs()
       },
       update = {
         shinyapp$session$mset(msg$data)
       })
     flush.react()
-    shinyapp$flush.output()
+    shinyapp$flushOutput()
   }, ws_env)
   
   cat(paste('Listening on http://0.0.0.0:', port, "\n", sep=''))
@@ -153,7 +151,7 @@ start.app <- function(app, www.root, sys.www.root=NULL, port=8101L) {
   return(ws_env)
 }
 
-run.app <- function(ws_env) {
+runApp <- function(ws_env) {
   while (T)
     service(server=ws_env)
 }

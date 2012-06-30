@@ -1,7 +1,7 @@
 # TESTS
 # Simple set/get
 # Simple remove
-# Simple contains.key
+# Simple containsKey
 # Simple keys
 # Simple values
 # Simple clear
@@ -19,7 +19,7 @@ Map <- setRefClass(
       .env <<- new.env(parent=emptyenv())
     },
     get = function(key) {
-      if (.self$contains.key(key))
+      if (.self$containsKey(key))
         return(base::get(key, pos=.env, inherits=F))
       else
         return(NULL)
@@ -29,14 +29,14 @@ Map <- setRefClass(
       return(value)
     },
     remove = function(key) {
-      if (.self$contains.key(key)) {
+      if (.self$containsKey(key)) {
         result <- .self$get(key)
         rm(list = key, pos=.env, inherits=F)
         return(result)
       }
       return(NULL)
     },
-    contains.key = function(key) {
+    containsKey = function(key) {
       exists(key, where=.env, inherits=F)
     },
     keys = function() {
@@ -82,32 +82,32 @@ Context <- setRefClass(
   ),
   methods = list(
     initialize = function() {
-      id <<- .get.reactive.environment()$next.id()
+      id <<- .getReactiveEnvironment()$nextId()
       .invalidated <<- F
       .callbacks <<- list()
     },
     run = function(func) {
-      env <- .get.reactive.environment()
-      old.ctx <- env$current.context(warn=F)
-      env$set.current.context(.self)
-      on.exit(env$set.current.context(old.ctx))
+      env <- .getReactiveEnvironment()
+      old.ctx <- env$currentContext(warn=F)
+      env$set.currentContext(.self)
+      on.exit(env$set.currentContext(old.ctx))
       func()
     },
     invalidate = function() {
       if (.invalidated)
         return()
       .invalidated <<- T
-      .get.reactive.environment()$add.pending.invalidate(.self)
+      .getReactiveEnvironment()$addPendingInvalidate(.self)
       NULL
     },
-    on.invalidate = function(func) {
+    onInvalidate = function(func) {
       if (.invalidated)
         func()
       else
         .callbacks <<- c(.callbacks, func)
       NULL
     },
-    execute.callbacks = function() {
+    executeCallbacks = function() {
       lapply(.callbacks, function(func) {
         tryCatch({
           func()
@@ -125,34 +125,34 @@ Context <- setRefClass(
 
 ReactiveEnvironment <- setRefClass(
   'ReactiveEnvironment',
-  fields = c('.current.context', '.next.id', '.pending.invalidate'),
+  fields = c('.currentContext', '.nextId', '.pendingInvalidate'),
   methods = list(
     initialize = function() {
-      .current.context <<- NULL
-      .next.id <<- 0L
-      .pending.invalidate <<- list()
+      .currentContext <<- NULL
+      .nextId <<- 0L
+      .pendingInvalidate <<- list()
     },
-    next.id = function() {
-      .next.id <<- .next.id + 1L
-      return(as.character(.next.id))
+    nextId = function() {
+      .nextId <<- .nextId + 1L
+      return(as.character(.nextId))
     },
-    current.context = function(warn=T) {
-      if (warn && is.null(.current.context))
+    currentContext = function(warn=T) {
+      if (warn && is.null(.currentContext))
         warning('No reactive context is active')
-      return(.current.context)
+      return(.currentContext)
     },
-    set.current.context = function(ctx) {
-      .current.context <<- ctx
+    set.currentContext = function(ctx) {
+      .currentContext <<- ctx
     },
-    add.pending.invalidate = function(ctx) {
-      .pending.invalidate <<- c(.pending.invalidate, ctx)
+    addPendingInvalidate = function(ctx) {
+      .pendingInvalidate <<- c(.pendingInvalidate, ctx)
     },
     flush = function() {
-      while (length(.pending.invalidate) > 0) {
-        contexts <- .pending.invalidate
-        .pending.invalidate <<- list()
+      while (length(.pendingInvalidate) > 0) {
+        contexts <- .pendingInvalidate
+        .pendingInvalidate <<- list()
         lapply(contexts, function(ctx) {
-          ctx$execute.callbacks()
+          ctx$executeCallbacks()
           NULL
         })
       }
@@ -172,11 +172,11 @@ Values <- setRefClass(
       .dependencies <<- new.env(parent=emptyenv())
     },
     get = function(key) {
-      ctx <- .get.reactive.environment()$current.context()
+      ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
       if (!exists(dep.key, where=.dependencies, inherits=F)) {
         assign(dep.key, ctx, pos=.dependencies, inherits=F)
-        ctx$on.invalidate(function() {
+        ctx$onInvalidate(function() {
           rm(list=dep.key, pos=.dependencies, inherits=F)
         })
       }
@@ -248,27 +248,27 @@ Observable <- setRefClass(
       .dependencies <<- Map$new()
       .initialized <<- F
     },
-    get.value = function() {
+    getValue = function() {
       if (!.initialized) {
         .initialized <<- T
-        .self$.update.value()
+        .self$.updateValue()
       }
       
-      ctx <- .get.reactive.environment()$current.context()
-      if (!.dependencies$contains.key(ctx$id)) {
+      ctx <- .getReactiveEnvironment()$currentContext()
+      if (!.dependencies$containsKey(ctx$id)) {
         .dependencies$set(ctx$id, ctx)
-        ctx$on.invalidate(function() {
+        ctx$onInvalidate(function() {
           .dependencies$remove(ctx$id)
         })
       }
       return(.value)
     },
-    .update.value = function() {
+    .updateValue = function() {
       old.value <- .value
       
       ctx <- Context$new()
-      ctx$on.invalidate(function() {
-        .self$.update.value()
+      ctx$onInvalidate(function() {
+        .self$.updateValue()
       })
       ctx$run(function() {
         .value <<- .func()
@@ -290,7 +290,7 @@ reactive <- function(x) {
   UseMethod("reactive")
 }
 reactive.function <- function(func) {
-  return(Observable$new(func)$get.value)
+  return(Observable$new(func)$getValue)
 }
 reactive.default <- function(x) {
   stop("Don't know how to make this value reactive!")
@@ -308,7 +308,7 @@ Observer <- setRefClass(
     },
     run = function() {
       ctx <- Context$new()
-      ctx$on.invalidate(function() {
+      ctx$onInvalidate(function() {
         run()
       })
       ctx$run(.func)
@@ -316,7 +316,7 @@ Observer <- setRefClass(
   )
 )
 
-.get.reactive.environment <- function() {
+.getReactiveEnvironment <- function() {
   if (!exists('.ReactiveEnvironment', envir=.GlobalEnv, inherits=F)) {
     assign('.ReactiveEnvironment', ReactiveEnvironment$new(), envir=.GlobalEnv)
   }
@@ -324,10 +324,10 @@ Observer <- setRefClass(
 }
 
 flush.react <- function() {
-  .get.reactive.environment()$flush()
+  .getReactiveEnvironment()$flush()
 }
 
-test <- function () {
+.test <- function () {
   values <- Values$new()
   obs <- Observer$new(function() {print(values$get('foo'))})
   flush.react()
@@ -339,7 +339,7 @@ test <- function () {
   observable <- Observable$new(function() {
     values$get('a') + values$get('b')
   })
-  obs2 <- Observer$new(function() {print(paste0('a+b: ', observable$get.value()))})
+  obs2 <- Observer$new(function() {print(paste0('a+b: ', observable$getValue()))})
   flush.react()
   values$set('b', 300)
   flush.react()

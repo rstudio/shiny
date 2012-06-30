@@ -1,3 +1,8 @@
+suppressPackageStartupMessages({
+  library(caTools)
+  library(xtable)
+})
+
 reactivePlot <- function(func, ...) {
   reactive(function() {
     png.file <- tempfile(fileext='.png')

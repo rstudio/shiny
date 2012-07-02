@@ -103,6 +103,8 @@ statics <- function(root, sys.root=NULL) {
   })
 }
 
+shinyapp <- NULL
+
 startApp <- function(app, www.root, sys.www.root=NULL, port=8101L) {
   
   ws_env <- create_server(port=port, webpage=statics(www.root, sys.www.root))

@@ -1,0 +1,21 @@
+Package: shiny
+Type: Package
+Title: Web application framework for R
+Version: 0.1
+Date: 2012-07-02
+Author: RStudio, Inc.
+Maintainer: Joe Cheng <joe@rstudio.org>
+Description: Shiny makes it fast and extremely easy to create powerful
+    web applications in R. Only minimal knowledge of HTML is necessary
+    to create beautiful and responsive web user interfaces for your R
+    projects.
+License: GPL-3
+Depends:
+    methods,
+    websockets,
+    RJSONIO,
+    xtable
+Collate:
+    react.R
+    shiny.R
+    shinywrappers.R

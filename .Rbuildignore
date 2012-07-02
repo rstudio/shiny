@@ -1,0 +1,9 @@
+^\.Rproj\.user$
+^\.git$
+^examples$
+^README\.md$
+^shiny\.Rproj$
+^shiny\.sh$
+^shiny\.cmd$
+^run\.R$
+^\.gitignore$

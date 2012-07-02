@@ -323,16 +323,16 @@ Observer <- setRefClass(
   get('.ReactiveEnvironment', envir=.GlobalEnv, inherits=F)
 }
 
-flush.react <- function() {
+flushReact <- function() {
   .getReactiveEnvironment()$flush()
 }
 
 .test <- function () {
   values <- Values$new()
   obs <- Observer$new(function() {print(values$get('foo'))})
-  flush.react()
+  flushReact()
   values$set('foo', 'bar')
-  flush.react()
+  flushReact()
   
   values$set('a', 100)
   values$set('b', 250)
@@ -340,9 +340,9 @@ flush.react <- function() {
     values$get('a') + values$get('b')
   })
   obs2 <- Observer$new(function() {print(paste0('a+b: ', observable$getValue()))})
-  flush.react()
+  flushReact()
   values$set('b', 300)
-  flush.react()
+  flushReact()
   values$mset(list(a = 10, b = 20))
-  flush.react()
+  flushReact()
 }

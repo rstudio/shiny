@@ -125,7 +125,7 @@ startApp <- function(app, www.root, sys.www.root=NULL, port=8101L) {
       msg$method,
       init = {
         shinyapp$session$mset(msg$data)
-        flush.react()
+        flushReact()
         local({
           input <- .createValuesReader(shinyapp$session)
           output <- .createOutputWriter(shinyapp)
@@ -142,7 +142,7 @@ startApp <- function(app, www.root, sys.www.root=NULL, port=8101L) {
       update = {
         shinyapp$session$mset(msg$data)
       })
-    flush.react()
+    flushReact()
     shinyapp$flushOutput()
   }, ws_env)
   

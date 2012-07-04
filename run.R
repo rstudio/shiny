@@ -1,4 +1,5 @@
 source('R/react.R');
+source('R/reactives.R');
 source('R/shiny.R');
 source('R/shinywrappers.R');
 

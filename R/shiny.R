@@ -48,6 +48,8 @@ ShinyApp <- setRefClass(
   class(ow) <- 'shinyoutput'
   return(ow)
 }
+
+#' @S3method $<- shinyoutput
 `$<-.shinyoutput` <- function(x, name, value) {
   x[['impl']]$defineOutput(name, value)
   return(invisible(x))
@@ -105,6 +107,16 @@ statics <- function(root, sys.root=NULL) {
 
 shinyapp <- NULL
 
+#' Creates a new app with the given properties.
+#' 
+#' @param app Path to the R file that contains the server application logic.
+#' @param www.root Path to the root of the application-specific www files
+#'     (which should include index.html).
+#' @param sys.www.root Path to the system www root, that is, the assets that
+#'     are shared by all Shiny applications (shiny.css, shiny.js, etc.).
+#' @param port The TCP port that the application should listen on.
+#'
+#' @export
 startApp <- function(app, www.root, sys.www.root=NULL, port=8101L) {
   
   ws_env <- create_server(port=port, webpage=statics(www.root, sys.www.root))
@@ -153,6 +165,11 @@ startApp <- function(app, www.root, sys.www.root=NULL, port=8101L) {
   return(ws_env)
 }
 
+#' Run an application that was created by \code{\link{startApp}}. This
+#' function does not normally return.
+#' 
+#' @param ws_env The return value from \code{\link{startApp}}.
+#' @export
 runApp <- function(ws_env) {
   while (T)
     service(server=ws_env)

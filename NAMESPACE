@@ -1,0 +1,7 @@
+S3method("$",reactvaluesreader)
+S3method("$<-",shinyoutput)
+S3method(reactive,"function")
+S3method(reactive,default)
+export(reactive)
+export(runApp)
+export(startApp)

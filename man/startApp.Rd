@@ -1,0 +1,26 @@
+\name{startApp}
+\alias{startApp}
+\title{Creates a new app with the given properties.}
+\usage{
+  startApp(app, www.root, sys.www.root = NULL,
+    port = 8101L)
+}
+\arguments{
+  \item{app}{Path to the R file that contains the server
+  application logic.}
+
+  \item{www.root}{Path to the root of the
+  application-specific www files (which should include
+  index.html).}
+
+  \item{sys.www.root}{Path to the system www root, that is,
+  the assets that are shared by all Shiny applications
+  (shiny.css, shiny.js, etc.).}
+
+  \item{port}{The TCP port that the application should
+  listen on.}
+}
+\description{
+  Creates a new app with the given properties.
+}
+

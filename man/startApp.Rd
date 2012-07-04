@@ -2,7 +2,8 @@
 \alias{startApp}
 \title{Creates a new app with the given properties.}
 \usage{
-  startApp(app, www.root, sys.www.root = NULL,
+  startApp(app = "./app.R", www.root = "./www",
+    sys.www.root = system.file("www", package = "shiny"),
     port = 8101L)
 }
 \arguments{

@@ -18,7 +18,7 @@
 
   Reactive functions are functions that can read reactive
   values and call other reactive functions. Whenever a
-  reactive value changes, any reactive functions that read
-  that reactive value will re-execute.
+  reactive value changes, any reactive functions that
+  depended on it will re-execute.
 }
 

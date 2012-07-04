@@ -105,8 +105,6 @@ statics <- function(root, sys.root=NULL) {
   })
 }
 
-shinyapp <- NULL
-
 #' Creates a new app with the given properties.
 #' 
 #' @param app Path to the R file that contains the server application logic.
@@ -117,8 +115,14 @@ shinyapp <- NULL
 #' @param port The TCP port that the application should listen on.
 #'
 #' @export
-startApp <- function(app, www.root, sys.www.root=NULL, port=8101L) {
+startApp <- function(app = './app.R',
+                     www.root = './www',
+                     sys.www.root = system.file('www',
+                                                package='shiny'),
+                     port=8101L) {
   
+  shinyapp <- NULL
+
   ws_env <- create_server(port=port, webpage=statics(www.root, sys.www.root))
   
   set_callback('established', function(WS, ...) {

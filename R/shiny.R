@@ -110,13 +110,15 @@ statics <- function(root, sys.root=NULL) {
 
 #' Creates a new app with the given properties.
 #' 
-#' @param app Path to the R file that contains the server application logic.
-#' @param www.root Path to the root of the application-specific www files
-#'     (which should include index.html).
-#' @param sys.www.root Path to the system www root, that is, the assets that
-#'     are shared by all Shiny applications (shiny.css, shiny.js, etc.).
+#' @param app If a character string, a path to the R file that contains the 
+#'   server application logic. If a function, the actual server application 
+#'   logic (should take \code{input} and \code{output} parameters).
+#' @param www.root Path to the root of the application-specific www files (which
+#'   should include index.html).
+#' @param sys.www.root Path to the system www root, that is, the assets that are
+#'   shared by all Shiny applications (shiny.css, shiny.js, etc.).
 #' @param port The TCP port that the application should listen on.
-#'
+#'   
 #' @export
 startApp <- function(app = './app.R',
                      www.root = './www',
@@ -152,7 +154,7 @@ startApp <- function(app = './app.R',
           output <- .createOutputWriter(shinyapp)
           
           if (is.function(app))
-            app()
+            app(input=input, output=output)
           else if (is.character(app))
             source(app, local=T)
           else

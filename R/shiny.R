@@ -132,6 +132,7 @@ startApp <- function(app = './app.R',
   
   set_callback('established', function(WS, ...) {
     shinyapp <<- ShinyApp$new(WS)
+    assign('shinyapp', shinyapp, pos=ws_env, inherits=F)
   }, ws_env)
   
    set_callback('closed', function(WS, ...) {
@@ -158,7 +159,7 @@ startApp <- function(app = './app.R',
           else if (is.character(app))
             source(app, local=T)
           else
-            warning("Don't know how to configure app; it's neither a function or filename!")
+            warning("app must be a function or filename")
         })
         shinyapp$instantiateOutputs()
       },
@@ -180,6 +181,12 @@ startApp <- function(app = './app.R',
 #' @param ws_env The return value from \code{\link{startApp}}.
 #' @export
 runApp <- function(ws_env) {
-  while (T)
-    service(server=ws_env)
+  while (T) {
+    if (timerCallbacks$executeElapsed()) {
+      flushReact()
+      get('shinyapp', pos=ws_env)$flushOutput()
+    }
+    timeout <- max(1, min(1000, timerCallbacks$timeToNextEvent()))
+    service(server=ws_env, timeout=timeout)
+  }
 }

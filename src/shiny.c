@@ -4,7 +4,7 @@
 #include <sys/time.h>
 
 static R_CallMethodDef CallEntries[] = {
-  {"getTimeInMillis", &getTimeInMillis, 0},
+  {"getTimeInMillis", (DL_FUNC)&getTimeInMillis, 0},
   {NULL, NULL, 0}
 };
 

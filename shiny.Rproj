@@ -14,4 +14,3 @@ LaTeX: pdfLaTeX
 RootDocument: 
 
 BuildType: Package
-PackageRoxygenize: rd,namespace

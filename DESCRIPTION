@@ -16,6 +16,7 @@ Depends:
     RJSONIO,
     xtable
 Collate:
+    'map.R'
     'timer.R'
     'react.R'
     'reactives.R'

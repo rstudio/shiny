@@ -150,7 +150,7 @@
     var initialValues = {};
     $('input, select').each(function() {
       var input = this;
-      var name = input.name;
+      var name = input['data-input-id'] || input.name || input.id;
       var value = elementToValue(input);
       // TODO: validate name is non-blank, and no duplicates
       // TODO: If submit button is present, don't send anything

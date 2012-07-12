@@ -7,8 +7,10 @@
     port = 8101L)
 }
 \arguments{
-  \item{app}{Path to the R file that contains the server
-  application logic.}
+  \item{app}{If a character string, a path to the R file
+  that contains the server application logic. If a
+  function, the actual server application logic (should
+  take \code{input} and \code{output} parameters).}
 
   \item{www.root}{Path to the root of the
   application-specific www files (which should include

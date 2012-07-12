@@ -174,6 +174,31 @@ Observer <- setRefClass(
   )
 )
 
+#' Creates a reactive timer with the given interval.
+#' @param intervalMs Interval to fire, in milliseconds
+#' @export
+reactiveTimer <- function(intervalMs=1000) {
+  dependencies <- Map$new()
+  timerCallbacks$schedule(intervalMs, function() {
+    timerCallbacks$schedule(intervalMs, sys.function())
+    lapply(
+      dependencies$values(),
+      function(dep.ctx) {
+        dep.ctx$invalidate()
+        NULL
+      })
+  })
+  return(function() {
+    ctx <- .getReactiveEnvironment()$currentContext()
+    if (!dependencies$containsKey(ctx$id)) {
+      dependencies$set(ctx$id, ctx)
+      ctx$onInvalidate(function() {
+        dependencies$remove(ctx$id)
+      })
+    }
+  })
+}
+
 .test <- function () {
   values <- Values$new()
   obs <- Observer$new(function() {print(values$get('foo'))})

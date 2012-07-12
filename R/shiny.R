@@ -1,3 +1,6 @@
+#' @useDynLib shiny
+NULL
+
 suppressPackageStartupMessages({
   library(websockets)
   library(RJSONIO)

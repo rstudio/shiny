@@ -16,6 +16,7 @@ Depends:
     RJSONIO,
     xtable
 Collate:
+    'timer.R'
     'react.R'
     'reactives.R'
     'shiny.R'

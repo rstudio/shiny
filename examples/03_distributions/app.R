@@ -1,12 +1,9 @@
-# Create a timer that operates on a 1-second interval
-animTimer <- reactiveTimer(1000)
-
 data <- reactive(function() {
-  if (input$animate) {
-    # Invoking the timer from within this reactive function causes
-    # this function to be re-run whenever the timer fires
-    animTimer()
-  }
+
+  # If the Animate checkbox is checked, then we want to re-calculate this
+  # reactive function 1 second from now
+  if (input$animate)
+    invalidateLater(1000)
   
   # Choose a distribution function
   dist <- switch(input$dist,

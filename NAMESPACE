@@ -1,3 +1,4 @@
+export(invalidateLater)
 export(reactive)
 export(reactivePlot)
 export(reactiveTable)

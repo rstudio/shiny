@@ -199,6 +199,18 @@ reactiveTimer <- function(intervalMs=1000) {
   })
 }
 
+#' Schedules the current reactive context to be invalidated in the given number 
+#' of milliseconds.
+#' @param millis Approximate milliseconds to wait before invalidating the
+#'   current reactive context.
+#' @export
+invalidateLater <- function(millis) {
+  ctx <- .getReactiveEnvironment()$currentContext()
+  timerCallbacks$schedule(millis, function() {
+    ctx$invalidate()
+  })
+}
+
 .test <- function () {
   values <- Values$new()
   obs <- Observer$new(function() {print(values$get('foo'))})

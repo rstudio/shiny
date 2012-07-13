@@ -1,0 +1,26 @@
+\name{reactiveText}
+\alias{reactiveText}
+\title{Creates a reactive text value that is suitable for assigning to an
+\code{output} slot.}
+\usage{
+  reactiveText(func)
+}
+\arguments{
+  \item{func}{A function that returns a printable R object,
+  or an invisible character vector.}
+}
+\description{
+  The corresponding HTML output tag can be anything (though
+  \code{pre} is recommended if you need a monospace font
+  and whitespace preserved) and should have the CSS class
+  name \code{live-text}.
+}
+\details{
+  The result of executing \code{func} will be printed
+  inside a \code{\link{capture.output}} call. If instead
+  you want to return a single-element character vector to
+  be used verbatim, return it wrapped in
+  \code{\link{invisible}} (or alternatively, just use
+  \code{\link{reactive}} instead of \code{reactiveText}.
+}
+

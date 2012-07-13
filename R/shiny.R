@@ -108,6 +108,14 @@ statics <- function(root, sys.root=NULL) {
   })
 }
 
+apps <- Map$new()
+
+# Provide a character representation of the WS that can be used
+# as a key in a Map.
+wsToKey <- function(WS) {
+  as.character(WS$socket)
+}
+
 #' Creates a new app with the given properties.
 #' 
 #' @param app If a character string, a path to the R file that contains the 
@@ -118,31 +126,30 @@ statics <- function(root, sys.root=NULL) {
 #' @param sys.www.root Path to the system www root, that is, the assets that are
 #'   shared by all Shiny applications (shiny.css, shiny.js, etc.).
 #' @param port The TCP port that the application should listen on.
-#'   
-#' @export
 startApp <- function(app = './app.R',
                      www.root = './www',
                      sys.www.root = system.file('www',
                                                 package='shiny'),
                      port=8101L) {
   
-  shinyapp <- NULL
-
   ws_env <- create_server(port=port, webpage=statics(www.root, sys.www.root))
   
   set_callback('established', function(WS, ...) {
-    shinyapp <<- ShinyApp$new(WS)
-    assign('shinyapp', shinyapp, pos=ws_env, inherits=F)
+    shinyapp <- ShinyApp$new(WS)
+    apps$set(wsToKey(WS), shinyapp)
   }, ws_env)
   
-   set_callback('closed', function(WS, ...) {
-   }, ws_env)
+  set_callback('closed', function(WS, ...) {
+    apps$remove(wsToKey(WS))
+  }, ws_env)
   
   set_callback('receive', function(DATA, WS, ...) {
     # cat(c("RECV", rawToChar(DATA), "\n"))
     
     if (identical(charToRaw("\003\xe9"), DATA))
       return()
+    
+    shinyapp <- apps$get(wsToKey(WS))
     
     msg <- fromJSON(rawToChar(DATA), asText=T, simplify=F)
     switch(
@@ -176,17 +183,43 @@ startApp <- function(app = './app.R',
 }
 
 #' Run an application that was created by \code{\link{startApp}}. This
-#' function does not normally return.
+#' function should normally be called in a \code{while(T)} loop.
 #' 
 #' @param ws_env The return value from \code{\link{startApp}}.
-#' @export
-runApp <- function(ws_env) {
-  while (T) {
-    if (timerCallbacks$executeElapsed()) {
-      flushReact()
-      get('shinyapp', pos=ws_env)$flushOutput()
-    }
-    timeout <- max(1, min(1000, timerCallbacks$timeToNextEvent()))
-    service(server=ws_env, timeout=timeout)
+serviceApp <- function(ws_env) {
+  if (timerCallbacks$executeElapsed()) {
+    flushReact()
+     lapply(apps$values(), function(shinyapp) {
+       shinyapp$flushOutput()
+       NULL
+     })
   }
+  timeout <- max(1, min(1000, timerCallbacks$timeToNextEvent()))
+  service(server=ws_env, timeout=timeout)
+}
+
+#' Run an application. This function normally does not return.
+#' 
+#' @param app If a character string, a path to the R file that contains the 
+#'   server application logic. If a function, the actual server application 
+#'   logic (should take \code{input} and \code{output} parameters).
+#' @param www.root Path to the root of the application-specific www files (which
+#'   should include index.html).
+#' @param sys.www.root Path to the system www root, that is, the assets that are
+#'   shared by all Shiny applications (shiny.css, shiny.js, etc.).
+#' @param port The TCP port that the application should listen on.
+#' 
+#' @export
+runApp <- function(app = './app.R',
+                   www.root = './www',
+                   sys.www.root = system.file('www',
+                                              package='shiny'),
+                   port=8101L) {
+  ws_env <- startApp(app=app, 
+                     www.root=www.root, 
+                     sys.www.root=sys.www.root,
+                     port=port)
+  
+  while (T)
+    serviceApp(ws_env)
 }

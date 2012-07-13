@@ -1,17 +1,30 @@
 \name{runApp}
 \alias{runApp}
-\title{Run an application that was created by \code{\link{startApp}}. This
-function does not normally return.}
+\title{Run an application. This function normally does not return.}
 \usage{
-  runApp(ws_env)
+  runApp(app = "./app.R", www.root = "./www",
+    sys.www.root = system.file("www", package = "shiny"),
+    port = 8101L)
 }
 \arguments{
-  \item{ws_env}{The return value from
-  \code{\link{startApp}}.}
+  \item{app}{If a character string, a path to the R file
+  that contains the server application logic. If a
+  function, the actual server application logic (should
+  take \code{input} and \code{output} parameters).}
+
+  \item{www.root}{Path to the root of the
+  application-specific www files (which should include
+  index.html).}
+
+  \item{sys.www.root}{Path to the system www root, that is,
+  the assets that are shared by all Shiny applications
+  (shiny.css, shiny.js, etc.).}
+
+  \item{port}{The TCP port that the application should
+  listen on.}
 }
 \description{
-  Run an application that was created by
-  \code{\link{startApp}}. This function does not normally
+  Run an application. This function normally does not
   return.
 }
 

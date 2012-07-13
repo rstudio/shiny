@@ -7,8 +7,6 @@ if (length(args) == 0) {
 }
 
 app.path <- args[1]
-
 setwd(app.path)
 
-app <- startApp(port=8100L)
-runApp(app)
+runApp(port=8100L)

@@ -10,7 +10,7 @@ suppressPackageStartupMessages({
 #' the CSS class name \code{live-plot}.
 #' 
 #' @param func A function that generates a plot.
-#' @param ... Arguments to be passed through to \code{\link{grDevices::png}}. 
+#' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}. 
 #'   These can be used to set the width, height, background color, etc.
 #'   
 #' @export
@@ -37,9 +37,9 @@ reactivePlot <- function(func, ...) {
 #' The corresponding HTML output tag should be \code{div} and have the CSS class
 #' name \code{live-html}.
 #' 
-#' @param func A function that returns an R object that can be used with
-#'   \link{xtable::xtable}.
-#' @param ... Arguments to be passed through to \code{\link{xtable::xtable}}.
+#' @param func A function that returns an R object that can be used with 
+#'   \code{\link[xtable]{xtable}}.
+#' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}}.
 #'   
 #' @export
 reactiveTable <- function(func, ...) {
@@ -62,10 +62,10 @@ reactiveTable <- function(func, ...) {
 #' have the CSS class name \code{live-text}.
 #' 
 #' The result of executing \code{func} will be printed inside a 
-#' \code{\link{capture.output}} call. If instead you want to return a single-element 
-#' character vector to be used verbatim, return it wrapped in 
-#' \code{\link{invisible}} (or alternatively, just use \code{\link{reactive}}
-#' instead of \code{reactiveText}.
+#' \code{\link[utils]{capture.output}} call. If instead you want to return a
+#' single-element character vector to be used verbatim, return it wrapped in 
+#' \code{\link[base]{invisible}} (or alternatively, just use
+#' \code{\link{reactive}} instead of \code{reactiveText}.
 #' 
 #' @param func A function that returns a printable R object, or an invisible 
 #'   character vector.

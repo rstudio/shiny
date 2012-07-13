@@ -9,7 +9,7 @@ slot.}
   \item{func}{A function that generates a plot.}
 
   \item{...}{Arguments to be passed through to
-  \code{\link{grDevices::png}}.  These can be used to set
+  \code{\link[grDevices]{png}}.  These can be used to set
   the width, height, background color, etc.}
 }
 \description{

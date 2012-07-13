@@ -7,10 +7,10 @@ slot.}
 }
 \arguments{
   \item{func}{A function that returns an R object that can
-  be used with \link{xtable::xtable}.}
+  be used with \code{\link[xtable]{xtable}}.}
 
   \item{...}{Arguments to be passed through to
-  \code{\link{xtable::xtable}}.}
+  \code{\link[xtable]{xtable}}.}
 }
 \description{
   The corresponding HTML output tag should be \code{div}

@@ -17,10 +17,10 @@
 }
 \details{
   The result of executing \code{func} will be printed
-  inside a \code{\link{capture.output}} call. If instead
-  you want to return a single-element character vector to
-  be used verbatim, return it wrapped in
-  \code{\link{invisible}} (or alternatively, just use
+  inside a \code{\link[utils]{capture.output}} call. If
+  instead you want to return a single-element character
+  vector to be used verbatim, return it wrapped in
+  \code{\link[base]{invisible}} (or alternatively, just use
   \code{\link{reactive}} instead of \code{reactiveText}.
 }
 

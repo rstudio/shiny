@@ -220,6 +220,8 @@ runApp <- function(app = './app.R',
                      sys.www.root=sys.www.root,
                      port=port)
   
-  while (T)
+  while (T) {
+    Sys.sleep(0.1)
     serviceApp(ws_env)
+  }
 }

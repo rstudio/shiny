@@ -194,7 +194,12 @@ serviceApp <- function(ws_env) {
        NULL
      })
   }
-  timeout <- max(1, min(1000, timerCallbacks$timeToNextEvent()))
+
+  # If this R session is interactive, then call service() with a short timeout
+  # to keep the session responsive to user input
+  maxTimeout <- ifelse(interactive(), 100, 5000)
+  
+  timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent()))
   service(server=ws_env, timeout=timeout)
 }
 
@@ -221,7 +226,6 @@ runApp <- function(app = './app.R',
                      port=port)
   
   while (T) {
-    Sys.sleep(0.1)
     serviceApp(ws_env)
   }
 }

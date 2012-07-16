@@ -213,21 +213,35 @@ serviceApp <- function(ws_env) {
 #' @param sys.www.root Path to the system www root, that is, the assets that are
 #'   shared by all Shiny applications (shiny.css, shiny.js, etc.).
 #' @param port The TCP port that the application should listen on.
-#' 
+#' @param launch.browser If true, the system's default web browser will be 
+#'   launched automatically after the app is started. Defaults to true in 
+#'   interactive sessions only.
+#'   
 #' @export
 runApp <- function(app = './app.R',
                    www.root = './www',
                    sys.www.root = system.file('www',
                                               package='shiny'),
-                   port=8101L) {
+                   port=8101L,
+                   launch.browser=interactive()) {
   ws_env <- startApp(app=app, 
                      www.root=www.root, 
                      sys.www.root=sys.www.root,
                      port=port)
   
-  while (T) {
-    serviceApp(ws_env)
+  if (launch.browser) {
+    appUrl <- paste("http://localhost:", port, sep="")
+    utils::browseURL(appUrl)
   }
+  
+  tryCatch(
+    while (T) {
+      serviceApp(ws_env)
+    },
+    finally = {
+      websocket_close(ws_env)
+    }
+  )
 }
 
 

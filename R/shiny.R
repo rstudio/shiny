@@ -244,30 +244,3 @@ runApp <- function(app = './app.R',
   )
 }
 
-
-
-#' Run an application in a new process and open it in a web browser
-#' @param appDir Application directory
-#' @param port The TCP port that the application should listen on
-#' @return The URL used to access the application.
-#' @export
-launchApp <- function(appDir, port=8101L) {
-  # manage working directory
-  currentWd <- getwd()
-  on.exit(setwd(currentWd))
-  setwd(appDir)
-  
-  # launch an instance of R to run the app
-  code <- paste("library(shiny); runApp(port=", port, ");", sep = "")
-  runCmd <- paste("R --slave --vanilla -e", shQuote(code))
-  system(runCmd, wait=FALSE)
-  
-  # wait to ensure the port is bound, then launch a browser
-  Sys.sleep(0.5)
-  appUrl <- paste("http://localhost:", port, sep="")
-  utils::browseURL(appUrl)
-  
-  # return the url of the app (invisibliy)
-  invisible(appUrl)
-}
-

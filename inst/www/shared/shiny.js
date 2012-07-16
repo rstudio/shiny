@@ -140,6 +140,12 @@
       shinyapp.bind(this.id, new LiveHTMLBinding(this));
     });
 
+
+
+    // Input bindings
+
+    // TODO: This all needs to be refactored to be more modular, extensible
+
     function elementToValue(el) {
       if (el.type == 'checkbox')
         return el.checked ? true : false;
@@ -147,8 +153,30 @@
         return $(el).val();
     }
 
+    // Holds pending changes for deferred submit
+    var pendingData = {};
+
+    var deferredSubmit = false;
+    $('input[type="submit"], button[type="submit"]').each(function() {
+      deferredSubmit = true;
+      $(this).click(function(event) {
+        event.preventDefault();
+        shinyapp.sendInput(pendingData);
+      });
+    });
+
+    function onInputChange(name, value) {
+      if (deferredSubmit)
+        pendingData[name] = value;
+      else {
+        var data = {};
+        data[name] = value;
+        shinyapp.sendInput(data);
+      }
+    }
+
     var initialValues = {};
-    $('input, select').each(function() {
+    $('input[type!="submit"], select').each(function() {
       var input = this;
       var name = input['data-input-id'] || input.name || input.id;
       var value = elementToValue(input);
@@ -160,9 +188,7 @@
         var newValue = elementToValue(input);
         if (value !== newValue) {
           value = newValue;
-          var data = {};
-          data[name] = value;
-          shinyapp.sendInput(data);
+          onInputChange(name, value);
         }
       });
     });

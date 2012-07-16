@@ -4,7 +4,7 @@
 \usage{
   runApp(app = "./app.R", www.root = "./www",
     sys.www.root = system.file("www", package = "shiny"),
-    port = 8101L)
+    port = 8101L, launch.browser = interactive())
 }
 \arguments{
   \item{app}{If a character string, a path to the R file
@@ -22,6 +22,10 @@
 
   \item{port}{The TCP port that the application should
   listen on.}
+
+  \item{launch.browser}{If true, the system's default web
+  browser will be launched automatically after the app is
+  started. Defaults to true in interactive sessions only.}
 }
 \description{
   Run an application. This function normally does not

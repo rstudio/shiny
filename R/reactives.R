@@ -127,21 +127,25 @@ Observable <- setRefClass(
   )
 )
 
+#' Create a Reactive Function
+#' 
 #' Wraps a normal function to create a reactive function.
 #' 
-#' A reactive function is a function that knows its result will change over
+#' Conceptually, a reactive function is a function whose result will change over
 #' time.
-#' 
-#' 
-#' 
-#' Reactive values are values that can change over time.
 #' 
 #' Reactive functions are functions that can read reactive values and call other
 #' reactive functions. Whenever a reactive value changes, any reactive functions
-#' that depended on it will re-execute.
+#' that depended on it are marked as "invalidated" and will automatically 
+#' re-execute if necessary. If a reactive function is marked as invalidated, any
+#' other reactive functions that recently called it are also marked as 
+#' invalidated. In this way, invalidations ripple through the functions that
+#' depend on each other.
 #' 
 #' @param x The value or function to make reactive.
-#' 
+#' @return A reactive function. (Note that reactive functions can only be called
+#'   from within other reactive functions.)
+#'   
 #' @export
 reactive <- function(x) {
   UseMethod("reactive")
@@ -175,8 +179,14 @@ Observer <- setRefClass(
   )
 )
 
+#' Timer
+#' 
 #' Creates a reactive timer with the given interval.
+#' 
 #' @param intervalMs Interval to fire, in milliseconds
+#' @return A function that can be called from a reactive context, in order to
+#'   cause that context to be invalidated the next time the timer interval
+#'   elapses.
 #' @export
 reactiveTimer <- function(intervalMs=1000) {
   dependencies <- Map$new()
@@ -200,6 +210,8 @@ reactiveTimer <- function(intervalMs=1000) {
   })
 }
 
+#' Scheduled Invalidation
+#' 
 #' Schedules the current reactive context to be invalidated in the given number 
 #' of milliseconds.
 #' @param millis Approximate milliseconds to wait before invalidating the
@@ -210,24 +222,4 @@ invalidateLater <- function(millis) {
   timerCallbacks$schedule(millis, function() {
     ctx$invalidate()
   })
-}
-
-.test <- function () {
-  values <- Values$new()
-  obs <- Observer$new(function() {print(values$get('foo'))})
-  flushReact()
-  values$set('foo', 'bar')
-  flushReact()
-  
-  values$set('a', 100)
-  values$set('b', 250)
-  observable <- Observable$new(function() {
-    values$get('a') + values$get('b')
-  })
-  obs2 <- Observer$new(function() {print(paste0('a+b: ', observable$getValue()))})
-  flushReact()
-  values$set('b', 300)
-  flushReact()
-  values$mset(list(a = 10, b = 20))
-  flushReact()
 }

@@ -1,7 +1,6 @@
 \name{reactiveTable}
 \alias{reactiveTable}
-\title{Creates a reactive table that is suitable for assigning to an \code{output}
-slot.}
+\title{Table Output}
 \usage{
   reactiveTable(func, ...)
 }
@@ -13,6 +12,10 @@ slot.}
   \code{\link[xtable]{xtable}}.}
 }
 \description{
+  Creates a reactive table that is suitable for assigning
+  to an \code{output} slot.
+}
+\details{
   The corresponding HTML output tag should be \code{div}
   and have the CSS class name \code{live-html}.
 }

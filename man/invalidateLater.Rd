@@ -1,7 +1,6 @@
 \name{invalidateLater}
 \alias{invalidateLater}
-\title{Schedules the current reactive context to be invalidated in the given number
-of milliseconds.}
+\title{Scheduled Invalidation}
 \usage{
   invalidateLater(millis)
 }

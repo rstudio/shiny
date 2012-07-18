@@ -1,6 +1,6 @@
 \name{reactive}
 \alias{reactive}
-\title{Wraps a normal function to create a reactive function.}
+\title{Create a Reactive Function}
 \usage{
   reactive(x)
 }
@@ -8,11 +8,11 @@
   \item{x}{The value or function to make reactive.}
 }
 \description{
-  A reactive function is a function that knows its result
-  will change over time.
+  Wraps a normal function to create a reactive function.
 }
 \details{
-
+  A reactive function is a function that knows its result
+  will change over time.
 
   Reactive values are values that can change over time.
 

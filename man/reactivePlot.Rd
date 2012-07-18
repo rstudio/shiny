@@ -1,18 +1,29 @@
 \name{reactivePlot}
 \alias{reactivePlot}
-\title{Creates a reactive plot that is suitable for assigning to an \code{output}
-slot.}
+\title{Plot Output}
 \usage{
   reactivePlot(func, width = "auto", height = "auto", ...)
 }
 \arguments{
   \item{func}{A function that generates a plot.}
 
+  \item{width}{The width of the rendered plot, in pixels;
+  or \code{'auto'} to use the \code{offsetWidth} of the
+  HTML element that is bound to this plot.}
+
+  \item{height}{The height of the rendered plot, in pixels;
+  or \code{'auto'} to use the \code{offsetHeight} of the
+  HTML element that is bound to this plot.}
+
   \item{...}{Arguments to be passed through to
   \code{\link[grDevices]{png}}.  These can be used to set
   the width, height, background color, etc.}
 }
 \description{
+  Creates a reactive plot that is suitable for assigning to
+  an \code{output} slot.
+}
+\details{
   The corresponding HTML output tag should be \code{div} or
   \code{img} and have the CSS class name \code{live-plot}.
 }

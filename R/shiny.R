@@ -22,7 +22,22 @@ ShinyApp <- setRefClass(
       session <<- Values$new()
     },
     defineOutput = function(name, func) {
-      .outputs$set(name, func)
+      "Binds an output generating function to this name. The function can either
+      take no parameters, or have named parameters for \\code{name} and
+      \\code{shinyapp} (in the future this list may expand, so it is a good idea
+      to also include \\code{...} in your function signature)."
+      if (is.function(func)) {
+        if (length(formals(func)) != 0) {
+          orig <- func
+          func <- function() {
+            orig(name=name, shinyapp=.self)
+          }
+        }
+        .outputs$set(name, func)
+      }
+      else {
+        stop(paste("Unexpected", class(func), "output for", name))
+      }
     },
     instantiateOutputs = function() {
       lapply(.outputs$keys(),

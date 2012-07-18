@@ -222,7 +222,7 @@ ui <- defineUI(
 )
 
 
-renderPage(ui, stdout())
+#renderPage(ui, stdout())
 
 
 

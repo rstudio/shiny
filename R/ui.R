@@ -173,8 +173,10 @@ renderPage <- function(ui, connection) {
   close(textConn)
  
   # write preamble
-  writeLines(c('<html>',
+  writeLines(c('<!DOCTYPE html>',
+               '<html>',
                '<head>',
+               '   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
                '   <script src="shared/jquery.js" type="text/javascript"></script>',
                '   <script src="shared/shiny.js" type="text/javascript"></script>',
                '   <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',

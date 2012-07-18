@@ -1,63 +1,5 @@
 
-
-# attribs, text, children
-
-# explicit named args (my attributes)
-# special named args (class, style, attribs)
-# un-named character string (content)
-# children (which you must explicitly render)
-# you return a function 
-
-indentText <- function(indent) {
-  paste(rep(" ", indent*3), collapse="")
-}
-
-writeLine <- function(text, indent, writer) {
-  # compute indent text
-  indentText <- indentText(indent)
-  
-  # write text
-  writer(paste(indentText, text, "\n", sep=""))
-}
-
-writeTag <- function(tag, indent, writer) {
-  
-  # compute indent text
-  indentText <- indentText(indent)
-  
-  # write tag name
-  writer(paste(indentText, "<", tag$name, sep=""))
-   
-  # write attributes
-  for (attrib in names(tag$attribs))
-    writer(paste(" ", attrib,"=\"", tag$attribs[[attrib]], "\"", sep=""))
-  
-  # write any children
-  if (length(tag$children) > 0) {
-      
-    # special case for a single child text note (skip newlines and indentation)
-    if ((length(tag$children) == 1) && is.character(tag$children[[1]]) ) {
-      writer(paste(">", tag$children[1], "</", tag$name, ">\n", sep=""))
-    }
-    else {
-      writer(">\n")
-      
-      for (child in tag$children) {
-        if (inherits(child, "shiny.tag"))
-          child$renderer(child, indent+1, writer)
-        else
-          writeLine(child, indent+1, writer)
-      }
-      writer(paste(indentText, "</", tag$name, ">\n", sep=""))
-    }
-  }
-  else {
-    writer("/>\n")
-  }
-}
-
-
-createTag <- function(name, renderer, varArgs) {
+tag <- function(name, varArgs) {
   
   # create basic tag data structure
   tag <- list()
@@ -65,7 +7,6 @@ createTag <- function(name, renderer, varArgs) {
   tag$name <- name
   tag$attribs <- list()
   tag$children <- list()
-  tag$renderer <- renderer
   
   # process varArgs
   varArgsNames <- names(varArgs)
@@ -107,29 +48,42 @@ createTag <- function(name, renderer, varArgs) {
 }
 
 h1 <- function(...) {
-  createTag("h1", writeTag, list(...))
+  tag("h1", list(...))
 }
 
 h2 <- function(...) {
-  createTag("h2", writeTag, list(...))
+  tag("h2", list(...))
 }
 
 p <- function(...) {
-  createTag("p", writeTag, list(...))
+  tag("p", list(...))
 }
 
 div <- function(...) {
-  createTag("div", writeTag, list(...))
+  tag("div", list(...))
 }
 
 img <- function(...) {
-  createTag("img", writeTag, list(...))
+  tag("img", list(...))
 }
 
-shinyPlot <- function(id) {
-  img(id = id, class ="live-plot")
+head <- function(...) {
+  tag("head", list(...))
 }
 
+script <- function(...) {
+  tag("script", list(...))
+}
+
+style <- function(...) {
+  tag("style", list(...))
+}
+
+shinyPlot <- function(outputId) {
+  list(head(script(src="foobar.js"),
+            style(src="foobar.css")),
+       img(id = outputId, class ="live-plot"))
+}
 
 header <- function(...) {
   div(class="shiny-header", ...)
@@ -143,13 +97,96 @@ outputs <- function(...) {
   div(class="shiny-outputs", ...)
 }
 
-defineUI <- function(header, inputs, outputs) {
-  div(class="shiny-ui", header, inputs, outputs)
+defineUI <- function(...) {
+  div(class="shiny-ui", ...)
 }
 
-renderUI <- function(ui, writer) {
-  ui$renderer(ui, 0, writer)
+writeTag <- function(context, tag, textWriter, indent=0) {
+    
+  # function used to write children
+  writeChildren <- function(children, childTextWriter, indent) {
+    for (child in children) {
+      if (inherits(child, "shiny.tag")) {
+        writeTag(context, child, childTextWriter, indent)
+      }
+      else {
+        indentText <- paste(rep(" ", indent*3), collapse="")
+        childTextWriter(paste(indentText, child, "\n", sep=""))
+      }
+    }
+  }
+  
+  # special case for head tags, their children get written into
+  # a chracter vector which is later rendered into the head
+  if (identical(tag$name, "head")) {
+    textConn <- textConnection(NULL, "w") 
+    textConnWriter <- function(text) cat(text, file = textConn)
+    writeChildren(tag$children, textConnWriter, 1)
+    context$head <- append(context$head, textConnectionValue(textConn))
+    close(textConn)
+    return (NULL)
+  }
+  
+  # compute indent text
+  indentText <- paste(rep(" ", indent*3), collapse="")
+  
+  # write tag name
+  textWriter(paste(indentText, "<", tag$name, sep=""))
+  
+  # write attributes
+  for (attrib in names(tag$attribs))
+    textWriter(paste(" ", attrib,"=\"", tag$attribs[[attrib]], "\"", sep=""))
+  
+  # write any children
+  if (length(tag$children) > 0) {
+    
+    # special case for a single child text node (skip newlines and indentation)
+    if ((length(tag$children) == 1) && is.character(tag$children[[1]]) ) {
+      textWriter(paste(">", tag$children[1], "</", tag$name, ">\n", sep=""))
+    }
+    else {
+      textWriter(">\n")
+      writeChildren(tag$children, textWriter, indent+1)
+      textWriter(paste(indentText, "</", tag$name, ">\n", sep=""))
+    }
+  }
+  else {
+    textWriter("/>\n")
+  }
 }
+
+renderPage <- function(ui, connection) {
+  # setup context
+  context <- new.env()
+  context$head <- character()
+  
+  # write ui HTML to a character vector
+  textConn <- textConnection(NULL, "w") 
+  writeTag(context, ui, function(text) cat(text, file = textConn))
+  uiHTML <- textConnectionValue(textConn)
+  close(textConn)
+ 
+  # write preamble
+  writeLines(c('<html>',
+               '<head>',
+               '   <script src="shared/jquery.js" type="text/javascript"></script>',
+               '   <script src="shared/shiny.js" type="text/javascript"></script>',
+               '   <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
+               context$head[!duplicated(context$head)],
+               '</head>',
+               '<body>', 
+               recursive=TRUE),
+             con = connection)
+  
+  # write UI html to connection
+  writeLines(uiHTML, con = connection)
+  
+  # write end document
+  writeLines(c('</body>',
+               '</html>'),
+             con = connection)
+}
+
 
 ui <- defineUI(
   header(
@@ -161,11 +198,21 @@ ui <- defineUI(
   ),
   outputs(
     p("Check out my shiny plot:"),
-    shinyPlot("plot1"))
+    shinyPlot("plot1"),
+    p("Check out my other shiny plot:"),
+    shinyPlot("plot2")
   )
+)
 
 
-#renderUI(ui, cat)
+#renderPage(ui, stdout())
+
+
+
+
+
+
+
 
 
 

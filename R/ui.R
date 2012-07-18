@@ -80,6 +80,45 @@ style <- function(...) {
   tag("style", ...)
 }
 
+htmlEscape <- local({
+  .htmlSpecials <- list(
+    `&` = '&amp;',
+    `<` = '&lt;',
+    `>` = '&gt;'
+  )
+  .htmlSpecialsPattern <- paste(names(.htmlSpecials), collapse='|')
+  .htmlSpecialsAttrib <- c(
+    .htmlSpecials,
+    `'` = '&#39;',
+    `"` = '&quot;',
+    `\r` = '&#13;',
+    `\n` = '&#10;'
+  )
+  .htmlSpecialsPatternAttrib <- paste(names(.htmlSpecialsAttrib), collapse='|')
+
+  function(text, attribute=T) {
+    pattern <- if(attribute)
+      .htmlSpecialsPatternAttrib 
+    else
+      .htmlSpecialsPattern
+
+    # Short circuit in the common case that there's nothing to escape
+    if (!grep(pattern, text))
+      return(text)
+    
+    specials <- if(attribute)
+      .htmlSpecialsAttrib
+    else
+      .htmlSpecials
+    
+    for (chr in names(specials)) {
+      text <- gsub(chr, specials[[chr]], text, fixed=T)
+    }
+    
+    return(text)
+  }
+})
+
 shinyPlot <- function(outputId) {
   list(head(script(src="foobar.js"),
             style(src="foobar.css")),

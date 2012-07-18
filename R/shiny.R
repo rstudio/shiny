@@ -73,10 +73,40 @@ ShinyApp <- setRefClass(
   return(invisible(x))
 }
 
-statics <- function(root, sys.root=NULL) {
+httpServer <- function(handlers) {
+  handler <- joinHandlers(handlers)
+  function(ws, header) {
+    response <- handler(ws, header)
+    if (!is.null(response))
+      return(response)
+    else
+      return(http_response(ws, 404, content="<h1>Not Found</h1>"))
+  }
+}
+
+joinHandlers <- function(handlers) {
+  handlers <- lapply(handlers, function(h) {
+    if (is.character(h))
+      return(staticHandler(h))
+    else
+      return(h)
+  })
+  
+  if (length(handlers) < 2)
+    return(handlers)
+  
+  function(ws, header) {
+    for (handler in handlers) {
+      response <- handler(ws, header)
+      if (!is.null(response))
+        return(response)
+    }
+    return(NULL)
+  }
+}
+
+staticHandler <- function(root) {
   root <- normalizePath(root, mustWork=T)
-  if (!is.null(sys.root))
-    sys.root <- normalizePath(sys.root, mustWork=T)
   
   resolve <- function(dir, relpath) {
     abs.path <- file.path(dir, relpath)
@@ -102,10 +132,8 @@ statics <- function(root, sys.root=NULL) {
       path <- '/index.html'
     
     abs.path <- resolve(root, path)
-    if (is.null(abs.path) && !is.null(sys.root))
-      abs.path <- resolve(sys.root, path)
     if (is.null(abs.path))
-      return(http_response(ws, 404, content="<h1>Not Found</h1>"))
+      return(NULL)
     
     ext <- tools::file_ext(abs.path)
     content.type <- switch(ext,
@@ -134,7 +162,8 @@ wsToKey <- function(WS) {
 #' Creates a new app with the given properties.
 #' 
 #' @param client Path to the root of the application-specific www files (which
-#'   should include index.html).
+#'   should include index.html); or, a function that knows how to serve up www
+#'   files (TODO: document); or, a list of one or more paths and/or functions.
 #' @param server If a character string, a path to the R file that contains the 
 #'   server application logic. If a function, the actual server application 
 #'   logic (should take \code{input} and \code{output} parameters).
@@ -146,7 +175,9 @@ startApp <- function(client = './www',
                      sys.www.root = system.file('www', package='shiny'),
                      port=8101L) {
   
-  ws_env <- create_server(port=port, webpage=statics(client, sys.www.root))
+  ws_env <- create_server(
+    port=port,
+    webpage=httpServer(c(client, sys.www.root)))
   
   set_callback('established', function(WS, ...) {
     shinyapp <- ShinyApp$new(WS)

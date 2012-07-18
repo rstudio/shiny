@@ -34,7 +34,8 @@ Values <- setRefClass(
       assign(key, value, pos=.values, inherits=F)
       dep.keys <- objects(
         pos=.dependencies,
-        pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep='')
+        pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
+        all.names=T
       )
       lapply(
         mget(dep.keys, envir=.dependencies),

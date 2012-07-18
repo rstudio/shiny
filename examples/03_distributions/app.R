@@ -23,7 +23,7 @@ output$plot1 <- reactivePlot(function() {
   
   hist(data(), 
        main=paste('r', dist, '(', n, ')', sep=''))
-}, width=600, height=300)
+})
 
 output$table1 <- reactiveTable(function() {
   data.frame(x=data())

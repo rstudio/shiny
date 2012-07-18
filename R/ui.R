@@ -135,8 +135,13 @@ writeTag <- function(context, tag, textWriter, indent=0) {
   textWriter(paste(indentText, "<", tag$name, sep=""))
   
   # write attributes
-  for (attrib in names(tag$attribs))
-    textWriter(paste(" ", attrib,"=\"", tag$attribs[[attrib]], "\"", sep=""))
+  for (attrib in names(tag$attribs)) {
+    attribValue <- tag$attribs[[attrib]]
+    if (!is.na(attribValue))
+      textWriter(paste(" ", attrib,"=\"", attribValue, "\"", sep=""))
+    else
+      textWriter(paste(" ", attrib, sep=""))
+  }
   
   # write any children
   if (length(tag$children) > 0) {

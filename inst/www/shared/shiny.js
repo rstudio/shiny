@@ -2,6 +2,71 @@
 
   var $ = jQuery;
 
+  // Returns a debounced version of the given function.
+  // Debouncing means that when the function is invoked,
+  // there is a delay of `threshold` milliseconds before
+  // it is actually executed, and if the function is
+  // invoked again before that threshold has elapsed then
+  // the clock starts over.
+  //
+  // For example, if a function is debounced with a
+  // threshold of 1000ms, then calling it 17 times at
+  // 900ms intervals will result in a single execution
+  // of the underlying function, 1000ms after the 17th
+  // call.
+  function debounce(threshold, func) {
+    var timerId = null;
+    return function() {
+      var self = this;
+      if (timerId != null) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+      timerId = setTimeout(function() {
+        timerId = null;
+        func.call(self);
+      }, threshold);
+    };
+  }
+
+  // Returns a throttled version of the given function.
+  // Throttling means that the underlying function will
+  // be executed no more than once every `threshold`
+  // milliseconds.
+  //
+  // For example, if a function is throttled with a
+  // threshold of 1000ms, then calling it 17 times at
+  // 900ms intervals will result in something like 15
+  // or 16 executions of the underlying function.
+  function throttle(threshold, func) {
+    var executionPending = false;
+    var timerId = null;
+
+    function throttled() {
+      var self = this;
+      if (timerId == null) {
+        // Haven't seen a call recently. Execute now and
+        // start a timer to buffer any subsequent calls.
+        timerId = setTimeout(function() {
+          // When time expires, clear the timer; and if 
+          // there has been a call in the meantime, repeat.
+          timerId = null;
+          if (executionPending) {
+            executionPending = false;
+            throttled.call(self);
+          }
+        }, threshold);
+        func.call(self);
+      }
+      else {
+        // Something executed recently. Don't do anything
+        executionPending = true;
+      }
+    };
+    return throttled;
+  }
+
+
   var ShinyApp = window.ShinyApp = function() {
     this.$socket = null;
     this.$bindings = {};
@@ -184,12 +249,14 @@
       // TODO: If submit button is present, don't send anything
       //   until submit button is pressed
       initialValues[name] = value;
-      $(input).bind('change keyup input', function() {
-        var newValue = elementToValue(input);
-        if (value !== newValue) {
-          value = newValue;
-          onInputChange(name, value);
-        }
+      $(input).each(function() {
+        $(this).bind('change keyup input', debounce(500, function() {
+          var newValue = elementToValue(input);
+          if (value !== newValue) {
+            value = newValue;
+            onInputChange(name, value);
+          }
+        }));
       });
     });
 

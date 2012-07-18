@@ -133,21 +133,20 @@ wsToKey <- function(WS) {
 
 #' Creates a new app with the given properties.
 #' 
-#' @param app If a character string, a path to the R file that contains the 
+#' @param client Path to the root of the application-specific www files (which
+#'   should include index.html).
+#' @param server If a character string, a path to the R file that contains the 
 #'   server application logic. If a function, the actual server application 
 #'   logic (should take \code{input} and \code{output} parameters).
-#' @param www.root Path to the root of the application-specific www files (which
-#'   should include index.html).
 #' @param sys.www.root Path to the system www root, that is, the assets that are
 #'   shared by all Shiny applications (shiny.css, shiny.js, etc.).
 #' @param port The TCP port that the application should listen on.
-startApp <- function(app = './app.R',
-                     www.root = './www',
-                     sys.www.root = system.file('www',
-                                                package='shiny'),
+startApp <- function(client = './www',
+                     server = './app.R',
+                     sys.www.root = system.file('www', package='shiny'),
                      port=8101L) {
   
-  ws_env <- create_server(port=port, webpage=statics(www.root, sys.www.root))
+  ws_env <- create_server(port=port, webpage=statics(client, sys.www.root))
   
   set_callback('established', function(WS, ...) {
     shinyapp <- ShinyApp$new(WS)
@@ -176,10 +175,10 @@ startApp <- function(app = './app.R',
           input <- .createValuesReader(shinyapp$session)
           output <- .createOutputWriter(shinyapp)
           
-          if (is.function(app))
-            app(input=input, output=output)
-          else if (is.character(app))
-            source(app, local=T)
+          if (is.function(server))
+            server(input=input, output=output)
+          else if (is.character(server))
+            source(server, local=T)
           else
             warning("app must be a function or filename")
         })
@@ -192,7 +191,7 @@ startApp <- function(app = './app.R',
     shinyapp$flushOutput()
   }, ws_env)
   
-  cat(paste('Listening on http://0.0.0.0:', port, "\n", sep=''))
+  cat(paste('\nListening on port ', port, "\n", sep=''))
   
   return(ws_env)
 }
@@ -220,11 +219,11 @@ serviceApp <- function(ws_env) {
 
 #' Run an application. This function normally does not return.
 #' 
-#' @param app If a character string, a path to the R file that contains the 
+#' @param client Path to the root of the application-specific www files (which
+#'   should include index.html).
+#' @param server If a character string, a path to the R file that contains the 
 #'   server application logic. If a function, the actual server application 
 #'   logic (should take \code{input} and \code{output} parameters).
-#' @param www.root Path to the root of the application-specific www files (which
-#'   should include index.html).
 #' @param sys.www.root Path to the system www root, that is, the assets that are
 #'   shared by all Shiny applications (shiny.css, shiny.js, etc.).
 #' @param port The TCP port that the application should listen on.
@@ -233,14 +232,13 @@ serviceApp <- function(ws_env) {
 #'   interactive sessions only.
 #'   
 #' @export
-runApp <- function(app = './app.R',
-                   www.root = './www',
-                   sys.www.root = system.file('www',
-                                              package='shiny'),
+runApp <- function(client = './www',
+                   server = './app.R',
+                   sys.www.root = system.file('www', package='shiny'),
                    port=8101L,
                    launch.browser=interactive()) {
-  ws_env <- startApp(app=app, 
-                     www.root=www.root, 
+  ws_env <- startApp(server=server, 
+                     client=client,
                      sys.www.root=sys.www.root,
                      port=port)
   

@@ -7,18 +7,25 @@
 \arguments{
   \item{x}{The value or function to make reactive.}
 }
+\value{
+  A reactive function. (Note that reactive functions can
+  only be called from within other reactive functions.)
+}
 \description{
   Wraps a normal function to create a reactive function.
 }
 \details{
-  A reactive function is a function that knows its result
-  will change over time.
-
-  Reactive values are values that can change over time.
+  Conceptually, a reactive function is a function whose
+  result will change over time.
 
   Reactive functions are functions that can read reactive
   values and call other reactive functions. Whenever a
   reactive value changes, any reactive functions that
-  depended on it will re-execute.
+  depended on it are marked as "invalidated" and will
+  automatically re-execute if necessary. If a reactive
+  function is marked as invalidated, any other reactive
+  functions that recently called it are also marked as
+  invalidated. In this way, invalidations ripple through
+  the functions that depend on each other.
 }
 

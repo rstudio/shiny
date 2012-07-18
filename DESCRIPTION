@@ -22,3 +22,4 @@ Collate:
     'reactives.R'
     'shiny.R'
     'shinywrappers.R'
+    'ui.R'

@@ -1,5 +1,5 @@
 
-tag <- function(name, varArgs) {
+tag <- function(name, ...) {
   
   # create basic tag data structure
   tag <- list()
@@ -9,6 +9,7 @@ tag <- function(name, varArgs) {
   tag$children <- list()
   
   # process varArgs
+  varArgs <- list(...)
   varArgsNames <- names(varArgs)
   if (is.null(varArgsNames))
     varArgsNames <- character(length=length(varArgs))
@@ -48,35 +49,35 @@ tag <- function(name, varArgs) {
 }
 
 h1 <- function(...) {
-  tag("h1", list(...))
+  tag("h1", ...)
 }
 
 h2 <- function(...) {
-  tag("h2", list(...))
+  tag("h2", ...)
 }
 
 p <- function(...) {
-  tag("p", list(...))
+  tag("p", ...)
 }
 
 div <- function(...) {
-  tag("div", list(...))
+  tag("div", ...)
 }
 
 img <- function(...) {
-  tag("img", list(...))
+  tag("img", ...)
 }
 
 head <- function(...) {
-  tag("head", list(...))
+  tag("head", ...)
 }
 
 script <- function(...) {
-  tag("script", list(...))
+  tag("script", ...)
 }
 
 style <- function(...) {
-  tag("style", list(...))
+  tag("style", ...)
 }
 
 shinyPlot <- function(outputId) {
@@ -205,7 +206,7 @@ ui <- defineUI(
 )
 
 
-#renderPage(ui, stdout())
+renderPage(ui, stdout())
 
 
 

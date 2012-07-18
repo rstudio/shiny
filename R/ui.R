@@ -9,11 +9,16 @@
 # you return a function 
 
 processArgs <- function(args) {
+  a <- list()
+  a$class = args$class
+  a$style = args$style
+  a$attribs = args$attribs
   
+  return (a)
 }
 
 p <- function(...) {
-  
+  args <- processArgs(list(...))
 }
 
 

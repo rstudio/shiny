@@ -3,7 +3,7 @@
 \title{Creates a reactive plot that is suitable for assigning to an \code{output}
 slot.}
 \usage{
-  reactivePlot(func, ...)
+  reactivePlot(func, width = "auto", height = "auto", ...)
 }
 \arguments{
   \item{func}{A function that generates a plot.}

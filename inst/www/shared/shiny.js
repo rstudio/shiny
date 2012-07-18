@@ -260,6 +260,24 @@
       });
     });
 
+    $('.live-plot').each(function() {
+      var width = this.offsetWidth;
+      var height = this.offsetHeight;
+      initialValues['.shinyout_' + this.id + '_width'] = width;
+      initialValues['.shinyout_' + this.id + '_height'] = height;
+      var self = this;
+      $(window).resize(debounce(500, function() {
+        if (self.offsetWidth != width) {
+          width = self.offsetWidth;
+          onInputChange('.shinyout_' + self.id + '_width', width);
+        }
+        if (self.offsetHeight != height) {
+          height = self.offsetHeight;
+          onInputChange('.shinyout_' + self.id + '_height', height);
+        }
+      }));
+    });
+
     shinyapp.connect(initialValues);
   });
 })();

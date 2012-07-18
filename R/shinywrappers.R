@@ -14,10 +14,21 @@ suppressPackageStartupMessages({
 #'   These can be used to set the width, height, background color, etc.
 #'   
 #' @export
-reactivePlot <- function(func, ...) {
-  reactive(function() {
+reactivePlot <- function(func, width='auto', height='auto', ...) {
+  args <- list(...)
+  
+  return(function(shinyapp, name, ...) {
     png.file <- tempfile(fileext='.png')
-    png(filename=png.file, ...)
+    
+    # Note that these are reactive calls. A change to the width and height
+    # will inherently cause a reactive plot to redraw (unless width and 
+    # height were explicitly specified).
+    if (width == 'auto')
+      width <- shinyapp$session$get(paste0('.shinyout_', name, '_width'));
+    if (height == 'auto')
+      height <- shinyapp$session$get(paste0('.shinyout_', name, '_height'));
+    
+    do.call(png, c(args, filename=png.file, width=width, height=height))
     tryCatch(
       func(),
       finally=dev.off())

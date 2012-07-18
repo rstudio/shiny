@@ -9,7 +9,9 @@
 \arguments{
   \item{client}{Path to the root of the
   application-specific www files (which should include
-  index.html).}
+  index.html); or, a function that knows how to serve up
+  www files (TODO: document); or, a list of one or more
+  paths and/or functions.}
 
   \item{server}{If a character string, a path to the R file
   that contains the server application logic. If a

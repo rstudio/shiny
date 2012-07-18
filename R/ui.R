@@ -1,10 +1,10 @@
-
-tag <- function(name, ...) {
+#' @export
+tag <- function(`_tag_name`, ...) {
   
   # create basic tag data structure
   tag <- list()
   class(tag) <- "shiny.tag"
-  tag$name <- name
+  tag$name <- `_tag_name`
   tag$attribs <- list()
   tag$children <- list()
   
@@ -14,33 +14,35 @@ tag <- function(name, ...) {
   if (is.null(varArgsNames))
     varArgsNames <- character(length=length(varArgs))
     
-  for (i in 1:length(varArgsNames)) {
-    # save name and value
-    name <- varArgsNames[[i]]
-    value <- varArgs[[i]]
-    
-    # process attribs
-    if (nzchar(name))
-      tag$attribs[[name]] <- value
-    
-    # process child tags
-    else if (inherits(value, "shiny.tag")) {
-      tag$children[[length(tag$children)+1]] <- value
-    }
-    
-    # process lists of children
-    else if (is.list(value)) {
-      for(child in value) {
-        if (inherits(child, "shiny.tag")) 
-          tag$children[[length(tag$children)+1]] <- child
-        else
-          tag$children[[length(tag$children)+1]] <- as.character(child)
+  if (length(varArgsNames) > 0) {
+    for (i in 1:length(varArgsNames)) {
+      # save name and value
+      name <- varArgsNames[[i]]
+      value <- varArgs[[i]]
+      
+      # process attribs
+      if (nzchar(name))
+        tag$attribs[[name]] <- value
+      
+      # process child tags
+      else if (inherits(value, "shiny.tag")) {
+        tag$children[[length(tag$children)+1]] <- value
       }
-    }
-    
-    # everything else treated as text
-    else {
-      tag$children[[length(tag$children)+1]] <- as.character(value)
+      
+      # process lists of children
+      else if (is.list(value)) {
+        for(child in value) {
+          if (inherits(child, "shiny.tag")) 
+            tag$children[[length(tag$children)+1]] <- child
+          else
+            tag$children[[length(tag$children)+1]] <- as.character(child)
+        }
+      }
+      
+      # everything else treated as text
+      else {
+        tag$children[[length(tag$children)+1]] <- as.character(value)
+      }
     }
   }
     
@@ -48,36 +50,54 @@ tag <- function(name, ...) {
   return (tag)
 }
 
+#' @export
 h1 <- function(...) {
   tag("h1", ...)
 }
 
+#' @export
 h2 <- function(...) {
   tag("h2", ...)
 }
 
+#' @export
 p <- function(...) {
   tag("p", ...)
 }
 
+#' @export
 div <- function(...) {
   tag("div", ...)
 }
 
+#' @export
 img <- function(...) {
   tag("img", ...)
 }
 
+#' @export
 head <- function(...) {
   tag("head", ...)
 }
 
+#' @export
 script <- function(...) {
   tag("script", ...)
 }
 
+#' @export
 style <- function(...) {
   tag("style", ...)
+}
+
+#' @export
+input <- function(...) {
+  tag("input", ...)
+}
+
+#' @export
+br <- function(...) {
+  tag("br", ...)
 }
 
 htmlEscape <- local({
@@ -119,24 +139,34 @@ htmlEscape <- local({
   }
 })
 
+#' @export
 shinyPlot <- function(outputId) {
   list(head(script(src="foobar.js"),
             style(src="foobar.css")),
-       img(id = outputId, class ="live-plot"))
+       div(id = outputId, class ="live-plot"))
 }
 
+#' @export
+shinyText <- function(outputId) {
+  div(id = outputId, class = "live-text")
+}
+
+#' @export
 header <- function(...) {
   div(class="shiny-header", ...)
 }
 
+#' @export
 inputs <- function(...) {
   div(class="shiny-inputs", ...)
 }
 
+#' @export
 outputs <- function(...) {
   div(class="shiny-outputs", ...)
 }
 
+#' @export
 defineUI <- function(...) {
   div(class="shiny-ui", ...)
 }
@@ -243,32 +273,36 @@ renderPage <- function(ui, connection) {
              con = connection)
 }
 
+#' @export
+page <- function(ui, path='/') {
+  function(ws, header) {
+    if (header$RESOURCE != path)
+      return(NULL)
+    
+    textConn <- textConnection(NULL, "w") 
+    on.exit(close(textConn))
+    
+    renderPage(ui, textConn)
+    html <- paste(textConnectionValue(textConn), collapse='\n')
+    return(http_response(ws, 200, content=html))
+  }
+}
 
-ui <- defineUI(
-  header(
-    h1("My first application"),
-    p("This is a really exciting application")
-  ),
-  inputs(
-    p("Here are the inputs")
-  ),
-  outputs(
-    p("Check out my shiny plot:"),
-    shinyPlot("plot1"),
-    p("Check out my other shiny plot:"),
-    shinyPlot("plot2")
-  )
-)
+# ui <- defineUI(
+#   header(
+#     h1("My first application"),
+#     p("This is a really exciting application")
+#   ),
+#   inputs(
+#     p("Here are the inputs")
+#   ),
+#   outputs(
+#     p("Check out my shiny plot:"),
+#     shinyPlot("plot1"),
+#     p("Check out my other shiny plot:"),
+#     shinyPlot("plot2")
+#   )
+# )
 
 
 #renderPage(ui, stdout())
-
-
-
-
-
-
-
-
-
-

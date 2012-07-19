@@ -270,7 +270,7 @@ renderPage <- function(ui, connection) {
 }
 
 #' @export
-clientUI <- function(..., path='/') {
+clientPage <- function(..., path='/') {
   
   ui <- div(class="shiny-ui", ...)
   

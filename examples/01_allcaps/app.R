@@ -1,7 +1,7 @@
 library(shiny)
 
 
-client <- clientUI(
+client <- clientPage(
   h1("Example One: All Caps"),
   p(
     "Input:", br(),

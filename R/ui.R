@@ -287,21 +287,3 @@ clientUI <- function(..., path='/') {
   }
 }
 
-# ui <- defineUI(
-#   header(
-#     h1("My first application"),
-#     p("This is a really exciting application")
-#   ),
-#   inputs(
-#     p("Here are the inputs")
-#   ),
-#   outputs(
-#     p("Check out my shiny plot:"),
-#     shinyPlot("plot1"),
-#     p("Check out my other shiny plot:"),
-#     shinyPlot("plot2")
-#   )
-# )
-
-
-#renderPage(ui, stdout())

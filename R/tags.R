@@ -80,14 +80,22 @@ createTag <- function(`_tag_name`, varArgs) {
         tag$children[[length(tag$children)+1]] <- value
       }
       
-      # process lists of children
+      # recursively process lists of children
       else if (is.list(value)) {
-        for(child in value) {
-          if (isTag(child))
-            tag <- appendTagChild(tag, child)
-          else
-            tag <- appendTagChild(tag, as.character(child))
-        } 
+        
+        appendChildren <- function(tag, children) {
+          for(child in children) {
+            if (isTag(child))
+              tag <- appendTagChild(tag, child)
+            else if (is.list(child))
+              tag <- appendChildren(tag, child)
+            else
+              tag <- appendTagChild(tag, as.character(child))
+          }
+          return (tag)
+        }
+        
+        tag <- appendChildren(tag, value)
       }
       
       # everything else treated as text

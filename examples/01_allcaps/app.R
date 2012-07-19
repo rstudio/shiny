@@ -1,16 +1,13 @@
 library(shiny)
 
-
 client <- clientPage(
-  h1("Example One: All Caps"),
-  p(
-    "Input:", br(),
-    input(name='val', type='text', value='Hello World!')
-  ),
-  p(
-    "You said:", br(),
-    shinyText("valUpper")
-  )
+    
+  textInput("val", 
+            label = "Input:", 
+            value = "Hello, World!",
+            labelOnTop = TRUE),
+  
+  p("You said:"), shinyText("valUpper")
 )
 
 server <- function(input, output) {

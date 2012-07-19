@@ -1,4 +1,10 @@
 #' @export
+appendChild <- function(tag, child) {
+  tag$children[[length(tag$children)+1]] <- child
+  tag
+}
+
+#' @export
 tag <- function(`_tag_name`, ...) {
   
   # create basic tag data structure
@@ -33,15 +39,15 @@ tag <- function(`_tag_name`, ...) {
       else if (is.list(value)) {
         for(child in value) {
           if (inherits(child, "shiny.tag")) 
-            tag$children[[length(tag$children)+1]] <- child
+            tag <- appendChild(tag, child)
           else
-            tag$children[[length(tag$children)+1]] <- as.character(child)
-        }
+            tag <- appendChild(tag, as.character(child))
+        } 
       }
       
       # everything else treated as text
       else {
-        tag$children[[length(tag$children)+1]] <- as.character(value)
+        tag <- appendChild(tag, as.character(value))
       }
     }
   }
@@ -150,6 +156,19 @@ shinyPlot <- function(outputId) {
 shinyText <- function(outputId) {
   div(id = outputId, class = "live-text")
 }
+
+
+
+
+#' @export
+textInput <- function(inputId, label, value = "", labelOnTop = FALSE) {
+  tag <- p(label)
+  if (labelOnTop)
+    tag <- appendChild(tag, br())
+  tag <- appendChild(tag, input(name = inputId, type = 'text', value = value))
+}
+
+
 
 #' @export
 header <- function(...) {

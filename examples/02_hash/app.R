@@ -1,7 +1,17 @@
 library(shiny)
 library(digest)
 
-app <- function(input, output) {
+client <- clientPage(
+  
+  textInput("input1", caption="Input:", initialValue="Hello, world!"),
+  checkboxInput("addnewline", caption = "Append newline", initialValue=TRUE),
+    
+  textOutput("md5_hash", caption = "MD5:"),
+  textOutput("sha1_hash", caption = "SHA-1:")
+  
+)
+
+server <- function(input, output) {
   text <- reactive(function() {
     str <- input$input1
     if (input$addnewline)
@@ -18,4 +28,4 @@ app <- function(input, output) {
   })
 }
 
-runApp(client='./www', server=app)
+runApp(client, server, port=8500)

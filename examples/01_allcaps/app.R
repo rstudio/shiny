@@ -2,12 +2,9 @@ library(shiny)
 
 client <- clientPage(
     
-  textInput("val", 
-            label = "Input:", 
-            value = "Hello, World!",
-            labelOnTop = TRUE),
+  textInput("val", caption = "Input:", initialValue = "Hello, World!"),
   
-  p("You said:"), shinyText("valUpper")
+  textOutput("valUpper", caption = "You said:")
 )
 
 server <- function(input, output) {

@@ -77,6 +77,11 @@ div <- function(...) {
 }
 
 #' @export
+span <- function(...) {
+  tag("span", ...)
+}
+
+#' @export
 img <- function(...) {
   tag("img", ...)
 }
@@ -105,6 +110,12 @@ input <- function(...) {
 br <- function(...) {
   tag("br", ...)
 }
+
+#' @export
+hr <- function(...) {
+  tag("hr", ...)
+}
+
 
 htmlEscape <- local({
   .htmlSpecials <- list(
@@ -153,20 +164,43 @@ shinyPlot <- function(outputId) {
 }
 
 #' @export
-shinyText <- function(outputId) {
-  div(id = outputId, class = "live-text")
+textOutput <- function(outputId, 
+                       caption = "", 
+                       captionOnTop = FALSE) {
+  tag <- div()
+  if (nzchar(caption)) {
+    tag <- appendChild(tag, caption)
+    if (captionOnTop)
+      tag <- appendChild(tag, br())
+  }
+  tag <- appendChild(tag, span(id = outputId, class = "live-text"))
 }
-
-
 
 
 #' @export
-textInput <- function(inputId, label, value = "", labelOnTop = FALSE) {
-  tag <- p(label)
-  if (labelOnTop)
+textInput <- function(inputId, 
+                      caption = "", 
+                      captionOnTop = FALSE,
+                      initialValue = "") {
+  tag <- p(caption)
+  if (captionOnTop)
     tag <- appendChild(tag, br())
-  tag <- appendChild(tag, input(name = inputId, type = 'text', value = value))
+  tag <- appendChild(tag, input(name = inputId, type = 'text', value = initialValue))
 }
+
+#' @export
+checkboxInput <- function(inputId, 
+                          caption,
+                          initialValue = FALSE) {
+  tag <- p()
+  inputTag <- input(type="checkbox", name=inputId)
+  if (initialValue)
+    inputTag$attribs$checked <- "checked"
+  tag <- appendChild(tag, inputTag)
+  
+  tag <- appendChild(tag, caption)
+}
+
 
 
 

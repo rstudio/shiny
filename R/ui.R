@@ -94,18 +94,20 @@ renderPage <- function(ui, connection) {
 #' @export
 clientPage <- function(..., path='/') {
   
-  ui <- tags$div(class="shiny-ui", ...)
-  
-  function(ws, header) {
-    if (header$RESOURCE != path)
-      return(NULL)
+  registerClient({
+    ui <- tags$div(class="shiny-ui", ...)
     
-    textConn <- textConnection(NULL, "w") 
-    on.exit(close(textConn))
-    
-    renderPage(ui, textConn)
-    html <- paste(textConnectionValue(textConn), collapse='\n')
-    return(http_response(ws, 200, content=html))
-  }
+    function(ws, header) {
+      if (header$RESOURCE != path)
+        return(NULL)
+      
+      textConn <- textConnection(NULL, "w") 
+      on.exit(close(textConn))
+      
+      renderPage(ui, textConn)
+      html <- paste(textConnectionValue(textConn), collapse='\n')
+      return(http_response(ws, 200, content=html))
+    }
+  })
 }
 

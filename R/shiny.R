@@ -73,6 +73,20 @@ ShinyApp <- setRefClass(
   return(invisible(x))
 }
 
+resolve <- function(dir, relpath) {
+  abs.path <- file.path(dir, relpath)
+  if (!file.exists(abs.path))
+    return(NULL)
+  abs.path <- normalizePath(abs.path, mustWork=T)
+  if (nchar(abs.path) <= nchar(dir) + 1)
+    return(NULL)
+  if (substr(abs.path, 1, nchar(dir)) != dir ||
+    !(substr(abs.path, nchar(dir)+1, nchar(dir)+1) %in% c('/', '\\'))) {
+    return(NULL)
+  }
+  return(abs.path)
+}
+
 httpServer <- function(handlers) {
   handler <- joinHandlers(handlers)
   function(ws, header) {
@@ -92,6 +106,9 @@ joinHandlers <- function(handlers) {
       return(h)
   })
   
+  # Filter out NULL
+  handlers <- handlers[!sapply(handlers, is.null)]
+  
   if (length(handlers) < 2)
     return(handlers)
   
@@ -107,20 +124,6 @@ joinHandlers <- function(handlers) {
 
 staticHandler <- function(root) {
   root <- normalizePath(root, mustWork=T)
-  
-  resolve <- function(dir, relpath) {
-    abs.path <- file.path(dir, relpath)
-    if (!file.exists(abs.path))
-      return(NULL)
-    abs.path <- normalizePath(abs.path, mustWork=T)
-    if (nchar(abs.path) <= nchar(dir) + 1)
-      return(NULL)
-    if (substr(abs.path, 1, nchar(dir)) != dir ||
-        !(substr(abs.path, nchar(dir)+1, nchar(dir)+1) %in% c('/', '\\'))) {
-      return(NULL)
-    }
-    return(abs.path)
-  }
   
   return(function(ws, header) {
     path <- header$RESOURCE
@@ -159,25 +162,65 @@ wsToKey <- function(WS) {
   as.character(WS$socket)
 }
 
-#' Creates a new app with the given properties.
+.clients <- function(ws, header) NULL
+#' @export
+clearClients <- function() {
+  unlockBinding('.clients', environment(clearClients))
+  .clients <<- NULL
+}
+#' @export
+registerClient <- function(client) {
+  unlockBinding('.clients', environment(registerClient))
+  .clients <<- append(.clients, client)
+}
+
+.server <- NULL
+#' @export
+server <- function(func) {
+  unlockBinding('.server', environment(server))
+  .server <<- func
+}
+
+#' Instantiates the app in the current working directory.
 #' 
-#' @param client Path to the root of the application-specific www files (which
-#'   should include index.html); or, a function that knows how to serve up www
-#'   files (TODO: document); or, a list of one or more paths and/or functions.
-#' @param server If a character string, a path to the R file that contains the 
-#'   server application logic. If a function, the actual server application 
-#'   logic (should take \code{input} and \code{output} parameters).
-#' @param sys.www.root Path to the system www root, that is, the assets that are
-#'   shared by all Shiny applications (shiny.css, shiny.js, etc.).
 #' @param port The TCP port that the application should listen on.
-startApp <- function(client = './www',
-                     server = './app.R',
-                     sys.www.root = system.file('www', package='shiny'),
-                     port=8101L) {
+startApp <- function(port=8101L) {
+
+  sys.www.root <- system.file('www', package='shiny')
+  
+  commonR <- resolve(getwd(), 'common.R')
+  clientR <- resolve(getwd(), 'client.R')
+  serverR <- resolve(getwd(), 'server.R')
+  wwwDir <- resolve(getwd(), 'www')
+  
+  if (is.null(clientR) && is.null(wwwDir))
+    stop(paste("Neither client.R nor a www subdirectory was found in", getwd()))
+  if (is.null(serverR))
+    stop(paste("server.R file was not found in", getwd()))
+  
+  sourceNonNull <- function(f, local) {
+    if (!is.null(f))
+      source(file=f, local=local) 
+  }
+  sourceNonNull(commonR, local=F)
+  clearClients()
+  local({
+    sourceNonNull(clientR, local=T)
+    if (is.null(.clients) && is.null(wwwDir))
+      stop("No clients were defined in client.R")
+  })
+  
+  server(NULL)
+  local({
+    source(serverR, local=T)
+    if (is.null(.server))
+      stop("No server was defined in server.R")
+  })
+  server <- .server
   
   ws_env <- create_server(
     port=port,
-    webpage=httpServer(c(client, sys.www.root)))
+    webpage=httpServer(c(.clients, wwwDir, sys.www.root)))
   
   set_callback('established', function(WS, ...) {
     shinyapp <- ShinyApp$new(WS)
@@ -203,15 +246,8 @@ startApp <- function(client = './www',
         shinyapp$session$mset(msg$data)
         flushReact()
         local({
-          input <- .createValuesReader(shinyapp$session)
-          output <- .createOutputWriter(shinyapp)
-          
-          if (is.function(server))
-            server(input=input, output=output)
-          else if (is.character(server))
-            source(server, local=T)
-          else
-            warning("app must be a function or filename")
+          server(input=.createValuesReader(shinyapp$session),
+                 output=.createOutputWriter(shinyapp))
         })
         shinyapp$instantiateOutputs()
       },
@@ -263,15 +299,15 @@ serviceApp <- function(ws_env) {
 #'   interactive sessions only.
 #'   
 #' @export
-runApp <- function(client = './www',
-                   server = './app.R',
-                   sys.www.root = system.file('www', package='shiny'),
-                   port=8101L,
+runApp <- function(appDir=getwd(),
+                   port=8100L,
                    launch.browser=interactive()) {
-  ws_env <- startApp(server=server, 
-                     client=client,
-                     sys.www.root=sys.www.root,
-                     port=port)
+
+  orig.wd <- getwd()
+  setwd(appDir)
+  on.exit(setwd(orig.wd))
+  
+  ws_env <- startApp(port=port)
   
   if (launch.browser) {
     appUrl <- paste("http://localhost:", port, sep="")
@@ -287,4 +323,3 @@ runApp <- function(client = './www',
     }
   )
 }
-

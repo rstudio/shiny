@@ -1,6 +1,6 @@
 library(shiny)
 
-app <- function(input, output) {
+server(function(input, output) {
   
   data <- reactive(function() {
   
@@ -36,7 +36,4 @@ app <- function(input, output) {
   output$summary1 <- reactiveText(function() {
     summary(data())
   })
-
-}
-
-runApp(client='./www', server=app)
+})

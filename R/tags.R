@@ -83,7 +83,7 @@ createTag <- function(`_tag_name`, varArgs) {
       # process lists of children
       else if (is.list(value)) {
         for(child in value) {
-          if (isTag(value))
+          if (isTag(child))
             tag <- appendTagChild(tag, child)
           else
             tag <- appendTagChild(tag, as.character(child))

@@ -18,8 +18,10 @@ Depends:
 Collate:
     'map.R'
     'timer.R'
+    'tags.R'
+    'ui.R'
     'react.R'
     'reactives.R'
     'shiny.R'
     'shinywrappers.R'
-    'ui.R'
+

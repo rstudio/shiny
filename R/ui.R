@@ -1,179 +1,17 @@
-#' @export
-appendChild <- function(tag, child) {
-  tag$children[[length(tag$children)+1]] <- child
-  tag
-}
 
-#' @export
-tag <- function(`_tag_name`, ...) {
-  
-  # create basic tag data structure
-  tag <- list()
-  class(tag) <- "shiny.tag"
-  tag$name <- `_tag_name`
-  tag$attribs <- list()
-  tag$children <- list()
-  
-  # process varArgs
-  varArgs <- list(...)
-  varArgsNames <- names(varArgs)
-  if (is.null(varArgsNames))
-    varArgsNames <- character(length=length(varArgs))
-    
-  if (length(varArgsNames) > 0) {
-    for (i in 1:length(varArgsNames)) {
-      # save name and value
-      name <- varArgsNames[[i]]
-      value <- varArgs[[i]]
-      
-      # process attribs
-      if (nzchar(name))
-        tag$attribs[[name]] <- value
-      
-      # process child tags
-      else if (inherits(value, "shiny.tag")) {
-        tag$children[[length(tag$children)+1]] <- value
-      }
-      
-      # process lists of children
-      else if (is.list(value)) {
-        for(child in value) {
-          if (inherits(child, "shiny.tag")) 
-            tag <- appendChild(tag, child)
-          else
-            tag <- appendChild(tag, as.character(child))
-        } 
-      }
-      
-      # everything else treated as text
-      else {
-        tag <- appendChild(tag, as.character(value))
-      }
-    }
-  }
-    
-  # return the tag
-  return (tag)
-}
-
-#' @export
-h1 <- function(...) {
-  tag("h1", ...)
-}
-
-#' @export
-h2 <- function(...) {
-  tag("h2", ...)
-}
-
-#' @export
-p <- function(...) {
-  tag("p", ...)
-}
-
-#' @export
-div <- function(...) {
-  tag("div", ...)
-}
-
-#' @export
-span <- function(...) {
-  tag("span", ...)
-}
-
-#' @export
-img <- function(...) {
-  tag("img", ...)
-}
-
-#' @export
-withHeadTags <- function(tag, ...) {
-  list(tag, tag("head", ...))
-}
-
-#' @export
-script <- function(...) {
-  tag("script", ...)
-}
-
-#' @export
-style <- function(...) {
-  tag("style", ...)
-}
-
-#' @export
-input <- function(...) {
-  tag("input", ...)
-}
-
-#' @export
-br <- function(...) {
-  tag("br", ...)
-}
-
-#' @export
-hr <- function(...) {
-  tag("hr", ...)
-}
-
-
-htmlEscape <- local({
-  .htmlSpecials <- list(
-    `&` = '&amp;',
-    `<` = '&lt;',
-    `>` = '&gt;'
-  )
-  .htmlSpecialsPattern <- paste(names(.htmlSpecials), collapse='|')
-  .htmlSpecialsAttrib <- c(
-    .htmlSpecials,
-    `'` = '&#39;',
-    `"` = '&quot;',
-    `\r` = '&#13;',
-    `\n` = '&#10;'
-  )
-  .htmlSpecialsPatternAttrib <- paste(names(.htmlSpecialsAttrib), collapse='|')
-
-  function(text, attribute=T) {
-    pattern <- if(attribute)
-      .htmlSpecialsPatternAttrib 
-    else
-      .htmlSpecialsPattern
-
-    # Short circuit in the common case that there's nothing to escape
-    if (!grep(pattern, text))
-      return(text)
-    
-    specials <- if(attribute)
-      .htmlSpecialsAttrib
-    else
-      .htmlSpecials
-    
-    for (chr in names(specials)) {
-      text <- gsub(chr, specials[[chr]], text, fixed=T)
-    }
-    
-    return(text)
-  }
-})
-
-#' @export
-shinyPlot <- function(outputId) {
-  withHeadTags(script(src="foobar.js"),
-               style(src="foobar.css"),
-               tag = div(id = outputId, class ="live-plot"))
-}
 
 #' @export
 textOutput <- function(outputId, 
                        caption = "", 
                        captionOnTop = FALSE) {
-  tag <- div()
+
+  tag <- tags$div()
   if (nzchar(caption)) {
-    tag <- appendChild(tag, caption)
+    tag <- appendTagChild(tag, caption)
     if (captionOnTop)
-      tag <- appendChild(tag, br())
+      tag <- appendTagChild(tag, tags$br())
   }
-  tag <- appendChild(tag, span(id = outputId, class = "live-text"))
+  tag <- appendTagChild(tag, tags$span(id = outputId, class = "live-text"))
 }
 
 
@@ -182,120 +20,51 @@ textInput <- function(inputId,
                       caption = "", 
                       captionOnTop = FALSE,
                       initialValue = "") {
-  tag <- p(caption)
-  if (captionOnTop)
-    tag <- appendChild(tag, br())
-  tag <- appendChild(tag, input(name = inputId, type = 'text', value = initialValue))
+    tag <- tags$p(caption)
+    if (captionOnTop)
+      tag <- appendTagChild(tag, tags$br())
+    tag <- appendTagChild(tag, tags$input(name = inputId, 
+                                          type = 'text', 
+                                          value = initialValue))   
 }
 
 #' @export
 checkboxInput <- function(inputId, 
                           caption,
                           initialValue = FALSE) {
-  tag <- p()
-  inputTag <- input(type="checkbox", name=inputId)
+  tag <- tags$p()
+  inputTag <- tags$input(type="checkbox", name=inputId)
   if (initialValue)
     inputTag$attribs$checked <- "checked"
-  tag <- appendChild(tag, inputTag)
+  tag <- appendTagChild(tag, inputTag)
   
-  tag <- appendChild(tag, caption)
+  tag <- appendTagChild(tag, caption)
 }
 
 
-
-
-#' @export
-header <- function(...) {
-  div(class="shiny-header", ...)
-}
-
-#' @export
-inputs <- function(...) {
-  div(class="shiny-inputs", ...)
-}
-
-#' @export
-outputs <- function(...) {
-  div(class="shiny-outputs", ...)
-}
-
-
-writeTag <- function(context, tag, textWriter, indent=0) {
-    
-  # function used to write children
-  writeChildren <- function(children, childTextWriter, indent) {
-    for (child in children) {
-      if (inherits(child, "shiny.tag")) {
-        writeTag(context, child, childTextWriter, indent)
-      }
-      else {
-        indentText <- paste(rep(" ", indent*3), collapse="")
-        childTextWriter(paste(indentText, child, "\n", sep=""))
-      }
-    }
-  }
-  
-  # special case for head tags, their children get written into
-  # a chracter vector which is later rendered into the head
-  if (identical(tag$name, "head")) {
-    textConn <- textConnection(NULL, "w") 
-    textConnWriter <- function(text) cat(text, file = textConn)
-    writeChildren(tag$children, textConnWriter, 1)
-    context$head <- append(context$head, textConnectionValue(textConn))
-    close(textConn)
-    return (NULL)
-  }
-  
-  # compute indent text
-  indentText <- paste(rep(" ", indent*3), collapse="")
-  
-  # write tag name
-  textWriter(paste(indentText, "<", tag$name, sep=""))
-  
-  # write attributes
-  for (attrib in names(tag$attribs)) {
-    attribValue <- tag$attribs[[attrib]]
-    if (!is.na(attribValue))
-      textWriter(paste(" ", attrib,"=\"", attribValue, "\"", sep=""))
-    else
-      textWriter(paste(" ", attrib, sep=""))
-  }
-  
-  # write any children
-  if (length(tag$children) > 0) {
-    
-    # special case for a single child text node (skip newlines and indentation)
-    if ((length(tag$children) == 1) && is.character(tag$children[[1]]) ) {
-      textWriter(paste(">", tag$children[1], "</", tag$name, ">\n", sep=""))
-    }
-    else {
-      textWriter(">\n")
-      writeChildren(tag$children, textWriter, indent+1)
-      textWriter(paste(indentText, "</", tag$name, ">\n", sep=""))
-    }
-  }
-  else {
-    # only self-close void elements 
-    # (see: http://dev.w3.org/html5/spec/single-page.html#void-elements)
-    if (tag$name %in% c("area", "base", "br", "col", "command", "embed", "hr", 
-                        "img", "input", "keygen", "link", "meta", "param",
-                        "source", "track", "wbr")) {
-      textWriter("/>\n")
-    }
-    else {
-      textWriter(paste("></", tag$name, ">\n", sep=""))
-    }
-  }
-}
 
 renderPage <- function(ui, connection) {
-  # setup context
+  
+  # provide a filter so we can intercept head tag requests
   context <- new.env()
   context$head <- character()
+  context$filter <- function(tag) {
+    if (identical(tag$name, "head")) {
+      textConn <- textConnection(NULL, "w") 
+      textConnWriter <- function(text) cat(text, file = textConn)
+      writeTagChildren(tag$children, textConnWriter, 1, context)
+      context$head <- append(context$head, textConnectionValue(textConn))
+      close(textConn)
+      return (FALSE)
+    }
+    else {
+      return (TRUE)
+    }
+  }
   
   # write ui HTML to a character vector
   textConn <- textConnection(NULL, "w") 
-  writeTag(context, ui, function(text) cat(text, file = textConn))
+  writeTag(ui, function(text) cat(text, file = textConn), 0, context)
   uiHTML <- textConnectionValue(textConn)
   close(textConn)
  
@@ -325,7 +94,7 @@ renderPage <- function(ui, connection) {
 #' @export
 clientPage <- function(..., path='/') {
   
-  ui <- div(class="shiny-ui", ...)
+  ui <- tags$div(class="shiny-ui", ...)
   
   function(ws, header) {
     if (header$RESOURCE != path)

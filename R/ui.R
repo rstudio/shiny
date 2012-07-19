@@ -76,8 +76,8 @@ img <- function(...) {
 }
 
 #' @export
-head <- function(...) {
-  tag("head", ...)
+withHeadTags <- function(tag, ...) {
+  list(tag, tag("head", ...))
 }
 
 #' @export
@@ -141,9 +141,9 @@ htmlEscape <- local({
 
 #' @export
 shinyPlot <- function(outputId) {
-  list(head(script(src="foobar.js"),
-            style(src="foobar.css")),
-       div(id = outputId, class ="live-plot"))
+  withHeadTags(script(src="foobar.js"),
+               style(src="foobar.css"),
+               tag = div(id = outputId, class ="live-plot"))
 }
 
 #' @export

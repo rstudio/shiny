@@ -166,10 +166,6 @@ outputs <- function(...) {
   div(class="shiny-outputs", ...)
 }
 
-#' @export
-defineUI <- function(...) {
-  div(class="shiny-ui", ...)
-}
 
 writeTag <- function(context, tag, textWriter, indent=0) {
     
@@ -274,7 +270,10 @@ renderPage <- function(ui, connection) {
 }
 
 #' @export
-page <- function(ui, path='/') {
+clientUI <- function(..., path='/') {
+  
+  ui <- div(class="shiny-ui", ...)
+  
   function(ws, header) {
     if (header$RESOURCE != path)
       return(NULL)

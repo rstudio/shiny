@@ -293,6 +293,19 @@ tags$var <- function(...) createTag("var", list(...))
 tags$video <- function(...) createTag("video", list(...))
 tags$wbr <- function(...) createTag("wbr", list(...))
 
+# environment used to do substitution in withTags
+.tagSubs <- new.env()
+for (tagName in ls(tags)) {
+  .tagSubs[[tagName]] <- substituteDirect(quote(tags$tag), list(tag=tagName))
+}
+
+# evaluate an expression with the set of html tags in scope
+#' @export
+withTags <- function(expr) {
+ exprTree <- substitute(eval(quote(expr)))
+ targetExpr <- substituteDirect(exprTree, .tagSubs)
+ eval.parent(targetExpr)
+}
 
 
 

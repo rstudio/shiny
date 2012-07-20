@@ -60,27 +60,23 @@ applicationUI <- function(header, sidebar, main) {
 }
 
 #' @export
-textInput <- function(inputId, 
-                      caption, 
-                      initialValue = "") {
+textInput <- function(inputId, label, value = "") {
   
   list(
-    tags$label(caption),
-    tags$input(id = inputId, type="text", value=initialValue)
+    tags$label(label),
+    tags$input(id = inputId, type="text", value=value)
   )
 }
 
 
 #' @export
-checkboxInput <- function(inputId, 
-                          caption,
-                          initialValue = FALSE) {
+checkboxInput <- function(inputId, label, value = FALSE) {
   
   inputTag <- tags$input(id = inputId, type="checkbox")
-  if (initialValue)
+  if (value)
     inputTag$attribs$checked <- "checked"
   
-  tags$label(class = "checkbox", inputTag, caption)  
+  tags$label(class = "checkbox", inputTag, label)  
 }
   
 

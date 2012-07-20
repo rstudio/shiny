@@ -6,11 +6,11 @@ clientPage(
     headerPanel("Example 1: All Caps"),
     
     sidebarPanel(
-      textInput("val", caption = "Input:", initialValue = "Hello, World!")
+      textInput("val", label = "Input:", value = "Hello, World!")
     ),
     
     mainPanel(
-      textOutput("valUpper", caption = "You said:")
+      textOutput("valUpper", label = "You said:")
     )
   )
 )

@@ -2,13 +2,13 @@
 
 #' @export
 textOutput <- function(outputId, 
-                       caption = "", 
-                       captionOnTop = FALSE) {
+                       label = "", 
+                       labelOnTop = FALSE) {
 
   tag <- tags$div()
-  if (nzchar(caption)) {
-    tag <- appendTagChild(tag, caption)
-    if (captionOnTop)
+  if (nzchar(label)) {
+    tag <- appendTagChild(tag, label)
+    if (labelOnTop)
       tag <- appendTagChild(tag, tags$br())
   }
   tag <- appendTagChild(tag, tags$span(id = outputId, class = "live-text"))

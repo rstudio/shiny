@@ -289,12 +289,6 @@ tags$wbr <- function(...) createTag("wbr", list(...))
 
 
 
-#' @export
-withTags <- function(expr) {
-  eval(substitute(expr), envir = tags, enclos = parent.frame())
-}
-
-
 
 
 

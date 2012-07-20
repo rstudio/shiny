@@ -1,7 +1,7 @@
 
 
 #' @export
-application <- function(header, sidebar, main) {
+application <- function(headerPanel, sidebarPanel, mainPanel) {
   
   # required head tags for boostrap
   importBootstrap <- function(min = TRUE) {
@@ -13,27 +13,38 @@ application <- function(header, sidebar, main) {
     jsExt = ext(".js")
     bs <- "shared/bootstrap/"
     
-    tags$head(
-      tags$meta(name="viewport", content="width=device-width, initial-scale=1.0"),
-      tags$link(rel="stylesheet", 
-                type="text/css", 
-                href=paste(bs, "css/bootstrap", cssExt, sep="")),
-      
-      tags$link(rel="stylesheet", 
-                type="text/css", 
-                href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")),
-      
-      tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
-    )
+    withTags({
+      head(
+        meta(name="viewport", content="width=device-width, initial-scale=1.0"),
+        link(rel="stylesheet", 
+             type="text/css", 
+             href=paste(bs, "css/bootstrap", cssExt, sep="")),
+        
+        link(rel="stylesheet", 
+             type="text/css", 
+             href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")),
+        
+        script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
+      )
+    })
   }
   
-  # define application container w/ bootstrap requirements
   list(
+    # inject bootstrap requirements into head
     importBootstrap(),
-    tags$div(class="container-fluid", 
-             tags$div(class="row-fluid", header),
-             tags$div(class="row-fluid", sidebar, main)
-    )
+    
+    # basic application container divs
+    withTags({
+      div(class="container-fluid", 
+        div(class="row-fluid", 
+          headerPanel
+        ),
+        div(class="row-fluid", 
+          sidebarPanel, 
+          mainPanel
+        )
+      )
+    })
   )
 }
 
@@ -41,25 +52,35 @@ application <- function(header, sidebar, main) {
 
 #' @export
 headerPanel <- function(title, ...) {
-  tags$div(class="span12", 
-    tags$h1(title), 
-    ..., 
-    tags$br()
-  )
+  appTitle <- title
+  
+  withTags({
+    div(class="span12", 
+      h1(appTitle), 
+      ..., 
+      br()
+    )
+  })
 }
 
 #' @export
 sidebarPanel <- function(...) {
-  tags$div(class="span4",
-           tags$div(class="well", ...)
-  )
+  withTags({
+    div(class="span4",
+      div(class="well", 
+        ...
+      )
+    )   
+  })
 }
 
 #' @export
 mainPanel <- function(...) {
-  tags$div(class="span8",
-           tags$div(...)
-  )
+  withTags({
+    div(class="span8",
+      ...
+    )
+  })
 }
 
 #' @export
@@ -73,15 +94,16 @@ textInput <- function(inputId, label, value = "") {
 
 #' @export
 numericInput <- function(inputId, label, min, max, value = NA) {
+  inputLabel <- label
   
-  list(
-    tags$label(label),
-    tags$input(id = inputId, 
-               type="number",
-               min = min,
-               max = max,
-               value = ifelse(!is.na(value), value, ""))
-  )
+  withTags({list(
+    label(inputLabel),
+    input(id = inputId, 
+          type= "number",
+          min = min,
+          max = max,
+          value = ifelse(!is.na(value), value, ""))
+  )})
 }
 
 #' @export

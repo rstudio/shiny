@@ -2,9 +2,8 @@
 \alias{runApp}
 \title{Run an application. This function normally does not return.}
 \usage{
-  runApp(client = "./www", server = "./app.R",
-    sys.www.root = system.file("www", package = "shiny"),
-    port = 8101L, launch.browser = interactive())
+  runApp(appDir = getwd(), port = 8100L,
+    launch.browser = interactive())
 }
 \arguments{
   \item{client}{Path to the root of the

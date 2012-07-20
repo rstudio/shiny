@@ -34,6 +34,9 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
     if (height == 'auto')
       height <- shinyapp$session$get(paste0('.shinyout_', name, '_height'));
     
+    if (width <= 0 || height <= 0)
+      return(NULL)
+    
     do.call(png, c(args, filename=png.file, width=width, height=height))
     tryCatch(
       func(),

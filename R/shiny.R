@@ -55,7 +55,8 @@ ShinyApp <- setRefClass(
       
       data <- .invalidatedOutputValues
       .invalidatedOutputValues <<- Map$new()
-      # cat(c("SEND", toJSON(as.list(data)), "\n"))
+      if (getOption('shiny.trace', F))
+        cat(c("SEND", toJSON(as.list(data)), "\n"))
       websocket_write(toJSON(as.list(data)), .websocket)
     }
   )
@@ -232,7 +233,8 @@ startApp <- function(port=8101L) {
   }, ws_env)
   
   set_callback('receive', function(DATA, WS, ...) {
-    # cat(c("RECV", rawToChar(DATA), "\n"))
+    if (getOption('shiny.trace', F))
+      cat(c("RECV", rawToChar(DATA), "\n"))
     
     if (identical(charToRaw("\003\xe9"), DATA))
       return()

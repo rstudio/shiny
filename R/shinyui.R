@@ -5,9 +5,9 @@ shinyTextOutput <- function(outputId,  label = NULL) {
 
   tag <- tags$div()
   if (!is.null(label)) 
-    tag <- appendTagChild(tag, label)
+    tag <- appendChild(tag, label)
   
-  tag <- appendTagChild(tag, tags$span(id = outputId, class = "live-text"))
+  tag <- appendChild(tag, tags$span(id = outputId, class = "live-text"))
 }
 
 #' @export
@@ -36,7 +36,7 @@ shinyPage <- function(ui, connection) {
     if (identical(tag$name, "head")) {
       textConn <- textConnection(NULL, "w") 
       textConnWriter <- function(text) cat(text, file = textConn)
-      writeTagChildren(tag$children, textConnWriter, 1, context)
+      writeChildren(tag$children, textConnWriter, 1, context)
       context$head <- append(context$head, textConnectionValue(textConn))
       close(textConn)
       return (FALSE)

@@ -44,7 +44,7 @@ isTag <- function(x) {
 }
 
 #' @export
-appendTagChild <- function(tag, child) {
+appendChild <- function(tag, child) {
   tag$children[[length(tag$children)+1]] <- child
   tag
 }
@@ -86,11 +86,11 @@ createTag <- function(`_tag_name`, varArgs) {
         appendChildren <- function(tag, children) {
           for(child in children) {
             if (isTag(child))
-              tag <- appendTagChild(tag, child)
+              tag <- appendChild(tag, child)
             else if (is.list(child))
               tag <- appendChildren(tag, child)
             else
-              tag <- appendTagChild(tag, as.character(child))
+              tag <- appendChild(tag, as.character(child))
           }
           return (tag)
         }
@@ -100,7 +100,7 @@ createTag <- function(`_tag_name`, varArgs) {
       
       # everything else treated as text
       else {
-        tag <- appendTagChild(tag, as.character(value))
+        tag <- appendChild(tag, as.character(value))
       }
     }
   }
@@ -111,7 +111,7 @@ createTag <- function(`_tag_name`, varArgs) {
 
 
 #' @export
-writeTagChildren <- function(children, textWriter, indent, context) {
+writeChildren <- function(children, textWriter, indent, context) {
   for (child in children) {
     if (isTag(child)) {
       writeTag(child, textWriter, indent, context)
@@ -160,7 +160,7 @@ writeTag <- function(tag, textWriter, indent=0, context = NULL) {
     }
     else {
       textWriter(">\n")
-      writeTagChildren(tag$children, textWriter, indent+1, context)
+      writeChildren(tag$children, textWriter, indent+1, context)
       textWriter(paste(indentText, "</", tag$name, ">\n", sep=""))
     }
   }

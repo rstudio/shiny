@@ -48,6 +48,40 @@ mainPanel <- function(...) {
 }
 
 #' @export
+tab <- function(label, ...) {
+  tags$div(class="tab-pane", id=label, ...)
+}
+
+#' @export
+tabset <- function(...) {
+  
+  # build tab-nav and tab-content divs
+  tabs <- list(...)
+  tabNavList <- tags$ul(class = "nav nav-tabs")
+  tabContent <- tags$div(class = "tab-content")
+  firstTab <- TRUE
+  for (divTag in tabs) {
+    id <- divTag$attribs$id
+    liTag <- tags$li(tags$a(href=paste("#", id, sep=""),
+                            `data-toggle` = "tab", 
+                            id))
+    
+    if (firstTab) {
+      liTag$attribs$class <- "active"
+      divTag$attribs$class <- "tab-pane active"
+      firstTab = FALSE
+    }
+    
+    tabNavList <- appendTagChild(tabNavList, liTag)
+    tabContent <- appendTagChild(tabContent, divTag)
+  }
+  
+  tabDiv <- tags$div(class = "tabbable", tabNavList, tabContent)
+}
+
+
+
+#' @export
 applicationUI <- function(header, sidebar, main) {
   
   list(

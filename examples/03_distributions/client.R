@@ -24,9 +24,11 @@ clientPage(
     ),
     
     mainPanel(
-      verbatimTextOutput("summary1"),
-      plotOutput("plot1"),
-      tableOutput("table1")
+      tabset(
+        tab("Summary", verbatimTextOutput("summary1")),
+        #tab("Plot", plotOutput("plot1")),
+        tab("Table", tableOutput("table1"))
+      )
     )
   )
 )

@@ -14,6 +14,22 @@ textOutput <- function(outputId,
   tag <- appendTagChild(tag, tags$span(id = outputId, class = "live-text"))
 }
 
+#' @export
+verbatimTextOutput <- function(outputId) {
+  tags$pre(id = outputId, class = "live-text")
+}
+
+#' @export
+plotOutput <- function(outputId, width = "100%", height="400px") {
+  style <- paste("width:", width, ";", "height:", height)
+  tags$div(id = outputId, class="live-plot", style = style)
+}
+
+#' @export
+tableOutput <- function(outputId) {
+  tags$div(id = outputId, class="live-html")
+}
+  
 
 renderPage <- function(applicationUI, connection) {
   

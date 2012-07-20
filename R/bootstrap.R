@@ -68,6 +68,18 @@ textInput <- function(inputId, label, value = "") {
   )
 }
 
+#' @export
+numericInput <- function(inputId, label, min, max, value = NA) {
+  
+  list(
+    tags$label(label),
+    tags$input(id = inputId, 
+               type="number",
+               min = min,
+               max = max,
+               value = ifelse(!is.na(value), value, ""))
+  )
+}
 
 #' @export
 checkboxInput <- function(inputId, label, value = FALSE) {
@@ -78,7 +90,40 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   
   tags$label(class = "checkbox", inputTag, label)  
 }
+
+controlLabel <- function(controlName, label) {
+  tags$label(class = "control-label", `for` = controlName, label)
+}
+
+#' @export
+selectListInput <- function(inputId, label, choices, value = NULL) {
+    
+  # get choice names
+  choiceNames <- names(choices)
+  if (is.null(choiceNames))
+    choiceNames <- character(length(choices))
   
+  # default missing names to choice values
+  missingNames <- choiceNames == ""
+  choiceNames[missingNames] <- paste(choices)[missingNames]
+  names(choices) <- choiceNames
+  
+  # default value if it's not specified
+  if (is.null(value))
+    value <- choiceNames[[1]]
+  
+  # create select tag and add options
+  selectTag <- tags$select(id = inputId)
+  for (choiceName in names(choices)) {
+    optionTag <- tags$option(value = choiceName, choices[[choiceName]])
+    if (identical(choiceName, value))
+      optionTag$attribs$selected = "selected"
+    selectTag <- appendTagChild(selectTag, optionTag)
+  } 
+  
+  # return label and select tag
+  list(controlLabel(inputId, label), selectTag)
+}
 
 
 

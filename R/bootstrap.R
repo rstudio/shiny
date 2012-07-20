@@ -161,11 +161,8 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
 
 
 #' @export
-textOutput <- function(outputId, 
-                       label = "", 
-                       labelOnTop = FALSE) {
-  
-  shinyTextOutput(outputId, label, labelOnTop)
+textOutput <- function(outputId, label = NULL) {
+  shinyTextOutput(outputId, label)
 }
 
 #' @export

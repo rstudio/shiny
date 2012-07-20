@@ -1,16 +1,12 @@
 
 
 #' @export
-shinyTextOutput <- function(outputId, 
-                            label = "", 
-                            labelOnTop = FALSE) {
+shinyTextOutput <- function(outputId,  label = NULL) {
 
   tag <- tags$div()
-  if (nzchar(label)) {
+  if (!is.null(label)) 
     tag <- appendTagChild(tag, label)
-    if (labelOnTop)
-      tag <- appendTagChild(tag, tags$br())
-  }
+  
   tag <- appendTagChild(tag, tags$span(id = outputId, class = "live-text"))
 }
 

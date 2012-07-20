@@ -226,12 +226,14 @@ startApp <- function(port=8101L) {
     source(commonR, local=F)
   
   server(NULL)
+  serverFileTimestamp <- NULL
   local({
+    serverFileTimestamp <<- file.info(serverR)$mtime
     source(serverR, local=T)
     if (is.null(.server))
       stop("No server was defined in server.R")
   })
-  server <- .server
+  serverFunc <- .server
   
   ws_env <- create_server(
     port=port,
@@ -259,11 +261,25 @@ startApp <- function(port=8101L) {
     switch(
       msg$method,
       init = {
+        
+        # Check if server.R has changed, and if so, reload
+        mtime <- file.info(serverR)$mtime
+        if (!identical(mtime, serverFileTimestamp)) {
+          server(NULL)
+          local({
+            serverFileTimestamp <<- mtime
+            source(serverR, local=T)
+            if (is.null(.server))
+              stop("No server was defined in server.R")
+          })
+          serverFunc <<- .server
+        }
+        
         shinyapp$session$mset(msg$data)
         flushReact()
         local({
-          server(input=.createValuesReader(shinyapp$session),
-                 output=.createOutputWriter(shinyapp))
+          serverFunc(input=.createValuesReader(shinyapp$session),
+                     output=.createOutputWriter(shinyapp))
         })
         shinyapp$instantiateOutputs()
       },

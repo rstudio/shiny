@@ -110,8 +110,10 @@ joinHandlers <- function(handlers) {
   # Filter out NULL
   handlers <- handlers[!sapply(handlers, is.null)]
   
-  if (length(handlers) < 2)
-    return(handlers)
+  if (length(handlers) == 0)
+    return(function(ws, header) NULL)
+  if (length(handlers) == 1)
+    return(handlers[[1]])
   
   function(ws, header) {
     for (handler in handlers) {
@@ -123,9 +125,30 @@ joinHandlers <- function(handlers) {
   }
 }
 
-staticHandler <- function(root) {
-  root <- normalizePath(root, mustWork=T)
+dynamicHandler <- function(filePath, dependencyFiles=filePath) {
+  lastKnownTimestamps <- NA
+  metaHandler <- function(ws, header) NULL
   
+  return (function(ws, header) {
+    # Check if we need to rebuild
+    mtime <- file.info(dependencyFiles)$mtime
+    if (!identical(lastKnownTimestamps, mtime)) {
+      lastKnownTimestamps <<- mtime
+      clearClients()
+      if (file.exists(filePath)) {
+        local({
+          source(filePath, local=T)
+        })
+      }
+      metaHandler <<- joinHandlers(.clients)
+      clearClients()
+    }
+    
+    return(metaHandler(ws, header))
+  })
+}
+
+staticHandler <- function(root) {
   return(function(ws, header) {
     path <- header$RESOURCE
     
@@ -189,27 +212,18 @@ startApp <- function(port=8101L) {
 
   sys.www.root <- system.file('www', package='shiny')
   
-  commonR <- resolve(getwd(), 'common.R')
-  uiR <- resolve(getwd(), 'ui.R')
-  serverR <- resolve(getwd(), 'server.R')
-  wwwDir <- resolve(getwd(), 'www')
+  commonR <- file.path(getwd(), 'common.R')
+  uiR <- file.path(getwd(), 'ui.R')
+  serverR <- file.path(getwd(), 'server.R')
+  wwwDir <- file.path(getwd(), 'www')
   
-  if (is.null(uiR) && is.null(wwwDir))
+  if (!file.exists(uiR) && !file.exists(wwwDir))
     stop(paste("Neither ui.R nor a www subdirectory was found in", getwd()))
-  if (is.null(serverR))
+  if (!file.exists(serverR))
     stop(paste("server.R file was not found in", getwd()))
   
-  sourceNonNull <- function(f, local) {
-    if (!is.null(f))
-      source(file=f, local=local) 
-  }
-  sourceNonNull(commonR, local=F)
-  clearClients()
-  local({
-    sourceNonNull(uiR, local=T)
-    if (is.null(.clients) && is.null(wwwDir))
-      stop("No ui was defined in ui.R")
-  })
+  if (file.exists(commonR))
+    source(commonR, local=F)
   
   server(NULL)
   local({
@@ -221,7 +235,7 @@ startApp <- function(port=8101L) {
   
   ws_env <- create_server(
     port=port,
-    webpage=httpServer(c(.clients, wwwDir, sys.www.root)))
+    webpage=httpServer(c(dynamicHandler(uiR), wwwDir, sys.www.root)))
   
   set_callback('established', function(WS, ...) {
     shinyapp <- ShinyApp$new(WS)

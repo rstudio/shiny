@@ -1,7 +1,7 @@
 library(shiny)
 
-clientPage(
-  applicationUI(
+shinyUI(
+  application(
     
     headerPanel("Example 1: All Caps"),
     

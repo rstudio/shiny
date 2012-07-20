@@ -2,8 +2,8 @@
 
 library(shiny)
 
-clientPage(
-  applicationUI(
+shinyUI(
+  application(
     
     headerPanel("Example 3: Distributions"),
     
@@ -25,8 +25,8 @@ clientPage(
     
     mainPanel(
       tabset(
-        tab("Summary", verbatimTextOutput("summary1")),
-        #tab("Plot", plotOutput("plot1")),
+        tab("Plot", plotOutput("plot1")),
+        tab("Summary", verbatimTextOutput("summary1")), 
         tab("Table", tableOutput("table1"))
       )
     )

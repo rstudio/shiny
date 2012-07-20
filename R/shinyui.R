@@ -1,9 +1,9 @@
 
 
 #' @export
-textOutput <- function(outputId, 
-                       label = "", 
-                       labelOnTop = FALSE) {
+shinyTextOutput <- function(outputId, 
+                            label = "", 
+                            labelOnTop = FALSE) {
 
   tag <- tags$div()
   if (nzchar(label)) {
@@ -15,23 +15,23 @@ textOutput <- function(outputId,
 }
 
 #' @export
-verbatimTextOutput <- function(outputId) {
+shinyVerbatimTextOutput <- function(outputId) {
   tags$pre(id = outputId, class = "live-text")
 }
 
 #' @export
-plotOutput <- function(outputId, width = "100%", height="400px") {
+shinyPlotOutput <- function(outputId, width = "100%", height="400px") {
   style <- paste("width:", width, ";", "height:", height)
   tags$div(id = outputId, class="live-plot", style = style)
 }
 
 #' @export
-tableOutput <- function(outputId) {
+shinyTableOutput <- function(outputId) {
   tags$div(id = outputId, class="live-html")
 }
   
 
-renderPage <- function(applicationUI, connection) {
+shinyPage <- function(ui, connection) {
   
   # provide a filter so we can intercept head tag requests
   context <- new.env()
@@ -52,7 +52,7 @@ renderPage <- function(applicationUI, connection) {
   
   # write ui HTML to a character vector
   textConn <- textConnection(NULL, "w") 
-  writeTag(applicationUI, function(text) cat(text, file = textConn), 0, context)
+  writeTag(ui, function(text) cat(text, file = textConn), 0, context)
   uiHTML <- textConnectionValue(textConn)
   close(textConn)
  
@@ -80,7 +80,7 @@ renderPage <- function(applicationUI, connection) {
 }
 
 #' @export
-clientPage <- function(applicationUI, path='/') {
+shinyUI <- function(ui, path='/') {
   
   registerClient({
     
@@ -91,7 +91,7 @@ clientPage <- function(applicationUI, path='/') {
       textConn <- textConnection(NULL, "w") 
       on.exit(close(textConn))
       
-      renderPage(applicationUI, textConn)
+      shinyPage(ui, textConn)
       html <- paste(textConnectionValue(textConn), collapse='\n')
       return(http_response(ws, 200, content=html))
     }

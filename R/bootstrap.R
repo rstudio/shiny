@@ -82,7 +82,7 @@ tabset <- function(...) {
 
 
 #' @export
-applicationUI <- function(header, sidebar, main) {
+application <- function(header, sidebar, main) {
   
   list(
     requireBootstrap(),
@@ -157,6 +157,30 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
   
   # return label and select tag
   list(controlLabel(inputId, label), selectTag)
+}
+
+
+#' @export
+textOutput <- function(outputId, 
+                       label = "", 
+                       labelOnTop = FALSE) {
+  
+  shinyTextOutput(outputId, label, labelOnTop)
+}
+
+#' @export
+verbatimTextOutput <- function(outputId) {
+  shinyVerbatimTextOutput(outputId)
+}
+
+#' @export
+plotOutput <- function(outputId, width = "100%", height="400px") {
+  shinyPlotOutput(outputId, width, height)
+}
+
+#' @export
+tableOutput <- function(outputId) {
+  shinyTableOutput(outputId)
 }
 
 

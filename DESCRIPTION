@@ -24,4 +24,5 @@ Collate:
     'reactives.R'
     'shiny.R'
     'shinywrappers.R'
+    'bootstrap.R'
 

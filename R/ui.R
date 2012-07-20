@@ -15,35 +15,7 @@ textOutput <- function(outputId,
 }
 
 
-#' @export
-textInput <- function(inputId, 
-                      caption = "", 
-                      captionOnTop = FALSE,
-                      initialValue = "") {
-    tag <- tags$p(caption)
-    if (captionOnTop)
-      tag <- appendTagChild(tag, tags$br())
-    tag <- appendTagChild(tag, tags$input(name = inputId, 
-                                          type = 'text', 
-                                          value = initialValue))   
-}
-
-#' @export
-checkboxInput <- function(inputId, 
-                          caption,
-                          initialValue = FALSE) {
-  tag <- tags$p()
-  inputTag <- tags$input(type="checkbox", name=inputId)
-  if (initialValue)
-    inputTag$attribs$checked <- "checked"
-  tag <- appendTagChild(tag, inputTag)
-  
-  tag <- appendTagChild(tag, caption)
-}
-
-
-
-renderPage <- function(ui, connection) {
+renderPage <- function(applicationUI, connection) {
   
   # provide a filter so we can intercept head tag requests
   context <- new.env()
@@ -64,7 +36,7 @@ renderPage <- function(ui, connection) {
   
   # write ui HTML to a character vector
   textConn <- textConnection(NULL, "w") 
-  writeTag(ui, function(text) cat(text, file = textConn), 0, context)
+  writeTag(applicationUI, function(text) cat(text, file = textConn), 0, context)
   uiHTML <- textConnectionValue(textConn)
   close(textConn)
  
@@ -92,10 +64,9 @@ renderPage <- function(ui, connection) {
 }
 
 #' @export
-clientPage <- function(..., path='/') {
+clientPage <- function(applicationUI, path='/') {
   
   registerClient({
-    ui <- tags$div(class="shiny-ui", ...)
     
     function(ws, header) {
       if (header$RESOURCE != path)
@@ -104,7 +75,7 @@ clientPage <- function(..., path='/') {
       textConn <- textConnection(NULL, "w") 
       on.exit(close(textConn))
       
-      renderPage(ui, textConn)
+      renderPage(applicationUI, textConn)
       html <- paste(textConnectionValue(textConn), collapse='\n')
       return(http_response(ws, 200, content=html))
     }

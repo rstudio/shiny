@@ -1,6 +1,17 @@
 library(shiny)
 
 clientPage(
-  textInput("val", caption = "Input:", initialValue = "Hello, World!"),
-  textOutput("valUpper", caption = "You said:")
+  applicationUI(
+    
+    headerPanel("Example 1: All Caps"),
+    
+    sidebarPanel(
+      textInput("val", caption = "Input:", initialValue = "Hello, World!")
+    ),
+    
+    mainPanel(
+      textOutput("valUpper", caption = "You said:")
+    )
+  )
 )
+

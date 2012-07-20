@@ -126,6 +126,12 @@ writeTagChildren <- function(children, textWriter, indent, context) {
 #' @export
 writeTag <- function(tag, textWriter, indent=0, context = NULL) {
   
+  # optionally process a list of tags
+  if (!isTag(tag) && is.list(tag)) {
+    sapply(tag, function(t) writeTag(t, textWriter, indent, context))
+    return (NULL)
+  }
+  
   # first call optional filter -- exit function if it returns false
   if (!is.null(context) && !is.null(context$filter) && !context$filter(tag))
     return (NULL)

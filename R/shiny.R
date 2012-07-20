@@ -190,12 +190,12 @@ startApp <- function(port=8101L) {
   sys.www.root <- system.file('www', package='shiny')
   
   commonR <- resolve(getwd(), 'common.R')
-  clientR <- resolve(getwd(), 'client.R')
+  uiR <- resolve(getwd(), 'ui.R')
   serverR <- resolve(getwd(), 'server.R')
   wwwDir <- resolve(getwd(), 'www')
   
-  if (is.null(clientR) && is.null(wwwDir))
-    stop(paste("Neither client.R nor a www subdirectory was found in", getwd()))
+  if (is.null(uiR) && is.null(wwwDir))
+    stop(paste("Neither ui.R nor a www subdirectory was found in", getwd()))
   if (is.null(serverR))
     stop(paste("server.R file was not found in", getwd()))
   
@@ -206,9 +206,9 @@ startApp <- function(port=8101L) {
   sourceNonNull(commonR, local=F)
   clearClients()
   local({
-    sourceNonNull(clientR, local=T)
+    sourceNonNull(uiR, local=T)
     if (is.null(.clients) && is.null(wwwDir))
-      stop("No clients were defined in client.R")
+      stop("No ui was defined in ui.R")
   })
   
   server(NULL)

@@ -1,27 +1,42 @@
 
 
-requireBootstrap <- function(min = TRUE) {
+#' @export
+application <- function(header, sidebar, main) {
   
-  ext <- function(ext) {
-    ifelse(min, paste(".min", ext, sep=""), ext)
+  # required head tags for boostrap
+  importBootstrap <- function(min = TRUE) {
+    
+    ext <- function(ext) {
+      ifelse(min, paste(".min", ext, sep=""), ext)
+    }
+    cssExt <- ext(".css")
+    jsExt = ext(".js")
+    bs <- "shared/bootstrap/"
+    
+    tags$head(
+      tags$meta(name="viewport", content="width=device-width, initial-scale=1.0"),
+      tags$link(rel="stylesheet", 
+                type="text/css", 
+                href=paste(bs, "css/bootstrap", cssExt, sep="")),
+      
+      tags$link(rel="stylesheet", 
+                type="text/css", 
+                href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")),
+      
+      tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
+    )
   }
-  cssExt <- ext(".css")
-  jsExt = ext(".js")
-  bs <- "shared/bootstrap/"
   
-  tags$head(
-    tags$meta(name="viewport", content="width=device-width, initial-scale=1.0"),
-    tags$link(rel="stylesheet", 
-              type="text/css", 
-              href=paste(bs, "css/bootstrap", cssExt, sep="")),
-    
-    tags$link(rel="stylesheet", 
-              type="text/css", 
-              href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")),
-    
-    tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
+  # define application container w/ bootstrap requirements
+  list(
+    importBootstrap(),
+    tags$div(class="container-fluid", 
+             tags$div(class="row-fluid", header),
+             tags$div(class="row-fluid", sidebar, main)
+    )
   )
 }
+
 
 
 #' @export
@@ -44,52 +59,6 @@ sidebarPanel <- function(...) {
 mainPanel <- function(...) {
   tags$div(class="span8",
            tags$div(...)
-  )
-}
-
-#' @export
-tab <- function(label, ...) {
-  tags$div(class="tab-pane", id=label, ...)
-}
-
-#' @export
-tabset <- function(...) {
-  
-  # build tab-nav and tab-content divs
-  tabs <- list(...)
-  tabNavList <- tags$ul(class = "nav nav-tabs")
-  tabContent <- tags$div(class = "tab-content")
-  firstTab <- TRUE
-  for (divTag in tabs) {
-    id <- divTag$attribs$id
-    liTag <- tags$li(tags$a(href=paste("#", id, sep=""),
-                            `data-toggle` = "tab", 
-                            id))
-    
-    if (firstTab) {
-      liTag$attribs$class <- "active"
-      divTag$attribs$class <- "tab-pane active"
-      firstTab = FALSE
-    }
-    
-    tabNavList <- appendTagChild(tabNavList, liTag)
-    tabContent <- appendTagChild(tabContent, divTag)
-  }
-  
-  tabDiv <- tags$div(class = "tabbable", tabNavList, tabContent)
-}
-
-
-
-#' @export
-application <- function(header, sidebar, main) {
-  
-  list(
-    requireBootstrap(),
-    tags$div(class="container-fluid", 
-             tags$div(class="row-fluid", header),
-             tags$div(class="row-fluid", sidebar, main)
-    )
   )
 }
 
@@ -158,6 +127,40 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
   # return label and select tag
   list(controlLabel(inputId, label), selectTag)
 }
+
+
+#' @export
+tab <- function(label, ...) {
+  tags$div(class="tab-pane", id=label, ...)
+}
+
+#' @export
+tabset <- function(...) {
+  
+  # build tab-nav and tab-content divs
+  tabs <- list(...)
+  tabNavList <- tags$ul(class = "nav nav-tabs")
+  tabContent <- tags$div(class = "tab-content")
+  firstTab <- TRUE
+  for (divTag in tabs) {
+    id <- divTag$attribs$id
+    liTag <- tags$li(tags$a(href=paste("#", id, sep=""),
+                            `data-toggle` = "tab", 
+                            id))
+    
+    if (firstTab) {
+      liTag$attribs$class <- "active"
+      divTag$attribs$class <- "tab-pane active"
+      firstTab = FALSE
+    }
+    
+    tabNavList <- appendTagChild(tabNavList, liTag)
+    tabContent <- appendTagChild(tabContent, divTag)
+  }
+  
+  tabDiv <- tags$div(class = "tabbable", tabNavList, tabContent)
+}
+
 
 
 #' @export

@@ -3,7 +3,9 @@ library(shiny)
 shinyUI(
   applicationPage(
     
-    headerPanel("Example 2: Computing Hashes"),
+    headerPanel(
+      h1("Example 2: Computing Hashes")
+    ),
     
     sidebarPanel(
       textInput("input1", label="Input:", value="Hello, world!"),

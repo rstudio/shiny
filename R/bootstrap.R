@@ -51,12 +51,9 @@ applicationPage <- function(headerPanel, sidebarPanel, mainPanel) {
 
 
 #' @export
-headerPanel <- function(title,...) {
-  appTitle <- title
-  
+headerPanel <- function(...) {
   withTags({
     div(class="span12", style="padding: 10px 0px;",
-      h1(appTitle), 
       ...
     )
   })

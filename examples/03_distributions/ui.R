@@ -5,7 +5,9 @@ library(shiny)
 shinyUI(
   applicationPage(
     
-    headerPanel("Example 3: Distributions"),
+    headerPanel(
+      h1("Example 3: Distributions")
+    ),
     
     sidebarPanel(
       selectListInput("dist", "Distibution type:",

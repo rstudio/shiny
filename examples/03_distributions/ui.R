@@ -6,7 +6,8 @@ shinyUI(
   applicationPage(
     
     headerPanel(
-      h1("Example 3: Distributions")
+      h1("Example 3: Distributions"),
+      HTML("This example generates <b>random</b> distributions")
     ),
     
     sidebarPanel(

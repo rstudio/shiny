@@ -89,6 +89,8 @@ tag <- function(`_tag_name`, varArgs) {
               tag <- appendChild(tag, child)
             else if (is.list(child))
               tag <- appendChildren(tag, child)
+            else if (is.character(child))
+              tag <- appendChild(tag, child)
             else
               tag <- appendChild(tag, as.character(child))
           }
@@ -96,6 +98,11 @@ tag <- function(`_tag_name`, varArgs) {
         }
         
         tag <- appendChildren(tag, value)
+      }
+      
+      # add text
+      else if (is.character(value)) {
+        tag <- appendChild(tag, value)
       }
       
       # everything else treated as text
@@ -110,6 +117,14 @@ tag <- function(`_tag_name`, varArgs) {
 }
 
 
+normalizeText <- function(text) {
+  if (!is.null(attr(text, "html")))
+    text
+  else
+    htmlEscape(text, attribute=FALSE)
+    
+}
+
 #' @export
 writeChildren <- function(children, textWriter, indent, context) {
   for (child in children) {
@@ -117,7 +132,7 @@ writeChildren <- function(children, textWriter, indent, context) {
       writeTag(child, textWriter, indent, context)
     }
     else {
-      child <- htmlEscape(child, attribute=FALSE)
+      child <- normalizeText(child)
       indentText <- paste(rep(" ", indent*3), collapse="")
       textWriter(paste(indentText, child, "\n", sep=""))
     }
@@ -160,7 +175,7 @@ writeTag <- function(tag, textWriter, indent=0, context = NULL) {
     
     # special case for a single child text node (skip newlines and indentation)
     if ((length(tag$children) == 1) && is.character(tag$children[[1]]) ) {
-      text <- htmlEscape(tag$children[1], attribute=FALSE)
+      text <- normalizeText(tag$children[1])
       textWriter(paste(">", text, "</", tag$name, ">\n", sep=""))
     }
     else {
@@ -232,7 +247,12 @@ strong <- function(...) tag("strong", list(...))
 #' @export
 em <- function(...) tag("em", list(...))
 
-
+#' @export
+HTML <- function(text) {
+  htmlText <- text
+  attr(htmlText, "html") <- TRUE
+  htmlText
+}
 
 # environment used to store all available tags
 #' @export

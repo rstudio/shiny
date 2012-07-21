@@ -1,5 +1,5 @@
 export(appendChild)
-export(application)
+export(applicationPage)
 export(checkboxInput)
 export(clearClients)
 export(headerPanel)

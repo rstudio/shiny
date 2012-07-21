@@ -1,7 +1,7 @@
 library(shiny)
 
 shinyUI(
-  application(
+  applicationPage(
     
     headerPanel("Example 2: Computing Hashes"),
     

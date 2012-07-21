@@ -8,13 +8,13 @@ shinyUI(
     ),
     
     sidebarPanel(
-      textInput("input1", label="Input:", value="Hello, world!"),
-      checkboxInput("addnewline", label = "Append newline", value=TRUE)
+      textInput("input1", "Input:", value="Hello, world!"),
+      checkboxInput("addnewline", "Append newline", TRUE)
     ),
   
     mainPanel(
-      textOutput("md5_hash", label = "MD5:"),
-      textOutput("sha1_hash", label = "SHA-1:")
+      textOutput("md5_hash", "MD5:"),
+      textOutput("sha1_hash", "SHA-1:")
     )
   )
 )

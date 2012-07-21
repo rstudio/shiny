@@ -17,7 +17,7 @@ shinyUI(
                            exp = "Exponential")),
      
       numericInput("n", 
-                   label = "Number of observations:", 
+                   "Number of observations:", 
                    min = 0, 
                    max = 10000, 
                    value = 500),

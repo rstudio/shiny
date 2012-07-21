@@ -7,11 +7,11 @@ shinyUI(
     ),
     
     sidebarPanel(
-      textInput("val", label = "Input:", value = "Hello, World!")
+      textInput("val", "Input:", value = "Hello, World!")
     ),
     
     mainPanel(
-      textOutput("valUpper", label = "You said:")
+      textOutput("valUpper", "You said:")
     )
   )
 )

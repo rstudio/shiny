@@ -2,28 +2,27 @@
 
 #' @export
 liveText <- function(outputId,  labelText = NULL) {
-
-  tag <- tags$div()
+  tag <- div()
   if (!is.null(labelText)) 
     tag <- appendChild(tag, labelText)
   
-  tag <- appendChild(tag, tags$span(id = outputId, class = "live-text"))
+  tag <- appendChild(tag, span(id = outputId, class = "live-text"))
 }
 
 #' @export
 liveVerbatimText <- function(outputId) {
-  tags$pre(id = outputId, class = "live-text")
+  pre(id = outputId, class = "live-text")
 }
 
 #' @export
 livePlot <- function(outputId, width = "100%", height="400px") {
   style <- paste("width:", width, ";", "height:", height)
-  tags$div(id = outputId, class="live-plot", style = style)
+  div(id = outputId, class="live-plot", style = style)
 }
 
 #' @export
 liveTable <- function(outputId) {
-  tags$div(id = outputId, class="live-html")
+  div(id = outputId, class="live-html")
 }
   
 

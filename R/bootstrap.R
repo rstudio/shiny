@@ -34,17 +34,15 @@ applicationPage <- function(headerPanel, sidebarPanel, mainPanel) {
     importBootstrap(),
     
     # basic application container divs
-    withTags({
-      div(class="container-fluid", 
-        div(class="row-fluid", 
-          headerPanel
-        ),
-        div(class="row-fluid", 
-          sidebarPanel, 
-          mainPanel
-        )
+    div(class="container-fluid", 
+      div(class="row-fluid", 
+        headerPanel
+      ),
+      div(class="row-fluid", 
+        sidebarPanel, 
+        mainPanel
       )
-    })
+    )
   )
 }
 
@@ -52,31 +50,25 @@ applicationPage <- function(headerPanel, sidebarPanel, mainPanel) {
 
 #' @export
 headerPanel <- function(...) {
-  withTags({
-    div(class="span12", style="padding: 10px 0px;",
-      ...
-    )
-  })
+  div(class="span12", style="padding: 10px 0px;",
+    ...
+  )
 }
 
 #' @export
 sidebarPanel <- function(...) {
-  withTags({
-    div(class="span4",
-      div(class="well", 
-        ...
-      )
-    )   
-  })
+  div(class="span4",
+    div(class="well", 
+      ...
+    )
+  )   
 }
 
 #' @export
 mainPanel <- function(...) {
-  withTags({
-    div(class="span8",
-      ...
-    )
-  })
+  div(class="span8",
+    ...
+  )
 }
 
 #' @export
@@ -143,7 +135,7 @@ selectListInput <- function(inputId, labelText, choices, value = NULL) {
 
 #' @export
 tab <- function(name, ...) {
-  tags$div(class="tab-pane", id=name, ...)
+  div(class="tab-pane", id=name, ...)
 }
 
 #' @export

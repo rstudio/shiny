@@ -206,6 +206,29 @@ a <- function(...) tag("a", list(...))
 #' @export
 br <- function(...) tag("br", list(...))
 
+#' @export
+div <- function(...) tag("div", list(...))
+
+#' @export
+span <- function(...) tag("span", list(...))
+
+#' @export
+pre <- function(...) tag("pre", list(...))
+
+#' @export
+code <- function(...) tag("code", list(...))
+
+#' @export
+img <- function(...) tag("img", list(...))
+
+#' @export
+strong <- function(...) tag("strong", list(...))
+
+#' @export
+em <- function(...) tag("em", list(...))
+
+
+
 # environment used to store all available tags
 #' @export
 tags <- new.env()

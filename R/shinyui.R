@@ -1,10 +1,10 @@
 
 
 #' @export
-liveText <- function(outputId,  labelText = NULL) {
+liveText <- function(outputId,  label = NULL) {
   tag <- div()
-  if (!is.null(labelText)) 
-    tag <- appendChild(tag, labelText)
+  if (!is.null(label)) 
+    tag <- appendChild(tag, label)
   
   tag <- appendChild(tag, span(id = outputId, class = "live-text"))
 }

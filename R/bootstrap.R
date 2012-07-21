@@ -80,44 +80,38 @@ mainPanel <- function(...) {
 }
 
 #' @export
-textInput <- function(inputId, label, value = "") {
-  
-  list(
-    tags$label(label),
-    tags$input(id = inputId, type="text", value=value)
-  )
+textInput <- function(inputId, labelText, value = "") {
+  withTags({list(
+    label(labelText),
+    input(id = inputId, type="text", value=value)
+  )})
 }
 
 #' @export
-numericInput <- function(inputId, label, min, max, value = NA) {
-  inputLabel <- label
-  
+numericInput <- function(inputId, labelText, min, max, value = NA) {
   withTags({list(
-    label(inputLabel),
-    input(id = inputId, 
-          type= "number",
-          min = min,
-          max = max,
+    label(labelText),
+    input(id = inputId, type= "number", min = min, max = max,
           value = ifelse(!is.na(value), value, ""))
   )})
 }
 
 #' @export
-checkboxInput <- function(inputId, label, value = FALSE) {
-  
-  inputTag <- tags$input(id = inputId, type="checkbox")
-  if (value)
-    inputTag$attribs$checked <- "checked"
-  
-  tags$label(class = "checkbox", inputTag, label)  
+checkboxInput <- function(inputId, labelText, value = FALSE) {
+  withTags({
+    inputTag <- input(id = inputId, type="checkbox")
+    if (value)
+      inputTag$attribs$checked <- "checked"
+    label(class = "checkbox", inputTag, labelText)
+  })
 }
 
-controlLabel <- function(controlName, label) {
-  tags$label(class = "control-label", `for` = controlName, label)
+controlLabel <- function(controlName, labelText) {
+  tags$label(class = "control-label", `for` = controlName, labelText)
 }
 
 #' @export
-selectListInput <- function(inputId, label, choices, value = NULL) {
+selectListInput <- function(inputId, labelText, choices, value = NULL) {
     
   # get choice names
   choiceNames <- names(choices)
@@ -143,13 +137,13 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
   } 
   
   # return label and select tag
-  list(controlLabel(inputId, label), selectTag)
+  list(controlLabel(inputId, labelText), selectTag)
 }
 
 
 #' @export
-tab <- function(label, ...) {
-  tags$div(class="tab-pane", id=label, ...)
+tab <- function(name, ...) {
+  tags$div(class="tab-pane", id=name, ...)
 }
 
 #' @export
@@ -182,8 +176,8 @@ tabset <- function(...) {
 
 
 #' @export
-textOutput <- function(outputId, label = NULL) {
-  liveText(outputId, label)
+textOutput <- function(outputId, labelText = NULL) {
+  liveText(outputId, labelText)
 }
 
 #' @export

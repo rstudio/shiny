@@ -1,7 +1,7 @@
 
 
 #' @export
-shinyTextOutput <- function(outputId,  label = NULL) {
+liveText <- function(outputId,  label = NULL) {
 
   tag <- tags$div()
   if (!is.null(label)) 
@@ -11,18 +11,18 @@ shinyTextOutput <- function(outputId,  label = NULL) {
 }
 
 #' @export
-shinyVerbatimTextOutput <- function(outputId) {
+liveVerbatimText <- function(outputId) {
   tags$pre(id = outputId, class = "live-text")
 }
 
 #' @export
-shinyPlotOutput <- function(outputId, width = "100%", height="400px") {
+livePlot <- function(outputId, width = "100%", height="400px") {
   style <- paste("width:", width, ";", "height:", height)
   tags$div(id = outputId, class="live-plot", style = style)
 }
 
 #' @export
-shinyTableOutput <- function(outputId) {
+liveTable <- function(outputId) {
   tags$div(id = outputId, class="live-html")
 }
   

@@ -187,22 +187,22 @@ tabset <- function(...) {
 
 #' @export
 textOutput <- function(outputId, label = NULL) {
-  shinyTextOutput(outputId, label)
+  liveText(outputId, label)
 }
 
 #' @export
 verbatimTextOutput <- function(outputId) {
-  shinyVerbatimTextOutput(outputId)
+  liveVerbatimText(outputId)
 }
 
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px") {
-  shinyPlotOutput(outputId, width, height)
+  livePlot(outputId, width, height)
 }
 
 #' @export
 tableOutput <- function(outputId) {
-  shinyTableOutput(outputId)
+  liveTable(outputId)
 }
 
 

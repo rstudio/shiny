@@ -55,7 +55,7 @@ headerPanel <- function(title, ...) {
   appTitle <- title
   
   withTags({
-    div(class="span12", 
+    div(class="span12", style="padding-top: 10px;",
       h1(appTitle), 
       ..., 
       br()

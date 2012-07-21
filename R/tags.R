@@ -23,7 +23,7 @@ htmlEscape <- local({
       .htmlSpecialsPattern
     
     # Short circuit in the common case that there's nothing to escape
-    if (!grep(pattern, text))
+    if (!grepl(pattern, text))
       return(text)
     
     specials <- if(attribute)
@@ -117,6 +117,7 @@ writeChildren <- function(children, textWriter, indent, context) {
       writeTag(child, textWriter, indent, context)
     }
     else {
+      child <- htmlEscape(child, attribute=FALSE)
       indentText <- paste(rep(" ", indent*3), collapse="")
       textWriter(paste(indentText, child, "\n", sep=""))
     }
@@ -145,10 +146,13 @@ writeTag <- function(tag, textWriter, indent=0, context = NULL) {
   # write attributes
   for (attrib in names(tag$attribs)) {
     attribValue <- tag$attribs[[attrib]]
-    if (!is.na(attribValue))
-      textWriter(paste(" ", attrib,"=\"", attribValue, "\"", sep=""))
-    else
+    if (!is.na(attribValue)) {
+      text <- htmlEscape(attribValue, attribute=TRUE) 
+      textWriter(paste(" ", attrib,"=\"", text, "\"", sep=""))
+    }
+    else {
       textWriter(paste(" ", attrib, sep=""))
+    }
   }
   
   # write any children
@@ -156,7 +160,8 @@ writeTag <- function(tag, textWriter, indent=0, context = NULL) {
     
     # special case for a single child text node (skip newlines and indentation)
     if ((length(tag$children) == 1) && is.character(tag$children[[1]]) ) {
-      textWriter(paste(">", tag$children[1], "</", tag$name, ">\n", sep=""))
+      text <- htmlEscape(tag$children[1], attribute=FALSE)
+      textWriter(paste(">", text, "</", tag$name, ">\n", sep=""))
     }
     else {
       textWriter(">\n")

@@ -179,6 +179,33 @@ writeTag <- function(tag, textWriter, indent=0, context = NULL) {
 }
 
 
+#' @export
+p <- function(...)  tag("p", list(...))
+
+#' @export
+h1 <- function(...) tag("h1", list(...))
+
+#' @export
+h2 <- function(...) tag("h2", list(...))
+
+#' @export
+h3 <- function(...) tag("h3", list(...))
+
+#' @export
+h4 <- function(...) tag("h4", list(...))
+
+#' @export
+h5 <- function(...) tag("h5", list(...))
+
+#' @export
+h6 <- function(...) tag("h6", list(...))
+
+#' @export
+a <- function(...) tag("a", list(...))
+
+#' @export
+br <- function(...) tag("br", list(...))
+
 # environment used to store all available tags
 #' @export
 tags <- new.env()

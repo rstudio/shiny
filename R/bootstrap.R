@@ -133,7 +133,7 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
 
 #' @export
 tab <- function(name, ...) {
-  div(class="tab-pane", id=name, ...)
+  div(class="tab-pane", title=name, ...)
 }
 
 #' @export
@@ -144,18 +144,27 @@ tabset <- function(...) {
   tabNavList <- tags$ul(class = "nav nav-tabs")
   tabContent <- tags$div(class = "tab-content")
   firstTab <- TRUE
+  tabsetId <- as.integer(stats::runif(1, 1, 10000))
+  tabId <- 1
   for (divTag in tabs) {
-    id <- divTag$attribs$id
+    # compute id and assign it to the div
+    id <- paste("tab", tabsetId, tabId, sep="-")
+    divTag$attribs$id <- id
+    tabId <- tabId + 1
+    
+    # create the li tag
     liTag <- tags$li(tags$a(href=paste("#", id, sep=""),
                             `data-toggle` = "tab", 
-                            id))
+                            divTag$attribs$title))
     
+    # set the first tab as active
     if (firstTab) {
       liTag$attribs$class <- "active"
       divTag$attribs$class <- "tab-pane active"
       firstTab = FALSE
     }
     
+    # append the elements to our lists
     tabNavList <- appendChild(tabNavList, liTag)
     tabContent <- appendChild(tabContent, divTag)
   }

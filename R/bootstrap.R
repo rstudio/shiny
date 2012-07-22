@@ -139,7 +139,7 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
 
 #' @export
 submitButton <- function(text = "Update") {
-  tags$button(type="submit", class="btn", text)
+  tags$button(type="submit", class="btn btn-primary", text)
 }
 
 #' @export

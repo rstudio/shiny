@@ -3,6 +3,9 @@
 # Create a new slider control (list of slider input element and the script
 # tag used to configure it). This is a lower level control that should
 # be wrapped in an "input" construct (e.g. sliderInput in bootstrap.R)
+# 
+# this is a wrapper for: https://github.com/egorkhmelev/jslider
+# (www/shared/slider contains js, css, and img dependencies) 
 slider <- function(inputId, min, max, value = min) {
   # validate inputId
   inputId <- as.character(inputId)

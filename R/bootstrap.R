@@ -57,11 +57,13 @@ headerPanel <- function(...) {
 
 #' @export
 sidebarPanel <- function(...) {
-  div(class="span4",
-    div(class="well", 
-      ...
+  withTags({
+    div(class="span4",
+        form(class="well", 
+             ...
+        )
     )
-  )   
+  })
 }
 
 #' @export
@@ -133,6 +135,11 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
   
   # return label and select tag
   list(controlLabel(inputId, label), selectTag)
+}
+
+#' @export
+submitButton <- function(text = "Update") {
+  tags$button(type="submit", class="btn", text)
 }
 
 

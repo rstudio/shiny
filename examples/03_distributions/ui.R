@@ -6,8 +6,7 @@ shinyUI(
   applicationPage(
     
     headerPanel(
-      h1("Example 3: Distributions"),
-      HTML("This example generates <b>random</b> distributions")
+      h1("Example 3: Distributions")
     ),
     
     sidebarPanel(
@@ -16,6 +15,8 @@ shinyUI(
                            unif = "Uniform",
                            lnorm = "Log-normal",
                            exp = "Exponential")),
+      
+      helpText("You can select any distribution which you'd like to"),
      
       numericInput("n", 
                    "Number of observations:", 

@@ -96,6 +96,11 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   tags$label(class = "checkbox", inputTag, label)
 }
 
+#' @export
+helpText <- function(text) {
+  span(class="help-block", text)
+}
+
 controlLabel <- function(controlName, label) {
   tags$label(class = "control-label", `for` = controlName, label)
 }

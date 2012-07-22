@@ -140,6 +140,48 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
 #' @export
 submitButton <- function(text = "Update") {
   tags$button(type="submit", class="btn", text)
+
+#' @export
+sliderInput <- function(inputId, label, min, max, value = min) {
+  # validate inputId
+  inputId <- as.character(inputId)
+  if (!is.character(inputId))
+    stop("inputId not specified")
+  
+  # validate label
+  labelText <- as.character(label)
+  if (!is.character(labelText))
+    stop("label not specified")
+  
+  # validate numeric inputs
+  if (!is.numeric(value) || !is.numeric(min) || !is.numeric(max)) 
+    stop("min, max, amd value must all be numeric values")
+  else if (value < min) 
+    stop(paste("slider initial value", value, 
+               "is less than the specified minimum"))
+  else if (value > max) 
+    stop(paste("slider initial value", value, 
+               "is greater than the specified maximum"))
+  else if (min > max) 
+    stop(paste("slider maximum is greater than minimum"))
+  
+  # build slider
+  withTags({list(
+    head(
+      link(rel="stylesheet", 
+           type="text/css", 
+           href="shared/slider/css/jquery.slider.min.css"),
+      
+      script(src="shared/slider/js/jquery.slider.min.js")
+    ),
+    controlLabel(inputId, labelText),
+    input(id=inputId, type="slider", 
+          name=inputId, value=value),
+    script(type="text/javascript",
+           paste('jQuery("#', inputId, '").slider(', sep = ''),
+           paste('{ from:', min, ', to:', max, sep=''), 
+           '});')   
+  )})
 }
 
 

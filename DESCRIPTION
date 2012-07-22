@@ -24,5 +24,6 @@ Collate:
     'shiny.R'
     'shinywrappers.R'
     'shinyui.R'
+    'slider.R'
     'bootstrap.R'
 

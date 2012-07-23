@@ -314,7 +314,7 @@ tags$video <- function(...) tag("video", list(...))
 tags$wbr <- function(...) tag("wbr", list(...))
 
 #' @export
-as.html <- function(text) {
+HTML <- function(text) {
   htmlText <- text
   attr(htmlText, "html") <- TRUE
   htmlText

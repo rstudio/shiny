@@ -1,6 +1,5 @@
 export(a)
 export(applicationPage)
-export(as.html)
 export(br)
 export(checkboxInput)
 export(clearClients)

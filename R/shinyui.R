@@ -47,9 +47,6 @@ strong <- function(...) tags$strong(...)
 #' @export
 em <- function(...) tags$em(...)
 
-#' @export
-HTML <- function(text) as.html(text)
-
 
 #' @export
 liveText <- function(outputId) {

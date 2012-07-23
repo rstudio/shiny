@@ -13,20 +13,19 @@ applicationPage <- function(headerPanel, sidebarPanel, mainPanel) {
     jsExt = ext(".js")
     bs <- "shared/bootstrap/"
     
-    withTags({
-      head(
-        meta(name="viewport", content="width=device-width, initial-scale=1.0"),
-        link(rel="stylesheet", 
-             type="text/css", 
-             href=paste(bs, "css/bootstrap", cssExt, sep="")),
-        
-        link(rel="stylesheet", 
-             type="text/css", 
-             href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")),
-        
-        script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
-      )
-    })
+    tags$head(
+      tags$meta(name="viewport", 
+                content="width=device-width, initial-scale=1.0"),
+      tags$link(rel="stylesheet", 
+                type="text/css", 
+                href=paste(bs, "css/bootstrap", cssExt, sep="")),
+      
+      tags$link(rel="stylesheet", 
+                type="text/css", 
+                href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")),
+      
+      tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
+    )
   }
   
   list(
@@ -57,13 +56,11 @@ headerPanel <- function(...) {
 
 #' @export
 sidebarPanel <- function(...) {
-  withTags({
-    div(class="span4",
-        form(class="well", 
-             ...
-        )
+  div(class="span4",
+    tags$form(class="well", 
+      ...
     )
-  })
+  )
 }
 
 #' @export
@@ -139,12 +136,9 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
 
 #' @export
 submitButton <- function(text = "Apply Changes") {
-  withTags({
-    div(
-      button(type="submit", class="btn btn-primary", text)
-    )
-  })
-   
+  div(
+    tags$button(type="submit", class="btn btn-primary", text)
+  )
 }
 
 

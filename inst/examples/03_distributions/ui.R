@@ -6,9 +6,7 @@ shinyUI(
   pageWithSidebar(
     
     headerPanel(
-      h1("Example 3: Distributions"),
-      p("You really need to check out these distributions."),
-      HTML("No, <b>really</b> you should check these out!")
+      h1("Example 3: Distributions")
     ),
     
     sidebarPanel(

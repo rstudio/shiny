@@ -1,17 +1,10 @@
 # Shiny
 ### A web framework for R
 
-To launch example apps:
+### License
 
-```sh
-cd examples/01_allcaps
-R --slave < app.R
-```
-```sh
-cd examples/02_hash
-R --slave < app.R
-```
-```sh
-cd examples/03_distributions
-R --slave < app.R
-```
+The shiny package is licensed under the GPLv3. See these files for 
+additional details:
+
+- inst/COPYING - shiny package license (GPLv3)
+- inst/NOTICE  - Copyright notices for additional included software

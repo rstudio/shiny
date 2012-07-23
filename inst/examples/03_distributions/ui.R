@@ -24,9 +24,7 @@ shinyUI(
                    max = 10000, 
                    value = 500),
               
-      checkboxInput("animate", "Animate"),
-      
-      submitButton()
+      checkboxInput("animate", "Animate")
     ),
     
     mainPanel(

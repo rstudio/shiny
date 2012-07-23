@@ -11,10 +11,10 @@ shinyUI(
     
     sidebarPanel(
       selectInput("dist", "Distibution type:",
-                  list(norm = "Normal",
-                       unif = "Uniform",
-                       lnorm = "Log-normal",
-                       exp = "Exponential")),
+                  list("Normal" = "norm",
+                       "Uniform" = "unif",
+                       "Log-normal" = "lnorm",
+                       "Exponential" = "exp")),
       
       helpText("You can select any distribution which you'd like to"),
      

@@ -9,7 +9,7 @@ suppressPackageStartupMessages({
 #' slot.
 #' 
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
-#' the CSS class name \code{live-plot}.
+#' the CSS class name \code{shiny-plot-output}.
 #' 
 #' @param func A function that generates a plot.
 #' @param width The width of the rendered plot, in pixels; or \code{'auto'} to use
@@ -57,7 +57,7 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 #' slot.
 #' 
 #' The corresponding HTML output tag should be \code{div} and have the CSS class
-#' name \code{live-html}.
+#' name \code{shiny-html-output}.
 #' 
 #' @param func A function that returns an R object that can be used with 
 #'   \code{\link[xtable]{xtable}}.
@@ -83,7 +83,7 @@ reactiveTable <- function(func, ...) {
 #' 
 #' The corresponding HTML output tag can be anything (though \code{pre} is 
 #' recommended if you need a monospace font and whitespace preserved) and should
-#' have the CSS class name \code{live-text}.
+#' have the CSS class name \code{shiny-text-output}.
 #' 
 #' The result of executing \code{func} will be printed inside a 
 #' \code{\link[utils]{capture.output}} call. If instead you want to return a

@@ -48,29 +48,7 @@ strong <- function(...) tags$strong(...)
 em <- function(...) tags$em(...)
 
 
-#' @export
-liveText <- function(outputId) {
-  span(id = outputId, class = "live-text")
-}
-
-#' @export
-liveVerbatimText <- function(outputId) {
-  pre(id = outputId, class = "live-text")
-}
-
-#' @export
-livePlot <- function(outputId, width = "100%", height="400px") {
-  style <- paste("width:", width, ";", "height:", height)
-  div(id = outputId, class="live-plot", style = style)
-}
-
-#' @export
-liveTable <- function(outputId) {
-  div(id = outputId, class="live-html")
-}
-  
-
-shinyPage <- function(ui, connection) {
+renderPage <- function(ui, connection) {
   
   # provide a filter so we can intercept head tag requests
   context <- new.env()
@@ -130,7 +108,7 @@ shinyUI <- function(ui, path='/') {
       textConn <- textConnection(NULL, "w") 
       on.exit(close(textConn))
       
-      shinyPage(ui, textConn)
+      renderPage(ui, textConn)
       html <- paste(textConnectionValue(textConn), collapse='\n')
       return(http_response(ws, 200, content=html))
     }

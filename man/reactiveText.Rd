@@ -16,7 +16,7 @@
   The corresponding HTML output tag can be anything (though
   \code{pre} is recommended if you need a monospace font
   and whitespace preserved) and should have the CSS class
-  name \code{live-text}.
+  name \code{shiny-text-output}.
 
   The result of executing \code{func} will be printed
   inside a \code{\link[utils]{capture.output}} call. If

@@ -55,7 +55,7 @@ index.html (abridged):
 
 <p>
   You said:<br/>
-  <div id="valUpper" class="live-text"/>
+  <div id="valUpper" class="shiny-text-output"/>
 </p>
 ```
 

@@ -17,6 +17,6 @@
 }
 \details{
   The corresponding HTML output tag should be \code{div}
-  and have the CSS class name \code{live-html}.
+  and have the CSS class name \code{shiny-html-output}.
 }
 

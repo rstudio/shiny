@@ -195,13 +195,13 @@
 
     var shinyapp = window.shinyapp = new ShinyApp();
 
-    $('.live-text').each(function() {
+    $('.shiny-text-output').each(function() {
       shinyapp.bind(this.id, new LiveTextBinding(this));
     });
-    $('.live-plot').each(function() {
+    $('.shiny-plot-output').each(function() {
       shinyapp.bind(this.id, new LivePlotBinding(this));
     });
-    $('.live-html').each(function() {
+    $('.shiny-html-output').each(function() {
       shinyapp.bind(this.id, new LiveHTMLBinding(this));
     });
 
@@ -260,7 +260,7 @@
       });
     });
 
-    $('.live-plot').each(function() {
+    $('.shiny-plot-output').each(function() {
       var width = this.offsetWidth;
       var height = this.offsetHeight;
       initialValues['.shinyout_' + this.id + '_width'] = width;

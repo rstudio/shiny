@@ -25,6 +25,7 @@
 }
 \details{
   The corresponding HTML output tag should be \code{div} or
-  \code{img} and have the CSS class name \code{live-plot}.
+  \code{img} and have the CSS class name
+  \code{shiny-plot-output}.
 }
 

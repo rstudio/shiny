@@ -187,22 +187,23 @@ tabsetPanel <- function(...) {
 
 #' @export
 textOutput <- function(outputId) {
-  liveText(outputId)
+  span(id = outputId, class = "shiny-text-output")
 }
 
 #' @export
 verbatimTextOutput <- function(outputId) {
-  liveVerbatimText(outputId)
+  pre(id = outputId, class =  "shiny-text-output")
 }
 
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px") {
-  livePlot(outputId, width, height)
+  style <- paste("width:", width, ";", "height:", height)
+  div(id = outputId, class="shiny-plot-output", style = style)
 }
 
 #' @export
 tableOutput <- function(outputId) {
-  liveTable(outputId)
+  div(id = outputId, class="shiny-html-output")
 }
 
 

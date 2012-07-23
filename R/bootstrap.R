@@ -105,7 +105,7 @@ controlLabel <- function(controlName, label) {
 }
 
 #' @export
-selectListInput <- function(inputId, label, choices, value = NULL) {
+selectInput <- function(inputId, label, choices, value = NULL) {
     
   # get choice names
   choiceNames <- names(choices)

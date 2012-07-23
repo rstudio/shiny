@@ -43,8 +43,16 @@ isTag <- function(x) {
   inherits(x, "shiny.tag")
 }
 
+normalizeText <- function(text) {
+  if (!is.null(attr(text, "html")))
+    text
+  else
+    htmlEscape(text, attribute=FALSE)
+  
+}
+
 #' @export
-appendChild <- function(tag, child) {
+tagAppendChild <- function(tag, child) {
   tag$children[[length(tag$children)+1]] <- child
   tag
 }
@@ -83,31 +91,31 @@ tag <- function(`_tag_name`, varArgs) {
       # recursively process lists of children
       else if (is.list(value)) {
         
-        appendChildren <- function(tag, children) {
+        tagAppendChildren <- function(tag, children) {
           for(child in children) {
             if (isTag(child))
-              tag <- appendChild(tag, child)
+              tag <- tagAppendChild(tag, child)
             else if (is.list(child))
-              tag <- appendChildren(tag, child)
+              tag <- tagAppendChildren(tag, child)
             else if (is.character(child))
-              tag <- appendChild(tag, child)
+              tag <- tagAppendChild(tag, child)
             else
-              tag <- appendChild(tag, as.character(child))
+              tag <- tagAppendChild(tag, as.character(child))
           }
           return (tag)
         }
         
-        tag <- appendChildren(tag, value)
+        tag <- tagAppendChildren(tag, value)
       }
       
       # add text
       else if (is.character(value)) {
-        tag <- appendChild(tag, value)
+        tag <- tagAppendChild(tag, value)
       }
       
       # everything else treated as text
       else {
-        tag <- appendChild(tag, as.character(value))
+        tag <- tagAppendChild(tag, as.character(value))
       }
     }
   }
@@ -116,20 +124,11 @@ tag <- function(`_tag_name`, varArgs) {
   return (tag)
 }
 
-
-normalizeText <- function(text) {
-  if (!is.null(attr(text, "html")))
-    text
-  else
-    htmlEscape(text, attribute=FALSE)
-    
-}
-
 #' @export
-writeChildren <- function(children, textWriter, indent, context) {
-  for (child in children) {
+tagWriteChildren <- function(tag, textWriter, indent, context) {
+  for (child in tag$children) {
     if (isTag(child)) {
-      writeTag(child, textWriter, indent, context)
+      tagWrite(child, textWriter, indent, context)
     }
     else {
       child <- normalizeText(child)
@@ -140,11 +139,11 @@ writeChildren <- function(children, textWriter, indent, context) {
 }
 
 #' @export
-writeTag <- function(tag, textWriter, indent=0, context = NULL) {
+tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
   
   # optionally process a list of tags
   if (!isTag(tag) && is.list(tag)) {
-    sapply(tag, function(t) writeTag(t, textWriter, indent, context))
+    sapply(tag, function(t) tagWrite(t, textWriter, indent, context))
     return (NULL)
   }
   
@@ -180,7 +179,7 @@ writeTag <- function(tag, textWriter, indent=0, context = NULL) {
     }
     else {
       textWriter(">\n")
-      writeChildren(tag$children, textWriter, indent+1, context)
+      tagWriteChildren(tag, textWriter, indent+1, context)
       textWriter(paste(indentText, "</", tag$name, ">\n", sep=""))
     }
   }
@@ -247,12 +246,6 @@ strong <- function(...) tag("strong", list(...))
 #' @export
 em <- function(...) tag("em", list(...))
 
-#' @export
-HTML <- function(text) {
-  htmlText <- text
-  attr(htmlText, "html") <- TRUE
-  htmlText
-}
 
 # environment used to store all available tags
 #' @export
@@ -381,3 +374,12 @@ withTags <- function(expr) {
  targetExpr <- substituteDirect(exprTree, .tagSubs)
  eval.parent(targetExpr)
 }
+
+#' @export
+as.html <- function(text) {
+  htmlText <- text
+  attr(htmlText, "html") <- TRUE
+  htmlText
+}
+
+

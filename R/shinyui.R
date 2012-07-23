@@ -31,7 +31,7 @@ shinyPage <- function(ui, connection) {
     if (identical(tag$name, "head")) {
       textConn <- textConnection(NULL, "w") 
       textConnWriter <- function(text) cat(text, file = textConn)
-      writeChildren(tag$children, textConnWriter, 1, context)
+      tagWriteChildren(tag, textConnWriter, 1, context)
       context$head <- append(context$head, textConnectionValue(textConn))
       close(textConn)
       return (FALSE)
@@ -43,7 +43,7 @@ shinyPage <- function(ui, connection) {
   
   # write ui HTML to a character vector
   textConn <- textConnection(NULL, "w") 
-  writeTag(ui, function(text) cat(text, file = textConn), 0, context)
+  tagWrite(ui, function(text) cat(text, file = textConn), 0, context)
   uiHTML <- textConnectionValue(textConn)
   close(textConn)
  

@@ -130,7 +130,7 @@ selectListInput <- function(inputId, label, choices, value = NULL) {
     optionTag <- tags$option(value = choiceName, choices[[choiceName]])
     if (identical(choiceName, value))
       optionTag$attribs$selected = "selected"
-    selectTag <- appendChild(selectTag, optionTag)
+    selectTag <- tagAppendChild(selectTag, optionTag)
   } 
   
   # return label and select tag
@@ -182,8 +182,8 @@ tabset <- function(...) {
     }
     
     # append the elements to our lists
-    tabNavList <- appendChild(tabNavList, liTag)
-    tabContent <- appendChild(tabContent, divTag)
+    tabNavList <- tagAppendChild(tabNavList, liTag)
+    tabContent <- tagAppendChild(tabContent, divTag)
   }
   
   tabDiv <- tags$div(class = "tabbable", tabNavList, tabContent)

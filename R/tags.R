@@ -198,54 +198,6 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
 }
 
 
-#' @export
-p <- function(...)  tag("p", list(...))
-
-#' @export
-h1 <- function(...) tag("h1", list(...))
-
-#' @export
-h2 <- function(...) tag("h2", list(...))
-
-#' @export
-h3 <- function(...) tag("h3", list(...))
-
-#' @export
-h4 <- function(...) tag("h4", list(...))
-
-#' @export
-h5 <- function(...) tag("h5", list(...))
-
-#' @export
-h6 <- function(...) tag("h6", list(...))
-
-#' @export
-a <- function(...) tag("a", list(...))
-
-#' @export
-br <- function(...) tag("br", list(...))
-
-#' @export
-div <- function(...) tag("div", list(...))
-
-#' @export
-span <- function(...) tag("span", list(...))
-
-#' @export
-pre <- function(...) tag("pre", list(...))
-
-#' @export
-code <- function(...) tag("code", list(...))
-
-#' @export
-img <- function(...) tag("img", list(...))
-
-#' @export
-strong <- function(...) tag("strong", list(...))
-
-#' @export
-em <- function(...) tag("em", list(...))
-
 
 # environment used to store all available tags
 #' @export

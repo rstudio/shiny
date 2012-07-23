@@ -1,4 +1,55 @@
 
+#' @export
+p <- function(...) tags$p(...)
+
+#' @export
+h1 <- function(...) tags$h1(...)
+
+#' @export
+h2 <- function(...) tags$h2(...)
+
+#' @export
+h3 <- function(...) tags$h3(...)
+
+#' @export
+h4 <- function(...) tags$h4(...)
+
+#' @export
+h5 <- function(...) tags$h5(...)
+
+#' @export
+h6 <- function(...) tags$h6(...)
+
+#' @export
+a <- function(...) tags$a(...)
+
+#' @export
+br <- function(...) tags$br(...)
+
+#' @export
+div <- function(...) tags$div(...)
+
+#' @export
+span <- function(...) tags$span(...)
+
+#' @export
+pre <- function(...) tags$pre(...)
+
+#' @export
+code <- function(...) tags$code(...)
+
+#' @export
+img <- function(...) tags$img(...)
+
+#' @export
+strong <- function(...) tags$strong(...)
+
+#' @export
+em <- function(...) tags$em(...)
+
+#' @export
+HTML <- function(...) tags$as.html(...)
+
 
 #' @export
 liveText <- function(outputId) {

@@ -30,10 +30,10 @@ shinyUI(
     ),
     
     mainPanel(
-      tabset(
-        tab("Plot", plotOutput("plot1")),
-        tab("Summary", verbatimTextOutput("summary1")), 
-        tab("Table", tableOutput("table1"))
+      tabsetPanel(
+        tabPanel("Plot", plotOutput("plot1")),
+        tabPanel("Summary", verbatimTextOutput("summary1")), 
+        tabPanel("Table", tableOutput("table1"))
       )
     )
   )

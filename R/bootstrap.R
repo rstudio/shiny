@@ -149,12 +149,12 @@ submitButton <- function(text = "Apply Changes") {
 
 
 #' @export
-tab <- function(name, ...) {
+tabPanel <- function(name, ...) {
   div(class="tab-pane", title=name, ...)
 }
 
 #' @export
-tabset <- function(...) {
+tabsetPanel <- function(...) {
   
   # build tab-nav and tab-content divs
   tabs <- list(...)

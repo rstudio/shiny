@@ -48,7 +48,7 @@ strong <- function(...) tags$strong(...)
 em <- function(...) tags$em(...)
 
 #' @export
-HTML <- function(...) tags$as.html(...)
+HTML <- function(text) as.html(text)
 
 
 #' @export

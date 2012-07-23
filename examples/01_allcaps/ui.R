@@ -11,7 +11,7 @@ shinyUI(
     ),
     
     mainPanel(
-      textOutput("valUpper", "You said:")
+      p("You said: ", textOutput("valUpper"))
     )
   )
 )

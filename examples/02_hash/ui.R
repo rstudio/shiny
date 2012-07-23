@@ -13,8 +13,8 @@ shinyUI(
     ),
   
     mainPanel(
-      textOutput("md5_hash", "MD5:"),
-      textOutput("sha1_hash", "SHA-1:")
+      p("MD5: ", textOutput("md5_hash")),
+      p("SHA-1: ", textOutput("sha1_hash"))
     )
   )
 )

@@ -1,12 +1,8 @@
 
 
 #' @export
-liveText <- function(outputId,  label = NULL) {
-  tag <- div()
-  if (!is.null(label)) 
-    tag <- appendChild(tag, label)
-  
-  tag <- appendChild(tag, span(id = outputId, class = "live-text"))
+liveText <- function(outputId) {
+  span(id = outputId, class = "live-text")
 }
 
 #' @export

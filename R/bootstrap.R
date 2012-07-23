@@ -207,8 +207,8 @@ tabset <- function(...) {
 
 
 #' @export
-textOutput <- function(outputId, label = NULL) {
-  liveText(outputId, label)
+textOutput <- function(outputId) {
+  liveText(outputId)
 }
 
 #' @export

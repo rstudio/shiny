@@ -1,7 +1,7 @@
 
 
 #' @export
-applicationPage <- function(headerPanel, sidebarPanel, mainPanel) {
+pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
   
   # required head tags for boostrap
   importBootstrap <- function(min = TRUE) {

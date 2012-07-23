@@ -1,7 +1,7 @@
 library(shiny)
 
 shinyUI(
-  applicationPage(
+  pageWithSidebar(
     headerPanel(
       h1("Example 1: All Caps")
     ),

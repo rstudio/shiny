@@ -355,3 +355,11 @@ runApp <- function(appDir=getwd(),
     }
   )
 }
+
+#' @export
+runExample <- function(example, port=8100L, launch.browser=interactive()) {
+  runApp(system.file(paste('examples', example, sep=.Platform$file.sep), 
+                     package='shiny'),
+         port = port,
+         launch.browser = launch.browser)
+}

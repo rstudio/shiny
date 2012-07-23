@@ -141,6 +141,21 @@ submitButton <- function(text = "Apply Changes") {
   )
 }
 
+#' @export
+sliderInput <- function(inputId, label, min, max, value, step = NULL) {
+ 
+  # validate label
+  labelText <- as.character(label)
+  if (!is.character(labelText))
+    stop("label not specified")
+  
+  # bulid slider
+  list(
+    controlLabel(inputId, labelText),  
+    slider(inputId, min, max, value, step)
+  )
+}
+
 
 #' @export
 tabPanel <- function(name, ...) {

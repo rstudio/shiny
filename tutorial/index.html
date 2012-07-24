@@ -1,3 +1,7 @@
+---
+title: Tutorial: Building 'shiny' Web Applications with R
+---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,8 +137,9 @@ hljs.initHighlightingOnLoad();
    
 <!-- Welcome -->   
 <div class="tab-pane active" id="welcome">
-      
-<h3>Welcome</h3>
+
+{% capture welcome %}{% include welcome.md %}{% endcapture %}
+{{ welcome | markdownify }}
       
 </div>
 

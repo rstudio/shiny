@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Tutorial: Building 'shiny' Web Applications with R</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+<meta charset="utf-8">
+<title>Tutorial: Building 'shiny' Web Applications with R</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-      .responsive-image {
-         max-width: 100%;
-      }
-    </style>
-    <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<style>
+   body {
+     padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+   }
+   .responsive-image {
+      max-width: 100%;
+   }
+      
+</style>
+<link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+<!--[if lt IE 9]>
+   <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
 
 
 <!-- Styles for R syntax highlighter -->
@@ -64,76 +65,87 @@ var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/<
 hljs.initHighlightingOnLoad();
 </script>
 
+</head>
 
+<body>
 
-  </head>
+<!-- Top navigation bar -->
+<div class="navbar navbar-fixed-top">
+<div class="navbar-inner">
+  <div class="container">
+   
+    <a class="brand" href="#">Tutorial: Building 'shiny' Web Applications with R</a>
+   <a class="btn btn-primary pull-right" href="https://github.com/rstudio/shiny" target="_blank">shiny on GitHub</a>
+  </div>
+</div>
+</div>
 
-  <body>
-  
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-         
-          <a class="brand" href="#">Tutorial: Building 'shiny' Web Applications with R</a>
-         <a class="btn btn-primary pull-right" href="https://github.com/rstudio/shiny" target="_blank">shiny on GitHub</a>
-        </div>
-      </div>
-    </div>
+<!-- Document body -->
+<div class="container-fluid">
+<div class="row-fluid">
 
-    <div class="container-fluid">
+<!-- Side navigation bar -->
+<div class="span4 well">
+<ul class = "nav nav-list">
+   <li class="nav-header">Getting Started</li>
+    <li class="active">
+      <a href="#welcome" data-toggle="tab">Welcome</a>
+   </li>
+   <li>
+      <a href="#installation" data-toggle="tab">Installation</a>
+   </li>
+   <li>
+      <a href="#hello-shiny" data-toggle="tab">Hello Shiny</a>
+   </li>
+   <li>
+      <a href="#shiny-text" data-toggle="tab">Shiny Text</a>
+   </li>
+   <li>
+      <a href="#reactivity" data-toggle="tab">Reactivity</a>
+   </li>
+   <li class="nav-header">Building an App</li>
+   <li>
+      <a href="#ui-and-server" data-toggle="tab">UI &amp; Server</a>
+   </li>
+   <li>
+      <a href="#inputs-and-outputs" data-toggle="tab">Inputs &amp; Outputs</a>
+   </li>
+   <li>
+      <a href="#edit-run-debug" data-toggle="tab">Edit, Run, Debug</a>
+   </li>
+   <li class="nav-header">Tooling Up</li>
+   <li>
+      <a href="#sliders" data-toggle="tab">Sliders</a>
+   </li>
+   <li>
+      <a href="#animation" data-toggle="tab">Animation</a>
+   </li>
+   <li>
+      <a href="#tabsets" data-toggle="tab">Tabsets</a>
+   <li>
+      <a href="#html-ui" data-toggle="tab">HTML UI</a>
+   </li>
+</ul>
+</div>
+
+<!-- Tabs -->
+<div class="span8 tab-content">
+   
+<!-- Welcome -->   
+<div class="tab-pane active" id="welcome">
       
+welcome to shiny
+    
+<ul class="pager">
+   <li><a href="#installation">Next &rarr;</a></li>
+</ul>    
+    
+</div>
 
-       <div class="row-fluid">
-         <div class="span4 well">
-            <ul class = "nav nav-list">
-               <li class="nav-header">Getting Started</li>
-               <li class="">
-                  <a href="#installation">Installation</a>
-               </li>
-               <li class="active">
-                  <a href="#hello">Hello Shiny</a>
-               </li>
-               <li>
-                  <a href="#text">Shiny Text</a>
-               </li>
-               <li class="nav-header">Building an App</li>
-               <li>
-                  <a href="#sliders">Scaffolding</a>
-               </li>
-               <li>
-                  <a href="#animation">Inputs &amp; Outputs</a>
-               </li>
-               <li>
-                  <a href="#tabsets">Run and Debug</a>
-               </li>
-               <li class="nav-header">Tooling Up</li>
-               <li>
-                  <a href="#sliders">Sliders</a>
-               </li>
-               <li>
-                  <a href="#animation">Animation</a>
-               </li>
-               <li>
-                  <a href="#tabsets">Tabsets</a>
-               </li>
-                <li class="nav-header">Extra Credit</li>
-               <li>
-                  <a href="#common">Data Sources</a>
-               </li>
-               <li>
-                  <a href="#tabsets">HTML UI</a>
-               </li>
-               <li>
-                  <a href="#reactiveconcepts">Reactivity</a>
-               </li>
-              
-            </ul>
-         </div>
-         
-         <div class="span8 tab-content">
-            <div class="tab-pane" id="installation">
-       
-       
+
+<!-- Installation -->   
+<div class="tab-pane" id="installation">
+ 
 <p>You can install shiny directly from github using the <code>devtools</code> package. In order to install shiny you&#39;ll also need to be configured to build R packages from source. To install devtools and verify that you can build packages from source:</p>
 
 <pre><code class="r">install.packages(&quot;devtools&quot;)
@@ -166,22 +178,20 @@ runExample(&quot;01_hello&quot;)
 </code></pre>
 
 <p>If everything is installed and working correctly a browser will open and navigate to the running application. </p>
-              
-              <ul class="pager">
-                 <li>
-                    <a href="#">&larr; Previous</a>
-                 </li>
-                 <li>
-                    <a href="#">Next &rarr;</a>
-                 </li>
-              </ul>
-              
-            </div>
-            
-            <div class="tab-pane active" id="hello">
- 
+        
+<ul class="pager">
+   <li><a href="#welcome">&larr; Previous</a></li>
+   <li><a href="#hello-shiny">Next &rarr;</a></li>
+</ul>
+        
+</div>
+      
+
+<!-- Hello Shiny -->      
+<div class="tab-pane" id="hello-shiny">
+
 <h4>Screenshot</h4> 
- 
+
 <img src="screenshots/hello.png" class="responsive-image"></img>
 
 
@@ -190,82 +200,101 @@ runExample(&quot;01_hello&quot;)
 <pre><code class="r">library(shiny)
 runExample(&quot;hello&quot;)
 </code></pre>       
- 
+
 <h4>ui.R</h4> 
 
 <pre><code class="r">library(shiny)
-
-shinyUI(
-  pageWithSidebar(
-
-    headerPanel(
+shinyUI(pageWithSidebar(
+   headerPanel(
       h1(&quot;Hello shiny!&quot;)
-    ),
-
-    sidebarPanel(
+   ),
+   sidebarPanel(
       numericInput(&quot;obs&quot;, 
                    &quot;Number of observations:&quot;, 
-                   min = 0, 
+                   min = 1, 
                    max = 10000, 
                    value = 500)
-    ),
-
-    mainPanel(
+   ),
+   mainPanel(
       plotOutput(&quot;plot&quot;)
-    )
-  )
-)
+   )
+))
 </code></pre>
- 
+
 <h4>server.R</h4> 
- 
+
 <pre><code class="r">library(shiny)
-
 shinyServer(function(input, output) {
-
-    output$plot &lt;- reactivePlot(function() {
-
-        obs &lt;- as.integer(input$obs)
-
-        hist(rnorm(obs))
-    })
-
+   output$plot &lt;- reactivePlot(function() {
+      obs &lt;- as.integer(input$obs)
+      hist(rnorm(obs))
+   })
 })
 </code></pre>
- 
+</div>
 
-              <ul class="pager">
-                 <li>
-                    <a href="#">&larr; Previous</a>
-                 </li>
-                 <li>
-                    <a href="#">Next &rarr;</a>
-                 </li>
-              </ul>
-              
-            </div>
- 
- 
-            </div>
- 
-            
-            <div class="tab-pane" id="reactive">
-              Reactive
-            </div>
-            
-            
-         
-         </div>
-      </div>
-    
-    </div>
+<!-- Shiny Text -->
+<div class="tab-pane" id="shiny-text">
+Shiny Text
+</div>
 
-    
-    
 
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="jquery.js"></script>
-    <script src="bootstrap/js/bootstrap.min.js"></script>
-   
-  </body>
+<!-- Reactivity -->
+<div class="tab-pane" id="reactivity">
+Reativity
+</div>
+
+
+<!-- UI and Server -->
+<div class="tab-pane" id="ui-and-server">
+UI and Server
+</div>
+
+<!-- Inputs and Outputs -->
+<div class="tab-pane" id="inputs-and-outputs">
+Inputs and Outputs
+</div>
+
+<!-- Edit, Run, Debug -->
+<div class="tab-pane" id="edit-run-debug">
+Edit, Run, Debug
+</div>
+
+<!-- Sliders -->
+<div class="tab-pane" id="sliders">
+Sliders
+</div>
+
+<!-- Sliders -->
+<div class="tab-pane" id="animation">
+Animation
+</div>
+
+<!-- Tabsets -->
+<div class="tab-pane" id="tabsets">
+Tabsets
+</div>
+
+<!-- HTML UI -->
+<div class="tab-pane" id="html-ui">
+HTML UI
+</div>
+
+
+
+
+
+
+
+</div>
+
+</div>
+</div>
+
+
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="jquery.js"></script>
+<script src="bootstrap/js/bootstrap.min.js"></script>
+
+</body>
 </html>

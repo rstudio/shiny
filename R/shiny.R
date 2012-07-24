@@ -262,7 +262,7 @@ startApp <- function(port=8101L) {
 
   sys.www.root <- system.file('www', package='shiny')
   
-  commonR <- file.path(getwd(), 'common.R')
+  globalR <- file.path(getwd(), 'global.R')
   uiR <- file.path(getwd(), 'ui.R')
   serverR <- file.path(getwd(), 'server.R')
   wwwDir <- file.path(getwd(), 'www')
@@ -272,8 +272,8 @@ startApp <- function(port=8101L) {
   if (!file.exists(serverR))
     stop(paste("server.R file was not found in", getwd()))
   
-  if (file.exists(commonR))
-    source(commonR, local=F)
+  if (file.exists(globalR))
+    source(globalR, local=F)
   
   shinyServer(NULL)
   serverFileTimestamp <- NULL

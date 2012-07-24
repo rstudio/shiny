@@ -220,9 +220,18 @@ hljs.initHighlightingOnLoad();
 </div>
 
 <ul class="pager">
-   <li><a href="#" onclick="$('.nav li.active').prevAll('li:not(.nav-header)').first().find('a').tab('show')">&larr; Previous</a></li> 
-   <li><a href="#" onclick="$('.nav li.active').nextAll('li:not(.nav-header)').first().find('a').tab('show')">Next &rarr;</a></li> 
+   <li><a href="#" id="previous">&larr; Previous</a></li> 
+   <li><a href="#" id="next">Next &rarr;</a></li> 
 </ul>
+
+<script>
+$('a#next').click(function() {
+   $('.nav li.active').nextAll('li:not(.nav-header)').first().find('a').tab('show')
+})
+$('a#previous').click(function() {
+  $('.nav li.active').prevAll('li:not(.nav-header)').first().find('a').tab('show')
+})
+</script>
 
 </div>
 

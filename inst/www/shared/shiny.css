@@ -13,3 +13,7 @@ table.data td, table th {
 table.data td[align=right] {
   font-family: monospace;
 }
+
+.shiny-output-error {
+  color: red;
+}

@@ -12,6 +12,7 @@ ShinyApp <- setRefClass(
     .websocket = 'list',
     .outputs = 'Map',
     .invalidatedOutputValues = 'Map',
+    .invalidatedOutputErrors = 'Map',
     session = 'Values'
   ),
   methods = list(
@@ -19,6 +20,7 @@ ShinyApp <- setRefClass(
       .websocket <<- ws
       .outputs <<- Map$new()
       .invalidatedOutputValues <<- Map$new()
+      .invalidatedOutputErrors <<- Map$new()
       session <<- Values$new()
     },
     defineOutput = function(name, func) {
@@ -44,20 +46,40 @@ ShinyApp <- setRefClass(
              function(key) {
                func <- .outputs$remove(key)
                Observer$new(function() {
-                 value <- func()
-                 .invalidatedOutputValues$set(key, value)
+                 .invalidatedOutputErrors$remove(key)
+                 .invalidatedOutputValues$remove(key)
+                 
+                 value <- try(func(), silent=F)
+                 if (identical(class(value), 'try-error')) {
+                   cond <- attr(value, 'condition')
+                   .invalidatedOutputErrors$set(
+                     key, 
+                     list(message=cond$message,
+                          call=capture.output(print(cond$call))))
+                 }
+                 else
+                   .invalidatedOutputValues$set(key, value)
                })
              })
     },
     flushOutput = function() {
-      if (length(.invalidatedOutputValues) == 0)
+      if (length(.invalidatedOutputValues) == 0
+          && length(.invalidatedOutputErrors)== 0) {
         return(invisible())
+      }
       
-      data <- .invalidatedOutputValues
+      values <- .invalidatedOutputValues
       .invalidatedOutputValues <<- Map$new()
+      errors <- .invalidatedOutputErrors
+      .invalidatedOutputErrors <<- Map$new()
+      
+      json <- toJSON(list(errors=as.list(errors),
+                          values=as.list(values)))
+
       if (getOption('shiny.trace', F))
-        cat(c("SEND", toJSON(as.list(data)), "\n"))
-      websocket_write(toJSON(as.list(data)), .websocket)
+        message("SEND ", json)
+
+      websocket_write(json, .websocket)
     }
   )
 )
@@ -250,7 +272,7 @@ startApp <- function(port=8101L) {
   
   set_callback('receive', function(DATA, WS, ...) {
     if (getOption('shiny.trace', F))
-      cat(c("RECV", rawToChar(DATA), "\n"))
+      message("RECV ", rawToChar(DATA))
     
     if (identical(charToRaw("\003\xe9"), DATA))
       return()
@@ -290,7 +312,7 @@ startApp <- function(port=8101L) {
     shinyapp$flushOutput()
   }, ws_env)
   
-  cat(paste('\nListening on port ', port, "\n", sep=''))
+  message('\n', 'Listening on port ', port)
   
   return(ws_env)
 }

@@ -122,6 +122,15 @@
       }
     };
 
+    this.receiveError = function(name, error) {
+      this.$values[name] = null;
+
+      var binding = this.$bindings[name];
+      if (binding && binding.onValueError) {
+        binding.onValueError(error);
+      }
+    }
+
     this.receiveOutput = function(name, value) {
       var oldValue = this.$values[name];
       this.$values[name] = value;
@@ -138,8 +147,11 @@
 
     this.dispatchMessage = function(msg) {
       var msgObj = JSON.parse(msg);
-      for (key in msgObj) {
-        this.receiveOutput(key, msgObj[key]);
+      for (key in msgObj.errors) {
+        this.receiveError(key, msgObj.errors[key]);
+      }
+      for (key in msgObj.values) {
+        this.receiveOutput(key, msgObj.values[key]);
       }
     };
 
@@ -159,8 +171,13 @@
   };
   (function() {
     this.onValueChange = function(data) {
+      $(this.el).removeClass('shiny-output-error');
       $(this.el).text(data);
     };
+    this.onValueError = function(err) {
+      $(this.el).text('ERROR: ' + err.message);
+      $(this.el).addClass('shiny-output-error');
+    }
   }).call(LiveTextBinding.prototype);
 
   var LivePlotBinding = function(el) {
@@ -168,17 +185,17 @@
   };
   (function() {
     this.onValueChange = function(data) {
-      if (this.el.tagName == 'IMG') {
-        this.el.src = data ? data : '';
-      }
-      else {
-        $(this.el).empty();
-        if (!data)
-          return;
-        var img = document.createElement('img');
-        img.src = data;
-        this.el.appendChild(img);
-      }
+      $(this.el).removeClass('shiny-output-error');
+      $(this.el).empty();
+      if (!data)
+        return;
+      var img = document.createElement('img');
+      img.src = data;
+      this.el.appendChild(img);
+    };
+    this.onValueError = function(err) {
+      $(this.el).text('ERROR: ' + err.message);
+      $(this.el).addClass('shiny-output-error');
     };
   }).call(LivePlotBinding.prototype);
 
@@ -187,7 +204,12 @@
   };
   (function() {
     this.onValueChange = function(data) {
+      $(this.el).removeClass('shiny-output-error');
       $(this.el).html(data)
+    };
+    this.onValueError = function(err) {
+      $(this.el).text('ERROR: ' + err.message);
+      $(this.el).addClass('shiny-output-error');
     };
   }).call(LiveHTMLBinding.prototype);
   
@@ -227,6 +249,7 @@
       $(this).click(function(event) {
         event.preventDefault();
         shinyapp.sendInput(pendingData);
+        pendingData = {};
       });
     });
 
@@ -250,7 +273,8 @@
       //   until submit button is pressed
       initialValues[name] = value;
       $(input).each(function() {
-        $(this).bind('change keyup input', debounce(500, function() {
+        delay = deferredSubmit ? 0 : 250;
+        $(this).bind('change keyup input', debounce(delay, function() {
           var newValue = elementToValue(input);
           if (value !== newValue) {
             value = newValue;

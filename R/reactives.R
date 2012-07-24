@@ -102,6 +102,9 @@ Observable <- setRefClass(
           .dependencies$remove(ctx$id)
         })
       }
+      
+      if (identical(class(.value), 'try-error'))
+        stop(attr(.value, 'condition'))
       return(.value)
     },
     .updateValue = function() {
@@ -112,7 +115,7 @@ Observable <- setRefClass(
         .self$.updateValue()
       })
       ctx$run(function() {
-        .value <<- .func()
+        .value <<- try(.func(), silent=F)
       })
       if (!identical(old.value, .value)) {
         lapply(

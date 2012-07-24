@@ -29,10 +29,11 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
     # Note that these are reactive calls. A change to the width and height
     # will inherently cause a reactive plot to redraw (unless width and 
     # height were explicitly specified).
+    prefix <- '.shinyout_'
     if (width == 'auto')
-      width <- shinyapp$session$get(paste0('.shinyout_', name, '_width'));
+      width <- shinyapp$session$get(paste(prefix, name, '_width', sep=''));
     if (height == 'auto')
-      height <- shinyapp$session$get(paste0('.shinyout_', name, '_height'));
+      height <- shinyapp$session$get(paste(prefix, name, '_height', sep=''));
     
     if (width <= 0 || height <= 0)
       return(NULL)

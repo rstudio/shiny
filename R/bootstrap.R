@@ -105,7 +105,11 @@ controlLabel <- function(controlName, label) {
 }
 
 #' @export
-selectInput <- function(inputId, label, choices, selected = NULL) {
+selectInput <- function(inputId, 
+                        label, 
+                        choices, 
+                        selected = NULL, 
+                        multiple = FALSE) {
     
   # get choice names
   choiceNames <- names(choices)
@@ -118,14 +122,16 @@ selectInput <- function(inputId, label, choices, selected = NULL) {
   names(choices) <- choiceNames
   
   # default value if it's not specified
-  if (is.null(selected))
+  if (is.null(selected) && !multiple)
     selected <- choiceNames[[1]]
   
   # create select tag and add options
   selectTag <- tags$select(id = inputId)
+  if (multiple)
+    selectTag$attribs$multiple <- "multiple"
   for (choiceName in names(choices)) {
     optionTag <- tags$option(value = choices[[choiceName]], choiceName)
-    if (identical(choiceName, selected))
+    if (choiceName %in% selected)
       optionTag$attribs$selected = "selected"
     selectTag <- tagAppendChild(selectTag, optionTag)
   } 

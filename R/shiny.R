@@ -13,6 +13,7 @@ ShinyApp <- setRefClass(
     .outputs = 'Map',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
+    .progressKeys = 'character',
     session = 'Values'
   ),
   methods = list(
@@ -21,6 +22,7 @@ ShinyApp <- setRefClass(
       .outputs <<- Map$new()
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
+      .progressKeys <<- character(0)
       session <<- Values$new()
     },
     defineOutput = function(name, func) {
@@ -45,11 +47,13 @@ ShinyApp <- setRefClass(
       lapply(.outputs$keys(),
              function(key) {
                func <- .outputs$remove(key)
-               Observer$new(function() {
+               obs <- Observer$new(function() {
+                 
+                 value <- try(func(), silent=F)
+
                  .invalidatedOutputErrors$remove(key)
                  .invalidatedOutputValues$remove(key)
                  
-                 value <- try(func(), silent=F)
                  if (identical(class(value), 'try-error')) {
                    cond <- attr(value, 'condition')
                    .invalidatedOutputErrors$set(
@@ -60,13 +64,20 @@ ShinyApp <- setRefClass(
                  else
                    .invalidatedOutputValues$set(key, value)
                })
+               
+               obs$onInvalidateHint(function() {
+                 showProgress(key)
+               })
              })
     },
     flushOutput = function() {
-      if (length(.invalidatedOutputValues) == 0
-          && length(.invalidatedOutputErrors)== 0) {
+      if (length(.progressKeys) == 0
+          && length(.invalidatedOutputValues) == 0
+          && length(.invalidatedOutputErrors) == 0) {
         return(invisible())
       }
+      
+      .progressKeys <<- character(0)
       
       values <- .invalidatedOutputValues
       .invalidatedOutputValues <<- Map$new()
@@ -79,6 +90,23 @@ ShinyApp <- setRefClass(
       if (getOption('shiny.trace', F))
         message("SEND ", json)
 
+      websocket_write(json, .websocket)
+    },
+    showProgress = function(id) {
+      'Send a message to the client that recalculation of the output identified
+      by \\code{id} is in progress. There is currently no mechanism for
+      explicitly turning off progress for an output component; instead, all
+      progress is implicitly turned off when flushOutput is next called.'
+      if (id %in% .progressKeys)
+        return()
+      
+      .progressKeys <<- c(.progressKeys, id)
+      
+      json <- toJSON(list(progress=list(id)))
+      
+      if (getOption('shiny.trace', F))
+        message("SEND ", json)
+      
       websocket_write(json, .websocket)
     }
   )

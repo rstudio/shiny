@@ -17,3 +17,11 @@ table.data td[align=right] {
 .shiny-output-error {
   color: red;
 }
+
+.recalculating {
+  opacity: 0.3;
+  transition: opacity 250ms ease 500ms;
+  -moz-transition: opacity 250ms ease 500ms;
+  -webkit-transition: opacity 250ms ease 500ms;
+  -o-transition: opacity 250ms ease 500ms;
+}

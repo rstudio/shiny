@@ -3,18 +3,29 @@ Context <- setRefClass(
   fields = list(
     id = 'character',
     .invalidated = 'logical',
-    .callbacks = 'list'
+    .callbacks = 'list',
+    .hintCallbacks = 'list'
   ),
   methods = list(
     initialize = function() {
       id <<- .getReactiveEnvironment()$nextId()
       .invalidated <<- F
       .callbacks <<- list()
+      .hintCallbacks <<- list()
     },
     run = function(func) {
       "Run the provided function under this context."
       env <- .getReactiveEnvironment()
       env$runWith(.self, func)
+    },
+    invalidateHint = function() {
+      "Let this context know it may or may not be invalidated very soon; that
+      is, something in its dependency graph has been invalidated but there's no
+      guarantee that the cascade of invalidations will reach all the way here.
+      This is used to show progress in the UI."
+      lapply(.hintCallbacks, function(func) {
+        func()
+      })
     },
     invalidate = function() {
       "Schedule this context for invalidation. It will not actually be
@@ -34,6 +45,9 @@ Context <- setRefClass(
       else
         .callbacks <<- c(.callbacks, func)
       NULL
+    },
+    onInvalidateHint = function(func) {
+      .hintCallbacks <<- c(.hintCallbacks, func)
     },
     executeCallbacks = function() {
       "For internal use only."

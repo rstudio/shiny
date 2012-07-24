@@ -151,7 +151,18 @@
         this.receiveError(key, msgObj.errors[key]);
       }
       for (key in msgObj.values) {
+        for (name in this.$bindings)
+          this.$bindings[name].showProgress(false);
         this.receiveOutput(key, msgObj.values[key]);
+      }
+      if (msgObj.progress) {
+        for (var i = 0; i < msgObj.progress.length; i++) {
+          var key = msgObj.progress[i];
+          var binding = this.$bindings[key];
+          if (binding && binding.showProgress) {
+            binding.showProgress(true);
+          }
+        }
       }
     };
 
@@ -166,26 +177,49 @@
   }).call(ShinyApp.prototype);
 
 
-  var LiveTextBinding = function(el) {
+  var LiveBinding = function(el) {
     this.el = el;
   };
   (function() {
     this.onValueChange = function(data) {
-      $(this.el).removeClass('shiny-output-error');
-      $(this.el).text(data);
+      this.clearError();
+      this.renderValue(data);
     };
     this.onValueError = function(err) {
+      this.renderError(err);
+    };
+    this.renderError = function(err) {
       $(this.el).text('ERROR: ' + err.message);
       $(this.el).addClass('shiny-output-error');
-    }
+    };
+    this.clearError = function() {
+      $(this.el).removeClass('shiny-output-error');
+    };
+    this.showProgress = function(show) {
+      var RECALC_CLASS = 'recalculating';
+      if (show)
+        $(this.el).addClass(RECALC_CLASS);
+      else
+        $(this.el).removeClass(RECALC_CLASS);
+    };
+  }).call(LiveBinding.prototype);
+
+
+  var LiveTextBinding = function(el) {
+    this.el = el;
+  };
+  (function() {
+    this.renderValue = function(data) {
+      $(this.el).text(data);
+    };
   }).call(LiveTextBinding.prototype);
+  $.extend(LiveTextBinding.prototype, LiveBinding.prototype);
 
   var LivePlotBinding = function(el) {
     this.el = el;
   };
   (function() {
-    this.onValueChange = function(data) {
-      $(this.el).removeClass('shiny-output-error');
+    this.renderValue = function(data) {
       $(this.el).empty();
       if (!data)
         return;
@@ -193,26 +227,20 @@
       img.src = data;
       this.el.appendChild(img);
     };
-    this.onValueError = function(err) {
-      $(this.el).text('ERROR: ' + err.message);
-      $(this.el).addClass('shiny-output-error');
-    };
   }).call(LivePlotBinding.prototype);
+  $.extend(LivePlotBinding.prototype, LiveBinding.prototype);
 
   var LiveHTMLBinding = function(el) {
     this.el = el;
   };
   (function() {
-    this.onValueChange = function(data) {
-      $(this.el).removeClass('shiny-output-error');
+    this.renderValue = function(data) {
       $(this.el).html(data)
     };
-    this.onValueError = function(err) {
-      $(this.el).text('ERROR: ' + err.message);
-      $(this.el).addClass('shiny-output-error');
-    };
   }).call(LiveHTMLBinding.prototype);
-  
+  $.extend(LiveHTMLBinding.prototype, LiveBinding.prototype);
+
+
   $(function() {
 
     var shinyapp = window.shinyapp = new ShinyApp();

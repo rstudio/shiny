@@ -40,6 +40,7 @@ Values <- setRefClass(
       lapply(
         mget(dep.keys, envir=.dependencies),
         function(ctx) {
+          ctx$invalidateHint()
           ctx$invalidate()
           NULL
         }
@@ -77,11 +78,11 @@ Values <- setRefClass(
 
 Observable <- setRefClass(
   'Observable',
-  fields = c(
-    '.func',         # function
-    '.dependencies', # Map
-    '.initialized',  # logical
-    '.value'         # any
+  fields = list(
+    .func = 'function',
+    .dependencies = 'Map',
+    .initialized = 'logical',
+    .value = 'ANY'
   ),
   methods = list(
     initialize = function(func) {
@@ -113,6 +114,14 @@ Observable <- setRefClass(
       ctx <- Context$new()
       ctx$onInvalidate(function() {
         .self$.updateValue()
+      })
+      ctx$onInvalidateHint(function() {
+        lapply(
+          .dependencies$values(),
+          function(dep.ctx) {
+            dep.ctx$invalidateHint()
+            NULL
+          })
       })
       ctx$run(function() {
         .value <<- try(.func(), silent=F)
@@ -165,7 +174,8 @@ reactive.default <- function(x) {
 Observer <- setRefClass(
   'Observer',
   fields = list(
-    .func = 'function'
+    .func = 'function',
+    .hintCallbacks = 'list'
   ),
   methods = list(
     initialize = function(func) {
@@ -177,7 +187,16 @@ Observer <- setRefClass(
       ctx$onInvalidate(function() {
         run()
       })
+      ctx$onInvalidateHint(function() {
+        lapply(.hintCallbacks, function(func) {
+          func()
+          NULL
+        })
+      })
       ctx$run(.func)
+    },
+    onInvalidateHint = function(func) {
+      .hintCallbacks <<- c(.hintCallbacks, func)
     }
   )
 )

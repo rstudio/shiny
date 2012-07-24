@@ -10,6 +10,9 @@
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
+      .responsive-image {
+         max-width: 100%;
+      }
     </style>
     <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 
@@ -21,6 +24,10 @@
 
 <!-- Styles for R syntax highlighter -->
 <style type="text/css">
+   tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console',       Consolas, Monaco, monospace;
+   }
+   
    pre .operator,
    pre .paren {
      color: rgb(104, 118, 135)
@@ -80,10 +87,10 @@ hljs.initHighlightingOnLoad();
          <div class="span4 well">
             <ul class = "nav nav-list">
                <li class="nav-header">Getting Started</li>
-               <li class="active">
+               <li class="">
                   <a href="#installation">Installation</a>
                </li>
-               <li>
+               <li class="active">
                   <a href="#hello">Hello Shiny</a>
                </li>
                <li>
@@ -124,8 +131,9 @@ hljs.initHighlightingOnLoad();
          </div>
          
          <div class="span8 tab-content">
-            <div class="tab-pane active" id="installation">
-              
+            <div class="tab-pane" id="installation">
+       
+       
 <p>You can install shiny directly from github using the <code>devtools</code> package. In order to install shiny you&#39;ll also need to be configured to build R packages from source. To install devtools and verify that you can build packages from source:</p>
 
 <pre><code class="r">install.packages(&quot;devtools&quot;)
@@ -170,8 +178,74 @@ runExample(&quot;01_hello&quot;)
               
             </div>
             
-            <div class="tab-pane" id="hello">
-              Hello
+            <div class="tab-pane active" id="hello">
+ 
+<h4>Screenshot</h4> 
+ 
+<img src="screenshots/hello.png" class="responsive-image"></img>
+
+
+<h4>Run the example</h4>
+
+<pre><code class="r">library(shiny)
+runExample(&quot;hello&quot;)
+</code></pre>       
+ 
+<h4>ui.R</h4> 
+
+<pre><code class="r">library(shiny)
+
+shinyUI(
+  pageWithSidebar(
+
+    headerPanel(
+      h1(&quot;Hello shiny!&quot;)
+    ),
+
+    sidebarPanel(
+      numericInput(&quot;obs&quot;, 
+                   &quot;Number of observations:&quot;, 
+                   min = 0, 
+                   max = 10000, 
+                   value = 500)
+    ),
+
+    mainPanel(
+      plotOutput(&quot;plot&quot;)
+    )
+  )
+)
+</code></pre>
+ 
+<h4>server.R</h4> 
+ 
+<pre><code class="r">library(shiny)
+
+shinyServer(function(input, output) {
+
+    output$plot &lt;- reactivePlot(function() {
+
+        obs &lt;- as.integer(input$obs)
+
+        hist(rnorm(obs))
+    })
+
+})
+</code></pre>
+ 
+
+              <ul class="pager">
+                 <li>
+                    <a href="#">&larr; Previous</a>
+                 </li>
+                 <li>
+                    <a href="#">Next &rarr;</a>
+                 </li>
+              </ul>
+              
+            </div>
+ 
+ 
             </div>
  
             

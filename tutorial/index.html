@@ -138,7 +138,7 @@ hljs.initHighlightingOnLoad();
 <!-- Welcome -->   
 <div class="tab-pane active" id="welcome">
 
-{% capture welcome %}{% include welcome.md %}{% endcapture %}
+{% capture welcome %}{% include tutorial/welcome.md %}{% endcapture %}
 {{ welcome | markdownify }}
       
 </div>
@@ -147,7 +147,8 @@ hljs.initHighlightingOnLoad();
 <!-- Installation -->   
 <div class="tab-pane" id="installation">
  
-<h3>Installation</h3>
+{% capture installation %}{% include tutorial/installation.md %}{% endcapture %}
+{{ installation | markdownify }}
        
 </div>
       
@@ -155,14 +156,16 @@ hljs.initHighlightingOnLoad();
 <!-- Hello Shiny -->      
 <div class="tab-pane" id="hello-shiny">
 
-<h3>Hello Shiny</h3> 
+{% capture hello_shiny %}{% include tutorial/hello-shiny.md %}{% endcapture %}
+{{ hello_shiny | markdownify }}
 
 </div>
 
 <!-- Shiny Text -->
 <div class="tab-pane" id="shiny-text">
 
-<h3>Shiny Text</h3>
+{% capture shiny_text %}{% include tutorial/shiny-text.md %}{% endcapture %}
+{{ shiny_text | markdownify }}
 
 </div>
 
@@ -170,7 +173,9 @@ hljs.initHighlightingOnLoad();
 <!-- Reactivity -->
 <div class="tab-pane" id="reactivity">
 
-<h3>Reactivity</h3>
+{% capture reactivity %}{% include tutorial/reactivity.md %}{% endcapture %}
+{{ reactivity | markdownify }}
+      
 
 </div>
 
@@ -178,49 +183,58 @@ hljs.initHighlightingOnLoad();
 <!-- UI and Server -->
 <div class="tab-pane" id="ui-and-server">
 
-<h3>UI &amp; Server</h3>
+{% capture ui_and_server %}{% include tutorial/ui-and-server.md %}{% endcapture %}
+{{ ui_and_server | markdownify }}
 
 </div>
 
 <!-- Inputs and Outputs -->
 <div class="tab-pane" id="inputs-and-outputs">
 
-<h3>Inputs &amp; Outputs</h3>
+{% capture inputs_and_outputs %}{% include tutorial/inputs-and-outputs.md %}{% endcapture %}
+{{ inputs_and_outputs | markdownify }}
 
 </div>
 
 <!-- Edit, Run, Debug -->
 <div class="tab-pane" id="edit-run-debug">
 
-<h3>Edit, Run, Debug</h3>
+{% capture edit_run_debug %}{% include tutorial/edit-run-debug.md %}{% endcapture %}
+{{ edit_run_debug | markdownify }}
 
 </div>
 
 <!-- Sliders -->
 <div class="tab-pane" id="sliders">
 
-<h3>Sliders</h3>
+{% capture sliders %}{% include tutorial/sliders.md %}{% endcapture %}
+{{ sliders | markdownify }}
 
 </div>
 
 <!-- Sliders -->
 <div class="tab-pane" id="animation">
 
-<h3>Animation</h3>
+{% capture animation %}{% include tutorial/animation.md %}{% endcapture %}
+{{ animation | markdownify }}
+
 
 </div>
 
 <!-- Tabsets -->
 <div class="tab-pane" id="tabsets">
 
-<h3>Tabsets</h3>
+{% capture tabsets %}{% include tutorial/tabsets.md %}{% endcapture %}
+{{ tabsets | markdownify }}
+
 
 </div>
 
 <!-- HTML UI -->
 <div class="tab-pane" id="html-ui">
 
-<h3>HTML UI</h3>
+{% capture html_ui %}{% include tutorial/html-ui.md %}{% endcapture %}
+{{ html_ui | markdownify }}
 
 </div>
 

@@ -224,15 +224,6 @@ hljs.initHighlightingOnLoad();
    <li><a href="#" id="next">Next &rarr;</a></li> 
 </ul>
 
-<script>
-$('a#next').click(function() {
-   $('.nav li.active').nextAll('li:not(.nav-header)').first().find('a').tab('show')
-})
-$('a#previous').click(function() {
-  $('.nav li.active').prevAll('li:not(.nav-header)').first().find('a').tab('show')
-})
-</script>
-
 </div>
 
 </div>
@@ -242,6 +233,25 @@ $('a#previous').click(function() {
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="jquery.js"></script>
 <script src="bootstrap/js/bootstrap.min.js"></script>
+<script>
+function manageNextPrev() {
+   $('a#next').parent().toggleClass('disabled', $('.nav li.active').nextAll('li:not(.nav-header)').size() == 0);
+   $('a#previous').parent().toggleClass('disabled', $('.nav li.active').prevAll('li:not(.nav-header)').size() == 0);
+}
+$('.nav a[data-toggle="tab"]').on('shown', function(e) {
+   manageNextPrev();
+});
+manageNextPrev();
+
+$('a#next').click(function(e) {
+   e.preventDefault();
+   $('.nav li.active').nextAll('li:not(.nav-header)').first().find('a').tab('show');
+})
+$('a#previous').click(function(e) {
+   e.preventDefault();
+   $('.nav li.active').prevAll('li:not(.nav-header)').first().find('a').tab('show');
+})
+</script>
 
 </body>
 </html>

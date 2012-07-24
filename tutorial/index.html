@@ -134,157 +134,95 @@ hljs.initHighlightingOnLoad();
 <!-- Welcome -->   
 <div class="tab-pane active" id="welcome">
       
-welcome to shiny
-    
-<ul class="pager">
-   <li><a href="#installation">Next &rarr;</a></li>
-</ul>    
-    
+<h3>Welcome</h3>
+      
 </div>
 
 
 <!-- Installation -->   
 <div class="tab-pane" id="installation">
  
-<p>You can install shiny directly from github using the <code>devtools</code> package. In order to install shiny you&#39;ll also need to be configured to build R packages from source. To install devtools and verify that you can build packages from source:</p>
-
-<pre><code class="r">install.packages(&quot;devtools&quot;)
-library(devtools)
-has_devel()
-</code></pre>
-
-<p>If the has_devel function produces an error then you&#39;ll need to install some additional components required to build packages from source:</p>
-
-<ul>
-<li><em>Windows</em> &ndash; Install the appropriate <a href="http://cran.r-project.org/bin/windows/Rtools/">Rtools</a> binaries for your version of R.</li>
-<li><em>MacOS X</em> &ndash; Install the <a href="https://developer.apple.com/downloads/">Command Line Tools for Xcode</a>.</li>
-<li><em>Debian/Ubuntu</em> &ndash; sudo apt-get install r-base-dev</li>
-</ul>
-
-<p>Next, you need to install a modified version of the <code>websockets</code> package from github:</p>
-
-<pre><code class="r">install_github(&quot;R-websockets&quot;, &quot;jcheng5&quot;)
-</code></pre>
-
-<p>Finally, you can install the <code>shiny</code> package from github:</p>
-
-<pre><code class="r">install_github(&quot;shiny&quot;, &quot;rstudio&quot;)
-</code></pre>
-
-<p>To verify that Shiny is installed correctly you can run an example application:</p>
-
-<pre><code class="r">library(shiny)
-runExample(&quot;01_hello&quot;)
-</code></pre>
-
-<p>If everything is installed and working correctly a browser will open and navigate to the running application. </p>
-        
-<ul class="pager">
-   <li><a href="#welcome">&larr; Previous</a></li>
-   <li><a href="#hello-shiny">Next &rarr;</a></li>
-</ul>
-        
+<h3>Installation</h3>
+       
 </div>
       
 
 <!-- Hello Shiny -->      
 <div class="tab-pane" id="hello-shiny">
 
-<h4>Screenshot</h4> 
+<h3>Hello Shiny</h3> 
 
-<img src="screenshots/hello.png" class="responsive-image"></img>
-
-
-<h4>Run the example</h4>
-
-<pre><code class="r">library(shiny)
-runExample(&quot;hello&quot;)
-</code></pre>       
-
-<h4>ui.R</h4> 
-
-<pre><code class="r">library(shiny)
-shinyUI(pageWithSidebar(
-   headerPanel(
-      h1(&quot;Hello shiny!&quot;)
-   ),
-   sidebarPanel(
-      numericInput(&quot;obs&quot;, 
-                   &quot;Number of observations:&quot;, 
-                   min = 1, 
-                   max = 10000, 
-                   value = 500)
-   ),
-   mainPanel(
-      plotOutput(&quot;plot&quot;)
-   )
-))
-</code></pre>
-
-<h4>server.R</h4> 
-
-<pre><code class="r">library(shiny)
-shinyServer(function(input, output) {
-   output$plot &lt;- reactivePlot(function() {
-      obs &lt;- as.integer(input$obs)
-      hist(rnorm(obs))
-   })
-})
-</code></pre>
 </div>
 
 <!-- Shiny Text -->
 <div class="tab-pane" id="shiny-text">
-Shiny Text
+
+<h3>Shiny Text</h3>
+
 </div>
 
 
 <!-- Reactivity -->
 <div class="tab-pane" id="reactivity">
-Reativity
+
+<h3>Reactivity</h3>
+
 </div>
 
 
 <!-- UI and Server -->
 <div class="tab-pane" id="ui-and-server">
-UI and Server
+
+<h3>UI &amp; Server</h3>
+
 </div>
 
 <!-- Inputs and Outputs -->
 <div class="tab-pane" id="inputs-and-outputs">
-Inputs and Outputs
+
+<h3>Inputs &amp; Outputs</h3>
+
 </div>
 
 <!-- Edit, Run, Debug -->
 <div class="tab-pane" id="edit-run-debug">
-Edit, Run, Debug
+
+<h3>Edit, Run, Debug</h3>
+
 </div>
 
 <!-- Sliders -->
 <div class="tab-pane" id="sliders">
-Sliders
+
+<h3>Sliders</h3>
+
 </div>
 
 <!-- Sliders -->
 <div class="tab-pane" id="animation">
-Animation
+
+<h3>Animation</h3>
+
 </div>
 
 <!-- Tabsets -->
 <div class="tab-pane" id="tabsets">
-Tabsets
+
+<h3>Tabsets</h3>
+
 </div>
 
 <!-- HTML UI -->
 <div class="tab-pane" id="html-ui">
-HTML UI
+
+<h3>HTML UI</h3>
+
 </div>
 
-
-
-
-
-
+<ul class="pager">
+   <li><a href="#" onclick="$('.nav li.active').prevAll('li:not(.nav-header)').first().find('a').tab('show')">&larr; Previous</a></li> 
+   <li><a href="#" onclick="$('.nav li.active').nextAll('li:not(.nav-header)').first().find('a').tab('show')">Next &rarr;</a></li> 
+</ul>
 
 </div>
 

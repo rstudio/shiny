@@ -1,7 +1,7 @@
 library(shiny)
 library(digest)
 
-server(function(input, output) {
+shinyServer(function(input, output) {
   text <- reactive(function() {
     str <- input$input1
     if (input$addnewline)

@@ -222,8 +222,8 @@ registerClient <- function(client) {
 
 .server <- NULL
 #' @export
-server <- function(func) {
-  unlockBinding('.server', environment(server))
+shinyServer <- function(func) {
+  unlockBinding('.server', environment(shinyServer))
   .server <<- func
 }
 
@@ -247,7 +247,7 @@ startApp <- function(port=8101L) {
   if (file.exists(commonR))
     source(commonR, local=F)
   
-  server(NULL)
+  shinyServer(NULL)
   serverFileTimestamp <- NULL
   local({
     serverFileTimestamp <<- file.info(serverR)$mtime
@@ -287,7 +287,7 @@ startApp <- function(port=8101L) {
         # Check if server.R has changed, and if so, reload
         mtime <- file.info(serverR)$mtime
         if (!identical(mtime, serverFileTimestamp)) {
-          server(NULL)
+          shinyServer(NULL)
           local({
             serverFileTimestamp <<- mtime
             source(serverR, local=T)

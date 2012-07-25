@@ -112,13 +112,7 @@ controlLabel <- function(controlName, label) {
   tags$label(class = "control-label", `for` = controlName, label)
 }
 
-#' @export
-selectInput <- function(inputId, 
-                        label, 
-                        choices, 
-                        selected = NULL, 
-                        multiple = FALSE) {
-    
+choicesWithNames <- function(choices) {
   # get choice names
   choiceNames <- names(choices)
   if (is.null(choiceNames))
@@ -129,9 +123,22 @@ selectInput <- function(inputId,
   choiceNames[missingNames] <- paste(choices)[missingNames]
   names(choices) <- choiceNames
   
+  # return choices
+  return (choices)
+}
+
+#' @export
+selectInput <- function(inputId, 
+                        label, 
+                        choices, 
+                        selected = NULL, 
+                        multiple = FALSE) {
+  # resolve names
+  choices <- choicesWithNames(choices)
+  
   # default value if it's not specified
   if (is.null(selected) && !multiple)
-    selected <- choiceNames[[1]]
+    selected <- names(choices)[[1]]
   
   # create select tag and add options
   selectTag <- tags$select(id = inputId)
@@ -146,6 +153,38 @@ selectInput <- function(inputId,
   
   # return label and select tag
   list(controlLabel(inputId, label), selectTag)
+}
+
+#' @export 
+radioButtons <- function(inputId, label, choices, selected = NULL) {
+  # resolve names
+  choices <- choicesWithNames(choices)
+  
+  # default value if it's not specified
+  if (is.null(selected))
+    selected <- names(choices)[[1]]
+  
+  # build list of radio button tags
+  inputTags <- list()
+  for (i in 1:length(choices)) {
+    id <- paste(inputId, i, sep="")
+    name <- names(choices)[[i]]
+    value <- choices[[i]]
+    inputTag <- tags$input(type = "radio", 
+                           name = inputId,
+                           id = id,
+                           value = value)
+    if (identical(name, selected))
+      inputTag$attribs$checked = "checked"
+    
+    labelTag <- tags$label(class = "radio")
+    labelTag <- tagAppendChild(labelTag, inputTag)
+    labelTag <- tagAppendChild(labelTag, name)
+    inputTags[[length(inputTags) + 1]] <- labelTag
+  }
+  
+  list(tags$label(class = "control-label", label),
+       inputTags)
 }
 
 #' @export

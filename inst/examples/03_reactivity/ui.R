@@ -9,7 +9,9 @@ shinyUI(pageWithSidebar(
   ),
   
   # Sidebar with controls to provide a caption, select a dataset, and 
-  # specify the number of observations to view
+  # specify the number of observations to view. Note that changes made
+  # to the caption in the textInput control are updated in the output
+  # area immediately as you type
   sidebarPanel(
     textInput("caption", "Caption:", "Data Summary"),
     

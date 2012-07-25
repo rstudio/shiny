@@ -1,11 +1,14 @@
 library(shiny)
 
+# Define UI for application that plots random distributions 
 shinyUI(pageWithSidebar(
   
+    # Application title
     headerPanel(
       h1("Hello shiny!")
     ),
     
+    # Sidebar with a slider input for number of observations
     sidebarPanel(
       sliderInput("obs", 
                    "Number of observations:", 
@@ -14,7 +17,8 @@ shinyUI(pageWithSidebar(
                    value = 500)
     ),
     
+    # Main output panel is a plot of the generated distribution
     mainPanel(
-      plotOutput("plot")
+      plotOutput("distPlot")
     )
 ))

@@ -67,7 +67,7 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 #' @export
 reactiveTable <- function(func, ...) {
   reactive(function() {
-    classNames <- getOption('shiny.table.class', 'data table table-bordered')
+    classNames <- getOption('shiny.table.class', 'data table table-bordered table-condensed')
     data <- func()
     return(paste(
       capture.output(

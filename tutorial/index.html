@@ -96,9 +96,6 @@ hljs.initHighlightingOnLoad();
       <a href="#welcome" data-toggle="tab">Welcome</a>
    </li>
    <li>
-      <a href="#installation" data-toggle="tab">Installation</a>
-   </li>
-   <li>
       <a href="#hello-shiny" data-toggle="tab">Hello Shiny</a>
    </li>
    <li>
@@ -122,9 +119,6 @@ hljs.initHighlightingOnLoad();
       <a href="#sliders" data-toggle="tab">Sliders</a>
    </li>
    <li>
-      <a href="#animation" data-toggle="tab">Animation</a>
-   </li>
-   <li>
       <a href="#tabsets" data-toggle="tab">Tabsets</a>
    <li>
       <a href="#more-widgets" data-toggle="tab">More Widgets</a>
@@ -144,15 +138,6 @@ hljs.initHighlightingOnLoad();
 {% capture welcome %}{% include tutorial/welcome.md %}{% endcapture %}
 {{ welcome | markdownify }}
       
-</div>
-
-
-<!-- Installation -->   
-<div class="tab-pane" id="installation">
- 
-{% capture installation %}{% include tutorial/installation.md %}{% endcapture %}
-{{ installation | markdownify }}
-       
 </div>
       
 
@@ -215,14 +200,6 @@ hljs.initHighlightingOnLoad();
 
 </div>
 
-<!-- Sliders -->
-<div class="tab-pane" id="animation">
-
-{% capture animation %}{% include tutorial/animation.md %}{% endcapture %}
-{{ animation | markdownify }}
-
-
-</div>
 
 <!-- Tabsets -->
 <div class="tab-pane" id="tabsets">

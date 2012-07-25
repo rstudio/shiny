@@ -3,12 +3,12 @@ library(datasets)
 
 shinyServer(function(input, output) {
   
-  datasetInput <- function() {
+  datasetInput <- reactive(function() {
     switch(input$dataset,
            "rock" = rock,
            "pressure" = pressure,
            "cars" = cars)
-  }
+  })
   
   output$summary <- reactiveText(function() {
     dataset <- datasetInput()

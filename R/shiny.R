@@ -305,6 +305,18 @@ startApp <- function(port=8101L) {
     shinyapp <- apps$get(wsToKey(WS))
     
     msg <- fromJSON(rawToChar(DATA), asText=T, simplify=F)
+    
+    # Do our own list simplifying here. sapply/simplify2array give names to
+    # character vectors, which is rarely what we want.
+    if (!is.null(msg$data)) {
+      msg$data <- lapply(msg$data, function(x) {
+        if (is.list(x) && is.null(names(x)))
+          unlist(x, recursive=F)
+        else
+          x
+      })
+    }
+    
     switch(
       msg$method,
       init = {

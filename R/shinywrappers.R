@@ -106,6 +106,6 @@ reactiveText <- function(func) {
     if (x$visible)
       return(paste(capture.output(print(x$value)), collapse="\n"))
     else
-      return(x)
+      return(x$value)
   })
 }

@@ -195,12 +195,14 @@
 
     this.dispatchMessage = function(msg) {
       var msgObj = JSON.parse(msg);
+      if (msgObj.values) {
+        for (name in this.$bindings)
+          this.$bindings[name].showProgress(false);
+      }
       for (key in msgObj.errors) {
         this.receiveError(key, msgObj.errors[key]);
       }
       for (key in msgObj.values) {
-        for (name in this.$bindings)
-          this.$bindings[name].showProgress(false);
         this.receiveOutput(key, msgObj.values[key]);
       }
       if (msgObj.progress) {
@@ -310,7 +312,7 @@
     // TODO: This all needs to be refactored to be more modular, extensible
 
     function elementToValue(el) {
-      if (el.type == 'checkbox')
+      if (el.type == 'checkbox' || el.type == 'radio')
         return el.checked ? true : false;
       else
         return $(el).val();
@@ -353,7 +355,7 @@
       0,
       onInputChange);
 
-    var inputSelector = ':input:not([type="submit"])';
+    var inputSelector = ':input:not([type="submit"], [type="checkbox"], [type="radio"])';
     var initialValues = {};
     $(document).on('change keyup input', inputSelector, function() {
       var input = this;
@@ -373,6 +375,50 @@
       //   until submit button is pressed
       initialValues[name] = value;
     });
+
+    function getMultiValue(input, exclusiveValue) {
+      if (!input.name)
+        return null;
+
+      els = $(
+        'input:checked' + 
+        '[type="' + input.type + '"]' + 
+        '[name="' + input.name + '"]');
+      var values = els.map(function() { return this.value; }).get();
+      if (exclusiveValue) {
+        if (values.length > 0)
+          return values[0];
+        else
+          return null;
+      }
+      else {
+        return values;
+      }
+    }
+
+    function configureMultiInput(selector, exclusiveValue) {
+      $(document).on('change input', selector, function() {
+        if (this.name) {
+          onInputChange(this.name, getMultiValue(this, exclusiveValue));
+        }
+        var id = this['data-input-id'] || this.id;
+        if (id) {
+          onInputChange(id, elementToValue(this));
+        }
+      });
+      $(selector).each(function() {
+        if (this.name) {
+          initialValues[this.name] = getMultiValue(this, exclusiveValue);
+        }
+        var id = this['data-input-id'] || this.id;
+        if (id) {
+          initialValues[id] = elementToValue(this);
+        }
+      });
+    }
+
+    configureMultiInput('input[type="checkbox"]', false);
+    configureMultiInput('input[type="radio"]', true);
 
     $('.shiny-plot-output').each(function() {
       var width = this.offsetWidth;

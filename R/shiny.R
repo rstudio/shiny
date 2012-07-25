@@ -407,9 +407,25 @@ runApp <- function(appDir=getwd(),
 }
 
 #' @export
-runExample <- function(example, port=8100L, launch.browser=interactive()) {
-  runApp(system.file(paste('examples', example, sep=.Platform$file.sep), 
-                     package='shiny'),
-         port = port,
-         launch.browser = launch.browser)
+runExample <- function(example=NA, port=8100L, launch.browser=interactive()) {
+  examplesDir <- system.file('examples', package='shiny')
+  dir <- resolve(examplesDir, example)
+  if (is.null(dir)) {
+    if (is.na(example)) {
+      errFun <- message
+      errMsg <- ''
+    }
+    else {
+      errFun <- stop
+      errMsg <- paste('Example', example, 'does not exist. ')
+    }
+    
+    errFun(errMsg,
+           'Valid examples are "',
+           paste(list.files(examplesDir), collapse='", "'),
+           '"')
+  }
+  else {
+    runApp(dir, port = port, launch.browser = launch.browser)
+  }
 }

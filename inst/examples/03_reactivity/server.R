@@ -25,7 +25,6 @@ shinyServer(function(input, output) {
   # Note that because the data-oriented reactive functions below don't 
   # depend on input$caption, those functions are NOT called when the 
   # input$caption changes.
-  #
   output$caption <- reactive(function() {
     input$caption
   })
@@ -33,7 +32,6 @@ shinyServer(function(input, output) {
   # The output$summary depends on the datasetInput reactive function, 
   # so will be re-executed whenever datasetInput is re-executed 
   # (i.e. whenever the input$dataset changes)
-  #
   output$summary <- reactiveText(function() {
     dataset <- datasetInput()
     summary(dataset)
@@ -42,7 +40,6 @@ shinyServer(function(input, output) {
   # The output$view depends on both the databaseInput reactive function,
   # and input$obs, so will be re-executed whenever input$dataset or 
   # input$obs is changed. 
-  #
   output$view <- reactiveTable(function() {
     obs <- as.integer(input$obs)
     head(datasetInput(), n = obs)

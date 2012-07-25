@@ -4,12 +4,14 @@ library(datasets)
 shinyUI(pageWithSidebar(
   
   headerPanel(
-    h1("Titanic")
+    h1("Miles Per Gallon")
   ),
   
   sidebarPanel(
     selectInput("variable", "Variable:",
-                c("Class", "Sex", "Age", "Survived")),
+                list("Cylinders" = "cyl", 
+                     "Transmission" = "am", 
+                     "Gears" = "gear")),
     
     checkboxInput("outliers", "Show outliers", FALSE)
   ),
@@ -19,5 +21,3 @@ shinyUI(pageWithSidebar(
     plotOutput("plot")
   )
 ))
-
-

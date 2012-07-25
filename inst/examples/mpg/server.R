@@ -4,7 +4,14 @@ library(datasets)
 shinyServer(function(input, output) {
   
   formulaText <- reactive(function() {
-    paste("Freq ~", input$variable)
+    paste("mpg ~", input$variable)
+  })
+  
+  mpgData <- reactive(function() {
+    data <- mtcars
+    data$cyl <- as.factor(data$cyl)
+    data$am <- factor(data$am, labels = c("Automatic", "Manual"))
+    data
   })
   
   output$caption <- reactive(function() {
@@ -13,7 +20,7 @@ shinyServer(function(input, output) {
   
   output$plot <- reactivePlot(function() {
     boxplot(as.formula(formulaText()), 
-            data = Titanic,
+            data = mpgData(),
             outline = input$outliers)
   })
 })

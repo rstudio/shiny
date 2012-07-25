@@ -1,7 +1,7 @@
 # Return the current time, in milliseconds from epoch, with
 # unspecified time zone.
 now <- function() {
-  .Call('getTimeInMillis')
+  as.numeric(Sys.time()) * 1000
 }
 
 TimerCallbacks <- setRefClass(

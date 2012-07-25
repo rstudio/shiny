@@ -13,7 +13,7 @@ shinyServer(function(input, output) {
   })
   
   # Generate a summary of the dataset
-  output$summary <- reactiveText(function() {
+  output$summary <- reactivePrint(function() {
     dataset <- datasetInput()
     summary(dataset)
   })

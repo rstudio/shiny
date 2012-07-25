@@ -30,7 +30,7 @@ shinyServer(function(input, output) {
   })
   
   # Generate a summary of the data
-  output$summary <- reactiveText(function() {
+  output$summary <- reactivePrint(function() {
     summary(data())
   })
   

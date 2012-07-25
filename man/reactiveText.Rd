@@ -5,12 +5,13 @@
   reactiveText(func)
 }
 \arguments{
-  \item{func}{A function that returns a printable R object,
-  or an invisible character vector.}
+  \item{func}{A function that returns an R object that can
+  be used as an argument to \code{cat}.}
 }
 \description{
-  Creates a reactive text value that is suitable for
-  assigning to an \code{output} slot.
+  Makes a reactive version of the given function that also
+  uses \code{\link[base]{cat}} to turn its result into a
+  single-element character vector.
 }
 \details{
   The corresponding HTML output tag can be anything (though
@@ -18,11 +19,8 @@
   and whitespace preserved) and should have the CSS class
   name \code{shiny-text-output}.
 
-  The result of executing \code{func} will be printed
-  inside a \code{\link[utils]{capture.output}} call. If
-  instead you want to return a single-element character
-  vector to be used verbatim, return it wrapped in
-  \code{\link[base]{invisible}} (or alternatively, just use
-  \code{\link{reactive}} instead of \code{reactiveText}.
+  The result of executing \code{func} will passed to
+  \code{cat}, inside a \code{\link[utils]{capture.output}}
+  call.
 }
 

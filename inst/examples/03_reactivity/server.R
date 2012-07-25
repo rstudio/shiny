@@ -26,14 +26,14 @@ shinyServer(function(input, output) {
   # Note that because the data-oriented reactive functions below don't 
   # depend on input$caption, those functions are NOT called when the 
   # input$caption changes.
-  output$caption <- reactive(function() {
+  output$caption <- reactiveText(function() {
     input$caption
   })
   
   # The output$summary depends on the datasetInput reactive function, 
   # so will be re-executed whenever datasetInput is re-executed 
   # (i.e. whenever the input$dataset changes)
-  output$summary <- reactiveText(function() {
+  output$summary <- reactivePrint(function() {
     dataset <- datasetInput()
     summary(dataset)
   })

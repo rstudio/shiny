@@ -15,9 +15,7 @@ shinyUI(pageWithSidebar(
   
   mainPanel(
     h3(textOutput("caption")), 
-    br(),
-    verbatimTextOutput("summary"),
-    br(),
+    verbatimTextOutput("summary"), 
     tableOutput("view")
   )
 ))

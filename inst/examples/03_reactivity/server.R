@@ -1,6 +1,7 @@
 library(shiny)
 library(datasets)
 
+# Define server logic required to summarize and view the selected dataset
 shinyServer(function(input, output) {
   
   # By declaring databaseInput as a reactive function we ensure that:

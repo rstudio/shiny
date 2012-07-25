@@ -7,6 +7,8 @@ library(datasets)
 mpgData <- mtcars
 mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
 
+
+# Define server logic required to plot various variables against mpg
 shinyServer(function(input, output) {
   
   # Compute the forumla text in a reactive function since it is 

@@ -11,7 +11,7 @@ shinyUI(pageWithSidebar(
                    "Number of observations:", 
                    min = 0, 
                    max = 1000, 
-                   value = 20)
+                   value = 500)
     ),
     
     mainPanel(

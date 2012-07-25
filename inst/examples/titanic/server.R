@@ -3,16 +3,16 @@ library(datasets)
 
 shinyServer(function(input, output) {
   
-  model <- reactive(function() {
+  formulaText <- reactive(function() {
     paste("Freq ~", input$variable)
   })
   
   output$caption <- reactive(function() {
-    model()
+    formulaText()
   })
   
   output$plot <- reactivePlot(function() {
-    boxplot(as.formula(model()), 
+    boxplot(as.formula(formulaText()), 
             data = Titanic,
             outline = input$outliers)
   })

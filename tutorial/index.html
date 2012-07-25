@@ -127,6 +127,9 @@ hljs.initHighlightingOnLoad();
    <li>
       <a href="#tabsets" data-toggle="tab">Tabsets</a>
    <li>
+      <a href="#more-widgets" data-toggle="tab">More Widgets</a>
+   </li>
+   <li>
       <a href="#html-ui" data-toggle="tab">HTML UI</a>
    </li>
 </ul>
@@ -227,6 +230,14 @@ hljs.initHighlightingOnLoad();
 {% capture tabsets %}{% include tutorial/tabsets.md %}{% endcapture %}
 {{ tabsets | markdownify }}
 
+
+</div>
+
+<!-- More Widgets -->
+<div class="tab-pane" id="more-widgets">
+
+{% capture more_widgets %}{% include tutorial/more-widgets.md %}{% endcapture %}
+{{ more_widgets | markdownify }}
 
 </div>
 

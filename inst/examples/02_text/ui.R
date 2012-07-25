@@ -17,8 +17,8 @@ shinyUI(pageWithSidebar(
     numericInput("obs", "Number of observations to view:", 10)
   ),
   
-  # Main output panel includes a summary of the dataset and an HTL
-  # table with the requested number of observations
+  # Show a summary of the dataset and an HTML table with the requested
+  # number of observations
   mainPanel(
     verbatimTextOutput("summary"),
     

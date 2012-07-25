@@ -17,7 +17,7 @@ shinyUI(pageWithSidebar(
                    value = 500)
     ),
     
-    # Main output panel is a plot of the generated distribution
+    # Show a plot of the generated distribution
     mainPanel(
       plotOutput("distPlot")
     )

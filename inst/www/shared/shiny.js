@@ -16,15 +16,17 @@
   // call.
   function debounce(threshold, func) {
     var timerId = null;
+    var self, args;
     return function() {
-      var self = this;
+      self = this;
+      args = arguments;
       if (timerId != null) {
         clearTimeout(timerId);
         timerId = null;
       }
       timerId = setTimeout(function() {
         timerId = null;
-        func.call(self);
+        func.apply(self, args);
       }, threshold);
     };
   }
@@ -41,9 +43,11 @@
   function throttle(threshold, func) {
     var executionPending = false;
     var timerId = null;
+    var self, args;
 
     function throttled() {
-      var self = this;
+      self = null;
+      args = null;
       if (timerId == null) {
         // Haven't seen a call recently. Execute now and
         // start a timer to buffer any subsequent calls.
@@ -53,17 +57,61 @@
           timerId = null;
           if (executionPending) {
             executionPending = false;
-            throttled.call(self);
+            throttled.apply(self, args);
           }
         }, threshold);
-        func.call(self);
+        func.apply(this, arguments);
       }
       else {
         // Something executed recently. Don't do anything
+        // except set up target/arguments to be called later
         executionPending = true;
+        self = this;
+        args = arguments;
       }
     };
     return throttled;
+  }
+
+  function keyedFunc(delay, keyArgNum, func, modFunc) {
+    if (delay == 0)
+      return func;
+
+    var keyedFuncs = {};
+    return function() {
+      var key = keyArgNum == -1 ? this : arguments[keyArgNum];
+      if (!keyedFuncs[key])
+        keyedFuncs[key] = modFunc(delay, func);
+      keyedFuncs[key].apply(this, arguments);
+    };
+  }
+
+  // Behaves similarly to the debounce function, except that
+  // internally it will create a separate debounce function
+  // for each distinct value of one of the arguments. You
+  // specify which argument that is using keyArgNum (-1 means
+  // to use 'this').
+  //
+  // For example:
+  //
+  // function printNameValue(name, value) {
+  //   console.log(name + '=' + value);
+  // }
+  // var debouncedPNV = keyedDebounce(500, 0, printNameValue);
+  // debouncedPNV('foo', 10);
+  // debouncedPNV('bar', 10);
+  // debouncedPNV('bar', 20);
+  //
+  // will print:
+  // foo=10
+  // bar=20
+  function keyedDebounce(delay, keyArgNum, func) {
+    return keyedFunc(delay, keyArgNum, func, debounce);
+  }
+
+  // Same as keyedDebounce, but for throttling
+  function keyedThrottle(delay, keyArgNum, func) {
+    return keyedFunc(delay, keyArgNum, func, throttle);
   }
 
 
@@ -178,7 +226,7 @@
 
 
   var LiveBinding = function(el) {
-    this.el = el;
+    this.el = $(el);
   };
   (function() {
     this.onValueChange = function(data) {
@@ -189,53 +237,53 @@
       this.renderError(err);
     };
     this.renderError = function(err) {
-      $(this.el).text('ERROR: ' + err.message);
-      $(this.el).addClass('shiny-output-error');
+      this.el.text('ERROR: ' + err.message);
+      this.el.addClass('shiny-output-error');
     };
     this.clearError = function() {
-      $(this.el).removeClass('shiny-output-error');
+      this.el.removeClass('shiny-output-error');
     };
     this.showProgress = function(show) {
       var RECALC_CLASS = 'recalculating';
       if (show)
-        $(this.el).addClass(RECALC_CLASS);
+        this.el.addClass(RECALC_CLASS);
       else
-        $(this.el).removeClass(RECALC_CLASS);
+        this.el.removeClass(RECALC_CLASS);
     };
   }).call(LiveBinding.prototype);
 
 
   var LiveTextBinding = function(el) {
-    this.el = el;
+    LiveBinding.call(this, el);
   };
   (function() {
     this.renderValue = function(data) {
-      $(this.el).text(data);
+      this.el.text(data);
     };
   }).call(LiveTextBinding.prototype);
   $.extend(LiveTextBinding.prototype, LiveBinding.prototype);
 
   var LivePlotBinding = function(el) {
-    this.el = el;
+    LiveBinding.call(this, el);
   };
   (function() {
     this.renderValue = function(data) {
-      $(this.el).empty();
+      this.el.empty();
       if (!data)
         return;
       var img = document.createElement('img');
       img.src = data;
-      this.el.appendChild(img);
+      this.el.append(img);
     };
   }).call(LivePlotBinding.prototype);
   $.extend(LivePlotBinding.prototype, LiveBinding.prototype);
 
   var LiveHTMLBinding = function(el) {
-    this.el = el;
+    LiveBinding.call(this, el);
   };
   (function() {
     this.renderValue = function(data) {
-      $(this.el).html(data)
+      this.el.html(data)
     };
   }).call(LiveHTMLBinding.prototype);
   $.extend(LiveHTMLBinding.prototype, LiveBinding.prototype);
@@ -270,6 +318,8 @@
 
     // Holds pending changes for deferred submit
     var pendingData = {};
+    // Holds last sent data, so we know when we don't have to send again
+    var lastSentData = {};
 
     var deferredSubmit = false;
     $('input[type="submit"], button[type="submit"]').each(function() {
@@ -277,22 +327,44 @@
       $(this).click(function(event) {
         event.preventDefault();
         shinyapp.sendInput(pendingData);
+        $.extend(lastSentData, pendingData);
         pendingData = {};
       });
     });
 
     function onInputChange(name, value) {
+      if (lastSentData[name] === value) {
+        delete pendingData[name];
+        return;
+      }
+
       if (deferredSubmit)
         pendingData[name] = value;
       else {
         var data = {};
         data[name] = value;
         shinyapp.sendInput(data);
+        $.extend(lastSentData, data);
       }
     }
 
+    var debouncedInputChange = keyedDebounce(
+      deferredSubmit ? 0 : 250, 
+      0,
+      onInputChange);
+
+    var inputSelector = ':input:not([type="submit"])';
     var initialValues = {};
-    $('input[type!="submit"], select').each(function() {
+    $(document).on('change keyup input', inputSelector, function() {
+      var input = this;
+      var name = input['data-input-id'] || input.name || input.id;
+      var value = elementToValue(input);
+      if (input.type == 'text')
+        debouncedInputChange(name, value);
+      else
+        onInputChange(name, value);
+    });
+    $(inputSelector).each(function() {
       var input = this;
       var name = input['data-input-id'] || input.name || input.id;
       var value = elementToValue(input);
@@ -300,16 +372,6 @@
       // TODO: If submit button is present, don't send anything
       //   until submit button is pressed
       initialValues[name] = value;
-      $(input).each(function() {
-        delay = deferredSubmit ? 0 : 250;
-        $(this).bind('change keyup input', debounce(delay, function() {
-          var newValue = elementToValue(input);
-          if (value !== newValue) {
-            value = newValue;
-            onInputChange(name, value);
-          }
-        }));
-      });
     });
 
     $('.shiny-plot-output').each(function() {
@@ -331,5 +393,6 @@
     });
 
     shinyapp.connect(initialValues);
+    lastSentData = initialValues;
   });
 })();

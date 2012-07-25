@@ -22,9 +22,15 @@ sliderOptions <- function(min, max, step) {
   opt <- paste(opt, ', step:', step)
   
   # number format
-  opt <- paste(opt, ', format: { format: "#,##0.#####", locale: "us" }')
-  opt <- paste(opt, ', round: 5')
-  opt <- paste(opt, ', skin: "plastic"')
+  opt <- paste(
+    opt, 
+    ', format: { format: "#,##0.#####", locale: "us" }',
+    ', round: 5',
+    ', skin: "plastic"',
+    ', onstatechange: function(value) {',
+    '    jQuery(this.inputNode).val(this.getValue());',
+    '    jQuery(this.inputNode).trigger("change")',
+    '  }')
   opt <- paste(opt, '}')
   
   # return options
@@ -72,7 +78,7 @@ slider <- function(inputId, min, max, value, step = NULL) {
       tags$script(src="shared/slider/js/jquery.slider.min.js")
     ),
     tags$input(id=inputId, type="slider", 
-               name=inputId, value=value),
+               name=inputId, value=value, class="jslider"),
     tags$script(type="text/javascript",
                 paste('jQuery("#', inputId, '").slider(', sep = ''),
                 sliderOptions(min, max, step),

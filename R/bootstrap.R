@@ -79,11 +79,18 @@ textInput <- function(inputId, label, value = "") {
 }
 
 #' @export
-numericInput <- function(inputId, label, min, max, value = NA) {
+numericInput <- function(inputId, label, value, min = NA, max = NA) {
+  
+  # build input tag
+  inputTag <- tags$input(id = inputId, type = "number", value = value)
+  if (!is.na(min))
+    inputTag$attribs$min = min
+  if (!is.na(max))
+    inputTag$attribs$max = max
+  
   list(
     tags$label(label),
-    tags$input(id = inputId, type= "number", min = min, max = max,
-               value = ifelse(!is.na(value), value, ""))
+    inputTag
   )
 }
 

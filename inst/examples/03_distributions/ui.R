@@ -20,9 +20,9 @@ shinyUI(
      
       numericInput("n", 
                    "Number of observations:", 
+                   value = 500,
                    min = 0, 
-                   max = 10000, 
-                   value = 500),
+                   max = 10000),
               
       checkboxInput("animate", "Animate")
     ),

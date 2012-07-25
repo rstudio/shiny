@@ -103,7 +103,8 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 }
 
 #' @export
-helpText <- function(text) {
+helpText <- function(text, ...) {
+  paste(text, list(...), collapse="")
   span(class="help-block", text)
 }
 

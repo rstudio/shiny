@@ -7,8 +7,8 @@ shinyServer(function(input, output) {
   # is wrapped in a call to reactivePlot to indicate that:
   #
   #  1) It is "reactive" and therefore should be automatically 
-  #     re-executed when inputs changes.
-  #  2) It's output type is a plot 
+  #     re-executed when inputs change
+  #  2) Its output type is a plot 
   #
   output$distPlot <- reactivePlot(function() {
     

@@ -7,7 +7,6 @@ ShinyApp <- setRefClass(
   'ShinyApp',
   fields = list(
     .websocket = 'list',
-    .outputs = 'Map',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
     .progressKeys = 'character',
@@ -16,7 +15,6 @@ ShinyApp <- setRefClass(
   methods = list(
     initialize = function(ws) {
       .websocket <<- ws
-      .outputs <<- Map$new()
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
       .progressKeys <<- character(0)
@@ -34,38 +32,32 @@ ShinyApp <- setRefClass(
             orig(name=name, shinyapp=.self)
           }
         }
-        .outputs$set(name, func)
+
+        obs <- Observer$new(function() {
+          
+          value <- try(func(), silent=F)
+          
+          .invalidatedOutputErrors$remove(name)
+          .invalidatedOutputValues$remove(name)
+          
+          if (identical(class(value), 'try-error')) {
+            cond <- attr(value, 'condition')
+            .invalidatedOutputErrors$set(
+              name, 
+              list(message=cond$message,
+                   call=capture.output(print(cond$call))))
+          }
+          else
+            .invalidatedOutputValues$set(name, value)
+        })
+        
+        obs$onInvalidateHint(function() {
+          showProgress(name)
+        })
       }
       else {
         stop(paste("Unexpected", class(func), "output for", name))
       }
-    },
-    instantiateOutputs = function() {
-      lapply(.outputs$keys(),
-             function(key) {
-               func <- .outputs$remove(key)
-               obs <- Observer$new(function() {
-                 
-                 value <- try(func(), silent=F)
-
-                 .invalidatedOutputErrors$remove(key)
-                 .invalidatedOutputValues$remove(key)
-                 
-                 if (identical(class(value), 'try-error')) {
-                   cond <- attr(value, 'condition')
-                   .invalidatedOutputErrors$set(
-                     key, 
-                     list(message=cond$message,
-                          call=capture.output(print(cond$call))))
-                 }
-                 else
-                   .invalidatedOutputValues$set(key, value)
-               })
-               
-               obs$onInvalidateHint(function() {
-                 showProgress(key)
-               })
-             })
     },
     flushOutput = function() {
       if (length(.progressKeys) == 0
@@ -340,7 +332,6 @@ startApp <- function(port=8101L) {
           serverFunc(input=.createValuesReader(shinyapp$session),
                      output=.createOutputWriter(shinyapp))
         })
-        shinyapp$instantiateOutputs()
       },
       update = {
         shinyapp$session$mset(msg$data)

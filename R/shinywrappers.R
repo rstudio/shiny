@@ -67,12 +67,16 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 #' @export
 reactiveTable <- function(func, ...) {
   reactive(function() {
+    classNames <- getOption('shiny.table.class', 'data table table-bordered')
     data <- func()
     return(paste(
       capture.output(
         print(xtable(data, ...), 
               type='html', 
-              html.table.attributes='class="data"')),
+              html.table.attributes=paste('class="',
+                                          htmlEscape(classNames, T),
+                                          '"',
+                                          sep=''))),
       collapse="\n"))
   })
 }

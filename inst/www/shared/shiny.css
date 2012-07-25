@@ -4,14 +4,11 @@ body.disconnected {
 }
 
 table.data {
-  border-collapse: collapse;
-}
-table.data td, table th {
-  border: 1px solid #CCC;
-  padding: 3pt 8pt;
+  width: auto;
 }
 table.data td[align=right] {
   font-family: monospace;
+  text-align: right;
 }
 
 .shiny-output-error {

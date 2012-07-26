@@ -2,9 +2,7 @@ library(shiny)
 
 shinyUI(pageWithSidebar(
   
-  headerPanel(
-    h1("Sliders")
-  ),
+  headerPanel("Sliders"),
   
   sidebarPanel(
     

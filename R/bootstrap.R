@@ -48,9 +48,12 @@ pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
 
 
 #' @export
-headerPanel <- function(...) {
-  div(class="span12", style="padding: 10px 0px;",
-    ...
+headerPanel <- function(title) {    
+  list(
+    tags$head(tags$title(title)),
+    div(class="span12", style="padding: 10px 0px;",
+      h1(title)
+    )
   )
 }
 

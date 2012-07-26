@@ -3,16 +3,8 @@ library(shiny)
 # Define UI for dataset viewer application
 shinyUI(pageWithSidebar(
   
-  # Application title. Note that in addition to the standard h1 title
-  # element we use the HTML function to add additional content to the 
-  # title region and draw a horizontal rule beneath it
-  headerPanel(
-    h1("More Widgets"),
-    HTML("This example demonstrates the use of the <em>HTML</em>",
-         "widget to embed HTML directly, as well as the use of the ",
-         "<em>helpText</em> and <em>submitButton</em> widgets.",
-         "<hr/>")
-  ),
+  # Application title.
+  headerPanel("More Widgets"),
   
   # Sidebar with controls to select a dataset and specify the number
   # of observations to view. The helpText function is also used to 

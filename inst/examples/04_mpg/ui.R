@@ -5,9 +5,7 @@ library(datasets)
 shinyUI(pageWithSidebar(
   
   # Application title
-  headerPanel(
-    h1("Miles Per Gallon")
-  ),
+  headerPanel("Miles Per Gallon"),
   
   # Sidebar with controls to select the variable to plot against mpg
   # and to specify whether outliers should be included

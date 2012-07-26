@@ -4,9 +4,7 @@ library(shiny)
 shinyUI(pageWithSidebar(
   
   # Application title
-  headerPanel(
-    h1("Reactivity")
-  ),
+  headerPanel("Reactivity"),
   
   # Sidebar with controls to provide a caption, select a dataset, and 
   # specify the number of observations to view. Note that changes made

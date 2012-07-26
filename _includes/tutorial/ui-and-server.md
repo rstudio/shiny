@@ -44,7 +44,7 @@ shinyServer(function(input, output) {
 
 Our server function is empty for now but later we'll use it to define the relationship between our inputs and outputs.
 
-We've now create the most minimal possible Shiny application. You can run the application by calling the `runApp` function as follows:
+We've now created the most minimal possible Shiny application. You can run the application by calling the `runApp` function as follows:
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runApp(&quot;~/shinyapp&quot;)

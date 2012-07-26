@@ -1,5 +1,4 @@
 library(shiny)
-library(datasets)
 
 # Define UI for miles per gallon application
 shinyUI(pageWithSidebar(

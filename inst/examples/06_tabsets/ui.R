@@ -5,9 +5,7 @@ shinyUI(
   pageWithSidebar(
     
     # Application title
-    headerPanel(
-      h1("Tabsets")
-    ),
+    headerPanel("Tabsets"),
     
     # Sidebar with controls to select the random distribution type
     # and number of observations to generate. Note the use of the br()

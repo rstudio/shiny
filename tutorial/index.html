@@ -97,38 +97,38 @@ hljs.initHighlightingOnLoad();
 <ul class = "nav nav-list">
    <li class="nav-header">Getting Started</li>
     <li class="active">
-      <a href="#welcome" data-toggle="tab">Welcome</a>
+      <a target="_self" href="#welcome">Welcome</a>
    </li>
    <li>
-      <a href="#hello-shiny" data-toggle="tab">Hello Shiny</a>
+      <a target="_self" href="#hello-shiny">Hello Shiny</a>
    </li>
    <li>
-      <a href="#shiny-text" data-toggle="tab">Shiny Text</a>
+      <a target="_self" href="#shiny-text">Shiny Text</a>
    </li>
    <li>
-      <a href="#reactivity" data-toggle="tab">Reactivity</a>
+      <a target="_self" href="#reactivity">Reactivity</a>
    </li>
    <li class="nav-header">Building an App</li>
    <li>
-      <a href="#ui-and-server" data-toggle="tab">UI &amp; Server</a>
+      <a target="_self" href="#ui-and-server">UI &amp; Server</a>
    </li>
    <li>
-      <a href="#inputs-and-outputs" data-toggle="tab">Inputs &amp; Outputs</a>
+      <a target="_self" href="#inputs-and-outputs">Inputs &amp; Outputs</a>
    </li>
    <li>
-      <a href="#edit-run-debug" data-toggle="tab">Edit, Run, Debug</a>
+      <a target="_self" href="#edit-run-debug">Edit, Run, Debug</a>
    </li>
    <li class="nav-header">Tooling Up</li>
    <li>
-      <a href="#sliders" data-toggle="tab">Sliders</a>
+      <a target="_self" href="#sliders">Sliders</a>
    </li>
    <li>
-      <a href="#tabsets" data-toggle="tab">Tabsets</a>
+      <a target="_self" href="#tabsets">Tabsets</a>
    <li>
-      <a href="#more-widgets" data-toggle="tab">More Widgets</a>
+      <a target="_self" href="#more-widgets">More Widgets</a>
    </li>
    <li>
-      <a href="#html-ui" data-toggle="tab">HTML UI</a>
+      <a target="_self" href="#html-ui">HTML UI</a>
    </li>
 </ul>
 </div>
@@ -243,25 +243,36 @@ hljs.initHighlightingOnLoad();
 
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="jquery.js"></script>
+<script src="jquery.ba-hashchange.min.js"></script>
 <script src="bootstrap/js/bootstrap.min.js"></script>
 <script>
 function manageNextPrev() {
    $('a#next').parent().toggleClass('disabled', $('.nav li.active').nextAll('li:not(.nav-header)').size() == 0);
    $('a#previous').parent().toggleClass('disabled', $('.nav li.active').prevAll('li:not(.nav-header)').size() == 0);
 }
-$('.nav a[data-toggle="tab"]').on('shown', function(e) {
-   manageNextPrev();
-});
 manageNextPrev();
 
 $('a#next').click(function(e) {
    e.preventDefault();
-   $('.nav li.active').nextAll('li:not(.nav-header)').first().find('a').tab('show');
-})
+   location.href = $('.nav li.active').nextAll('li:not(.nav-header)').first().find('a').attr('href');
+   manageNextPrev();
+});
 $('a#previous').click(function(e) {
    e.preventDefault();
-   $('.nav li.active').prevAll('li:not(.nav-header)').first().find('a').tab('show');
-})
+   location.href = $('.nav li.active').prevAll('li:not(.nav-header)').first().find('a').attr('href');
+   manageNextPrev();
+});
+
+$(window).hashchange(function() {
+  $('.tab-pane').hide();
+  var tab = location.hash || '#welcome';
+  $(tab + '.tab-pane').show();
+
+  $('.nav li.active').removeClass('active');
+  $('.nav li a[href="' + tab + '"]').parent().addClass('active');
+  manageNextPrev();
+});
+$(window).hashchange();
 </script>
 
 </body>

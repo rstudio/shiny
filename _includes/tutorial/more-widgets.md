@@ -2,7 +2,7 @@
 
 ![More Widgets Screenshot](screenshots/more-widgets.png)
 
-To run the example type: 
+The More Widgets application demonstrates the helpText and submitButton widgets as well as the use of embedded HTML elements to customized formatting. To run the example type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;07_widgets&quot;)

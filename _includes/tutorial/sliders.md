@@ -2,7 +2,7 @@
 
 ## (Under Construction)
 
-To run the example type: 
+The Sliders application demonstrates the many capabilities of slider controls, including the ability to run an animation sequence. To run the example type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;05_sliders&quot;)

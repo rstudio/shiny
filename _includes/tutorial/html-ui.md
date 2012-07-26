@@ -2,7 +2,7 @@
 
 ![HTML UI Screenshot](screenshots/html-ui.png)
 
-To run the example type: 
+The HTML UI application demonstrates defining a Shiny user-interface using a standard HTML page rather than a ui.R script. To run the example type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;08_html&quot;)

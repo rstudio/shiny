@@ -2,12 +2,13 @@
 
 ![Reactivity Screenshot](screenshots/reactivity.png)
 
-
-To run the example type: 
+The Reactivity application is very similar to Hello Text but goes into much more detail about reactive programming concepts. To run the example type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;03_reactivity&quot;)
 </code></pre>
+
+Try changing the text in the Caption field to something else--you'll notice that the caption is updated immediately in the output pane. 
 
 #### ui.R
 

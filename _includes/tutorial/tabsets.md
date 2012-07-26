@@ -2,7 +2,7 @@
 
 ![Tabsets Screenshot](screenshots/tabsets.png)
 
-To run the example type: 
+The Tabsets application demonstrates using tabs to present output. To run the example type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;06_tabsets&quot;)

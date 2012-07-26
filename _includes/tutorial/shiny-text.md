@@ -1,7 +1,7 @@
 
 ![Tabsets Screenshot](screenshots/shiny-text.png)
 
-To run the example type: 
+The Shiny Text application demonstrates printing R objects directly as well as displaying data-frames using HTML tables. To run the example type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;02_text&quot;)

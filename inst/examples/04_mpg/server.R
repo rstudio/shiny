@@ -18,7 +18,7 @@ shinyServer(function(input, output) {
   })
    
   # Return the formula text for printing as a caption
-  output$caption <- reactive(function() {
+  output$caption <- reactiveText(function() {
     formulaText()
   })
   

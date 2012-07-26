@@ -12,7 +12,7 @@ For this example we'll assume you've chosen to create the application within a s
 |-- server.R
 </code></pre>
 
-Now we'll fill in a basic shell for each of these files. For ui.R we'll define our user interface by calling the function `pageWithSidebar` and passing it's result to the `shinyUI` function:
+Now we'll create minimal versions of each of these files. For ui.R we'll define our user interface by calling the function `pageWithSidebar` and passing it's result to the `shinyUI` function:
 
 #### ui.R
 <pre><code class="r">library(shiny)

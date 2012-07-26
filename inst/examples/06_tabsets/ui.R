@@ -10,13 +10,15 @@ shinyUI(
     ),
     
     # Sidebar with controls to select the random distribution type
-    # and number of observations to generate
+    # and number of observations to generate. Note the use of the br()
+    # element to introduce extra vertical spacing
     sidebarPanel(
-      selectInput("dist", "Distribution type:",
-                  list("Normal" = "norm",
-                       "Uniform" = "unif",
-                       "Log-normal" = "lnorm",
-                       "Exponential" = "exp")),
+      radioButtons("dist", "Distribution type:",
+                   list("Normal" = "norm",
+                        "Uniform" = "unif",
+                        "Log-normal" = "lnorm",
+                        "Exponential" = "exp")),
+      br(),
       
       sliderInput("n", 
                   "Number of observations:", 

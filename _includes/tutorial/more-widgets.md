@@ -8,6 +8,16 @@ The More Widgets application demonstrates the helpText and submitButton widgets 
 &gt; runExample(&quot;07_widgets&quot;)
 </code></pre>
 
+### UI Enhancements
+
+In this example we update the Shiny Text application with some additional controls and formatting, specifically:
+
+* We added a `helpText` control to provide additional clarifying text alongside our input controls.
+* We added a `submitButton` control to indicate that we don't want a live connection between inputs and outputs, but rather to wait until the user clicks that button to update the output. This is especially useful if computing output is computationally expensive.
+* We added `h4` elements (heading level 4) into the output pane. Shiny includes a variety of functions for including HTML elements directly covering headings, paragraphics, links, and more.
+
+Here is the updated source code for the user-interface:
+
 #### ui.R
 
 <pre><code class="r">library(shiny)
@@ -50,6 +60,10 @@ shinyUI(pageWithSidebar(
   )
 ))
 </code></pre>
+
+### Server Script
+
+All of the changes from the original Shiny Text application were to the user-interface, the server script remains the same:
 
 #### server.R
 

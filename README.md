@@ -21,7 +21,7 @@ Shiny is currently available only directly from this GitHub repository (it will 
 Once you've extracted the Shiny source code to a directory you can install it as follows:
 
 ```r
-install.packages("websockets", "RJSONIO", "xtable")
+install.packages(c("websockets", "RJSONIO", "xtable"))
 system("R CMD INSTALL <shiny-dir>")
 ```
 

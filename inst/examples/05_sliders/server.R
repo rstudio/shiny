@@ -6,11 +6,6 @@ shinyServer(function(input, output) {
   # Reactive function to compose a data frame containing all of the values
   sliderValues <- reactive(function() {
     
-    # Show values using R's default print format
-    printValue <- function(value) {
-      capture.output(print(value))
-    }
-    
     # Compose data frame
     data.frame(
       Name = c("Integer", 
@@ -18,11 +13,11 @@ shinyServer(function(input, output) {
                "Range",
                "Custom Format",
                "Animation"),
-      Value = c(printValue(input$integer), 
-                printValue(input$decimal),
-                printValue(input$range),
-                printValue(input$format),
-                printValue(input$animation)), 
+      Value = as.character(c(input$integer, 
+                             input$decimal,
+                             paste(input$range, collapse=' '),
+                             input$format,
+                             input$animation)), 
       stringsAsFactors=FALSE)
   }) 
   

@@ -16,7 +16,7 @@ Shiny is currently available only directly from this GitHub repository (it will 
 
 * [Download tar.gz](https://github.com/rstudio/shiny/tarball/master) 
 * [Download zip](https://github.com/rstudio/shiny/zipball/master)
-* `git clone https://github.com/rstudio/shiny.git` [Recommended]
+* `git clone https://github.com/rstudio/shiny.git` **[Recommended]**
 
 Once you've extracted the Shiny source code to a directory you can install it as follows:
 

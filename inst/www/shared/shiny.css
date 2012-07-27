@@ -31,3 +31,21 @@ table.data td[align=right] {
   -webkit-transition: opacity 250ms ease 500ms;
   -o-transition: opacity 250ms ease 500ms;
 }
+
+.slider-animate-button {
+  display: block;
+  text-align: right;
+  opacity: 0.5;
+}
+.slider-animate-button .pause {
+  display: none;
+}
+.slider-animate-button.playing .pause {
+  display: inline;
+}
+.slider-animate-button .play {
+  display: inline;
+}
+.slider-animate-button.playing .play {
+  display: none;
+}

@@ -374,14 +374,16 @@
 
     var inputSelector = ':input:not([type="submit"], [type="checkbox"], [type="radio"])';
     var initialValues = {};
-    $(document).on('change keyup input', inputSelector, function() {
+    $(document).on('change keyup input', inputSelector, function(evt) {
       var input = this;
       var name = input['data-input-id'] || input.name || input.id;
       var value = elementToValue(input);
-      if (input.type == 'text')
+      if (input.type == 'text' && !$(input).data('animating')) {
         debouncedInputChange(name, value);
-      else
+      }
+      else {
         onInputChange(name, value);
+      }
     });
     $(inputSelector).each(function() {
       var input = this;
@@ -458,4 +460,35 @@
     shinyapp.connect(initialValues);
     lastSentData = initialValues;
   });
+
+  $(document).on('click', '.slider-animate-button', function(evt) {
+    evt.preventDefault();
+    var self = $(this);
+    var target = $('#' + self.attr('data-target-id'));
+    var startLabel = 'Play';
+    var stopLabel = 'Pause';
+    var animInterval = target.attr('data-animation-interval');
+    if (isNaN(animInterval))
+      animInterval = 1500;
+    else
+      animInterval = +animInterval;
+
+    if (!target.data('animTimer')) {
+      var timer = setInterval(function() {
+        return target.slider().stepNext();
+      }, animInterval);
+      target.data('animTimer', timer);
+      self.attr('title', stopLabel);
+      self.addClass('playing');
+      target.data('animating', true);
+    }
+    else {
+      clearTimeout(target.data('animTimer'));
+      target.removeData('animTimer');
+      self.attr('title', startLabel);
+      self.removeClass('playing');
+      target.removeData('animating');
+    }
+  });
+
 })();

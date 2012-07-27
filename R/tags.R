@@ -161,6 +161,8 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
   for (attrib in names(tag$attribs)) {
     attribValue <- tag$attribs[[attrib]]
     if (!is.na(attribValue)) {
+      if (is.logical(attribValue))
+        attribValue <- tolower(attribValue)
       text <- htmlEscape(attribValue, attribute=TRUE) 
       textWriter(paste(" ", attrib,"=\"", text, "\"", sep=""))
     }

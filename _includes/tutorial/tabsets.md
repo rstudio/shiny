@@ -2,14 +2,19 @@
 
 ![Tabsets Screenshot](screenshots/tabsets.png)
 
-The Tabsets application demonstrates using tabs to present output. To run the example type: 
+The Tabsets application demonstrates using tabs to organize output. To run the example type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;06_tabsets&quot;)
 </code></pre>
 
-#### ui.R
+### Tab Panels
 
+Tabsets are created by calling the `tabsetPanel` function with a list of tabs created by the `tabPanel` function. Each tab panel is provided a list of output elements which are rendered vertically within the tab.
+
+In this example we updated our Hello Shiny application to add a summary and table view of the data,  each rendered on their own tab. Here is the revised source code for the user-interface:
+
+#### ui.R
 <pre><code class="r">library(shiny)
 
 # Define UI for random distribution application 
@@ -47,6 +52,10 @@ shinyUI(pageWithSidebar(
   )
 ))
 </code></pre>
+
+### Tabs and Reactive Data
+
+Introducing tabs into our user-interface underlines the importance of creating reactive functions for shared data. In this example each tab provides it's own view of the dataset. If the dataset is expensive to compute then our user-interface might be quite slow to render. The server script below demonstrates how to calculate the data once in a reactive function and have the result be shared by all of the output tabs:
 
 #### server.R
 

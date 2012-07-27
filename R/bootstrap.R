@@ -269,7 +269,7 @@ tabsetPanel <- function(...) {
 
 #' @export
 textOutput <- function(outputId) {
-  div(id = outputId, class = "shiny-text-output")
+  span(id = outputId, class = "shiny-text-output")
 }
 
 #' @export

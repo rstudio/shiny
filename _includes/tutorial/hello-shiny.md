@@ -49,11 +49,8 @@ shinyServer(function(input, output) {
   #
   output$distPlot &lt;- reactivePlot(function() {
 
-    # convert string input to an integer
-    obs &lt;- as.integer(input$obs)
-
     # generate an rnorm distribution and plot it
-    dist &lt;- rnorm(obs)
+    dist &lt;- rnorm(input$obs)
     hist(dist)
   })
 })

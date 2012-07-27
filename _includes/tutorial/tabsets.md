@@ -75,7 +75,7 @@ shinyServer(function(input, output) {
                    exp = rexp,
                    rnorm)
 
-    dist(as.integer(input$n))
+    dist(input$n)
   })
 
   # Generate a plot of the data. Also uses the inputs to build the 

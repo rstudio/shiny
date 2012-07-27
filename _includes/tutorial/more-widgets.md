@@ -89,8 +89,7 @@ shinyServer(function(input, output) {
 
   # Show the first &quot;n&quot; observations
   output$view &lt;- reactiveTable(function() {
-    obs &lt;- as.integer(input$obs)
-    head(datasetInput(), n = obs)
+    head(datasetInput(), n = input$obs)
   })
 })
 </code></pre>

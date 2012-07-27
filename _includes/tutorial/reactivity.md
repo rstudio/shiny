@@ -10,7 +10,7 @@ The Reactivity application is very similar to Hello Text but goes into much more
 
 The previous examples have given you a good idea of what the code for Shiny applications looks like. We've explained a bit about reactivity but mostly glossed over the finer details. Now before we look at more code we'll explore these concepts more deeply.
 
-### What is Shiny Reactivity?
+### What is Reactivity?
 
 The Shiny web framework is fundamentally about making it easy to wire up *input values* from a web page, making them easily available to you in R, and have the results of your R code be written as *output values* back out to the web page.
 
@@ -40,8 +40,7 @@ It's also possible to create reactive functions directly (usually computed based
 
 The transormation of reactive values into outputs is then by assignments to the `output` object. Here is an example of an assignment to an output that depends on both the `datasetInput` reactive function we just defined as well as `input$obs`:
 
-<pre><code class="r"> 
-output$view &lt;- reactiveTable(function() {
+<pre><code class="r">output$view &lt;- reactiveTable(function() {
    head(datasetInput(), n = input$obs)
 })
 </code></pre>

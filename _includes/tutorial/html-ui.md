@@ -8,7 +8,7 @@ The HTML UI application demonstrates defining a Shiny user-interface using a sta
 &gt; runExample(&quot;08_html&quot;)
 </code></pre>
 
-### Using HTML Directly
+### Defining an HTML UI
 
 The previous examples in this tutorial used a ui.R file to build their user-interfaces. While this is fast and convenient way to build user-interfaces, some appliations will inevitably require more flexiblity. For this type of application, you can define your user-interface directly in HTML. In this case there is no ui.R file and the directory structure looks like this:
 

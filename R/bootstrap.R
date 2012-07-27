@@ -200,8 +200,9 @@ submitButton <- function(text = "Apply Changes") {
 
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
+                        ...,
                         round = NULL, locale='us', format='#,##0.#####', 
-                        ticks=TRUE) {
+                        ticks=TRUE, smooth=FALSE) {
  
   # validate label
   labelText <- as.character(label)

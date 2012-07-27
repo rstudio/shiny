@@ -9,8 +9,9 @@ hasDecimals <- function(value) {
 # 
 # this is a wrapper for: https://github.com/egorkhmelev/jslider
 # (www/shared/slider contains js, css, and img dependencies) 
-slider <- function(inputId, min, max, value, step = NULL, round = NULL,
-                   locale='us', format='#,##0.#####', ticks=TRUE) {
+slider <- function(inputId, min, max, value, step = NULL, ...,
+                   round = NULL, locale='us', format='#,##0.#####', 
+                   ticks=TRUE, smooth=FALSE) {
   # validate inputId
   inputId <- as.character(inputId)
   if (!is.character(inputId))
@@ -19,10 +20,10 @@ slider <- function(inputId, min, max, value, step = NULL, round = NULL,
   # validate numeric inputs
   if (!is.numeric(value) || !is.numeric(min) || !is.numeric(max)) 
     stop("min, max, amd value must all be numeric values")
-  else if (value < min) 
+  else if (min(value) < min) 
     stop(paste("slider initial value", value, 
                "is less than the specified minimum"))
-  else if (value > max) 
+  else if (max(value) > max) 
     stop(paste("slider initial value", value, 
                "is greater than the specified maximum"))
   else if (min > max) 
@@ -47,8 +48,8 @@ slider <- function(inputId, min, max, value, step = NULL, round = NULL,
   # Default state is to not have ticks
   if (identical(ticks, T)) {
     # Automatic ticks
-    tickCount <- range / step
-    if (tickCount <= 25)
+    tickCount <- (range / step) + 1
+    if (tickCount <= 26)
       ticks <- paste(rep('|', floor(tickCount)), collapse=';')
     else {
       ticks <- NULL
@@ -85,10 +86,11 @@ slider <- function(inputId, min, max, value, step = NULL, round = NULL,
       tags$script(src="shared/slider/js/jquery.slider.min.js")
     ),
     tags$input(id=inputId, type="slider", 
-               name=inputId, value=value, class="jslider",
+               name=inputId, value=paste(value, collapse=';'), class="jslider",
                'data-from'=min, 'data-to'=max, 'data-step'=step,
                'data-skin'='plastic', 'data-round'=round, 'data-locale'=locale,
-               'data-format'=format, 'data-scale'=ticks),
+               'data-format'=format, 'data-scale'=ticks,
+               'data-smooth'=ifelse(smooth, 'true', 'false')),
     tags$script(type="text/javascript",
                 paste('jQuery("#', inputId, '").slider();', sep = ''))
   )

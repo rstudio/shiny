@@ -314,6 +314,23 @@
     function elementToValue(el) {
       if (el.type == 'checkbox' || el.type == 'radio')
         return el.checked ? true : false;
+      else if ($(el).attr('type') === 'slider') {
+        var sliderVal = $(el).val();
+        if (/;/.test(sliderVal)) {
+          var chunks = sliderVal.split(/;/, 2);
+          return [+chunks[0], +chunks[1]];
+        }
+        else {
+          return +sliderVal;
+        }
+      }
+      else if ($(el).attr('type') === 'number') {
+        var numberVal = $(el).val();
+        if (!isNaN(numberVal))
+          return +numberVal;
+        else
+          return numberVal;
+      }
       else
         return $(el).val();
     }

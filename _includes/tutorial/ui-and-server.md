@@ -29,7 +29,7 @@ shinyUI(pageWithSidebar(
 ))
 </code></pre>
 
-The three functions `headerPanel`, `sidebarPanel`, and `mainPanel` define the various regions of the user-interface, which are empty for now save for the title we passed to the header panel.
+The three functions `headerPanel`, `sidebarPanel`, and `mainPanel` define the various regions of the user-interface. The application will be called "Miles Per Gallon" so we specify that as the title when we create the header panel. The other panels are empty for now.
 
 Now let's define a skeletal server implementation. To do this we call `shinyServer` and pass it a function that accepts two parameters: `input` and `output`:
 

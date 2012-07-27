@@ -372,6 +372,9 @@
       0,
       onInputChange);
 
+    // Instantiate all sliders
+    $('input.jslider').slider();
+
     var inputSelector = ':input:not([type="submit"], [type="checkbox"], [type="radio"])';
     var initialValues = {};
     $(document).on('change keyup input', inputSelector, function(evt) {

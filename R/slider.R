@@ -91,10 +91,8 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
                'data-from'=min, 'data-to'=max, 'data-step'=step,
                'data-skin'='plastic', 'data-round'=round, 'data-locale'=locale,
                'data-format'=format, 'data-scale'=ticks,
-               'data-smooth'='false',
-               'data-animation-interval'=animationInterval),
-    tags$script(type="text/javascript",
-                paste('jQuery("#', inputId, '").slider();', sep = ''))
+               'data-smooth'=FALSE,
+               'data-animation-interval'=animationInterval)
   )
   
   sliderFragment[[length(sliderFragment)+1]] <-

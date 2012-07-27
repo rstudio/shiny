@@ -287,5 +287,7 @@ tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
 }
 
-
-
+#' @export
+htmlOutput <- function(outputId) {
+  div(id = outputId, class="shiny-html-output")
+}

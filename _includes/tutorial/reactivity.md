@@ -8,7 +8,50 @@ The Reactivity application is very similar to Hello Text but goes into much more
 &gt; runExample(&quot;03_reactivity&quot;)
 </code></pre>
 
-Try changing the text in the Caption field to something else--you'll notice that the caption is updated immediately in the output pane. 
+The previous examples have given you a good idea of what the code for Shiny applications looks like. We've explained a bit about reactivity but mostly glossed over the finer details. Now before we look at more code we'll explore these concepts more deeply.
+
+### What is Shiny Reactivity?
+
+The Shiny web framework is fundamentally about making it easy to wire up *input values* from a web page, making them easily available to you in R, and have the results of your R code be written as *output values* back out to the web page.
+
+    input values => R code => output values
+
+Since Shiny web apps are interactive, the input values can change at any time, and the output values need to be updated immediately to reflect those changes.
+
+Shiny comes with a **reactive programming** library that you will use to structure your application logic. By using this library, changing input values will naturally cause the right parts of your R code to be reexecuted, which will in turn cause any changed outputs to be updated.
+
+### Reactive Programming Basics
+
+Reactive programming is a coding style that starts with **reactive values**--values that change over time, or in response to the user--and builds on top of them with **reactive functions**--functions that access reactive values and execute other reactive functions.
+
+What's interesting about reactive functions is that whenever they execute, they automatically keep track of what reactive values they read and what reactive functions they called. If those "dependencies" become out of date, then they know that their own return value has also become out of date. Because of this dependency tracking, changing a reactive value will automatically instruct all reactive functions that directly or indirectly depended on that value to re-execute.
+
+The initial way you'll encounter reactive values in Shiny is using the `input` object. The `input` object, which is passed to your `shinyServer` function, lets you access the web page's user input fields using a list-like syntax. Code-wise, it looks like you're grabbing a value from a list or data frame, but you're actually reading a reactive value.
+
+It's also possible to create reactive functions directly (usually computed based on user inputs or even other reactive values), which can then in turn be depended on by other reactive functions. In this application an example of that is the function that returns an R data frame based on the selection the user made in the input form:
+
+<pre><code class="r">datasetInput &lt;- reactive(function() {
+   switch(input$dataset,
+          &quot;rock&quot; = rock,
+          &quot;pressure&quot; = pressure,
+          &quot;cars&quot; = cars)
+})
+</code></pre>
+
+The transormation of reactive values into outputs is then by assignments to the `output` object. Here is an example of an assignment to an output that depends on both the `datasetInput` reactive function we just defined as well as `input$obs`:
+
+<pre><code class="r"> 
+output$view &lt;- reactiveTable(function() {
+   head(datasetInput(), n = input$obs)
+})
+</code></pre>
+
+This function will be re-executed (and it's output re-rendered in the browser) whenever either the `datasetInput` or `input$obs` value changes.
+ 
+
+### Back to the Code
+
+Now that we've taken a deeper loop at some of the core concepts, let's revised the source code and try to understand what's going on at a bit finer level of detail. The user interface definition has been updated to include a text-input field that defines a caption. Other than that it's very similar to the previous example:
 
 #### ui.R
 
@@ -45,6 +88,10 @@ shinyUI(pageWithSidebar(
   )
 ))
 </code></pre>
+
+### Server Script
+
+The server script declares the `datasetInput` reactive function as well as three reactive output values. There are detailed comments for each definition that describe how it works within the reactive system:
 
 #### server.R
 
@@ -99,3 +146,5 @@ shinyServer(function(input, output) {
   })
 })
 </code></pre>
+
+We've reviewed a lot code and covered a lot of conceptual ground in the first three examples. The next section focuses on the mechanics of building a Shiny appliation from the ground up and also covers tips on how to run and debug Shiny applications.

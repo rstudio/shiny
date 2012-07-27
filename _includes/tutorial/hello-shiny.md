@@ -41,7 +41,7 @@ shinyUI(pageWithSidebar(
 ))
 </code></pre>
 
-The server-side of the application is implemented in a source file named server.R:
+The server-side of the application is shown below. At one level it's very simple--a random distribution with the requested number of observations is generated and then plotted as a historgram. However, you'll also notice that the function which returns the plot is wrapped in a call to `reactivePlot`. The comment above the function explains a bit about this, but if you find it confusing don't worry we'll cover this concept in much more detail soon.
 
 #### server.R
 
@@ -65,3 +65,5 @@ shinyServer(function(input, output) {
   })
 })
 </code></pre>
+
+The next example will show the use more input controls as well as the use of reactive functions to generate textual output.

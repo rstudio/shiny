@@ -2,11 +2,11 @@
 
 ## Run & Debug
 
-### Starting and Stopping
-
 Throughout the tutorial you've been calling `runApp` to run examples and the MPG application. This function starts the Shiny application and opens up your default web browser to view it. The call to runApp is blocking, meaning that it prevents traditional interaction with the console while the applciation is running.
 
 To stop the application you simply interupt R -- you can do this by pressing the Escape key in all R front ends as well as by clicking the stop button if your R environment provides one.
+
+### Running in a Separate Process
 
 If you don't want to block access to the console while running your Shiny application you can also run it in a separate process. You can do this by opening a terminal or console window and executing the following:
 

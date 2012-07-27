@@ -202,23 +202,29 @@ submitButton <- function(text = "Apply Changes") {
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         ...,
                         round=FALSE, format='#,##0.#####', locale='us',
-                        ticks=TRUE, animate=TRUE, animationInterval=1000) {
+                        ticks=TRUE, animate=FALSE) {
  
   # validate label
   labelText <- as.character(label)
   if (!is.character(labelText))
     stop("label not specified")
   
-  play <- tags$i(class='icon-play')
-  pause <- tags$i(class='icon-pause')
+  if (identical(animate, T))
+    animate <- animationOptions()
+  
+  if (!is.null(animate) && !identical(animate, F)) {
+    if (is.null(animate$playButton))
+      animate$playButton <- tags$i(class='icon-play')
+    if (is.null(animate$pauseButton))
+      animate$pauseButton <- tags$i(class='icon-pause')
+  }
   
   # build slider
   list(
     controlLabel(inputId, labelText),  
     slider(inputId, min=min, max=max, value=value, step=step, round=round,
            locale=locale, format=format, ticks=ticks,
-           animate=animate, playButton=play, pauseButton=pause,
-           animationInterval=animationInterval)
+           animate=animate)
   )
 }
 

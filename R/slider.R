@@ -3,6 +3,17 @@ hasDecimals <- function(value) {
   return (!identical(value, truncatedValue))
 }
 
+#' @export
+animationOptions <- function(interval=1000,
+                             loop=F,
+                             playButton=NULL,
+                             pauseButton=NULL) {
+  list(interval=interval,
+       loop=loop,
+       playButton=playButton,
+       pauseButton=pauseButton)
+}
+
 # Create a new slider control (list of slider input element and the script
 # tag used to configure it). This is a lower level control that should
 # be wrapped in an "input" construct (e.g. sliderInput in bootstrap.R)
@@ -11,8 +22,7 @@ hasDecimals <- function(value) {
 # (www/shared/slider contains js, css, and img dependencies) 
 slider <- function(inputId, min, max, value, step = NULL, ...,
                    round=FALSE, format='#,##0.#####', locale='us',
-                   ticks=TRUE, animate=FALSE, playButton=NULL,
-                   pauseButton=NULL, animationInterval=1000) {
+                   ticks=TRUE, animate=FALSE) {
   # validate inputId
   inputId <- as.character(inputId)
   if (!is.character(inputId))
@@ -91,17 +101,28 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
                'data-from'=min, 'data-to'=max, 'data-step'=step,
                'data-skin'='plastic', 'data-round'=round, 'data-locale'=locale,
                'data-format'=format, 'data-scale'=ticks,
-               'data-smooth'=FALSE,
-               'data-animation-interval'=animationInterval)
+               'data-smooth'=FALSE)
   )
   
-  sliderFragment[[length(sliderFragment)+1]] <-
-    tags$div(class='slider-animate-container',
-             tags$a(href='#',
-                    class='slider-animate-button',
-                    'data-target-id'=inputId,
-                    tags$span(class='play', playButton),
-                    tags$span(class='pause', pauseButton)))
+  if (identical(animate, T))
+    animate <- animationOptions()
+  
+  if (!is.null(animate) && !identical(animate, F)) {
+    if (is.null(animate$playButton))
+      animate$playButton <- 'Play'
+    if (is.null(animate$pauseButton))
+      animate$pauseButton <- 'Pause'
+    
+    sliderFragment[[length(sliderFragment)+1]] <-
+      tags$div(class='slider-animate-container',
+               tags$a(href='#',
+                      class='slider-animate-button',
+                      'data-target-id'=inputId,
+                      'data-interval'=animate$interval,
+                      'data-loop'=animate$loop,
+                      tags$span(class='play', animate$playButton),
+                      tags$span(class='pause', animate$pauseButton)))
+  }
   
   return(sliderFragment)
 }

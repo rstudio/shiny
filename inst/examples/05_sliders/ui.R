@@ -20,15 +20,15 @@ shinyUI(pageWithSidebar(
     sliderInput("range", "Range:",
                 min = 1, max = 1000, value = c(200,500)),
     
-    # Provide a custom currency format for value display
+    # Provide a custom currency format for value display, with basic animation
     sliderInput("format", "Custom Format:", 
-                min = 0, max = 100000, value = 50000, step = 25000,
-                format="$#,##0", locale="us"),  
+                min = 0, max = 10000, value = 0, step = 2500,
+                format="$#,##0", locale="us", animate=TRUE),
     
-    # Animation with custom interval (in milliseconds) to control speed
-    # (also provide helpText to highlight the possiblity of animation)
-    sliderInput("animation", "Animation:", 1, 2000, 1, step = 10,
-                animationInterval = 300),
+    # Animation with custom interval (in milliseconds) to control speed, plus
+    # looping. (Also provide helpText to highlight the possiblity of animation.)
+    sliderInput("animation", "Looping Animation:", 1, 2000, 1, step = 10, 
+                animate=animationOptions(interval=300, loop=T)),
     helpText("Use the Play button to animate values.")
   ),
   

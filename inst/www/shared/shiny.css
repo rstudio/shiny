@@ -32,8 +32,12 @@ table.data td[align=right] {
   -o-transition: opacity 250ms ease 500ms;
 }
 
+span.jslider {
+  margin-bottom: 12px;
+}
 .slider-animate-container {
   text-align: right;
+  margin-top: -9px;
 }
 .slider-animate-button {
   opacity: 0.5;

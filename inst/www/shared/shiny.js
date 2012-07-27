@@ -468,9 +468,12 @@
     evt.preventDefault();
     var self = $(this);
     var target = $('#' + self.attr('data-target-id'));
+    var slider = target.slider();
     var startLabel = 'Play';
     var stopLabel = 'Pause';
-    var animInterval = target.attr('data-animation-interval');
+    var loop = self.attr('data-loop') !== undefined &&
+               !/^\s*false\s*$/i.test(self.attr('data-loop'))
+    var animInterval = self.attr('data-interval');
     if (isNaN(animInterval))
       animInterval = 1500;
     else
@@ -478,13 +481,20 @@
 
     if (!target.data('animTimer')) {
       // If we're currently at the end, restart
-      if (!target.slider().canStepNext())
-        target.slider().resetToStart();
+      if (!slider.canStepNext())
+        slider.resetToStart();
 
       var timer = setInterval(function() {
-        target.slider().stepNext();
-        if (!target.slider().canStepNext()) {
-          self.click(); // stop the animation
+        if (loop && !slider.canStepNext()) {
+          slider.resetToStart();
+        }
+        else {
+
+          slider.stepNext();
+
+          if (!loop && !slider.canStepNext()) {
+            self.click(); // stop the animation
+          }
         }
       }, animInterval);
       target.data('animTimer', timer);

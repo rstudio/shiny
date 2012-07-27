@@ -201,9 +201,8 @@ submitButton <- function(text = "Apply Changes") {
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         ...,
-                        round = NULL, locale='us', format='#,##0.#####', 
-                        ticks=TRUE, smooth=FALSE, animate=TRUE,
-                        animationInterval=1500) {
+                        round=FALSE, format='#,##0.#####', locale='us',
+                        ticks=TRUE, animate=TRUE, animationInterval=1000) {
  
   # validate label
   labelText <- as.character(label)
@@ -217,7 +216,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   list(
     controlLabel(inputId, labelText),  
     slider(inputId, min=min, max=max, value=value, step=step, round=round,
-           locale=locale, format=format, ticks=ticks, smooth=smooth,
+           locale=locale, format=format, ticks=ticks,
            animate=animate, playButton=play, pauseButton=pause,
            animationInterval=animationInterval)
   )
@@ -269,7 +268,7 @@ tabsetPanel <- function(...) {
 
 #' @export
 textOutput <- function(outputId) {
-  span(id = outputId, class = "shiny-text-output")
+  div(id = outputId, class = "shiny-text-output")
 }
 
 #' @export

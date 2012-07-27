@@ -474,8 +474,15 @@
       animInterval = +animInterval;
 
     if (!target.data('animTimer')) {
+      // If we're currently at the end, restart
+      if (!target.slider().canStepNext())
+        target.slider().resetToStart();
+
       var timer = setInterval(function() {
-        return target.slider().stepNext();
+        target.slider().stepNext();
+        if (!target.slider().canStepNext()) {
+          self.click(); // stop the animation
+        }
       }, animInterval);
       target.data('animTimer', timer);
       self.attr('title', stopLabel);

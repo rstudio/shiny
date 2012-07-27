@@ -7,6 +7,16 @@ The Sliders application demonstrates the many capabilities of slider controls, i
 &gt; runExample(&quot;05_sliders&quot;)
 </code></pre>
 
+### Customizing Sliders
+
+Shiny slider controls are extremely capable and customizable. Features supported include:
+
+* The ability to specify both single values and ranges
+* Custom formats for value display (e.g for currency)
+* The ability to animate the slider across a range of values
+
+Slider controls are created by calling the `sliderInput` function. The ui.R file demonstrates using sliders with a variety of options:
+
 #### ui.R
 
 <pre><code class="r">library(shiny)
@@ -49,6 +59,10 @@ shinyUI(pageWithSidebar(
   )
 ))
 </code></pre>
+
+### Server Script
+
+The server side of the Slider application is very straightforward: it creates a data frame containing all of the input values and then renders it as an HTML table:
 
 #### server.R
 

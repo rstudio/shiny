@@ -1,18 +1,18 @@
 
 ## UI & Server
 
-Let's walk through the steps of building a simple Shiny application. As with the previous examples we'll be building our user interface using R, however it's also possible to define a user interface directly in HTML (a possibility covered in the  *HTML UI* example later in the tutorial).
+Let's walk through the steps of building a simple Shiny application. As with the previous examples we'll be building our user interface using R, however it's also possible to define a user interface directly in HTML (covered more detail in the  *HTML UI* topic later in the tutorial).
 
-A Shiny application is simply a directory containing a user-interface definition, a  server script, and any additional data, scripts, or other resources required to support the application. 
+A Shiny application is simply a directory containing a user-interface definition, a server script, and any additional data, scripts, or other resources required to support the application. 
 
-For this example we'll assume you've chosen to create the application within a sub-directory of your home directory named "shinyapp". To get started first create this directory and then create ui.R and server.R files within it:
+To get started building the application, create a new empty directory wherever you'd like, then create empty ui.R and server.R files within in. For purposes of illustration we'll assume you've chosen to create the application at ~/shinyapp:
 
 <pre><code>~/shinyapp
 |-- ui.R
 |-- server.R
 </code></pre>
 
-Now we'll create minimal versions of each of these files. For ui.R we'll define our user interface by calling the function `pageWithSidebar` and passing it's result to the `shinyUI` function:
+Now we'll add the minimal code required in each source file. For ui.R we'll define our user interface by calling the function `pageWithSidebar` and passing it's result to the `shinyUI` function:
 
 #### ui.R
 <pre><code class="r">library(shiny)

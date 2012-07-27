@@ -20,7 +20,6 @@ shinyServer(function(input, output) {
   
   # Show the first "n" observations
   output$view <- reactiveTable(function() {
-    obs <- as.integer(input$obs)
-    head(datasetInput(), n = obs)
+    head(datasetInput(), n = input$obs)
   })
 })

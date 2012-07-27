@@ -45,7 +45,6 @@ shinyServer(function(input, output) {
   # and input$obs, so will be re-executed whenever input$dataset or 
   # input$obs is changed. 
   output$view <- reactiveTable(function() {
-    obs <- as.integer(input$obs)
-    head(datasetInput(), n = obs)
+    head(datasetInput(), n = input$obs)
   })
 })

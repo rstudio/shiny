@@ -11,12 +11,9 @@ shinyServer(function(input, output) {
   #  2) Its output type is a plot 
   #
   output$distPlot <- reactivePlot(function() {
-    
-    # convert string input to an integer
-    obs <- as.integer(input$obs)
-    
+        
     # generate an rnorm distribution and plot it
-    dist <- rnorm(obs)
+    dist <- rnorm(input$obs)
     hist(dist)
   })
   

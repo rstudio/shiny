@@ -10,9 +10,9 @@ hasDecimals <- function(value) {
 # this is a wrapper for: https://github.com/egorkhmelev/jslider
 # (www/shared/slider contains js, css, and img dependencies) 
 slider <- function(inputId, min, max, value, step = NULL, ...,
-                   round = NULL, locale='us', format='#,##0.#####', 
-                   ticks=TRUE, smooth=FALSE, animate=FALSE, playButton=NULL,
-                   pauseButton=NULL, animationInterval=1500) {
+                   round=FALSE, format='#,##0.#####', locale='us',
+                   ticks=TRUE, animate=FALSE, playButton=NULL,
+                   pauseButton=NULL, animationInterval=1000) {
   # validate inputId
   inputId <- as.character(inputId)
   if (!is.character(inputId))
@@ -91,18 +91,19 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
                'data-from'=min, 'data-to'=max, 'data-step'=step,
                'data-skin'='plastic', 'data-round'=round, 'data-locale'=locale,
                'data-format'=format, 'data-scale'=ticks,
-               'data-smooth'=ifelse(smooth, 'true', 'false'),
+               'data-smooth'='false',
                'data-animation-interval'=animationInterval),
     tags$script(type="text/javascript",
                 paste('jQuery("#', inputId, '").slider();', sep = ''))
   )
   
   sliderFragment[[length(sliderFragment)+1]] <-
-    tags$a(href='#',
-           class='slider-animate-button',
-           'data-target-id'=inputId,
-           tags$span(class='play', playButton),
-           tags$span(class='pause', pauseButton))
+    tags$div(class='slider-animate-container',
+             tags$a(href='#',
+                    class='slider-animate-button',
+                    'data-target-id'=inputId,
+                    tags$span(class='play', playButton),
+                    tags$span(class='pause', pauseButton)))
   
   return(sliderFragment)
 }

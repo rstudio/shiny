@@ -1,33 +1,28 @@
 # Shiny 
 
-The R package **shiny** makes it incredibly easy to build interactive web applications with R. Shiny features automatic "reactive" data binding between user inputs and outputs as well as pre-built widgets for displaying tables, plots, and dynamic text. Shiny applications can be built entirely with R or can optionally make use of custom HTML, CSS, and JavaScript.
+Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R. Building applications with Shiny has many compelling benefits, including:
 
+* Automatic [reactive](http://en.wikipedia.org/wiki/Reactive_programming) data-binding between inputs and outputs that makes it possible to build useful applications with only a few lines of code.
+* Shiny user-interfaces are "live" in the same way that spreadsheets are live. Outputs change instantly as users modify inputs without explicit programming or requiring a reload of the browser.
+* Applications can be built entirely using R, or can optionally make use of custom HTML, CSS, and JavaScript.
+* A highly customizable slider control that has built-in support for animation.
+* Pre-built output widgets for displaying plots, tables, and printed output of R objects.
+* Fast bi-directional communication between the web browser and R using the [websockets](http://illposed.net/websockets.html) package.
 
 ## Installation
 
-You can install shiny directly from github using the `devtools` package. In order to install shiny you'll also need to be configured to build R packages from source. To install devtools and verify that you can build packages from source:
+
+Shiny is currently available only directly from this GitHub repository (it will be on CRAN in a few months). You can download the Shiny source code using one of these methods:
+
+* [Download tar.gz](https://github.com/rstudio/shiny/tarball/master) 
+* [Download zip](https://github.com/rstudio/shiny/zipball/master)
+* `git clone https://github.com/rstudio/shiny.git`
+
+Once you've extracted the Shiny source code to a directory you can install it as follows:
 
 ```r
-install.packages("devtools")
-library(devtools)
-has_devel()
-```
-If the `has_devel` function produces an error then you'll need to install some additional components required to build packages from source:
-
-- *Windows* -- Install the appropriate [Rtools](http://cran.r-project.org/bin/windows/Rtools/) binaries for your version of R.
-- *MacOS X* -- Install the [Command Line Tools for Xcode](https://developer.apple.com/downloads/).
-- *Debian/Ubuntu* -- `sudo apt-get install r-base-dev`
-
-Next, you need to install a modified version of the `websockets` package from github:
-
-```r
-install_github("R-websockets", "jcheng5")
-```
-
-Finally, you can install the `shiny` package from github:
-
-```r
-install_github("shiny", "rstudio")
+install.packages("websockets", "RJSONIO", "xtable")
+system("R CMD INSTALL <shiny-dir>")
 ```
 
 To verify that Shiny is installed correctly you can run an example application:
@@ -41,16 +36,11 @@ If everything is installed and working correctly a browser will open and navigat
 
 ## Tutorial
 
-See the tutorial here: 
-
-## Feedback 
-
-Please use the github issue tracker
+To learn more about Shiny we highly recommend you check out the [Shiny Tutorial](http://rstudio.github.com/shiny/tutorial). The tutorial walks you through building a simple application and demostrates nearly all of the Shiny features.
 
 ## License
 
-The shiny package is licensed under the GPLv3. See these files in the inst
-directory for additional details:
+The shiny package is licensed under the GPLv3. See these files in the inst directory for additional details:
 
 - COPYING - shiny package license (GPLv3)
 - NOTICE  - Copyright notices for additional included software

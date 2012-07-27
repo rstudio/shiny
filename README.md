@@ -2,7 +2,7 @@
 
 Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R. Building applications with Shiny has many compelling benefits, including:
 
-* Automatic [reactive](http://en.wikipedia.org/wiki/Reactive_programming) data-binding between inputs and outputs that makes it possible to build useful applications with only a few lines of code.
+* Automatic [reactive](http://en.wikipedia.org/wiki/Reactive_programming) data-binding between inputs and outputs that makes it possible to build applications with only a few lines of code.
 * Shiny user-interfaces are "live" in the same way that spreadsheets are live. Outputs change instantly as users modify inputs without explicit programming or requiring a reload of the browser.
 * Applications can be built entirely using R, or can optionally make use of custom HTML, CSS, and JavaScript.
 * A highly customizable slider control that has built-in support for animation.
@@ -16,7 +16,7 @@ Shiny is currently available only directly from this GitHub repository (it will 
 
 * [Download tar.gz](https://github.com/rstudio/shiny/tarball/master) 
 * [Download zip](https://github.com/rstudio/shiny/zipball/master)
-* `git clone https://github.com/rstudio/shiny.git`
+* `git clone https://github.com/rstudio/shiny.git` [Recommended]
 
 Once you've extracted the Shiny source code to a directory you can install it as follows:
 

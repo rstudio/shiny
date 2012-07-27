@@ -8,6 +8,18 @@ The HTML UI application demonstrates defining a Shiny user-interface using a sta
 &gt; runExample(&quot;08_html&quot;)
 </code></pre>
 
+### Using HTML Directly
+
+The previous examples in this tutorial used a ui.R file to build their user-interfaces. While this is fast and convenient way to build user-interfaces, some appliations will inevitably require more flexiblity. For this type of application, you can define your user-interface directly in HTML. In this case there is no ui.R file and the directory structure looks like this:
+
+<pre><code>&lt;<em>application-dir</em>&gt;
+|-- www
+    |-- index.html
+|-- server.R
+</code></pre>
+
+In this example we re-write the front-end of the Tabsets application using HTML directly. Here is the source code for the new user-interface:
+
 #### www/index.html
 
 <pre style='color:#000000;background:#ffffff;'><code><span style='color:#7f0055; '>&lt;</span><span style='color:#7f0055; font-weight:bold; '>html</span><span style='color:#7f0055; '>></span>
@@ -47,6 +59,16 @@ The HTML UI application demonstrates defining a Shiny user-interface using a sta
 <span style='color:#7f0055; '>&lt;/</span><span style='color:#7f0055; font-weight:bold; '>html</span><span style='color:#7f0055; '>></span>
 </code></pre>
 
+There are few things to point out regarding how Shiny binds HTML elements back to inputs and outputs:
+
+* HTML form elmements (in this case a select list and a number input) are bound to input slots using their `name` attribute.
+* Output is rendered into HTML elements based on matching their `id` attribute to an output slot and by specifying the requisite css class for the element (in this case either shiny-text-output, shiny-plot-output, or shiny-html-output).
+
+With this technique you can create highly customized user-interfaces using whatever HTML, CSS, and JavaScript you can dream up.
+
+### Server Script
+
+All of the changes from the original Tabsets application were to the user-interface, the server script remains the same:
 
 #### server.R
 

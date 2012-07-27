@@ -7,6 +7,14 @@ The Hello Shiny example is a simple application that generates a random distribu
 &gt; runExample(&quot;01_hello&quot;)
 </code></pre>
 
+### Getting Familliar with Shiny
+
+Shiny applications have two components: a user-interface definition and a server script. The source code for both of these components is listed below. 
+
+In subsequent sections of the tutorial we'll break down all of the code in detail and explain the use of "reactive" functions for generating output. For starters though just try playing with the sample application and reviewing the source code to get an initial feel for things. Be sure to read the comments carefully as they explain in detail what the code is doing and why.
+
+The user interface is defined in a source file named ui.R:
+
 #### ui.R
 
 <pre><code class="r">library(shiny)
@@ -32,6 +40,8 @@ shinyUI(pageWithSidebar(
   )
 ))
 </code></pre>
+
+The server-side of the application is implemented in a source file named server.R:
 
 #### server.R
 

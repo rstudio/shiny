@@ -2,13 +2,13 @@
 
 ![Reactivity Screenshot](screenshots/reactivity.png)
 
-The Reactivity application is very similar to Hello Text but goes into much more detail about reactive programming concepts. To run the example type: 
+The Reactivity application is very similar to Hello Text, but goes into much more detail about reactive programming concepts. To run the example, type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;03_reactivity&quot;)
 </code></pre>
 
-The previous examples have given you a good idea of what the code for Shiny applications looks like. We've explained a bit about reactivity but mostly glossed over the finer details. Now before we look at more code we'll explore these concepts more deeply.
+The previous examples have given you a good idea of what the code for Shiny applications looks like. We've explained a bit about reactivity, but mostly glossed over the finer details. In this section, we'll explore these concepts more deeply.
 
 ### What is Reactivity?
 
@@ -26,9 +26,9 @@ Reactive programming is a coding style that starts with **reactive values**--val
 
 What's interesting about reactive functions is that whenever they execute, they automatically keep track of what reactive values they read and what reactive functions they called. If those "dependencies" become out of date, then they know that their own return value has also become out of date. Because of this dependency tracking, changing a reactive value will automatically instruct all reactive functions that directly or indirectly depended on that value to re-execute.
 
-The initial way you'll encounter reactive values in Shiny is using the `input` object. The `input` object, which is passed to your `shinyServer` function, lets you access the web page's user input fields using a list-like syntax. Code-wise, it looks like you're grabbing a value from a list or data frame, but you're actually reading a reactive value.
+The most common way you'll encounter reactive values in Shiny is using the `input` object. The `input` object, which is passed to your `shinyServer` function, lets you access the web page's user input fields using a list-like syntax. Code-wise, it looks like you're grabbing a value from a list or data frame, but you're actually reading a reactive value. No need to write code to monitor when inputs change--just write reactive functions that read the inputs they need, and let Shiny take care of knowing when to call them.
 
-It's also possible to create reactive functions directly (usually computed based on user inputs or even other reactive values), which can then in turn be depended on by other reactive functions. In this application an example of that is the function that returns an R data frame based on the selection the user made in the input form:
+It's simple to create reactive functions: just pass a normal function definition into `reactive`. In this application, an example of that is the function that returns an R data frame based on the selection the user made in the input form:
 
 <pre><code class="r">datasetInput &lt;- reactive(function() {
    switch(input$dataset,
@@ -38,7 +38,7 @@ It's also possible to create reactive functions directly (usually computed based
 })
 </code></pre>
 
-The transormation of reactive values into outputs is then by assignments to the `output` object. Here is an example of an assignment to an output that depends on both the `datasetInput` reactive function we just defined as well as `input$obs`:
+The transformation of reactive values into outputs is then by assignments to the `output` object. Here is an example of an assignment to an output that depends on both the `datasetInput` reactive function we just defined as well as `input$obs`:
 
 <pre><code class="r">output$view &lt;- reactiveTable(function() {
    head(datasetInput(), n = input$obs)
@@ -46,7 +46,6 @@ The transormation of reactive values into outputs is then by assignments to the 
 </code></pre>
 
 This function will be re-executed (and it's output re-rendered in the browser) whenever either the `datasetInput` or `input$obs` value changes.
- 
 
 ### Back to the Code
 

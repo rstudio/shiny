@@ -238,10 +238,42 @@ registerClient <- function(client) {
 }
 
 .server <- NULL
+#' Define Server Functionality
+#' 
+#' Defines the server-side logic of the Shiny application. This generally 
+#' involves creating functions that map user inputs to various kinds of output.
+#' 
+#' @param func The server function for this application. See the details section
+#'   for more information.
+#'   
+#' @details
+#' Call \code{shinyServer} from your application's \code{server.R} file, passing
+#' in a "server function" that provides the server-side logic of your 
+#' application.
+#' 
+#' The server function will be called when each client (web browser) first loads
+#' the Shiny application's page. It must take an \code{input} and an
+#' \code{output} parameter. Any return value will be ignored.
+#' 
+#' See the \href{http://rstudio.github.com/shiny/tutorial/}{tutorial} for more 
+#' on how to write a server function.
+#' 
+#' @examples
+#' \dontrun{
+#' # A very simple Shiny app that takes a message from the user
+#' # and outputs an uppercase version of it.
+#' shinyServer(function(input, output) {
+#'   output$uppercase <- reactiveText(function() {
+#'     toupper(input$message)
+#'   })
+#' })
+#' }
+#' 
 #' @export
 shinyServer <- function(func) {
   unlockBinding('.server', environment(shinyServer))
   .server <<- func
+  invisible()
 }
 
 #' Instantiates the app in the current working directory.
@@ -366,16 +398,16 @@ serviceApp <- function(ws_env) {
   service(server=ws_env, timeout=timeout)
 }
 
-#' Run an application. This function normally does not return.
+#' Run Shiny Application
 #' 
-#' @param client Path to the root of the application-specific www files (which
-#'   should include index.html).
-#' @param server If a character string, a path to the R file that contains the 
-#'   server application logic. If a function, the actual server application 
-#'   logic (should take \code{input} and \code{output} parameters).
-#' @param sys.www.root Path to the system www root, that is, the assets that are
-#'   shared by all Shiny applications (shiny.css, shiny.js, etc.).
-#' @param port The TCP port that the application should listen on.
+#' Runs a Shiny application. This function normally does not return; interrupt
+#' R to stop the application (usually by pressing Ctrl+C or Esc).
+#' 
+#' @param appDir The directory of the application. Should contain
+#'   \code{server.R}, plus, either \code{ui.R} or a \code{www} directory that
+#'   contains the file \code{index.html}. Defaults to the working directory.
+#' @param port The TCP port that the application should listen on. Defaults to 
+#'   port 8100.
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only.
@@ -383,7 +415,8 @@ serviceApp <- function(ws_env) {
 #' @export
 runApp <- function(appDir=getwd(),
                    port=8100L,
-                   launch.browser=interactive()) {
+                   launch.browser=getOption('shiny.launch.browser',
+                                            interactive())) {
 
   orig.wd <- getwd()
   setwd(appDir)
@@ -406,8 +439,23 @@ runApp <- function(appDir=getwd(),
   )
 }
 
+#' Run Shiny Example Applications
+#' 
+#' Launch Shiny example applications, and optionally, your system's web browser.
+#' 
+#' @param example The name of the example to run, or \code{NA} (the default) to
+#'   list the available examples.
+#' @param port The TCP port that the application should listen on. Defaults to 
+#'   port 8100.
+#' @param launch.browser If true, the system's default web browser will be 
+#'   launched automatically after the app is started. Defaults to true in 
+#'   interactive sessions only.
+#'   
 #' @export
-runExample <- function(example=NA, port=8100L, launch.browser=interactive()) {
+runExample <- function(example=NA,
+                       port=8100L,
+                       launch.browser=getOption('shiny.launch.browser',
+                                                interactive())) {
   examplesDir <- system.file('examples', package='shiny')
   dir <- resolve(examplesDir, example)
   if (is.null(dir)) {

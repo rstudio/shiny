@@ -5,7 +5,7 @@ hasDecimals <- function(value) {
 
 #' Animation Options
 #' 
-#' Creates an options object for customizing animations for \link{slider}.
+#' Creates an options object for customizing animations for \link{sliderInput}.
 #' 
 #' @param interval The interval, in milliseconds, between each animation step.
 #' @param loop \code{TRUE} to automatically restart the animation when it 

@@ -23,6 +23,6 @@
 }
 \description{
   Creates an options object for customizing animations for
-  \link{slider}.
+  \link{sliderInput}.
 }
 

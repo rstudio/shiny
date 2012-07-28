@@ -179,7 +179,7 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
           source(filePath, local=T)
         })
       }
-      metaHandler <<- joinHandlers(.clients)
+      metaHandler <<- joinHandlers(.globals$clients)
       clearClients()
     }
     
@@ -225,19 +225,19 @@ wsToKey <- function(WS) {
   as.character(WS$socket)
 }
 
-.clients <- function(ws, header) NULL
+.globals <- new.env()
+
+.globals$clients <- function(ws, header) NULL
 #' @export
 clearClients <- function() {
-  unlockBinding('.clients', environment(clearClients))
-  .clients <<- NULL
+  .globals$clients <- function(ws, header) NULL
 }
 #' @export
 registerClient <- function(client) {
-  unlockBinding('.clients', environment(registerClient))
-  .clients <<- append(.clients, client)
+  .globals$clients <- append(.globals$clients, client)
 }
 
-.server <- NULL
+.globals$server <- NULL
 #' Define Server Functionality
 #' 
 #' Defines the server-side logic of the Shiny application. This generally 
@@ -271,8 +271,7 @@ registerClient <- function(client) {
 #' 
 #' @export
 shinyServer <- function(func) {
-  unlockBinding('.server', environment(shinyServer))
-  .server <<- func
+  .globals$server <- func
   invisible()
 }
 
@@ -301,10 +300,10 @@ startApp <- function(port=8101L) {
   local({
     serverFileTimestamp <<- file.info(serverR)$mtime
     source(serverR, local=T)
-    if (is.null(.server))
+    if (is.null(.globals$server))
       stop("No server was defined in server.R")
   })
-  serverFunc <- .server
+  serverFunc <- .globals$server
   
   ws_env <- create_server(
     port=port,
@@ -352,10 +351,10 @@ startApp <- function(port=8101L) {
           local({
             serverFileTimestamp <<- mtime
             source(serverR, local=T)
-            if (is.null(.server))
+            if (is.null(.globals$server))
               stop("No server was defined in server.R")
           })
-          serverFunc <<- .server
+          serverFunc <<- .globals$server
         }
         
         shinyapp$session$mset(msg$data)

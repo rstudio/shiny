@@ -41,16 +41,14 @@ shinyUI(pageWithSidebar(
     sliderInput(&quot;range&quot;, &quot;Range:&quot;,
                 min = 1, max = 1000, value = c(200,500)),
 
-    # Provide a custom currency format for value display
+    # Provide a custom currency format for value display, with basic animation
     sliderInput(&quot;format&quot;, &quot;Custom Format:&quot;, 
-                min = 0, max = 100000, value = 50000, step = 25000,
-                format=&quot;$#,##0&quot;, locale=&quot;us&quot;),  
+                min = 0, max = 10000, value = 0, step = 2500,
+                format=&quot;$#,##0&quot;, locale=&quot;us&quot;, animate=TRUE),
 
-    # Animation with custom interval (in milliseconds) to control speed
-    # (also provide helpText to highlight the possiblity of animation)
-    sliderInput(&quot;animation&quot;, &quot;Animation:&quot;, 1, 2000, 1, step = 10,
-                animationInterval = 300),
-    helpText(&quot;Use the Play button to animate values.&quot;)
+    # Animation with custom interval (in ms) to control speed, plus looping
+    sliderInput(&quot;animation&quot;, &quot;Looping Animation:&quot;, 1, 2000, 1, step = 10, 
+                animate=animationOptions(interval=300, loop=T))
   ),
 
   # Show a table summarizing the values entered
@@ -74,11 +72,6 @@ shinyServer(function(input, output) {
   # Reactive function to compose a data frame containing all of the values
   sliderValues &lt;- reactive(function() {
 
-    # Show values using R&#39;s default print format
-    printValue &lt;- function(value) {
-      capture.output(print(value))
-    }
-
     # Compose data frame
     data.frame(
       Name = c(&quot;Integer&quot;, 
@@ -86,11 +79,11 @@ shinyServer(function(input, output) {
                &quot;Range&quot;,
                &quot;Custom Format&quot;,
                &quot;Animation&quot;),
-      Value = c(printValue(input$integer), 
-                printValue(input$decimal),
-                printValue(input$range),
-                printValue(input$format),
-                printValue(input$animation)), 
+      Value = as.character(c(input$integer, 
+                             input$decimal,
+                             paste(input$range, collapse=&#39; &#39;),
+                             input$format,
+                             input$animation)), 
       stringsAsFactors=FALSE)
   }) 
 

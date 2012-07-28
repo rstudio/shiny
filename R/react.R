@@ -81,7 +81,9 @@ ReactiveEnvironment <- setRefClass(
     },
     currentContext = function() {
       if (is.null(.currentContext))
-        stop('No reactive context is active')
+        stop('Operation not allowed without an active reactive context. ',
+             '(You tried to do something that can only be done from inside a ',
+             'reactive function.)')
       return(.currentContext)
     },
     runWith = function(ctx, func) {

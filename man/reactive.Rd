@@ -5,7 +5,8 @@
   reactive(x)
 }
 \arguments{
-  \item{x}{The value or function to make reactive.}
+  \item{x}{The value or function to make reactive. The
+  function must not have any parameters.}
 }
 \value{
   A reactive function. (Note that reactive functions can
@@ -13,11 +14,10 @@
 }
 \description{
   Wraps a normal function to create a reactive function.
-}
-\details{
   Conceptually, a reactive function is a function whose
   result will change over time.
-
+}
+\details{
   Reactive functions are functions that can read reactive
   values and call other reactive functions. Whenever a
   reactive value changes, any reactive functions that
@@ -27,5 +27,9 @@
   functions that recently called it are also marked as
   invalidated. In this way, invalidations ripple through
   the functions that depend on each other.
+
+  See the
+  \href{http://rstudio.github.com/shiny/tutorial/}{Shiny
+  tutorial} for more information about reactive functions.
 }
 

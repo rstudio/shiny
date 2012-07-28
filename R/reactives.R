@@ -86,6 +86,10 @@ Observable <- setRefClass(
   ),
   methods = list(
     initialize = function(func) {
+      if (length(formals(func)) > 0)
+        stop("Can't make a reactive function from a function that takes one ",
+             "or more parameters; only functions without parameters can be ",
+             "reactive.")
       .func <<- func
       .dependencies <<- Map$new()
       .initialized <<- F
@@ -141,20 +145,22 @@ Observable <- setRefClass(
 
 #' Create a Reactive Function
 #' 
-#' Wraps a normal function to create a reactive function.
-#' 
-#' Conceptually, a reactive function is a function whose result will change over
-#' time.
+#' Wraps a normal function to create a reactive function. Conceptually, a 
+#' reactive function is a function whose result will change over time.
 #' 
 #' Reactive functions are functions that can read reactive values and call other
 #' reactive functions. Whenever a reactive value changes, any reactive functions
 #' that depended on it are marked as "invalidated" and will automatically 
 #' re-execute if necessary. If a reactive function is marked as invalidated, any
 #' other reactive functions that recently called it are also marked as 
-#' invalidated. In this way, invalidations ripple through the functions that
+#' invalidated. In this way, invalidations ripple through the functions that 
 #' depend on each other.
 #' 
-#' @param x The value or function to make reactive.
+#' See the \href{http://rstudio.github.com/shiny/tutorial/}{Shiny tutorial} for 
+#' more information about reactive functions.
+#' 
+#' @param x The value or function to make reactive. The function must not have 
+#'   any parameters.
 #' @return A reactive function. (Note that reactive functions can only be called
 #'   from within other reactive functions.)
 #'   
@@ -168,7 +174,7 @@ reactive.function <- function(x) {
 }
 #' @S3method reactive default
 reactive.default <- function(x) {
-  stop("Don't know how to make this value reactive!")
+  stop("Don't know how to make this object reactive!")
 }
 
 Observer <- setRefClass(
@@ -179,6 +185,10 @@ Observer <- setRefClass(
   ),
   methods = list(
     initialize = function(func) {
+      if (length(formals(func)) > 0)
+        stop("Can't make an observer from a function that takes parameters; ",
+             "only functions without parameters can be reactive.")
+
       .func <<- func
 
       # Defer the first running of this until flushReact is called
@@ -210,13 +220,14 @@ Observer <- setRefClass(
 #' Observe
 #' 
 #' Creates an observer from the given function. An observer is like a reactive 
-#' function in that it can access reactive values and call reactive functions, 
-#' and will automatically re-execute when those dependencies change. Unlike
+#' function in that it can read reactive values and call reactive functions, 
+#' and will automatically re-execute when those dependencies change. But unlike
 #' reactive functions, it doesn't yield a result and can't be used as an input 
 #' to other reactive functions. Thus, observers are only useful for their side 
 #' effects (for example, performing I/O).
 #'
-#' @param func The function to observe.
+#' @param func The function to observe. It must not have any parameters. Any
+#' return value from this function will be ignored.
 #'
 #' @export
 observe <- function(func) {
@@ -225,12 +236,23 @@ observe <- function(func) {
 
 #' Timer
 #' 
-#' Creates a reactive timer with the given interval.
+#' Creates a reactive timer with the given interval. A reactive timer is like a 
+#' reactive value, except reactive values are triggered when they are set, while
+#' reactive timers are triggered simply by the passage of time.
 #' 
-#' @param intervalMs Interval to fire, in milliseconds
-#' @return A function that can be called from a reactive context, in order to
-#'   cause that context to be invalidated the next time the timer interval
-#'   elapses.
+#' \link[=reactive]{Reactive functions} and observers that want to be 
+#' invalidated by the timer need to call the timer function that 
+#' \code{reactiveTimer} returns, even if the current time value is not actually 
+#' needed.
+#' 
+#' See \code{\link{invalidateLater}} as a safer and simpler alternative.
+#' 
+#' @param intervalMs How often to fire, in milliseconds
+#' @return A no-parameter function that can be called from a reactive context, 
+#'   in order to cause that context to be invalidated the next time the timer 
+#'   interval elapses. Calling the returned function also happens to yield the 
+#'   current time (as in \code{\link{Sys.time}}).
+#' @seealso invalidateLater
 #' @export
 reactiveTimer <- function(intervalMs=1000) {
   dependencies <- Map$new()
@@ -251,6 +273,7 @@ reactiveTimer <- function(intervalMs=1000) {
         dependencies$remove(ctx$id)
       })
     }
+    return(Sys.time())
   })
 }
 
@@ -266,4 +289,5 @@ invalidateLater <- function(millis) {
   timerCallbacks$schedule(millis, function() {
     ctx$invalidate()
   })
+  invisible()
 }

@@ -196,7 +196,7 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
     
     # special case for a single child text node (skip newlines and indentation)
     if ((length(tag$children) == 1) && is.character(tag$children[[1]]) ) {
-      text <- normalizeText(tag$children[1])
+      text <- normalizeText(tag$children[[1]])
       textWriter(paste(">", text, "</", tag$name, ">\n", sep=""))
     }
     else {

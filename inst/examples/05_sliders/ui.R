@@ -25,11 +25,9 @@ shinyUI(pageWithSidebar(
                 min = 0, max = 10000, value = 0, step = 2500,
                 format="$#,##0", locale="us", animate=TRUE),
     
-    # Animation with custom interval (in milliseconds) to control speed, plus
-    # looping. (Also provide helpText to highlight the possiblity of animation.)
+    # Animation with custom interval (in ms) to control speed, plus looping
     sliderInput("animation", "Looping Animation:", 1, 2000, 1, step = 10, 
-                animate=animationOptions(interval=300, loop=T)),
-    helpText("Use the Play button to animate values.")
+                animate=animationOptions(interval=300, loop=T))
   ),
   
   # Show a table summarizing the values entered

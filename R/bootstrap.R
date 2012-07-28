@@ -220,19 +220,22 @@ submitButton <- function(text = "Apply Changes") {
 #'   \url{http://archive.plugins.jquery.com/project/numberformatter} for syntax 
 #'   details.
 #' @param locale The locale to be used when applying \code{format}. See details.
-#' @param ticks \code{FALSE} to hide tick marks, \code{TRUE} to show them
+#' @param ticks \code{FALSE} to hide tick marks, \code{TRUE} to show them 
 #'   according to some simple heuristics.
+#' @param animate \code{TRUE} to show simple animation controls with default 
+#'   settings; \code{FALSE} not to; or a custom settings list, such as those 
+#'   created using \code{\link{animationOptions}}.
 #'   
 #' @details
 #' 
 #' Valid values for \code{locale} are: \tabular{ll}{ Arab Emirates \tab "ae" \cr
-#' Australia \tab "au" \cr Austria \tab "at" \cr Brazil \tab "br" \cr Canada
+#' Australia \tab "au" \cr Austria \tab "at" \cr Brazil \tab "br" \cr Canada 
 #' \tab "ca" \cr China \tab "cn" \cr Czech \tab "cz" \cr Denmark \tab "dk" \cr 
-#' Egypt \tab "eg" \cr Finland \tab "fi" \cr France  \tab "fr" \cr Germany \tab
+#' Egypt \tab "eg" \cr Finland \tab "fi" \cr France  \tab "fr" \cr Germany \tab 
 #' "de" \cr Greece \tab "gr" \cr Great Britain \tab "gb" \cr Hong Kong \tab "hk"
-#' \cr India \tab "in" \cr Israel \tab "il" \cr Japan \tab "jp" \cr Russia \tab
+#' \cr India \tab "in" \cr Israel \tab "il" \cr Japan \tab "jp" \cr Russia \tab 
 #' "ru" \cr South Korea \tab "kr" \cr Spain \tab "es" \cr Sweden \tab "se" \cr 
-#' Switzerland \tab "ch" \cr Taiwan \tab "tw" \cr Thailand \tab "th" \cr United
+#' Switzerland \tab "ch" \cr Taiwan \tab "tw" \cr Thailand \tab "th" \cr United 
 #' States \tab "us" \cr Vietnam \tab "vn" \cr }
 #' 
 #' @export

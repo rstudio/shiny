@@ -43,6 +43,27 @@ isTag <- function(x) {
   inherits(x, "shiny.tag")
 }
 
+#' @S3method print shiny.tag
+print.shiny.tag <- function(x, ...) {
+  print(as.character(x), ...)
+}
+
+#' @S3method format shiny.tag
+format.shiny.tag <- function(x, ...) {
+  as.character.shiny.tag(x)
+}
+
+#' @S3method as.character shiny.tag
+as.character.shiny.tag <- function(x, ...) {
+  f = file()
+  on.exit(close(f))
+  textWriter <- function(text) {
+    cat(text, file=f)
+  }
+  tagWrite(x, textWriter)
+  return(HTML(paste(readLines(f), collapse='\n')))
+}
+
 normalizeText <- function(text) {
   if (!is.null(attr(text, "html")))
     text
@@ -57,7 +78,6 @@ tagAppendChild <- function(tag, child) {
   tag
 }
 
-# create a tag 
 #' @export
 tag <- function(`_tag_name`, varArgs) {
   

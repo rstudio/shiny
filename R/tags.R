@@ -335,8 +335,22 @@ tags$var <- function(...) tag("var", list(...))
 tags$video <- function(...) tag("video", list(...))
 tags$wbr <- function(...) tag("wbr", list(...))
 
+#' Mark Characters as HTML
+#' 
+#' Marks the given text as HTML, which means the \link{tag} functions will know
+#' not to perform HTML escaping on it.
+#' 
+#' @param text The text value to mark with HTML
+#' @param ... Any additional values to be converted to character and
+#'   concatenated together
+#' @return The same value, but marked as HTML.
+#' 
+#' @examples
+#' el <- div(HTML("I like <u>turtles</u>"))
+#' cat(as.character(el))
+#'   
 #' @export
-HTML <- function(text,...) {
+HTML <- function(text, ...) {
   htmlText <- c(text, as.character(list(...)))
   htmlText <- paste(htmlText, collapse=" ")
   attr(htmlText, "html") <- TRUE

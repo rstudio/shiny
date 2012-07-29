@@ -240,6 +240,7 @@ clearClients <- function() {
 #' Register a client
 #' 
 #' Register a client for handling requests.
+#' @param client Client to register
 #' @export
 registerClient <- function(client) {
   .globals$clients <- append(.globals$clients, client)

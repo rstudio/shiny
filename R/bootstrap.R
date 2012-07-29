@@ -1,5 +1,36 @@
 
-
+#' Create a page with a sidebar
+#' 
+#' Create a Shiny UI that contains a header with the application title, a 
+#' sidebar for input controls, and a main area for output.
+#' 
+#' @param headerPanel The \link{headerPanel} with the application title
+#' @param sidebarPanel The \link{sidebarPanel} containing input controls
+#' @param mainPanel The \link{mainPanel} containing outputs
+#' @return A UI defintion that can be passed to the \link{shinyUI} function
+#' 
+#' @examples
+#' # Define UI
+#' shinyUI(pageWithSidebar(
+#'   
+#'   # Application title
+#'   headerPanel("Hello Shiny!"),
+#'   
+#'   # Sidebar with a slider input
+#'   sidebarPanel(
+#'     sliderInput("obs", 
+#'                 "Number of observations:", 
+#'                 min = 0, 
+#'                 max = 1000, 
+#'                 value = 500)
+#'   ),
+#'   
+#'   # Show a plot of the generated distribution
+#'   mainPanel(
+#'     plotOutput("distPlot")
+#'   )
+#' ))
+#'
 #' @export
 pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
   
@@ -46,7 +77,15 @@ pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
 }
 
 
-
+#' Create a header panel
+#' 
+#' Create a header panel containing an application title.
+#' 
+#' @param title An application title to display
+#' @return A headerPanel that can be passed to \link{pageWithSidebar}
+#' 
+#' @examples
+#' headerPanel("Hello Shiny!")
 #' @export
 headerPanel <- function(title) {    
   list(
@@ -57,6 +96,23 @@ headerPanel <- function(title) {
   )
 }
 
+#' Create a sidebar panel
+#' 
+#' Create a sidebar panel containing input controls that can in turn be 
+#' passed to \link{pageWithSidebar}.
+#' 
+#' @param ... UI elements to include on the sidebar
+#' @return A sidebar that can be passed to \link{pageWithSidebar}
+#' 
+#' @examples
+#' # Sidebar with controls to select a dataset and specify
+#' # the number of observations to view
+#' sidebarPanel(
+#'   selectInput("dataset", "Choose a dataset:", 
+#'               choices = c("rock", "pressure", "cars")),
+#'   
+#'   numericInput("obs", "Observations:", 10)
+#' )
 #' @export
 sidebarPanel <- function(...) {
   div(class="span4",
@@ -66,6 +122,20 @@ sidebarPanel <- function(...) {
   )
 }
 
+#' Create a main panel
+#' 
+#' Create a main panel containing output elements that can in turn be 
+#' passed to \link{pageWithSidebar}.
+#' 
+#' @param ... Ouput elements to include in the main panel
+#' @return A main panel that can be passed to \link{pageWithSidebar}
+#' 
+#' @examples
+#' Show the caption and plot of the requested variable against mpg
+#' mainPanel(
+#'    h3(textOutput("caption")),
+#'    plotOutput("mpgPlot")
+#' )
 #' @export
 mainPanel <- function(...) {
   div(class="span8",
@@ -96,6 +166,8 @@ numericInput <- function(inputId, label, value, min = NA, max = NA) {
     inputTag
   )
 }
+
+
 
 #' @export
 checkboxInput <- function(inputId, label, value = FALSE) {

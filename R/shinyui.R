@@ -96,6 +96,42 @@ renderPage <- function(ui, connection) {
              con = connection)
 }
 
+#' Create a Shiny UI handler
+#' 
+#' Register a UI handler by providing a UI definition (created with e.g. 
+#' \link{pageWithSidebar}) and web server path (typically "/", the default
+#' value).
+#' 
+#' @param ui A user-interace definition
+#' @param path The web server path to server the UI from
+#' @return Called for its side-effect of registering a UI handler
+#' 
+#' @examples
+#' el <- div(HTML("I like <u>turtles</u>"))
+#' cat(as.character(el))
+#'   
+#' @examples
+#' # Define UI
+#' shinyUI(pageWithSidebar(
+#'   
+#'   # Application title
+#'   headerPanel("Hello Shiny!"),
+#'   
+#'   # Sidebar with a slider input
+#'   sidebarPanel(
+#'     sliderInput("obs", 
+#'                 "Number of observations:", 
+#'                 min = 0, 
+#'                 max = 1000, 
+#'                 value = 500)
+#'   ),
+#'   
+#'   # Show a plot of the generated distribution
+#'   mainPanel(
+#'     plotOutput("distPlot")
+#'   )
+#' ))
+#'
 #' @export
 shinyUI <- function(ui, path='/') {
   

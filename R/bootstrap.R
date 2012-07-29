@@ -143,6 +143,17 @@ mainPanel <- function(...) {
   )
 }
 
+#' Create a text input control
+#' 
+#' Create an input control for entry of unstructured text values
+#' 
+#' @param inputId Input variable to assign the control's value to
+#' @param label Display label for the control
+#' @param value Initial value
+#' @return A text input control that can be added to a UI definition.
+#' 
+#' @examples
+#' textInput("caption", "Caption:", "Data Summary")
 #' @export
 textInput <- function(inputId, label, value = "") {
   list(
@@ -151,6 +162,20 @@ textInput <- function(inputId, label, value = "") {
   )
 }
 
+#' Create a numeric input control
+#' 
+#' Create an input control for entry of numeric values
+#' 
+#' @param inputId Input variable to assign the control's value to
+#' @param label Display label for the control
+#' @param value Initial value
+#' @param min Minimum allowed value
+#' @param max Maximum allowed value
+#' @return A numeric input control that can be added to a UI definition.
+#' 
+#' @examples
+#' numericInput("obs", "Observations:", 10, 
+#'              min = 1, max = 100)
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA) {
   

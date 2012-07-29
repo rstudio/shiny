@@ -20,8 +20,6 @@
 
 \title{HTML Builder Functions}
 \usage{
-  tags$\emph{tagname}(...)
-  
   p(...)
   h1(...)
   h2(...)
@@ -40,6 +38,8 @@
   em(...)
 
   tag(`_tag_name`, varArgs)
+  
+  tags
 }
 \arguments{
   \item{...}{Attributes and children of the element. Named arguments

@@ -1,15 +1,19 @@
 # Shiny 
 
-Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R. Building applications with Shiny has many compelling benefits, including:
+Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
 
-* [Reactive](http://en.wikipedia.org/wiki/Reactive_programming) data-binding between inputs and outputs that makes it possible to build applications with only a few lines of code.
-* Shiny user-interfaces are "live" in the same way that spreadsheets are live. Outputs change instantly as users modify inputs without explicit programming or requiring a reload of the browser.
-* Applications can be built entirely using R, or can optionally make use of custom HTML, CSS, and JavaScript.
-* A highly customizable slider control that has built-in support for animation.
+## Features
+
+* Build useful web applications with only a few lines of code&mdash;no JavaScript required.
+* Shiny applications are automatically "live" in the same way that spreadsheets are live. Outputs change instantly as users modify inputs, without requiring a reload of the browser.
+* Shiny user interfaces can be built entirely using R, or can be written directly in HTML, CSS, and JavaScript for more flexibility.
+* Works in any R environment (Console R, Rgui for Windows or Mac, ESS, StatET, RStudio, etc.)
+* Attractive default UI theme based on [Twitter Bootstrap](http://twitter.github.com/bootstrap).
+* A highly customizable slider widget with built-in support for animation.
 * Pre-built output widgets for displaying plots, tables, and printed output of R objects.
-* Fast bi-directional communication between the web browser and R using the [websockets](http://illposed.net/websockets.html) package.
-
-The purpose of the current release is to gather feedback so we can improve and evolve Shiny's capabilities. As a result there may be breaking changes as we make improvements--these will all be clearly communicated and documented so that it's as straightforward as possible to migrate code.
+* Fast bidirectional communication between the web browser and R using the [websockets](http://illposed.net/websockets.html) package.
+* Uses a [reactive](http://en.wikipedia.org/wiki/Reactive_programming) programming model that eliminates messy event handling code, so you can focus on the code that really matters.
+* Develop and redistribute your own Shiny widgets that other developers can easily drop into their own applications (coming soon!).
 
 ## Installation
 

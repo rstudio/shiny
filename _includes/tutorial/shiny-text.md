@@ -1,7 +1,7 @@
 
 ![Tabsets Screenshot](screenshots/shiny-text.png)
 
-The Shiny Text application demonstrates printing R objects directly as well as displaying data-frames using HTML tables. To run the example type: 
+The Shiny Text application demonstrates printing R objects directly, as well as displaying data frames using HTML tables. To run the example, type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;02_text&quot;)
@@ -9,9 +9,9 @@ The Shiny Text application demonstrates printing R objects directly as well as d
 
 The first example had a single numeric input specified using a slider and a single plot output. This example has a bit more going on: two inputs and two types of textual output.
 
-If you try changing the number of observations to another value you'll see a demonstration of one of the most important attributes of Shiny applications -- inputs and outputs are connected together "live" and changes are propagated immediately (like a spreadsheet). In this case rather than the entire page being reloaded just the table view is updated when the number of observations change.
+If you try changing the number of observations to another value, you'll see a demonstration of one of the most important attributes of Shiny applications: inputs and outputs are connected together "live" and changes are propagated immediately (like a spreadsheet). In this case, rather than the entire page being reloaded, just the table view is updated when the number of observations change.
 
-Here is the user interface definition for the application. Notice in particular that the `sidebarPanel` and `mainPanel` functions now take two arguments (corresponding to the two inputs and two outputs displayed):
+Here is the user interface definition for the application. Notice in particular that the `sidebarPanel` and `mainPanel` functions are now called with two arguments (corresponding to the two inputs and two outputs displayed):
 
 #### ui.R
 
@@ -42,7 +42,10 @@ shinyUI(pageWithSidebar(
 ))
 </code></pre>
 
-The server side of the application has also gotten a bit more complicated. Now rather than just computing a single output we see the definition of a reactive function to return the dataset corresponding to the user choice and two other reactive functions (`reactivePrint` and `reactiveTable`) that return the output$summary and output$view values.
+The server side of the application has also gotten a bit more complicated. Now we create:
+
+* A reactive function to return the dataset corresponding to the user choice
+* Two other reactive functions (`reactivePrint` and `reactiveTable`) that return the output$summary and output$view values
 
 These reactive functions work similarly to the `reactivePlot` function used in the first example: by declaring a reactive function you tell Shiny that it should only be executed when it's dependencies change. In this case that's either one of the user input values (input$dataset or input$n)
 

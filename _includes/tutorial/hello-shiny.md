@@ -1,7 +1,7 @@
 
 ![Hello Shiny Screenshot](screenshots/hello-shiny.png)
 
-The Hello Shiny example is a simple application that generates a random distribution with a configurable number of observations and then plots it. To run the example type: 
+The Hello Shiny example is a simple application that generates a random distribution with a configurable number of observations and then plots it. To run the example, type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;01_hello&quot;)
@@ -9,7 +9,7 @@ The Hello Shiny example is a simple application that generates a random distribu
 
 Shiny applications have two components: a user-interface definition and a server script. The source code for both of these components is listed below. 
 
-In subsequent sections of the tutorial we'll break down all of the code in detail and explain the use of "reactive" functions for generating output. For starters though just try playing with the sample application and reviewing the source code to get an initial feel for things. Be sure to read the comments carefully as they explain in detail what the code is doing and why.
+In subsequent sections of the tutorial we'll break down all of the code in detail and explain the use of "reactive" functions for generating output. For now, though, just try playing with the sample application and reviewing the source code to get an initial feel for things. Be sure to read the comments carefully.
 
 The user interface is defined in a source file named ui.R:
 
@@ -39,7 +39,7 @@ shinyUI(pageWithSidebar(
 ))
 </code></pre>
 
-The server-side of the application is shown below. At one level it's very simple--a random distribution with the requested number of observations is generated and then plotted as a historgram. However, you'll also notice that the function which returns the plot is wrapped in a call to `reactivePlot`. The comment above the function explains a bit about this, but if you find it confusing don't worry we'll cover this concept in much more detail soon.
+The server-side of the application is shown below. At one level, it's very simple--a random distribution with the requested number of observations is generated, and then plotted as a historgram. However, you'll also notice that the function which returns the plot is wrapped in a call to `reactivePlot`. The comment above the function explains a bit about this, but if you find it confusing, don't worry--we'll cover this concept in much more detail soon.
 
 #### server.R
 
@@ -64,4 +64,4 @@ shinyServer(function(input, output) {
 })
 </code></pre>
 
-The next example will show the use of more input controls as well as the use of reactive functions to generate textual output.
+The next example will show the use of more input controls, as well as the use of reactive functions to generate textual output.

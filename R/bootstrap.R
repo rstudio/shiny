@@ -275,7 +275,25 @@ selectInput <- function(inputId,
   list(controlLabel(inputId, label), selectTag)
 }
 
-#' @export 
+#' Create radio buttons
+#' 
+#' Create a set of radio buttons used to select an item from a list.
+#' 
+#' @param inputId Input variable to assign the control's value to
+#' @param label Display label for the control
+#' @param choices List of values to select from (if elements of the list are 
+#' named then that name rather than the value is displayed to the user)
+#' @param selected Name of initially selected item (if not specified then
+#' defaults to the first item)
+#' @return A set of radio buttons that can be added to a UI definition.
+#' 
+#' @examples
+#' radioButtons("dist", "Distribution type:",
+#'              list("Normal" = "norm",
+#'                   "Uniform" = "unif",
+#'                   "Log-normal" = "lnorm",
+#'                   "Exponential" = "exp"))
+#' @export
 radioButtons <- function(inputId, label, choices, selected = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
@@ -307,6 +325,17 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
        inputTags)
 }
 
+#' Create a submit button
+#' 
+#' Create a submit button for an input form. Forms that include a submit
+#' button do not automatically update their outputs when inputs change,
+#' rather they wait until the user explicitly clicks the submit button.
+#' 
+#' @param text Button caption
+#' @return A submit button that can be added to a UI definition.
+#' 
+#' @examples
+#' submitButton("Update View")
 #' @export
 submitButton <- function(text = "Apply Changes") {
   div(

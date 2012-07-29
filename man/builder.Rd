@@ -19,28 +19,7 @@
 \alias{em}
 
 \title{HTML Builder Functions}
-\usage{
-  p(...)
-  h1(...)
-  h2(...)
-  h3(...)
-  h4(...)
-  h5(...)
-  h6(...)
-  a(...)
-  br(...)
-  div(...)
-  span(...)
-  pre(...)
-  code(...)
-  img(...)
-  strong(...)
-  em(...)
 
-  tag(`_tag_name`, varArgs)
-  
-  tags
-}
 \arguments{
   \item{...}{Attributes and children of the element. Named arguments
   become attributes, and positional arguments become children. Valid

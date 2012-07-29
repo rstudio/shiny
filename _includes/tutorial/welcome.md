@@ -9,6 +9,7 @@ Shiny is a new package from RStudio that makes it incredibly easy to build inter
 * Build useful applications with only a few lines of code--no JavaScript required.
 * Shiny applications are automatically "live" in the same way that spreadsheets are live. Outputs change instantly as users modify inputs, without requiring a reload of the browser.
 * Shiny user interfaces can be built entirely using R, or can be written directly in HTML, CSS, and JavaScript for more flexibility.
+* Works in any R environment (Console R, Rgui for Windows or Mac, ESS, StatET, RStudio, etc.)
 * Attractive default UI theme based on [Twitter Bootstrap](http://twitter.github.com/bootstrap).
 * A highly customizable slider widget with built-in support for animation.
 * Pre-built output widgets for displaying plots, tables, and printed output of R objects.

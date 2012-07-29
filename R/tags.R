@@ -144,7 +144,6 @@ tag <- function(`_tag_name`, varArgs) {
   return (tag)
 }
 
-#' @export
 tagWriteChildren <- function(tag, textWriter, indent, context) {
   for (child in tag$children) {
     if (isTag(child)) {
@@ -158,7 +157,6 @@ tagWriteChildren <- function(tag, textWriter, indent, context) {
   }
 }
 
-#' @export
 tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
   
   # optionally process a list of tags

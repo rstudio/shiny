@@ -168,7 +168,17 @@ numericInput <- function(inputId, label, value, min = NA, max = NA) {
 }
 
 
-
+#' Create a checkbox input control
+#' 
+#' Create a checkbox that can be used to specify logical values
+#' 
+#' @param inputId Input variable to assign the control's value to
+#' @param label Display label for the control
+#' @param value Initial value
+#' @return A checkbox control that can be added to a UI definition.
+#' 
+#' @examples
+#' checkboxInput("outliers", "Show outliers", FALSE)
 #' @export
 checkboxInput <- function(inputId, label, value = FALSE) {
   inputTag <- tags$input(id = inputId, type="checkbox")
@@ -177,6 +187,20 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   tags$label(class = "checkbox", inputTag, label)
 }
 
+
+#' Create a help text element
+#' 
+#' Create help text which can be added to an input form to provide
+#' additional explanation or context.
+#' 
+#' @param text Help text string
+#' @param ... Additional help text strings
+#' @return A help text element that can be added to a UI definition.
+#' 
+#' @examples
+#' helpText("Note: while the data view will show only",
+#'          "the specified number of observations, the",
+#'          "summary will be based on the full dataset.")
 #' @export
 helpText <- function(text, ...) {
   text <- c(text, as.character(list(...)))
@@ -203,6 +227,26 @@ choicesWithNames <- function(choices) {
   return (choices)
 }
 
+#' Create a select list input control
+#' 
+#' Create a select list that can be used to choose a single or
+#' multiple items from a list of values.
+#' 
+#' @param inputId Input variable to assign the control's value to
+#' @param label Display label for the control
+#' @param choices List of values to select from. If elements of the list are 
+#' named then that name rather than the value is displayed to the user.
+#' @param selected Name of initially selected item (or multiple names if
+#' \code{multiple = TRUE}). If not specified then defaults to the first item
+#' for single-select lists and no items for multiple select lists.
+#' @param multile Is selection of multiple items allowed?
+#' @return A select list control that can be added to a UI definition.
+#' 
+#' @examples
+#' selectInput("variable", "Variable:",
+#'             list("Cylinders" = "cyl", 
+#'                  "Transmission" = "am", 
+#'                  "Gears" = "gear"))
 #' @export
 selectInput <- function(inputId, 
                         label, 

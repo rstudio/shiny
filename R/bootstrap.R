@@ -264,7 +264,7 @@ choicesWithNames <- function(choices) {
 #' @param selected Name of initially selected item (or multiple names if
 #' \code{multiple = TRUE}). If not specified then defaults to the first item
 #' for single-select lists and no items for multiple select lists.
-#' @param multile Is selection of multiple items allowed?
+#' @param multiple Is selection of multiple items allowed?
 #' @return A select list control that can be added to a UI definition.
 #' 
 #' @examples
@@ -447,8 +447,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' @return A tab that can be passed to \link{tabsetPanel}
 #' 
 #' @examples
-#' Show a tabset that includes a plot, summary, and
-#' table view of the generated distribution
+#' # Show a tabset that includes a plot, summary, and
+#' # table view of the generated distribution
 #' mainPanel(
 #'   tabsetPanel(
 #'     tabPanel("Plot", plotOutput("plot")), 
@@ -471,8 +471,8 @@ tabPanel <- function(title, ...) {
 #' @return A tabset that can be passed to \link{mainPanel}
 #' 
 #' @examples
-#' Show a tabset that includes a plot, summary, and
-#' table view of the generated distribution
+#' # Show a tabset that includes a plot, summary, and
+#' # table view of the generated distribution
 #' mainPanel(
 #'   tabsetPanel(
 #'     tabPanel("Plot", plotOutput("plot")), 

@@ -21,7 +21,7 @@
   single-select lists and no items for multiple select
   lists.}
 
-  \item{multile}{Is selection of multiple items allowed?}
+  \item{multiple}{Is selection of multiple items allowed?}
 }
 \value{
   A select list control that can be added to a UI

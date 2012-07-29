@@ -17,7 +17,7 @@ Shiny is a new package from RStudio that makes it incredibly easy to build inter
 * Uses a [reactive](http://en.wikipedia.org/wiki/Reactive_programming) programming model that eliminates messy event handling code, so you can focus on the code that really matters.
 * Develop and redistribute your own Shiny widgets that other developers can easily drop into their own applications (coming soon!).
 
-### Getting Started
+### Getting Shiny
 
 If you've already got the Shiny package installed, you're ready to go. If you don't have Shiny yet, you'll need to:
 

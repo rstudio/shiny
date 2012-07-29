@@ -277,9 +277,8 @@ shinyServer <- function(func) {
   invisible()
 }
 
-#' Instantiates the app in the current working directory.
-#' 
-#' @param port The TCP port that the application should listen on.
+# Instantiates the app in the current working directory.
+# port - The TCP port that the application should listen on.
 startApp <- function(port=8101L) {
 
   sys.www.root <- system.file('www', package='shiny')

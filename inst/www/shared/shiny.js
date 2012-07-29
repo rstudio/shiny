@@ -372,8 +372,9 @@
       0,
       onInputChange);
 
-    // Instantiate all sliders
-    $('input.jslider').slider();
+    // Instantiate all sliders (if jslider plugin is loaded)
+    if ($.fn.slider)
+      $('input.jslider').slider();
 
     var inputSelector = ':input:not([type="submit"], [type="checkbox"], [type="radio"])';
     var initialValues = {};

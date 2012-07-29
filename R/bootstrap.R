@@ -517,28 +517,84 @@ tabsetPanel <- function(...) {
 }
 
 
-
+#' Create a text output element
+#' 
+#' Render a reactive output variable as text within an application page. The 
+#' text will be included within an HTML \code{div} tag. 
+#' @param outputId output variable to read the value from
+#' @return A text output element that can be included in a panel
+#' @details Text is HTML-escaped prior to rendering. This element is often used 
+#' to dispaly \link{reactiveText} output variables.
+#' @examples
+#' h3(textOutput("caption"))
 #' @export
 textOutput <- function(outputId) {
   div(id = outputId, class = "shiny-text-output")
 }
 
+#' Create a verbatim text output element
+#' 
+#' Render a reactive output variable as verbatim text within an
+#' application page. The text will be included within an HTML \code{pre} tag.
+#' @param outputId output variable to read the value from
+#' @return A verbatim text output element that can be included in a panel
+#' @details Text is HTML-escaped prior to rendering. This element is often used
+#' with the \link{reactivePrint} function to preserve fixed-width formatting
+#' of printed objects.
+#' @examples
+#' mainPanel(
+#'   h4("Summary"),
+#'   verbatimTextOutput("summary"),
+#'  
+#'   h4("Observations"),
+#'   tableOutput("view")
+#' )
 #' @export
 verbatimTextOutput <- function(outputId) {
   pre(id = outputId, class =  "shiny-text-output")
 }
 
+#' Create a plot output element
+#' 
+#' Render a \link{reactivePlot} within an application page.
+#' @param outputId output variable to read the plot from
+#' @param width Plot width
+#' @param height Plot height
+#' @return A plot output element that can be included in a panel
+#' @examples
+#' # Show a plot of the generated distribution
+#' mainPanel(
+#'   plotOutput("distPlot")
+#' )
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px") {
   style <- paste("width:", width, ";", "height:", height)
   div(id = outputId, class="shiny-plot-output", style = style)
 }
 
+#' Create a table output element
+#' 
+#' Render a \link{reactiveTable} within an application page.
+#' @param outputId output variable to read the table from
+#' @return A table output element that can be included in a panel
+#' @examples
+#' mainPanel(
+#'   tableOutput("view")
+#' )
 #' @export
 tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
 }
 
+#' Create an HTML output element
+#' 
+#' Render a reactive output variable as HTML within an application page. The 
+#' text will be included within an HTML \code{div} tag, and is presumed to 
+#' contain HTML content which should not be escaped.
+#' @param outputId output variable to read the value from
+#' @return An HTML output element that can be included in a panel
+#' @examples
+#' htmlOutput("summary")
 #' @export
 htmlOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")

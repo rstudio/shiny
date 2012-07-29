@@ -1,6 +1,4 @@
-\name{tag}
-\alias{tag}
-\alias{tags}
+\name{builder}
 \alias{p}
 \alias{h1}
 \alias{h2}
@@ -17,6 +15,28 @@
 \alias{img}
 \alias{strong}
 \alias{em}
+\alias{tags}
+
+\usage{
+  p(...)
+  h1(...)
+  h2(...)
+  h3(...)
+  h4(...)
+  h5(...)
+  h6(...)
+  a(...)
+  br(...)
+  div(...)
+  span(...)
+  pre(...)
+  code(...)
+  img(...)
+  strong(...)
+  em(...)
+  
+  tags
+}
 
 \title{HTML Builder Functions}
 
@@ -26,10 +46,6 @@
   children are tags, single-character character vectors (which become
   text nodes), and raw HTML (see \code{\link{HTML}}). You can also
   pass lists that contain tags, text nodes, and HTML.}
-
-  \item{`_tag_name`}{The name of the tag to create.}
-
-  \item{varArgs}{The list of the tag's attributes and children.}
 }
 \description{
   Simple functions for constructing HTML documents.
@@ -37,7 +53,7 @@
 \details{
   The \code{tags} environment contains convenience functions for all
   valid HTML5 tags. To generate tags that are not part of the HTML5
-  specification, you can use the \code{tag} function.
+  specification, you can use the \link{tag} function.
   
   Dedicated functions are available for the most common HTML tags
   that do not conflict with common R functions.

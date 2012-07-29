@@ -438,11 +438,48 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 }
 
 
+#' Create a tab panel
+#' 
+#' Create a tab panel that can be inluded within a \link{tabsetPanel}. 
+#' 
+#' @param title Display title for tab
+#' @param ... UI elements to include within the tab
+#' @return A tab that can be passed to \link{tabsetPanel}
+#' 
+#' @examples
+#' Show a tabset that includes a plot, summary, and
+#' table view of the generated distribution
+#' mainPanel(
+#'   tabsetPanel(
+#'     tabPanel("Plot", plotOutput("plot")), 
+#'     tabPanel("Summary", verbatimTextOutput("summary")), 
+#'     tabPanel("Table", tableOutput("table"))
+#'   )
+#' )
 #' @export
-tabPanel <- function(name, ...) {
-  div(class="tab-pane", title=name, ...)
+tabPanel <- function(title, ...) {
+  div(class="tab-pane", title=title, ...)
 }
 
+#' Create a tabset panel
+#' 
+#' Create a tabset that contains \link{tabPanel} elements. Tabsets
+#' are useful for dividing output into multiple independently viewable
+#' sections.
+#' 
+#' @param ... \link{tabPanel} elements to include in the tabset
+#' @return A tabset that can be passed to \link{mainPanel}
+#' 
+#' @examples
+#' Show a tabset that includes a plot, summary, and
+#' table view of the generated distribution
+#' mainPanel(
+#'   tabsetPanel(
+#'     tabPanel("Plot", plotOutput("plot")), 
+#'     tabPanel("Summary", verbatimTextOutput("summary")), 
+#'     tabPanel("Table", tableOutput("table"))
+#'   )
+#' )
 #' @export
 tabsetPanel <- function(...) {
   

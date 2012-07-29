@@ -115,13 +115,13 @@ ReactiveEnvironment <- setRefClass(
   get('.ReactiveEnvironment', envir=.GlobalEnv, inherits=F)
 }
 
-#' Causes any pending invalidations to run.
+# Causes any pending invalidations to run.
 flushReact <- function() {
   .getReactiveEnvironment()$flush()
 }
 
-#' Retrieves the current reactive context, or errors if there is no reactive
-#' context active at the moment.
+# Retrieves the current reactive context, or errors if there is no reactive
+# context active at the moment.
 getCurrentContext <- function() {
   .getReactiveEnvironment()$currentContext()
 }

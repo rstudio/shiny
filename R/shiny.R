@@ -229,19 +229,12 @@ wsToKey <- function(WS) {
 
 .globals$clients <- function(ws, header) NULL
 
-#' Clear all clients
-#' 
-#' Clear all of the currently registered clients.
-#' @export
+
 clearClients <- function() {
   .globals$clients <- function(ws, header) NULL
 }
 
-#' Register a client
-#' 
-#' Register a client for handling requests.
-#' @param client Client to register
-#' @export
+
 registerClient <- function(client) {
   .globals$clients <- append(.globals$clients, client)
 }
@@ -385,10 +378,11 @@ startApp <- function(port=8101L) {
   return(ws_env)
 }
 
-#' Run an application that was created by \code{\link{startApp}}. This
-#' function should normally be called in a \code{while(T)} loop.
-#' 
-#' @param ws_env The return value from \code{\link{startApp}}.
+# NOTE: we de-roxygenized this comment because the function isn't exported
+# Run an application that was created by \code{\link{startApp}}. This
+# function should normally be called in a \code{while(T)} loop.
+# 
+# @param ws_env The return value from \code{\link{startApp}}.
 serviceApp <- function(ws_env) {
   if (timerCallbacks$executeElapsed()) {
     flushReact()

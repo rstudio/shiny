@@ -2,7 +2,7 @@
 
 ## Run & Debug
 
-Throughout the tutorial you've been calling `runApp` to run examples and the MPG application. This function starts the Shiny application and opens up your default web browser to view it. The call to runApp is blocking, meaning that it prevents traditional interaction with the console while the applciation is running.
+Throughout the tutorial you've been calling `runApp` to run the example applications. This function starts the application and opens up your default web browser to view it. The call is blocking, meaning that it prevents traditional interaction with the console while the applciation is running.
 
 To stop the application you simply interupt R -- you can do this by pressing the Escape key in all R front ends as well as by clicking the stop button if your R environment provides one.
 
@@ -15,22 +15,24 @@ If you don't want to block access to the console while running your Shiny applic
 
 By default `runApp` starts the application on port 8100. If you are using this default then you can connect to the running application by navigating your browser to [http://localhost:8100](http://localhost:8100).
 
+Note that below we discuss some techniques for debugging Shiny applications, including the ability to stop execution and inspect the current environment. In order to combine these techniques with running your applications in a separate terminal session you need to run R interactively (that is, first type "R" to start an R session then execute `runApp` from within the session).
+
 ### Live Reloading
 
-When you make changes to your underlying user-interface defintiion or server script you don't need to stop and restart your application to see the changes. Simply save your changes and then reload the browser to the updated application in action.
+When you make changes to your underlying user-interface definition or server script you don't need to stop and restart your application to see the changes. Simply save your changes and then reload the browser to see the updated application in action.
 
-One qualification to this: when a browser reload occurs Shiny explicitly checks the timestamps of the ui.R and server.R files to see if they need to be re-sources. If you have other scripts or data files that change Shiny can't see those, so a full stop and restart of the application is necessary to see those changes.
+One qualification to this: when a browser reload occurs Shiny explicitly checks the timestamps of the ui.R and server.R files to see if they need to be re-sourced. If you have other scripts or data files that change Shiny isn't aware of those, so a full stop and restart of the application is necessary to see those changes reflected.
 
 ### Debugging Techniques
 
 #### Printing 
-There are several potential techniques for debugging Shiny applications. The first is to add calls to the [cat](http://stat.ethz.ch/R-manual/R-devel/library/base/html/cat.html) function that print diagnostics where appropriate. For example, these two calls to cat print diagnostics to standard output and standard error respectively:
+There are several techniques available for debugging Shiny applications. The first is to add calls to the [cat](http://stat.ethz.ch/R-manual/R-devel/library/base/html/cat.html) function which print diagnostics where appropriate. For example, these two calls to cat print diagnostics to standard output and standard error respectively:
 
 <pre><code class="r">cat(&quot;foo\n&quot;)
 cat(&quot;bar\n&quot;, stderr())
 </code></pre>
 
-#### Using browse
+#### Using browser
 The second technique is to add explicit calls to the [browser](http://stat.ethz.ch/R-manual/R-devel/library/base/html/browser.html) function to interrupt execution and inspect the environment where browser was called from. Note that using browser requires that you start the application from an interactive session (as opposed to using R -e as described above).
 
 For example, to unconditionally stop execution at a certain point in the code:

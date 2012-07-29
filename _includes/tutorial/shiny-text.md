@@ -11,7 +11,7 @@ The first example had a single numeric input specified using a slider and a sing
 
 If you try changing the number of observations to another value you'll see a demonstration of one of the most important attributes of Shiny applications -- inputs and outputs are connected together "live" and changes are propagated immediately (like a spreadsheet). In this case rather than the entire page being reloaded just the table view is updated when the number of observations change.
 
-Here is the user interface definition for the application. Notice in particular that the mainPanel function now takes two arguments (corresponding to the two types of output displayed):
+Here is the user interface definition for the application. Notice in particular that the `sidebarPanel` and `mainPanel` functions now take two arguments (corresponding to the two inputs and two outputs displayed):
 
 #### ui.R
 
@@ -44,7 +44,7 @@ shinyUI(pageWithSidebar(
 
 The server side of the application has also gotten a bit more complicated. Now rather than just computing a single output we see the definition of a reactive function to return the dataset corresponding to the user choice and two other reactive functions (`reactivePrint` and `reactiveTable`) that return the output$summary and output$view values.
 
-These reactive functions work similarly to the `reactivePrint` function used in the first example: by declaring a reactive function you tell Shiny that it should only be executed when it's dependencies change. In this case that's either one of the user input values. 
+These reactive functions work similarly to the `reactivePlot` function used in the first example: by declaring a reactive function you tell Shiny that it should only be executed when it's dependencies change. In this case that's either one of the user input values (input$dataset or input$n)
 
 #### server.R
 
@@ -75,4 +75,4 @@ shinyServer(function(input, output) {
 })
 </code></pre>
 
-The next example will start with this one as a baseline and expand significantly on how reactive functions work in Shiny.
+We're introduced more use of reactive functions but haven't really explained how they work yet. The next example will start with this one as a baseline and expand significantly on how reactive functions work in Shiny.

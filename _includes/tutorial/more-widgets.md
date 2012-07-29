@@ -2,7 +2,7 @@
 
 ![More Widgets Screenshot](screenshots/more-widgets.png)
 
-The More Widgets application demonstrates the helpText and submitButton widgets as well as the use of embedded HTML elements to customized formatting. To run the example type: 
+The More Widgets application demonstrates the help text and submit button widgets as well as the use of embedded HTML elements to customize formatting. To run the example type: 
 
 <pre><code class="console">&gt; library(shiny)
 &gt; runExample(&quot;07_widgets&quot;)
@@ -14,7 +14,7 @@ In this example we update the Shiny Text application with some additional contro
 
 * We added a `helpText` control to provide additional clarifying text alongside our input controls.
 * We added a `submitButton` control to indicate that we don't want a live connection between inputs and outputs, but rather to wait until the user clicks that button to update the output. This is especially useful if computing output is computationally expensive.
-* We added `h4` elements (heading level 4) into the output pane. Shiny includes a variety of functions for including HTML elements directly covering headings, paragraphics, links, and more.
+* We added `h4` elements (heading level 4) into the output pane. Shiny offers a variety of functions for including HTML elements directly in pages including headings, paragraphics, links, and more.
 
 Here is the updated source code for the user-interface:
 

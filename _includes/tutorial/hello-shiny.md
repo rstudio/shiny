@@ -64,4 +64,4 @@ shinyServer(function(input, output) {
 })
 </code></pre>
 
-The next example will show the use more input controls as well as the use of reactive functions to generate textual output.
+The next example will show the use of more input controls as well as the use of reactive functions to generate textual output.

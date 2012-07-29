@@ -10,7 +10,7 @@ The HTML UI application demonstrates defining a Shiny user-interface using a sta
 
 ### Defining an HTML UI
 
-The previous examples in this tutorial used a ui.R file to build their user-interfaces. While this is fast and convenient way to build user-interfaces, some appliations will inevitably require more flexiblity. For this type of application, you can define your user-interface directly in HTML. In this case there is no ui.R file and the directory structure looks like this:
+The previous examples in this tutorial used a ui.R file to build their user-interfaces. While this is a fast and convenient way to build user-interfaces, some appliations will inevitably require more flexiblity. For this type of application, you can define your user-interface directly in HTML. In this case there is no ui.R file and the directory structure looks like this:
 
 <pre><code>&lt;<em>application-dir</em>&gt;
 |-- www
@@ -18,7 +18,7 @@ The previous examples in this tutorial used a ui.R file to build their user-inte
 |-- server.R
 </code></pre>
 
-In this example we re-write the front-end of the Tabsets application using HTML directly. Here is the source code for the new user-interface:
+In this example we re-write the front-end of the Tabsets application using HTML directly. Here is the source code for the new user-interface definition:
 
 #### www/index.html
 
@@ -64,7 +64,7 @@ There are few things to point out regarding how Shiny binds HTML elements back t
 * HTML form elmements (in this case a select list and a number input) are bound to input slots using their `name` attribute.
 * Output is rendered into HTML elements based on matching their `id` attribute to an output slot and by specifying the requisite css class for the element (in this case either shiny-text-output, shiny-plot-output, or shiny-html-output).
 
-With this technique you can create highly customized user-interfaces using whatever HTML, CSS, and JavaScript you can dream up.
+With this technique you can create highly customized user-interfaces using whatever HTML, CSS, and JavaScript you like.
 
 ### Server Script
 

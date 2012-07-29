@@ -11,7 +11,7 @@ The Sliders application demonstrates the many capabilities of slider controls, i
 
 Shiny slider controls are extremely capable and customizable. Features supported include:
 
-* The ability to specify both single values and ranges
+* The ability to input both single values and ranges
 * Custom formats for value display (e.g for currency)
 * The ability to animate the slider across a range of values
 

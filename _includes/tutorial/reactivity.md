@@ -8,7 +8,7 @@ The Reactivity application is very similar to Hello Text, but goes into much mor
 &gt; runExample(&quot;03_reactivity&quot;)
 </code></pre>
 
-The previous examples have given you a good idea of what the code for Shiny applications looks like. We've explained a bit about reactivity, but mostly glossed over the finer details. In this section, we'll explore these concepts more deeply.
+The previous examples have given you a good idea of what the code for Shiny applications looks like. We've explained a bit about reactivity, but mostly glossed over the details. In this section, we'll explore these concepts more deeply.
 
 ### What is Reactivity?
 
@@ -38,7 +38,7 @@ It's simple to create reactive functions: just pass a normal function definition
 })
 </code></pre>
 
-The transformation of reactive values into outputs is then by assignments to the `output` object. Here is an example of an assignment to an output that depends on both the `datasetInput` reactive function we just defined as well as `input$obs`:
+To turn reactive values into outputs that can viewed on the web page, we assigned them to the `output` object (also passed to the `shinyServer` function). Here is an example of an assignment to an output that depends on both the `datasetInput` reactive function we just defined as well as `input$obs`:
 
 <pre><code class="r">output$view &lt;- reactiveTable(function() {
    head(datasetInput(), n = input$obs)
@@ -49,7 +49,7 @@ This function will be re-executed (and it's output re-rendered in the browser) w
 
 ### Back to the Code
 
-Now that we've taken a deeper loop at some of the core concepts, let's revised the source code and try to understand what's going on at a bit finer level of detail. The user interface definition has been updated to include a text-input field that defines a caption. Other than that it's very similar to the previous example:
+Now that we've taken a deeper loop at some of the core concepts, let's revisit the source code and try to understand what's going on in more depth. The user interface definition has been updated to include a text-input field that defines a caption. Other than that it's very similar to the previous example:
 
 #### ui.R
 

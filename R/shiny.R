@@ -228,10 +228,18 @@ wsToKey <- function(WS) {
 .globals <- new.env()
 
 .globals$clients <- function(ws, header) NULL
+
+#' Clear all clients
+#' 
+#' Clear all of the currently registered clients.
 #' @export
 clearClients <- function() {
   .globals$clients <- function(ws, header) NULL
 }
+
+#' Register a client
+#' 
+#' Register a client for handling requests.
 #' @export
 registerClient <- function(client) {
   .globals$clients <- append(.globals$clients, client)

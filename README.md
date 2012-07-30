@@ -17,19 +17,31 @@ Shiny is a new package from RStudio that makes it incredibly easy to build inter
 
 ## Installation
 
-Shiny is currently available only directly from this GitHub repository (it will eventually be available on CRAN). You can download the Shiny source code using one of these methods:
+### Linux & Mac
 
-* [Download tar.gz](https://github.com/rstudio/shiny/tarball/master) 
-* [Download zip](https://github.com/rstudio/shiny/zipball/master)
-* `git clone git@github.com:rstudio/shiny.git` **[Recommended]**
+First download the Shiny source package from here:
 
-Once you've extracted the Shiny source code to a directory you can install it using the [devtools](http://cran.r-project.org/web/packages/devtools/index.html) package as follows:
+[https://github.com/downloads/rstudio/shiny/shiny_0.1.1.tar.gz](https://github.com/downloads/rstudio/shiny/shiny_0.1.1.tar.gz)
+
+Now install the package as follows (substituting *\<shiny-pkg-file\>* with the path to which you downloaded the package):
 
 ```r
-library(devtools); install("<shiny-dir>");
+install.packages(c("websockets", "RJSONIO", "xtable"))
+install.packages("<shiny-pkg-file>", repos = NULL, type="source")
 ```
 
-If you are on Windows you also need to be sure to have installed [Rtools](http://cran.r-project.org/bin/windows/Rtools/) prior to attempting to install Shiny.
+### Windows
+
+First download the Shiny binary package from here:
+
+[https://github.com/downloads/rstudio/shiny/shiny_0.1.1.zip](https://github.com/downloads/rstudio/shiny/shiny_0.1.1.zip)
+
+Now install the package as follows (substituting *\<shiny-pkg-file\>* with the path to which you downloaded the package):
+
+```r
+install.packages(c("websockets", "RJSONIO", "xtable"))
+install.packages("<shiny-pkg-file>", repos = NULL)
+```
 
 ## Getting Started
 

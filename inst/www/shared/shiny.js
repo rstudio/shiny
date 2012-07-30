@@ -2,6 +2,96 @@
 
   var $ = jQuery;
 
+  var Invoker = function(target, func) {
+    this.target = target;
+    this.func = func;
+  };
+
+  (function() {
+    this.normalCall =
+    this.immediateCall = function() {
+      this.func.apply(this.target, arguments);
+    };
+  }).call(Invoker.prototype);
+
+  var Debouncer = function(target, func, delayMs) {
+    this.target = target;
+    this.func = func;
+    this.delayMs = delayMs;
+
+    this.timerId = null;
+    this.args = null;
+  };
+
+  (function() {
+    this.normalCall = function() {
+      var self = this;
+
+      this.$clearTimer();
+      this.args = arguments;
+
+      this.timerId = setTimeout(function() {
+        self.$clearTimer();
+        self.$invoke();
+      }, this.delayMs);
+    };
+    this.immediateCall = function() {
+      this.$clearTimer();
+      this.args = arguments;
+      this.$invoke();
+    };
+    this.$clearTimer = function() {
+      if (this.timerId != null) {
+        clearTimeout(this.timerId);
+        this.timerId = null;
+      }
+    };
+    this.$invoke = function() {
+      this.func.apply(this.target, this.args);
+      this.args = null;
+    };
+  }).call(Debouncer.prototype);
+
+  var Throttler = function(target, func, delayMs) {
+    this.target = target;
+    this.func = func;
+    this.delayMs = delayMs;
+
+    this.timerId = null;
+    this.args = null;
+  };
+
+  (function() {
+    this.normalCall = function() {
+      var self = this;
+
+      this.args = arguments;
+      if (this.timerId == null) {
+        this.$invoke();
+        this.timerId = setTimeout(function() {
+          self.$clearTimer();
+          if (self.args)
+            self.normalCall.apply(self, self.args);
+        }, this.delayMs);
+      }
+    };
+    this.immediateCall = function() {
+      this.$clearTimer();
+      this.args = arguments;
+      this.$invoke();
+    };
+    this.$clearTimer = function() {
+      if (this.timerId != null) {
+        clearTimeout(this.timerId);
+        this.timerId = null;
+      }
+    };
+    this.$invoke = function() {
+      this.func.apply(this.target, this.args);
+      this.args = null;
+    };
+  }).call(Throttler.prototype);
+
   // Returns a debounced version of the given function.
   // Debouncing means that when the function is invoked,
   // there is a delay of `threshold` milliseconds before
@@ -72,6 +162,104 @@
     };
     return throttled;
   }
+
+  // Immediately sends data to shinyapp
+  var InputSender = function(shinyapp) {
+    this.shinyapp = shinyapp;
+  };
+  (function() {
+    this.setInput = function(name, value) {
+      var data = {};
+      data[name] = value;
+      shinyapp.sendInput(data);
+    };
+  }).call(InputSender.prototype);
+
+  // Schedules data to be sent to shinyapp at the next setTimeout(0).
+  // Batches multiple input calls into one websocket message.
+  var InputBatchSender = function(shinyapp) {
+    this.shinyapp = shinyapp;
+    this.timerId = null;
+    this.pendingData = {};
+  };
+  (function() {
+    this.setInput = function(name, value) {
+      var self = this;
+
+      this.pendingData[name] = value;
+      if (!this.timerId) {
+        this.timerId = setTimeout(function() {
+          this.timerId = null;
+          var currentData = pendingData;
+          pendingData = {};
+          self.shinyapp.sendInput(currentData);
+        }, 0);
+      }
+    };
+  }).call(InputBatchSender.prototype);
+
+  var InputNoResendDecorator = function(target, initialValues) {
+    this.target = target;
+    this.lastSentValues = initialValues || {};
+  };
+  (function() {
+    this.setInput = function(name, value) {
+      var jsonValue = JSON.stringify(value);
+      if (this.lastSentValues[name] === jsonValue)
+        return;
+      this.lastSentValues[name] = jsonValue;
+      target.setInput(name, value);
+    };
+    this.reset = function() {
+      this.lastSentValues = {};
+    };
+  }).call(InputNoResendDecorator.prototype);
+
+  var InputDeferDecorator = function(target) {
+    this.target = target;
+    this.pendingInput = {};
+  };
+  (function() {
+    this.setInput = function(name, value) {
+      this.pendingInput[name] = value;
+    };
+    this.submit = function() {
+      for (var name in this.pendingInput) {
+        this.target.setInput(this.pendingInput[name]);
+      }
+    };
+  }).call(InputDeferDecorator.prototype);
+
+  var InputRateDecorator = function(target) {
+    this.target = target;
+  };
+  (function() {
+    this.setInput = function(name, value, immediate) {
+      this.$ensureInit(name);
+      if (immediate)
+        this.inputRatePolicies[name].immediateCall(name, value, immediate);
+      else
+        this.inputRatePolicies[name].normalCall(name, value, immediate);
+    };
+    this.setRatePolicy = function(name, mode, millis) {
+      if (mode == 'direct') {
+        this.inputRatePolicies[name] = new Invoker(this, this.$doSetInput);
+      }
+      else if (mode == 'debounce') {
+        this.inputRatePolicies[name] = new Debouncer(this, this.$doSetInput, millis);
+      }
+      else if (mode == 'throttle') {
+        this.inputRatePolicies[name] = new Throttler(this, this.$doSetInput, millis);
+      }
+    };
+    this.$ensureInit = function(name) {
+      if (!(name in this.inputRatePolicies))
+        this.setRatePolicy(name, 'direct');
+    };
+    this.$doSetInput = function(name, value) {
+      this.target.setInput(name, value);
+    };
+  }).call(InputRateDecorator.prototype);
 
   function keyedFunc(delay, keyArgNum, func, modFunc) {
     if (delay == 0)

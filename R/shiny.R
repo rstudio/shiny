@@ -117,7 +117,8 @@ resolve <- function(dir, relpath) {
   abs.path <- file.path(dir, relpath)
   if (!file.exists(abs.path))
     return(NULL)
-  abs.path <- normalizePath(abs.path, mustWork=T)
+  abs.path <- normalizePath(abs.path, winslash='/', mustWork=T)
+  dir <- normalizePath(dir, winslash='/', mustWork=T)
   if (nchar(abs.path) <= nchar(dir) + 1)
     return(NULL)
   if (substr(abs.path, 1, nchar(dir)) != dir ||

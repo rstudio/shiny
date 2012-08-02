@@ -169,6 +169,9 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
   lastKnownTimestamps <- NA
   metaHandler <- function(ws, header) NULL
   
+  if (!file.exists(filePath))
+    return(metaHandler)
+  
   return (function(ws, header) {
     # Check if we need to rebuild
     mtime <- file.info(dependencyFiles)$mtime

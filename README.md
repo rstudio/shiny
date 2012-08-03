@@ -17,30 +17,10 @@ Shiny is a new package from RStudio that makes it incredibly easy to build inter
 
 ## Installation
 
-### Linux & Mac
-
-First download the Shiny source package from here:
-
-[https://github.com/downloads/rstudio/shiny/shiny_0.1.1.tar.gz](https://github.com/downloads/rstudio/shiny/shiny_0.1.1.tar.gz)
-
-Now install the package as follows (substituting *\<shiny-pkg-file\>* with the path to which you downloaded the package):
+From an R console:
 
 ```r
-install.packages(c("websockets", "RJSONIO", "xtable"))
-install.packages("<shiny-pkg-file>", repos = NULL, type="source")
-```
-
-### Windows
-
-First download the Shiny binary package from here:
-
-[https://github.com/downloads/rstudio/shiny/shiny_0.1.1.zip](https://github.com/downloads/rstudio/shiny/shiny_0.1.1.zip)
-
-Now install the package as follows (substituting *\<shiny-pkg-file\>* with the path to which you downloaded the package):
-
-```r
-install.packages(c("websockets", "RJSONIO", "xtable"))
-install.packages("<shiny-pkg-file>", repos = NULL)
+install.packages("shiny", repos="http://rstudio.org/_packages")
 ```
 
 ## Getting Started

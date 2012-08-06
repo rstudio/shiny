@@ -20,7 +20,8 @@ Shiny is a new package from RStudio that makes it incredibly easy to build inter
 From an R console:
 
 ```r
-install.packages("shiny", repos="http://rstudio.org/_packages")
+options(repos=c(RStudio="http://rstudio.org/_packages", getOption("repos")))
+install.packages("shiny")
 ```
 
 ## Getting Started

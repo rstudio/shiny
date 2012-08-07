@@ -189,9 +189,9 @@
       this.pendingData[name] = value;
       if (!this.timerId) {
         this.timerId = setTimeout(function() {
-          this.timerId = null;
-          var currentData = pendingData;
-          pendingData = {};
+          self.timerId = null;
+          var currentData = self.pendingData;
+          self.pendingData = {};
           self.shinyapp.sendInput(currentData);
         }, 0);
       }
@@ -208,7 +208,7 @@
       if (this.lastSentValues[name] === jsonValue)
         return;
       this.lastSentValues[name] = jsonValue;
-      target.setInput(name, value);
+      this.target.setInput(name, value);
     };
     this.reset = function() {
       this.lastSentValues = {};
@@ -232,6 +232,7 @@
 
   var InputRateDecorator = function(target) {
     this.target = target;
+    this.inputRatePolicies = {};
   };
   (function() {
     this.setInput = function(name, value, immediate) {
@@ -528,41 +529,37 @@
     // Holds last sent data, so we know when we don't have to send again
     var lastSentData = {};
 
-    var deferredSubmit = false;
+    var inputs = new InputNoResendDecorator(new InputBatchSender(shinyapp));
+    var inputsRate = new InputRateDecorator(inputs);
+    var inputsDefer = new InputDeferDecorator(inputs);
+
+    inputs = inputsRate;
     $('input[type="submit"], button[type="submit"]').each(function() {
-      deferredSubmit = true;
+      inputs = inputsDefer;
       $(this).click(function(event) {
         event.preventDefault();
-        shinyapp.sendInput(pendingData);
-        $.extend(lastSentData, pendingData);
-        pendingData = {};
+        inputsDefer.submit();
       });
     });
 
     function onInputChange(name, value) {
-      if (lastSentData[name] === value) {
-        delete pendingData[name];
-        return;
-      }
-
-      if (deferredSubmit)
-        pendingData[name] = value;
-      else {
-        var data = {};
-        data[name] = value;
-        shinyapp.sendInput(data);
-        $.extend(lastSentData, data);
-      }
+      inputs.setInput(name, value);
     }
 
-    var debouncedInputChange = keyedDebounce(
-      deferredSubmit ? 0 : 250, 
-      0,
-      onInputChange);
-
     // Instantiate all sliders (if jslider plugin is loaded)
-    if ($.fn.slider)
+    if ($.fn.slider) {
       $('input.jslider').slider();
+      $('input.jslider').each(function() {
+        var name = this['data-input-id'] || this.name || this.id;
+        if (name)
+          inputsRate.setRatePolicy(name, 'debounce', 250);
+      });
+    }
+    $(':text').each(function() {
+        var name = this['data-input-id'] || this.name || this.id;
+        if (name)
+          inputsRate.setRatePolicy(name, 'debounce', 250);
+    });
 
     var inputSelector = ':input:not([type="submit"], [type="checkbox"], [type="radio"])';
     var initialValues = {};
@@ -571,10 +568,10 @@
       var name = input['data-input-id'] || input.name || input.id;
       var value = elementToValue(input);
       if (input.type == 'text' && !$(input).data('animating')) {
-        debouncedInputChange(name, value);
+        inputs.setInput(name, value);
       }
       else {
-        onInputChange(name, value);
+        inputs.setInput(name, value, true);
       }
     });
     $(inputSelector).each(function() {
@@ -610,11 +607,11 @@
     function configureMultiInput(selector, exclusiveValue) {
       $(document).on('change input', selector, function() {
         if (this.name) {
-          onInputChange(this.name, getMultiValue(this, exclusiveValue));
+          inputs.setInput(this.name, getMultiValue(this, exclusiveValue));
         }
         var id = this['data-input-id'] || this.id;
         if (id) {
-          onInputChange(id, elementToValue(this));
+          inputs.setInput(id, elementToValue(this));
         }
       });
       $(selector).each(function() {
@@ -640,11 +637,11 @@
       $(window).resize(debounce(500, function() {
         if (self.offsetWidth != width) {
           width = self.offsetWidth;
-          onInputChange('.shinyout_' + self.id + '_width', width);
+          inputs.setInput('.shinyout_' + self.id + '_width', width);
         }
         if (self.offsetHeight != height) {
           height = self.offsetHeight;
-          onInputChange('.shinyout_' + self.id + '_height', height);
+          inputs.setInput('.shinyout_' + self.id + '_height', height);
         }
       }));
     });

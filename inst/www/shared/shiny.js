@@ -2,6 +2,8 @@
 
   var $ = jQuery;
 
+  var exports = window.Shiny = window.Shiny || {};
+
   var Invoker = function(target, func) {
     this.target = target;
     this.func = func;
@@ -262,49 +264,8 @@
     };
   }).call(InputRateDecorator.prototype);
 
-  function keyedFunc(delay, keyArgNum, func, modFunc) {
-    if (delay == 0)
-      return func;
 
-    var keyedFuncs = {};
-    return function() {
-      var key = keyArgNum == -1 ? this : arguments[keyArgNum];
-      if (!keyedFuncs[key])
-        keyedFuncs[key] = modFunc(delay, func);
-      keyedFuncs[key].apply(this, arguments);
-    };
-  }
-
-  // Behaves similarly to the debounce function, except that
-  // internally it will create a separate debounce function
-  // for each distinct value of one of the arguments. You
-  // specify which argument that is using keyArgNum (-1 means
-  // to use 'this').
-  //
-  // For example:
-  //
-  // function printNameValue(name, value) {
-  //   console.log(name + '=' + value);
-  // }
-  // var debouncedPNV = keyedDebounce(500, 0, printNameValue);
-  // debouncedPNV('foo', 10);
-  // debouncedPNV('bar', 10);
-  // debouncedPNV('bar', 20);
-  //
-  // will print:
-  // foo=10
-  // bar=20
-  function keyedDebounce(delay, keyArgNum, func) {
-    return keyedFunc(delay, keyArgNum, func, debounce);
-  }
-
-  // Same as keyedDebounce, but for throttling
-  function keyedThrottle(delay, keyArgNum, func) {
-    return keyedFunc(delay, keyArgNum, func, throttle);
-  }
-
-
-  var ShinyApp = window.ShinyApp = function() {
+  var ShinyApp = function() {
     this.$socket = null;
     this.$bindings = {};
     this.$values = {};
@@ -482,7 +443,7 @@
 
   $(function() {
 
-    var shinyapp = window.shinyapp = new ShinyApp();
+    var shinyapp = exports.shinyapp = new ShinyApp();
 
     $('.shiny-text-output').each(function() {
       shinyapp.bind(this.id, new LiveTextBinding(this));
@@ -542,9 +503,9 @@
       });
     });
 
-    function onInputChange(name, value) {
+    exports.onInputChange = function(name, value) {
       inputs.setInput(name, value);
-    }
+    };
 
     // Instantiate all sliders (if jslider plugin is loaded)
     if ($.fn.slider) {
@@ -609,18 +570,22 @@
         if (this.name) {
           inputs.setInput(this.name, getMultiValue(this, exclusiveValue));
         }
-        var id = this['data-input-id'] || this.id;
-        if (id) {
-          inputs.setInput(id, elementToValue(this));
+        if (!exclusiveValue) {
+          var id = this['data-input-id'] || this.id;
+          if (id) {
+            inputs.setInput(id, elementToValue(this));
+          }
         }
       });
       $(selector).each(function() {
         if (this.name) {
           initialValues[this.name] = getMultiValue(this, exclusiveValue);
         }
-        var id = this['data-input-id'] || this.id;
-        if (id) {
-          initialValues[id] = elementToValue(this);
+        if (!exclusiveValue) {
+          var id = this['data-input-id'] || this.id;
+          if (id) {
+            initialValues[id] = elementToValue(this);
+          }
         }
       });
     }

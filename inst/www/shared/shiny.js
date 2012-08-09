@@ -413,7 +413,7 @@
       this.el.text(data);
     };
   }).call(LiveTextBinding.prototype);
-  $.extend(LiveTextBinding.prototype, LiveBinding.prototype);
+  LiveTextBinding.prototype = $.extend({}, LiveBinding.prototype, LiveTextBinding.prototype);
 
   var LivePlotBinding = function(el) {
     LiveBinding.call(this, el);
@@ -428,7 +428,7 @@
       this.el.append(img);
     };
   }).call(LivePlotBinding.prototype);
-  $.extend(LivePlotBinding.prototype, LiveBinding.prototype);
+  LivePlotBinding.prototype = $.extend({}, LiveBinding.prototype, LivePlotBinding.prototype);
 
   var LiveHTMLBinding = function(el) {
     LiveBinding.call(this, el);
@@ -438,8 +438,120 @@
       this.el.html(data)
     };
   }).call(LiveHTMLBinding.prototype);
-  $.extend(LiveHTMLBinding.prototype, LiveBinding.prototype);
+  LiveHTMLBinding.prototype = $.extend({}, LiveBinding.prototype, LiveHTMLBinding.prototype);
 
+
+  var inputBindings = [];
+  var registerInputBinding = function(binding, priority) {
+    inputBindings.push({binding: binding, priority: priority});
+  }
+  exports.registerInputBinding = registerInputBinding;
+  
+    
+  var InputBinding = exports.InputBinding = function() {
+  };
+  
+  (function() {
+  
+    // Returns a jQuery object or element array that contains the
+    // descendants of scope that match this binding
+    this.find = function(scope) { throw "Not implemented"; };
+  
+    this.getId = function(el) {
+      return el['data-input-id'] || el.id;
+    };
+  
+    this.getValue = function(el) { throw "Not implemented"; };
+    this.subscribe = function(el) { };
+    this.unsubscribe = function(el) { };
+    
+    this.getRatePolicy = function() { return null; };
+  
+  }).call(InputBinding.prototype);
+  
+  
+  
+  // Text input
+  var textInputBinding = new InputBinding();
+  $.extend(textInputBinding, {
+    find: function(scope) {
+      return $(scope).find('input[type="text"]');
+    },
+    getId: function(el) {
+      return InputBinding.prototype.getId.call(this, el) || el.name;
+    },
+    getValue: function(el) {
+      return el.value;
+    },
+    setValue: function(el, value) {
+      el.value = value;
+    },
+    subscribe: function(el, callback) {
+      var self = this;
+      $(el).on('keyup.textInputBinding input.textInputBinding', function(event) {
+        callback(self, el, true);
+      });
+      $(el).on('change.textInputBinding', function(event) {
+        callback(self, el, false);
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.textInputBinding');
+    },
+    getRatePolicy: function() {
+      return {
+        policy: 'debounce',
+        delay: 250
+      };
+    }
+  });
+  registerInputBinding(textInputBinding, 0);
+  
+  
+  var numberInputBinding = {};
+  $.extend(numberInputBinding, textInputBinding, {
+    find: function(scope) {
+      return $(scope).find('input[type="number"]');
+    },
+    getValue: function(el) {
+      var numberVal = $(el).val();
+      if (!isNaN(numberVal))
+        return +numberVal;
+      else
+        return numberVal;
+    }
+  });
+  registerInputBinding(numberInputBinding, 0);
+  
+  
+  // Select input
+  var selectInputBinding = new InputBinding();
+  $.extend(selectInputBinding, {
+    find: function(scope) {
+      return scope.find('select');
+    },
+    getId: function(el) {
+      return InputBinding.prototype.getId.call(this, el) || el.name;
+    },
+    getValue: function(el) {
+      return $(el).val();
+    },
+    setValue: function(el, value) {
+      $(el).val(value);
+    },
+    subscribe: function(el, callback) {
+      var self = this;
+      $(el).on('change.selectInputBinding', function(event) {
+        callback(self, el);
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.selectInputBinding');
+    }
+  });
+  registerInputBinding(selectInputBinding, 0);
+
+  
 
   $(function() {
 
@@ -522,32 +634,52 @@
           inputsRate.setRatePolicy(name, 'debounce', 250);
     });
 
-    var inputSelector = ':input:not([type="submit"], [type="checkbox"], [type="radio"])';
-    var initialValues = {};
-    $(document).on('change keyup input', inputSelector, function(evt) {
-      var input = this;
-      var name = input['data-input-id'] || input.name || input.id;
-      if (!name)
-        return;
-      var value = elementToValue(input);
-      if (input.type == 'text' && !$(input).data('animating')) {
-        inputs.setInput(name, value);
+    var boundInputs = {};
+    
+    function valueChangeCallback(binding, el, allowDeferred) {
+      var id = binding.getId(el);
+      var el = binding.getValue(el);
+      if (id)
+        inputs.setInput(id, el, !allowDeferred);
+    }
+    
+    function bindInputs(scope) {
+      
+      scope = $(scope);
+      
+      var currentValues = {};
+    
+      for (var i = 0; i < inputBindings.length; i++) {
+        var binding = inputBindings[i].binding;
+        var matches = binding.find(scope) || [];
+        for (var j = 0; j < matches.length; j++) {
+          var el = matches[j];
+          var id = binding.getId(el);
+          // Check if ID is falsy, or if already bound
+          if (!id || boundInputs[id])
+            continue;
+    
+          currentValues[id] = binding.getValue(el);
+          binding.subscribe(el, valueChangeCallback);
+          var ratePolicy = binding.getRatePolicy();
+          if (ratePolicy != null) {
+            inputsRate.setRatePolicy(
+              id,
+              ratePolicy.policy,
+              ratePolicy.delay);
+          }
+    
+          boundInputs[id] = {
+            binding: binding,
+            node: el
+          };
+        }
       }
-      else {
-        inputs.setInput(name, value, true);
-      }
-    });
-    $(inputSelector).each(function() {
-      var input = this;
-      var name = input['data-input-id'] || input.name || input.id;
-      if (!name)
-        return;
-      var value = elementToValue(input);
-      // TODO: validate name is non-blank, and no duplicates
-      // TODO: If submit button is present, don't send anything
-      //   until submit button is pressed
-      initialValues[name] = value;
-    });
+    
+      return currentValues;
+    }
+    
+    initialValues = bindInputs(document);
 
     function getMultiValue(input, exclusiveValue) {
       if (!input.name)

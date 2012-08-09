@@ -527,6 +527,8 @@
     $(document).on('change keyup input', inputSelector, function(evt) {
       var input = this;
       var name = input['data-input-id'] || input.name || input.id;
+      if (!name)
+        return;
       var value = elementToValue(input);
       if (input.type == 'text' && !$(input).data('animating')) {
         inputs.setInput(name, value);
@@ -538,6 +540,8 @@
     $(inputSelector).each(function() {
       var input = this;
       var name = input['data-input-id'] || input.name || input.id;
+      if (!name)
+        return;
       var value = elementToValue(input);
       // TODO: validate name is non-blank, and no duplicates
       // TODO: If submit button is present, don't send anything

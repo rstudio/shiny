@@ -522,6 +522,49 @@
     }
   });
   registerInputBinding(numberInputBinding, 0);
+
+
+  var sliderInputBinding = {};
+  $.extend(sliderInputBinding, numberInputBinding, {
+    find: function(scope) {
+      // Check if jslider plugin is loaded
+      if (!$.fn.slider)
+        return [];
+
+      var sliders = $(scope).find('input.jslider');
+      sliders.slider();
+      return sliders;
+    },
+    getValue: function(el) {
+      var sliderVal = $(el).val();
+      if (/;/.test(sliderVal)) {
+        var chunks = sliderVal.split(/;/, 2);
+        return [+chunks[0], +chunks[1]];
+      }
+      else {
+        return +sliderVal;
+      }
+    },
+    setValue: function(el, val) {
+      // TODO: implement
+    },
+    subscribe: function(el, callback) {
+      var self = this;
+      $(el).on('change.inputBinding', function(event) {
+        callback(self, el, true);
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.inputBinding');
+    },
+    getRatePolicy: function() {
+      return {
+        policy: 'debounce',
+        delay: 250
+      };
+    }
+  });
+  registerInputBinding(sliderInputBinding, 0);
   
   
   // Select input
@@ -576,23 +619,6 @@
     function elementToValue(el) {
       if (el.type == 'checkbox' || el.type == 'radio')
         return el.checked ? true : false;
-      else if ($(el).attr('type') === 'slider') {
-        var sliderVal = $(el).val();
-        if (/;/.test(sliderVal)) {
-          var chunks = sliderVal.split(/;/, 2);
-          return [+chunks[0], +chunks[1]];
-        }
-        else {
-          return +sliderVal;
-        }
-      }
-      else if ($(el).attr('type') === 'number') {
-        var numberVal = $(el).val();
-        if (!isNaN(numberVal))
-          return +numberVal;
-        else
-          return numberVal;
-      }
       else
         return $(el).val();
     }
@@ -618,21 +644,6 @@
     exports.onInputChange = function(name, value) {
       inputs.setInput(name, value);
     };
-
-    // Instantiate all sliders (if jslider plugin is loaded)
-    if ($.fn.slider) {
-      $('input.jslider').slider();
-      $('input.jslider').each(function() {
-        var name = this['data-input-id'] || this.name || this.id;
-        if (name)
-          inputsRate.setRatePolicy(name, 'debounce', 250);
-      });
-    }
-    $(':text').each(function() {
-        var name = this['data-input-id'] || this.name || this.id;
-        if (name)
-          inputsRate.setRatePolicy(name, 'debounce', 250);
-    });
 
     var boundInputs = {};
     

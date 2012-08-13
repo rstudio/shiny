@@ -596,7 +596,7 @@
 
   
 
-  $(function() {
+  function initShiny() {
 
     var shinyapp = exports.shinyapp = new ShinyApp();
 
@@ -622,11 +622,6 @@
       else
         return $(el).val();
     }
-
-    // Holds pending changes for deferred submit
-    var pendingData = {};
-    // Holds last sent data, so we know when we don't have to send again
-    var lastSentData = {};
 
     var inputs = new InputNoResendDecorator(new InputBatchSender(shinyapp));
     var inputsRate = new InputRateDecorator(inputs);
@@ -759,7 +754,12 @@
     });
 
     shinyapp.connect(initialValues);
-    lastSentData = initialValues;
+  } // function initShiny()
+
+  $(function() {
+    // Init Shiny a little later than document ready, so user code can
+    // run first (i.e. to register bindings)
+    setTimeout(initShiny, 1);
   });
 
   $(document).on('click', '.slider-animate-button', function(evt) {

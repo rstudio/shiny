@@ -551,7 +551,7 @@
     subscribe: function(el, callback) {
       var self = this;
       $(el).on('change.inputBinding', function(event) {
-        callback(self, el, true);
+        callback(self, el, !$(el).data('animating'));
       });
     },
     unsubscribe: function(el) {

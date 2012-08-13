@@ -227,7 +227,7 @@
     };
     this.submit = function() {
       for (var name in this.pendingInput) {
-        this.target.setInput(this.pendingInput[name]);
+        this.target.setInput(name, this.pendingInput[name]);
       }
     };
   }).call(InputDeferDecorator.prototype);

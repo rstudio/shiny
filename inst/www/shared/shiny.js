@@ -612,10 +612,6 @@
 
 
 
-    // Input bindings
-
-    // TODO: This all needs to be refactored to be more modular, extensible
-
     function elementToValue(el) {
       if (el.type == 'checkbox' || el.type == 'radio')
         return el.checked ? true : false;

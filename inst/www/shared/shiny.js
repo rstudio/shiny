@@ -406,7 +406,7 @@
       }
     };
 
-    this.bind = function(id, binding) {
+    this.bindOutput = function(id, binding) {
       if (!id)
         throw "Can't bind an element with no ID";
       if (this.$bindings[id])
@@ -417,71 +417,6 @@
   }).call(ShinyApp.prototype);
 
 
-  var OutputBinding = function(el) {
-    this.el = $(el);
-  };
-  (function() {
-    this.onValueChange = function(data) {
-      this.clearError();
-      this.renderValue(data);
-    };
-    this.onValueError = function(err) {
-      this.renderError(err);
-    };
-    this.renderError = function(err) {
-      this.el.text('ERROR: ' + err.message);
-      this.el.addClass('shiny-output-error');
-    };
-    this.clearError = function() {
-      this.el.removeClass('shiny-output-error');
-    };
-    this.showProgress = function(show) {
-      var RECALC_CLASS = 'recalculating';
-      if (show)
-        this.el.addClass(RECALC_CLASS);
-      else
-        this.el.removeClass(RECALC_CLASS);
-    };
-  }).call(OutputBinding.prototype);
-
-
-  var TextOutputBinding = function(el) {
-    OutputBinding.call(this, el);
-  };
-  (function() {
-    this.renderValue = function(data) {
-      this.el.text(data);
-    };
-  }).call(TextOutputBinding.prototype);
-  TextOutputBinding.prototype = $.extend({}, OutputBinding.prototype, TextOutputBinding.prototype);
-
-  var PlotOutputBinding = function(el) {
-    OutputBinding.call(this, el);
-  };
-  (function() {
-    this.renderValue = function(data) {
-      this.el.empty();
-      if (!data)
-        return;
-      var img = document.createElement('img');
-      img.src = data;
-      this.el.append(img);
-    };
-  }).call(PlotOutputBinding.prototype);
-  PlotOutputBinding.prototype = $.extend({}, OutputBinding.prototype, PlotOutputBinding.prototype);
-
-  var HTMLOutputBinding = function(el) {
-    OutputBinding.call(this, el);
-  };
-  (function() {
-    this.renderValue = function(data) {
-      this.el.html(data)
-    };
-  }).call(HTMLOutputBinding.prototype);
-  HTMLOutputBinding.prototype = $.extend({}, OutputBinding.prototype, HTMLOutputBinding.prototype);
-
-
-
   var BindingRegistry = function() {
     this.bindings = [];
     this.bindingNames = {};
@@ -490,8 +425,10 @@
     this.register = function(binding, bindingName, priority) {
       var bindingObj = {binding: binding, priority: priority || 0};
       this.bindings.unshift(bindingObj);
-      if (bindingName)
+      if (bindingName) {
         this.bindingNames[bindingName] = bindingObj;
+        binding.name = bindingName;
+      }
     },
     this.setPriority = function(bindingName, priority) {
       var bindingObj = this.bindingNames[bindingName];
@@ -519,7 +456,78 @@
   var outputBindings = exports.outputBindings = new BindingRegistry();
 
   
-    
+  var OutputBinding = function() {};
+  (function() {
+    // Returns a jQuery object or element array that contains the
+    // descendants of scope that match this binding
+    this.find = function(scope) { throw "Not implemented"; };
+  
+    this.getId = function(el) {
+      return el['data-input-id'] || el.id;
+    };
+
+    this.onValueChange = function(el, data) {
+      this.clearError();
+      this.renderValue(el, data);
+    };
+    this.onValueError = function(el, err) {
+      this.renderError(el, err);
+    };
+    this.renderError = function(el, err) {
+      $(el).addClass('shiny-output-error').text('ERROR: ' + err.message);
+    };
+    this.clearError = function(el) {
+      $(el).removeClass('shiny-output-error');
+    };
+    this.showProgress = function(el, show) {
+      var RECALC_CLASS = 'recalculating';
+      if (show)
+        $(el).addClass('RECALC_CLASS');
+      else
+        $(el).removeClass('RECALC_CLASS');
+    };
+  }).call(OutputBinding.prototype);
+
+
+  var textOutputBinding = new OutputBinding();
+  $.extend(textOutputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-text-output');
+    },
+    renderValue: function(el, data) {
+      $(el).text(data);
+    }
+  });
+  outputBindings.register(textOutputBinding, 'shiny.textOutput');
+
+  var plotOutputBinding = new OutputBinding();
+  $.extend(plotOutputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-plot-output');
+    },
+    renderValue: function(el, data) {
+      $(el).empty();
+      if (!data)
+        return;
+      var img = document.createElement('img');
+      img.src = data;
+      $(el).append(img);
+    }
+  });
+  outputBindings.register(plotOutputBinding, 'shiny.plotOutput');
+
+  var htmlOutputBinding = new OutputBinding();
+  $.extend(htmlOutputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-html-output');
+    },
+    renderValue: function(el, data) {
+      $(el).html(data);
+    }
+  });
+  outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');
+
+
   var InputBinding = exports.InputBinding = function() {
   };
   
@@ -681,15 +689,45 @@
 
     var shinyapp = exports.shinyapp = new ShinyApp();
 
-    $('.shiny-text-output').each(function() {
-      shinyapp.bind(this.id, new TextOutputBinding(this));
-    });
-    $('.shiny-plot-output').each(function() {
-      shinyapp.bind(this.id, new PlotOutputBinding(this));
-    });
-    $('.shiny-html-output').each(function() {
-      shinyapp.bind(this.id, new HTMLOutputBinding(this));
-    });
+    function bindOutputs(scope) {
+
+      var OutputBindingAdapter = function(el, binding) {
+        this.el = el;
+        this.binding = binding;
+      };
+      $.extend(OutputBindingAdapter.prototype, {
+        onValueChange: function(data) {
+          this.binding.onValueChange(this.el, data);
+        },
+        onValueError: function(err) {
+          this.binding.onValueError(this.el, err);
+        },
+        showProgress: function(show) {
+          this.binding.showProgress(this.el, show);
+        }
+      });
+
+      scope = $(scope);
+
+      var bindings = outputBindings.getBindings();
+      
+      for (var i = 0; i < bindings.length; i++) {
+        var binding = bindings[i].binding;
+        var matches = binding.find(scope) || [];
+        for (var j = 0; j < matches.length; j++) {
+          var el = matches[j];
+          var id = binding.getId(el);
+
+          // Check if ID is falsy
+          if (!id)
+            continue;
+
+          shinyapp.bindOutput(id, new OutputBindingAdapter(el, binding));
+        }
+      }
+    }
+
+    bindOutputs(document);
 
 
 
@@ -740,6 +778,7 @@
         for (var j = 0; j < matches.length; j++) {
           var el = matches[j];
           var id = binding.getId(el);
+
           // Check if ID is falsy, or if already bound
           if (!id || boundInputs[id])
             continue;

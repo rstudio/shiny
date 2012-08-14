@@ -265,6 +265,46 @@
   }).call(InputRateDecorator.prototype);
 
 
+  // We need a stable sorting algorithm for ordering
+  // bindings by priority and insertion order.
+  function mergeSort(list, sortfunc) {
+    function merge(sortfunc, a, b) {
+      var ia = 0;
+      var ib = 0;
+      var sorted = [];
+      while (ia < a.length && ib < b.length) {
+        if (sortfunc(a[ia], b[ib]) <= 0) {
+          sorted.push(a[ia++]);
+        }
+        else {
+          sorted.push(b[ib++]);
+        }
+      }
+      while (ia < a.length)
+        sorted.push(a[ia++]);
+      while (ib < b.length)
+        sorted.push(b[ib++]);
+      return sorted;
+    }
+
+    // Don't mutate list argument
+    list = list.slice(0);
+
+    for (var chunkSize = 1; chunkSize < list.length; chunkSize *= 2) {
+      for (var i = 0; i < list.length; i += chunkSize * 2) {
+        var listA = list.slice(i, i + chunkSize);
+        var listB = list.slice(i + chunkSize, i + chunkSize * 2);
+        var merged = merge(sortfunc, listA, listB);
+        var args = [i, merged.length];
+        Array.prototype.push.apply(args, merged);
+        Array.prototype.splice.apply(list, args);
+      }
+    }
+
+    return list;
+  }
+
+
   var ShinyApp = function() {
     this.$socket = null;
     this.$bindings = {};
@@ -377,7 +417,7 @@
   }).call(ShinyApp.prototype);
 
 
-  var LiveBinding = function(el) {
+  var OutputBinding = function(el) {
     this.el = $(el);
   };
   (function() {
@@ -402,21 +442,21 @@
       else
         this.el.removeClass(RECALC_CLASS);
     };
-  }).call(LiveBinding.prototype);
+  }).call(OutputBinding.prototype);
 
 
-  var LiveTextBinding = function(el) {
-    LiveBinding.call(this, el);
+  var TextOutputBinding = function(el) {
+    OutputBinding.call(this, el);
   };
   (function() {
     this.renderValue = function(data) {
       this.el.text(data);
     };
-  }).call(LiveTextBinding.prototype);
-  LiveTextBinding.prototype = $.extend({}, LiveBinding.prototype, LiveTextBinding.prototype);
+  }).call(TextOutputBinding.prototype);
+  TextOutputBinding.prototype = $.extend({}, OutputBinding.prototype, TextOutputBinding.prototype);
 
-  var LivePlotBinding = function(el) {
-    LiveBinding.call(this, el);
+  var PlotOutputBinding = function(el) {
+    OutputBinding.call(this, el);
   };
   (function() {
     this.renderValue = function(data) {
@@ -427,25 +467,57 @@
       img.src = data;
       this.el.append(img);
     };
-  }).call(LivePlotBinding.prototype);
-  LivePlotBinding.prototype = $.extend({}, LiveBinding.prototype, LivePlotBinding.prototype);
+  }).call(PlotOutputBinding.prototype);
+  PlotOutputBinding.prototype = $.extend({}, OutputBinding.prototype, PlotOutputBinding.prototype);
 
-  var LiveHTMLBinding = function(el) {
-    LiveBinding.call(this, el);
+  var HTMLOutputBinding = function(el) {
+    OutputBinding.call(this, el);
   };
   (function() {
     this.renderValue = function(data) {
       this.el.html(data)
     };
-  }).call(LiveHTMLBinding.prototype);
-  LiveHTMLBinding.prototype = $.extend({}, LiveBinding.prototype, LiveHTMLBinding.prototype);
+  }).call(HTMLOutputBinding.prototype);
+  HTMLOutputBinding.prototype = $.extend({}, OutputBinding.prototype, HTMLOutputBinding.prototype);
 
 
-  var inputBindings = [];
-  var registerInputBinding = function(binding, priority) {
-    inputBindings.push({binding: binding, priority: priority});
-  }
-  exports.registerInputBinding = registerInputBinding;
+
+  var BindingRegistry = function() {
+    this.bindings = [];
+    this.bindingNames = {};
+  };
+  (function() {
+    this.register = function(binding, bindingName, priority) {
+      var bindingObj = {binding: binding, priority: priority || 0};
+      this.bindings.unshift(bindingObj);
+      if (bindingName)
+        this.bindingNames[bindingName] = bindingObj;
+    },
+    this.setPriority = function(bindingName, priority) {
+      var bindingObj = this.bindingNames[bindingName];
+      if (!bindingObj)
+        throw "Tried to set priority on unknown binding " + bindingName;
+      bindingObj.priority = priority || 0;
+    },
+    this.getPriority = function(bindingName) {
+      var bindingObj = this.bindingNames[bindingName];
+      if (!bindingObj)
+        return false;
+      return bindingObj.priority;
+    },
+    this.getBindings = function() {
+      // Sort the bindings. The ones with higher priority are consulted
+      // first; ties are broken by most-recently-registered.
+      return mergeSort(this.bindings, function(a, b) {
+        return b.priority - a.priority;
+      });
+    }
+  }).call(BindingRegistry.prototype);
+
+
+  var inputBindings = exports.inputBindings = new BindingRegistry();
+  var outputBindings = exports.outputBindings = new BindingRegistry();
+
   
     
   var InputBinding = exports.InputBinding = function() {
@@ -505,8 +577,17 @@
       };
     }
   });
-  registerInputBinding(textInputBinding, 0);
-  
+  inputBindings.register(textInputBinding, 'shiny.textInput');
+
+
+  var textareaInputBinding = {};
+  $.extend(textareaInputBinding, textInputBinding, {
+    find: function(scope) {
+      return $(scope).find('textarea');
+    }
+  });
+  inputBindings.register(textareaInputBinding, 'shiny.textareaInput');
+
   
   var numberInputBinding = {};
   $.extend(numberInputBinding, textInputBinding, {
@@ -521,7 +602,7 @@
         return numberVal;
     }
   });
-  registerInputBinding(numberInputBinding, 0);
+  inputBindings.register(numberInputBinding, 'shiny.numberInput');
 
 
   var sliderInputBinding = {};
@@ -564,7 +645,7 @@
       };
     }
   });
-  registerInputBinding(sliderInputBinding, 0);
+  inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
   
   
   // Select input
@@ -592,7 +673,7 @@
       $(el).off('.selectInputBinding');
     }
   });
-  registerInputBinding(selectInputBinding, 0);
+  inputBindings.register(selectInputBinding, 'shiny.selectInput');
 
   
 
@@ -601,13 +682,13 @@
     var shinyapp = exports.shinyapp = new ShinyApp();
 
     $('.shiny-text-output').each(function() {
-      shinyapp.bind(this.id, new LiveTextBinding(this));
+      shinyapp.bind(this.id, new TextOutputBinding(this));
     });
     $('.shiny-plot-output').each(function() {
-      shinyapp.bind(this.id, new LivePlotBinding(this));
+      shinyapp.bind(this.id, new PlotOutputBinding(this));
     });
     $('.shiny-html-output').each(function() {
-      shinyapp.bind(this.id, new LiveHTMLBinding(this));
+      shinyapp.bind(this.id, new HTMLOutputBinding(this));
     });
 
 
@@ -648,11 +729,13 @@
     function bindInputs(scope) {
       
       scope = $(scope);
+
+      var bindings = inputBindings.getBindings();
       
       var currentValues = {};
     
-      for (var i = 0; i < inputBindings.length; i++) {
-        var binding = inputBindings[i].binding;
+      for (var i = 0; i < bindings.length; i++) {
+        var binding = bindings[i].binding;
         var matches = binding.find(scope) || [];
         for (var j = 0; j < matches.length; j++) {
           var el = matches[j];

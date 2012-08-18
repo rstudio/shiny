@@ -55,7 +55,7 @@ shinyUI(pageWithSidebar(
 
 ### Tabs and Reactive Data
 
-Introducing tabs into our user-interface underlines the importance of creating reactive functions for shared data. In this example each tab provides it's own view of the dataset. If the dataset is expensive to compute then our user-interface might be quite slow to render. The server script below demonstrates how to calculate the data once in a reactive function and have the result be shared by all of the output tabs:
+Introducing tabs into our user-interface underlines the importance of creating reactive functions for shared data. In this example each tab provides its own view of the dataset. If the dataset is expensive to compute then our user-interface might be quite slow to render. The server script below demonstrates how to calculate the data once in a reactive function and have the result be shared by all of the output tabs:
 
 #### server.R
 
@@ -80,7 +80,7 @@ shinyServer(function(input, output) {
 
   # Generate a plot of the data. Also uses the inputs to build the 
   # plot label. Note that the dependencies on both the inputs and
-  # the data reactive function are both tracked, and all functions 
+  # the 'data' reactive function are both tracked, and all functions 
   # are called in the sequence implied by the dependency graph
   output$plot &lt;- reactivePlot(function() {
     dist &lt;- input$dist

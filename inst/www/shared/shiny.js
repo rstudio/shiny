@@ -482,9 +482,9 @@
     this.showProgress = function(el, show) {
       var RECALC_CLASS = 'recalculating';
       if (show)
-        $(el).addClass('RECALC_CLASS');
+        $(el).addClass(RECALC_CLASS);
       else
-        $(el).removeClass('RECALC_CLASS');
+        $(el).removeClass(RECALC_CLASS);
     };
   }).call(OutputBinding.prototype);
 
@@ -727,10 +727,6 @@
       }
     }
 
-    bindOutputs(document);
-
-
-
     function elementToValue(el) {
       if (el.type == 'checkbox' || el.type == 'radio')
         return el.checked ? true : false;
@@ -803,6 +799,7 @@
       return currentValues;
     }
     
+    bindOutputs(document);
     initialValues = bindInputs(document);
 
     function getMultiValue(input, exclusiveValue) {

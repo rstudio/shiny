@@ -102,12 +102,14 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
   
   # build slider
   sliderFragment <- list(
-    tags$head(
-      tags$link(rel="stylesheet", 
-                type="text/css", 
-                href="shared/slider/css/jquery.slider.min.css"),
-      
-      tags$script(src="shared/slider/js/jquery.slider.min.js")
+    singleton(
+      tags$head(
+        tags$link(rel="stylesheet", 
+                  type="text/css", 
+                  href="shared/slider/css/jquery.slider.min.css"),
+        
+        tags$script(src="shared/slider/js/jquery.slider.min.js")
+      )
     ),
     tags$input(id=inputId, type="slider", 
                name=inputId, value=paste(value, collapse=';'), class="jslider",

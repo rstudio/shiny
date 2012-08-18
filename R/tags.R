@@ -150,9 +150,12 @@ tagWriteChildren <- function(tag, textWriter, indent, context) {
       tagWrite(child, textWriter, indent, context)
     }
     else {
-      child <- normalizeText(child)
-      indentText <- paste(rep(" ", indent*3), collapse="")
-      textWriter(paste(indentText, child, "\n", sep=""))
+      # first call optional filter -- exit function if it returns false
+      if (is.null(context) || is.null(context$filter) || context$filter(child)) {
+        child <- normalizeText(child)
+        indentText <- paste(rep(" ", indent*3), collapse="")
+        textWriter(paste(indentText, child, "\n", sep=""))
+      }
     }
   }
 }
@@ -194,8 +197,11 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
     
     # special case for a single child text node (skip newlines and indentation)
     if ((length(tag$children) == 1) && is.character(tag$children[[1]]) ) {
-      text <- normalizeText(tag$children[[1]])
-      textWriter(paste(">", text, "</", tag$name, ">\n", sep=""))
+      if (is.null(context) || is.null(context$filter) 
+          || context$filter(tag$children[[1]])) {
+        text <- normalizeText(tag$children[[1]])
+        textWriter(paste(">", text, "</", tag$name, ">\n", sep=""))
+      }
     }
     else {
       textWriter(">\n")

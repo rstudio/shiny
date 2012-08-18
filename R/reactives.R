@@ -1,8 +1,48 @@
+Dependencies <- setRefClass(
+  'Dependencies',
+  fields = list(
+    .dependencies = 'Map'
+  ),
+  methods = list(
+    register = function() {
+      ctx <- .getReactiveEnvironment()$currentContext()
+      if (!.dependencies$containsKey(ctx$id)) {
+        .dependencies$set(ctx$id, ctx)
+        ctx$onInvalidate(function() {
+          .dependencies$remove(ctx$id)
+        })
+      }
+    },
+    invalidate = function() {
+      lapply(
+        .dependencies$values(),
+        function(ctx) {
+          ctx$invalidateHint()
+          ctx$invalidate()
+          NULL
+        }
+      )
+    },
+    invalidateHint = function() {
+      lapply(
+        .dependencies$values(),
+        function(dep.ctx) {
+          dep.ctx$invalidateHint()
+          NULL
+        })
+    }
+  )
+)
+
 Values <- setRefClass(
   'Values',
   fields = list(
     .values = 'environment',
-    .dependencies = 'environment'
+    .dependencies = 'environment',
+    # Dependencies for the list of names
+    .namesDeps = 'Dependencies',
+    # Dependencies for all values
+    .allDeps = 'Dependencies'
   ),
   methods = list(
     initialize = function() {
@@ -30,6 +70,10 @@ Values <- setRefClass(
           return(invisible())
         }
       }
+      else {
+        .namesDeps$invalidate()
+      }
+      .allDeps$invalidate()
       
       assign(key, value, pos=.values, inherits=F)
       dep.keys <- objects(
@@ -48,10 +92,18 @@ Values <- setRefClass(
       invisible()
     },
     mset = function(lst) {
-      lapply(names(lst),
+      lapply(base::names(lst),
              function(name) {
                .self$set(name, lst[[name]])
              })
+    },
+    names = function() {
+      .namesDeps$register()
+      return(ls(.values, all.names=T))
+    },
+    toList = function() {
+      .allDeps$register()
+      return(as.list(.values))
     }
   )
 )
@@ -76,11 +128,21 @@ Values <- setRefClass(
   x[['impl']]$get(name)
 }
 
+#' @S3method names reactvaluesreader
+names.reactvaluesreader <- function(x) {
+  x[['impl']]$names()
+}
+
+#' @S3method as.list reactvaluesreader
+as.list.reactvaluesreader <- function(x) {
+  x[['impl']]$toList()
+}
+
 Observable <- setRefClass(
   'Observable',
   fields = list(
     .func = 'function',
-    .dependencies = 'Map',
+    .dependencies = 'Dependencies',
     .initialized = 'logical',
     .value = 'ANY'
   ),
@@ -91,7 +153,6 @@ Observable <- setRefClass(
              "or more parameters; only functions without parameters can be ",
              "reactive.")
       .func <<- func
-      .dependencies <<- Map$new()
       .initialized <<- F
     },
     getValue = function() {
@@ -100,13 +161,7 @@ Observable <- setRefClass(
         .self$.updateValue()
       }
       
-      ctx <- .getReactiveEnvironment()$currentContext()
-      if (!.dependencies$containsKey(ctx$id)) {
-        .dependencies$set(ctx$id, ctx)
-        ctx$onInvalidate(function() {
-          .dependencies$remove(ctx$id)
-        })
-      }
+      .dependencies$register()
       
       if (identical(class(.value), 'try-error'))
         stop(attr(.value, 'condition'))
@@ -120,24 +175,13 @@ Observable <- setRefClass(
         .self$.updateValue()
       })
       ctx$onInvalidateHint(function() {
-        lapply(
-          .dependencies$values(),
-          function(dep.ctx) {
-            dep.ctx$invalidateHint()
-            NULL
-          })
+        .dependencies$invalidateHint()
       })
       ctx$run(function() {
         .value <<- try(.func(), silent=F)
       })
       if (!identical(old.value, .value)) {
-        lapply(
-          .dependencies$values(),
-          function(dep.ctx) {
-            dep.ctx$invalidate()
-            NULL
-          }
-        )
+        .dependencies$invalidate()
       }
     }
   )

@@ -48,16 +48,40 @@ strong <- function(...) tags$strong(...)
 em <- function(...) tags$em(...)
 
 
+#' Include Content Only Once
+#' 
+#' Use \code{singleton} to wrap contents (tag, text, HTML, or lists) that should
+#' be included in the generated document only once, yet may appear in the 
+#' document-generating code more than once. Only the first appearance of the 
+#' content (in document order) will be used. Useful for custom components that 
+#' have JavaScript files or stylesheets.
+#' 
+#' @param A \code{\link{tag}}, text, \code{\link{HTML}}, or list.
+#'
+#' @export
+singleton <- function(x) {
+  class(x) <- c(class(x), 'shiny.singleton')
+  return(x)
+}
+
 renderPage <- function(ui, connection) {
   
   # provide a filter so we can intercept head tag requests
   context <- new.env()
   context$head <- character()
-  context$filter <- function(tag) {
-    if (identical(tag$name, "head")) {
+  context$singletons <- character()
+  context$filter <- function(content) {
+    if (inherits(content, 'shiny.singleton')) {
+      sig <- digest(content, algo='sha1')
+      if (sig %in% context$singletons)
+        return(FALSE)
+      context$singletons <- c(sig, context$singletons)
+    }
+    
+    if (isTag(content) && identical(content$name, "head")) {
       textConn <- textConnection(NULL, "w") 
       textConnWriter <- function(text) cat(text, file = textConn)
-      tagWriteChildren(tag, textConnWriter, 1, context)
+      tagWriteChildren(content, textConnWriter, 1, context)
       context$head <- append(context$head, textConnectionValue(textConn))
       close(textConn)
       return (FALSE)
@@ -81,7 +105,7 @@ renderPage <- function(ui, connection) {
                '   <script src="shared/jquery.js" type="text/javascript"></script>',
                '   <script src="shared/shiny.js" type="text/javascript"></script>',
                '   <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
-               context$head[!duplicated(context$head)],
+               context$head,
                '</head>',
                '<body>', 
                recursive=TRUE),

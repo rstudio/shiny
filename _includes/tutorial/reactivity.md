@@ -45,7 +45,7 @@ To turn reactive values into outputs that can viewed on the web page, we assigne
 })
 </code></pre>
 
-This function will be re-executed (and it's output re-rendered in the browser) whenever either the `datasetInput` or `input$obs` value changes.
+This function will be re-executed (and its output re-rendered in the browser) whenever either the `datasetInput` or `input$obs` value changes.
 
 ### Back to the Code
 
@@ -99,7 +99,7 @@ library(datasets)
 # Define server logic required to summarize and view the selected dataset
 shinyServer(function(input, output) {
 
-  # By declaring databaseInput as a reactive function we ensure that:
+  # By declaring datasetInput as a reactive function we ensure that:
   #
   #  1) It is only called when the inputs it depends on changes
   #  2) The computation and result are shared by all the callers (it 
@@ -145,4 +145,4 @@ shinyServer(function(input, output) {
 })
 </code></pre>
 
-We've reviewed a lot code and covered a lot of conceptual ground in the first three examples. The next section focuses on the mechanics of building a Shiny appliation from the ground up and also covers tips on how to run and debug Shiny applications.
+We've reviewed a lot code and covered a lot of conceptual ground in the first three examples. The next section focuses on the mechanics of building a Shiny application from the ground up and also covers tips on how to run and debug Shiny applications.

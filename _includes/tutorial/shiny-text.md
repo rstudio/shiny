@@ -47,7 +47,7 @@ The server side of the application has also gotten a bit more complicated. Now w
 * A reactive function to return the dataset corresponding to the user choice
 * Two other reactive functions (`reactivePrint` and `reactiveTable`) that return the output$summary and output$view values
 
-These reactive functions work similarly to the `reactivePlot` function used in the first example: by declaring a reactive function you tell Shiny that it should only be executed when it's dependencies change. In this case that's either one of the user input values (input$dataset or input$n)
+These reactive functions work similarly to the `reactivePlot` function used in the first example: by declaring a reactive function you tell Shiny that it should only be executed when its dependencies change. In this case that's either one of the user input values (input$dataset or input$n)
 
 #### server.R
 

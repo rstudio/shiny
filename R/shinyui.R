@@ -56,7 +56,7 @@ em <- function(...) tags$em(...)
 #' content (in document order) will be used. Useful for custom components that 
 #' have JavaScript files or stylesheets.
 #' 
-#' @param A \code{\link{tag}}, text, \code{\link{HTML}}, or list.
+#' @param x A \code{\link{tag}}, text, \code{\link{HTML}}, or list.
 #'
 #' @export
 singleton <- function(x) {

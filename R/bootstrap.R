@@ -171,13 +171,14 @@ textInput <- function(inputId, label, value = "") {
 #' @param value Initial value
 #' @param min Minimum allowed value
 #' @param max Maximum allowed value
+#' @param step Interval to use when stepping between min and max
 #' @return A numeric input control that can be added to a UI definition.
 #' 
 #' @examples
 #' numericInput("obs", "Observations:", 10, 
 #'              min = 1, max = 100)
 #' @export
-numericInput <- function(inputId, label, value, min = NA, max = NA) {
+numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
   
   # build input tag
   inputTag <- tags$input(id = inputId, type = "number", value = value)
@@ -185,6 +186,8 @@ numericInput <- function(inputId, label, value, min = NA, max = NA) {
     inputTag$attribs$min = min
   if (!is.na(max))
     inputTag$attribs$max = max
+  if (!is.na(step))
+    inputTag$attribs$step = step
   
   list(
     tags$label(label),

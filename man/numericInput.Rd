@@ -2,7 +2,8 @@
 \alias{numericInput}
 \title{Create a numeric input control}
 \usage{
-  numericInput(inputId, label, value, min = NA, max = NA)
+  numericInput(inputId, label, value, min = NA, max = NA,
+    step = NA)
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -15,6 +16,9 @@
   \item{min}{Minimum allowed value}
 
   \item{max}{Maximum allowed value}
+
+  \item{step}{Interval to use when stepping between min and
+  max}
 }
 \value{
   A numeric input control that can be added to a UI

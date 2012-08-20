@@ -1,0 +1,12 @@
+shiny 0.1.3
+--------------------------------------------------------------------------------
+
+* Introduce Shiny.inputBindings.register JS API and InputBinding class, for
+  creating custom input controls
+* Fix issue #10: Plots in tabsets not rendered
+
+
+shiny 0.1.2
+--------------------------------------------------------------------------------
+
+Initial private beta release!

@@ -134,7 +134,7 @@ names.reactvaluesreader <- function(x) {
 }
 
 #' @S3method as.list reactvaluesreader
-as.list.reactvaluesreader <- function(x) {
+as.list.reactvaluesreader <- function(x, ...) {
   x[['impl']]$toList()
 }
 

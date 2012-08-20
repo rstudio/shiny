@@ -850,24 +850,29 @@
     configureMultiInput('input[type="checkbox"]', false);
     configureMultiInput('input[type="radio"]', true);
 
+    // The server needs to know the size of each plot output element, in case
+    // the plot is auto-sizing
     $('.shiny-plot-output').each(function() {
       var width = this.offsetWidth;
       var height = this.offsetHeight;
       initialValues['.shinyout_' + this.id + '_width'] = width;
       initialValues['.shinyout_' + this.id + '_height'] = height;
-      var self = this;
-      $(window).resize(debounce(500, function() {
-        if (self.offsetWidth != width) {
-          width = self.offsetWidth;
-          inputs.setInput('.shinyout_' + self.id + '_width', width);
-        }
-        if (self.offsetHeight != height) {
-          height = self.offsetHeight;
-          inputs.setInput('.shinyout_' + self.id + '_height', height);
-        }
-      }));
     });
+    function sendPlotSize() {
+      $('.shiny-plot-output').each(function() {
+        inputs.setInput('.shinyout_' + this.id + '_width', this.offsetWidth);
+        inputs.setInput('.shinyout_' + this.id + '_height', this.offsetHeight);
+      });
+    }
+    // The size of each plot may change either because the browser window was
+    // resized, or because a tab was shown/hidden (hidden elements report size
+    // of 0x0). It's OK to over-report sizes because the input pipeline will
+    // filter out values that haven't changed.
+    $(window).resize(debounce(500, sendPlotSize));
+    $(window).on(
+      'shown', '[data-toggle="tab"], [data-toggle="pill"]', sendPlotSize);
 
+    // We've collected all the initial values--start the server process!
     shinyapp.connect(initialValues);
   } // function initShiny()
 

@@ -906,8 +906,7 @@
     // of 0x0). It's OK to over-report sizes because the input pipeline will
     // filter out values that haven't changed.
     $(window).resize(debounce(500, sendPlotSize));
-    $(window).on(
-      'shown', '[data-toggle="tab"], [data-toggle="pill"]', sendPlotSize);
+    $('body').on('shown.sendPlotSize hidden.sendPlotSize', '*', sendPlotSize);
 
     // We've collected all the initial values--start the server process!
     shinyapp.connect(initialValues);

@@ -2,19 +2,24 @@
 \alias{tabPanel}
 \title{Create a tab panel}
 \usage{
-  tabPanel(title, ...)
+  tabPanel(title, ..., value = NULL)
 }
 \arguments{
   \item{title}{Display title for tab}
 
   \item{...}{UI elements to include within the tab}
+
+  \item{value}{The value that should be sent when
+  \code{tabsetPanel} reports that this tab is selected. If
+  omitted and \code{tabsetPanel} has an \code{id}, then the
+  title will be used.}
 }
 \value{
-  A tab that can be passed to \link{tabsetPanel}
+  A tab that can be passed to \code{\link{tabsetPanel}}
 }
 \description{
-  Create a tab panel that can be inluded within a
-  \link{tabsetPanel}.
+  Create a tab panel that can be included within a
+  \code{\link{tabsetPanel}}.
 }
 \examples{
 # Show a tabset that includes a plot, summary, and

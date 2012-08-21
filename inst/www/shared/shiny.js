@@ -683,6 +683,43 @@
   });
   inputBindings.register(selectInputBinding, 'shiny.selectInput');
 
+
+  var bootstrapTabInputBinding = new InputBinding();
+  $.extend(bootstrapTabInputBinding, {
+    find: function(scope) {
+      return scope.find('ul.nav.nav-tabs');
+    },
+    getValue: function(el) {
+      var anchor = $(el).children('li.active').children('a');
+      if (anchor.length == 1)
+        return this.$getTabName(anchor);
+      return null;
+    },
+    setValue: function(el, value) {
+      var self = this;
+      var anchors = $(el).children('li').children('a');
+      anchors.each(function() {
+        if (self.$getTabName($(this)) === value) {
+          $(this).tab('show');
+          return false;
+        }
+      });
+    },
+    subscribe: function(el, callback) {
+      var self = this;
+      $(el).on('shown.bootstrapTabInputBinding', function(event) {
+        callback(self, el);
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.bootstrapTabInputBinding');
+    },
+    $getTabName: function(anchor) {
+      return anchor.attr('data-value') || anchor.text();
+    }
+  });
+  inputBindings.register(bootstrapTabInputBinding, 'shiny.bootstrapTabInput');
+
   
 
   function initShiny() {

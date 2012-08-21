@@ -443,12 +443,15 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 
 #' Create a tab panel
 #' 
-#' Create a tab panel that can be inluded within a \link{tabsetPanel}. 
+#' Create a tab panel that can be included within a \code{\link{tabsetPanel}}.
 #' 
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
-#' @return A tab that can be passed to \link{tabsetPanel}
-#' 
+#' @param value The value that should be sent when \code{tabsetPanel} reports 
+#'   that this tab is selected. If omitted and \code{tabsetPanel} has an 
+#'   \code{id}, then the title will be used.
+#' @return A tab that can be passed to \code{\link{tabsetPanel}}
+#'   
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
 #' # table view of the generated distribution
@@ -460,19 +463,22 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'   )
 #' )
 #' @export
-tabPanel <- function(title, ...) {
-  div(class="tab-pane", title=title, ...)
+tabPanel <- function(title, ..., value = NULL) {
+  div(class="tab-pane", title=title, `data-value`=value, ...)
 }
 
 #' Create a tabset panel
 #' 
-#' Create a tabset that contains \link{tabPanel} elements. Tabsets
-#' are useful for dividing output into multiple independently viewable
-#' sections.
+#' Create a tabset that contains \code{\link{tabPanel}} elements. Tabsets are
+#' useful for dividing output into multiple independently viewable sections.
 #' 
-#' @param ... \link{tabPanel} elements to include in the tabset
-#' @return A tabset that can be passed to \link{mainPanel}
-#' 
+#' @param ... \code{\link{tabPanel}} elements to include in the tabset
+#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your server 
+#'   logic to determine which of the current tabs is active. The value will 
+#'   correspond to the \code{value} argument that is passed to 
+#'   \code{\link{tabPanel}}.
+#' @return A tabset that can be passed to \code{\link{mainPanel}}
+#'   
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
 #' # table view of the generated distribution
@@ -484,24 +490,31 @@ tabPanel <- function(title, ...) {
 #'   )
 #' )
 #' @export
-tabsetPanel <- function(...) {
+tabsetPanel <- function(..., id = NULL) {
   
   # build tab-nav and tab-content divs
   tabs <- list(...)
-  tabNavList <- tags$ul(class = "nav nav-tabs")
+  tabNavList <- tags$ul(class = "nav nav-tabs", id = id)
   tabContent <- tags$div(class = "tab-content")
   firstTab <- TRUE
   tabsetId <- as.integer(stats::runif(1, 1, 10000))
   tabId <- 1
   for (divTag in tabs) {
     # compute id and assign it to the div
-    id <- paste("tab", tabsetId, tabId, sep="-")
-    divTag$attribs$id <- id
+    thisId <- paste("tab", tabsetId, tabId, sep="-")
+    divTag$attribs$id <- thisId
     tabId <- tabId + 1
     
+    tabValue <- divTag$attribs$`data-value`
+    if (!is.null(tabValue) && is.null(id)) {
+      stop("tabsetPanel doesn't have an id assigned, but one of its tabPanels ",
+           "has a value. The value won't be sent without an id.")
+    }
+
     # create the li tag
-    liTag <- tags$li(tags$a(href=paste("#", id, sep=""),
+    liTag <- tags$li(tags$a(href=paste("#", thisId, sep=""),
                             `data-toggle` = "tab", 
+                            `data-value` = tabValue,
                             divTag$attribs$title))
     
     # set the first tab as active

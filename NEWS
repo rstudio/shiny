@@ -3,6 +3,7 @@ shiny 0.1.4
 
 * Allow Bootstrap tabsets to act as reactive inputs; their value indicates which
   tab is active
+* Upgrade to Bootstrap 2.1
 
 
 shiny 0.1.3
@@ -11,6 +12,8 @@ shiny 0.1.3
 * Introduce Shiny.inputBindings.register JS API and InputBinding class, for
   creating custom input controls
 * Add `step` parameter to numericInput
+* Read names of input using `names(input)`
+* Access snapshot of input as a list using `as.list(input)` 
 * Fix issue #10: Plots in tabsets not rendered
 
 

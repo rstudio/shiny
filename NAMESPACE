@@ -1,6 +1,7 @@
 export(a)
 export(animationOptions)
 export(br)
+export(checkboxGroupInput)
 export(checkboxInput)
 export(code)
 export(div)

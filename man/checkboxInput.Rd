@@ -1,25 +1,29 @@
 \name{checkboxInput}
 \alias{checkboxInput}
-\title{Create a checkbox input control}
+\title{Checkbox Input Control}
 \usage{
   checkboxInput(inputId, label, value = FALSE)
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
-  value to}
+  value to.}
 
-  \item{label}{Display label for the control}
+  \item{label}{Display label for the control.}
 
-  \item{value}{Initial value}
+  \item{value}{Initial value (\code{TRUE} or
+  \code{FALSE}).}
 }
 \value{
   A checkbox control that can be added to a UI definition.
 }
 \description{
   Create a checkbox that can be used to specify logical
-  values
+  values.
 }
 \examples{
 checkboxInput("outliers", "Show outliers", FALSE)
+}
+\seealso{
+  \code{\link{checkboxGroupInput}}
 }
 

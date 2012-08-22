@@ -196,14 +196,16 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 }
 
 
-#' Create a checkbox input control
+#' Checkbox Input Control
 #' 
-#' Create a checkbox that can be used to specify logical values
+#' Create a checkbox that can be used to specify logical values.
 #' 
-#' @param inputId Input variable to assign the control's value to
-#' @param label Display label for the control
-#' @param value Initial value
+#' @param inputId Input variable to assign the control's value to.
+#' @param label Display label for the control.
+#' @param value Initial value (\code{TRUE} or \code{FALSE}).
 #' @return A checkbox control that can be added to a UI definition.
+#' 
+#' @seealso \code{\link{checkboxGroupInput}}
 #' 
 #' @examples
 #' checkboxInput("outliers", "Show outliers", FALSE)
@@ -213,6 +215,53 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   if (value)
     inputTag$attribs$checked <- "checked"
   tags$label(class = "checkbox", inputTag, label)
+}
+
+
+#' Checkbox Group Input Control
+#' 
+#' Create a group of checkboxes that can be used to toggle multiple choices 
+#' independently. The server will receive the input as a character vector of the
+#' selected values.
+#' 
+#' @param inputId Input variable to assign the control's value to.
+#' @param label Display label for the control.
+#' @param choices List of values to show checkboxes for. If elements of the list
+#'   are named then that name rather than the value is displayed to the user.
+#' @param selected Names of items that should be initially selected, if any.
+#' @return A list of HTML elements that can be added to a UI definition.
+#'   
+#' @seealso \code{\link{checkboxInput}}
+#'   
+#' @examples
+#' checkboxGroupInput("variable", "Variable:",
+#'                    list("Cylinders" = "cyl", 
+#'                         "Transmission" = "am", 
+#'                         "Gears" = "gear"))
+#'                  
+#' @export
+checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
+  # resolve names
+  choices <- choicesWithNames(choices)
+  
+  checkboxes <- list()
+  for (choiceName in names(choices)) {
+    
+    checkbox <- tags$input(name = inputId, type="checkbox",
+                           value = choices[[choiceName]])
+    
+    if (choiceName %in% selected)
+      checkbox$attribs$selected <- 'selected'
+    
+    checkboxes[[length(checkboxes)+1]] <- checkbox
+    checkboxes[[length(checkboxes)+1]] <- choiceName
+    checkboxes[[length(checkboxes)+1]] <- tags$br()
+  } 
+  
+  # return label and select tag
+  tags$div(class='control-group',
+           controlLabel(inputId, label),
+           checkboxes)
 }
 
 

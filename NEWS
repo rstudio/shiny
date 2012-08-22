@@ -4,6 +4,8 @@ shiny 0.1.4
 * Allow Bootstrap tabsets to act as reactive inputs; their value indicates which
   tab is active
 * Upgrade to Bootstrap 2.1
+* Add `checkboxGroupInput` control, which presents a list of checkboxes and
+  returns a vector of the selected values
 
 
 shiny 0.1.3

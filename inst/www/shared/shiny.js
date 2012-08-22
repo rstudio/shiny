@@ -325,7 +325,11 @@
     this.createSocket = function () {
       var self = this;
 
-      var socket = new WebSocket('ws://' + window.location.host, 'shiny');
+      var createSocketFunc = exports.createSocket || function() {
+        return new WebSocket('ws://' + window.location.host, 'shiny');
+      };
+
+      var socket = createSocketFunc();
       socket.onopen = function() {
         socket.send(JSON.stringify({
           method: 'init',

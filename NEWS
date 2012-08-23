@@ -6,6 +6,8 @@ shiny 0.1.4
 * Upgrade to Bootstrap 2.1
 * Add `checkboxGroupInput` control, which presents a list of checkboxes and
   returns a vector of the selected values
+* Add `addResourcePath`, intended for reusable component authors to access CSS,
+  JavaScript, image files, etc. from their package directories
 
 
 shiny 0.1.3

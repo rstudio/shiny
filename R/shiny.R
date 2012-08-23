@@ -243,6 +243,81 @@ registerClient <- function(client) {
   .globals$clients <- append(.globals$clients, client)
 }
 
+
+.globals$resources <- list()
+
+#' Resource Publishing
+#' 
+#' Adds a directory of static resources to Shiny's web server, with the given 
+#' path prefix. Primarily intended for package authors to make supporting 
+#' JavaScript/CSS files available to their components.
+#' 
+#' @param prefix The URL prefix (without slashes). Valid characters are a-z, 
+#'   A-Z, 0-9, hyphen, and underscore; and must begin with a-z or A-Z. For 
+#'   example, a value of 'foo' means that any request paths that begin with 
+#'   '/foo' will be mapped to the given directory.
+#' @param directoryPath The directory that contains the static resources to be 
+#'   served.
+#'   
+#' @details You can call \code{addResourcePath} multiple times for a given 
+#'   \code{prefix}; only the most recent value will be retained. If the 
+#'   normalized \code{directoryPath} is different than the directory that's 
+#'   currently mapped to the \code{prefix}, a warning will be issued.
+#'   
+#' @seealso \code{\link{singleton}}
+#' 
+#' @examples
+#' addResourcePath('datasets', system.file('data', package='datasets'))
+#'   
+#' @export
+addResourcePath <- function(prefix, directoryPath) {
+  prefix <- prefix[1]
+  if (!grepl('^[a-z][a-z0-9\\-_]*$', prefix, ignore.case=T, perl=T)) {
+    stop("addResourcePath called with invalid prefix; please see documentation")
+  }
+  
+  if (prefix %in% c('shared')) {
+    stop("addResourcePath called with the reserved prefix '", prefix, "'; ",
+         "please use a different prefix")
+  }
+  
+  directoryPath <- normalizePath(directoryPath, mustWork=T)
+  
+  existing <- .globals$resources[[prefix]]
+  
+  if (!is.null(existing)) {
+    if (existing$directoryPath != directoryPath) {
+      warning("Overriding existing prefix ", prefix, " => ",
+              existing$directoryPath)
+    }
+  }
+  
+  message('Shiny URLs starting with /', prefix, ' will mapped to ', directoryPath)
+  
+  .globals$resources[[prefix]] <- list(directoryPath=directoryPath,
+                                       func=staticHandler(directoryPath))
+}
+
+resourcePathHandler <- function(ws, header) {
+  path <- header$RESOURCE
+  
+  match <- regexpr('^/([^/]+)/', path, perl=T)
+  if (match == -1)
+    return(NULL)
+  len <- attr(match, 'capture.length')
+  prefix <- substr(path, 2, 2 + len - 1)
+  
+  resInfo <- .globals$resources[[prefix]]
+  if (is.null(resInfo))
+    return(NULL)
+  
+  suffix <- substr(path, 2 + len, nchar(path))
+  
+  header$RESOURCE <- suffix
+  
+  return(resInfo$func(ws, header))
+}
+
 .globals$server <- NULL
 #' Define Server Functionality
 #' 
@@ -312,7 +387,10 @@ startApp <- function(port=8101L) {
   
   ws_env <- create_server(
     port=port,
-    webpage=httpServer(c(dynamicHandler(uiR), wwwDir, sys.www.root)))
+    webpage=httpServer(c(dynamicHandler(uiR),
+                         wwwDir,
+                         sys.www.root,
+                         resourcePathHandler)))
   
   set_callback('established', function(WS, ...) {
     shinyapp <- ShinyApp$new(WS)
@@ -423,6 +501,10 @@ runApp <- function(appDir=getwd(),
                    launch.browser=getOption('shiny.launch.browser',
                                             interactive())) {
 
+  # Make warnings print immediately
+  ops <- options(warn = 1)
+  on.exit(options(ops))
+  
   orig.wd <- getwd()
   setwd(appDir)
   on.exit(setwd(orig.wd))

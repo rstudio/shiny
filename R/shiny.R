@@ -40,7 +40,7 @@ ShinyApp <- setRefClass(
           .invalidatedOutputErrors$remove(name)
           .invalidatedOutputValues$remove(name)
           
-          if (identical(class(value), 'try-error')) {
+          if (inherits(value, 'try-error')) {
             cond <- attr(value, 'condition')
             .invalidatedOutputErrors$set(
               name, 

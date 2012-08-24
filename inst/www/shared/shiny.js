@@ -356,7 +356,7 @@
         data: values
       });
 
-      if (this.$socket.readyState == WebSocket.CONNECTING) {
+      if (!this.$socket.readyState) {
         this.$pendingMessages.push(msg);
       }
       else {

@@ -322,6 +322,10 @@
       this.$initialInput = initialInput;
     };
 
+    this.isConnected = function() {
+      return !!this.$socket;
+    };
+
     this.createSocket = function () {
       var self = this;
 
@@ -417,6 +421,15 @@
         throw "Duplicate binding for ID " + id;
       this.$bindings[id] = binding;
       return binding;
+    };
+    this.unbindOutput = function(id, binding) {
+      if (this.$bindings[id] === binding) {
+        delete this.$bindings[id];
+        return true;
+      }
+      else {
+        return false;
+      }
     };
   }).call(ShinyApp.prototype);
 
@@ -748,6 +761,9 @@
         }
       });
 
+      if (scope == undefined)
+        scope = document;
+
       scope = $(scope);
 
       var bindings = outputBindings.getBindings();
@@ -764,7 +780,24 @@
             continue;
 
           shinyapp.bindOutput(id, new OutputBindingAdapter(el, binding));
+          $(el).data('shiny-output-binding', binding);
+          $(el).addClass('shiny-bound-output');
         }
+      }
+    }
+
+    function unbindOutputs(scope) {
+      if (scope == undefined)
+        scope = document;
+
+      var outputs = $(scope).find('.shiny-bound-output');
+      for (var i = 0; i < outputs.length; i++) {
+        var binding = $(outputs[i]).data('shiny-output-binding');
+        if (!binding)
+          continue;
+        var id = binding.getId(outputs[i]);
+        shinyapp.unbindOutput(id, binding);
+        $(outputs[i]).removeClass('shiny-bound-output');
       }
     }
 
@@ -802,6 +835,9 @@
     }
     
     function bindInputs(scope) {
+
+      if (scope == undefined)
+        scope = document;
       
       scope = $(scope);
 
@@ -822,6 +858,8 @@
     
           currentValues[id] = binding.getValue(el);
           binding.subscribe(el, valueChangeCallback);
+          $(el).data('shiny-input-binding', binding);
+          $(el).addClass('shiny-bound-input');
           var ratePolicy = binding.getRatePolicy();
           if (ratePolicy != null) {
             inputsRate.setRatePolicy(
@@ -834,14 +872,37 @@
             binding: binding,
             node: el
           };
+
+          if (shinyapp.isConnected()) {
+            valueChangeCallback(binding, el, false);
+          }
         }
       }
     
       return currentValues;
     }
+
+    function unbindInputs(scope) {
+      if (scope == undefined)
+        scope = document;
+
+      var inputs = $(scope).find('.shiny-bound-input');
+      for (var i = 0; i < inputs.length; i++) {
+        var binding = $(inputs[i]).data('shiny-input-binding');
+        if (!binding)
+          continue;
+        var id = binding.getId(inputs[i]);
+        $(inputs[i]).removeClass('shiny-bound-input');
+        delete boundInputs[id];
+        binding.unsubscribe(inputs[i]);
+      }
+    }
     
     bindOutputs(document);
     initialValues = bindInputs(document);
+    exports.bindOutputs = bindOutputs;
+    exports.bindInputs = bindInputs;
+    exports.unbindInputs = unbindInputs;
 
     function getMultiValue(input, exclusiveValue) {
       if (!input.name)

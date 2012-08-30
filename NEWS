@@ -8,6 +8,9 @@ shiny 0.1.4
   returns a vector of the selected values
 * Add `addResourcePath`, intended for reusable component authors to access CSS,
   JavaScript, image files, etc. from their package directories
+* Add Shiny.bindInputs(scope), .unbindInputs(scope), .bindOutputs(scope), and
+  .unbindOutputs(scope) JS API calls to allow dynamic binding/unbinding of HTML
+  elements
 
 
 shiny 0.1.3

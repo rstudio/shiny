@@ -76,10 +76,7 @@ ShinyApp <- setRefClass(
       json <- toJSON(list(errors=as.list(errors),
                           values=as.list(values)))
 
-      if (getOption('shiny.trace', F))
-        message("SEND ", json)
-
-      websocket_write(json, .websocket)
+      .write(json)
     },
     showProgress = function(id) {
       'Send a message to the client that recalculation of the output identified
@@ -93,9 +90,14 @@ ShinyApp <- setRefClass(
       
       json <- toJSON(list(progress=list(id)))
       
+      .write(json)
+    },
+    sendResponse = function(requestMsg, value) {
+      .write(toJSON(list(response=list(tag=requestMsg$tag, value=value))))
+    },
+    .write = function(json) {
       if (getOption('shiny.trace', F))
-        message("SEND ", json)
-      
+        message('SEND ', json)
       websocket_write(json, .websocket)
     }
   )
@@ -356,6 +358,31 @@ shinyServer <- function(func) {
   invisible()
 }
 
+decodeMessage <- function(data) {
+  readInt <- function(pos) {
+    packBits(rawToBits(data[pos:(pos+3)]), type='integer')
+  }
+  
+  if (readInt(1) != 0x01020202L)
+    return(fromJSON(rawToChar(data), asText=T, simplify=F))
+  
+  i <- 5
+  parts <- list()
+  while (i <= length(data)) {
+    length <- readInt(i)
+    i <- i + 4
+    if (length != 0)
+      parts <- append(parts, list(data[i:(i+length-1)]))
+    else
+      parts <- append(parts, list(raw(0)))
+    i <- i + length
+  }
+  
+  mainMessage <- decodeMessage(parts[[1]])
+  mainMessage$blobs <- parts[2:length(parts)]
+  return(mainMessage)
+}
+
 # Instantiates the app in the current working directory.
 # port - The TCP port that the application should listen on.
 startApp <- function(port=8101L) {
@@ -402,16 +429,20 @@ startApp <- function(port=8101L) {
   }, ws_env)
   
   set_callback('receive', function(DATA, WS, ...) {
-    if (getOption('shiny.trace', F))
-      message("RECV ", rawToChar(DATA))
+    if (getOption('shiny.trace', F)) {
+      if (as.raw(0) %in% DATA)
+        message("RECV ", '$$binary data$$')
+      else
+        message("RECV ", rawToChar(DATA))
+    }
     
     if (identical(charToRaw("\003\xe9"), DATA))
       return()
     
     shinyapp <- apps$get(wsToKey(WS))
     
-    msg <- fromJSON(rawToChar(DATA), asText=T, simplify=F)
-    
+    msg <- decodeMessage(DATA)
+
     # Do our own list simplifying here. sapply/simplify2array give names to
     # character vectors, which is rarely what we want.
     if (!is.null(msg$data)) {

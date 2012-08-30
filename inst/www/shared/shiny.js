@@ -4,6 +4,10 @@
 
   var exports = window.Shiny = window.Shiny || {};
 
+  function randomId() {
+    return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
+  }
+
   var Invoker = function(target, func) {
     this.target = target;
     this.func = func;
@@ -310,6 +314,8 @@
     this.$bindings = {};
     this.$values = {};
     this.$pendingMessages = [];
+    this.$activeRequests = {};
+    this.$nextRequestId = 0;
   };
 
   (function() {
@@ -330,7 +336,9 @@
       var self = this;
 
       var createSocketFunc = exports.createSocket || function() {
-        return new WebSocket('ws://' + window.location.host, 'shiny');
+        var ws = new WebSocket('ws://' + window.location.host, 'shiny');
+        ws.binaryType = 'arraybuffer';
+        return ws;
       };
 
       var socket = createSocketFunc();
@@ -360,6 +368,83 @@
         data: values
       });
 
+      this.$sendMsg(msg);
+    };
+
+    // NB: Including blobs will cause IE to break!
+    // TODO: Make blobs work with Internet Explorer
+    //
+    // Websocket messages are normally one-way--i.e. the client passes a
+    // message to the server but there is no way for the server to provide
+    // a response to that specific message. makeRequest provides a way to
+    // do asynchronous RPC over websocket. Each request has a method name
+    // and arguments, plus optionally one or more binary blobs can be
+    // included as well. The request is tagged with a unique number that
+    // the server will use to label the corresponding response.
+    //
+    // @param method A string that tells the server what logic to run.
+    // @param args An array of objects that should also be passed to the
+    //   server in JSON-ified form.
+    // @param onSuccess A function that will be called back if the server
+    //   responds with success. If the server provides a value in the
+    //   response, the function will be called with it as the only argument.
+    // @param onError A function that will be called back if the server
+    //   responds with error, or if the request fails for any other reason.
+    //   The parameter to onError will be an error object or message (format
+    //   TBD).
+    // @param blobs Optionally, an array of Blob, ArrayBuffer, or string
+    //   objects that will be made available to the server as part of the
+    //   request. Strings will be encoded using UTF-8.
+    this.makeRequest = function(method, args, onSuccess, onError, blobs) {
+      var requestId = this.$nextRequestId;
+      while (this.$activeRequests[requestId]) {
+        requestId = (requestId + 1) % 1000000000;
+      }
+      this.$nextRequestId = requestId + 1;
+
+      this.$activeRequests[requestId] = {
+        onSuccess: onSuccess,
+        onError: onError
+      };
+
+      var msg = JSON.stringify({
+        method: method,
+        args: args,
+        tag: requestId
+      });
+
+      if (blobs) {
+        // We have binary data to transfer; form a different kind of packet.
+        // Start with a 4-byte signature, then for each blob, emit 4 bytes for
+        // the length followed by the blob. The json payload is UTF-8 encoded
+        // and used as the first blob.
+
+        function uint32_to_buf(val) {
+          var buffer = new ArrayBuffer(4);
+          var view = new DataView(buffer);
+          view.setUint32(0, val, true); // little-endian
+          return buffer;
+        }
+
+        var payload = [];
+        payload.push(uint32_to_buf(0x01020202)); // signature
+
+        var jsonBuf = new Blob([msg]);
+        payload.push(uint32_to_buf(jsonBuf.size));
+        payload.push(jsonBuf);
+
+        for (var i = 0; i < blobs.length; i++) {
+          payload.push(uint32_to_buf(blobs[i].byteLength || blobs[i].size || 0));
+          payload.push(blobs[i]);
+        }
+
+        msg = new Blob(payload);
+      }
+
+      this.$sendMsg(msg);
+    };
+
+    this.$sendMsg = function(msg) {
       if (!this.$socket.readyState) {
         this.$pendingMessages.push(msg);
       }
@@ -412,6 +497,18 @@
           }
         }
       }
+      if (msgObj.response) {
+        var resp = msgObj.response;
+        var requestId = resp.tag;
+        var request = this.$activeRequests[requestId];
+        if (request) {
+          delete this.$activeRequests[requestId];
+          if ('value' in resp)
+            request.onSuccess(resp.value);
+          else
+            request.onError(resp.error);
+        }
+      };
     };
 
     this.bindOutput = function(id, binding) {

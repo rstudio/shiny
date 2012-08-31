@@ -196,6 +196,32 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 }
 
 
+#' File Upload Control
+#' 
+#' Create a file upload control that can be used to upload one or more files.
+#' 
+#' @param inputId Input variable to assign the control's value to.
+#' @param label Display label for the control.
+#' @param multiple Whether the user should be allowed to select and upload 
+#'   multiple files at once.
+#' @param accept A character vector of MIME types; gives the browser a hint of 
+#'   what kind of files the server is expecting.
+#'   
+#' @export
+fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
+  inputTag <- tags$input(id = inputId, type = "file")
+  if (multiple)
+    inputTag$attribs$multiple <- "multiple"
+  if (length(accept) > 0)
+    inputTag$attribs$accept <- paste(accept, collapse=',')
+  
+  list(
+    tags$label(label),
+    inputTag
+  )
+}
+
+
 #' Checkbox Input Control
 #' 
 #' Create a checkbox that can be used to specify logical values.

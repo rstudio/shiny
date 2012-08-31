@@ -10,6 +10,7 @@ ShinyApp <- setRefClass(
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
     .progressKeys = 'character',
+    .fileUploadContext = 'FileUploadContext',
     session = 'Values'
   ),
   methods = list(
@@ -18,6 +19,8 @@ ShinyApp <- setRefClass(
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
       .progressKeys <<- character(0)
+      # TODO: Put file upload context in user/app-specific dir if possible
+      .fileUploadContext <<- FileUploadContext$new()
       session <<- Values$new()
     },
     defineOutput = function(name, func) {
@@ -92,13 +95,65 @@ ShinyApp <- setRefClass(
       
       .write(json)
     },
-    sendResponse = function(requestMsg, value) {
+    dispatch = function(msg) {
+      method <- paste('@', msg$method, sep='')
+      func <- try(do.call(`$`, list(.self, method)), silent=T)
+      if (inherits(func, 'try-error')) {
+        .sendErrorResponse(msg, paste('Unknown method', msg$method))
+      }
+      
+      value <- try(do.call(func, as.list(append(msg$args, msg$blobs))))
+      if (inherits(value, 'try-error')) {
+        .sendErrorResponse(msg, paste('Error:', as.character(value)))
+      }
+      else {
+        .sendResponse(msg, value)
+      }
+    },
+    .sendResponse = function(requestMsg, value) {
+      if (is.null(requestMsg$tag)) {
+        warning("Tried to send response for untagged message; method: ",
+                requestMsg$method)
+        return()
+      }
       .write(toJSON(list(response=list(tag=requestMsg$tag, value=value))))
+    },
+    .sendErrorResponse = function(requestMsg, error) {
+      if (is.null(requestMsg$tag))
+        return()
+      .write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
     },
     .write = function(json) {
       if (getOption('shiny.trace', F))
         message('SEND ', json)
       websocket_write(json, .websocket)
+    },
+    
+    # Public RPC methods
+    `@uploadInit` = function() {
+      return(list(jobId=.fileUploadContext$createUploadOperation()))
+    },
+    `@uploadFileBegin` = function(jobId, fileName, fileType, fileSize) {
+      .fileUploadContext$getUploadOperation(jobId)$fileBegin(list(
+        name=fileName, type=fileType, size=fileSize
+      ))
+      invisible()
+    },
+    `@uploadFileChunk` = function(jobId, ...) {
+      args <- list(...)
+      if (length(args) != 1)
+        stop("Bad file chunk request")
+      .fileUploadContext$getUploadOperation(jobId)$fileChunk(args[[1]])
+      invisible()
+    },
+    `@uploadFileEnd` = function(jobId) {
+      .fileUploadContext$getUploadOperation(jobId)$fileEnd()
+      invisible()
+    },
+    `@uploadEnd` = function(jobId, inputId) {
+      fileData <- .fileUploadContext$getUploadOperation(jobId)$finish()
+      session$set(inputId, fileData)
+      invisible()
     }
   )
 )
@@ -480,7 +535,9 @@ startApp <- function(port=8101L) {
       },
       update = {
         shinyapp$session$mset(msg$data)
-      })
+      },
+      shinyapp$dispatch(msg)
+    )
     flushReact()
     shinyapp$flushOutput()
   }, ws_env)

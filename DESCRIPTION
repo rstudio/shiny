@@ -20,6 +20,7 @@ Collate:
     'tags.R'
     'react.R'
     'reactives.R'
+    'fileupload.R'
     'shiny.R'
     'shinywrappers.R'
     'shinyui.R'

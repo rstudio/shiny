@@ -423,7 +423,7 @@
           var buffer = new ArrayBuffer(4);
           var view = new DataView(buffer);
           view.setUint32(0, val, true); // little-endian
-          return buffer;
+          return new Uint8Array(buffer);
         }
 
         var payload = [];
@@ -531,6 +531,139 @@
   }).call(ShinyApp.prototype);
 
 
+
+  var FileProcessor = function(files) {
+    this.files = files;
+    this.fileReader = new FileReader();
+    this.fileIndex = -1;
+    this.pos = 0;
+    // Currently need to use small chunk size because R-Websockets can't
+    // handle continuation frames
+    this.chunkSize = 4096;
+    this.aborted = false;
+    this.completed = false;
+    
+    var self = this;
+    $(this.fileReader).on('load', function(evt) {
+      self.$endReadChunk();
+    });
+    // TODO: Register error/abort callbacks
+    
+    this.$run();
+  };
+  $.extend(FileProcessor.prototype, {
+    // Begin callbacks. Subclassers may override any or all of these.
+    onBegin: function(files, cont) {
+      setTimeout(cont, 0);
+    },
+    onFileBegin: function(file, cont) {
+      setTimeout(cont, 0);
+    },
+    onFileChunk: function(file, offset, blob, cont) {
+      setTimeout(cont, 0);
+    },
+    onFileEnd: function(file, cont) {
+      setTimeout(cont, 0);
+    },
+    onComplete: function() {
+    },
+    onAbort: function() {
+    },
+    // End callbacks
+    
+    // Aborts processing, unless it's already completed
+    abort: function() {
+      if (this.completed || this.aborted)
+        return;
+      
+      this.aborted = true;
+      this.onAbort();
+    },
+    
+    // Returns a bound function that will call this.$run one time.
+    $getRun: function() {
+      var self = this;
+      var called = false;
+      return function() {
+        if (called)
+          return;
+        called = true;
+        self.$run();
+      };
+    },
+    
+    // This function will be called multiple times to advance the process.
+    // It relies on the state of the object's fields to know what to do next.
+    $run: function() {
+      
+      var self = this;
+
+      if (this.aborted || this.completed)
+        return;
+      
+      if (this.fileIndex < 0) {
+        // Haven't started yet--begin
+        this.fileIndex = 0;
+        this.onBegin(this.files, this.$getRun());
+        return;
+      }
+      
+      if (this.fileIndex == this.files.length) {
+        // Just ended
+        this.completed = true;
+        this.onComplete();
+        return;
+      }
+      
+      // If we got here, then we have a file to process, or we are
+      // in the middle of processing a file, or have just finished
+      // processing a file.
+      
+      var file = this.files[this.fileIndex];
+      if (this.pos >= file.size) {
+        // We've read past the end of this file--it's done
+        this.fileIndex++;
+        this.pos = 0;
+        this.onFileEnd(file, this.$getRun());
+      }
+      else if (this.pos == 0) {
+        // We're just starting with this file, need to call onFileBegin
+        // before we actually start reading
+        var called = false;
+        this.onFileBegin(file, function() {
+          if (called)
+            return;
+          called = true;
+          self.$beginReadChunk();
+        });
+      }
+      else {
+        // We're neither starting nor ending--just start the next chunk
+        this.$beginReadChunk();
+      }
+    },
+    
+    // Starts asynchronous read of the current chunk of the current file
+    $beginReadChunk: function() {
+      var file = this.files[this.fileIndex];
+      var blob = file.slice(this.pos, this.pos + this.chunkSize);
+      this.fileReader.readAsArrayBuffer(blob);
+    },
+    
+    // Called when a chunk has been successfully read
+    $endReadChunk: function() {
+      var file = this.files[this.fileIndex];
+      var offset = this.pos;
+      var data = this.fileReader.result;
+      this.pos = this.pos + this.chunkSize;
+      this.onFileChunk(file, offset, new Blob([new Uint8Array(data)]),
+                       this.$getRun());
+    }
+  });
+
+
+
+
   var BindingRegistry = function() {
     this.bindings = [];
     this.bindingNames = {};
@@ -581,7 +714,7 @@
     };
 
     this.onValueChange = function(el, data) {
-      this.clearError();
+      this.clearError(el);
       this.renderValue(el, data);
     };
     this.onValueError = function(el, err) {
@@ -833,6 +966,111 @@
     }
   });
   inputBindings.register(bootstrapTabInputBinding, 'shiny.bootstrapTabInput');
+
+
+  var FileUploader = function(shinyapp, id, files) {
+    this.shinyapp = shinyapp;
+    this.id = id;
+    FileProcessor.call(this, files);
+  };
+  $.extend(FileUploader.prototype, FileProcessor.prototype, {
+    makeRequest: function(method, args, onSuccess, onFailure, blobs) {
+      this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
+    },
+    onBegin: function(files, cont) {
+      var self = this;
+      this.makeRequest(
+        'uploadInit', [],
+        function(response) {
+          self.jobId = response.jobId;
+          cont();
+        },
+        function(error) {
+        });
+    },
+    onFileBegin: function(file, cont) {
+      this.onProgress(file, 0);
+      
+      this.makeRequest(
+        'uploadFileBegin', [this.jobId, file.name, file.type, file.size],
+        function(response) {
+          cont();
+        },
+        function(error) {
+        });
+    },
+    onFileChunk: function(file, offset, blob, cont) {
+      this.onProgress(file, (offset + blob.size) / file.size);
+
+      this.makeRequest(
+        'uploadFileChunk', [this.jobId],
+        function(response) {
+          cont();
+        },
+        function(error) {
+        },
+        [blob]);
+    },
+    onFileEnd: function(file, cont) {
+      this.makeRequest(
+        'uploadFileEnd', [this.jobId],
+        function(response) {
+          cont();
+        },
+        function(error) {
+        });
+    },
+    onComplete: function() {
+      this.makeRequest(
+        'uploadEnd', [this.jobId, this.id], 
+        function(response) {
+        },
+        function(error) {
+        });
+    },
+    onAbort: function() {
+    },
+    onProgress: function(file, completed) {
+      console.log('file: ' + file.name + ' [' + Math.round(completed*100) + '%]');
+    }
+  });
+
+  function uploadFiles(evt) {
+    // If previously selected files are uploading, abort that.
+    var el = $(evt.target);
+    var uploader = el.data('currentUploader');
+    if (uploader)
+      uploader.abort();
+
+    var files = evt.target.files;
+    var id = fileInputBinding.getId(evt.target);
+
+    // Start the new upload and put the uploader in 'currentUploader'.
+    el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+  };
+
+  var fileInputBinding = new InputBinding();
+  $.extend(fileInputBinding, {
+    find: function(scope) {
+      return scope.find('input[type="file"]');
+    },
+    getId: function(el) {
+      return InputBinding.prototype.getId.call(this, el) || el.name;
+    },
+    getValue: function(el) {
+      return null;
+    },
+    setValue: function(el, value) {
+      // Not implemented
+    },
+    subscribe: function(el, callback) {
+      $(el).on('change.fileInputBinding', uploadFiles);
+    },
+    unsubscribe: function(el) {
+      $(el).off('.fileInputBinding');
+    }
+  })
+  inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');
 
   
 

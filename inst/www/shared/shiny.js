@@ -531,7 +531,9 @@
   }).call(ShinyApp.prototype);
 
 
-
+  // Generic driver class for doing chunk-wise asynchronous processing of a
+  // FileList object. Subclass/clone it and override the `on*` functions to
+  // make it do something useful.
   var FileProcessor = function(files) {
     this.files = files;
     this.fileReader = new FileReader();
@@ -551,37 +553,37 @@
     
     this.$run();
   };
-  $.extend(FileProcessor.prototype, {
-    // Begin callbacks. Subclassers may override any or all of these.
-    onBegin: function(files, cont) {
+  (function() {
+    // Begin callbacks. Subclassers/cloners may override any or all of these.
+    this.onBegin = function(files, cont) {
       setTimeout(cont, 0);
-    },
-    onFileBegin: function(file, cont) {
+    };
+    this.onFileBegin = function(file, cont) {
       setTimeout(cont, 0);
-    },
-    onFileChunk: function(file, offset, blob, cont) {
+    };
+    this.onFileChunk = function(file, offset, blob, cont) {
       setTimeout(cont, 0);
-    },
-    onFileEnd: function(file, cont) {
+    };
+    this.onFileEnd = function(file, cont) {
       setTimeout(cont, 0);
-    },
-    onComplete: function() {
-    },
-    onAbort: function() {
-    },
+    };
+    this.onComplete = function() {
+    };
+    this.onAbort = function() {
+    };
     // End callbacks
     
     // Aborts processing, unless it's already completed
-    abort: function() {
+    this.abort = function() {
       if (this.completed || this.aborted)
         return;
       
       this.aborted = true;
       this.onAbort();
-    },
+    };
     
     // Returns a bound function that will call this.$run one time.
-    $getRun: function() {
+    this.$getRun = function() {
       var self = this;
       var called = false;
       return function() {
@@ -590,11 +592,11 @@
         called = true;
         self.$run();
       };
-    },
+    };
     
     // This function will be called multiple times to advance the process.
     // It relies on the state of the object's fields to know what to do next.
-    $run: function() {
+    this.$run = function() {
       
       var self = this;
 
@@ -641,27 +643,25 @@
         // We're neither starting nor ending--just start the next chunk
         this.$beginReadChunk();
       }
-    },
+    };
     
     // Starts asynchronous read of the current chunk of the current file
-    $beginReadChunk: function() {
+    this.$beginReadChunk = function() {
       var file = this.files[this.fileIndex];
       var blob = file.slice(this.pos, this.pos + this.chunkSize);
       this.fileReader.readAsArrayBuffer(blob);
-    },
+    };
     
     // Called when a chunk has been successfully read
-    $endReadChunk: function() {
+    this.$endReadChunk = function() {
       var file = this.files[this.fileIndex];
       var offset = this.pos;
       var data = this.fileReader.result;
       this.pos = this.pos + this.chunkSize;
       this.onFileChunk(file, offset, new Blob([new Uint8Array(data)]),
                        this.$getRun());
-    }
-  });
-
-
+    };
+  }).call(FileProcessor.prototype);
 
 
   var BindingRegistry = function() {
@@ -973,11 +973,12 @@
     this.id = id;
     FileProcessor.call(this, files);
   };
-  $.extend(FileUploader.prototype, FileProcessor.prototype, {
-    makeRequest: function(method, args, onSuccess, onFailure, blobs) {
+  $.extend(FileUploader.prototype, FileProcessor.prototype);
+  (function() {
+    this.makeRequest = function(method, args, onSuccess, onFailure, blobs) {
       this.shinyapp.makeRequest(method, args, onSuccess, onFailure, blobs);
-    },
-    onBegin: function(files, cont) {
+    };
+    this.onBegin = function(files, cont) {
       var self = this;
       this.makeRequest(
         'uploadInit', [],
@@ -987,8 +988,8 @@
         },
         function(error) {
         });
-    },
-    onFileBegin: function(file, cont) {
+    };
+    this.onFileBegin = function(file, cont) {
       this.onProgress(file, 0);
       
       this.makeRequest(
@@ -998,8 +999,8 @@
         },
         function(error) {
         });
-    },
-    onFileChunk: function(file, offset, blob, cont) {
+    };
+    this.onFileChunk = function(file, offset, blob, cont) {
       this.onProgress(file, (offset + blob.size) / file.size);
 
       this.makeRequest(
@@ -1010,8 +1011,8 @@
         function(error) {
         },
         [blob]);
-    },
-    onFileEnd: function(file, cont) {
+    };
+    this.onFileEnd = function(file, cont) {
       this.makeRequest(
         'uploadFileEnd', [this.jobId],
         function(response) {
@@ -1019,21 +1020,22 @@
         },
         function(error) {
         });
-    },
-    onComplete: function() {
+    };
+    this.onComplete = function() {
       this.makeRequest(
         'uploadEnd', [this.jobId, this.id], 
         function(response) {
         },
         function(error) {
         });
-    },
-    onAbort: function() {
-    },
-    onProgress: function(file, completed) {
+    };
+    this.onAbort = function() {
+    };
+    this.onProgress = function(file, completed) {
       console.log('file: ' + file.name + ' [' + Math.round(completed*100) + '%]');
-    }
-  });
+    };
+  }).call(FileUploader.prototype);
+
 
   function uploadFiles(evt) {
     // If previously selected files are uploading, abort that.
@@ -1073,28 +1075,28 @@
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');
 
   
+  var OutputBindingAdapter = function(el, binding) {
+    this.el = el;
+    this.binding = binding;
+  };
+  (function() {
+    this.onValueChange = function(data) {
+      this.binding.onValueChange(this.el, data);
+    };
+    this.onValueError = function(err) {
+      this.binding.onValueError(this.el, err);
+    };
+    this.showProgress = function(show) {
+      this.binding.showProgress(this.el, show);
+    };
+  }).call(OutputBindingAdapter.prototype);
+
 
   function initShiny() {
 
     var shinyapp = exports.shinyapp = new ShinyApp();
 
     function bindOutputs(scope) {
-
-      var OutputBindingAdapter = function(el, binding) {
-        this.el = el;
-        this.binding = binding;
-      };
-      $.extend(OutputBindingAdapter.prototype, {
-        onValueChange: function(data) {
-          this.binding.onValueChange(this.el, data);
-        },
-        onValueError: function(err) {
-          this.binding.onValueError(this.el, err);
-        },
-        showProgress: function(show) {
-          this.binding.showProgress(this.el, show);
-        }
-      });
 
       if (scope == undefined)
         scope = document;

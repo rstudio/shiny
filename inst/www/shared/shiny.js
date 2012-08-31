@@ -789,7 +789,7 @@
     };
   
     this.getValue = function(el) { throw "Not implemented"; };
-    this.subscribe = function(el) { };
+    this.subscribe = function(el, callback) { };
     this.unsubscribe = function(el) { };
     
     this.getRatePolicy = function() { return null; };

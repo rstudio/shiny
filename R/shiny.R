@@ -28,6 +28,11 @@ ShinyApp <- setRefClass(
       take no parameters, or have named parameters for \\code{name} and
       \\code{shinyapp} (in the future this list may expand, so it is a good idea
       to also include \\code{...} in your function signature)."
+      
+      # jcheng 08/31/2012: User submitted an example of a dynamically calculated
+      # name not working unless name was eagerly evaluated. Yikes!
+      force(name)
+      
       if (is.function(func)) {
         if (length(formals(func)) != 0) {
           orig <- func

@@ -8,6 +8,51 @@
     return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
   }
 
+  function slice(blob, start, end) {
+    if (blob.slice)
+      return blob.slice(start, end);
+    if (blob.mozSlice)
+      return blob.mozSlice(start, end);
+    if (blob.webkitSlice)
+      return blob.webkitSlice(start, end);
+    throw "Blob doesn't support slice";
+  }
+
+  var _BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || 
+      window.MozBlobBuilder || window.MSBlobBuilder;
+
+  function makeBlob(parts) {
+
+    // Browser compatibility is a mess right now. The code as written works in
+    // a variety of modern browsers, but sadly gives a deprecation warning
+    // message on the console in current versions (as of this writing) of
+    // Chrome.
+
+    // Safari 6.0 (8536.25) on Mac OS X 10.8.1:
+    // Has Blob constructor but it doesn't work with ArrayBufferView args
+
+    // Google Chrome 21.0.1180.81 on Xubuntu 12.04:
+    // Has Blob constructor, accepts ArrayBufferView args, accepts ArrayBuffer
+    // but with a deprecation warning message
+
+    // Firefox 15.0 on Xubuntu 12.04:
+    // Has Blob constructor, accepts both ArrayBuffer and ArrayBufferView args
+
+    // Chromium 18.0.1025.168 (Developer Build 134367 Linux) on Xubuntu 12.04:
+    // No Blob constructor. Has WebKitBlobBuilder.
+
+    try {
+      return new Blob(parts);
+    }
+    catch (e) {
+      var blobBuilder = new _BlobBuilder();
+      $.each(parts, function(i, part) {
+        blobBuilder.append(part);
+      });
+      return blobBuilder.getBlob();
+    }
+  }
+
   var Invoker = function(target, func) {
     this.target = target;
     this.func = func;
@@ -292,12 +337,12 @@
     }
 
     // Don't mutate list argument
-    list = list.slice(0);
+    list = slice(list, 0);
 
     for (var chunkSize = 1; chunkSize < list.length; chunkSize *= 2) {
       for (var i = 0; i < list.length; i += chunkSize * 2) {
-        var listA = list.slice(i, i + chunkSize);
-        var listB = list.slice(i + chunkSize, i + chunkSize * 2);
+        var listA = slice(list, i, i + chunkSize);
+        var listB = slice(list, i + chunkSize, i + chunkSize * 2);
         var merged = merge(sortfunc, listA, listB);
         var args = [i, merged.length];
         Array.prototype.push.apply(args, merged);
@@ -423,13 +468,13 @@
           var buffer = new ArrayBuffer(4);
           var view = new DataView(buffer);
           view.setUint32(0, val, true); // little-endian
-          return new Uint8Array(buffer);
+          return buffer;
         }
 
         var payload = [];
         payload.push(uint32_to_buf(0x01020202)); // signature
 
-        var jsonBuf = new Blob([msg]);
+        var jsonBuf = makeBlob([msg]);
         payload.push(uint32_to_buf(jsonBuf.size));
         payload.push(jsonBuf);
 
@@ -438,7 +483,7 @@
           payload.push(blobs[i]);
         }
 
-        msg = new Blob(payload);
+        msg = makeBlob(payload);
       }
 
       this.$sendMsg(msg);
@@ -648,7 +693,7 @@
     // Starts asynchronous read of the current chunk of the current file
     this.$beginReadChunk = function() {
       var file = this.files[this.fileIndex];
-      var blob = file.slice(this.pos, this.pos + this.chunkSize);
+      var blob = slice(file, this.pos, this.pos + this.chunkSize);
       this.fileReader.readAsArrayBuffer(blob);
     };
     
@@ -658,7 +703,7 @@
       var offset = this.pos;
       var data = this.fileReader.result;
       this.pos = this.pos + this.chunkSize;
-      this.onFileChunk(file, offset, new Blob([new Uint8Array(data)]),
+      this.onFileChunk(file, offset, makeBlob([data]),
                        this.$getRun());
     };
   }).call(FileProcessor.prototype);

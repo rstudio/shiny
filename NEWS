@@ -3,6 +3,8 @@ shiny 0.1.5
 
 * Add file upload support (currently only works with Chrome and Firefox). Use
   a normal HTML file input, or call the `fileInput` UI function.
+* Shiny.unbindOutputs did not work, now it does.
+* Generally improved robustness of dynamic input/output bindings.
 
 
 shiny 0.1.4

@@ -1116,8 +1116,9 @@
           if (!id)
             continue;
 
-          shinyapp.bindOutput(id, new OutputBindingAdapter(el, binding));
-          $(el).data('shiny-output-binding', binding);
+          var bindingAdapter = new OutputBindingAdapter(el, binding);
+          shinyapp.bindOutput(id, bindingAdapter);
+          $(el).data('shiny-output-binding', bindingAdapter);
           $(el).addClass('shiny-bound-output');
         }
       }
@@ -1129,11 +1130,11 @@
 
       var outputs = $(scope).find('.shiny-bound-output');
       for (var i = 0; i < outputs.length; i++) {
-        var binding = $(outputs[i]).data('shiny-output-binding');
-        if (!binding)
+        var bindingAdapter = $(outputs[i]).data('shiny-output-binding');
+        if (!bindingAdapter)
           continue;
-        var id = binding.getId(outputs[i]);
-        shinyapp.unbindOutput(id, binding);
+        var id = bindingAdapter.binding.getId(outputs[i]);
+        shinyapp.unbindOutput(id, bindingAdapter);
         $(outputs[i]).removeClass('shiny-bound-output');
       }
     }
@@ -1240,6 +1241,7 @@
     exports.bindOutputs = bindOutputs;
     exports.bindInputs = bindInputs;
     exports.unbindInputs = unbindInputs;
+    exports.unbindOutputs = unbindOutputs;
 
     function getMultiValue(input, exclusiveValue) {
       if (!input.name)

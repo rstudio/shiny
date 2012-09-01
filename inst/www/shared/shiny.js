@@ -358,6 +358,7 @@
     this.$socket = null;
     this.$bindings = {};
     this.$values = {};
+    this.$errors = {};
     this.$pendingMessages = [];
     this.$activeRequests = {};
     this.$nextRequestId = 0;
@@ -499,7 +500,11 @@
     };
 
     this.receiveError = function(name, error) {
-      this.$values[name] = null;
+      if (this.$errors[name] === error)
+        return;
+
+      this.$errors[name] = error;
+      delete this.$values[name];
 
       var binding = this.$bindings[name];
       if (binding && binding.onValueError) {
@@ -508,10 +513,11 @@
     }
 
     this.receiveOutput = function(name, value) {
-      var oldValue = this.$values[name];
-      this.$values[name] = value;
-      if (oldValue === value)
+      if (this.$values[name] === value)
         return;
+
+      this.$values[name] = value;
+      delete this.$errors[name];
 
       var binding = this.$bindings[name];
       if (binding) {
@@ -562,6 +568,12 @@
       if (this.$bindings[id])
         throw "Duplicate binding for ID " + id;
       this.$bindings[id] = binding;
+
+      if (this.$values[id] !== undefined)
+        binding.onValueChange(this.$values[id]);
+      else if (this.$errors[id] !== undefined)
+        binding.onValueError(this.$errors[id]);
+
       return binding;
     };
     this.unbindOutput = function(id, binding) {
@@ -1167,6 +1179,9 @@
           $(el).addClass('shiny-bound-output');
         }
       }
+
+      // Send later in case DOM layout isn't final yet.
+      setTimeout(sendPlotSize, 0);
     }
 
     function unbindOutputs(scope) {

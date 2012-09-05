@@ -12,6 +12,7 @@ shiny 0.1.5
   expression; for example, whether an input is a particular value. Also works in
   raw HTML (add the `data-display-if` attribute to the element that should be
   shown/hidden).
+* htmlOutput (CSS class `shiny-html-output`) can contain inputs and outputs.
 
 
 shiny 0.1.4

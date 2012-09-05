@@ -879,7 +879,9 @@
       return $(scope).find('.shiny-html-output');
     },
     renderValue: function(el, data) {
+      exports.unbindAll(el);
       $(el).html(data);
+      exports.bindAll(el);
     }
   });
   outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');

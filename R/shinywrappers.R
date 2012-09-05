@@ -129,3 +129,34 @@ reactiveText <- function(func) {
     return(paste(capture.output(cat(func())), collapse="\n"))
   })
 }
+
+#' UI Output
+#' 
+#' Makes a reactive version of a function that generates HTML using the Shiny UI
+#' library.
+#' 
+#' The corresponding HTML output tag should be \code{div} and have the CSS class
+#' name \code{shiny-html-output} (or use \code{\link{htmlOutput}}).
+#' 
+#' @param func A function that returns a Shiny tag object, \code{\link{HTML}}, 
+#'   or a list of such objects.
+#'   
+#' @seealso conditionalPanel
+#'   
+#' @export
+#' @examples
+#' \dontrun{
+#'   output$moreControls <- reactiveUI(function() {
+#'     list(
+#'       
+#'     )
+#'   })
+#' }
+reactiveUI <- function(func) {
+  reactive(function() {
+    result <- func()
+    if (is.null(result) || length(result) == 0)
+      return(NULL)
+    return(as.character(result))
+  })
+}

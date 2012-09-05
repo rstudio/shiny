@@ -64,12 +64,28 @@ as.character.shiny.tag <- function(x, ...) {
   return(HTML(paste(readLines(f), collapse='\n')))
 }
 
+#' @S3method print shiny.tag.list
+print.shiny.tag.list <- print.shiny.tag
+
+#' @S3method format shiny.tag.list
+format.shiny.tag.list <- format.shiny.tag
+
+#' @S3method as.character shiny.tag.list
+as.character.shiny.tag.list <- as.character.shiny.tag
+
 normalizeText <- function(text) {
   if (!is.null(attr(text, "html")))
     text
   else
     htmlEscape(text, attribute=FALSE)
   
+}
+
+#' @export
+tagList <- function(...) {
+  lst <- list(...)
+  class(lst) <- c("shiny.tag.list", "list")
+  return(lst)
 }
 
 #' @export

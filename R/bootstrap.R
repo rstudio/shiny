@@ -59,7 +59,7 @@ pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
     )
   }
   
-  list(
+  tagList(
     # inject bootstrap requirements into head
     importBootstrap(),
     
@@ -88,7 +88,7 @@ pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
 #' headerPanel("Hello Shiny!")
 #' @export
 headerPanel <- function(title) {    
-  list(
+  tagList(
     tags$head(tags$title(title)),
     div(class="span12", style="padding: 10px 0px;",
       h1(title)
@@ -202,7 +202,7 @@ conditionalPanel <- function(condition, ...) {
 #' textInput("caption", "Caption:", "Data Summary")
 #' @export
 textInput <- function(inputId, label, value = "") {
-  list(
+  tagList(
     tags$label(label),
     tags$input(id = inputId, type="text", value=value)
   )
@@ -235,7 +235,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
   if (!is.na(step))
     inputTag$attribs$step = step
   
-  list(
+  tagList(
     tags$label(label),
     inputTag
   )
@@ -261,7 +261,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
   if (length(accept) > 0)
     inputTag$attribs$accept <- paste(accept, collapse=',')
   
-  list(
+  tagList(
     tags$label(label),
     inputTag
   )
@@ -421,7 +421,7 @@ selectInput <- function(inputId,
   } 
   
   # return label and select tag
-  list(controlLabel(inputId, label), selectTag)
+  tagList(controlLabel(inputId, label), selectTag)
 }
 
 #' Create radio buttons
@@ -470,8 +470,8 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
     inputTags[[length(inputTags) + 1]] <- labelTag
   }
   
-  list(tags$label(class = "control-label", label),
-       inputTags)
+  tagList(tags$label(class = "control-label", label),
+          inputTags)
 }
 
 #' Create a submit button
@@ -553,7 +553,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   }
   
   # build slider
-  list(
+  tagList(
     controlLabel(inputId, labelText),  
     slider(inputId, min=min, max=max, value=value, step=step, round=round,
            locale=locale, format=format, ticks=ticks,

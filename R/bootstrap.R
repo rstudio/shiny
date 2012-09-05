@@ -143,6 +143,52 @@ mainPanel <- function(...) {
   )
 }
 
+#' Conditional Panel
+#' 
+#' Creates a panel that is visible or not, depending on the value of a 
+#' JavaScript expression. The JS expression is evaluated once at startup and 
+#' whenever Shiny detects a relevant change in input/output.
+#' 
+#' In the JS expression, you can refer to \code{input} and \code{output} 
+#' JavaScript objects that contain the current values of input and output. For
+#' example, if you have an input with an id of \code{foo}, then you can use
+#' \code{input.foo} to read its value. (Be sure not to modify the input/output
+#' objects, as this may cause unpredictable behavior.)
+#' 
+#' @param condition A JavaScript expression that will be evaluated repeatedly to
+#'   determine whether the panel should be displayed.
+#' @param ... Elements to include in the panel.
+#' 
+#' @examples
+#' sidebarPanel(
+#'    selectInput(
+#'       "plotType", "Plot Type",
+#'       list(Scatter = "scatter",
+#'            Histogram = "hist")),
+#' 
+#'    # Only show this panel if the plot type is a histogram
+#'    conditionalPanel(
+#'       condition = "input.plotType == 'hist'",
+#'       selectInput(
+#'          "breaks", "Breaks",
+#'          list("Sturges", 
+#'               "Scott",
+#'               "Freedman-Diaconis",
+#'               "[Custom]" = "custom")),
+#'               
+#'       # Only show this panel if Custom is selected
+#'       conditionalPanel(
+#'          condition = "input.breaks == 'custom'",
+#'          sliderInput("breakCount", "Break Count", min=1, max=1000, value=10)
+#'       )
+#'    )
+#' )
+#'   
+#' @export
+conditionalPanel <- function(condition, ...) {
+  div('data-display-if'=condition, ...)
+}
+
 #' Create a text input control
 #' 
 #' Create an input control for entry of unstructured text values

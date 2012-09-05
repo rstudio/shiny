@@ -1,10 +1,17 @@
 shiny 0.1.5
 --------------------------------------------------------------------------------
 
+* BREAKING CHANGE: JS APIs Shiny.bindInput and Shiny.bindOutput removed and
+  replaced with Shiny.bindAll; Shiny.unbindInput and Shiny.unbindOutput removed
+  and replaced with Shiny.unbindAll.
 * Add file upload support (currently only works with Chrome and Firefox). Use
   a normal HTML file input, or call the `fileInput` UI function.
 * Shiny.unbindOutputs did not work, now it does.
 * Generally improved robustness of dynamic input/output bindings.
+* Add conditionalPanel UI function to allow showing/hiding UI based on a JS
+  expression; for example, whether an input is a particular value. Also works in
+  raw HTML (add the `data-display-if` attribute to the element that should be
+  shown/hidden).
 
 
 shiny 0.1.4

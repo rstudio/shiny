@@ -53,6 +53,19 @@
     }
   }
 
+
+  // Takes a string expression and returns a function that takes an argument.
+  // 
+  // When the function is executed, it will evaluate that expression using
+  // "with" on the argument value, and return the result.
+  function scopeExprToFunc(expr) {
+    var func = new Function("with (this) {return (" + expr + ");}");
+    return function(scope) {
+      return func.call(scope);
+    };
+  }
+
+
   var Invoker = function(target, func) {
     this.target = target;
     this.func = func;
@@ -356,9 +369,20 @@
 
   var ShinyApp = function() {
     this.$socket = null;
+
+    // Cached input values
+    this.$inputValues = {};
+
+    // Output bindings
     this.$bindings = {};
+
+    // Cached values/errors
     this.$values = {};
     this.$errors = {};
+
+    // Conditional bindings (show/hide element based on expression)
+    this.$conditionals = {};
+
     this.$pendingMessages = [];
     this.$activeRequests = {};
     this.$nextRequestId = 0;
@@ -372,6 +396,9 @@
 
       this.$socket = this.createSocket();
       this.$initialInput = initialInput;
+      $.extend(this.$inputValues, initialInput);
+
+      this.$updateConditionals();
     };
 
     this.isConnected = function() {
@@ -415,6 +442,9 @@
       });
 
       this.$sendMsg(msg);
+
+      $.extend(this.$inputValues, values);
+      this.$updateConditionals();
     };
 
     // NB: Including blobs will cause IE to break!
@@ -560,6 +590,8 @@
             request.onError(resp.error);
         }
       };
+
+      this.$updateConditionals();
     };
 
     this.bindOutput = function(id, binding) {
@@ -583,6 +615,27 @@
       }
       else {
         return false;
+      }
+    };
+
+    this.$updateConditionals = function() {
+      var scope = {input: this.$inputValues, output: this.$values};
+
+      var conditionals = $(document).find('[data-display-if]');
+      for (var i = 0; i < conditionals.length; i++) {
+        var el = $(conditionals[i]);
+        var condFunc = el.data('data-display-if-func');
+
+        if (!condFunc) {
+          var condExpr = el.attr('data-display-if');
+          condFunc = scopeExprToFunc(condExpr);
+          el.data('data-display-if-func', condFunc);
+        }
+
+        if (condFunc(scope))
+          el.show();
+        else
+          el.hide();
       }
     };
   }).call(ShinyApp.prototype);
@@ -1295,13 +1348,20 @@
         binding.unsubscribe(inputs[i]);
       }
     }
-    
-    bindOutputs(document);
-    initialValues = bindInputs(document);
-    exports.bindOutputs = bindOutputs;
-    exports.bindInputs = bindInputs;
-    exports.unbindInputs = unbindInputs;
-    exports.unbindOutputs = unbindOutputs;
+
+
+    function bindAll(scope) {
+      bindOutputs(scope);
+      return bindInputs(scope);
+    }
+    function unbindAll(scope) {
+      unbindInputs(scope);
+      unbindOutputs(scope);
+    }
+    exports.bindAll = bindAll;
+    exports.unbindAll = unbindAll;
+
+    var initialValues = bindAll(document);
 
     function getMultiValue(input, exclusiveValue) {
       if (!input.name)

@@ -21,6 +21,19 @@ title: "Tutorial: Building 'Shiny' Web Applications with R"
    .console {
       color: blue;
    }
+   code {
+     background-color: transparent;
+     border: none;
+     padding: 0;
+     color: inherit;
+   }
+   dt {
+     margin-top: 20px;
+     margin-bottom: 4px;
+   }
+   dd {
+     margin-left: 30px;
+   }
       
 </style>
 <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
@@ -130,6 +143,18 @@ hljs.initHighlightingOnLoad();
    <li>
       <a target="_self" href="#html-ui">HTML UI</a>
    </li>
+   <!--
+   <li class="nav-header">Extending Shiny</li>
+   <li>
+      <a target="_self" href="#building-inputs">Building Inputs</a>
+   </li>
+   <li>
+      <a target="_self" href="#building-outputs">Building Outputs</a>
+   </li>
+   <li>
+      <a target="_self" href="#packaging-components">Packaging Components</a>
+   </li>
+ -->
 </ul>
 </div>
 
@@ -227,6 +252,14 @@ hljs.initHighlightingOnLoad();
 
 {% capture html_ui %}{% include tutorial/html-ui.md %}{% endcapture %}
 {{ html_ui | markdownify }}
+
+</div>
+
+<!-- Building Inputs -->
+<div class="tab-pane" id="building-inputs">
+
+{% capture building_inputs %}{% include tutorial/building-inputs.md %}{% endcapture %}
+{{ building_inputs | markdownify }}
 
 </div>
 

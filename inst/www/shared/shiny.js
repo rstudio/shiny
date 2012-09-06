@@ -926,12 +926,11 @@
       el.value = value;
     },
     subscribe: function(el, callback) {
-      var self = this;
       $(el).on('keyup.textInputBinding input.textInputBinding', function(event) {
-        callback(self, el, true);
+        callback(true);
       });
       $(el).on('change.textInputBinding', function(event) {
-        callback(self, el, false);
+        callback(false);
       });
     },
     unsubscribe: function(el) {
@@ -997,9 +996,8 @@
       // TODO: implement
     },
     subscribe: function(el, callback) {
-      var self = this;
       $(el).on('change.inputBinding', function(event) {
-        callback(self, el, !$(el).data('animating'));
+        callback(!$(el).data('animating'));
       });
     },
     unsubscribe: function(el) {
@@ -1031,9 +1029,8 @@
       $(el).val(value);
     },
     subscribe: function(el, callback) {
-      var self = this;
       $(el).on('change.selectInputBinding', function(event) {
-        callback(self, el);
+        callback();
       });
     },
     unsubscribe: function(el) {
@@ -1065,9 +1062,8 @@
       });
     },
     subscribe: function(el, callback) {
-      var self = this;
       $(el).on('shown.bootstrapTabInputBinding', function(event) {
-        callback(self, el);
+        callback();
       });
     },
     unsubscribe: function(el) {
@@ -1310,7 +1306,16 @@
             continue;
     
           currentValues[id] = binding.getValue(el);
-          binding.subscribe(el, valueChangeCallback);
+
+          var thisCallback = (function() {
+            var thisBinding = binding;
+            var thisEl = el;
+            return function(allowDeferred) {
+              valueChangeCallback(thisBinding, thisEl, allowDeferred);
+            };
+          })();
+
+          binding.subscribe(el, thisCallback);
           $(el).data('shiny-input-binding', binding);
           $(el).addClass('shiny-bound-input');
           var ratePolicy = binding.getRatePolicy();

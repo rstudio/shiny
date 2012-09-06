@@ -7,6 +7,12 @@ Shiny input components should try to adhere to the following principles, if poss
 * **Designed to be used from HTML and R:** Shiny user interfaces can either be written using R code (that generates HTML), or by writing the HTML directly. A well-designed Shiny input component will take both styles into account: offer an R function for creating the component, but also have thoughtfully designed and documented HTML markup.
 * **Configurable using HTML attributes:** Avoid requiring the user to make JavaScript calls to configure the component. Instead, it's better to use HTML attributes. In your component's JavaScript logic, you can [easily access these values using jQuery](http://api.jquery.com/data/#data-html5) (or simply by reading the DOM attribute directly).
 
+### Design the Component
+
+
+
+### Write an Input Binding
+
 Each custom input component you design needs an *input binding*, an object you create that tells Shiny how to identify instances of your component and how to interact with it. An input binding object needs to have the following methods:
 
 <dl>
@@ -74,9 +80,9 @@ Each custom input component you design needs an *input binding*, an object you c
   <dd>
     <p>Unsubscribe DOM event listeners that were bound in <code>subscribe</code>.</p>
     <p>Example:</p>
-<pre>exampleInputBinding.unsubscribe = function(el) {
+<pre><code class="javascript">exampleInputBinding.unsubscribe = function(el) {
   $(el).off(".exampleComponentName");
-};</pre>
+};</code></pre>
   </dd>
   <dt>
     <code>getRatePolicy()</code>
@@ -105,3 +111,61 @@ Each custom input component you design needs an *input binding*, an object you c
     </p>
   </dd>
 </dl>
+
+### Register Input Binding
+
+```
+Shiny.inputBindings.register(exampleInputBinding);
+```
+
+### Example
+
+For this example, we'll create a button that displays a number, whose value increases by one each time the button is clicked.
+
+<p>Example:</p>
+<p>
+  <button class="increment btn" type="button">0</button>​​​​​​​​​​​​​​​​​​​​​​​
+</p>
+<script>
+$(document).on("click", "button.increment", function(evt) {
+  var el = $(evt.target);
+  el.text(parseInt(el.text()) + 1);
+});
+</script>
+
+<p>HTML:</p>
+<pre><code class="html">&lt;button class="increment btn" type="button">0&lt;/button>​​​​​​​​​​​​​​​​​​​​​​​</code></pre>
+<p>JavaScript:</p>
+<pre><code class="html">// Non-Shiny-specific code that drives the basic behavior
+
+$(document).on("click", "button.increment", function(evt) {
+  var el = $(evt.target);
+  el.text(parseInt(el.text()) + 1);
+  el.trigger("change");
+});
+
+
+// Shiny-specific binding code
+
+var incrementBinding = new Shiny.InputBinding();
+$.extend(incrementBinding, {
+  find: function(scope) {
+    return $(scope).find(".increment");
+  },
+  getValue: function(el) {
+    return parseInt($(el).text());
+  },
+  setValue: function(el, value) {
+    $(el).text(value);
+  },
+  subscribe: function(el, callback) {
+    $(el).on("change.incrementBinding", function(e) {
+      callback();
+    });
+  },
+  unsubscribe: function(el) {
+    $(el).off(".incrementBinding");
+  }
+});
+
+Shiny.inputBindings.register(incrementBinding);</code></pre>

@@ -632,10 +632,18 @@
           el.data('data-display-if-func', condFunc);
         }
 
-        if (condFunc(scope))
-          el.show();
-        else
-          el.hide();
+        if (condFunc(scope)) {
+          el.trigger('show');
+          el.show(function() {
+            $(this).trigger('shown');
+          });
+        }
+        else {
+          el.trigger('hide');
+          el.hide(function() {
+            $(this).trigger('hidden');
+          });
+        }
       }
     };
   }).call(ShinyApp.prototype);

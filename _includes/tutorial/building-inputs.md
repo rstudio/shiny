@@ -2,18 +2,22 @@
 
 If you have some knowledge of HTML/CSS/JavaScript, you can create your own custom input components that can be reused by others.
 
+### Design the Component
+
+The first steps in creating a custom input component is no different than in any other form of web development. You write HTML markup that lays out the component, CSS rules to style it, and use JavaScript (mostly event handlers) to give it behavior, if necessary.
+
 Shiny input components should try to adhere to the following principles, if possible:
 
 * **Designed to be used from HTML and R:** Shiny user interfaces can either be written using R code (that generates HTML), or by writing the HTML directly. A well-designed Shiny input component will take both styles into account: offer an R function for creating the component, but also have thoughtfully designed and documented HTML markup.
 * **Configurable using HTML attributes:** Avoid requiring the user to make JavaScript calls to configure the component. Instead, it's better to use HTML attributes. In your component's JavaScript logic, you can [easily access these values using jQuery](http://api.jquery.com/data/#data-html5) (or simply by reading the DOM attribute directly).
 
-### Design the Component
-
-
+When used in a Shiny application, your component's HTML markup will be repeated once for each instance of the component on the page, but the CSS and JavaScript will generally only need to appear once, most likely in the `<head>`. For R-based interface code, you can use the functions `singleton` and `tags$head` together to ensure these tags appear once and only once, in the head. (See the full example below.)
 
 ### Write an Input Binding
 
-Each custom input component you design needs an *input binding*, an object you create that tells Shiny how to identify instances of your component and how to interact with it. An input binding object needs to have the following methods:
+Each custom input component also needs an *input binding*, an object you create that tells Shiny how to identify instances of your component and how to interact with them. (Note that each *instance* of the input component doesn't need its own input binding object; rather, all instances of a particular type of input component share a single input binding object.)
+
+An input binding object needs to have the following methods:
 
 <dl>
   <dt>
@@ -114,40 +118,60 @@ Each custom input component you design needs an *input binding*, an object you c
 
 ### Register Input Binding
 
-```
-Shiny.inputBindings.register(exampleInputBinding);
-```
+Once you've created an input binding object, you need to tell Shiny to use it:
+<pre><code class="javascript">Shiny.inputBindings.register(exampleInputBinding, "yourname.exampleInputBinding");</code></pre>
+
+The second argument is a name the user can use to change the priority of the binding. On the off chance that the user has multiple bindings that all want to claim the same HTML element as their own, this call can be used to control the priority of the bindings:
+
+<pre><code class="javascript">Shiny.inputBindings.setPriority("yourname.exampleInputBinding", 10);</code></pre>
+
+Higher numbers indicate a higher priority; the default priority is 0. All of Shiny's built-in input component bindings default to a priority of 0.
+
+If two bindings have the same priority value, then the more recently registered binding has the higher priority.
 
 ### Example
 
-For this example, we'll create a button that displays a number, whose value increases by one each time the button is clicked.
+For this example, we'll create a button that displays a number, whose value increases by one each time the button is clicked. Here's what the end result will look like:
 
-<p>Example:</p>
 <p>
   <button class="increment btn" type="button">0</button>​​​​​​​​​​​​​​​​​​​​​​​
 </p>
 <script>
 $(document).on("click", "button.increment", function(evt) {
+  // evt.target is the button that was clicked
   var el = $(evt.target);
+  // Set the button's text to its current value plus 1
   el.text(parseInt(el.text()) + 1);
+  // Raise an event to signal that the value changed
+  el.trigger("change");
 });
 </script>
 
-<p>HTML:</p>
-<pre><code class="html">&lt;button class="increment btn" type="button">0&lt;/button>​​​​​​​​​​​​​​​​​​​​​​​</code></pre>
-<p>JavaScript:</p>
-<pre><code class="html">// Non-Shiny-specific code that drives the basic behavior
+To start, let's design the HTML markup for this component:
 
-$(document).on("click", "button.increment", function(evt) {
+<pre><code class="html">&lt;button id="inputId" class="increment btn" type="button">0&lt;/button>​​​​​​​​​​​​​​​​​​​​​​​</code></pre>
+
+The CSS class `increment` is what will differentiate our buttons from any other kind of buttons. (The `btn` class is just to make the button look decent in [Twitter Bootstrap](http://twitter.github.com/bootstrap).)
+
+Now we'll write the JavaScript that drives the button's basic behavior:
+
+<pre><code class="javascript">$(document).on("click", "button.increment", function(evt) {
+
+  // evt.target is the button that was clicked
   var el = $(evt.target);
+
+  // Set the button's text to its current value plus 1
   el.text(parseInt(el.text()) + 1);
+
+  // Raise an event to signal that the value changed
   el.trigger("change");
-});
+});</code></pre>
 
+This code uses [jQuery's delegated events feature](http://api.jquery.com/on/) to bind all increment buttons at once.
 
-// Shiny-specific binding code
+Now we'll create the Shiny binding object for our component, and register it:
 
-var incrementBinding = new Shiny.InputBinding();
+<pre><code class="javascript">var incrementBinding = new Shiny.InputBinding();
 $.extend(incrementBinding, {
   find: function(scope) {
     return $(scope).find(".increment");
@@ -169,3 +193,25 @@ $.extend(incrementBinding, {
 });
 
 Shiny.inputBindings.register(incrementBinding);</code></pre>
+
+Both the behavioral JavaScript code and the Shiny binding code should generally be run when the page loads. (It's important that they run before Shiny initialization, which occurs after all the document ready event handlers are executed.)
+
+The easiest way to do this is to put both chunks of JavaScript into a file; in this case, we'll use the path `./www/js/increment.js`, which we can then access as `http://localhost:8100/js/increment.js`.
+
+If you're using an `index.html` style user interface, you'll just need to add this line to your `<head>` (make sure it comes after the script tag that loads `shiny.js`):
+
+<pre><code class="html">&lt;script src="js/increment.js"&gt;&lt;/script&gt;</code></pre>
+
+On the other hand, if you're using `ui.R`, then you can define this function before the call to `shinyUI`:
+
+<pre><code class="r">incrementButton &lt;- function(inputId, value = 0) {
+  tagList(
+    singleton(tags$head(tags$script(src = "js/increment.js"))),
+    tags$button(id = inputId,
+                class = "increment btn",
+                type = "button",
+                as.character(value))
+  )
+}</code></pre>
+
+Then in your `shinyUI` page definition you can call `incrementButton` wherever you want an increment button rendered. Notice the line that begins with `singleton` will ensure that the `increment.js` file will be included just one time, in the `<head>`, no matter how many buttons you insert into the page or where you place them.

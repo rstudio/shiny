@@ -265,6 +265,14 @@ hljs.initHighlightingOnLoad();
 
 </div>
 
+<!-- Building Outputs -->
+<div class="tab-pane" id="building-outputs">
+
+{% capture building_outputs %}{% include tutorial/building-outputs.md %}{% endcapture %}
+{{ building_outputs | markdownify }}
+
+</div>
+
 <ul class="pager">
    <li><a href="#" id="previous">&larr; Previous</a></li> 
    <li><a href="#" id="next">Next &rarr;</a></li> 

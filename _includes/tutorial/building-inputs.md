@@ -196,7 +196,7 @@ Shiny.inputBindings.register(incrementBinding);</code></pre>
 
 Both the behavioral JavaScript code and the Shiny binding code should generally be run when the page loads. (It's important that they run before Shiny initialization, which occurs after all the document ready event handlers are executed.)
 
-The easiest way to do this is to put both chunks of JavaScript into a file; in this case, we'll use the path `./www/js/increment.js`, which we can then access as `http://localhost:8100/js/increment.js`.
+The cleanest way to do this is to put both chunks of JavaScript into a file. In this case, we'll use the path `./www/js/increment.js`, which we can then access as `http://localhost:8100/js/increment.js`.
 
 If you're using an `index.html` style user interface, you'll just need to add this line to your `<head>` (make sure it comes after the script tag that loads `shiny.js`):
 

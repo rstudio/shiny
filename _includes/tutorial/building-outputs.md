@@ -1,17 +1,43 @@
 ## Building Outputs
 
-Similar to <a href="#building-inputs">custom inputs</a>, if you have some knowledge of HTML/CSS/JavaScript you can also build reusable, custom *output* components.
+Right out of the box, Shiny makes it easy to include plots, simple tables, and text as outputs in your application; but we imagine that you'll also want to display outputs that don't fit into those categories. Perhaps you need an interactive [choropleth map](http://en.wikipedia.org/wiki/Choropleth_map) or a [googleVis motion chart](http://code.google.com/p/google-motion-charts-with-r/).
 
-Output values are received from the server and are directed to an *output binding*, which then 
+Similar to <a href="#building-inputs">custom inputs</a>, if you have some knowledge of HTML/CSS/JavaScript you can also build reusable, custom output components. And you can bundle up output components as R packages for other Shiny users to use.
 
+### Server-Side Output Functions
 
+Start by deciding the kind of values your output component is going to receive from the user's server side R code.
 
+Whatever value the user's R code returns is going to need to somehow be turned into a JSON-compatible value (Shiny uses [RJSONIO](http://cran.r-project.org/web/packages/RJSONIO/index.html) to do the conversion). If the user's code is naturally going to return something RJSONIO-compatible&nbsp;&ndash; like a character vector, a data frame, or even a list that contains atomic vectors&nbsp;&ndash; then you can just direct the user to use a regular `reactive` function on the server. However, if the output needs to undergo some other kind of transformation, then you'll need to write a wrapper function for `reactive` that your users will use instead (analogous to `reactivePlot` or `reactiveTable`).
 
+For example, if the user wants to output [time series objects](http://stat.ethz.ch/R-manual/R-patched/library/stats/html/ts.html) then you might create a `reactiveTimeSeries` function that knows how to translate `ts` objects to a simple list or data frame:
 
+<pre><code class="r">reactiveTimeSeries &lt;- function(func) {
+    reactive(function() {
+        val &lt; func()
+        list(start = tsp(val)[1],
+             end = tsp(val)[2],
+             freq = tsp(val)[3],
+             data = as.vector(val))
+    })
+}</code></pre>
 
+which would then be used by the user like so:
 
+<pre><code class="r">output$timeSeries1 &lt;- reactiveTimeSeries(function() {
+    ts(matrix(rnorm(300), 100, 3), start=c(1961, 1), frequency=12)
+})
+</code></pre>
 
+### Design Output Component Markup
 
+At this point, we're ready to design the HTML markup and write the JavaScript code for our output component.
+
+For many components, you'll be able to have extremely simple HTML markup, something like this:
+
+<pre><code class="html">&lt;div id="timeSeries1" class="timeseries-output"&gt;&lt;/div&gt;</code></pre>
+
+We'll use the `timeseries-output` CSS class as an indicator that the element is one that we should bind to. When new output values for `timeSeries1` come down from the server, we'll fill up the div with our visualization using JavaScript.
 
 ### Write an Output Binding
 
@@ -39,7 +65,7 @@ An output binding object needs to have the following methods:
     <code>getId(el)</code>
   </dt>
   <dd>
-    Return the Shiny output ID for the element <code>el</code>, or <code>null</code> if the element doesn't have an ID and should therefore be ignored. The default implementation in <code>Shiny.InputBinding</code> reads the <code>data-output-id</code> attribute and falls back to the element's <code>id</code> if not present.
+    Return the Shiny output ID for the element <code>el</code>, or <code>null</code> if the element doesn't have an ID and should therefore be ignored. The default implementation in <code>Shiny.OutputBinding</code> reads the <code>data-output-id</code> attribute and falls back to the element's <code>id</code> if not present.
   </dd>
   <dt>
     <code>renderValue(el, data)</code>
@@ -59,11 +85,6 @@ An output binding object needs to have the following methods:
   <dd>
     If the element <code>el</code> is currently displaying an error, clear it.
   </dd>
-  <dt>
-    <code>showProgress(el, show)</code>
-  </dt>
-  <dd>
-  </dd>
 </dl>
 
 ### Register Output Binding
@@ -71,14 +92,4 @@ An output binding object needs to have the following methods:
 Once you've created an output binding object, you need to tell Shiny to use it:
 <pre><code class="javascript">Shiny.outputBindings.register(exampleOutputBinding, "yourname.exampleOutputBinding");</code></pre>
 
-The second argument is a name the user can use to change the priority of the binding. On the off chance that the user has multiple bindings that all want to claim the same HTML element as their own, this call can be used to control the priority of the bindings:
-
-<pre><code class="javascript">Shiny.outputBindings.setPriority("yourname.exampleOutputBinding", 10);</code></pre>
-
-Higher numbers indicate a higher priority; the default priority is 0. All of Shiny's built-in input component bindings default to a priority of 0.
-
-If two bindings have the same priority value, then the more recently registered binding has the higher priority.
-
-### Example
-
-
+The second argument is a string that uniquely identifies your output binding. At the moment it is unused but future features may depend on it.

@@ -1,6 +1,8 @@
 ## Building Inputs
 
-If you have some knowledge of HTML/CSS/JavaScript, you can create your own custom input components that can be reused by others.
+Shiny comes equipped with a variety of useful input components, but as you build more ambitious applications, you may find yourself needing input widgets that we don't include. Fortunately, Shiny is designed to let you create your own custom input components. If you can implement it using HTML, CSS, and JavaScript, you can use it as a Shiny input!
+
+(If you're only familiar with R and not with HTML/CSS/JavaScript, then you will likely find it tough to create all but the simplest custom input components on your own. However, other people can&nbsp;&ndash; and hopefully will&nbsp;&ndash; bundle up their custom Shiny input components as R packages and make them available to the world.)
 
 ### Design the Component
 

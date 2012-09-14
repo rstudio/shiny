@@ -170,7 +170,7 @@ shinyUI <- function(ui, path='/') {
       
       renderPage(ui, textConn)
       html <- paste(textConnectionValue(textConn), collapse='\n')
-      return(http_response(ws, 200, content=html))
+      return(httpResponse(200, content=html))
     }
   })
 }

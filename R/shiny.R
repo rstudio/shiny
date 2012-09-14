@@ -190,14 +190,32 @@ resolve <- function(dir, relpath) {
   return(abs.path)
 }
 
+httpResponse <- function(status = 200,
+                         content_type = "text/html; charset=UTF-8", 
+                         content = "") {
+  resp <- list(status = status, content_type = content_type, content = content);
+  class(resp) <- 'httpResponse'
+  return(resp)
+}
+
 httpServer <- function(handlers) {
   handler <- joinHandlers(handlers)
+
+  filter <- getOption('shiny.http.response.filter', NULL)
+  if (is.null(filter))
+    filter <- function(ws, header, response) response
+  
   function(ws, header) {
     response <- handler(ws, header)
-    if (!is.null(response))
-      return(response)
-    else
-      return(http_response(ws, 404, content="<h1>Not Found</h1>"))
+    if (is.null(response))
+      response <- httpResponse(404, content="<h1>Not Found</h1>")
+    
+    response <- filter(ws, header, response)
+    
+    return(http_response(ws,
+                         status=response$status,
+                         content_type=response$content_type,
+                         content=response$content))
   }
 }
 
@@ -258,7 +276,7 @@ staticHandler <- function(root) {
     path <- header$RESOURCE
     
     if (is.null(path))
-      return(http_response(ws, 400, content="<h1>Bad Request</h1>"))
+      return(httpResponse(400, content="<h1>Bad Request</h1>"))
     
     if (path == '/')
       path <- '/index.html'
@@ -279,7 +297,7 @@ staticHandler <- function(root) {
                            gif='image/gif',
                            'application/octet-stream')
     response.content <- readBin(abs.path, 'raw', n=file.info(abs.path)$size)
-    return(http_response(ws, 200, content.type, response.content))
+    return(httpResponse(200, content.type, response.content))
   })
 }
 

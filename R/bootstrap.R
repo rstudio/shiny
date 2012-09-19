@@ -284,7 +284,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
 #' @export
 checkboxInput <- function(inputId, label, value = FALSE) {
   inputTag <- tags$input(id = inputId, type="checkbox")
-  if (value)
+  if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
   tags$label(class = "checkbox", inputTag, label)
 }

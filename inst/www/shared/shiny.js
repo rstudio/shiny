@@ -1365,19 +1365,6 @@
     }
 
 
-    function bindAll(scope) {
-      bindOutputs(scope);
-      return bindInputs(scope);
-    }
-    function unbindAll(scope) {
-      unbindInputs(scope);
-      unbindOutputs(scope);
-    }
-    exports.bindAll = bindAll;
-    exports.unbindAll = unbindAll;
-
-    var initialValues = bindAll(document);
-
     function getMultiValue(input, exclusiveValue) {
       if (!input.name)
         return null;
@@ -1398,7 +1385,7 @@
       }
     }
 
-    function configureMultiInput(selector, exclusiveValue) {
+    function bindMultiInput(selector, exclusiveValue) {
       $(document).on('change input', selector, function() {
         if (this.name) {
           inputs.setInput(this.name, getMultiValue(this, exclusiveValue));
@@ -1410,7 +1397,11 @@
           }
         }
       });
-      $(selector).each(function() {
+    }
+
+    function getMultiInputValues(scope, selector, exclusiveValue) {
+      var initialValues = {};
+      $(scope).find(selector).each(function() {
         if (this.name) {
           initialValues[this.name] = getMultiValue(this, exclusiveValue);
         }
@@ -1421,10 +1412,29 @@
           }
         }
       });
+      return initialValues;
     }
 
-    configureMultiInput('input[type="checkbox"]', false);
-    configureMultiInput('input[type="radio"]', true);
+    function bindAll(scope) {
+      bindOutputs(scope);
+      return $.extend(
+        {},
+        getMultiInputValues(scope, 'input[type="checkbox"]', false),
+        getMultiInputValues(scope, 'input[type="radio"]', true),
+        bindInputs(scope)
+      );
+    }
+    function unbindAll(scope) {
+      unbindInputs(scope);
+      unbindOutputs(scope);
+    }
+    exports.bindAll = bindAll;
+    exports.unbindAll = unbindAll;
+
+    bindMultiInput('input[type="checkbox"]', false);
+    bindMultiInput('input[type="radio"]', true);
+    var initialValues = bindAll(document);
+
 
     // The server needs to know the size of each plot output element, in case
     // the plot is auto-sizing

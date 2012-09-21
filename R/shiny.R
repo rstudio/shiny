@@ -1,3 +1,7 @@
+#' @docType package
+#' @import websockets caTools RJSONIO xtable digest
+NULL
+
 suppressPackageStartupMessages({
   library(websockets)
   library(RJSONIO)

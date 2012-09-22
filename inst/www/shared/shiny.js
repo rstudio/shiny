@@ -634,13 +634,13 @@
 
         if (condFunc(scope)) {
           el.trigger('show');
-          el.show(function() {
+          el.show(0, function() {
             $(this).trigger('shown');
           });
         }
         else {
           el.trigger('hide');
-          el.hide(function() {
+          el.hide(0, function() {
             $(this).trigger('hidden');
           });
         }

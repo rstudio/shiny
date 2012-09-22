@@ -10,7 +10,7 @@
 }
 \description{
   Makes a reactive version of a function that generates
-  HTML using the Shiny UI library.
+  HTML using the Shiny UI library. \bold{Experimental.}
 }
 \details{
   The corresponding HTML output tag should be \code{div}

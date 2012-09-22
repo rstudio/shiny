@@ -244,7 +244,9 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 
 #' File Upload Control
 #' 
-#' Create a file upload control that can be used to upload one or more files.
+#' Create a file upload control that can be used to upload one or more files. 
+#' \bold{Experimental feature. Only works in some browsers (primarily tested on
+#' Chrome and Firefox).}
 #' 
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.

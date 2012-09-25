@@ -20,7 +20,8 @@
 }
 \description{
   Create a file upload control that can be used to upload
-  one or more files. \bold{Experimental. Only works in some
-  browsers (primarily tested on Chrome and Firefox).}
+  one or more files. \bold{Experimental feature. Only works
+  in some browsers (primarily tested on Chrome and
+  Firefox).}
 }
 

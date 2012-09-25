@@ -9,13 +9,14 @@
   \code{\link{HTML}}, or a list of such objects.}
 }
 \description{
-  Makes a reactive version of a function that generates
-  HTML using the Shiny UI library. \bold{Experimental.}
+  \bold{Experimental feature.} Makes a reactive version of
+  a function that generates HTML using the Shiny UI
+  library.
 }
 \details{
   The corresponding HTML output tag should be \code{div}
   and have the CSS class name \code{shiny-html-output} (or
-  use \code{\link{htmlOutput}}).
+  use \code{\link{uiOutput}}).
 }
 \examples{
 \dontrun{

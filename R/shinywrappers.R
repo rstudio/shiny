@@ -136,7 +136,7 @@ reactiveText <- function(func) {
 #' generates HTML using the Shiny UI library.
 #' 
 #' The corresponding HTML output tag should be \code{div} and have the CSS class
-#' name \code{shiny-html-output} (or use \code{\link{htmlOutput}}).
+#' name \code{shiny-html-output} (or use \code{\link{uiOutput}}).
 #' 
 #' @param func A function that returns a Shiny tag object, \code{\link{HTML}}, 
 #'   or a list of such objects.

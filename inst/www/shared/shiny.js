@@ -1415,7 +1415,7 @@
       return initialValues;
     }
 
-    function bindAll(scope) {
+    function _bindAll(scope) {
       bindOutputs(scope);
       return $.extend(
         {},
@@ -1428,12 +1428,20 @@
       unbindInputs(scope);
       unbindOutputs(scope);
     }
-    exports.bindAll = bindAll;
+    exports.bindAll = function(scope) {
+      // _bindAll alone returns initial values, it doesn't send them to the
+      // server. export.bindAll needs to send the values to the server, so we
+      // wrap _bindAll in a closure that does that.
+      var currentValues = _bindAll(scope);
+      $.each(currentValues, function(name, value) {
+        inputs.setInput(name, value);
+      });
+    };
     exports.unbindAll = unbindAll;
 
     bindMultiInput('input[type="checkbox"]', false);
     bindMultiInput('input[type="radio"]', true);
-    var initialValues = bindAll(document);
+    var initialValues = _bindAll(document);
 
 
     // The server needs to know the size of each plot output element, in case

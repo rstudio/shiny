@@ -145,7 +145,9 @@ hljs.initHighlightingOnLoad();
    <li>
       <a target="_self" href="#html-ui">HTML UI</a>
    </li>
-   <!--
+   <li>
+      <a target="_self" href="#dynamic-ui">Dynamic UI</a>
+   </li>
    <li class="nav-header">Extending Shiny</li>
    <li>
       <a target="_self" href="#building-inputs">Building Inputs</a>
@@ -153,6 +155,7 @@ hljs.initHighlightingOnLoad();
    <li>
       <a target="_self" href="#building-outputs">Building Outputs</a>
    </li>
+<!--
    <li>
       <a target="_self" href="#packaging-components">Packaging Components</a>
    </li>
@@ -246,6 +249,14 @@ hljs.initHighlightingOnLoad();
 
 {% capture more_widgets %}{% include tutorial/more-widgets.md %}{% endcapture %}
 {{ more_widgets | markdownify }}
+
+</div>
+
+<!-- Dynamic UI -->
+<div class="tab-pane" id="dynamic-ui">
+
+{% capture dynamic_ui %}{% include tutorial/dynamic-ui.md %}{% endcapture %}
+{{ dynamic_ui | markdownify }}
 
 </div>
 

@@ -1,3 +1,12 @@
+shiny 0.1.6
+--------------------------------------------------------------------------------
+
+* Import package dependencies, instead of attaching them (with the exception of
+  websockets, which doesn't currently work unless attached).
+* conditionalPanel was animated, now it is not.
+* bindAll was not correctly sending initial values to the server; fixed.
+
+
 shiny 0.1.5
 --------------------------------------------------------------------------------
 

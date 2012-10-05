@@ -559,6 +559,9 @@
 
     this.dispatchMessage = function(msg) {
       var msgObj = JSON.parse(msg);
+      if (msgObj.custom !== undefined && exports.oncustommessage) {
+        exports.oncustommessage(msgObj.custom);
+      }
       if (msgObj.values) {
         for (name in this.$bindings)
           this.$bindings[name].showProgress(false);
@@ -568,6 +571,11 @@
       }
       for (key in msgObj.values) {
         this.receiveOutput(key, msgObj.values[key]);
+      }
+      if (msgObj.console) {
+        for (var i = 0; i < msgObj.console.length; i++) {
+          console.log(msgObj.console[i]);
+        }
       }
       if (msgObj.progress) {
         for (var i = 0; i < msgObj.progress.length; i++) {

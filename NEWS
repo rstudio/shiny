@@ -2,6 +2,8 @@ shiny 0.1.7
 --------------------------------------------------------------------------------
 
 * Fix issue #26: Shiny.OutputBindings not correctly exported
+* Add `repeatable` function for making easily repeatable versions of random
+  number generating functions
 
 
 shiny 0.1.6

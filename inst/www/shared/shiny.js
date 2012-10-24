@@ -829,7 +829,7 @@
   var outputBindings = exports.outputBindings = new BindingRegistry();
 
   
-  var OutputBinding = function() {};
+  var OutputBinding = exports.OutputBinding = function() {};
   (function() {
     // Returns a jQuery object or element array that contains the
     // descendants of scope that match this binding

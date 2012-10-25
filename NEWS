@@ -1,9 +1,11 @@
 shiny 0.1.7
 --------------------------------------------------------------------------------
 
-* Fix issue #26: Shiny.OutputBindings not correctly exported
+* Fix issue #26: Shiny.OutputBindings not correctly exported.
 * Add `repeatable` function for making easily repeatable versions of random
-  number generating functions
+  number generating functions.
+* Transcode JSON into UTF-8 (prevents non-ASCII reactivePrint values from
+  causing errors on Windows).
 
 
 shiny 0.1.6

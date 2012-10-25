@@ -22,9 +22,17 @@
 #' 
 #' @export
 repeatable <- function(rngfunc, seed = runif(1, 0, .Machine$integer.max)) {
+  force(seed)
+  
   function(...) {
-    currentSeed <- .Random.seed
-    on.exit(.Random.seed <- currentSeed)
+    # When we exit, restore the seed to its original state
+    if (exists('.Random.seed', where=globalenv())) {
+      currentSeed <- get('.Random.seed', pos=globalenv())
+      on.exit(assign('.Random.seed', currentSeed, pos=globalenv()))
+    }
+    else {
+      on.exit(rm('.Random.seed', pos=globalenv()))
+    }
     
     set.seed(seed)
     

@@ -23,7 +23,4 @@
   Download and launch a Shiny application that is hosted on
   GitHub as a gist.
 }
-\note{
-  Requires the \code{RCurl} package.
-}
 

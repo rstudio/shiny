@@ -707,6 +707,46 @@ runExample <- function(example=NA,
   }
 }
 
+# This is a wrapper for download.file and has the same interface.
+# The only difference is that, if the protocol is https, it changes the
+# download settings, depending on platform.
+download <- function(url, ...) {
+  # First, check protocol. If https, check platform:
+  if (grepl('^https://', url)) {
+    
+    # If Windows, call setInternet2, then use download.file with defaults.
+    if (.Platform$OS.type == "windows") {
+      # If we directly use setInternet2, R CMD CHECK gives a Note on Mac/Linux
+      mySI2 <- eval(parse(text="setInternet2"))
+      # Store initial settings
+      internet2_start <- mySI2(NA)
+      on.exit(mySI2(internet2_start))
+      
+      # Needed for https
+      mySI2(TRUE)
+      download.file(url, ...)
+      
+      # If non-Windows, check for curl/wget/lynx, then call download.file with
+      # appropriate method.
+    } else {
+      
+      if (system("wget --help > /dev/null") == 0L) 
+        method <- "wget"
+      else if (system("curl --help > /dev/null") == 0L) 
+        method <- "curl"
+      else if (system("lynx -help > /dev/null") == 0L) 
+        method <- "lynx"
+      else
+        stop("no download method found")
+      
+      download.file(url, method = method, ...)
+    }
+    
+  } else {
+    download.file(url, ...)
+  }
+}
+
 #' Run a Shiny application from https://gist.github.com
 #' 
 #' Download and launch a Shiny application that is hosted on GitHub as a gist.
@@ -720,16 +760,12 @@ runExample <- function(example=NA,
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only.
 #'   
-#' @note Requires the \code{RCurl} package.
-#' 
 #' @export
 runGist <- function(gist,
                     port=8100L,
                     launch.browser=getOption('shiny.launch.browser',
                                              interactive())) {
-  if (!require(RCurl, quietly=TRUE))
-    stop("Please install package 'RCurl' before attempting to use runGist")
-  
+
   gistUrl <- if (is.numeric(gist) || grepl('^[0-9a-f]+$', gist)) {
     sprintf('https://gist.github.com/gists/%s/download', gist)
   } else if(grepl('^https://gist.github.com/([0-9a-f]+)$', gist)) {
@@ -742,18 +778,15 @@ runGist <- function(gist,
     stop('Unrecognized gist identifier format')
   }
   filePath <- tempfile('shinygist', fileext='.tar.gz')
-  zipdata <- getBinaryURL(gistUrl)
-  
-  hZipFile <- file(filePath, open='wb', raw=TRUE)
-  writeBin(zipdata, hZipFile)
-  close(hZipFile)
+  if (download(gistUrl, filePath, quiet = TRUE) != 0)
+    stop("Failed to download URL ", gistUrl)
+  on.exit(unlink(filePath))
   
   dirname <- untar(filePath, list=TRUE)[1]
   untar(filePath, exdir=dirname(filePath))
   
-  # TODO: Remove tarball and expanded directory when finished
+  appdir <- file.path(dirname(filePath), dirname)
+  on.exit(unlink(appdir, recursive = TRUE))
   
-  shiny::runApp(file.path(dirname(filePath), dirname),
-                port=port, 
-                launch.browser=launch.browser)
+  shiny::runApp(appdir, port=port, launch.browser=launch.browser)
 }

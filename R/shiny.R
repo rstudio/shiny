@@ -681,3 +681,49 @@ runExample <- function(example=NA,
     runApp(dir, port = port, launch.browser = launch.browser)
   }
 }
+
+#' Run a Shiny application from https://gist.github.com
+#' 
+#' Download and launch a Shiny application that is hosted on GitHub as a gist.
+#' 
+#' @param gist The identifier of the gist. For example, if the gist is
+#'   https://gist.github.com/3239667, then \code{3239667}, \code{'3239667'}, and
+#'   \code{'https://gist.github.com/3239667'} are all valid values.
+#'   
+#' @note Requires the \code{RCurl} package.
+#' 
+#' @export
+runGist <- function(gist,
+                    port=8100L,
+                    launch.browser=getOption('shiny.launch.browser',
+                                             interactive())) {
+  if (!require(RCurl, quietly=TRUE))
+    stop("Please install package 'RCurl' before attempting to use runGist")
+  
+  gistUrl <- if (is.numeric(gist) || grepl('^[0-9a-f]+$', gist)) {
+    sprintf('https://gist.github.com/gists/%s/download', gist)
+  } else if(grepl('^https://gist.github.com/([0-9a-f]+)$', gist)) {
+    paste(sub('https://gist.github.com/',
+              'https://gist.github.com/gists/',
+              gist),
+          '/download',
+          sep='')
+  } else {
+    stop('Unrecognized gist identifier format')
+  }
+  filePath <- tempfile('shinygist', fileext='.tar.gz')
+  zipdata <- getBinaryURL(gistUrl)
+  
+  hZipFile <- file(filePath, open='wb', raw=TRUE)
+  writeBin(zipdata, hZipFile)
+  close(hZipFile)
+  
+  dirname <- untar(filePath, list=TRUE)[1]
+  untar(filePath, exdir=dirname(filePath))
+  
+  # TODO: Remove tarball and expanded directory when finished
+  
+  shiny::runApp(file.path(dirname(filePath), dirname),
+                port=port, 
+                launch.browser=launch.browser)
+}

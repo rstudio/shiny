@@ -1,3 +1,10 @@
+shiny 0.1.8
+--------------------------------------------------------------------------------
+
+* Add `runGist` function for conveniently running a Shiny app that is published
+  on gist.github.com.
+
+
 shiny 0.1.7
 --------------------------------------------------------------------------------
 

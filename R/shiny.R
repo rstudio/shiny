@@ -467,8 +467,8 @@ decodeMessage <- function(data) {
   return(mainMessage)
 }
 
-#' Takes a list-of-lists and returns a matrix. The lists
-#' must all be the same length. NULL is replaced by NA.
+# Takes a list-of-lists and returns a matrix. The lists
+# must all be the same length. NULL is replaced by NA.
 unpackMatrix <- function(data) {
   if (length(data) == 0)
     return(matrix(nrow=0, ncol=0))
@@ -714,6 +714,11 @@ runExample <- function(example=NA,
 #' @param gist The identifier of the gist. For example, if the gist is
 #'   https://gist.github.com/3239667, then \code{3239667}, \code{'3239667'}, and
 #'   \code{'https://gist.github.com/3239667'} are all valid values.
+#' @param port The TCP port that the application should listen on. Defaults to 
+#'   port 8100.
+#' @param launch.browser If true, the system's default web browser will be 
+#'   launched automatically after the app is started. Defaults to true in 
+#'   interactive sessions only.
 #'   
 #' @note Requires the \code{RCurl} package.
 #' 

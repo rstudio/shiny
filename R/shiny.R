@@ -778,7 +778,7 @@ runGist <- function(gist,
     stop('Unrecognized gist identifier format')
   }
   filePath <- tempfile('shinygist', fileext='.tar.gz')
-  if (download(gistUrl, filePath, quiet = TRUE) != 0)
+  if (download(gistUrl, filePath, mode = "wb", quiet = TRUE) != 0)
     stop("Failed to download URL ", gistUrl)
   on.exit(unlink(filePath))
   

@@ -467,6 +467,20 @@ decodeMessage <- function(data) {
   return(mainMessage)
 }
 
+#' Takes a list-of-lists and returns a matrix. The lists
+#' must all be the same length. NULL is replaced by NA.
+unpackMatrix <- function(data) {
+  if (length(data) == 0)
+    return(matrix(nrow=0, ncol=0))
+  
+  m <- matrix(unlist(lapply(data, function(x) {
+    sapply(x, function(y) {
+      ifelse(is.null(y), NA, y)
+    })
+  })), nrow = length(data[[1]]), ncol = length(data))
+  return(m)
+}
+
 # Instantiates the app in the current working directory.
 # port - The TCP port that the application should listen on.
 startApp <- function(port=8101L) {
@@ -530,12 +544,23 @@ startApp <- function(port=8101L) {
     # Do our own list simplifying here. sapply/simplify2array give names to
     # character vectors, which is rarely what we want.
     if (!is.null(msg$data)) {
-      msg$data <- lapply(msg$data, function(x) {
-        if (is.list(x) && is.null(names(x)))
-          unlist(x, recursive=F)
-        else
-          x
-      })
+      for (name in names(msg$data)) {
+        val <- msg$data[[name]]
+        
+        splitName <- strsplit(name, ':')[[1]]
+        if (length(splitName) > 1) {
+          msg$data[[name]] <- NULL
+          
+          # TODO: Make the below a user-extensible registry of deserializers
+          msg$data[[ splitName[[1]] ]] <- switch(
+            splitName[[2]],
+            matrix = unpackMatrix(val),
+            stop('Unknown type specified for ', name)
+          )
+        }
+        else if (is.list(val) && is.null(names(val)))
+          msg$data[[name]] <- unlist(val, recursive=F)
+      }
     }
     
     switch(

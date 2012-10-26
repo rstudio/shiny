@@ -916,6 +916,9 @@
       return el['data-input-id'] || el.id;
     };
   
+    // Gives the input a type in case the server needs to know it
+    // to deserialize the JSON correctly
+    this.getType = function() { return false; }
     this.getValue = function(el) { throw "Not implemented"; };
     this.subscribe = function(el, callback) { };
     this.unsubscribe = function(el) { };
@@ -1294,9 +1297,13 @@
     
     function valueChangeCallback(binding, el, allowDeferred) {
       var id = binding.getId(el);
-      var el = binding.getValue(el);
-      if (id)
+      if (id) {
+        var el = binding.getValue(el);
+        var type = binding.getType(el);
+        if (type)
+          id = id + ":" + type
         inputs.setInput(id, el, !allowDeferred);
+      }
     }
     
     function bindInputs(scope) {
@@ -1321,7 +1328,9 @@
           if (!id || boundInputs[id])
             continue;
     
-          currentValues[id] = binding.getValue(el);
+          var type = binding.getType(el);
+          var effectiveId = type ? id + ":" + type : id;
+          currentValues[effectiveId] = binding.getValue(el);
 
           var thisCallback = (function() {
             var thisBinding = binding;

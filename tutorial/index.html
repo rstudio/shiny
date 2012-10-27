@@ -1,19 +1,23 @@
 ---
-title: "Tutorial: Building 'Shiny' Web Applications with R"
+title: "Tutorial: Building 'Shiny' Applications with R"
 ---
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Tutorial: Building 'Shiny' Web Applications with R</title>
+<title>Tutorial: Building 'Shiny' Applications with R</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <base target="_blank"/>
 
 <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700,400italic,600italic,700italic' rel='stylesheet' type='text/css'>
 <style>
    body {
      padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+     font-family: 'Source Sans Pro', sans-serif;
+     font-size: 15px;
+     line-height: 1.5;
    }
    .responsive-image {
       max-width: 100%;
@@ -33,6 +37,14 @@ title: "Tutorial: Building 'Shiny' Web Applications with R"
    }
    dd {
      margin-left: 30px;
+   }
+   h2 {
+     font-size: 30px;
+   }
+   h3 {
+     font-size: 22px;
+     margin-top: 30px;
+     margin-bottom: 10px;
    }
       
 </style>
@@ -97,7 +109,7 @@ hljs.initHighlightingOnLoad();
 <div class="navbar-inner">
   <div class="container">
    
-    <a class="brand" href="#">Tutorial: Building 'Shiny' Web Applications with R</a>
+    <a class="brand" href="#">Tutorial: Building 'Shiny' Applications with R</a>
    <a class="btn btn-primary pull-right" href="https://github.com/rstudio/shiny" target="_blank">Shiny on GitHub</a>
   </div>
 </div>
@@ -147,6 +159,10 @@ hljs.initHighlightingOnLoad();
    </li>
    <li>
       <a target="_self" href="#dynamic-ui">Dynamic UI</a>
+   </li>
+   <li class="nav-header">Sharing Apps</li>
+   <li>
+      <a target="_self" href="#delivering">Delivering Shiny Apps</a>
    </li>
    <li class="nav-header">Extending Shiny</li>
    <li>
@@ -265,6 +281,14 @@ hljs.initHighlightingOnLoad();
 
 {% capture html_ui %}{% include tutorial/html-ui.md %}{% endcapture %}
 {{ html_ui | markdownify }}
+
+</div>
+
+<!-- Delivering Shiny Apps -->
+<div class="tab-pane" id="delivering">
+
+{% capture delivering %}{% include tutorial/delivering.md %}{% endcapture %}
+{{ delivering | markdownify }}
 
 </div>
 

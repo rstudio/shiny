@@ -126,9 +126,7 @@ headerPanel <- function(title) {
 #' Create a well panel
 #' 
 #' Creates a panel with a slightly inset border and grey background. Equivalent
-#' to Twitter Bootstrap's
-#' \code{\href{http://twitter.github.com/bootstrap/components.html#misc}{well}}
-#' CSS class.
+#' to Twitter Bootstrap's \code{well} CSS class.
 #' 
 #' @param ... UI elements to include inside the panel.
 #' @return The newly created panel.

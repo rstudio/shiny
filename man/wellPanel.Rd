@@ -12,8 +12,7 @@
 }
 \description{
   Creates a panel with a slightly inset border and grey
-  background. Equivalent to Twitter Bootstrap's
-  \code{\href{http://twitter.github.com/bootstrap/components.html#misc}{well}}
+  background. Equivalent to Twitter Bootstrap's \code{well}
   CSS class.
 }
 

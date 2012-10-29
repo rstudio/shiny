@@ -5,6 +5,9 @@ shiny 0.1.8
   on gist.github.com.
 * Fix issue #27: Warnings cause reactive functions to stop executing.
 * The server.R and ui.R filenames are now case insensitive.
+* Add `wellPanel` function for creating inset areas on the page.
+* Add `bootstrapPage` function for creating new Twitter Bootstrap based
+  layouts from scratch.
 
 
 shiny 0.1.7

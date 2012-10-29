@@ -481,16 +481,32 @@ unpackMatrix <- function(data) {
   return(m)
 }
 
+# Combine dir and (file)name into a file path. If a file already exists with a
+# name differing only by case, then use it instead.
+file.path.ci <- function(dir, name) {
+  default <- file.path(dir, name)
+  if (file.exists(default))
+    return(default)
+  if (!file.exists(dir))
+    return(default)
+  
+  matches <- list.files(dir, name, ignore.case=TRUE, full.names=TRUE,
+                        include.dirs=TRUE)
+  if (length(matches) == 0)
+    return(default)
+  return(matches[[1]])
+}
+
 # Instantiates the app in the current working directory.
 # port - The TCP port that the application should listen on.
 startApp <- function(port=8101L) {
 
   sys.www.root <- system.file('www', package='shiny')
   
-  globalR <- file.path(getwd(), 'global.R')
-  uiR <- file.path(getwd(), 'ui.R')
-  serverR <- file.path(getwd(), 'server.R')
-  wwwDir <- file.path(getwd(), 'www')
+  globalR <- file.path.ci(getwd(), 'global.R')
+  uiR <- file.path.ci(getwd(), 'ui.R')
+  serverR <- file.path.ci(getwd(), 'server.R')
+  wwwDir <- file.path.ci(getwd(), 'www')
   
   if (!file.exists(uiR) && !file.exists(wwwDir))
     stop(paste("Neither ui.R nor a www subdirectory was found in", getwd()))

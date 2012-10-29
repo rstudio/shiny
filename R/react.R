@@ -52,14 +52,12 @@ Context <- setRefClass(
     executeCallbacks = function() {
       "For internal use only."
       lapply(.callbacks, function(func) {
-        tryCatch({
+        withCallingHandlers({
           func()
         }, warning = function(e) {
           # TODO: Callbacks in app
-          print(e)
         }, error = function(e) {
           # TODO: Callbacks in app
-          print(e)
         })
       })
     }

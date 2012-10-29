@@ -1,3 +1,57 @@
+#' Create a Twitter Bootstrap page
+#' 
+#' Create a Shiny UI page that loads the CSS and JavaScript for
+#' \href{http://getbootstrap.com}{Twitter Bootstrap}, and has no content in the
+#' page body (other than what you provide).
+#' 
+#' This function is primarily intended for users who are proficient in HTML/CSS,
+#' and know how to lay out pages in Bootstrap. Most users should use template
+#' functions like \code{\link{pageWithSidebar}}.
+#' 
+#' @param ... The contents of the document body.
+#' @return A UI defintion that can be passed to the \link{shinyUI} function.
+#' 
+#' @export
+bootstrapPage <- function(...) {
+  # required head tags for boostrap
+  importBootstrap <- function(min = TRUE, responsive = TRUE) {
+    
+    ext <- function(ext) {
+      ifelse(min, paste(".min", ext, sep=""), ext)
+    }
+    cssExt <- ext(".css")
+    jsExt = ext(".js")
+    bs <- "shared/bootstrap/"
+    
+    result <- tags$head(
+      tags$link(rel="stylesheet", 
+                type="text/css", 
+                href=paste(bs, "css/bootstrap", cssExt, sep="")),
+      
+      tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
+    )
+    
+    if (responsive) {
+      result <- tagAppendChild(
+        result, 
+        tags$meta(name="viewport", 
+                  content="width=device-width, initial-scale=1.0"))
+      result <- tagAppendChild(
+        result,
+        tags$link(rel="stylesheet", 
+                  type="text/css", 
+                  href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")))
+    }
+    
+    result
+  }
+  
+  tagList(
+    # inject bootstrap requirements into head
+    importBootstrap(),
+    list(...)
+  )
+}
 
 #' Create a page with a sidebar
 #' 
@@ -34,43 +88,16 @@
 #' @export
 pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
   
-  # required head tags for boostrap
-  importBootstrap <- function(min = TRUE) {
-    
-    ext <- function(ext) {
-      ifelse(min, paste(".min", ext, sep=""), ext)
-    }
-    cssExt <- ext(".css")
-    jsExt = ext(".js")
-    bs <- "shared/bootstrap/"
-    
-    tags$head(
-      tags$meta(name="viewport", 
-                content="width=device-width, initial-scale=1.0"),
-      tags$link(rel="stylesheet", 
-                type="text/css", 
-                href=paste(bs, "css/bootstrap", cssExt, sep="")),
-      
-      tags$link(rel="stylesheet", 
-                type="text/css", 
-                href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")),
-      
-      tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
-    )
-  }
-  
-  tagList(
-    # inject bootstrap requirements into head
-    importBootstrap(),
-    
+  bootstrapPage(
     # basic application container divs
-    div(class="container-fluid", 
+    div(
+      class="container-fluid", 
       div(class="row-fluid", 
-        headerPanel
+          headerPanel
       ),
       div(class="row-fluid", 
-        sidebarPanel, 
-        mainPanel
+          sidebarPanel, 
+          mainPanel
       )
     )
   )
@@ -94,6 +121,21 @@ headerPanel <- function(title) {
       h1(title)
     )
   )
+}
+
+#' Create a well panel
+#' 
+#' Creates a panel with a slightly inset border and grey background. Equivalent
+#' to Twitter Bootstrap's
+#' \code{\href{http://twitter.github.com/bootstrap/components.html#misc}{well}}
+#' CSS class.
+#' 
+#' @param ... UI elements to include inside the panel.
+#' @return The newly created panel.
+#' 
+#' @export
+wellPanel <- function(...) {
+  div(class="well", ...)
 }
 
 #' Create a sidebar panel

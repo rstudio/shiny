@@ -3,6 +3,8 @@ shiny 0.1.8
 
 * Add `runGist` function for conveniently running a Shiny app that is published
   on gist.github.com.
+* Fix issue #27: Warnings cause reactive functions to stop executing.
+* The server.R and ui.R filenames are now case insensitive.
 
 
 shiny 0.1.7

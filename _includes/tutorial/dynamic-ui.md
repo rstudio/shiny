@@ -33,7 +33,7 @@ The condition can also use `output` values; they work in the same way (`output.f
 <pre><code class="r"># Partial example
 selectInput("dataset", "Dataset", c("diamonds", "rock", "pressure", "cars")),
 conditionalPanel(
-  condition = "output.nrow",
+  condition = "output.nrows",
   checkboxInput("headonly", "Only use first 1000 rows"))</code></pre>
 
 #### server.R

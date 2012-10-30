@@ -746,11 +746,11 @@ download <- function(url, ...) {
       # appropriate method.
     } else {
       
-      if (system("wget --help > /dev/null") == 0L) 
+      if (system("wget --help", ignore.stdout=TRUE, ignore.stderr=TRUE) == 0L)
         method <- "wget"
-      else if (system("curl --help > /dev/null") == 0L) 
+      else if (system("curl --help", ignore.stdout=TRUE, ignore.stderr=TRUE) == 0L)
         method <- "curl"
-      else if (system("lynx -help > /dev/null") == 0L) 
+      else if (system("lynx -help", ignore.stdout=TRUE, ignore.stderr=TRUE) == 0L)
         method <- "lynx"
       else
         stop("no download method found")

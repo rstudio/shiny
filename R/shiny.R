@@ -733,7 +733,7 @@ download <- function(url, ...) {
     # If Windows, call setInternet2, then use download.file with defaults.
     if (.Platform$OS.type == "windows") {
       # If we directly use setInternet2, R CMD CHECK gives a Note on Mac/Linux
-      mySI2 <- eval(parse(text="setInternet2"))
+      mySI2 <- `::`(utils, 'setInternet2')
       # Store initial settings
       internet2_start <- mySI2(NA)
       on.exit(mySI2(internet2_start))

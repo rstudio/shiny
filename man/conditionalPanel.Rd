@@ -30,18 +30,18 @@
 sidebarPanel(
    selectInput(
       "plotType", "Plot Type",
-      list(Scatter = "scatter",
-           Histogram = "hist")),
+      c(Scatter = "scatter",
+        Histogram = "hist")),
 
    # Only show this panel if the plot type is a histogram
    conditionalPanel(
       condition = "input.plotType == 'hist'",
       selectInput(
          "breaks", "Breaks",
-         list("Sturges",
-              "Scott",
-              "Freedman-Diaconis",
-              "[Custom]" = "custom")),
+         c("Sturges",
+           "Scott",
+           "Freedman-Diaconis",
+           "[Custom]" = "custom")),
 
       # Only show this panel if Custom is selected
       conditionalPanel(

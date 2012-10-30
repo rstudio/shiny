@@ -203,18 +203,18 @@ mainPanel <- function(...) {
 #' sidebarPanel(
 #'    selectInput(
 #'       "plotType", "Plot Type",
-#'       list(Scatter = "scatter",
-#'            Histogram = "hist")),
+#'       c(Scatter = "scatter",
+#'         Histogram = "hist")),
 #' 
 #'    # Only show this panel if the plot type is a histogram
 #'    conditionalPanel(
 #'       condition = "input.plotType == 'hist'",
 #'       selectInput(
 #'          "breaks", "Breaks",
-#'          list("Sturges", 
-#'               "Scott",
-#'               "Freedman-Diaconis",
-#'               "[Custom]" = "custom")),
+#'          c("Sturges",
+#'            "Scott",
+#'            "Freedman-Diaconis",
+#'            "[Custom]" = "custom")),
 #'               
 #'       # Only show this panel if Custom is selected
 #'       conditionalPanel(
@@ -349,9 +349,9 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #'   
 #' @examples
 #' checkboxGroupInput("variable", "Variable:",
-#'                    list("Cylinders" = "cyl", 
-#'                         "Transmission" = "am", 
-#'                         "Gears" = "gear"))
+#'                    c("Cylinders" = "cyl",
+#'                      "Transmission" = "am",
+#'                      "Gears" = "gear"))
 #'                  
 #' @export
 checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
@@ -435,9 +435,9 @@ choicesWithNames <- function(choices) {
 #' 
 #' @examples
 #' selectInput("variable", "Variable:",
-#'             list("Cylinders" = "cyl", 
-#'                  "Transmission" = "am", 
-#'                  "Gears" = "gear"))
+#'             c("Cylinders" = "cyl",
+#'               "Transmission" = "am",
+#'               "Gears" = "gear"))
 #' @export
 selectInput <- function(inputId, 
                         label, 
@@ -480,10 +480,10 @@ selectInput <- function(inputId,
 #' 
 #' @examples
 #' radioButtons("dist", "Distribution type:",
-#'              list("Normal" = "norm",
-#'                   "Uniform" = "unif",
-#'                   "Log-normal" = "lnorm",
-#'                   "Exponential" = "exp"))
+#'              c("Normal" = "norm",
+#'                "Uniform" = "unif",
+#'                "Log-normal" = "lnorm",
+#'                "Exponential" = "exp"))
 #' @export
 radioButtons <- function(inputId, label, choices, selected = NULL) {
   # resolve names

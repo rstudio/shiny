@@ -22,8 +22,7 @@ Shiny is a new package from RStudio that makes it incredibly easy to build inter
 If you've already got the Shiny package installed, you're ready to go. If you don't have Shiny yet, you'll need to:
 
 * Request access to the beta at [http://shiny.rstudio.org](http://shiny.rstudio.org).
-* Once you have been granted access to the beta, download and install the Shiny package from GitHub at 
-[https://github.com/rstudio/shiny](https://github.com/rstudio/shiny).
+* Once you have been granted access to the beta, follow the instructions in the welcome e-mail to install the Shiny package.
 
 
 ### Let's Go!

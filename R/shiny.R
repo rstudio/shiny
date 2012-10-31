@@ -742,18 +742,27 @@ download <- function(url, ...) {
       mySI2(TRUE)
       download.file(url, ...)
       
+    } else {
       # If non-Windows, check for curl/wget/lynx, then call download.file with
       # appropriate method.
-    } else {
       
-      if (system("wget --help", ignore.stdout=TRUE, ignore.stderr=TRUE) == 0L)
+      if (nzchar(Sys.which("wget")[1])) {
         method <- "wget"
-      else if (system("curl --help", ignore.stdout=TRUE, ignore.stderr=TRUE) == 0L)
+      } else if (nzchar(Sys.which("curl")[1])) {
         method <- "curl"
-      else if (system("lynx -help", ignore.stdout=TRUE, ignore.stderr=TRUE) == 0L)
+        
+        # curl needs to add a -L option to follow redirects.
+        # Save the original options and restore when we exit.
+        orig_extra_options <- getOption("download.file.extra")
+        on.exit(options(download.file.extra = orig_extra_options))
+        
+        options(download.file.extra = paste("-L", orig_extra_options))
+        
+      } else if (nzchar(Sys.which("lynx")[1])) {
         method <- "lynx"
-      else
+      } else {
         stop("no download method found")
+      }
       
       download.file(url, method = method, ...)
     }

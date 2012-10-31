@@ -52,21 +52,21 @@ Values <- setRefClass(
     get = function(key) {
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!exists(dep.key, where=.dependencies, inherits=F)) {
-        assign(dep.key, ctx, pos=.dependencies, inherits=F)
+      if (!exists(dep.key, where=.dependencies, inherits=FALSE)) {
+        assign(dep.key, ctx, pos=.dependencies, inherits=FALSE)
         ctx$onInvalidate(function() {
-          rm(list=dep.key, pos=.dependencies, inherits=F)
+          rm(list=dep.key, pos=.dependencies, inherits=FALSE)
         })
       }
       
-      if (!exists(key, where=.values, inherits=F))
+      if (!exists(key, where=.values, inherits=FALSE))
         NULL
       else
-        base::get(key, pos=.values, inherits=F)
+        base::get(key, pos=.values, inherits=FALSE)
     },
     set = function(key, value) {
-      if (exists(key, where=.values, inherits=F)) {
-        if (identical(base::get(key, pos=.values, inherits=F), value)) {
+      if (exists(key, where=.values, inherits=FALSE)) {
+        if (identical(base::get(key, pos=.values, inherits=FALSE), value)) {
           return(invisible())
         }
       }
@@ -75,11 +75,11 @@ Values <- setRefClass(
       }
       .allDeps$invalidate()
       
-      assign(key, value, pos=.values, inherits=F)
+      assign(key, value, pos=.values, inherits=FALSE)
       dep.keys <- objects(
         pos=.dependencies,
         pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
-        all.names=T
+        all.names=TRUE
       )
       lapply(
         mget(dep.keys, envir=.dependencies),
@@ -99,7 +99,7 @@ Values <- setRefClass(
     },
     names = function() {
       .namesDeps$register()
-      return(ls(.values, all.names=T))
+      return(ls(.values, all.names=TRUE))
     },
     toList = function() {
       .allDeps$register()
@@ -153,11 +153,11 @@ Observable <- setRefClass(
              "or more parameters; only functions without parameters can be ",
              "reactive.")
       .func <<- func
-      .initialized <<- F
+      .initialized <<- FALSE
     },
     getValue = function() {
       if (!.initialized) {
-        .initialized <<- T
+        .initialized <<- TRUE
         .self$.updateValue()
       }
       
@@ -178,7 +178,7 @@ Observable <- setRefClass(
         .dependencies$invalidateHint()
       })
       ctx$run(function() {
-        .value <<- try(.func(), silent=F)
+        .value <<- try(.func(), silent=FALSE)
       })
       if (!identical(old.value, .value)) {
         .dependencies$invalidate()

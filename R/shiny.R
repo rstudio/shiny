@@ -47,7 +47,7 @@ ShinyApp <- setRefClass(
 
         obs <- Observer$new(function() {
           
-          value <- try(func(), silent=F)
+          value <- try(func(), silent=FALSE)
           
           .invalidatedOutputErrors$remove(name)
           .invalidatedOutputValues$remove(name)
@@ -106,7 +106,7 @@ ShinyApp <- setRefClass(
     },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
-      func <- try(do.call(`$`, list(.self, method)), silent=T)
+      func <- try(do.call(`$`, list(.self, method)), silent=TRUE)
       if (inherits(func, 'try-error')) {
         .sendErrorResponse(msg, paste('Unknown method', msg$method))
       }
@@ -133,9 +133,9 @@ ShinyApp <- setRefClass(
       .write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
     },
     .write = function(json) {
-      if (getOption('shiny.trace', F))
+      if (getOption('shiny.trace', FALSE))
         message('SEND ', json)
-      if (getOption('shiny.transcode.json', T))
+      if (getOption('shiny.transcode.json', TRUE))
         json <- iconv(json, to='UTF-8')
       websocket_write(json, .websocket)
     },
@@ -185,8 +185,8 @@ resolve <- function(dir, relpath) {
   abs.path <- file.path(dir, relpath)
   if (!file.exists(abs.path))
     return(NULL)
-  abs.path <- normalizePath(abs.path, winslash='/', mustWork=T)
-  dir <- normalizePath(dir, winslash='/', mustWork=T)
+  abs.path <- normalizePath(abs.path, winslash='/', mustWork=TRUE)
+  dir <- normalizePath(dir, winslash='/', mustWork=TRUE)
   if (nchar(abs.path) <= nchar(dir) + 1)
     return(NULL)
   if (substr(abs.path, 1, nchar(dir)) != dir ||
@@ -266,7 +266,7 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
       clearClients()
       if (file.exists(filePath)) {
         local({
-          source(filePath, local=T)
+          source(filePath, local=TRUE)
         })
       }
       metaHandler <<- joinHandlers(.globals$clients)
@@ -358,7 +358,7 @@ registerClient <- function(client) {
 #' @export
 addResourcePath <- function(prefix, directoryPath) {
   prefix <- prefix[1]
-  if (!grepl('^[a-z][a-z0-9\\-_]*$', prefix, ignore.case=T, perl=T)) {
+  if (!grepl('^[a-z][a-z0-9\\-_]*$', prefix, ignore.case=TRUE, perl=TRUE)) {
     stop("addResourcePath called with invalid prefix; please see documentation")
   }
   
@@ -367,7 +367,7 @@ addResourcePath <- function(prefix, directoryPath) {
          "please use a different prefix")
   }
   
-  directoryPath <- normalizePath(directoryPath, mustWork=T)
+  directoryPath <- normalizePath(directoryPath, mustWork=TRUE)
   
   existing <- .globals$resources[[prefix]]
   
@@ -387,7 +387,7 @@ addResourcePath <- function(prefix, directoryPath) {
 resourcePathHandler <- function(ws, header) {
   path <- header$RESOURCE
   
-  match <- regexpr('^/([^/]+)/', path, perl=T)
+  match <- regexpr('^/([^/]+)/', path, perl=TRUE)
   if (match == -1)
     return(NULL)
   len <- attr(match, 'capture.length')
@@ -448,7 +448,7 @@ decodeMessage <- function(data) {
   }
   
   if (readInt(1) != 0x01020202L)
-    return(fromJSON(rawToChar(data), asText=T, simplify=F))
+    return(fromJSON(rawToChar(data), asText=TRUE, simplify=FALSE))
   
   i <- 5
   parts <- list()
@@ -514,13 +514,13 @@ startApp <- function(port=8101L) {
     stop(paste("server.R file was not found in", getwd()))
   
   if (file.exists(globalR))
-    source(globalR, local=F)
+    source(globalR, local=FALSE)
   
   shinyServer(NULL)
   serverFileTimestamp <- NULL
   local({
     serverFileTimestamp <<- file.info(serverR)$mtime
-    source(serverR, local=T)
+    source(serverR, local=TRUE)
     if (is.null(.globals$server))
       stop("No server was defined in server.R")
   })
@@ -543,7 +543,7 @@ startApp <- function(port=8101L) {
   }, ws_env)
   
   set_callback('receive', function(DATA, WS, ...) {
-    if (getOption('shiny.trace', F)) {
+    if (getOption('shiny.trace', FALSE)) {
       if (as.raw(0) %in% DATA)
         message("RECV ", '$$binary data$$')
       else
@@ -575,7 +575,7 @@ startApp <- function(port=8101L) {
           )
         }
         else if (is.list(val) && is.null(names(val)))
-          msg$data[[name]] <- unlist(val, recursive=F)
+          msg$data[[name]] <- unlist(val, recursive=FALSE)
       }
     }
     
@@ -589,7 +589,7 @@ startApp <- function(port=8101L) {
           shinyServer(NULL)
           local({
             serverFileTimestamp <<- mtime
-            source(serverR, local=T)
+            source(serverR, local=TRUE)
             if (is.null(.globals$server))
               stop("No server was defined in server.R")
           })
@@ -619,7 +619,7 @@ startApp <- function(port=8101L) {
 
 # NOTE: we de-roxygenized this comment because the function isn't exported
 # Run an application that was created by \code{\link{startApp}}. This
-# function should normally be called in a \code{while(T)} loop.
+# function should normally be called in a \code{while(TRUE)} loop.
 # 
 # @param ws_env The return value from \code{\link{startApp}}.
 serviceApp <- function(ws_env) {
@@ -675,7 +675,7 @@ runApp <- function(appDir=getwd(),
   }
   
   tryCatch(
-    while (T) {
+    while (TRUE) {
       serviceApp(ws_env)
     },
     finally = {

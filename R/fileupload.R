@@ -41,7 +41,7 @@ FileUploadOperation <- setRefClass(
 
       filename <- file.path(.dir, as.character(length(.files)))
       row <- data.frame(name=file$name, size=file$size, type=file$type,
-                        datapath=filename, stringsAsFactors=F)
+                        datapath=filename, stringsAsFactors=FALSE)
       
       if (length(.files) == 0)
         .files <<- row
@@ -74,7 +74,7 @@ FileUploadContext <- setRefClass(
       .basedir <<- dir
     },
     createUploadOperation = function() {
-      while (T) {
+      while (TRUE) {
         id <- paste(as.raw(runif(12, min=0, max=0xFF)), collapse='')
         dir <- file.path(.basedir, id)
         if (!dir.create(dir))

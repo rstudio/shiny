@@ -51,7 +51,7 @@ TimerCallbacks <- setRefClass(
     executeElapsed = function() {
       elapsed <- takeElapsed()
       if (length(elapsed) == 0)
-        return(F)
+        return(FALSE)
       
       for (id in elapsed$id) {
         thisFunc <- .funcs$remove(as.character(id))
@@ -59,7 +59,7 @@ TimerCallbacks <- setRefClass(
         # TODO: Detect NULL, and...?
         thisFunc()
       }
-      return(T)
+      return(TRUE)
     }
   )
 )

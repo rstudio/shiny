@@ -9,7 +9,7 @@ Context <- setRefClass(
   methods = list(
     initialize = function() {
       id <<- .getReactiveEnvironment()$nextId()
-      .invalidated <<- F
+      .invalidated <<- FALSE
       .callbacks <<- list()
       .hintCallbacks <<- list()
     },
@@ -32,7 +32,7 @@ Context <- setRefClass(
         invalidated until the next call to \\code{\\link{flushReact}}."
       if (.invalidated)
         return()
-      .invalidated <<- T
+      .invalidated <<- TRUE
       .getReactiveEnvironment()$addPendingInvalidate(.self)
       NULL
     },
@@ -107,10 +107,10 @@ ReactiveEnvironment <- setRefClass(
 )
 
 .getReactiveEnvironment <- function() {
-  if (!exists('.ReactiveEnvironment', envir=.GlobalEnv, inherits=F)) {
+  if (!exists('.ReactiveEnvironment', envir=.GlobalEnv, inherits=FALSE)) {
     assign('.ReactiveEnvironment', ReactiveEnvironment$new(), envir=.GlobalEnv)
   }
-  get('.ReactiveEnvironment', envir=.GlobalEnv, inherits=F)
+  get('.ReactiveEnvironment', envir=.GlobalEnv, inherits=FALSE)
 }
 
 # Causes any pending invalidations to run.

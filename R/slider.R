@@ -70,7 +70,7 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
   }
   
   # Default state is to not have ticks
-  if (identical(ticks, T)) {
+  if (identical(ticks, TRUE)) {
     # Automatic ticks
     tickCount <- (range / step) + 1
     if (tickCount <= 26)
@@ -119,10 +119,10 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
                'data-smooth'=FALSE)
   )
   
-  if (identical(animate, T))
+  if (identical(animate, TRUE))
     animate <- animationOptions()
   
-  if (!is.null(animate) && !identical(animate, F)) {
+  if (!is.null(animate) && !identical(animate, FALSE)) {
     if (is.null(animate$playButton))
       animate$playButton <- 'Play'
     if (is.null(animate$pauseButton))

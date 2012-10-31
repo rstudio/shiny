@@ -20,30 +20,30 @@ Map <- setRefClass(
     },
     get = function(key) {
       if (.self$containsKey(key))
-        return(base::get(key, pos=.env, inherits=F))
+        return(base::get(key, pos=.env, inherits=FALSE))
       else
         return(NULL)
     },
     set = function(key, value) {
-      assign(key, value, pos=.env, inherits=F)
+      assign(key, value, pos=.env, inherits=FALSE)
       return(value)
     },
     remove = function(key) {
       if (.self$containsKey(key)) {
         result <- .self$get(key)
-        rm(list = key, pos=.env, inherits=F)
+        rm(list = key, pos=.env, inherits=FALSE)
         return(result)
       }
       return(NULL)
     },
     containsKey = function(key) {
-      exists(key, where=.env, inherits=F)
+      exists(key, where=.env, inherits=FALSE)
     },
     keys = function() {
-      ls(envir=.env, all.names=T)
+      ls(envir=.env, all.names=TRUE)
     },
     values = function() {
-      mget(.self$keys(), envir=.env, inherits=F)
+      mget(.self$keys(), envir=.env, inherits=FALSE)
     },
     clear = function() {
       .env <<- new.env(parent=emptyenv())
@@ -67,7 +67,7 @@ Map <- setRefClass(
 as.list.Map <- function(map) {
   sapply(map$keys(),
          map$get,
-         simplify=F)
+         simplify=FALSE)
 }
 length.Map <- function(map) {
   map$size()

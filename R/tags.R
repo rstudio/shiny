@@ -16,7 +16,7 @@ htmlEscape <- local({
   )
   .htmlSpecialsPatternAttrib <- paste(names(.htmlSpecialsAttrib), collapse='|')
   
-  function(text, attribute=T) {
+  function(text, attribute=TRUE) {
     pattern <- if(attribute)
       .htmlSpecialsPatternAttrib 
     else
@@ -32,7 +32,7 @@ htmlEscape <- local({
       .htmlSpecials
     
     for (chr in names(specials)) {
-      text <- gsub(chr, specials[[chr]], text, fixed=T)
+      text <- gsub(chr, specials[[chr]], text, fixed=TRUE)
     }
     
     return(text)

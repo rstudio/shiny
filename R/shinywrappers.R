@@ -78,7 +78,7 @@ reactiveTable <- function(func, ...) {
         print(xtable(data, ...), 
               type='html', 
               html.table.attributes=paste('class="',
-                                          htmlEscape(classNames, T),
+                                          htmlEscape(classNames, TRUE),
                                           '"',
                                           sep=''))),
       collapse="\n"))

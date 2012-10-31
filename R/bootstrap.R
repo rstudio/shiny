@@ -584,10 +584,10 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   if (!is.character(labelText))
     stop("label not specified")
   
-  if (identical(animate, T))
+  if (identical(animate, TRUE))
     animate <- animationOptions()
   
-  if (!is.null(animate) && !identical(animate, F)) {
+  if (!is.null(animate) && !identical(animate, FALSE)) {
     if (is.null(animate$playButton))
       animate$playButton <- tags$i(class='icon-play')
     if (is.null(animate$pauseButton))

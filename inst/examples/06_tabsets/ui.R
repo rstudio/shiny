@@ -11,10 +11,10 @@ shinyUI(pageWithSidebar(
   # element to introduce extra vertical spacing
   sidebarPanel(
     radioButtons("dist", "Distribution type:",
-                 list("Normal" = "norm",
-                      "Uniform" = "unif",
-                      "Log-normal" = "lnorm",
-                      "Exponential" = "exp")),
+                 c("Normal" = "norm",
+                   "Uniform" = "unif",
+                   "Log-normal" = "lnorm",
+                   "Exponential" = "exp")),
     br(),
     
     sliderInput("n", 

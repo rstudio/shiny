@@ -10,10 +10,10 @@ shinyUI(pageWithSidebar(
   # and to specify whether outliers should be included
   sidebarPanel(
     selectInput("variable", "Variable:",
-                list("Cylinders" = "cyl", 
-                     "Transmission" = "am", 
-                     "Gears" = "gear")),
-    
+                c("Cylinders" = "cyl",
+                  "Transmission" = "am",
+                  "Gears" = "gear")),
+
     checkboxInput("outliers", "Show outliers", FALSE)
   ),
   

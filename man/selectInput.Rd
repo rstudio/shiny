@@ -33,8 +33,8 @@
 }
 \examples{
 selectInput("variable", "Variable:",
-            list("Cylinders" = "cyl",
-                 "Transmission" = "am",
-                 "Gears" = "gear"))
+            c("Cylinders" = "cyl",
+              "Transmission" = "am",
+              "Gears" = "gear"))
 }
 

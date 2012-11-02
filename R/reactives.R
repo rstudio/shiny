@@ -34,6 +34,55 @@ Dependencies <- setRefClass(
   )
 )
 
+ReactiveValue <- setRefClass(
+  'ReactiveValue',
+  fields = list(
+    .value = 'ANY',
+    .dependencies = 'Dependencies'
+  ),
+  methods = list(
+    initialize = function(value) {
+      .value <<- value
+    },
+    get = function() {
+      .dependencies$register()
+      return(.value)
+    },
+    set = function(value) {
+      if (identical(.value, value))
+        return()
+      .value <<- value
+      .dependencies$invalidate()
+      return()
+    }
+  )
+)
+
+#' @export
+reactiveValue <- function(initialValue) {
+  obj <- list(impl=ReactiveValue$new(initialValue))
+  class(obj) <- 'reactvalue'
+  return(obj)
+}
+
+#' @export
+`value<-` <- function(x, value) {
+  UseMethod('value<-')
+}
+#' @S3method value<- reactvalue
+`value<-.reactvalue` <- function(x, value) {
+  x[['impl']]$set(value)
+  return(x)
+}
+#' @export
+`value` <- function(x) {
+  UseMethod('value')
+}
+#' @S3method value reactvalue
+`value.reactvalue` <- function(x) {
+  x[['impl']]$get()
+}
+
 Values <- setRefClass(
   'Values',
   fields = list(

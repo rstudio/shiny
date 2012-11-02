@@ -2,6 +2,7 @@ shiny 0.1.9
 --------------------------------------------------------------------------------
 
 * Much less flicker when updating plots
+* More customizable error display
 
 
 shiny 0.1.8

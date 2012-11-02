@@ -847,7 +847,7 @@
       this.renderError(el, err);
     };
     this.renderError = function(el, err) {
-      $(el).addClass('shiny-output-error').text('ERROR: ' + err.message);
+      $(el).addClass('shiny-output-error').text(err.message);
     };
     this.clearError = function(el) {
       $(el).removeClass('shiny-output-error');

@@ -879,12 +879,16 @@
       return $(scope).find('.shiny-plot-output');
     },
     renderValue: function(el, data) {
+      // Load the image before emptying, to minimize flicker
+      var img = null;
+      if (data) {
+        img = document.createElement('img');
+        img.src = data;
+      }
+
       $(el).empty();
-      if (!data)
-        return;
-      var img = document.createElement('img');
-      img.src = data;
-      $(el).append(img);
+      if (img)
+        $(el).append(img);
     }
   });
   outputBindings.register(plotOutputBinding, 'shiny.plotOutput');

@@ -679,6 +679,7 @@ runApp <- function(appDir=getwd(),
       serviceApp(ws_env)
     },
     finally = {
+      timerCallbacks$clear()
       websocket_close(ws_env)
     }
   )
@@ -813,5 +814,5 @@ runGist <- function(gist,
   appdir <- file.path(dirname(filePath), dirname)
   on.exit(unlink(appdir, recursive = TRUE))
   
-  shiny::runApp(appdir, port=port, launch.browser=launch.browser)
+  runApp(appdir, port=port, launch.browser=launch.browser)
 }

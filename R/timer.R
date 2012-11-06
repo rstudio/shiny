@@ -15,6 +15,11 @@ TimerCallbacks <- setRefClass(
     initialize = function() {
       .nextId <<- 0L
     },
+    clear = function() {
+      .nextId <<- 0L
+      .funcs$clear()
+      .times <<- data.frame()
+    },
     schedule = function(millis, func) {
       id <- .nextId
       .nextId <<- .nextId + 1L

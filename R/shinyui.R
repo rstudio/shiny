@@ -47,6 +47,31 @@ strong <- function(...) tags$strong(...)
 #' @export
 em <- function(...) tags$em(...)
 
+#' @export
+includeHTML <- function(path) {
+  dependsOnFile(path)
+  lines <- readLines(path, warn=FALSE, encoding='UTF-8')
+  return(HTML(paste(lines, collapse='\r\n')))
+}
+
+#' @export
+includeText <- function(path) {
+  dependsOnFile(path)
+  lines <- readLines(path, warn=FALSE, encoding='UTF-8')
+  return(HTML(paste(lines, collapse='\r\n')))
+}
+
+#' @export
+includeMarkdown <- function(path) {
+  if (!require(markdown))
+    stop("Markdown package is not installed")
+  
+  dependsOnFile(path)
+  html <- markdown::markdownToHTML(path, fragment.only=TRUE)
+  Encoding(html) <- 'UTF-8'
+  return(HTML(html))
+}
+
 
 #' Include Content Only Once
 #' 
@@ -158,6 +183,8 @@ renderPage <- function(ui, connection) {
 #'
 #' @export
 shinyUI <- function(ui, path='/') {
+  
+  force(ui)
   
   registerClient({
     

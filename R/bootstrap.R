@@ -381,22 +381,19 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
 
 #' Create a help text element
 #' 
-#' Create help text which can be added to an input form to provide
-#' additional explanation or context.
+#' Create help text which can be added to an input form to provide additional
+#' explanation or context.
 #' 
-#' @param text Help text string
-#' @param ... Additional help text strings
+#' @param ... One or more help text strings (or other inline HTML elements)
 #' @return A help text element that can be added to a UI definition.
-#' 
+#'   
 #' @examples
 #' helpText("Note: while the data view will show only",
 #'          "the specified number of observations, the",
 #'          "summary will be based on the full dataset.")
 #' @export
-helpText <- function(text, ...) {
-  text <- c(text, as.character(list(...)))
-  text <- paste(text, collapse=" ")
-  span(class="help-block", text)
+helpText <- function(...) {
+  span(class="help-block", ...)
 }
 
 controlLabel <- function(controlName, label) {

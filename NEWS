@@ -3,6 +3,8 @@ shiny 0.1.9
 
 * Much less flicker when updating plots
 * More customizable error display
+* Add `includeText`, `includeHTML`, and `includeMarkdown` functions for putting
+  text, HTML, and Markdown content from external files in the application's UI.
 
 
 shiny 0.1.8

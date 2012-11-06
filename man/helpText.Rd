@@ -2,12 +2,11 @@
 \alias{helpText}
 \title{Create a help text element}
 \usage{
-  helpText(text, ...)
+  helpText(...)
 }
 \arguments{
-  \item{text}{Help text string}
-
-  \item{...}{Additional help text strings}
+  \item{...}{One or more help text strings (or other inline
+  HTML elements)}
 }
 \value{
   A help text element that can be added to a UI definition.

@@ -22,6 +22,8 @@ Imports:
     RJSONIO,
     xtable,
     digest
+Suggests:
+    markdown
 URL: https://github.com/rstudio/shiny, http://rstudio.github.com/shiny/tutorial
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
@@ -29,6 +31,7 @@ Collate:
     'random.R'
     'timer.R'
     'tags.R'
+    'cache.R'
     'react.R'
     'reactives.R'
     'fileupload.R'

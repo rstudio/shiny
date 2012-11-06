@@ -258,15 +258,21 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
   if (!file.exists(filePath))
     return(metaHandler)
   
+  cacheContext <- CacheContext$new()
+  
   return (function(ws, header) {
     # Check if we need to rebuild
-    mtime <- file.info(dependencyFiles)$mtime
-    if (!identical(lastKnownTimestamps, mtime)) {
-      lastKnownTimestamps <<- mtime
+    if (cacheContext$isDirty()) {
+      cacheContext$reset()
+      for (dep in dependencyFiles)
+        cacheContext$addDependencyFile(dep)
+
       clearClients()
       if (file.exists(filePath)) {
         local({
-          source(filePath, local=TRUE)
+          cacheContext$with(function() {
+            source(filePath, local=TRUE)
+          })
         })
       }
       metaHandler <<- joinHandlers(.globals$clients)

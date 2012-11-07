@@ -2,6 +2,12 @@
 
 Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
 
+## Example
+
+<iframe id="example1" src="http://glimmer.rstudio.com/winston/faithful2/" style="border: none; width: 600px; height: 520px"></iframe>
+
+Source: [https://gist.github.com/4022280](https://gist.github.com/4022280)
+
 ## Features
 
 * Build useful web applications with only a few lines of code&mdash;no JavaScript required.

@@ -365,7 +365,7 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
                            value = choices[[choiceName]])
     
     if (choiceName %in% selected)
-      checkbox$attribs$selected <- 'selected'
+      checkbox$attribs$checked <- 'checked'
     
     checkboxes[[length(checkboxes)+1]] <- checkbox
     checkboxes[[length(checkboxes)+1]] <- choiceName

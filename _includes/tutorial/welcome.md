@@ -4,6 +4,8 @@
 
 Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
 
+For an introduction and live examples, visit the [Shiny homepage](http://www.rstudio.com/shiny).
+
 ### Features
 
 * Build useful web applications with only a few lines of code&mdash;no JavaScript required.

@@ -29,7 +29,7 @@ One qualification to this: when a browser reload occurs Shiny explicitly checks 
 There are several techniques available for debugging Shiny applications. The first is to add calls to the [cat](http://stat.ethz.ch/R-manual/R-devel/library/base/html/cat.html) function which print diagnostics where appropriate. For example, these two calls to cat print diagnostics to standard output and standard error respectively:
 
 <pre><code class="r">cat(&quot;foo\n&quot;)
-cat(&quot;bar\n&quot;, stderr())
+cat(&quot;bar\n&quot;, file=stderr())
 </code></pre>
 
 #### Using browser

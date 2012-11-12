@@ -26,6 +26,12 @@ bootstrapPage <- function(...) {
     result <- tags$head(
       tags$link(rel="stylesheet", 
                 type="text/css", 
+                href="shared/slider/css/jquery.slider.min.css"),
+      
+      tags$script(src="shared/slider/js/jquery.slider.min.js"),
+      
+      tags$link(rel="stylesheet", 
+                type="text/css", 
                 href=paste(bs, "css/bootstrap", cssExt, sep="")),
       
       tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))

@@ -848,8 +848,9 @@ runGist <- function(gist,
     stop("Failed to download URL ", gistUrl)
   on.exit(unlink(filePath))
   
-  dirname <- untar(filePath, list=TRUE)[1]
-  untar(filePath, exdir=dirname(filePath))
+  argsFilter <- getOption('shiny.untar.args.filter', identity)
+  dirname <- do.call(untar, argsFilter(list(filePath, list=TRUE)))[1]
+  do.call(untar, argsFilter(list(filePath, exdir=dirname(filePath))))
   
   appdir <- file.path(dirname(filePath), dirname)
   on.exit(unlink(appdir, recursive = TRUE))

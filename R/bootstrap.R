@@ -115,14 +115,16 @@ pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
 #' Create a header panel containing an application title.
 #' 
 #' @param title An application title to display
+#' @param windowTitle The title that should be displayed by the browser window. 
+#'   Useful if \code{title} is not a string.
 #' @return A headerPanel that can be passed to \link{pageWithSidebar}
-#' 
+#'   
 #' @examples
 #' headerPanel("Hello Shiny!")
 #' @export
-headerPanel <- function(title) {    
+headerPanel <- function(title, windowTitle=title) {    
   tagList(
-    tags$head(tags$title(title)),
+    tags$head(tags$title(windowTitle)),
     div(class="span12", style="padding: 10px 0px;",
       h1(title)
     )

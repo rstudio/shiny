@@ -7,6 +7,11 @@ suppressPackageStartupMessages({
   library(RJSONIO)
 })
 
+createUniqueId <- function(bytes) {
+  # TODO: Use a method that isn't affected by the R seed
+  paste(as.character(as.raw(floor(runif(bytes, min=1, max=255)))), collapse='')
+}
+
 ShinyApp <- setRefClass(
   'ShinyApp',
   fields = list(
@@ -15,7 +20,10 @@ ShinyApp <- setRefClass(
     .invalidatedOutputErrors = 'Map',
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
-    session = 'Values'
+    session = 'Values',
+    token = 'character',  # Used to identify this instance in URLs
+    plots = 'Map',
+    allowDataUriScheme = 'logical'
   ),
   methods = list(
     initialize = function(ws) {
@@ -26,6 +34,10 @@ ShinyApp <- setRefClass(
       # TODO: Put file upload context in user/app-specific dir if possible
       .fileUploadContext <<- FileUploadContext$new()
       session <<- Values$new()
+      
+      token <<- createUniqueId(16)
+      
+      allowDataUriScheme <<- TRUE
     },
     defineOutput = function(name, func) {
       "Binds an output generating function to this name. The function can either
@@ -165,6 +177,35 @@ ShinyApp <- setRefClass(
       fileData <- .fileUploadContext$getUploadOperation(jobId)$finish()
       session$set(inputId, fileData)
       invisible()
+    },
+    # Provides a mechanism for handling direct HTTP requests that are posted
+    # to the session (rather than going through the websocket)
+    handleRequest = function(ws, header, subpath) {
+      # TODO: Turn off caching for the response
+      
+      matches <- regmatches(subpath,
+                            regexec("^/([a-z]+)/([^?]*)", 
+                                    subpath, 
+                                    ignore.case=TRUE))[[1]]
+      if (length(matches) == 0)
+        return(httpResponse(400, 'text/html', '<h1>Bad Request</h1>'))
+      
+      if (matches[2] == 'plot') {
+        savedPlot <- plots$get(matches[3])
+        if (is.null(savedPlot))
+          return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
+        
+        return(httpResponse(200, savedPlot$contentType, savedPlot$data))
+      }
+      
+      return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
+    },
+    savePlot = function(name, data, contentType) {
+      plots$set(name, list(data=data, contentType=contentType))
+      return(sprintf('session/%s/plot/%s?%s',
+                     URLencode(token),
+                     URLencode(name),
+                     createUniqueId(8)))
     }
   )
 )
@@ -198,8 +239,10 @@ resolve <- function(dir, relpath) {
 
 httpResponse <- function(status = 200,
                          content_type = "text/html; charset=UTF-8", 
-                         content = "") {
-  resp <- list(status = status, content_type = content_type, content = content);
+                         content = "",
+                         headers = c()) {
+  resp <- list(status = status, content_type = content_type, content = content,
+               headers = headers)
   class(resp) <- 'httpResponse'
   return(resp)
 }
@@ -221,7 +264,8 @@ httpServer <- function(handlers) {
     return(http_response(ws,
                          status=response$status,
                          content_type=response$content_type,
-                         content=response$content))
+                         content=response$content,
+                         headers=response$headers))
   }
 }
 
@@ -249,6 +293,25 @@ joinHandlers <- function(handlers) {
     }
     return(NULL)
   }
+}
+
+sessionHandler <- function(ws, header) {
+  path <- header$RESOURCE
+  if (is.null(path))
+    return(NULL)
+  
+  matches <- regmatches(path, regexec('^/session/([0-9a-f]+)(/.*)$', path))
+  if (length(matches[[1]]) == 0)
+    return(NULL)
+  
+  session <- matches[[1]][2]
+  subpath <- matches[[1]][3]
+  
+  shinyapp <- appsByToken$get(session)
+  if (is.null(shinyapp))
+    return(NULL)
+  
+  return(shinyapp$handleRequest(ws, header, subpath))
 }
 
 dynamicHandler <- function(filePath, dependencyFiles=filePath) {
@@ -348,6 +411,7 @@ staticHandler <- function(root) {
 }
 
 apps <- Map$new()
+appsByToken <- Map$new()
 
 # Provide a character representation of the WS that can be used
 # as a key in a Map.
@@ -568,7 +632,8 @@ startApp <- function(port=8101L) {
   
   ws_env <- create_server(
     port=port,
-    webpage=httpServer(c(dynamicHandler(uiR),
+    webpage=httpServer(c(sessionHandler,
+                         dynamicHandler(uiR),
                          wwwDir,
                          sys.www.root,
                          resourcePathHandler)))
@@ -576,9 +641,13 @@ startApp <- function(port=8101L) {
   set_callback('established', function(WS, ...) {
     shinyapp <- ShinyApp$new(WS)
     apps$set(wsToKey(WS), shinyapp)
+    appsByToken$set(shinyapp$token, shinyapp)
   }, ws_env)
   
   set_callback('closed', function(WS, ...) {
+    shinyapp <- apps$get(wsToKey(WS))
+    if (!is.null(shinyapp))
+      appsByToken$remove(shinyapp$token)
     apps$remove(wsToKey(WS))
   }, ws_env)
   
@@ -636,6 +705,8 @@ startApp <- function(port=8101L) {
           serverFunc <<- .globals$server
         }
         
+        shinyapp$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
+        msg$data[['__allowDataUriScheme']] <- NULL
         shinyapp$session$mset(msg$data)
         flushReact()
         local({

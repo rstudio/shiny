@@ -11,13 +11,14 @@ Description: Shiny makes it incredibly easy to build interactive web
     beautiful, responsive, and powerful applications with minimal effort.
 License: GPL-3
 Depends:
-    R (>= 2.14.1), websockets (>= 1.1.5)
+    R (>= 2.14.1)
 Imports:
     stats,
     tools,
     utils,
     datasets,
     methods,
+    websockets (>= 1.1.6),
     caTools,
     RJSONIO,
     xtable,

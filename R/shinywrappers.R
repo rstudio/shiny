@@ -47,8 +47,15 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
     if (is.na(bytes))
       return(NULL)
     
-    b64 <- base64encode(readBin(png.file, 'raw', n=bytes))
-    return(paste("data:image/png;base64,", b64, sep=''))
+    pngData <- readBin(png.file, 'raw', n=bytes)
+    if (shinyapp$allowDataUriScheme) {
+      b64 <- base64encode(pngData)
+      return(paste("data:image/png;base64,", b64, sep=''))
+    }
+    else {
+      imageUrl <- shinyapp$savePlot(name, pngData, 'image/png')
+      return(imageUrl)
+    }
   })
 }
 

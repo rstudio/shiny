@@ -12,10 +12,16 @@ suppressPackageStartupMessages({
 #' the CSS class name \code{shiny-plot-output}.
 #' 
 #' @param func A function that generates a plot.
-#' @param width The width of the rendered plot, in pixels; or \code{'auto'} to use
-#'   the \code{offsetWidth} of the HTML element that is bound to this plot.
-#' @param height The height of the rendered plot, in pixels; or \code{'auto'} to use
-#'   the \code{offsetHeight} of the HTML element that is bound to this plot.
+#' @param width The width of the rendered plot, in pixels; or \code{'auto'} to 
+#'   use the \code{offsetWidth} of the HTML element that is bound to this plot. 
+#'   You can also pass in a function that returns the width in pixels or 
+#'   \code{'auto'}; in the body of the function you may reference reactive 
+#'   values and functions.
+#' @param height The height of the rendered plot, in pixels; or \code{'auto'} to
+#'   use the \code{offsetHeight} of the HTML element that is bound to this plot.
+#'   You can also pass in a function that returns the width in pixels or 
+#'   \code{'auto'}; in the body of the function you may reference reactive 
+#'   values and functions.
 #' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}. 
 #'   These can be used to set the width, height, background color, etc.
 #'   
@@ -23,8 +29,18 @@ suppressPackageStartupMessages({
 reactivePlot <- function(func, width='auto', height='auto', ...) {
   args <- list(...)
   
+  if (is.function(width))
+    width <- reactive(width)
+  if (is.function(height))
+    height <- reactive(height)
+
   return(function(shinyapp, name, ...) {
     png.file <- tempfile(fileext='.png')
+    
+    if (is.function(width))
+      width <- width()
+    if (is.function(height))
+      height <- height()
     
     # Note that these are reactive calls. A change to the width and height
     # will inherently cause a reactive plot to redraw (unless width and 

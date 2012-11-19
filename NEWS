@@ -1,3 +1,13 @@
+shiny 0.1.10
+--------------------------------------------------------------------------------
+
+* Support more MIME types when serving out of www
+* Fix issue #35: Allow modification of untar args
+* headerPanel can take an explicit window title parameter
+* checkboxInput uses correct attribute `checked` instead of `selected`
+* Fix plot rendering with IE8 on Shiny Server
+
+
 shiny 0.1.9
 --------------------------------------------------------------------------------
 

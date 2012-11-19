@@ -85,7 +85,8 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 #' 
 #' @param func A function that returns an R object that can be used with 
 #'   \code{\link[xtable]{xtable}}.
-#' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}}.
+#' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}} and
+#'   \code{\link[xtable]{print.xtable}}.
 #'   
 #' @export
 reactiveTable <- function(func, ...) {
@@ -103,7 +104,7 @@ reactiveTable <- function(func, ...) {
               html.table.attributes=paste('class="',
                                           htmlEscape(classNames, TRUE),
                                           '"',
-                                          sep=''))),
+                                          sep=''), ...)),
       collapse="\n"))
   })
 }

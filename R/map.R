@@ -28,6 +28,12 @@ Map <- setRefClass(
       assign(key, value, pos=.env, inherits=FALSE)
       return(value)
     },
+    mset = function(...) {
+      args <- list(...)
+      for (key in names(args))
+        set(key, args[[key]])
+      return()
+    },
     remove = function(key) {
       if (.self$containsKey(key)) {
         result <- .self$get(key)

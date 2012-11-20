@@ -793,3 +793,47 @@ htmlOutput <- function(outputId) {
 uiOutput <- function(outputId) {
   htmlOutput(outputId)
 }
+
+#' Create a download button or link
+#' 
+#' Use these functions to create a download button or link; when clicked, it 
+#' will initiate a browser download. The filename and contents are specified by 
+#' the corresponding \code{\link{downloadHandler}} defined in the server 
+#' function.
+#' 
+#' @examples
+#' \dontrun{
+#' # In server.R:
+#' output$downloadData <- downloadHandler(
+#'   filename = function() {
+#'     paste('data-', Sys.Date(), '.csv', sep='')
+#'   },
+#'   content = function(con) {
+#'     write.csv(data, con)
+#'   }
+#' )
+#' 
+#' # In ui.R:
+#' downloadLink('downloadData', 'Download')
+#' }
+#' 
+#' @aliases downloadLink
+#' @seealso downloadHandler
+#' @export
+downloadButton <- function(outputId, label="Download", class=NULL) {
+  tags$a(id=outputId,
+         class=paste(c('btn shiny-download-link', class), collapse=" "),
+         href='',
+         target='_blank',
+         label)
+}
+
+#' @rdname downloadButton
+#' @export
+downloadLink <- function(outputId, label="Download", class=NULL) {
+  tags$a(id=outputId,
+         class=paste(c('shiny-download-link', class), collapse=" "),
+         href='',
+         target='_blank',
+         label)
+}

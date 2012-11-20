@@ -9,11 +9,17 @@
 
   \item{width}{The width of the rendered plot, in pixels;
   or \code{'auto'} to use the \code{offsetWidth} of the
-  HTML element that is bound to this plot.}
+  HTML element that is bound to this plot.  You can also
+  pass in a function that returns the width in pixels or
+  \code{'auto'}; in the body of the function you may
+  reference reactive values and functions.}
 
   \item{height}{The height of the rendered plot, in pixels;
   or \code{'auto'} to use the \code{offsetHeight} of the
-  HTML element that is bound to this plot.}
+  HTML element that is bound to this plot.  You can also
+  pass in a function that returns the width in pixels or
+  \code{'auto'}; in the body of the function you may
+  reference reactive values and functions.}
 
   \item{...}{Arguments to be passed through to
   \code{\link[grDevices]{png}}.  These can be used to set

@@ -184,3 +184,50 @@ reactiveUI <- function(func) {
     return(as.character(result))
   })
 }
+
+#' File Downloads
+#' 
+#' Allows content from the Shiny application to be made available to the user as
+#' file downloads (for example, downloading the currently visible data as a CSV 
+#' file). Both filename and contents can be calculated dynamically at the time 
+#' the user initiates the download. Assign the return value to a slot on 
+#' \code{output} in your server function, and in the UI use 
+#' \code{\link{downloadButton}} or \code{\link{downloadLink}} to make the
+#' download available.
+#' 
+#' @param filename A string of the filename, including extension, that the 
+#'   user's web browser should default to when downloading the file; or a 
+#'   function that returns such a string. (Reactive values and functions may be 
+#'   used from this function.)
+#' @param content A function that takes a single argument \code{con} that is a 
+#'   file connection opened in mode \code{wb}, and writes the content of the 
+#'   download into the connection. (Reactive values and functions may be used 
+#'   from this function.)
+#' @param contentType A string of the download's 
+#'   \href{http://en.wikipedia.org/wiki/Internet_media_type}{content type}, for 
+#'   example \code{"text/csv"} or \code{"image/png"}. If \code{NULL} or 
+#'   \code{NA}, the content type will be guessed based on the filename 
+#'   extension, or \code{application/octet-stream} if the extension is unknown.
+#'   
+#' @examples
+#' \dontrun{
+#' # In server.R:
+#' output$downloadData <- downloadHandler(
+#'   filename = function() {
+#'     paste('data-', Sys.Date(), '.csv', sep='')
+#'   },
+#'   content = function(con) {
+#'     write.csv(data, con)
+#'   }
+#' )
+#' 
+#' # In ui.R:
+#' downloadLink('downloadData', 'Download')
+#' }
+#' 
+#' @export
+downloadHandler <- function(filename, content, contentType=NA) {
+  return(function(shinyapp, name, ...) {
+    shinyapp$registerDownload(name, filename, contentType, content)
+  })
+}

@@ -9,7 +9,8 @@
   be used with \code{\link[xtable]{xtable}}.}
 
   \item{...}{Arguments to be passed through to
-  \code{\link[xtable]{xtable}}.}
+  \code{\link[xtable]{xtable}} and
+  \code{\link[xtable]{print.xtable}}.}
 }
 \description{
   Creates a reactive table that is suitable for assigning

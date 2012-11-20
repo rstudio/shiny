@@ -1,3 +1,12 @@
+shiny 0.1.11
+--------------------------------------------------------------------------------
+
+* Fix input binding with IE8 on Shiny Server
+* Fix issue #41: reactiveTable should allow print options too
+* Allow dynamic sizing of reactivePlot (i.e. using a function instead of a fixed
+  value)
+
+
 shiny 0.1.10
 --------------------------------------------------------------------------------
 

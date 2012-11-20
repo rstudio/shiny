@@ -350,12 +350,12 @@
     }
 
     // Don't mutate list argument
-    list = slice(list, 0);
+    list = list.slice(0);
 
     for (var chunkSize = 1; chunkSize < list.length; chunkSize *= 2) {
       for (var i = 0; i < list.length; i += chunkSize * 2) {
-        var listA = slice(list, i, i + chunkSize);
-        var listB = slice(list, i + chunkSize, i + chunkSize * 2);
+        var listA = list.slice(i, i + chunkSize);
+        var listB = list.slice(i + chunkSize, i + chunkSize * 2);
         var merged = merge(sortfunc, listA, listB);
         var args = [i, merged.length];
         Array.prototype.push.apply(args, merged);

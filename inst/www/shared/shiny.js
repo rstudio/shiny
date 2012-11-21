@@ -568,6 +568,7 @@
         exports.oncustommessage(msgObj.custom);
       }
       if (msgObj.values) {
+        $(document.documentElement).removeClass('shiny-busy');
         for (name in this.$bindings)
           this.$bindings[name].showProgress(false);
       }
@@ -583,6 +584,7 @@
         }
       }
       if (msgObj.progress) {
+        $(document.documentElement).addClass('shiny-busy');
         for (var i = 0; i < msgObj.progress.length; i++) {
           var key = msgObj.progress[i];
           var binding = this.$bindings[key];

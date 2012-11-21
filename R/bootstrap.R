@@ -801,6 +801,11 @@ uiOutput <- function(outputId) {
 #' the corresponding \code{\link{downloadHandler}} defined in the server 
 #' function.
 #' 
+#' @param outputId The name of the output slot that the \code{downloadHandler}
+#'   is assigned to.
+#' @param label The label that should appear on the button.
+#' @param class Additional CSS classes to apply to the tag, if any.
+#'   
 #' @examples
 #' \dontrun{
 #' # In server.R:

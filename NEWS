@@ -1,3 +1,11 @@
+shiny 0.1.12
+--------------------------------------------------------------------------------
+
+* Fix problems with runGist on Windows
+* Add feature for on-the-fly file downloads (e.g. CSV data, PDFs)
+* Add CSS hooks for app-wide busy indicators
+
+
 shiny 0.1.11
 --------------------------------------------------------------------------------
 

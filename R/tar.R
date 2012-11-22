@@ -26,7 +26,7 @@
 #  http://www.r-project.org/Licenses/
 
 untar2 <- function(tarfile, files = NULL, list = FALSE, exdir = ".")
-{print("GOT HERE")
+{
     getOct <- function(x, offset, len)
     {
         x <- 0L

@@ -966,7 +966,7 @@ runGist <- function(gist,
   
   argsFilter <- getOption('shiny.untar.args.filter', identity)
   dirname <- do.call(untar, argsFilter(list(basename(filePath), list=TRUE)))[1]
-  do.call(untar, argsFilter(list(filePath)))
+  do.call(untar, argsFilter(list(basename(filePath))))
   
   appdir <- file.path(dirname(filePath), dirname)
   on.exit(unlink(appdir, recursive = TRUE))

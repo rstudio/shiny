@@ -954,9 +954,19 @@ runGist <- function(gist,
     stop("Failed to download URL ", gistUrl)
   on.exit(unlink(filePath))
   
+  # The version of tar.exe that ships with RTools (and may be used by untar if
+  # present in the PATH) does not respond well to absolute paths on Windows when
+  # list = TRUE; you get a cygwin warning "MS-DOS style path detected" which
+  # interferes with the results. So we temporarily change directories so we can
+  # deal with only basenames.
+  
+  oldwd <- getwd()
+  setwd(dirname(filePath))
+  on.exit(setwd(oldwd))
+  
   argsFilter <- getOption('shiny.untar.args.filter', identity)
-  dirname <- do.call(untar, argsFilter(list(filePath, list=TRUE)))[1]
-  do.call(untar, argsFilter(list(filePath, exdir=dirname(filePath))))
+  dirname <- do.call(untar, argsFilter(list(basename(filePath), list=TRUE)))[1]
+  do.call(untar, argsFilter(list(filePath)))
   
   appdir <- file.path(dirname(filePath), dirname)
   on.exit(unlink(appdir, recursive = TRUE))

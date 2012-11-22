@@ -30,6 +30,7 @@ BugReports: https://github.com/rstudio/shiny/issues
 Collate:
     'map.R'
     'utils.R'
+    'tar.R'
     'timer.R'
     'tags.R'
     'cache.R'

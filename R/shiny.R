@@ -953,20 +953,15 @@ runGist <- function(gist,
   if (download(gistUrl, filePath, mode = "wb", quiet = TRUE) != 0)
     stop("Failed to download URL ", gistUrl)
   on.exit(unlink(filePath))
-  
-  # The version of tar.exe that ships with RTools (and may be used by untar if
-  # present in the PATH) does not respond well to absolute paths on Windows when
-  # list = TRUE; you get a cygwin warning "MS-DOS style path detected" which
-  # interferes with the results. So we temporarily change directories so we can
-  # deal with only basenames.
-  
-  oldwd <- getwd()
-  setwd(dirname(filePath))
-  on.exit(setwd(oldwd))
-  
-  argsFilter <- getOption('shiny.untar.args.filter', identity)
-  dirname <- do.call(untar, argsFilter(list(basename(filePath), list=TRUE)))[1]
-  do.call(untar, argsFilter(list(basename(filePath))))
+
+  # Regular untar commonly causes two problems on Windows with github tarballs:
+  #   1) If RTools' tar.exe is in the path, you get cygwin path warnings which
+  #      throw list=TRUE off;
+  #   2) If the internal untar implementation is used, it chokes on the 'g'
+  #      type flag that github uses (to stash their commit hash info).
+  # By using our own forked/modified untar2 we sidestep both issues.
+  dirname <- untar2(filePath, list=TRUE)[1]
+  untar2(filePath, exdir = dirname(filePath))
   
   appdir <- file.path(dirname(filePath), dirname)
   on.exit(unlink(appdir, recursive = TRUE))

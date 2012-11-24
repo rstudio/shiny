@@ -55,6 +55,7 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
       return(NULL)
     
     do.call(png, c(args, filename=png.file, width=width, height=height))
+    on.exit(unlink(png.file))
     tryCatch(
       func(),
       finally=dev.off())

@@ -1,5 +1,5 @@
 shinyUI(pageWithSidebar(
-  headerPanel('Download Example'),
+  headerPanel('Downloading Data'),
   sidebarPanel(
     selectInput("dataset", "Choose a dataset:", 
                 choices = c("rock", "pressure", "cars")),

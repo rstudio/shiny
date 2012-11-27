@@ -412,7 +412,7 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
       if (file.exists(filePath)) {
         local({
           cacheContext$with(function() {
-            source(filePath, local=TRUE)
+            source(filePath, local=new.env(parent=.GlobalEnv))
           })
         })
       }
@@ -659,7 +659,7 @@ startApp <- function(port=8101L) {
   serverFileTimestamp <- NULL
   local({
     serverFileTimestamp <<- file.info(serverR)$mtime
-    source(serverR, local=TRUE)
+    source(serverR, local=new.env(parent=.GlobalEnv))
     if (is.null(.globals$server))
       stop("No server was defined in server.R")
   })
@@ -733,7 +733,7 @@ startApp <- function(port=8101L) {
           shinyServer(NULL)
           local({
             serverFileTimestamp <<- mtime
-            source(serverR, local=TRUE)
+            source(serverR, local=new.env(parent=.GlobalEnv))
             if (is.null(.globals$server))
               stop("No server was defined in server.R")
           })

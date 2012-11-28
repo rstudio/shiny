@@ -1,3 +1,10 @@
+shiny 0.2.0
+--------------------------------------------------------------------------------
+
+* Fix subtle name resolution bug--the usual symptom being S4 methods not being
+  invoked correctly when called from inside of ui.R or server.R
+
+
 shiny 0.1.14
 --------------------------------------------------------------------------------
 

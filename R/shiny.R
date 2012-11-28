@@ -813,6 +813,8 @@ runApp <- function(appDir=getwd(),
   setwd(appDir)
   on.exit(setwd(orig.wd))
   
+  require(shiny)
+  
   ws_env <- startApp(port=port)
   
   if (launch.browser) {

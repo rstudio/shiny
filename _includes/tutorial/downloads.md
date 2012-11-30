@@ -38,8 +38,8 @@ You define a download using the `downloadHandler` function on the server side, a
   
   output$downloadData &lt;- downloadHandler(
     filename = function() { paste(input$dataset, '.csv', sep='') },
-    content = function(con) {
-      write.csv(datasetInput(), con)
+    content = function(file) {
+      write.csv(datasetInput(), file)
     }
   )
 })
@@ -47,7 +47,7 @@ You define a download using the `downloadHandler` function on the server side, a
 
 As you can see, `downloadHandler` takes a `filename` argument, which tells the web browser what filename to default to when saving. This argument can either be a simple string, or it can be a function that returns a string (as is the case here).
 
-The `content` argument must be a function that takes a single argument, a binary write-only connection. The `content` function is responsible for writing the contents of the file download into the connection object.
+The `content` argument must be a function that takes a single argument, the file name of a non-existent temp file. The `content` function is responsible for writing the contents of the file download into that temp file.
 
 Both the `filename` and `content` arguments can use reactive values and functions (although in the case of `filename`, be sure your argument is an actual function; `filename = paste(input$dataset, '.csv')` is not going to work the way you want it to, since it is evaluated only once, when the download handler is being defined).
 

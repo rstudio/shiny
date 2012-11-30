@@ -106,11 +106,9 @@ ReactiveEnvironment <- setRefClass(
   )
 )
 
+.reactiveEnvironment <- ReactiveEnvironment$new()
 .getReactiveEnvironment <- function() {
-  if (!exists('.ReactiveEnvironment', envir=.GlobalEnv, inherits=FALSE)) {
-    assign('.ReactiveEnvironment', ReactiveEnvironment$new(), envir=.GlobalEnv)
-  }
-  get('.ReactiveEnvironment', envir=.GlobalEnv, inherits=FALSE)
+  .reactiveEnvironment
 }
 
 # Causes any pending invalidations to run.

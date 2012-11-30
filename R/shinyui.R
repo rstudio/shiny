@@ -189,7 +189,8 @@ shinyUI <- function(ui, path='/') {
   registerClient({
     
     function(ws, header) {
-      if (header$RESOURCE != path)
+
+      if (header$PATH != path)
         return(NULL)
       
       textConn <- textConnection(NULL, "w") 

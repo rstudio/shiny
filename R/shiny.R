@@ -323,6 +323,16 @@ httpResponse <- function(status = 200,
   return(resp)
 }
 
+fixupRequestPath <- function(header) {
+  # Separate the path from the query
+  pathEnd <- regexpr('?', header$RESOURCE, fixed=TRUE)
+  if (pathEnd > 0)
+    header$PATH <- substring(header$RESOURCE, 1, pathEnd - 1)
+  else
+    header$PATH <- header$RESOURCE
+  return(header)
+}
+
 httpServer <- function(handlers) {
   handler <- joinHandlers(handlers)
 
@@ -331,6 +341,8 @@ httpServer <- function(handlers) {
     filter <- function(ws, header, response) response
   
   function(ws, header) {
+    header <- fixupRequestPath(header)
+    
     response <- handler(ws, header)
     if (is.null(response))
       response <- httpResponse(404, content="<h1>Not Found</h1>")
@@ -372,7 +384,7 @@ joinHandlers <- function(handlers) {
 }
 
 sessionHandler <- function(ws, header) {
-  path <- header$RESOURCE
+  path <- header$PATH
   if (is.null(path))
     return(NULL)
   
@@ -424,7 +436,7 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
 
 staticHandler <- function(root) {
   return(function(ws, header) {
-    path <- header$RESOURCE
+    path <- header$PATH
     
     if (is.null(path))
       return(httpResponse(400, content="<h1>Bad Request</h1>"))
@@ -537,6 +549,7 @@ resourcePathHandler <- function(ws, header) {
   suffix <- substr(path, 2 + len, nchar(path))
   
   header$RESOURCE <- suffix
+  header <- fixupRequestPath(header)
   
   return(resInfo$func(ws, header))
 }

@@ -12,10 +12,10 @@
   from this function.)}
 
   \item{content}{A function that takes a single argument
-  \code{con} that is a file connection opened in mode
-  \code{wb}, and writes the content of the download into
-  the connection. (Reactive values and functions may be
-  used from this function.)}
+  \code{file} that is a file path (string) of a nonexistent
+  temp file, and writes the content to that file path.
+  (Reactive values and functions may be used from this
+  function.)}
 
   \item{contentType}{A string of the download's
   \href{http://en.wikipedia.org/wiki/Internet_media_type}{content
@@ -43,8 +43,8 @@ output$downloadData <- downloadHandler(
   filename = function() {
     paste('data-', Sys.Date(), '.csv', sep='')
   },
-  content = function(con) {
-    write.csv(data, con)
+  content = function(file) {
+    write.csv(data, file)
   }
 )
 

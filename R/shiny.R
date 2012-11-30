@@ -245,13 +245,11 @@ ShinyApp <- setRefClass(
         
         tmpdata <- tempfile()
         on.exit(unlink(tmpdata))
-        conn <- file(tmpdata, open = 'wb')
-        result <- try(Context$new()$run(function() { download$func(conn) }))
+        result <- try(Context$new()$run(function() { download$func(tmpdata) }))
         if (is(result, 'try-error')) {
           return(httpResponse(500, 'text/plain', 
                               attr(result, 'condition')$message))
         }
-        close(conn)
         return(httpResponse(
           200,
           download$contentType %OR% getContentType(tools::file_ext(filename)),

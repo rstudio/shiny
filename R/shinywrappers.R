@@ -200,10 +200,10 @@ reactiveUI <- function(func) {
 #'   user's web browser should default to when downloading the file; or a 
 #'   function that returns such a string. (Reactive values and functions may be 
 #'   used from this function.)
-#' @param content A function that takes a single argument \code{con} that is a 
-#'   file connection opened in mode \code{wb}, and writes the content of the 
-#'   download into the connection. (Reactive values and functions may be used 
-#'   from this function.)
+#' @param content A function that takes a single argument \code{file} that is a 
+#'   file path (string) of a nonexistent temp file, and writes the content to
+#'   that file path. (Reactive values and functions may be used from this
+#'   function.)
 #' @param contentType A string of the download's 
 #'   \href{http://en.wikipedia.org/wiki/Internet_media_type}{content type}, for 
 #'   example \code{"text/csv"} or \code{"image/png"}. If \code{NULL} or 
@@ -217,8 +217,8 @@ reactiveUI <- function(func) {
 #'   filename = function() {
 #'     paste('data-', Sys.Date(), '.csv', sep='')
 #'   },
-#'   content = function(con) {
-#'     write.csv(data, con)
+#'   content = function(file) {
+#'     write.csv(data, file)
 #'   }
 #' )
 #' 

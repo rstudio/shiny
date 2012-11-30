@@ -1,3 +1,11 @@
+shiny 0.2.1
+--------------------------------------------------------------------------------
+
+* [BREAKING] Modify API of `downloadHandler`: The `content` function now takes
+  a file path, not writable connection, as an argument. This makes it much
+  easier to work with APIs that only write to file paths, not connections.
+
+
 shiny 0.2.0
 --------------------------------------------------------------------------------
 

@@ -10,6 +10,12 @@ suppressPackageStartupMessages({
 #' 
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
 #' the CSS class name \code{shiny-plot-output}.
+#'
+#' For output, it will try to use the following devices, in this order:
+#' quartz (via \code{\link[grDevices]{png}}), then \code{\link[Cairo]{CairoPNG}},
+#' and finally \code{\link[grDevices]{png}}. This is in order of quality of
+#' output. Notably, plain \code{png} output on Linux and Windows may not
+#' antialias some point shapes, resulting in poor quality output.
 #' 
 #' @param func A function that generates a plot.
 #' @param width The width of the rendered plot, in pixels; or \code{'auto'} to 
@@ -53,8 +59,18 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
     
     if (width <= 0 || height <= 0)
       return(NULL)
-    
-    do.call(png, c(args, filename=png.file, width=width, height=height))
+
+    # If quartz is available, use png() (which will default to quartz).
+    # Otherwise, if the Cairo package is installed, use CairoPNG().
+    # Finally, if neither quartz nor Cairo, use png().
+    if (capabilities("aqua"))
+      pngfun <- png
+    else if (nchar(system.file(package = "Cairo")))
+      pngfun <- Cairo::CairoPNG
+    else
+      pngfun <- png
+
+    do.call(pngfun, c(args, filename=png.file, width=width, height=height))
     on.exit(unlink(png.file))
     tryCatch(
       func(),

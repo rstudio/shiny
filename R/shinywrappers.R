@@ -195,7 +195,7 @@ reactiveText <- function(func) {
 #' }
 reactiveUI <- function(func) {
   reactive(function() {
-    result <- func()
+    result <- tagList(func())
     if (is.null(result) || length(result) == 0)
       return(NULL)
     # Wrap result in tagList in case it is an ordinary list

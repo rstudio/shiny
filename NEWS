@@ -1,3 +1,6 @@
+* Functions passed to reactiveUI() can now return a list, as described in the
+  help page.
+
 shiny 0.2.3
 --------------------------------------------------------------------------------
 

@@ -22,7 +22,8 @@ Imports:
     caTools,
     RJSONIO,
     xtable,
-    digest
+    digest,
+    downloader
 Suggests:
     markdown
 URL: https://github.com/rstudio/shiny, http://rstudio.github.com/shiny/tutorial

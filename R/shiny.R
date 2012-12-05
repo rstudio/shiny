@@ -883,55 +883,6 @@ runExample <- function(example=NA,
   }
 }
 
-# This is a wrapper for download.file and has the same interface.
-# The only difference is that, if the protocol is https, it changes the
-# download settings, depending on platform.
-download <- function(url, ...) {
-  # First, check protocol. If https, check platform:
-  if (grepl('^https://', url)) {
-    
-    # If Windows, call setInternet2, then use download.file with defaults.
-    if (.Platform$OS.type == "windows") {
-      # If we directly use setInternet2, R CMD CHECK gives a Note on Mac/Linux
-      mySI2 <- `::`(utils, 'setInternet2')
-      # Store initial settings
-      internet2_start <- mySI2(NA)
-      on.exit(mySI2(internet2_start))
-      
-      # Needed for https
-      mySI2(TRUE)
-      download.file(url, ...)
-      
-    } else {
-      # If non-Windows, check for curl/wget/lynx, then call download.file with
-      # appropriate method.
-      
-      if (nzchar(Sys.which("wget")[1])) {
-        method <- "wget"
-      } else if (nzchar(Sys.which("curl")[1])) {
-        method <- "curl"
-        
-        # curl needs to add a -L option to follow redirects.
-        # Save the original options and restore when we exit.
-        orig_extra_options <- getOption("download.file.extra")
-        on.exit(options(download.file.extra = orig_extra_options))
-        
-        options(download.file.extra = paste("-L", orig_extra_options))
-        
-      } else if (nzchar(Sys.which("lynx")[1])) {
-        method <- "lynx"
-      } else {
-        stop("no download method found")
-      }
-      
-      download.file(url, method = method, ...)
-    }
-    
-  } else {
-    download.file(url, ...)
-  }
-}
-
 #' Run a Shiny application from https://gist.github.com
 #' 
 #' Download and launch a Shiny application that is hosted on GitHub as a gist.
@@ -946,6 +897,7 @@ download <- function(url, ...) {
 #'   interactive sessions only.
 #'   
 #' @export
+#' @importFrom downloader download
 runGist <- function(gist,
                     port=8100L,
                     launch.browser=getOption('shiny.launch.browser',

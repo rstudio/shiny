@@ -182,7 +182,8 @@ reactiveUI <- function(func) {
     result <- func()
     if (is.null(result) || length(result) == 0)
       return(NULL)
-    return(as.character(result))
+    # Wrap result in tagList in case it is an ordinary list
+    return(as.character(tagList(result)))
   })
 }
 

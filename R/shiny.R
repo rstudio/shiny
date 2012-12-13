@@ -147,7 +147,8 @@ ShinyApp <- setRefClass(
     },
     .write = function(json) {
       if (getOption('shiny.trace', FALSE))
-        message('SEND ', json)
+        message('SEND ', 
+           gsub('(?m)base64,[a-zA-Z0-9+/=]+','[base64 data]',json,perl=TRUE))
       if (getOption('shiny.transcode.json', TRUE))
         json <- iconv(json, to='UTF-8')
       websocket_write(json, .websocket)

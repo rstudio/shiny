@@ -3,7 +3,6 @@ Context <- setRefClass(
   fields = list(
     id = 'character',
     .invalidated = 'logical',
-    .invalidatedHint = 'logical',
     .callbacks = 'list',
     .hintCallbacks = 'list'
   ),
@@ -11,7 +10,8 @@ Context <- setRefClass(
     initialize = function() {
       id <<- .getReactiveEnvironment()$nextId()
       .invalidated <<- FALSE
-      .invalidatedHint <<- FALSE
+      .callbacks <<- list()
+      .hintCallbacks <<- list()
     },
     run = function(func) {
       "Run the provided function under this context."
@@ -23,9 +23,6 @@ Context <- setRefClass(
       is, something in its dependency graph has been invalidated but there's no
       guarantee that the cascade of invalidations will reach all the way here.
       This is used to show progress in the UI."
-      if (.invalidatedHint)
-        return()
-      .invalidatedHint <<- TRUE
       lapply(.hintCallbacks, function(func) {
         func()
       })

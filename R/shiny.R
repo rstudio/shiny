@@ -18,6 +18,7 @@ ShinyApp <- setRefClass(
     .websocket = 'list',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
+    .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
     session = 'Values',
     token = 'character',  # Used to identify this instance in URLs
@@ -30,6 +31,7 @@ ShinyApp <- setRefClass(
       .websocket <<- ws
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
+      .progressKeys <<- character(0)
       # TODO: Put file upload context in user/app-specific dir if possible
       .fileUploadContext <<- FileUploadContext$new()
       session <<- Values$new()
@@ -83,10 +85,13 @@ ShinyApp <- setRefClass(
       }
     },
     flushOutput = function() {
-      if (length(.invalidatedOutputValues) == 0
+      if (length(.progressKeys) == 0
+          && length(.invalidatedOutputValues) == 0
           && length(.invalidatedOutputErrors) == 0) {
         return(invisible())
       }
+      
+      .progressKeys <<- character(0)
       
       values <- .invalidatedOutputValues
       .invalidatedOutputValues <<- Map$new()
@@ -103,8 +108,14 @@ ShinyApp <- setRefClass(
       by \\code{id} is in progress. There is currently no mechanism for
       explicitly turning off progress for an output component; instead, all
       progress is implicitly turned off when flushOutput is next called.'
-
-      .write(toJSON(list(progress=list(id))))
+      if (id %in% .progressKeys)
+        return()
+      
+      .progressKeys <<- c(.progressKeys, id)
+      
+      json <- toJSON(list(progress=list(id)))
+      
+      .write(json)
     },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')

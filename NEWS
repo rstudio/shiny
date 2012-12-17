@@ -3,6 +3,8 @@ shiny 0.2.3
 
 * Ignore request variables for routing purposes
 
+* `runGist` has been updated to use the new download URLs from
+  https://gist.github.com.
 
 shiny 0.2.2
 --------------------------------------------------------------------------------

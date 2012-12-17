@@ -63,12 +63,14 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
     # If quartz is available, use png() (which will default to quartz).
     # Otherwise, if the Cairo package is installed, use CairoPNG().
     # Finally, if neither quartz nor Cairo, use png().
-    if (capabilities("aqua"))
+    if (capabilities("aqua")) {
       pngfun <- png
-    else if (nchar(system.file(package = "Cairo")))
-      pngfun <- Cairo::CairoPNG
-    else
+    } else if (nchar(system.file(package = "Cairo"))) {
+      require(Cairo)
+      pngfun <- CairoPNG
+    } else {
       pngfun <- png
+    }
 
     do.call(pngfun, c(args, filename=png.file, width=width, height=height))
     on.exit(unlink(png.file))

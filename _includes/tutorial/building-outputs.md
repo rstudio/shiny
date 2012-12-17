@@ -14,7 +14,7 @@ For example, if the user wants to output [time series objects](http://stat.ethz.
 
 <pre><code class="r">reactiveTimeSeries &lt;- function(func) {
     reactive(function() {
-        val &lt; func()
+        val &lt;- func()
         list(start = tsp(val)[1],
              end = tsp(val)[2],
              freq = tsp(val)[3],

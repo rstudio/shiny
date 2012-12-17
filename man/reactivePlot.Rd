@@ -33,5 +33,13 @@
   The corresponding HTML output tag should be \code{div} or
   \code{img} and have the CSS class name
   \code{shiny-plot-output}.
+
+  For output, it will try to use the following devices, in
+  this order: quartz (via \code{\link[grDevices]{png}}),
+  then \code{\link[Cairo]{CairoPNG}}, and finally
+  \code{\link[grDevices]{png}}. This is in order of quality
+  of output. Notably, plain \code{png} output on Linux and
+  Windows may not antialias some point shapes, resulting in
+  poor quality output.
 }
 

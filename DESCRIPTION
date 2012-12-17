@@ -4,7 +4,7 @@ Title: Web Application Framework for R
 Version: 0.2.3
 Date: 2012-11-30
 Author: RStudio, Inc.
-Maintainer: Joe Cheng <joe@rstudio.org>
+Maintainer: Winston Chang <winston@rstudio.com>
 Description: Shiny makes it incredibly easy to build interactive web
     applications with R. Automatic "reactive" binding between inputs and
     outputs and extensive pre-built widgets make it possible to build

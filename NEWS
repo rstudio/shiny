@@ -6,6 +6,9 @@ shiny 0.2.3
 * `runGist` has been updated to use the new download URLs from
   https://gist.github.com.
 
+* Shiny now uses `CairoPNG()` for output, when the Cairo package is available.
+  This provides better-looking output on Linux and Windows.
+
 shiny 0.2.2
 --------------------------------------------------------------------------------
 

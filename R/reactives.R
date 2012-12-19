@@ -134,6 +134,11 @@ Values <- setRefClass(
   x[['impl']]$get(name)
 }
 
+#' @S3method ^ reactvaluesreader
+`^.reactvaluesreader` <- function(x, name) {
+  x[['impl']]$get_inert(name)
+}
+
 #' @S3method names reactvaluesreader
 names.reactvaluesreader <- function(x) {
   x[['impl']]$names()

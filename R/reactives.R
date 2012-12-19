@@ -64,6 +64,12 @@ Values <- setRefClass(
       else
         base::get(key, pos=.values, inherits=FALSE)
     },
+    get_inert = function(key) {
+      if (!exists(key, where=.values, inherits=FALSE))
+        NULL
+      else
+        base::get(key, pos=.values, inherits=FALSE)
+    },
     set = function(key, value) {
       if (exists(key, where=.values, inherits=FALSE)) {
         if (identical(base::get(key, pos=.values, inherits=FALSE), value)) {
@@ -126,6 +132,11 @@ Values <- setRefClass(
 #' @S3method $ reactvaluesreader
 `$.reactvaluesreader` <- function(x, name) {
   x[['impl']]$get(name)
+}
+
+#' @S3method ^ reactvaluesreader
+`^.reactvaluesreader` <- function(x, name) {
+  x[['impl']]$get_inert(name)
 }
 
 #' @S3method names reactvaluesreader

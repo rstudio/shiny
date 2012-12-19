@@ -64,6 +64,12 @@ Values <- setRefClass(
       else
         base::get(key, pos=.values, inherits=FALSE)
     },
+    get_inert = function(key) {
+      if (!exists(key, where=.values, inherits=FALSE))
+        NULL
+      else
+        base::get(key, pos=.values, inherits=FALSE)
+    },
     set = function(key, value) {
       if (exists(key, where=.values, inherits=FALSE)) {
         if (identical(base::get(key, pos=.values, inherits=FALSE), value)) {

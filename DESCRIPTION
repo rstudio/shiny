@@ -26,7 +26,7 @@ Imports:
 Suggests:
     markdown,
     Cairo
-URL: https://github.com/rstudio/shiny, http://rstudio.github.com/shiny/tutorial
+URL: http://www.rstudio.com/shiny/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
     'map.R'

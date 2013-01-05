@@ -40,16 +40,18 @@ test_that("Functions are not over-reactive", {
     value(valueA)
   })
 
-  cobserve(function() {
+  obsC <- cobserve(function() {
     funcB$call()
   })
 
   flushReact()
   expect_equal(funcB$times, 1)
+  expect_equal(obsC$times, 1)
 
   value(valueA) <- 11
   flushReact()
   expect_equal(funcB$times, 2)
+  expect_equal(obsC$times, 2)
 })
 
 
@@ -97,7 +99,7 @@ test_that("laziness", {
     funcA$call()
   })
 
-  cobserve(function() {
+  obsC <- cobserve(function() {
     if (value(valueA) > 10)
       return()
     funcB$call()
@@ -106,9 +108,11 @@ test_that("laziness", {
   flushReact()
   expect_equal(funcA$times, 1)
   expect_equal(funcB$times, 1)
+  expect_equal(obsC$times, 1)
 
   value(valueA) <- 11
   flushReact()
   expect_equal(funcA$times, 1)
   expect_equal(funcB$times, 1)
+  expect_equal(obsC$times, 2)
 })

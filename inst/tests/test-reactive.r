@@ -116,3 +116,65 @@ test_that("laziness", {
   expect_equal(funcB$times, 1)
   expect_equal(obsC$times, 2)
 })
+
+
+## Suppose B depends on A and C depends on A and B. Then when A is changed,
+## the evaluation order should be A, B, C. Also, each time A is changed, B and
+## C should be run once, if we want to be maximally efficient.
+test_that("order of evaluation", {
+  # ----------------------------------------------
+  # Test 1
+  # B depends on A, and observer depends on A and B. The observer uses A and
+  # B, in that order.
+
+  # This is to store the value from cobserve()
+  observed_value <- NA
+
+  valueA <- reactiveValue(1)
+  funcB  <- creactive(function() {
+    value(valueA) + 5
+  })
+  obsC <- cobserve(function() {
+    observed_value <<- value(valueA) * funcB$call()
+  })
+
+  flushReact()
+  expect_equal(observed_value, 6)   # Should be 1 * (1 + 5) = 6
+  expect_equal(funcB$times, 1)
+  expect_equal(obsC$times, 1)
+
+  value(valueA) <- 2
+  flushReact()
+  expect_equal(observed_value, 14)  # Should be 2 * (2 + 5) = 14
+  expect_equal(funcB$times, 2)
+  expect_equal(obsC$times, 2)
+
+
+  # ----------------------------------------------
+  # Test 2:
+  # Same as Test 1, except the observer uses A and B in reversed order.
+  # Resulting values should be the same.
+
+  observed_value <- NA
+
+  valueA <- reactiveValue(1)
+  funcB <- creactive(function() {
+    value(valueA) + 5
+  })
+  obsC <- cobserve(function() {
+    observed_value <<- funcB$call() * value(valueA)
+  })
+
+  flushReact()
+  # Should be 1 * (1 + 5) = 6
+  expect_equal(observed_value, 6)
+  expect_equal(funcB$times, 1)
+  expect_equal(obsC$times, 1)
+
+  value(valueA) <- 2
+  flushReact()
+  # Should be 2 * (2 + 5) = 14
+  expect_equal(observed_value, 14)
+  expect_equal(funcB$times, 2)
+  expect_equal(obsC$times, 2)
+})

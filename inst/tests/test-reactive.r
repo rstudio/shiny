@@ -178,3 +178,62 @@ test_that("order of evaluation", {
   expect_equal(funcB$times, 2)
   expect_equal(obsC$times, 2)
 })
+
+
+## Expressions in isolate() should not invalidate the parent context.
+test_that("isolate() blocks invalidations from propagating", {
+
+  obsC_value <- NA
+  obsD_value <- NA
+
+  valueA <- reactiveValue(1)
+  valueB <- reactiveValue(10)
+  funcB <- creactive(function() {
+    value(valueB) + 100
+  })
+
+  # References to valueB and funcB are isolated
+  obsC <- cobserve(function() {
+    obsC_value <<-
+      value(valueA) + isolate(value(valueB)) + isolate(funcB$call())
+  })
+
+  # In contrast with obsC, this has a non-isolated reference to funcB
+  obsD <- cobserve(function() {
+    obsD_value <<-
+      value(valueA) + isolate(value(valueB)) + funcB$call()
+  })
+
+
+  flushReact()
+  expect_equal(obsC_value, 121)
+  expect_equal(obsC$times, 1)
+  expect_equal(obsD_value, 121)
+  expect_equal(obsD$times, 1)
+
+  # Changing A should invalidate obsC and obsD
+  value(valueA) <- 2
+  flushReact()
+  expect_equal(obsC_value, 122)
+  expect_equal(obsC$times, 2)
+  expect_equal(obsD_value, 122)
+  expect_equal(obsD$times, 2)
+
+  # Changing B shouldn't invalidate obsC becuause references to B are in isolate()
+  # But it should invalidate obsD.
+  value(valueB) <- 20
+  flushReact()
+  expect_equal(obsC_value, 122)
+  expect_equal(obsC$times, 2)
+  expect_equal(obsD_value, 142)
+  expect_equal(obsD$times, 3)
+
+  # Changing A should invalidate obsC and obsD, and they should see updated
+  # values for valueA, valueB, and funcB
+  value(valueA) <- 3
+  flushReact()
+  expect_equal(obsC_value, 143)
+  expect_equal(obsC$times, 3)
+  expect_equal(obsD_value, 143)
+  expect_equal(obsD$times, 4)
+})

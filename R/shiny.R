@@ -40,7 +40,7 @@ ShinyApp <- setRefClass(
       
       allowDataUriScheme <<- TRUE
     },
-    defineOutput = function(name, func) {
+    defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
       take no parameters, or have named parameters for \\code{name} and
       \\code{shinyapp} (in the future this list may expand, so it is a good idea
@@ -74,7 +74,7 @@ ShinyApp <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        })
+        }, label)
         
         obs$onInvalidateHint(function() {
           showProgress(name)
@@ -295,7 +295,7 @@ ShinyApp <- setRefClass(
 
 #' @S3method $<- shinyoutput
 `$<-.shinyoutput` <- function(x, name, value) {
-  x[['impl']]$defineOutput(name, value)
+  x[['impl']]$defineOutput(name, value, deparse(substitute(value)))
   return(invisible(x))
 }
 

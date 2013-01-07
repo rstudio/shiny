@@ -191,18 +191,20 @@ Observable <- setRefClass(
   'Observable',
   fields = list(
     .func = 'function',
+    .label = 'character',
     .dependencies = 'Dependencies',
     .dirty = 'logical',
     .value = 'ANY'
   ),
   methods = list(
-    initialize = function(func) {
+    initialize = function(func, label=deparse(substitute(func))) {
       if (length(formals(func)) > 0)
         stop("Can't make a reactive function from a function that takes one ",
              "or more parameters; only functions without parameters can be ",
              "reactive.")
       .func <<- func
       .dirty <<- TRUE
+      .label <<- label
     },
     getValue = function() {
       if (.dirty) {
@@ -216,7 +218,7 @@ Observable <- setRefClass(
       return(.value)
     },
     .updateValue = function() {
-      ctx <- Context$new()
+      ctx <- Context$new(.label)
       ctx$onInvalidate(function() {
         .dirty <<- TRUE
         .dependencies$invalidate()
@@ -259,7 +261,7 @@ reactive <- function(x) {
 }
 #' @S3method reactive function
 reactive.function <- function(x) {
-  return(Observable$new(x)$getValue)
+  return(Observable$new(x, deparse(substitute(x)))$getValue)
 }
 #' @S3method reactive default
 reactive.default <- function(x) {
@@ -270,25 +272,27 @@ Observer <- setRefClass(
   'Observer',
   fields = list(
     .func = 'function',
+    .label = 'character',
     .hintCallbacks = 'list'
   ),
   methods = list(
-    initialize = function(func) {
+    initialize = function(func, label) {
       if (length(formals(func)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
 
       .func <<- func
+      .label <<- label
 
       # Defer the first running of this until flushReact is called
-      ctx <- Context$new()
+      ctx <- Context$new(.label)
       ctx$onInvalidate(function() {
         run()
       })
       ctx$invalidate()
     },
     run = function() {
-      ctx <- Context$new()
+      ctx <- Context$new(.label)
       ctx$onInvalidate(function() {
         run()
       })
@@ -327,7 +331,7 @@ Observer <- setRefClass(
 #'   
 #' @export
 observe <- function(func) {
-  Observer$new(func)
+  Observer$new(func, deparse(substitute(func)))
   invisible()
 }
 
@@ -428,7 +432,7 @@ invalidateLater <- function(millis) {
 #' }
 #' @export
 isolate <- function(expr) {
-  ctx <- Context$new()
+  ctx <- Context$new('[isolate]')
   ctx$run(function() {
     eval.parent(expr)
   })

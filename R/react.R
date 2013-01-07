@@ -2,16 +2,18 @@ Context <- setRefClass(
   'Context',
   fields = list(
     id = 'character',
+    .label = 'character',      # For debug purposes
     .invalidated = 'logical',
     .callbacks = 'list',
     .hintCallbacks = 'list'
   ),
   methods = list(
-    initialize = function() {
+    initialize = function(label=NULL) {
       id <<- .getReactiveEnvironment()$nextId()
       .invalidated <<- FALSE
       .callbacks <<- list()
       .hintCallbacks <<- list()
+      .label <<- label
     },
     run = function(func) {
       "Run the provided function under this context."

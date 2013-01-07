@@ -194,7 +194,8 @@ Observable <- setRefClass(
     .label = 'character',
     .dependencies = 'Dependencies',
     .dirty = 'logical',
-    .value = 'ANY'
+    .value = 'ANY',
+    .execCount = 'integer'
   ),
   methods = list(
     initialize = function(func, label=deparse(substitute(func))) {
@@ -205,6 +206,7 @@ Observable <- setRefClass(
       .func <<- func
       .dirty <<- TRUE
       .label <<- label
+      .execCount <<- 0L
     },
     getValue = function() {
       if (.dirty) {
@@ -226,6 +228,7 @@ Observable <- setRefClass(
       ctx$onInvalidateHint(function() {
         .dependencies$invalidateHint()
       })
+      .execCount <<- .execCount + 1L
       ctx$run(function() {
         .value <<- try(.func(), silent=FALSE)
       })
@@ -268,12 +271,23 @@ reactive.default <- function(x) {
   stop("Don't know how to make this object reactive!")
 }
 
+#' @export
+execCount <- function(x) {
+  if (is.function(x))
+    return(environment(x)$.execCount)
+  else if (is(x, 'Observer'))
+    return(x$.execCount)
+  else
+    stop('Unexpected argument to execCount')
+}
+
 Observer <- setRefClass(
   'Observer',
   fields = list(
     .func = 'function',
     .label = 'character',
-    .hintCallbacks = 'list'
+    .hintCallbacks = 'list',
+    .execCount = 'integer'
   ),
   methods = list(
     initialize = function(func, label) {
@@ -283,6 +297,7 @@ Observer <- setRefClass(
 
       .func <<- func
       .label <<- label
+      .execCount <<- 0L
 
       # Defer the first running of this until flushReact is called
       ctx <- Context$new(.label)
@@ -302,6 +317,7 @@ Observer <- setRefClass(
           NULL
         })
       })
+      .execCount <<- .execCount + 1L
       ctx$run(.func)
     },
     onInvalidateHint = function(func) {
@@ -331,8 +347,7 @@ Observer <- setRefClass(
 #'   
 #' @export
 observe <- function(func) {
-  Observer$new(func, deparse(substitute(func)))
-  invisible()
+  invisible(Observer$new(func, deparse(substitute(func))))
 }
 
 #' Timer

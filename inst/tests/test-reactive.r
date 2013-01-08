@@ -30,6 +30,49 @@ test_that("Functions are not over-reactive", {
   expect_equal(execCount(obsC), 2)
 })
 
+## "foo => bar" is defined as "foo is a dependency of bar"
+##
+## vA => fB
+## (fB, vA) => obsE
+## (fB, vA) => obsF
+##
+## obsE and obsF should each execute once when vA changes.
+test_that("overreactivity2", {
+  # ----------------------------------------------
+  # Test 1
+  # B depends on A, and observer depends on A and B. The observer uses A and
+  # B, in that order.
+
+  # This is to store the value from observe()
+  observed_value1 <- NA
+  observed_value2 <- NA
+
+  valueA <- reactiveValue(1)
+  funcB  <- reactive(function() {
+    value(valueA) + 5
+  })
+  obsC <- observe(function() {
+    observed_value1 <<-  funcB() * value(valueA)
+  })
+  obsD <- observe(function() {
+    observed_value2 <<-  funcB() * value(valueA)
+  })
+
+  flushReact()
+  expect_equal(observed_value1, 6)   # Should be 1 * (1 + 5) = 6
+  expect_equal(observed_value2, 6)   # Should be 1 * (1 + 5) = 6
+  expect_equal(execCount(funcB), 1)
+  expect_equal(execCount(obsC), 1)
+  expect_equal(execCount(obsD), 1)
+
+  value(valueA) <- 2
+  flushReact()
+  expect_equal(observed_value1, 14)  # Should be 2 * (2 + 5) = 14
+  expect_equal(observed_value2, 14)  # Should be 2 * (2 + 5) = 14
+  expect_equal(execCount(funcB), 2)
+  expect_equal(execCount(obsC), 2)
+  expect_equal(execCount(obsD), 2)
+})
 
 ## Test for isolation. funcB depends on funcA depends on valueA. When funcA
 ## is invalidated, if its new result is not different than its old result,

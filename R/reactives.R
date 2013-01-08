@@ -301,21 +301,24 @@ Observer <- setRefClass(
 
       # Defer the first running of this until flushReact is called
       ctx <- Context$new(.label)
-      ctx$onInvalidate(function() {
+      ctx$onFlush(function() {
         run()
       })
-      ctx$invalidate()
+      ctx$addPendingFlush()
     },
     run = function() {
       ctx <- Context$new(.label)
       ctx$onInvalidate(function() {
-        run()
+        ctx$addPendingFlush()
       })
       ctx$onInvalidateHint(function() {
         lapply(.hintCallbacks, function(func) {
           func()
           NULL
         })
+      })
+      ctx$onFlush(function() {
+        run()
       })
       .execCount <<- .execCount + 1L
       ctx$run(.func)

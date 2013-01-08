@@ -22,7 +22,6 @@ For an introduction and examples, visit the [Shiny homepage](http://www.rstudio.
 From an R console:
 
 ```r
-options(repos=c(RStudio="http://rstudio.org/_packages", getOption("repos")))
 install.packages("shiny")
 ```
 

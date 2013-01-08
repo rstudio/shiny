@@ -309,13 +309,16 @@ Observer <- setRefClass(
     run = function() {
       ctx <- Context$new(.label)
       ctx$onInvalidate(function() {
-        run()
+        ctx$addPendingFlush()
       })
       ctx$onInvalidateHint(function() {
         lapply(.hintCallbacks, function(func) {
           func()
           NULL
         })
+      })
+      ctx$onFlush(function() {
+        run()
       })
       .execCount <<- .execCount + 1L
       ctx$run(.func)

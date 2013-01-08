@@ -730,8 +730,12 @@ startApp <- function(port=8101L) {
             stop('Unknown type specified for ', name)
           )
         }
-        else if (is.list(val) && is.null(names(val)))
-          msg$data[[name]] <- unlist(val, recursive=FALSE)
+        else if (is.list(val) && is.null(names(val))) {
+          # The single-bracket indexing and use of list() on the right side is
+          # a workaround for when unlist(val) is NULL; double bracket indexing
+          # would delete the item instead of assigning it NULL.
+          msg$data[name] <- list(unlist(val, recursive=FALSE))
+        }
       }
     }
     

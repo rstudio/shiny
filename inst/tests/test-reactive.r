@@ -52,11 +52,11 @@ test_that("isolation", {
   })
 
   flushReact()
-  expect_equal(execCount(funcC), 1)
+  countC <- execCount(funcC)
 
   value(valueA) <- 11
   flushReact()
-  expect_equal(execCount(funcC), 1)
+  expect_equal(execCount(funcC), countC)
 })
 
 

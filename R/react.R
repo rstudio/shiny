@@ -93,16 +93,13 @@ ReactiveEnvironment <- setRefClass(
       func()
     },
     addPendingInvalidate = function(ctx) {
-      .pendingInvalidate <<- c(.pendingInvalidate, ctx)
+      .pendingInvalidate <<- c(ctx, .pendingInvalidate)
     },
     flush = function() {
       while (length(.pendingInvalidate) > 0) {
-        contexts <- .pendingInvalidate
-        .pendingInvalidate <<- list()
-        lapply(contexts, function(ctx) {
-          ctx$executeCallbacks()
-          NULL
-        })
+        ctx <- .pendingInvalidate[[1]]
+        .pendingInvalidate <<- .pendingInvalidate[-1]
+        ctx$executeCallbacks()
       }
     }
   )

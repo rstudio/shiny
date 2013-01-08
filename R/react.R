@@ -41,7 +41,6 @@ Context <- setRefClass(
       lapply(.invalidateCallbacks, function(func) {
         func()
       })
-      # .getReactiveEnvironment()$addPendingInvalidate(.self)
       NULL
     },
     onInvalidate = function(func) {
@@ -83,12 +82,11 @@ Context <- setRefClass(
 
 ReactiveEnvironment <- setRefClass(
   'ReactiveEnvironment',
-  fields = c('.currentContext', '.nextId', '.pendingInvalidate', '.pendingFlush'),
+  fields = c('.currentContext', '.nextId', '.pendingFlush'),
   methods = list(
     initialize = function() {
       .currentContext <<- NULL
       .nextId <<- 0L
-      .pendingInvalidate <<- list()
       .pendingFlush <<- list()
     },
     nextId = function() {
@@ -110,9 +108,6 @@ ReactiveEnvironment <- setRefClass(
     },
     addPendingFlush = function(ctx) {
       .pendingFlush <<- c(ctx, .pendingFlush)
-    },
-    addPendingInvalidate = function(ctx) {
-      .pendingInvalidate <<- c(ctx, .pendingInvalidate)
     },
     flush = function() {
       while (length(.pendingFlush) > 0) {

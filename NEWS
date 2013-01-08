@@ -1,3 +1,14 @@
+shiny 0.2.3.99
+--------------------------------------------------------------------------------
+
+* Add `reactiveValue()`.
+
+* Add `isolate()`. This function is used for accessing reactive functions,
+  without them invalidating their parent contexts.
+
+* Fix issue #58: bug where reactive functions are not re-run when all items in
+  a checkboxGroup are unchecked.
+
 shiny 0.2.3
 --------------------------------------------------------------------------------
 

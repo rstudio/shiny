@@ -730,8 +730,16 @@ startApp <- function(port=8101L) {
             stop('Unknown type specified for ', name)
           )
         }
-        else if (is.list(val) && is.null(names(val)))
-          msg$data[[name]] <- unlist(val, recursive=FALSE)
+        else if (is.list(val) && is.null(names(val))) {
+          val_flat <- unlist(val, recursive = TRUE)
+
+          if (is.null(val_flat)) {
+            # This is to assign NULL instead of deleting the item
+            msg$data[name] <- list(NULL)
+          } else {
+            msg$data[[name]] <- val_flat
+          }
+        }
       }
     }
     

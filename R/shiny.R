@@ -76,7 +76,7 @@ ShinyApp <- setRefClass(
             .invalidatedOutputValues$set(name, value)
         }, label)
         
-        obs$onInvalidateHint(function() {
+        obs$onInvalidate(function() {
           showProgress(name)
         })
       }

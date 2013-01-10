@@ -17,19 +17,10 @@ Dependencies <- setRefClass(
       lapply(
         .dependencies$values(),
         function(ctx) {
-          ctx$invalidateHint()
           ctx$invalidate()
           NULL
         }
       )
-    },
-    invalidateHint = function() {
-      lapply(
-        .dependencies$values(),
-        function(dep.ctx) {
-          dep.ctx$invalidateHint()
-          NULL
-        })
     }
   )
 )
@@ -133,7 +124,6 @@ Values <- setRefClass(
       lapply(
         mget(dep.keys, envir=.dependencies),
         function(ctx) {
-          ctx$invalidateHint()
           ctx$invalidate()
           NULL
         }
@@ -225,9 +215,6 @@ Observable <- setRefClass(
         .dirty <<- TRUE
         .dependencies$invalidate()
       })
-      ctx$onInvalidateHint(function() {
-        .dependencies$invalidateHint()
-      })
       .execCount <<- .execCount + 1L
       ctx$run(function() {
         .value <<- try(.func(), silent=FALSE)
@@ -286,7 +273,6 @@ Observer <- setRefClass(
   fields = list(
     .func = 'function',
     .label = 'character',
-    .hintCallbacks = 'list',
     .execCount = 'integer'
   ),
   methods = list(
@@ -311,20 +297,11 @@ Observer <- setRefClass(
       ctx$onInvalidate(function() {
         ctx$addPendingFlush()
       })
-      ctx$onInvalidateHint(function() {
-        lapply(.hintCallbacks, function(func) {
-          func()
-          NULL
-        })
-      })
       ctx$onFlush(function() {
         run()
       })
       .execCount <<- .execCount + 1L
       ctx$run(.func)
-    },
-    onInvalidateHint = function(func) {
-      .hintCallbacks <<- c(.hintCallbacks, func)
     }
   )
 )

@@ -5,8 +5,7 @@ Context <- setRefClass(
     .label = 'character',      # For debug purposes
     .invalidated = 'logical',
     .invalidateCallbacks = 'list',
-    .flushCallbacks = 'list',
-    .hintCallbacks = 'list'
+    .flushCallbacks = 'list'
   ),
   methods = list(
     initialize = function(label=NULL) {
@@ -14,22 +13,12 @@ Context <- setRefClass(
       .invalidated <<- FALSE
       .invalidateCallbacks <<- list()
       .flushCallbacks <<- list()
-      .hintCallbacks <<- list()
       .label <<- label
     },
     run = function(func) {
       "Run the provided function under this context."
       env <- .getReactiveEnvironment()
       env$runWith(.self, func)
-    },
-    invalidateHint = function() {
-      "Let this context know it may or may not be invalidated very soon; that
-      is, something in its dependency graph has been invalidated but there's no
-      guarantee that the cascade of invalidations will reach all the way here.
-      This is used to show progress in the UI."
-      lapply(.hintCallbacks, function(func) {
-        func()
-      })
     },
     invalidate = function() {
       "Invalidate this context. It will immediately call the callbacks
@@ -61,9 +50,6 @@ Context <- setRefClass(
     onFlush = function(func) {
       "Register a function to be called when this context is flushed."
       .flushCallbacks <<- c(.flushCallbacks, func)
-    },
-    onInvalidateHint = function(func) {
-      .hintCallbacks <<- c(.hintCallbacks, func)
     },
     executeFlushCallbacks = function() {
       "For internal use only."

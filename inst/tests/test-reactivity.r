@@ -1,3 +1,5 @@
+context("reactivity")
+
 ## Helper functions
 
 # Test for overreactivity. funcB has an indirect dependency on valueA (via
@@ -78,28 +80,30 @@ test_that("overreactivity2", {
 ## is invalidated, if its new result is not different than its old result,
 ## then it doesn't invalidate its dependents. This is done by adding an observer
 ## (valueB) between obsA and funcC.
+##
+## valueA => obsB => valueC => funcD => obsE
 test_that("isolation", {
   valueA <- reactiveValue(10)
-  valueB <- reactiveValue(NULL)
-
-  obsA <- observe(function() {
-    value(valueB) <- value(valueA) > 0
-  })
-
-  funcC <- reactive(function() {
-    value(valueB)
-  })
+  valueC <- reactiveValue(NULL)
 
   obsB <- observe(function() {
-    funcC()
+    value(valueC) <- value(valueA) > 0
+  })
+
+  funcD <- reactive(function() {
+    value(valueC)
+  })
+
+  obsE <- observe(function() {
+    funcD()
   })
 
   flushReact()
-  countC <- execCount(funcC)
+  countD <- execCount(funcD)
 
   value(valueA) <- 11
   flushReact()
-  expect_equal(execCount(funcC), countC)
+  expect_equal(execCount(funcD), countD)
 })
 
 

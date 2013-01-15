@@ -147,24 +147,78 @@ Values <- setRefClass(
   )
 )
 
-.createValuesReader <- function(values) {
+
+# reactvalues: S3 wrapper class for Values class -----------------------
+
+#' Create a reactvalues object
+#'
+#' A reactvalues object is used for storing reactive values. It is similar to
+#' the \code{input} and \code{output} objects, except that the values can be
+#' changed within
+#'
+#' @examples
+#' values <- reactiveValues()
+#' values$a <- 3
+#' \dontrun{
+#' # From within a reactive context, you can access the value with:
+#' values$a
+#' }
+#'
+#' # If not in a reactive context (e.g., at the console), you can use isolate()
+#' # to retrieve the value:
+#' isolate(values$a)
+#'
+#' # Set values upon creation
+#' values <- reactiveValues(a = 1, b = 2)
+#' isolate(values$a)
+#'
+#' @param ... Objects that will be added to the reactvalues object. All of
+#'   these objects must be named.
+#'
+#' @export
+reactiveValues <- function(...) {
+  args <- list(...)
+  if (any(names(args) == ""))
+    stop("All arguments passed to reactiveValues() must be named.")
+
+  values <- .createValues(Values$new())
+  values[['impl']]$mset(args)
+  values
+}
+
+# Create a reactvalues object
+#
+# @param values A Values object
+# @param readonly Should this object be read-only?
+.createValues <- function(values = NULL, readonly = FALSE) {
   acc <- list(impl=values)
-  class(acc) <- 'reactvaluesreader'
+  class(acc) <- 'reactvalues'
+  attr(acc, 'readonly') <- readonly
   return(acc)
 }
 
-#' @S3method $ reactvaluesreader
-`$.reactvaluesreader` <- function(x, name) {
+#' @S3method $ reactvalues
+`$.reactvalues` <- function(x, name) {
   x[['impl']]$get(name)
 }
 
-#' @S3method names reactvaluesreader
-names.reactvaluesreader <- function(x) {
+#' @S3method $<- reactvalues
+`$<-.reactvalues` <- function(x, name, value) {
+  if (attr(x, 'readonly')) {
+    stop("Attempted to assign value to a read-only reactvalues object")
+  } else {
+    x[['impl']]$set(name, value)
+    x
+  }
+}
+
+#' @S3method names reactvalues
+names.reactvalues <- function(x) {
   x[['impl']]$names()
 }
 
-#' @S3method as.list reactvaluesreader
-as.list.reactvaluesreader <- function(x, ...) {
+#' @S3method as.list reactvalues
+as.list.reactvalues <- function(x, ...) {
   x[['impl']]$toList()
 }
 

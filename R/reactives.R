@@ -273,6 +273,7 @@ Observer <- setRefClass(
   fields = list(
     .func = 'function',
     .label = 'character',
+    .flushCallbacks = 'list',
     .execCount = 'integer'
   ),
   methods = list(
@@ -294,14 +295,23 @@ Observer <- setRefClass(
     },
     run = function() {
       ctx <- Context$new(.label)
+
       ctx$onInvalidate(function() {
+        lapply(.flushCallbacks, function(func) {
+          func()
+          NULL
+        })
         ctx$addPendingFlush()
       })
+
       ctx$onFlush(function() {
         run()
       })
       .execCount <<- .execCount + 1L
       ctx$run(.func)
+    },
+    onInvalidate = function(func) {
+      .flushCallbacks <<- c(.flushCallbacks, func)
     }
   )
 )

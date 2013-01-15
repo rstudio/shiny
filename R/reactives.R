@@ -258,7 +258,7 @@ reactive.default <- function(x) {
   stop("Don't know how to make this object reactive!")
 }
 
-#' @export
+# Return the number of times that a reactive function or observer has been run
 execCount <- function(x) {
   if (is.function(x))
     return(environment(x)$.execCount)

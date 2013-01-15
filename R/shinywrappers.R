@@ -113,7 +113,7 @@ reactiveTable <- function(func, ...) {
     classNames <- getOption('shiny.table.class', 'data table table-bordered table-condensed')
     data <- func()
 
-    if (is.null(data) || is.na(data))
+    if (is.null(data))
       return("")
     
     return(paste(

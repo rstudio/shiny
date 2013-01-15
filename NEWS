@@ -9,6 +9,9 @@ shiny 0.2.3.99
 * Fix issue #58: bug where reactive functions are not re-run when all items in
   a checkboxGroup are unchecked.
 
+* Fix issue #71, where `reactiveTable()` would return blank if the first
+  element of a data frame was NA.
+
 shiny 0.2.3
 --------------------------------------------------------------------------------
 

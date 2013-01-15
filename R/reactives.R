@@ -287,10 +287,10 @@ Observer <- setRefClass(
 
       # Defer the first running of this until flushReact is called
       ctx <- Context$new(.label)
-      ctx$onInvalidate(function() {
+      ctx$onFlush(function() {
         run()
       })
-      ctx$invalidate()
+      ctx$addPendingFlush()
     },
     run = function() {
       ctx <- Context$new(.label)

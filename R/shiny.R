@@ -831,7 +831,7 @@ runApp <- function(appDir=getwd(),
   
   orig.wd <- getwd()
   setwd(appDir)
-  on.exit(setwd(orig.wd))
+  on.exit(setwd(orig.wd), add = TRUE)
   
   require(shiny)
   
@@ -982,7 +982,7 @@ runGist <- function(gist,
   untar2(filePath, exdir = dirname(filePath))
   
   appdir <- file.path(dirname(filePath), dirname)
-  on.exit(unlink(appdir, recursive = TRUE))
+  on.exit(unlink(appdir, recursive = TRUE), add = TRUE)
   
   runApp(appdir, port=port, launch.browser=launch.browser)
 }

@@ -181,7 +181,7 @@ reactiveValues <- function(...) {
   if (any(names(args) == ""))
     stop("All arguments passed to reactiveValues() must be named.")
 
-  values <- .create_reactivevalues(Values$new())
+  values <- .createReactiveValues(ReactiveValues$new())
   values[['impl']]$mset(args)
   values
 }
@@ -190,7 +190,7 @@ reactiveValues <- function(...) {
 #
 # @param values A Values object
 # @param readonly Should this object be read-only?
-.create_reactivevalues <- function(values = NULL, readonly = FALSE) {
+.createReactiveValues <- function(values = NULL, readonly = FALSE) {
   acc <- list(impl=values)
   class(acc) <- 'reactvalues'
   attr(acc, 'readonly') <- readonly

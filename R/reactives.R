@@ -74,8 +74,8 @@ reactiveValue <- function(initialValue) {
   x[['impl']]$get()
 }
 
-Values <- setRefClass(
-  'Values',
+ReactiveValues <- setRefClass(
+  'ReactiveValues',
   fields = list(
     .values = 'environment',
     .dependencies = 'environment',
@@ -188,7 +188,7 @@ reactiveValues <- function(...) {
 
 # Create a reactvalues object
 #
-# @param values A Values object
+# @param values A ReactiveValues object
 # @param readonly Should this object be read-only?
 .createReactiveValues <- function(values = NULL, readonly = FALSE) {
   acc <- list(impl=values)

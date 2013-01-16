@@ -20,7 +20,7 @@ ShinyApp <- setRefClass(
     .invalidatedOutputErrors = 'Map',
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
-    session = 'Values',
+    session = 'ReactiveValues',
     token = 'character',  # Used to identify this instance in URLs
     plots = 'Map',
     downloads = 'Map',
@@ -34,7 +34,7 @@ ShinyApp <- setRefClass(
       .progressKeys <<- character(0)
       # TODO: Put file upload context in user/app-specific dir if possible
       .fileUploadContext <<- FileUploadContext$new()
-      session <<- Values$new()
+      session <<- ReactiveValues$new()
       
       token <<- createUniqueId(16)
       

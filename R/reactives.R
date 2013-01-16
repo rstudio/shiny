@@ -182,7 +182,9 @@ reactiveValues <- function(...) {
     stop("All arguments passed to reactiveValues() must be named.")
 
   values <- .createReactiveValues(ReactiveValues$new())
-  values[['impl']]$mset(args)
+
+  # Use .subset2() instead of [[, to avoid method dispatch
+  .subset2(values, 'impl')$mset(args)
   values
 }
 
@@ -199,27 +201,45 @@ reactiveValues <- function(...) {
 
 #' @S3method $ reactivevalues
 `$.reactivevalues` <- function(x, name) {
-  x[['impl']]$get(name)
+  .subset2(x, 'impl')$get(name)
 }
+
+#' @S3method [[ reactivevalues
+`[[.reactivevalues` <- `$.reactivevalues`
 
 #' @S3method $<- reactivevalues
 `$<-.reactivevalues` <- function(x, name, value) {
   if (attr(x, 'readonly')) {
     stop("Attempted to assign value to a read-only reactivevalues object")
+  } else if (length(name) != 1 || !is.character(name)) {
+    stop("Must use single string to index into reactivevalues")
   } else {
-    x[['impl']]$set(name, value)
+    .subset2(x, 'impl')$set(name, value)
     x
   }
 }
 
+#' @S3method [[<- reactivevalues
+`[[<-.reactivevalues` <- `$<-.reactivevalues`
+
+#' @S3method [ reactivevalues
+`[.reactivevalues` <- function(values, name) {
+  stop("Single-bracket indexing of reactivevalues object is not allowed.")
+}
+
+#' @S3method [<- reactivevalues
+`[<-.reactivevalues` <- function(values, name, value) {
+  stop("Single-bracket indexing of reactivevalues object is not allowed.")
+}
+
 #' @S3method names reactivevalues
 names.reactivevalues <- function(x) {
-  x[['impl']]$names()
+  .subset2(x, 'impl')$names()
 }
 
 #' @S3method as.list reactivevalues
 as.list.reactivevalues <- function(x, ...) {
-  x[['impl']]$toList()
+  .subset2(x, 'impl')$toList()
 }
 
 Observable <- setRefClass(

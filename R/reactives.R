@@ -148,11 +148,11 @@ ReactiveValues <- setRefClass(
 )
 
 
-# reactvalues: S3 wrapper class for Values class -----------------------
+# reactivevalues: S3 wrapper class for Values class -----------------------
 
-#' Create a reactvalues object
+#' Create a reactivevalues object
 #'
-#' A reactvalues object is used for storing reactive values. It is similar to
+#' A reactivevalues object is used for storing reactive values. It is similar to
 #' the \code{input} and \code{output} objects, except that the values can be
 #' changed within
 #'
@@ -172,7 +172,7 @@ ReactiveValues <- setRefClass(
 #' values <- reactiveValues(a = 1, b = 2)
 #' isolate(values$a)
 #'
-#' @param ... Objects that will be added to the reactvalues object. All of
+#' @param ... Objects that will be added to the reactivevalues object. All of
 #'   these objects must be named.
 #'
 #' @export
@@ -186,39 +186,39 @@ reactiveValues <- function(...) {
   values
 }
 
-# Create a reactvalues object
+# Create a reactivevalues object
 #
 # @param values A ReactiveValues object
 # @param readonly Should this object be read-only?
 .createReactiveValues <- function(values = NULL, readonly = FALSE) {
   acc <- list(impl=values)
-  class(acc) <- 'reactvalues'
+  class(acc) <- 'reactivevalues'
   attr(acc, 'readonly') <- readonly
   return(acc)
 }
 
-#' @S3method $ reactvalues
-`$.reactvalues` <- function(x, name) {
+#' @S3method $ reactivevalues
+`$.reactivevalues` <- function(x, name) {
   x[['impl']]$get(name)
 }
 
-#' @S3method $<- reactvalues
-`$<-.reactvalues` <- function(x, name, value) {
+#' @S3method $<- reactivevalues
+`$<-.reactivevalues` <- function(x, name, value) {
   if (attr(x, 'readonly')) {
-    stop("Attempted to assign value to a read-only reactvalues object")
+    stop("Attempted to assign value to a read-only reactivevalues object")
   } else {
     x[['impl']]$set(name, value)
     x
   }
 }
 
-#' @S3method names reactvalues
-names.reactvalues <- function(x) {
+#' @S3method names reactivevalues
+names.reactivevalues <- function(x) {
   x[['impl']]$names()
 }
 
-#' @S3method as.list reactvalues
-as.list.reactvalues <- function(x, ...) {
+#' @S3method as.list reactivevalues
+as.list.reactivevalues <- function(x, ...) {
   x[['impl']]$toList()
 }
 

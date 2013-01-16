@@ -40,7 +40,7 @@ ShinyApp <- setRefClass(
       
       allowDataUriScheme <<- TRUE
     },
-    defineOutput = function(name, func) {
+    defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
       take no parameters, or have named parameters for \\code{name} and
       \\code{shinyapp} (in the future this list may expand, so it is a good idea
@@ -74,9 +74,9 @@ ShinyApp <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        })
+        }, label)
         
-        obs$onInvalidateHint(function() {
+        obs$onInvalidate(function() {
           showProgress(name)
         })
       }
@@ -295,7 +295,7 @@ ShinyApp <- setRefClass(
 
 #' @S3method $<- shinyoutput
 `$<-.shinyoutput` <- function(x, name, value) {
-  x[['impl']]$defineOutput(name, value)
+  x[['impl']]$defineOutput(name, value, deparse(substitute(value)))
   return(invisible(x))
 }
 
@@ -831,7 +831,7 @@ runApp <- function(appDir=getwd(),
   
   orig.wd <- getwd()
   setwd(appDir)
-  on.exit(setwd(orig.wd))
+  on.exit(setwd(orig.wd), add = TRUE)
   
   require(shiny)
   
@@ -982,7 +982,7 @@ runGist <- function(gist,
   untar2(filePath, exdir = dirname(filePath))
   
   appdir <- file.path(dirname(filePath), dirname)
-  on.exit(unlink(appdir, recursive = TRUE))
+  on.exit(unlink(appdir, recursive = TRUE), add = TRUE)
   
   runApp(appdir, port=port, launch.browser=launch.browser)
 }

@@ -2,38 +2,34 @@ Context <- setRefClass(
   'Context',
   fields = list(
     id = 'character',
+    .label = 'character',      # For debug purposes
     .invalidated = 'logical',
-    .callbacks = 'list',
-    .hintCallbacks = 'list'
+    .invalidateCallbacks = 'list',
+    .flushCallbacks = 'list'
   ),
   methods = list(
-    initialize = function() {
+    initialize = function(label=NULL) {
       id <<- .getReactiveEnvironment()$nextId()
       .invalidated <<- FALSE
-      .callbacks <<- list()
-      .hintCallbacks <<- list()
+      .invalidateCallbacks <<- list()
+      .flushCallbacks <<- list()
+      .label <<- label
     },
     run = function(func) {
       "Run the provided function under this context."
       env <- .getReactiveEnvironment()
       env$runWith(.self, func)
     },
-    invalidateHint = function() {
-      "Let this context know it may or may not be invalidated very soon; that
-      is, something in its dependency graph has been invalidated but there's no
-      guarantee that the cascade of invalidations will reach all the way here.
-      This is used to show progress in the UI."
-      lapply(.hintCallbacks, function(func) {
-        func()
-      })
-    },
     invalidate = function() {
-      "Schedule this context for invalidation. It will not actually be
-        invalidated until the next call to \\code{\\link{flushReact}}."
+      "Invalidate this context. It will immediately call the callbacks
+        that have been registered with onInvalidate()."
       if (.invalidated)
         return()
       .invalidated <<- TRUE
-      .getReactiveEnvironment()$addPendingInvalidate(.self)
+
+      lapply(.invalidateCallbacks, function(func) {
+        func()
+      })
       NULL
     },
     onInvalidate = function(func) {
@@ -43,15 +39,21 @@ Context <- setRefClass(
       if (.invalidated)
         func()
       else
-        .callbacks <<- c(.callbacks, func)
+        .invalidateCallbacks <<- c(.invalidateCallbacks, func)
       NULL
     },
-    onInvalidateHint = function(func) {
-      .hintCallbacks <<- c(.hintCallbacks, func)
+    addPendingFlush = function() {
+      "Tell the reactive environment that this context should be flushed the
+        next time flushReact() called."
+      .getReactiveEnvironment()$addPendingFlush(.self)
     },
-    executeCallbacks = function() {
+    onFlush = function(func) {
+      "Register a function to be called when this context is flushed."
+      .flushCallbacks <<- c(.flushCallbacks, func)
+    },
+    executeFlushCallbacks = function() {
       "For internal use only."
-      lapply(.callbacks, function(func) {
+      lapply(.flushCallbacks, function(func) {
         withCallingHandlers({
           func()
         }, warning = function(e) {
@@ -66,12 +68,12 @@ Context <- setRefClass(
 
 ReactiveEnvironment <- setRefClass(
   'ReactiveEnvironment',
-  fields = c('.currentContext', '.nextId', '.pendingInvalidate'),
+  fields = c('.currentContext', '.nextId', '.pendingFlush'),
   methods = list(
     initialize = function() {
       .currentContext <<- NULL
       .nextId <<- 0L
-      .pendingInvalidate <<- list()
+      .pendingFlush <<- list()
     },
     nextId = function() {
       .nextId <<- .nextId + 1L
@@ -90,17 +92,14 @@ ReactiveEnvironment <- setRefClass(
       on.exit(.currentContext <<- old.ctx)
       func()
     },
-    addPendingInvalidate = function(ctx) {
-      .pendingInvalidate <<- c(.pendingInvalidate, ctx)
+    addPendingFlush = function(ctx) {
+      .pendingFlush <<- c(ctx, .pendingFlush)
     },
     flush = function() {
-      while (length(.pendingInvalidate) > 0) {
-        contexts <- .pendingInvalidate
-        .pendingInvalidate <<- list()
-        lapply(contexts, function(ctx) {
-          ctx$executeCallbacks()
-          NULL
-        })
+      while (length(.pendingFlush) > 0) {
+        ctx <- .pendingFlush[[1]]
+        .pendingFlush <<- .pendingFlush[-1]
+        ctx$executeFlushCallbacks()
       }
     }
   )

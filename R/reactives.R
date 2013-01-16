@@ -17,19 +17,10 @@ Dependencies <- setRefClass(
       lapply(
         .dependencies$values(),
         function(ctx) {
-          ctx$invalidateHint()
           ctx$invalidate()
           NULL
         }
       )
-    },
-    invalidateHint = function() {
-      lapply(
-        .dependencies$values(),
-        function(dep.ctx) {
-          dep.ctx$invalidateHint()
-          NULL
-        })
     }
   )
 )
@@ -133,7 +124,6 @@ Values <- setRefClass(
       lapply(
         mget(dep.keys, envir=.dependencies),
         function(ctx) {
-          ctx$invalidateHint()
           ctx$invalidate()
           NULL
         }
@@ -191,47 +181,53 @@ Observable <- setRefClass(
   'Observable',
   fields = list(
     .func = 'function',
+    .label = 'character',
     .dependencies = 'Dependencies',
-    .initialized = 'logical',
-    .value = 'ANY'
+    .dirty = 'logical',
+    .running = 'logical',
+    .value = 'ANY',
+    .execCount = 'integer'
   ),
   methods = list(
-    initialize = function(func) {
+    initialize = function(func, label=deparse(substitute(func))) {
       if (length(formals(func)) > 0)
         stop("Can't make a reactive function from a function that takes one ",
              "or more parameters; only functions without parameters can be ",
              "reactive.")
       .func <<- func
-      .initialized <<- FALSE
+      .dirty <<- TRUE
+      .running <<- FALSE
+      .label <<- label
+      .execCount <<- 0L
     },
     getValue = function() {
-      if (!.initialized) {
-        .initialized <<- TRUE
+      .dependencies$register()
+
+      if (.dirty || .running) {
         .self$.updateValue()
       }
-      
-      .dependencies$register()
       
       if (identical(class(.value), 'try-error'))
         stop(attr(.value, 'condition'))
       return(.value)
     },
     .updateValue = function() {
-      old.value <- .value
-      
-      ctx <- Context$new()
+      ctx <- Context$new(.label)
       ctx$onInvalidate(function() {
-        .self$.updateValue()
+        .dirty <<- TRUE
+        .dependencies$invalidate()
       })
-      ctx$onInvalidateHint(function() {
-        .dependencies$invalidateHint()
-      })
+      .execCount <<- .execCount + 1L
+
+      .dirty <<- FALSE
+
+      wasRunning <- .running
+      .running <<- TRUE
+      on.exit(.running <<- wasRunning)
+
       ctx$run(function() {
         .value <<- try(.func(), silent=FALSE)
       })
-      if (!identical(old.value, .value)) {
-        .dependencies$invalidate()
-      }
     }
   )
 )
@@ -263,49 +259,67 @@ reactive <- function(x) {
 }
 #' @S3method reactive function
 reactive.function <- function(x) {
-  return(Observable$new(x)$getValue)
+  return(Observable$new(x, deparse(substitute(x)))$getValue)
 }
 #' @S3method reactive default
 reactive.default <- function(x) {
   stop("Don't know how to make this object reactive!")
 }
 
+# Return the number of times that a reactive function or observer has been run
+execCount <- function(x) {
+  if (is.function(x))
+    return(environment(x)$.execCount)
+  else if (is(x, 'Observer'))
+    return(x$.execCount)
+  else
+    stop('Unexpected argument to execCount')
+}
+
 Observer <- setRefClass(
   'Observer',
   fields = list(
     .func = 'function',
-    .hintCallbacks = 'list'
+    .label = 'character',
+    .flushCallbacks = 'list',
+    .execCount = 'integer'
   ),
   methods = list(
-    initialize = function(func) {
+    initialize = function(func, label) {
       if (length(formals(func)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
 
       .func <<- func
+      .label <<- label
+      .execCount <<- 0L
 
       # Defer the first running of this until flushReact is called
-      ctx <- Context$new()
-      ctx$onInvalidate(function() {
+      ctx <- Context$new(.label)
+      ctx$onFlush(function() {
         run()
       })
-      ctx$invalidate()
+      ctx$addPendingFlush()
     },
     run = function() {
-      ctx <- Context$new()
+      ctx <- Context$new(.label)
+
       ctx$onInvalidate(function() {
-        run()
-      })
-      ctx$onInvalidateHint(function() {
-        lapply(.hintCallbacks, function(func) {
+        lapply(.flushCallbacks, function(func) {
           func()
           NULL
         })
+        ctx$addPendingFlush()
       })
+
+      ctx$onFlush(function() {
+        run()
+      })
+      .execCount <<- .execCount + 1L
       ctx$run(.func)
     },
-    onInvalidateHint = function(func) {
-      .hintCallbacks <<- c(.hintCallbacks, func)
+    onInvalidate = function(func) {
+      .flushCallbacks <<- c(.flushCallbacks, func)
     }
   )
 )
@@ -331,8 +345,7 @@ Observer <- setRefClass(
 #'   
 #' @export
 observe <- function(func) {
-  Observer$new(func)
-  invisible()
+  invisible(Observer$new(func, deparse(substitute(func))))
 }
 
 #' Timer
@@ -432,7 +445,7 @@ invalidateLater <- function(millis) {
 #' }
 #' @export
 isolate <- function(expr) {
-  ctx <- Context$new()
+  ctx <- Context$new('[isolate]')
   ctx$run(function() {
     eval.parent(expr)
   })

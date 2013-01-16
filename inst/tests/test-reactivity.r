@@ -1,6 +1,55 @@
 context("reactivity")
 
-## Helper functions
+
+# Test for correct behavior of ReactiveValues
+test_that("ReactiveValues", {
+  # Creation and indexing into ReactiveValues -------------------------------
+  values <- reactiveValues()
+
+  # $ indexing
+  values$a <- 3
+  expect_equal(isolate(values$a), 3)
+
+  # [[ indexing
+  values[['a']] <- 4
+  expect_equal(isolate(values[['a']]), 4)
+
+  # Create with initialized values
+  values <- reactiveValues(a=1, b=2)
+  expect_equal(isolate(values$a), 1)
+  expect_equal(isolate(values[['b']]), 2)
+
+  # NULL values -------------------------------------------------------------
+  # Initializing with NULL value
+  values <- reactiveValues(a=NULL, b=2)
+  # a should exist and be NULL
+  expect_equal(isolate(names(values)), c("a", "b"))
+  expect_true(is.null(isolate(values$a)))
+
+  # Assigning NULL should keep object (not delete it), and set value to NULL
+  values$b <- NULL
+  expect_equal(isolate(names(values)), c("a", "b"))
+  expect_true(is.null(isolate(values$b)))
+
+
+  # Errors -----------------------------------------------------------------
+  # Error: indexing with non-string
+  expect_error(isolate(values[[1]]))
+  expect_error(isolate(values[[NULL]]))
+  expect_error(isolate(values[[list('a')]]))
+
+  # Error: [ indexing shouldn't work
+  expect_error(isolate(values['a']))
+  expect_error(isolate(values['a'] <- 1))
+
+  # Error: unnamed arguments
+  expect_error(reactiveValues(1, b=2))
+
+  # Error: assignment to readonly values
+  values <- .create_reactivevalues(ReactiveValues$new(), readonly = TRUE)
+  expect_error(values$a <- 1)
+})
+
 
 # Test for overreactivity. funcB has an indirect dependency on valueA (via
 # funcA) and also a direct dependency on valueA. When valueA changes, funcB

@@ -307,6 +307,38 @@ test_that("Simple recursion", {
   expect_equal(execCount(funcB), 6)
 })
 
+test_that("Non-reactive recursion", {
+  nonreactiveA <- 3
+  outputD <- NULL
+
+  funcB <- reactive(function() {
+    if (nonreactiveA == 0)
+      return(0)
+    nonreactiveA <<- nonreactiveA - 1
+    return(funcB())
+  })
+  obsC <- observe(function() {
+    outputD <<- funcB()
+  })
+
+  flushReact()
+  expect_equal(execCount(funcB), 4)
+  expect_equal(outputD, 0)
+})
+
+test_that("Circular dep with observer only", {
+
+  valueA <- reactiveValue(3)
+  obsB <- observe(function() {
+    if (value(valueA) == 0)
+      return()
+    value(valueA) <- value(valueA) - 1
+  })
+
+  flushReact()
+  expect_equal(execCount(obsB), 4)
+})
+
 test_that("Writing then reading value is not circular", {
 
   valueA <- reactiveValue(3)

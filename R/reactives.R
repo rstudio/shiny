@@ -147,15 +147,6 @@ Values <- setRefClass(
   )
 )
 
-`[.Values` <- function(values, name) {
-  values$get(name)
-}
-
-`[<-.Values` <- function(values, name, value) {
-  values$set(name, value)
-  return(values)
-}
-
 .createValuesReader <- function(values) {
   acc <- list(impl=values)
   class(acc) <- 'reactvaluesreader'

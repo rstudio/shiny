@@ -61,15 +61,6 @@ Map <- setRefClass(
   )
 )
 
-`[.Map` <- function(map, name) {
-  map$get(name)
-}
-
-`[<-.Map` <- function(map, name, value) {
-  map$set(name, value)
-  return(map)
-}
-
 as.list.Map <- function(map) {
   sapply(map$keys(),
          map$get,

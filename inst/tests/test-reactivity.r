@@ -260,3 +260,70 @@ test_that("isolate() blocks invalidations from propagating", {
   expect_equal(obsD_value, 143)
   expect_equal(execCount(obsD), 4)
 })
+
+test_that("Circular refs/reentrancy in reactive functions work", {
+
+  valueA <- reactiveValue(3)
+
+  funcB <- reactive(function() {
+    # Each time fB executes, it reads and then writes valueA,
+    # effectively invalidating itself--until valueA becomes 0.
+    if (value(valueA) == 0)
+      return()
+    value(valueA) <- value(valueA) - 1
+    return(value(valueA))
+  })
+
+  obsC <- observe(function() {
+    funcB()
+  })
+
+  flushReact()
+  expect_equal(execCount(obsC), 4)
+
+  value(valueA) <- 3
+
+  flushReact()
+  expect_equal(execCount(obsC), 8)
+
+})
+
+test_that("Simple recursion", {
+
+  valueA <- reactiveValue(5)
+  funcB <- reactive(function() {
+    if (value(valueA) == 0)
+      return(0)
+    value(valueA) <- value(valueA) - 1
+    funcB()
+  })
+
+  obsC <- observe(function() {
+    funcB()
+  })
+
+  flushReact()
+  expect_equal(execCount(obsC), 2)
+  expect_equal(execCount(funcB), 6)
+})
+
+test_that("Writing then reading value is not circular", {
+
+  valueA <- reactiveValue(3)
+  funcB <- reactive(function() {
+    value(valueA) <- isolate(value(valueA)) - 1
+    value(valueA)
+  })
+
+  obsC <- observe(function() {
+    funcB()
+  })
+
+  flushReact()
+  expect_equal(execCount(obsC), 1)
+
+  value(valueA) <- 10
+
+  flushReact()
+  expect_equal(execCount(obsC), 2)
+})

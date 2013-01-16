@@ -184,6 +184,7 @@ Observable <- setRefClass(
     .label = 'character',
     .dependencies = 'Dependencies',
     .dirty = 'logical',
+    .running = 'logical',
     .value = 'ANY',
     .execCount = 'integer'
   ),
@@ -195,15 +196,16 @@ Observable <- setRefClass(
              "reactive.")
       .func <<- func
       .dirty <<- TRUE
+      .running <<- FALSE
       .label <<- label
       .execCount <<- 0L
     },
     getValue = function() {
-      if (.dirty) {
+      .dependencies$register()
+
+      if (.dirty || .running) {
         .self$.updateValue()
       }
-      
-      .dependencies$register()
       
       if (identical(class(.value), 'try-error'))
         stop(attr(.value, 'condition'))
@@ -216,10 +218,16 @@ Observable <- setRefClass(
         .dependencies$invalidate()
       })
       .execCount <<- .execCount + 1L
+
+      .dirty <<- FALSE
+
+      wasRunning <- .running
+      .running <<- TRUE
+      on.exit(.running <<- wasRunning)
+
       ctx$run(function() {
         .value <<- try(.func(), silent=FALSE)
       })
-      .dirty <<- FALSE
     }
   )
 )

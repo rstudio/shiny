@@ -765,7 +765,7 @@ startApp <- function(port=8101L) {
         shinyapp$session$mset(msg$data)
         flushReact()
         local({
-          serverFunc(input=.createValues(shinyapp$session, readonly=TRUE),
+          serverFunc(input=.create_reactivevalues(shinyapp$session, readonly=TRUE),
                      output=.createOutputWriter(shinyapp))
         })
       },

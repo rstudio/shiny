@@ -1,21 +1,21 @@
-Dependencies <- setRefClass(
-  'Dependencies',
+Dependents <- setRefClass(
+  'Dependents',
   fields = list(
-    .dependencies = 'Map'
+    .dependents = 'Map'
   ),
   methods = list(
     register = function() {
       ctx <- .getReactiveEnvironment()$currentContext()
-      if (!.dependencies$containsKey(ctx$id)) {
-        .dependencies$set(ctx$id, ctx)
+      if (!.dependents$containsKey(ctx$id)) {
+        .dependents$set(ctx$id, ctx)
         ctx$onInvalidate(function() {
-          .dependencies$remove(ctx$id)
+          .dependents$remove(ctx$id)
         })
       }
     },
     invalidate = function() {
       lapply(
-        .dependencies$values(),
+        .dependents$values(),
         function(ctx) {
           ctx$invalidate()
           NULL
@@ -30,24 +30,24 @@ ReactiveValues <- setRefClass(
   'ReactiveValues',
   fields = list(
     .values = 'environment',
-    .dependencies = 'environment',
-    # Dependencies for the list of names
-    .namesDeps = 'Dependencies',
-    # Dependencies for all values
-    .allDeps = 'Dependencies'
+    .dependents = 'environment',
+    # Dependents for the list of names
+    .namesDeps = 'Dependents',
+    # Dependents for all values
+    .allDeps = 'Dependents'
   ),
   methods = list(
     initialize = function() {
       .values <<- new.env(parent=emptyenv())
-      .dependencies <<- new.env(parent=emptyenv())
+      .dependents <<- new.env(parent=emptyenv())
     },
     get = function(key) {
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!exists(dep.key, where=.dependencies, inherits=FALSE)) {
-        assign(dep.key, ctx, pos=.dependencies, inherits=FALSE)
+      if (!exists(dep.key, where=.dependents, inherits=FALSE)) {
+        assign(dep.key, ctx, pos=.dependents, inherits=FALSE)
         ctx$onInvalidate(function() {
-          rm(list=dep.key, pos=.dependencies, inherits=FALSE)
+          rm(list=dep.key, pos=.dependents, inherits=FALSE)
         })
       }
       
@@ -69,12 +69,12 @@ ReactiveValues <- setRefClass(
       
       assign(key, value, pos=.values, inherits=FALSE)
       dep.keys <- objects(
-        pos=.dependencies,
+        pos=.dependents,
         pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
         all.names=TRUE
       )
       lapply(
-        mget(dep.keys, envir=.dependencies),
+        mget(dep.keys, envir=.dependents),
         function(ctx) {
           ctx$invalidate()
           NULL
@@ -210,7 +210,7 @@ Observable <- setRefClass(
   fields = list(
     .func = 'function',
     .label = 'character',
-    .dependencies = 'Dependencies',
+    .dependents = 'Dependents',
     .dirty = 'logical',
     .running = 'logical',
     .value = 'ANY',
@@ -229,7 +229,7 @@ Observable <- setRefClass(
       .execCount <<- 0L
     },
     getValue = function() {
-      .dependencies$register()
+      .dependents$register()
 
       if (.dirty || .running) {
         .self$.updateValue()
@@ -243,7 +243,7 @@ Observable <- setRefClass(
       ctx <- Context$new(.label)
       ctx$onInvalidate(function() {
         .dirty <<- TRUE
-        .dependencies$invalidate()
+        .dependents$invalidate()
       })
       .execCount <<- .execCount + 1L
 
@@ -397,11 +397,11 @@ observe <- function(func) {
 #' @seealso invalidateLater
 #' @export
 reactiveTimer <- function(intervalMs=1000) {
-  dependencies <- Map$new()
+  dependents <- Map$new()
   timerCallbacks$schedule(intervalMs, function() {
     timerCallbacks$schedule(intervalMs, sys.function())
     lapply(
-      dependencies$values(),
+      dependents$values(),
       function(dep.ctx) {
         dep.ctx$invalidate()
         NULL
@@ -409,10 +409,10 @@ reactiveTimer <- function(intervalMs=1000) {
   })
   return(function() {
     ctx <- .getReactiveEnvironment()$currentContext()
-    if (!dependencies$containsKey(ctx$id)) {
-      dependencies$set(ctx$id, ctx)
+    if (!dependents$containsKey(ctx$id)) {
+      dependents$set(ctx$id, ctx)
       ctx$onInvalidate(function() {
-        dependencies$remove(ctx$id)
+        dependents$remove(ctx$id)
       })
     }
     return(Sys.time())

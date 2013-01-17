@@ -1,0 +1,47 @@
+\name{reactiveValues}
+\alias{reactiveValues}
+\title{Create an object for storing reactive values}
+\usage{
+  reactiveValues(...)
+}
+\arguments{
+  \item{...}{Objects that will be added to the
+  reactivevalues object. All of these objects must be
+  named.}
+}
+\description{
+  This function returns an object for storing reactive
+  values. It is similar to a list, but with special
+  capabilities for reactive programming. When you read a
+  value from it, the calling reactive function takes a
+  reactive dependency on that value, and when you write to
+  it, it notifies any reactive functions that depend on
+  that value.
+}
+\examples{
+# Create the object with no values
+values <- reactiveValues()
+
+# Assign values to 'a' and 'b'
+values$a <- 3
+values[['b']] <- 4
+
+\dontrun{
+# From within a reactive context, you can access values with:
+values$a
+values[['a']]
+}
+
+# If not in a reactive context (e.g., at the console), you can use isolate()
+# to retrieve the value:
+isolate(values$a)
+isolate(values[['a']])
+
+# Set values upon creation
+values <- reactiveValues(a = 1, b = 2)
+isolate(values$a)
+}
+\seealso{
+  \code{\link{isolate}}.
+}
+

@@ -25,57 +25,9 @@ Dependencies <- setRefClass(
   )
 )
 
-ReactiveValue <- setRefClass(
-  'ReactiveValue',
-  fields = list(
-    .value = 'ANY',
-    .dependencies = 'Dependencies'
-  ),
-  methods = list(
-    initialize = function(value) {
-      .value <<- value
-    },
-    get = function() {
-      .dependencies$register()
-      return(.value)
-    },
-    set = function(value) {
-      if (identical(.value, value))
-        return()
-      .value <<- value
-      .dependencies$invalidate()
-      return()
-    }
-  )
-)
 
-#' @export
-reactiveValue <- function(initialValue) {
-  obj <- list(impl=ReactiveValue$new(initialValue))
-  class(obj) <- 'reactvalue'
-  return(obj)
-}
-
-#' @export
-`value<-` <- function(x, value) {
-  UseMethod('value<-')
-}
-#' @S3method value<- reactvalue
-`value<-.reactvalue` <- function(x, value) {
-  x[['impl']]$set(value)
-  return(x)
-}
-#' @export
-`value` <- function(x) {
-  UseMethod('value')
-}
-#' @S3method value reactvalue
-`value.reactvalue` <- function(x) {
-  x[['impl']]$get()
-}
-
-Values <- setRefClass(
-  'Values',
+ReactiveValues <- setRefClass(
+  'ReactiveValues',
   fields = list(
     .values = 'environment',
     .dependencies = 'environment',
@@ -147,25 +99,110 @@ Values <- setRefClass(
   )
 )
 
-.createValuesReader <- function(values) {
+
+# reactivevalues: S3 wrapper class for Values class -----------------------
+
+#' Create an object for storing reactive values
+#'
+#' This function returns an object for storing reactive values. It is similar
+#' to a list, but with special capabilities for reactive programming. When you
+#' read a value from it, the calling reactive function takes a reactive
+#' dependency on that value, and when you write to it, it notifies any reactive
+#' functions that depend on that value.
+#'
+#' @examples
+#' # Create the object with no values
+#' values <- reactiveValues()
+#'
+#' # Assign values to 'a' and 'b'
+#' values$a <- 3
+#' values[['b']] <- 4
+#'
+#' \dontrun{
+#' # From within a reactive context, you can access values with:
+#' values$a
+#' values[['a']]
+#' }
+#'
+#' # If not in a reactive context (e.g., at the console), you can use isolate()
+#' # to retrieve the value:
+#' isolate(values$a)
+#' isolate(values[['a']])
+#'
+#' # Set values upon creation
+#' values <- reactiveValues(a = 1, b = 2)
+#' isolate(values$a)
+#'
+#' @param ... Objects that will be added to the reactivevalues object. All of
+#'   these objects must be named.
+#'
+#' @seealso \code{\link{isolate}}.
+#'
+#' @export
+reactiveValues <- function(...) {
+  args <- list(...)
+  if (any(names(args) == ""))
+    stop("All arguments passed to reactiveValues() must be named.")
+
+  values <- .createReactiveValues(ReactiveValues$new())
+
+  # Use .subset2() instead of [[, to avoid method dispatch
+  .subset2(values, 'impl')$mset(args)
+  values
+}
+
+# Create a reactivevalues object
+#
+# @param values A ReactiveValues object
+# @param readonly Should this object be read-only?
+.createReactiveValues <- function(values = NULL, readonly = FALSE) {
   acc <- list(impl=values)
-  class(acc) <- 'reactvaluesreader'
+  class(acc) <- 'reactivevalues'
+  attr(acc, 'readonly') <- readonly
   return(acc)
 }
 
-#' @S3method $ reactvaluesreader
-`$.reactvaluesreader` <- function(x, name) {
-  x[['impl']]$get(name)
+#' @S3method $ reactivevalues
+`$.reactivevalues` <- function(x, name) {
+  .subset2(x, 'impl')$get(name)
 }
 
-#' @S3method names reactvaluesreader
-names.reactvaluesreader <- function(x) {
-  x[['impl']]$names()
+#' @S3method [[ reactivevalues
+`[[.reactivevalues` <- `$.reactivevalues`
+
+#' @S3method $<- reactivevalues
+`$<-.reactivevalues` <- function(x, name, value) {
+  if (attr(x, 'readonly')) {
+    stop("Attempted to assign value to a read-only reactivevalues object")
+  } else if (length(name) != 1 || !is.character(name)) {
+    stop("Must use single string to index into reactivevalues")
+  } else {
+    .subset2(x, 'impl')$set(name, value)
+    x
+  }
 }
 
-#' @S3method as.list reactvaluesreader
-as.list.reactvaluesreader <- function(x, ...) {
-  x[['impl']]$toList()
+#' @S3method [[<- reactivevalues
+`[[<-.reactivevalues` <- `$<-.reactivevalues`
+
+#' @S3method [ reactivevalues
+`[.reactivevalues` <- function(values, name) {
+  stop("Single-bracket indexing of reactivevalues object is not allowed.")
+}
+
+#' @S3method [<- reactivevalues
+`[<-.reactivevalues` <- function(values, name, value) {
+  stop("Single-bracket indexing of reactivevalues object is not allowed.")
+}
+
+#' @S3method names reactivevalues
+names.reactivevalues <- function(x) {
+  .subset2(x, 'impl')$names()
+}
+
+#' @S3method as.list reactivevalues
+as.list.reactivevalues <- function(x, ...) {
+  .subset2(x, 'impl')$toList()
 }
 
 Observable <- setRefClass(

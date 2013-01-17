@@ -1,21 +1,70 @@
 context("reactivity")
 
-## Helper functions
+
+# Test for correct behavior of ReactiveValues
+test_that("ReactiveValues", {
+  # Creation and indexing into ReactiveValues -------------------------------
+  values <- reactiveValues()
+
+  # $ indexing
+  values$a <- 3
+  expect_equal(isolate(values$a), 3)
+
+  # [[ indexing
+  values[['a']] <- 4
+  expect_equal(isolate(values[['a']]), 4)
+
+  # Create with initialized values
+  values <- reactiveValues(a=1, b=2)
+  expect_equal(isolate(values$a), 1)
+  expect_equal(isolate(values[['b']]), 2)
+
+  # NULL values -------------------------------------------------------------
+  # Initializing with NULL value
+  values <- reactiveValues(a=NULL, b=2)
+  # a should exist and be NULL
+  expect_equal(isolate(names(values)), c("a", "b"))
+  expect_true(is.null(isolate(values$a)))
+
+  # Assigning NULL should keep object (not delete it), and set value to NULL
+  values$b <- NULL
+  expect_equal(isolate(names(values)), c("a", "b"))
+  expect_true(is.null(isolate(values$b)))
+
+
+  # Errors -----------------------------------------------------------------
+  # Error: indexing with non-string
+  expect_error(isolate(values[[1]]))
+  expect_error(isolate(values[[NULL]]))
+  expect_error(isolate(values[[list('a')]]))
+
+  # Error: [ indexing shouldn't work
+  expect_error(isolate(values['a']))
+  expect_error(isolate(values['a'] <- 1))
+
+  # Error: unnamed arguments
+  expect_error(reactiveValues(1, b=2))
+
+  # Error: assignment to readonly values
+  values <- .create_reactivevalues(ReactiveValues$new(), readonly = TRUE)
+  expect_error(values$a <- 1)
+})
+
 
 # Test for overreactivity. funcB has an indirect dependency on valueA (via
 # funcA) and also a direct dependency on valueA. When valueA changes, funcB
 # should only execute once.
 test_that("Functions are not over-reactive", {
 
-  valueA <- reactiveValue(10)
+  values <- reactiveValues(A=10)
 
   funcA <- reactive(function() {
-    value(valueA)
+    values$A
   })
 
   funcB <- reactive(function() {
     funcA()
-    value(valueA)
+    values$A
   })
 
   obsC <- observe(function() {
@@ -26,7 +75,7 @@ test_that("Functions are not over-reactive", {
   expect_equal(execCount(funcB), 1)
   expect_equal(execCount(obsC), 1)
 
-  value(valueA) <- 11
+  values$A <- 11
   flushReact()
   expect_equal(execCount(funcB), 2)
   expect_equal(execCount(obsC), 2)
@@ -49,15 +98,15 @@ test_that("overreactivity2", {
   observed_value1 <- NA
   observed_value2 <- NA
 
-  valueA <- reactiveValue(1)
+  values <- reactiveValues(A=1)
   funcB  <- reactive(function() {
-    value(valueA) + 5
+    values$A + 5
   })
   obsC <- observe(function() {
-    observed_value1 <<-  funcB() * value(valueA)
+    observed_value1 <<-  funcB() * values$A
   })
   obsD <- observe(function() {
-    observed_value2 <<-  funcB() * value(valueA)
+    observed_value2 <<-  funcB() * values$A
   })
 
   flushReact()
@@ -67,7 +116,7 @@ test_that("overreactivity2", {
   expect_equal(execCount(obsC), 1)
   expect_equal(execCount(obsD), 1)
 
-  value(valueA) <- 2
+  values$A <- 2
   flushReact()
   expect_equal(observed_value1, 14)  # Should be 2 * (2 + 5) = 14
   expect_equal(observed_value2, 14)  # Should be 2 * (2 + 5) = 14
@@ -83,15 +132,14 @@ test_that("overreactivity2", {
 ##
 ## valueA => obsB => valueC => funcD => obsE
 test_that("isolation", {
-  valueA <- reactiveValue(10)
-  valueC <- reactiveValue(NULL)
+  values <- reactiveValues(A=10, C=NULL)
 
   obsB <- observe(function() {
-    value(valueC) <- value(valueA) > 0
+    values$C <- values$A > 0
   })
 
   funcD <- reactive(function() {
-    value(valueC)
+    values$C
   })
 
   obsE <- observe(function() {
@@ -101,7 +149,7 @@ test_that("isolation", {
   flushReact()
   countD <- execCount(funcD)
 
-  value(valueA) <- 11
+  values$A <- 11
   flushReact()
   expect_equal(execCount(funcD), countD)
 })
@@ -112,10 +160,10 @@ test_that("isolation", {
 ## reactive values and functions "push" their changes down to their descendents.
 test_that("laziness", {
 
-  valueA <- reactiveValue(10)
+  values <- reactiveValues(A=10)
 
   funcA <- reactive(function() {
-    value(valueA) > 0
+    values$A > 0
   })
 
   funcB <- reactive(function() {
@@ -123,7 +171,7 @@ test_that("laziness", {
   })
 
   obsC <- observe(function() {
-    if (value(valueA) > 10)
+    if (values$A > 10)
       return()
     funcB()
   })
@@ -133,7 +181,7 @@ test_that("laziness", {
   expect_equal(execCount(funcB), 1)
   expect_equal(execCount(obsC), 1)
 
-  value(valueA) <- 11
+  values$A <- 11
   flushReact()
   expect_equal(execCount(funcA), 1)
   expect_equal(execCount(funcB), 1)
@@ -153,12 +201,12 @@ test_that("order of evaluation", {
   # This is to store the value from observe()
   observed_value <- NA
 
-  valueA <- reactiveValue(1)
+  values <- reactiveValues(A=1)
   funcB  <- reactive(function() {
-    value(valueA) + 5
+    values$A + 5
   })
   obsC <- observe(function() {
-    observed_value <<- value(valueA) * funcB()
+    observed_value <<- values$A * funcB()
   })
 
   flushReact()
@@ -166,7 +214,7 @@ test_that("order of evaluation", {
   expect_equal(execCount(funcB), 1)
   expect_equal(execCount(obsC), 1)
 
-  value(valueA) <- 2
+  values$A <- 2
   flushReact()
   expect_equal(observed_value, 14)  # Should be 2 * (2 + 5) = 14
   expect_equal(execCount(funcB), 2)
@@ -180,12 +228,12 @@ test_that("order of evaluation", {
 
   observed_value <- NA
 
-  valueA <- reactiveValue(1)
+  values <- reactiveValues(A=1)
   funcB <- reactive(function() {
-    value(valueA) + 5
+    values$A + 5
   })
   obsC <- observe(function() {
-    observed_value <<- funcB() * value(valueA)
+    observed_value <<- funcB() * values$A
   })
 
   flushReact()
@@ -194,7 +242,7 @@ test_that("order of evaluation", {
   expect_equal(execCount(funcB), 1)
   expect_equal(execCount(obsC), 1)
 
-  value(valueA) <- 2
+  values$A <- 2
   flushReact()
   # Should be 2 * (2 + 5) = 14
   expect_equal(observed_value, 14)
@@ -209,22 +257,21 @@ test_that("isolate() blocks invalidations from propagating", {
   obsC_value <- NA
   obsD_value <- NA
 
-  valueA <- reactiveValue(1)
-  valueB <- reactiveValue(10)
+  values <- reactiveValues(A=1, B=10)
   funcB <- reactive(function() {
-    value(valueB) + 100
+    values$B + 100
   })
 
   # References to valueB and funcB are isolated
   obsC <- observe(function() {
     obsC_value <<-
-      value(valueA) + isolate(value(valueB)) + isolate(funcB())
+      values$A + isolate(values$B) + isolate(funcB())
   })
 
   # In contrast with obsC, this has a non-isolated reference to funcB
   obsD <- observe(function() {
     obsD_value <<-
-      value(valueA) + isolate(value(valueB)) + funcB()
+      values$A + isolate(values$B) + funcB()
   })
 
 
@@ -235,7 +282,7 @@ test_that("isolate() blocks invalidations from propagating", {
   expect_equal(execCount(obsD), 1)
 
   # Changing A should invalidate obsC and obsD
-  value(valueA) <- 2
+  values$A <- 2
   flushReact()
   expect_equal(obsC_value, 122)
   expect_equal(execCount(obsC), 2)
@@ -244,7 +291,7 @@ test_that("isolate() blocks invalidations from propagating", {
 
   # Changing B shouldn't invalidate obsC becuause references to B are in isolate()
   # But it should invalidate obsD.
-  value(valueB) <- 20
+  values$B <- 20
   flushReact()
   expect_equal(obsC_value, 122)
   expect_equal(execCount(obsC), 2)
@@ -253,7 +300,7 @@ test_that("isolate() blocks invalidations from propagating", {
 
   # Changing A should invalidate obsC and obsD, and they should see updated
   # values for valueA, valueB, and funcB
-  value(valueA) <- 3
+  values$A <- 3
   flushReact()
   expect_equal(obsC_value, 143)
   expect_equal(execCount(obsC), 3)
@@ -263,15 +310,15 @@ test_that("isolate() blocks invalidations from propagating", {
 
 test_that("Circular refs/reentrancy in reactive functions work", {
 
-  valueA <- reactiveValue(3)
+  values <- reactiveValues(A=3)
 
   funcB <- reactive(function() {
     # Each time fB executes, it reads and then writes valueA,
     # effectively invalidating itself--until valueA becomes 0.
-    if (value(valueA) == 0)
+    if (values$A == 0)
       return()
-    value(valueA) <- value(valueA) - 1
-    return(value(valueA))
+    values$A <- values$A - 1
+    return(values$A)
   })
 
   obsC <- observe(function() {
@@ -281,7 +328,7 @@ test_that("Circular refs/reentrancy in reactive functions work", {
   flushReact()
   expect_equal(execCount(obsC), 4)
 
-  value(valueA) <- 3
+  values$A <- 3
 
   flushReact()
   expect_equal(execCount(obsC), 8)
@@ -290,11 +337,11 @@ test_that("Circular refs/reentrancy in reactive functions work", {
 
 test_that("Simple recursion", {
 
-  valueA <- reactiveValue(5)
+  values <- reactiveValues(A=5)
   funcB <- reactive(function() {
-    if (value(valueA) == 0)
+    if (values$A == 0)
       return(0)
-    value(valueA) <- value(valueA) - 1
+    values$A <- values$A - 1
     funcB()
   })
 
@@ -328,11 +375,11 @@ test_that("Non-reactive recursion", {
 
 test_that("Circular dep with observer only", {
 
-  valueA <- reactiveValue(3)
+  values <- reactiveValues(A=3)
   obsB <- observe(function() {
-    if (value(valueA) == 0)
+    if (values$A == 0)
       return()
-    value(valueA) <- value(valueA) - 1
+    values$A <- values$A - 1
   })
 
   flushReact()
@@ -341,10 +388,10 @@ test_that("Circular dep with observer only", {
 
 test_that("Writing then reading value is not circular", {
 
-  valueA <- reactiveValue(3)
+  values <- reactiveValues(3)
   funcB <- reactive(function() {
-    value(valueA) <- isolate(value(valueA)) - 1
-    value(valueA)
+    values$A <- isolate(values$A) - 1
+    values$A
   })
 
   obsC <- observe(function() {
@@ -354,7 +401,7 @@ test_that("Writing then reading value is not circular", {
   flushReact()
   expect_equal(execCount(obsC), 1)
 
-  value(valueA) <- 10
+  values$A <- 10
 
   flushReact()
   expect_equal(execCount(obsC), 2)

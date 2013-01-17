@@ -46,7 +46,7 @@ test_that("ReactiveValues", {
   expect_error(reactiveValues(1, b=2))
 
   # Error: assignment to readonly values
-  values <- .create_reactivevalues(ReactiveValues$new(), readonly = TRUE)
+  values <- .createReactiveValues(ReactiveValues$new(), readonly = TRUE)
   expect_error(values$a <- 1)
 })
 

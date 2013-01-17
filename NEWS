@@ -1,7 +1,9 @@
-shiny 0.2.3.99
+shiny 0.2.4.99
 --------------------------------------------------------------------------------
 
-* Add `reactiveValue()`.
+* Reactive functions are now evaluated lazily.
+
+* Add `reactiveValues()`.
 
 * Add `isolate()`. This function is used for accessing reactive functions,
   without them invalidating their parent contexts.
@@ -12,16 +14,19 @@ shiny 0.2.3.99
 * Fix issue #71, where `reactiveTable()` would return blank if the first
   element of a data frame was NA.
 
-shiny 0.2.3
+shiny 0.2.4
 --------------------------------------------------------------------------------
-
-* Ignore request variables for routing purposes
 
 * `runGist` has been updated to use the new download URLs from
   https://gist.github.com.
 
 * Shiny now uses `CairoPNG()` for output, when the Cairo package is available.
   This provides better-looking output on Linux and Windows.
+
+shiny 0.2.3
+--------------------------------------------------------------------------------
+
+* Ignore request variables for routing purposes
 
 shiny 0.2.2
 --------------------------------------------------------------------------------

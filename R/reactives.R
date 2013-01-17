@@ -26,6 +26,8 @@ Dependents <- setRefClass(
 )
 
 
+# ReactiveValues ------------------------------------------------------------
+
 ReactiveValues <- setRefClass(
   'ReactiveValues',
   fields = list(
@@ -112,7 +114,8 @@ ReactiveValues <- setRefClass(
 )
 
 
-# reactivevalues: S3 wrapper class for Values class -----------------------
+# reactivevalues ------------------------------------------------------------
+# S3 wrapper class for ReactiveValues reference class
 
 #' Create an object for storing reactive values
 #'
@@ -254,6 +257,8 @@ reactiveValuesToList <- function(x, all.names=FALSE) {
   .subset2(x, 'impl')$toList(all.names)
 }
 
+# Observable ----------------------------------------------------------------
+
 Observable <- setRefClass(
   'Observable',
   fields = list(
@@ -360,6 +365,8 @@ execCount <- function(x) {
     stop('Unexpected argument to execCount')
 }
 
+# Observer ------------------------------------------------------------------
+
 Observer <- setRefClass(
   'Observer',
   fields = list(
@@ -462,6 +469,8 @@ Observer <- setRefClass(
 observe <- function(func) {
   invisible(Observer$new(func, deparse(substitute(func))))
 }
+
+# ---------------------------------------------------------------------------
 
 #' Timer
 #' 

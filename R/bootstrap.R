@@ -742,7 +742,7 @@ verbatimTextOutput <- function(outputId) {
 #' 
 #' Render a \link{reactivePlot} within an application page.
 #' @param outputId output variable to read the plot from
-#' @param width Plot width
+#' @param width Plot width. Either a number, or a string ending in \code{"px"}.
 #' @param height Plot height
 #' @return A plot output element that can be included in a panel
 #' @examples
@@ -752,6 +752,15 @@ verbatimTextOutput <- function(outputId) {
 #' )
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px") {
+
+  if (is.character(height) &&
+      substr(height, nchar(height) - 1, nchar(height)) != "px") {
+    stop("height must be a number, or a string ending with 'px'.")
+
+  } else if (is.numeric(height)) {
+    height <- paste(height, "px", sep = "")
+  }
+
   style <- paste("width:", width, ";", "height:", height)
   div(id = outputId, class="shiny-plot-output", style = style)
 }

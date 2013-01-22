@@ -31,10 +31,12 @@ ReactiveValues <- setRefClass(
   fields = list(
     .values = 'environment',
     .dependents = 'environment',
-    # Dependents for the list of names
+    # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
+    # Dependents for all values, including hidden
+    .allValuesDeps = 'Dependents',
     # Dependents for all values
-    .allDeps = 'Dependents'
+    .valuesDeps = 'Dependents'
   ),
   methods = list(
     initialize = function() {
@@ -57,6 +59,8 @@ ReactiveValues <- setRefClass(
         base::get(key, pos=.values, inherits=FALSE)
     },
     set = function(key, value) {
+      hidden <- substr(key, 1, 1) == "."
+
       if (exists(key, where=.values, inherits=FALSE)) {
         if (identical(base::get(key, pos=.values, inherits=FALSE), value)) {
           return(invisible())
@@ -65,7 +69,11 @@ ReactiveValues <- setRefClass(
       else {
         .namesDeps$invalidate()
       }
-      .allDeps$invalidate()
+
+      if (hidden)
+        .allValuesDeps$invalidate()
+      else
+        .valuesDeps$invalidate()
       
       assign(key, value, pos=.values, inherits=FALSE)
       dep.keys <- objects(
@@ -92,9 +100,13 @@ ReactiveValues <- setRefClass(
       .namesDeps$register()
       return(ls(.values, all.names=TRUE))
     },
-    toList = function() {
-      .allDeps$register()
-      return(as.list(.values))
+    toList = function(all.names=FALSE) {
+      if (all.names)
+        .allValuesDeps$register()
+
+      .valuesDeps$register()
+
+      return(as.list(.values, all.names=all.names))
     }
   )
 )
@@ -206,13 +218,14 @@ names.reactivevalues <- function(x) {
 }
 
 #' @S3method as.list reactivevalues
-as.list.reactivevalues <- function(x, ...) {
+as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
   .Deprecated("reactivevalues_to_list",
     msg = paste("'as.list.reactivevalues' is deprecated. ",
       "Use 'reactivevalues_to_list' instead.",
       "\nPlease see ?reactivevalues_to_list for more information.",
       sep = ""))
-  reactivevalues_to_list(x)
+
+  reactivevalues_to_list(x, all.names)
 }
 
 #' Convert a reactivevalues object to a list
@@ -226,17 +239,17 @@ as.list.reactivevalues <- function(x, ...) {
 #' @examples
 #' values <- reactiveValues(a = 1)
 #' \dontrun{
-#' convert_to_list(values)
+#' reactivevalues_to_list(values)
 #' }
 #'
 #' # To get the objects without taking dependencies on them, use isolate().
 #' # isolate() can also be used when calling from outside a reactive context (e.g.
 #' # at the console)
-#' isolate(convert_to_list(values))
+#' isolate(reactivevalues_to_list(values))
 #'
 #' @export
-reactivevalues_to_list <- function(x) {
-  .subset2(x, 'impl')$toList()
+reactivevalues_to_list <- function(x, all.names=FALSE) {
+  .subset2(x, 'impl')$toList(all.names)
 }
 
 Observable <- setRefClass(

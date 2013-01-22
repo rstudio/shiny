@@ -61,7 +61,7 @@ as.character.shiny.tag <- function(x, ...) {
     cat(text, file=f)
   }
   tagWrite(x, textWriter)
-  return(HTML(paste(readLines(f), collapse='\n')))
+  return(HTML(paste(readLines(f, warn=FALSE), collapse='\n')))
 }
 
 #' @S3method print shiny.tag.list
@@ -160,23 +160,7 @@ tag <- function(`_tag_name`, varArgs) {
   return (tag)
 }
 
-tagWriteChildren <- function(tag, textWriter, indent, context) {
-  for (child in tag$children) {
-    if (isTag(child)) {
-      tagWrite(child, textWriter, indent, context)
-    }
-    else {
-      # first call optional filter -- exit function if it returns false
-      if (is.null(context) || is.null(context$filter) || context$filter(child)) {
-        child <- normalizeText(child)
-        indentText <- paste(rep(" ", indent*3), collapse="")
-        textWriter(paste(indentText, child, "\n", sep=""))
-      }
-    }
-  }
-}
-
-tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
+tagWrite <- function(tag, textWriter, indent=0, context = NULL, eol = "\n") {
   
   # optionally process a list of tags
   if (!isTag(tag) && is.list(tag)) {
@@ -189,7 +173,13 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
     return (NULL)
   
   # compute indent text
-  indentText <- paste(rep(" ", indent*3), collapse="")
+  indentText <- paste(rep(" ", indent*2), collapse="")
+  
+  # Check if it's just text (may either be plain-text or HTML)
+  if (is.character(tag)) {
+    textWriter(paste(indentText, normalizeText(tag), eol, sep=""))
+    return (NULL)
+  }
   
   # write tag name
   textWriter(paste(indentText, "<", tag$name, sep=""))
@@ -210,19 +200,18 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
   
   # write any children
   if (length(tag$children) > 0) {
+    textWriter(">")
     
     # special case for a single child text node (skip newlines and indentation)
     if ((length(tag$children) == 1) && is.character(tag$children[[1]]) ) {
-      if (is.null(context) || is.null(context$filter) 
-          || context$filter(tag$children[[1]])) {
-        text <- normalizeText(tag$children[[1]])
-        textWriter(paste(">", text, "</", tag$name, ">\n", sep=""))
-      }
+      tagWrite(tag$children[[1]], textWriter, 0, context, "")
+      textWriter(paste("</", tag$name, ">", eol, sep=""))
     }
     else {
-      textWriter(">\n")
-      tagWriteChildren(tag, textWriter, indent+1, context)
-      textWriter(paste(indentText, "</", tag$name, ">\n", sep=""))
+      textWriter("\n")
+      for (child in tag$children)
+        tagWrite(child, textWriter, indent+1, context)
+      textWriter(paste(indentText, "</", tag$name, ">", eol, sep=""))
     }
   }
   else {
@@ -231,14 +220,13 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL) {
     if (tag$name %in% c("area", "base", "br", "col", "command", "embed", "hr", 
                         "img", "input", "keygen", "link", "meta", "param",
                         "source", "track", "wbr")) {
-      textWriter("/>\n")
+      textWriter(paste("/>", eol, sep=""))
     }
     else {
-      textWriter(paste("></", tag$name, ">\n", sep=""))
+      textWriter(paste("></", tag$name, ">", eol, sep=""))
     }
   }
 }
-
 
 
 # environment used to store all available tags

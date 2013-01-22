@@ -141,7 +141,7 @@ ReactiveValues <- setRefClass(
 #' @export
 reactiveValues <- function(...) {
   args <- list(...)
-  if (any(names(args) == ""))
+  if ((length(args) > 0) && (is.null(names(args)) || any(names(args) == "")))
     stop("All arguments passed to reactiveValues() must be named.")
 
   values <- .createReactiveValues(ReactiveValues$new())

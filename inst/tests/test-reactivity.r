@@ -43,6 +43,7 @@ test_that("ReactiveValues", {
   expect_error(isolate(values['a'] <- 1))
 
   # Error: unnamed arguments
+  expect_error(reactiveValues(1))
   expect_error(reactiveValues(1, b=2))
 
   # Error: assignment to readonly values
@@ -388,7 +389,7 @@ test_that("Circular dep with observer only", {
 
 test_that("Writing then reading value is not circular", {
 
-  values <- reactiveValues(3)
+  values <- reactiveValues(A=3)
   funcB <- reactive(function() {
     values$A <- isolate(values$A) - 1
     values$A

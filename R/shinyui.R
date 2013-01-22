@@ -106,7 +106,7 @@ renderPage <- function(ui, connection) {
     if (isTag(content) && identical(content$name, "head")) {
       textConn <- textConnection(NULL, "w") 
       textConnWriter <- function(text) cat(text, file = textConn)
-      tagWriteChildren(content, textConnWriter, 1, context)
+      tagWrite(content$children, textConnWriter, 1, context)
       context$head <- append(context$head, textConnectionValue(textConn))
       close(textConn)
       return (FALSE)
@@ -126,10 +126,10 @@ renderPage <- function(ui, connection) {
   writeLines(c('<!DOCTYPE html>',
                '<html>',
                '<head>',
-               '   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
-               '   <script src="shared/jquery.js" type="text/javascript"></script>',
-               '   <script src="shared/shiny.js" type="text/javascript"></script>',
-               '   <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
+               '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
+               '  <script src="shared/jquery.js" type="text/javascript"></script>',
+               '  <script src="shared/shiny.js" type="text/javascript"></script>',
+               '  <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
                context$head,
                '</head>',
                '<body>', 

@@ -742,7 +742,9 @@ verbatimTextOutput <- function(outputId) {
 #' 
 #' Render a \link{reactivePlot} within an application page.
 #' @param outputId output variable to read the plot from
-#' @param width Plot width. Either a number, or a string ending in \code{"px"}.
+#' @param width Plot width. Must be a valid CSS unit (like \code{"100%"},
+#' \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
+#' string and have \code{"px"} appended.
 #' @param height Plot height
 #' @return A plot output element that can be included in a panel
 #' @examples
@@ -753,15 +755,19 @@ verbatimTextOutput <- function(outputId) {
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px") {
 
-  if (is.character(height) &&
-      substr(height, nchar(height) - 1, nchar(height)) != "px") {
-    stop("height must be a number, or a string ending with 'px'.")
-
-  } else if (is.numeric(height)) {
-    height <- paste(height, "px", sep = "")
+  validate_css_unit <- function(x) {
+    if (is.character(x) &&
+       !grepl("^(auto|((\\.\\d+)|(\\d+(\\.\\d+)?))(%|in|cm|mm|em|ex|pt|pc|px))$", x)) {
+      stop('"', x, '" is not a valid CSS unit (e.g., "100%", "400px", "auto")')
+    }
+    if (is.numeric(x)) {
+      x <- paste(x, "px", sep = "")
+    }
+    x
   }
 
-  style <- paste("width:", width, ";", "height:", height)
+  style <- paste("width:", validate_css_unit(width), ";",
+    "height:", validate_css_unit(height))
   div(id = outputId, class="shiny-plot-output", style = style)
 }
 

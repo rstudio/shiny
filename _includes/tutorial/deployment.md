@@ -48,10 +48,27 @@ where `appdir` is the name of your app's subdirectory in `inst`, and `packagenam
 * More work to set up
 * Source code is visible by recipient (if not desired)
 
-### Over the Web
+### Over the web (self hosted)
 
-The most convenient possibility for non-R users would be to access your application directly using their web browsers, without needing to run the application themselves.
+You can deploy Shiny applications over the web, so that users need only a web browser and your application's URL. You'll need a Linux server and our [Shiny Server](https://github.com/rstudio/shiny-server) software.
 
-Unfortunately, R alone does not currently have the pieces necessary to run a production-quality web service. While nothing prevents you from running an R process on a server and calling `runApp`, the websockets package that Shiny uses as its HTTP listener is not well suited for deploying directly on the open web. Furthermore, any error in your application will cause the `runApp` loop to exit and you will need to restart the R process yourself.
+Shiny Server is free and open source, though in the future we will offer a commercially licensed edition with additional features for larger organizations. If you'd like to be notified of future beta releases of Shiny Server, please [register now](https://rstudio.wufoo.com/forms/shiny-server-beta-program/).
 
-We're also working on a Shiny server that is designed to provide web-based application hosting, which we'll offer as a subscription-based hosting service and/or software package that you can install yourself. An open source version of the latter will be available as a beta by the end of January 2013, and a paid version with additional features for larger organizations will follow later in the year. If you'd like to help us beta test Shiny server, please [register](https://rstudio.wufoo.com/forms/shiny-server-beta-program/).
+#### Pros
+* Easiest for your users&mdash;only a web browser is required
+* Take advantage of centralized computing resources
+
+#### Cons
+* Requires server setup and maintenance of a Linux server
+
+### Over the web (RStudio hosted)
+
+Want to deploy over the web but prefer not to run your own server? We're currently beta testing a subscription-based hosting service for Shiny. To apply for a free beta test account, [register now](https://rstudio.wufoo.com/forms/shiny-server-beta-program/).
+
+#### Pros
+* Easiest for your users&mdash;only a web browser is required
+* No need to run your own server
+
+#### Cons
+* Code and data must be copied to our servers
+

@@ -219,13 +219,13 @@ names.reactivevalues <- function(x) {
 
 #' @S3method as.list reactivevalues
 as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
-  .Deprecated("reactivevalues_to_list",
+  .Deprecated("reactiveValuesToList",
     msg = paste("'as.list.reactivevalues' is deprecated. ",
-      "Use 'reactivevalues_to_list' instead.",
-      "\nPlease see ?reactivevalues_to_list for more information.",
+      "Use reactiveValuesToList instead.",
+      "\nPlease see ?reactiveValuesToList for more information.",
       sep = ""))
 
-  reactivevalues_to_list(x, all.names)
+  reactiveValuesToList(x, all.names)
 }
 
 #' Convert a reactivevalues object to a list
@@ -239,16 +239,16 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 #' @examples
 #' values <- reactiveValues(a = 1)
 #' \dontrun{
-#' reactivevalues_to_list(values)
+#' reactiveValuesToList(values)
 #' }
 #'
 #' # To get the objects without taking dependencies on them, use isolate().
 #' # isolate() can also be used when calling from outside a reactive context (e.g.
 #' # at the console)
-#' isolate(reactivevalues_to_list(values))
+#' isolate(reactiveValuesToList(values))
 #'
 #' @export
-reactivevalues_to_list <- function(x, all.names=FALSE) {
+reactiveValuesToList <- function(x, all.names=FALSE) {
   .subset2(x, 'impl')$toList(all.names)
 }
 

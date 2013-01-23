@@ -7,3 +7,4 @@
 ^shiny\.cmd$
 ^run\.R$
 ^\.gitignore$
+^res$

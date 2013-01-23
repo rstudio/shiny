@@ -4,6 +4,10 @@
 
   var exports = window.Shiny = window.Shiny || {};
 
+  $(document).on('submit', 'form:not([action])', function(e) {
+    e.preventDefault();
+  });
+
   function randomId() {
     return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
   }

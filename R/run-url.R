@@ -47,10 +47,6 @@ runGist <- function(gist,
 #' @param subdir A subdirectory in the repository that contains the app. By
 #'   default, this function will run an app from the top level of the repo, but
 #'   you can use a path such as `\code{"inst/shinyapp"}.
-#' @param auth_user GitHub username, if you're attempting to install
-#'   a package hosted in a private repository (and your username is different
-#'   to \code{username}).
-#' @param password GitHub password, for private repositories.
 #' @param port The TCP port that the application should listen on. Defaults to
 #'   port 8100.
 #' @param launch.browser If true, the system's default web browser will be
@@ -67,20 +63,11 @@ runGist <- function(gist,
 #'
 #' @export
 runGitHub <- function(repo, username = getOption("github.user"),
-  ref = "master", subdir = NULL, auth_user = NULL, password = NULL, port = 8100,
+  ref = "master", subdir = NULL, port = 8100,
   launch.browser = getOption('shiny.launch.browser', interactive())) {
 
   if (is.null(ref)) {
     stop("Must specify either a ref. ")
-  }
-
-  if (!is.null(password)) {
-    auth <- authenticate(
-      user = auth_user %||% username,
-      password = password,
-      type = "basic")
-  } else {
-    auth <- list()
   }
 
   message("Downloading github repo(s) ",

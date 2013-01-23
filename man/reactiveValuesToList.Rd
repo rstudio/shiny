@@ -6,6 +6,10 @@
 }
 \arguments{
   \item{x}{A reactivevalues object.}
+
+  \item{all.names}{If \code{TRUE}, include objects with a
+  leading dot. If \code{FALSE} (the default) don't include
+  those objects.}
 }
 \description{
   This function does something similar to what you might
@@ -13,7 +17,7 @@
   calling context will take dependencies on every object in
   the reactivevalues object. To avoid taking dependencies
   on all the objects, you can wrap the call with
-  \code{\link{isolate()}}.
+  \code{\link{isolate}()}.
 }
 \examples{
 values <- reactiveValues(a = 1)

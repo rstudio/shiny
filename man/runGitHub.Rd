@@ -3,8 +3,7 @@
 \title{Run a Shiny application from a GitHub repository}
 \usage{
   runGitHub(repo, username = getOption("github.user"),
-    ref = "master", subdir = NULL, auth_user = NULL,
-    password = NULL, port = 8100,
+    ref = "master", subdir = NULL, port = 8100,
     launch.browser = getOption("shiny.launch.browser", interactive()))
 }
 \arguments{
@@ -19,13 +18,6 @@
   contains the app. By default, this function will run an
   app from the top level of the repo, but you can use a
   path such as `\code{"inst/shinyapp"}.}
-
-  \item{auth_user}{GitHub username, if you're attempting to
-  install a package hosted in a private repository (and
-  your username is different to \code{username}).}
-
-  \item{password}{GitHub password, for private
-  repositories.}
 
   \item{port}{The TCP port that the application should
   listen on. Defaults to port 8100.}

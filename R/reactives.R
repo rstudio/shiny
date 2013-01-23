@@ -213,7 +213,7 @@ names.reactivevalues <- function(x) {
 }
 
 #' @S3method names<- reactivevalues
-`names<-.reactivevalues` <- function(x, values) {
+`names<-.reactivevalues` <- function(x, value) {
   stop("Can't assign names to reactivevalues object")
 }
 
@@ -233,9 +233,11 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 #' This function does something similar to what you might \code{\link{as.list}}
 #' to do. The difference is that the calling context will take dependencies on
 #' every object in the reactivevalues object. To avoid taking dependencies on
-#' all the objects, you can wrap the call with \code{\link{isolate()}}.
+#' all the objects, you can wrap the call with \code{\link{isolate}()}.
 #'
 #' @param x A reactivevalues object.
+#' @param all.names If \code{TRUE}, include objects with a leading dot. If
+#'   \code{FALSE} (the default) don't include those objects.
 #' @examples
 #' values <- reactiveValues(a = 1)
 #' \dontrun{

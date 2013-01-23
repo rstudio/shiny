@@ -130,9 +130,10 @@ reactiveTable <- function(func, ...) {
 
 #' Printable Output
 #' 
-#' Makes a reactive version of the given function that also turns its printable
-#' result into a string. The reactive function is suitable for assigning to an 
-#' \code{output} slot.
+#' Makes a reactive version of the given function that captures any printed 
+#' output, and also captures its printable result (unless 
+#' \code{\link{invisible}}), into a string. The resulting function is suitable 
+#' for assigning to an  \code{output} slot.
 #' 
 #' The corresponding HTML output tag can be anything (though \code{pre} is 
 #' recommended if you need a monospace font and whitespace preserved) and should
@@ -141,12 +142,26 @@ reactiveTable <- function(func, ...) {
 #' The result of executing \code{func} will be printed inside a 
 #' \code{\link[utils]{capture.output}} call.
 #' 
-#' @param func A function that returns a printable R object.
+#' Note that unlike most other Shiny output functions, if the given function 
+#' returns \code{NULL} then \code{NULL} will actually be visible in the output. 
+#' To display nothing, make your function return \code{\link{invisible}()}.
+#' 
+#' @param func A function that may print output and/or return a printable R 
+#'   object.
+#'   
+#' @seealso \code{\link{reactiveText}} for displaying the value returned from a 
+#'   function, instead of the printed output.
+#'
+#' @example res/text-example.R
 #'   
 #' @export
 reactivePrint <- function(func) {
   reactive(function() {
-    return(paste(capture.output(print(func())), collapse="\n"))
+    return(paste(capture.output({
+      result <- withVisible(func())
+      if (result$visible)
+        print(result$value)
+    }), collapse="\n"))
   })
 }
 
@@ -166,10 +181,16 @@ reactivePrint <- function(func) {
 #' @param func A function that returns an R object that can be used as an
 #'   argument to \code{cat}.
 #'   
+#' @seealso \code{\link{reactivePrint}} for capturing the print output of a
+#'   function, rather than the returned text value.
+#'
+#' @example res/text-example.R
+#'   
 #' @export
 reactiveText <- function(func) {
   reactive(function() {
-    return(paste(capture.output(cat(func())), collapse="\n"))
+    value <- func()
+    return(paste(capture.output(cat(value)), collapse="\n"))
   })
 }
 

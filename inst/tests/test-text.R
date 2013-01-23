@@ -19,7 +19,7 @@ test_that("reactivePrint and reactiveText behavior is correct", {
   expect_equal(isolate(reactiveText(function() invisible("foo"))()),
                'foo')
   expect_equal(isolate(reactiveText(function() { print("foo"); "bar"})()),
-               'bar') ## FAIL: returns '[1] "foo"\nbar'
+               'bar')
   expect_equal(isolate(reactiveText(function() NULL)()),
                '')
   expect_equal(isolate(reactiveText(function() invisible())()),

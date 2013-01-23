@@ -1,4 +1,4 @@
-shiny 0.2.4.99
+shiny 0.3.0
 --------------------------------------------------------------------------------
 
 * Reactive functions are now evaluated lazily.
@@ -20,6 +20,17 @@ shiny 0.2.4.99
 
 * In `plotOutput`, better validation for CSS units when specifying width and
   height.
+
+* `reactivePrint()` no longer displays invisible output.
+
+* `reactiveText()` no longer displays printed output, only the return value
+  from a function.
+
+* The `runGitHub()` and `runUrl()` functions have been added, for running
+  Shiny apps from GitHub repositories and zip/tar files at remote URLs.
+
+* Fix issue #64, where pressing Enter in a textbox would cause a form to
+  submit.
 
 shiny 0.2.4
 --------------------------------------------------------------------------------

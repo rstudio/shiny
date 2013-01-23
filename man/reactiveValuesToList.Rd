@@ -1,0 +1,29 @@
+\name{reactiveValuesToList}
+\alias{reactiveValuesToList}
+\title{Convert a reactivevalues object to a list}
+\usage{
+  reactiveValuesToList(x, all.names = FALSE)
+}
+\arguments{
+  \item{x}{A reactivevalues object.}
+}
+\description{
+  This function does something similar to what you might
+  \code{\link{as.list}} to do. The difference is that the
+  calling context will take dependencies on every object in
+  the reactivevalues object. To avoid taking dependencies
+  on all the objects, you can wrap the call with
+  \code{\link{isolate()}}.
+}
+\examples{
+values <- reactiveValues(a = 1)
+\dontrun{
+reactiveValuesToList(values)
+}
+
+# To get the objects without taking dependencies on them, use isolate().
+# isolate() can also be used when calling from outside a reactive context (e.g.
+# at the console)
+isolate(reactiveValuesToList(values))
+}
+

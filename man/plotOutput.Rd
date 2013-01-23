@@ -7,7 +7,10 @@
 \arguments{
   \item{outputId}{output variable to read the plot from}
 
-  \item{width}{Plot width}
+  \item{width}{Plot width. Must be a valid CSS unit (like
+  \code{"100%"}, \code{"400px"}, \code{"auto"}) or a
+  number, which will be coerced to a string and have
+  \code{"px"} appended.}
 
   \item{height}{Plot height}
 }

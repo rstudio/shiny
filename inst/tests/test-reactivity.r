@@ -428,7 +428,7 @@ test_that("names() and reactiveValuesToList()", {
   })
 
   # names() returns all names
-  expect_equal(sort(isolate(names(values))), c(".B", "A"))
+  expect_equal(sort(isolate(names(values))), sort(c(".B", "A")))
   # Assigning names fails
   expect_error(isolate(names(v) <- c('x', 'y')))
 

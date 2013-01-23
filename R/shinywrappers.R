@@ -179,7 +179,8 @@ reactivePrint <- function(func) {
 #' @export
 reactiveText <- function(func) {
   reactive(function() {
-    return(paste(capture.output(cat(func())), collapse="\n"))
+    value <- func()
+    return(paste(capture.output(cat(value)), collapse="\n"))
   })
 }
 

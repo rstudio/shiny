@@ -31,7 +31,8 @@ runGist <- function(gist,
     stop('Unrecognized gist identifier format')
   }
 
-  runUrl(gistUrl, filetype=".tar.gz", port=port, launch.browser=launch.browser)
+  runUrl(gistUrl, filetype=".tar.gz", subdir=NULL, port=port,
+    launch.browser=launch.browser)
 }
 
 
@@ -43,6 +44,9 @@ runGist <- function(gist,
 #' @param username GitHub username
 #' @param ref Desired git reference. Could be a commit, tag, or branch
 #'   name. Defaults to \code{"master"}.
+#' @param subdir A subdirectory in the repository that contains the app. By
+#'   default, this function will run an app from the top level of the repo, but
+#'   you can use a path such as `\code{"inst/shinyapp"}.
 #' @param auth_user GitHub username, if you're attempting to install
 #'   a package hosted in a private repository (and your username is different
 #'   to \code{username}).
@@ -56,11 +60,14 @@ runGist <- function(gist,
 #' @examples
 #' \dontrun{
 #' runGitHub("shiny_example", "rstudio")
+#'
+#' # Can run an app from a subdirectory in the repo
+#' runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
 #' }
 #'
 #' @export
 runGitHub <- function(repo, username = getOption("github.user"),
-  ref = "master", auth_user = NULL, password = NULL, port = 8100,
+  ref = "master", subdir = NULL, auth_user = NULL, password = NULL, port = 8100,
   launch.browser = getOption('shiny.launch.browser', interactive())) {
 
   if (is.null(ref)) {
@@ -85,7 +92,7 @@ runGitHub <- function(repo, username = getOption("github.user"),
   url <- paste("https://github.com/", username, "/", repo, "/archive/",
     ref, ".tar.gz", sep = "")
 
-  runUrl(url, port=port, launch.browser=launch.browser)
+  runUrl(url, subdir=subdir, port=port, launch.browser=launch.browser)
 }
 
 
@@ -97,6 +104,9 @@ runGitHub <- function(repo, username = getOption("github.user"),
 #' @param url URL of the application.
 #' @param filetype The file type (\code{".zip"}, \code{".tar"}, or
 #'   \code{".tar.gz"}. Defaults to the file extension taken from the url.
+#' @param subdir A subdirectory in the repository that contains the app. By
+#'   default, this function will run an app from the top level of the repo, but
+#'   you can use a path such as `\code{"inst/shinyapp"}.
 #' @param port The TCP port that the application should listen on. Defaults to
 #'   port 8100.
 #' @param launch.browser If true, the system's default web browser will be
@@ -106,11 +116,18 @@ runGitHub <- function(repo, username = getOption("github.user"),
 #' @examples
 #' \dontrun{
 #' runUrl('https://github.com/rstudio/shiny_example/archive/master.tar.gz')
+#'
+#' # Can run an app from a subdirectory in the archive
+#' runUrl("https://github.com/rstudio/shiny_example/archive/master.zip",
+#'  subdir = "inst/shinyapp/")
 #' }
 #'
 #' @export
-runUrl <- function(url, filetype = NULL, port = 8100,
+runUrl <- function(url, filetype = NULL, subdir = NULL, port = 8100,
   launch.browser = getOption('shiny.launch.browser', interactive())) {
+
+  if (!is.null(subdir) && ".." %in% strsplit(subdir, '/')[[1]])
+    stop("'..' not allowed in subdir")
 
   if (is.null(filetype))
     filetype <- basename(url)
@@ -148,5 +165,6 @@ runUrl <- function(url, filetype = NULL, port = 8100,
   appdir <- file.path(dirname(filePath), dirname)
   on.exit(unlink(appdir, recursive = TRUE), add = TRUE)
 
-  runApp(appdir, port=port, launch.browser=launch.browser)
+  appsubdir <- ifelse(is.null(subdir), appdir, file.path(appdir, subdir))
+  runApp(appsubdir, port=port, launch.browser=launch.browser)
 }

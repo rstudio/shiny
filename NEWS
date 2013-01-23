@@ -5,6 +5,10 @@ shiny 0.2.4.99
 
 * Add `reactiveValues()`.
 
+* Using `as.list()` to convert a reactivevalues object (like `input`) to a list
+  is deprecated. The new function `reactiveValuesToList()` should be used
+  instead.
+
 * Add `isolate()`. This function is used for accessing reactive functions,
   without them invalidating their parent contexts.
 
@@ -13,6 +17,9 @@ shiny 0.2.4.99
 
 * Fix issue #71, where `reactiveTable()` would return blank if the first
   element of a data frame was NA.
+
+* In `plotOutput`, better validation for CSS units when specifying width and
+  height.
 
 shiny 0.2.4
 --------------------------------------------------------------------------------

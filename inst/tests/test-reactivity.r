@@ -407,3 +407,61 @@ test_that("Writing then reading value is not circular", {
   flushReact()
   expect_equal(execCount(obsC), 2)
 })
+
+test_that("names() and reactivevalues_to_list()", {
+
+  values <- reactiveValues(A=1, .B=2)
+
+  # Dependent on names
+  depNames <- observe(function() {
+    names(values)
+  })
+
+  # Dependent on all non-hidden objects
+  depValues <- observe(function() {
+    reactivevalues_to_list(values)
+  })
+
+  # Dependent on all objects, including hidden
+  depAllValues <- observe(function() {
+    reactivevalues_to_list(values, all.names = TRUE)
+  })
+
+  # names() returns all names
+  expect_equal(sort(isolate(names(values))), c(".B", "A"))
+  # Assigning names fails
+  expect_error(isolate(names(v) <- c('x', 'y')))
+
+  expect_equal(isolate(reactivevalues_to_list(values)), list(A=1))
+  expect_equal(isolate(reactivevalues_to_list(values, all.names=TRUE)), list(A=1, .B=2))
+
+
+  flushReact()
+  expect_equal(execCount(depNames), 1)
+  expect_equal(execCount(depValues), 1)
+  expect_equal(execCount(depAllValues), 1)
+
+  values$A <- 2
+  flushReact()
+  expect_equal(execCount(depNames), 1)
+  expect_equal(execCount(depValues), 2)
+  expect_equal(execCount(depAllValues), 2)
+
+  values$.B <- 3
+  flushReact()
+  expect_equal(execCount(depNames), 1)
+  expect_equal(execCount(depValues), 2)
+  expect_equal(execCount(depAllValues), 3)
+
+  values$C <- 1
+  flushReact()
+  expect_equal(execCount(depNames), 2)
+  expect_equal(execCount(depValues), 3)
+  expect_equal(execCount(depAllValues), 4)
+
+  values$.D <- 1
+  flushReact()
+  expect_equal(execCount(depNames), 3)
+  expect_equal(execCount(depValues), 3)
+  expect_equal(execCount(depAllValues), 5)
+})

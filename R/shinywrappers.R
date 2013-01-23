@@ -149,6 +149,11 @@ reactiveTable <- function(func, ...) {
 #' @param func A function that may print output and/or return a printable R 
 #'   object.
 #'   
+#' @seealso \code{\link{reactiveText}} for displaying the value returned from a 
+#'   function, instead of the printed output.
+#'
+#' @example res/text-example.R
+#'   
 #' @export
 reactivePrint <- function(func) {
   reactive(function() {
@@ -175,6 +180,11 @@ reactivePrint <- function(func) {
 #' 
 #' @param func A function that returns an R object that can be used as an
 #'   argument to \code{cat}.
+#'   
+#' @seealso \code{\link{reactivePrint}} for capturing the print output of a
+#'   function, rather than the returned text value.
+#'
+#' @example res/text-example.R
 #'   
 #' @export
 reactiveText <- function(func) {

@@ -7,7 +7,8 @@
 \arguments{
   \item{outputId}{output variable to read the plot from}
 
-  \item{width}{Plot width}
+  \item{width}{Plot width. Either a number, or a string
+  ending in \code{"px"}.}
 
   \item{height}{Plot height}
 }

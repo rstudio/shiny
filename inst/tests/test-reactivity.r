@@ -408,7 +408,7 @@ test_that("Writing then reading value is not circular", {
   expect_equal(execCount(obsC), 2)
 })
 
-test_that("names() and reactivevalues_to_list()", {
+test_that("names() and reactiveValuesToList()", {
 
   values <- reactiveValues(A=1, .B=2)
 
@@ -419,12 +419,12 @@ test_that("names() and reactivevalues_to_list()", {
 
   # Dependent on all non-hidden objects
   depValues <- observe(function() {
-    reactivevalues_to_list(values)
+    reactiveValuesToList(values)
   })
 
   # Dependent on all objects, including hidden
   depAllValues <- observe(function() {
-    reactivevalues_to_list(values, all.names = TRUE)
+    reactiveValuesToList(values, all.names = TRUE)
   })
 
   # names() returns all names
@@ -432,8 +432,8 @@ test_that("names() and reactivevalues_to_list()", {
   # Assigning names fails
   expect_error(isolate(names(v) <- c('x', 'y')))
 
-  expect_equal(isolate(reactivevalues_to_list(values)), list(A=1))
-  expect_equal(isolate(reactivevalues_to_list(values, all.names=TRUE)), list(A=1, .B=2))
+  expect_equal(isolate(reactiveValuesToList(values)), list(A=1))
+  expect_equal(isolate(reactiveValuesToList(values, all.names=TRUE)), list(A=1, .B=2))
 
 
   flushReact()

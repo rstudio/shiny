@@ -23,4 +23,10 @@
   Download and launch a Shiny application that is hosted on
   GitHub as a gist.
 }
+\examples{
+\dontrun{
+runGist(4034323)
+runGist("https://gist.github.com/4034323")
+}
+}
 

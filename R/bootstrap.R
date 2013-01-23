@@ -742,9 +742,9 @@ verbatimTextOutput <- function(outputId) {
 #' 
 #' Render a \link{reactivePlot} within an application page.
 #' @param outputId output variable to read the plot from
-#' @param width Plot width. Must be a valid CSS unit (like \code{"100%"},
-#' \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
-#' string and have \code{"px"} appended.
+#' @param width Plot width. Must be a valid CSS unit (like \code{"100\%"},
+#'   \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
+#'   string and have \code{"px"} appended.
 #' @param height Plot height
 #' @return A plot output element that can be included in a panel
 #' @examples

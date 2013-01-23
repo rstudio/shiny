@@ -754,20 +754,8 @@ verbatimTextOutput <- function(outputId) {
 #' )
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px") {
-
-  validate_css_unit <- function(x) {
-    if (is.character(x) &&
-       !grepl("^(auto|((\\.\\d+)|(\\d+(\\.\\d+)?))(%|in|cm|mm|em|ex|pt|pc|px))$", x)) {
-      stop('"', x, '" is not a valid CSS unit (e.g., "100%", "400px", "auto")')
-    }
-    if (is.numeric(x)) {
-      x <- paste(x, "px", sep = "")
-    }
-    x
-  }
-
-  style <- paste("width:", validate_css_unit(width), ";",
-    "height:", validate_css_unit(height))
+  style <- paste("width:", validateCssUnit(width), ";",
+    "height:", validateCssUnit(height))
   div(id = outputId, class="shiny-plot-output", style = style)
 }
 
@@ -856,4 +844,15 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
          href='',
          target='_blank',
          label)
+}
+
+validateCssUnit <- function(x) {
+  if (is.character(x) &&
+     !grepl("^(auto|((\\.\\d+)|(\\d+(\\.\\d+)?))(%|in|cm|mm|em|ex|pt|pc|px))$", x)) {
+    stop('"', x, '" is not a valid CSS unit (e.g., "100%", "400px", "auto")')
+  }
+  if (is.numeric(x)) {
+    x <- paste(x, "px", sep = "")
+  }
+  x
 }

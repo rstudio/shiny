@@ -177,9 +177,12 @@ hljs.initHighlightingOnLoad();
    <li>
       <a target="_self" href="#dynamic-ui">Dynamic UI</a>
    </li>
-   <li class="nav-header">Sharing Apps</li>
+   <li class="nav-header">Deploying and Sharing Apps</li>
    <li>
-      <a target="_self" href="#deployment">Delivering Shiny Apps</a>
+      <a target="_self" href="#deployment-web">Deploying Over the Web</a>
+   </li>
+   <li>
+      <a target="_self" href="#deployment-local">Sharing Apps to Run Locally</a>
    </li>
    <li class="nav-header">Extending Shiny</li>
    <li>
@@ -309,11 +312,19 @@ hljs.initHighlightingOnLoad();
 
 </div>
 
-<!-- Delivering Shiny Apps -->
-<div class="tab-pane" id="deployment">
+<!-- Deploying Shiny Apps Over the Web -->
+<div class="tab-pane" id="deployment-web">
 
-{% capture deployment %}{% include tutorial/deployment.md %}{% endcapture %}
-{{ deployment | markdownify }}
+{% capture deployment_web %}{% include tutorial/deployment-web.md %}{% endcapture %}
+{{ deployment_web | markdownify }}
+
+</div>
+
+<!-- Sharing Apps to Run Locally -->
+<div class="tab-pane" id="deployment-local">
+
+{% capture deployment_local %}{% include tutorial/deployment-local.md %}{% endcapture %}
+{{ deployment_local | markdownify }}
 
 </div>
 

@@ -441,24 +441,28 @@ test_that("names() and reactiveValuesToList()", {
   expect_equal(execCount(depValues), 1)
   expect_equal(execCount(depAllValues), 1)
 
+  # Update existing variable
   values$A <- 2
   flushReact()
   expect_equal(execCount(depNames), 1)
   expect_equal(execCount(depValues), 2)
   expect_equal(execCount(depAllValues), 2)
 
+  # Update existing hidden variable
   values$.B <- 3
   flushReact()
   expect_equal(execCount(depNames), 1)
   expect_equal(execCount(depValues), 2)
   expect_equal(execCount(depAllValues), 3)
 
+  # Add new variable
   values$C <- 1
   flushReact()
   expect_equal(execCount(depNames), 2)
   expect_equal(execCount(depValues), 3)
   expect_equal(execCount(depAllValues), 4)
 
+  # Add new hidden variable
   values$.D <- 1
   flushReact()
   expect_equal(execCount(depNames), 3)

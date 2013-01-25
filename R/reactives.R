@@ -263,6 +263,7 @@ Observable <- setRefClass(
     .dirty = 'logical',
     .running = 'logical',
     .value = 'ANY',
+    .visible = 'logical',
     .execCount = 'integer'
   ),
   methods = list(
@@ -286,7 +287,11 @@ Observable <- setRefClass(
       
       if (identical(class(.value), 'try-error'))
         stop(attr(.value, 'condition'))
-      return(.value)
+
+      if (.visible)
+        .value
+      else
+        invisible(.value)
     },
     .updateValue = function() {
       ctx <- Context$new(.label)
@@ -303,7 +308,9 @@ Observable <- setRefClass(
       on.exit(.running <<- wasRunning)
 
       ctx$run(function() {
-        .value <<- try(.func(), silent=FALSE)
+        result <- withVisible(try(.func(), silent=FALSE))
+        .visible <<- result$visible
+        .value <<- result$value
       })
     }
   )

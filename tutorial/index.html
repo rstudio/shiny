@@ -177,6 +177,10 @@ hljs.initHighlightingOnLoad();
    <li>
       <a target="_self" href="#dynamic-ui">Dynamic UI</a>
    </li>
+   <li class="nav-header">Advanced Shiny</li>
+   <li>
+      <a target="_self" href="#scoping">Scoping</a>
+   </li>
    <li class="nav-header">Deploying and Sharing Apps</li>
    <li>
       <a target="_self" href="#deployment-web">Deploying Over the Web</a>
@@ -309,6 +313,14 @@ hljs.initHighlightingOnLoad();
 
 {% capture html_ui %}{% include tutorial/html-ui.md %}{% endcapture %}
 {{ html_ui | markdownify }}
+
+</div>
+
+<!-- Scoping -->
+<div class="tab-pane" id="scoping">
+
+{% capture scoping %}{% include tutorial/scoping.md %}{% endcapture %}
+{{ scoping | markdownify }}
 
 </div>
 

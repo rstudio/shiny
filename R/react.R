@@ -8,7 +8,7 @@ Context <- setRefClass(
     .flushCallbacks = 'list'
   ),
   methods = list(
-    initialize = function(label=NULL) {
+    initialize = function(label='') {
       id <<- .getReactiveEnvironment()$nextId()
       .invalidated <<- FALSE
       .invalidateCallbacks <<- list()

@@ -102,3 +102,12 @@ knownContentTypes$mset(
 getContentType <- function(ext, defaultType='application/octet-stream') {
   knownContentTypes$get(tolower(ext)) %OR% defaultType
 }
+
+# Takes the result of withVisible(...) and returns an (in)visible version of the
+# value field.
+applyVisible <- function(x) {
+  if (x$visible == FALSE)
+    return(invisible(x$value))
+  else
+    return(x$value)
+}

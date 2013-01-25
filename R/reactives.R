@@ -524,6 +524,6 @@ invalidateLater <- function(millis) {
 isolate <- function(expr) {
   ctx <- Context$new('[isolate]')
   ctx$run(function() {
-    eval.parent(expr)
+    expr
   })
 }

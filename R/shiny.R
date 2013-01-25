@@ -775,7 +775,10 @@ startApp <- function(port=8101L) {
       shinyapp$dispatch(msg)
     )
     flushReact()
-    shinyapp$flushOutput()
+    lapply(apps$values(), function(shinyapp) {
+      shinyapp$flushOutput()
+      NULL
+    })
   }, ws_env)
   
   message('\n', 'Listening on port ', port)

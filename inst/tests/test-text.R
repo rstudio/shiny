@@ -30,3 +30,27 @@ test_that("reactivePrint and reactiveText behavior is correct", {
   expect_equal(isolate(reactiveText(function() 1:5)()),
                '1 2 3 4 5')  
 })
+
+test_that("reactive functions save visibility state", {
+  # Call each function twice - should be no change in state with second call
+
+  # invisible NULL
+  f <- reactive(function() invisible())
+  expect_identical(withVisible(isolate(f())), list(value=NULL, visible=FALSE))
+  expect_identical(withVisible(isolate(f())), list(value=NULL, visible=FALSE))
+
+  # visible NULL
+  f <- reactive(function() NULL)
+  expect_identical(withVisible(isolate(f())), list(value=NULL, visible=TRUE))
+  expect_identical(withVisible(isolate(f())), list(value=NULL, visible=TRUE))
+
+  # invisible non-NULL value
+  f <- reactive(function() invisible(10))
+  expect_identical(withVisible(isolate(f())), list(value=10, visible=FALSE))
+  expect_identical(withVisible(isolate(f())), list(value=10, visible=FALSE))
+
+  # visible non-NULL value
+  f <- reactive(function() 10)
+  expect_identical(withVisible(isolate(f())), list(value=10, visible=TRUE))
+  expect_identical(withVisible(isolate(f())), list(value=10, visible=TRUE))
+})

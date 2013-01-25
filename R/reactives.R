@@ -522,8 +522,12 @@ invalidateLater <- function(millis) {
 #' }
 #' @export
 isolate <- function(expr) {
+  # Relying on lazy evaluation here to not evaluate expr until we are safely
+  # inside ctx$run. Previously used eval.parent but this seemed to have weird
+  # side effects (invisible() would come out as visible NULL).
+  
   ctx <- Context$new('[isolate]')
   ctx$run(function() {
-    eval.parent(expr)
+    expr
   })
 }

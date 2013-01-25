@@ -18,8 +18,11 @@ test_that("reactivePrint and reactiveText behavior is correct", {
                'foo')
   expect_equal(isolate(reactiveText(function() invisible("foo"))()),
                'foo')
-  expect_equal(isolate(reactiveText(function() { print("foo"); "bar"})()),
-               'bar')
+  # Capture the print output so it's not shown on console during test, and
+  # also check that it is correct
+  print_out <- capture.output(ret <- isolate(reactiveText(function() { print("foo"); "bar"})()))
+  expect_equal(ret, 'bar')
+  expect_equal(print_out, '[1] "foo"')
   expect_equal(isolate(reactiveText(function() NULL)()),
                '')
   expect_equal(isolate(reactiveText(function() invisible())()),

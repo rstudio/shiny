@@ -295,12 +295,30 @@ ShinyApp <- setRefClass(
 
 #' @S3method $<- shinyoutput
 `$<-.shinyoutput` <- function(x, name, value) {
-  x[['impl']]$defineOutput(name, value, deparse(substitute(value)))
+  .subset2(x, 'impl')$defineOutput(name, value, deparse(substitute(value)))
   return(invisible(x))
 }
 
 #' @S3method [[<- shinyoutput
 `[[<-.shinyoutput` <- `$<-.shinyoutput`
+
+#' @S3method $ shinyoutput
+`$.shinyoutput` <- function(x, name) {
+  stop("Reading objects from shinyoutput object not allowed.")
+}
+
+#' @S3method [[ shinyoutput
+`[[.shinyoutput` <- `$.shinyoutput`
+
+#' @S3method [ shinyoutput
+`[.shinyoutput` <- function(values, name) {
+  stop("Single-bracket indexing of shinyoutput object is not allowed.")
+}
+
+#' @S3method [<- shinyoutput
+`[<-.shinyoutput` <- function(values, name, value) {
+  stop("Single-bracket indexing of shinyoutput object is not allowed.")
+}
 
 resolve <- function(dir, relpath) {
   abs.path <- file.path(dir, relpath)

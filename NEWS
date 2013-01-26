@@ -1,3 +1,14 @@
+shiny 0.3.0.99
+--------------------------------------------------------------------------------
+
+* Fix issue #91: bug where downloading files did not work.
+
+* Add [[<- operator for shinyoutput object, making it possible to assign values
+  with `output[['plot1']] <- ...`.
+
+* Reactive functions now preserve the visible/invisible state of their returned
+  values.
+
 shiny 0.3.0
 --------------------------------------------------------------------------------
 

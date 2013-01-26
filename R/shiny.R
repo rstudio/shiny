@@ -288,9 +288,7 @@ ShinyApp <- setRefClass(
 )
 
 .createOutputWriter <- function(shinyapp) {
-  ow <- list(impl=shinyapp)
-  class(ow) <- 'shinyoutput'
-  return(ow)
+  structure(list(impl=shinyapp), class='shinyoutput')
 }
 
 #' @S3method $<- shinyoutput

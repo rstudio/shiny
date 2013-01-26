@@ -171,10 +171,7 @@ reactiveValues <- function(...) {
 # @param values A ReactiveValues object
 # @param readonly Should this object be read-only?
 .createReactiveValues <- function(values = NULL, readonly = FALSE) {
-  acc <- list(impl=values)
-  class(acc) <- 'reactivevalues'
-  attr(acc, 'readonly') <- readonly
-  return(acc)
+  structure(list(impl=values), class='reactivevalues', readonly=readonly)
 }
 
 #' @S3method $ reactivevalues

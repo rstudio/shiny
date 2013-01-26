@@ -299,6 +299,9 @@ ShinyApp <- setRefClass(
   return(invisible(x))
 }
 
+#' @S3method [[<- shinyoutput
+`[[<-.shinyoutput` <- `$<-.shinyoutput`
+
 resolve <- function(dir, relpath) {
   abs.path <- file.path(dir, relpath)
   if (!file.exists(abs.path))

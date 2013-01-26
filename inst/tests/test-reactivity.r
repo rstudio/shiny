@@ -465,3 +465,63 @@ test_that("names() and reactiveValuesToList()", {
   expect_equal(execCount(depValues), 3)
   expect_equal(execCount(depAllValues), 5)
 })
+
+test_that("Observer pausing works", {
+  values <- reactiveValues(a=1)
+  
+  funcA <- reactive(function() {
+    values$a
+  })
+  
+  obsB <- observe(function() {
+    funcA()
+  })
+  
+  # Important: suspend() only affects observer at invalidation time
+  
+  # Observers are invalidated at creation time, so it will run once regardless
+  # of being suspended
+  obsB$suspend()
+  flushReact()
+  expect_equal(execCount(funcA), 1)
+  expect_equal(execCount(obsB), 1)
+  
+  # When resuming, if nothing changed, don't do anything
+  obsB$resume()
+  flushReact()
+  expect_equal(execCount(funcA), 1)
+  expect_equal(execCount(obsB), 1)
+  
+  # Make sure suspended observers do not flush, but do invalidate
+  obsB_invalidated <- FALSE
+  obsB$onInvalidate(function() {obsB_invalidated <<- TRUE})
+  obsB$suspend()
+  values$a <- 2
+  flushReact()
+  expect_equal(obsB_invalidated, TRUE)
+  expect_equal(execCount(funcA), 1)
+  expect_equal(execCount(obsB), 1)
+  
+  obsB$resume()
+  values$a <- 2.5
+  obsB$suspend()
+  flushReact()
+  expect_equal(execCount(funcA), 2)
+  expect_equal(execCount(obsB), 2)
+  
+  values$a <- 3
+  flushReact()
+
+  expect_equal(execCount(funcA), 2)
+  expect_equal(execCount(obsB), 2)
+  
+  values$a <- 4
+  obsB_invalidated2 <- FALSE
+  obsB$onInvalidate(function() {obsB_invalidated2 <<- TRUE})
+  obsB$resume()
+  flushReact()
+
+  expect_equal(execCount(funcA), 3)
+  expect_equal(execCount(obsB), 3)
+  expect_equal(obsB_invalidated2, TRUE)
+})

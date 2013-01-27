@@ -94,23 +94,26 @@ In practice, there aren't many times where it's necessary to share variables bet
 
 ### Scope for included R files
 
-If you want to split the server or ui code into multiple files, you can use `source()` to load each file. You can think of `source()` as putting the code in-line, so the code from the sourced files will receive the same scope as if you copied and pasted the text right there.
+If you want to split the server or ui code into multiple files, you can use `source(local=TRUE)` to load each file. You can think of this as putting the code in-line, so the code from the sourced files will receive the same scope as if you copied and pasted the text right there.
 
 This example `server.R` file shows how sourced files will be scoped:
 
 {% highlight r %}
 # Objects in this file are shared across all sessions
-source('all_sessions.R')
+source('all_sessions.R', local=TRUE)
 
 shinyServer(function(input, output) {
   # Objects in this file are defined in each session
-  source('each_session.R')
+  source('each_session.R', local=TRUE)
 
   output$text <- reactiveText(function() {
     # Objects in this file are defined each time this function is called
-    source('each_call.R')
+    source('each_call.R', local=TRUE)
 
     # ...
   })
 })
+
+If you use the default value of `local=FALSE`, then the file will be sourced in the global environment.
+
 {% endhighlight %}

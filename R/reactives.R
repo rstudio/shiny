@@ -413,8 +413,8 @@ Observer <- setRefClass(
     run = function() {
       ctx <- .createContext()
       .execCount <<- .execCount + 1L
-      ctx$run(.func)
       .invalidated <<- FALSE
+      ctx$run(.func)
     },
     onInvalidate = function(func) {
       .flushCallbacks <<- c(.flushCallbacks, func)

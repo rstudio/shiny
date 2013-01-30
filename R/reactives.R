@@ -260,7 +260,7 @@ Observable <- setRefClass(
     .func = 'function',
     .label = 'character',
     .dependents = 'Dependents',
-    .dirty = 'logical',
+    .invalidated = 'logical',
     .running = 'logical',
     .value = 'ANY',
     .visible = 'logical',
@@ -273,7 +273,7 @@ Observable <- setRefClass(
              "or more parameters; only functions without parameters can be ",
              "reactive.")
       .func <<- func
-      .dirty <<- TRUE
+      .invalidated <<- TRUE
       .running <<- FALSE
       .label <<- label
       .execCount <<- 0L
@@ -281,7 +281,7 @@ Observable <- setRefClass(
     getValue = function() {
       .dependents$register()
 
-      if (.dirty || .running) {
+      if (.invalidated || .running) {
         .self$.updateValue()
       }
       
@@ -296,12 +296,12 @@ Observable <- setRefClass(
     .updateValue = function() {
       ctx <- Context$new(.label)
       ctx$onInvalidate(function() {
-        .dirty <<- TRUE
+        .invalidated <<- TRUE
         .dependents$invalidate()
       })
       .execCount <<- .execCount + 1L
 
-      .dirty <<- FALSE
+      .invalidated <<- FALSE
 
       wasRunning <- .running
       .running <<- TRUE

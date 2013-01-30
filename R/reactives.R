@@ -367,7 +367,8 @@ Observer <- setRefClass(
     .label = 'character',
     .flushCallbacks = 'list',
     .execCount = 'integer',
-    .state = 'character'  # 'normal', 'suspended-clean', or 'suspended-dirty'
+    .invalidated = 'logical',
+    .suspended = 'logical'
   ),
   methods = list(
     initialize = function(func, label) {
@@ -378,7 +379,8 @@ Observer <- setRefClass(
       .func <<- func
       .label <<- label
       .execCount <<- 0L
-      .state <<- 'normal'
+      .invalidated <<- TRUE
+      .suspended <<- FALSE
 
       # Defer the first running of this until flushReact is called
       ctx <- Context$new(.label)
@@ -391,16 +393,15 @@ Observer <- setRefClass(
       ctx <- Context$new(.label)
 
       ctx$onInvalidate(function() {
+        .invalidated <<- TRUE
+
         lapply(.flushCallbacks, function(func) {
           func()
           NULL
         })
         
-        if (.state == 'normal')
+        if (.suspended == FALSE)
           ctx$addPendingFlush()
-        else {
-          .state <<- 'suspended-dirty'
-        }
       })
       
       ctx$onFlush(function() {
@@ -413,6 +414,7 @@ Observer <- setRefClass(
       ctx <- .createContext()
       .execCount <<- .execCount + 1L
       ctx$run(.func)
+      .invalidated <<- FALSE
     },
     onInvalidate = function(func) {
       .flushCallbacks <<- c(.flushCallbacks, func)
@@ -422,17 +424,15 @@ Observer <- setRefClass(
       If the observer was invalidated prior to this call but it has not
       re-executed yet (because it waits until onFlush is called) then that
       re-execution will still occur."
-      if (.state == 'normal')
-        .state <<- 'suspended-clean'
+      .suspended <<- TRUE
     },
     resume = function() {
       "Causes this observer to start re-executing in response to invalidations.
       If the observer was invalidated while suspended, then it will schedule
       itself for re-execution (pending flush)."
-      oldState <- .state
-      .state <<- 'normal'
+      .suspended <<- FALSE
       
-      if (oldState == 'suspended-dirty') {
+      if (.invalidated) {
         .createContext()$invalidate()
       }
     }

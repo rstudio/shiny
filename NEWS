@@ -1,4 +1,4 @@
-shiny 0.3.0.99
+shiny 0.3.1
 --------------------------------------------------------------------------------
 
 * Fix issue #91: bug where downloading files did not work.

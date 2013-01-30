@@ -260,7 +260,7 @@ Observable <- setRefClass(
     .func = 'function',
     .label = 'character',
     .dependents = 'Dependents',
-    .dirty = 'logical',
+    .invalidated = 'logical',
     .running = 'logical',
     .value = 'ANY',
     .visible = 'logical',
@@ -273,7 +273,7 @@ Observable <- setRefClass(
              "or more parameters; only functions without parameters can be ",
              "reactive.")
       .func <<- func
-      .dirty <<- TRUE
+      .invalidated <<- TRUE
       .running <<- FALSE
       .label <<- label
       .execCount <<- 0L
@@ -281,7 +281,7 @@ Observable <- setRefClass(
     getValue = function() {
       .dependents$register()
 
-      if (.dirty || .running) {
+      if (.invalidated || .running) {
         .self$.updateValue()
       }
       
@@ -296,12 +296,12 @@ Observable <- setRefClass(
     .updateValue = function() {
       ctx <- Context$new(.label)
       ctx$onInvalidate(function() {
-        .dirty <<- TRUE
+        .invalidated <<- TRUE
         .dependents$invalidate()
       })
       .execCount <<- .execCount + 1L
 
-      .dirty <<- FALSE
+      .invalidated <<- FALSE
 
       wasRunning <- .running
       .running <<- TRUE
@@ -366,7 +366,9 @@ Observer <- setRefClass(
     .func = 'function',
     .label = 'character',
     .flushCallbacks = 'list',
-    .execCount = 'integer'
+    .execCount = 'integer',
+    .invalidated = 'logical',
+    .suspended = 'logical'
   ),
   methods = list(
     initialize = function(func, label) {
@@ -377,6 +379,8 @@ Observer <- setRefClass(
       .func <<- func
       .label <<- label
       .execCount <<- 0L
+      .invalidated <<- TRUE
+      .suspended <<- FALSE
 
       # Defer the first running of this until flushReact is called
       ctx <- Context$new(.label)
@@ -385,25 +389,52 @@ Observer <- setRefClass(
       })
       ctx$addPendingFlush()
     },
-    run = function() {
+    .createContext = function() {
       ctx <- Context$new(.label)
 
       ctx$onInvalidate(function() {
+        .invalidated <<- TRUE
+
         lapply(.flushCallbacks, function(func) {
           func()
           NULL
         })
-        ctx$addPendingFlush()
+        
+        if (.suspended == FALSE)
+          ctx$addPendingFlush()
       })
-
+      
       ctx$onFlush(function() {
         run()
       })
+      
+      return(ctx)
+    },
+    run = function() {
+      ctx <- .createContext()
       .execCount <<- .execCount + 1L
+      .invalidated <<- FALSE
       ctx$run(.func)
     },
     onInvalidate = function(func) {
       .flushCallbacks <<- c(.flushCallbacks, func)
+    },
+    suspend = function() {
+      "Causes this observer to stop re-executing in response to invalidations.
+      If the observer was invalidated prior to this call but it has not
+      re-executed yet (because it waits until onFlush is called) then that
+      re-execution will still occur."
+      .suspended <<- TRUE
+    },
+    resume = function() {
+      "Causes this observer to start re-executing in response to invalidations.
+      If the observer was invalidated while suspended, then it will schedule
+      itself for re-execution (pending flush)."
+      .suspended <<- FALSE
+      
+      if (.invalidated) {
+        .createContext()$invalidate()
+      }
     }
   )
 )

@@ -33,7 +33,7 @@ shinyServer(function(input, output) {
 
 ### Objects visible across all sessions
 
-You might want some objects to be visible across all sessions. For example, if you have large data structures that are read-only, or if you have utility functions that are not reactive (ones that don't involve the `input` or `output` objects), then you can create these objects once and share them across all user sessions, by placing them in `server.R`, but outside of the call to `shinyServer()`.
+You might want some objects to be visible across all sessions. For example, if you have large data structures, or if you have utility functions that are not reactive (ones that don't involve the `input` or `output` objects), then you can create these objects once and share them across all user sessions, by placing them in `server.R`, but outside of the call to `shinyServer()`.
 
 For example:
 
@@ -75,7 +75,7 @@ shinyServer(function(input, output) {
   # Makes a local copy of listA
   listA$X <- 5
 
-  # Modify the shared variable listB
+  # Modify the shared copy of listB
   listB$X <<- 5
 
   # ...

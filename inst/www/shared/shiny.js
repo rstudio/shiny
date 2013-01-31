@@ -1278,6 +1278,7 @@
 
       // Send later in case DOM layout isn't final yet.
       setTimeout(sendPlotSize, 0);
+      setTimeout(sendOutputHiddenState, 0);
     }
 
     function unbindOutputs(scope) {
@@ -1501,12 +1502,24 @@
         inputs.setInput('.shinyout_' + this.id + '_height', this.offsetHeight);
       });
     }
+    function sendOutputHiddenState() {
+      $('.shiny-bound-output').each(function() {
+        // Assume that the object is hidden when width and height are 0
+        if (this.offsetWidth == 0 && this.offsetHeight == 0) {
+          inputs.setInput('.shinyout_' + this.id + '_hidden', true);
+        } else {
+          inputs.setInput('.shinyout_' + this.id + '_hidden', false);
+        }
+      });
+    }
     // The size of each plot may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size
     // of 0x0). It's OK to over-report sizes because the input pipeline will
     // filter out values that haven't changed.
     $(window).resize(debounce(500, sendPlotSize));
-    $('body').on('shown.sendPlotSize hidden.sendPlotSize', '*', sendPlotSize);
+    $('body').on('shown.sendPlotSize', '*', sendPlotSize);
+    $('body').on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*',
+                 sendOutputHiddenState);
 
     // We've collected all the initial values--start the server process!
     shinyapp.connect(initialValues);

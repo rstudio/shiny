@@ -18,6 +18,7 @@ ShinyApp <- setRefClass(
     .websocket = 'list',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
+    .outputs = 'list',    # Keeps track of all the output observer objects
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
     session = 'ReactiveValues',
@@ -37,6 +38,7 @@ ShinyApp <- setRefClass(
       session <<- ReactiveValues$new()
       
       token <<- createUniqueId(16)
+      .outputs <<- list()
       
       allowDataUriScheme <<- TRUE
     },
@@ -79,6 +81,8 @@ ShinyApp <- setRefClass(
         obs$onInvalidate(function() {
           showProgress(name)
         })
+
+        .outputs[[name]] <<- obs
       }
       else {
         stop(paste("Unexpected", class(func), "output for", name))
@@ -283,6 +287,28 @@ ShinyApp <- setRefClass(
       return(sprintf('session/%s/download/%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE)))
+    },
+    # This function suspends observers for hidden outputs and resumes observers
+    # for un-hidden outputs.
+    manageHiddenOutputs = function() {
+      # Get all input object names, and keep only those that represent hidden
+      # states, with the format ".shinyout_foo_hidden".
+      # Some tricky stuff: insetad of accessing names using session$names(),
+      # get the names directly via session$.values, to avoid triggering reactivity.
+      hiddenNames <- ls(session$.values, all.names=TRUE)
+      hiddenNames <- hiddenNames[grepl("^\\.shinyout_.*_hidden$", hiddenNames)]
+
+      # Find hidden state for each output, and suspend/resume accordingly
+      for (hiddenName in hiddenNames) {
+        outputName <- sub("^\\.shinyout_(.*)_hidden", "\\1", hiddenName)
+
+        # Use session$.values intead of session$get() to avoid reactivity
+        if (session$.values[[hiddenName]]) {
+          .outputs[[outputName]]$suspend()
+        } else {
+          .outputs[[outputName]]$resume()
+        }
+      }
     }
   )
 )
@@ -794,6 +820,7 @@ startApp <- function(port=8101L) {
       },
       update = {
         shinyapp$session$mset(msg$data)
+        shinyapp$manageHiddenOutputs()
       },
       shinyapp$dispatch(msg)
     )

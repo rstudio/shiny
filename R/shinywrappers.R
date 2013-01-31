@@ -109,7 +109,7 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 #'   
 #' @export
 reactiveTable <- function(func, ...) {
-  reactive(function() {
+  function() {
     classNames <- getOption('shiny.table.class', 'data table table-bordered table-condensed')
     data <- func()
 
@@ -125,7 +125,7 @@ reactiveTable <- function(func, ...) {
                                           '"',
                                           sep=''), ...)),
       collapse="\n"))
-  })
+  }
 }
 
 #' Printable Output
@@ -156,13 +156,13 @@ reactiveTable <- function(func, ...) {
 #'   
 #' @export
 reactivePrint <- function(func) {
-  reactive(function() {
+  function() {
     return(paste(capture.output({
       result <- withVisible(func())
       if (result$visible)
         print(result$value)
     }), collapse="\n"))
-  })
+  }
 }
 
 #' Text Output
@@ -188,10 +188,10 @@ reactivePrint <- function(func) {
 #'   
 #' @export
 reactiveText <- function(func) {
-  reactive(function() {
+  function() {
     value <- func()
     return(paste(capture.output(cat(value)), collapse="\n"))
-  })
+  }
 }
 
 #' UI Output
@@ -217,13 +217,13 @@ reactiveText <- function(func) {
 #'   })
 #' }
 reactiveUI <- function(func) {
-  reactive(function() {
+  function() {
     result <- func()
     if (is.null(result) || length(result) == 0)
       return(NULL)
     # Wrap result in tagList in case it is an ordinary list
     return(as.character(tagList(result)))
-  })
+  }
 }
 
 #' File Downloads

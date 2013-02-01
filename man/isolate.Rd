@@ -23,6 +23,13 @@
   value.) The \code{isolate} function lets you read a
   reactive value or function without establishing this
   relationship.
+
+  The expression given to \code{isolate()} is evaluated in
+  the calling environment. This means that if you assign a
+  variable inside the \code{isolate()}, its value will be
+  visible outside of the \code{isolate()}. If you want to
+  avoid this, you can use \code{\link{local}()) inside the
+  \code{isolate()}.
 }
 \examples{
 \dontrun{
@@ -45,6 +52,20 @@ observer(function() {
   })
   writeToDatabase(data)
 })
+
+
+observer(function() {
+  x <- 1
+  # x outside of isolate() is affected
+  isolate(x <- 2)
+  print(x) # 2
+
+  y <- 1
+  # Use local() to avoid affecting calling environment
+  isolate(local(y <- 2))
+  print(y) # 1
+})
+
 }
 }
 

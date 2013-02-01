@@ -309,6 +309,24 @@ test_that("isolate() blocks invalidations from propagating", {
   expect_equal(execCount(obsD), 4)
 })
 
+
+test_that("isolate() evaluates expressions in calling environment", {
+  outside <- 1
+  inside <- 1
+  loc <- 1
+
+  outside <- isolate(2)      # Assignment outside isolate
+  isolate(inside <- 2)       # Assignment inside isolate
+  # Should affect vars in the calling environment
+  expect_equal(outside, 2)
+  expect_equal(inside, 2)
+
+  isolate(local(loc <<- 2))  # <<- inside isolate(local)
+  isolate(local(loc <- 3))   # <- inside isolate(local) - should have no effect
+  expect_equal(loc, 2)
+})
+
+
 test_that("Circular refs/reentrancy in reactive functions work", {
 
   values <- reactiveValues(A=3)

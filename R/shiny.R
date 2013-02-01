@@ -18,7 +18,8 @@ ShinyApp <- setRefClass(
     .websocket = 'list',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
-    .outputs = 'list',    # Keeps track of all the output observer objects
+    .outputs = 'list',       # Keeps track of all the output observer objects
+    .outputOptions = 'list', # Options for each of the output observer objects
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
     session = 'ReactiveValues',
@@ -39,6 +40,7 @@ ShinyApp <- setRefClass(
       
       token <<- createUniqueId(16)
       .outputs <<- list()
+      .outputOptions <<- list()
       
       allowDataUriScheme <<- TRUE
     },
@@ -83,6 +85,8 @@ ShinyApp <- setRefClass(
         })
 
         .outputs[[name]] <<- obs
+        # Default is to suspend when hidden
+        .outputOptions[[name]][['suspendWhenHidden']] <<- TRUE
       }
       else {
         stop(paste("Unexpected", class(func), "output for", name))
@@ -304,11 +308,35 @@ ShinyApp <- setRefClass(
 
         # Use session$.values intead of session$get() to avoid reactivity
         if (session$.values[[hiddenName]]) {
-          .outputs[[outputName]]$suspend()
+          if (.outputOptions[[outputName]][['suspendWhenHidden']]) {
+            .outputs[[outputName]]$suspend()
+          }
         } else {
           .outputs[[outputName]]$resume()
         }
       }
+    },
+    outputOptions = function(name, ...) {
+      # If no name supplied, return the list of options for all outputs
+      if (is.null(name))
+        return(.outputOptions)
+      if (! name %in% names(.outputs))
+        stop(name, " is not in list of output objects")
+
+      opts <- list(...)
+      # If no options are set, return the options for the specified output
+      if (length(opts) == 0)
+        return(.outputOptions[[name]])
+
+      # Set the appropriate option
+      validOpts <- "suspendWhenHidden"
+      for (optname in names(opts)) {
+        if (! optname %in% validOpts)
+          stop(optname, " is not a valid option")
+
+        .outputOptions[[name]][[optname]] <<- opts[[optname]]
+      }
+      invisible()
     }
   )
 )
@@ -343,6 +371,31 @@ ShinyApp <- setRefClass(
 `[<-.shinyoutput` <- function(values, name, value) {
   stop("Single-bracket indexing of shinyoutput object is not allowed.")
 }
+
+#' Set options for an output object.
+#'
+#' @examples
+#' \dontrun{
+#' # Get the list of options for all observers within output
+#' outputOptions(output)
+#'
+#' # Disable suspend for output$myplot
+#' outputOptions(output, "myplot", suspendWhenHidden = FALSE)
+#'
+#' # Get the list of options for output$myplot
+#' outputOptions(output, "myplot")
+#' }
+#'
+#' @param x A shinyoutput object (typically \code{output}).
+#' @param name The name of an output observer in the shinyoutput object.
+#' @export
+outputOptions <- function(x, name, ...) {
+  if (!inherits(x, "shinyoutput"))
+    stop("x must be a shinyoutput object.")
+
+  .subset2(x, 'impl')$outputOptions(name, ...)
+}
+
 
 resolve <- function(dir, relpath) {
   abs.path <- file.path(dir, relpath)

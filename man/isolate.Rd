@@ -28,7 +28,7 @@
   the calling environment. This means that if you assign a
   variable inside the \code{isolate()}, its value will be
   visible outside of the \code{isolate()}. If you want to
-  avoid this, you can use \code{\link{local}()) inside the
+  avoid this, you can use \code{\link{local}()} inside the
   \code{isolate()}.
 }
 \examples{
@@ -52,7 +52,6 @@ observer(function() {
   })
   writeToDatabase(data)
 })
-
 
 observer(function() {
   x <- 1

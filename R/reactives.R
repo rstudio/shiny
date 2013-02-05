@@ -543,7 +543,7 @@ invalidateLater <- function(millis) {
 #' The expression given to \code{isolate()} is evaluated in the calling
 #' environment. This means that if you assign a variable inside the
 #' \code{isolate()}, its value will be visible outside of the \code{isolate()}.
-#' If you want to avoid this, you can use \code{\link{local}()) inside the
+#' If you want to avoid this, you can use \code{\link{local}()} inside the
 #' \code{isolate()}.
 #'
 #' @param expr An expression that can access reactive values or functions.
@@ -569,7 +569,6 @@ invalidateLater <- function(millis) {
 #'   })
 #'   writeToDatabase(data)
 #' })
-#'
 #'
 #' observer(function() {
 #'   x <- 1

@@ -336,7 +336,9 @@ resolve <- function(dir, relpath) {
 httpResponse <- function(status = 200,
                          content_type = "text/html; charset=UTF-8", 
                          content = "",
-                         headers = c()) {
+                         headers = list()) {
+  if (is.null(headers$`X-UA-Compatible`))
+    headers$`X-UA-Compatible` <- "chrome=1"
   resp <- list(status = status, content_type = content_type, content = content,
                headers = headers)
   class(resp) <- 'httpResponse'

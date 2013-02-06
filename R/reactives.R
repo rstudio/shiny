@@ -375,7 +375,7 @@ Observer <- setRefClass(
     .suspended = 'logical'
   ),
   methods = list(
-    initialize = function(func, label) {
+    initialize = function(func, label, suspended = FALSE) {
       if (length(formals(func)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
@@ -384,14 +384,16 @@ Observer <- setRefClass(
       .label <<- label
       .execCount <<- 0L
       .invalidated <<- TRUE
-      .suspended <<- FALSE
+      .suspended <<- suspended
 
       # Defer the first running of this until flushReact is called
       ctx <- Context$new(.label)
       ctx$onFlush(function() {
         run()
       })
-      ctx$addPendingFlush()
+      # If we start suspended, don't add a pending flush
+      if (!.suspended)
+        ctx$addPendingFlush()
     },
     .createContext = function() {
       ctx <- Context$new(.label)

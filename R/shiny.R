@@ -78,7 +78,7 @@ ShinyApp <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        }, label)
+        }, label, suspended = TRUE)
         
         obs$onInvalidate(function() {
           showProgress(name)

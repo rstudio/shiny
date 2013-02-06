@@ -102,3 +102,10 @@ knownContentTypes$mset(
 getContentType <- function(ext, defaultType='application/octet-stream') {
   knownContentTypes$get(tolower(ext)) %OR% defaultType
 }
+
+# Create a zero-arg function from a quoted expression and environment
+# @examples
+# exprToFunction(quote(print(3)))
+exprToFunction <- function(body, env = parent.frame()) {
+  eval(call("function", pairlist(), body), env)
+}

@@ -318,38 +318,75 @@ Observable <- setRefClass(
   )
 )
 
-#' Create a Reactive Function
-#' 
-#' Wraps a normal function to create a reactive function. Conceptually, a 
-#' reactive function is a function whose result will change over time.
-#' 
-#' Reactive functions are functions that can read reactive values and call other
-#' reactive functions. Whenever a reactive value changes, any reactive functions
-#' that depended on it are marked as "invalidated" and will automatically 
-#' re-execute if necessary. If a reactive function is marked as invalidated, any
-#' other reactive functions that recently called it are also marked as 
-#' invalidated. In this way, invalidations ripple through the functions that 
+#' Create a reactive expression
+#'
+#' Wraps a normal expression to create a reactive expression. Conceptually, a
+#' reactive expression is a expression whose result will change over time.
+#'
+#' Reactive expressions are expressions that can read reactive values and call other
+#' reactive expressions. Whenever a reactive value changes, any reactive expressions
+#' that depended on it are marked as "invalidated" and will automatically
+#' re-execute if necessary. If a reactive expression is marked as invalidated, any
+#' other reactive expressions that recently called it are also marked as
+#' invalidated. In this way, invalidations ripple through the expressions that
 #' depend on each other.
-#' 
-#' See the \href{http://rstudio.github.com/shiny/tutorial/}{Shiny tutorial} for 
-#' more information about reactive functions.
-#' 
-#' @param x The value or function to make reactive. The function must not have 
-#'   any parameters.
-#' @return A reactive function. (Note that reactive functions can only be called
-#'   from within other reactive functions.)
-#'   
+#'
+#' See the \href{http://rstudio.github.com/shiny/tutorial/}{Shiny tutorial} for
+#' more information about reactive expressions.
+#'
+#' @param x An expression (quoted or unquoted).
+#' @param env The parent environment for the reactive function. By default, this
+#'   is the calling environment, the same as when defining an ordinary
+#'   non-reactive function.
+#' @param quoted Is the expression quoted? By default, this is \code{FALSE}.
+#'   This is useful when you want to use an expression that is stored in a
+#'   variable; to do so, it must be quoted with `quote()`.
+#'
+#' @examples
+#' values <- reactiveValues(A=1)
+#'
+#' reactiveB <- reactive({
+#'   values$A + 1
+#' })
+#'
+#' # Can use quoted expressions
+#' reactiveC <- reactive(quote({ values$A + 2 }), quoted = TRUE)
+#'
+#' # To store expressions for later conversion to reactive, use quote()
+#' expr_q <- quote({ values$A + 3 })
+#' reactiveD <- reactive(expr_q, quoted = TRUE)
+#'
+#' # View the values from the R console with isolate()
+#' isolate(reactiveB())
+#' isolate(reactiveC())
+#' isolate(reactiveD())
+#'
 #' @export
-reactive <- function(x) {
-  UseMethod("reactive")
-}
-#' @S3method reactive function
-reactive.function <- function(x) {
-  return(Observable$new(x, deparse(substitute(x)))$getValue)
-}
-#' @S3method reactive default
-reactive.default <- function(x) {
-  stop("Don't know how to make this object reactive!")
+reactive <- function(x, env = parent.frame(), quoted = FALSE) {
+  sub_x <- substitute(x)
+
+  # Try to detect if x is a function
+  # If x is a single token, then indexing with [[ will error; if it has multiple
+  # tokens, then [[ works. In the former case it will be a name object; in the
+  # latter, it will be a language object.
+  if (!is.name(sub_x) && sub_x[[1]] == as.name('function')) {
+    message("Passing functions to reactive() is deprecated. ",
+      "Please use expressions instead. See ?reactive for more information.")
+    return(Observable$new(x, deparse(sub_x))$getValue)
+  }
+
+  if (quoted) {
+    # x is a quoted expression
+    fun <- exprToFunction(x, env)
+    label <- deparse(x)
+
+  } else {
+    # x is an unquoted expression
+    fun <- exprToFunction(sub_x, env)
+    label <- deparse(sub_x)
+  }
+
+  Observable$new(fun, label)$getValue
 }
 
 # Return the number of times that a reactive function or observer has been run
@@ -466,9 +503,50 @@ Observer <- setRefClass(
 #' @param suspended If \code{TRUE}, start the observer in a suspended state.
 #'   If \code{FALSE} (the default), start in a non-suspended state.
 #'
+#' @examples
+#' values <- reactiveValues(A=1)
+#'
+#' obsB <- observe({
+#'   print(values$A + 1)
+#' })
+#'
+#' # Can use quoted expressions
+#' obsC <- observe(quote({ print(values$A + 2) }), quoted = TRUE)
+#'
+#' # To store expressions for later conversion to observe, use quote()
+#' expr_q <- quote({ print(values$A + 3) })
+#' obsD <- observe(expr_q, quoted = TRUE)
+#'
+#' # In a normal Shiny app, the web client will trigger flush events. If you
+#' # are at the console, you can force a flush with flushReact()
+#' flushReact()
+#'
 #' @export
-observe <- function(func, suspended=FALSE) {
-  invisible(Observer$new(func, deparse(substitute(func)), suspended=suspended))
+observe <- function(x, env=parent.frame(), quoted=FALSE, suspended=FALSE) {
+  sub_x <- substitute(x)
+
+  # Try to detect if x is a function
+  # If x is a single token, then indexing with [[ will error; if it has multiple
+  # tokens, then [[ works. In the former case it will be a name object; in the
+  # latter, it will be a language object.
+  if (!is.name(sub_x) && sub_x[[1]] == as.name('function')) {
+    message("Passing functions to reactive() is deprecated. ",
+      "Please use expressions instead. See ?reactive for more information.")
+    return(Observer$new(x, deparse(substitute(x))))
+  }
+
+  if (quoted) {
+    # x is a quoted expression
+    fun <- exprToFunction(x, env)
+    label <- deparse(x)
+
+  } else {
+    # x is an unquoted expression
+    fun <- exprToFunction(substitute(x), env)
+    label <- deparse(substitute(x))
+  }
+
+  invisible(Observer$new(fun, label=label, suspended=suspended))
 }
 
 # ---------------------------------------------------------------------------

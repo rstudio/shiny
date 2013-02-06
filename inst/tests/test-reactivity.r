@@ -574,3 +574,70 @@ test_that("suspended/resumed observers run at most once", {
   expect_equal(execCount(obs), 2)
 
 })
+
+
+test_that("reactive() accepts quoted and unquoted expressions", {
+  vals <- reactiveValues(A=1)
+
+  # Unquoted expression, with curly braces
+  fun <- reactive({ vals$A + 1 })
+  expect_equal(isolate(fun()), 2)
+
+  # Unquoted expression, no curly braces
+  fun <- reactive(vals$A + 1)
+  expect_equal(isolate(fun()), 2)
+
+  # Quoted expression
+  fun <- reactive(quote(vals$A + 1), quoted = TRUE)
+  expect_equal(isolate(fun()), 2)
+
+  # Quoted expression, saved in a variable
+  q_expr <- quote(vals$A + 1)
+  fun <- reactive(q_expr, quoted = TRUE)
+  expect_equal(isolate(fun()), 2)
+
+
+  # Check that environment is correct - parent environment should be this one
+  this_env <- environment()
+  fun <- reactive(environment())
+  expect_identical(isolate(parent.env(fun())), this_env)
+
+  # Sanity check: environment structure for a reactive() should be the same as for
+  # a normal function
+  fun <- function() environment()
+  expect_identical(parent.env(fun()), this_env)
+})
+
+test_that("observe() accepts quoted and unquoted expressions", {
+  vals <- reactiveValues(A=0)
+  valB <- 0
+
+  # Unquoted expression, with curly braces
+  observe({ valB <<- vals$A + 1})
+  flushReact()
+  expect_equal(valB, 1)
+
+  # Unquoted expression, no curly braces
+  observe({ valB <<- vals$A + 2})
+  flushReact()
+  expect_equal(valB, 2)
+
+  # Quoted expression
+  observe(quote(valB <<- vals$A + 3), quoted = TRUE)
+  flushReact()
+  expect_equal(valB, 3)
+
+  # Quoted expression, saved in a variable
+  q_expr <- quote(valB <<- vals$A + 4)
+  fun <- observe(q_expr, quoted = TRUE)
+  flushReact()
+  expect_equal(valB, 4)
+
+
+  # Check that environment is correct - parent environment should be this one
+  this_env <- environment()
+  inside_env <- NULL
+  fun <- observe(inside_env <<- environment())
+  flushReact()
+  expect_identical(parent.env(inside_env), this_env)
+})

@@ -3,8 +3,9 @@
 #' Download and launch a Shiny application that is hosted on GitHub as a gist.
 #'
 #' @param gist The identifier of the gist. For example, if the gist is
-#'   https://gist.github.com/3239667, then \code{3239667}, \code{'3239667'}, and
-#'   \code{'https://gist.github.com/3239667'} are all valid values.
+#'   https://gist.github.com/jcheng5/3239667, then \code{3239667},
+#'   \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'}
+#'   are all valid values.
 #' @param port The TCP port that the application should listen on. Defaults to
 #'   port 8100.
 #' @param launch.browser If true, the system's default web browser will be
@@ -13,8 +14,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' runGist(4034323)
-#' runGist("https://gist.github.com/4034323")
+#' runGist(3239667)
+#' runGist("https://gist.github.com/jcheng5/3239667")
+#'
+#' # Old URL format without username
+#' runGist("https://gist.github.com/3239667")
 #' }
 #'
 #' @export
@@ -25,7 +29,7 @@ runGist <- function(gist,
 
   gistUrl <- if (is.numeric(gist) || grepl('^[0-9a-f]+$', gist)) {
     sprintf('https://gist.github.com/%s/download', gist)
-  } else if(grepl('^https://gist.github.com/([0-9a-f]+)$', gist)) {
+  } else if(grepl('^https://gist.github.com/([^/]+/)?([0-9a-f]+)$', gist)) {
     paste(gist, '/download', sep='')
   } else {
     stop('Unrecognized gist identifier format')

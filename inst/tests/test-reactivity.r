@@ -547,3 +547,31 @@ test_that("Observer pausing works", {
   expect_equal(execCount(obsB), 3)
   expect_equal(obsB_invalidated2, TRUE)
 })
+
+test_that("suspended/resumed observers run at most once", {
+  runcount <- 0
+
+  v <- reactiveValues(A=1)
+  obs <- observe(function() {
+    v$A
+    runcount <<- runcount + 1
+  })
+
+  # First flush should run obs once
+  flushReact()
+  expect_equal(runcount, 1)
+
+  # Modify the dependency, suspend, resume, and flush: should run obs once
+  v$A <- 2
+  obs$suspend()
+  obs$resume()
+  flushReact()
+  expect_equal(runcount, 2)
+
+  # Suspend, modify the dependency, resume, and flush: should run obs once
+  obs$suspend()
+  v$A <- 3
+  obs$resume()
+  flushReact()
+  expect_equal(runcount, 3)
+})

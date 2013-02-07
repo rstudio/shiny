@@ -341,6 +341,7 @@ Observable <- setRefClass(
 #' @param quoted Is the expression quoted? By default, this is \code{FALSE}.
 #'   This is useful when you want to use an expression that is stored in a
 #'   variable; to do so, it must be quoted with `quote()`.
+#' @param label A label for the reactive expression, useful for debugging.
 #'
 #' @examples
 #' values <- reactiveValues(A=1)
@@ -362,7 +363,7 @@ Observable <- setRefClass(
 #' isolate(reactiveD())
 #'
 #' @export
-reactive <- function(x, env = parent.frame(), quoted = FALSE) {
+reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL) {
   sub_x <- substitute(x)
 
   # Try to detect if x is a function
@@ -378,12 +379,14 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE) {
   if (quoted) {
     # x is a quoted expression
     fun <- exprToFunction(x, env)
-    label <- deparse(x)
+    if (is.null(label))
+      label <- deparse(x)
 
   } else {
     # x is an unquoted expression
     fun <- exprToFunction(sub_x, env)
-    label <- deparse(sub_x)
+    if (is.null(label))
+      label <- deparse(sub_x)
   }
 
   Observable$new(fun, label)$getValue
@@ -498,8 +501,14 @@ Observer <- setRefClass(
 #' will never re-execute. In contrast, observers use eager evaluation; as soon
 #' as their dependencies change, they schedule themselves to re-execute.
 #' 
-#' @param func The function to observe. It must not have any parameters. Any 
-#'   return value from this function will be ignored.
+#' @param x An expression (quoted or unquoted). Any return value will be ignored.
+#' @param env The parent environment for the reactive expression. By default, this
+#'   is the calling environment, the same as when defining an ordinary
+#'   non-reactive expression.
+#' @param quoted Is the expression quoted? By default, this is \code{FALSE}.
+#'   This is useful when you want to use an expression that is stored in a
+#'   variable; to do so, it must be quoted with `quote()`.
+#' @param label A label for the observer, useful for debugging.
 #' @param suspended If \code{TRUE}, start the observer in a suspended state.
 #'   If \code{FALSE} (the default), start in a non-suspended state.
 #'
@@ -522,7 +531,8 @@ Observer <- setRefClass(
 #' flushReact()
 #'
 #' @export
-observe <- function(x, env=parent.frame(), quoted=FALSE, suspended=FALSE) {
+observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
+                    suspended=FALSE) {
   sub_x <- substitute(x)
 
   # Try to detect if x is a function
@@ -538,12 +548,14 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, suspended=FALSE) {
   if (quoted) {
     # x is a quoted expression
     fun <- exprToFunction(x, env)
-    label <- deparse(x)
+    if (is.null(label))
+      label <- deparse(x)
 
   } else {
     # x is an unquoted expression
     fun <- exprToFunction(sub_x, env)
-    label <- deparse(sub_x)
+    if (is.null(label))
+      label <- deparse(sub_x)
   }
 
   invisible(Observer$new(fun, label=label, suspended=suspended))

@@ -424,10 +424,11 @@ Observer <- setRefClass(
       .invalidateCallbacks <<- c(.invalidateCallbacks, func)
     },
     suspend = function() {
-      "Causes this observer to stop re-executing in response to invalidations.
-      If the observer was invalidated prior to this call but it has not
-      re-executed yet (because it waits until onFlush is called) then that
-      re-execution will still occur."
+      "Causes this observer to stop scheduling flushes (re-executions) in
+      response to invalidations. If the observer was invalidated prior to this
+      call but it has not re-executed yet (because it waits until onFlush is
+      called) then that re-execution will still occur, becasue the flush is
+      already scheduled."
       .suspended <<- TRUE
     },
     resume = function() {

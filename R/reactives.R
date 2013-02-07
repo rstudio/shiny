@@ -121,7 +121,7 @@ ReactiveValues <- setRefClass(
 #'
 #' This function returns an object for storing reactive values. It is similar
 #' to a list, but with special capabilities for reactive programming. When you
-#' read a value from it, the calling reactive function takes a reactive
+#' read a value from it, the calling reactive expression takes a reactive
 #' dependency on that value, and when you write to it, it notifies any reactive
 #' functions that depend on that value.
 #'
@@ -271,7 +271,7 @@ Observable <- setRefClass(
   methods = list(
     initialize = function(func, label=deparse(substitute(func))) {
       if (length(formals(func)) > 0)
-        stop("Can't make a reactive function from a function that takes one ",
+        stop("Can't make a reactive expression from a function that takes one ",
              "or more parameters; only functions without parameters can be ",
              "reactive.")
       .func <<- func
@@ -335,9 +335,9 @@ Observable <- setRefClass(
 #' more information about reactive expressions.
 #'
 #' @param x An expression (quoted or unquoted).
-#' @param env The parent environment for the reactive function. By default, this
+#' @param env The parent environment for the reactive expression. By default, this
 #'   is the calling environment, the same as when defining an ordinary
-#'   non-reactive function.
+#'   non-reactive expression.
 #' @param quoted Is the expression quoted? By default, this is \code{FALSE}.
 #'   This is useful when you want to use an expression that is stored in a
 #'   variable; to do so, it must be quoted with `quote()`.
@@ -389,7 +389,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE) {
   Observable$new(fun, label)$getValue
 }
 
-# Return the number of times that a reactive function or observer has been run
+# Return the number of times that a reactive expression or observer has been run
 execCount <- function(x) {
   if (is.function(x))
     return(environment(x)$.execCount)
@@ -484,15 +484,15 @@ Observer <- setRefClass(
 
 #' Create a reactive observer
 #' 
-#' Creates an observer from the given function. An observer is like a reactive 
-#' function in that it can read reactive values and call reactive functions, and
+#' Creates an observer from the given expression An observer is like a reactive
+#' expression in that it can read reactive values and call reactive expressions, and
 #' will automatically re-execute when those dependencies change. But unlike 
-#' reactive functions, it doesn't yield a result and can't be used as an input 
-#' to other reactive functions. Thus, observers are only useful for their side 
+#' reactive expression, it doesn't yield a result and can't be used as an input 
+#' to other reactive expressions. Thus, observers are only useful for their side 
 #' effects (for example, performing I/O).
 #' 
-#' Another contrast between reactive functions and observers is their execution
-#' strategy. Reactive functions use lazy evaluation; that is, when their
+#' Another contrast between reactive expressions and observers is their execution
+#' strategy. Reactive expressions use lazy evaluation; that is, when their
 #' dependencies change, they don't re-execute right away but rather wait until
 #' they are called by someone else. Indeed, if they are not called then they
 #' will never re-execute. In contrast, observers use eager evaluation; as soon
@@ -532,7 +532,7 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, suspended=FALSE) {
   if (!is.name(sub_x) && sub_x[[1]] == as.name('function')) {
     message("Passing functions to reactive() is deprecated. ",
       "Please use expressions instead. See ?reactive for more information.")
-    return(Observer$new(x, deparse(substitute(x))))
+    return(Observer$new(x, deparse(sub_x)))
   }
 
   if (quoted) {
@@ -542,8 +542,8 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, suspended=FALSE) {
 
   } else {
     # x is an unquoted expression
-    fun <- exprToFunction(substitute(x), env)
-    label <- deparse(substitute(x))
+    fun <- exprToFunction(sub_x, env)
+    label <- deparse(sub_x)
   }
 
   invisible(Observer$new(fun, label=label, suspended=suspended))
@@ -557,7 +557,7 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, suspended=FALSE) {
 #' reactive value, except reactive values are triggered when they are set, while
 #' reactive timers are triggered simply by the passage of time.
 #' 
-#' \link[=reactive]{Reactive functions} and observers that want to be 
+#' \link[=reactive]{Reactive expressions} and observers that want to be 
 #' invalidated by the timer need to call the timer function that 
 #' \code{reactiveTimer} returns, even if the current time value is not actually 
 #' needed.
@@ -611,15 +611,15 @@ invalidateLater <- function(millis) {
 
 #' Create a non-reactive scope for an expression
 #' 
-#' Executes the given expression in a scope where reactive values or functions 
+#' Executes the given expression in a scope where reactive values or expression 
 #' can be read, but they cannot cause the reactive scope of the caller to be 
 #' re-evaluated when they change.
 #' 
 #' Ordinarily, the simple act of reading a reactive value causes a relationship 
 #' to be established between the caller and the reactive value, where a change 
 #' to the reactive value will cause the caller to re-execute. (The same applies 
-#' for the act of getting a reactive function's value.) The \code{isolate} 
-#' function lets you read a reactive value or function without establishing this
+#' for the act of getting a reactive expression's value.) The \code{isolate} 
+#' function lets you read a reactive value or expression without establishing this
 #' relationship.
 #' 
 #' The expression given to \code{isolate()} is evaluated in the calling
@@ -628,15 +628,15 @@ invalidateLater <- function(millis) {
 #' If you want to avoid this, you can use \code{\link{local}()} inside the
 #' \code{isolate()}.
 #'
-#' This function can also be useful for calling reactive functions at the
+#' This function can also be useful for calling reactive expression at the
 #' console, which can be useful for debugging. To do so, simply wrap the
-#' functino calls with \code{isolate()}.
+#' calls to the reactive expression with \code{isolate()}.
 #'
-#' @param expr An expression that can access reactive values or functions.
+#' @param expr An expression that can access reactive values or expressions.
 #' 
 #' @examples
 #' \dontrun{
-#' observe(function() {
+#' observe({
 #'   input$saveButton  # Do take a dependency on input$saveButton
 #'   
 #'   # isolate a simple expression
@@ -644,7 +644,7 @@ invalidateLater <- function(millis) {
 #'   writeToDatabase(data)
 #' })
 #' 
-#' observe(function() {
+#' observe({
 #'   input$saveButton  # Do take a dependency on input$saveButton
 #'   
 #'   # isolate a whole block
@@ -656,7 +656,7 @@ invalidateLater <- function(millis) {
 #'   writeToDatabase(data)
 #' })
 #'
-#' observe(function() {
+#' observe({
 #'   x <- 1
 #'   # x outside of isolate() is affected
 #'   isolate(x <- 2)
@@ -670,13 +670,13 @@ invalidateLater <- function(millis) {
 #'
 #' }
 #'
-#' # Can also use isolate to call reactive functions from the R console
+#' # Can also use isolate to call reactive expressions from the R console
 #' values <- reactiveValues(A=1)
-#' fun <- reactive(function() as.character(values$A))
+#' fun <- reactive({ as.character(values$A) })
 #' isolate(fun())
 #' # "1"
 #'
-#' # isolate also works if the reactive function accesses values from the
+#' # isolate also works if the reactive expression accesses values from the
 #' # input object, like input$x
 #'
 #' @export

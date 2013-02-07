@@ -32,7 +32,7 @@ suppressPackageStartupMessages({
 #'   These can be used to set the width, height, background color, etc.
 #'   
 #' @export
-reactivePlot <- function(func, width='auto', height='auto', ...) {
+renderPlot <- function(func, width='auto', height='auto', ...) {
   args <- list(...)
   
   if (is.function(width))
@@ -108,7 +108,7 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 #'   \code{\link[xtable]{print.xtable}}.
 #'   
 #' @export
-reactiveTable <- function(func, ...) {
+renderTable <- function(func, ...) {
   function() {
     classNames <- getOption('shiny.table.class', 'data table table-bordered table-condensed')
     data <- func()
@@ -149,13 +149,13 @@ reactiveTable <- function(func, ...) {
 #' @param func A function that may print output and/or return a printable R 
 #'   object.
 #'   
-#' @seealso \code{\link{reactiveText}} for displaying the value returned from a 
+#' @seealso \code{\link{renderText}} for displaying the value returned from a 
 #'   function, instead of the printed output.
 #'
 #' @example res/text-example.R
 #'   
 #' @export
-reactivePrint <- function(func) {
+renderPrint <- function(func) {
   function() {
     return(paste(capture.output({
       result <- withVisible(func())
@@ -187,7 +187,7 @@ reactivePrint <- function(func) {
 #' @example res/text-example.R
 #'   
 #' @export
-reactiveText <- function(func) {
+renderText <- function(func) {
   function() {
     value <- func()
     return(paste(capture.output(cat(value)), collapse="\n"))
@@ -210,13 +210,13 @@ reactiveText <- function(func) {
 #' @export
 #' @examples
 #' \dontrun{
-#'   output$moreControls <- reactiveUI(function() {
+#'   output$moreControls <- renderUI(function() {
 #'     list(
 #'       
 #'     )
 #'   })
 #' }
-reactiveUI <- function(func) {
+renderUI <- function(func) {
   function() {
     result <- func()
     if (is.null(result) || length(result) == 0)
@@ -271,4 +271,27 @@ downloadHandler <- function(filename, content, contentType=NA) {
   return(function(shinyapp, name, ...) {
     shinyapp$registerDownload(name, filename, contentType, content)
   })
+}
+
+
+# Deprecated functions ------------------------------------------------------
+reactivePlot <- function(func, width='auto', height='auto', ...) {
+  message("reactivePlot is deprecated. Please use renderPlot instead.")
+  renderPlot(func, width='auto', height='auto', ...)
+}
+reactiveTable <- function(func, ...) {
+  message("reactiveTable is deprecated. Please use renderTable instead.")
+  renderTable(func, ...)
+}
+reactivePrint <- function(func) {
+  message("reactivePrint is deprecated. Please use renderPrint instead.")
+  renderPrint(func)
+}
+reactiveUI <- function(func) {
+  message("reactiveUI is deprecated. Please use renderUI instead.")
+  renderUI(func)
+}
+reactiveText <- function(func) {
+  message("reactiveText is deprecated. Please use renderText instead.")
+  renderText(func)
 }

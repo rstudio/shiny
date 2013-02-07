@@ -2,20 +2,24 @@
 \alias{reactive}
 \title{Create a reactive expression}
 \usage{
-  reactive(x, env = parent.frame(), quoted = FALSE)
+  reactive(x, env = parent.frame(), quoted = FALSE,
+    label = NULL)
 }
 \arguments{
   \item{x}{An expression (quoted or unquoted).}
 
   \item{env}{The parent environment for the reactive
-  function. By default, this is the calling environment,
+  expression. By default, this is the calling environment,
   the same as when defining an ordinary non-reactive
-  function.}
+  expression.}
 
   \item{quoted}{Is the expression quoted? By default, this
   is \code{FALSE}.  This is useful when you want to use an
   expression that is stored in a variable; to do so, it
   must be quoted with `quote()`.}
+
+  \item{label}{A label for the reactive expression, useful
+  for debugging.}
 }
 \description{
   Wraps a normal expression to create a reactive

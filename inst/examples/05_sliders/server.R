@@ -4,7 +4,7 @@ library(shiny)
 shinyServer(function(input, output) {
   
   # Reactive function to compose a data frame containing all of the values
-  sliderValues <- reactive(function() {
+  sliderValues <- reactive({
     
     # Compose data frame
     data.frame(

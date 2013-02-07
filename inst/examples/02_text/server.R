@@ -5,7 +5,7 @@ library(datasets)
 shinyServer(function(input, output) {
   
   # Return the requested dataset
-  datasetInput <- reactive(function() {
+  datasetInput <- reactive({
     switch(input$dataset,
            "rock" = rock,
            "pressure" = pressure,

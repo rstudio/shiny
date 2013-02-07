@@ -35,22 +35,22 @@ test_that("reactive functions save visibility state", {
   # Call each function twice - should be no change in state with second call
 
   # invisible NULL
-  f <- reactive(function() invisible())
+  f <- reactive({ invisible() })
   expect_identical(withVisible(isolate(f())), list(value=NULL, visible=FALSE))
   expect_identical(withVisible(isolate(f())), list(value=NULL, visible=FALSE))
 
   # visible NULL
-  f <- reactive(function() NULL)
+  f <- reactive({ NULL })
   expect_identical(withVisible(isolate(f())), list(value=NULL, visible=TRUE))
   expect_identical(withVisible(isolate(f())), list(value=NULL, visible=TRUE))
 
   # invisible non-NULL value
-  f <- reactive(function() invisible(10))
+  f <- reactive({ invisible(10)})
   expect_identical(withVisible(isolate(f())), list(value=10, visible=FALSE))
   expect_identical(withVisible(isolate(f())), list(value=10, visible=FALSE))
 
   # visible non-NULL value
-  f <- reactive(function() 10)
+  f <- reactive({ 10 })
   expect_identical(withVisible(isolate(f())), list(value=10, visible=TRUE))
   expect_identical(withVisible(isolate(f())), list(value=10, visible=TRUE))
 })

@@ -13,7 +13,7 @@ shinyServer(function(input, output) {
   
   # Compute the forumla text in a reactive function since it is 
   # shared by the output$caption and output$mpgPlot functions
-  formulaText <- reactive(function() {
+  formulaText <- reactive({
     paste("mpg ~", input$variable)
   })
    

@@ -6,7 +6,7 @@ shinyServer(function(input, output) {
   # Reactive function to generate the requested distribution. This is 
   # called whenever the inputs change. The output functions defined 
   # below then all used the value computed from this function
-  data <- reactive(function() {  
+  data <- reactive({
     dist <- switch(input$dist,
                    norm = rnorm,
                    unif = runif,

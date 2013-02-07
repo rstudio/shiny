@@ -1,5 +1,5 @@
 shinyServer(function(input, output) {
-  datasetInput <- reactive(function() {
+  datasetInput <- reactive({
     switch(input$dataset,
            "rock" = rock,
            "pressure" = pressure,

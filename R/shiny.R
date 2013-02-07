@@ -62,7 +62,7 @@ ShinyApp <- setRefClass(
           }
         }
 
-        obs <- Observer$new(function() {
+        obs <- observe({
           
           value <- try(func(), silent=FALSE)
           
@@ -78,7 +78,7 @@ ShinyApp <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        }, label, suspended = TRUE)
+        }, label=label, suspended=TRUE)
         
         obs$onInvalidate(function() {
           showProgress(name)

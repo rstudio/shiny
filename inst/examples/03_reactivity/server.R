@@ -13,7 +13,7 @@ shinyServer(function(input, output) {
   #     new result is compared to the previous result; if the two are
   #     identical, then the callers are not notified
   #
-  datasetInput <- reactive(function() {
+  datasetInput <- reactive({
     switch(input$dataset,
            "rock" = rock,
            "pressure" = pressure,

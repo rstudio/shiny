@@ -371,7 +371,7 @@ Observer <- setRefClass(
     .label = 'character',
     .flushCallbacks = 'list',
     .execCount = 'integer',
-    .invalidated = 'logical',
+    .onResume = 'function',
     .suspended = 'logical'
   ),
   methods = list(
@@ -383,31 +383,29 @@ Observer <- setRefClass(
       .func <<- func
       .label <<- label
       .execCount <<- 0L
-      .invalidated <<- TRUE
       .suspended <<- suspended
+      .onResume <<- function() NULL
 
       # Defer the first running of this until flushReact is called
-      ctx <- Context$new(.label)
-      ctx$onFlush(function() {
-        run()
-      })
-      # If we start suspended, don't add a pending flush
-      if (!.suspended)
-        ctx$addPendingFlush()
+      .createContext()$invalidate()
     },
     .createContext = function() {
       ctx <- Context$new(.label)
 
       ctx$onInvalidate(function() {
-        .invalidated <<- TRUE
-
         lapply(.flushCallbacks, function(func) {
           func()
           NULL
         })
+
+        continue <- function() {
+          ctx$addPendingFlush()
+        }
         
         if (.suspended == FALSE)
-          ctx$addPendingFlush()
+          continue()
+        else
+          .onResume <<- continue
       })
       
       ctx$onFlush(function() {
@@ -419,7 +417,6 @@ Observer <- setRefClass(
     run = function() {
       ctx <- .createContext()
       .execCount <<- .execCount + 1L
-      .invalidated <<- FALSE
       ctx$run(.func)
     },
     onInvalidate = function(func) {
@@ -436,11 +433,12 @@ Observer <- setRefClass(
       "Causes this observer to start re-executing in response to invalidations.
       If the observer was invalidated while suspended, then it will schedule
       itself for re-execution (pending flush)."
-      .suspended <<- FALSE
-      
-      if (.invalidated) {
-        .createContext()$invalidate()
+      if (.suspended) {
+        .suspended <<- FALSE
+        .onResume()
+        .onResume <<- function() NULL
       }
+      invisible()
     }
   )
 )

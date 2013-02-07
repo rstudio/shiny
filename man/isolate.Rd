@@ -30,10 +30,15 @@
   visible outside of the \code{isolate()}. If you want to
   avoid this, you can use \code{\link{local}()} inside the
   \code{isolate()}.
+
+  This function can also be useful for calling reactive
+  functions at the console, which can be useful for
+  debugging. To do so, simply wrap the functino calls with
+  \code{isolate()}.
 }
 \examples{
 \dontrun{
-observer(function() {
+observe(function() {
   input$saveButton  # Do take a dependency on input$saveButton
 
   # isolate a simple expression
@@ -41,7 +46,7 @@ observer(function() {
   writeToDatabase(data)
 })
 
-observer(function() {
+observe(function() {
   input$saveButton  # Do take a dependency on input$saveButton
 
   # isolate a whole block
@@ -53,7 +58,7 @@ observer(function() {
   writeToDatabase(data)
 })
 
-observer(function() {
+observe(function() {
   x <- 1
   # x outside of isolate() is affected
   isolate(x <- 2)
@@ -66,5 +71,14 @@ observer(function() {
 })
 
 }
+
+# Can also use isolate to call reactive functions from the R console
+values <- reactiveValues(A=1)
+fun <- reactive(function() as.character(values$A))
+isolate(fun())
+# "1"
+
+# isolate also works if the reactive function accesses values from the
+# input object, like input$x
 }
 

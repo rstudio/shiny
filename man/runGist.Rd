@@ -25,11 +25,11 @@
 }
 \examples{
 \dontrun{
-runGist(4034323)
-runGist("https://gist.github.com/wch/4034323")
+runGist(3239667)
+runGist("https://gist.github.com/jcheng5/3239667")
 
 # Old URL format without username
-runGist("https://gist.github.com/4034323")
+runGist("https://gist.github.com/3239667")
 }
 }
 

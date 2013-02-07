@@ -27,7 +27,10 @@
 \description{
   Download and launch a Shiny application that is hosted at
   a downloadable URL. The Shiny application must be saved
-  in a .zip, .tar, or .tar.gz file.
+  in a .zip, .tar, or .tar.gz file. The Shiny application
+  files must be contained in a subdirectory in the archive.
+  For example, the files might be \code{myapp/server.r} and
+  \code{myapp/ui.r}.
 }
 \examples{
 \dontrun{

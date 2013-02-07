@@ -369,7 +369,7 @@ Observer <- setRefClass(
   fields = list(
     .func = 'function',
     .label = 'character',
-    .flushCallbacks = 'list',
+    .invalidateCallbacks = 'list',
     .execCount = 'integer',
     .onResume = 'function',
     .suspended = 'logical'
@@ -393,7 +393,7 @@ Observer <- setRefClass(
       ctx <- Context$new(.label)
 
       ctx$onInvalidate(function() {
-        lapply(.flushCallbacks, function(func) {
+        lapply(.invalidateCallbacks, function(func) {
           func()
           NULL
         })
@@ -420,7 +420,8 @@ Observer <- setRefClass(
       ctx$run(.func)
     },
     onInvalidate = function(func) {
-      .flushCallbacks <<- c(.flushCallbacks, func)
+      "Register a function to run when this observer is invalidated"
+      .invalidateCallbacks <<- c(.invalidateCallbacks, func)
     },
     suspend = function() {
       "Causes this observer to stop re-executing in response to invalidations.

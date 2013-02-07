@@ -1502,6 +1502,16 @@
         inputs.setInput('.shinyout_' + this.id + '_height', this.offsetHeight);
       });
     }
+
+    // Set initial state of outputs to hidden, if needed
+    $('.shiny-bound-output').each(function() {
+      if (this.offsetWidth == 0 && this.offsetHeight == 0) {
+        initialValues['.shinyout_' + this.id + '_hidden'] = true;
+      } else {
+        initialValues['.shinyout_' + this.id + '_hidden'] = false;
+      }
+    });
+    // Send update when hidden state changes
     function sendOutputHiddenState() {
       $('.shiny-bound-output').each(function() {
         // Assume that the object is hidden when width and height are 0

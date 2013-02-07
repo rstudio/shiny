@@ -87,7 +87,7 @@ Things work this way because `server.R` is sourced when you start your Shiny app
 
 ### Global objects
 
-Objects defined in `global.R` are similar to those defined in `server.R` outside `shinyServer()`, but there's one important difference: they are also visible to the code in `ui.R`.
+Objects defined in `global.R` are similar to those defined in `server.R` outside `shinyServer()`, with one important difference: they are also visible to the code in `ui.R`. This is because they are loaded into the global environment of the R session; all R code in a Shiny app is run in the global environment or a child of it.
 
 In practice, there aren't many times where it's necessary to share variables between `server.R` and `ui.R`. The code in `ui.R` is run once, when the Shiny app is started and it generates an HTML file which is cached and sent to each web browser that connects. This may be useful for setting some shared configuration options.
 

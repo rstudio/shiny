@@ -109,3 +109,26 @@ getContentType <- function(ext, defaultType='application/octet-stream') {
 exprToFunction <- function(body, env = parent.frame()) {
   eval(call("function", pairlist(), body), env)
 }
+
+#' Print message for deprecated functions in Shiny
+#'
+#' To disable these messages, use \code{options(shiny.deprecation.messages=FALSE)}.
+#'
+#' @param new Name of replacement function.
+#' @param msg Message to print. If used, this will override the default message.
+#' @param old Name of deprecated function.
+shinyDeprecated <- function(new=NULL, msg=NULL,
+                            old=as.character(sys.call(sys.parent()))[1L]) {
+
+  if (getOption("shiny.deprecation.messages", default=TRUE) == FALSE)
+    invisible()
+
+  if (is.null(msg)) {
+    msg <- paste(old, "is deprecated.")
+    if (!is.null(new))
+      msg <- paste(msg, "Please use", new, "instead.",
+        "To disable this message, run options(shiny.deprecation.messages=FALSE)")
+  }
+  # Similar to .Deprecated(), but print a message instead of warning
+  message(msg)
+}

@@ -540,8 +540,8 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
   # tokens, then [[ works. In the former case it will be a name object; in the
   # latter, it will be a language object.
   if (!is.name(sub_x) && sub_x[[1]] == as.name('function')) {
-    message("Passing functions to reactive() is deprecated. ",
-      "Please use expressions instead. See ?reactive for more information.")
+    message("Passing functions to observe() is deprecated. ",
+      "Please use expressions instead. See ?observe for more information.")
     return(Observer$new(x, deparse(sub_x)))
   }
 

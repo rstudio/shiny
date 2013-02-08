@@ -6,7 +6,7 @@ shinyServer(function(input, output) {
            "cars" = cars)
   })
   
-  output$table <- reactiveTable(function() {
+  output$table <- renderTable({
     datasetInput()
   })
   

@@ -32,7 +32,15 @@ suppressPackageStartupMessages({
 #'   These can be used to set the width, height, background color, etc.
 #'   
 #' @export
-renderPlot <- function(func, width='auto', height='auto', ...) {
+renderPlot <- function(expr, width='auto', height='auto', ...,
+                       env=parent.frame(), quoted=FALSE, func=NULL) {
+  if (!is.null(func)) {
+    shinyDeprecated(msg="renderPlot: argument 'func' is deprecated. Please use 'expr' instead.")
+  } else {
+    func <- exprToFunction(expr, env, quoted)
+  }
+
+
   args <- list(...)
   
   if (is.function(width))
@@ -108,7 +116,13 @@ renderPlot <- function(func, width='auto', height='auto', ...) {
 #'   \code{\link[xtable]{print.xtable}}.
 #'   
 #' @export
-renderTable <- function(func, ...) {
+renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) {
+  if (!is.null(func)) {
+    shinyDeprecated(msg="renderTable: argument 'func' is deprecated. Please use 'expr' instead.")
+  } else {
+    func <- exprToFunction(expr, env, quoted)
+  }
+
   function() {
     classNames <- getOption('shiny.table.class', 'data table table-bordered table-condensed')
     data <- func()
@@ -155,7 +169,13 @@ renderTable <- function(func, ...) {
 #' @example res/text-example.R
 #'   
 #' @export
-renderPrint <- function(func) {
+renderPrint <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
+  if (!is.null(func)) {
+    shinyDeprecated(msg="renderPrint: argument 'func' is deprecated. Please use 'expr' instead.")
+  } else {
+    func <- exprToFunction(expr, env, quoted)
+  }
+
   function() {
     return(paste(capture.output({
       result <- withVisible(func())
@@ -181,13 +201,19 @@ renderPrint <- function(func) {
 #' @param func A function that returns an R object that can be used as an
 #'   argument to \code{cat}.
 #'   
-#' @seealso \code{\link{reactivePrint}} for capturing the print output of a
+#' @seealso \code{\link{renderPrint}} for capturing the print output of a
 #'   function, rather than the returned text value.
 #'
 #' @example res/text-example.R
 #'   
 #' @export
-renderText <- function(func) {
+renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
+  if (!is.null(func)) {
+    shinyDeprecated(msg="renderText: argument 'func' is deprecated. Please use 'expr' instead.")
+  } else {
+    func <- exprToFunction(expr, env, quoted)
+  }
+
   function() {
     value <- func()
     return(paste(capture.output(cat(value)), collapse="\n"))
@@ -216,7 +242,13 @@ renderText <- function(func) {
 #'     )
 #'   })
 #' }
-renderUI <- function(func) {
+renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
+  if (!is.null(func)) {
+    shinyDeprecated(msg="renderUI: argument 'func' is deprecated. Please use 'expr' instead.")
+  } else {
+    func <- exprToFunction(expr, env, quoted)
+  }
+
   function() {
     result <- func()
     if (is.null(result) || length(result) == 0)
@@ -277,21 +309,21 @@ downloadHandler <- function(filename, content, contentType=NA) {
 # Deprecated functions ------------------------------------------------------
 reactivePlot <- function(func, width='auto', height='auto', ...) {
   shinyDeprecated(new="renderPlot")
-  renderPlot(func, width='auto', height='auto', ...)
+  renderPlot({ func() }, width='auto', height='auto', ...)
 }
 reactiveTable <- function(func, ...) {
   shinyDeprecated(new="renderTable")
-  renderTable(func, ...)
+  renderTable({ func() })
 }
 reactivePrint <- function(func) {
   shinyDeprecated(new="renderPrint")
-  renderPrint(func)
+  renderPrint({ func() })
 }
 reactiveUI <- function(func) {
   shinyDeprecated(new="renderUI")
-  renderUI(func)
+  renderUI({ func() })
 }
 reactiveText <- function(func) {
   shinyDeprecated(new="renderText")
-  renderText(func)
+  renderText({ func() })
 }

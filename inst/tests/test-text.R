@@ -1,33 +1,33 @@
 context("text")
 
-test_that("reactivePrint and reactiveText behavior is correct", {
-  expect_equal(isolate(reactivePrint(function() "foo")()),
+test_that("renderPrint and renderText behavior is correct", {
+  expect_equal(isolate(renderPrint(function() "foo")()),
                '[1] "foo"')
-  expect_equal(isolate(reactivePrint(function() invisible("foo"))()),
+  expect_equal(isolate(renderPrint(function() invisible("foo"))()),
                '')
-  expect_equal(isolate(reactivePrint(function() { print("foo"); "bar"})()),
+  expect_equal(isolate(renderPrint(function() { print("foo"); "bar"})()),
                '[1] "foo"\n[1] "bar"')
-  expect_equal(isolate(reactivePrint(function() NULL)()),
+  expect_equal(isolate(renderPrint(function() NULL)()),
                'NULL')
-  expect_equal(isolate(reactivePrint(function() invisible())()),
+  expect_equal(isolate(renderPrint(function() invisible())()),
                '')
-  expect_equal(isolate(reactivePrint(function() 1:5)()),
+  expect_equal(isolate(renderPrint(function() 1:5)()),
                '[1] 1 2 3 4 5')
   
-  expect_equal(isolate(reactiveText(function() "foo")()),
+  expect_equal(isolate(renderText(function() "foo")()),
                'foo')
-  expect_equal(isolate(reactiveText(function() invisible("foo"))()),
+  expect_equal(isolate(renderText(function() invisible("foo"))()),
                'foo')
   # Capture the print output so it's not shown on console during test, and
   # also check that it is correct
-  print_out <- capture.output(ret <- isolate(reactiveText(function() { print("foo"); "bar"})()))
+  print_out <- capture.output(ret <- isolate(renderText(function() { print("foo"); "bar"})()))
   expect_equal(ret, 'bar')
   expect_equal(print_out, '[1] "foo"')
-  expect_equal(isolate(reactiveText(function() NULL)()),
+  expect_equal(isolate(renderText(function() NULL)()),
                '')
-  expect_equal(isolate(reactiveText(function() invisible())()),
+  expect_equal(isolate(renderText(function() invisible())()),
                '')
-  expect_equal(isolate(reactiveText(function() 1:5)()),
+  expect_equal(isolate(renderText(function() 1:5)()),
                '1 2 3 4 5')  
 })
 

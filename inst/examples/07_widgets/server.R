@@ -13,13 +13,13 @@ shinyServer(function(input, output) {
   })
   
   # Generate a summary of the dataset
-  output$summary <- reactivePrint(function() {
+  output$summary <- renderPrint({
     dataset <- datasetInput()
     summary(dataset)
   })
   
   # Show the first "n" observations
-  output$view <- reactiveTable(function() {
+  output$view <- renderTable({
     head(datasetInput(), n = input$obs)
   })
 })

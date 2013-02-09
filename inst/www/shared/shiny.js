@@ -278,8 +278,13 @@
       this.lastSentValues[name] = jsonValue;
       this.target.setInput(name, value);
     };
-    this.reset = function() {
-      this.lastSentValues = {};
+    this.reset = function(values) {
+      values = values || {};
+      var strValues = {};
+      $.each(values, function(key, value) {
+        strValues[key] = JSON.stringify(value);
+      });
+      this.lastSentValues = strValues;
     };
   }).call(InputNoResendDecorator.prototype);
 
@@ -1303,9 +1308,9 @@
         return $(el).val();
     }
 
-    var inputs = new InputNoResendDecorator(new InputBatchSender(shinyapp));
-    var inputsRate = new InputRateDecorator(inputs);
-    var inputsDefer = new InputDeferDecorator(inputs);
+    var inputsNoResend = new InputNoResendDecorator(new InputBatchSender(shinyapp));
+    var inputsRate = new InputRateDecorator(inputsNoResend);
+    var inputsDefer = new InputDeferDecorator(inputsNoResend);
 
     inputs = inputsRate;
     $('input[type="submit"], button[type="submit"]').each(function() {
@@ -1532,6 +1537,7 @@
                  sendOutputHiddenState);
 
     // We've collected all the initial values--start the server process!
+    inputsNoResend.reset(initialValues);
     shinyapp.connect(initialValues);
   } // function initShiny()
 

@@ -865,7 +865,6 @@ startApp <- function(port=8101L) {
         shinyapp$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
         msg$data[['__allowDataUriScheme']] <- NULL
         shinyapp$session$mset(msg$data)
-        flushReact()
         local({
           serverFunc(input=.createReactiveValues(shinyapp$session, readonly=TRUE),
                      output=.createOutputWriter(shinyapp))
@@ -873,10 +872,10 @@ startApp <- function(port=8101L) {
       },
       update = {
         shinyapp$session$mset(msg$data)
-        shinyapp$manageHiddenOutputs()
       },
       shinyapp$dispatch(msg)
     )
+    shinyapp$manageHiddenOutputs()
     flushReact()
     lapply(apps$values(), function(shinyapp) {
       shinyapp$flushOutput()

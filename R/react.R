@@ -68,12 +68,18 @@ Context <- setRefClass(
 
 ReactiveEnvironment <- setRefClass(
   'ReactiveEnvironment',
-  fields = c('.currentContext', '.nextId', '.pendingFlush'),
+  fields = list(
+    .currentContext = 'ANY',
+    .nextId = 'integer',
+    .pendingFlush = 'list',
+    .inFlush = 'logical'
+  ),
   methods = list(
     initialize = function() {
       .currentContext <<- NULL
       .nextId <<- 0L
       .pendingFlush <<- list()
+      .inFlush <<- FALSE
     },
     nextId = function() {
       .nextId <<- .nextId + 1L
@@ -96,6 +102,11 @@ ReactiveEnvironment <- setRefClass(
       .pendingFlush <<- c(ctx, .pendingFlush)
     },
     flush = function() {
+      # If already in a flush, don't start another one
+      if (.inFlush) return()
+      .inFlush <<- TRUE
+      on.exit(.inFlush <<- FALSE)
+
       while (length(.pendingFlush) > 0) {
         ctx <- .pendingFlush[[1]]
         .pendingFlush <<- .pendingFlush[-1]

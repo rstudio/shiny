@@ -379,6 +379,13 @@ ShinyApp <- setRefClass(
 
 #' Set options for an output object.
 #'
+#' These are the available options for an output object:
+#' \itemize{
+#'   \item suspendWhenHidden. When \code{TRUE} (the default), the output object
+#'     will be suspended (not execute) when it is hidden on the web page. When
+#'     \code{FALSE}, the output object will not suspend when hidden, and if it
+#'     was already hidden and suspended, then it will resume immediately.
+#'
 #' @examples
 #' \dontrun{
 #' # Get the list of options for all observers within output

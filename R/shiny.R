@@ -307,10 +307,9 @@ ShinyApp <- setRefClass(
         outputName <- sub("^\\.shinyout_(.*)_hidden", "\\1", hiddenName)
 
         # Use session$.values intead of session$get() to avoid reactivity
-        if (session$.values[[hiddenName]]) {
-          if (.outputOptions[[outputName]][['suspendWhenHidden']]) {
-            .outputs[[outputName]]$suspend()
-          }
+        if (session$.values[[hiddenName]] &&
+            .outputOptions[[outputName]][['suspendWhenHidden']]) {
+          .outputs[[outputName]]$suspend()
         } else {
           .outputs[[outputName]]$resume()
         }
@@ -336,6 +335,12 @@ ShinyApp <- setRefClass(
 
         .outputOptions[[name]][[optname]] <<- opts[[optname]]
       }
+
+      # If any changes to suspendWhenHidden, need to re-run manageHiddenOutputs
+      if ("suspendWhenHidden" %in% names(opts)) {
+        manageHiddenOutputs()
+      }
+
       invisible()
     }
   )

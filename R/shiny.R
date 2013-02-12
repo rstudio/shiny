@@ -18,6 +18,8 @@ ShinyApp <- setRefClass(
     .websocket = 'list',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
+    .outputs = 'list',       # Keeps track of all the output observer objects
+    .outputOptions = 'list', # Options for each of the output observer objects
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
     session = 'ReactiveValues',
@@ -37,6 +39,8 @@ ShinyApp <- setRefClass(
       session <<- ReactiveValues$new()
       
       token <<- createUniqueId(16)
+      .outputs <<- list()
+      .outputOptions <<- list()
       
       allowDataUriScheme <<- TRUE
     },
@@ -74,11 +78,15 @@ ShinyApp <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        }, label)
+        }, label, suspended = TRUE)
         
         obs$onInvalidate(function() {
           showProgress(name)
         })
+
+        .outputs[[name]] <<- obs
+        # Default is to suspend when hidden
+        .outputOptions[[name]][['suspendWhenHidden']] <<- TRUE
       }
       else {
         stop(paste("Unexpected", class(func), "output for", name))
@@ -283,6 +291,63 @@ ShinyApp <- setRefClass(
       return(sprintf('session/%s/download/%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE)))
+    },
+    # This function suspends observers for hidden outputs and resumes observers
+    # for un-hidden outputs.
+    manageHiddenOutputs = function() {
+      # Get all input object names, and keep only those that represent hidden
+      # states, with the format ".shinyout_foo_hidden".
+      # Some tricky stuff: insetad of accessing names using session$names(),
+      # get the names directly via session$.values, to avoid triggering reactivity.
+      hiddenNames <- ls(session$.values, all.names=TRUE)
+      hiddenNames <- hiddenNames[grepl("^\\.shinyout_.*_hidden$", hiddenNames)]
+
+      # Find hidden state for each output, and suspend/resume accordingly
+      for (hiddenName in hiddenNames) {
+        outputName <- sub("^\\.shinyout_(.*)_hidden", "\\1a", hiddenName)
+
+        if (!exists(outputName, .outputs, inherits = FALSE)) {
+          warning("Attempted to manage hidden state of nonexistent output object '",
+            outputName, "'.")
+          return()
+        }
+
+        # Use session$.values intead of session$get() to avoid reactivity
+        if (session$.values[[hiddenName]] &&
+            .outputOptions[[outputName]][['suspendWhenHidden']]) {
+          .outputs[[outputName]]$suspend()
+        } else {
+          .outputs[[outputName]]$resume()
+        }
+      }
+    },
+    outputOptions = function(name, ...) {
+      # If no name supplied, return the list of options for all outputs
+      if (is.null(name))
+        return(.outputOptions)
+      if (! name %in% names(.outputs))
+        stop(name, " is not in list of output objects")
+
+      opts <- list(...)
+      # If no options are set, return the options for the specified output
+      if (length(opts) == 0)
+        return(.outputOptions[[name]])
+
+      # Set the appropriate option
+      validOpts <- "suspendWhenHidden"
+      for (optname in names(opts)) {
+        if (! optname %in% validOpts)
+          stop(optname, " is not a valid option")
+
+        .outputOptions[[name]][[optname]] <<- opts[[optname]]
+      }
+
+      # If any changes to suspendWhenHidden, need to re-run manageHiddenOutputs
+      if ("suspendWhenHidden" %in% names(opts)) {
+        manageHiddenOutputs()
+      }
+
+      invisible()
     }
   )
 )
@@ -317,6 +382,38 @@ ShinyApp <- setRefClass(
 `[<-.shinyoutput` <- function(values, name, value) {
   stop("Single-bracket indexing of shinyoutput object is not allowed.")
 }
+
+#' Set options for an output object.
+#'
+#' These are the available options for an output object:
+#' \itemize{
+#'   \item suspendWhenHidden. When \code{TRUE} (the default), the output object
+#'     will be suspended (not execute) when it is hidden on the web page. When
+#'     \code{FALSE}, the output object will not suspend when hidden, and if it
+#'     was already hidden and suspended, then it will resume immediately.
+#'
+#' @examples
+#' \dontrun{
+#' # Get the list of options for all observers within output
+#' outputOptions(output)
+#'
+#' # Disable suspend for output$myplot
+#' outputOptions(output, "myplot", suspendWhenHidden = FALSE)
+#'
+#' # Get the list of options for output$myplot
+#' outputOptions(output, "myplot")
+#' }
+#'
+#' @param x A shinyoutput object (typically \code{output}).
+#' @param name The name of an output observer in the shinyoutput object.
+#' @export
+outputOptions <- function(x, name, ...) {
+  if (!inherits(x, "shinyoutput"))
+    stop("x must be a shinyoutput object.")
+
+  .subset2(x, 'impl')$outputOptions(name, ...)
+}
+
 
 resolve <- function(dir, relpath) {
   abs.path <- file.path(dir, relpath)
@@ -786,7 +883,6 @@ startApp <- function(port=8101L) {
         shinyapp$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
         msg$data[['__allowDataUriScheme']] <- NULL
         shinyapp$session$mset(msg$data)
-        flushReact()
         local({
           serverFunc(input=.createReactiveValues(shinyapp$session, readonly=TRUE),
                      output=.createOutputWriter(shinyapp))
@@ -797,6 +893,7 @@ startApp <- function(port=8101L) {
       },
       shinyapp$dispatch(msg)
     )
+    shinyapp$manageHiddenOutputs()
     flushReact()
     lapply(apps$values(), function(shinyapp) {
       shinyapp$flushOutput()
@@ -816,11 +913,12 @@ startApp <- function(port=8101L) {
 # @param ws_env The return value from \code{\link{startApp}}.
 serviceApp <- function(ws_env) {
   if (timerCallbacks$executeElapsed()) {
+    manageHiddenOutputs()
     flushReact()
-     lapply(apps$values(), function(shinyapp) {
-       shinyapp$flushOutput()
-       NULL
-     })
+    lapply(apps$values(), function(shinyapp) {
+      shinyapp$flushOutput()
+      NULL
+    })
   }
 
   # If this R session is interactive, then call service() with a short timeout

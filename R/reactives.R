@@ -369,13 +369,13 @@ Observer <- setRefClass(
   fields = list(
     .func = 'function',
     .label = 'character',
-    .flushCallbacks = 'list',
+    .invalidateCallbacks = 'list',
     .execCount = 'integer',
-    .invalidated = 'logical',
+    .onResume = 'function',
     .suspended = 'logical'
   ),
   methods = list(
-    initialize = function(func, label) {
+    initialize = function(func, label, suspended = FALSE) {
       if (length(formals(func)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
@@ -383,29 +383,29 @@ Observer <- setRefClass(
       .func <<- func
       .label <<- label
       .execCount <<- 0L
-      .invalidated <<- TRUE
-      .suspended <<- FALSE
+      .suspended <<- suspended
+      .onResume <<- function() NULL
 
       # Defer the first running of this until flushReact is called
-      ctx <- Context$new(.label)
-      ctx$onFlush(function() {
-        run()
-      })
-      ctx$addPendingFlush()
+      .createContext()$invalidate()
     },
     .createContext = function() {
       ctx <- Context$new(.label)
 
       ctx$onInvalidate(function() {
-        .invalidated <<- TRUE
-
-        lapply(.flushCallbacks, function(func) {
+        lapply(.invalidateCallbacks, function(func) {
           func()
           NULL
         })
+
+        continue <- function() {
+          ctx$addPendingFlush()
+        }
         
         if (.suspended == FALSE)
-          ctx$addPendingFlush()
+          continue()
+        else
+          .onResume <<- continue
       })
       
       ctx$onFlush(function() {
@@ -417,28 +417,30 @@ Observer <- setRefClass(
     run = function() {
       ctx <- .createContext()
       .execCount <<- .execCount + 1L
-      .invalidated <<- FALSE
       ctx$run(.func)
     },
     onInvalidate = function(func) {
-      .flushCallbacks <<- c(.flushCallbacks, func)
+      "Register a function to run when this observer is invalidated"
+      .invalidateCallbacks <<- c(.invalidateCallbacks, func)
     },
     suspend = function() {
-      "Causes this observer to stop re-executing in response to invalidations.
-      If the observer was invalidated prior to this call but it has not
-      re-executed yet (because it waits until onFlush is called) then that
-      re-execution will still occur."
+      "Causes this observer to stop scheduling flushes (re-executions) in
+      response to invalidations. If the observer was invalidated prior to this
+      call but it has not re-executed yet (because it waits until onFlush is
+      called) then that re-execution will still occur, becasue the flush is
+      already scheduled."
       .suspended <<- TRUE
     },
     resume = function() {
       "Causes this observer to start re-executing in response to invalidations.
       If the observer was invalidated while suspended, then it will schedule
       itself for re-execution (pending flush)."
-      .suspended <<- FALSE
-      
-      if (.invalidated) {
-        .createContext()$invalidate()
+      if (.suspended) {
+        .suspended <<- FALSE
+        .onResume()
+        .onResume <<- function() NULL
       }
+      invisible()
     }
   )
 )

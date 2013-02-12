@@ -537,6 +537,9 @@ test_that("Observer pausing works", {
   expect_equal(execCount(funcA), 2)
   expect_equal(execCount(obsB), 2)
   
+  # If onInvalidate() is added _after_ obsB is suspended and the values$a
+  # changes, then it shouldn't get run (onInvalidate runs on invalidation, not
+  # on flush)
   values$a <- 4
   obsB_invalidated2 <- FALSE
   obsB$onInvalidate(function() {obsB_invalidated2 <<- TRUE})
@@ -545,5 +548,29 @@ test_that("Observer pausing works", {
 
   expect_equal(execCount(funcA), 3)
   expect_equal(execCount(obsB), 3)
-  expect_equal(obsB_invalidated2, TRUE)
+  expect_equal(obsB_invalidated2, FALSE)
+})
+
+test_that("suspended/resumed observers run at most once", {
+
+  values <- reactiveValues(A=1)
+  obs <- observe(function() {
+    values$A
+  })
+  expect_equal(execCount(obs), 0)
+  
+  # First flush should run obs once
+  flushReact()
+  expect_equal(execCount(obs), 1)
+
+  # Modify the dependency at each stage of suspend/resume/flush should still
+  # only result in one run of obs()
+  values$A <- 2
+  obs$suspend()
+  values$A <- 3
+  obs$resume()
+  values$A <- 4
+  flushReact()
+  expect_equal(execCount(obs), 2)
+
 })

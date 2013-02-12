@@ -463,10 +463,12 @@ Observer <- setRefClass(
 #' 
 #' @param func The function to observe. It must not have any parameters. Any 
 #'   return value from this function will be ignored.
-#'   
+#' @param suspended If \code{TRUE}, start the observer in a suspended state.
+#'   If \code{FALSE} (the default), start in a non-suspended state.
+#'
 #' @export
-observe <- function(func) {
-  invisible(Observer$new(func, deparse(substitute(func))))
+observe <- function(func, suspended=FALSE) {
+  invisible(Observer$new(func, deparse(substitute(func)), suspended=suspended))
 }
 
 # ---------------------------------------------------------------------------

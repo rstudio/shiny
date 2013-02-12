@@ -2,12 +2,16 @@
 \alias{observe}
 \title{Create a reactive observer}
 \usage{
-  observe(func)
+  observe(func, suspended = FALSE)
 }
 \arguments{
   \item{func}{The function to observe. It must not have any
   parameters. Any return value from this function will be
   ignored.}
+
+  \item{suspended}{If \code{TRUE}, start the observer in a
+  suspended state.  If \code{FALSE} (the default), start in
+  a non-suspended state.}
 }
 \description{
   Creates an observer from the given function. An observer

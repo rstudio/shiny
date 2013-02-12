@@ -304,7 +304,7 @@ ShinyApp <- setRefClass(
 
       # Find hidden state for each output, and suspend/resume accordingly
       for (hiddenName in hiddenNames) {
-        outputName <- sub("^\\.shinyout_(.*)_hidden", "\\1a", hiddenName)
+        outputName <- sub("^\\.shinyout_(.*)_hidden", "\\1", hiddenName)
 
         if (!exists(outputName, .outputs, inherits = FALSE)) {
           warning("Attempted to manage hidden state of nonexistent output object '",

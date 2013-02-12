@@ -9,6 +9,8 @@
 
   \item{name}{The name of an output observer in the
   shinyoutput object.}
+
+  \item{...}{Options to set for the output observer.}
 }
 \description{
   These are the available options for an output object:
@@ -17,7 +19,7 @@
   execute) when it is hidden on the web page. When
   \code{FALSE}, the output object will not suspend when
   hidden, and if it was already hidden and suspended, then
-  it will resume immediately.
+  it will resume immediately. }
 }
 \examples{
 \dontrun{

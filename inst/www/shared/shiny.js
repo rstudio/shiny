@@ -1496,21 +1496,23 @@
     // The server needs to know the size of each plot output element, in case
     // the plot is auto-sizing
     $('.shiny-plot-output').each(function() {
-      var width = this.offsetWidth;
-      var height = this.offsetHeight;
-      initialValues['.shinyout_' + this.id + '_width'] = width;
-      initialValues['.shinyout_' + this.id + '_height'] = height;
+      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
+        initialValues['.shinyout_' + this.id + '_width'] = this.offsetWidth;
+        initialValues['.shinyout_' + this.id + '_height'] = this.offsetHeight;
+      }
     });
     function sendPlotSize() {
       $('.shiny-plot-output').each(function() {
-        inputs.setInput('.shinyout_' + this.id + '_width', this.offsetWidth);
-        inputs.setInput('.shinyout_' + this.id + '_height', this.offsetHeight);
+        if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
+          inputs.setInput('.shinyout_' + this.id + '_width', this.offsetWidth);
+          inputs.setInput('.shinyout_' + this.id + '_height', this.offsetHeight);
+        }
       });
     }
 
     // Set initial state of outputs to hidden, if needed
     $('.shiny-bound-output').each(function() {
-      if (this.offsetWidth == 0 && this.offsetHeight == 0) {
+      if (this.offsetWidth === 0 && this.offsetHeight === 0) {
         initialValues['.shinyout_' + this.id + '_hidden'] = true;
       } else {
         initialValues['.shinyout_' + this.id + '_hidden'] = false;
@@ -1520,7 +1522,7 @@
     function sendOutputHiddenState() {
       $('.shiny-bound-output').each(function() {
         // Assume that the object is hidden when width and height are 0
-        if (this.offsetWidth == 0 && this.offsetHeight == 0) {
+        if (this.offsetWidth === 0 && this.offsetHeight === 0) {
           inputs.setInput('.shinyout_' + this.id + '_hidden', true);
         } else {
           inputs.setInput('.shinyout_' + this.id + '_hidden', false);

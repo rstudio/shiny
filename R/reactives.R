@@ -364,30 +364,9 @@ Observable <- setRefClass(
 #'
 #' @export
 reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL) {
-  sub_x <- substitute(x)
-
-  # Try to detect if x is a function
-  # If x is a single token, then indexing with [[ will error; if it has multiple
-  # tokens, then [[ works. In the former case it will be a name object; in the
-  # latter, it will be a language object.
-  if (!is.name(sub_x) && sub_x[[1]] == as.name('function')) {
-    shinyDeprecated(msg = paste("Passing functions to reactive() is deprecated. ",
-      "Please use expressions instead. See ?reactive for more information."))
-    return(Observable$new(x, deparse(sub_x))$getValue)
-  }
-
-  if (quoted) {
-    # x is a quoted expression
-    fun <- exprToFunction(x, env)
-    if (is.null(label))
-      label <- deparse(x)
-
-  } else {
-    # x is an unquoted expression
-    fun <- exprToFunction(sub_x, env)
-    if (is.null(label))
-      label <- deparse(sub_x)
-  }
+  fun <- exprToFunction(x, env, quoted)
+  if (is.null(label))
+    label <- deparse(body(fun))
 
   Observable$new(fun, label)$getValue
 }
@@ -533,30 +512,10 @@ Observer <- setRefClass(
 #' @export
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
                     suspended=FALSE) {
-  sub_x <- substitute(x)
 
-  # Try to detect if x is a function
-  # If x is a single token, then indexing with [[ will error; if it has multiple
-  # tokens, then [[ works. In the former case it will be a name object; in the
-  # latter, it will be a language object.
-  if (!is.name(sub_x) && sub_x[[1]] == as.name('function')) {
-    shinyDeprecated(msg = paste("Passing functions to observe() is deprecated.",
-      "Please use expressions instead. See ?observe for more information."))
-    return(Observer$new(x, deparse(sub_x)))
-  }
-
-  if (quoted) {
-    # x is a quoted expression
-    fun <- exprToFunction(x, env)
-    if (is.null(label))
-      label <- deparse(x)
-
-  } else {
-    # x is an unquoted expression
-    fun <- exprToFunction(sub_x, env)
-    if (is.null(label))
-      label <- deparse(sub_x)
-  }
+  fun <- exprToFunction(x, env, quoted)
+  if (is.null(label))
+    label <- deparse(body(fun))
 
   invisible(Observer$new(fun, label=label, suspended=suspended))
 }

@@ -105,9 +105,52 @@ getContentType <- function(ext, defaultType='application/octet-stream') {
 
 # Create a zero-arg function from a quoted expression and environment
 # @examples
-# exprToFunction(quote(print(3)))
-exprToFunction <- function(body, env = parent.frame()) {
-  eval(call("function", pairlist(), body), env)
+# makeFunction(body=quote(print(3)))
+makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
+  eval(call("function", args, body), env)
+}
+
+# Convert an expression or quoted expression to a function
+#
+# This is to be called from another function, because it will attempt to get
+# an unquoted expression from two calls back.
+#
+# If expr is a quoted expression, then this just converts it to a function.
+# If expr is a function, then this simply returns expr (and prints a
+#   deprecation message.
+# If expr was a non-quoted expression from two calls back, then this will
+#   quote the original expression and convert it to a function.
+#
+# @param expr A quoted or unquoted expression, or a function.
+# @param env The desired environment for the function. Defaults to the
+#   calling environment two steps back.
+# @param quoted Is the expression quoted?
+#
+exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE) {
+  # Get the quoted expr from two calls back
+  expr_sub <- eval(substitute(substitute(expr)), parent.frame())
+
+  # Check if expr is a function, making sure not to evaluate expr, in case it
+  # is actually an unquoted expression.
+  # If expr is a single token, then indexing with [[ will error; if it has multiple
+  # tokens, then [[ works. In the former case it will be a name object; in the
+  # latter, it will be a language object.
+  if (!is.name(expr_sub) && expr_sub[[1]] == as.name('function')) {
+    called_fun <- sys.call(1)[[1]]
+
+    shinyDeprecated(msg = paste("Passing functions to '", called_fun,
+      "' is deprecated. Please use expressions instead. See ?", called_fun,
+      " for more information.", sep=""))
+    return(expr)
+  }
+
+  if (quoted) {
+    # expr is a quoted expression
+    makeFunction(body=expr, env=env)
+  } else {
+    # expr is an unquoted expression
+    makeFunction(body=expr_sub, env=env)
+  }
 }
 
 #' Print message for deprecated functions in Shiny

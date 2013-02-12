@@ -49,9 +49,9 @@ renderPlot <- function(expr, width='auto', height='auto', ...,
   args <- list(...)
   
   if (is.function(width))
-    width <- reactive(width)
+    width <- reactive({ width() })
   if (is.function(height))
-    height <- reactive(height)
+    height <- reactive({ height() })
 
   return(function(shinyapp, name, ...) {
     png.file <- tempfile(fileext='.png')

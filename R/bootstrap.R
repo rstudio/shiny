@@ -708,7 +708,7 @@ tabsetPanel <- function(..., id = NULL) {
 #' @param outputId output variable to read the value from
 #' @return A text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used 
-#' to dispaly \link{renderText} output variables.
+#' to display \link{renderText} output variables.
 #' @examples
 #' h3(textOutput("caption"))
 #' @export

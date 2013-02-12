@@ -18,7 +18,7 @@
 }
 \details{
   Text is HTML-escaped prior to rendering. This element is
-  often used with the \link{reactivePrint} function to
+  often used with the \link{renderPrint} function to
   preserve fixed-width formatting of printed objects.
 }
 \examples{

@@ -507,7 +507,7 @@ Observer <- setRefClass(
 #'
 #' # In a normal Shiny app, the web client will trigger flush events. If you
 #' # are at the console, you can force a flush with flushReact()
-#' flushReact()
+#' shiny:::flushReact()
 #'
 #' @export
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,

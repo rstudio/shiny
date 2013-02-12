@@ -32,7 +32,7 @@
 # A very simple Shiny app that takes a message from the user
 # and outputs an uppercase version of it.
 shinyServer(function(input, output) {
-  output$uppercase <- reactiveText(function() {
+  output$uppercase <- renderText({
     toupper(input$message)
   })
 })

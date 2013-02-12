@@ -21,8 +21,8 @@
 }
 \details{
   \code{uiOutput} is intended to be used with
-  \code{reactiveUI} on the server side. It is currently
-  just an alias for \code{htmlOutput}.
+  \code{renderUI} on the server side. It is currently just
+  an alias for \code{htmlOutput}.
 }
 \examples{
 htmlOutput("summary")

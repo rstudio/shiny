@@ -63,6 +63,6 @@ obsD <- observe(expr_q, quoted = TRUE)
 
 # In a normal Shiny app, the web client will trigger flush events. If you
 # are at the console, you can force a flush with flushReact()
-flushReact()
+shiny:::flushReact()
 }
 

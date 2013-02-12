@@ -5,7 +5,7 @@ suppressPackageStartupMessages({
 
 #' Plot Output
 #' 
-#' Creates a reactive plot that is suitable for assigning to an \code{output} 
+#' Renders a reactive plot that is suitable for assigning to an \code{output} 
 #' slot.
 #' 
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
@@ -17,7 +17,7 @@ suppressPackageStartupMessages({
 #' output. Notably, plain \code{png} output on Linux and Windows may not
 #' antialias some point shapes, resulting in poor quality output.
 #' 
-#' @param func A function that generates a plot.
+#' @param expr An expression that generates a plot.
 #' @param width The width of the rendered plot, in pixels; or \code{'auto'} to 
 #'   use the \code{offsetWidth} of the HTML element that is bound to this plot. 
 #'   You can also pass in a function that returns the width in pixels or 
@@ -30,6 +30,11 @@ suppressPackageStartupMessages({
 #'   values and functions.
 #' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}. 
 #'   These can be used to set the width, height, background color, etc.
+#' @param env The environment in which to evaluate \code{expr}.
+#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#'   is useful if you want to save an expression in a variable.
+#' @param func A function that generates a plot (deprecated; use \code{expr}
+#'   instead).
 #'   
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', ...,
@@ -110,10 +115,15 @@ renderPlot <- function(expr, width='auto', height='auto', ...,
 #' The corresponding HTML output tag should be \code{div} and have the CSS class
 #' name \code{shiny-html-output}.
 #' 
-#' @param func A function that returns an R object that can be used with 
+#' @param expr An expression that returns an R object that can be used with 
 #'   \code{\link[xtable]{xtable}}.
 #' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}} and
 #'   \code{\link[xtable]{print.xtable}}.
+#' @param env The environment in which to evaluate \code{expr}.
+#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#'   is useful if you want to save an expression in a variable.
+#' @param func A function that returns an R object that can be used with 
+#'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #'   
 #' @export
 renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) {
@@ -160,8 +170,12 @@ renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) 
 #' returns \code{NULL} then \code{NULL} will actually be visible in the output. 
 #' To display nothing, make your function return \code{\link{invisible}()}.
 #' 
-#' @param func A function that may print output and/or return a printable R 
+#' @param expr An expression that may print output and/or return a printable R 
 #'   object.
+#' @param env The environment in which to evaluate \code{expr}.
+#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#' @param func A function that may print output and/or return a printable R 
+#'   object (deprecated; use \code{expr} instead).
 #'   
 #' @seealso \code{\link{renderText}} for displaying the value returned from a 
 #'   function, instead of the printed output.
@@ -198,8 +212,13 @@ renderPrint <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 #' The result of executing \code{func} will passed to \code{cat}, inside a 
 #' \code{\link[utils]{capture.output}} call.
 #' 
-#' @param func A function that returns an R object that can be used as an
+#' @param expr An expression that returns an R object that can be used as an
 #'   argument to \code{cat}.
+#' @param env The environment in which to evaluate \code{expr}.
+#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#'   is useful if you want to save an expression in a variable.
+#' @param func A function that returns an R object that can be used as an
+#'   argument to \code{cat}.(deprecated; use \code{expr} instead).
 #'   
 #' @seealso \code{\link{renderPrint}} for capturing the print output of a
 #'   function, rather than the returned text value.
@@ -228,8 +247,13 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 #' The corresponding HTML output tag should be \code{div} and have the CSS class
 #' name \code{shiny-html-output} (or use \code{\link{uiOutput}}).
 #' 
-#' @param func A function that returns a Shiny tag object, \code{\link{HTML}}, 
+#' @param expr An expression that returns a Shiny tag object, \code{\link{HTML}}, 
 #'   or a list of such objects.
+#' @param env The environment in which to evaluate \code{expr}.
+#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#'   is useful if you want to save an expression in a variable.
+#' @param func A function that returns a Shiny tag object, \code{\link{HTML}}, 
+#'   or a list of such objects (deprecated; use \code{expr} instead).
 #'   
 #' @seealso conditionalPanel
 #'   
@@ -307,22 +331,56 @@ downloadHandler <- function(filename, content, contentType=NA) {
 
 
 # Deprecated functions ------------------------------------------------------
+
+#' Plot output (deprecated)
+#'
+#' See \code{\link{renderPlot}}.
+#' @param func A function.
+#' @param width Width.
+#' @param height Height.
+#' @param ... Other arguments to pass on.
+#' @export
 reactivePlot <- function(func, width='auto', height='auto', ...) {
   shinyDeprecated(new="renderPlot")
   renderPlot({ func() }, width='auto', height='auto', ...)
 }
+
+#' Table output (deprecated)
+#'
+#' See \code{\link{renderTable}}.
+#' @param func A function.
+#' @param ... Other arguments to pass on.
+#' @export
 reactiveTable <- function(func, ...) {
   shinyDeprecated(new="renderTable")
   renderTable({ func() })
 }
+
+#' Print output (deprecated)
+#'
+#' See \code{\link{renderPrint}}.
+#' @param func A function.
+#' @export
 reactivePrint <- function(func) {
   shinyDeprecated(new="renderPrint")
   renderPrint({ func() })
 }
+
+#' UI output (deprecated)
+#'
+#' See \code{\link{renderUI}}.
+#' @param func A function.
+#' @export
 reactiveUI <- function(func) {
   shinyDeprecated(new="renderUI")
   renderUI({ func() })
 }
+
+#' Text output (deprecated)
+#'
+#' See \code{\link{renderText}}.
+#' @param func A function.
+#' @export
 reactiveText <- function(func) {
   shinyDeprecated(new="renderText")
   renderText({ func() })

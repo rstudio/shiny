@@ -110,22 +110,56 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
   eval(call("function", args, body), env)
 }
 
-# Convert an expression or quoted expression to a function
+#' Convert an expression or quoted expression to a function
+#'
+#' This is to be called from another function, because it will attempt to get
+#' an unquoted expression from two calls back.
+#'
+#' If expr is a quoted expression, then this just converts it to a function.
+#' If expr is a function, then this simply returns expr (and prints a
+#'   deprecation message.
+#' If expr was a non-quoted expression from two calls back, then this will
+#'   quote the original expression and convert it to a function.
 #
-# This is to be called from another function, because it will attempt to get
-# an unquoted expression from two calls back.
-#
-# If expr is a quoted expression, then this just converts it to a function.
-# If expr is a function, then this simply returns expr (and prints a
-#   deprecation message.
-# If expr was a non-quoted expression from two calls back, then this will
-#   quote the original expression and convert it to a function.
-#
-# @param expr A quoted or unquoted expression, or a function.
-# @param env The desired environment for the function. Defaults to the
-#   calling environment two steps back.
-# @param quoted Is the expression quoted?
-#
+#' @param expr A quoted or unquoted expression, or a function.
+#' @param env The desired environment for the function. Defaults to the
+#'   calling environment two steps back.
+#' @param quoted Is the expression quoted?
+#'
+#' @examples
+#' # Example of a new renderer, similar to renderText
+#' # This is something that toolkit authors will do
+#' renderTriple <- function(expr, env=parent.frame(), quoted=FALSE) {
+#'   # Convert expr to a function
+#'   func <- shiny::exprToFunction(expr, env, quoted)
+#'
+#'   function() {
+#'     value <- func()
+#'     paste(rep(value, 3), collapse=", ")
+#'   }
+#' }
+#'
+#'
+#' # Example of using the renderer.
+#' # This is something that app authors will do.
+#' values <- reactiveValues(A="text")
+#'
+#' \dontrun{
+#' # Create an output object
+#' output$tripleA <- renderTriple({
+#'   values$A
+#' })
+#' }
+#'
+#' # At the R console, you can experiment with the renderer using isolate()
+#' tripleA <- renderTriple({
+#'   values$A
+#' })
+#'
+#' isolate(tripleA())
+#' # "text, text, text"
+#'
+#' @export
 exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE) {
   # Get the quoted expr from two calls back
   expr_sub <- eval(substitute(substitute(expr)), parent.frame())

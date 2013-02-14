@@ -3,8 +3,8 @@ library(shiny)
 # Define server logic for slider examples
 shinyServer(function(input, output) {
   
-  # Reactive function to compose a data frame containing all of the values
-  sliderValues <- reactive(function() {
+  # Reactive expression to compose a data frame containing all of the values
+  sliderValues <- reactive({
     
     # Compose data frame
     data.frame(
@@ -22,7 +22,7 @@ shinyServer(function(input, output) {
   }) 
   
   # Show the values using an HTML table
-  output$values <- reactiveTable(function() {
+  output$values <- renderTable({
     sliderValues()
   })
 })

@@ -17,8 +17,7 @@
 }
 \details{
   Text is HTML-escaped prior to rendering. This element is
-  often used to dispaly \link{reactiveText} output
-  variables.
+  often used to display \link{renderText} output variables.
 }
 \examples{
 h3(textOutput("caption"))

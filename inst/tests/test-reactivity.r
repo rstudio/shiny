@@ -59,16 +59,16 @@ test_that("Functions are not over-reactive", {
 
   values <- reactiveValues(A=10)
 
-  funcA <- reactive(function() {
+  funcA <- reactive({
     values$A
   })
 
-  funcB <- reactive(function() {
+  funcB <- reactive({
     funcA()
     values$A
   })
 
-  obsC <- observe(function() {
+  obsC <- observe({
     funcB()
   })
 
@@ -100,13 +100,13 @@ test_that("overreactivity2", {
   observed_value2 <- NA
 
   values <- reactiveValues(A=1)
-  funcB  <- reactive(function() {
+  funcB  <- reactive({
     values$A + 5
   })
-  obsC <- observe(function() {
+  obsC <- observe({
     observed_value1 <<-  funcB() * values$A
   })
-  obsD <- observe(function() {
+  obsD <- observe({
     observed_value2 <<-  funcB() * values$A
   })
 
@@ -135,15 +135,15 @@ test_that("overreactivity2", {
 test_that("isolation", {
   values <- reactiveValues(A=10, C=NULL)
 
-  obsB <- observe(function() {
+  obsB <- observe({
     values$C <- values$A > 0
   })
 
-  funcD <- reactive(function() {
+  funcD <- reactive({
     values$C
   })
 
-  obsE <- observe(function() {
+  obsE <- observe({
     funcD()
   })
 
@@ -163,15 +163,15 @@ test_that("laziness", {
 
   values <- reactiveValues(A=10)
 
-  funcA <- reactive(function() {
+  funcA <- reactive({
     values$A > 0
   })
 
-  funcB <- reactive(function() {
+  funcB <- reactive({
     funcA()
   })
 
-  obsC <- observe(function() {
+  obsC <- observe({
     if (values$A > 10)
       return()
     funcB()
@@ -203,10 +203,10 @@ test_that("order of evaluation", {
   observed_value <- NA
 
   values <- reactiveValues(A=1)
-  funcB  <- reactive(function() {
+  funcB  <- reactive({
     values$A + 5
   })
-  obsC <- observe(function() {
+  obsC <- observe({
     observed_value <<- values$A * funcB()
   })
 
@@ -230,10 +230,10 @@ test_that("order of evaluation", {
   observed_value <- NA
 
   values <- reactiveValues(A=1)
-  funcB <- reactive(function() {
+  funcB <- reactive({
     values$A + 5
   })
-  obsC <- observe(function() {
+  obsC <- observe({
     observed_value <<- funcB() * values$A
   })
 
@@ -259,18 +259,18 @@ test_that("isolate() blocks invalidations from propagating", {
   obsD_value <- NA
 
   values <- reactiveValues(A=1, B=10)
-  funcB <- reactive(function() {
+  funcB <- reactive({
     values$B + 100
   })
 
   # References to valueB and funcB are isolated
-  obsC <- observe(function() {
+  obsC <- observe({
     obsC_value <<-
       values$A + isolate(values$B) + isolate(funcB())
   })
 
   # In contrast with obsC, this has a non-isolated reference to funcB
-  obsD <- observe(function() {
+  obsD <- observe({
     obsD_value <<-
       values$A + isolate(values$B) + funcB()
   })
@@ -331,7 +331,7 @@ test_that("Circular refs/reentrancy in reactive functions work", {
 
   values <- reactiveValues(A=3)
 
-  funcB <- reactive(function() {
+  funcB <- reactive({
     # Each time fB executes, it reads and then writes valueA,
     # effectively invalidating itself--until valueA becomes 0.
     if (values$A == 0)
@@ -340,7 +340,7 @@ test_that("Circular refs/reentrancy in reactive functions work", {
     return(values$A)
   })
 
-  obsC <- observe(function() {
+  obsC <- observe({
     funcB()
   })
 
@@ -357,14 +357,14 @@ test_that("Circular refs/reentrancy in reactive functions work", {
 test_that("Simple recursion", {
 
   values <- reactiveValues(A=5)
-  funcB <- reactive(function() {
+  funcB <- reactive({
     if (values$A == 0)
       return(0)
     values$A <- values$A - 1
     funcB()
   })
 
-  obsC <- observe(function() {
+  obsC <- observe({
     funcB()
   })
 
@@ -377,13 +377,13 @@ test_that("Non-reactive recursion", {
   nonreactiveA <- 3
   outputD <- NULL
 
-  funcB <- reactive(function() {
+  funcB <- reactive({
     if (nonreactiveA == 0)
       return(0)
     nonreactiveA <<- nonreactiveA - 1
     return(funcB())
   })
-  obsC <- observe(function() {
+  obsC <- observe({
     outputD <<- funcB()
   })
 
@@ -395,7 +395,7 @@ test_that("Non-reactive recursion", {
 test_that("Circular dep with observer only", {
 
   values <- reactiveValues(A=3)
-  obsB <- observe(function() {
+  obsB <- observe({
     if (values$A == 0)
       return()
     values$A <- values$A - 1
@@ -408,12 +408,12 @@ test_that("Circular dep with observer only", {
 test_that("Writing then reading value is not circular", {
 
   values <- reactiveValues(A=3)
-  funcB <- reactive(function() {
+  funcB <- reactive({
     values$A <- isolate(values$A) - 1
     values$A
   })
 
-  obsC <- observe(function() {
+  obsC <- observe({
     funcB()
   })
 
@@ -431,17 +431,17 @@ test_that("names() and reactiveValuesToList()", {
   values <- reactiveValues(A=1, .B=2)
 
   # Dependent on names
-  depNames <- observe(function() {
+  depNames <- observe({
     names(values)
   })
 
   # Dependent on all non-hidden objects
-  depValues <- observe(function() {
+  depValues <- observe({
     reactiveValuesToList(values)
   })
 
   # Dependent on all objects, including hidden
-  depAllValues <- observe(function() {
+  depAllValues <- observe({
     reactiveValuesToList(values, all.names = TRUE)
   })
 
@@ -491,11 +491,11 @@ test_that("names() and reactiveValuesToList()", {
 test_that("Observer pausing works", {
   values <- reactiveValues(a=1)
   
-  funcA <- reactive(function() {
+  funcA <- reactive({
     values$a
   })
   
-  obsB <- observe(function() {
+  obsB <- observe({
     funcA()
   })
   
@@ -573,4 +573,80 @@ test_that("suspended/resumed observers run at most once", {
   flushReact()
   expect_equal(execCount(obs), 2)
 
+})
+
+
+test_that("reactive() accepts quoted and unquoted expressions", {
+  vals <- reactiveValues(A=1)
+
+  # Unquoted expression, with curly braces
+  fun <- reactive({ vals$A + 1 })
+  expect_equal(isolate(fun()), 2)
+
+  # Unquoted expression, no curly braces
+  fun <- reactive(vals$A + 1)
+  expect_equal(isolate(fun()), 2)
+
+  # Quoted expression
+  fun <- reactive(quote(vals$A + 1), quoted = TRUE)
+  expect_equal(isolate(fun()), 2)
+
+  # Quoted expression, saved in a variable
+  q_expr <- quote(vals$A + 1)
+  fun <- reactive(q_expr, quoted = TRUE)
+  expect_equal(isolate(fun()), 2)
+
+  # If function is used, work, but print message
+  expect_message(fun <- reactive(function() { vals$A + 1 }))
+  expect_equal(isolate(fun()), 2)
+
+
+  # Check that environment is correct - parent environment should be this one
+  this_env <- environment()
+  fun <- reactive(environment())
+  expect_identical(isolate(parent.env(fun())), this_env)
+
+  # Sanity check: environment structure for a reactive() should be the same as for
+  # a normal function
+  fun <- function() environment()
+  expect_identical(parent.env(fun()), this_env)
+})
+
+test_that("observe() accepts quoted and unquoted expressions", {
+  vals <- reactiveValues(A=0)
+  valB <- 0
+
+  # Unquoted expression, with curly braces
+  observe({ valB <<- vals$A + 1})
+  flushReact()
+  expect_equal(valB, 1)
+
+  # Unquoted expression, no curly braces
+  observe({ valB <<- vals$A + 2})
+  flushReact()
+  expect_equal(valB, 2)
+
+  # Quoted expression
+  observe(quote(valB <<- vals$A + 3), quoted = TRUE)
+  flushReact()
+  expect_equal(valB, 3)
+
+  # Quoted expression, saved in a variable
+  q_expr <- quote(valB <<- vals$A + 4)
+  fun <- observe(q_expr, quoted = TRUE)
+  flushReact()
+  expect_equal(valB, 4)
+
+  # If function is used, work, but print message
+  expect_message(observe(function() { valB <<- vals$A + 5 }))
+  flushReact()
+  expect_equal(valB, 5)
+
+
+  # Check that environment is correct - parent environment should be this one
+  this_env <- environment()
+  inside_env <- NULL
+  fun <- observe(inside_env <<- environment())
+  flushReact()
+  expect_identical(parent.env(inside_env), this_env)
 })

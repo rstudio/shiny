@@ -1,7 +1,7 @@
 library(shiny)
 
 shinyServer(function(input, output) {
-  output$contents <- reactiveTable(function() {
+  output$contents <- renderTable({
     
     # input$file1 will be NULL initially. After the user selects and uploads a 
     # file, it will be a data frame with 'name', 'size', 'type', and 'data' 

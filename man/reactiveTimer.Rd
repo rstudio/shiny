@@ -21,7 +21,7 @@
   timers are triggered simply by the passage of time.
 }
 \details{
-  \link[=reactive]{Reactive functions} and observers that
+  \link[=reactive]{Reactive expressions} and observers that
   want to be invalidated by the timer need to call the
   timer function that \code{reactiveTimer} returns, even if
   the current time value is not actually needed.

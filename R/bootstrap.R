@@ -708,7 +708,7 @@ tabsetPanel <- function(..., id = NULL) {
 #' @param outputId output variable to read the value from
 #' @return A text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used 
-#' to dispaly \link{reactiveText} output variables.
+#' to display \link{renderText} output variables.
 #' @examples
 #' h3(textOutput("caption"))
 #' @export
@@ -723,7 +723,7 @@ textOutput <- function(outputId) {
 #' @param outputId output variable to read the value from
 #' @return A verbatim text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
-#' with the \link{reactivePrint} function to preserve fixed-width formatting
+#' with the \link{renderPrint} function to preserve fixed-width formatting
 #' of printed objects.
 #' @examples
 #' mainPanel(
@@ -740,7 +740,7 @@ verbatimTextOutput <- function(outputId) {
 
 #' Create a plot output element
 #' 
-#' Render a \link{reactivePlot} within an application page.
+#' Render a \link{renderPlot} within an application page.
 #' @param outputId output variable to read the plot from
 #' @param width Plot width. Must be a valid CSS unit (like \code{"100\%"},
 #'   \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
@@ -761,7 +761,7 @@ plotOutput <- function(outputId, width = "100%", height="400px") {
 
 #' Create a table output element
 #' 
-#' Render a \link{reactiveTable} within an application page.
+#' Render a \link{renderTable} within an application page.
 #' @param outputId output variable to read the table from
 #' @return A table output element that can be included in a panel
 #' @examples
@@ -779,7 +779,7 @@ tableOutput <- function(outputId) {
 #' text will be included within an HTML \code{div} tag, and is presumed to 
 #' contain HTML content which should not be escaped.
 #' 
-#' \code{uiOutput} is intended to be used with \code{reactiveUI} on the
+#' \code{uiOutput} is intended to be used with \code{renderUI} on the
 #' server side. It is currently just an alias for \code{htmlOutput}.
 #'   
 #' @param outputId output variable to read the value from

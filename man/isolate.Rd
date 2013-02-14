@@ -6,11 +6,11 @@
 }
 \arguments{
   \item{expr}{An expression that can access reactive values
-  or functions.}
+  or expressions.}
 }
 \description{
   Executes the given expression in a scope where reactive
-  values or functions can be read, but they cannot cause
+  values or expression can be read, but they cannot cause
   the reactive scope of the caller to be re-evaluated when
   they change.
 }
@@ -19,10 +19,10 @@
   causes a relationship to be established between the
   caller and the reactive value, where a change to the
   reactive value will cause the caller to re-execute. (The
-  same applies for the act of getting a reactive function's
-  value.) The \code{isolate} function lets you read a
-  reactive value or function without establishing this
-  relationship.
+  same applies for the act of getting a reactive
+  expression's value.) The \code{isolate} function lets you
+  read a reactive value or expression without establishing
+  this relationship.
 
   The expression given to \code{isolate()} is evaluated in
   the calling environment. This means that if you assign a
@@ -32,13 +32,13 @@
   \code{isolate()}.
 
   This function can also be useful for calling reactive
-  functions at the console, which can be useful for
-  debugging. To do so, simply wrap the functino calls with
-  \code{isolate()}.
+  expression at the console, which can be useful for
+  debugging. To do so, simply wrap the calls to the
+  reactive expression with \code{isolate()}.
 }
 \examples{
 \dontrun{
-observe(function() {
+observe({
   input$saveButton  # Do take a dependency on input$saveButton
 
   # isolate a simple expression
@@ -46,7 +46,7 @@ observe(function() {
   writeToDatabase(data)
 })
 
-observe(function() {
+observe({
   input$saveButton  # Do take a dependency on input$saveButton
 
   # isolate a whole block
@@ -58,7 +58,7 @@ observe(function() {
   writeToDatabase(data)
 })
 
-observe(function() {
+observe({
   x <- 1
   # x outside of isolate() is affected
   isolate(x <- 2)
@@ -72,13 +72,13 @@ observe(function() {
 
 }
 
-# Can also use isolate to call reactive functions from the R console
+# Can also use isolate to call reactive expressions from the R console
 values <- reactiveValues(A=1)
-fun <- reactive(function() as.character(values$A))
+fun <- reactive({ as.character(values$A) })
 isolate(fun())
 # "1"
 
-# isolate also works if the reactive function accesses values from the
+# isolate also works if the reactive expression accesses values from the
 # input object, like input$x
 }
 

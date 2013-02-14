@@ -67,7 +67,7 @@ ShinyApp <- setRefClass(
           }
         }
 
-        obs <- Observer$new(function() {
+        obs <- observe({
           
           value <- try(func(), silent=FALSE)
           
@@ -83,7 +83,7 @@ ShinyApp <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        }, label, suspended = TRUE)
+        }, label=label, suspended=TRUE)
         
         obs$onInvalidate(function() {
           showProgress(name)
@@ -708,7 +708,7 @@ resourcePathHandler <- function(ws, header) {
 #' # A very simple Shiny app that takes a message from the user
 #' # and outputs an uppercase version of it.
 #' shinyServer(function(input, output) {
-#'   output$uppercase <- reactiveText(function() {
+#'   output$uppercase <- renderText({
 #'     toupper(input$message)
 #'   })
 #' })

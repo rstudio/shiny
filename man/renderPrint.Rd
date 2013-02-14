@@ -1,0 +1,112 @@
+\name{renderPrint}
+\alias{renderPrint}
+\title{Printable Output}
+\usage{
+  renderPrint(expr, env = parent.frame(), quoted = FALSE,
+    func = NULL)
+}
+\arguments{
+  \item{expr}{An expression that may print output and/or
+  return a printable R object.}
+
+  \item{env}{The environment in which to evaluate
+  \code{expr}.}
+
+  \item{quoted}{Is \code{expr} a quoted expression (with
+  \code{quote()})? This}
+
+  \item{func}{A function that may print output and/or
+  return a printable R object (deprecated; use \code{expr}
+  instead).}
+}
+\description{
+  Makes a reactive version of the given function that
+  captures any printed output, and also captures its
+  printable result (unless \code{\link{invisible}}), into a
+  string. The resulting function is suitable for assigning
+  to an \code{output} slot.
+}
+\details{
+  The corresponding HTML output tag can be anything (though
+  \code{pre} is recommended if you need a monospace font
+  and whitespace preserved) and should have the CSS class
+  name \code{shiny-text-output}.
+
+  The result of executing \code{func} will be printed
+  inside a \code{\link[utils]{capture.output}} call.
+
+  Note that unlike most other Shiny output functions, if
+  the given function returns \code{NULL} then \code{NULL}
+  will actually be visible in the output. To display
+  nothing, make your function return
+  \code{\link{invisible}()}.
+}
+\examples{
+isolate({
+
+# renderPrint captures any print output, converts it to a string, and
+# returns it
+visFun <- renderPrint({ "foo" })
+visFun()
+# '[1] "foo"'
+
+invisFun <- renderPrint({ invisible("foo") })
+invisFun()
+# ''
+
+multiprintFun <- renderPrint({
+  print("foo");
+  "bar"
+})
+multiprintFun()
+# '[1] "foo"\\n[1] "bar"'
+
+nullFun <- renderPrint({ NULL })
+nullFun()
+# 'NULL'
+
+invisNullFun <- renderPrint({ invisible(NULL) })
+invisNullFun()
+# ''
+
+vecFun <- renderPrint({ 1:5 })
+vecFun()
+# '[1] 1 2 3 4 5'
+
+
+# Contrast with renderText, which takes the value returned from the function
+# and uses cat() to convert it to a string
+visFun <- renderText({ "foo" })
+visFun()
+# 'foo'
+
+invisFun <- renderText({ invisible("foo") })
+invisFun()
+# 'foo'
+
+multiprintFun <- renderText({
+  print("foo");
+  "bar"
+})
+multiprintFun()
+# 'bar'
+
+nullFun <- renderText({ NULL })
+nullFun()
+# ''
+
+invisNullFun <- renderText({ invisible(NULL) })
+invisNullFun()
+# ''
+
+vecFun <- renderText({ 1:5 })
+vecFun()
+# '1 2 3 4 5'
+
+})
+}
+\seealso{
+  \code{\link{renderText}} for displaying the value
+  returned from a function, instead of the printed output.
+}
+

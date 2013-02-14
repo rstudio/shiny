@@ -11,7 +11,7 @@
   A table output element that can be included in a panel
 }
 \description{
-  Render a \link{reactiveTable} within an application page.
+  Render a \link{renderTable} within an application page.
 }
 \examples{
 mainPanel(

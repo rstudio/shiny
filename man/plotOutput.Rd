@@ -18,7 +18,7 @@
   A plot output element that can be included in a panel
 }
 \description{
-  Render a \link{reactivePlot} within an application page.
+  Render a \link{renderPlot} within an application page.
 }
 \examples{
 # Show a plot of the generated distribution

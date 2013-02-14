@@ -53,6 +53,11 @@ ShinyApp <- setRefClass(
       # jcheng 08/31/2012: User submitted an example of a dynamically calculated
       # name not working unless name was eagerly evaluated. Yikes!
       force(name)
+
+      # If overwriting an output object, suspend the previous copy of it
+      if (!is.null(.outputs[[name]])) {
+        .outputs[[name]]$suspend()
+      }
       
       if (is.function(func)) {
         if (length(formals(func)) != 0) {

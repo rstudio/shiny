@@ -1,3 +1,19 @@
+shiny 0.3.1.99
+--------------------------------------------------------------------------------
+
+* Added suspend/resume capability to observers.
+
+* Output objects are automatically suspended when they are hidden on the user's
+  web browser.
+
+* `runGist()` accepts GitHub's new URL format, which includes the username.
+
+* `reactive()` and `observe()` now take expressions instead of functions.
+
+* `reactiveText()`, `reactivePlot()`, and so on, have been renamed to
+  `renderText()`, `renderPlot()`, etc.  They also now take expressions instead
+  of functions.
+
 shiny 0.3.1
 --------------------------------------------------------------------------------
 

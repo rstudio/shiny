@@ -260,7 +260,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 #' @export
 #' @examples
 #' \dontrun{
-#'   output$moreControls <- renderUI(function() {
+#'   output$moreControls <- renderUI({
 #'     list(
 #'       
 #'     )

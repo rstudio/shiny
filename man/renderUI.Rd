@@ -32,7 +32,7 @@
 }
 \examples{
 \dontrun{
-  output$moreControls <- renderUI(function() {
+  output$moreControls <- renderUI({
     list(
 
     )

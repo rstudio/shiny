@@ -57,6 +57,13 @@
     }
   }
 
+  function pixelRatio() {
+    if (window.devicePixelRatio) {
+      return window.devicePixelRatio;
+    } else {
+      return 1;
+    }
+  }
 
   // Takes a string expression and returns a function that takes an argument.
   // 
@@ -1542,6 +1549,12 @@
     $('body').on('shown.sendPlotSize', '*', sendPlotSize);
     $('body').on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*',
                  sendOutputHiddenState);
+
+    // Send initial pixel ratio, and update it if it changes
+    initialValues['.shinymetadata_pixelratio'] = pixelRatio();
+    $(window).resize(function() {
+      inputs.setInput('.shinymetadata_pixelratio', pixelRatio());
+    });
 
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);

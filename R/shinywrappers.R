@@ -28,6 +28,9 @@ suppressPackageStartupMessages({
 #'   You can also pass in a function that returns the width in pixels or 
 #'   \code{'auto'}; in the body of the function you may reference reactive 
 #'   values and functions.
+#' @param res Resolution of resulting plot, in pixels per inch. This value is
+#'   passed to \code{\link{png}}. Note that this affects the resolution of PNG
+#'   rendering in R; it won't change the actual ppi of the browser.
 #' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}. 
 #'   These can be used to set the width, height, background color, etc.
 #' @param env The environment in which to evaluate \code{expr}.
@@ -37,7 +40,7 @@ suppressPackageStartupMessages({
 #'   instead).
 #'   
 #' @export
-renderPlot <- function(expr, width='auto', height='auto', ...,
+renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE, func=NULL) {
   if (!is.null(func)) {
     shinyDeprecated(msg="renderPlot: argument 'func' is deprecated. Please use 'expr' instead.")
@@ -90,7 +93,11 @@ renderPlot <- function(expr, width='auto', height='auto', ...,
       pngfun <- png
     }
 
-    do.call(pngfun, c(args, filename=png.file, width=width, height=height))
+    # Resolution multiplier
+    pixelratio <- shinyapp$getMetadata("pixelratio", default=1)
+
+    do.call(pngfun, c(args, filename=png.file, width=width*pixelratio,
+                      height=height*pixelratio, res=res*pixelratio))
     on.exit(unlink(png.file))
     tryCatch(
       func(),

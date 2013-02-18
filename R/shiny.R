@@ -20,6 +20,7 @@ ShinyApp <- setRefClass(
     .invalidatedOutputErrors = 'Map',
     .outputs = 'list',       # Keeps track of all the output observer objects
     .outputOptions = 'list', # Options for each of the output observer objects
+    .metadata = 'list',      # Metadata sent from the browser
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
     session = 'ReactiveValues',
@@ -41,6 +42,7 @@ ShinyApp <- setRefClass(
       token <<- createUniqueId(16)
       .outputs <<- list()
       .outputOptions <<- list()
+      .metadata <<- list()
       
       allowDataUriScheme <<- TRUE
     },
@@ -319,6 +321,24 @@ ShinyApp <- setRefClass(
           .outputs[[outputName]]$resume()
         }
       }
+    },
+    # This function manages metadata sent from the browser
+    manageMetadata= function() {
+      # Find and extract all values that start with .shinymetadata_
+      full_names <- ls(session$.values, all.names=TRUE)
+      full_names <- full_names[grepl("^.shinymetadata_", full_names)]
+      values <- mget(full_names, session$.values)
+
+      # Remove the leading .shinymetadata_ and store in the .metadata object
+      short_names <- sub("^.shinymetadata_", "", full_names)
+      .metadata <<- setNames(values, short_names)
+    },
+    # This is for other functions to access metadata values
+    getMetadata = function(name, default=NULL) {
+      if (!is.null(.metadata[[name]]))
+        .metadata[[name]]
+      else
+       default
     },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs
@@ -896,6 +916,7 @@ startApp <- function(port=8101L) {
       shinyapp$dispatch(msg)
     )
     shinyapp$manageHiddenOutputs()
+    shinyapp$manageMetadata()
     flushReact()
     lapply(apps$values(), function(shinyapp) {
       shinyapp$flushOutput()
@@ -917,6 +938,7 @@ serviceApp <- function(ws_env) {
   if (timerCallbacks$executeElapsed()) {
     for (shinyapp in apps$values()) {
       shinyapp$manageHiddenOutputs()
+      shinyapp$manageMetadata()
     }
 
     flushReact()

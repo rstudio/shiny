@@ -1012,10 +1012,15 @@
     },
     getValue: function(el) {
       var numberVal = $(el).val();
-      if (!isNaN(numberVal))
+      if (/^\s*$/.test(numberVal))  // Return null if all whitespace
+        return null;
+      else if (!isNaN(numberVal))   // If valid Javascript number string, coerce to number
         return +numberVal;
       else
-        return numberVal;
+        return numberVal;           // If other string like "1e6", send it unchanged
+    },
+    getType: function(el) {
+      return "number"
     }
   });
   inputBindings.register(numberInputBinding, 'shiny.numberInput');

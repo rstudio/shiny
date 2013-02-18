@@ -848,6 +848,7 @@ startApp <- function(port=8101L) {
           msg$data[[ splitName[[1]] ]] <- switch(
             splitName[[2]],
             matrix = unpackMatrix(val),
+            number = ifelse(is.null(val), NA, val),
             stop('Unknown type specified for ', name)
           )
         }

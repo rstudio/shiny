@@ -300,26 +300,20 @@ ShinyApp <- setRefClass(
     # This function suspends observers for hidden outputs and resumes observers
     # for un-hidden outputs.
     manageHiddenOutputs = function() {
-      # Get all input object names, and keep only those that represent hidden
-      # states, with the format ".shinyout_foo_hidden".
-      # Some tricky stuff: insetad of accessing names using session$names(),
-      # get the names directly via session$.values, to avoid triggering reactivity.
-      hiddenNames <- ls(session$.values, all.names=TRUE)
-      hiddenNames <- hiddenNames[grepl("^\\.shinyout_.*_hidden$", hiddenNames)]
-
       # Find hidden state for each output, and suspend/resume accordingly
-      for (hiddenName in hiddenNames) {
-        outputName <- sub("^\\.shinyout_(.*)_hidden", "\\1", hiddenName)
+      for (outputName in names(.outputs)) {
+        # Find corresponding hidden state input variable, with the format
+        # ".shinyout_foo_hidden".
+        # Some tricky stuff: instead of accessing names using session$names(),
+        # get the names directly via session$.values, to avoid triggering reactivity.
+        # Need to handle cases where the output object isn't actually used
+        # in the web page; in these cases, there's no .shinyout_foo_hidden flag,
+        # and hidden should be TRUE. In other words, NULL and TRUE should map
+        # to TRUE, FALSE should map to FALSE.
+        hidden <- session$.values[[paste(".shinyout_", outputName, "_hidden", sep="")]]
+        if (is.null(hidden)) hidden <- TRUE
 
-        if (!exists(outputName, .outputs, inherits = FALSE)) {
-          warning("Attempted to manage hidden state of nonexistent output object '",
-            outputName, "'.")
-          return()
-        }
-
-        # Use session$.values intead of session$get() to avoid reactivity
-        if (session$.values[[hiddenName]] &&
-            .outputOptions[[outputName]][['suspendWhenHidden']]) {
+        if (hidden && .outputOptions[[outputName]][['suspendWhenHidden']]) {
           .outputs[[outputName]]$suspend()
         } else {
           .outputs[[outputName]]$resume()

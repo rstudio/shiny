@@ -1027,7 +1027,7 @@
 
 
   var sliderInputBinding = {};
-  $.extend(sliderInputBinding, numberInputBinding, {
+  $.extend(sliderInputBinding, textInputBinding, {
     find: function(scope) {
       // Check if jslider plugin is loaded
       if (!$.fn.slider)

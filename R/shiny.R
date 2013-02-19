@@ -915,12 +915,15 @@ startApp <- function(port=8101L) {
 # @param ws_env The return value from \code{\link{startApp}}.
 serviceApp <- function(ws_env) {
   if (timerCallbacks$executeElapsed()) {
-    manageHiddenOutputs()
+    for (shinyapp in apps$values()) {
+      shinyapp$manageHiddenOutputs()
+    }
+
     flushReact()
-    lapply(apps$values(), function(shinyapp) {
+
+    for (shinyapp in apps$values()) {
       shinyapp$flushOutput()
-      NULL
-    })
+    }
   }
 
   # If this R session is interactive, then call service() with a short timeout

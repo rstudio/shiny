@@ -1,9 +1,9 @@
 #' @docType package
-#' @import websockets caTools RJSONIO xtable digest
+#' @import eventloop caTools RJSONIO xtable digest
 NULL
 
 suppressPackageStartupMessages({
-  library(websockets)
+  library(eventloop)
   library(RJSONIO)
 })
 
@@ -15,7 +15,7 @@ createUniqueId <- function(bytes) {
 ShinyApp <- setRefClass(
   'ShinyApp',
   fields = list(
-    .websocket = 'list',
+    .websocket = 'ANY',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
     .outputs = 'list',       # Keeps track of all the output observer objects
@@ -29,8 +29,8 @@ ShinyApp <- setRefClass(
     allowDataUriScheme = 'logical'
   ),
   methods = list(
-    initialize = function(ws) {
-      .websocket <<- ws
+    initialize = function(websocket) {
+      .websocket <<- websocket
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
       .progressKeys <<- character(0)
@@ -164,7 +164,7 @@ ShinyApp <- setRefClass(
            gsub('(?m)base64,[a-zA-Z0-9+/=]+','[base64 data]',json,perl=TRUE))
       if (getOption('shiny.transcode.json', TRUE))
         json <- iconv(json, to='UTF-8')
-      websocket_write(json, .websocket)
+      .websocket$send(json)
     },
     
     # Public RPC methods
@@ -195,8 +195,9 @@ ShinyApp <- setRefClass(
     },
     # Provides a mechanism for handling direct HTTP requests that are posted
     # to the session (rather than going through the websocket)
-    handleRequest = function(ws, header, subpath) {
+    handleRequest = function(req) {
       # TODO: Turn off caching for the response
+      subpath <- req$PATH_INFO
       
       matches <- regmatches(subpath,
                             regexec("^/([a-z]+)/([^?]*)", 
@@ -445,37 +446,26 @@ httpResponse <- function(status = 200,
   return(resp)
 }
 
-fixupRequestPath <- function(header) {
-  # Separate the path from the query
-  pathEnd <- regexpr('?', header$RESOURCE, fixed=TRUE)
-  if (pathEnd > 0)
-    header$PATH <- substring(header$RESOURCE, 1, pathEnd - 1)
-  else
-    header$PATH <- header$RESOURCE
-  return(header)
-}
-
 httpServer <- function(handlers) {
   handler <- joinHandlers(handlers)
 
-  filter <- getOption('shiny.http.response.filter', NULL)
-  if (is.null(filter))
-    filter <- function(ws, header, response) response
+  # TODO: Figure out what this means after eventloop migration
+#   filter <- getOption('shiny.http.response.filter', NULL)
+#   if (is.null(filter))
+#     filter <- function(ws, header, response) response
   
-  function(ws, header) {
-    header <- fixupRequestPath(header)
-    
-    response <- handler(ws, header)
+  function(req) {
+    response <- handler(req)
     if (is.null(response))
       response <- httpResponse(404, content="<h1>Not Found</h1>")
     
-    response <- filter(ws, header, response)
+    headers <- as.list(response$headers)
+    headers$'Content-Type' <- response$content_type
     
-    return(http_response(ws,
-                         status=response$status,
-                         content_type=response$content_type,
-                         content=response$content,
-                         headers=response$headers))
+    #response <- filter(ws, header, response)
+    return(list(status=response$status,
+                body=response$content,
+                headers=headers))
   }
 }
 
@@ -491,13 +481,13 @@ joinHandlers <- function(handlers) {
   handlers <- handlers[!sapply(handlers, is.null)]
   
   if (length(handlers) == 0)
-    return(function(ws, header) NULL)
+    return(function(req) NULL)
   if (length(handlers) == 1)
     return(handlers[[1]])
   
-  function(ws, header) {
+  function(req) {
     for (handler in handlers) {
-      response <- handler(ws, header)
+      response <- handler(req)
       if (!is.null(response))
         return(response)
     }
@@ -505,35 +495,39 @@ joinHandlers <- function(handlers) {
   }
 }
 
-sessionHandler <- function(ws, header) {
-  path <- header$PATH
+sessionHandler <- function(req) {
+  path <- req$PATH_INFO
   if (is.null(path))
     return(NULL)
   
-  matches <- regmatches(path, regexec('^/session/([0-9a-f]+)(/.*)$', path))
+  matches <- regmatches(path, regexec('^(/session/([0-9a-f]+))(/.*)$', path))
   if (length(matches[[1]]) == 0)
     return(NULL)
   
-  session <- matches[[1]][2]
-  subpath <- matches[[1]][3]
+  session <- matches[[1]][3]
+  subpath <- matches[[1]][4]
   
   shinyapp <- appsByToken$get(session)
   if (is.null(shinyapp))
     return(NULL)
   
-  return(shinyapp$handleRequest(ws, header, subpath))
+  subreq <- as.environment(as.list(req, all.names=TRUE))
+  subreq$PATH_INFO <- subpath
+  subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, matches[[1]][2], sep='')
+  
+  return(shinyapp$handleRequest(subreq))
 }
 
 dynamicHandler <- function(filePath, dependencyFiles=filePath) {
   lastKnownTimestamps <- NA
-  metaHandler <- function(ws, header) NULL
+  metaHandler <- function(req) NULL
   
   if (!file.exists(filePath))
     return(metaHandler)
   
   cacheContext <- CacheContext$new()
   
-  return (function(ws, header) {
+  return (function(req) {
     # Check if we need to rebuild
     if (cacheContext$isDirty()) {
       cacheContext$reset()
@@ -552,13 +546,13 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
       clearClients()
     }
     
-    return(metaHandler(ws, header))
+    return(metaHandler(req))
   })
 }
 
 staticHandler <- function(root) {
-  return(function(ws, header) {
-    path <- header$PATH
+  return(function(req) {
+    path <- req$PATH_INFO
     
     if (is.null(path))
       return(httpResponse(400, content="<h1>Bad Request</h1>"))
@@ -577,7 +571,6 @@ staticHandler <- function(root) {
   })
 }
 
-apps <- Map$new()
 appsByToken <- Map$new()
 
 # Provide a character representation of the WS that can be used
@@ -588,11 +581,11 @@ wsToKey <- function(WS) {
 
 .globals <- new.env()
 
-.globals$clients <- function(ws, header) NULL
+.globals$clients <- function(req) NULL
 
 
 clearClients <- function() {
-  .globals$clients <- function(ws, header) NULL
+  .globals$clients <- function(req) NULL
 }
 
 
@@ -655,8 +648,8 @@ addResourcePath <- function(prefix, directoryPath) {
                                        func=staticHandler(directoryPath))
 }
 
-resourcePathHandler <- function(ws, header) {
-  path <- header$RESOURCE
+resourcePathHandler <- function(req) {
+  path <- req$PATH_INFO
   
   match <- regexpr('^/([^/]+)/', path, perl=TRUE)
   if (match == -1)
@@ -670,10 +663,11 @@ resourcePathHandler <- function(ws, header) {
   
   suffix <- substr(path, 2 + len, nchar(path))
   
-  header$RESOURCE <- suffix
-  header <- fixupRequestPath(header)
+  subreq <- as.environment(as.list(req, all.names=TRUE))
+  subreq$PATH_INFO <- suffix
+  subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, substr(path, 1, 2 + len), sep='')
   
-  return(resInfo$func(ws, header))
+  return(resInfo$func(subreq))
 }
 
 .globals$server <- NULL
@@ -798,114 +792,111 @@ startApp <- function(port=8101L) {
   })
   serverFunc <- .globals$server
   
-  ws_env <- create_server(
-    port=port,
-    webpage=httpServer(c(sessionHandler,
-                         dynamicHandler(uiR),
-                         wwwDir,
-                         sys.www.root,
-                         resourcePathHandler)))
-  
-  set_callback('established', function(WS, ...) {
-    shinyapp <- ShinyApp$new(WS)
-    apps$set(wsToKey(WS), shinyapp)
-    appsByToken$set(shinyapp$token, shinyapp)
-  }, ws_env)
-  
-  set_callback('closed', function(WS, ...) {
-    shinyapp <- apps$get(wsToKey(WS))
-    if (!is.null(shinyapp))
-      appsByToken$remove(shinyapp$token)
-    apps$remove(wsToKey(WS))
-  }, ws_env)
-  
-  set_callback('receive', function(DATA, WS, ...) {
-    if (getOption('shiny.trace', FALSE)) {
-      if (as.raw(0) %in% DATA)
-        message("RECV ", '$$binary data$$')
-      else
-        message("RECV ", rawToChar(DATA))
-    }
-    
-    if (identical(charToRaw("\003\xe9"), DATA))
-      return()
-    
-    shinyapp <- apps$get(wsToKey(WS))
-    
-    msg <- decodeMessage(DATA)
-
-    # Do our own list simplifying here. sapply/simplify2array give names to
-    # character vectors, which is rarely what we want.
-    if (!is.null(msg$data)) {
-      for (name in names(msg$data)) {
-        val <- msg$data[[name]]
+  eventloopCallbacks <- list(
+    call = httpServer(c(sessionHandler,
+                        dynamicHandler(uiR),
+                        wwwDir,
+                        sys.www.root,
+                        resourcePathHandler)),
+    onWSOpen = function(ws) {
+      shinyapp <- ShinyApp$new(ws)
+      appsByToken$set(shinyapp$token, shinyapp)
+      
+      ws$onMessage(function(binary, msg) {
         
-        splitName <- strsplit(name, ':')[[1]]
-        if (length(splitName) > 1) {
-          msg$data[[name]] <- NULL
-          
-          # TODO: Make the below a user-extensible registry of deserializers
-          msg$data[[ splitName[[1]] ]] <- switch(
-            splitName[[2]],
-            matrix = unpackMatrix(val),
-            number = ifelse(is.null(val), NA, val),
-            stop('Unknown type specified for ', name)
-          )
+        # To ease transition from websockets-based code. Should remove once we're stable.
+        if (is.character(msg))
+          msg <- charToRaw(msg)
+        
+        if (getOption('shiny.trace', FALSE)) {
+          if (binary)
+            message("RECV ", '$$binary data$$')
+          else
+            message("RECV ", rawToChar(msg))
         }
-        else if (is.list(val) && is.null(names(val))) {
-          val_flat <- unlist(val, recursive = TRUE)
-
-          if (is.null(val_flat)) {
-            # This is to assign NULL instead of deleting the item
-            msg$data[name] <- list(NULL)
-          } else {
-            msg$data[[name]] <- val_flat
+        
+        if (identical(charToRaw("\003\xe9"), msg))
+          return()
+        
+        msg <- decodeMessage(msg)
+        
+        # Do our own list simplifying here. sapply/simplify2array give names to
+        # character vectors, which is rarely what we want.
+        if (!is.null(msg$data)) {
+          for (name in names(msg$data)) {
+            val <- msg$data[[name]]
+            
+            splitName <- strsplit(name, ':')[[1]]
+            if (length(splitName) > 1) {
+              msg$data[[name]] <- NULL
+              
+              # TODO: Make the below a user-extensible registry of deserializers
+              msg$data[[ splitName[[1]] ]] <- switch(
+                splitName[[2]],
+                matrix = unpackMatrix(val),
+                number = ifelse(is.null(val), NA, val),
+                stop('Unknown type specified for ', name)
+              )
+            }
+            else if (is.list(val) && is.null(names(val))) {
+              val_flat <- unlist(val, recursive = TRUE)
+              
+              if (is.null(val_flat)) {
+                # This is to assign NULL instead of deleting the item
+                msg$data[name] <- list(NULL)
+              } else {
+                msg$data[[name]] <- val_flat
+              }
+            }
           }
         }
-      }
-    }
-    
-    switch(
-      msg$method,
-      init = {
         
-        # Check if server.R has changed, and if so, reload
-        mtime <- file.info(serverR)$mtime
-        if (!identical(mtime, serverFileTimestamp)) {
-          shinyServer(NULL)
-          local({
-            serverFileTimestamp <<- mtime
-            source(serverR, local=new.env(parent=.GlobalEnv))
-            if (is.null(.globals$server))
-              stop("No server was defined in server.R")
-          })
-          serverFunc <<- .globals$server
-        }
-        
-        shinyapp$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
-        msg$data[['__allowDataUriScheme']] <- NULL
-        shinyapp$session$mset(msg$data)
-        local({
-          serverFunc(input=.createReactiveValues(shinyapp$session, readonly=TRUE),
-                     output=.createOutputWriter(shinyapp))
+        switch(
+          msg$method,
+          init = {
+            
+            # Check if server.R has changed, and if so, reload
+            mtime <- file.info(serverR)$mtime
+            if (!identical(mtime, serverFileTimestamp)) {
+              shinyServer(NULL)
+              local({
+                serverFileTimestamp <<- mtime
+                source(serverR, local=new.env(parent=.GlobalEnv))
+                if (is.null(.globals$server))
+                  stop("No server was defined in server.R")
+              })
+              serverFunc <<- .globals$server
+            }
+            
+            shinyapp$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
+            msg$data[['__allowDataUriScheme']] <- NULL
+            shinyapp$session$mset(msg$data)
+            local({
+              serverFunc(input=.createReactiveValues(shinyapp$session, readonly=TRUE),
+                         output=.createOutputWriter(shinyapp))
+            })
+          },
+          update = {
+            shinyapp$session$mset(msg$data)
+          },
+          shinyapp$dispatch(msg)
+        )
+        shinyapp$manageHiddenOutputs()
+        flushReact()
+        lapply(appsByToken$values(), function(shinyapp) {
+          shinyapp$flushOutput()
+          NULL
         })
-      },
-      update = {
-        shinyapp$session$mset(msg$data)
-      },
-      shinyapp$dispatch(msg)
-    )
-    shinyapp$manageHiddenOutputs()
-    flushReact()
-    lapply(apps$values(), function(shinyapp) {
-      shinyapp$flushOutput()
-      NULL
-    })
-  }, ws_env)
+      })
+      
+      ws$onClose(function() {
+        appsByToken$remove(shinyapp$token)
+      })
+    }
+  )
   
   message('\n', 'Listening on port ', port)
-  
-  return(ws_env)
+  eventloop::run("0.0.0.0", port, eventloopCallbacks)
 }
 
 # NOTE: we de-roxygenized this comment because the function isn't exported
@@ -931,7 +922,7 @@ serviceApp <- function(ws_env) {
   maxTimeout <- ifelse(interactive(), 100, 5000)
   
   timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent()))
-  service(server=ws_env, timeout=timeout)
+  service(timeout)
 }
 
 #' Run Shiny Application

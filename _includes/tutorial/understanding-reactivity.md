@@ -64,7 +64,7 @@ At the core of Shiny is its reactive engine: this is how Shiny knows when to re-
 We've discussed reactive sources and reactive endpoints. These are general terms for parts that play a particular role in a reactive program. Presently, Shiny has one class of objects that act as reactive sources, and one class of objects that act as reactive endpoints, but in principle there could be other classes that implement these roles.
 
 * **Reactive values** are an implementation of Reactive sources; that is, they are an implementation of that role. The `input` object is a `ReactiveValues` object which looks something like a list, and it contains many individual reactive values.
-* **Reactive expressions** are an implementation of Reactive conductors. We haven't seen these yet, but we'll explore in the next section.
+* **Reactive expressions** are an implementation of Reactive conductors. We haven't seen these yet, but we'll explore them in the next section.
 * **Observers** are an implementation of Reactive endpoints. The `output` object looks something like a list, and it can contain many individual observers.
 
 ![Implementations of reactive roles](reactivity_diagrams/roles_implement.png)
@@ -76,7 +76,7 @@ As shown in the diagram below, a reactive value has a value (no surprise there).
 
 ![](reactivity_diagrams/01_hello_process_1.png)
 
-When you load this application in a web page, it be in the state shown above, with `input$obs` having the value 500 (this is set in the `ui.r` file, which isn't shown here). If you change the value to 1000, it triggers a series of events that result in a new image being sent to your browser.
+When you load this application in a web page, it be in the state shown above, with `input$obs` having the value 500 (this is set in the `ui.r` file, which isn't shown here). The arrow represents the direction that invalidations will flow. If you change the value to 1000, it triggers a series of events that result in a new image being sent to your browser.
 
 When the value of `input$obs` changes, two things happen:
 * All of its descendants in the graph are invalidated. Sometimes for brevity we'll say that an observer is _dirty_, meaning that it is invalidated, or _clean_, meaning that it is _not_ invalidated.
@@ -94,12 +94,12 @@ Once all the descendants are invalidated, a _flush_ occurs. When this happens, a
 Remember that the code we assigned to `output$distPlot` makes use of `input$obs`:
 
 {% highlight r %}
-  output$distPlot <- renderPlot({
-    hist(rnorm(input$obs))
-  })
+output$distPlot <- renderPlot({
+  hist(rnorm(input$obs))
+})
 {% endhighlight %}
 
-As `output$distPlot` re-executes, it accesses the reactive value `input$obs`. When it does this, it takes a dependency on that value; in other words, an arrow is drawn from `input$obs` to `output$distPlot`.
+As `output$distPlot` re-executes, it accesses the reactive value `input$obs`. When it does this, it becomes a dependent of that value, represented by the arrow . When `input$obs` changes, it invalidates all of its children; in this case, that's just`output$distPlot`. 
 
 ![](reactivity_diagrams/01_hello_process_4.png)
 
@@ -127,8 +127,8 @@ Reactive conductors are useful for encapsulating slow or computationally expensi
 fib <- function(n) ifelse(n<3, 1, fib(n-1)+fib(n-2))
 
 shinyServer(function(input, output) {
-  output$nthValue    <- reactiveText({ fib(as.numeric(input$n)) })
-  output$nthValueInv <- reactiveText({ 1 / fib(as.numeric(input$n)) })
+  output$nthValue    <- renderText({ fib(as.numeric(input$n)) })
+  output$nthValueInv <- renderText({ 1 / fib(as.numeric(input$n)) })
 })
 {% endhighlight %}
 
@@ -148,8 +148,8 @@ fib <- function(n) ifelse(n<3, 1, fib(n-1)+fib(n-2))
 shinyServer(function(input, output) {
   currentFib         <- reactive({ fib(as.numeric(input$n)) })
 
-  output$nthValue    <- reactiveText({ fib(as.numeric(input$n)) })
-  output$nthValueInv <- reactiveText({ 1 / fib(as.numeric(input$n)) })
+  output$nthValue    <- renderText({ currentFib(as.numeric(input$n)) })
+  output$nthValueInv <- renderText({ 1 / currentFib(as.numeric(input$n)) })
 })
 {% endhighlight %}
 
@@ -159,11 +159,13 @@ Here is the new graph structure, this time shown in its state after the initial 
 ![](reactivity_diagrams/fib_process_1.png)
 
 
-Suppose the user sets `input$n` to 30. This is a new value, so it immediately invalidates its children, `currentFib`, which in turn invalidates its children, `output$nthValue` and `output$nthValueInv`. As the invalidations are made, the dependency arrows are removed:
+Suppose the user sets `input$n` to 30. This is a new value, so it immediately invalidates its children, `currentFib`, which in turn invalidates its children, `output$nthValue` and `output$nthValueInv`. As the invalidations are made, the invalidation arrows are removed:
 
 ![](reactivity_diagrams/fib_process_2.png)
 
-After the invalidations finish, the reactive environment is flushed, so the endpoints re-execute. If a flush occurs when multiple endpoints are invalidated, there isn't a guaranteed order that the endpoints will execute, so `nthValue` may run before `nthValueInv`, or vice versa. Suppose in this case that `nthValue()` executes first. The next several steps are straightforward:
+After the invalidations finish, the reactive environment is flushed, so the endpoints re-execute. If a flush occurs when multiple endpoints are invalidated, there isn't a guaranteed order that the endpoints will execute, so `nthValue` may run before `nthValueInv`, or vice versa. If the execution order of endpoints will not affect the results, as long as they don't change and read non-reactive variables (which don't become part of the reactive graph).
+
+Suppose in this case that `nthValue()` executes first. The next several steps are straightforward:
 
 ![](reactivity_diagrams/fib_process_3.png)
 
@@ -207,7 +209,7 @@ Conductors (reactive expressions) and endpoints (reactive observers) are similar
 * Endpoints respond to reactive flush events, but conductors don't. If you want a conductor to execute, it must have an endpoint as a descendent on the reactive dependency graph.
 * Conductors return values, but endpoints don't. Note that reactive expressions are an implementation of conductors, and they happen to cache their return values. (In an abstract sense, a conductor doesn't necessarily cache its return values, but this implementation -- the reactive expression -- does so.)
 
-If you look at the code for `reactiveText()` and friends, you'll see that they each return a function which returns a value. This might lead you to think that the endpoints _do_ return values. However, this isn't the whole story. The function returned by `reactiveText()` is actually not an observer/endpoint. The function returned by `reactiveText()` gets automatically wrapped into an observer when it is assigned to `output$x`. This is because the observer needs to do special things to send the data to the browser.
+If you look at the code for `renderText()` and friends, you'll see that they each return a function which returns a value. This might lead you to think that the endpoints _do_ return values. However, this isn't the whole story. The function returned by `renderText()` is actually not an observer/endpoint. The function returned by `renderText()` gets automatically wrapped into an observer when it is assigned to `output$x`. This is because the observer needs to do special things to send the data to the browser.
 
 
 ### Isolation: avoiding dependency
@@ -291,14 +293,40 @@ In the `actionButton` example, you might want to prevent it from returning a plo
 {% endhighlight %}
 
 
-Reactive values are not the only things that can be isolated; reactive expressions can also be put inside an `isolate()`. It's also possible to put multiple lines of code in `isolate()`, like this:
+Reactive values are not the only things that can be isolated; reactive expressions can also be put inside an `isolate()`. Building off the Fibonacci example from above, this would calculate the _n_th value only when the button is clicked:
 
 {% highlight r %}
-z <- isolate({
-  x <- input$xSlider + 100
-  y <- input$ySlider * 2
-  x / y
+output$nthValue <- renderText({
+  if (input$goButton == 0)
+    return()
+
+  isolate({ fib(as.numeric(input$n)) })
 })
 {% endhighlight %}
 
-In this piece of code, `x` and `y` are assigned values that will be visible even outside of the `isolate()`, and `z` will be assigned the last value in the expression, `x / y`. The calling function won't take a reactive dependency on either of the `input` variables.
+
+
+It's also possible to put multiple lines of code in `isolate()`. For example here are some blocks of code that have equivalent effect:
+
+{% highlight r %}
+# Separate calls to isolate -------------------------------
+x <- isolate({ input$xSlider }) + 100
+y <- isolate({ input$ySlider })  * 2
+z <- x/y
+
+# Single call to isolate ----------------------------------
+isolate({
+  x <- input$xSlider + 100
+  y <- input$ySlider * 2
+  z <- x/y
+})
+
+# Single call to isolate, use return value ----------------
+z <- isolate({
+  x <- input$xSlider + 100
+  y <- input$ySlider * 2
+  x/y
+})
+{% endhighlight %}
+
+In all of these cases, the calling function won't take a reactive dependency on either of the `input` variables.

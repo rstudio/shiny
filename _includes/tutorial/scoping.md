@@ -113,7 +113,7 @@ shinyServer(function(input, output) {
     # ...
   })
 })
+{% endhighlight %}
 
 If you use the default value of `local=FALSE`, then the file will be sourced in the global environment.
 
-{% endhighlight %}

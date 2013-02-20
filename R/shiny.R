@@ -896,7 +896,12 @@ startApp <- function(port=8101L) {
   )
   
   message('\n', 'Listening on port ', port)
-  eventloop::run("0.0.0.0", port, eventloopCallbacks)
+
+  # If this R session is interactive, then use a short timeout to keep the
+  # session responsive to user interrupt
+  maxTimeout <- ifelse(interactive(), 100, 5000)
+  
+  return(createServer("0.0.0.0", port, eventloopCallbacks, maxTimeout))
 }
 
 # NOTE: we de-roxygenized this comment because the function isn't exported
@@ -955,7 +960,10 @@ runApp <- function(appDir=getwd(),
   
   require(shiny)
   
-  ws_env <- startApp(port=port)
+  server <- startApp(port=port)
+  on.exit({
+    stopServer(server)
+  })
   
   if (launch.browser) {
     appUrl <- paste("http://localhost:", port, sep="")
@@ -964,11 +972,11 @@ runApp <- function(appDir=getwd(),
   
   tryCatch(
     while (TRUE) {
-      serviceApp(ws_env)
+      service()
+      Sys.sleep(0)
     },
     finally = {
       timerCallbacks$clear()
-      websocket_close(ws_env)
     }
   )
 }

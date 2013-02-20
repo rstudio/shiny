@@ -181,8 +181,15 @@ hljs.initHighlightingOnLoad();
    <li>
       <a target="_self" href="#scoping">Scoping</a>
    </li>
+   <li class="nav-header">Understanding Reactivity</li>
    <li>
-      <a target="_self" href="#understanding-reactivity">Understanding Reactivity</a>
+      <a target="_self" href="#reactivity-overview">Reactivity Overview</a>
+   </li>
+   <li>
+      <a target="_self" href="#execution-scheduling">Execution Scheduling</a>
+   </li>
+   <li>
+      <a target="_self" href="#isolation">Isolation</a>
    </li>
    <li class="nav-header">Deploying and Sharing Apps</li>
    <li>
@@ -327,11 +334,27 @@ hljs.initHighlightingOnLoad();
 
 </div>
 
-<!-- Understanding Reactivity -->
-<div class="tab-pane" id="understanding-reactivity">
+<!-- Reactivity Overview -->
+<div class="tab-pane" id="reactivity-overview">
 
-{% capture understanding_reactivity %}{% include tutorial/understanding-reactivity.md %}{% endcapture %}
-{{ understanding_reactivity | markdownify }}
+{% capture reactivity_overview %}{% include tutorial/reactivity-overview.md %}{% endcapture %}
+{{ reactivity_overview | markdownify }}
+
+</div>
+
+<!-- Execution Scheduling -->
+<div class="tab-pane" id="execution-scheduling">
+
+{% capture execution_scheduling %}{% include tutorial/execution-scheduling.md %}{% endcapture %}
+{{ execution_scheduling | markdownify }}
+
+</div>
+
+<!-- Isolation -->
+<div class="tab-pane" id="isolation">
+
+{% capture isolation %}{% include tutorial/isolation.md %}{% endcapture %}
+{{ isolation | markdownify }}
 
 </div>
 

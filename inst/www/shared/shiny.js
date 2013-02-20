@@ -1383,7 +1383,7 @@
           var ratePolicy = binding.getRatePolicy();
           if (ratePolicy != null) {
             inputsRate.setRatePolicy(
-              id,
+              effectiveId,
               ratePolicy.policy,
               ratePolicy.delay);
           }

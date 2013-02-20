@@ -20,7 +20,7 @@ ShinyApp <- setRefClass(
     .invalidatedOutputErrors = 'Map',
     .outputs = 'list',       # Keeps track of all the output observer objects
     .outputOptions = 'list', # Options for each of the output observer objects
-    .metadata = 'list',      # Metadata sent from the browser
+    .metadata = 'ReactiveValues', # Metadata sent from the browser
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
     session = 'ReactiveValues',
@@ -42,7 +42,7 @@ ShinyApp <- setRefClass(
       token <<- createUniqueId(16)
       .outputs <<- list()
       .outputOptions <<- list()
-      .metadata <<- list()
+      .metadata <<- ReactiveValues$new()
       
       allowDataUriScheme <<- TRUE
     },

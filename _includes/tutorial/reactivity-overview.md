@@ -103,6 +103,16 @@ Here is the new graph structure:
 ![Fibonacci app with conductor](reactivity_diagrams/conductor.png)
 
 
+Keep in mind that if your application tries to access reactive values or expressions from outside a reactive context &mdash; that is, outside of a reactive expression or observer &mdash; then it will result in an error. You can think of there being a reactive "world" which can see and change the non-reactive world, but the non-reactive world can't do the same to the reactive world. Code like this will not work, because the call to `fib()` is not in the reactive world, but it tries to access some that is, the reactive value `input$n`:
+
+{% highlight r %}
+shinyServer(function(input, output) {
+  currentFib         <- fib(as.numeric(input$n))
+  output$nthValue    <- renderText({ currentFib })
+})
+{% endhighlight %}
+
+
 ### Summary
 
 In this section, we've learned about:

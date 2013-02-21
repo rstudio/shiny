@@ -3,9 +3,10 @@
 
 The Shiny Text application demonstrates printing R objects directly, as well as displaying data frames using HTML tables. To run the example, type: 
 
-<pre><code class="console">&gt; library(shiny)
-&gt; runExample(&quot;02_text&quot;)
-</code></pre>
+{% highlight console %}
+> library(shiny)
+> runExample("02_text")
+{% endhighlight %}
 
 The first example had a single numeric input specified using a slider and a single plot output. This example has a bit more going on: two inputs and two types of textual output.
 
@@ -15,32 +16,33 @@ Here is the user interface definition for the application. Notice in particular 
 
 #### ui.R
 
-<pre><code class="r">library(shiny)
+{% highlight r %}
+library(shiny)
 
 # Define UI for dataset viewer application
 shinyUI(pageWithSidebar(
 
   # Application title
-  headerPanel(&quot;Shiny Text&quot;),
+  headerPanel("Shiny Text"),
 
   # Sidebar with controls to select a dataset and specify the number
   # of observations to view
   sidebarPanel(
-    selectInput(&quot;dataset&quot;, &quot;Choose a dataset:&quot;, 
-                choices = c(&quot;rock&quot;, &quot;pressure&quot;, &quot;cars&quot;)),
+    selectInput("dataset", "Choose a dataset:", 
+                choices = c("rock", "pressure", "cars")),
 
-    numericInput(&quot;obs&quot;, &quot;Number of observations to view:&quot;, 10)
+    numericInput("obs", "Number of observations to view:", 10)
   ),
 
   # Show a summary of the dataset and an HTML table with the requested
   # number of observations
   mainPanel(
-    verbatimTextOutput(&quot;summary&quot;),
+    verbatimTextOutput("summary"),
 
-    tableOutput(&quot;view&quot;)
+    tableOutput("view")
   )
 ))
-</code></pre>
+{% endhighlight %}
 
 The server side of the application has also gotten a bit more complicated. Now we create:
 
@@ -51,31 +53,33 @@ These expressions work similarly to the `renderPlot` expression used in the firs
 
 #### server.R
 
-<pre><code class="r">library(shiny)
+{% highlight r %}
+library(shiny)
 library(datasets)
 
 # Define server logic required to summarize and view the selected dataset
 shinyServer(function(input, output) {
 
   # Return the requested dataset
-  datasetInput &lt;- reactive({
+  datasetInput <- reactive({
     switch(input$dataset,
-           &quot;rock&quot; = rock,
-           &quot;pressure&quot; = pressure,
-           &quot;cars&quot; = cars)
+           "rock" = rock,
+           "pressure" = pressure,
+           "cars" = cars)
   })
 
   # Generate a summary of the dataset
-  output$summary &lt;- renderPrint({
-    dataset &lt;- datasetInput()
+  output$summary <- renderPrint({
+    dataset <- datasetInput()
     summary(dataset)
   })
 
-  # Show the first &quot;n&quot; observations
-  output$view &lt;- renderTable({
+  # Show the first "n" observations
+  output$view <- renderTable({
     head(datasetInput(), n = input$obs)
   })
 })
-</code></pre>
+{% endhighlight %}
+
 
 We've introduced more use of reactive expressions but haven't really explained how they work yet. The next example will start with this one as a baseline and expand significantly on how reactive expressions work in Shiny.

@@ -4,13 +4,17 @@ The examples so far have demonstrated outputs that appear directly in the page, 
 
 To run the example below, type:
 
-<pre><code class="console">&gt; library(shiny)
-&gt; runExample("10_download")</code></pre>
+{% highlight console %}
+> library(shiny)
+> runExample("10_download")
+{% endhighlight %}
 
 You define a download using the `downloadHandler` function on the server side, and either `downloadButton` or `downloadLink` in the UI:
 
 #### ui.R
-<pre><code class="r">shinyUI(pageWithSidebar(
+
+{% highlight r %}
+shinyUI(pageWithSidebar(
   headerPanel('Download Example'),
   sidebarPanel(
     selectInput("dataset", "Choose a dataset:", 
@@ -21,29 +25,31 @@ You define a download using the `downloadHandler` function on the server side, a
     tableOutput('table')
   )
 ))
-</code></pre>
+{% endhighlight %}
 
 #### server.R
-<pre><code class="r">shinyServer(function(input, output) {
-  datasetInput &lt;- reactive({
+
+{% highlight r %}
+shinyServer(function(input, output) {
+  datasetInput <- reactive({
     switch(input$dataset,
            "rock" = rock,
            "pressure" = pressure,
            "cars" = cars)
   })
   
-  output$table &lt;- renderTable({
+  output$table <- renderTable({
     datasetInput()
   })
   
-  output$downloadData &lt;- downloadHandler(
+  output$downloadData <- downloadHandler(
     filename = function() { paste(input$dataset, '.csv', sep='') },
     content = function(file) {
       write.csv(datasetInput(), file)
     }
   )
 })
-</code></pre>
+{% endhighlight %}
 
 As you can see, `downloadHandler` takes a `filename` argument, which tells the web browser what filename to default to when saving. This argument can either be a simple string, or it can be a function that returns a string (as is the case here).
 

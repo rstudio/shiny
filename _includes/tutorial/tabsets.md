@@ -4,9 +4,11 @@
 
 The Tabsets application demonstrates using tabs to organize output. To run the example type: 
 
-<pre><code class="console">&gt; library(shiny)
-&gt; runExample(&quot;06_tabsets&quot;)
-</code></pre>
+{% highlight console %}
+> library(shiny)
+> runExample("06_tabsets")
+{% endhighlight %}
+
 
 ### Tab Panels
 
@@ -15,27 +17,29 @@ Tabsets are created by calling the `tabsetPanel` function with a list of tabs cr
 In this example we updated our Hello Shiny application to add a summary and table view of the data,  each rendered on their own tab. Here is the revised source code for the user-interface:
 
 #### ui.R
-<pre><code class="r">library(shiny)
+
+{% highlight r %}
+library(shiny)
 
 # Define UI for random distribution application 
 shinyUI(pageWithSidebar(
 
   # Application title
-  headerPanel(&quot;Tabsets&quot;),
+  headerPanel("Tabsets"),
 
   # Sidebar with controls to select the random distribution type
   # and number of observations to generate. Note the use of the br()
   # element to introduce extra vertical spacing
   sidebarPanel(
-    radioButtons(&quot;dist&quot;, &quot;Distribution type:&quot;,
-                 list(&quot;Normal&quot; = &quot;norm&quot;,
-                      &quot;Uniform&quot; = &quot;unif&quot;,
-                      &quot;Log-normal&quot; = &quot;lnorm&quot;,
-                      &quot;Exponential&quot; = &quot;exp&quot;)),
+    radioButtons("dist", "Distribution type:",
+                 list("Normal" = "norm",
+                      "Uniform" = "unif",
+                      "Log-normal" = "lnorm",
+                      "Exponential" = "exp")),
     br(),
 
-    sliderInput(&quot;n&quot;, 
-                &quot;Number of observations:&quot;, 
+    sliderInput("n", 
+                "Number of observations:", 
                  value = 500,
                  min = 1, 
                  max = 1000)
@@ -45,13 +49,14 @@ shinyUI(pageWithSidebar(
   # of the generated distribution
   mainPanel(
     tabsetPanel(
-      tabPanel(&quot;Plot&quot;, plotOutput(&quot;plot&quot;)), 
-      tabPanel(&quot;Summary&quot;, verbatimTextOutput(&quot;summary&quot;)), 
-      tabPanel(&quot;Table&quot;, tableOutput(&quot;table&quot;))
+      tabPanel("Plot", plotOutput("plot")), 
+      tabPanel("Summary", verbatimTextOutput("summary")), 
+      tabPanel("Table", tableOutput("table"))
     )
   )
 ))
-</code></pre>
+{% endhighlight %}
+
 
 ### Tabs and Reactive Data
 
@@ -59,7 +64,8 @@ Introducing tabs into our user-interface underlines the importance of creating r
 
 #### server.R
 
-<pre><code class="r">library(shiny)
+{% highlight r %}
+library(shiny)
 
 # Define server logic for random distribution application
 shinyServer(function(input, output) {
@@ -67,8 +73,8 @@ shinyServer(function(input, output) {
   # Reactive expression to generate the requested distribution. This is 
   # called whenever the inputs change. The renderers defined 
   # below then all use the value computed from this expression
-  data &lt;- reactive({  
-    dist &lt;- switch(input$dist,
+  data <- reactive({  
+    dist <- switch(input$dist,
                    norm = rnorm,
                    unif = runif,
                    lnorm = rlnorm,
@@ -82,22 +88,22 @@ shinyServer(function(input, output) {
   # plot label. Note that the dependencies on both the inputs and
   # the 'data' reactive expression are both tracked, and all expressions 
   # are called in the sequence implied by the dependency graph
-  output$plot &lt;- renderPlot({
-    dist &lt;- input$dist
-    n &lt;- input$n
+  output$plot <- renderPlot({
+    dist <- input$dist
+    n <- input$n
 
     hist(data(), 
-         main=paste(&#39;r&#39;, dist, &#39;(&#39;, n, &#39;)&#39;, sep=&#39;&#39;))
+         main=paste('r', dist, '(', n, ')', sep=''))
   })
 
   # Generate a summary of the data
-  output$summary &lt;- renderPrint({
+  output$summary <- renderPrint({
     summary(data())
   })
 
   # Generate an HTML table view of the data
-  output$table &lt;- renderTable({
+  output$table <- renderTable({
     data.frame(x=data())
   })
 })
-</code></pre>
+{% endhighlight %}

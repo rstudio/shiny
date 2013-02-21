@@ -10,28 +10,30 @@ We want to provide a way to select which variable to plot MPG against as well as
 
 #### ui.R
 
-<pre><code class="r">library(shiny)
+{% highlight r %}
+library(shiny)
 
 # Define UI for miles per gallon application
 shinyUI(pageWithSidebar(
 
   # Application title
-  headerPanel(&quot;Miles Per Gallon&quot;),
+  headerPanel("Miles Per Gallon"),
 
   # Sidebar with controls to select the variable to plot against mpg
   # and to specify whether outliers should be included
   sidebarPanel(
-    selectInput(&quot;variable&quot;, &quot;Variable:&quot;,
-                list(&quot;Cylinders&quot; = &quot;cyl&quot;, 
-                     &quot;Transmission&quot; = &quot;am&quot;, 
-                     &quot;Gears&quot; = &quot;gear&quot;)),
+    selectInput("variable", "Variable:",
+                list("Cylinders" = "cyl", 
+                     "Transmission" = "am", 
+                     "Gears" = "gear")),
 
-    checkboxInput(&quot;outliers&quot;, &quot;Show outliers&quot;, FALSE)
+    checkboxInput("outliers", "Show outliers", FALSE)
   ),
 
   mainPanel()
 ))
-</code></pre>
+{% endhighlight %}
+
 
 If you run the application again after making these changes you'll see the two user-inputs we defined displayed within the sidebar:
 
@@ -51,38 +53,39 @@ Here is the source code for the full server script (the inline comments explain 
 
 #### server.R
 
-<pre><code class="r">library(shiny)
+{% highlight r %}
+library(shiny)
 library(datasets)
 
-# We tweak the &quot;am&quot; field to have nicer factor labels. Since this doesn&#39;t
+# We tweak the "am" field to have nicer factor labels. Since this doesn't
 # rely on any user inputs we can do this once at startup and then use the
 # value throughout the lifetime of the application
-mpgData &lt;- mtcars
-mpgData$am &lt;- factor(mpgData$am, labels = c(&quot;Automatic&quot;, &quot;Manual&quot;))
+mpgData <- mtcars
+mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
 
 # Define server logic required to plot various variables against mpg
 shinyServer(function(input, output) {
 
   # Compute the forumla text in a reactive expression since it is 
   # shared by the output$caption and output$mpgPlot expressions
-  formulaText &lt;- reactive({
-    paste(&quot;mpg ~&quot;, input$variable)
+  formulaText <- reactive({
+    paste("mpg ~", input$variable)
   })
 
   # Return the formula text for printing as a caption
-  output$caption &lt;- renderText({
+  output$caption <- renderText({
     formulaText()
   })
 
   # Generate a plot of the requested variable against mpg and only 
   # include outliers if requested
-  output$mpgPlot &lt;- renderPlot({
+  output$mpgPlot <- renderPlot({
     boxplot(as.formula(formulaText()), 
             data = mpgData,
             outline = input$outliers)
   })
 })
-</code></pre>
+{% endhighlight %}
 
 The use of `renderText` and `renderPlot` to generate output (rather than just assigning values directly) is what makes the application reactive. These reactive wrappers return special expressions that are only re-executed when their dependencies change. This behavior is what enables Shiny to automatically update output whenever input changes.
 
@@ -95,33 +98,35 @@ In the updated user-interface definition below you can see that we've added the 
 
 #### ui.R
 
-<pre><code class="r">library(shiny)
+{% highlight r %}
+library(shiny)
 
 # Define UI for miles per gallon application
 shinyUI(pageWithSidebar(
 
   # Application title
-  headerPanel(&quot;Miles Per Gallon&quot;),
+  headerPanel("Miles Per Gallon"),
 
   # Sidebar with controls to select the variable to plot against mpg
   # and to specify whether outliers should be included
   sidebarPanel(
-    selectInput(&quot;variable&quot;, &quot;Variable:&quot;,
-                list(&quot;Cylinders&quot; = &quot;cyl&quot;, 
-                     &quot;Transmission&quot; = &quot;am&quot;, 
-                     &quot;Gears&quot; = &quot;gear&quot;)),
+    selectInput("variable", "Variable:",
+                list("Cylinders" = "cyl", 
+                     "Transmission" = "am", 
+                     "Gears" = "gear")),
 
-    checkboxInput(&quot;outliers&quot;, &quot;Show outliers&quot;, FALSE)
+    checkboxInput("outliers", "Show outliers", FALSE)
   ),
 
   # Show the caption and plot of the requested variable against mpg
   mainPanel(
-    h3(textOutput(&quot;caption&quot;)),
+    h3(textOutput("caption")),
 
-    plotOutput(&quot;mpgPlot&quot;)
+    plotOutput("mpgPlot")
   )
 ))
-</code></pre>
+{% endhighlight %}
+
 
 Running the application now shows it in its final form including inputs and dynamically updating outputs:
 

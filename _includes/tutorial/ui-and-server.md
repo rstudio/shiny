@@ -13,40 +13,47 @@ To get started building the application, create a new empty directory wherever y
 Now we'll add the minimal code required in each source file. We'll first define the user interface by calling the function `pageWithSidebar` and passing it's result to the `shinyUI` function:
 
 #### ui.R
-<pre><code class="r">library(shiny)
+
+{% highlight r %}
+library(shiny)
 
 # Define UI for miles per gallon application
 shinyUI(pageWithSidebar(
 
   # Application title
-  headerPanel(&quot;Miles Per Gallon&quot;),
+  headerPanel("Miles Per Gallon"),
 
   sidebarPanel(),
 
   mainPanel()
 ))
-</code></pre>
+{% endhighlight %}
+
 
 The three functions `headerPanel`, `sidebarPanel`, and `mainPanel` define the various regions of the user-interface. The application will be called "Miles Per Gallon" so we specify that as the title when we create the header panel. The other panels are empty for now.
 
 Now let's define a skeletal server implementation. To do this we call `shinyServer` and pass it a function that accepts two parameters: `input` and `output`:
 
 #### server.R
-<pre><code class="r">library(shiny)
+
+{% highlight r %}
+library(shiny)
 
 # Define server logic required to plot various variables against mpg
 shinyServer(function(input, output) {
 
 })
-</code></pre>
+{% endhighlight %}
+
 
 Our server function is empty for now but later we'll use it to define the relationship between our inputs and outputs.
 
 We've now created the most minimal possible Shiny application. You can run the application by calling the `runApp` function as follows:
 
-<pre><code class="console">&gt; library(shiny)
-&gt; runApp(&quot;~/shinyapp&quot;)
-</code></pre>
+{% highlight console %}
+> library(shiny)
+> runApp("~/shinyapp")
+{% endhighlight %}
 
 If everything is working correctly you'll see the application appear in your browser looking something like this: 
 

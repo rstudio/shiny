@@ -4,9 +4,10 @@
 
 The HTML UI application demonstrates defining a Shiny user-interface using a standard HTML page rather than a ui.R script. To run the example type: 
 
-<pre><code class="console">&gt; library(shiny)
-&gt; runExample(&quot;08_html&quot;)
-</code></pre>
+{% highlight console %}
+> library(shiny)
+> runExample("08_html")
+{% endhighlight %}
 
 ### Defining an HTML UI
 
@@ -72,7 +73,8 @@ All of the changes from the original Tabsets application were to the user-interf
 
 #### server.R
 
-<pre><code class="r">library(shiny)
+{% highlight r %}
+library(shiny)
 
 # Define server logic for random distribution application
 shinyServer(function(input, output) {
@@ -80,8 +82,8 @@ shinyServer(function(input, output) {
   # Reactive expression to generate the requested distribution. This is 
   # called whenever the inputs change. The output renderers defined 
   # below then all used the value computed from this expression
-  data &lt;- reactive({  
-    dist &lt;- switch(input$dist,
+  data <- reactive({  
+    dist <- switch(input$dist,
                    norm = rnorm,
                    unif = runif,
                    lnorm = rlnorm,
@@ -95,24 +97,22 @@ shinyServer(function(input, output) {
   # plot label. Note that the dependencies on both the inputs and
   # the data reactive expression are both tracked, and all expressions 
   # are called in the sequence implied by the dependency graph
-  output$plot &lt;- renderPlot({
-    dist &lt;- input$dist
-    n &lt;- input$n
+  output$plot <- renderPlot({
+    dist <- input$dist
+    n <- input$n
 
     hist(data(), 
-         main=paste(&#39;r&#39;, dist, &#39;(&#39;, n, &#39;)&#39;, sep=&#39;&#39;))
+         main=paste('r', dist, '(', n, ')', sep=''))
   })
 
   # Generate a summary of the data
-  output$summary &lt;- renderPrint({
+  output$summary <- renderPrint({
     summary(data())
   })
 
   # Generate an HTML table view of the data
-  output$table &lt;- renderTable({
+  output$table <- renderTable({
     data.frame(x=data())
   })
 })
-</code></pre>
-
-
+{% endhighlight %}

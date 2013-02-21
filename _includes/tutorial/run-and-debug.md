@@ -10,8 +10,9 @@ To stop the application you simply interupt R -- you can do this by pressing the
 
 If you don't want to block access to the console while running your Shiny application you can also run it in a separate process. You can do this by opening a terminal or console window and executing the following:
 
-<pre><code class="console">R -e &quot;shiny::runApp('~/shinyapp')&quot;
-</code></pre>
+{% highlight console %}
+R -e "shiny::runApp('~/shinyapp')"
+{% endhighlight %}
 
 By default `runApp` starts the application on port 8100. If you are using this default then you can connect to the running application by navigating your browser to [http://localhost:8100](http://localhost:8100).
 
@@ -28,37 +29,42 @@ One qualification to this: when a browser reload occurs Shiny explicitly checks 
 #### Printing 
 There are several techniques available for debugging Shiny applications. The first is to add calls to the [cat](http://stat.ethz.ch/R-manual/R-devel/library/base/html/cat.html) function which print diagnostics where appropriate. For example, these two calls to cat print diagnostics to standard output and standard error respectively:
 
-<pre><code class="r">cat(&quot;foo\n&quot;)
-cat(&quot;bar\n&quot;, file=stderr())
-</code></pre>
+{% highlight r %}
+cat("foo\n")
+cat("bar\n", file=stderr())
+{% endhighlight %}
 
 #### Using browser
 The second technique is to add explicit calls to the [browser](http://stat.ethz.ch/R-manual/R-devel/library/base/html/browser.html) function to interrupt execution and inspect the environment where browser was called from. Note that using browser requires that you start the application from an interactive session (as opposed to using R -e as described above).
 
 For example, to unconditionally stop execution at a certain point in the code:
 
-<pre><code class="r"># Always stop execution here
+{% highlight r %}
+# Always stop execution here
 browser() 
-</code></pre>
+{% endhighlight %}
 
 You can also use this technique to stop only on certain conditions. For example, to stop the MPG application only when the user selects "Transmission" as the variable:
 
-<pre><code class="r"># Stop execution when the user selects &quot;am&quot;
-browser(expr = identical(input$variable, &quot;am&quot;))
-</code></pre>
+{% highlight r %}
+# Stop execution when the user selects "am"
+browser(expr = identical(input$variable, "am"))
+{% endhighlight %}
 
 #### Establishing a custom error handler
 You can also set the R &quot;error&quot; option to automatically enter the browser when an error occurs:
 
-<pre><code class="r"># Immediately enter the browser when an error occurs
+{% highlight r %}
+# Immediately enter the browser when an error occurs
 options(error = browser)
-</code></pre>
+{% endhighlight %}
 
 Alternatively, you can specify the [recover](http://stat.ethz.ch/R-manual/R-devel/library/utils/html/recover.html) function as your error handler, which will print a list of the call stack and allow you to browse at any point in he stack:
 
-<pre><code class="r"># Call the recover function when an error occurs
+{% highlight r %}
+# Call the recover function when an error occurs
 options(error = recover)
-</code></pre>
+{% endhighlight %}
 
 If you want to set the error option automatically for every R session, you can do this in your .Rprofile file as described in this article on [R Startup](http://stat.ethz.ch/R-manual/R-patched/library/base/html/Startup.html).
 

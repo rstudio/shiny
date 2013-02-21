@@ -4,9 +4,10 @@
 
 The Reactivity application is very similar to Hello Text, but goes into much more detail about reactive programming concepts. To run the example, type: 
 
-<pre><code class="console">&gt; library(shiny)
-&gt; runExample(&quot;03_reactivity&quot;)
-</code></pre>
+{% highlight console %}
+> library(shiny)
+> runExample("03_reactivity")
+{% endhighlight %}
 
 The previous examples have given you a good idea of what the code for Shiny applications looks like. We've explained a bit about reactivity, but mostly glossed over the details. In this section, we'll explore these concepts more deeply. If you want to dive in and learn about the details, see the Understanding Reactivity section, starting with [Reactivity Overview](#reactivity-overview).
 
@@ -30,20 +31,23 @@ The most common way you'll encounter reactive values in Shiny is using the `inpu
 
 It's simple to create reactive expression: just pass a normal expression into `reactive`. In this application, an example of that is the expression that returns an R data frame based on the selection the user made in the input form:
 
-<pre><code class="r">datasetInput &lt;- reactive({
+{% highlight r %}
+datasetInput <- reactive({
    switch(input$dataset,
-          &quot;rock&quot; = rock,
-          &quot;pressure&quot; = pressure,
-          &quot;cars&quot; = cars)
+          "rock" = rock,
+          "pressure" = pressure,
+          "cars" = cars)
 })
-</code></pre>
+{% endhighlight %}
+
 
 To turn reactive values into outputs that can viewed on the web page, we assigned them to the `output` object (also passed to the `shinyServer` function). Here is an example of an assignment to an output that depends on both the `datasetInput` reactive expression we just defined, as well as `input$obs`:
 
-<pre><code class="r">output$view &lt;- renderTable({
+{% highlight r %}
+output$view <- renderTable({
    head(datasetInput(), n = input$obs)
 })
-</code></pre>
+{% endhighlight %}
 
 This expression will be re-executed (and its output re-rendered in the browser) whenever either the `datasetInput` or `input$obs` value changes.
 
@@ -53,39 +57,41 @@ Now that we've taken a deeper loop at some of the core concepts, let's revisit t
 
 #### ui.R
 
-<pre><code class="r">library(shiny)
+{% highlight r %}
+library(shiny)
 
 # Define UI for dataset viewer application
 shinyUI(pageWithSidebar(
 
   # Application title
-  headerPanel(&quot;Reactivity&quot;),
+  headerPanel("Reactivity"),
 
   # Sidebar with controls to provide a caption, select a dataset, and 
   # specify the number of observations to view. Note that changes made
   # to the caption in the textInput control are updated in the output
   # area immediately as you type
   sidebarPanel(
-    textInput(&quot;caption&quot;, &quot;Caption:&quot;, &quot;Data Summary&quot;),
+    textInput("caption", "Caption:", "Data Summary"),
 
-    selectInput(&quot;dataset&quot;, &quot;Choose a dataset:&quot;, 
-                choices = c(&quot;rock&quot;, &quot;pressure&quot;, &quot;cars&quot;)),
+    selectInput("dataset", "Choose a dataset:", 
+                choices = c("rock", "pressure", "cars")),
 
-    numericInput(&quot;obs&quot;, &quot;Number of observations to view:&quot;, 10)
+    numericInput("obs", "Number of observations to view:", 10)
   ),
 
 
   # Show the caption, a summary of the dataset and an HTML table with
   # the requested number of observations
   mainPanel(
-    h3(textOutput(&quot;caption&quot;)), 
+    h3(textOutput("caption")), 
 
-    verbatimTextOutput(&quot;summary&quot;), 
+    verbatimTextOutput("summary"), 
 
-    tableOutput(&quot;view&quot;)
+    tableOutput("view")
   )
 ))
-</code></pre>
+{% endhighlight %}
+
 
 ### Server Script
 
@@ -93,7 +99,8 @@ The server script declares the `datasetInput` reactive expression as well as thr
 
 #### server.R
 
-<pre><code class="r">library(shiny)
+{% highlight r %}
+library(shiny)
 library(datasets)
 
 # Define server logic required to summarize and view the selected dataset
@@ -108,41 +115,41 @@ shinyServer(function(input, output) {
   #     new result is compared to the previous result; if the two are
   #     identical, then the callers are not notified
   #
-  datasetInput &lt;- reactive({
+  datasetInput <- reactive({
     switch(input$dataset,
-           &quot;rock&quot; = rock,
-           &quot;pressure&quot; = pressure,
-           &quot;cars&quot; = cars)
+           "rock" = rock,
+           "pressure" = pressure,
+           "cars" = cars)
   })
 
   # The output$caption is computed based on a reactive expression that
-  # returns input$caption. When the user changes the &quot;caption&quot; field:
+  # returns input$caption. When the user changes the "caption" field:
   #
   #  1) This expression is automatically called to recompute the output 
   #  2) The new caption is pushed back to the browser for re-display
   # 
-  # Note that because the data-oriented reactive expression below don&#39;t 
+  # Note that because the data-oriented reactive expression below don't 
   # depend on input$caption, those expression are NOT called when 
   # input$caption changes.
-  output$caption &lt;- renderText({
+  output$caption <- renderText({
     input$caption
   })
 
   # The output$summary depends on the datasetInput reactive expression, 
   # so will be re-executed whenever datasetInput is re-executed 
   # (i.e. whenever the input$dataset changes)
-  output$summary &lt;- renderPrint({
-    dataset &lt;- datasetInput()
+  output$summary <- renderPrint({
+    dataset <- datasetInput()
     summary(dataset)
   })
 
   # The output$view depends on both the databaseInput reactive expression
   # and input$obs, so will be re-executed whenever input$dataset or 
   # input$obs is changed. 
-  output$view &lt;- renderTable({
+  output$view <- renderTable({
     head(datasetInput(), n = input$obs)
   })
 })
-</code></pre>
+{% endhighlight %}
 
 We've reviewed a lot code and covered a lot of conceptual ground in the first three examples. The next section focuses on the mechanics of building a Shiny application from the ground up and also covers tips on how to run and debug Shiny applications.

@@ -1,4 +1,4 @@
-shiny 0.3.1.99
+shiny 0.4.0
 --------------------------------------------------------------------------------
 
 * Added suspend/resume capability to observers.

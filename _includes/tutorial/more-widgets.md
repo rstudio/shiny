@@ -74,7 +74,7 @@ library(datasets)
 shinyServer(function(input, output) {
 
   # Return the requested dataset
-  datasetInput &lt;- reactive(function() {
+  datasetInput &lt;- reactive({
     switch(input$dataset,
            &quot;rock&quot; = rock,
            &quot;pressure&quot; = pressure,
@@ -82,13 +82,13 @@ shinyServer(function(input, output) {
   })
 
   # Generate a summary of the dataset
-  output$summary &lt;- reactivePrint(function() {
+  output$summary &lt;- renderPrint({
     dataset &lt;- datasetInput()
     summary(dataset)
   })
 
   # Show the first &quot;n&quot; observations
-  output$view &lt;- reactiveTable(function() {
+  output$view &lt;- renderTable({
     head(datasetInput(), n = input$obs)
   })
 })

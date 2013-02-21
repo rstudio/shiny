@@ -8,7 +8,7 @@ The Reactivity application is very similar to Hello Text, but goes into much mor
 &gt; runExample(&quot;03_reactivity&quot;)
 </code></pre>
 
-The previous examples have given you a good idea of what the code for Shiny applications looks like. We've explained a bit about reactivity, but mostly glossed over the details. In this section, we'll explore these concepts more deeply.
+The previous examples have given you a good idea of what the code for Shiny applications looks like. We've explained a bit about reactivity, but mostly glossed over the details. In this section, we'll explore these concepts more deeply. If you want to dive in and learn about the details, see the Understanding Reactivity section, starting with [Reactivity Overview](#reactivity-overview).
 
 ### What is Reactivity?
 
@@ -22,15 +22,15 @@ Shiny comes with a **reactive programming** library that you will use to structu
 
 ### Reactive Programming Basics
 
-Reactive programming is a coding style that starts with **reactive values**--values that change over time, or in response to the user--and builds on top of them with **reactive functions**--functions that access reactive values and execute other reactive functions.
+Reactive programming is a coding style that starts with **reactive values**--values that change over time, or in response to the user--and builds on top of them with **reactive expressions**--expressions that access reactive values and execute other reactive expressions.
 
-What's interesting about reactive functions is that whenever they execute, they automatically keep track of what reactive values they read and what reactive functions they called. If those "dependencies" become out of date, then they know that their own return value has also become out of date. Because of this dependency tracking, changing a reactive value will automatically instruct all reactive functions that directly or indirectly depended on that value to re-execute.
+What's interesting about reactive expressions is that whenever they execute, they automatically keep track of what reactive values they read and what reactive expressions they invoked. If those "dependencies" become out of date, then they know that their own return value has also become out of date. Because of this dependency tracking, changing a reactive value will automatically instruct all reactive expressions that directly or indirectly depended on that value to re-execute.
 
-The most common way you'll encounter reactive values in Shiny is using the `input` object. The `input` object, which is passed to your `shinyServer` function, lets you access the web page's user input fields using a list-like syntax. Code-wise, it looks like you're grabbing a value from a list or data frame, but you're actually reading a reactive value. No need to write code to monitor when inputs change--just write reactive functions that read the inputs they need, and let Shiny take care of knowing when to call them.
+The most common way you'll encounter reactive values in Shiny is using the `input` object. The `input` object, which is passed to your `shinyServer` function, lets you access the web page's user input fields using a list-like syntax. Code-wise, it looks like you're grabbing a value from a list or data frame, but you're actually reading a reactive value. No need to write code to monitor when inputs change--just write reactive expression that read the inputs they need, and let Shiny take care of knowing when to call them.
 
-It's simple to create reactive functions: just pass a normal function definition into `reactive`. In this application, an example of that is the function that returns an R data frame based on the selection the user made in the input form:
+It's simple to create reactive expression: just pass a normal expression into `reactive`. In this application, an example of that is the expression that returns an R data frame based on the selection the user made in the input form:
 
-<pre><code class="r">datasetInput &lt;- reactive(function() {
+<pre><code class="r">datasetInput &lt;- reactive({
    switch(input$dataset,
           &quot;rock&quot; = rock,
           &quot;pressure&quot; = pressure,
@@ -38,14 +38,14 @@ It's simple to create reactive functions: just pass a normal function definition
 })
 </code></pre>
 
-To turn reactive values into outputs that can viewed on the web page, we assigned them to the `output` object (also passed to the `shinyServer` function). Here is an example of an assignment to an output that depends on both the `datasetInput` reactive function we just defined as well as `input$obs`:
+To turn reactive values into outputs that can viewed on the web page, we assigned them to the `output` object (also passed to the `shinyServer` function). Here is an example of an assignment to an output that depends on both the `datasetInput` reactive expression we just defined, as well as `input$obs`:
 
-<pre><code class="r">output$view &lt;- reactiveTable(function() {
+<pre><code class="r">output$view &lt;- renderTable({
    head(datasetInput(), n = input$obs)
 })
 </code></pre>
 
-This function will be re-executed (and its output re-rendered in the browser) whenever either the `datasetInput` or `input$obs` value changes.
+This expression will be re-executed (and its output re-rendered in the browser) whenever either the `datasetInput` or `input$obs` value changes.
 
 ### Back to the Code
 
@@ -89,7 +89,7 @@ shinyUI(pageWithSidebar(
 
 ### Server Script
 
-The server script declares the `datasetInput` reactive function as well as three reactive output values. There are detailed comments for each definition that describe how it works within the reactive system:
+The server script declares the `datasetInput` reactive expression as well as three reactive output values. There are detailed comments for each definition that describe how it works within the reactive system:
 
 #### server.R
 
@@ -99,47 +99,47 @@ library(datasets)
 # Define server logic required to summarize and view the selected dataset
 shinyServer(function(input, output) {
 
-  # By declaring datasetInput as a reactive function we ensure that:
+  # By declaring datasetInput as a reactive expression we ensure that:
   #
   #  1) It is only called when the inputs it depends on changes
   #  2) The computation and result are shared by all the callers (it 
   #     only executes a single time)
-  #  3) When the inputs change and the function is re-executed, the
+  #  3) When the inputs change and the expression is re-executed, the
   #     new result is compared to the previous result; if the two are
   #     identical, then the callers are not notified
   #
-  datasetInput &lt;- reactive(function() {
+  datasetInput &lt;- reactive({
     switch(input$dataset,
            &quot;rock&quot; = rock,
            &quot;pressure&quot; = pressure,
            &quot;cars&quot; = cars)
   })
 
-  # The output$caption is computed based on a reactive function that
+  # The output$caption is computed based on a reactive expression that
   # returns input$caption. When the user changes the &quot;caption&quot; field:
   #
-  #  1) This function is automatically called to recompute the output 
+  #  1) This expression is automatically called to recompute the output 
   #  2) The new caption is pushed back to the browser for re-display
   # 
-  # Note that because the data-oriented reactive functions below don&#39;t 
-  # depend on input$caption, those functions are NOT called when 
+  # Note that because the data-oriented reactive expression below don&#39;t 
+  # depend on input$caption, those expression are NOT called when 
   # input$caption changes.
-  output$caption &lt;- reactiveText(function() {
+  output$caption &lt;- renderText({
     input$caption
   })
 
-  # The output$summary depends on the datasetInput reactive function, 
+  # The output$summary depends on the datasetInput reactive expression, 
   # so will be re-executed whenever datasetInput is re-executed 
   # (i.e. whenever the input$dataset changes)
-  output$summary &lt;- reactivePrint(function() {
+  output$summary &lt;- renderPrint({
     dataset &lt;- datasetInput()
     summary(dataset)
   })
 
-  # The output$view depends on both the databaseInput reactive function
+  # The output$view depends on both the databaseInput reactive expression
   # and input$obs, so will be re-executed whenever input$dataset or 
   # input$obs is changed. 
-  output$view &lt;- reactiveTable(function() {
+  output$view &lt;- renderTable({
     head(datasetInput(), n = input$obs)
   })
 })

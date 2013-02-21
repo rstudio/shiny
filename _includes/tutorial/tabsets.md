@@ -55,7 +55,7 @@ shinyUI(pageWithSidebar(
 
 ### Tabs and Reactive Data
 
-Introducing tabs into our user-interface underlines the importance of creating reactive functions for shared data. In this example each tab provides its own view of the dataset. If the dataset is expensive to compute then our user-interface might be quite slow to render. The server script below demonstrates how to calculate the data once in a reactive function and have the result be shared by all of the output tabs:
+Introducing tabs into our user-interface underlines the importance of creating reactive expressions for shared data. In this example each tab provides its own view of the dataset. If the dataset is expensive to compute then our user-interface might be quite slow to render. The server script below demonstrates how to calculate the data once in a reactive expression and have the result be shared by all of the output tabs:
 
 #### server.R
 
@@ -64,10 +64,10 @@ Introducing tabs into our user-interface underlines the importance of creating r
 # Define server logic for random distribution application
 shinyServer(function(input, output) {
 
-  # Reactive function to generate the requested distribution. This is 
-  # called whenever the inputs change. The output functions defined 
-  # below then all use the value computed from this function
-  data &lt;- reactive(function() {  
+  # Reactive expression to generate the requested distribution. This is 
+  # called whenever the inputs change. The renderers defined 
+  # below then all use the value computed from this expression
+  data &lt;- reactive({  
     dist &lt;- switch(input$dist,
                    norm = rnorm,
                    unif = runif,
@@ -80,9 +80,9 @@ shinyServer(function(input, output) {
 
   # Generate a plot of the data. Also uses the inputs to build the 
   # plot label. Note that the dependencies on both the inputs and
-  # the 'data' reactive function are both tracked, and all functions 
+  # the 'data' reactive expression are both tracked, and all expressions 
   # are called in the sequence implied by the dependency graph
-  output$plot &lt;- reactivePlot(function() {
+  output$plot &lt;- renderPlot({
     dist &lt;- input$dist
     n &lt;- input$n
 
@@ -91,12 +91,12 @@ shinyServer(function(input, output) {
   })
 
   # Generate a summary of the data
-  output$summary &lt;- reactivePrint(function() {
+  output$summary &lt;- renderPrint({
     summary(data())
   })
 
   # Generate an HTML table view of the data
-  output$table &lt;- reactiveTable(function() {
+  output$table &lt;- renderTable({
     data.frame(x=data())
   })
 })

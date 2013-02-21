@@ -8,26 +8,31 @@ Similar to <a href="#building-inputs">custom inputs</a>, if you have some knowle
 
 Start by deciding the kind of values your output component is going to receive from the user's server side R code.
 
-Whatever value the user's R code returns is going to need to somehow be turned into a JSON-compatible value (Shiny uses [RJSONIO](http://cran.r-project.org/web/packages/RJSONIO/index.html) to do the conversion). If the user's code is naturally going to return something RJSONIO-compatible&nbsp;&ndash; like a character vector, a data frame, or even a list that contains atomic vectors&nbsp;&ndash; then you can just direct the user to use a regular `reactive` function on the server. However, if the output needs to undergo some other kind of transformation, then you'll need to write a wrapper function for `reactive` that your users will use instead (analogous to `reactivePlot` or `reactiveTable`).
+Whatever value the user's R code returns is going to need to somehow be turned into a JSON-compatible value (Shiny uses [RJSONIO](http://cran.r-project.org/web/packages/RJSONIO/index.html) to do the conversion). If the user's code is naturally going to return something RJSONIO-compatible&nbsp;&ndash; like a character vector, a data frame, or even a list that contains atomic vectors&nbsp;&ndash; then you can just direct the user to use a function on the server. However, if the output needs to undergo some other kind of transformation, then you'll need to write a wrapper function that your users will use instead (analogous to `renderPlot` or `renderTable`).
 
-For example, if the user wants to output [time series objects](http://stat.ethz.ch/R-manual/R-patched/library/stats/html/ts.html) then you might create a `reactiveTimeSeries` function that knows how to translate `ts` objects to a simple list or data frame:
+For example, if the user wants to output [time series objects](http://stat.ethz.ch/R-manual/R-patched/library/stats/html/ts.html) then you might create a `renderTimeSeries` function that knows how to translate `ts` objects to a simple list or data frame:
 
-<pre><code class="r">reactiveTimeSeries &lt;- function(func) {
-    reactive(function() {
-        val &lt;- func()
-        list(start = tsp(val)[1],
-             end = tsp(val)[2],
-             freq = tsp(val)[3],
-             data = as.vector(val))
-    })
-}</code></pre>
+
+{% highlight r %}
+renderTimeSeries <- function(expr, env=parent.frame(), quoted=FALSE) {
+    # Convert the expression + environment into a function
+    func <- exprToFunction(expr, env, quoted)
+
+    val <- func()
+    list(start = tsp(val)[1],
+         end = tsp(val)[2],
+         freq = tsp(val)[3],
+         data = as.vector(val))
+}
+{% endhighlight %}
 
 which would then be used by the user like so:
 
-<pre><code class="r">output$timeSeries1 &lt;- reactiveTimeSeries(function() {
+{% highlight r %}
+output$timeSeries1 <- renderTimeSeries(function() {
     ts(matrix(rnorm(300), 100, 3), start=c(1961, 1), frequency=12)
 })
-</code></pre>
+{% endhighlight %}
 
 ### Design Output Component Markup
 
@@ -35,7 +40,9 @@ At this point, we're ready to design the HTML markup and write the JavaScript co
 
 For many components, you'll be able to have extremely simple HTML markup, something like this:
 
-<pre><code class="html">&lt;div id="timeSeries1" class="timeseries-output"&gt;&lt;/div&gt;</code></pre>
+{% highlight html %}
+<div id="timeSeries1" class="timeseries-output"></div>
+{% endhighlight %}
 
 We'll use the `timeseries-output` CSS class as an indicator that the element is one that we should bind to. When new output values for `timeSeries1` come down from the server, we'll fill up the div with our visualization using JavaScript.
 
@@ -90,6 +97,10 @@ An output binding object needs to have the following methods:
 ### Register Output Binding
 
 Once you've created an output binding object, you need to tell Shiny to use it:
-<pre><code class="javascript">Shiny.outputBindings.register(exampleOutputBinding, "yourname.exampleOutputBinding");</code></pre>
+
+{% highlight javascript %}
+Shiny.outputBindings.register(exampleOutputBinding, "yourname.exampleOutputBinding");
+{% endhighlight %}
+
 
 The second argument is a string that uniquely identifies your output binding. At the moment it is unused but future features may depend on it.

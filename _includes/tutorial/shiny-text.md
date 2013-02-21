@@ -44,10 +44,10 @@ shinyUI(pageWithSidebar(
 
 The server side of the application has also gotten a bit more complicated. Now we create:
 
-* A reactive function to return the dataset corresponding to the user choice
-* Two other reactive functions (`reactivePrint` and `reactiveTable`) that return the output$summary and output$view values
+* A reactive expression to return the dataset corresponding to the user choice
+* Two other rendering expressions (`renderPrint` and `renderTable`) that return the `output$summary` and `output$view` values
 
-These reactive functions work similarly to the `reactivePlot` function used in the first example: by declaring a reactive function you tell Shiny that it should only be executed when its dependencies change. In this case that's either one of the user input values (input$dataset or input$n)
+These expressions work similarly to the `renderPlot` expression used in the first example: by declaring a rendering expression you tell Shiny that it should only be executed when its dependencies change. In this case that's either one of the user input values (`input$dataset` or `input$n`).
 
 #### server.R
 
@@ -58,7 +58,7 @@ library(datasets)
 shinyServer(function(input, output) {
 
   # Return the requested dataset
-  datasetInput &lt;- reactive(function() {
+  datasetInput &lt;- reactive({
     switch(input$dataset,
            &quot;rock&quot; = rock,
            &quot;pressure&quot; = pressure,
@@ -66,16 +66,16 @@ shinyServer(function(input, output) {
   })
 
   # Generate a summary of the dataset
-  output$summary &lt;- reactivePrint(function() {
+  output$summary &lt;- renderPrint({
     dataset &lt;- datasetInput()
     summary(dataset)
   })
 
   # Show the first &quot;n&quot; observations
-  output$view &lt;- reactiveTable(function() {
+  output$view &lt;- renderTable({
     head(datasetInput(), n = input$obs)
   })
 })
 </code></pre>
 
-We're introduced more use of reactive functions but haven't really explained how they work yet. The next example will start with this one as a baseline and expand significantly on how reactive functions work in Shiny.
+We've introduced more use of reactive expressions but haven't really explained how they work yet. The next example will start with this one as a baseline and expand significantly on how reactive expressions work in Shiny.

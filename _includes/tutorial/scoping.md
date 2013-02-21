@@ -106,7 +106,7 @@ shinyServer(function(input, output) {
   # Objects in this file are defined in each session
   source('each_session.R', local=TRUE)
 
-  output$text <- reactiveText(function() {
+  output$text <- renderText({
     # Objects in this file are defined each time this function is called
     source('each_call.R', local=TRUE)
 

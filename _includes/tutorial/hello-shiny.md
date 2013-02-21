@@ -9,7 +9,7 @@ The Hello Shiny example is a simple application that generates a random distribu
 
 Shiny applications have two components: a user-interface definition and a server script. The source code for both of these components is listed below. 
 
-In subsequent sections of the tutorial we'll break down all of the code in detail and explain the use of "reactive" functions for generating output. For now, though, just try playing with the sample application and reviewing the source code to get an initial feel for things. Be sure to read the comments carefully.
+In subsequent sections of the tutorial we'll break down all of the code in detail and explain the use of "reactive" expressions for generating output. For now, though, just try playing with the sample application and reviewing the source code to get an initial feel for things. Be sure to read the comments carefully.
 
 The user interface is defined in a source file named ui.R:
 
@@ -39,7 +39,7 @@ shinyUI(pageWithSidebar(
 ))
 </code></pre>
 
-The server-side of the application is shown below. At one level, it's very simple--a random distribution with the requested number of observations is generated, and then plotted as a historgram. However, you'll also notice that the function which returns the plot is wrapped in a call to `reactivePlot`. The comment above the function explains a bit about this, but if you find it confusing, don't worry--we'll cover this concept in much more detail soon.
+The server-side of the application is shown below. At one level, it's very simple--a random distribution with the requested number of observations is generated, and then plotted as a historgram. However, you'll also notice that the function which returns the plot is wrapped in a call to `renderPlot`. The comment above the function explains a bit about this, but if you find it confusing, don't worry--we'll cover this concept in much more detail soon.
 
 #### server.R
 
@@ -48,14 +48,14 @@ The server-side of the application is shown below. At one level, it's very simpl
 # Define server logic required to generate and plot a random distribution
 shinyServer(function(input, output) {
 
-  # Function that generates a plot of the distribution. The function
-  # is wrapped in a call to reactivePlot to indicate that:
+  # Expression that generates a plot of the distribution. The expression
+  # is wrapped in a call to renderPlot to indicate that:
   #
   #  1) It is &quot;reactive&quot; and therefore should be automatically 
   #     re-executed when inputs change
   #  2) Its output type is a plot 
   #
-  output$distPlot &lt;- reactivePlot(function() {
+  output$distPlot &lt;- renderPlot({
 
     # generate an rnorm distribution and plot it
     dist &lt;- rnorm(input$obs)

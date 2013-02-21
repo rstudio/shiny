@@ -69,8 +69,8 @@ The server side of the Slider application is very straightforward: it creates a 
 # Define server logic for slider examples
 shinyServer(function(input, output) {
 
-  # Reactive function to compose a data frame containing all of the values
-  sliderValues &lt;- reactive(function() {
+  # Reactive expression to compose a data frame containing all of the values
+  sliderValues &lt;- reactive({
 
     # Compose data frame
     data.frame(
@@ -88,7 +88,7 @@ shinyServer(function(input, output) {
   }) 
 
   # Show the values using an HTML table
-  output$values &lt;- reactiveTable(function() {
+  output$values &lt;- renderTable({
     sliderValues()
   })
 })

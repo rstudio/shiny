@@ -43,9 +43,9 @@ If you run the application again after making these changes you'll see the two u
 Next we need to define the server-side of the application which will accept inputs and compute outputs. Our server.R file is shown below, and illustrates some important concepts:
 * Accessing input using slots on the `input` object and generating output by assigning to slots on the `output` object.
 * Initializing data at startup that can be accessed throughout the lifetime of the application.
-* Using a reactive function to compute a value shared by more than one output.
+* Using a reactive expression to compute a value shared by more than one output.
 
-The basic task of a Shiny server script is to define the relationship between inputs and outputs. Our script does this by accessing inputs to perform computations and by assigning reactive functions to output slots. 
+The basic task of a Shiny server script is to define the relationship between inputs and outputs. Our script does this by accessing inputs to perform computations and by assigning reactive expressions to output slots. 
 
 Here is the source code for the full server script (the inline comments explain the implementation technqiues in more detail):
 
@@ -63,20 +63,20 @@ mpgData$am &lt;- factor(mpgData$am, labels = c(&quot;Automatic&quot;, &quot;Manu
 # Define server logic required to plot various variables against mpg
 shinyServer(function(input, output) {
 
-  # Compute the forumla text in a reactive function since it is 
-  # shared by the output$caption and output$mpgPlot functions
-  formulaText &lt;- reactive(function() {
+  # Compute the forumla text in a reactive expression since it is 
+  # shared by the output$caption and output$mpgPlot expressions
+  formulaText &lt;- reactive({
     paste(&quot;mpg ~&quot;, input$variable)
   })
 
   # Return the formula text for printing as a caption
-  output$caption &lt;- reactiveText(function() {
+  output$caption &lt;- renderText({
     formulaText()
   })
 
   # Generate a plot of the requested variable against mpg and only 
   # include outliers if requested
-  output$mpgPlot &lt;- reactivePlot(function() {
+  output$mpgPlot &lt;- renderPlot({
     boxplot(as.formula(formulaText()), 
             data = mpgData,
             outline = input$outliers)
@@ -84,7 +84,7 @@ shinyServer(function(input, output) {
 })
 </code></pre>
 
-The use of `reactiveText` and `reactivePlot` to generate output (rather than just assigning values directly) is what makes the application reactive. These reactive wrappers return special functions that are only re-executed when their dependencies change. This behavior is what enables Shiny to automatically update output whenever input changes.
+The use of `renderText` and `renderPlot` to generate output (rather than just assigning values directly) is what makes the application reactive. These reactive wrappers return special expressions that are only re-executed when their dependencies change. This behavior is what enables Shiny to automatically update output whenever input changes.
 
 
 ### Displaying Outputs

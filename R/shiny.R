@@ -973,7 +973,7 @@ runApp <- function(appDir=getwd(),
   tryCatch(
     while (TRUE) {
       service()
-      Sys.sleep(0)
+      Sys.sleep(0.001)
     },
     finally = {
       timerCallbacks$clear()

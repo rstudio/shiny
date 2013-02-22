@@ -110,6 +110,6 @@ Finally, `output$nthValueInv()` takes that value, finds the inverse, and then as
 
 In this section we've learned about:
 
-* **Invalidation flags**
-* **Arrow removal**
-* **Flush events**
+* **Invalidation flags**: reactive expressions and observers are invalidated (marked dirty) when their parents change or are invalidated, and they are marked as clean after they re-execute.
+* **Arrow creation and removal**: After a parent object follows invalidates its children, the arrows will be removed. New arrows will be created when a reactive object accesses another reactive object.
+* **Flush events** trigger the execution of endpoints. Flush events occur whenever the browser sends data to the server.

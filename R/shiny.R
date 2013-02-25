@@ -26,7 +26,8 @@ ShinyApp <- setRefClass(
     token = 'character',  # Used to identify this instance in URLs
     plots = 'Map',
     downloads = 'Map',
-    allowDataUriScheme = 'logical'
+    allowDataUriScheme = 'logical',
+    closed = 'logical'
   ),
   methods = list(
     initialize = function(websocket) {
@@ -34,6 +35,7 @@ ShinyApp <- setRefClass(
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
       .progressKeys <<- character(0)
+      closed <<- FALSE
       # TODO: Put file upload context in user/app-specific dir if possible
       .fileUploadContext <<- FileUploadContext$new()
       session <<- ReactiveValues$new()
@@ -43,6 +45,12 @@ ShinyApp <- setRefClass(
       .outputOptions <<- list()
       
       allowDataUriScheme <<- TRUE
+    },
+    close = function() {
+      closed <<- TRUE
+      for (output in .outputs) {
+        output$suspend()
+      }
     },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
@@ -121,6 +129,12 @@ ShinyApp <- setRefClass(
       by \\code{id} is in progress. There is currently no mechanism for
       explicitly turning off progress for an output component; instead, all
       progress is implicitly turned off when flushOutput is next called.'
+
+      # If app is already closed, be sure not to show progress, otherwise we
+      # will get an error because of the closed websocket
+      if (closed)
+        return()
+      
       if (id %in% .progressKeys)
         return()
       
@@ -890,6 +904,7 @@ startApp <- function(port=8101L) {
       })
       
       ws$onClose(function() {
+        shinyapp$close()
         appsByToken$remove(shinyapp$token)
       })
     }
@@ -897,11 +912,7 @@ startApp <- function(port=8101L) {
   
   message('\n', 'Listening on port ', port)
 
-  # If this R session is interactive, then use a short timeout to keep the
-  # session responsive to user interrupt
-  maxTimeout <- ifelse(interactive(), 100, 5000)
-  
-  return(createServer("0.0.0.0", port, eventloopCallbacks, maxTimeout))
+  return(startServer("0.0.0.0", port, eventloopCallbacks))
 }
 
 # NOTE: we de-roxygenized this comment because the function isn't exported
@@ -911,20 +922,20 @@ startApp <- function(port=8101L) {
 # @param ws_env The return value from \code{\link{startApp}}.
 serviceApp <- function(ws_env) {
   if (timerCallbacks$executeElapsed()) {
-    for (shinyapp in apps$values()) {
+    for (shinyapp in appsByToken$values()) {
       shinyapp$manageHiddenOutputs()
     }
 
     flushReact()
 
-    for (shinyapp in apps$values()) {
+    for (shinyapp in appsByToken$values()) {
       shinyapp$flushOutput()
     }
   }
 
   # If this R session is interactive, then call service() with a short timeout
   # to keep the session responsive to user input
-  maxTimeout <- ifelse(interactive(), 100, 5000)
+  maxTimeout <- ifelse(interactive(), 100, 1000)
   
   timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent()))
   service(timeout)
@@ -972,7 +983,7 @@ runApp <- function(appDir=getwd(),
   
   tryCatch(
     while (TRUE) {
-      service()
+      serviceApp()
       Sys.sleep(0.001)
     },
     finally = {

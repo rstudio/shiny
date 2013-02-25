@@ -342,7 +342,7 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' @export
 reactivePlot <- function(func, width='auto', height='auto', ...) {
   shinyDeprecated(new="renderPlot")
-  renderPlot({ func() }, width='auto', height='auto', ...)
+  renderPlot({ func() }, width=width, height=height, ...)
 }
 
 #' Table output (deprecated)

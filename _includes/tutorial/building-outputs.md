@@ -18,18 +18,20 @@ renderTimeSeries <- function(expr, env=parent.frame(), quoted=FALSE) {
     # Convert the expression + environment into a function
     func <- exprToFunction(expr, env, quoted)
 
-    val <- func()
-    list(start = tsp(val)[1],
-         end = tsp(val)[2],
-         freq = tsp(val)[3],
-         data = as.vector(val))
+    function() {
+      val <- func()
+      list(start = tsp(val)[1],
+           end = tsp(val)[2],
+           freq = tsp(val)[3],
+           data = as.vector(val))
+    }
 }
 {% endhighlight %}
 
 which would then be used by the user like so:
 
 {% highlight r %}
-output$timeSeries1 <- renderTimeSeries(function() {
+output$timeSeries1 <- renderTimeSeries({
     ts(matrix(rnorm(300), 100, 3), start=c(1961, 1), frequency=12)
 })
 {% endhighlight %}

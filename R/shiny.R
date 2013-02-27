@@ -464,9 +464,9 @@ httpServer <- function(handlers) {
   handler <- joinHandlers(handlers)
 
   # TODO: Figure out what this means after httpuv migration
-#   filter <- getOption('shiny.http.response.filter', NULL)
-#   if (is.null(filter))
-#     filter <- function(ws, header, response) response
+  filter <- getOption('shiny.http.response.filter', NULL)
+  if (is.null(filter))
+    filter <- function(req, response) response
   
   function(req) {
     response <- handler(req)
@@ -476,7 +476,7 @@ httpServer <- function(handlers) {
     headers <- as.list(response$headers)
     headers$'Content-Type' <- response$content_type
     
-    #response <- filter(ws, header, response)
+    response <- filter(req, response)
     return(list(status=response$status,
                 body=response$content,
                 headers=headers))

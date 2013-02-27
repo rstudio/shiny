@@ -18,7 +18,7 @@ Imports:
     utils,
     datasets,
     methods,
-    eventloop,
+    httpuv,
     caTools,
     RJSONIO,
     xtable,

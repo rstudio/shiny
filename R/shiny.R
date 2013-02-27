@@ -1,9 +1,9 @@
 #' @docType package
-#' @import eventloop caTools RJSONIO xtable digest
+#' @import httpuv caTools RJSONIO xtable digest
 NULL
 
 suppressPackageStartupMessages({
-  library(eventloop)
+  library(httpuv)
   library(RJSONIO)
 })
 
@@ -463,7 +463,7 @@ httpResponse <- function(status = 200,
 httpServer <- function(handlers) {
   handler <- joinHandlers(handlers)
 
-  # TODO: Figure out what this means after eventloop migration
+  # TODO: Figure out what this means after httpuv migration
 #   filter <- getOption('shiny.http.response.filter', NULL)
 #   if (is.null(filter))
 #     filter <- function(ws, header, response) response
@@ -806,7 +806,7 @@ startApp <- function(port=8101L) {
   })
   serverFunc <- .globals$server
   
-  eventloopCallbacks <- list(
+  httpuvCallbacks <- list(
     call = httpServer(c(sessionHandler,
                         dynamicHandler(uiR),
                         wwwDir,
@@ -912,7 +912,7 @@ startApp <- function(port=8101L) {
   
   message('\n', 'Listening on port ', port)
 
-  return(startServer("0.0.0.0", port, eventloopCallbacks))
+  return(startServer("0.0.0.0", port, httpuvCallbacks))
 }
 
 # NOTE: we de-roxygenized this comment because the function isn't exported

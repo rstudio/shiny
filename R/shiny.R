@@ -183,7 +183,9 @@ ShinyApp <- setRefClass(
     
     # Public RPC methods
     `@uploadInit` = function() {
-      return(list(jobId=.fileUploadContext$createUploadOperation()))
+      jobId <- .fileUploadContext$createUploadOperation()
+      return(list(jobId=jobId,
+                  uploadUrl=paste('session', token, 'upload', jobId, sep='/')))
     },
     `@uploadFileBegin` = function(jobId, fileName, fileType, fileSize) {
       .fileUploadContext$getUploadOperation(jobId)$fileBegin(list(
@@ -226,6 +228,20 @@ ShinyApp <- setRefClass(
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
         
         return(httpResponse(200, savedPlot$contentType, savedPlot$data))
+      }
+      
+      if (matches[2] == 'upload' && identical(req$REQUEST_METHOD, "POST")) {
+        job <- .fileUploadContext$getUploadOperation(matches[3])
+        if (!is.null(job)) {
+          fileName <- req$HTTP_SHINY_FILE_NAME
+          fileType <- req$HTTP_SHINY_FILE_TYPE
+          fileSize <- req$CONTENT_LENGTH
+          job$fileBegin(list(name=fileName, type=fileType, size=fileSize))
+          job$fileChunk(req$rook.input$read(-1L))
+          job$fileEnd()
+          
+          return(httpResponse(200, 'text/plain', 'OK'))
+        }
       }
       
       if (matches[2] == 'download') {

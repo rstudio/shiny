@@ -678,19 +678,12 @@
   // make it do something useful.
   var FileProcessor = function(files) {
     this.files = files;
-    this.fileReader = new FileReader();
     this.fileIndex = -1;
-    this.pos = 0;
     // Currently need to use small chunk size because R-Websockets can't
     // handle continuation frames
-    this.chunkSize = 4096;
     this.aborted = false;
     this.completed = false;
     
-    var self = this;
-    $(this.fileReader).on('load', function(evt) {
-      self.$endReadChunk();
-    });
     // TODO: Register error/abort callbacks
     
     this.$run();
@@ -700,13 +693,7 @@
     this.onBegin = function(files, cont) {
       setTimeout(cont, 0);
     };
-    this.onFileBegin = function(file, cont) {
-      setTimeout(cont, 0);
-    };
-    this.onFileChunk = function(file, offset, blob, cont) {
-      setTimeout(cont, 0);
-    };
-    this.onFileEnd = function(file, cont) {
+    this.onFile = function(file, cont) {
       setTimeout(cont, 0);
     };
     this.onComplete = function() {
@@ -763,45 +750,8 @@
       // in the middle of processing a file, or have just finished
       // processing a file.
       
-      var file = this.files[this.fileIndex];
-      if (this.pos >= file.size) {
-        // We've read past the end of this file--it's done
-        this.fileIndex++;
-        this.pos = 0;
-        this.onFileEnd(file, this.$getRun());
-      }
-      else if (this.pos == 0) {
-        // We're just starting with this file, need to call onFileBegin
-        // before we actually start reading
-        var called = false;
-        this.onFileBegin(file, function() {
-          if (called)
-            return;
-          called = true;
-          self.$beginReadChunk();
-        });
-      }
-      else {
-        // We're neither starting nor ending--just start the next chunk
-        this.$beginReadChunk();
-      }
-    };
-    
-    // Starts asynchronous read of the current chunk of the current file
-    this.$beginReadChunk = function() {
-      var file = this.files[this.fileIndex];
-      var blob = slice(file, this.pos, this.pos + this.chunkSize);
-      this.fileReader.readAsArrayBuffer(blob);
-    };
-    
-    // Called when a chunk has been successfully read
-    this.$endReadChunk = function() {
-      var file = this.files[this.fileIndex];
-      var offset = this.pos;
-      var data = this.fileReader.result;
-      this.pos = this.pos + this.chunkSize;
-      this.onFileChunk(file, offset, makeBlob([data]),
-                       this.$getRun());
+      var file = this.files[this.fileIndex++];
+      this.onFile(file, this.$getRun());
     };
   }).call(FileProcessor.prototype);
 
@@ -1147,42 +1097,43 @@
         'uploadInit', [],
         function(response) {
           self.jobId = response.jobId;
+          self.uploadUrl = response.uploadUrl;
           cont();
         },
         function(error) {
         });
     };
-    this.onFileBegin = function(file, cont) {
+    this.onFile = function(file, cont) {
+      var self = this;
       this.onProgress(file, 0);
-      
-      this.makeRequest(
-        'uploadFileBegin', [this.jobId, file.name, file.type, file.size],
-        function(response) {
-          cont();
-        },
-        function(error) {
-        });
-    };
-    this.onFileChunk = function(file, offset, blob, cont) {
-      this.onProgress(file, (offset + blob.size) / file.size);
 
-      this.makeRequest(
-        'uploadFileChunk', [this.jobId],
-        function(response) {
-          cont();
+      $.ajax(this.uploadUrl, {
+        type: 'POST',
+        cache: false,
+        headers: {
+          'Shiny-File-Name': file.name,
+          'Shiny-File-Type': file.type
         },
-        function(error) {
+        xhr: function() {
+          var xhrVal = $.ajaxSettings.xhr();
+          if (xhrVal.upload) {
+            xhrVal.upload.onprogress = function(e) {
+              if (e.lengthComputable) {
+                self.onProgress(file, (e.loaded / e.total));
+              }
+            }
+          }
+          return xhrVal;
         },
-        [blob]);
-    };
-    this.onFileEnd = function(file, cont) {
-      this.makeRequest(
-        'uploadFileEnd', [this.jobId],
-        function(response) {
-          cont();
-        },
-        function(error) {
-        });
+        data: file,
+        processData: false,
+        complete: function(jqXHR, textStatus) {
+          if (textStatus == 'success') {
+            cont();
+          }
+          // TODO: Message and reset state on error?
+        }
+      });
     };
     this.onComplete = function() {
       this.makeRequest(

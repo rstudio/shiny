@@ -187,23 +187,6 @@ ShinyApp <- setRefClass(
       return(list(jobId=jobId,
                   uploadUrl=paste('session', token, 'upload', jobId, sep='/')))
     },
-    `@uploadFileBegin` = function(jobId, fileName, fileType, fileSize) {
-      .fileUploadContext$getUploadOperation(jobId)$fileBegin(list(
-        name=fileName, type=fileType, size=fileSize
-      ))
-      invisible()
-    },
-    `@uploadFileChunk` = function(jobId, ...) {
-      args <- list(...)
-      if (length(args) != 1)
-        stop("Bad file chunk request")
-      .fileUploadContext$getUploadOperation(jobId)$fileChunk(args[[1]])
-      invisible()
-    },
-    `@uploadFileEnd` = function(jobId) {
-      .fileUploadContext$getUploadOperation(jobId)$fileEnd()
-      invisible()
-    },
     `@uploadEnd` = function(jobId, inputId) {
       fileData <- .fileUploadContext$getUploadOperation(jobId)$finish()
       session$set(inputId, fileData)

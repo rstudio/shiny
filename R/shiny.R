@@ -565,6 +565,9 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
 
 staticHandler <- function(root) {
   return(function(req) {
+    if (!identical(req$REQUEST_METHOD, 'GET'))
+      return(NULL)
+
     path <- req$PATH_INFO
     
     if (is.null(path))
@@ -662,6 +665,9 @@ addResourcePath <- function(prefix, directoryPath) {
 }
 
 resourcePathHandler <- function(req) {
+  if (!identical(req$REQUEST_METHOD, 'GET'))
+    return(NULL)
+
   path <- req$PATH_INFO
   
   match <- regexpr('^/([^/]+)/', path, perl=TRUE)
@@ -806,6 +812,28 @@ startApp <- function(port=8101L) {
   serverFunc <- .globals$server
   
   httpuvCallbacks <- list(
+    onHeaders = function(req) {
+      maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
+      if (maxSize <= 0)
+        return(NULL)
+
+      reqSize <- 0
+      if (length(req$CONTENT_LENGTH) > 0)
+        reqSize <- as.integer(req$CONTENT_LENGTH)
+      else if (length(req$HTTP_TRANSFER_ENCODING) > 0)
+        reqSize <- Inf
+
+      if (reqSize > maxSize) {
+        return(list(status = 413L,
+                    headers = list(
+                      'Content-Type' = 'text/plain'
+                    ),
+                    body = 'Maximum upload size exceeded'))
+      }
+      else {
+        return(NULL)
+      }
+    },
     call = httpServer(c(sessionHandler,
                         dynamicHandler(uiR),
                         wwwDir,

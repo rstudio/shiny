@@ -189,6 +189,8 @@ shinyUI <- function(ui, path='/') {
   registerClient({
     
     function(req) {
+      if (!identical(req$REQUEST_METHOD, 'GET'))
+        return(NULL)
 
       if (req$PATH_INFO != path)
         return(NULL)

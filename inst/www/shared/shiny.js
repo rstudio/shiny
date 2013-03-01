@@ -1093,6 +1093,19 @@
     };
     this.onBegin = function(files, cont) {
       var self = this;
+
+      // Reset progress bar
+      this.$setError(null);
+      this.$setActive(true);
+      this.$setVisible(true);
+      this.onProgress(null, 0);
+
+      this.totalBytes = 0;
+      this.progressBytes = 0;
+      $.each(files, function(i, file) {
+        self.totalBytes += file.size;
+      });
+
       this.makeRequest(
         'uploadInit', [],
         function(response) {
@@ -1119,7 +1132,9 @@
           if (xhrVal.upload) {
             xhrVal.upload.onprogress = function(e) {
               if (e.lengthComputable) {
-                self.onProgress(file, (e.loaded / e.total));
+                self.onProgress(
+                  file,
+                  (self.progressBytes + e.loaded) / self.totalBytes);
               }
             }
           }
@@ -1127,11 +1142,12 @@
         },
         data: file,
         processData: false,
-        complete: function(jqXHR, textStatus) {
-          if (textStatus == 'success') {
-            cont();
-          }
-          // TODO: Message and reset state on error?
+        success: function() {
+          self.progressBytes += file.size;
+          cont();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          self.onError(jqXHR.responseText || textStatus);
         }
       });
     };
@@ -1142,11 +1158,42 @@
         },
         function(error) {
         });
+      this.$setActive(false);
+      this.onProgress(null, 1);
+      this.$label().text('Upload complete');
+    };
+    this.onError = function(message) {
+      this.$setError(message || '');
+      this.$setActive(false);
     };
     this.onAbort = function() {
+      this.$setVisible(false);
     };
     this.onProgress = function(file, completed) {
-      console.log('file: ' + file.name + ' [' + Math.round(completed*100) + '%]');
+      this.$bar().width(Math.round(completed*100) + '%');
+      this.$label().text(file ? file.name : '');
+    };
+    this.$container = function() {
+      return $('#' + this.id + '_progress.shiny-file-input-progress');
+    };
+    this.$bar = function() {
+      return $('#' + this.id + '_progress.shiny-file-input-progress .bar');
+    };
+    this.$label = function() {
+      return $('#' + this.id + '_progress.shiny-file-input-progress label');
+    };
+    this.$setVisible = function(visible) {
+      this.$container().css('visibility', visible ? 'visible' : 'hidden');
+    };
+    this.$setError = function(error) {
+      this.$bar().toggleClass('bar-danger', (error !== null));
+      if (error !== null) {
+        this.onProgress(null, 1);
+        this.$label().text(error);
+      }
+    };
+    this.$setActive = function(active) {
+      this.$container().toggleClass('active', !!active);
     };
   }).call(FileUploader.prototype);
 

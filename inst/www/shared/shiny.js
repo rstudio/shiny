@@ -589,7 +589,8 @@
       }
       if (msgObj.console) {
         for (var i = 0; i < msgObj.console.length; i++) {
-          console.log(msgObj.console[i]);
+          if (console.log)
+            console.log(msgObj.console[i]);
         }
       }
       if (msgObj.progress) {
@@ -1207,6 +1208,9 @@
 
     var files = evt.target.files;
     var id = fileInputBinding.getId(evt.target);
+
+    if (files.length == 0)
+      return;
 
     // Start the new upload and put the uploader in 'currentUploader'.
     el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));

@@ -151,9 +151,10 @@ ShinyApp <- setRefClass(
         .sendErrorResponse(msg, paste('Unknown method', msg$method))
       }
       
-      value <- try(do.call(func, as.list(append(msg$args, msg$blobs))))
+      value <- try(do.call(func, as.list(append(msg$args, msg$blobs))),
+                   silent=TRUE)
       if (inherits(value, 'try-error')) {
-        .sendErrorResponse(msg, paste('Error:', as.character(value)))
+        .sendErrorResponse(msg, conditionMessage(attr(value, 'condition')))
       }
       else {
         .sendResponse(msg, value)
@@ -182,7 +183,12 @@ ShinyApp <- setRefClass(
     },
     
     # Public RPC methods
-    `@uploadInit` = function() {
+    `@uploadInit` = function(fileSizes) {
+      maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
+      if (maxSize > 0 && any(fileSizes > maxSize)) {
+        stop("Maximum upload size exceeded")
+      }
+
       jobId <- .fileUploadContext$createUploadOperation()
       return(list(jobId=jobId,
                   uploadUrl=paste('session', token, 'upload', jobId, sep='/')))
@@ -819,7 +825,7 @@ startApp <- function(port=8101L) {
 
       reqSize <- 0
       if (length(req$CONTENT_LENGTH) > 0)
-        reqSize <- as.integer(req$CONTENT_LENGTH)
+        reqSize <- as.numeric(req$CONTENT_LENGTH)
       else if (length(req$HTTP_TRANSFER_ENCODING) > 0)
         reqSize <- Inf
 

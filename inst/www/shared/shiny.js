@@ -480,8 +480,7 @@
     //   response, the function will be called with it as the only argument.
     // @param onError A function that will be called back if the server
     //   responds with error, or if the request fails for any other reason.
-    //   The parameter to onError will be an error object or message (format
-    //   TBD).
+    //   The parameter to onError will be a string describing the error.
     // @param blobs Optionally, an array of Blob, ArrayBuffer, or string
     //   objects that will be made available to the server as part of the
     //   request. Strings will be encoded using UTF-8.
@@ -1107,14 +1106,17 @@
         self.totalBytes += file.size;
       });
 
+      var fileSizes = $.map(files, function(file, i) { return file.size; });
+
       this.makeRequest(
-        'uploadInit', [],
+        'uploadInit', [fileSizes],
         function(response) {
           self.jobId = response.jobId;
           self.uploadUrl = response.uploadUrl;
           cont();
         },
         function(error) {
+          self.onError(error);
         });
     };
     this.onFile = function(file, cont) {

@@ -226,7 +226,11 @@ ShinyApp <- setRefClass(
           fileType <- req$HTTP_SHINY_FILE_TYPE
           fileSize <- req$CONTENT_LENGTH
           job$fileBegin(list(name=fileName, type=fileType, size=fileSize))
-          job$fileChunk(req$rook.input$read(-1L))
+          
+          input <- req$rook.input
+          while (length(buf <- input$read(2^16)) > 0)
+            job$fileChunk(buf)
+          
           job$fileEnd()
           
           return(httpResponse(200, 'text/plain', 'OK'))

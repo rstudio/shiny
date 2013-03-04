@@ -76,3 +76,9 @@ span.jslider {
   font-size: 12px;
   padding: 0 6px;
 }
+.progress.shiny-file-input-progress .bar.bar-danger {
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  transition: none;
+}

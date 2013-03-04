@@ -49,17 +49,22 @@ renderPlot <- function(expr, width='auto', height='auto', ...,
   args <- list(...)
   
   if (is.function(width))
-    width <- reactive({ width() })
+    widthWrapper <- reactive({ width() })
+  else
+    widthWrapper <- NULL
+
   if (is.function(height))
-    height <- reactive({ height() })
+    heightWrapper <- reactive({ height() })
+  else
+    heightWrapper <- NULL
 
   return(function(shinyapp, name, ...) {
     png.file <- tempfile(fileext='.png')
     
-    if (is.function(width))
-      width <- width()
-    if (is.function(height))
-      height <- height()
+    if (!is.null(widthWrapper))
+      width <- widthWrapper()
+    if (!is.null(heightWrapper))
+      height <- heightWrapper()
     
     # Note that these are reactive calls. A change to the width and height
     # will inherently cause a reactive plot to redraw (unless width and 

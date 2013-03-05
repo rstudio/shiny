@@ -1,8 +1,11 @@
-shiny 0.4.0.99
+shiny 0.4.1
 --------------------------------------------------------------------------------
 
 * Fix bug where width and height weren't passed along properly from
   `reactivePlot` to `renderPlot`.
+
+* Fix bug where infinite recursion would happen when `reactivePlot` was passed
+  a function for width or height.
 
 shiny 0.4.0
 --------------------------------------------------------------------------------

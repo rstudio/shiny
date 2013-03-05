@@ -12,8 +12,8 @@ createUniqueId <- function(bytes) {
   paste(as.character(as.raw(floor(runif(bytes, min=1, max=255)))), collapse='')
 }
 
-ShinyApp <- setRefClass(
-  'ShinyApp',
+ShinySession <- setRefClass(
+  'ShinySession',
   fields = list(
     .websocket = 'list',
     .invalidatedOutputValues = 'Map',
@@ -22,7 +22,7 @@ ShinyApp <- setRefClass(
     .outputOptions = 'list', # Options for each of the output observer objects
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
-    session = 'ReactiveValues',
+    input = 'ReactiveValues',      # Normal input sent from client
     clientData = 'ReactiveValues', # Other data sent from the client
     token = 'character',  # Used to identify this instance in URLs
     plots = 'Map',
@@ -37,19 +37,19 @@ ShinyApp <- setRefClass(
       .progressKeys <<- character(0)
       # TODO: Put file upload context in user/app-specific dir if possible
       .fileUploadContext <<- FileUploadContext$new()
-      session <<- ReactiveValues$new()
+      input <<- ReactiveValues$new()
+      clientData <<- ReactiveValues$new()
       
       token <<- createUniqueId(16)
       .outputs <<- list()
       .outputOptions <<- list()
-      clientData <<- ReactiveValues$new()
       
       allowDataUriScheme <<- TRUE
     },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
       take no parameters, or have named parameters for \\code{name} and
-      \\code{shinyapp} (in the future this list may expand, so it is a good idea
+      \\code{shinysession} (in the future this list may expand, so it is a good idea
       to also include \\code{...} in your function signature)."
       
       # jcheng 08/31/2012: User submitted an example of a dynamically calculated
@@ -65,7 +65,7 @@ ShinyApp <- setRefClass(
         if (length(formals(func)) != 0) {
           orig <- func
           func <- function() {
-            orig(name=name, shinyapp=.self)
+            orig(name=name, shinysession=.self)
           }
         }
 
@@ -192,7 +192,7 @@ ShinyApp <- setRefClass(
     },
     `@uploadEnd` = function(jobId, inputId) {
       fileData <- .fileUploadContext$getUploadOperation(jobId)$finish()
-      session$set(inputId, fileData)
+      input$set(inputId, fileData)
       invisible()
     },
     # Provides a mechanism for handling direct HTTP requests that are posted
@@ -304,15 +304,17 @@ ShinyApp <- setRefClass(
     manageHiddenOutputs = function() {
       # Find hidden state for each output, and suspend/resume accordingly
       for (outputName in names(.outputs)) {
-        # Find corresponding hidden state input variable, with the format
-        # ".shinyout_foo_hidden".
-        # Some tricky stuff: instead of accessing names using session$names(),
-        # get the names directly via session$.values, to avoid triggering reactivity.
+        # Find corresponding hidden state clientData variable, with the format
+        # "output_foo_hidden". (It comes from .clientdata_output_foo_hidden
+        # on the JS side)
+        # Some tricky stuff: instead of accessing names using input$names(),
+        # get the names directly via input$.values, to avoid triggering reactivity.
         # Need to handle cases where the output object isn't actually used
-        # in the web page; in these cases, there's no .shinyout_foo_hidden flag,
-        # and hidden should be TRUE. In other words, NULL and TRUE should map
-        # to TRUE, FALSE should map to FALSE.
-        hidden <- session$.values[[paste(".shinyout_", outputName, "_hidden", sep="")]]
+        # in the web page; in these cases, there's no output_foo_hidden flag,
+        # and hidden should be TRUE. In other words, NULL and TRUE should map to
+        # TRUE, FALSE should map to FALSE.
+        hidden <- clientData$.values[[paste("output_", outputName, "_hidden",
+                                            sep="")]]
         if (is.null(hidden)) hidden <- TRUE
 
         if (hidden && .outputOptions[[outputName]][['suspendWhenHidden']]) {
@@ -322,28 +324,19 @@ ShinyApp <- setRefClass(
         }
       }
     },
-    # This is for other functions to access clientData values
-    getClientData = function(name, default=NULL) {
-      # Make sure the item exists - without taking dependency
-      # Then fetch the item with dependency
-      if (!is.null(clientData$.values[[name]]))
-        clientData$get(name)
-      else
-        default
-    },
     # Set the normal and client data input variables
     manageInputs = function(data) {
       data_names <- names(data)
 
       # Separate normal input variables from client data input variables
-      clientdata_idx <- grepl("^.shinyclientdata_", data_names)
+      clientdata_idx <- grepl("^.clientdata_", data_names)
 
       # Set normal (non-clientData) input values
-      session$mset(data[data_names[!clientdata_idx]])
+      input$mset(data[data_names[!clientdata_idx]])
 
-      # Strip off .shinyclientdata_ from clientdata input names, and set values
+      # Strip off .clientdata_ from clientdata input names, and set values
       input_clientdata <- data[data_names[clientdata_idx]]
-      names(input_clientdata) <- sub("^.shinyclientdata_", "",
+      names(input_clientdata) <- sub("^.clientdata_", "",
                                      names(input_clientdata))
       clientData$mset(input_clientdata)
     },
@@ -378,8 +371,8 @@ ShinyApp <- setRefClass(
   )
 )
 
-.createOutputWriter <- function(shinyapp) {
-  structure(list(impl=shinyapp), class='shinyoutput')
+.createOutputWriter <- function(shinysession) {
+  structure(list(impl=shinysession), class='shinyoutput')
 }
 
 #' @S3method $<- shinyoutput
@@ -544,11 +537,11 @@ sessionHandler <- function(ws, header) {
   session <- matches[[1]][2]
   subpath <- matches[[1]][3]
   
-  shinyapp <- appsByToken$get(session)
-  if (is.null(shinyapp))
+  shinysession <- appsByToken$get(session)
+  if (is.null(shinysession))
     return(NULL)
   
-  return(shinyapp$handleRequest(ws, header, subpath))
+  return(shinysession$handleRequest(ws, header, subpath))
 }
 
 dynamicHandler <- function(filePath, dependencyFiles=filePath) {
@@ -834,15 +827,15 @@ startApp <- function(port=8101L) {
                          resourcePathHandler)))
   
   set_callback('established', function(WS, ...) {
-    shinyapp <- ShinyApp$new(WS)
-    apps$set(wsToKey(WS), shinyapp)
-    appsByToken$set(shinyapp$token, shinyapp)
+    shinysession <- ShinySession$new(WS)
+    apps$set(wsToKey(WS), shinysession)
+    appsByToken$set(shinysession$token, shinysession)
   }, ws_env)
   
   set_callback('closed', function(WS, ...) {
-    shinyapp <- apps$get(wsToKey(WS))
-    if (!is.null(shinyapp))
-      appsByToken$remove(shinyapp$token)
+    shinysession <- apps$get(wsToKey(WS))
+    if (!is.null(shinysession))
+      appsByToken$remove(shinysession$token)
     apps$remove(wsToKey(WS))
   }, ws_env)
   
@@ -857,7 +850,7 @@ startApp <- function(port=8101L) {
     if (identical(charToRaw("\003\xe9"), DATA))
       return()
     
-    shinyapp <- apps$get(wsToKey(WS))
+    shinysession <- apps$get(wsToKey(WS))
     
     msg <- decodeMessage(DATA)
 
@@ -909,23 +902,23 @@ startApp <- function(port=8101L) {
           serverFunc <<- .globals$server
         }
         
-        shinyapp$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
+        shinysession$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
         msg$data[['__allowDataUriScheme']] <- NULL
-        shinyapp$manageInputs(msg$data)
+        shinysession$manageInputs(msg$data)
         local({
-          serverFunc(input=.createReactiveValues(shinyapp$session, readonly=TRUE),
-                     output=.createOutputWriter(shinyapp))
+          serverFunc(input=.createReactiveValues(shinysession$input, readonly=TRUE),
+                     output=.createOutputWriter(shinysession))
         })
       },
       update = {
-        shinyapp$manageInputs(msg$data)
+        shinysession$manageInputs(msg$data)
       },
-      shinyapp$dispatch(msg)
+      shinysession$dispatch(msg)
     )
-    shinyapp$manageHiddenOutputs()
+    shinysession$manageHiddenOutputs()
     flushReact()
-    lapply(apps$values(), function(shinyapp) {
-      shinyapp$flushOutput()
+    lapply(apps$values(), function(shinysession) {
+      shinysession$flushOutput()
       NULL
     })
   }, ws_env)
@@ -942,14 +935,14 @@ startApp <- function(port=8101L) {
 # @param ws_env The return value from \code{\link{startApp}}.
 serviceApp <- function(ws_env) {
   if (timerCallbacks$executeElapsed()) {
-    for (shinyapp in apps$values()) {
-      shinyapp$manageHiddenOutputs()
+    for (shinysession in apps$values()) {
+      shinysession$manageHiddenOutputs()
     }
 
     flushReact()
 
-    for (shinyapp in apps$values()) {
-      shinyapp$flushOutput()
+    for (shinysession in apps$values()) {
+      shinysession$flushOutput()
     }
   }
 

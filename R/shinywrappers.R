@@ -61,7 +61,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   else
     heightWrapper <- NULL
 
-  return(function(shinyapp, name, ...) {
+  return(function(shinysession, name, ...) {
     png.file <- tempfile(fileext='.png')
     
     if (!is.null(widthWrapper))
@@ -72,11 +72,11 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # Note that these are reactive calls. A change to the width and height
     # will inherently cause a reactive plot to redraw (unless width and 
     # height were explicitly specified).
-    prefix <- '.shinyout_'
+    prefix <- 'output_'
     if (width == 'auto')
-      width <- shinyapp$session$get(paste(prefix, name, '_width', sep=''));
+      width <- shinysession$clientData$get(paste(prefix, name, '_width', sep=''));
     if (height == 'auto')
-      height <- shinyapp$session$get(paste(prefix, name, '_height', sep=''));
+      height <- shinysession$clientData$get(paste(prefix, name, '_height', sep=''));
     
     if (width <= 0 || height <= 0)
       return(NULL)
@@ -94,7 +94,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     }
 
     # Resolution multiplier
-    pixelratio <- shinyapp$getClientData("pixelratio", default=1)
+    pixelratio <- shinysession$clientData$get("pixelratio")
+    if (is.null(pixelratio))
+      pixelratio <- 1
 
     do.call(pngfun, c(args, filename=png.file, width=width*pixelratio,
                       height=height*pixelratio, res=res*pixelratio))
@@ -108,12 +110,12 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       return(NULL)
     
     pngData <- readBin(png.file, 'raw', n=bytes)
-    if (shinyapp$allowDataUriScheme) {
+    if (shinysession$allowDataUriScheme) {
       b64 <- base64encode(pngData)
       return(paste("data:image/png;base64,", b64, sep=''))
     }
     else {
-      imageUrl <- shinyapp$savePlot(name, pngData, 'image/png')
+      imageUrl <- shinysession$savePlot(name, pngData, 'image/png')
       return(imageUrl)
     }
   })
@@ -336,8 +338,8 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 #' 
 #' @export
 downloadHandler <- function(filename, content, contentType=NA) {
-  return(function(shinyapp, name, ...) {
-    shinyapp$registerDownload(name, filename, contentType, content)
+  return(function(shinysession, name, ...) {
+    shinysession$registerDownload(name, filename, contentType, content)
   })
 }
 

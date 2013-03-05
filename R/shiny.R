@@ -20,10 +20,10 @@ ShinyApp <- setRefClass(
     .invalidatedOutputErrors = 'Map',
     .outputs = 'list',       # Keeps track of all the output observer objects
     .outputOptions = 'list', # Options for each of the output observer objects
-    .metadata = 'ReactiveValues', # Metadata sent from the browser
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
     session = 'ReactiveValues',
+    clientData = 'ReactiveValues', # Other data sent from the client
     token = 'character',  # Used to identify this instance in URLs
     plots = 'Map',
     downloads = 'Map',
@@ -42,7 +42,7 @@ ShinyApp <- setRefClass(
       token <<- createUniqueId(16)
       .outputs <<- list()
       .outputOptions <<- list()
-      .metadata <<- ReactiveValues$new()
+      clientData <<- ReactiveValues$new()
       
       allowDataUriScheme <<- TRUE
     },
@@ -322,29 +322,30 @@ ShinyApp <- setRefClass(
         }
       }
     },
-    # This is for other functions to access metadata values
-    getMetadata = function(name, default=NULL) {
+    # This is for other functions to access clientData values
+    getClientData = function(name, default=NULL) {
       # Make sure the item exists - without taking dependency
       # Then fetch the item with dependency
-      if (!is.null(.metadata$.values[[name]]))
-        .metadata$get(name)
+      if (!is.null(clientData$.values[[name]]))
+        clientData$get(name)
       else
         default
     },
-    # Set the normal and metadata input variables
+    # Set the normal and client data input variables
     manageInputs = function(data) {
       data_names <- names(data)
 
-      # Separate normal input variables from metadata input variables
-      metadata_idx <- grepl("^.shinymetadata_", data_names)
+      # Separate normal input variables from client data input variables
+      clientdata_idx <- grepl("^.shinyclientdata_", data_names)
 
-      # Set non-metadata input values
-      session$mset(data[data_names[!metadata_idx]])
+      # Set normal (non-clientData) input values
+      session$mset(data[data_names[!clientdata_idx]])
 
-      # Strip off .shinymetadata_ from metadata input names, and set values
-      input_metadata <- data[data_names[metadata_idx]]
-      names(input_metadata) <- sub("^.shinymetadata_", "", names(input_metadata))
-      .metadata$mset(input_metadata)
+      # Strip off .shinyclientdata_ from clientdata input names, and set values
+      input_clientdata <- data[data_names[clientdata_idx]]
+      names(input_clientdata) <- sub("^.shinyclientdata_", "",
+                                     names(input_clientdata))
+      clientData$mset(input_clientdata)
     },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs

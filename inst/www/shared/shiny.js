@@ -1551,9 +1551,9 @@
                  sendOutputHiddenState);
 
     // Send initial pixel ratio, and update it if it changes
-    initialValues['.shinymetadata_pixelratio'] = pixelRatio();
+    initialValues['.shinyclientdata_pixelratio'] = pixelRatio();
     $(window).resize(function() {
-      inputs.setInput('.shinymetadata_pixelratio', pixelRatio());
+      inputs.setInput('.shinyclientdata_pixelratio', pixelRatio());
     });
 
     // We've collected all the initial values--start the server process!

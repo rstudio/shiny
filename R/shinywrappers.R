@@ -94,7 +94,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     }
 
     # Resolution multiplier
-    pixelratio <- shinyapp$getMetadata("pixelratio", default=1)
+    pixelratio <- shinyapp$getClientData("pixelratio", default=1)
 
     do.call(pngfun, c(args, filename=png.file, width=width*pixelratio,
                       height=height*pixelratio, res=res*pixelratio))

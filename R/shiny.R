@@ -322,23 +322,29 @@ ShinyApp <- setRefClass(
         }
       }
     },
-    # This function manages metadata sent from the browser
-    manageMetadata= function() {
-      # Find and extract all values that start with .shinymetadata_
-      full_names <- ls(session$.values, all.names=TRUE)
-      full_names <- full_names[grepl("^.shinymetadata_", full_names)]
-      values <- mget(full_names, session$.values)
-
-      # Remove the leading .shinymetadata_ and store in the .metadata object
-      short_names <- sub("^.shinymetadata_", "", full_names)
-      .metadata <<- setNames(values, short_names)
-    },
     # This is for other functions to access metadata values
     getMetadata = function(name, default=NULL) {
-      if (!is.null(.metadata[[name]]))
-        .metadata[[name]]
+      # Make sure the item exists - without taking dependency
+      # Then fetch the item with dependency
+      if (!is.null(.metadata$.values[[name]]))
+        .metadata$get(name)
       else
-       default
+        default
+    },
+    # Set the normal and metadata input variables
+    manageInputs = function(data) {
+      data_names <- names(data)
+
+      # Separate normal input variables from metadata input variables
+      metadata_idx <- grepl("^.shinymetadata_", data_names)
+
+      # Set non-metadata input values
+      session$mset(data[data_names[!metadata_idx]])
+
+      # Strip off .shinymetadata_ from metadata input names, and set values
+      input_metadata <- data[data_names[metadata_idx]]
+      names(input_metadata) <- sub("^.shinymetadata_", "", names(input_metadata))
+      .metadata$mset(input_metadata)
     },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs
@@ -904,19 +910,18 @@ startApp <- function(port=8101L) {
         
         shinyapp$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
         msg$data[['__allowDataUriScheme']] <- NULL
-        shinyapp$session$mset(msg$data)
+        shinyapp$manageInputs(msg$data)
         local({
           serverFunc(input=.createReactiveValues(shinyapp$session, readonly=TRUE),
                      output=.createOutputWriter(shinyapp))
         })
       },
       update = {
-        shinyapp$session$mset(msg$data)
+        shinyapp$manageInputs(msg$data)
       },
       shinyapp$dispatch(msg)
     )
     shinyapp$manageHiddenOutputs()
-    shinyapp$manageMetadata()
     flushReact()
     lapply(apps$values(), function(shinyapp) {
       shinyapp$flushOutput()
@@ -938,7 +943,6 @@ serviceApp <- function(ws_env) {
   if (timerCallbacks$executeElapsed()) {
     for (shinyapp in apps$values()) {
       shinyapp$manageHiddenOutputs()
-      shinyapp$manageMetadata()
     }
 
     flushReact()

@@ -18,7 +18,7 @@ Imports:
     utils,
     datasets,
     methods,
-    httpuv,
+    httpuv (>= 1.0.3),
     caTools,
     RJSONIO,
     xtable,

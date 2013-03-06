@@ -282,16 +282,17 @@ ShinyApp <- setRefClass(
         }
         
         tmpdata <- tempfile()
-        on.exit(unlink(tmpdata))
         result <- try(Context$new('[download]')$run(function() { download$func(tmpdata) }))
         if (is(result, 'try-error')) {
+          unlink(tmpdata)
           return(httpResponse(500, 'text/plain', 
                               attr(result, 'condition')$message))
         }
         return(httpResponse(
           200,
           download$contentType %OR% getContentType(tools::file_ext(filename)),
-          readBin(tmpdata, 'raw', n=file.info(tmpdata)$size),
+          # owned=TRUE means tmpdata will be deleted after response completes
+          list(file=tmpdata, owned=TRUE),
           c(
             'Content-Disposition' = ifelse(
               dlmatches[3] == '',

@@ -906,8 +906,15 @@ startApp <- function(port=8101L) {
         msg$data[['__allowDataUriScheme']] <- NULL
         shinysession$manageInputs(msg$data)
         local({
-          serverFunc(input=.createReactiveValues(shinysession$input, readonly=TRUE),
-                     output=.createOutputWriter(shinysession))
+          args <- list(
+            input=.createReactiveValues(shinysession$input, readonly=TRUE),
+            output=.createOutputWriter(shinysession))
+
+          # The clientData argument is optional; check if it exists
+          if ('clientData' %in% names(formals(serverFunc)))
+            args$clientData <- .createReactiveValues(shinysession$clientData, readonly=TRUE)
+
+          do.call(serverFunc, args)
         })
       },
       update = {

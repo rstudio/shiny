@@ -25,7 +25,7 @@ ShinySession <- setRefClass(
     input = 'ReactiveValues',      # Normal input sent from client
     clientData = 'ReactiveValues', # Other data sent from the client
     token = 'character',  # Used to identify this instance in URLs
-    plots = 'Map',
+    files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
     allowDataUriScheme = 'logical'
   ),
@@ -207,12 +207,12 @@ ShinySession <- setRefClass(
       if (length(matches) == 0)
         return(httpResponse(400, 'text/html', '<h1>Bad Request</h1>'))
       
-      if (matches[2] == 'plot') {
-        savedPlot <- plots$get(utils::URLdecode(matches[3]))
-        if (is.null(savedPlot))
+      if (matches[2] == 'file') {
+        savedFile <- files$get(utils::URLdecode(matches[3]))
+        if (is.null(savedFile))
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
         
-        return(httpResponse(200, savedPlot$contentType, savedPlot$data))
+        return(httpResponse(200, savedFile$contentType, savedFile$data))
       }
       
       if (matches[2] == 'download') {
@@ -283,15 +283,15 @@ ShinySession <- setRefClass(
       
       return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
     },
-    savePlot = function(name, data, contentType) {
-      plots$set(name, list(data=data, contentType=contentType))
-      return(sprintf('session/%s/plot/%s?%s',
+    saveFile = function(name, data, contentType) {
+      files$set(name, list(data=data, contentType=contentType))
+      return(sprintf('session/%s/file/%s?%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
                      createUniqueId(8)))
     },
     # Send a file to the client
-    sendFile = function(file, contentType='application/octet-stream') {
+    sendFile = function(name, file, contentType='application/octet-stream') {
       bytes <- file.info(file)$size
       if (is.na(bytes))
         return(NULL)
@@ -302,7 +302,7 @@ ShinySession <- setRefClass(
         paste('data:', contentType, ';base64,', b64, sep='')
       }
       else {
-        savePlot(name, fileData, contentType)
+        saveFile(name, fileData, contentType)
       }
     },
     registerDownload = function(name, filename, contentType, func) {

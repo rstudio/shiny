@@ -106,7 +106,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       finally=dev.off())
     
     # Send Image
-    shinysession$sendFile(png.file, contentType='image/png')
+    shinysession$sendFile(name, png.file, contentType='image/png')
   })
 }
 

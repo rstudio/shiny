@@ -2,8 +2,9 @@
 \alias{renderPlot}
 \title{Plot Output}
 \usage{
-  renderPlot(expr, width = "auto", height = "auto", ...,
-    env = parent.frame(), quoted = FALSE, func = NULL)
+  renderPlot(expr, width = "auto", height = "auto",
+    res = 72, ..., env = parent.frame(), quoted = FALSE,
+    func = NULL)
 }
 \arguments{
   \item{expr}{An expression that generates a plot.}
@@ -21,6 +22,11 @@
   pass in a function that returns the width in pixels or
   \code{'auto'}; in the body of the function you may
   reference reactive values and functions.}
+
+  \item{res}{Resolution of resulting plot, in pixels per
+  inch. This value is passed to \code{\link{png}}. Note
+  that this affects the resolution of PNG rendering in R;
+  it won't change the actual ppi of the browser.}
 
   \item{...}{Arguments to be passed through to
   \code{\link[grDevices]{png}}.  These can be used to set
@@ -44,13 +50,5 @@
   The corresponding HTML output tag should be \code{div} or
   \code{img} and have the CSS class name
   \code{shiny-plot-output}.
-
-  For output, it will try to use the following devices, in
-  this order: quartz (via \code{\link[grDevices]{png}}),
-  then \code{\link[Cairo]{CairoPNG}}, and finally
-  \code{\link[grDevices]{png}}. This is in order of quality
-  of output. Notably, plain \code{png} output on Linux and
-  Windows may not antialias some point shapes, resulting in
-  poor quality output.
 }
 

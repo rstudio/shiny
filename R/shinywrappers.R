@@ -11,12 +11,6 @@ suppressPackageStartupMessages({
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
 #' the CSS class name \code{shiny-plot-output}.
 #'
-#' For output, it will try to use the following devices, in this order:
-#' quartz (via \code{\link[grDevices]{png}}), then \code{\link[Cairo]{CairoPNG}},
-#' and finally \code{\link[grDevices]{png}}. This is in order of quality of
-#' output. Notably, plain \code{png} output on Linux and Windows may not
-#' antialias some point shapes, resulting in poor quality output.
-#' 
 #' @param expr An expression that generates a plot.
 #' @param width The width of the rendered plot, in pixels; or \code{'auto'} to 
 #'   use the \code{offsetWidth} of the HTML element that is bound to this plot. 
@@ -62,8 +56,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     heightWrapper <- NULL
 
   return(function(shinysession, name, ...) {
-    png.file <- tempfile(fileext='.png')
-    
     if (!is.null(widthWrapper))
       width <- widthWrapper()
     if (!is.null(heightWrapper))
@@ -81,32 +73,17 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     if (width <= 0 || height <= 0)
       return(NULL)
 
-    # If quartz is available, use png() (which will default to quartz).
-    # Otherwise, if the Cairo package is installed, use CairoPNG().
-    # Finally, if neither quartz nor Cairo, use png().
-    if (capabilities("aqua")) {
-      pngfun <- png
-    } else if (nchar(system.file(package = "Cairo"))) {
-      require(Cairo)
-      pngfun <- CairoPNG
-    } else {
-      pngfun <- png
-    }
-
     # Resolution multiplier
     pixelratio <- shinysession$clientData$get("pixelratio")
     if (is.null(pixelratio))
       pixelratio <- 1
 
-    do.call(pngfun, c(args, filename=png.file, width=width*pixelratio,
-                      height=height*pixelratio, res=res*pixelratio))
-    on.exit(unlink(png.file))
-    tryCatch(
-      func(),
-      finally=dev.off())
+    outfile <- do.call(plotPNG, c(func, width=width*pixelratio,
+                                  height=height*pixelratio, res=res*pixelratio, args))
+    on.exit(unlink(outfile))
     
     # Send Image
-    shinysession$sendFile(name, png.file, contentType='image/png')
+    shinysession$sendFile(name, outfile, contentType='image/png')
   })
 }
 

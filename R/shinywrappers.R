@@ -105,19 +105,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       func(),
       finally=dev.off())
     
-    bytes <- file.info(png.file)$size
-    if (is.na(bytes))
-      return(NULL)
-    
-    pngData <- readBin(png.file, 'raw', n=bytes)
-    if (shinysession$allowDataUriScheme) {
-      b64 <- base64encode(pngData)
-      return(paste("data:image/png;base64,", b64, sep=''))
-    }
-    else {
-      imageUrl <- shinysession$savePlot(name, pngData, 'image/png')
-      return(imageUrl)
-    }
+    # Send Image
+    shinysession$sendFile(png.file, contentType='image/png')
   })
 }
 

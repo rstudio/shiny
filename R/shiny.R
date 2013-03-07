@@ -290,6 +290,21 @@ ShinySession <- setRefClass(
                      URLencode(name, TRUE),
                      createUniqueId(8)))
     },
+    # Send a file to the client
+    sendFile = function(file, contentType='application/octet-stream') {
+      bytes <- file.info(file)$size
+      if (is.na(bytes))
+        return(NULL)
+
+      fileData <- readBin(file, 'raw', n=bytes)
+      if (allowDataUriScheme) {
+        b64 <- base64encode(fileData)
+        paste('data:', contentType, ';base64,', b64, sep='')
+      }
+      else {
+        savePlot(name, fileData, contentType)
+      }
+    },
     registerDownload = function(name, filename, contentType, func) {
       
       downloads$set(name, list(filename = filename,

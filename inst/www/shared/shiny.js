@@ -1327,8 +1327,10 @@
     var inputsRate = new InputRateDecorator(inputsNoResend);
     var inputsDefer = new InputDeferDecorator(inputsNoResend);
 
+    // By default, use rate decorator
     inputs = inputsRate;
     $('input[type="submit"], button[type="submit"]').each(function() {
+      // If there is a submit button on the page, use defer decorator
       inputs = inputsDefer;
       $(this).click(function(event) {
         event.preventDefault();

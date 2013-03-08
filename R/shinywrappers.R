@@ -89,6 +89,120 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   })
 }
 
+#' Image file output
+#'
+#' Renders a reactive image that is suitable for assigning to an \code{output} 
+#' slot.
+#'
+#' The expression \code{expr} must return a list containing the attributes for
+#' the \code{img} object on the client web page. For the image to display,
+#' properly, the list must have at least one entry, \code{src}, which is the
+#' path to the image file. It may also useful to have a \code{contentType}
+#' entry specifying the MIME type of the image. If one is not provided,
+#' \code{renderImage} will try to autodetect the type, based on the file
+#' extension.
+#'
+#' Other elements such as \code{width}, \code{height}, \code{class}, and
+#' \code{alt}, can also be added to the list, and they will be used as
+#' attributes in the \code{img} object.
+#'
+#' The corresponding HTML output tag should be \code{div} or \code{img} and have
+#' the CSS class name \code{shiny-plot-output}.
+#'
+#' @param expr An expression that returns a list.
+#' @param env The environment in which to evaluate \code{expr}.
+#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
+#'   is useful if you want to save an expression in a variable.
+#' @param deleteFile Should the file in \code{func()$src} be deleted after
+#'   it is sent to the client browser? Genrrally speaking, if the image is a
+#'   temp file generated within \code{func}, then this should be \code{TRUE};
+#'   if the image is not a temp file, this should be \code{FALSE}.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#'
+#' shinyServer(function(input, output, clientData) {
+#'
+#'   # A plot of fixed size
+#'   output$plot1 <- renderImage({
+#'     # A temp file to save the output. It will be deleted after renderImage
+#'     # sends it, because deleteFile=TRUE.
+#'     outfile <- tempfile(fileext='.png')
+#'
+#'     # Generate a png
+#'     png(outfile, width=400, height=400)
+#'     hist(rnorm(input$n))
+#'     dev.off()
+#'
+#'     # Return a list
+#'     list(src = outfile,
+#'          alt = "This is alternate text")
+#'   }, deleteFile = TRUE)
+#'
+#'   # A dynamically-sized plot
+#'   output$plot2 <- renderImage({
+#'     # Read plot2's width and height. These are reactive values, so this
+#'     # expression will re-run whenever these values change.
+#'     width  <- clientData$output_plot2_width
+#'     height <- clientData$output_plot2_height
+#'
+#'     # A temp file to save the output.
+#'     outfile <- tempfile(fileext='.png')
+#'
+#'     png(outfile, width=width, height=height)
+#'     hist(rnorm(input$obs))
+#'     dev.off()
+#'
+#'     # Return a list containing the filename
+#'     list(src = outfile,
+#'          width = width,
+#'          height = height,
+#'          alt = "This is alternate text")
+#'   }, deleteFile = TRUE)
+#'
+#'   # Send a pre-rendered image, and don't delete the image after sending it
+#'   output$plot3 <- renderImage({
+#'     # When input$n is 1, filename is ./images/image1.jpeg
+#'     filename <- normalizePath(file.path('./images',
+#'                               paste('image', input$n, '.jpeg', sep='')))
+#'
+#'     # Return a list containing the filename
+#'     list(src = filename)
+#'   }, deleteFile = FALSE)
+#' })
+#'
+#' }
+renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
+                        deleteFile=TRUE) {
+  func <- exprToFunction(expr, env, quoted)
+
+  return(function(shinysession, name, ...) {
+    imageinfo <- func()
+    # Should the file be deleted after being sent? If .deleteFile not set or if
+    # TRUE, then delete; otherwise don't delete.
+    if (deleteFile) {
+      on.exit(unlink(imageinfo$src))
+    }
+
+    # If contentType not specified, autodetect based on extension
+    if (is.null(imageinfo$contentType)) {
+      contentType <- getContentType(sub('^.*\\.', '', basename(imageinfo$src)))
+    } else {
+      contentType <- imageinfo$contentType
+    }
+
+    # Extra values are everything in imageinfo except 'src' and 'contentType'
+    extra_attr <- imageinfo[!names(imageinfo) %in% c('src', 'contentType')]
+
+    # Return a list with src, and other img attributes
+    c(src = shinysession$fileUrl(name, file=imageinfo$src, contentType=contentType),
+      extra_attr)
+  })
+}
+
+
 #' Table Output
 #' 
 #' Creates a reactive table that is suitable for assigning to an \code{output} 

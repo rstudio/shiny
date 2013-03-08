@@ -906,7 +906,10 @@
       var img = null;
       if (data) {
         img = document.createElement('img');
-        img.src = data;
+        // Copy items from data to img. This should include 'src'
+        $.each(data, function(key, value) {
+          img[key] = value;
+        })
       }
 
       $(el).empty();

@@ -283,7 +283,9 @@ ShinySession <- setRefClass(
       
       return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
     },
-    saveFile = function(name, data, contentType) {
+    saveFileUrl = function(name, data, contentType, extra=list()) {
+      "Creates an entry in the file map for the data, and returns a URL pointing
+      to the file."
       files$set(name, list(data=data, contentType=contentType))
       return(sprintf('session/%s/file/%s?%s',
                      URLencode(token, TRUE),
@@ -291,7 +293,10 @@ ShinySession <- setRefClass(
                      createUniqueId(8)))
     },
     # Send a file to the client
-    sendFile = function(name, file, contentType='application/octet-stream') {
+    fileUrl = function(name, file, contentType='application/octet-stream') {
+      "Return a URL for a file to be sent to the client. If allowDataUriScheme
+      is TRUE, then the file will be base64 encoded and embedded in the URL.
+      Otherwise, a URL pointing to the file will be returned."
       bytes <- file.info(file)$size
       if (is.na(bytes))
         return(NULL)
@@ -299,10 +304,10 @@ ShinySession <- setRefClass(
       fileData <- readBin(file, 'raw', n=bytes)
       if (allowDataUriScheme) {
         b64 <- base64encode(fileData)
-        paste('data:', contentType, ';base64,', b64, sep='')
+        return(paste('data:', contentType, ';base64,', b64, sep=''))
       }
       else {
-        saveFile(name, fileData, contentType)
+        return(saveFileUrl(name, fileData, contentType))
       }
     },
     registerDownload = function(name, filename, contentType, func) {

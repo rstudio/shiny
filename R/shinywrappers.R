@@ -82,8 +82,10 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                                   height=height*pixelratio, res=res*pixelratio, args))
     on.exit(unlink(outfile))
     
-    # Send Image
-    shinysession$sendFile(name, outfile, contentType='image/png')
+    # Return a list of attributes for the img
+    return(list(
+      src=shinysession$fileUrl(name, outfile, contentType='image/png'),
+      width=width, height=height))
   })
 }
 

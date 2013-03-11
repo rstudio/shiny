@@ -188,6 +188,62 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE) {
   }
 }
 
+#' Parse a GET query string from a URL
+#'
+#' Returns a named character vector of key-value pairs.
+#'
+#' @param str The query string. It can have a leading \code{"?"} or not.
+#' @export
+#' @examples
+#' parseQueryString("?foo=1&bar=b%20a%20r")
+#'
+#' \dontrun{
+#' # Example of usage within a Shiny app
+#' shinyServer(function(input, output, clientData) {
+#'
+#'   output$queryText <- renderText({
+#'     query <- parseQueryString(clientData$url_search)
+#'
+#'     # Ways of accessing the values
+#'     if (as.numeric(query$foo) == 1) {
+#'       # Do something
+#'     }
+#'     if (query[["bar"]] == "targetstring") {
+#'       # Do something else
+#'     }
+#'
+#'     # Return a string with key-value pairs
+#'     paste(names(query), query, sep = "=", collapse=", ")
+#'   })
+#' })
+#' }
+#'
+parseQueryString <- function(str) {
+  if (is.null(str) || nchar(str) == 0)
+    return(list())
+
+  # Remove leading ?
+  if (substr(str, 1, 1) == '?')
+    str <- substr(str, 2, nchar(str))
+
+  pairs <- strsplit(str, '&', fixed = TRUE)[[1]]
+  pairs <- strsplit(pairs, '=', fixed = TRUE)
+
+  keys   <- vapply(pairs, function(x) x[1], FUN.VALUE = character(1))
+  values <- vapply(pairs, function(x) x[2], FUN.VALUE = character(1))
+  # Replace NA with '', so they don't get converted to 'NA' by URLdecode
+  values[is.na(values)] <- ''
+
+  # Convert "+" to " ", since URLdecode doesn't do it
+  keys   <- gsub('+', ' ', keys,   fixed = TRUE)
+  values <- gsub('+', ' ', values, fixed = TRUE)
+
+  keys   <- vapply(keys,   function(x) URLdecode(x), FUN.VALUE = character(1))
+  values <- vapply(values, function(x) URLdecode(x), FUN.VALUE = character(1))
+
+  setNames(as.list(values), keys)
+}
+
 #' Print message for deprecated functions in Shiny
 #'
 #' To disable these messages, use \code{options(shiny.deprecation.messages=FALSE)}.

@@ -26,8 +26,7 @@ ShinySession <- setRefClass(
     clientData = 'ReactiveValues', # Other data sent from the client
     token = 'character',  # Used to identify this instance in URLs
     files = 'Map',        # For keeping track of files sent to client
-    downloads = 'Map',
-    allowDataUriScheme = 'logical'
+    downloads = 'Map'
   ),
   methods = list(
     initialize = function(ws) {
@@ -43,8 +42,6 @@ ShinySession <- setRefClass(
       token <<- createUniqueId(16)
       .outputs <<- list()
       .outputOptions <<- list()
-      
-      allowDataUriScheme <<- TRUE
     },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
@@ -302,11 +299,11 @@ ShinySession <- setRefClass(
         return(NULL)
 
       fileData <- readBin(file, 'raw', n=bytes)
-      if (allowDataUriScheme) {
+
+      if (isTRUE(clientData$.values$allowDataUriScheme)) {
         b64 <- base64encode(fileData)
         return(paste('data:', contentType, ';base64,', b64, sep=''))
-      }
-      else {
+      } else {
         return(saveFileUrl(name, fileData, contentType))
       }
     },
@@ -922,8 +919,6 @@ startApp <- function(port=8101L) {
           serverFunc <<- .globals$server
         }
         
-        shinysession$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
-        msg$data[['__allowDataUriScheme']] <- NULL
         shinysession$manageInputs(msg$data)
         local({
           args <- list(

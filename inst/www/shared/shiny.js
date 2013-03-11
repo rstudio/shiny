@@ -412,7 +412,7 @@
 
       $.extend(initialInput, {
         // IE8 and IE9 have some limitations with data URIs
-        "__allowDataUriScheme": typeof WebSocket !== 'undefined'
+        ".clientdata_allowDataUriScheme": typeof WebSocket !== 'undefined'
       });
 
       this.$socket = this.createSocket();

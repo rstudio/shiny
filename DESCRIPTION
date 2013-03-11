@@ -45,3 +45,4 @@ Collate:
     'slider.R'
     'bootstrap.R'
     'run-url.R'
+    'imageutils.R'

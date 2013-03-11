@@ -57,6 +57,13 @@
     }
   }
 
+  function pixelRatio() {
+    if (window.devicePixelRatio) {
+      return window.devicePixelRatio;
+    } else {
+      return 1;
+    }
+  }
 
   // Takes a string expression and returns a function that takes an argument.
   // 
@@ -899,7 +906,10 @@
       var img = null;
       if (data) {
         img = document.createElement('img');
-        img.src = data;
+        // Copy items from data to img. This should include 'src'
+        $.each(data, function(key, value) {
+          img[key] = value;
+        })
       }
 
       $(el).empty();
@@ -1502,15 +1512,15 @@
     // the plot is auto-sizing
     $('.shiny-plot-output').each(function() {
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-        initialValues['.shinyout_' + this.id + '_width'] = this.offsetWidth;
-        initialValues['.shinyout_' + this.id + '_height'] = this.offsetHeight;
+        initialValues['.clientdata_output_' + this.id + '_width'] = this.offsetWidth;
+        initialValues['.clientdata_output_' + this.id + '_height'] = this.offsetHeight;
       }
     });
     function sendPlotSize() {
       $('.shiny-plot-output').each(function() {
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-          inputs.setInput('.shinyout_' + this.id + '_width', this.offsetWidth);
-          inputs.setInput('.shinyout_' + this.id + '_height', this.offsetHeight);
+          inputs.setInput('.clientdata_output_' + this.id + '_width', this.offsetWidth);
+          inputs.setInput('.clientdata_output_' + this.id + '_height', this.offsetHeight);
         }
       });
     }
@@ -1518,9 +1528,9 @@
     // Set initial state of outputs to hidden, if needed
     $('.shiny-bound-output').each(function() {
       if (this.offsetWidth === 0 && this.offsetHeight === 0) {
-        initialValues['.shinyout_' + this.id + '_hidden'] = true;
+        initialValues['.clientdata_output_' + this.id + '_hidden'] = true;
       } else {
-        initialValues['.shinyout_' + this.id + '_hidden'] = false;
+        initialValues['.clientdata_output_' + this.id + '_hidden'] = false;
       }
     });
     // Send update when hidden state changes
@@ -1528,9 +1538,9 @@
       $('.shiny-bound-output').each(function() {
         // Assume that the object is hidden when width and height are 0
         if (this.offsetWidth === 0 && this.offsetHeight === 0) {
-          inputs.setInput('.shinyout_' + this.id + '_hidden', true);
+          inputs.setInput('.clientdata_output_' + this.id + '_hidden', true);
         } else {
-          inputs.setInput('.shinyout_' + this.id + '_hidden', false);
+          inputs.setInput('.clientdata_output_' + this.id + '_hidden', false);
         }
       });
     }
@@ -1542,6 +1552,12 @@
     $('body').on('shown.sendPlotSize', '*', sendPlotSize);
     $('body').on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*',
                  sendOutputHiddenState);
+
+    // Send initial pixel ratio, and update it if it changes
+    initialValues['.clientdata_pixelratio'] = pixelRatio();
+    $(window).resize(function() {
+      inputs.setInput('.clientdata_pixelratio', pixelRatio());
+    });
 
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);

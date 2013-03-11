@@ -1,9 +1,9 @@
 #' @docType package
-#' @import websockets caTools RJSONIO xtable digest
+#' @import httpuv caTools RJSONIO xtable digest
 NULL
 
 suppressPackageStartupMessages({
-  library(websockets)
+  library(httpuv)
   library(RJSONIO)
 })
 
@@ -15,7 +15,7 @@ createUniqueId <- function(bytes) {
 ShinySession <- setRefClass(
   'ShinySession',
   fields = list(
-    .websocket = 'list',
+    .websocket = 'ANY',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
     .outputs = 'list',       # Keeps track of all the output observer objects
@@ -27,14 +27,16 @@ ShinySession <- setRefClass(
     token = 'character',  # Used to identify this instance in URLs
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
-    allowDataUriScheme = 'logical'
+    allowDataUriScheme = 'logical',
+    closed = 'logical'
   ),
   methods = list(
-    initialize = function(ws) {
-      .websocket <<- ws
+    initialize = function(websocket) {
+      .websocket <<- websocket
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
       .progressKeys <<- character(0)
+      closed <<- FALSE
       # TODO: Put file upload context in user/app-specific dir if possible
       .fileUploadContext <<- FileUploadContext$new()
       input <<- ReactiveValues$new()
@@ -45,6 +47,12 @@ ShinySession <- setRefClass(
       .outputOptions <<- list()
       
       allowDataUriScheme <<- TRUE
+    },
+    close = function() {
+      closed <<- TRUE
+      for (output in .outputs) {
+        output$suspend()
+      }
     },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
@@ -123,6 +131,12 @@ ShinySession <- setRefClass(
       by \\code{id} is in progress. There is currently no mechanism for
       explicitly turning off progress for an output component; instead, all
       progress is implicitly turned off when flushOutput is next called.'
+
+      # If app is already closed, be sure not to show progress, otherwise we
+      # will get an error because of the closed websocket
+      if (closed)
+        return()
+      
       if (id %in% .progressKeys)
         return()
       
@@ -139,9 +153,10 @@ ShinySession <- setRefClass(
         .sendErrorResponse(msg, paste('Unknown method', msg$method))
       }
       
-      value <- try(do.call(func, as.list(append(msg$args, msg$blobs))))
+      value <- try(do.call(func, as.list(append(msg$args, msg$blobs))),
+                   silent=TRUE)
       if (inherits(value, 'try-error')) {
-        .sendErrorResponse(msg, paste('Error:', as.character(value)))
+        .sendErrorResponse(msg, conditionMessage(attr(value, 'condition')))
       }
       else {
         .sendResponse(msg, value)
@@ -166,29 +181,19 @@ ShinySession <- setRefClass(
            gsub('(?m)base64,[a-zA-Z0-9+/=]+','[base64 data]',json,perl=TRUE))
       if (getOption('shiny.transcode.json', TRUE))
         json <- iconv(json, to='UTF-8')
-      websocket_write(json, .websocket)
+      .websocket$send(json)
     },
     
     # Public RPC methods
-    `@uploadInit` = function() {
-      return(list(jobId=.fileUploadContext$createUploadOperation()))
-    },
-    `@uploadFileBegin` = function(jobId, fileName, fileType, fileSize) {
-      .fileUploadContext$getUploadOperation(jobId)$fileBegin(list(
-        name=fileName, type=fileType, size=fileSize
-      ))
-      invisible()
-    },
-    `@uploadFileChunk` = function(jobId, ...) {
-      args <- list(...)
-      if (length(args) != 1)
-        stop("Bad file chunk request")
-      .fileUploadContext$getUploadOperation(jobId)$fileChunk(args[[1]])
-      invisible()
-    },
-    `@uploadFileEnd` = function(jobId) {
-      .fileUploadContext$getUploadOperation(jobId)$fileEnd()
-      invisible()
+    `@uploadInit` = function(fileSizes) {
+      maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
+      if (maxSize > 0 && any(fileSizes > maxSize)) {
+        stop("Maximum upload size exceeded")
+      }
+
+      jobId <- .fileUploadContext$createUploadOperation()
+      return(list(jobId=jobId,
+                  uploadUrl=paste('session', token, 'upload', jobId, sep='/')))
     },
     `@uploadEnd` = function(jobId, inputId) {
       fileData <- .fileUploadContext$getUploadOperation(jobId)$finish()
@@ -197,8 +202,9 @@ ShinySession <- setRefClass(
     },
     # Provides a mechanism for handling direct HTTP requests that are posted
     # to the session (rather than going through the websocket)
-    handleRequest = function(ws, header, subpath) {
+    handleRequest = function(req) {
       # TODO: Turn off caching for the response
+      subpath <- req$PATH_INFO
       
       matches <- regmatches(subpath,
                             regexec("^/([a-z]+)/([^?]*)", 
@@ -213,6 +219,24 @@ ShinySession <- setRefClass(
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
         
         return(httpResponse(200, savedFile$contentType, savedFile$data))
+      }
+      
+      if (matches[2] == 'upload' && identical(req$REQUEST_METHOD, "POST")) {
+        job <- .fileUploadContext$getUploadOperation(matches[3])
+        if (!is.null(job)) {
+          fileName <- req$HTTP_SHINY_FILE_NAME
+          fileType <- req$HTTP_SHINY_FILE_TYPE
+          fileSize <- req$CONTENT_LENGTH
+          job$fileBegin(list(name=fileName, type=fileType, size=fileSize))
+          
+          reqInput <- req$rook.input
+          while (length(buf <- reqInput$read(2^16)) > 0)
+            job$fileChunk(buf)
+          
+          job$fileEnd()
+          
+          return(httpResponse(200, 'text/plain', 'OK'))
+        }
       }
       
       if (matches[2] == 'download') {
@@ -260,16 +284,17 @@ ShinySession <- setRefClass(
         }
         
         tmpdata <- tempfile()
-        on.exit(unlink(tmpdata))
         result <- try(Context$new('[download]')$run(function() { download$func(tmpdata) }))
         if (is(result, 'try-error')) {
+          unlink(tmpdata)
           return(httpResponse(500, 'text/plain', 
                               attr(result, 'condition')$message))
         }
         return(httpResponse(
           200,
           download$contentType %OR% getContentType(tools::file_ext(filename)),
-          readBin(tmpdata, 'raw', n=file.info(tmpdata)$size),
+          # owned=TRUE means tmpdata will be deleted after response completes
+          list(file=tmpdata, owned=TRUE),
           c(
             'Content-Disposition' = ifelse(
               dlmatches[3] == '',
@@ -485,37 +510,26 @@ httpResponse <- function(status = 200,
   return(resp)
 }
 
-fixupRequestPath <- function(header) {
-  # Separate the path from the query
-  pathEnd <- regexpr('?', header$RESOURCE, fixed=TRUE)
-  if (pathEnd > 0)
-    header$PATH <- substring(header$RESOURCE, 1, pathEnd - 1)
-  else
-    header$PATH <- header$RESOURCE
-  return(header)
-}
-
 httpServer <- function(handlers) {
   handler <- joinHandlers(handlers)
 
+  # TODO: Figure out what this means after httpuv migration
   filter <- getOption('shiny.http.response.filter', NULL)
   if (is.null(filter))
-    filter <- function(ws, header, response) response
+    filter <- function(req, response) response
   
-  function(ws, header) {
-    header <- fixupRequestPath(header)
-    
-    response <- handler(ws, header)
+  function(req) {
+    response <- handler(req)
     if (is.null(response))
       response <- httpResponse(404, content="<h1>Not Found</h1>")
     
-    response <- filter(ws, header, response)
+    headers <- as.list(response$headers)
+    headers$'Content-Type' <- response$content_type
     
-    return(http_response(ws,
-                         status=response$status,
-                         content_type=response$content_type,
-                         content=response$content,
-                         headers=response$headers))
+    response <- filter(req, response)
+    return(list(status=response$status,
+                body=response$content,
+                headers=headers))
   }
 }
 
@@ -531,13 +545,13 @@ joinHandlers <- function(handlers) {
   handlers <- handlers[!sapply(handlers, is.null)]
   
   if (length(handlers) == 0)
-    return(function(ws, header) NULL)
+    return(function(req) NULL)
   if (length(handlers) == 1)
     return(handlers[[1]])
   
-  function(ws, header) {
+  function(req) {
     for (handler in handlers) {
-      response <- handler(ws, header)
+      response <- handler(req)
       if (!is.null(response))
         return(response)
     }
@@ -545,35 +559,39 @@ joinHandlers <- function(handlers) {
   }
 }
 
-sessionHandler <- function(ws, header) {
-  path <- header$PATH
+sessionHandler <- function(req) {
+  path <- req$PATH_INFO
   if (is.null(path))
     return(NULL)
   
-  matches <- regmatches(path, regexec('^/session/([0-9a-f]+)(/.*)$', path))
+  matches <- regmatches(path, regexec('^(/session/([0-9a-f]+))(/.*)$', path))
   if (length(matches[[1]]) == 0)
     return(NULL)
   
-  session <- matches[[1]][2]
-  subpath <- matches[[1]][3]
+  session <- matches[[1]][3]
+  subpath <- matches[[1]][4]
   
   shinysession <- appsByToken$get(session)
   if (is.null(shinysession))
     return(NULL)
   
-  return(shinysession$handleRequest(ws, header, subpath))
+  subreq <- as.environment(as.list(req, all.names=TRUE))
+  subreq$PATH_INFO <- subpath
+  subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, matches[[1]][2], sep='')
+  
+  return(shinysession$handleRequest(subreq))
 }
 
 dynamicHandler <- function(filePath, dependencyFiles=filePath) {
   lastKnownTimestamps <- NA
-  metaHandler <- function(ws, header) NULL
+  metaHandler <- function(req) NULL
   
   if (!file.exists(filePath))
     return(metaHandler)
   
   cacheContext <- CacheContext$new()
   
-  return (function(ws, header) {
+  return (function(req) {
     # Check if we need to rebuild
     if (cacheContext$isDirty()) {
       cacheContext$reset()
@@ -592,13 +610,16 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
       clearClients()
     }
     
-    return(metaHandler(ws, header))
+    return(metaHandler(req))
   })
 }
 
 staticHandler <- function(root) {
-  return(function(ws, header) {
-    path <- header$PATH
+  return(function(req) {
+    if (!identical(req$REQUEST_METHOD, 'GET'))
+      return(NULL)
+
+    path <- req$PATH_INFO
     
     if (is.null(path))
       return(httpResponse(400, content="<h1>Bad Request</h1>"))
@@ -617,7 +638,6 @@ staticHandler <- function(root) {
   })
 }
 
-apps <- Map$new()
 appsByToken <- Map$new()
 
 # Provide a character representation of the WS that can be used
@@ -628,11 +648,11 @@ wsToKey <- function(WS) {
 
 .globals <- new.env()
 
-.globals$clients <- function(ws, header) NULL
+.globals$clients <- function(req) NULL
 
 
 clearClients <- function() {
-  .globals$clients <- function(ws, header) NULL
+  .globals$clients <- function(req) NULL
 }
 
 
@@ -695,8 +715,11 @@ addResourcePath <- function(prefix, directoryPath) {
                                        func=staticHandler(directoryPath))
 }
 
-resourcePathHandler <- function(ws, header) {
-  path <- header$RESOURCE
+resourcePathHandler <- function(req) {
+  if (!identical(req$REQUEST_METHOD, 'GET'))
+    return(NULL)
+
+  path <- req$PATH_INFO
   
   match <- regexpr('^/([^/]+)/', path, perl=TRUE)
   if (match == -1)
@@ -710,10 +733,11 @@ resourcePathHandler <- function(ws, header) {
   
   suffix <- substr(path, 2 + len, nchar(path))
   
-  header$RESOURCE <- suffix
-  header <- fixupRequestPath(header)
+  subreq <- as.environment(as.list(req, all.names=TRUE))
+  subreq$PATH_INFO <- suffix
+  subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, substr(path, 1, 2 + len), sep='')
   
-  return(resInfo$func(ws, header))
+  return(resInfo$func(subreq))
 }
 
 .globals$server <- NULL
@@ -838,121 +862,135 @@ startApp <- function(port=8101L) {
   })
   serverFunc <- .globals$server
   
-  ws_env <- create_server(
-    port=port,
-    webpage=httpServer(c(sessionHandler,
-                         dynamicHandler(uiR),
-                         wwwDir,
-                         sys.www.root,
-                         resourcePathHandler)))
-  
-  set_callback('established', function(WS, ...) {
-    shinysession <- ShinySession$new(WS)
-    apps$set(wsToKey(WS), shinysession)
-    appsByToken$set(shinysession$token, shinysession)
-  }, ws_env)
-  
-  set_callback('closed', function(WS, ...) {
-    shinysession <- apps$get(wsToKey(WS))
-    if (!is.null(shinysession))
-      appsByToken$remove(shinysession$token)
-    apps$remove(wsToKey(WS))
-  }, ws_env)
-  
-  set_callback('receive', function(DATA, WS, ...) {
-    if (getOption('shiny.trace', FALSE)) {
-      if (as.raw(0) %in% DATA)
-        message("RECV ", '$$binary data$$')
-      else
-        message("RECV ", rawToChar(DATA))
-    }
-    
-    if (identical(charToRaw("\003\xe9"), DATA))
-      return()
-    
-    shinysession <- apps$get(wsToKey(WS))
-    
-    msg <- decodeMessage(DATA)
+  httpuvCallbacks <- list(
+    onHeaders = function(req) {
+      maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
+      if (maxSize <= 0)
+        return(NULL)
 
-    # Do our own list simplifying here. sapply/simplify2array give names to
-    # character vectors, which is rarely what we want.
-    if (!is.null(msg$data)) {
-      for (name in names(msg$data)) {
-        val <- msg$data[[name]]
+      reqSize <- 0
+      if (length(req$CONTENT_LENGTH) > 0)
+        reqSize <- as.numeric(req$CONTENT_LENGTH)
+      else if (length(req$HTTP_TRANSFER_ENCODING) > 0)
+        reqSize <- Inf
+
+      if (reqSize > maxSize) {
+        return(list(status = 413L,
+                    headers = list(
+                      'Content-Type' = 'text/plain'
+                    ),
+                    body = 'Maximum upload size exceeded'))
+      }
+      else {
+        return(NULL)
+      }
+    },
+    call = httpServer(c(sessionHandler,
+                        dynamicHandler(uiR),
+                        wwwDir,
+                        sys.www.root,
+                        resourcePathHandler)),
+    onWSOpen = function(ws) {
+      shinysession <- ShinySession$new(ws)
+      appsByToken$set(shinysession$token, shinysession)
+      
+      ws$onMessage(function(binary, msg) {
         
-        splitName <- strsplit(name, ':')[[1]]
-        if (length(splitName) > 1) {
-          msg$data[[name]] <- NULL
-          
-          # TODO: Make the below a user-extensible registry of deserializers
-          msg$data[[ splitName[[1]] ]] <- switch(
-            splitName[[2]],
-            matrix = unpackMatrix(val),
-            number = ifelse(is.null(val), NA, val),
-            stop('Unknown type specified for ', name)
-          )
+        # To ease transition from websockets-based code. Should remove once we're stable.
+        if (is.character(msg))
+          msg <- charToRaw(msg)
+        
+        if (getOption('shiny.trace', FALSE)) {
+          if (binary)
+            message("RECV ", '$$binary data$$')
+          else
+            message("RECV ", rawToChar(msg))
         }
-        else if (is.list(val) && is.null(names(val))) {
-          val_flat <- unlist(val, recursive = TRUE)
-
-          if (is.null(val_flat)) {
-            # This is to assign NULL instead of deleting the item
-            msg$data[name] <- list(NULL)
-          } else {
-            msg$data[[name]] <- val_flat
+        
+        if (identical(charToRaw("\003\xe9"), msg))
+          return()
+        
+        msg <- decodeMessage(msg)
+        
+        # Do our own list simplifying here. sapply/simplify2array give names to
+        # character vectors, which is rarely what we want.
+        if (!is.null(msg$data)) {
+          for (name in names(msg$data)) {
+            val <- msg$data[[name]]
+            
+            splitName <- strsplit(name, ':')[[1]]
+            if (length(splitName) > 1) {
+              msg$data[[name]] <- NULL
+              
+              # TODO: Make the below a user-extensible registry of deserializers
+              msg$data[[ splitName[[1]] ]] <- switch(
+                splitName[[2]],
+                matrix = unpackMatrix(val),
+                number = ifelse(is.null(val), NA, val),
+                stop('Unknown type specified for ', name)
+              )
+            }
+            else if (is.list(val) && is.null(names(val))) {
+              val_flat <- unlist(val, recursive = TRUE)
+              
+              if (is.null(val_flat)) {
+                # This is to assign NULL instead of deleting the item
+                msg$data[name] <- list(NULL)
+              } else {
+                msg$data[[name]] <- val_flat
+              }
+            }
           }
         }
-      }
-    }
-    
-    switch(
-      msg$method,
-      init = {
         
-        # Check if server.R has changed, and if so, reload
-        mtime <- file.info(serverR)$mtime
-        if (!identical(mtime, serverFileTimestamp)) {
-          shinyServer(NULL)
-          local({
-            serverFileTimestamp <<- mtime
-            source(serverR, local=new.env(parent=.GlobalEnv))
-            if (is.null(.globals$server))
-              stop("No server was defined in server.R")
-          })
-          serverFunc <<- .globals$server
-        }
-        
-        shinysession$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
-        msg$data[['__allowDataUriScheme']] <- NULL
-        shinysession$manageInputs(msg$data)
-        local({
-          args <- list(
-            input=.createReactiveValues(shinysession$input, readonly=TRUE),
-            output=.createOutputWriter(shinysession))
-
-          # The clientData argument is optional; check if it exists
-          if ('clientData' %in% names(formals(serverFunc)))
-            args$clientData <- .createReactiveValues(shinysession$clientData, readonly=TRUE)
-
-          do.call(serverFunc, args)
+        switch(
+          msg$method,
+          init = {
+            
+            # Check if server.R has changed, and if so, reload
+            mtime <- file.info(serverR)$mtime
+            if (!identical(mtime, serverFileTimestamp)) {
+              shinyServer(NULL)
+              local({
+                serverFileTimestamp <<- mtime
+                source(serverR, local=new.env(parent=.GlobalEnv))
+                if (is.null(.globals$server))
+                  stop("No server was defined in server.R")
+              })
+              serverFunc <<- .globals$server
+            }
+            
+            shinysession$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
+            msg$data[['__allowDataUriScheme']] <- NULL
+            shinysession$manageInputs(msg$data)
+            local({
+              serverFunc(input=.createReactiveValues(shinysession$input, readonly=TRUE),
+                         output=.createOutputWriter(shinysession))
+            })
+          },
+          update = {
+            shinysession$manageInputs(msg$data)
+          },
+          shinysession$dispatch(msg)
+        )
+        shinysession$manageHiddenOutputs()
+        flushReact()
+        lapply(appsByToken$values(), function(shinysession) {
+          shinysession$flushOutput()
+          NULL
         })
-      },
-      update = {
-        shinysession$manageInputs(msg$data)
-      },
-      shinysession$dispatch(msg)
-    )
-    shinysession$manageHiddenOutputs()
-    flushReact()
-    lapply(apps$values(), function(shinysession) {
-      shinysession$flushOutput()
-      NULL
-    })
-  }, ws_env)
+      })
+      
+      ws$onClose(function() {
+        shinysession$close()
+        appsByToken$remove(shinysession$token)
+      })
+    }
+  )
   
   message('\n', 'Listening on port ', port)
-  
-  return(ws_env)
+
+  return(startServer("0.0.0.0", port, httpuvCallbacks))
 }
 
 # NOTE: we de-roxygenized this comment because the function isn't exported
@@ -962,23 +1000,23 @@ startApp <- function(port=8101L) {
 # @param ws_env The return value from \code{\link{startApp}}.
 serviceApp <- function(ws_env) {
   if (timerCallbacks$executeElapsed()) {
-    for (shinysession in apps$values()) {
+    for (shinysession in appsByToken$values()) {
       shinysession$manageHiddenOutputs()
     }
 
     flushReact()
 
-    for (shinysession in apps$values()) {
+    for (shinysession in appsByToken$values()) {
       shinysession$flushOutput()
     }
   }
 
   # If this R session is interactive, then call service() with a short timeout
   # to keep the session responsive to user input
-  maxTimeout <- ifelse(interactive(), 100, 5000)
+  maxTimeout <- ifelse(interactive(), 100, 1000)
   
   timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent()))
-  service(server=ws_env, timeout=timeout)
+  service(timeout)
 }
 
 #' Run Shiny Application
@@ -1011,7 +1049,10 @@ runApp <- function(appDir=getwd(),
   
   require(shiny)
   
-  ws_env <- startApp(port=port)
+  server <- startApp(port=port)
+  on.exit({
+    stopServer(server)
+  })
   
   if (launch.browser) {
     appUrl <- paste("http://localhost:", port, sep="")
@@ -1020,11 +1061,11 @@ runApp <- function(appDir=getwd(),
   
   tryCatch(
     while (TRUE) {
-      serviceApp(ws_env)
+      serviceApp()
+      Sys.sleep(0.001)
     },
     finally = {
       timerCallbacks$clear()
-      websocket_close(ws_env)
     }
   )
 }

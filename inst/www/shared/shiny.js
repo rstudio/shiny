@@ -1116,10 +1116,16 @@
         self.totalBytes += file.size;
       });
 
-      var fileSizes = $.map(files, function(file, i) { return file.size; });
+      var fileInfo = $.map(files, function(file, i) {
+        return {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        };
+      });
 
       this.makeRequest(
-        'uploadInit', [fileSizes],
+        'uploadInit', [fileInfo],
         function(response) {
           self.jobId = response.jobId;
           self.uploadUrl = response.uploadUrl;
@@ -1136,10 +1142,6 @@
       $.ajax(this.uploadUrl, {
         type: 'POST',
         cache: false,
-        headers: {
-          'Shiny-File-Name': file.name,
-          'Shiny-File-Type': file.type
-        },
         xhr: function() {
           var xhrVal = $.ajaxSettings.xhr();
           if (xhrVal.upload) {
@@ -1165,15 +1167,18 @@
       });
     };
     this.onComplete = function() {
+      var self = this;
       this.makeRequest(
         'uploadEnd', [this.jobId, this.id], 
         function(response) {
+          self.$setActive(false);
+          self.onProgress(null, 1);
+          self.$label().text('Upload complete');
         },
         function(error) {
+          self.onError(error);
         });
-      this.$setActive(false);
-      this.onProgress(null, 1);
-      this.$label().text('Upload complete');
+      this.$label().text('Finishing upload');
     };
     this.onError = function(message) {
       this.$setError(message || '');

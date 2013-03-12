@@ -58,3 +58,27 @@ span.jslider {
 .slider-animate-button.playing .play {
   display: none;
 }
+
+.progress.shiny-file-input-progress {
+  position: relative;
+  visibility: hidden;
+}
+.progress.shiny-file-input-progress .bar {
+  overflow: hidden;
+}
+.progress.shiny-file-input-progress label {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 12px;
+  padding: 0 6px;
+}
+.progress.shiny-file-input-progress .bar.bar-danger {
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  transition: none;
+}

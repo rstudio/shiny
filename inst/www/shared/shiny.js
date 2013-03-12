@@ -412,7 +412,7 @@
 
       $.extend(initialInput, {
         // IE8 and IE9 have some limitations with data URIs
-        "__allowDataUriScheme": typeof WebSocket !== 'undefined'
+        ".clientdata_allowDataUriScheme": typeof WebSocket !== 'undefined'
       });
 
       this.$socket = this.createSocket();
@@ -1560,6 +1560,16 @@
     $(window).resize(function() {
       inputs.setInput('.clientdata_pixelratio', pixelRatio());
     });
+
+    // Send initial URL
+    // The hash isn't sent because it can change, and watching for changes can
+    // require polling on some browsers. The JQuery hashchange plugin can be
+    // used if this capability is important.
+    initialValues['.clientdata_url_protocol'] = window.location.protocol;
+    initialValues['.clientdata_url_hostname'] = window.location.hostname;
+    initialValues['.clientdata_url_port']     = window.location.port;
+    initialValues['.clientdata_url_pathname'] = window.location.pathname;
+    initialValues['.clientdata_url_search']   = window.location.search;
 
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);

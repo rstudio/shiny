@@ -64,8 +64,8 @@ fib <- function(n) ifelse(n<3, 1, fib(n-1)+fib(n-2))
 shinyServer(function(input, output) {
   currentFib         <- reactive({ fib(as.numeric(input$n)) })
 
-  output$nthValue    <- renderText({ currentFib(as.numeric(input$n)) })
-  output$nthValueInv <- renderText({ 1 / currentFib(as.numeric(input$n)) })
+  output$nthValue    <- renderText({ currentFib() })
+  output$nthValueInv <- renderText({ 1 / currentFib() })
 })
 {% endhighlight %}
 

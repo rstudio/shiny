@@ -28,16 +28,23 @@ FileUploadOperation <- setRefClass(
     .files = 'data.frame',
     .dir = 'character',
     .currentFileInfo = 'list',
-    .currentFileData = 'ANY'
+    .currentFileData = 'ANY',
+    .pendingFileInfos = 'list'
   ),
   methods = list(
-    initialize = function(parent, id, dir) {
+    initialize = function(parent, id, dir, fileInfos) {
       .parent <<- parent
       .id <<- id
       .dir <<- dir
+      .pendingFileInfos <<- fileInfos
     },
-    fileBegin = function(file) {
+    fileBegin = function() {
+      if (length(.pendingFileInfos) < 1)
+        stop("fileBegin called too many times")
+
+      file <- .pendingFileInfos[[1]]
       .currentFileInfo <<- file
+      .pendingFileInfos <<- tail(.pendingFileInfos, -1)
 
       filename <- file.path(.dir, as.character(length(.files)))
       row <- data.frame(name=file$name, size=file$size, type=file$type,
@@ -57,6 +64,8 @@ FileUploadOperation <- setRefClass(
       close(.currentFileData)
     },
     finish = function() {
+      if (length(.pendingFileInfos) > 0)
+        stop("File upload job was stopped prematurely")
       .parent$onJobFinished(.id)
       return(.files)
     }
@@ -73,14 +82,14 @@ FileUploadContext <- setRefClass(
     initialize = function(dir=tempdir()) {
       .basedir <<- dir
     },
-    createUploadOperation = function() {
+    createUploadOperation = function(fileInfos) {
       while (TRUE) {
         id <- paste(as.raw(runif(12, min=0, max=0xFF)), collapse='')
         dir <- file.path(.basedir, id)
         if (!dir.create(dir))
           next
         
-        op <- FileUploadOperation$new(.self, id, dir)
+        op <- FileUploadOperation$new(.self, id, dir, fileInfos)
         .operations$set(id, op)
         return(id)
       }

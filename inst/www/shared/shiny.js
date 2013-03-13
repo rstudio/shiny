@@ -487,8 +487,7 @@
     //   response, the function will be called with it as the only argument.
     // @param onError A function that will be called back if the server
     //   responds with error, or if the request fails for any other reason.
-    //   The parameter to onError will be an error object or message (format
-    //   TBD).
+    //   The parameter to onError will be a string describing the error.
     // @param blobs Optionally, an array of Blob, ArrayBuffer, or string
     //   objects that will be made available to the server as part of the
     //   request. Strings will be encoded using UTF-8.
@@ -596,7 +595,8 @@
       }
       if (msgObj.console) {
         for (var i = 0; i < msgObj.console.length; i++) {
-          console.log(msgObj.console[i]);
+          if (console.log)
+            console.log(msgObj.console[i]);
         }
       }
       if (msgObj.progress) {
@@ -685,19 +685,12 @@
   // make it do something useful.
   var FileProcessor = function(files) {
     this.files = files;
-    this.fileReader = new FileReader();
     this.fileIndex = -1;
-    this.pos = 0;
     // Currently need to use small chunk size because R-Websockets can't
     // handle continuation frames
-    this.chunkSize = 4096;
     this.aborted = false;
     this.completed = false;
     
-    var self = this;
-    $(this.fileReader).on('load', function(evt) {
-      self.$endReadChunk();
-    });
     // TODO: Register error/abort callbacks
     
     this.$run();
@@ -707,13 +700,7 @@
     this.onBegin = function(files, cont) {
       setTimeout(cont, 0);
     };
-    this.onFileBegin = function(file, cont) {
-      setTimeout(cont, 0);
-    };
-    this.onFileChunk = function(file, offset, blob, cont) {
-      setTimeout(cont, 0);
-    };
-    this.onFileEnd = function(file, cont) {
+    this.onFile = function(file, cont) {
       setTimeout(cont, 0);
     };
     this.onComplete = function() {
@@ -770,45 +757,8 @@
       // in the middle of processing a file, or have just finished
       // processing a file.
       
-      var file = this.files[this.fileIndex];
-      if (this.pos >= file.size) {
-        // We've read past the end of this file--it's done
-        this.fileIndex++;
-        this.pos = 0;
-        this.onFileEnd(file, this.$getRun());
-      }
-      else if (this.pos == 0) {
-        // We're just starting with this file, need to call onFileBegin
-        // before we actually start reading
-        var called = false;
-        this.onFileBegin(file, function() {
-          if (called)
-            return;
-          called = true;
-          self.$beginReadChunk();
-        });
-      }
-      else {
-        // We're neither starting nor ending--just start the next chunk
-        this.$beginReadChunk();
-      }
-    };
-    
-    // Starts asynchronous read of the current chunk of the current file
-    this.$beginReadChunk = function() {
-      var file = this.files[this.fileIndex];
-      var blob = slice(file, this.pos, this.pos + this.chunkSize);
-      this.fileReader.readAsArrayBuffer(blob);
-    };
-    
-    // Called when a chunk has been successfully read
-    this.$endReadChunk = function() {
-      var file = this.files[this.fileIndex];
-      var offset = this.pos;
-      var data = this.fileReader.result;
-      this.pos = this.pos + this.chunkSize;
-      this.onFileChunk(file, offset, makeBlob([data]),
-                       this.$getRun());
+      var file = this.files[this.fileIndex++];
+      this.onFile(file, this.$getRun());
     };
   }).call(FileProcessor.prototype);
 
@@ -1153,59 +1103,115 @@
     };
     this.onBegin = function(files, cont) {
       var self = this;
-      this.makeRequest(
-        'uploadInit', [],
-        function(response) {
-          self.jobId = response.jobId;
-          cont();
-        },
-        function(error) {
-        });
-    };
-    this.onFileBegin = function(file, cont) {
-      this.onProgress(file, 0);
-      
-      this.makeRequest(
-        'uploadFileBegin', [this.jobId, file.name, file.type, file.size],
-        function(response) {
-          cont();
-        },
-        function(error) {
-        });
-    };
-    this.onFileChunk = function(file, offset, blob, cont) {
-      this.onProgress(file, (offset + blob.size) / file.size);
+
+      // Reset progress bar
+      this.$setError(null);
+      this.$setActive(true);
+      this.$setVisible(true);
+      this.onProgress(null, 0);
+
+      this.totalBytes = 0;
+      this.progressBytes = 0;
+      $.each(files, function(i, file) {
+        self.totalBytes += file.size;
+      });
+
+      var fileInfo = $.map(files, function(file, i) {
+        return {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        };
+      });
 
       this.makeRequest(
-        'uploadFileChunk', [this.jobId],
+        'uploadInit', [fileInfo],
         function(response) {
+          self.jobId = response.jobId;
+          self.uploadUrl = response.uploadUrl;
           cont();
         },
         function(error) {
-        },
-        [blob]);
-    };
-    this.onFileEnd = function(file, cont) {
-      this.makeRequest(
-        'uploadFileEnd', [this.jobId],
-        function(response) {
-          cont();
-        },
-        function(error) {
+          self.onError(error);
         });
     };
+    this.onFile = function(file, cont) {
+      var self = this;
+      this.onProgress(file, 0);
+
+      $.ajax(this.uploadUrl, {
+        type: 'POST',
+        cache: false,
+        xhr: function() {
+          var xhrVal = $.ajaxSettings.xhr();
+          if (xhrVal.upload) {
+            xhrVal.upload.onprogress = function(e) {
+              if (e.lengthComputable) {
+                self.onProgress(
+                  file,
+                  (self.progressBytes + e.loaded) / self.totalBytes);
+              }
+            }
+          }
+          return xhrVal;
+        },
+        data: file,
+        processData: false,
+        success: function() {
+          self.progressBytes += file.size;
+          cont();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          self.onError(jqXHR.responseText || textStatus);
+        }
+      });
+    };
     this.onComplete = function() {
+      var self = this;
       this.makeRequest(
         'uploadEnd', [this.jobId, this.id], 
         function(response) {
+          self.$setActive(false);
+          self.onProgress(null, 1);
+          self.$label().text('Upload complete');
         },
         function(error) {
+          self.onError(error);
         });
+      this.$label().text('Finishing upload');
+    };
+    this.onError = function(message) {
+      this.$setError(message || '');
+      this.$setActive(false);
     };
     this.onAbort = function() {
+      this.$setVisible(false);
     };
     this.onProgress = function(file, completed) {
-      console.log('file: ' + file.name + ' [' + Math.round(completed*100) + '%]');
+      this.$bar().width(Math.round(completed*100) + '%');
+      this.$label().text(file ? file.name : '');
+    };
+    this.$container = function() {
+      return $('#' + this.id + '_progress.shiny-file-input-progress');
+    };
+    this.$bar = function() {
+      return $('#' + this.id + '_progress.shiny-file-input-progress .bar');
+    };
+    this.$label = function() {
+      return $('#' + this.id + '_progress.shiny-file-input-progress label');
+    };
+    this.$setVisible = function(visible) {
+      this.$container().css('visibility', visible ? 'visible' : 'hidden');
+    };
+    this.$setError = function(error) {
+      this.$bar().toggleClass('bar-danger', (error !== null));
+      if (error !== null) {
+        this.onProgress(null, 1);
+        this.$label().text(error);
+      }
+    };
+    this.$setActive = function(active) {
+      this.$container().toggleClass('active', !!active);
     };
   }).call(FileUploader.prototype);
 
@@ -1219,6 +1225,9 @@
 
     var files = evt.target.files;
     var id = fileInputBinding.getId(evt.target);
+
+    if (files.length == 0)
+      return;
 
     // Start the new upload and put the uploader in 'currentUploader'.
     el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));

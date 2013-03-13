@@ -22,8 +22,10 @@ ShinySession <- setRefClass(
     .outputOptions = 'list', # Options for each of the output observer objects
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
-    input = 'ReactiveValues',      # Normal input sent from client
-    clientData = 'ReactiveValues', # Other data sent from the client
+    .input      = 'ReactiveValues', # Internal object for normal input sent from client
+    .clientData = 'ReactiveValues', # Internal object for other data sent from the client
+    input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
+    clientData  = 'reactivevalues', # Externally-usable S3 wrapper object for .clientData
     token = 'character',  # Used to identify this instance in URLs
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map'
@@ -36,8 +38,12 @@ ShinySession <- setRefClass(
       .progressKeys <<- character(0)
       # TODO: Put file upload context in user/app-specific dir if possible
       .fileUploadContext <<- FileUploadContext$new()
-      input <<- ReactiveValues$new()
-      clientData <<- ReactiveValues$new()
+
+      .input      <<- ReactiveValues$new()
+      .clientData <<- ReactiveValues$new()
+
+      input      <<- .createReactiveValues(.input,      readonly=TRUE)
+      clientData <<- .createReactiveValues(.clientData, readonly=TRUE)
       
       token <<- createUniqueId(16)
       .outputs <<- list()
@@ -189,7 +195,7 @@ ShinySession <- setRefClass(
     },
     `@uploadEnd` = function(jobId, inputId) {
       fileData <- .fileUploadContext$getUploadOperation(jobId)$finish()
-      input$set(inputId, fileData)
+      .input$set(inputId, fileData)
       invisible()
     },
     # Provides a mechanism for handling direct HTTP requests that are posted
@@ -330,8 +336,8 @@ ShinySession <- setRefClass(
         # in the web page; in these cases, there's no output_foo_hidden flag,
         # and hidden should be TRUE. In other words, NULL and TRUE should map to
         # TRUE, FALSE should map to FALSE.
-        hidden <- clientData$.values[[paste("output_", outputName, "_hidden",
-                                            sep="")]]
+        hidden <- .clientData$.values[[paste("output_", outputName, "_hidden",
+                                             sep="")]]
         if (is.null(hidden)) hidden <- TRUE
 
         if (hidden && .outputOptions[[outputName]][['suspendWhenHidden']]) {
@@ -349,13 +355,13 @@ ShinySession <- setRefClass(
       clientdata_idx <- grepl("^.clientdata_", data_names)
 
       # Set normal (non-clientData) input values
-      input$mset(data[data_names[!clientdata_idx]])
+      .input$mset(data[data_names[!clientdata_idx]])
 
       # Strip off .clientdata_ from clientdata input names, and set values
       input_clientdata <- data[data_names[clientdata_idx]]
       names(input_clientdata) <- sub("^.clientdata_", "",
                                      names(input_clientdata))
-      clientData$mset(input_clientdata)
+      .clientData$mset(input_clientdata)
     },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs
@@ -922,12 +928,12 @@ startApp <- function(port=8101L) {
         shinysession$manageInputs(msg$data)
         local({
           args <- list(
-            input=.createReactiveValues(shinysession$input, readonly=TRUE),
+            input=shinysession$input,
             output=.createOutputWriter(shinysession))
 
           # The clientData argument is optional; check if it exists
           if ('clientData' %in% names(formals(serverFunc)))
-            args$clientData <- .createReactiveValues(shinysession$clientData, readonly=TRUE)
+            args$clientData <- shinysession$clientData
 
           do.call(serverFunc, args)
         })

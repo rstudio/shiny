@@ -66,15 +66,15 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # height were explicitly specified).
     prefix <- 'output_'
     if (width == 'auto')
-      width <- shinysession$clientData$get(paste(prefix, name, '_width', sep=''));
+      width <- shinysession$clientData[[paste(prefix, name, '_width', sep='')]];
     if (height == 'auto')
-      height <- shinysession$clientData$get(paste(prefix, name, '_height', sep=''));
+      height <- shinysession$clientData[[paste(prefix, name, '_height', sep='')]];
     
     if (width <= 0 || height <= 0)
       return(NULL)
 
     # Resolution multiplier
-    pixelratio <- shinysession$clientData$get("pixelratio")
+    pixelratio <- shinysession$clientData$pixelratio
     if (is.null(pixelratio))
       pixelratio <- 1
 

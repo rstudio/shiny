@@ -166,6 +166,9 @@ reactiveValues <- function(...) {
   values
 }
 
+# Register the S3 class so that it can be used for a field in a Reference Class
+setOldClass("reactivevalues")
+
 # Create a reactivevalues object
 #
 # @param values A ReactiveValues object

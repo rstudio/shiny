@@ -969,8 +969,6 @@ startApp <- function(port=8101L) {
               serverFunc <<- .globals$server
             }
             
-            shinysession$allowDataUriScheme <- msg$data[['__allowDataUriScheme']]
-            msg$data[['__allowDataUriScheme']] <- NULL
             shinysession$manageInputs(msg$data)
             local({
               args <- list(

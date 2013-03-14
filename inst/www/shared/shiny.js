@@ -846,10 +846,10 @@
   });
   outputBindings.register(textOutputBinding, 'shiny.textOutput');
 
-  var plotOutputBinding = new OutputBinding();
-  $.extend(plotOutputBinding, {
+  var imageOutputBinding = new OutputBinding();
+  $.extend(imageOutputBinding, {
     find: function(scope) {
-      return $(scope).find('.shiny-plot-output');
+      return $(scope).find('.shiny-image-output, .shiny-plot-output');
     },
     renderValue: function(el, data) {
       // Load the image before emptying, to minimize flicker
@@ -867,7 +867,7 @@
         $(el).append(img);
     }
   });
-  outputBindings.register(plotOutputBinding, 'shiny.plotOutput');
+  outputBindings.register(imageOutputBinding, 'shiny.imageOutput');
 
   var htmlOutputBinding = new OutputBinding();
   $.extend(htmlOutputBinding, {
@@ -1306,7 +1306,7 @@
       }
 
       // Send later in case DOM layout isn't final yet.
-      setTimeout(sendPlotSize, 0);
+      setTimeout(sendImageSize, 0);
       setTimeout(sendOutputHiddenState, 0);
     }
 
@@ -1519,16 +1519,16 @@
     var initialValues = _bindAll(document);
 
 
-    // The server needs to know the size of each plot output element, in case
-    // the plot is auto-sizing
-    $('.shiny-plot-output').each(function() {
+    // The server needs to know the size of each image and plot output element,
+    // in case it is auto-sizing
+    $('.shiny-image-output, .shiny-plot-output').each(function() {
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
         initialValues['.clientdata_output_' + this.id + '_width'] = this.offsetWidth;
         initialValues['.clientdata_output_' + this.id + '_height'] = this.offsetHeight;
       }
     });
-    function sendPlotSize() {
-      $('.shiny-plot-output').each(function() {
+    function sendImageSize() {
+      $('.shiny-image-output, .shiny-plot-output').each(function() {
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput('.clientdata_output_' + this.id + '_width', this.offsetWidth);
           inputs.setInput('.clientdata_output_' + this.id + '_height', this.offsetHeight);
@@ -1555,12 +1555,12 @@
         }
       });
     }
-    // The size of each plot may change either because the browser window was
+    // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size
     // of 0x0). It's OK to over-report sizes because the input pipeline will
     // filter out values that haven't changed.
-    $(window).resize(debounce(500, sendPlotSize));
-    $('body').on('shown.sendPlotSize', '*', sendPlotSize);
+    $(window).resize(debounce(500, sendImageSize));
+    $('body').on('shown.sendImageSize', '*', sendImageSize);
     $('body').on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*',
                  sendOutputHiddenState);
 

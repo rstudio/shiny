@@ -42,7 +42,7 @@
 
   The corresponding HTML output tag should be \code{div} or
   \code{img} and have the CSS class name
-  \code{shiny-plot-output}.
+  \code{shiny-image-output}.
 }
 \examples{
 \dontrun{

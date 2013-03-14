@@ -761,7 +761,28 @@ verbatimTextOutput <- function(outputId) {
   pre(id = outputId, class =  "shiny-text-output")
 }
 
-#' Create a plot output element
+#' Create a image output element
+#' 
+#' Render a \link{renderImage} within an application page.
+#' @param outputId output variable to read the image from
+#' @param width Image width. Must be a valid CSS unit (like \code{"100\%"},
+#'   \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
+#'   string and have \code{"px"} appended.
+#' @param height Image height
+#' @return An image output element that can be included in a panel
+#' @examples
+#' # Show an image
+#' mainPanel(
+#'   imageOutput("dataImage")
+#' )
+#' @export
+imageOutput <- function(outputId, width = "100%", height="400px") {
+  style <- paste("width:", validateCssUnit(width), ";",
+    "height:", validateCssUnit(height))
+  div(id = outputId, class = "shiny-image-output", style = style)
+}
+
+#' Create an plot output element
 #' 
 #' Render a \link{renderPlot} within an application page.
 #' @param outputId output variable to read the plot from
@@ -779,7 +800,7 @@ verbatimTextOutput <- function(outputId) {
 plotOutput <- function(outputId, width = "100%", height="400px") {
   style <- paste("width:", validateCssUnit(width), ";",
     "height:", validateCssUnit(height))
-  div(id = outputId, class="shiny-plot-output", style = style)
+  div(id = outputId, class = "shiny-plot-output", style = style)
 }
 
 #' Create a table output element

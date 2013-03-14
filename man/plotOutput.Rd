@@ -1,6 +1,6 @@
 \name{plotOutput}
 \alias{plotOutput}
-\title{Create a plot output element}
+\title{Create an plot output element}
 \usage{
   plotOutput(outputId, width = "100\%", height = "400px")
 }

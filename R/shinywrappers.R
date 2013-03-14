@@ -107,7 +107,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 #' attributes in the \code{img} object.
 #'
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
-#' the CSS class name \code{shiny-plot-output}.
+#' the CSS class name \code{shiny-image-output}.
 #'
 #' @param expr An expression that returns a list.
 #' @param env The environment in which to evaluate \code{expr}.

@@ -9,7 +9,7 @@ Description: Shiny makes it incredibly easy to build interactive web
     applications with R. Automatic "reactive" binding between inputs and
     outputs and extensive pre-built widgets make it possible to build
     beautiful, responsive, and powerful applications with minimal effort.
-License: GPL-3
+License: GPL (>= 2)
 Depends:
     R (>= 2.14.1)
 Imports:

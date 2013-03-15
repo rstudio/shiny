@@ -1066,7 +1066,7 @@ runApp <- function(appDir=getwd(),
   server <- startApp(port=port)
   on.exit({
     stopServer(server)
-  })
+  }, add = TRUE)
   
   if (launch.browser) {
     appUrl <- paste("http://localhost:", port, sep="")

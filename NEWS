@@ -7,7 +7,8 @@ shiny 0.4.1.99
 
 * Add `parseQueryString()` function.
 
-* Add `renderImage()` function for sending arbitrary image files to the client.
+* Add `renderImage()` function for sending arbitrary image files to the client,
+  and its counterpart, `imageOutput()`.
 
 * Add support for high-resolution (Retina) displays.
 

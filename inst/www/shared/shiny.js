@@ -1536,9 +1536,22 @@
       });
     }
 
+    // Return true if the object or one of its ancestors in the DOM tree has
+    // style='display:none'; otherwise return false.
+    function isHidden(obj) {
+      // null means we've hit the top of the tree. If width or height is
+      // non-zero, then we know that no ancestor has display:none.
+      if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
+        return false;
+      } else if (getComputedStyle(obj, null).display === 'none') {
+        return true;
+      } else {
+        return(isHidden(obj.parentNode));
+      }
+    }
     // Set initial state of outputs to hidden, if needed
     $('.shiny-bound-output').each(function() {
-      if (this.offsetWidth === 0 && this.offsetHeight === 0) {
+      if (isHidden(this)) {
         initialValues['.clientdata_output_' + this.id + '_hidden'] = true;
       } else {
         initialValues['.clientdata_output_' + this.id + '_hidden'] = false;
@@ -1548,7 +1561,7 @@
     function sendOutputHiddenState() {
       $('.shiny-bound-output').each(function() {
         // Assume that the object is hidden when width and height are 0
-        if (this.offsetWidth === 0 && this.offsetHeight === 0) {
+        if (isHidden(this)) {
           inputs.setInput('.clientdata_output_' + this.id + '_hidden', true);
         } else {
           inputs.setInput('.clientdata_output_' + this.id + '_hidden', false);

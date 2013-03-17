@@ -337,7 +337,7 @@ ShinySession <- setRefClass(
 
       fileData <- readBin(file, 'raw', n=bytes)
 
-      if (isTRUE(clientData$.values$allowDataUriScheme)) {
+      if (isTRUE(.clientData$.values$allowDataUriScheme)) {
         b64 <- base64encode(fileData)
         return(paste('data:', contentType, ';base64,', b64, sep=''))
       } else {

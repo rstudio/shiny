@@ -379,6 +379,9 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 }
 
 
+
+
+
 #' HTML Output
 #' 
 #' Makes a reactive version of the given function which can handle both \code{character} and \code{XMLInernalNode} results.
@@ -393,14 +396,17 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
+#' @param func A function that returns an object representing raw HTML code 
+#'   or a list of such objects (deprecated; use \code{expr} instead).
 #'   
-#' @seealso \code{\link{renderText}} 
+#' @seealso \code{\link{renderText}}
+#' @note If the suggested \code{XML} package is not installed, this function is identical to \code{renderText}
 #'
 #' @export
 
-if(require(XML))
+    renderHTML <- if(require(XML))
   {
-    renderHTML <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
+    function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
       if (!is.null(func)) {
         shinyDeprecated(msg="renderText: argument 'func' is deprecated. Please use 'expr' instead.")
       } else {
@@ -417,7 +423,10 @@ if(require(XML))
       }
       
     }
+  } else {
+    renderText
   }
+
 
 #' File Downloads
 #' 

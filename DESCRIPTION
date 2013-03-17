@@ -26,7 +26,8 @@ Imports:
 Suggests:
     markdown,
     Cairo,
-    testthat
+    testthat,
+    XML
 URL: http://www.rstudio.com/shiny/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

@@ -31,18 +31,17 @@ test_that("renderPrint and renderText behavior is correct", {
                '1 2 3 4 5')  
  })
 
-#renderHTML function is only defined if XML package is installed, and thus is
-#only tested when that package is present
-if(require(XML))
-{
-  test_that("renderHTML behavior is correct", {
-    expect_equal(isolate(renderHTML({ "<div><p>sometext</p></div>" })()),
-                 '<div><p>sometext</p></div>')
-    node = newXMLNode("div", newXMLNode("p", "sometext"))
-    expect_equal(isolate(renderHTML({ node })()),
-                 '<div>\n  <p>sometext</p>\n</div>')
+test_that("renderHTML behavior is correct", {
+  expect_equal(isolate(renderHTML({ "<div><p>sometext</p></div>" })()),
+               '<div><p>sometext</p></div>')
+  if(require(XML))
+    {
+      node = newXMLNode("div", newXMLNode("p", "sometext"))
+      expect_equal(isolate(renderHTML({ node })()),
+                   '<div>\n  <p>sometext</p>\n</div>')
+    }
   })
-}
+
 
 test_that("reactive functions save visibility state", {
   # Call each function twice - should be no change in state with second call

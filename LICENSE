@@ -1,0 +1,21 @@
+Except where noted below, the files in this package are copyright RStudio, Inc.,
+and are distributed under GPL-2 (GNU GENERAL PUBLIC LICENSE version 2) or any
+later version.
+
+The files R/bootstrap.R and R/shinywrappers.R are also dual-licensed under the
+the BSD 3-clause license ("Modified BSD License"). This is so that users may
+use code from these files in their projects without needing to license their
+project under the GPL.
+
+
+Included below is license and copyright information for externally-maintained
+libraries used by Shiny.
+
+The file inst/www/shared/jquery.js is part of the jQuery project and is
+distributed under the MIT license.
+
+The files in inst/www/shared/jslider are authored by Egor Khmelev and are
+distributed under the MIT license.
+
+The file inst/www/shared/bootstrap.js is part of the Bootstrap project and
+is distributed under the Apache 2.0 license.

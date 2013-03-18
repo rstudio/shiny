@@ -1,6 +1,10 @@
 shiny 0.4.1.99
 --------------------------------------------------------------------------------
 
+* New method for detecting hidden output objects. Instead of checking that
+  height and width are 0, it checks that the object or any ancestor in the DOM
+  has style display:none.
+
 * Add `clientData` reactive values object, which carries information about the
   client. This includes the hidden status of output objects, height/width plot
   output objects, and the URL of the browser.

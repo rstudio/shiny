@@ -874,6 +874,10 @@
     find: function(scope) {
       return $(scope).find('.shiny-html-output');
     },
+    onValueError: function(el, err) {
+      exports.unbindAll(el);
+      this.renderError(el, err);
+    },
     renderValue: function(el, data) {
       exports.unbindAll(el);
       $(el).html(data);

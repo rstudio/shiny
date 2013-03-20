@@ -1576,14 +1576,16 @@
     });
 
     // Send initial URL
-    // The hash isn't sent because it can change, and watching for changes can
-    // require polling on some browsers. The JQuery hashchange plugin can be
-    // used if this capability is important.
     initialValues['.clientdata_url_protocol'] = window.location.protocol;
     initialValues['.clientdata_url_hostname'] = window.location.hostname;
     initialValues['.clientdata_url_port']     = window.location.port;
     initialValues['.clientdata_url_pathname'] = window.location.pathname;
     initialValues['.clientdata_url_search']   = window.location.search;
+    // This is only the initial value of the hash. The hash can change, but
+    // a reactive version of this isn't sent because w atching for changes can
+    // require polling on some browsers. The JQuery hashchange plugin can be
+    // used if this capability is important.
+    initialValues['.clientdata_url_hash_initial'] = window.location.hash;
 
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);

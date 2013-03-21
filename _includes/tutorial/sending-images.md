@@ -59,6 +59,23 @@ shinyServer(function(input, output, clientData) {
 })
 {% endhighlight %}
 
+#### ui.r
+
+{% highlight r %}
+shinyUI(pageWithSidebar(
+  headerPanel("renderImage example"),
+  sidebarPanel(
+    sliderInput("obs", "Number of observations:",
+                min = 0, max = 1000,  value = 500)
+  ),
+  mainPanel(
+    # Use imageOutput to place the image on the page
+    imageOutput("myImage")
+  )
+))
+{% endhighlight %}
+
+
 Each time this output object is re-executed, it creates a new PNG file, saves a plot to it, then returns a list containing the filename along with some other values.
 
 Because the `deleteFile` argument is `TRUE`, Shiny will delete the file (specified by the `src` element) after it sends the data. This is appropriate for a case like this, where the image is created on-the-fly, but it wouldn't be appropriate when, for example, your app sends pre-rendered images.

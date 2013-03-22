@@ -70,7 +70,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     if (height == 'auto')
       height <- shinysession$clientData[[paste(prefix, name, '_height', sep='')]];
     
-    if (width <= 0 || height <= 0)
+    if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
       return(NULL)
 
     # Resolution multiplier

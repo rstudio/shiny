@@ -1033,6 +1033,8 @@ serviceApp <- function(ws_env) {
   service(timeout)
 }
 
+shinyServerMinVersion <- '0.3.4'
+
 #' Run Shiny Application
 #' 
 #' Runs a Shiny application. This function normally does not return; interrupt
@@ -1056,7 +1058,13 @@ runApp <- function(appDir=getwd(),
   # Make warnings print immediately
   ops <- options(warn = 1)
   on.exit(options(ops))
-  
+
+  if (nzchar(Sys.getenv('SHINY_PORT'))) {
+    ver <- Sys.getenv('SHINY_SERVER_VERSION')
+    if (compareVersion(ver, shinyServerMinVersion) < 0)
+      warning('Shiny Server v0.3.4 or later is required; please upgrade!')
+  }
+
   orig.wd <- getwd()
   setwd(appDir)
   on.exit(setwd(orig.wd), add = TRUE)

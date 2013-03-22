@@ -1546,6 +1546,14 @@
     var initialValues = _bindAll(document);
 
 
+    // The server needs to know the size of each image and plot output element,
+    // in case it is auto-sizing
+    $('.shiny-image-output, .shiny-plot-output').each(function() {
+      if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
+        initialValues['.clientdata_output_' + this.id + '_width'] = this.offsetWidth;
+        initialValues['.clientdata_output_' + this.id + '_height'] = this.offsetHeight;
+      }
+    });
     function sendImageSize() {
       $('.shiny-image-output, .shiny-plot-output').each(function() {
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
@@ -1568,6 +1576,14 @@
         return(isHidden(obj.parentNode));
       }
     }
+    // Set initial state of outputs to hidden, if needed
+    $('.shiny-bound-output').each(function() {
+      if (isHidden(this)) {
+        initialValues['.clientdata_output_' + this.id + '_hidden'] = true;
+      } else {
+        initialValues['.clientdata_output_' + this.id + '_hidden'] = false;
+      }
+    });
     // Send update when hidden state changes
     function sendOutputHiddenState() {
       $('.shiny-bound-output').each(function() {
@@ -1579,9 +1595,6 @@
         }
       });
     }
-
-    sendImageSize();
-    sendOutputHiddenState();
 
     // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size

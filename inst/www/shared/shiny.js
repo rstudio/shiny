@@ -77,6 +77,10 @@
   }
 
 
+  // =========================================================================
+  // Input rate stuff
+  // =========================================================================
+
   var Invoker = function(target, func) {
     this.target = target;
     this.func = func;
@@ -383,6 +387,9 @@
   }
 
 
+  // =========================================================================
+  // ShinyApp
+  // =========================================================================
   var ShinyApp = function() {
     this.$socket = null;
 
@@ -680,6 +687,10 @@
   }).call(ShinyApp.prototype);
 
 
+  // =========================================================================
+  // File Processor
+  // =========================================================================
+
   // Generic driver class for doing chunk-wise asynchronous processing of a
   // FileList object. Subclass/clone it and override the `on*` functions to
   // make it do something useful.
@@ -763,6 +774,9 @@
   }).call(FileProcessor.prototype);
 
 
+  // =========================================================================
+  // Binding registry
+  // =========================================================================
   var BindingRegistry = function() {
     this.bindings = [];
     this.bindingNames = {};
@@ -801,6 +815,9 @@
   var inputBindings = exports.inputBindings = new BindingRegistry();
   var outputBindings = exports.outputBindings = new BindingRegistry();
 
+  // =========================================================================
+  // Output bindings
+  // =========================================================================
   
   var OutputBinding = exports.OutputBinding = function() {};
   (function() {
@@ -897,6 +914,9 @@
   })
   outputBindings.register(downloadLinkOutputBinding, 'shiny.downloadLink');
 
+  // =========================================================================
+  // Input bindings
+  // =========================================================================
 
   var InputBinding = exports.InputBinding = function() {
   };
@@ -1278,6 +1298,9 @@
   }).call(OutputBindingAdapter.prototype);
 
 
+  // =========================================================================
+  // initShiny
+  // =========================================================================
   function initShiny() {
 
     var shinyapp = exports.shinyapp = new ShinyApp();

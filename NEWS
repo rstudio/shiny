@@ -1,8 +1,10 @@
-shiny 0.4.1.99
+shiny 0.5.0
 --------------------------------------------------------------------------------
 
 * License for Shiny changed to GPL >= 2, and a few files are dual-licensed
   under the GPL >= 2 and BSD 3-clause.
+
+* Switch from websockets package for handling websocket connections to httpuv.
 
 * New method for detecting hidden output objects. Instead of checking that
   height and width are 0, it checks that the object or any ancestor in the DOM

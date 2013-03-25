@@ -1033,7 +1033,7 @@ serviceApp <- function(ws_env) {
   service(timeout)
 }
 
-shinyServerMinVersion <- '0.3.4'
+.shinyServerMinVersion <- '0.3.4'
 
 #' Run Shiny Application
 #' 
@@ -1060,9 +1060,15 @@ runApp <- function(appDir=getwd(),
   on.exit(options(ops))
 
   if (nzchar(Sys.getenv('SHINY_PORT'))) {
+    # If SHINY_PORT is set, we're running under Shiny Server. Check the version
+    # to make sure it is compatible. Older versions of Shiny Server don't set
+    # SHINY_SERVER_VERSION, those will return "" which is considered less than
+    # any valid version.
     ver <- Sys.getenv('SHINY_SERVER_VERSION')
-    if (compareVersion(ver, shinyServerMinVersion) < 0)
-      warning('Shiny Server v0.3.4 or later is required; please upgrade!')
+    if (compareVersion(ver, .shinyServerMinVersion) < 0) {
+      warning('Shiny Server v', .shinyServerMinVersion,
+              ' or later is required; please upgrade!')
+    }
   }
 
   orig.wd <- getwd()

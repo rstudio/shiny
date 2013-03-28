@@ -937,6 +937,13 @@
     this.getValue = function(el) { throw "Not implemented"; };
     this.subscribe = function(el, callback) { };
     this.unsubscribe = function(el) { };
+
+    // This is used for receiving messages that tell the input object to do
+    // things, such as setting values (including min, max, and others).
+    // 'data' should be an object with elements corresponding to value, min,
+    //  max, etc., as appropriate for the type of input object.
+    this.receiveMessage = function(el, data) { throw "Not implemented"; };
+    this.getState = function(el, data) { throw "Not implemented"; };
     
     this.getRatePolicy = function() { return null; };
   
@@ -969,6 +976,13 @@
     },
     unsubscribe: function(el) {
       $(el).off('.textInputBinding');
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value)
+    },
+    getState: function(el) {
+      return { value: el.value };
     },
     getRatePolicy: function() {
       return {
@@ -1003,12 +1017,61 @@
       else
         return numberVal;           // If other string like "1e6", send it unchanged
     },
+    setValue: function(el, value) {
+      el.value = value;
+    },
     getType: function(el) {
       return "number"
+    },
+    receiveMessage: function(el, data) {
+      // Get each value if present in data; otherwise get it from el
+      var value = data.hasOwnProperty('value') ? data.value : el.value;
+      var min   = data.hasOwnProperty('min')   ? data.min   : el.min;
+      var max   = data.hasOwnProperty('max')   ? data.max   : el.max;
+      var step  = data.hasOwnProperty('step')  ? data.step  : el.step;
+
+      // Make sure we have actual numbers so we can compare them
+      value = Number(value);
+      min   = Number(min);
+      max   = Number(max);
+      step  = Number(step);
+
+      // Assign values
+      el.value = value;
+      el.min   = min;
+      el.max   = max;
+      el.step  = step;
+    },
+    getState: function(el) {
+      return { value: this.getValue(el),
+               min:   Number(el.min),
+               max:   Number(el.max),
+               step:  Number(el.step) };
     }
   });
   inputBindings.register(numberInputBinding, 'shiny.numberInput');
 
+
+  var checkboxInputBinding = new InputBinding();
+  $.extend(checkboxInputBinding, {
+    find: function(scope) {
+      return $(scope).find('input[type="checkbox"]');
+    },
+    getValue: function(el) {
+      return el.checked;
+    },
+    setValue: function(el, value) {
+      el.checked = value;
+    },
+    getState: function(el) {
+      return { value: el.checked }
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        el.checked = data.value;
+    }
+  });
+  inputBindings.register(checkboxInputBinding, 'shiny.checkboxInput');
 
   var sliderInputBinding = {};
   $.extend(sliderInputBinding, textInputBinding, {
@@ -1022,7 +1085,7 @@
       return sliders;
     },
     getValue: function(el) {
-      var sliderVal = $(el).val();
+      var sliderVal = $(el).slider("value");
       if (/;/.test(sliderVal)) {
         var chunks = sliderVal.split(/;/, 2);
         return [+chunks[0], +chunks[1]];
@@ -1031,8 +1094,8 @@
         return +sliderVal;
       }
     },
-    setValue: function(el, val) {
-      // TODO: implement
+    setValue: function(el, value) {
+       $(el).slider("value", value)
     },
     subscribe: function(el, callback) {
       $(el).on('change.inputBinding', function(event) {
@@ -1042,11 +1105,33 @@
     unsubscribe: function(el) {
       $(el).off('.inputBinding');
     },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value)
+    },
     getRatePolicy: function() {
       return {
         policy: 'debounce',
         delay: 250
       };
+    },
+    getState: function(el) {
+      var settings = $(el).slider().settings;
+
+      return { value:  this.getValue(el),
+               min:    Number(settings.from),
+               max:    Number(settings.to),
+               step:   Number(settings.step),
+               round:  settings.round,
+               format: settings.format.format,
+               locale: settings.format.locale
+             };
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value);
+
+      // jslider doesn't support setting other properties
     }
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
@@ -1074,6 +1159,10 @@
     },
     unsubscribe: function(el) {
       $(el).off('.selectInputBinding');
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value)
     }
   });
   inputBindings.register(selectInputBinding, 'shiny.selectInput');

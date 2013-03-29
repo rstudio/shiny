@@ -600,6 +600,19 @@
       for (key in msgObj.values) {
         this.receiveOutput(key, msgObj.values[key]);
       }
+      if (msgObj.message) {
+        var msg = msgObj.message;
+
+        if (msg.type === 'inputMessage') {
+          // Send msg.data.message to the appropriate inputHandler object
+          var $obj = $('.shiny-bound-input#' + msg.data.id);
+          if ($obj.length > 0) {
+            $obj.data('shiny-input-binding').receiveMessage($obj[0], msg.data.message);
+          }
+        } else if (msg.type === 'javascript') {
+          eval(msg.data);
+        }
+      }
       if (msgObj.console) {
         for (var i = 0; i < msgObj.console.length; i++) {
           if (console.log)

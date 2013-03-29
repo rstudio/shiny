@@ -29,7 +29,8 @@ ShinySession <- setRefClass(
     token = 'character',  # Used to identify this instance in URLs
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
-    closed = 'logical'
+    closed = 'logical',
+    messenger = 'list'    # Object for the server app to talk to client
   ),
   methods = list(
     initialize = function(websocket) {
@@ -50,6 +51,8 @@ ShinySession <- setRefClass(
       token <<- createUniqueId(16)
       .outputs <<- list()
       .outputOptions <<- list()
+
+      messenger <<- list(send = .self$.sendMessage)
     },
     close = function() {
       closed <<- TRUE
@@ -177,6 +180,9 @@ ShinySession <- setRefClass(
       if (is.null(requestMsg$tag))
         return()
       .write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
+    },
+    .sendMessage = function(messageType, data) {
+      .write(toJSON(list(message=list(type=messageType, data=data))))
     },
     .write = function(json) {
       if (getOption('shiny.trace', FALSE))
@@ -975,9 +981,13 @@ startApp <- function(port=8101L) {
                 input=shinysession$input,
                 output=.createOutputWriter(shinysession))
 
-              # The clientData argument is optional; check if it exists
+              # The clientData and messenger arguments are optional; check if
+              # each exists
               if ('clientData' %in% names(formals(serverFunc)))
                 args$clientData <- shinysession$clientData
+
+              if ('messenger' %in% names(formals(serverFunc)))
+                args$messenger <- shinysession$messenger
 
               do.call(serverFunc, args)
             })

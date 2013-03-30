@@ -668,6 +668,9 @@ tabPanel <- function(title, ..., value = NULL) {
 #'   logic to determine which of the current tabs is active. The value will 
 #'   correspond to the \code{value} argument that is passed to 
 #'   \code{\link{tabPanel}}.
+#' @param selected The \code{value} (or, if none was supplied, the \code{title})
+#'   of the tab that should be selected by default. If \code{NULL}, the first
+#'   tab will be selected.
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
 #' @examples
@@ -681,7 +684,7 @@ tabPanel <- function(title, ..., value = NULL) {
 #'   )
 #' )
 #' @export
-tabsetPanel <- function(..., id = NULL) {
+tabsetPanel <- function(..., id = NULL, selected = NULL) {
   
   # build tab-nav and tab-content divs
   tabs <- list(...)
@@ -708,8 +711,13 @@ tabsetPanel <- function(..., id = NULL) {
                             `data-value` = tabValue,
                             divTag$attribs$title))
     
-    # set the first tab as active
-    if (firstTab) {
+    if (is.null(tabValue)) {
+      tabValue <- divTag$attribs$title
+    }
+
+    # If appropriate, make this the selected tab
+    if ((firstTab && is.null(selected)) ||
+        (!is.null(selected) && identical(selected, tabValue))) {
       liTag$attribs$class <- "active"
       divTag$attribs$class <- "tab-pane active"
       firstTab = FALSE

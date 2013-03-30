@@ -2,7 +2,7 @@
 \alias{tabsetPanel}
 \title{Create a tabset panel}
 \usage{
-  tabsetPanel(..., id = NULL)
+  tabsetPanel(..., id = NULL, selected = NULL)
 }
 \arguments{
   \item{...}{\code{\link{tabPanel}} elements to include in
@@ -13,6 +13,11 @@
   determine which of the current tabs is active. The value
   will correspond to the \code{value} argument that is
   passed to \code{\link{tabPanel}}.}
+
+  \item{selected}{The \code{value} (or, if none was
+  supplied, the \code{title}) of the tab that should be
+  selected by default. If \code{NULL}, the first tab will
+  be selected.}
 }
 \value{
   A tabset that can be passed to \code{\link{mainPanel}}

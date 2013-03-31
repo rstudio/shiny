@@ -30,7 +30,7 @@ ShinySession <- setRefClass(
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
     closed = 'logical',
-    messenger = 'list'    # Object for the server app to talk to client
+    session = 'list'      # Object for the server app to access session stuff
   ),
   methods = list(
     initialize = function(websocket) {
@@ -52,7 +52,7 @@ ShinySession <- setRefClass(
       .outputs <<- list()
       .outputOptions <<- list()
 
-      messenger <<- list(send = .self$.sendMessage)
+      session <<- list(send = .self$.sendMessage)
     },
     close = function() {
       closed <<- TRUE
@@ -181,8 +181,8 @@ ShinySession <- setRefClass(
         return()
       .write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
     },
-    .sendMessage = function(messageType, data) {
-      .write(toJSON(list(message=list(type=messageType, data=data))))
+    .sendMessage = function(data) {
+      .write(toJSON(data))
     },
     .write = function(json) {
       if (getOption('shiny.trace', FALSE))
@@ -981,13 +981,13 @@ startApp <- function(port=8101L) {
                 input=shinysession$input,
                 output=.createOutputWriter(shinysession))
 
-              # The clientData and messenger arguments are optional; check if
+              # The clientData and session arguments are optional; check if
               # each exists
               if ('clientData' %in% names(formals(serverFunc)))
                 args$clientData <- shinysession$clientData
 
-              if ('messenger' %in% names(formals(serverFunc)))
-                args$messenger <- shinysession$messenger
+              if ('session' %in% names(formals(serverFunc)))
+                args$session <- shinysession$session
 
               do.call(serverFunc, args)
             })

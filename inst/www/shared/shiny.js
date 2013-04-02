@@ -600,13 +600,16 @@
       for (key in msgObj.values) {
         this.receiveOutput(key, msgObj.values[key]);
       }
-      if (msgObj.inputMessage) {
-        var $obj = $('.shiny-bound-input#' + msgObj.inputMessage.id);
-        var inputBinding = $obj.data('shiny-input-binding');
+      if (msgObj.inputMessages) {
+        // inputMessages should be an array
+        for (var i = 0; i < msgObj.inputMessages.length; i++) {
+          var $obj = $('.shiny-bound-input#' + msgObj.inputMessages[i].id);
+          var inputBinding = $obj.data('shiny-input-binding');
 
-        // Dispatch the message to the appropriate input object
-        if ($obj.length > 0) {
-          inputBinding.receiveMessage($obj[0], msgObj.inputMessage.message);
+          // Dispatch the message to the appropriate input object
+          if ($obj.length > 0) {
+            inputBinding.receiveMessage($obj[0], msgObj.inputMessages[i].message);
+          }
         }
       }
       if (msgObj.javascript) {

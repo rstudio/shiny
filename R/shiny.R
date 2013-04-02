@@ -1002,9 +1002,14 @@ startApp <- function(port=8101L) {
     }
   )
   
-  message('\n', 'Listening on port ', port)
-
-  return(startServer("0.0.0.0", port, httpuvCallbacks))
+  if (is.numeric(port) || is.integer(port)) {
+    message('\n', 'Listening on port ', port)
+    return(startServer("0.0.0.0", port, httpuvCallbacks))
+  } else if (is.character(port)) {    
+    message('\n', 'Listening on domain socket ', port)
+    mask <- attr(port, 'mask')
+    return(startPipeServer(port, mask, httpuvCallbacks))
+  }
 }
 
 # NOTE: we de-roxygenized this comment because the function isn't exported
@@ -1082,7 +1087,7 @@ runApp <- function(appDir=getwd(),
     stopServer(server)
   }, add = TRUE)
   
-  if (launch.browser) {
+  if (launch.browser && !is.character(port)) {
     appUrl <- paste("http://localhost:", port, sep="")
     utils::browseURL(appUrl)
   }

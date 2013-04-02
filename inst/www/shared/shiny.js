@@ -1156,7 +1156,7 @@
   var selectInputBinding = new InputBinding();
   $.extend(selectInputBinding, {
     find: function(scope) {
-      return scope.find('select');
+      return $(scope).find('select');
     },
     getId: function(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -1167,6 +1167,46 @@
     setValue: function(el, value) {
       $(el).val(value);
     },
+    getState: function(el) {
+      // Store options in an array of objects, each with with value and label
+      var options = new Array(el.length);
+      for (var i = 0; i < el.length; i++) {
+        options[i] = { value:    el[i].value,
+                       label:    el[i].label,
+                       selected: el[i].selected };
+      }
+
+      return { value:    this.getValue(el),
+               options:  options
+             };
+    },
+    receiveMessage: function(el, data) {
+      $el = $(el);
+
+      // This will replace all the options
+      if (data.hasOwnProperty('options')) {
+        // Clear existing options and add each new one
+        $el.empty();
+        for (var i = 0; i < data.options.length; i++) {
+          var in_opt = data.options[i];
+
+          var $newopt = $('<option/>', {
+            value: in_opt.value,
+            text: in_opt.label
+          });
+
+          // Add selected attribute if present
+          if (in_opt.hasOwnProperty('selected')) {
+            $newopt.prop('selected', in_opt.selected);
+          }
+
+          $el.append($newopt)
+        }
+      }
+
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value)
+    },
     subscribe: function(el, callback) {
       $(el).on('change.selectInputBinding', function(event) {
         callback();
@@ -1174,10 +1214,6 @@
     },
     unsubscribe: function(el) {
       $(el).off('.selectInputBinding');
-    },
-    receiveMessage: function(el, data) {
-      if (data.hasOwnProperty('value'))
-        this.setValue(el, data.value)
     }
   });
   inputBindings.register(selectInputBinding, 'shiny.selectInput');

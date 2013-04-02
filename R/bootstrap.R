@@ -392,19 +392,19 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   checkboxes <- list()
   for (choiceName in names(choices)) {
     
-    checkbox <- tags$input(name = inputId, type="checkbox",
-                           value = choices[[choiceName]])
+    checkbox <- tags$label(class = "checkbox",
+                  tags$input(name = inputId, type="checkbox",
+                             value = choices[[choiceName]]),
+                  choiceName)
     
     if (choiceName %in% selected)
       checkbox$attribs$checked <- 'checked'
     
     checkboxes[[length(checkboxes)+1]] <- checkbox
-    checkboxes[[length(checkboxes)+1]] <- choiceName
-    checkboxes[[length(checkboxes)+1]] <- tags$br()
   } 
   
   # return label and select tag
-  tags$div(class='control-group',
+  tags$div(class="control-group",
            controlLabel(inputId, label),
            checkboxes)
 }
@@ -540,8 +540,9 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
     inputTags[[length(inputTags) + 1]] <- labelTag
   }
   
-  tagList(tags$label(class = "control-label", label),
-          inputTags)
+  tags$div(class = 'control-group',
+           tags$label(class = "control-label", label),
+           inputTags)
 }
 
 #' Create a submit button

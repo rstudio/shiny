@@ -378,4 +378,109 @@ describe("Input Bindings", function() {
 
   });
 
+
+  // ===========================================================================
+  describe("selectInputBinding", function() {
+    var id = 'in_select';
+    var binding_name = 'selectInput'; // Name of the input binding in the registry
+
+    // Some convenience objects
+    var $obj;
+    var input_binding;
+
+    beforeEach(function(){
+      el = $('<select id="' + id + '">').prependTo('body');
+      el.append('<option value="option1" selected="selected">option1 label</option>');
+      el.append('<option value="option2">option2 label</option>');
+      // Wrap the input object in a div so we can select and remove it later
+      el.wrap('<div id="input_binding_test">');
+      Shiny.bindAll()
+
+      $obj          = select_input_object(id);
+      input_binding = get_input_binding_name(binding_name);
+    });
+
+    afterEach(function(){
+      Shiny.unbindAll();
+      $('#input_binding_test').remove();
+    });
+
+    // Run tests that are exactly the same for all InputBindings
+    common_tests(id, binding_name);
+
+    it("getValue() works", function() {
+      expect(input_binding.getValue($obj[0])).toBe('option1');
+    });
+
+    it("setValue() works", function() {
+      input_binding.setValue($obj[0], 'option2');
+      expect(input_binding.getValue($obj[0])).toBe('option2');
+
+      // Setting to nonexistent option should have no effect
+      input_binding.setValue($obj[0], 'option100');
+      expect(input_binding.getValue($obj[0])).toBe('option1');
+    });
+
+    it("getState() works", function() {
+      expect(get_state(id)).toEqual({
+        value: 'option1',
+        options: [
+          { value: 'option1', label: 'option1 label', selected: true },
+          { value: 'option2', label: 'option2 label', selected: false }
+        ]
+      });
+    });
+
+    it("receiveMessage() works", function() {
+      var state_complete = {
+        value: 'option4',
+        options: [
+          { value: 'option3', label: 'option3 label', selected: false },
+          { value: 'option4', label: 'option4 label', selected: true }
+        ]
+      };
+      receive_message(id, state_complete);
+      expect(get_value(id)).toBe('option4');
+      expect(get_state(id)).toEqual(state_complete);
+
+
+      // Don't provide value, but set selected:true on an option
+      var state_novalue = {
+        options: [
+          { value: 'option5', label: 'option5 label', selected: false },
+          { value: 'option6', label: 'option6 label', selected: true }
+        ]
+      };
+      var state_novalue_expected = {
+        value: 'option6',
+        options: state_novalue.options
+      };
+      receive_message(id, state_novalue);
+      expect(get_value(id)).toBe('option6');
+      expect(get_state(id)).toEqual(state_novalue_expected);
+
+
+      // Provide value, but no selected:true
+      var state_noselected = {
+        value: 'option7',
+        options: [
+          { value: 'option7', label: 'option7 label'},
+          { value: 'option8', label: 'option8 label'}
+        ]
+      };
+      var state_noselected_expected = {
+        value: 'option7',
+        options: [
+          { value: 'option7', label: 'option7 label', selected: true },
+          { value: 'option8', label: 'option8 label', selected: false }
+        ]
+      };
+      receive_message(id, state_noselected);
+      expect(get_value(id)).toBe('option7');
+      expect(get_state(id)).toEqual(state_noselected_expected);
+
+    });
+
+  });
+
 });

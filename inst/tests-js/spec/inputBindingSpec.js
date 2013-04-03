@@ -1,6 +1,6 @@
-// TODO:
-//  separate general tests which all inputbindings must pass, from tests
-//  that are specific to each inputbinding
+/*jshint forin:true, noarg:true, noempty:true, eqeqeq:true, bitwise:true, undef:true, unused:true, browser:true, jquery:true, maxerr:50 */
+/*global Shiny*/
+/*global describe, it, expect, beforeEach, afterEach*/
 
 describe("Input Bindings", function() {
 
@@ -118,10 +118,10 @@ describe("Input Bindings", function() {
     var input_binding;
 
     beforeEach(function(){
-      el = $('<input id="' + id +'" type="text" value="starting value"/>').prependTo('body');
+      var el = $('<input id="' + id +'" type="text" value="starting value"/>').prependTo('body');
       // Wrap the input object in a div so we can select and remove it later
       el.wrap('<div id="input_binding_test">');
-      Shiny.bindAll()
+      Shiny.bindAll();
 
       // Assign values to convenience objects
       $obj = select_input_object(id);
@@ -175,10 +175,10 @@ describe("Input Bindings", function() {
     var input_binding;
 
     beforeEach(function(){
-      el = $('<input id="' + id +'" type="number" value="8" min="4" max="10" step="0.5"/>').prependTo('body');
+      var el = $('<input id="' + id +'" type="number" value="8" min="4" max="10" step="0.5"/>').prependTo('body');
       // Wrap the input object in a div so we can select and remove it later
       el.wrap('<div id="input_binding_test">');
-      Shiny.bindAll()
+      Shiny.bindAll();
 
       $obj          = select_input_object(id);
       input_binding = get_input_binding_name(binding_name);
@@ -245,10 +245,10 @@ describe("Input Bindings", function() {
     var input_binding;
 
     beforeEach(function(){
-      el = $('<input id="' + id +'" type="checkbox"/>').prependTo('body');
+      var el = $('<input id="' + id +'" type="checkbox"/>').prependTo('body');
       // Wrap the input object in a div so we can select and remove it later
       el.wrap('<div id="input_binding_test">');
-      Shiny.bindAll()
+      Shiny.bindAll();
 
       $obj          = select_input_object(id);
       input_binding = get_input_binding_name(binding_name);
@@ -307,10 +307,10 @@ describe("Input Bindings", function() {
     var input_binding;
 
     beforeEach(function(){
-      el = $('<input id="' + id + '" type="slider" name="in_slider" value="20" class="jslider" data-from="5" data-to="40" data-step="1" data-skin="plastic" data-round="false" data-locale="us" data-format="#,##0.#####" data-smooth="false"/>').prependTo('body');
+      var el = $('<input id="' + id + '" type="slider" name="in_slider" value="20" class="jslider" data-from="5" data-to="40" data-step="1" data-skin="plastic" data-round="false" data-locale="us" data-format="#,##0.#####" data-smooth="false"/>').prependTo('body');
       // Wrap the input object in a div so we can select and remove it later
       el.wrap('<div id="input_binding_test">');
-      Shiny.bindAll()
+      Shiny.bindAll();
 
       $obj          = select_input_object(id);
       input_binding = get_input_binding_name(binding_name);
@@ -389,12 +389,12 @@ describe("Input Bindings", function() {
     var input_binding;
 
     beforeEach(function(){
-      el = $('<select id="' + id + '">').prependTo('body');
+      var el = $('<select id="' + id + '">').prependTo('body');
       el.append('<option value="option1" selected="selected">option1 label</option>');
       el.append('<option value="option2">option2 label</option>');
       // Wrap the input object in a div so we can select and remove it later
       el.wrap('<div id="input_binding_test">');
-      Shiny.bindAll()
+      Shiny.bindAll();
 
       $obj          = select_input_object(id);
       input_binding = get_input_binding_name(binding_name);

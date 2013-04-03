@@ -956,7 +956,8 @@
     // This is used for receiving messages that tell the input object to do
     // things, such as setting values (including min, max, and others).
     // 'data' should be an object with elements corresponding to value, min,
-    //  max, etc., as appropriate for the type of input object.
+    // max, etc., as appropriate for the type of input object. It also should
+    // trigger a change event.
     this.receiveMessage = function(el, data) { throw "Not implemented"; };
     this.getState = function(el, data) { throw "Not implemented"; };
     
@@ -995,6 +996,8 @@
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value)
+
+      $(el).trigger('change');
     },
     getState: function(el) {
       return { value: el.value };
@@ -1056,6 +1059,8 @@
       el.min   = min;
       el.max   = max;
       el.step  = step;
+
+      $(el).trigger('change');
     },
     getState: function(el) {
       return { value: this.getValue(el),
@@ -1084,6 +1089,8 @@
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
         el.checked = data.value;
+
+      $(el).trigger('change');
     }
   });
   inputBindings.register(checkboxInputBinding, 'shiny.checkboxInput');
@@ -1110,7 +1117,7 @@
       }
     },
     setValue: function(el, value) {
-       $(el).slider("value", value)
+      $(el).slider("value", value);
     },
     subscribe: function(el, callback) {
       $(el).on('change.inputBinding', function(event) {
@@ -1122,7 +1129,10 @@
     },
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
-        this.setValue(el, data.value)
+        this.setValue(el, data.value);
+      // jslider doesn't support setting other properties
+
+      $(el).trigger('change');
     },
     getRatePolicy: function() {
       return {
@@ -1141,12 +1151,6 @@
                format: settings.format.format,
                locale: settings.format.locale
              };
-    },
-    receiveMessage: function(el, data) {
-      if (data.hasOwnProperty('value'))
-        this.setValue(el, data.value);
-
-      // jslider doesn't support setting other properties
     }
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
@@ -1206,6 +1210,8 @@
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value)
+
+      $(el).trigger('change');
     },
     subscribe: function(el, callback) {
       $(el).on('change.selectInputBinding', function(event) {

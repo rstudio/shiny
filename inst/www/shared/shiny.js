@@ -1225,6 +1225,115 @@
   inputBindings.register(selectInputBinding, 'shiny.selectInput');
 
 
+  // Radio input groups
+  var radioInputBinding = new InputBinding();
+  $.extend(radioInputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-input-radiogroup');
+    },
+    getValue: function(el) {
+      // Select the radio objects that have name equal to the grouping div's id
+      return $('input:radio[name=' + el.id + ']:checked').val();
+    },
+    setValue: function(el, value) {
+      $('input:radio[name=' + el.id + '][value=' + value + ']').prop('checked', true);
+    },
+    getState: function(el) {
+      var $objs = $('input:radio[name=' + el.id + ']');
+
+      // Store options in an array of objects, each with with value and label
+      var options = new Array($objs.length);
+      for (var i = 0; i < options.length; i++) {
+        options[i] = { value:   $objs[i].value,
+                       label:   this._getLabel($objs[i]),
+                       checked: $objs[i].checked };
+      }
+
+      return { value:    this.getValue(el),
+               options:  options
+             };
+    },
+    receiveMessage: function(el, data) {
+      $el = $(el);
+
+      // This will replace all the options
+      if (data.hasOwnProperty('options')) {
+        // Clear existing options and add each new one
+        $el.find('label.radio').remove();
+        for (var i = 0; i < data.options.length; i++) {
+          var in_opt = data.options[i];
+
+          var $newopt = $('<label class="radio">');
+          var $radio = $('<input/>', {
+            type:  "radio",
+            name:  el.id,
+            id:    el.id + (i+1).toString(),
+            value: in_opt.value
+          });
+
+          // Add checked attribute if present
+          if (in_opt.hasOwnProperty('checked')) {
+            $radio.prop('checked', in_opt.checked);
+          }
+
+          $newopt.append($radio);
+          $newopt.append('<span>' + in_opt.label + '</span>');
+
+          $el.append($newopt)
+        }
+      }
+
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value)
+
+      $(el).trigger('change');
+    },
+    subscribe: function(el, callback) {
+      $(el).on('change.radioInputBinding', function(event) {
+        callback();
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.radioInputBinding');
+    },
+    // Given an input DOM object, get the associated label. Handles labels
+    // that wrap the input as well as labels associated with 'for' attribute.
+    _getLabel: function(obj) {
+      // If <input id='myid'><label for='myid'>label text</label>
+      var $label_for = $('label[for=' + obj.id + ']');
+      if ($label_for.length > 0) {
+        return $.trim($label_for.text());
+      }
+
+      // If <label><input /><span>label text</span></label>
+      if (obj.parentNode.tagName === "LABEL") {
+        return $.trim($(obj.parentNode).find('span').text());
+      }
+
+      return null;
+    },
+    // Given an input DOM object, set the associated label. Handles labels
+    // that wrap the input as well as labels associated with 'for' attribute.
+    _setLabel: function(obj, value) {
+      // If <input id='myid'><label for='myid'>label text</label>
+      var $label_for = $('label[for=' + obj.id + ']');
+      if ($label_for.length > 0) {
+        $label_for.text(value);
+      }
+
+      // If <label><input /><span>label text</span></label>
+      if (obj.parentNode.tagName === "LABEL") {
+        $(obj.parentNode).find('span').text(value);
+      }
+
+      return null;
+    }
+
+  });
+  inputBindings.register(radioInputBinding, 'shiny.radioInput');
+
+
+
   var bootstrapTabInputBinding = new InputBinding();
   $.extend(bootstrapTabInputBinding, {
     find: function(scope) {

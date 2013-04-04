@@ -533,14 +533,17 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
                            value = value)
     if (identical(name, selected))
       inputTag$attribs$checked = "checked"
-    
+
+    # Put the label text in a span
+    spanTag <- tags$span(name)
     labelTag <- tags$label(class = "radio")
     labelTag <- tagAppendChild(labelTag, inputTag)
-    labelTag <- tagAppendChild(labelTag, name)
+    labelTag <- tagAppendChild(labelTag, spanTag)
     inputTags[[length(inputTags) + 1]] <- labelTag
   }
   
-  tags$div(class = 'control-group',
+  tags$div(id = inputId,
+           class = 'control-group shiny-input-radiogroup',
            tags$label(class = "control-label", label),
            inputTags)
 }

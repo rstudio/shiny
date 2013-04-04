@@ -390,21 +390,26 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   choices <- choicesWithNames(choices)
   
   checkboxes <- list()
-  for (choiceName in names(choices)) {
-    
+  # for (choiceName in names(choices)) {
+  for (i in seq_along(choices)) {
+    choiceName <- names(choices)[i]
+
     checkbox <- tags$label(class = "checkbox",
-                  tags$input(name = inputId, type="checkbox",
-                             value = choices[[choiceName]]),
-                  choiceName)
+                  tags$input(type = "checkbox",
+                             name = inputId,
+                             id = paste(inputId, i, sep=""),
+                             value = choices[[i]]),
+                  tags$span(choiceName))
     
     if (choiceName %in% selected)
       checkbox$attribs$checked <- 'checked'
     
-    checkboxes[[length(checkboxes)+1]] <- checkbox
+    checkboxes[[i]] <- checkbox
   } 
   
   # return label and select tag
-  tags$div(class="control-group",
+  tags$div(id = inputId,
+           class = "control-group shiny-input-checkboxgroup",
            controlLabel(inputId, label),
            checkboxes)
 }

@@ -1,4 +1,6 @@
-/*jshint forin:true, noarg:true, noempty:true, eqeqeq:true, bitwise:true, undef:true, unused:true, browser:true, jquery:true, maxerr:50 */
+/*jshint forin:true, noarg:true, noempty:true, eqeqeq:true, bitwise:true,
+    strict:false, undef:true, unused:true, browser:true, jquery:true, maxerr:50,
+    curly:false, multistr:true */
 /*global Shiny*/
 /*global describe, it, expect, beforeEach, afterEach*/
 
@@ -292,7 +294,6 @@ describe("Input Bindings", function() {
       expect(get_state(id)).toEqual({ value:true });
 
     });
-
   });
 
 
@@ -375,7 +376,6 @@ describe("Input Bindings", function() {
 
       // Setting other values isn't implemented yet
     });
-
   });
 
 
@@ -484,9 +484,7 @@ describe("Input Bindings", function() {
       receive_message(id, state_noselected);
       expect(get_value(id)).toBe('option7');
       expect(get_state(id)).toEqual(state_noselected_expected);
-
     });
-
   });
 
 
@@ -601,9 +599,139 @@ describe("Input Bindings", function() {
       receive_message(id, state_nochecked);
       expect(get_value(id)).toBe('option7');
       expect(get_state(id)).toEqual(state_nochecked_expected);
+    });
+  });
 
+
+
+  // ===========================================================================
+  describe("checkboxGroupInputBinding", function() {
+    var id = 'in_checkboxgroup';
+    var binding_name = 'checkboxGroupInput'; // Name of the input binding in the registry
+
+    // Some convenience objects
+    var $obj;
+    var input_binding;
+
+    beforeEach(function(){
+      var htmlstring =
+        '<div id="' + id + '" class="control-group shiny-input-checkboxgroup">\
+          <label class="control-label">Checkbox group:</label>\
+          <label class="checkbox">\
+            <input type="checkbox" name="' + id + '" id="' + id + '1" value="option1" checked="checked"/>\
+            <span>option1 label</span>\
+          </label>\
+          <label class="checkbox">\
+            <input type="checkbox" name="' + id + '" id="' + id + '2" value="option2"/>\
+            <span>option2 label</span>\
+          </label>\
+        </div>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
+
+      Shiny.bindAll();
+
+      $obj          = select_input_object(id);
+      input_binding = get_input_binding_name(binding_name);
     });
 
+    afterEach(function(){
+      Shiny.unbindAll();
+      $('#input_binding_test').remove();
+    });
+
+    // Run tests that are exactly the same for all InputBindings
+    common_tests(id, binding_name);
+
+    it("getValue() works", function() {
+      // Should return an array of values
+      expect(input_binding.getValue($obj[0])).toEqual(['option1']);
+    });
+
+    it("setValue() works", function() {
+      // Accept single value
+      input_binding.setValue($obj[0], 'option2');
+      expect(input_binding.getValue($obj[0])).toEqual(['option2']);
+
+      // Accept array of values
+      input_binding.setValue($obj[0], ['option1', 'option2']);
+      expect(input_binding.getValue($obj[0])).toEqual(['option1', 'option2']);
+
+      input_binding.setValue($obj[0], ['option2']);
+      expect(input_binding.getValue($obj[0])).toEqual(['option2']);
+
+      // Accept empty array of values
+      input_binding.setValue($obj[0], [ ]);
+      expect(input_binding.getValue($obj[0])).toEqual([ ]);
+
+      // Setting to nonexistent option should have no effect
+      input_binding.setValue($obj[0], 'option100');
+      expect(input_binding.getValue($obj[0])).toEqual([ ]);
+
+      input_binding.setValue($obj[0], ['option100', 'option2']);
+      expect(input_binding.getValue($obj[0])).toEqual(['option2']);
+    });
+
+    it("getState() works", function() {
+      expect(get_state(id)).toEqual({
+        value: ['option1'],
+        options: [
+          { value: 'option1', label: 'option1 label', checked: true },
+          { value: 'option2', label: 'option2 label', checked: false }
+        ]
+      });
+    });
+
+    it("receiveMessage() works", function() {
+      var state_complete = {
+        value: ['option4'],
+        options: [
+          { value: 'option3', label: 'option3 label', checked: false },
+          { value: 'option4', label: 'option4 label', checked: true }
+        ]
+      };
+      receive_message(id, state_complete);
+      expect(get_value(id)).toEqual(['option4']);
+      expect(get_state(id)).toEqual(state_complete);
+
+
+      // Don't provide value, but set checked:true on an option
+      var state_novalue = {
+        options: [
+          { value: 'option5', label: 'option5 label', checked: true },
+          { value: 'option6', label: 'option6 label', checked: true }
+        ]
+      };
+      var state_novalue_expected = {
+        value: ['option5', 'option6'],
+        options: state_novalue.options
+      };
+      receive_message(id, state_novalue);
+      expect(get_value(id)).toEqual(['option5', 'option6']);
+      expect(get_state(id)).toEqual(state_novalue_expected);
+
+
+      // Provide value, but no checked:true
+      var state_nochecked = {
+        value: 'option7',
+        options: [
+          { value: 'option7', label: 'option7 label'},
+          { value: 'option8', label: 'option8 label'}
+        ]
+      };
+      var state_nochecked_expected = {
+        value: ['option7'],
+        options: [
+          { value: 'option7', label: 'option7 label', checked: true },
+          { value: 'option8', label: 'option8 label', checked: false }
+        ]
+      };
+      receive_message(id, state_nochecked);
+      expect(get_value(id)).toEqual(['option7']);
+      expect(get_state(id)).toEqual(state_nochecked_expected);
+    });
   });
 
 });

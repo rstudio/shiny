@@ -293,6 +293,9 @@ describe("Input Bindings", function() {
       receive_message(id, { checked:false });
       expect(get_state(id)).toEqual({ value:true });
 
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_state(id)).toEqual({ value:true });
     });
   });
 
@@ -374,6 +377,10 @@ describe("Input Bindings", function() {
       receive_message(id, { value:7.8 });
       expect(get_value(id)).toBe(8);
 
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_value(id)).toBe(8);
+
       // Setting other values isn't implemented yet
     });
   });
@@ -449,6 +456,9 @@ describe("Input Bindings", function() {
       expect(get_value(id)).toBe('option4');
       expect(get_state(id)).toEqual(state_complete);
 
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_state(id)).toEqual(state_complete);
 
       // Don't provide value, but set selected:true on an option
       var state_novalue = {
@@ -564,6 +574,9 @@ describe("Input Bindings", function() {
       expect(get_value(id)).toBe('option4');
       expect(get_state(id)).toEqual(state_complete);
 
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_state(id)).toEqual(state_complete);
 
       // Don't provide value, but set checked:true on an option
       var state_novalue = {
@@ -696,6 +709,9 @@ describe("Input Bindings", function() {
       expect(get_value(id)).toEqual(['option4']);
       expect(get_state(id)).toEqual(state_complete);
 
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_state(id)).toEqual(state_complete);
 
       // Don't provide value, but set checked:true on an option
       var state_novalue = {

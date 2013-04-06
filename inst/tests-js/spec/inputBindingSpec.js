@@ -793,4 +793,73 @@ describe("Input Bindings", function() {
     });
   });
 
+
+  // ===========================================================================
+  describe("bootstrapTabInputBinding", function() {
+    var id = 'in_tabset';
+    var binding_name = 'bootstrapTabInput'; // Name of the input binding in the registry
+
+    beforeEach(function(){
+      var htmlstring =
+        '<div class="tabbable">\
+          <ul class="nav nav-tabs" id="' + id + '">\
+            <li class="active">\
+              <a href="#tab-455-1" data-toggle="tab">panel1</a>\
+            </li>\
+            <li>\
+              <a href="#tab-455-2" data-toggle="tab">panel2</a>\
+            </li>\
+          </ul>\
+          <div class="tab-content">\
+            <div class="tab-pane active" title="panel1" id="tab-455-1">\
+              <p>This is the first panel.</p>\
+            </div>\
+            <div class="tab-pane" title="panel2" id="tab-455-2">\
+              <p>This is the second panel.</p>\
+            </div>\
+          </div>\
+        </div>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
+
+      Shiny.bindAll();
+    });
+
+    afterEach(function(){
+      Shiny.unbindAll();
+      $('#input_binding_test').remove();
+    });
+
+    // Run tests that are exactly the same for all InputBindings
+    common_tests(id, binding_name);
+
+    it("getValue() works", function() {
+      expect(get_value(id)).toEqual('panel1');
+    });
+
+    it("setValue() works", function() {
+      set_value(id, 'panel2');
+      expect(get_value(id)).toEqual('panel2');
+
+      set_value(id, 'panel1');
+      expect(get_value(id)).toEqual('panel1');
+    });
+
+    it("getState() works", function() {
+      expect(get_state(id)).toEqual({ value: 'panel1' });
+    });
+
+    it("receiveMessage() works", function() {
+      receive_message(id, { value: 'panel2' });
+      expect(get_value(id)).toEqual('panel2');
+      expect(get_state(id)).toEqual({ value: 'panel2' });
+
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_state(id)).toEqual({ value: 'panel2' });
+    });
+  });
+
 });

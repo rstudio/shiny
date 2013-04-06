@@ -1467,23 +1467,30 @@
   var bootstrapTabInputBinding = new InputBinding();
   $.extend(bootstrapTabInputBinding, {
     find: function(scope) {
-      return scope.find('ul.nav.nav-tabs');
+      return $(scope).find('ul.nav.nav-tabs');
     },
     getValue: function(el) {
       var anchor = $(el).children('li.active').children('a');
       if (anchor.length == 1)
-        return this.$getTabName(anchor);
+        return this._getTabName(anchor);
       return null;
     },
     setValue: function(el, value) {
       var self = this;
       var anchors = $(el).children('li').children('a');
       anchors.each(function() {
-        if (self.$getTabName($(this)) === value) {
+        if (self._getTabName($(this)) === value) {
           $(this).tab('show');
           return false;
         }
       });
+    },
+    getState: function(el) {
+      return { value: this.getValue(el) };
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value);
     },
     subscribe: function(el, callback) {
       $(el).on('shown.bootstrapTabInputBinding', function(event) {
@@ -1493,7 +1500,7 @@
     unsubscribe: function(el) {
       $(el).off('.bootstrapTabInputBinding');
     },
-    $getTabName: function(anchor) {
+    _getTabName: function(anchor) {
       return anchor.attr('data-value') || anchor.text();
     }
   });

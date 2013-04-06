@@ -31,6 +31,11 @@ describe("Input Bindings", function() {
     return get_input_binding_id(id).getValue($obj[0]);
   };
 
+  var set_value = function(id, value) {
+    var $obj = select_input_object(id);
+    return get_input_binding_id(id).setValue($obj[0], value);
+  };
+
   var receive_message = function(id, data) {
     var $obj = select_input_object(id);
     get_input_binding_id(id).receiveMessage($obj[0], data);
@@ -115,19 +120,11 @@ describe("Input Bindings", function() {
     var id           = 'in_text';   // id of the DOM object
     var binding_name = 'textInput'; // Name of the input binding in the registry
 
-    // Some convenience objects
-    var $obj;
-    var input_binding;
-
     beforeEach(function(){
       var el = $('<input id="' + id +'" type="text" value="starting value"/>').prependTo('body');
       // Wrap the input object in a div so we can select and remove it later
       el.wrap('<div id="input_binding_test">');
       Shiny.bindAll();
-
-      // Assign values to convenience objects
-      $obj = select_input_object(id);
-      input_binding = get_input_binding_name(binding_name);
     });
 
     afterEach(function(){
@@ -141,12 +138,12 @@ describe("Input Bindings", function() {
 
 
     it("getValue() works", function() {
-      expect(input_binding.getValue($obj[0])).toEqual('starting value');
+      expect(get_value(id)).toEqual('starting value');
     });
 
     it("setValue() works", function() {
-      input_binding.setValue($obj[0], 'value 2');
-      expect(input_binding.getValue($obj[0])).toEqual('value 2');
+      set_value(id, 'value 2');
+      expect(get_value(id)).toEqual('value 2');
     });
 
     it("getState() works", function() {
@@ -172,18 +169,11 @@ describe("Input Bindings", function() {
     var id = 'in_number';
     var binding_name = 'numberInput'; // Name of the input binding in the registry
 
-    // Some convenience objects
-    var $obj;
-    var input_binding;
-
     beforeEach(function(){
       var el = $('<input id="' + id +'" type="number" value="8" min="4" max="10" step="0.5"/>').prependTo('body');
       // Wrap the input object in a div so we can select and remove it later
       el.wrap('<div id="input_binding_test">');
       Shiny.bindAll();
-
-      $obj          = select_input_object(id);
-      input_binding = get_input_binding_name(binding_name);
     });
 
     afterEach(function(){
@@ -196,20 +186,20 @@ describe("Input Bindings", function() {
 
 
     it("getValue() works", function() {
-      expect(input_binding.getValue($obj[0])).toBe(8);
+      expect(get_value(id)).toBe(8);
     });
 
     it("setValue() works", function() {
-      input_binding.setValue($obj[0], 5);
-      expect(input_binding.getValue($obj[0])).toBe(5);
+      set_value(id, 5);
+      expect(get_value(id)).toBe(5);
 
       // getValue should coerce to number
-      input_binding.setValue($obj[0], '6');
-      expect(input_binding.getValue($obj[0])).toBe(6);
+      set_value(id, '6');
+      expect(get_value(id)).toBe(6);
 
       // getValue should return the numeric value when input is scientific notation
-      input_binding.setValue($obj[0], '1e6');
-      expect(input_binding.getValue($obj[0])).toBe(1000000);
+      set_value(id, '1e6');
+      expect(get_value(id)).toBe(1000000);
     });
 
     it("getState() works", function() {
@@ -242,18 +232,11 @@ describe("Input Bindings", function() {
     var id = 'in_checkbox';
     var binding_name = 'checkboxInput'; // Name of the input binding in the registry
 
-    // Some convenience objects
-    var $obj;
-    var input_binding;
-
     beforeEach(function(){
       var el = $('<input id="' + id +'" type="checkbox"/>').prependTo('body');
       // Wrap the input object in a div so we can select and remove it later
       el.wrap('<div id="input_binding_test">');
       Shiny.bindAll();
-
-      $obj          = select_input_object(id);
-      input_binding = get_input_binding_name(binding_name);
     });
 
     afterEach(function(){
@@ -267,15 +250,15 @@ describe("Input Bindings", function() {
 
 
     it("getValue() works", function() {
-      expect(input_binding.getValue($obj[0])).toBe(false);
+      expect(get_value(id)).toBe(false);
     });
 
     it("setValue() works", function() {
-      input_binding.setValue($obj[0], false);
-      expect(input_binding.getValue($obj[0])).toBe(false);
+      set_value(id, false);
+      expect(get_value(id)).toBe(false);
 
-      input_binding.setValue($obj[0], true);
-      expect(input_binding.getValue($obj[0])).toBe(true);
+      set_value(id, true);
+      expect(get_value(id)).toBe(true);
     });
 
     it("getState() works", function() {
@@ -306,10 +289,6 @@ describe("Input Bindings", function() {
     var id = 'in_slider';
     var binding_name = 'sliderInput'; // Name of the input binding in the registry
 
-    // Some convenience objects
-    var $obj;
-    var input_binding;
-
     beforeEach(function(){
       var htmlstring =
         '<input id="' + id + '" type="slider" name="' + id + '" value="20"\
@@ -321,9 +300,6 @@ describe("Input Bindings", function() {
       var el = $('<div id="input_binding_test">').prependTo('body');
       el.html(htmlstring);
       Shiny.bindAll();
-
-      $obj          = select_input_object(id);
-      input_binding = get_input_binding_name(binding_name);
     });
 
     afterEach(function(){
@@ -335,28 +311,28 @@ describe("Input Bindings", function() {
     common_tests(id, binding_name);
 
     it("getValue() works", function() {
-      expect(input_binding.getValue($obj[0])).toBe(20);
+      expect(get_value(id)).toBe(20);
     });
 
     it("setValue() works", function() {
-      input_binding.setValue($obj[0], 5);
-      expect(input_binding.getValue($obj[0])).toBe(5);
+      set_value(id, 5);
+      expect(get_value(id)).toBe(5);
 
       // setValue should coerce to number
-      input_binding.setValue($obj[0], '6');
-      expect(input_binding.getValue($obj[0])).toBe(6);
+      set_value(id, '6');
+      expect(get_value(id)).toBe(6);
 
       // Sould round value to nearest step
-      input_binding.setValue($obj[0], '7.8');
-      expect(input_binding.getValue($obj[0])).toBe(8);
+      set_value(id, '7.8');
+      expect(get_value(id)).toBe(8);
 
       // Below min: should report min
-      input_binding.setValue($obj[0], 2);
-      expect(input_binding.getValue($obj[0])).toBe(5);
+      set_value(id, 2);
+      expect(get_value(id)).toBe(5);
 
       // Above max: should report max
-      input_binding.setValue($obj[0], 100);
-      expect(input_binding.getValue($obj[0])).toBe(40);
+      set_value(id, 100);
+      expect(get_value(id)).toBe(40);
     });
 
     it("getState() works", function() {
@@ -395,11 +371,6 @@ describe("Input Bindings", function() {
   // ===========================================================================
   describe("sliderInputBinding with range (two values)", function() {
     var id  = 'in_slider';
-    var binding_name = 'sliderInput'; // Name of the input binding in the registry
-
-    // Some convenience objects
-    var $obj;
-    var input_binding;
 
     beforeEach(function(){
       var htmlstring =
@@ -412,9 +383,6 @@ describe("Input Bindings", function() {
       var el = $('<div id="input_binding_test">').prependTo('body');
       el.html(htmlstring);
       Shiny.bindAll();
-
-      $obj          = select_input_object(id);
-      input_binding = get_input_binding_name(binding_name);
     });
 
     afterEach(function(){
@@ -427,29 +395,29 @@ describe("Input Bindings", function() {
     });
 
     it("setValue() works", function() {
-      input_binding.setValue($obj[0], [15, 25]);
+      set_value(id, [15, 25]);
       expect(get_value(id)).toEqual([15, 25]);
 
       // setValue should coerce to number
-      input_binding.setValue($obj[0], ['16', '26']);
+      set_value(id, ['16', '26']);
       expect(get_value(id)).toEqual([16, 26]);
 
       // Min and max in wrong order: Behavior not defined, so don't run test
-      // input_binding.setValue($obj[0], [25, 15]);
+      // set_value(id, [25, 15]);
       // expect(get_value(id)).toEqual([25, 15]);
 
       // Below min and above max: should go to min and max
-      input_binding.setValue($obj[0], [0, 100]);
+      set_value(id, [0, 100]);
       expect(get_value(id)).toEqual([5, 40]);
 
       // Set single value: only changes lower
-      input_binding.setValue($obj[0], 15);
+      set_value(id, 15);
       expect(get_value(id)).toEqual([15, 40]);
 
       // Pass null: no effect on value when null
-      input_binding.setValue($obj[0], [null, 25]);
+      set_value(id, [null, 25]);
       expect(get_value(id)).toEqual([15, 25]);
-      input_binding.setValue($obj[0], [10, null]);
+      set_value(id, [10, null]);
       expect(get_value(id)).toEqual([10, 25]);
     });
 
@@ -487,10 +455,6 @@ describe("Input Bindings", function() {
     var id = 'in_select';
     var binding_name = 'selectInput'; // Name of the input binding in the registry
 
-    // Some convenience objects
-    var $obj;
-    var input_binding;
-
     beforeEach(function(){
       var htmlstring =
         '<select id="' + id + '">\
@@ -503,9 +467,6 @@ describe("Input Bindings", function() {
       el.html(htmlstring);
 
       Shiny.bindAll();
-
-      $obj          = select_input_object(id);
-      input_binding = get_input_binding_name(binding_name);
     });
 
     afterEach(function(){
@@ -517,17 +478,17 @@ describe("Input Bindings", function() {
     common_tests(id, binding_name);
 
     it("getValue() works", function() {
-      expect(input_binding.getValue($obj[0])).toBe('option1');
+      expect(get_value(id)).toBe('option1');
     });
 
     it("setValue() works", function() {
-      input_binding.setValue($obj[0], 'option2');
-      expect(input_binding.getValue($obj[0])).toBe('option2');
+      set_value(id, 'option2');
+      expect(get_value(id)).toBe('option2');
 
       // Setting to nonexistent option should have no effect
       // NOTE: this actually resets it to the first option
-      input_binding.setValue($obj[0], 'option999');
-      expect(input_binding.getValue($obj[0])).toBe('option1');
+      set_value(id, 'option999');
+      expect(get_value(id)).toBe('option1');
     });
 
     it("getState() works", function() {
@@ -599,10 +560,6 @@ describe("Input Bindings", function() {
     var id = 'in_radio';
     var binding_name = 'radioInput'; // Name of the input binding in the registry
 
-    // Some convenience objects
-    var $obj;
-    var input_binding;
-
     beforeEach(function(){
       var htmlstring =
         '<div id="' + id + '" class="control-group shiny-input-radiogroup">\
@@ -622,9 +579,6 @@ describe("Input Bindings", function() {
       el.html(htmlstring);
 
       Shiny.bindAll();
-
-      $obj          = select_input_object(id);
-      input_binding = get_input_binding_name(binding_name);
     });
 
     afterEach(function(){
@@ -636,16 +590,16 @@ describe("Input Bindings", function() {
     common_tests(id, binding_name);
 
     it("getValue() works", function() {
-      expect(input_binding.getValue($obj[0])).toBe('option1');
+      expect(get_value(id)).toBe('option1');
     });
 
     it("setValue() works", function() {
-      input_binding.setValue($obj[0], 'option2');
-      expect(input_binding.getValue($obj[0])).toBe('option2');
+      set_value(id, 'option2');
+      expect(get_value(id)).toBe('option2');
 
       // Setting to nonexistent option should have no effect
-      input_binding.setValue($obj[0], 'option100');
-      expect(input_binding.getValue($obj[0])).toBe('option2');
+      set_value(id, 'option100');
+      expect(get_value(id)).toBe('option2');
     });
 
     it("getState() works", function() {
@@ -718,10 +672,6 @@ describe("Input Bindings", function() {
     var id = 'in_checkboxgroup';
     var binding_name = 'checkboxGroupInput'; // Name of the input binding in the registry
 
-    // Some convenience objects
-    var $obj;
-    var input_binding;
-
     beforeEach(function(){
       var htmlstring =
         '<div id="' + id + '" class="control-group shiny-input-checkboxgroup">\
@@ -741,9 +691,6 @@ describe("Input Bindings", function() {
       el.html(htmlstring);
 
       Shiny.bindAll();
-
-      $obj          = select_input_object(id);
-      input_binding = get_input_binding_name(binding_name);
     });
 
     afterEach(function(){
@@ -756,31 +703,31 @@ describe("Input Bindings", function() {
 
     it("getValue() works", function() {
       // Should return an array of values
-      expect(input_binding.getValue($obj[0])).toEqual(['option1']);
+      expect(get_value(id)).toEqual(['option1']);
     });
 
     it("setValue() works", function() {
       // Accept single value
-      input_binding.setValue($obj[0], 'option2');
-      expect(input_binding.getValue($obj[0])).toEqual(['option2']);
+      set_value(id, 'option2');
+      expect(get_value(id)).toEqual(['option2']);
 
       // Accept array of values
-      input_binding.setValue($obj[0], ['option1', 'option2']);
-      expect(input_binding.getValue($obj[0])).toEqual(['option1', 'option2']);
+      set_value(id, ['option1', 'option2']);
+      expect(get_value(id)).toEqual(['option1', 'option2']);
 
-      input_binding.setValue($obj[0], ['option2']);
-      expect(input_binding.getValue($obj[0])).toEqual(['option2']);
+      set_value(id, ['option2']);
+      expect(get_value(id)).toEqual(['option2']);
 
       // Accept empty array of values
-      input_binding.setValue($obj[0], [ ]);
-      expect(input_binding.getValue($obj[0])).toEqual([ ]);
+      set_value(id, [ ]);
+      expect(get_value(id)).toEqual([ ]);
 
       // Setting to nonexistent option should have no effect
-      input_binding.setValue($obj[0], 'option100');
-      expect(input_binding.getValue($obj[0])).toEqual([ ]);
+      set_value(id, 'option100');
+      expect(get_value(id)).toEqual([ ]);
 
-      input_binding.setValue($obj[0], ['option100', 'option2']);
-      expect(input_binding.getValue($obj[0])).toEqual(['option2']);
+      set_value(id, ['option100', 'option2']);
+      expect(get_value(id)).toEqual(['option2']);
     });
 
     it("getState() works", function() {

@@ -46,3 +46,4 @@ Collate:
     'bootstrap.R'
     'run-url.R'
     'imageutils.R'
+    'update-input.R'

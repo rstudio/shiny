@@ -311,9 +311,15 @@ describe("Input Bindings", function() {
     var input_binding;
 
     beforeEach(function(){
-      var el = $('<input id="' + id + '" type="slider" name="in_slider" value="20" class="jslider" data-from="5" data-to="40" data-step="1" data-skin="plastic" data-round="false" data-locale="us" data-format="#,##0.#####" data-smooth="false"/>').prependTo('body');
-      // Wrap the input object in a div so we can select and remove it later
-      el.wrap('<div id="input_binding_test">');
+      var htmlstring =
+        '<input id="' + id + '" type="slider" name="' + id + '" value="20"\
+            class="jslider" data-from="5" data-to="40" data-step="1"\
+            data-skin="plastic" data-round="false" data-locale="us"\
+            data-format="#,##0.#####" data-smooth="false"/>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
       Shiny.bindAll();
 
       $obj          = select_input_object(id);
@@ -336,7 +342,7 @@ describe("Input Bindings", function() {
       input_binding.setValue($obj[0], 5);
       expect(input_binding.getValue($obj[0])).toBe(5);
 
-      // getValue should coerce to number
+      // setValue should coerce to number
       input_binding.setValue($obj[0], '6');
       expect(input_binding.getValue($obj[0])).toBe(6);
 
@@ -380,6 +386,96 @@ describe("Input Bindings", function() {
       // Empty message has no effect
       receive_message(id, { });
       expect(get_value(id)).toBe(8);
+
+      // Setting other values isn't implemented yet
+    });
+  });
+
+
+  // ===========================================================================
+  describe("sliderInputBinding with range (two values)", function() {
+    var id  = 'in_slider';
+    var binding_name = 'sliderInput'; // Name of the input binding in the registry
+
+    // Some convenience objects
+    var $obj;
+    var input_binding;
+
+    beforeEach(function(){
+      var htmlstring =
+         '<input id="' + id + '" type="slider" name="' + id + '" value="10;30"\
+            class="jslider" data-from="5" data-to="40" data-step="1"\
+            data-skin="plastic" data-round="false" data-locale="us"\
+            data-format="#,##0.#####" data-smooth="false"/>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
+      Shiny.bindAll();
+
+      $obj          = select_input_object(id);
+      input_binding = get_input_binding_name(binding_name);
+    });
+
+    afterEach(function(){
+      Shiny.unbindAll();
+      $('#input_binding_test').remove();
+    });
+
+    it("getValue() works", function() {
+      expect(get_value(id)).toEqual([10, 30]);
+    });
+
+    it("setValue() works", function() {
+      input_binding.setValue($obj[0], [15, 25]);
+      expect(get_value(id)).toEqual([15, 25]);
+
+      // setValue should coerce to number
+      input_binding.setValue($obj[0], ['16', '26']);
+      expect(get_value(id)).toEqual([16, 26]);
+
+      // Min and max in wrong order: Behavior not defined, so don't run test
+      // input_binding.setValue($obj[0], [25, 15]);
+      // expect(get_value(id)).toEqual([25, 15]);
+
+      // Below min and above max: should go to min and max
+      input_binding.setValue($obj[0], [0, 100]);
+      expect(get_value(id)).toEqual([5, 40]);
+
+      // Set single value: only changes lower
+      input_binding.setValue($obj[0], 15);
+      expect(get_value(id)).toEqual([15, 40]);
+
+      // Pass null: no effect on value when null
+      input_binding.setValue($obj[0], [null, 25]);
+      expect(get_value(id)).toEqual([15, 25]);
+      input_binding.setValue($obj[0], [10, null]);
+      expect(get_value(id)).toEqual([10, 25]);
+    });
+
+    it("getState() works", function() {
+      expect(get_state(id)).toEqual({
+        value:[10, 30], min:5, max:40, step:1, round:false,
+        format:"#,##0.#####", locale:"us"
+      });
+    });
+
+    it("receiveMessage() works", function() {
+      // Set value
+      // getValue() and getState().value should be the same
+      receive_message(id, { value:[6, 20] });
+      expect(get_value(id)).toEqual([6, 20]);
+      expect(get_state(id).value).toEqual([6, 20]);
+
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_state(id).value).toEqual([6, 20]);
+
+      // Pass null: no effect on value when null
+      receive_message(id, { value:[null, 25] });
+      expect(get_state(id).value).toEqual([6, 25]);
+      receive_message(id, { value:[10, null] });
+      expect(get_state(id).value).toEqual([10, 25]);
 
       // Setting other values isn't implemented yet
     });

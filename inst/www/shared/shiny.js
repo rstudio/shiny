@@ -1117,7 +1117,11 @@
       }
     },
     setValue: function(el, value) {
-      $(el).slider("value", value);
+      if (value instanceof Array) {
+        $(el).slider("value", value[0], value[1]);
+      } else {
+        $(el).slider("value", value);
+      }
     },
     subscribe: function(el, callback) {
       $(el).on('change.inputBinding', function(event) {

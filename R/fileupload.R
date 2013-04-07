@@ -35,6 +35,11 @@ FileUploadOperation <- setRefClass(
     initialize = function(parent, id, dir, fileInfos) {
       .parent <<- parent
       .id <<- id
+      .files <<- data.frame(name=character(),
+                            size=numeric(),
+                            type=character(),
+                            datapath=character(),
+                            stringsAsFactors=FALSE)
       .dir <<- dir
       .pendingFileInfos <<- fileInfos
     },
@@ -46,11 +51,11 @@ FileUploadOperation <- setRefClass(
       .currentFileInfo <<- file
       .pendingFileInfos <<- tail(.pendingFileInfos, -1)
 
-      filename <- file.path(.dir, as.character(length(.files)))
+      filename <- file.path(.dir, as.character(length(.files$name)))
       row <- data.frame(name=file$name, size=file$size, type=file$type,
                         datapath=filename, stringsAsFactors=FALSE)
       
-      if (length(.files) == 0)
+      if (length(.files$name) == 0)
         .files <<- row
       else
         .files <<- rbind(.files, row)

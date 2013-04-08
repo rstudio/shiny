@@ -1,6 +1,6 @@
 #' @export
-updateTextInput <- function(session, inputId, value = NULL) {
-  message <- list(value=value)
+updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
+  message <- list(label=label, value=value)
   # Drop nulls
   message <- message[!vapply(message, is.null, FUN.VALUE=logical(1))]
   
@@ -17,10 +17,10 @@ updateSliderInput <- updateTextInput
 updateTabsetInput <- updateTextInput
 
 #' @export
-updateNumberInput <- function(session, inputId, value = NULL, min = NULL,
-    max = NULL, step = NULL) {
+updateNumberInput <- function(session, inputId, label = NULL, value = NULL,
+    min = NULL, max = NULL, step = NULL) {
 
-  message <- list(value=value, min=min, max=max, step=step)
+  message <- list(label=label, value=value, min=min, max=max, step=step)
   # Drop nulls
   message <- message[!vapply(message, is.null, FUN.VALUE=logical(1))]
   
@@ -28,8 +28,9 @@ updateNumberInput <- function(session, inputId, value = NULL, min = NULL,
 }
 
 #' @export
-updateSelectInput <- function(session, inputId, value = NULL, options = NULL) {
-  message <- list(value=value, options=options)
+updateSelectInput <- function(session, inputId, label = NULL, value = NULL,
+    options = NULL) {
+  message <- list(label=label, value=value, options=options)
   # Drop nulls
   message <- message[!vapply(message, is.null, FUN.VALUE=logical(1))]
 

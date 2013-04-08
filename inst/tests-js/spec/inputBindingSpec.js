@@ -121,9 +121,13 @@ describe("Input Bindings", function() {
     var binding_name = 'textInput'; // Name of the input binding in the registry
 
     beforeEach(function(){
-      var el = $('<input id="' + id +'" type="text" value="starting value"/>').prependTo('body');
-      // Wrap the input object in a div so we can select and remove it later
-      el.wrap('<div id="input_binding_test">');
+      var htmlstring =
+        '<label for="' + id + '">Text input:</label>\
+        <input id="' + id + '" type="text" value="starting value"/>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
       Shiny.bindAll();
     });
 
@@ -147,10 +151,10 @@ describe("Input Bindings", function() {
     });
 
     it("getState() works", function() {
-      expect(get_state(id)).toEqual({ value:"starting value" });
+      expect(get_state(id)).toEqual({ label : 'Text input:', value:"starting value" });
 
       receive_message(id, { value:"foo" });
-      expect(get_state(id)).toEqual({ value:"foo" });
+      expect(get_state(id)).toEqual({ label : 'Text input:', value:"foo" });
     });
 
     it("receiveMessage() works", function() {
@@ -160,6 +164,10 @@ describe("Input Bindings", function() {
       // Set and check the value again
       receive_message(id, { value:"bar" });
       expect(get_value(id)).toBe("bar");
+
+      // Set label
+      receive_message(id, { label: "new label", value:"foo" });
+      expect(get_state(id)).toEqual({ label: "new label", value:"foo" });
     });
 
   });
@@ -170,9 +178,13 @@ describe("Input Bindings", function() {
     var binding_name = 'numberInput'; // Name of the input binding in the registry
 
     beforeEach(function(){
-      var el = $('<input id="' + id +'" type="number" value="8" min="4" max="10" step="0.5"/>').prependTo('body');
-      // Wrap the input object in a div so we can select and remove it later
-      el.wrap('<div id="input_binding_test">');
+      var htmlstring =
+        '<label for="' + id + '">Numeric input:</label>\
+        <input id="' + id + '" type="number" value="8" min="4" max="10" step="0.5"/>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
       Shiny.bindAll();
     });
 
@@ -203,10 +215,12 @@ describe("Input Bindings", function() {
     });
 
     it("getState() works", function() {
-      expect(get_state(id)).toEqual({ value:8, min:4, max:10, step:0.5 });
+      expect(get_state(id)).toEqual(
+        { label:'Numeric input:', value:8, min:4, max:10, step:0.5 });
 
       receive_message(id, { min:5, value:5, max:5, step:0.2 });
-      expect(get_state(id)).toEqual({ min:5, value:5, max:5, step:0.2 });
+      expect(get_state(id)).toEqual(
+        { label:'Numeric input:', min:5, value:5, max:5, step:0.2 });
     });
 
     it("receiveMessage() works", function() {
@@ -222,6 +236,12 @@ describe("Input Bindings", function() {
 
       receive_message(id, { min:5, value:5, max:5, step:0.2 });
       expect(get_value(id)).toBe(5);
+
+      // Set label
+      receive_message(id, { label:'new label', value:5 });
+      expect(get_state(id)).toEqual(
+        { label:'new label', min:5, value:5, max:5, step:0.2 });
+
     });
 
   });
@@ -233,9 +253,15 @@ describe("Input Bindings", function() {
     var binding_name = 'checkboxInput'; // Name of the input binding in the registry
 
     beforeEach(function(){
-      var el = $('<input id="' + id +'" type="checkbox"/>').prependTo('body');
-      // Wrap the input object in a div so we can select and remove it later
-      el.wrap('<div id="input_binding_test">');
+      var htmlstring =
+        '<label class="checkbox" for="' + id + '">\
+          <input id="' + id + '" type="checkbox"/>\
+          <span>Checkbox input:</span>\
+        </label>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
       Shiny.bindAll();
     });
 
@@ -262,23 +288,27 @@ describe("Input Bindings", function() {
     });
 
     it("getState() works", function() {
-      expect(get_state(id)).toEqual({ value:false });
+      expect(get_state(id)).toEqual({ label:'Checkbox input:', value:false });
 
       receive_message(id, { value:true });
-      expect(get_state(id)).toEqual({ value:true });
+      expect(get_state(id)).toEqual({ label:'Checkbox input:', value:true });
     });
 
     it("receiveMessage() works", function() {
       // Should use 'value', and ignore 'checked'
       receive_message(id, { value:true, checked:false });
-      expect(get_state(id)).toEqual({ value:true });
+      expect(get_state(id)).toEqual({ label:'Checkbox input:', value:true });
 
       receive_message(id, { checked:false });
-      expect(get_state(id)).toEqual({ value:true });
+      expect(get_state(id)).toEqual({ label:'Checkbox input:', value:true });
 
       // Empty message has no effect
       receive_message(id, { });
-      expect(get_state(id)).toEqual({ value:true });
+      expect(get_state(id)).toEqual({ label:'Checkbox input:', value:true });
+
+      // Set label
+      receive_message(id, { label:'new label' });
+      expect(get_state(id)).toEqual({ label:'new label', value:true });
     });
   });
 
@@ -291,10 +321,13 @@ describe("Input Bindings", function() {
 
     beforeEach(function(){
       var htmlstring =
-        '<input id="' + id + '" type="slider" name="' + id + '" value="20"\
+        '<div>\
+          <label class="control-label" for="' + id + '">Slider input:</label>\
+          <input id="' + id + '" type="slider" name="' + id + '" value="20"\
             class="jslider" data-from="5" data-to="40" data-step="1"\
             data-skin="plastic" data-round="false" data-locale="us"\
-            data-format="#,##0.#####" data-smooth="false"/>';
+            data-format="#,##0.#####" data-smooth="false"/>\
+        </div>';
 
       // Wrapper div for the htmlstring
       var el = $('<div id="input_binding_test">').prependTo('body');
@@ -337,6 +370,7 @@ describe("Input Bindings", function() {
 
     it("getState() works", function() {
       expect(get_state(id)).toEqual({
+        label: 'Slider input:',
         value:20, min:5, max:40, step:1, round:false, 
         format:"#,##0.#####", locale:"us"
       });
@@ -353,15 +387,21 @@ describe("Input Bindings", function() {
       // getValue() and getState().value should be the same
       receive_message(id, { value:6 });
       expect(get_value(id)).toBe(6);
-      expect(get_state(id).value).toBe(6);
+      expect(get_state(id).value).toEqual(6);
+      expect(get_state(id).label).toEqual('Slider input:');
 
       // Sould round value to nearest step
       receive_message(id, { value:7.8 });
-      expect(get_value(id)).toBe(8);
+      expect(get_state(id).value).toEqual(8);
 
       // Empty message has no effect
       receive_message(id, { });
-      expect(get_value(id)).toBe(8);
+      expect(get_state(id).value).toEqual(8);
+
+      // Set label
+      receive_message(id, { label:'new label' });
+      expect(get_state(id).value).toEqual(8);
+      expect(get_state(id).label).toEqual('new label');
 
       // Setting other values isn't implemented yet
     });
@@ -374,10 +414,13 @@ describe("Input Bindings", function() {
 
     beforeEach(function(){
       var htmlstring =
-         '<input id="' + id + '" type="slider" name="' + id + '" value="10;30"\
+        '<div>\
+          <label class="control-label" for="' + id + '">Slider input:</label>\
+          <input id="' + id + '" type="slider" name="' + id + '" value="10;30"\
             class="jslider" data-from="5" data-to="40" data-step="1"\
             data-skin="plastic" data-round="false" data-locale="us"\
-            data-format="#,##0.#####" data-smooth="false"/>';
+            data-format="#,##0.#####" data-smooth="false"/>\
+        </div>';
 
       // Wrapper div for the htmlstring
       var el = $('<div id="input_binding_test">').prependTo('body');
@@ -423,6 +466,7 @@ describe("Input Bindings", function() {
 
     it("getState() works", function() {
       expect(get_state(id)).toEqual({
+        label: 'Slider input:',
         value:[10, 30], min:5, max:40, step:1, round:false,
         format:"#,##0.#####", locale:"us"
       });
@@ -434,16 +478,23 @@ describe("Input Bindings", function() {
       receive_message(id, { value:[6, 20] });
       expect(get_value(id)).toEqual([6, 20]);
       expect(get_state(id).value).toEqual([6, 20]);
+      expect(get_state(id).label).toEqual('Slider input:');
 
       // Empty message has no effect
       receive_message(id, { });
       expect(get_state(id).value).toEqual([6, 20]);
+      expect(get_state(id).label).toEqual('Slider input:');
 
       // Pass null: no effect on value when null
       receive_message(id, { value:[null, 25] });
       expect(get_state(id).value).toEqual([6, 25]);
       receive_message(id, { value:[10, null] });
       expect(get_state(id).value).toEqual([10, 25]);
+
+      // Set label
+      receive_message(id, { label:'new label' });
+      expect(get_state(id).value).toEqual([10, 25]);
+      expect(get_state(id).label).toEqual('new label');
 
       // Setting other values isn't implemented yet
     });
@@ -457,7 +508,8 @@ describe("Input Bindings", function() {
 
     beforeEach(function(){
       var htmlstring =
-        '<select id="' + id + '">\
+        '<label class="control-label" for="' + id + '">Select input:</label>\
+        <select id="' + id + '">\
           <option value="option1" selected="selected">option1 label</option>\
           <option value="option2">option2 label</option>\
         </select>';
@@ -493,6 +545,7 @@ describe("Input Bindings", function() {
 
     it("getState() works", function() {
       expect(get_state(id)).toEqual({
+        label: 'Select input:',
         value: 'option1',
         options: [
           { value: 'option1', label: 'option1 label', selected: true },
@@ -503,6 +556,7 @@ describe("Input Bindings", function() {
 
     it("receiveMessage() works", function() {
       var state_complete = {
+        label: 'Select input:',
         value: 'option4',
         options: [
           { value: 'option3', label: 'option3 label', selected: false },
@@ -525,6 +579,7 @@ describe("Input Bindings", function() {
         ]
       };
       var state_novalue_expected = {
+        label: 'Select input:',
         value: 'option6',
         options: state_novalue.options
       };
@@ -542,6 +597,7 @@ describe("Input Bindings", function() {
         ]
       };
       var state_noselected_expected = {
+        label: 'Select input:',
         value: 'option7',
         options: [
           { value: 'option7', label: 'option7 label', selected: true },
@@ -551,6 +607,18 @@ describe("Input Bindings", function() {
       receive_message(id, state_noselected);
       expect(get_value(id)).toBe('option7');
       expect(get_state(id)).toEqual(state_noselected_expected);
+
+      // Set label
+      var state_newlabel_complete = {
+        label: 'new label',
+        value: 'option9',
+        options: [
+          { value: 'option9',  label: 'option9 label',  selected: true },
+          { value: 'option10', label: 'option10 label', selected: false }
+        ]
+      };
+      receive_message(id, state_newlabel_complete);
+      expect(get_state(id)).toEqual(state_newlabel_complete);
     });
   });
 
@@ -563,7 +631,7 @@ describe("Input Bindings", function() {
     beforeEach(function(){
       var htmlstring =
         '<div id="' + id + '" class="control-group shiny-input-radiogroup">\
-          <label class="control-label">Radio buttons:</label>\
+          <label class="control-label" for="' + id + '">Radio buttons:</label>\
           <label class="radio">\
             <input type="radio" name="' + id + '" id="' + id + '1" value="option1" checked="checked"/>\
             <span>option1 label</span>\
@@ -604,6 +672,7 @@ describe("Input Bindings", function() {
 
     it("getState() works", function() {
       expect(get_state(id)).toEqual({
+        label: 'Radio buttons:',
         value: 'option1',
         options: [
           { value: 'option1', label: 'option1 label', checked: true },
@@ -614,6 +683,7 @@ describe("Input Bindings", function() {
 
     it("receiveMessage() works", function() {
       var state_complete = {
+        label: 'Radio buttons:',
         value: 'option4',
         options: [
           { value: 'option3', label: 'option3 label', checked: false },
@@ -636,6 +706,7 @@ describe("Input Bindings", function() {
         ]
       };
       var state_novalue_expected = {
+        label: 'Radio buttons:',
         value: 'option6',
         options: state_novalue.options
       };
@@ -653,6 +724,7 @@ describe("Input Bindings", function() {
         ]
       };
       var state_nochecked_expected = {
+        label: 'Radio buttons:',
         value: 'option7',
         options: [
           { value: 'option7', label: 'option7 label', checked: true },
@@ -662,6 +734,18 @@ describe("Input Bindings", function() {
       receive_message(id, state_nochecked);
       expect(get_value(id)).toBe('option7');
       expect(get_state(id)).toEqual(state_nochecked_expected);
+
+      // Set label
+      var state_newlabel_complete = {
+        label: 'new label',
+        value: 'option9',
+        options: [
+          { value: 'option9',  label: 'option9 label',  checked: true },
+          { value: 'option10', label: 'option10 label', checked: false }
+        ]
+      };
+      receive_message(id, state_newlabel_complete);
+      expect(get_state(id)).toEqual(state_newlabel_complete);
     });
   });
 
@@ -675,7 +759,7 @@ describe("Input Bindings", function() {
     beforeEach(function(){
       var htmlstring =
         '<div id="' + id + '" class="control-group shiny-input-checkboxgroup">\
-          <label class="control-label">Checkbox group:</label>\
+          <label class="control-label" for="in_checkboxgroup">Checkbox group:</label>\
           <label class="checkbox">\
             <input type="checkbox" name="' + id + '" id="' + id + '1" value="option1" checked="checked"/>\
             <span>option1 label</span>\

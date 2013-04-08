@@ -997,10 +997,16 @@
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value)
 
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+
       $(el).trigger('change');
     },
     getState: function(el) {
-      return { value: el.value };
+      return {
+        label: $(el).parent().find('label[for=' + el.id + ']').text(),
+        value: el.value
+      };
     },
     getRatePolicy: function() {
       return {
@@ -1042,28 +1048,19 @@
       return "number"
     },
     receiveMessage: function(el, data) {
-      // Get each value if present in data; otherwise get it from el
-      var value = data.hasOwnProperty('value') ? data.value : el.value;
-      var min   = data.hasOwnProperty('min')   ? data.min   : el.min;
-      var max   = data.hasOwnProperty('max')   ? data.max   : el.max;
-      var step  = data.hasOwnProperty('step')  ? data.step  : el.step;
+      if (data.hasOwnProperty('value'))  el.value = data.value;
+      if (data.hasOwnProperty('min'))    el.min   = data.min;
+      if (data.hasOwnProperty('max'))    el.max   = data.max;
+      if (data.hasOwnProperty('step'))   el.step  = data.step;
 
-      // Make sure we have actual numbers so we can compare them
-      value = Number(value);
-      min   = Number(min);
-      max   = Number(max);
-      step  = Number(step);
-
-      // Assign values
-      el.value = value;
-      el.min   = min;
-      el.max   = max;
-      el.step  = step;
+      if (data.hasOwnProperty('label'))
+        label: $(el).parent().find('label[for=' + el.id + ']').text(data.label);
 
       $(el).trigger('change');
     },
     getState: function(el) {
-      return { value: this.getValue(el),
+      return { label: $(el).parent().find('label[for=' + el.id + ']').text(),
+               value: this.getValue(el),
                min:   Number(el.min),
                max:   Number(el.max),
                step:  Number(el.step) };
@@ -1084,11 +1081,17 @@
       el.checked = value;
     },
     getState: function(el) {
-      return { value: el.checked }
+      return {
+        label: $(el).parent().find('span').text(),
+        value: el.checked
+      };
     },
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
         el.checked = data.value;
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('span').text(data.label);
 
       $(el).trigger('change');
     }
@@ -1134,6 +1137,10 @@
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value);
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+
       // jslider doesn't support setting other properties
 
       $(el).trigger('change');
@@ -1145,9 +1152,11 @@
       };
     },
     getState: function(el) {
-      var settings = $(el).slider().settings;
+      var $el = $(el);
+      var settings = $el.slider().settings;
 
-      return { value:  this.getValue(el),
+      return { label: $el.parent().find('label[for=' + el.id + ']').text(),
+               value:  this.getValue(el),
                min:    Number(settings.from),
                max:    Number(settings.to),
                step:   Number(settings.step),
@@ -1184,9 +1193,11 @@
                        selected: el[i].selected };
       }
 
-      return { value:    this.getValue(el),
-               options:  options
-             };
+      return {
+        label: $(el).parent().find('label[for=' + el.id + ']').text(),
+        value:    this.getValue(el),               
+        options:  options
+      };
     },
     receiveMessage: function(el, data) {
       $el = $(el);
@@ -1214,6 +1225,9 @@
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value)
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
 
       $(el).trigger('change');
     },
@@ -1253,9 +1267,11 @@
                        checked: $objs[i].checked };
       }
 
-      return { value:    this.getValue(el),
-               options:  options
-             };
+      return {
+        label:    $(el).parent().find('label[for=' + el.id + ']').text(),
+        value:    this.getValue(el),
+        options:  options
+      };
     },
     receiveMessage: function(el, data) {
       $el = $(el);
@@ -1289,6 +1305,9 @@
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value)
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
 
       $(el).trigger('change');
     },
@@ -1380,7 +1399,7 @@
                        checked: $objs[i].checked };
       }
 
-      return { label:    $(el).find('.control-label').text(),
+      return { label:    $(el).find('label[for=' + el.id + ']').text(),
                value:    this.getValue(el),
                options:  options
              };
@@ -1419,7 +1438,7 @@
         this.setValue(el, data.value)
 
       if (data.hasOwnProperty('label'))
-        $el.find('.control-label').text(data.label)
+        $el.find('label[for=' + el.id + ']').text(data.label)
 
       $(el).trigger('change');
     },

@@ -251,7 +251,7 @@ conditionalPanel <- function(condition, ...) {
 #' @export
 textInput <- function(inputId, label, value = "") {
   tagList(
-    tags$label(label),
+    tags$label(label, `for` = inputId),
     tags$input(id = inputId, type="text", value=value)
   )
 }
@@ -284,7 +284,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
     inputTag$attribs$step = step
   
   tagList(
-    tags$label(label),
+    tags$label(label, `for` = inputId),
     inputTag
   )
 }
@@ -359,7 +359,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   inputTag <- tags$input(id = inputId, type="checkbox")
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
-  tags$label(class = "checkbox", inputTag, label)
+  tags$label(class = "checkbox", `for` = inputId, inputTag, tags$span(label))
 }
 
 
@@ -550,7 +550,7 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
   
   tags$div(id = inputId,
            class = 'control-group shiny-input-radiogroup',
-           tags$label(class = "control-label", label),
+           tags$label(class = "control-label", `for` = inputId, label),
            inputTags)
 }
 

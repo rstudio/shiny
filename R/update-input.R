@@ -1,10 +1,7 @@
 #' @export
 updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
-  message <- list(label=label, value=value)
-  # Drop nulls
-  message <- message[!vapply(message, is.null, FUN.VALUE=logical(1))]
-  
-  sendInputMessage(session, inputId, message)
+  message <- dropNulls(list(label=label, value=value))
+  sendInputMessage(session, inputId, message = message)
 }
 
 #' @export
@@ -20,21 +17,15 @@ updateTabsetInput <- updateTextInput
 updateNumberInput <- function(session, inputId, label = NULL, value = NULL,
     min = NULL, max = NULL, step = NULL) {
 
-  message <- list(label=label, value=value, min=min, max=max, step=step)
-  # Drop nulls
-  message <- message[!vapply(message, is.null, FUN.VALUE=logical(1))]
-  
-  sendInputMessage(session, inputId, message)
+  message <- dropNulls(list(label=label, value=value, min=min, max=max, step=step))
+  sendInputMessage(session, inputId, message = message)
 }
 
 #' @export
 updateSelectInput <- function(session, inputId, label = NULL, value = NULL,
     options = NULL) {
-  message <- list(label=label, value=value, options=options)
-  # Drop nulls
-  message <- message[!vapply(message, is.null, FUN.VALUE=logical(1))]
-
-  sendInputMessage(session, inputId, message)
+  message <- dropNulls(list(label=label, value=value, options=options))
+  sendInputMessage(session, inputId, message = message)
 }
 
 #' @export
@@ -57,8 +48,9 @@ updateCheckboxGroupInput <- function(session, inputId, label, choices = NULL,
     options[[i]] <- opt
   }
 
-  sendInputMessage(session, inputId,
-    message = list(label = label, options = options))
+  message <- dropNulls(list(label = label, options = options))
+
+  sendInputMessage(session, inputId, message = message)
 }
 
 

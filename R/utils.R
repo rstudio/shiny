@@ -55,6 +55,11 @@ repeatable <- function(rngfunc, seed = runif(1, 0, .Machine$integer.max)) {
   paste(x, y, sep='')
 }
 
+# Given a vector or list, drop all the NULL items in it
+dropNulls <- function(x) {
+  x[!vapply(x, is.null, FUN.VALUE=logical(1))]
+}
+
 knownContentTypes <- Map$new()
 knownContentTypes$mset(
   html='text/html; charset=UTF-8',

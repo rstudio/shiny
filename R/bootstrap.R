@@ -632,11 +632,13 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   }
   
   # build slider
-  tagList(
-    controlLabel(inputId, labelText),  
-    slider(inputId, min=min, max=max, value=value, step=step, round=round,
-           locale=locale, format=format, ticks=ticks,
-           animate=animate)
+  tags$div(
+    tagList(
+      controlLabel(inputId, labelText),
+      slider(inputId, min=min, max=max, value=value, step=step, round=round,
+             locale=locale, format=format, ticks=ticks,
+             animate=animate)
+    )
   )
 }
 

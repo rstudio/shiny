@@ -390,7 +390,6 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   choices <- choicesWithNames(choices)
   
   checkboxes <- list()
-  # for (choiceName in names(choices)) {
   for (i in seq_along(choices)) {
     choiceName <- names(choices)[i]
 
@@ -436,6 +435,8 @@ controlLabel <- function(controlName, label) {
   tags$label(class = "control-label", `for` = controlName, label)
 }
 
+# Takes a vector or list, and adds names (same as the value) to any entries
+# without names.
 choicesWithNames <- function(choices) {
   # get choice names
   choiceNames <- names(choices)

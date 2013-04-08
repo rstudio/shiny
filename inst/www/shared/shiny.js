@@ -1380,7 +1380,8 @@
                        checked: $objs[i].checked };
       }
 
-      return { value:    this.getValue(el),
+      return { label:    $(el).find('.control-label').text(),
+               value:    this.getValue(el),
                options:  options
              };
     },
@@ -1416,6 +1417,9 @@
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value)
+
+      if (data.hasOwnProperty('label'))
+        $el.find('.control-label').text(data.label)
 
       $(el).trigger('change');
     },

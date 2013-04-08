@@ -732,6 +732,7 @@ describe("Input Bindings", function() {
 
     it("getState() works", function() {
       expect(get_state(id)).toEqual({
+        label: 'Checkbox group:',
         value: ['option1'],
         options: [
           { value: 'option1', label: 'option1 label', checked: true },
@@ -742,6 +743,7 @@ describe("Input Bindings", function() {
 
     it("receiveMessage() works", function() {
       var state_complete = {
+        label: 'Checkbox group:',
         value: ['option4'],
         options: [
           { value: 'option3', label: 'option3 label', checked: false },
@@ -764,6 +766,7 @@ describe("Input Bindings", function() {
         ]
       };
       var state_novalue_expected = {
+        label: 'Checkbox group:',
         value: ['option5', 'option6'],
         options: state_novalue.options
       };
@@ -781,6 +784,7 @@ describe("Input Bindings", function() {
         ]
       };
       var state_nochecked_expected = {
+        label: 'Checkbox group:',
         value: ['option7'],
         options: [
           { value: 'option7', label: 'option7 label', checked: true },
@@ -790,6 +794,19 @@ describe("Input Bindings", function() {
       receive_message(id, state_nochecked);
       expect(get_value(id)).toEqual(['option7']);
       expect(get_state(id)).toEqual(state_nochecked_expected);
+
+      // Set label
+      var state_newlabel_complete = {
+        label: 'Checkbox group new label:',
+        value: ['option4'],
+        options: [
+          { value: 'option3', label: 'option3 label', checked: false },
+          { value: 'option4', label: 'option4 label', checked: true }
+        ]
+      };
+      receive_message(id, state_newlabel_complete);
+      expect(get_state(id)).toEqual(state_newlabel_complete);
+
     });
   });
 

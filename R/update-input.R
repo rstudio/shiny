@@ -40,7 +40,25 @@ updateSelectInput <- function(session, inputId, value = NULL, options = NULL) {
 updateRadioInput <- updateSelectInput
 
 #' @export
-updateCheckboxGroupInput <- updateRadioInput
+updateCheckboxGroupInput <- function(session, inputId, label, choices = NULL,
+    selected = NULL) {
+
+  choices <- choicesWithNames(choices)
+  options <- list()
+
+  for (i in seq_along(choices)) {
+    choiceName <- names(choices)[i]
+
+    opt <- list(value = choices[[i]],
+                label = names(choices)[i],
+                checked = choiceName %in% selected)
+
+    options[[i]] <- opt
+  }
+
+  sendInputMessage(session, inputId,
+    message = list(label = label, options = options))
+}
 
 
 sendInputMessage <- function(session, inputId, message) {

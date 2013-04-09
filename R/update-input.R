@@ -1,29 +1,201 @@
+#' Change the value of a text input on the client
+#'
+#' @template update-input
+#' @param value The value to set for the input object.
+#'
+#' @seealso \code{\link{textInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     # This will change the value of input$inText, based on x
+#'     updateTextInput(session, "inText", value = paste("New text", x))
+#'
+#'     # Can also set the label, this time for input$inText2
+#'     updateTextInput(session, "inText2",
+#'       label = paste("New label", x),
+#'       value = paste("New text", x))
+#'   })
+#' })
+#' }
 #' @export
 updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
   message <- dropNulls(list(label=label, value=value))
   sendInputMessage(session, inputId, message = message)
 }
 
+
+#' Change the value of a checkbox input on the client
+#'
+#' @template update-input
+#' @param value The value to set for the input object.
+#'
+#' @seealso \code{\link{checkboxInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # TRUE if input$controller is even, FALSE otherwise.
+#'     x_even <- input$controller %% 2 == 0
+#'
+#'     updateCheckboxInput(session, "inCheckbox", value = x_even)
+#'   })
+#' })
+#' }
 #' @export
 updateCheckboxInput <- updateTextInput
 
+
+#' Change the value of a slider input on the client
+#'
+#' @template update-input
+#' @param value The value to set for the input object.
+#'
+#' @seealso \code{\link{sliderInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     # Similar to number and text. only label and value can be set for slider
+#'     updateSliderInput(session, "inSlider",
+#'       label = paste("Slider label", x),
+#'       value = x)
+#'
+#'     # For sliders that pick out a range, pass in a vector of 2 values.
+#'     updateSliderInput(session, "inSlider2", value = c(x-1, x+1))
+#'
+#'     # An NA means to not change that value (the low or high one)
+#'     updateSliderInput(session, "inSlider3", value = c(NA, x+2))
+#'   })
+#' })
+#' }
 #' @export
 updateSliderInput <- updateTextInput
 
-#' @export
-updateTabsetInput <- updateTextInput
 
+#' Change the selected tab on the client
+#'
+#' @param session The \code{session} object passed to function given to
+#'   \code{shinyServer}.
+#' @param inputId The id of the tabset panel object.
+#' @param selected The name of the tab to make active.
+#'
+#' @seealso \code{\link{tabsetPanel}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # TRUE if input$controller is even, FALSE otherwise.
+#'     x_even <- input$controller %% 2 == 0
+#'
+#'     # Change the selected tab.
+#'     # Note that the tabsetPanel must have been created with an 'id' argument
+#'     if (x_even) {
+#'       updateTabsetPanel(session, "inTabset", selected = "panel2")
+#'     } else {
+#'       updateTabsetPanel(session, "inTabset", selected = "panel1")
+#'     }
+#'   })
+#' })
+#' }
 #' @export
-updateNumberInput <- function(session, inputId, label = NULL, value = NULL,
+updateTabsetPanel <- function(session, inputId, selected = NULL) {
+  message <- dropNulls(list(value = selected))
+  sendInputMessage(session, inputId, message = message)
+}
+
+
+#' Change the value of a number input on the client
+#'
+#' @template update-input
+#' @param value The value to set for the input object.
+#' @param min Minimum value.
+#' @param max Maximum value.
+#' @param step Step size.
+#'
+#' @seealso \code{\link{numericInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     updateNumericInput(session, "inNumber", value = x)
+#'
+#'     updateNumericInput(session, "inNumber2",
+#'       label = paste("Number label ", x),
+#'       value = x, min = x-10, max = x+10, step = 5)
+#'   })
+#' })
+#' }
+#' @export
+updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
     min = NULL, max = NULL, step = NULL) {
 
   message <- dropNulls(list(label=label, value=value, min=min, max=max, step=step))
   sendInputMessage(session, inputId, message = message)
 }
 
+
+#' Change the value of a checkbox group input on the client
+#'
+#' @template update-input
+#' @param choices A named vector or named list of options. For each item, the
+#'   name will be used as the label, and the value will be used as the value.
+#' @param selected A vector or list of options which will be selected.
+#'
+#' @seealso \code{\link{checkboxGroupInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     # Create a list of new options, where the name of the items is something
+#'     # like 'option label x 1', and the values are 'option-x-1'.
+#'     cb_options <- list()
+#'     cb_options[[sprintf("option label %d 1", x)]] <- sprintf("option-%d-1", x)
+#'     cb_options[[sprintf("option label %d 2", x)]] <- sprintf("option-%d-2", x)
+#'
+#'     # Change values for input$inCheckboxGroup
+#'     updateCheckboxGroupInput(session, "inCheckboxGroup", choices = cb_options)
+#'
+#'     # Can also set the label and select items
+#'     updateCheckboxGroupInput(session, "inCheckboxGroup2",
+#'       label = paste("checkboxgroup label", x),
+#'       choices = cb_options,
+#'       selected = sprintf("option label %d 2", x)
+#'     )
+#'   })
+#' })
+#' }
 #' @export
-updateCheckboxGroupInput <- function(session, inputId, label, choices = NULL,
-    selected = NULL) {
+updateCheckboxGroupInput <- function(session, inputId, label = NULL,
+  choices = NULL, selected = NULL) {
 
   choices <- choicesWithNames(choices)
   options <- list()
@@ -43,11 +215,84 @@ updateCheckboxGroupInput <- function(session, inputId, label, choices = NULL,
   sendInputMessage(session, inputId, message = message)
 }
 
-#' @export
-updateRadioInput <- updateCheckboxGroupInput
 
+#' Change the value of a radio input on the client
+#'
+#' @template update-input
+#' @param choices A named vector or named list of options. For each item, the
+#'   name will be used as the label, and the value will be used as the value.
+#' @param selected A vector or list of options which will be selected.
+#'
+#' @seealso \code{\link{radioButtons}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     r_options <- list()
+#'     r_options[[sprintf("option label %d 1", x)]] <- sprintf("option-%d-1", x)
+#'     r_options[[sprintf("option label %d 2", x)]] <- sprintf("option-%d-2", x)
+#'
+#'     # Change values for input$inRadio
+#'     updateRadioButtons(session, "inRadio", choices = r_options)
+#'
+#'     # Can also set the label and select an item
+#'     updateRadioButtons(session, "inRadio2",
+#'       label = paste("Radio label", x),
+#'       choices = r_options,
+#'       selected = sprintf("option label %d 2", x)
+#'     )
+#'   })
+#' })
+#' }
 #' @export
-updateSelectInput <- function(session, inputId, label, choices = NULL,
+updateRadioButtons <- updateCheckboxGroupInput
+
+
+#' Change the value of a select input on the client
+#'
+#' @template update-input
+#' @param choices A named vector or named list of options. For each item, the
+#'   name will be used as the label, and the value will be used as the value.
+#' @param selected A vector or list of options which will be selected.
+#'
+#' @seealso \code{\link{selectInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     # Create a list of new options, where the name of the items is something
+#'     # like 'option label x 1', and the values are 'option-x-1'.
+#'     s_options <- list()
+#'     s_options[[sprintf("option label %d 1", x)]] <- sprintf("option-%d-1", x)
+#'     s_options[[sprintf("option label %d 2", x)]] <- sprintf("option-%d-2", x)
+#'
+#'     # Change values for input$inSelect
+#'     updateSelectInput(session, "inSelect", choices = s_options)
+#'
+#'     # Can also set the label and select an item (or more than one if it's a
+#'     # multi-select)
+#'     updateSelectInput(session, "inSelect2",
+#'       label = paste("Select label", x),
+#'       choices = s_options,
+#'       selected = sprintf("option label %d 2", x)
+#'     )
+#'   })
+#' })
+#' }
+#' @export
+updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
     selected = NULL) {
 
   choices <- choicesWithNames(choices)
@@ -67,6 +312,7 @@ updateSelectInput <- function(session, inputId, label, choices = NULL,
 
   sendInputMessage(session, inputId, message = message)
 }
+
 
 
 sendInputMessage <- function(session, inputId, message) {

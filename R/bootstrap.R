@@ -246,6 +246,8 @@ conditionalPanel <- function(condition, ...) {
 #' @param value Initial value
 #' @return A text input control that can be added to a UI definition.
 #' 
+#' @seealso \code{\link{updateTextInput}}
+#'
 #' @examples
 #' textInput("caption", "Caption:", "Data Summary")
 #' @export
@@ -267,6 +269,8 @@ textInput <- function(inputId, label, value = "") {
 #' @param max Maximum allowed value
 #' @param step Interval to use when stepping between min and max
 #' @return A numeric input control that can be added to a UI definition.
+#'
+#' @seealso \code{\link{updateNumericInput}}
 #' 
 #' @examples
 #' numericInput("obs", "Observations:", 10, 
@@ -350,7 +354,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
 #' @param value Initial value (\code{TRUE} or \code{FALSE}).
 #' @return A checkbox control that can be added to a UI definition.
 #' 
-#' @seealso \code{\link{checkboxGroupInput}}
+#' @seealso \code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
 #' 
 #' @examples
 #' checkboxInput("outliers", "Show outliers", FALSE)
@@ -376,7 +380,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #' @param selected Names of items that should be initially selected, if any.
 #' @return A list of HTML elements that can be added to a UI definition.
 #'   
-#' @seealso \code{\link{checkboxInput}}
+#' @seealso \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
 #'   
 #' @examples
 #' checkboxGroupInput("variable", "Variable:",
@@ -467,6 +471,8 @@ choicesWithNames <- function(choices) {
 #' @param multiple Is selection of multiple items allowed?
 #' @return A select list control that can be added to a UI definition.
 #' 
+#' @seealso \code{\link{updateSelectInput}}
+#'
 #' @examples
 #' selectInput("variable", "Variable:",
 #'             c("Cylinders" = "cyl",
@@ -511,6 +517,8 @@ selectInput <- function(inputId,
 #' @param selected Name of initially selected item (if not specified then
 #' defaults to the first item)
 #' @return A set of radio buttons that can be added to a UI definition.
+#'
+#' @seealso \code{\link{updateRadioButtons}}
 #' 
 #' @examples
 #' radioButtons("dist", "Distribution type:",
@@ -599,6 +607,8 @@ submitButton <- function(text = "Apply Changes") {
 #' @param animate \code{TRUE} to show simple animation controls with default 
 #'   settings; \code{FALSE} not to; or a custom settings list, such as those 
 #'   created using \code{\link{animationOptions}}.
+#'
+#' @seealso \code{\link{updateSliderInput}}
 #'   
 #' @details
 #' 
@@ -654,6 +664,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'   that this tab is selected. If omitted and \code{tabsetPanel} has an 
 #'   \code{id}, then the title will be used.
 #' @return A tab that can be passed to \code{\link{tabsetPanel}}
+#'
+#' @seealso \code{\link{tabsetPanel}}
 #'   
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -682,6 +694,8 @@ tabPanel <- function(title, ..., value = NULL) {
 #'   \code{\link{tabPanel}}.
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
+#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
+#'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
 #' # table view of the generated distribution

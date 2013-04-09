@@ -32,7 +32,14 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
     pngfun <- png
   } else if (nchar(system.file(package = "Cairo"))) {
     require(Cairo)
-    pngfun <- CairoPNG
+
+    # Workaround for issue #140: Cairo ignores res and dpi settings. Need to
+    # use regular png function.
+    if (res == 72) {
+      pngfun <- CairoPNG
+    } else {
+      pngfun <- png
+    }
   } else {
     pngfun <- png
   }

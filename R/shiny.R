@@ -54,7 +54,8 @@ ShinySession <- setRefClass(
       .outputs <<- list()
       .outputOptions <<- list()
 
-      session <<- list(send = .self$.sendMessage)
+      session <<- list(sendInputMessage = .self$.sendInputMessage,
+                       sendJavascript   = .self$.sendJavascript)
     },
     close = function() {
       closed <<- TRUE
@@ -188,18 +189,14 @@ ShinySession <- setRefClass(
         return()
       .write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
     },
-    .sendMessage = function(type, data) {
-      # If inputMessage, add to queue
-      # If javascript, send immediately
-      if (type == "inputMessage") {
-        .inputMessageQueue[[length(.inputMessageQueue) + 1]] <<- data
+    .sendInputMessage = function(inputId, message) {
+      data <- list(id = inputId, message = message)
 
-      } else if (type == "javascript") {
-        .write(toJSON(list(javascript=data)))
-
-      } else {
-        warning("Not sure how to send message of type '", type, "'")
-      }
+      # Add to input message queue
+      .inputMessageQueue[[length(.inputMessageQueue) + 1]] <<- data
+    },
+    .sendJavascript = function(data) {
+      .write(toJSON(list(javascript = data)))
     },
     .write = function(json) {
       if (getOption('shiny.trace', FALSE))

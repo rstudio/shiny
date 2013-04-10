@@ -27,7 +27,7 @@
 #' @export
 updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
   message <- dropNulls(list(label=label, value=value))
-  sendInputMessage(session, inputId, message = message)
+  session$sendInputMessage(inputId, message)
 }
 
 
@@ -117,7 +117,7 @@ updateSliderInput <- updateTextInput
 #' @export
 updateTabsetPanel <- function(session, inputId, selected = NULL) {
   message <- dropNulls(list(value = selected))
-  sendInputMessage(session, inputId, message = message)
+  session$sendInputMessage(inputId, message)
 }
 
 
@@ -153,7 +153,7 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
     min = NULL, max = NULL, step = NULL) {
 
   message <- dropNulls(list(label=label, value=value, min=min, max=max, step=step))
-  sendInputMessage(session, inputId, message = message)
+  session$sendInputMessage(inputId, message)
 }
 
 
@@ -212,7 +212,7 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 
   message <- dropNulls(list(label = label, options = options))
 
-  sendInputMessage(session, inputId, message = message)
+  session$sendInputMessage(inputId, message)
 }
 
 
@@ -310,17 +310,5 @@ updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
 
   message <- dropNulls(list(label = label, options = options))
 
-  sendInputMessage(session, inputId, message = message)
-}
-
-
-
-sendInputMessage <- function(session, inputId, message) {
-  session$send(
-    type = "inputMessage",
-    data = list(
-      id = inputId,
-      message = message
-    )
-  )
+  session$sendInputMessage(inputId, message)
 }

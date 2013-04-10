@@ -68,4 +68,7 @@
   \tab "tw" \cr Thailand \tab "th" \cr United States \tab
   "us" \cr Vietnam \tab "vn" \cr }
 }
+\seealso{
+  \code{\link{updateSliderInput}}
+}
 

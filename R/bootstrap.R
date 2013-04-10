@@ -246,12 +246,14 @@ conditionalPanel <- function(condition, ...) {
 #' @param value Initial value
 #' @return A text input control that can be added to a UI definition.
 #' 
+#' @seealso \code{\link{updateTextInput}}
+#'
 #' @examples
 #' textInput("caption", "Caption:", "Data Summary")
 #' @export
 textInput <- function(inputId, label, value = "") {
   tagList(
-    tags$label(label),
+    tags$label(label, `for` = inputId),
     tags$input(id = inputId, type="text", value=value)
   )
 }
@@ -267,6 +269,8 @@ textInput <- function(inputId, label, value = "") {
 #' @param max Maximum allowed value
 #' @param step Interval to use when stepping between min and max
 #' @return A numeric input control that can be added to a UI definition.
+#'
+#' @seealso \code{\link{updateNumericInput}}
 #' 
 #' @examples
 #' numericInput("obs", "Observations:", 10, 
@@ -284,7 +288,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
     inputTag$attribs$step = step
   
   tagList(
-    tags$label(label),
+    tags$label(label, `for` = inputId),
     inputTag
   )
 }
@@ -350,7 +354,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
 #' @param value Initial value (\code{TRUE} or \code{FALSE}).
 #' @return A checkbox control that can be added to a UI definition.
 #' 
-#' @seealso \code{\link{checkboxGroupInput}}
+#' @seealso \code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
 #' 
 #' @examples
 #' checkboxInput("outliers", "Show outliers", FALSE)
@@ -359,7 +363,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   inputTag <- tags$input(id = inputId, type="checkbox")
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
-  tags$label(class = "checkbox", inputTag, label)
+  tags$label(class = "checkbox", `for` = inputId, inputTag, tags$span(label))
 }
 
 
@@ -376,7 +380,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #' @param selected Names of items that should be initially selected, if any.
 #' @return A list of HTML elements that can be added to a UI definition.
 #'   
-#' @seealso \code{\link{checkboxInput}}
+#' @seealso \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
 #'   
 #' @examples
 #' checkboxGroupInput("variable", "Variable:",
@@ -390,21 +394,25 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   choices <- choicesWithNames(choices)
   
   checkboxes <- list()
-  for (choiceName in names(choices)) {
-    
-    checkbox <- tags$input(name = inputId, type="checkbox",
-                           value = choices[[choiceName]])
+  for (i in seq_along(choices)) {
+    choiceName <- names(choices)[i]
+
+    checkbox <- tags$label(class = "checkbox",
+                  tags$input(type = "checkbox",
+                             name = inputId,
+                             id = paste(inputId, i, sep=""),
+                             value = choices[[i]]),
+                  tags$span(choiceName))
     
     if (choiceName %in% selected)
       checkbox$attribs$checked <- 'checked'
     
-    checkboxes[[length(checkboxes)+1]] <- checkbox
-    checkboxes[[length(checkboxes)+1]] <- choiceName
-    checkboxes[[length(checkboxes)+1]] <- tags$br()
+    checkboxes[[i]] <- checkbox
   } 
   
   # return label and select tag
-  tags$div(class='control-group',
+  tags$div(id = inputId,
+           class = "control-group shiny-input-checkboxgroup",
            controlLabel(inputId, label),
            checkboxes)
 }
@@ -431,6 +439,8 @@ controlLabel <- function(controlName, label) {
   tags$label(class = "control-label", `for` = controlName, label)
 }
 
+# Takes a vector or list, and adds names (same as the value) to any entries
+# without names.
 choicesWithNames <- function(choices) {
   # get choice names
   choiceNames <- names(choices)
@@ -461,6 +471,8 @@ choicesWithNames <- function(choices) {
 #' @param multiple Is selection of multiple items allowed?
 #' @return A select list control that can be added to a UI definition.
 #' 
+#' @seealso \code{\link{updateSelectInput}}
+#'
 #' @examples
 #' selectInput("variable", "Variable:",
 #'             c("Cylinders" = "cyl",
@@ -505,6 +517,8 @@ selectInput <- function(inputId,
 #' @param selected Name of initially selected item (if not specified then
 #' defaults to the first item)
 #' @return A set of radio buttons that can be added to a UI definition.
+#'
+#' @seealso \code{\link{updateRadioButtons}}
 #' 
 #' @examples
 #' radioButtons("dist", "Distribution type:",
@@ -533,15 +547,19 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
                            value = value)
     if (identical(name, selected))
       inputTag$attribs$checked = "checked"
-    
+
+    # Put the label text in a span
+    spanTag <- tags$span(name)
     labelTag <- tags$label(class = "radio")
     labelTag <- tagAppendChild(labelTag, inputTag)
-    labelTag <- tagAppendChild(labelTag, name)
+    labelTag <- tagAppendChild(labelTag, spanTag)
     inputTags[[length(inputTags) + 1]] <- labelTag
   }
   
-  tagList(tags$label(class = "control-label", label),
-          inputTags)
+  tags$div(id = inputId,
+           class = 'control-group shiny-input-radiogroup',
+           tags$label(class = "control-label", `for` = inputId, label),
+           inputTags)
 }
 
 #' Create a submit button
@@ -589,6 +607,8 @@ submitButton <- function(text = "Apply Changes") {
 #' @param animate \code{TRUE} to show simple animation controls with default 
 #'   settings; \code{FALSE} not to; or a custom settings list, such as those 
 #'   created using \code{\link{animationOptions}}.
+#'
+#' @seealso \code{\link{updateSliderInput}}
 #'   
 #' @details
 #' 
@@ -623,11 +643,13 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   }
   
   # build slider
-  tagList(
-    controlLabel(inputId, labelText),  
-    slider(inputId, min=min, max=max, value=value, step=step, round=round,
-           locale=locale, format=format, ticks=ticks,
-           animate=animate)
+  tags$div(
+    tagList(
+      controlLabel(inputId, labelText),
+      slider(inputId, min=min, max=max, value=value, step=step, round=round,
+             locale=locale, format=format, ticks=ticks,
+             animate=animate)
+    )
   )
 }
 
@@ -642,6 +664,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'   that this tab is selected. If omitted and \code{tabsetPanel} has an 
 #'   \code{id}, then the title will be used.
 #' @return A tab that can be passed to \code{\link{tabsetPanel}}
+#'
+#' @seealso \code{\link{tabsetPanel}}
 #'   
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -673,6 +697,8 @@ tabPanel <- function(title, ..., value = NULL) {
 #'   tab will be selected.
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
+#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
+#'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
 #' # table view of the generated distribution

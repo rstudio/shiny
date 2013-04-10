@@ -32,4 +32,7 @@ mainPanel(
   )
 )
 }
+\seealso{
+  \code{\link{tabsetPanel}}
+}
 

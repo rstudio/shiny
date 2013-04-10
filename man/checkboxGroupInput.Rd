@@ -34,6 +34,7 @@ checkboxGroupInput("variable", "Variable:",
                      "Gears" = "gear"))
 }
 \seealso{
-  \code{\link{checkboxInput}}
+  \code{\link{checkboxInput}},
+  \code{\link{updateCheckboxGroupInput}}
 }
 

@@ -600,6 +600,21 @@
       for (key in msgObj.values) {
         this.receiveOutput(key, msgObj.values[key]);
       }
+      if (msgObj.inputMessages) {
+        // inputMessages should be an array
+        for (var i = 0; i < msgObj.inputMessages.length; i++) {
+          var $obj = $('.shiny-bound-input#' + msgObj.inputMessages[i].id);
+          var inputBinding = $obj.data('shiny-input-binding');
+
+          // Dispatch the message to the appropriate input object
+          if ($obj.length > 0) {
+            inputBinding.receiveMessage($obj[0], msgObj.inputMessages[i].message);
+          }
+        }
+      }
+      if (msgObj.javascript) {
+        eval(msgObj.javascript);
+      }
       if (msgObj.console) {
         for (var i = 0; i < msgObj.console.length; i++) {
           if (console.log)
@@ -937,6 +952,14 @@
     this.getValue = function(el) { throw "Not implemented"; };
     this.subscribe = function(el, callback) { };
     this.unsubscribe = function(el) { };
+
+    // This is used for receiving messages that tell the input object to do
+    // things, such as setting values (including min, max, and others).
+    // 'data' should be an object with elements corresponding to value, min,
+    // max, etc., as appropriate for the type of input object. It also should
+    // trigger a change event.
+    this.receiveMessage = function(el, data) { throw "Not implemented"; };
+    this.getState = function(el, data) { throw "Not implemented"; };
     
     this.getRatePolicy = function() { return null; };
   
@@ -969,6 +992,21 @@
     },
     unsubscribe: function(el) {
       $(el).off('.textInputBinding');
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value)
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+
+      $(el).trigger('change');
+    },
+    getState: function(el) {
+      return {
+        label: $(el).parent().find('label[for=' + el.id + ']').text(),
+        value: el.value
+      };
     },
     getRatePolicy: function() {
       return {
@@ -1003,12 +1041,62 @@
       else
         return numberVal;           // If other string like "1e6", send it unchanged
     },
+    setValue: function(el, value) {
+      el.value = value;
+    },
     getType: function(el) {
       return "number"
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))  el.value = data.value;
+      if (data.hasOwnProperty('min'))    el.min   = data.min;
+      if (data.hasOwnProperty('max'))    el.max   = data.max;
+      if (data.hasOwnProperty('step'))   el.step  = data.step;
+
+      if (data.hasOwnProperty('label'))
+        label: $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+
+      $(el).trigger('change');
+    },
+    getState: function(el) {
+      return { label: $(el).parent().find('label[for=' + el.id + ']').text(),
+               value: this.getValue(el),
+               min:   Number(el.min),
+               max:   Number(el.max),
+               step:  Number(el.step) };
     }
   });
   inputBindings.register(numberInputBinding, 'shiny.numberInput');
 
+
+  var checkboxInputBinding = new InputBinding();
+  $.extend(checkboxInputBinding, {
+    find: function(scope) {
+      return $(scope).find('input[type="checkbox"]');
+    },
+    getValue: function(el) {
+      return el.checked;
+    },
+    setValue: function(el, value) {
+      el.checked = value;
+    },
+    getState: function(el) {
+      return {
+        label: $(el).parent().find('span').text(),
+        value: el.checked
+      };
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        el.checked = data.value;
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('span').text(data.label);
+
+      $(el).trigger('change');
+    }
+  });
+  inputBindings.register(checkboxInputBinding, 'shiny.checkboxInput');
 
   var sliderInputBinding = {};
   $.extend(sliderInputBinding, textInputBinding, {
@@ -1022,7 +1110,7 @@
       return sliders;
     },
     getValue: function(el) {
-      var sliderVal = $(el).val();
+      var sliderVal = $(el).slider("value");
       if (/;/.test(sliderVal)) {
         var chunks = sliderVal.split(/;/, 2);
         return [+chunks[0], +chunks[1]];
@@ -1031,8 +1119,12 @@
         return +sliderVal;
       }
     },
-    setValue: function(el, val) {
-      // TODO: implement
+    setValue: function(el, value) {
+      if (value instanceof Array) {
+        $(el).slider("value", value[0], value[1]);
+      } else {
+        $(el).slider("value", value);
+      }
     },
     subscribe: function(el, callback) {
       $(el).on('change.inputBinding', function(event) {
@@ -1042,11 +1134,36 @@
     unsubscribe: function(el) {
       $(el).off('.inputBinding');
     },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value);
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+
+      // jslider doesn't support setting other properties
+
+      $(el).trigger('change');
+    },
     getRatePolicy: function() {
       return {
         policy: 'debounce',
         delay: 250
       };
+    },
+    getState: function(el) {
+      var $el = $(el);
+      var settings = $el.slider().settings;
+
+      return { label: $el.parent().find('label[for=' + el.id + ']').text(),
+               value:  this.getValue(el),
+               min:    Number(settings.from),
+               max:    Number(settings.to),
+               step:   Number(settings.step),
+               round:  settings.round,
+               format: settings.format.format,
+               locale: settings.format.locale
+             };
     }
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
@@ -1056,7 +1173,7 @@
   var selectInputBinding = new InputBinding();
   $.extend(selectInputBinding, {
     find: function(scope) {
-      return scope.find('select');
+      return $(scope).find('select');
     },
     getId: function(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -1066,6 +1183,53 @@
     },
     setValue: function(el, value) {
       $(el).val(value);
+    },
+    getState: function(el) {
+      // Store options in an array of objects, each with with value and label
+      var options = new Array(el.length);
+      for (var i = 0; i < el.length; i++) {
+        options[i] = { value:    el[i].value,
+                       label:    el[i].label,
+                       selected: el[i].selected };
+      }
+
+      return {
+        label: $(el).parent().find('label[for=' + el.id + ']').text(),
+        value:    this.getValue(el),               
+        options:  options
+      };
+    },
+    receiveMessage: function(el, data) {
+      $el = $(el);
+
+      // This will replace all the options
+      if (data.hasOwnProperty('options')) {
+        // Clear existing options and add each new one
+        $el.empty();
+        for (var i = 0; i < data.options.length; i++) {
+          var in_opt = data.options[i];
+
+          var $newopt = $('<option/>', {
+            value: in_opt.value,
+            text: in_opt.label
+          });
+
+          // Add selected attribute if present
+          if (in_opt.hasOwnProperty('selected')) {
+            $newopt.prop('selected', in_opt.selected);
+          }
+
+          $el.append($newopt)
+        }
+      }
+
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value)
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+
+      $(el).trigger('change');
     },
     subscribe: function(el, callback) {
       $(el).on('change.selectInputBinding', function(event) {
@@ -1079,26 +1243,277 @@
   inputBindings.register(selectInputBinding, 'shiny.selectInput');
 
 
+  // Radio input groups
+  var radioInputBinding = new InputBinding();
+  $.extend(radioInputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-input-radiogroup');
+    },
+    getValue: function(el) {
+      // Select the radio objects that have name equal to the grouping div's id
+      return $('input:radio[name=' + el.id + ']:checked').val();
+    },
+    setValue: function(el, value) {
+      $('input:radio[name=' + el.id + '][value=' + value + ']').prop('checked', true);
+    },
+    getState: function(el) {
+      var $objs = $('input:radio[name=' + el.id + ']');
+
+      // Store options in an array of objects, each with with value and label
+      var options = new Array($objs.length);
+      for (var i = 0; i < options.length; i++) {
+        options[i] = { value:   $objs[i].value,
+                       label:   this._getLabel($objs[i]),
+                       checked: $objs[i].checked };
+      }
+
+      return {
+        label:    $(el).parent().find('label[for=' + el.id + ']').text(),
+        value:    this.getValue(el),
+        options:  options
+      };
+    },
+    receiveMessage: function(el, data) {
+      $el = $(el);
+
+      // This will replace all the options
+      if (data.hasOwnProperty('options')) {
+        // Clear existing options and add each new one
+        $el.find('label.radio').remove();
+        for (var i = 0; i < data.options.length; i++) {
+          var in_opt = data.options[i];
+
+          var $newopt = $('<label class="radio">');
+          var $radio = $('<input/>', {
+            type:  "radio",
+            name:  el.id,
+            id:    el.id + (i+1).toString(),
+            value: in_opt.value
+          });
+
+          // Add checked attribute if present
+          if (in_opt.hasOwnProperty('checked')) {
+            $radio.prop('checked', in_opt.checked);
+          }
+
+          $newopt.append($radio);
+          $newopt.append('<span>' + in_opt.label + '</span>');
+
+          $el.append($newopt)
+        }
+      }
+
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value)
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+
+      $(el).trigger('change');
+    },
+    subscribe: function(el, callback) {
+      $(el).on('change.radioInputBinding', function(event) {
+        callback();
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.radioInputBinding');
+    },
+    // Given an input DOM object, get the associated label. Handles labels
+    // that wrap the input as well as labels associated with 'for' attribute.
+    _getLabel: function(obj) {
+      // If <input id='myid'><label for='myid'>label text</label>
+      var $label_for = $('label[for=' + obj.id + ']');
+      if ($label_for.length > 0) {
+        return $.trim($label_for.text());
+      }
+
+      // If <label><input /><span>label text</span></label>
+      if (obj.parentNode.tagName === "LABEL") {
+        return $.trim($(obj.parentNode).find('span').text());
+      }
+
+      return null;
+    },
+    // Given an input DOM object, set the associated label. Handles labels
+    // that wrap the input as well as labels associated with 'for' attribute.
+    _setLabel: function(obj, value) {
+      // If <input id='myid'><label for='myid'>label text</label>
+      var $label_for = $('label[for=' + obj.id + ']');
+      if ($label_for.length > 0) {
+        $label_for.text(value);
+      }
+
+      // If <label><input /><span>label text</span></label>
+      if (obj.parentNode.tagName === "LABEL") {
+        $(obj.parentNode).find('span').text(value);
+      }
+
+      return null;
+    }
+
+  });
+  inputBindings.register(radioInputBinding, 'shiny.radioInput');
+
+
+  // Checkbox input groups
+  var checkboxGroupInputBinding = new InputBinding();
+  $.extend(checkboxGroupInputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-input-checkboxgroup');
+    },
+    getValue: function(el) {
+      // Select the checkbox objects that have name equal to the grouping div's id
+      var $objs = $('input:checkbox[name=' + el.id + ']:checked');
+      var values = new Array($objs.length);
+      for (var i = 0; i < $objs.length; i ++) {
+        values[i] = $objs[i].value;
+      }
+      return values;
+    },
+    setValue: function(el, value) {
+      // Clear all checkboxes
+      $('input:checkbox[name=' + el.id + ']').prop('checked', false);
+
+      // Accept array
+      if (value instanceof Array) {
+        for (var i = 0; i < value.length; i++) {
+          $('input:checkbox[name=' + el.id + '][value=' + value[i] + ']')
+            .prop('checked', true);
+        }
+      // Else assume it's a single value
+      } else {
+        $('input:checkbox[name=' + el.id + '][value=' + value + ']')
+          .prop('checked', true);
+      }
+
+    },
+    getState: function(el) {
+      var $objs = $('input:checkbox[name=' + el.id + ']');
+
+      // Store options in an array of objects, each with with value and label
+      var options = new Array($objs.length);
+      for (var i = 0; i < options.length; i++) {
+        options[i] = { value:   $objs[i].value,
+                       label:   this._getLabel($objs[i]),
+                       checked: $objs[i].checked };
+      }
+
+      return { label:    $(el).find('label[for=' + el.id + ']').text(),
+               value:    this.getValue(el),
+               options:  options
+             };
+    },
+    receiveMessage: function(el, data) {
+      $el = $(el);
+
+      // This will replace all the options
+      if (data.hasOwnProperty('options')) {
+        // Clear existing options and add each new one
+        $el.find('label.checkbox').remove();
+        for (var i = 0; i < data.options.length; i++) {
+          var in_opt = data.options[i];
+
+          var $newopt = $('<label class="checkbox">');
+          var $checkbox = $('<input/>', {
+            type:  "checkbox",
+            name:  el.id,
+            id:    el.id + (i+1).toString(),
+            value: in_opt.value
+          });
+
+          // Add checked attribute if present
+          if (in_opt.hasOwnProperty('checked')) {
+            $checkbox.prop('checked', in_opt.checked);
+          }
+
+          $newopt.append($checkbox);
+          $newopt.append('<span>' + in_opt.label + '</span>');
+
+          $el.append($newopt)
+        }
+      }
+
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value)
+
+      if (data.hasOwnProperty('label'))
+        $el.find('label[for=' + el.id + ']').text(data.label)
+
+      $(el).trigger('change');
+    },
+    subscribe: function(el, callback) {
+      $(el).on('change.checkboxGroupInputBinding', function(event) {
+        callback();
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.checkboxGroupInputBinding');
+    },
+    // Given an input DOM object, get the associated label. Handles labels
+    // that wrap the input as well as labels associated with 'for' attribute.
+    _getLabel: function(obj) {
+      // If <input id='myid'><label for='myid'>label text</label>
+      var $label_for = $('label[for=' + obj.id + ']');
+      if ($label_for.length > 0) {
+        return $.trim($label_for.text());
+      }
+
+      // If <label><input /><span>label text</span></label>
+      if (obj.parentNode.tagName === "LABEL") {
+        return $.trim($(obj.parentNode).find('span').text());
+      }
+
+      return null;
+    },
+    // Given an input DOM object, set the associated label. Handles labels
+    // that wrap the input as well as labels associated with 'for' attribute.
+    _setLabel: function(obj, value) {
+      // If <input id='myid'><label for='myid'>label text</label>
+      var $label_for = $('label[for=' + obj.id + ']');
+      if ($label_for.length > 0) {
+        $label_for.text(value);
+      }
+
+      // If <label><input /><span>label text</span></label>
+      if (obj.parentNode.tagName === "LABEL") {
+        $(obj.parentNode).find('span').text(value);
+      }
+
+      return null;
+    }
+
+  });
+  inputBindings.register(checkboxGroupInputBinding, 'shiny.checkboxGroupInput');
+
+
   var bootstrapTabInputBinding = new InputBinding();
   $.extend(bootstrapTabInputBinding, {
     find: function(scope) {
-      return scope.find('ul.nav.nav-tabs');
+      return $(scope).find('ul.nav.nav-tabs');
     },
     getValue: function(el) {
       var anchor = $(el).children('li.active').children('a');
       if (anchor.length == 1)
-        return this.$getTabName(anchor);
+        return this._getTabName(anchor);
       return null;
     },
     setValue: function(el, value) {
       var self = this;
       var anchors = $(el).children('li').children('a');
       anchors.each(function() {
-        if (self.$getTabName($(this)) === value) {
+        if (self._getTabName($(this)) === value) {
           $(this).tab('show');
           return false;
         }
       });
+    },
+    getState: function(el) {
+      return { value: this.getValue(el) };
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value);
     },
     subscribe: function(el, callback) {
       $(el).on('shown.bootstrapTabInputBinding', function(event) {
@@ -1108,7 +1523,7 @@
     unsubscribe: function(el) {
       $(el).off('.bootstrapTabInputBinding');
     },
-    $getTabName: function(anchor) {
+    _getTabName: function(anchor) {
       return anchor.attr('data-value') || anchor.text();
     }
   });
@@ -1489,6 +1904,14 @@
 
     function bindMultiInput(selector, exclusiveValue) {
       $(document).on('change input', selector, function() {
+        // Check if this radio or checkbox is of the new style (after 0.5.0),
+        // where there's a wrapping div that has an associated input binding object.
+        // If so, then exit. This function is only meant to operate on old-style
+        // checkbox and radio groups.
+        if (isNewStyleMultiInput(this)) {
+          return;
+        }
+
         if (this.name) {
           inputs.setInput(this.name, getMultiValue(this, exclusiveValue));
         }
@@ -1499,6 +1922,33 @@
           }
         }
       });
+
+      function isNewStyleMultiInput(el) {
+        if ((el.type === "checkbox" &&
+             ancestorHasClass(el, 'shiny-input-checkboxgroup')) ||
+            (el.type === "radio" &&
+             ancestorHasClass(el, 'shiny-input-radiogroup'))) {
+          return true;
+
+        } else {
+          return false;
+        }
+      }
+
+      function ancestorHasClass(el, classname) {
+        if (el === null) {
+          return false;
+        } if (hasClass(el, classname)) {
+          return true;
+        } else {
+          return ancestorHasClass(el.parentNode, classname);
+        }
+      }
+
+      // Fast (non-jQuery) function for checking if an element has a class
+      function hasClass(el, classname) {
+        return (' ' + el.className + ' ').indexOf(' ' + classname + ' ') > -1;
+      }
     }
 
     function getMultiInputValues(scope, selector, exclusiveValue) {
@@ -1541,6 +1991,8 @@
     };
     exports.unbindAll = unbindAll;
 
+    // Binding multiInputs in this method is useful for old-style (<=0.5.0)
+    // HTML generated by Shiny. This should be deprecated at some point.
     bindMultiInput('input[type="checkbox"]', false);
     bindMultiInput('input[type="radio"]', true);
     var initialValues = _bindAll(document);

@@ -37,4 +37,7 @@ selectInput("variable", "Variable:",
               "Transmission" = "am",
               "Gears" = "gear"))
 }
+\seealso{
+  \code{\link{updateSelectInput}}
+}
 

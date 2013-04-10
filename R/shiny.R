@@ -54,7 +54,8 @@ ShinySession <- setRefClass(
       .outputs <<- list()
       .outputOptions <<- list()
 
-      session <<- list(sendInputMessage = .self$.sendInputMessage,
+      session <<- list(clientData       = clientData,
+                       sendInputMessage = .self$.sendInputMessage,
                        sendJavascript   = .self$.sendJavascript)
     },
     close = function() {

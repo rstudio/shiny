@@ -86,6 +86,31 @@ updateCheckboxInput <- updateTextInput
 #' @export
 updateSliderInput <- updateTextInput
 
+#' Change the value of a date picker input on the client
+#'
+#' @template update-input
+#' @param value The value to set for the input object.
+#'
+#' @seealso \code{\link{textInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     updateDatePickerInput(session, "inDate",
+#'       label = paste("Date label", x),
+#'       value = paste("2013-04-", x, sep=""))
+#'   })
+#' })
+#' }
+#' @export
+updateDatePickerInput <- updateTextInput
+
 
 #' Change the selected tab on the client
 #'

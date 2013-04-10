@@ -669,6 +669,78 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 }
 
 
+#' Create date picker input
+#'
+#' Creates a text input which, when clicked on, brings up a calendar that
+#' the user can click on.
+#'
+#' @param inputId Input variable to assign the control's value to.
+#' @param label Display label for the control.
+#' @param value The starting value of the date picker.
+#' @param format The format of the date. Defaults to \code{"yyyy-mm-dd"}.
+#'
+#' @seealso \code{\link{updateDatePickerInput}}
+#'
+#' @examples
+#' datePickerInput("date", "Date:", value = "2012-02-29")
+#'
+#' @export
+datePickerInput <- function(inputId, label, value = Sys.Date(), 
+    format = "yyyy-mm-dd") {
+
+  # Make sure value is a string, not a date object. This is for consistency
+  # across different locales.
+  if (inherits(value, "Date"))
+    value <- format(value, '%Y-%m-%d')
+
+  tagList(
+    singleton(tags$head(
+      tags$script(src = "shared/datepicker/js/bootstrap-datepicker.js"),
+      tags$link(rel = "stylesheet", type = "text/css",
+                href = 'shared/datepicker/css/datepicker.css')
+    )),
+    tags$div(
+      controlLabel(inputId, label),
+      tags$input(id = inputId,
+                 name = inputId,
+                 type = "text",
+                 class = "datepicker",
+                 `data-date-format` = format,
+                 value = value)
+    )
+  )
+}
+
+
+#' @export
+dateRangePickerInput <- function(inputId, label, value = Sys.Date(), 
+    format = "yyyy-mm-dd") {
+
+  # Make sure value is a string, not a date object. This is for consistency
+  # across different locales.
+  if (inherits(value, "Date"))
+    value <- format(value, '%Y-%m-%d')
+
+  tagList(
+    singleton(tags$head(
+      tags$script(src = "shared/bootstrap-daterangepicker/date.js"),
+      tags$script(src = "shared/bootstrap-daterangepicker/daterangepicker.js"),
+      tags$link(rel = "stylesheet", type = "text/css",
+                href = "shared/bootstrap-daterangepicker/daterangepicker.css")
+    )),
+    tags$div(
+      controlLabel(inputId, label),
+      tags$input(id = inputId,
+                 name = inputId,
+                 type = "text",
+                 class = "datepicker",
+                 `data-date-format` = format,
+                 value = value)
+    )
+  )
+}
+
+
 #' Create a tab panel
 #' 
 #' Create a tab panel that can be included within a \code{\link{tabsetPanel}}.

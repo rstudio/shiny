@@ -1128,12 +1128,12 @@
       }
     },
     subscribe: function(el, callback) {
-      $(el).on('change.inputBinding', function(event) {
+      $(el).on('change.sliderInputBinding', function(event) {
         callback(!$(el).data('animating'));
       });
     },
     unsubscribe: function(el) {
-      $(el).off('.inputBinding');
+      $(el).off('.sliderInputBinding');
     },
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
@@ -1169,7 +1169,60 @@
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
   
-  
+
+  var datePickerInputBinding = new Shiny.InputBinding();
+  $.extend(datePickerInputBinding, {
+    find: function(scope) {
+      return $(scope).find('input.datepicker');
+    },
+    getValue: function(el) {
+      return el.value;
+    },
+    setValue: function(el, value) {
+      el.value = value;
+    },
+    getState: function(el) {
+      var $el = $(el);
+      return {
+        label:  $el.parent().find('label[for=' + el.id + ']').text(),
+        value:  this.getValue(el),
+        format: $el.data('dateFormat')
+      };
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value);
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+
+      // date picker doesn't support setting format
+
+      $(el).trigger('change');
+    },
+    subscribe: function(el, callback) {
+      $(el).on('keyup.datePickerInputBinding input.datePickerInputBinding', function(event) {
+        // Use normal debouncing policy when typing
+        callback(true);
+      });
+      $(el).on('changeDate.datePickerInputBinding change.datePickerInputBinding', function(event) {
+        // Send immediately when clicked
+        callback(false);
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.datePickerInputBinding');
+    },
+    getRatePolicy: function() {
+      return {
+        policy: 'debounce',
+        delay: 250
+      };
+    }
+  });
+  Shiny.inputBindings.register(datePickerInputBinding, 'shiny.datePickerInput');
+
+
   // Select input
   var selectInputBinding = new InputBinding();
   $.extend(selectInputBinding, {
@@ -2080,6 +2133,13 @@
         }
       });
     }
+
+    function initDatePickers() {
+      if ($('input.datepicker').length > 0){
+        $('input.datepicker').datepicker();
+      }
+    }
+    initDatePickers();
 
     // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size

@@ -502,6 +502,86 @@ describe("Input Bindings", function() {
 
 
   // ===========================================================================
+  describe("datePickerInputBinding", function() {
+    var id  = 'in_datepicker';
+    var binding_name = 'datePickerInput';
+
+    beforeEach(function(){
+      var htmlstring =
+        '<div>\
+          <label class="control-label" for="' + id + '">Date input:</label>\
+          <input id="' + id + '" name="' + id + '" type="text"\
+            class="datepicker" data-date-format="yyyy-mm-dd"  value="2013-04-10"/>\
+        </div>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
+      Shiny.bindAll();
+    });
+
+    // Run tests that are exactly the same for all InputBindings
+    common_tests(id, binding_name);
+
+    afterEach(function(){
+      Shiny.unbindAll();
+      $('#input_binding_test').remove();
+    });
+
+    it("getValue() works", function() {
+      expect(get_value(id)).toEqual('2013-04-10');
+    });
+
+    it("setValue() works", function() {
+      set_value(id, '2012-02-29');
+      expect(get_value(id)).toEqual('2012-02-29');
+
+      // Invalid date - works?
+      set_value(id, '2012-02-40');
+      expect(get_value(id)).toEqual('2012-02-40');
+    });
+
+    it("getState() works", function() {
+      expect(get_state(id)).toEqual({
+        label: 'Date input:',
+        value: '2013-04-10',
+        format: 'yyyy-mm-dd'
+      });
+    });
+
+    it("receiveMessage() works", function() {
+      // Set value
+      // getValue() and getState().value should be the same
+      receive_message(id, { value: '2012-02-29' });
+      expect(get_value(id)).toEqual('2012-02-29');
+      expect(get_state(id)).toEqual({
+        label: 'Date input:',
+        value: '2012-02-29',
+        format: 'yyyy-mm-dd'
+      });
+
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_state(id)).toEqual({
+        label: 'Date input:',
+        value: '2012-02-29',
+        format: 'yyyy-mm-dd'
+      });
+
+      // Set label
+      receive_message(id, { label:'new label' });
+      expect(get_state(id)).toEqual({
+        label: 'new label',
+        value: '2012-02-29',
+        format: 'yyyy-mm-dd'
+      });
+
+      // Setting format isn't implemented yet
+    });
+  });
+
+
+  // ===========================================================================
   describe("selectInputBinding", function() {
     var id = 'in_select';
     var binding_name = 'selectInput'; // Name of the input binding in the registry

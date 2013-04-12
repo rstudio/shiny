@@ -1170,10 +1170,10 @@
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
   
 
-  var datePickerInputBinding = new Shiny.InputBinding();
-  $.extend(datePickerInputBinding, {
+  var dateInputBinding = new Shiny.InputBinding();
+  $.extend(dateInputBinding, {
     find: function(scope) {
-      return $(scope).find('input.datepicker');
+      return $(scope).find('input.date-input');
     },
     getValue: function(el) {
       return el.value;
@@ -1201,17 +1201,17 @@
       $(el).trigger('change');
     },
     subscribe: function(el, callback) {
-      $(el).on('keyup.datePickerInputBinding input.datePickerInputBinding', function(event) {
+      $(el).on('keyup.dateInputBinding input.dateInputBinding', function(event) {
         // Use normal debouncing policy when typing
         callback(true);
       });
-      $(el).on('changeDate.datePickerInputBinding change.datePickerInputBinding', function(event) {
+      $(el).on('changeDate.dateInputBinding change.dateInputBinding', function(event) {
         // Send immediately when clicked
         callback(false);
       });
     },
     unsubscribe: function(el) {
-      $(el).off('.datePickerInputBinding');
+      $(el).off('.dateInputBinding');
     },
     getRatePolicy: function() {
       return {
@@ -1220,13 +1220,13 @@
       };
     }
   });
-  Shiny.inputBindings.register(datePickerInputBinding, 'shiny.datePickerInput');
+  Shiny.inputBindings.register(dateInputBinding, 'shiny.dateInput');
 
 
-  var dateRangePickerInputBinding = new Shiny.InputBinding();
-  $.extend(dateRangePickerInputBinding, {
+  var dateRangeInputBinding = new Shiny.InputBinding();
+  $.extend(dateRangeInputBinding, {
     find: function(scope) {
-      return $(scope).find('input.date-range-picker');
+      return $(scope).find('input.date-range-input');
     },
     getValue: function(el) {
       var settings = $(el).data('daterangepicker');
@@ -1305,17 +1305,17 @@
       $(el).trigger('change');
     },
     subscribe: function(el, callback) {
-      $(el).on('keyup.dateRangePickerInputBinding input.dateRangePickerInputBinding', function(event) {
+      $(el).on('keyup.dateRangeInputBinding input.dateRangeInputBinding', function(event) {
         // Use normal debouncing policy when typing
         callback(true);
       });
-      $(el).on('change.dateRangePickerInputBinding', function(event) {
+      $(el).on('change.dateRangeInputBinding', function(event) {
         // Send immediately when clicked
         callback(false);
       });
     },
     unsubscribe: function(el) {
-      $(el).off('.dateRangePickerInputBinding');
+      $(el).off('.dateRangeInputBinding');
     },
     getRatePolicy: function() {
       return {
@@ -1324,7 +1324,7 @@
       };
     }
   });
-  Shiny.inputBindings.register(dateRangePickerInputBinding, 'shiny.dateRangePickerInput');
+  Shiny.inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');
 
 
   // Select input
@@ -2238,15 +2238,15 @@
       });
     }
 
-    function initDatePickers() {
-      if ($('input.datepicker').length > 0){
-        $('input.datepicker').datepicker();
+    function initDateInputs() {
+      if ($('input.date-input').length > 0){
+        $('input.date-input').datepicker();
       }
     }
-    initDatePickers();
+    initDateInputs();
 
-    function initDateRangePickers() {
-      $('input.date-range-picker').each(function() {
+    function initDateRangeInputs() {
+      $('input.date-range-input').each(function() {
         var $el = $(this);
 
         // Trigger change event whenever the value is changed via user input
@@ -2262,7 +2262,7 @@
         $el.trigger('change');
       });
     }
-    initDateRangePickers();
+    initDateRangeInputs();
 
     // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size

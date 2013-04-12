@@ -502,16 +502,16 @@ describe("Input Bindings", function() {
 
 
   // ===========================================================================
-  describe("datePickerInputBinding", function() {
-    var id  = 'in_datepicker';
-    var binding_name = 'datePickerInput';
+  describe("dateInputBinding", function() {
+    var id  = 'in_date';
+    var binding_name = 'dateInput';
 
     beforeEach(function(){
       var htmlstring =
         '<div>\
           <label class="control-label" for="' + id + '">Date input:</label>\
           <input id="' + id + '" name="' + id + '" type="text"\
-            class="datepicker" data-date-format="yyyy-mm-dd"  value="2013-04-10"/>\
+            class="date-input" data-date-format="yyyy-mm-dd"  value="2013-04-10"/>\
         </div>';
 
       // Wrapper div for the htmlstring
@@ -582,16 +582,16 @@ describe("Input Bindings", function() {
 
 
   // ===========================================================================
-  describe("dateRangePickerInputBinding", function() {
-    var id  = 'in_daterangepicker';
-    var binding_name = 'dateRangePickerInput';
+  describe("dateRangeInputBinding", function() {
+    var id  = 'in_daterange';
+    var binding_name = 'dateRangeInput';
 
     beforeEach(function(){
       var htmlstring =
         '<div>\
           <label class="control-label" for="' + id + '">Date range input:</label>\
           <input id="' + id + '" name="' + id + '" type="text"\
-           class="date-range-picker" data-startDate="2012-02-29"\
+           class="date-range-input" data-startDate="2012-02-29"\
            data-endDate="2013-01-01" data-format="yyyy-MM-dd"\
            data-separator=" to "/>\
         </div>';

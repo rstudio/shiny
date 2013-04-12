@@ -86,12 +86,12 @@ updateCheckboxInput <- updateTextInput
 #' @export
 updateSliderInput <- updateTextInput
 
-#' Change the value of a date picker input on the client
+#' Change the value of a date input on the client
 #'
 #' @template update-input
 #' @param value The value to set for the input object.
 #'
-#' @seealso \code{\link{datePickerInput}}
+#' @seealso \code{\link{dateInput}}
 #'
 #' @examples
 #' \dontrun{
@@ -102,14 +102,14 @@ updateSliderInput <- updateTextInput
 #'     # for convenience.
 #'     x <- input$controller
 #'
-#'     updateDatePickerInput(session, "inDate",
+#'     updateDateInput(session, "inDate",
 #'       label = paste("Date label", x),
 #'       value = paste("2013-04-", x, sep=""))
 #'   })
 #' })
 #' }
 #' @export
-updateDatePickerInput  <- function(session, inputId, label = NULL, value = NULL) {
+updateDateInput <- function(session, inputId, label = NULL, value = NULL) {
   # Make sure value is a string, not a date object. This is for consistency
   # across different locales.
   if (inherits(value, "Date"))
@@ -120,13 +120,13 @@ updateDatePickerInput  <- function(session, inputId, label = NULL, value = NULL)
 }
 
 
-#' Change the start and end values of a date range picker input on the client
+#' Change the start and end values of a date range input on the client
 #'
 #' @template update-input
 #' @param start The start date.
 #' @param end The end date.
 #'
-#' @seealso \code{\link{dateRangePickerInput}}
+#' @seealso \code{\link{dateRangeInput}}
 #'
 #' @examples
 #' \dontrun{
@@ -137,7 +137,7 @@ updateDatePickerInput  <- function(session, inputId, label = NULL, value = NULL)
 #'     # for convenience.
 #'     x <- input$controller
 #'
-#'     updateRangeDatePickerInput(session, "inDateRange",
+#'     updateDateRangeInput(session, "inDateRange",
 #'       label = paste("Date range label", x),
 #'       start = paste("2013-01-", x, sep=""))
 #'       end = paste("2013-12-", x, sep=""))
@@ -145,7 +145,7 @@ updateDatePickerInput  <- function(session, inputId, label = NULL, value = NULL)
 #' })
 #' }
 #' @export
-updateDateRangePickerInput <- function(session, inputId, label = NULL,
+updateDateRangeInput <- function(session, inputId, label = NULL,
     start = Sys.Date(), end = Sys.Date(), min = NULL, max = NULL) {
 
   # Make sure start and end are strings, not date objects. This is for

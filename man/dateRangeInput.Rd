@@ -1,8 +1,8 @@
-\name{dateRangePickerInput}
-\alias{dateRangePickerInput}
-\title{Create date range picker input}
+\name{dateRangeInput}
+\alias{dateRangeInput}
+\title{Create date range input}
 \usage{
-  dateRangePickerInput(inputId, label, start = Sys.Date(),
+  dateRangeInput(inputId, label, start = Sys.Date(),
     end = Sys.Date(), min = NULL, max = NULL,
     format = "yyyy-MM-dd", sep = " - ", dropdowns = TRUE)
 }
@@ -22,9 +22,9 @@
 
   \item{format}{The format of the date. Defaults to
   \code{"yyyy-MM-dd"}. Note that this differs from the date
-  format string for \code{\link{datePickerInput}} in that
-  the "MM" is capitalized. This is because it uses a
-  different date library on the Javascript end.}
+  format string for \code{\link{dateInput}} in that the
+  "MM" is capitalized. This is because it uses a different
+  date library on the Javascript end.}
 
   \item{sep}{String to use as a separator between the start
   and end date.}
@@ -38,10 +38,18 @@
   end dates
 }
 \examples{
-dateRangePickerInput("date", "Date:", value = "2012-02-29",
-)
+dateRangeInput("daterange", "Date range:",
+               start = "2001-01-01",
+               end   = "2010-12-31")
+
+dateRangeInput("daterange", "Date range:",
+               start = "2001-01-01",
+               end   = "2010-12-31",
+               min   = "2001-01-01",
+               max   = "2012-12-21",
+               format = "MM/dd/yyyy", sep = " to ")
 }
 \seealso{
-  \code{\link{updateDatePickerInput}}
+  \code{\link{updateDateInput}}
 }
 

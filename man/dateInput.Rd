@@ -1,8 +1,8 @@
-\name{datePickerInput}
-\alias{datePickerInput}
-\title{Create date picker input}
+\name{dateInput}
+\alias{dateInput}
+\title{Create date input}
 \usage{
-  datePickerInput(inputId, label, value = Sys.Date(),
+  dateInput(inputId, label, value = Sys.Date(),
     format = "yyyy-mm-dd")
 }
 \arguments{
@@ -11,7 +11,7 @@
 
   \item{label}{Display label for the control.}
 
-  \item{value}{The starting value of the date picker.}
+  \item{value}{The starting date.}
 
   \item{format}{The format of the date. Defaults to
   \code{"yyyy-mm-dd"}.}
@@ -21,9 +21,9 @@
   calendar that the user can click on.
 }
 \examples{
-datePickerInput("date", "Date:", value = "2012-02-29")
+dateInput("date", "Date:", value = "2012-02-29")
 }
 \seealso{
-  \code{\link{updateDatePickerInput}}
+  \code{\link{updateDateInput}}
 }
 

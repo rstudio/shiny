@@ -1,10 +1,10 @@
-\name{updateDateRangePickerInput}
-\alias{updateDateRangePickerInput}
-\title{Change the start and end values of a date range picker input on the client}
+\name{updateDateRangeInput}
+\alias{updateDateRangeInput}
+\title{Change the start and end values of a date range input on the client}
 \usage{
-  updateDateRangePickerInput(session, inputId,
-    label = NULL, start = Sys.Date(), end = Sys.Date(),
-    min = NULL, max = NULL)
+  updateDateRangeInput(session, inputId, label = NULL,
+    start = Sys.Date(), end = Sys.Date(), min = NULL,
+    max = NULL)
 }
 \arguments{
   \item{session}{The \code{session} object passed to
@@ -19,8 +19,8 @@
   \item{end}{The end date.}
 }
 \description{
-  Change the start and end values of a date range picker
-  input on the client
+  Change the start and end values of a date range input on
+  the client
 }
 \details{
   The input updater functions send a message to the client,
@@ -43,7 +43,7 @@ shinyServer(function(input, output, clientData, session) {
     # for convenience.
     x <- input$controller
 
-    updateRangeDatePickerInput(session, "inDateRange",
+    updateDateRangeInput(session, "inDateRange",
       label = paste("Date range label", x),
       start = paste("2013-01-", x, sep=""))
       end = paste("2013-12-", x, sep=""))
@@ -52,6 +52,6 @@ shinyServer(function(input, output, clientData, session) {
 }
 }
 \seealso{
-  \code{\link{dateRangePickerInput}}
+  \code{\link{dateRangeInput}}
 }
 

@@ -582,6 +582,130 @@ describe("Input Bindings", function() {
 
 
   // ===========================================================================
+  describe("dateRangePickerInputBinding", function() {
+    var id  = 'in_daterangepicker';
+    var binding_name = 'dateRangePickerInput';
+
+    beforeEach(function(){
+      var htmlstring =
+        '<div>\
+          <label class="control-label" for="' + id + '">Date range input:</label>\
+          <input id="' + id + '" name="' + id + '" type="text"\
+           class="date-range-picker" data-startDate="2012-02-29"\
+           data-endDate="2013-01-01" data-format="yyyy-MM-dd"\
+           data-separator=" to "/>\
+        </div>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
+
+      // The date range picker object needs some initialization
+      var $obj = $('#' + id);
+      $obj.daterangepicker();
+      $obj.data('daterangepicker').notify();
+      $obj.data('daterangepicker').updateCalendars();
+
+      Shiny.bindAll();
+    });
+
+    // Run tests that are exactly the same for all InputBindings
+    common_tests(id, binding_name);
+
+    afterEach(function(){
+      Shiny.unbindAll();
+      $('#input_binding_test').remove();
+    });
+
+    it("getValue() works", function() {
+      expect(get_value(id)).toEqual(['2012-02-29', '2013-01-01']);
+    });
+
+    it("setValue() works", function() {
+      set_value(id, ['2001-01-01', '2014-02-28']);
+      expect(get_value(id)).toEqual(['2001-01-01', '2014-02-28']);
+
+      // Single value only changes the min
+      set_value(id, ['2002-02-02']);
+      expect(get_value(id)).toEqual(['2002-02-02', '2014-02-28']);
+
+      // Non-array value
+      set_value(id, '2003-03-03');
+      expect(get_value(id)).toEqual(['2003-03-03', '2014-02-28']);
+
+      // Null values have no effect
+      set_value(id, [null, null]);
+      expect(get_value(id)).toEqual(['2003-03-03', '2014-02-28']);
+
+      // Invalid date has no effect
+      set_value(id, ['2012-02-40', '2012-04-20']);
+      expect(get_value(id)).toEqual(['2003-03-03', '2012-04-20']);
+
+      // Reversed order - works?
+      set_value(id, ['2002-02-02', '2001-01-01']);
+      expect(get_value(id)).toEqual(['2002-02-02', '2001-01-01']);
+    });
+
+    it("getState() works", function() {
+      expect(get_state(id)).toEqual({
+        label: 'Date range input:',
+        minDate: false,
+        maxDate: false,
+        value: ['2012-02-29', '2013-01-01'],
+        format: 'yyyy-MM-dd',
+        separator: ' to ',
+        showDropdowns: false
+      });
+    });
+
+    it("receiveMessage() works", function() {
+      var expected_state = {
+        label: 'Date range input:',
+        minDate: false,
+        maxDate: false,
+        value: ['2001-01-01', '2002-02-02'],
+        format: 'yyyy-MM-dd',
+        separator: ' to ',
+        showDropdowns: false
+      };
+
+      // Set value
+      // getValue() and getState().value should be the same
+      receive_message(id, { value: ['2001-01-01', '2002-02-02'] });
+      expect(get_value(id)).toEqual(['2001-01-01', '2002-02-02']);
+      expect(get_state(id)).toEqual(expected_state);
+
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_state(id)).toEqual(expected_state);
+
+      // Set label
+      receive_message(id, { label:'new label' });
+      expect(get_state(id)).toEqual(
+        $.extend(expected_state, { label:'new label' })
+      );
+
+      // Set format, separator, minDate, maxDate
+      receive_message(id, {
+        minDate: '2000-01-01',
+        maxDate: '2020-12-31',
+        format:'MM/dd/yyyy',
+        separator:' - '
+      });
+      expect(get_state(id)).toEqual(
+        $.extend(expected_state, {
+          minDate: '2000-01-01',
+          maxDate: '2020-12-31',
+          format: 'MM/dd/yyyy',
+          separator : ' - '
+        })
+      );
+
+    });
+  });
+
+
+  // ===========================================================================
   describe("selectInputBinding", function() {
     var id = 'in_select';
     var binding_name = 'selectInput'; // Name of the input binding in the registry

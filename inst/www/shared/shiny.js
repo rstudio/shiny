@@ -1223,6 +1223,110 @@
   Shiny.inputBindings.register(datePickerInputBinding, 'shiny.datePickerInput');
 
 
+  var dateRangePickerInputBinding = new Shiny.InputBinding();
+  $.extend(dateRangePickerInputBinding, {
+    find: function(scope) {
+      return $(scope).find('input.date-range-picker');
+    },
+    getValue: function(el) {
+      var settings = $(el).data('daterangepicker');
+      if (settings) {
+        return [ settings.startDate.toString('yyyy-MM-dd'),
+                 settings.endDate.toString('yyyy-MM-dd') ];
+      } else {
+        return [ null, null ];
+      }
+    },
+    setValue: function(el, value) {
+      var settings = $(el).data('daterangepicker');
+
+      if (value instanceof Array) {
+        var date = Date.parse(value[0]);
+        if (date) settings.startDate = date;
+
+        date = Date.parse(value[1]);
+        if (date) settings.endDate = date;
+      } else {
+        settings.startDate = Date.parse(value);
+      }
+
+      // Update the input text from the startDate and endDate
+      settings.notify();
+      // Update the calendars to show startDate and endDate
+      settings.updateCalendars();
+    },
+    getState: function(el) {
+      var $el = $(el);
+      var settings = $el.data('daterangepicker');
+
+      var minDate = false;
+      if (settings.minDate)
+        minDate = settings.minDate.toString('yyyy-MM-dd');
+      var maxDate = false;
+      if (settings.maxDate)
+        maxDate = settings.maxDate.toString('yyyy-MM-dd');
+
+      return {
+        label:     $el.parent().find('label[for=' + el.id + ']').text(),
+        value:     this.getValue(el),
+        minDate:   minDate,
+        maxDate:   maxDate,
+        format:    settings.format,
+        separator: settings.separator,
+        showDropdowns: settings.showDropdowns
+      };
+    },
+    receiveMessage: function(el, data) {
+      var settings = $(el).data('daterangepicker');
+
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value);
+
+      if (data.hasOwnProperty('minDate'))
+        settings.minDate = Date.parse(data.minDate);
+
+      if (data.hasOwnProperty('maxDate'))
+        settings.maxDate = Date.parse(data.maxDate);
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+
+      if (data.hasOwnProperty('format'))
+        settings.format = data.format;
+
+      if (data.hasOwnProperty('separator'))
+        settings.separator = data.separator;
+
+      // Update the input text from the startDate and endDate
+      settings.notify();
+      // Update the calendars to show startDate and endDate
+      settings.updateCalendars();
+
+      $(el).trigger('change');
+    },
+    subscribe: function(el, callback) {
+      $(el).on('keyup.dateRangePickerInputBinding input.dateRangePickerInputBinding', function(event) {
+        // Use normal debouncing policy when typing
+        callback(true);
+      });
+      $(el).on('change.dateRangePickerInputBinding', function(event) {
+        // Send immediately when clicked
+        callback(false);
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.dateRangePickerInputBinding');
+    },
+    getRatePolicy: function() {
+      return {
+        policy: 'debounce',
+        delay: 250
+      };
+    }
+  });
+  Shiny.inputBindings.register(dateRangePickerInputBinding, 'shiny.dateRangePickerInput');
+
+
   // Select input
   var selectInputBinding = new InputBinding();
   $.extend(selectInputBinding, {
@@ -2140,6 +2244,25 @@
       }
     }
     initDatePickers();
+
+    function initDateRangePickers() {
+      $('input.date-range-picker').each(function() {
+        var $el = $(this);
+
+        // Trigger change event whenever the value is changed via user input
+        $el.daterangepicker(null, function() {
+          $el.trigger('change');
+        });
+
+        // Fill the value text from the startDate and endDate
+        $el.data('daterangepicker').notify();
+        // Update the calendars to show startDate and
+        $el.data('daterangepicker').updateCalendars();
+
+        $el.trigger('change');
+      });
+    }
+    initDateRangePickers();
 
     // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size

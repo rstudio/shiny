@@ -120,6 +120,51 @@ updateDatePickerInput  <- function(session, inputId, label = NULL, value = NULL)
 }
 
 
+#' Change the start and end values of a date range picker input on the client
+#'
+#' @template update-input
+#' @param start The start date.
+#' @param end The end date.
+#'
+#' @seealso \code{\link{dateRangePickerInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, clientData, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     updateRangeDatePickerInput(session, "inDateRange",
+#'       label = paste("Date range label", x),
+#'       start = paste("2013-01-", x, sep=""))
+#'       end = paste("2013-12-", x, sep=""))
+#'   })
+#' })
+#' }
+#' @export
+updateDateRangePickerInput <- function(session, inputId, label = NULL,
+    start = Sys.Date(), end = Sys.Date(), min = NULL, max = NULL) {
+
+  # Make sure start and end are strings, not date objects. This is for
+  # consistency across different locales.
+  if (inherits(start, "Date"))  start <- format(start, '%Y-%m-%d')
+  if (inherits(end, "Date"))    end <- format(end, '%Y-%m-%d')
+  if (inherits(min, "Date"))    min <- format(min, '%Y-%m-%d')
+  if (inherits(max, "Date"))    max <- format(max, '%Y-%m-%d')
+
+  message <- dropNulls(list(
+    label = label,
+    value = c(start, end),
+    minDate = min,
+    maxDate = max
+  ))
+
+  session$sendInputMessage(inputId, message)
+}
+
 #' Change the selected tab on the client
 #'
 #' @param session The \code{session} object passed to function given to

@@ -712,14 +712,44 @@ datePickerInput <- function(inputId, label, value = Sys.Date(),
 }
 
 
-#' @export
-dateRangePickerInput <- function(inputId, label, value = Sys.Date(), 
-    format = "yyyy-mm-dd") {
 
-  # Make sure value is a string, not a date object. This is for consistency
-  # across different locales.
-  if (inherits(value, "Date"))
-    value <- format(value, '%Y-%m-%d')
+#' Create date range picker input
+#'
+#' Creates a text input which, when clicked on, brings up a calendar that
+#' the user can click on to select start and end dates
+#'
+#' @param inputId Input variable to assign the control's value to.
+#' @param label Display label for the control.
+#' @param start Start date.
+#' @param end End date.
+#' @param min Minimum date available.
+#' @param min Maximum date available.
+#' @param format The format of the date. Defaults to \code{"yyyy-MM-dd"}. Note
+#'   that this differs from the date format string for
+#'   \code{\link{datePickerInput}} in that the "MM" is capitalized. This is
+#'   because it uses a different date library on the Javascript end.
+#' @param sep String to use as a separator between the start and end date.
+#' @param dropdowns Should the month and year be shown with dropdown menus for
+#'   quicker navigation?
+#'
+#' @seealso \code{\link{updateDatePickerInput}}
+#'
+#' @examples
+#' dateRangePickerInput("date", "Date:", value = "2012-02-29", 
+#' )
+#'
+#' @export
+dateRangePickerInput <- function(inputId, label, start = Sys.Date(),
+    end = Sys.Date(), min = NULL, max = NULL, format = "yyyy-MM-dd",
+    sep = " - ", dropdowns = TRUE) {
+
+  # Make sure start and end are strings, not date objects. This is for
+  # consistency across different locales.
+  if (inherits(start, "Date"))  start <- format(start, '%Y-%m-%d')
+  if (inherits(end, "Date"))    end <- format(end, '%Y-%m-%d')
+  if (inherits(min, "Date"))    min <- format(min, '%Y-%m-%d')
+  if (inherits(max, "Date"))    max <- format(max, '%Y-%m-%d')
+
 
   tagList(
     singleton(tags$head(
@@ -733,9 +763,15 @@ dateRangePickerInput <- function(inputId, label, value = Sys.Date(),
       tags$input(id = inputId,
                  name = inputId,
                  type = "text",
-                 class = "datepicker",
-                 `data-date-format` = format,
-                 value = value)
+                 class = "date-range-picker",
+                 `data-startDate` = start,
+                 `data-endDate` = end,
+                 `data-minDate` = min,
+                 `data-maxDate` = max,
+                 `data-format` = format,
+                 `data-separator` = sep,
+                 `data-showDropdowns` = dropdowns
+      )
     )
   )
 }

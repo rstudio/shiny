@@ -47,6 +47,6 @@ shinyServer(function(input, output, clientData, session) {
 }
 }
 \seealso{
-  \code{\link{textInput}}
+  \code{\link{datePickerInput}}
 }
 

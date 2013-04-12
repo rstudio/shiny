@@ -91,7 +91,7 @@ updateSliderInput <- updateTextInput
 #' @template update-input
 #' @param value The value to set for the input object.
 #'
-#' @seealso \code{\link{textInput}}
+#' @seealso \code{\link{datePickerInput}}
 #'
 #' @examples
 #' \dontrun{
@@ -109,7 +109,15 @@ updateSliderInput <- updateTextInput
 #' })
 #' }
 #' @export
-updateDatePickerInput <- updateTextInput
+updateDatePickerInput  <- function(session, inputId, label = NULL, value = NULL) {
+  # Make sure value is a string, not a date object. This is for consistency
+  # across different locales.
+  if (inherits(value, "Date"))
+    value <- format(value, '%Y-%m-%d')
+
+  message <- dropNulls(list(label=label, value=value))
+  session$sendInputMessage(inputId, message)
+}
 
 
 #' Change the selected tab on the client

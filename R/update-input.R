@@ -7,7 +7,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -40,7 +40,7 @@ updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # TRUE if input$controller is even, FALSE otherwise.
@@ -63,7 +63,7 @@ updateCheckboxInput <- updateTextInput
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -95,7 +95,7 @@ updateSliderInput <- updateTextInput
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -130,7 +130,7 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -176,7 +176,7 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # TRUE if input$controller is even, FALSE otherwise.
@@ -211,7 +211,7 @@ updateTabsetPanel <- function(session, inputId, selected = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -246,7 +246,7 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -305,7 +305,7 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -343,7 +343,7 @@ updateRadioButtons <- updateCheckboxGroupInput
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x

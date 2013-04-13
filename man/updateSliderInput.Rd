@@ -32,7 +32,7 @@
 }
 \examples{
 \dontrun{
-shinyServer(function(input, output, clientData, session) {
+shinyServer(function(input, output, session) {
 
   observe({
     # We'll use the input$controller variable multiple times, so save it as x

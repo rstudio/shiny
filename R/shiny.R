@@ -55,6 +55,7 @@ ShinySession <- setRefClass(
       .outputOptions <<- list()
 
       session <<- list(clientData       = clientData,
+                       sendMessage      = .self$.sendMessage,
                        sendInputMessage = .self$.sendInputMessage,
                        sendJavascript   = .self$.sendJavascript)
     },
@@ -189,6 +190,11 @@ ShinySession <- setRefClass(
       if (is.null(requestMsg$tag))
         return()
       .write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
+    },
+    .sendMessage = function(type, message) {
+      data <- list()
+      data[[type]] <- message
+      .write(toJSON(data))
     },
     .sendInputMessage = function(inputId, message) {
       data <- list(id = inputId, message = message)

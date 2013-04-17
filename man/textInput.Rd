@@ -23,4 +23,7 @@
 \examples{
 textInput("caption", "Caption:", "Data Summary")
 }
+\seealso{
+  \code{\link{updateTextInput}}
+}
 

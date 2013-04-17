@@ -31,4 +31,7 @@
 numericInput("obs", "Observations:", 10,
              min = 1, max = 100)
 }
+\seealso{
+  \code{\link{updateNumericInput}}
+}
 

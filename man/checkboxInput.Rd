@@ -24,6 +24,7 @@
 checkboxInput("outliers", "Show outliers", FALSE)
 }
 \seealso{
-  \code{\link{checkboxGroupInput}}
+  \code{\link{checkboxGroupInput}},
+  \code{\link{updateCheckboxInput}}
 }
 

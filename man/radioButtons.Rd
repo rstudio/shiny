@@ -32,4 +32,7 @@ radioButtons("dist", "Distribution type:",
                "Log-normal" = "lnorm",
                "Exponential" = "exp"))
 }
+\seealso{
+  \code{\link{updateRadioButtons}}
+}
 

@@ -1,0 +1,49 @@
+\name{updateCheckboxInput}
+\alias{updateCheckboxInput}
+\title{Change the value of a checkbox input on the client}
+\usage{
+  updateCheckboxInput(session, inputId, label = NULL,
+    value = NULL)
+}
+\arguments{
+  \item{session}{The \code{session} object passed to
+  function given to \code{shinyServer}.}
+
+  \item{inputId}{The id of the input object.}
+
+  \item{label}{The label to set for the input object.}
+
+  \item{value}{The value to set for the input object.}
+}
+\description{
+  Change the value of a checkbox input on the client
+}
+\details{
+  The input updater functions send a message to the client,
+  telling it to change the settings of an input object. The
+  messages are collected and sent after all the observers
+  (including outputs) have finished running.
+
+  The syntax of these functions is similar to the functions
+  that created the inputs in the first place. For example,
+  \code{\link{numericInput}()} and
+  \code{updateNumericInput()} take a similar set of
+  arguments.
+}
+\examples{
+\dontrun{
+shinyServer(function(input, output, clientData, session) {
+
+  observe({
+    # TRUE if input$controller is even, FALSE otherwise.
+    x_even <- input$controller \%\% 2 == 0
+
+    updateCheckboxInput(session, "inCheckbox", value = x_even)
+  })
+})
+}
+}
+\seealso{
+  \code{\link{checkboxInput}}
+}
+

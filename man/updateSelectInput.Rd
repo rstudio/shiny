@@ -1,0 +1,70 @@
+\name{updateSelectInput}
+\alias{updateSelectInput}
+\title{Change the value of a select input on the client}
+\usage{
+  updateSelectInput(session, inputId, label = NULL,
+    choices = NULL, selected = NULL)
+}
+\arguments{
+  \item{session}{The \code{session} object passed to
+  function given to \code{shinyServer}.}
+
+  \item{inputId}{The id of the input object.}
+
+  \item{label}{The label to set for the input object.}
+
+  \item{choices}{A named vector or named list of options.
+  For each item, the name will be used as the label, and
+  the value will be used as the value.}
+
+  \item{selected}{A vector or list of options which will be
+  selected.}
+}
+\description{
+  Change the value of a select input on the client
+}
+\details{
+  The input updater functions send a message to the client,
+  telling it to change the settings of an input object. The
+  messages are collected and sent after all the observers
+  (including outputs) have finished running.
+
+  The syntax of these functions is similar to the functions
+  that created the inputs in the first place. For example,
+  \code{\link{numericInput}()} and
+  \code{updateNumericInput()} take a similar set of
+  arguments.
+}
+\examples{
+\dontrun{
+shinyServer(function(input, output, clientData, session) {
+
+  observe({
+    # We'll use the input$controller variable multiple times, so save it as x
+    # for convenience.
+    x <- input$controller
+
+    # Create a list of new options, where the name of the items is something
+    # like 'option label x 1', and the values are 'option-x-1'.
+    s_options <- list()
+    s_options[[sprintf("option label \%d 1", x)]] <- sprintf("option-\%d-1", x)
+    s_options[[sprintf("option label \%d 2", x)]] <- sprintf("option-\%d-2", x)
+
+    # Change values for input$inSelect
+    updateSelectInput(session, "inSelect", choices = s_options)
+
+    # Can also set the label and select an item (or more than one if it's a
+    # multi-select)
+    updateSelectInput(session, "inSelect2",
+      label = paste("Select label", x),
+      choices = s_options,
+      selected = sprintf("option label \%d 2", x)
+    )
+  })
+})
+}
+}
+\seealso{
+  \code{\link{selectInput}}
+}
+

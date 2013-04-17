@@ -18,6 +18,7 @@ ShinySession <- setRefClass(
     .websocket = 'ANY',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
+    .inputMessageQueue = 'list',    # A list of inputMessages to send when flushed
     .outputs = 'list',       # Keeps track of all the output observer objects
     .outputOptions = 'list', # Options for each of the output observer objects
     .progressKeys = 'character',
@@ -29,13 +30,15 @@ ShinySession <- setRefClass(
     token = 'character',  # Used to identify this instance in URLs
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
-    closed = 'logical'
+    closed = 'logical',
+    session = 'list'      # Object for the server app to access session stuff
   ),
   methods = list(
     initialize = function(websocket) {
       .websocket <<- websocket
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
+      .inputMessageQueue <<- list()
       .progressKeys <<- character(0)
       closed <<- FALSE
       # TODO: Put file upload context in user/app-specific dir if possible
@@ -50,6 +53,10 @@ ShinySession <- setRefClass(
       token <<- createUniqueId(16)
       .outputs <<- list()
       .outputOptions <<- list()
+
+      session <<- list(clientData       = clientData,
+                       sendInputMessage = .self$.sendInputMessage,
+                       sendJavascript   = .self$.sendJavascript)
     },
     close = function() {
       closed <<- TRUE
@@ -111,9 +118,11 @@ ShinySession <- setRefClass(
       }
     },
     flushOutput = function() {
+
       if (length(.progressKeys) == 0
           && length(.invalidatedOutputValues) == 0
-          && length(.invalidatedOutputErrors) == 0) {
+          && length(.invalidatedOutputErrors) == 0
+          && length(.inputMessageQueue) == 0) {
         return(invisible())
       }
       
@@ -123,9 +132,12 @@ ShinySession <- setRefClass(
       .invalidatedOutputValues <<- Map$new()
       errors <- .invalidatedOutputErrors
       .invalidatedOutputErrors <<- Map$new()
+      inputMessages <- .inputMessageQueue
+      .inputMessageQueue <<- list()
       
       json <- toJSON(list(errors=as.list(errors),
-                          values=as.list(values)))
+                          values=as.list(values),
+                          inputMessages=inputMessages))
 
       .write(json)
     },
@@ -177,6 +189,15 @@ ShinySession <- setRefClass(
       if (is.null(requestMsg$tag))
         return()
       .write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
+    },
+    .sendInputMessage = function(inputId, message) {
+      data <- list(id = inputId, message = message)
+
+      # Add to input message queue
+      .inputMessageQueue[[length(.inputMessageQueue) + 1]] <<- data
+    },
+    .sendJavascript = function(data) {
+      .write(toJSON(list(javascript = data)))
     },
     .write = function(json) {
       if (getOption('shiny.trace', FALSE))
@@ -975,9 +996,13 @@ startApp <- function(port=8101L) {
                 input=shinysession$input,
                 output=.createOutputWriter(shinysession))
 
-              # The clientData argument is optional; check if it exists
+              # The clientData and session arguments are optional; check if
+              # each exists
               if ('clientData' %in% names(formals(serverFunc)))
                 args$clientData <- shinysession$clientData
+
+              if ('session' %in% names(formals(serverFunc)))
+                args$session <- shinysession$session
 
               do.call(serverFunc, args)
             })

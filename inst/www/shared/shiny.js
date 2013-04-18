@@ -1,5 +1,6 @@
-(function() {
+/*jshint browser:true, jquery:true, strict:false, curly:false, indent:2*/
 
+(function() {
   var $ = jQuery;
 
   var exports = window.Shiny = window.Shiny || {};
@@ -120,7 +121,7 @@
       this.$invoke();
     };
     this.$clearTimer = function() {
-      if (this.timerId != null) {
+      if (this.timerId !== null) {
         clearTimeout(this.timerId);
         this.timerId = null;
       }
@@ -145,7 +146,7 @@
       var self = this;
 
       this.args = arguments;
-      if (this.timerId == null) {
+      if (this.timerId === null) {
         this.$invoke();
         this.timerId = setTimeout(function() {
           self.$clearTimer();
@@ -160,7 +161,7 @@
       this.$invoke();
     };
     this.$clearTimer = function() {
-      if (this.timerId != null) {
+      if (this.timerId !== null) {
         clearTimeout(this.timerId);
         this.timerId = null;
       }
@@ -189,7 +190,7 @@
     return function() {
       self = this;
       args = arguments;
-      if (timerId != null) {
+      if (timerId !== null) {
         clearTimeout(timerId);
         timerId = null;
       }
@@ -217,7 +218,7 @@
     function throttled() {
       self = null;
       args = null;
-      if (timerId == null) {
+      if (timerId === null) {
         // Haven't seen a call recently. Execute now and
         // start a timer to buffer any subsequent calls.
         timerId = setTimeout(function() {
@@ -238,7 +239,7 @@
         self = this;
         args = arguments;
       }
-    };
+    }
     return throttled;
   }
 
@@ -309,7 +310,8 @@
     };
     this.submit = function() {
       for (var name in this.pendingInput) {
-        this.target.setInput(name, this.pendingInput[name]);
+        if (this.pendingInput.hasOwnProperty(name))
+          this.target.setInput(name, this.pendingInput[name]);
       }
     };
   }).call(InputDeferDecorator.prototype);
@@ -327,13 +329,13 @@
         this.inputRatePolicies[name].normalCall(name, value, immediate);
     };
     this.setRatePolicy = function(name, mode, millis) {
-      if (mode == 'direct') {
+      if (mode === 'direct') {
         this.inputRatePolicies[name] = new Invoker(this, this.$doSetInput);
       }
-      else if (mode == 'debounce') {
+      else if (mode === 'debounce') {
         this.inputRatePolicies[name] = new Debouncer(this, this.$doSetInput, millis);
       }
-      else if (mode == 'throttle') {
+      else if (mode === 'throttle') {
         this.inputRatePolicies[name] = new Throttler(this, this.$doSetInput, millis);
       }
     };
@@ -447,7 +449,7 @@
         socket.send(JSON.stringify({
           method: 'init',
           data: self.$initialInput
-        }))
+        }));
 
         while (self.$pendingMessages.length) {
           var msg = self.$pendingMessages.shift();
@@ -567,7 +569,7 @@
       if (binding && binding.onValueError) {
         binding.onValueError(error);
       }
-    }
+    };
 
     this.receiveOutput = function(name, value) {
       if (this.$values[name] === value)
@@ -584,69 +586,6 @@
       return value;
     };
 
-    this.dispatchMessage = function(msg) {
-      var msgObj = JSON.parse(msg);
-      if (msgObj.custom !== undefined && exports.oncustommessage) {
-        exports.oncustommessage(msgObj.custom);
-      }
-      if (msgObj.values) {
-        $(document.documentElement).removeClass('shiny-busy');
-        for (name in this.$bindings)
-          this.$bindings[name].showProgress(false);
-      }
-      for (key in msgObj.errors) {
-        this.receiveError(key, msgObj.errors[key]);
-      }
-      for (key in msgObj.values) {
-        this.receiveOutput(key, msgObj.values[key]);
-      }
-      if (msgObj.inputMessages) {
-        // inputMessages should be an array
-        for (var i = 0; i < msgObj.inputMessages.length; i++) {
-          var $obj = $('.shiny-bound-input#' + msgObj.inputMessages[i].id);
-          var inputBinding = $obj.data('shiny-input-binding');
-
-          // Dispatch the message to the appropriate input object
-          if ($obj.length > 0) {
-            inputBinding.receiveMessage($obj[0], msgObj.inputMessages[i].message);
-          }
-        }
-      }
-      if (msgObj.javascript) {
-        eval(msgObj.javascript);
-      }
-      if (msgObj.console) {
-        for (var i = 0; i < msgObj.console.length; i++) {
-          if (console.log)
-            console.log(msgObj.console[i]);
-        }
-      }
-      if (msgObj.progress) {
-        $(document.documentElement).addClass('shiny-busy');
-        for (var i = 0; i < msgObj.progress.length; i++) {
-          var key = msgObj.progress[i];
-          var binding = this.$bindings[key];
-          if (binding && binding.showProgress) {
-            binding.showProgress(true);
-          }
-        }
-      }
-      if (msgObj.response) {
-        var resp = msgObj.response;
-        var requestId = resp.tag;
-        var request = this.$activeRequests[requestId];
-        if (request) {
-          delete this.$activeRequests[requestId];
-          if ('value' in resp)
-            request.onSuccess(resp.value);
-          else
-            request.onError(resp.error);
-        }
-      };
-
-      this.$updateConditionals();
-    };
-
     this.bindOutput = function(id, binding) {
       if (!id)
         throw "Can't bind an element with no ID";
@@ -661,6 +600,7 @@
 
       return binding;
     };
+
     this.unbindOutput = function(id, binding) {
       if (this.$bindings[id] === binding) {
         delete this.$bindings[id];
@@ -673,6 +613,9 @@
 
     this.$updateConditionals = function() {
       var scope = {input: this.$inputValues, output: this.$values};
+
+      var triggerShown  = function() { $(this).trigger('shown'); };
+      var triggerHidden = function() { $(this).trigger('hidden'); };
 
       var conditionals = $(document).find('[data-display-if]');
       for (var i = 0; i < conditionals.length; i++) {
@@ -687,18 +630,167 @@
 
         if (condFunc(scope)) {
           el.trigger('show');
-          el.show(0, function() {
-            $(this).trigger('shown');
-          });
+          el.show(0, triggerShown);
         }
         else {
           el.trigger('hide');
-          el.hide(0, function() {
-            $(this).trigger('hidden');
-          });
+          el.hide(0, triggerHidden);
         }
       }
     };
+
+    // Message handler management functions =================================
+
+    // Records insertion order of handlers. Maps number to name. This is so
+    // we can dispatch messages to handlers in the order that handlers were
+    // added.
+    var messageHandlerOrder = [];
+    // Keep track of handlers by name. Maps name to handler function.
+    var messageHandlers = {};
+
+    // Two categories of message handlers: those that are from Shiny, and those
+    // that are added by the user. The Shiny ones handle messages in
+    // msgObj.values, msgObj.errors, and so on. The user ones handle messages
+    // in msgObj.custom.foo and msgObj.custom.bar.
+    var customMessageHandlerOrder = [];
+    var customMessageHandlers = {};
+
+    // Adds Shiny (internal) message handler
+    function addMessageHandler(type, handler) {
+      if (messageHandlers[type]) {
+        throw('handler for message of type "' + type + '" already added.');
+      }
+      if (typeof(handler) !== 'function') {
+        throw('handler must be a function.');
+      }
+      if (handler.length !== 1) {
+        throw('handler must be a function that takes one argument.');
+      }
+
+      messageHandlerOrder.push(type);
+      messageHandlers[type] = handler;
+    }
+
+    // Adds custom message handler - this one is exposed to the user
+    function addCustomMessageHandler(type, handler) {
+      if (customMessageHandlers[type]) {
+        throw('handler for message of type "' + type + '" already added.');
+      }
+      if (typeof(handler) !== 'function') {
+        throw('handler must be a function.');
+      }
+      if (handler.length !== 1) {
+        throw('handler must be a function that takes one argument.');
+      }
+
+      customMessageHandlerOrder.push(type);
+      customMessageHandlers[type] = handler;
+    }
+
+    exports.addCustomMessageHandler = addCustomMessageHandler;
+
+    this.dispatchMessage = function(msg) {
+      var msgObj = JSON.parse(msg);
+
+      // Send msgObj.foo and msgObj.bar to appropriate handlers
+      this._sendMessagesToHandlers(msgObj, messageHandlers, messageHandlerOrder);
+
+      this.$updateConditionals();
+    };
+
+
+    // A function for sending messages to the appropriate handlers.
+    // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
+    this._sendMessagesToHandlers = function(msgObj, handlers, handlerOrder) {
+      // Dispatch messages to handlers, if handler is present
+      for (var i = 0; i < handlerOrder.length; i++) {
+        var msgType = handlerOrder[i];
+
+        if (msgObj[msgType]) {
+          // Execute each handler with 'this' referring to the present value of
+          // 'this'
+          handlers[msgType].call(this, msgObj[msgType]);
+        }
+      }
+    };
+
+    // Message handlers =====================================================
+
+    addMessageHandler('values', function(message) {
+      $(document.documentElement).removeClass('shiny-busy');
+      for (var name in this.$bindings)
+        this.$bindings[name].showProgress(false);
+
+      for (var key in message) {
+        this.receiveOutput(key, message[key]);
+      }
+    });
+
+    addMessageHandler('errors', function(message) {
+      for (var key in message) {
+        this.receiveError(key, message[key]);
+      }
+    });
+
+    addMessageHandler('inputMessages', function(message) {
+      // inputMessages should be an array
+      for (var i = 0; i < message.length; i++) {
+        var $obj = $('.shiny-bound-input#' + message[i].id);
+        var inputBinding = $obj.data('shiny-input-binding');
+
+        // Dispatch the message to the appropriate input object
+        if ($obj.length > 0) {
+          inputBinding.receiveMessage($obj[0], message[i].message);
+        }
+      }
+    });
+
+    addMessageHandler('javascript', function(message) {
+      eval(message);
+    });
+
+    addMessageHandler('console', function(message) {
+      for (var i = 0; i < message.length; i++) {
+        if (console.log)
+          console.log(message[i]);
+      }
+    });
+
+    addMessageHandler('progress', function(message) {
+      $(document.documentElement).addClass('shiny-busy');
+      for (var i = 0; i < message.length; i++) {
+        var key = message[i];
+        var binding = this.$bindings[key];
+        if (binding && binding.showProgress) {
+          binding.showProgress(true);
+        }
+      }
+    });
+
+    addMessageHandler('response', function(message) {
+      var requestId = message.tag;
+      var request = this.$activeRequests[requestId];
+      if (request) {
+        delete this.$activeRequests[requestId];
+        if ('value' in message)
+          request.onSuccess(message.value);
+        else
+          request.onError(message.error);
+      }
+    });
+
+    addMessageHandler('custom', function(message) {
+      // For old-style custom messages - should deprecate and migrate to new
+      // method
+      if (exports.oncustommessage) {
+        exports.oncustommessage(message);
+      }
+
+      // Send messages.foo and messages.bar to appropriate handlers
+      this._sendMessagesToHandlers(message, customMessageHandlers,
+                                   customMessageHandlerOrder);
+    });
+
   }).call(ShinyApp.prototype);
 
 
@@ -772,7 +864,7 @@
         return;
       }
       
-      if (this.fileIndex == this.files.length) {
+      if (this.fileIndex === this.files.length) {
         // Just ended
         this.completed = true;
         this.onComplete();
@@ -804,26 +896,26 @@
         this.bindingNames[bindingName] = bindingObj;
         binding.name = bindingName;
       }
-    },
+    };
     this.setPriority = function(bindingName, priority) {
       var bindingObj = this.bindingNames[bindingName];
       if (!bindingObj)
         throw "Tried to set priority on unknown binding " + bindingName;
       bindingObj.priority = priority || 0;
-    },
+    };
     this.getPriority = function(bindingName) {
       var bindingObj = this.bindingNames[bindingName];
       if (!bindingObj)
         return false;
       return bindingObj.priority;
-    },
+    };
     this.getBindings = function() {
       // Sort the bindings. The ones with higher priority are consulted
       // first; ties are broken by most-recently-registered.
       return mergeSort(this.bindings, function(a, b) {
         return b.priority - a.priority;
       });
-    }
+    };
   }).call(BindingRegistry.prototype);
 
 
@@ -891,7 +983,7 @@
         // Copy items from data to img. This should include 'src'
         $.each(data, function(key, value) {
           img[key] = value;
-        })
+        });
       }
 
       $(el).empty();
@@ -926,7 +1018,7 @@
     renderValue: function(el, data) {
       $(el).attr('href', data);
     }
-  })
+  });
   outputBindings.register(downloadLinkOutputBinding, 'shiny.downloadLink');
 
   // =========================================================================
@@ -948,7 +1040,7 @@
   
     // Gives the input a type in case the server needs to know it
     // to deserialize the JSON correctly
-    this.getType = function() { return false; }
+    this.getType = function() { return false; };
     this.getValue = function(el) { throw "Not implemented"; };
     this.subscribe = function(el, callback) { };
     this.unsubscribe = function(el) { };
@@ -995,7 +1087,7 @@
     },
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
-        this.setValue(el, data.value)
+        this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
         $(el).parent().find('label[for=' + el.id + ']').text(data.label);
@@ -1045,7 +1137,7 @@
       el.value = value;
     },
     getType: function(el) {
-      return "number"
+      return "number";
     },
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))  el.value = data.value;
@@ -1054,7 +1146,7 @@
       if (data.hasOwnProperty('step'))   el.step  = data.step;
 
       if (data.hasOwnProperty('label'))
-        label: $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
 
       $(el).trigger('change');
     },
@@ -1139,7 +1231,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
 
       // jslider doesn't support setting other properties
 
@@ -1200,7 +1292,7 @@
       };
     },
     receiveMessage: function(el, data) {
-      $el = $(el);
+      var $el = $(el);
 
       // This will replace all the options
       if (data.hasOwnProperty('options')) {
@@ -1219,15 +1311,15 @@
             $newopt.prop('selected', in_opt.selected);
           }
 
-          $el.append($newopt)
+          $el.append($newopt);
         }
       }
 
       if (data.hasOwnProperty('value'))
-        this.setValue(el, data.value)
+        this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
 
       $(el).trigger('change');
     },
@@ -1274,7 +1366,7 @@
       };
     },
     receiveMessage: function(el, data) {
-      $el = $(el);
+      var $el = $(el);
 
       // This will replace all the options
       if (data.hasOwnProperty('options')) {
@@ -1299,15 +1391,15 @@
           $newopt.append($radio);
           $newopt.append('<span>' + in_opt.label + '</span>');
 
-          $el.append($newopt)
+          $el.append($newopt);
         }
       }
 
       if (data.hasOwnProperty('value'))
-        this.setValue(el, data.value)
+        this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
 
       $(el).trigger('change');
     },
@@ -1405,7 +1497,7 @@
              };
     },
     receiveMessage: function(el, data) {
-      $el = $(el);
+      var $el = $(el);
 
       // This will replace all the options
       if (data.hasOwnProperty('options')) {
@@ -1430,15 +1522,15 @@
           $newopt.append($checkbox);
           $newopt.append('<span>' + in_opt.label + '</span>');
 
-          $el.append($newopt)
+          $el.append($newopt);
         }
       }
 
       if (data.hasOwnProperty('value'))
-        this.setValue(el, data.value)
+        this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $el.find('label[for=' + el.id + ']').text(data.label)
+        $el.find('label[for=' + el.id + ']').text(data.label);
 
       $(el).trigger('change');
     },
@@ -1494,8 +1586,9 @@
     },
     getValue: function(el) {
       var anchor = $(el).children('li.active').children('a');
-      if (anchor.length == 1)
+      if (anchor.length === 1)
         return this._getTabName(anchor);
+
       return null;
     },
     setValue: function(el, value) {
@@ -1590,7 +1683,7 @@
                   file,
                   (self.progressBytes + e.loaded) / self.totalBytes);
               }
-            }
+            };
           }
           return xhrVal;
         },
@@ -1665,12 +1758,12 @@
     var files = evt.target.files;
     var id = fileInputBinding.getId(evt.target);
 
-    if (files.length == 0)
+    if (files.length === 0)
       return;
 
     // Start the new upload and put the uploader in 'currentUploader'.
     el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
-  };
+  }
 
   var fileInputBinding = new InputBinding();
   $.extend(fileInputBinding, {
@@ -1692,7 +1785,7 @@
     unsubscribe: function(el) {
       $(el).off('.fileInputBinding');
     }
-  })
+  });
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');
 
   
@@ -1722,7 +1815,7 @@
 
     function bindOutputs(scope) {
 
-      if (scope == undefined)
+      if (scope === undefined)
         scope = document;
 
       scope = $(scope);
@@ -1753,7 +1846,7 @@
     }
 
     function unbindOutputs(scope) {
-      if (scope == undefined)
+      if (scope === undefined)
         scope = document;
 
       var outputs = $(scope).find('.shiny-bound-output');
@@ -1768,7 +1861,7 @@
     }
 
     function elementToValue(el) {
-      if (el.type == 'checkbox' || el.type == 'radio')
+      if (el.type === 'checkbox' || el.type === 'radio')
         return el.checked ? true : false;
       else
         return $(el).val();
@@ -1779,7 +1872,7 @@
     var inputsDefer = new InputDeferDecorator(inputsNoResend);
 
     // By default, use rate decorator
-    inputs = inputsRate;
+    var inputs = inputsRate;
     $('input[type="submit"], button[type="submit"]').each(function() {
       // If there is a submit button on the page, use defer decorator
       inputs = inputsDefer;
@@ -1798,17 +1891,17 @@
     function valueChangeCallback(binding, el, allowDeferred) {
       var id = binding.getId(el);
       if (id) {
-        var el = binding.getValue(el);
+        var value = binding.getValue(el);
         var type = binding.getType(el);
         if (type)
-          id = id + ":" + type
-        inputs.setInput(id, el, !allowDeferred);
+          id = id + ":" + type;
+        inputs.setInput(id, value, !allowDeferred);
       }
     }
     
     function bindInputs(scope) {
 
-      if (scope == undefined)
+      if (scope === undefined)
         scope = document;
       
       scope = $(scope);
@@ -1844,7 +1937,7 @@
           $(el).data('shiny-input-binding', binding);
           $(el).addClass('shiny-bound-input');
           var ratePolicy = binding.getRatePolicy();
-          if (ratePolicy != null) {
+          if (ratePolicy !== null) {
             inputsRate.setRatePolicy(
               effectiveId,
               ratePolicy.policy,
@@ -1866,7 +1959,7 @@
     }
 
     function unbindInputs(scope) {
-      if (scope == undefined)
+      if (scope === undefined)
         scope = document;
 
       var inputs = $(scope).find('.shiny-bound-input');
@@ -1886,7 +1979,7 @@
       if (!input.name)
         return null;
 
-      els = $(
+      var els = $(
         'input:checked' + 
         '[type="' + input.type + '"]' + 
         '[name="' + input.name + '"]');
@@ -1938,7 +2031,7 @@
       function ancestorHasClass(el, classname) {
         if (el === null) {
           return false;
-        } if (hasClass(el, classname)) {
+        } else if (hasClass(el, classname)) {
           return true;
         } else {
           return ancestorHasClass(el.parentNode, classname);
@@ -2094,7 +2187,7 @@
     var startLabel = 'Play';
     var stopLabel = 'Pause';
     var loop = self.attr('data-loop') !== undefined &&
-               !/^\s*false\s*$/i.test(self.attr('data-loop'))
+               !/^\s*false\s*$/i.test(self.attr('data-loop'));
     var animInterval = self.attr('data-interval');
     if (isNaN(animInterval))
       animInterval = 1500;

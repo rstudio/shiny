@@ -896,6 +896,63 @@ describe("Input Bindings", function() {
 
 
   // ===========================================================================
+  describe("actionButtonInputBinding", function() {
+    var id = 'in_actionbutton';
+    var binding_name = 'actionButtonInput'; // Name of the input binding in the registry
+
+    beforeEach(function(){
+      var htmlstring =
+        '<button id="' + id + '" type="button" class="btn action-button">button label</button>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
+
+      Shiny.bindAll();
+    });
+
+    afterEach(function(){
+      Shiny.unbindAll();
+      $('#input_binding_test').remove();
+    });
+
+    // Run tests that are exactly the same for all InputBindings
+    common_tests(id, binding_name);
+
+    it("getValue() works", function() {
+      expect(get_value(id)).toEqual(0);
+    });
+
+    it("click event increments counter", function() {
+      expect(get_value(id)).toEqual(0);
+
+      select_input_object(id).trigger('click');
+      expect(get_value(id)).toEqual(1);
+
+      select_input_object(id).trigger('click');
+      expect(get_value(id)).toEqual(2);
+    });
+
+    it("setValue() doesn't change the value", function() {
+      set_value(id, 2000);
+      expect(get_value(id)).toEqual(0);
+    });
+
+    it("getState() works", function() {
+      expect(get_state(id)).toEqual({ value: 0 });
+    });
+
+    it("receiveMessage() has no effect", function() {
+      receive_message(id, { value: 2000 });
+      expect(get_state(id)).toEqual({ value: 0 });
+
+      receive_message(id, { });
+      expect(get_state(id)).toEqual({ value: 0 });
+    });
+  });
+
+
+  // ===========================================================================
   describe("bootstrapTabInputBinding", function() {
     var id = 'in_tabset';
     var binding_name = 'bootstrapTabInput'; // Name of the input binding in the registry

@@ -1488,6 +1488,37 @@
   inputBindings.register(checkboxGroupInputBinding, 'shiny.checkboxGroupInput');
 
 
+  var actionButtonInputBinding = new Shiny.InputBinding();
+  $.extend(actionButtonInputBinding, {
+    find: function(scope) {
+      return $(scope).find(".action-button");
+    },
+    getValue: function(el) {
+      return $(el).data('val') || 0;
+    },
+    setValue: function(el, value) {
+    },
+    subscribe: function(el, callback) {
+      $(el).on("click.actionButtonInputBinding", function(e) {
+        $el = $(this);
+        var val = $el.data('val') || 0;
+        $el.data('val', val + 1);
+
+        callback();
+      });
+    },
+    getState: function(el) {
+      return { value: this.getValue(el) };
+    },
+    receiveMessage: function(el, data) {
+    },
+    unsubscribe: function(el) {
+      $(el).off(".actionButtonInputBinding");
+    }
+  });
+  Shiny.inputBindings.register(actionButtonInputBinding, 'shiny.actionButtonInput');
+
+
   var bootstrapTabInputBinding = new InputBinding();
   $.extend(bootstrapTabInputBinding, {
     find: function(scope) {

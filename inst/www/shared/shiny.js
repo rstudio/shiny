@@ -648,6 +648,14 @@
     // Keep track of handlers by name. Maps name to handler function.
     var messageHandlers = {};
 
+    // Two categories of message handlers: those that are from Shiny, and those
+    // that are added by the user. The Shiny ones handle messages in
+    // msgObj.values, msgObj.errors, and so on. The user ones handle messages
+    // in msgObj.custom.foo and msgObj.custom.bar.
+    var customMessageHandlerOrder = [];
+    var customMessageHandlers = {};
+
+    // Adds Shiny (internal) message handler
     function addMessageHandler(type, handler) {
       if (messageHandlers[type]) {
         throw('handler for message of type "' + type + '" already added.');
@@ -663,32 +671,50 @@
       messageHandlers[type] = handler;
     }
 
-    exports.addMessageHandler = addMessageHandler;
+    // Adds custom message handler - this one is exposed to the user
+    function addCustomMessageHandler(type, handler) {
+      if (customMessageHandlers[type]) {
+        throw('handler for message of type "' + type + '" already added.');
+      }
+      if (typeof(handler) !== 'function') {
+        throw('handler must be a function.');
+      }
+      if (handler.length !== 1) {
+        throw('handler must be a function that takes one argument.');
+      }
+
+      customMessageHandlerOrder.push(type);
+      customMessageHandlers[type] = handler;
+    }
+
+    exports.addCustomMessageHandler = addCustomMessageHandler;
 
     this.dispatchMessage = function(msg) {
       var msgObj = JSON.parse(msg);
 
-      // Dispatch messages to handlers, if handler is present
-      for (var i = 0; i < messageHandlerOrder.length; i++) {
-        var msgType = messageHandlerOrder[i];
-
-        if (msgObj[msgType]) {
-          // Execute each handler with 'this' referring to the present value of
-          // 'this'
-          messageHandlers[msgType].call(this, msgObj[msgType]);
-        }
-      }
+      // Send msgObj.foo and msgObj.bar to appropriate handlers
+      this._sendMessagesToHandlers(msgObj, messageHandlers, messageHandlerOrder);
 
       this.$updateConditionals();
     };
 
-    // Message handlers =====================================================
 
-    addMessageHandler('custom', function(message) {
-      if (exports.oncustommessage) {
-        exports.oncustommessage(message);
+    // A function for sending messages to the appropriate handlers.
+    // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
+    this._sendMessagesToHandlers = function(msgObj, handlers, handlerOrder) {
+      // Dispatch messages to handlers, if handler is present
+      for (var i = 0; i < handlerOrder.length; i++) {
+        var msgType = handlerOrder[i];
+
+        if (msgObj[msgType]) {
+          // Execute each handler with 'this' referring to the present value of
+          // 'this'
+          handlers[msgType].call(this, msgObj[msgType]);
+        }
       }
-    });
+    };
+
+    // Message handlers =====================================================
 
     addMessageHandler('values', function(message) {
       $(document.documentElement).removeClass('shiny-busy');
@@ -751,6 +777,18 @@
         else
           request.onError(message.error);
       }
+    });
+
+    addMessageHandler('custom', function(message) {
+      // For old-style custom messages - should deprecate and migrate to new
+      // method
+      if (exports.oncustommessage) {
+        exports.oncustommessage(message);
+      }
+
+      // Send messages.foo and messages.bar to appropriate handlers
+      this._sendMessagesToHandlers(message, customMessageHandlers,
+                                   customMessageHandlerOrder);
     });
 
   }).call(ShinyApp.prototype);

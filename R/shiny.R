@@ -957,6 +957,11 @@ startApp <- function(port=8101L) {
                 splitName[[2]],
                 matrix = unpackMatrix(val),
                 number = ifelse(is.null(val), NA, val),
+                date = {
+                  # First replace NULLs with NA, then convert to Date vector
+                  datelist <- ifelse(lapply(val, is.null), NA, val)
+                  as.Date(unlist(datelist))
+                },
                 stop('Unknown type specified for ', name)
               )
             }

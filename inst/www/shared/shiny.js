@@ -1175,6 +1175,9 @@
     find: function(scope) {
       return $(scope).find('input.date-input');
     },
+    getType: function(el) {
+      return "date";
+    },
     getValue: function(el) {
       return el.value;
     },
@@ -1236,6 +1239,9 @@
       } else {
         return [ null, null ];
       }
+    },
+    getType: function(el) {
+      return "date";
     },
     setValue: function(el, value) {
       var settings = $(el).data('daterangepicker');

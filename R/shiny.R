@@ -428,7 +428,7 @@ ShinySession <- setRefClass(
         return(.outputOptions[[name]])
 
       # Set the appropriate option
-      validOpts <- "suspendWhenHidden"
+      validOpts <- c("suspendWhenHidden", "priority")
       for (optname in names(opts)) {
         if (! optname %in% validOpts)
           stop(optname, " is not a valid option")
@@ -439,6 +439,10 @@ ShinySession <- setRefClass(
       # If any changes to suspendWhenHidden, need to re-run manageHiddenOutputs
       if ("suspendWhenHidden" %in% names(opts)) {
         manageHiddenOutputs()
+      }
+      
+      if ("priority" %in% names(opts)) {
+        .outputs[[name]]$setPriority(opts[['priority']])
       }
 
       invisible()
@@ -494,6 +498,9 @@ ShinySession <- setRefClass(
 #'
 #' # Disable suspend for output$myplot
 #' outputOptions(output, "myplot", suspendWhenHidden = FALSE)
+#' 
+#' # Change priority for output$myplot
+#' outputOptions(output, "myplot", priority = 10)
 #'
 #' # Get the list of options for output$myplot
 #' outputOptions(output, "myplot")

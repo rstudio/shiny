@@ -653,10 +653,10 @@ test_that("observe() accepts quoted and unquoted expressions", {
 
 test_that("Observer priorities are respected", {
   results <- c()
-  observe(results <<- c(results, 10), priority=10L)
-  observe(results <<- c(results, 30), priority=30L)
+  observe(results <<- c(results, 10), priority=10)
+  observe(results <<- c(results, 30), priority=30)
   observe(results <<- c(results, 20), priority=20L)
-  observe(results <<- c(results, 21), priority=20L)
+  observe(results <<- c(results, 21), priority=20)
   observe(results <<- c(results, 22), priority=20L)
   
   flushReact()

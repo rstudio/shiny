@@ -10,16 +10,14 @@ PriorityQueue <- setRefClass(
     # Keys are priorities, values are subqueues (implemented as list)
     .itemsByPriority = 'Map',
     # Sorted vector (largest first)
-    .priorities = 'integer'  
+    .priorities = 'numeric'  
   ),
   methods = list(
     # Enqueue an item, with the given priority level (must be integer). Higher 
     # priority numbers are dequeued earlier than lower.
-    # 
-    # We insist on integers over numerics to avoid problems that may arise from 
-    # loss of precision that is introduced when converting a numeric to a string
-    # (which is performed when accessing the .itemsByPriority map).
     enqueue = function(item, priority) {
+      priority <- normalizePriority(priority)
+      
       if (!(priority %in% .priorities)) {
         .priorities <<- c(.priorities, priority)
         .priorities <<- sort(.priorities, decreasing=TRUE)
@@ -63,22 +61,50 @@ PriorityQueue <- setRefClass(
     # Translates a priority integer to a character that is suitable for using as
     # a key.
     .key = function(priority) {
-      as.character(priority)
+      sprintf('%a', priority)
     }
   )
 )
 
+normalizePriority <- function(priority) {
+  
+  if (is.null(priority))
+    priority <- 0
+  
+  # Cast integers to numeric to prevent any inconsistencies
+  if (is.integer(priority))
+    priority <- as.numeric(priority)
+  
+  if (!is.numeric(priority))
+    stop('priority must be an integer or numeric')
+  
+  # Check length
+  if (length(priority) == 0) {
+    warning('Zero-length priority vector was passed; using 0')
+    priority <- 0
+  } else if (length(priority) > 1) {
+    warning('Priority has length > 1 and only the first element will be used')
+    priority <- priority[1]
+  }
+  
+  # NA == 0
+  if (is.na(priority))
+    priority <- 0
+
+  return(priority)
+}
+
 # pq <- PriorityQueue$new()
-# pq$enqueue('a', 1L)
+# pq$enqueue('a', 1)
 # pq$enqueue('b', 1L)
-# pq$enqueue('c', 1L)
-# pq$enqueue('A', 2L)
+# pq$enqueue('c', 1)
+# pq$enqueue('A', 2)
 # pq$enqueue('B', 2L)
-# pq$enqueue('C', 2L)
-# pq$enqueue('d', 1L)
+# pq$enqueue('C', 2)
+# pq$enqueue('d', 1)
 # pq$enqueue('e', 1L)
-# pq$enqueue('f', 1L)
-# pq$enqueue('D', 2L)
+# pq$enqueue('f', 1)
+# pq$enqueue('D', 2)
 # pq$enqueue('E', 2L)
-# pq$enqueue('F', 2L)
+# pq$enqueue('F', 2)
 # # Expect ABCDEFabcdef

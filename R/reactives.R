@@ -391,19 +391,21 @@ Observer <- setRefClass(
   fields = list(
     .func = 'function',
     .label = 'character',
+    .priority = 'numeric',
     .invalidateCallbacks = 'list',
     .execCount = 'integer',
     .onResume = 'function',
     .suspended = 'logical'
   ),
   methods = list(
-    initialize = function(func, label, suspended = FALSE) {
+    initialize = function(func, label, suspended = FALSE, priority = 0L) {
       if (length(formals(func)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
 
       .func <<- func
       .label <<- label
+      .priority <<- priority
       .execCount <<- 0L
       .suspended <<- suspended
       .onResume <<- function() NULL
@@ -421,7 +423,7 @@ Observer <- setRefClass(
         })
 
         continue <- function() {
-          ctx$addPendingFlush()
+          ctx$addPendingFlush(.priority)
         }
         
         if (.suspended == FALSE)
@@ -444,6 +446,13 @@ Observer <- setRefClass(
     onInvalidate = function(func) {
       "Register a function to run when this observer is invalidated"
       .invalidateCallbacks <<- c(.invalidateCallbacks, func)
+    },
+    setPriority = function(priority = 0L) {
+      "Change the observer's priority. Note that if the observer is currently
+      invalidated, then the change in priority will not take effect until the
+      next invalidation--unless the observer is also currently suspended, in
+      which case the priority change will be effective upon resume."
+      .priority <<- priority
     },
     suspend = function() {
       "Causes this observer to stop scheduling flushes (re-executions) in
@@ -493,6 +502,10 @@ Observer <- setRefClass(
 #' @param label A label for the observer, useful for debugging.
 #' @param suspended If \code{TRUE}, start the observer in a suspended state.
 #'   If \code{FALSE} (the default), start in a non-suspended state.
+#' @param priority An integer that controls the priority with which this
+#'   observer should be executed. An observer with a given priority level will
+#'   always execute sooner than all observers with a lower priority level.
+#'   Positive, negative, and zero values are allowed.
 #'
 #' @examples
 #' values <- reactiveValues(A=1)
@@ -514,13 +527,14 @@ Observer <- setRefClass(
 #'
 #' @export
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
-                    suspended=FALSE) {
+                    suspended=FALSE, priority=0L) {
 
   fun <- exprToFunction(x, env, quoted)
   if (is.null(label))
     label <- deparse(body(fun))
 
-  invisible(Observer$new(fun, label=label, suspended=suspended))
+  invisible(Observer$new(
+    fun, label=label, suspended=suspended, priority=priority))
 }
 
 # ---------------------------------------------------------------------------

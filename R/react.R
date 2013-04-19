@@ -42,10 +42,10 @@ Context <- setRefClass(
         .invalidateCallbacks <<- c(.invalidateCallbacks, func)
       NULL
     },
-    addPendingFlush = function() {
+    addPendingFlush = function(priority) {
       "Tell the reactive environment that this context should be flushed the
         next time flushReact() called."
-      .getReactiveEnvironment()$addPendingFlush(.self)
+      .getReactiveEnvironment()$addPendingFlush(.self, priority)
     },
     onFlush = function(func) {
       "Register a function to be called when this context is flushed."
@@ -71,14 +71,14 @@ ReactiveEnvironment <- setRefClass(
   fields = list(
     .currentContext = 'ANY',
     .nextId = 'integer',
-    .pendingFlush = 'list',
+    .pendingFlush = 'PriorityQueue',
     .inFlush = 'logical'
   ),
   methods = list(
     initialize = function() {
       .currentContext <<- NULL
       .nextId <<- 0L
-      .pendingFlush <<- list()
+      .pendingFlush <<- PriorityQueue$new()
       .inFlush <<- FALSE
     },
     nextId = function() {
@@ -98,8 +98,8 @@ ReactiveEnvironment <- setRefClass(
       on.exit(.currentContext <<- old.ctx)
       func()
     },
-    addPendingFlush = function(ctx) {
-      .pendingFlush <<- c(ctx, .pendingFlush)
+    addPendingFlush = function(ctx, priority) {
+      .pendingFlush$enqueue(ctx, priority)
     },
     flush = function() {
       # If already in a flush, don't start another one
@@ -107,9 +107,8 @@ ReactiveEnvironment <- setRefClass(
       .inFlush <<- TRUE
       on.exit(.inFlush <<- FALSE)
 
-      while (length(.pendingFlush) > 0) {
-        ctx <- .pendingFlush[[1]]
-        .pendingFlush <<- .pendingFlush[-1]
+      while (!.pendingFlush$isEmpty()) {
+        ctx <- .pendingFlush$dequeue()
         ctx$executeFlushCallbacks()
       }
     }

@@ -674,24 +674,63 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' Creates a text input which, when clicked on, brings up a calendar that
 #' the user can click on.
 #'
+#' The date \code{format} string uses a subset of R's \code{\link{strptime}}
+#' format codes. The reason it uses a subset is because the formats must be
+#' the Javascript date picker only supports some of the format codes. Valid
+#' values are:
+#'
+#' \itemize{
+#'   \item \code{%y} Year without century (12)
+#'   \item \code{%Y} Year with century (2012)
+#'   \item \code{%m} Month number, with leading zero (01-12)
+#'   \item \code{%b} Abbreviated month name
+#'   \item \code{%B} Full month name
+#'   \item \code{%d} Day of month with leading zero
+#'   \item \code{%e} Day of month without leading zero
+#'   \item \code{%a} Abbreviated weekday name
+#'   \item \code{%A} Full weekday name
+#' }
+#'
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
 #' @param value The starting date.
-#' @param format The format of the date. Defaults to \code{"yyyy-mm-dd"}.
+#' @param format The format of the date. Defaults to \code{"%Y-%m-%d"}.
 #'
 #' @seealso \code{\link{updateDateInput}}
 #'
 #' @examples
 #' dateInput("date", "Date:", value = "2012-02-29")
 #'
+#' dateInput("date", "Date:", value = "2/29/2012", format = "%m/%d/%y")
+#'
 #' @export
 dateInput <- function(inputId, label, value = Sys.Date(), 
-    format = "yyyy-mm-dd") {
+    format = "%Y-%m-%d") {
 
-  # Make sure value is a string, not a date object. This is for consistency
-  # across different locales.
+  # Convert from R's strptime date format strings to bootstrap-datepicker's
+  # date format
+  translateDateFormat <- function(str) {
+    map <- c(
+      '%y' = 'yy',   # Year without century
+      '%Y' = 'yyyy', # Year with century
+      '%m' = 'mm',   # Month number with leading zero
+      '%b' = 'M',    # Abbreviated month name
+      '%B' = 'MM',   # Full month name
+      '%d' = 'dd',   # Day of month with leading zero
+      '%e' = 'd',    # Day of month without leading zero
+      '%a' = 'D',    # Abbreviated weekday name
+      '%A' = 'DD'    # Full weekday name
+    )
+
+    for (i in seq_along(map)) {
+      str <- gsub(names(map[i]), map[i], str, fixed = TRUE)
+    }
+    str
+  }
+
+  # If value is a date object, convert it to a string with the appropriate format
   if (inherits(value, "Date"))
-    value <- format(value, '%Y-%m-%d')
+    value <- format(value, format)
 
   tagList(
     singleton(tags$head(
@@ -705,7 +744,7 @@ dateInput <- function(inputId, label, value = Sys.Date(),
                  name = inputId,
                  type = "text",
                  class = "date-input",
-                 `data-date-format` = format,
+                 `data-date-format` = translateDateFormat(format),
                  value = value)
     )
   )

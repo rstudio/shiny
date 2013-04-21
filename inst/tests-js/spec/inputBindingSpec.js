@@ -557,6 +557,8 @@ describe("Input Bindings", function() {
         label: 'Date input:',
         value: '2013-04-10',
         valueString : '2013-04-10',
+        min: null,
+        max: null,
         format: 'yyyy-mm-dd'
       });
     });
@@ -565,41 +567,43 @@ describe("Input Bindings", function() {
       // Set value
       // getValue() and getState().value should be the same
       receive_message(id, { value: '2012-02-29' });
-      expect(get_value(id)).toEqual('2012-02-29');
-      expect(get_state(id)).toEqual({
+      var fullstate =  {
         label: 'Date input:',
         value: '2012-02-29',
         valueString: '2012-02-29',
+        min: null,
+        max: null,
         format: 'yyyy-mm-dd'
-      });
+      };
+      expect(get_value(id)).toEqual('2012-02-29');
+      expect(get_state(id)).toEqual(fullstate);
 
       // Empty message has no effect
       receive_message(id, { });
-      expect(get_state(id)).toEqual({
-        label: 'Date input:',
-        value: '2012-02-29',
-        valueString: '2012-02-29',
-        format: 'yyyy-mm-dd'
-      });
+      expect(get_state(id)).toEqual(fullstate);
 
       // Set label
       receive_message(id, { label:'new label' });
-      expect(get_state(id)).toEqual({
-        label: 'new label',
-        value: '2012-02-29',
-        valueString: '2012-02-29',
-        format: 'yyyy-mm-dd'
-      });
+      expect(get_state(id)).toEqual(
+        $.extend(fullstate, { label:'new label' })
+      );
 
-      // Setting format isn't implemented yet
+      // Set min and max
+      receive_message(id, { min:'2011-03-02', max:'2012-03-02' });
+      expect(get_state(id)).toEqual(
+        $.extend(fullstate, { min:'2011-03-02', max:'2012-03-02' })
+      );
+
+      // Unset min and max
+
+      // Setting format isn't implemented
     });
   });
 
 
   // ===========================================================================
-  describe("dateInputBinding with mm/dd/yy format", function() {
+  describe("dateInputBinding with mm/dd/yy format and min, max", function() {
     var id  = 'in_date';
-    var binding_name = 'dateInput';
 
     beforeEach(function(){
       var htmlstring =
@@ -607,7 +611,9 @@ describe("Input Bindings", function() {
           <label class="control-label" for="' + id + '">Date input:</label>\
           <input id="' + id + '" name="' + id + '" type="text"\
             class="date-input" data-date-format="mm/dd/yy"\
-            data-initial-date="2013-04-10"/>\
+            data-initial-date="2013-04-10",\
+            data-min-date="2012-02-01",\
+            data-max-date="2013-05-04"/>\
         </div>';
 
       // Wrapper div for the htmlstring
@@ -649,6 +655,8 @@ describe("Input Bindings", function() {
         label: 'Date input:',
         value: '2013-04-10',
         valueString : '04/10/13',
+        min: "2012-02-01",
+        max: "2013-05-04",
         format: 'mm/dd/yy'
       });
     });
@@ -657,33 +665,35 @@ describe("Input Bindings", function() {
       // Set value
       // getValue() and getState().value should be the same
       receive_message(id, { value: '2012-02-29' });
-      expect(get_value(id)).toEqual('2012-02-29');
-      expect(get_state(id)).toEqual({
+      var fullstate =  {
         label: 'Date input:',
         value: '2012-02-29',
         valueString: '02/29/12',
+        min: "2012-02-01",
+        max: "2013-05-04",
         format: 'mm/dd/yy'
-      });
+      };
+      expect(get_value(id)).toEqual('2012-02-29');
+      expect(get_state(id)).toEqual(fullstate);
 
       // Empty message has no effect
       receive_message(id, { });
-      expect(get_state(id)).toEqual({
-        label: 'Date input:',
-        value: '2012-02-29',
-        valueString: '02/29/12',
-        format: 'mm/dd/yy'
-      });
+      expect(get_state(id)).toEqual(fullstate);
 
       // Set label
       receive_message(id, { label:'new label' });
-      expect(get_state(id)).toEqual({
-        label: 'new label',
-        value: '2012-02-29',
-        valueString: '02/29/12',
-        format: 'mm/dd/yy'
-      });
+      expect(get_state(id)).toEqual(
+        $.extend(fullstate, { label:'new label' })
+      );
 
-      // Setting format isn't implemented yet
+      // Set min and max
+      // receive_message(id, { min:'2011-02-01', max:'2015-03-02' });
+      // debugger;
+      // expect(get_state(id)).toEqual(
+      //   $.extend(fullstate, { min:'2011-02-01', max:'2015-03-02' })
+      // );
+
+      // Setting format isn't implemented
     });
   });
 

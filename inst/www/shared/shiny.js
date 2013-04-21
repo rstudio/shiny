@@ -1200,27 +1200,35 @@
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)
     getValue: function(el) {
-      var $el = $(el);
-      var date = $(el).data('datepicker').date;
-      return date.getFullYear() + '-' +
-             padZeros(date.getMonth()+1, 2) + '-' +
-             padZeros(date.getDate()+1, 2);
+      var date = $(el).data('datepicker').getDate();
+      return this._formatDate(date);
     },
     // value must be an unambiguous string like '2001-01-01', or a Date object.
     setValue: function(el, value) {
-      var date = new Date(value);
+      var date = this._newDate(value);
       // If date is invalid, do nothing
       if (isNaN(date))
         return;
 
-      $(el).datepicker('update', new Date(date));
+      $(el).datepicker('update', date);
     },
     getState: function(el) {
       var $el = $(el);
+
+      var min = $el.data('datepicker').startDate;
+      var max = $el.data('datepicker').endDate;
+
+      // Stringify min and max. If min and max aren't set, they will be
+      // -Infinity and Infinity; replace these with null.
+      min = (min === -Infinity) ? null : this._formatDate(min);
+      max = (max ===  Infinity) ? null : this._formatDate(max);
+
       return {
         label:       $el.parent().find('label[for=' + el.id + ']').text(),
         value:       this.getValue(el),
         valueString: el.value,
+        min:         min,
+        max:         max,
         format:      $el.data('dateFormat')
       };
     },
@@ -1230,6 +1238,12 @@
 
       if (data.hasOwnProperty('label'))
         $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+
+      if (data.hasOwnProperty('min'))
+        this._setMin(el, data.min)
+
+      if (data.hasOwnProperty('max'))
+        this._setMax(el, data.max)
 
       // date picker doesn't support setting format
 
@@ -1257,6 +1271,60 @@
     initialize: function(el) {
       var $el = $(el);
       this.setValue(el, $el.data('initial-date'));
+
+      // Set the start and end dates, from min-date and max-date. These always
+      // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
+      // support for date-startdate and data-enddate, which use the current
+      // date format.
+      this._setMin(el, $el.data('min-date'));
+      this._setMax(el, $el.data('max-date'));
+    },
+    // Given a Date object, return a string in yyyy-mm-dd format
+    _formatDate: function(date) {
+      if (date instanceof Date) {
+        return date.getFullYear() + '-' +
+               padZeros(date.getMonth()+1, 2) + '-' +
+               padZeros(date.getDate(), 2);
+
+      } else {
+        return null;
+      }
+    },
+    // Given an unambiguous date string or a Date object, set the min (start) date
+    _setMin: function(el, date) {
+      var date = this._newDate(date);
+      if (!isNaN(date)) {
+        $(el).datepicker('setStartDate', date);
+      }
+    },
+    // Given an unambiguous date string or a Date object, set the max (end) date
+    _setMax: function(el, date) {
+      var date = this._newDate(date);
+      if (!isNaN(date)) {
+        $(el).datepicker('setEndDate', date);
+      }
+    },
+    // Given a date string of format yyyy-mm-dd, return a Date object, in the
+    // local time zone.
+    // If date is a Date object, return it unchanged.
+    _newDate: function(date) {
+      if (date instanceof Date)
+        return date;
+      if (!date)
+        return null;
+
+      // Running new Date('2012-02-01') gives a weird result in non-GMT
+      // timezones. For more info, see
+      // http://stackoverflow.com/questions/8612631/javascript-date-why-is-the-date-new-date2011-12-13-considered-a-monday-and-n
+
+      // Get Date in current time zone
+      var d = new Date(date);
+
+      // If invalid date, return null
+      if (isNaN(d))
+        return null;
+
+      return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
     }
   });
   Shiny.inputBindings.register(dateInputBinding, 'shiny.dateInput');

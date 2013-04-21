@@ -695,6 +695,10 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' @param label Display label for the control.
 #' @param value The starting date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
+#' @param min The minimum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param max The maximum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
 #' @param format The format of the date. Defaults to \code{"%Y-%m-%d"}.
 #'
 #' @seealso \code{\link{updateDateInput}}
@@ -709,7 +713,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' dateInput("date", "Date:", value = Sys.Date()-10)
 #'
 #' @export
-dateInput <- function(inputId, label, value = Sys.Date(), 
+dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL,
     format = "%Y-%m-%d") {
 
   # Convert from R's strptime date format strings to bootstrap-datepicker's
@@ -733,9 +737,11 @@ dateInput <- function(inputId, label, value = Sys.Date(),
     str
   }
 
-  # If value is a date object, convert it to a string with the yyyy-mm-dd format
-  if (inherits(value, "Date"))
-    value <- format(value, "%Y-%m-%d")
+  # If value is a date object, convert it to a string with yyyy-mm-dd format
+  # Same for min and max
+  if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
+  if (inherits(min, "Date"))    min   <- format(min,   "%Y-%m-%d")
+  if (inherits(max, "Date"))    max   <- format(max,   "%Y-%m-%d")
 
   tagList(
     singleton(tags$head(
@@ -750,6 +756,8 @@ dateInput <- function(inputId, label, value = Sys.Date(),
                  type = "text",
                  class = "date-input",
                  `data-date-format` = translateDateFormat(format),
+                 `data-min-date` = min,
+                 `data-max-date` = max,
                  `data-initial-date` = value)
     )
   )

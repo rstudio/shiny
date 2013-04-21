@@ -89,7 +89,12 @@ updateSliderInput <- updateTextInput
 #' Change the value of a date input on the client
 #'
 #' @template update-input
-#' @param value The value to set for the input object.
+#' @param value The desired date value. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param min The minimum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param max The maximum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
 #'
 #' @seealso \code{\link{dateInput}}
 #'
@@ -104,18 +109,24 @@ updateSliderInput <- updateTextInput
 #'
 #'     updateDateInput(session, "inDate",
 #'       label = paste("Date label", x),
-#'       value = paste("2013-04-", x, sep=""))
+#'       value = paste("2013-04-", x, sep=""),
+#'       min   = paste("2013-04-", x-1, sep=""),
+#'       max   = paste("2013-04-", x+1, sep="")
+#'     )
 #'   })
 #' })
 #' }
 #' @export
-updateDateInput <- function(session, inputId, label = NULL, value = NULL) {
-  # Make sure value is a string, not a date object. This is for consistency
-  # across different locales.
-  if (inherits(value, "Date"))
-    value <- format(value, '%Y-%m-%d')
+updateDateInput <- function(session, inputId, label = NULL, value = NULL,
+    min = NULL, max = NULL) {
 
-  message <- dropNulls(list(label=label, value=value))
+  # If value is a date object, convert it to a string with yyyy-mm-dd format
+  # Same for min and max
+  if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
+  if (inherits(min, "Date"))    min   <- format(min,   "%Y-%m-%d")
+  if (inherits(max, "Date"))    max   <- format(max,   "%Y-%m-%d")
+
+  message <- dropNulls(list(label=label, value=value, min=min, max=max))
   session$sendInputMessage(inputId, message)
 }
 

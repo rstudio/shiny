@@ -2,8 +2,8 @@
 \alias{dateInput}
 \title{Create date input}
 \usage{
-  dateInput(inputId, label, value = Sys.Date(),
-    format = "\%Y-\%m-\%d")
+  dateInput(inputId, label, value = Sys.Date(), min = NULL,
+    max = NULL, format = "\%Y-\%m-\%d")
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -13,6 +13,12 @@
 
   \item{value}{The starting date. Either a Date object, or
   a string in \code{yyyy-mm-dd} format.}
+
+  \item{min}{The minimum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
+
+  \item{max}{The maximum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
 
   \item{format}{The format of the date. Defaults to
   \code{"%Y-%m-%d"}.}

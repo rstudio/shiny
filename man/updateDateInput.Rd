@@ -3,7 +3,7 @@
 \title{Change the value of a date input on the client}
 \usage{
   updateDateInput(session, inputId, label = NULL,
-    value = NULL)
+    value = NULL, min = NULL, max = NULL)
 }
 \arguments{
   \item{session}{The \code{session} object passed to
@@ -13,7 +13,14 @@
 
   \item{label}{The label to set for the input object.}
 
-  \item{value}{The value to set for the input object.}
+  \item{value}{The desired date value. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
+
+  \item{min}{The minimum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
+
+  \item{max}{The maximum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
 }
 \description{
   Change the value of a date input on the client
@@ -41,7 +48,10 @@ shinyServer(function(input, output, session) {
 
     updateDateInput(session, "inDate",
       label = paste("Date label", x),
-      value = paste("2013-04-", x, sep=""))
+      value = paste("2013-04-", x, sep=""),
+      min   = paste("2013-04-", x-1, sep=""),
+      max   = paste("2013-04-", x+1, sep="")
+    )
   })
 })
 }

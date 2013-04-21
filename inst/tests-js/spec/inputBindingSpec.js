@@ -511,7 +511,8 @@ describe("Input Bindings", function() {
         '<div>\
           <label class="control-label" for="' + id + '">Date input:</label>\
           <input id="' + id + '" name="' + id + '" type="text"\
-            class="date-input" data-date-format="yyyy-mm-dd"  value="2013-04-10"/>\
+            class="date-input" data-date-format="yyyy-mm-dd"\
+            data-initial-date="2013-04-10"/>\
         </div>';
 
       // Wrapper div for the htmlstring
@@ -522,8 +523,100 @@ describe("Input Bindings", function() {
       Shiny.bindAll();
     });
 
+    afterEach(function(){
+      Shiny.unbindAll();
+      $('#input_binding_test').remove();
+    });
+
     // Run tests that are exactly the same for all InputBindings
     common_tests(id, binding_name);
+
+    it("getValue() works", function() {
+      expect(get_value(id)).toEqual('2013-04-10');
+    });
+
+    it("setValue() works", function() {
+      set_value(id, '2012-02-29');
+      expect(get_value(id)).toEqual('2012-02-29');
+
+      // Invalid date - no effect
+      set_value(id, '2012-02-40');
+      expect(get_value(id)).toEqual('2012-02-29');
+
+      // Date object
+      set_value(id, new Date('2011-10-09'));
+      expect(get_value(id)).toEqual('2011-10-09');
+
+      // Invalid Date object -  no effect
+      set_value(id, new Date('2000-01-100'));
+      expect(get_value(id)).toEqual('2011-10-09');
+    });
+
+    it("getState() works", function() {
+      expect(get_state(id)).toEqual({
+        label: 'Date input:',
+        value: '2013-04-10',
+        valueString : '2013-04-10',
+        format: 'yyyy-mm-dd'
+      });
+    });
+
+    it("receiveMessage() works", function() {
+      // Set value
+      // getValue() and getState().value should be the same
+      receive_message(id, { value: '2012-02-29' });
+      expect(get_value(id)).toEqual('2012-02-29');
+      expect(get_state(id)).toEqual({
+        label: 'Date input:',
+        value: '2012-02-29',
+        valueString: '2012-02-29',
+        format: 'yyyy-mm-dd'
+      });
+
+      // Empty message has no effect
+      receive_message(id, { });
+      expect(get_state(id)).toEqual({
+        label: 'Date input:',
+        value: '2012-02-29',
+        valueString: '2012-02-29',
+        format: 'yyyy-mm-dd'
+      });
+
+      // Set label
+      receive_message(id, { label:'new label' });
+      expect(get_state(id)).toEqual({
+        label: 'new label',
+        value: '2012-02-29',
+        valueString: '2012-02-29',
+        format: 'yyyy-mm-dd'
+      });
+
+      // Setting format isn't implemented yet
+    });
+  });
+
+
+  // ===========================================================================
+  describe("dateInputBinding with mm/dd/yy format", function() {
+    var id  = 'in_date';
+    var binding_name = 'dateInput';
+
+    beforeEach(function(){
+      var htmlstring =
+        '<div>\
+          <label class="control-label" for="' + id + '">Date input:</label>\
+          <input id="' + id + '" name="' + id + '" type="text"\
+            class="date-input" data-date-format="mm/dd/yy"\
+            data-initial-date="2013-04-10"/>\
+        </div>';
+
+      // Wrapper div for the htmlstring
+      var el = $('<div id="input_binding_test">').prependTo('body');
+      el.html(htmlstring);
+
+      Shiny.initializeInputs(el);
+      Shiny.bindAll();
+    });
 
     afterEach(function(){
       Shiny.unbindAll();
@@ -538,16 +631,25 @@ describe("Input Bindings", function() {
       set_value(id, '2012-02-29');
       expect(get_value(id)).toEqual('2012-02-29');
 
-      // Invalid date - works?
+      // Invalid date - no effect
       set_value(id, '2012-02-40');
-      expect(get_value(id)).toEqual('2012-02-40');
+      expect(get_value(id)).toEqual('2012-02-29');
+
+      // Date object
+      set_value(id, new Date('2011-10-09'));
+      expect(get_value(id)).toEqual('2011-10-09');
+
+      // Invalid Date object -  no effect
+      set_value(id, new Date('2000-01-100'));
+      expect(get_value(id)).toEqual('2011-10-09');
     });
 
     it("getState() works", function() {
       expect(get_state(id)).toEqual({
         label: 'Date input:',
         value: '2013-04-10',
-        format: 'yyyy-mm-dd'
+        valueString : '04/10/13',
+        format: 'mm/dd/yy'
       });
     });
 
@@ -559,7 +661,8 @@ describe("Input Bindings", function() {
       expect(get_state(id)).toEqual({
         label: 'Date input:',
         value: '2012-02-29',
-        format: 'yyyy-mm-dd'
+        valueString: '02/29/12',
+        format: 'mm/dd/yy'
       });
 
       // Empty message has no effect
@@ -567,7 +670,8 @@ describe("Input Bindings", function() {
       expect(get_state(id)).toEqual({
         label: 'Date input:',
         value: '2012-02-29',
-        format: 'yyyy-mm-dd'
+        valueString: '02/29/12',
+        format: 'mm/dd/yy'
       });
 
       // Set label
@@ -575,12 +679,15 @@ describe("Input Bindings", function() {
       expect(get_state(id)).toEqual({
         label: 'new label',
         value: '2012-02-29',
-        format: 'yyyy-mm-dd'
+        valueString: '02/29/12',
+        format: 'mm/dd/yy'
       });
 
       // Setting format isn't implemented yet
     });
   });
+
+
 
 
   // ===========================================================================

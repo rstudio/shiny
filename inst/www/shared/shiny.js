@@ -1200,14 +1200,20 @@
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)
     getValue: function(el) {
-      $el = $(el);
+      var $el = $(el);
       var date = $(el).data('datepicker').date;
       return date.getFullYear() + '-' +
              padZeros(date.getMonth()+1, 2) + '-' +
              padZeros(date.getDate()+1, 2);
     },
+    // value must be an unambiguous string like '2001-01-01', or a Date object.
     setValue: function(el, value) {
-      el.value = value;
+      var date = new Date(value);
+      // If date is invalid, do nothing
+      if (isNaN(date))
+        return;
+
+      $(el).datepicker('update', new Date(date));
     },
     getState: function(el) {
       var $el = $(el);
@@ -1249,7 +1255,8 @@
       };
     },
     initialize: function(el) {
-      $(el).datepicker();
+      var $el = $(el);
+      this.setValue(el, $el.data('initial-date'));
     }
   });
   Shiny.inputBindings.register(dateInputBinding, 'shiny.dateInput');

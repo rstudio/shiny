@@ -1223,13 +1223,20 @@
       min = (min === -Infinity) ? null : this._formatDate(min);
       max = (max ===  Infinity) ? null : this._formatDate(max);
 
+      // startViewMode is stored as a number; convert to string
+      var startview = $el.data('datepicker').startViewMode;
+      if      (startview === 2)  startview = 'decade';
+      else if (startview === 1)  startview = 'year';
+      else if (startview === 0)  startview = 'month';
+
       return {
         label:       $el.parent().find('label[for=' + el.id + ']').text(),
         value:       this.getValue(el),
         valueString: el.value,
         min:         min,
         max:         max,
-        format:      $el.data('dateFormat')
+        format:      $el.data('dateFormat'),
+        startview:   startview
       };
     },
     receiveMessage: function(el, data) {

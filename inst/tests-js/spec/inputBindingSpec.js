@@ -559,7 +559,8 @@ describe("Input Bindings", function() {
         valueString : '2013-04-10',
         min: null,
         max: null,
-        format: 'yyyy-mm-dd'
+        format: 'yyyy-mm-dd',
+        startview: 'month'
       });
     });
 
@@ -573,7 +574,8 @@ describe("Input Bindings", function() {
         valueString: '2012-02-29',
         min: null,
         max: null,
-        format: 'yyyy-mm-dd'
+        format: 'yyyy-mm-dd',
+        startview: 'month'
       };
       expect(get_value(id)).toEqual('2012-02-29');
       expect(get_state(id)).toEqual(fullstate);
@@ -602,7 +604,7 @@ describe("Input Bindings", function() {
 
 
   // ===========================================================================
-  describe("dateInputBinding with mm/dd/yy format and min, max", function() {
+  describe("dateInputBinding with mm/dd/yy format, min, max, and startview", function() {
     var id  = 'in_date';
 
     beforeEach(function(){
@@ -611,9 +613,10 @@ describe("Input Bindings", function() {
           <label class="control-label" for="' + id + '">Date input:</label>\
           <input id="' + id + '" name="' + id + '" type="text"\
             class="date-input" data-date-format="mm/dd/yy"\
-            data-initial-date="2013-04-10",\
-            data-min-date="2012-02-01",\
-            data-max-date="2013-05-04"/>\
+            data-initial-date="2013-04-10"\
+            data-min-date="2012-02-01"\
+            data-max-date="2013-05-04"\
+            data-date-start-view="decade"/>\
         </div>';
 
       // Wrapper div for the htmlstring
@@ -657,7 +660,8 @@ describe("Input Bindings", function() {
         valueString : '04/10/13',
         min: "2012-02-01",
         max: "2013-05-04",
-        format: 'mm/dd/yy'
+        format: 'mm/dd/yy',
+        startview: 'decade'
       });
     });
 
@@ -671,7 +675,8 @@ describe("Input Bindings", function() {
         valueString: '02/29/12',
         min: "2012-02-01",
         max: "2013-05-04",
-        format: 'mm/dd/yy'
+        format: 'mm/dd/yy',
+        startview: 'decade'
       };
       expect(get_value(id)).toEqual('2012-02-29');
       expect(get_state(id)).toEqual(fullstate);
@@ -696,8 +701,6 @@ describe("Input Bindings", function() {
       // Setting format isn't implemented
     });
   });
-
-
 
 
   // ===========================================================================

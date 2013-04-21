@@ -700,6 +700,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' @param max The maximum allowed date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
 #' @param format The format of the date. Defaults to \code{"%Y-%m-%d"}.
+#' @param startview The date range shown when the input object is first
+#'   clicked. Can be "month" (the default), "year", or "decade".
 #'
 #' @seealso \code{\link{updateDateInput}}
 #'
@@ -714,7 +716,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'
 #' @export
 dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL,
-    format = "%Y-%m-%d") {
+    format = "%Y-%m-%d", startview = "month") {
 
   # Convert from R's strptime date format strings to bootstrap-datepicker's
   # date format
@@ -756,6 +758,7 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
                  type = "text",
                  class = "date-input",
                  `data-date-format` = translateDateFormat(format),
+                 `data-date-start-view` = startview,
                  `data-min-date` = min,
                  `data-max-date` = max,
                  `data-initial-date` = value)

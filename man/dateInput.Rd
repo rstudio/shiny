@@ -3,7 +3,8 @@
 \title{Create date input}
 \usage{
   dateInput(inputId, label, value = Sys.Date(), min = NULL,
-    max = NULL, format = "\%Y-\%m-\%d")
+    max = NULL, format = "\%Y-\%m-\%d",
+    startview = "month")
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -22,6 +23,10 @@
 
   \item{format}{The format of the date. Defaults to
   \code{"%Y-%m-%d"}.}
+
+  \item{startview}{The date range shown when the input
+  object is first clicked. Can be "month" (the default),
+  "year", or "decade".}
 }
 \description{
   Creates a text input which, when clicked on, brings up a

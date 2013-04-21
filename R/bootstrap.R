@@ -702,6 +702,13 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' @param format The format of the date. Defaults to \code{"%Y-%m-%d"}.
 #' @param startview The date range shown when the input object is first
 #'   clicked. Can be "month" (the default), "year", or "decade".
+#' @param weekstart Which day is the start of the week. Should be an integer
+#'   from 0 (Sunday) to 6 (Saturday).
+#' @param language The language used for month and day names. Default is "en".
+#'   Other valid values include "bg", "ca", "cs", "da", "de", "el", "es", "fi",
+#'   "fr", "he", "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv", "ms",
+#'   "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs", "ru", "sk", "sl", "sv",
+#'   "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".
 #'
 #' @seealso \code{\link{updateDateInput}}
 #'
@@ -716,7 +723,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'
 #' @export
 dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL,
-    format = "%Y-%m-%d", startview = "month") {
+    format = "%Y-%m-%d", startview = "month", weekstart = 0, language = "en") {
 
   # Convert from R's strptime date format strings to bootstrap-datepicker's
   # date format
@@ -747,7 +754,7 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 
   tagList(
     singleton(tags$head(
-      tags$script(src = "shared/datepicker/js/bootstrap-datepicker.js"),
+      tags$script(src = "shared/datepicker/js/bootstrap-datepicker.min.js"),
       tags$link(rel = "stylesheet", type = "text/css",
                 href = 'shared/datepicker/css/datepicker.css')
     )),
@@ -757,6 +764,8 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
                  name = inputId,
                  type = "text",
                  class = "date-input",
+                 `data-date-language` = language,
+                 `data-date-weekstart` = weekstart,
                  `data-date-format` = translateDateFormat(format),
                  `data-date-start-view` = startview,
                  `data-min-date` = min,

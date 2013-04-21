@@ -1235,7 +1235,9 @@
         valueString: el.value,
         min:         min,
         max:         max,
-        format:      $el.data('dateFormat'),
+        language:    $el.data('datepicker').language,
+        weekstart:   $el.data('datepicker').weekStart,
+        format:      this._formatToString($el.data('datepicker').format),
         startview:   startview
       };
     },
@@ -1251,8 +1253,6 @@
 
       if (data.hasOwnProperty('max'))
         this._setMax(el, data.max);
-
-      // date picker doesn't support setting format
 
       $(el).trigger('change');
     },
@@ -1296,6 +1296,17 @@
       } else {
         return null;
       }
+    },
+    // Given a format object from a date picker, return a string
+    _formatToString: function(format) {
+      // Format object has structure like:
+      // { parts: ['mm', 'dd', 'yy'], separators: ['', '/', '/' ,''] }
+      var str = '';
+      for (var i = 0; i < format.parts.length; i++) {
+        str += format.separators[i] + format.parts[i];
+      }
+      str += format.separators[i];
+      return str;
     },
     // Given an unambiguous date string or a Date object, set the min (start) date
     _setMin: function(el, date) {

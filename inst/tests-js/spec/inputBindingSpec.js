@@ -559,6 +559,8 @@ describe("Input Bindings", function() {
         valueString : '2013-04-10',
         min: null,
         max: null,
+        language: 'en',
+        weekstart: 0,
         format: 'yyyy-mm-dd',
         startview: 'month'
       });
@@ -574,6 +576,8 @@ describe("Input Bindings", function() {
         valueString: '2012-02-29',
         min: null,
         max: null,
+        language: 'en',
+        weekstart: 0,
         format: 'yyyy-mm-dd',
         startview: 'month'
       };
@@ -597,6 +601,10 @@ describe("Input Bindings", function() {
       );
 
       // Unset min and max
+      receive_message(id, { min:null, max:null });
+      expect(get_state(id)).toEqual(
+        $.extend(fullstate, { min:null, max:null })
+      );
 
       // Setting format isn't implemented
     });
@@ -616,6 +624,8 @@ describe("Input Bindings", function() {
             data-initial-date="2013-04-10"\
             data-min-date="2012-02-01"\
             data-max-date="2013-05-04"\
+            data-date-language="de",\
+            data-date-weekstart="1",\
             data-date-start-view="decade"/>\
         </div>';
 
@@ -660,6 +670,8 @@ describe("Input Bindings", function() {
         valueString : '04/10/13',
         min: "2012-02-01",
         max: "2013-05-04",
+        language: 'de',
+        weekstart: 1,
         format: 'mm/dd/yy',
         startview: 'decade'
       });
@@ -675,6 +687,8 @@ describe("Input Bindings", function() {
         valueString: '02/29/12',
         min: "2012-02-01",
         max: "2013-05-04",
+        language: 'de',
+        weekstart: 1,
         format: 'mm/dd/yy',
         startview: 'decade'
       };

@@ -517,6 +517,8 @@ describe("Input Bindings", function() {
       // Wrapper div for the htmlstring
       var el = $('<div id="input_binding_test">').prependTo('body');
       el.html(htmlstring);
+
+      Shiny.initializeInputs(el);
       Shiny.bindAll();
     });
 

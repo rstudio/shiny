@@ -1189,7 +1189,7 @@
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
   
 
-  var dateInputBinding = new Shiny.InputBinding();
+  var dateInputBinding = new InputBinding();
   $.extend(dateInputBinding, {
     find: function(scope) {
       return $(scope).find('input.date-input');
@@ -1244,13 +1244,13 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
 
       if (data.hasOwnProperty('min'))
-        this._setMin(el, data.min)
+        this._setMin(el, data.min);
 
       if (data.hasOwnProperty('max'))
-        this._setMax(el, data.max)
+        this._setMax(el, data.max);
 
       // date picker doesn't support setting format
 
@@ -1299,14 +1299,14 @@
     },
     // Given an unambiguous date string or a Date object, set the min (start) date
     _setMin: function(el, date) {
-      var date = this._newDate(date);
+      date = this._newDate(date);
       if (!isNaN(date)) {
         $(el).datepicker('setStartDate', date);
       }
     },
     // Given an unambiguous date string or a Date object, set the max (end) date
     _setMax: function(el, date) {
-      var date = this._newDate(date);
+      date = this._newDate(date);
       if (!isNaN(date)) {
         $(el).datepicker('setEndDate', date);
       }
@@ -1334,10 +1334,10 @@
       return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
     }
   });
-  Shiny.inputBindings.register(dateInputBinding, 'shiny.dateInput');
+  inputBindings.register(dateInputBinding, 'shiny.dateInput');
 
 
-  var dateRangeInputBinding = new Shiny.InputBinding();
+  var dateRangeInputBinding = new InputBinding();
   $.extend(dateRangeInputBinding, {
     find: function(scope) {
       return $(scope).find('input.date-range-input');
@@ -1406,7 +1406,7 @@
         settings.maxDate = Date.parse(data.maxDate);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label)
+        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
 
       if (data.hasOwnProperty('format'))
         settings.format = data.format;
@@ -1441,7 +1441,7 @@
       };
     }
   });
-  Shiny.inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');
+  inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');
 
 
   // Select input
@@ -1762,7 +1762,7 @@
   inputBindings.register(checkboxGroupInputBinding, 'shiny.checkboxGroupInput');
 
 
-  var actionButtonInputBinding = new Shiny.InputBinding();
+  var actionButtonInputBinding = new InputBinding();
   $.extend(actionButtonInputBinding, {
     find: function(scope) {
       return $(scope).find(".action-button");
@@ -1774,7 +1774,7 @@
     },
     subscribe: function(el, callback) {
       $(el).on("click.actionButtonInputBinding", function(e) {
-        $el = $(this);
+        var $el = $(this);
         var val = $el.data('val') || 0;
         $el.data('val', val + 1);
 
@@ -1790,7 +1790,7 @@
       $(el).off(".actionButtonInputBinding");
     }
   });
-  Shiny.inputBindings.register(actionButtonInputBinding, 'shiny.actionButtonInput');
+  inputBindings.register(actionButtonInputBinding, 'shiny.actionButtonInput');
 
 
   var bootstrapTabInputBinding = new InputBinding();

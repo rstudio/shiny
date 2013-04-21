@@ -1886,7 +1886,7 @@
   var fileInputBinding = new InputBinding();
   $.extend(fileInputBinding, {
     find: function(scope) {
-      return scope.find('input[type="file"]');
+      return $(scope).find('input[type="file"]');
     },
     getId: function(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -2022,8 +2022,6 @@
       if (scope === undefined)
         scope = document;
       
-      scope = $(scope);
-
       var bindings = inputBindings.getBindings();
       
       var currentValues = {};

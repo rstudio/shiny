@@ -1200,7 +1200,7 @@
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)
     getValue: function(el) {
-      var date = $(el).data('datepicker').getDate();
+      var date = $(el).data('datepicker').getUTCDate();
       return this._formatDate(date);
     },
     // value must be an unambiguous string like '2001-01-01', or a Date object.
@@ -1289,9 +1289,9 @@
     // Given a Date object, return a string in yyyy-mm-dd format
     _formatDate: function(date) {
       if (date instanceof Date) {
-        return date.getFullYear() + '-' +
-               padZeros(date.getMonth()+1, 2) + '-' +
-               padZeros(date.getDate(), 2);
+        return date.getUTCFullYear() + '-' +
+               padZeros(date.getUTCMonth()+1, 2) + '-' +
+               padZeros(date.getUTCDate(), 2);
 
       } else {
         return null;
@@ -1352,7 +1352,7 @@
       if (isNaN(d))
         return null;
 
-      return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+      return new Date(d.getTime());
     }
   });
   inputBindings.register(dateInputBinding, 'shiny.dateInput');
@@ -1366,8 +1366,8 @@
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)
     getValue: function(el) {
-      var start = $(el).find('input[name=start]').data('datepicker').getDate();
-      var end   = $(el).find('input[name=end]').data('datepicker').getDate();
+      var start = $(el).find('input[name=start]').data('datepicker').getUTCDate();
+      var end   = $(el).find('input[name=end]').data('datepicker').getUTCDate();
 
       return [this._formatDate(start), this._formatDate(end)];
     },

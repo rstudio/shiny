@@ -175,8 +175,8 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
   message <- dropNulls(list(
     label = label,
     value = c(start, end),
-    minDate = min,
-    maxDate = max
+    min = min,
+    max = max
   ))
 
   session$sendInputMessage(inputId, message)

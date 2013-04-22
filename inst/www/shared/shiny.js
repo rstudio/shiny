@@ -1449,12 +1449,12 @@
       var $startinput = $el.find('[name=start]') 
       var $endinput   = $el.find('[name=end]') 
 
-      $el.datepicker();
-
       var start = $startinput.data('initial-date');
       var end   = $endinput.data('initial-date');
 
       this.setValue(el, [start, end]);
+
+      $el.datepicker();
 
       // // Set the start and end dates, from min-date and max-date. These always
       // // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in

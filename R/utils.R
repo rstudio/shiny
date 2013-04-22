@@ -271,3 +271,40 @@ shinyDeprecated <- function(new=NULL, msg=NULL,
   # Similar to .Deprecated(), but print a message instead of warning
   message(msg)
 }
+
+Callbacks <- setRefClass(
+  'Callbacks',
+  fields = list(
+    .nextId = 'integer',
+    .callbacks = 'Map'
+  ),
+  methods = list(
+    initialize = function() {
+      .nextId <<- as.integer(.Machine$integer.max)
+    },
+    register = function(callback) {
+      id <- as.character(.nextId)
+      .nextId <<- .nextId - 1L
+      .callbacks$set(id, callback)
+      return(function() {
+        .callbacks$remove(id)
+      })
+    },
+    invoke = function(..., onError=NULL) {
+      for (callback in .callbacks$values()) {
+        tryCatch(
+          do.call(callback, list(...)),
+          error = function(e) {
+            if (is.null(onError))
+              stop(e)
+            else
+              onError(e)
+          }
+        )
+      }
+    },
+    count = function() {
+      .callbacks$size()
+    }
+  )
+)

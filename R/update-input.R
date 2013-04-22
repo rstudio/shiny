@@ -134,8 +134,14 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #' Change the start and end values of a date range input on the client
 #'
 #' @template update-input
-#' @param start The start date.
-#' @param end The end date.
+#' @param start The start date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param end The end date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param min The minimum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param max The maximum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
 #'
 #' @seealso \code{\link{dateRangeInput}}
 #'

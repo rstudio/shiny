@@ -14,9 +14,17 @@
 
   \item{label}{The label to set for the input object.}
 
-  \item{start}{The start date.}
+  \item{start}{The start date. Either a Date object, or a
+  string in \code{yyyy-mm-dd} format.}
 
-  \item{end}{The end date.}
+  \item{end}{The end date. Either a Date object, or a
+  string in \code{yyyy-mm-dd} format.}
+
+  \item{min}{The minimum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
+
+  \item{max}{The maximum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
 }
 \description{
   Change the start and end values of a date range input on

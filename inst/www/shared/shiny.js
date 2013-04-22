@@ -1230,7 +1230,7 @@
       else if (startview === 0)  startview = 'month';
 
       return {
-        label:       $el.parent().find('label[for=' + el.id + ']').text(),
+        label:       $el.find('label[for=' + el.id + ']').text(),
         value:       this.getValue(el),
         valueString: $el.find('input').val(),
         min:         min,
@@ -1246,7 +1246,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+        $(el).find('label[for=' + el.id + ']').text(data.label);
 
       if (data.hasOwnProperty('min'))
         this._setMin(el, data.min);
@@ -1308,18 +1308,28 @@
       str += format.separators[i];
       return str;
     },
-    // Given an unambiguous date string or a Date object, set the min (start) date
+    // Given an unambiguous date string or a Date object, set the min (start) date.
+    // null will unset.
     _setMin: function(el, date) {
-      date = this._newDate(date);
-      if (!isNaN(date)) {
-        $(el).datepicker('setStartDate', date);
+      if (date === null) {
+        $(el).datepicker('setStartDate', null);
+
+      } else {
+        date = this._newDate(date);
+        if (!isNaN(date))
+          $(el).datepicker('setStartDate', date);
       }
     },
     // Given an unambiguous date string or a Date object, set the max (end) date
+    // null will unset.
     _setMax: function(el, date) {
-      date = this._newDate(date);
-      if (!isNaN(date)) {
-        $(el).datepicker('setEndDate', date);
+      if (date === null) {
+        $(el).datepicker('setEndDate', null);
+
+      } else {
+        date = this._newDate(date);
+        if (!isNaN(date))
+          $(el).datepicker('setEndDate', date);
       }
     },
     // Given a date string of format yyyy-mm-dd, return a Date object, in the
@@ -1348,108 +1358,125 @@
   inputBindings.register(dateInputBinding, 'shiny.dateInput');
 
 
-  var dateRangeInputBinding = new InputBinding();
-  $.extend(dateRangeInputBinding, {
+  var dateRangeInputBinding = {};
+  $.extend(dateRangeInputBinding, dateInputBinding, {
     find: function(scope) {
-      return $(scope).find('input.date-range-input');
+      return $(scope).find('div.date-range-input');
     },
+    // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
+    // format like mm/dd/yyyy)
     getValue: function(el) {
-      var settings = $(el).data('daterangepicker');
-      if (settings) {
-        return [ settings.startDate.toString('yyyy-MM-dd'),
-                 settings.endDate.toString('yyyy-MM-dd') ];
-      } else {
-        return [ null, null ];
-      }
+      var start = $(el).find('input[name=start]').data('datepicker').getDate();
+      var end   = $(el).find('input[name=end]').data('datepicker').getDate();
+
+      return [this._formatDate(start), this._formatDate(end)];
     },
-    getType: function(el) {
-      return "date";
-    },
+    // value must be an array of unambiguous strings like '2001-01-01', or
+    // Date objects.
     setValue: function(el, value) {
-      var settings = $(el).data('daterangepicker');
-
-      if (value instanceof Array) {
-        var date = Date.parse(value[0]);
-        if (date) settings.startDate = date;
-
-        date = Date.parse(value[1]);
-        if (date) settings.endDate = date;
-      } else {
-        settings.startDate = Date.parse(value);
+      if (!(value instanceof Array)) {
+        return;
       }
 
-      // Update the input text from the startDate and endDate
-      settings.notify();
-      // Update the calendars to show startDate and endDate
-      settings.updateCalendars();
+      // If value is undefined, don't try to set
+      if (value[0] !== undefined) {
+        var start = this._newDate(value[0]);
+        $(el).find('input[name=start]').datepicker('update', start);
+      }
+      if (value[1] !== undefined) {
+        var end = this._newDate(value[1]);
+        $(el).find('input[name=end]').datepicker('update', end);
+      }
     },
     getState: function(el) {
       var $el = $(el);
-      var settings = $el.data('daterangepicker');
 
-      var minDate = false;
-      if (settings.minDate)
-        minDate = settings.minDate.toString('yyyy-MM-dd');
-      var maxDate = false;
-      if (settings.maxDate)
-        maxDate = settings.maxDate.toString('yyyy-MM-dd');
+      // For many of the properties, sssume start and end have the same values
+      var $startinput = $el.find('input[name=start]') 
+      var $endinput   = $el.find('input[name=end]') 
+
+      var min = $startinput.data('datepicker').startDate;
+      var max = $startinput.data('datepicker').endDate;
+
+      // Stringify min and max. If min and max aren't set, they will be
+      // -Infinity and Infinity; replace these with null.
+      min = (min === -Infinity) ? null : this._formatDate(min);
+      max = (max ===  Infinity) ? null : this._formatDate(max);
+
+      // startViewMode is stored as a number; convert to string
+      var startview = $startinput.data('datepicker').startViewMode;
+      if      (startview === 2)  startview = 'decade';
+      else if (startview === 1)  startview = 'year';
+      else if (startview === 0)  startview = 'month';
 
       return {
-        label:     $el.parent().find('label[for=' + el.id + ']').text(),
-        value:     this.getValue(el),
-        minDate:   minDate,
-        maxDate:   maxDate,
-        format:    settings.format,
-        separator: settings.separator,
-        showDropdowns: settings.showDropdowns
+        label:       $el.find('label[for=' + el.id + ']').text(),
+        value:       this.getValue(el),
+        valueString: [ $startinput.val(), $endinput.val() ],
+        min:         min,
+        max:         max,
+        weekstart:   $startinput.data('datepicker').weekStart,
+        format:      this._formatToString($startinput.data('datepicker').format),
+        language:    $startinput.data('datepicker').language,
+        startview:   startview
       };
     },
     receiveMessage: function(el, data) {
-      var settings = $(el).data('daterangepicker');
+      var $el = $(el);
+      var $startinput = $el.find('[name=start]') 
+      var $endinput   = $el.find('[name=end]') 
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value);
 
-      if (data.hasOwnProperty('minDate'))
-        settings.minDate = Date.parse(data.minDate);
-
-      if (data.hasOwnProperty('maxDate'))
-        settings.maxDate = Date.parse(data.maxDate);
-
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+        $el.find('label[for=' + el.id + ']').text(data.label);
 
-      if (data.hasOwnProperty('format'))
-        settings.format = data.format;
+      if (data.hasOwnProperty('min')) {
+        this._setMin($startinput[0], data.min);
+        this._setMin($endinput[0],   data.min);
+      }
 
-      if (data.hasOwnProperty('separator'))
-        settings.separator = data.separator;
-
-      // Update the input text from the startDate and endDate
-      settings.notify();
-      // Update the calendars to show startDate and endDate
-      settings.updateCalendars();
+      if (data.hasOwnProperty('max')) {
+        this._setMax($startinput[0], data.max);
+        this._setMax($endinput[0],   data.max);
+      }
 
       $(el).trigger('change');
+    },
+    initialize: function(el) {
+      var $el = $(el);
+      var $startinput = $el.find('[name=start]') 
+      var $endinput   = $el.find('[name=end]') 
+
+      $el.datepicker();
+
+      var start = $startinput.data('initial-date');
+      var end   = $endinput.data('initial-date');
+
+      this.setValue(el, [start, end]);
+
+      // // Set the start and end dates, from min-date and max-date. These always
+      // // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
+      // // support for date-startdate and data-enddate, which use the current
+      // // date format.
+      this._setMin($startinput[0], $startinput.data('min-date'));
+      this._setMin($endinput[0],   $startinput.data('min-date'));
+      this._setMax($startinput[0], $endinput.data('max-date'));
+      this._setMax($endinput[0],   $endinput.data('max-date'));
     },
     subscribe: function(el, callback) {
       $(el).on('keyup.dateRangeInputBinding input.dateRangeInputBinding', function(event) {
         // Use normal debouncing policy when typing
         callback(true);
       });
-      $(el).on('change.dateRangeInputBinding', function(event) {
+      $(el).on('changeDate.dateRangeInputBinding change.dateRangeInputBinding', function(event) {
         // Send immediately when clicked
         callback(false);
       });
     },
     unsubscribe: function(el) {
       $(el).off('.dateRangeInputBinding');
-    },
-    getRatePolicy: function() {
-      return {
-        policy: 'debounce',
-        delay: 250
-      };
     }
   });
   inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');
@@ -2388,25 +2415,6 @@
         }
       });
     }
-
-    function initDateRangeInputs() {
-      $('input.date-range-input').each(function() {
-        var $el = $(this);
-
-        // Trigger change event whenever the value is changed via user input
-        $el.daterangepicker(null, function() {
-          $el.trigger('change');
-        });
-
-        // Fill the value text from the startDate and endDate
-        $el.data('daterangepicker').notify();
-        // Update the calendars to show startDate and
-        $el.data('daterangepicker').updateCalendars();
-
-        $el.trigger('change');
-      });
-    }
-    initDateRangeInputs();
 
     // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size

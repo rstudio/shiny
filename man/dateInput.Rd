@@ -4,7 +4,7 @@
 \usage{
   dateInput(inputId, label, value = Sys.Date(), min = NULL,
     max = NULL, format = "\%Y-\%m-\%d",
-    startview = "month")
+    startview = "month", weekstart = 0, language = "en")
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -27,10 +27,21 @@
   \item{startview}{The date range shown when the input
   object is first clicked. Can be "month" (the default),
   "year", or "decade".}
+
+  \item{weekstart}{Which day is the start of the week.
+  Should be an integer from 0 (Sunday) to 6 (Saturday).}
+
+  \item{language}{The language used for month and day
+  names. Default is "en".  Other valid values include "bg",
+  "ca", "cs", "da", "de", "el", "es", "fi", "fr", "he",
+  "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv",
+  "ms", "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs",
+  "ru", "sk", "sl", "sv", "sw", "th", "tr", "uk", "zh-CN",
+  and "zh-TW".}
 }
 \description{
   Creates a text input which, when clicked on, brings up a
-  calendar that the user can click on.
+  calendar that the user can click on to select dates.
 }
 \details{
   The date \code{format} string uses a subset of R's
@@ -56,6 +67,15 @@ dateInput("date", "Date:", value = "2012-02-29", format = "\%m/\%d/\%y")
 
 # Pass in a date object
 dateInput("date", "Date:", value = Sys.Date()-10)
+
+# Use different language and different first day of week
+dateInput("date", "Date:",
+          language = "de",
+          weekstart = 1)
+
+# Start with decade view instead of default month view
+dateInput("date", "Date:",
+          startview = "decade")
 }
 \seealso{
   \code{\link{updateDateInput}}

@@ -26,7 +26,7 @@
   object, or a string in \code{yyyy-mm-dd} format.}
 
   \item{format}{The format of the date. Defaults to
-  \code{"%Y-%m-%d"}.}
+  \code{"\%Y-\%m-\%d"}.}
 
   \item{startview}{The date range shown when the input
   object is first clicked. Can be "month" (the default),
@@ -55,14 +55,14 @@
   picker only supports some of the format codes. Valid
   values are:
 
-  \itemize{ \item \code{%y} Year without century (12) \item
-  \code{%Y} Year with century (2012) \item \code{%m} Month
-  number, with leading zero (01-12) \item \code{%b}
-  Abbreviated month name \item \code{%B} Full month name
-  \item \code{%d} Day of month with leading zero \item
-  \code{%e} Day of month without leading zero \item
-  \code{%a} Abbreviated weekday name \item \code{%A} Full
-  weekday name }
+  \itemize{ \item \code{\%y} Year without century (12)
+  \item \code{\%Y} Year with century (2012) \item
+  \code{\%m} Month number, with leading zero (01-12) \item
+  \code{\%b} Abbreviated month name \item \code{\%B} Full
+  month name \item \code{\%d} Day of month with leading
+  zero \item \code{\%e} Day of month without leading zero
+  \item \code{\%a} Abbreviated weekday name \item
+  \code{\%A} Full weekday name }
 }
 \examples{
 dateRangeInput("daterange", "Date range:",

@@ -680,15 +680,15 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' values are:
 #'
 #' \itemize{
-#'   \item \code{%y} Year without century (12)
-#'   \item \code{%Y} Year with century (2012)
-#'   \item \code{%m} Month number, with leading zero (01-12)
-#'   \item \code{%b} Abbreviated month name
-#'   \item \code{%B} Full month name
-#'   \item \code{%d} Day of month with leading zero
-#'   \item \code{%e} Day of month without leading zero
-#'   \item \code{%a} Abbreviated weekday name
-#'   \item \code{%A} Full weekday name
+#'   \item \code{\%y} Year without century (12)
+#'   \item \code{\%Y} Year with century (2012)
+#'   \item \code{\%m} Month number, with leading zero (01-12)
+#'   \item \code{\%b} Abbreviated month name
+#'   \item \code{\%B} Full month name
+#'   \item \code{\%d} Day of month with leading zero
+#'   \item \code{\%e} Day of month without leading zero
+#'   \item \code{\%a} Abbreviated weekday name
+#'   \item \code{\%A} Full weekday name
 #' }
 #'
 #' @param inputId Input variable to assign the control's value to.
@@ -699,7 +699,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'   \code{yyyy-mm-dd} format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
-#' @param format The format of the date. Defaults to \code{"%Y-%m-%d"}.
+#' @param format The format of the date. Defaults to \code{"\%Y-\%m-\%d"}.
 #' @param startview The date range shown when the input object is first
 #'   clicked. Can be "month" (the default), "year", or "decade".
 #' @param weekstart Which day is the start of the week. Should be an integer
@@ -779,15 +779,15 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 #' values are:
 #'
 #' \itemize{
-#'   \item \code{%y} Year without century (12)
-#'   \item \code{%Y} Year with century (2012)
-#'   \item \code{%m} Month number, with leading zero (01-12)
-#'   \item \code{%b} Abbreviated month name
-#'   \item \code{%B} Full month name
-#'   \item \code{%d} Day of month with leading zero
-#'   \item \code{%e} Day of month without leading zero
-#'   \item \code{%a} Abbreviated weekday name
-#'   \item \code{%A} Full weekday name
+#'   \item \code{\%y} Year without century (12)
+#'   \item \code{\%Y} Year with century (2012)
+#'   \item \code{\%m} Month number, with leading zero (01-12)
+#'   \item \code{\%b} Abbreviated month name
+#'   \item \code{\%B} Full month name
+#'   \item \code{\%d} Day of month with leading zero
+#'   \item \code{\%e} Day of month without leading zero
+#'   \item \code{\%a} Abbreviated weekday name
+#'   \item \code{\%A} Full weekday name
 #' }
 #'
 #' @param inputId Input variable to assign the control's value to.
@@ -800,7 +800,7 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 #'   \code{yyyy-mm-dd} format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
-#' @param format The format of the date. Defaults to \code{"%Y-%m-%d"}.
+#' @param format The format of the date. Defaults to \code{"\%Y-\%m-\%d"}.
 #' @param startview The date range shown when the input object is first
 #'   clicked. Can be "month" (the default), "year", or "decade".
 #' @param weekstart Which day is the start of the week. Should be an integer

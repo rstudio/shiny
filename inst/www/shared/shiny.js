@@ -586,69 +586,6 @@
       return value;
     };
 
-    this.dispatchMessage = function(msg) {
-      var msgObj = JSON.parse(msg);
-      if (msgObj.custom !== undefined && exports.oncustommessage) {
-        exports.oncustommessage(msgObj.custom);
-      }
-      if (msgObj.values) {
-        $(document.documentElement).removeClass('shiny-busy');
-        for (var name in this.$bindings)
-          this.$bindings[name].showProgress(false);
-      }
-      for (var key in msgObj.errors) {
-        this.receiveError(key, msgObj.errors[key]);
-      }
-      for (var key in msgObj.values) {
-        this.receiveOutput(key, msgObj.values[key]);
-      }
-      if (msgObj.inputMessages) {
-        // inputMessages should be an array
-        for (var i = 0; i < msgObj.inputMessages.length; i++) {
-          var $obj = $('.shiny-bound-input#' + msgObj.inputMessages[i].id);
-          var inputBinding = $obj.data('shiny-input-binding');
-
-          // Dispatch the message to the appropriate input object
-          if ($obj.length > 0) {
-            inputBinding.receiveMessage($obj[0], msgObj.inputMessages[i].message);
-          }
-        }
-      }
-      if (msgObj.javascript) {
-        eval(msgObj.javascript);
-      }
-      if (msgObj.console) {
-        for (var i = 0; i < msgObj.console.length; i++) {
-          if (console.log)
-            console.log(msgObj.console[i]);
-        }
-      }
-      if (msgObj.progress) {
-        $(document.documentElement).addClass('shiny-busy');
-        for (var i = 0; i < msgObj.progress.length; i++) {
-          var key = msgObj.progress[i];
-          var binding = this.$bindings[key];
-          if (binding && binding.showProgress) {
-            binding.showProgress(true);
-          }
-        }
-      }
-      if (msgObj.response) {
-        var resp = msgObj.response;
-        var requestId = resp.tag;
-        var request = this.$activeRequests[requestId];
-        if (request) {
-          delete this.$activeRequests[requestId];
-          if ('value' in resp)
-            request.onSuccess(resp.value);
-          else
-            request.onError(resp.error);
-        }
-      }
-
-      this.$updateConditionals();
-    };
-
     this.bindOutput = function(id, binding) {
       if (!id)
         throw "Can't bind an element with no ID";
@@ -663,6 +600,7 @@
 
       return binding;
     };
+
     this.unbindOutput = function(id, binding) {
       if (this.$bindings[id] === binding) {
         delete this.$bindings[id];
@@ -700,6 +638,159 @@
         }
       }
     };
+
+    // Message handler management functions =================================
+
+    // Records insertion order of handlers. Maps number to name. This is so
+    // we can dispatch messages to handlers in the order that handlers were
+    // added.
+    var messageHandlerOrder = [];
+    // Keep track of handlers by name. Maps name to handler function.
+    var messageHandlers = {};
+
+    // Two categories of message handlers: those that are from Shiny, and those
+    // that are added by the user. The Shiny ones handle messages in
+    // msgObj.values, msgObj.errors, and so on. The user ones handle messages
+    // in msgObj.custom.foo and msgObj.custom.bar.
+    var customMessageHandlerOrder = [];
+    var customMessageHandlers = {};
+
+    // Adds Shiny (internal) message handler
+    function addMessageHandler(type, handler) {
+      if (messageHandlers[type]) {
+        throw('handler for message of type "' + type + '" already added.');
+      }
+      if (typeof(handler) !== 'function') {
+        throw('handler must be a function.');
+      }
+      if (handler.length !== 1) {
+        throw('handler must be a function that takes one argument.');
+      }
+
+      messageHandlerOrder.push(type);
+      messageHandlers[type] = handler;
+    }
+
+    // Adds custom message handler - this one is exposed to the user
+    function addCustomMessageHandler(type, handler) {
+      if (customMessageHandlers[type]) {
+        throw('handler for message of type "' + type + '" already added.');
+      }
+      if (typeof(handler) !== 'function') {
+        throw('handler must be a function.');
+      }
+      if (handler.length !== 1) {
+        throw('handler must be a function that takes one argument.');
+      }
+
+      customMessageHandlerOrder.push(type);
+      customMessageHandlers[type] = handler;
+    }
+
+    exports.addCustomMessageHandler = addCustomMessageHandler;
+
+    this.dispatchMessage = function(msg) {
+      var msgObj = JSON.parse(msg);
+
+      // Send msgObj.foo and msgObj.bar to appropriate handlers
+      this._sendMessagesToHandlers(msgObj, messageHandlers, messageHandlerOrder);
+
+      this.$updateConditionals();
+    };
+
+
+    // A function for sending messages to the appropriate handlers.
+    // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
+    this._sendMessagesToHandlers = function(msgObj, handlers, handlerOrder) {
+      // Dispatch messages to handlers, if handler is present
+      for (var i = 0; i < handlerOrder.length; i++) {
+        var msgType = handlerOrder[i];
+
+        if (msgObj[msgType]) {
+          // Execute each handler with 'this' referring to the present value of
+          // 'this'
+          handlers[msgType].call(this, msgObj[msgType]);
+        }
+      }
+    };
+
+    // Message handlers =====================================================
+
+    addMessageHandler('values', function(message) {
+      $(document.documentElement).removeClass('shiny-busy');
+      for (var name in this.$bindings)
+        this.$bindings[name].showProgress(false);
+
+      for (var key in message) {
+        this.receiveOutput(key, message[key]);
+      }
+    });
+
+    addMessageHandler('errors', function(message) {
+      for (var key in message) {
+        this.receiveError(key, message[key]);
+      }
+    });
+
+    addMessageHandler('inputMessages', function(message) {
+      // inputMessages should be an array
+      for (var i = 0; i < message.length; i++) {
+        var $obj = $('.shiny-bound-input#' + message[i].id);
+        var inputBinding = $obj.data('shiny-input-binding');
+
+        // Dispatch the message to the appropriate input object
+        if ($obj.length > 0) {
+          inputBinding.receiveMessage($obj[0], message[i].message);
+        }
+      }
+    });
+
+    addMessageHandler('javascript', function(message) {
+      eval(message);
+    });
+
+    addMessageHandler('console', function(message) {
+      for (var i = 0; i < message.length; i++) {
+        if (console.log)
+          console.log(message[i]);
+      }
+    });
+
+    addMessageHandler('progress', function(message) {
+      $(document.documentElement).addClass('shiny-busy');
+      for (var i = 0; i < message.length; i++) {
+        var key = message[i];
+        var binding = this.$bindings[key];
+        if (binding && binding.showProgress) {
+          binding.showProgress(true);
+        }
+      }
+    });
+
+    addMessageHandler('response', function(message) {
+      var requestId = message.tag;
+      var request = this.$activeRequests[requestId];
+      if (request) {
+        delete this.$activeRequests[requestId];
+        if ('value' in message)
+          request.onSuccess(message.value);
+        else
+          request.onError(message.error);
+      }
+    });
+
+    addMessageHandler('custom', function(message) {
+      // For old-style custom messages - should deprecate and migrate to new
+      // method
+      if (exports.oncustommessage) {
+        exports.oncustommessage(message);
+      }
+
+      // Send messages.foo and messages.bar to appropriate handlers
+      this._sendMessagesToHandlers(message, customMessageHandlers,
+                                   customMessageHandlerOrder);
+    });
+
   }).call(ShinyApp.prototype);
 
 

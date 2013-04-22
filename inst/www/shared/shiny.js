@@ -1392,8 +1392,8 @@
       var $el = $(el);
 
       // For many of the properties, sssume start and end have the same values
-      var $startinput = $el.find('input[name=start]') 
-      var $endinput   = $el.find('input[name=end]') 
+      var $startinput = $el.find('input[name=start]');
+      var $endinput   = $el.find('input[name=end]');
 
       var min = $startinput.data('datepicker').startDate;
       var max = $startinput.data('datepicker').endDate;
@@ -1423,8 +1423,8 @@
     },
     receiveMessage: function(el, data) {
       var $el = $(el);
-      var $startinput = $el.find('[name=start]') 
-      var $endinput   = $el.find('[name=end]') 
+      var $startinput = $el.find('[name=start]');
+      var $endinput   = $el.find('[name=end]');
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value);
@@ -1446,8 +1446,8 @@
     },
     initialize: function(el) {
       var $el = $(el);
-      var $startinput = $el.find('[name=start]') 
-      var $endinput   = $el.find('[name=end]') 
+      var $startinput = $el.find('[name=start]');
+      var $endinput   = $el.find('[name=end]');
 
       var start = $startinput.data('initial-date');
       var end   = $endinput.data('initial-date');

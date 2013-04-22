@@ -763,14 +763,17 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
       tags$input(id = inputId,
                  name = inputId,
                  type = "text",
-                 class = "date-input",
+                 class = "date-input input-small",
                  `data-date-language` = language,
                  `data-date-weekstart` = weekstart,
                  `data-date-format` = translateDateFormat(format),
                  `data-date-start-view` = startview,
                  `data-min-date` = min,
                  `data-max-date` = max,
-                 `data-initial-date` = value)
+                 `data-initial-date` = value),
+      tags$span(class = "add-on",
+        tags$i(class = "icon-th")
+      )
     )
   )
 }

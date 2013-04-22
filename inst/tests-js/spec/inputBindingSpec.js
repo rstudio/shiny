@@ -508,11 +508,18 @@ describe("Input Bindings", function() {
 
     beforeEach(function(){
       var htmlstring =
-        '<div>\
+        '<div id="' + id + '"\
+          class="shiny-date-input input-append date datepicker"\
+          data-date-language="en"\
+          data-date-weekstart="0"\
+          data-date-format="yyyy-mm-dd"\
+          data-date-start-view="month"\
+          data-initial-date="2013-04-10">\
           <label class="control-label" for="' + id + '">Date input:</label>\
-          <input id="' + id + '" name="' + id + '" type="text"\
-            class="date-input" data-date-format="yyyy-mm-dd"\
-            data-initial-date="2013-04-10"/>\
+          <input type="text"/>\
+          <span class="add-on">\
+            <i class="icon-th"></i>\
+          </span>\
         </div>';
 
       // Wrapper div for the htmlstring
@@ -617,16 +624,20 @@ describe("Input Bindings", function() {
 
     beforeEach(function(){
       var htmlstring =
-        '<div>\
+        '<div id="' + id + '"\
+          class="shiny-date-input input-append date datepicker"\
+          data-date-language="de"\
+          data-date-weekstart="1"\
+          data-min-date="2012-02-01"\
+          data-max-date="2013-05-04"\
+          data-date-format="mm/dd/yy"\
+          data-date-start-view="decade"\
+          data-initial-date="2013-04-10">\
           <label class="control-label" for="' + id + '">Date input:</label>\
-          <input id="' + id + '" name="' + id + '" type="text"\
-            class="date-input" data-date-format="mm/dd/yy"\
-            data-initial-date="2013-04-10"\
-            data-min-date="2012-02-01"\
-            data-max-date="2013-05-04"\
-            data-date-language="de",\
-            data-date-weekstart="1",\
-            data-date-start-view="decade"/>\
+          <input type="text"/>\
+          <span class="add-on">\
+            <i class="icon-th"></i>\
+          </span>\
         </div>';
 
       // Wrapper div for the htmlstring
@@ -724,24 +735,21 @@ describe("Input Bindings", function() {
 
     beforeEach(function(){
       var htmlstring =
-        '<div>\
+        '<div id="' + id + '" class="date-range-input" data-date-language="en"\
+          data-date-weekstart="0" data-date-format="yyyy-mm-dd"\
+          data-date-start-view="month" data-initial-start="2010-02-01"\
+          data-initial-end="2011-03-02">\
           <label class="control-label" for="' + id + '">Date range input:</label>\
-          <input id="' + id + '" name="' + id + '" type="text"\
-           class="date-range-input" data-startDate="2012-02-29"\
-           data-endDate="2013-01-01" data-format="yyyy-MM-dd"\
-           data-separator=" to "/>\
+          <input name="start" class="input-small" type="text"/>\
+           to \
+          <input name="end" class="input-small" type="text"/>\
         </div>';
 
       // Wrapper div for the htmlstring
       var el = $('<div id="input_binding_test">').prependTo('body');
       el.html(htmlstring);
 
-      // The date range picker object needs some initialization
-      var $obj = $('#' + id);
-      $obj.daterangepicker();
-      $obj.data('daterangepicker').notify();
-      $obj.data('daterangepicker').updateCalendars();
-
+      Shiny.initializeInputs(el);
       Shiny.bindAll();
     });
 

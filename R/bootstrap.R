@@ -725,27 +725,6 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL,
     format = "%Y-%m-%d", startview = "month", weekstart = 0, language = "en") {
 
-  # Convert from R's strptime date format strings to bootstrap-datepicker's
-  # date format
-  translateDateFormat <- function(str) {
-    map <- c(
-      '%y' = 'yy',   # Year without century
-      '%Y' = 'yyyy', # Year with century
-      '%m' = 'mm',   # Month number with leading zero
-      '%b' = 'M',    # Abbreviated month name
-      '%B' = 'MM',   # Full month name
-      '%d' = 'dd',   # Day of month with leading zero
-      '%e' = 'd',    # Day of month without leading zero
-      '%a' = 'D',    # Abbreviated weekday name
-      '%A' = 'DD'    # Full weekday name
-    )
-
-    for (i in seq_along(map)) {
-      str <- gsub(names(map[i]), map[i], str, fixed = TRUE)
-    }
-    str
-  }
-
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
   if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
@@ -758,19 +737,20 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
       tags$link(rel = "stylesheet", type = "text/css",
                 href = 'shared/datepicker/css/datepicker.css')
     )),
-    tags$div(
+    tags$div(id = inputId,
+             # All these extra classes are necessary for the dropdown to
+             # display correctly
+             class = "shiny-date-input input-append date datepicker",
+             `data-date-language` = language,
+             `data-date-weekstart` = weekstart,
+             `data-date-format` = translateDateFormat(format),
+             `data-date-start-view` = startview,
+             `data-min-date` = min,
+             `data-max-date` = max,
+             `data-initial-date` = value,
+
       controlLabel(inputId, label),
-      tags$input(id = inputId,
-                 name = inputId,
-                 type = "text",
-                 class = "date-input input-small",
-                 `data-date-language` = language,
-                 `data-date-weekstart` = weekstart,
-                 `data-date-format` = translateDateFormat(format),
-                 `data-date-start-view` = startview,
-                 `data-min-date` = min,
-                 `data-max-date` = max,
-                 `data-initial-date` = value),
+      tags$input(type = "text"),
       tags$span(class = "add-on",
         tags$i(class = "icon-th")
       )
@@ -848,6 +828,28 @@ dateRangeInput <- function(inputId, label, start = Sys.Date(),
       )
     )
   )
+}
+
+
+# Convert from R's strptime date format strings to bootstrap-datepicker's
+# date format
+translateDateFormat <- function(str) {
+  map <- c(
+    '%y' = 'yy',   # Year without century
+    '%Y' = 'yyyy', # Year with century
+    '%m' = 'mm',   # Month number with leading zero
+    '%b' = 'M',    # Abbreviated month name
+    '%B' = 'MM',   # Full month name
+    '%d' = 'dd',   # Day of month with leading zero
+    '%e' = 'd',    # Day of month without leading zero
+    '%a' = 'D',    # Abbreviated weekday name
+    '%A' = 'DD'    # Full weekday name
+  )
+
+  for (i in seq_along(map)) {
+    str <- gsub(names(map[i]), map[i], str, fixed = TRUE)
+  }
+  str
 }
 
 

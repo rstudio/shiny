@@ -1192,7 +1192,7 @@
   var dateInputBinding = new InputBinding();
   $.extend(dateInputBinding, {
     find: function(scope) {
-      return $(scope).find('input.date-input');
+      return $(scope).find('div.shiny-date-input');
     },
     getType: function(el) {
       return "date";
@@ -1232,7 +1232,7 @@
       return {
         label:       $el.parent().find('label[for=' + el.id + ']').text(),
         value:       this.getValue(el),
-        valueString: el.value,
+        valueString: $el.find('input').val(),
         min:         min,
         max:         max,
         language:    $el.data('datepicker').language,

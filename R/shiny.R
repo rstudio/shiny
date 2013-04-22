@@ -25,6 +25,7 @@ ShinySession <- setRefClass(
     .fileUploadContext = 'FileUploadContext',
     .input      = 'ReactiveValues', # Internal object for normal input sent from client
     .clientData = 'ReactiveValues', # Internal object for other data sent from the client
+    .closedCallbacks = 'Callbacks',
     input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
     clientData  = 'reactivevalues', # Externally-usable S3 wrapper object for .clientData
     token = 'character',  # Used to identify this instance in URLs
@@ -56,13 +57,28 @@ ShinySession <- setRefClass(
 
       session <<- list(clientData       = clientData,
                        sendInputMessage = .self$.sendInputMessage,
-                       sendJavascript   = .self$.sendJavascript)
+                       sendJavascript   = .self$.sendJavascript,
+                       onSessionEnded   = .self$onSessionEnded)
+    },
+    onSessionEnded = function(callback) {
+      "Registers the given callback to be invoked when the session is closed
+      (i.e. the connection to the client has been severed). The return value
+      is a function which unregisters the callback. If multiple callbacks are
+      registered, the order in which they are invoked is not guaranteed."
+      return(.closedCallbacks$register(callback))
     },
     close = function() {
       closed <<- TRUE
       for (output in .outputs) {
         output$suspend()
       }
+      .closedCallbacks$invoke(onError=function(e) {
+        warning(simpleWarning(
+          paste("An error occurred in an onSessionEnded handler:",
+                e$message),
+          e$call
+        ))
+      })
     },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either

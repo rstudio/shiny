@@ -1200,7 +1200,7 @@
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)
     getValue: function(el) {
-      var date = $(el).data('datepicker').getUTCDate();
+      var date = $(el).find('input[name=date]').data('datepicker').getUTCDate();
       return this._formatDate(date);
     },
     // value must be an unambiguous string like '2001-01-01', or a Date object.
@@ -1210,13 +1210,14 @@
       if (isNaN(date))
         return;
 
-      $(el).datepicker('update', date);
+      $(el).find('input[name=date]').datepicker('update', date);
     },
     getState: function(el) {
       var $el = $(el);
+      var $input = $el.find('input[name=date]');
 
-      var min = $el.data('datepicker').startDate;
-      var max = $el.data('datepicker').endDate;
+      var min = $input.data('datepicker').startDate;
+      var max = $input.data('datepicker').endDate;
 
       // Stringify min and max. If min and max aren't set, they will be
       // -Infinity and Infinity; replace these with null.
@@ -1224,7 +1225,7 @@
       max = (max ===  Infinity) ? null : this._formatDate(max);
 
       // startViewMode is stored as a number; convert to string
-      var startview = $el.data('datepicker').startViewMode;
+      var startview = $input.data('datepicker').startViewMode;
       if      (startview === 2)  startview = 'decade';
       else if (startview === 1)  startview = 'year';
       else if (startview === 0)  startview = 'month';
@@ -1232,16 +1233,18 @@
       return {
         label:       $el.find('label[for=' + el.id + ']').text(),
         value:       this.getValue(el),
-        valueString: $el.find('input').val(),
+        valueString: $input.val(),
         min:         min,
         max:         max,
-        language:    $el.data('datepicker').language,
-        weekstart:   $el.data('datepicker').weekStart,
-        format:      this._formatToString($el.data('datepicker').format),
+        language:    $input.data('datepicker').language,
+        weekstart:   $input.data('datepicker').weekStart,
+        format:      this._formatToString($input.data('datepicker').format),
         startview:   startview
       };
     },
     receiveMessage: function(el, data) {
+      var $input = $(el).find('input[name=date]');
+
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value);
 
@@ -1249,10 +1252,10 @@
         $(el).find('label[for=' + el.id + ']').text(data.label);
 
       if (data.hasOwnProperty('min'))
-        this._setMin(el, data.min);
+        this._setMin($input[0], data.min);
 
       if (data.hasOwnProperty('max'))
-        this._setMax(el, data.max);
+        this._setMax($input[0], data.max);
 
       $(el).trigger('change');
     },
@@ -1276,15 +1279,15 @@
       };
     },
     initialize: function(el) {
-      var $el = $(el);
-      this.setValue(el, $el.data('initial-date'));
+      var $input = $(el).find('input[name=date]');
+      this.setValue(el, $input.data('initial-date'));
 
       // Set the start and end dates, from min-date and max-date. These always
       // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
       // support for date-startdate and data-enddate, which use the current
       // date format.
-      this._setMin(el, $el.data('min-date'));
-      this._setMax(el, $el.data('max-date'));
+      this._setMin($input[0], $input.data('min-date'));
+      this._setMax($input[0], $input.data('max-date'));
     },
     // Given a Date object, return a string in yyyy-mm-dd format
     _formatDate: function(date) {
@@ -1361,7 +1364,7 @@
   var dateRangeInputBinding = {};
   $.extend(dateRangeInputBinding, dateInputBinding, {
     find: function(scope) {
-      return $(scope).find('div.date-range-input');
+      return $(scope).find('div.shiny-date-range-input');
     },
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)

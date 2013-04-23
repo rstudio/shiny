@@ -747,21 +747,21 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
                 href = 'shared/datepicker/css/datepicker.css')
     )),
     tags$div(id = inputId,
-             # All these extra classes are necessary for the dropdown to
-             # display correctly
-             class = "shiny-date-input input-append date datepicker",
-             `data-date-language` = language,
-             `data-date-weekstart` = weekstart,
-             `data-date-format` = translateDateFormat(format),
-             `data-date-start-view` = startview,
-             `data-min-date` = min,
-             `data-max-date` = max,
-             `data-initial-date` = value,
+             class = "shiny-date-input",
 
       controlLabel(inputId, label),
-      tags$input(type = "text"),
-      tags$span(class = "add-on",
-        tags$i(class = "icon-th")
+      tags$input(type = "text",
+                 name = "date",
+                 # All these extra classes are necessary for the dropdown to
+                 # display correctly
+                 class = "input-medium datepicker",
+                 `data-date-language` = language,
+                 `data-date-weekstart` = weekstart,
+                 `data-date-format` = translateDateFormat(format),
+                 `data-date-start-view` = startview,
+                 `data-min-date` = min,
+                 `data-max-date` = max,
+                 `data-initial-date` = value
       )
     )
   )
@@ -862,7 +862,7 @@ dateRangeInput <- function(inputId, label, start = Sys.Date(), end = Sys.Date(),
     )),
     tags$div(id = inputId,
              # input-daterange class is needed for dropdown behavior
-             class = "date-range-input input-daterange",
+             class = "shiny-date-range-input input-daterange",
 
       controlLabel(inputId, label),
       tags$input(name = "start",

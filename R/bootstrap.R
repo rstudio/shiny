@@ -674,21 +674,20 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' Creates a text input which, when clicked on, brings up a calendar that
 #' the user can click on to select dates.
 #'
-#' The date \code{format} string uses a subset of R's \code{\link{strptime}}
-#' format codes. The reason it uses a subset is because the formats must be
-#' the Javascript date picker only supports some of the format codes. Valid
-#' values are:
+#' The date \code{format} string specifies how the date will be displayed in
+#' the browser. It allows the following values:
 #'
 #' \itemize{
-#'   \item \code{\%y} Year without century (12)
-#'   \item \code{\%Y} Year with century (2012)
-#'   \item \code{\%m} Month number, with leading zero (01-12)
-#'   \item \code{\%b} Abbreviated month name
-#'   \item \code{\%B} Full month name
-#'   \item \code{\%d} Day of month with leading zero
-#'   \item \code{\%e} Day of month without leading zero
-#'   \item \code{\%a} Abbreviated weekday name
-#'   \item \code{\%A} Full weekday name
+#'   \item \code{yy} Year without century (12)
+#'   \item \code{yyyy} Year with century (2012)
+#'   \item \code{mm} Month number, with leading zero (01-12)
+#'   \item \code{m} Month number, without leading zero (01-12)
+#'   \item \code{M} Abbreviated month name
+#'   \item \code{MM} Full month name
+#'   \item \code{dd} Day of month with leading zero
+#'   \item \code{d} Day of month without leading zero
+#'   \item \code{D} Abbreviated weekday name
+#'   \item \code{DD} Full weekday name
 #' }
 #'
 #' @param inputId Input variable to assign the control's value to.
@@ -710,7 +709,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'   "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs", "ru", "sk", "sl", "sv",
 #'   "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".
 #'
-#' @seealso \code{\link{updateDateInput}}
+#' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
 #'
 #' @examples
 #' dateInput("date", "Date:", value = "2012-02-29")
@@ -718,7 +717,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' # value is always yyyy-mm-dd, even if the display format is different
 #' dateInput("date", "Date:", value = "2012-02-29", format = "%m/%d/%y")
 #'
-#' # Pass in a date object
+#' # Pass in a Date object
 #' dateInput("date", "Date:", value = Sys.Date()-10)
 #'
 #' # Use different language and different first day of week
@@ -732,13 +731,13 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'
 #' @export
 dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL,
-    format = "%Y-%m-%d", startview = "month", weekstart = 0, language = "en") {
+    format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en") {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
   if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
-  if (inherits(min, "Date"))    min   <- format(min,   "%Y-%m-%d")
-  if (inherits(max, "Date"))    max   <- format(max,   "%Y-%m-%d")
+  if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
+  if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
   tagList(
     singleton(tags$head(
@@ -757,7 +756,7 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
                  class = "input-medium datepicker",
                  `data-date-language` = language,
                  `data-date-weekstart` = weekstart,
-                 `data-date-format` = translateDateFormat(format),
+                 `data-date-format` = format,
                  `data-date-start-view` = startview,
                  `data-min-date` = min,
                  `data-max-date` = max,
@@ -773,21 +772,20 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 #' Creates a pair of text inputs which, when clicked on, bring up calendars that
 #' the user can click on to select dates.
 #'
-#' The date \code{format} string uses a subset of R's \code{\link{strptime}}
-#' format codes. The reason it uses a subset is because the formats must be
-#' the Javascript date picker only supports some of the format codes. Valid
-#' values are:
+#' The date \code{format} string specifies how the date will be displayed in
+#' the browser. It allows the following values:
 #'
 #' \itemize{
-#'   \item \code{\%y} Year without century (12)
-#'   \item \code{\%Y} Year with century (2012)
-#'   \item \code{\%m} Month number, with leading zero (01-12)
-#'   \item \code{\%b} Abbreviated month name
-#'   \item \code{\%B} Full month name
-#'   \item \code{\%d} Day of month with leading zero
-#'   \item \code{\%e} Day of month without leading zero
-#'   \item \code{\%a} Abbreviated weekday name
-#'   \item \code{\%A} Full weekday name
+#'   \item \code{yy} Year without century (12)
+#'   \item \code{yyyy} Year with century (2012)
+#'   \item \code{mm} Month number, with leading zero (01-12)
+#'   \item \code{m} Month number, without leading zero (01-12)
+#'   \item \code{M} Abbreviated month name
+#'   \item \code{MM} Full month name
+#'   \item \code{dd} Day of month with leading zero
+#'   \item \code{d} Day of month without leading zero
+#'   \item \code{D} Abbreviated weekday name
+#'   \item \code{DD} Full weekday name
 #' }
 #'
 #' @param inputId Input variable to assign the control's value to.
@@ -818,8 +816,8 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 #'                start = "2001-01-01",
 #'                end   = "2010-12-31")
 #'
-#' # start and end are always yyyy-mm-dd, even if the display format
-#' # is different
+#' # start and end are always specified in yyyy-mm-dd, even if the display
+#' # format is different
 #' dateRangeInput("daterange", "Date range:",
 #'                start  = "2001-01-01",
 #'                end    = "2010-12-31",
@@ -828,7 +826,7 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 #'                format = "mm/dd/yy",
 #'                separator = " - ")
 #'
-#' # Pass in date objects
+#' # Pass in Date objects
 #' dateRangeInput("daterange", "Date range:",
 #'                start = Sys.Date()-10,
 #'                end = Sys.Date()+10)
@@ -844,15 +842,15 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 #'
 #' @export
 dateRangeInput <- function(inputId, label, start = Sys.Date(), end = Sys.Date(),
-    min = NULL, max = NULL, format = "%Y-%m-%d", startview = "month",
+    min = NULL, max = NULL, format = "yyyy-mm-dd", startview = "month",
     weekstart = 0, language = "en", separator = " to ") {
 
   # If start and end are date objects, convert to a string with yyyy-mm-dd format
   # Same for min and max
   if (inherits(start, "Date"))  start <- format(start, "%Y-%m-%d")
-  if (inherits(end, "Date"))    end   <- format(end, "%Y-%m-%d")
-  if (inherits(min, "Date"))    min   <- format(min,   "%Y-%m-%d")
-  if (inherits(max, "Date"))    max   <- format(max,   "%Y-%m-%d")
+  if (inherits(end,   "Date"))  end   <- format(end,   "%Y-%m-%d")
+  if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
+  if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
   tagList(
     singleton(tags$head(
@@ -870,7 +868,7 @@ dateRangeInput <- function(inputId, label, start = Sys.Date(), end = Sys.Date(),
                  type = "text",
                  `data-date-language` = language,
                  `data-date-weekstart` = weekstart,
-                 `data-date-format` = translateDateFormat(format),
+                 `data-date-format` = format,
                  `data-date-start-view` = startview,
                  `data-min-date` = min,
                  `data-max-date` = max,
@@ -882,7 +880,7 @@ dateRangeInput <- function(inputId, label, start = Sys.Date(), end = Sys.Date(),
                  type = "text",
                  `data-date-language` = language,
                  `data-date-weekstart` = weekstart,
-                 `data-date-format` = translateDateFormat(format),
+                 `data-date-format` = format,
                  `data-date-start-view` = startview,
                  `data-min-date` = min,
                  `data-max-date` = max,
@@ -890,28 +888,6 @@ dateRangeInput <- function(inputId, label, start = Sys.Date(), end = Sys.Date(),
                  )
     )
   )
-}
-
-
-# Convert from R's strptime date format strings to bootstrap-datepicker's
-# date format
-translateDateFormat <- function(str) {
-  map <- c(
-    '%y' = 'yy',   # Year without century
-    '%Y' = 'yyyy', # Year with century
-    '%m' = 'mm',   # Month number with leading zero
-    '%b' = 'M',    # Abbreviated month name
-    '%B' = 'MM',   # Full month name
-    '%d' = 'dd',   # Day of month with leading zero
-    '%e' = 'd',    # Day of month without leading zero
-    '%a' = 'D',    # Abbreviated weekday name
-    '%A' = 'DD'    # Full weekday name
-  )
-
-  for (i in seq_along(map)) {
-    str <- gsub(names(map[i]), map[i], str, fixed = TRUE)
-  }
-  str
 }
 
 

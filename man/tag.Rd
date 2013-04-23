@@ -44,3 +44,16 @@ sets of tags; see the contents of bootstrap.R for examples.
 \value{
   An HTML tag object that can be rendered as HTML using \link{as.character}.
 }
+
+\examples{
+tagList(tags$h1("Title"),
+        tags$h2("Header text"),
+        tags$p("Text here"))
+
+# Can also convert a regular list to a tagList (internal data structure isn't
+# exactly the same, but when rendered to HTML, the output is the same).
+x <- list(tags$h1("Title"),
+          tags$h2("Header text"),
+          tags$p("Text here"))
+tagList(x)
+}

@@ -1200,7 +1200,7 @@
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)
     getValue: function(el) {
-      var date = $(el).find('input[name=date]').data('datepicker').getUTCDate();
+      var date = $(el).find('input').data('datepicker').getUTCDate();
       return this._formatDate(date);
     },
     // value must be an unambiguous string like '2001-01-01', or a Date object.
@@ -1210,11 +1210,11 @@
       if (isNaN(date))
         return;
 
-      $(el).find('input[name=date]').datepicker('update', date);
+      $(el).find('input').datepicker('update', date);
     },
     getState: function(el) {
       var $el = $(el);
-      var $input = $el.find('input[name=date]');
+      var $input = $el.find('input');
 
       var min = $input.data('datepicker').startDate;
       var max = $input.data('datepicker').endDate;
@@ -1243,7 +1243,7 @@
       };
     },
     receiveMessage: function(el, data) {
-      var $input = $(el).find('input[name=date]');
+      var $input = $(el).find('input');
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value);
@@ -1279,7 +1279,7 @@
       };
     },
     initialize: function(el) {
-      var $input = $(el).find('input[name=date]');
+      var $input = $(el).find('input');
 
       var date = $input.data('initial-date');
       // If initial_date is null, set to current date
@@ -1386,8 +1386,8 @@
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)
     getValue: function(el) {
-      var start = $(el).find('input[name=start]').data('datepicker').getUTCDate();
-      var end   = $(el).find('input[name=end]').data('datepicker').getUTCDate();
+      var start = $(el).find('input.start').data('datepicker').getUTCDate();
+      var end   = $(el).find('input.end').data('datepicker').getUTCDate();
 
       return [this._formatDate(start), this._formatDate(end)];
     },
@@ -1401,11 +1401,11 @@
       // If value is undefined, don't try to set
       if (value[0] !== undefined) {
         var start = this._newDate(value[0]);
-        $(el).find('input[name=start]').datepicker('update', start);
+        $(el).find('input.start').datepicker('update', start);
       }
       if (value[1] !== undefined) {
         var end = this._newDate(value[1]);
-        $(el).find('input[name=end]').datepicker('update', end);
+        $(el).find('input.end').datepicker('update', end);
       }
 
       // Make it so that the correct items are highlighted when the calendar is
@@ -1416,8 +1416,8 @@
       var $el = $(el);
 
       // For many of the properties, sssume start and end have the same values
-      var $startinput = $el.find('input[name=start]');
-      var $endinput   = $el.find('input[name=end]');
+      var $startinput = $el.find('input.start');
+      var $endinput   = $el.find('input.end');
 
       var min = $startinput.data('datepicker').startDate;
       var max = $startinput.data('datepicker').endDate;
@@ -1447,8 +1447,8 @@
     },
     receiveMessage: function(el, data) {
       var $el = $(el);
-      var $startinput = $el.find('[name=start]');
-      var $endinput   = $el.find('[name=end]');
+      var $startinput = $el.find('.start');
+      var $endinput   = $el.find('.end');
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value);
@@ -1470,8 +1470,8 @@
     },
     initialize: function(el) {
       var $el = $(el);
-      var $startinput = $el.find('[name=start]');
-      var $endinput   = $el.find('[name=end]');
+      var $startinput = $el.find('.start');
+      var $endinput   = $el.find('.end');
 
       var start = $startinput.data('initial-date');
       var end   = $endinput.data('initial-date');

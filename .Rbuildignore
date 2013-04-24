@@ -8,3 +8,4 @@
 ^run\.R$
 ^\.gitignore$
 ^res$
+^tools$

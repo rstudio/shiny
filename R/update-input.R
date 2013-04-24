@@ -163,7 +163,7 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #' }
 #' @export
 updateDateRangeInput <- function(session, inputId, label = NULL,
-    start = Sys.Date(), end = Sys.Date(), min = NULL, max = NULL) {
+    start = NULL, end = NULL, min = NULL, max = NULL) {
 
   # Make sure start and end are strings, not date objects. This is for
   # consistency across different locales.

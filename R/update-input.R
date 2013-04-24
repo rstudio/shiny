@@ -7,7 +7,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -40,7 +40,7 @@ updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # TRUE if input$controller is even, FALSE otherwise.
@@ -63,7 +63,7 @@ updateCheckboxInput <- updateTextInput
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -86,6 +86,101 @@ updateCheckboxInput <- updateTextInput
 #' @export
 updateSliderInput <- updateTextInput
 
+#' Change the value of a date input on the client
+#'
+#' @template update-input
+#' @param value The desired date value. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param min The minimum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param max The maximum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#'
+#' @seealso \code{\link{dateInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     updateDateInput(session, "inDate",
+#'       label = paste("Date label", x),
+#'       value = paste("2013-04-", x, sep=""),
+#'       min   = paste("2013-04-", x-1, sep=""),
+#'       max   = paste("2013-04-", x+1, sep="")
+#'     )
+#'   })
+#' })
+#' }
+#' @export
+updateDateInput <- function(session, inputId, label = NULL, value = NULL,
+    min = NULL, max = NULL) {
+
+  # If value is a date object, convert it to a string with yyyy-mm-dd format
+  # Same for min and max
+  if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
+  if (inherits(min, "Date"))    min   <- format(min,   "%Y-%m-%d")
+  if (inherits(max, "Date"))    max   <- format(max,   "%Y-%m-%d")
+
+  message <- dropNulls(list(label=label, value=value, min=min, max=max))
+  session$sendInputMessage(inputId, message)
+}
+
+
+#' Change the start and end values of a date range input on the client
+#'
+#' @template update-input
+#' @param start The start date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param end The end date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param min The minimum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#' @param max The maximum allowed date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format.
+#'
+#' @seealso \code{\link{dateRangeInput}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, session) {
+#'
+#'   observe({
+#'     # We'll use the input$controller variable multiple times, so save it as x
+#'     # for convenience.
+#'     x <- input$controller
+#'
+#'     updateDateRangeInput(session, "inDateRange",
+#'       label = paste("Date range label", x),
+#'       start = paste("2013-01-", x, sep=""))
+#'       end = paste("2013-12-", x, sep=""))
+#'   })
+#' })
+#' }
+#' @export
+updateDateRangeInput <- function(session, inputId, label = NULL,
+    start = NULL, end = NULL, min = NULL, max = NULL) {
+
+  # Make sure start and end are strings, not date objects. This is for
+  # consistency across different locales.
+  if (inherits(start, "Date"))  start <- format(start, '%Y-%m-%d')
+  if (inherits(end, "Date"))    end <- format(end, '%Y-%m-%d')
+  if (inherits(min, "Date"))    min <- format(min, '%Y-%m-%d')
+  if (inherits(max, "Date"))    max <- format(max, '%Y-%m-%d')
+
+  message <- dropNulls(list(
+    label = label,
+    value = c(start, end),
+    min = min,
+    max = max
+  ))
+
+  session$sendInputMessage(inputId, message)
+}
 
 #' Change the selected tab on the client
 #'
@@ -98,7 +193,7 @@ updateSliderInput <- updateTextInput
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # TRUE if input$controller is even, FALSE otherwise.
@@ -133,7 +228,7 @@ updateTabsetPanel <- function(session, inputId, selected = NULL) {
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -168,7 +263,7 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -227,7 +322,7 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
@@ -265,7 +360,7 @@ updateRadioButtons <- updateCheckboxGroupInput
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, clientData, session) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x

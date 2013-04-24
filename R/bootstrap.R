@@ -814,8 +814,9 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 #'   "fr", "he", "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv", "ms",
 #'   "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs-latin", "ru", "sk", "sl",
 #'   "sv", "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".
+#' @param separator String to display between the start and end input boxes.
 #'
-#' @seealso \code{\link{DateInput}}, \code{\link{updateDateRangeInput}}
+#' @seealso \code{\link{dateInput}}, \code{\link{updateDateRangeInput}}
 #'
 #' @examples
 #' dateRangeInput("daterange", "Date range:",

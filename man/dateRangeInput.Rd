@@ -46,6 +46,9 @@
   "ms", "nb", "nl", "pl", "pt", "pt", "ro", "rs",
   "rs-latin", "ru", "sk", "sl", "sv", "sw", "th", "tr",
   "uk", "zh-CN", and "zh-TW".}
+
+  \item{separator}{String to display between the start and
+  end input boxes.}
 }
 \description{
   Creates a pair of text inputs which, when clicked on,
@@ -100,7 +103,7 @@ dateRangeInput("daterange", "Date range:",
                startview = "decade")
 }
 \seealso{
-  \code{\link{DateInput}},
+  \code{\link{dateInput}},
   \code{\link{updateDateRangeInput}}
 }
 

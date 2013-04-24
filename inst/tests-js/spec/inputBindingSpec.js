@@ -648,7 +648,6 @@ describe("Input Bindings", function() {
           class="shiny-date-input">\
           <label class="control-label" for="' + id + '">Date input:</label>\
           <input type="text"\
-            name="date"\
             class="input-medium datepicker"\
             data-date-language="de"\
             data-date-weekstart="1"\
@@ -759,7 +758,6 @@ describe("Input Bindings", function() {
           class="shiny-date-input">\
           <label class="control-label" for="' + id + '">Date input:</label>\
           <input type="text"\
-            name="date"\
             class="input-medium datepicker"/>\
         </div>';
 
@@ -794,8 +792,8 @@ describe("Input Bindings", function() {
       var htmlstring =
         '<div id="' + id + '" class="shiny-date-range-input input-daterange">\
           <label class="control-label" for="' + id + '">Date range input:</label>\
-          <input name="start"\
-            class="input-small"\
+          <input\
+            class="input-small start"\
             type="text"\
             data-date-language="en"\
             data-date-weekstart="0"\
@@ -803,8 +801,8 @@ describe("Input Bindings", function() {
             data-date-start-view="month"\
             data-initial-date="2012-02-29"/>\
            to \
-          <input name="end"\
-            class="input-small"\
+          <input\
+            class="input-small end"\
             type="text"\
             data-date-language="en"\
             data-date-weekstart="0"\
@@ -934,8 +932,8 @@ describe("Input Bindings", function() {
       var htmlstring =
         '<div id="' + id + '" class="shiny-date-range-input input-daterange">\
           <label class="control-label" for="' + id + '">Date range input:</label>\
-          <input name="start"\
-            class="input-small"\
+          <input\
+            class="input-small start"\
             type="text"\
             data-date-language="en"\
             data-date-weekstart="2"\
@@ -945,8 +943,8 @@ describe("Input Bindings", function() {
             data-max-date="2013-05-04"\
             data-initial-date="2012-02-29"/>\
            to \
-          <input name="end"\
-            class="input-small"\
+          <input\
+            class="input-small end"\
             type="text"\
             data-date-language="en"\
             data-date-weekstart="2"\
@@ -1072,12 +1070,12 @@ describe("Input Bindings", function() {
       var htmlstring =
         '<div id="' + id + '" class="shiny-date-range-input input-daterange">\
           <label class="control-label" for="' + id + '">Date range input:</label>\
-          <input name="start"\
-            class="input-small"\
+          <input\
+            class="input-small start"\
             type="text"/>\
            to \
-          <input name="end"\
-            class="input-small"\
+          <input\
+            class="input-small end"\
             type="text"/>\
         </div>';
 

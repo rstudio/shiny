@@ -1415,7 +1415,7 @@
     getState: function(el) {
       var $el = $(el);
 
-      // For many of the properties, sssume start and end have the same values
+      // For many of the properties, assume start and end have the same values
       var $startinput = $el.find('input.start');
       var $endinput   = $el.find('input.end');
 
@@ -1447,8 +1447,8 @@
     },
     receiveMessage: function(el, data) {
       var $el = $(el);
-      var $startinput = $el.find('.start');
-      var $endinput   = $el.find('.end');
+      var $startinput = $el.find('input.start');
+      var $endinput   = $el.find('input.end');
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value);
@@ -1470,8 +1470,8 @@
     },
     initialize: function(el) {
       var $el = $(el);
-      var $startinput = $el.find('.start');
-      var $endinput   = $el.find('.end');
+      var $startinput = $el.find('input.start');
+      var $endinput   = $el.find('input.end');
 
       var start = $startinput.data('initial-date');
       var end   = $endinput.data('initial-date');
@@ -1484,8 +1484,6 @@
         end = this._dateAsUTC(new Date());
 
       this.setValue(el, [start, end]);
-
-      $el.datepicker();
 
       // // Set the start and end dates, from min-date and max-date. These always
       // // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in

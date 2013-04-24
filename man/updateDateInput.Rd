@@ -1,9 +1,9 @@
-\name{updateNumericInput}
-\alias{updateNumericInput}
-\title{Change the value of a number input on the client}
+\name{updateDateInput}
+\alias{updateDateInput}
+\title{Change the value of a date input on the client}
 \usage{
-  updateNumericInput(session, inputId, label = NULL,
-    value = NULL, min = NULL, max = NULL, step = NULL)
+  updateDateInput(session, inputId, label = NULL,
+    value = NULL, min = NULL, max = NULL)
 }
 \arguments{
   \item{session}{The \code{session} object passed to
@@ -13,16 +13,17 @@
 
   \item{label}{The label to set for the input object.}
 
-  \item{value}{The value to set for the input object.}
+  \item{value}{The desired date value. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
 
-  \item{min}{Minimum value.}
+  \item{min}{The minimum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
 
-  \item{max}{Maximum value.}
-
-  \item{step}{Step size.}
+  \item{max}{The maximum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
 }
 \description{
-  Change the value of a number input on the client
+  Change the value of a date input on the client
 }
 \details{
   The input updater functions send a message to the client,
@@ -49,16 +50,17 @@ shinyServer(function(input, output, session) {
     # for convenience.
     x <- input$controller
 
-    updateNumericInput(session, "inNumber", value = x)
-
-    updateNumericInput(session, "inNumber2",
-      label = paste("Number label ", x),
-      value = x, min = x-10, max = x+10, step = 5)
+    updateDateInput(session, "inDate",
+      label = paste("Date label", x),
+      value = paste("2013-04-", x, sep=""),
+      min   = paste("2013-04-", x-1, sep=""),
+      max   = paste("2013-04-", x+1, sep="")
+    )
   })
 })
 }
 }
 \seealso{
-  \code{\link{numericInput}}
+  \code{\link{dateInput}}
 }
 

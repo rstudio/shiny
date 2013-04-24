@@ -34,10 +34,14 @@
   \code{\link{numericInput}()} and
   \code{updateNumericInput()} take a similar set of
   arguments.
+
+  Any arguments with NULL values will be ignored; they will
+  not result in any changes to the input object on the
+  client.
 }
 \examples{
 \dontrun{
-shinyServer(function(input, output, clientData, session) {
+shinyServer(function(input, output, session) {
 
   observe({
     # We'll use the input$controller variable multiple times, so save it as x

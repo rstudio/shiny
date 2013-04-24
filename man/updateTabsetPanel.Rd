@@ -17,7 +17,7 @@
 }
 \examples{
 \dontrun{
-shinyServer(function(input, output, clientData, session) {
+shinyServer(function(input, output, session) {
 
   observe({
     # TRUE if input$controller is even, FALSE otherwise.

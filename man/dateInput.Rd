@@ -1,0 +1,88 @@
+\name{dateInput}
+\alias{dateInput}
+\title{Create date input}
+\usage{
+  dateInput(inputId, label, value = NULL, min = NULL,
+    max = NULL, format = "yyyy-mm-dd", startview = "month",
+    weekstart = 0, language = "en")
+}
+\arguments{
+  \item{inputId}{Input variable to assign the control's
+  value to.}
+
+  \item{label}{Display label for the control.}
+
+  \item{value}{The starting date. Either a Date object, or
+  a string in \code{yyyy-mm-dd} format. If NULL (the
+  default), will use the current date in the client's time
+  zone.}
+
+  \item{min}{The minimum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
+
+  \item{max}{The maximum allowed date. Either a Date
+  object, or a string in \code{yyyy-mm-dd} format.}
+
+  \item{format}{The format of the date to display in the
+  browser. Defaults to \code{"yyyy-mm-dd"}.}
+
+  \item{startview}{The date range shown when the input
+  object is first clicked. Can be "month" (the default),
+  "year", or "decade".}
+
+  \item{weekstart}{Which day is the start of the week.
+  Should be an integer from 0 (Sunday) to 6 (Saturday).}
+
+  \item{language}{The language used for month and day
+  names. Default is "en".  Other valid values include "bg",
+  "ca", "cs", "da", "de", "el", "es", "fi", "fr", "he",
+  "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv",
+  "ms", "nb", "nl", "pl", "pt", "pt", "ro", "rs",
+  "rs-latin", "ru", "sk", "sl", "sv", "sw", "th", "tr",
+  "uk", "zh-CN", and "zh-TW".}
+}
+\description{
+  Creates a text input which, when clicked on, brings up a
+  calendar that the user can click on to select dates.
+}
+\details{
+  The date \code{format} string specifies how the date will
+  be displayed in the browser. It allows the following
+  values:
+
+  \itemize{ \item \code{yy} Year without century (12) \item
+  \code{yyyy} Year with century (2012) \item \code{mm}
+  Month number, with leading zero (01-12) \item \code{m}
+  Month number, without leading zero (01-12) \item \code{M}
+  Abbreviated month name \item \code{MM} Full month name
+  \item \code{dd} Day of month with leading zero \item
+  \code{d} Day of month without leading zero \item \code{D}
+  Abbreviated weekday name \item \code{DD} Full weekday
+  name }
+}
+\examples{
+dateInput("date", "Date:", value = "2012-02-29")
+
+# Default value is the date in client's time zone
+dateInput("date", "Date:")
+
+# value is always yyyy-mm-dd, even if the display format is different
+dateInput("date", "Date:", value = "2012-02-29", format = "mm/dd/yy")
+
+# Pass in a Date object
+dateInput("date", "Date:", value = Sys.Date()-10)
+
+# Use different language and different first day of week
+dateInput("date", "Date:",
+          language = "de",
+          weekstart = 1)
+
+# Start with decade view instead of default month view
+dateInput("date", "Date:",
+          startview = "decade")
+}
+\seealso{
+  \code{\link{dateRangeInput}},
+  \code{\link{updateDateInput}}
+}
+

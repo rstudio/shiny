@@ -13,6 +13,14 @@
     return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
   }
 
+  // Convert a number to a string with leading zeros
+  function padZeros(n, digits) {
+    var str = n.toString();
+    while (str.length < digits)
+      str = "0" + str;
+    return str;
+  }
+
   function slice(blob, start, end) {
     if (blob.slice)
       return blob.slice(start, end);
@@ -1005,6 +1013,7 @@
     renderValue: function(el, data) {
       exports.unbindAll(el);
       $(el).html(data);
+      exports.initializeInputs(el);
       exports.bindAll(el);
     }
   });
@@ -1054,7 +1063,17 @@
     this.getState = function(el, data) { throw "Not implemented"; };
     
     this.getRatePolicy = function() { return null; };
-  
+
+    // Some input objects need initialization before being bound. This is
+    // called when the document is ready (for statically-added input objects),
+    // and when new input objects are added to the document with
+    // htmlOutputBinding.renderValue() (for dynamically-added input objects).
+    // This is called before the input is bound.
+    this.initialize = function(el) { };
+
+    // This is called after unbinding the output.
+    this.dispose = function(el) { };
+
   }).call(InputBinding.prototype);
   
   
@@ -1219,12 +1238,12 @@
       }
     },
     subscribe: function(el, callback) {
-      $(el).on('change.inputBinding', function(event) {
+      $(el).on('change.sliderInputBinding', function(event) {
         callback(!$(el).data('animating'));
       });
     },
     unsubscribe: function(el) {
-      $(el).off('.inputBinding');
+      $(el).off('.sliderInputBinding');
     },
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))
@@ -1260,7 +1279,331 @@
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
   
-  
+
+  var dateInputBinding = new InputBinding();
+  $.extend(dateInputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-date-input');
+    },
+    getType: function(el) {
+      return "date";
+    },
+    // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
+    // format like mm/dd/yyyy)
+    getValue: function(el) {
+      var date = $(el).find('input').data('datepicker').getUTCDate();
+      return this._formatDate(date);
+    },
+    // value must be an unambiguous string like '2001-01-01', or a Date object.
+    setValue: function(el, value) {
+      var date = this._newDate(value);
+      // If date is invalid, do nothing
+      if (isNaN(date))
+        return;
+
+      $(el).find('input').datepicker('update', date);
+    },
+    getState: function(el) {
+      var $el = $(el);
+      var $input = $el.find('input');
+
+      var min = $input.data('datepicker').startDate;
+      var max = $input.data('datepicker').endDate;
+
+      // Stringify min and max. If min and max aren't set, they will be
+      // -Infinity and Infinity; replace these with null.
+      min = (min === -Infinity) ? null : this._formatDate(min);
+      max = (max ===  Infinity) ? null : this._formatDate(max);
+
+      // startViewMode is stored as a number; convert to string
+      var startview = $input.data('datepicker').startViewMode;
+      if      (startview === 2)  startview = 'decade';
+      else if (startview === 1)  startview = 'year';
+      else if (startview === 0)  startview = 'month';
+
+      return {
+        label:       $el.find('label[for=' + el.id + ']').text(),
+        value:       this.getValue(el),
+        valueString: $input.val(),
+        min:         min,
+        max:         max,
+        language:    $input.data('datepicker').language,
+        weekstart:   $input.data('datepicker').weekStart,
+        format:      this._formatToString($input.data('datepicker').format),
+        startview:   startview
+      };
+    },
+    receiveMessage: function(el, data) {
+      var $input = $(el).find('input');
+
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value);
+
+      if (data.hasOwnProperty('label'))
+        $(el).find('label[for=' + el.id + ']').text(data.label);
+
+      if (data.hasOwnProperty('min'))
+        this._setMin($input[0], data.min);
+
+      if (data.hasOwnProperty('max'))
+        this._setMax($input[0], data.max);
+
+      $(el).trigger('change');
+    },
+    subscribe: function(el, callback) {
+      $(el).on('keyup.dateInputBinding input.dateInputBinding', function(event) {
+        // Use normal debouncing policy when typing
+        callback(true);
+      });
+      $(el).on('changeDate.dateInputBinding change.dateInputBinding', function(event) {
+        // Send immediately when clicked
+        callback(false);
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.dateInputBinding');
+    },
+    getRatePolicy: function() {
+      return {
+        policy: 'debounce',
+        delay: 250
+      };
+    },
+    initialize: function(el) {
+      var $input = $(el).find('input');
+
+      var date = $input.data('initial-date');
+      // If initial_date is null, set to current date
+      if (date === undefined || date === null) {
+        // Get local date, but as UTC
+        date = this._dateAsUTC(new Date());
+      }
+
+      this.setValue(el, date);
+
+      // Set the start and end dates, from min-date and max-date. These always
+      // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
+      // support for date-startdate and data-enddate, which use the current
+      // date format.
+      this._setMin($input[0], $input.data('min-date'));
+      this._setMax($input[0], $input.data('max-date'));
+    },
+    // Given a Date object, return a string in yyyy-mm-dd format, using the
+    // UTC date. This may be a day off from the date in the local time zone.
+    _formatDate: function(date) {
+      if (date instanceof Date) {
+        return date.getUTCFullYear() + '-' +
+               padZeros(date.getUTCMonth()+1, 2) + '-' +
+               padZeros(date.getUTCDate(), 2);
+
+      } else {
+        return null;
+      }
+    },
+    // Given a format object from a date picker, return a string
+    _formatToString: function(format) {
+      // Format object has structure like:
+      // { parts: ['mm', 'dd', 'yy'], separators: ['', '/', '/' ,''] }
+      var str = '';
+      for (var i = 0; i < format.parts.length; i++) {
+        str += format.separators[i] + format.parts[i];
+      }
+      str += format.separators[i];
+      return str;
+    },
+    // Given an unambiguous date string or a Date object, set the min (start) date.
+    // null will unset.
+    _setMin: function(el, date) {
+      if (date === null) {
+        $(el).datepicker('setStartDate', null);
+
+      } else {
+        date = this._newDate(date);
+        if (!isNaN(date))
+          $(el).datepicker('setStartDate', date);
+      }
+    },
+    // Given an unambiguous date string or a Date object, set the max (end) date
+    // null will unset.
+    _setMax: function(el, date) {
+      if (date === null) {
+        $(el).datepicker('setEndDate', null);
+
+      } else {
+        date = this._newDate(date);
+        if (!isNaN(date))
+          $(el).datepicker('setEndDate', date);
+      }
+    },
+    // Given a date string of format yyyy-mm-dd, return a Date object with
+    // that date at 12AM UTC.
+    // If date is a Date object, return it unchanged.
+    _newDate: function(date) {
+      if (date instanceof Date)
+        return date;
+      if (!date)
+        return null;
+
+      // Get Date object - this will be at 12AM in UTC, but may print
+      // differently at the Javascript console.
+      var d = new Date(date);
+
+      // If invalid date, return null
+      if (isNaN(d))
+        return null;
+
+      return new Date(d.getTime());
+    },
+    // Given a Date object, return a Date object which has the same "clock time"
+    // in UTC. For example, if input date is 2013-02-01 23:00:00 GMT-0600 (CST),
+    // output will be 2013-02-01 23:00:00 UTC. Note that the JS console may
+    // print this in local time, as "Sat Feb 02 2013 05:00:00 GMT-0600 (CST)".
+    _dateAsUTC: function(date) {
+      return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    }
+  });
+  inputBindings.register(dateInputBinding, 'shiny.dateInput');
+
+
+  var dateRangeInputBinding = {};
+  $.extend(dateRangeInputBinding, dateInputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-date-range-input');
+    },
+    // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
+    // format like mm/dd/yyyy)
+    getValue: function(el) {
+      var $inputs = $(el).find('input');
+      var start = $inputs.eq(0).data('datepicker').getUTCDate();
+      var end   = $inputs.eq(1).data('datepicker').getUTCDate();
+
+      return [this._formatDate(start), this._formatDate(end)];
+    },
+    // value must be an array of unambiguous strings like '2001-01-01', or
+    // Date objects.
+    setValue: function(el, value) {
+      if (!(value instanceof Array)) {
+        return;
+      }
+
+      // Get the start and end input objects
+      var $inputs = $(el).find('input');
+
+      // If value is undefined, don't try to set
+      if (value[0] !== undefined) {
+        var start = this._newDate(value[0]);
+        $inputs.eq(0).datepicker('update', start);
+      }
+      if (value[1] !== undefined) {
+        var end = this._newDate(value[1]);
+        $inputs.eq(1).datepicker('update', end);
+      }
+
+      // Make it so that the correct items are highlighted when the calendar is
+      // displayed
+      $(el).datepicker('updateDates');
+    },
+    getState: function(el) {
+      var $el = $(el);
+      var $inputs     = $el.find('input');
+      var $startinput = $inputs.eq(0);
+      var $endinput   = $inputs.eq(1);
+
+      // For many of the properties, assume start and end have the same values
+      var min = $startinput.data('datepicker').startDate;
+      var max = $startinput.data('datepicker').endDate;
+
+      // Stringify min and max. If min and max aren't set, they will be
+      // -Infinity and Infinity; replace these with null.
+      min = (min === -Infinity) ? null : this._formatDate(min);
+      max = (max ===  Infinity) ? null : this._formatDate(max);
+
+      // startViewMode is stored as a number; convert to string
+      var startview = $startinput.data('datepicker').startViewMode;
+      if      (startview === 2)  startview = 'decade';
+      else if (startview === 1)  startview = 'year';
+      else if (startview === 0)  startview = 'month';
+
+      return {
+        label:       $el.find('label[for=' + el.id + ']').text(),
+        value:       this.getValue(el),
+        valueString: [ $startinput.val(), $endinput.val() ],
+        min:         min,
+        max:         max,
+        weekstart:   $startinput.data('datepicker').weekStart,
+        format:      this._formatToString($startinput.data('datepicker').format),
+        language:    $startinput.data('datepicker').language,
+        startview:   startview
+      };
+    },
+    receiveMessage: function(el, data) {
+      var $el = $(el);
+      var $inputs     = $el.find('input');
+      var $startinput = $inputs.eq(0);
+      var $endinput   = $inputs.eq(1);
+
+      if (data.hasOwnProperty('value'))
+        this.setValue(el, data.value);
+
+      if (data.hasOwnProperty('label'))
+        $el.find('label[for=' + el.id + ']').text(data.label);
+
+      if (data.hasOwnProperty('min')) {
+        this._setMin($startinput[0], data.min);
+        this._setMin($endinput[0],   data.min);
+      }
+
+      if (data.hasOwnProperty('max')) {
+        this._setMax($startinput[0], data.max);
+        this._setMax($endinput[0],   data.max);
+      }
+
+      $el.trigger('change');
+    },
+    initialize: function(el) {
+      var $el = $(el);
+      var $inputs     = $el.find('input');
+      var $startinput = $inputs.eq(0);
+      var $endinput   = $inputs.eq(1);
+
+      var start = $startinput.data('initial-date');
+      var end   = $endinput.data('initial-date');
+
+      // If empty/null, use local date, but as UTC
+      if (start === undefined || start === null)
+        start = this._dateAsUTC(new Date());
+
+      if (end === undefined || end === null)
+        end = this._dateAsUTC(new Date());
+
+      this.setValue(el, [start, end]);
+
+      // // Set the start and end dates, from min-date and max-date. These always
+      // // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
+      // // support for date-startdate and data-enddate, which use the current
+      // // date format.
+      this._setMin($startinput[0], $startinput.data('min-date'));
+      this._setMin($endinput[0],   $startinput.data('min-date'));
+      this._setMax($startinput[0], $endinput.data('max-date'));
+      this._setMax($endinput[0],   $endinput.data('max-date'));
+    },
+    subscribe: function(el, callback) {
+      $(el).on('keyup.dateRangeInputBinding input.dateRangeInputBinding', function(event) {
+        // Use normal debouncing policy when typing
+        callback(true);
+      });
+      $(el).on('changeDate.dateRangeInputBinding change.dateRangeInputBinding', function(event) {
+        // Send immediately when clicked
+        callback(false);
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.dateRangeInputBinding');
+    }
+  });
+  inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');
+
+
   // Select input
   var selectInputBinding = new InputBinding();
   $.extend(selectInputBinding, {
@@ -1579,7 +1922,7 @@
   inputBindings.register(checkboxGroupInputBinding, 'shiny.checkboxGroupInput');
 
 
-  var actionButtonInputBinding = new Shiny.InputBinding();
+  var actionButtonInputBinding = new InputBinding();
   $.extend(actionButtonInputBinding, {
     find: function(scope) {
       return $(scope).find(".action-button");
@@ -1591,7 +1934,7 @@
     },
     subscribe: function(el, callback) {
       $(el).on("click.actionButtonInputBinding", function(e) {
-        $el = $(this);
+        var $el = $(this);
         var val = $el.data('val') || 0;
         $el.data('val', val + 1);
 
@@ -1607,7 +1950,7 @@
       $(el).off(".actionButtonInputBinding");
     }
   });
-  Shiny.inputBindings.register(actionButtonInputBinding, 'shiny.actionButtonInput');
+  inputBindings.register(actionButtonInputBinding, 'shiny.actionButtonInput');
 
 
   var bootstrapTabInputBinding = new InputBinding();
@@ -1799,7 +2142,7 @@
   var fileInputBinding = new InputBinding();
   $.extend(fileInputBinding, {
     find: function(scope) {
-      return scope.find('input[type="file"]');
+      return $(scope).find('input[type="file"]');
     },
     getId: function(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -1935,8 +2278,6 @@
       if (scope === undefined)
         scope = document;
       
-      scope = $(scope);
-
       var bindings = inputBindings.getBindings();
       
       var currentValues = {};
@@ -2114,6 +2455,31 @@
       });
     };
     exports.unbindAll = unbindAll;
+
+    // Calls .initialize() for all of the input objects in all input bindings,
+    // in the given scope.
+    function initializeInputs(scope) {
+      if (scope === undefined)
+        scope = document;
+
+      var bindings = inputBindings.getBindings();
+
+      // Iterate over all bindings
+      for (var i = 0; i < bindings.length; i++) {
+        var binding = bindings[i].binding;
+        var inputObjects = binding.find(scope) || [];
+
+        // Iterate over all input objects for this binding
+        for (var j = 0; j < inputObjects.length; j++) {
+          binding.initialize(inputObjects[j]);
+        }
+      }
+    }
+    exports.initializeInputs = initializeInputs;
+
+
+    // Initialize all input objects in the document, before binding
+    initializeInputs(document);
 
     // Binding multiInputs in this method is useful for old-style (<=0.5.0)
     // HTML generated by Shiny. This should be deprecated at some point.

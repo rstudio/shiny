@@ -793,7 +793,7 @@ describe("Input Bindings", function() {
         '<div id="' + id + '" class="shiny-date-range-input input-daterange">\
           <label class="control-label" for="' + id + '">Date range input:</label>\
           <input\
-            class="input-small start"\
+            class="input-small"\
             type="text"\
             data-date-language="en"\
             data-date-weekstart="0"\
@@ -802,7 +802,7 @@ describe("Input Bindings", function() {
             data-initial-date="2012-02-29"/>\
            to \
           <input\
-            class="input-small end"\
+            class="input-small"\
             type="text"\
             data-date-language="en"\
             data-date-weekstart="0"\
@@ -933,7 +933,7 @@ describe("Input Bindings", function() {
         '<div id="' + id + '" class="shiny-date-range-input input-daterange">\
           <label class="control-label" for="' + id + '">Date range input:</label>\
           <input\
-            class="input-small start"\
+            class="input-small"\
             type="text"\
             data-date-language="en"\
             data-date-weekstart="2"\
@@ -944,7 +944,7 @@ describe("Input Bindings", function() {
             data-initial-date="2012-02-29"/>\
            to \
           <input\
-            class="input-small end"\
+            class="input-small"\
             type="text"\
             data-date-language="en"\
             data-date-weekstart="2"\
@@ -1071,11 +1071,11 @@ describe("Input Bindings", function() {
         '<div id="' + id + '" class="shiny-date-range-input input-daterange">\
           <label class="control-label" for="' + id + '">Date range input:</label>\
           <input\
-            class="input-small start"\
+            class="input-small"\
             type="text"/>\
            to \
           <input\
-            class="input-small end"\
+            class="input-small"\
             type="text"/>\
         </div>';
 

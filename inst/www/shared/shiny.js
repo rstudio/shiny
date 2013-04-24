@@ -1192,7 +1192,7 @@
   var dateInputBinding = new InputBinding();
   $.extend(dateInputBinding, {
     find: function(scope) {
-      return $(scope).find('div.shiny-date-input');
+      return $(scope).find('.shiny-date-input');
     },
     getType: function(el) {
       return "date";
@@ -1353,10 +1353,6 @@
       if (!date)
         return null;
 
-      // Running new Date('2012-02-01') gives a weird result in non-GMT
-      // timezones. For more info, see
-      // http://stackoverflow.com/questions/8612631/javascript-date-why-is-the-date-new-date2011-12-13-considered-a-monday-and-n
-
       // Get Date object - this will be at 12AM in UTC, but may print
       // differently at the Javascript console.
       var d = new Date(date);
@@ -1381,13 +1377,14 @@
   var dateRangeInputBinding = {};
   $.extend(dateRangeInputBinding, dateInputBinding, {
     find: function(scope) {
-      return $(scope).find('div.shiny-date-range-input');
+      return $(scope).find('.shiny-date-range-input');
     },
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)
     getValue: function(el) {
-      var start = $(el).find('input.start').data('datepicker').getUTCDate();
-      var end   = $(el).find('input.end').data('datepicker').getUTCDate();
+      var $inputs = $(el).find('input');
+      var start = $inputs.eq(0).data('datepicker').getUTCDate();
+      var end   = $inputs.eq(1).data('datepicker').getUTCDate();
 
       return [this._formatDate(start), this._formatDate(end)];
     },
@@ -1398,14 +1395,17 @@
         return;
       }
 
+      // Get the start and end input objects
+      var $inputs = $(el).find('input');
+
       // If value is undefined, don't try to set
       if (value[0] !== undefined) {
         var start = this._newDate(value[0]);
-        $(el).find('input.start').datepicker('update', start);
+        $inputs.eq(0).datepicker('update', start);
       }
       if (value[1] !== undefined) {
         var end = this._newDate(value[1]);
-        $(el).find('input.end').datepicker('update', end);
+        $inputs.eq(1).datepicker('update', end);
       }
 
       // Make it so that the correct items are highlighted when the calendar is
@@ -1416,8 +1416,9 @@
       var $el = $(el);
 
       // For many of the properties, assume start and end have the same values
-      var $startinput = $el.find('input.start');
-      var $endinput   = $el.find('input.end');
+      var $inputs     = $el.find('input');
+      var $startinput = $inputs.eq(0);
+      var $endinput   = $inputs.eq(1);
 
       var min = $startinput.data('datepicker').startDate;
       var max = $startinput.data('datepicker').endDate;
@@ -1447,8 +1448,9 @@
     },
     receiveMessage: function(el, data) {
       var $el = $(el);
-      var $startinput = $el.find('input.start');
-      var $endinput   = $el.find('input.end');
+      var $inputs     = $el.find('input');
+      var $startinput = $inputs.eq(0);
+      var $endinput   = $inputs.eq(1);
 
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value);
@@ -1466,12 +1468,13 @@
         this._setMax($endinput[0],   data.max);
       }
 
-      $(el).trigger('change');
+      $el.trigger('change');
     },
     initialize: function(el) {
       var $el = $(el);
-      var $startinput = $el.find('input.start');
-      var $endinput   = $el.find('input.end');
+      var $inputs     = $el.find('input');
+      var $startinput = $inputs.eq(0);
+      var $endinput   = $inputs.eq(1);
 
       var start = $startinput.data('initial-date');
       var end   = $endinput.data('initial-date');

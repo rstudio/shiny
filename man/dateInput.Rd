@@ -23,8 +23,8 @@
   \item{max}{The maximum allowed date. Either a Date
   object, or a string in \code{yyyy-mm-dd} format.}
 
-  \item{format}{The format of the date. Defaults to
-  \code{"\%Y-\%m-\%d"}.}
+  \item{format}{The format of the date to display in the
+  browser. Defaults to \code{"yyyy-mm-dd"}.}
 
   \item{startview}{The date range shown when the input
   object is first clicked. Can be "month" (the default),
@@ -67,7 +67,7 @@ dateInput("date", "Date:", value = "2012-02-29")
 dateInput("date", "Date:")
 
 # value is always yyyy-mm-dd, even if the display format is different
-dateInput("date", "Date:", value = "2012-02-29", format = "\%m/\%d/\%y")
+dateInput("date", "Date:", value = "2012-02-29", format = "mm/dd/yy")
 
 # Pass in a Date object
 dateInput("date", "Date:", value = Sys.Date()-10)

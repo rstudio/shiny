@@ -699,7 +699,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'   \code{yyyy-mm-dd} format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
-#' @param format The format of the date. Defaults to \code{"\%Y-\%m-\%d"}.
+#' @param format The format of the date to display in the browser. Defaults to
+#'   \code{"yyyy-mm-dd"}.
 #' @param startview The date range shown when the input object is first
 #'   clicked. Can be "month" (the default), "year", or "decade".
 #' @param weekstart Which day is the start of the week. Should be an integer
@@ -719,7 +720,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' dateInput("date", "Date:")
 #'
 #' # value is always yyyy-mm-dd, even if the display format is different
-#' dateInput("date", "Date:", value = "2012-02-29", format = "%m/%d/%y")
+#' dateInput("date", "Date:", value = "2012-02-29", format = "mm/dd/yy")
 #'
 #' # Pass in a Date object
 #' dateInput("date", "Date:", value = Sys.Date()-10)
@@ -803,7 +804,8 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 #'   \code{yyyy-mm-dd} format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
-#' @param format The format of the date. Defaults to \code{"\%Y-\%m-\%d"}.
+#' @param format The format of the date to display in the browser. Defaults to
+#'   \code{"yyyy-mm-dd"}.
 #' @param startview The date range shown when the input object is first
 #'   clicked. Can be "month" (the default), "year", or "decade".
 #' @param weekstart Which day is the start of the week. Should be an integer

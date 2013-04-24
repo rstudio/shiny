@@ -29,8 +29,8 @@
   \item{max}{The maximum allowed date. Either a Date
   object, or a string in \code{yyyy-mm-dd} format.}
 
-  \item{format}{The format of the date. Defaults to
-  \code{"\%Y-\%m-\%d"}.}
+  \item{format}{The format of the date to display in the
+  browser. Defaults to \code{"yyyy-mm-dd"}.}
 
   \item{startview}{The date range shown when the input
   object is first clicked. Can be "month" (the default),

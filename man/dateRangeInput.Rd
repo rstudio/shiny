@@ -2,10 +2,10 @@
 \alias{dateRangeInput}
 \title{Create date range input}
 \usage{
-  dateRangeInput(inputId, label, start = Sys.Date(),
-    end = Sys.Date(), min = NULL, max = NULL,
-    format = "\%Y-\%m-\%d", startview = "month",
-    weekstart = 0, language = "en", separator = " to ")
+  dateRangeInput(inputId, label, start = NULL, end = NULL,
+    min = NULL, max = NULL, format = "yyyy-mm-dd",
+    startview = "month", weekstart = 0, language = "en",
+    separator = " to ")
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -14,10 +14,14 @@
   \item{label}{Display label for the control.}
 
   \item{start}{The initial start date. Either a Date
-  object, or a string in \code{yyyy-mm-dd} format.}
+  object, or a string in \code{yyyy-mm-dd} format. If NULL
+  (the default), will use the current date in the client's
+  time zone.}
 
-  \item{start}{The initial end date. Either a Date object,
-  or a string in \code{yyyy-mm-dd} format.}
+  \item{end}{The initial end date. Either a Date object, or
+  a string in \code{yyyy-mm-dd} format. If NULL (the
+  default), will use the current date in the client's time
+  zone.}
 
   \item{min}{The minimum allowed date. Either a Date
   object, or a string in \code{yyyy-mm-dd} format.}
@@ -49,28 +53,30 @@
   dates.
 }
 \details{
-  The date \code{format} string uses a subset of R's
-  \code{\link{strptime}} format codes. The reason it uses a
-  subset is because the formats must be the Javascript date
-  picker only supports some of the format codes. Valid
-  values are:
+  The date \code{format} string specifies how the date will
+  be displayed in the browser. It allows the following
+  values:
 
-  \itemize{ \item \code{\%y} Year without century (12)
-  \item \code{\%Y} Year with century (2012) \item
-  \code{\%m} Month number, with leading zero (01-12) \item
-  \code{\%b} Abbreviated month name \item \code{\%B} Full
-  month name \item \code{\%d} Day of month with leading
-  zero \item \code{\%e} Day of month without leading zero
-  \item \code{\%a} Abbreviated weekday name \item
-  \code{\%A} Full weekday name }
+  \itemize{ \item \code{yy} Year without century (12) \item
+  \code{yyyy} Year with century (2012) \item \code{mm}
+  Month number, with leading zero (01-12) \item \code{m}
+  Month number, without leading zero (01-12) \item \code{M}
+  Abbreviated month name \item \code{MM} Full month name
+  \item \code{dd} Day of month with leading zero \item
+  \code{d} Day of month without leading zero \item \code{D}
+  Abbreviated weekday name \item \code{DD} Full weekday
+  name }
 }
 \examples{
 dateRangeInput("daterange", "Date range:",
                start = "2001-01-01",
                end   = "2010-12-31")
 
-# start and end are always yyyy-mm-dd, even if the display format
-# is different
+# Default start and end is the current date in the client's time zone
+dateRangeInput("daterange", "Date range:")
+
+# start and end are always specified in yyyy-mm-dd, even if the display
+# format is different
 dateRangeInput("daterange", "Date range:",
                start  = "2001-01-01",
                end    = "2010-12-31",
@@ -79,7 +85,7 @@ dateRangeInput("daterange", "Date range:",
                format = "mm/dd/yy",
                separator = " - ")
 
-# Pass in date objects
+# Pass in Date objects
 dateRangeInput("daterange", "Date range:",
                start = Sys.Date()-10,
                end = Sys.Date()+10)

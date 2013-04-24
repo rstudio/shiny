@@ -693,7 +693,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
 #' @param value The starting date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
+#'   date in the client's time zone.
 #' @param min The minimum allowed date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
@@ -714,6 +715,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' @examples
 #' dateInput("date", "Date:", value = "2012-02-29")
 #'
+#' # Default value is the date in client's time zone
+#' dateInput("date", "Date:")
+#'
 #' # value is always yyyy-mm-dd, even if the display format is different
 #' dateInput("date", "Date:", value = "2012-02-29", format = "%m/%d/%y")
 #'
@@ -730,7 +734,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'           startview = "decade")
 #'
 #' @export
-dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL,
+dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
     format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en") {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
@@ -751,8 +755,7 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
       controlLabel(inputId, label),
       tags$input(type = "text",
                  name = "date",
-                 # All these extra classes are necessary for the dropdown to
-                 # display correctly
+                 # datepicker class necessary for dropdown to display correctly
                  class = "input-medium datepicker",
                  `data-date-language` = language,
                  `data-date-weekstart` = weekstart,
@@ -791,9 +794,11 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
 #' @param start The initial start date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
-#' @param start The initial end date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
+#'   date in the client's time zone.
+#' @param end The initial end date. Either a Date object, or a string in
+#'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
+#'   date in the client's time zone.
 #' @param min The minimum allowed date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
@@ -815,6 +820,9 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 #' dateRangeInput("daterange", "Date range:",
 #'                start = "2001-01-01",
 #'                end   = "2010-12-31")
+#'
+#' # Default start and end is the current date in the client's time zone
+#' dateRangeInput("daterange", "Date range:")
 #'
 #' # start and end are always specified in yyyy-mm-dd, even if the display
 #' # format is different
@@ -841,7 +849,7 @@ dateInput <- function(inputId, label, value = Sys.Date(), min = NULL, max = NULL
 #'                startview = "decade")
 #'
 #' @export
-dateRangeInput <- function(inputId, label, start = Sys.Date(), end = Sys.Date(),
+dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     min = NULL, max = NULL, format = "yyyy-mm-dd", startview = "month",
     weekstart = 0, language = "en", separator = " to ") {
 

@@ -1280,7 +1280,15 @@
     },
     initialize: function(el) {
       var $input = $(el).find('input[name=date]');
-      this.setValue(el, $input.data('initial-date'));
+
+      var date = $input.data('initial-date');
+      // If initial_date is null, set to current date
+      if (date === undefined || date === null) {
+        // Get local date, but as UTC
+        date = this._dateAsUTC(new Date());
+      }
+
+      this.setValue(el, date);
 
       // Set the start and end dates, from min-date and max-date. These always
       // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
@@ -1289,7 +1297,8 @@
       this._setMin($input[0], $input.data('min-date'));
       this._setMax($input[0], $input.data('max-date'));
     },
-    // Given a Date object, return a string in yyyy-mm-dd format
+    // Given a Date object, return a string in yyyy-mm-dd format, using the
+    // UTC date. This may be a day off from the date in the local time zone.
     _formatDate: function(date) {
       if (date instanceof Date) {
         return date.getUTCFullYear() + '-' +
@@ -1335,8 +1344,8 @@
           $(el).datepicker('setEndDate', date);
       }
     },
-    // Given a date string of format yyyy-mm-dd, return a Date object, in the
-    // local time zone.
+    // Given a date string of format yyyy-mm-dd, return a Date object with
+    // that date at 12AM UTC.
     // If date is a Date object, return it unchanged.
     _newDate: function(date) {
       if (date instanceof Date)
@@ -1348,7 +1357,8 @@
       // timezones. For more info, see
       // http://stackoverflow.com/questions/8612631/javascript-date-why-is-the-date-new-date2011-12-13-considered-a-monday-and-n
 
-      // Get Date in current time zone
+      // Get Date object - this will be at 12AM in UTC, but may print
+      // differently at the Javascript console.
       var d = new Date(date);
 
       // If invalid date, return null
@@ -1356,6 +1366,13 @@
         return null;
 
       return new Date(d.getTime());
+    },
+    // Given a Date object, return a Date object which has the same "clock time"
+    // in UTC. For example, if input date is 2013-02-01 23:00:00 GMT-0600 (CST),
+    // output will be 2013-02-01 23:00:00 UTC. Note that the JS console may
+    // print this in local time, as "Sat Feb 02 2013 05:00:00 GMT-0600 (CST)".
+    _dateAsUTC: function(date) {
+      return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
     }
   });
   inputBindings.register(dateInputBinding, 'shiny.dateInput');
@@ -1458,6 +1475,13 @@
 
       var start = $startinput.data('initial-date');
       var end   = $endinput.data('initial-date');
+
+      // If empty/null, use local date, but as UTC
+      if (start === undefined || start === null)
+        start = this._dateAsUTC(new Date());
+
+      if (end === undefined || end === null)
+        end = this._dateAsUTC(new Date());
 
       this.setValue(el, [start, end]);
 

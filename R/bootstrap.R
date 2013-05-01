@@ -397,15 +397,17 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   for (i in seq_along(choices)) {
     choiceName <- names(choices)[i]
 
-    checkbox <- tags$label(class = "checkbox",
-                  tags$input(type = "checkbox",
-                             name = inputId,
-                             id = paste(inputId, i, sep=""),
-                             value = choices[[i]]),
-                  tags$span(choiceName))
-    
+    inputTag <- tags$input(type = "checkbox",
+                           name = inputId,
+                           id = paste(inputId, i, sep=""),
+                           value = choices[[i]])
+
     if (choiceName %in% selected)
-      checkbox$attribs$checked <- 'checked'
+      inputTag$attribs$checked <- "checked"
+
+    checkbox <- tags$label(class = "checkbox",
+                           inputTag,
+                           tags$span(choiceName))
     
     checkboxes[[i]] <- checkbox
   } 

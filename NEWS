@@ -8,6 +8,25 @@ shiny 0.5.0.99
 
 * Add `withTags()` function.
 
+* Add dateInput and dateRangeInput.
+
+* `shinyServer()` now takes an optional `session` argument, which is used for
+  communication with the session object.
+
+* Add functions to update values of existing inputs on a page, instead of
+  replacing them entirely.
+
+* Allow listening on domain sockets.
+
+* Added `actionButton()` to Shiny.
+
+* The server can now send custom JSON messages to the client. On the client
+  side, functions can be registered to handle these messages.
+
+* The server can send Javascript code to execute on the client.
+
+* Callbacks can be registered to be called at the end of a client session.
+
 shiny 0.5.0
 --------------------------------------------------------------------------------
 

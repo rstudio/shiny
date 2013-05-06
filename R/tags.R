@@ -231,117 +231,118 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL, eol = "\n") {
 
 # environment used to store all available tags
 #' @export
-tags <- new.env()
-tags$a <- function(...) tag("a", list(...))
-tags$abbr <- function(...) tag("abbr", list(...))
-tags$address <- function(...) tag("address", list(...))
-tags$area <- function(...) tag("area", list(...))
-tags$article <- function(...) tag("article", list(...))
-tags$aside <- function(...) tag("aside", list(...))
-tags$audio <- function(...) tag("audio", list(...))
-tags$b <- function(...) tag("b", list(...))
-tags$base <- function(...) tag("base", list(...))
-tags$bdi <- function(...) tag("bdi", list(...))
-tags$bdo <- function(...) tag("bdo", list(...))
-tags$blockquote <- function(...) tag("blockquote", list(...))
-tags$body <- function(...) tag("body", list(...))
-tags$br <- function(...) tag("br", list(...))
-tags$button <- function(...) tag("button", list(...))
-tags$canvas <- function(...) tag("canvas", list(...))
-tags$caption <- function(...) tag("caption", list(...))
-tags$cite <- function(...) tag("cite", list(...))
-tags$code <- function(...) tag("code", list(...))
-tags$col <- function(...) tag("col", list(...))
-tags$colgroup <- function(...) tag("colgroup", list(...))
-tags$command <- function(...) tag("command", list(...))
-tags$data <- function(...) tag("data", list(...))
-tags$datalist <- function(...) tag("datalist", list(...))
-tags$dd <- function(...) tag("dd", list(...))
-tags$del <- function(...) tag("del", list(...))
-tags$details <- function(...) tag("details", list(...))
-tags$dfn <- function(...) tag("dfn", list(...))
-tags$div <- function(...) tag("div", list(...))
-tags$dl <- function(...) tag("dl", list(...))
-tags$dt <- function(...) tag("dt", list(...))
-tags$em <- function(...) tag("em", list(...))
-tags$embed <- function(...) tag("embed", list(...))
-tags$eventsource <- function(...) tag("eventsource", list(...))
-tags$fieldset <- function(...) tag("fieldset", list(...))
-tags$figcaption <- function(...) tag("figcaption", list(...))
-tags$figure <- function(...) tag("figure", list(...))
-tags$footer <- function(...) tag("footer", list(...))
-tags$form <- function(...) tag("form", list(...))
-tags$h1 <- function(...) tag("h1", list(...))
-tags$h2 <- function(...) tag("h2", list(...))
-tags$h3 <- function(...) tag("h3", list(...))
-tags$h4 <- function(...) tag("h4", list(...))
-tags$h5 <- function(...) tag("h5", list(...))
-tags$h6 <- function(...) tag("h6", list(...))
-tags$head <- function(...) tag("head", list(...))
-tags$header <- function(...) tag("header", list(...))
-tags$hgroup <- function(...) tag("hgroup", list(...))
-tags$hr <- function(...) tag("hr", list(...))
-tags$html <- function(...) tag("html", list(...))
-tags$i <- function(...) tag("i", list(...))
-tags$iframe <- function(...) tag("iframe", list(...))
-tags$img <- function(...) tag("img", list(...))
-tags$input <- function(...) tag("input", list(...))
-tags$ins <- function(...) tag("ins", list(...))
-tags$kbd <- function(...) tag("kbd", list(...))
-tags$keygen <- function(...) tag("keygen", list(...))
-tags$label <- function(...) tag("label", list(...))
-tags$legend <- function(...) tag("legend", list(...))
-tags$li <- function(...) tag("li", list(...))
-tags$link <- function(...) tag("link", list(...))
-tags$mark <- function(...) tag("mark", list(...))
-tags$map <- function(...) tag("map", list(...))
-tags$menu <- function(...) tag("menu", list(...))
-tags$meta <- function(...) tag("meta", list(...))
-tags$meter <- function(...) tag("meter", list(...))
-tags$nav <- function(...) tag("nav", list(...))
-tags$noscript <- function(...) tag("noscript", list(...))
-tags$object <- function(...) tag("object", list(...))
-tags$ol <- function(...) tag("ol", list(...))
-tags$optgroup <- function(...) tag("optgroup", list(...))
-tags$option <- function(...) tag("option", list(...))
-tags$output <- function(...) tag("output", list(...))
-tags$p <- function(...) tag("p", list(...))
-tags$param <- function(...) tag("param", list(...))
-tags$pre <- function(...) tag("pre", list(...))
-tags$progress <- function(...) tag("progress", list(...))
-tags$q <- function(...) tag("q", list(...))
-tags$ruby <- function(...) tag("ruby", list(...))
-tags$rp <- function(...) tag("rp", list(...))
-tags$rt <- function(...) tag("rt", list(...))
-tags$s <- function(...) tag("s", list(...))
-tags$samp <- function(...) tag("samp", list(...))
-tags$script <- function(...) tag("script", list(...))
-tags$section <- function(...) tag("section", list(...))
-tags$select <- function(...) tag("select", list(...))
-tags$small <- function(...) tag("small", list(...))
-tags$source <- function(...) tag("source", list(...))
-tags$span <- function(...) tag("span", list(...))
-tags$strong <- function(...) tag("strong", list(...))
-tags$style <- function(...) tag("style", list(...))
-tags$sub <- function(...) tag("sub", list(...))
-tags$summary <- function(...) tag("summary", list(...))
-tags$sup <- function(...) tag("sup", list(...))
-tags$table <- function(...) tag("table", list(...))
-tags$tbody <- function(...) tag("tbody", list(...))
-tags$td <- function(...) tag("td", list(...))
-tags$textarea <- function(...) tag("textarea", list(...))
-tags$tfoot <- function(...) tag("tfoot", list(...))
-tags$th <- function(...) tag("th", list(...))
-tags$thead <- function(...) tag("thead", list(...))
-tags$time <- function(...) tag("time", list(...))
-tags$title <- function(...) tag("title", list(...))
-tags$tr <- function(...) tag("tr", list(...))
-tags$track <- function(...) tag("track", list(...))
-tags$u <- function(...) tag("u", list(...))
-tags$ul <- function(...) tag("ul", list(...))
-tags$var <- function(...) tag("var", list(...))
-tags$video <- function(...) tag("video", list(...))
-tags$wbr <- function(...) tag("wbr", list(...))
+tags <- list(
+  a = function(...) tag("a", list(...)),
+  abbr = function(...) tag("abbr", list(...)),
+  address = function(...) tag("address", list(...)),
+  area = function(...) tag("area", list(...)),
+  article = function(...) tag("article", list(...)),
+  aside = function(...) tag("aside", list(...)),
+  audio = function(...) tag("audio", list(...)),
+  b = function(...) tag("b", list(...)),
+  base = function(...) tag("base", list(...)),
+  bdi = function(...) tag("bdi", list(...)),
+  bdo = function(...) tag("bdo", list(...)),
+  blockquote = function(...) tag("blockquote", list(...)),
+  body = function(...) tag("body", list(...)),
+  br = function(...) tag("br", list(...)),
+  button = function(...) tag("button", list(...)),
+  canvas = function(...) tag("canvas", list(...)),
+  caption = function(...) tag("caption", list(...)),
+  cite = function(...) tag("cite", list(...)),
+  code = function(...) tag("code", list(...)),
+  col = function(...) tag("col", list(...)),
+  colgroup = function(...) tag("colgroup", list(...)),
+  command = function(...) tag("command", list(...)),
+  data = function(...) tag("data", list(...)),
+  datalist = function(...) tag("datalist", list(...)),
+  dd = function(...) tag("dd", list(...)),
+  del = function(...) tag("del", list(...)),
+  details = function(...) tag("details", list(...)),
+  dfn = function(...) tag("dfn", list(...)),
+  div = function(...) tag("div", list(...)),
+  dl = function(...) tag("dl", list(...)),
+  dt = function(...) tag("dt", list(...)),
+  em = function(...) tag("em", list(...)),
+  embed = function(...) tag("embed", list(...)),
+  eventsource = function(...) tag("eventsource", list(...)),
+  fieldset = function(...) tag("fieldset", list(...)),
+  figcaption = function(...) tag("figcaption", list(...)),
+  figure = function(...) tag("figure", list(...)),
+  footer = function(...) tag("footer", list(...)),
+  form = function(...) tag("form", list(...)),
+  h1 = function(...) tag("h1", list(...)),
+  h2 = function(...) tag("h2", list(...)),
+  h3 = function(...) tag("h3", list(...)),
+  h4 = function(...) tag("h4", list(...)),
+  h5 = function(...) tag("h5", list(...)),
+  h6 = function(...) tag("h6", list(...)),
+  head = function(...) tag("head", list(...)),
+  header = function(...) tag("header", list(...)),
+  hgroup = function(...) tag("hgroup", list(...)),
+  hr = function(...) tag("hr", list(...)),
+  html = function(...) tag("html", list(...)),
+  i = function(...) tag("i", list(...)),
+  iframe = function(...) tag("iframe", list(...)),
+  img = function(...) tag("img", list(...)),
+  input = function(...) tag("input", list(...)),
+  ins = function(...) tag("ins", list(...)),
+  kbd = function(...) tag("kbd", list(...)),
+  keygen = function(...) tag("keygen", list(...)),
+  label = function(...) tag("label", list(...)),
+  legend = function(...) tag("legend", list(...)),
+  li = function(...) tag("li", list(...)),
+  link = function(...) tag("link", list(...)),
+  mark = function(...) tag("mark", list(...)),
+  map = function(...) tag("map", list(...)),
+  menu = function(...) tag("menu", list(...)),
+  meta = function(...) tag("meta", list(...)),
+  meter = function(...) tag("meter", list(...)),
+  nav = function(...) tag("nav", list(...)),
+  noscript = function(...) tag("noscript", list(...)),
+  object = function(...) tag("object", list(...)),
+  ol = function(...) tag("ol", list(...)),
+  optgroup = function(...) tag("optgroup", list(...)),
+  option = function(...) tag("option", list(...)),
+  output = function(...) tag("output", list(...)),
+  p = function(...) tag("p", list(...)),
+  param = function(...) tag("param", list(...)),
+  pre = function(...) tag("pre", list(...)),
+  progress = function(...) tag("progress", list(...)),
+  q = function(...) tag("q", list(...)),
+  ruby = function(...) tag("ruby", list(...)),
+  rp = function(...) tag("rp", list(...)),
+  rt = function(...) tag("rt", list(...)),
+  s = function(...) tag("s", list(...)),
+  samp = function(...) tag("samp", list(...)),
+  script = function(...) tag("script", list(...)),
+  section = function(...) tag("section", list(...)),
+  select = function(...) tag("select", list(...)),
+  small = function(...) tag("small", list(...)),
+  source = function(...) tag("source", list(...)),
+  span = function(...) tag("span", list(...)),
+  strong = function(...) tag("strong", list(...)),
+  style = function(...) tag("style", list(...)),
+  sub = function(...) tag("sub", list(...)),
+  summary = function(...) tag("summary", list(...)),
+  sup = function(...) tag("sup", list(...)),
+  table = function(...) tag("table", list(...)),
+  tbody = function(...) tag("tbody", list(...)),
+  td = function(...) tag("td", list(...)),
+  textarea = function(...) tag("textarea", list(...)),
+  tfoot = function(...) tag("tfoot", list(...)),
+  th = function(...) tag("th", list(...)),
+  thead = function(...) tag("thead", list(...)),
+  time = function(...) tag("time", list(...)),
+  title = function(...) tag("title", list(...)),
+  tr = function(...) tag("tr", list(...)),
+  track = function(...) tag("track", list(...)),
+  u = function(...) tag("u", list(...)),
+  ul = function(...) tag("ul", list(...)),
+  var = function(...) tag("var", list(...)),
+  video = function(...) tag("video", list(...)),
+  wbr = function(...) tag("wbr", list(...))
+)
 
 #' Mark Characters as HTML
 #' 
@@ -365,4 +366,36 @@ HTML <- function(text, ...) {
   htmlText
 }
 
-
+#' Evaluate an expression using the \code{tags}
+#'
+#' This function makes it simpler to write HTML-generating code. Instead of
+#' needing to specify \code{tags} each time a tag function is used, as in
+#' \code{tags$div()} and \code{tags$p()}, code inside \code{withTags} is
+#' evaluated with \code{tags} searched first, so you can simply use
+#' \code{div()} and \code{p()}.
+#'
+#' If your code uses an object which happens to have the same name as an
+#' HTML tag function, such as \code{source()} or \code{summary()}, it will call
+#' the tag function. To call the intended (non-tags function), specify the
+#' namespace, as in \code{base::source()} or \code{base::summary()}.
+#'
+#' @examples
+#' # Using tags$ each time
+#' tags$div(class = "myclass",
+#'   tags$h3("header"),
+#'   tags$p("text")
+#' )
+#'
+#' # Equivalent to above, but using withTags
+#' withTags(
+#'   div(class = "myclass",
+#'     h3("header"),
+#'     p("text")
+#'   )
+#' )
+#'
+#'
+#' @export
+withTags <- function(code) {
+  eval(substitute(code), envir = as.list(tags), enclos = parent.frame())
+}

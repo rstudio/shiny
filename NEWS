@@ -1,10 +1,12 @@
-shiny 0.5.1
+shiny 0.5.0.99
 --------------------------------------------------------------------------------
 
 * `tabsetPanel()` can be directed to start with a specific tab selected.
 
 * Fix bug where multiple file uploads with 3 or more files result in incorrect
   data.
+
+* Add `withTags()` function.
 
 shiny 0.5.0
 --------------------------------------------------------------------------------

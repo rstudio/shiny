@@ -497,12 +497,16 @@ selectInput <- function(inputId,
   selectTag <- tags$select(id = inputId)
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
-  for (choiceName in names(choices)) {
-    optionTag <- tags$option(value = choices[[choiceName]], choiceName)
+
+  for (i in seq_along(choices)) {
+    choiceName <- names(choices)[i]
+    optionTag <- tags$option(value = choices[[i]], choiceName)
+
     if (choiceName %in% selected)
       optionTag$attribs$selected = "selected"
+
     selectTag <- tagAppendChild(selectTag, optionTag)
-  } 
+  }
   
   # return label and select tag
   tagList(controlLabel(inputId, label), selectTag)
@@ -539,7 +543,7 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
   
   # build list of radio button tags
   inputTags <- list()
-  for (i in 1:length(choices)) {
+  for (i in seq_along(choices)) {
     id <- paste(inputId, i, sep="")
     name <- names(choices)[[i]]
     value <- choices[[i]]

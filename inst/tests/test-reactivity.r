@@ -650,3 +650,16 @@ test_that("observe() accepts quoted and unquoted expressions", {
   flushReact()
   expect_identical(parent.env(inside_env), this_env)
 })
+
+test_that("Observer priorities are respected", {
+  results <- c()
+  observe(results <<- c(results, 10), priority=10)
+  observe(results <<- c(results, 30), priority=30)
+  observe(results <<- c(results, 20), priority=20L)
+  observe(results <<- c(results, 21), priority=20)
+  observe(results <<- c(results, 22), priority=20L)
+  
+  flushReact()
+  
+  expect_identical(results, c(30, 20, 21, 22, 10))
+})

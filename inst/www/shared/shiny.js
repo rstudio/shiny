@@ -314,7 +314,10 @@
   };
   (function() {
     this.setInput = function(name, value) {
-      this.pendingInput[name] = value;
+      if (/^\./.test(name))
+        this.target.setInput(name, value);
+      else
+        this.pendingInput[name] = value;
     };
     this.submit = function() {
       for (var name in this.pendingInput) {

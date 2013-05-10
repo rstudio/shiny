@@ -3,7 +3,7 @@
 \title{Create a reactive observer}
 \usage{
   observe(x, env = parent.frame(), quoted = FALSE,
-    label = NULL, suspended = FALSE)
+    label = NULL, suspended = FALSE, priority = 0)
 }
 \arguments{
   \item{x}{An expression (quoted or unquoted). Any return
@@ -25,6 +25,12 @@
   \item{suspended}{If \code{TRUE}, start the observer in a
   suspended state.  If \code{FALSE} (the default), start in
   a non-suspended state.}
+
+  \item{priority}{An integer or numeric that controls the
+  priority with which this observer should be executed. An
+  observer with a given priority level will always execute
+  sooner than all observers with a lower priority level.
+  Positive, negative, and zero values are allowed.}
 }
 \description{
   Creates an observer from the given expression An observer

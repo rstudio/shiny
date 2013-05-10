@@ -27,6 +27,12 @@ shiny 0.5.0.99
 
 * Callbacks can be registered to be called at the end of a client session.
 
+* Add ability to set priority of observers and outputs. Each priority level
+  gets its own queue.
+
+* Fix bug where the presence of a submit button would prevent sending of
+  metadata until the button was clicked.
+
 shiny 0.5.0
 --------------------------------------------------------------------------------
 

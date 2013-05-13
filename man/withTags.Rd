@@ -4,6 +4,9 @@
 \usage{
   withTags(code)
 }
+\arguments{
+  \item{code}{A set of tags.}
+}
 \description{
   This function makes it simpler to write HTML-generating
   code. Instead of needing to specify \code{tags} each time

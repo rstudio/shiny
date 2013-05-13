@@ -29,6 +29,9 @@ outputOptions(output)
 # Disable suspend for output$myplot
 outputOptions(output, "myplot", suspendWhenHidden = FALSE)
 
+# Change priority for output$myplot
+outputOptions(output, "myplot", priority = 10)
+
 # Get the list of options for output$myplot
 outputOptions(output, "myplot")
 }

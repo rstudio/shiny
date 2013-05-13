@@ -379,6 +379,8 @@ HTML <- function(text, ...) {
 #' the tag function. To call the intended (non-tags function), specify the
 #' namespace, as in \code{base::source()} or \code{base::summary()}.
 #'
+#' @param code A set of tags.
+#'
 #' @examples
 #' # Using tags$ each time
 #' tags$div(class = "myclass",

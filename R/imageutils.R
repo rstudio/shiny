@@ -36,7 +36,7 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
     # Workaround for issue #140: Cairo ignores res and dpi settings. Need to
     # use regular png function.
     if (res == 72) {
-      pngfun <- CairoPNG
+      pngfun <- Cairo::CairoPNG
     } else {
       pngfun <- png
     }

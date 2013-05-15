@@ -2,14 +2,36 @@
 \alias{invalidateLater}
 \title{Scheduled Invalidation}
 \usage{
-  invalidateLater(millis)
+  invalidateLater(millis, session)
 }
 \arguments{
   \item{millis}{Approximate milliseconds to wait before
   invalidating the current reactive context.}
+
+  \item{session}{A session object. This is needed to cancel
+  any scheduled invalidations after a user has ended the
+  session. If \code{NULL}, then this invalidation will not
+  be tied to any session, and so it will still occur.}
 }
 \description{
   Schedules the current reactive context to be invalidated
   in the given number of milliseconds.
+}
+\examples{
+\dontrun{
+shinyServer(function(input, output, session) {
+
+  observe({
+    # Re-execute this reactive expression after 1000 milliseconds
+    invalidateLater(1000, session)
+
+    # Do something each time this is invalidated.
+    # The isolate() makes this observer _not_ get invalidated and re-executed
+    # when input$n changes.
+    print(paste("The value of input$n is", isolate(input$n)))
+  })
+
+})
+}
 }
 

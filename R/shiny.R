@@ -59,7 +59,8 @@ ShinySession <- setRefClass(
                        sendCustomMessage = .self$.sendCustomMessage,
                        sendInputMessage  = .self$.sendInputMessage,
                        sendJavascript    = .self$.sendJavascript,
-                       onSessionEnded   = .self$onSessionEnded)
+                       onSessionEnded    = .self$onSessionEnded,
+                       isClosed          = .self$isClosed)
     },
     onSessionEnded = function(callback) {
       "Registers the given callback to be invoked when the session is closed
@@ -80,6 +81,9 @@ ShinySession <- setRefClass(
           e$call
         ))
       })
+    },
+    isClosed = function() {
+      return(closed)
     },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either

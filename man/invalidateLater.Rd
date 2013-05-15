@@ -31,6 +31,13 @@ shinyServer(function(input, output, session) {
     print(paste("The value of input$n is", isolate(input$n)))
   })
 
+  # Generate a new histogram at timed intervals, but not when
+  # input$n changes.
+  output$plot <- renderPlot({
+    # Re-execute this reactive expression after 2000 milliseconds
+    invalidateLater(2000, session)
+    hist(isolate(input$n))
+  })
 })
 }
 }

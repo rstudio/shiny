@@ -553,15 +553,58 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' See \code{\link{invalidateLater}} as a safer and simpler alternative.
 #' 
 #' @param intervalMs How often to fire, in milliseconds
+#' @param session A session object. This is needed to cancel any scheduled
+#'   invalidations after a user has ended the session. If \code{NULL}, then
+#'   this invalidation will not be tied to any session, and so it will still
+#'   occur.
 #' @return A no-parameter function that can be called from a reactive context, 
 #'   in order to cause that context to be invalidated the next time the timer 
 #'   interval elapses. Calling the returned function also happens to yield the 
 #'   current time (as in \code{\link{Sys.time}}).
 #' @seealso invalidateLater
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, session) {
+#'
+#'   # Anything that calls autoInvalidate will automatically invalidate
+#'   # every 2 seconds.
+#'   autoInvalidate <- reactiveTimer(2000, session)
+#'
+#'   observe({
+#'     # Invalidate and re-execute this reactive expression every time the
+#'     # timer fires.
+#'     autoInvalidate()
+#'
+#'     # Do something each time this is invalidated.
+#'     # The isolate() makes this observer _not_ get invalidated and re-executed
+#'     # when input$n changes.
+#'     print(paste("The value of input$n is", isolate(input$n)))
+#'   })
+#'
+#'   # Generate a new histogram each time the timer fires, but not when
+#'   # input$n changes.
+#'   output$plot <- renderPlot({
+#'     autoInvalidate()
+#'     hist(isolate(input$n))
+#'   })
+#' })
+#' }
+#'
 #' @export
-reactiveTimer <- function(intervalMs=1000) {
+reactiveTimer <- function(intervalMs=1000, session) {
+  if (missing(session)) {
+    warning("reactiveTimer should be passed a session object or NULL")
+    session <- NULL
+  }
+
   dependents <- Map$new()
   timerCallbacks$schedule(intervalMs, function() {
+    # Quit if the session is closed
+    if (!is.null(session) && session$isClosed()) {
+      return(invisible())
+    }
+
     timerCallbacks$schedule(intervalMs, sys.function())
     lapply(
       dependents$values(),
@@ -607,6 +650,13 @@ reactiveTimer <- function(intervalMs=1000) {
 #'     print(paste("The value of input$n is", isolate(input$n)))
 #'   })
 #'
+#'   # Generate a new histogram at timed intervals, but not when
+#'   # input$n changes.
+#'   output$plot <- renderPlot({
+#'     # Re-execute this reactive expression after 2000 milliseconds
+#'     invalidateLater(2000, session)
+#'     hist(isolate(input$n))
+#'   })
 #' })
 #' }
 #'

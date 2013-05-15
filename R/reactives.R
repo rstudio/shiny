@@ -588,10 +588,41 @@ reactiveTimer <- function(intervalMs=1000) {
 #' of milliseconds.
 #' @param millis Approximate milliseconds to wait before invalidating the
 #'   current reactive context.
+#' @param session A session object. This is needed to cancel any scheduled
+#'   invalidations after a user has ended the session. If \code{NULL}, then
+#'   this invalidation will not be tied to any session, and so it will still
+#'   occur.
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, session) {
+#'
+#'   observe({
+#'     # Re-execute this reactive expression after 1000 milliseconds
+#'     invalidateLater(1000, session)
+#'
+#'     # Do something each time this is invalidated.
+#'     # The isolate() makes this observer _not_ get invalidated and re-executed
+#'     # when input$n changes.
+#'     print(paste("The value of input$n is", isolate(input$n)))
+#'   })
+#'
+#' })
+#' }
+#'
 #' @export
-invalidateLater <- function(millis) {
+invalidateLater <- function(millis, session) {
+  if (missing(session)) {
+    warning("invalidateLater should be passed a session object or NULL")
+    session <- NULL
+  }
+
   ctx <- .getReactiveEnvironment()$currentContext()
   timerCallbacks$schedule(millis, function() {
+    # Quit if the session is closed
+    if (!is.null(session) && session$isClosed()) {
+      return(invisible())
+    }
     ctx$invalidate()
   })
   invisible()

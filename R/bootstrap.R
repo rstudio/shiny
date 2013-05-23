@@ -63,6 +63,7 @@ bootstrapPage <- function(...) {
 }
 
 #' @rdname bootstrapPage
+#' @export
 basicPage <- function(...) {
   bootstrapPage(div(class="container-fluid", list(...)))
 }

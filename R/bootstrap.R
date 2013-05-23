@@ -4,9 +4,12 @@
 #' \href{http://getbootstrap.com}{Twitter Bootstrap}, and has no content in the
 #' page body (other than what you provide).
 #' 
-#' This function is primarily intended for users who are proficient in HTML/CSS,
-#' and know how to lay out pages in Bootstrap. Most users should use template
-#' functions like \code{\link{pageWithSidebar}}.
+#' These functions are primarily intended for users who are proficient in
+#' HTML/CSS, and know how to lay out pages in Bootstrap. Most users should use
+#' template functions like \code{\link{pageWithSidebar}}.
+#'
+#' \code{basicPage} is the same as \code{bootstrapPage}, with an added
+#' \code{<div class="container-fluid">} wrapper to provide a little padding.
 #' 
 #' @param ... The contents of the document body.
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
@@ -57,6 +60,11 @@ bootstrapPage <- function(...) {
     importBootstrap(),
     list(...)
   )
+}
+
+#' @rdname bootstrapPage
+basicPage <- function(...) {
+  bootstrapPage(div(class="container-fluid", list(...)))
 }
 
 #' Create a page with a sidebar

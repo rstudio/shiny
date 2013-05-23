@@ -1,8 +1,11 @@
 \name{bootstrapPage}
+\alias{basicPage}
 \alias{bootstrapPage}
 \title{Create a Twitter Bootstrap page}
 \usage{
   bootstrapPage(...)
+
+  basicPage(...)
 }
 \arguments{
   \item{...}{The contents of the document body.}
@@ -18,9 +21,13 @@
   provide).
 }
 \details{
-  This function is primarily intended for users who are
+  These functions are primarily intended for users who are
   proficient in HTML/CSS, and know how to lay out pages in
   Bootstrap. Most users should use template functions like
   \code{\link{pageWithSidebar}}.
+
+  \code{basicPage} is the same as \code{bootstrapPage},
+  with an added \code{<div class="container-fluid">}
+  wrapper to provide a little padding.
 }
 

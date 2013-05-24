@@ -1219,9 +1219,7 @@
       if (!$.fn.slider)
         return [];
 
-      var sliders = $(scope).find('input.jslider');
-      sliders.slider();
-      return sliders;
+      return $(scope).find('input.jslider');
     },
     getValue: function(el) {
       var sliderVal = $(el).slider("value");
@@ -1278,6 +1276,9 @@
                format: settings.format.format,
                locale: settings.format.locale
              };
+    },
+    initialize: function(el) {
+      $(el).slider();
     }
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');

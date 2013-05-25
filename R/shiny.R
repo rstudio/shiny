@@ -898,10 +898,7 @@ file.path.ci <- function(dir, name) {
 
 # Instantiates the app in the current working directory.
 # port - The TCP port that the application should listen on.
-startApp <- function(port=8101L) {
-
-  sys.www.root <- system.file('www', package='shiny')
-  
+startAppDir <- function(port=8101L) {
   globalR <- file.path.ci(getwd(), 'global.R')
   uiR <- file.path.ci(getwd(), 'ui.R')
   serverR <- file.path.ci(getwd(), 'server.R')
@@ -916,14 +913,55 @@ startApp <- function(port=8101L) {
     source(globalR, local=FALSE)
   
   shinyServer(NULL)
-  serverFileTimestamp <- NULL
-  local({
-    serverFileTimestamp <<- file.info(serverR)$mtime
-    source(serverR, local=new.env(parent=.GlobalEnv))
-    if (is.null(.globals$server))
-      stop("No server was defined in server.R")
-  })
-  serverFunc <- .globals$server
+  serverFileTimestamp <- file.info(serverR)$mtime
+  local(source(serverR, local=new.env(parent=.GlobalEnv)))
+  if (is.null(.globals$server))
+    stop("No server was defined in server.R")
+  
+  serverFuncSource <- function() {
+    # Check if server.R has changed, and if so, reload
+    mtime <- file.info(serverR)$mtime
+    if (!identical(mtime, serverFileTimestamp)) {
+      shinyServer(NULL)
+      serverFileTimestamp <<- mtime
+      local(source(serverR, local=new.env(parent=.GlobalEnv)))
+      if (is.null(.globals$server))
+        stop("No server was defined in server.R")
+    }
+    return(.globals$server)
+  }
+  
+  startApp(
+    c(dynamicHandler(uiR), wwwDir),
+    serverFuncSource,
+    port
+  )
+}
+
+startAppObj <- function(ui, serverFunc, port) {
+  uiHandler <- function(req) {
+    if (!identical(req$REQUEST_METHOD, 'GET'))
+      return(NULL)
+    
+    if (req$PATH_INFO != '/')
+      return(NULL)
+    
+    textConn <- textConnection(NULL, "w") 
+    on.exit(close(textConn))
+    
+    renderPage(ui, textConn)
+    html <- paste(textConnectionValue(textConn), collapse='\n')
+    return(httpResponse(200, content=html))
+  }
+  
+  startApp(uiHandler,
+             function() { serverFunc },
+             port)
+}
+
+startApp <- function(httpHandlers, serverFuncSource, port) {
+  
+  sys.www.root <- system.file('www', package='shiny')
   
   httpuvCallbacks <- list(
     onHeaders = function(req) {
@@ -949,8 +987,7 @@ startApp <- function(port=8101L) {
       }
     },
     call = httpServer(c(sessionHandler,
-                        dynamicHandler(uiR),
-                        wwwDir,
+                        httpHandlers,
                         sys.www.root,
                         resourcePathHandler)),
     onWSOpen = function(ws) {
@@ -1015,18 +1052,7 @@ startApp <- function(port=8101L) {
           msg$method,
           init = {
             
-            # Check if server.R has changed, and if so, reload
-            mtime <- file.info(serverR)$mtime
-            if (!identical(mtime, serverFileTimestamp)) {
-              shinyServer(NULL)
-              local({
-                serverFileTimestamp <<- mtime
-                source(serverR, local=new.env(parent=.GlobalEnv))
-                if (is.null(.globals$server))
-                  stop("No server was defined in server.R")
-              })
-              serverFunc <<- .globals$server
-            }
+            serverFunc <- serverFuncSource()
             
             shinysession$manageInputs(msg$data)
             local({
@@ -1139,13 +1165,17 @@ runApp <- function(appDir=getwd(),
     }
   }
 
-  orig.wd <- getwd()
-  setwd(appDir)
-  on.exit(setwd(orig.wd), add = TRUE)
-  
   require(shiny)
+
+  if (is.character(appDir)) {
+    orig.wd <- getwd()
+    setwd(appDir)
+    on.exit(setwd(orig.wd), add = TRUE)
+    server <- startAppDir(port=port)
+  } else {
+    server <- startAppObj(appDir$ui, appDir$server, port=port)
+  }
   
-  server <- startApp(port=port)
   on.exit({
     stopServer(server)
   }, add = TRUE)

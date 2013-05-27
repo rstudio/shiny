@@ -124,15 +124,15 @@ ShinySession <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        }, label=label, suspended=TRUE)
+        }, label=label, suspended=.shouldSuspend(name))
         
         obs$onInvalidate(function() {
           showProgress(name)
         })
 
         .outputs[[name]] <<- obs
-        # Default is to suspend when hidden
-        .outputOptions[[name]][['suspendWhenHidden']] <<- TRUE
+        if (is.null(.outputOptions[[name]]))
+          .outputOptions[[name]] <<- list()
       }
       else {
         stop(paste("Unexpected", class(func), "output for", name))
@@ -400,25 +400,37 @@ ShinySession <- setRefClass(
                      URLencode(token, TRUE),
                      URLencode(name, TRUE)))
     },
+    .getOutputOption = function(outputName, propertyName, defaultValue) {
+      opts <- .outputOptions[[outputName]]
+      if (is.null(opts))
+        return(defaultValue)
+      result <- opts[[propertyName]]
+      if (is.null(result))
+        return(defaultValue)
+      return(result)
+    },
+    .shouldSuspend = function(name) {
+      # Find corresponding hidden state clientData variable, with the format
+      # "output_foo_hidden". (It comes from .clientdata_output_foo_hidden
+      # on the JS side)
+      # Some tricky stuff: instead of accessing names using input$names(),
+      # get the names directly via input$.values, to avoid triggering reactivity.
+      # Need to handle cases where the output object isn't actually used
+      # in the web page; in these cases, there's no output_foo_hidden flag,
+      # and hidden should be TRUE. In other words, NULL and TRUE should map to
+      # TRUE, FALSE should map to FALSE.
+      hidden <- .clientData$.values[[paste("output_", name, "_hidden",
+                                           sep="")]]
+      if (is.null(hidden)) hidden <- TRUE
+
+      return(hidden && .getOutputOption(name, 'suspendWhenHidden', TRUE))
+    },
     # This function suspends observers for hidden outputs and resumes observers
     # for un-hidden outputs.
     manageHiddenOutputs = function() {
       # Find hidden state for each output, and suspend/resume accordingly
       for (outputName in names(.outputs)) {
-        # Find corresponding hidden state clientData variable, with the format
-        # "output_foo_hidden". (It comes from .clientdata_output_foo_hidden
-        # on the JS side)
-        # Some tricky stuff: instead of accessing names using input$names(),
-        # get the names directly via input$.values, to avoid triggering reactivity.
-        # Need to handle cases where the output object isn't actually used
-        # in the web page; in these cases, there's no output_foo_hidden flag,
-        # and hidden should be TRUE. In other words, NULL and TRUE should map to
-        # TRUE, FALSE should map to FALSE.
-        hidden <- .clientData$.values[[paste("output_", outputName, "_hidden",
-                                             sep="")]]
-        if (is.null(hidden)) hidden <- TRUE
-
-        if (hidden && .outputOptions[[outputName]][['suspendWhenHidden']]) {
+        if (.shouldSuspend(outputName)) {
           .outputs[[outputName]]$suspend()
         } else {
           .outputs[[outputName]]$resume()

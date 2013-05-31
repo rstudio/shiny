@@ -58,7 +58,6 @@ ShinySession <- setRefClass(
       session <<- list(clientData        = clientData,
                        sendCustomMessage = .self$.sendCustomMessage,
                        sendInputMessage  = .self$.sendInputMessage,
-                       sendJavascript    = .self$.sendJavascript,
                        onSessionEnded    = .self$onSessionEnded,
                        isClosed          = .self$isClosed)
     },
@@ -221,9 +220,6 @@ ShinySession <- setRefClass(
 
       # Add to input message queue
       .inputMessageQueue[[length(.inputMessageQueue) + 1]] <<- data
-    },
-    .sendJavascript = function(data) {
-      .write(toJSON(list(javascript = data)))
     },
     .write = function(json) {
       if (getOption('shiny.trace', FALSE))

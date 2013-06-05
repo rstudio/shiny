@@ -1,4 +1,4 @@
-shiny 0.5.0.99
+shiny 0.6.0
 --------------------------------------------------------------------------------
 
 * `tabsetPanel()` can be directed to start with a specific tab selected.

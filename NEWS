@@ -33,6 +33,11 @@ shiny 0.5.0.99
 * Fix bug where the presence of a submit button would prevent sending of
   metadata until the button was clicked.
 
+* `reactiveTimer()` and `invalidateLater()` by default no longer invalidate
+  reactive objects after the client session has closed.
+
+* Shiny apps can be run without a server.r and ui.r file.
+
 shiny 0.5.0
 --------------------------------------------------------------------------------
 

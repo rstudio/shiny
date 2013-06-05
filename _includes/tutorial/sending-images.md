@@ -38,7 +38,7 @@ Image files can be sent using `renderImage()`. The expression that you pass to `
 #### server.R
 
 {% highlight r %}
-shinyServer(function(input, output, clientData) {
+shinyServer(function(input, output, session) {
   output$myImage <- renderImage({
     # A temp file to save the output.
     # This file will be removed later by renderImage
@@ -114,7 +114,7 @@ If your Shiny app has pre-rendered images saved in a subdirectory, you can send 
 #### server.R
 
 {% highlight r %}
-shinyServer(function(input, output, clientData) {
+shinyServer(function(input, output, session) {
   # Send a pre-rendered image, and don't delete the image after sending it
   output$preImage <- renderImage({
     # When input$n is 3, filename is ./images/image3.jpeg
@@ -136,24 +136,24 @@ Note that this might be less efficient than putting images in `www/images` and e
 
 ### Using clientData values
 
-In the first example above, the plot size was fixed at 400 by 300 pixels. For dynamic resizing, it's possible to use values from `clientData` to detect the output size.
+In the first example above, the plot size was fixed at 400 by 300 pixels. For dynamic resizing, it's possible to use values from `session$clientData` to detect the output size.
 
-In the example below, the output object is `output$myImage`, and the width and height on the client browser are sent via `clientData$output_myImage_width` and `clientData$output_myImage_height`. This example also uses `clientData$pixelratio` to multiply the resolution of the image, so that it appears sharp on high-resolution (Retina) displays:
+In the example below, the output object is `output$myImage`, and the width and height on the client browser are sent via `session$clientData$output_myImage_width` and `session$clientData$output_myImage_height`. This example also uses `session$clientData$pixelratio` to multiply the resolution of the image, so that it appears sharp on high-resolution (Retina) displays:
 
 #### server.R
 
 {% highlight r %}
-shinyServer(function(input, output, clientData) {
+shinyServer(function(input, output, session) {
 
   # A dynamically-sized plot
   output$myImage <- renderImage({
     # Read myImage's width and height. These are reactive values, so this
     # expression will re-run whenever they change.
-    width  <- clientData$output_myImage_width
-    height <- clientData$output_myImage_height
+    width  <- session$clientData$output_myImage_width
+    height <- session$clientData$output_myImage_height
 
     # For high-res displays, this will be greater than 1
-    pixelratio <- clientData$pixelratio
+    pixelratio <- session$clientData$pixelratio
 
     # A temp file to save the output.
     outfile <- tempfile(fileext='.png')

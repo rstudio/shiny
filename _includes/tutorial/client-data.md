@@ -1,32 +1,32 @@
 ## Getting Non-Input Data From the Client
 
-On the server side, Shiny applications use the `input` object to receive user input from the client web browser. The values in `input` are set by UI objects on the client web page. There are also non-input values (in the sense that the user doesn't enter these values through UI components) that are stored in an object called `clientData`. These values include the URL, the pixel ratio (for high-resolution "Retina" displays), the hidden state of output objects, and the height and width of plot outputs.
+On the server side, Shiny applications use the `input` object to receive user input from the client web browser. The values in `input` are set by UI objects on the client web page. There are also non-input values (in the sense that the user doesn't enter these values through UI components) that are stored in an object called `session$clientData`. These values include the URL, the pixel ratio (for high-resolution "Retina" displays), the hidden state of output objects, and the height and width of plot outputs.
 
-### Using clientData
+### Using session$clientData
 
-To access `clientData` values, you need to pass a function to `shinyServer()` that takes `clientData` as an argument. Once it's in there, you can access `clientData` just as you would `input`.
+To access `session$clientData` values, you need to pass a function to `shinyServer()` that takes `session` as an argument (`session` is a special object that is used for finer control over a user's app session). Once it's in there, you can access `session$clientData` just as you would `input`.
 
 In the example below, the client browser will display out the components of the URL and also parse and print the query/search string (the part of the URL after a "`?`"):
 
 #### server.R
 
 {% highlight r %}
-shinyServer(function(input, output, clientData) {
+shinyServer(function(input, output, session) {
 
   # Return the components of the URL in a string:
   output$urlText <- renderText({
     paste(sep = "",
-      "protocol: ", clientData$url_protocol, "\n",
-      "hostname: ", clientData$url_hostname, "\n",
-      "pathname: ", clientData$url_pathname, "\n",
-      "port: ",     clientData$url_port,     "\n",
-      "search: ",   clientData$url_search,   "\n"
+      "protocol: ", session$clientData$url_protocol, "\n",
+      "hostname: ", session$clientData$url_hostname, "\n",
+      "pathname: ", session$clientData$url_pathname, "\n",
+      "port: ",     session$clientData$url_port,     "\n",
+      "search: ",   session$clientData$url_search,   "\n"
     )
   })
 
   # Parse the GET query string
   output$queryText <- renderText({
-    query <- parseQueryString(clientData$url_search)
+    query <- parseQueryString(session$clientData$url_search)
 
     # Return a string with key-value pairs
     paste(names(query), query, sep = "=", collapse=", ")
@@ -54,17 +54,19 @@ This app will display the following:
 
 ### Viewing all available values in clientData
 
-The values in `clientData` will depend to some extent on the outputs. For example, a plot output object will report its height, width, and hidden status. The app below has a plot output, and displays all the values in `clientData`:
+The values in `session$clientData` will depend to some extent on the outputs. For example, a plot output object will report its height, width, and hidden status. The app below has a plot output, and displays all the values in `session$clientData`:
 
 {% highlight r %}
-shinyServer(function(input, output, clientData) {
+shinyServer(function(input, output, session) {
+  # Store in a convenience variable
+  cdata <- session$clientData
 
-  # Values from clientData returned as text
+  # Values from cdata returned as text
   output$clientdataText <- renderText({
-    cnames <- names(clientData)
+    cnames <- names(cdata)
 
     allvalues <- lapply(cnames, function(name) {
-      paste(name, clientData[[name]], sep=" = ")
+      paste(name, cdata[[name]], sep=" = ")
     })
     paste(allvalues, collapse = "\n")
   })
@@ -76,7 +78,7 @@ shinyServer(function(input, output, clientData) {
 })
 {% endhighlight %}
 
-Notice that, just as with `input`, values in `clientData` can be accessed with `clientData$myvar` or `clientData[['myvar']]`.
+Notice that, just as with `input`, values in `session$clientData` can be accessed with `session$clientData$myvar` or `session$clientData[['myvar']]`. Or, equivalently, since we've saved it into a convenience variable `cdata`, we can use `cdata$myvar` or `cdata[['myvar']]`.
 
 ##### ui.R
 

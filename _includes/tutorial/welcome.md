@@ -21,11 +21,11 @@ For an introduction and live examples, visit the [Shiny homepage](http://www.rst
 
 ### Installation
 
-If you've already got the Shiny package installed, you're ready to go. If you don't have Shiny yet, you'll need to:
+Shiny is available on CRAN, so you can install it in the usual way from your R console:
 
-* Request access to the beta at [http://shiny.rstudio.org](http://shiny.rstudio.org).
-* Once you have been granted access to the beta, follow the instructions in the welcome e-mail to install the Shiny package.
-
+```
+install.packages("shiny")
+```
 
 ### Let's Go!
 

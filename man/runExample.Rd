@@ -20,4 +20,16 @@
   Launch Shiny example applications, and optionally, your
   system's web browser.
 }
+\examples{
+\dontrun{
+# List all available examples
+runExample()
+
+# Run one of the examples
+runExample("01_hello")
+
+# Print the directory containing the code for all examples
+system.file("examples", package="shiny")
+}
+}
 

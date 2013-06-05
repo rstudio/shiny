@@ -23,4 +23,25 @@
   return; interrupt R to stop the application (usually by
   pressing Ctrl+C or Esc).
 }
+\examples{
+\dontrun{
+# Start app in the current working directory
+runApp()
+
+# Start app in a subdirectory called myapp
+runApp("myapp")
+
+
+# Apps can be run without a server.r and ui.r file
+runApp(list(
+  ui = bootstrapPage(
+    numericInput('n', 'Number of obs', 100),
+    plotOutput('plot')
+  ),
+  server = function(input, output) {
+    output$plot <- renderPlot({ hist(runif(input$n)) })
+  }
+))
+}
+}
 

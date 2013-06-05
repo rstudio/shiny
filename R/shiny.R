@@ -523,6 +523,8 @@ ShinySession <- setRefClass(
 #'     will be suspended (not execute) when it is hidden on the web page. When
 #'     \code{FALSE}, the output object will not suspend when hidden, and if it
 #'     was already hidden and suspended, then it will resume immediately.
+#'   \item priority. The priority level of the output object. Queued outputs
+#'     with higher priority values will execute before those with lower values.
 #' }
 #'
 #' @examples
@@ -827,7 +829,9 @@ resourcePathHandler <- function(req) {
 #' 
 #' The server function will be called when each client (web browser) first loads
 #' the Shiny application's page. It must take an \code{input} and an
-#' \code{output} parameter. Any return value will be ignored.
+#' \code{output} parameter. Any return value will be ignored. It also takes an
+#' optional \code{session} parameter, which is used when greater control is
+#' needed.
 #' 
 #' See the \href{http://rstudio.github.com/shiny/tutorial/}{tutorial} for more 
 #' on how to write a server function.
@@ -836,7 +840,7 @@ resourcePathHandler <- function(req) {
 #' \dontrun{
 #' # A very simple Shiny app that takes a message from the user
 #' # and outputs an uppercase version of it.
-#' shinyServer(function(input, output) {
+#' shinyServer(function(input, output, session) {
 #'   output$uppercase <- renderText({
 #'     toupper(input$message)
 #'   })
@@ -1150,7 +1154,27 @@ serviceApp <- function(ws_env) {
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only.
-#'   
+#'
+#' @examples
+#' \dontrun{
+#' # Start app in the current working directory
+#' runApp()
+#'
+#' # Start app in a subdirectory called myapp
+#' runApp("myapp")
+#'
+#'
+#' # Apps can be run without a server.r and ui.r file
+#' runApp(list(
+#'   ui = bootstrapPage(
+#'     numericInput('n', 'Number of obs', 100),
+#'     plotOutput('plot')
+#'   ),
+#'   server = function(input, output) {
+#'     output$plot <- renderPlot({ hist(runif(input$n)) })
+#'   }
+#' ))
+#' }
 #' @export
 runApp <- function(appDir=getwd(),
                    port=8100L,
@@ -1215,7 +1239,18 @@ runApp <- function(appDir=getwd(),
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only.
-#'   
+#'
+#' @examples
+#' \dontrun{
+#' # List all available examples
+#' runExample()
+#'
+#' # Run one of the examples
+#' runExample("01_hello")
+#'
+#' # Print the directory containing the code for all examples
+#' system.file("examples", package="shiny")
+#' }
 #' @export
 runExample <- function(example=NA,
                        port=8100L,

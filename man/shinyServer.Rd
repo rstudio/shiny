@@ -21,7 +21,9 @@
   The server function will be called when each client (web
   browser) first loads the Shiny application's page. It
   must take an \code{input} and an \code{output} parameter.
-  Any return value will be ignored.
+  Any return value will be ignored. It also takes an
+  optional \code{session} parameter, which is used when
+  greater control is needed.
 
   See the
   \href{http://rstudio.github.com/shiny/tutorial/}{tutorial}
@@ -31,7 +33,7 @@
 \dontrun{
 # A very simple Shiny app that takes a message from the user
 # and outputs an uppercase version of it.
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   output$uppercase <- renderText({
     toupper(input$message)
   })

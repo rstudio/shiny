@@ -2,20 +2,11 @@
 
 Sometimes it's useful for an observer/endpoint to access a reactive value or expression, but not to take a dependency on it. For example, if the observer performs a long calculation or downloads large data set, you might want it to execute only when a button is clicked. 
 
-For this, we'll use `actionButton` from the `shinyIncubator` package. If you want try this code yourself, you'll have to install the package from Github, using devtools:
-
-{% highlight r %}
-install.packages('devtools')
-devtools::install_github('shiny-incubator', 'rstudio')
-{% endhighlight %}
-
-We'll define a `ui.R` that is a slight modification of the one from 01_hello -- the only difference is that it has an actionButton labeled "Go!". You can see it in action at [http://glimmer.rstudio.com/winston/actionbutton/](http://glimmer.rstudio.com/winston/actionbutton/).
+For this, we'll use `actionButton`. We'll define a `ui.R` that is a slight modification of the one from 01_hello -- the only difference is that it has an actionButton labeled "Go!". You can see it in action at [http://glimmer.rstudio.com/winston/actionbutton/](http://glimmer.rstudio.com/winston/actionbutton/).
 
 The actionButton includes some JavaScript code that sends numbers to the server. When the web browser first connects, it sends a value of 0, and on each click, it sends an incremented value: 1, 2, 3, and so on.
 
 {% highlight r %}
-library(shinyIncubator)
-
 shinyUI(pageWithSidebar(
   headerPanel("Click the button"),
   sidebarPanel(

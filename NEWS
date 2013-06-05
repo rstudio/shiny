@@ -23,8 +23,6 @@ shiny 0.5.0.99
 * The server can now send custom JSON messages to the client. On the client
   side, functions can be registered to handle these messages.
 
-* The server can send Javascript code to execute on the client.
-
 * Callbacks can be registered to be called at the end of a client session.
 
 * Add ability to set priority of observers and outputs. Each priority level

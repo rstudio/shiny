@@ -1184,6 +1184,16 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
          label)
 }
 
+#' Validate proper CSS formatting of a unit
+#' 
+#' @param x The unit to validate. Will be treated as a number of pixels if a 
+#' unit is not specified.
+#' @return A properly formatted CSS unit of length, if possible. Otherwise, will
+#' throw an error.
+#' @examples
+#' validateCssUnit("10%")
+#' validateCssUnit(400)  #treated as '400px'
+#' @export
 validateCssUnit <- function(x) {
   if (is.character(x) &&
      !grepl("^(auto|((\\.\\d+)|(\\d+(\\.\\d+)?))(%|in|cm|mm|em|ex|pt|pc|px))$", x)) {

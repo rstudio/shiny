@@ -4,7 +4,7 @@ Sometimes you'll want users to be able to upload their own data to your applicat
 
 **Important notes:**
 * This feature does not work with Internet Explorer 9 and earlier (not even with Shiny Server).
-* By default, Shiny limits file uploads to 5MB per file. You can modify this limit by using the `shiny.maxRequestSize` option. For example, adding `options(shiny.maxRequestSize, 30*1024^2)` to the top of `server.R` would increase the limit to 30MB.
+* By default, Shiny limits file uploads to 5MB per file. You can modify this limit by using the `shiny.maxRequestSize` option. For example, adding `options(shiny.maxRequestSize=30*1024^2)` to the top of `server.R` would increase the limit to 30MB.
 
 To run this example, type:
 

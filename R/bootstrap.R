@@ -1009,6 +1009,8 @@ tabsetPanel <- function(..., id = NULL, selected = NULL) {
       firstTab = FALSE
     }
     
+    divTag$attribs$title <- NULL
+
     # append the elements to our lists
     tabNavList <- tagAppendChild(tabNavList, liTag)
     tabContent <- tagAppendChild(tabContent, divTag)

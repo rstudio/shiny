@@ -32,6 +32,29 @@
   sooner than all observers with a lower priority level.
   Positive, negative, and zero values are allowed.}
 }
+\value{
+  An observer reference class object. This object has the
+  following methods: \describe{ \item{\code{suspend()}}{
+  Causes this observer to stop scheduling flushes
+  (re-executions) in response to invalidations. If the
+  observer was invalidated prior to this call but it has
+  not re-executed yet then that re-execution will still
+  occur, because the flush is already scheduled.  }
+  \item{\code{resume()}}{ Causes this observer to start
+  re-executing in response to invalidations. If the
+  observer was invalidated while suspended, then it will
+  schedule itself for re-execution.  }
+  \item{\code{setPriority(priority = 0)}}{ Change this
+  observer's priority. Note that if the observer is
+  currently invalidated, then the change in priority will
+  not take effect until the next invalidation--unless the
+  observer is also currently suspended, in which case the
+  priority change will be effective upon resume.  }
+  \item{\code{onInvalidate(callback)}}{ Register a callback
+  function to run when this observer is invalidated.  No
+  arguments will be provided to the callback function when
+  it is invoked.  } }
+}
 \description{
   Creates an observer from the given expression An observer
   is like a reactive expression in that it can read

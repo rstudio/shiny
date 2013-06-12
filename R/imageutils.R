@@ -11,6 +11,10 @@
 #' output. Notably, plain \code{png} output on Linux and Windows may not
 #' antialias some point shapes, resulting in poor quality output.
 #'
+#' In some cases, \code{Cairo()} provides output that looks worse than
+#' \code{png()}. To disable Cairo output for an app, use
+#' \code{options(shiny.usecairo=FALSE)}.
+#'
 #' @param func A function that generates a plot.
 #' @param filename The name of the output file. Defaults to a temp file with
 #'   extension \code{.png}.
@@ -30,9 +34,8 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   # Finally, if neither quartz nor Cairo, use png().
   if (capabilities("aqua")) {
     pngfun <- png
-  } else if (nchar(system.file(package = "Cairo"))) {
-    require(Cairo)
-
+  } else if (getOption('shiny.usecairo', TRUE) &&
+             nchar(system.file(package = "Cairo"))) {
     # Workaround for issue #140: Cairo ignores res and dpi settings. Need to
     # use regular png function.
     if (res == 72) {

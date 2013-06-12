@@ -11,6 +11,9 @@ suppressPackageStartupMessages({
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
 #' the CSS class name \code{shiny-plot-output}.
 #'
+#' @seealso For more details on how the plots are generated, and how to control
+#'   the output, see \code{\link{plotPNG}}.
+#'
 #' @param expr An expression that generates a plot.
 #' @param width The width of the rendered plot, in pixels; or \code{'auto'} to 
 #'   use the \code{offsetWidth} of the HTML element that is bound to this plot. 
@@ -108,6 +111,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 #'
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
 #' the CSS class name \code{shiny-image-output}.
+#'
+#' @seealso For more details on how the images are generated, and how to control
+#'   the output, see \code{\link{plotPNG}}.
 #'
 #' @param expr An expression that returns a list.
 #' @param env The environment in which to evaluate \code{expr}.

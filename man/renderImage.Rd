@@ -99,4 +99,8 @@ shinyServer(function(input, output, clientData) {
 
 }
 }
+\seealso{
+  For more details on how the images are generated, and how
+  to control the output, see \code{\link{plotPNG}}.
+}
 

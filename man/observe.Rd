@@ -56,16 +56,17 @@
   it is invoked.  } }
 }
 \description{
-  Creates an observer from the given expression An observer
-  is like a reactive expression in that it can read
-  reactive values and call reactive expressions, and will
-  automatically re-execute when those dependencies change.
-  But unlike reactive expression, it doesn't yield a result
-  and can't be used as an input to other reactive
-  expressions. Thus, observers are only useful for their
-  side effects (for example, performing I/O).
+  Creates an observer from the given expression.
 }
 \details{
+  An observer is like a reactive expression in that it can
+  read reactive values and call reactive expressions, and
+  will automatically re-execute when those dependencies
+  change. But unlike reactive expressions, it doesn't yield
+  a result and can't be used as an input to other reactive
+  expressions. Thus, observers are only useful for their
+  side effects (for example, performing I/O).
+
   Another contrast between reactive expressions and
   observers is their execution strategy. Reactive
   expressions use lazy evaluation; that is, when their

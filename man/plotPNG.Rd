@@ -39,5 +39,9 @@
   of output. Notably, plain \code{png} output on Linux and
   Windows may not antialias some point shapes, resulting in
   poor quality output.
+
+  In some cases, \code{Cairo()} provides output that looks
+  worse than \code{png()}. To disable Cairo output for an
+  app, use \code{options(shiny.usecairo=FALSE)}.
 }
 

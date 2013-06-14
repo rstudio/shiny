@@ -32,7 +32,8 @@ ShinySession <- setRefClass(
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
     closed = 'logical',
-    session = 'list'      # Object for the server app to access session stuff
+    session = 'list',      # Object for the server app to access session stuff
+    workerId = 'character'
   ),
   methods = list(
     initialize = function(websocket) {
@@ -245,7 +246,9 @@ ShinySession <- setRefClass(
 
       jobId <- .fileUploadContext$createUploadOperation(fileInfos)
       return(list(jobId=jobId,
-                  uploadUrl=paste('session', token, 'upload', jobId, sep='/')))
+                  uploadUrl=paste('session', token, 'upload', 
+                                  paste(jobId, "?w=", workerId,sep=""), 
+                                  sep='/')))
     },
     `@uploadEnd` = function(jobId, inputId) {
       fileData <- .fileUploadContext$getUploadOperation(jobId)$finish()
@@ -364,9 +367,10 @@ ShinySession <- setRefClass(
       "Creates an entry in the file map for the data, and returns a URL pointing
       to the file."
       files$set(name, list(data=data, contentType=contentType))
-      return(sprintf('session/%s/file/%s?%s',
+      return(sprintf('session/%s/file/%s?w=%s&r=%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
+                     workerId,
                      createUniqueId(8)))
     },
     # Send a file to the client
@@ -379,7 +383,7 @@ ShinySession <- setRefClass(
         return(NULL)
 
       fileData <- readBin(file, 'raw', n=bytes)
-
+      
       if (isTRUE(.clientData$.values$allowDataUriScheme)) {
         b64 <- base64encode(fileData)
         return(paste('data:', contentType, ';base64,', b64, sep=''))
@@ -392,9 +396,10 @@ ShinySession <- setRefClass(
       downloads$set(name, list(filename = filename,
                                contentType = contentType,
                                func = func))
-      return(sprintf('session/%s/download/%s',
+      return(sprintf('session/%s/download/%s?w=%s',
                      URLencode(token, TRUE),
-                     URLencode(name, TRUE)))
+                     URLencode(name, TRUE),
+                     workerId))
     },
     .getOutputOption = function(outputName, propertyName, defaultValue) {
       opts <- .outputOptions[[outputName]]
@@ -910,7 +915,7 @@ file.path.ci <- function(dir, name) {
 
 # Instantiates the app in the current working directory.
 # port - The TCP port that the application should listen on.
-startAppDir <- function(port=8101L) {
+startAppDir <- function(port=8101L, workerId) {
   globalR <- file.path.ci(getwd(), 'global.R')
   uiR <- file.path.ci(getwd(), 'ui.R')
   serverR <- file.path.ci(getwd(), 'server.R')
@@ -946,11 +951,12 @@ startAppDir <- function(port=8101L) {
   startApp(
     c(dynamicHandler(uiR), wwwDir),
     serverFuncSource,
-    port
+    port,
+    workerId
   )
 }
 
-startAppObj <- function(ui, serverFunc, port) {
+startAppObj <- function(ui, serverFunc, port, workerId) {
   uiHandler <- function(req) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
@@ -968,10 +974,10 @@ startAppObj <- function(ui, serverFunc, port) {
   
   startApp(uiHandler,
              function() { serverFunc },
-             port)
+             port, workerId)
 }
 
-startApp <- function(httpHandlers, serverFuncSource, port) {
+startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
   
   sys.www.root <- system.file('www', package='shiny')
   
@@ -1005,6 +1011,7 @@ startApp <- function(httpHandlers, serverFuncSource, port) {
     onWSOpen = function(ws) {
       shinysession <- ShinySession$new(ws)
       appsByToken$set(shinysession$token, shinysession)
+      shinysession$workerId <- workerId
       
       ws$onMessage(function(binary, msg) {
         
@@ -1179,12 +1186,13 @@ serviceApp <- function(ws_env) {
 runApp <- function(appDir=getwd(),
                    port=8100L,
                    launch.browser=getOption('shiny.launch.browser',
-                                            interactive())) {
+                                            interactive()), 
+                   workerId="") {
 
   # Make warnings print immediately
   ops <- options(warn = 1)
   on.exit(options(ops))
-
+  
   if (nzchar(Sys.getenv('SHINY_PORT'))) {
     # If SHINY_PORT is set, we're running under Shiny Server. Check the version
     # to make sure it is compatible. Older versions of Shiny Server don't set
@@ -1203,9 +1211,9 @@ runApp <- function(appDir=getwd(),
     orig.wd <- getwd()
     setwd(appDir)
     on.exit(setwd(orig.wd), add = TRUE)
-    server <- startAppDir(port=port)
+    server <- startAppDir(port=port, workerId)
   } else {
-    server <- startAppObj(appDir$ui, appDir$server, port=port)
+    server <- startAppObj(appDir$ui, appDir$server, port=port, workerId)
   }
   
   on.exit({

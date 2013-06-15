@@ -1217,8 +1217,10 @@ runApp <- function(appDir=getwd(),
     utils::browseURL(appUrl)
   }
   
+  .globals$retval <- NULL
+  .globals$stopped <- FALSE
   tryCatch(
-    while (TRUE) {
+    while (!.globals$stopped) {
       serviceApp()
       Sys.sleep(0.001)
     },
@@ -1226,6 +1228,23 @@ runApp <- function(appDir=getwd(),
       timerCallbacks$clear()
     }
   )
+  
+  return(.globals$retval)
+}
+
+#' Stop the currently running Shiny app
+#' 
+#' Stops the currently running Shiny app, returning control to the caller of 
+#' \code{\link{runApp}}.
+#' 
+#' @param returnValue The value that should be returned from
+#'   \code{\link{runApp}}.
+#'   
+#' @export
+stopApp <- function(returnValue = NULL) {
+  .globals$retval <- returnValue
+  .globals$stopped <- TRUE
+  httpuv::interrupt()
 }
 
 #' Run Shiny Example Applications

@@ -1,0 +1,15 @@
+\name{stopApp}
+\alias{stopApp}
+\title{Stop the currently running Shiny app}
+\usage{
+  stopApp(returnValue = NULL)
+}
+\arguments{
+  \item{returnValue}{The value that should be returned from
+  \code{\link{runApp}}.}
+}
+\description{
+  Stops the currently running Shiny app, returning control
+  to the caller of \code{\link{runApp}}.
+}
+

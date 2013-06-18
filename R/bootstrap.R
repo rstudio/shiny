@@ -507,16 +507,20 @@ selectInput <- function(inputId,
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
 
-  for (i in seq_along(choices)) {
-    choiceName <- names(choices)[i]
-    optionTag <- tags$option(value = choices[[i]], choiceName)
+  # Create tags for each of the options
+  optionTags <- mapply(choices, names(choices), SIMPLIFY = FALSE,
+    FUN = function(choice, name) {
+      optionTag <- tags$option(value = choice, name)
 
-    if (choiceName %in% selected)
-      optionTag$attribs$selected = "selected"
+      if (name %in% selected)
+        optionTag$attribs$selected = "selected"
 
-    selectTag <- tagAppendChild(selectTag, optionTag)
-  }
-  
+      optionTag
+    }
+  )
+
+  selectTag <- tagAppendChild(selectTag, optionTags)
+
   # return label and select tag
   tagList(controlLabel(inputId, label), selectTag)
 }

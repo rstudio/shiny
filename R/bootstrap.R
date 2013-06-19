@@ -509,7 +509,8 @@ selectInput <- function(inputId,
     selectTag$attribs$multiple <- "multiple"
 
   # Create tags for each of the options
-  optionTags <- mapply(choices, names(choices), SIMPLIFY = FALSE,
+  optionTags <- mapply(choices, names(choices),
+    SIMPLIFY = FALSE, USE.NAMES = FALSE,
     FUN = function(choice, name) {
       optionTag <- tags$option(value = choice, name)
 
@@ -557,7 +558,9 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
   
   # Create tags for each of the options
   ids <- paste0(inputId, seq_along(choices))
-  inputTags <- mapply(ids, choices, names(choices), SIMPLIFY = FALSE,
+
+  inputTags <- mapply(ids, choices, names(choices),
+    SIMPLIFY = FALSE, USE.NAMES = FALSE,
     FUN = function(id, value, name) {
       inputTag <- tags$input(type = "radio",
                              name = inputId,

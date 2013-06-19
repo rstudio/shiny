@@ -113,9 +113,9 @@ tag <- function(`_tag_name`, varArgs) {
   if (is.null(varArgsNames))
     varArgsNames <- character(length=length(varArgs))
 
-  # Named arguments become attribs
+  # Named arguments become attribs, dropping NULL values
   named_idx <- nzchar(varArgsNames)
-  attribs <- varArgs[named_idx]
+  attribs <- dropNulls(varArgs[named_idx])
   
   # Unnamed arguments are flattened and added as children.
   # Use unname() to remove the names attribute from the list, which would

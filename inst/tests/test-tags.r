@@ -136,6 +136,12 @@ test_that("Creating simple tags", {
     )
   )
 
+  # NULL attributes are dropped
+  expect_identical(
+    div(a = NULL, b = "value"),
+    div(b = "value")
+  )
+
   # Numbers are coerced to strings
   expect_identical(
     div(1234),

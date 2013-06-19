@@ -81,7 +81,7 @@ includeHTML <- function(path) {
 includeText <- function(path) {
   dependsOnFile(path)
   lines <- readLines(path, warn=FALSE, encoding='UTF-8')
-  return(HTML(paste(lines, collapse='\r\n')))
+  return(paste(lines, collapse='\r\n'))
 }
 
 #' @rdname include

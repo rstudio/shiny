@@ -114,6 +114,41 @@ test_that("Adding child tags", {
 
 
 
+
+test_that("Creating simple tags", {
+  # Empty tag
+  expect_identical(
+    div(),
+    structure(
+      list(name = "div", attribs = list(), children = list()),
+      .Names = c("name", "attribs", "children"),
+      class = "shiny.tag"
+    )
+  )
+
+  # Tag with text
+  expect_identical(
+    div("text"),
+    structure(
+      list(name = "div", attribs = list(), children = list("text")),
+      .Names = c("name", "attribs", "children"),
+      class = "shiny.tag"
+    )
+  )
+
+  # Numbers are coerced to strings
+  expect_identical(
+    div(1234),
+    structure(
+      list(name = "div", attribs = list(), children = list("1234")),
+      .Names = c("name", "attribs", "children"),
+      class = "shiny.tag"
+    )
+  )
+
+})
+
+
 test_that("Creating nested tags", {
   # Simple version
   # Note that the $children list should not have a names attribute
@@ -135,6 +170,7 @@ test_that("Creating nested tags", {
       list(
         p("in-list child tag 1"),
         "in-list character string",
+        p(),
         p("in-list child tag 2")
       ),
       "character string",
@@ -161,6 +197,11 @@ test_that("Creating nested tags", {
                   class = "shiny.tag"
         ),
         "in-list character string",
+        structure(list(name = "p",
+                       attribs = list(),
+                       children = list()),
+                  class = "shiny.tag"
+        ),
         structure(list(name = "p",
                        attribs = list(),
                        children = list("in-list child tag 2")),
@@ -198,4 +239,7 @@ test_that("Flattening a list of tags", {
 
   # numbers are coerced to character
   expect_identical(flattenTags(list(a=1, "b")), list(a="1", "b"))
+
+  # empty list results in empty list
+  expect_identical(flattenTags(list()), list())
 })

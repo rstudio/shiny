@@ -381,8 +381,13 @@ flattenTags <- function(x) {
     # For tags, wrap them into a list (which will be unwrapped by caller)
     list(x)
   } else if (is.list(x)) {
-    # For items that are lists (but not tags), recurse
-    unlist(lapply(x, flattenTags), recursive = FALSE)
+    if (length(x) == 0) {
+      # Empty lists are simply returned
+      x
+    } else {
+      # For items that are lists (but not tags), recurse
+      unlist(lapply(x, flattenTags), recursive = FALSE)
+    }
   } else {
     # For other items, coerce to character and wrap them into a list (which
     # will be unwrapped by caller)

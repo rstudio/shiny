@@ -111,3 +111,67 @@ test_that("Adding child tags", {
   t2 <- tagAppendChildren(div_tag, list = tag_list)
   expect_identical(t1, t2)
 })
+
+
+
+test_that("Creating nested tags", {
+  # Simple version
+  # Note that the $children list should not have a names attribute
+  expect_identical(
+    div(class="foo", list("a", "b")),
+    structure(
+      list(name = "div",
+           attribs = structure(list(class = "foo"), .Names = "class"),
+           children = list("a", "b")),
+      .Names = c("name", "attribs", "children"),
+      class = "shiny.tag"
+    )
+  )
+
+  # More complex version
+  t1 <- withTags(
+    div(class = "foo",
+      p("child tag"),
+      list(
+        p("in-list child tag 1"),
+        "in-list character string",
+        p("in-list child tag 2")
+      ),
+      "character string",
+      1234
+    )
+  )
+
+  # t1 should be identical to this data structure.
+  # The nested list should be flattened, and non-tag, non-strings should be
+  # converted to strings
+  t1_full <- structure(
+    list(
+      name = "div",
+      attribs = list(class = "foo"),
+      children = list(
+        structure(list(name = "p",
+                       attribs = list(),
+                       children = list("child tag")),
+                  class = "shiny.tag"
+        ),
+        structure(list(name = "p",
+                       attribs = list(),
+                       children = list("in-list child tag 1")),
+                  class = "shiny.tag"
+        ),
+        "in-list character string",
+        structure(list(name = "p",
+                       attribs = list(),
+                       children = list("in-list child tag 2")),
+                  class = "shiny.tag"
+        ),
+        "character string",
+        "1234"
+      )
+    ),
+    class = "shiny.tag"
+  )
+
+  expect_identical(t1, t1_full)
+})

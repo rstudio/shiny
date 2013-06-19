@@ -47,6 +47,28 @@ strong <- function(...) tags$strong(...)
 #' @export
 em <- function(...) tags$em(...)
 
+#' Include Content From a File
+#' 
+#' Include HTML, text, or rendered Markdown into a \link[=shinyUI]{Shiny UI}.
+#' 
+#' These functions provide a convenient way to include an extensive amount of 
+#' HTML, textual, Markdown, CSS, or JavaScript content, rather than using a
+#' large literal R string.
+#' 
+#' @note \code{includeText} escapes its contents, but does no other processing. 
+#'   This means that hard breaks and multiple spaces will be rendered as they 
+#'   usually are in HTML: as a single space character. If you are looking for 
+#'   preformatted text, wrap the call with \code{\link{pre}}, or consider using 
+#'   \code{includeMarkdown} instead.
+#'   
+#' @note The \code{includeMarkdown} function requires the \code{markdown} 
+#'   package.
+#'   
+#' @param path The path of the file to be included. It is highly recommended to 
+#'   use a relative path (the base path being the Shiny application directory), 
+#'   not an absolute path.
+#'   
+#' @rdname include
 #' @export
 includeHTML <- function(path) {
   dependsOnFile(path)
@@ -54,6 +76,7 @@ includeHTML <- function(path) {
   return(HTML(paste(lines, collapse='\r\n')))
 }
 
+#' @rdname include
 #' @export
 includeText <- function(path) {
   dependsOnFile(path)
@@ -61,6 +84,7 @@ includeText <- function(path) {
   return(HTML(paste(lines, collapse='\r\n')))
 }
 
+#' @rdname include
 #' @export
 includeMarkdown <- function(path) {
   if (!require(markdown))
@@ -70,6 +94,27 @@ includeMarkdown <- function(path) {
   html <- markdown::markdownToHTML(path, fragment.only=TRUE)
   Encoding(html) <- 'UTF-8'
   return(HTML(html))
+}
+
+#' @param ... Any additional attributes to be applied to the generated tag.
+#' @rdname include
+#' @export
+includeCSS <- function(path, ...) {
+  dependsOnFile(path)
+  lines <- readLines(path, warn=FALSE, encoding='UTF-8')
+  args <- list(...)
+  if (is.null(args$type))
+    args$type <- 'text/css'
+  return(do.call(tags$style,
+                 c(list(HTML(paste(lines, collapse='\r\n'))), args)))
+}
+
+#' @rdname include
+#' @export
+includeScript <- function(path, ...) {
+  dependsOnFile(path)
+  lines <- readLines(path, warn=FALSE, encoding='UTF-8')
+  return(tags$script(HTML(paste(lines, collapse='\r\n')), ...))
 }
 
 

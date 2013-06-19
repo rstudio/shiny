@@ -27,6 +27,7 @@ ShinySession <- setRefClass(
     .clientData = 'ReactiveValues', # Internal object for other data sent from the client
     .closedCallbacks = 'Callbacks',
     input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
+    output      = 'ANY',    # Externally-usable S3 wrapper object for .outputs
     clientData  = 'reactivevalues', # Externally-usable S3 wrapper object for .clientData
     token = 'character',  # Used to identify this instance in URLs
     files = 'Map',        # For keeping track of files sent to client
@@ -51,6 +52,8 @@ ShinySession <- setRefClass(
       input      <<- .createReactiveValues(.input,      readonly=TRUE)
       clientData <<- .createReactiveValues(.clientData, readonly=TRUE)
       
+      output     <<- .createOutputWriter(.self)
+      
       token <<- createUniqueId(16)
       .outputs <<- list()
       .outputOptions <<- list()
@@ -59,7 +62,9 @@ ShinySession <- setRefClass(
                        sendCustomMessage = .self$.sendCustomMessage,
                        sendInputMessage  = .self$.sendInputMessage,
                        onSessionEnded    = .self$onSessionEnded,
-                       isClosed          = .self$isClosed)
+                       isClosed          = .self$isClosed,
+                       input             = .self$input,
+                       output            = .self$output)
     },
     onSessionEnded = function(callback) {
       "Registers the given callback to be invoked when the session is closed

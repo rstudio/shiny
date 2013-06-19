@@ -799,7 +799,7 @@ isolate <- function(expr) {
 #' ))
 #' # In server.R:
 #' shinyServer(function(input, output) {
-#'   handleButtonClick(input$saveButton, function() {
+#'   observeEvent(input$saveButton, function() {
 #'     write.csv(runif(input$n), file = "data.csv")
 #'   })
 #' })
@@ -827,7 +827,7 @@ eventFilter <- function(eventExpr, valueFunc, env=parent.frame(), quoted=FALSE) 
   
   # Legacy logic. We'd prefer to have actionButton initialize to NULL, but too
   # much code already expects it to be 0.
-  if (identical(eventExpr, 0) && identical(attr(eventExpr, 'actionButton'), TRUE))
+  if (isTRUE(eventExpr == 0) && identical(attr(eventExpr, 'actionButton'), TRUE))
     return(invisible())
   
   return(isolate(valueFunc()))

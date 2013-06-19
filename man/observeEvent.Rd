@@ -21,7 +21,7 @@ shinyUI(basicPage(
 ))
 # In server.R:
 shinyServer(function(input, output) {
-  handleButtonClick(input$saveButton, function() {
+  observeEvent(input$saveButton, function() {
     write.csv(runif(input$n), file = "data.csv")
   })
 })

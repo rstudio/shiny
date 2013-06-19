@@ -605,6 +605,8 @@ submitButton <- function(text = "Apply Changes") {
 #' @param label The contents of the button--usually a text label, but you could
 #'   also use any other HTML, like an image.
 #'
+#' @seealso \code{\link{observeEvent}} and \code{\link{eventFilter}}
+#'
 #' @export
 actionButton <- function(inputId, label) {
   tags$button(id=inputId, type="button", class="btn action-button", label)

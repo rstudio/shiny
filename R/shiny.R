@@ -1049,6 +1049,10 @@ startApp <- function(httpHandlers, serverFuncSource, port) {
                   datelist <- ifelse(lapply(val, is.null), NA, val)
                   as.Date(unlist(datelist))
                 },
+                actionButton = {
+                  attr(val, 'actionButton', TRUE)
+                  val
+                },
                 stop('Unknown type specified for ', name)
               )
             }

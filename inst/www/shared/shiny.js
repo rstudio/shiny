@@ -1936,6 +1936,9 @@
     },
     setValue: function(el, value) {
     },
+    getType: function(el) {
+      return "actionButton";
+    },
     subscribe: function(el, callback) {
       $(el).on("click.actionButtonInputBinding", function(e) {
         var $el = $(this);

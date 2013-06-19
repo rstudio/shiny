@@ -293,17 +293,15 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
   choices = NULL, selected = NULL) {
 
   choices <- choicesWithNames(choices)
-  options <- list()
 
-  for (i in seq_along(choices)) {
-    choiceName <- names(choices)[i]
-
-    opt <- list(value = choices[[i]],
-                label = choiceName,
-                checked = choiceName %in% selected)
-
-    options[[i]] <- opt
-  }
+  options <- mapply(choices, names(choices),
+    SIMPLIFY = FALSE, USE.NAMES = FALSE,
+    FUN = function(value, name) {
+      list(value = value,
+           label = name,
+           checked = name %in% selected)
+    }
+  )
 
   message <- dropNulls(list(label = label, options = options))
 
@@ -391,17 +389,15 @@ updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
     selected = NULL) {
 
   choices <- choicesWithNames(choices)
-  options <- list()
 
-  for (i in seq_along(choices)) {
-    choiceName <- names(choices)[i]
-
-    opt <- list(value = choices[[i]],
-                label = choiceName,
-                selected = choiceName %in% selected)
-
-    options[[i]] <- opt
-  }
+  options <- mapply(choices, names(choices),
+    SIMPLIFY = FALSE, USE.NAMES = FALSE,
+    FUN = function(value, name) {
+      list(value = value,
+           label = name,
+           selected = name %in% selected)
+    }
+  )
 
   message <- dropNulls(list(label = label, options = options))
 

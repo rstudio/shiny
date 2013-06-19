@@ -71,7 +71,7 @@ CacheContext <- setRefClass(
 # If NULL or NA is given as the argument, then ui.R will re-execute next time.
 dependsOnFile <- function(filepath) {
   if (is.null(.currentCacheContext$cc))
-    stop("addFileDependency was called at an unexpected time (no cache context found)")
+    return()
   
   if (is.null(filepath) || is.na(filepath))
     .currentCacheContext$cc$forceDirty()

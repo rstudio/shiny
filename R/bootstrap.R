@@ -401,25 +401,26 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
-  
-  checkboxes <- list()
-  for (i in seq_along(choices)) {
-    choiceName <- names(choices)[i]
 
-    inputTag <- tags$input(type = "checkbox",
-                           name = inputId,
-                           id = paste(inputId, i, sep=""),
-                           value = choices[[i]])
+  # Create tags for each of the options
+  ids <- paste0(inputId, seq_along(choices))
 
-    if (choiceName %in% selected)
+  checkboxes <- mapply(ids, choices, names(choices),
+    SIMPLIFY = FALSE, USE.NAMES = FALSE,
+    FUN = function(id, value, name) {
+      inputTag <- tags$input(type = "checkbox",
+                             name = inputId,
+                             id = id,
+                             value = value)
+
+    if (name %in% selected)
       inputTag$attribs$checked <- "checked"
 
-    checkbox <- tags$label(class = "checkbox",
-                           inputTag,
-                           tags$span(choiceName))
-    
-    checkboxes[[i]] <- checkbox
-  } 
+    tags$label(class = "checkbox",
+               inputTag,
+               tags$span(name))
+    }
+  )
   
   # return label and select tag
   tags$div(id = inputId,

@@ -175,3 +175,27 @@ test_that("Creating nested tags", {
 
   expect_identical(t1, t1_full)
 })
+
+
+test_that("Flattening a list of tags", {
+  # Flatten a nested list
+  nested <- list(
+    "a1",
+    list(
+      "b1",
+      list("c1", "c2"),
+      list(),
+      "b2",
+      list("d1", "d2")
+    ),
+    "a2"
+  )
+  flat <- list("a1", "b1", "c1", "c2", "b2", "d1", "d2", "a2")
+  expect_identical(flattenTags(nested), flat)
+
+  # no-op for flat lists
+  expect_identical(flattenTags(list(a="1", "b")), list(a="1", "b"))
+
+  # numbers are coerced to character
+  expect_identical(flattenTags(list(a=1, "b")), list(a="1", "b"))
+})

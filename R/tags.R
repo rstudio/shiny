@@ -95,6 +95,18 @@ tagAppendChild <- function(tag, child) {
 }
 
 #' @export
+tagAppendChildren <- function(tag, ..., list = NULL) {
+  tag$children <- c(tag$children, c(list(...), list))
+  tag
+}
+
+#' @export
+tagSetChildren <- function(tag, ..., list = NULL) {
+  tag$children <- c(list(...), list)
+  tag
+}
+
+#' @export
 tag <- function(`_tag_name`, varArgs) {
   
   # create basic tag data structure

@@ -519,7 +519,7 @@ selectInput <- function(inputId,
     }
   )
 
-  selectTag <- tagAppendChild(selectTag, optionTags)
+  selectTag <- tagSetChildren(selectTag, list = optionTags)
 
   # return label and select tag
   tagList(controlLabel(inputId, label), selectTag)

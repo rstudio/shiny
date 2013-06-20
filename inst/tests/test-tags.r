@@ -50,6 +50,23 @@ test_that("withTags works", {
 })
 
 
+test_that("HTML escaping in tags", {
+  # Regular text is escaped
+  expect_equivalent(format(div("<a&b>")), "<div>&lt;a&amp;b&gt;</div>")
+
+  # Text in HTML() isn't escaped
+  expect_equivalent(format(div(HTML("<a&b>"))), "<div><a&b></div>")
+
+  # Text in a property is escaped
+  expect_equivalent(format(div(class = "<a&b>", "text")),
+                    '<div class="&lt;a&amp;b&gt;">text</div>')
+
+  # HTML() has no effect in a property like 'class'
+  expect_equivalent(format(div(class = HTML("<a&b>"), "text")),
+                    '<div class="&lt;a&amp;b&gt;">text</div>')
+})
+
+
 test_that("Adding child tags", {
   tag_list <- list(tags$p("tag1"), tags$b("tag2"), tags$i("tag3"))
 

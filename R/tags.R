@@ -388,9 +388,15 @@ flattenTags <- function(x) {
       # For items that are lists (but not tags), recurse
       unlist(lapply(x, flattenTags), recursive = FALSE)
     }
+
+  } else if (is.character(x)){
+    # This will preserve attributes if x is a character with attribute,
+    # like what HTML() produces
+    list(x)
+
   } else {
     # For other items, coerce to character and wrap them into a list (which
-    # will be unwrapped by caller)
+    # will be unwrapped by caller). Note that this will strip attributes.
     list(as.character(x))
   }
 }

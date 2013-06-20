@@ -110,9 +110,16 @@ test_that("Adding child tags", {
   # tagAppendChildren can start with no children
   t2 <- tagAppendChildren(div_tag, list = tag_list)
   expect_identical(t1, t2)
+
+
+  # tagSetChildren preserves attributes
+  x <- tagSetChildren(div(), HTML("text"))
+  expect_identical(attr(x$children[[1]], "html"), TRUE)
+
+  # tagAppendChildren preserves attributes
+  x <- tagAppendChildren(div(), HTML("text"))
+  expect_identical(attr(x$children[[1]], "html"), TRUE)
 })
-
-
 
 
 test_that("Creating simple tags", {
@@ -151,7 +158,6 @@ test_that("Creating simple tags", {
       class = "shiny.tag"
     )
   )
-
 })
 
 
@@ -223,6 +229,26 @@ test_that("Creating nested tags", {
   expect_identical(t1, t1_full)
 })
 
+test_that("Attributes are preserved", {
+  # HTML() adds an attribute to the data structure (note that this is
+  # different from the 'attribs' field in the list)
+  x <- HTML("<tag>&&</tag>")
+  expect_identical(attr(x, "html"), TRUE)
+  expect_equivalent(format(x), "<tag>&&</tag>")
+
+  # Make sure attributes are preserved when wrapped in other tags
+  x <- div(HTML("<tag>&&</tag>"))
+  expect_equivalent(x$children[[1]], "<tag>&&</tag>")
+  expect_identical(attr(x$children[[1]], "html"), TRUE)
+  expect_equivalent(format(x), "<div><tag>&&</tag></div>")
+
+  # Deeper nesting
+  x <- div(p(HTML("<tag>&&</tag>")))
+  expect_equivalent(x$children[[1]]$children[[1]], "<tag>&&</tag>")
+  expect_identical(attr(x$children[[1]]$children[[1]], "html"), TRUE)
+  expect_equivalent(format(x), "<div>\n  <p><tag>&&</tag></p>\n</div>")
+})
+
 
 test_that("Flattening a list of tags", {
   # Flatten a nested list
@@ -248,4 +274,10 @@ test_that("Flattening a list of tags", {
 
   # empty list results in empty list
   expect_identical(flattenTags(list()), list())
+
+  # preserve attributes
+  nested <- list("txt1", list(structure("txt2", prop="prop2")))
+  flat <- list("txt1",
+               structure("txt2", prop="prop2"))
+  expect_identical(flattenTags(nested), flat)
 })

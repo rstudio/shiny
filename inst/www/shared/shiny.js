@@ -987,19 +987,77 @@
       return $(scope).find('.shiny-image-output, .shiny-plot-output');
     },
     renderValue: function(el, data) {
+      var self = this;
+      var $el = $(el);
       // Load the image before emptying, to minimize flicker
       var img = null;
+      var coordmap, clickId, hoverId;
+      
       if (data) {
+        clickId = $el.data('click-id');
+        hoverId = $el.data('hover-id');
+        
+        coordmap = data.coordmap;
+        delete data.coordmap;
+        
         img = document.createElement('img');
         // Copy items from data to img. This should include 'src'
         $.each(data, function(key, value) {
           img[key] = value;
         });
+        
+        function createMouseHandler(inputId) {
+          return function(e) {
+            if (e === null) {
+              Shiny.onInputChange(inputId, null);
+              return;
+            }
+            
+            // TODO: Account for retina
+            // TODO: Account for scrolling within the image??
+            
+            function devToUsrX(deviceX) {
+              var x = deviceX - coordmap.bounds.left;
+              var factor = (coordmap.usr.right - coordmap.usr.left) /
+                  (coordmap.bounds.right - coordmap.bounds.left);
+              return (x * factor) + coordmap.usr.left;
+            }
+            function devToUsrY(deviceY) {
+              var y = deviceY - coordmap.bounds.bottom;
+              var factor = (coordmap.usr.top - coordmap.usr.bottom) /
+                  (coordmap.bounds.top - coordmap.bounds.bottom);
+              return (y * factor) + coordmap.usr.bottom;
+            }
+            
+            var userX = devToUsrX(e.offsetX);
+            if (coordmap.log.x)
+              userX = Math.pow(10, userX);
+            
+            var userY = devToUsrY(e.offsetY);
+            if (coordmap.log.y)
+              userY = Math.pow(10, userY);
+            
+            Shiny.onInputChange(inputId, {
+              x: userX, y: userY,
+              ".nonce": Math.random()
+            });
+          }
+        };
+        
+        if (clickId)
+          $(img).on('click', createMouseHandler(clickId));
+        var hoverFunc = debounce(500, createMouseHandler(hoverId));
+        if (hoverId) {
+          $(img).on('mousemove', hoverFunc);
+          $(img).on('mouseout', function(e) {
+            hoverFunc(null);
+          });
+        }
       }
 
-      $(el).empty();
+      $el.empty();
       if (img)
-        $(el).append(img);
+        $el.append(img);
     }
   });
   outputBindings.register(imageOutputBinding, 'shiny.imageOutput');

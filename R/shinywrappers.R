@@ -112,7 +112,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         log = c(
           x = par('xlog'),
           y = par('ylog')
-        )
+        ),
+        pixelratio = pixelratio
       )
     }
 

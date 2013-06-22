@@ -1013,17 +1013,16 @@
               return;
             }
             
-            // TODO: Account for retina
             // TODO: Account for scrolling within the image??
             
             function devToUsrX(deviceX) {
-              var x = deviceX - coordmap.bounds.left;
+              var x = (deviceX * coordmap.pixelratio) - coordmap.bounds.left;
               var factor = (coordmap.usr.right - coordmap.usr.left) /
                   (coordmap.bounds.right - coordmap.bounds.left);
               return (x * factor) + coordmap.usr.left;
             }
             function devToUsrY(deviceY) {
-              var y = deviceY - coordmap.bounds.bottom;
+              var y = (deviceY * coordmap.pixelratio) - coordmap.bounds.bottom;
               var factor = (coordmap.usr.top - coordmap.usr.bottom) /
                   (coordmap.bounds.top - coordmap.bounds.bottom);
               return (y * factor) + coordmap.usr.bottom;

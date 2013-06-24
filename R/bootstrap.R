@@ -1092,11 +1092,13 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 #'   named list or vector with \code{x} and \code{y} elements indicating the
 #'   mouse position in user units.
 #' @param hoverId If not \code{NULL}, the plot will send coordinates to the
-#'   server whenever the mouse pauses on the plot for more than 500
-#'   milliseconds. This information will be accessible on the \code{input}
-#'   object using \code{input$\emph{clickId}}. The value will be \code{NULL} if
-#'   the user is not hovering, and a named list or vector with \code{x} and
-#'   \code{y} elements indicating the mouse position in user units.
+#'   server whenever the mouse pauses on the plot for more than the number of
+#'   milliseconds determined by \code{hoverTimeout}. This information will be
+#    accessible on the \code{input} object using \code{input$\emph{clickId}}.
+#'   The value will be \code{NULL} if the user is not hovering, and a named
+#'   list or vector with \code{x} and \code{y} elements indicating the mouse
+#'   position in user units.
+#' @param hoverDelay The delay for hovering, in milliseconds.
 #' @return A plot output element that can be included in a panel
 #' @examples
 #' # Show a plot of the generated distribution
@@ -1105,12 +1107,13 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 #' )
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
-                       clickId = NULL, hoverId = NULL) {
+                       clickId = NULL, hoverId = NULL, hoverDelay = 500) {
   style <- paste("width:", validateCssUnit(width), ";",
     "height:", validateCssUnit(height))
   div(id = outputId, class = "shiny-plot-output", style = style,
       `data-click-id` = clickId,
-      `data-hover-id` = hoverId)
+      `data-hover-id` = hoverId,
+      `data-hover-delay` = hoverDelay)
 }
 
 #' Create a table output element

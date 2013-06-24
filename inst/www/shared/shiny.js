@@ -1045,7 +1045,8 @@
         
         if (clickId)
           $(img).on('click', createMouseHandler(clickId));
-        var hoverFunc = debounce(500, createMouseHandler(hoverId));
+        var hoverFunc = debounce($el.data('hover-delay'),
+                                 createMouseHandler(hoverId));
         if (hoverId) {
           $(img).on('mousemove', hoverFunc);
           $(img).on('mouseout', function(e) {

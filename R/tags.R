@@ -95,69 +95,40 @@ tagAppendChild <- function(tag, child) {
 }
 
 #' @export
+tagAppendChildren <- function(tag, ..., list = NULL) {
+  tag$children <- c(tag$children, c(list(...), list))
+  tag
+}
+
+#' @export
+tagSetChildren <- function(tag, ..., list = NULL) {
+  tag$children <- c(list(...), list)
+  tag
+}
+
+#' @export
 tag <- function(`_tag_name`, varArgs) {
-  
-  # create basic tag data structure
-  tag <- list()
-  class(tag) <- "shiny.tag"
-  tag$name <- `_tag_name`
-  tag$attribs <- list()
-  tag$children <- list()
-  
-  # process varArgs
+  # Get arg names; if not a named list, use vector of empty strings
   varArgsNames <- names(varArgs)
   if (is.null(varArgsNames))
     varArgsNames <- character(length=length(varArgs))
+
+  # Named arguments become attribs, dropping NULL values
+  named_idx <- nzchar(varArgsNames)
+  attribs <- dropNulls(varArgs[named_idx])
   
-  if (length(varArgsNames) > 0) {
-    for (i in 1:length(varArgsNames)) {
-      # save name and value
-      name <- varArgsNames[[i]]
-      value <- varArgs[[i]]
-      
-      # process attribs
-      if (nzchar(name))
-        tag$attribs[[name]] <- value
-      
-      # process child tags
-      else if (isTag(value)) {
-        tag$children[[length(tag$children)+1]] <- value
-      }
-      
-      # recursively process lists of children
-      else if (is.list(value)) {
-        
-        tagAppendChildren <- function(tag, children) {
-          for(child in children) {
-            if (isTag(child))
-              tag <- tagAppendChild(tag, child)
-            else if (is.list(child))
-              tag <- tagAppendChildren(tag, child)
-            else if (is.character(child))
-              tag <- tagAppendChild(tag, child)
-            else
-              tag <- tagAppendChild(tag, as.character(child))
-          }
-          return (tag)
-        }
-        
-        tag <- tagAppendChildren(tag, value)
-      }
-      
-      # add text
-      else if (is.character(value)) {
-        tag <- tagAppendChild(tag, value)
-      }
-      
-      # everything else treated as text
-      else {
-        tag <- tagAppendChild(tag, as.character(value))
-      }
-    }
-  }
-  
-  # return the tag
-  return (tag)
+  # Unnamed arguments are flattened and added as children.
+  # Use unname() to remove the names attribute from the list, which would
+  # consist of empty strings anyway.
+  children <- flattenTags(unname(varArgs[!named_idx]))
+
+  # Return tag data structure
+  structure(
+    list(name = `_tag_name`,
+         attribs = attribs,
+         children = children),
+    class = "shiny.tag"
+  )
 }
 
 tagWrite <- function(tag, textWriter, indent=0, context = NULL, eol = "\n") {
@@ -400,4 +371,32 @@ HTML <- function(text, ...) {
 #' @export
 withTags <- function(code) {
   eval(substitute(code), envir = as.list(tags), enclos = parent.frame())
+}
+
+
+# Given a list of tags, lists, and other items, return a flat list, where the
+# items from the inner, nested lists are pulled to the top level, recursively.
+flattenTags <- function(x) {
+  if (isTag(x)) {
+    # For tags, wrap them into a list (which will be unwrapped by caller)
+    list(x)
+  } else if (is.list(x)) {
+    if (length(x) == 0) {
+      # Empty lists are simply returned
+      x
+    } else {
+      # For items that are lists (but not tags), recurse
+      unlist(lapply(x, flattenTags), recursive = FALSE)
+    }
+
+  } else if (is.character(x)){
+    # This will preserve attributes if x is a character with attribute,
+    # like what HTML() produces
+    list(x)
+
+  } else {
+    # For other items, coerce to character and wrap them into a list (which
+    # will be unwrapped by caller). Note that this will strip attributes.
+    list(as.character(x))
+  }
 }

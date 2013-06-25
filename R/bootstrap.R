@@ -401,25 +401,26 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
-  
-  checkboxes <- list()
-  for (i in seq_along(choices)) {
-    choiceName <- names(choices)[i]
 
-    inputTag <- tags$input(type = "checkbox",
-                           name = inputId,
-                           id = paste(inputId, i, sep=""),
-                           value = choices[[i]])
+  # Create tags for each of the options
+  ids <- paste0(inputId, seq_along(choices))
 
-    if (choiceName %in% selected)
+  checkboxes <- mapply(ids, choices, names(choices),
+    SIMPLIFY = FALSE, USE.NAMES = FALSE,
+    FUN = function(id, value, name) {
+      inputTag <- tags$input(type = "checkbox",
+                             name = inputId,
+                             id = id,
+                             value = value)
+
+    if (name %in% selected)
       inputTag$attribs$checked <- "checked"
 
-    checkbox <- tags$label(class = "checkbox",
-                           inputTag,
-                           tags$span(choiceName))
-    
-    checkboxes[[i]] <- checkbox
-  } 
+    tags$label(class = "checkbox",
+               inputTag,
+               tags$span(name))
+    }
+  )
   
   # return label and select tag
   tags$div(id = inputId,
@@ -507,16 +508,21 @@ selectInput <- function(inputId,
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
 
-  for (i in seq_along(choices)) {
-    choiceName <- names(choices)[i]
-    optionTag <- tags$option(value = choices[[i]], choiceName)
+  # Create tags for each of the options
+  optionTags <- mapply(choices, names(choices),
+    SIMPLIFY = FALSE, USE.NAMES = FALSE,
+    FUN = function(choice, name) {
+      optionTag <- tags$option(value = choice, name)
 
-    if (choiceName %in% selected)
-      optionTag$attribs$selected = "selected"
+      if (name %in% selected)
+        optionTag$attribs$selected = "selected"
 
-    selectTag <- tagAppendChild(selectTag, optionTag)
-  }
-  
+      optionTag
+    }
+  )
+
+  selectTag <- tagSetChildren(selectTag, list = optionTags)
+
   # return label and select tag
   tagList(controlLabel(inputId, label), selectTag)
 }
@@ -550,27 +556,28 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
   if (is.null(selected))
     selected <- names(choices)[[1]]
   
-  # build list of radio button tags
-  inputTags <- list()
-  for (i in seq_along(choices)) {
-    id <- paste(inputId, i, sep="")
-    name <- names(choices)[[i]]
-    value <- choices[[i]]
-    inputTag <- tags$input(type = "radio", 
-                           name = inputId,
-                           id = id,
-                           value = value)
-    if (identical(name, selected))
-      inputTag$attribs$checked = "checked"
+  # Create tags for each of the options
+  ids <- paste0(inputId, seq_along(choices))
 
-    # Put the label text in a span
-    spanTag <- tags$span(name)
-    labelTag <- tags$label(class = "radio")
-    labelTag <- tagAppendChild(labelTag, inputTag)
-    labelTag <- tagAppendChild(labelTag, spanTag)
-    inputTags[[length(inputTags) + 1]] <- labelTag
-  }
-  
+  inputTags <- mapply(ids, choices, names(choices),
+    SIMPLIFY = FALSE, USE.NAMES = FALSE,
+    FUN = function(id, value, name) {
+      inputTag <- tags$input(type = "radio",
+                             name = inputId,
+                             id = id,
+                             value = value)
+
+      if (identical(name, selected))
+        inputTag$attribs$checked = "checked"
+
+      # Put the label text in a span
+      tags$label(class = "radio",
+                inputTag,
+                tags$span(name)
+      )
+    }
+  )
+
   tags$div(id = inputId,
            class = 'control-group shiny-input-radiogroup',
            tags$label(class = "control-label", `for` = inputId, label),

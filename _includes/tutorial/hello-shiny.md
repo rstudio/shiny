@@ -42,7 +42,7 @@ shinyUI(pageWithSidebar(
 ))
 {% endhighlight %}
 
-The server-side of the application is shown below. At one level, it's very simple--a random distribution with the requested number of observations is generated, and then plotted as a historgram. However, you'll also notice that the function which returns the plot is wrapped in a call to `renderPlot`. The comment above the function explains a bit about this, but if you find it confusing, don't worry--we'll cover this concept in much more detail soon.
+The server-side of the application is shown below. At one level, it's very simple--a random distribution with the requested number of observations is generated, and then plotted as a histogram. However, you'll also notice that the function which returns the plot is wrapped in a call to `renderPlot`. The comment above the function explains a bit about this, but if you find it confusing, don't worry--we'll cover this concept in much more detail soon.
 
 #### server.R
 

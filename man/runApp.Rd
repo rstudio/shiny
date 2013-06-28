@@ -3,7 +3,8 @@
 \title{Run Shiny Application}
 \usage{
   runApp(appDir = getwd(), port = 8100L,
-    launch.browser = getOption("shiny.launch.browser", interactive()))
+    launch.browser = getOption("shiny.launch.browser", interactive()),
+    workerId = "")
 }
 \arguments{
   \item{appDir}{The directory of the application. Should
@@ -17,6 +18,10 @@
   \item{launch.browser}{If true, the system's default web
   browser will be launched automatically after the app is
   started. Defaults to true in interactive sessions only.}
+
+  \item{workerId}{Can generally be ignored. Exists to help
+  some editions of Shiny Server Pro route requests to the
+  correct process.}
 }
 \description{
   Runs a Shiny application. This function normally does not

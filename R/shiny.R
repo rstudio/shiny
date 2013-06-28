@@ -1179,6 +1179,8 @@ serviceApp <- function(ws_env) {
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only.
+#' @param workerId Can generally be ignored. Exists to help some editions of
+#'   Shiny Server Pro route requests to the correct process.
 #'
 #' @examples
 #' \dontrun{

@@ -4,13 +4,18 @@ Dependents <- setRefClass(
     .dependents = 'Map'
   ),
   methods = list(
-    register = function() {
+    register = function(depId=NULL, depLabel=NULL) {
       ctx <- .getReactiveEnvironment()$currentContext()
       if (!.dependents$containsKey(ctx$id)) {
         .dependents$set(ctx$id, ctx)
         ctx$onInvalidate(function() {
           .dependents$remove(ctx$id)
         })
+        
+        if (!is.null(depId) && nchar(depId) > 0)
+          .graphDependsOnId(ctx$id, depId)
+        if (!is.null(depLabel))
+          .graphDependsOn(ctx$id, depLabel)
       }
     },
     invalidate = function() {
@@ -31,6 +36,8 @@ Dependents <- setRefClass(
 ReactiveValues <- setRefClass(
   'ReactiveValues',
   fields = list(
+    # For debug purposes
+    .label = 'character',
     .values = 'environment',
     .dependents = 'environment',
     # Dependents for the list of all names, including hidden
@@ -42,6 +49,8 @@ ReactiveValues <- setRefClass(
   ),
   methods = list(
     initialize = function() {
+      .label <<- paste('reactiveValues', runif(1, min=1000, max=9999),
+                       sep="")
       .values <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
     },
@@ -49,6 +58,7 @@ ReactiveValues <- setRefClass(
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
       if (!exists(dep.key, where=.dependents, inherits=FALSE)) {
+        .graphDependsOn(ctx$id, sprintf('%s$%s', .label, key))
         assign(dep.key, ctx, pos=.dependents, inherits=FALSE)
         ctx$onInvalidate(function() {
           rm(list=dep.key, pos=.dependents, inherits=FALSE)
@@ -76,7 +86,11 @@ ReactiveValues <- setRefClass(
         .allValuesDeps$invalidate()
       else
         .valuesDeps$invalidate()
-      
+
+      .graphValueChange(sprintf('names(%s)', .label))
+      .graphValueChange(sprintf('%s (all)', .label))
+      .graphValueChange(sprintf('%s$%s', .label, key))
+
       assign(key, value, pos=.values, inherits=FALSE)
       dep.keys <- objects(
         pos=.dependents,
@@ -99,16 +113,23 @@ ReactiveValues <- setRefClass(
              })
     },
     names = function() {
+      .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
+                      sprintf('names(%s)', .label))
       .namesDeps$register()
       return(ls(.values, all.names=TRUE))
     },
     toList = function(all.names=FALSE) {
+      .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
+                      sprintf('%s (all)', .label))
       if (all.names)
         .allValuesDeps$register()
 
       .valuesDeps$register()
 
       return(as.list(.values, all.names=all.names))
+    },
+    .setLabel = function(label) {
+      .label <<- label
     }
   )
 )
@@ -231,6 +252,11 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
   reactiveValuesToList(x, all.names)
 }
 
+# For debug purposes
+.setLabel <- function(x, label) {
+  .subset2(x, 'impl')$.setLabel(label)
+}
+
 #' Convert a reactivevalues object to a list
 #'
 #' This function does something similar to what you might \code{\link{as.list}}
@@ -269,7 +295,8 @@ Observable <- setRefClass(
     .running = 'logical',
     .value = 'ANY',
     .visible = 'logical',
-    .execCount = 'integer'
+    .execCount = 'integer',
+    .mostRecentCtxId = 'character'
   ),
   methods = list(
     initialize = function(func, label=deparse(substitute(func))) {
@@ -282,9 +309,10 @@ Observable <- setRefClass(
       .running <<- FALSE
       .label <<- label
       .execCount <<- 0L
+      .mostRecentCtxId <<- ""
     },
     getValue = function() {
-      .dependents$register()
+      .dependents$register(.mostRecentCtxId)
 
       if (.invalidated || .running) {
         .self$.updateValue()
@@ -299,7 +327,8 @@ Observable <- setRefClass(
         invisible(.value)
     },
     .updateValue = function() {
-      ctx <- Context$new(.label)
+      ctx <- Context$new(.label, type='observable', prevId=.mostRecentCtxId)
+      .mostRecentCtxId <<- ctx$id
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
         .dependents$invalidate()
@@ -395,7 +424,8 @@ Observer <- setRefClass(
     .invalidateCallbacks = 'list',
     .execCount = 'integer',
     .onResume = 'function',
-    .suspended = 'logical'
+    .suspended = 'logical',
+    .prevId = 'character'
   ),
   methods = list(
     initialize = function(func, label, suspended = FALSE, priority = 0) {
@@ -409,12 +439,14 @@ Observer <- setRefClass(
       .execCount <<- 0L
       .suspended <<- suspended
       .onResume <<- function() NULL
+      .prevId <<- ''
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
     },
     .createContext = function() {
-      ctx <- Context$new(.label)
+      ctx <- Context$new(.label, type='observer', prevId=.prevId)
+      .prevId <<- ctx$id
 
       ctx$onInvalidate(function() {
         lapply(.invalidateCallbacks, function(func) {
@@ -780,7 +812,7 @@ invalidateLater <- function(millis, session) {
 #'
 #' @export
 isolate <- function(expr) {
-  ctx <- Context$new('[isolate]')
+  ctx <- Context$new('[isolate]', type='isolate')
   ctx$run(function() {
     expr
   })

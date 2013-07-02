@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<style type="text/css">
+#viz {
+  width: 600px;
+  height: 300px;
+}
+.node {
+  z-index: 1;
+}
+.node.invalidated {
+  opacity: 0.5;
+}
+.link {
+  fill: none;
+  stroke: #CCC;
+  stroke-width: 0.5px;
+  z-index: 0;
+}
+#description {
+  position: fixed;
+  width: 300px;
+  left: 12px;
+  top: 36px;
+  height: auto;
+}
+</style>
+<script>
+var log = [
+
+
+
+
+
+
+  {
+    "action" : "valueChange",
+    "id" : "names(input)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input$dataset"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(input)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input$caption"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(input)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input$obs"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$output_caption_hidden"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$output_summary_hidden"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$output_view_hidden"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$pixelratio"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_protocol"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_hostname"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_port"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_pathname"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_search"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_hash_initial"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$allowDataUriScheme"
+  },
+  {
+    "action" : "ctx",
+    "id" : "1",
+    "label" : "output$caption",
+    "type" : "observer",
+    "prevId" : ""
+  },
+  {
+    "action" : "invalidate",
+    "id" : "1"
+  },
+  {
+    "action" : "ctx",
+    "id" : "2",
+    "label" : "output$summary",
+    "type" : "observer",
+    "prevId" : ""
+  },
+  {
+    "action" : "invalidate",
+    "id" : "2"
+  },
+  {
+    "action" : "ctx",
+    "id" : "3",
+    "label" : "output$view",
+    "type" : "observer",
+    "prevId" : ""
+  },
+  {
+    "action" : "invalidate",
+    "id" : "3"
+  },
+  {
+    "action" : "ctx",
+    "id" : "4",
+    "label" : "output$caption",
+    "type" : "observer",
+    "prevId" : "1"
+  },
+  {
+    "action" : "enter",
+    "id" : "4"
+  },
+  {
+    "action" : "dep",
+    "id" : "4",
+    "dependsOn" : "input$caption"
+  },
+  {
+    "action" : "exit",
+    "id" : "4"
+  },
+  {
+    "action" : "ctx",
+    "id" : "5",
+    "label" : "output$summary",
+    "type" : "observer",
+    "prevId" : "2"
+  },
+  {
+    "action" : "enter",
+    "id" : "5"
+  },
+  {
+    "action" : "ctx",
+    "id" : "6",
+    "label" : "{\n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n}",
+    "type" : "observable",
+    "prevId" : ""
+  },
+  {
+    "action" : "enter",
+    "id" : "6"
+  },
+  {
+    "action" : "dep",
+    "id" : "6",
+    "dependsOn" : "input$dataset"
+  },
+  {
+    "action" : "exit",
+    "id" : "6"
+  },
+  {
+    "action" : "exit",
+    "id" : "5"
+  },
+  {
+    "action" : "ctx",
+    "id" : "7",
+    "label" : "output$view",
+    "type" : "observer",
+    "prevId" : "3"
+  },
+  {
+    "action" : "enter",
+    "id" : "7"
+  },
+  {
+    "action" : "depId",
+    "id" : "7",
+    "dependsOn" : "6"
+  },
+  {
+    "action" : "dep",
+    "id" : "7",
+    "dependsOn" : "input$obs"
+  },
+  {
+    "action" : "exit",
+    "id" : "7"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(input)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input$caption"
+  },
+  {
+    "action" : "invalidate",
+    "id" : "4"
+  },
+  {
+    "action" : "ctx",
+    "id" : "8",
+    "label" : "output$caption",
+    "type" : "observer",
+    "prevId" : "4"
+  },
+  {
+    "action" : "enter",
+    "id" : "8"
+  },
+  {
+    "action" : "dep",
+    "id" : "8",
+    "dependsOn" : "input$caption"
+  },
+  {
+    "action" : "exit",
+    "id" : "8"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(input)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input$dataset"
+  },
+  {
+    "action" : "invalidate",
+    "id" : "5"
+  },
+  {
+    "action" : "invalidate",
+    "id" : "7"
+  },
+  {
+    "action" : "invalidate",
+    "id" : "6"
+  },
+  {
+    "action" : "ctx",
+    "id" : "9",
+    "label" : "output$summary",
+    "type" : "observer",
+    "prevId" : "5"
+  },
+  {
+    "action" : "enter",
+    "id" : "9"
+  },
+  {
+    "action" : "depId",
+    "id" : "9",
+    "dependsOn" : "6"
+  },
+  {
+    "action" : "ctx",
+    "id" : "10",
+    "label" : "{\n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n}",
+    "type" : "observable",
+    "prevId" : "6"
+  },
+  {
+    "action" : "enter",
+    "id" : "10"
+  },
+  {
+    "action" : "dep",
+    "id" : "10",
+    "dependsOn" : "input$dataset"
+  },
+  {
+    "action" : "exit",
+    "id" : "10"
+  },
+  {
+    "action" : "exit",
+    "id" : "9"
+  },
+  {
+    "action" : "ctx",
+    "id" : "11",
+    "label" : "output$view",
+    "type" : "observer",
+    "prevId" : "7"
+  },
+  {
+    "action" : "enter",
+    "id" : "11"
+  },
+  {
+    "action" : "depId",
+    "id" : "11",
+    "dependsOn" : "10"
+  },
+  {
+    "action" : "dep",
+    "id" : "11",
+    "dependsOn" : "input$obs"
+  },
+  {
+    "action" : "exit",
+    "id" : "11"
+  }
+
+
+
+
+
+
+
+
+
+];
+
+var nodes = {};
+var nodeList = [];
+var nodeSelection = null;
+var links = [];
+var linkSelection = null;
+
+var colors = {
+  observer: '#009',
+  observable: '#900',
+  value: '#999'
+};
+
+var force = d3.layout.force()
+    .nodes(nodeList)
+    .links(links)
+    .size([150, 75]);
+force.on('tick', onTick);
+
+function update() {
+  var viz = d3.select('#viz');
+  viz.select('#nodes').selectAll('.node').data(nodeList)
+    .enter().append('circle')
+      .attr('class', 'node')
+      .attr('title', function(n) {return n.label;})
+      .attr('fill', function(n) {return colors[n.type];})
+      .attr('r', 5)
+      .attr('onmouseover', '$("#description").text(this.getAttribute("title"));')
+      .attr('onmouseout', '$("#description").html("<br/>");');
+  viz.selectAll('.node').data(nodeList)
+    .exit().remove();
+  nodeSelection = viz.selectAll('.node');
+  nodeSelection.classed('invalidated', function(n) { return n.invalidated; })
+
+  viz.select('#links').selectAll('.link').data(links)
+    .enter().append('path')
+      .attr('class', 'link');
+  viz.selectAll('.link').data(links)
+    .exit().remove();
+  linkSelection = viz.selectAll('.link');
+
+  force.start();
+}
+
+function onTick() {
+  nodeSelection
+      .attr('cx', function(n) { return n.x; })
+      .attr('cy', function(n) { return n.y; })
+  ;
+  linkSelection
+      .attr('d', function(link) {
+        return 'M' + link.source.x + ',' + link.source.y +
+          ' L' + link.target.x + ',' + link.target.y;
+      });
+}
+
+function createNode(data, type) {
+  var node;
+  if (!data.prevId) {
+    node = {
+      label: data.label,
+      type: data.type,
+      index: nodeList.length
+    };
+    nodes[data.id] = node;
+    nodeList.push(node);
+  } else {
+    node = nodes[data.prevId];
+    delete nodes[data.prevId];
+    nodes[data.id] = node;
+    node.invalidated = false;
+  }
+}
+
+var callbacks = {
+  ctx: function(data) {
+    createNode(data);
+  },
+  dep: function(data) {
+    if (!nodes[data.dependsOn])
+      createNode({id: data.dependsOn, label: data.dependsOn, type: 'value'});
+    links.push({
+      source: nodes[data.id],
+      target: nodes[data.dependsOn]
+    });
+  },
+  depId: function(data) {
+    links.push({
+      source: nodes[data.id],
+      target: nodes[data.dependsOn]
+    });
+  },
+  invalidate: function(data) {
+    var node = nodes[data.id];
+    node.invalidated = true;
+    links = links.filter(function(link) {
+      return link.source !== node;
+    });
+  },
+  valueChange: function(data) {
+    return true;
+  },
+  enter: function(data) {
+    return true;
+  },
+  exit: function(data) {
+    return true;
+  }
+};
+
+function processMessage(data) {
+  console.log(JSON.stringify(data));
+  if (!callbacks.hasOwnProperty(data.action))
+    throw new Error('Unknown action ' + data.action);
+  var result = callbacks[data.action].call(callbacks, data);
+  update();
+  return result;
+}
+
+function doNext() {
+  while (log.length)
+    if (!processMessage(log.shift()))
+      break;
+  if (log.length === 0)
+    document.getElementById('processNext').setAttribute('disabled', 'disabled');
+}
+</script>
+<body>
+  <button id="processNext" onclick="doNext();">Next</button>
+  <br/>
+  <svg>
+    <g id="viz" transform="scale(4)">
+      <g id="links"></g>
+      <g id="nodes"></g>
+    </g>
+  </svg>
+  <pre id="description"><br/></pre>
+</body>
+</html>
+<!--
+<svg style="border: 1px solid silver; width: 400px; height: 400px">
+  <g>
+    <path stroke="black" stroke-width="4" fill="white" d="m 58,2  c -75,0 -75,100 0,100  l 60,0  l 50,-50  l -50,-50  Z"/>
+  </g>
+  <g transform="translate(0 110)">
+      <path stroke="black" stroke-width="4" fill="white" d="m 58,2  c -75,0 -75,100 0,100  l 100,0  l 0,-100 Z"/>
+  </g>
+  <g transform="translate(0 220)">
+    <path stroke="black" stroke-width="4" fill="white" d="m 2,0 l 0,100 l 100,0  l 50,-50  l -50,-50  Z"/>
+  </g>
+</svg>
+-->

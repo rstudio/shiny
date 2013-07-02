@@ -64,7 +64,9 @@ ShinySession <- setRefClass(
       .clientData <<- ReactiveValues$new()
 
       input      <<- .createReactiveValues(.input,      readonly=TRUE)
+      .setLabel(input, 'input')
       clientData <<- .createReactiveValues(.clientData, readonly=TRUE)
+      .setLabel(clientData, 'clientData')
       
       output     <<- .createOutputWriter(.self)
       
@@ -142,7 +144,7 @@ ShinySession <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        }, label=label, suspended=.shouldSuspend(name))
+        }, label=sprintf('output$%s', name), suspended=.shouldSuspend(name))
         
         obs$onInvalidate(function() {
           showProgress(name)

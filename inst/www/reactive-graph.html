@@ -15,6 +15,7 @@ svg, #viz {
   stroke: white;
   stroke-width: 1px;
   fill: #FEF2A9;
+  transition: stroke 0.75s ease;
 }
 .node.observer {
   fill: #9C6E46;
@@ -28,6 +29,7 @@ svg, #viz {
 
 .node.invalidated {
   stroke: #FF2B3D;
+  /*fill: url(#diagonalHatch);*/
 }
 .node.running {
   stroke: #333;
@@ -57,7 +59,8 @@ var nodeList = [];
 var nodeSelection = null;
 var links = [];
 var linkSelection = null;
-var layoutDirty = true;
+
+var node, link;  // d3 selections
 
 var force = d3.layout.force()
     .nodes(nodeList)
@@ -66,28 +69,34 @@ var force = d3.layout.force()
 force.on('tick', onTick);
 
 function update() {
-  var viz = d3.select('#viz');
-  viz.select('#nodes').selectAll('.node').data(nodeList)
-    .enter().append('circle')
+  var layoutDirty = true;
+
+  node = d3.select('#nodes').selectAll('.node').data(nodeList);
+  //layoutDirty = layoutDirty || !node.enter().empty() || !node.exit().empty();
+  node.enter().append('circle')
       .attr('class', function(n) {return 'node ' + n.type;})
       .attr('title', function(n) {return n.label;})
       .attr('r', 5)
       .attr('onmouseover', '$("#description").text(this.getAttribute("title"));')
       .attr('onmouseout', '$("#description").html("<br/>");')
       .call(force.drag);
-  viz.selectAll('.node').data(nodeList)
-    .exit().remove();
-  nodeSelection = viz.selectAll('.node');
-  nodeSelection.classed('invalidated', function(n) { return n.invalidated; })
-  nodeSelection.classed('running', function(n) { return n.running; })
+  node.exit().remove();
+  node
+      .classed('invalidated', function(n) { return n.invalidated; })
+      .classed('running', function(n) { return n.running; })
+      .attr('fill', function(n) {
+        if (n.invalidated)
+          return "url(#diagonalHatch)";
+        else
+          return null;
+      });
 
-  viz.select('#links').selectAll('.link').data(links)
-    .enter().append('path')
+  link = d3.select('#links').selectAll('.link').data(links);
+  //layoutDirty = layoutDirty || !link.enter().empty() || !link.exit().empty();
+  link.enter().append('path')
       .attr('class', 'link')
       .attr('marker-end', 'url(#triangle)');
-  viz.selectAll('.link').data(links)
-    .exit().remove();
-  linkSelection = viz.selectAll('.link');
+  link.exit().remove();
 
   if (layoutDirty) {
     force.start();
@@ -96,11 +105,10 @@ function update() {
 }
 
 function onTick() {
-  nodeSelection
+  node
       .attr('cx', function(n) { return n.x; })
-      .attr('cy', function(n) { return n.y; })
-  ;
-  linkSelection
+      .attr('cy', function(n) { return n.y; });
+  link
       .attr('d', function(link) {
         return 'M' + link.source.x + ',' + link.source.y +
           ' L' + link.target.x + ',' + link.target.y;
@@ -117,7 +125,6 @@ function createNode(data, type) {
     };
     nodes[data.id] = node;
     nodeList.push(node);
-    layoutDirty = true;
   } else {
     node = nodes[data.prevId];
     delete nodes[data.prevId];
@@ -138,14 +145,12 @@ var callbacks = {
       source: nodes[data.id],
       target: nodes[data.dependsOn]
     });
-    layoutDirty = true;
   },
   depId: function(data) {
     links.push({
       source: nodes[data.id],
       target: nodes[data.dependsOn]
     });
-    layoutDirty = true;
   },
   invalidate: function(data) {
     var node = nodes[data.id];
@@ -153,7 +158,6 @@ var callbacks = {
     links = links.filter(function(link) {
       return link.source !== node;
     });
-    layoutDirty = true;
   },
   valueChange: function(data) {
     return true;
@@ -209,6 +213,12 @@ $(function() {
                 orient="auto">
             <path d="M 0 0 L 10 5 L 0 10 z" />
         </marker>
+        <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="1" height="1">
+          <path stroke="black" stroke-width="0.25" fill="none"
+            d="M-1,1 l2,-2
+               M0,4 l4,-4
+               M3,5 l2,-2" />
+        </pattern>
       </defs>
       <g id="viz" transform="scale(4)">
         <g id="links"></g>

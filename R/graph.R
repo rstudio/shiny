@@ -3,6 +3,21 @@ writeReactLog <- function(file=stdout()) {
   cat(RJSONIO::toJSON(.graphEnv$log, pretty=TRUE), file=file)
 }
 
+#' @export
+showReactLog <- function() {
+  templateFile <- system.file('www/reactive-graph.html', package='shiny')
+  html <- paste(readLines(templateFile, warn=FALSE), collapse='\r\n')
+  tc <- textConnection(NULL, 'w')
+  on.exit(close(tc))
+  writeReactLog(tc)
+  cat('\n', file=tc)
+  flush(tc)
+  html <- sub('__DATA__', paste(textConnectionValue(tc), collapse='\r\n'), html, fixed=TRUE)
+  file <- tempfile(fileext = '.html')
+  writeLines(html, file)
+  browseURL(file)
+}
+
 .graphAppend <- function(logEntry) {
   if (isTRUE(getOption('shiny.reactlog', FALSE)))
     .graphEnv$log <- c(.graphEnv$log, list(logEntry))

@@ -818,4 +818,5 @@ isolate <- function(expr) {
   ctx$run(function() {
     expr
   })
+  ctx$invalidate()
 }

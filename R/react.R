@@ -30,10 +30,10 @@ Context <- setRefClass(
         return()
       .invalidated <<- TRUE
 
+      .graphInvalidate(id)
       lapply(.invalidateCallbacks, function(func) {
         func()
       })
-      .graphInvalidate(id)
       NULL
     },
     onInvalidate = function(func) {

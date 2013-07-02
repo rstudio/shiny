@@ -9,9 +9,28 @@
 }
 .node {
   z-index: 1;
+  stroke: white;
+  stroke-width: 1px;
+  fill: pink;
 }
+.node.observer {
+  fill: #009;
+}
+.node.observable {
+  fill: #900;
+}
+.node.value {
+  fill: #999;
+}
+
 .node.invalidated {
   opacity: 0.5;
+}
+.node.running {
+  stroke: yellow;
+}
+#triangle {
+  fill: #CCC;
 }
 .link {
   fill: none;
@@ -29,7 +48,6 @@
 </style>
 <script>
 var log = [
-
 
 
 
@@ -288,6 +306,11 @@ var log = [
     "id" : "6"
   },
   {
+    "action" : "depId",
+    "id" : "5",
+    "dependsOn" : "6"
+  },
+  {
     "action" : "exit",
     "id" : "5"
   },
@@ -326,43 +349,11 @@ var log = [
   },
   {
     "action" : "valueChange",
-    "id" : "input$caption"
+    "id" : "input$dataset"
   },
   {
     "action" : "invalidate",
-    "id" : "4"
-  },
-  {
-    "action" : "ctx",
-    "id" : "8",
-    "label" : "output$caption",
-    "type" : "observer",
-    "prevId" : "4"
-  },
-  {
-    "action" : "enter",
-    "id" : "8"
-  },
-  {
-    "action" : "dep",
-    "id" : "8",
-    "dependsOn" : "input$caption"
-  },
-  {
-    "action" : "exit",
-    "id" : "8"
-  },
-  {
-    "action" : "valueChange",
-    "id" : "names(input)"
-  },
-  {
-    "action" : "valueChange",
-    "id" : "input (all)"
-  },
-  {
-    "action" : "valueChange",
-    "id" : "input$dataset"
+    "id" : "6"
   },
   {
     "action" : "invalidate",
@@ -373,78 +364,70 @@ var log = [
     "id" : "7"
   },
   {
-    "action" : "invalidate",
-    "id" : "6"
-  },
-  {
     "action" : "ctx",
-    "id" : "9",
+    "id" : "8",
     "label" : "output$summary",
     "type" : "observer",
     "prevId" : "5"
   },
   {
     "action" : "enter",
-    "id" : "9"
-  },
-  {
-    "action" : "depId",
-    "id" : "9",
-    "dependsOn" : "6"
+    "id" : "8"
   },
   {
     "action" : "ctx",
-    "id" : "10",
+    "id" : "9",
     "label" : "{\n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n}",
     "type" : "observable",
     "prevId" : "6"
   },
   {
     "action" : "enter",
-    "id" : "10"
+    "id" : "9"
   },
   {
     "action" : "dep",
-    "id" : "10",
+    "id" : "9",
     "dependsOn" : "input$dataset"
-  },
-  {
-    "action" : "exit",
-    "id" : "10"
   },
   {
     "action" : "exit",
     "id" : "9"
   },
   {
+    "action" : "depId",
+    "id" : "8",
+    "dependsOn" : "9"
+  },
+  {
+    "action" : "exit",
+    "id" : "8"
+  },
+  {
     "action" : "ctx",
-    "id" : "11",
+    "id" : "10",
     "label" : "output$view",
     "type" : "observer",
     "prevId" : "7"
   },
   {
     "action" : "enter",
-    "id" : "11"
+    "id" : "10"
   },
   {
     "action" : "depId",
-    "id" : "11",
-    "dependsOn" : "10"
+    "id" : "10",
+    "dependsOn" : "9"
   },
   {
     "action" : "dep",
-    "id" : "11",
+    "id" : "10",
     "dependsOn" : "input$obs"
   },
   {
     "action" : "exit",
-    "id" : "11"
+    "id" : "10"
   }
-
-
-
-
 
 
 
@@ -457,12 +440,7 @@ var nodeList = [];
 var nodeSelection = null;
 var links = [];
 var linkSelection = null;
-
-var colors = {
-  observer: '#009',
-  observable: '#900',
-  value: '#999'
-};
+var layoutDirty = true;
 
 var force = d3.layout.force()
     .nodes(nodeList)
@@ -474,9 +452,8 @@ function update() {
   var viz = d3.select('#viz');
   viz.select('#nodes').selectAll('.node').data(nodeList)
     .enter().append('circle')
-      .attr('class', 'node')
+      .attr('class', function(n) {return 'node ' + n.type;})
       .attr('title', function(n) {return n.label;})
-      .attr('fill', function(n) {return colors[n.type];})
       .attr('r', 5)
       .attr('onmouseover', '$("#description").text(this.getAttribute("title"));')
       .attr('onmouseout', '$("#description").html("<br/>");');
@@ -484,15 +461,20 @@ function update() {
     .exit().remove();
   nodeSelection = viz.selectAll('.node');
   nodeSelection.classed('invalidated', function(n) { return n.invalidated; })
+  nodeSelection.classed('running', function(n) { return n.running; })
 
   viz.select('#links').selectAll('.link').data(links)
     .enter().append('path')
-      .attr('class', 'link');
+      .attr('class', 'link')
+      .attr('marker-end', 'url(#triangle)');
   viz.selectAll('.link').data(links)
     .exit().remove();
   linkSelection = viz.selectAll('.link');
 
-  force.start();
+  if (layoutDirty) {
+    force.start();
+    layoutDirty = false;
+  }
 }
 
 function onTick() {
@@ -517,6 +499,7 @@ function createNode(data, type) {
     };
     nodes[data.id] = node;
     nodeList.push(node);
+    layoutDirty = true;
   } else {
     node = nodes[data.prevId];
     delete nodes[data.prevId];
@@ -528,6 +511,7 @@ function createNode(data, type) {
 var callbacks = {
   ctx: function(data) {
     createNode(data);
+    return true;
   },
   dep: function(data) {
     if (!nodes[data.dependsOn])
@@ -536,12 +520,14 @@ var callbacks = {
       source: nodes[data.id],
       target: nodes[data.dependsOn]
     });
+    layoutDirty = true;
   },
   depId: function(data) {
     links.push({
       source: nodes[data.id],
       target: nodes[data.dependsOn]
     });
+    layoutDirty = true;
   },
   invalidate: function(data) {
     var node = nodes[data.id];
@@ -549,15 +535,18 @@ var callbacks = {
     links = links.filter(function(link) {
       return link.source !== node;
     });
+    layoutDirty = true;
   },
   valueChange: function(data) {
     return true;
   },
   enter: function(data) {
-    return true;
+    var node = nodes[data.id];
+    node.running = true;
   },
   exit: function(data) {
-    return true;
+    var node = nodes[data.id];
+    node.running = false;
   }
 };
 
@@ -582,6 +571,16 @@ function doNext() {
   <button id="processNext" onclick="doNext();">Next</button>
   <br/>
   <svg>
+    <defs>
+      <marker id="triangle"
+              viewBox="0 0 10 10" 
+              refX="28" refY="5"
+              markerWidth="6" 
+              markerHeight="6"
+              orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" />
+      </marker>
+    </defs>
     <g id="viz" transform="scale(4)">
       <g id="links"></g>
       <g id="nodes"></g>

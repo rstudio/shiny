@@ -312,11 +312,13 @@ Observable <- setRefClass(
       .mostRecentCtxId <<- ""
     },
     getValue = function() {
-      .dependents$register(.mostRecentCtxId)
+      .dependents$register()
 
       if (.invalidated || .running) {
         .self$.updateValue()
       }
+
+      .graphDependsOnId(getCurrentContext()$id, .mostRecentCtxId)
       
       if (identical(class(.value), 'try-error'))
         stop(attr(.value, 'condition'))

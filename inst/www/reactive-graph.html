@@ -52,7 +52,386 @@ svg, #viz {
 }
 </style>
 <script>
-var log = __DATA__;
+var log = [
+  {
+    "action" : "valueChange",
+    "id" : "names(input)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input$dataset"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(input)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input$caption"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(input)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input$obs"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$output_caption_hidden"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$output_summary_hidden"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$output_view_hidden"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$pixelratio"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_protocol"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_hostname"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_port"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_pathname"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_search"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$url_hash_initial"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(clientData)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "clientData$allowDataUriScheme"
+  },
+  {
+    "action" : "ctx",
+    "id" : "1",
+    "label" : "output$caption",
+    "type" : "observer",
+    "prevId" : ""
+  },
+  {
+    "action" : "invalidate",
+    "id" : "1"
+  },
+  {
+    "action" : "ctx",
+    "id" : "2",
+    "label" : "output$summary",
+    "type" : "observer",
+    "prevId" : ""
+  },
+  {
+    "action" : "invalidate",
+    "id" : "2"
+  },
+  {
+    "action" : "ctx",
+    "id" : "3",
+    "label" : "output$view",
+    "type" : "observer",
+    "prevId" : ""
+  },
+  {
+    "action" : "invalidate",
+    "id" : "3"
+  },
+  {
+    "action" : "ctx",
+    "id" : "4",
+    "label" : "output$caption",
+    "type" : "observer",
+    "prevId" : "1"
+  },
+  {
+    "action" : "enter",
+    "id" : "4"
+  },
+  {
+    "action" : "dep",
+    "id" : "4",
+    "dependsOn" : "input$caption"
+  },
+  {
+    "action" : "exit",
+    "id" : "4"
+  },
+  {
+    "action" : "ctx",
+    "id" : "5",
+    "label" : "output$summary",
+    "type" : "observer",
+    "prevId" : "2"
+  },
+  {
+    "action" : "enter",
+    "id" : "5"
+  },
+  {
+    "action" : "ctx",
+    "id" : "6",
+    "label" : "reactive({\n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n})",
+    "type" : "observable",
+    "prevId" : ""
+  },
+  {
+    "action" : "enter",
+    "id" : "6"
+  },
+  {
+    "action" : "dep",
+    "id" : "6",
+    "dependsOn" : "input$dataset"
+  },
+  {
+    "action" : "exit",
+    "id" : "6"
+  },
+  {
+    "action" : "depId",
+    "id" : "5",
+    "dependsOn" : "6"
+  },
+  {
+    "action" : "exit",
+    "id" : "5"
+  },
+  {
+    "action" : "ctx",
+    "id" : "7",
+    "label" : "output$view",
+    "type" : "observer",
+    "prevId" : "3"
+  },
+  {
+    "action" : "enter",
+    "id" : "7"
+  },
+  {
+    "action" : "depId",
+    "id" : "7",
+    "dependsOn" : "6"
+  },
+  {
+    "action" : "dep",
+    "id" : "7",
+    "dependsOn" : "input$obs"
+  },
+  {
+    "action" : "exit",
+    "id" : "7"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "names(input)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input (all)"
+  },
+  {
+    "action" : "valueChange",
+    "id" : "input$dataset"
+  },
+  {
+    "action" : "invalidate",
+    "id" : "6"
+  },
+  {
+    "action" : "invalidate",
+    "id" : "5"
+  },
+  {
+    "action" : "invalidate",
+    "id" : "7"
+  },
+  {
+    "action" : "ctx",
+    "id" : "8",
+    "label" : "output$summary",
+    "type" : "observer",
+    "prevId" : "5"
+  },
+  {
+    "action" : "enter",
+    "id" : "8"
+  },
+  {
+    "action" : "ctx",
+    "id" : "9",
+    "label" : "reactive({\n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n})",
+    "type" : "observable",
+    "prevId" : "6"
+  },
+  {
+    "action" : "enter",
+    "id" : "9"
+  },
+  {
+    "action" : "dep",
+    "id" : "9",
+    "dependsOn" : "input$dataset"
+  },
+  {
+    "action" : "exit",
+    "id" : "9"
+  },
+  {
+    "action" : "depId",
+    "id" : "8",
+    "dependsOn" : "9"
+  },
+  {
+    "action" : "exit",
+    "id" : "8"
+  },
+  {
+    "action" : "ctx",
+    "id" : "10",
+    "label" : "output$view",
+    "type" : "observer",
+    "prevId" : "7"
+  },
+  {
+    "action" : "enter",
+    "id" : "10"
+  },
+  {
+    "action" : "depId",
+    "id" : "10",
+    "dependsOn" : "9"
+  },
+  {
+    "action" : "dep",
+    "id" : "10",
+    "dependsOn" : "input$obs"
+  },
+  {
+    "action" : "exit",
+    "id" : "10"
+  }
+];
+try {
+  log = __DATA__;
+} catch (e) {}
 
 var nodes = {};
 var nodeList = [];
@@ -95,7 +474,7 @@ function update() {
   //layoutDirty = layoutDirty || !link.enter().empty() || !link.exit().empty();
   link.enter().append('path')
       .attr('class', 'link')
-      .attr('marker-end', 'url(#triangle)');
+      .attr('marker-start', 'url(#triangle)');
   link.exit().remove();
 
   if (layoutDirty) {
@@ -207,11 +586,11 @@ $(function() {
       <defs>
         <marker id="triangle"
                 viewBox="0 0 10 10" 
-                refX="28" refY="5"
+                refX="-18" refY="5"
                 markerWidth="6" 
                 markerHeight="6"
                 orient="auto">
-            <path d="M 0 0 L 10 5 L 0 10 z" />
+            <path d="M 10 0 L 0 5 L 10 10 z" />
         </marker>
         <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="1" height="1">
           <path stroke="black" stroke-width="0.25" fill="none"

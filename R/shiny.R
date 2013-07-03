@@ -144,7 +144,7 @@ ShinySession <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        }, label=sprintf('output$%s', name), suspended=.shouldSuspend(name))
+        }, suspended=.shouldSuspend(name), label=sprintf('output$%s <- %s', name, paste(label, collapse='\n')))
         
         obs$onInvalidate(function() {
           showProgress(name)

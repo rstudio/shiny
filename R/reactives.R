@@ -87,11 +87,12 @@ ReactiveValues <- setRefClass(
       else
         .valuesDeps$invalidate()
 
-      .graphValueChange(sprintf('names(%s)', .label))
-      .graphValueChange(sprintf('%s (all)', .label))
-      .graphValueChange(sprintf('%s$%s', .label, key))
-
       assign(key, value, pos=.values, inherits=FALSE)
+
+      .graphValueChange(sprintf('names(%s)', .label), ls(.values, all.names=TRUE))
+      .graphValueChange(sprintf('%s (all)', .label), as.list(.values))
+      .graphValueChange(sprintf('%s$%s', .label, key), value)
+
       dep.keys <- objects(
         pos=.dependents,
         pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),

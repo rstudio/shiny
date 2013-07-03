@@ -50,9 +50,14 @@ showReactLog <- function() {
     .graphAppend(list(action='exit', id=id))
 }
 
-.graphValueChange <- function(label) {
-  if (isTRUE(getOption('shiny.reactlog', FALSE)))
-    .graphAppend(list(action='valueChange', id=label))
+.graphValueChange <- function(label, value) {
+  if (isTRUE(getOption('shiny.reactlog', FALSE))) {
+    .graphAppend(list(
+      action = 'valueChange',
+      id = label,
+      value = paste(capture.output(str(value)), collapse='\n')
+    ))
+  }
 }
 
 .graphInvalidate <- function(id) {

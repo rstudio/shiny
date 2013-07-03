@@ -3,36 +3,52 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <style type="text/css">
+body {
+  overflow: hidden;
+}
+button {
+  font-size: 18px;
+}
 svg {
   border: 1px solid silver;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
 }
-svg, #viz {
-  width: 600px;
-  height: 600px;
+.node text {
+  font-family: 'Source Code Pro', monospace;
+  text-anchor: start;
+  fill: #999;
+  transform: scale(0.3);
 }
-.node {
+.node.running text {
+  fill: black;
+}
+.node text tspan {
+  white-space: pre;
+}
+.node path {
   z-index: 1;
-  stroke: white;
-  stroke-width: 1px;
-  fill: #FEF2A9;
+  fill: white;
+  stroke: #777;
+  stroke-width: 7.5px;
   transition: stroke 0.75s ease;
 }
-.node.observer {
-  fill: #9C6E46;
+.node.observer path {
 }
-.node.observable {
-  fill: #C7D4E3;
+.node.observable path {
 }
-.node.value {
-  fill: #D0D0CD;
+.node.value path {
 }
-
-.node.invalidated {
-  stroke: #FF2B3D;
+.node.invalidated path {
+  fill: #E0E0E0;
   /*fill: url(#diagonalHatch);*/
 }
-.node.running {
-  stroke: #333;
+.node.running path {
+  fill: #61B97E;
 }
 #triangle {
   fill: #CCC;
@@ -288,7 +304,7 @@ var log = [
   {
     "action" : "ctx",
     "id" : "6",
-    "label" : "reactive({\n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n})",
+    "label" : "reactive({\n    switch(input$dataset,\n           rock = rock,\n           pressure = pressure,\n           cars = cars)\n})",
     "type" : "observable",
     "prevId" : ""
   },
@@ -442,23 +458,102 @@ var linkSelection = null;
 var node, link;  // d3 selections
 
 var force = d3.layout.force()
+    .charge(-100)
     .nodes(nodeList)
-    .links(links)
-    .size([150, 150]);
+    .links(links);
 force.on('tick', onTick);
 
+function pathDataForNode(node) {
+/*
+d="m 58,2  c -75,0 -75,100 0,100  l 60,0  l 50,-50  l -50,-50  Z"
+d="m 58,2  c -75,0 -75,100 0,100  l 100,0  l 0,-100 Z"
+d="m 2,0 l 0,100 l 100,0  l 50,-50  l -50,-50  Z"
+*/
+  switch (node.type) {
+    case 'observer':
+      return 'M -25,-50  c -75,0 -75,100 0,100  l 100,0  l 0,-100 Z';
+    case 'observable':
+      return 'M -25,-50  c -75,0 -75,100 0,100  l 60,0  l 50,-50  l -50,-50  Z';
+    case 'value':
+      return 'M -50,-50 l 0,100 l 100,0  l 50,-50  l -50,-50  Z';
+  }
+}
+
+function getSourceCoords(node) {
+  switch (node.type) {
+    case 'observer':
+    case 'observable':
+      return {x: node.x - 5, y: node.y};
+    default:
+      return {x: node.x, y: node.y};
+  }
+}
+
+function getTargetCoords(node) {
+  switch (node.type) {
+    case 'observable':
+    case 'value':
+      return {x: node.x + 8, y: node.y};
+    default:
+      return {x: node.x, y: node.y};
+  }
+}
+
+function multilineTextNode(node) {
+  var MAX_LINES = 6;
+  var fade = false;
+  var el = d3.select(this);
+  var lines = el.text().split('\n');
+  if (lines.length > MAX_LINES) {
+    lines.splice(MAX_LINES);
+    fade = true;
+  }
+  el.text('');
+  el.selectAll('tspan').data(lines)
+    .enter().append('tspan')
+      .attr('x', 0)
+      .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
+      .attr('opacity', function(line, i) {
+        if (!fade)
+          return 1;
+        return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
+      })
+      .text(function(line) { return line; });
+}
+
 function update() {
+  force.size([document.documentElement.clientWidth / 4,
+              document.documentElement.clientHeight / 4]);
+
   var layoutDirty = true;
 
   node = d3.select('#nodes').selectAll('.node').data(nodeList);
   //layoutDirty = layoutDirty || !node.enter().empty() || !node.exit().empty();
-  node.enter().append('circle')
+  var newG = node.enter().append('g')
       .attr('class', function(n) {return 'node ' + n.type;})
-      .attr('title', function(n) {return n.label;})
       .attr('r', 5)
-      .attr('onmouseover', '$("#description").text(this.getAttribute("title"));')
-      .attr('onmouseout', '$("#description").html("<br/>");')
+      .on('mousedown', function() {
+        d3.event.stopPropagation();
+      })
+      .on('mouseover', function(n) {
+        $('#description').text(n.title);
+      })
+      .on('mouseout', function(d, i) {
+        $('#description').html('');
+      })
       .call(force.drag);
+  newG.append('path')
+      .attr('transform', 'scale(0.08)')
+      .attr('stroke', 'black')
+      .attr('stroke-width', 4)
+      .attr('fill', 'white')
+      .attr('d', pathDataForNode);
+  newG.append('text')
+      .attr('x', 3)
+      .attr('y', 0)
+      .attr('font-size', 2.5)
+      .text(function(n) {return n.label;})
+      .each(multilineTextNode);
   node.exit().remove();
   node
       .classed('invalidated', function(n) { return n.invalidated; })
@@ -474,7 +569,7 @@ function update() {
   //layoutDirty = layoutDirty || !link.enter().empty() || !link.exit().empty();
   link.enter().append('path')
       .attr('class', 'link')
-      .attr('marker-start', 'url(#triangle)');
+      .attr('marker-mid', 'url(#triangle)');
   link.exit().remove();
 
   if (layoutDirty) {
@@ -485,12 +580,20 @@ function update() {
 
 function onTick() {
   node
-      .attr('cx', function(n) { return n.x; })
-      .attr('cy', function(n) { return n.y; });
+      .attr('transform', function(n) {
+        return 'translate(' + n.x + ' ' + n.y + ')';
+      });
   link
       .attr('d', function(link) {
-        return 'M' + link.source.x + ',' + link.source.y +
-          ' L' + link.target.x + ',' + link.target.y;
+        var source = getSourceCoords(link.source);
+        var target = getTargetCoords(link.target)
+        var mid = {
+          x: (source.x + target.x) / 2,
+          y: (source.y + target.y) / 2
+        }
+        return 'M' + source.x + ',' + source.y +
+          ' L' + mid.x + ',' + mid.y +
+          ' L' + target.x + ',' + target.y;
       });
 }
 
@@ -539,7 +642,10 @@ var callbacks = {
     });
   },
   valueChange: function(data) {
-    return true;
+    var node = nodes[data.id];
+    if (!node)
+      return true;
+
   },
   enter: function(data) {
     var node = nodes[data.id];
@@ -581,43 +687,28 @@ $(function() {
 <body>
   <button id="processNext" onclick="doNext();">Next</button>
   <br/>
-  <div id="container">
-    <svg>
-      <defs>
-        <marker id="triangle"
-                viewBox="0 0 10 10" 
-                refX="-18" refY="5"
-                markerWidth="6" 
-                markerHeight="6"
-                orient="auto">
-            <path d="M 10 0 L 0 5 L 10 10 z" />
-        </marker>
-        <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="1" height="1">
-          <path stroke="black" stroke-width="0.25" fill="none"
-            d="M-1,1 l2,-2
-               M0,4 l4,-4
-               M3,5 l2,-2" />
-        </pattern>
-      </defs>
-      <g id="viz" transform="scale(4)">
-        <g id="links"></g>
-        <g id="nodes"></g>
-      </g>
-    </svg>
-  </div>
+  <svg>
+    <defs>
+      <marker id="triangle"
+              viewBox="0 0 10 10" 
+              refX="5" refY="5"
+              markerWidth="6" 
+              markerHeight="6"
+              orient="auto">
+          <path d="M 10 0 L 0 5 L 10 10 z" />
+      </marker>
+      <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="1" height="1">
+        <path stroke="black" stroke-width="0.25" fill="none"
+          d="M-1,1 l2,-2
+             M0,4 l4,-4
+             M3,5 l2,-2" />
+      </pattern>
+    </defs>
+    <g id="viz" transform="scale(4)">
+      <g id="links"></g>
+      <g id="nodes"></g>
+    </g>
+  </svg>
   <pre id="description"><br/></pre>
 </body>
 </html>
-<!--
-<svg style="border: 1px solid silver; width: 400px; height: 400px">
-  <g>
-    <path stroke="black" stroke-width="4" fill="white" d="m 58,2  c -75,0 -75,100 0,100  l 60,0  l 50,-50  l -50,-50  Z"/>
-  </g>
-  <g transform="translate(0 110)">
-      <path stroke="black" stroke-width="4" fill="white" d="m 58,2  c -75,0 -75,100 0,100  l 100,0  l 0,-100 Z"/>
-  </g>
-  <g transform="translate(0 220)">
-    <path stroke="black" stroke-width="4" fill="white" d="m 2,0 l 0,100 l 100,0  l 50,-50  l -50,-50  Z"/>
-  </g>
-</svg>
--->

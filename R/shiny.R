@@ -47,11 +47,12 @@ ShinySession <- setRefClass(
     downloads = 'Map',
     closed = 'logical',
     session = 'list',      # Object for the server app to access session stuff
-    workerId = 'character'
+    .workerId = 'character'
   ),
   methods = list(
-    initialize = function(websocket) {
+    initialize = function(websocket, workerId) {
       .websocket <<- websocket
+      .workerId <<- workerId
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
       .inputMessageQueue <<- list()
@@ -81,6 +82,11 @@ ShinySession <- setRefClass(
                        isClosed          = .self$isClosed,
                        input             = .self$input,
                        output            = .self$output)
+      
+      .write(toJSON(list(config = list(
+        workerId = .workerId,
+        sessionId = token
+      ))))
     },
     onSessionEnded = function(callback) {
       "Registers the given callback to be invoked when the session is closed
@@ -267,7 +273,7 @@ ShinySession <- setRefClass(
       jobId <- .fileUploadContext$createUploadOperation(fileInfos)
       return(list(jobId=jobId,
                   uploadUrl=paste('session', token, 'upload', 
-                                  paste(jobId, "?w=", workerId,sep=""), 
+                                  paste(jobId, "?w=", .workerId,sep=""), 
                                   sep='/')))
     },
     `@uploadEnd` = function(jobId, inputId) {
@@ -390,7 +396,7 @@ ShinySession <- setRefClass(
       return(sprintf('session/%s/file/%s?w=%s&r=%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
-                     workerId,
+                     .workerId,
                      createUniqueId(8)))
     },
     # Send a file to the client
@@ -419,7 +425,7 @@ ShinySession <- setRefClass(
       return(sprintf('session/%s/download/%s?w=%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
-                     workerId))
+                     .workerId))
     },
     .getOutputOption = function(outputName, propertyName, defaultValue) {
       opts <- .outputOptions[[outputName]]
@@ -655,6 +661,20 @@ joinHandlers <- function(handlers) {
     }
     return(NULL)
   }
+}
+
+reactLogHandler <- function(req) {
+  if (!identical(req$PATH_INFO, '/reactlog'))
+    return(NULL)
+  
+  if (!getOption('shiny.reactlog', FALSE)) {
+    return(NULL)
+  }
+  
+  return(httpResponse(
+    status=200,
+    content=list(file=renderReactLog(), owned=TRUE)
+  ))
 }
 
 sessionHandler <- function(req) {
@@ -1027,11 +1047,11 @@ startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
     call = httpServer(c(sessionHandler,
                         httpHandlers,
                         sys.www.root,
-                        resourcePathHandler)),
+                        resourcePathHandler,
+                        reactLogHandler)),
     onWSOpen = function(ws) {
-      shinysession <- ShinySession$new(ws)
+      shinysession <- ShinySession$new(ws, workerId)
       appsByToken$set(shinysession$token, shinysession)
-      shinysession$workerId <- workerId
       
       ws$onMessage(function(binary, msg) {
         

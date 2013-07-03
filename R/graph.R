@@ -5,6 +5,10 @@ writeReactLog <- function(file=stdout()) {
 
 #' @export
 showReactLog <- function() {
+  browseURL(renderReactLog())
+}
+
+renderReactLog <- function() {
   templateFile <- system.file('www/reactive-graph.html', package='shiny')
   html <- paste(readLines(templateFile, warn=FALSE), collapse='\r\n')
   tc <- textConnection(NULL, 'w')
@@ -15,7 +19,7 @@ showReactLog <- function() {
   html <- sub('__DATA__', paste(textConnectionValue(tc), collapse='\r\n'), html, fixed=TRUE)
   file <- tempfile(fileext = '.html')
   writeLines(html, file)
-  browseURL(file)
+  return(file)
 }
 
 .graphAppend <- function(logEntry) {

@@ -801,6 +801,10 @@
       this._sendMessagesToHandlers(message, customMessageHandlers,
                                    customMessageHandlerOrder);
     });
+    
+    addMessageHandler('config', function(message) {
+      this.config = message;
+    });
 
   }).call(ShinyApp.prototype);
 
@@ -2639,6 +2643,14 @@
       self.removeClass('playing');
       target.removeData('animating');
     }
+  });
+  
+  $(document).on('keydown', function(e) {
+    if (e.which !== 114)
+      return;
+    var url = 'reactlog?w=' + Shiny.shinyapp.config.workerId;
+    window.open(url);
+    e.preventDefault();
   });
 
 })();

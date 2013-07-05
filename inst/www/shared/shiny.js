@@ -1005,6 +1005,23 @@
         $.each(data, function(key, value) {
           img[key] = value;
         });
+
+        // Firefox doesn't have offsetX/Y, so we need to use an alternate
+        // method of calculation for it
+        function mouseOffset(mouseEvent) {
+          if (typeof(mouseEvent.offsetX) !== 'undefined') {
+            return {
+              x: mouseEvent.offsetX,
+              y: mouseEvent.offsetY
+            };
+          }
+
+          var origEvent = mouseEvent.originalEvent || {};
+          return {
+            x: origEvent.layerX - origEvent.target.offsetLeft,
+            y: origEvent.layerY - origEvent.target.offsetTop
+          };
+        }
         
         function createMouseHandler(inputId) {
           return function(e) {
@@ -1027,12 +1044,14 @@
                   (coordmap.bounds.top - coordmap.bounds.bottom);
               return (y * factor) + coordmap.usr.bottom;
             }
+
+            var offset = mouseOffset(e);
             
-            var userX = devToUsrX(e.offsetX);
+            var userX = devToUsrX(offset.x);
             if (coordmap.log.x)
               userX = Math.pow(10, userX);
             
-            var userY = devToUsrY(e.offsetY);
+            var userY = devToUsrY(offset.y);
             if (coordmap.log.y)
               userY = Math.pow(10, userY);
             
@@ -1044,7 +1063,7 @@
         };
         
         if (clickId)
-          $(img).on('click', createMouseHandler(clickId));
+          $(img).on('mousedown', createMouseHandler(clickId));
         var hoverFunc = debounce($el.data('hover-delay'),
                                  createMouseHandler(hoverId));
         if (hoverId) {

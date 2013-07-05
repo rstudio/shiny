@@ -82,3 +82,7 @@ span.jslider {
   -o-transition: none;
   transition: none;
 }
+
+.crosshair {
+  cursor: crosshair;
+}

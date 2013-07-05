@@ -1053,6 +1053,10 @@
             hoverFunc(null);
           });
         }
+
+        if (clickId || hoverId) {
+          $(img).addClass('crosshair');
+        }
       }
 
       $el.empty();

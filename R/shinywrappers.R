@@ -95,7 +95,14 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       if (par('ylog')) {
         usrBounds[c(3,4)] <- 10 ^ usrBounds[c(3,4)]
       }
-        
+      
+      # On Mac OS X with Retina displays, device coordinates are not
+      # the same as pixels. Figure out the ratio.
+      devPixelRatioX <- grconvertX(width*pixelratio, 'dev', 'nfc')
+      devPixelRatioY <- height*pixelratio / grconvertY(0, 'nfc', 'dev')
+      xfactor = devPixelRatioX / pixelratio
+      yfactor = devPixelRatioY / pixelratio
+      
       coordmap <<- list(
         usr = c(
           left = usrCoords[1],
@@ -103,11 +110,12 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
           bottom = usrCoords[3],
           top = usrCoords[4]
         ),
+        # The bounds of the plot area, in DOM pixels
         bounds = c(
-          left = grconvertX(usrBounds[1], 'user', 'dev'),
-          right = grconvertX(usrBounds[2], 'user', 'dev'),
-          bottom = grconvertY(usrBounds[3], 'user', 'dev'),
-          top = grconvertY(usrBounds[4], 'user', 'dev')
+          left = grconvertX(usrBounds[1], 'user', 'dev') * xfactor,
+          right = grconvertX(usrBounds[2], 'user', 'dev') * xfactor,
+          bottom = grconvertY(usrBounds[3], 'user', 'dev') * yfactor,
+          top = grconvertY(usrBounds[4], 'user', 'dev') * yfactor
         ),
         log = c(
           x = par('xlog'),

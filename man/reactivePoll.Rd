@@ -1,0 +1,81 @@
+\name{reactivePoll}
+\alias{reactivePoll}
+\title{Reactive polling}
+\usage{
+  reactivePoll(intervalMillis, session, checkFunc,
+    valueFunc)
+}
+\arguments{
+  \item{intervalMillis}{Approximate number of milliseconds
+  to wait between calls to \code{checkFunc}. This can be
+  either a numeric value, or a function that returns a
+  numeric value.}
+
+  \item{session}{The user session to associate this file
+  reader with, or \code{NULL} if none. If non-null, the
+  reader will automatically stop when the session ends.}
+
+  \item{checkFunc}{A relatively cheap function whose values
+  over time will be tested for equality; inequality
+  indicates that the underlying value has changed and needs
+  to be invalidated and re-read using \code{valueFunc}. See
+  Details.}
+
+  \item{valueFunc}{A function that calculates the
+  underlying value. See Details.}
+}
+\value{
+  A reactive expression that returns the result of
+  \code{valueFunc}, and invalidates when \code{checkFunc}
+  changes.
+}
+\description{
+  Used to create a reactive data source, which works by
+  periodically polling a non-reactive data source.
+}
+\details{
+  \code{reactivePoll} works by pairing a relatively cheap
+  "check" function with a more expensive value retrieval
+  function. The check function will be executed
+  periodically and should always return a consistent value
+  until the data changes. When the check function returns a
+  different value, then the value retrieval function will
+  be used to re-populate the data.
+
+  Note that the check function doesn't return \code{TRUE}
+  or \code{FALSE} to indicate whether the underlying data
+  has changed. Rather, the check function indicates change
+  by returning a different value from the previous time it
+  was called.
+
+  For example, \code{reactivePoll} is used to implement
+  \code{reactiveFileReader} by pairing a check function
+  that simply returns the last modified timestamp of a
+  file, and a value retrieval function that actually reads
+  the contents of the file.
+
+  As another example, one might read a relational database
+  table reactively by using a check function that does
+  \code{SELECT MAX(timestamp) FROM table} and a value
+  retrieval function that does \code{SELECT * FROM table}.
+
+  The \code{intervalMillis}, \code{checkFunc}, and
+  \code{valueFunc} functions will be executed in a reactive
+  context; therefore, they may read reactive values and
+  reactive expressions.
+}
+\examples{
+\dontrun{
+# Assume the existence of readTimestamp and readValue functions
+shinyServer(function(input, output, session) {
+  data <- reactivePoll(1000, session, readTimestamp, readValue)
+  output$dataTable <- renderTable({
+    data()
+  })
+})
+}
+}
+\seealso{
+  \code{\link{reactiveFileReader}}
+}
+

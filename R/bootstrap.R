@@ -1106,6 +1106,11 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 #'   list or vector with \code{x} and \code{y} elements indicating the mouse
 #'   position in user units.
 #' @param hoverDelay The delay for hovering, in milliseconds.
+#' @param hoverDelayType The type of algorithm for limiting the number of hover 
+#'   events. Use \code{"throttle"} to limit the number of hover events to one
+#'   every \code{hoverDelay} milliseconds. Use \code{"debounce"} to suspend
+#'   events while the cursor is moving, and wait until the cursor has been at
+#'   rest for \code{hoverDelay} milliseconds before sending an event.
 #' @return A plot output element that can be included in a panel
 #' @examples
 #' # Show a plot of the generated distribution
@@ -1114,13 +1119,22 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 #' )
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
-                       clickId = NULL, hoverId = NULL, hoverDelay = 500) {
+                       clickId = NULL, hoverId = NULL, hoverDelay = 300,
+                       hoverDelayType = c("debounce", "throttle")) {
+  if (is.null(clickId) && is.null(hoverId)) {
+    hoverDelay <- NULL
+    hoverDelayType <- NULL
+  } else {
+    hoverDelayType <- match.arg(hoverDelayType)[[1]]
+  }
+  
   style <- paste("width:", validateCssUnit(width), ";",
     "height:", validateCssUnit(height))
   div(id = outputId, class = "shiny-plot-output", style = style,
       `data-click-id` = clickId,
       `data-hover-id` = hoverId,
-      `data-hover-delay` = hoverDelay)
+      `data-hover-delay` = hoverDelay,
+      `data-hover-delay-type` = hoverDelayType)
 }
 
 #' Create a table output element

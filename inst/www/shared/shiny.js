@@ -1061,15 +1061,21 @@
             });
           }
         };
+
+        if (!$el.data('hover-func')) {
+          var hoverDelayType = $el.data('hover-delay-type') || 'debounce';
+          var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
+          var hoverFunc = delayFunc($el.data('hover-delay') || 300,
+                                    createMouseHandler(hoverId));
+          $el.data('hover-func', hoverFunc);
+        }
         
         if (clickId)
           $(img).on('mousedown', createMouseHandler(clickId));
-        var hoverFunc = debounce($el.data('hover-delay'),
-                                 createMouseHandler(hoverId));
         if (hoverId) {
-          $(img).on('mousemove', hoverFunc);
+          $(img).on('mousemove', $el.data('hover-func'));
           $(img).on('mouseout', function(e) {
-            hoverFunc(null);
+            $el.data('hover-func')(null);
           });
         }
 

@@ -3,7 +3,8 @@
 \title{Create an plot output element}
 \usage{
   plotOutput(outputId, width = "100\%", height = "400px",
-    clickId = NULL, hoverId = NULL, hoverDelay = 500)
+    clickId = NULL, hoverId = NULL, hoverDelay = 300,
+    hoverDelayType = c("debounce", "throttle"))
 }
 \arguments{
   \item{outputId}{output variable to read the plot from}
@@ -33,6 +34,14 @@
 
   \item{hoverDelay}{The delay for hovering, in
   milliseconds.}
+
+  \item{hoverDelayType}{The type of algorithm for limiting
+  the number of hover events. Use \code{"throttle"} to
+  limit the number of hover events to one every
+  \code{hoverDelay} milliseconds. Use \code{"debounce"} to
+  suspend events while the cursor is moving, and wait until
+  the cursor has been at rest for \code{hoverDelay}
+  milliseconds before sending an event.}
 }
 \value{
   A plot output element that can be included in a panel

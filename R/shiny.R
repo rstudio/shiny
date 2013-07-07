@@ -39,6 +39,8 @@ ShinySession <- setRefClass(
     .input      = 'ReactiveValues', # Internal object for normal input sent from client
     .clientData = 'ReactiveValues', # Internal object for other data sent from the client
     .closedCallbacks = 'Callbacks',
+    .flushCallbacks = 'Callbacks',
+    .flushedCallbacks = 'Callbacks',
     input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
     output      = 'ANY',    # Externally-usable S3 wrapper object for .outputs
     clientData  = 'reactivevalues', # Externally-usable S3 wrapper object for .clientData
@@ -79,6 +81,8 @@ ShinySession <- setRefClass(
                        sendCustomMessage = .self$.sendCustomMessage,
                        sendInputMessage  = .self$.sendInputMessage,
                        onSessionEnded    = .self$onSessionEnded,
+                       onFlush           = .self$onFlush,
+                       onFlushed         = .self$onFlushed,
                        isClosed          = .self$isClosed,
                        input             = .self$input,
                        output            = .self$output)
@@ -166,6 +170,9 @@ ShinySession <- setRefClass(
     },
     flushOutput = function() {
 
+      .flushCallbacks$invoke()
+      on.exit(.flushedCallbacks$invoke())
+
       if (length(.progressKeys) == 0
           && length(.invalidatedOutputValues) == 0
           && length(.invalidatedOutputErrors) == 0
@@ -247,6 +254,28 @@ ShinySession <- setRefClass(
 
       # Add to input message queue
       .inputMessageQueue[[length(.inputMessageQueue) + 1]] <<- data
+    },
+    onFlush = function(func, once = TRUE) {
+      if (!isTRUE(once)) {
+        return(.flushCallbacks$register(func))
+      } else {
+        dereg <- .flushCallbacks$register(function() {
+          dereg()
+          func()
+        })
+        return(dereg)
+      }
+    },
+    onFlushed = function(func, once = TRUE) {
+      if (!isTRUE(once)) {
+        return(.flushedCallbacks$register(func))
+      } else {
+        dereg <- .flushedCallbacks$register(function() {
+          dereg()
+          func()
+        })
+        return(dereg)
+      }
     },
     .write = function(json) {
       if (getOption('shiny.trace', FALSE))

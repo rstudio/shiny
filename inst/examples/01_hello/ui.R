@@ -10,7 +10,7 @@ shinyUI(pageWithSidebar(
   sidebarPanel(
     sliderInput("obs", 
                 "Number of observations:", 
-                min = 0, 
+                min = 1, 
                 max = 1000, 
                 value = 500)
   ),

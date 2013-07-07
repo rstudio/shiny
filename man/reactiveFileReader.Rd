@@ -1,0 +1,75 @@
+\name{reactiveFileReader}
+\alias{reactiveFileReader}
+\title{Reactive file reader}
+\usage{
+  reactiveFileReader(intervalMillis, session, filePath,
+    readFunc, ...)
+}
+\arguments{
+  \item{intervalMillis}{Approximate number of milliseconds
+  to wait between checks of the file's last modified time.
+  This can be a numeric value, or a function that returns a
+  numeric value.}
+
+  \item{session}{The user session to associate this file
+  reader with, or \code{NULL} if none. If non-null, the
+  reader will automatically stop when the session ends.}
+
+  \item{filePath}{The file path to poll against and to pass
+  to \code{readFunc}.  This can either be a single-element
+  character vector, or a function that returns one.}
+
+  \item{readFunc}{The function to use to read the file;
+  must expect the first argument to be the file path to
+  read. The return value of this function is used as the
+  value of the reactive file reader.}
+
+  \item{...}{Any additional arguments to pass to
+  \code{readFunc} whenever it is invoked.}
+}
+\value{
+  A reactive expression that returns the contents of the
+  file, and automatically invalidates when the file changes
+  on disk (as determined by last modified time).
+}
+\description{
+  Given a file path and read function, returns a reactive
+  data source for the contents of the file.
+}
+\details{
+  \code{reactiveFileReader} works by periodically checking
+  the file's last modified time; if it has changed, then
+  the file is re-read and any reactive dependents are
+  invalidated.
+
+  The \code{intervalMillis}, \code{filePath}, and
+  \code{readFunc} functions will each be executed in a
+  reactive context; therefore, they may read reactive
+  values and reactive expressions.
+}
+\examples{
+\dontrun{
+# Per-session reactive file reader
+shinyServer(function(input, output, session)) {
+  fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
+
+  output$data <- renderTable({
+    fileData()
+  })
+}
+
+# Cross-session reactive file reader. In this example, all sessions share
+# the same reader, so read.csv only gets executed once no matter how many
+# user sessions are connected.
+fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
+shinyServer(function(input, output, session)) {
+  output$data <- renderTable({
+    fileData()
+  })
+}
+}
+}
+\seealso{
+  \code{\link{reactivePoll}}
+}
+

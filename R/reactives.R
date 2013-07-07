@@ -743,6 +743,168 @@ invalidateLater <- function(millis, session) {
   invisible()
 }
 
+coerceToFunc <- function(x) {
+  force(x);
+  if (is.function(x))
+    return(x)
+  else
+    return(function() x)
+}
+
+#' Reactive polling
+#' 
+#' Used to create a reactive data source, which works by periodically polling a 
+#' non-reactive data source.
+#' 
+#' \code{reactivePoll} works by pairing a relatively cheap "check" function with
+#' a more expensive value retrieval function. The check function will be 
+#' executed periodically and should always return a consistent value until the 
+#' data changes. When the check function returns a different value, then the 
+#' value retrieval function will be used to re-populate the data.
+#' 
+#' Note that the check function doesn't return \code{TRUE} or \code{FALSE} to 
+#' indicate whether the underlying data has changed. Rather, the check function 
+#' indicates change by returning a different value from the previous time it was
+#' called.
+#' 
+#' For example, \code{reactivePoll} is used to implement 
+#' \code{reactiveFileReader} by pairing a check function that simply returns the
+#' last modified timestamp of a file, and a value retrieval function that 
+#' actually reads the contents of the file.
+#' 
+#' As another example, one might read a relational database table reactively by 
+#' using a check function that does \code{SELECT MAX(timestamp) FROM table} and 
+#' a value retrieval function that does \code{SELECT * FROM table}.
+#' 
+#' The \code{intervalMillis}, \code{checkFunc}, and \code{valueFunc} functions
+#' will be executed in a reactive context; therefore, they may read reactive
+#' values and reactive expressions.
+#' 
+#' @param intervalMillis Approximate number of milliseconds to wait between 
+#'   calls to \code{checkFunc}. This can be either a numeric value, or a 
+#'   function that returns a numeric value.
+#' @param session The user session to associate this file reader with, or 
+#'   \code{NULL} if none. If non-null, the reader will automatically stop when 
+#'   the session ends.
+#' @param checkFunc A relatively cheap function whose values over time will be 
+#'   tested for equality; inequality indicates that the underlying value has 
+#'   changed and needs to be invalidated and re-read using \code{valueFunc}. See
+#'   Details.
+#' @param valueFunc A function that calculates the underlying value. See 
+#'   Details.
+#'   
+#' @return A reactive expression that returns the result of \code{valueFunc}, 
+#'   and invalidates when \code{checkFunc} changes.
+#'   
+#' @seealso \code{\link{reactiveFileReader}}
+#'   
+#' @examples
+#' \dontrun{
+#' # Assume the existence of readTimestamp and readValue functions
+#' shinyServer(function(input, output, session) {
+#'   data <- reactivePoll(1000, session, readTimestamp, readValue)
+#'   output$dataTable <- renderTable({
+#'     data()
+#'   })
+#' })
+#' }
+#'   
+#' @export
+reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
+  intervalMillis <- coerceToFunc(intervalMillis)
+  
+  rv <- reactiveValues(cookie = isolate(checkFunc()))
+  
+  observe({
+    rv$cookie <- checkFunc()
+    invalidateLater(intervalMillis(), session)
+  })
+  
+  # TODO: what to use for a label?
+  re <- reactive({
+    rv$cookie
+    
+    valueFunc()
+    
+  }, label = NULL)
+  
+  return(re)
+}
+
+#' Reactive file reader
+#' 
+#' Given a file path and read function, returns a reactive data source for the 
+#' contents of the file.
+#' 
+#' \code{reactiveFileReader} works by periodically checking the file's last 
+#' modified time; if it has changed, then the file is re-read and any reactive 
+#' dependents are invalidated.
+#' 
+#' The \code{intervalMillis}, \code{filePath}, and \code{readFunc} functions 
+#' will each be executed in a reactive context; therefore, they may read
+#' reactive values and reactive expressions.
+#' 
+#' @param intervalMillis Approximate number of milliseconds to wait between 
+#'   checks of the file's last modified time. This can be a numeric value, or a 
+#'   function that returns a numeric value.
+#' @param session The user session to associate this file reader with, or 
+#'   \code{NULL} if none. If non-null, the reader will automatically stop when 
+#'   the session ends.
+#' @param filePath The file path to poll against and to pass to \code{readFunc}.
+#'   This can either be a single-element character vector, or a function that 
+#'   returns one.
+#' @param readFunc The function to use to read the file; must expect the first 
+#'   argument to be the file path to read. The return value of this function is 
+#'   used as the value of the reactive file reader.
+#' @param ... Any additional arguments to pass to \code{readFunc} whenever it is
+#'   invoked.
+#'   
+#' @return A reactive expression that returns the contents of the file, and 
+#'   automatically invalidates when the file changes on disk (as determined by 
+#'   last modified time).
+#'   
+#' @seealso \code{\link{reactivePoll}}
+#'   
+#' @examples
+#' \dontrun{
+#' # Per-session reactive file reader
+#' shinyServer(function(input, output, session)) {
+#'   fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
+#'   
+#'   output$data <- renderTable({
+#'     fileData()
+#'   })
+#' }
+#' 
+#' # Cross-session reactive file reader. In this example, all sessions share
+#' # the same reader, so read.csv only gets executed once no matter how many
+#' # user sessions are connected.
+#' fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
+#' shinyServer(function(input, output, session)) {
+#'   output$data <- renderTable({
+#'     fileData()
+#'   })
+#' }
+#' }
+#' 
+#' @export
+reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...) {
+  filePath <- coerceToFunc(filePath)
+  extraArgs <- list(...)
+  
+  reactivePoll(
+    intervalMillis, session,
+    function() {
+      path <- filePath()
+      info <- file.info(path)
+      return(paste(path, info$mtime, info$size))
+    },
+    function() {
+      do.call(readFunc, c(filePath(), extraArgs))
+    }
+  )
+}
+
 #' Create a non-reactive scope for an expression
 #' 
 #' Executes the given expression in a scope where reactive values or expression 

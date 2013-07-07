@@ -80,15 +80,53 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     pixelratio <- shinysession$clientData$pixelratio
     if (is.null(pixelratio))
       pixelratio <- 1
+    
+    coordmap <- NULL
+    plotFunc <- function() {
+      # Actually perform the plotting
+      func()
 
-    outfile <- do.call(plotPNG, c(func, width=width*pixelratio,
+      # Now capture some graphics device info before we close it
+      usrCoords <- par('usr')
+      usrBounds <- usrCoords
+      if (par('xlog')) {
+        usrBounds[c(1,2)] <- 10 ^ usrBounds[c(1,2)]
+      }
+      if (par('ylog')) {
+        usrBounds[c(3,4)] <- 10 ^ usrBounds[c(3,4)]
+      }
+      
+      coordmap <<- list(
+        usr = c(
+          left = usrCoords[1],
+          right = usrCoords[2],
+          bottom = usrCoords[3],
+          top = usrCoords[4]
+        ),
+        # The bounds of the plot area, in DOM pixels
+        bounds = c(
+          left = grconvertX(usrBounds[1], 'user', 'nfc') * width,
+          right = grconvertX(usrBounds[2], 'user', 'nfc') * width,
+          bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height,
+          top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height
+        ),
+        log = c(
+          x = par('xlog'),
+          y = par('ylog')
+        ),
+        pixelratio = pixelratio
+      )
+    }
+
+    outfile <- do.call(plotPNG, c(plotFunc, width=width*pixelratio,
                                   height=height*pixelratio, res=res*pixelratio, args))
     on.exit(unlink(outfile))
     
     # Return a list of attributes for the img
     return(list(
       src=shinysession$fileUrl(name, outfile, contentType='image/png'),
-      width=width, height=height))
+      width=width, height=height, coordmap=coordmap
+    ))
   })
 }
 

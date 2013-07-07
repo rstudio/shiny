@@ -991,19 +991,106 @@
       return $(scope).find('.shiny-image-output, .shiny-plot-output');
     },
     renderValue: function(el, data) {
+      var self = this;
+      var $el = $(el);
       // Load the image before emptying, to minimize flicker
       var img = null;
+      var coordmap, clickId, hoverId;
+      
       if (data) {
+        clickId = $el.data('click-id');
+        hoverId = $el.data('hover-id');
+        
+        coordmap = data.coordmap;
+        delete data.coordmap;
+        
         img = document.createElement('img');
         // Copy items from data to img. This should include 'src'
         $.each(data, function(key, value) {
           img[key] = value;
         });
+
+        // Firefox doesn't have offsetX/Y, so we need to use an alternate
+        // method of calculation for it
+        function mouseOffset(mouseEvent) {
+          if (typeof(mouseEvent.offsetX) !== 'undefined') {
+            return {
+              x: mouseEvent.offsetX,
+              y: mouseEvent.offsetY
+            };
+          }
+
+          var origEvent = mouseEvent.originalEvent || {};
+          return {
+            x: origEvent.layerX - origEvent.target.offsetLeft,
+            y: origEvent.layerY - origEvent.target.offsetTop
+          };
+        }
+        
+        function createMouseHandler(inputId) {
+          return function(e) {
+            if (e === null) {
+              Shiny.onInputChange(inputId, null);
+              return;
+            }
+            
+            // TODO: Account for scrolling within the image??
+            
+            function devToUsrX(deviceX) {
+              var x = deviceX - coordmap.bounds.left;
+              var factor = (coordmap.usr.right - coordmap.usr.left) /
+                  (coordmap.bounds.right - coordmap.bounds.left);
+              return (x * factor) + coordmap.usr.left;
+            }
+            function devToUsrY(deviceY) {
+              var y = deviceY - coordmap.bounds.bottom;
+              var factor = (coordmap.usr.top - coordmap.usr.bottom) /
+                  (coordmap.bounds.top - coordmap.bounds.bottom);
+              return (y * factor) + coordmap.usr.bottom;
+            }
+
+            var offset = mouseOffset(e);
+            
+            var userX = devToUsrX(offset.x);
+            if (coordmap.log.x)
+              userX = Math.pow(10, userX);
+            
+            var userY = devToUsrY(offset.y);
+            if (coordmap.log.y)
+              userY = Math.pow(10, userY);
+            
+            Shiny.onInputChange(inputId, {
+              x: userX, y: userY,
+              ".nonce": Math.random()
+            });
+          }
+        };
+
+        if (!$el.data('hover-func')) {
+          var hoverDelayType = $el.data('hover-delay-type') || 'debounce';
+          var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
+          var hoverFunc = delayFunc($el.data('hover-delay') || 300,
+                                    createMouseHandler(hoverId));
+          $el.data('hover-func', hoverFunc);
+        }
+        
+        if (clickId)
+          $(img).on('mousedown', createMouseHandler(clickId));
+        if (hoverId) {
+          $(img).on('mousemove', $el.data('hover-func'));
+          $(img).on('mouseout', function(e) {
+            $el.data('hover-func')(null);
+          });
+        }
+
+        if (clickId || hoverId) {
+          $(img).addClass('crosshair');
+        }
       }
 
-      $(el).empty();
+      $el.empty();
       if (img)
-        $(el).append(img);
+        $el.append(img);
     }
   });
   outputBindings.register(imageOutputBinding, 'shiny.imageOutput');

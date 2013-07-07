@@ -2,27 +2,50 @@
 <html>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,600' rel='stylesheet' type='text/css'>
 <style type="text/css">
-body {
+html, body {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: 400;
   overflow: hidden;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+div {
+  -moz-user-select: none; 
+  -khtml-user-select: none; 
+  -webkit-user-select: none; 
+  -o-user-select: none;
+  cursor: default;
+}
+#instructions, #ended {
+  position: relative;
+  font-weight: 200;
+  color: #444;
+  top: 20px;
+  font-size: 30px;
+  text-align: center;
+}
+#ended strong {
+  font-weight: 600;
 }
 svg {
-  border: 1px solid silver;
   position: absolute;
   left: 0;
   top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
+  width: 100%;
+  height: 100%;
 }
 .node {
   cursor: pointer;
 }
 .node text {
   font-family: 'Source Code Pro', monospace;
+  font-weight: normal;
   text-anchor: start;
   fill: #999;
-  transform: scale(0.3);
   user-select: none;
   transition: fill 0.75s ease;
 }
@@ -36,7 +59,6 @@ svg {
   white-space: pre;
 }
 .node path {
-  z-index: 1;
   fill: white;
   stroke: #777;
   stroke-width: 7.5px;
@@ -55,6 +77,27 @@ svg {
 .node.running path {
   fill: #61B97E;
 }
+#legend {
+  font-size: 22px;
+  position: fixed;
+  bottom: 10px;
+  right: 20px;
+}
+.color {
+  display: inline-block;
+  border: 1px solid #777;
+  height: 14px;
+  width: 14px;
+}
+.color.normal {
+  background-color: #white;
+}
+.color.invalidated {
+  background-color: #E0E0E0;
+}
+.color.running {
+  background-color: #61B97E;
+}
 #triangle {
   fill: #CCC;
 }
@@ -62,7 +105,6 @@ svg {
   fill: none;
   stroke: #CCC;
   stroke-width: 0.5px;
-  z-index: 0;
 }
 #description {
   position: fixed;
@@ -70,6 +112,7 @@ svg {
   left: 630px;
   top: 36px;
   height: auto;
+  display: none;
 }
 </style>
 <script>
@@ -267,11 +310,13 @@ function update() {
   var newG = node.enter().append('g')
       .attr('class', function(n) {return 'node ' + n.type;})
       .attr('r', 5)
+      // don't show until next tick
+      .style('display', 'none')
       .on('mousedown', function() {
         d3.event.stopPropagation();
       })
       .on('mouseover', function(n) {
-        $('#description').text(n.title);
+        $('#description').text(n.label);
       })
       .on('mouseout', function(d, i) {
         $('#description').html('');
@@ -286,7 +331,7 @@ function update() {
   newG.append('text')
       .attr('x', 3)
       .attr('y', 0)
-      .attr('font-size', 2.5)
+      .attr('font-size', 3.25)
       .attr('transform', function(n) {
         if (n.type !== 'observer')
           return 'translate(1.5, 0)';
@@ -304,7 +349,13 @@ function update() {
         else
           return null;
       });
-  var tspan = node.selectAll('text').selectAll('tspan')
+  var tspan = node.selectAll('text').filter(function(n) {
+    // This filter is used to disregard all nodes whose labels have
+    // not changed since the last time we updated them.
+    var changed = n.label !== this.label;
+    this.label = n.label;
+    return changed;
+  }).selectAll('tspan')
     .data(function(n) {
       var lines = n.label.split('\n');
       if (lines.length > MAX_LINES) {
@@ -339,6 +390,7 @@ function update() {
 
 function onTick() {
   node
+      .style('display', null)
       .attr('transform', function(n) {
         return 'translate(' + n.x + ' ' + n.y + ')';
       });
@@ -451,8 +503,8 @@ function doNext() {
   while (log.length)
     if (!processMessage(log.shift()))
       break;
-  if (log.length === 0)
-    document.getElementById('processNext').setAttribute('disabled', 'disabled');
+  if (!log.length)
+    $('#ended').fadeIn(1500);
 }
 
 function zoom() {
@@ -466,13 +518,19 @@ $(function() {
   $(document.body).on('keydown', function(e) {
     if (e.which === 39 || e.which === 32)
       doNext();
+    if (e.which === 35) {
+      while (log.length) {
+        doNext();
+      }
+    }
   });
   doNext();
+  executeBeforeNextCommand.push(function() {
+    $('#instructions').fadeOut(1000);
+  });
 });
 </script>
 <body>
-  <button id="processNext" onclick="doNext();">Next</button>
-  <br/>
   <svg>
     <defs>
       <marker id="triangle"
@@ -495,6 +553,18 @@ $(function() {
       <g id="nodes"></g>
     </g>
   </svg>
+  <div id="instructions">
+    Press right-arrow to advance
+  </div>
+  <div id="ended" style="display: none;">
+    <strong>You&rsquo;ve reached the end</strong><br/>Reload the page to start over
+  </div>
+  <div id="legend">
+    <div class="color normal"></div> Normal<br/>
+    <div class="color invalidated"></div> Invalidated<br/>
+    <div class="color running"></div> Running<br/>
+  </div>
+  <br/>
   <pre id="description"><br/></pre>
 </body>
 </html>

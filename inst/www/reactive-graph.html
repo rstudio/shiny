@@ -114,6 +114,37 @@ svg {
   height: auto;
   display: none;
 }
+#timeline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  transition: height 500ms;
+}
+#timeline, #timeline * {
+  cursor: pointer;
+}
+#timeline:hover {
+  height: 32px;
+}
+#timeline-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  background-color: silver;
+}
+#timeline-fill {
+  background-color: #28A3F2;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  transition: width 500ms;
+}
 </style>
 <script>
 var log = [
@@ -240,11 +271,6 @@ var force = d3.layout.force()
 force.on('tick', onTick);
 
 function pathDataForNode(node) {
-/*
-d="m 58,2  c -75,0 -75,100 0,100  l 60,0  l 50,-50  l -50,-50  Z"
-d="m 58,2  c -75,0 -75,100 0,100  l 100,0  l 0,-100 Z"
-d="m 2,0 l 0,100 l 100,0  l 50,-50  l -50,-50  Z"
-*/
   switch (node.type) {
     case 'observer':
       return 'M -25,-50  c -75,0 -75,100 0,100  l 100,0  l 0,-100 Z';
@@ -303,10 +329,10 @@ function update() {
   force.size([document.documentElement.clientWidth / 4,
               document.documentElement.clientHeight / 4]);
 
-  var layoutDirty = true;
+  var layoutDirty = false;
 
   node = d3.select('#nodes').selectAll('.node').data(nodeList);
-  //layoutDirty = layoutDirty || !node.enter().empty() || !node.exit().empty();
+  layoutDirty = layoutDirty || !node.enter().empty() || !node.exit().empty();
   var newG = node.enter().append('g')
       .attr('class', function(n) {return 'node ' + n.type;})
       .attr('r', 5)
@@ -357,7 +383,7 @@ function update() {
     return changed;
   }).selectAll('tspan')
     .data(function(n) {
-      var lines = n.label.split('\n');
+      var lines = n.label.replace(/ /g, '\xA0').split('\n');
       if (lines.length > MAX_LINES) {
         lines.splice(MAX_LINES);
       }
@@ -374,7 +400,7 @@ function update() {
       .text(function(line) { return line; });
 
   link = d3.select('#links').selectAll('.link').data(links);
-  //layoutDirty = layoutDirty || !link.enter().empty() || !link.exit().empty();
+  layoutDirty = layoutDirty || !link.enter().empty() || !link.exit().empty();
   link.enter().append('path')
       .attr('class', 'link')
       .attr('marker-mid', 'url(#triangle)');
@@ -408,7 +434,7 @@ function onTick() {
       });
 }
 
-function createNode(data) {
+function createNodeWithUndo(data) {
   var node;
   if (!data.prevId) {
     node = {
@@ -417,35 +443,131 @@ function createNode(data) {
       hide: data.hide
     };
     nodes[data.id] = node;
-    if (!node.hide)
+    pushUndo(function() {
+      delete nodes[data.id];
+    });
+    if (!node.hide) {
       nodeList.push(node);
+      pushUndo(function() {
+        nodeList.pop();
+      });
+    }
   } else {
     node = nodes[data.prevId];
+    var oldLabel = node.label;
+    var oldInvalidated = node.invalidated;
     delete nodes[data.prevId];
     nodes[data.id] = node;
     node.label = data.label;
     node.invalidated = false;
+    pushUndo(function() {
+      node.label = oldLabel;
+      node.invalidated = oldInvalidated;
+      delete nodes[data.id];
+      nodes[data.prevId] = node;
+    });
   }
 }
 
+Array.prototype.pushWithUndo = function(value) {
+  var self = this;
+  this.push(value);
+  pushUndo(function() {
+    self.pop();
+  });
+}
+
+Array.prototype.shiftWithUndo = function(value) {
+  var self = this;
+  var value = this.shift();
+  pushUndo(function() {
+    self.unshift(value);
+  });
+  return value;
+}
+
+var undoStack = [];
+var currentUndos = null;
+function startUndoScope() {
+  if (currentUndos !== null)
+    throw new Error('Illegal state');
+  currentUndos = [];
+}
+function pushUndo(func) {
+  currentUndos.push(func);
+}
+function endUndoScope() {
+  var localUndos = currentUndos;
+  undoStack.push(function() {
+    while (localUndos.length) {
+      localUndos.pop()();
+    }
+  });
+  currentUndos = null;
+}
+function undo() {
+  if (undoStack.length) {
+    undoStack.pop()();
+    update();
+    return true;
+  }
+  return false;
+}
+function undoAll() {
+  while (undo()) {}
+}
+
+// Here we monkeypatch Math.random to take part in the undo mechanism.
+// This allows "random" d3 force-layout decisions to be reproducible.
+// If we don't do this, then doing/undoing/redoing a node creation step
+// looks very confusing, as the node comes flying in from a different
+// direction each time.
+var trueRandom = Math.random;
+Math.random = (function() {
+  var randomStack = [];
+  return function() {
+    if (!currentUndos)
+      return trueRandom();
+
+    var value;
+    if (randomStack.length > 0) {
+      value = randomStack.pop();
+    }
+    else {
+      value = trueRandom();
+    }
+    pushUndo(function() {
+      randomStack.push(value);
+    });
+    return value;
+  };
+})();
+
 var callbacks = {
   ctx: function(data) {
-    createNode(data);
+    createNodeWithUndo(data);
     return true;
   },
   dep: function(data) {
     var dependsOn = nodes[data.dependsOn];
     if (!dependsOn) {
-      createNode({id: data.dependsOn, label: data.dependsOn, type: 'value'});
+      createNodeWithUndo({id: data.dependsOn, label: data.dependsOn, type: 'value'});
       dependsOn = nodes[data.dependsOn];
     }
     if (dependsOn.hide) {
       dependsOn.hide = false;
       nodeList.push(dependsOn);
+      pushUndo(function() {
+        dependsOn.hide = true;
+        nodeList.pop();
+      });
     }
     links.push({
       source: nodes[data.id],
       target: nodes[data.dependsOn]
+    });
+    pushUndo(function() {
+      links.pop();
     });
   },
   depId: function(data) {
@@ -453,17 +575,31 @@ var callbacks = {
       source: nodes[data.id],
       target: nodes[data.dependsOn]
     });
+    pushUndo(function() {
+      links.pop();
+    });
   },
   invalidate: function(data) {
     var node = nodes[data.id];
+    if (node.invalidated)
+      throw new Error('Illegal sequence');
+
     node.invalidated = true;
+    pushUndo(function() {
+      node.invalidated = false;
+    });
+
+    var origLinks = links;
     links = links.filter(function(link) {
       return link.source !== node;
+    });
+    pushUndo(function() {
+      links = origLinks;
     });
   },
   valueChange: function(data) {
     var existed = !!nodes[data.id];
-    createNode({
+    createNodeWithUndo({
       id: data.id,
       label: data.id + ' = ' + data.value,
       type: 'value',
@@ -473,38 +609,94 @@ var callbacks = {
     if (!existed || nodes[data.id].hide)
       return true;
     nodes[data.id].changed = true;
-    executeBeforeNextCommand.push(function() {
+    pushUndo(function() {
       nodes[data.id].changed = false;
+    });
+    executeBeforeNextCommand.pushWithUndo(function() {
+      nodes[data.id].changed = false;
+      pushUndo(function() {
+        nodes[data.id].changed = true;
+      });
     });
   },
   enter: function(data) {
     var node = nodes[data.id];
     node.running = true;
+    pushUndo(function() {
+      node.running = false;
+    });
   },
   exit: function(data) {
     var node = nodes[data.id];
     node.running = false;
+    pushUndo(function() {
+      node.running = true;
+    });
   }
 };
 
-function processMessage(data) {
+function processMessage(data, suppressUpdate) {
   console.log(JSON.stringify(data));
   if (!callbacks.hasOwnProperty(data.action))
     throw new Error('Unknown action ' + data.action);
   var result = callbacks[data.action].call(callbacks, data);
-  update();
+  if (!suppressUpdate)
+    update();
   return result;
 }
 
 var executeBeforeNextCommand = [];
-function doNext() {
-  while (executeBeforeNextCommand.length)
-    executeBeforeNextCommand.shift()();
-  while (log.length)
-    if (!processMessage(log.shift()))
-      break;
+function doNext(suppressUpdate) {
   if (!log.length)
+    return;
+
+  startUndoScope();
+  while (executeBeforeNextCommand.length) {
+    executeBeforeNextCommand.shiftWithUndo()();
+  }
+  while (log.length) {
+    var result = (function() {
+      var message = log.shift();
+      pushUndo(function() {
+        log.unshift(message);
+      })
+      return processMessage(message, suppressUpdate);
+    })();
+    if (!result)
+      break;
+  }
+  if (!log.length) {
     $('#ended').fadeIn(1500);
+    pushUndo(function() {
+      $('#ended').hide();
+    });
+  }
+  step++;
+  updateTimeline();
+  pushUndo(function() {
+    step--;
+    updateTimeline();
+  });
+  endUndoScope();
+}
+
+function countSteps() {
+  if (undoStack.length !== 0) {
+    throw new Error(
+      'Illegal state; must call countSteps before execution begins');
+  }
+  var steps = 0;
+  while (log.length) {
+    doNext();
+    steps++;
+  }
+  while (undoStack.length)
+    undoStack.pop()();
+  return steps;
+}
+
+function updateTimeline() {
+  $('#timeline-fill').width((step/totalSteps*100) + '%');
 }
 
 function zoom() {
@@ -513,20 +705,65 @@ function zoom() {
   var y = d3.event.translate[1];
   d3.select('#viz').attr('transform', 'scale(' + scale + ') translate(' + x/scale + ' ' + y/scale + ')');
 }
+
+// The total number of steps, as far as the user is concerned, in the log.
+// This may/will be different than the number of log entries, since each
+// step may include more than one log entry.
+var totalSteps;
+// The current step we're on.
+var step;
 $(function() {
   d3.select('svg').call(d3.behavior.zoom().scale(4).on('zoom', zoom));
   $(document.body).on('keydown', function(e) {
-    if (e.which === 39 || e.which === 32)
+    if (e.which === 39 || e.which === 32) { // space, right
+      // Move one step ahead
       doNext();
-    if (e.which === 35) {
+    }
+    if (e.which === 37) { // left
+      // Move one step back
+      undo();
+    }
+    if (e.which === 35) { // end
+      // Seek to end
       while (log.length) {
         doNext();
       }
     }
+    if (e.which === 36) { // home
+      // Seek to beginning
+      undoAll();
+    }
   });
+
+  // Timeline click and scrub
+  $('#timeline').on('click mousemove', function(e) {
+    // Make sure left mouse button is down
+    if (e.which !== 1)
+      return;
+
+    var timeline = e.currentTarget;
+    var pos = e.offsetX || e.originalEvent.layerX;
+    var width = timeline.offsetWidth;
+    var targetStep = Math.round((pos/width) * totalSteps);
+    while (step < targetStep) {
+      doNext();
+    }
+    while (step > targetStep && step != 1) {
+      undo();
+    }
+  });
+
+  totalSteps = countSteps();
+  step = 0;
+
   doNext();
+
+  // don't allow undoing past initial state
+  while (undoStack.length)
+    undoStack.pop();
   executeBeforeNextCommand.push(function() {
     $('#instructions').fadeOut(1000);
+    // It's weird for the instructions to fade back in, so no pushUndo here
   });
 });
 </script>
@@ -557,7 +794,7 @@ $(function() {
     Press right-arrow to advance
   </div>
   <div id="ended" style="display: none;">
-    <strong>You&rsquo;ve reached the end</strong><br/>Reload the page to start over
+    <strong>You&rsquo;ve reached the end</strong><br/>Press the Home key to start over
   </div>
   <div id="legend">
     <div class="color normal"></div> Normal<br/>
@@ -566,5 +803,10 @@ $(function() {
   </div>
   <br/>
   <pre id="description"><br/></pre>
+  <div id="timeline">
+    <div id="timeline-bg">
+      <div id="timeline-fill"></div>
+    </div>
+  </div>
 </body>
 </html>

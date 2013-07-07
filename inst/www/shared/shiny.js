@@ -2646,7 +2646,7 @@
   });
   
   $(document).on('keydown', function(e) {
-    if (e.which !== 114)
+    if (e.which !== 114 || !e.ctrlKey || (e.shiftKey || e.altKey || e.metaKey))
       return;
     var url = 'reactlog?w=' + Shiny.shinyapp.config.workerId;
     window.open(url);

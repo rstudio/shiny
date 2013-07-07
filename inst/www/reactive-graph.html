@@ -737,9 +737,15 @@ $(function() {
 
   // Timeline click and scrub
   $('#timeline').on('click mousemove', function(e) {
-    // Make sure left mouse button is down
-    if (e.which !== 1)
+    // Make sure left mouse button is down.
+    // Firefox is stupid; e.which is always 1 on mousemove events,
+    // even when button is not down!! So read e.originalEvent.buttons.
+    if (typeof(e.originalEvent.buttons) !== 'undefined') {
+      if (e.originalEvent.buttons !== 1)
+        return;
+    } else if (e.which !== 1) {
       return;
+    }
 
     var timeline = e.currentTarget;
     var pos = e.offsetX || e.originalEvent.layerX;

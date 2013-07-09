@@ -8,16 +8,19 @@ Context <- setRefClass(
     .flushCallbacks = 'list'
   ),
   methods = list(
-    initialize = function(label='') {
+    initialize = function(label='', type='other', prevId='') {
       id <<- .getReactiveEnvironment()$nextId()
       .invalidated <<- FALSE
       .invalidateCallbacks <<- list()
       .flushCallbacks <<- list()
       .label <<- label
+      .graphCreateContext(id, label, type, prevId)
     },
     run = function(func) {
       "Run the provided function under this context."
       env <- .getReactiveEnvironment()
+      .graphEnterContext(id)
+      on.exit(.graphExitContext(id))
       env$runWith(.self, func)
     },
     invalidate = function() {
@@ -27,6 +30,7 @@ Context <- setRefClass(
         return()
       .invalidated <<- TRUE
 
+      .graphInvalidate(id)
       lapply(.invalidateCallbacks, function(func) {
         func()
       })
@@ -86,10 +90,11 @@ ReactiveEnvironment <- setRefClass(
       return(as.character(.nextId))
     },
     currentContext = function() {
-      if (is.null(.currentContext))
+      if (is.null(.currentContext)) {
         stop('Operation not allowed without an active reactive context. ',
              '(You tried to do something that can only be done from inside a ',
              'reactive function.)')
+      }
       return(.currentContext)
     },
     runWith = function(ctx, func) {

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,600' rel='stylesheet' type='text/css'>
+<style type="text/css">
+html, body {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: 400;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+div {
+  -moz-user-select: none; 
+  -khtml-user-select: none; 
+  -webkit-user-select: none; 
+  -o-user-select: none;
+  cursor: default;
+}
+#instructions, #ended {
+  position: relative;
+  font-weight: 200;
+  color: #444;
+  top: 20px;
+  font-size: 30px;
+  text-align: center;
+}
+#ended strong {
+  font-weight: 600;
+}
+svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.node {
+  cursor: pointer;
+}
+.node text {
+  font-family: 'Source Code Pro', monospace;
+  font-weight: normal;
+  text-anchor: start;
+  fill: #999;
+  user-select: none;
+  transition: fill 0.75s ease;
+}
+.node.running text {
+  fill: black;
+}
+.node.changed text {
+  fill: red;
+}
+.node text tspan {
+  white-space: pre;
+}
+.node path {
+  fill: white;
+  stroke: #777;
+  stroke-width: 7.5px;
+  transition: fill 0.75s ease;
+}
+.node.observer path {
+}
+.node.observable path {
+}
+.node.value path {
+}
+.node.invalidated path {
+  fill: #E0E0E0;
+  /*fill: url(#diagonalHatch);*/
+}
+.node.running path {
+  fill: #61B97E;
+}
+#legend {
+  font-size: 22px;
+  position: fixed;
+  bottom: 10px;
+  right: 20px;
+}
+.color {
+  display: inline-block;
+  border: 1px solid #777;
+  height: 14px;
+  width: 14px;
+}
+.color.normal {
+  background-color: #white;
+}
+.color.invalidated {
+  background-color: #E0E0E0;
+}
+.color.running {
+  background-color: #61B97E;
+}
+#triangle {
+  fill: #CCC;
+}
+.link {
+  fill: none;
+  stroke: #CCC;
+  stroke-width: 0.5px;
+}
+#description {
+  position: fixed;
+  width: 300px;
+  left: 630px;
+  top: 36px;
+  height: auto;
+  display: none;
+}
+#timeline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  transition: height 500ms;
+}
+#timeline, #timeline * {
+  cursor: pointer;
+}
+#timeline:hover {
+  height: 32px;
+}
+#timeline-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  background-color: silver;
+}
+#timeline-fill {
+  background-color: #28A3F2;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  transition: width 500ms;
+}
+</style>
+<script>
+var log = [
+  { "action" : "valueChange", "id" : "names(input)", "value" : " chr \"dataset\"" },
+  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 1\n $ dataset: chr \"rock\"" },
+  { "action" : "valueChange", "id" : "input$dataset", "value" : " chr \"rock\"" },
+  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:2] \"caption\" \"dataset\"" },
+  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 2\n $ caption: chr \"Data Summary\"\n $ dataset: chr \"rock\"" },
+  { "action" : "valueChange", "id" : "input$caption", "value" : " chr \"Data Summary\"" },
+  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:3] \"caption\" \"dataset\" \"obs\"" },
+  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Data Summary\"\n $ obs    : num 10\n $ dataset: chr \"rock\"" },
+  { "action" : "valueChange", "id" : "input$obs", "value" : " num 10" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr \"output_caption_hidden\"" },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 1\n $ output_caption_hidden: logi FALSE" },
+  { "action" : "valueChange", "id" : "clientData$output_caption_hidden", "value" : " logi FALSE" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:2] \"output_caption_hidden\" \"output_summary_hidden\"" },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 2\n $ output_caption_hidden: logi FALSE\n $ output_summary_hidden: logi FALSE" },
+  { "action" : "valueChange", "id" : "clientData$output_summary_hidden", "value" : " logi FALSE" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:3] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\"" },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 3\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ output_summary_hidden: logi FALSE" },
+  { "action" : "valueChange", "id" : "clientData$output_view_hidden", "value" : " logi FALSE" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:4] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 4\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ output_summary_hidden: logi FALSE" },
+  { "action" : "valueChange", "id" : "clientData$pixelratio", "value" : " num 2" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:5] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 5\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"" },
+  { "action" : "valueChange", "id" : "clientData$url_protocol", "value" : " chr \"http:\"" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:6] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 6\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"" },
+  { "action" : "valueChange", "id" : "clientData$url_hostname", "value" : " chr \"localhost\"" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:7] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 7\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"" },
+  { "action" : "valueChange", "id" : "clientData$url_port", "value" : " chr \"8100\"" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:8] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 8\n $ url_pathname         : chr \"/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"" },
+  { "action" : "valueChange", "id" : "clientData$url_pathname", "value" : " chr \"/\"" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:9] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 9\n $ url_pathname         : chr \"/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"" },
+  { "action" : "valueChange", "id" : "clientData$url_search", "value" : " chr \"\"" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:10] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 10\n $ url_pathname         : chr \"/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ url_hash_initial     : chr \"\"\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"" },
+  { "action" : "valueChange", "id" : "clientData$url_hash_initial", "value" : " chr \"\"" },
+  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:11] \"allowDataUriScheme\" \"output_caption_hidden\" \"output_summary_hidden\" ..." },
+  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 11\n $ allowDataUriScheme   : logi TRUE\n $ url_pathname         : chr \"/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ url_hash_initial     : chr \"\"\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"" },
+  { "action" : "valueChange", "id" : "clientData$allowDataUriScheme", "value" : " logi TRUE" },
+  { "action" : "ctx", "id" : "1", "label" : "output$caption <- renderText({ \n    input$caption\n})", "type" : "observer", "prevId" : "" },
+  { "action" : "invalidate", "id" : "1" },
+  { "action" : "ctx", "id" : "2", "label" : "output$summary <- renderPrint({ \n    dataset <- datasetInput()\n    summary(dataset)\n})", "type" : "observer", "prevId" : "" },
+  { "action" : "invalidate", "id" : "2" },
+  { "action" : "ctx", "id" : "3", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "" },
+  { "action" : "invalidate", "id" : "3" },
+  { "action" : "ctx", "id" : "4", "label" : "output$caption <- renderText({ \n    input$caption\n})", "type" : "observer", "prevId" : "1" },
+  { "action" : "enter", "id" : "4" },
+  { "action" : "dep", "id" : "4", "dependsOn" : "input$caption" },
+  { "action" : "exit", "id" : "4" },
+  { "action" : "ctx", "id" : "5", "label" : "output$summary <- renderPrint({ \n    dataset <- datasetInput()\n    summary(dataset)\n})", "type" : "observer", "prevId" : "2" },
+  { "action" : "enter", "id" : "5" },
+  { "action" : "ctx", "id" : "6", "label" : "reactive({ \n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n})", "type" : "observable", "prevId" : "" },
+  { "action" : "enter", "id" : "6" },
+  { "action" : "dep", "id" : "6", "dependsOn" : "input$dataset" },
+  { "action" : "exit", "id" : "6" },
+  { "action" : "depId", "id" : "5", "dependsOn" : "6" },
+  { "action" : "exit", "id" : "5" },
+  { "action" : "ctx", "id" : "7", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "3" },
+  { "action" : "enter", "id" : "7" },
+  { "action" : "depId", "id" : "7", "dependsOn" : "6" },
+  { "action" : "dep", "id" : "7", "dependsOn" : "input$obs" },
+  { "action" : "exit", "id" : "7" },
+  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:3] \"caption\" \"dataset\" \"obs\"" },
+  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Pressure Summary\"\n $ obs    : num 10\n $ dataset: chr \"rock\"" },
+  { "action" : "valueChange", "id" : "input$caption", "value" : " chr \"Pressure Summary\"" },
+  { "action" : "invalidate", "id" : "4" },
+  { "action" : "ctx", "id" : "8", "label" : "output$caption <- renderText({ \n    input$caption\n})", "type" : "observer", "prevId" : "4" },
+  { "action" : "enter", "id" : "8" },
+  { "action" : "dep", "id" : "8", "dependsOn" : "input$caption" },
+  { "action" : "exit", "id" : "8" },
+  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:3] \"caption\" \"dataset\" \"obs\"" },
+  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Pressure Summary\"\n $ obs    : num 10\n $ dataset: chr \"pressure\"" },
+  { "action" : "valueChange", "id" : "input$dataset", "value" : " chr \"pressure\"" },
+  { "action" : "invalidate", "id" : "6" },
+  { "action" : "invalidate", "id" : "5" },
+  { "action" : "invalidate", "id" : "7" },
+  { "action" : "ctx", "id" : "9", "label" : "output$summary <- renderPrint({ \n    dataset <- datasetInput()\n    summary(dataset)\n})", "type" : "observer", "prevId" : "5" },
+  { "action" : "enter", "id" : "9" },
+  { "action" : "ctx", "id" : "10", "label" : "reactive({ \n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n})", "type" : "observable", "prevId" : "6" },
+  { "action" : "enter", "id" : "10" },
+  { "action" : "dep", "id" : "10", "dependsOn" : "input$dataset" },
+  { "action" : "exit", "id" : "10" },
+  { "action" : "depId", "id" : "9", "dependsOn" : "10" },
+  { "action" : "exit", "id" : "9" },
+  { "action" : "ctx", "id" : "11", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "7" },
+  { "action" : "enter", "id" : "11" },
+  { "action" : "depId", "id" : "11", "dependsOn" : "10" },
+  { "action" : "dep", "id" : "11", "dependsOn" : "input$obs" },
+  { "action" : "exit", "id" : "11" },
+  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:3] \"caption\" \"dataset\" \"obs\"" },
+  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Pressure Summary\"\n $ obs    : num 15\n $ dataset: chr \"pressure\"" },
+  { "action" : "valueChange", "id" : "input$obs", "value" : " num 15" },
+  { "action" : "invalidate", "id" : "11" },
+  { "action" : "ctx", "id" : "12", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "11" },
+  { "action" : "enter", "id" : "12" },
+  { "action" : "depId", "id" : "12", "dependsOn" : "10" },
+  { "action" : "dep", "id" : "12", "dependsOn" : "input$obs" },
+  { "action" : "exit", "id" : "12" }
+];
+try {
+  log = __DATA__;
+} catch (e) {}
+
+var nodes = {};
+var nodeList = [];
+var nodeSelection = null;
+var links = [];
+var linkSelection = null;
+
+var node, link;  // d3 selections
+
+var MAX_LINES = 6;
+
+var force = d3.layout.force()
+    .charge(-100)
+    .nodes(nodeList)
+    .links(links);
+force.on('tick', onTick);
+
+function pathDataForNode(node) {
+  switch (node.type) {
+    case 'observer':
+      return 'M -25,-50  c -75,0 -75,100 0,100  l 100,0  l 0,-100 Z';
+    case 'observable':
+      return 'M -25,-50  c -75,0 -75,100 0,100  l 60,0  l 50,-50  l -50,-50  Z';
+    case 'value':
+      return 'M -50,-50 l 0,100 l 100,0  l 50,-50  l -50,-50  Z';
+  }
+}
+
+function getSourceCoords(node) {
+  switch (node.type) {
+    case 'observer':
+    case 'observable':
+      return {x: node.x - 5, y: node.y};
+    default:
+      return {x: node.x, y: node.y};
+  }
+}
+
+function getTargetCoords(node) {
+  switch (node.type) {
+    case 'observable':
+      return {x: node.x + 7, y: node.y};
+    case 'value':
+      return {x: node.x + 8, y: node.y};
+    default:
+      return {x: node.x, y: node.y};
+  }
+}
+
+function multilineTextNode(node) {
+  var MAX_LINES = 6;
+  var fade = false;
+  var el = d3.select(this);
+  var lines = el.text().split('\n');
+  if (lines.length > MAX_LINES) {
+    lines.splice(MAX_LINES);
+    fade = true;
+  }
+  el.text('');
+  var tspan = el.selectAll('tspan').data(lines);
+  tspan.enter().append('tspan');
+  tspan
+      .attr('x', 8)
+      .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
+      .attr('opacity', function(line, i) {
+        if (!fade)
+          return 1;
+        return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
+      })
+      .text(function(line) { return line; });
+}
+
+function update() {
+  force.size([document.documentElement.clientWidth / 4,
+              document.documentElement.clientHeight / 4]);
+
+  var layoutDirty = false;
+
+  node = d3.select('#nodes').selectAll('.node').data(nodeList);
+  layoutDirty = layoutDirty || !node.enter().empty() || !node.exit().empty();
+  var newG = node.enter().append('g')
+      .attr('class', function(n) {return 'node ' + n.type;})
+      .attr('r', 5)
+      // don't show until next tick
+      .style('display', 'none')
+      .on('mousedown', function() {
+        d3.event.stopPropagation();
+      })
+      .on('mouseover', function(n) {
+        $('#description').text(n.label);
+      })
+      .on('mouseout', function(d, i) {
+        $('#description').html('');
+      })
+      .call(force.drag);
+  newG.append('path')
+      .attr('transform', 'scale(0.08)')
+      .attr('stroke', 'black')
+      .attr('stroke-width', 4)
+      .attr('fill', 'white')
+      .attr('d', pathDataForNode);
+  newG.append('text')
+      .attr('x', 3)
+      .attr('y', 0)
+      .attr('font-size', 3.25)
+      .attr('transform', function(n) {
+        if (n.type !== 'observer')
+          return 'translate(1.5, 0)';
+        else
+          return null;
+      })
+  node.exit().remove();
+  node
+      .classed('invalidated', function(n) { return n.invalidated; })
+      .classed('running', function(n) { return n.running; })
+      .classed('changed', function(n) { return n.changed; })
+      .attr('fill', function(n) {
+        if (n.invalidated)
+          return "url(#diagonalHatch)";
+        else
+          return null;
+      });
+  var tspan = node.selectAll('text').filter(function(n) {
+    // This filter is used to disregard all nodes whose labels have
+    // not changed since the last time we updated them.
+    var changed = n.label !== this.label;
+    this.label = n.label;
+    return changed;
+  }).selectAll('tspan')
+    .data(function(n) {
+      var lines = n.label.replace(/ /g, '\xA0').split('\n');
+      if (lines.length > MAX_LINES) {
+        lines.splice(MAX_LINES);
+      }
+      return lines;
+    });
+  tspan.enter().append('tspan');
+  tspan.exit().remove();
+  tspan
+      .attr('x', 8)
+      .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
+      .attr('opacity', function(line, i) {
+        return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
+      })
+      .text(function(line) { return line; });
+
+  link = d3.select('#links').selectAll('.link').data(links);
+  layoutDirty = layoutDirty || !link.enter().empty() || !link.exit().empty();
+  link.enter().append('path')
+      .attr('class', 'link')
+      .attr('marker-mid', 'url(#triangle)');
+  link.exit().remove();
+
+  if (layoutDirty) {
+    force
+      .nodes(nodeList.filter(function(n) {return !n.hide;}))
+      .start();
+    layoutDirty = false;
+  }
+}
+
+function onTick() {
+  node
+      .style('display', null)
+      .attr('transform', function(n) {
+        return 'translate(' + n.x + ' ' + n.y + ')';
+      });
+  link
+      .attr('d', function(link) {
+        var source = getSourceCoords(link.source);
+        var target = getTargetCoords(link.target)
+        var mid = {
+          x: (source.x + target.x) / 2,
+          y: (source.y + target.y) / 2
+        }
+        return 'M' + source.x + ',' + source.y +
+          ' L' + mid.x + ',' + mid.y +
+          ' L' + target.x + ',' + target.y;
+      });
+}
+
+function createNodeWithUndo(data) {
+  var node;
+  if (!data.prevId) {
+    node = {
+      label: data.label,
+      type: data.type,
+      hide: data.hide
+    };
+    nodes[data.id] = node;
+    pushUndo(function() {
+      delete nodes[data.id];
+    });
+    if (!node.hide) {
+      nodeList.push(node);
+      pushUndo(function() {
+        nodeList.pop();
+      });
+    }
+  } else {
+    node = nodes[data.prevId];
+    var oldLabel = node.label;
+    var oldInvalidated = node.invalidated;
+    delete nodes[data.prevId];
+    nodes[data.id] = node;
+    node.label = data.label;
+    node.invalidated = false;
+    pushUndo(function() {
+      node.label = oldLabel;
+      node.invalidated = oldInvalidated;
+      delete nodes[data.id];
+      nodes[data.prevId] = node;
+    });
+  }
+}
+
+Array.prototype.pushWithUndo = function(value) {
+  var self = this;
+  this.push(value);
+  pushUndo(function() {
+    self.pop();
+  });
+}
+
+Array.prototype.shiftWithUndo = function(value) {
+  var self = this;
+  var value = this.shift();
+  pushUndo(function() {
+    self.unshift(value);
+  });
+  return value;
+}
+
+var undoStack = [];
+var currentUndos = null;
+function startUndoScope() {
+  if (currentUndos !== null)
+    throw new Error('Illegal state');
+  currentUndos = [];
+}
+function pushUndo(func) {
+  currentUndos.push(func);
+}
+function endUndoScope() {
+  var localUndos = currentUndos;
+  undoStack.push(function() {
+    while (localUndos.length) {
+      localUndos.pop()();
+    }
+  });
+  currentUndos = null;
+}
+function undo() {
+  if (undoStack.length) {
+    undoStack.pop()();
+    update();
+    return true;
+  }
+  return false;
+}
+function undoAll() {
+  while (undo()) {}
+}
+
+// Here we monkeypatch Math.random to take part in the undo mechanism.
+// This allows "random" d3 force-layout decisions to be reproducible.
+// If we don't do this, then doing/undoing/redoing a node creation step
+// looks very confusing, as the node comes flying in from a different
+// direction each time.
+var trueRandom = Math.random;
+Math.random = (function() {
+  var randomStack = [];
+  return function() {
+    if (!currentUndos)
+      return trueRandom();
+
+    var value;
+    if (randomStack.length > 0) {
+      value = randomStack.pop();
+    }
+    else {
+      value = trueRandom();
+    }
+    pushUndo(function() {
+      randomStack.push(value);
+    });
+    return value;
+  };
+})();
+
+var callbacks = {
+  ctx: function(data) {
+    createNodeWithUndo(data);
+    return true;
+  },
+  dep: function(data) {
+    var dependsOn = nodes[data.dependsOn];
+    if (!dependsOn) {
+      createNodeWithUndo({id: data.dependsOn, label: data.dependsOn, type: 'value'});
+      dependsOn = nodes[data.dependsOn];
+    }
+    if (dependsOn.hide) {
+      dependsOn.hide = false;
+      nodeList.push(dependsOn);
+      pushUndo(function() {
+        dependsOn.hide = true;
+        nodeList.pop();
+      });
+    }
+    links.push({
+      source: nodes[data.id],
+      target: nodes[data.dependsOn]
+    });
+    pushUndo(function() {
+      links.pop();
+    });
+  },
+  depId: function(data) {
+    links.push({
+      source: nodes[data.id],
+      target: nodes[data.dependsOn]
+    });
+    pushUndo(function() {
+      links.pop();
+    });
+  },
+  invalidate: function(data) {
+    var node = nodes[data.id];
+    if (node.invalidated)
+      throw new Error('Illegal sequence');
+
+    node.invalidated = true;
+    pushUndo(function() {
+      node.invalidated = false;
+    });
+
+    var origLinks = links;
+    links = links.filter(function(link) {
+      return link.source !== node;
+    });
+    pushUndo(function() {
+      links = origLinks;
+    });
+  },
+  valueChange: function(data) {
+    var existed = !!nodes[data.id];
+    createNodeWithUndo({
+      id: data.id,
+      label: data.id + ' = ' + data.value,
+      type: 'value',
+      prevId: nodes[data.id] ? data.id : null,
+      hide: existed ? nodes[data.id].hide : true
+    });
+    if (!existed || nodes[data.id].hide)
+      return true;
+    nodes[data.id].changed = true;
+    pushUndo(function() {
+      nodes[data.id].changed = false;
+    });
+    executeBeforeNextCommand.pushWithUndo(function() {
+      nodes[data.id].changed = false;
+      pushUndo(function() {
+        nodes[data.id].changed = true;
+      });
+    });
+  },
+  enter: function(data) {
+    var node = nodes[data.id];
+    node.running = true;
+    pushUndo(function() {
+      node.running = false;
+    });
+  },
+  exit: function(data) {
+    var node = nodes[data.id];
+    node.running = false;
+    pushUndo(function() {
+      node.running = true;
+    });
+  }
+};
+
+function processMessage(data, suppressUpdate) {
+  console.log(JSON.stringify(data));
+  if (!callbacks.hasOwnProperty(data.action))
+    throw new Error('Unknown action ' + data.action);
+  var result = callbacks[data.action].call(callbacks, data);
+  if (!suppressUpdate)
+    update();
+  return result;
+}
+
+var executeBeforeNextCommand = [];
+function doNext(suppressUpdate) {
+  if (!log.length)
+    return;
+
+  startUndoScope();
+  while (executeBeforeNextCommand.length) {
+    executeBeforeNextCommand.shiftWithUndo()();
+  }
+  while (log.length) {
+    var result = (function() {
+      var message = log.shift();
+      pushUndo(function() {
+        log.unshift(message);
+      })
+      return processMessage(message, suppressUpdate);
+    })();
+    if (!result)
+      break;
+  }
+  if (!log.length) {
+    $('#ended').fadeIn(1500);
+    pushUndo(function() {
+      $('#ended').hide();
+    });
+  }
+  step++;
+  updateTimeline();
+  pushUndo(function() {
+    step--;
+    updateTimeline();
+  });
+  endUndoScope();
+}
+
+function countSteps() {
+  if (undoStack.length !== 0) {
+    throw new Error(
+      'Illegal state; must call countSteps before execution begins');
+  }
+  var steps = 0;
+  while (log.length) {
+    doNext();
+    steps++;
+  }
+  while (undoStack.length)
+    undoStack.pop()();
+  return steps;
+}
+
+function updateTimeline() {
+  $('#timeline-fill').width((step/totalSteps*100) + '%');
+}
+
+function zoom() {
+  var scale = d3.event.scale;
+  var x = d3.event.translate[0];
+  var y = d3.event.translate[1];
+  d3.select('#viz').attr('transform', 'scale(' + scale + ') translate(' + x/scale + ' ' + y/scale + ')');
+}
+
+// The total number of steps, as far as the user is concerned, in the log.
+// This may/will be different than the number of log entries, since each
+// step may include more than one log entry.
+var totalSteps;
+// The current step we're on.
+var step;
+$(function() {
+  d3.select('svg').call(d3.behavior.zoom().scale(4).on('zoom', zoom));
+  $(document.body).on('keydown', function(e) {
+    if (e.which === 39 || e.which === 32) { // space, right
+      // Move one step ahead
+      doNext();
+    }
+    if (e.which === 37) { // left
+      // Move one step back
+      undo();
+    }
+    if (e.which === 35) { // end
+      // Seek to end
+      while (log.length) {
+        doNext();
+      }
+    }
+    if (e.which === 36) { // home
+      // Seek to beginning
+      undoAll();
+    }
+  });
+
+  // Timeline click and scrub
+  $('#timeline').on('click mousemove', function(e) {
+    // Make sure left mouse button is down.
+    // Firefox is stupid; e.which is always 1 on mousemove events,
+    // even when button is not down!! So read e.originalEvent.buttons.
+    if (typeof(e.originalEvent.buttons) !== 'undefined') {
+      if (e.originalEvent.buttons !== 1)
+        return;
+    } else if (e.which !== 1) {
+      return;
+    }
+
+    var timeline = e.currentTarget;
+    var pos = e.offsetX || e.originalEvent.layerX;
+    var width = timeline.offsetWidth;
+    var targetStep = Math.round((pos/width) * totalSteps);
+    while (step < targetStep) {
+      doNext();
+    }
+    while (step > targetStep && step != 1) {
+      undo();
+    }
+  });
+
+  totalSteps = countSteps();
+  step = 0;
+
+  doNext();
+
+  // don't allow undoing past initial state
+  while (undoStack.length)
+    undoStack.pop();
+  executeBeforeNextCommand.push(function() {
+    $('#instructions').fadeOut(1000);
+    // It's weird for the instructions to fade back in, so no pushUndo here
+  });
+});
+</script>
+<body>
+  <svg>
+    <defs>
+      <marker id="triangle"
+              viewBox="0 0 10 10" 
+              refX="5" refY="5"
+              markerWidth="6" 
+              markerHeight="6"
+              orient="auto">
+          <path d="M 10 0 L 0 5 L 10 10 z" />
+      </marker>
+      <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="1" height="1">
+        <path stroke="black" stroke-width="0.25" fill="none"
+          d="M-1,1 l2,-2
+             M0,4 l4,-4
+             M3,5 l2,-2" />
+      </pattern>
+    </defs>
+    <g id="viz" transform="scale(4)">
+      <g id="links"></g>
+      <g id="nodes"></g>
+    </g>
+  </svg>
+  <div id="instructions">
+    Press right-arrow to advance
+  </div>
+  <div id="ended" style="display: none;">
+    <strong>You&rsquo;ve reached the end</strong><br/>Press the Home key to start over
+  </div>
+  <div id="legend">
+    <div class="color normal"></div> Normal<br/>
+    <div class="color invalidated"></div> Invalidated<br/>
+    <div class="color running"></div> Running<br/>
+  </div>
+  <br/>
+  <pre id="description"><br/></pre>
+  <div id="timeline">
+    <div id="timeline-bg">
+      <div id="timeline-fill"></div>
+    </div>
+  </div>
+</body>
+</html>

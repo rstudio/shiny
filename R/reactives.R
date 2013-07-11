@@ -978,8 +978,8 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #' @export
 isolate <- function(expr) {
   ctx <- Context$new('[isolate]', type='isolate')
+  on.exit(ctx$invalidate())
   ctx$run(function() {
     expr
   })
-  ctx$invalidate()
 }

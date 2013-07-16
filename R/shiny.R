@@ -1255,8 +1255,6 @@ runApp <- function(appDir=getwd(),
   }
 
   require(shiny)
-
-  cat(paste("\nStarting Shiny with process ID: '",Sys.getpid(),"'\n", sep=""))
   
   if (is.character(appDir)) {
     orig.wd <- getwd()

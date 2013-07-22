@@ -85,7 +85,8 @@ ShinySession <- setRefClass(
                        onFlushed         = .self$onFlushed,
                        isClosed          = .self$isClosed,
                        input             = .self$input,
-                       output            = .self$output)
+                       output            = .self$output,
+                       request           = websocket$request)
       
       .write(toJSON(list(config = list(
         workerId = .workerId,

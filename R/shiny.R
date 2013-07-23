@@ -48,7 +48,7 @@ ShinySession <- setRefClass(
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
     closed = 'logical',
-    session = 'list',      # Object for the server app to access session stuff
+    session = 'environment',      # Object for the server app to access session stuff
     .workerId = 'character'
   ),
   methods = list(
@@ -77,16 +77,21 @@ ShinySession <- setRefClass(
       .outputs <<- list()
       .outputOptions <<- list()
 
-      session <<- list(clientData        = clientData,
-                       sendCustomMessage = .self$.sendCustomMessage,
-                       sendInputMessage  = .self$.sendInputMessage,
-                       onSessionEnded    = .self$onSessionEnded,
-                       onFlush           = .self$onFlush,
-                       onFlushed         = .self$onFlushed,
-                       isClosed          = .self$isClosed,
-                       input             = .self$input,
-                       output            = .self$output,
-                       request           = websocket$request)
+      session <<- new.env(parent=emptyenv())
+      session$clientData        <<- clientData
+      session$sendCustomMessage <<- .self$.sendCustomMessage
+      session$sendInputMessage  <<- .self$.sendInputMessage
+      session$onSessionEnded    <<- .self$onSessionEnded
+      session$onFlush           <<- .self$onFlush
+      session$onFlushed         <<- .self$onFlushed
+      session$isClosed          <<- .self$isClosed
+      session$input             <<- .self$input
+      session$output            <<- .self$output
+      session$.impl             <<- .self
+      # session$request should throw an error if httpuv doesn't have
+      # websocket$request, but don't throw it until a caller actually
+      # tries to access session$request
+      delayedAssign('request', websocket$request, assign.env = session)
       
       .write(toJSON(list(config = list(
         workerId = .workerId,

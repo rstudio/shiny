@@ -19,10 +19,18 @@ For an introduction and examples, visit the [Shiny homepage](http://www.rstudio.
 
 ## Installation
 
-From an R console:
+To install the stable version from CRAN, simply run the following from an R console:
 
 ```r
 install.packages("shiny")
+```
+
+To install the latest development builds directly from GitHub, run this instead:
+
+```r
+if (!require("devtools"))
+  install.packages("devtools")
+devtools::install_github("shiny", "rstudio")
 ```
 
 ## Getting Started

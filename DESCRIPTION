@@ -37,6 +37,7 @@ Collate:
     'timer.R'
     'tags.R'
     'cache.R'
+    'graph.R'
     'react.R'
     'reactives.R'
     'fileupload.R'

@@ -1,12 +1,16 @@
 \name{reactive}
+\alias{is.reactive}
 \alias{reactive}
 \title{Create a reactive expression}
 \usage{
   reactive(x, env = parent.frame(), quoted = FALSE,
     label = NULL)
+
+  is.reactive(x)
 }
 \arguments{
-  \item{x}{An expression (quoted or unquoted).}
+  \item{x}{For \code{reactive}, an expression (quoted or
+  unquoted). For \code{is.reactive}, an object to test.}
 
   \item{env}{The parent environment for the reactive
   expression. By default, this is the calling environment,
@@ -20,6 +24,9 @@
 
   \item{label}{A label for the reactive expression, useful
   for debugging.}
+}
+\value{
+  a function, wrapped in a S3 class "reactive"
 }
 \description{
   Wraps a normal expression to create a reactive

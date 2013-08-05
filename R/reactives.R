@@ -199,6 +199,9 @@ setOldClass("reactivevalues")
   structure(list(impl=values), class='reactivevalues', readonly=readonly)
 }
 
+#' @export
+is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
+
 #' @S3method $ reactivevalues
 `$.reactivevalues` <- function(x, name) {
   .subset2(x, 'impl')$get(name)

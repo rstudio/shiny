@@ -8,11 +8,6 @@
     separator = " to ")
 }
 \arguments{
-  \item{inputId}{Input variable to assign the control's
-  value to.}
-
-  \item{label}{Display label for the control.}
-
   \item{start}{The initial start date. Either a Date
   object, or a string in \code{yyyy-mm-dd} format. If NULL
   (the default), will use the current date in the client's
@@ -22,6 +17,14 @@
   a string in \code{yyyy-mm-dd} format. If NULL (the
   default), will use the current date in the client's time
   zone.}
+
+  \item{separator}{String to display between the start and
+  end input boxes.}
+
+  \item{inputId}{Input variable to assign the control's
+  value to.}
+
+  \item{label}{Display label for the control.}
 
   \item{min}{The minimum allowed date. Either a Date
   object, or a string in \code{yyyy-mm-dd} format.}
@@ -46,9 +49,6 @@
   "ms", "nb", "nl", "pl", "pt", "pt", "ro", "rs",
   "rs-latin", "ru", "sk", "sl", "sv", "sw", "th", "tr",
   "uk", "zh-CN", and "zh-TW".}
-
-  \item{separator}{String to display between the start and
-  end input boxes.}
 }
 \description{
   Creates a pair of text inputs which, when clicked on,

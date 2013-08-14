@@ -829,29 +829,13 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 #'   \item \code{DD} Full weekday name
 #' }
 #'
-#' @param inputId Input variable to assign the control's value to.
-#' @param label Display label for the control.
+#' @inheritParams dateInput
 #' @param start The initial start date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
 #'   date in the client's time zone.
 #' @param end The initial end date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
 #'   date in the client's time zone.
-#' @param min The minimum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
-#' @param max The maximum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
-#' @param format The format of the date to display in the browser. Defaults to
-#'   \code{"yyyy-mm-dd"}.
-#' @param startview The date range shown when the input object is first
-#'   clicked. Can be "month" (the default), "year", or "decade".
-#' @param weekstart Which day is the start of the week. Should be an integer
-#'   from 0 (Sunday) to 6 (Saturday).
-#' @param language The language used for month and day names. Default is "en".
-#'   Other valid values include "bg", "ca", "cs", "da", "de", "el", "es", "fi",
-#'   "fr", "he", "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv", "ms",
-#'   "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs-latin", "ru", "sk", "sl",
-#'   "sv", "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".
 #' @param separator String to display between the start and end input boxes.
 #'
 #' @family input elements

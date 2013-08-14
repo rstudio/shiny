@@ -626,8 +626,10 @@ actionButton <- function(inputId, label) {
 #' @param label A descriptive label to be displayed with the widget.
 #' @param min The minimum value (inclusive) that can be selected.
 #' @param max The maximum value (inclusive) that can be selected.
-#' @param value The initial value of the slider. A warning will be issued if the
-#'   value doesn't fit between \code{min} and \code{max}.
+#' @param value The initial value of the slider. A numeric vector of length
+#'   one will create a regular slider; a numeric vector of length two will
+#'   create a double-ended range slider.. A warning will be issued if the
+#'   value doesn't fit between \code{min} and \code{max}. 
 #' @param step Specifies the interval between each selectable value on the 
 #'   slider (\code{NULL} means no restriction).
 #' @param round \code{TRUE} to round all values to the nearest integer; 

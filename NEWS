@@ -39,7 +39,8 @@ shiny 0.6.0.99
   the proxy HTTP request that was made from the Shiny Server process to the R
   process, not the request that was made from the web browser to Shiny Server.)
 
-* Fix `getComputedStyle` issue, for IE8 browser compatibility (#196).
+* Fix `getComputedStyle` issue, for IE8 browser compatibility (#196). Note:
+  Shiny Server is still required for IE8/9 compatibility.
 
 shiny 0.6.0
 --------------------------------------------------------------------------------

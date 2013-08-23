@@ -19,9 +19,11 @@
   \item{max}{The maximum value (inclusive) that can be
   selected.}
 
-  \item{value}{The initial value of the slider. A warning
-  will be issued if the value doesn't fit between
-  \code{min} and \code{max}.}
+  \item{value}{The initial value of the slider. A numeric
+  vector of length one will create a regular slider; a
+  numeric vector of length two will create a double-ended
+  range slider.. A warning will be issued if the value
+  doesn't fit between \code{min} and \code{max}.}
 
   \item{step}{Specifies the interval between each
   selectable value on the slider (\code{NULL} means no

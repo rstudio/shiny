@@ -1171,20 +1171,27 @@ startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
           shinysession$dispatch(msg)
         )
         shinysession$manageHiddenOutputs()
-        if (exists(".shiny__stdout") && exists("HTTP_GUID", env=ws$request)){
-          # safe to assume we're in shiny-server, eNter a flushReact
-          writeLines(paste("_n_flushReact ", get("HTTP_GUID", env=ws$request), 
+
+        if (exists(".shiny__stdout", globalenv()) &&
+            exists("HTTP_GUID", ws$request)) {
+          # safe to assume we're in shiny-server
+          shiny_stdout <- get(".shiny__stdout", globalenv())
+
+          # eNter a flushReact
+          writeLines(paste("_n_flushReact ", get("HTTP_GUID", ws$request),
                            " @ ", sprintf("%.3f", as.numeric(Sys.time())), 
-                           sep=""), con=.shiny__stdout)
-          flush(.shiny__stdout)
-        }
-        flushReact()
-        if (exists(".shiny__stdout") && exists("HTTP_GUID", env=ws$request)){
-          # safe to assume we're in shiny-server, eXit a flushReact
-          writeLines(paste("_x_flushReact ", get("HTTP_GUID", env=ws$request), 
+                           sep=""), con=shiny_stdout)
+          flush(shiny_stdout)
+
+          flushReact()
+
+          # eXit a flushReact
+          writeLines(paste("_x_flushReact ", get("HTTP_GUID", ws$request),
                            " @ ", sprintf("%.3f", as.numeric(Sys.time())),
-                           sep=""), con=.shiny__stdout)
-          flush(.shiny__stdout)
+                           sep=""), con=shiny_stdout)
+          flush(shiny_stdout)
+        } else {
+          flushReact()
         }
         lapply(appsByToken$values(), function(shinysession) {
           shinysession$flushOutput()

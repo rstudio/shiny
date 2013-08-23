@@ -1,6 +1,40 @@
 shiny 0.6.0.99
 --------------------------------------------------------------------------------
 
+* Stopped sending websocket subprotocol. This fixes a compatibility issue with
+  Google Chromium.
+
+* The `input` and `output` objects are now also accessible via `session$input`
+  and `session$output`.
+
+* Added click and hover events for static plots.
+
+* Added optional logging of the execution states of a reactive program, and
+  tools for visualizing the log data.
+
+* Added timestamps to reactive log.
+
+* Added `includeScript()` and `includeCSS()` functions.
+
+* Reactive expressions now have class="reactive" attribute. Also added
+  `is.reactive()` and `is.reactivevalues()` functions.
+
+* New `stopApp()` function, which stops an app and returns a value.
+
+* Added the `shiny.usecairo` option, which tells Shiny to not use Cairo for PNG
+  output even when it is installed.
+
+* Speed increases for `selectInput()` and `radioButtons()`, and their
+  corresponding updater functions, for when they have many options.
+
+* Added `tagSetChildren()` and `tagAppendChildren()` functions.
+
+* Added a worker ID for each Shiny session.
+
+* The websocket object is now accessible from the `session` object, as
+  `session$request`.
+
+* Fix `getComputedStyle` issue, for IE8 browser compatibility (#196).
 
 shiny 0.6.0
 --------------------------------------------------------------------------------

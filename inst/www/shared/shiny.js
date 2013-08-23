@@ -461,7 +461,7 @@
       var self = this;
 
       var createSocketFunc = exports.createSocket || function() {
-        var ws = new WebSocket('ws://' + window.location.host + '/websocket');
+        var ws = new WebSocket('ws://' + window.location.host + '/websocket/');
         ws.binaryType = 'arraybuffer';
         return ws;
       };

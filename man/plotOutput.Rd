@@ -19,9 +19,9 @@
   \item{clickId}{If not \code{NULL}, the plot will send
   coordinates to the server whenever it is clicked. This
   information will be accessible on the \code{input} object
-  using \code{input$\emph{clickId}}. The value will be a
-  named list or vector with \code{x} and \code{y} elements
-  indicating the mouse position in user units.}
+  using \code{input$}\emph{\code{clickId}}. The value will
+  be a named list or vector with \code{x} and \code{y}
+  elements indicating the mouse position in user units.}
 
   \item{hoverId}{If not \code{NULL}, the plot will send
   coordinates to the server whenever the mouse pauses on

@@ -173,7 +173,7 @@ ReactiveValues <- setRefClass(
 #' @param ... Objects that will be added to the reactivevalues object. All of
 #'   these objects must be named.
 #'
-#' @seealso \code{\link{isolate}}.
+#' @seealso \code{\link{isolate}} and \code{\link{is.reactivevalues}}.
 #'
 #' @export
 reactiveValues <- function(...) {
@@ -199,6 +199,12 @@ setOldClass("reactivevalues")
   structure(list(impl=values), class='reactivevalues', readonly=readonly)
 }
 
+#' Checks whether an object is a reactivevalues object
+#'
+#' Checks whether its argument is a reactivevalues object.
+#'
+#' @param x The object to test.
+#' @seealso \code{\link{reactiveValues}}.
 #' @export
 is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 

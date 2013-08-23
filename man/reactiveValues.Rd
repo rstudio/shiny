@@ -42,6 +42,7 @@ values <- reactiveValues(a = 1, b = 2)
 isolate(values$a)
 }
 \seealso{
-  \code{\link{isolate}}.
+  \code{\link{isolate}} and
+  \code{\link{is.reactivevalues}}.
 }
 

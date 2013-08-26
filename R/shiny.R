@@ -649,7 +649,7 @@ httpResponse <- function(status = 200,
   return(resp)
 }
 
-httpServer <- function(handlers) {
+httpServer <- function(handlers, sharedSecret) {
   handler <- joinHandlers(handlers)
 
   # TODO: Figure out what this means after httpuv migration
@@ -658,6 +658,13 @@ httpServer <- function(handlers) {
     filter <- function(req, response) response
   
   function(req) {
+    if (!is.null(sharedSecret)
+        && !identical(sharedSecret, req$HTTP_SHINY_SHARED_SECRET)) {
+      return(list(status=403,
+                  body='<h1>403 Forbidden</h1><p>Shared secret mismatch</p>',
+                  headers=list('Content-Type' = 'text/html')))
+    }
+
     response <- handler(req)
     if (is.null(response))
       response <- httpResponse(404, content="<h1>Not Found</h1>")
@@ -1056,6 +1063,11 @@ startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
   
   sys.www.root <- system.file('www', package='shiny')
   
+  # This value, if non-NULL, must be present on all HTTP and WebSocket
+  # requests as the Shiny-Shared-Secret header or else access will be
+  # denied (403 response for HTTP, and instant close for websocket).
+  sharedSecret <- getOption('shiny.sharedSecret', NULL)
+  
   httpuvCallbacks <- list(
     onHeaders = function(req) {
       maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
@@ -1083,8 +1095,13 @@ startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
                         httpHandlers,
                         sys.www.root,
                         resourcePathHandler,
-                        reactLogHandler)),
+                        reactLogHandler), sharedSecret),
     onWSOpen = function(ws) {
+      if (!is.null(sharedSecret)
+          && !identical(sharedSecret, ws$request$HTTP_SHINY_SHARED_SECRET)) {
+        ws$close()
+      }
+
       shinysession <- ShinySession$new(ws, workerId)
       appsByToken$set(shinysession$token, shinysession)
       

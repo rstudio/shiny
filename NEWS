@@ -42,6 +42,9 @@ shiny 0.6.0.99
 * Fix `getComputedStyle` issue, for IE8 browser compatibility (#196). Note:
   Shiny Server is still required for IE8/9 compatibility.
 
+* Add shiny.sharedSecret option, to require the HTTP header Shiny-Shared-Secret
+  to be set to the given value.
+
 shiny 0.6.0
 --------------------------------------------------------------------------------
 

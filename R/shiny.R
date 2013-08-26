@@ -12,7 +12,7 @@
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @import httpuv caTools RJSONIO xtable digest
+#' @import httpuv caTools RJSONIO xtable digest methods
 NULL
 
 suppressPackageStartupMessages({

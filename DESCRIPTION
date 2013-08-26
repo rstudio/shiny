@@ -16,7 +16,6 @@ Imports:
     stats,
     tools,
     utils,
-    datasets,
     methods,
     httpuv (>= 1.1.0),
     caTools,
@@ -24,6 +23,7 @@ Imports:
     xtable,
     digest
 Suggests:
+    datasets,
     markdown,
     Cairo,
     testthat

@@ -9,3 +9,4 @@
 ^\.gitignore$
 ^res$
 ^tools$
+^man-roxygen$

@@ -34,5 +34,13 @@ radioButtons("dist", "Distribution type:",
 }
 \seealso{
   \code{\link{updateRadioButtons}}
+
+  Other input.elements: \code{\link{actionButton}},
+  \code{\link{checkboxGroupInput}},
+  \code{\link{checkboxInput}}, \code{\link{dateInput}},
+  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
+  \code{\link{numericInput}}, \code{\link{selectInput}},
+  \code{\link{sliderInput}}, \code{\link{submitButton}},
+  \code{\link{textInput}}
 }
 

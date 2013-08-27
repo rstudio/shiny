@@ -16,4 +16,12 @@
   Creates an action button whose value is initially zero,
   and increments by one each time it is pressed.
 }
+\seealso{
+  Other input.elements: \code{\link{checkboxGroupInput}},
+  \code{\link{checkboxInput}}, \code{\link{dateInput}},
+  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
+  \code{\link{numericInput}}, \code{\link{radioButtons}},
+  \code{\link{selectInput}}, \code{\link{sliderInput}},
+  \code{\link{submitButton}}, \code{\link{textInput}}
+}
 

@@ -36,5 +36,12 @@ checkboxGroupInput("variable", "Variable:",
 \seealso{
   \code{\link{checkboxInput}},
   \code{\link{updateCheckboxGroupInput}}
+
+  Other input.elements: \code{\link{actionButton}},
+  \code{\link{checkboxInput}}, \code{\link{dateInput}},
+  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
+  \code{\link{numericInput}}, \code{\link{radioButtons}},
+  \code{\link{selectInput}}, \code{\link{sliderInput}},
+  \code{\link{submitButton}}, \code{\link{textInput}}
 }
 

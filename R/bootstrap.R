@@ -255,6 +255,7 @@ conditionalPanel <- function(condition, ...) {
 #' @param value Initial value
 #' @return A text input control that can be added to a UI definition.
 #' 
+#' @family input elements
 #' @seealso \code{\link{updateTextInput}}
 #'
 #' @examples
@@ -279,6 +280,7 @@ textInput <- function(inputId, label, value = "") {
 #' @param step Interval to use when stepping between min and max
 #' @return A numeric input control that can be added to a UI definition.
 #'
+#' @family input elements
 #' @seealso \code{\link{updateNumericInput}}
 #' 
 #' @examples
@@ -326,6 +328,8 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 #'   operation.}
 #' }
 #' 
+#' @family input elements
+#'
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
 #' @param multiple Whether the user should be allowed to select and upload 
@@ -363,6 +367,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
 #' @param value Initial value (\code{TRUE} or \code{FALSE}).
 #' @return A checkbox control that can be added to a UI definition.
 #' 
+#' @family input elements
 #' @seealso \code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
 #' 
 #' @examples
@@ -389,6 +394,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #' @param selected Names of items that should be initially selected, if any.
 #' @return A list of HTML elements that can be added to a UI definition.
 #'   
+#' @family input elements
 #' @seealso \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
 #'   
 #' @examples
@@ -483,6 +489,7 @@ choicesWithNames <- function(choices) {
 #' @param multiple Is selection of multiple items allowed?
 #' @return A select list control that can be added to a UI definition.
 #' 
+#' @family input elements
 #' @seealso \code{\link{updateSelectInput}}
 #'
 #' @examples
@@ -539,6 +546,7 @@ selectInput <- function(inputId,
 #' defaults to the first item)
 #' @return A set of radio buttons that can be added to a UI definition.
 #'
+#' @family input elements
 #' @seealso \code{\link{updateRadioButtons}}
 #' 
 #' @examples
@@ -593,6 +601,8 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
 #' @param text Button caption
 #' @return A submit button that can be added to a UI definition.
 #' 
+#' @family input elements
+#'
 #' @examples
 #' submitButton("Update View")
 #' @export
@@ -611,6 +621,8 @@ submitButton <- function(text = "Apply Changes") {
 #'   value.
 #' @param label The contents of the button--usually a text label, but you could
 #'   also use any other HTML, like an image.
+#'
+#' @family input elements
 #'
 #' @export
 actionButton <- function(inputId, label) {
@@ -647,6 +659,7 @@ actionButton <- function(inputId, label) {
 #'   settings; \code{FALSE} not to; or a custom settings list, such as those 
 #'   created using \code{\link{animationOptions}}.
 #'
+#' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
 #'   
 #' @details
@@ -735,6 +748,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'   "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs-latin", "ru", "sk", "sl",
 #'   "sv", "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".
 #'
+#' @family input elements
 #' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
 #'
 #' @examples
@@ -815,31 +829,16 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 #'   \item \code{DD} Full weekday name
 #' }
 #'
-#' @param inputId Input variable to assign the control's value to.
-#' @param label Display label for the control.
+#' @inheritParams dateInput
 #' @param start The initial start date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
 #'   date in the client's time zone.
 #' @param end The initial end date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
 #'   date in the client's time zone.
-#' @param min The minimum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
-#' @param max The maximum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
-#' @param format The format of the date to display in the browser. Defaults to
-#'   \code{"yyyy-mm-dd"}.
-#' @param startview The date range shown when the input object is first
-#'   clicked. Can be "month" (the default), "year", or "decade".
-#' @param weekstart Which day is the start of the week. Should be an integer
-#'   from 0 (Sunday) to 6 (Saturday).
-#' @param language The language used for month and day names. Default is "en".
-#'   Other valid values include "bg", "ca", "cs", "da", "de", "el", "es", "fi",
-#'   "fr", "he", "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv", "ms",
-#'   "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs-latin", "ru", "sk", "sl",
-#'   "sv", "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".
 #' @param separator String to display between the start and end input boxes.
 #'
+#' @family input elements
 #' @seealso \code{\link{dateInput}}, \code{\link{updateDateRangeInput}}
 #'
 #' @examples

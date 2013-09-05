@@ -16,7 +16,7 @@
   expression in a variable.}
 
   \item{deleteFile}{Should the file in \code{func()$src} be
-  deleted after it is sent to the client browser? Genrrally
+  deleted after it is sent to the client browser? Generally
   speaking, if the image is a temp file generated within
   \code{func}, then this should be \code{TRUE}; if the
   image is not a temp file, this should be \code{FALSE}.}

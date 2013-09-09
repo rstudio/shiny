@@ -457,11 +457,13 @@ manageNextPrev();
 $('a#next').click(function(e) {
    e.preventDefault();
    location.href = $('.nav li.active').nextAll('li:not(.nav-header)').first().find('a').attr('href');
+   $('html,body').scrollTop(0);
    manageNextPrev();
 });
 $('a#previous').click(function(e) {
    e.preventDefault();
    location.href = $('.nav li.active').prevAll('li:not(.nav-header)').first().find('a').attr('href');
+   $('html,body').scrollTop(0);
    manageNextPrev();
 });
 

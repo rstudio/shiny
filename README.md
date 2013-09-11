@@ -37,7 +37,7 @@ devtools::install_github("shiny", "rstudio")
 
 To learn more we highly recommend you check out the [Shiny Tutorial](http://rstudio.github.com/shiny/tutorial). The tutorial explains the framework in-depth, walks you through building a simple application, and includes extensive annotated examples.
 
-We hope you enjoy using Shiny. As you learn more and work with the package please [let us know](https://github.com/rstudio/shiny/issues) what problems you encounter and how you'd like to see Shiny evolve.
+We hope you enjoy using Shiny. If you have general questions about using Shiny, please use the Shiny [mailing list](https://groups.google.com/forum/#!forum/shiny-discuss). For bug reports, please use the [issue tracker](https://github.com/rstudio/shiny/issues).
 
 ## License
 

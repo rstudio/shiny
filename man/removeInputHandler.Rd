@@ -1,0 +1,23 @@
+\name{removeInputHandler}
+\alias{removeInputHandler}
+\title{Deregister an Input Handler}
+\usage{
+  removeInputHandler(type)
+}
+\arguments{
+  \item{type}{The type for which handlers should be
+  removed.}
+}
+\value{
+  The handler previously associated with this \code{type},
+  if one existed. Otherwise, \code{NULL}.
+}
+\description{
+  Removes an Input Handler. Rather than using the
+  previously specified handler for data of this type, the
+  default RJSONIO serialization will be used.
+}
+\seealso{
+  \code{\link{addInputHandler}}
+}
+

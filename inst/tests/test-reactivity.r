@@ -678,3 +678,20 @@ test_that("reactivePoll and reactiveFileReader", {
   flushReact()
   expect_equal(isolate(rfr()), rbind(cars, cars))
 })
+
+
+test_that("classes of reactive object", {
+  v <- reactiveValues(a = 1)
+  r <- reactive({ v$a + 1 })
+  o <- observe({ print(r()) })
+
+  expect_false(is.reactivevalues(12))
+  expect_true(is.reactivevalues(v))
+  expect_false(is.reactivevalues(r))
+  expect_false(is.reactivevalues(o))
+
+  expect_false(is.reactive(12))
+  expect_false(is.reactive(v))
+  expect_true(is.reactive(r))
+  expect_false(is.reactive(o))
+})

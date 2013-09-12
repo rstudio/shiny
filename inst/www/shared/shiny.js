@@ -13,6 +13,17 @@
     return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
   }
 
+  // A wrapper for getComputedStyle that is compatible with older browsers.
+  // This is significantly faster than jQuery's .css() function.
+  function getStyle(el, styleProp) {
+    if (el.currentStyle)
+      var x = el.currentStyle[styleProp];
+    else if (window.getComputedStyle)
+      var x = document.defaultView.getComputedStyle(el, null)
+                .getPropertyValue(styleProp);
+    return x;
+  }
+
   // Convert a number to a string with leading zeros
   function padZeros(n, digits) {
     var str = n.toString();
@@ -450,7 +461,7 @@
       var self = this;
 
       var createSocketFunc = exports.createSocket || function() {
-        var ws = new WebSocket('ws://' + window.location.host, 'shiny');
+        var ws = new WebSocket('ws://' + window.location.host + '/websocket/');
         ws.binaryType = 'arraybuffer';
         return ws;
       };
@@ -2609,7 +2620,7 @@
       // non-zero, then we know that no ancestor has display:none.
       if (obj === null || obj.offsetWidth !== 0 || obj.offsetHeight !== 0) {
         return false;
-      } else if (getComputedStyle(obj, null).display === 'none') {
+      } else if (getStyle(obj, 'display') === 'none') {
         return true;
       } else {
         return(isHidden(obj.parentNode));

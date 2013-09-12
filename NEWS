@@ -1,6 +1,53 @@
-shiny 0.6.0.99
+shiny 0.7.0.99
 --------------------------------------------------------------------------------
 
+
+shiny 0.7.0
+--------------------------------------------------------------------------------
+
+* Stopped sending websocket subprotocol. This fixes a compatibility issue with
+  Google Chrome 30.
+
+* The `input` and `output` objects are now also accessible via `session$input`
+  and `session$output`.
+
+* Added click and hover events for static plots; see `?plotOutput` for details.
+
+* Added optional logging of the execution states of a reactive program, and
+  tools for visualizing the log data. To use, start a new R session and call
+  `options(shiny.reactlog=TRUE)`. Then launch a Shiny app and interact with it.
+  Press Ctrl+F3 (or for Mac, Cmd+F3) in the browser to launch an interactive
+  visualization of the reactivity that has occurred. See `?showReactLog` for
+  more information.
+
+* Added `includeScript()` and `includeCSS()` functions.
+
+* Reactive expressions now have class="reactive" attribute. Also added
+  `is.reactive()` and `is.reactivevalues()` functions.
+
+* New `stopApp()` function, which stops an app and returns a value to the caller
+  of `runApp()`.
+
+* Added the `shiny.usecairo` option, which can be used to tell Shiny not to use
+  Cairo for PNG output even when it is installed. (Defaults to `TRUE`.)
+
+* Speed increases for `selectInput()` and `radioButtons()`, and their
+  corresponding updater functions, for when they have many options.
+
+* Added `tagSetChildren()` and `tagAppendChildren()` functions.
+
+* The HTTP request object that created the websocket is now accessible from the
+  `session` object, as `session$request`. This is a Rook-like request
+  environment that can be used to access HTTP headers, among other things.
+  (Note: When running in a Shiny Server environment, the request will reflect
+  the proxy HTTP request that was made from the Shiny Server process to the R
+  process, not the request that was made from the web browser to Shiny Server.)
+
+* Fix `getComputedStyle` issue, for IE8 browser compatibility (#196). Note:
+  Shiny Server is still required for IE8/9 compatibility.
+
+* Add shiny.sharedSecret option, to require the HTTP header Shiny-Shared-Secret
+  to be set to the given value.
 
 shiny 0.6.0
 --------------------------------------------------------------------------------

@@ -1,6 +1,8 @@
 \name{tag}
 \alias{tag}
 \alias{tagAppendChild}
+\alias{tagAppendChildren}
+\alias{tagSetChildren}
 \alias{tagList}
 \title{
 HTML Tag Object
@@ -15,6 +17,14 @@ sets of tags; see the contents of bootstrap.R for examples.
 \code{tag(_tag_name, varArgs)}
 
 \code{tagAppendChild(tag, child)}
+
+\code{tagAppendChildren(tag, child1, child2)}
+
+\code{tagAppendChildren(tag, list = list(child1, child2))}
+
+\code{tagSetChildren(tag, child1, child2)}
+
+\code{tagSetChildren(tag, list = list(child1, child2))}
 
 \code{tagList(...)}
 }
@@ -38,6 +48,10 @@ sets of tags; see the contents of bootstrap.R for examples.
 }
   \item{...}{
     Unnamed items that comprise this list of tags.
+}
+  \item{list}{
+    An optional list of elements. Can be used with or instead of the \code{...}
+    items.
 }
 }
 

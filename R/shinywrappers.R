@@ -158,7 +158,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
 #' @param deleteFile Should the file in \code{func()$src} be deleted after
-#'   it is sent to the client browser? Genrrally speaking, if the image is a
+#'   it is sent to the client browser? Generally speaking, if the image is a
 #'   temp file generated within \code{func}, then this should be \code{TRUE};
 #'   if the image is not a temp file, this should be \code{FALSE}.
 #'

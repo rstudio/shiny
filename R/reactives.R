@@ -173,7 +173,7 @@ ReactiveValues <- setRefClass(
 #' @param ... Objects that will be added to the reactivevalues object. All of
 #'   these objects must be named.
 #'
-#' @seealso \code{\link{isolate}}.
+#' @seealso \code{\link{isolate}} and \code{\link{is.reactivevalues}}.
 #'
 #' @export
 reactiveValues <- function(...) {
@@ -198,6 +198,15 @@ setOldClass("reactivevalues")
 .createReactiveValues <- function(values = NULL, readonly = FALSE) {
   structure(list(impl=values), class='reactivevalues', readonly=readonly)
 }
+
+#' Checks whether an object is a reactivevalues object
+#'
+#' Checks whether its argument is a reactivevalues object.
+#'
+#' @param x The object to test.
+#' @seealso \code{\link{reactiveValues}}.
+#' @export
+is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 
 #' @S3method $ reactivevalues
 `$.reactivevalues` <- function(x, name) {
@@ -369,7 +378,8 @@ Observable <- setRefClass(
 #' See the \href{http://rstudio.github.com/shiny/tutorial/}{Shiny tutorial} for
 #' more information about reactive expressions.
 #'
-#' @param x An expression (quoted or unquoted).
+#' @param x For \code{reactive}, an expression (quoted or unquoted). For 
+#'   \code{is.reactive}, an object to test.
 #' @param env The parent environment for the reactive expression. By default, this
 #'   is the calling environment, the same as when defining an ordinary
 #'   non-reactive expression.
@@ -377,6 +387,7 @@ Observable <- setRefClass(
 #'   This is useful when you want to use an expression that is stored in a
 #'   variable; to do so, it must be quoted with `quote()`.
 #' @param label A label for the reactive expression, useful for debugging.
+#' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
 #' values <- reactiveValues(A=1)
@@ -403,8 +414,19 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL) {
   if (is.null(label))
     label <- sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n'))
 
-  Observable$new(fun, label)$getValue
+  o <- Observable$new(fun, label)
+  structure(o$getValue@.Data, observable = o, class = "reactive")
 }
+
+#' @S3method print reactive
+print.reactive <- function(x, ...) {
+  label <- attr(x, "observable")$.label
+  cat(label, "\n")
+}
+
+#' @export
+#' @rdname reactive
+is.reactive <- function(x) inherits(x, "reactive")
 
 # Return the number of times that a reactive expression or observer has been run
 execCount <- function(x) {

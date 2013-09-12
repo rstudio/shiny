@@ -19,9 +19,11 @@
   \item{max}{The maximum value (inclusive) that can be
   selected.}
 
-  \item{value}{The initial value of the slider. A warning
-  will be issued if the value doesn't fit between
-  \code{min} and \code{max}.}
+  \item{value}{The initial value of the slider. A numeric
+  vector of length one will create a regular slider; a
+  numeric vector of length two will create a double-ended
+  range slider.. A warning will be issued if the value
+  doesn't fit between \code{min} and \code{max}.}
 
   \item{step}{Specifies the interval between each
   selectable value on the slider (\code{NULL} means no
@@ -70,5 +72,13 @@
 }
 \seealso{
   \code{\link{updateSliderInput}}
+
+  Other input.elements: \code{\link{actionButton}},
+  \code{\link{checkboxGroupInput}},
+  \code{\link{checkboxInput}}, \code{\link{dateInput}},
+  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
+  \code{\link{numericInput}}, \code{\link{radioButtons}},
+  \code{\link{selectInput}}, \code{\link{submitButton}},
+  \code{\link{textInput}}
 }
 

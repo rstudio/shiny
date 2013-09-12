@@ -255,6 +255,7 @@ conditionalPanel <- function(condition, ...) {
 #' @param value Initial value
 #' @return A text input control that can be added to a UI definition.
 #' 
+#' @family input elements
 #' @seealso \code{\link{updateTextInput}}
 #'
 #' @examples
@@ -279,6 +280,7 @@ textInput <- function(inputId, label, value = "") {
 #' @param step Interval to use when stepping between min and max
 #' @return A numeric input control that can be added to a UI definition.
 #'
+#' @family input elements
 #' @seealso \code{\link{updateNumericInput}}
 #' 
 #' @examples
@@ -326,6 +328,8 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 #'   operation.}
 #' }
 #' 
+#' @family input elements
+#'
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
 #' @param multiple Whether the user should be allowed to select and upload 
@@ -363,6 +367,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
 #' @param value Initial value (\code{TRUE} or \code{FALSE}).
 #' @return A checkbox control that can be added to a UI definition.
 #' 
+#' @family input elements
 #' @seealso \code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
 #' 
 #' @examples
@@ -389,6 +394,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #' @param selected Names of items that should be initially selected, if any.
 #' @return A list of HTML elements that can be added to a UI definition.
 #'   
+#' @family input elements
 #' @seealso \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
 #'   
 #' @examples
@@ -483,6 +489,7 @@ choicesWithNames <- function(choices) {
 #' @param multiple Is selection of multiple items allowed?
 #' @return A select list control that can be added to a UI definition.
 #' 
+#' @family input elements
 #' @seealso \code{\link{updateSelectInput}}
 #'
 #' @examples
@@ -539,6 +546,7 @@ selectInput <- function(inputId,
 #' defaults to the first item)
 #' @return A set of radio buttons that can be added to a UI definition.
 #'
+#' @family input elements
 #' @seealso \code{\link{updateRadioButtons}}
 #' 
 #' @examples
@@ -593,6 +601,8 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
 #' @param text Button caption
 #' @return A submit button that can be added to a UI definition.
 #' 
+#' @family input elements
+#'
 #' @examples
 #' submitButton("Update View")
 #' @export
@@ -612,6 +622,8 @@ submitButton <- function(text = "Apply Changes") {
 #' @param label The contents of the button--usually a text label, but you could
 #'   also use any other HTML, like an image.
 #'
+#' @family input elements
+#'
 #' @export
 actionButton <- function(inputId, label) {
   tags$button(id=inputId, type="button", class="btn action-button", label)
@@ -626,8 +638,10 @@ actionButton <- function(inputId, label) {
 #' @param label A descriptive label to be displayed with the widget.
 #' @param min The minimum value (inclusive) that can be selected.
 #' @param max The maximum value (inclusive) that can be selected.
-#' @param value The initial value of the slider. A warning will be issued if the
-#'   value doesn't fit between \code{min} and \code{max}.
+#' @param value The initial value of the slider. A numeric vector of length
+#'   one will create a regular slider; a numeric vector of length two will
+#'   create a double-ended range slider.. A warning will be issued if the
+#'   value doesn't fit between \code{min} and \code{max}. 
 #' @param step Specifies the interval between each selectable value on the 
 #'   slider (\code{NULL} means no restriction).
 #' @param round \code{TRUE} to round all values to the nearest integer; 
@@ -645,6 +659,7 @@ actionButton <- function(inputId, label) {
 #'   settings; \code{FALSE} not to; or a custom settings list, such as those 
 #'   created using \code{\link{animationOptions}}.
 #'
+#' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
 #'   
 #' @details
@@ -733,6 +748,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #'   "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs-latin", "ru", "sk", "sl",
 #'   "sv", "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".
 #'
+#' @family input elements
 #' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
 #'
 #' @examples
@@ -813,31 +829,16 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 #'   \item \code{DD} Full weekday name
 #' }
 #'
-#' @param inputId Input variable to assign the control's value to.
-#' @param label Display label for the control.
+#' @inheritParams dateInput
 #' @param start The initial start date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
 #'   date in the client's time zone.
 #' @param end The initial end date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
 #'   date in the client's time zone.
-#' @param min The minimum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
-#' @param max The maximum allowed date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
-#' @param format The format of the date to display in the browser. Defaults to
-#'   \code{"yyyy-mm-dd"}.
-#' @param startview The date range shown when the input object is first
-#'   clicked. Can be "month" (the default), "year", or "decade".
-#' @param weekstart Which day is the start of the week. Should be an integer
-#'   from 0 (Sunday) to 6 (Saturday).
-#' @param language The language used for month and day names. Default is "en".
-#'   Other valid values include "bg", "ca", "cs", "da", "de", "el", "es", "fi",
-#'   "fr", "he", "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv", "ms",
-#'   "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs-latin", "ru", "sk", "sl",
-#'   "sv", "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".
 #' @param separator String to display between the start and end input boxes.
 #'
+#' @family input elements
 #' @seealso \code{\link{dateInput}}, \code{\link{updateDateRangeInput}}
 #'
 #' @examples
@@ -1095,13 +1096,13 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 #' @param height Plot height
 #' @param clickId If not \code{NULL}, the plot will send coordinates to the
 #'   server whenever it is clicked. This information will be accessible on the 
-#'   \code{input} object using \code{input$\emph{clickId}}. The value will be a
+#'   \code{input} object using \code{input$}\emph{\code{clickId}}. The value will be a
 #'   named list or vector with \code{x} and \code{y} elements indicating the
 #'   mouse position in user units.
 #' @param hoverId If not \code{NULL}, the plot will send coordinates to the
 #'   server whenever the mouse pauses on the plot for more than the number of
 #'   milliseconds determined by \code{hoverTimeout}. This information will be
-#    accessible on the \code{input} object using \code{input$\emph{clickId}}.
+#    accessible on the \code{input} object using \code{input$}\emph{\code{clickId}}.
 #'   The value will be \code{NULL} if the user is not hovering, and a named
 #'   list or vector with \code{x} and \code{y} elements indicating the mouse
 #'   position in user units.

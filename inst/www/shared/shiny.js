@@ -1410,7 +1410,7 @@
       el.value = value;
     },
     getType: function(el) {
-      return "number";
+      return "shiny.number";
     },
     receiveMessage: function(el, data) {
       if (data.hasOwnProperty('value'))  el.value = data.value;
@@ -1541,7 +1541,7 @@
       return $(scope).find('.shiny-date-input');
     },
     getType: function(el) {
-      return "shinyDate";
+      return "shiny.date";
     },
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)

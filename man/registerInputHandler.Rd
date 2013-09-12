@@ -1,0 +1,50 @@
+\name{registerInputHandler}
+\alias{registerInputHandler}
+\title{Register an Input Handler}
+\usage{
+  registerInputHandler(type, fun, force = FALSE)
+}
+\arguments{
+  \item{type}{The type for which the handler should be
+  added}
+
+  \item{fun}{The handler function. This is the function
+  that will be used to parse the data delivered from the
+  client before it is available in the \code{input}
+  variable. The function will be called with the following
+  three parameters: \enumerate{ \item{The value of this
+  input as provided by the client, deserialized using
+  RJSONIO.} \item{The \code{shinysession} in which the
+  input exists.} \item{The name of the input.} }}
+
+  \item{force}{If \code{TRUE}, will overwrite any existing
+  handler without warning.}
+}
+\description{
+  Adds an input handler for data of this type. When called,
+  Shiny will use the function provided to refine the data
+  passed back from the client (after being deserialized by
+  RJSONIO) before making it available in the \code{input}
+  variable of the \code{server.R} file.
+}
+\details{
+  This function will register the handler for the duration
+  of the R process (unless Shiny is explicitly reloaded).
+  For that reason, the \code{type} used should be very
+  specific to this package to minimize the risk of
+  colliding with another Shiny package which might use this
+  data type name. We recommend the format of
+  "packageName.widgetName".
+
+  Currently Shiny registers the following handlers:
+  \code{shiny.matrix}, \code{shiny.number}, and
+  \code{shiny.date}.
+
+  The \code{type} of a custom Shiny Input widget will be
+  deduced using the \code{getType()} JavaScript function on
+  the registered Shiny inputBinding.
+}
+\seealso{
+  \code{\link{removeInputHandler}}
+}
+

@@ -461,7 +461,16 @@
       var self = this;
 
       var createSocketFunc = exports.createSocket || function() {
-        var ws = new WebSocket('ws://' + window.location.host + '/websocket/');
+        var protocol = 'ws:';
+        if (window.location.protocol === 'https:')
+          protocol = 'wss:';
+
+        var defaultPath = window.location.pathname;
+        if (!/\/$/.test(defaultPath))
+          defaultPath += '/';
+        defaultPath += 'websocket/';
+
+        var ws = new WebSocket(protocol + '//' + window.location.host + defaultPath);
         ws.binaryType = 'arraybuffer';
         return ws;
       };

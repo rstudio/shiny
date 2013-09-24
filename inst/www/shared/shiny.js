@@ -1078,11 +1078,13 @@
           }
         };
 
-        var hoverDelayType = $el.data('hover-delay-type') || 'debounce';
-        var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
-        var hoverFunc = delayFunc($el.data('hover-delay') || 300,
-                                  createMouseHandler(hoverId));
-        $el.data('hover-func', hoverFunc);
+        if (!$el.data('hover-func')) {
+          var hoverDelayType = $el.data('hover-delay-type') || 'debounce';
+          var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
+          var hoverFunc = delayFunc($el.data('hover-delay') || 300,
+                                    createMouseHandler(hoverId));
+          $el.data('hover-func', hoverFunc);
+        }
         
         if (clickId)
           $(img).on('mousedown', createMouseHandler(clickId));

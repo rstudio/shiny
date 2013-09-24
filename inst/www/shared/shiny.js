@@ -1015,13 +1015,13 @@
       var $el = $(el);
       // Load the image before emptying, to minimize flicker
       var img = null;
-      var coordmap, clickId, hoverId;
+      var clickId, hoverId;
       
       if (data) {
         clickId = $el.data('click-id');
         hoverId = $el.data('hover-id');
         
-        coordmap = data.coordmap;
+        $el.data('coordmap', data.coordmap);
         delete data.coordmap;
         
         img = document.createElement('img');
@@ -1056,6 +1056,7 @@
             
             // TODO: Account for scrolling within the image??
             
+            var coordmap = $el.data('coordmap');
             function devToUsrX(deviceX) {
               var x = deviceX - coordmap.bounds.left;
               var factor = (coordmap.usr.right - coordmap.usr.left) /

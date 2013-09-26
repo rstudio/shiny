@@ -22,7 +22,7 @@
 \details{
   If expr is a quoted expression, then this just converts
   it to a function. If expr is a function, then this simply
-  returns expr (and prints a deprecation message. If expr
+  returns expr (and prints a deprecation message). If expr
   was a non-quoted expression from two calls back, then
   this will quote the original expression and convert it to
   a function.

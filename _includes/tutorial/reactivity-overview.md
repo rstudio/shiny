@@ -122,7 +122,7 @@ shinyServer(function(input, output) {
     fib(as.numeric(input$n))
   }
 
-  output$nthValue <- renderText({ currentFib })
+  output$nthValue <- renderText({ currentFib() })
 })
 {% endhighlight %}
 

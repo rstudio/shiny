@@ -451,19 +451,18 @@ hljs.initHighlightingOnLoad();
 function manageNextPrev() {
    $('a#next').parent().toggleClass('disabled', $('.nav li.active').nextAll('li:not(.nav-header)').size() == 0);
    $('a#previous').parent().toggleClass('disabled', $('.nav li.active').prevAll('li:not(.nav-header)').size() == 0);
+   $('html,body').scrollTop(0);
 }
 manageNextPrev();
 
 $('a#next').click(function(e) {
    e.preventDefault();
    location.href = $('.nav li.active').nextAll('li:not(.nav-header)').first().find('a').attr('href');
-   $('html,body').scrollTop(0);
    manageNextPrev();
 });
 $('a#previous').click(function(e) {
    e.preventDefault();
    location.href = $('.nav li.active').prevAll('li:not(.nav-header)').first().find('a').attr('href');
-   $('html,body').scrollTop(0);
    manageNextPrev();
 });
 

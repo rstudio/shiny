@@ -7,7 +7,7 @@
 #'   \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'}
 #'   are all valid values.
 #' @param port The TCP port that the application should listen on. Defaults to
-#'   port 8100.
+#'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
 #'   interactive sessions only.
@@ -23,7 +23,7 @@
 #'
 #' @export
 runGist <- function(gist,
-                    port=8100L,
+                    port=NULL,
                     launch.browser=getOption('shiny.launch.browser',
                                              interactive())) {
 
@@ -52,7 +52,7 @@ runGist <- function(gist,
 #'   default, this function will run an app from the top level of the repo, but
 #'   you can use a path such as `\code{"inst/shinyapp"}.
 #' @param port The TCP port that the application should listen on. Defaults to
-#'   port 8100.
+#'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
 #'   interactive sessions only.
@@ -67,7 +67,7 @@ runGist <- function(gist,
 #'
 #' @export
 runGitHub <- function(repo, username = getOption("github.user"),
-  ref = "master", subdir = NULL, port = 8100,
+  ref = "master", subdir = NULL, port = NULL,
   launch.browser = getOption('shiny.launch.browser', interactive())) {
 
   if (is.null(ref)) {
@@ -102,7 +102,7 @@ runGitHub <- function(repo, username = getOption("github.user"),
 #'   default, this function will run an app from the top level of the repo, but
 #'   you can use a path such as `\code{"inst/shinyapp"}.
 #' @param port The TCP port that the application should listen on. Defaults to
-#'   port 8100.
+#'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
 #'   interactive sessions only.
@@ -117,7 +117,7 @@ runGitHub <- function(repo, username = getOption("github.user"),
 #' }
 #'
 #' @export
-runUrl <- function(url, filetype = NULL, subdir = NULL, port = 8100,
+runUrl <- function(url, filetype = NULL, subdir = NULL, port = NULL,
   launch.browser = getOption('shiny.launch.browser', interactive())) {
 
   if (!is.null(subdir) && ".." %in% strsplit(subdir, '/')[[1]])

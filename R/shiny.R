@@ -1270,7 +1270,7 @@ serviceApp <- function(ws_env) {
 #'   \code{server.R}, plus, either \code{ui.R} or a \code{www} directory that
 #'   contains the file \code{index.html}. Defaults to the working directory.
 #' @param port The TCP port that the application should listen on. Defaults to 
-#'   port 8100.
+#'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only.
@@ -1299,7 +1299,7 @@ serviceApp <- function(ws_env) {
 #' }
 #' @export
 runApp <- function(appDir=getwd(),
-                   port=8100L,
+                   port=NULL,
                    launch.browser=getOption('shiny.launch.browser',
                                             interactive()), 
                    workerId="") {
@@ -1322,6 +1322,17 @@ runApp <- function(appDir=getwd(),
 
   require(shiny)
   
+  # determine port if we need to
+  if (is.null(port)) {
+    if (!is.null(.globals$lastPort))
+      port <- .globals$lastPort
+    else
+      port <- sample(3000:8000, 1)
+  }
+  
+  # set lastPort to NULL so that we don't re-use it if startApp fails
+  .globals$lastPort <- NULL
+  
   if (is.character(appDir)) {
     orig.wd <- getwd()
     setwd(appDir)
@@ -1330,6 +1341,9 @@ runApp <- function(appDir=getwd(),
   } else {
     server <- startAppObj(appDir$ui, appDir$server, port=port, workerId)
   }
+  
+  # record port
+  .globals$lastPort <- port
   
   on.exit({
     stopServer(server)
@@ -1377,7 +1391,7 @@ stopApp <- function(returnValue = NULL) {
 #' @param example The name of the example to run, or \code{NA} (the default) to
 #'   list the available examples.
 #' @param port The TCP port that the application should listen on. Defaults to 
-#'   port 8100.
+#'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only.
@@ -1395,7 +1409,7 @@ stopApp <- function(returnValue = NULL) {
 #' }
 #' @export
 runExample <- function(example=NA,
-                       port=8100L,
+                       port=NULL,
                        launch.browser=getOption('shiny.launch.browser',
                                                 interactive())) {
   examplesDir <- system.file('examples', package='shiny')

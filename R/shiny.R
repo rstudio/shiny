@@ -1261,8 +1261,6 @@ serviceApp <- function(ws_env) {
 
 .shinyServerMinVersion <- '0.3.4'
 
-.runContext <- new.env()
-
 #' Run Shiny Application
 #' 
 #' Runs a Shiny application. This function normally does not return; interrupt
@@ -1326,14 +1324,14 @@ runApp <- function(appDir=getwd(),
   
   # determine port if we need to
   if (is.null(port)) {
-    if (!is.null(.runContext$lastPort))
-      port <- .runContext$lastPort
+    if (!is.null(.globals$lastPort))
+      port <- .globals$lastPort
     else
       port <- sample(3000:8000, 1)
   }
   
   # set lastPort to NULL so that we don't re-use it if startApp fails
-  .runContext$lastPort <- NULL
+  .globals$lastPort <- NULL
   
   if (is.character(appDir)) {
     orig.wd <- getwd()
@@ -1345,7 +1343,7 @@ runApp <- function(appDir=getwd(),
   }
   
   # record port
-  .runContext$lastPort <- port
+  .globals$lastPort <- port
   
   on.exit({
     stopServer(server)

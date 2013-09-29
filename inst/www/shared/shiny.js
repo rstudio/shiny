@@ -643,7 +643,18 @@
     };
 
     this.$updateConditionals = function() {
-      var scope = {input: this.$inputValues, output: this.$values};
+      var inputs = {};
+
+      // Input keys use "name:type" format; we don't want the user to
+      // have to know about the type suffix when referring to inputs.
+      for (var name in this.$inputValues) {
+        if (this.$inputValues.hasOwnProperty(name)) {
+          var shortName = name.replace(/:.*/, '');
+          inputs[shortName] = this.$inputValues[name];
+        }
+      }
+
+      var scope = {input: inputs, output: this.$values};
 
       var triggerShown  = function() { $(this).trigger('shown'); };
       var triggerHidden = function() { $(this).trigger('hidden'); };

@@ -146,7 +146,7 @@ ShinySession <- setRefClass(
 
         obs <- observe({
           
-          value <- try(func(), silent=FALSE)
+          value <- try2(func(), silent=FALSE)
           
           .invalidatedOutputErrors$remove(name)
           .invalidatedOutputValues$remove(name)

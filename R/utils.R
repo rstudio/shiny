@@ -304,3 +304,8 @@ Callbacks <- setRefClass(
     }
   )
 )
+
+# make it possible to disable try() in Shiny via the option shiny.try
+try2 <- function(expr, silent = FALSE) {
+  if (getOption("shiny.try", TRUE)) try(expr, silent) else expr
+}

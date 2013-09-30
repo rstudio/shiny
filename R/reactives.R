@@ -354,7 +354,7 @@ Observable <- setRefClass(
       on.exit(.running <<- wasRunning)
 
       ctx$run(function() {
-        result <- withVisible(try(.func(), silent=FALSE))
+        result <- withVisible(try2(.func(), silent=FALSE))
         .visible <<- result$visible
         .value <<- result$value
       })

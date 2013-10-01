@@ -469,6 +469,15 @@ downloadHandler <- function(filename, content, contentType=NA) {
   })
 }
 
+#' Table output with the JavaScript library DataTables
+#'
+#' Makes a reactive version of the given function that returns a data frame (or
+#' matrix), which will be rendered with the DataTables library. Paging,
+#' searching, filtering, and sorting can be done on the R side using Shiny as
+#' the server infrastructure.
+#' @param expr An expression that returns a data frame or a matrix.
+#' @export
+#' @inheritParams renderPlot
 renderDataTable <- function(expr, env=parent.frame(), quoted=FALSE) {
   func <- exprToFunction(expr, env, quoted)
 

@@ -1152,6 +1152,8 @@ tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
 }
 
+#' @rdname tableOutput
+#' @export
 dataTableOutput <- function(outputId) {
   tagList(
     singleton(tags$head(

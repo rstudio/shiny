@@ -80,10 +80,7 @@ ReactiveEnvironment <- setRefClass(
   ),
   methods = list(
     initialize = function() {
-      .currentContext <<- NULL
-      .nextId <<- 0L
-      .pendingFlush <<- PriorityQueue$new()
-      .inFlush <<- FALSE
+      reset()
     },
     nextId = function() {
       .nextId <<- .nextId + 1L
@@ -118,7 +115,10 @@ ReactiveEnvironment <- setRefClass(
       }
     },
     reset = function() {
+      .currentContext <<- NULL
+      .nextId <<- 0L
       .pendingFlush <<- PriorityQueue$new()
+      .inFlush <<- FALSE
     }
   )
 )

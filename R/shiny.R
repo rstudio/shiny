@@ -1347,6 +1347,7 @@ runApp <- function(appDir=getwd(),
   
   on.exit({
     stopServer(server)
+    .getReactiveEnvironment()$reset()
   }, add = TRUE)
   
   if (launch.browser && !is.character(port)) {

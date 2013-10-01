@@ -116,6 +116,9 @@ ReactiveEnvironment <- setRefClass(
         ctx <- .pendingFlush$dequeue()
         ctx$executeFlushCallbacks()
       }
+    },
+    reset = function() {
+      .pendingFlush <<- PriorityQueue$new()
     }
   )
 )

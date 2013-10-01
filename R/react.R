@@ -114,7 +114,7 @@ ReactiveEnvironment <- setRefClass(
 
       while (!.pendingFlush$isEmpty()) {
         ctx <- .pendingFlush$dequeue()
-        ctx$executeFlushCallbacks()
+        try(ctx$executeFlushCallbacks())
       }
     },
     reset = function() {

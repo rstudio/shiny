@@ -292,15 +292,11 @@ Callbacks <- setRefClass(
     },
     invoke = function(..., onError=NULL) {
       for (callback in .callbacks$values()) {
-        tryCatch(
-          do.call(callback, list(...)),
-          error = function(e) {
-            if (is.null(onError))
-              stop(e)
-            else
-              onError(e)
-          }
-        )
+        if (is.null(onError)) {
+          callback(...)
+        } else {
+          tryCatch2(callback(...), error = onError)
+        }
       }
     },
     count = function() {
@@ -308,3 +304,12 @@ Callbacks <- setRefClass(
     }
   )
 )
+
+# make it possible to disable try() in Shiny via the option shiny.try
+try2 <- function(expr, silent = FALSE) {
+  if (getOption("shiny.try", TRUE)) try(expr, silent) else expr
+}
+
+tryCatch2 <- function(expr, ..., finally) {
+  if (getOption("shiny.try", TRUE)) tryCatch(expr, ..., finally) else expr
+}

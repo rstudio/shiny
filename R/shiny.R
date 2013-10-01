@@ -146,7 +146,7 @@ ShinySession <- setRefClass(
 
         obs <- observe({
           
-          value <- try(func(), silent=FALSE)
+          value <- try2(func(), silent=FALSE)
           
           .invalidatedOutputErrors$remove(name)
           .invalidatedOutputValues$remove(name)
@@ -223,12 +223,12 @@ ShinySession <- setRefClass(
     },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
-      func <- try(do.call(`$`, list(.self, method)), silent=TRUE)
+      func <- try2(do.call(`$`, list(.self, method)), silent=TRUE)
       if (inherits(func, 'try-error')) {
         .sendErrorResponse(msg, paste('Unknown method', msg$method))
       }
       
-      value <- try(do.call(func, as.list(append(msg$args, msg$blobs))),
+      value <- try2(do.call(func, as.list(append(msg$args, msg$blobs))),
                    silent=TRUE)
       if (inherits(value, 'try-error')) {
         .sendErrorResponse(msg, conditionMessage(attr(value, 'condition')))
@@ -400,7 +400,7 @@ ShinySession <- setRefClass(
         }
         
         tmpdata <- tempfile()
-        result <- try(Context$new('[download]')$run(function() { download$func(tmpdata) }))
+        result <- try2(Context$new('[download]')$run(function() { download$func(tmpdata) }))
         if (is(result, 'try-error')) {
           unlink(tmpdata)
           return(httpResponse(500, 'text/plain', 
@@ -1356,7 +1356,7 @@ runApp <- function(appDir=getwd(),
   
   .globals$retval <- NULL
   .globals$stopped <- FALSE
-  tryCatch(
+  tryCatch2(
     while (!.globals$stopped) {
       serviceApp()
       Sys.sleep(0.001)

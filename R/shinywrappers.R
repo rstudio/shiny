@@ -469,7 +469,7 @@ downloadHandler <- function(filename, content, contentType=NA) {
   })
 }
 
-renderDataTable <- function(expr, ..., env=parent.frame(), quoted=FALSE) {
+renderDataTable <- function(expr, env=parent.frame(), quoted=FALSE) {
   func <- exprToFunction(expr, env, quoted)
 
   function(shinysession, name, ...) {

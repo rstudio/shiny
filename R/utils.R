@@ -375,6 +375,11 @@ Callbacks <- setRefClass(
 dataTablesJSON <- function(data, query) {
   n <- nrow(data)
   with(parseQueryString(query), {
+    if (nzchar(sSearch)) {
+      i <- apply(data, 2, function(x) grep(sSearch, as.character(x)))
+      i <- unique(unlist(i))
+      data <- data[i, , drop = FALSE]
+    }
     i <- seq(as.integer(iDisplayStart) + 1L, length.out = as.integer(iDisplayLength))
     i <- i[i <= n]
     fdata <- data[i, , drop = FALSE]  # filtered data

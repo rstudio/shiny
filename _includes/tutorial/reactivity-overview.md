@@ -109,7 +109,7 @@ Keep in mind that if your application tries to access reactive values or express
 shinyServer(function(input, output) {
   # Will give error
   currentFib      <- fib(as.numeric(input$n))
-  output$nthValue <- renderText({ currentFib() })
+  output$nthValue <- renderText({ currentFib })
 })
 {% endhighlight %}
 

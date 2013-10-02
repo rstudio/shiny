@@ -937,6 +937,8 @@ resourcePathHandler <- function(req) {
 #' @export
 shinyServer <- function(func) {
   .globals$server <- func
+  if (!is.null(func))
+    registerDebugHook("server", .globals, "Server Function")
   invisible()
 }
 

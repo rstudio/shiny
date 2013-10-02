@@ -223,7 +223,7 @@ ShinySession <- setRefClass(
     },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
-      func <- try(do.call(`$`, list(.self, method)), silent=TRUE)
+      func <- try(.self[[method]], silent=TRUE)
       if (inherits(func, 'try-error')) {
         .sendErrorResponse(msg, paste('Unknown method', msg$method))
       }

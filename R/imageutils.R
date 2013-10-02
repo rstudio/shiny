@@ -47,7 +47,7 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
     pngfun <- png
   }
 
-  do.call(pngfun, c(filename=filename, width=width, height=height, res=res, list(...)))
+  pngfun(filename=filename, width=width, height=height, res=res, ...)
   tryCatch(
     func(),
     finally=dev.off())

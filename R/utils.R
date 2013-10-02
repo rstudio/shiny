@@ -36,7 +36,7 @@ repeatable <- function(rngfunc, seed = runif(1, 0, .Machine$integer.max)) {
     
     set.seed(seed)
     
-    do.call(rngfunc, list(...))
+    rngfunc(...)
   }
 }
 
@@ -292,15 +292,11 @@ Callbacks <- setRefClass(
     },
     invoke = function(..., onError=NULL) {
       for (callback in .callbacks$values()) {
-        tryCatch(
-          do.call(callback, list(...)),
-          error = function(e) {
-            if (is.null(onError))
-              stop(e)
-            else
-              onError(e)
-          }
-        )
+        if (is.null(onError)) {
+          callback(...)
+        } else {
+          tryCatch(callback(...), error = onError)
+        }
       }
     },
     count = function() {

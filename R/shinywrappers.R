@@ -469,6 +469,28 @@ downloadHandler <- function(filename, content, contentType=NA) {
   })
 }
 
+renderDataTable <- function(expr, ..., env=parent.frame(), quoted=FALSE) {
+  func <- exprToFunction(expr, env, quoted)
+
+  function(shinysession, name, ...) {
+    data <- func()
+    action <- shinysession$registerDataTable(name, data)
+    header <- paste(sprintf('{"sTitle": "%s"}', colnames(data)), collapse = ',')
+    as.character(tagList(
+      tags$table(cellpadding="0", cellspacing="0", border="0", class="display"),
+      tags$script(HTML(sprintf(
+'$(document).ready(function() {
+  $("div#%s > table").dataTable({
+    "bProcessing": true,
+    "aoColumns": [%s],
+    "bServerSide": true,
+    "sAjaxSource": "%s"
+  });
+});', name, header, action)))
+    ))
+  }
+}
+
 
 # Deprecated functions ------------------------------------------------------
 

@@ -938,7 +938,12 @@ resourcePathHandler <- function(req) {
 shinyServer <- function(func) {
   .globals$server <- func
   if (!is.null(func))
+  {
+    # Tag this function as the Shiny server function. A debugger may use this
+    # tag to give this function special treatment.
+    attr(.globals$server, "shinyServerFunction") <- TRUE
     registerDebugHook("server", .globals, "Server Function")
+  }
   invisible()
 }
 

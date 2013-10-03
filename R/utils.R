@@ -272,6 +272,26 @@ shinyDeprecated <- function(new=NULL, msg=NULL,
   message(msg)
 }
 
+#' Register a function with the debugger (if one is active). 
+#' 
+#' Call this function after exprToFunction to give any active debugger a hook
+#' to set and clear breakpoints in the function. A debugger may implement
+#' registerShinyDebugHook to receive callbacks when Shiny functions are 
+#' instantiated at runtime. 
+#'
+#' @param name Name of the field or object containing the function. 
+#' @param where The reference object or environment containing the function.
+#' @param label A label to display on the function in the debugger.
+registerDebugHook <- function(name, where, label) {
+  if (exists("registerShinyDebugHook", mode = "function")) {
+    params <- new.env(parent = emptyenv())
+    params$name <- name
+    params$where <- where
+    params$label <- label
+    registerShinyDebugHook(params)
+  }
+}
+
 Callbacks <- setRefClass(
   'Callbacks',
   fields = list(

@@ -375,11 +375,23 @@ Callbacks <- setRefClass(
 dataTablesJSON <- function(data, query) {
   n <- nrow(data)
   with(parseQueryString(query), {
+    # global searching
     if (nzchar(sSearch)) {
       i <- apply(data, 2, function(x) grep(sSearch, as.character(x)))
       i <- unique(unlist(i))
       data <- data[i, , drop = FALSE]
     }
+    # sorting
+    for (j in seq_len(as.integer(iColumns)) - 1) {
+      if (is.null(k <- get_exists(sprintf('iSortCol_%d', j), 'character'))) next
+      desc = get_exists(sprintf('sSortDir_%d', j), 'character')
+      if (is.character(desc)) {
+        i <- order(data[, as.integer(k) + 1], decreasing = desc == 'desc')
+        data <- data[i, , drop = FALSE]
+        break
+      }
+    }
+    # paging
     i <- seq(as.integer(iDisplayStart) + 1L, length.out = as.integer(iDisplayLength))
     i <- i[i <= n]
     fdata <- data[i, , drop = FALSE]  # filtered data
@@ -388,8 +400,13 @@ dataTablesJSON <- function(data, query) {
     toJSON(list(
       sEcho = as.integer(sEcho),
       iTotalRecords = n,
-      iTotalDisplayRecords = n,
+      iTotalDisplayRecords = nrow(data),
       aaData = fdata
     ))
   })
+}
+
+get_exists = function(x, mode) {
+  if (exists(x, envir = parent.frame(), mode = mode, inherits = FALSE))
+    get(x, envir = parent.frame(), mode = mode, inherits = FALSE)
 }

@@ -483,6 +483,8 @@ renderDataTable <- function(expr, env=parent.frame(), quoted=FALSE) {
 
   function(shinysession, name, ...) {
     data <- func()
+    if (length(dim(data)) != 2)
+      stop('renderDataTable() expects a rectangular data object (e.g. data frame)')
     action <- shinysession$registerDataTable(name, data)
     header <- paste(sprintf('{"sTitle": "%s"}', colnames(data)), collapse = ',')
     as.character(tagList(

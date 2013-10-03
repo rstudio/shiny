@@ -495,6 +495,7 @@ renderDataTable <- function(expr, env=parent.frame(), quoted=FALSE) {
     "bProcessing": true,
     "aoColumns": [%s],
     "bServerSide": true,
+    "aaSorting": [],
     "sAjaxSource": "%s"
   });
 });', name, header, action)))

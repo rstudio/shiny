@@ -130,6 +130,7 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' @param env The desired environment for the function. Defaults to the
 #'   calling environment two steps back.
 #' @param quoted Is the expression quoted?
+#' @param debug whether to enable debugging
 #'
 #' @examples
 #' # Example of a new renderer, similar to renderText

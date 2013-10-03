@@ -382,14 +382,20 @@ dataTablesJSON <- function(data, query) {
       data <- data[i, , drop = FALSE]
     }
     # sorting
-    for (j in seq_len(as.integer(iColumns)) - 1) {
-      if (is.null(k <- get_exists(sprintf('iSortCol_%d', j), 'character'))) next
+    oList <- list()
+    for (j in seq_len(as.integer(iSortingCols))) {
+      if (is.null(k <- get_exists(sprintf('iSortCol_%d', j), 'character'))) break
       desc = get_exists(sprintf('sSortDir_%d', j), 'character')
       if (is.character(desc)) {
-        i <- order(data[, as.integer(k) + 1], decreasing = desc == 'desc')
-        data <- data[i, , drop = FALSE]
-        break
+        col <- data[, as.integer(k) + 1]
+        oList[[length(oList) + 1]] <- (if (desc == 'asc') identity else `-`)(
+          if (is.numeric(col)) col else xtfrm(col)
+        )
       }
+    }
+    if (length(oList)) {
+      i <- do.call(order, oList)
+      data <- data[i, , drop = FALSE]
     }
     # paging
     i <- seq(as.integer(iDisplayStart) + 1L, length.out = as.integer(iDisplayLength))

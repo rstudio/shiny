@@ -165,7 +165,7 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' # "text, text, text"
 #'
 #' @export
-exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE) {
+exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE, debug = TRUE) {
   # Get the quoted expr from two calls back
   expr_sub <- eval(substitute(substitute(expr)), parent.frame())
 
@@ -184,13 +184,17 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE) {
     return(expr)
   }
 
-  if (quoted) {
+  func <- if (quoted) {
     # expr is a quoted expression
     makeFunction(body=expr, env=env)
   } else {
     # expr is an unquoted expression
     makeFunction(body=expr_sub, env=env)
   }
+  if (debug)
+    registerDebugHook("func", environment(), as.character(sys.call(-1)[[1]]))
+
+  func
 }
 
 #' Parse a GET query string from a URL

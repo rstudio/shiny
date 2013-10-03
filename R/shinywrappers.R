@@ -43,7 +43,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     shinyDeprecated(msg="renderPlot: argument 'func' is deprecated. Please use 'expr' instead.")
   } else {
     func <- exprToFunction(expr, env, quoted)
-    registerDebugHook("func", environment(), "Render Plot")
   }
 
 
@@ -222,7 +221,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
                         deleteFile=TRUE) {
   func <- exprToFunction(expr, env, quoted)
-  registerDebugHook("func", environment(), "Render Image")
   
   return(function(shinysession, name, ...) {
     imageinfo <- func()
@@ -273,7 +271,6 @@ renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) 
     shinyDeprecated(msg="renderTable: argument 'func' is deprecated. Please use 'expr' instead.")
   } else {
     func <- exprToFunction(expr, env, quoted)
-    registerDebugHook("func", environment(), "Render Table")
   }
 
   function() {
@@ -331,7 +328,6 @@ renderPrint <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
     shinyDeprecated(msg="renderPrint: argument 'func' is deprecated. Please use 'expr' instead.")
   } else {
     func <- exprToFunction(expr, env, quoted)
-    registerDebugHook("func", environment(), "Render Print")
   }
 
   function() {
@@ -375,7 +371,6 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
     shinyDeprecated(msg="renderText: argument 'func' is deprecated. Please use 'expr' instead.")
   } else {
     func <- exprToFunction(expr, env, quoted)
-    registerDebugHook("func", environment(), "Render Text")
   }
 
   function() {
@@ -416,7 +411,6 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
     shinyDeprecated(msg="renderUI: argument 'func' is deprecated. Please use 'expr' instead.")
   } else {
     func <- exprToFunction(expr, env, quoted)
-    registerDebugHook("func", environment(), "Render UI")
   }
 
   function() {

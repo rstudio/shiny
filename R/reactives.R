@@ -410,7 +410,7 @@ Observable <- setRefClass(
 #'
 #' @export
 reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL) {
-  fun <- exprToFunction(x, env, quoted)
+  fun <- exprToFunction(x, env, quoted, debug = FALSE)
   if (is.null(label))
     label <- sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n'))
 
@@ -617,7 +617,7 @@ Observer <- setRefClass(
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
                     suspended=FALSE, priority=0) {
 
-  fun <- exprToFunction(x, env, quoted)
+  fun <- exprToFunction(x, env, quoted, debug = FALSE)
   if (is.null(label))
     label <- sprintf('observe(%s)', paste(deparse(body(fun)), collapse='\n'))
 

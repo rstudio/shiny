@@ -383,7 +383,7 @@ dataTablesJSON <- function(data, query) {
     }
     # sorting
     oList <- list()
-    for (j in seq_len(as.integer(iSortingCols))) {
+    for (j in seq_len(as.integer(iSortingCols)) - 1) {
       if (is.null(k <- get_exists(sprintf('iSortCol_%d', j), 'character'))) break
       desc = get_exists(sprintf('sSortDir_%d', j), 'character')
       if (is.character(desc)) {

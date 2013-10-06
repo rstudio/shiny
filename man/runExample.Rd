@@ -2,7 +2,7 @@
 \alias{runExample}
 \title{Run Shiny Example Applications}
 \usage{
-  runExample(example = NA, port = 8100L,
+  runExample(example = NA, port = NULL,
     launch.browser = getOption("shiny.launch.browser", interactive()))
 }
 \arguments{
@@ -10,7 +10,7 @@
   \code{NA} (the default) to list the available examples.}
 
   \item{port}{The TCP port that the application should
-  listen on. Defaults to port 8100.}
+  listen on. Defaults to choosing a random port.}
 
   \item{launch.browser}{If true, the system's default web
   browser will be launched automatically after the app is

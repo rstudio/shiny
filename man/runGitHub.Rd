@@ -3,7 +3,7 @@
 \title{Run a Shiny application from a GitHub repository}
 \usage{
   runGitHub(repo, username = getOption("github.user"),
-    ref = "master", subdir = NULL, port = 8100,
+    ref = "master", subdir = NULL, port = NULL,
     launch.browser = getOption("shiny.launch.browser", interactive()))
 }
 \arguments{
@@ -20,7 +20,7 @@
   path such as `\code{"inst/shinyapp"}.}
 
   \item{port}{The TCP port that the application should
-  listen on. Defaults to port 8100.}
+  listen on. Defaults to choosing a random port.}
 
   \item{launch.browser}{If true, the system's default web
   browser will be launched automatically after the app is

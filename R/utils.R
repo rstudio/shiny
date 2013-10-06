@@ -282,8 +282,10 @@ shinyDeprecated <- function(new=NULL, msg=NULL,
 #' @param name Name of the field or object containing the function. 
 #' @param where The reference object or environment containing the function.
 #' @param label A label to display on the function in the debugger.
+#' @noRd
 registerDebugHook <- function(name, where, label) {
   if (exists("registerShinyDebugHook", mode = "function")) {
+    registerShinyDebugHook <- get("registerShinyDebugHook", mode = "function")
     params <- new.env(parent = emptyenv())
     params$name <- name
     params$where <- where

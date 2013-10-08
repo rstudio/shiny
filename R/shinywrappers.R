@@ -222,7 +222,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
   installExprFunction(expr, "func", env, quoted)
   
   return(function(shinysession, name, ...) {
-    imageinfo <- func()
+    imageinfo <- get("func")()
     # Should the file be deleted after being sent? If .deleteFile not set or if
     # TRUE, then delete; otherwise don't delete.
     if (deleteFile) {

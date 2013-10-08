@@ -1332,14 +1332,33 @@ runApp <- function(appDir=getwd(),
   
   # determine port if we need to
   if (is.null(port)) {
-    if (!is.null(.globals$lastPort))
-      port <- .globals$lastPort
-    else
-      port <- sample(3000:8000, 1)
+    
+    # Try up to 20 random ports. If we don't succeed just plow ahead
+    # with the final value we tried, and let the "real" startServer
+    # somewhere down the line fail and throw the error to the user.
+    #
+    # If we (think we) succeed, save the value as .globals$lastPort,
+    # and try that first next time the user wants a random port.
+    
+    for (i in 1:20) {
+      if (!is.null(.globals$lastPort)) {
+        port <- .globals$lastPort
+        .globals$lastPort <- NULL
+      }
+      else {
+        # Try up to 20 random ports
+        port <- round(runif(1, min=3000, max=8000))
+      }
+
+      # Test port to see if we can use it
+      tmp <- try(startServer('0.0.0.0', port, list()), silent=TRUE)
+      if (!is(tmp, 'try-error')) {
+        stopServer(tmp)
+        .globals$lastPort <- port
+        break
+      }
+    }
   }
-  
-  # set lastPort to NULL so that we don't re-use it if startApp fails
-  .globals$lastPort <- NULL
   
   if (is.character(appDir)) {
     orig.wd <- getwd()
@@ -1349,9 +1368,6 @@ runApp <- function(appDir=getwd(),
   } else {
     server <- startAppObj(appDir$ui, appDir$server, port=port, workerId)
   }
-  
-  # record port
-  .globals$lastPort <- port
   
   on.exit({
     stopServer(server)

@@ -1280,7 +1280,8 @@ serviceApp <- function(ws_env) {
 #'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
-#'   interactive sessions only.
+#'   interactive sessions only. This value of this parameter can also be a 
+#'   function to call with the application's URL. 
 #' @param workerId Can generally be ignored. Exists to help some editions of
 #'   Shiny Server Pro route requests to the correct process.
 #'
@@ -1356,9 +1357,12 @@ runApp <- function(appDir=getwd(),
     stopServer(server)
   }, add = TRUE)
   
-  if (launch.browser && !is.character(port)) {
+  if (!is.character(port)) {
     appUrl <- paste("http://localhost:", port, sep="")
-    utils::browseURL(appUrl)
+    if (is.function(launch.browser))
+      launch.browser(appUrl)
+    else if (launch.browser)
+      utils::browseURL(appUrl)
   }
   
   .globals$retval <- NULL

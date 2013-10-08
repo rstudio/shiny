@@ -1184,6 +1184,34 @@
   });
   outputBindings.register(downloadLinkOutputBinding, 'shiny.downloadLink');
 
+  var datatableOutputBinding = new OutputBinding();
+  $.extend(datatableOutputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-datatable-output');
+    },
+    onValueError: function(el, err) {
+      exports.unbindAll(el);
+      this.renderError(el, err);
+    },
+    renderValue: function(el, data) {
+      var content = data.colnames.map(function(x) {
+        return '<th>' + x + '</th>';
+      }).join('');
+      content = '<tr>' + content + '</tr>';
+      content = '<table cellpadding="0", cellspacing="0", border="0", class="display">' +
+                '<thead>' + content + '</thead>' + '<tfoot>' + content + '</tfoot>' +
+                '</table>';
+      $(el).append(content);
+      $(el).children("table").dataTable({
+        "bProcessing": true,
+        "bServerSide": true,
+        "aaSorting": [],
+        "sAjaxSource": data.action
+      }).columnFilter();
+    }
+  });
+  outputBindings.register(datatableOutputBinding, 'shiny.datatableOutput');
+
   // =========================================================================
   // Input bindings
   // =========================================================================

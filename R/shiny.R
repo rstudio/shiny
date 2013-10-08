@@ -1153,7 +1153,8 @@ serviceApp <- function(ws_env) {
 #'   port 8100.
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
-#'   interactive sessions only.
+#'   interactive sessions only. This value of this parameter can also be a 
+#'   function to call with the application's URL. 
 #'
 #' @examples
 #' \dontrun{
@@ -1212,9 +1213,12 @@ runApp <- function(appDir=getwd(),
     stopServer(server)
   }, add = TRUE)
   
-  if (launch.browser && !is.character(port)) {
+  if (!is.character(port)) {
     appUrl <- paste("http://localhost:", port, sep="")
-    utils::browseURL(appUrl)
+    if (is.function(launch.browser))
+      launch.browser(appUrl)
+    else if (launch.browser)
+      utils::browseURL(appUrl)
   }
   
   tryCatch(

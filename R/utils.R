@@ -199,7 +199,13 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 #' Installs an expression in the given environment as a function, and registers
 #' debug hooks so that breakpoints may be set in the function.
 #' 
-#' @note Wraps \code{exprToFunction}; see that method's documentation for 
+#' Can replace \code{exprToFunction} as follows:
+#' 
+#' Before: \code{func <- exprToFunction(expr)}
+#' 
+#' After: \code{installExprFunction(expr, "func")}
+#' 
+#' @seealso Wraps \code{exprToFunction}; see that method's documentation for 
 #'   more documentation and examples.
 #'   
 #' @param expr A quoted or unquoted expression
@@ -210,6 +216,8 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 #' @param assign.env The environment in which the function should be assigned.
 #' @param label A label for the object to be shown in the debugger. Defaults
 #'   to the name of the calling function. 
+#' 
+#' @export
 installExprFunction <- function(expr, name, eval.env = parent.frame(2), 
                                 quoted = FALSE, 
                                 assign.env = parent.frame(1),

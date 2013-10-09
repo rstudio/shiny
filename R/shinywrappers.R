@@ -2,6 +2,7 @@ suppressPackageStartupMessages({
   library(caTools)
   library(xtable)
 })
+globalVariables('func')
 
 #' Plot Output
 #' 
@@ -222,7 +223,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
   installExprFunction(expr, "func", env, quoted)
   
   return(function(shinysession, name, ...) {
-    imageinfo <- get("func")()
+    imageinfo <- func()
     # Should the file be deleted after being sent? If .deleteFile not set or if
     # TRUE, then delete; otherwise don't delete.
     if (deleteFile) {

@@ -492,6 +492,7 @@
       };
       socket.onclose = function() {
         $(document.body).addClass('disconnected');
+        self.$notifyDisconnected();
       };
       return socket;
     };
@@ -507,6 +508,34 @@
       $.extend(this.$inputValues, values);
       this.$updateConditionals();
     };
+
+    this.$notifyDisconnected = function() {
+
+      // function to normalize hostnames
+      normalize = function(hostname) {
+        if (hostname == "127.0.0.1")
+          return "localhost";
+        else
+          return hostname;
+      }
+
+      // Send a 'disconnected' message to parent if we are on the same domin
+      var parentUrl = (parent !== window) ? document.referrer : null;
+      if (parentUrl) {
+        // parse the parent href
+        var a = document.createElement('a');
+        a.href = parentUrl;
+                
+        // post the disconnected message if the hostnames are the same
+        if (normalize(a.hostname) == normalize(window.location.hostname)) {
+          protocol = a.protocol.replace(':',''); // browser compatability
+          origin = protocol + '://' + a.hostname;
+          if (a.port)
+            origin = origin + ':' + a.port;
+          parent.postMessage('disconnected', origin);
+        }
+      }
+    }
 
     // NB: Including blobs will cause IE to break!
     // TODO: Make blobs work with Internet Explorer

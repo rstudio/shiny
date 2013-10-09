@@ -53,7 +53,7 @@ This expression will be re-executed (and its output re-rendered in the browser) 
 
 ### Back to the Code
 
-Now that we've taken a deeper loop at some of the core concepts, let's revisit the source code and try to understand what's going on in more depth. The user interface definition has been updated to include a text-input field that defines a caption. Other than that it's very similar to the previous example:
+Now that we've taken a deeper look at some of the core concepts, let's revisit the source code and try to understand what's going on in more depth. The user interface definition has been updated to include a text-input field that defines a caption. Other than that it's very similar to the previous example:
 
 #### ui.R
 

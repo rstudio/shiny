@@ -1157,10 +1157,10 @@ tableOutput <- function(outputId) {
 dataTableOutput <- function(outputId) {
   tagList(
     singleton(tags$head(
-      tags$script(src = "http://www.datatables.net/release-datatables/media/js/jquery.dataTables.js"),
-      tags$script(src = "http://jquery-datatables-column-filter.googlecode.com/svn/trunk/media/js/jquery.dataTables.columnFilter.js"),
       tags$link(rel = "stylesheet", type = "text/css",
-                href = "http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css")
+                href = "shared/datatables/css/DT_bootstrap.css"),
+      tags$script(src = "shared/datatables/js/jquery.dataTables.min.js"),
+      tags$script(src = "shared/datatables/js/DT_bootstrap.js")
     )),
     div(id = outputId, class="shiny-datatable-output")
   )

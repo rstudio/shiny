@@ -1194,20 +1194,28 @@
       this.renderError(el, err);
     },
     renderValue: function(el, data) {
-      var content = data.colnames.map(function(x) {
+      var header = data.colnames.map(function(x) {
         return '<th>' + x + '</th>';
       }).join('');
-      content = '<tr>' + content + '</tr>';
-      content = '<table cellpadding="0", cellspacing="0", border="0", class="display">' +
-                '<thead>' + content + '</thead>' + '<tfoot>' + content + '</tfoot>' +
-                '</table>';
+      header = '<thead><tr>' + header + '</tr></thead>';
+      var footer = data.colnames.map(function(x) {
+        return '<th><input type="text" placeholder="' + x + '" /></th>';
+      }).join('');
+      footer = '<tfoot>' + footer + '</tfoot>';
+      var content = '<table class="table table-striped table-hover">' +
+                    header + footer + '</table>';
       $(el).append(content);
-      $(el).children("table").dataTable({
+      var oTable = $(el).children("table").dataTable({
         "bProcessing": true,
         "bServerSide": true,
         "aaSorting": [],
         "sAjaxSource": data.action
-      }).columnFilter();
+      });
+      // TODO: use debouncing for searching boxes
+      var searchInputs = $(el).find("tfoot input");
+      searchInputs.keyup(function() {
+        oTable.fnFilter(this.value, searchInputs.index(this));
+      });
     }
   });
   outputBindings.register(datatableOutputBinding, 'shiny.datatableOutput');

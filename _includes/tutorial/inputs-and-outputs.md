@@ -94,7 +94,7 @@ The use of `renderText` and `renderPlot` to generate output (rather than just as
 
 The server script assigned two output values: `output$caption` and `output$mpgPlot`. To update our user interface to display the output we need to add some elements to the main UI panel. 
 
-In the updated user-interface definition below you can see that we've added the caption as an h3 element and filled in it's value using the `textOutput` function, and also rendered the plot by calling the `plotOutput` function:
+In the updated user-interface definition below you can see that we've added the caption as an h3 element and filled in its value using the `textOutput` function, and also rendered the plot by calling the `plotOutput` function:
 
 #### ui.R
 

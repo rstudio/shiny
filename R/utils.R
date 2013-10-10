@@ -376,17 +376,18 @@ dataTablesJSON <- function(data, query) {
   n <- nrow(data)
   with(parseQueryString(query), {
     # global searching
+    i <- seq_len(n)
     if (nzchar(sSearch)) {
-      i <- apply(data, 2, function(x) grep(sSearch, as.character(x)))
-      i <- unique(unlist(i))
-      data <- data[i, , drop = FALSE]
+      i0 <- apply(data, 2, function(x) grep(sSearch, as.character(x)))
+      i <- intersect(i, unique(unlist(i0)))
     }
-    i <- NULL
-    for (j in seq_len(as.integer(iColumns)) - 1) {
+    # search by columns
+    if (length(i)) for (j in seq_len(as.integer(iColumns)) - 1) {
       if (is.null(k <- get_exists(sprintf('sSearch_%d', j), 'character'))) next
-      if (nzchar(k)) i <- c(i, grep(k, data[, j + 1]))
+      if (nzchar(k)) i <- intersect(grep(k, as.character(data[, j + 1])), i)
+      if (length(i) == 0) break
     }
-    if (length(i)) data <- data[i, , drop = FALSE]
+    if (length(i) != n) data <- data[i, , drop = FALSE]
     # sorting
     oList <- list()
     for (j in seq_len(as.integer(iSortingCols)) - 1) {

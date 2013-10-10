@@ -66,7 +66,7 @@ Alternatively, you can specify the [recover](http://stat.ethz.ch/R-manual/R-deve
 options(error = recover)
 {% endhighlight %}
 
-If you want to set the error option automatically for every R session, you can do this in your .Rprofile file as described in this article on [R Startup](http://stat.ethz.ch/R-manual/R-patched/library/base/html/Startup.html).
+If you want to set the error option automatically for every R session, you can do this in your .Rprofile file as described in [this article on R Startup](http://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html).
 
 
 

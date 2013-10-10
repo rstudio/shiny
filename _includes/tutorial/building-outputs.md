@@ -10,7 +10,7 @@ Start by deciding the kind of values your output component is going to receive f
 
 Whatever value the user's R code returns is going to need to somehow be turned into a JSON-compatible value (Shiny uses [RJSONIO](http://cran.r-project.org/web/packages/RJSONIO/index.html) to do the conversion). If the user's code is naturally going to return something RJSONIO-compatible&nbsp;&ndash; like a character vector, a data frame, or even a list that contains atomic vectors&nbsp;&ndash; then you can just direct the user to use a function on the server. However, if the output needs to undergo some other kind of transformation, then you'll need to write a wrapper function that your users will use instead (analogous to `renderPlot` or `renderTable`).
 
-For example, if the user wants to output [time series objects](http://stat.ethz.ch/R-manual/R-patched/library/stats/html/ts.html) then you might create a `renderTimeSeries` function that knows how to translate `ts` objects to a simple list or data frame:
+For example, if the user wants to output [time series objects](http://stat.ethz.ch/R-manual/R-devel/library/stats/html/ts.html) then you might create a `renderTimeSeries` function that knows how to translate `ts` objects to a simple list or data frame:
 
 
 {% highlight r %}

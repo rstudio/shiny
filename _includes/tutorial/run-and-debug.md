@@ -2,9 +2,9 @@
 
 ## Run & Debug
 
-Throughout the tutorial you've been calling `runApp` to run the example applications. This function starts the application and opens up your default web browser to view it. The call is blocking, meaning that it prevents traditional interaction with the console while the applciation is running.
+Throughout the tutorial you've been calling `runApp` to run the example applications. This function starts the application and opens up your default web browser to view it. The call is blocking, meaning that it prevents traditional interaction with the console while the application is running.
 
-To stop the application you simply interupt R -- you can do this by pressing the Escape key in all R front ends as well as by clicking the stop button if your R environment provides one.
+To stop the application you simply interrupt R -- you can do this by pressing the Escape key in all R front ends as well as by clicking the stop button if your R environment provides one.
 
 ### Running in a Separate Process
 
@@ -59,7 +59,7 @@ You can also set the R &quot;error&quot; option to automatically enter the brows
 options(error = browser)
 {% endhighlight %}
 
-Alternatively, you can specify the [recover](http://stat.ethz.ch/R-manual/R-devel/library/utils/html/recover.html) function as your error handler, which will print a list of the call stack and allow you to browse at any point in he stack:
+Alternatively, you can specify the [recover](http://stat.ethz.ch/R-manual/R-devel/library/utils/html/recover.html) function as your error handler, which will print a list of the call stack and allow you to browse at any point in the stack:
 
 {% highlight r %}
 # Call the recover function when an error occurs

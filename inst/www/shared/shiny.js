@@ -1079,11 +1079,10 @@
               y: mouseEvent.offsetY
             };
           }
-
-          var origEvent = mouseEvent.originalEvent || {};
+          var offset = $el.offset();
           return {
-            x: origEvent.layerX - origEvent.target.offsetLeft,
-            y: origEvent.layerY - origEvent.target.offsetTop
+            x: mouseEvent.pageX - offset.left,
+            y: mouseEvent.pageY - offset.top
           };
         }
         

@@ -476,9 +476,11 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' searching, filtering, and sorting can be done on the R side using Shiny as
 #' the server infrastructure.
 #' @param expr An expression that returns a data frame or a matrix.
+#' @param options A list of initialization options to be passed to DataTables.
+#' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot
-renderDataTable <- function(expr, env=parent.frame(), quoted=FALSE) {
+renderDataTable <- function(expr, options = NULL, env=parent.frame(), quoted=FALSE) {
   func <- exprToFunction(expr, env, quoted)
 
   function(shinysession, name, ...) {
@@ -486,7 +488,7 @@ renderDataTable <- function(expr, env=parent.frame(), quoted=FALSE) {
     if (length(dim(data)) != 2)
       stop('renderDataTable() expects a rectangular data object (e.g. data frame)')
     action <- shinysession$registerDataTable(name, data)
-    list(colnames = colnames(data), action = action)
+    list(colnames = colnames(data), action = action, options = options)
   }
 }
 

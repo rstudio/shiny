@@ -1205,12 +1205,12 @@
       var content = '<table class="table table-striped table-hover">' +
                     header + footer + '</table>';
       $(el).append(content);
-      var oTable = $(el).children("table").dataTable({
+      var oTable = $(el).children("table").dataTable($.extend({
         "bProcessing": true,
         "bServerSide": true,
         "aaSorting": [],
         "sAjaxSource": data.action
-      });
+      }, data.options));
       // TODO: use debouncing for searching boxes
       var searchInputs = $(el).find("tfoot input");
       searchInputs.keyup(function() {

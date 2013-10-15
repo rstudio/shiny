@@ -1,8 +1,11 @@
 \name{tableOutput}
+\alias{dataTableOutput}
 \alias{tableOutput}
 \title{Create a table output element}
 \usage{
   tableOutput(outputId)
+
+  dataTableOutput(outputId)
 }
 \arguments{
   \item{outputId}{output variable to read the table from}

@@ -2,7 +2,7 @@
 \alias{renderDataTable}
 \title{Table output with the JavaScript library DataTables}
 \usage{
-  renderDataTable(expr, options = NULL,
+  renderDataTable(expr, options = NULL, searchDelay = 500,
     env = parent.frame(), quoted = FALSE)
 }
 \arguments{
@@ -11,6 +11,9 @@
 
   \item{options}{A list of initialization options to be
   passed to DataTables.}
+
+  \item{searchDelay}{The delay for searching, in
+  milliseconds (to avoid too frequent search requests).}
 
   \item{env}{The environment in which to evaluate
   \code{expr}.}

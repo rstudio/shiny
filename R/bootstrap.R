@@ -620,13 +620,19 @@ submitButton <- function(text = "Apply Changes") {
 #' @param inputId Specifies the input slot that will be used to access the
 #'   value.
 #' @param label The contents of the button--usually a text label, but you could
-#'   also use any other HTML, like an image.
+#'  also use any other HTML, like an image.
+#' @param style The styling class of the button--options are primary, info, success 
+#'  ,warning, ,danger ,inverse ,link
 #'
 #' @family input elements
 #'
 #' @export
-actionButton <- function(inputId, label) {
-  tags$button(id=inputId, type="button", class="btn action-button", label)
+actionButton <- function(inputId, label, style = "" , additionalClass = "") {
+  if (style %in% c("primary","info","success","warning","","danger","inverse","link")) {
+  	class.style <- paste("btn",style,sep="-")
+  } else class.style = ""
+
+  tags$button(id=inputId, type="button", class=paste("btn action-button",class.style,additionalClass), label)
 }
 
 #' Slider Input Widget

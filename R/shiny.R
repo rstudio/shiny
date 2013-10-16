@@ -146,7 +146,7 @@ ShinySession <- setRefClass(
 
         obs <- observe({
           
-          value <- try(func(), silent=FALSE)
+          value <- try(shinyCallingHandlers(func()), silent=FALSE)
           
           .invalidatedOutputErrors$remove(name)
           .invalidatedOutputValues$remove(name)
@@ -1383,15 +1383,12 @@ runApp <- function(appDir=getwd(),
   
   .globals$retval <- NULL
   .globals$stopped <- FALSE
-  tryCatch(
+  tryCatch(shinyCallingHandlers(
     while (!.globals$stopped) {
       serviceApp()
       Sys.sleep(0.001)
-    },
-    finally = {
-      timerCallbacks$clear()
     }
-  )
+  ), finally = timerCallbacks$clear())
   
   return(.globals$retval)
 }

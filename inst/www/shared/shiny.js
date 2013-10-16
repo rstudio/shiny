@@ -1211,11 +1211,15 @@
         "aaSorting": [],
         "sAjaxSource": data.action
       }, data.options));
-      // TODO: use debouncing for searching boxes
+      // use debouncing for searching boxes
+      $(el).find('label input').first().unbind('keyup')
+           .keyup(debounce(data.searchDelay, function() {
+              oTable.fnFilter(this.value);
+            }));
       var searchInputs = $(el).find("tfoot input");
-      searchInputs.keyup(function() {
+      searchInputs.keyup(debounce(data.searchDelay, function() {
         oTable.fnFilter(this.value, searchInputs.index(this));
-      });
+      }));
     }
   });
   outputBindings.register(datatableOutputBinding, 'shiny.datatableOutput');

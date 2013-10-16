@@ -477,10 +477,13 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' the server infrastructure.
 #' @param expr An expression that returns a data frame or a matrix.
 #' @param options A list of initialization options to be passed to DataTables.
+#' @param searchDelay The delay for searching, in milliseconds (to avoid too
+#'   frequent search requests).
 #' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot
-renderDataTable <- function(expr, options = NULL, env=parent.frame(), quoted=FALSE) {
+renderDataTable <- function(expr, options = NULL, searchDelay = 500,
+                            env=parent.frame(), quoted=FALSE) {
   func <- exprToFunction(expr, env, quoted)
 
   function(shinysession, name, ...) {
@@ -488,7 +491,8 @@ renderDataTable <- function(expr, options = NULL, env=parent.frame(), quoted=FAL
     if (length(dim(data)) != 2)
       stop('renderDataTable() expects a rectangular data object (e.g. data frame)')
     action <- shinysession$registerDataTable(name, data)
-    list(colnames = colnames(data), action = action, options = options)
+    list(colnames = colnames(data), action = action, options = options,
+         searchDelay = searchDelay)
   }
 }
 

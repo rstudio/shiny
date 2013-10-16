@@ -1383,15 +1383,10 @@ runApp <- function(appDir=getwd(),
   
   .globals$retval <- NULL
   .globals$stopped <- FALSE
-  tryCatch(
-    while (!.globals$stopped) {
-      serviceApp()
-      Sys.sleep(0.001)
-    },
-    finally = {
-      timerCallbacks$clear()
-    }
-  )
+  while (!.globals$stopped) {
+    serviceApp()
+    Sys.sleep(0.001)
+  }
   
   return(.globals$retval)
 }

@@ -249,6 +249,16 @@ parseQueryString <- function(str) {
   setNames(as.list(values), keys)
 }
 
+# decide what to do in case of errors; it is customizable using the shiny.error
+# option (e.g. we can set options(shiny.error = recover))
+shinyCallingHandlers <- function(expr) {
+  withCallingHandlers(expr, error = function(e) {
+    handle <- getOption('shiny.error')
+    if (is.null(handle) || !is.function(handle)) return()
+    if (length(formals(handle)) > 0) handle(e) else handle()
+  })
+}
+
 #' Print message for deprecated functions in Shiny
 #'
 #' To disable these messages, use \code{options(shiny.deprecation.messages=FALSE)}.

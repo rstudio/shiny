@@ -3,7 +3,7 @@
 \title{Convert an expression or quoted expression to a function}
 \usage{
   exprToFunction(expr, env = parent.frame(2),
-    quoted = FALSE)
+    quoted = FALSE, caller_offset = 1)
 }
 \arguments{
   \item{expr}{A quoted or unquoted expression, or a
@@ -13,6 +13,9 @@
   Defaults to the calling environment two steps back.}
 
   \item{quoted}{Is the expression quoted?}
+
+  \item{caller_offset}{The offset in the callstack of the function to be
+  considered the caller. Defaults to the direct caller.}
 }
 \description{
   This is to be called from another function, because it
@@ -26,6 +29,12 @@
   was a non-quoted expression from two calls back, then
   this will quote the original expression and convert it to
   a function.
+}
+\note{
+exprToFunction does not set debug hooks in the function it creates, so it is
+not possible to set breakpoints in the original expressions and hit them during
+Shiny application runtime. Use \code{\link{installExprFunction}} instead if you
+need debug support.
 }
 \examples{
 # Example of a new renderer, similar to renderText

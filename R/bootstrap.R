@@ -623,7 +623,8 @@ submitButton <- function(text = "Apply Changes") {
 #'   also use any other HTML, like an image.
 #' @param btn.style The styling class of the button--options are primary, info, 
 #'   success ,warning, ,danger ,inverse ,link
-#' @param css.class Any additional CSS class one wishes to the action button
+#' @param css.class Any additional CSS class one wishes to add to the action
+#'   button e.g btn-large
 #'   
 #' @family input elements
 #'   

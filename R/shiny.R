@@ -1373,6 +1373,7 @@ runApp <- function(appDir=getwd(),
   
   on.exit({
     stopServer(server)
+    .getReactiveEnvironment()$reset()
   }, add = TRUE)
   
   if (!is.character(port)) {

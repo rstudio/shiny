@@ -146,7 +146,7 @@ ShinySession <- setRefClass(
 
         obs <- observe({
           
-          value <- try(func(), silent=FALSE)
+          value <- try(shinyCallingHandlers(func()), silent=FALSE)
           
           .invalidatedOutputErrors$remove(name)
           .invalidatedOutputValues$remove(name)
@@ -223,7 +223,9 @@ ShinySession <- setRefClass(
     },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
-      func <- try(.self[[method]], silent=TRUE)
+      # we must use $ instead of [[ here at the moment; see
+      # https://github.com/rstudio/shiny/issues/274
+      func <- try(do.call(`$`, list(.self, method)), silent=TRUE)
       if (inherits(func, 'try-error')) {
         .sendErrorResponse(msg, paste('Unknown method', msg$method))
       }
@@ -1383,15 +1385,12 @@ runApp <- function(appDir=getwd(),
   
   .globals$retval <- NULL
   .globals$stopped <- FALSE
-  tryCatch(
+  tryCatch(shinyCallingHandlers(
     while (!.globals$stopped) {
       serviceApp()
       Sys.sleep(0.001)
-    },
-    finally = {
-      timerCallbacks$clear()
     }
-  )
+  ), finally = timerCallbacks$clear())
   
   return(.globals$retval)
 }

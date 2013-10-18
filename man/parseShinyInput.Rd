@@ -14,8 +14,7 @@
 \details{
   The \code{type} of a custom Shiny Input widget will be
   deduced using the \code{getType()} JavaScript function on
-  the registered Shiny inputBinding. This type will then be
-  set as the incoming object's class.
+  the registered Shiny inputBinding.
 
   The provided function will be used to parse the data
   delivered from the client before it is available in the

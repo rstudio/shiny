@@ -1242,12 +1242,9 @@ startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
   }
 }
 
-# NOTE: we de-roxygenized this comment because the function isn't exported
 # Run an application that was created by \code{\link{startApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
-# 
-# @param ws_env The return value from \code{\link{startApp}}.
-serviceApp <- function(ws_env) {
+serviceApp <- function() {
   if (timerCallbacks$executeElapsed()) {
     for (shinysession in appsByToken$values()) {
       shinysession$manageHiddenOutputs()

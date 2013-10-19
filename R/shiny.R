@@ -764,7 +764,7 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
       if (file.exists(filePath)) {
         local({
           cacheContext$with(function() {
-            sys.source(filePath, envir=new.env(parent=.GlobalEnv))
+            sys.source(filePath, envir=new.env(parent=.GlobalEnv), keep.source=TRUE)
           })
         })
       }
@@ -1018,11 +1018,11 @@ startAppDir <- function(port=8101L, workerId) {
     stop(paste("server.R file was not found in", getwd()))
   
   if (file.exists(globalR))
-    sys.source(globalR, envir=.GlobalEnv)
+    sys.source(globalR, envir=.GlobalEnv, keep.source=TRUE)
   
   shinyServer(NULL)
   serverFileTimestamp <- file.info(serverR)$mtime
-  local(sys.source(serverR, envir=new.env(parent=.GlobalEnv)))
+  local(sys.source(serverR, envir=new.env(parent=.GlobalEnv), keep.source=TRUE))
   if (is.null(.globals$server))
     stop("No server was defined in server.R")
   
@@ -1032,7 +1032,7 @@ startAppDir <- function(port=8101L, workerId) {
     if (!identical(mtime, serverFileTimestamp)) {
       shinyServer(NULL)
       serverFileTimestamp <<- mtime
-      local(sys.source(serverR, envir=new.env(parent=.GlobalEnv)))
+      local(sys.source(serverR, envir=new.env(parent=.GlobalEnv), keep.source=TRUE))
       if (is.null(.globals$server))
         stop("No server was defined in server.R")
     }

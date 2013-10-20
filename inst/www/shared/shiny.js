@@ -1209,6 +1209,7 @@
         "bProcessing": true,
         "bServerSide": true,
         "aaSorting": [],
+        "bSortClasses": false,
         "sAjaxSource": data.action
       }, data.options));
       // use debouncing for searching boxes

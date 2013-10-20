@@ -1210,6 +1210,7 @@
         "bServerSide": true,
         "aaSorting": [],
         "bSortClasses": false,
+        "iDisplayLength": 25,
         "sAjaxSource": data.action
       }, data.options));
       // use debouncing for searching boxes

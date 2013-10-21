@@ -1382,12 +1382,12 @@ runApp <- function(appDir=getwd(),
   
   .globals$retval <- NULL
   .globals$stopped <- FALSE
-  tryCatch(shinyCallingHandlers(
+  shinyCallingHandlers(
     while (!.globals$stopped) {
       serviceApp()
       Sys.sleep(0.001)
     }
-  ), finally = timerCallbacks$clear())
+  )
   
   return(.globals$retval)
 }

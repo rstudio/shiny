@@ -335,7 +335,7 @@ shiny 0.1.3
   creating custom input controls
 * Add `step` parameter to numericInput
 * Read names of input using `names(input)`
-* Access snapshot of input as a list using `as.list(input)` 
+* Access snapshot of input as a list using `as.list(input)`
 * Fix issue #10: Plots in tabsets not rendered
 
 

@@ -423,6 +423,18 @@ ShinySession <- setRefClass(
             ),
             'Cache-Control'='no-cache')))
       }
+
+      if (matches[2] == 'datatable') {
+        # /session/$TOKEN/datatable/$NAME
+        dlmatches <- regmatches(matches[3],
+                                regexec("^([^/]+)(/[^/]+)?$",
+                                        matches[3]))[[1]]
+        dlname <- utils::URLdecode(dlmatches[2])
+        download <- downloads$get(dlname)
+        return(httpResponse(
+          200, 'application/json', dataTablesJSON(download$data, req$QUERY_STRING)
+        ))
+      }
       
       return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
     },
@@ -460,6 +472,15 @@ ShinySession <- setRefClass(
                                contentType = contentType,
                                func = func))
       return(sprintf('session/%s/download/%s?w=%s',
+                     URLencode(token, TRUE),
+                     URLencode(name, TRUE),
+                     .workerId))
+    },
+    # this can be more general registrations; not limited to data tables
+    registerDataTable = function(name, data) {
+      # abusing downloads at the moment
+      downloads$set(name, list(data = data))
+      return(sprintf('session/%s/datatable/%s?w=%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
                      .workerId))

@@ -1184,6 +1184,52 @@
   });
   outputBindings.register(downloadLinkOutputBinding, 'shiny.downloadLink');
 
+  var datatableOutputBinding = new OutputBinding();
+  $.extend(datatableOutputBinding, {
+    find: function(scope) {
+      return $(scope).find('.shiny-datatable-output');
+    },
+    onValueError: function(el, err) {
+      exports.unbindAll(el);
+      this.renderError(el, err);
+    },
+    renderValue: function(el, data) {
+      var $el = $(el).empty();
+      var colnames = $.makeArray(data.colnames);
+      var header = colnames.map(function(x) {
+        return '<th>' + x + '</th>';
+      }).join('');
+      header = '<thead><tr>' + header + '</tr></thead>';
+      var footer = colnames.map(function(x) {
+        return '<th><input type="text" placeholder="' + x + '" /></th>';
+      }).join('');
+      footer = '<tfoot>' + footer + '</tfoot>';
+      var content = '<table class="table table-striped table-hover">' +
+                    header + footer + '</table>';
+      $el.append(content);
+      var oTable = $(el).children("table").dataTable($.extend({
+        "bProcessing": true,
+        "bServerSide": true,
+        "aaSorting": [],
+        "bSortClasses": false,
+        "iDisplayLength": 25,
+        "sAjaxSource": data.action
+      }, data.options));
+      // use debouncing for searching boxes
+      $el.find('label input').first().unbind('keyup')
+           .keyup(debounce(data.searchDelay, function() {
+              oTable.fnFilter(this.value);
+            }));
+      var searchInputs = $el.find("tfoot input");
+      searchInputs.keyup(debounce(data.searchDelay, function() {
+        oTable.fnFilter(this.value, searchInputs.index(this));
+      }));
+      // FIXME: ugly scrollbars in tab panels b/c Bootstrap uses 'visible: auto'
+      $el.parents('.tab-content').css('overflow', 'visible');
+    }
+  });
+  outputBindings.register(datatableOutputBinding, 'shiny.datatableOutput');
+
   // =========================================================================
   // Input bindings
   // =========================================================================

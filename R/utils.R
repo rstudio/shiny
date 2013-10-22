@@ -369,3 +369,56 @@ Callbacks <- setRefClass(
     }
   )
 )
+
+# convert a data frame to JSON as required by DataTables request
+dataTablesJSON <- function(data, query) {
+  n <- nrow(data)
+  with(parseQueryString(query), {
+    # global searching
+    i <- seq_len(n)
+    if (nzchar(sSearch)) {
+      i0 <- apply(data, 2, function(x) grep(sSearch, as.character(x)))
+      i <- intersect(i, unique(unlist(i0)))
+    }
+    # search by columns
+    if (length(i)) for (j in seq_len(as.integer(iColumns)) - 1) {
+      if (is.null(k <- get_exists(sprintf('sSearch_%d', j), 'character'))) next
+      if (nzchar(k)) i <- intersect(grep(k, as.character(data[, j + 1])), i)
+      if (length(i) == 0) break
+    }
+    if (length(i) != n) data <- data[i, , drop = FALSE]
+    # sorting
+    oList <- list()
+    for (j in seq_len(as.integer(iSortingCols)) - 1) {
+      if (is.null(k <- get_exists(sprintf('iSortCol_%d', j), 'character'))) break
+      desc = get_exists(sprintf('sSortDir_%d', j), 'character')
+      if (is.character(desc)) {
+        col <- data[, as.integer(k) + 1]
+        oList[[length(oList) + 1]] <- (if (desc == 'asc') identity else `-`)(
+          if (is.numeric(col)) col else xtfrm(col)
+        )
+      }
+    }
+    if (length(oList)) {
+      i <- do.call(order, oList)
+      data <- data[i, , drop = FALSE]
+    }
+    # paging
+    i <- seq(as.integer(iDisplayStart) + 1L, length.out = as.integer(iDisplayLength))
+    i <- i[i <= n]
+    fdata <- data[i, , drop = FALSE]  # filtered data
+    fdata <- unname(as.matrix(fdata))
+
+    toJSON(list(
+      sEcho = as.integer(sEcho),
+      iTotalRecords = n,
+      iTotalDisplayRecords = nrow(data),
+      aaData = fdata
+    ))
+  })
+}
+
+get_exists = function(x, mode) {
+  if (exists(x, envir = parent.frame(), mode = mode, inherits = FALSE))
+    get(x, envir = parent.frame(), mode = mode, inherits = FALSE)
+}

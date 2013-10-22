@@ -1152,6 +1152,20 @@ tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
 }
 
+#' @rdname tableOutput
+#' @export
+dataTableOutput <- function(outputId) {
+  tagList(
+    singleton(tags$head(
+      tags$link(rel = "stylesheet", type = "text/css",
+                href = "shared/datatables/css/DT_bootstrap.css"),
+      tags$script(src = "shared/datatables/js/jquery.dataTables.min.js"),
+      tags$script(src = "shared/datatables/js/DT_bootstrap.js")
+    )),
+    div(id = outputId, class="shiny-datatable-output")
+  )
+}
+
 #' Create an HTML output element
 #' 
 #' Render a reactive output variable as HTML within an application page. The 

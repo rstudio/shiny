@@ -469,6 +469,33 @@ downloadHandler <- function(filename, content, contentType=NA) {
   })
 }
 
+#' Table output with the JavaScript library DataTables
+#'
+#' Makes a reactive version of the given function that returns a data frame (or
+#' matrix), which will be rendered with the DataTables library. Paging,
+#' searching, filtering, and sorting can be done on the R side using Shiny as
+#' the server infrastructure.
+#' @param expr An expression that returns a data frame or a matrix.
+#' @param options A list of initialization options to be passed to DataTables.
+#' @param searchDelay The delay for searching, in milliseconds (to avoid too
+#'   frequent search requests).
+#' @references \url{http://datatables.net}
+#' @export
+#' @inheritParams renderPlot
+renderDataTable <- function(expr, options = NULL, searchDelay = 500,
+                            env=parent.frame(), quoted=FALSE) {
+  installExprFunction(expr, "func", env, quoted)
+
+  function(shinysession, name, ...) {
+    data <- func()
+    if (length(dim(data)) != 2)
+      stop('renderDataTable() expects a rectangular data object (e.g. data frame)')
+    action <- shinysession$registerDataTable(name, data)
+    list(colnames = colnames(data), action = action, options = options,
+         searchDelay = searchDelay)
+  }
+}
+
 
 # Deprecated functions ------------------------------------------------------
 

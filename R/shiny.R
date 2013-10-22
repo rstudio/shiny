@@ -88,6 +88,15 @@ ShinySession <- setRefClass(
       session$input             <<- .self$input
       session$output            <<- .self$output
       session$.impl             <<- .self
+
+      if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
+        try({
+          creds <- fromJSON(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)
+          session$user <<- creds$user
+          session$groups <<- creds$groups
+        }, silent=FALSE)
+      }
+
       # session$request should throw an error if httpuv doesn't have
       # websocket$request, but don't throw it until a caller actually
       # tries to access session$request

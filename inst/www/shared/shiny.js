@@ -1194,7 +1194,7 @@
       this.renderError(el, err);
     },
     renderValue: function(el, data) {
-      var $el = $(el);
+      var $el = $(el).empty();
       var header = data.colnames.map(function(x) {
         return '<th>' + x + '</th>';
       }).join('');

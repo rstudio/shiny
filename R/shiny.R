@@ -839,27 +839,17 @@ parseShinyInput.default <- function(x, ...){
 }
 
 # Takes a list-of-lists and returns a matrix. The lists
-# must all be the same length. NULLs and empty lists are replaced by NA.
+# must all be the same length.
 parseShinyInput.matrix <- function(data, ...) {
   if (length(data) == 0)
     return(matrix(nrow=0, ncol=0))
   
-  m <- matrix(unlist(lapply(data, function(x) {
-    sapply(x, function(y) {
-      ifelse(is.null(y) || (is.list(y) && length(y) == 0), NA, y)
-    })
-  })), nrow = length(data[[1]]), ncol = length(data))
+  m <- matrix(unlist(data), nrow = length(data[[1]]), ncol = length(data))
   return(m)
 }
 
-parseShinyInput.number <- function(val, ...){
-  ifelse((is.list(val) && length(val) == 0), NA, val)
-}
-
 parseShinyInput.date <- function(val, ...){  
-  # First replace NULLs with NA, then convert to Date vector
-  nullTest <- function(x){is.null(x) || (is.list(x) && length(x) == 0)}
-  datelist <- ifelse(lapply(val, nullTest), NA, val)
+  # Convert to Date vector
   as.Date(unlist(datelist))
 }
 
@@ -1016,7 +1006,7 @@ decodeMessage <- function(data) {
   }
   
   if (readInt(1) != 0x01020202L)
-    return(fromJSON(rawToChar(data), asText=TRUE, simplify=FALSE))
+    return(fromJSON(rawToChar(data), asText=TRUE, simplify=FALSE, nullValue=NA))
   
   i <- 5
   parts <- list()
@@ -1189,7 +1179,7 @@ startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
             if (length(splitName) > 1) {
               msg$data[[name]] <- NULL
 
-              val <- structure(val, class=splitName[[2]])
+              class(val) <- splitName[[2]]
               
               msg$data[[ splitName[[1]] ]] <- 
                 parseShinyInput(

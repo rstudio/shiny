@@ -1195,11 +1195,12 @@
     },
     renderValue: function(el, data) {
       var $el = $(el).empty();
-      var header = data.colnames.map(function(x) {
+      var colnames = $.makeArray(data.colnames);
+      var header = colnames.map(function(x) {
         return '<th>' + x + '</th>';
       }).join('');
       header = '<thead><tr>' + header + '</tr></thead>';
-      var footer = data.colnames.map(function(x) {
+      var footer = colnames.map(function(x) {
         return '<th><input type="text" placeholder="' + x + '" /></th>';
       }).join('');
       footer = '<tfoot>' + footer + '</tfoot>';

@@ -1224,6 +1224,8 @@
       searchInputs.keyup(debounce(data.searchDelay, function() {
         oTable.fnFilter(this.value, searchInputs.index(this));
       }));
+      // FIXME: ugly scrollbars in tab panels b/c Bootstrap uses 'visible: auto'
+      $el.parents('.tab-content').css('overflow', 'visible');
     }
   });
   outputBindings.register(datatableOutputBinding, 'shiny.datatableOutput');

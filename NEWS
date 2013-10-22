@@ -1,6 +1,46 @@
 shiny 0.7.0.99
 --------------------------------------------------------------------------------
 
+* Debug hooks are registered on all user-provided functions and (reactive)
+  expressions (e.g., in renderPlot()), which makes it possible to set
+  breakpoints in these functions using the latest version of the RStudio
+  IDE, and the RStudio visual debugging tools can be used to debug Shiny
+  apps. Internally, the registration is done via installExprFunction(),
+  which is a new function introduced in this version to replace
+  exprToFunction() so that the registration can be automatically done.
+
+* Added a new function renderDataTable() to display tables using the
+  JavaScript library DataTables. It includes basic features like pagination,
+  searching (global search or search by individual columns), sorting (by
+  single or multiple columns). All these features are implemented on the R
+  side; for example, we can use R regular expressions for searching.
+  Besides, it also uses the Twitter Bootstrap CSS style. See the full
+  documentation and examples in the tutorial:
+  http://rstudio.github.io/shiny/tutorial/#datatables
+
+* Added a new option `shiny.error` which can take a function as an error
+  handler. It is called when an error occurs in an app (in user-provided
+  code), e.g., after we set options(shiny.error = recover), we can enter a
+  specified environment in the call stack to debug our code after an error
+  occurs.
+
+* The argument `launch.browser` in runApp() can also be a function,
+  which takes the URL of the shiny app as its input value.
+
+* runApp() uses a random port between 3000 and 8000 instead of 8100 now. It
+  will try up to 20 ports in case certain ports are not available.
+
+* Fixed a bug for conditional panels: the value `input.id` in the condition
+  was not correctly retrieved when the input widget had a type, such as
+  numericInput(). (reported by Jason Bryer)
+
+* Fixed two bugs in plotOutput(); clickId and hoverId did not give correct
+  coordinates in Firefox, or when the axis limits of the plot were changed.
+  (reported by Chris Warth and Greg D)
+
+* The minimal required version for the httpuv package was increased to 1.2
+  (on CRAN now).
+
 
 shiny 0.7.0
 --------------------------------------------------------------------------------

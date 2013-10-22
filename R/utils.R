@@ -288,8 +288,7 @@ parseQueryString <- function(str) {
 shinyCallingHandlers <- function(expr) {
   withCallingHandlers(expr, error = function(e) {
     handle <- getOption('shiny.error')
-    if (is.null(handle) || !is.function(handle)) return()
-    if (length(formals(handle)) > 0) handle(e) else handle()
+    if (is.function(handle)) handle()
   })
 }
 

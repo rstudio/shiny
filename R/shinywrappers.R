@@ -484,7 +484,7 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' @inheritParams renderPlot
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             env=parent.frame(), quoted=FALSE) {
-  func <- exprToFunction(expr, env, quoted)
+  func <- installExprFunction(expr, "func", env, quoted)
 
   function(shinysession, name, ...) {
     data <- func()

@@ -9,8 +9,11 @@ demonstrates HTML tables using the jQuery library
 [DataTables](http://datatables.net). To run the example type:
 
 {% highlight r %}
-library(shiny)
-runGitHub("shiny-examples", "rstudio", subdir = "12_datatables")
+# this requires shiny >= 0.8 (not released on CRAN yet)
+if (packageVersion('shiny') > '0.7') {
+  library(shiny)
+  runGitHub("shiny-examples", "rstudio", subdir = "12_datatables")
+}
 {% endhighlight %}
 
 The basic usage is to create an output element in the UI using

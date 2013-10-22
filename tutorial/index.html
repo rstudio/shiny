@@ -171,6 +171,9 @@ hljs.initHighlightingOnLoad();
       <a target="_self" href="#tabsets">Tabsets</a>
    </li>
    <li>
+      <a target="_self" href="#datatables">DataTables</a>
+   </li>
+   <li>
       <a target="_self" href="#more-widgets">More Widgets</a>
    </li>
    <li>
@@ -305,6 +308,14 @@ hljs.initHighlightingOnLoad();
 {% capture tabsets %}{% include tutorial/tabsets.md %}{% endcapture %}
 {{ tabsets | markdownify }}
 
+</div>
+
+
+<!-- Tabsets -->
+<div class="tab-pane" id="datatables">
+
+{% capture datatables %}{% include tutorial/datatables.md %}{% endcapture %}
+{{ datatables | markdownify }}
 
 </div>
 

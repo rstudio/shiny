@@ -1194,6 +1194,7 @@
       this.renderError(el, err);
     },
     renderValue: function(el, data) {
+      var $el = $(el);
       var header = data.colnames.map(function(x) {
         return '<th>' + x + '</th>';
       }).join('');
@@ -1204,7 +1205,7 @@
       footer = '<tfoot>' + footer + '</tfoot>';
       var content = '<table class="table table-striped table-hover">' +
                     header + footer + '</table>';
-      $(el).append(content);
+      $el.append(content);
       var oTable = $(el).children("table").dataTable($.extend({
         "bProcessing": true,
         "bServerSide": true,
@@ -1214,11 +1215,11 @@
         "sAjaxSource": data.action
       }, data.options));
       // use debouncing for searching boxes
-      $(el).find('label input').first().unbind('keyup')
+      $el.find('label input').first().unbind('keyup')
            .keyup(debounce(data.searchDelay, function() {
               oTable.fnFilter(this.value);
             }));
-      var searchInputs = $(el).find("tfoot input");
+      var searchInputs = $el.find("tfoot input");
       searchInputs.keyup(debounce(data.searchDelay, function() {
         oTable.fnFilter(this.value, searchInputs.index(this));
       }));

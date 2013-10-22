@@ -811,6 +811,7 @@ appsByToken <- Map$new()
 #' 
 #' The \code{type} of a custom Shiny Input widget will be deduced using the 
 #' \code{getType()} JavaScript function on the registered Shiny inputBinding.
+#' This type will then be set as the incoming object's class.
 #' 
 #' The provided function will be used to parse the data delivered from the 
 #' client before it is available in the \code{input} variable. The function will 
@@ -845,19 +846,20 @@ parseShinyInput.matrix <- function(data, ...) {
   
   m <- matrix(unlist(lapply(data, function(x) {
     sapply(x, function(y) {
-      ifelse(is.null(y), NA, y)
+      ifelse(is.null(y) || (is.list(y) && length(y) == 0), NA, y)
     })
   })), nrow = length(data[[1]]), ncol = length(data))
   return(m)
 }
 
 parseShinyInput.number <- function(val, ...){
-  ifelse(is.null(val), NA, val)
+  ifelse((is.list(val) && length(val) == 0), NA, val)
 }
 
 parseShinyInput.date <- function(val, ...){  
   # First replace NULLs with NA, then convert to Date vector
-  datelist <- ifelse(lapply(val, is.null), NA, val)
+  nullTest <- function(x){is.null(x) || (is.list(x) && length(x) == 0)}
+  datelist <- ifelse(lapply(val, nullTest), NA, val)
   as.Date(unlist(datelist))
 }
 
@@ -1186,27 +1188,14 @@ startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
             splitName <- strsplit(name, ':')[[1]]
             if (length(splitName) > 1) {
               msg$data[[name]] <- NULL
-              
-              # Must create a custom dispatcher here b/c R can't assign classes
-              # to NULL objects. So we can't dispatch NULLs unless we do it 
-              # ourselves. For consistency, don't set "type" to the class of the
-              # object.
-              customDispatchParser <- function(classStr, ...){
-                # Loop through the classes to dispatch the call
-                for (fun in paste0("parseShinyInput.", c(classStr, "default"))){
-                  if (exists(fun)){
-                    return(get(fun)(...))
-                  }
-                }
-                stop("No function found to which we could dispatch.")
-              }
+
+              val <- structure(val, class=splitName[[2]])
               
               msg$data[[ splitName[[1]] ]] <- 
-                customDispatchParser(
-                  splitName[[2]],    
-                  val, 
-                  shinysession, 
-                  splitName[[1]] )
+                parseShinyInput(
+                      val, 
+                      shinysession, 
+                      splitName[[1]] )
             }
             else if (is.list(val) && is.null(names(val))) {
               val_flat <- unlist(val, recursive = TRUE)

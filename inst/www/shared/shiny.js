@@ -1195,6 +1195,7 @@
     },
     renderValue: function(el, data) {
       var $el = $(el).empty();
+      if (!data.colnames) return();
       var colnames = $.makeArray(data.colnames);
       var header = colnames.map(function(x) {
         return '<th>' + x + '</th>';

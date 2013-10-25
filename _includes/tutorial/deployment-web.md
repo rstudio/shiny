@@ -7,7 +7,7 @@ If you want a simple way to distribute your Shiny app so that users can run them
 
 ### Self-hosted Shiny Server
 
-With our [Shiny Server](https://github.com/rstudio/shiny-server) software, you can deploy Shiny applications over the web so that users need only a web browser and your application's URL. You'll need a Linux server and [Shiny Server](https://github.com/rstudio/shiny-server).
+With our [Shiny Server](http://rstudio.com/shiny/server/) software, you can deploy Shiny applications over the web so that users need only a web browser and your application's URL. You'll need a Linux server and [Shiny Server](http://rstudio.com/shiny/server/).
 
 Shiny Server is free and open source, though in the future we will offer a commercially licensed edition with additional features for larger organizations. If you'd like to be notified of future beta releases of Shiny Server, please [register now](https://rstudio.wufoo.com/forms/shiny-server-beta-program/).
 

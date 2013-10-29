@@ -101,7 +101,7 @@ ReactiveEnvironment <- setRefClass(
       old.ctx <- .currentContext
       .currentContext <<- ctx
       on.exit(.currentContext <<- old.ctx)
-      func()
+      shinyCallingHandlers(func())
     },
     addPendingFlush = function(ctx, priority) {
       .pendingFlush$enqueue(ctx, priority)

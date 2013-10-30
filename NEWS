@@ -1,4 +1,4 @@
-shiny 0.7.0.99
+shiny 0.8.0
 --------------------------------------------------------------------------------
 
 * Debug hooks are registered on all user-provided functions and (reactive)

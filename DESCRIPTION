@@ -11,12 +11,12 @@ Description: Shiny makes it incredibly easy to build interactive web
     beautiful, responsive, and powerful applications with minimal effort.
 License: GPL-3
 Depends:
-    R (>= 2.14.1)
+    R (>= 2.14.1),
+    methods
 Imports:
     stats,
     tools,
     utils,
-    methods,
     httpuv (>= 1.2.0),
     caTools,
     RJSONIO,

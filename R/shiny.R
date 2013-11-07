@@ -1036,7 +1036,7 @@ file.path.ci <- function(dir, name) {
 
 # Instantiates the app in the current working directory.
 # port - The TCP port that the application should listen on.
-startAppDir <- function(port=8101L, workerId) {
+startAppDir <- function(port=8101L, workerId, quiet=FALSE) {
   globalR <- file.path.ci(getwd(), 'global.R')
   uiR <- file.path.ci(getwd(), 'ui.R')
   serverR <- file.path.ci(getwd(), 'server.R')
@@ -1077,7 +1077,7 @@ startAppDir <- function(port=8101L, workerId) {
   )
 }
 
-startAppObj <- function(ui, serverFunc, port, workerId) {
+startAppObj <- function(ui, serverFunc, port, workerId, quiet=FALSE) {
   uiHandler <- function(req) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
@@ -1094,11 +1094,11 @@ startAppObj <- function(ui, serverFunc, port, workerId) {
   }
   
   startApp(uiHandler,
-             function() { serverFunc },
-             port, workerId)
+           function() { serverFunc },
+           port, workerId, quiet)
 }
 
-startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
+startApp <- function(httpHandlers, serverFuncSource, port, workerId, quiet=FALSE) {
   
   sys.www.root <- system.file('www', package='shiny')
   
@@ -1263,10 +1263,14 @@ startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
   )
   
   if (is.numeric(port) || is.integer(port)) {
-    message('\n', 'Listening on port ', port)
+    if (!quiet) {
+      message('\n', 'Listening on port ', port)
+    }
     return(startServer("0.0.0.0", port, httpuvCallbacks))
   } else if (is.character(port)) {    
-    message('\n', 'Listening on domain socket ', port)
+    if (!quiet) {
+      message('\n', 'Listening on domain socket ', port)
+    }
     mask <- attr(port, 'mask')
     return(startPipeServer(port, mask, httpuvCallbacks))
   }
@@ -1313,6 +1317,7 @@ serviceApp <- function() {
 #'   function to call with the application's URL. 
 #' @param workerId Can generally be ignored. Exists to help some editions of
 #'   Shiny Server Pro route requests to the correct process.
+#' @param quiet Should Shiny status messages be shown? Defaults to FALSE.
 #'
 #' @examples
 #' \dontrun{
@@ -1339,7 +1344,7 @@ runApp <- function(appDir=getwd(),
                    port=NULL,
                    launch.browser=getOption('shiny.launch.browser',
                                             interactive()), 
-                   workerId="") {
+                   workerId="", quiet=FALSE) {
 
   # Make warnings print immediately
   ops <- options(warn = 1)
@@ -1393,9 +1398,9 @@ runApp <- function(appDir=getwd(),
     orig.wd <- getwd()
     setwd(appDir)
     on.exit(setwd(orig.wd), add = TRUE)
-    server <- startAppDir(port=port, workerId)
+    server <- startAppDir(port=port, workerId, quiet)
   } else {
-    server <- startAppObj(appDir$ui, appDir$server, port=port, workerId)
+    server <- startAppObj(appDir$ui, appDir$server, port=port, workerId, quiet)
   }
   
   on.exit({

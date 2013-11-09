@@ -1166,7 +1166,25 @@
     },
     renderValue: function(el, data) {
       exports.unbindAll(el);
-      $(el).html(data);
+
+      // data may be an object with .head and .html fields, or else,
+      // a simple HTML string
+      var html;
+      if (typeof(data) == 'object') {
+        if (data.head) {
+          var tempDiv = document.createElement('div');
+          tempDiv.innerHTML = data.head;
+          var head = $('head');
+          while (tempDiv.hasChildNodes()) {
+            head.append(tempDiv.firstChild);
+          }
+        }
+        html = data.html;
+      } else {
+        html = data;
+      }
+
+      $(el).html(html);
       exports.initializeInputs(el);
       exports.bindAll(el);
     }
@@ -2780,6 +2798,11 @@
     // require polling on some browsers. The JQuery hashchange plugin can be
     // used if this capability is important.
     initialValues['.clientdata_url_hash_initial'] = window.location.hash;
+
+    // The server needs to know what singletons were rendered as part of
+    // the page loading
+    initialValues['.clientdata_singletons'] =
+        $('script[type="application/shiny-singletons"]').text();
 
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);

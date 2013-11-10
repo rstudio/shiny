@@ -17,8 +17,7 @@ Imports:
     stats,
     tools,
     utils,
-    httpuv (>= 1.2.0),
-    caTools,
+    httpuv (>= 1.2.2),
     RJSONIO,
     xtable,
     digest

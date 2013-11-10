@@ -12,7 +12,7 @@
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @import httpuv caTools RJSONIO xtable digest methods
+#' @import httpuv RJSONIO xtable digest methods
 NULL
 
 createUniqueId <- function(bytes) {
@@ -481,7 +481,7 @@ ShinySession <- setRefClass(
       fileData <- readBin(file, 'raw', n=bytes)
       
       if (isTRUE(.clientData$.values$allowDataUriScheme)) {
-        b64 <- base64encode(fileData)
+        b64 <- rawToBase64(fileData)
         return(paste('data:', contentType, ';base64,', b64, sep=''))
       } else {
         return(saveFileUrl(name, fileData, contentType))

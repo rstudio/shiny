@@ -101,13 +101,23 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
   }
   
   # build slider
-  sliderFragment <- list(tags$input(
-    id=inputId, type="slider", 
-    name=inputId, value=paste(value, collapse=';'), class="jslider",
-    'data-from'=min, 'data-to'=max, 'data-step'=step,
-    'data-skin'='plastic', 'data-round'=round, 'data-locale'=locale,
-    'data-format'=format, 'data-scale'=ticks,
-    'data-smooth'=FALSE))
+  sliderFragment <- list(
+    singleton(tags$head(
+      tags$link(rel="stylesheet", 
+                type="text/css", 
+                href="shared/slider/css/jquery.slider.min.css"),
+      
+      tags$script(src="shared/slider/js/jquery.slider.min.js")
+    )),
+    tags$input(
+      id=inputId, type="slider", 
+      name=inputId, value=paste(value, collapse=';'), class="jslider",
+      'data-from'=min, 'data-to'=max, 'data-step'=step,
+      'data-skin'='plastic', 'data-round'=round, 'data-locale'=locale,
+      'data-format'=format, 'data-scale'=ticks,
+      'data-smooth'=FALSE
+    )
+  )
 
   if (identical(animate, TRUE))
     animate <- animationOptions()

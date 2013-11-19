@@ -413,12 +413,21 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
     installExprFunction(expr, "func", env, quoted)
   }
 
-  function() {
+  function(shinysession, name, ...) {
     result <- func()
     if (is.null(result) || length(result) == 0)
       return(NULL)
-    # Wrap result in tagList in case it is an ordinary list
-    return(as.character(tagList(result)))
+
+    # renderTags returns a list with head, singletons, and html
+    output <- renderTags(result, shinysession$singletons)
+    shinysession$singletons <- output$singletons
+    output$singletons <- NULL
+    
+    # If there's stuff in head, then return a list; otherwise, just a string.
+    if (isTRUE(nchar(output$head) > 0))
+      return(output)
+    else
+      return(output$html)
   }
 }
 

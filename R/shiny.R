@@ -49,7 +49,8 @@ ShinySession <- setRefClass(
     downloads = 'Map',
     closed = 'logical',
     session = 'environment',      # Object for the server app to access session stuff
-    .workerId = 'character'
+    .workerId = 'character',
+    singletons = 'character'  # Tracks singleton HTML fragments sent to the page
   ),
   methods = list(
     initialize = function(websocket, workerId) {
@@ -70,6 +71,12 @@ ShinySession <- setRefClass(
       .setLabel(input, 'input')
       clientData <<- .createReactiveValues(.clientData, readonly=TRUE)
       .setLabel(clientData, 'clientData')
+      
+      observe({
+        # clientData$singletons tells us what singletons were part of the
+        # initial page render
+        singletons <<- strsplit(clientData$singletons, ',')[[1]]
+      })
       
       output     <<- .createOutputWriter(.self)
       

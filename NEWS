@@ -1,6 +1,14 @@
 shiny 0.8.0.99
 --------------------------------------------------------------------------------
 
+* BREAKING CHANGE: Added a `host` parameter to runApp() and runExample(),
+  which defaults to the shiny.host option if it is non-NULL, or "127.0.0.1"
+  otherwise. This means that by default, Shiny applications can only be
+  accessed on the same machine from which they are served. To allow other
+  clients to connect, as in previous versions of Shiny, use "0.0.0.0"
+  (or the IP address of one of your network interfaces, if you care to be
+  explicit about it).
+
 
 shiny 0.8.0
 --------------------------------------------------------------------------------

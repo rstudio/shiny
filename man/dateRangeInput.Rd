@@ -46,7 +46,7 @@
   names. Default is "en".  Other valid values include "bg",
   "ca", "cs", "da", "de", "el", "es", "fi", "fr", "he",
   "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv",
-  "ms", "nb", "nl", "pl", "pt", "pt", "ro", "rs",
+  "ms", "nb", "nl", "pl", "pt", "pt-BR", "ro", "rs",
   "rs-latin", "ru", "sk", "sl", "sv", "sw", "th", "tr",
   "uk", "zh-CN", and "zh-TW".}
 }

@@ -1,8 +1,30 @@
 \name{parseShinyInput}
 \alias{parseShinyInput}
+\alias{parseShinyInput.date}
+\alias{parseShinyInput.default}
+\alias{parseShinyInput.matrix}
 \title{Provide the new generic for parsing Shiny Input}
 \usage{
-  parseShinyInput(x, ...)
+  parseShinyInput(x, shinysession, name)
+
+  parseShinyInput.default(x, shinysession, name)
+
+  parseShinyInput.matrix(x, shinysession, name)
+
+  parseShinyInput.date(x, shinysession, name)
+}
+\arguments{
+  \item{x}{The value of this input as provided by the
+  client, deserialized using RJSONIO, then passed through a
+  call to \code{\link{structure}} to set the class of the
+  object. Note that the call to \code{structure} does
+  convert \code{NULL} values to an empty
+  \code{\link{list}}.}
+
+  \item{shinysession}{The \code{shinysession} in which the
+  input exists.}
+
+  \item{name}{The name of the input}
 }
 \description{
   Provides an S3 generic to parse incoming Shiny JSON data.
@@ -10,6 +32,12 @@
   dispatch to refine the data passed back from the client
   before making it available in the \code{input} variable
   of the \code{server.R} file.
+
+  Pass the data straight through if no class is provided.
+
+  Takes a list-of-lists and returns a matrix. The lists
+  must all be the same length. NULLs and empty lists are
+  replaced by NA.
 }
 \details{
   The \code{type} of a custom Shiny Input widget will be
@@ -19,21 +47,11 @@
 
   The provided function will be used to parse the data
   delivered from the client before it is available in the
-  \code{input} variable. The function will be called with
-  the following three parameters: \enumerate{ \item{The
-  value of this input as provided by the client,
-  deserialized using RJSONIO, then passed through a call to
-  \code{\link{structure}} to set the class of the object.
-  Note that the call to \code{structure} does convert
-  \code{NULL} values to an empty \code{\link{list}}.}
-  \item{The \code{shinysession} in which the input exists.}
-  \item{The name of the input.} }
+  \code{input} variable.
 }
 \examples{
-parseShinyInput.myNonNullClass <- function(x, ...){
-  # Check for an empty list (the NULL equivalent after setting a class using
-  # `structure`).
-  ifelse((is.list(val) && length(val) == 0), NA, val)
+parseShinyInput.myIntegerClass <- function(x, shinysession, name){
+  as.integer(x)
 }
 }
 

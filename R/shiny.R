@@ -814,43 +814,44 @@ appsByToken <- Map$new()
 #' This type will then be set as the incoming object's class.
 #' 
 #' The provided function will be used to parse the data delivered from the 
-#' client before it is available in the \code{input} variable. The function will 
-#' be called with the following three parameters: 
-#'    \enumerate{
-#'      \item{The value of this input as provided by the client, deserialized 
+#' client before it is available in the \code{input} variable.
+#' @param x The value of this input as provided by the client, deserialized 
 #'      using RJSONIO, then passed through a call to \code{\link{structure}} to
 #'      set the class of the object. Note that the call to \code{structure} does
-#'      convert \code{NULL} values to an empty \code{\link{list}}.}
-#'      \item{The \code{shinysession} in which the input exists.}
-#'      \item{The name of the input.}
-#'    }
+#'      convert \code{NULL} values to an empty \code{\link{list}}.
+#' @param shinysession The \code{shinysession} in which the input exists.
+#' @param name The name of the input
 #' @examples
-#' parseShinyInput.myNonNullClass <- function(x, ...){
-#'   # Check for an empty list (the NULL equivalent after setting a class using
-#'   # `structure`).
-#'   ifelse((is.list(val) && length(val) == 0), NA, val)
+#' parseShinyInput.myIntegerClass <- function(x, shinysession, name){
+#'   as.integer(x)
 #' }
+#' @rdname parseShinyInput
 #' @export
-parseShinyInput <- function(x, ...) UseMethod("parseShinyInput")
+parseShinyInput <- function(x, shinysession, name) UseMethod("parseShinyInput")
 
-# Pass the data straight through if no class is provided.
-parseShinyInput.default <- function(x, ...){
+#' Pass the data straight through if no class is provided.
+#' @rdname parseShinyInput
+#' @S3method parseShinyInput default
+parseShinyInput.default <- function(x, shinysession, name){
   x
 }
 
-# Takes a list-of-lists and returns a matrix. The lists
-# must all be the same length.
-parseShinyInput.matrix <- function(data, ...) {
-  if (length(data) == 0)
+#' Takes a list-of-lists and returns a matrix. The lists
+#' must all be the same length. NULLs and empty lists are replaced by NA.
+#' @rdname parseShinyInput
+#' @S3method parseShinyInput matrix
+parseShinyInput.matrix <- function(x, shinysession, name) {
+  if (length(x) == 0)
     return(matrix(nrow=0, ncol=0))
   
-  m <- matrix(unlist(data), nrow = length(data[[1]]), ncol = length(data))
-  return(m)
+  matrix(unlist(x), nrow = length(x[[1]]), ncol = length(x))  
 }
 
-parseShinyInput.date <- function(val, ...){  
+#' @rdname parseShinyInput
+#' @S3method parseShinyInput date
+parseShinyInput.date <- function(x, shinysession, name){  
   # Convert to Date vector
-  as.Date(unlist(datelist))
+  as.Date(x)
 }
 
 # Provide a character representation of the WS that can be used

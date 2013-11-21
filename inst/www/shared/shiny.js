@@ -16,11 +16,12 @@
   // A wrapper for getComputedStyle that is compatible with older browsers.
   // This is significantly faster than jQuery's .css() function.
   function getStyle(el, styleProp) {
+    var x;
     if (el.currentStyle)
-      var x = el.currentStyle[styleProp];
+      x = el.currentStyle[styleProp];
     else if (window.getComputedStyle)
-      var x = document.defaultView.getComputedStyle(el, null)
-                .getPropertyValue(styleProp);
+      x = document.defaultView.getComputedStyle(el, null)
+          .getPropertyValue(styleProp);
     return x;
   }
 
@@ -262,18 +263,6 @@
     return throttled;
   }
 
-  // Immediately sends data to shinyapp
-  var InputSender = function(shinyapp) {
-    this.shinyapp = shinyapp;
-  };
-  (function() {
-    this.setInput = function(name, value) {
-      var data = {};
-      data[name] = value;
-      shinyapp.sendInput(data);
-    };
-  }).call(InputSender.prototype);
-
   // Schedules data to be sent to shinyapp at the next setTimeout(0).
   // Batches multiple input calls into one websocket message.
   var InputBatchSender = function(shinyapp) {
@@ -512,12 +501,12 @@
     this.$notifyDisconnected = function() {
 
       // function to normalize hostnames
-      normalize = function(hostname) {
+      var normalize = function(hostname) {
         if (hostname == "127.0.0.1")
           return "localhost";
         else
           return hostname;
-      }
+      };
 
       // Send a 'disconnected' message to parent if we are on the same domin
       var parentUrl = (parent !== window) ? document.referrer : null;
@@ -528,14 +517,14 @@
                 
         // post the disconnected message if the hostnames are the same
         if (normalize(a.hostname) == normalize(window.location.hostname)) {
-          protocol = a.protocol.replace(':',''); // browser compatability
-          origin = protocol + '://' + a.hostname;
+          var protocol = a.protocol.replace(':',''); // browser compatability
+          var origin = protocol + '://' + a.hostname;
           if (a.port)
             origin = origin + ':' + a.port;
           parent.postMessage('disconnected', origin);
         }
       }
-    }
+    };
 
     // NB: Including blobs will cause IE to break!
     // TODO: Make blobs work with Internet Explorer
@@ -1089,7 +1078,7 @@
         function createMouseHandler(inputId) {
           return function(e) {
             if (e === null) {
-              Shiny.onInputChange(inputId, null);
+              exports.onInputChange(inputId, null);
               return;
             }
             
@@ -1119,12 +1108,13 @@
             if (coordmap.log.y)
               userY = Math.pow(10, userY);
             
-            Shiny.onInputChange(inputId, {
-              x: userX, y: userY,
+            exports.onInputChange(inputId, {
+              x: userX,
+              y: userY,
               ".nonce": Math.random()
             });
-          }
-        };
+          };
+        }
 
         if (!$el.data('hover-func')) {
           var hoverDelayType = $el.data('hover-delay-type') || 'debounce';
@@ -2865,7 +2855,7 @@
   $(document).on('keydown', function(e) {
     if (e.which !== 114 || (!e.ctrlKey && !e.metaKey) || (e.shiftKey || e.altKey))
       return;
-    var url = 'reactlog?w=' + Shiny.shinyapp.config.workerId;
+    var url = 'reactlog?w=' + exports.shinyapp.config.workerId;
     window.open(url);
     e.preventDefault();
   });

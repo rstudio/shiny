@@ -1170,7 +1170,7 @@
       // data may be an object with .head and .html fields, or else,
       // a simple HTML string
       var html;
-      if (typeof(data) == 'object') {
+      if (typeof(data) === 'object') {
         if (data.head) {
           var tempDiv = document.createElement('div');
           tempDiv.innerHTML = data.head;

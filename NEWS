@@ -16,6 +16,9 @@ shiny 0.8.0.99
   and "only rendering items a single time" were features that worked only
   when the page was initially loading, not in dynamic rendering.
 
+* Files are now sourced with the `keep.source` option, to help with debugging
+  and profiling.
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

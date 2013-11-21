@@ -11,6 +11,11 @@ shiny 0.8.0.99
 
 * Upgraded to Bootstrap 2.3.2 and jQuery 1.10.2.
 
+* Make `tags$head()` and `singleton()` behave correctly when used with
+  `renderUI()` and `uiOutput()`. Previously, "hoisting content to the head"
+  and "only rendering items a single time" were features that worked only
+  when the page was initially loading, not in dynamic rendering.
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

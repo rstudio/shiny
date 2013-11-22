@@ -91,6 +91,7 @@
   // When the function is executed, it will evaluate that expression using
   // "with" on the argument value, and return the result.
   function scopeExprToFunc(expr) {
+    /*jshint evil: true */
     var func = new Function("with (this) {return (" + expr + ");}");
     return function(scope) {
       return func.call(scope);
@@ -810,6 +811,7 @@
     });
 
     addMessageHandler('javascript', function(message) {
+      /*jshint evil: true */
       eval(message);
     });
 
@@ -2513,6 +2515,7 @@
           var effectiveId = type ? id + ":" + type : id;
           currentValues[effectiveId] = binding.getValue(el);
 
+          /*jshint loopfunc:true*/
           var thisCallback = (function() {
             var thisBinding = binding;
             var thisEl = el;

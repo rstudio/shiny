@@ -573,12 +573,12 @@
         // the length followed by the blob. The json payload is UTF-8 encoded
         // and used as the first blob.
 
-        function uint32_to_buf(val) {
+        var uint32_to_buf = function(val) {
           var buffer = new ArrayBuffer(4);
           var view = new DataView(buffer);
           view.setUint32(0, val, true); // little-endian
           return buffer;
-        }
+        };
 
         var payload = [];
         payload.push(uint32_to_buf(0x01020202)); // signature
@@ -1061,7 +1061,7 @@
 
         // Firefox doesn't have offsetX/Y, so we need to use an alternate
         // method of calculation for it
-        function mouseOffset(mouseEvent) {
+        var mouseOffset = function(mouseEvent) {
           if (typeof(mouseEvent.offsetX) !== 'undefined') {
             return {
               x: mouseEvent.offsetX,
@@ -1073,9 +1073,9 @@
             x: mouseEvent.pageX - offset.left,
             y: mouseEvent.pageY - offset.top
           };
-        }
+        };
         
-        function createMouseHandler(inputId) {
+        var createMouseHandler = function(inputId) {
           return function(e) {
             if (e === null) {
               exports.onInputChange(inputId, null);
@@ -1114,7 +1114,7 @@
               ".nonce": Math.random()
             });
           };
-        }
+        };
 
         if (!$el.data('hover-func')) {
           var hoverDelayType = $el.data('hover-delay-type') || 'debounce';

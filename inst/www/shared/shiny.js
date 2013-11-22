@@ -16,11 +16,12 @@
   // A wrapper for getComputedStyle that is compatible with older browsers.
   // This is significantly faster than jQuery's .css() function.
   function getStyle(el, styleProp) {
+    var x;
     if (el.currentStyle)
-      var x = el.currentStyle[styleProp];
+      x = el.currentStyle[styleProp];
     else if (window.getComputedStyle)
-      var x = document.defaultView.getComputedStyle(el, null)
-                .getPropertyValue(styleProp);
+      x = document.defaultView.getComputedStyle(el, null)
+          .getPropertyValue(styleProp);
     return x;
   }
 
@@ -90,6 +91,7 @@
   // When the function is executed, it will evaluate that expression using
   // "with" on the argument value, and return the result.
   function scopeExprToFunc(expr) {
+    /*jshint evil: true */
     var func = new Function("with (this) {return (" + expr + ");}");
     return function(scope) {
       return func.call(scope);
@@ -261,18 +263,6 @@
     }
     return throttled;
   }
-
-  // Immediately sends data to shinyapp
-  var InputSender = function(shinyapp) {
-    this.shinyapp = shinyapp;
-  };
-  (function() {
-    this.setInput = function(name, value) {
-      var data = {};
-      data[name] = value;
-      shinyapp.sendInput(data);
-    };
-  }).call(InputSender.prototype);
 
   // Schedules data to be sent to shinyapp at the next setTimeout(0).
   // Batches multiple input calls into one websocket message.
@@ -512,12 +502,12 @@
     this.$notifyDisconnected = function() {
 
       // function to normalize hostnames
-      normalize = function(hostname) {
+      var normalize = function(hostname) {
         if (hostname == "127.0.0.1")
           return "localhost";
         else
           return hostname;
-      }
+      };
 
       // Send a 'disconnected' message to parent if we are on the same domin
       var parentUrl = (parent !== window) ? document.referrer : null;
@@ -528,14 +518,14 @@
                 
         // post the disconnected message if the hostnames are the same
         if (normalize(a.hostname) == normalize(window.location.hostname)) {
-          protocol = a.protocol.replace(':',''); // browser compatability
-          origin = protocol + '://' + a.hostname;
+          var protocol = a.protocol.replace(':',''); // browser compatability
+          var origin = protocol + '://' + a.hostname;
           if (a.port)
             origin = origin + ':' + a.port;
           parent.postMessage('disconnected', origin);
         }
       }
-    }
+    };
 
     // NB: Including blobs will cause IE to break!
     // TODO: Make blobs work with Internet Explorer
@@ -584,12 +574,12 @@
         // the length followed by the blob. The json payload is UTF-8 encoded
         // and used as the first blob.
 
-        function uint32_to_buf(val) {
+        var uint32_to_buf = function(val) {
           var buffer = new ArrayBuffer(4);
           var view = new DataView(buffer);
           view.setUint32(0, val, true); // little-endian
           return buffer;
-        }
+        };
 
         var payload = [];
         payload.push(uint32_to_buf(0x01020202)); // signature
@@ -789,17 +779,21 @@
 
     addMessageHandler('values', function(message) {
       $(document.documentElement).removeClass('shiny-busy');
-      for (var name in this.$bindings)
-        this.$bindings[name].showProgress(false);
+      for (var name in this.$bindings) {
+        if (this.$bindings.hasOwnProperty(name))
+          this.$bindings[name].showProgress(false);
+      }
 
       for (var key in message) {
-        this.receiveOutput(key, message[key]);
+        if (message.hasOwnProperty(key))
+          this.receiveOutput(key, message[key]);
       }
     });
 
     addMessageHandler('errors', function(message) {
       for (var key in message) {
-        this.receiveError(key, message[key]);
+        if (message.hasOwnProperty(key))
+          this.receiveError(key, message[key]);
       }
     });
 
@@ -817,6 +811,7 @@
     });
 
     addMessageHandler('javascript', function(message) {
+      /*jshint evil: true */
       eval(message);
     });
 
@@ -1072,7 +1067,7 @@
 
         // Firefox doesn't have offsetX/Y, so we need to use an alternate
         // method of calculation for it
-        function mouseOffset(mouseEvent) {
+        var mouseOffset = function(mouseEvent) {
           if (typeof(mouseEvent.offsetX) !== 'undefined') {
             return {
               x: mouseEvent.offsetX,
@@ -1084,12 +1079,12 @@
             x: mouseEvent.pageX - offset.left,
             y: mouseEvent.pageY - offset.top
           };
-        }
+        };
         
-        function createMouseHandler(inputId) {
+        var createMouseHandler = function(inputId) {
           return function(e) {
             if (e === null) {
-              Shiny.onInputChange(inputId, null);
+              exports.onInputChange(inputId, null);
               return;
             }
             
@@ -1119,11 +1114,12 @@
             if (coordmap.log.y)
               userY = Math.pow(10, userY);
             
-            Shiny.onInputChange(inputId, {
-              x: userX, y: userY,
+            exports.onInputChange(inputId, {
+              x: userX,
+              y: userY,
               ".nonce": Math.random()
             });
-          }
+          };
         };
 
         if (!$el.data('hover-func')) {
@@ -2519,6 +2515,7 @@
           var effectiveId = type ? id + ":" + type : id;
           currentValues[effectiveId] = binding.getValue(el);
 
+          /*jshint loopfunc:true*/
           var thisCallback = (function() {
             var thisBinding = binding;
             var thisEl = el;
@@ -2865,7 +2862,7 @@
   $(document).on('keydown', function(e) {
     if (e.which !== 114 || (!e.ctrlKey && !e.metaKey) || (e.shiftKey || e.altKey))
       return;
-    var url = 'reactlog?w=' + Shiny.shinyapp.config.workerId;
+    var url = 'reactlog?w=' + exports.shinyapp.config.workerId;
     window.open(url);
     e.preventDefault();
   });

@@ -778,17 +778,21 @@
 
     addMessageHandler('values', function(message) {
       $(document.documentElement).removeClass('shiny-busy');
-      for (var name in this.$bindings)
-        this.$bindings[name].showProgress(false);
+      for (var name in this.$bindings) {
+        if (this.$bindings.hasOwnProperty(name))
+          this.$bindings[name].showProgress(false);
+      }
 
       for (var key in message) {
-        this.receiveOutput(key, message[key]);
+        if (message.hasOwnProperty(key))
+          this.receiveOutput(key, message[key]);
       }
     });
 
     addMessageHandler('errors', function(message) {
       for (var key in message) {
-        this.receiveError(key, message[key]);
+        if (message.hasOwnProperty(key))
+          this.receiveError(key, message[key]);
       }
     });
 

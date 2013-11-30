@@ -839,8 +839,8 @@ parseShinyInput.default <- function(x, shinysession, name){
 #' Takes a list-of-lists and returns a matrix. The lists
 #' must all be the same length. NULLs and empty lists are replaced by NA.
 #' @rdname parseShinyInput
-#' @S3method parseShinyInput matrix
-parseShinyInput.matrix <- function(x, shinysession, name) {
+#' @S3method parseShinyInput shinyMatrix
+parseShinyInput.shinyMatrix <- function(x, shinysession, name) {
   if (length(x) == 0)
     return(matrix(nrow=0, ncol=0))
   
@@ -848,10 +848,10 @@ parseShinyInput.matrix <- function(x, shinysession, name) {
 }
 
 #' @rdname parseShinyInput
-#' @S3method parseShinyInput date
-parseShinyInput.date <- function(x, shinysession, name){  
+#' @S3method parseShinyInput shinyDate
+parseShinyInput.shinyDate <- function(x, shinysession, name){  
   # Convert to Date vector
-  as.Date(x)
+  as.Date(unclass(x))
 }
 
 # Provide a character representation of the WS that can be used

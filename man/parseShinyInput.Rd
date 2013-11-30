@@ -1,17 +1,17 @@
 \name{parseShinyInput}
 \alias{parseShinyInput}
-\alias{parseShinyInput.date}
 \alias{parseShinyInput.default}
-\alias{parseShinyInput.matrix}
+\alias{parseShinyInput.shinyDate}
+\alias{parseShinyInput.shinyMatrix}
 \title{Provide the new generic for parsing Shiny Input}
 \usage{
   parseShinyInput(x, shinysession, name)
 
   parseShinyInput.default(x, shinysession, name)
 
-  parseShinyInput.matrix(x, shinysession, name)
+  parseShinyInput.shinyMatrix(x, shinysession, name)
 
-  parseShinyInput.date(x, shinysession, name)
+  parseShinyInput.shinyDate(x, shinysession, name)
 }
 \arguments{
   \item{x}{The value of this input as provided by the

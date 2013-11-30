@@ -1,5 +1,69 @@
-shiny 0.7.0.99
+shiny 0.8.0.99
 --------------------------------------------------------------------------------
+
+* BREAKING CHANGE: Added a `host` parameter to runApp() and runExample(),
+  which defaults to the shiny.host option if it is non-NULL, or "127.0.0.1"
+  otherwise. This means that by default, Shiny applications can only be
+  accessed on the same machine from which they are served. To allow other
+  clients to connect, as in previous versions of Shiny, use "0.0.0.0"
+  (or the IP address of one of your network interfaces, if you care to be
+  explicit about it).
+
+* Upgraded to Bootstrap 2.3.2 and jQuery 1.10.2.
+
+* Make `tags$head()` and `singleton()` behave correctly when used with
+  `renderUI()` and `uiOutput()`. Previously, "hoisting content to the head"
+  and "only rendering items a single time" were features that worked only
+  when the page was initially loading, not in dynamic rendering.
+
+* Files are now sourced with the `keep.source` option, to help with debugging
+  and profiling.
+
+* Support user-defined input parsers for data coming in from JavaScript using 
+  the parseShinyInput method.
+
+shiny 0.8.0
+--------------------------------------------------------------------------------
+
+* Debug hooks are registered on all user-provided functions and (reactive)
+  expressions (e.g., in renderPlot()), which makes it possible to set
+  breakpoints in these functions using the latest version of the RStudio
+  IDE, and the RStudio visual debugging tools can be used to debug Shiny
+  apps. Internally, the registration is done via installExprFunction(),
+  which is a new function introduced in this version to replace
+  exprToFunction() so that the registration can be automatically done.
+
+* Added a new function renderDataTable() to display tables using the
+  JavaScript library DataTables. It includes basic features like pagination,
+  searching (global search or search by individual columns), sorting (by
+  single or multiple columns). All these features are implemented on the R
+  side; for example, we can use R regular expressions for searching.
+  Besides, it also uses the Twitter Bootstrap CSS style. See the full
+  documentation and examples in the tutorial:
+  http://rstudio.github.io/shiny/tutorial/#datatables
+
+* Added a new option `shiny.error` which can take a function as an error
+  handler. It is called when an error occurs in an app (in user-provided
+  code), e.g., after we set options(shiny.error = recover), we can enter a
+  specified environment in the call stack to debug our code after an error
+  occurs.
+
+* The argument `launch.browser` in runApp() can also be a function,
+  which takes the URL of the shiny app as its input value.
+
+* runApp() uses a random port between 3000 and 8000 instead of 8100 now. It
+  will try up to 20 ports in case certain ports are not available.
+
+* Fixed a bug for conditional panels: the value `input.id` in the condition
+  was not correctly retrieved when the input widget had a type, such as
+  numericInput(). (reported by Jason Bryer)
+
+* Fixed two bugs in plotOutput(); clickId and hoverId did not give correct
+  coordinates in Firefox, or when the axis limits of the plot were changed.
+  (reported by Chris Warth and Greg D)
+
+* The minimal required version for the httpuv package was increased to 1.2
+  (on CRAN now).
 
 
 shiny 0.7.0
@@ -335,7 +399,7 @@ shiny 0.1.3
   creating custom input controls
 * Add `step` parameter to numericInput
 * Read names of input using `names(input)`
-* Access snapshot of input as a list using `as.list(input)` 
+* Access snapshot of input as a list using `as.list(input)`
 * Fix issue #10: Plots in tabsets not rendered
 
 

@@ -1,7 +1,7 @@
 context("Parse Shiny Input")
 
 test_that("Default function is a pass-through", {
-  x <- "2013/01/01"   
+  x <- "2013/01/01"
   expect_identical(     
     parseShinyInput(x), x
   )
@@ -9,15 +9,17 @@ test_that("Default function is a pass-through", {
 
 test_that("Date converts to date", {
   x <- "2013/01/01"
+  class(x) <- "shinyDate"
   expect_identical(    
-    parseShinyInput.date(x), as.Date(x)
+    parseShinyInput(x), as.Date(unclass(x))
   )
 })
 
 test_that("Matrix converts list of lists to matrix", {
-  x <- data.frame(a=1:3,b=4:6)
+  x <- list(a=1:3,b=4:6)
+  class(x) <- "shinyMatrix"
   expect_identical(
-    parseShinyInput.matrix(x), matrix(c(1:3,4:6), byrow=FALSE, ncol=2)
+    parseShinyInput(x), matrix(c(1:3,4:6), byrow=FALSE, ncol=2)
   )
 })
 

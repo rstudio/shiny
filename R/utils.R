@@ -407,6 +407,7 @@ dataTablesJSON <- function(data, query) {
     i <- i[i <= n]
     fdata <- data[i, , drop = FALSE]  # filtered data
     fdata <- unname(as.matrix(fdata))
+    if (nrow(fdata) == 0) fdata = list()
 
     toJSON(list(
       sEcho = as.integer(sEcho),

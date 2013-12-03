@@ -19,6 +19,9 @@ shiny 0.8.0.99
 * Files are now sourced with the `keep.source` option, to help with debugging
   and profiling.
 
+* Fixed the bug #299: renderDataTable() can deal with 0-row data frames now.
+  (reported by Harlan Harris)
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

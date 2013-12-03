@@ -22,6 +22,9 @@ shiny 0.8.0.99
 * Support user-defined input parsers for data coming in from JavaScript using 
   the parseShinyInput method.
 
+* Fixed the bug #299: renderDataTable() can deal with 0-row data frames now.
+  (reported by Harlan Harris)
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

@@ -55,13 +55,7 @@ format.shiny.tag <- function(x, ...) {
 
 #' @S3method as.character shiny.tag
 as.character.shiny.tag <- function(x, ...) {
-  f = file()
-  on.exit(close(f))
-  textWriter <- function(text) {
-    cat(text, file=f)
-  }
-  tagWrite(x, textWriter)
-  return(HTML(paste(readLines(f, warn=FALSE), collapse='\n')))
+  renderTags(x)$html
 }
 
 #' @S3method print shiny.tag.list
@@ -199,6 +193,42 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL, eol = "\n") {
   }
 }
 
+renderTags <- function(ui, singletons = character(0)) {
+  # provide a filter so we can intercept head tag requests
+  context <- new.env()
+  context$head <- character()
+  context$singletons <- singletons
+  context$filter <- function(content) {
+    if (inherits(content, 'shiny.singleton')) {
+      sig <- digest(content, algo='sha1')
+      if (sig %in% context$singletons)
+        return(FALSE)
+      context$singletons <- c(sig, context$singletons)
+    }
+    
+    if (isTag(content) && identical(content$name, "head")) {
+      textConn <- textConnection(NULL, "w") 
+      textConnWriter <- function(text) cat(text, file = textConn)
+      tagWrite(content$children, textConnWriter, 1, context)
+      context$head <- append(context$head, textConnectionValue(textConn))
+      close(textConn)
+      return (FALSE)
+    }
+    else {
+      return (TRUE)
+    }
+  }
+  
+  # write ui HTML to a character vector
+  textConn <- textConnection(NULL, "w") 
+  tagWrite(ui, function(text) cat(text, file = textConn), 0, context)
+  uiHTML <- paste(textConnectionValue(textConn), collapse = "\n")
+  close(textConn)
+  
+  return(list(head = paste(context$head, collapse = "\n"),
+              singletons = context$singletons,
+              html = uiHTML))
+}
 
 # environment used to store all available tags
 #' @export

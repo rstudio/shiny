@@ -25,12 +25,12 @@ debug hooks so that breakpoints may be set in the function.}
   debugger. Defaults to the name of the calling function.}
 }
 \description{
-  Can replace \code{exprToFunction} as follows:
-}
-\details{
-  Before: \code{func <- exprToFunction(expr)}
-
-  After: \code{installExprFunction(expr, "func")}
+  This function can replace \code{exprToFunction} as
+  follows: we may use \code{func <- exprToFunction(expr)}
+  if we do not want the debug hooks, or
+  \code{installExprFunction(expr, "func")} if we do. Both
+  approaches create a function named \code{func} in the
+  current environment.
 }
 \seealso{
   Wraps \code{exprToFunction}; see that method's

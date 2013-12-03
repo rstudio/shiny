@@ -1534,9 +1534,9 @@ describe("Input Bindings", function() {
       expect(get_value(id)).toEqual(2);
     });
 
-    it("setValue() doesn't change the value", function() {
+    it("setValue() works", function() {
       set_value(id, 2000);
-      expect(get_value(id)).toEqual(0);
+      expect(get_value(id)).toEqual(2000);
     });
 
     it("getState() works", function() {

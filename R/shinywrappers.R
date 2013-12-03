@@ -413,12 +413,21 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
     installExprFunction(expr, "func", env, quoted)
   }
 
-  function() {
+  function(shinysession, name, ...) {
     result <- func()
     if (is.null(result) || length(result) == 0)
       return(NULL)
-    # Wrap result in tagList in case it is an ordinary list
-    return(as.character(tagList(result)))
+
+    # renderTags returns a list with head, singletons, and html
+    output <- renderTags(result, shinysession$singletons)
+    shinysession$singletons <- output$singletons
+    output$singletons <- NULL
+    
+    # If there's stuff in head, then return a list; otherwise, just a string.
+    if (isTRUE(nchar(output$head) > 0))
+      return(output)
+    else
+      return(output$html)
   }
 }
 
@@ -467,6 +476,32 @@ downloadHandler <- function(filename, content, contentType=NA) {
   return(function(shinysession, name, ...) {
     shinysession$registerDownload(name, filename, contentType, content)
   })
+}
+
+#' Table output with the JavaScript library DataTables
+#'
+#' Makes a reactive version of the given function that returns a data frame (or
+#' matrix), which will be rendered with the DataTables library. Paging,
+#' searching, filtering, and sorting can be done on the R side using Shiny as
+#' the server infrastructure.
+#' @param expr An expression that returns a data frame or a matrix.
+#' @param options A list of initialization options to be passed to DataTables.
+#' @param searchDelay The delay for searching, in milliseconds (to avoid too
+#'   frequent search requests).
+#' @references \url{http://datatables.net}
+#' @export
+#' @inheritParams renderPlot
+renderDataTable <- function(expr, options = NULL, searchDelay = 500,
+                            env=parent.frame(), quoted=FALSE) {
+  installExprFunction(expr, "func", env, quoted)
+
+  function(shinysession, name, ...) {
+    data <- func()
+    if (length(dim(data)) != 2) return() # expects a rectangular data object
+    action <- shinysession$registerDataTable(name, data)
+    list(colnames = colnames(data), action = action, options = options,
+         searchDelay = searchDelay)
+  }
 }
 
 

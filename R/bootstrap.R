@@ -29,12 +29,6 @@ bootstrapPage <- function(...) {
     result <- tags$head(
       tags$link(rel="stylesheet", 
                 type="text/css", 
-                href="shared/slider/css/jquery.slider.min.css"),
-      
-      tags$script(src="shared/slider/js/jquery.slider.min.js"),
-      
-      tags$link(rel="stylesheet", 
-                type="text/css", 
                 href=paste(bs, "css/bootstrap", cssExt, sep="")),
       
       tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
@@ -745,7 +739,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' @param language The language used for month and day names. Default is "en".
 #'   Other valid values include "bg", "ca", "cs", "da", "de", "el", "es", "fi",
 #'   "fr", "he", "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv", "ms",
-#'   "nb", "nl", "pl", "pt", "pt", "ro", "rs", "rs-latin", "ru", "sk", "sl",
+#'   "nb", "nl", "pl", "pt", "pt-BR", "ro", "rs", "rs-latin", "ru", "sk", "sl",
 #'   "sv", "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".
 #'
 #' @family input elements
@@ -1150,6 +1144,20 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' @export
 tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
+}
+
+#' @rdname tableOutput
+#' @export
+dataTableOutput <- function(outputId) {
+  tagList(
+    singleton(tags$head(
+      tags$link(rel = "stylesheet", type = "text/css",
+                href = "shared/datatables/css/DT_bootstrap.css"),
+      tags$script(src = "shared/datatables/js/jquery.dataTables.min.js"),
+      tags$script(src = "shared/datatables/js/DT_bootstrap.js")
+    )),
+    div(id = outputId, class="shiny-datatable-output")
+  )
 }
 
 #' Create an HTML output element

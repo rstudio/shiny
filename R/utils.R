@@ -199,11 +199,10 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 #' Installs an expression in the given environment as a function, and registers
 #' debug hooks so that breakpoints may be set in the function.
 #' 
-#' Can replace \code{exprToFunction} as follows:
-#' 
-#' Before: \code{func <- exprToFunction(expr)}
-#' 
-#' After: \code{installExprFunction(expr, "func")}
+#' This function can replace \code{exprToFunction} as follows: we may use
+#' \code{func <- exprToFunction(expr)} if we do not want the debug hooks, or
+#' \code{installExprFunction(expr, "func")} if we do. Both approaches create a
+#' function named \code{func} in the current environment.
 #' 
 #' @seealso Wraps \code{exprToFunction}; see that method's documentation for 
 #'   more documentation and examples.
@@ -288,8 +287,7 @@ parseQueryString <- function(str) {
 shinyCallingHandlers <- function(expr) {
   withCallingHandlers(expr, error = function(e) {
     handle <- getOption('shiny.error')
-    if (is.null(handle) || !is.function(handle)) return()
-    if (length(formals(handle)) > 0) handle(e) else handle()
+    if (is.function(handle)) handle()
   })
 }
 
@@ -370,3 +368,57 @@ Callbacks <- setRefClass(
     }
   )
 )
+
+# convert a data frame to JSON as required by DataTables request
+dataTablesJSON <- function(data, query) {
+  n <- nrow(data)
+  with(parseQueryString(query), {
+    # global searching
+    i <- seq_len(n)
+    if (nzchar(sSearch)) {
+      i0 <- apply(data, 2, function(x) grep(sSearch, as.character(x)))
+      i <- intersect(i, unique(unlist(i0)))
+    }
+    # search by columns
+    if (length(i)) for (j in seq_len(as.integer(iColumns)) - 1) {
+      if (is.null(k <- get_exists(sprintf('sSearch_%d', j), 'character'))) next
+      if (nzchar(k)) i <- intersect(grep(k, as.character(data[, j + 1])), i)
+      if (length(i) == 0) break
+    }
+    if (length(i) != n) data <- data[i, , drop = FALSE]
+    # sorting
+    oList <- list()
+    for (j in seq_len(as.integer(iSortingCols)) - 1) {
+      if (is.null(k <- get_exists(sprintf('iSortCol_%d', j), 'character'))) break
+      desc = get_exists(sprintf('sSortDir_%d', j), 'character')
+      if (is.character(desc)) {
+        col <- data[, as.integer(k) + 1]
+        oList[[length(oList) + 1]] <- (if (desc == 'asc') identity else `-`)(
+          if (is.numeric(col)) col else xtfrm(col)
+        )
+      }
+    }
+    if (length(oList)) {
+      i <- do.call(order, oList)
+      data <- data[i, , drop = FALSE]
+    }
+    # paging
+    i <- seq(as.integer(iDisplayStart) + 1L, length.out = as.integer(iDisplayLength))
+    i <- i[i <= n]
+    fdata <- data[i, , drop = FALSE]  # filtered data
+    fdata <- unname(as.matrix(fdata))
+    if (nrow(fdata) == 0) fdata = list()
+
+    toJSON(list(
+      sEcho = as.integer(sEcho),
+      iTotalRecords = n,
+      iTotalDisplayRecords = nrow(data),
+      aaData = fdata
+    ))
+  })
+}
+
+get_exists = function(x, mode) {
+  if (exists(x, envir = parent.frame(), mode = mode, inherits = FALSE))
+    get(x, envir = parent.frame(), mode = mode, inherits = FALSE)
+}

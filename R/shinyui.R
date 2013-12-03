@@ -136,37 +136,8 @@ singleton <- function(x) {
 
 renderPage <- function(ui, connection) {
   
-  # provide a filter so we can intercept head tag requests
-  context <- new.env()
-  context$head <- character()
-  context$singletons <- character()
-  context$filter <- function(content) {
-    if (inherits(content, 'shiny.singleton')) {
-      sig <- digest(content, algo='sha1')
-      if (sig %in% context$singletons)
-        return(FALSE)
-      context$singletons <- c(sig, context$singletons)
-    }
-    
-    if (isTag(content) && identical(content$name, "head")) {
-      textConn <- textConnection(NULL, "w") 
-      textConnWriter <- function(text) cat(text, file = textConn)
-      tagWrite(content$children, textConnWriter, 1, context)
-      context$head <- append(context$head, textConnectionValue(textConn))
-      close(textConn)
-      return (FALSE)
-    }
-    else {
-      return (TRUE)
-    }
-  }
-  
-  # write ui HTML to a character vector
-  textConn <- textConnection(NULL, "w") 
-  tagWrite(ui, function(text) cat(text, file = textConn), 0, context)
-  uiHTML <- textConnectionValue(textConn)
-  close(textConn)
- 
+  result <- renderTags(ui)
+
   # write preamble
   writeLines(c('<!DOCTYPE html>',
                '<html>',
@@ -175,14 +146,17 @@ renderPage <- function(ui, connection) {
                '  <script src="shared/jquery.js" type="text/javascript"></script>',
                '  <script src="shared/shiny.js" type="text/javascript"></script>',
                '  <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
-               context$head,
+               sprintf('  <script type="application/shiny-singletons">%s</script>',
+                       paste(result$singletons, collapse = ',')
+               ),
+               result$head,
                '</head>',
                '<body>', 
                recursive=TRUE),
              con = connection)
   
   # write UI html to connection
-  writeLines(uiHTML, con = connection)
+  writeLines(result$html, con = connection)
   
   # write end document
   writeLines(c('</body>',

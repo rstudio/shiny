@@ -4,7 +4,7 @@
 \usage{
   runApp(appDir = getwd(), port = NULL,
     launch.browser = getOption("shiny.launch.browser", interactive()),
-    workerId = "")
+    workerId = "", quiet = FALSE)
 }
 \arguments{
   \item{appDir}{The directory of the application. Should
@@ -24,6 +24,9 @@
   \item{workerId}{Can generally be ignored. Exists to help
   some editions of Shiny Server Pro route requests to the
   correct process.}
+
+  \item{quiet}{Should Shiny status messages be shown?
+  Defaults to FALSE.}
 }
 \description{
   Runs a Shiny application. This function normally does not

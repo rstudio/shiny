@@ -49,7 +49,8 @@ ShinySession <- setRefClass(
     downloads = 'Map',
     closed = 'logical',
     session = 'environment',      # Object for the server app to access session stuff
-    .workerId = 'character'
+    .workerId = 'character',
+    singletons = 'character'  # Tracks singleton HTML fragments sent to the page
   ),
   methods = list(
     initialize = function(websocket, workerId) {
@@ -71,6 +72,12 @@ ShinySession <- setRefClass(
       clientData <<- .createReactiveValues(.clientData, readonly=TRUE)
       .setLabel(clientData, 'clientData')
       
+      observe({
+        # clientData$singletons tells us what singletons were part of the
+        # initial page render
+        singletons <<- strsplit(clientData$singletons, ',')[[1]]
+      })
+      
       output     <<- .createOutputWriter(.self)
       
       token <<- createUniqueId(16)
@@ -88,6 +95,15 @@ ShinySession <- setRefClass(
       session$input             <<- .self$input
       session$output            <<- .self$output
       session$.impl             <<- .self
+
+      if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
+        try({
+          creds <- fromJSON(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)
+          session$user <<- creds$user
+          session$groups <<- creds$groups
+        }, silent=FALSE)
+      }
+
       # session$request should throw an error if httpuv doesn't have
       # websocket$request, but don't throw it until a caller actually
       # tries to access session$request
@@ -423,6 +439,18 @@ ShinySession <- setRefClass(
             ),
             'Cache-Control'='no-cache')))
       }
+
+      if (matches[2] == 'datatable') {
+        # /session/$TOKEN/datatable/$NAME
+        dlmatches <- regmatches(matches[3],
+                                regexec("^([^/]+)(/[^/]+)?$",
+                                        matches[3]))[[1]]
+        dlname <- utils::URLdecode(dlmatches[2])
+        download <- downloads$get(dlname)
+        return(httpResponse(
+          200, 'application/json', dataTablesJSON(download$data, req$QUERY_STRING)
+        ))
+      }
       
       return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
     },
@@ -460,6 +488,15 @@ ShinySession <- setRefClass(
                                contentType = contentType,
                                func = func))
       return(sprintf('session/%s/download/%s?w=%s',
+                     URLencode(token, TRUE),
+                     URLencode(name, TRUE),
+                     .workerId))
+    },
+    # this can be more general registrations; not limited to data tables
+    registerDataTable = function(name, data) {
+      # abusing downloads at the moment
+      downloads$set(name, list(data = data))
+      return(sprintf('session/%s/datatable/%s?w=%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
                      .workerId))
@@ -764,7 +801,7 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
       if (file.exists(filePath)) {
         local({
           cacheContext$with(function() {
-            source(filePath, local=new.env(parent=.GlobalEnv))
+            sys.source(filePath, envir=new.env(parent=globalenv()), keep.source=TRUE)
           })
         })
       }
@@ -1044,7 +1081,7 @@ file.path.ci <- function(dir, name) {
 
 # Instantiates the app in the current working directory.
 # port - The TCP port that the application should listen on.
-startAppDir <- function(port=8101L, workerId) {
+startAppDir <- function(port, host, workerId, quiet) {
   globalR <- file.path.ci(getwd(), 'global.R')
   uiR <- file.path.ci(getwd(), 'ui.R')
   serverR <- file.path.ci(getwd(), 'server.R')
@@ -1056,11 +1093,11 @@ startAppDir <- function(port=8101L, workerId) {
     stop(paste("server.R file was not found in", getwd()))
   
   if (file.exists(globalR))
-    source(globalR, local=FALSE)
+    sys.source(globalR, envir=globalenv(), keep.source=TRUE)
   
   shinyServer(NULL)
   serverFileTimestamp <- file.info(serverR)$mtime
-  local(source(serverR, local=new.env(parent=.GlobalEnv)))
+  sys.source(serverR, envir=new.env(parent=globalenv()), keep.source=TRUE)
   if (is.null(.globals$server))
     stop("No server was defined in server.R")
   
@@ -1070,7 +1107,7 @@ startAppDir <- function(port=8101L, workerId) {
     if (!identical(mtime, serverFileTimestamp)) {
       shinyServer(NULL)
       serverFileTimestamp <<- mtime
-      local(source(serverR, local=new.env(parent=.GlobalEnv)))
+      sys.source(serverR, envir=new.env(parent=globalenv()), keep.source=TRUE)
       if (is.null(.globals$server))
         stop("No server was defined in server.R")
     }
@@ -1081,11 +1118,13 @@ startAppDir <- function(port=8101L, workerId) {
     c(dynamicHandler(uiR), wwwDir),
     serverFuncSource,
     port,
-    workerId
+    host,
+    workerId,
+    quiet
   )
 }
 
-startAppObj <- function(ui, serverFunc, port, workerId) {
+startAppObj <- function(ui, serverFunc, port, host, workerId, quiet) {
   uiHandler <- function(req) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
@@ -1102,11 +1141,11 @@ startAppObj <- function(ui, serverFunc, port, workerId) {
   }
   
   startApp(uiHandler,
-             function() { serverFunc },
-             port, workerId)
+           function() { serverFunc },
+           port, host, workerId, quiet)
 }
 
-startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
+startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet) {
   
   sys.www.root <- system.file('www', package='shiny')
   
@@ -1266,21 +1305,22 @@ startApp <- function(httpHandlers, serverFuncSource, port, workerId) {
   )
   
   if (is.numeric(port) || is.integer(port)) {
-    message('\n', 'Listening on port ', port)
-    return(startServer("0.0.0.0", port, httpuvCallbacks))
+    if (!quiet) {
+      message('\n', 'Listening on http://', host, ':', port)
+    }
+    return(startServer(host, port, httpuvCallbacks))
   } else if (is.character(port)) {    
-    message('\n', 'Listening on domain socket ', port)
+    if (!quiet) {
+      message('\n', 'Listening on domain socket ', port)
+    }
     mask <- attr(port, 'mask')
     return(startPipeServer(port, mask, httpuvCallbacks))
   }
 }
 
-# NOTE: we de-roxygenized this comment because the function isn't exported
 # Run an application that was created by \code{\link{startApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
-# 
-# @param ws_env The return value from \code{\link{startApp}}.
-serviceApp <- function(ws_env) {
+serviceApp <- function() {
   if (timerCallbacks$executeElapsed()) {
     for (shinysession in appsByToken$values()) {
       shinysession$manageHiddenOutputs()
@@ -1307,6 +1347,12 @@ serviceApp <- function(ws_env) {
 #' 
 #' Runs a Shiny application. This function normally does not return; interrupt
 #' R to stop the application (usually by pressing Ctrl+C or Esc).
+#'
+#' The host parameter was introduced in Shiny 0.9.0. Its default value of
+#' \code{"127.0.0.1"} means that, contrary to previous versions of Shiny, only
+#' the current machine can access locally hosted Shiny apps. To allow other
+#' clients to connect, use the value \code{"0.0.0.0"} instead (which was the
+#' value that was hard-coded into Shiny in 0.8.0 and earlier).
 #' 
 #' @param appDir The directory of the application. Should contain
 #'   \code{server.R}, plus, either \code{ui.R} or a \code{www} directory that
@@ -1316,9 +1362,13 @@ serviceApp <- function(ws_env) {
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only. This value of this parameter can also be a 
-#'   function to call with the application's URL. 
+#'   function to call with the application's URL.
+#' @param host The IPv4 address that the application should listen on. Defaults
+#'   to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not. See
+#'   Details.
 #' @param workerId Can generally be ignored. Exists to help some editions of
 #'   Shiny Server Pro route requests to the correct process.
+#' @param quiet Should Shiny status messages be shown? Defaults to FALSE.
 #'
 #' @examples
 #' \dontrun{
@@ -1344,8 +1394,11 @@ serviceApp <- function(ws_env) {
 runApp <- function(appDir=getwd(),
                    port=NULL,
                    launch.browser=getOption('shiny.launch.browser',
-                                            interactive()), 
-                   workerId="") {
+                                            interactive()),
+                   host=getOption('shiny.host', '127.0.0.1'),
+                   workerId="", quiet=FALSE) {
+  if (is.null(host) || is.na(host))
+    host <- '0.0.0.0'
 
   # Make warnings print immediately
   ops <- options(warn = 1)
@@ -1386,7 +1439,7 @@ runApp <- function(appDir=getwd(),
       }
 
       # Test port to see if we can use it
-      tmp <- try(startServer('0.0.0.0', port, list()), silent=TRUE)
+      tmp <- try(startServer(host, port, list()), silent=TRUE)
       if (!is(tmp, 'try-error')) {
         stopServer(tmp)
         .globals$lastPort <- port
@@ -1399,9 +1452,10 @@ runApp <- function(appDir=getwd(),
     orig.wd <- getwd()
     setwd(appDir)
     on.exit(setwd(orig.wd), add = TRUE)
-    server <- startAppDir(port=port, workerId)
+    server <- startAppDir(port=port, host=host, workerId=workerId, quiet=quiet)
   } else {
-    server <- startAppObj(appDir$ui, appDir$server, port=port, workerId)
+    server <- startAppObj(appDir$ui, appDir$server, port=port,
+                          host=host, workerId=workerId, quiet=quiet)
   }
   
   on.exit({
@@ -1409,7 +1463,7 @@ runApp <- function(appDir=getwd(),
   }, add = TRUE)
   
   if (!is.character(port)) {
-    appUrl <- paste("http://localhost:", port, sep="")
+    appUrl <- paste("http://", host, ":", port, sep="")
     if (is.function(launch.browser))
       launch.browser(appUrl)
     else if (launch.browser)
@@ -1418,12 +1472,12 @@ runApp <- function(appDir=getwd(),
   
   .globals$retval <- NULL
   .globals$stopped <- FALSE
-  tryCatch(shinyCallingHandlers(
+  shinyCallingHandlers(
     while (!.globals$stopped) {
       serviceApp()
       Sys.sleep(0.001)
     }
-  ), finally = timerCallbacks$clear())
+  )
   
   return(.globals$retval)
 }
@@ -1470,7 +1524,8 @@ stopApp <- function(returnValue = NULL) {
 runExample <- function(example=NA,
                        port=NULL,
                        launch.browser=getOption('shiny.launch.browser',
-                                                interactive())) {
+                                                interactive()),
+                       host=getOption('shiny.host', '127.0.0.1')) {
   examplesDir <- system.file('examples', package='shiny')
   dir <- resolve(examplesDir, example)
   if (is.null(dir)) {
@@ -1489,7 +1544,7 @@ runExample <- function(example=NA,
            '"')
   }
   else {
-    runApp(dir, port = port, launch.browser = launch.browser)
+    runApp(dir, port = port, host = host, launch.browser = launch.browser)
   }
 }
 

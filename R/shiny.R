@@ -839,6 +839,58 @@ staticHandler <- function(root) {
 
 appsByToken <- Map$new()
 
+#' Provide the new generic for parsing Shiny Input
+#' 
+#' Provides an S3 generic to parse incoming Shiny JSON data. When defined on a
+#' particular class, Shiny will use S3 dispatch to refine the data passed back 
+#' from the client before making it available in the \code{input} variable of 
+#' the \code{server.R} file. 
+#' 
+#' The \code{type} of a custom Shiny Input widget will be deduced using the 
+#' \code{getType()} JavaScript function on the registered Shiny inputBinding.
+#' This type will then be set as the incoming object's class.
+#' 
+#' The provided function will be used to parse the data delivered from the 
+#' client before it is available in the \code{input} variable.
+#' @param x The value of this input as provided by the client, deserialized 
+#'      using RJSONIO, then passed through a call to \code{\link{structure}} to
+#'      set the class of the object. Note that the call to \code{structure} does
+#'      convert \code{NULL} values to an empty \code{\link{list}}.
+#' @param shinysession The \code{shinysession} in which the input exists.
+#' @param name The name of the input
+#' @examples
+#' parseShinyInput.myIntegerClass <- function(x, shinysession, name){
+#'   as.integer(x)
+#' }
+#' @rdname parseShinyInput
+#' @export
+parseShinyInput <- function(x, shinysession, name) UseMethod("parseShinyInput")
+
+#' Pass the data straight through if no class is provided.
+#' @rdname parseShinyInput
+#' @S3method parseShinyInput default
+parseShinyInput.default <- function(x, shinysession, name){
+  x
+}
+
+#' Takes a list-of-lists and returns a matrix. The lists
+#' must all be the same length. NULLs and empty lists are replaced by NA.
+#' @rdname parseShinyInput
+#' @S3method parseShinyInput shinyMatrix
+parseShinyInput.shinyMatrix <- function(x, shinysession, name) {
+  if (length(x) == 0)
+    return(matrix(nrow=0, ncol=0))
+  
+  matrix(unlist(x), nrow = length(x[[1]]), ncol = length(x))  
+}
+
+#' @rdname parseShinyInput
+#' @S3method parseShinyInput shinyDate
+parseShinyInput.shinyDate <- function(x, shinysession, name){  
+  # Convert to Date vector
+  as.Date(unclass(x))
+}
+
 # Provide a character representation of the WS that can be used
 # as a key in a Map.
 wsToKey <- function(WS) {
@@ -992,7 +1044,7 @@ decodeMessage <- function(data) {
   }
   
   if (readInt(1) != 0x01020202L)
-    return(fromJSON(rawToChar(data), asText=TRUE, simplify=FALSE))
+    return(fromJSON(rawToChar(data), asText=TRUE, simplify=FALSE, nullValue=NA))
   
   i <- 5
   parts <- list()
@@ -1009,20 +1061,6 @@ decodeMessage <- function(data) {
   mainMessage <- decodeMessage(parts[[1]])
   mainMessage$blobs <- parts[2:length(parts)]
   return(mainMessage)
-}
-
-# Takes a list-of-lists and returns a matrix. The lists
-# must all be the same length. NULL is replaced by NA.
-unpackMatrix <- function(data) {
-  if (length(data) == 0)
-    return(matrix(nrow=0, ncol=0))
-  
-  m <- matrix(unlist(lapply(data, function(x) {
-    sapply(x, function(y) {
-      ifelse(is.null(y), NA, y)
-    })
-  })), nrow = length(data[[1]]), ncol = length(data))
-  return(m)
 }
 
 # Combine dir and (file)name into a file path. If a file already exists with a
@@ -1180,19 +1218,14 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
             splitName <- strsplit(name, ':')[[1]]
             if (length(splitName) > 1) {
               msg$data[[name]] <- NULL
+
+              class(val) <- splitName[[2]]
               
-              # TODO: Make the below a user-extensible registry of deserializers
-              msg$data[[ splitName[[1]] ]] <- switch(
-                splitName[[2]],
-                matrix = unpackMatrix(val),
-                number = ifelse(is.null(val), NA, val),
-                date = {
-                  # First replace NULLs with NA, then convert to Date vector
-                  datelist <- ifelse(lapply(val, is.null), NA, val)
-                  as.Date(unlist(datelist))
-                },
-                stop('Unknown type specified for ', name)
-              )
+              msg$data[[ splitName[[1]] ]] <- 
+                parseShinyInput(
+                      val, 
+                      shinysession, 
+                      splitName[[1]] )
             }
             else if (is.list(val) && is.null(names(val))) {
               val_flat <- unlist(val, recursive = TRUE)

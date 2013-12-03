@@ -1502,7 +1502,7 @@
       return $(scope).find('.shiny-date-input');
     },
     getType: function(el) {
-      return "date";
+      return "shinyDate";
     },
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)

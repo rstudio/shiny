@@ -3,7 +3,8 @@
 \title{Run Shiny Example Applications}
 \usage{
   runExample(example = NA, port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()))
+    launch.browser = getOption("shiny.launch.browser", interactive()),
+    host = getOption("shiny.host", "127.0.0.1"))
 }
 \arguments{
   \item{example}{The name of the example to run, or

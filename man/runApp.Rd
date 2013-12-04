@@ -4,6 +4,7 @@
 \usage{
   runApp(appDir = getwd(), port = NULL,
     launch.browser = getOption("shiny.launch.browser", interactive()),
+    host = getOption("shiny.host", "127.0.0.1"),
     workerId = "", quiet = FALSE)
 }
 \arguments{
@@ -21,6 +22,10 @@
   This value of this parameter can also be a function to
   call with the application's URL.}
 
+  \item{host}{The IPv4 address that the application should
+  listen on. Defaults to the \code{shiny.host} option, if
+  set, or \code{"127.0.0.1"} if not. See Details.}
+
   \item{workerId}{Can generally be ignored. Exists to help
   some editions of Shiny Server Pro route requests to the
   correct process.}
@@ -32,6 +37,15 @@
   Runs a Shiny application. This function normally does not
   return; interrupt R to stop the application (usually by
   pressing Ctrl+C or Esc).
+}
+\details{
+  The host parameter was introduced in Shiny 0.9.0. Its
+  default value of \code{"127.0.0.1"} means that, contrary
+  to previous versions of Shiny, only the current machine
+  can access locally hosted Shiny apps. To allow other
+  clients to connect, use the value \code{"0.0.0.0"}
+  instead (which was the value that was hard-coded into
+  Shiny in 0.8.0 and earlier).
 }
 \examples{
 \dontrun{

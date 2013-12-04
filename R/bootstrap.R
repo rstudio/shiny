@@ -112,6 +112,94 @@ pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
   )
 }
 
+#' Create a panel with a sidebar
+#' 
+#' Create a panel that includes a sidebar for input controls
+#' and a main area for output
+#' 
+#' @param sidebarPanel The \link{sidebarPanel} containing input controls
+#' @param mainPanel The \link{mainPanel} containing outputs
+#' @return The newly created panel.
+#' 
+#' @examples
+#' panelWithSidebar(
+#'   
+#'   # Sidebar with a slider input
+#'   sidebarPanel(
+#'     sliderInput("obs", 
+#'                 "Number of observations:", 
+#'                 min = 0, 
+#'                 max = 1000, 
+#'                 value = 500)
+#'   ),
+#'   
+#'   # Show a plot of the generated distribution
+#'   mainPanel(
+#'     plotOutput("distPlot")
+#'   )
+#' )
+#'
+#' @export
+panelWithSidebar <- function(sidebarPanel, mainPanel) {
+  div(class="row-fluid", 
+      sidebarPanel, 
+      mainPanel
+  )
+}
+
+#' Create a page with a top level navigation bar
+#' 
+#' Create a page that contains a top level navigation bar that can be used
+#' to toggle a set of \code{\link{tabPanel}} elements.
+#' 
+#' @param title The application title to display in the navbar
+#' @param ... \code{\link{tabPanel}} elements to include in the page
+#' @param inverse \code{TRUE} to use a dark background and light text
+#' for the navigation bar
+#' @param windowTitle The title that should be displayed by the browser window. 
+#'   Useful if \code{title} is not a string.
+#' 
+#' @return A UI defintion that can be passed to the \link{shinyUI} function.
+#' 
+#' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}}
+#'
+#' @examples
+#' shinyUI(navbarPage("App Title",
+#'   tabPanel("Plot"), 
+#'   tabPanel("Summary"), 
+#'   tabPanel("Table")
+#' ))
+#' @export
+navbarPage <- function(title, ..., inverse = FALSE, windowTitle = title) {
+  
+  # alias title so we can avoid conflicts w/ title in withTags
+  pageTitle <- title 
+  
+  # navbar class based on options
+  navbarClass <- "navbar navbar-static-top"
+  if (inverse)
+    navbarClass <- paste(navbarClass, "navbar-inverse")
+  
+  # build the tabset
+  tabs <- list(...)
+  tabset <- buildTabset(tabs, FALSE)
+  
+  # build the page
+  withTags(bootstrapPage(
+    head(title(windowTitle)),
+    div(class=navbarClass,
+      div(class="navbar-inner",
+        div(class="container",
+          span(class="brand pull-left", pageTitle),
+          tabset$navList
+        )
+      )
+    ),
+    div(class="container-fluid", 
+      div(class="row-fluid", HTML("&nbsp;")),
+      tabset$content)
+  ))
+}
 
 #' Create a header panel
 #' 
@@ -959,7 +1047,8 @@ tabPanel <- function(title, ..., value = NULL) {
 #'   tab will be selected.
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
-#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
+#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}, 
+#' \code{\link{tabsetPage}}
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -972,11 +1061,17 @@ tabPanel <- function(title, ..., value = NULL) {
 #'   )
 #' )
 #' @export
-tabsetPanel <- function(..., id = NULL, selected = NULL) {
-  
-  # build tab-nav and tab-content divs
+tabsetPanel <- function(..., id = NULL, selected = NULL) { 
   tabs <- list(...)
-  tabNavList <- tags$ul(class = "nav nav-tabs", id = id)
+  tabset <- buildTabset(tabs, TRUE, id, selected)
+  tabDiv <- tags$div(class = "tabbable", tabset$navList, tabset$content)
+}
+
+buildTabset <- function(tabs, navTabs, id = NULL, selected = NULL) {
+  
+  # build tab nav list and tab content div
+  navListClass <- ifelse(navTabs, "nav nav-tabs", "nav")
+  tabNavList <- tags$ul(class = navListClass, id = id)
   tabContent <- tags$div(class = "tab-content")
   firstTab <- TRUE
   tabsetId <- as.integer(stats::runif(1, 1, 10000))
@@ -1018,7 +1113,7 @@ tabsetPanel <- function(..., id = NULL, selected = NULL) {
     tabContent <- tagAppendChild(tabContent, divTag)
   }
   
-  tabDiv <- tags$div(class = "tabbable", tabNavList, tabContent)
+  list(navList = tabNavList, content = tabContent)
 }
 
 

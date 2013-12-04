@@ -112,6 +112,35 @@ pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
   )
 }
 
+#' Create a page that consists of several tabs
+#' @export
+tabsetPage <- function(headerPanel, ...) {
+  # basic application container divs
+  bootstrapPage(
+    div(
+      class="container-fluid", 
+      div(class="row-fluid", 
+          headerPanel
+      ),
+      div(class="row-fluid", 
+          tabsetPanel(...)
+      )
+    )
+  )
+}
+
+#' Create a panel that includes a sidebar for input controls
+#' and a main panel for output
+#' @export
+panelWithSidebar <- function(sidebarPanel, mainPanel) {
+  div(
+    class="container-fluid", 
+    div(class="row-fluid", 
+        sidebarPanel, 
+        mainPanel
+    )
+  )
+}
 
 #' Create a header panel
 #' 

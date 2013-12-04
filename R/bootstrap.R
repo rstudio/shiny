@@ -112,6 +112,79 @@ pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
   )
 }
 
+#' Create a tabset page
+#' 
+#' Create a page that contains \code{\link{tabPanel}} elements. Tabsets are
+#' useful for dividing applications into multiple independently viewable modes.
+#' 
+#' @param headerPanel The \link{headerPanel} with the application title
+#' @param ... \code{\link{tabPanel}} elements to include in the page
+#' @return A UI defintion that can be passed to the \link{shinyUI} function.
+#' 
+#' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}}
+#'
+#' @examples
+#' shinyUI(tabsetPage(
+#'   
+#'   headerPanel("Hello Shiny!"),
+#'   
+#'   tabPanel("Plot", plotOutput("plot")), 
+#'   tabPanel("Summary", verbatimTextOutput("summary")), 
+#'   tabPanel("Table", tableOutput("table"))
+#' ))
+#' @export
+tabsetPage <- function(headerPanel, ...) {
+  # basic application container divs
+  bootstrapPage(
+    div(
+      class="container-fluid", 
+      div(class="row-fluid", 
+          headerPanel
+      ),
+      div(class="row-fluid", 
+          tabsetPanel(...)
+      )
+    )
+  )
+}
+
+#' Create a panel with a sidebar
+#' 
+#' Create a panel that includes a sidebar for input controls
+#' and a main area for output
+#' 
+#' @param sidebarPanel The \link{sidebarPanel} containing input controls
+#' @param mainPanel The \link{mainPanel} containing outputs
+#' @return The newly created panel.
+#' 
+#' @examples
+#' panelWithSidebar(
+#'   
+#'   # Sidebar with a slider input
+#'   sidebarPanel(
+#'     sliderInput("obs", 
+#'                 "Number of observations:", 
+#'                 min = 0, 
+#'                 max = 1000, 
+#'                 value = 500)
+#'   ),
+#'   
+#'   # Show a plot of the generated distribution
+#'   mainPanel(
+#'     plotOutput("distPlot")
+#'   )
+#' )
+#'
+#' @export
+panelWithSidebar <- function(sidebarPanel, mainPanel) {
+  div(
+    class="container-fluid", 
+    div(class="row-fluid", 
+        sidebarPanel, 
+        mainPanel
+    )
+  )
+}
 
 #' Create a header panel
 #' 
@@ -959,7 +1032,8 @@ tabPanel <- function(title, ..., value = NULL) {
 #'   tab will be selected.
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
-#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
+#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}, 
+#' \code{\link{tabsetPage}}
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and

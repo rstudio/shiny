@@ -190,6 +190,7 @@ navbarPage <- function(title,
   
   # built the container div dynamically to support optional collapsability
   if (collapsable) {
+    navId <- paste("navbar-", as.integer(stats::runif(1, 1, 10000)), sep="")
     containerDiv <- div(class="container",
                         tags$button(type="button", 
                                     class="btn btn-navbar", 
@@ -200,7 +201,16 @@ navbarPage <- function(title,
                           span(class="icon-bar")
                         ),
                         span(class="brand pull-left", pageTitle),
-                        div(class="nav-collapse collapse", tabset$navList))
+                        div(class="nav-collapse collapse", 
+                            id=navId,
+                            tabset$navList),
+                            tags$script(paste(
+                              "$('#", navId, " a').click(function (e) {
+                                  e.preventDefault();
+                                  $(this).tab('show');
+                                  if ($('.btn').is(':visible'))
+                                    $('.btn').click();
+                               });", sep="")))
   } else {
     containerDiv <- div(class="container",
                         span(class="brand pull-left", pageTitle),

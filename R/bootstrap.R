@@ -170,7 +170,11 @@ panelWithSidebar <- function(sidebarPanel, mainPanel) {
 #'   tabPanel("Table")
 #' ))
 #' @export
-navbarPage <- function(title, ..., inverse = FALSE, windowTitle = title) {
+navbarPage <- function(title, 
+                       ..., 
+                       collapsable = FALSE, 
+                       inverse = FALSE, 
+                       windowTitle = title) {
   
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title 
@@ -184,16 +188,30 @@ navbarPage <- function(title, ..., inverse = FALSE, windowTitle = title) {
   tabs <- list(...)
   tabset <- buildTabset(tabs, FALSE)
   
+  # built the container div dynamically to support optional collapsability
+  if (collapsable) {
+    containerDiv <- div(class="container",
+                        tags$button(type="button", 
+                                    class="btn btn-navbar", 
+                                    `data-toggle`="collapse",
+                                    `data-target`=".nav-collapse",
+                          span(class="icon-bar"),
+                          span(class="icon-bar"),
+                          span(class="icon-bar")
+                        ),
+                        span(class="brand pull-left", pageTitle),
+                        div(class="nav-collapse collapse", tabset$navList))
+  } else {
+    containerDiv <- div(class="container",
+                        span(class="brand pull-left", pageTitle),
+                        tabset$navList)
+  }
+
   # build the page
   withTags(bootstrapPage(
     head(title(windowTitle)),
     div(class=navbarClass,
-      div(class="navbar-inner",
-        div(class="container",
-          span(class="brand pull-left", pageTitle),
-          tabset$navList
-        )
-      )
+      div(class="navbar-inner", containerDiv)
     ),
     div(class="container-fluid", 
       div(class="row-fluid", HTML("&nbsp;")),

@@ -149,20 +149,23 @@ panelWithSidebar <- function(sidebarPanel, mainPanel) {
 
 #' Create a page with a top level navigation bar
 #' 
-#' Create a page that contains a top level navigation bar that can be used
-#' to toggle a set of \code{\link{tabPanel}} elements.
+#' Create a page that contains a top level navigation bar that can be used to
+#' toggle a set of \code{\link{tabPanel}} elements.
 #' 
 #' @param title The application title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
-#' @param inverse \code{TRUE} to use a dark background and light text
-#' for the navigation bar
-#' @param windowTitle The title that should be displayed by the browser window. 
-#'   Useful if \code{title} is not a string.
-#' 
+#' @param collapsable \code{TRUE} to automatically collapse the navigation 
+#'   elements into a menu when the width of the browser is less than 940 pixels 
+#'   (useful for viewing on smaller touchscreen device)
+#' @param inverse \code{TRUE} to use a dark background and light text for the
+#'   navigation bar
+#' @param windowTitle The title that should be displayed by the browser window 
+#'   (defaults to \code{title} if not specified)
+#'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
-#' 
+#'   
 #' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}}
-#'
+#'   
 #' @examples
 #' shinyUI(navbarPage("App Title",
 #'   tabPanel("Plot"), 

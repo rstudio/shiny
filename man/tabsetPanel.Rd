@@ -2,7 +2,8 @@
 \alias{tabsetPanel}
 \title{Create a tabset panel}
 \usage{
-  tabsetPanel(..., id = NULL, selected = NULL)
+  tabsetPanel(..., id = NULL, selected = NULL,
+    position = "above")
 }
 \arguments{
   \item{...}{\code{\link{tabPanel}} elements to include in
@@ -18,6 +19,10 @@
   supplied, the \code{title}) of the tab that should be
   selected by default. If \code{NULL}, the first tab will
   be selected.}
+
+  \item{position}{The position of the tabs relative to the
+  content. Valid values are "above", "below", "left", and
+  "right" (defaults to "above")}
 }
 \value{
   A tabset that can be passed to \code{\link{mainPanel}}

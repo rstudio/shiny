@@ -35,6 +35,9 @@ shiny 0.8.0.99
 * Added `head` parameter to top-level page functions for providing a list
   of tags to be inserted into the document head.
 
+* Added `position` paramter to `tabsetPanel()` to enable positioning of tabs
+  above, below, left, or right of tab content
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

@@ -3,7 +3,7 @@
 \title{Create a page with a top level navigation bar}
 \usage{
   navbarPage(title, ..., collapsable = FALSE,
-    inverse = FALSE, windowTitle = title)
+    inverse = FALSE, head = list())
 }
 \arguments{
   \item{title}{The application title to display in the
@@ -20,9 +20,10 @@
   \item{inverse}{\code{TRUE} to use a dark background and
   light text for the navigation bar}
 
-  \item{windowTitle}{The title that should be displayed by
-  the browser window (defaults to \code{title} if not
-  specified)}
+  \item{head}{Tag or list of tags to be inserted into the
+  head of the document (for example, addition of required
+  Javascript or CSS resources via \code{tags$script} or
+  \code{tags$style})}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

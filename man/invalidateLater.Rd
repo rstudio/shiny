@@ -17,6 +17,16 @@
   Schedules the current reactive context to be invalidated
   in the given number of milliseconds.
 }
+\details{
+  If this is placed within an observer or reactive
+  expression, that object will be invalidated (and
+  re-execute) after the interval has passed. The
+  re-execution will reset the invalidation flag, so in a
+  typical use case, the object will keep re-executing and
+  waiting for the specified interval. It's possible to stop
+  this cycle by adding conditional logic that prevents the
+  \code{invalidateLater} from being run.
+}
 \examples{
 \dontrun{
 shinyServer(function(input, output, session) {
@@ -40,5 +50,9 @@ shinyServer(function(input, output, session) {
   })
 })
 }
+}
+\seealso{
+  \code{\link{reactiveTimer}} is a slightly less safe
+  alternative.
 }
 

@@ -650,7 +650,7 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #'   in order to cause that context to be invalidated the next time the timer 
 #'   interval elapses. Calling the returned function also happens to yield the 
 #'   current time (as in \code{\link{Sys.time}}).
-#' @seealso invalidateLater
+#' @seealso \code{\link{invalidateLater}}
 #'
 #' @examples
 #' \dontrun{
@@ -718,12 +718,22 @@ reactiveTimer <- function(intervalMs=1000, session) {
 #' 
 #' Schedules the current reactive context to be invalidated in the given number 
 #' of milliseconds.
+#'
+#' If this is placed within an observer or reactive expression, that object will
+#' be invalidated (and re-execute) after the interval has passed. The
+#' re-execution will reset the invalidation flag, so in a typical use case, the
+#' object will keep re-executing and waiting for the specified interval. It's
+#' possible to stop this cycle by adding conditional logic that prevents the
+#' \code{invalidateLater} from being run.
+#'
 #' @param millis Approximate milliseconds to wait before invalidating the
 #'   current reactive context.
 #' @param session A session object. This is needed to cancel any scheduled
 #'   invalidations after a user has ended the session. If \code{NULL}, then
 #'   this invalidation will not be tied to any session, and so it will still
 #'   occur.
+#'
+#' @seealso \code{\link{reactiveTimer}} is a slightly less safe alternative.
 #'
 #' @examples
 #' \dontrun{

@@ -63,6 +63,6 @@ shinyServer(function(input, output, session) {
 }
 }
 \seealso{
-  invalidateLater
+  \code{\link{invalidateLater}}
 }
 

@@ -113,6 +113,7 @@ pageWithSidebar <- function(headerPanel,
   
   bootstrapPage(
     # basic application container divs
+    head = head,
     div(
       class="container-fluid", 
       div(class="row-fluid", 

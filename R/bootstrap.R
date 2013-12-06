@@ -12,10 +12,13 @@
 #' \code{<div class="container-fluid">} wrapper to provide a little padding.
 #' 
 #' @param ... The contents of the document body.
+#' @param head Tag or list of tags to be inserted into the head of the document
+#' (for example, addition of required Javascript or CSS resources via
+#' \code{tags$script} or \code{tags$style})
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #' 
 #' @export
-bootstrapPage <- function(...) {
+bootstrapPage <- function(..., head = list()) {
   # required head tags for boostrap
   importBootstrap <- function(min = TRUE, responsive = TRUE) {
     
@@ -52,13 +55,18 @@ bootstrapPage <- function(...) {
   tagList(
     # inject bootstrap requirements into head
     importBootstrap(),
+    
+    # other head tags
+    tags$head(head),
+    
+    # remainder of tags passed to the function
     list(...)
   )
 }
 
 #' @rdname bootstrapPage
 #' @export
-basicPage <- function(...) {
+basicPage <- function(..., head = list()) {
   bootstrapPage(div(class="container-fluid", list(...)))
 }
 
@@ -70,6 +78,9 @@ basicPage <- function(...) {
 #' @param headerPanel The \link{headerPanel} with the application title
 #' @param sidebarPanel The \link{sidebarPanel} containing input controls
 #' @param mainPanel The \link{mainPanel} containing outputs
+#' @param head Tag or list of tags to be inserted into the head of the document
+#' (for example, addition of required Javascript or CSS resources via
+#' \code{tags$script} or \code{tags$style})
 #' @return A UI defintion that can be passed to the \link{shinyUI} function
 #' 
 #' @examples
@@ -95,10 +106,14 @@ basicPage <- function(...) {
 #' ))
 #'
 #' @export
-pageWithSidebar <- function(headerPanel, sidebarPanel, mainPanel) {
+pageWithSidebar <- function(headerPanel, 
+                            sidebarPanel, 
+                            mainPanel,
+                            head = list()) {
   
   bootstrapPage(
     # basic application container divs
+    head = head,
     div(
       class="container-fluid", 
       div(class="row-fluid", 
@@ -159,8 +174,9 @@ panelWithSidebar <- function(sidebarPanel, mainPanel) {
 #'   (useful for viewing on smaller touchscreen device)
 #' @param inverse \code{TRUE} to use a dark background and light text for the
 #'   navigation bar
-#' @param windowTitle The title that should be displayed by the browser window 
-#'   (defaults to \code{title} if not specified)
+#' @param head Tag or list of tags to be inserted into the head of the document
+#' (for example, addition of required Javascript or CSS resources via
+#' \code{tags$script} or \code{tags$style})
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -177,7 +193,7 @@ navbarPage <- function(title,
                        ..., 
                        collapsable = FALSE, 
                        inverse = FALSE, 
-                       windowTitle = title) {
+                       head = list()) {
   
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title 
@@ -221,15 +237,15 @@ navbarPage <- function(title,
   }
 
   # build the page
-  withTags(bootstrapPage(
-    head(title(windowTitle)),
+  bootstrapPage(
+    head = head,
     div(class=navbarClass,
       div(class="navbar-inner", containerDiv)
     ),
     div(class="container-fluid", 
       div(class="row-fluid", HTML("&nbsp;")),
       tabset$content)
-  ))
+  )
 }
 
 #' Create a header panel

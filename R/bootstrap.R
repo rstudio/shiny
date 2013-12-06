@@ -617,7 +617,21 @@ submitButton <- function(text = "Apply Changes") {
 #'   also use any other HTML, like an image.
 #'
 #' @family input elements
+#' @examples
+#' \dontrun{
+#' # In server.R
+#' output$distPlot <- renderPlot({
+#'   # Take a dependency on input$goButton
+#'   input$goButton
 #'
+#'   # Use isolate() to avoid dependency on input$obs
+#'   dist <- isolate(rnorm(input$obs))
+#'   hist(dist)
+#' })
+#'
+#' # In ui.R
+#' actionButton("goButton", "Go!")
+#' }
 #' @export
 actionButton <- function(inputId, label) {
   tags$button(id=inputId, type="button", class="btn action-button", label)

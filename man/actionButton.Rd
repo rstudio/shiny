@@ -16,6 +16,22 @@
   Creates an action button whose value is initially zero,
   and increments by one each time it is pressed.
 }
+\examples{
+\dontrun{
+# In server.R
+output$distPlot <- renderPlot({
+  # Take a dependency on input$goButton
+  input$goButton
+
+  # Use isolate() to avoid dependency on input$obs
+  dist <- isolate(rnorm(input$obs))
+  hist(dist)
+})
+
+# In ui.R
+actionButton("goButton", "Go!")
+}
+}
 \seealso{
   Other input.elements: \code{\link{checkboxGroupInput}},
   \code{\link{checkboxInput}}, \code{\link{dateInput}},

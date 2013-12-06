@@ -1064,10 +1064,11 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #' )
 #' @export
 tabPanel <- function(title, ..., value = NULL, condition = NULL) {
-  divTag <- div(class="tab-pane", title=title, `data-value`=value, ...)
-  if (!is.null(condition))
-    divTag$attribs$`data-display-if` <- condition
-  divTag
+  divTag <- div(class="tab-pane", 
+                title=title, 
+                `data-value`=value,
+                `data-display-if` = condition,
+                ...)
 }
 
 #' Create a tabset panel

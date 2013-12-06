@@ -1114,6 +1114,8 @@ tabPanel <- function(title, ..., value = NULL, condition = NULL) {
 #' @param selected The \code{value} (or, if none was supplied, the \code{title})
 #'   of the tab that should be selected by default. If \code{NULL}, the first
 #'   tab will be selected.
+#' @param tabsPosition The position of the tabs relative to the content. Valid
+#' values are "above", "below", "left", and "right" (defaults to "above")
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
 #' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}, 
@@ -1130,10 +1132,29 @@ tabPanel <- function(title, ..., value = NULL, condition = NULL) {
 #'   )
 #' )
 #' @export
-tabsetPanel <- function(..., id = NULL, selected = NULL) { 
+tabsetPanel <- function(..., 
+                        id = NULL, 
+                        selected = NULL, 
+                        tabsPosition = c("above", "below", "left", "right")) { 
+  
+  # build the tabset
   tabs <- list(...)
   tabset <- buildTabset(tabs, TRUE, id, selected)
-  tabDiv <- tags$div(class = "tabbable", tabset$navList, tabset$content)
+  
+  # position the nav list and content appropriately
+  tabsPosition <- match.arg(tabsPosition)
+  if (tabsPosition %in% c("above", "left", "right")) {
+    first <- tabset$navList
+    second <- tabset$content
+  } else if (tabsPosition %in% c("below")) {
+    first <- tabset$content
+    second <- tabset$navList
+  }
+  
+  # create the tab div
+  tabDiv <- tags$div(class = paste("tabbable tabs-", tabsPosition, sep=""), 
+                     first, 
+                     second)
 }
 
 buildTabset <- function(tabs, navTabs, id = NULL, selected = NULL) {

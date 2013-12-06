@@ -1109,23 +1109,23 @@ tabPanel <- function(title, ..., value = NULL) {
 #'   )
 #' )
 #' @export
-tabsetPanel <- function(..., id = NULL, selected = NULL, tabsPosition = "above") { 
+tabsetPanel <- function(..., 
+                        id = NULL, 
+                        selected = NULL, 
+                        tabsPosition = c("above", "below", "left", "right")) { 
   
   # build the tabset
   tabs <- list(...)
   tabset <- buildTabset(tabs, TRUE, id, selected)
   
   # position the nav list and content appropriately
+  tabsPosition <- match.arg(tabsPosition)
   if (tabsPosition %in% c("above", "left", "right")) {
     first <- tabset$navList
     second <- tabset$content
   } else if (tabsPosition %in% c("below")) {
     first <- tabset$content
     second <- tabset$navList
-  }
-  else {
-    stop("Invalid value for tabsPosition (valid values are above, below, ",
-         "left, and right)")
   }
   
   # create the tab div

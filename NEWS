@@ -25,6 +25,10 @@ shiny 0.8.0.99
 * Fixed the bug #299: renderDataTable() can deal with 0-row data frames now.
   (reported by Harlan Harris)
 
+* Added `navbarPage()` function to create applications with multiple top
+  level panels. Added `panelWithSidebar()` to faciliate creating a 
+  pageWithSidebar style layout within a navbarPage panel.
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

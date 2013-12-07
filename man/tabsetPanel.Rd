@@ -3,7 +3,7 @@
 \title{Create a tabset panel}
 \usage{
   tabsetPanel(..., id = NULL, selected = NULL,
-    tabsPosition = "above")
+    tabsPosition = c("above", "below", "left", "right"))
 }
 \arguments{
   \item{...}{\code{\link{tabPanel}} elements to include in

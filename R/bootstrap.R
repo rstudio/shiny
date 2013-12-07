@@ -1073,11 +1073,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #' @param ... UI elements to include within the tab
 #' @param value The value that should be sent when \code{tabsetPanel} reports 
 #'   that this tab is selected. If omitted and \code{tabsetPanel} has an 
-#'   \code{id}, then the title will be used.
-#' @param condition A JavaScript expression that will be evaluated repeatedly to
-#'   determine whether the tab should be displayed. See
-#'   \code{\link{conditionalPanel}} for additional details on conditional 
-#'   expressions.
+#'   \code{id}, then the title will be used..
 #' @return A tab that can be passed to \code{\link{tabsetPanel}}
 #'
 #' @seealso \code{\link{tabsetPanel}}
@@ -1093,11 +1089,10 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #'   )
 #' )
 #' @export
-tabPanel <- function(title, ..., value = NULL, condition = NULL) {
+tabPanel <- function(title, ..., value = NULL) {
   divTag <- div(class="tab-pane", 
                 title=title, 
                 `data-value`=value,
-                `data-display-if` = condition,
                 ...)
 }
 
@@ -1183,10 +1178,6 @@ buildTabset <- function(tabs, navTabs, id = NULL, selected = NULL) {
                             `data-toggle` = "tab", 
                             `data-value` = tabValue,
                             divTag$attribs$title))
-    
-    # add condition if appropriate
-    if (!is.null(divTag$attribs$`data-display-if`))
-      liTag$attribs$`data-display-if` <- divTag$attribs$`data-display-if`
     
     if (is.null(tabValue)) {
       tabValue <- divTag$attribs$title

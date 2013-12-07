@@ -29,9 +29,6 @@ shiny 0.8.0.99
   level panels. Added `panelWithSidebar()` to faciliate creating a 
   pageWithSidebar style layout within a navbarPage panel.
 
-* Added `condition` parameter to `tabPanel()` to allow tab visibility to 
-  be determined dynamically by a JavaScript expression.
-
 * Added `head` parameter to top-level page functions for providing a list
   of tags to be inserted into the document head.
 

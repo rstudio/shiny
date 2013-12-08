@@ -169,14 +169,19 @@ panelWithSidebar <- function(sidebarPanel, mainPanel) {
 #' 
 #' @param title The application title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
+#' @param head Tag or list of tags to be inserted into the head of the document
+#' (for example, addition of required Javascript or CSS resources via
+#' \code{tags$script} or \code{tags$style})
+#' @param header Tag of list of tags to display as a common header above
+#' all tabPanels.
+#' @param footer Tag or list of tags to display as a common footer below
+#' all tabPanels
 #' @param collapsable \code{TRUE} to automatically collapse the navigation 
 #'   elements into a menu when the width of the browser is less than 940 pixels 
 #'   (useful for viewing on smaller touchscreen device)
 #' @param inverse \code{TRUE} to use a dark background and light text for the
 #'   navigation bar
-#' @param head Tag or list of tags to be inserted into the head of the document
-#' (for example, addition of required Javascript or CSS resources via
-#' \code{tags$script} or \code{tags$style})
+
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -191,9 +196,11 @@ panelWithSidebar <- function(sidebarPanel, mainPanel) {
 #' @export
 navbarPage <- function(title, 
                        ..., 
+                       head = list(),
+                       header = list(),
+                       footer = list(),
                        collapsable = FALSE, 
-                       inverse = FALSE, 
-                       head = list()) {
+                       inverse = FALSE) {
   
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title 
@@ -236,6 +243,10 @@ navbarPage <- function(title,
                         tabset$navList)
   }
 
+  # create a default header if necessary
+  if (length(header) == 0)
+    header <- HTML("&nbsp;")
+  
   # build the page
   bootstrapPage(
     head = head,
@@ -243,8 +254,10 @@ navbarPage <- function(title,
       div(class="navbar-inner", containerDiv)
     ),
     div(class="container-fluid", 
-      div(class="row-fluid", HTML("&nbsp;")),
-      tabset$content)
+      div(class="row-fluid", header),
+      div(class="row-fluid", tabset$content),
+      div(class="row-fluid", footer)
+    )
   )
 }
 

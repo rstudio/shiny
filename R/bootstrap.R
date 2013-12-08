@@ -127,41 +127,6 @@ pageWithSidebar <- function(headerPanel,
   )
 }
 
-#' Create a panel with a sidebar
-#' 
-#' Create a panel that includes a sidebar for input controls
-#' and a main area for output
-#' 
-#' @param sidebarPanel The \link{sidebarPanel} containing input controls
-#' @param mainPanel The \link{mainPanel} containing outputs
-#' @return The newly created panel.
-#' 
-#' @examples
-#' panelWithSidebar(
-#'   
-#'   # Sidebar with a slider input
-#'   sidebarPanel(
-#'     sliderInput("obs", 
-#'                 "Number of observations:", 
-#'                 min = 0, 
-#'                 max = 1000, 
-#'                 value = 500)
-#'   ),
-#'   
-#'   # Show a plot of the generated distribution
-#'   mainPanel(
-#'     plotOutput("distPlot")
-#'   )
-#' )
-#'
-#' @export
-panelWithSidebar <- function(sidebarPanel, mainPanel) {
-  div(class="row-fluid", 
-      sidebarPanel, 
-      mainPanel
-  )
-}
-
 #' Create a page with a top level navigation bar
 #' 
 #' Create a page that contains a top level navigation bar that can be used to

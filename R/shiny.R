@@ -75,7 +75,8 @@ ShinySession <- setRefClass(
       observe({
         # clientData$singletons tells us what singletons were part of the
         # initial page render
-        singletons <<- strsplit(clientData$singletons, ',')[[1]]
+        if (!is.null(clientData$singletons))
+          singletons <<- strsplit(clientData$singletons, ',')[[1]]
       })
       
       output     <<- .createOutputWriter(.self)

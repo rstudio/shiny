@@ -1,50 +1,4 @@
 
-#' Functions for creating bootstrap grid layouts
-#' 
-#' @param fluid Whether to use fluid layout for the grid. Automatically 
-#' defaults to the appropriate value for the current page being built.
-#' 
-#' @return A grid container or element that can be added to a UI definition.
-#' 
-#' @details See the documentation on the bootstrap \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{fluid grid system} and 
-#' \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{fixed grid system} for more details on using containers, rows, and columns to layout pages.
-#' 
-#' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
-#' 
-#' @rdname gridLayout
-#' @export
-gridContainer <- function(..., fluid = isPageFluid()) {
-  div(class = gridClass("container", fluid), ...)
-}
-
-#' @rdname gridLayout
-#' @export
-gridRow <- function(..., fluid = isPageFluid()) {
-  div(class = gridClass("row", fluid), ...)
-}
-
-#' @rdname gridLayout
-#' 
-#' @param width The grid width of the column (must be between 1 and 12)
-#' @param offset The number of columns to offset this column from the 
-#' end of the previous column.
-#' 
-#' @export
-gridCol <- function(width, ..., offset = NA) {
-  colClass <- paste("span", width, sep="")
-  if (!is.na(offset))
-    colClass <- paste(colClass, " offset", offset, sep="")
-  div(class = colClass, ...)
-}
-
-# Helper function to append -fluid to containers and rows if appropriate
-gridClass <- function(class, fluid = isPageFluid()) {
-  if (fluid)
-    paste(class, "-fluid", sep="")
-  else
-    class
-}
-
 #' Functions for creating top-level page containers
 #' 
 #' Functions for creating a top-level application page that uses either 
@@ -104,3 +58,49 @@ containerPage <- function(fluid, ..., head = list()) {
   bootstrapPage(containerDiv, head = head)
 }
 
+
+#' Functions for creating bootstrap grid layouts
+#' 
+#' @param fluid Whether to use fluid layout for the grid. Automatically 
+#' defaults to the appropriate value for the current page being built.
+#' 
+#' @return A grid container or element that can be added to a UI definition.
+#' 
+#' @details See the documentation on the bootstrap \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{fluid grid system} and 
+#' \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{fixed grid system} for more details on using containers, rows, and columns to layout pages.
+#' 
+#' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
+#' 
+#' @rdname gridLayout
+#' @export
+gridContainer <- function(..., fluid = isPageFluid()) {
+  div(class = gridClass("container", fluid), ...)
+}
+
+#' @rdname gridLayout
+#' @export
+gridRow <- function(..., fluid = isPageFluid()) {
+  div(class = gridClass("row", fluid), ...)
+}
+
+#' @rdname gridLayout
+#' 
+#' @param width The grid width of the column (must be between 1 and 12)
+#' @param offset The number of columns to offset this column from the 
+#' end of the previous column.
+#' 
+#' @export
+gridCol <- function(width, ..., offset = NA) {
+  colClass <- paste("span", width, sep="")
+  if (!is.na(offset))
+    colClass <- paste(colClass, " offset", offset, sep="")
+  div(class = colClass, ...)
+}
+
+# Helper function to append -fluid to containers and rows if appropriate
+gridClass <- function(class, fluid = isPageFluid()) {
+  if (fluid)
+    paste(class, "-fluid", sep="")
+  else
+    class
+}

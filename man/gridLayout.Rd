@@ -1,42 +1,70 @@
-\name{gridContainer}
-\alias{gridCol}
-\alias{gridContainer}
-\alias{gridRow}
+\name{fluidContainer}
+\alias{fixedContainer}
+\alias{fixedRow}
+\alias{fluidContainer}
+\alias{fluidRow}
 \title{Functions for creating bootstrap grid layouts}
 \usage{
-  gridContainer(..., fluid = isPageFluid())
+  fluidContainer(...)
 
-  gridRow(..., fluid = isPageFluid())
+  fluidRow(...)
 
-  gridCol(width, ..., offset = NA)
+  fixedContainer(...)
+
+  fixedRow(...)
 }
 \arguments{
-  \item{fluid}{Whether to use fluid layout for the grid.
-  Automatically defaults to the appropriate value for the
-  current page being built.}
-
-  \item{width}{The grid width of the column (must be
-  between 1 and 12)}
-
-  \item{offset}{The number of columns to offset this column
-  from the end of the previous column.}
+  \item{...}{Elements to include within the grid}
 }
 \value{
-  A grid container or element that can be added to a UI
+  A bootstrap grid layout that can be added to a UI
   definition.
 }
 \description{
-  Functions for creating bootstrap grid layouts
+  Functions for creating a bootstrap fluid or fixed grid
+  layout. Fluid layouts scale their components in realtime
+  to fill all available browser width. Fixed layouts scale
+  components at predefined size thresholds and limit the
+  total width to 940 pixels.
 }
 \details{
+  A bootstrap grid layout consists of containers that
+  include rows which in turn include columns. Rows exist
+  for the purpose of making sure their elements appear on
+  the same line (if the browser has adequate width).
+  Columns exist for the purpose of defining how much
+  horizontal space within a 12-unit wide grid it's elements
+  should occupy.
+
+  To create a fluid grid layout use the
+  \code{fluidContainer} function and include instances of
+  \code{fluidRow} within it. To create a fixed grid layout
+  use the \code{fixedContainer} function includes instances
+  of \code{fixedRow} within it.
+}
+\note{
   See the documentation on the bootstrap
   \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{fluid
   grid system} and
   \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{fixed
-  grid system} for more details on using containers, rows,
-  and columns to layout pages.
+  grid system} for more details on the differences between
+  fluid and fixed layouts.
+}
+\examples{
+shinyUI(bootstrapPage(
+  fluidContainer(
+    fluidRow(
+      column(width = 4,
+        "4"
+      ),
+      column(width = 3, offset = 2,
+        "3 offset 2"
+      )
+    )
+ )
+))
 }
 \seealso{
-  \code{\link{fluidPage}}, \code{\link{fixedPage}}
+  \code{\link{bootstrapPage}}, \code{\link{column}}
 }
 

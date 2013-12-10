@@ -86,3 +86,11 @@ span.jslider {
 .crosshair {
   cursor: crosshair;
 }
+
+.shiny-code {
+  background-color: white;
+}
+
+.shiny-code code {
+  font-family: Menlo, Consolas, "Courier New", monospace;
+}

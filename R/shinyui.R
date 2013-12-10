@@ -148,12 +148,25 @@ renderPage <- function(ui, connection, showcase=FALSE) {
                '  <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
                sprintf('  <script type="application/shiny-singletons">%s</script>',
                        paste(result$singletons, collapse = ',')
-               ),
-               result$head,
+               )),
+              con = connection)
+
+  if (showcase) {
+    writeLines(c('  <script src="shared/highlight/highlight.pack.js"></script>',
+                 '  <link rel="stylesheet" type="text/css" href="shared/highlight/styles/tomorrow.css" />',
+                 '  <script type="text/javascript">', 
+                 '    $(document).ready(function() { ', 
+                 '      $("pre code").each(function(i, e) {hljs.highlightBlock(e)});',
+                 '     });',
+                 '  </script>'), 
+               con = connection)
+  }
+  writeLines(c(result$head,
                '</head>',
                '<body>',
                recursive=TRUE),
              con = connection)
+
   
   # write UI html to connection
   writeLines(result$html, con = connection)
@@ -161,13 +174,13 @@ renderPage <- function(ui, connection, showcase=FALSE) {
   if (showcase) {
     writeLines(c('<div class="container-fluid"><div class="row-fluid">', 
                  '<div class="span6"><h4>ui.R</h4>',
-                 '<pre>', 
+                 '<pre class="shiny-code"><code>', 
                  readLines(file.path.ci(getwd(), 'ui.R')), 
-                 '</pre></div>',
+                 '</code></pre></div>',
                  '<div class="span6"><h4>server.R</h4>',
-                 '<pre>', 
+                 '<pre class="shiny-code"><code>', 
                  readLines(file.path.ci(getwd(), 'server.R')), 
-                 '</pre></div></div></div>'), 
+                 '</code></pre></div></div></div>'), 
                con = connection)
   }
   

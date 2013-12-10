@@ -152,12 +152,24 @@ renderPage <- function(ui, connection, showcase=FALSE) {
                result$head,
                '</head>',
                '<body>',
-               if (showcase) "Showcase Mode" else "",
                recursive=TRUE),
              con = connection)
   
   # write UI html to connection
   writeLines(result$html, con = connection)
+  
+  if (showcase) {
+    writeLines(c('<div class="container-fluid"><div class="row-fluid">', 
+                 '<div class="span6"><h4>ui.R</h4>',
+                 '<pre>', 
+                 readLines(file.path.ci(getwd(), 'ui.R')), 
+                 '</pre></div>',
+                 '<div class="span6"><h4>server.R</h4>',
+                 '<pre>', 
+                 readLines(file.path.ci(getwd(), 'server.R')), 
+                 '</pre></div></div></div>'), 
+               con = connection)
+  }
   
   # write end document
   writeLines(c('</body>',

@@ -12,4 +12,8 @@
   content (each element passed to the container will appear
   on it's own line in the UI)
 }
+\note{
+  The \code{verticalLayout} function can only be used
+  within a \code{\link{fluidPage}}.
+}
 

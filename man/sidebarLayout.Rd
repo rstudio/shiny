@@ -21,9 +21,13 @@
   2/3 of the horizontal width and typically contains
   outputs.
 }
+\note{
+  The \code{sidebarLayout} function can only be used within
+  a \code{\link{fluidPage}}.
+}
 \examples{
 # Define UI
-shinyUI(bootstrapPage(
+shinyUI(fluidPage(
 
   # Application title
   titlePanel("Hello Shiny!"),

@@ -1,65 +1,102 @@
 
-#' Functions for creating bootstrap grid layouts
+#' Create a page with fluid layout
 #' 
-#' Functions for creating a bootstrap fluid or fixed grid layout. Fluid layouts 
-#' scale their components in realtime to fill all available browser width. 
-#' Fixed layouts scale components at predefined size thresholds and limit the
-#' total width to 940 pixels.
-#' 
-#' @param ... Elements to include within the grid
-#' 
-#' @return A bootstrap grid layout that can be added to a UI definition.
-#' 
-#' @details A bootstrap grid layout consists of containers that include rows 
+#' Functions for creating fluid page layouts. A fluid layout consists of rows
 #' which in turn include columns. Rows exist for the purpose of making sure
 #' their elements appear on the same line (if the browser has adequate width).
 #' Columns exist for the purpose of defining how much horizontal space within
-#' a 12-unit wide grid it's elements should occupy.
+#' a 12-unit wide grid it's elements should occupy. Fluid pages scale their 
+#' components in realtime to fill all available browser width. 
 #' 
-#' To create a fluid grid layout use the \code{fluidContainer} function and 
-#' include instances of \code{fluidRow} within it. To create a fixed grid
-#' layout use the \code{fixedContainer} function includes instances of 
-#' \code{fixedRow} within it.
+#' @param ... Elements to include within the page
+#' @param head Tag or list of tags to be inserted into the head of the document
+#' (for example, addition of required Javascript or CSS resources via
+#' \code{tags$script} or \code{tags$style})
 #' 
-#' @note See the documentation on the bootstrap \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{fluid grid system} and 
-#' \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{fixed grid system}
-#' for more details on the differences between fluid and fixed layouts.
+#' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #' 
-#' @seealso \code{\link{bootstrapPage}}, \code{\link{column}}
+#' @details To create a fluid page use the \code{fluidPage} function and 
+#' include instances of \code{fluidRow} and \code{\link{column}} within it. 
+#' As an alternative to low-level row and column functions you can also use 
+#' higher-level layout functions like \code{\link{sidebarLayout}}, 
+#' \code{\link{horizontalLayout}}, or \code{\link{columnLayout}}.
+#' 
+#' @note See the documentation on the bootstrap \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{fluid grid system} for additional details.
+#' 
+#' @seealso \code{\link{column}}
 #' 
 #' @examples
-#' shinyUI(bootstrapPage(
-#'   fluidContainer(
-#'     fluidRow(
-#'       column(width = 4,
-#'         "4"
-#'       ),
-#'       column(width = 3, offset = 2,
-#'         "3 offset 2"
-#'       )
+#' shinyUI(fluidPage(
+#'   fluidRow(
+#'     column(width = 4,
+#'       "4"
+#'     ),
+#'     column(width = 3, offset = 2,
+#'       "3 offset 2"
 #'     )
-#'  )
+#'   )
 #' ))
-#' 
-#' @rdname gridLayout
+#'
+#' @rdname fluidPage
 #' @export
-fluidContainer <- function(...) {
-  div(class = "container-fluid", ...)
+fluidPage <- function(..., head = list()) {
+  bootstrapPage(div(class = "container-fluid", ...),
+                head = head)
+                
 }
 
-#' @rdname gridLayout
+#' @rdname fluidPage
 #' @export
 fluidRow <- function(...) {
   div(class = "row-fluid", ...)
 }
 
-#' @rdname gridLayout
+#' Create a page with a fixed layout
+#' 
+#' Functions for creating fixed page layouts. A fixed layout consists of rows
+#' which in turn include columns. Rows exist for the purpose of making sure
+#' their elements appear on the same line (if the browser has adequate width).
+#' Columns exist for the purpose of defining how much horizontal space within
+#' a 12-unit wide grid it's elements should occupy. Fixed pages limit their
+#' width to 940 pixels.
+#' 
+#' @param ... Elements to include within the page
+#' @param head Tag or list of tags to be inserted into the head of the document
+#' (for example, addition of required Javascript or CSS resources via
+#' \code{tags$script} or \code{tags$style})
+#' 
+#' @return A UI defintion that can be passed to the \link{shinyUI} function.
+#' 
+#' @details To create a fixed page use the \code{fixedPage} function and 
+#' include instances of \code{fixedRow} and \code{\link{column}} within it. 
+#' Note that unlike \code{\link{fluidPage}}, fixed pages cannot make use
+#' of higher-level layout functions like \code{sidebarLayout}, rather, all
+#' layout must be done with \code{fixedRow} and \code{column}.
+#' 
+#' @note See the documentation on the bootstrap \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{fixed grid system} for additional details.
+#' 
+#' @seealso \code{\link{column}}
+#' 
+#' @examples
+#' shinyUI(fixedPage(
+#'   fixedRow(
+#'     column(width = 4,
+#'       "4"
+#'     ),
+#'     column(width = 3, offset = 2,
+#'       "3 offset 2"
+#'     )
+#'   )
+#' ))
+#'
+#' @rdname fixedPage
 #' @export
-fixedContainer <- function(...) {
-  div(class = "container", ...)
+fixedPage <- function(..., head = list()) {
+  bootstrapPage(div(class = "container", ...),
+                head = head)
 }
 
-#' @rdname gridLayout
+#' @rdname fixedPage
 #' @export
 fixedRow <- function(...) {
   div(class = "row", ...)
@@ -82,7 +119,7 @@ fixedRow <- function(...) {
 #' @export
 column <- function(width, ..., offset = 0) {
   
-  if (!is.integer(width) || (width < 1) || (width > 12))
+  if (!is.numeric(width) || (width < 1) || (width > 12))
     stop("column width must be between 1 and 12")
   
   colClass <- paste("span", width, sep="")
@@ -99,6 +136,9 @@ column <- function(width, ..., offset = 0) {
 #' 
 #' @details Calling this function has the side effect of including a 
 #' \code{title} tag within the head. 
+#' 
+#' @note The \code{titlePanel} function can only be used within a 
+#' \code{\link{fluidPage}}.
 #'     
 #' @examples
 #' titlePanel("Hello Shiny!")
@@ -107,7 +147,9 @@ column <- function(width, ..., offset = 0) {
 titlePanel <- function(title, windowTitle=title) {    
   tagList(
     tags$head(tags$title(windowTitle)),
-    fluidContainer(fluidRow(h2(title)))
+    fluidRow(style = "padding: 10px 0px;",
+      column(12, 
+        h2(title)))
   )
 }
 
@@ -123,9 +165,12 @@ titlePanel <- function(title, windowTitle=title) {
 #' @param position The position of the sidebar relative to the main area
 #' ("left" or "right")
 #' 
+#' @note The \code{sidebarLayout} function can only be used within a 
+#' \code{\link{fluidPage}}.
+#' 
 #' @examples
 #' # Define UI
-#' shinyUI(bootstrapPage(
+#' shinyUI(fluidPage(
 #'   
 #'   # Application title
 #'   titlePanel("Hello Shiny!"),
@@ -179,6 +224,34 @@ sidebarLayout <- function(sidebarPanel,
 #' 
 #' @param ... Columns to include within the layout
 #' 
+#' @note The \code{columnLayout} function can only be used within a 
+#' \code{\link{fluidPage}}.
+#' 
+#' @examples
+#' shinyUI(fluidPage(
+#'
+#'   titlePanel("New Application"),
+#' 
+#'   columnLayout(
+#'   
+#'     # Sidebar with a slider input for number of observations
+#'     column(width = 4,
+#'       wellPanel(
+#'         sliderInput("obs", 
+#'                     "Number of observations:", 
+#'                     min = 1, 
+#'                     max = 1000, 
+#'                     value = 500)
+#'       )
+#'     ),
+#'   
+#'     column(width = 8,
+#'       # Show a plot of the generated distribution
+#'       plotOutput("distPlot")
+#'     )
+#' )
+# ))
+#' 
 #' @export
 columnLayout <- function(...) {
   
@@ -188,9 +261,7 @@ columnLayout <- function(...) {
     validateSpan(column, "column")
   
   # create the layout
-  fluidContainer(
-    fluidRow(columns)
-  )
+  fluidRow(columns)
 }
 
 #' Layout UI elements vertically
@@ -200,13 +271,12 @@ columnLayout <- function(...) {
 #' 
 #' @param ... Elements to include within the container
 #' 
+#' @note The \code{verticalLayout} function can only be used within a 
+#' \code{\link{fluidPage}}.
+#' 
 #' @export
 verticalLayout <- function(...) {
-  rows <- list(...)
-  container <- fluidContainer()
-  for (row in rows)
-    container <- tagAppendChild(container, fluidRow(row))
-  container
+  lapply(list(...), function(row) fluidRow(column(12, row)))
 }
 
 #' Layout UI elements horizontally
@@ -220,27 +290,31 @@ verticalLayout <- function(...) {
 #' 
 #' @export
 horizontalLayout <- function(...) {
-  rowDiv <- fluidRow()
-  for (element in elements)
-    rowDiv <- tagAppendChild(rowDiv, element)
-  fluidContainer(rowDiv)
+  fluidRow(column(12, ...))
 }
 
 #' Pull elements left or right
 #' 
 #' Pull an element to the left or right side of a \code{\link{horizontalLayout}}.
 #' 
-#' @param element Element to pull left or right
+#' @param ... Element or list of elements to pull left or right
 #' 
+#' @rdname horizontalLayout
 #' @export
-pullLeft <- function(element) {
-  element$attribs$class <- paste(element$attribs$class, "pull-left")
+pullLeft <- function(...) {
+  lapply(list(...), function(element) {
+    element$attribs$class <- paste(element$attribs$class, "pull-left")
+    element
+  })
 }
 
-#' @rdname pullLeft
+#' @rdname horizontalLayout
 #' @export
-pullRight <- function(element) {
-  element$attribs$class <- paste(element$attribs$class, "pull-right")
+pullRight <- function(...) {
+  lapply(list(...), function(element) {
+    element$attribs$class <- paste(element$attribs$class, "pull-right")
+    element
+  })
 }
 
 

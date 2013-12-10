@@ -17,6 +17,10 @@
   Calling this function has the side effect of including a
   \code{title} tag within the head.
 }
+\note{
+  The \code{titlePanel} function can only be used within a
+  \code{\link{fluidPage}}.
+}
 \examples{
 titlePanel("Hello Shiny!")
 }

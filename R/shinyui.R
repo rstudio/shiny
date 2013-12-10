@@ -134,7 +134,7 @@ singleton <- function(x) {
   return(x)
 }
 
-renderPage <- function(ui, connection) {
+renderPage <- function(ui, connection, showcase=FALSE) {
   
   result <- renderTags(ui)
 
@@ -151,7 +151,8 @@ renderPage <- function(ui, connection) {
                ),
                result$head,
                '</head>',
-               '<body>', 
+               '<body>',
+               if (showcase) "Showcase Mode" else "",
                recursive=TRUE),
              con = connection)
   
@@ -214,10 +215,19 @@ shinyUI <- function(ui, path='/') {
       if (req$PATH_INFO != path)
         return(NULL)
       
+      # check to see if showcase mode was requested 
+      showcase <- FALSE
+      if (nchar(req$QUERY_STRING) > 0) {
+        qsenv <- parse_querystring(req$QUERY_STRING)
+        if (exists("showcase", where = qsenv)) {
+          showcase <- as.logical(as.numeric(qsenv$showcase))
+        }
+      }
+      
       textConn <- textConnection(NULL, "w") 
       on.exit(close(textConn))
       
-      renderPage(ui, textConn)
+      renderPage(ui, textConn, showcase)
       html <- paste(textConnectionValue(textConn), collapse='\n')
       return(httpResponse(200, content=html))
     }

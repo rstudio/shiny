@@ -1082,7 +1082,7 @@ file.path.ci <- function(dir, name) {
 
 # Instantiates the app in the current working directory.
 # port - The TCP port that the application should listen on.
-startAppDir <- function(port, host, workerId, quiet) {
+startAppDir <- function(port, host, workerId, quiet, showcase) {
   globalR <- file.path.ci(getwd(), 'global.R')
   uiR <- file.path.ci(getwd(), 'ui.R')
   serverR <- file.path.ci(getwd(), 'server.R')
@@ -1121,11 +1121,12 @@ startAppDir <- function(port, host, workerId, quiet) {
     port,
     host,
     workerId,
-    quiet
+    quiet,
+    showcase
   )
 }
 
-startAppObj <- function(ui, serverFunc, port, host, workerId, quiet) {
+startAppObj <- function(ui, serverFunc, port, host, workerId, quiet, showcase) {
   uiHandler <- function(req) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
@@ -1143,10 +1144,10 @@ startAppObj <- function(ui, serverFunc, port, host, workerId, quiet) {
   
   startApp(uiHandler,
            function() { serverFunc },
-           port, host, workerId, quiet)
+           port, host, workerId, quiet, showcase)
 }
 
-startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet) {
+startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet, showcase) {
   
   sys.www.root <- system.file('www', package='shiny')
   
@@ -1370,6 +1371,7 @@ serviceApp <- function() {
 #' @param workerId Can generally be ignored. Exists to help some editions of
 #'   Shiny Server Pro route requests to the correct process.
 #' @param quiet Should Shiny status messages be shown? Defaults to FALSE.
+#' @param showcase Should the app be run in showcase mode? Defaults to FALSE.
 #'
 #' @examples
 #' \dontrun{
@@ -1397,7 +1399,8 @@ runApp <- function(appDir=getwd(),
                    launch.browser=getOption('shiny.launch.browser',
                                             interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
-                   workerId="", quiet=FALSE) {
+                   workerId="", quiet=FALSE, 
+                   showcase=FALSE) {
   if (is.null(host) || is.na(host))
     host <- '0.0.0.0'
 
@@ -1453,10 +1456,12 @@ runApp <- function(appDir=getwd(),
     orig.wd <- getwd()
     setwd(appDir)
     on.exit(setwd(orig.wd), add = TRUE)
-    server <- startAppDir(port=port, host=host, workerId=workerId, quiet=quiet)
+    server <- startAppDir(port=port, host=host, workerId=workerId, quiet=quiet, 
+                          showcase=showcase)
   } else {
     server <- startAppObj(appDir$ui, appDir$server, port=port,
-                          host=host, workerId=workerId, quiet=quiet)
+                          host=host, workerId=workerId, quiet=quiet, 
+                          showcase=showcase)
   }
   
   on.exit({
@@ -1465,6 +1470,8 @@ runApp <- function(appDir=getwd(),
   
   if (!is.character(port)) {
     appUrl <- paste("http://", host, ":", port, sep="")
+    if (showcase) 
+      appUrl <- paste(appUrl, "?showcase=1", sep="")
     if (is.function(launch.browser))
       launch.browser(appUrl)
     else if (launch.browser)
@@ -1545,7 +1552,8 @@ runExample <- function(example=NA,
            '"')
   }
   else {
-    runApp(dir, port = port, host = host, launch.browser = launch.browser)
+    runApp(dir, port = port, host = host, launch.browser = launch.browser, 
+           showcase = TRUE)
   }
 }
 

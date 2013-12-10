@@ -230,7 +230,7 @@ shinyUI <- function(ui, path='/') {
       # check to see if showcase mode was requested 
       showcase <- FALSE
       if (nchar(req$QUERY_STRING) > 0) {
-        qsenv <- parse_querystring(req$QUERY_STRING)
+        qsenv <- parseQueryString(req$QUERY_STRING)
         if (exists("showcase", where = qsenv)) {
           showcase <- as.logical(as.numeric(qsenv$showcase))
         }

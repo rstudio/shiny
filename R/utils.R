@@ -422,19 +422,3 @@ get_exists = function(x, mode) {
   if (exists(x, envir = parent.frame(), mode = mode, inherits = FALSE))
     get(x, envir = parent.frame(), mode = mode, inherits = FALSE)
 }
-
-# Given a querystring in the format "?foo=bar&baz=qux", return an environment
-# containing variables with the given values.
-parse_querystring = function(qs) {
-  # remove leading question mark
-  qs <- substr(qs, 2, nchar(qs))
-  
-  # split into individual values
-  vals <- unlist(strsplit(qs, "&", fixed = TRUE))
-  ret <- new.env(parent = emptyenv())
-  for (val in vals) {
-    pair <- unlist(strsplit(val, "=", fixed = TRUE))
-    ret[[pair[1]]] <- if (length(pair) > 1) pair[2] else TRUE
-  }
-  return(ret)
-}

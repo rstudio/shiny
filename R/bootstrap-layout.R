@@ -110,22 +110,6 @@ titlePanel <- function(title, windowTitle=title) {
   )
 }
 
-#' Create a container panel
-#' 
-#' Create a container that includes one or more rows of content (each element
-#' passed to the container will appear on it's own line in the UI)
-#' 
-#' @param ... Elements to include within the container
-#' 
-#' @export
-containerPanel <- function(...) {
-  rows <- list(...)
-  container <- fluidContainer()
-  for (row in rows)
-    container <- tagAppendChild(container, fluidRow(row))
-  container
-}
-
 #' Layout a sidebar and main area
 #' 
 #' Create a layout with a sidebar and main area. The sidebar is displayed with
@@ -202,5 +186,57 @@ columnLayout <- function(...) {
     fluidRow(...)
   )
 }
+
+#' Layout UI elements vertically
+#' 
+#' Create a container that includes one or more rows of content (each element
+#' passed to the container will appear on it's own line in the UI)
+#' 
+#' @param ... Elements to include within the container
+#' 
+#' @export
+verticalLayout <- function(...) {
+  rows <- list(...)
+  container <- fluidContainer()
+  for (row in rows)
+    container <- tagAppendChild(container, fluidRow(row))
+  container
+}
+
+#' Layout UI elements horizontally
+#' 
+#' Create a container that includes several elements laid out side-by-side.
+#' 
+#' @param ... Elements to include within the container
+#' 
+#' @details To force elements to the left or right of the container you can 
+#' use the \code{\link{pullLeft}} and \code{\link{pullRight}} functions.
+#' 
+#' @export
+horizontalLayout <- function(...) {
+  rowDiv <- fluidRow()
+  for (element in elements)
+    rowDiv <- tagAppendChild(rowDiv, element)
+  fluidContainer(rowDiv)
+}
+
+#' Pull elements left or right
+#' 
+#' Pull an element to the left or right side of a \code{\link{horizontalLayout}}.
+#' 
+#' @param element Element to pull left or right
+#' 
+#' @export
+pullLeft <- function(element) {
+  element$attribs$class <- paste(element$attribs$class, "pull-left")
+}
+
+#' @rdname pullLeft
+#' @export
+pullRight <- function(element) {
+  element$attribs$class <- paste(element$attribs$class, "pull-right")
+}
+
+
 
 

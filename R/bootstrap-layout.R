@@ -82,7 +82,8 @@ fixedRow <- function(...) {
 #' @export
 column <- function(width, ..., offset = 0) {
   
-  # TODO: validate that the columns width is from 1 to 12
+  if (!is.integer(width) || (width < 1) || (width > 12))
+    stop("column width must be between 1 and 12")
   
   colClass <- paste("span", width, sep="")
   if (offset > 0)
@@ -151,9 +152,10 @@ titlePanel <- function(title, windowTitle=title) {
 sidebarLayout <- function(sidebarPanel,
                           mainPanel,
                           position = c("left", "right")) {
-   
-  # TODO: validate that sidebarPanel and mainPanel were created by
-  # their respective functions (i.e. have the correct span)
+  
+  # validate that inputs were created by their respective functions
+  validateSpan(sidebarPanel, "sidebarPanel", 4)
+  validateSpan(mainPanel, "mainPanel", 8)
   
   # determine the order 
   position <- match.arg(position)
@@ -180,10 +182,14 @@ sidebarLayout <- function(sidebarPanel,
 #' @export
 columnLayout <- function(...) {
   
-  # TODO: validate that all of the columns have a spanX in their class
+  # get the columns and validate that they all have explicit widths
+  columns <- list(...)
+  for (column in columns)
+    validateSpan(column, "column")
   
+  # create the layout
   fluidContainer(
-    fluidRow(...)
+    fluidRow(columns)
   )
 }
 
@@ -237,6 +243,26 @@ pullRight <- function(element) {
   element$attribs$class <- paste(element$attribs$class, "pull-right")
 }
 
+
+# Helper function to test whether an element has a span class
+validateSpan <- function(element, name, width = NA) {
+  
+  if (!is.list(element) || 
+      is.null(element$attribs) || 
+      is.null(element$attribs$class)) {
+    stop(name, " does not have a valid column span", call. = FALSE)
+  } 
+  else {
+    test <- paste("span", ifelse(is.na(width), "", width), sep="")
+    if (!grepl(test, element$attribs$class)) {
+      msg <- paste(name, "does not have a valid column span")
+      if (!is.na(width)) {
+        msg <- paste(msg, " (it must be span", width, ")", sep = "")
+        stop(msg, call. = FALSE)
+      }
+    }
+  }
+}
 
 
 

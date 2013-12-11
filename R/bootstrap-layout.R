@@ -258,7 +258,7 @@ sidebarLayout <- function(sidebarPanel,
 #' 
 #' @export
 columnLayout <- function(...) {
-  fluidRow(columns)
+  fluidRow(...)
 }
 
 #' Layout UI elements vertically

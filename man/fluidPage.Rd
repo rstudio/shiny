@@ -5,7 +5,7 @@
 \usage{
   fluidPage(..., head = list())
 
-  fluidRow(...)
+  fluidRow(..., class = NULL)
 }
 \arguments{
   \item{...}{Elements to include within the page}
@@ -14,6 +14,8 @@
   head of the document (for example, addition of required
   Javascript or CSS resources via \code{tags$script} or
   \code{tags$style})}
+
+  \item{class}{Optional css class to attach to the row}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

@@ -45,10 +45,12 @@ fluidPage <- function(..., head = list()) {
                 
 }
 
+#' @param class Optional css class to attach to the row
+#' 
 #' @rdname fluidPage
 #' @export
-fluidRow <- function(...) {
-  div(class = "row-fluid", ...)
+fluidRow <- function(..., class = NULL) {
+  div(class = paste("row-fluid", class), ...)
 }
 
 #' Create a page with a fixed layout
@@ -96,10 +98,12 @@ fixedPage <- function(..., head = list()) {
                 head = head)
 }
 
+#' @param class Optional css class to attach to the row
+#' 
 #' @rdname fixedPage
 #' @export
-fixedRow <- function(...) {
-  div(class = "row", ...)
+fixedRow <- function(..., class = NULL) {
+  div(class = paste("row", class), ...)
 }
 
 
@@ -254,13 +258,6 @@ sidebarLayout <- function(sidebarPanel,
 #' 
 #' @export
 columnLayout <- function(...) {
-  
-  # get the columns and validate that they all have explicit widths
-  columns <- list(...)
-  for (column in columns)
-    validateSpan(column, "column")
-  
-  # create the layout
   fluidRow(columns)
 }
 

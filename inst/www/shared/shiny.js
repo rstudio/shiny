@@ -861,6 +861,10 @@
       this.config = message;
     });
 
+    addCustomMessageHandler('reactlog', function(message) {
+       # TODO: add reactive log handling here
+    });
+
   }).call(ShinyApp.prototype);
 
 

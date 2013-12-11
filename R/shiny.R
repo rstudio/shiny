@@ -50,10 +50,11 @@ ShinySession <- setRefClass(
     closed = 'logical',
     session = 'environment',      # Object for the server app to access session stuff
     .workerId = 'character',
-    singletons = 'character'  # Tracks singleton HTML fragments sent to the page
+    singletons = 'character', # Tracks singleton HTML fragments sent to the page
+    .showcase = 'logical'     # Whether or not the session is in showcase app mode
   ),
   methods = list(
-    initialize = function(websocket, workerId) {
+    initialize = function(websocket, workerId, showcase = FALSE) {
       .websocket <<- websocket
       .workerId <<- workerId
       .invalidatedOutputValues <<- Map$new()
@@ -61,6 +62,7 @@ ShinySession <- setRefClass(
       .inputMessageQueue <<- list()
       .progressKeys <<- character(0)
       closed <<- FALSE
+      .showcase <<- showcase
       # TODO: Put file upload context in user/app-specific dir if possible
       .fileUploadContext <<- FileUploadContext$new()
 
@@ -93,6 +95,7 @@ ShinySession <- setRefClass(
       session$onFlush           <<- .self$onFlush
       session$onFlushed         <<- .self$onFlushed
       session$isClosed          <<- .self$isClosed
+      session$isShowcase        <<- .self$isShowcase
       session$input             <<- .self$input
       session$output            <<- .self$output
       session$.impl             <<- .self
@@ -137,6 +140,9 @@ ShinySession <- setRefClass(
     },
     isClosed = function() {
       return(closed)
+    },
+    isShowcase = function () {
+      return(.showcase)
     },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
@@ -1190,10 +1196,12 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
         ws$close()
       }
 
-      shinysession <- ShinySession$new(ws, workerId)
+      shinysession <- ShinySession$new(ws, workerId, showcase)
       appsByToken$set(shinysession$token, shinysession)
       
       ws$onMessage(function(binary, msg) {
+        .beginSessionContext(shinysession)
+        on.exit(.endSessionContext(), add = TRUE)
         
         # To ease transition from websockets-based code. Should remove once we're stable.
         if (is.character(msg))

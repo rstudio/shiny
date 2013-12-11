@@ -57,48 +57,45 @@ renderReactLog <- function() {
 .graphAppend <- function(logEntry) {
   if (isTRUE(getOption('shiny.reactlog', FALSE)))
     .graphEnv$log <- c(.graphEnv$log, list(logEntry))
-}
-
-.graphDependsOn <- function(id, label) {
-  if (isTRUE(getOption('shiny.reactlog', FALSE)))
-    .graphAppend(list(action='dep', id=id, dependsOn=label))
-}
-
-.graphDependsOnId <- function(id, dependee) {
-  if (isTRUE(getOption('shiny.reactlog', FALSE)))
-    .graphAppend(list(action='depId', id=id, dependsOn=dependee))
-}
-
-.graphCreateContext <- function(id, label, type, prevId) {
-  if (isTRUE(getOption('shiny.reactlog', FALSE)))
-    .graphAppend(list(
-      action='ctx', id=id, label=paste(label, collapse='\n'), type=type, prevId=prevId
-    ))
-}
-
-.graphEnterContext <- function(id) {
-  if (isTRUE(getOption('shiny.reactlog', FALSE)))
-    .graphAppend(list(action='enter', id=id))
-}
-
-.graphExitContext <- function(id) {
-  if (isTRUE(getOption('shiny.reactlog', FALSE)))
-    .graphAppend(list(action='exit', id=id))
-}
-
-.graphValueChange <- function(label, value) {
-  if (isTRUE(getOption('shiny.reactlog', FALSE))) {
-    .graphAppend(list(
-      action = 'valueChange',
-      id = label,
-      value = paste(capture.output(str(value)), collapse='\n')
-    ))
+  session <- .getSessionContext()
+  if (!is.null(session) &&
+      session$isShowcase()) {
+    session$.sendCustomMessage("reactlog", logEntry)
   }
 }
 
+.graphDependsOn <- function(id, label) {
+  .graphAppend(list(action='dep', id=id, dependsOn=label))
+}
+
+.graphDependsOnId <- function(id, dependee) {
+  .graphAppend(list(action='depId', id=id, dependsOn=dependee))
+}
+
+.graphCreateContext <- function(id, label, type, prevId) {
+  .graphAppend(list(
+    action='ctx', id=id, label=paste(label, collapse='\n'), type=type, prevId=prevId
+  ))
+}
+
+.graphEnterContext <- function(id) {
+  .graphAppend(list(action='enter', id=id))
+}
+
+.graphExitContext <- function(id) {
+  .graphAppend(list(action='exit', id=id))
+}
+
+.graphValueChange <- function(label, value) {
+  .graphAppend(list(
+    action = 'valueChange',
+    id = label,
+    value = paste(capture.output(str(value)), collapse='\n')
+  ))
+}
+
 .graphInvalidate <- function(id) {
-  if (isTRUE(getOption('shiny.reactlog', FALSE)))
-    .graphAppend(list(action='invalidate', id=id))
+  .graphAppend(list(action='invalidate', id=id))
 }
 
 .graphEnv <- new.env()

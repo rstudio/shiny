@@ -41,6 +41,7 @@ Collate:
     'react.R'
     'reactives.R'
     'fileupload.R'
+    'sessioncontext.R'
     'shiny.R'
     'shinywrappers.R'
     'shinyui.R'

@@ -3,7 +3,8 @@
 \title{Create a page with a top level navigation bar}
 \usage{
   navbarPage(title, ..., head = list(), header = list(),
-    footer = list(), collapsable = FALSE, inverse = FALSE)
+    footer = list(), fluid = TRUE, collapsable = FALSE,
+    inverse = FALSE)
 }
 \arguments{
   \item{title}{The application title to display in the
@@ -22,6 +23,9 @@
 
   \item{footer}{Tag or list of tags to display as a common
   footer below all tabPanels}
+
+  \item{fluid}{\code{TRUE} to use a fluid layout.
+  \code{FALSE} to use a fixed layout.}
 
   \item{collapsable}{\code{TRUE} to automatically collapse
   the navigation elements into a menu when the width of the

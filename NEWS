@@ -44,6 +44,9 @@ column functions for creating arbitrary bootstrap grid layouts.
 * Added several layout functions for use with `fluidPage()`: `sidebarLayout()`, 
 `columnLayout()`, `verticalLayout()`, and `horizontalLayout()`.
 
+* Added `hr()` builder function for creating horizontal rules.
+
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

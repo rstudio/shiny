@@ -3,7 +3,7 @@
 \title{Create a tabset panel}
 \usage{
   tabsetPanel(..., id = NULL, selected = NULL,
-    tabsPosition = c("above", "below", "left", "right"))
+    position = c("above", "below", "left", "right"))
 }
 \arguments{
   \item{...}{\code{\link{tabPanel}} elements to include in
@@ -20,9 +20,9 @@
   selected by default. If \code{NULL}, the first tab will
   be selected.}
 
-  \item{tabsPosition}{The position of the tabs relative to
-  the content. Valid values are "above", "below", "left",
-  and "right" (defaults to "above")}
+  \item{position}{The position of the tabs relative to the
+  content. Valid values are "above", "below", "left", and
+  "right" (defaults to "above")}
 }
 \value{
   A tabset that can be passed to \code{\link{mainPanel}}

@@ -38,6 +38,12 @@ shiny 0.8.0.99
 * Added `position` paramter to `tabsetPanel()` to enable positioning of tabs
   above, below, left, or right of tab content
 
+* Added `fluidPage()` and `fixedPage()` functions as well as related row and
+column functions for creating arbitrary bootstrap grid layouts.
+
+* Added several layout functions for use with `fluidPage()`: `sidebarLayout()`, 
+`columnLayout()`, `verticalLayout()`, and `horizontalLayout()`.
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

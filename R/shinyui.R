@@ -48,7 +48,7 @@ strong <- function(...) tags$strong(...)
 em <- function(...) tags$em(...)
 
 #' @export
-hr <- function(..) tags$hr(...)
+hr <- function(...) tags$hr(...)
 
 #' Include Content From a File
 #' 

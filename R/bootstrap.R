@@ -141,6 +141,8 @@ pageWithSidebar <- function(headerPanel,
 #' all tabPanels.
 #' @param footer Tag or list of tags to display as a common footer below
 #' all tabPanels
+#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use 
+#' a fixed layout.
 #' @param collapsable \code{TRUE} to automatically collapse the navigation 
 #'   elements into a menu when the width of the browser is less than 940 pixels 
 #'   (useful for viewing on smaller touchscreen device)
@@ -164,6 +166,7 @@ navbarPage <- function(title,
                        head = list(),
                        header = list(),
                        footer = list(),
+                       fluid = TRUE,
                        collapsable = FALSE, 
                        inverse = FALSE) {
   
@@ -212,16 +215,24 @@ navbarPage <- function(title,
   if (length(header) == 0)
     header <- HTML("&nbsp;")
   
+  # function to return plain or fluid class name
+  className <- function(name) {
+    if (fluid)
+      paste(name, "-fluid", sep="")
+    else
+      name
+  }
+  
   # build the page
   bootstrapPage(
     head = head,
     div(class=navbarClass,
       div(class="navbar-inner", containerDiv)
     ),
-    div(class="container-fluid", 
-      div(class="row-fluid", header),
-      div(class="row-fluid", tabset$content),
-      div(class="row-fluid", footer)
+    div(class=className("container"), 
+      div(class=className("row"), header),
+      div(class=className("row"), tabset$content),
+      div(class=className("row"), footer)
     )
   )
 }

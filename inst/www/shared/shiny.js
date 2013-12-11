@@ -400,6 +400,42 @@
     return list;
   }
 
+  // Returns an object indicating the element contain the given line and 
+  // column of text, and the offset into that element where the text was 
+  // found. 
+  //
+  // If the given line and column are not found, returns a null element and
+  // the number of lines found.
+  function findTextPoint(el, line, col) {
+    var newlines = 0;
+    for (childId in el.childNodes) {
+      var child = el.childNodes[childId];
+      // If this is a text node, count the number of newlines it contains.
+      if (child.nodeType === 3) {  // TEXT_NODE
+        var text = child.nodeValue;
+        var matches = text.match(/\n/g);
+        if (matches) {
+          if (newlines + matches.length >= line) {
+            // TODO: This is extremely wrong.
+            return { element: child, offset: col };
+          } else {
+            newlines += matches.length;
+          }
+        }
+      }
+      // If this is not a text node, descend recursively to see how many 
+      // lines it contains.
+      else if (child.nodeType === 1) { // ELEMENT_NODE
+        var ret = findTextPoint(child, line - newlines, col);
+        if (ret.element !== null)
+          return ret; 
+        else 
+          newlines += ret.offset;
+      }
+    }
+    return { element: null, offset: newlines };
+  }
+
 
   // =========================================================================
   // ShinyApp
@@ -862,7 +898,24 @@
     });
 
     addCustomMessageHandler('reactlog', function(message) {
-       # TODO: add reactive log handling here
+       console.log("reactlog: " + message.label + " " + message.action + " " + 
+                   message.id + " " + message.value + " " + message.srcref);
+       if (message.srcref) {
+          var el = document.getElementById("srcref_" + message.srcref);
+          if (!el) {
+             el = document.createElement("span");
+             el.id = "srcref_" + message.srcref;
+             var ref = message.srcref;
+             var code = document.getElementById("server-r-code"); 
+             var start = findTextPoint(code, ref[0] - 1, ref[4] - 1); 
+             var end = findTextPoint(code, ref[2] - 1, ref[5] - 1); 
+             var range = document.createRange();
+             range.setStart(start.element, start.offset);
+             range.setEnd(end.element, end.offset);
+             range.surroundContents(el);
+          }
+          $(el).effect("highlight");
+       }
     });
 
   }).call(ShinyApp.prototype);

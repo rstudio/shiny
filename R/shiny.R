@@ -166,7 +166,11 @@ ShinySession <- setRefClass(
             orig(name=name, shinysession=.self)
           }
         }
-
+        
+        srcref <- attr(label, "srcref")
+        label <- sprintf('output$%s <- %s', name, paste(label, collapse='\n'))
+        attr(label, "srcref") <- srcref
+        
         obs <- observe({
           
           value <- try(shinyCallingHandlers(func()), silent=FALSE)
@@ -183,7 +187,7 @@ ShinySession <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        }, suspended=.shouldSuspend(name), label=sprintf('output$%s <- %s', name, paste(label, collapse='\n')))
+        }, suspended=.shouldSuspend(name), label=label)
         
         obs$onInvalidate(function() {
           showProgress(name)
@@ -602,7 +606,9 @@ ShinySession <- setRefClass(
 
 #' @S3method $<- shinyoutput
 `$<-.shinyoutput` <- function(x, name, value) {
-  .subset2(x, 'impl')$defineOutput(name, value, deparse(substitute(value)))
+  label <- deparse(substitute(value))
+  attr(label, "srcref") <- attr(substitute(value)[[2]], "srcref")[[2]]
+  .subset2(x, 'impl')$defineOutput(name, value, label)
   return(invisible(x))
 }
 

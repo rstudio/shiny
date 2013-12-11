@@ -153,6 +153,7 @@ renderPage <- function(ui, connection, showcase=FALSE) {
 
   if (showcase) {
     writeLines(c('  <script src="shared/highlight/highlight.pack.js"></script>',
+                 '  <script src="shared/jquery-ui.js"></script>',
                  '  <link rel="stylesheet" type="text/css" href="shared/highlight/styles/tomorrow.css" />',
                  '  <script type="text/javascript">', 
                  '    $(document).ready(function() { ', 
@@ -174,11 +175,11 @@ renderPage <- function(ui, connection, showcase=FALSE) {
   if (showcase) {
     writeLines(c('<div class="container-fluid"><div class="row-fluid">', 
                  '<div class="span6"><h4>ui.R</h4>',
-                 '<pre class="shiny-code"><code>', 
+                 '<pre class="shiny-code"><code id="ui-r-code">', 
                  readLines(file.path.ci(getwd(), 'ui.R')), 
                  '</code></pre></div>',
                  '<div class="span6"><h4>server.R</h4>',
-                 '<pre class="shiny-code"><code>', 
+                 '<pre class="shiny-code"><code id="server-r-code">', 
                  readLines(file.path.ci(getwd(), 'server.R')), 
                  '</code></pre></div></div></div>'), 
                con = connection)

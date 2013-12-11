@@ -649,9 +649,9 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' }  
 #' @export
 makeReactiveBinding <- function(symbol, env = parent.frame()) {
-  if (exists(symbol, where = env)) {
-    initialValue <- get(symbol, pos = env)
-    do.call(rm, list(symbol, pos = env))
+  if (exists(symbol, where = env, inherits = FALSE)) {
+    initialValue <- get(symbol, pos = env, inherits = FALSE)
+    rm(list = symbol, pos = env, inherits = FALSE)
   }
   else
     initialValue <- NULL

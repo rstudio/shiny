@@ -2,7 +2,7 @@
 \alias{tabPanel}
 \title{Create a tab panel}
 \usage{
-  tabPanel(title, ..., value = NULL, condition = NULL)
+  tabPanel(title, ..., value = NULL)
 }
 \arguments{
   \item{title}{Display title for tab}
@@ -12,12 +12,7 @@
   \item{value}{The value that should be sent when
   \code{tabsetPanel} reports that this tab is selected. If
   omitted and \code{tabsetPanel} has an \code{id}, then the
-  title will be used.}
-
-  \item{condition}{A JavaScript expression that will be
-  evaluated repeatedly to determine whether the tab should
-  be displayed. See \code{\link{conditionalPanel}} for
-  additional details on conditional expressions.}
+  title will be used..}
 }
 \value{
   A tab that can be passed to \code{\link{tabsetPanel}}

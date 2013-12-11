@@ -127,41 +127,6 @@ pageWithSidebar <- function(headerPanel,
   )
 }
 
-#' Create a panel with a sidebar
-#' 
-#' Create a panel that includes a sidebar for input controls
-#' and a main area for output
-#' 
-#' @param sidebarPanel The \link{sidebarPanel} containing input controls
-#' @param mainPanel The \link{mainPanel} containing outputs
-#' @return The newly created panel.
-#' 
-#' @examples
-#' panelWithSidebar(
-#'   
-#'   # Sidebar with a slider input
-#'   sidebarPanel(
-#'     sliderInput("obs", 
-#'                 "Number of observations:", 
-#'                 min = 0, 
-#'                 max = 1000, 
-#'                 value = 500)
-#'   ),
-#'   
-#'   # Show a plot of the generated distribution
-#'   mainPanel(
-#'     plotOutput("distPlot")
-#'   )
-#' )
-#'
-#' @export
-panelWithSidebar <- function(sidebarPanel, mainPanel) {
-  div(class="row-fluid", 
-      sidebarPanel, 
-      mainPanel
-  )
-}
-
 #' Create a page with a top level navigation bar
 #' 
 #' Create a page that contains a top level navigation bar that can be used to
@@ -169,14 +134,21 @@ panelWithSidebar <- function(sidebarPanel, mainPanel) {
 #' 
 #' @param title The application title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
+#' @param head Tag or list of tags to be inserted into the head of the document
+#' (for example, addition of required Javascript or CSS resources via
+#' \code{tags$script} or \code{tags$style})
+#' @param header Tag of list of tags to display as a common header above
+#' all tabPanels.
+#' @param footer Tag or list of tags to display as a common footer below
+#' all tabPanels
+#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use 
+#' a fixed layout.
 #' @param collapsable \code{TRUE} to automatically collapse the navigation 
 #'   elements into a menu when the width of the browser is less than 940 pixels 
 #'   (useful for viewing on smaller touchscreen device)
 #' @param inverse \code{TRUE} to use a dark background and light text for the
 #'   navigation bar
-#' @param head Tag or list of tags to be inserted into the head of the document
-#' (for example, addition of required Javascript or CSS resources via
-#' \code{tags$script} or \code{tags$style})
+
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -191,9 +163,12 @@ panelWithSidebar <- function(sidebarPanel, mainPanel) {
 #' @export
 navbarPage <- function(title, 
                        ..., 
+                       head = list(),
+                       header = list(),
+                       footer = list(),
+                       fluid = TRUE,
                        collapsable = FALSE, 
-                       inverse = FALSE, 
-                       head = list()) {
+                       inverse = FALSE) {
   
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title 
@@ -236,15 +211,29 @@ navbarPage <- function(title,
                         tabset$navList)
   }
 
+  # create a default header if necessary
+  if (length(header) == 0)
+    header <- HTML("&nbsp;")
+  
+  # function to return plain or fluid class name
+  className <- function(name) {
+    if (fluid)
+      paste(name, "-fluid", sep="")
+    else
+      name
+  }
+  
   # build the page
   bootstrapPage(
     head = head,
     div(class=navbarClass,
       div(class="navbar-inner", containerDiv)
     ),
-    div(class="container-fluid", 
-      div(class="row-fluid", HTML("&nbsp;")),
-      tabset$content)
+    div(class=className("container"), 
+      div(class=className("row"), header),
+      div(class=className("row"), tabset$content),
+      div(class=className("row"), footer)
+    )
   )
 }
 
@@ -1073,11 +1062,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #' @param ... UI elements to include within the tab
 #' @param value The value that should be sent when \code{tabsetPanel} reports 
 #'   that this tab is selected. If omitted and \code{tabsetPanel} has an 
-#'   \code{id}, then the title will be used.
-#' @param condition A JavaScript expression that will be evaluated repeatedly to
-#'   determine whether the tab should be displayed. See
-#'   \code{\link{conditionalPanel}} for additional details on conditional 
-#'   expressions.
+#'   \code{id}, then the title will be used..
 #' @return A tab that can be passed to \code{\link{tabsetPanel}}
 #'
 #' @seealso \code{\link{tabsetPanel}}
@@ -1093,11 +1078,10 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #'   )
 #' )
 #' @export
-tabPanel <- function(title, ..., value = NULL, condition = NULL) {
+tabPanel <- function(title, ..., value = NULL) {
   divTag <- div(class="tab-pane", 
                 title=title, 
                 `data-value`=value,
-                `data-display-if` = condition,
                 ...)
 }
 
@@ -1114,7 +1098,7 @@ tabPanel <- function(title, ..., value = NULL, condition = NULL) {
 #' @param selected The \code{value} (or, if none was supplied, the \code{title})
 #'   of the tab that should be selected by default. If \code{NULL}, the first
 #'   tab will be selected.
-#' @param tabsPosition The position of the tabs relative to the content. Valid
+#' @param position The position of the tabs relative to the content. Valid
 #' values are "above", "below", "left", and "right" (defaults to "above")
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
@@ -1135,24 +1119,24 @@ tabPanel <- function(title, ..., value = NULL, condition = NULL) {
 tabsetPanel <- function(..., 
                         id = NULL, 
                         selected = NULL, 
-                        tabsPosition = c("above", "below", "left", "right")) { 
+                        position = c("above", "below", "left", "right")) { 
   
   # build the tabset
   tabs <- list(...)
   tabset <- buildTabset(tabs, TRUE, id, selected)
   
   # position the nav list and content appropriately
-  tabsPosition <- match.arg(tabsPosition)
-  if (tabsPosition %in% c("above", "left", "right")) {
+  position <- match.arg(position)
+  if (position %in% c("above", "left", "right")) {
     first <- tabset$navList
     second <- tabset$content
-  } else if (tabsPosition %in% c("below")) {
+  } else if (position %in% c("below")) {
     first <- tabset$content
     second <- tabset$navList
   }
   
   # create the tab div
-  tabDiv <- tags$div(class = paste("tabbable tabs-", tabsPosition, sep=""), 
+  tabDiv <- tags$div(class = paste("tabbable tabs-", position, sep=""), 
                      first, 
                      second)
 }
@@ -1183,10 +1167,6 @@ buildTabset <- function(tabs, navTabs, id = NULL, selected = NULL) {
                             `data-toggle` = "tab", 
                             `data-value` = tabValue,
                             divTag$attribs$title))
-    
-    # add condition if appropriate
-    if (!is.null(divTag$attribs$`data-display-if`))
-      liTag$attribs$`data-display-if` <- divTag$attribs$`data-display-if`
     
     if (is.null(tabValue)) {
       tabValue <- divTag$attribs$title

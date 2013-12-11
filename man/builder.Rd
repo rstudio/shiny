@@ -15,6 +15,7 @@
 \alias{img}
 \alias{strong}
 \alias{em}
+\alias{hr}
 \alias{tags}
 
 \usage{
@@ -34,6 +35,7 @@
   img(...)
   strong(...)
   em(...)
+  hr(...)
   
   tags
 }

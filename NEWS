@@ -34,6 +34,8 @@ shiny 0.8.0.99
 * Added `position` paramter to `tabsetPanel()` to enable positioning of tabs
   above, below, left, or right of tab content
 
+* Added `hr()` builder function for creating horizontal rules.
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

@@ -400,6 +400,31 @@
     return list;
   }
 
+  // Given a DOM node and a column (count of characters), walk recursively
+  // through the node's siblings counting characters until the character has
+  // been reached.
+  function findTextColPoint(node, col) {
+    var cols = 0;
+    if (node.nodeType === 3) {
+      if (node.nodeValue.length >= col) {
+        return { element: node, offset: col };
+      } else {
+        cols += node.nodeValue.length;
+      }
+    } else if (node.nodeType === 1 && node.firstChild) {
+      var ret = findTextColPoint(node.firstChild, col);
+      if (ret.element !== null) {
+        return ret;
+      } else {
+        cols += ret.offset;
+      }
+    }
+    if (node.nextSibling)
+      return findTextColPoint(node.nextSibling, col - cols);
+    else
+      return { element: null, offset: cols }
+  }
+
   // Returns an object indicating the element contain the given line and 
   // column of text, and the offset into that element where the text was 
   // found. 
@@ -416,9 +441,10 @@
         var match;
         while ((match = newlinere.exec(child.nodeValue)) !== null) {
           newlines++;
-          if (newlines === line) 
-            return { element: child, 
-                     offset: Math.min(match.index + col, child.nodeValue.length) };
+          // Found the desired line, now find the column.
+          if (newlines === line) {
+            return findTextColPoint(child, match.index + col + 1);
+          }
         }
       }
       // If this is not a text node, descend recursively to see how many 
@@ -896,8 +922,6 @@
     });
 
     addCustomMessageHandler('reactlog', function(message) {
-       console.log("reactlog: " + message.label + " " + message.action + " " + 
-                   message.id + " " + message.value + " " + message.srcref);
        if (message.srcref) {
           var el = document.getElementById("srcref_" + message.srcref);
           if (!el) {
@@ -912,7 +936,7 @@
              range.setEnd(end.element, end.offset);
              range.surroundContents(el);
           }
-          $(el).effect("highlight");
+          $(el).effect("highlight", null, 800);
        }
     });
 

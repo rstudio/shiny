@@ -89,6 +89,8 @@ span.jslider {
 
 .shiny-code {
   background-color: white;
+  max-height: 500px;
+  overflow: auto;
 }
 
 .shiny-code code {

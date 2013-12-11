@@ -607,7 +607,16 @@ ShinySession <- setRefClass(
 #' @S3method $<- shinyoutput
 `$<-.shinyoutput` <- function(x, name, value) {
   label <- deparse(substitute(value))
-  attr(label, "srcref") <- attr(substitute(value)[[2]], "srcref")[[2]]
+  # The value refers to the Shiny function, so its source refs point inside the
+  # Shiny package itself. To find the source refs of the user, we take apart
+  # the expression, and get a list of its source refs, then generate a new 
+  # source ref from the first and last expressions within.
+  srcrefs <- attr(substitute(value)[[2]], "srcref")
+  num_exprs <- length(srcrefs)
+  srcref <- c(srcrefs[[1]][1], srcrefs[[1]][2], 
+              srcrefs[[num_exprs]][3], srcrefs[[num_exprs]][4],
+              srcrefs[[1]][5], srcrefs[[num_exprs]][6])
+  attr(label, "srcref") <- srcref
   .subset2(x, 'impl')$defineOutput(name, value, label)
   return(invisible(x))
 }

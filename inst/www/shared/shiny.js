@@ -412,15 +412,13 @@
       var child = el.childNodes[childId];
       // If this is a text node, count the number of newlines it contains.
       if (child.nodeType === 3) {  // TEXT_NODE
-        var text = child.nodeValue;
-        var matches = text.match(/\n/g);
-        if (matches) {
-          if (newlines + matches.length >= line) {
-            // TODO: This is extremely wrong.
-            return { element: child, offset: col };
-          } else {
-            newlines += matches.length;
-          }
+        var newlinere = /\n/g;
+        var match;
+        while ((match = newlinere.exec(child.nodeValue)) !== null) {
+          newlines++;
+          if (newlines === line) 
+            return { element: child, 
+                     offset: Math.min(match.index + col, child.nodeValue.length) };
         }
       }
       // If this is not a text node, descend recursively to see how many 
@@ -907,8 +905,8 @@
              el.id = "srcref_" + message.srcref;
              var ref = message.srcref;
              var code = document.getElementById("server-r-code"); 
-             var start = findTextPoint(code, ref[0] - 1, ref[4] - 1); 
-             var end = findTextPoint(code, ref[2] - 1, ref[5] - 1); 
+             var start = findTextPoint(code, ref[0], ref[4]); 
+             var end = findTextPoint(code, ref[2], ref[5]); 
              var range = document.createRange();
              range.setStart(start.element, start.offset);
              range.setEnd(end.element, end.offset);

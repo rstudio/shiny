@@ -644,7 +644,7 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' a <- 10
 #' makeReactiveBinding("a")
 #' b <- reactive(a * -1)
-#' observe(print(b))
+#' observe(print(b()))
 #' a <- 20
 #' }  
 #' @export

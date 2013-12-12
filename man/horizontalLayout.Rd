@@ -11,10 +11,7 @@
   pullRight(...)
 }
 \arguments{
-  \item{...}{Elements to include within the container}
-
-  \item{...}{Element or list of elements to pull left or
-  right}
+  \item{...}{Elements or list of elements}
 }
 \description{
   Create a container that includes several elements laid

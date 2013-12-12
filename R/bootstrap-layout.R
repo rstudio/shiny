@@ -284,7 +284,7 @@ verticalLayout <- function(...) {
 #' 
 #' Create a container that includes several elements laid out side-by-side.
 #' 
-#' @param ... Elements to include within the container
+#' @param ... Elements or list of elements
 #' 
 #' @details To force elements to the left or right of the container you can 
 #' use the \code{\link{pullLeft}} and \code{\link{pullRight}} functions.
@@ -297,8 +297,6 @@ horizontalLayout <- function(...) {
 #' Pull elements left or right
 #' 
 #' Pull an element to the left or right side of a \code{\link{horizontalLayout}}.
-#' 
-#' @param ... Element or list of elements to pull left or right
 #' 
 #' @rdname horizontalLayout
 #' @export

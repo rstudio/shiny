@@ -9,9 +9,6 @@
 #' components in realtime to fill all available browser width.
 #' 
 #' @param ... Elements to include within the page
-#' @param head Tag or list of tags to be inserted into the head of the document 
-#'   (for example, addition of required Javascript or CSS resources via 
-#'   \code{tags$script} or \code{tags$style})
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -65,10 +62,8 @@
 #' 
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(..., head = list()) {
-  bootstrapPage(div(class = "container-fluid", ...),
-                head = head)
-                
+fluidPage <- function(...) {
+  bootstrapPage(div(class = "container-fluid", ...))
 }
 
 
@@ -89,9 +84,6 @@ fluidRow <- function(...) {
 #' displays respectively.
 #' 
 #' @param ... Elements to include within the page
-#' @param head Tag or list of tags to be inserted into the head of the document 
-#'   (for example, addition of required Javascript or CSS resources via 
-#'   \code{tags$script} or \code{tags$style})
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -121,9 +113,8 @@ fluidRow <- function(...) {
 #' 
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(..., head = list()) {
-  bootstrapPage(div(class = "container", ...),
-                head = head)
+fixedPage <- function(...) {
+  bootstrapPage(div(class = "container", ...))
 }
 
 #' @rdname fixedPage

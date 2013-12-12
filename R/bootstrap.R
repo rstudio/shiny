@@ -12,13 +12,10 @@
 #' \code{<div class="container-fluid">} wrapper to provide a little padding.
 #' 
 #' @param ... The contents of the document body.
-#' @param head Tag or list of tags to be inserted into the head of the document
-#' (for example, addition of required Javascript or CSS resources via
-#' \code{tags$script} or \code{tags$style})
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #' 
 #' @export
-bootstrapPage <- function(..., head = list()) {
+bootstrapPage <- function(...) {
   # required head tags for boostrap
   importBootstrap <- function(min = TRUE, responsive = TRUE) {
     
@@ -56,9 +53,6 @@ bootstrapPage <- function(..., head = list()) {
     # inject bootstrap requirements into head
     importBootstrap(),
     
-    # other head tags
-    tags$head(head),
-    
     # remainder of tags passed to the function
     list(...)
   )
@@ -66,7 +60,7 @@ bootstrapPage <- function(..., head = list()) {
 
 #' @rdname bootstrapPage
 #' @export
-basicPage <- function(..., head = list()) {
+basicPage <- function(...) {
   bootstrapPage(div(class="container-fluid", list(...)))
 }
 
@@ -78,9 +72,7 @@ basicPage <- function(..., head = list()) {
 #' @param headerPanel The \link{headerPanel} with the application title
 #' @param sidebarPanel The \link{sidebarPanel} containing input controls
 #' @param mainPanel The \link{mainPanel} containing outputs
-#' @param head Tag or list of tags to be inserted into the head of the document
-#' (for example, addition of required Javascript or CSS resources via
-#' \code{tags$script} or \code{tags$style})
+
 #' @return A UI defintion that can be passed to the \link{shinyUI} function
 #' 
 #' @examples
@@ -108,12 +100,10 @@ basicPage <- function(..., head = list()) {
 #' @export
 pageWithSidebar <- function(headerPanel, 
                             sidebarPanel, 
-                            mainPanel,
-                            head = list()) {
+                            mainPanel) {
   
   bootstrapPage(
     # basic application container divs
-    head = head,
     div(
       class="container-fluid", 
       div(class="row-fluid", 
@@ -134,9 +124,6 @@ pageWithSidebar <- function(headerPanel,
 #' 
 #' @param title The title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
-#' @param head Tag or list of tags to be inserted into the head of the document
-#' (for example, addition of required Javascript or CSS resources via
-#' \code{tags$script} or \code{tags$style})
 #' @param header Tag of list of tags to display as a common header above
 #' all tabPanels.
 #' @param footer Tag or list of tags to display as a common footer below
@@ -175,7 +162,6 @@ pageWithSidebar <- function(headerPanel,
 #' @export
 navbarPage <- function(title, 
                        ..., 
-                       head = list(),
                        header = list(),
                        footer = list(),
                        fluid = TRUE,
@@ -237,7 +223,6 @@ navbarPage <- function(title,
   
   # build the page
   bootstrapPage(
-    head = head,
     div(class=navbarClass,
       div(class="navbar-inner", containerDiv)
     ),

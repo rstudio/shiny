@@ -3,9 +3,8 @@
 \alias{navbarPage}
 \title{Create a page with a top level navigation bar}
 \usage{
-  navbarPage(title, ..., head = list(), header = list(),
-    footer = list(), fluid = TRUE, collapsable = FALSE,
-    inverse = FALSE)
+  navbarPage(title, ..., header = list(), footer = list(),
+    fluid = TRUE, collapsable = FALSE, inverse = FALSE)
 
   navbarMenu(title, ...)
 }
@@ -14,11 +13,6 @@
 
   \item{...}{\code{\link{tabPanel}} elements to include in
   the page}
-
-  \item{head}{Tag or list of tags to be inserted into the
-  head of the document (for example, addition of required
-  Javascript or CSS resources via \code{tags$script} or
-  \code{tags$style})}
 
   \item{header}{Tag of list of tags to display as a common
   header above all tabPanels.}

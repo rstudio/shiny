@@ -2,8 +2,7 @@
 \alias{pageWithSidebar}
 \title{Create a page with a sidebar}
 \usage{
-  pageWithSidebar(headerPanel, sidebarPanel, mainPanel,
-    head = list())
+  pageWithSidebar(headerPanel, sidebarPanel, mainPanel)
 }
 \arguments{
   \item{headerPanel}{The \link{headerPanel} with the
@@ -13,11 +12,6 @@
   input controls}
 
   \item{mainPanel}{The \link{mainPanel} containing outputs}
-
-  \item{head}{Tag or list of tags to be inserted into the
-  head of the document (for example, addition of required
-  Javascript or CSS resources via \code{tags$script} or
-  \code{tags$style})}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

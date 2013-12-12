@@ -3,17 +3,12 @@
 \alias{fixedRow}
 \title{Create a page with a fixed layout}
 \usage{
-  fixedPage(..., head = list())
+  fixedPage(...)
 
   fixedRow(...)
 }
 \arguments{
   \item{...}{Elements to include within the page}
-
-  \item{head}{Tag or list of tags to be inserted into the
-  head of the document (for example, addition of required
-  Javascript or CSS resources via \code{tags$script} or
-  \code{tags$style})}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

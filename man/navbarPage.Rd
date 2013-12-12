@@ -1,14 +1,16 @@
 \name{navbarPage}
+\alias{navbarMenu}
 \alias{navbarPage}
 \title{Create a page with a top level navigation bar}
 \usage{
   navbarPage(title, ..., head = list(), header = list(),
     footer = list(), fluid = TRUE, collapsable = FALSE,
     inverse = FALSE)
+
+  navbarMenu(title, ...)
 }
 \arguments{
-  \item{title}{The application title to display in the
-  navbar}
+  \item{title}{The title to display in the navbar}
 
   \item{...}{\code{\link{tabPanel}} elements to include in
   the page}
@@ -44,11 +46,24 @@
   that can be used to toggle a set of
   \code{\link{tabPanel}} elements.
 }
+\details{
+  The \code{navbarMenu} function can be used to create an
+  embedded menu within the navbar that in turns includes
+  additional tabPanels (see example below).
+}
 \examples{
 shinyUI(navbarPage("App Title",
   tabPanel("Plot"),
   tabPanel("Summary"),
   tabPanel("Table")
+))
+
+shinyUI(navbarPage("App Title",
+  tabPanel("Plot"),
+  navbarMenu("More",
+    tabPanel("Summary"),
+    tabPanel("Table")
+  )
 ))
 }
 \seealso{

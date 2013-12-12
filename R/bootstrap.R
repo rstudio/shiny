@@ -132,7 +132,7 @@ pageWithSidebar <- function(headerPanel,
 #' Create a page that contains a top level navigation bar that can be used to
 #' toggle a set of \code{\link{tabPanel}} elements.
 #' 
-#' @param title The application title to display in the navbar
+#' @param title The title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
 #' @param head Tag or list of tags to be inserted into the head of the document
 #' (for example, addition of required Javascript or CSS resources via
@@ -152,6 +152,10 @@ pageWithSidebar <- function(headerPanel,
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
+#' @details The \code{navbarMenu} function can be used to create an embedded
+#' menu within the navbar that in turns includes additional tabPanels 
+#' (see example below).   
+#'   
 #' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}}
 #'   
 #' @examples
@@ -159,6 +163,14 @@ pageWithSidebar <- function(headerPanel,
 #'   tabPanel("Plot"), 
 #'   tabPanel("Summary"), 
 #'   tabPanel("Table")
+#' ))
+#' 
+#' shinyUI(navbarPage("App Title",
+#'   tabPanel("Plot"), 
+#'   navbarMenu("More",
+#'     tabPanel("Summary"), 
+#'     tabPanel("Table")
+#'   )
 #' ))
 #' @export
 navbarPage <- function(title, 
@@ -180,7 +192,7 @@ navbarPage <- function(title,
   
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, FALSE)
+  tabset <- buildTabset(tabs, "nav")
   
   # built the container div dynamically to support optional collapsability
   if (collapsable) {
@@ -235,6 +247,13 @@ navbarPage <- function(title,
       div(class=className("row"), footer)
     )
   )
+}
+
+#' @rdname navbarPage
+#' @export
+navbarMenu <- function(title, ...) {
+  structure(list(title = title, tabs = list(...)), 
+            class = "shiny.navbarmenu")
 }
 
 #' Create a header panel
@@ -1122,7 +1141,7 @@ tabsetPanel <- function(...,
   
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, TRUE, id, selected)
+  tabset <- buildTabset(tabs, "nav nav-tabs", id, selected)
   
   # position the nav list and content appropriately
   position <- match.arg(position)
@@ -1140,11 +1159,11 @@ tabsetPanel <- function(...,
                      second)
 }
 
-buildTabset <- function(tabs, navTabs, id = NULL, selected = NULL) {
+
+buildTabset <- function(tabs, ulClass, id = NULL, selected = NULL) {
   
   # build tab nav list and tab content div
-  navListClass <- ifelse(navTabs, "nav nav-tabs", "nav")
-  tabNavList <- tags$ul(class = navListClass, id = id)
+  tabNavList <- tags$ul(class = ulClass, id = id)
   tabContent <- tags$div(class = "tab-content")
   firstTab <- TRUE
   tabsetId <- as.integer(stats::runif(1, 1, 10000))
@@ -1161,19 +1180,44 @@ buildTabset <- function(tabs, navTabs, id = NULL, selected = NULL) {
            "has a value. The value won't be sent without an id.")
     }
 
-    # create the li tag
-    liTag <- tags$li(tags$a(href=paste("#", thisId, sep=""),
-                            `data-toggle` = "tab", 
-                            `data-value` = tabValue,
-                            divTag$attribs$title))
+    # check for a navbarMenu and handle appropriately
+    if (inherits(divTag, "shiny.navbarmenu")) {
+      
+      # build the dropdown list element
+      liTag <- tags$li(class = "dropdown",
+        tags$a(href="#", class="dropdown-toggle", `data-toggle`="dropdown",
+          divTag$title,
+          tags$b(class="caret")
+        )
+      )
+      
+      # build the child tabset
+      tabset <- buildTabset(divTag$tabs, "dropdown-menu")
+      liTag <- tagAppendChild(liTag, tabset$navList)
+      
+      # don't add a standard tab content div, rather add the list of tab 
+      # content divs that are contained within the tabset 
+      divTag <- NULL
+      tabContent <- tagAppendChildren(tabContent, 
+                                      list = tabset$content$children)
+    }
+    # else it's a standard navbar item
+    else {
+      liTag <- tags$li(tags$a(href=paste("#", thisId, sep=""),
+                              `data-toggle` = "tab", 
+                              `data-value` = tabValue,
+                              divTag$attribs$title))
+    }
     
     if (is.null(tabValue)) {
       tabValue <- divTag$attribs$title
     }
 
-    # If appropriate, make this the selected tab
-    if ((firstTab && is.null(selected)) ||
-        (!is.null(selected) && identical(selected, tabValue))) {
+    # If appropriate, make this the selected tab (don't ever do initial
+    # selection of tabs that are within a navbarMenu)
+    if ((ulClass != "dropdown-menu") &&
+       ((firstTab && is.null(selected)) ||
+        (!is.null(selected) && identical(selected, tabValue)))) {
       liTag$attribs$class <- "active"
       divTag$attribs$class <- "tab-pane active"
       firstTab = FALSE

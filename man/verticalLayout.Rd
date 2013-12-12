@@ -16,4 +16,16 @@
   The \code{verticalLayout} function can only be used
   within a \code{\link{fluidPage}}.
 }
+\examples{
+shinyUI(fluidPage(
+  verticalLayout(
+    a(href="http://example.com/link1", "Link One"),
+    a(href="http://example.com/link2", "Link Two"),
+    a(href="http://example.com/link3", "Link Three")
+  )
+))
+}
+\seealso{
+  \code{\link{fluidPage}}
+}
 

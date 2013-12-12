@@ -25,4 +25,14 @@
   you can use the \code{\link{pullLeft}} and
   \code{\link{pullRight}} functions.
 }
+\examples{
+shinyUI(fluidPage(
+  horizontalLayout(
+    h3("Application Title"), pullRight(img(src="images/logo.png"))
+  )
+))
+}
+\seealso{
+  \code{\link{fluidPage}}
+}
 

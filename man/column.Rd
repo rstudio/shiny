@@ -23,4 +23,28 @@
   \code{\link{columnLayout}}, \code{\link{fluidRow}}, or
   \code{\link{fixedRow}}
 }
+\examples{
+columnLayout(
+  column(4,
+    sliderInput("obs", "Number of observations:",
+                min = 1, max = 1000, value = 500)
+  ),
+  column(8,
+    plotOutput("distPlot")
+  )
+)
+
+fluidRow(
+  column(width = 4,
+    "4"
+  ),
+  column(width = 3, offset = 2,
+    "3 offset 2"
+  )
+)
+}
+\seealso{
+  \code{\link{columnLayout}}, \code{\link{fluidRow}},
+  \code{\link{fixedRow}}.
+}
 

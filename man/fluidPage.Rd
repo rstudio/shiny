@@ -20,9 +20,9 @@
   function.
 }
 \description{
-  Functions for creating fluid page layouts. A fluid layout
-  consists of rows which in turn include columns. Rows
-  exist for the purpose of making sure their elements
+  Functions for creating fluid page layouts. A fluid page
+  layout consists of rows which in turn include columns.
+  Rows exist for the purpose of making sure their elements
   appear on the same line (if the browser has adequate
   width). Columns exist for the purpose of defining how
   much horizontal space within a 12-unit wide grid it's
@@ -36,8 +36,7 @@
   \code{\link{column}} within it. As an alternative to
   low-level row and column functions you can also use
   higher-level layout functions like
-  \code{\link{sidebarLayout}},
-  \code{\link{horizontalLayout}}, or
+  \code{\link{sidebarLayout}} and
   \code{\link{columnLayout}}.
 }
 \note{
@@ -46,6 +45,29 @@
   fluid grid system} for additional details.
 }
 \examples{
+shinyUI(fluidPage(
+
+  # Application title
+  titlePanel("Hello Shiny!"),
+
+  sidebarLayout(
+
+    # Sidebar with a slider input
+    sidebarPanel(
+      sliderInput("obs",
+                  "Number of observations:",
+                  min = 0,
+                  max = 1000,
+                  value = 500)
+    ),
+
+    # Show a plot of the generated distribution
+    mainPanel(
+      plotOutput("distPlot")
+    )
+  )
+))
+
 shinyUI(fluidPage(
   fluidRow(
     column(width = 4,
@@ -58,6 +80,7 @@ shinyUI(fluidPage(
 ))
 }
 \seealso{
-  \code{\link{column}}
+  \code{\link{column}}, \code{\link{sidebarLayout}},
+  \code{\link{columnLayout}}
 }
 

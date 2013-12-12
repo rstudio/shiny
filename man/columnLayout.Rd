@@ -17,27 +17,26 @@
   a \code{\link{fluidPage}}.
 }
 \examples{
-shinyUI(fluidPage(
-
-  titlePanel("New Application"),
-
-  columnLayout(
-
-    # Sidebar with a slider input for number of observations
-    column(width = 4,
-      wellPanel(
-        sliderInput("obs",
-                    "Number of observations:",
-                    min = 1,
-                    max = 1000,
-                    value = 500)
-      )
-    ),
-
-    column(width = 8,
-      # Show a plot of the generated distribution
-      plotOutput("distPlot")
-    )
+columnLayout(
+  column(4,
+    sliderInput("obs", "Number of observations:",
+                min = 1, max = 1000, value = 500)
+  ),
+  column(8,
+    plotOutput("distPlot")
+  )
 )
+
+fluidRow(
+  column(width = 4,
+    "4"
+  ),
+  column(width = 3, offset = 2,
+    "3 offset 2"
+  )
+)
+}
+\seealso{
+  \code{\link{column}}, \code{\link{fluidRow}}.
 }
 

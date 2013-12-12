@@ -20,14 +20,15 @@
   function.
 }
 \description{
-  Functions for creating fixed page layouts. A fixed layout
-  consists of rows which in turn include columns. Rows
-  exist for the purpose of making sure their elements
+  Functions for creating fixed page layouts. A fixed page
+  layout consists of rows which in turn include columns.
+  Rows exist for the purpose of making sure their elements
   appear on the same line (if the browser has adequate
   width). Columns exist for the purpose of defining how
   much horizontal space within a 12-unit wide grid it's
   elements should occupy. Fixed pages limit their width to
-  940 pixels.
+  940 pixels on a typical display, and 724px or 1170px on
+  smaller and larger displays respectively.
 }
 \details{
   To create a fixed page use the \code{fixedPage} function

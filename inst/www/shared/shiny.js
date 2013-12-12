@@ -946,6 +946,7 @@
     });
 
     addCustomMessageHandler('reactlog', function(message) {
+      // console.log("reactlog action " + message.action + " id " + message.id);
       if (message.srcref) {
         var doc = codeWindow.document;
         var el = doc.getElementById("srcref_" + message.srcref);
@@ -957,8 +958,22 @@
           var start = findTextPoint(code, ref[0], ref[4]); 
           var end = findTextPoint(code, ref[2], ref[5]); 
           var range = doc.createRange();
-          range.setStart(start.element, start.offset);
-          range.setEnd(end.element, end.offset);
+          // If the text points are inside a <SPAN>, we won't be able to 
+          // surround them without breaking apart SPANs to keep the DOM tree
+          // intact. Just move the selection points to encompass the contents
+          // of the SPANs. 
+          if (start.element.parentNode.nodeName === "SPAN" &&
+              start.element !== end.element) {
+            range.setStartBefore(start.element.parentNode);
+          } else {
+            range.setStart(start.element, start.offset);
+          }
+          if (end.element.parentNode.nodeName === "SPAN" && 
+              start.element !== end.element) {
+            range.setEndAfter(end.element.parentNode);
+          } else {
+            range.setEnd(end.element, end.offset);
+          }
           range.surroundContents(el);
         }
         $(el).effect("highlight", null, 800);

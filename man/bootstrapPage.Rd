@@ -3,12 +3,16 @@
 \alias{bootstrapPage}
 \title{Create a Twitter Bootstrap page}
 \usage{
-  bootstrapPage(...)
+  bootstrapPage(..., responsive = TRUE)
 
   basicPage(...)
 }
 \arguments{
   \item{...}{The contents of the document body.}
+
+  \item{responsive}{\code{TRUE} to use responsive layout
+  (automatically adapt and resize page elements based on
+  the size of the viewing device)}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}
@@ -29,5 +33,12 @@
   \code{basicPage} is the same as \code{bootstrapPage},
   with an added \code{<div class="container-fluid">}
   wrapper to provide a little padding.
+}
+\note{
+  The \code{basicPage} function is deprecated, you should
+  use the \code{\link{fluidPage}} function instead.
+}
+\seealso{
+  \code{\link{fluidPage}}, \code{\link{fixedPage}}
 }
 

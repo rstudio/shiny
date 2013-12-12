@@ -3,12 +3,16 @@
 \alias{fixedRow}
 \title{Create a page with a fixed layout}
 \usage{
-  fixedPage(...)
+  fixedPage(..., responsive = TRUE)
 
   fixedRow(...)
 }
 \arguments{
   \item{...}{Elements to include within the page}
+
+  \item{responsive}{\code{TRUE} to use responsive layout
+  (automatically adapt and resize page elements based on
+  the size of the viewing device)}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

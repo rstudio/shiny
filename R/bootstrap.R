@@ -12,10 +12,18 @@
 #' \code{<div class="container-fluid">} wrapper to provide a little padding.
 #' 
 #' @param ... The contents of the document body.
+#' @param responsive \code{TRUE} to use responsive layout (automatically
+#' adapt and resize page elements based on the size of the viewing device)
+#' 
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #' 
+#' @note The \code{basicPage} function is deprecated, you should use the 
+#' \code{\link{fluidPage}} function instead.
+#' 
+#' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
+#' 
 #' @export
-bootstrapPage <- function(...) {
+bootstrapPage <- function(..., responsive = TRUE) {
   # required head tags for boostrap
   importBootstrap <- function(min = TRUE, responsive = TRUE) {
     
@@ -51,7 +59,7 @@ bootstrapPage <- function(...) {
   
   tagList(
     # inject bootstrap requirements into head
-    importBootstrap(),
+    importBootstrap(min = TRUE, responsive = responsive),
     
     # remainder of tags passed to the function
     list(...)
@@ -119,29 +127,30 @@ pageWithSidebar <- function(headerPanel,
 
 #' Create a page with a top level navigation bar
 #' 
-#' Create a page that contains a top level navigation bar that can be used to
+#' Create a page that contains a top level navigation bar that can be used to 
 #' toggle a set of \code{\link{tabPanel}} elements.
 #' 
 #' @param title The title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
-#' @param header Tag of list of tags to display as a common header above
-#' all tabPanels.
-#' @param footer Tag or list of tags to display as a common footer below
-#' all tabPanels
-#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use 
-#' a fixed layout.
+#' @param header Tag of list of tags to display as a common header above all
+#'   tabPanels.
+#' @param footer Tag or list of tags to display as a common footer below all
+#'   tabPanels
+#' @param inverse \code{TRUE} to use a dark background and light text for the 
+#'   navigation bar
 #' @param collapsable \code{TRUE} to automatically collapse the navigation 
 #'   elements into a menu when the width of the browser is less than 940 pixels 
 #'   (useful for viewing on smaller touchscreen device)
-#' @param inverse \code{TRUE} to use a dark background and light text for the
-#'   navigation bar
-
+#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
+#'   layout.
+#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
+#'   and resize page elements based on the size of the viewing device)
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
-#' @details The \code{navbarMenu} function can be used to create an embedded
-#' menu within the navbar that in turns includes additional tabPanels 
-#' (see example below).   
+#' @details The \code{navbarMenu} function can be used to create an embedded 
+#'   menu within the navbar that in turns includes additional tabPanels (see
+#'   example below).
 #'   
 #' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}}
 #'   
@@ -164,9 +173,10 @@ navbarPage <- function(title,
                        ..., 
                        header = NULL,
                        footer = NULL,
-                       fluid = TRUE,
+                       inverse = FALSE,
                        collapsable = FALSE, 
-                       inverse = FALSE) {
+                       fluid = TRUE,
+                       responsive = TRUE) {
   
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title 
@@ -231,6 +241,7 @@ navbarPage <- function(title,
   
   # build the page
   bootstrapPage(
+    responsive = responsive,
     div(class=navbarClass,
       div(class="navbar-inner", containerDiv)
     ),

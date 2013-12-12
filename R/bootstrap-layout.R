@@ -9,6 +9,8 @@
 #' components in realtime to fill all available browser width.
 #' 
 #' @param ... Elements to include within the page
+#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
+#'   and resize page elements based on the size of the viewing device)
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -62,8 +64,8 @@
 #' 
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(...) {
-  bootstrapPage(div(class = "container-fluid", ...))
+fluidPage <- function(..., responsive = TRUE) {
+  bootstrapPage(div(class = "container-fluid", ...), responsive = responsive)
 }
 
 
@@ -84,6 +86,8 @@ fluidRow <- function(...) {
 #' displays respectively.
 #' 
 #' @param ... Elements to include within the page
+#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
+#'   and resize page elements based on the size of the viewing device)
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -113,8 +117,8 @@ fluidRow <- function(...) {
 #' 
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(...) {
-  bootstrapPage(div(class = "container", ...))
+fixedPage <- function(..., responsive = TRUE) {
+  bootstrapPage(div(class = "container", ..., responsive = responsive))
 }
 
 #' @rdname fixedPage

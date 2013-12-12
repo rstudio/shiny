@@ -4,7 +4,8 @@
 \title{Create a page with a top level navigation bar}
 \usage{
   navbarPage(title, ..., header = NULL, footer = NULL,
-    fluid = TRUE, collapsable = FALSE, inverse = FALSE)
+    inverse = FALSE, collapsable = FALSE, fluid = TRUE,
+    responsive = TRUE)
 
   navbarMenu(title, ...)
 }
@@ -20,16 +21,20 @@
   \item{footer}{Tag or list of tags to display as a common
   footer below all tabPanels}
 
-  \item{fluid}{\code{TRUE} to use a fluid layout.
-  \code{FALSE} to use a fixed layout.}
+  \item{inverse}{\code{TRUE} to use a dark background and
+  light text for the navigation bar}
 
   \item{collapsable}{\code{TRUE} to automatically collapse
   the navigation elements into a menu when the width of the
   browser is less than 940 pixels (useful for viewing on
   smaller touchscreen device)}
 
-  \item{inverse}{\code{TRUE} to use a dark background and
-  light text for the navigation bar}
+  \item{fluid}{\code{TRUE} to use a fluid layout.
+  \code{FALSE} to use a fixed layout.}
+
+  \item{responsive}{\code{TRUE} to use responsive layout
+  (automatically adapt and resize page elements based on
+  the size of the viewing device)}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

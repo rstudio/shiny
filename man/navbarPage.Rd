@@ -5,7 +5,7 @@
 \usage{
   navbarPage(title, ..., header = NULL, footer = NULL,
     inverse = FALSE, collapsable = FALSE, fluid = TRUE,
-    responsive = TRUE)
+    responsive = TRUE, theme = NULL)
 
   navbarMenu(title, ...)
 }
@@ -35,6 +35,9 @@
   \item{responsive}{\code{TRUE} to use responsive layout
   (automatically adapt and resize page elements based on
   the size of the viewing device)}
+
+  \item{theme}{href to alternative Bootstrap css
+  stylesheet}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

@@ -3,7 +3,7 @@
 \alias{fluidRow}
 \title{Create a page with fluid layout}
 \usage{
-  fluidPage(..., responsive = TRUE)
+  fluidPage(..., responsive = TRUE, theme = NULL)
 
   fluidRow(...)
 }
@@ -13,6 +13,9 @@
   \item{responsive}{\code{TRUE} to use responsive layout
   (automatically adapt and resize page elements based on
   the size of the viewing device)}
+
+  \item{theme}{href to alternative Bootstrap css
+  stylesheet}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

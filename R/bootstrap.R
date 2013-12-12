@@ -14,6 +14,7 @@
 #' @param ... The contents of the document body.
 #' @param responsive \code{TRUE} to use responsive layout (automatically
 #' adapt and resize page elements based on the size of the viewing device)
+#' @param theme href to alternative bootstrap css stylesheet
 #' 
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #' 
@@ -23,7 +24,7 @@
 #' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
 #' 
 #' @export
-bootstrapPage <- function(..., responsive = TRUE) {
+bootstrapPage <- function(..., responsive = TRUE, theme = NULL) {
   # required head tags for boostrap
   importBootstrap <- function(min = TRUE, responsive = TRUE) {
     
@@ -34,11 +35,14 @@ bootstrapPage <- function(..., responsive = TRUE) {
     jsExt = ext(".js")
     bs <- "shared/bootstrap/"
     
+    # apply theme if requested
+    if (is.null(theme)) 
+      cssHref <- paste(bs, "css/bootstrap", cssExt, sep="")
+    else 
+      cssHref <- theme
+    
     result <- tags$head(
-      tags$link(rel="stylesheet", 
-                type="text/css", 
-                href=paste(bs, "css/bootstrap", cssExt, sep="")),
-      
+      tags$link(rel="stylesheet", type="text/css", href=cssHref),
       tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
     )
     
@@ -145,6 +149,7 @@ pageWithSidebar <- function(headerPanel,
 #'   layout.
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
+#' @param theme href to alternative bootstrap css stylesheet
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -176,7 +181,8 @@ navbarPage <- function(title,
                        inverse = FALSE,
                        collapsable = FALSE, 
                        fluid = TRUE,
-                       responsive = TRUE) {
+                       responsive = TRUE,
+                       theme = NULL) {
   
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title 
@@ -242,6 +248,7 @@ navbarPage <- function(title,
   # build the page
   bootstrapPage(
     responsive = responsive,
+    theme = theme,
     div(class=navbarClass,
       div(class="navbar-inner", containerDiv)
     ),

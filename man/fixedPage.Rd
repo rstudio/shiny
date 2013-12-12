@@ -3,7 +3,7 @@
 \alias{fixedRow}
 \title{Create a page with a fixed layout}
 \usage{
-  fixedPage(..., responsive = TRUE)
+  fixedPage(..., responsive = TRUE, theme = NULL)
 
   fixedRow(...)
 }
@@ -13,6 +13,9 @@
   \item{responsive}{\code{TRUE} to use responsive layout
   (automatically adapt and resize page elements based on
   the size of the viewing device)}
+
+  \item{theme}{href to alternative Bootstrap css
+  stylesheet}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

@@ -11,7 +11,8 @@
 #' @param ... Elements to include within the page
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
-#'   
+#' @param theme href to alternative bootstrap css stylesheet
+#' 
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
 #' @details To create a fluid page use the \code{fluidPage} function and include
@@ -64,8 +65,10 @@
 #' 
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(..., responsive = TRUE) {
-  bootstrapPage(div(class = "container-fluid", ...), responsive = responsive)
+fluidPage <- function(..., responsive = TRUE, theme = NULL) {
+  bootstrapPage(div(class = "container-fluid", ...), 
+                responsive = responsive,
+                theme = theme)
 }
 
 
@@ -88,6 +91,7 @@ fluidRow <- function(...) {
 #' @param ... Elements to include within the page
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
+#' @param theme href to alternative bootstrap css stylesheet
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -117,8 +121,10 @@ fluidRow <- function(...) {
 #' 
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(..., responsive = TRUE) {
-  bootstrapPage(div(class = "container", ..., responsive = responsive))
+fixedPage <- function(..., responsive = TRUE, theme = NULL) {
+  bootstrapPage(div(class = "container", ...), 
+                responsive = responsive,
+                theme = theme)
 }
 
 #' @rdname fixedPage

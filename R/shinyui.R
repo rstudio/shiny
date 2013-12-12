@@ -134,6 +134,91 @@ singleton <- function(x) {
   return(x)
 }
 
+# Writes the portion of the showcase header that lives inside the <HEAD> tag to
+# the connection.
+writeShowcaseHead <- function(connection) {
+  writeLines(c('  <script src="shared/highlight/highlight.pack.js"></script>',
+               '  <script src="shared/jquery-ui.js"></script>',
+               '  <script src="shared/showdown/src/showdown.js"></script>',
+               '  <link rel="stylesheet" type="text/css" href="shared/highlight/styles/tomorrow.css" />',
+               '  <script type="text/javascript">', 
+               '    $(document).ready(function() { ', 
+               '      $("pre code").each(function(i, e) { hljs.highlightBlock(e) });'),
+             con = connection)
+  mdfile <- file.path.ci(getwd(), 'Readme.md')
+  if (file.exists(mdfile)) {
+    writeLines(c('      document.getElementById("readme-md").innerHTML = ',
+                 '         (new Showdown.converter()).makeHtml('), 
+               con = connection)
+    # Read lines from the Markdown file, join them to a single string separated
+    # by literal \n (for JavaScript), escape quotes, and emit to a JavaScript
+    # string literal. 
+    writeLines(paste('"', do.call(paste, as.list(c(gsub('"', '\"', readLines(mdfile)), sep = "\\n"))),
+                     '");', sep = ""), con = connection)
+  }
+  writeLines(c('});', 
+               '</script>'), con = connection)
+}
+
+# Writes the showcase preamble (the UI drawn above the application to be 
+# showcased) to the connection.
+writeShowcasePreamble <- function(connection) {
+  writeLines(c('<div class="container-fluid">', 
+               '<div class="row-fluid"><div class="span8">'), 
+             con = connection)
+  descfile <- file.path.ci(getwd(), 'DESCRIPTION')
+  if (file.exists(descfile)) {
+    desc <- read.dcf(descfile)
+    cols <- colnames(desc)
+    if ("Title" %in% cols) {
+      writeLines(paste('<h2><small>', desc[1,"Title"], 
+                       sep = ""), con = connection)
+      if ("Author" %in% cols) {
+        writeLines('by', con = connection)
+        if ("AuthorUrl" %in% cols) {
+          writeLines(paste('<a href="', desc[1,"AuthorUrl"], '">', 
+                           desc[1,"Author"], '</a>', sep = ''), 
+                     con = connection)
+        } else {
+          writeLines(desc[1,"Author"], con = connection)
+        }
+        if ("AuthorEmail" %in% cols) {
+          writeLines(paste('(<a href="mailto:', desc[1,"AuthorEmail"], '">', 
+                           desc[1,"AuthorEmail"], '</a>', sep = ''), 
+                     con = connection)
+        }
+      }
+      writeLines('</small></h2>', con = connection)
+    }
+  } else {
+    writeLines('<h2><small>Shiny Application</small></h2>', con = connection)
+  }
+  writeLines(c('</div><div class="span4 showcase-code-link">',
+               '<button type="button" class="btn btn-default btn-lg"',
+               'onclick="javascript:Shiny.popOutCode()">show code',
+               '<span class="glyphicon glyphicon-new-window"></span></button>',
+               '</div></div></div>'),
+             con = connection)
+}
+
+# Writes the showcase application information (readme and code) to the given
+# connection.
+writeShowcaseAppInfo <- function(connection) {
+  writeLines(c('<div class="container-fluid shiny-code-container">',
+               '<div class="row-fluid" id="readme-md"></div>',
+               '<div class="row-fluid"><h3>Code</h3></div>',
+               '<div class="row-fluid">', 
+               '<div class="span6"><h4>ui.R</h4>',
+               '<pre class="shiny-code"><code id="ui-r-code">', 
+               readLines(file.path.ci(getwd(), 'ui.R')), 
+               '</code></pre></div>',
+               '<div class="span6"><h4>server.R</h4>',
+               '<pre class="shiny-code"><code id="server-r-code">', 
+               readLines(file.path.ci(getwd(), 'server.R')), 
+               '</code></pre></div></div></div>'), 
+             con = connection)
+}
+  
 renderPage <- function(ui, connection, showcase=FALSE) {
   
   result <- renderTags(ui)
@@ -150,91 +235,23 @@ renderPage <- function(ui, connection, showcase=FALSE) {
                        paste(result$singletons, collapse = ',')
                )),
               con = connection)
-
   if (showcase) {
-    writeLines(c('  <script src="shared/highlight/highlight.pack.js"></script>',
-                 '  <script src="shared/jquery-ui.js"></script>',
-                 '  <script src="shared/showdown/src/showdown.js"></script>',
-                 '  <link rel="stylesheet" type="text/css" href="shared/highlight/styles/tomorrow.css" />',
-                 '  <script type="text/javascript">', 
-                 '    $(document).ready(function() { ', 
-                 '      $("pre code").each(function(i, e) { hljs.highlightBlock(e) });'),
-                con = connection)
-    mdfile <- file.path.ci(getwd(), 'Readme.md')
-    if (file.exists(mdfile)) {
-      writeLines(c('      document.getElementById("readme-md").innerHTML = ',
-                   '         (new Showdown.converter()).makeHtml('), 
-                 con = connection)
-      writeLines(paste('"', do.call(paste, as.list(c(gsub('"', '\"', readLines(mdfile)), sep = "\\n"))),
-                       '");', sep = ""), con = connection)
-    }
-    writeLines(c('});', 
-                 '</script>'), con = connection)
-      
+    writeShowcaseHead(connection)
   }
   writeLines(c(result$head,
                '</head>',
                '<body>',
                recursive=TRUE),
              con = connection)
-
-  
   if (showcase) {
-    writeLines(c('<div class="container-fluid">', 
-                 '<div class="row-fluid"><div class="span8">'), 
-               con = connection)
-    descfile <- file.path.ci(getwd(), 'DESCRIPTION')
-    if (file.exists(descfile)) {
-      desc <- read.dcf(descfile)
-      cols <- colnames(desc)
-      if ("Title" %in% cols) {
-        writeLines(paste('<h2><small>', desc[1,"Title"], 
-                         sep = ""), con = connection)
-        if ("Author" %in% cols) {
-          writeLines('by', con = connection)
-          if ("AuthorUrl" %in% cols) {
-            writeLines(paste('<a href="', desc[1,"AuthorUrl"], '">', 
-                             desc[1,"Author"], '</a>', sep = ''), 
-                       con = connection)
-          } else {
-            writeLines(desc[1,"Author"], con = connection)
-          }
-          if ("AuthorEmail" %in% cols) {
-            writeLines(paste('(<a href="mailto:', desc[1,"AuthorEmail"], '">', 
-                             desc[1,"AuthorEmail"], '</a>', sep = ''), 
-                       con = connection)
-          }
-        }
-        writeLines('</small></h2>', con = connection)
-      }
-    } else {
-      writeLines('<h2><small>Shiny Application</small></h2>', con = connection)
-    }
-    writeLines(c('</div><div class="span4 showcase-code-link">',
-                 '<button type="button" class="btn btn-default btn-lg"',
-                 'onclick="javascript:Shiny.popOutCode()">show code',
-                 '<span class="glyphicon glyphicon-new-window"></span></button>',
-                 '</div></div></div>'),
-               con = connection)
+    writeShowcasePreamble(connection)
   }
   
   # write UI html to connection
   writeLines(result$html, con = connection)
   
   if (showcase) {
-    writeLines(c('<div class="container-fluid shiny-code-container">',
-                 '<div class="row-fluid" id="readme-md"></div>',
-                 '<div class="row-fluid"><h3>Code</h3></div>',
-                 '<div class="row-fluid">', 
-                 '<div class="span6"><h4>ui.R</h4>',
-                 '<pre class="shiny-code"><code id="ui-r-code">', 
-                 readLines(file.path.ci(getwd(), 'ui.R')), 
-                 '</code></pre></div>',
-                 '<div class="span6"><h4>server.R</h4>',
-                 '<pre class="shiny-code"><code id="server-r-code">', 
-                 readLines(file.path.ci(getwd(), 'server.R')), 
-                 '</code></pre></div></div></div>'), 
-               con = connection)
+    writeShowcaseAppInfo(connection)
   }
   
   # write end document

@@ -154,13 +154,23 @@ renderPage <- function(ui, connection, showcase=FALSE) {
   if (showcase) {
     writeLines(c('  <script src="shared/highlight/highlight.pack.js"></script>',
                  '  <script src="shared/jquery-ui.js"></script>',
+                 '  <script src="shared/showdown/src/showdown.js"></script>',
                  '  <link rel="stylesheet" type="text/css" href="shared/highlight/styles/tomorrow.css" />',
                  '  <script type="text/javascript">', 
                  '    $(document).ready(function() { ', 
-                 '      $("pre code").each(function(i, e) {hljs.highlightBlock(e)});',
-                 '     });',
-                 '  </script>'), 
-               con = connection)
+                 '      $("pre code").each(function(i, e) { hljs.highlightBlock(e) });'),
+                con = connection)
+    mdfile <- file.path.ci(getwd(), 'Readme.md')
+    if (file.exists(mdfile)) {
+      writeLines(c('      document.getElementById("readme-md").innerHTML = ',
+                   '         (new Showdown.converter()).makeHtml('), 
+                 con = connection)
+      writeLines(paste('"', do.call(paste, as.list(c(gsub('"', '\"', readLines(mdfile)), sep = "\\n"))),
+                       '");', sep = ""), con = connection)
+    }
+    writeLines(c('});', 
+                 '</script>'), con = connection)
+      
   }
   writeLines(c(result$head,
                '</head>',
@@ -178,7 +188,7 @@ renderPage <- function(ui, connection, showcase=FALSE) {
       desc <- read.dcf(descfile)
       cols <- colnames(desc)
       if ("Title" %in% cols) {
-        writeLines(paste('<h1 class="showcase-header">', desc[1,"Title"], 
+        writeLines(paste('<h2><small>', desc[1,"Title"], 
                          sep = ""), con = connection)
         if ("Author" %in% cols) {
           writeLines('by', con = connection)
@@ -195,11 +205,15 @@ renderPage <- function(ui, connection, showcase=FALSE) {
                        con = connection)
           }
         }
-        writeLines('</h1>', con = connection)
+        writeLines('</small></h2>', con = connection)
       }
+    } else {
+      writeLines('<h2><small>Shiny Application</small></h2>', con = connection)
     }
     writeLines(c('</div><div class="span4 showcase-code-link">',
-                 '<a href="javascript:Shiny.popOutCode()">show code</a>',
+                 '<button type="button" class="btn btn-default btn-lg"',
+                 'onclick="javascript:Shiny.popOutCode()">show code',
+                 '<span class="glyphicon glyphicon-new-window"></span></button>',
                  '</div></div></div>'),
                con = connection)
   }
@@ -209,6 +223,7 @@ renderPage <- function(ui, connection, showcase=FALSE) {
   
   if (showcase) {
     writeLines(c('<div class="container-fluid shiny-code-container">',
+                 '<div class="row-fluid" id="readme-md"></div>',
                  '<div class="row-fluid"><h3>Code</h3></div>',
                  '<div class="row-fluid">', 
                  '<div class="span6"><h4>ui.R</h4>',

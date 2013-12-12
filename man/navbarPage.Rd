@@ -3,7 +3,7 @@
 \alias{navbarPage}
 \title{Create a page with a top level navigation bar}
 \usage{
-  navbarPage(title, ..., header = list(), footer = list(),
+  navbarPage(title, ..., header = NULL, footer = NULL,
     fluid = TRUE, collapsable = FALSE, inverse = FALSE)
 
   navbarMenu(title, ...)

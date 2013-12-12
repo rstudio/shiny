@@ -162,8 +162,8 @@ pageWithSidebar <- function(headerPanel,
 #' @export
 navbarPage <- function(title, 
                        ..., 
-                       header = list(),
-                       footer = list(),
+                       header = NULL,
+                       footer = NULL,
                        fluid = TRUE,
                        collapsable = FALSE, 
                        inverse = FALSE) {
@@ -221,16 +221,20 @@ navbarPage <- function(title,
       name
   }
   
+  # build the main tab content div
+  contentDiv <- div(class=className("container"))
+  if (!is.null(header))
+    contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), header))
+  contentDiv <- tagAppendChild(contentDiv, tabset$content)
+  if (!is.null(footer)) 
+    contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), footer))
+  
   # build the page
   bootstrapPage(
     div(class=navbarClass,
       div(class="navbar-inner", containerDiv)
     ),
-    div(class=className("container"), 
-      div(class=className("row"), header),
-      div(class=className("row"), tabset$content),
-      div(class=className("row"), footer)
-    )
+    contentDiv
   )
 }
 

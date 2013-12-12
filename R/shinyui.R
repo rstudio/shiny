@@ -163,7 +163,7 @@ writeShowcaseHead <- function(connection) {
 # Writes the showcase preamble (the UI drawn above the application to be 
 # showcased) to the connection.
 writeShowcasePreamble <- function(connection) {
-  writeLines(c('<div class="container-fluid">', 
+  writeLines(c('<div class="container-fluid showcase-container">', 
                '<div class="row-fluid"><div class="span8">'), 
              con = connection)
   descfile <- file.path.ci(getwd(), 'DESCRIPTION')
@@ -204,7 +204,7 @@ writeShowcasePreamble <- function(connection) {
 # Writes the showcase application information (readme and code) to the given
 # connection.
 writeShowcaseAppInfo <- function(connection) {
-  writeLines(c('<div class="container-fluid shiny-code-container">',
+  writeLines(c('<div class="container-fluid shiny-code-container showcase-container">',
                '<div class="row-fluid" id="readme-md"></div>',
                '<div class="row-fluid"><h3>Code</h3></div>',
                '<div class="row-fluid">', 

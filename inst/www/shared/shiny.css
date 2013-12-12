@@ -95,6 +95,16 @@ span.jslider {
   font-family: Menlo, Consolas, "Courier New", monospace;
 }
 
+.showcase-container {
+  background-color: #f0f0f0;
+  box-shadow: 0px 5px 5px #d0d0d0;
+}
+
+.shiny-code-container {
+  box-shadow: 0px -5px 5px #d0d0d0;
+  margin-top: 15px;
+}
+
 .shiny-code-container h3 {
   display: inline;
   margin-right: 15px;
@@ -108,4 +118,8 @@ span.jslider {
 .showcase-code-link {
   text-align: right;
   padding: 15px;
+}
+
+#readme-md {
+  margin-top: 15px;
 }

@@ -976,7 +976,7 @@
           }
           range.surroundContents(el);
         }
-        $(el).effect("highlight", null, 800);
+        $(el).effect("highlight", null, 1600);
       }
     });
 

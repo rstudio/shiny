@@ -21,7 +21,9 @@
 #' higher-level layout functions like \code{\link{sidebarLayout}}, 
 #' \code{\link{horizontalLayout}}, or \code{\link{columnLayout}}.
 #' 
-#' @note See the documentation on the bootstrap \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{fluid grid system} for additional details.
+#' @note See the documentation on the bootstrap
+#' \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{
+#' fluid grid system} for additional details.
 #' 
 #' @seealso \code{\link{column}}
 #' 
@@ -75,7 +77,9 @@ fluidRow <- function(..., class = NULL) {
 #' of higher-level layout functions like \code{sidebarLayout}, rather, all
 #' layout must be done with \code{fixedRow} and \code{column}.
 #' 
-#' @note See the documentation on the bootstrap \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{fixed grid system} for additional details.
+#' @note See the documentation on the bootstrap 
+#' \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{
+#' fixed grid system} for additional details.
 #' 
 #' @seealso \code{\link{column}}
 #' 

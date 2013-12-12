@@ -42,8 +42,8 @@
 }
 \note{
   See the documentation on the bootstrap
-  \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{fixed
-  grid system} for additional details.
+  \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{
+  fixed grid system} for additional details.
 }
 \examples{
 shinyUI(fixedPage(

@@ -44,8 +44,8 @@
 }
 \note{
   See the documentation on the bootstrap
-  \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{fluid
-  grid system} for additional details.
+  \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{
+  fluid grid system} for additional details.
 }
 \examples{
 shinyUI(fluidPage(

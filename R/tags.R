@@ -149,11 +149,10 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL, eol = "\n") {
   # write tag name
   textWriter(paste(indentText, "<", tag$name, sep=""))
   
-  # concatenate class attributes
+  # concatenate attributes
   attribs <- tag$attribs
-  classValue <- paste(attribs[names(attribs) == "class"], collapse=" ")
-  attribs <- c(list(class = classValue), attribs[names(attribs) != "class"])
-  
+  attribs <- lapply(split(attribs, names(attribs)), paste, collapse = " ")
+
   # write attributes
   for (attrib in names(attribs)) {
     attribValue <- attribs[[attrib]]

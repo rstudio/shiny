@@ -14,17 +14,36 @@
       document.getElementById("server-r-code-pre").appendChild(
         document.importNode(window.opener.document.getElementById("server-r-code"), true));
     });
+    window.addEventListener("unload", function() {
+      window.opener.Shiny.closePopOutCode();
+    });
   </script>
+  <style>
+    .tab-pane pre {
+      border: none;
+      background-color: white;
+    }
+    body {
+      margin-top: 15px;
+      background-color: #f0f0f0;
+    }
+    .nav-tabs {
+      padding-left: 10px;
+    }
+    ul.nav-tabs {
+      margin-bottom: 0px;
+    }
+  </style>
   <title>Shiny Application Code</title>
 </script>
 <body>
   <ul class="nav nav-tabs">
     <li><a href="#ui-r-code-tab" data-toggle="tab">ui.R</a>
-    <li><a href="#server-r-code-tab" data-toggle="tab">server.R</a>
+    <li class="active"><a href="#server-r-code-tab" data-toggle="tab">server.R</a>
   </ul>
   <div class="tab-content">
     <div class="tab-pane" id="ui-r-code-tab"><pre id="ui-r-code-pre"></pre></div>
-    <div class="tab-pane" id="server-r-code-tab"><pre id="server-r-code-pre"></pre></div>
+    <div class="tab-pane active" id="server-r-code-tab"><pre id="server-r-code-pre"></pre></div>
   </div>
 </body>
 </html>

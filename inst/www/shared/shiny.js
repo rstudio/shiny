@@ -460,17 +460,26 @@
     return { element: null, offset: newlines };
   }
 
+
   var codeWindow = window;
   var popoutWindowOpen = false;
   exports.popOutCode = function() {
     if (popoutWindowOpen) {
-      codeWindow.close();
-      codeWindow = window;
+      // If the code window is already open, just bring it to the front
+      codeWindow.focus();
     }
     else {
-      codeWindow = window.open("showcase-code-popup.html", "Shiny Application Code", "menubar=0,resizeable=1,status=0,titlebar=0,toolbar=0,location=0"); 
+      // Not already open, open it. 
+      codeWindow = window.open("showcase-code-popup.html", 
+                               "Shiny Application Code", 
+                               "menubar=0,resizeable=1,status=0,titlebar=0,toolbar=0,location=0"); 
       popoutwindowOpen = true;
     }
+  }
+  
+  exports.closePopOutCode = function() {
+    codeWindow = window;
+    popoutWindowOpen = false;
   }
 
   // =========================================================================

@@ -89,10 +89,13 @@ span.jslider {
 
 .shiny-code {
   background-color: white;
-  max-height: 500px;
-  overflow: auto;
 }
 
 .shiny-code code {
   font-family: Menlo, Consolas, "Courier New", monospace;
+}
+
+.shiny-code-container h3 {
+  display: inline;
+  margin-right: 15px;
 }

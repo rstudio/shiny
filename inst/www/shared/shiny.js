@@ -460,6 +460,18 @@
     return { element: null, offset: newlines };
   }
 
+  var codeWindow = window;
+  var popoutWindowOpen = false;
+  exports.popOutCode = function() {
+    if (popoutWindowOpen) {
+      codeWindow.close();
+      codeWindow = window;
+    }
+    else {
+      codeWindow = window.open("showcase-code-popup.html", "Shiny Application Code", "menubar=0,resizeable=1,status=0,titlebar=0,toolbar=0,location=0"); 
+      popoutwindowOpen = true;
+    }
+  }
 
   // =========================================================================
   // ShinyApp
@@ -922,22 +934,23 @@
     });
 
     addCustomMessageHandler('reactlog', function(message) {
-       if (message.srcref) {
-          var el = document.getElementById("srcref_" + message.srcref);
-          if (!el) {
-             el = document.createElement("span");
-             el.id = "srcref_" + message.srcref;
-             var ref = message.srcref;
-             var code = document.getElementById("server-r-code"); 
-             var start = findTextPoint(code, ref[0], ref[4]); 
-             var end = findTextPoint(code, ref[2], ref[5]); 
-             var range = document.createRange();
-             range.setStart(start.element, start.offset);
-             range.setEnd(end.element, end.offset);
-             range.surroundContents(el);
-          }
-          $(el).effect("highlight", null, 800);
-       }
+      if (message.srcref) {
+        var doc = codeWindow.document;
+        var el = doc.getElementById("srcref_" + message.srcref);
+        if (!el) {
+          el = doc.createElement("span");
+          el.id = "srcref_" + message.srcref;
+          var ref = message.srcref;
+          var code = doc.getElementById("server-r-code"); 
+          var start = findTextPoint(code, ref[0], ref[4]); 
+          var end = findTextPoint(code, ref[2], ref[5]); 
+          var range = doc.createRange();
+          range.setStart(start.element, start.offset);
+          range.setEnd(end.element, end.offset);
+          range.surroundContents(el);
+        }
+        $(el).effect("highlight", null, 800);
+      }
     });
 
   }).call(ShinyApp.prototype);

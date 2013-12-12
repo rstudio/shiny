@@ -173,7 +173,9 @@ renderPage <- function(ui, connection, showcase=FALSE) {
   writeLines(result$html, con = connection)
   
   if (showcase) {
-    writeLines(c('<div class="container-fluid"><div class="row-fluid">', 
+    writeLines(c('<div class="container-fluid shiny-code-container">',
+                 '<div class="row-fluid"><h3>Code</h3> (<a href="javascript:Shiny.popOutCode()">popout</a>)</div>',
+                 '<div class="row-fluid">', 
                  '<div class="span6"><h4>ui.R</h4>',
                  '<pre class="shiny-code"><code id="ui-r-code">', 
                  readLines(file.path.ci(getwd(), 'ui.R')), 

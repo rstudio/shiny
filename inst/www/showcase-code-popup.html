@@ -1,0 +1,30 @@
+ <!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <link rel="stylesheet" type="text/css" href="shared/shiny.css"/> 
+  <link rel="stylesheet" type="text/css" href="shared/bootstrap/css/bootstrap.min.css"/> 
+  <link rel="stylesheet" type="text/css" href="shared/highlight/styles/tomorrow.css" />
+  <script src="shared/jquery.js" type="text/javascript"></script>
+  <script src="shared/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript">
+    window.addEventListener("load", function() {
+      document.getElementById("ui-r-code-pre").appendChild(
+        document.importNode(window.opener.document.getElementById("ui-r-code"), true));
+      document.getElementById("server-r-code-pre").appendChild(
+        document.importNode(window.opener.document.getElementById("server-r-code"), true));
+    });
+  </script>
+  <title>Shiny Application Code</title>
+</script>
+<body>
+  <ul class="nav nav-tabs">
+    <li><a href="#ui-r-code-tab" data-toggle="tab">ui.R</a>
+    <li><a href="#server-r-code-tab" data-toggle="tab">server.R</a>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane" id="ui-r-code-tab"><pre id="ui-r-code-pre"></pre></div>
+    <div class="tab-pane" id="server-r-code-tab"><pre id="server-r-code-pre"></pre></div>
+  </div>
+</body>
+</html>

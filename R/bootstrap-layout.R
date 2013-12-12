@@ -126,9 +126,9 @@ column <- function(width, ..., offset = 0) {
   if (!is.numeric(width) || (width < 1) || (width > 12))
     stop("column width must be between 1 and 12")
   
-  colClass <- paste("span", width, sep="")
+  colClass <- paste0("span", width)
   if (offset > 0)
-    colClass <- paste(colClass, " offset", offset, sep="")
+    colClass <- paste0(colClass, " offset", offset)
   div(class = colClass, ...)
 }
 
@@ -324,11 +324,11 @@ validateSpan <- function(element, name, width = NA) {
     stop(name, " does not have a valid column span", call. = FALSE)
   } 
   else {
-    test <- paste("span", ifelse(is.na(width), "", width), sep="")
+    test <- paste0("span", ifelse(is.na(width), "", width))
     if (!grepl(test, element$attribs$class)) {
       msg <- paste(name, "does not have a valid column span")
       if (!is.na(width)) {
-        msg <- paste(msg, " (it must be span", width, ")", sep = "")
+        msg <- paste0(msg, " (it must be span", width, ")")
         stop(msg, call. = FALSE)
       }
     }

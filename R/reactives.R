@@ -411,9 +411,10 @@ Observable <- setRefClass(
 #' @export
 reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL) {
   fun <- exprToFunction(x, env, quoted)
+  # Attach a label and a reference to the original user source for debugging
   if (is.null(label))
     label <- sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n'))
-
+  attr(label, "srcref") <- attr(substitute(x), "srcref")[[2]]
   o <- Observable$new(fun, label)
   registerDebugHook(".func", o, "Reactive")
   structure(o$getValue@.Data, observable = o, class = "reactive")

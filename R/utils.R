@@ -422,3 +422,11 @@ get_exists = function(x, mode) {
   if (exists(x, envir = parent.frame(), mode = mode, inherits = FALSE))
     get(x, envir = parent.frame(), mode = mode, inherits = FALSE)
 }
+
+srcrefFromShinyCall <- function(expr) {
+  srcrefs <- attr(expr, "srcref")
+  num_exprs <- length(srcrefs)
+  c(srcrefs[[1]][1], srcrefs[[1]][2], 
+    srcrefs[[num_exprs]][3], srcrefs[[num_exprs]][4],
+    srcrefs[[1]][5], srcrefs[[num_exprs]][6])
+}

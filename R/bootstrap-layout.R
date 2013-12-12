@@ -299,7 +299,9 @@ horizontalLayout <- function(...) {
 #' @rdname horizontalLayout
 #' @export
 pullLeft <- function(...) {
-  lapply(list(...), function(element) {
+  lapply(flattenTags(list(...)), function(element) {
+    if (!isTag(element))
+      stop("pullLeft - passed argument not a shiny UI element", call. = FALSE)
     element$attribs$class <- paste(element$attribs$class, "pull-left")
     element
   })
@@ -308,12 +310,13 @@ pullLeft <- function(...) {
 #' @rdname horizontalLayout
 #' @export
 pullRight <- function(...) {
-  lapply(list(...), function(element) {
+  lapply(flattenTags(list(...)), function(element) {
+    if (!isTag(element))
+      stop("pullRight - passed argument not a shiny UI element", call. = FALSE)
     element$attribs$class <- paste(element$attribs$class, "pull-right")
     element
   })
 }
-
 
 # Helper function to test whether an element has a span class
 validateSpan <- function(element, name, width = NA) {

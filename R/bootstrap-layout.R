@@ -47,12 +47,11 @@ fluidPage <- function(..., head = list()) {
                 
 }
 
-#' @param class Optional css class to attach to the row
-#' 
+
 #' @rdname fluidPage
 #' @export
-fluidRow <- function(..., class = NULL) {
-  div(class = paste("row-fluid", class), ...)
+fluidRow <- function(...) {
+  div(class = "row-fluid", ...)
 }
 
 #' Create a page with a fixed layout
@@ -102,12 +101,10 @@ fixedPage <- function(..., head = list()) {
                 head = head)
 }
 
-#' @param class Optional css class to attach to the row
-#' 
 #' @rdname fixedPage
 #' @export
-fixedRow <- function(..., class = NULL) {
-  div(class = paste("row", class), ...)
+fixedRow <- function(...) {
+  div(class = "row", ...)
 }
 
 

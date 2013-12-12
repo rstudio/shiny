@@ -42,6 +42,8 @@ column functions for creating arbitrary bootstrap grid layouts.
 
 * Added `hr()` builder function for creating horizontal rules.
 
+* Automatically concatenate multiple class attributes in tag definitions
+
 
 shiny 0.8.0
 --------------------------------------------------------------------------------

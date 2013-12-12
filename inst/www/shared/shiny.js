@@ -472,7 +472,10 @@
       // Not already open, open it. 
       codeWindow = window.open("showcase-code-popup.html", 
                                "Shiny Application Code", 
-                               "menubar=0,resizeable=1,status=0,titlebar=0,toolbar=0,location=0"); 
+                               "menubar=0,resizeable=1,status=0,titlebar=0," + 
+                                 "width=" + (screen.width / 3) + "," +
+                                 "height=" + (screen.height / 2) + "," +
+                                 "toolbar=0,location=0"); 
       popoutwindowOpen = true;
     }
   }

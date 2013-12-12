@@ -169,12 +169,47 @@ renderPage <- function(ui, connection, showcase=FALSE) {
              con = connection)
 
   
+  if (showcase) {
+    writeLines(c('<div class="container-fluid">', 
+                 '<div class="row-fluid"><div class="span8">'), 
+               con = connection)
+    descfile <- file.path.ci(getwd(), 'DESCRIPTION')
+    if (file.exists(descfile)) {
+      desc <- read.dcf(descfile)
+      cols <- colnames(desc)
+      if ("Title" %in% cols) {
+        writeLines(paste('<h1 class="showcase-header">', desc[1,"Title"], 
+                         sep = ""), con = connection)
+        if ("Author" %in% cols) {
+          writeLines('by', con = connection)
+          if ("AuthorUrl" %in% cols) {
+            writeLines(paste('<a href="', desc[1,"AuthorUrl"], '">', 
+                             desc[1,"Author"], '</a>', sep = ''), 
+                       con = connection)
+          } else {
+            writeLines(desc[1,"Author"], con = connection)
+          }
+          if ("AuthorEmail" %in% cols) {
+            writeLines(paste('(<a href="mailto:', desc[1,"AuthorEmail"], '">', 
+                             desc[1,"AuthorEmail"], '</a>', sep = ''), 
+                       con = connection)
+          }
+        }
+        writeLines('</h1>', con = connection)
+      }
+    }
+    writeLines(c('</div><div class="span4 showcase-code-link">',
+                 '<a href="javascript:Shiny.popOutCode()">show code</a>',
+                 '</div></div></div>'),
+               con = connection)
+  }
+  
   # write UI html to connection
   writeLines(result$html, con = connection)
   
   if (showcase) {
     writeLines(c('<div class="container-fluid shiny-code-container">',
-                 '<div class="row-fluid"><h3>Code</h3> (<a href="javascript:Shiny.popOutCode()">popout</a>)</div>',
+                 '<div class="row-fluid"><h3>Code</h3></div>',
                  '<div class="row-fluid">', 
                  '<div class="span6"><h4>ui.R</h4>',
                  '<pre class="shiny-code"><code id="ui-r-code">', 

@@ -99,3 +99,14 @@ span.jslider {
   display: inline;
   margin-right: 15px;
 }
+
+.showcase-header {
+  font-size: 16px;
+  font-weight: normal;
+  color: #909090;
+}
+
+.showcase-code-link {
+  text-align: right;
+  padding: 15px;
+}

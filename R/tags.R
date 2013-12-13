@@ -229,9 +229,9 @@ renderTags <- function(ui, singletons = character(0)) {
   uiHTML <- paste(textConnectionValue(textConn), collapse = "\n")
   close(textConn)
   
-  return(list(head = paste(context$head, collapse = "\n"),
+  return(list(head = HTML(paste(context$head, collapse = "\n")),
               singletons = context$singletons,
-              html = uiHTML))
+              html = HTML(uiHTML)))
 }
 
 # environment used to store all available tags

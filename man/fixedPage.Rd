@@ -47,9 +47,10 @@
   \code{column}.
 }
 \note{
-  See the documentation on the bootstrap
-  \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{
-  fixed grid system} for additional details.
+  See the
+  \href{https://github.com/rstudio/shiny/wiki/Shiny-Grid-Layout-Guide}{
+  Shiny Grid Layout Guide} for additional details on laying
+  out fixed pages.
 }
 \examples{
 shinyUI(fixedPage(

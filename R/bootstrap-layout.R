@@ -1,34 +1,35 @@
 
 #' Create a page with fluid layout
 #' 
-#' Functions for creating fluid page layouts. A fluid page layout consists of
+#' Functions for creating fluid page layouts. A fluid page layout consists of 
 #' rows which in turn include columns. Rows exist for the purpose of making sure
 #' their elements appear on the same line (if the browser has adequate width). 
-#' Columns exist for the purpose of defining how much horizontal space within a
+#' Columns exist for the purpose of defining how much horizontal space within a 
 #' 12-unit wide grid it's elements should occupy. Fluid pages scale their 
 #' components in realtime to fill all available browser width.
 #' 
 #' @param ... Elements to include within the page
 #' @param title The browser window title (defaults to the host URL of the page).
 #'   Can also be set as a side effect of the \code{\link{titlePanel}} function.
-#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
+#' @param responsive \code{TRUE} to use responsive layout (automatically adapt 
 #'   and resize page elements based on the size of the viewing device)
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory, e.g. \code{www/bootstrap.css})
-#' 
+#'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
 #' @details To create a fluid page use the \code{fluidPage} function and include
-#'   instances of \code{fluidRow} and \code{\link{column}} within it. As an
+#'   instances of \code{fluidRow} and \code{\link{column}} within it. As an 
 #'   alternative to low-level row and column functions you can also use 
 #'   higher-level layout functions like \code{\link{sidebarLayout}} and 
 #'   \code{\link{columnLayout}}.
 #'   
-#' @note See the documentation on the bootstrap 
-#'   \href{http://getbootstrap.com/2.3.2/scaffolding.html#fluidGridSystem}{ 
-#'   fluid grid system} for additional details.
+#' @note See the 
+#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Component-Layout-Guide}{ 
+#'   Shiny Component Layout Guide} for additional details on laying out fluid 
+#'   pages. 
 #'   
-#' @seealso \code{\link{column}}, \code{\link{sidebarLayout}},
+#' @seealso \code{\link{column}}, \code{\link{sidebarLayout}}, 
 #'   \code{\link{columnLayout}}
 #'   
 #' @examples
@@ -108,9 +109,10 @@ fluidRow <- function(...) {
 #'   layout functions like \code{sidebarLayout}, rather, all layout must be done
 #'   with \code{fixedRow} and \code{column}.
 #'   
-#' @note See the documentation on the bootstrap 
-#'   \href{http://getbootstrap.com/2.3.2/scaffolding.html#gridSystem}{ fixed 
-#'   grid system} for additional details.
+#' @note See the 
+#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Grid-Layout-Guide}{ 
+#'   Shiny Grid Layout Guide} for additional details on laying out fixed 
+#'   pages. 
 #'   
 #' @seealso \code{\link{column}}
 #'   
@@ -155,6 +157,7 @@ fixedRow <- function(...) {
 #'   
 #' @return A column that can be included within a \code{columnLayout},
 #'   \code{\link{fluidRow}}, or \code{\link{fixedRow}}.
+#'
 #'   
 #' @seealso \code{\link{columnLayout}}, \code{\link{fluidRow}},
 #'   \code{\link{fixedRow}}.
@@ -288,6 +291,11 @@ sidebarLayout <- function(sidebarPanel,
 #'   
 #' @note The \code{columnLayout} function can only be used within a 
 #'   \code{\link{fluidPage}}.
+#'   
+#' See the 
+#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Component-Layout-Guide}{ 
+#'   Shiny Component Layout Guide} for additional details on using columns 
+#'   to lay out pages.   
 #'   
 #' @seealso \code{\link{column}}, \code{\link{fluidRow}}.
 #'   

@@ -15,6 +15,11 @@
 \note{
   The \code{columnLayout} function can only be used within
   a \code{\link{fluidPage}}.
+
+  See the
+  \href{https://github.com/rstudio/shiny/wiki/Shiny-Component-Layout-Guide}{
+  Shiny Component Layout Guide} for additional details on
+  using columns to lay out pages.
 }
 \examples{
 columnLayout(

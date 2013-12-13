@@ -14,7 +14,8 @@
 #' @param ... The contents of the document body.
 #' @param responsive \code{TRUE} to use responsive layout (automatically
 #' adapt and resize page elements based on the size of the viewing device)
-#' @param theme href to alternative bootstrap css stylesheet
+#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
+#'   www directory, e.g. \code{www/bootstrap.css})
 #' 
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #' 
@@ -136,25 +137,26 @@ pageWithSidebar <- function(headerPanel,
 #' 
 #' @param title The title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
-#' @param header Tag of list of tags to display as a common header above all
+#' @param header Tag of list of tags to display as a common header above all 
 #'   tabPanels.
-#' @param footer Tag or list of tags to display as a common footer below all
+#' @param footer Tag or list of tags to display as a common footer below all 
 #'   tabPanels
 #' @param inverse \code{TRUE} to use a dark background and light text for the 
 #'   navigation bar
 #' @param collapsable \code{TRUE} to automatically collapse the navigation 
 #'   elements into a menu when the width of the browser is less than 940 pixels 
 #'   (useful for viewing on smaller touchscreen device)
-#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
+#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed 
 #'   layout.
-#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
+#' @param responsive \code{TRUE} to use responsive layout (automatically adapt 
 #'   and resize page elements based on the size of the viewing device)
-#' @param theme href to alternative bootstrap css stylesheet
+#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
+#'   www directory, e.g. \code{www/bootstrap.css})
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
 #' @details The \code{navbarMenu} function can be used to create an embedded 
-#'   menu within the navbar that in turns includes additional tabPanels (see
+#'   menu within the navbar that in turns includes additional tabPanels (see 
 #'   example below).
 #'   
 #' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}}

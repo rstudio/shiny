@@ -36,8 +36,9 @@
   (automatically adapt and resize page elements based on
   the size of the viewing device)}
 
-  \item{theme}{href to alternative Bootstrap css
-  stylesheet}
+  \item{theme}{Alternative Bootstrap stylesheet (normally a
+  css file within the www directory, e.g.
+  \code{www/bootstrap.css})}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

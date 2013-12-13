@@ -11,7 +11,8 @@
 #' @param ... Elements to include within the page
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
-#' @param theme href to alternative bootstrap css stylesheet
+#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
+#'   www directory, e.g. \code{www/bootstrap.css})
 #' 
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -91,7 +92,8 @@ fluidRow <- function(...) {
 #' @param ... Elements to include within the page
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
-#' @param theme href to alternative bootstrap css stylesheet
+#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
+#'   www directory, e.g. \code{www/bootstrap.css})
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   

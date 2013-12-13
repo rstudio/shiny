@@ -19,10 +19,6 @@
   page title explicitly using the `title` parameter of the
   top-level page function.
 }
-\note{
-  The \code{titlePanel} function should only be used within
-  a \code{\link{fluidPage}}.
-}
 \examples{
 titlePanel("Hello Shiny!")
 }

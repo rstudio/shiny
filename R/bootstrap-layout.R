@@ -200,8 +200,6 @@ column <- function(width, ..., offset = 0) {
 #'   \code{title} tag within the head. You can also specify a page title 
 #'   explicitly using the `title` parameter of the top-level page function.
 #'   
-#' @note The \code{titlePanel} function should only be used within a 
-#'   \code{\link{fluidPage}}.
 #'   
 #' @examples
 #' titlePanel("Hello Shiny!")
@@ -209,10 +207,8 @@ column <- function(width, ..., offset = 0) {
 #' @export
 titlePanel <- function(title, windowTitle=title) {    
   tagList(
-    tags$head(tags$title(windowTitle)),
-    fluidRow(style = "padding: 10px 0px;",
-      column(12, 
-        h2(title)))
+    tags$head(tags$title(windowTitle)), 
+    h2(style = "padding: 10px 0px;", title)
   )
 }
 
@@ -226,9 +222,12 @@ titlePanel <- function(title, windowTitle=title) {
 #' @param mainPanel The \link{mainPanel} containing outputs
 #' @param position The position of the sidebar relative to the main area ("left"
 #'   or "right")
-#'   
-#' @note The \code{sidebarLayout} function can only be used within a 
-#'   \code{\link{fluidPage}}.
+#' @param fixed \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
+#'   layout.
+#' @param widths The columns widths of the sidebar and main panel (the first
+#'   value is for the sidebar; the second for the main panel). Note that if 
+#'   you are using fixed layout you may need to adjust these to accomodate 
+#'   the size of the container if it's less than 12 units wide.
 #'   
 #' @examples
 #' # Define UI
@@ -258,11 +257,13 @@ titlePanel <- function(title, windowTitle=title) {
 #' @export
 sidebarLayout <- function(sidebarPanel,
                           mainPanel,
-                          position = c("left", "right")) {
+                          position = c("left", "right"),
+                          fluid = TRUE,
+                          widths = c(4, 8)) {
   
   # validate that inputs were created by their respective functions
-  validateSpan(sidebarPanel, "sidebarPanel", 4)
-  validateSpan(mainPanel, "mainPanel", 8)
+  validateSpan(sidebarPanel, "sidebarPanel", widths[[1]])
+  validateSpan(mainPanel, "mainPanel", widths[[2]])
   
   # determine the order 
   position <- match.arg(position)
@@ -275,8 +276,11 @@ sidebarLayout <- function(sidebarPanel,
     secondPanel <- sidebarPanel
   }
   
-  # return as a fluid row
-  fluidRow(firstPanel, secondPanel)
+  # return as as row
+  if (fluid)
+    fluidRow(firstPanel, secondPanel)
+  else
+    fixedRow(firstPanel, secondPanel)
 }
 
 #' Layout UI elements vertically
@@ -285,9 +289,8 @@ sidebarLayout <- function(sidebarPanel,
 #' passed to the container will appear on it's own line in the UI)
 #' 
 #' @param ... Elements to include within the container
-#'   
-#' @note The \code{verticalLayout} function can only be used within a 
-#'   \code{\link{fluidPage}}.
+#' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
+#'   layout.
 #'   
 #' @seealso \code{\link{fluidPage}}
 #'   
@@ -300,8 +303,14 @@ sidebarLayout <- function(sidebarPanel,
 #'   )
 #' ))
 #' @export
-verticalLayout <- function(...) {
-  lapply(list(...), function(row) fluidRow(column(12, row)))
+verticalLayout <- function(..., fluid = TRUE) {
+  lapply(list(...), function(row) {
+    col <- column(12, row)
+    if (fluid)
+      fluidRow(col)
+    else
+      fixedRow(col)
+  })
 }
 
 

@@ -50,11 +50,10 @@ ShinySession <- setRefClass(
     closed = 'logical',
     session = 'environment',      # Object for the server app to access session stuff
     .workerId = 'character',
-    singletons = 'character', # Tracks singleton HTML fragments sent to the page
-    .showcase = 'logical'     # Whether or not the session is in showcase app mode
+    singletons = 'character'  # Tracks singleton HTML fragments sent to the page
   ),
   methods = list(
-    initialize = function(websocket, workerId, showcase = FALSE) {
+    initialize = function(websocket, workerId) {
       .websocket <<- websocket
       .workerId <<- workerId
       .invalidatedOutputValues <<- Map$new()
@@ -62,7 +61,6 @@ ShinySession <- setRefClass(
       .inputMessageQueue <<- list()
       .progressKeys <<- character(0)
       closed <<- FALSE
-      .showcase <<- showcase
       # TODO: Put file upload context in user/app-specific dir if possible
       .fileUploadContext <<- FileUploadContext$new()
 
@@ -1133,12 +1131,11 @@ startAppDir <- function(port, host, workerId, quiet, showcase) {
     port,
     host,
     workerId,
-    quiet,
-    showcase
+    quiet
   )
 }
 
-startAppObj <- function(ui, serverFunc, port, host, workerId, quiet, showcase) {
+startAppObj <- function(ui, serverFunc, port, host, workerId, quiet) {
   uiHandler <- function(req) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
@@ -1156,10 +1153,10 @@ startAppObj <- function(ui, serverFunc, port, host, workerId, quiet, showcase) {
   
   startApp(uiHandler,
            function() { serverFunc },
-           port, host, workerId, quiet, showcase)
+           port, host, workerId, quiet)
 }
 
-startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet, showcase) {
+startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet) {
   
   sys.www.root <- system.file('www', package='shiny')
   
@@ -1179,7 +1176,7 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
         reqSize <- as.numeric(req$CONTENT_LENGTH)
       else if (length(req$HTTP_TRANSFER_ENCODING) > 0)
         reqSize <- Inf
-
+      
       if (reqSize > maxSize) {
         return(list(status = 413L,
                     headers = list(
@@ -1202,12 +1199,17 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
         ws$close()
       }
 
-      shinysession <- ShinySession$new(ws, workerId, showcase)
+      shinysession <- ShinySession$new(ws, workerId)
       appsByToken$set(shinysession$token, shinysession)
+      showcase <- FALSE
       
       ws$onMessage(function(binary, msg) {
-        .beginSessionContext(shinysession)
-        on.exit(.endSessionContext(), add = TRUE)
+        # If in showcase mode, record the session that should receive the reactive
+        # log messages for the duration of the servicing of this message. Note that
+        # we can't just wrap this in an if statement since on.exit will fire as soon
+        # as control leaves the block. 
+        if (showcase) .beginShowcaseSessionContext(shinysession)
+        on.exit(if (showcase) .endShowcaseSessionContext(), add = TRUE)
         
         # To ease transition from websockets-based code. Should remove once we're stable.
         if (is.character(msg))
@@ -1261,6 +1263,10 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
           init = {
             
             serverFunc <- serverFuncSource()
+            
+            # Check for switching into/out of showcase mode 
+            showcase <<- exists(".clientdata_url_search", where = msg$data) &&
+                         isShowcaseQuerystring(msg$data$.clientdata_url_search)
             
             shinysession$manageInputs(msg$data)
             local({
@@ -1470,12 +1476,10 @@ runApp <- function(appDir=getwd(),
     orig.wd <- getwd()
     setwd(appDir)
     on.exit(setwd(orig.wd), add = TRUE)
-    server <- startAppDir(port=port, host=host, workerId=workerId, quiet=quiet, 
-                          showcase=showcase)
+    server <- startAppDir(port=port, host=host, workerId=workerId, quiet=quiet)
   } else {
     server <- startAppObj(appDir$ui, appDir$server, port=port,
-                          host=host, workerId=workerId, quiet=quiet, 
-                          showcase=showcase)
+                          host=host, workerId=workerId, quiet=quiet)
   }
   
   on.exit({

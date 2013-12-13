@@ -12,13 +12,13 @@
   <script src="shared/bootstrap/js/bootstrap.min.js"></script>
   <script type="text/javascript">
     window.addEventListener("load", function() {
-      document.getElementById("ui-r-code-pre").innerHTML =
+      document.getElementById("ui-r-code").innerHTML =
         window.opener.document.getElementById("ui-r-code").innerHTML;
-      document.getElementById("server-r-code-pre").innerHTML = 
+      document.getElementById("server-r-code").innerHTML = 
         window.opener.document.getElementById("server-r-code").innerHTML;
     });
     window.addEventListener("unload", function() {
-      window.opener.Shiny.closePopOutCode();
+      window.opener.closePopOutCode();
     });
   </script>
   <style>
@@ -45,8 +45,8 @@
     <li class="active"><a href="#server-r-code-tab" data-toggle="tab">server.R</a>
   </ul>
   <div class="tab-content">
-    <div class="tab-pane" id="ui-r-code-tab"><pre><code id="ui-r-code-pre"></code></pre></div>
-    <div class="tab-pane active" id="server-r-code-tab"><pre><code id="server-r-code-pre"></code></pre></div>
+    <div class="tab-pane" id="ui-r-code-tab"><pre><code id="ui-r-code"></code></pre></div>
+    <div class="tab-pane active" id="server-r-code-tab"><pre><code id="server-r-code"></code></pre></div>
   </div>
 </body>
 </html>

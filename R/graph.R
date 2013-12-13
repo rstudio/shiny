@@ -57,9 +57,8 @@ renderReactLog <- function() {
 .graphAppend <- function(logEntry) {
   if (isTRUE(getOption('shiny.reactlog', FALSE)))
     .graphEnv$log <- c(.graphEnv$log, list(logEntry))
-  session <- .getSessionContext()
-  if (!is.null(session) &&
-      session$isShowcase()) {
+  session <- .getShowcaseSessionContext()
+  if (!is.null(session)) {
     session$.sendCustomMessage("reactlog", logEntry)
   }
 }

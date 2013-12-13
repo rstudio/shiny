@@ -196,7 +196,7 @@ writeShowcasePreamble <- function(connection) {
   }
   writeLines(c('</div><div class="span4 showcase-code-link">',
                '<button type="button" class="btn btn-default btn-lg"',
-               'onclick="javascript:Shiny.popOutCode()">show code',
+               'onclick="javascript:popOutCode()">show code',
                '<span class="glyphicon glyphicon-new-window"></span></button>',
                '</div></div></div>'),
              con = connection)
@@ -311,19 +311,10 @@ shinyUI <- function(ui, path='/') {
       if (req$PATH_INFO != path)
         return(NULL)
       
-      # check to see if showcase mode was requested 
-      showcase <- FALSE
-      if (nchar(req$QUERY_STRING) > 0) {
-        qsenv <- parseQueryString(req$QUERY_STRING)
-        if (exists("showcase", where = qsenv)) {
-          showcase <- as.logical(as.numeric(qsenv$showcase))
-        }
-      }
-      
       textConn <- textConnection(NULL, "w") 
       on.exit(close(textConn))
       
-      renderPage(ui, textConn, showcase)
+      renderPage(ui, textConn, isShowcaseReq(req))
       html <- paste(textConnectionValue(textConn), collapse='\n')
       return(httpResponse(200, content=html))
     }

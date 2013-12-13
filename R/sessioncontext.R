@@ -3,15 +3,16 @@
 # appropriate session when showcase mode is enabled. 
 
 .sessionContext <- new.env(parent=emptyenv())
-.beginSessionContext <- function(session) {
+.beginShowcaseSessionContext <- function(session) {
   assign("session", session, envir = .sessionContext)
 }
 
-.endSessionContext <- function() {
-  remove("session", envir = .sessionContext)
+.endShowcaseSessionContext <- function() {
+  if (exists("session", where = .sessionContext))
+    remove("session", envir = .sessionContext)
 }
 
-.getSessionContext <- function() {
+.getShowcaseSessionContext <- function() {
   if (exists("session", where = .sessionContext)) 
     .sessionContext$session
   else

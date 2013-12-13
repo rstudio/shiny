@@ -400,31 +400,6 @@
     return list;
   }
 
-  var codeWindow = window;
-  exports.popOutCode = function() {
-    if (codeWindow !== window) {
-      // If the code window is already open, just bring it to the front
-      codeWindow.focus();
-    }
-    else {
-      // Kill all running animations so we don't clone the state of the DOM
-      // mid-animation.
-      $("*").stop(true, true);
-
-      // Not already open, open it. 
-      codeWindow = window.open("showcase-code-popup.html", 
-                               "Shiny Application Code", 
-                               "menubar=0,resizeable=1,status=0,titlebar=0," + 
-                                 "width=" + (screen.width / 3) + "," +
-                                 "height=" + (screen.height / 2) + "," +
-                                 "toolbar=0,location=0"); 
-    }
-  }
-  
-  exports.closePopOutCode = function() {
-    codeWindow = window;
-  }
-
   // =========================================================================
   // ShinyApp
   // =========================================================================
@@ -884,13 +859,6 @@
     addMessageHandler('config', function(message) {
       this.config = message;
     });
-
-    addCustomMessageHandler('reactlog', function(message) {
-      if (message.srcref && codeWindow.highlightSrcref) {
-        codeWindow.highlightSrcref(message.srcref)
-      }
-    });
-
   }).call(ShinyApp.prototype);
 
   // =========================================================================

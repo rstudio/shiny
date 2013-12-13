@@ -15,16 +15,14 @@
 }
 \value{
   A column that can be included within a
-  \code{columnLayout}, \code{\link{fluidRow}}, or
-  \code{\link{fixedRow}}.
+  \code{\link{fluidRow}}, or \code{\link{fixedRow}}.
 }
 \description{
-  Create a column for use within a
-  \code{\link{columnLayout}}, \code{\link{fluidRow}}, or
-  \code{\link{fixedRow}}
+  Create a column for use within a \code{\link{fluidRow}}
+  or \code{\link{fixedRow}}
 }
 \examples{
-columnLayout(
+fluidRow(
   column(4,
     sliderInput("obs", "Number of observations:",
                 min = 1, max = 1000, value = 500)
@@ -44,7 +42,6 @@ fluidRow(
 )
 }
 \seealso{
-  \code{\link{columnLayout}}, \code{\link{fluidRow}},
-  \code{\link{fixedRow}}.
+  \code{\link{fluidRow}}, \code{\link{fixedRow}}.
 }
 

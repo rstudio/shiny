@@ -21,16 +21,14 @@
 #' @details To create a fluid page use the \code{fluidPage} function and include
 #'   instances of \code{fluidRow} and \code{\link{column}} within it. As an 
 #'   alternative to low-level row and column functions you can also use 
-#'   higher-level layout functions like \code{\link{sidebarLayout}} and 
-#'   \code{\link{columnLayout}}.
+#'   higher-level layout functions like \code{\link{sidebarLayout}}.
 #'   
 #' @note See the 
 #'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Component-Layout-Guide}{ 
 #'   Shiny Component Layout Guide} for additional details on laying out fluid 
 #'   pages. 
 #'   
-#' @seealso \code{\link{column}}, \code{\link{sidebarLayout}}, 
-#'   \code{\link{columnLayout}}
+#' @seealso \code{\link{column}}, \code{\link{sidebarLayout}}
 #'   
 #' @examples
 #' shinyUI(fluidPage(
@@ -94,7 +92,7 @@ fluidRow <- function(...) {
 #' to 940 pixels on a typical display, and 724px or 1170px on smaller and larger
 #' displays respectively.
 #' 
-#' @param ... Elements to include within the page
+#' @param ... Elements to include within the container
 #' @param title The browser window title (defaults to the host URL of the page)
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
@@ -147,23 +145,22 @@ fixedRow <- function(...) {
 
 #' Create a column within a UI definition
 #' 
-#' Create a column for use within a \code{\link{columnLayout}}, 
-#' \code{\link{fluidRow}}, or \code{\link{fixedRow}}
+#' Create a column for use within a  \code{\link{fluidRow}} or 
+#' \code{\link{fixedRow}}
 #' 
 #' @param width The grid width of the column (must be between 1 and 12)
 #' @param ... Elements to include within the column
 #' @param offset The number of columns to offset this column from the end of the
 #'   previous column.
 #'   
-#' @return A column that can be included within a \code{columnLayout},
-#'   \code{\link{fluidRow}}, or \code{\link{fixedRow}}.
+#' @return A column that can be included within a
+#'   \code{\link{fluidRow}} or \code{\link{fixedRow}}.
 #'
 #'   
-#' @seealso \code{\link{columnLayout}}, \code{\link{fluidRow}},
-#'   \code{\link{fixedRow}}.
+#' @seealso \code{\link{fluidRow}}, \code{\link{fixedRow}}.
 #'   
 #' @examples
-#' columnLayout(  
+#' fluidRow(  
 #'   column(4,
 #'     sliderInput("obs", "Number of observations:",  
 #'                 min = 1, max = 1000, value = 500)       
@@ -278,49 +275,8 @@ sidebarLayout <- function(sidebarPanel,
     secondPanel <- sidebarPanel
   }
   
-  # return as a column layout
-  columnLayout(firstPanel, secondPanel)
-}
-
-#' Layout a set of columns
-#' 
-#' Layout a set of columns created using the \code{\link{column}} function. The 
-#' widths of the columns should total no more than 12 units.
-#' 
-#' @param ... Columns to include within the layout
-#'   
-#' @note The \code{columnLayout} function can only be used within a 
-#'   \code{\link{fluidPage}}.
-#'   
-#' See the 
-#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Component-Layout-Guide}{ 
-#'   Shiny Component Layout Guide} for additional details on using columns 
-#'   to lay out pages.   
-#'   
-#' @seealso \code{\link{column}}, \code{\link{fluidRow}}.
-#'   
-#' @examples
-#' columnLayout(  
-#'   column(4,
-#'     sliderInput("obs", "Number of observations:",  
-#'                 min = 1, max = 1000, value = 500)       
-#'   ),
-#'   column(8,
-#'     plotOutput("distPlot")
-#'   )
-#' )
-#' 
-#' fluidRow(
-#'   column(width = 4,
-#'     "4"
-#'   ),
-#'   column(width = 3, offset = 2,
-#'     "3 offset 2"
-#'   )
-#' )
-#' @export
-columnLayout <- function(...) {
-  fluidRow(...)
+  # return as a fluid row
+  fluidRow(firstPanel, secondPanel)
 }
 
 #' Layout UI elements vertically

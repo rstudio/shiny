@@ -44,8 +44,7 @@
   \code{\link{column}} within it. As an alternative to
   low-level row and column functions you can also use
   higher-level layout functions like
-  \code{\link{sidebarLayout}} and
-  \code{\link{columnLayout}}.
+  \code{\link{sidebarLayout}}.
 }
 \note{
   See the
@@ -90,7 +89,6 @@ shinyUI(fluidPage(
 ))
 }
 \seealso{
-  \code{\link{column}}, \code{\link{sidebarLayout}},
-  \code{\link{columnLayout}}
+  \code{\link{column}}, \code{\link{sidebarLayout}}
 }
 

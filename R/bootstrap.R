@@ -7,7 +7,7 @@
 #' This function is primarily intended for users who are proficient in 
 #' HTML/CSS, and know how to lay out pages in Bootstrap. Most applications 
 #' should use \code{\link{fluidPage}} along with layout functions like
-#' \code{\link{sidebarLayout}} and \code{\link{columnLayout}}.
+#' \code{\link{fluidRow}} and \code{\link{sidebarLayout}}.
 #' 
 #' @param ... The contents of the document body.
 #' @param title The browser window title (defaults to the host URL of the page)

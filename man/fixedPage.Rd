@@ -9,7 +9,7 @@
   fixedRow(...)
 }
 \arguments{
-  \item{...}{Elements to include within the page}
+  \item{...}{Elements to include within the container}
 
   \item{title}{The browser window title (defaults to the
   host URL of the page)}

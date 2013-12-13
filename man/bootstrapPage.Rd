@@ -37,8 +37,7 @@
   proficient in HTML/CSS, and know how to lay out pages in
   Bootstrap. Most applications should use
   \code{\link{fluidPage}} along with layout functions like
-  \code{\link{sidebarLayout}} and
-  \code{\link{columnLayout}}.
+  \code{\link{fluidRow}} and \code{\link{sidebarLayout}}.
 }
 \note{
   The \code{basicPage} function is deprecated, you should

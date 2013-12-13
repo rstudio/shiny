@@ -22,6 +22,12 @@
   application title, a sidebar for input controls, and a
   main area for output.
 }
+\note{
+  This function is deprecated. You should use
+  \code{\link{fluidPage}} along with
+  \code{\link{sidebarLayout}} to implement a page with a
+  sidebar.
+}
 \examples{
 # Define UI
 shinyUI(pageWithSidebar(

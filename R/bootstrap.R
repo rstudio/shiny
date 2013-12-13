@@ -88,6 +88,9 @@ basicPage <- function(...) {
 
 #' @return A UI defintion that can be passed to the \link{shinyUI} function
 #' 
+#' @note This function is deprecated. You should use \code{\link{fluidPage}} 
+#' along with \code{\link{sidebarLayout}} to implement a page with a sidebar.
+#' 
 #' @examples
 #' # Define UI
 #' shinyUI(pageWithSidebar(

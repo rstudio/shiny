@@ -1,3 +1,3 @@
-shinyUI(bootstrapPage(
+shinyUI(fluidPage(
   textOutput("currentTime")
 ))

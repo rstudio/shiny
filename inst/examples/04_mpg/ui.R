@@ -1,26 +1,28 @@
 library(shiny)
 
 # Define UI for miles per gallon application
-shinyUI(pageWithSidebar(
+shinyUI(fluidPage(
   
   # Application title
-  headerPanel("Miles Per Gallon"),
+  titlePanel("Miles Per Gallon"),
   
   # Sidebar with controls to select the variable to plot against mpg
   # and to specify whether outliers should be included
-  sidebarPanel(
-    selectInput("variable", "Variable:",
-                c("Cylinders" = "cyl",
-                  "Transmission" = "am",
-                  "Gears" = "gear")),
-
-    checkboxInput("outliers", "Show outliers", FALSE)
-  ),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("variable", "Variable:",
+                  c("Cylinders" = "cyl",
+                    "Transmission" = "am",
+                    "Gears" = "gear")),
   
-  # Show the caption and plot of the requested variable against mpg
-  mainPanel(
-    h3(textOutput("caption")),
+      checkboxInput("outliers", "Show outliers", FALSE)
+    ),
     
-    plotOutput("mpgPlot")
+    # Show the caption and plot of the requested variable against mpg
+    mainPanel(
+      h3(textOutput("caption")),
+      
+      plotOutput("mpgPlot")
+    )
   )
 ))

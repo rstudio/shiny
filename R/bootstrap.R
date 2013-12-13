@@ -1402,6 +1402,21 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
          label)
 }
 
+
+#' Create an icon
+#'
+#' Create an icon for use within an appplication. Icons can appear on their own
+#' or as part of buttons and tabPanels.
+#'
+#' @param name Name of icon 
+#' @param class Additional class attributes for the icon
+#' @param lib Icon library to use (only "font-awesome" is currently supported)
+#' @return An icon element 
+#' @export
+icon <- function(name, class = NULL, lib = "font-awesome") {
+  
+}
+
 #' Validate proper CSS formatting of a unit
 #' 
 #' @param x The unit to validate. Will be treated as a number of pixels if a 

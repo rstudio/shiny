@@ -48,9 +48,9 @@
 }
 \note{
   See the
-  \href{https://github.com/rstudio/shiny/wiki/Shiny-Grid-Layout-Guide}{
-  Shiny Grid Layout Guide} for additional details on laying
-  out fixed pages.
+  \href{https://github.com/rstudio/shiny/wiki/Shiny-Application-Layout-Guide}{
+  Shiny Application Layout Guide} for additional details on
+  laying out fixed pages.
 }
 \examples{
 shinyUI(fixedPage(

@@ -48,8 +48,8 @@
 }
 \note{
   See the
-  \href{https://github.com/rstudio/shiny/wiki/Shiny-Component-Layout-Guide}{
-  Shiny Component Layout Guide} for additional details on
+  \href{https://github.com/rstudio/shiny/wiki/Shiny-Application-Layout-Guide}{
+  Shiny-Application-Layout-Guide} for additional details on
   laying out fluid pages.
 }
 \examples{

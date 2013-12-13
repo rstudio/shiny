@@ -24,8 +24,8 @@
 #'   higher-level layout functions like \code{\link{sidebarLayout}}.
 #'   
 #' @note See the 
-#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Component-Layout-Guide}{ 
-#'   Shiny Component Layout Guide} for additional details on laying out fluid 
+#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Application-Layout-Guide}{ 
+#'   Shiny-Application-Layout-Guide} for additional details on laying out fluid 
 #'   pages. 
 #'   
 #' @seealso \code{\link{column}}, \code{\link{sidebarLayout}}
@@ -108,8 +108,8 @@ fluidRow <- function(...) {
 #'   with \code{fixedRow} and \code{column}.
 #'   
 #' @note See the 
-#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Component-Layout-Guide}{ 
-#'   Shiny Component Layout Guide} for additional details on laying out fixed 
+#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Application-Layout-Guide}{ 
+#'   Shiny Application Layout Guide} for additional details on laying out fixed 
 #'   pages. 
 #'   
 #' @seealso \code{\link{column}}

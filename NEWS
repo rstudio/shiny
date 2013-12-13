@@ -43,8 +43,11 @@ column functions for creating arbitrary bootstrap grid layouts.
 
 * Automatically concatenate duplicate attributes in tag definitions
 
-* Add `responsive` parameter to page building functions for opting-out of
+* Added `responsive` parameter to page building functions for opting-out of
 bootstrap responsive css.
+
+* Added `theme` parameter to page building functions for specifying alternate
+bootstrap css styles.
 
 
 shiny 0.8.0

@@ -15,7 +15,7 @@
   \item{position}{The position of the sidebar relative to
   the main area ("left" or "right")}
 
-  \item{fixed}{\code{TRUE} to use fluid layout;
+  \item{fluid}{\code{TRUE} to use fluid layout;
   \code{FALSE} to use fixed layout.}
 
   \item{widths}{The columns widths of the sidebar and main

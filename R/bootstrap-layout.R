@@ -222,7 +222,7 @@ titlePanel <- function(title, windowTitle=title) {
 #' @param mainPanel The \link{mainPanel} containing outputs
 #' @param position The position of the sidebar relative to the main area ("left"
 #'   or "right")
-#' @param fixed \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
+#' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
 #'   layout.
 #' @param widths The columns widths of the sidebar and main panel (the first
 #'   value is for the sidebar; the second for the main panel). Note that if 

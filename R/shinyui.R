@@ -205,7 +205,7 @@ writeShowcasePreamble <- function(connection) {
 # connection.
 writeShowcaseAppInfo <- function(connection) {
   writeLines(c('<div class="container-fluid shiny-code-container showcase-container">',
-               '<div class="row-fluid" id="readme-md"></div>',
+               '<div class="row-fluid"><div id="readme-md"></div></div>',
                '<div class="row-fluid"><h3>Code</h3></div>',
                '<div class="row-fluid">', 
                '<div class="span6"><h4>ui.R</h4>',

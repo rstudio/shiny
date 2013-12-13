@@ -469,6 +469,10 @@
       codeWindow.focus();
     }
     else {
+      // Kill all running animations so we don't clone the state of the DOM
+      // mid-animation.
+      $("*").stop(true, true);
+
       // Not already open, open it. 
       codeWindow = window.open("showcase-code-popup.html", 
                                "Shiny Application Code", 
@@ -976,6 +980,8 @@
           }
           range.surroundContents(el);
         }
+        // End any previous highlight before starting this one
+        $(el).stop(true, true);
         $(el).effect("highlight", null, 1600);
       }
     });

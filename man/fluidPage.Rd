@@ -3,12 +3,17 @@
 \alias{fluidRow}
 \title{Create a page with fluid layout}
 \usage{
-  fluidPage(..., responsive = TRUE, theme = NULL)
+  fluidPage(..., title = NULL, responsive = TRUE,
+    theme = NULL)
 
   fluidRow(...)
 }
 \arguments{
   \item{...}{Elements to include within the page}
+
+  \item{title}{The browser window title (defaults to the
+  host URL of the page).  Can also be set as a side effect
+  of the \code{\link{titlePanel}} function.}
 
   \item{responsive}{\code{TRUE} to use responsive layout
   (automatically adapt and resize page elements based on
@@ -72,6 +77,7 @@ shinyUI(fluidPage(
 ))
 
 shinyUI(fluidPage(
+  title = "Hello Shiny!",
   fluidRow(
     column(width = 4,
       "4"

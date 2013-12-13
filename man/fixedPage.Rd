@@ -3,12 +3,16 @@
 \alias{fixedRow}
 \title{Create a page with a fixed layout}
 \usage{
-  fixedPage(..., responsive = TRUE, theme = NULL)
+  fixedPage(..., title = NULL, responsive = TRUE,
+    theme = NULL)
 
   fixedRow(...)
 }
 \arguments{
   \item{...}{Elements to include within the page}
+
+  \item{title}{The browser window title (defaults to the
+  host URL of the page)}
 
   \item{responsive}{\code{TRUE} to use responsive layout
   (automatically adapt and resize page elements based on
@@ -49,6 +53,7 @@
 }
 \examples{
 shinyUI(fixedPage(
+  title = "Hello, Shiny!",
   fixedRow(
     column(width = 4,
       "4"

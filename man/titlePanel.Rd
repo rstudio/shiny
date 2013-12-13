@@ -15,11 +15,13 @@
 }
 \details{
   Calling this function has the side effect of including a
-  \code{title} tag within the head.
+  \code{title} tag within the head. You can also specify a
+  page title explicitly using the `title` parameter of the
+  top-level page function.
 }
 \note{
-  The \code{titlePanel} function can only be used within a
-  \code{\link{fluidPage}}.
+  The \code{titlePanel} function should only be used within
+  a \code{\link{fluidPage}}.
 }
 \examples{
 titlePanel("Hello Shiny!")

@@ -1,33 +1,33 @@
-#' Create a Twitter Bootstrap page
+#' Create a Bootstrap page
 #' 
-#' Create a Shiny UI page that loads the CSS and JavaScript for
-#' \href{http://getbootstrap.com}{Twitter Bootstrap}, and has no content in the
+#' Create a Shiny UI page that loads the CSS and JavaScript for 
+#' \href{http://getbootstrap.com}{Bootstrap}, and has no content in the 
 #' page body (other than what you provide).
 #' 
-#' These functions are primarily intended for users who are proficient in
-#' HTML/CSS, and know how to lay out pages in Bootstrap. Most users should use
-#' template functions like \code{\link{pageWithSidebar}}.
-#'
-#' \code{basicPage} is the same as \code{bootstrapPage}, with an added
-#' \code{<div class="container-fluid">} wrapper to provide a little padding.
+#' This function is primarily intended for users who are proficient in 
+#' HTML/CSS, and know how to lay out pages in Bootstrap. Most applications 
+#' should use \code{\link{fluidPage}} along with layout functions like
+#' \code{\link{sidebarLayout}} and \code{\link{columnLayout}}.
 #' 
 #' @param ... The contents of the document body.
-#' @param responsive \code{TRUE} to use responsive layout (automatically
-#' adapt and resize page elements based on the size of the viewing device)
+#' @param title The browser window title (defaults to the host URL of the page)
+#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
+#'   and resize page elements based on the size of the viewing device)
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory, e.g. \code{www/bootstrap.css})
-#' 
+#'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
-#' 
+#'   
 #' @note The \code{basicPage} function is deprecated, you should use the 
-#' \code{\link{fluidPage}} function instead.
-#' 
+#'   \code{\link{fluidPage}} function instead.
+#'   
 #' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
-#' 
+#'   
 #' @export
-bootstrapPage <- function(..., responsive = TRUE, theme = NULL) {
+bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
+  
   # required head tags for boostrap
-  importBootstrap <- function(min = TRUE, responsive = TRUE) {
+  importBootstrap <- function(min = TRUE) {
     
     ext <- function(ext) {
       ifelse(min, paste(".min", ext, sep=""), ext)
@@ -47,6 +47,9 @@ bootstrapPage <- function(..., responsive = TRUE, theme = NULL) {
       tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
     )
     
+    if (!is.null(title))
+      result <- tagAppendChild(result, tags$title(title))
+    
     if (responsive) {
       result <- tagAppendChild(
         result, 
@@ -64,7 +67,7 @@ bootstrapPage <- function(..., responsive = TRUE, theme = NULL) {
   
   tagList(
     # inject bootstrap requirements into head
-    importBootstrap(min = TRUE, responsive = responsive),
+    importBootstrap(),
     
     # remainder of tags passed to the function
     list(...)
@@ -252,6 +255,7 @@ navbarPage <- function(title,
   
   # build the page
   bootstrapPage(
+    title = title,
     responsive = responsive,
     theme = theme,
     div(class=navbarClass,

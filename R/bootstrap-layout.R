@@ -9,6 +9,8 @@
 #' components in realtime to fill all available browser width.
 #' 
 #' @param ... Elements to include within the page
+#' @param title The browser window title (defaults to the host URL of the page).
+#'   Can also be set as a side effect of the \code{\link{titlePanel}} function.
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
@@ -54,6 +56,7 @@
 #' ))
 #' 
 #' shinyUI(fluidPage(
+#'   title = "Hello Shiny!",
 #'   fluidRow(
 #'     column(width = 4,
 #'       "4"
@@ -66,8 +69,9 @@
 #' 
 #' @rdname fluidPage
 #' @export
-fluidPage <- function(..., responsive = TRUE, theme = NULL) {
+fluidPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
   bootstrapPage(div(class = "container-fluid", ...), 
+                title = title,
                 responsive = responsive,
                 theme = theme)
 }
@@ -90,6 +94,7 @@ fluidRow <- function(...) {
 #' displays respectively.
 #' 
 #' @param ... Elements to include within the page
+#' @param title The browser window title (defaults to the host URL of the page)
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
@@ -111,6 +116,7 @@ fluidRow <- function(...) {
 #'   
 #' @examples
 #' shinyUI(fixedPage(
+#'   title = "Hello, Shiny!",
 #'   fixedRow(
 #'     column(width = 4,
 #'       "4"
@@ -123,8 +129,9 @@ fluidRow <- function(...) {
 #' 
 #' @rdname fixedPage
 #' @export
-fixedPage <- function(..., responsive = TRUE, theme = NULL) {
+fixedPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
   bootstrapPage(div(class = "container", ...), 
+                title = title,
                 responsive = responsive,
                 theme = theme)
 }
@@ -190,9 +197,10 @@ column <- function(width, ..., offset = 0) {
 #' @param windowTitle The title that should be displayed by the browser window.
 #'   
 #' @details Calling this function has the side effect of including a 
-#'   \code{title} tag within the head.
+#'   \code{title} tag within the head. You can also specify a page title 
+#'   explicitly using the `title` parameter of the top-level page function.
 #'   
-#' @note The \code{titlePanel} function can only be used within a 
+#' @note The \code{titlePanel} function should only be used within a 
 #'   \code{\link{fluidPage}}.
 #'   
 #' @examples

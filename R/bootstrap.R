@@ -1,7 +1,7 @@
 #' Create a Bootstrap page
 #' 
 #' Create a Shiny UI page that loads the CSS and JavaScript for 
-#' \href{http://getbootstrap.com}{Bootstrap}, and has no content in the 
+#' \href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and has no content in the 
 #' page body (other than what you provide).
 #' 
 #' This function is primarily intended for users who are proficient in 
@@ -296,7 +296,7 @@ headerPanel <- function(title, windowTitle=title) {
 #' Create a well panel
 #' 
 #' Creates a panel with a slightly inset border and grey background. Equivalent
-#' to Twitter Bootstrap's \code{well} CSS class.
+#' to Bootstrap's \code{well} CSS class.
 #' 
 #' @param ... UI elements to include inside the panel.
 #' @return The newly created panel.

@@ -28,8 +28,9 @@
 }
 \description{
   Create a Shiny UI page that loads the CSS and JavaScript
-  for \href{http://getbootstrap.com}{Bootstrap}, and has no
-  content in the page body (other than what you provide).
+  for \href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and
+  has no content in the page body (other than what you
+  provide).
 }
 \details{
   This function is primarily intended for users who are

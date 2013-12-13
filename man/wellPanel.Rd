@@ -12,7 +12,7 @@
 }
 \description{
   Creates a panel with a slightly inset border and grey
-  background. Equivalent to Twitter Bootstrap's \code{well}
-  CSS class.
+  background. Equivalent to Bootstrap's \code{well} CSS
+  class.
 }
 

@@ -66,7 +66,7 @@ shiny 0.8.0
   searching (global search or search by individual columns), sorting (by
   single or multiple columns). All these features are implemented on the R
   side; for example, we can use R regular expressions for searching.
-  Besides, it also uses the Twitter Bootstrap CSS style. See the full
+  Besides, it also uses the Bootstrap CSS style. See the full
   documentation and examples in the tutorial:
   http://rstudio.github.io/shiny/tutorial/#datatables
 
@@ -365,7 +365,7 @@ shiny 0.1.8
 * Fix issue #27: Warnings cause reactive functions to stop executing.
 * The server.R and ui.R filenames are now case insensitive.
 * Add `wellPanel` function for creating inset areas on the page.
-* Add `bootstrapPage` function for creating new Twitter Bootstrap based
+* Add `bootstrapPage` function for creating new Bootstrap based
   layouts from scratch.
 
 

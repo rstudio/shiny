@@ -1,4 +1,6 @@
-# Shiny 
+# Shiny
+
+[![Build Status](https://travis-ci.org/rstudio/shiny.png)](https://travis-ci.org/rstudio/shiny)
 
 Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
 

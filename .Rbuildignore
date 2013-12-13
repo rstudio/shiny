@@ -10,3 +10,4 @@
 ^res$
 ^tools$
 ^man-roxygen$
+^\.travis\.yml$

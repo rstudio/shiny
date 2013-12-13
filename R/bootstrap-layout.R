@@ -348,55 +348,6 @@ verticalLayout <- function(...) {
   lapply(list(...), function(row) fluidRow(column(12, row)))
 }
 
-#' Layout UI elements horizontally
-#' 
-#' Create a container that includes several elements laid out side-by-side.
-#' 
-#' @param ... Elements or list of elements
-#'   
-#' @details To force elements to the left or right of the container you can use
-#'   the \code{\link{pullLeft}} and \code{\link{pullRight}} functions.
-#'   
-#' @examples
-#' shinyUI(fluidPage(
-#'   horizontalLayout(
-#'     h3("Application Title"), pullRight(img(src="images/logo.png"))  
-#'   )  
-#' ))
-#' 
-#' @seealso \code{\link{fluidPage}}
-#'   
-#' @export
-horizontalLayout <- function(...) {
-  fluidRow(column(12, ...))
-}
-
-#' Pull elements left or right
-#' 
-#' Pull an element to the left or right side of a
-#' \code{\link{horizontalLayout}}.
-#' 
-#' @rdname horizontalLayout
-#' @export
-pullLeft <- function(...) {
-  lapply(flattenTags(list(...)), function(element) {
-    if (!isTag(element))
-      stop("pullLeft - passed argument not a shiny UI element", call. = FALSE)
-    element$attribs$class <- paste(element$attribs$class, "pull-left")
-    element
-  })
-}
-
-#' @rdname horizontalLayout
-#' @export
-pullRight <- function(...) {
-  lapply(flattenTags(list(...)), function(element) {
-    if (!isTag(element))
-      stop("pullRight - passed argument not a shiny UI element", call. = FALSE)
-    element$attribs$class <- paste(element$attribs$class, "pull-right")
-    element
-  })
-}
 
 # Helper function to test whether an element has a span class
 validateSpan <- function(element, name, width = NA) {

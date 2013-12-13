@@ -400,71 +400,9 @@
     return list;
   }
 
-  // Given a DOM node and a column (count of characters), walk recursively
-  // through the node's siblings counting characters until the character has
-  // been reached.
-  function findTextColPoint(node, col) {
-    var cols = 0;
-    if (node.nodeType === 3) {
-      if (node.nodeValue.length >= col) {
-        return { element: node, offset: col };
-      } else {
-        cols += node.nodeValue.length;
-      }
-    } else if (node.nodeType === 1 && node.firstChild) {
-      var ret = findTextColPoint(node.firstChild, col);
-      if (ret.element !== null) {
-        return ret;
-      } else {
-        cols += ret.offset;
-      }
-    }
-    if (node.nextSibling)
-      return findTextColPoint(node.nextSibling, col - cols);
-    else
-      return { element: null, offset: cols }
-  }
-
-  // Returns an object indicating the element contain the given line and 
-  // column of text, and the offset into that element where the text was 
-  // found. 
-  //
-  // If the given line and column are not found, returns a null element and
-  // the number of lines found.
-  function findTextPoint(el, line, col) {
-    var newlines = 0;
-    for (childId in el.childNodes) {
-      var child = el.childNodes[childId];
-      // If this is a text node, count the number of newlines it contains.
-      if (child.nodeType === 3) {  // TEXT_NODE
-        var newlinere = /\n/g;
-        var match;
-        while ((match = newlinere.exec(child.nodeValue)) !== null) {
-          newlines++;
-          // Found the desired line, now find the column.
-          if (newlines === line) {
-            return findTextColPoint(child, match.index + col + 1);
-          }
-        }
-      }
-      // If this is not a text node, descend recursively to see how many 
-      // lines it contains.
-      else if (child.nodeType === 1) { // ELEMENT_NODE
-        var ret = findTextPoint(child, line - newlines, col);
-        if (ret.element !== null)
-          return ret; 
-        else 
-          newlines += ret.offset;
-      }
-    }
-    return { element: null, offset: newlines };
-  }
-
-
   var codeWindow = window;
-  var popoutWindowOpen = false;
   exports.popOutCode = function() {
-    if (popoutWindowOpen) {
+    if (codeWindow !== window) {
       // If the code window is already open, just bring it to the front
       codeWindow.focus();
     }
@@ -480,13 +418,11 @@
                                  "width=" + (screen.width / 3) + "," +
                                  "height=" + (screen.height / 2) + "," +
                                  "toolbar=0,location=0"); 
-      popoutwindowOpen = true;
     }
   }
   
   exports.closePopOutCode = function() {
     codeWindow = window;
-    popoutWindowOpen = false;
   }
 
   // =========================================================================
@@ -950,44 +886,12 @@
     });
 
     addCustomMessageHandler('reactlog', function(message) {
-      // console.log("reactlog action " + message.action + " id " + message.id);
-      if (message.srcref) {
-        var doc = codeWindow.document;
-        var el = doc.getElementById("srcref_" + message.srcref);
-        if (!el) {
-          el = doc.createElement("span");
-          el.id = "srcref_" + message.srcref;
-          var ref = message.srcref;
-          var code = doc.getElementById("server-r-code"); 
-          var start = findTextPoint(code, ref[0], ref[4]); 
-          var end = findTextPoint(code, ref[2], ref[5]); 
-          var range = doc.createRange();
-          // If the text points are inside a <SPAN>, we won't be able to 
-          // surround them without breaking apart SPANs to keep the DOM tree
-          // intact. Just move the selection points to encompass the contents
-          // of the SPANs. 
-          if (start.element.parentNode.nodeName === "SPAN" &&
-              start.element !== end.element) {
-            range.setStartBefore(start.element.parentNode);
-          } else {
-            range.setStart(start.element, start.offset);
-          }
-          if (end.element.parentNode.nodeName === "SPAN" && 
-              start.element !== end.element) {
-            range.setEndAfter(end.element.parentNode);
-          } else {
-            range.setEnd(end.element, end.offset);
-          }
-          range.surroundContents(el);
-        }
-        // End any previous highlight before starting this one
-        $(el).stop(true, true);
-        $(el).effect("highlight", null, 1600);
+      if (message.srcref && codeWindow.highlightSrcref) {
+        codeWindow.highlightSrcref(message.srcref)
       }
     });
 
   }).call(ShinyApp.prototype);
-
 
   // =========================================================================
   // File Processor

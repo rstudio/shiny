@@ -140,6 +140,7 @@ writeShowcaseHead <- function(connection) {
   writeLines(c('  <script src="shared/highlight/highlight.pack.js"></script>',
                '  <script src="shared/jquery-ui.js"></script>',
                '  <script src="shared/showdown/src/showdown.js"></script>',
+               '  <script src="shared/shiny-showcase.js"></script>',
                '  <link rel="stylesheet" type="text/css" href="shared/highlight/styles/tomorrow.css" />',
                '  <script type="text/javascript">', 
                '    $(document).ready(function() { ', 

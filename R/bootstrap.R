@@ -717,16 +717,24 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
 #' rather they wait until the user explicitly clicks the submit button.
 #' 
 #' @param text Button caption
+#' @param icon Optional \code{\link{icon}} to appear on the button
 #' @return A submit button that can be added to a UI definition.
 #' 
 #' @family input elements
 #'
 #' @examples
 #' submitButton("Update View")
+#' submitButton("Update View", icon("refresh"))
 #' @export
-submitButton <- function(text = "Apply Changes") {
+submitButton <- function(text = "Apply Changes", icon = NULL) {
+  
+  if (!is.null(icon))
+    buttonContent <- list(icon, text)
+  else
+    buttonContent <- text
+  
   div(
-    tags$button(type="submit", class="btn btn-primary", text)
+    tags$button(type="submit", class="btn btn-primary", buttonContent)
   )
 }
 
@@ -739,6 +747,7 @@ submitButton <- function(text = "Apply Changes") {
 #'   value.
 #' @param label The contents of the button--usually a text label, but you could
 #'   also use any other HTML, like an image.
+#' @param icon Optional \code{\link{icon}} to appear on the button
 #'
 #' @family input elements
 #' @examples
@@ -757,8 +766,17 @@ submitButton <- function(text = "Apply Changes") {
 #' actionButton("goButton", "Go!")
 #' }
 #' @export
-actionButton <- function(inputId, label) {
-  tags$button(id=inputId, type="button", class="btn action-button", label)
+actionButton <- function(inputId, label, icon = NULL) {
+  
+  if (!is.null(icon))
+    buttonContent <- list(icon, label)
+  else
+    buttonContent <- label
+  
+  tags$button(id=inputId, 
+              type="button", 
+              class="btn action-button", 
+              buttonContent)
 }
 
 #' Slider Input Widget
@@ -1063,6 +1081,8 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #' @param value The value that should be sent when \code{tabsetPanel} reports 
 #'   that this tab is selected. If omitted and \code{tabsetPanel} has an 
 #'   \code{id}, then the title will be used..
+#' @param icon Optional icon to appear on the tab. This attribute is only
+#' valid when using a \code{tabPanel} within a \code{\link{navbarPage}}.
 #' @return A tab that can be passed to \code{\link{tabsetPanel}}
 #'
 #' @seealso \code{\link{tabsetPanel}}
@@ -1078,10 +1098,11 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #'   )
 #' )
 #' @export
-tabPanel <- function(title, ..., value = NULL) {
+tabPanel <- function(title, ..., value = NULL, icon = NULL) {
   divTag <- div(class="tab-pane", 
                 title=title, 
                 `data-value`=value,
+                `data-icon-class` = iconClass(icon),
                 ...)
 }
 
@@ -1162,11 +1183,25 @@ buildTabset <- function(tabs, navTabs, id = NULL, selected = NULL) {
            "has a value. The value won't be sent without an id.")
     }
 
+    # create the a tag
+    aTag <- tags$a(href=paste("#", thisId, sep=""),
+                   `data-toggle` = "tab", 
+                   `data-value` = tabValue)
+    
+    # append optional icon
+    iconClass <- divTag$attribs$`data-icon-class`
+    if (!is.null(iconClass)) {
+      # for font-awesome we specify fixed-width
+      if (grepl("fa-", iconClass, fixed = TRUE))
+        iconClass <- paste(iconClass, "fa-fw")
+      aTag <- tagAppendChild(aTag, icon(name = NULL, class = iconClass))
+    }
+    
+    # append title
+    aTag <- tagAppendChild(aTag, divTag$attribs$title)
+    
     # create the li tag
-    liTag <- tags$li(tags$a(href=paste("#", thisId, sep=""),
-                            `data-toggle` = "tab", 
-                            `data-value` = tabValue,
-                            divTag$attribs$title))
+    liTag <- tags$li(aTag)
     
     if (is.null(tabValue)) {
       tabValue <- divTag$attribs$title
@@ -1384,12 +1419,15 @@ uiOutput <- function(outputId) {
 #' @aliases downloadLink
 #' @seealso downloadHandler
 #' @export
-downloadButton <- function(outputId, label="Download", class=NULL) {
-  tags$a(id=outputId,
-         class=paste(c('btn shiny-download-link', class), collapse=" "),
-         href='',
-         target='_blank',
-         label)
+downloadButton <- function(outputId, 
+                           label="Download", 
+                           class=NULL) {
+  aTag <- tags$a(id=outputId,
+                 class=paste(c('btn shiny-download-link', class), collapse=" "),
+                 href='',
+                 target='_blank',
+                 icon("download"),
+                 label)
 }
 
 #' @rdname downloadButton
@@ -1404,17 +1442,68 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
 
 
 #' Create an icon
+#' 
+#' Create an icon for use within a page. Icons can appear on their own,
+#' inside of a button, or as an icon for a \code{\link{tabPanel}} within a
+#' \code{\link{navbarPage}}.
+#' 
+#' @param name Name of icon. Icons are drawn from the 
+#'   \href{http://fontawesome.io/icons/}{Font Awesome} library. Note that the 
+#'   "fa-" prefix should not be used in icon names (i.e. the "fa-calendar" icon 
+#'   should be referred to as "calendar")
+#' @param class Additional classes to customize the style of the icon (see the 
+#'  \href{http://fontawesome.io/examples/}{usage examples} for 
+#'   details on supported styles).
+#' @param lib Icon library to use ("font-awesome" is only one currently 
+#'   supported)
+#'   
+#' @return An icon element   
 #'
-#' Create an icon for use within an appplication. Icons can appear on their own
-#' or as part of buttons and tabPanels.
-#'
-#' @param name Name of icon 
-#' @param class Additional class attributes for the icon
-#' @param lib Icon library to use (only "font-awesome" is currently supported)
-#' @return An icon element 
+#'   
+#' @examples
+#' icon("calendar")            # standard icon
+#' icon("calendar", "fa-3x")   # 3x normal size
+#' 
+#' # add an icon to a submit button
+#' submitButton("Update View", icon = icon("refresh"))
+#' 
+#' shinyUI(navbarPage("App Title",
+#'   tabPanel("Plot", icon = icon("bar-chart-o")), 
+#'   tabPanel("Summary", icon = icon("list-alt")), 
+#'   tabPanel("Table", icon = icon("table"))
+#' ))
+#' 
 #' @export
 icon <- function(name, class = NULL, lib = "font-awesome") {
   
+  # determine stylesheet
+  if (!identical(lib, "font-awesome"))
+    stop("Unknown font library '", lib, "' specified")
+  
+  # build the icon class (allow name to be null so that other functions
+  # e.g. builtTabset can pass an explict class value)
+  iconClass <- ""
+  if (!is.null(name))
+    iconClass <- paste0("fa fa-", name)
+  if (!is.null(class))
+    iconClass <- paste(iconClass, class)
+  
+  # return the element and css dependency
+  tagList(
+    singleton(tags$head(
+      tags$link(rel = "stylesheet", type = "text/css",
+                href = 'shared/font-awesome/css/font-awesome.min.css')
+    )),
+    tags$i(class = iconClass)
+  ) 
+}
+
+# Helper funtion to extract the class from an icon
+iconClass <- function(icon) {
+  if (is.null(icon))
+    NULL
+  else
+    icon[[2]]$attribs$class  
 }
 
 #' Validate proper CSS formatting of a unit

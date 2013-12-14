@@ -2,7 +2,7 @@
 \alias{tabPanel}
 \title{Create a tab panel}
 \usage{
-  tabPanel(title, ..., value = NULL)
+  tabPanel(title, ..., value = NULL, icon = NULL)
 }
 \arguments{
   \item{title}{Display title for tab}
@@ -13,6 +13,10 @@
   \code{tabsetPanel} reports that this tab is selected. If
   omitted and \code{tabsetPanel} has an \code{id}, then the
   title will be used..}
+
+  \item{icon}{Optional icon to appear on the tab. This
+  attribute is only valid when using a \code{tabPanel}
+  within a navbar.}
 }
 \value{
   A tab that can be passed to \code{\link{tabsetPanel}}

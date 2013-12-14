@@ -1509,7 +1509,8 @@ stopApp <- function(returnValue = NULL) {
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only.
-#'
+#' @param host The IPv4 address that the application should listen on. Defaults
+#'   to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not.
 #' @examples
 #' \dontrun{
 #' # List all available examples

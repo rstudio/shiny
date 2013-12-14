@@ -44,7 +44,6 @@ mainPanel(
 )
 }
 \seealso{
-  \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}},
-  \code{\link{tabsetPage}}
+  \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
 }
 

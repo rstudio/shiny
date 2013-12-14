@@ -36,6 +36,8 @@ shiny 0.8.0.99
 
 * Added `hr()` builder function for creating horizontal rules.
 
+# Added `alertPanel()` function for showing user alerts
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

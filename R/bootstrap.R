@@ -1401,6 +1401,86 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
          label)
 }
 
+
+#' Show an alert panel
+#' 
+#' Show an alert panel with warning, error, or informational content. Alert 
+#' panels use a distinct background color designed to gain the user's attention 
+#' immediately.
+#' 
+#' @param ... Contents of the alert panel. Often a simple text value 
+#'   however arbitrary formatting and UI elements can be included.
+#' @param type Type of alert (determines the background color of the alert 
+#'   panel). Can be "warning", "error", "success", or "info" (defaults to 
+#'   "warning").
+#' @param closeable Allow the user to dismiss the alert (useful for dynamic
+#'   alerts).
+#' @param block Provide extra padding around the alert's content (useful if 
+#'   there is a lot of alert text).
+#'   
+#' @details Alert panels are typically shown dynamically with 
+#'   \code{\link{renderUI}} in response to specific conditions within the 
+#'   application (see example below).
+#'   
+#' @examples
+#' \dontrun{
+#' 
+#' # Specifying a uiOutput placeholder for a dynamic alert in ui.R:
+#' mainPanel(
+#'   uiOutput("alert"),
+#'   plotOutput("plot")
+#' )
+#' 
+#' # Generating the dynamic alert in server.R:
+#' output$alert <- renderUI({ 
+#'   alertPanel("This might take a while...") 
+#' })
+#' }
+#' 
+#' # Change the type of alert to error
+#' alertPanel(type = "error", "Invalid range specified")
+#' 
+#' # Use a heading 
+#' alertPanel(h4("Warning"), 
+#'           "The uploaded dataset is very large and ",
+#'           "will take a long time to process")
+#'  
+#' @export
+alertPanel <- function(...,
+                       type = c("warning", "error", "success", "info"),
+                       closeable = TRUE,
+                       block = FALSE) {
+  
+  # build alert class
+  alertClass <- "alert"
+  
+  # add type qualifier if necessary
+  type <- match.arg(type)
+  if (type != "warning")
+    alertClass <- paste0(alertClass, " alert-", type)
+  
+  # add block style if requested
+  if (block)
+    alertClass <- paste(alertClass, "alert-block")
+  
+  # build alert div. since this is typically created in a reactiveUI block we
+  # need to generate some uniqueness so that the client re-renders the UI
+  # (otherwise it would ignore it when the same alert message is sent 
+  # consecutively). we use the data-unique attribute to do this.
+  alertDiv <- div(class = alertClass, 
+                  `data-unique` = runif(1, min=1, max=1000))
+  if (closeable) {
+    closeButton <- tags$button(type = "button",
+                               class = "close",
+                               `data-dismiss` = "alert",
+                               HTML("&times;"))
+    alertDiv <- tagAppendChild(alertDiv, closeButton) 
+  }
+  alertDiv <- tagAppendChildren(alertDiv, list = list(...))
+  alertDiv
+}
+
+
 #' Validate proper CSS formatting of a unit
 #' 
 #' @param x The unit to validate. Will be treated as a number of pixels if a 

@@ -26,9 +26,7 @@ shinyServer(function(input, output) {
     # more than 25 requested
     n = input$obs
     if (n > 25)
-      output$alert <- renderUI({ 
-        alertPanel("That's a lot of observations!")
-      })
+      output$alert <- renderUI(alert("That's a lot of observations!"))
     
     # return the requested number of observations
     head(datasetInput(), n)

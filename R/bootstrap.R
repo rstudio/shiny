@@ -1102,8 +1102,7 @@ tabPanel <- function(title, ..., value = NULL) {
 #' values are "above", "below", "left", and "right" (defaults to "above")
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
-#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}, 
-#' \code{\link{tabsetPage}}
+#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and

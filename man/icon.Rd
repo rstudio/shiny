@@ -24,7 +24,8 @@
 }
 \description{
   Create an icon for use within a page. Icons can appear on
-  their own or as a part of a button or navbar menu.
+  their own, inside of a button, or as an icon for a
+  \code{\link{tabPanel}} within a \code{\link{navbarPage}}.
 }
 \examples{
 icon("calendar")            # standard icon
@@ -32,5 +33,11 @@ icon("calendar", "fa-3x")   # 3x normal size
 
 # add an icon to a submit button
 submitButton("Update View", icon = icon("refresh"))
+
+shinyUI(navbarPage("App Title",
+  tabPanel("Plot", icon = icon("bar-chart-o")),
+  tabPanel("Summary", icon = icon("list-alt")),
+  tabPanel("Table", icon = icon("table"))
+))
 }
 

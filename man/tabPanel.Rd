@@ -16,7 +16,7 @@
 
   \item{icon}{Optional icon to appear on the tab. This
   attribute is only valid when using a \code{tabPanel}
-  within a navbar.}
+  within a \code{\link{navbarPage}}.}
 }
 \value{
   A tab that can be passed to \code{\link{tabsetPanel}}

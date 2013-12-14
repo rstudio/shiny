@@ -308,12 +308,15 @@ wellPanel <- function(...) {
 
 #' Create a sidebar panel
 #' 
-#' Create a sidebar panel containing input controls that can in turn be 
-#' passed to \link{pageWithSidebar}.
+#' Create a sidebar panel containing input controls that can in turn be passed
+#' to \code{\link{sidebarLayout}}.
 #' 
 #' @param ... UI elements to include on the sidebar
-#' @return A sidebar that can be passed to \link{pageWithSidebar}
-#' 
+#' @param width The width of the sidebar. For fluid layouts this is out of 12
+#'   total units; for fixed layouts it is out of whatever the width of the
+#'   sidebar's parent column is.
+#' @return A sidebar that can be passed to \code{\link{sidebarLayout}}
+#'   
 #' @examples
 #' # Sidebar with controls to select a dataset and specify
 #' # the number of observations to view
@@ -324,8 +327,8 @@ wellPanel <- function(...) {
 #'   numericInput("obs", "Observations:", 10)
 #' )
 #' @export
-sidebarPanel <- function(...) {
-  div(class="span4",
+sidebarPanel <- function(..., width = 4) {
+  div(class=paste0("span", width),
     tags$form(class="well", 
       ...
     )
@@ -334,12 +337,15 @@ sidebarPanel <- function(...) {
 
 #' Create a main panel
 #' 
-#' Create a main panel containing output elements that can in turn be 
-#' passed to \link{pageWithSidebar}.
+#' Create a main panel containing output elements that can in turn be passed to 
+#' \code{\link{sidebarLayout}}.
 #' 
-#' @param ... Ouput elements to include in the main panel
-#' @return A main panel that can be passed to \link{pageWithSidebar}
-#' 
+#' @param ... Output elements to include in the main panel
+#' @param width The width of the main panel. For fluid layouts this is out of 12
+#'   total units; for fixed layouts it is out of whatever the width of the main 
+#'   panel's parent column is.
+#' @return A main panel that can be passed to \code{\link{sidebarLayout}}.
+#'   
 #' @examples
 #' # Show the caption and plot of the requested variable against mpg
 #' mainPanel(
@@ -347,8 +353,8 @@ sidebarPanel <- function(...) {
 #'    plotOutput("mpgPlot")
 #' )
 #' @export
-mainPanel <- function(...) {
-  div(class="span8",
+mainPanel <- function(..., width = 8) {
+  div(class=paste0("span", width),
     ...
   )
 }

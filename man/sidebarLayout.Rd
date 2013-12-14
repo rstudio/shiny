@@ -3,8 +3,7 @@
 \title{Layout a sidebar and main area}
 \usage{
   sidebarLayout(sidebarPanel, mainPanel,
-    position = c("left", "right"), fluid = TRUE,
-    widths = c(4, 8))
+    position = c("left", "right"), fluid = TRUE)
 }
 \arguments{
   \item{sidebarPanel}{The \link{sidebarPanel} containing
@@ -17,12 +16,6 @@
 
   \item{fluid}{\code{TRUE} to use fluid layout;
   \code{FALSE} to use fixed layout.}
-
-  \item{widths}{The columns widths of the sidebar and main
-  panel (the first value is for the sidebar; the second for
-  the main panel). Note that if you are using fixed layout
-  you may need to adjust these to accomodate the size of
-  the container if it's less than 12 units wide.}
 }
 \description{
   Create a layout with a sidebar and main area. The sidebar

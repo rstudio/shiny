@@ -224,10 +224,6 @@ titlePanel <- function(title, windowTitle=title) {
 #'   or "right")
 #' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
 #'   layout.
-#' @param widths The columns widths of the sidebar and main panel (the first
-#'   value is for the sidebar; the second for the main panel). Note that if 
-#'   you are using fixed layout you may need to adjust these to accomodate 
-#'   the size of the container if it's less than 12 units wide.
 #'   
 #' @examples
 #' # Define UI
@@ -258,13 +254,8 @@ titlePanel <- function(title, windowTitle=title) {
 sidebarLayout <- function(sidebarPanel,
                           mainPanel,
                           position = c("left", "right"),
-                          fluid = TRUE,
-                          widths = c(4, 8)) {
-  
-  # validate that inputs were created by their respective functions
-  validateSpan(sidebarPanel, "sidebarPanel", widths[[1]])
-  validateSpan(mainPanel, "mainPanel", widths[[2]])
-  
+                          fluid = TRUE) {
+    
   # determine the order 
   position <- match.arg(position)
   if (position == "left") {
@@ -311,27 +302,6 @@ verticalLayout <- function(..., fluid = TRUE) {
     else
       fixedRow(col)
   })
-}
-
-
-# Helper function to test whether an element has a span class
-validateSpan <- function(element, name, width = NA) {
-  
-  if (!is.list(element) || 
-      is.null(element$attribs) || 
-      is.null(element$attribs$class)) {
-    stop(name, " does not have a valid column span", call. = FALSE)
-  } 
-  else {
-    test <- paste0("span", ifelse(is.na(width), "", width))
-    if (!grepl(test, element$attribs$class)) {
-      msg <- paste(name, "does not have a valid column span")
-      if (!is.na(width)) {
-        msg <- paste0(msg, " (it must be span", width, ")")
-        stop(msg, call. = FALSE)
-      }
-    }
-  }
 }
 
 

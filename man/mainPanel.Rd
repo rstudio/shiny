@@ -2,17 +2,23 @@
 \alias{mainPanel}
 \title{Create a main panel}
 \usage{
-  mainPanel(...)
+  mainPanel(..., width = 8)
 }
 \arguments{
-  \item{...}{Ouput elements to include in the main panel}
+  \item{...}{Output elements to include in the main panel}
+
+  \item{width}{The width of the main panel. For fluid
+  layouts this is out of 12 total units; for fixed layouts
+  it is out of whatever the width of the main panel's
+  parent column is.}
 }
 \value{
-  A main panel that can be passed to \link{pageWithSidebar}
+  A main panel that can be passed to
+  \code{\link{sidebarLayout}}.
 }
 \description{
   Create a main panel containing output elements that can
-  in turn be passed to \link{pageWithSidebar}.
+  in turn be passed to \code{\link{sidebarLayout}}.
 }
 \examples{
 # Show the caption and plot of the requested variable against mpg

@@ -2,7 +2,7 @@
 \alias{actionButton}
 \title{Action button}
 \usage{
-  actionButton(inputId, label)
+  actionButton(inputId, label, icon = NULL)
 }
 \arguments{
   \item{inputId}{Specifies the input slot that will be used
@@ -11,6 +11,9 @@
   \item{label}{The contents of the button--usually a text
   label, but you could also use any other HTML, like an
   image.}
+
+  \item{icon}{Optional \code{\link{icon}} to appear on the
+  button}
 }
 \description{
   Creates an action button whose value is initially zero,

@@ -36,7 +36,11 @@ shiny 0.8.0.99
 
 * Added `hr()` builder function for creating horizontal rules.
 
-# Added `alert()` function for showing user alerts
+* Added `icon()` function for embedding icons from the 
+[http://fontawesome.io/](font awesome) icon library 
+
+* Added `alert()` function for showing user alerts.
+
 
 shiny 0.8.0
 --------------------------------------------------------------------------------

@@ -521,7 +521,7 @@ ShinySession <- R6Class(
     },
 
     # Public RPC methods
-    `@uploadInit` = function(fileInfos) {
+    `@uploadInit` = function(fileInfos = list()) {
       maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
       fileInfos <- lapply(fileInfos, function(fi) {
         if (is.null(fi$type))
@@ -581,6 +581,11 @@ ShinySession <- R6Class(
 
           return(httpResponse(200, 'text/plain', 'OK'))
         }
+      }
+
+      if (matches[2] == 'upload2' && identical(req$REQUEST_METHOD, "POST")) {
+        id <- URLdecode(matches[3])
+        .input$set(id, Math.runif(1))
       }
 
       if (matches[2] == 'download') {

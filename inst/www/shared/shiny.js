@@ -2644,6 +2644,37 @@
   });
   inputBindings.register(bootstrapTabInputBinding, 'shiny.bootstrapTabInput');
 
+  var IE8FileUploader = function(shinyapp, id, fileEl) {
+    this.shinyapp = shinyapp;
+    this.id = id;
+    this.fileEl = fileEl;
+    this.beginUpload();
+  };
+  (function() {
+    this.beginUpload = function() {
+      var self = this;
+      // Create invisible frame
+      var iframeId = 'shinyupload_iframe_' + this.id;
+      this.iframe = document.createElement('iframe');
+      this.iframe.id = iframeId;
+      this.iframe.name = iframeId;
+      this.iframe.src = 'about:blank';
+      this.iframe.setAttribute('style', 'position: fixed; top: 0; left: 0; width: 0; height: 0; border: none');
+      this.iframe.onload = function() {
+        $(self.iframe).remove();
+      };
+      $('body').append(this.iframe);
+
+      this.form = document.createElement('form');
+      this.form.method = 'POST';
+      this.form.setAttribute('enctype', 'multipart/form-data');
+      this.form.action = "session/" + escape(this.config.sessionId) + "/upload2/" + escape(this.id);
+      this.form.id = 'shinyupload_form_' + this.id;
+      this.form.target = iframeId;
+      $(this.form).insertAfter(this.fileEl).append(this.fileEl);
+      this.form.submit();
+    };
+  }).call(IE8FileUploader.prototype);
 
   var FileUploader = function(shinyapp, id, files) {
     this.shinyapp = shinyapp;
@@ -2784,7 +2815,8 @@
       return;
 
     // Start the new upload and put the uploader in 'currentUploader'.
-    el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+    //el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+    el.data('currentUploader', new IE8FileUploader(exports.shinyapp, id, evt.target));
   }
 
   var fileInputBinding = new InputBinding();

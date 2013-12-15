@@ -72,13 +72,6 @@ ShinySession <- setRefClass(
       clientData <<- .createReactiveValues(.clientData, readonly=TRUE)
       .setLabel(clientData, 'clientData')
       
-      observe({
-        # clientData$singletons tells us what singletons were part of the
-        # initial page render
-        if (!is.null(clientData$singletons))
-          singletons <<- strsplit(clientData$singletons, ',')[[1]]
-      })
-      
       output     <<- .createOutputWriter(.self)
       
       token <<- createUniqueId(16)
@@ -1248,6 +1241,14 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
             serverFunc <- serverFuncSource()
             
             shinysession$manageInputs(msg$data)
+
+            # The client tells us what singletons were rendered into
+            # the initial page
+            if (!is.null(msg$data$.clientdata_singletons)) {
+              shinysession$singletons <<- strsplit(
+                msg$data$.clientdata_singletons, ',')[[1]]
+            }
+
             local({
               args <- list(
                 input=shinysession$input,

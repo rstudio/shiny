@@ -675,12 +675,11 @@ makeReactiveBinding <- function(symbol, env = parent.frame()) {
 
 # Causes flushReact to be called every time an expression is
 # entered into the top-level prompt
-setAutoflush <- function(enable) {}
-local({
+setAutoflush <- local({
   callbackId <- NULL
   
-  setAutoflush <<- function(enable) {
-    if (identical(is.null(callbackId), !isTRUE(enable))) {
+  function(enable) {
+    if (xor(is.null(callbackId), isTRUE(enable))) {
       return(invisible())
     }
     

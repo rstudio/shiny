@@ -298,3 +298,22 @@ test_that("Flattening a list of tags", {
                structure("txt2", prop="prop2"))
   expect_identical(flattenTags(nested), flat)
 })
+
+test_that("Head and singleton behavior", {
+  result <- renderTags(tagList(
+    tags$head(singleton("hello"))
+  ))
+  
+  expect_identical(result$html, HTML(""))
+  expect_identical(result$head, HTML("  hello"))
+  expect_identical(result$singletons, "60eed8231e688bcba7c275c58dd2e3b4dacb61f0")
+  
+  # Ensure that "hello" actually behaves like a singleton
+  result2 <- renderTags(tagList(
+    tags$head(singleton("hello"))
+  ), singletons = result$singletons)
+  
+  expect_identical(result$singletons, result2$singletons)
+  expect_identical(result2$head, HTML(""))
+  expect_identical(result2$html, HTML(""))
+})

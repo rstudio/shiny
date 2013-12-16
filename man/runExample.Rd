@@ -16,6 +16,10 @@
   \item{launch.browser}{If true, the system's default web
   browser will be launched automatically after the app is
   started. Defaults to true in interactive sessions only.}
+
+  \item{host}{The IPv4 address that the application should
+  listen on. Defaults to the \code{shiny.host} option, if
+  set, or \code{"127.0.0.1"} if not.}
 }
 \description{
   Launch Shiny example applications, and optionally, your

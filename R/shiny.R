@@ -72,13 +72,6 @@ ShinySession <- setRefClass(
       clientData <<- .createReactiveValues(.clientData, readonly=TRUE)
       .setLabel(clientData, 'clientData')
       
-      observe({
-        # clientData$singletons tells us what singletons were part of the
-        # initial page render
-        if (!is.null(clientData$singletons))
-          singletons <<- strsplit(clientData$singletons, ',')[[1]]
-      })
-      
       output     <<- .createOutputWriter(.self)
       
       token <<- createUniqueId(16)
@@ -1265,6 +1258,14 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
                          isShowcaseQuerystring(msg$data$.clientdata_url_search)
             
             shinysession$manageInputs(msg$data)
+
+            # The client tells us what singletons were rendered into
+            # the initial page
+            if (!is.null(msg$data$.clientdata_singletons)) {
+              shinysession$singletons <<- strsplit(
+                msg$data$.clientdata_singletons, ',')[[1]]
+            }
+
             local({
               args <- list(
                 input=shinysession$input,
@@ -1533,7 +1534,8 @@ stopApp <- function(returnValue = NULL) {
 #' @param launch.browser If true, the system's default web browser will be 
 #'   launched automatically after the app is started. Defaults to true in 
 #'   interactive sessions only.
-#'
+#' @param host The IPv4 address that the application should listen on. Defaults
+#'   to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not.
 #' @examples
 #' \dontrun{
 #' # List all available examples

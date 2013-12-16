@@ -1,26 +1,33 @@
-#' Create a Twitter Bootstrap page
+#' Create a Bootstrap page
 #' 
-#' Create a Shiny UI page that loads the CSS and JavaScript for
-#' \href{http://getbootstrap.com}{Twitter Bootstrap}, and has no content in the
+#' Create a Shiny UI page that loads the CSS and JavaScript for 
+#' \href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and has no content in the 
 #' page body (other than what you provide).
 #' 
-#' These functions are primarily intended for users who are proficient in
-#' HTML/CSS, and know how to lay out pages in Bootstrap. Most users should use
-#' template functions like \code{\link{pageWithSidebar}}.
-#'
-#' \code{basicPage} is the same as \code{bootstrapPage}, with an added
-#' \code{<div class="container-fluid">} wrapper to provide a little padding.
+#' This function is primarily intended for users who are proficient in 
+#' HTML/CSS, and know how to lay out pages in Bootstrap. Most applications 
+#' should use \code{\link{fluidPage}} along with layout functions like
+#' \code{\link{fluidRow}} and \code{\link{sidebarLayout}}.
 #' 
 #' @param ... The contents of the document body.
-#' @param head Tag or list of tags to be inserted into the head of the document
-#' (for example, addition of required Javascript or CSS resources via
-#' \code{tags$script} or \code{tags$style})
+#' @param title The browser window title (defaults to the host URL of the page)
+#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
+#'   and resize page elements based on the size of the viewing device)
+#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
+#'   www directory, e.g. \code{www/bootstrap.css})
+#'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
-#' 
+#'   
+#' @note The \code{basicPage} function is deprecated, you should use the 
+#'   \code{\link{fluidPage}} function instead.
+#'   
+#' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
+#'   
 #' @export
-bootstrapPage <- function(..., head = list()) {
+bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
+  
   # required head tags for boostrap
-  importBootstrap <- function(min = TRUE, responsive = TRUE) {
+  importBootstrap <- function(min = TRUE) {
     
     ext <- function(ext) {
       ifelse(min, paste(".min", ext, sep=""), ext)
@@ -29,13 +36,19 @@ bootstrapPage <- function(..., head = list()) {
     jsExt = ext(".js")
     bs <- "shared/bootstrap/"
     
+    # apply theme if requested
+    if (is.null(theme)) 
+      cssHref <- paste(bs, "css/bootstrap", cssExt, sep="")
+    else 
+      cssHref <- theme
+    
     result <- tags$head(
-      tags$link(rel="stylesheet", 
-                type="text/css", 
-                href=paste(bs, "css/bootstrap", cssExt, sep="")),
-      
+      tags$link(rel="stylesheet", type="text/css", href=cssHref),
       tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
     )
+    
+    if (!is.null(title))
+      result <- tagAppendChild(result, tags$title(title))
     
     if (responsive) {
       result <- tagAppendChild(
@@ -56,9 +69,6 @@ bootstrapPage <- function(..., head = list()) {
     # inject bootstrap requirements into head
     importBootstrap(),
     
-    # other head tags
-    tags$head(head),
-    
     # remainder of tags passed to the function
     list(...)
   )
@@ -66,7 +76,7 @@ bootstrapPage <- function(..., head = list()) {
 
 #' @rdname bootstrapPage
 #' @export
-basicPage <- function(..., head = list()) {
+basicPage <- function(...) {
   bootstrapPage(div(class="container-fluid", list(...)))
 }
 
@@ -78,10 +88,11 @@ basicPage <- function(..., head = list()) {
 #' @param headerPanel The \link{headerPanel} with the application title
 #' @param sidebarPanel The \link{sidebarPanel} containing input controls
 #' @param mainPanel The \link{mainPanel} containing outputs
-#' @param head Tag or list of tags to be inserted into the head of the document
-#' (for example, addition of required Javascript or CSS resources via
-#' \code{tags$script} or \code{tags$style})
+
 #' @return A UI defintion that can be passed to the \link{shinyUI} function
+#' 
+#' @note This function is deprecated. You should use \code{\link{fluidPage}} 
+#' along with \code{\link{sidebarLayout}} to implement a page with a sidebar.
 #' 
 #' @examples
 #' # Define UI
@@ -108,12 +119,10 @@ basicPage <- function(..., head = list()) {
 #' @export
 pageWithSidebar <- function(headerPanel, 
                             sidebarPanel, 
-                            mainPanel,
-                            head = list()) {
+                            mainPanel) {
   
   bootstrapPage(
     # basic application container divs
-    head = head,
     div(
       class="container-fluid", 
       div(class="row-fluid", 
@@ -127,58 +136,35 @@ pageWithSidebar <- function(headerPanel,
   )
 }
 
-#' Create a panel with a sidebar
-#' 
-#' Create a panel that includes a sidebar for input controls
-#' and a main area for output
-#' 
-#' @param sidebarPanel The \link{sidebarPanel} containing input controls
-#' @param mainPanel The \link{mainPanel} containing outputs
-#' @return The newly created panel.
-#' 
-#' @examples
-#' panelWithSidebar(
-#'   
-#'   # Sidebar with a slider input
-#'   sidebarPanel(
-#'     sliderInput("obs", 
-#'                 "Number of observations:", 
-#'                 min = 0, 
-#'                 max = 1000, 
-#'                 value = 500)
-#'   ),
-#'   
-#'   # Show a plot of the generated distribution
-#'   mainPanel(
-#'     plotOutput("distPlot")
-#'   )
-#' )
-#'
-#' @export
-panelWithSidebar <- function(sidebarPanel, mainPanel) {
-  div(class="row-fluid", 
-      sidebarPanel, 
-      mainPanel
-  )
-}
-
 #' Create a page with a top level navigation bar
 #' 
-#' Create a page that contains a top level navigation bar that can be used to
+#' Create a page that contains a top level navigation bar that can be used to 
 #' toggle a set of \code{\link{tabPanel}} elements.
 #' 
-#' @param title The application title to display in the navbar
+#' @param title The title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
+#' @param header Tag of list of tags to display as a common header above all 
+#'   tabPanels.
+#' @param footer Tag or list of tags to display as a common footer below all 
+#'   tabPanels
+#' @param inverse \code{TRUE} to use a dark background and light text for the 
+#'   navigation bar
 #' @param collapsable \code{TRUE} to automatically collapse the navigation 
 #'   elements into a menu when the width of the browser is less than 940 pixels 
 #'   (useful for viewing on smaller touchscreen device)
-#' @param inverse \code{TRUE} to use a dark background and light text for the
-#'   navigation bar
-#' @param head Tag or list of tags to be inserted into the head of the document
-#' (for example, addition of required Javascript or CSS resources via
-#' \code{tags$script} or \code{tags$style})
+#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed 
+#'   layout.
+#' @param responsive \code{TRUE} to use responsive layout (automatically adapt 
+#'   and resize page elements based on the size of the viewing device)
+#' @param theme Alternative Bootstrap stylesheet (normally a css file within the
+#'   www directory). For example, to use the theme located at 
+#'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
+#'   
+#' @details The \code{navbarMenu} function can be used to create an embedded 
+#'   menu within the navbar that in turns includes additional tabPanels (see 
+#'   example below).
 #'   
 #' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}}
 #'   
@@ -188,12 +174,24 @@ panelWithSidebar <- function(sidebarPanel, mainPanel) {
 #'   tabPanel("Summary"), 
 #'   tabPanel("Table")
 #' ))
+#' 
+#' shinyUI(navbarPage("App Title",
+#'   tabPanel("Plot"), 
+#'   navbarMenu("More",
+#'     tabPanel("Summary"), 
+#'     tabPanel("Table")
+#'   )
+#' ))
 #' @export
 navbarPage <- function(title, 
                        ..., 
+                       header = NULL,
+                       footer = NULL,
+                       inverse = FALSE,
                        collapsable = FALSE, 
-                       inverse = FALSE, 
-                       head = list()) {
+                       fluid = TRUE,
+                       responsive = TRUE,
+                       theme = NULL) {
   
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title 
@@ -205,7 +203,7 @@ navbarPage <- function(title,
   
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, FALSE)
+  tabset <- buildTabset(tabs, "nav")
   
   # built the container div dynamically to support optional collapsability
   if (collapsable) {
@@ -236,16 +234,45 @@ navbarPage <- function(title,
                         tabset$navList)
   }
 
+  # create a default header if necessary
+  if (length(header) == 0)
+    header <- HTML("&nbsp;")
+  
+  # function to return plain or fluid class name
+  className <- function(name) {
+    if (fluid)
+      paste(name, "-fluid", sep="")
+    else
+      name
+  }
+  
+  # build the main tab content div
+  contentDiv <- div(class=className("container"))
+  if (!is.null(header))
+    contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), header))
+  contentDiv <- tagAppendChild(contentDiv, tabset$content)
+  if (!is.null(footer)) 
+    contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), footer))
+  
   # build the page
   bootstrapPage(
-    head = head,
+    title = title,
+    responsive = responsive,
+    theme = theme,
     div(class=navbarClass,
       div(class="navbar-inner", containerDiv)
     ),
-    div(class="container-fluid", 
-      div(class="row-fluid", HTML("&nbsp;")),
-      tabset$content)
+    contentDiv
   )
+}
+
+#' @rdname navbarPage
+#' @export
+navbarMenu <- function(title, ..., icon = NULL) {
+  structure(list(title = title, 
+                 tabs = list(...), 
+                 iconClass = iconClass(icon)), 
+            class = "shiny.navbarmenu")
 }
 
 #' Create a header panel
@@ -272,7 +299,7 @@ headerPanel <- function(title, windowTitle=title) {
 #' Create a well panel
 #' 
 #' Creates a panel with a slightly inset border and grey background. Equivalent
-#' to Twitter Bootstrap's \code{well} CSS class.
+#' to Bootstrap's \code{well} CSS class.
 #' 
 #' @param ... UI elements to include inside the panel.
 #' @return The newly created panel.
@@ -284,12 +311,15 @@ wellPanel <- function(...) {
 
 #' Create a sidebar panel
 #' 
-#' Create a sidebar panel containing input controls that can in turn be 
-#' passed to \link{pageWithSidebar}.
+#' Create a sidebar panel containing input controls that can in turn be passed
+#' to \code{\link{sidebarLayout}}.
 #' 
 #' @param ... UI elements to include on the sidebar
-#' @return A sidebar that can be passed to \link{pageWithSidebar}
-#' 
+#' @param width The width of the sidebar. For fluid layouts this is out of 12
+#'   total units; for fixed layouts it is out of whatever the width of the
+#'   sidebar's parent column is.
+#' @return A sidebar that can be passed to \code{\link{sidebarLayout}}
+#'   
 #' @examples
 #' # Sidebar with controls to select a dataset and specify
 #' # the number of observations to view
@@ -300,8 +330,8 @@ wellPanel <- function(...) {
 #'   numericInput("obs", "Observations:", 10)
 #' )
 #' @export
-sidebarPanel <- function(...) {
-  div(class="span4",
+sidebarPanel <- function(..., width = 4) {
+  div(class=paste0("span", width),
     tags$form(class="well", 
       ...
     )
@@ -310,12 +340,15 @@ sidebarPanel <- function(...) {
 
 #' Create a main panel
 #' 
-#' Create a main panel containing output elements that can in turn be 
-#' passed to \link{pageWithSidebar}.
+#' Create a main panel containing output elements that can in turn be passed to 
+#' \code{\link{sidebarLayout}}.
 #' 
-#' @param ... Ouput elements to include in the main panel
-#' @return A main panel that can be passed to \link{pageWithSidebar}
-#' 
+#' @param ... Output elements to include in the main panel
+#' @param width The width of the main panel. For fluid layouts this is out of 12
+#'   total units; for fixed layouts it is out of whatever the width of the main 
+#'   panel's parent column is.
+#' @return A main panel that can be passed to \code{\link{sidebarLayout}}.
+#'   
 #' @examples
 #' # Show the caption and plot of the requested variable against mpg
 #' mainPanel(
@@ -323,8 +356,8 @@ sidebarPanel <- function(...) {
 #'    plotOutput("mpgPlot")
 #' )
 #' @export
-mainPanel <- function(...) {
-  div(class="span8",
+mainPanel <- function(..., width = 8) {
+  div(class=paste0("span", width),
     ...
   )
 }
@@ -728,16 +761,24 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
 #' rather they wait until the user explicitly clicks the submit button.
 #' 
 #' @param text Button caption
+#' @param icon Optional \code{\link{icon}} to appear on the button
 #' @return A submit button that can be added to a UI definition.
 #' 
 #' @family input elements
 #'
 #' @examples
 #' submitButton("Update View")
+#' submitButton("Update View", icon("refresh"))
 #' @export
-submitButton <- function(text = "Apply Changes") {
+submitButton <- function(text = "Apply Changes", icon = NULL) {
+  
+  if (!is.null(icon))
+    buttonContent <- list(icon, text)
+  else
+    buttonContent <- text
+  
   div(
-    tags$button(type="submit", class="btn btn-primary", text)
+    tags$button(type="submit", class="btn btn-primary", buttonContent)
   )
 }
 
@@ -750,6 +791,7 @@ submitButton <- function(text = "Apply Changes") {
 #'   value.
 #' @param label The contents of the button--usually a text label, but you could
 #'   also use any other HTML, like an image.
+#' @param icon Optional \code{\link{icon}} to appear on the button
 #'
 #' @family input elements
 #' @examples
@@ -768,8 +810,17 @@ submitButton <- function(text = "Apply Changes") {
 #' actionButton("goButton", "Go!")
 #' }
 #' @export
-actionButton <- function(inputId, label) {
-  tags$button(id=inputId, type="button", class="btn action-button", label)
+actionButton <- function(inputId, label, icon = NULL) {
+  
+  if (!is.null(icon))
+    buttonContent <- list(icon, label)
+  else
+    buttonContent <- label
+  
+  tags$button(id=inputId, 
+              type="button", 
+              class="btn action-button", 
+              buttonContent)
 }
 
 #' Slider Input Widget
@@ -1073,11 +1124,9 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #' @param ... UI elements to include within the tab
 #' @param value The value that should be sent when \code{tabsetPanel} reports 
 #'   that this tab is selected. If omitted and \code{tabsetPanel} has an 
-#'   \code{id}, then the title will be used.
-#' @param condition A JavaScript expression that will be evaluated repeatedly to
-#'   determine whether the tab should be displayed. See
-#'   \code{\link{conditionalPanel}} for additional details on conditional 
-#'   expressions.
+#'   \code{id}, then the title will be used..
+#' @param icon Optional icon to appear on the tab. This attribute is only
+#' valid when using a \code{tabPanel} within a \code{\link{navbarPage}}.
 #' @return A tab that can be passed to \code{\link{tabsetPanel}}
 #'
 #' @seealso \code{\link{tabsetPanel}}
@@ -1093,33 +1142,36 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #'   )
 #' )
 #' @export
-tabPanel <- function(title, ..., value = NULL, condition = NULL) {
+tabPanel <- function(title, ..., value = NULL, icon = NULL) {
   divTag <- div(class="tab-pane", 
                 title=title, 
                 `data-value`=value,
-                `data-display-if` = condition,
+                `data-icon-class` = iconClass(icon),
                 ...)
 }
 
 #' Create a tabset panel
 #' 
-#' Create a tabset that contains \code{\link{tabPanel}} elements. Tabsets are
+#' Create a tabset that contains \code{\link{tabPanel}} elements. Tabsets are 
 #' useful for dividing output into multiple independently viewable sections.
 #' 
 #' @param ... \code{\link{tabPanel}} elements to include in the tabset
-#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your server 
-#'   logic to determine which of the current tabs is active. The value will 
-#'   correspond to the \code{value} argument that is passed to 
+#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your 
+#'   server logic to determine which of the current tabs is active. The value 
+#'   will correspond to the \code{value} argument that is passed to 
 #'   \code{\link{tabPanel}}.
 #' @param selected The \code{value} (or, if none was supplied, the \code{title})
-#'   of the tab that should be selected by default. If \code{NULL}, the first
+#'   of the tab that should be selected by default. If \code{NULL}, the first 
 #'   tab will be selected.
-#' @param tabsPosition The position of the tabs relative to the content. Valid
-#' values are "above", "below", "left", and "right" (defaults to "above")
+#' @param type Use "tabs" for the standard look; Use "pills" for a more plain
+#'   look where tabs are selected using a background fill color.
+#' @param position The position of the tabs relative to the content. Valid 
+#'   values are "above", "below", "left", and "right" (defaults to "above"). 
+#'   Note that the \code{position} argument is not valid when \code{type} is 
+#'   "pill".
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
-#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}, 
-#' \code{\link{tabsetPage}}
+#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -1135,38 +1187,126 @@ tabPanel <- function(title, ..., value = NULL, condition = NULL) {
 tabsetPanel <- function(..., 
                         id = NULL, 
                         selected = NULL, 
-                        tabsPosition = c("above", "below", "left", "right")) { 
+                        type = c("tabs", "pills"),
+                        position = c("above", "below", "left", "right")) { 
   
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, TRUE, id, selected)
+  type <- match.arg(type)
+  tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
   
   # position the nav list and content appropriately
-  tabsPosition <- match.arg(tabsPosition)
-  if (tabsPosition %in% c("above", "left", "right")) {
+  position <- match.arg(position)
+  if (position %in% c("above", "left", "right")) {
     first <- tabset$navList
     second <- tabset$content
-  } else if (tabsPosition %in% c("below")) {
+  } else if (position %in% c("below")) {
     first <- tabset$content
     second <- tabset$navList
   }
   
   # create the tab div
-  tabDiv <- tags$div(class = paste("tabbable tabs-", tabsPosition, sep=""), 
+  tabDiv <- tags$div(class = paste("tabbable tabs-", position, sep=""), 
                      first, 
                      second)
 }
 
-buildTabset <- function(tabs, navTabs, id = NULL, selected = NULL) {
+#' Create a navigation list panel
+#' 
+#' Create a navigation list panel that provides a list of links on the left 
+#' which navigate to a set of tabPanels displayed to the right.
+#' 
+#' @param ... \code{\link{tabPanel}} elements to include in the navlist
+#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your 
+#'   server logic to determine which of the current navlist items is active. The
+#'   value will correspond to the \code{value} argument that is passed to 
+#'   \code{\link{tabPanel}}.
+#' @param selected The \code{value} (or, if none was supplied, the \code{title})
+#'   of the navigation item that should be selected by default. If \code{NULL}, 
+#'   the first navigation will be selected.
+#' @param well \code{TRUE} to place a well (gray rounded rectangle) around the 
+#'   navigation list.
+#' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed 
+#'   layout.
+#' @param widths Column withs of the navigation list and tabset content areas
+#'   respectively.
+#' 
+#' @details You can include headers within the \code{navlistPanel} by 
+#' including plain text elements in the list; you can include separators by
+#' including "------" (any number of dashes works).    
+#'       
+#' @examples
+#' shinyUI(fluidPage(
+#'  
+#'   titlePanel("Application Title"),
+#'  
+#'   navlistPanel(
+#'     "Header",
+#'     tabPanel("First"),
+#'     tabPanel("Second"),
+#'     "-----",
+#'     tabPanel("Third")
+#'   )
+#' ))  
+#' @export
+navlistPanel <- function(..., 
+                         id = NULL, 
+                         selected = NULL,
+                         well = TRUE,
+                         fluid = TRUE, 
+                         widths = c(4, 8)) {
+    
+  # text filter for defining separtors and headers
+  textFilter <- function(text) {
+    if (grepl("^\\-+$", text))
+      tags$li(class="divider")
+    else
+      tags$li(class="nav-header", text)
+  }
+  
+  # build the tabset
+  tabs <- list(...)
+  tabset <- buildTabset(tabs, 
+                        "nav nav-list", 
+                        textFilter,
+                        id, 
+                        selected)
+  
+  # create the columns
+  columns <- list(
+    column(widths[[1]], class=ifelse(well, "well", ""), tabset$navList),
+    column(widths[[2]], tabset$content)
+  )
+  
+  # return the row
+  if (fluid) 
+    fluidRow(columns)
+  else
+    fixedRow(columns)
+}
+
+
+buildTabset <- function(tabs, 
+                        ulClass, 
+                        textFilter = NULL, 
+                        id = NULL, 
+                        selected = NULL) {
   
   # build tab nav list and tab content div
-  navListClass <- ifelse(navTabs, "nav nav-tabs", "nav")
-  tabNavList <- tags$ul(class = navListClass, id = id)
+  tabNavList <- tags$ul(class = ulClass, id = id)
   tabContent <- tags$div(class = "tab-content")
   firstTab <- TRUE
   tabsetId <- as.integer(stats::runif(1, 1, 10000))
   tabId <- 1
   for (divTag in tabs) {
+    
+    # check for text; pass it to the textFilter or skip it if there is none
+    if (is.character(divTag)) {
+      if (!is.null(textFilter))
+        tabNavList <- tagAppendChild(tabNavList, textFilter(divTag))
+      next
+    }
+    
     # compute id and assign it to the div
     thisId <- paste("tab", tabsetId, tabId, sep="-")
     divTag$attribs$id <- thisId
@@ -1178,23 +1318,72 @@ buildTabset <- function(tabs, navTabs, id = NULL, selected = NULL) {
            "has a value. The value won't be sent without an id.")
     }
 
-    # create the li tag
-    liTag <- tags$li(tags$a(href=paste("#", thisId, sep=""),
-                            `data-toggle` = "tab", 
-                            `data-value` = tabValue,
-                            divTag$attribs$title))
+
+    # function to append an optional icon to an aTag
+    appendIcon <- function(aTag, iconClass) {
+      if (!is.null(iconClass)) {
+        # for font-awesome we specify fixed-width
+        if (grepl("fa-", iconClass, fixed = TRUE))
+          iconClass <- paste(iconClass, "fa-fw")
+        aTag <- tagAppendChild(aTag, icon(name = NULL, class = iconClass))
+      }
+      aTag
+    }
     
-    # add condition if appropriate
-    if (!is.null(divTag$attribs$`data-display-if`))
-      liTag$attribs$`data-display-if` <- divTag$attribs$`data-display-if`
+    # check for a navbarMenu and handle appropriately
+    if (inherits(divTag, "shiny.navbarmenu")) {
+      
+      # create the a tag
+      aTag <- tags$a(href="#", 
+                     class="dropdown-toggle", 
+                     `data-toggle`="dropdown")
+      
+      # add optional icon
+      aTag <- appendIcon(aTag, divTag$iconClass)
+      
+      # add the title and caret
+      aTag <- tagAppendChild(aTag, divTag$title)
+      aTag <- tagAppendChild(aTag, tags$b(class="caret"))
+      
+      # build the dropdown list element
+      liTag <- tags$li(class = "dropdown", aTag)
+       
+      # build the child tabset
+      tabset <- buildTabset(divTag$tabs, "dropdown-menu")
+      liTag <- tagAppendChild(liTag, tabset$navList)
+      
+      # don't add a standard tab content div, rather add the list of tab 
+      # content divs that are contained within the tabset 
+      divTag <- NULL
+      tabContent <- tagAppendChildren(tabContent, 
+                                      list = tabset$content$children)
+    }
+    # else it's a standard navbar item
+    else {
+      # create the a tag
+      aTag <- tags$a(href=paste("#", thisId, sep=""),
+                     `data-toggle` = "tab", 
+                     `data-value` = tabValue)
+      
+      # append optional icon
+      aTag <- appendIcon(aTag, divTag$attribs$`data-icon-class`)
+      
+      # add the title
+      aTag <- tagAppendChild(aTag, divTag$attribs$title)
+
+      # create the li tag
+      liTag <- tags$li(aTag)
+    }
     
     if (is.null(tabValue)) {
       tabValue <- divTag$attribs$title
     }
 
-    # If appropriate, make this the selected tab
-    if ((firstTab && is.null(selected)) ||
-        (!is.null(selected) && identical(selected, tabValue))) {
+    # If appropriate, make this the selected tab (don't ever do initial
+    # selection of tabs that are within a navbarMenu)
+    if ((ulClass != "dropdown-menu") &&
+       ((firstTab && is.null(selected)) ||
+        (!is.null(selected) && identical(selected, tabValue)))) {
       liTag$attribs$class <- "active"
       divTag$attribs$class <- "tab-pane active"
       firstTab = FALSE
@@ -1404,12 +1593,15 @@ uiOutput <- function(outputId) {
 #' @aliases downloadLink
 #' @seealso downloadHandler
 #' @export
-downloadButton <- function(outputId, label="Download", class=NULL) {
-  tags$a(id=outputId,
-         class=paste(c('btn shiny-download-link', class), collapse=" "),
-         href='',
-         target='_blank',
-         label)
+downloadButton <- function(outputId, 
+                           label="Download", 
+                           class=NULL) {
+  aTag <- tags$a(id=outputId,
+                 class=paste(c('btn shiny-download-link', class), collapse=" "),
+                 href='',
+                 target='_blank',
+                 icon("download"),
+                 label)
 }
 
 #' @rdname downloadButton
@@ -1420,6 +1612,72 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
          href='',
          target='_blank',
          label)
+}
+
+
+#' Create an icon
+#' 
+#' Create an icon for use within a page. Icons can appear on their own,
+#' inside of a button, or as an icon for a \code{\link{tabPanel}} within a
+#' \code{\link{navbarPage}}.
+#' 
+#' @param name Name of icon. Icons are drawn from the 
+#'   \href{http://fontawesome.io/icons/}{Font Awesome} library. Note that the 
+#'   "fa-" prefix should not be used in icon names (i.e. the "fa-calendar" icon 
+#'   should be referred to as "calendar")
+#' @param class Additional classes to customize the style of the icon (see the 
+#'  \href{http://fontawesome.io/examples/}{usage examples} for 
+#'   details on supported styles).
+#' @param lib Icon library to use ("font-awesome" is only one currently 
+#'   supported)
+#'   
+#' @return An icon element   
+#'
+#'   
+#' @examples
+#' icon("calendar")            # standard icon
+#' icon("calendar", "fa-3x")   # 3x normal size
+#' 
+#' # add an icon to a submit button
+#' submitButton("Update View", icon = icon("refresh"))
+#' 
+#' shinyUI(navbarPage("App Title",
+#'   tabPanel("Plot", icon = icon("bar-chart-o")), 
+#'   tabPanel("Summary", icon = icon("list-alt")), 
+#'   tabPanel("Table", icon = icon("table"))
+#' ))
+#' 
+#' @export
+icon <- function(name, class = NULL, lib = "font-awesome") {
+  
+  # determine stylesheet
+  if (!identical(lib, "font-awesome"))
+    stop("Unknown font library '", lib, "' specified")
+  
+  # build the icon class (allow name to be null so that other functions
+  # e.g. builtTabset can pass an explict class value)
+  iconClass <- ""
+  if (!is.null(name))
+    iconClass <- paste0("fa fa-", name)
+  if (!is.null(class))
+    iconClass <- paste(iconClass, class)
+  
+  # return the element and css dependency
+  tagList(
+    singleton(tags$head(
+      tags$link(rel = "stylesheet", type = "text/css",
+                href = 'shared/font-awesome/css/font-awesome.min.css')
+    )),
+    tags$i(class = iconClass)
+  ) 
+}
+
+# Helper funtion to extract the class from an icon
+iconClass <- function(icon) {
+  if (is.null(icon))
+    NULL
+  else
+    icon[[2]]$attribs$class  
 }
 
 #' Validate proper CSS formatting of a unit

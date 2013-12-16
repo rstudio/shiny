@@ -25,7 +25,7 @@ Imports:
 Suggests:
     datasets,
     markdown,
-    Cairo,
+    Cairo (>= 1.5-4),
     testthat
 URL: http://www.rstudio.com/shiny/
 BugReports: https://github.com/rstudio/shiny/issues
@@ -50,3 +50,4 @@ Collate:
     'run-url.R'
     'imageutils.R'
     'update-input.R'
+    'bootstrap-layout.R'

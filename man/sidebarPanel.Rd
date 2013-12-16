@@ -2,17 +2,23 @@
 \alias{sidebarPanel}
 \title{Create a sidebar panel}
 \usage{
-  sidebarPanel(...)
+  sidebarPanel(..., width = 4)
 }
 \arguments{
   \item{...}{UI elements to include on the sidebar}
+
+  \item{width}{The width of the sidebar. For fluid layouts
+  this is out of 12 total units; for fixed layouts it is
+  out of whatever the width of the sidebar's parent column
+  is.}
 }
 \value{
-  A sidebar that can be passed to \link{pageWithSidebar}
+  A sidebar that can be passed to
+  \code{\link{sidebarLayout}}
 }
 \description{
   Create a sidebar panel containing input controls that can
-  in turn be passed to \link{pageWithSidebar}.
+  in turn be passed to \code{\link{sidebarLayout}}.
 }
 \examples{
 # Sidebar with controls to select a dataset and specify

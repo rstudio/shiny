@@ -2,10 +2,13 @@
 \alias{submitButton}
 \title{Create a submit button}
 \usage{
-  submitButton(text = "Apply Changes")
+  submitButton(text = "Apply Changes", icon = NULL)
 }
 \arguments{
   \item{text}{Button caption}
+
+  \item{icon}{Optional \code{\link{icon}} to appear on the
+  button}
 }
 \value{
   A submit button that can be added to a UI definition.
@@ -18,6 +21,7 @@
 }
 \examples{
 submitButton("Update View")
+submitButton("Update View", icon("refresh"))
 }
 \seealso{
   Other input.elements: \code{\link{actionButton}},

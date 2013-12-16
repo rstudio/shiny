@@ -47,6 +47,9 @@ strong <- function(...) tags$strong(...)
 #' @export
 em <- function(...) tags$em(...)
 
+#' @export
+hr <- function(...) tags$hr(...)
+
 #' Include Content From a File
 #' 
 #' Include HTML, text, or rendered Markdown into a \link[=shinyUI]{Shiny UI}.

@@ -229,7 +229,7 @@ writeShowcaseAppInfo <- function(connection) {
              con = connection)
 }
   
-renderPage <- function(ui, connection, showcase=FALSE) {
+renderPage <- function(ui, connection, showcase=0) {
   
   result <- renderTags(ui)
 
@@ -245,7 +245,7 @@ renderPage <- function(ui, connection, showcase=FALSE) {
                        paste(result$singletons, collapse = ',')
                )),
               con = connection)
-  if (showcase) {
+  if (showcase > 0) {
     writeShowcaseHead(connection)
   }
   writeLines(c(result$head,
@@ -253,14 +253,14 @@ renderPage <- function(ui, connection, showcase=FALSE) {
                '<body>',
                recursive=TRUE),
              con = connection)
-  if (showcase) {
+  if (showcase == 1) {
     writeShowcasePreamble(connection)
   }
   
   # write UI html to connection
   writeLines(result$html, con = connection)
   
-  if (showcase) {
+  if (showcase > 0) {
     writeShowcaseAppInfo(connection)
   }
   
@@ -323,7 +323,7 @@ shinyUI <- function(ui, path='/') {
       textConn <- textConnection(NULL, "w") 
       on.exit(close(textConn))
       
-      renderPage(ui, textConn, isShowcaseReq(req))
+      renderPage(ui, textConn, showcaseModeOfReq(req))
       html <- paste(textConnectionValue(textConn), collapse='\n')
       return(httpResponse(200, content=html))
     }

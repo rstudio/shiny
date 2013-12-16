@@ -1255,7 +1255,7 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
             
             # Check for switching into/out of showcase mode 
             showcase <<- exists(".clientdata_url_search", where = msg$data) &&
-                         isShowcaseQuerystring(msg$data$.clientdata_url_search)
+                         showcaseModeOfQuerystring(msg$data$.clientdata_url_search) > 0
             
             shinysession$manageInputs(msg$data)
 
@@ -1388,10 +1388,9 @@ serviceApp <- function() {
 #' @param workerId Can generally be ignored. Exists to help some editions of
 #'   Shiny Server Pro route requests to the correct process.
 #' @param quiet Should Shiny status messages be shown? Defaults to FALSE.
-#' @param showcase If true, the application will be started in showcase mode. In 
-#'   showcase mode, the application's code is visible, and additional metadata
-#'   from \code{DESCRIPTION} and \code{readme.md} files in the application's
-#'   directory are displayed. Defaults to FALSE.
+#' @param showcase.mode The showcase mode in which to display the application. 
+#'   Possible values are 0 (no showcase, the default), 1 (standalone showcase),
+#'   and 2 (embedded showcase). 
 #'
 #' @examples
 #' \dontrun{
@@ -1420,7 +1419,7 @@ runApp <- function(appDir=getwd(),
                                             interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
                    workerId="", quiet=FALSE, 
-                   showcase=FALSE) {
+                   showcase.mode=0) {
   if (is.null(host) || is.na(host))
     host <- '0.0.0.0'
 
@@ -1488,8 +1487,8 @@ runApp <- function(appDir=getwd(),
   
   if (!is.character(port)) {
     appUrl <- paste("http://", host, ":", port, sep="")
-    if (showcase) 
-      appUrl <- paste(appUrl, "?showcase=1", sep="")
+    if (showcase.mode > 0) 
+      appUrl <- paste(appUrl, "?showcase=", showcase.mode, sep="")
     if (is.function(launch.browser))
       launch.browser(appUrl)
     else if (launch.browser)
@@ -1572,7 +1571,7 @@ runExample <- function(example=NA,
   }
   else {
     runApp(dir, port = port, host = host, launch.browser = launch.browser, 
-           showcase = TRUE)
+           showcase.mode = 1)
   }
 }
 

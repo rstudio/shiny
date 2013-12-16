@@ -431,16 +431,16 @@ srcrefFromShinyCall <- function(expr) {
     srcrefs[[1]][5], srcrefs[[num_exprs]][6])
 }
 
-isShowcaseQuerystring <- function(querystring) {
+showcaseModeOfQuerystring <- function(querystring) {
   if (nchar(querystring) > 0) {
     qs <- parseQueryString(querystring)
     if (exists("showcase", where = qs)) {
-      return(as.logical(as.numeric(qs$showcase)))
+      return(as.numeric(qs$showcase))
     }
   }
-  return(FALSE)
+  return(0)
 }
   
-isShowcaseReq <- function(req) {
-  isShowcaseQuerystring(req$QUERY_STRING)
+showcaseModeOfReq <- function(req) {
+  showcaseModeOfQuerystring(req$QUERY_STRING)
 }

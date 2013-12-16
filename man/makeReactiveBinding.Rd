@@ -1,0 +1,34 @@
+\name{makeReactiveBinding}
+\alias{makeReactiveBinding}
+\title{Make a reactive variable}
+\usage{
+  makeReactiveBinding(symbol, env = parent.frame())
+}
+\arguments{
+  \item{symbol}{A character string indicating the name of
+  the variable that should be made reactive}
+
+  \item{env}{The environment that will contain the reactive
+  variable}
+}
+\value{
+  None.
+}
+\description{
+  Turns a normal variable into a reactive variable, that
+  is, one that has reactive semantics when assigned or read
+  in the usual ways. The variable may already exist; if so,
+  its value will be used as the initial value of the
+  reactive variable (or \code{NULL} if the variable did not
+  exist).
+}
+\examples{
+\dontrun{
+a <- 10
+makeReactiveBinding("a")
+b <- reactive(a * -1)
+observe(print(b))
+a <- 20
+}
+}
+

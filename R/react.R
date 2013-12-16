@@ -91,9 +91,13 @@ ReactiveEnvironment <- setRefClass(
     },
     currentContext = function() {
       if (is.null(.currentContext)) {
-        stop('Operation not allowed without an active reactive context. ',
-             '(You tried to do something that can only be done from inside a ',
-             'reactive function.)')
+        if (isTRUE(getOption('shiny.suppressMissingContextError', FALSE))) {
+          return(dummyContext)
+        } else {
+          stop('Operation not allowed without an active reactive context. ',
+               '(You tried to do something that can only be done from inside a ',
+               'reactive expression or observer.)')
+        }
       }
       return(.currentContext)
     },
@@ -135,3 +139,5 @@ flushReact <- function() {
 getCurrentContext <- function() {
   .getReactiveEnvironment()$currentContext()
 }
+
+delayedAssign("dummyContext", Context$new('[none]', type='isolate'))

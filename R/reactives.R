@@ -626,6 +626,77 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
   invisible(o)
 }
 
+#' Make a reactive variable
+#' 
+#' Turns a normal variable into a reactive variable, that is, one that has 
+#' reactive semantics when assigned or read in the usual ways. The variable may 
+#' already exist; if so, its value will be used as the initial value of the 
+#' reactive variable (or \code{NULL} if the variable did not exist).
+#' 
+#' @param symbol A character string indicating the name of the variable that 
+#'   should be made reactive
+#' @param env The environment that will contain the reactive variable
+#' 
+#' @return None.
+#' 
+#' @examples
+#' \dontrun{
+#' a <- 10
+#' makeReactiveBinding("a")
+#' b <- reactive(a * -1)
+#' observe(print(b()))
+#' a <- 20
+#' }  
+#' @export
+makeReactiveBinding <- function(symbol, env = parent.frame()) {
+  if (exists(symbol, where = env, inherits = FALSE)) {
+    initialValue <- get(symbol, pos = env, inherits = FALSE)
+    rm(list = symbol, pos = env, inherits = FALSE)
+  }
+  else
+    initialValue <- NULL
+  values <- reactiveValues(value = initialValue)
+  makeActiveBinding(symbol, env=env, fun=function(v) {
+    if (missing(v))
+      values$value
+    else
+      values$value <- v
+  })
+  
+  invisible()
+}
+
+# `%<-reactive%` <- function(name, value) {
+#   sym <- deparse(substitute(name))
+#   assign(sym, value, pos = parent.frame())
+#   makeReactiveBinding(sym, env=parent.frame())
+#   invisible(NULL)
+# }
+
+# Causes flushReact to be called every time an expression is
+# entered into the top-level prompt
+setAutoflush <- local({
+  callbackId <- NULL
+  
+  function(enable) {
+    if (xor(is.null(callbackId), isTRUE(enable))) {
+      return(invisible())
+    }
+    
+    if (isTRUE(enable)) {
+      callbackId <<- addTaskCallback(function(expr, value, ok, visible) {
+        timerCallbacks$executeElapsed()
+        flushReact()
+        return(TRUE)
+      })
+    } else {
+      removeTaskCallback(callbackId)
+      callbackId <<- NULL
+    }
+    invisible()
+  }
+})
+
 # ---------------------------------------------------------------------------
 
 #' Timer

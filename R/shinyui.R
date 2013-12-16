@@ -138,15 +138,28 @@ singleton <- function(x) {
 # the connection.
 writeShowcaseHead <- function(connection) {
   writeLines(c('  <script src="shared/highlight/highlight.pack.js"></script>',
+               '  <script src="shared/showdown/compressed/showdown.js"></script>',
                '  <script src="shared/jquery-ui.js"></script>',
                '  <script src="shared/shiny-showcase.js"></script>',
                '  <link rel="stylesheet" type="text/css" href="shared/highlight/styles/tomorrow.css" />',
                '  <link rel="stylesheet" type="text/css" href="shared/shiny-showcase.css" />',
                '  <script type="text/javascript">', 
                '    $(document).ready(function() { ', 
-               '      $("pre code").each(function(i, e) { hljs.highlightBlock(e) });',
-               '    });', 
-               '  </script>'), con = connection)
+               '      $("pre code").each(function(i, e) { hljs.highlightBlock(e) });'),
+              con = connection)
+   mdfile <- file.path.ci(getwd(), 'Readme.md')
+   if (file.exists(mdfile)) {
+     writeLines(c('      document.getElementById("readme-md").innerHTML = ',
+                  '         (new Showdown.converter()).makeHtml('), 
+                con = connection)
+     # Read lines from the Markdown file, join them to a single string separated
+     # by literal \n (for JavaScript), escape quotes, and emit to a JavaScript
+     # string literal. 
+     writeLines(paste('"', do.call(paste, as.list(c(gsub('"', '\"', readLines(mdfile)), sep = "\\n"))),
+                      '");', sep = ""), con = connection)
+   }
+   writeLines(c('});', 
+                '</script>'), con = connection)
 }
 
 # Writes the showcase preamble (the UI drawn above the application to be 
@@ -197,13 +210,8 @@ writeShowcaseAppInfo <- function(connection) {
              con = connection)
   readmemd <- file.path.ci(getwd(), "Readme.md")
   if (file.exists(readmemd)) {
-    if (!require(markdown))
-      stop("Markdown package is not installed")
-    html <- markdown::markdownToHTML(readmemd, fragment.only = TRUE)
-    Encoding(html) <- 'UTF-8'
-    writeLines('<div class="row-fluid"><div id="readme-md">', con = connection)
-    writeLines(html, con = connection)
-    writeLines('</div></div>', con = connection)
+    writeLines('<div class="row-fluid"><div id="readme-md"></div></div>', 
+               con = connection)
   }
   writeLines(c('<div class="row-fluid"><h3>Code</h3></div>',
                '<div class="row-fluid">', 

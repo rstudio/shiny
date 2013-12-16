@@ -93,7 +93,6 @@ ShinySession <- setRefClass(
       session$onFlush           <<- .self$onFlush
       session$onFlushed         <<- .self$onFlushed
       session$isClosed          <<- .self$isClosed
-      session$isShowcase        <<- .self$isShowcase
       session$input             <<- .self$input
       session$output            <<- .self$output
       session$.impl             <<- .self
@@ -138,9 +137,6 @@ ShinySession <- setRefClass(
     },
     isClosed = function() {
       return(closed)
-    },
-    isShowcase = function () {
-      return(.showcase)
     },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
@@ -1205,11 +1201,11 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
       
       ws$onMessage(function(binary, msg) {
         # If in showcase mode, record the session that should receive the reactive
-        # log messages for the duration of the servicing of this message. Note that
-        # we can't just wrap this in an if statement since on.exit will fire as soon
-        # as control leaves the block. 
-        if (showcase) .beginShowcaseSessionContext(shinysession)
-        on.exit(if (showcase) .endShowcaseSessionContext(), add = TRUE)
+        # log messages for the duration of the servicing of this message. 
+        if (showcase) {
+          .beginShowcaseSessionContext(shinysession)
+          on.exit(.endShowcaseSessionContext(), add = TRUE)
+        }
         
         # To ease transition from websockets-based code. Should remove once we're stable.
         if (is.character(msg))

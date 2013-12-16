@@ -18,8 +18,17 @@ shinyServer(function(input, output) {
     summary(dataset)
   })
   
-  # Show the first "n" observations
+  # Show the first "n" observations. Show an alert warning if more
+  # than 25 observations are requested
   output$view <- renderTable({
-    head(datasetInput(), n = input$obs)
+    
+    # determine the number of observations and warn if there are
+    # more than 25 requested
+    n = input$obs
+    if (n > 25)
+      output$alert <- renderUI(alertPanel("That's a lot of observations!"))
+    
+    # return the requested number of observations
+    head(datasetInput(), n)
   })
 })

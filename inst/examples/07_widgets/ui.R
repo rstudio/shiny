@@ -28,12 +28,15 @@ shinyUI(pageWithSidebar(
   
   # Show a summary of the dataset and an HTML table with the requested
   # number of observations. Note the use of the h4 function to provide
-  # an additional header above each output section.
+  # an additional header above each output section. Also note the 
+  # placeholder for an alert to warn the user when the requested number
+  # of observations is large.
   mainPanel(
     h4("Summary"),
     verbatimTextOutput("summary"),
     
     h4("Observations"),
+    uiOutput("alert"),
     tableOutput("view")
   )
 ))

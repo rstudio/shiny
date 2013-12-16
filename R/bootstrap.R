@@ -1186,7 +1186,7 @@ tabsetPanel <- function(...,
   
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, "nav nav-tabs", id, selected)
+  tabset <- buildTabset(tabs, "nav nav-tabs", NULL, id, selected)
   
   # position the nav list and content appropriately
   position <- match.arg(position)
@@ -1204,8 +1204,86 @@ tabsetPanel <- function(...,
                      second)
 }
 
+#' Create a navigation list panel
+#' 
+#' Create a navigation list panel that provides a list of links on the left 
+#' which navigate to a set of tabPanels displayed to the right.
+#' 
+#' @param ... \code{\link{tabPanel}} elements to include in the navlist
+#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your 
+#'   server logic to determine which of the current navlist items is active. The
+#'   value will correspond to the \code{value} argument that is passed to 
+#'   \code{\link{tabPanel}}.
+#' @param selected The \code{value} (or, if none was supplied, the \code{title})
+#'   of the navigation item that should be selected by default. If \code{NULL}, 
+#'   the first navigation will be selected.
+#' @param well \code{TRUE} to place a well (gray rounded rectangle) around the 
+#'   navigation list.
+#' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed 
+#'   layout.
+#' @param widths Column withs of the navigation list and tabset content areas
+#'   respectively.
+#' 
+#' @details You can include headers within the \code{navlistPanel} by 
+#' including plain text elements in the list; you can include separators by
+#' including "------" (any number of dashes works).    
+#'       
+#' @examples
+#' shinyUI(fluidPage(
+#'  
+#'   titlePanel("Application Title"),
+#'  
+#'   navlistPanel(
+#'     "Header",
+#'     tabPanel("First"),
+#'     tabPanel("Second"),
+#'     "-----",
+#'     tabPanel("Third")
+#'   )
+#' ))  
+#' @export
+navlistPanel <- function(..., 
+                         id = NULL, 
+                         selected = NULL,
+                         well = TRUE,
+                         fluid = TRUE, 
+                         widths = c(4, 8)) {
+    
+  # text filter for defining separtors and headers
+  textFilter <- function(text) {
+    if (grepl("^\\-+$", text))
+      tags$li(class="divider")
+    else
+      tags$li(class="nav-header", text)
+  }
+  
+  # build the tabset
+  tabs <- list(...)
+  tabset <- buildTabset(tabs, 
+                        "nav nav-list", 
+                        textFilter,
+                        id, 
+                        selected)
+  
+  # create the columns
+  columns <- list(
+    column(widths[[1]], class=ifelse(well, "well", ""), tabset$navList),
+    column(widths[[2]], tabset$content)
+  )
+  
+  # return the row
+  if (fluid) 
+    fluidRow(columns)
+  else
+    fixedRow(columns)
+}
 
-buildTabset <- function(tabs, ulClass, id = NULL, selected = NULL) {
+
+buildTabset <- function(tabs, 
+                        ulClass, 
+                        textFilter = NULL, 
+                        id = NULL, 
+                        selected = NULL) {
   
   # build tab nav list and tab content div
   tabNavList <- tags$ul(class = ulClass, id = id)
@@ -1214,6 +1292,14 @@ buildTabset <- function(tabs, ulClass, id = NULL, selected = NULL) {
   tabsetId <- as.integer(stats::runif(1, 1, 10000))
   tabId <- 1
   for (divTag in tabs) {
+    
+    # check for text; pass it to the textFilter or skip it if there is none
+    if (is.character(divTag)) {
+      if (!is.null(textFilter))
+        tabNavList <- tagAppendChild(tabNavList, textFilter(divTag))
+      next
+    }
+    
     # compute id and assign it to the div
     thisId <- paste("tab", tabsetId, tabId, sep="-")
     divTag$attribs$id <- thisId

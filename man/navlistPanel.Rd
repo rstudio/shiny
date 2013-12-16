@@ -35,8 +35,8 @@
   displayed to the right.
 }
 \details{
-  You can include headers within the \code{navlistLayout}
-  by including plain text elements in the list; you can
+  You can include headers within the \code{navlistPanel} by
+  including plain text elements in the list; you can
   include separators by including "------" (any number of
   dashes works).
 }

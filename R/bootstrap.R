@@ -157,7 +157,8 @@ pageWithSidebar <- function(headerPanel,
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt 
 #'   and resize page elements based on the size of the viewing device)
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory, e.g. \code{www/bootstrap.css})
+#'   www directory). For example, to use the theme located at 
+#'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   

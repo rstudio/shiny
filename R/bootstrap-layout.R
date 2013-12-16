@@ -14,7 +14,8 @@
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt 
 #'   and resize page elements based on the size of the viewing device)
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory, e.g. \code{www/bootstrap.css})
+#'   www directory). For example, to use the theme located at 
+#'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -24,9 +25,9 @@
 #'   higher-level layout functions like \code{\link{sidebarLayout}}.
 #'   
 #' @note See the 
-#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Application-Layout-Guide}{ 
-#'   Shiny-Application-Layout-Guide} for additional details on laying out fluid 
-#'   pages. 
+#'   \href{https://github.com/rstudio/shiny/wiki/Shiny-Application-Layout-Guide}{
+#'    Shiny-Application-Layout-Guide} for additional details on laying out fluid
+#'   pages.
 #'   
 #' @seealso \code{\link{column}}, \code{\link{sidebarLayout}}
 #'   
@@ -97,7 +98,8 @@ fluidRow <- function(...) {
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory, e.g. \code{www/bootstrap.css})
+#'   www directory). For example, to use the theme located at 
+#'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   

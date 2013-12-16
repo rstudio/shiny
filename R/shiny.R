@@ -1391,7 +1391,10 @@ serviceApp <- function() {
 #' @param workerId Can generally be ignored. Exists to help some editions of
 #'   Shiny Server Pro route requests to the correct process.
 #' @param quiet Should Shiny status messages be shown? Defaults to FALSE.
-#' @param showcase Should the app be run in showcase mode? Defaults to FALSE.
+#' @param showcase If true, the application will be started in showcase mode. In 
+#'   showcase mode, the application's code is visible, and additional metadata
+#'   from \code{DESCRIPTION} and \code{readme.md} files in the application's
+#'   directory are displayed. Defaults to FALSE.
 #'
 #' @examples
 #' \dontrun{

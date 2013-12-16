@@ -27,7 +27,7 @@
     if (node.nextSibling)
       return findTextColPoint(node.nextSibling, col - cols);
     else
-      return { element: null, offset: cols }
+      return { element: null, offset: cols };
   }
 
   // Returns an object indicating the element containing the given line and
@@ -37,7 +37,7 @@
   // the number of lines found.
   function findTextPoint(el, line, col) {
     var newlines = 0;
-    for (childId in el.childNodes) {
+    for (var childId = 0; childId < el.childNodes.length; childId++) {
       var child = el.childNodes[childId];
       // If this is a text node, count the number of newlines it contains.
       if (child.nodeType === 3) {  // TEXT_NODE
@@ -122,19 +122,19 @@
                                  "height=" + (screen.height / 2) + "," +
                                  "toolbar=0,location=0"); 
     }
-  }
+  };
   
   var closePopOutCode = function() {
     codeWindow = window;
-  }
+  };
 
   // If this is the main Shiny window, wire up our custom message handler.
   if (window.Shiny) {
-   Shiny.addCustomMessageHandler('reactlog', function(message) {
-     if (message.srcref && codeWindow.highlightSrcref) {
-       codeWindow.highlightSrcref(message.srcref)
-     }
-   });
+    Shiny.addCustomMessageHandler('reactlog', function(message) {
+      if (message.srcref && codeWindow.highlightSrcref) {
+        codeWindow.highlightSrcref(message.srcref);
+      }
+    });
   }
 
   window.highlightSrcref = highlightSrcref;

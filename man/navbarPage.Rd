@@ -7,7 +7,7 @@
     inverse = FALSE, collapsable = FALSE, fluid = TRUE,
     responsive = TRUE, theme = NULL)
 
-  navbarMenu(title, ...)
+  navbarMenu(title, ..., icon = NULL)
 }
 \arguments{
   \item{title}{The title to display in the navbar}

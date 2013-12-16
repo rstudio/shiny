@@ -3,6 +3,7 @@
 \title{Create a tabset panel}
 \usage{
   tabsetPanel(..., id = NULL, selected = NULL,
+    type = c("tabs", "pills"),
     position = c("above", "below", "left", "right"))
 }
 \arguments{
@@ -20,9 +21,15 @@
   selected by default. If \code{NULL}, the first tab will
   be selected.}
 
+  \item{type}{Use "tabs" for the standard look; Use "pills"
+  for a more plain look where tabs are selected using a
+  background fill color.}
+
   \item{position}{The position of the tabs relative to the
   content. Valid values are "above", "below", "left", and
-  "right" (defaults to "above")}
+  "right" (defaults to "above").  Note that the
+  \code{position} argument is not valid when \code{type} is
+  "pill".}
 }
 \value{
   A tabset that can be passed to \code{\link{mainPanel}}

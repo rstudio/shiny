@@ -49,3 +49,4 @@ Collate:
     'run-url.R'
     'imageutils.R'
     'update-input.R'
+    'bootstrap-layout.R'

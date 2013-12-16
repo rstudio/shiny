@@ -25,19 +25,34 @@ shiny 0.8.0.99
 * Fixed the bug #299: renderDataTable() can deal with 0-row data frames now.
   (reported by Harlan Harris)
 
-* Added `navbarPage()` function to create applications with multiple top
-  level panels.
+* Added `navbarPage()` and `navbarMenu()` functions to create applications
+  with multiple top level panels.
 
-* Added `head` parameter to top-level page functions for providing a list
-  of tags to be inserted into the document head.
+* Added `navlistPanel()` function to create layouts with a a bootstrap
+  navlist on the left and tabPanels on the right
+
+* Added `type` parameter to `tabsetPanel()` to enable the use of pill 
+  style tabs in addition to the standard ones.
 
 * Added `position` paramter to `tabsetPanel()` to enable positioning of tabs
-  above, below, left, or right of tab content
+  above, below, left, or right of tab content.
+
+* Added `fluidPage()` and `fixedPage()` functions as well as related row and
+column layout functions for creating arbitrary bootstrap grid layouts.
 
 * Added `hr()` builder function for creating horizontal rules.
 
+* Automatically concatenate duplicate attributes in tag definitions
+
+* Added `responsive` parameter to page building functions for opting-out of
+bootstrap responsive css.
+
+* Added `theme` parameter to page building functions for specifying alternate
+bootstrap css styles.
+
 * Added `icon()` function for embedding icons from the 
 [http://fontawesome.io/](font awesome) icon library 
+
 
 shiny 0.8.0
 --------------------------------------------------------------------------------
@@ -55,7 +70,7 @@ shiny 0.8.0
   searching (global search or search by individual columns), sorting (by
   single or multiple columns). All these features are implemented on the R
   side; for example, we can use R regular expressions for searching.
-  Besides, it also uses the Twitter Bootstrap CSS style. See the full
+  Besides, it also uses the Bootstrap CSS style. See the full
   documentation and examples in the tutorial:
   http://rstudio.github.io/shiny/tutorial/#datatables
 
@@ -354,7 +369,7 @@ shiny 0.1.8
 * Fix issue #27: Warnings cause reactive functions to stop executing.
 * The server.R and ui.R filenames are now case insensitive.
 * Add `wellPanel` function for creating inset areas on the page.
-* Add `bootstrapPage` function for creating new Twitter Bootstrap based
+* Add `bootstrapPage` function for creating new Bootstrap based
   layouts from scratch.
 
 

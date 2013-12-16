@@ -46,6 +46,9 @@ bootstrap responsive css.
 * Added `theme` parameter to page building functions for specifying alternate
 bootstrap css styles.
 
+* Added `icon()` function for embedding icons from the 
+[http://fontawesome.io/](font awesome) icon library 
+
 
 shiny 0.8.0
 --------------------------------------------------------------------------------

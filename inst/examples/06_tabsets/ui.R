@@ -28,7 +28,7 @@ shinyUI(fluidPage(
     # Show a tabset that includes a plot, summary, and table view
     # of the generated distribution
     mainPanel(
-      tabsetPanel(
+      tabsetPanel(type = "tabs", 
         tabPanel("Plot", plotOutput("plot")), 
         tabPanel("Summary", verbatimTextOutput("summary")), 
         tabPanel("Table", tableOutput("table"))

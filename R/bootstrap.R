@@ -1151,19 +1151,23 @@ tabPanel <- function(title, ..., value = NULL, icon = NULL) {
 
 #' Create a tabset panel
 #' 
-#' Create a tabset that contains \code{\link{tabPanel}} elements. Tabsets are
+#' Create a tabset that contains \code{\link{tabPanel}} elements. Tabsets are 
 #' useful for dividing output into multiple independently viewable sections.
 #' 
 #' @param ... \code{\link{tabPanel}} elements to include in the tabset
-#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your server 
-#'   logic to determine which of the current tabs is active. The value will 
-#'   correspond to the \code{value} argument that is passed to 
+#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your 
+#'   server logic to determine which of the current tabs is active. The value 
+#'   will correspond to the \code{value} argument that is passed to 
 #'   \code{\link{tabPanel}}.
 #' @param selected The \code{value} (or, if none was supplied, the \code{title})
-#'   of the tab that should be selected by default. If \code{NULL}, the first
+#'   of the tab that should be selected by default. If \code{NULL}, the first 
 #'   tab will be selected.
-#' @param position The position of the tabs relative to the content. Valid
-#' values are "above", "below", "left", and "right" (defaults to "above")
+#' @param type Use "tabs" for the standard look; Use "pills" for a more plain
+#'   look where tabs are selected using a background fill color.
+#' @param position The position of the tabs relative to the content. Valid 
+#'   values are "above", "below", "left", and "right" (defaults to "above"). 
+#'   Note that the \code{position} argument is not valid when \code{type} is 
+#'   "pill".
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'   
 #' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
@@ -1182,11 +1186,13 @@ tabPanel <- function(title, ..., value = NULL, icon = NULL) {
 tabsetPanel <- function(..., 
                         id = NULL, 
                         selected = NULL, 
+                        type = c("tabs", "pills"),
                         position = c("above", "below", "left", "right")) { 
   
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, "nav nav-tabs", NULL, id, selected)
+  type <- match.arg(type)
+  tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
   
   # position the nav list and content appropriately
   position <- match.arg(position)

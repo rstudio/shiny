@@ -31,8 +31,11 @@ shiny 0.8.0.99
 * Added `navlistPanel()` function to create layouts with a a bootstrap
   navlist on the left and tabPanels on the right
 
+* Added `type` parameter to `tabsetPanel()` to enable the use of pill 
+  style tabs in addition to the standard ones.
+
 * Added `position` paramter to `tabsetPanel()` to enable positioning of tabs
-  above, below, left, or right of tab content
+  above, below, left, or right of tab content.
 
 * Added `fluidPage()` and `fixedPage()` functions as well as related row and
 column layout functions for creating arbitrary bootstrap grid layouts.

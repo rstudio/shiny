@@ -137,8 +137,56 @@
     });
   }
 
+  
+  var isAlongside = false;
+  var moveCodeAlongsideApp = function() {
+    $("#showcase-code-inline").fadeOut(400, function() {
+      var uiR = document.getElementById("ui-r-code").parentElement;
+      var serverR = document.getElementById("server-r-code").parentElement;
+      uiR.parentElement.removeChild(uiR);
+      serverR.parentElement.removeChild(serverR);
+      document.getElementById("ui-r-code-tab").appendChild(uiR);
+      document.getElementById("server-r-code-tab").appendChild(serverR);
+      $("#showcase-sxs-code").fadeIn();
+    });
+    $("#showcase-sxs-code").hide();
+    isAlongside = true;
+    $(window).trigger("resize");
+  }
+
+  var setAppCodeSxsWidths = function() {
+    var appTargetWidth = appWidth = 960;
+    var zoom = 1.0;
+    var totalWidth = document.getElementById("showcase-app-code").offsetWidth;
+    if (totalWidth / 2 > appTargetWidth) {
+      // If the app can use only half the available space and still meet its
+      // target, take half the available space.
+      appWidth = totalWidth / 2;
+    } else if (totalWidth * 0.66 > appTargetWidth)  {
+      // If the app can meet its target by taking up more space (up to 66%
+      // of its container), take up more space.
+      appWidth = 960;
+    } else {
+      // The space is too narrow for the app and code to live side-by-side
+      // in a friendly way. Keep the app at 2/3 of the space but scale it.
+      appWidth = totalWidth * 0.66;
+      zoom = appWidth/appTargetWidth;
+    }
+    var app = document.getElementById("showcase-app-container");
+    app.style.width = appWidth + "px";
+    app.style.zoom = zoom;
+  }
+  
+
+  $(window).resize(function() {
+    if (isAlongside) {
+      setAppCodeSxsWidths();
+    }
+  });
+
   window.highlightSrcref = highlightSrcref;
   window.popOutCode = popOutCode;
   window.closePopOutCode = closePopOutCode;
+  window.moveCodeAlongsideApp = moveCodeAlongsideApp;
 })();
 

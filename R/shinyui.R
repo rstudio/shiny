@@ -176,7 +176,7 @@ writeShowcasePreamble <- function(connection) {
     desc <- read.dcf(descfile)
     cols <- colnames(desc)
     if ("Title" %in% cols) {
-      writeLines(paste('<h2><small>', desc[1,"Title"], 
+      writeLines(paste('<h4><small>', desc[1,"Title"], 
                        sep = ""), con = connection)
       if ("Author" %in% cols) {
         writeLines('by', con = connection)
@@ -193,17 +193,12 @@ writeShowcasePreamble <- function(connection) {
                      con = connection)
         }
       }
-      writeLines('</small></h2>', con = connection)
+      writeLines('</small></h4>', con = connection)
     }
   } else {
-    writeLines('<h2><small>Shiny Application</small></h2>', con = connection)
+    writeLines('<h4><small>Shiny Application</small></h4>', con = connection)
   }
-  writeLines(c('</div><div class="span4 showcase-code-link">',
-               '<button type="button" class="btn btn-default btn-lg"',
-               'onclick="javascript:popOutCode()">show code',
-               '<span class="glyphicon glyphicon-new-window"></span></button>',
-               '</div></div></div>'),
-             con = connection)
+  writeLines('</div></div></div>', con = connection)
 }
 
 # Writes the showcase application information (readme and code) to the given
@@ -216,8 +211,9 @@ writeShowcaseAppInfo <- function(connection) {
     writeLines('<div class="row-fluid"><div id="readme-md"></div></div>', 
                con = connection)
   }
-  writeLines(c('<div class="row-fluid"><h3>Code</h3></div>',
-               '<div class="row-fluid">', 
+  writeLines(c('<div class="row-fluid"><div class="span8"><h3>Code</h3></div>',
+               '<div class="showcase-code-link span4"><a href="javascript:moveCodeAlongsideApp()">move alongside</a></div></div>',
+               '<div class="row-fluid" id="showcase-code-inline">', 
                '<div class="span6"><h4>ui.R</h4>',
                '<pre class="shiny-code"><code id="ui-r-code">', 
                readLines(file.path.ci(getwd(), 'ui.R')), 
@@ -257,10 +253,23 @@ renderPage <- function(ui, connection, showcase=0) {
     writeShowcasePreamble(connection)
   }
   
+  if (showcase > 0) {
+    writeLines('<table id="showcase-app-code"><tr><td id="showcase-app-container" class="showcase-app-container-expanded">', con = connection)
+  }
+  
   # write UI html to connection
   writeLines(result$html, con = connection)
   
   if (showcase > 0) {
+    writeLines(c('</td><td id="showcase-sxs-code" class="showcase-sxs-code-collapsed">',
+                 '<ul class="nav nav-tabs">', 
+                 '  <li><a href="#ui-r-code-tab" data-toggle="tab">ui.R</a>', 
+                 '  <li class="active"><a href="#server-r-code-tab" data-toggle="tab">server.R</a>', 
+                 '</ul>', 
+                 '<div class="tab-content">', 
+                 '  <div class="tab-pane" id="ui-r-code-tab"></div>', 
+                 '  <div class="tab-pane active" id="server-r-code-tab"></div>', 
+                 '</div></td></tr></table>'), con = connection)
     writeShowcaseAppInfo(connection)
   }
   

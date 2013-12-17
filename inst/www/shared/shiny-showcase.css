@@ -8,12 +8,11 @@
 
 .showcase-container {
   background-color: #f0f0f0;
-  box-shadow: 0px 5px 5px #d0d0d0;
 }
 
 .shiny-code-container {
-  box-shadow: 0px -5px 5px #d0d0d0;
   margin-top: 15px;
+  clear: both;
 }
 
 .shiny-code-container h3 {
@@ -37,3 +36,15 @@
   margin-right: 10%;
 }
 
+#showcase-app-container {
+   vertical-align: top;
+}
+
+#showcase-sxs-code {
+   vertical-align: top;
+   display: none;
+}
+
+#showcase-app-code {
+   width: 100%;
+}

@@ -98,8 +98,10 @@
       range.surroundContents(el);
     }
     // End any previous highlight before starting this one
-    jQuery(el).stop(true, true);
-    jQuery(el).effect("highlight", null, 1600);
+    jQuery(el)
+      .stop(true, true)
+      .effect("highlight", null, 1600);
+    el.scrollIntoView();
   }
 
   // Manages the pop-out code window. 
@@ -137,7 +139,6 @@
     });
   }
 
-  
   var isAlongside = false;
   var moveCodeAlongsideApp = function() {
     $("#showcase-code-inline").fadeOut(400, function() {
@@ -175,6 +176,9 @@
     var app = document.getElementById("showcase-app-container");
     app.style.width = appWidth + "px";
     app.style.zoom = zoom;
+
+    document.getElementById("showcase-sxs-code-tabs").style.height = 
+      app.firstElementChild.offsetHeight + "px";
   }
   
 

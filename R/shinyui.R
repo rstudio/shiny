@@ -262,14 +262,14 @@ renderPage <- function(ui, connection, showcase=0) {
   
   if (showcase > 0) {
     writeLines(c('</td><td id="showcase-sxs-code" class="showcase-sxs-code-collapsed">',
-                 '<ul class="nav nav-tabs">', 
+                 '<div id="showcase-sxs-code-tabs"><ul class="nav nav-tabs">', 
                  '  <li><a href="#ui-r-code-tab" data-toggle="tab">ui.R</a>', 
                  '  <li class="active"><a href="#server-r-code-tab" data-toggle="tab">server.R</a>', 
                  '</ul>', 
                  '<div class="tab-content">', 
                  '  <div class="tab-pane" id="ui-r-code-tab"></div>', 
                  '  <div class="tab-pane active" id="server-r-code-tab"></div>', 
-                 '</div></td></tr></table>'), con = connection)
+                 '</div></div></td></tr></table>'), con = connection)
     writeShowcaseAppInfo(connection)
   }
   

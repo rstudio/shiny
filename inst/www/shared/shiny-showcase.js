@@ -106,8 +106,8 @@
   // If this is the main Shiny window, wire up our custom message handler.
   if (window.Shiny) {
     Shiny.addCustomMessageHandler('reactlog', function(message) {
-      if (message.srcref && codeWindow.highlightSrcref) {
-        codeWindow.highlightSrcref(message.srcref);
+      if (message.srcref) {
+        highlightSrcref(message.srcref);
       }
     });
   }
@@ -136,10 +136,11 @@
     });
     $(newHostElement).hide();
     isCodeAbove = above;
+    setAppCodeSxsWidths(true);
     $(window).trigger("resize");
   }
 
-  var setAppCodeSxsWidths = function() {
+  var setAppCodeSxsWidths = function(animate) {
     var appTargetWidth = appWidth = 960;
     var zoom = 1.0;
     var totalWidth = document.getElementById("showcase-app-code").offsetWidth;
@@ -158,17 +159,18 @@
       zoom = appWidth/appTargetWidth;
     }
     var app = document.getElementById("showcase-app-container");
-    app.style.width = appWidth + "px";
-    app.style.zoom = zoom;
+    $(app).animate({
+        width: appWidth + "px",
+        zoom: zoom
+      }, animate ? 400 : 0);
 
     document.getElementById("showcase-sxs-code-tabs").style.height = 
       app.firstElementChild.offsetHeight + "px";
   }
-  
 
   $(window).resize(function() {
     if (isCodeAbove) {
-      setAppCodeSxsWidths();
+      setAppCodeSxsWidths(false);
     }
   });
 

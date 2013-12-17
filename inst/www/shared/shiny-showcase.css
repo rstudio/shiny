@@ -62,3 +62,7 @@
    overflow: auto;
 }
 
+#showcase-sxs-code button {
+   margin-right: 20px;
+   float: right;
+}

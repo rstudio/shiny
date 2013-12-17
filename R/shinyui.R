@@ -146,6 +146,7 @@ writeShowcaseHead <- function(connection) {
                '  <script src="shared/shiny-showcase.js"></script>',
                '  <link rel="stylesheet" type="text/css" href="shared/highlight/styles/tomorrow.css" />',
                '  <link rel="stylesheet" type="text/css" href="shared/shiny-showcase.css" />',
+               '  <link rel="stylesheet" type="text/css" href="shared/font-awesome/css/font-awesome.min.css" />',
                '  <script type="text/javascript">', 
                '    $(document).ready(function() { ', 
                '      $("pre code").each(function(i, e) { hljs.highlightBlock(e) });'),
@@ -211,9 +212,13 @@ writeShowcaseAppInfo <- function(connection) {
     writeLines('<div class="row-fluid"><div id="readme-md"></div></div>', 
                con = connection)
   }
-  writeLines(c('<div class="row-fluid"><div class="span8"><h3>Code</h3></div>',
-               '<div class="showcase-code-link span4"><a href="javascript:toggleCodePosition()">toggle</a></div></div>',
-               '<div class="row-fluid" id="showcase-code-inline">', 
+  writeLines(c('<div id="showcase-code-inline">',
+               '<div class="row-fluid"><div class="span8"><h3>Code</h3></div>',
+               '<div class="showcase-code-link span4">', 
+               '<button class="btn btn-default" onclick="setCodePosition(true)">',
+               '<i class="fa fa-level-up"></i> show with app',
+               '</button></div></div>',
+               '<div class="row-fluid">', 
                '<div class="span6"><h4>ui.R</h4><div id="ui-r-code-inline">',
                '<pre class="shiny-code"><code id="ui-r-code">', 
                readLines(file.path.ci(getwd(), 'ui.R')), 
@@ -221,7 +226,7 @@ writeShowcaseAppInfo <- function(connection) {
                '<div class="span6"><h4>server.R</h4><div id="server-r-code-inline">',
                '<pre class="shiny-code"><code id="server-r-code">', 
                readLines(file.path.ci(getwd(), 'server.R')), 
-               '</code></pre></div></div></div></div>'), 
+               '</code></pre></div></div></div></div></div>'), 
              con = connection)
 }
   
@@ -262,10 +267,13 @@ renderPage <- function(ui, connection, showcase=0) {
   
   if (showcase > 0) {
     writeLines(c('</td><td id="showcase-sxs-code" class="showcase-sxs-code-collapsed">',
-                 '<div id="showcase-sxs-code-tabs"><ul class="nav nav-tabs">', 
+                 '<div id="showcase-sxs-code-tabs">',
+                 '<button class="btn btn-default" onclick="setCodePosition(false)">',
+                 '<i class="fa fa-level-down"></i> show below</button>',
+                 '<ul class="nav nav-tabs">', 
                  '  <li><a href="#ui-r-code-tab" data-toggle="tab">ui.R</a>', 
                  '  <li class="active"><a href="#server-r-code-tab" data-toggle="tab">server.R</a>', 
-                 '</ul>', 
+                 '</ul>',
                  '<div class="tab-content">', 
                  '  <div class="tab-pane" id="ui-r-code-tab"></div>', 
                  '  <div class="tab-pane active" id="server-r-code-tab"></div>', 

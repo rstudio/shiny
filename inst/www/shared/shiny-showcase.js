@@ -135,6 +135,9 @@
       $(newHostElement).fadeIn();
     });
     $(newHostElement).hide();
+    if (above) {
+      $(document.body).animate({ scrollTop: 0 });
+    }
     isCodeAbove = above;
     setAppCodeSxsWidths(true);
     $(window).trigger("resize");
@@ -175,8 +178,6 @@
   });
 
   window.highlightSrcref = highlightSrcref;
-  window.toggleCodePosition = function() {
-    setCodePosition(!isCodeAbove);
-  }
+  window.setCodePosition = setCodePosition;
 })();
 

@@ -212,16 +212,16 @@ writeShowcaseAppInfo <- function(connection) {
                con = connection)
   }
   writeLines(c('<div class="row-fluid"><div class="span8"><h3>Code</h3></div>',
-               '<div class="showcase-code-link span4"><a href="javascript:moveCodeAlongsideApp()">move alongside</a></div></div>',
+               '<div class="showcase-code-link span4"><a href="javascript:toggleCodePosition()">toggle</a></div></div>',
                '<div class="row-fluid" id="showcase-code-inline">', 
-               '<div class="span6"><h4>ui.R</h4>',
+               '<div class="span6"><h4>ui.R</h4><div id="ui-r-code-inline">',
                '<pre class="shiny-code"><code id="ui-r-code">', 
                readLines(file.path.ci(getwd(), 'ui.R')), 
-               '</code></pre></div>',
-               '<div class="span6"><h4>server.R</h4>',
+               '</code></pre></div></div>',
+               '<div class="span6"><h4>server.R</h4><div id="server-r-code-inline">',
                '<pre class="shiny-code"><code id="server-r-code">', 
                readLines(file.path.ci(getwd(), 'server.R')), 
-               '</code></pre></div></div></div>'), 
+               '</code></pre></div></div></div></div>'), 
              con = connection)
 }
   

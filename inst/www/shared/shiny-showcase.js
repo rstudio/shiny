@@ -101,34 +101,7 @@
     jQuery(el)
       .stop(true, true)
       .effect("highlight", null, 1600);
-    el.scrollIntoView();
   }
-
-  // Manages the pop-out code window. 
-  var codeWindow = window;
-  var popOutCode = function() {
-    if (codeWindow !== window) {
-      // If the code window is already open, just bring it to the front
-      codeWindow.focus();
-    }
-    else {
-      // Kill all running animations so we don't clone the state of the DOM
-      // mid-animation.
-      $("*").stop(true, true);
-
-      // Not already open, open it. 
-      codeWindow = window.open("showcase-code-popup.html", 
-                               "Shiny Application Code", 
-                               "menubar=0,resizeable=1,status=0,titlebar=0," + 
-                                 "width=" + (screen.width / 3) + "," +
-                                 "height=" + (screen.height / 2) + "," +
-                                 "toolbar=0,location=0"); 
-    }
-  };
-  
-  var closePopOutCode = function() {
-    codeWindow = window;
-  };
 
   // If this is the main Shiny window, wire up our custom message handler.
   if (window.Shiny) {
@@ -139,19 +112,30 @@
     });
   }
 
-  var isAlongside = false;
-  var moveCodeAlongsideApp = function() {
-    $("#showcase-code-inline").fadeOut(400, function() {
+  var isCodeAbove = false;
+  var setCodePosition = function(above) {
+    var newHostElement = above ? 
+      document.getElementById("showcase-sxs-code") :
+      document.getElementById("showcase-code-inline");
+    var currentHostElement = above ? 
+      document.getElementById("showcase-code-inline") :
+      document.getElementById("showcase-sxs-code");
+
+    $(currentHostElement).fadeOut(400, function() {
       var uiR = document.getElementById("ui-r-code").parentElement;
       var serverR = document.getElementById("server-r-code").parentElement;
       uiR.parentElement.removeChild(uiR);
       serverR.parentElement.removeChild(serverR);
-      document.getElementById("ui-r-code-tab").appendChild(uiR);
-      document.getElementById("server-r-code-tab").appendChild(serverR);
-      $("#showcase-sxs-code").fadeIn();
+      document.getElementById(above ? 
+         "ui-r-code-tab" : 
+         "ui-r-code-inline").appendChild(uiR);
+      document.getElementById(above ? 
+         "server-r-code-tab" :
+         "server-r-code-inline").appendChild(serverR);
+      $(newHostElement).fadeIn();
     });
-    $("#showcase-sxs-code").hide();
-    isAlongside = true;
+    $(newHostElement).hide();
+    isCodeAbove = above;
     $(window).trigger("resize");
   }
 
@@ -183,14 +167,14 @@
   
 
   $(window).resize(function() {
-    if (isAlongside) {
+    if (isCodeAbove) {
       setAppCodeSxsWidths();
     }
   });
 
   window.highlightSrcref = highlightSrcref;
-  window.popOutCode = popOutCode;
-  window.closePopOutCode = closePopOutCode;
-  window.moveCodeAlongsideApp = moveCodeAlongsideApp;
+  window.toggleCodePosition = function() {
+    setCodePosition(!isCodeAbove);
+  }
 })();
 

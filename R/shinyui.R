@@ -142,7 +142,7 @@ singleton <- function(x) {
 writeShowcaseHead <- function(connection) {
   writeLines(c('  <script src="shared/highlight/highlight.pack.js"></script>',
                '  <script src="shared/showdown/compressed/showdown.js"></script>',
-               '  <script src="shared/jquery-ui.js"></script>',
+               '  <script src="shared/jquery-ui/jquery-ui-min.js"></script>',
                '  <script src="shared/shiny-showcase.js"></script>',
                '  <link rel="stylesheet" type="text/css" href="shared/highlight/rstudio.css" />',
                '  <link rel="stylesheet" type="text/css" href="shared/shiny-showcase.css" />',

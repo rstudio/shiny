@@ -147,23 +147,23 @@ writeShowcaseHead <- function(connection) {
                '  <link rel="stylesheet" type="text/css" href="shared/highlight/rstudio.css" />',
                '  <link rel="stylesheet" type="text/css" href="shared/shiny-showcase.css" />',
                '  <link rel="stylesheet" type="text/css" href="shared/font-awesome/css/font-awesome.min.css" />',
-               '  <script type="text/javascript">', 
-               '    $(document).ready(function() { ', 
-               '      $("pre code").each(function(i, e) { hljs.highlightBlock(e) });'),
+               '  <script type="text/javascript">',
+               '    hljs.initHighlightingOnLoad();'),
               con = connection)
-   mdfile <- file.path.ci(getwd(), 'Readme.md')
-   if (file.exists(mdfile)) {
-     writeLines(c('      document.getElementById("readme-md").innerHTML = ',
-                  '         (new Showdown.converter()).makeHtml('), 
+  mdfile <- file.path.ci(getwd(), 'Readme.md')
+  if (file.exists(mdfile)) {
+    writeLines(c('    $(document).ready(function() { ', 
+                 '      document.getElementById("readme-md").innerHTML = ',
+                 '         (new Showdown.converter()).makeHtml('), 
                 con = connection)
      # Read lines from the Markdown file, join them to a single string separated
      # by literal \n (for JavaScript), escape quotes, and emit to a JavaScript
      # string literal. 
      writeLines(paste('"', do.call(paste, as.list(c(gsub('"', '\"', readLines(mdfile)), sep = "\\n"))),
                       '");', sep = ""), con = connection)
-   }
-   writeLines(c('});', 
-                '</script>'), con = connection)
+     writeLines('});', con = connection);
+  }
+  writeLines('  </script>', con = connection)
 }
 
 # Writes the showcase preamble (the UI drawn above the application to be 
@@ -220,11 +220,11 @@ writeShowcaseAppInfo <- function(connection) {
                '</button></div></div>',
                '<div class="row-fluid">', 
                '<div class="span6"><h4>ui.R</h4><div id="ui-r-code-inline">',
-               '<pre class="shiny-code"><code id="ui-r-code">', 
+               '<pre class="shiny-code"><code class="language-r" id="ui-r-code">', 
                readLines(file.path.ci(getwd(), 'ui.R')), 
                '</code></pre></div></div>',
                '<div class="span6"><h4>server.R</h4><div id="server-r-code-inline">',
-               '<pre class="shiny-code"><code id="server-r-code">', 
+               '<pre class="shiny-code"><code class="language-r" id="server-r-code">', 
                readLines(file.path.ci(getwd(), 'server.R')), 
                '</code></pre></div></div></div></div></div>'), 
              con = connection)

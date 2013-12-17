@@ -98,47 +98,86 @@
       range.surroundContents(el);
     }
     // End any previous highlight before starting this one
-    jQuery(el).stop(true, true);
-    jQuery(el).effect("highlight", null, 1600);
+    jQuery(el)
+      .stop(true, true)
+      .effect("highlight", null, 1600);
   }
-
-  // Manages the pop-out code window. 
-  var codeWindow = window;
-  var popOutCode = function() {
-    if (codeWindow !== window) {
-      // If the code window is already open, just bring it to the front
-      codeWindow.focus();
-    }
-    else {
-      // Kill all running animations so we don't clone the state of the DOM
-      // mid-animation.
-      $("*").stop(true, true);
-
-      // Not already open, open it. 
-      codeWindow = window.open("showcase-code-popup.html", 
-                               "Shiny Application Code", 
-                               "menubar=0,resizeable=1,status=0,titlebar=0," + 
-                                 "width=" + (screen.width / 3) + "," +
-                                 "height=" + (screen.height / 2) + "," +
-                                 "toolbar=0,location=0"); 
-    }
-  };
-  
-  var closePopOutCode = function() {
-    codeWindow = window;
-  };
 
   // If this is the main Shiny window, wire up our custom message handler.
   if (window.Shiny) {
     Shiny.addCustomMessageHandler('reactlog', function(message) {
-      if (message.srcref && codeWindow.highlightSrcref) {
-        codeWindow.highlightSrcref(message.srcref);
+      if (message.srcref) {
+        highlightSrcref(message.srcref);
       }
     });
   }
 
+  var isCodeAbove = false;
+  var setCodePosition = function(above) {
+    var newHostElement = above ? 
+      document.getElementById("showcase-sxs-code") :
+      document.getElementById("showcase-code-inline");
+    var currentHostElement = above ? 
+      document.getElementById("showcase-code-inline") :
+      document.getElementById("showcase-sxs-code");
+
+    $(currentHostElement).fadeOut(400, function() {
+      var uiR = document.getElementById("ui-r-code").parentElement;
+      var serverR = document.getElementById("server-r-code").parentElement;
+      uiR.parentElement.removeChild(uiR);
+      serverR.parentElement.removeChild(serverR);
+      document.getElementById(above ? 
+         "ui-r-code-tab" : 
+         "ui-r-code-inline").appendChild(uiR);
+      document.getElementById(above ? 
+         "server-r-code-tab" :
+         "server-r-code-inline").appendChild(serverR);
+      $(newHostElement).fadeIn();
+    });
+    $(newHostElement).hide();
+    if (above) {
+      $(document.body).animate({ scrollTop: 0 });
+    }
+    isCodeAbove = above;
+    setAppCodeSxsWidths(true);
+    $(window).trigger("resize");
+  }
+
+  var setAppCodeSxsWidths = function(animate) {
+    var appTargetWidth = appWidth = 960;
+    var zoom = 1.0;
+    var totalWidth = document.getElementById("showcase-app-code").offsetWidth;
+    if (totalWidth / 2 > appTargetWidth) {
+      // If the app can use only half the available space and still meet its
+      // target, take half the available space.
+      appWidth = totalWidth / 2;
+    } else if (totalWidth * 0.66 > appTargetWidth)  {
+      // If the app can meet its target by taking up more space (up to 66%
+      // of its container), take up more space.
+      appWidth = 960;
+    } else {
+      // The space is too narrow for the app and code to live side-by-side
+      // in a friendly way. Keep the app at 2/3 of the space but scale it.
+      appWidth = totalWidth * 0.66;
+      zoom = appWidth/appTargetWidth;
+    }
+    var app = document.getElementById("showcase-app-container");
+    $(app).animate({
+        width: appWidth + "px",
+        zoom: zoom
+      }, animate ? 400 : 0);
+
+    document.getElementById("showcase-sxs-code-tabs").style.height = 
+      app.firstElementChild.offsetHeight + "px";
+  }
+
+  $(window).resize(function() {
+    if (isCodeAbove) {
+      setAppCodeSxsWidths(false);
+    }
+  });
+
   window.highlightSrcref = highlightSrcref;
-  window.popOutCode = popOutCode;
-  window.closePopOutCode = closePopOutCode;
+  window.setCodePosition = setCodePosition;
 })();
 

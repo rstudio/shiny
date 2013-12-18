@@ -122,12 +122,6 @@
       document.getElementById("showcase-code-inline") :
       document.getElementById("showcase-sxs-code");
 
-    // change the text on the toggle button to reflect the new state
-    document.getElementById("showcase-code-position-toggle").innerHTML = above ?
-      '<i class="fa fa-level-down"></i> show below' :
-      '<i class="fa fa-level-up"></i> show with app';
-    
-
     $(currentHostElement).fadeOut(400, function() {
       var tabs = document.getElementById("showcase-code-tabs");
       currentHostElement.removeChild(tabs);
@@ -146,7 +140,12 @@
           "span10 offset1" :
           "span3";
       }
-    });
+
+      // change the text on the toggle button to reflect the new state
+      document.getElementById("showcase-code-position-toggle").innerHTML = above ?
+        '<i class="fa fa-level-down"></i> show below' :
+        '<i class="fa fa-level-up"></i> show with app';
+      });
     if (above) {
       $(document.body).animate({ scrollTop: 0 });
     }

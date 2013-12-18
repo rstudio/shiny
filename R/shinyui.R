@@ -220,24 +220,40 @@ writeShowcaseAppInfo <- function(connection) {
                '<button id="showcase-code-position-toggle" class="btn btn-default btn-small" onclick="toggleCodePosition()">',
                '   <i class="fa fa-level-up"></i> show with app', 
                '</button>',
-               '<ul class="nav nav-tabs">', 
-               '  <li><a href="#ui-r-code-tab" data-toggle="tab">ui.R</a>', 
-               '  <li class="active"><a href="#server-r-code-tab" data-toggle="tab">server.R</a>', 
-               '</ul>',
-               '<div class="tab-content" id="showcase-code-content">', 
-               '  <div class="tab-pane" id="ui-r-code-tab">',
-               '     <pre class="shiny-code"><code class="language-r" id="ui-r-code">', 
-               readLines(file.path.ci(getwd(), 'ui.R')), 
-               '     </code></pre>', 
-               '  </div>', 
-               '  <div class="tab-pane active" id="server-r-code-tab">', 
-               '     <pre class="shiny-code"><code class="language-r" id="server-r-code">', 
-               readLines(file.path.ci(getwd(), 'server.R')), 
-               '     </code></pre>',
-               '  </div>',
-               '</div>',
-               '</div></div></div>'), 
+               '<ul class="nav nav-tabs">'), con = connection)
+  # We don't show all .R files in the app, just the ones in the list below
+  # (filtered to those that also exist on disk)
+  rFiles <- c("ui.R", "server.R", "global.R")
+  rFiles <- rFiles[file.exists(file.path(getwd(), rFiles))]
+  
+  # Write the tab navigation for each R file
+  for (rFile in rFiles) {
+    writeLines(paste('<li', 
+                     if (rFile == "server.R") ' class="active"' else '',
+                     '><a href="#', 
+                     gsub(".", "_", rFile, fixed = TRUE), 
+                     '_code" data-toggle="tab"',
+                     '>', 
+                     rFile, '</a></li>', sep=""), con = connection)
+  }
+  writeLines(c('</ul>',
+               '<div class="tab-content" id="showcase-code-content">'),
              con = connection)
+  
+  # Write the tab content for each R file
+  for (rFile in rFiles) {
+    writeLines(c(paste('  <div class="tab-pane', 
+                       if (rFile == "server.R") ' active' else '', 
+                       '" id="', 
+                       gsub(".", "_", rFile, fixed = TRUE), 
+                       '_code">', sep = ""),
+                 '     <pre class="shiny-code"><code class="language-r">', 
+                 readLines(file.path.ci(getwd(), rFile)), 
+                 '     </code></pre>', 
+                 '  </div>'), con = connection)
+  }
+  
+  writeLines('</div></div></div>', con = connection)
 }
   
 renderPage <- function(ui, connection, showcase=0) {

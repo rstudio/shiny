@@ -26,27 +26,16 @@
   padding: 15px;
 }
 
-#readme-md {
-  margin-top: 15px;
-  margin-left: 10%;
-  margin-right: 10%;
-}
-
 #showcase-app-container {
   vertical-align: top;
 }
 
-#showcase-sxs-code {
-  vertical-align: top;
-  display: none;
-}
-
-#showcase-sxs-code pre {
+#showcase-code-tabs pre {
   border: none;
 }
 
-#showcase-sxs-code .nav, 
-#showcase-sxs-code ul {
+#showcase-code-tabs .nav, 
+#showcase-code-tabs ul {
   margin-bottom: 0px;
 }
 
@@ -54,11 +43,11 @@
   width: 100%;
 }
 
-#showcase-sxs-code-tabs {
+#showcase-code-tabs {
   margin-right: 15px;
 }
 
-#showcase-sxs-code-tabs .tab-content {
+#showcase-code-tabs .tab-content {
   border-style: solid;
   border-color: #e5e5e5;
   border-width: 0px 1px 1px 1px;
@@ -71,7 +60,7 @@
   border-bottom-left-radius: 4px;
 }
 
-#showcase-sxs-code button {
+#showcase-code-tabs button {
   margin-right: 20px;
   float: right;
 }

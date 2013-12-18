@@ -114,6 +114,7 @@
 
   var isCodeAbove = false;
   var setCodePosition = function(above) {
+    // set the source and targets for the tab move
     var newHostElement = above ? 
       document.getElementById("showcase-sxs-code") :
       document.getElementById("showcase-code-inline");
@@ -121,23 +122,29 @@
       document.getElementById("showcase-code-inline") :
       document.getElementById("showcase-sxs-code");
 
+    // change the text on the toggle button to reflect the new state
+    document.getElementById("showcase-code-position-toggle").innerHTML = above ?
+      '<i class="fa fa-level-down"></i> show below' :
+      '<i class="fa fa-level-up"></i> show with app';
+    
+
     $(currentHostElement).fadeOut(400, function() {
-      var uiR = document.getElementById("ui-r-code").parentElement;
-      var serverR = document.getElementById("server-r-code").parentElement;
-      uiR.parentElement.removeChild(uiR);
-      serverR.parentElement.removeChild(serverR);
-      document.getElementById(above ? 
-         "ui-r-code-tab" : 
-         "ui-r-code-inline").appendChild(uiR);
-      document.getElementById(above ? 
-         "server-r-code-tab" :
-         "server-r-code-inline").appendChild(serverR);
+      var tabs = document.getElementById("showcase-code-tabs");
+      currentHostElement.removeChild(tabs);
+      newHostElement.appendChild(tabs);
       $(newHostElement).fadeIn();
       if (!above) {
         // remove the applied width and zoom on the app container, and 
         // scroll smoothly down to the code's new home
         document.getElementById("showcase-app-container").removeAttribute("style");
         $(document.body).animate({ scrollTop: $(newHostElement).offset().top });
+      }
+      // if there's a readme, toggle it between full width and alongside
+      var readme = document.getElementById("readme-md");
+      if (readme !== null) {
+        readme.className = above ? 
+          "span10 offset1" :
+          "span3";
       }
     });
     if (above) {
@@ -176,13 +183,16 @@
       app.firstElementChild.offsetHeight + "px";
   }
 
+  var toggleCodePosition = function() {
+    setCodePosition(!isCodeAbove);
+  }
+
   $(window).resize(function() {
     if (isCodeAbove) {
       setAppCodeSxsWidths(false);
     }
   });
 
-  window.highlightSrcref = highlightSrcref;
-  window.setCodePosition = setCodePosition;
+  window.toggleCodePosition = toggleCodePosition;
 })();
 

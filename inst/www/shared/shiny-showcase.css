@@ -6,10 +6,6 @@
   font-family: Menlo, Consolas, "Courier New", monospace;
 }
 
-.showcase-container {
-  background-color: #f0f0f0;
-}
-
 .shiny-code-container {
   clear: both;
 }
@@ -42,7 +38,6 @@
 #showcase-sxs-code {
    vertical-align: top;
    display: none;
-   background-color: #f0f0f0;
 }
 
 #showcase-sxs-code pre {
@@ -60,6 +55,15 @@
 
 #showcase-sxs-code-tabs {
    overflow: auto;
+}
+
+#showcase-sxs-code-tabs .tab-content {
+   background-color: #f0f0f0;
+}
+
+#showcase-sxs-code-tabs .tab-pane {
+   margin-left: 1px;
+   margin-right: 1px;
 }
 
 #showcase-sxs-code button {

@@ -169,7 +169,7 @@ writeShowcaseHead <- function(connection) {
 # Writes the showcase preamble (the UI drawn above the application to be 
 # showcased) to the connection.
 writeShowcasePreamble <- function(connection) {
-  writeLines(c('<div class="container-fluid showcase-container">', 
+  writeLines(c('<div class="container-fluid well well-small">', 
                '<div class="row-fluid"><div class="span8">'), 
              con = connection)
   descfile <- file.path.ci(getwd(), 'DESCRIPTION')
@@ -177,7 +177,7 @@ writeShowcasePreamble <- function(connection) {
     desc <- read.dcf(descfile)
     cols <- colnames(desc)
     if ("Title" %in% cols) {
-      writeLines(paste('<h4><small>', desc[1,"Title"], 
+      writeLines(paste('<h4 class="muted">', desc[1,"Title"], 
                        sep = ""), con = connection)
       if ("Author" %in% cols) {
         writeLines('by', con = connection)
@@ -194,7 +194,7 @@ writeShowcasePreamble <- function(connection) {
                      con = connection)
         }
       }
-      writeLines('</small></h4>', con = connection)
+      writeLines('</h4>', con = connection)
     }
   } else {
     writeLines('<h4><small>Shiny Application</small></h4>', con = connection)
@@ -205,7 +205,7 @@ writeShowcasePreamble <- function(connection) {
 # Writes the showcase application information (readme and code) to the given
 # connection.
 writeShowcaseAppInfo <- function(connection) {
-  writeLines('<div class="container-fluid shiny-code-container showcase-container">',
+  writeLines('<div class="container-fluid shiny-code-container well">',
              con = connection)
   readmemd <- file.path.ci(getwd(), "Readme.md")
   if (file.exists(readmemd)) {
@@ -269,7 +269,7 @@ renderPage <- function(ui, connection, showcase=0) {
     writeLines(c('</td><td id="showcase-sxs-code" class="showcase-sxs-code-collapsed">',
                  '<div id="showcase-sxs-code-tabs">',
                  '<button class="btn btn-default btn-small" onclick="setCodePosition(false)">',
-                 '<i class="fa fa-level-down"></i> show below</button>',
+                 '<i class="fa fa-level-down"></i> show below app</button>',
                  '<ul class="nav nav-tabs">', 
                  '  <li><a href="#ui-r-code-tab" data-toggle="tab">ui.R</a>', 
                  '  <li class="active"><a href="#server-r-code-tab" data-toggle="tab">server.R</a>', 

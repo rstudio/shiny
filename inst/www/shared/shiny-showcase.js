@@ -133,13 +133,19 @@
          "server-r-code-tab" :
          "server-r-code-inline").appendChild(serverR);
       $(newHostElement).fadeIn();
+      if (!above) {
+        // remove the applied width and zoom on the app container, and 
+        // scroll smoothly down to the code's new home
+        document.getElementById("showcase-app-container").removeAttribute("style");
+        $(document.body).animate({ scrollTop: $(newHostElement).offset().top });
+      }
     });
-    $(newHostElement).hide();
     if (above) {
       $(document.body).animate({ scrollTop: 0 });
     }
+    $(newHostElement).hide();
     isCodeAbove = above;
-    setAppCodeSxsWidths(true);
+    setAppCodeSxsWidths(above);
     $(window).trigger("resize");
   }
 

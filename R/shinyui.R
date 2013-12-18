@@ -197,7 +197,7 @@ writeShowcasePreamble <- function(connection) {
       writeLines('</h4>', con = connection)
     }
   } else {
-    writeLines('<h4><small>Shiny Application</small></h4>', con = connection)
+    writeLines('<h4 class="muted">Shiny Application</h4>', con = connection)
   }
   writeLines('</div></div></div>', con = connection)
 }
@@ -274,7 +274,7 @@ renderPage <- function(ui, connection, showcase=0) {
                  '  <li><a href="#ui-r-code-tab" data-toggle="tab">ui.R</a>', 
                  '  <li class="active"><a href="#server-r-code-tab" data-toggle="tab">server.R</a>', 
                  '</ul>',
-                 '<div class="tab-content">', 
+                 '<div class="tab-content" id="showcase-code-content">', 
                  '  <div class="tab-pane" id="ui-r-code-tab"></div>', 
                  '  <div class="tab-pane active" id="server-r-code-tab"></div>', 
                  '</div></div></td></tr></table>'), con = connection)

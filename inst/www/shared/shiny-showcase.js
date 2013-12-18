@@ -172,8 +172,7 @@
         width: appWidth + "px",
         zoom: zoom
       }, animate ? 400 : 0);
-
-    document.getElementById("showcase-sxs-code-tabs").style.height = 
+    document.getElementById("showcase-code-content").style.height = 
       app.firstElementChild.offsetHeight + "px";
   }
 

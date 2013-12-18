@@ -7,6 +7,7 @@
 }
 
 .shiny-code-container {
+  margin-top: 20px;
   clear: both;
 }
 
@@ -32,41 +33,45 @@
 }
 
 #showcase-app-container {
-   vertical-align: top;
+  vertical-align: top;
 }
 
 #showcase-sxs-code {
-   vertical-align: top;
-   display: none;
+  vertical-align: top;
+  display: none;
 }
 
 #showcase-sxs-code pre {
-   border: none;
+  border: none;
 }
 
 #showcase-sxs-code .nav, 
 #showcase-sxs-code ul {
-   margin-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 #showcase-app-code {
-   width: 100%;
+  width: 100%;
 }
 
 #showcase-sxs-code-tabs {
-   overflow: auto;
+  margin-right: 15px;
 }
 
 #showcase-sxs-code-tabs .tab-content {
-   background-color: #f0f0f0;
-}
-
-#showcase-sxs-code-tabs .tab-pane {
-   margin-left: 1px;
-   margin-right: 1px;
+  border-style: solid;
+  border-color: #e5e5e5;
+  border-width: 0px 1px 1px 1px;
+  overflow:auto;
+  -webkit-border-bottom-right-radius: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+  -moz-border-radius-bottomright: 4px;
+  -moz-border-radius-bottomleft: 4px;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
 }
 
 #showcase-sxs-code button {
-   margin-right: 20px;
-   float: right;
+  margin-right: 20px;
+  float: right;
 }

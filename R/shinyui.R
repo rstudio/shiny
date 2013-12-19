@@ -243,13 +243,18 @@ writeShowcaseAppInfo <- function(connection) {
   
   # Write the tab content for each R file
   for (rFile in rFiles) {
-    writeLines(c(paste('  <div class="tab-pane', 
+    writeLines(paste('  <div class="tab-pane', 
                        if (rFile == "server.R") ' active' else '', 
                        '" id="', 
                        gsub(".", "_", rFile, fixed = TRUE), 
                        '_code">', sep = ""),
-                 '     <pre class="shiny-code"><code class="language-r">', 
-                 readLines(file.path.ci(getwd(), rFile)), 
+                con = connection)
+    # Join the first line to the HTML preamble so <pre> block doesn't start
+    # with a superfluous newline
+    fileLines <- readLines(file.path.ci(getwd(), rFile))
+    writeLines(c(paste('     <pre class="shiny-code"><code class="language-r">',
+                     fileLines[1], sep = ""),
+                 fileLines[2:length(fileLines)],
                  '     </code></pre>', 
                  '  </div>'), con = connection)
   }

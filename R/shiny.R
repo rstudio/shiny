@@ -1122,9 +1122,9 @@ startAppDir <- function(port, host, workerId, quiet, showcase) {
   if (file.exists(desc)) {
     settings <- read.dcf(desc)
     if ("DefaultShowcaseMode" %in% colnames(settings))
-      .globals$showcaseDefault <- settings[1,"DefaultShowcaseMode"]
+      .globals$showcaseDefault <- as.numeric(settings[1,"DefaultShowcaseMode"])
     if ("AllowShowcaseModeOverride" %in% colnames(settings))
-      .globals$showcaseOverride <- settings[1,"AllowShowcaseModeOverride"]
+      .globals$showcaseOverride <- as.logical(settings[1,"AllowShowcaseModeOverride"])
   }
   
   startApp(

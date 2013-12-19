@@ -194,7 +194,7 @@ writeAppMetadata <- function(connection, desc) {
 # Writes the showcase application information (readme and code) to the given
 # connection.
 writeShowcaseAppInfo <- function(connection) {
-  writeLines('<div class="container-fluid shiny-code-container well">',
+  writeLines('<div class="container-fluid shiny-code-container well" id="showcase-well">',
              con = connection)
   descfile <- file.path.ci(getwd(), "DESCRIPTION")
   hasDesc <- file.exists(descfile)

@@ -122,6 +122,18 @@
       document.getElementById("showcase-code-inline") :
       document.getElementById("showcase-sxs-code");
 
+    var metadataElement = document.getElementById("showcase-app-metadata");
+    if (metadataElement === null) {
+      // if there's no app metadata, show and hide the entire well container
+      // when the code changes position
+      var wellElement = $("#showcase-well");
+      if (above) {
+        wellElement.fadeOut();
+      } else {
+        wellElement.fadeIn();
+      }
+    }
+
     $(currentHostElement).fadeOut(400, function() {
       var tabs = document.getElementById("showcase-code-tabs");
       currentHostElement.removeChild(tabs);

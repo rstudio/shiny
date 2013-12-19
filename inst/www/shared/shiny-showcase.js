@@ -1,6 +1,8 @@
 /*jshint browser:true, jquery:true, strict:false, curly:false, indent:2*/
 
 (function() {
+  var animateMs = 400;
+
   // Given a DOM node and a column (count of characters), walk recursively
   // through the node's siblings counting characters until the given number
   // of characters have been found. 
@@ -113,7 +115,9 @@
   }
 
   var isCodeAbove = false;
-  var setCodePosition = function(above) {
+  var setCodePosition = function(above, animate) {
+    animateCodeMs = animate ? animateMs : 1;
+
     // set the source and targets for the tab move
     var newHostElement = above ? 
       document.getElementById("showcase-sxs-code") :
@@ -128,13 +132,13 @@
       // when the code changes position
       var wellElement = $("#showcase-well");
       if (above) {
-        wellElement.fadeOut();
+        wellElement.fadeOut(animateCodeMs);
       } else {
-        wellElement.fadeIn();
+        wellElement.fadeIn(animateCodeMs);
       }
     }
 
-    $(currentHostElement).fadeOut(400, function() {
+    $(currentHostElement).fadeOut(animateCodeMs, function() {
       var tabs = document.getElementById("showcase-code-tabs");
       currentHostElement.removeChild(tabs);
       newHostElement.appendChild(tabs);
@@ -143,7 +147,8 @@
         // remove the applied width and zoom on the app container, and 
         // scroll smoothly down to the code's new home
         document.getElementById("showcase-app-container").removeAttribute("style");
-        $(document.body).animate({ scrollTop: $(newHostElement).offset().top });
+        if (animate)
+          $(document.body).animate({ scrollTop: $(newHostElement).offset().top });
       }
       // if there's a readme, move it either alongside the code or beneath
       // the app
@@ -152,7 +157,7 @@
         readme.parentElement.removeChild(readme);
         if (above) {
           currentHostElement.appendChild(readme);
-          $(currentHostElement).fadeIn();
+          $(currentHostElement).fadeIn(animateCodeMs);
         }
         else
           document.getElementById("showcase-app-metadata").appendChild(readme);
@@ -164,11 +169,11 @@
         '<i class="fa fa-level-up"></i> show with app';
       });
     if (above) {
-      $(document.body).animate({ scrollTop: 0 });
+      $(document.body).animate({ scrollTop: 0 }, animateCodeMs);
     }
     $(newHostElement).hide();
     isCodeAbove = above;
-    setAppCodeSxsWidths(above);
+    setAppCodeSxsWidths(above && animate);
     $(window).trigger("resize");
   }
 
@@ -194,13 +199,21 @@
     $(app).animate({
         width: appWidth + "px",
         zoom: zoom
-      }, animate ? 400 : 0);
+      }, animate ? animateMs : 0);
     document.getElementById("showcase-code-content").style.height = 
       app.firstElementChild.offsetHeight + "px";
   }
 
   var toggleCodePosition = function() {
-    setCodePosition(!isCodeAbove);
+    setCodePosition(!isCodeAbove, true);
+  }
+
+  // if the browser is sized to wider than 1350px, show the code next to the
+  // app by default
+  var setInitialCodePosition = function() {
+    if (document.body.offsetWidth > 1350) {
+      setCodePosition(true, false);
+    }
   }
 
   $(window).resize(function() {
@@ -210,5 +223,6 @@
   });
 
   window.toggleCodePosition = toggleCodePosition;
+  window.addEventListener("load", setInitialCodePosition);
 })();
 

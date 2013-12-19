@@ -13,10 +13,11 @@
   function findTextColPoint(node, col) {
     var cols = 0;
     if (node.nodeType === 3) {
-      if (node.nodeValue.length >= col) {
+      var nchar = node.nodeValue.replace(/\n/g, "").length;
+      if (nchar >= col) {
         return { element: node, offset: col };
       } else {
-        cols += node.nodeValue.length;
+        cols += nchar;
       }
     } else if (node.nodeType === 1 && node.firstChild) {
       var ret = findTextColPoint(node.firstChild, col);

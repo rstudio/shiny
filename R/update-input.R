@@ -390,7 +390,7 @@ updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
 
   choices <- choicesWithNames(choices)
 
-  options <- mapply(choices, names(choices),
+  options <- if (length(choices)) mapply(choices, names(choices),
     SIMPLIFY = FALSE, USE.NAMES = FALSE,
     FUN = function(value, name) {
       list(value = value,
@@ -399,7 +399,7 @@ updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
     }
   )
 
-  message <- dropNulls(list(label = label, options = options))
+  message <- dropNulls(list(label = label, options = options, value = selected))
 
   session$sendInputMessage(inputId, message)
 }

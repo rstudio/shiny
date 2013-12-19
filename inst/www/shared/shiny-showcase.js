@@ -133,12 +133,17 @@
         document.getElementById("showcase-app-container").removeAttribute("style");
         $(document.body).animate({ scrollTop: $(newHostElement).offset().top });
       }
-      // if there's a readme, toggle it between full width and alongside
+      // if there's a readme, move it either alongside the code or beneath
+      // the app
       var readme = document.getElementById("readme-md");
       if (readme !== null) {
-        readme.className = above ? 
-          "span10 offset1" :
-          "span3";
+        readme.parentElement.removeChild(readme);
+        if (above) {
+          currentHostElement.appendChild(readme);
+          $(currentHostElement).fadeIn();
+        }
+        else
+          document.getElementById("showcase-app-metadata").appendChild(readme);
       }
 
       // change the text on the toggle button to reflect the new state

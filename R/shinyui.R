@@ -166,55 +166,56 @@ writeShowcaseHead <- function(connection) {
   writeLines('  </script>', con = connection)
 }
 
-# Writes the showcase preamble (the UI drawn above the application to be 
-# showcased) to the connection.
-writeShowcasePreamble <- function(connection) {
-  writeLines(c('<div class="container-fluid well well-small">', 
-               '<div class="row-fluid"><div class="span8">'), 
-             con = connection)
-  descfile <- file.path.ci(getwd(), 'DESCRIPTION')
-  if (file.exists(descfile)) {
-    desc <- read.dcf(descfile)
-    cols <- colnames(desc)
-    if ("Title" %in% cols) {
-      writeLines(paste('<h4 class="muted">', desc[1,"Title"], 
-                       sep = ""), con = connection)
-      if ("Author" %in% cols) {
-        writeLines('by', con = connection)
-        if ("AuthorUrl" %in% cols) {
-          writeLines(paste('<a href="', desc[1,"AuthorUrl"], '">', 
-                           desc[1,"Author"], '</a>', sep = ''), 
-                     con = connection)
-        } else {
-          writeLines(desc[1,"Author"], con = connection)
-        }
-        if ("AuthorEmail" %in% cols) {
-          writeLines(paste('(<a href="mailto:', desc[1,"AuthorEmail"], '">', 
-                           desc[1,"AuthorEmail"], '</a>', sep = ''), 
-                     con = connection)
-        }
+writeAppMetadata <- function(connection, desc) {
+  cols <- colnames(desc)
+  if ("Title" %in% cols) {
+    writeLines(paste('<h4 class="muted">', desc[1,"Title"], 
+                     sep = ""), con = connection)
+    if ("Author" %in% cols) {
+      writeLines('<br/><small>by', con = connection)
+      if ("AuthorUrl" %in% cols) {
+        writeLines(paste('<a href="', desc[1,"AuthorUrl"], '">', 
+                         desc[1,"Author"], '</a>', sep = ''), 
+                   con = connection)
+      } else {
+        writeLines(desc[1,"Author"], con = connection)
       }
-      writeLines('</h4>', con = connection)
+      if ("AuthorEmail" %in% cols) {
+        writeLines(paste('(<a href="mailto:', desc[1,"AuthorEmail"], '">', 
+                         desc[1,"AuthorEmail"], '</a>', sep = ''), 
+                   con = connection)
+      }
+      writeLines('</small>', con = connection)
     }
-  } else {
-    writeLines('<h4 class="muted">Shiny Application</h4>', con = connection)
-  }
-  writeLines('</div></div></div>', con = connection)
+    writeLines('</h4>', con = connection)
+  } 
 }
 
 # Writes the showcase application information (readme and code) to the given
 # connection.
 writeShowcaseAppInfo <- function(connection) {
-  writeLines('<div class="container-fluid shiny-code-container well"><div class="row-fluid">',
+  writeLines('<div class="container-fluid shiny-code-container well">',
              con = connection)
+  descfile <- file.path.ci(getwd(), "DESCRIPTION")
+  hasDesc <- file.exists(descfile)
   readmemd <- file.path.ci(getwd(), "Readme.md")
   hasReadme <- file.exists(readmemd)
+  writeLines('<div class="row-fluid">', con = connection)
+  if (hasDesc || hasReadme) {
+    writeLines('<div id="showcase-app-metadata" class="span4">', con = connection)
+  }  
+  if (hasDesc) {
+    writeAppMetadata(connection, read.dcf(descfile))
+  }
   if (hasReadme) {
-    writeLines('<div id="readme-md" class="span3"></div>', 
+    writeLines('<div id="readme-md"></div>', 
                con = connection)
   }
+  if (hasDesc || hasReadme) {
+    writeLines('</div>', con = connection)
+  }  
   writeLines(c('<div id="showcase-code-inline"', 
-               if (hasReadme) 'class="span9"' else 'class="span10 offset1"',
+               if (hasReadme || hasDesc) 'class="span8"' else 'class="span10 offset1"',
                '>',
                '<div id="showcase-code-tabs">',
                '<button id="showcase-code-position-toggle" class="btn btn-default btn-small" onclick="toggleCodePosition()">',
@@ -280,10 +281,7 @@ renderPage <- function(ui, connection, showcase=0) {
                '<body>',
                recursive=TRUE),
              con = connection)
-  if (showcase == 1) {
-    writeShowcasePreamble(connection)
-  }
-  
+
   if (showcase > 0) {
     writeLines('<table id="showcase-app-code"><tr><td id="showcase-app-container" class="showcase-app-container-expanded">', con = connection)
   }

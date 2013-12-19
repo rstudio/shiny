@@ -1,5 +1,5 @@
-Title: Shiny Example 3: Reactivity Demo
+Title: Reactivity
 Author: RStudio, Inc.
 AuthorUrl: http://www.rstudio.com/
 License: GPL-3
-
+DefaultShowcaseMode: 1

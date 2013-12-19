@@ -431,6 +431,9 @@ srcrefFromShinyCall <- function(expr) {
     srcrefs[[1]][5], srcrefs[[num_exprs]][6])
 }
 
+# Indicates whether the given querystring should cause the associated request
+# to be handled in showcase mode. Returns the showcase mode if set, or NULL 
+# if no showcase mode is set. 
 showcaseModeOfQuerystring <- function(querystring) {
   if (nchar(querystring) > 0) {
     qs <- parseQueryString(querystring)
@@ -438,9 +441,13 @@ showcaseModeOfQuerystring <- function(querystring) {
       return(as.numeric(qs$showcase))
     }
   }
-  return(0)
+  return(NULL)
 }
   
 showcaseModeOfReq <- function(req) {
   showcaseModeOfQuerystring(req$QUERY_STRING)
+}
+
+allowShowcaseOverride <- function() {
+  !nzchar(Sys.getenv("SHINY_PORT"))
 }

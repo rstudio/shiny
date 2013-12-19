@@ -914,6 +914,10 @@ registerClient <- function(client) {
 
 .globals$resources <- list()
 
+.globals$showcaseDefault <- 0
+
+.globals$showcaseOverride <- TRUE
+
 #' Resource Publishing
 #' 
 #' Adds a directory of static resources to Shiny's web server, with the given 
@@ -1086,6 +1090,7 @@ startAppDir <- function(port, host, workerId, quiet, showcase) {
   uiR <- file.path.ci(getwd(), 'ui.R')
   serverR <- file.path.ci(getwd(), 'server.R')
   wwwDir <- file.path.ci(getwd(), 'www')
+  desc <- file.path.ci(getwd(), "DESCRIPTION")
   
   if (!file.exists(uiR) && !file.exists(wwwDir))
     stop(paste("Neither ui.R nor a www subdirectory was found in", getwd()))
@@ -1112,6 +1117,14 @@ startAppDir <- function(port, host, workerId, quiet, showcase) {
         stop("No server was defined in server.R")
     }
     return(.globals$server)
+  }
+  
+  if (file.exists(desc)) {
+    settings <- read.dcf(desc)
+    if ("DefaultShowcaseMode" %in% colnames(settings))
+      .globals$showcaseDefault <- settings[1,"DefaultShowcaseMode"]
+    if ("AllowShowcaseModeOverride" %in% colnames(settings))
+      .globals$showcaseOverride <- settings[1,"AllowShowcaseModeOverride"]
   }
   
   startApp(
@@ -1190,12 +1203,12 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
 
       shinysession <- ShinySession$new(ws, workerId)
       appsByToken$set(shinysession$token, shinysession)
-      showcase <- FALSE
+      showcase <- .globals$showcaseDefault
       
       ws$onMessage(function(binary, msg) {
         # If in showcase mode, record the session that should receive the reactive
         # log messages for the duration of the servicing of this message. 
-        if (showcase) {
+        if (showcase > 0) {
           .beginShowcaseSessionContext(shinysession)
           on.exit(.endShowcaseSessionContext(), add = TRUE)
         }
@@ -1254,8 +1267,12 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
             serverFunc <- serverFuncSource()
             
             # Check for switching into/out of showcase mode 
-            showcase <<- exists(".clientdata_url_search", where = msg$data) &&
-                         showcaseModeOfQuerystring(msg$data$.clientdata_url_search) > 0
+            if (.globals$showcaseOverride && 
+                exists(".clientdata_url_search", where = msg$data)) {
+              mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
+              if (!is.null(mode))
+                showcase <<- mode
+            }
             
             shinysession$manageInputs(msg$data)
 
@@ -1438,7 +1455,12 @@ runApp <- function(appDir=getwd(),
               ' or later is required; please upgrade!')
     }
   }
-
+  
+  # Set showcase defaults: showcase mode specified, and allow overriding if not
+  # running under Shiny Server
+  .globals$showcaseDefault <- showcase.mode
+  .globals$showcaseOverride <- allowShowcaseOverride()
+  
   require(shiny)
   
   # determine port if we need to
@@ -1487,8 +1509,6 @@ runApp <- function(appDir=getwd(),
   
   if (!is.character(port)) {
     appUrl <- paste("http://", host, ":", port, sep="")
-    if (showcase.mode > 0) 
-      appUrl <- paste(appUrl, "?showcase=", showcase.mode, sep="")
     if (is.function(launch.browser))
       launch.browser(appUrl)
     else if (launch.browser)

@@ -356,7 +356,13 @@ shinyUI <- function(ui, path='/') {
       textConn <- textConnection(NULL, "w") 
       on.exit(close(textConn))
       
-      renderPage(ui, textConn, showcaseModeOfReq(req))
+      showcaseMode <- .globals$showcaseDefault
+      if (.globals$showcaseOverride) {
+        mode <- showcaseModeOfReq(req)
+        if (!is.null(mode))
+          showcaseMode <- mode
+      }
+      renderPage(ui, textConn, showcaseMode)
       html <- paste(textConnectionValue(textConn), collapse='\n')
       return(httpResponse(200, content=html))
     }

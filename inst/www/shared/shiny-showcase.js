@@ -75,7 +75,7 @@
       el = document.createElement("span");
       el.id = "srcref_" + srcref;
       var ref = srcref;
-      var code = document.getElementById("server-r-code"); 
+      var code = document.getElementById("server_R_code"); 
       var start = findTextPoint(code, ref[0], ref[4]); 
       var end = findTextPoint(code, ref[2], ref[5]); 
       var range = document.createRange();

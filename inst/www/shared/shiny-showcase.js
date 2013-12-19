@@ -143,6 +143,14 @@
       var tabs = document.getElementById("showcase-code-tabs");
       currentHostElement.removeChild(tabs);
       newHostElement.appendChild(tabs);
+
+      // remove or set the height of the code
+      if (above) {
+        setCodeHeightFromDocHeight();
+      } else {
+        document.getElementById("showcase-code-content").removeAttribute("style");
+      }
+
       $(newHostElement).fadeIn();
       if (!above) {
         // remove the applied width and zoom on the app container, and 
@@ -168,6 +176,8 @@
       document.getElementById("showcase-code-position-toggle").innerHTML = above ?
         '<i class="fa fa-level-down"></i> show below' :
         '<i class="fa fa-level-up"></i> show with app';
+
+
       });
     if (above) {
       $(document.body).animate({ scrollTop: 0 }, animateCodeMs);
@@ -201,8 +211,6 @@
         width: appWidth + "px",
         zoom: zoom
       }, animate ? animateMs : 0);
-    document.getElementById("showcase-code-content").style.height = 
-      app.firstElementChild.offsetHeight + "px";
   }
 
   var toggleCodePosition = function() {
@@ -217,10 +225,18 @@
     }
   }
 
+  // make the code scrollable to about the height of the browser, less space
+  // for the tabs 
+  var setCodeHeightFromDocHeight = function() {
+    document.getElementById("showcase-code-content").style.height = 
+      (window.innerHeight - 200) + "px";
+  }
+
   $(window).resize(function() {
     if (isCodeAbove) {
       setAppCodeSxsWidths(false);
-    }
+      setCodeHeightFromDocHeight();
+    } 
   });
 
   window.toggleCodePosition = toggleCodePosition;

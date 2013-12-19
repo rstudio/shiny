@@ -623,6 +623,8 @@ controlLabel <- function(controlName, label) {
 # Takes a vector or list, and adds names (same as the value) to any entries
 # without names.
 choicesWithNames <- function(choices) {
+  if (is.null(choices)) return(choices)  # ignore NULL
+
   # get choice names
   choiceNames <- names(choices)
   if (is.null(choiceNames))

@@ -1867,11 +1867,6 @@
             text: in_opt.label
           });
 
-          // Add selected attribute if present
-          if (in_opt.hasOwnProperty('selected')) {
-            $newopt.prop('selected', in_opt.selected);
-          }
-
           $el.append($newopt);
         }
       }
@@ -1943,11 +1938,6 @@
             id:    el.id + (i+1).toString(),
             value: in_opt.value
           });
-
-          // Add checked attribute if present
-          if (in_opt.hasOwnProperty('checked')) {
-            $radio.prop('checked', in_opt.checked);
-          }
 
           $newopt.append($radio);
           $newopt.append('<span>' + in_opt.label + '</span>');
@@ -2074,11 +2064,6 @@
             id:    el.id + (i+1).toString(),
             value: in_opt.value
           });
-
-          // Add checked attribute if present
-          if (in_opt.hasOwnProperty('checked')) {
-            $checkbox.prop('checked', in_opt.checked);
-          }
 
           $newopt.append($checkbox);
           $newopt.append('<span>' + in_opt.label + '</span>');

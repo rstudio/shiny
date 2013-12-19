@@ -298,8 +298,7 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
     SIMPLIFY = FALSE, USE.NAMES = FALSE,
     FUN = function(value, name) {
       list(value = value,
-           label = name,
-           checked = name %in% selected)
+           label = name)
     }
   )
 
@@ -385,21 +384,4 @@ updateRadioButtons <- updateCheckboxGroupInput
 #' })
 #' }
 #' @export
-updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
-    selected = NULL) {
-
-  choices <- choicesWithNames(choices)
-
-  options <- if (length(choices)) mapply(choices, names(choices),
-    SIMPLIFY = FALSE, USE.NAMES = FALSE,
-    FUN = function(value, name) {
-      list(value = value,
-           label = name,
-           selected = name %in% selected)
-    }
-  )
-
-  message <- dropNulls(list(label = label, options = options, value = selected))
-
-  session$sendInputMessage(inputId, message)
-}
+updateSelectInput <- updateCheckboxGroupInput

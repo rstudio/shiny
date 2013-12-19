@@ -294,7 +294,7 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 
   choices <- choicesWithNames(choices)
 
-  options <- mapply(choices, names(choices),
+  options <- if (length(choices)) mapply(choices, names(choices),
     SIMPLIFY = FALSE, USE.NAMES = FALSE,
     FUN = function(value, name) {
       list(value = value,

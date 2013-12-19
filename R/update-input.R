@@ -303,7 +303,7 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
     }
   )
 
-  message <- dropNulls(list(label = label, options = options))
+  message <- dropNulls(list(label = label, options = options, value = selected))
 
   session$sendInputMessage(inputId, message)
 }

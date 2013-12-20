@@ -222,7 +222,7 @@ navbarPage <- function(title,
                             id=navId,
                             tabset$navList),
                             tags$script(paste(
-                              "$('#", navId, " a').click(function (e) {
+                              "$('#", navId, " a:not(.dropdown-toggle)').click(function (e) { 
                                   e.preventDefault();
                                   $(this).tab('show');
                                   if ($('.btn').is(':visible'))

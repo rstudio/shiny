@@ -67,6 +67,11 @@ format.shiny.tag.list <- format.shiny.tag
 #' @S3method as.character shiny.tag.list
 as.character.shiny.tag.list <- as.character.shiny.tag
 
+#' @S3method print html
+print.html <- function(x, ...) {
+  cat(x, "\n")
+}
+
 normalizeText <- function(text) {
   if (!is.null(attr(text, "html")))
     text
@@ -368,6 +373,7 @@ HTML <- function(text, ...) {
   htmlText <- c(text, as.character(list(...)))
   htmlText <- paste(htmlText, collapse=" ")
   attr(htmlText, "html") <- TRUE
+  class(htmlText) <- c("html", "character")
   htmlText
 }
 

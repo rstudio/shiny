@@ -83,6 +83,12 @@ tagList <- function(...) {
 }
 
 #' @export
+tagAppendAttributes <- function(tag, ...) {
+  tag$attribs <- c(tag$attribs, list(...))
+  tag
+}
+
+#' @export
 tagAppendChild <- function(tag, child) {
   tag$children[[length(tag$children)+1]] <- child
   tag

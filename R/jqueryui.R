@@ -50,7 +50,8 @@
 #'   the panel. Use \code{"move"} for a north-east-south-west icon, 
 #'   \code{"default"} for the usual cursor arrow, or \code{"inherit"} for the 
 #'   usual cursor behavior (including changing to an I-beam when the cursor is 
-#'   over text).
+#'   over text). The default is \code{"auto"}, which is equivalent to
+#'   \code{ifelse(draggable, "move", "inherit")}.
 #' @return An HTML element or list of elements.
 #'   
 #' @export
@@ -58,7 +59,7 @@ absolutePanel <- function(...,
                           top = NULL, left = NULL, right = NULL, bottom = NULL,
                           width = NULL, height = NULL,
                           draggable = FALSE, fixed = FALSE,
-                          cursor = c('move', 'default', 'inherit')) {
+                          cursor = c('auto', 'move', 'default', 'inherit')) {
   cssProps <- list(
     top = top,
     left = left,
@@ -71,6 +72,8 @@ absolutePanel <- function(...,
   cssProps <- sapply(cssProps, validateCssUnit)
   cssProps[['position']] <- ifelse(fixed, 'fixed', 'absolute')
   cssProps[['cursor']] <- match.arg(cursor)
+  if (identical(cssProps[['cursor']], 'auto'))
+    cssProps[['cursor']] <- ifelse(draggable, 'move', 'inherit')
   
   style <- paste(paste(names(cssProps), cssProps, sep = ':', collapse = ';'), ';', sep='')
   divTag <- tags$div(style=style, ...)

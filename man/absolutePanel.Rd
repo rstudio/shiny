@@ -6,7 +6,7 @@
   absolutePanel(..., top = NULL, left = NULL, right = NULL,
     bottom = NULL, width = NULL, height = NULL,
     draggable = FALSE, fixed = FALSE,
-    cursor = c("move", "default", "inherit"))
+    cursor = c("auto", "move", "default", "inherit"))
 
   fixedPanel(..., top = NULL, left = NULL, right = NULL,
     bottom = NULL, width = NULL, height = NULL,
@@ -45,7 +45,9 @@
   north-east-south-west icon, \code{"default"} for the
   usual cursor arrow, or \code{"inherit"} for the usual
   cursor behavior (including changing to an I-beam when the
-  cursor is over text).}
+  cursor is over text). The default is \code{"auto"}, which
+  is equivalent to \code{ifelse(draggable, "move",
+  "inherit")}.}
 }
 \value{
   An HTML element or list of elements.

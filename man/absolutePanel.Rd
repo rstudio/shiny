@@ -14,8 +14,9 @@
     cursor = c("move", "default", "inherit"))
 }
 \arguments{
-  \item{...}{Attributes (named elements) or children
-  (unnamed elements) that should be included in the panel.}
+  \item{...}{Attributes (named arguments) or children
+  (unnamed arguments) that should be included in the
+  panel.}
 
   \item{top}{Distance between the top of the panel, and the
   top of the page or parent container.}

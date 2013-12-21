@@ -29,7 +29,7 @@
 #' rather than the more obvious \code{width = "100\%"} and \code{height =
 #' "100\%"}.
 #' 
-#' @param ... Attributes (named elements) or children (unnamed elements) that 
+#' @param ... Attributes (named arguments) or children (unnamed arguments) that 
 #'   should be included in the panel.
 #'   
 #' @param top Distance between the top of the panel, and the top of the page or 

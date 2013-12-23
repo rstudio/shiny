@@ -888,7 +888,7 @@ parseShinyInput.shinyMatrix <- function(x, shinysession, name) {
 #' @S3method parseShinyInput shinyDate
 parseShinyInput.shinyDate <- function(x, shinysession, name){  
   # Convert to Date vector
-  as.Date(unclass(x))
+  as.Date(unclass(unlist(x)))
 }
 
 # Provide a character representation of the WS that can be used

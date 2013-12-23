@@ -255,13 +255,13 @@ test_that("Attributes are preserved", {
 
   # Make sure attributes are preserved when wrapped in other tags
   x <- div(HTML("<tag>&&</tag>"))
-  expect_equivalent(x$children[[1]], "<tag>&&</tag>")
+  expect_equivalent(x$children[[1]], HTML("<tag>&&</tag>"))
   expect_identical(attr(x$children[[1]], "html"), TRUE)
   expect_equivalent(format(x), "<div><tag>&&</tag></div>")
 
   # Deeper nesting
   x <- div(p(HTML("<tag>&&</tag>")))
-  expect_equivalent(x$children[[1]]$children[[1]], "<tag>&&</tag>")
+  expect_equivalent(x$children[[1]]$children[[1]], HTML("<tag>&&</tag>"))
   expect_identical(attr(x$children[[1]]$children[[1]], "html"), TRUE)
   expect_equivalent(format(x), "<div>\n  <p><tag>&&</tag></p>\n</div>")
 })

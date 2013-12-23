@@ -27,7 +27,7 @@
 a <- 10
 makeReactiveBinding("a")
 b <- reactive(a * -1)
-observe(print(b))
+observe(print(b()))
 a <- 20
 }
 }

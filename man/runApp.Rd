@@ -5,7 +5,7 @@
   runApp(appDir = getwd(), port = NULL,
     launch.browser = getOption("shiny.launch.browser", interactive()),
     host = getOption("shiny.host", "127.0.0.1"),
-    workerId = "", quiet = FALSE, showcase = FALSE)
+    workerId = "", quiet = FALSE, showcase.mode = 0)
 }
 \arguments{
   \item{appDir}{The directory of the application. Should
@@ -33,12 +33,9 @@
   \item{quiet}{Should Shiny status messages be shown?
   Defaults to FALSE.}
 
-  \item{showcase}{If true, the application will be started
-  in showcase mode. In showcase mode, the application's
-  code is visible, and additional metadata from
-  \code{DESCRIPTION} and \code{Readme.md} files in the
-  application's directory are displayed. Defaults to
-  FALSE.}
+  \item{showcase.mode}{The showcase mode in which to
+  display the application, or 0 if no showcase mode is
+  desired. Defaults to 0.}
 }
 \description{
   Runs a Shiny application. This function normally does not

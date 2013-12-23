@@ -152,6 +152,8 @@ writeShowcaseHead <- function(connection) {
               con = connection)
   mdfile <- file.path.ci(getwd(), 'Readme.md')
   if (file.exists(mdfile)) {
+    # If the readme file exists, write a JavaScript fragment to render it to
+    # HTML from Markdown.
     writeLines(c('    $(document).ready(function() { ', 
                  '      document.getElementById("readme-md").innerHTML = ',
                  '         (new Showdown.converter()).makeHtml('), 
@@ -166,6 +168,8 @@ writeShowcaseHead <- function(connection) {
   writeLines('  </script>', con = connection)
 }
 
+# Writes the application metadata in showcase mode--this is the tag that shows
+# the app's title and author.
 writeAppMetadata <- function(connection, desc) {
   cols <- colnames(desc)
   if ("Title" %in% cols) {
@@ -227,7 +231,8 @@ writeShowcaseAppInfo <- function(connection) {
   rFiles <- c("ui.R", "server.R", "global.R")
   rFiles <- rFiles[file.exists(file.path(getwd(), rFiles))]
   
-  # Write the tab navigation for each R file
+  # Write the tab navigation for each R file. Pre-select server.R since that's
+  # very likely where the action is.
   for (rFile in rFiles) {
     writeLines(paste('<li', 
                      if (rFile == "server.R") ' class="active"' else '',
@@ -249,7 +254,7 @@ writeShowcaseAppInfo <- function(connection) {
                        gsub(".", "_", rFile, fixed = TRUE), 
                        '_code">', sep = ""),
                 con = connection)
-    # Join the first line to the HTML preamble so <pre> block doesn't start
+    # Join the first line to the HTML preamble so the <pre> block doesn't start
     # with a superfluous newline
     fileLines <- readLines(file.path.ci(getwd(), rFile))
     writeLines(c(paste('     <pre class="shiny-code"><code class="language-r">',

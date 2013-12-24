@@ -50,3 +50,4 @@ Collate:
     'imageutils.R'
     'update-input.R'
     'bootstrap-layout.R'
+    'hooks.R'

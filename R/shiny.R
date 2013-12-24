@@ -1470,7 +1470,15 @@ runApp <- function(appDir=getwd(),
       launch.browser(appUrl)
     else if (launch.browser)
       utils::browseURL(appUrl)
+  } else {
+    appUrl <- NULL
   }
+  
+  # call application hooks
+  callAppHook("onRunApp", appUrl)
+  on.exit({
+    callAppHook("onAppStop", appUrl)
+  }, add = TRUE)
   
   .globals$retval <- NULL
   .globals$stopped <- FALSE

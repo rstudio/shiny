@@ -1561,7 +1561,7 @@ describe("Input Bindings", function() {
     beforeEach(function(){
       var htmlstring =
         '<div class="tabbable">\
-          <ul class="nav nav-tabs" id="' + id + '">\
+          <ul class="nav shiny-tab-input" id="' + id + '">\
             <li class="active">\
               <a href="#tab-455-1" data-toggle="tab">panel1</a>\
             </li>\

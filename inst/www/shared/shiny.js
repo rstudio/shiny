@@ -2175,10 +2175,18 @@
   var bootstrapTabInputBinding = new InputBinding();
   $.extend(bootstrapTabInputBinding, {
     find: function(scope) {
-      return $(scope).find('ul.nav.nav-tabs');
+      return $(scope).find('ul.nav.shiny-tab-input');
     },
     getValue: function(el) {
-      var anchor = $(el).children('li.active').children('a');
+      
+      var li = $(el).children('li.active');
+      
+      // handle nested navbar menu (note: only one level of nesting is
+      // supported by bootstrap so this doesn't need to recurse)
+      if ($(li).hasClass('dropdown'))
+        li = $(li).children('ul').children('li.active');
+      
+      var anchor = $(li).children('a');
       if (anchor.length === 1)
         return this._getTabName(anchor);
 
@@ -2186,6 +2194,20 @@
     },
     setValue: function(el, value) {
       var self = this;
+      var listItems = $(el).children('li');
+      listItems.each(function() {
+        // recursively handle nested navbar menu
+        if ($(this).hasClass('dropdown')) {
+          var ul = $(this).children('ul');
+          self.setValue(ul, value);
+        } else {
+          if (self._getTabName($(this)) === value) {
+            $(this).tab('show');
+            return false;
+          }
+        }
+      });
+      
       var anchors = $(el).children('li').children('a');
       anchors.each(function() {
         if (self._getTabName($(this)) === value) {

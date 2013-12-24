@@ -159,6 +159,7 @@ pageWithSidebar <- function(headerPanel,
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at 
 #'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
+#' @param icon Optional icon to appear on a \code{navbarMenu} tab. 
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   

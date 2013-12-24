@@ -1,10 +1,12 @@
 library(shiny)
 
-# Define server logic required to generate and plot a random distribution
+# Define server logic required to generate and plot a random
+# distribution
 shinyServer(function(input, output) {
    
-  # Expression that generates a plot of the distribution. The expression
-  # is wrapped in a call to renderPlot to indicate that:
+  # Expression that generates a plot of the distribution. The 
+  # expression is wrapped in a call to renderPlot to indicate 
+  # that:
   #
   #  1) It is "reactive" and therefore should be automatically 
   #     re-executed when inputs change

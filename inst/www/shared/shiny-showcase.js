@@ -228,7 +228,7 @@
   // for the tabs 
   var setCodeHeightFromDocHeight = function() {
     document.getElementById("showcase-code-content").style.height = 
-      (window.innerHeight - 200) + "px";
+      (window.innerHeight - 250) + "px";
   };
 
   $(window).resize(function() {

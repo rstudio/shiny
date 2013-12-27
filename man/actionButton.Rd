@@ -36,6 +36,8 @@ actionButton("goButton", "Go!")
 }
 }
 \seealso{
+  \code{\link{observeEvent}} and \code{\link{onChange}}
+
   Other input.elements: \code{\link{checkboxGroupInput}},
   \code{\link{checkboxInput}}, \code{\link{dateInput}},
   \code{\link{dateRangeInput}}, \code{\link{fileInput}},

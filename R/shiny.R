@@ -1475,7 +1475,7 @@ runApp <- function(appDir=getwd(),
   }
   
   # call application hooks
-  callAppHook("onRunApp", appUrl)
+  callAppHook("onAppStart", appUrl)
   on.exit({
     callAppHook("onAppStop", appUrl)
   }, add = TRUE)

@@ -882,6 +882,13 @@ parseShinyInput.shinyMatrix <- function(x, shinysession, name) {
 }
 
 #' @rdname parseShinyInput
+#' @S3method parseShinyInput actionButton
+parseShinyInput.actionButton <- function(x, shinysession, name) {
+  # Pass through, keeping actionButton class
+  x
+}
+
+#' @rdname parseShinyInput
 #' @S3method parseShinyInput shinyDate
 parseShinyInput.shinyDate <- function(x, shinysession, name){  
   # Convert to Date vector

@@ -1,5 +1,6 @@
 \name{parseShinyInput}
 \alias{parseShinyInput}
+\alias{parseShinyInput.actionButton}
 \alias{parseShinyInput.default}
 \alias{parseShinyInput.shinyDate}
 \alias{parseShinyInput.shinyMatrix}
@@ -10,6 +11,8 @@
   parseShinyInput.default(x, shinysession, name)
 
   parseShinyInput.shinyMatrix(x, shinysession, name)
+
+  parseShinyInput.actionButton(x, shinysession, name)
 
   parseShinyInput.shinyDate(x, shinysession, name)
 }

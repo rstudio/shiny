@@ -33,11 +33,14 @@
   before making it available in the \code{input} variable
   of the \code{server.R} file.
 
-  Pass the data straight through if no class is provided.
+  \code{parseShinyInput.default}: Pass the data straight
+  through if no class is provided. Also remove any class
+  that may have been assigned from the \code{getType}
+  method on the client side.
 
-  Takes a list-of-lists and returns a matrix. The lists
-  must all be the same length. NULLs and empty lists are
-  replaced by NA.
+  \code{parseShinyInput.shinyMatrix}: Takes a list-of-lists
+  and returns a matrix. The lists must all be the same
+  length. NULLs and empty lists are replaced by NA.
 }
 \details{
   The \code{type} of a custom Shiny Input widget will be

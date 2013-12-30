@@ -161,7 +161,7 @@ writeShowcaseHead <- function(connection) {
      # Read lines from the Markdown file, join them to a single string separated
      # by literal \n (for JavaScript), escape quotes, and emit to a JavaScript
      # string literal. 
-     writeLines(paste('"', do.call(paste, as.list(c(gsub('"', '\"', readLines(mdfile)), sep = "\\n"))),
+     writeLines(paste('"', do.call(paste, as.list(c(gsub('"', '\\\\"', readLines(mdfile)), sep = "\\n"))),
                       '");', sep = ""), con = connection)
      writeLines('});', con = connection);
   }

@@ -7,8 +7,8 @@ shinyUI(fluidPage(
   titlePanel("Tabsets"),
   
   # Sidebar with controls to select the random distribution type
-  # and number of observations to generate. Note the use of the br()
-  # element to introduce extra vertical spacing
+  # and number of observations to generate. Note the use of the
+  # br() element to introduce extra vertical spacing
   sidebarLayout(
     sidebarPanel(
       radioButtons("dist", "Distribution type:",

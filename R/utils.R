@@ -451,3 +451,27 @@ showcaseModeOfReq <- function(req) {
 allowShowcaseOverride <- function() {
   !nzchar(Sys.getenv("SHINY_PORT"))
 }
+
+# Given the name of a license, return the appropriate link HTML for the license,
+# which may just be the name of the license if the name is unrecognized.
+# Recognizes the 'standard' set of licenses used for R packages 
+# (see http://cran.r-project.org/doc/manuals/R-exts.html)
+licenseLink <- function(licenseName) {
+  licenses <- list(
+    "GPL-2" = "https://gnu.org/licenses/gpl-2.0.txt", 
+    "GPL-3" = "https://gnu.org/licenses/gpl-3.0.txt", 
+    "LGPL-3" = "https://www.gnu.org/licenses/lgpl-3.0.txt",
+    "LGPL-2" = "http://www.gnu.org/licenses/old-licenses/lgpl-2.0.txt",
+    "LGPL-2.1" = "http://www.gnu.org/licenses/lgpl-2.1.txt", 
+    "AGPL-3" = "http://www.gnu.org/licenses/agpl-3.0.txt",
+    "Artistic-2.0" = "http://www.r-project.org/Licenses/Artistic-2.0",
+    "BSD_2_clause" = "http://www.r-project.org/Licenses/BSD_2_clause",
+    "BSD_3_clause" = "http://www.r-project.org/Licenses/BSD_3_clause",
+    "MIT" = "http://www.r-project.org/Licenses/MIT")
+  if (exists(licenseName, where = licenses)) {
+    paste('<a href="', licenses[licenseName], '">', licenseName, '</a>', 
+          sep = '')
+  } else {
+    licenseName 
+  }
+}

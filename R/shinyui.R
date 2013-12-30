@@ -205,11 +205,14 @@ writeShowcaseAppInfo <- function(connection) {
   readmemd <- file.path.ci(getwd(), "Readme.md")
   hasReadme <- file.exists(readmemd)
   writeLines('<div class="row-fluid">', con = connection)
+  if (hasDesc) {
+    desc <- read.dcf(descfile)
+  }
   if (hasDesc || hasReadme) {
     writeLines('<div id="showcase-app-metadata" class="span4">', con = connection)
   }  
   if (hasDesc) {
-    writeAppMetadata(connection, read.dcf(descfile))
+    writeAppMetadata(connection, desc)
   }
   if (hasReadme) {
     writeLines('<div id="readme-md"></div>', 
@@ -226,10 +229,7 @@ writeShowcaseAppInfo <- function(connection) {
                '   <i class="fa fa-level-up"></i> show with app', 
                '</button>',
                '<ul class="nav nav-tabs">'), con = connection)
-  # We don't show all .R files in the app, just the ones in the list below
-  # (filtered to those that also exist on disk)
-  rFiles <- c("ui.R", "server.R", "global.R")
-  rFiles <- rFiles[file.exists(file.path(getwd(), rFiles))]
+  rFiles <- list.files(pattern = "\\.R$")
   
   # Write the tab navigation for each R file. Pre-select server.R since that's
   # very likely where the action is.
@@ -264,7 +264,13 @@ writeShowcaseAppInfo <- function(connection) {
                  '  </div>'), con = connection)
   }
   
-  writeLines('</div></div></div>', con = connection)
+  writeLines('</div>', con = connection)
+  if (hasDesc && "License" %in% colnames(desc)) {
+    writeLines(c('<small class="showcase-code-license muted">Code license: ', 
+                licenseLink(desc[1,"License"]), 
+                '</small>'), con = connection) 
+  }
+  writeLines('</div></div>', con = connection)
 }
   
 renderPage <- function(ui, connection, showcase=0) {

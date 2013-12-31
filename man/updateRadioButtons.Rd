@@ -17,8 +17,8 @@
   For each item, the name will be used as the label, and
   the value will be used as the value.}
 
-  \item{selected}{A vector or list of options which will be
-  selected.}
+  \item{selected}{A vector or list of options (values)
+  which will be selected.}
 }
 \description{
   Change the value of a radio input on the client
@@ -59,7 +59,7 @@ shinyServer(function(input, output, session) {
     updateRadioButtons(session, "inRadio2",
       label = paste("Radio label", x),
       choices = r_options,
-      selected = sprintf("option label \%d 2", x)
+      selected = sprintf("option-\%d-2", x)
     )
   })
 })

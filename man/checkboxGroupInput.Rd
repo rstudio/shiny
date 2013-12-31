@@ -15,7 +15,7 @@
   elements of the list are named then that name rather than
   the value is displayed to the user.}
 
-  \item{selected}{Names of items that should be initially
+  \item{selected}{The values that should be initially
   selected, if any.}
 }
 \value{

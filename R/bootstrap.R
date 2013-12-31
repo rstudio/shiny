@@ -554,7 +554,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #' @param label Display label for the control.
 #' @param choices List of values to show checkboxes for. If elements of the list
 #'   are named then that name rather than the value is displayed to the user.
-#' @param selected Names of items that should be initially selected, if any.
+#' @param selected The values that should be initially selected, if any.
 #' @return A list of HTML elements that can be added to a UI definition.
 #'   
 #' @family input elements
@@ -570,6 +570,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
+  if (!is.null(selected)) selected <- validateSelected(selected, choices)
 
   # Create tags for each of the options
   ids <- paste0(inputId, seq_along(choices))
@@ -582,7 +583,7 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
                              id = id,
                              value = value)
 
-    if (name %in% selected)
+    if (value %in% selected)
       inputTag$attribs$checked <- "checked"
 
     tags$label(class = "checkbox",
@@ -598,6 +599,27 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
            checkboxes)
 }
 
+# Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
+# refers to values. Below is a function for backward compatibility.
+validateSelected <- function(selected, choices, multiple = FALSE) {
+  if (is.list(choices)) {
+    # <optgroup> is not there yet
+    if (any(sapply(choices, length) > 1)) return(selected)
+    choices <- unlist(choices)
+  }
+  # labels and values are identical, no need to validate
+  if (identical(nms <- names(choices), unname(choices))) return(selected)
+  # when selected labels instead of values
+  if (any(i <- (selected %in% nms) & !(selected %in% choices))) {
+    warnFun <- if (all(i)) {
+      # replace names with values; drop names, otherwise toJSON() keeps them too
+      selected <- unname(choices[selected])
+      warning
+    } else stop  # stop when it is ambiguous (some labels == values)
+    warnFun("'selected' must be the values instead of names of 'choices'")
+  }
+  selected
+}
 
 #' Create a help text element
 #' 
@@ -648,9 +670,9 @@ choicesWithNames <- function(choices) {
 #' @param label Display label for the control
 #' @param choices List of values to select from. If elements of the list are 
 #' named then that name rather than the value is displayed to the user.
-#' @param selected Name of initially selected item (or multiple names if
-#' \code{multiple = TRUE}). If not specified then defaults to the first item
-#' for single-select lists and no items for multiple select lists.
+#' @param selected The initially selected value (or multiple values if
+#' \code{multiple = TRUE}). If not specified then defaults to the first value
+#' for single-select lists and no values for multiple select lists.
 #' @param multiple Is selection of multiple items allowed?
 #' @return A select list control that can be added to a UI definition.
 #' 
@@ -672,8 +694,9 @@ selectInput <- function(inputId,
   choices <- choicesWithNames(choices)
   
   # default value if it's not specified
-  if (is.null(selected) && !multiple)
-    selected <- names(choices)[[1]]
+  if (is.null(selected)) {
+    if (!multiple) selected <- choices[[1]]
+  } else selected <- validateSelected(selected, choices)
   
   # create select tag and add options
   selectTag <- tags$select(id = inputId)
@@ -686,7 +709,7 @@ selectInput <- function(inputId,
     FUN = function(choice, name) {
       optionTag <- tags$option(value = choice, name)
 
-      if (name %in% selected)
+      if (choice %in% selected)
         optionTag$attribs$selected = "selected"
 
       optionTag
@@ -707,8 +730,8 @@ selectInput <- function(inputId,
 #' @param label Display label for the control
 #' @param choices List of values to select from (if elements of the list are 
 #' named then that name rather than the value is displayed to the user)
-#' @param selected Name of initially selected item (if not specified then
-#' defaults to the first item)
+#' @param selected The initially selected value (if not specified then
+#' defaults to the first value)
 #' @return A set of radio buttons that can be added to a UI definition.
 #'
 #' @family input elements
@@ -726,8 +749,9 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
   choices <- choicesWithNames(choices)
   
   # default value if it's not specified
-  if (is.null(selected))
-    selected <- names(choices)[[1]]
+  selected <- if (is.null(selected)) choices[[1]] else {
+    validateSelected(selected, choices)
+  }
   
   # Create tags for each of the options
   ids <- paste0(inputId, seq_along(choices))
@@ -740,7 +764,7 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
                              id = id,
                              value = value)
 
-      if (identical(name, selected))
+      if (identical(value, selected))
         inputTag$attribs$checked = "checked"
 
       # Put the label text in a span

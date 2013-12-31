@@ -57,6 +57,19 @@ bootstrap css styles.
   reactive one (i.e. reading the variable makes the current reactive context
   dependent on it, and setting the variable is a source of reactivity).
 
+* The argument `selected` in checkboxGroupInput(), selectInput(), and
+  radioButtons() refers to the value(s) instead of the name(s) of the
+  argument `choices` now. For example, the value of the `selected` argument
+  in selectInput(..., choices = c('Label 1' = 'x1', 'Label 2' = 'x2'),
+  selected = 'Label 2') must be updated to 'x2', although names/labels will
+  be automatically converted to values internally for backward
+  compatibility. The same change applies to updateCheckboxGroupInput(),
+  updateSelectInput(), and updateRadioButtons() as well. (#340)
+
+* Now it is possible to only update the value of a checkbox group, select input,
+  or radio buttons using the `selected` argument without providing the
+  `choices` argument in updateCheckboxGroupInput(), updateSelectInput(), and
+  updateRadioButtons(), respectively. (#340)
 
 shiny 0.8.0
 --------------------------------------------------------------------------------

@@ -1842,8 +1842,7 @@
       var options = new Array(el.length);
       for (var i = 0; i < el.length; i++) {
         options[i] = { value:    el[i].value,
-                       label:    el[i].label,
-                       selected: el[i].selected };
+                       label:    el[i].label };
       }
 
       return {
@@ -1911,8 +1910,7 @@
       var options = new Array($objs.length);
       for (var i = 0; i < options.length; i++) {
         options[i] = { value:   $objs[i].value,
-                       label:   this._getLabel($objs[i]),
-                       checked: $objs[i].checked };
+                       label:   this._getLabel($objs[i]) };
       }
 
       return {
@@ -2038,8 +2036,7 @@
       var options = new Array($objs.length);
       for (var i = 0; i < options.length; i++) {
         options[i] = { value:   $objs[i].value,
-                       label:   this._getLabel($objs[i]),
-                       checked: $objs[i].checked };
+                       label:   this._getLabel($objs[i]) };
       }
 
       return { label:    $(el).find('label[for=' + el.id + ']').text(),

@@ -1145,8 +1145,8 @@ describe("Input Bindings", function() {
         label: 'Select input:',
         value: 'option1',
         options: [
-          { value: 'option1', label: 'option1 label', selected: true },
-          { value: 'option2', label: 'option2 label', selected: false }
+          { value: 'option1', label: 'option1 label' },
+          { value: 'option2', label: 'option2 label' }
         ]
       });
     });
@@ -1156,8 +1156,8 @@ describe("Input Bindings", function() {
         label: 'Select input:',
         value: 'option4',
         options: [
-          { value: 'option3', label: 'option3 label', selected: false },
-          { value: 'option4', label: 'option4 label', selected: true }
+          { value: 'option3', label: 'option3 label' },
+          { value: 'option4', label: 'option4 label' }
         ]
       };
       receive_message(id, state_complete);
@@ -1168,50 +1168,45 @@ describe("Input Bindings", function() {
       receive_message(id, { });
       expect(get_state(id)).toEqual(state_complete);
 
-      // Don't provide value, but set selected:true on an option
+      // Don't provide value, and the default should be the first option
       var state_novalue = {
         options: [
-          { value: 'option5', label: 'option5 label', selected: false },
-          { value: 'option6', label: 'option6 label', selected: true }
+          { value: 'option5', label: 'option5 label' },
+          { value: 'option6', label: 'option6 label' }
         ]
       };
       var state_novalue_expected = {
         label: 'Select input:',
-        value: 'option6',
+        value: 'option5',
         options: state_novalue.options
       };
       receive_message(id, state_novalue);
-      expect(get_value(id)).toBe('option6');
+      expect(get_value(id)).toBe('option5');
       expect(get_state(id)).toEqual(state_novalue_expected);
 
-
-      // Provide value, but no selected:true
-      var state_noselected = {
-        value: 'option7',
-        options: [
-          { value: 'option7', label: 'option7 label'},
-          { value: 'option8', label: 'option8 label'}
-        ]
+      // Only update value
+      var state_value = {
+        value: 'option6'
       };
-      var state_noselected_expected = {
+      var state_value_expected = {
         label: 'Select input:',
-        value: 'option7',
+        value: 'option6',
         options: [
-          { value: 'option7', label: 'option7 label', selected: true },
-          { value: 'option8', label: 'option8 label', selected: false }
+          { value: 'option5', label: 'option5 label' },
+          { value: 'option6', label: 'option6 label' }
         ]
       };
-      receive_message(id, state_noselected);
-      expect(get_value(id)).toBe('option7');
-      expect(get_state(id)).toEqual(state_noselected_expected);
+      receive_message(id, state_value);
+      expect(get_value(id)).toEqual('option6');
+      expect(get_state(id)).toEqual(state_value_expected);
 
       // Set label
       var state_newlabel_complete = {
         label: 'new label',
         value: 'option9',
         options: [
-          { value: 'option9',  label: 'option9 label',  selected: true },
-          { value: 'option10', label: 'option10 label', selected: false }
+          { value: 'option9',  label: 'option9 label' },
+          { value: 'option10', label: 'option10 label' }
         ]
       };
       receive_message(id, state_newlabel_complete);
@@ -1272,8 +1267,8 @@ describe("Input Bindings", function() {
         label: 'Radio buttons:',
         value: 'option1',
         options: [
-          { value: 'option1', label: 'option1 label', checked: true },
-          { value: 'option2', label: 'option2 label', checked: false }
+          { value: 'option1', label: 'option1 label' },
+          { value: 'option2', label: 'option2 label' }
         ]
       });
     });
@@ -1283,8 +1278,8 @@ describe("Input Bindings", function() {
         label: 'Radio buttons:',
         value: 'option4',
         options: [
-          { value: 'option3', label: 'option3 label', checked: false },
-          { value: 'option4', label: 'option4 label', checked: true }
+          { value: 'option3', label: 'option3 label' },
+          { value: 'option4', label: 'option4 label' }
         ]
       };
       receive_message(id, state_complete);
@@ -1295,50 +1290,46 @@ describe("Input Bindings", function() {
       receive_message(id, { });
       expect(get_state(id)).toEqual(state_complete);
 
-      // Don't provide value, but set checked:true on an option
+      // Don't provide value, and the value will be undefined
+      // since no option is checked
       var state_novalue = {
         options: [
-          { value: 'option5', label: 'option5 label', checked: false },
-          { value: 'option6', label: 'option6 label', checked: true }
+          { value: 'option5', label: 'option5 label' },
+          { value: 'option6', label: 'option6 label' }
         ]
       };
       var state_novalue_expected = {
         label: 'Radio buttons:',
-        value: 'option6',
+        value: undefined,
         options: state_novalue.options
       };
       receive_message(id, state_novalue);
-      expect(get_value(id)).toBe('option6');
+      expect(get_value(id)).toBe(undefined);
       expect(get_state(id)).toEqual(state_novalue_expected);
 
-
-      // Provide value, but no checked:true
-      var state_nochecked = {
-        value: 'option7',
-        options: [
-          { value: 'option7', label: 'option7 label'},
-          { value: 'option8', label: 'option8 label'}
-        ]
+      // Only update value
+      var state_value = {
+        value: 'option6'
       };
-      var state_nochecked_expected = {
+      var state_value_expected = {
         label: 'Radio buttons:',
-        value: 'option7',
+        value: 'option6',
         options: [
-          { value: 'option7', label: 'option7 label', checked: true },
-          { value: 'option8', label: 'option8 label', checked: false }
+          { value: 'option5', label: 'option5 label' },
+          { value: 'option6', label: 'option6 label' }
         ]
       };
-      receive_message(id, state_nochecked);
-      expect(get_value(id)).toBe('option7');
-      expect(get_state(id)).toEqual(state_nochecked_expected);
+      receive_message(id, state_value);
+      expect(get_value(id)).toEqual('option6');
+      expect(get_state(id)).toEqual(state_value_expected);
 
       // Set label
       var state_newlabel_complete = {
         label: 'new label',
         value: 'option9',
         options: [
-          { value: 'option9',  label: 'option9 label',  checked: true },
-          { value: 'option10', label: 'option10 label', checked: false }
+          { value: 'option9',  label: 'option9 label' },
+          { value: 'option10', label: 'option10 label' }
         ]
       };
       receive_message(id, state_newlabel_complete);
@@ -1419,8 +1410,8 @@ describe("Input Bindings", function() {
         label: 'Checkbox group:',
         value: ['option1'],
         options: [
-          { value: 'option1', label: 'option1 label', checked: true },
-          { value: 'option2', label: 'option2 label', checked: false }
+          { value: 'option1', label: 'option1 label' },
+          { value: 'option2', label: 'option2 label' }
         ]
       });
     });
@@ -1430,8 +1421,8 @@ describe("Input Bindings", function() {
         label: 'Checkbox group:',
         value: ['option4'],
         options: [
-          { value: 'option3', label: 'option3 label', checked: false },
-          { value: 'option4', label: 'option4 label', checked: true }
+          { value: 'option3', label: 'option3 label' },
+          { value: 'option4', label: 'option4 label' }
         ]
       };
       receive_message(id, state_complete);
@@ -1442,50 +1433,46 @@ describe("Input Bindings", function() {
       receive_message(id, { });
       expect(get_state(id)).toEqual(state_complete);
 
-      // Don't provide value, but set checked:true on an option
+      // Don't provide value
       var state_novalue = {
         options: [
-          { value: 'option5', label: 'option5 label', checked: true },
-          { value: 'option6', label: 'option6 label', checked: true }
+          { value: 'option5', label: 'option5 label' },
+          { value: 'option6', label: 'option6 label' }
         ]
       };
       var state_novalue_expected = {
         label: 'Checkbox group:',
-        value: ['option5', 'option6'],
+        value: [ ],
         options: state_novalue.options
       };
       receive_message(id, state_novalue);
-      expect(get_value(id)).toEqual(['option5', 'option6']);
+      expect(get_value(id)).toEqual([ ]);
       expect(get_state(id)).toEqual(state_novalue_expected);
 
 
-      // Provide value, but no checked:true
-      var state_nochecked = {
-        value: 'option7',
-        options: [
-          { value: 'option7', label: 'option7 label'},
-          { value: 'option8', label: 'option8 label'}
-        ]
+      // Only update value
+      var state_value = {
+        value: 'option6'
       };
-      var state_nochecked_expected = {
+      var state_value_expected = {
         label: 'Checkbox group:',
-        value: ['option7'],
+        value: ['option6'],
         options: [
-          { value: 'option7', label: 'option7 label', checked: true },
-          { value: 'option8', label: 'option8 label', checked: false }
+          { value: 'option5', label: 'option5 label' },
+          { value: 'option6', label: 'option6 label' }
         ]
       };
-      receive_message(id, state_nochecked);
-      expect(get_value(id)).toEqual(['option7']);
-      expect(get_state(id)).toEqual(state_nochecked_expected);
+      receive_message(id, state_value);
+      expect(get_value(id)).toEqual(['option6']);
+      expect(get_state(id)).toEqual(state_value_expected);
 
       // Set label
       var state_newlabel_complete = {
         label: 'Checkbox group new label:',
         value: ['option4'],
         options: [
-          { value: 'option3', label: 'option3 label', checked: false },
-          { value: 'option4', label: 'option4 label', checked: true }
+          { value: 'option3', label: 'option3 label' },
+          { value: 'option4', label: 'option4 label' }
         ]
       };
       receive_message(id, state_newlabel_complete);

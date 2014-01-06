@@ -32,6 +32,7 @@
 
 #showcase-code-tabs pre {
   border: none;
+  line-height: 1em;
 }
 
 #showcase-code-tabs .nav, 

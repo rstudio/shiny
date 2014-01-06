@@ -86,3 +86,11 @@ span.jslider {
 .crosshair {
   cursor: crosshair;
 } 
+
+.well input[type="text"],
+.well input[type="number"],
+.well select {
+  width: 95%;
+}
+
+

@@ -1415,8 +1415,10 @@ serviceApp <- function() {
 #' @param workerId Can generally be ignored. Exists to help some editions of
 #'   Shiny Server Pro route requests to the correct process.
 #' @param quiet Should Shiny status messages be shown? Defaults to FALSE.
-#' @param showcase.mode The showcase mode in which to display the application, 
-#'   or 0 if no showcase mode is desired. Defaults to 0. 
+#' @param display.mode The mode in which to display the application. If set to
+#'   the value \code{"showcase"}, shows application code and metadata from a
+#'   \code{DESCRIPTION} file in the application directory alongside the
+#'   application. Defaults to \code{"normal"}.
 #'
 #' @examples
 #' \dontrun{
@@ -1445,7 +1447,7 @@ runApp <- function(appDir=getwd(),
                                             interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
                    workerId="", quiet=FALSE, 
-                   showcase.mode=0) {
+                   display.mode="normal") {
   if (is.null(host) || is.na(host))
     host <- '0.0.0.0'
 
@@ -1467,6 +1469,7 @@ runApp <- function(appDir=getwd(),
   
   # Set showcase defaults: showcase mode specified, and allow overriding if 
   # showcase mode is set to something other than 0.
+  showcase.mode <- if (display.mode == "showcase") 1 else 0
   .globals$showcaseDefault <- showcase.mode
   .globals$showcaseOverride <- as.logical(showcase.mode)
   
@@ -1600,7 +1603,7 @@ runExample <- function(example=NA,
   }
   else {
     runApp(dir, port = port, host = host, launch.browser = launch.browser, 
-           showcase.mode = 1)
+           display.mode = "showcase")
   }
 }
 

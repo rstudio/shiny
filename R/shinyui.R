@@ -120,7 +120,6 @@ includeScript <- function(path, ...) {
   return(tags$script(HTML(paste(lines, collapse='\r\n')), ...))
 }
 
-
 #' Include Content Only Once
 #' 
 #' Use \code{singleton} to wrap contents (tag, text, HTML, or lists) that should
@@ -137,132 +136,6 @@ singleton <- function(x) {
   return(x)
 }
 
-# Writes the portion of the showcase header that lives inside the <HEAD> tag to
-# the connection.
-writeShowcaseHead <- function(connection) {
-  mdfile <- file.path.ci(getwd(), 'Readme.md')
-  writeLines(as.character(withTags(tagList(
-    script(src="shared/highlight/highlight.pack.js"),
-    script(src="shared/showdown/compressed/showdown.js"),
-    script(src="shared/jquery-ui/jquery-ui-min.js"),
-    script(src="shared/shiny-showcase.js"),
-    link(rel="stylesheet", type="text/css", 
-         href="shared/highlight/rstudio.css"),
-    link(rel="stylesheet", type="text/css", 
-         href="shared/shiny-showcase.css"),
-    link(rel="stylesheet", type="text/css", 
-         href="shared/font-awesome/css/font-awesome.min.css"), 
-    if (file.exists(mdfile)) 
-      script(type="text/markdown", id="showcase-markdown-content", 
-        readLines(mdfile))
-    else ""
-  ))), con = connection);
-}
-
-# Writes the application metadata in showcase mode--this is the tag that shows
-# the app's title and author.
-writeAppMetadata <- function(connection, desc) {
-  cols <- colnames(desc)
-  if ("Title" %in% cols) {
-    writeLines(as.character(withTags(tagList(
-      h4(class="muted shiny-showcase-apptitle", desc[1,"Title"], 
-        if ("Author" %in% cols) small(
-          br(), "by",
-          if ("AuthorUrl" %in% cols)
-            a(href=desc[1,"AuthorUrl"], class="shiny-showcase-appauthor", 
-              desc[1,"Author"])
-          else
-            desc[1,"Author"],
-          if ("AuthorEmail" %in% cols) 
-            a(href=paste("mailto:", desc[1,"AuthorEmail"], sep = ''),
-              class="shiny-showcase-appauthoreemail", 
-              desc[1,"AuthorEmail"])
-          else ""
-        )
-        else ""
-    )
-    ))), con = connection)
-  }
-}
-
-# Writes the showcase application information (readme and code) to the given
-# connection.
-writeShowcaseAppInfo <- function(connection) {
-  writeLines('<div class="container-fluid shiny-code-container well" id="showcase-well">',
-             con = connection)
-  descfile <- file.path.ci(getwd(), "DESCRIPTION")
-  hasDesc <- file.exists(descfile)
-  readmemd <- file.path.ci(getwd(), "Readme.md")
-  hasReadme <- file.exists(readmemd)
-  writeLines('<div class="row-fluid">', con = connection)
-  if (hasDesc) {
-    desc <- read.dcf(descfile)
-  }
-  if (hasDesc || hasReadme) {
-    writeLines('<div id="showcase-app-metadata" class="span4">', con = connection)
-  }  
-  if (hasDesc) {
-    writeAppMetadata(connection, desc)
-  }
-  if (hasReadme) {
-    writeLines('<div id="readme-md"></div>', 
-               con = connection)
-  }
-  if (hasDesc || hasReadme) {
-    writeLines('</div>', con = connection)
-  }  
-  writeLines(c('<div id="showcase-code-inline"', 
-               if (hasReadme || hasDesc) 'class="span8"' else 'class="span10 offset1"',
-               '>',
-               '<div id="showcase-code-tabs">',
-               '<button id="showcase-code-position-toggle" class="btn btn-default btn-small" onclick="toggleCodePosition()">',
-               '   <i class="fa fa-level-up"></i> show with app', 
-               '</button>',
-               '<ul class="nav nav-tabs">'), con = connection)
-  rFiles <- list.files(pattern = "\\.R$")
-  
-  # Write the tab navigation for each R file. Pre-select server.R since that's
-  # very likely where the action is.
-  for (rFile in rFiles) {
-    writeLines(paste('<li', 
-                     if (rFile == "server.R") ' class="active"' else '',
-                     '><a href="#', 
-                     gsub(".", "_", rFile, fixed = TRUE), 
-                     '_code" data-toggle="tab"',
-                     '>', 
-                     rFile, '</a></li>', sep=""), con = connection)
-  }
-  writeLines(c('</ul>',
-               '<div class="tab-content" id="showcase-code-content">'),
-             con = connection)
-  
-  # Write the tab content for each R file
-  for (rFile in rFiles) {
-    writeLines(paste('  <div class="tab-pane', 
-                       if (rFile == "server.R") ' active' else '', 
-                       '" id="', 
-                       gsub(".", "_", rFile, fixed = TRUE), 
-                       '_code">', sep = ""),
-                con = connection)
-    # Join the first line to the HTML preamble so the <pre> block doesn't start
-    # with a superfluous newline
-    fileLines <- readLines(file.path.ci(getwd(), rFile))
-    writeLines(c(paste('     <pre class="shiny-code"><code class="language-r">',
-                     fileLines[1], sep = ""),
-                 fileLines[2:length(fileLines)],
-                 '     </code></pre>', 
-                 '  </div>'), con = connection)
-  }
-  
-  writeLines('</div>', con = connection)
-  if (hasDesc && "License" %in% colnames(desc)) {
-    writeLines(c('<small class="showcase-code-license muted">Code license: ', 
-                licenseLink(desc[1,"License"]), 
-                '</small>'), con = connection) 
-  }
-  writeLines('</div></div>', con = connection)
-}
-  
 renderPage <- function(ui, connection, showcase=0) {
   
   result <- renderTags(ui)
@@ -280,7 +153,7 @@ renderPage <- function(ui, connection, showcase=0) {
                )),
               con = connection)
   if (showcase > 0) {
-    writeShowcaseHead(connection)
+    writeLines(as.character(showcaseHead()), con = connection)
   }
   writeLines(c(result$head,
                '</head>',
@@ -289,16 +162,12 @@ renderPage <- function(ui, connection, showcase=0) {
              con = connection)
 
   if (showcase > 0) {
-    writeLines('<table id="showcase-app-code"><tr><td id="showcase-app-container" class="showcase-app-container-expanded">', con = connection)
-  }
-  
-  # write UI html to connection
-  writeLines(result$html, con = connection)
-  
-  if (showcase > 0) {
-    writeLines(c('</td><td id="showcase-sxs-code" class="showcase-sxs-code-collapsed"></td>',
-                 '</tr></table>'), con = connection)
-    writeShowcaseAppInfo(connection)
+    # in showcase mode, emit containing elements and app HTML
+    writeLines(as.character(showcaseBody(result$html)), 
+               con = connection)
+  } else {
+    # in normal mode, write UI html directly to connection
+    writeLines(result$html, con = connection)
   }
   
   # write end document

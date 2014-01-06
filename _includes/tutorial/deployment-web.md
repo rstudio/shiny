@@ -9,7 +9,7 @@ If you want a simple way to distribute your Shiny app so that users can run them
 
 With our [Shiny Server](http://rstudio.com/shiny/server/) software, you can deploy Shiny applications over the web so that users need only a web browser and your application's URL. You'll need a Linux server and [Shiny Server](http://rstudio.com/shiny/server/).
 
-Shiny Server is free and open source, though in the future we will offer a commercially licensed edition with additional features for larger organizations. If you'd like to be notified of future beta releases of Shiny Server, please [register now](https://rstudio.wufoo.com/forms/shiny-server-beta-program/).
+Shiny Server is free and open source, though in the future we will offer a commercially licensed edition with additional features for larger organizations.
 
 #### Pros
 * Easiest for your users&mdash;only a web browser is required
@@ -19,13 +19,14 @@ Shiny Server is free and open source, though in the future we will offer a comme
 * Requires server setup and maintenance of a Linux server
 
 
-### RStudio-hosted Shiny Server
+### RStudio-hosted Shiny Apps
 
-Want to deploy over the web but prefer not to run your own server? We're currently beta testing a subscription-based hosting service for Shiny. To apply for a free beta test account, [register now](https://rstudio.wufoo.com/forms/shiny-server-beta-program/).
+Want to deploy over the web but prefer not to run your own server? We're currently alpha testing ShinyApps, a subscription-based hosting service. To apply for a free alpha test account, [register now](http://www.shinyapps.io/signup.html).
 
 #### Pros
 * Easiest for your users&mdash;only a web browser is required
 * No need to run your own server
+* Easy deployment to the web with one line of R code
 
 #### Cons
 * Code and data must be copied to our servers

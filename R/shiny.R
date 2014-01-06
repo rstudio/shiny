@@ -154,9 +154,13 @@ ShinySession <- setRefClass(
           }
         }
         
+        # Preserve source reference and file information when formatting the
+        # label for display in the reactive graph
         srcref <- attr(label, "srcref")
+        srcfile <- attr(label, "srcfile")
         label <- sprintf('output$%s <- %s', name, paste(label, collapse='\n'))
         attr(label, "srcref") <- srcref
+        attr(label, "srcfile") <- srcfile
         
         obs <- observe({
           
@@ -595,6 +599,7 @@ ShinySession <- setRefClass(
 `$<-.shinyoutput` <- function(x, name, value) {
   label <- deparse(substitute(value))
   attr(label, "srcref") <- srcrefFromShinyCall(substitute(value)[[2]])
+  attr(label, "srcfile") <- srcFileOfRef(attr(substitute(value)[[2]], "srcref")[[1]])
   .subset2(x, 'impl')$defineOutput(name, value, label)
   return(invisible(x))
 }

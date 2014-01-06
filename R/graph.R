@@ -73,7 +73,9 @@ renderReactLog <- function() {
 
 .graphCreateContext <- function(id, label, type, prevId) {
   .graphAppend(list(
-    action='ctx', id=id, label=paste(label, collapse='\n'), srcref=attr(label, "srcref"), type=type, prevId=prevId
+    action='ctx', id=id, label=paste(label, collapse='\n'), 
+    srcref=attr(label, "srcref"), srcfile=attr(label, "srcfile"),
+    type=type, prevId=prevId
   ))
 }
 

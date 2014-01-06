@@ -448,3 +448,6 @@ showcaseModeOfReq <- function(req) {
   showcaseModeOfQuerystring(req$QUERY_STRING)
 }
 
+srcFileOfRef <- function(srcref) {
+  basename((attr(srcref, "srcfile"))$filename)
+}

@@ -70,7 +70,7 @@
   // Draw a highlight effect for the given source ref. srcref is assumed to be
   // an integer array of length 6, following the standard R format for source
   // refs.
-  function highlightSrcref (srcref) {
+  function highlightSrcref (srcref, srcfile) {
     // Check to see if we already have a marker for this source ref
     var el = document.getElementById("srcref_" + srcref);
     if (!el) {
@@ -78,7 +78,7 @@
       el = document.createElement("span");
       el.id = "srcref_" + srcref;
       var ref = srcref;
-      var code = document.getElementById("server_R_code"); 
+      var code = document.getElementById(srcfile.replace(/\./g, "_") + "_code");
       var start = findTextPoint(code, ref[0], ref[4]); 
       var end = findTextPoint(code, ref[2], ref[5]); 
       var range = document.createRange();
@@ -109,8 +109,8 @@
   // If this is the main Shiny window, wire up our custom message handler.
   if (window.Shiny) {
     Shiny.addCustomMessageHandler('reactlog', function(message) {
-      if (message.srcref) {
-        highlightSrcref(message.srcref);
+      if (message.srcref && message.srcfile) {
+        highlightSrcref(message.srcref, message.srcfile);
       }
     });
   }

@@ -469,8 +469,7 @@ licenseLink <- function(licenseName) {
     "BSD_3_clause" = "http://www.r-project.org/Licenses/BSD_3_clause",
     "MIT" = "http://www.r-project.org/Licenses/MIT")
   if (exists(licenseName, where = licenses)) {
-    paste('<a href="', licenses[licenseName], '">', licenseName, '</a>', 
-          sep = '')
+    as.character(tags$a(href = licenses[licenseName], licenseName))
   } else {
     licenseName 
   }

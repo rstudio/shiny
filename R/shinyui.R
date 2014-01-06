@@ -140,32 +140,24 @@ singleton <- function(x) {
 # Writes the portion of the showcase header that lives inside the <HEAD> tag to
 # the connection.
 writeShowcaseHead <- function(connection) {
-  writeLines(c('  <script src="shared/highlight/highlight.pack.js"></script>',
-               '  <script src="shared/showdown/compressed/showdown.js"></script>',
-               '  <script src="shared/jquery-ui/jquery-ui-min.js"></script>',
-               '  <script src="shared/shiny-showcase.js"></script>',
-               '  <link rel="stylesheet" type="text/css" href="shared/highlight/rstudio.css" />',
-               '  <link rel="stylesheet" type="text/css" href="shared/shiny-showcase.css" />',
-               '  <link rel="stylesheet" type="text/css" href="shared/font-awesome/css/font-awesome.min.css" />',
-               '  <script type="text/javascript">',
-               '    hljs.initHighlightingOnLoad();'),
-              con = connection)
   mdfile <- file.path.ci(getwd(), 'Readme.md')
-  if (file.exists(mdfile)) {
-    # If the readme file exists, write a JavaScript fragment to render it to
-    # HTML from Markdown.
-    writeLines(c('    $(document).ready(function() { ', 
-                 '      document.getElementById("readme-md").innerHTML = ',
-                 '         (new Showdown.converter()).makeHtml('), 
-                con = connection)
-     # Read lines from the Markdown file, join them to a single string separated
-     # by literal \n (for JavaScript), escape quotes, and emit to a JavaScript
-     # string literal. 
-     writeLines(paste('"', do.call(paste, as.list(c(gsub('"', '\\\\"', readLines(mdfile)), sep = "\\n"))),
-                      '");', sep = ""), con = connection)
-     writeLines('});', con = connection);
-  }
-  writeLines('  </script>', con = connection)
+  writeLines(as.character(withTags(tagList(
+    script(src="shared/highlight/highlight.pack.js"),
+    script(src="shared/showdown/compressed/showdown.js"),
+    script(src="shared/jquery-ui/jquery-ui-min.js"),
+    script(src="shared/shiny-showcase.js"),
+    link(rel="stylesheet", type="text/css", 
+         href="shared/highlight/rstudio.css"),
+    link(rel="stylesheet", type="text/css", 
+         href="shared/shiny-showcase.css"),
+    link(rel="stylesheet", type="text/css", 
+         href="shared/font-awesome/css/font-awesome.min.css"), 
+    if (file.exists(mdfile)) 
+      script(type="text/markdown", id="showcase-markdown-content", 
+        readLines(mdfile))
+    else
+      NULL
+  ))), con = connection);
 }
 
 # Writes the application metadata in showcase mode--this is the tag that shows

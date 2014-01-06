@@ -231,6 +231,15 @@
       (window.innerHeight - 250) + "px";
   };
 
+  // if there's a block of markdown content, render it to HTML
+  var renderMarkdown = function() {
+    var mdContent = document.getElementById("showcase-markdown-content");
+    if (mdContent !== null) {
+      document.getElementById("readme-md").innerHTML = 
+        (new Showdown.converter()).makeHtml(mdContent.innerText)
+    }
+  }
+
   $(window).resize(function() {
     if (isCodeAbove) {
       setAppCodeSxsWidths(false);
@@ -240,5 +249,8 @@
 
   window.toggleCodePosition = toggleCodePosition;
   window.addEventListener("load", setInitialCodePosition);
+  window.addEventListener("load", renderMarkdown);
+  if (window.hljs)
+    hljs.initHighlightingOnLoad();
 })();
 

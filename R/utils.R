@@ -448,7 +448,3 @@ showcaseModeOfReq <- function(req) {
   showcaseModeOfQuerystring(req$QUERY_STRING)
 }
 
-allowShowcaseOverride <- function() {
-  !nzchar(Sys.getenv("SHINY_PORT"))
-}
-

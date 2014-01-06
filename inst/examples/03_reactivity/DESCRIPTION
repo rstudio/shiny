@@ -2,7 +2,6 @@ Title: Reactivity
 Author: RStudio, Inc.
 AuthorUrl: http://www.rstudio.com/
 License: GPL-3
-DefaultShowcaseMode: 1
-AllowShowcaseModeOverride: TRUE
+DisplayMode: Showcase
 Tags: getting-started
 Type: ShinyShowcase

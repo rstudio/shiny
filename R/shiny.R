@@ -916,7 +916,7 @@ registerClient <- function(client) {
 
 .globals$showcaseDefault <- 0
 
-.globals$showcaseOverride <- TRUE
+.globals$showcaseOverride <- FALSE
 
 #' Resource Publishing
 #' 
@@ -1119,12 +1119,17 @@ startAppDir <- function(port, host, workerId, quiet, showcase) {
     return(.globals$server)
   }
   
+  # If the display mode is specified in the description file, apply it here.
+  # Currently the only understood display mode is "Showcase". 
   if (file.exists(desc)) {
     settings <- read.dcf(desc)
-    if ("DefaultShowcaseMode" %in% colnames(settings))
-      .globals$showcaseDefault <- as.numeric(settings[1,"DefaultShowcaseMode"])
-    if ("AllowShowcaseModeOverride" %in% colnames(settings))
-      .globals$showcaseOverride <- as.logical(settings[1,"AllowShowcaseModeOverride"])
+    if ("DisplayMode" %in% colnames(settings)) {
+      mode <- settings[1,"DisplayMode"]
+      if (mode == "Showcase") {
+        .globals$showcaseDefault <- 1
+        .globals$showcaseOverride <- TRUE
+      }
+    }
   }
   
   startApp(
@@ -1455,11 +1460,10 @@ runApp <- function(appDir=getwd(),
     }
   }
   
-  # Set showcase defaults: showcase mode specified, and allow overriding if not
-  # running under Shiny Server. These globals may be overwritten by values in 
-  # the app's DESCRIPTION file, if it exists. 
+  # Set showcase defaults: showcase mode specified, and allow overriding if 
+  # showcase mode is set to something other than 0.
   .globals$showcaseDefault <- showcase.mode
-  .globals$showcaseOverride <- allowShowcaseOverride()
+  .globals$showcaseOverride <- as.logical(showcase.mode)
   
   require(shiny)
   

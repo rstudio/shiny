@@ -155,8 +155,7 @@ writeShowcaseHead <- function(connection) {
     if (file.exists(mdfile)) 
       script(type="text/markdown", id="showcase-markdown-content", 
         readLines(mdfile))
-    else
-      NULL
+    else ""
   ))), con = connection);
 }
 
@@ -165,26 +164,25 @@ writeShowcaseHead <- function(connection) {
 writeAppMetadata <- function(connection, desc) {
   cols <- colnames(desc)
   if ("Title" %in% cols) {
-    writeLines(paste('<h4 class="muted">', desc[1,"Title"], 
-                     sep = ""), con = connection)
-    if ("Author" %in% cols) {
-      writeLines('<br/><small>by', con = connection)
-      if ("AuthorUrl" %in% cols) {
-        writeLines(paste('<a href="', desc[1,"AuthorUrl"], '">', 
-                         desc[1,"Author"], '</a>', sep = ''), 
-                   con = connection)
-      } else {
-        writeLines(desc[1,"Author"], con = connection)
-      }
-      if ("AuthorEmail" %in% cols) {
-        writeLines(paste('(<a href="mailto:', desc[1,"AuthorEmail"], '">', 
-                         desc[1,"AuthorEmail"], '</a>', sep = ''), 
-                   con = connection)
-      }
-      writeLines('</small>', con = connection)
-    }
-    writeLines('</h4>', con = connection)
-  } 
+    writeLines(as.character(withTags(tagList(
+      h4(class="muted shiny-showcase-apptitle", desc[1,"Title"], 
+        if ("Author" %in% cols) small(
+          br(), "by",
+          if ("AuthorUrl" %in% cols)
+            a(href=desc[1,"AuthorUrl"], class="shiny-showcase-appauthor", 
+              desc[1,"Author"])
+          else
+            desc[1,"Author"],
+          if ("AuthorEmail" %in% cols) 
+            a(href=paste("mailto:", desc[1,"AuthorEmail"], sep = ''),
+              class="shiny-showcase-appauthoreemail", 
+              desc[1,"AuthorEmail"])
+          else ""
+        )
+        else ""
+    )
+    ))), con = connection)
+  }
 }
 
 # Writes the showcase application information (readme and code) to the given

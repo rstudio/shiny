@@ -448,6 +448,16 @@ showcaseModeOfReq <- function(req) {
   showcaseModeOfQuerystring(req$QUERY_STRING)
 }
 
+# Returns (just) the filename containing the given source reference, or an
+# empty string if the source reference doesn't include file information.
 srcFileOfRef <- function(srcref) {
-  basename((attr(srcref, "srcfile"))$filename)
+  fileEnv <- attr(srcref, "srcfile")
+  # The 'srcfile' attribute should be a non-null environment containing the 
+  # variable 'filename', which gives the full path to the source file. 
+  if (!is.null(fileEnv) &&
+      is.environment(fileEnv) &&
+      exists("filename", where = fileEnv))
+    basename(fileEnv[["filename"]])
+  else
+    ""
 }

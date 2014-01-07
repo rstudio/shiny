@@ -1,3 +1,4 @@
+
 # Given the name of a license, return the appropriate link HTML for the
 # license, which may just be the name of the license if the name is
 # unrecognized.
@@ -27,7 +28,7 @@ licenseLink <- function(licenseName) {
 # document. 
 showcaseHead <- function() {
   mdfile <- file.path.ci(getwd(), 'Readme.md')
-  withTags(tagList(
+  with(tags, tagList(
     script(src="shared/highlight/highlight.pack.js"),
     script(src="shared/showdown/compressed/showdown.js"),
     script(src="shared/jquery-ui/jquery-ui-min.js"),
@@ -50,7 +51,7 @@ showcaseHead <- function() {
 appMetadata <- function(desc) {
   cols <- colnames(desc)
   if ("Title" %in% cols)
-    withTags(h4(class="muted shiny-showcase-apptitle", desc[1,"Title"], 
+    with(tags, h4(class="muted shiny-showcase-apptitle", desc[1,"Title"], 
       if ("Author" %in% cols) small(
         br(), "by",
         if ("AuthorUrl" %in% cols)
@@ -71,7 +72,7 @@ appMetadata <- function(desc) {
 # showcase mode.
 showcaseCodeTabs <- function(codeLicense) {
   rFiles <- list.files(pattern = "\\.R$")
-  withTags(div(id="showcase-code-tabs", 
+  with(tags, div(id="showcase-code-tabs", 
     button(id="showcase-code-position-toggle",
            class="btn btn-default btn-small",
            onclick="toggleCodePosition()", 
@@ -111,7 +112,7 @@ showcaseAppInfo <- function() {
   if (hasDesc) {
     desc <- read.dcf(descfile)
   }
-  withTags(
+  with(tags, 
     div(class="container-fluid shiny-code-container well", 
         id="showcase-well",
         div(class="row-fluid",
@@ -133,7 +134,7 @@ showcaseAppInfo <- function() {
 
 # Returns the body of the showcase document, given the HTML it should wrap.
 showcaseBody <- function(htmlBody) {
-  withTags(tagList(
+  with(tags, tagList(
     table(id="showcase-app-code", 
           tr(td(id="showcase-app-container",
                 class="showcase-app-container-expanded", 

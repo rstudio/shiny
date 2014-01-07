@@ -60,6 +60,14 @@ dropNulls <- function(x) {
   x[!vapply(x, is.null, FUN.VALUE=logical(1))]
 }
 
+nullOrEmpty <- function(x) {
+  is.null(x) || length(x) == 0
+}
+# Given a vector or list, drop all the NULL items in it
+dropNullsOrEmpty <- function(x) {
+  x[!vapply(x, nullOrEmpty, FUN.VALUE=logical(1))]
+}
+
 knownContentTypes <- Map$new()
 knownContentTypes$mset(
   html='text/html; charset=UTF-8',

@@ -126,7 +126,7 @@ tag <- function(`_tag_name`, varArgs) {
   # Unnamed arguments are flattened and added as children.
   # Use unname() to remove the names attribute from the list, which would
   # consist of empty strings anyway.
-  children <- flattenTags(unname(varArgs[!named_idx]))
+  children <- dropNullsOrEmpty(flattenTags(unname(varArgs[!named_idx])))
 
   # Return tag data structure
   structure(

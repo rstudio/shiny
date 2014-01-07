@@ -90,7 +90,7 @@ span.jslider {
 .well input[type="text"],
 .well input[type="number"],
 .well select {
-  width: 95%;
+  max-width: 95%;
 }
 
 

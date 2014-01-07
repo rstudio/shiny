@@ -4,5 +4,5 @@ AuthorUrl: http://www.rstudio.com/
 License: GPL-3
 DisplayMode: Showcase
 Tags: getting-started
-Type: ShinyShowcase
+Type: Shiny
 

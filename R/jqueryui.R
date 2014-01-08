@@ -80,7 +80,7 @@ absolutePanel <- function(...,
   if (isTRUE(draggable)) {
     divTag <- tagAppendAttributes(divTag, class='draggable')
     return(tagList(
-      singleton(tags$head(tags$script(src='shared/jqueryui/1.10.3/ui/minified/jquery-ui.min.js'))),
+      singleton(tags$head(tags$script(src='shared/jqueryui/1.10.3/jquery-ui.min.js'))),
       divTag,
       tags$script('$(".draggable").draggable();')
     ))

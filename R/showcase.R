@@ -144,3 +144,8 @@ showcaseBody <- function(htmlBody) {
     showcaseAppInfo()))
 }
 
+# Sets the defaults for showcase mode (for app boot).
+setShowcaseDefault <- function(showcaseDefault) {
+  .globals$showcaseDefault <- showcaseDefault
+  .globals$showcaseOverride <- as.logical(showcaseDefault)
+}

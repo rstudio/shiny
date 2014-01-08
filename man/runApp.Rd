@@ -6,7 +6,7 @@
     launch.browser = getOption("shiny.launch.browser", interactive()),
     host = getOption("shiny.host", "127.0.0.1"),
     workerId = "", quiet = FALSE,
-    display.mode = c("normal", "showcase"))
+    display.mode = c("auto", "normal", "showcase"))
 }
 \arguments{
   \item{appDir}{The directory of the application. Should
@@ -38,7 +38,10 @@
   application. If set to the value \code{"showcase"}, shows
   application code and metadata from a \code{DESCRIPTION}
   file in the application directory alongside the
-  application. Defaults to \code{"normal"}.}
+  application. If set to \code{"normal"}, displays the
+  application normally.  Defaults to \code{"auto"}, which
+  displays the application in the mode given in its
+  \code{DESCRIPTION} file, if any.}
 }
 \description{
   Runs a Shiny application. This function normally does not

@@ -1095,7 +1095,6 @@ startAppDir <- function(port, host, workerId, quiet) {
   uiR <- file.path.ci(getwd(), 'ui.R')
   serverR <- file.path.ci(getwd(), 'server.R')
   wwwDir <- file.path.ci(getwd(), 'www')
-  desc <- file.path.ci(getwd(), "DESCRIPTION")
   
   if (!file.exists(uiR) && !file.exists(wwwDir))
     stop(paste("Neither ui.R nor a www subdirectory was found in", getwd()))
@@ -1122,19 +1121,6 @@ startAppDir <- function(port, host, workerId, quiet) {
         stop("No server was defined in server.R")
     }
     return(.globals$server)
-  }
-  
-  # If the display mode is specified in the description file, apply it here.
-  # Currently the only understood display mode is "Showcase". 
-  if (file.exists(desc)) {
-    settings <- read.dcf(desc)
-    if ("DisplayMode" %in% colnames(settings)) {
-      mode <- settings[1,"DisplayMode"]
-      if (mode == "Showcase") {
-        .globals$showcaseDefault <- 1
-        .globals$showcaseOverride <- TRUE
-      }
-    }
   }
   
   startApp(
@@ -1418,7 +1404,9 @@ serviceApp <- function() {
 #' @param display.mode The mode in which to display the application. If set to
 #'   the value \code{"showcase"}, shows application code and metadata from a
 #'   \code{DESCRIPTION} file in the application directory alongside the
-#'   application. Defaults to \code{"normal"}.
+#'   application. If set to \code{"normal"}, displays the application normally.
+#'   Defaults to \code{"auto"}, which displays the application in the mode 
+#'   given in its \code{DESCRIPTION} file, if any.
 #'
 #' @examples
 #' \dontrun{
@@ -1447,7 +1435,7 @@ runApp <- function(appDir=getwd(),
                                             interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
                    workerId="", quiet=FALSE, 
-                   display.mode=c("normal", "showcase")) {
+                   display.mode=c("auto", "normal", "showcase")) {
   if (is.null(host) || is.na(host))
     host <- '0.0.0.0'
 
@@ -1466,13 +1454,34 @@ runApp <- function(appDir=getwd(),
               ' or later is required; please upgrade!')
     }
   }
+
+  # Showcase mode is disabled by default; it must be explicitly enabled in
+  # either the DESCRIPTION file for directory-based apps, or via 
+  # the display.mode parameter. The latter takes precedence.
+  setShowcaseDefault(0)
   
-  # Set showcase defaults: showcase mode specified, and allow overriding if 
-  # showcase mode is set to something other than 0.
+  # If appDir specifies a path, and display mode is specified in the 
+  # DESCRIPTION file at that path, apply it here.
+  if (is.character(appDir)) {
+    desc <- file.path.ci(appDir, "DESCRIPTION")
+    if (file.exists(desc)) {
+      settings <- read.dcf(desc)
+      if ("DisplayMode" %in% colnames(settings)) {
+        mode <- settings[1,"DisplayMode"]
+        if (mode == "Showcase") {
+          setShowcaseDefault(1)
+        }
+      }
+    }
+  }
+  
+  # If display mode is specified as an argument, apply it (overriding the
+  # value specified in DESCRIPTION, if any).
   display.mode <- match.arg(display.mode)
-  showcase.mode <- if (display.mode == "showcase") 1 else 0
-  .globals$showcaseDefault <- showcase.mode
-  .globals$showcaseOverride <- as.logical(showcase.mode)
+  if (display.mode == "normal")
+    setShowcaseDefault(0)
+  else if (display.mode == "showcase")
+    setShowcaseDefault(1)
   
   require(shiny)
   

@@ -607,10 +607,12 @@ validateSelected <- function(selected, choices, inputId) {
     if (any(sapply(choices, length) > 1)) return(selected)
     choices <- unlist(choices)
   }
+  nms <- names(choices)
   # labels and values are identical, no need to validate
-  if (identical(nms <- names(choices), unname(choices))) return(selected)
+  if (identical(nms, unname(choices))) return(selected)
   # when selected labels instead of values
-  if (any(i <- (selected %in% nms) & !(selected %in% choices))) {
+  i <- (selected %in% nms) & !(selected %in% choices))
+  if (any(i) {
     warnFun <- if (all(i)) {
       # replace names with values; drop names, otherwise toJSON() keeps them too
       selected <- unname(choices[selected])

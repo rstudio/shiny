@@ -611,7 +611,7 @@ validateSelected <- function(selected, choices, inputId) {
   # labels and values are identical, no need to validate
   if (identical(nms, unname(choices))) return(selected)
   # when selected labels instead of values
-  i <- (selected %in% nms) & !(selected %in% choices))
+  i <- (selected %in% nms) & !(selected %in% choices)
   if (any(i) {
     warnFun <- if (all(i)) {
       # replace names with values; drop names, otherwise toJSON() keeps them too

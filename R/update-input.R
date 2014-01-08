@@ -186,10 +186,12 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
 #'
 #' @param session The \code{session} object passed to function given to
 #'   \code{shinyServer}.
-#' @param inputId The id of the tabset panel object.
+#' @param inputId The id of the \code{tabsetPanel}, \code{navlistPanel}, 
+#' or \code{navbarPage} object.
 #' @param selected The name of the tab to make active.
 #'
-#' @seealso \code{\link{tabsetPanel}}
+#' @seealso \code{\link{tabsetPanel}}, \code{\link{navlistPanel}}, 
+#' \code{\link{navbarPage}}
 #'
 #' @examples
 #' \dontrun{
@@ -200,7 +202,7 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
 #'     x_even <- input$controller %% 2 == 0
 #'
 #'     # Change the selected tab.
-#'     # Note that the tabsetPanel must have been created with an 'id' argument
+#'     # Note that the tabset container must have been created with an 'id' argument
 #'     if (x_even) {
 #'       updateTabsetPanel(session, "inTabset", selected = "panel2")
 #'     } else {

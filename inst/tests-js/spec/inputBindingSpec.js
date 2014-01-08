@@ -1135,10 +1135,9 @@ describe("Input Bindings", function() {
       set_value(id, 'option2');
       expect(get_value(id)).toBe('option2');
 
-      // Setting to nonexistent option should have no effect
-      // NOTE: this actually resets it to the first option
+      // Setting to nonexistent option turns the value to null
       set_value(id, 'option999');
-      expect(get_value(id)).toBe('option1');
+      expect(get_value(id)).toBe(null);
     });
 
     it("getState() works", function() {
@@ -1561,7 +1560,7 @@ describe("Input Bindings", function() {
     beforeEach(function(){
       var htmlstring =
         '<div class="tabbable">\
-          <ul class="nav nav-tabs" id="' + id + '">\
+          <ul class="nav shiny-tab-input" id="' + id + '">\
             <li class="active">\
               <a href="#tab-455-1" data-toggle="tab">panel1</a>\
             </li>\

@@ -46,11 +46,12 @@ isTag <- function(x) {
 #' @S3method print shiny.tag
 print.shiny.tag <- function(x, ...) {
   print(as.character(x), ...)
+  invisible(x)
 }
 
 #' @S3method format shiny.tag
 format.shiny.tag <- function(x, ...) {
-  as.character.shiny.tag(x)
+  as.character(renderTags(x)$html)
 }
 
 #' @S3method as.character shiny.tag
@@ -66,6 +67,17 @@ format.shiny.tag.list <- format.shiny.tag
 
 #' @S3method as.character shiny.tag.list
 as.character.shiny.tag.list <- as.character.shiny.tag
+
+#' @S3method print html
+print.html <- function(x, ...) {
+  cat(x, "\n")
+  invisible(x)
+}
+
+#' @S3method format html
+format.html <- function(x, ...) {
+  as.character(x)
+}
 
 normalizeText <- function(text) {
   if (!is.null(attr(text, "html")))
@@ -374,6 +386,7 @@ HTML <- function(text, ...) {
   htmlText <- c(text, as.character(list(...)))
   htmlText <- paste(htmlText, collapse=" ")
   attr(htmlText, "html") <- TRUE
+  class(htmlText) <- c("html", "character")
   htmlText
 }
 

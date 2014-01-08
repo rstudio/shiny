@@ -422,3 +422,42 @@ get_exists = function(x, mode) {
   if (exists(x, envir = parent.frame(), mode = mode, inherits = FALSE))
     get(x, envir = parent.frame(), mode = mode, inherits = FALSE)
 }
+
+srcrefFromShinyCall <- function(expr) {
+  srcrefs <- attr(expr, "srcref")
+  num_exprs <- length(srcrefs)
+  c(srcrefs[[1]][1], srcrefs[[1]][2], 
+    srcrefs[[num_exprs]][3], srcrefs[[num_exprs]][4],
+    srcrefs[[1]][5], srcrefs[[num_exprs]][6])
+}
+
+# Indicates whether the given querystring should cause the associated request
+# to be handled in showcase mode. Returns the showcase mode if set, or NULL 
+# if no showcase mode is set. 
+showcaseModeOfQuerystring <- function(querystring) {
+  if (nchar(querystring) > 0) {
+    qs <- parseQueryString(querystring)
+    if (exists("showcase", where = qs)) {
+      return(as.numeric(qs$showcase))
+    }
+  }
+  return(NULL)
+}
+  
+showcaseModeOfReq <- function(req) {
+  showcaseModeOfQuerystring(req$QUERY_STRING)
+}
+
+# Returns (just) the filename containing the given source reference, or an
+# empty string if the source reference doesn't include file information.
+srcFileOfRef <- function(srcref) {
+  fileEnv <- attr(srcref, "srcfile")
+  # The 'srcfile' attribute should be a non-null environment containing the 
+  # variable 'filename', which gives the full path to the source file. 
+  if (!is.null(fileEnv) &&
+      is.environment(fileEnv) &&
+      exists("filename", where = fileEnv))
+    basename(fileEnv[["filename"]])
+  else
+    ""
+}

@@ -36,13 +36,7 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
     pngfun <- png
   } else if (getOption('shiny.usecairo', TRUE) &&
              nchar(system.file(package = "Cairo"))) {
-    # Workaround for issue #140: Cairo ignores res and dpi settings. Need to
-    # use regular png function.
-    if (res == 72) {
-      pngfun <- Cairo::CairoPNG
-    } else {
-      pngfun <- png
-    }
+    pngfun <- Cairo::CairoPNG
   } else {
     pngfun <- png
   }

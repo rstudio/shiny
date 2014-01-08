@@ -3,9 +3,9 @@
 \alias{navbarPage}
 \title{Create a page with a top level navigation bar}
 \usage{
-  navbarPage(title, ..., header = NULL, footer = NULL,
-    inverse = FALSE, collapsable = FALSE, fluid = TRUE,
-    responsive = TRUE, theme = NULL)
+  navbarPage(title, ..., id = NULL, header = NULL,
+    footer = NULL, inverse = FALSE, collapsable = FALSE,
+    fluid = TRUE, responsive = TRUE, theme = NULL)
 
   navbarMenu(title, ..., icon = NULL)
 }
@@ -14,6 +14,12 @@
 
   \item{...}{\code{\link{tabPanel}} elements to include in
   the page}
+
+  \item{id}{If provided, you can use
+  \code{input$}\emph{\code{id}} in your server logic to
+  determine which of the current tabs is active. The value
+  will correspond to the \code{value} argument that is
+  passed to \code{\link{tabPanel}}.}
 
   \item{header}{Tag of list of tags to display as a common
   header above all tabPanels.}
@@ -40,6 +46,9 @@
   css file within the www directory). For example, to use
   the theme located at \code{www/bootstrap.css} you would
   use \code{theme = "bootstrap.css"}.}
+
+  \item{icon}{Optional icon to appear on a
+  \code{navbarMenu} tab.}
 }
 \value{
   A UI defintion that can be passed to the \link{shinyUI}

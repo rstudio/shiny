@@ -1,0 +1,151 @@
+
+# Given the name of a license, return the appropriate link HTML for the
+# license, which may just be the name of the license if the name is
+# unrecognized.
+#
+# Recognizes the 'standard' set of licenses used for R packages 
+# (see http://cran.r-project.org/doc/manuals/R-exts.html)
+licenseLink <- function(licenseName) {
+  licenses <- list(
+    "GPL-2" = "https://gnu.org/licenses/gpl-2.0.txt", 
+    "GPL-3" = "https://gnu.org/licenses/gpl-3.0.txt", 
+    "LGPL-3" = "https://www.gnu.org/licenses/lgpl-3.0.txt",
+    "LGPL-2" = "http://www.gnu.org/licenses/old-licenses/lgpl-2.0.txt",
+    "LGPL-2.1" = "http://www.gnu.org/licenses/lgpl-2.1.txt", 
+    "AGPL-3" = "http://www.gnu.org/licenses/agpl-3.0.txt",
+    "Artistic-2.0" = "http://www.r-project.org/Licenses/Artistic-2.0",
+    "BSD_2_clause" = "http://www.r-project.org/Licenses/BSD_2_clause",
+    "BSD_3_clause" = "http://www.r-project.org/Licenses/BSD_3_clause",
+    "MIT" = "http://www.r-project.org/Licenses/MIT")
+  if (exists(licenseName, where = licenses)) {
+    tags$a(href=licenses[[licenseName]], licenseName)
+  } else {
+    licenseName 
+  }
+}
+
+# Returns tags containing showcase directives intended for the <HEAD> of the
+# document. 
+showcaseHead <- function() {
+  mdfile <- file.path.ci(getwd(), 'Readme.md')
+  with(tags, tagList(
+    script(src="shared/highlight/highlight.pack.js"),
+    script(src="shared/showdown/compressed/showdown.js"),
+    script(src="shared/jquery-ui/jquery-ui-min.js"),
+    script(src="shared/shiny-showcase.js"),
+    link(rel="stylesheet", type="text/css", 
+         href="shared/highlight/rstudio.css"),
+    link(rel="stylesheet", type="text/css", 
+         href="shared/shiny-showcase.css"),
+    link(rel="stylesheet", type="text/css", 
+         href="shared/font-awesome/css/font-awesome.min.css"), 
+    if (file.exists(mdfile)) 
+      script(type="text/markdown", id="showcase-markdown-content", 
+        paste(readLines(mdfile), collapse="\n"))
+    else ""
+  ))
+}
+
+# Returns tags containing the application metadata (title and author) in
+# showcase mode.
+appMetadata <- function(desc) {
+  cols <- colnames(desc)
+  if ("Title" %in% cols)
+    with(tags, h4(class="muted shiny-showcase-apptitle", desc[1,"Title"], 
+      if ("Author" %in% cols) small(
+        br(), "by",
+        if ("AuthorUrl" %in% cols)
+          a(href=desc[1,"AuthorUrl"], class="shiny-showcase-appauthor", 
+            desc[1,"Author"])
+        else
+          desc[1,"Author"],
+        if ("AuthorEmail" %in% cols) 
+          a(href=paste("mailto:", desc[1,"AuthorEmail"], sep = ''),
+            class="shiny-showcase-appauthoreemail", 
+            desc[1,"AuthorEmail"])
+        else "")
+      else ""))
+  else ""
+}
+
+# Returns tags containing the application's code in Bootstrap-style tabs in
+# showcase mode.
+showcaseCodeTabs <- function(codeLicense) {
+  rFiles <- list.files(pattern = "\\.R$")
+  with(tags, div(id="showcase-code-tabs", 
+    button(id="showcase-code-position-toggle",
+           class="btn btn-default btn-small",
+           onclick="toggleCodePosition()", 
+           i(class="fa fa-level-up", "show with app")),
+    ul(class="nav nav-tabs", 
+       lapply(rFiles, function(rFile) {
+         li(class=if (rFile == "server.R") "active" else "", 
+            a(href=paste("#", gsub(".", "_", rFile, fixed=TRUE),
+                         "_code", sep=""), 
+              "data-toggle"="tab", rFile))
+       })),
+    div(class="tab-content", id="showcase-code-content", 
+        lapply(rFiles, function(rFile) {
+          div(class=paste("tab-pane", 
+                          if (rFile == "server.R") " active" else "", 
+                          sep=""),
+              id=paste(gsub(".", "_", rFile, fixed=TRUE), 
+                       "_code", sep=""), 
+              pre(class="shiny-code", 
+                  # We can't use tag$code here since we need to prevent
+                  # whitespace from being emitted between <code> ... </code>
+                  HTML(paste('<code class="language-r">', 
+                              paste(readLines(file.path.ci(getwd(), rFile)), 
+                                    collapse="\n"),
+                              '</code>', sep=""))))
+        })), 
+    codeLicense))
+}
+
+# Returns tags containing the showcase application information (readme and
+# code).
+showcaseAppInfo <- function() {
+  descfile <- file.path.ci(getwd(), "DESCRIPTION")
+  hasDesc <- file.exists(descfile)
+  readmemd <- file.path.ci(getwd(), "Readme.md")
+  hasReadme <- file.exists(readmemd)
+  if (hasDesc) {
+    desc <- read.dcf(descfile)
+  }
+  with(tags, 
+    div(class="container-fluid shiny-code-container well", 
+        id="showcase-well",
+        div(class="row-fluid",
+          if (hasDesc || hasReadme) {
+            div(id="showcase-app-metadata", class="span4", 
+                if (hasDesc) appMetadata(desc) else "", 
+                if (hasReadme) div(id="readme-md"))
+          } else "",
+          div(id="showcase-code-inline", 
+              class=if (hasReadme || hasDesc) "span8" else "span10 offset1",
+              showcaseCodeTabs(
+                if (hasDesc && "License" %in% colnames(desc)) {
+                  small(class="showcase-code-license muted", 
+                        "Code license: ", 
+                        licenseLink(desc[1,"License"]))
+                } else "")))))
+}
+
+
+# Returns the body of the showcase document, given the HTML it should wrap.
+showcaseBody <- function(htmlBody) {
+  with(tags, tagList(
+    table(id="showcase-app-code", 
+          tr(td(id="showcase-app-container",
+                class="showcase-app-container-expanded", 
+                HTML(htmlBody), 
+             td(id="showcase-sxs-code",
+                class="showcase-sxs-code-collapsed")))),
+    showcaseAppInfo()))
+}
+
+# Sets the defaults for showcase mode (for app boot).
+setShowcaseDefault <- function(showcaseDefault) {
+  .globals$showcaseDefault <- showcaseDefault
+  .globals$showcaseOverride <- as.logical(showcaseDefault)
+}

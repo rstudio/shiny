@@ -120,7 +120,6 @@ includeScript <- function(path, ...) {
   return(tags$script(HTML(paste(lines, collapse='\r\n')), ...))
 }
 
-
 #' Include Content Only Once
 #' 
 #' Use \code{singleton} to wrap contents (tag, text, HTML, or lists) that should
@@ -137,7 +136,7 @@ singleton <- function(x) {
   return(x)
 }
 
-renderPage <- function(ui, connection) {
+renderPage <- function(ui, connection, showcase=0) {
   
   result <- renderTags(ui)
 
@@ -151,15 +150,25 @@ renderPage <- function(ui, connection) {
                '  <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
                sprintf('  <script type="application/shiny-singletons">%s</script>',
                        paste(result$singletons, collapse = ',')
-               ),
-               result$head,
+               )),
+              con = connection)
+  if (showcase > 0) {
+    writeLines(as.character(showcaseHead()), con = connection)
+  }
+  writeLines(c(result$head,
                '</head>',
-               '<body>', 
+               '<body>',
                recursive=TRUE),
              con = connection)
-  
-  # write UI html to connection
-  writeLines(result$html, con = connection)
+
+  if (showcase > 0) {
+    # in showcase mode, emit containing elements and app HTML
+    writeLines(as.character(showcaseBody(result$html)), 
+               con = connection)
+  } else {
+    # in normal mode, write UI html directly to connection
+    writeLines(result$html, con = connection)
+  }
   
   # write end document
   writeLines(c('</body>',
@@ -220,7 +229,13 @@ shinyUI <- function(ui, path='/') {
       textConn <- textConnection(NULL, "w") 
       on.exit(close(textConn))
       
-      renderPage(ui, textConn)
+      showcaseMode <- .globals$showcaseDefault
+      if (.globals$showcaseOverride) {
+        mode <- showcaseModeOfReq(req)
+        if (!is.null(mode))
+          showcaseMode <- mode
+      }
+      renderPage(ui, textConn, showcaseMode)
       html <- paste(textConnectionValue(textConn), collapse='\n')
       return(httpResponse(200, content=html))
     }

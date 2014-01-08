@@ -143,6 +143,10 @@ pageWithSidebar <- function(headerPanel,
 #' 
 #' @param title The title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
+#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your 
+#'   server logic to determine which of the current tabs is active. The value 
+#'   will correspond to the \code{value} argument that is passed to 
+#'   \code{\link{tabPanel}}.
 #' @param header Tag of list of tags to display as a common header above all 
 #'   tabPanels.
 #' @param footer Tag or list of tags to display as a common footer below all 
@@ -159,6 +163,7 @@ pageWithSidebar <- function(headerPanel,
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at 
 #'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
+#' @param icon Optional icon to appear on a \code{navbarMenu} tab. 
 #'   
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
 #'   
@@ -185,6 +190,7 @@ pageWithSidebar <- function(headerPanel,
 #' @export
 navbarPage <- function(title, 
                        ..., 
+                       id = NULL,
                        header = NULL,
                        footer = NULL,
                        inverse = FALSE,
@@ -203,7 +209,7 @@ navbarPage <- function(title,
   
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, "nav")
+  tabset <- buildTabset(tabs, "nav", NULL, id)
   
   # built the container div dynamically to support optional collapsability
   if (collapsable) {
@@ -222,11 +228,11 @@ navbarPage <- function(title,
                             id=navId,
                             tabset$navList),
                             tags$script(paste(
-                              "$('#", navId, " a').click(function (e) {
+                              "$('#", navId, " a:not(.dropdown-toggle)').click(function (e) { 
                                   e.preventDefault();
                                   $(this).tab('show');
-                                  if ($('.btn').is(':visible'))
-                                    $('.btn').click();
+                                  if ($('.navbar .btn-navbar').is(':visible'))
+                                    $('.navbar .btn-navbar').click();
                                });", sep="")))
   } else {
     containerDiv <- div(class="container",
@@ -1293,6 +1299,11 @@ buildTabset <- function(tabs,
                         selected = NULL) {
   
   # build tab nav list and tab content div
+  
+  # add tab input sentinel class if we have an id
+  if (!is.null(id))
+    ulClass <- paste(ulClass, "shiny-tab-input")
+  
   tabNavList <- tags$ul(class = ulClass, id = id)
   tabContent <- tags$div(class = "tab-content")
   firstTab <- TRUE

@@ -570,7 +570,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
-  if (!is.null(selected)) selected <- validateSelected(selected, choices)
+  if (!is.null(selected)) selected <- validateSelected(selected, choices, inputId)
 
   # Create tags for each of the options
   ids <- paste0(inputId, seq_along(choices))
@@ -601,7 +601,7 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
 
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
 # refers to values. Below is a function for backward compatibility.
-validateSelected <- function(selected, choices, multiple = FALSE) {
+validateSelected <- function(selected, choices, inputId) {
   if (is.list(choices)) {
     # <optgroup> is not there yet
     if (any(sapply(choices, length) > 1)) return(selected)
@@ -616,7 +616,8 @@ validateSelected <- function(selected, choices, multiple = FALSE) {
       selected <- unname(choices[selected])
       warning
     } else stop  # stop when it is ambiguous (some labels == values)
-    warnFun("'selected' must be the values instead of names of 'choices'")
+    warnFun("'selected' must be the values instead of names of 'choices'",
+            "for the input '", inputId, "'")
   }
   selected
 }
@@ -696,7 +697,7 @@ selectInput <- function(inputId,
   # default value if it's not specified
   if (is.null(selected)) {
     if (!multiple) selected <- choices[[1]]
-  } else selected <- validateSelected(selected, choices)
+  } else selected <- validateSelected(selected, choices, inputId)
   
   # create select tag and add options
   selectTag <- tags$select(id = inputId)
@@ -750,7 +751,7 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
   
   # default value if it's not specified
   selected <- if (is.null(selected)) choices[[1]] else {
-    validateSelected(selected, choices)
+    validateSelected(selected, choices, inputId)
   }
   
   # Create tags for each of the options

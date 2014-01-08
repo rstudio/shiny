@@ -18,3 +18,7 @@ install:
 script:
   - cd ..; rm -f *.tar.gz; R CMD build $R_MY_PKG
   - R CMD check $R_MY_PKG*.tar.gz --no-manual
+
+after_failure:
+  - cat $R_MY_PKG.Rcheck/00install.out || true
+  - cat $R_MY_PKG.Rcheck/00check.log || true

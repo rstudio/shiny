@@ -618,7 +618,7 @@ validateSelected <- function(selected, choices, inputId) {
       selected <- unname(choices[selected])
       warning
     } else stop  # stop when it is ambiguous (some labels == values)
-    warnFun("'selected' must be the values instead of names of 'choices'",
+    warnFun("'selected' must be the values instead of names of 'choices' ",
             "for the input '", inputId, "'")
   }
   selected

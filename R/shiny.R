@@ -1090,7 +1090,7 @@ file.path.ci <- function(dir, name) {
 
 # Instantiates the app in the current working directory.
 # port - The TCP port that the application should listen on.
-startAppDir <- function(port, host, workerId, quiet, showcase) {
+startAppDir <- function(port, host, workerId, quiet) {
   globalR <- file.path.ci(getwd(), 'global.R')
   uiR <- file.path.ci(getwd(), 'ui.R')
   serverR <- file.path.ci(getwd(), 'server.R')

@@ -8,7 +8,8 @@
   \item{session}{The \code{session} object passed to
   function given to \code{shinyServer}.}
 
-  \item{inputId}{The id of the tabset panel object.}
+  \item{inputId}{The id of the \code{tabsetPanel},
+  \code{navlistPanel}, or \code{navbarPage} object.}
 
   \item{selected}{The name of the tab to make active.}
 }
@@ -24,7 +25,7 @@ shinyServer(function(input, output, session) {
     x_even <- input$controller \%\% 2 == 0
 
     # Change the selected tab.
-    # Note that the tabsetPanel must have been created with an 'id' argument
+    # Note that the tabset container must have been created with an 'id' argument
     if (x_even) {
       updateTabsetPanel(session, "inTabset", selected = "panel2")
     } else {
@@ -35,6 +36,7 @@ shinyServer(function(input, output, session) {
 }
 }
 \seealso{
-  \code{\link{tabsetPanel}}
+  \code{\link{tabsetPanel}}, \code{\link{navlistPanel}},
+  \code{\link{navbarPage}}
 }
 

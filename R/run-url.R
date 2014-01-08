@@ -9,8 +9,9 @@
 #' @param port The TCP port that the application should listen on. Defaults to
 #'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be
-#'   launched automatically after the app is started. Defaults to true in
-#'   interactive sessions only.
+#'   launched automatically after the app is started. Defaults to \code{"auto"},
+#'   which uses the \code{shiny.launch.browser} preference if present, and
+#'   invokes the browser specified by \code{shiny.browser} if specified. 
 #'
 #' @examples
 #' \dontrun{
@@ -24,8 +25,7 @@
 #' @export
 runGist <- function(gist,
                     port=NULL,
-                    launch.browser=getOption('shiny.launch.browser',
-                                             interactive())) {
+                    launch.browser="auto") {
 
   gistUrl <- if (is.numeric(gist) || grepl('^[0-9a-f]+$', gist)) {
     sprintf('https://gist.github.com/%s/download', gist)
@@ -54,8 +54,9 @@ runGist <- function(gist,
 #' @param port The TCP port that the application should listen on. Defaults to
 #'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be
-#'   launched automatically after the app is started. Defaults to true in
-#'   interactive sessions only.
+#'   launched automatically after the app is started. Defaults to \code{"auto"},
+#'   which uses the \code{shiny.launch.browser} preference if present, and
+#'   invokes the browser specified by \code{shiny.browser} if specified. 
 #'
 #' @examples
 #' \dontrun{
@@ -68,7 +69,7 @@ runGist <- function(gist,
 #' @export
 runGitHub <- function(repo, username = getOption("github.user"),
   ref = "master", subdir = NULL, port = NULL,
-  launch.browser = getOption('shiny.launch.browser', interactive())) {
+  launch.browser = "auto") {
 
   if (is.null(ref)) {
     stop("Must specify either a ref. ")
@@ -104,8 +105,9 @@ runGitHub <- function(repo, username = getOption("github.user"),
 #' @param port The TCP port that the application should listen on. Defaults to
 #'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be
-#'   launched automatically after the app is started. Defaults to true in
-#'   interactive sessions only.
+#'   launched automatically after the app is started. Defaults to \code{"auto"},
+#'   which uses the \code{shiny.launch.browser} preference if present, and
+#'   invokes the browser specified by \code{shiny.browser} if specified. 
 #'
 #' @examples
 #' \dontrun{
@@ -118,7 +120,7 @@ runGitHub <- function(repo, username = getOption("github.user"),
 #'
 #' @export
 runUrl <- function(url, filetype = NULL, subdir = NULL, port = NULL,
-  launch.browser = getOption('shiny.launch.browser', interactive())) {
+  launch.browser = "auto") {
 
   if (!is.null(subdir) && ".." %in% strsplit(subdir, '/')[[1]])
     stop("'..' not allowed in subdir")

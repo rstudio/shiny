@@ -1392,9 +1392,11 @@ serviceApp <- function() {
 #' @param port The TCP port that the application should listen on. Defaults to 
 #'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be 
-#'   launched automatically after the app is started. Defaults to true in 
-#'   interactive sessions only. This value of this parameter can also be a 
-#'   function to call with the application's URL.
+#'   launched automatically after the app is started. Defaults to \code{"auto"},
+#'   which uses the \code{shiny.launch.browser} preference if present, and 
+#'   invokes the browser specified by \code{shiny.browser} if specified. This 
+#'   value of this parameter can also be a function to call with the
+#'   application's URL.
 #' @param host The IPv4 address that the application should listen on. Defaults
 #'   to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not. See
 #'   Details.
@@ -1431,8 +1433,7 @@ serviceApp <- function() {
 #' @export
 runApp <- function(appDir=getwd(),
                    port=NULL,
-                   launch.browser=getOption('shiny.launch.browser',
-                                            interactive()),
+                   launch.browser="auto",
                    host=getOption('shiny.host', '127.0.0.1'),
                    workerId="", quiet=FALSE, 
                    display.mode=c("auto", "normal", "showcase")) {
@@ -1531,9 +1532,28 @@ runApp <- function(appDir=getwd(),
   
   if (!is.character(port)) {
     appUrl <- paste("http://", host, ":", port, sep="")
+    if (is.character(launch.browser) && identical(launch.browser, "auto")) {
+      launch.browser <- getOption("shiny.launch.browser")
+      if (is.null(launch.browser)) {
+        # The user did not specify a browser to launch; check shiny.browser 
+        shiny.browser <- getOption("shiny.browser")
+        if (!is.null(shiny.browser)) {
+          if (is.function(shiny.browser))
+            shiny.browser(appUrl, if (is.character(appDir)) appDir else "")
+          else
+            warning("The option shiny.browser is expected to be set to either ",
+                    "NULL or a function that takes a URL and path. No browser ",
+                    "will be launched.")
+        } else {
+          # No browser was specified in shiny.browser, either; launch the 
+          # system browser if we're interactive.
+          launch.browser <- interactive()
+        }
+      }
+    }
     if (is.function(launch.browser))
       launch.browser(appUrl)
-    else if (launch.browser)
+    else if (is.logical(launch.browser) && launch.browser)
       utils::browseURL(appUrl)
   } else {
     appUrl <- NULL
@@ -1580,9 +1600,10 @@ stopApp <- function(returnValue = NULL) {
 #'   list the available examples.
 #' @param port The TCP port that the application should listen on. Defaults to 
 #'   choosing a random port.
-#' @param launch.browser If true, the system's default web browser will be 
-#'   launched automatically after the app is started. Defaults to true in 
-#'   interactive sessions only.
+#' @param launch.browser If true, the system's default web browser will be
+#'   launched automatically after the app is started. Defaults to \code{"auto"},
+#'   which uses the \code{shiny.launch.browser} preference if present, and
+#'   invokes the browser specified by \code{shiny.browser} if specified. 
 #' @param host The IPv4 address that the application should listen on. Defaults
 #'   to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not.
 #' @examples
@@ -1599,8 +1620,7 @@ stopApp <- function(returnValue = NULL) {
 #' @export
 runExample <- function(example=NA,
                        port=NULL,
-                       launch.browser=getOption('shiny.launch.browser',
-                                                interactive()),
+                       launch.browser="auto",
                        host=getOption('shiny.host', '127.0.0.1')) {
   examplesDir <- system.file('examples', package='shiny')
   dir <- resolve(examplesDir, example)

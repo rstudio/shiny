@@ -3,7 +3,7 @@
 \title{Run Shiny Example Applications}
 \usage{
   runExample(example = NA, port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()),
+    launch.browser = "auto",
     host = getOption("shiny.host", "127.0.0.1"))
 }
 \arguments{
@@ -15,7 +15,10 @@
 
   \item{launch.browser}{If true, the system's default web
   browser will be launched automatically after the app is
-  started. Defaults to true in interactive sessions only.}
+  started. Defaults to \code{"auto"}, which uses the
+  \code{shiny.launch.browser} preference if present, and
+  invokes the browser specified by \code{shiny.browser} if
+  specified.}
 
   \item{host}{The IPv4 address that the application should
   listen on. Defaults to the \code{shiny.host} option, if

@@ -3,7 +3,7 @@
 \title{Run Shiny Application}
 \usage{
   runApp(appDir = getwd(), port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()),
+    launch.browser = "auto",
     host = getOption("shiny.host", "127.0.0.1"),
     workerId = "", quiet = FALSE,
     display.mode = c("auto", "normal", "showcase"))
@@ -19,9 +19,11 @@
 
   \item{launch.browser}{If true, the system's default web
   browser will be launched automatically after the app is
-  started. Defaults to true in interactive sessions only.
-  This value of this parameter can also be a function to
-  call with the application's URL.}
+  started. Defaults to \code{"auto"}, which uses the
+  \code{shiny.launch.browser} preference if present, and
+  invokes the browser specified by \code{shiny.browser} if
+  specified. This value of this parameter can also be a
+  function to call with the application's URL.}
 
   \item{host}{The IPv4 address that the application should
   listen on. Defaults to the \code{shiny.host} option, if

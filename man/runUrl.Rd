@@ -3,7 +3,7 @@
 \title{Run a Shiny application from a URL}
 \usage{
   runUrl(url, filetype = NULL, subdir = NULL, port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()))
+    launch.browser = "auto")
 }
 \arguments{
   \item{url}{URL of the application.}
@@ -22,7 +22,10 @@
 
   \item{launch.browser}{If true, the system's default web
   browser will be launched automatically after the app is
-  started. Defaults to true in interactive sessions only.}
+  started. Defaults to \code{"auto"}, which uses the
+  \code{shiny.launch.browser} preference if present, and
+  invokes the browser specified by \code{shiny.browser} if
+  specified.}
 }
 \description{
   Download and launch a Shiny application that is hosted at

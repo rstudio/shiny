@@ -2,8 +2,7 @@
 \alias{runGist}
 \title{Run a Shiny application from https://gist.github.com}
 \usage{
-  runGist(gist, port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()))
+  runGist(gist, port = NULL, launch.browser = "auto")
 }
 \arguments{
   \item{gist}{The identifier of the gist. For example, if
@@ -17,7 +16,10 @@
 
   \item{launch.browser}{If true, the system's default web
   browser will be launched automatically after the app is
-  started. Defaults to true in interactive sessions only.}
+  started. Defaults to \code{"auto"}, which uses the
+  \code{shiny.launch.browser} preference if present, and
+  invokes the browser specified by \code{shiny.browser} if
+  specified.}
 }
 \description{
   Download and launch a Shiny application that is hosted on

@@ -570,7 +570,8 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
-  if (!is.null(selected)) selected <- validateSelected(selected, choices, inputId)
+  if (!is.null(selected))
+    selected <- validateSelected(selected, choices, inputId)
 
   # Create tags for each of the options
   ids <- paste0(inputId, seq_along(choices))

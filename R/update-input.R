@@ -293,7 +293,8 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
   choices = NULL, selected = NULL) {
 
   choices <- choicesWithNames(choices)
-  if (!is.null(selected)) selected <- validateSelected(selected, choices, inputId)
+  if (!is.null(selected))
+    selected <- validateSelected(selected, choices, inputId)
 
   options <- if (length(choices)) mapply(choices, names(choices),
     SIMPLIFY = FALSE, USE.NAMES = FALSE,

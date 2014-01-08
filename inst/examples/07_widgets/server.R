@@ -1,7 +1,8 @@
 library(shiny)
 library(datasets)
 
-# Define server logic required to summarize and view the selected dataset
+# Define server logic required to summarize and view the 
+# selected dataset
 shinyServer(function(input, output) {
   
   # Return the requested dataset

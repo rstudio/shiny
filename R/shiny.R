@@ -153,7 +153,15 @@ ShinySession <- setRefClass(
             orig(name=name, shinysession=.self)
           }
         }
-
+        
+        # Preserve source reference and file information when formatting the
+        # label for display in the reactive graph
+        srcref <- attr(label, "srcref")
+        srcfile <- attr(label, "srcfile")
+        label <- sprintf('output$%s <- %s', name, paste(label, collapse='\n'))
+        attr(label, "srcref") <- srcref
+        attr(label, "srcfile") <- srcfile
+        
         obs <- observe({
           
           value <- try(shinyCallingHandlers(func()), silent=FALSE)
@@ -170,7 +178,7 @@ ShinySession <- setRefClass(
           }
           else
             .invalidatedOutputValues$set(name, value)
-        }, suspended=.shouldSuspend(name), label=sprintf('output$%s <- %s', name, paste(label, collapse='\n')))
+        }, suspended=.shouldSuspend(name), label=label)
         
         obs$onInvalidate(function() {
           showProgress(name)
@@ -589,7 +597,10 @@ ShinySession <- setRefClass(
 
 #' @S3method $<- shinyoutput
 `$<-.shinyoutput` <- function(x, name, value) {
-  .subset2(x, 'impl')$defineOutput(name, value, deparse(substitute(value)))
+  label <- deparse(substitute(value))
+  attr(label, "srcref") <- srcrefFromShinyCall(substitute(value)[[2]])
+  attr(label, "srcfile") <- srcFileOfRef(attr(substitute(value)[[2]], "srcref")[[1]])
+  .subset2(x, 'impl')$defineOutput(name, value, label)
   return(invisible(x))
 }
 
@@ -908,6 +919,10 @@ registerClient <- function(client) {
 
 .globals$resources <- list()
 
+.globals$showcaseDefault <- 0
+
+.globals$showcaseOverride <- FALSE
+
 #' Resource Publishing
 #' 
 #' Adds a directory of static resources to Shiny's web server, with the given 
@@ -1159,7 +1174,7 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
         reqSize <- as.numeric(req$CONTENT_LENGTH)
       else if (length(req$HTTP_TRANSFER_ENCODING) > 0)
         reqSize <- Inf
-
+      
       if (reqSize > maxSize) {
         return(list(status = 413L,
                     headers = list(
@@ -1184,8 +1199,15 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
 
       shinysession <- ShinySession$new(ws, workerId)
       appsByToken$set(shinysession$token, shinysession)
+      showcase <- .globals$showcaseDefault
       
       ws$onMessage(function(binary, msg) {
+        # If in showcase mode, record the session that should receive the reactive
+        # log messages for the duration of the servicing of this message. 
+        if (showcase > 0) {
+          .beginShowcaseSessionContext(shinysession)
+          on.exit(.endShowcaseSessionContext(), add = TRUE)
+        }
         
         # To ease transition from websockets-based code. Should remove once we're stable.
         if (is.character(msg))
@@ -1239,6 +1261,14 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
           init = {
             
             serverFunc <- serverFuncSource()
+            
+            # Check for switching into/out of showcase mode 
+            if (.globals$showcaseOverride && 
+                exists(".clientdata_url_search", where = msg$data)) {
+              mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
+              if (!is.null(mode))
+                showcase <<- mode
+            }
             
             shinysession$manageInputs(msg$data)
 
@@ -1371,6 +1401,12 @@ serviceApp <- function() {
 #' @param workerId Can generally be ignored. Exists to help some editions of
 #'   Shiny Server Pro route requests to the correct process.
 #' @param quiet Should Shiny status messages be shown? Defaults to FALSE.
+#' @param display.mode The mode in which to display the application. If set to
+#'   the value \code{"showcase"}, shows application code and metadata from a
+#'   \code{DESCRIPTION} file in the application directory alongside the
+#'   application. If set to \code{"normal"}, displays the application normally.
+#'   Defaults to \code{"auto"}, which displays the application in the mode 
+#'   given in its \code{DESCRIPTION} file, if any.
 #'
 #' @examples
 #' \dontrun{
@@ -1398,7 +1434,8 @@ runApp <- function(appDir=getwd(),
                    launch.browser=getOption('shiny.launch.browser',
                                             interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
-                   workerId="", quiet=FALSE) {
+                   workerId="", quiet=FALSE, 
+                   display.mode=c("auto", "normal", "showcase")) {
   if (is.null(host) || is.na(host))
     host <- '0.0.0.0'
 
@@ -1418,6 +1455,34 @@ runApp <- function(appDir=getwd(),
     }
   }
 
+  # Showcase mode is disabled by default; it must be explicitly enabled in
+  # either the DESCRIPTION file for directory-based apps, or via 
+  # the display.mode parameter. The latter takes precedence.
+  setShowcaseDefault(0)
+  
+  # If appDir specifies a path, and display mode is specified in the 
+  # DESCRIPTION file at that path, apply it here.
+  if (is.character(appDir)) {
+    desc <- file.path.ci(appDir, "DESCRIPTION")
+    if (file.exists(desc)) {
+      settings <- read.dcf(desc)
+      if ("DisplayMode" %in% colnames(settings)) {
+        mode <- settings[1,"DisplayMode"]
+        if (mode == "Showcase") {
+          setShowcaseDefault(1)
+        }
+      }
+    }
+  }
+  
+  # If display mode is specified as an argument, apply it (overriding the
+  # value specified in DESCRIPTION, if any).
+  display.mode <- match.arg(display.mode)
+  if (display.mode == "normal")
+    setShowcaseDefault(0)
+  else if (display.mode == "showcase")
+    setShowcaseDefault(1)
+  
   require(shiny)
   
   # determine port if we need to
@@ -1555,7 +1620,8 @@ runExample <- function(example=NA,
            '"')
   }
   else {
-    runApp(dir, port = port, host = host, launch.browser = launch.browser)
+    runApp(dir, port = port, host = host, launch.browser = launch.browser, 
+           display.mode = "showcase")
   }
 }
 

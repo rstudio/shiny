@@ -6,7 +6,8 @@ shinyUI(fluidPage(
   #  Application title
   titlePanel("Sliders"),
   
-  # Sidebar with sliders that demonstrate various available options
+  # Sidebar with sliders that demonstrate various available
+  # options
   sidebarLayout(
     sidebarPanel(
       # Simple integer interval
@@ -21,14 +22,17 @@ shinyUI(fluidPage(
       sliderInput("range", "Range:",
                   min = 1, max = 1000, value = c(200,500)),
       
-      # Provide a custom currency format for value display, with basic animation
+      # Provide a custom currency format for value display, 
+		# with basic animation
       sliderInput("format", "Custom Format:", 
                   min = 0, max = 10000, value = 0, step = 2500,
                   format="$#,##0", locale="us", animate=TRUE),
       
-      # Animation with custom interval (in ms) to control speed, plus looping
-      sliderInput("animation", "Looping Animation:", 1, 2000, 1, step = 10, 
-                  animate=animationOptions(interval=300, loop=TRUE))
+      # Animation with custom interval (in ms) to control speed,
+		# plus looping
+      sliderInput("animation", "Looping Animation:", 1, 2000, 1,
+					  	step = 10, animate=
+							animationOptions(interval=300, loop=TRUE))
     ),
     
     # Show a table summarizing the values entered

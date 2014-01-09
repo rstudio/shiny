@@ -166,6 +166,12 @@ test_that("Creating simple tags", {
     div(b = "value")
   )
 
+  # NULL children are dropped
+  expect_identical(
+    div("foo", NULL, list(NULL, list(NULL, "bar"))),
+    div("foo", "bar")
+  )
+
   # Numbers are coerced to strings
   expect_identical(
     div(1234),

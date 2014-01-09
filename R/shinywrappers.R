@@ -1,7 +1,3 @@
-suppressPackageStartupMessages({
-  library(caTools)
-  library(xtable)
-})
 globalVariables('func')
 
 #' Plot Output

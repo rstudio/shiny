@@ -15,11 +15,6 @@
 #' @import httpuv caTools RJSONIO xtable digest methods
 NULL
 
-suppressPackageStartupMessages({
-  library(httpuv)
-  library(RJSONIO)
-})
-
 createUniqueId <- function(bytes) {
   # TODO: Use a method that isn't affected by the R seed
   paste(as.character(as.raw(floor(runif(bytes, min=1, max=255)))), collapse='')

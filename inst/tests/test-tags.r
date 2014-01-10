@@ -323,3 +323,16 @@ test_that("Head and singleton behavior", {
   expect_identical(result2$head, HTML(""))
   expect_identical(result2$html, HTML(""))
 })
+
+test_that("Factors are treated as characters, not numbers", {
+  myfactors <- factor(LETTERS[1:3])
+  expect_identical(
+    as.character(tags$option(value=myfactors[[1]], myfactors[[1]])),
+    HTML('<option value="A">A</option>')
+  )
+
+  expect_identical(
+    as.character(tags$option(value=myfactors[[1]], value='B', value=3, myfactors[[1]])),
+    HTML('<option value="A B 3">A</option>')
+  )
+})

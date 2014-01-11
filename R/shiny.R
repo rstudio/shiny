@@ -866,15 +866,18 @@ appsByToken <- Map$new()
 #' @export
 parseShinyInput <- function(x, shinysession, name) UseMethod("parseShinyInput")
 
-#' Pass the data straight through if no class is provided.
+#' \code{parseShinyInput.default}: Pass the data straight through if no class
+#' is provided. Also remove any class that may have been assigned from the
+#' \code{getType} method on the client side.
 #' @rdname parseShinyInput
 #' @S3method parseShinyInput default
 parseShinyInput.default <- function(x, shinysession, name){
-  x
+  unclass(x)
 }
 
-#' Takes a list-of-lists and returns a matrix. The lists
-#' must all be the same length. NULLs and empty lists are replaced by NA.
+#' \code{parseShinyInput.shinyMatrix}: Takes a list-of-lists and returns a
+#' matrix. The lists must all be the same length. NULLs and empty lists are
+#' replaced by NA.
 #' @rdname parseShinyInput
 #' @S3method parseShinyInput shinyMatrix
 parseShinyInput.shinyMatrix <- function(x, shinysession, name) {
@@ -882,6 +885,13 @@ parseShinyInput.shinyMatrix <- function(x, shinysession, name) {
     return(matrix(nrow=0, ncol=0))
   
   matrix(unlist(x), nrow = length(x[[1]]), ncol = length(x))  
+}
+
+#' @rdname parseShinyInput
+#' @S3method parseShinyInput actionButton
+parseShinyInput.actionButton <- function(x, shinysession, name) {
+  # Pass through, keeping actionButton class
+  x
 }
 
 #' @rdname parseShinyInput

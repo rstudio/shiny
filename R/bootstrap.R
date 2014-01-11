@@ -799,6 +799,8 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 #'   also use any other HTML, like an image.
 #' @param icon Optional \code{\link{icon}} to appear on the button
 #'
+#' @seealso \code{\link{observeEvent}} and \code{\link{onChange}}
+#'
 #' @family input elements
 #' @examples
 #' \dontrun{

@@ -1091,3 +1091,113 @@ isolate <- function(expr) {
     expr
   })
 }
+
+
+#' Execute code when a value changes
+#'
+#' This is to be placed within an observer or reactive expression. The purpose
+#' is to watch a reactive value (or reactive expression) \code{eventExpr}, and
+#' execute another expression, \code{expr}, whenever \code{eventExpr} changes.
+#' The surrounding reactive context takes a dependence on \code{eventExpr}, but
+#' not \code{expr}, so changes to reactive objects in \code{expr} won't cause
+#' \code{expr} to be re-executed.
+#'
+#' If the value of \code{eventExpr} is \code{NULL}, then instead of re-executing
+#' \code{expr}, this function will simply return an invisible \code{NULL}.
+#'
+#' This function is useful with \code{\link{actionButton}}, if you want code to
+#' execute only when the button is pressed. actionButtons can also be used with
+#' the \code{runFirst} argument. actionButtons have an initial value of 0 before
+#' being clicked; when \code{runFirst} is TRUE (the default), \code{expr} will
+#' run before the button is clicked, and when \code{runFirst} is FALSE,
+#' \code{expr} will be run only after the button is clicked once.
+#'
+#' @param eventExpr An expression, generally with a reactive object. The
+#'   surrounding reactive context takes a dependency on this expression.
+#' @param expr An expression which is re-executed when the surrounding context
+#'   is invalidated and \code{eventExpr} is not \code{NULL}.
+#' @param runFirst If TRUE (the default), then \code{expr} will be run when
+#'   \code{eventExpr} takes its first non-NULL value. if FALSE, then \code{expr}
+#'   will be run the next time, when \code{eventExpr} takes its second non-NULL
+#'   value. This presently is only implemented for cases where \code{eventExpr}
+#'   is the value of an \code{\link{actionButton}}.
+#'
+#' @seealso \code{\link{actionButton}}, \code{\link{isolate}}
+#' @examples
+#' \dontrun{
+#' ## In ui.R
+#' actionButton("goButton", "Go!")
+#'
+#' ## In server.R. This generates the histogram once before the actionButton is
+#' ## clicked, and each time the button is clicked.
+#' output$distPlot <- renderPlot({
+#'   # When input$goButton changes, re-run the histogram. But don't re-run when
+#'   # just input$obs changes.
+#'   onChange(input$goButton, {
+#'     hist(rnorm(input$obs))
+#'   })
+#' })
+#'
+#' ## The code above is similar to using isolate(), as follows:
+#' # output$distPlot <- renderPlot({
+#' #   input$goButton # Take a dependency on input$goButton
+#' #
+#' #   # Use isolate() to avoid dependency on input$obs
+#' #   hist(isolate(rnorm(input$obs)))
+#' # })
+#'
+#'
+#' ## A different version of server.R code. This time generate the histogram
+#' ## only after the button has been clicked once, with runFirst=FALSE
+#' output$distPlot <- renderPlot({
+#'   onChange(input$goButton, {
+#'     hist(rnorm(input$obs))
+#'   }, runFirst = FALSE)
+#' })
+#'
+#'
+#' ## onChange can be used in observe()
+#' observe({
+#'   onChange(input$goButton,
+#'     sendCustomMessage(type = "myMessage",
+#'       message = paste("Number of observations:", input$obs)
+#'     )
+#'   )
+#' })
+#'
+#' ## Can be used inside reactive() - also use an observer in this example so
+#' ## that the reactive expression gets run.
+#' obs_string <- reactive({
+#'   onChange(input$goButton, paste("Number of observations:", input$obs))
+#' })
+#' observe({
+#'   sendCustomMessage(type = "myMessage", message = obs_string())
+#' })
+#' }
+#' @export
+onChange <- function(eventExpr, expr, runFirst = TRUE) {
+  if (is.null(eventExpr))
+    return(invisible())
+
+  if (!runFirst && !isInputInitialized(eventExpr))
+    return(invisible())
+
+  return(isolate(expr))
+}
+
+# Reports whether an input has been initialized. Usually NULL is used as an
+# indicator of an uninitialized input, but there is special handling for
+# actionButton, which starts with value 0.
+# If needed in the future, this can be converted to an S3 generic with methods
+# for different types of inputs.
+isInputInitialized <- function(value) {
+  if (is.null(value))
+    return(FALSE)
+
+  # Legacy logic. We'd prefer to have actionButton initialize to NULL, but too
+  # much code already expects it to be 0.
+  if (inherits(value, "actionButton") && isTRUE(value == 0))
+    return(FALSE)
+
+  return(TRUE)
+}

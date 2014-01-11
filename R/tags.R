@@ -161,8 +161,9 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL, eol = "\n") {
   # write tag name
   textWriter(paste(indentText, "<", tag$name, sep=""))
   
+  # Convert all attribs to chars explicitly; prevents us from messing up factors
+  attribs <- lapply(tag$attribs, as.character)
   # concatenate attributes
-  attribs <- tag$attribs
   attribs <- lapply(split(attribs, names(attribs)), paste, collapse = " ")
 
   # write attributes

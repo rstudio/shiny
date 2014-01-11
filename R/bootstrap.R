@@ -1414,16 +1414,17 @@ buildTabset <- function(tabs,
 #' Create a text output element
 #' 
 #' Render a reactive output variable as text within an application page. The 
-#' text will be included within an HTML \code{div} tag. 
+#' text will be included within an HTML \code{div} tag by default.
 #' @param outputId output variable to read the value from
+#' @param container a function to generate an HTML element to contain the text
 #' @return A text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used 
 #' to display \link{renderText} output variables.
 #' @examples
 #' h3(textOutput("caption"))
 #' @export
-textOutput <- function(outputId) {
-  div(id = outputId, class = "shiny-text-output")
+textOutput <- function(outputId, container = div) {
+  container(id = outputId, class = "shiny-text-output")
 }
 
 #' Create a verbatim text output element
@@ -1445,7 +1446,7 @@ textOutput <- function(outputId) {
 #' )
 #' @export
 verbatimTextOutput <- function(outputId) {
-  pre(id = outputId, class =  "shiny-text-output")
+  textOutput(outputId, container = pre)
 }
 
 #' Create a image output element

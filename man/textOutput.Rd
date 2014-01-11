@@ -2,10 +2,13 @@
 \alias{textOutput}
 \title{Create a text output element}
 \usage{
-  textOutput(outputId)
+  textOutput(outputId, container = div)
 }
 \arguments{
   \item{outputId}{output variable to read the value from}
+
+  \item{container}{a function to generate an HTML element
+  to contain the text}
 }
 \value{
   A text output element that can be included in a panel
@@ -13,7 +16,7 @@
 \description{
   Render a reactive output variable as text within an
   application page. The text will be included within an
-  HTML \code{div} tag.
+  HTML \code{div} tag by default.
 }
 \details{
   Text is HTML-escaped prior to rendering. This element is

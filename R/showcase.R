@@ -31,7 +31,7 @@ showcaseHead <- function() {
   with(tags, tagList(
     script(src="shared/highlight/highlight.pack.js"),
     script(src="shared/showdown/compressed/showdown.js"),
-    script(src="shared/jquery-ui/jquery-ui-min.js"),
+    script(src="shared/jqueryui/1.10.3/jquery-ui.min.js"),
     script(src="shared/shiny-showcase.js"),
     link(rel="stylesheet", type="text/css", 
          href="shared/highlight/rstudio.css"),

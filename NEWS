@@ -57,6 +57,10 @@ bootstrap css styles.
   reactive one (i.e. reading the variable makes the current reactive context
   dependent on it, and setting the variable is a source of reactivity).
 
+* Added `absolutePanel` and `fixedPanel` functions for creating absolute-
+  and fixed-position panels. They can be easily made user-draggable by
+  specifying `draggable = TRUE`.
+
 
 shiny 0.8.0
 --------------------------------------------------------------------------------

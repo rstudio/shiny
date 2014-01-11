@@ -14,8 +14,8 @@
   of the list are named then that name rather than the
   value is displayed to the user)}
 
-  \item{selected}{Name of initially selected item (if not
-  specified then defaults to the first item)}
+  \item{selected}{The initially selected value (if not
+  specified then defaults to the first value)}
 }
 \value{
   A set of radio buttons that can be added to a UI

@@ -31,9 +31,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
   expect_equal(choices[[2]]$children[[1]], 'a')
   expect_equal(choices[[2]]$attribs$value, 'x2')
-  # This one actually should be NULL, but with the syntax of selectInput, it
-  # must be 'selected'.
-  expect_equal(choices[[2]]$attribs$selected, 'selected')
+  expect_equal(choices[[2]]$attribs$selected, NULL)
 
   expect_equal(choices[[3]]$children[[1]], 'b')
   expect_equal(choices[[3]]$attribs$value, 'x3')
@@ -50,9 +48,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
   expect_equal(choices[[3]]$children[[2]]$children[[1]], 'a')
   expect_equal(choices[[3]]$children[[1]]$attribs$value, 'x2')
-  # This one actually should be NULL, but with the syntax of radioButtons, it
-  # must be 'checked'.
-  expect_equal(choices[[3]]$children[[1]]$attribs$checked, 'checked')
+  expect_equal(choices[[3]]$children[[1]]$attribs$checked, NULL)
 
   expect_equal(choices[[4]]$children[[2]]$children[[1]], 'b')
   expect_equal(choices[[4]]$children[[1]]$attribs$value, 'x3')

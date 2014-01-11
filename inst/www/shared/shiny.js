@@ -1842,8 +1842,7 @@
       var options = new Array(el.length);
       for (var i = 0; i < el.length; i++) {
         options[i] = { value:    el[i].value,
-                       label:    el[i].label,
-                       selected: el[i].selected };
+                       label:    el[i].label };
       }
 
       return {
@@ -1866,11 +1865,6 @@
             value: in_opt.value,
             text: in_opt.label
           });
-
-          // Add selected attribute if present
-          if (in_opt.hasOwnProperty('selected')) {
-            $newopt.prop('selected', in_opt.selected);
-          }
 
           $el.append($newopt);
         }
@@ -1916,8 +1910,7 @@
       var options = new Array($objs.length);
       for (var i = 0; i < options.length; i++) {
         options[i] = { value:   $objs[i].value,
-                       label:   this._getLabel($objs[i]),
-                       checked: $objs[i].checked };
+                       label:   this._getLabel($objs[i]) };
       }
 
       return {
@@ -1943,11 +1936,6 @@
             id:    el.id + (i+1).toString(),
             value: in_opt.value
           });
-
-          // Add checked attribute if present
-          if (in_opt.hasOwnProperty('checked')) {
-            $radio.prop('checked', in_opt.checked);
-          }
 
           $newopt.append($radio);
           $newopt.append('<span>' + in_opt.label + '</span>');
@@ -2048,8 +2036,7 @@
       var options = new Array($objs.length);
       for (var i = 0; i < options.length; i++) {
         options[i] = { value:   $objs[i].value,
-                       label:   this._getLabel($objs[i]),
-                       checked: $objs[i].checked };
+                       label:   this._getLabel($objs[i]) };
       }
 
       return { label:    $(el).find('label[for=' + el.id + ']').text(),
@@ -2074,11 +2061,6 @@
             id:    el.id + (i+1).toString(),
             value: in_opt.value
           });
-
-          // Add checked attribute if present
-          if (in_opt.hasOwnProperty('checked')) {
-            $checkbox.prop('checked', in_opt.checked);
-          }
 
           $newopt.append($checkbox);
           $newopt.append('<span>' + in_opt.label + '</span>');

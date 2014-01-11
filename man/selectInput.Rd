@@ -15,11 +15,10 @@
   of the list are named then that name rather than the
   value is displayed to the user.}
 
-  \item{selected}{Name of initially selected item (or
-  multiple names if \code{multiple = TRUE}). If not
-  specified then defaults to the first item for
-  single-select lists and no items for multiple select
-  lists.}
+  \item{selected}{The initially selected value (or multiple
+  values if \code{multiple = TRUE}). If not specified then
+  defaults to the first value for single-select lists and
+  no values for multiple select lists.}
 
   \item{multiple}{Is selection of multiple items allowed?}
 }

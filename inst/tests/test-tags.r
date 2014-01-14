@@ -72,13 +72,14 @@ test_that("Adding child tags", {
 
   # Creating nested tags by calling the tag$div function and passing a list
   t1 <- tags$div(class="foo", tag_list)
-  expect_equal(length(t1$children), 3)
-  expect_equal(t1$children[[1]]$name, "p")
-  expect_equal(t1$children[[1]]$children[[1]], "tag1")
-  expect_equal(t1$children[[2]]$name, "b")
-  expect_equal(t1$children[[2]]$children[[1]], "tag2")
-  expect_equal(t1$children[[3]]$name, "i")
-  expect_equal(t1$children[[3]]$children[[1]], "tag3")
+  expect_equal(length(t1$children), 1)
+  expect_equal(length(t1$children[[1]]), 3)
+  expect_equal(t1$children[[1]][[1]]$name, "p")
+  expect_equal(t1$children[[1]][[1]]$children[[1]], "tag1")
+  expect_equal(t1$children[[1]][[2]]$name, "b")
+  expect_equal(t1$children[[1]][[2]]$children[[1]], "tag2")
+  expect_equal(t1$children[[1]][[3]]$name, "i")
+  expect_equal(t1$children[[1]][[3]]$children[[1]], "tag3")
 
 
   # div tag used as starting point for tests below
@@ -88,45 +89,46 @@ test_that("Adding child tags", {
   t2 <- tagAppendChild(div_tag, tag_list[[1]])
   t2 <- tagAppendChild(t2, tag_list[[2]])
   t2 <- tagAppendChild(t2, tag_list[[3]])
-  expect_identical(t1, t2)
+  t2a <- do.call(tags$div, c(tag_list, class="foo"))
+  expect_identical(t2a, t2)
 
 
   # tagSetChildren, using list argument
   t2 <- tagSetChildren(div_tag, list = tag_list)
-  expect_identical(t1, t2)
+  expect_identical(t2a, t2)
 
   # tagSetChildren, using ... arguments
   t2 <- tagSetChildren(div_tag, tag_list[[1]], tag_list[[2]], tag_list[[3]])
-  expect_identical(t1, t2)
+  expect_identical(t2a, t2)
 
   # tagSetChildren, using ... and list arguments
   t2 <- tagSetChildren(div_tag, tag_list[[1]], list = tag_list[2:3])
-  expect_identical(t1, t2)
+  expect_identical(t2a, t2)
 
   # tagSetChildren overwrites existing children
   t2 <- tagAppendChild(div_tag, p("should replace this tag"))
   t2 <- tagSetChildren(div_tag, list = tag_list)
-  expect_identical(t1, t2)
+  expect_identical(t2a, t2)
 
 
   # tagAppendChildren, using list argument
   t2 <- tagAppendChild(div_tag, tag_list[[1]])
   t2 <- tagAppendChildren(t2, list = tag_list[2:3])
-  expect_identical(t1, t2)
+  expect_identical(t2a, t2)
 
   # tagAppendChildren, using ... arguments
   t2 <- tagAppendChild(div_tag, tag_list[[1]])
   t2 <- tagAppendChildren(t2, tag_list[[2]], tag_list[[3]])
-  expect_identical(t1, t2)
+  expect_identical(t2a, t2)
 
   # tagAppendChildren, using ... and list arguments
   t2 <- tagAppendChild(div_tag, tag_list[[1]])
   t2 <- tagAppendChildren(t2, tag_list[[2]], list = list(tag_list[[3]]))
-  expect_identical(t1, t2)
+  expect_identical(t2a, t2)
 
   # tagAppendChildren can start with no children
   t2 <- tagAppendChildren(div_tag, list = tag_list)
-  expect_identical(t1, t2)
+  expect_identical(t2a, t2)
 
 
   # tagSetChildren preserves attributes
@@ -168,18 +170,14 @@ test_that("Creating simple tags", {
 
   # NULL children are dropped
   expect_identical(
-    div("foo", NULL, list(NULL, list(NULL, "bar"))),
-    div("foo", "bar")
+    renderTags(div("foo", NULL, list(NULL, list(NULL, "bar"))))$html,
+    renderTags(div("foo", "bar"))$html
   )
 
   # Numbers are coerced to strings
   expect_identical(
-    div(1234),
-    structure(
-      list(name = "div", attribs = list(), children = list("1234")),
-      .Names = c("name", "attribs", "children"),
-      class = "shiny.tag"
-    )
+    renderTags(div(1234))$html,
+    renderTags(div("1234"))$html
   )
 })
 
@@ -192,7 +190,7 @@ test_that("Creating nested tags", {
     structure(
       list(name = "div",
            attribs = structure(list(class = "foo"), .Names = "class"),
-           children = list("a", "b")),
+           children = list(list("a", "b"))),
       .Names = c("name", "attribs", "children"),
       class = "shiny.tag"
     )
@@ -249,7 +247,7 @@ test_that("Creating nested tags", {
     class = "shiny.tag"
   )
 
-  expect_identical(t1, t1_full)
+  expect_identical(renderTags(t1)$html, renderTags(t1_full)$html)
 })
 
 test_that("Attributes are preserved", {
@@ -322,6 +320,17 @@ test_that("Head and singleton behavior", {
   expect_identical(result$singletons, result2$singletons)
   expect_identical(result2$head, HTML(""))
   expect_identical(result2$html, HTML(""))
+  
+  result3 <- renderTags(tagList(
+    tags$head(singleton("hello"), singleton("hello"))
+  ))
+  expect_identical(result$singletons, result3$singletons)
+  expect_identical(result3$head, HTML("  hello"))
+  
+  # Ensure that singleton can be applied to lists, not just tags
+  result4 <- renderTags(list(singleton(list("hello")), singleton(list("hello"))))
+  expect_identical(result4$singletons, "d7319e3f14167c4c056dd7aa0b274c83fe2291f6")
+  expect_identical(result4$html, renderTags(HTML("hello"))$html)
 })
 
 test_that("Factors are treated as characters, not numbers", {
@@ -334,5 +343,52 @@ test_that("Factors are treated as characters, not numbers", {
   expect_identical(
     as.character(tags$option(value=myfactors[[1]], value='B', value=3, myfactors[[1]])),
     HTML('<option value="A B 3">A</option>')
+  )
+})
+
+test_that("Unusual list contents are rendered correctly", {
+  expect_identical(renderTags(list(NULL)), renderTags(HTML("")))
+  expect_identical(renderTags(list(100)), renderTags(HTML("100")))
+  expect_identical(renderTags(list(list(100))), renderTags(HTML("100")))
+  expect_identical(renderTags(list(list())), renderTags(HTML("")))
+  expect_identical(renderTags(NULL), renderTags(HTML("")))
+})
+
+test_that("Low-level singleton manipulation methods", {
+  # Default arguments drop singleton duplicates and strips the
+  # singletons it keeps of the singleton bit
+  result1 <- takeSingletons(tags$div(
+    singleton(tags$head(tags$script("foo"))),
+    singleton(tags$head(tags$script("foo")))
+  ))
+  
+  expect_identical(result1$ui$children[[2]], NULL)
+  expect_false(is(result1$ui$children[[1]], "shiny.singleton"))
+
+  # desingleton=FALSE means drop duplicates but don't strip the
+  # singleton bit
+  result2 <- takeSingletons(tags$div(
+    singleton(tags$head(tags$script("foo"))),
+    singleton(tags$head(tags$script("foo")))
+  ), desingleton=FALSE)
+
+  expect_identical(result2$ui$children[[2]], NULL)
+  expect_is(result2$ui$children[[1]], "shiny.singleton")
+  
+  result3 <- surroundSingletons(tags$div(
+    singleton(tags$script("foo")),
+    singleton(tags$script("foo"))
+  ))
+  
+  expect_identical(
+    renderTags(result3)$html,
+    HTML("<div>
+  <!--SHINY.SINGLETON[58b302d493b50acb75e4a5606687cadccdf902d8]-->
+  <script>foo</script>
+  <!--/SHINY.SINGLETON[58b302d493b50acb75e4a5606687cadccdf902d8]-->
+  <!--SHINY.SINGLETON[58b302d493b50acb75e4a5606687cadccdf902d8]-->
+  <script>foo</script>
+  <!--/SHINY.SINGLETON[58b302d493b50acb75e4a5606687cadccdf902d8]-->
+</div>")
   )
 })

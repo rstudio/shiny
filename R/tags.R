@@ -126,7 +126,7 @@ tag <- function(`_tag_name`, varArgs) {
   # Unnamed arguments are flattened and added as children.
   # Use unname() to remove the names attribute from the list, which would
   # consist of empty strings anyway.
-  children <- dropNullsOrEmpty(flattenTags(unname(varArgs[!named_idx])))
+  children <- unname(varArgs[!named_idx])
 
   # Return tag data structure
   structure(
@@ -137,17 +137,17 @@ tag <- function(`_tag_name`, varArgs) {
   )
 }
 
-tagWrite <- function(tag, textWriter, indent=0, context = NULL, eol = "\n") {
+tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
+  
+  if (length(tag) == 0)
+    return (NULL)
   
   # optionally process a list of tags
   if (!isTag(tag) && is.list(tag)) {
-    sapply(tag, function(t) tagWrite(t, textWriter, indent, context))
+    tag <- dropNullsOrEmpty(flattenTags(tag))
+    sapply(tag, function(t) tagWrite(t, textWriter, indent))
     return (NULL)
   }
-  
-  # first call optional filter -- exit function if it returns false
-  if (!is.null(context) && !is.null(context$filter) && !context$filter(tag))
-    return (NULL)
   
   # compute indent text
   indentText <- paste(rep(" ", indent*2), collapse="")
@@ -181,18 +181,19 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL, eol = "\n") {
   }
   
   # write any children
-  if (length(tag$children) > 0) {
+  children <- dropNullsOrEmpty(flattenTags(tag$children))
+  if (length(children) > 0) {
     textWriter(">")
     
     # special case for a single child text node (skip newlines and indentation)
-    if ((length(tag$children) == 1) && is.character(tag$children[[1]]) ) {
-      tagWrite(tag$children[[1]], textWriter, 0, context, "")
+    if ((length(children) == 1) && is.character(children[[1]]) ) {
+      tagWrite(children[[1]], textWriter, 0, "")
       textWriter(paste("</", tag$name, ">", eol, sep=""))
     }
     else {
       textWriter("\n")
-      for (child in tag$children)
-        tagWrite(child, textWriter, indent+1, context)
+      for (child in children)
+        tagWrite(child, textWriter, indent+1)
       textWriter(paste(indentText, "</", tag$name, ">", eol, sep=""))
     }
   }
@@ -210,41 +211,128 @@ tagWrite <- function(tag, textWriter, indent=0, context = NULL, eol = "\n") {
   }
 }
 
+doRenderTags <- function(ui, indent = 0) {
+  # Render the body--the bodyHtml variable will be created
+  conn <- textConnection("htmlResult", "w", local = TRUE)
+  connWriter <- function(text) cat(text, file = conn)
+  tryCatch(
+    tagWrite(ui, connWriter, indent),
+    finally = close(conn)
+  )
+  return(HTML(paste(htmlResult, collapse = "\n")))
+}
+
 renderTags <- function(ui, singletons = character(0)) {
-  # provide a filter so we can intercept head tag requests
-  context <- new.env()
-  context$head <- character()
-  context$singletons <- singletons
-  context$filter <- function(content) {
-    if (inherits(content, 'shiny.singleton')) {
-      sig <- digest(content, algo='sha1')
-      if (sig %in% context$singletons)
-        return(FALSE)
-      context$singletons <- c(sig, context$singletons)
+  # Do singleton and head processing before rendering
+  singletonInfo <- takeSingletons(ui, singletons)
+  headInfo <- takeHeads(singletonInfo$ui)
+  
+  headHtml <- doRenderTags(headInfo$head, indent = 1)
+  bodyHtml <- doRenderTags(headInfo$ui)
+
+  return(list(head = headHtml,
+              singletons = singletonInfo$singletons,
+              html = bodyHtml))
+}
+
+# Walk a tree of tag objects, rewriting objects according to func.
+# preorder=TRUE means preorder tree traversal, that is, an object
+# should be rewritten before its children.
+rewriteTags <- function(ui, func, preorder) {
+  if (preorder)
+    ui <- func(ui)
+  
+  if (!isTag(ui) && is.list(ui)) {
+    if (length(ui) > 0) {
+      for (i in 1:length(ui)) {
+        newVal <- rewriteTags(ui[[i]], func, preorder)
+        if (is.null(newVal))
+          ui[i] <- list(NULL)
+        else
+          ui[[i]] <- newVal
+      }
     }
-    
-    if (isTag(content) && identical(content$name, "head")) {
-      textConn <- textConnection(NULL, "w") 
-      textConnWriter <- function(text) cat(text, file = textConn)
-      tagWrite(content$children, textConnWriter, 1, context)
-      context$head <- append(context$head, textConnectionValue(textConn))
-      close(textConn)
-      return (FALSE)
-    }
-    else {
-      return (TRUE)
+  } else if (isTag(ui)) {
+    if (length(ui$children) > 0) {
+      for (i in 1:length(ui$children)) {
+        newVal <- rewriteTags(ui$children[[i]], func, preorder)
+        if (is.null(newVal))
+          ui$children[i] <- list(NULL)
+        else
+          ui$children[[i]] <- newVal
+      }
     }
   }
   
-  # write ui HTML to a character vector
-  textConn <- textConnection(NULL, "w") 
-  tagWrite(ui, function(text) cat(text, file = textConn), 0, context)
-  uiHTML <- paste(textConnectionValue(textConn), collapse = "\n")
-  close(textConn)
+  if (!preorder)
+    ui <- func(ui)
   
-  return(list(head = HTML(paste(context$head, collapse = "\n")),
-              singletons = context$singletons,
-              html = HTML(uiHTML)))
+  return(ui)
+}
+
+# Preprocess a tag object by changing any singleton X into
+# <!--SHINY.SINGLETON[sig]-->X'<!--/SHINY.SINGLETON[sig]-->
+# where sig is the sha1 of X, and X' is X minus the singleton
+# attribute.
+#
+# In the case of nested singletons, outer singletons are processed
+# before inner singletons (otherwise the processing of inner
+# singletons would cause the sha1 of the outer singletons to be
+# different).
+surroundSingletons <- local({
+  surroundSingleton <- function(uiObj) {
+    if (is(uiObj, "shiny.singleton")) {
+      sig <- digest(uiObj, "sha1")
+      class(uiObj) <- class(uiObj)[class(uiObj) != "shiny.singleton"]
+      return(tagList(
+        HTML(sprintf("<!--SHINY.SINGLETON[%s]-->", sig)),
+        uiObj,
+        HTML(sprintf("<!--/SHINY.SINGLETON[%s]-->", sig))
+      ))
+    } else {
+      uiObj
+    }
+  }
+
+  function(ui) {
+    rewriteTags(ui, surroundSingleton, TRUE)
+  }
+})
+
+# Given a tag object, apply singleton logic (allow singleton objects
+# to appear no more than once per signature) and return the processed
+# HTML objects and also the list of known singletons.
+takeSingletons <- function(ui, singletons=character(0), desingleton=TRUE) {
+  result <- rewriteTags(ui, function(uiObj) {
+    if (is(uiObj, "shiny.singleton")) {
+      sig <- digest(uiObj, "sha1")
+      if (sig %in% singletons)
+        return(NULL)
+      singletons <<- append(singletons, sig)
+      if (desingleton)
+        class(uiObj) <- class(uiObj)[class(uiObj) != "shiny.singleton"]
+      return(uiObj)
+    } else {
+      return(uiObj)
+    }
+  }, TRUE)
+  
+  return(list(ui=result, singletons=singletons))
+}
+
+# Given a tag object, extract out any children of tags$head
+# and return them separate from the body.
+takeHeads <- function(ui) {
+  headItems <- list()
+  result <- rewriteTags(ui, function(uiObj) {
+    if (isTag(uiObj) && tolower(uiObj$name) == "head") {
+      headItems <<- append(headItems, uiObj$children)
+      return(NULL)
+    }
+    return(uiObj)
+  }, FALSE)
+  
+  return(list(ui=result, head=headItems))
 }
 
 # environment used to store all available tags

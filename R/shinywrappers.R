@@ -414,16 +414,13 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
     if (is.null(result) || length(result) == 0)
       return(NULL)
 
-    # renderTags returns a list with head, singletons, and html
-    output <- renderTags(result, shinysession$singletons)
-    shinysession$singletons <- output$singletons
-    output$singletons <- NULL
+    result <- takeSingletons(result, shinysession$singletons, desingleton=FALSE)$ui
+    result <- surroundSingletons(result)
     
-    # If there's stuff in head, then return a list; otherwise, just a string.
-    if (isTRUE(nchar(output$head) > 0))
-      return(output)
-    else
-      return(output$html)
+    # renderTags returns a list with head, singletons, and html
+    output <- doRenderTags(result)
+    
+    return(output)
   }
 }
 

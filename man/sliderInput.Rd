@@ -77,8 +77,8 @@
   \code{\link{checkboxGroupInput}},
   \code{\link{checkboxInput}}, \code{\link{dateInput}},
   \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{submitButton}},
-  \code{\link{textInput}}
+  \code{\link{numericInput}}, \code{\link{passwordInput}},
+  \code{\link{radioButtons}}, \code{\link{selectInput}},
+  \code{\link{submitButton}}, \code{\link{textInput}}
 }
 

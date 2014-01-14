@@ -38,8 +38,8 @@ numericInput("obs", "Observations:", 10,
   \code{\link{checkboxGroupInput}},
   \code{\link{checkboxInput}}, \code{\link{dateInput}},
   \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textInput}}
+  \code{\link{passwordInput}}, \code{\link{radioButtons}},
+  \code{\link{selectInput}}, \code{\link{sliderInput}},
+  \code{\link{submitButton}}, \code{\link{textInput}}
 }
 

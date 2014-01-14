@@ -1336,7 +1336,7 @@
   var textInputBinding = new InputBinding();
   $.extend(textInputBinding, {
     find: function(scope) {
-      return $(scope).find('input[type="text"]');
+      return $(scope).find('input[type="text"],input[type="password"]');
     },
     getId: function(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;

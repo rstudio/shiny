@@ -436,6 +436,28 @@ textInput <- function(inputId, label, value = "") {
   )
 }
 
+#' Create a password input control
+#' 
+#' Create an input control for censored entry of unstructured text values
+#' 
+#' @param inputId Input variable to assign the control's value to
+#' @param label Display label for the control
+#' @param value Initial value
+#' @return A password input control that can be added to a UI definition.
+#' 
+#' @family input elements
+#' @seealso \code{\link{updateTextInput}}
+#'
+#' @examples
+#' passwordInput("password", "Password:")
+#' @export
+passwordInput <- function(inputId, label, value = "") {
+  tagList(
+    tags$label(label, `for` = inputId),
+    tags$input(id = inputId, type="password", value=value)
+  )
+}
+
 #' Create a numeric input control
 #' 
 #' Create an input control for entry of numeric values

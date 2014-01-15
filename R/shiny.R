@@ -1094,7 +1094,7 @@ decodeMessage <- function(data) {
   }
   
   if (readInt(1) != 0x01020202L)
-    return(fromJSON(rawToChar(data), asText=TRUE, simplify=FALSE, nullValue=NA))
+    return(fromJSON(rawToChar(data), asText=TRUE, simplify=FALSE))
   
   i <- 5
   parts <- list()

@@ -860,7 +860,8 @@ inputHandlers <- Map$new()
 #' 
 #' The \code{type} of a custom Shiny Input widget will be deduced using the 
 #' \code{getType()} JavaScript function on the registered Shiny inputBinding.
-#' @param type The type for which the handler should be added
+#' @param type The type for which the handler should be added -- should be a 
+#' single-element character vector.
 #' @param fun The handler function. This is the function that will be used to
 #'   parse the data delivered from the client before it is available in the 
 #'   \code{input} variable. The function will be called with the following three
@@ -872,7 +873,22 @@ inputHandlers <- Map$new()
 #'      \item{The name of the input.}
 #'    }
 #' @param force If \code{TRUE}, will overwrite any existing handler without
-#' warning.
+#' warning. If \code{FALSE}, will throw an error if this class already has
+#' a handler defined.
+#' @examples
+#' \dontrun{
+#' # Register an input handler which rounds a input number to the nearest integer
+#' registerInputHandler("mypackage.validint", function(x, shinysession, name) {
+#'   if (is.null(x)) return(NA)
+#'   round(x)
+#' }) 
+#' 
+#' ## On the Javascript side, the associated input binding must have a corresponding getType method:
+#' getType: function(el) {
+#'   return "mypackage.validint";
+#' }
+#' 
+#' }
 #' @seealso \code{\link{removeInputHandler}}
 #' @export
 registerInputHandler <- function(type, fun, force=FALSE){
@@ -890,7 +906,7 @@ registerInputHandler <- function(type, fun, force=FALSE){
 #' @param type The type for which handlers should be removed.
 #' @return The handler previously associated with this \code{type}, if one
 #'   existed. Otherwise, \code{NULL}.
-#' @seealso \code{\link{addInputHandler}}
+#' @seealso \code{\link{registerInputHandler}}
 #' @export
 removeInputHandler <- function(type){
   inputHandlers$remove(type)
@@ -1259,12 +1275,10 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
             splitName <- strsplit(name, ':')[[1]]
             if (length(splitName) > 1) {
               msg$data[[name]] <- NULL
-
-              class(val) <- splitName[[2]]
               
               if (!inputHandlers$containsKey(splitName[[2]])){
                 # No input handler registered for this type
-                stop ("No handler registered for for type ", name)
+                stop("No handler registered for for type ", name)
               }
               
               msg$data[[ splitName[[1]] ]] <- 

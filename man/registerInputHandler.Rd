@@ -6,7 +6,7 @@
 }
 \arguments{
   \item{type}{The type for which the handler should be
-  added}
+  added -- should be a single-element character vector.}
 
   \item{fun}{The handler function. This is the function
   that will be used to parse the data delivered from the
@@ -18,7 +18,8 @@
   input exists.} \item{The name of the input.} }}
 
   \item{force}{If \code{TRUE}, will overwrite any existing
-  handler without warning.}
+  handler without warning. If \code{FALSE}, will throw an
+  error if this class already has a handler defined.}
 }
 \description{
   Adds an input handler for data of this type. When called,
@@ -43,6 +44,21 @@
   The \code{type} of a custom Shiny Input widget will be
   deduced using the \code{getType()} JavaScript function on
   the registered Shiny inputBinding.
+}
+\examples{
+\dontrun{
+# Register an input handler which rounds a input number to the nearest integer
+registerInputHandler("mypackage.validint", function(x, shinysession, name) {
+  if (is.null(x)) return(NA)
+  round(x)
+})
+
+## On the Javascript side, the associated input binding must have a corresponding getType method:
+getType: function(el) {
+  return "mypackage.validint";
+}
+
+}
 }
 \seealso{
   \code{\link{removeInputHandler}}

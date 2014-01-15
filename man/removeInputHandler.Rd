@@ -18,6 +18,6 @@
   default RJSONIO serialization will be used.
 }
 \seealso{
-  \code{\link{addInputHandler}}
+  \code{\link{registerInputHandler}}
 }
 

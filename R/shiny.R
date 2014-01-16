@@ -122,6 +122,11 @@ ShinySession <- setRefClass(
           e$call
         ))
       })
+      flushReact()
+      lapply(appsByToken$values(), function(shinysession) {
+        shinysession$flushOutput()
+        NULL
+      })
     },
     isClosed = function() {
       return(closed)

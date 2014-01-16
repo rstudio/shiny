@@ -304,6 +304,9 @@ ShinySession <- setRefClass(
       }
     },
     .write = function(json) {
+      if (closed){
+        return()
+      }
       if (getOption('shiny.trace', FALSE))
         message('SEND ', 
            gsub('(?m)base64,[a-zA-Z0-9+/=]+','[base64 data]',json,perl=TRUE))

@@ -185,7 +185,7 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
   # If expr is a single token, then indexing with [[ will error; if it has multiple
   # tokens, then [[ works. In the former case it will be a name object; in the
   # latter, it will be a language object.
-  if (!is.name(expr_sub) && expr_sub[[1]] == as.name('function')) {
+  if (!is.null(expr_sub) && !is.name(expr_sub) && expr_sub[[1]] == as.name('function')) {
     # Get name of function that called this function
     called_fun <- sys.call(-1 * caller_offset)[[1]]
     

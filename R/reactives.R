@@ -415,7 +415,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL) {
   if (is.null(label))
     label <- sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n'))
   srcref <- attr(substitute(x), "srcref")
-  attr(label, "srcref") <- srcref[[2]]
+  if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   o <- Observable$new(fun, label)
   registerDebugHook(".func", o, "Reactive")

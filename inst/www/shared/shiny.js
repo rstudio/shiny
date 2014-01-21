@@ -1218,24 +1218,27 @@
       var self = this;
       var newSingletons = {};
       var newVal;
+
+      var findNewPayload = function(match, p1, sig, payload) {
+        if (self.knownSingletons[sig] || newSingletons[sig])
+          return "";
+        newSingletons[sig] = true;
+        return payload;
+      };
       while (true) {
-        newVal = val.replace(self._reSingleton, function(match, p1, sig, payload) {
-          if (self.knownSingletons[sig] || newSingletons[sig])
-            return "";
-          newSingletons[sig] = true;
-          return payload;
-        });
+        newVal = val.replace(self._reSingleton, findNewPayload);
         if (val.length === newVal.length)
           break;
         val = newVal;
       }
       
       var heads = [];
+      var headAddPayload = function(match, payload) {
+        heads.push(payload);
+        return "";
+      };
       while (true) {
-        newVal = val.replace(this._reHead, function(match, payload) {
-          heads.push(payload);
-          return "";
-        });
+        newVal = val.replace(self._reHead, headAddPayload);
         if (val.length === newVal.length)
           break;
         val = newVal;

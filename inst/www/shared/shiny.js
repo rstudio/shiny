@@ -2168,7 +2168,7 @@
       return $(el).data('val') || 0;
     },
     setValue: function(el, value) {
-      $(el).data('val', value)
+      $(el).data('val', value);
     },
     subscribe: function(el, callback) {
       $(el).on("click.actionButtonInputBinding", function(e) {

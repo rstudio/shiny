@@ -1170,21 +1170,25 @@
         html = data;
       }
 
-      var processed = singletons.processHtml(html);
-      $(el).html(processed.html);
-      
+      exports.renderHtml(html, el);
       exports.initializeInputs(el);
       exports.bindAll(el);
     }
   });
   outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');
 
-  var singletons = exports.singletons = {
+  // Render HTML in a DOM element, inserting singletons into head as needed
+  exports.renderHtml = function(html, el) {
+    return singletons.renderHtml(html, el);
+  };
+
+  var singletons = {
     knownSingletons: {},
-    processHtml: function(html) {
-      var processed = this._readHtml(html);
-      this._addToHead(processed);
+    renderHtml: function(html, el) {
+      var processed = this._processHtml(html);
+      this._addToHead(processed.head);
       this.register(processed.singletons);
+      $(el).html(processed.html);
       return processed;
     },
     // Take an object where keys are names of singletons, and merges it into
@@ -1202,19 +1206,19 @@
         }
       }
     },
-    // Inserts singletons into document head
-    _addToHead: function(processed) {
-      if (processed.head.length > 0) {
+    // Inserts new content into document head
+    _addToHead: function(head) {
+      if (head.length > 0) {
         var tempDiv = document.createElement('div');
-        tempDiv.innerHTML = processed.head;
-        var head = $('head');
+        tempDiv.innerHTML = head;
+        var $head = $('head');
         while (tempDiv.hasChildNodes()) {
-          head.append(tempDiv.firstChild);
+          $head.append(tempDiv.firstChild);
         }
       }
     },
     // Reads HTML and returns an object with info about singletons
-    _readHtml: function(val) {
+    _processHtml: function(val) {
       var self = this;
       var newSingletons = {};
       var newVal;

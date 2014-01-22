@@ -1152,7 +1152,6 @@
   outputBindings.register(imageOutputBinding, 'shiny.imageOutput');
 
   var htmlOutputBinding = new OutputBinding();
-  exports.knownSingletons = exports.knownSingletons || {};
   $.extend(htmlOutputBinding, {
     find: function(scope) {
       return $(scope).find('.shiny-html-output');
@@ -1170,48 +1169,80 @@
       } else {
         html = data;
       }
-      
-      var processed = this._processHtml(html, exports.knownSingletons);
-      if (processed.head.length > 0) {
-        var tempDiv = document.createElement('div');
-        tempDiv.innerHTML = processed.head;
-        var head = $('head');
-        while (tempDiv.hasChildNodes()) {
-          head.append(tempDiv.firstChild);
-        }
-      }
-      $.extend(exports.knownSingletons, processed.singletons);
-      
-      $(el).html(processed.html);
-      
+
+      exports.renderHtml(html, el);
       exports.initializeInputs(el);
       exports.bindAll(el);
+    }
+  });
+  outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');
+
+  // Render HTML in a DOM element, inserting singletons into head as needed
+  exports.renderHtml = function(html, el) {
+    return singletons.renderHtml(html, el);
+  };
+
+  var singletons = {
+    knownSingletons: {},
+    renderHtml: function(html, el) {
+      var processed = this._processHtml(html);
+      this._addToHead(processed.head);
+      this.register(processed.singletons);
+      $(el).html(processed.html);
+      return processed;
     },
-    _reSingleton: /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/,
-    _reHead: /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/,
-    _processHtml: function(val, knownSingletons) {
+    // Take an object where keys are names of singletons, and merges it into
+    // knownSingletons
+    register: function(s) {
+      $.extend(this.knownSingletons, s);
+    },
+    // Takes a string or array of strings and adds them to knownSingletons
+    registerNames: function(s) {
+      if (typeof s === 'string') {
+        this.knownSingletons[s] = true;
+      } else if (s instanceof Array) {
+        for (var i = 0; i < s.length; i++) {
+          this.knownSingletons[s[i]] = true;
+        }
+      }
+    },
+    // Inserts new content into document head
+    _addToHead: function(head) {
+      if (head.length > 0) {
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = head;
+        var $head = $('head');
+        while (tempDiv.hasChildNodes()) {
+          $head.append(tempDiv.firstChild);
+        }
+      }
+    },
+    // Reads HTML and returns an object with info about singletons
+    _processHtml: function(val) {
+      var self = this;
       var newSingletons = {};
-      // This doesn't actually need to be a method, but this is a convenient
-      // place to put it since we'll only call it from renderValue
       var newVal;
+
+      var findNewPayload = function(match, p1, sig, payload) {
+        if (self.knownSingletons[sig] || newSingletons[sig])
+          return "";
+        newSingletons[sig] = true;
+        return payload;
+      };
       while (true) {
-        newVal = val.replace(this._reSingleton, function(match, p1, sig, payload) {
-          if (knownSingletons[sig] || newSingletons[sig])
-            return "";
-          newSingletons[sig] = true;
-          return payload;
-        });
+        newVal = val.replace(self._reSingleton, findNewPayload);
         if (val.length === newVal.length)
           break;
         val = newVal;
       }
       
       var heads = [];
+      var headAddPayload = function(match, payload) {
+        heads.push(payload);
+        return "";
+      };
       while (true) {
-        newVal = val.replace(this._reHead, function(match, payload) {
-          heads.push(payload);
-          return "";
-        });
+        newVal = val.replace(self._reHead, headAddPayload);
         if (val.length === newVal.length)
           break;
         val = newVal;
@@ -1222,10 +1253,11 @@
         head: heads.join("\n"),
         singletons: newSingletons
       };
-    }
-  });
-  outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');
-  
+    },
+    _reSingleton: /<!--(SHINY.SINGLETON\[([\w]+)\])-->([\s\S]*?)<!--\/\1-->/,
+    _reHead: /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/
+  };
+
   var downloadLinkOutputBinding = new OutputBinding();
   $.extend(downloadLinkOutputBinding, {
     find: function(scope) {
@@ -2820,11 +2852,9 @@
 
     // The server needs to know what singletons were rendered as part of
     // the page loading
-    var singletons = initialValues['.clientdata_singletons'] =
+    var singletonText = initialValues['.clientdata_singletons'] =
         $('script[type="application/shiny-singletons"]').text();
-    $.each(singletons.split(/,/), function(i, singleton) {
-      exports.knownSingletons[singleton] = true;
-    });
+    singletons.registerNames(singletonText.split(/,/));
 
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);

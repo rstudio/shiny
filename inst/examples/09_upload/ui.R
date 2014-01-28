@@ -14,12 +14,12 @@ shinyUI(fluidPage(
                    c(Comma=',',
                      Semicolon=';',
                      Tab='\t'),
-                   'Comma'),
+                   ','),
       radioButtons('quote', 'Quote',
                    c(None='',
                      'Double Quote'='"',
                      'Single Quote'="'"),
-                   'Double Quote')
+                   '"')
     ),
     mainPanel(
       tableOutput('contents')

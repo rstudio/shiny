@@ -1062,7 +1062,8 @@
         img = document.createElement('img');
         // Copy items from data to img. This should include 'src'
         $.each(data, function(key, value) {
-          img[key] = value;
+          if (value !== null)
+            img[key] = value;
         });
 
         // Firefox doesn't have offsetX/Y, so we need to use an alternate

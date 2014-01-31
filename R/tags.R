@@ -213,6 +213,7 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
 
 doRenderTags <- function(ui, indent = 0) {
   # Render the body--the bodyHtml variable will be created
+  htmlResult <- NULL
   conn <- textConnection("htmlResult", "w", local = TRUE)
   connWriter <- function(text) cat(text, file = conn)
   tryCatch(

@@ -38,7 +38,7 @@
 
   \item{format}{Customize format values in slider labels.
   See
-  \url{http://archive.plugins.jquery.com/project/numberformatter}
+  \url{https://code.google.com/p/jquery-numberformatter/}
   for syntax details.}
 
   \item{locale}{The locale to be used when applying

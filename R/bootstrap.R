@@ -880,7 +880,7 @@ actionButton <- function(inputId, label, icon = NULL) {
 #'   round to the nearest .01). Any rounding will be applied after snapping to 
 #'   the nearest step.
 #' @param format Customize format values in slider labels. See 
-#'   \url{http://archive.plugins.jquery.com/project/numberformatter} for syntax 
+#'   \url{https://code.google.com/p/jquery-numberformatter/} for syntax
 #'   details.
 #' @param locale The locale to be used when applying \code{format}. See details.
 #' @param ticks \code{FALSE} to hide tick marks, \code{TRUE} to show them 

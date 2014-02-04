@@ -24,7 +24,7 @@ shinyUI(fluidPage(
     # Show the caption, a summary of the dataset and an HTML 
 	 # table with the requested number of observations
     mainPanel(
-      h3(textOutput("caption")), 
+      h3(textOutput("caption", container = span)),
       
       verbatimTextOutput("summary"), 
       

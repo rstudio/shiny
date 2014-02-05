@@ -2815,10 +2815,8 @@
         initialValues['.clientdata_output_' + this.id + '_hidden'] = false;
       }
     });
-    var sendOutputHiddenStateCount = 0;
     // Send update when hidden state changes
     function doSendOutputHiddenState() {
-      console.log('sendoutputhiddenstate: ' + (++sendOutputHiddenStateCount) );
       var visibleOutputs = {};
       $('.shiny-bound-output').each(function() {
         delete lastKnownVisibleOutputs[this.id];

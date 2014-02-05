@@ -141,6 +141,9 @@
       this.args = arguments;
       this.$invoke();
     };
+    this.isPending = function() {
+      return this.timerId !== null;
+    };
     this.$clearTimer = function() {
       if (this.timerId !== null) {
         clearTimeout(this.timerId);
@@ -270,18 +273,28 @@
     this.shinyapp = shinyapp;
     this.timerId = null;
     this.pendingData = {};
+    this.reentrant = false;
+    this.lastChanceCallback = [];
   };
   (function() {
     this.setInput = function(name, value) {
       var self = this;
 
       this.pendingData[name] = value;
-      if (!this.timerId) {
+      if (!this.timerId && !this.reentrant) {
         this.timerId = setTimeout(function() {
-          self.timerId = null;
-          var currentData = self.pendingData;
-          self.pendingData = {};
-          self.shinyapp.sendInput(currentData);
+          self.reentrant = true;
+          try {
+            $.each(self.lastChanceCallback, function(i, callback) {
+              callback();
+            });
+            self.timerId = null;
+            var currentData = self.pendingData;
+            self.pendingData = {};
+            self.shinyapp.sendInput(currentData);
+          } finally {
+            self.reentrant = false;
+          }
         }, 0);
       }
     };
@@ -2514,7 +2527,8 @@
         return $(el).val();
     }
 
-    var inputsNoResend = new InputNoResendDecorator(new InputBatchSender(shinyapp));
+    var inputBatchSender = new InputBatchSender(shinyapp);
+    var inputsNoResend = new InputNoResendDecorator(inputBatchSender);
     var inputsRate = new InputRateDecorator(inputsNoResend);
     var inputsDefer = new InputDeferDecorator(inputsNoResend);
 
@@ -2803,7 +2817,7 @@
       }
     });
     // Send update when hidden state changes
-    function sendOutputHiddenState() {
+    function doSendOutputHiddenState() {
       var visibleOutputs = {};
       $('.shiny-bound-output').each(function() {
         delete lastKnownVisibleOutputs[this.id];
@@ -2823,6 +2837,20 @@
       // Update the visible outputs for next time
       lastKnownVisibleOutputs = visibleOutputs;
     }
+    // sendOutputHiddenState gets called each time DOM elements are shown or
+    // hidden. This can be in the hundreds or thousands of times at startup.
+    // We'll debounce it, so that we do the actual work once per tick.
+    var sendOutputHiddenStateDebouncer = new Debouncer(null, doSendOutputHiddenState, 0);
+    function sendOutputHiddenState() {
+      sendOutputHiddenStateDebouncer.normalCall();
+    }
+    // We need to make sure doSendOutputHiddenState actually gets called before
+    // the inputBatchSender sends data to the server. The lastChanceCallback
+    // here does that - if the debouncer has a pending call, flush it.
+    inputBatchSender.lastChanceCallback.push(function() {
+      if (sendOutputHiddenStateDebouncer.isPending())
+        sendOutputHiddenStateDebouncer.immediateCall();
+    });
 
     // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size

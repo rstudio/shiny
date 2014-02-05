@@ -2,18 +2,18 @@
 \alias{helpText}
 \title{Create a help text element}
 \usage{
-  helpText(...)
+helpText(...)
 }
 \arguments{
   \item{...}{One or more help text strings (or other inline
   HTML elements)}
 }
 \value{
-  A help text element that can be added to a UI definition.
+A help text element that can be added to a UI definition.
 }
 \description{
-  Create help text which can be added to an input form to
-  provide additional explanation or context.
+Create help text which can be added to an input form to
+provide additional explanation or context.
 }
 \examples{
 helpText("Note: while the data view will show only",

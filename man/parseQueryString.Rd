@@ -2,14 +2,14 @@
 \alias{parseQueryString}
 \title{Parse a GET query string from a URL}
 \usage{
-  parseQueryString(str)
+parseQueryString(str)
 }
 \arguments{
   \item{str}{The query string. It can have a leading
   \code{"?"} or not.}
 }
 \description{
-  Returns a named character vector of key-value pairs.
+Returns a named character vector of key-value pairs.
 }
 \examples{
 parseQueryString("?foo=1&bar=b\%20a\%20r")

@@ -2,39 +2,39 @@
 \alias{isolate}
 \title{Create a non-reactive scope for an expression}
 \usage{
-  isolate(expr)
+isolate(expr)
 }
 \arguments{
   \item{expr}{An expression that can access reactive values
   or expressions.}
 }
 \description{
-  Executes the given expression in a scope where reactive
-  values or expression can be read, but they cannot cause
-  the reactive scope of the caller to be re-evaluated when
-  they change.
+Executes the given expression in a scope where reactive
+values or expression can be read, but they cannot cause the
+reactive scope of the caller to be re-evaluated when they
+change.
 }
 \details{
-  Ordinarily, the simple act of reading a reactive value
-  causes a relationship to be established between the
-  caller and the reactive value, where a change to the
-  reactive value will cause the caller to re-execute. (The
-  same applies for the act of getting a reactive
-  expression's value.) The \code{isolate} function lets you
-  read a reactive value or expression without establishing
-  this relationship.
+Ordinarily, the simple act of reading a reactive value
+causes a relationship to be established between the caller
+and the reactive value, where a change to the reactive
+value will cause the caller to re-execute. (The same
+applies for the act of getting a reactive expression's
+value.) The \code{isolate} function lets you read a
+reactive value or expression without establishing this
+relationship.
 
-  The expression given to \code{isolate()} is evaluated in
-  the calling environment. This means that if you assign a
-  variable inside the \code{isolate()}, its value will be
-  visible outside of the \code{isolate()}. If you want to
-  avoid this, you can use \code{\link{local}()} inside the
-  \code{isolate()}.
+The expression given to \code{isolate()} is evaluated in
+the calling environment. This means that if you assign a
+variable inside the \code{isolate()}, its value will be
+visible outside of the \code{isolate()}. If you want to
+avoid this, you can use \code{\link{local}()} inside the
+\code{isolate()}.
 
-  This function can also be useful for calling reactive
-  expression at the console, which can be useful for
-  debugging. To do so, simply wrap the calls to the
-  reactive expression with \code{isolate()}.
+This function can also be useful for calling reactive
+expression at the console, which can be useful for
+debugging. To do so, simply wrap the calls to the reactive
+expression with \code{isolate()}.
 }
 \examples{
 \dontrun{

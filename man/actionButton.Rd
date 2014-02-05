@@ -2,7 +2,7 @@
 \alias{actionButton}
 \title{Action button}
 \usage{
-  actionButton(inputId, label, icon = NULL)
+actionButton(inputId, label, icon = NULL)
 }
 \arguments{
   \item{inputId}{Specifies the input slot that will be used
@@ -16,8 +16,8 @@
   button}
 }
 \description{
-  Creates an action button whose value is initially zero,
-  and increments by one each time it is pressed.
+Creates an action button whose value is initially zero, and
+increments by one each time it is pressed.
 }
 \examples{
 \dontrun{
@@ -36,11 +36,13 @@ actionButton("goButton", "Go!")
 }
 }
 \seealso{
-  Other input.elements: \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textInput}}
+Other input.elements: \code{\link{animationOptions}},
+\code{\link{sliderInput}};
+\code{\link{checkboxGroupInput}};
+\code{\link{checkboxInput}}; \code{\link{dateInput}};
+\code{\link{dateRangeInput}}; \code{\link{fileInput}};
+\code{\link{numericInput}}; \code{\link{radioButtons}};
+\code{\link{selectInput}}; \code{\link{submitButton}};
+\code{\link{textInput}}
 }
 

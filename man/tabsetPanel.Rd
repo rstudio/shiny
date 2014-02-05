@@ -2,9 +2,8 @@
 \alias{tabsetPanel}
 \title{Create a tabset panel}
 \usage{
-  tabsetPanel(..., id = NULL, selected = NULL,
-    type = c("tabs", "pills"),
-    position = c("above", "below", "left", "right"))
+tabsetPanel(..., id = NULL, selected = NULL, type = c("tabs", "pills"),
+  position = c("above", "below", "left", "right"))
 }
 \arguments{
   \item{...}{\code{\link{tabPanel}} elements to include in
@@ -32,12 +31,12 @@
   "pill".}
 }
 \value{
-  A tabset that can be passed to \code{\link{mainPanel}}
+A tabset that can be passed to \code{\link{mainPanel}}
 }
 \description{
-  Create a tabset that contains \code{\link{tabPanel}}
-  elements. Tabsets are useful for dividing output into
-  multiple independently viewable sections.
+Create a tabset that contains \code{\link{tabPanel}}
+elements. Tabsets are useful for dividing output into
+multiple independently viewable sections.
 }
 \examples{
 # Show a tabset that includes a plot, summary, and
@@ -51,6 +50,6 @@ mainPanel(
 )
 }
 \seealso{
-  \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
+\code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
 }
 

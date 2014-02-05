@@ -2,7 +2,7 @@
 \alias{outputOptions}
 \title{Set options for an output object.}
 \usage{
-  outputOptions(x, name, ...)
+outputOptions(x, name, ...)
 }
 \arguments{
   \item{x}{A shinyoutput object (typically \code{output}).}
@@ -13,16 +13,15 @@
   \item{...}{Options to set for the output observer.}
 }
 \description{
-  These are the available options for an output object:
-  \itemize{ \item suspendWhenHidden. When \code{TRUE} (the
-  default), the output object will be suspended (not
-  execute) when it is hidden on the web page. When
-  \code{FALSE}, the output object will not suspend when
-  hidden, and if it was already hidden and suspended, then
-  it will resume immediately.  \item priority. The priority
-  level of the output object. Queued outputs with higher
-  priority values will execute before those with lower
-  values. }
+These are the available options for an output object:
+\itemize{ \item suspendWhenHidden. When \code{TRUE} (the
+default), the output object will be suspended (not execute)
+when it is hidden on the web page. When \code{FALSE}, the
+output object will not suspend when hidden, and if it was
+already hidden and suspended, then it will resume
+immediately.  \item priority. The priority level of the
+output object. Queued outputs with higher priority values
+will execute before those with lower values. }
 }
 \examples{
 \dontrun{

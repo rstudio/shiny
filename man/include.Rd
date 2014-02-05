@@ -6,15 +6,15 @@
 \alias{includeText}
 \title{Include Content From a File}
 \usage{
-  includeHTML(path)
+includeHTML(path)
 
-  includeText(path)
+includeText(path)
 
-  includeMarkdown(path)
+includeMarkdown(path)
 
-  includeCSS(path, ...)
+includeCSS(path, ...)
 
-  includeScript(path, ...)
+includeScript(path, ...)
 }
 \arguments{
   \item{path}{The path of the file to be included. It is
@@ -26,24 +26,24 @@
   generated tag.}
 }
 \description{
-  Include HTML, text, or rendered Markdown into a
-  \link[=shinyUI]{Shiny UI}.
+Include HTML, text, or rendered Markdown into a
+\link[=shinyUI]{Shiny UI}.
 }
 \details{
-  These functions provide a convenient way to include an
-  extensive amount of HTML, textual, Markdown, CSS, or
-  JavaScript content, rather than using a large literal R
-  string.
+These functions provide a convenient way to include an
+extensive amount of HTML, textual, Markdown, CSS, or
+JavaScript content, rather than using a large literal R
+string.
 }
 \note{
-  \code{includeText} escapes its contents, but does no
-  other processing.  This means that hard breaks and
-  multiple spaces will be rendered as they usually are in
-  HTML: as a single space character. If you are looking for
-  preformatted text, wrap the call with \code{\link{pre}},
-  or consider using \code{includeMarkdown} instead.
+\code{includeText} escapes its contents, but does no other
+processing.  This means that hard breaks and multiple
+spaces will be rendered as they usually are in HTML: as a
+single space character. If you are looking for preformatted
+text, wrap the call with \code{\link{pre}}, or consider
+using \code{includeMarkdown} instead.
 
-  The \code{includeMarkdown} function requires the
-  \code{markdown} package.
+The \code{includeMarkdown} function requires the
+\code{markdown} package.
 }
 

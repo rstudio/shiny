@@ -2,7 +2,7 @@
 \alias{pageWithSidebar}
 \title{Create a page with a sidebar}
 \usage{
-  pageWithSidebar(headerPanel, sidebarPanel, mainPanel)
+pageWithSidebar(headerPanel, sidebarPanel, mainPanel)
 }
 \arguments{
   \item{headerPanel}{The \link{headerPanel} with the
@@ -14,19 +14,19 @@
   \item{mainPanel}{The \link{mainPanel} containing outputs}
 }
 \value{
-  A UI defintion that can be passed to the \link{shinyUI}
-  function
+A UI defintion that can be passed to the \link{shinyUI}
+function
 }
 \description{
-  Create a Shiny UI that contains a header with the
-  application title, a sidebar for input controls, and a
-  main area for output.
+Create a Shiny UI that contains a header with the
+application title, a sidebar for input controls, and a main
+area for output.
 }
 \note{
-  This function is deprecated. You should use
-  \code{\link{fluidPage}} along with
-  \code{\link{sidebarLayout}} to implement a page with a
-  sidebar.
+This function is deprecated. You should use
+\code{\link{fluidPage}} along with
+\code{\link{sidebarLayout}} to implement a page with a
+sidebar.
 }
 \examples{
 # Define UI

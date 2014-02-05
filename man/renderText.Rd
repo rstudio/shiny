@@ -2,8 +2,7 @@
 \alias{renderText}
 \title{Text Output}
 \usage{
-  renderText(expr, env = parent.frame(), quoted = FALSE,
-    func = NULL)
+renderText(expr, env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
   \item{expr}{An expression that returns an R object that
@@ -21,19 +20,19 @@
   \code{expr} instead).}
 }
 \description{
-  Makes a reactive version of the given function that also
-  uses \code{\link[base]{cat}} to turn its result into a
-  single-element character vector.
+Makes a reactive version of the given function that also
+uses \code{\link[base]{cat}} to turn its result into a
+single-element character vector.
 }
 \details{
-  The corresponding HTML output tag can be anything (though
-  \code{pre} is recommended if you need a monospace font
-  and whitespace preserved) and should have the CSS class
-  name \code{shiny-text-output}.
+The corresponding HTML output tag can be anything (though
+\code{pre} is recommended if you need a monospace font and
+whitespace preserved) and should have the CSS class name
+\code{shiny-text-output}.
 
-  The result of executing \code{func} will passed to
-  \code{cat}, inside a \code{\link[utils]{capture.output}}
-  call.
+The result of executing \code{func} will passed to
+\code{cat}, inside a \code{\link[utils]{capture.output}}
+call.
 }
 \examples{
 isolate({
@@ -100,7 +99,7 @@ vecFun()
 })
 }
 \seealso{
-  \code{\link{renderPrint}} for capturing the print output
-  of a function, rather than the returned text value.
+\code{\link{renderPrint}} for capturing the print output of
+a function, rather than the returned text value.
 }
 

@@ -2,7 +2,7 @@
 \alias{textOutput}
 \title{Create a text output element}
 \usage{
-  textOutput(outputId, container = div)
+textOutput(outputId, container = div)
 }
 \arguments{
   \item{outputId}{output variable to read the value from}
@@ -11,16 +11,16 @@
   to contain the text}
 }
 \value{
-  A text output element that can be included in a panel
+A text output element that can be included in a panel
 }
 \description{
-  Render a reactive output variable as text within an
-  application page. The text will be included within an
-  HTML \code{div} tag by default.
+Render a reactive output variable as text within an
+application page. The text will be included within an HTML
+\code{div} tag by default.
 }
 \details{
-  Text is HTML-escaped prior to rendering. This element is
-  often used to display \link{renderText} output variables.
+Text is HTML-escaped prior to rendering. This element is
+often used to display \link{renderText} output variables.
 }
 \examples{
 h3(textOutput("caption"))

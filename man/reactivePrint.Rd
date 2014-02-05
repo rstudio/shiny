@@ -2,12 +2,12 @@
 \alias{reactivePrint}
 \title{Print output (deprecated)}
 \usage{
-  reactivePrint(func)
+reactivePrint(func)
 }
 \arguments{
   \item{func}{A function.}
 }
 \description{
-  See \code{\link{renderPrint}}.
+See \code{\link{renderPrint}}.
 }
 

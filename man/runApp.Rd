@@ -2,11 +2,10 @@
 \alias{runApp}
 \title{Run Shiny Application}
 \usage{
-  runApp(appDir = getwd(), port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()),
-    host = getOption("shiny.host", "127.0.0.1"),
-    workerId = "", quiet = FALSE,
-    display.mode = c("auto", "normal", "showcase"))
+runApp(appDir = getwd(), port = NULL,
+  launch.browser = getOption("shiny.launch.browser", interactive()),
+  host = getOption("shiny.host", "127.0.0.1"), workerId = "",
+  quiet = FALSE, display.mode = c("auto", "normal", "showcase"))
 }
 \arguments{
   \item{appDir}{The directory of the application. Should
@@ -44,18 +43,18 @@
   \code{DESCRIPTION} file, if any.}
 }
 \description{
-  Runs a Shiny application. This function normally does not
-  return; interrupt R to stop the application (usually by
-  pressing Ctrl+C or Esc).
+Runs a Shiny application. This function normally does not
+return; interrupt R to stop the application (usually by
+pressing Ctrl+C or Esc).
 }
 \details{
-  The host parameter was introduced in Shiny 0.9.0. Its
-  default value of \code{"127.0.0.1"} means that, contrary
-  to previous versions of Shiny, only the current machine
-  can access locally hosted Shiny apps. To allow other
-  clients to connect, use the value \code{"0.0.0.0"}
-  instead (which was the value that was hard-coded into
-  Shiny in 0.8.0 and earlier).
+The host parameter was introduced in Shiny 0.9.0. Its
+default value of \code{"127.0.0.1"} means that, contrary to
+previous versions of Shiny, only the current machine can
+access locally hosted Shiny apps. To allow other clients to
+connect, use the value \code{"0.0.0.0"} instead (which was
+the value that was hard-coded into Shiny in 0.8.0 and
+earlier).
 }
 \examples{
 \dontrun{

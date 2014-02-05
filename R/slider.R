@@ -3,9 +3,7 @@ hasDecimals <- function(value) {
   return (!identical(value, truncatedValue))
 }
 
-#' Animation Options
-#' 
-#' Creates an options object for customizing animations for \link{sliderInput}.
+#' @rdname sliderInput
 #' 
 #' @param interval The interval, in milliseconds, between each animation step.
 #' @param loop \code{TRUE} to automatically restart the animation when it 

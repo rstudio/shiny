@@ -3,10 +3,8 @@
 \title{Installs an expression in the given environment as a function, and registers
 debug hooks so that breakpoints may be set in the function.}
 \usage{
-  installExprFunction(expr, name,
-    eval.env = parent.frame(2), quoted = FALSE,
-    assign.env = parent.frame(1),
-    label = as.character(sys.call(-1)[[1]]))
+installExprFunction(expr, name, eval.env = parent.frame(2), quoted = FALSE,
+  assign.env = parent.frame(1), label = as.character(sys.call(-1)[[1]]))
 }
 \arguments{
   \item{expr}{A quoted or unquoted expression}
@@ -25,15 +23,14 @@ debug hooks so that breakpoints may be set in the function.}
   debugger. Defaults to the name of the calling function.}
 }
 \description{
-  This function can replace \code{exprToFunction} as
-  follows: we may use \code{func <- exprToFunction(expr)}
-  if we do not want the debug hooks, or
-  \code{installExprFunction(expr, "func")} if we do. Both
-  approaches create a function named \code{func} in the
-  current environment.
+This function can replace \code{exprToFunction} as follows:
+we may use \code{func <- exprToFunction(expr)} if we do not
+want the debug hooks, or \code{installExprFunction(expr,
+"func")} if we do. Both approaches create a function named
+\code{func} in the current environment.
 }
 \seealso{
-  Wraps \code{exprToFunction}; see that method's
-  documentation for more documentation and examples.
+Wraps \code{exprToFunction}; see that method's
+documentation for more documentation and examples.
 }
 

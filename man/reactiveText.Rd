@@ -2,12 +2,12 @@
 \alias{reactiveText}
 \title{Text output (deprecated)}
 \usage{
-  reactiveText(func)
+reactiveText(func)
 }
 \arguments{
   \item{func}{A function.}
 }
 \description{
-  See \code{\link{renderText}}.
+See \code{\link{renderText}}.
 }
 

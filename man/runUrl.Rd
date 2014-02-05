@@ -2,8 +2,8 @@
 \alias{runUrl}
 \title{Run a Shiny application from a URL}
 \usage{
-  runUrl(url, filetype = NULL, subdir = NULL, port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()))
+runUrl(url, filetype = NULL, subdir = NULL, port = NULL,
+  launch.browser = getOption("shiny.launch.browser", interactive()))
 }
 \arguments{
   \item{url}{URL of the application.}
@@ -25,12 +25,12 @@
   started. Defaults to true in interactive sessions only.}
 }
 \description{
-  Download and launch a Shiny application that is hosted at
-  a downloadable URL. The Shiny application must be saved
-  in a .zip, .tar, or .tar.gz file. The Shiny application
-  files must be contained in a subdirectory in the archive.
-  For example, the files might be \code{myapp/server.r} and
-  \code{myapp/ui.r}.
+Download and launch a Shiny application that is hosted at a
+downloadable URL. The Shiny application must be saved in a
+.zip, .tar, or .tar.gz file. The Shiny application files
+must be contained in a subdirectory in the archive. For
+example, the files might be \code{myapp/server.r} and
+\code{myapp/ui.r}.
 }
 \examples{
 \dontrun{

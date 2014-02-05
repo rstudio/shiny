@@ -2,8 +2,7 @@
 \alias{updateSliderInput}
 \title{Change the value of a slider input on the client}
 \usage{
-  updateSliderInput(session, inputId, label = NULL,
-    value = NULL)
+updateSliderInput(session, inputId, label = NULL, value = NULL)
 }
 \arguments{
   \item{session}{The \code{session} object passed to
@@ -16,23 +15,23 @@
   \item{value}{The value to set for the input object.}
 }
 \description{
-  Change the value of a slider input on the client
+Change the value of a slider input on the client
 }
 \details{
-  The input updater functions send a message to the client,
-  telling it to change the settings of an input object. The
-  messages are collected and sent after all the observers
-  (including outputs) have finished running.
+The input updater functions send a message to the client,
+telling it to change the settings of an input object. The
+messages are collected and sent after all the observers
+(including outputs) have finished running.
 
-  The syntax of these functions is similar to the functions
-  that created the inputs in the first place. For example,
-  \code{\link{numericInput}()} and
-  \code{updateNumericInput()} take a similar set of
-  arguments.
+The syntax of these functions is similar to the functions
+that created the inputs in the first place. For example,
+\code{\link{numericInput}()} and
+\code{updateNumericInput()} take a similar set of
+arguments.
 
-  Any arguments with NULL values will be ignored; they will
-  not result in any changes to the input object on the
-  client.
+Any arguments with NULL values will be ignored; they will
+not result in any changes to the input object on the
+client.
 }
 \examples{
 \dontrun{
@@ -58,6 +57,6 @@ shinyServer(function(input, output, session) {
 }
 }
 \seealso{
-  \code{\link{sliderInput}}
+\code{\link{sliderInput}}
 }
 

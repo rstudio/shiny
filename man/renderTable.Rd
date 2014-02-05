@@ -2,8 +2,7 @@
 \alias{renderTable}
 \title{Table Output}
 \usage{
-  renderTable(expr, ..., env = parent.frame(),
-    quoted = FALSE, func = NULL)
+renderTable(expr, ..., env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
   \item{expr}{An expression that returns an R object that
@@ -25,11 +24,11 @@
   use \code{expr} instead).}
 }
 \description{
-  Creates a reactive table that is suitable for assigning
-  to an \code{output} slot.
+Creates a reactive table that is suitable for assigning to
+an \code{output} slot.
 }
 \details{
-  The corresponding HTML output tag should be \code{div}
-  and have the CSS class name \code{shiny-html-output}.
+The corresponding HTML output tag should be \code{div} and
+have the CSS class name \code{shiny-html-output}.
 }
 

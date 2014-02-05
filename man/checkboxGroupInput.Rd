@@ -2,8 +2,7 @@
 \alias{checkboxGroupInput}
 \title{Checkbox Group Input Control}
 \usage{
-  checkboxGroupInput(inputId, label, choices,
-    selected = NULL)
+checkboxGroupInput(inputId, label, choices, selected = NULL)
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -19,13 +18,13 @@
   selected, if any.}
 }
 \value{
-  A list of HTML elements that can be added to a UI
-  definition.
+A list of HTML elements that can be added to a UI
+definition.
 }
 \description{
-  Create a group of checkboxes that can be used to toggle
-  multiple choices independently. The server will receive
-  the input as a character vector of the selected values.
+Create a group of checkboxes that can be used to toggle
+multiple choices independently. The server will receive the
+input as a character vector of the selected values.
 }
 \examples{
 checkboxGroupInput("variable", "Variable:",
@@ -34,14 +33,15 @@ checkboxGroupInput("variable", "Variable:",
                      "Gears" = "gear"))
 }
 \seealso{
-  \code{\link{checkboxInput}},
-  \code{\link{updateCheckboxGroupInput}}
+\code{\link{checkboxInput}},
+\code{\link{updateCheckboxGroupInput}}
 
-  Other input.elements: \code{\link{actionButton}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textInput}}
+Other input.elements: \code{\link{actionButton}};
+\code{\link{animationOptions}}, \code{\link{sliderInput}};
+\code{\link{checkboxInput}}; \code{\link{dateInput}};
+\code{\link{dateRangeInput}}; \code{\link{fileInput}};
+\code{\link{numericInput}}; \code{\link{radioButtons}};
+\code{\link{selectInput}}; \code{\link{submitButton}};
+\code{\link{textInput}}
 }
 

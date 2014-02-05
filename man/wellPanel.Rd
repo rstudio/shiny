@@ -2,17 +2,17 @@
 \alias{wellPanel}
 \title{Create a well panel}
 \usage{
-  wellPanel(...)
+wellPanel(...)
 }
 \arguments{
   \item{...}{UI elements to include inside the panel.}
 }
 \value{
-  The newly created panel.
+The newly created panel.
 }
 \description{
-  Creates a panel with a slightly inset border and grey
-  background. Equivalent to Bootstrap's \code{well} CSS
-  class.
+Creates a panel with a slightly inset border and grey
+background. Equivalent to Bootstrap's \code{well} CSS
+class.
 }
 

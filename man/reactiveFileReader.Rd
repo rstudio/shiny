@@ -2,8 +2,7 @@
 \alias{reactiveFileReader}
 \title{Reactive file reader}
 \usage{
-  reactiveFileReader(intervalMillis, session, filePath,
-    readFunc, ...)
+reactiveFileReader(intervalMillis, session, filePath, readFunc, ...)
 }
 \arguments{
   \item{intervalMillis}{Approximate number of milliseconds
@@ -28,24 +27,24 @@
   \code{readFunc} whenever it is invoked.}
 }
 \value{
-  A reactive expression that returns the contents of the
-  file, and automatically invalidates when the file changes
-  on disk (as determined by last modified time).
+A reactive expression that returns the contents of the
+file, and automatically invalidates when the file changes
+on disk (as determined by last modified time).
 }
 \description{
-  Given a file path and read function, returns a reactive
-  data source for the contents of the file.
+Given a file path and read function, returns a reactive
+data source for the contents of the file.
 }
 \details{
-  \code{reactiveFileReader} works by periodically checking
-  the file's last modified time; if it has changed, then
-  the file is re-read and any reactive dependents are
-  invalidated.
+\code{reactiveFileReader} works by periodically checking
+the file's last modified time; if it has changed, then the
+file is re-read and any reactive dependents are
+invalidated.
 
-  The \code{intervalMillis}, \code{filePath}, and
-  \code{readFunc} functions will each be executed in a
-  reactive context; therefore, they may read reactive
-  values and reactive expressions.
+The \code{intervalMillis}, \code{filePath}, and
+\code{readFunc} functions will each be executed in a
+reactive context; therefore, they may read reactive values
+and reactive expressions.
 }
 \examples{
 \dontrun{
@@ -70,6 +69,6 @@ shinyServer(function(input, output, session)) {
 }
 }
 \seealso{
-  \code{\link{reactivePoll}}
+\code{\link{reactivePoll}}
 }
 

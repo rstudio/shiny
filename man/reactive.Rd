@@ -3,10 +3,9 @@
 \alias{reactive}
 \title{Create a reactive expression}
 \usage{
-  reactive(x, env = parent.frame(), quoted = FALSE,
-    label = NULL)
+reactive(x, env = parent.frame(), quoted = FALSE, label = NULL)
 
-  is.reactive(x)
+is.reactive(x)
 }
 \arguments{
   \item{x}{For \code{reactive}, an expression (quoted or
@@ -26,29 +25,27 @@
   for debugging.}
 }
 \value{
-  a function, wrapped in a S3 class "reactive"
+a function, wrapped in a S3 class "reactive"
 }
 \description{
-  Wraps a normal expression to create a reactive
-  expression. Conceptually, a reactive expression is a
-  expression whose result will change over time.
+Wraps a normal expression to create a reactive expression.
+Conceptually, a reactive expression is a expression whose
+result will change over time.
 }
 \details{
-  Reactive expressions are expressions that can read
-  reactive values and call other reactive expressions.
-  Whenever a reactive value changes, any reactive
-  expressions that depended on it are marked as
-  "invalidated" and will automatically re-execute if
-  necessary. If a reactive expression is marked as
-  invalidated, any other reactive expressions that recently
-  called it are also marked as invalidated. In this way,
-  invalidations ripple through the expressions that depend
-  on each other.
+Reactive expressions are expressions that can read reactive
+values and call other reactive expressions. Whenever a
+reactive value changes, any reactive expressions that
+depended on it are marked as "invalidated" and will
+automatically re-execute if necessary. If a reactive
+expression is marked as invalidated, any other reactive
+expressions that recently called it are also marked as
+invalidated. In this way, invalidations ripple through the
+expressions that depend on each other.
 
-  See the
-  \href{http://rstudio.github.com/shiny/tutorial/}{Shiny
-  tutorial} for more information about reactive
-  expressions.
+See the
+\href{http://rstudio.github.com/shiny/tutorial/}{Shiny
+tutorial} for more information about reactive expressions.
 }
 \examples{
 values <- reactiveValues(A=1)

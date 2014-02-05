@@ -2,7 +2,7 @@
 \alias{verticalLayout}
 \title{Layout UI elements vertically}
 \usage{
-  verticalLayout(..., fluid = TRUE)
+verticalLayout(..., fluid = TRUE)
 }
 \arguments{
   \item{...}{Elements to include within the container}
@@ -11,9 +11,9 @@
   \code{FALSE} to use fixed layout.}
 }
 \description{
-  Create a container that includes one or more rows of
-  content (each element passed to the container will appear
-  on it's own line in the UI)
+Create a container that includes one or more rows of
+content (each element passed to the container will appear
+on it's own line in the UI)
 }
 \examples{
 shinyUI(fluidPage(
@@ -25,6 +25,6 @@ shinyUI(fluidPage(
 ))
 }
 \seealso{
-  \code{\link{fluidPage}}
+\code{\link{fluidPage}}
 }
 

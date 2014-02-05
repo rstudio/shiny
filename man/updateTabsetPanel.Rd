@@ -2,7 +2,7 @@
 \alias{updateTabsetPanel}
 \title{Change the selected tab on the client}
 \usage{
-  updateTabsetPanel(session, inputId, selected = NULL)
+updateTabsetPanel(session, inputId, selected = NULL)
 }
 \arguments{
   \item{session}{The \code{session} object passed to
@@ -14,7 +14,7 @@
   \item{selected}{The name of the tab to make active.}
 }
 \description{
-  Change the selected tab on the client
+Change the selected tab on the client
 }
 \examples{
 \dontrun{
@@ -36,7 +36,7 @@ shinyServer(function(input, output, session) {
 }
 }
 \seealso{
-  \code{\link{tabsetPanel}}, \code{\link{navlistPanel}},
-  \code{\link{navbarPage}}
+\code{\link{tabsetPanel}}, \code{\link{navlistPanel}},
+\code{\link{navbarPage}}
 }
 

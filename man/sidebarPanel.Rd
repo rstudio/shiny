@@ -2,7 +2,7 @@
 \alias{sidebarPanel}
 \title{Create a sidebar panel}
 \usage{
-  sidebarPanel(..., width = 4)
+sidebarPanel(..., width = 4)
 }
 \arguments{
   \item{...}{UI elements to include on the sidebar}
@@ -13,12 +13,11 @@
   is.}
 }
 \value{
-  A sidebar that can be passed to
-  \code{\link{sidebarLayout}}
+A sidebar that can be passed to \code{\link{sidebarLayout}}
 }
 \description{
-  Create a sidebar panel containing input controls that can
-  in turn be passed to \code{\link{sidebarLayout}}.
+Create a sidebar panel containing input controls that can
+in turn be passed to \code{\link{sidebarLayout}}.
 }
 \examples{
 # Sidebar with controls to select a dataset and specify

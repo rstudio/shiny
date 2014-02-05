@@ -2,8 +2,7 @@
 \alias{numericInput}
 \title{Create a numeric input control}
 \usage{
-  numericInput(inputId, label, value, min = NA, max = NA,
-    step = NA)
+numericInput(inputId, label, value, min = NA, max = NA, step = NA)
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -21,25 +20,25 @@
   max}
 }
 \value{
-  A numeric input control that can be added to a UI
-  definition.
+A numeric input control that can be added to a UI
+definition.
 }
 \description{
-  Create an input control for entry of numeric values
+Create an input control for entry of numeric values
 }
 \examples{
 numericInput("obs", "Observations:", 10,
              min = 1, max = 100)
 }
 \seealso{
-  \code{\link{updateNumericInput}}
+\code{\link{updateNumericInput}}
 
-  Other input.elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textInput}}
+Other input.elements: \code{\link{actionButton}};
+\code{\link{animationOptions}}, \code{\link{sliderInput}};
+\code{\link{checkboxGroupInput}};
+\code{\link{checkboxInput}}; \code{\link{dateInput}};
+\code{\link{dateRangeInput}}; \code{\link{fileInput}};
+\code{\link{radioButtons}}; \code{\link{selectInput}};
+\code{\link{submitButton}}; \code{\link{textInput}}
 }
 

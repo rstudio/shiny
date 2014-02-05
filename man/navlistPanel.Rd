@@ -2,8 +2,8 @@
 \alias{navlistPanel}
 \title{Create a navigation list panel}
 \usage{
-  navlistPanel(..., id = NULL, selected = NULL,
-    well = TRUE, fluid = TRUE, widths = c(4, 8))
+navlistPanel(..., id = NULL, selected = NULL, well = TRUE, fluid = TRUE,
+  widths = c(4, 8))
 }
 \arguments{
   \item{...}{\code{\link{tabPanel}} elements to include in
@@ -30,15 +30,15 @@
   tabset content areas respectively.}
 }
 \description{
-  Create a navigation list panel that provides a list of
-  links on the left which navigate to a set of tabPanels
-  displayed to the right.
+Create a navigation list panel that provides a list of
+links on the left which navigate to a set of tabPanels
+displayed to the right.
 }
 \details{
-  You can include headers within the \code{navlistPanel} by
-  including plain text elements in the list; you can
-  include separators by including "------" (any number of
-  dashes works).
+You can include headers within the \code{navlistPanel} by
+including plain text elements in the list; you can include
+separators by including "------" (any number of dashes
+works).
 }
 \examples{
 shinyUI(fluidPage(

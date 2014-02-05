@@ -1,48 +1,7 @@
 list(
   index = list(
-    sd_section("UI Inputs",
-      "Use for inputs in ui.R",
-      c(
-        "checkboxGroupInput",
-        "checkboxInput",
-        "dateInput",
-        "dateRangeInput",
-        "fileInput",
-        "numericInput",
-        "radioButtons",
-        "selectInput",
-        "sliderInput",
-        "animationOptions",
-        "textInput",
-        "actionButton",
-        "submitButton",
-        "updateCheckboxGroupInput",
-        "updateCheckboxInput",
-        "updateDateInput",
-        "updateDateRangeInput",
-        "updateNumericInput",
-        "updateRadioButtons",
-        "updateSelectInput",
-        "updateSliderInput",
-        "updateTabsetPanel",
-        "updateTextInput"
-      )
-    ),
-    sd_section("UI Outputs",
-      "Use for outputs in ui.R",
-      c(
-        "htmlOutput",
-        "imageOutput",
-        "plotOutput",
-        "outputOptions",
-        "tableOutput",
-        "textOutput",
-        "verbatimTextOutput",
-        "downloadButton"
-      )
-    ),
     sd_section("UI Layout",
-      "Use for layout out your app UI",
+      "Functions for laying out the user interface for your application.",
       c(
         "bootstrapPage",
         "column",
@@ -65,8 +24,48 @@ list(
         "wellPanel"
       )
     ),
+    sd_section("UI Inputs",
+      "Functions for creating user interface elements that prompt the user for input values or interaction.",
+      c(
+        "actionButton",
+        "checkboxGroupInput",
+        "checkboxInput",
+        "dateInput",
+        "dateRangeInput",
+        "fileInput",
+        "numericInput",
+        "radioButtons",
+        "selectInput",
+        "sliderInput",
+        "submitButton",
+        "textInput",
+        "updateCheckboxGroupInput",
+        "updateCheckboxInput",
+        "updateDateInput",
+        "updateDateRangeInput",
+        "updateNumericInput",
+        "updateRadioButtons",
+        "updateSelectInput",
+        "updateSliderInput",
+        "updateTabsetPanel",
+        "updateTextInput"
+      )
+    ),
+    sd_section("UI Outputs",
+      "Functions for creating user interface elements that, in conjunction with rendering functions, display different kinds of output from your application.",
+      c(
+        "htmlOutput",
+        "imageOutput",
+        "plotOutput",
+        "outputOptions",
+        "tableOutput",
+        "textOutput",
+        "verbatimTextOutput",
+        "downloadButton"
+      )
+    ),
     sd_section("Interface builder functions",
-      "Functions for building up HTML",
+      "A sub-library for writing HTML using R functions. These functions form the foundation on which the higher level user interface functions are built, and can also be used in your Shiny UI to provide custom HTML, CSS, and JavaScript.",
       c(
         "builder",
         "HTML",
@@ -78,7 +77,7 @@ list(
       )
     ),
     sd_section("Rendering functions",
-      "These functions are used for rendering... obviously.",
+      "Functions that you use in your application's server side code, assigning them to outputs that appear in your user interface.",
       c(
         "renderPlot", 
         "renderText", 
@@ -96,7 +95,7 @@ list(
       )
     ),
     sd_section("Reactive constructs",
-      "Reactive programming support",
+      "A sub-library that provides reactive programming facilities for R.",
       c(
         "invalidateLater",
         "is.reactivevalues",
@@ -113,14 +112,14 @@ list(
       )
     ),
     sd_section("Boilerplate",
-      "Functions for declaring UI and server",
+      "Functions that are required boilerplate in ui.R and server.R.",
       c(
         "shinyUI",
         "shinyServer"
       )
     ),
     sd_section("Running",
-      "Launch Shiny apps",
+      "Functions that are used to run or stop Shiny applications.",
       c(
         "runApp",
         "runExample",
@@ -131,7 +130,7 @@ list(
       )
     ),
     sd_section("Extending Shiny",
-      "Build your own extensions",
+      "Functions that are intended to be called by third-party packages that extend Shiny.",
       c(
         "addResourcePath",
         "registerInputHandler",
@@ -139,7 +138,7 @@ list(
       )
     ),
     sd_section("Utility functions",
-      "Miscellaneous utilities",
+      "Miscellaneous utilities that may be useful to advanced users or when extending Shiny.",
       c(
         "exprToFunction",
         "installExprFunction",

@@ -887,7 +887,7 @@ actionButton <- function(inputId, label, icon = NULL) {
 #'   according to some simple heuristics.
 #' @param animate \code{TRUE} to show simple animation controls with default 
 #'   settings; \code{FALSE} not to; or a custom settings list, such as those 
-#'   created using \code{\link{animationOptions}}.
+#'   created using \code{animationOptions}.
 #'
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}

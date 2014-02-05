@@ -2,8 +2,8 @@
 \alias{shinyDeprecated}
 \title{Print message for deprecated functions in Shiny}
 \usage{
-  shinyDeprecated(new = NULL, msg = NULL,
-    old = as.character(sys.call(sys.parent()))[1L])
+shinyDeprecated(new = NULL, msg = NULL,
+  old = as.character(sys.call(sys.parent()))[1L])
 }
 \arguments{
   \item{new}{Name of replacement function.}
@@ -14,7 +14,7 @@
   \item{old}{Name of deprecated function.}
 }
 \description{
-  To disable these messages, use
-  \code{options(shiny.deprecation.messages=FALSE)}.
+To disable these messages, use
+\code{options(shiny.deprecation.messages=FALSE)}.
 }
 

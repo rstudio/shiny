@@ -2,7 +2,7 @@
 \alias{textInput}
 \title{Create a text input control}
 \usage{
-  textInput(inputId, label, value = "")
+textInput(inputId, label, value = "")
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -13,25 +13,24 @@
   \item{value}{Initial value}
 }
 \value{
-  A text input control that can be added to a UI
-  definition.
+A text input control that can be added to a UI definition.
 }
 \description{
-  Create an input control for entry of unstructured text
-  values
+Create an input control for entry of unstructured text
+values
 }
 \examples{
 textInput("caption", "Caption:", "Data Summary")
 }
 \seealso{
-  \code{\link{updateTextInput}}
+\code{\link{updateTextInput}}
 
-  Other input.elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}
+Other input.elements: \code{\link{actionButton}};
+\code{\link{animationOptions}}, \code{\link{sliderInput}};
+\code{\link{checkboxGroupInput}};
+\code{\link{checkboxInput}}; \code{\link{dateInput}};
+\code{\link{dateRangeInput}}; \code{\link{fileInput}};
+\code{\link{numericInput}}; \code{\link{radioButtons}};
+\code{\link{selectInput}}; \code{\link{submitButton}}
 }
 

@@ -2,7 +2,7 @@
 \alias{reactiveTable}
 \title{Table output (deprecated)}
 \usage{
-  reactiveTable(func, ...)
+reactiveTable(func, ...)
 }
 \arguments{
   \item{func}{A function.}
@@ -10,6 +10,6 @@
   \item{...}{Other arguments to pass on.}
 }
 \description{
-  See \code{\link{renderTable}}.
+See \code{\link{renderTable}}.
 }
 

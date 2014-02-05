@@ -2,9 +2,8 @@
 \alias{renderPlot}
 \title{Plot Output}
 \usage{
-  renderPlot(expr, width = "auto", height = "auto",
-    res = 72, ..., env = parent.frame(), quoted = FALSE,
-    func = NULL)
+renderPlot(expr, width = "auto", height = "auto", res = 72, ...,
+  env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
   \item{expr}{An expression that generates a plot.}
@@ -43,16 +42,16 @@
   use \code{expr} instead).}
 }
 \description{
-  Renders a reactive plot that is suitable for assigning to
-  an \code{output} slot.
+Renders a reactive plot that is suitable for assigning to
+an \code{output} slot.
 }
 \details{
-  The corresponding HTML output tag should be \code{div} or
-  \code{img} and have the CSS class name
-  \code{shiny-plot-output}.
+The corresponding HTML output tag should be \code{div} or
+\code{img} and have the CSS class name
+\code{shiny-plot-output}.
 }
 \seealso{
-  For more details on how the plots are generated, and how
-  to control the output, see \code{\link{plotPNG}}.
+For more details on how the plots are generated, and how to
+control the output, see \code{\link{plotPNG}}.
 }
 

@@ -2,7 +2,7 @@
 \alias{titlePanel}
 \title{Create a panel containing an application title.}
 \usage{
-  titlePanel(title, windowTitle = title)
+titlePanel(title, windowTitle = title)
 }
 \arguments{
   \item{title}{An application title to display}
@@ -11,13 +11,13 @@
   the browser window.}
 }
 \description{
-  Create a panel containing an application title.
+Create a panel containing an application title.
 }
 \details{
-  Calling this function has the side effect of including a
-  \code{title} tag within the head. You can also specify a
-  page title explicitly using the `title` parameter of the
-  top-level page function.
+Calling this function has the side effect of including a
+\code{title} tag within the head. You can also specify a
+page title explicitly using the `title` parameter of the
+top-level page function.
 }
 \examples{
 titlePanel("Hello Shiny!")

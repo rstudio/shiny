@@ -2,9 +2,9 @@
 \alias{runGitHub}
 \title{Run a Shiny application from a GitHub repository}
 \usage{
-  runGitHub(repo, username = getOption("github.user"),
-    ref = "master", subdir = NULL, port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()))
+runGitHub(repo, username = getOption("github.user"), ref = "master",
+  subdir = NULL, port = NULL,
+  launch.browser = getOption("shiny.launch.browser", interactive()))
 }
 \arguments{
   \item{repo}{Name of the repository}
@@ -27,8 +27,8 @@
   started. Defaults to true in interactive sessions only.}
 }
 \description{
-  Download and launch a Shiny application that is hosted in
-  a GitHub repository.
+Download and launch a Shiny application that is hosted in a
+GitHub repository.
 }
 \examples{
 \dontrun{

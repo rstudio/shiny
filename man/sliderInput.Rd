@@ -1,10 +1,13 @@
 \name{sliderInput}
+\alias{animationOptions}
 \alias{sliderInput}
 \title{Slider Input Widget}
 \usage{
-  sliderInput(inputId, label, min, max, value, step = NULL,
-    round = FALSE, format = "#,##0.#####", locale = "us",
-    ticks = TRUE, animate = FALSE)
+sliderInput(inputId, label, min, max, value, step = NULL, round = FALSE,
+  format = "#,##0.#####", locale = "us", ticks = TRUE, animate = FALSE)
+
+animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
+  pauseButton = NULL)
 }
 \arguments{
   \item{inputId}{Specifies the \code{input} slot that will
@@ -50,35 +53,50 @@
   \item{animate}{\code{TRUE} to show simple animation
   controls with default settings; \code{FALSE} not to; or a
   custom settings list, such as those created using
-  \code{\link{animationOptions}}.}
+  \code{animationOptions}.}
+
+  \item{interval}{The interval, in milliseconds, between
+  each animation step.}
+
+  \item{loop}{\code{TRUE} to automatically restart the
+  animation when it reaches the end.}
+
+  \item{playButton}{Specifies the appearance of the play
+  button. Valid values are a one-element character vector
+  (for a simple text label), an HTML tag or list of tags
+  (using \code{\link{tag}} and friends), or raw HTML (using
+  \code{\link{HTML}}).}
+
+  \item{pauseButton}{Similar to \code{playButton}, but for
+  the pause button.}
 }
 \description{
-  Constructs a slider widget to select a numeric value from
-  a range.
+Constructs a slider widget to select a numeric value from a
+range.
 }
 \details{
-  Valid values for \code{locale} are: \tabular{ll}{ Arab
-  Emirates \tab "ae" \cr Australia \tab "au" \cr Austria
-  \tab "at" \cr Brazil \tab "br" \cr Canada \tab "ca" \cr
-  China \tab "cn" \cr Czech \tab "cz" \cr Denmark \tab "dk"
-  \cr Egypt \tab "eg" \cr Finland \tab "fi" \cr France \tab
-  "fr" \cr Germany \tab "de" \cr Greece \tab "gr" \cr Great
-  Britain \tab "gb" \cr Hong Kong \tab "hk" \cr India \tab
-  "in" \cr Israel \tab "il" \cr Japan \tab "jp" \cr Russia
-  \tab "ru" \cr South Korea \tab "kr" \cr Spain \tab "es"
-  \cr Sweden \tab "se" \cr Switzerland \tab "ch" \cr Taiwan
-  \tab "tw" \cr Thailand \tab "th" \cr United States \tab
-  "us" \cr Vietnam \tab "vn" \cr }
+Valid values for \code{locale} are: \tabular{ll}{ Arab
+Emirates \tab "ae" \cr Australia \tab "au" \cr Austria \tab
+"at" \cr Brazil \tab "br" \cr Canada \tab "ca" \cr China
+\tab "cn" \cr Czech \tab "cz" \cr Denmark \tab "dk" \cr
+Egypt \tab "eg" \cr Finland \tab "fi" \cr France \tab "fr"
+\cr Germany \tab "de" \cr Greece \tab "gr" \cr Great
+Britain \tab "gb" \cr Hong Kong \tab "hk" \cr India \tab
+"in" \cr Israel \tab "il" \cr Japan \tab "jp" \cr Russia
+\tab "ru" \cr South Korea \tab "kr" \cr Spain \tab "es" \cr
+Sweden \tab "se" \cr Switzerland \tab "ch" \cr Taiwan \tab
+"tw" \cr Thailand \tab "th" \cr United States \tab "us" \cr
+Vietnam \tab "vn" \cr }
 }
 \seealso{
-  \code{\link{updateSliderInput}}
+\code{\link{updateSliderInput}}
 
-  Other input.elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}}, \code{\link{dateInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{submitButton}},
-  \code{\link{textInput}}
+Other input.elements: \code{\link{actionButton}};
+\code{\link{checkboxGroupInput}};
+\code{\link{checkboxInput}}; \code{\link{dateInput}};
+\code{\link{dateRangeInput}}; \code{\link{fileInput}};
+\code{\link{numericInput}}; \code{\link{radioButtons}};
+\code{\link{selectInput}}; \code{\link{submitButton}};
+\code{\link{textInput}}
 }
 

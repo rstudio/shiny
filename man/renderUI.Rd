@@ -2,8 +2,7 @@
 \alias{renderUI}
 \title{UI Output}
 \usage{
-  renderUI(expr, env = parent.frame(), quoted = FALSE,
-    func = NULL)
+renderUI(expr, env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
   \item{expr}{An expression that returns a Shiny tag
@@ -21,14 +20,13 @@
   (deprecated; use \code{expr} instead).}
 }
 \description{
-  \bold{Experimental feature.} Makes a reactive version of
-  a function that generates HTML using the Shiny UI
-  library.
+\bold{Experimental feature.} Makes a reactive version of a
+function that generates HTML using the Shiny UI library.
 }
 \details{
-  The corresponding HTML output tag should be \code{div}
-  and have the CSS class name \code{shiny-html-output} (or
-  use \code{\link{uiOutput}}).
+The corresponding HTML output tag should be \code{div} and
+have the CSS class name \code{shiny-html-output} (or use
+\code{\link{uiOutput}}).
 }
 \examples{
 \dontrun{
@@ -40,6 +38,6 @@
 }
 }
 \seealso{
-  conditionalPanel
+conditionalPanel
 }
 

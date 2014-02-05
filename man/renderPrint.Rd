@@ -2,8 +2,7 @@
 \alias{renderPrint}
 \title{Printable Output}
 \usage{
-  renderPrint(expr, env = parent.frame(), quoted = FALSE,
-    func = NULL)
+renderPrint(expr, env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
   \item{expr}{An expression that may print output and/or
@@ -20,26 +19,25 @@
   instead).}
 }
 \description{
-  Makes a reactive version of the given function that
-  captures any printed output, and also captures its
-  printable result (unless \code{\link{invisible}}), into a
-  string. The resulting function is suitable for assigning
-  to an \code{output} slot.
+Makes a reactive version of the given function that
+captures any printed output, and also captures its
+printable result (unless \code{\link{invisible}}), into a
+string. The resulting function is suitable for assigning to
+an \code{output} slot.
 }
 \details{
-  The corresponding HTML output tag can be anything (though
-  \code{pre} is recommended if you need a monospace font
-  and whitespace preserved) and should have the CSS class
-  name \code{shiny-text-output}.
+The corresponding HTML output tag can be anything (though
+\code{pre} is recommended if you need a monospace font and
+whitespace preserved) and should have the CSS class name
+\code{shiny-text-output}.
 
-  The result of executing \code{func} will be printed
-  inside a \code{\link[utils]{capture.output}} call.
+The result of executing \code{func} will be printed inside
+a \code{\link[utils]{capture.output}} call.
 
-  Note that unlike most other Shiny output functions, if
-  the given function returns \code{NULL} then \code{NULL}
-  will actually be visible in the output. To display
-  nothing, make your function return
-  \code{\link{invisible}()}.
+Note that unlike most other Shiny output functions, if the
+given function returns \code{NULL} then \code{NULL} will
+actually be visible in the output. To display nothing, make
+your function return \code{\link{invisible}()}.
 }
 \examples{
 isolate({
@@ -106,7 +104,7 @@ vecFun()
 })
 }
 \seealso{
-  \code{\link{renderText}} for displaying the value
-  returned from a function, instead of the printed output.
+\code{\link{renderText}} for displaying the value returned
+from a function, instead of the printed output.
 }
 

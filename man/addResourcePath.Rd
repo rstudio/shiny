@@ -2,7 +2,7 @@
 \alias{addResourcePath}
 \title{Resource Publishing}
 \usage{
-  addResourcePath(prefix, directoryPath)
+addResourcePath(prefix, directoryPath)
 }
 \arguments{
   \item{prefix}{The URL prefix (without slashes). Valid
@@ -15,22 +15,22 @@
   static resources to be served.}
 }
 \description{
-  Adds a directory of static resources to Shiny's web
-  server, with the given path prefix. Primarily intended
-  for package authors to make supporting JavaScript/CSS
-  files available to their components.
+Adds a directory of static resources to Shiny's web server,
+with the given path prefix. Primarily intended for package
+authors to make supporting JavaScript/CSS files available
+to their components.
 }
 \details{
-  You can call \code{addResourcePath} multiple times for a
-  given \code{prefix}; only the most recent value will be
-  retained. If the normalized \code{directoryPath} is
-  different than the directory that's currently mapped to
-  the \code{prefix}, a warning will be issued.
+You can call \code{addResourcePath} multiple times for a
+given \code{prefix}; only the most recent value will be
+retained. If the normalized \code{directoryPath} is
+different than the directory that's currently mapped to the
+\code{prefix}, a warning will be issued.
 }
 \examples{
 addResourcePath('datasets', system.file('data', package='datasets'))
 }
 \seealso{
-  \code{\link{singleton}}
+\code{\link{singleton}}
 }
 

@@ -3,10 +3,9 @@
 \alias{bootstrapPage}
 \title{Create a Bootstrap page}
 \usage{
-  bootstrapPage(..., title = NULL, responsive = TRUE,
-    theme = NULL)
+bootstrapPage(..., title = NULL, responsive = TRUE, theme = NULL)
 
-  basicPage(...)
+basicPage(...)
 }
 \arguments{
   \item{...}{The contents of the document body.}
@@ -23,27 +22,27 @@
   \code{www/bootstrap.css})}
 }
 \value{
-  A UI defintion that can be passed to the \link{shinyUI}
-  function.
+A UI defintion that can be passed to the \link{shinyUI}
+function.
 }
 \description{
-  Create a Shiny UI page that loads the CSS and JavaScript
-  for \href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and
-  has no content in the page body (other than what you
-  provide).
+Create a Shiny UI page that loads the CSS and JavaScript
+for \href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and
+has no content in the page body (other than what you
+provide).
 }
 \details{
-  This function is primarily intended for users who are
-  proficient in HTML/CSS, and know how to lay out pages in
-  Bootstrap. Most applications should use
-  \code{\link{fluidPage}} along with layout functions like
-  \code{\link{fluidRow}} and \code{\link{sidebarLayout}}.
+This function is primarily intended for users who are
+proficient in HTML/CSS, and know how to lay out pages in
+Bootstrap. Most applications should use
+\code{\link{fluidPage}} along with layout functions like
+\code{\link{fluidRow}} and \code{\link{sidebarLayout}}.
 }
 \note{
-  The \code{basicPage} function is deprecated, you should
-  use the \code{\link{fluidPage}} function instead.
+The \code{basicPage} function is deprecated, you should use
+the \code{\link{fluidPage}} function instead.
 }
 \seealso{
-  \code{\link{fluidPage}}, \code{\link{fixedPage}}
+\code{\link{fluidPage}}, \code{\link{fixedPage}}
 }
 

@@ -2,8 +2,7 @@
 \alias{reactivePoll}
 \title{Reactive polling}
 \usage{
-  reactivePoll(intervalMillis, session, checkFunc,
-    valueFunc)
+reactivePoll(intervalMillis, session, checkFunc, valueFunc)
 }
 \arguments{
   \item{intervalMillis}{Approximate number of milliseconds
@@ -25,44 +24,44 @@
   underlying value. See Details.}
 }
 \value{
-  A reactive expression that returns the result of
-  \code{valueFunc}, and invalidates when \code{checkFunc}
-  changes.
+A reactive expression that returns the result of
+\code{valueFunc}, and invalidates when \code{checkFunc}
+changes.
 }
 \description{
-  Used to create a reactive data source, which works by
-  periodically polling a non-reactive data source.
+Used to create a reactive data source, which works by
+periodically polling a non-reactive data source.
 }
 \details{
-  \code{reactivePoll} works by pairing a relatively cheap
-  "check" function with a more expensive value retrieval
-  function. The check function will be executed
-  periodically and should always return a consistent value
-  until the data changes. When the check function returns a
-  different value, then the value retrieval function will
-  be used to re-populate the data.
+\code{reactivePoll} works by pairing a relatively cheap
+"check" function with a more expensive value retrieval
+function. The check function will be executed periodically
+and should always return a consistent value until the data
+changes. When the check function returns a different value,
+then the value retrieval function will be used to
+re-populate the data.
 
-  Note that the check function doesn't return \code{TRUE}
-  or \code{FALSE} to indicate whether the underlying data
-  has changed. Rather, the check function indicates change
-  by returning a different value from the previous time it
-  was called.
+Note that the check function doesn't return \code{TRUE} or
+\code{FALSE} to indicate whether the underlying data has
+changed. Rather, the check function indicates change by
+returning a different value from the previous time it was
+called.
 
-  For example, \code{reactivePoll} is used to implement
-  \code{reactiveFileReader} by pairing a check function
-  that simply returns the last modified timestamp of a
-  file, and a value retrieval function that actually reads
-  the contents of the file.
+For example, \code{reactivePoll} is used to implement
+\code{reactiveFileReader} by pairing a check function that
+simply returns the last modified timestamp of a file, and a
+value retrieval function that actually reads the contents
+of the file.
 
-  As another example, one might read a relational database
-  table reactively by using a check function that does
-  \code{SELECT MAX(timestamp) FROM table} and a value
-  retrieval function that does \code{SELECT * FROM table}.
+As another example, one might read a relational database
+table reactively by using a check function that does
+\code{SELECT MAX(timestamp) FROM table} and a value
+retrieval function that does \code{SELECT * FROM table}.
 
-  The \code{intervalMillis}, \code{checkFunc}, and
-  \code{valueFunc} functions will be executed in a reactive
-  context; therefore, they may read reactive values and
-  reactive expressions.
+The \code{intervalMillis}, \code{checkFunc}, and
+\code{valueFunc} functions will be executed in a reactive
+context; therefore, they may read reactive values and
+reactive expressions.
 }
 \examples{
 \dontrun{
@@ -76,6 +75,6 @@ shinyServer(function(input, output, session) {
 }
 }
 \seealso{
-  \code{\link{reactiveFileReader}}
+\code{\link{reactiveFileReader}}
 }
 

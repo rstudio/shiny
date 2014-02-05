@@ -2,8 +2,7 @@
 \alias{renderImage}
 \title{Image file output}
 \usage{
-  renderImage(expr, env = parent.frame(), quoted = FALSE,
-    deleteFile = TRUE)
+renderImage(expr, env = parent.frame(), quoted = FALSE, deleteFile = TRUE)
 }
 \arguments{
   \item{expr}{An expression that returns a list.}
@@ -22,27 +21,27 @@
   image is not a temp file, this should be \code{FALSE}.}
 }
 \description{
-  Renders a reactive image that is suitable for assigning
-  to an \code{output} slot.
+Renders a reactive image that is suitable for assigning to
+an \code{output} slot.
 }
 \details{
-  The expression \code{expr} must return a list containing
-  the attributes for the \code{img} object on the client
-  web page. For the image to display, properly, the list
-  must have at least one entry, \code{src}, which is the
-  path to the image file. It may also useful to have a
-  \code{contentType} entry specifying the MIME type of the
-  image. If one is not provided, \code{renderImage} will
-  try to autodetect the type, based on the file extension.
+The expression \code{expr} must return a list containing
+the attributes for the \code{img} object on the client web
+page. For the image to display, properly, the list must
+have at least one entry, \code{src}, which is the path to
+the image file. It may also useful to have a
+\code{contentType} entry specifying the MIME type of the
+image. If one is not provided, \code{renderImage} will try
+to autodetect the type, based on the file extension.
 
-  Other elements such as \code{width}, \code{height},
-  \code{class}, and \code{alt}, can also be added to the
-  list, and they will be used as attributes in the
-  \code{img} object.
+Other elements such as \code{width}, \code{height},
+\code{class}, and \code{alt}, can also be added to the
+list, and they will be used as attributes in the \code{img}
+object.
 
-  The corresponding HTML output tag should be \code{div} or
-  \code{img} and have the CSS class name
-  \code{shiny-image-output}.
+The corresponding HTML output tag should be \code{div} or
+\code{img} and have the CSS class name
+\code{shiny-image-output}.
 }
 \examples{
 \dontrun{
@@ -100,7 +99,7 @@ shinyServer(function(input, output, clientData) {
 }
 }
 \seealso{
-  For more details on how the images are generated, and how
-  to control the output, see \code{\link{plotPNG}}.
+For more details on how the images are generated, and how
+to control the output, see \code{\link{plotPNG}}.
 }
 

@@ -2,9 +2,9 @@
 \alias{runExample}
 \title{Run Shiny Example Applications}
 \usage{
-  runExample(example = NA, port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()),
-    host = getOption("shiny.host", "127.0.0.1"))
+runExample(example = NA, port = NULL,
+  launch.browser = getOption("shiny.launch.browser", interactive()),
+  host = getOption("shiny.host", "127.0.0.1"))
 }
 \arguments{
   \item{example}{The name of the example to run, or
@@ -22,8 +22,8 @@
   set, or \code{"127.0.0.1"} if not.}
 }
 \description{
-  Launch Shiny example applications, and optionally, your
-  system's web browser.
+Launch Shiny example applications, and optionally, your
+system's web browser.
 }
 \examples{
 \dontrun{

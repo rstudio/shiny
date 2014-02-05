@@ -2,32 +2,32 @@
 \alias{shinyServer}
 \title{Define Server Functionality}
 \usage{
-  shinyServer(func)
+shinyServer(func)
 }
 \arguments{
   \item{func}{The server function for this application. See
   the details section for more information.}
 }
 \description{
-  Defines the server-side logic of the Shiny application.
-  This generally involves creating functions that map user
-  inputs to various kinds of output.
+Defines the server-side logic of the Shiny application.
+This generally involves creating functions that map user
+inputs to various kinds of output.
 }
 \details{
-  Call \code{shinyServer} from your application's
-  \code{server.R} file, passing in a "server function" that
-  provides the server-side logic of your application.
+Call \code{shinyServer} from your application's
+\code{server.R} file, passing in a "server function" that
+provides the server-side logic of your application.
 
-  The server function will be called when each client (web
-  browser) first loads the Shiny application's page. It
-  must take an \code{input} and an \code{output} parameter.
-  Any return value will be ignored. It also takes an
-  optional \code{session} parameter, which is used when
-  greater control is needed.
+The server function will be called when each client (web
+browser) first loads the Shiny application's page. It must
+take an \code{input} and an \code{output} parameter. Any
+return value will be ignored. It also takes an optional
+\code{session} parameter, which is used when greater
+control is needed.
 
-  See the
-  \href{http://rstudio.github.com/shiny/tutorial/}{tutorial}
-  for more on how to write a server function.
+See the
+\href{http://rstudio.github.com/shiny/tutorial/}{tutorial}
+for more on how to write a server function.
 }
 \examples{
 \dontrun{

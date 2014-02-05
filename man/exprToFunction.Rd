@@ -2,8 +2,8 @@
 \alias{exprToFunction}
 \title{Convert an expression or quoted expression to a function}
 \usage{
-  exprToFunction(expr, env = parent.frame(2),
-    quoted = FALSE, caller_offset = 1)
+exprToFunction(expr, env = parent.frame(2), quoted = FALSE,
+  caller_offset = 1)
 }
 \arguments{
   \item{expr}{A quoted or unquoted expression, or a
@@ -18,17 +18,16 @@
   callstack of the functiont to be treated as the caller.}
 }
 \description{
-  This is to be called from another function, because it
-  will attempt to get an unquoted expression from two calls
-  back.
+This is to be called from another function, because it will
+attempt to get an unquoted expression from two calls back.
 }
 \details{
-  If expr is a quoted expression, then this just converts
-  it to a function. If expr is a function, then this simply
-  returns expr (and prints a deprecation message). If expr
-  was a non-quoted expression from two calls back, then
-  this will quote the original expression and convert it to
-  a function.
+If expr is a quoted expression, then this just converts it
+to a function. If expr is a function, then this simply
+returns expr (and prints a deprecation message). If expr
+was a non-quoted expression from two calls back, then this
+will quote the original expression and convert it to a
+function.
 }
 \examples{
 # Example of a new renderer, similar to renderText

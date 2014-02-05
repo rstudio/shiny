@@ -2,7 +2,7 @@
 \alias{tabPanel}
 \title{Create a tab panel}
 \usage{
-  tabPanel(title, ..., value = NULL, icon = NULL)
+tabPanel(title, ..., value = NULL, icon = NULL)
 }
 \arguments{
   \item{title}{Display title for tab}
@@ -19,11 +19,11 @@
   within a \code{\link{navbarPage}}.}
 }
 \value{
-  A tab that can be passed to \code{\link{tabsetPanel}}
+A tab that can be passed to \code{\link{tabsetPanel}}
 }
 \description{
-  Create a tab panel that can be included within a
-  \code{\link{tabsetPanel}}.
+Create a tab panel that can be included within a
+\code{\link{tabsetPanel}}.
 }
 \examples{
 # Show a tabset that includes a plot, summary, and
@@ -37,6 +37,6 @@ mainPanel(
 )
 }
 \seealso{
-  \code{\link{tabsetPanel}}
+\code{\link{tabsetPanel}}
 }
 

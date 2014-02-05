@@ -3,11 +3,11 @@
 \alias{navbarPage}
 \title{Create a page with a top level navigation bar}
 \usage{
-  navbarPage(title, ..., id = NULL, header = NULL,
-    footer = NULL, inverse = FALSE, collapsable = FALSE,
-    fluid = TRUE, responsive = TRUE, theme = NULL)
+navbarPage(title, ..., id = NULL, header = NULL, footer = NULL,
+  inverse = FALSE, collapsable = FALSE, fluid = TRUE, responsive = TRUE,
+  theme = NULL)
 
-  navbarMenu(title, ..., icon = NULL)
+navbarMenu(title, ..., icon = NULL)
 }
 \arguments{
   \item{title}{The title to display in the navbar}
@@ -51,18 +51,18 @@
   \code{navbarMenu} tab.}
 }
 \value{
-  A UI defintion that can be passed to the \link{shinyUI}
-  function.
+A UI defintion that can be passed to the \link{shinyUI}
+function.
 }
 \description{
-  Create a page that contains a top level navigation bar
-  that can be used to toggle a set of
-  \code{\link{tabPanel}} elements.
+Create a page that contains a top level navigation bar that
+can be used to toggle a set of \code{\link{tabPanel}}
+elements.
 }
 \details{
-  The \code{navbarMenu} function can be used to create an
-  embedded menu within the navbar that in turns includes
-  additional tabPanels (see example below).
+The \code{navbarMenu} function can be used to create an
+embedded menu within the navbar that in turns includes
+additional tabPanels (see example below).
 }
 \examples{
 shinyUI(navbarPage("App Title",
@@ -80,6 +80,6 @@ shinyUI(navbarPage("App Title",
 ))
 }
 \seealso{
-  \code{\link{tabPanel}}, \code{\link{tabsetPanel}}
+\code{\link{tabPanel}}, \code{\link{tabsetPanel}}
 }
 

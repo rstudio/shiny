@@ -2,7 +2,7 @@
 \alias{checkboxInput}
 \title{Checkbox Input Control}
 \usage{
-  checkboxInput(inputId, label, value = FALSE)
+checkboxInput(inputId, label, value = FALSE)
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -14,25 +14,25 @@
   \code{FALSE}).}
 }
 \value{
-  A checkbox control that can be added to a UI definition.
+A checkbox control that can be added to a UI definition.
 }
 \description{
-  Create a checkbox that can be used to specify logical
-  values.
+Create a checkbox that can be used to specify logical
+values.
 }
 \examples{
 checkboxInput("outliers", "Show outliers", FALSE)
 }
 \seealso{
-  \code{\link{checkboxGroupInput}},
-  \code{\link{updateCheckboxInput}}
+\code{\link{checkboxGroupInput}},
+\code{\link{updateCheckboxInput}}
 
-  Other input.elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{dateInput}}, \code{\link{dateRangeInput}},
-  \code{\link{fileInput}}, \code{\link{numericInput}},
-  \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textInput}}
+Other input.elements: \code{\link{actionButton}};
+\code{\link{animationOptions}}, \code{\link{sliderInput}};
+\code{\link{checkboxGroupInput}}; \code{\link{dateInput}};
+\code{\link{dateRangeInput}}; \code{\link{fileInput}};
+\code{\link{numericInput}}; \code{\link{radioButtons}};
+\code{\link{selectInput}}; \code{\link{submitButton}};
+\code{\link{textInput}}
 }
 

@@ -2,7 +2,7 @@
 \alias{reactivePlot}
 \title{Plot output (deprecated)}
 \usage{
-  reactivePlot(func, width = "auto", height = "auto", ...)
+reactivePlot(func, width = "auto", height = "auto", ...)
 }
 \arguments{
   \item{func}{A function.}
@@ -14,6 +14,6 @@
   \item{...}{Other arguments to pass on.}
 }
 \description{
-  See \code{\link{renderPlot}}.
+See \code{\link{renderPlot}}.
 }
 

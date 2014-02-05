@@ -2,7 +2,7 @@
 \alias{conditionalPanel}
 \title{Conditional Panel}
 \usage{
-  conditionalPanel(condition, ...)
+conditionalPanel(condition, ...)
 }
 \arguments{
   \item{condition}{A JavaScript expression that will be
@@ -12,19 +12,19 @@
   \item{...}{Elements to include in the panel.}
 }
 \description{
-  Creates a panel that is visible or not, depending on the
-  value of a JavaScript expression. The JS expression is
-  evaluated once at startup and whenever Shiny detects a
-  relevant change in input/output.
+Creates a panel that is visible or not, depending on the
+value of a JavaScript expression. The JS expression is
+evaluated once at startup and whenever Shiny detects a
+relevant change in input/output.
 }
 \details{
-  In the JS expression, you can refer to \code{input} and
-  \code{output} JavaScript objects that contain the current
-  values of input and output. For example, if you have an
-  input with an id of \code{foo}, then you can use
-  \code{input.foo} to read its value. (Be sure not to
-  modify the input/output objects, as this may cause
-  unpredictable behavior.)
+In the JS expression, you can refer to \code{input} and
+\code{output} JavaScript objects that contain the current
+values of input and output. For example, if you have an
+input with an id of \code{foo}, then you can use
+\code{input.foo} to read its value. (Be sure not to modify
+the input/output objects, as this may cause unpredictable
+behavior.)
 }
 \examples{
 sidebarPanel(

@@ -2,7 +2,7 @@
 \alias{reactiveValues}
 \title{Create an object for storing reactive values}
 \usage{
-  reactiveValues(...)
+reactiveValues(...)
 }
 \arguments{
   \item{...}{Objects that will be added to the
@@ -10,13 +10,13 @@
   named.}
 }
 \description{
-  This function returns an object for storing reactive
-  values. It is similar to a list, but with special
-  capabilities for reactive programming. When you read a
-  value from it, the calling reactive expression takes a
-  reactive dependency on that value, and when you write to
-  it, it notifies any reactive functions that depend on
-  that value.
+This function returns an object for storing reactive
+values. It is similar to a list, but with special
+capabilities for reactive programming. When you read a
+value from it, the calling reactive expression takes a
+reactive dependency on that value, and when you write to
+it, it notifies any reactive functions that depend on that
+value.
 }
 \examples{
 # Create the object with no values
@@ -42,7 +42,6 @@ values <- reactiveValues(a = 1, b = 2)
 isolate(values$a)
 }
 \seealso{
-  \code{\link{isolate}} and
-  \code{\link{is.reactivevalues}}.
+\code{\link{isolate}} and \code{\link{is.reactivevalues}}.
 }
 

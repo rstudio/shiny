@@ -2,7 +2,7 @@
 \alias{column}
 \title{Create a column within a UI definition}
 \usage{
-  column(width, ..., offset = 0)
+column(width, ..., offset = 0)
 }
 \arguments{
   \item{width}{The grid width of the column (must be
@@ -14,12 +14,12 @@
   from the end of the previous column.}
 }
 \value{
-  A column that can be included within a
-  \code{\link{fluidRow}} or \code{\link{fixedRow}}.
+A column that can be included within a
+\code{\link{fluidRow}} or \code{\link{fixedRow}}.
 }
 \description{
-  Create a column for use within a \code{\link{fluidRow}}
-  or \code{\link{fixedRow}}
+Create a column for use within a \code{\link{fluidRow}} or
+\code{\link{fixedRow}}
 }
 \examples{
 fluidRow(
@@ -42,6 +42,6 @@ fluidRow(
 )
 }
 \seealso{
-  \code{\link{fluidRow}}, \code{\link{fixedRow}}.
+\code{\link{fluidRow}}, \code{\link{fixedRow}}.
 }
 

@@ -2,7 +2,7 @@
 \alias{downloadHandler}
 \title{File Downloads}
 \usage{
-  downloadHandler(filename, content, contentType = NA)
+downloadHandler(filename, content, contentType = NA)
 }
 \arguments{
   \item{filename}{A string of the filename, including
@@ -26,15 +26,14 @@
   extension is unknown.}
 }
 \description{
-  Allows content from the Shiny application to be made
-  available to the user as file downloads (for example,
-  downloading the currently visible data as a CSV file).
-  Both filename and contents can be calculated dynamically
-  at the time the user initiates the download. Assign the
-  return value to a slot on \code{output} in your server
-  function, and in the UI use \code{\link{downloadButton}}
-  or \code{\link{downloadLink}} to make the download
-  available.
+Allows content from the Shiny application to be made
+available to the user as file downloads (for example,
+downloading the currently visible data as a CSV file). Both
+filename and contents can be calculated dynamically at the
+time the user initiates the download. Assign the return
+value to a slot on \code{output} in your server function,
+and in the UI use \code{\link{downloadButton}} or
+\code{\link{downloadLink}} to make the download available.
 }
 \examples{
 \dontrun{

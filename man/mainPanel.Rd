@@ -2,7 +2,7 @@
 \alias{mainPanel}
 \title{Create a main panel}
 \usage{
-  mainPanel(..., width = 8)
+mainPanel(..., width = 8)
 }
 \arguments{
   \item{...}{Output elements to include in the main panel}
@@ -13,12 +13,12 @@
   parent column is.}
 }
 \value{
-  A main panel that can be passed to
-  \code{\link{sidebarLayout}}.
+A main panel that can be passed to
+\code{\link{sidebarLayout}}.
 }
 \description{
-  Create a main panel containing output elements that can
-  in turn be passed to \code{\link{sidebarLayout}}.
+Create a main panel containing output elements that can in
+turn be passed to \code{\link{sidebarLayout}}.
 }
 \examples{
 # Show the caption and plot of the requested variable against mpg

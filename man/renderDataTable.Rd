@@ -2,8 +2,8 @@
 \alias{renderDataTable}
 \title{Table output with the JavaScript library DataTables}
 \usage{
-  renderDataTable(expr, options = NULL, searchDelay = 500,
-    env = parent.frame(), quoted = FALSE)
+renderDataTable(expr, options = NULL, searchDelay = 500,
+  env = parent.frame(), quoted = FALSE)
 }
 \arguments{
   \item{expr}{An expression that returns a data frame or a
@@ -23,13 +23,13 @@
   expression in a variable.}
 }
 \description{
-  Makes a reactive version of the given function that
-  returns a data frame (or matrix), which will be rendered
-  with the DataTables library. Paging, searching,
-  filtering, and sorting can be done on the R side using
-  Shiny as the server infrastructure.
+Makes a reactive version of the given function that returns
+a data frame (or matrix), which will be rendered with the
+DataTables library. Paging, searching, filtering, and
+sorting can be done on the R side using Shiny as the server
+infrastructure.
 }
 \references{
-  \url{http://datatables.net}
+\url{http://datatables.net}
 }
 

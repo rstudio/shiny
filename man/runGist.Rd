@@ -2,8 +2,8 @@
 \alias{runGist}
 \title{Run a Shiny application from https://gist.github.com}
 \usage{
-  runGist(gist, port = NULL,
-    launch.browser = getOption("shiny.launch.browser", interactive()))
+runGist(gist, port = NULL,
+  launch.browser = getOption("shiny.launch.browser", interactive()))
 }
 \arguments{
   \item{gist}{The identifier of the gist. For example, if
@@ -20,8 +20,8 @@
   started. Defaults to true in interactive sessions only.}
 }
 \description{
-  Download and launch a Shiny application that is hosted on
-  GitHub as a gist.
+Download and launch a Shiny application that is hosted on
+GitHub as a gist.
 }
 \examples{
 \dontrun{

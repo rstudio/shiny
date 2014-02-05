@@ -2,8 +2,7 @@
 \alias{repeatable}
 \title{Make a random number generator repeatable}
 \usage{
-  repeatable(rngfunc,
-    seed = runif(1, 0, .Machine$integer.max))
+repeatable(rngfunc, seed = runif(1, 0, .Machine$integer.max))
 }
 \arguments{
   \item{rngfunc}{The function that is affected by the R
@@ -13,19 +12,18 @@
   function is called.}
 }
 \value{
-  A repeatable version of the function that was passed in.
+A repeatable version of the function that was passed in.
 }
 \description{
-  Given a function that generates random data, returns a
-  wrapped version of that function that always uses the
-  same seed when called. The seed to use can be passed in
-  explicitly if desired; otherwise, a random number is
-  used.
+Given a function that generates random data, returns a
+wrapped version of that function that always uses the same
+seed when called. The seed to use can be passed in
+explicitly if desired; otherwise, a random number is used.
 }
 \note{
-  When called, the returned function attempts to preserve
-  the R session's current seed by snapshotting and
-  restoring \code{\link[base]{.Random.seed}}.
+When called, the returned function attempts to preserve the
+R session's current seed by snapshotting and restoring
+\code{\link[base]{.Random.seed}}.
 }
 \examples{
 rnormA <- repeatable(rnorm)

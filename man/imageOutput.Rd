@@ -2,7 +2,7 @@
 \alias{imageOutput}
 \title{Create a image output element}
 \usage{
-  imageOutput(outputId, width = "100\%", height = "400px")
+imageOutput(outputId, width = "100\%", height = "400px")
 }
 \arguments{
   \item{outputId}{output variable to read the image from}
@@ -15,10 +15,10 @@
   \item{height}{Image height}
 }
 \value{
-  An image output element that can be included in a panel
+An image output element that can be included in a panel
 }
 \description{
-  Render a \link{renderImage} within an application page.
+Render a \link{renderImage} within an application page.
 }
 \examples{
 # Show an image

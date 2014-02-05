@@ -3,10 +3,9 @@
 \alias{downloadLink}
 \title{Create a download button or link}
 \usage{
-  downloadButton(outputId, label = "Download",
-    class = NULL)
+downloadButton(outputId, label = "Download", class = NULL)
 
-  downloadLink(outputId, label = "Download", class = NULL)
+downloadLink(outputId, label = "Download", class = NULL)
 }
 \arguments{
   \item{outputId}{The name of the output slot that the
@@ -18,11 +17,11 @@
   if any.}
 }
 \description{
-  Use these functions to create a download button or link;
-  when clicked, it will initiate a browser download. The
-  filename and contents are specified by the corresponding
-  \code{\link{downloadHandler}} defined in the server
-  function.
+Use these functions to create a download button or link;
+when clicked, it will initiate a browser download. The
+filename and contents are specified by the corresponding
+\code{\link{downloadHandler}} defined in the server
+function.
 }
 \examples{
 \dontrun{
@@ -41,6 +40,6 @@ downloadLink('downloadData', 'Download')
 }
 }
 \seealso{
-  downloadHandler
+downloadHandler
 }
 

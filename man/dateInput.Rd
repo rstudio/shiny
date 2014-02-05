@@ -2,9 +2,9 @@
 \alias{dateInput}
 \title{Create date input}
 \usage{
-  dateInput(inputId, label, value = NULL, min = NULL,
-    max = NULL, format = "yyyy-mm-dd", startview = "month",
-    weekstart = 0, language = "en")
+dateInput(inputId, label, value = NULL, min = NULL, max = NULL,
+  format = "yyyy-mm-dd", startview = "month", weekstart = 0,
+  language = "en")
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -42,23 +42,23 @@
   "uk", "zh-CN", and "zh-TW".}
 }
 \description{
-  Creates a text input which, when clicked on, brings up a
-  calendar that the user can click on to select dates.
+Creates a text input which, when clicked on, brings up a
+calendar that the user can click on to select dates.
 }
 \details{
-  The date \code{format} string specifies how the date will
-  be displayed in the browser. It allows the following
-  values:
+The date \code{format} string specifies how the date will
+be displayed in the browser. It allows the following
+values:
 
-  \itemize{ \item \code{yy} Year without century (12) \item
-  \code{yyyy} Year with century (2012) \item \code{mm}
-  Month number, with leading zero (01-12) \item \code{m}
-  Month number, without leading zero (01-12) \item \code{M}
-  Abbreviated month name \item \code{MM} Full month name
-  \item \code{dd} Day of month with leading zero \item
-  \code{d} Day of month without leading zero \item \code{D}
-  Abbreviated weekday name \item \code{DD} Full weekday
-  name }
+\itemize{ \item \code{yy} Year without century (12) \item
+\code{yyyy} Year with century (2012) \item \code{mm} Month
+number, with leading zero (01-12) \item \code{m} Month
+number, without leading zero (01-12) \item \code{M}
+Abbreviated month name \item \code{MM} Full month name
+\item \code{dd} Day of month with leading zero \item
+\code{d} Day of month without leading zero \item \code{D}
+Abbreviated weekday name \item \code{DD} Full weekday name
+}
 }
 \examples{
 dateInput("date", "Date:", value = "2012-02-29")
@@ -82,15 +82,14 @@ dateInput("date", "Date:",
           startview = "decade")
 }
 \seealso{
-  \code{\link{dateRangeInput}},
-  \code{\link{updateDateInput}}
+\code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
 
-  Other input.elements: \code{\link{actionButton}},
-  \code{\link{checkboxGroupInput}},
-  \code{\link{checkboxInput}},
-  \code{\link{dateRangeInput}}, \code{\link{fileInput}},
-  \code{\link{numericInput}}, \code{\link{radioButtons}},
-  \code{\link{selectInput}}, \code{\link{sliderInput}},
-  \code{\link{submitButton}}, \code{\link{textInput}}
+Other input.elements: \code{\link{actionButton}};
+\code{\link{animationOptions}}, \code{\link{sliderInput}};
+\code{\link{checkboxGroupInput}};
+\code{\link{checkboxInput}}; \code{\link{dateRangeInput}};
+\code{\link{fileInput}}; \code{\link{numericInput}};
+\code{\link{radioButtons}}; \code{\link{selectInput}};
+\code{\link{submitButton}}; \code{\link{textInput}}
 }
 

@@ -2,8 +2,8 @@
 \alias{sidebarLayout}
 \title{Layout a sidebar and main area}
 \usage{
-  sidebarLayout(sidebarPanel, mainPanel,
-    position = c("left", "right"), fluid = TRUE)
+sidebarLayout(sidebarPanel, mainPanel, position = c("left", "right"),
+  fluid = TRUE)
 }
 \arguments{
   \item{sidebarPanel}{The \link{sidebarPanel} containing
@@ -18,11 +18,10 @@
   \code{FALSE} to use fixed layout.}
 }
 \description{
-  Create a layout with a sidebar and main area. The sidebar
-  is displayed with a distinct background color and
-  typically contains input controls. The main area occupies
-  2/3 of the horizontal width and typically contains
-  outputs.
+Create a layout with a sidebar and main area. The sidebar
+is displayed with a distinct background color and typically
+contains input controls. The main area occupies 2/3 of the
+horizontal width and typically contains outputs.
 }
 \examples{
 # Define UI

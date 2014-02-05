@@ -2,9 +2,9 @@
 \alias{plotOutput}
 \title{Create an plot output element}
 \usage{
-  plotOutput(outputId, width = "100\%", height = "400px",
-    clickId = NULL, hoverId = NULL, hoverDelay = 300,
-    hoverDelayType = c("debounce", "throttle"))
+plotOutput(outputId, width = "100\%", height = "400px", clickId = NULL,
+  hoverId = NULL, hoverDelay = 300, hoverDelayType = c("debounce",
+  "throttle"))
 }
 \arguments{
   \item{outputId}{output variable to read the plot from}
@@ -44,10 +44,10 @@
   milliseconds before sending an event.}
 }
 \value{
-  A plot output element that can be included in a panel
+A plot output element that can be included in a panel
 }
 \description{
-  Render a \link{renderPlot} within an application page.
+Render a \link{renderPlot} within an application page.
 }
 \examples{
 # Show a plot of the generated distribution

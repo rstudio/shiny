@@ -2,7 +2,7 @@
 \alias{icon}
 \title{Create an icon}
 \usage{
-  icon(name, class = NULL, lib = "font-awesome")
+icon(name, class = NULL, lib = "font-awesome")
 }
 \arguments{
   \item{name}{Name of icon. Icons are drawn from the
@@ -20,12 +20,12 @@
   one currently supported)}
 }
 \value{
-  An icon element
+An icon element
 }
 \description{
-  Create an icon for use within a page. Icons can appear on
-  their own, inside of a button, or as an icon for a
-  \code{\link{tabPanel}} within a \code{\link{navbarPage}}.
+Create an icon for use within a page. Icons can appear on
+their own, inside of a button, or as an icon for a
+\code{\link{tabPanel}} within a \code{\link{navbarPage}}.
 }
 \examples{
 icon("calendar")            # standard icon

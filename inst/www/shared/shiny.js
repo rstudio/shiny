@@ -2836,10 +2836,16 @@
       // Update the visible outputs for next time
       lastKnownVisibleOutputs = visibleOutputs;
     }
+    // sendOutputHiddenState gets called each time DOM elements are shown or
+    // hidden. This can be in the hundreds or thousands of times at startup.
+    // We'll debounce it, so that we do the actual work once per tick.
     var sendOutputHiddenStateDebouncer = new Debouncer(null, doSendOutputHiddenState, 0);
     function sendOutputHiddenState() {
       sendOutputHiddenStateDebouncer.normalCall();
     }
+    // We need to make sure doSendOutputHiddenState actually gets called before
+    // the inputBatchSender sends data to the server. The lastChanceCallback
+    // here does that - if the debouncer has a pending call, flush it.
     inputBatchSender.lastChanceCallback.push(function() {
       if (sendOutputHiddenStateDebouncer.isPending())
         sendOutputHiddenStateDebouncer.immediateCall();

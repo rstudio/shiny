@@ -72,6 +72,8 @@ hr <- function(...) tags$hr(...)
 #'   not an absolute path.
 #'   
 #' @rdname include
+#' @name include
+#' @aliases includeHTML
 #' @export
 includeHTML <- function(path) {
   dependsOnFile(path)

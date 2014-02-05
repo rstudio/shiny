@@ -69,7 +69,7 @@ list(
       c(
         "builder",
         "HTML",
-        "includeHTML",
+        "include",
         "singleton",
         "tag",
         "validateCssUnit",

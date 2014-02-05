@@ -1,4 +1,5 @@
-\name{includeHTML}
+\name{include}
+\alias{include}
 \alias{includeCSS}
 \alias{includeHTML}
 \alias{includeMarkdown}

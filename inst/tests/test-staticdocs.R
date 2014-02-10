@@ -1,7 +1,10 @@
 context("staticdocs")
 
 test_that("All man pages have an entry in staticdocs/index.R", {
-  
+  if (!all(file.exists(c('../../staticdocs', '../../man')))) {
+    # This test works only when run against a package directory
+    return()
+  }
   # Known not to be indexed
   known_unindexed <- c("shiny-package")
   

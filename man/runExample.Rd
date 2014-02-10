@@ -4,7 +4,8 @@
 \usage{
 runExample(example = NA, port = NULL,
   launch.browser = getOption("shiny.launch.browser", interactive()),
-  host = getOption("shiny.host", "127.0.0.1"))
+  host = getOption("shiny.host", "127.0.0.1"), display.mode = c("auto",
+  "normal", "showcase"))
 }
 \arguments{
   \item{example}{The name of the example to run, or
@@ -20,10 +21,15 @@ runExample(example = NA, port = NULL,
   \item{host}{The IPv4 address that the application should
   listen on. Defaults to the \code{shiny.host} option, if
   set, or \code{"127.0.0.1"} if not.}
+
+  \item{display.mode}{The mode in which to display the
+  example. Defaults to \code{showcase}, but may be set to
+  \code{normal} to see the example without code or
+  commentary.}
 }
 \description{
-Launch Shiny example applications, and optionally, your
-system's web browser.
+  Launch Shiny example applications, and optionally, your
+  system's web browser.
 }
 \examples{
 \dontrun{

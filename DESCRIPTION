@@ -51,4 +51,5 @@ Collate:
     'imageutils.R'
     'update-input.R'
     'bootstrap-layout.R'
+    'jqueryui.R'
     'hooks.R'

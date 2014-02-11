@@ -13,7 +13,21 @@ A properly formatted CSS unit of length, if possible.
 Otherwise, will throw an error.
 }
 \description{
-Validate proper CSS formatting of a unit
+Checks that the argument is valid for use as a CSS unit of
+length.
+}
+\details{
+\code{NULL} and \code{NA} are returned unchanged.
+
+Single element numeric vectors are returned as a character
+vector with the number plus a suffix of \code{"px"}.
+
+Single element character vectors must be \code{"auto"} or
+\code{"inherit"}, or a number followed by a valid suffix:
+\code{px}, \code{\%}, \code{em}, \code{pt}, \code{in},
+\code{cm}, \code{mm}, \code{ex}, or \code{pc}.
+
+Any other value will cause an error to be thrown.
 }
 \examples{
 validateCssUnit("10\%")

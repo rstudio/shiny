@@ -1,5 +1,6 @@
 \name{tag}
 \alias{tag}
+\alias{tagAppendAttributes}
 \alias{tagAppendChild}
 \alias{tagAppendChildren}
 \alias{tagSetChildren}
@@ -15,6 +16,8 @@ only be used to generate additional tags. \code{tagAppendChild} and
 sets of tags; see the contents of bootstrap.R for examples.
 
 \code{tag(_tag_name, varArgs)}
+
+\code{tagAppendAttributes(tag, ...)}
 
 \code{tagAppendChild(tag, child)}
 

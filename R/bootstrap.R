@@ -1724,20 +1724,38 @@ iconClass <- function(icon) {
 
 #' Validate proper CSS formatting of a unit
 #' 
+#' Checks that the argument is valid for use as a CSS unit of length.
+#' 
+#' \code{NULL} and \code{NA} are returned unchanged.
+#' 
+#' Single element numeric vectors are returned as a character vector with the
+#' number plus a suffix of \code{"px"}.
+#' 
+#' Single element character vectors must be \code{"auto"} or \code{"inherit"},
+#' or a number followed by a valid suffix: \code{px}, \code{\%}, \code{em},
+#' \code{pt}, \code{in}, \code{cm}, \code{mm}, \code{ex}, or \code{pc}.
+#' 
+#' Any other value will cause an error to be thrown.
+#' 
 #' @param x The unit to validate. Will be treated as a number of pixels if a 
-#' unit is not specified.
+#'   unit is not specified.
 #' @return A properly formatted CSS unit of length, if possible. Otherwise, will
-#' throw an error.
+#'   throw an error.
 #' @examples
 #' validateCssUnit("10%")
 #' validateCssUnit(400)  #treated as '400px'
 #' @export
 validateCssUnit <- function(x) {
+  if (is.null(x) || is.na(x))
+    return(x)
+  
+  if (length(x) > 1 || (!is.character(x) && !is.numeric(x)))
+    stop('CSS units must be a numeric or character vector with a single element')
+  
   if (is.character(x) &&
-     !grepl("^(auto|((\\.\\d+)|(\\d+(\\.\\d+)?))(%|in|cm|mm|em|ex|pt|pc|px))$", x)) {
+     !grepl("^(auto|inherit|((\\.\\d+)|(\\d+(\\.\\d+)?))(%|in|cm|mm|em|ex|pt|pc|px))$", x)) {
     stop('"', x, '" is not a valid CSS unit (e.g., "100%", "400px", "auto")')
-  }
-  if (is.numeric(x)) {
+  } else if (is.numeric(x)) {
     x <- paste(x, "px", sep = "")
   }
   x

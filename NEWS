@@ -9,7 +9,7 @@ shiny 0.8.0.99
   (or the IP address of one of your network interfaces, if you care to be
   explicit about it).
 
-* Upgraded to Bootstrap 2.3.2 and jQuery 1.10.2.
+* Upgraded to Bootstrap 2.3.2 and jQuery 1.11.0.
 
 * Make `tags$head()` and `singleton()` behave correctly when used with
   `renderUI()` and `uiOutput()`. Previously, "hoisting content to the head"
@@ -19,7 +19,7 @@ shiny 0.8.0.99
 * Files are now sourced with the `keep.source` option, to help with debugging
   and profiling.
 
-* Support user-defined input parsers for data coming in from JavaScript using 
+* Support user-defined input parsers for data coming in from JavaScript using
   the parseShinyInput method.
 
 * Fixed the bug #299: renderDataTable() can deal with 0-row data frames now.
@@ -31,27 +31,27 @@ shiny 0.8.0.99
 * Added `navlistPanel()` function to create layouts with a a bootstrap
   navlist on the left and tabPanels on the right
 
-* Added `type` parameter to `tabsetPanel()` to enable the use of pill 
+* Added `type` parameter to `tabsetPanel()` to enable the use of pill
   style tabs in addition to the standard ones.
 
 * Added `position` paramter to `tabsetPanel()` to enable positioning of tabs
   above, below, left, or right of tab content.
 
 * Added `fluidPage()` and `fixedPage()` functions as well as related row and
-column layout functions for creating arbitrary bootstrap grid layouts.
+  column layout functions for creating arbitrary bootstrap grid layouts.
 
 * Added `hr()` builder function for creating horizontal rules.
 
 * Automatically concatenate duplicate attributes in tag definitions
 
 * Added `responsive` parameter to page building functions for opting-out of
-bootstrap responsive css.
+  bootstrap responsive css.
 
 * Added `theme` parameter to page building functions for specifying alternate
-bootstrap css styles.
+  bootstrap css styles.
 
-* Added `icon()` function for embedding icons from the 
-[http://fontawesome.io/](font awesome) icon library 
+* Added `icon()` function for embedding icons from the
+  [font awesome](http://fontawesome.io/) icon library
 
 * Added `makeReactiveBinding` function to turn a "regular" variable into a
   reactive one (i.e. reading the variable makes the current reactive context

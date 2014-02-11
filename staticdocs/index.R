@@ -3,6 +3,7 @@ list(
     sd_section("UI Layout",
       "Functions for laying out the user interface for your application.",
       c(
+        "absolutePanel",
         "bootstrapPage",
         "column",
         "conditionalPanel",

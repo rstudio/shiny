@@ -1637,6 +1637,10 @@ stopApp <- function(returnValue = NULL) {
 #'   interactive sessions only.
 #' @param host The IPv4 address that the application should listen on. Defaults
 #'   to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not.
+#' @param display.mode The mode in which to display the example. Defaults to 
+#'   \code{showcase}, but may be set to \code{normal} to see the example without
+#'   code or commentary.
+#'
 #' @examples
 #' \dontrun{
 #' # List all available examples
@@ -1653,7 +1657,8 @@ runExample <- function(example=NA,
                        port=NULL,
                        launch.browser=getOption('shiny.launch.browser',
                                                 interactive()),
-                       host=getOption('shiny.host', '127.0.0.1')) {
+                       host=getOption('shiny.host', '127.0.0.1'), 
+                       display.mode=c("auto", "normal", "showcase")) {
   examplesDir <- system.file('examples', package='shiny')
   dir <- resolve(examplesDir, example)
   if (is.null(dir)) {
@@ -1673,7 +1678,7 @@ runExample <- function(example=NA,
   }
   else {
     runApp(dir, port = port, host = host, launch.browser = launch.browser, 
-           display.mode = "showcase")
+           display.mode = display.mode)
   }
 }
 

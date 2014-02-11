@@ -571,6 +571,8 @@ Observer <- setRefClass(
 #'   this observer should be executed. An observer with a given priority level
 #'   will always execute sooner than all observers with a lower priority level. 
 #'   Positive, negative, and zero values are allowed.
+#' @param session If supplied, the observer will automatically be suspended
+#'   when the session ends.
 #' @return An observer reference class object. This object has the following 
 #'   methods:
 #'   \describe{
@@ -618,7 +620,7 @@ Observer <- setRefClass(
 #'
 #' @export
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
-                    suspended=FALSE, priority=0) {
+                    suspended=FALSE, priority=0, session=NULL) {
 
   fun <- exprToFunction(x, env, quoted)
   if (is.null(label))
@@ -626,6 +628,13 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 
   o <- Observer$new(fun, label=label, suspended=suspended, priority=priority)
   registerDebugHook(".func", o, "Observer")
+  
+  if (!is.null(session)) {
+    session$onSessionEnded(function() {
+      o$suspend()
+    })
+  }
+  
   invisible(o)
 }
 

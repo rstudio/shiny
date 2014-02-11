@@ -122,6 +122,14 @@ includeScript <- function(path, ...) {
   return(tags$script(HTML(paste(lines, collapse='\r\n')), ...))
 }
 
+#' @rdname include
+#' @export
+includeMathJax <- function(path) {
+  if (missing(path))
+    path <- 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+  tags$head(singleton(tags$script(src = path, type = 'text/javascript')))
+}
+
 #' Include Content Only Once
 #' 
 #' Use \code{singleton} to wrap contents (tag, text, HTML, or lists) that should

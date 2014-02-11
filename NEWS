@@ -57,6 +57,8 @@ bootstrap css styles.
   reactive one (i.e. reading the variable makes the current reactive context
   dependent on it, and setting the variable is a source of reactivity).
 
+* Added a function `includeMathjax()` to include the MathJax library in an app.
+
 * The argument `selected` in checkboxGroupInput(), selectInput(), and
   radioButtons() refers to the value(s) instead of the name(s) of the
   argument `choices` now. For example, the value of the `selected` argument

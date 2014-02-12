@@ -477,6 +477,12 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' matrix), which will be rendered with the DataTables library. Paging,
 #' searching, filtering, and sorting can be done on the R side using Shiny as
 #' the server infrastructure.
+#'
+#' For the \code{options} argument, the character elements that have the class
+#' \code{"AsIs"} (usually returned from \code{\link{I}()}) will be evaluated in
+#' JavaScript. This is useful when the type of the option value is not supported
+#' in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
+#' character string.
 #' @param expr An expression that returns a data frame or a matrix.
 #' @param options A list of initialization options to be passed to DataTables.
 #' @param searchDelay The delay for searching, in milliseconds (to avoid too
@@ -484,16 +490,34 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot
+#' @examples  # pass a callback function to DataTables using I()
+#' renderDataTable(iris,
+#'   options = list(
+#'     iDisplayLength = 5,
+#'     fnInitComplete = I("(function(oSettings, json) {alert('Done.');})")
+#'   )
+#' )
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             env=parent.frame(), quoted=FALSE) {
   installExprFunction(expr, "func", env, quoted)
+  evalOptions <- if (length(options)) {
+    nms <- names(options)
+    i <- unlist(lapply(options, function(x) {
+      is.character(x) && inherits(x, 'AsIs')
+    }))
+    if (any(i)) {
+      # must convert to character, otherwise toJSON() turns it to an array []
+      options[i] <- lapply(options[i], paste, collapse = '\n')
+      nms[i]  # options of these names will be evaluated in JS
+    }
+  }
 
   function(shinysession, name, ...) {
     data <- func()
     if (length(dim(data)) != 2) return() # expects a rectangular data object
     action <- shinysession$registerDataTable(name, data)
     list(colnames = colnames(data), action = action, options = options,
-         searchDelay = searchDelay)
+         evalOptions = evalOptions, searchDelay = searchDelay)
   }
 }
 

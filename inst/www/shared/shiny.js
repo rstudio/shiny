@@ -1295,6 +1295,7 @@
     renderValue: function(el, data) {
       var $el = $(el).empty();
       if (!data || !data.colnames) return;
+
       var colnames = $.makeArray(data.colnames);
       var header = colnames.map(function(x) {
         return '<th>' + x + '</th>';
@@ -1307,6 +1308,13 @@
       var content = '<table class="table table-striped table-hover">' +
                     header + footer + '</table>';
       $el.append(content);
+
+      // options that should be eval()ed
+      if (data.evalOptions)
+        $.makeArray(data.evalOptions).forEach(function(x) {
+          data.options[x] = eval(data.options[x]);
+        });
+
       var oTable = $(el).children("table").dataTable($.extend({
         "bProcessing": true,
         "bServerSide": true,
@@ -1315,6 +1323,7 @@
         "iDisplayLength": 25,
         "sAjaxSource": data.action
       }, data.options));
+
       // use debouncing for searching boxes
       $el.find('label input').first().unbind('keyup')
            .keyup(debounce(data.searchDelay, function() {

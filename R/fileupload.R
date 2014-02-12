@@ -77,6 +77,7 @@ FileUploadOperation <- setRefClass(
   )
 )
 
+#' @include map.R
 FileUploadContext <- setRefClass(
   'FileUploadContext',
   fields = list(

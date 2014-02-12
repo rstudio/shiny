@@ -20,6 +20,7 @@ createUniqueId <- function(bytes) {
   paste(as.character(as.raw(floor(runif(bytes, min=1, max=255)))), collapse='')
 }
 
+#' @include utils.R
 ShinySession <- setRefClass(
   'ShinySession',
   fields = list(

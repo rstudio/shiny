@@ -77,6 +77,11 @@ shiny 0.8.0.99
   and fixed-position panels. They can be easily made user-draggable by
   specifying `draggable = TRUE`.
 
+* For the `options` argument of the function `renderDataTable()`, we can
+  pass literal JavaScript code to the DataTables library via `I()`. This
+  makes it possible to use any JavaScript object in the options, e.g. a
+  JavaScript function (which is not supported in JSON). See
+  `?renderDataTable` for details and examples.
 
 shiny 0.8.0
 --------------------------------------------------------------------------------

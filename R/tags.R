@@ -87,6 +87,7 @@ normalizeText <- function(text) {
 
 }
 
+#' @rdname tag
 #' @export
 tagList <- function(...) {
   lst <- list(...)
@@ -94,31 +95,68 @@ tagList <- function(...) {
   return(lst)
 }
 
+#' @rdname tag
 #' @export
 tagAppendAttributes <- function(tag, ...) {
   tag$attribs <- c(tag$attribs, list(...))
   tag
 }
 
+#' @rdname tag
 #' @export
 tagAppendChild <- function(tag, child) {
   tag$children[[length(tag$children)+1]] <- child
   tag
 }
 
+#' @rdname tag
 #' @export
 tagAppendChildren <- function(tag, ..., list = NULL) {
   tag$children <- c(tag$children, c(list(...), list))
   tag
 }
 
+#' @rdname tag
 #' @export
 tagSetChildren <- function(tag, ..., list = NULL) {
   tag$children <- c(list(...), list)
   tag
 }
 
+#' HTML Tag Object
+#'
+#' \code{tag()} creates an HTML tag definition. Note that all of the valid HTML5
+#' tags are already defined in the \code{\link{tags}} environment so these
+#' functions should only be used to generate additional tags.
+#' \code{tagAppendChild()} and \code{tagList()} are for supporting package
+#' authors who wish to create their own sets of tags; see the contents of
+#' bootstrap.R for examples.
+#' @usage tag(`_tag_name`, varArgs)
+#' @param _tag_name HTML tag name
+#' @param varArgs List of attributes and children of the element. Named list
+#'   items become attributes, and unnamed list items become children. Valid
+#'   children are tags, single-character character vectors (which become text
+#'   nodes), and raw HTML (see \code{\link{HTML}}). You can also pass lists that
+#'   contain tags, text nodes, and HTML.
+#' @param tag A tag to append child elements to.
+#' @param child A child element to append to a parent tag.
+#' @param ...  Unnamed items that comprise this list of tags.
+#' @param list An optional list of elements. Can be used with or instead of the
+#'   \code{...} items.
+#' @return An HTML tag object that can be rendered as HTML using
+#'   \code{\link{as.character}()}.
 #' @export
+#' @examples
+#' tagList(tags$h1("Title"),
+#'         tags$h2("Header text"),
+#'         tags$p("Text here"))
+#'
+#' # Can also convert a regular list to a tagList (internal data structure isn't
+#' # exactly the same, but when rendered to HTML, the output is the same).
+#' x <- list(tags$h1("Title"),
+#'           tags$h2("Header text"),
+#'           tags$p("Text here"))
+#' tagList(x)
 tag <- function(`_tag_name`, varArgs) {
   # Get arg names; if not a named list, use vector of empty strings
   varArgsNames <- names(varArgs)
@@ -342,8 +380,48 @@ takeHeads <- function(ui) {
   return(list(ui=result, head=headItems))
 }
 
-# environment used to store all available tags
-#' @export
+#' HTML Builder Functions
+#'
+#' Simple functions for constructing HTML documents.
+#'
+#' The \code{tags} environment contains convenience functions for all valid
+#' HTML5 tags. To generate tags that are not part of the HTML5 specification,
+#' you can use the \code{\link{tag}()} function.
+#'
+#' Dedicated functions are available for the most common HTML tags that do not
+#' conflict with common R functions.
+#'
+#' The result from these functions is a tag object, which can be converted using
+#' \code{\link{as.character}()}.
+#'
+#' @name builder
+#' @param ... Attributes and children of the element. Named arguments become
+#'   attributes, and positional arguments become children. Valid children are
+#'   tags, single-character character vectors (which become text nodes), and raw
+#'   HTML (see \code{\link{HTML}}). You can also pass lists that contain tags,
+#'   text nodes, and HTML.
+#' @export tags
+#' @examples
+#' doc <- tags$html(
+#'   tags$head(
+#'     tags$title('My first page')
+#'   ),
+#'   tags$body(
+#'     h1('My first heading'),
+#'     p('My first paragraph, with some ',
+#'       strong('bold'),
+#'       ' text.'),
+#'     div(id='myDiv', class='simpleDiv',
+#'         'Here is a div with some attributes.')
+#'   )
+#' )
+#' cat(as.character(doc))
+NULL
+
+#' @rdname builder
+#' @format NULL
+#' @docType NULL
+#' @keywords NULL
 tags <- list(
   a = function(...) tag("a", list(...)),
   abbr = function(...) tag("abbr", list(...)),

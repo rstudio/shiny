@@ -1,52 +1,68 @@
-
+#' @rdname builder
 #' @export
 p <- function(...) tags$p(...)
 
+#' @rdname builder
 #' @export
 h1 <- function(...) tags$h1(...)
 
+#' @rdname builder
 #' @export
 h2 <- function(...) tags$h2(...)
 
+#' @rdname builder
 #' @export
 h3 <- function(...) tags$h3(...)
 
+#' @rdname builder
 #' @export
 h4 <- function(...) tags$h4(...)
 
+#' @rdname builder
 #' @export
 h5 <- function(...) tags$h5(...)
 
+#' @rdname builder
 #' @export
 h6 <- function(...) tags$h6(...)
 
+#' @rdname builder
 #' @export
 a <- function(...) tags$a(...)
 
+#' @rdname builder
 #' @export
 br <- function(...) tags$br(...)
 
+#' @rdname builder
 #' @export
 div <- function(...) tags$div(...)
 
+#' @rdname builder
 #' @export
 span <- function(...) tags$span(...)
 
+#' @rdname builder
 #' @export
 pre <- function(...) tags$pre(...)
 
+#' @rdname builder
 #' @export
 code <- function(...) tags$code(...)
 
+#' @rdname builder
 #' @export
 img <- function(...) tags$img(...)
 
+#' @rdname builder
 #' @export
 strong <- function(...) tags$strong(...)
 
+#' @rdname builder
 #' @export
 em <- function(...) tags$em(...)
 
+#' @rdname builder
 #' @export
 hr <- function(...) tags$hr(...)
 

@@ -5,7 +5,7 @@ library(datasets)
 # dataset
 shinyServer(function(input, output) {
 
-  # By declaring databaseInput as a reactive expression we ensure 
+  # By declaring datasetInput as a reactive expression we ensure 
   # that:
   #
   #  1) It is only called when the inputs it depends on changes

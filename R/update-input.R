@@ -186,11 +186,11 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
 #'
 #' @param session The \code{session} object passed to function given to
 #'   \code{shinyServer}.
-#' @param inputId The id of the \code{tabsetPanel}, \code{navlistPanel}, 
+#' @param inputId The id of the \code{tabsetPanel}, \code{navlistPanel},
 #' or \code{navbarPage} object.
 #' @param selected The name of the tab to make active.
 #'
-#' @seealso \code{\link{tabsetPanel}}, \code{\link{navlistPanel}}, 
+#' @seealso \code{\link{tabsetPanel}}, \code{\link{navlistPanel}},
 #' \code{\link{navbarPage}}
 #'
 #' @examples

@@ -11,7 +11,7 @@ Dependents <- setRefClass(
         ctx$onInvalidate(function() {
           .dependents$remove(ctx$id)
         })
-        
+
         if (!is.null(depId) && nchar(depId) > 0)
           .graphDependsOnId(ctx$id, depId)
         if (!is.null(depLabel))
@@ -64,7 +64,7 @@ ReactiveValues <- setRefClass(
           rm(list=dep.key, pos=.dependents, inherits=FALSE)
         })
       }
-      
+
       if (!exists(key, where=.values, inherits=FALSE))
         NULL
       else
@@ -329,7 +329,7 @@ Observable <- setRefClass(
       }
 
       .graphDependsOnId(getCurrentContext()$id, .mostRecentCtxId)
-      
+
       if (identical(class(.value), 'try-error'))
         stop(attr(.value, 'condition'))
 
@@ -378,7 +378,7 @@ Observable <- setRefClass(
 #' See the \href{http://rstudio.github.com/shiny/tutorial/}{Shiny tutorial} for
 #' more information about reactive expressions.
 #'
-#' @param x For \code{reactive}, an expression (quoted or unquoted). For 
+#' @param x For \code{reactive}, an expression (quoted or unquoted). For
 #'   \code{is.reactive}, an object to test.
 #' @param env The parent environment for the reactive expression. By default, this
 #'   is the calling environment, the same as when defining an ordinary
@@ -486,17 +486,17 @@ Observer <- setRefClass(
         continue <- function() {
           ctx$addPendingFlush(.priority)
         }
-        
+
         if (.suspended == FALSE)
           continue()
         else
           .onResume <<- continue
       })
-      
+
       ctx$onFlush(function() {
         run()
       })
-      
+
       return(ctx)
     },
     run = function() {
@@ -540,23 +540,23 @@ Observer <- setRefClass(
 )
 
 #' Create a reactive observer
-#' 
+#'
 #' Creates an observer from the given expression.
-#' 
+#'
 #' An observer is like a reactive
 #' expression in that it can read reactive values and call reactive expressions, and
-#' will automatically re-execute when those dependencies change. But unlike 
-#' reactive expressions, it doesn't yield a result and can't be used as an input 
-#' to other reactive expressions. Thus, observers are only useful for their side 
+#' will automatically re-execute when those dependencies change. But unlike
+#' reactive expressions, it doesn't yield a result and can't be used as an input
+#' to other reactive expressions. Thus, observers are only useful for their side
 #' effects (for example, performing I/O).
-#' 
+#'
 #' Another contrast between reactive expressions and observers is their execution
 #' strategy. Reactive expressions use lazy evaluation; that is, when their
 #' dependencies change, they don't re-execute right away but rather wait until
 #' they are called by someone else. Indeed, if they are not called then they
 #' will never re-execute. In contrast, observers use eager evaluation; as soon
 #' as their dependencies change, they schedule themselves to re-execute.
-#' 
+#'
 #' @param x An expression (quoted or unquoted). Any return value will be ignored.
 #' @param env The parent environment for the reactive expression. By default, this
 #'   is the calling environment, the same as when defining an ordinary
@@ -569,14 +569,14 @@ Observer <- setRefClass(
 #'   If \code{FALSE} (the default), start in a non-suspended state.
 #' @param priority An integer or numeric that controls the priority with which
 #'   this observer should be executed. An observer with a given priority level
-#'   will always execute sooner than all observers with a lower priority level. 
+#'   will always execute sooner than all observers with a lower priority level.
 #'   Positive, negative, and zero values are allowed.
-#' @return An observer reference class object. This object has the following 
+#' @return An observer reference class object. This object has the following
 #'   methods:
 #'   \describe{
 #'     \item{\code{suspend()}}{
 #'       Causes this observer to stop scheduling flushes (re-executions) in
-#'       response to invalidations. If the observer was invalidated prior to 
+#'       response to invalidations. If the observer was invalidated prior to
 #'       this call but it has not re-executed yet then that re-execution will
 #'       still occur, because the flush is already scheduled.
 #'     }
@@ -586,9 +586,9 @@ Observer <- setRefClass(
 #'       will schedule itself for re-execution.
 #'     }
 #'     \item{\code{setPriority(priority = 0)}}{
-#'       Change this observer's priority. Note that if the observer is currently 
+#'       Change this observer's priority. Note that if the observer is currently
 #'       invalidated, then the change in priority will not take effect until the
-#'       next invalidation--unless the observer is also currently suspended, in 
+#'       next invalidation--unless the observer is also currently suspended, in
 #'       which case the priority change will be effective upon resume.
 #'     }
 #'     \item{\code{onInvalidate(callback)}}{
@@ -630,18 +630,18 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 }
 
 #' Make a reactive variable
-#' 
-#' Turns a normal variable into a reactive variable, that is, one that has 
-#' reactive semantics when assigned or read in the usual ways. The variable may 
-#' already exist; if so, its value will be used as the initial value of the 
+#'
+#' Turns a normal variable into a reactive variable, that is, one that has
+#' reactive semantics when assigned or read in the usual ways. The variable may
+#' already exist; if so, its value will be used as the initial value of the
 #' reactive variable (or \code{NULL} if the variable did not exist).
-#' 
-#' @param symbol A character string indicating the name of the variable that 
+#'
+#' @param symbol A character string indicating the name of the variable that
 #'   should be made reactive
 #' @param env The environment that will contain the reactive variable
-#' 
+#'
 #' @return None.
-#' 
+#'
 #' @examples
 #' \dontrun{
 #' a <- 10
@@ -649,7 +649,7 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' b <- reactive(a * -1)
 #' observe(print(b()))
 #' a <- 20
-#' }  
+#' }
 #' @export
 makeReactiveBinding <- function(symbol, env = parent.frame()) {
   if (exists(symbol, where = env, inherits = FALSE)) {
@@ -665,7 +665,7 @@ makeReactiveBinding <- function(symbol, env = parent.frame()) {
     else
       values$value <- v
   })
-  
+
   invisible()
 }
 
@@ -680,12 +680,12 @@ makeReactiveBinding <- function(symbol, env = parent.frame()) {
 # entered into the top-level prompt
 setAutoflush <- local({
   callbackId <- NULL
-  
+
   function(enable) {
     if (xor(is.null(callbackId), isTRUE(enable))) {
       return(invisible())
     }
-    
+
     if (isTRUE(enable)) {
       callbackId <<- addTaskCallback(function(expr, value, ok, visible) {
         timerCallbacks$executeElapsed()
@@ -703,26 +703,26 @@ setAutoflush <- local({
 # ---------------------------------------------------------------------------
 
 #' Timer
-#' 
-#' Creates a reactive timer with the given interval. A reactive timer is like a 
+#'
+#' Creates a reactive timer with the given interval. A reactive timer is like a
 #' reactive value, except reactive values are triggered when they are set, while
 #' reactive timers are triggered simply by the passage of time.
-#' 
-#' \link[=reactive]{Reactive expressions} and observers that want to be 
-#' invalidated by the timer need to call the timer function that 
-#' \code{reactiveTimer} returns, even if the current time value is not actually 
+#'
+#' \link[=reactive]{Reactive expressions} and observers that want to be
+#' invalidated by the timer need to call the timer function that
+#' \code{reactiveTimer} returns, even if the current time value is not actually
 #' needed.
-#' 
+#'
 #' See \code{\link{invalidateLater}} as a safer and simpler alternative.
-#' 
+#'
 #' @param intervalMs How often to fire, in milliseconds
 #' @param session A session object. This is needed to cancel any scheduled
 #'   invalidations after a user has ended the session. If \code{NULL}, then
 #'   this invalidation will not be tied to any session, and so it will still
 #'   occur.
-#' @return A no-parameter function that can be called from a reactive context, 
-#'   in order to cause that context to be invalidated the next time the timer 
-#'   interval elapses. Calling the returned function also happens to yield the 
+#' @return A no-parameter function that can be called from a reactive context,
+#'   in order to cause that context to be invalidated the next time the timer
+#'   interval elapses. Calling the returned function also happens to yield the
 #'   current time (as in \code{\link{Sys.time}}).
 #' @seealso \code{\link{invalidateLater}}
 #'
@@ -789,8 +789,8 @@ reactiveTimer <- function(intervalMs=1000, session) {
 }
 
 #' Scheduled Invalidation
-#' 
-#' Schedules the current reactive context to be invalidated in the given number 
+#'
+#' Schedules the current reactive context to be invalidated in the given number
 #' of milliseconds.
 #'
 #' If this is placed within an observer or reactive expression, that object will
@@ -860,52 +860,52 @@ coerceToFunc <- function(x) {
 }
 
 #' Reactive polling
-#' 
-#' Used to create a reactive data source, which works by periodically polling a 
+#'
+#' Used to create a reactive data source, which works by periodically polling a
 #' non-reactive data source.
-#' 
+#'
 #' \code{reactivePoll} works by pairing a relatively cheap "check" function with
-#' a more expensive value retrieval function. The check function will be 
-#' executed periodically and should always return a consistent value until the 
-#' data changes. When the check function returns a different value, then the 
+#' a more expensive value retrieval function. The check function will be
+#' executed periodically and should always return a consistent value until the
+#' data changes. When the check function returns a different value, then the
 #' value retrieval function will be used to re-populate the data.
-#' 
-#' Note that the check function doesn't return \code{TRUE} or \code{FALSE} to 
-#' indicate whether the underlying data has changed. Rather, the check function 
+#'
+#' Note that the check function doesn't return \code{TRUE} or \code{FALSE} to
+#' indicate whether the underlying data has changed. Rather, the check function
 #' indicates change by returning a different value from the previous time it was
 #' called.
-#' 
-#' For example, \code{reactivePoll} is used to implement 
+#'
+#' For example, \code{reactivePoll} is used to implement
 #' \code{reactiveFileReader} by pairing a check function that simply returns the
-#' last modified timestamp of a file, and a value retrieval function that 
+#' last modified timestamp of a file, and a value retrieval function that
 #' actually reads the contents of the file.
-#' 
-#' As another example, one might read a relational database table reactively by 
-#' using a check function that does \code{SELECT MAX(timestamp) FROM table} and 
+#'
+#' As another example, one might read a relational database table reactively by
+#' using a check function that does \code{SELECT MAX(timestamp) FROM table} and
 #' a value retrieval function that does \code{SELECT * FROM table}.
-#' 
+#'
 #' The \code{intervalMillis}, \code{checkFunc}, and \code{valueFunc} functions
 #' will be executed in a reactive context; therefore, they may read reactive
 #' values and reactive expressions.
-#' 
-#' @param intervalMillis Approximate number of milliseconds to wait between 
-#'   calls to \code{checkFunc}. This can be either a numeric value, or a 
+#'
+#' @param intervalMillis Approximate number of milliseconds to wait between
+#'   calls to \code{checkFunc}. This can be either a numeric value, or a
 #'   function that returns a numeric value.
-#' @param session The user session to associate this file reader with, or 
-#'   \code{NULL} if none. If non-null, the reader will automatically stop when 
+#' @param session The user session to associate this file reader with, or
+#'   \code{NULL} if none. If non-null, the reader will automatically stop when
 #'   the session ends.
-#' @param checkFunc A relatively cheap function whose values over time will be 
-#'   tested for equality; inequality indicates that the underlying value has 
+#' @param checkFunc A relatively cheap function whose values over time will be
+#'   tested for equality; inequality indicates that the underlying value has
 #'   changed and needs to be invalidated and re-read using \code{valueFunc}. See
 #'   Details.
-#' @param valueFunc A function that calculates the underlying value. See 
+#' @param valueFunc A function that calculates the underlying value. See
 #'   Details.
-#'   
-#' @return A reactive expression that returns the result of \code{valueFunc}, 
+#'
+#' @return A reactive expression that returns the result of \code{valueFunc},
 #'   and invalidates when \code{checkFunc} changes.
-#'   
+#'
 #' @seealso \code{\link{reactiveFileReader}}
-#'   
+#'
 #' @examples
 #' \dontrun{
 #' # Assume the existence of readTimestamp and readValue functions
@@ -916,74 +916,74 @@ coerceToFunc <- function(x) {
 #'   })
 #' })
 #' }
-#'   
+#'
 #' @export
 reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
   intervalMillis <- coerceToFunc(intervalMillis)
-  
+
   rv <- reactiveValues(cookie = isolate(checkFunc()))
-  
+
   observe({
     rv$cookie <- checkFunc()
     invalidateLater(intervalMillis(), session)
   })
-  
+
   # TODO: what to use for a label?
   re <- reactive({
     rv$cookie
-    
+
     valueFunc()
-    
+
   }, label = NULL)
-  
+
   return(re)
 }
 
 #' Reactive file reader
-#' 
-#' Given a file path and read function, returns a reactive data source for the 
+#'
+#' Given a file path and read function, returns a reactive data source for the
 #' contents of the file.
-#' 
-#' \code{reactiveFileReader} works by periodically checking the file's last 
-#' modified time; if it has changed, then the file is re-read and any reactive 
+#'
+#' \code{reactiveFileReader} works by periodically checking the file's last
+#' modified time; if it has changed, then the file is re-read and any reactive
 #' dependents are invalidated.
-#' 
-#' The \code{intervalMillis}, \code{filePath}, and \code{readFunc} functions 
+#'
+#' The \code{intervalMillis}, \code{filePath}, and \code{readFunc} functions
 #' will each be executed in a reactive context; therefore, they may read
 #' reactive values and reactive expressions.
-#' 
-#' @param intervalMillis Approximate number of milliseconds to wait between 
-#'   checks of the file's last modified time. This can be a numeric value, or a 
+#'
+#' @param intervalMillis Approximate number of milliseconds to wait between
+#'   checks of the file's last modified time. This can be a numeric value, or a
 #'   function that returns a numeric value.
-#' @param session The user session to associate this file reader with, or 
-#'   \code{NULL} if none. If non-null, the reader will automatically stop when 
+#' @param session The user session to associate this file reader with, or
+#'   \code{NULL} if none. If non-null, the reader will automatically stop when
 #'   the session ends.
 #' @param filePath The file path to poll against and to pass to \code{readFunc}.
-#'   This can either be a single-element character vector, or a function that 
+#'   This can either be a single-element character vector, or a function that
 #'   returns one.
-#' @param readFunc The function to use to read the file; must expect the first 
-#'   argument to be the file path to read. The return value of this function is 
+#' @param readFunc The function to use to read the file; must expect the first
+#'   argument to be the file path to read. The return value of this function is
 #'   used as the value of the reactive file reader.
 #' @param ... Any additional arguments to pass to \code{readFunc} whenever it is
 #'   invoked.
-#'   
-#' @return A reactive expression that returns the contents of the file, and 
-#'   automatically invalidates when the file changes on disk (as determined by 
+#'
+#' @return A reactive expression that returns the contents of the file, and
+#'   automatically invalidates when the file changes on disk (as determined by
 #'   last modified time).
-#'   
+#'
 #' @seealso \code{\link{reactivePoll}}
-#'   
+#'
 #' @examples
 #' \dontrun{
 #' # Per-session reactive file reader
 #' shinyServer(function(input, output, session)) {
 #'   fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
-#'   
+#'
 #'   output$data <- renderTable({
 #'     fileData()
 #'   })
 #' }
-#' 
+#'
 #' # Cross-session reactive file reader. In this example, all sessions share
 #' # the same reader, so read.csv only gets executed once no matter how many
 #' # user sessions are connected.
@@ -994,12 +994,12 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #'   })
 #' }
 #' }
-#' 
+#'
 #' @export
 reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...) {
   filePath <- coerceToFunc(filePath)
   extraArgs <- list(...)
-  
+
   reactivePoll(
     intervalMillis, session,
     function() {
@@ -1014,18 +1014,18 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 }
 
 #' Create a non-reactive scope for an expression
-#' 
-#' Executes the given expression in a scope where reactive values or expression 
-#' can be read, but they cannot cause the reactive scope of the caller to be 
+#'
+#' Executes the given expression in a scope where reactive values or expression
+#' can be read, but they cannot cause the reactive scope of the caller to be
 #' re-evaluated when they change.
-#' 
-#' Ordinarily, the simple act of reading a reactive value causes a relationship 
-#' to be established between the caller and the reactive value, where a change 
-#' to the reactive value will cause the caller to re-execute. (The same applies 
-#' for the act of getting a reactive expression's value.) The \code{isolate} 
+#'
+#' Ordinarily, the simple act of reading a reactive value causes a relationship
+#' to be established between the caller and the reactive value, where a change
+#' to the reactive value will cause the caller to re-execute. (The same applies
+#' for the act of getting a reactive expression's value.) The \code{isolate}
 #' function lets you read a reactive value or expression without establishing this
 #' relationship.
-#' 
+#'
 #' The expression given to \code{isolate()} is evaluated in the calling
 #' environment. This means that if you assign a variable inside the
 #' \code{isolate()}, its value will be visible outside of the \code{isolate()}.
@@ -1037,20 +1037,20 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #' calls to the reactive expression with \code{isolate()}.
 #'
 #' @param expr An expression that can access reactive values or expressions.
-#' 
+#'
 #' @examples
 #' \dontrun{
 #' observe({
 #'   input$saveButton  # Do take a dependency on input$saveButton
-#'   
+#'
 #'   # isolate a simple expression
 #'   data <- get(isolate(input$dataset))  # No dependency on input$dataset
 #'   writeToDatabase(data)
 #' })
-#' 
+#'
 #' observe({
 #'   input$saveButton  # Do take a dependency on input$saveButton
-#'   
+#'
 #'   # isolate a whole block
 #'   data <- isolate({
 #'     a <- input$valueA   # No dependency on input$valueA or input$valueB

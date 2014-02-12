@@ -51,26 +51,26 @@ em <- function(...) tags$em(...)
 hr <- function(...) tags$hr(...)
 
 #' Include Content From a File
-#' 
+#'
 #' Include HTML, text, or rendered Markdown into a \link[=shinyUI]{Shiny UI}.
-#' 
-#' These functions provide a convenient way to include an extensive amount of 
+#'
+#' These functions provide a convenient way to include an extensive amount of
 #' HTML, textual, Markdown, CSS, or JavaScript content, rather than using a
 #' large literal R string.
-#' 
-#' @note \code{includeText} escapes its contents, but does no other processing. 
-#'   This means that hard breaks and multiple spaces will be rendered as they 
-#'   usually are in HTML: as a single space character. If you are looking for 
-#'   preformatted text, wrap the call with \code{\link{pre}}, or consider using 
+#'
+#' @note \code{includeText} escapes its contents, but does no other processing.
+#'   This means that hard breaks and multiple spaces will be rendered as they
+#'   usually are in HTML: as a single space character. If you are looking for
+#'   preformatted text, wrap the call with \code{\link{pre}}, or consider using
 #'   \code{includeMarkdown} instead.
-#'   
-#' @note The \code{includeMarkdown} function requires the \code{markdown} 
+#'
+#' @note The \code{includeMarkdown} function requires the \code{markdown}
 #'   package.
-#'   
-#' @param path The path of the file to be included. It is highly recommended to 
-#'   use a relative path (the base path being the Shiny application directory), 
+#'
+#' @param path The path of the file to be included. It is highly recommended to
+#'   use a relative path (the base path being the Shiny application directory),
 #'   not an absolute path.
-#'   
+#'
 #' @rdname include
 #' @name include
 #' @aliases includeHTML
@@ -94,7 +94,7 @@ includeText <- function(path) {
 includeMarkdown <- function(path) {
   if (!require(markdown))
     stop("Markdown package is not installed")
-  
+
   dependsOnFile(path)
   html <- markdown::markdownToHTML(path, fragment.only=TRUE)
   Encoding(html) <- 'UTF-8'
@@ -131,13 +131,13 @@ includeMathJax <- function(path) {
 }
 
 #' Include Content Only Once
-#' 
+#'
 #' Use \code{singleton} to wrap contents (tag, text, HTML, or lists) that should
-#' be included in the generated document only once, yet may appear in the 
-#' document-generating code more than once. Only the first appearance of the 
-#' content (in document order) will be used. Useful for custom components that 
+#' be included in the generated document only once, yet may appear in the
+#' document-generating code more than once. Only the first appearance of the
+#' content (in document order) will be used. Useful for custom components that
 #' have JavaScript files or stylesheets.
-#' 
+#'
 #' @param x A \code{\link{tag}}, text, \code{\link{HTML}}, or list.
 #'
 #' @export
@@ -147,7 +147,7 @@ singleton <- function(x) {
 }
 
 renderPage <- function(ui, connection, showcase=0) {
-  
+
   result <- renderTags(ui)
 
   # write preamble
@@ -173,13 +173,13 @@ renderPage <- function(ui, connection, showcase=0) {
 
   if (showcase > 0) {
     # in showcase mode, emit containing elements and app HTML
-    writeLines(as.character(showcaseBody(result$html)), 
+    writeLines(as.character(showcaseBody(result$html)),
                con = connection)
   } else {
     # in normal mode, write UI html directly to connection
     writeLines(result$html, con = connection)
   }
-  
+
   # write end document
   writeLines(c('</body>',
                '</html>'),
@@ -187,35 +187,35 @@ renderPage <- function(ui, connection, showcase=0) {
 }
 
 #' Create a Shiny UI handler
-#' 
-#' Register a UI handler by providing a UI definition (created with e.g. 
+#'
+#' Register a UI handler by providing a UI definition (created with e.g.
 #' \link{pageWithSidebar}) and web server path (typically "/", the default
 #' value).
-#' 
+#'
 #' @param ui A user-interace definition
 #' @param path The web server path to server the UI from
 #' @return Called for its side-effect of registering a UI handler
-#' 
+#'
 #' @examples
 #' el <- div(HTML("I like <u>turtles</u>"))
 #' cat(as.character(el))
-#'   
+#'
 #' @examples
 #' # Define UI
 #' shinyUI(pageWithSidebar(
-#'   
+#'
 #'   # Application title
 #'   headerPanel("Hello Shiny!"),
-#'   
+#'
 #'   # Sidebar with a slider input
 #'   sidebarPanel(
-#'     sliderInput("obs", 
-#'                 "Number of observations:", 
-#'                 min = 0, 
-#'                 max = 1000, 
+#'     sliderInput("obs",
+#'                 "Number of observations:",
+#'                 min = 0,
+#'                 max = 1000,
 #'                 value = 500)
 #'   ),
-#'   
+#'
 #'   # Show a plot of the generated distribution
 #'   mainPanel(
 #'     plotOutput("distPlot")
@@ -224,21 +224,21 @@ renderPage <- function(ui, connection, showcase=0) {
 #'
 #' @export
 shinyUI <- function(ui, path='/') {
-  
+
   force(ui)
-  
+
   registerClient({
-    
+
     function(req) {
       if (!identical(req$REQUEST_METHOD, 'GET'))
         return(NULL)
 
       if (req$PATH_INFO != path)
         return(NULL)
-      
-      textConn <- textConnection(NULL, "w") 
+
+      textConn <- textConnection(NULL, "w")
       on.exit(close(textConn))
-      
+
       showcaseMode <- .globals$showcaseDefault
       if (.globals$showcaseOverride) {
         mode <- showcaseModeOfReq(req)

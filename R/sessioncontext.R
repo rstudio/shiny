@@ -1,6 +1,6 @@
-# Keeps the context associated with a ShinySession reference object for the 
+# Keeps the context associated with a ShinySession reference object for the
 # duration of a request. Used to emit reactive evaluation information to the
-# appropriate session when showcase mode is enabled. 
+# appropriate session when showcase mode is enabled.
 
 .sessionContext <- new.env(parent=emptyenv())
 .beginShowcaseSessionContext <- function(session) {
@@ -13,7 +13,7 @@
 }
 
 .getShowcaseSessionContext <- function() {
-  if (exists("session", where = .sessionContext)) 
+  if (exists("session", where = .sessionContext))
     .sessionContext$session
   else
     NULL

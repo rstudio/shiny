@@ -1,10 +1,10 @@
 globalVariables('func')
 
 #' Plot Output
-#' 
-#' Renders a reactive plot that is suitable for assigning to an \code{output} 
+#'
+#' Renders a reactive plot that is suitable for assigning to an \code{output}
 #' slot.
-#' 
+#'
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
 #' the CSS class name \code{shiny-plot-output}.
 #'
@@ -12,27 +12,27 @@ globalVariables('func')
 #'   the output, see \code{\link{plotPNG}}.
 #'
 #' @param expr An expression that generates a plot.
-#' @param width The width of the rendered plot, in pixels; or \code{'auto'} to 
-#'   use the \code{offsetWidth} of the HTML element that is bound to this plot. 
-#'   You can also pass in a function that returns the width in pixels or 
-#'   \code{'auto'}; in the body of the function you may reference reactive 
+#' @param width The width of the rendered plot, in pixels; or \code{'auto'} to
+#'   use the \code{offsetWidth} of the HTML element that is bound to this plot.
+#'   You can also pass in a function that returns the width in pixels or
+#'   \code{'auto'}; in the body of the function you may reference reactive
 #'   values and functions.
 #' @param height The height of the rendered plot, in pixels; or \code{'auto'} to
 #'   use the \code{offsetHeight} of the HTML element that is bound to this plot.
-#'   You can also pass in a function that returns the width in pixels or 
-#'   \code{'auto'}; in the body of the function you may reference reactive 
+#'   You can also pass in a function that returns the width in pixels or
+#'   \code{'auto'}; in the body of the function you may reference reactive
 #'   values and functions.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to \code{\link{png}}. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
-#' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}. 
+#' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}.
 #'   These can be used to set the width, height, background color, etc.
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
 #' @param func A function that generates a plot (deprecated; use \code{expr}
 #'   instead).
-#'   
+#'
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE, func=NULL) {
@@ -43,7 +43,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   }
 
   args <- list(...)
-  
+
   if (is.function(width))
     widthWrapper <- reactive({ width() })
   else
@@ -59,16 +59,16 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       width <- widthWrapper()
     if (!is.null(heightWrapper))
       height <- heightWrapper()
-    
+
     # Note that these are reactive calls. A change to the width and height
-    # will inherently cause a reactive plot to redraw (unless width and 
+    # will inherently cause a reactive plot to redraw (unless width and
     # height were explicitly specified).
     prefix <- 'output_'
     if (width == 'auto')
       width <- shinysession$clientData[[paste(prefix, name, '_width', sep='')]];
     if (height == 'auto')
       height <- shinysession$clientData[[paste(prefix, name, '_height', sep='')]];
-    
+
     if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
       return(NULL)
 
@@ -76,7 +76,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     pixelratio <- shinysession$clientData$pixelratio
     if (is.null(pixelratio))
       pixelratio <- 1
-    
+
     coordmap <- NULL
     plotFunc <- function() {
       # Actually perform the plotting
@@ -91,7 +91,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       if (par('ylog')) {
         usrBounds[c(3,4)] <- 10 ^ usrBounds[c(3,4)]
       }
-      
+
       coordmap <<- list(
         usr = c(
           left = usrCoords[1],
@@ -117,7 +117,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     outfile <- do.call(plotPNG, c(plotFunc, width=width*pixelratio,
                                   height=height*pixelratio, res=res*pixelratio, args))
     on.exit(unlink(outfile))
-    
+
     # Return a list of attributes for the img
     return(list(
       src=shinysession$fileUrl(name, outfile, contentType='image/png'),
@@ -128,7 +128,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
 #' Image file output
 #'
-#' Renders a reactive image that is suitable for assigning to an \code{output} 
+#' Renders a reactive image that is suitable for assigning to an \code{output}
 #' slot.
 #'
 #' The expression \code{expr} must return a list containing the attributes for
@@ -217,7 +217,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
                         deleteFile=TRUE) {
   installExprFunction(expr, "func", env, quoted)
-  
+
   return(function(shinysession, name, ...) {
     imageinfo <- func()
     # Should the file be deleted after being sent? If .deleteFile not set or if
@@ -244,23 +244,23 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 
 
 #' Table Output
-#' 
-#' Creates a reactive table that is suitable for assigning to an \code{output} 
+#'
+#' Creates a reactive table that is suitable for assigning to an \code{output}
 #' slot.
-#' 
+#'
 #' The corresponding HTML output tag should be \code{div} and have the CSS class
 #' name \code{shiny-html-output}.
-#' 
-#' @param expr An expression that returns an R object that can be used with 
+#'
+#' @param expr An expression that returns an R object that can be used with
 #'   \code{\link[xtable]{xtable}}.
 #' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}} and
 #'   \code{\link[xtable]{print.xtable}}.
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
-#' @param func A function that returns an R object that can be used with 
+#' @param func A function that returns an R object that can be used with
 #'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
-#'   
+#'
 #' @export
 renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) {
   if (!is.null(func)) {
@@ -275,11 +275,11 @@ renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) 
 
     if (is.null(data) || identical(data, data.frame()))
       return("")
-    
+
     return(paste(
       capture.output(
-        print(xtable(data, ...), 
-              type='html', 
+        print(xtable(data, ...),
+              type='html',
               html.table.attributes=paste('class="',
                                           htmlEscape(classNames, TRUE),
                                           '"',
@@ -289,35 +289,35 @@ renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) 
 }
 
 #' Printable Output
-#' 
-#' Makes a reactive version of the given function that captures any printed 
-#' output, and also captures its printable result (unless 
-#' \code{\link{invisible}}), into a string. The resulting function is suitable 
+#'
+#' Makes a reactive version of the given function that captures any printed
+#' output, and also captures its printable result (unless
+#' \code{\link{invisible}}), into a string. The resulting function is suitable
 #' for assigning to an  \code{output} slot.
-#' 
-#' The corresponding HTML output tag can be anything (though \code{pre} is 
+#'
+#' The corresponding HTML output tag can be anything (though \code{pre} is
 #' recommended if you need a monospace font and whitespace preserved) and should
 #' have the CSS class name \code{shiny-text-output}.
-#' 
-#' The result of executing \code{func} will be printed inside a 
+#'
+#' The result of executing \code{func} will be printed inside a
 #' \code{\link[utils]{capture.output}} call.
-#' 
-#' Note that unlike most other Shiny output functions, if the given function 
-#' returns \code{NULL} then \code{NULL} will actually be visible in the output. 
+#'
+#' Note that unlike most other Shiny output functions, if the given function
+#' returns \code{NULL} then \code{NULL} will actually be visible in the output.
 #' To display nothing, make your function return \code{\link{invisible}()}.
-#' 
-#' @param expr An expression that may print output and/or return a printable R 
+#'
+#' @param expr An expression that may print output and/or return a printable R
 #'   object.
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
-#' @param func A function that may print output and/or return a printable R 
+#' @param func A function that may print output and/or return a printable R
 #'   object (deprecated; use \code{expr} instead).
-#'   
-#' @seealso \code{\link{renderText}} for displaying the value returned from a 
+#'
+#' @seealso \code{\link{renderText}} for displaying the value returned from a
 #'   function, instead of the printed output.
 #'
 #' @example res/text-example.R
-#'   
+#'
 #' @export
 renderPrint <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
   if (!is.null(func)) {
@@ -336,18 +336,18 @@ renderPrint <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 }
 
 #' Text Output
-#' 
-#' Makes a reactive version of the given function that also uses 
-#' \code{\link[base]{cat}} to turn its result into a single-element character 
+#'
+#' Makes a reactive version of the given function that also uses
+#' \code{\link[base]{cat}} to turn its result into a single-element character
 #' vector.
-#' 
-#' The corresponding HTML output tag can be anything (though \code{pre} is 
+#'
+#' The corresponding HTML output tag can be anything (though \code{pre} is
 #' recommended if you need a monospace font and whitespace preserved) and should
 #' have the CSS class name \code{shiny-text-output}.
-#' 
-#' The result of executing \code{func} will passed to \code{cat}, inside a 
+#'
+#' The result of executing \code{func} will passed to \code{cat}, inside a
 #' \code{\link[utils]{capture.output}} call.
-#' 
+#'
 #' @param expr An expression that returns an R object that can be used as an
 #'   argument to \code{cat}.
 #' @param env The environment in which to evaluate \code{expr}.
@@ -355,12 +355,12 @@ renderPrint <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 #'   is useful if you want to save an expression in a variable.
 #' @param func A function that returns an R object that can be used as an
 #'   argument to \code{cat}.(deprecated; use \code{expr} instead).
-#'   
+#'
 #' @seealso \code{\link{renderPrint}} for capturing the print output of a
 #'   function, rather than the returned text value.
 #'
 #' @example res/text-example.R
-#'   
+#'
 #' @export
 renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
   if (!is.null(func)) {
@@ -376,29 +376,29 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 }
 
 #' UI Output
-#' 
+#'
 #' \bold{Experimental feature.} Makes a reactive version of a function that
 #' generates HTML using the Shiny UI library.
-#' 
+#'
 #' The corresponding HTML output tag should be \code{div} and have the CSS class
 #' name \code{shiny-html-output} (or use \code{\link{uiOutput}}).
-#' 
-#' @param expr An expression that returns a Shiny tag object, \code{\link{HTML}}, 
+#'
+#' @param expr An expression that returns a Shiny tag object, \code{\link{HTML}},
 #'   or a list of such objects.
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
-#' @param func A function that returns a Shiny tag object, \code{\link{HTML}}, 
+#' @param func A function that returns a Shiny tag object, \code{\link{HTML}},
 #'   or a list of such objects (deprecated; use \code{expr} instead).
-#'   
+#'
 #' @seealso conditionalPanel
-#'   
+#'
 #' @export
 #' @examples
 #' \dontrun{
 #'   output$moreControls <- renderUI({
 #'     list(
-#'       
+#'
 #'     )
 #'   })
 #' }
@@ -416,38 +416,38 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 
     result <- takeSingletons(result, shinysession$singletons, desingleton=FALSE)$ui
     result <- surroundSingletons(result)
-    
+
     # renderTags returns a list with head, singletons, and html
     output <- doRenderTags(result)
-    
+
     return(output)
   }
 }
 
 #' File Downloads
-#' 
+#'
 #' Allows content from the Shiny application to be made available to the user as
-#' file downloads (for example, downloading the currently visible data as a CSV 
-#' file). Both filename and contents can be calculated dynamically at the time 
-#' the user initiates the download. Assign the return value to a slot on 
-#' \code{output} in your server function, and in the UI use 
+#' file downloads (for example, downloading the currently visible data as a CSV
+#' file). Both filename and contents can be calculated dynamically at the time
+#' the user initiates the download. Assign the return value to a slot on
+#' \code{output} in your server function, and in the UI use
 #' \code{\link{downloadButton}} or \code{\link{downloadLink}} to make the
 #' download available.
-#' 
-#' @param filename A string of the filename, including extension, that the 
-#'   user's web browser should default to when downloading the file; or a 
-#'   function that returns such a string. (Reactive values and functions may be 
+#'
+#' @param filename A string of the filename, including extension, that the
+#'   user's web browser should default to when downloading the file; or a
+#'   function that returns such a string. (Reactive values and functions may be
 #'   used from this function.)
-#' @param content A function that takes a single argument \code{file} that is a 
+#' @param content A function that takes a single argument \code{file} that is a
 #'   file path (string) of a nonexistent temp file, and writes the content to
 #'   that file path. (Reactive values and functions may be used from this
 #'   function.)
-#' @param contentType A string of the download's 
-#'   \href{http://en.wikipedia.org/wiki/Internet_media_type}{content type}, for 
-#'   example \code{"text/csv"} or \code{"image/png"}. If \code{NULL} or 
-#'   \code{NA}, the content type will be guessed based on the filename 
+#' @param contentType A string of the download's
+#'   \href{http://en.wikipedia.org/wiki/Internet_media_type}{content type}, for
+#'   example \code{"text/csv"} or \code{"image/png"}. If \code{NULL} or
+#'   \code{NA}, the content type will be guessed based on the filename
 #'   extension, or \code{application/octet-stream} if the extension is unknown.
-#'   
+#'
 #' @examples
 #' \dontrun{
 #' # In server.R:
@@ -459,11 +459,11 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 #'     write.csv(data, file)
 #'   }
 #' )
-#' 
+#'
 #' # In ui.R:
 #' downloadLink('downloadData', 'Download')
 #' }
-#' 
+#'
 #' @export
 downloadHandler <- function(filename, content, contentType=NA) {
   return(function(shinysession, name, ...) {

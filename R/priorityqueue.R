@@ -10,14 +10,14 @@ PriorityQueue <- setRefClass(
     # Keys are priorities, values are subqueues (implemented as list)
     .itemsByPriority = 'Map',
     # Sorted vector (largest first)
-    .priorities = 'numeric'  
+    .priorities = 'numeric'
   ),
   methods = list(
-    # Enqueue an item, with the given priority level (must be integer). Higher 
+    # Enqueue an item, with the given priority level (must be integer). Higher
     # priority numbers are dequeued earlier than lower.
     enqueue = function(item, priority) {
       priority <- normalizePriority(priority)
-      
+
       if (!(priority %in% .priorities)) {
         .priorities <<- c(.priorities, priority)
         .priorities <<- sort(.priorities, decreasing=TRUE)
@@ -30,14 +30,14 @@ PriorityQueue <- setRefClass(
       }
       return(invisible())
     },
-    # Retrieve a single item by 1) priority number (highest first) and then 2) 
-    # insertion order (first in, first out). If there are no items to be 
+    # Retrieve a single item by 1) priority number (highest first) and then 2)
+    # insertion order (first in, first out). If there are no items to be
     # dequeued, then NULL is returned. If it is necessary to distinguish between
     # a NULL value and the empty case, call isEmpty() before dequeue().
     dequeue = function() {
       if (length(.priorities) == 0)
         return(NULL)
-      
+
       maxPriority <- .priorities[[1]]
       items <- .itemsByPriority$get(.key(maxPriority))
       firstItem <- items[[1]]
@@ -67,17 +67,17 @@ PriorityQueue <- setRefClass(
 )
 
 normalizePriority <- function(priority) {
-  
+
   if (is.null(priority))
     priority <- 0
-  
+
   # Cast integers to numeric to prevent any inconsistencies
   if (is.integer(priority))
     priority <- as.numeric(priority)
-  
+
   if (!is.numeric(priority))
     stop('priority must be an integer or numeric')
-  
+
   # Check length
   if (length(priority) == 0) {
     warning('Zero-length priority vector was passed; using 0')
@@ -86,7 +86,7 @@ normalizePriority <- function(priority) {
     warning('Priority has length > 1 and only the first element will be used')
     priority <- priority[1]
   }
-  
+
   # NA == 0
   if (is.na(priority))
     priority <- 0

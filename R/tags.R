@@ -15,26 +15,26 @@ htmlEscape <- local({
     `\n` = '&#10;'
   )
   .htmlSpecialsPatternAttrib <- paste(names(.htmlSpecialsAttrib), collapse='|')
-  
+
   function(text, attribute=TRUE) {
     pattern <- if(attribute)
-      .htmlSpecialsPatternAttrib 
+      .htmlSpecialsPatternAttrib
     else
       .htmlSpecialsPattern
-    
+
     # Short circuit in the common case that there's nothing to escape
     if (!grepl(pattern, text))
       return(text)
-    
+
     specials <- if(attribute)
       .htmlSpecialsAttrib
     else
       .htmlSpecials
-    
+
     for (chr in names(specials)) {
       text <- gsub(chr, specials[[chr]], text, fixed=TRUE)
     }
-    
+
     return(text)
   }
 })
@@ -84,7 +84,7 @@ normalizeText <- function(text) {
     text
   else
     htmlEscape(text, attribute=FALSE)
-  
+
 }
 
 #' @export
@@ -128,7 +128,7 @@ tag <- function(`_tag_name`, varArgs) {
   # Named arguments become attribs, dropping NULL values
   named_idx <- nzchar(varArgsNames)
   attribs <- dropNulls(varArgs[named_idx])
-  
+
   # Unnamed arguments are flattened and added as children.
   # Use unname() to remove the names attribute from the list, which would
   # consist of empty strings anyway.
@@ -144,29 +144,29 @@ tag <- function(`_tag_name`, varArgs) {
 }
 
 tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
-  
+
   if (length(tag) == 0)
     return (NULL)
-  
+
   # optionally process a list of tags
   if (!isTag(tag) && is.list(tag)) {
     tag <- dropNullsOrEmpty(flattenTags(tag))
     sapply(tag, function(t) tagWrite(t, textWriter, indent))
     return (NULL)
   }
-  
+
   # compute indent text
   indentText <- paste(rep(" ", indent*2), collapse="")
-  
+
   # Check if it's just text (may either be plain-text or HTML)
   if (is.character(tag)) {
     textWriter(paste(indentText, normalizeText(tag), eol, sep=""))
     return (NULL)
   }
-  
+
   # write tag name
   textWriter(paste(indentText, "<", tag$name, sep=""))
-  
+
   # Convert all attribs to chars explicitly; prevents us from messing up factors
   attribs <- lapply(tag$attribs, as.character)
   # concatenate attributes
@@ -178,19 +178,19 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
     if (!is.na(attribValue)) {
       if (is.logical(attribValue))
         attribValue <- tolower(attribValue)
-      text <- htmlEscape(attribValue, attribute=TRUE) 
+      text <- htmlEscape(attribValue, attribute=TRUE)
       textWriter(paste(" ", attrib,"=\"", text, "\"", sep=""))
     }
     else {
       textWriter(paste(" ", attrib, sep=""))
     }
   }
-  
+
   # write any children
   children <- dropNullsOrEmpty(flattenTags(tag$children))
   if (length(children) > 0) {
     textWriter(">")
-    
+
     # special case for a single child text node (skip newlines and indentation)
     if ((length(children) == 1) && is.character(children[[1]]) ) {
       tagWrite(children[[1]], textWriter, 0, "")
@@ -204,9 +204,9 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
     }
   }
   else {
-    # only self-close void elements 
+    # only self-close void elements
     # (see: http://dev.w3.org/html5/spec/single-page.html#void-elements)
-    if (tag$name %in% c("area", "base", "br", "col", "command", "embed", "hr", 
+    if (tag$name %in% c("area", "base", "br", "col", "command", "embed", "hr",
                         "img", "input", "keygen", "link", "meta", "param",
                         "source", "track", "wbr")) {
       textWriter(paste("/>", eol, sep=""))
@@ -233,7 +233,7 @@ renderTags <- function(ui, singletons = character(0)) {
   # Do singleton and head processing before rendering
   singletonInfo <- takeSingletons(ui, singletons)
   headInfo <- takeHeads(singletonInfo$ui)
-  
+
   headHtml <- doRenderTags(headInfo$head, indent = 1)
   bodyHtml <- doRenderTags(headInfo$ui)
 
@@ -248,7 +248,7 @@ renderTags <- function(ui, singletons = character(0)) {
 rewriteTags <- function(ui, func, preorder) {
   if (preorder)
     ui <- func(ui)
-  
+
   if (!isTag(ui) && is.list(ui)) {
     if (length(ui) > 0) {
       for (i in 1:length(ui)) {
@@ -270,10 +270,10 @@ rewriteTags <- function(ui, func, preorder) {
       }
     }
   }
-  
+
   if (!preorder)
     ui <- func(ui)
-  
+
   return(ui)
 }
 
@@ -323,7 +323,7 @@ takeSingletons <- function(ui, singletons=character(0), desingleton=TRUE) {
       return(uiObj)
     }
   }, TRUE)
-  
+
   return(list(ui=result, singletons=singletons))
 }
 
@@ -338,7 +338,7 @@ takeHeads <- function(ui) {
     }
     return(uiObj)
   }, FALSE)
-  
+
   return(list(ui=result, head=headItems))
 }
 
@@ -458,19 +458,19 @@ tags <- list(
 )
 
 #' Mark Characters as HTML
-#' 
+#'
 #' Marks the given text as HTML, which means the \link{tag} functions will know
 #' not to perform HTML escaping on it.
-#' 
+#'
 #' @param text The text value to mark with HTML
 #' @param ... Any additional values to be converted to character and
 #'   concatenated together
 #' @return The same value, but marked as HTML.
-#' 
+#'
 #' @examples
 #' el <- div(HTML("I like <u>turtles</u>"))
 #' cat(as.character(el))
-#'   
+#'
 #' @export
 HTML <- function(text, ...) {
   htmlText <- c(text, as.character(list(...)))

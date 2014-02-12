@@ -1,13 +1,13 @@
 #' Make a random number generator repeatable
-#' 
-#' Given a function that generates random data, returns a wrapped version of 
+#'
+#' Given a function that generates random data, returns a wrapped version of
 #' that function that always uses the same seed when called. The seed to use can
 #' be passed in explicitly if desired; otherwise, a random number is used.
-#' 
+#'
 #' @param rngfunc The function that is affected by the R session's seed.
 #' @param seed The seed to set every time the resulting function is called.
 #' @return A repeatable version of the function that was passed in.
-#'   
+#'
 #' @note When called, the returned function attempts to preserve the R session's
 #'   current seed by snapshotting and restoring
 #'   \code{\link[base]{.Random.seed}}.
@@ -19,11 +19,11 @@
 #' rnormA(3)  # [1]  1.8285879 -0.7468041 -0.4639111
 #' rnormA(5)  # [1]  1.8285879 -0.7468041 -0.4639111 -1.6510126 -1.4686924
 #' rnormB(5)  # [1] -0.7946034  0.2568374 -0.6567597  1.2451387 -0.8375699
-#' 
+#'
 #' @export
 repeatable <- function(rngfunc, seed = runif(1, 0, .Machine$integer.max)) {
   force(seed)
-  
+
   function(...) {
     # When we exit, restore the seed to its original state
     if (exists('.Random.seed', where=globalenv())) {
@@ -33,9 +33,9 @@ repeatable <- function(rngfunc, seed = runif(1, 0, .Machine$integer.max)) {
     else {
       on.exit(rm('.Random.seed', pos=globalenv()))
     }
-    
+
     set.seed(seed)
-    
+
     rngfunc(...)
   }
 }
@@ -138,8 +138,8 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' @param env The desired environment for the function. Defaults to the
 #'   calling environment two steps back.
 #' @param quoted Is the expression quoted?
-#' @param caller_offset If specified, the offset in the callstack of the 
-#'   functiont to be treated as the caller. 
+#' @param caller_offset If specified, the offset in the callstack of the
+#'   functiont to be treated as the caller.
 #'
 #' @examples
 #' # Example of a new renderer, similar to renderText
@@ -175,7 +175,7 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' # "text, text, text"
 #'
 #' @export
-exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE, 
+exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
                            caller_offset=1) {
   # Get the quoted expr from two calls back
   expr_sub <- eval(substitute(substitute(expr)), parent.frame(caller_offset))
@@ -188,7 +188,7 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
   if (!is.null(expr_sub) && !is.name(expr_sub) && expr_sub[[1]] == as.name('function')) {
     # Get name of function that called this function
     called_fun <- sys.call(-1 * caller_offset)[[1]]
-    
+
     shinyDeprecated(msg = paste("Passing functions to '", called_fun,
       "' is deprecated. Please use expressions instead. See ?", called_fun,
       " for more information.", sep=""))
@@ -206,27 +206,27 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 
 #' Installs an expression in the given environment as a function, and registers
 #' debug hooks so that breakpoints may be set in the function.
-#' 
+#'
 #' This function can replace \code{exprToFunction} as follows: we may use
 #' \code{func <- exprToFunction(expr)} if we do not want the debug hooks, or
 #' \code{installExprFunction(expr, "func")} if we do. Both approaches create a
 #' function named \code{func} in the current environment.
-#' 
-#' @seealso Wraps \code{exprToFunction}; see that method's documentation for 
+#'
+#' @seealso Wraps \code{exprToFunction}; see that method's documentation for
 #'   more documentation and examples.
-#'   
+#'
 #' @param expr A quoted or unquoted expression
-#' @param name The name the function should be given 
+#' @param name The name the function should be given
 #' @param eval.env The desired environment for the function. Defaults to the
-#'   calling environment two steps back. 
+#'   calling environment two steps back.
 #' @param quoted Is the expression quoted?
 #' @param assign.env The environment in which the function should be assigned.
 #' @param label A label for the object to be shown in the debugger. Defaults
-#'   to the name of the calling function. 
-#' 
+#'   to the name of the calling function.
+#'
 #' @export
-installExprFunction <- function(expr, name, eval.env = parent.frame(2), 
-                                quoted = FALSE, 
+installExprFunction <- function(expr, name, eval.env = parent.frame(2),
+                                quoted = FALSE,
                                 assign.env = parent.frame(1),
                                 label = as.character(sys.call(-1)[[1]])) {
   func <- exprToFunction(expr, eval.env, quoted, 2)
@@ -322,14 +322,14 @@ shinyDeprecated <- function(new=NULL, msg=NULL,
   message(msg)
 }
 
-#' Register a function with the debugger (if one is active). 
-#' 
+#' Register a function with the debugger (if one is active).
+#'
 #' Call this function after exprToFunction to give any active debugger a hook
 #' to set and clear breakpoints in the function. A debugger may implement
-#' registerShinyDebugHook to receive callbacks when Shiny functions are 
-#' instantiated at runtime. 
+#' registerShinyDebugHook to receive callbacks when Shiny functions are
+#' instantiated at runtime.
 #'
-#' @param name Name of the field or object containing the function. 
+#' @param name Name of the field or object containing the function.
 #' @param where The reference object or environment containing the function.
 #' @param label A label to display on the function in the debugger.
 #' @noRd
@@ -434,14 +434,14 @@ get_exists = function(x, mode) {
 srcrefFromShinyCall <- function(expr) {
   srcrefs <- attr(expr, "srcref")
   num_exprs <- length(srcrefs)
-  c(srcrefs[[1]][1], srcrefs[[1]][2], 
+  c(srcrefs[[1]][1], srcrefs[[1]][2],
     srcrefs[[num_exprs]][3], srcrefs[[num_exprs]][4],
     srcrefs[[1]][5], srcrefs[[num_exprs]][6])
 }
 
 # Indicates whether the given querystring should cause the associated request
-# to be handled in showcase mode. Returns the showcase mode if set, or NULL 
-# if no showcase mode is set. 
+# to be handled in showcase mode. Returns the showcase mode if set, or NULL
+# if no showcase mode is set.
 showcaseModeOfQuerystring <- function(querystring) {
   if (nchar(querystring) > 0) {
     qs <- parseQueryString(querystring)
@@ -451,7 +451,7 @@ showcaseModeOfQuerystring <- function(querystring) {
   }
   return(NULL)
 }
-  
+
 showcaseModeOfReq <- function(req) {
   showcaseModeOfQuerystring(req$QUERY_STRING)
 }
@@ -460,8 +460,8 @@ showcaseModeOfReq <- function(req) {
 # empty string if the source reference doesn't include file information.
 srcFileOfRef <- function(srcref) {
   fileEnv <- attr(srcref, "srcfile")
-  # The 'srcfile' attribute should be a non-null environment containing the 
-  # variable 'filename', which gives the full path to the source file. 
+  # The 'srcfile' attribute should be a non-null environment containing the
+  # variable 'filename', which gives the full path to the source file.
   if (!is.null(fileEnv) &&
       is.environment(fileEnv) &&
       exists("filename", where = fileEnv))

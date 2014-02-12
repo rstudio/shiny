@@ -1,74 +1,74 @@
 #' Create a Bootstrap page
-#' 
-#' Create a Shiny UI page that loads the CSS and JavaScript for 
-#' \href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and has no content in the 
+#'
+#' Create a Shiny UI page that loads the CSS and JavaScript for
+#' \href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and has no content in the
 #' page body (other than what you provide).
-#' 
-#' This function is primarily intended for users who are proficient in 
-#' HTML/CSS, and know how to lay out pages in Bootstrap. Most applications 
+#'
+#' This function is primarily intended for users who are proficient in
+#' HTML/CSS, and know how to lay out pages in Bootstrap. Most applications
 #' should use \code{\link{fluidPage}} along with layout functions like
 #' \code{\link{fluidRow}} and \code{\link{sidebarLayout}}.
-#' 
+#'
 #' @param ... The contents of the document body.
 #' @param title The browser window title (defaults to the host URL of the page)
 #' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory, e.g. \code{www/bootstrap.css})
-#'   
+#'
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
-#'   
-#' @note The \code{basicPage} function is deprecated, you should use the 
+#'
+#' @note The \code{basicPage} function is deprecated, you should use the
 #'   \code{\link{fluidPage}} function instead.
-#'   
+#'
 #' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
-#'   
+#'
 #' @export
 bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
-  
+
   # required head tags for boostrap
   importBootstrap <- function(min = TRUE) {
-    
+
     ext <- function(ext) {
       ifelse(min, paste(".min", ext, sep=""), ext)
     }
     cssExt <- ext(".css")
     jsExt = ext(".js")
     bs <- "shared/bootstrap/"
-    
+
     # apply theme if requested
-    if (is.null(theme)) 
+    if (is.null(theme))
       cssHref <- paste(bs, "css/bootstrap", cssExt, sep="")
-    else 
+    else
       cssHref <- theme
-    
+
     result <- tags$head(
       tags$link(rel="stylesheet", type="text/css", href=cssHref),
       tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
     )
-    
+
     if (!is.null(title))
       result <- tagAppendChild(result, tags$title(title))
-    
+
     if (responsive) {
       result <- tagAppendChild(
-        result, 
-        tags$meta(name="viewport", 
+        result,
+        tags$meta(name="viewport",
                   content="width=device-width, initial-scale=1.0"))
       result <- tagAppendChild(
         result,
-        tags$link(rel="stylesheet", 
-                  type="text/css", 
+        tags$link(rel="stylesheet",
+                  type="text/css",
                   href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")))
     }
-    
+
     result
   }
-  
+
   tagList(
     # inject bootstrap requirements into head
     importBootstrap(),
-    
+
     # remainder of tags passed to the function
     list(...)
   )
@@ -81,35 +81,35 @@ basicPage <- function(...) {
 }
 
 #' Create a page with a sidebar
-#' 
-#' Create a Shiny UI that contains a header with the application title, a 
+#'
+#' Create a Shiny UI that contains a header with the application title, a
 #' sidebar for input controls, and a main area for output.
-#' 
+#'
 #' @param headerPanel The \link{headerPanel} with the application title
 #' @param sidebarPanel The \link{sidebarPanel} containing input controls
 #' @param mainPanel The \link{mainPanel} containing outputs
 
 #' @return A UI defintion that can be passed to the \link{shinyUI} function
-#' 
-#' @note This function is deprecated. You should use \code{\link{fluidPage}} 
+#'
+#' @note This function is deprecated. You should use \code{\link{fluidPage}}
 #' along with \code{\link{sidebarLayout}} to implement a page with a sidebar.
-#' 
+#'
 #' @examples
 #' # Define UI
 #' shinyUI(pageWithSidebar(
-#'   
+#'
 #'   # Application title
 #'   headerPanel("Hello Shiny!"),
-#'   
+#'
 #'   # Sidebar with a slider input
 #'   sidebarPanel(
-#'     sliderInput("obs", 
-#'                 "Number of observations:", 
-#'                 min = 0, 
-#'                 max = 1000, 
+#'     sliderInput("obs",
+#'                 "Number of observations:",
+#'                 min = 0,
+#'                 max = 1000,
 #'                 value = 500)
 #'   ),
-#'   
+#'
 #'   # Show a plot of the generated distribution
 #'   mainPanel(
 #'     plotOutput("distPlot")
@@ -117,19 +117,19 @@ basicPage <- function(...) {
 #' ))
 #'
 #' @export
-pageWithSidebar <- function(headerPanel, 
-                            sidebarPanel, 
+pageWithSidebar <- function(headerPanel,
+                            sidebarPanel,
                             mainPanel) {
-  
+
   bootstrapPage(
     # basic application container divs
     div(
-      class="container-fluid", 
-      div(class="row-fluid", 
+      class="container-fluid",
+      div(class="row-fluid",
           headerPanel
       ),
-      div(class="row-fluid", 
-          sidebarPanel, 
+      div(class="row-fluid",
+          sidebarPanel,
           mainPanel
       )
     )
@@ -137,86 +137,86 @@ pageWithSidebar <- function(headerPanel,
 }
 
 #' Create a page with a top level navigation bar
-#' 
-#' Create a page that contains a top level navigation bar that can be used to 
+#'
+#' Create a page that contains a top level navigation bar that can be used to
 #' toggle a set of \code{\link{tabPanel}} elements.
-#' 
+#'
 #' @param title The title to display in the navbar
 #' @param ... \code{\link{tabPanel}} elements to include in the page
-#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your 
-#'   server logic to determine which of the current tabs is active. The value 
-#'   will correspond to the \code{value} argument that is passed to 
+#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your
+#'   server logic to determine which of the current tabs is active. The value
+#'   will correspond to the \code{value} argument that is passed to
 #'   \code{\link{tabPanel}}.
-#' @param header Tag of list of tags to display as a common header above all 
+#' @param header Tag of list of tags to display as a common header above all
 #'   tabPanels.
-#' @param footer Tag or list of tags to display as a common footer below all 
+#' @param footer Tag or list of tags to display as a common footer below all
 #'   tabPanels
-#' @param inverse \code{TRUE} to use a dark background and light text for the 
+#' @param inverse \code{TRUE} to use a dark background and light text for the
 #'   navigation bar
-#' @param collapsable \code{TRUE} to automatically collapse the navigation 
-#'   elements into a menu when the width of the browser is less than 940 pixels 
+#' @param collapsable \code{TRUE} to automatically collapse the navigation
+#'   elements into a menu when the width of the browser is less than 940 pixels
 #'   (useful for viewing on smaller touchscreen device)
-#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed 
+#' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
 #'   layout.
-#' @param responsive \code{TRUE} to use responsive layout (automatically adapt 
+#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
 #'   and resize page elements based on the size of the viewing device)
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
-#'   www directory). For example, to use the theme located at 
+#'   www directory). For example, to use the theme located at
 #'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
-#' @param icon Optional icon to appear on a \code{navbarMenu} tab. 
-#'   
+#' @param icon Optional icon to appear on a \code{navbarMenu} tab.
+#'
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
-#'   
-#' @details The \code{navbarMenu} function can be used to create an embedded 
-#'   menu within the navbar that in turns includes additional tabPanels (see 
+#'
+#' @details The \code{navbarMenu} function can be used to create an embedded
+#'   menu within the navbar that in turns includes additional tabPanels (see
 #'   example below).
-#'   
+#'
 #' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}}
-#'   
+#'
 #' @examples
 #' shinyUI(navbarPage("App Title",
-#'   tabPanel("Plot"), 
-#'   tabPanel("Summary"), 
+#'   tabPanel("Plot"),
+#'   tabPanel("Summary"),
 #'   tabPanel("Table")
 #' ))
-#' 
+#'
 #' shinyUI(navbarPage("App Title",
-#'   tabPanel("Plot"), 
+#'   tabPanel("Plot"),
 #'   navbarMenu("More",
-#'     tabPanel("Summary"), 
+#'     tabPanel("Summary"),
 #'     tabPanel("Table")
 #'   )
 #' ))
 #' @export
-navbarPage <- function(title, 
-                       ..., 
+navbarPage <- function(title,
+                       ...,
                        id = NULL,
                        header = NULL,
                        footer = NULL,
                        inverse = FALSE,
-                       collapsable = FALSE, 
+                       collapsable = FALSE,
                        fluid = TRUE,
                        responsive = TRUE,
                        theme = NULL) {
-  
+
   # alias title so we can avoid conflicts w/ title in withTags
-  pageTitle <- title 
-  
+  pageTitle <- title
+
   # navbar class based on options
   navbarClass <- "navbar navbar-static-top"
   if (inverse)
     navbarClass <- paste(navbarClass, "navbar-inverse")
-  
+
   # build the tabset
   tabs <- list(...)
   tabset <- buildTabset(tabs, "nav", NULL, id)
-  
+
   # built the container div dynamically to support optional collapsability
   if (collapsable) {
     navId <- paste("navbar-", as.integer(stats::runif(1, 1, 10000)), sep="")
     containerDiv <- div(class="container",
-                        tags$button(type="button", 
-                                    class="btn btn-navbar", 
+                        tags$button(type="button",
+                                    class="btn btn-navbar",
                                     `data-toggle`="collapse",
                                     `data-target`=".nav-collapse",
                           span(class="icon-bar"),
@@ -224,11 +224,11 @@ navbarPage <- function(title,
                           span(class="icon-bar")
                         ),
                         span(class="brand pull-left", pageTitle),
-                        div(class="nav-collapse collapse", 
+                        div(class="nav-collapse collapse",
                             id=navId,
                             tabset$navList),
                             tags$script(paste(
-                              "$('#", navId, " a:not(.dropdown-toggle)').click(function (e) { 
+                              "$('#", navId, " a:not(.dropdown-toggle)').click(function (e) {
                                   e.preventDefault();
                                   $(this).tab('show');
                                   if ($('.navbar .btn-navbar').is(':visible'))
@@ -243,7 +243,7 @@ navbarPage <- function(title,
   # create a default header if necessary
   if (length(header) == 0)
     header <- HTML("&nbsp;")
-  
+
   # function to return plain or fluid class name
   className <- function(name) {
     if (fluid)
@@ -251,15 +251,15 @@ navbarPage <- function(title,
     else
       name
   }
-  
+
   # build the main tab content div
   contentDiv <- div(class=className("container"))
   if (!is.null(header))
     contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), header))
   contentDiv <- tagAppendChild(contentDiv, tabset$content)
-  if (!is.null(footer)) 
+  if (!is.null(footer))
     contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), footer))
-  
+
   # build the page
   bootstrapPage(
     title = title,
@@ -275,25 +275,25 @@ navbarPage <- function(title,
 #' @rdname navbarPage
 #' @export
 navbarMenu <- function(title, ..., icon = NULL) {
-  structure(list(title = title, 
-                 tabs = list(...), 
-                 iconClass = iconClass(icon)), 
+  structure(list(title = title,
+                 tabs = list(...),
+                 iconClass = iconClass(icon)),
             class = "shiny.navbarmenu")
 }
 
 #' Create a header panel
-#' 
+#'
 #' Create a header panel containing an application title.
-#' 
+#'
 #' @param title An application title to display
-#' @param windowTitle The title that should be displayed by the browser window. 
+#' @param windowTitle The title that should be displayed by the browser window.
 #'   Useful if \code{title} is not a string.
 #' @return A headerPanel that can be passed to \link{pageWithSidebar}
-#'   
+#'
 #' @examples
 #' headerPanel("Hello Shiny!")
 #' @export
-headerPanel <- function(title, windowTitle=title) {    
+headerPanel <- function(title, windowTitle=title) {
   tagList(
     tags$head(tags$title(windowTitle)),
     div(class="span12", style="padding: 10px 0px;",
@@ -303,58 +303,58 @@ headerPanel <- function(title, windowTitle=title) {
 }
 
 #' Create a well panel
-#' 
+#'
 #' Creates a panel with a slightly inset border and grey background. Equivalent
 #' to Bootstrap's \code{well} CSS class.
-#' 
+#'
 #' @param ... UI elements to include inside the panel.
 #' @return The newly created panel.
-#' 
+#'
 #' @export
 wellPanel <- function(...) {
   div(class="well", ...)
 }
 
 #' Create a sidebar panel
-#' 
+#'
 #' Create a sidebar panel containing input controls that can in turn be passed
 #' to \code{\link{sidebarLayout}}.
-#' 
+#'
 #' @param ... UI elements to include on the sidebar
 #' @param width The width of the sidebar. For fluid layouts this is out of 12
 #'   total units; for fixed layouts it is out of whatever the width of the
 #'   sidebar's parent column is.
 #' @return A sidebar that can be passed to \code{\link{sidebarLayout}}
-#'   
+#'
 #' @examples
 #' # Sidebar with controls to select a dataset and specify
 #' # the number of observations to view
 #' sidebarPanel(
-#'   selectInput("dataset", "Choose a dataset:", 
+#'   selectInput("dataset", "Choose a dataset:",
 #'               choices = c("rock", "pressure", "cars")),
-#'   
+#'
 #'   numericInput("obs", "Observations:", 10)
 #' )
 #' @export
 sidebarPanel <- function(..., width = 4) {
   div(class=paste0("span", width),
-    tags$form(class="well", 
+    tags$form(class="well",
       ...
     )
   )
 }
 
 #' Create a main panel
-#' 
-#' Create a main panel containing output elements that can in turn be passed to 
+#'
+#' Create a main panel containing output elements that can in turn be passed to
 #' \code{\link{sidebarLayout}}.
-#' 
+#'
 #' @param ... Output elements to include in the main panel
 #' @param width The width of the main panel. For fluid layouts this is out of 12
-#'   total units; for fixed layouts it is out of whatever the width of the main 
+#'   total units; for fixed layouts it is out of whatever the width of the main
 #'   panel's parent column is.
 #' @return A main panel that can be passed to \code{\link{sidebarLayout}}.
-#'   
+#'
 #' @examples
 #' # Show the caption and plot of the requested variable against mpg
 #' mainPanel(
@@ -369,28 +369,28 @@ mainPanel <- function(..., width = 8) {
 }
 
 #' Conditional Panel
-#' 
-#' Creates a panel that is visible or not, depending on the value of a 
-#' JavaScript expression. The JS expression is evaluated once at startup and 
+#'
+#' Creates a panel that is visible or not, depending on the value of a
+#' JavaScript expression. The JS expression is evaluated once at startup and
 #' whenever Shiny detects a relevant change in input/output.
-#' 
-#' In the JS expression, you can refer to \code{input} and \code{output} 
+#'
+#' In the JS expression, you can refer to \code{input} and \code{output}
 #' JavaScript objects that contain the current values of input and output. For
 #' example, if you have an input with an id of \code{foo}, then you can use
 #' \code{input.foo} to read its value. (Be sure not to modify the input/output
 #' objects, as this may cause unpredictable behavior.)
-#' 
+#'
 #' @param condition A JavaScript expression that will be evaluated repeatedly to
 #'   determine whether the panel should be displayed.
 #' @param ... Elements to include in the panel.
-#' 
+#'
 #' @examples
 #' sidebarPanel(
 #'    selectInput(
 #'       "plotType", "Plot Type",
 #'       c(Scatter = "scatter",
 #'         Histogram = "hist")),
-#' 
+#'
 #'    # Only show this panel if the plot type is a histogram
 #'    conditionalPanel(
 #'       condition = "input.plotType == 'hist'",
@@ -400,7 +400,7 @@ mainPanel <- function(..., width = 8) {
 #'            "Scott",
 #'            "Freedman-Diaconis",
 #'            "[Custom]" = "custom")),
-#'               
+#'
 #'       # Only show this panel if Custom is selected
 #'       conditionalPanel(
 #'          condition = "input.breaks == 'custom'",
@@ -408,21 +408,21 @@ mainPanel <- function(..., width = 8) {
 #'       )
 #'    )
 #' )
-#'   
+#'
 #' @export
 conditionalPanel <- function(condition, ...) {
   div('data-display-if'=condition, ...)
 }
 
 #' Create a text input control
-#' 
+#'
 #' Create an input control for entry of unstructured text values
-#' 
+#'
 #' @param inputId Input variable to assign the control's value to
 #' @param label Display label for the control
 #' @param value Initial value
 #' @return A text input control that can be added to a UI definition.
-#' 
+#'
 #' @family input elements
 #' @seealso \code{\link{updateTextInput}}
 #'
@@ -437,9 +437,9 @@ textInput <- function(inputId, label, value = "") {
 }
 
 #' Create a numeric input control
-#' 
+#'
 #' Create an input control for entry of numeric values
-#' 
+#'
 #' @param inputId Input variable to assign the control's value to
 #' @param label Display label for the control
 #' @param value Initial value
@@ -450,13 +450,13 @@ textInput <- function(inputId, label, value = "") {
 #'
 #' @family input elements
 #' @seealso \code{\link{updateNumericInput}}
-#' 
+#'
 #' @examples
-#' numericInput("obs", "Observations:", 10, 
+#' numericInput("obs", "Observations:", 10,
 #'              min = 1, max = 100)
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
-  
+
   # build input tag
   inputTag <- tags$input(id = inputId, type = "number", value = value)
   if (!is.na(min))
@@ -465,7 +465,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
     inputTag$attribs$max = max
   if (!is.na(step))
     inputTag$attribs$step = step
-  
+
   tagList(
     tags$label(label, `for` = inputId),
     inputTag
@@ -474,11 +474,11 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 
 
 #' File Upload Control
-#' 
-#' Create a file upload control that can be used to upload one or more files. 
+#'
+#' Create a file upload control that can be used to upload one or more files.
 #' \bold{Does not work on older browsers, including Internet Explorer 9 and
 #' earlier.}
-#' 
+#'
 #' Whenever a file upload completes, the corresponding input variable is set
 #' to a dataframe. This dataframe contains one row for each selected file, and
 #' the following columns:
@@ -489,22 +489,22 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 #'   \code{datapath} column).}
 #'   \item{\code{size}}{The size of the uploaded data, in
 #'   bytes.}
-#'   \item{\code{type}}{The MIME type reported by the browser (for example, 
+#'   \item{\code{type}}{The MIME type reported by the browser (for example,
 #'   \code{text/plain}), or empty string if the browser didn't know.}
 #'   \item{\code{datapath}}{The path to a temp file that contains the data that was
 #'   uploaded. This file may be deleted if the user performs another upload
 #'   operation.}
 #' }
-#' 
+#'
 #' @family input elements
 #'
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
-#' @param multiple Whether the user should be allowed to select and upload 
+#' @param multiple Whether the user should be allowed to select and upload
 #'   multiple files at once.
-#' @param accept A character vector of MIME types; gives the browser a hint of 
+#' @param accept A character vector of MIME types; gives the browser a hint of
 #'   what kind of files the server is expecting.
-#'   
+#'
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
   inputTag <- tags$input(id = inputId, type = "file")
@@ -512,7 +512,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
     inputTag$attribs$multiple <- "multiple"
   if (length(accept) > 0)
     inputTag$attribs$accept <- paste(accept, collapse=',')
-  
+
   tagList(
     tags$label(label),
     inputTag,
@@ -527,17 +527,17 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
 
 
 #' Checkbox Input Control
-#' 
+#'
 #' Create a checkbox that can be used to specify logical values.
-#' 
+#'
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
 #' @param value Initial value (\code{TRUE} or \code{FALSE}).
 #' @return A checkbox control that can be added to a UI definition.
-#' 
+#'
 #' @family input elements
 #' @seealso \code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
-#' 
+#'
 #' @examples
 #' checkboxInput("outliers", "Show outliers", FALSE)
 #' @export
@@ -550,27 +550,27 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 
 
 #' Checkbox Group Input Control
-#' 
-#' Create a group of checkboxes that can be used to toggle multiple choices 
+#'
+#' Create a group of checkboxes that can be used to toggle multiple choices
 #' independently. The server will receive the input as a character vector of the
 #' selected values.
-#' 
+#'
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
 #' @param choices List of values to show checkboxes for. If elements of the list
 #'   are named then that name rather than the value is displayed to the user.
 #' @param selected The values that should be initially selected, if any.
 #' @return A list of HTML elements that can be added to a UI definition.
-#'   
+#'
 #' @family input elements
 #' @seealso \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
-#'   
+#'
 #' @examples
 #' checkboxGroupInput("variable", "Variable:",
 #'                    c("Cylinders" = "cyl",
 #'                      "Transmission" = "am",
 #'                      "Gears" = "gear"))
-#'                  
+#'
 #' @export
 checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
   # resolve names
@@ -597,7 +597,7 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
                tags$span(name))
     }
   )
-  
+
   # return label and select tag
   tags$div(id = inputId,
            class = "control-group shiny-input-checkboxgroup",
@@ -631,13 +631,13 @@ validateSelected <- function(selected, choices, inputId) {
 }
 
 #' Create a help text element
-#' 
+#'
 #' Create help text which can be added to an input form to provide additional
 #' explanation or context.
-#' 
+#'
 #' @param ... One or more help text strings (or other inline HTML elements)
 #' @return A help text element that can be added to a UI definition.
-#'   
+#'
 #' @examples
 #' helpText("Note: while the data view will show only",
 #'          "the specified number of observations, the",
@@ -660,31 +660,31 @@ choicesWithNames <- function(choices) {
   choiceNames <- names(choices)
   if (is.null(choiceNames))
     choiceNames <- character(length(choices))
-  
+
   # default missing names to choice values
   missingNames <- choiceNames == ""
   choiceNames[missingNames] <- paste(choices)[missingNames]
   names(choices) <- choiceNames
-  
+
   # return choices
   return (choices)
 }
 
 #' Create a select list input control
-#' 
+#'
 #' Create a select list that can be used to choose a single or
 #' multiple items from a list of values.
-#' 
+#'
 #' @param inputId Input variable to assign the control's value to
 #' @param label Display label for the control
-#' @param choices List of values to select from. If elements of the list are 
+#' @param choices List of values to select from. If elements of the list are
 #' named then that name rather than the value is displayed to the user.
 #' @param selected The initially selected value (or multiple values if
 #' \code{multiple = TRUE}). If not specified then defaults to the first value
 #' for single-select lists and no values for multiple select lists.
 #' @param multiple Is selection of multiple items allowed?
 #' @return A select list control that can be added to a UI definition.
-#' 
+#'
 #' @family input elements
 #' @seealso \code{\link{updateSelectInput}}
 #'
@@ -694,19 +694,19 @@ choicesWithNames <- function(choices) {
 #'               "Transmission" = "am",
 #'               "Gears" = "gear"))
 #' @export
-selectInput <- function(inputId, 
-                        label, 
-                        choices, 
-                        selected = NULL, 
+selectInput <- function(inputId,
+                        label,
+                        choices,
+                        selected = NULL,
                         multiple = FALSE) {
   # resolve names
   choices <- choicesWithNames(choices)
-  
+
   # default value if it's not specified
   if (is.null(selected)) {
     if (!multiple) selected <- choices[[1]]
   } else selected <- validateSelected(selected, choices, inputId)
-  
+
   # create select tag and add options
   selectTag <- tags$select(id = inputId)
   if (multiple)
@@ -732,12 +732,12 @@ selectInput <- function(inputId,
 }
 
 #' Create radio buttons
-#' 
+#'
 #' Create a set of radio buttons used to select an item from a list.
-#' 
+#'
 #' @param inputId Input variable to assign the control's value to
 #' @param label Display label for the control
-#' @param choices List of values to select from (if elements of the list are 
+#' @param choices List of values to select from (if elements of the list are
 #' named then that name rather than the value is displayed to the user)
 #' @param selected The initially selected value (if not specified then
 #' defaults to the first value)
@@ -745,7 +745,7 @@ selectInput <- function(inputId,
 #'
 #' @family input elements
 #' @seealso \code{\link{updateRadioButtons}}
-#' 
+#'
 #' @examples
 #' radioButtons("dist", "Distribution type:",
 #'              c("Normal" = "norm",
@@ -756,12 +756,12 @@ selectInput <- function(inputId,
 radioButtons <- function(inputId, label, choices, selected = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
-  
+
   # default value if it's not specified
   selected <- if (is.null(selected)) choices[[1]] else {
     validateSelected(selected, choices, inputId)
   }
-  
+
   # Create tags for each of the options
   ids <- paste0(inputId, seq_along(choices))
 
@@ -791,15 +791,15 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
 }
 
 #' Create a submit button
-#' 
+#'
 #' Create a submit button for an input form. Forms that include a submit
 #' button do not automatically update their outputs when inputs change,
 #' rather they wait until the user explicitly clicks the submit button.
-#' 
+#'
 #' @param text Button caption
 #' @param icon Optional \code{\link{icon}} to appear on the button
 #' @return A submit button that can be added to a UI definition.
-#' 
+#'
 #' @family input elements
 #'
 #' @examples
@@ -807,12 +807,12 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
 #' submitButton("Update View", icon("refresh"))
 #' @export
 submitButton <- function(text = "Apply Changes", icon = NULL) {
-  
+
   if (!is.null(icon))
     buttonContent <- list(icon, text)
   else
     buttonContent <- text
-  
+
   div(
     tags$button(type="submit", class="btn btn-primary", buttonContent)
   )
@@ -847,23 +847,23 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 #' }
 #' @export
 actionButton <- function(inputId, label, icon = NULL) {
-  
+
   if (!is.null(icon))
     buttonContent <- list(icon, label)
   else
     buttonContent <- label
-  
-  tags$button(id=inputId, 
-              type="button", 
-              class="btn action-button", 
+
+  tags$button(id=inputId,
+              type="button",
+              class="btn action-button",
               buttonContent)
 }
 
 #' Slider Input Widget
-#' 
+#'
 #' Constructs a slider widget to select a numeric value from a range.
-#' 
-#' @param inputId Specifies the \code{input} slot that will be used to access 
+#'
+#' @param inputId Specifies the \code{input} slot that will be used to access
 #'   the value.
 #' @param label A descriptive label to be displayed with the widget.
 #' @param min The minimum value (inclusive) that can be selected.
@@ -871,59 +871,59 @@ actionButton <- function(inputId, label, icon = NULL) {
 #' @param value The initial value of the slider. A numeric vector of length
 #'   one will create a regular slider; a numeric vector of length two will
 #'   create a double-ended range slider. A warning will be issued if the
-#'   value doesn't fit between \code{min} and \code{max}. 
-#' @param step Specifies the interval between each selectable value on the 
+#'   value doesn't fit between \code{min} and \code{max}.
+#' @param step Specifies the interval between each selectable value on the
 #'   slider (\code{NULL} means no restriction).
-#' @param round \code{TRUE} to round all values to the nearest integer; 
-#'   \code{FALSE} if no rounding is desired; or an integer to round to that 
-#'   number of digits (for example, 1 will round to the nearest 10, and -2 will 
-#'   round to the nearest .01). Any rounding will be applied after snapping to 
+#' @param round \code{TRUE} to round all values to the nearest integer;
+#'   \code{FALSE} if no rounding is desired; or an integer to round to that
+#'   number of digits (for example, 1 will round to the nearest 10, and -2 will
+#'   round to the nearest .01). Any rounding will be applied after snapping to
 #'   the nearest step.
-#' @param format Customize format values in slider labels. See 
+#' @param format Customize format values in slider labels. See
 #'   \url{https://code.google.com/p/jquery-numberformatter/} for syntax
 #'   details.
 #' @param locale The locale to be used when applying \code{format}. See details.
-#' @param ticks \code{FALSE} to hide tick marks, \code{TRUE} to show them 
+#' @param ticks \code{FALSE} to hide tick marks, \code{TRUE} to show them
 #'   according to some simple heuristics.
-#' @param animate \code{TRUE} to show simple animation controls with default 
-#'   settings; \code{FALSE} not to; or a custom settings list, such as those 
+#' @param animate \code{TRUE} to show simple animation controls with default
+#'   settings; \code{FALSE} not to; or a custom settings list, such as those
 #'   created using \code{animationOptions}.
 #'
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
-#'   
+#'
 #' @details
-#' 
+#'
 #' Valid values for \code{locale} are: \tabular{ll}{ Arab Emirates \tab "ae" \cr
-#' Australia \tab "au" \cr Austria \tab "at" \cr Brazil \tab "br" \cr Canada 
-#' \tab "ca" \cr China \tab "cn" \cr Czech \tab "cz" \cr Denmark \tab "dk" \cr 
-#' Egypt \tab "eg" \cr Finland \tab "fi" \cr France  \tab "fr" \cr Germany \tab 
+#' Australia \tab "au" \cr Austria \tab "at" \cr Brazil \tab "br" \cr Canada
+#' \tab "ca" \cr China \tab "cn" \cr Czech \tab "cz" \cr Denmark \tab "dk" \cr
+#' Egypt \tab "eg" \cr Finland \tab "fi" \cr France  \tab "fr" \cr Germany \tab
 #' "de" \cr Greece \tab "gr" \cr Great Britain \tab "gb" \cr Hong Kong \tab "hk"
-#' \cr India \tab "in" \cr Israel \tab "il" \cr Japan \tab "jp" \cr Russia \tab 
-#' "ru" \cr South Korea \tab "kr" \cr Spain \tab "es" \cr Sweden \tab "se" \cr 
-#' Switzerland \tab "ch" \cr Taiwan \tab "tw" \cr Thailand \tab "th" \cr United 
+#' \cr India \tab "in" \cr Israel \tab "il" \cr Japan \tab "jp" \cr Russia \tab
+#' "ru" \cr South Korea \tab "kr" \cr Spain \tab "es" \cr Sweden \tab "se" \cr
+#' Switzerland \tab "ch" \cr Taiwan \tab "tw" \cr Thailand \tab "th" \cr United
 #' States \tab "us" \cr Vietnam \tab "vn" \cr }
-#' 
+#'
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round=FALSE, format='#,##0.#####', locale='us',
                         ticks=TRUE, animate=FALSE) {
- 
+
   # validate label
   labelText <- as.character(label)
   if (!is.character(labelText))
     stop("label not specified")
-  
+
   if (identical(animate, TRUE))
     animate <- animationOptions()
-  
+
   if (!is.null(animate) && !identical(animate, FALSE)) {
     if (is.null(animate$playButton))
       animate$playButton <- tags$i(class='icon-play')
     if (is.null(animate$pauseButton))
       animate$pauseButton <- tags$i(class='icon-pause')
   }
-  
+
   # build slider
   tags$div(
     tagList(
@@ -1153,60 +1153,60 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 
 
 #' Create a tab panel
-#' 
+#'
 #' Create a tab panel that can be included within a \code{\link{tabsetPanel}}.
-#' 
+#'
 #' @param title Display title for tab
 #' @param ... UI elements to include within the tab
-#' @param value The value that should be sent when \code{tabsetPanel} reports 
-#'   that this tab is selected. If omitted and \code{tabsetPanel} has an 
+#' @param value The value that should be sent when \code{tabsetPanel} reports
+#'   that this tab is selected. If omitted and \code{tabsetPanel} has an
 #'   \code{id}, then the title will be used..
 #' @param icon Optional icon to appear on the tab. This attribute is only
 #' valid when using a \code{tabPanel} within a \code{\link{navbarPage}}.
 #' @return A tab that can be passed to \code{\link{tabsetPanel}}
 #'
 #' @seealso \code{\link{tabsetPanel}}
-#'   
+#'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
 #' # table view of the generated distribution
 #' mainPanel(
 #'   tabsetPanel(
-#'     tabPanel("Plot", plotOutput("plot")), 
-#'     tabPanel("Summary", verbatimTextOutput("summary")), 
+#'     tabPanel("Plot", plotOutput("plot")),
+#'     tabPanel("Summary", verbatimTextOutput("summary")),
 #'     tabPanel("Table", tableOutput("table"))
 #'   )
 #' )
 #' @export
 tabPanel <- function(title, ..., value = NULL, icon = NULL) {
-  divTag <- div(class="tab-pane", 
-                title=title, 
+  divTag <- div(class="tab-pane",
+                title=title,
                 `data-value`=value,
                 `data-icon-class` = iconClass(icon),
                 ...)
 }
 
 #' Create a tabset panel
-#' 
-#' Create a tabset that contains \code{\link{tabPanel}} elements. Tabsets are 
+#'
+#' Create a tabset that contains \code{\link{tabPanel}} elements. Tabsets are
 #' useful for dividing output into multiple independently viewable sections.
-#' 
+#'
 #' @param ... \code{\link{tabPanel}} elements to include in the tabset
-#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your 
-#'   server logic to determine which of the current tabs is active. The value 
-#'   will correspond to the \code{value} argument that is passed to 
+#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your
+#'   server logic to determine which of the current tabs is active. The value
+#'   will correspond to the \code{value} argument that is passed to
 #'   \code{\link{tabPanel}}.
 #' @param selected The \code{value} (or, if none was supplied, the \code{title})
-#'   of the tab that should be selected by default. If \code{NULL}, the first 
+#'   of the tab that should be selected by default. If \code{NULL}, the first
 #'   tab will be selected.
 #' @param type Use "tabs" for the standard look; Use "pills" for a more plain
 #'   look where tabs are selected using a background fill color.
-#' @param position The position of the tabs relative to the content. Valid 
-#'   values are "above", "below", "left", and "right" (defaults to "above"). 
-#'   Note that the \code{position} argument is not valid when \code{type} is 
+#' @param position The position of the tabs relative to the content. Valid
+#'   values are "above", "below", "left", and "right" (defaults to "above").
+#'   Note that the \code{position} argument is not valid when \code{type} is
 #'   "pill".
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
-#'   
+#'
 #' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
 #'
 #' @examples
@@ -1214,23 +1214,23 @@ tabPanel <- function(title, ..., value = NULL, icon = NULL) {
 #' # table view of the generated distribution
 #' mainPanel(
 #'   tabsetPanel(
-#'     tabPanel("Plot", plotOutput("plot")), 
-#'     tabPanel("Summary", verbatimTextOutput("summary")), 
+#'     tabPanel("Plot", plotOutput("plot")),
+#'     tabPanel("Summary", verbatimTextOutput("summary")),
 #'     tabPanel("Table", tableOutput("table"))
 #'   )
 #' )
 #' @export
-tabsetPanel <- function(..., 
-                        id = NULL, 
-                        selected = NULL, 
+tabsetPanel <- function(...,
+                        id = NULL,
+                        selected = NULL,
                         type = c("tabs", "pills"),
-                        position = c("above", "below", "left", "right")) { 
-  
+                        position = c("above", "below", "left", "right")) {
+
   # build the tabset
   tabs <- list(...)
   type <- match.arg(type)
   tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
-  
+
   # position the nav list and content appropriately
   position <- match.arg(position)
   if (position %in% c("above", "left", "right")) {
@@ -1240,42 +1240,42 @@ tabsetPanel <- function(...,
     first <- tabset$content
     second <- tabset$navList
   }
-  
+
   # create the tab div
-  tabDiv <- tags$div(class = paste("tabbable tabs-", position, sep=""), 
-                     first, 
+  tabDiv <- tags$div(class = paste("tabbable tabs-", position, sep=""),
+                     first,
                      second)
 }
 
 #' Create a navigation list panel
-#' 
-#' Create a navigation list panel that provides a list of links on the left 
+#'
+#' Create a navigation list panel that provides a list of links on the left
 #' which navigate to a set of tabPanels displayed to the right.
-#' 
+#'
 #' @param ... \code{\link{tabPanel}} elements to include in the navlist
-#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your 
+#' @param id If provided, you can use \code{input$}\emph{\code{id}} in your
 #'   server logic to determine which of the current navlist items is active. The
-#'   value will correspond to the \code{value} argument that is passed to 
+#'   value will correspond to the \code{value} argument that is passed to
 #'   \code{\link{tabPanel}}.
 #' @param selected The \code{value} (or, if none was supplied, the \code{title})
-#'   of the navigation item that should be selected by default. If \code{NULL}, 
+#'   of the navigation item that should be selected by default. If \code{NULL},
 #'   the first navigation will be selected.
-#' @param well \code{TRUE} to place a well (gray rounded rectangle) around the 
+#' @param well \code{TRUE} to place a well (gray rounded rectangle) around the
 #'   navigation list.
-#' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed 
+#' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
 #'   layout.
 #' @param widths Column withs of the navigation list and tabset content areas
 #'   respectively.
-#' 
-#' @details You can include headers within the \code{navlistPanel} by 
+#'
+#' @details You can include headers within the \code{navlistPanel} by
 #' including plain text elements in the list; you can include separators by
-#' including "------" (any number of dashes works).    
-#'       
+#' including "------" (any number of dashes works).
+#'
 #' @examples
 #' shinyUI(fluidPage(
-#'  
+#'
 #'   titlePanel("Application Title"),
-#'  
+#'
 #'   navlistPanel(
 #'     "Header",
 #'     tabPanel("First"),
@@ -1283,15 +1283,15 @@ tabsetPanel <- function(...,
 #'     "-----",
 #'     tabPanel("Third")
 #'   )
-#' ))  
+#' ))
 #' @export
-navlistPanel <- function(..., 
-                         id = NULL, 
+navlistPanel <- function(...,
+                         id = NULL,
                          selected = NULL,
                          well = TRUE,
-                         fluid = TRUE, 
+                         fluid = TRUE,
                          widths = c(4, 8)) {
-    
+
   # text filter for defining separtors and headers
   textFilter <- function(text) {
     if (grepl("^\\-+$", text))
@@ -1299,60 +1299,60 @@ navlistPanel <- function(...,
     else
       tags$li(class="nav-header", text)
   }
-  
+
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, 
-                        "nav nav-list", 
+  tabset <- buildTabset(tabs,
+                        "nav nav-list",
                         textFilter,
-                        id, 
+                        id,
                         selected)
-  
+
   # create the columns
   columns <- list(
     column(widths[[1]], class=ifelse(well, "well", ""), tabset$navList),
     column(widths[[2]], tabset$content)
   )
-  
+
   # return the row
-  if (fluid) 
+  if (fluid)
     fluidRow(columns)
   else
     fixedRow(columns)
 }
 
 
-buildTabset <- function(tabs, 
-                        ulClass, 
-                        textFilter = NULL, 
-                        id = NULL, 
+buildTabset <- function(tabs,
+                        ulClass,
+                        textFilter = NULL,
+                        id = NULL,
                         selected = NULL) {
-  
+
   # build tab nav list and tab content div
-  
+
   # add tab input sentinel class if we have an id
   if (!is.null(id))
     ulClass <- paste(ulClass, "shiny-tab-input")
-  
+
   tabNavList <- tags$ul(class = ulClass, id = id)
   tabContent <- tags$div(class = "tab-content")
   firstTab <- TRUE
   tabsetId <- as.integer(stats::runif(1, 1, 10000))
   tabId <- 1
   for (divTag in tabs) {
-    
+
     # check for text; pass it to the textFilter or skip it if there is none
     if (is.character(divTag)) {
       if (!is.null(textFilter))
         tabNavList <- tagAppendChild(tabNavList, textFilter(divTag))
       next
     }
-    
+
     # compute id and assign it to the div
     thisId <- paste("tab", tabsetId, tabId, sep="-")
     divTag$attribs$id <- thisId
     tabId <- tabId + 1
-    
+
     tabValue <- divTag$attribs$`data-value`
     if (!is.null(tabValue) && is.null(id)) {
       stop("tabsetPanel doesn't have an id assigned, but one of its tabPanels ",
@@ -1370,52 +1370,52 @@ buildTabset <- function(tabs,
       }
       aTag
     }
-    
+
     # check for a navbarMenu and handle appropriately
     if (inherits(divTag, "shiny.navbarmenu")) {
-      
+
       # create the a tag
-      aTag <- tags$a(href="#", 
-                     class="dropdown-toggle", 
+      aTag <- tags$a(href="#",
+                     class="dropdown-toggle",
                      `data-toggle`="dropdown")
-      
+
       # add optional icon
       aTag <- appendIcon(aTag, divTag$iconClass)
-      
+
       # add the title and caret
       aTag <- tagAppendChild(aTag, divTag$title)
       aTag <- tagAppendChild(aTag, tags$b(class="caret"))
-      
+
       # build the dropdown list element
       liTag <- tags$li(class = "dropdown", aTag)
-       
+
       # build the child tabset
       tabset <- buildTabset(divTag$tabs, "dropdown-menu")
       liTag <- tagAppendChild(liTag, tabset$navList)
-      
-      # don't add a standard tab content div, rather add the list of tab 
-      # content divs that are contained within the tabset 
+
+      # don't add a standard tab content div, rather add the list of tab
+      # content divs that are contained within the tabset
       divTag <- NULL
-      tabContent <- tagAppendChildren(tabContent, 
+      tabContent <- tagAppendChildren(tabContent,
                                       list = tabset$content$children)
     }
     # else it's a standard navbar item
     else {
       # create the a tag
       aTag <- tags$a(href=paste("#", thisId, sep=""),
-                     `data-toggle` = "tab", 
+                     `data-toggle` = "tab",
                      `data-value` = tabValue)
-      
+
       # append optional icon
       aTag <- appendIcon(aTag, divTag$attribs$`data-icon-class`)
-      
+
       # add the title
       aTag <- tagAppendChild(aTag, divTag$attribs$title)
 
       # create the li tag
       liTag <- tags$li(aTag)
     }
-    
+
     if (is.null(tabValue)) {
       tabValue <- divTag$attribs$title
     }
@@ -1429,26 +1429,26 @@ buildTabset <- function(tabs,
       divTag$attribs$class <- "tab-pane active"
       firstTab = FALSE
     }
-    
+
     divTag$attribs$title <- NULL
 
     # append the elements to our lists
     tabNavList <- tagAppendChild(tabNavList, liTag)
     tabContent <- tagAppendChild(tabContent, divTag)
   }
-  
+
   list(navList = tabNavList, content = tabContent)
 }
 
 
 #' Create a text output element
-#' 
-#' Render a reactive output variable as text within an application page. The 
+#'
+#' Render a reactive output variable as text within an application page. The
 #' text will be included within an HTML \code{div} tag by default.
 #' @param outputId output variable to read the value from
 #' @param container a function to generate an HTML element to contain the text
 #' @return A text output element that can be included in a panel
-#' @details Text is HTML-escaped prior to rendering. This element is often used 
+#' @details Text is HTML-escaped prior to rendering. This element is often used
 #' to display \link{renderText} output variables.
 #' @examples
 #' h3(textOutput("caption"))
@@ -1458,7 +1458,7 @@ textOutput <- function(outputId, container = div) {
 }
 
 #' Create a verbatim text output element
-#' 
+#'
 #' Render a reactive output variable as verbatim text within an
 #' application page. The text will be included within an HTML \code{pre} tag.
 #' @param outputId output variable to read the value from
@@ -1470,7 +1470,7 @@ textOutput <- function(outputId, container = div) {
 #' mainPanel(
 #'   h4("Summary"),
 #'   verbatimTextOutput("summary"),
-#'  
+#'
 #'   h4("Observations"),
 #'   tableOutput("view")
 #' )
@@ -1480,7 +1480,7 @@ verbatimTextOutput <- function(outputId) {
 }
 
 #' Create a image output element
-#' 
+#'
 #' Render a \link{renderImage} within an application page.
 #' @param outputId output variable to read the image from
 #' @param width Image width. Must be a valid CSS unit (like \code{"100\%"},
@@ -1501,7 +1501,7 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 }
 
 #' Create an plot output element
-#' 
+#'
 #' Render a \link{renderPlot} within an application page.
 #' @param outputId output variable to read the plot from
 #' @param width Plot width. Must be a valid CSS unit (like \code{"100\%"},
@@ -1509,7 +1509,7 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 #'   string and have \code{"px"} appended.
 #' @param height Plot height
 #' @param clickId If not \code{NULL}, the plot will send coordinates to the
-#'   server whenever it is clicked. This information will be accessible on the 
+#'   server whenever it is clicked. This information will be accessible on the
 #'   \code{input} object using \code{input$}\emph{\code{clickId}}. The value will be a
 #'   named list or vector with \code{x} and \code{y} elements indicating the
 #'   mouse position in user units.
@@ -1521,7 +1521,7 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 #'   list or vector with \code{x} and \code{y} elements indicating the mouse
 #'   position in user units.
 #' @param hoverDelay The delay for hovering, in milliseconds.
-#' @param hoverDelayType The type of algorithm for limiting the number of hover 
+#' @param hoverDelayType The type of algorithm for limiting the number of hover
 #'   events. Use \code{"throttle"} to limit the number of hover events to one
 #'   every \code{hoverDelay} milliseconds. Use \code{"debounce"} to suspend
 #'   events while the cursor is moving, and wait until the cursor has been at
@@ -1542,7 +1542,7 @@ plotOutput <- function(outputId, width = "100%", height="400px",
   } else {
     hoverDelayType <- match.arg(hoverDelayType)[[1]]
   }
-  
+
   style <- paste("width:", validateCssUnit(width), ";",
     "height:", validateCssUnit(height))
   div(id = outputId, class = "shiny-plot-output", style = style,
@@ -1553,7 +1553,7 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 }
 
 #' Create a table output element
-#' 
+#'
 #' Render a \link{renderTable} within an application page.
 #' @param outputId output variable to read the table from
 #' @return A table output element that can be included in a panel
@@ -1581,14 +1581,14 @@ dataTableOutput <- function(outputId) {
 }
 
 #' Create an HTML output element
-#' 
-#' Render a reactive output variable as HTML within an application page. The 
-#' text will be included within an HTML \code{div} tag, and is presumed to 
+#'
+#' Render a reactive output variable as HTML within an application page. The
+#' text will be included within an HTML \code{div} tag, and is presumed to
 #' contain HTML content which should not be escaped.
-#' 
+#'
 #' \code{uiOutput} is intended to be used with \code{renderUI} on the
 #' server side. It is currently just an alias for \code{htmlOutput}.
-#'   
+#'
 #' @param outputId output variable to read the value from
 #' @return An HTML output element that can be included in a panel
 #' @examples
@@ -1605,17 +1605,17 @@ uiOutput <- function(outputId) {
 }
 
 #' Create a download button or link
-#' 
-#' Use these functions to create a download button or link; when clicked, it 
-#' will initiate a browser download. The filename and contents are specified by 
-#' the corresponding \code{\link{downloadHandler}} defined in the server 
+#'
+#' Use these functions to create a download button or link; when clicked, it
+#' will initiate a browser download. The filename and contents are specified by
+#' the corresponding \code{\link{downloadHandler}} defined in the server
 #' function.
-#' 
+#'
 #' @param outputId The name of the output slot that the \code{downloadHandler}
 #'   is assigned to.
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
-#'   
+#'
 #' @examples
 #' \dontrun{
 #' # In server.R:
@@ -1627,16 +1627,16 @@ uiOutput <- function(outputId) {
 #'     write.csv(data, con)
 #'   }
 #' )
-#' 
+#'
 #' # In ui.R:
 #' downloadLink('downloadData', 'Download')
 #' }
-#' 
+#'
 #' @aliases downloadLink
 #' @seealso downloadHandler
 #' @export
-downloadButton <- function(outputId, 
-                           label="Download", 
+downloadButton <- function(outputId,
+                           label="Download",
                            class=NULL) {
   aTag <- tags$a(id=outputId,
                  class=paste(c('btn shiny-download-link', class), collapse=" "),
@@ -1658,44 +1658,44 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
 
 
 #' Create an icon
-#' 
+#'
 #' Create an icon for use within a page. Icons can appear on their own,
 #' inside of a button, or as an icon for a \code{\link{tabPanel}} within a
 #' \code{\link{navbarPage}}.
-#' 
-#' @param name Name of icon. Icons are drawn from the 
-#'   \href{http://fontawesome.io/icons/}{Font Awesome} library. Note that the 
-#'   "fa-" prefix should not be used in icon names (i.e. the "fa-calendar" icon 
-#'   should be referred to as "calendar")
-#' @param class Additional classes to customize the style of the icon (see the 
-#'  \href{http://fontawesome.io/examples/}{usage examples} for 
-#'   details on supported styles).
-#' @param lib Icon library to use ("font-awesome" is only one currently 
-#'   supported)
-#'   
-#' @return An icon element   
 #'
-#'   
+#' @param name Name of icon. Icons are drawn from the
+#'   \href{http://fontawesome.io/icons/}{Font Awesome} library. Note that the
+#'   "fa-" prefix should not be used in icon names (i.e. the "fa-calendar" icon
+#'   should be referred to as "calendar")
+#' @param class Additional classes to customize the style of the icon (see the
+#'  \href{http://fontawesome.io/examples/}{usage examples} for
+#'   details on supported styles).
+#' @param lib Icon library to use ("font-awesome" is only one currently
+#'   supported)
+#'
+#' @return An icon element
+#'
+#'
 #' @examples
 #' icon("calendar")            # standard icon
 #' icon("calendar", "fa-3x")   # 3x normal size
-#' 
+#'
 #' # add an icon to a submit button
 #' submitButton("Update View", icon = icon("refresh"))
-#' 
+#'
 #' shinyUI(navbarPage("App Title",
-#'   tabPanel("Plot", icon = icon("bar-chart-o")), 
-#'   tabPanel("Summary", icon = icon("list-alt")), 
+#'   tabPanel("Plot", icon = icon("bar-chart-o")),
+#'   tabPanel("Summary", icon = icon("list-alt")),
 #'   tabPanel("Table", icon = icon("table"))
 #' ))
-#' 
+#'
 #' @export
 icon <- function(name, class = NULL, lib = "font-awesome") {
-  
+
   # determine stylesheet
   if (!identical(lib, "font-awesome"))
     stop("Unknown font library '", lib, "' specified")
-  
+
   # build the icon class (allow name to be null so that other functions
   # e.g. builtTabset can pass an explict class value)
   iconClass <- ""
@@ -1703,7 +1703,7 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
     iconClass <- paste0("fa fa-", name)
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
-  
+
   # return the element and css dependency
   tagList(
     singleton(tags$head(
@@ -1711,7 +1711,7 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
                 href = 'shared/font-awesome/css/font-awesome.min.css')
     )),
     tags$i(class = iconClass)
-  ) 
+  )
 }
 
 # Helper funtion to extract the class from an icon
@@ -1719,25 +1719,25 @@ iconClass <- function(icon) {
   if (is.null(icon))
     NULL
   else
-    icon[[2]]$attribs$class  
+    icon[[2]]$attribs$class
 }
 
 #' Validate proper CSS formatting of a unit
-#' 
+#'
 #' Checks that the argument is valid for use as a CSS unit of length.
-#' 
+#'
 #' \code{NULL} and \code{NA} are returned unchanged.
-#' 
+#'
 #' Single element numeric vectors are returned as a character vector with the
 #' number plus a suffix of \code{"px"}.
-#' 
+#'
 #' Single element character vectors must be \code{"auto"} or \code{"inherit"},
 #' or a number followed by a valid suffix: \code{px}, \code{\%}, \code{em},
 #' \code{pt}, \code{in}, \code{cm}, \code{mm}, \code{ex}, or \code{pc}.
-#' 
+#'
 #' Any other value will cause an error to be thrown.
-#' 
-#' @param x The unit to validate. Will be treated as a number of pixels if a 
+#'
+#' @param x The unit to validate. Will be treated as a number of pixels if a
 #'   unit is not specified.
 #' @return A properly formatted CSS unit of length, if possible. Otherwise, will
 #'   throw an error.
@@ -1748,10 +1748,10 @@ iconClass <- function(icon) {
 validateCssUnit <- function(x) {
   if (is.null(x) || is.na(x))
     return(x)
-  
+
   if (length(x) > 1 || (!is.character(x) && !is.numeric(x)))
     stop('CSS units must be a numeric or character vector with a single element')
-  
+
   if (is.character(x) &&
      !grepl("^(auto|inherit|((\\.\\d+)|(\\d+(\\.\\d+)?))(%|in|cm|mm|em|ex|pt|pc|px))$", x)) {
     stop('"', x, '" is not a valid CSS unit (e.g., "100%", "400px", "auto")')

@@ -29,6 +29,22 @@ matrix), which will be rendered with the DataTables library. Paging,
 searching, filtering, and sorting can be done on the R side using Shiny as
 the server infrastructure.
 }
+\details{
+For the \code{options} argument, the character elements that have the class
+\code{"AsIs"} (usually returned from \code{\link{I}()}) will be evaluated in
+JavaScript. This is useful when the type of the option value is not supported
+in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
+character string.
+}
+\examples{
+# pass a callback function to DataTables using I()
+renderDataTable(iris,
+  options = list(
+    iDisplayLength = 5,
+    fnInitComplete = I("(function(oSettings, json) {alert('Done.');})")
+  )
+)
+}
 \references{
 \url{http://datatables.net}
 }

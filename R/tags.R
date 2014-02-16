@@ -133,7 +133,6 @@ tagSetChildren <- function(tag, ..., list = NULL) {
 #' \code{tagAppendChild()} and \code{tagList()} are for supporting package
 #' authors who wish to create their own sets of tags; see the contents of
 #' bootstrap.R for examples.
-#' @usage tag(`_tag_name`, varArgs)
 #' @param _tag_name HTML tag name
 #' @param varArgs List of attributes and children of the element. Named list
 #'   items become attributes, and unnamed list items become children. Valid

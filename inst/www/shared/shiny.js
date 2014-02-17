@@ -1996,7 +1996,7 @@
       var config = $el.parent().find('script[data-for=' + el.id + ']');
       if (config.length > 0)
         return $el.selectize($.extend(JSON.parse(config.text()), {
-          labelField: 'label', valueField: 'value'
+          labelField: 'label', valueField: 'value', searchField: ['label']
         }));
     }
   });

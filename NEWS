@@ -9,6 +9,10 @@ shiny 0.8.0.99
   (or the IP address of one of your network interfaces, if you care to be
   explicit about it).
 
+* Added a new function `selectizeInput()` to use the JavaScript library
+  selectize.js (https://github.com/brianreavis/selectize.js), which extends
+  the basic select input in many aspects.
+
 * Upgraded to Bootstrap 2.3.2 and jQuery 1.11.0.
 
 * Make `tags$head()` and `singleton()` behave correctly when used with

@@ -1,3 +1,9 @@
+#showcase-well {
+  border-radius: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+}
+
 .shiny-code {
   background-color: white;
 }

@@ -43,7 +43,7 @@
     throw "Blob doesn't support slice";
   }
 
-  var _BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || 
+  var _BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder ||
       window.MozBlobBuilder || window.MSBlobBuilder;
 
   function makeBlob(parts) {
@@ -87,7 +87,7 @@
   }
 
   // Takes a string expression and returns a function that takes an argument.
-  // 
+  //
   // When the function is executed, it will evaluate that expression using
   // "with" on the argument value, and return the result.
   function scopeExprToFunc(expr) {
@@ -246,7 +246,7 @@
         // Haven't seen a call recently. Execute now and
         // start a timer to buffer any subsequent calls.
         timerId = setTimeout(function() {
-          // When time expires, clear the timer; and if 
+          // When time expires, clear the timer; and if
           // there has been a call in the meantime, repeat.
           timerId = null;
           if (executionPending) {
@@ -528,7 +528,7 @@
         // parse the parent href
         var a = document.createElement('a');
         a.href = parentUrl;
-                
+
         // post the disconnected message if the hostnames are the same
         if (normalize(a.hostname) == normalize(window.location.hostname)) {
           var protocol = a.protocol.replace(':',''); // browser compatability
@@ -869,7 +869,7 @@
       this._sendMessagesToHandlers(message, customMessageHandlers,
                                    customMessageHandlerOrder);
     });
-    
+
     addMessageHandler('config', function(message) {
       this.config = message;
     });
@@ -891,9 +891,9 @@
     // handle continuation frames
     this.aborted = false;
     this.completed = false;
-    
+
     // TODO: Register error/abort callbacks
-    
+
     this.$run();
   };
   (function() {
@@ -909,16 +909,16 @@
     this.onAbort = function() {
     };
     // End callbacks
-    
+
     // Aborts processing, unless it's already completed
     this.abort = function() {
       if (this.completed || this.aborted)
         return;
-      
+
       this.aborted = true;
       this.onAbort();
     };
-    
+
     // Returns a bound function that will call this.$run one time.
     this.$getRun = function() {
       var self = this;
@@ -930,34 +930,34 @@
         self.$run();
       };
     };
-    
+
     // This function will be called multiple times to advance the process.
     // It relies on the state of the object's fields to know what to do next.
     this.$run = function() {
-      
+
       var self = this;
 
       if (this.aborted || this.completed)
         return;
-      
+
       if (this.fileIndex < 0) {
         // Haven't started yet--begin
         this.fileIndex = 0;
         this.onBegin(this.files, this.$getRun());
         return;
       }
-      
+
       if (this.fileIndex === this.files.length) {
         // Just ended
         this.completed = true;
         this.onComplete();
         return;
       }
-      
+
       // If we got here, then we have a file to process, or we are
       // in the middle of processing a file, or have just finished
       // processing a file.
-      
+
       var file = this.files[this.fileIndex++];
       this.onFile(file, this.$getRun());
     };
@@ -1008,13 +1008,13 @@
   // =========================================================================
   // Output bindings
   // =========================================================================
-  
+
   var OutputBinding = exports.OutputBinding = function() {};
   (function() {
     // Returns a jQuery object or element array that contains the
     // descendants of scope that match this binding
     this.find = function(scope) { throw "Not implemented"; };
-  
+
     this.getId = function(el) {
       return el['data-input-id'] || el.id;
     };
@@ -1064,14 +1064,14 @@
       // Load the image before emptying, to minimize flicker
       var img = null;
       var clickId, hoverId;
-      
+
       if (data) {
         clickId = $el.data('click-id');
         hoverId = $el.data('hover-id');
-        
+
         $el.data('coordmap', data.coordmap);
         delete data.coordmap;
-        
+
         img = document.createElement('img');
         // Copy items from data to img. This should include 'src'
         $.each(data, function(key, value) {
@@ -1094,16 +1094,16 @@
             y: mouseEvent.pageY - offset.top
           };
         };
-        
+
         var createMouseHandler = function(inputId) {
           return function(e) {
             if (e === null) {
               exports.onInputChange(inputId, null);
               return;
             }
-            
+
             // TODO: Account for scrolling within the image??
-            
+
             var coordmap = $el.data('coordmap');
             function devToUsrX(deviceX) {
               var x = deviceX - coordmap.bounds.left;
@@ -1119,15 +1119,15 @@
             }
 
             var offset = mouseOffset(e);
-            
+
             var userX = devToUsrX(offset.x);
             if (coordmap.log.x)
               userX = Math.pow(10, userX);
-            
+
             var userY = devToUsrY(offset.y);
             if (coordmap.log.y)
               userY = Math.pow(10, userY);
-            
+
             exports.onInputChange(inputId, {
               x: userX,
               y: userY,
@@ -1143,7 +1143,7 @@
                                     createMouseHandler(hoverId));
           $el.data('hover-func', hoverFunc);
         }
-        
+
         if (clickId)
           $(img).on('mousedown', createMouseHandler(clickId));
         if (hoverId) {
@@ -1251,7 +1251,7 @@
           break;
         val = newVal;
       }
-      
+
       var heads = [];
       var headAddPayload = function(match, payload) {
         heads.push(payload);
@@ -1263,7 +1263,7 @@
           break;
         val = newVal;
       }
-      
+
       return {
         html: val,
         head: heads.join("\n"),
@@ -1347,17 +1347,17 @@
 
   var InputBinding = exports.InputBinding = function() {
   };
-  
+
   (function() {
-  
+
     // Returns a jQuery object or element array that contains the
     // descendants of scope that match this binding
     this.find = function(scope) { throw "Not implemented"; };
-  
+
     this.getId = function(el) {
       return el['data-input-id'] || el.id;
     };
-  
+
     // Gives the input a type in case the server needs to know it
     // to deserialize the JSON correctly
     this.getType = function() { return false; };
@@ -1372,7 +1372,7 @@
     // trigger a change event.
     this.receiveMessage = function(el, data) { throw "Not implemented"; };
     this.getState = function(el, data) { throw "Not implemented"; };
-    
+
     this.getRatePolicy = function() { return null; };
 
     // Some input objects need initialization before being bound. This is
@@ -1386,9 +1386,9 @@
     this.dispose = function(el) { };
 
   }).call(InputBinding.prototype);
-  
-  
-  
+
+
+
   // Text input
   var textInputBinding = new InputBinding();
   $.extend(textInputBinding, {
@@ -1448,7 +1448,7 @@
   });
   inputBindings.register(textareaInputBinding, 'shiny.textareaInput');
 
-  
+
   var numberInputBinding = {};
   $.extend(numberInputBinding, textInputBinding, {
     find: function(scope) {
@@ -1590,7 +1590,7 @@
     }
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
-  
+
 
   var dateInputBinding = new InputBinding();
   $.extend(dateInputBinding, {
@@ -1941,7 +1941,7 @@
 
       return {
         label: $(el).parent().find('label[for=' + el.id + ']').text(),
-        value:    this.getValue(el),               
+        value:    this.getValue(el),
         options:  options
       };
     },
@@ -2370,7 +2370,7 @@
     this.onComplete = function() {
       var self = this;
       this.makeRequest(
-        'uploadEnd', [this.jobId, this.id], 
+        'uploadEnd', [this.jobId, this.id],
         function(response) {
           self.$setActive(false);
           self.onProgress(null, 1);
@@ -2457,7 +2457,7 @@
   });
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');
 
-  
+
   var OutputBindingAdapter = function(el, binding) {
     this.el = el;
     this.binding = binding;
@@ -2490,7 +2490,7 @@
       scope = $(scope);
 
       var bindings = outputBindings.getBindings();
-      
+
       for (var i = 0; i < bindings.length; i++) {
         var binding = bindings[i].binding;
         var matches = binding.find(scope) || [];
@@ -2559,7 +2559,7 @@
     };
 
     var boundInputs = {};
-    
+
     function valueChangeCallback(binding, el, allowDeferred) {
       var id = binding.getId(el);
       if (id) {
@@ -2570,16 +2570,16 @@
         inputs.setInput(id, value, !allowDeferred);
       }
     }
-    
+
     function bindInputs(scope) {
 
       if (scope === undefined)
         scope = document;
-      
+
       var bindings = inputBindings.getBindings();
-      
+
       var currentValues = {};
-    
+
       for (var i = 0; i < bindings.length; i++) {
         var binding = bindings[i].binding;
         var matches = binding.find(scope) || [];
@@ -2590,7 +2590,7 @@
           // Check if ID is falsy, or if already bound
           if (!id || boundInputs[id])
             continue;
-    
+
           var type = binding.getType(el);
           var effectiveId = type ? id + ":" + type : id;
           currentValues[effectiveId] = binding.getValue(el);
@@ -2614,7 +2614,7 @@
               ratePolicy.policy,
               ratePolicy.delay);
           }
-    
+
           boundInputs[id] = {
             binding: binding,
             node: el
@@ -2625,7 +2625,7 @@
           }
         }
       }
-    
+
       return currentValues;
     }
 
@@ -2651,8 +2651,8 @@
         return null;
 
       var els = $(
-        'input:checked' + 
-        '[type="' + input.type + '"]' + 
+        'input:checked' +
+        '[type="' + input.type + '"]' +
         '[name="' + input.name + '"]');
       var values = els.map(function() { return this.value; }).get();
       if (exclusiveValue) {
@@ -2953,7 +2953,7 @@
       target.removeData('animating');
     }
   });
-  
+
   $(document).on('keydown', function(e) {
     if (e.which !== 114 || (!e.ctrlKey && !e.metaKey) || (e.shiftKey || e.altKey))
       return;

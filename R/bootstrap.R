@@ -675,6 +675,9 @@ choicesWithNames <- function(choices) {
 #' Create a select list that can be used to choose a single or
 #' multiple items from a list of values.
 #'
+#' \code{selectizeInput()} uses the JavaScript library \pkg{selectize.js}
+#' (\url{https://github.com/brianreavis/selectize.js}) to extend the basic
+#' select input element.
 #' @param inputId Input variable to assign the control's value to
 #' @param label Display label for the control
 #' @param choices List of values to select from. If elements of the list are
@@ -729,6 +732,26 @@ selectInput <- function(inputId,
 
   # return label and select tag
   tagList(controlLabel(inputId, label), selectTag)
+}
+
+#' @rdname selectInput
+#' @param ... arguments passed to \code{selectInput()}
+#' @param options a list of options; see the documentation of \pkg{selectize.js}
+#'   \url{https://github.com/brianreavis/selectize.js} for possible options
+#' @export
+selectizeInput <- function(inputId, ..., options = NULL) {
+  tagList(
+    selectInput(inputId, ...),
+    singleton(tags$head(
+      tags$link(rel = 'stylesheet', type = 'text/css',
+                href = 'shared/selectize/css/selectize.bootstrap2.css'),
+      tags$script(src = 'shared/selectize/js/selectize.min.js')
+    )),
+    tags$script(
+      type = 'application/json', `data-for` = inputId,
+      if (length(options)) toJSON(options) else '{}'
+    )
+  )
 }
 
 #' Create radio buttons

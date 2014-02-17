@@ -1927,7 +1927,10 @@
       return $(el).val();
     },
     setValue: function(el, value) {
-      $(el).val(value);
+      var selectize = this._selectize(el);
+      if (selectize) {
+        selectize[0].selectize.setValue(value);
+      } else $(el).val(value);
     },
     getState: function(el) {
       // Store options in an array of objects, each with with value and label
@@ -1950,6 +1953,12 @@
       if (data.hasOwnProperty('options')) {
         // Clear existing options and add each new one
         $el.empty();
+        var selectize = this._selectize(el);
+        if (selectize) {
+          selectize = selectize[0].selectize;
+          selectize.clearOptions();
+          selectize.addOption(data.options);
+        }
         for (var i = 0; i < data.options.length; i++) {
           var in_opt = data.options[i];
 
@@ -1977,6 +1986,18 @@
     },
     unsubscribe: function(el) {
       $(el).off('.selectInputBinding');
+    },
+    initialize: function(el) {
+      this._selectize(el);
+    },
+    _selectize: function(el) {
+      if (!$.fn.selectize) return;
+      var $el = $(el);
+      var config = $el.parent().find('script[data-for=' + el.id + ']');
+      if (config.length > 0)
+        return $el.selectize($.extend(JSON.parse(config.text()), {
+          labelField: 'label', valueField: 'value'
+        }));
     }
   });
   inputBindings.register(selectInputBinding, 'shiny.selectInput');

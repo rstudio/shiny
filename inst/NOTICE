@@ -5,6 +5,7 @@ these components are included below):
 - jQuery
 - Bootstrap
 - bootstrap-datepicker, from https://github.com/eternicode/bootstrap-datepicker
+- selectize, from https://github.com/brianreavis/selectize.js
 - jslider
 - DataTables
 
@@ -34,7 +35,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-Bootstrap and bootstrap-datepicker License
+Bootstrap, bootstrap-datepicker, and selectize License
 ----------------------------------------------------------------------
 
                                  Apache License

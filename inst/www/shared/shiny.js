@@ -5,6 +5,11 @@
 
   var exports = window.Shiny = window.Shiny || {};
 
+  // For easy handling of Qt quirks using CSS
+  if (/\bQt\//.test(window.navigator.userAgent)) {
+    $(document.documentElement).addClass('qt');
+  }
+
   $(document).on('submit', 'form:not([action])', function(e) {
     e.preventDefault();
   });

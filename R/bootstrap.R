@@ -740,6 +740,8 @@ selectInput <- function(inputId,
 #'   \url{https://github.com/brianreavis/selectize.js} for possible options
 #' @export
 selectizeInput <- function(inputId, ..., options = NULL) {
+  res <- checkAsIs(options)
+
   tagList(
     selectInput(inputId, ...),
     singleton(tags$head(
@@ -749,7 +751,8 @@ selectizeInput <- function(inputId, ..., options = NULL) {
     )),
     tags$script(
       type = 'application/json', `data-for` = inputId,
-      if (length(options)) toJSON(options) else '{}'
+      `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
+      if (length(res$options)) HTML(toJSON(res$options)) else '{}'
     )
   )
 }

@@ -1994,10 +1994,18 @@
       if (!$.fn.selectize) return;
       var $el = $(el);
       var config = $el.parent().find('script[data-for=' + el.id + ']');
-      if (config.length > 0)
-        return $el.selectize($.extend(JSON.parse(config.text()), {
+      if (config.length > 0) {
+        var options = $.extend({
           labelField: 'label', valueField: 'value', searchField: ['label']
-        }));
+        }, JSON.parse(config.text()));
+        // options that should be eval()ed
+        if (config.data('eval') instanceof Array)
+          config.data('eval').forEach(function(x) {
+            options[x] = eval('(' + options[x] + ')');
+          });
+
+        return $el.selectize(options);
+      }
     }
   });
   inputBindings.register(selectInputBinding, 'shiny.selectInput');

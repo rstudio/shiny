@@ -50,8 +50,8 @@ print.shiny.tag <- function(x, ...) {
 }
 
 #' @S3method format shiny.tag
-format.shiny.tag <- function(x, ...) {
-  as.character(renderTags(x)$html)
+format.shiny.tag <- function(x, ..., singletons = character(0), indent = 0) {
+  as.character(renderTags(x, singletons = singletons, indent = indent)$html)
 }
 
 #' @S3method as.character shiny.tag
@@ -193,6 +193,9 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
     return (NULL)
   }
 
+  nextIndent <- if (is.numeric(indent)) indent + 1 else indent
+  indent <- if (is.numeric(indent)) indent else 0
+
   # compute indent text
   indentText <- paste(rep(" ", indent*2), collapse="")
 
@@ -237,7 +240,7 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
     else {
       textWriter("\n")
       for (child in children)
-        tagWrite(child, textWriter, indent+1)
+        tagWrite(child, textWriter, nextIndent)
       textWriter(paste(indentText, "</", tag$name, ">", eol, sep=""))
     }
   }
@@ -267,13 +270,14 @@ doRenderTags <- function(ui, indent = 0) {
   return(HTML(paste(htmlResult, collapse = "\n")))
 }
 
-renderTags <- function(ui, singletons = character(0)) {
+renderTags <- function(ui, singletons = character(0), indent = 0) {
   # Do singleton and head processing before rendering
   singletonInfo <- takeSingletons(ui, singletons)
   headInfo <- takeHeads(singletonInfo$ui)
 
-  headHtml <- doRenderTags(headInfo$head, indent = 1)
-  bodyHtml <- doRenderTags(headInfo$ui)
+  headIndent <- if (is.numeric(indent)) indent + 1 else indent
+  headHtml <- doRenderTags(headInfo$head, indent = headIndent)
+  bodyHtml <- doRenderTags(headInfo$ui, indent = indent)
 
   return(list(head = headHtml,
               singletons = singletonInfo$singletons,

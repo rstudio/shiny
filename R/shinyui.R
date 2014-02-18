@@ -138,12 +138,25 @@ includeScript <- function(path, ...) {
   return(tags$script(HTML(paste(lines, collapse='\r\n')), ...))
 }
 
-#' @rdname include
+#' Load the MathJax library and typeset math expressions
+#'
+#' This function adds MathJax to the page and typeset the math expressions (if
+#' found) in the content \code{...}. It only needs to be called once in an app
+#' unless the content is rendered \emph{after} the page is loaded, e.g. via
+#' \code{\link{renderUI}}, in which case we have to call it explicitly every
+#' time we write math expressions to the output.
+#' @param ... any HTML elements to apply MathJax to
 #' @export
-includeMathJax <- function(path) {
-  if (missing(path))
-    path <- 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
-  tags$head(singleton(tags$script(src = path, type = 'text/javascript')))
+#' @examples withMathJax(helpText("Some math here $$\\alpha+\\beta$$"))
+#' # now we can just write "static" content without withMathJax()
+#' div("more math here $$\\sqrt{2}$$")
+withMathJax <- function(...) {
+  path <- 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+  tagList(
+    tags$head(singleton(tags$script(src = path, type = 'text/javascript'))),
+    ...,
+    tags$script(HTML('MathJax.Hub.Typeset();'))
+  )
 }
 
 #' Include Content Only Once

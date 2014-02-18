@@ -4,7 +4,6 @@
 \alias{includeCSS}
 \alias{includeHTML}
 \alias{includeMarkdown}
-\alias{includeMathJax}
 \alias{includeScript}
 \alias{includeText}
 \title{Include Content From a File}
@@ -18,8 +17,6 @@ includeMarkdown(path)
 includeCSS(path, ...)
 
 includeScript(path, ...)
-
-includeMathJax(path)
 }
 \arguments{
   \item{path}{The path of the file to be included. It is

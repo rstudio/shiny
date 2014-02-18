@@ -433,6 +433,23 @@ get_exists = function(x, mode) {
     get(x, envir = parent.frame(), mode = mode, inherits = FALSE)
 }
 
+# for options passed to DataTables/Selectize/..., the options of the class AsIs
+# will be evaluated as literal JavaScript code
+checkAsIs <- function(options) {
+  evalOptions <- if (length(options)) {
+    nms <- names(options)
+    i <- unlist(lapply(options, function(x) {
+      is.character(x) && inherits(x, 'AsIs')
+    }))
+    if (any(i)) {
+      # must convert to character, otherwise toJSON() turns it to an array []
+      options[i] <- lapply(options[i], paste, collapse = '\n')
+      nms[i]  # options of these names will be evaluated in JS
+    }
+  }
+  list(options = options, eval = evalOptions)
+}
+
 srcrefFromShinyCall <- function(expr) {
   srcrefs <- attr(expr, "srcref")
   num_exprs <- length(srcrefs)

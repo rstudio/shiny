@@ -1187,8 +1187,6 @@
       exports.renderHtml(html, el);
       exports.initializeInputs(el);
       exports.bindAll(el);
-      // there may be MathJax expressions and we have to typeset them manually
-      if (MathJax && MathJax.Hub && MathJax.Hub.Typeset) MathJax.Hub.Typeset();
     }
   });
   outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');

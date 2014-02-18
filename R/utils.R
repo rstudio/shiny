@@ -123,7 +123,7 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
   eval(call("function", args, body), env)
 }
 
-#' Convert an expression or quoted expression to a function
+#' Convert an expression to a function
 #'
 #' This is to be called from another function, because it will attempt to get
 #' an unquoted expression from two calls back.
@@ -204,6 +204,8 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
   }
 }
 
+#' Install an expression as a function
+#'
 #' Installs an expression in the given environment as a function, and registers
 #' debug hooks so that breakpoints may be set in the function.
 #'
@@ -212,8 +214,8 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 #' \code{installExprFunction(expr, "func")} if we do. Both approaches create a
 #' function named \code{func} in the current environment.
 #'
-#' @seealso Wraps \code{exprToFunction}; see that method's documentation for
-#'   more documentation and examples.
+#' @seealso Wraps \code{\link{exprToFunction}}; see that method's documentation
+#'   for more documentation and examples.
 #'
 #' @param expr A quoted or unquoted expression
 #' @param name The name the function should be given
@@ -221,8 +223,8 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 #'   calling environment two steps back.
 #' @param quoted Is the expression quoted?
 #' @param assign.env The environment in which the function should be assigned.
-#' @param label A label for the object to be shown in the debugger. Defaults
-#'   to the name of the calling function.
+#' @param label A label for the object to be shown in the debugger. Defaults to
+#'   the name of the calling function.
 #'
 #' @export
 installExprFunction <- function(expr, name, eval.env = parent.frame(2),

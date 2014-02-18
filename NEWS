@@ -87,6 +87,8 @@ shiny 0.8.0.99
   JavaScript function (which is not supported in JSON). See
   `?renderDataTable` for details and examples.
 
+* DataTables also works under IE8 now.
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

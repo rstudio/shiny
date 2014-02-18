@@ -749,6 +749,9 @@ selectizeInput <- function(inputId, ..., options = NULL) {
     singleton(tags$head(
       tags$link(rel = 'stylesheet', type = 'text/css',
                 href = 'shared/selectize/css/selectize.bootstrap2.css'),
+      HTML('<!--[if lt IE 9]>'),
+      tags$script(src='http://cdnjs.cloudflare.com/ajax/libs/es5-shim/2.0.8/es5-shim.min.js'),
+      HTML('<![endif]-->'),
       tags$script(src = 'shared/selectize/js/selectize.min.js')
     )),
     tags$script(

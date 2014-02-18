@@ -1312,7 +1312,7 @@
       // options that should be eval()ed
       if (data.evalOptions)
         $.makeArray(data.evalOptions).forEach(function(x) {
-          data.options[x] = eval(data.options[x]);
+          data.options[x] = eval('(' + data.options[x] + ')');
         });
 
       var oTable = $(el).children("table").dataTable($.extend({

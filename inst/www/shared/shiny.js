@@ -1297,11 +1297,11 @@
       if (!data || !data.colnames) return;
 
       var colnames = $.makeArray(data.colnames);
-      var header = colnames.map(function(x) {
+      var header = $.map(colnames, function(x) {
         return '<th>' + x + '</th>';
       }).join('');
       header = '<thead><tr>' + header + '</tr></thead>';
-      var footer = colnames.map(function(x) {
+      var footer = $.map(colnames, function(x) {
         return '<th><input type="text" placeholder="' + x + '" /></th>';
       }).join('');
       footer = '<tfoot>' + footer + '</tfoot>';
@@ -1311,7 +1311,7 @@
 
       // options that should be eval()ed
       if (data.evalOptions)
-        $.makeArray(data.evalOptions).forEach(function(x) {
+        $.each(data.evalOptions, function(i, x) {
           data.options[x] = eval('(' + data.options[x] + ')');
         });
 
@@ -2000,7 +2000,7 @@
         }, JSON.parse(config.html()));
         // options that should be eval()ed
         if (config.data('eval') instanceof Array)
-          config.data('eval').forEach(function(x) {
+          $.each(config.data('eval'), function(i, x) {
             options[x] = eval('(' + options[x] + ')');
           });
 

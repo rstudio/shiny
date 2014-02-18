@@ -1997,7 +1997,7 @@
       if (config.length > 0) {
         var options = $.extend({
           labelField: 'label', valueField: 'value', searchField: ['label']
-        }, JSON.parse(config.text()));
+        }, JSON.parse(config.html()));
         // options that should be eval()ed
         if (config.data('eval') instanceof Array)
           config.data('eval').forEach(function(x) {

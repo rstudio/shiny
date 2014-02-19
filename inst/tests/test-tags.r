@@ -307,26 +307,26 @@ test_that("Head and singleton behavior", {
   result <- renderTags(tagList(
     tags$head(singleton("hello"))
   ))
-  
+
   expect_identical(result$html, HTML(""))
   expect_identical(result$head, HTML("  hello"))
   expect_identical(result$singletons, "60eed8231e688bcba7c275c58dd2e3b4dacb61f0")
-  
+
   # Ensure that "hello" actually behaves like a singleton
   result2 <- renderTags(tagList(
     tags$head(singleton("hello"))
   ), singletons = result$singletons)
-  
+
   expect_identical(result$singletons, result2$singletons)
   expect_identical(result2$head, HTML(""))
   expect_identical(result2$html, HTML(""))
-  
+
   result3 <- renderTags(tagList(
     tags$head(singleton("hello"), singleton("hello"))
   ))
   expect_identical(result$singletons, result3$singletons)
   expect_identical(result3$head, HTML("  hello"))
-  
+
   # Ensure that singleton can be applied to lists, not just tags
   result4 <- renderTags(list(singleton(list("hello")), singleton(list("hello"))))
   expect_identical(result4$singletons, "d7319e3f14167c4c056dd7aa0b274c83fe2291f6")
@@ -361,7 +361,7 @@ test_that("Low-level singleton manipulation methods", {
     singleton(tags$head(tags$script("foo"))),
     singleton(tags$head(tags$script("foo")))
   ))
-  
+
   expect_identical(result1$ui$children[[2]], NULL)
   expect_false(is(result1$ui$children[[1]], "shiny.singleton"))
 
@@ -374,12 +374,12 @@ test_that("Low-level singleton manipulation methods", {
 
   expect_identical(result2$ui$children[[2]], NULL)
   expect_is(result2$ui$children[[1]], "shiny.singleton")
-  
+
   result3 <- surroundSingletons(tags$div(
     singleton(tags$script("foo")),
     singleton(tags$script("foo"))
   ))
-  
+
   expect_identical(
     renderTags(result3)$html,
     HTML("<div>
@@ -390,5 +390,43 @@ test_that("Low-level singleton manipulation methods", {
   <script>foo</script>
   <!--/SHINY.SINGLETON[58b302d493b50acb75e4a5606687cadccdf902d8]-->
 </div>")
+  )
+})
+
+test_that("Indenting can be controlled/suppressed", {
+  expect_identical(
+    renderTags(tags$div("a", "b"))$html,
+    HTML("<div>\n  a\n  b\n</div>")
+  )
+  expect_identical(
+    format(tags$div("a", "b")),
+    "<div>\n  a\n  b\n</div>"
+  )
+
+  expect_identical(
+    renderTags(tags$div("a", "b"), indent = 2)$html,
+    HTML("    <div>\n      a\n      b\n    </div>")
+  )
+  expect_identical(
+    format(tags$div("a", "b"), indent = 2),
+    "    <div>\n      a\n      b\n    </div>"
+  )
+
+  expect_identical(
+    renderTags(tags$div("a", "b"), indent = FALSE)$html,
+    HTML("<div>\na\nb\n</div>")
+  )
+  expect_identical(
+    format(tags$div("a", "b"), indent = FALSE),
+    "<div>\na\nb\n</div>"
+  )
+
+  expect_identical(
+    renderTags(tagList(tags$div("a", "b")), indent = FALSE)$html,
+    HTML("<div>\na\nb\n</div>")
+  )
+  expect_identical(
+    format(tagList(tags$div("a", "b")), indent = FALSE),
+    "<div>\na\nb\n</div>"
   )
 })

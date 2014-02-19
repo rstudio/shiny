@@ -1297,11 +1297,11 @@
       if (!data || !data.colnames) return;
 
       var colnames = $.makeArray(data.colnames);
-      var header = colnames.map(function(x) {
+      var header = $.map(colnames, function(x) {
         return '<th>' + x + '</th>';
       }).join('');
       header = '<thead><tr>' + header + '</tr></thead>';
-      var footer = colnames.map(function(x) {
+      var footer = $.map(colnames, function(x) {
         return '<th><input type="text" placeholder="' + x + '" /></th>';
       }).join('');
       footer = '<tfoot>' + footer + '</tfoot>';
@@ -1311,8 +1311,8 @@
 
       // options that should be eval()ed
       if (data.evalOptions)
-        $.makeArray(data.evalOptions).forEach(function(x) {
-          data.options[x] = eval(data.options[x]);
+        $.each(data.evalOptions, function(i, x) {
+          data.options[x] = eval('(' + data.options[x] + ')');
         });
 
       var oTable = $(el).children("table").dataTable($.extend({
@@ -1927,7 +1927,10 @@
       return $(el).val();
     },
     setValue: function(el, value) {
-      $(el).val(value);
+      var selectize = this._selectize(el);
+      if (selectize) {
+        selectize[0].selectize.setValue(value);
+      } else $(el).val(value);
     },
     getState: function(el) {
       // Store options in an array of objects, each with with value and label
@@ -1950,6 +1953,12 @@
       if (data.hasOwnProperty('options')) {
         // Clear existing options and add each new one
         $el.empty();
+        var selectize = this._selectize(el);
+        if (selectize) {
+          selectize = selectize[0].selectize;
+          selectize.clearOptions();
+          selectize.addOption(data.options);
+        }
         for (var i = 0; i < data.options.length; i++) {
           var in_opt = data.options[i];
 
@@ -1977,6 +1986,26 @@
     },
     unsubscribe: function(el) {
       $(el).off('.selectInputBinding');
+    },
+    initialize: function(el) {
+      this._selectize(el);
+    },
+    _selectize: function(el) {
+      if (!$.fn.selectize) return;
+      var $el = $(el);
+      var config = $el.parent().find('script[data-for=' + el.id + ']');
+      if (config.length > 0) {
+        var options = $.extend({
+          labelField: 'label', valueField: 'value', searchField: ['label']
+        }, JSON.parse(config.html()));
+        // options that should be eval()ed
+        if (config.data('eval') instanceof Array)
+          $.each(config.data('eval'), function(i, x) {
+            options[x] = eval('(' + options[x] + ')');
+          });
+
+        return $el.selectize(options);
+      }
     }
   });
   inputBindings.register(selectInputBinding, 'shiny.selectInput');

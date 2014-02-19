@@ -500,24 +500,14 @@ downloadHandler <- function(filename, content, contentType=NA) {
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             env=parent.frame(), quoted=FALSE) {
   installExprFunction(expr, "func", env, quoted)
-  evalOptions <- if (length(options)) {
-    nms <- names(options)
-    i <- unlist(lapply(options, function(x) {
-      is.character(x) && inherits(x, 'AsIs')
-    }))
-    if (any(i)) {
-      # must convert to character, otherwise toJSON() turns it to an array []
-      options[i] <- lapply(options[i], paste, collapse = '\n')
-      nms[i]  # options of these names will be evaluated in JS
-    }
-  }
+  res <- checkAsIs(options)
 
   function(shinysession, name, ...) {
     data <- func()
     if (length(dim(data)) != 2) return() # expects a rectangular data object
     action <- shinysession$registerDataTable(name, data)
-    list(colnames = colnames(data), action = action, options = options,
-         evalOptions = evalOptions, searchDelay = searchDelay)
+    list(colnames = colnames(data), action = action, options = res$options,
+         evalOptions = res$eval, searchDelay = searchDelay)
   }
 }
 

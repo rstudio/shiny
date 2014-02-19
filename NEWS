@@ -9,6 +9,10 @@ shiny 0.8.0.99
   (or the IP address of one of your network interfaces, if you care to be
   explicit about it).
 
+* Added an argument `selectize = TRUE` to the function `selectInput()` to
+  use the JavaScript library selectize.js to extend the standard select
+  input (https://github.com/brianreavis/selectize.js).
+
 * Upgraded to Bootstrap 2.3.2 and jQuery 1.11.0.
 
 * Make `tags$head()` and `singleton()` behave correctly when used with
@@ -82,6 +86,8 @@ shiny 0.8.0.99
   makes it possible to use any JavaScript object in the options, e.g. a
   JavaScript function (which is not supported in JSON). See
   `?renderDataTable` for details and examples.
+
+* DataTables also works under IE8 now.
 
 shiny 0.8.0
 --------------------------------------------------------------------------------

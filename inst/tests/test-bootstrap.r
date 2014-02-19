@@ -7,7 +7,7 @@ test_that("CSS unit validation", {
   }
 
   # Test strings and expected results
-  strings  <- c("100x", "10px", "10.4px", ".4px", "1px0", "px", "5", "%", "5%", "auto", "1auto", "") 
+  strings  <- c("100x", "10px", "10.4px", ".4px", "1px0", "px", "5", "%", "5%", "auto", "1auto", "")
   expected <- c(NA,     "10px", "10.4px", ".4px", NA,     NA,   NA,  NA,  "5%", "auto", NA,      NA)
   results <- vapply(strings, validateCssUnit_wrap, character(1), USE.NAMES = FALSE)
   expect_equal(results, expected)
@@ -22,7 +22,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   # tag object, but they get the job done for now.
 
   # Select input
-  x <- selectInput('id','label', choices = c(a='x1', a='x2', b='x3'))
+  x <- selectInput('id','label', choices = c(a='x1', a='x2', b='x3'), selectize = FALSE)
   choices <- x[[2]]$children
 
   expect_equal(choices[[1]]$children[[1]], 'a')

@@ -49,6 +49,8 @@ print.shiny.tag <- function(x, ...) {
   invisible(x)
 }
 
+# indent can be numeric to indicate an initial indent level,
+# or FALSE to suppress
 #' @S3method format shiny.tag
 format.shiny.tag <- function(x, ..., singletons = character(0), indent = 0) {
   as.character(renderTags(x, singletons = singletons, indent = indent)$html)

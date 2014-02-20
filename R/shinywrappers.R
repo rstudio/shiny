@@ -484,7 +484,8 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
 #' character string.
 #' @param expr An expression that returns a data frame or a matrix.
-#' @param options A list of initialization options to be passed to DataTables.
+#' @param options A list of initialization options to be passed to DataTables,
+#'   or a function to return such a list.
 #' @param searchDelay The delay for searching, in milliseconds (to avoid too
 #'   frequent search requests).
 #' @references \url{http://datatables.net}
@@ -500,9 +501,9 @@ downloadHandler <- function(filename, content, contentType=NA) {
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             env=parent.frame(), quoted=FALSE) {
   installExprFunction(expr, "func", env, quoted)
-  res <- checkAsIs(options)
 
   function(shinysession, name, ...) {
+    res <- checkAsIs(if (is.function(options)) options() else options)
     data <- func()
     if (length(dim(data)) != 2) return() # expects a rectangular data object
     action <- shinysession$registerDataTable(name, data)

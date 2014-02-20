@@ -11,7 +11,8 @@ renderDataTable(expr, options = NULL, searchDelay = 500,
   matrix.}
 
   \item{options}{A list of initialization options to be
-  passed to DataTables.}
+  passed to DataTables, or a function to return such a
+  list.}
 
   \item{searchDelay}{The delay for searching, in
   milliseconds (to avoid too frequent search requests).}

@@ -93,6 +93,10 @@ shiny 0.8.0.99
   caused failures for matrices as well as empty rows when displaying data
   frames using renderDataTable().
 
+* The `options` argument in `renderDataTable()` can also take a function
+  that returns a list. This makes it possible to use reactive values in the
+  options. (#392)
+
 * `updateNumericInput(value)` tries to preserve numeric precision by avoiding
   scientific notation when possible, e.g. 102145 is no longer rounded to
   1.0214e+05 = 102140. (Thanks, Martin Loos. #401)

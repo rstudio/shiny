@@ -232,7 +232,7 @@
   // for the tabs 
   var setCodeHeightFromDocHeight = function() {
     document.getElementById("showcase-code-content").style.height = 
-      (window.innerHeight - 250) + "px";
+      $(window).height() + "px";
   };
 
   // if there's a block of markdown content, render it to HTML

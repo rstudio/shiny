@@ -80,3 +80,7 @@
   display: block;
   text-align: right;
 }
+
+#showcase-code-content pre {
+  background-color: white;
+}

@@ -414,7 +414,7 @@ dataTablesJSON <- function(data, query) {
     }
     # paging
     i <- seq(as.integer(iDisplayStart) + 1L, length.out = as.integer(iDisplayLength))
-    i <- i[i <= n]
+    i <- i[i <= nrow(data)]
     fdata <- data[i, , drop = FALSE]  # filtered data
     fdata <- unname(as.matrix(fdata))
     if (nrow(fdata) == 0) fdata = list()

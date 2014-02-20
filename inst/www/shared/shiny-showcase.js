@@ -239,8 +239,11 @@
   var renderMarkdown = function() {
     var mdContent = document.getElementById("showcase-markdown-content");
     if (mdContent !== null) {
+      // IE8 puts the content of <script> tags into innerHTML but
+      // not innerText
+      var content = mdContent.innerText || mdContent.innerHTML;
       document.getElementById("readme-md").innerHTML = 
-        (new Showdown.converter()).makeHtml(mdContent.innerText)
+        (new Showdown.converter()).makeHtml(content)
     }
   }
 
@@ -252,16 +255,10 @@
   });
 
   window.toggleCodePosition = toggleCodePosition;
-  if (window.addEventListener)
-  {
-    window.addEventListener("load", setInitialCodePosition);
-    window.addEventListener("load", renderMarkdown);
-  }
-  else if (window.attachEvent)
-  {
-    window.attachEvent("onload", setInitialCodePosition);
-    window.attachEvent("onload", renderMarkdown);
-  }
+
+  $(window).on("load", setInitialCodePosition);
+  $(window).on("load", renderMarkdown);
+
   if (window.hljs)
     hljs.initHighlightingOnLoad();
 })();

@@ -67,7 +67,7 @@
   border-bottom-left-radius: 4px;
 }
 
-#showcase-code-tabs button {
+#showcase-code-position-toggle {
   float: right;
 }
 
@@ -79,4 +79,8 @@
 .showcase-code-license {
   display: block;
   text-align: right;
+}
+
+#showcase-code-content pre {
+  background-color: white;
 }

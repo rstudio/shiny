@@ -73,10 +73,10 @@ appMetadata <- function(desc) {
 showcaseCodeTabs <- function(codeLicense) {
   rFiles <- list.files(pattern = "\\.R$")
   with(tags, div(id="showcase-code-tabs",
-    button(id="showcase-code-position-toggle",
-           class="btn btn-default btn-small",
-           onclick="toggleCodePosition()",
-           i(class="fa fa-level-up", "show with app")),
+    a(id="showcase-code-position-toggle",
+      class="btn btn-default btn-small",
+      onclick="toggleCodePosition()",
+      i(class="fa fa-level-up", "show with app")),
     ul(class="nav nav-tabs",
        lapply(rFiles, function(rFile) {
          li(class=if (rFile == "server.R") "active" else "",

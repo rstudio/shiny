@@ -249,7 +249,10 @@ updateTabsetPanel <- function(session, inputId, selected = NULL) {
 updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
     min = NULL, max = NULL, step = NULL) {
 
-  message <- dropNulls(list(label=label, value=value, min=min, max=max, step=step))
+  message <- dropNulls(list(
+    label = label, value = as.character(value),
+    min = as.character(min), max = as.character(max), step = as.character(step)
+  ))
   session$sendInputMessage(inputId, message)
 }
 

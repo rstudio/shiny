@@ -89,6 +89,10 @@ shiny 0.8.0.99
 
 * DataTables also works under IE8 now.
 
+* `updateNumericInput(value)` tries to preserve numeric precision by avoiding
+  scientific notation when possible, e.g. 102145 is no longer rounded to
+  1.0214e+05 = 102140. (Thanks, Martin Loos. #401)
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

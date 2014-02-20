@@ -507,7 +507,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     if (length(dim(data)) != 2) return() # expects a rectangular data object
     action <- shinysession$registerDataTable(name, data)
     list(colnames = colnames(data), action = action, options = res$options,
-         evalOptions = res$eval, searchDelay = searchDelay)
+         evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay)
   }
 }
 

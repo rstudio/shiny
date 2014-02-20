@@ -5,10 +5,10 @@
 
   // Given a DOM node and a column (count of characters), walk recursively
   // through the node's siblings counting characters until the given number
-  // of characters have been found. 
-  // 
+  // of characters have been found.
+  //
   // If the given count is bigger than the number of characters contained by
-  // the node and its siblings, returns a null node and the number of 
+  // the node and its siblings, returns a null node and the number of
   // characters found.
   function findTextColPoint(node, col) {
     var cols = 0;
@@ -34,7 +34,7 @@
   }
 
   // Returns an object indicating the element containing the given line and
-  // column of text, and the offset into that element where the text was found. 
+  // column of text, and the offset into that element where the text was found.
   //
   // If the given line and column are not found, returns a null element and
   // the number of lines found.
@@ -71,28 +71,32 @@
   // an integer array of length 6, following the standard R format for source
   // refs.
   function highlightSrcref (srcref, srcfile) {
+    // Check to see if the browser supports text ranges (IE8 doesn't)
+    if (!document.createRange)
+      return;
+
     // Check to see if we already have a marker for this source ref
     var el = document.getElementById("srcref_" + srcref);
     if (!el) {
-      // We don't have a marker, create one 
+      // We don't have a marker, create one
       el = document.createElement("span");
       el.id = "srcref_" + srcref;
       var ref = srcref;
       var code = document.getElementById(srcfile.replace(/\./g, "_") + "_code");
-      var start = findTextPoint(code, ref[0], ref[4]); 
-      var end = findTextPoint(code, ref[2], ref[5]); 
+      var start = findTextPoint(code, ref[0], ref[4]);
+      var end = findTextPoint(code, ref[2], ref[5]);
       var range = document.createRange();
       // If the text points are inside different <SPAN>s, we may not be able to
       // surround them without breaking apart the elements to keep the DOM tree
       // intact. Just move the selection points to encompass the contents of
-      // the SPANs. 
+      // the SPANs.
       if (start.element.parentNode.nodeName === "SPAN" &&
           start.element !== end.element) {
         range.setStartBefore(start.element.parentNode);
       } else {
         range.setStart(start.element, start.offset);
       }
-      if (end.element.parentNode.nodeName === "SPAN" && 
+      if (end.element.parentNode.nodeName === "SPAN" &&
           start.element !== end.element) {
         range.setEndAfter(end.element.parentNode);
       } else {
@@ -244,12 +248,20 @@
     if (isCodeAbove) {
       setAppCodeSxsWidths(false);
       setCodeHeightFromDocHeight();
-    } 
+    }
   });
 
   window.toggleCodePosition = toggleCodePosition;
-  window.addEventListener("load", setInitialCodePosition);
-  window.addEventListener("load", renderMarkdown);
+  if (window.addEventListener)
+  {
+    window.addEventListener("load", setInitialCodePosition);
+    window.addEventListener("load", renderMarkdown);
+  }
+  else if (window.attachEvent)
+  {
+    window.attachEvent("onload", setInitialCodePosition);
+    window.attachEvent("onload", renderMarkdown);
+  }
   if (window.hljs)
     hljs.initHighlightingOnLoad();
 })();

@@ -391,7 +391,7 @@ dataTablesJSON <- function(data, query) {
     }
     # search by columns
     if (length(i)) for (j in seq_len(as.integer(iColumns)) - 1) {
-      if (is.null(k <- get_exists(sprintf('sSearch_%d', j), 'character'))) next
+      if (is.null(k <- getExists(sprintf('sSearch_%d', j), 'character'))) next
       if (nzchar(k)) i <- intersect(grep(k, as.character(data[, j + 1])), i)
       if (length(i) == 0) break
     }
@@ -399,8 +399,8 @@ dataTablesJSON <- function(data, query) {
     # sorting
     oList <- list()
     for (j in seq_len(as.integer(iSortingCols)) - 1) {
-      if (is.null(k <- get_exists(sprintf('iSortCol_%d', j), 'character'))) break
-      desc = get_exists(sprintf('sSortDir_%d', j), 'character')
+      if (is.null(k <- getExists(sprintf('iSortCol_%d', j), 'character'))) break
+      desc <- getExists(sprintf('sSortDir_%d', j), 'character')
       if (is.character(desc)) {
         col <- data[, as.integer(k) + 1]
         oList[[length(oList) + 1]] <- (if (desc == 'asc') identity else `-`)(
@@ -417,7 +417,7 @@ dataTablesJSON <- function(data, query) {
     i <- i[i <= nrow(data)]
     fdata <- data[i, , drop = FALSE]  # filtered data
     fdata <- unname(as.matrix(fdata))
-    if (nrow(fdata) == 0) fdata = list()
+    if (nrow(fdata) == 0) fdata <- list()
 
     toJSON(list(
       sEcho = as.integer(sEcho),
@@ -428,7 +428,7 @@ dataTablesJSON <- function(data, query) {
   })
 }
 
-get_exists = function(x, mode) {
+getExists <- function(x, mode) {
   if (exists(x, envir = parent.frame(), mode = mode, inherits = FALSE))
     get(x, envir = parent.frame(), mode = mode, inherits = FALSE)
 }

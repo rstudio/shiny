@@ -1583,7 +1583,10 @@ runApp <- function(appDir=getwd(),
   }, add = TRUE)
 
   if (!is.character(port)) {
-    appUrl <- paste("http://", host, ":", port, sep="")
+    # http://0.0.0.0/ doesn't work on QtWebKit (i.e. RStudio viewer)
+    browseHost <- if (identical(host, "0.0.0.0")) "127.0.0.1" else host
+
+    appUrl <- paste("http://", browseHost, ":", port, sep="")
     if (is.function(launch.browser))
       launch.browser(appUrl)
     else if (launch.browser)

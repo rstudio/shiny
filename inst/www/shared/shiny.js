@@ -1338,9 +1338,15 @@
               oTable.fnFilter(this.value);
             }));
       var searchInputs = $el.find("tfoot input");
-      searchInputs.keyup(debounce(data.searchDelay, function() {
-        oTable.fnFilter(this.value, searchInputs.index(this));
-      }));
+      if (searchInputs.length > 0) {
+        $.each(oTable.fnSettings().aoColumns, function(i, x) {
+          // hide the text box if not searchable
+          if (!x.bSearchable) searchInputs.eq(i).hide();
+        });
+        searchInputs.keyup(debounce(data.searchDelay, function() {
+          oTable.fnFilter(this.value, searchInputs.index(this));
+        }));
+      }
       // FIXME: ugly scrollbars in tab panels b/c Bootstrap uses 'visible: auto'
       $el.parents('.tab-content').css('overflow', 'visible');
     }

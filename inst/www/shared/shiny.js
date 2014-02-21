@@ -1228,8 +1228,7 @@
     // Inserts new content into document head
     _addToHead: function(head) {
       if (head.length > 0) {
-        var tempDiv = document.createElement('div');
-        tempDiv.innerHTML = head;
+        var tempDiv = $("<div>" + head + "</div>")[0];
         var $head = $('head');
         while (tempDiv.hasChildNodes()) {
           $head.append(tempDiv.firstChild);

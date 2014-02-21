@@ -1306,10 +1306,13 @@
         return '<th>' + x + '</th>';
       }).join('');
       header = '<thead><tr>' + header + '</tr></thead>';
-      var footer = $.map(colnames, function(x) {
-        return '<th><input type="text" placeholder="' + x + '" /></th>';
-      }).join('');
-      footer = '<tfoot>' + footer + '</tfoot>';
+      var footer = '';
+      if (data.options.bFilter != false) {
+        footer = $.map(colnames, function(x) {
+          return '<th><input type="text" placeholder="' + x + '" /></th>';
+        }).join('');
+        footer = '<tfoot>' + footer + '</tfoot>';
+      }
       var content = '<table class="table table-striped table-hover">' +
                     header + footer + '</table>';
       $el.append(content);

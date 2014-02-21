@@ -385,7 +385,8 @@ dataTablesJSON <- function(data, query) {
   with(parseQueryString(query), {
     # global searching
     i <- seq_len(n)
-    if (nzchar(sSearch)) {
+    sSearch <- getExists('sSearch', 'character')
+    if (length(sSearch) && nzchar(sSearch)) {
       i0 <- apply(data, 2, function(x) grep(sSearch, as.character(x)))
       i <- intersect(i, unique(unlist(i0)))
     }

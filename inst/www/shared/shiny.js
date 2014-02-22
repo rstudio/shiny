@@ -2063,7 +2063,7 @@
         for (var i = 0; i < data.options.length; i++) {
           var in_opt = data.options[i];
 
-          var $newopt = $('<label class="radio">');
+          var $newopt = $('<label class="radio"/>');
           var $radio = $('<input/>', {
             type:  "radio",
             name:  el.id,
@@ -2188,7 +2188,7 @@
         for (var i = 0; i < data.options.length; i++) {
           var in_opt = data.options[i];
 
-          var $newopt = $('<label class="checkbox">');
+          var $newopt = $('<label class="checkbox"/>');
           var $checkbox = $('<input/>', {
             type:  "checkbox",
             name:  el.id,

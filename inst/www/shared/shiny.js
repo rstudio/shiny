@@ -38,6 +38,15 @@
     return str;
   }
 
+  // Take a string with format "YYYY-MM-DD" and return a Date object.
+  // IE8 doesn't support YYYY-MM-DD, but all major browsers support YYYY/MM/DD.
+  function parseDate(dateString) {
+    if (dateString.match(/^(\d\d\d\d)-(\d\d)-(\d\d)$/)) {
+      dateString = dateString.replace(/-/g, "/");
+    }
+    return new Date(dateString);
+  }
+
   function slice(blob, start, end) {
     if (blob.slice)
       return blob.slice(start, end);
@@ -1782,7 +1791,7 @@
 
       // Get Date object - this will be at 12AM in UTC, but may print
       // differently at the Javascript console.
-      var d = new Date(date);
+      var d = parseDate(date);
 
       // If invalid date, return null
       if (isNaN(d))

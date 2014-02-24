@@ -39,12 +39,12 @@
   }
 
   // Take a string with format "YYYY-MM-DD" and return a Date object.
-  // IE8 doesn't support YYYY-MM-DD, but all major browsers support YYYY/MM/DD.
+  // IE8 and QTWebKit don't support YYYY-MM-DD, but they support YYYY/MM/DD
   function parseDate(dateString) {
-    if (dateString.match(/^(\d\d\d\d)-(\d\d)-(\d\d)$/)) {
-      dateString = dateString.replace(/-/g, "/");
-    }
-    return new Date(dateString);
+    var date = new Date(dateString);
+    if (isNaN(date))
+      date = new Date(dateString.replace(/-/g, "/"));
+    return date;
   }
 
   function slice(blob, start, end) {

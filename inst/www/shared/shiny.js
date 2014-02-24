@@ -137,6 +137,10 @@
       this.args = arguments;
 
       this.timerId = setTimeout(function() {
+        // IE8 doesn't reliably clear timeout, so this additional
+        // check is needed
+        if (self.timerId === null)
+          return;
         self.$clearTimer();
         self.$invoke();
       }, this.delayMs);
@@ -178,6 +182,10 @@
       if (this.timerId === null) {
         this.$invoke();
         this.timerId = setTimeout(function() {
+          // IE8 doesn't reliably clear timeout, so this additional
+          // check is needed
+          if (self.timerId === null)
+            return;
           self.$clearTimer();
           if (self.args)
             self.normalCall.apply(self, self.args);
@@ -224,6 +232,10 @@
         timerId = null;
       }
       timerId = setTimeout(function() {
+        // IE8 doesn't reliably clear timeout, so this additional
+        // check is needed
+        if (timerId === null)
+          return;
         timerId = null;
         func.apply(self, args);
       }, threshold);

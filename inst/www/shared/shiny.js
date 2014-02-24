@@ -1306,7 +1306,7 @@
       }).join('');
       header = '<thead><tr>' + header + '</tr></thead>';
       var footer = '';
-      if (data.options.bFilter != false) {
+      if (data.options.bFilter !== false) {
         footer = $.map(colnames, function(x) {
           return '<th><input type="text" placeholder="' + x + '" /></th>';
         }).join('');
@@ -1319,6 +1319,7 @@
       // options that should be eval()ed
       if (data.evalOptions)
         $.each(data.evalOptions, function(i, x) {
+          /*jshint evil: true */
           data.options[x] = eval('(' + data.options[x] + ')');
         });
 
@@ -2009,11 +2010,14 @@
       var config = $el.parent().find('script[data-for=' + el.id + ']');
       if (config.length > 0) {
         var options = $.extend({
-          labelField: 'label', valueField: 'value', searchField: ['label']
+          labelField: 'label',
+          valueField: 'value',
+          searchField: ['label']
         }, JSON.parse(config.html()));
         // options that should be eval()ed
         if (config.data('eval') instanceof Array)
           $.each(config.data('eval'), function(i, x) {
+            /*jshint evil: true*/
             options[x] = eval('(' + options[x] + ')');
           });
 

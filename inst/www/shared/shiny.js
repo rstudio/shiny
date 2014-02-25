@@ -1352,6 +1352,12 @@
         "iDisplayLength": 25,
         "sAjaxSource": data.action
       }, data.options));
+      // the table object may need post-processing
+      if (typeof data.callback === 'string') {
+        /*jshint evil: true */
+        var callback = eval('(' + data.callback + ')');
+        if (typeof callback === 'function') callback(oTable);
+      }
 
       // use debouncing for searching boxes
       $el.find('label input').first().unbind('keyup')

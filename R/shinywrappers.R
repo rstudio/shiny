@@ -488,6 +488,9 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #'   or a function to return such a list.
 #' @param searchDelay The delay for searching, in milliseconds (to avoid too
 #'   frequent search requests).
+#' @param callback A JavaScript function to be applied to the DataTable object.
+#'   This is useful for DataTables plug-ins, which often require the DataTable
+#'   instance to be available (\url{http://datatables.net/extras/}).
 #' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot
@@ -499,6 +502,7 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #'   )
 #' )
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
+                            callback = 'function(oTable) {}',
                             env = parent.frame(), quoted = FALSE) {
   installExprFunction(expr, "func", env, quoted)
 
@@ -507,8 +511,11 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     data <- func()
     if (length(dim(data)) != 2) return() # expects a rectangular data object
     action <- shinysession$registerDataTable(name, data)
-    list(colnames = colnames(data), action = action, options = res$options,
-         evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay)
+    list(
+      colnames = colnames(data), action = action, options = res$options,
+      evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,
+      callback = paste(callback, collapse = '\n')
+    )
   }
 }
 

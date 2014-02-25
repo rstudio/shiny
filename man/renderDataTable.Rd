@@ -4,7 +4,7 @@
 \title{Table output with the JavaScript library DataTables}
 \usage{
 renderDataTable(expr, options = NULL, searchDelay = 500,
-  env = parent.frame(), quoted = FALSE)
+  callback = "function(oTable) {}", env = parent.frame(), quoted = FALSE)
 }
 \arguments{
   \item{expr}{An expression that returns a data frame or a
@@ -16,6 +16,11 @@ renderDataTable(expr, options = NULL, searchDelay = 500,
 
   \item{searchDelay}{The delay for searching, in
   milliseconds (to avoid too frequent search requests).}
+
+  \item{callback}{A JavaScript function to be applied to
+  the DataTable object.  This is useful for DataTables
+  plug-ins, which often require the DataTable instance to
+  be available (\url{http://datatables.net/extras/}).}
 
   \item{env}{The environment in which to evaluate
   \code{expr}.}
@@ -42,7 +47,7 @@ character string.
 renderDataTable(iris,
   options = list(
     iDisplayLength = 5,
-    fnInitComplete = I("(function(oSettings, json) {alert('Done.');})")
+    fnInitComplete = I("function(oSettings, json) {alert('Done.');}")
   )
 )
 }

@@ -1327,7 +1327,7 @@
       }).join('');
       header = '<thead><tr>' + header + '</tr></thead>';
       var footer = '';
-      if (data.options.bFilter !== false) {
+      if (data.options && data.options.bFilter !== false) {
         footer = $.map(colnames, function(x) {
           return '<th><input type="text" placeholder="' + x + '" /></th>';
         }).join('');

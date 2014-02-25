@@ -495,11 +495,11 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' renderDataTable(iris,
 #'   options = list(
 #'     iDisplayLength = 5,
-#'     fnInitComplete = I("(function(oSettings, json) {alert('Done.');})")
+#'     fnInitComplete = I("function(oSettings, json) {alert('Done.');}")
 #'   )
 #' )
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
-                            env=parent.frame(), quoted=FALSE) {
+                            env = parent.frame(), quoted = FALSE) {
   installExprFunction(expr, "func", env, quoted)
 
   function(shinysession, name, ...) {

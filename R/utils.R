@@ -383,11 +383,20 @@ Callbacks <- setRefClass(
 dataTablesJSON <- function(data, query) {
   n <- nrow(data)
   with(parseQueryString(query), {
+    useRegex <- function(j, envir = parent.frame()) {
+      # FIXME: bRegex is not part of the query string yet (DataTables 1.9.4)
+      return(TRUE)
+      ex <- getExists(
+        if (missing(j)) 'bRegex' else sprintf('bRegex_%s', j), 'character', envir
+      )
+      is.null(ex) || ex == 'true'
+    }
     # global searching
     i <- seq_len(n)
     sSearch <- getExists('sSearch', 'character')
     if (length(sSearch) && nzchar(sSearch)) {
-      i0 <- apply(data, 2, function(x) grep(sSearch, as.character(x)))
+      bRegex <- useRegex()
+      i0 <- apply(data, 2, function(x) grep(sSearch, as.character(x), fixed = !bRegex))
       i <- intersect(i, unique(unlist(i0)))
     }
     # search by columns
@@ -395,7 +404,8 @@ dataTablesJSON <- function(data, query) {
       if (is.null(s <- getExists(sprintf('bSearchable_%d', j), 'character')) ||
             s == "0" || s == "false") next  # the j-th column is not searchable
       if (is.null(k <- getExists(sprintf('sSearch_%d', j), 'character'))) next
-      if (nzchar(k)) i <- intersect(grep(k, as.character(data[, j + 1])), i)
+      if (nzchar(k))
+        i <- intersect(grep(k, as.character(data[, j + 1]), fixed = !useRegex(j)), i)
       if (length(i) == 0) break
     }
     if (length(i) != n) data <- data[i, , drop = FALSE]
@@ -431,9 +441,9 @@ dataTablesJSON <- function(data, query) {
   })
 }
 
-getExists <- function(x, mode) {
-  if (exists(x, envir = parent.frame(), mode = mode, inherits = FALSE))
-    get(x, envir = parent.frame(), mode = mode, inherits = FALSE)
+getExists <- function(x, mode, envir = parent.frame()) {
+  if (exists(x, envir = envir, mode = mode, inherits = FALSE))
+    get(x, envir = envir, mode = mode, inherits = FALSE)
 }
 
 # for options passed to DataTables/Selectize/..., the options of the class AsIs

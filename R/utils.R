@@ -404,8 +404,16 @@ dataTablesJSON <- function(data, query) {
       if (is.null(s <- getExists(sprintf('bSearchable_%d', j), 'character')) ||
             s == "0" || s == "false") next  # the j-th column is not searchable
       if (is.null(k <- getExists(sprintf('sSearch_%d', j), 'character'))) next
-      if (nzchar(k))
-        i <- intersect(grep(k, as.character(data[, j + 1]), fixed = !useRegex(j)), i)
+      if (nzchar(k)) {
+        dj <- data[, j + 1]
+        r  <- commaToRange(k)
+        ij <- if (length(r) == 2 && is.numeric(dj)) {
+          which(dj >= r[1] & dj <= r[2])
+        } else {
+          grep(k, as.character(dj), fixed = !useRegex(j))
+        }
+        i <- intersect(ij, i)
+      }
       if (length(i) == 0) break
     }
     if (length(i) != n) data <- data[i, , drop = FALSE]
@@ -446,6 +454,18 @@ dataTablesJSON <- function(data, query) {
 getExists <- function(x, mode, envir = parent.frame()) {
   if (exists(x, envir = envir, mode = mode, inherits = FALSE))
     get(x, envir = envir, mode = mode, inherits = FALSE)
+}
+
+# convert a string of the form "lower,upper" to c(lower, upper)
+commaToRange <- function(string) {
+  if (!grepl(',', string)) return()
+  r <- strsplit(string, ',')[[1]]
+  if (length(r) > 2) return()
+  if (length(r) == 1) r <- c(r, '')  # lower,
+  r <- as.numeric(r)
+  if (is.na(r[1])) r[1] <- -Inf
+  if (is.na(r[2])) r[2] <- Inf
+  r
 }
 
 # for options passed to DataTables/Selectize/..., the options of the class AsIs

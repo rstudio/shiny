@@ -392,6 +392,8 @@ dataTablesJSON <- function(data, query) {
     }
     # search by columns
     if (length(i)) for (j in seq_len(as.integer(iColumns)) - 1) {
+      if (is.null(s <- getExists(sprintf('bSearchable_%d', j), 'character')) ||
+            s == "0" || s == "false") next  # the j-th column is not searchable
       if (is.null(k <- getExists(sprintf('sSearch_%d', j), 'character'))) next
       if (nzchar(k)) i <- intersect(grep(k, as.character(data[, j + 1])), i)
       if (length(i) == 0) break

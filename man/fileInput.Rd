@@ -48,7 +48,8 @@ Other input.elements: \code{\link{actionButton}};
   \code{\link{checkboxGroupInput}};
   \code{\link{checkboxInput}}; \code{\link{dateInput}};
   \code{\link{dateRangeInput}}; \code{\link{numericInput}};
-  \code{\link{radioButtons}}; \code{\link{selectInput}};
-  \code{\link{submitButton}}; \code{\link{textInput}}
+  \code{\link{radioButtons}}; \code{\link{selectInput}},
+  \code{\link{selectizeInput}}; \code{\link{submitButton}};
+  \code{\link{textInput}}
 }
 

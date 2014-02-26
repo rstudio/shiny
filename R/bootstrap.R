@@ -737,9 +737,9 @@ selectInput <- function(inputId,
 #' @rdname selectInput
 #' @param ... arguments passed to \code{selectInput()}
 #' @param options a list of options; see the documentation of \pkg{selectize.js}
-#'   \url{https://github.com/brianreavis/selectize.js} for possible options
-#'   (character option values inside \code{\link{I}()} will be treated as
-#'   literal JavaScript code; see \code{\link{renderDataTable}()} for details)
+#'   for possible options (character option values inside \code{\link{I}()} will
+#'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+#'   for details)
 #' @export
 selectizeInput <- function(inputId, ..., options = NULL) {
   res <- checkAsIs(options)

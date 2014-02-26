@@ -97,6 +97,27 @@ shiny 0.8.0.99
   that returns a list. This makes it possible to use reactive values in the
   options. (#392)
 
+* `renderDataTable()` respects more DataTables options now: (1) either
+  bPaginate = FALSE or iDisplayLength = -1 will disable pagination (i.e. all
+  rows are returned from the data); besides, this means we can also use -1
+  in the length menu, e.g. aLengthMenu = list(c(10, 30, -1), list(10, 30,
+  'All')); (2) we can disable searching for individual columns through the
+  bSearchable option, e.g. aoColumns = list(list(bSearchable = FALSE),
+  list(bSearchable = TRUE),...) (the search box for the first column is
+  hidden); (3) we can turn off searching entirely (for both global searching
+  and individual columns) using the option bFilter = FALSE.
+
+* Added an argument `callback` in `renderDataTable()` so that a custom
+  JavaScript function can be applied to the DataTable object. This makes it
+  much easier to use DataTables plug-ins.
+
+* For numeric columns in a DataTable, the search boxes support lower and
+  upper bounds now: a search query of the form "lower,upper" (without
+  quotes) indicates the limits [lower, upper]. For a column X, this means
+  the rows corresponding to X >= lower & X <= upper are returned. If we omit
+  either the lower limit or the upper limit, only the other limit will be
+  used, e.g. ",upper" means X <= upper.
+
 * `updateNumericInput(value)` tries to preserve numeric precision by avoiding
   scientific notation when possible, e.g. 102145 is no longer rounded to
   1.0214e+05 = 102140. (Thanks, Martin Loos. #401)

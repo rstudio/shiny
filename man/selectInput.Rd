@@ -3,8 +3,7 @@
 \alias{selectInput}
 \title{Create a select list input control}
 \usage{
-selectInput(inputId, label, choices, selected = NULL, multiple = FALSE,
-  selectize = TRUE, options = NULL)
+selectInput(inputId, label, choices, selected = NULL, multiple = FALSE)
 }
 \arguments{
   \item{inputId}{Input variable to assign the control's
@@ -22,24 +21,13 @@ selectInput(inputId, label, choices, selected = NULL, multiple = FALSE,
   no values for multiple select lists.}
 
   \item{multiple}{Is selection of multiple items allowed?}
-
-  \item{selectize}{Whether to use the JavaScript library
-  \pkg{selectize.js}
-  (\url{https://github.com/brianreavis/selectize.js}) to
-  extend the standard select input element.}
-
-  \item{options}{A list of options for \pkg{selectize.js};
-  see \url{https://github.com/brianreavis/selectize.js} for
-  possible options (character option values inside
-  \code{\link{I}()} will be treated as literal JavaScript
-  code; see \code{\link{renderDataTable}()} for details)}
 }
 \value{
 A select list control that can be added to a UI definition.
 }
 \description{
-Create a select list that can be used to choose a single or multiple items
-from a list of values.
+Create a select list that can be used to choose a single or
+multiple items from a list of values.
 }
 \examples{
 selectInput("variable", "Variable:",

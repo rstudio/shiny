@@ -672,24 +672,20 @@ choicesWithNames <- function(choices) {
 
 #' Create a select list input control
 #'
-#' Create a select list that can be used to choose a single or multiple items
-#' from a list of values.
+#' Create a select list that can be used to choose a single or
+#' multiple items from a list of values.
 #'
+#' \code{selectizeInput()} uses the JavaScript library \pkg{selectize.js}
+#' (\url{https://github.com/brianreavis/selectize.js}) to extend the basic
+#' select input element.
 #' @param inputId Input variable to assign the control's value to
 #' @param label Display label for the control
 #' @param choices List of values to select from. If elements of the list are
-#'   named then that name rather than the value is displayed to the user.
+#' named then that name rather than the value is displayed to the user.
 #' @param selected The initially selected value (or multiple values if
-#'   \code{multiple = TRUE}). If not specified then defaults to the first value
-#'   for single-select lists and no values for multiple select lists.
+#' \code{multiple = TRUE}). If not specified then defaults to the first value
+#' for single-select lists and no values for multiple select lists.
 #' @param multiple Is selection of multiple items allowed?
-#' @param selectize Whether to use the JavaScript library \pkg{selectize.js}
-#'   (\url{https://github.com/brianreavis/selectize.js}) to extend the standard
-#'   select input element.
-#' @param options A list of options for \pkg{selectize.js}; see
-#'   \url{https://github.com/brianreavis/selectize.js} for possible options
-#'   (character option values inside \code{\link{I}()} will be treated as
-#'   literal JavaScript code; see \code{\link{renderDataTable}()} for details)
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -701,8 +697,11 @@ choicesWithNames <- function(choices) {
 #'               "Transmission" = "am",
 #'               "Gears" = "gear"))
 #' @export
-selectInput <- function(inputId, label, choices, selected = NULL,
-                        multiple = FALSE, selectize = TRUE, options = NULL) {
+selectInput <- function(inputId,
+                        label,
+                        choices,
+                        selected = NULL,
+                        multiple = FALSE) {
   # resolve names
   choices <- choicesWithNames(choices)
 
@@ -732,16 +731,21 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   selectTag <- tagSetChildren(selectTag, list = optionTags)
 
   # return label and select tag
-  res <- tagList(controlLabel(inputId, label), selectTag)
-  if (selectize) selectizeInput(res, inputId, options) else res
+  tagList(controlLabel(inputId, label), selectTag)
 }
 
-# additional CSS/JS for selectize.js
-selectizeInput <- function(select, inputId, options = NULL) {
+#' @rdname selectInput
+#' @param ... arguments passed to \code{selectInput()}
+#' @param options a list of options; see the documentation of \pkg{selectize.js}
+#'   \url{https://github.com/brianreavis/selectize.js} for possible options
+#'   (character option values inside \code{\link{I}()} will be treated as
+#'   literal JavaScript code; see \code{\link{renderDataTable}()} for details)
+#' @export
+selectizeInput <- function(inputId, ..., options = NULL) {
   res <- checkAsIs(options)
 
   tagList(
-    select,
+    selectInput(inputId, ...),
     singleton(tags$head(
       tags$link(rel = 'stylesheet', type = 'text/css',
                 href = 'shared/selectize/css/selectize.bootstrap2.css'),

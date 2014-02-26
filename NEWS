@@ -122,6 +122,10 @@ shiny 0.8.0.99
   scientific notation when possible, e.g. 102145 is no longer rounded to
   1.0214e+05 = 102140. (Thanks, Martin Loos. #401)
 
+* `sliderInput()` no longer treats a label wrapped in HTML() as plain text,
+  e.g. the label in sliderInput(..., label = HTML('<em>A Label</em>')) will
+  not be escaped any more. (#119)
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

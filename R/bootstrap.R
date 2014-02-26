@@ -940,11 +940,6 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round=FALSE, format='#,##0.#####', locale='us',
                         ticks=TRUE, animate=FALSE) {
 
-  # validate label
-  labelText <- as.character(label)
-  if (!is.character(labelText))
-    stop("label not specified")
-
   if (identical(animate, TRUE))
     animate <- animationOptions()
 
@@ -958,7 +953,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   # build slider
   tags$div(
     tagList(
-      controlLabel(inputId, labelText),
+      controlLabel(inputId, label),
       slider(inputId, min=min, max=max, value=value, step=step, round=round,
              locale=locale, format=format, ticks=ticks,
              animate=animate)

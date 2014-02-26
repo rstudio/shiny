@@ -335,7 +335,7 @@ rewriteTags <- function(ui, func, preorder) {
 # different).
 surroundSingletons <- local({
   surroundSingleton <- function(uiObj) {
-    if (is(uiObj, "shiny.singleton")) {
+    if (inherits(uiObj, "shiny.singleton")) {
       sig <- digest(uiObj, "sha1")
       class(uiObj) <- class(uiObj)[class(uiObj) != "shiny.singleton"]
       return(tagList(
@@ -358,7 +358,7 @@ surroundSingletons <- local({
 # HTML objects and also the list of known singletons.
 takeSingletons <- function(ui, singletons=character(0), desingleton=TRUE) {
   result <- rewriteTags(ui, function(uiObj) {
-    if (is(uiObj, "shiny.singleton")) {
+    if (inherits(uiObj, "shiny.singleton")) {
       sig <- digest(uiObj, "sha1")
       if (sig %in% singletons)
         return(NULL)

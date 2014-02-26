@@ -212,7 +212,9 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
   # Convert all attribs to chars explicitly; prevents us from messing up factors
   attribs <- lapply(tag$attribs, as.character)
   # concatenate attributes
-  attribs <- lapply(split(attribs, names(attribs)), paste, collapse = " ")
+  # split() is very slow, so avoid it if possible
+  if (anyDuplicated(names(attribs)))
+    attribs <- lapply(split(attribs, names(attribs)), paste, collapse = " ")
 
   # write attributes
   for (attrib in names(attribs)) {
@@ -261,11 +263,13 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
 
 doRenderTags <- function(ui, indent = 0) {
   # Render the body--the bodyHtml variable will be created
-  htmlResult <- NULL
-  conn <- textConnection("htmlResult", "w", local = TRUE)
+  conn <- file(open="w+")
   connWriter <- function(text) cat(text, file = conn)
-  tryCatch(
-    tagWrite(ui, connWriter, indent),
+  htmlResult <- tryCatch({
+    tagWrite(ui, connWriter, indent)
+    flush(conn)
+    readLines(conn)
+  },
     finally = close(conn)
   )
   return(HTML(paste(htmlResult, collapse = "\n")))
@@ -331,7 +335,7 @@ rewriteTags <- function(ui, func, preorder) {
 # different).
 surroundSingletons <- local({
   surroundSingleton <- function(uiObj) {
-    if (is(uiObj, "shiny.singleton")) {
+    if (inherits(uiObj, "shiny.singleton")) {
       sig <- digest(uiObj, "sha1")
       class(uiObj) <- class(uiObj)[class(uiObj) != "shiny.singleton"]
       return(tagList(
@@ -354,7 +358,7 @@ surroundSingletons <- local({
 # HTML objects and also the list of known singletons.
 takeSingletons <- function(ui, singletons=character(0), desingleton=TRUE) {
   result <- rewriteTags(ui, function(uiObj) {
-    if (is(uiObj, "shiny.singleton")) {
+    if (inherits(uiObj, "shiny.singleton")) {
       sig <- digest(uiObj, "sha1")
       if (sig %in% singletons)
         return(NULL)

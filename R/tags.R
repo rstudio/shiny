@@ -190,7 +190,7 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
   # optionally process a list of tags
   if (!isTag(tag) && is.list(tag)) {
     tag <- dropNullsOrEmpty(flattenTags(tag))
-    sapply(tag, function(t) tagWrite(t, textWriter, indent))
+    lapply(tag, tagWrite, textWriter, indent)
     return (NULL)
   }
 
@@ -237,8 +237,8 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
 
     # special case for a single child text node (skip newlines and indentation)
     if ((length(children) == 1) && is.character(children[[1]]) ) {
-      tagWrite(children[[1]], textWriter, 0, "")
-      textWriter(paste("</", tag$name, ">", eol, sep=""))
+      textWriter(paste(normalizeText(children[[1]]), "</", tag$name, ">", eol,
+        sep=""))
     }
     else {
       textWriter("\n")
@@ -264,7 +264,7 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
 doRenderTags <- function(ui, indent = 0) {
   # Render the body--the bodyHtml variable will be created
   conn <- file(open="w+")
-  connWriter <- function(text) cat(text, file = conn)
+  connWriter <- function(text) writeChar(text, conn, eos = NULL)
   htmlResult <- tryCatch({
     tagWrite(ui, connWriter, indent)
     flush(conn)
@@ -298,23 +298,11 @@ rewriteTags <- function(ui, func, preorder) {
 
   if (!isTag(ui) && is.list(ui)) {
     if (length(ui) > 0) {
-      for (i in 1:length(ui)) {
-        newVal <- rewriteTags(ui[[i]], func, preorder)
-        if (is.null(newVal))
-          ui[i] <- list(NULL)
-        else
-          ui[[i]] <- newVal
-      }
+      ui[] <- lapply(ui, rewriteTags, func, preorder)
     }
   } else if (isTag(ui)) {
     if (length(ui$children) > 0) {
-      for (i in 1:length(ui$children)) {
-        newVal <- rewriteTags(ui$children[[i]], func, preorder)
-        if (is.null(newVal))
-          ui$children[i] <- list(NULL)
-        else
-          ui$children[[i]] <- newVal
-      }
+      ui$children[] <- lapply(ui$children, rewriteTags, func, preorder)
     }
   }
 

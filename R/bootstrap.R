@@ -458,7 +458,7 @@ textInput <- function(inputId, label, value = "") {
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 
   # build input tag
-  inputTag <- tags$input(id = inputId, type = "number", value = value)
+  inputTag <- tags$input(id = inputId, type = "number", value = formatNoSci(value))
   if (!is.na(min))
     inputTag$attribs$min = min
   if (!is.na(max))

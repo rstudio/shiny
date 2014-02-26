@@ -523,3 +523,10 @@ srcFileOfRef <- function(srcref) {
   else
     ""
 }
+
+# Format a number without sci notation, and keep as many digits as possible (do
+# we really need to go beyond 15 digits?)
+formatNoSci <- function(x) {
+  if (is.null(x)) return(NULL)
+  format(x, scientific = FALSE, digits = 15)
+}

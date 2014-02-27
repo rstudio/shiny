@@ -677,7 +677,7 @@ resolve <- function(dir, relpath) {
   if (nchar(abs.path) <= nchar(dir) + 1)
     return(NULL)
   if (substr(abs.path, 1, nchar(dir)) != dir ||
-    !(substr(abs.path, nchar(dir)+1, nchar(dir)+1) %in% c('/', '\\'))) {
+    substr(abs.path, nchar(dir)+1, nchar(dir)+1) != '/') {
     return(NULL)
   }
   return(abs.path)

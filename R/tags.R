@@ -296,14 +296,10 @@ rewriteTags <- function(ui, func, preorder) {
   if (preorder)
     ui <- func(ui)
 
-  if (!isTag(ui) && is.list(ui)) {
-    if (length(ui) > 0) {
-      ui[] <- lapply(ui, rewriteTags, func, preorder)
-    }
-  } else if (isTag(ui)) {
-    if (length(ui$children) > 0) {
-      ui$children[] <- lapply(ui$children, rewriteTags, func, preorder)
-    }
+  if (isTag(ui)) {
+    ui$children[] <- lapply(ui$children, rewriteTags, func, preorder)
+  } else if (is.list(ui)) {
+    ui[] <- lapply(ui, rewriteTags, func, preorder)
   }
 
   if (!preorder)

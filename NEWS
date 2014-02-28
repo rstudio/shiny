@@ -13,6 +13,10 @@ shiny 0.8.0.99
   selectize.js (https://github.com/brianreavis/selectize.js), which extends
   the basic select input in many aspects.
 
+* The `selectInput()` function also gained a new argument `selectize = TRUE`
+  to makes use of selectize.js by default. If you want to revert back to the
+  original select input, you have to call selectInput(..., selectize = FALSE).
+
 * Upgraded to Bootstrap 2.3.2 and jQuery 1.11.0.
 
 * Make `tags$head()` and `singleton()` behave correctly when used with

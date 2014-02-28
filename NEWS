@@ -126,6 +126,9 @@ shiny 0.8.0.99
   e.g. the label in sliderInput(..., label = HTML('<em>A Label</em>')) will
   not be escaped any more. (#119)
 
+* Fixed #306: the trailing slash in a path could fail `addResourcePath()`
+  under Windows. (Thanks, ZJ Dai)
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

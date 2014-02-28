@@ -674,6 +674,8 @@ resolve <- function(dir, relpath) {
     return(NULL)
   abs.path <- normalizePath(abs.path, winslash='/', mustWork=TRUE)
   dir <- normalizePath(dir, winslash='/', mustWork=TRUE)
+  # trim the possible trailing slash under Windows (#306)
+  if (.Platform$OS.type == 'windows') dir <- sub('/$', '', dir)
   if (nchar(abs.path) <= nchar(dir) + 1)
     return(NULL)
   if (substr(abs.path, 1, nchar(dir)) != dir ||

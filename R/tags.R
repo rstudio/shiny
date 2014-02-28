@@ -190,7 +190,7 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
   # optionally process a list of tags
   if (!isTag(tag) && is.list(tag)) {
     tag <- dropNullsOrEmpty(flattenTags(tag))
-    sapply(tag, function(t) tagWrite(t, textWriter, indent))
+    lapply(tag, tagWrite, textWriter, indent)
     return (NULL)
   }
 
@@ -212,7 +212,9 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
   # Convert all attribs to chars explicitly; prevents us from messing up factors
   attribs <- lapply(tag$attribs, as.character)
   # concatenate attributes
-  attribs <- lapply(split(attribs, names(attribs)), paste, collapse = " ")
+  # split() is very slow, so avoid it if possible
+  if (anyDuplicated(names(attribs)))
+    attribs <- lapply(split(attribs, names(attribs)), paste, collapse = " ")
 
   # write attributes
   for (attrib in names(attribs)) {
@@ -235,8 +237,8 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
 
     # special case for a single child text node (skip newlines and indentation)
     if ((length(children) == 1) && is.character(children[[1]]) ) {
-      tagWrite(children[[1]], textWriter, 0, "")
-      textWriter(paste("</", tag$name, ">", eol, sep=""))
+      textWriter(paste(normalizeText(children[[1]]), "</", tag$name, ">", eol,
+        sep=""))
     }
     else {
       textWriter("\n")
@@ -261,11 +263,13 @@ tagWrite <- function(tag, textWriter, indent=0, eol = "\n") {
 
 doRenderTags <- function(ui, indent = 0) {
   # Render the body--the bodyHtml variable will be created
-  htmlResult <- NULL
-  conn <- textConnection("htmlResult", "w", local = TRUE)
-  connWriter <- function(text) cat(text, file = conn)
-  tryCatch(
-    tagWrite(ui, connWriter, indent),
+  conn <- file(open="w+")
+  connWriter <- function(text) writeChar(text, conn, eos = NULL)
+  htmlResult <- tryCatch({
+    tagWrite(ui, connWriter, indent)
+    flush(conn)
+    readLines(conn)
+  },
     finally = close(conn)
   )
   return(HTML(paste(htmlResult, collapse = "\n")))
@@ -292,26 +296,10 @@ rewriteTags <- function(ui, func, preorder) {
   if (preorder)
     ui <- func(ui)
 
-  if (!isTag(ui) && is.list(ui)) {
-    if (length(ui) > 0) {
-      for (i in 1:length(ui)) {
-        newVal <- rewriteTags(ui[[i]], func, preorder)
-        if (is.null(newVal))
-          ui[i] <- list(NULL)
-        else
-          ui[[i]] <- newVal
-      }
-    }
-  } else if (isTag(ui)) {
-    if (length(ui$children) > 0) {
-      for (i in 1:length(ui$children)) {
-        newVal <- rewriteTags(ui$children[[i]], func, preorder)
-        if (is.null(newVal))
-          ui$children[i] <- list(NULL)
-        else
-          ui$children[[i]] <- newVal
-      }
-    }
+  if (isTag(ui)) {
+    ui$children[] <- lapply(ui$children, rewriteTags, func, preorder)
+  } else if (is.list(ui)) {
+    ui[] <- lapply(ui, rewriteTags, func, preorder)
   }
 
   if (!preorder)
@@ -331,7 +319,7 @@ rewriteTags <- function(ui, func, preorder) {
 # different).
 surroundSingletons <- local({
   surroundSingleton <- function(uiObj) {
-    if (is(uiObj, "shiny.singleton")) {
+    if (inherits(uiObj, "shiny.singleton")) {
       sig <- digest(uiObj, "sha1")
       class(uiObj) <- class(uiObj)[class(uiObj) != "shiny.singleton"]
       return(tagList(
@@ -354,7 +342,7 @@ surroundSingletons <- local({
 # HTML objects and also the list of known singletons.
 takeSingletons <- function(ui, singletons=character(0), desingleton=TRUE) {
   result <- rewriteTags(ui, function(uiObj) {
-    if (is(uiObj, "shiny.singleton")) {
+    if (inherits(uiObj, "shiny.singleton")) {
       sig <- digest(uiObj, "sha1")
       if (sig %in% singletons)
         return(NULL)

@@ -2041,6 +2041,20 @@
           valueField: 'value',
           searchField: ['label']
         }, JSON.parse(config.html()));
+        if (config.data('nonempty') !== undefined) {
+          options = $.extend(options, {
+            onItemRemove: function(value) {
+              if (this.getValue() === "")
+                $("select[id=" + el.id + "]").empty().append($("<option/>", {
+                  "value": value, "selected": true
+                })).trigger("change");
+            },
+            onDropdownClose: function($dropdown) {
+              if (this.getValue() === "")
+                this.setValue($("select[id=" + el.id + "]").val());
+            }
+          });
+        }
         // options that should be eval()ed
         if (config.data('eval') instanceof Array)
           $.each(config.data('eval'), function(i, x) {

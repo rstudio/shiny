@@ -686,6 +686,7 @@ choicesWithNames <- function(choices) {
 #' \code{multiple = TRUE}). If not specified then defaults to the first value
 #' for single-select lists and no values for multiple select lists.
 #' @param multiple Is selection of multiple items allowed?
+#' @param selectize Whether to use \pkg{selectize.js} or not.
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -697,11 +698,8 @@ choicesWithNames <- function(choices) {
 #'               "Transmission" = "am",
 #'               "Gears" = "gear"))
 #' @export
-selectInput <- function(inputId,
-                        label,
-                        choices,
-                        selected = NULL,
-                        multiple = FALSE) {
+selectInput <- function(inputId, label, choices, selected = NULL,
+                        multiple = FALSE, selectize = TRUE) {
   # resolve names
   choices <- choicesWithNames(choices)
 
@@ -731,21 +729,36 @@ selectInput <- function(inputId,
   selectTag <- tagSetChildren(selectTag, list = optionTags)
 
   # return label and select tag
-  tagList(controlLabel(inputId, label), selectTag)
+  res <- tagList(controlLabel(inputId, label), selectTag)
+  if (!selectize) return(res)
+  selectizeIt(inputId, res, NULL, nonempty = !multiple && !("" %in% choices))
 }
 
 #' @rdname selectInput
-#' @param ... arguments passed to \code{selectInput()}
-#' @param options a list of options; see the documentation of \pkg{selectize.js}
+#' @param ... Arguments passed to \code{selectInput()}.
+#' @param options A list of options. See the documentation of \pkg{selectize.js}
 #'   for possible options (character option values inside \code{\link{I}()} will
 #'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
-#'   for details)
+#'   for details).
+#' @note The selectize input created from \code{selectizeInput()} allows
+#'   deletion of the selected option even in a single select input, which will
+#'   return an empty string as its value. This is the default behavior of
+#'   \pkg{selectize.js}. However, the selectize input created from
+#'   \code{selectInput(..., selectize = TRUE)} will ignore the empty string
+#'   value when it is a single choice input and the empty string is not in the
+#'   \code{choices} argument. This is to keep compatibility with
+#'   \code{selectInput(..., selectize = FALSE)}.
 #' @export
 selectizeInput <- function(inputId, ..., options = NULL) {
+  selectizeIt(inputId, selectInput(inputId, ..., selectize = FALSE), options)
+}
+
+# given a select input and its id, selectize it
+selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
   res <- checkAsIs(options)
 
   tagList(
-    selectInput(inputId, ...),
+    select,
     singleton(tags$head(
       tags$link(rel = 'stylesheet', type = 'text/css',
                 href = 'shared/selectize/css/selectize.bootstrap2.css'),
@@ -755,7 +768,8 @@ selectizeInput <- function(inputId, ..., options = NULL) {
       tags$script(src = 'shared/selectize/js/selectize.min.js')
     )),
     tags$script(
-      type = 'application/json', `data-for` = inputId,
+      type = 'application/json',
+      `data-for` = inputId, `data-nonempty` = if (nonempty) '',
       `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
       if (length(res$options)) HTML(toJSON(res$options)) else '{}'
     )

@@ -4,7 +4,8 @@
 \alias{selectizeInput}
 \title{Create a select list input control}
 \usage{
-selectInput(inputId, label, choices, selected = NULL, multiple = FALSE)
+selectInput(inputId, label, choices, selected = NULL, multiple = FALSE,
+  selectize = TRUE)
 
 selectizeInput(inputId, ..., options = NULL)
 }
@@ -25,13 +26,16 @@ selectizeInput(inputId, ..., options = NULL)
 
   \item{multiple}{Is selection of multiple items allowed?}
 
-  \item{...}{arguments passed to \code{selectInput()}}
+  \item{selectize}{Whether to use \pkg{selectize.js} or
+  not.}
 
-  \item{options}{a list of options; see the documentation
+  \item{...}{Arguments passed to \code{selectInput()}.}
+
+  \item{options}{A list of options. See the documentation
   of \pkg{selectize.js} for possible options (character
   option values inside \code{\link{I}()} will be treated as
   literal JavaScript code; see
-  \code{\link{renderDataTable}()} for details)}
+  \code{\link{renderDataTable}()} for details).}
 }
 \value{
 A select list control that can be added to a UI definition.
@@ -44,6 +48,16 @@ multiple items from a list of values.
 \code{selectizeInput()} uses the JavaScript library \pkg{selectize.js}
 (\url{https://github.com/brianreavis/selectize.js}) to extend the basic
 select input element.
+}
+\note{
+The selectize input created from \code{selectizeInput()} allows
+  deletion of the selected option even in a single select input, which will
+  return an empty string as its value. This is the default behavior of
+  \pkg{selectize.js}. However, the selectize input created from
+  \code{selectInput(..., selectize = TRUE)} will ignore the empty string
+  value when it is a single choice input and the empty string is not in the
+  \code{choices} argument. This is to keep compatibility with
+  \code{selectInput(..., selectize = FALSE)}.
 }
 \examples{
 selectInput("variable", "Variable:",

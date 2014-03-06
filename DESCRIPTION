@@ -1,8 +1,8 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 0.8.0.99
-Date: 2013-10-26
+Version: 0.9.0
+Date: 2014-03-06
 Author: RStudio, Inc.
 Maintainer: Winston Chang <winston@rstudio.com>
 Description: Shiny makes it incredibly easy to build interactive web

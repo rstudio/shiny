@@ -1,4 +1,4 @@
-shiny 0.8.0.99
+shiny 0.9.0
 --------------------------------------------------------------------------------
 
 * BREAKING CHANGE: Added a `host` parameter to runApp() and runExample(),

@@ -1998,6 +1998,13 @@
         if (selectize) {
           selectize = selectize[0].selectize;
           selectize.clearOptions();
+          // Selectize.js doesn't maintain insertion order on Chrome on Mac
+          // with >10 items if inserted using addOption (versus being present
+          // in the DOM at selectize() time). Putting $order on each option
+          // makes it work.
+          $.each(data.options, function(i, opt) {
+            opt.$order = i;
+          });
           selectize.addOption(data.options);
         }
         for (var i = 0; i < data.options.length; i++) {

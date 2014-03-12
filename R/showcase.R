@@ -92,12 +92,12 @@ showcaseCodeTabs <- function(codeLicense) {
               id=paste(gsub(".", "_", rFile, fixed=TRUE),
                        "_code", sep=""),
               pre(class="shiny-code",
-                  # We can't use tag$code here since we need to prevent
-                  # whitespace from being emitted between <code> ... </code>
-                  HTML(paste('<code class="language-r">',
-                              paste(readLines(file.path.ci(getwd(), rFile)),
-                                    collapse="\n"),
-                              '</code>', sep=""))))
+                  # we need to prevent the indentation of <code> ... </code>
+                  HTML(format(tags$code(
+                    class="language-r",
+                    paste(readLines(file.path.ci(getwd(), rFile)),
+                          collapse="\n")
+                  ), indent = FALSE))))
         })),
     codeLicense))
 }

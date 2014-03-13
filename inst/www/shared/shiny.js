@@ -14,6 +14,11 @@
     e.preventDefault();
   });
 
+  // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
+  var $escape = exports.$escape = function(val) {
+    val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1')
+  };
+
   function randomId() {
     return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
   }
@@ -839,7 +844,7 @@
     addMessageHandler('inputMessages', function(message) {
       // inputMessages should be an array
       for (var i = 0; i < message.length; i++) {
-        var $obj = $('.shiny-bound-input#' + message[i].id);
+        var $obj = $('.shiny-bound-input#' + $escape(message[i].id));
         var inputBinding = $obj.data('shiny-input-binding');
 
         // Dispatch the message to the appropriate input object
@@ -1459,13 +1464,13 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
 
       $(el).trigger('change');
     },
     getState: function(el) {
       return {
-        label: $(el).parent().find('label[for=' + el.id + ']').text(),
+        label: $(el).parent().find('label[for=' + $escape(el.id) + ']').text(),
         value: el.value
       };
     },
@@ -1515,12 +1520,12 @@
       if (data.hasOwnProperty('step'))   el.step  = data.step;
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
 
       $(el).trigger('change');
     },
     getState: function(el) {
-      return { label: $(el).parent().find('label[for=' + el.id + ']').text(),
+      return { label: $(el).parent().find('label[for=' + $escape(el.id) + ']').text(),
                value: this.getValue(el),
                min:   Number(el.min),
                max:   Number(el.max),
@@ -1598,7 +1603,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
 
       // jslider doesn't support setting other properties
 
@@ -1614,7 +1619,7 @@
       var $el = $(el);
       var settings = $el.slider().settings;
 
-      return { label: $el.parent().find('label[for=' + el.id + ']').text(),
+      return { label: $el.parent().find('label[for=' + $escape(el.id) + ']').text(),
                value:  this.getValue(el),
                min:    Number(settings.from),
                max:    Number(settings.to),
@@ -1673,7 +1678,7 @@
       else if (startview === 0)  startview = 'month';
 
       return {
-        label:       $el.find('label[for=' + el.id + ']').text(),
+        label:       $el.find('label[for=' + $escape(el.id) + ']').text(),
         value:       this.getValue(el),
         valueString: $input.val(),
         min:         min,
@@ -1691,7 +1696,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).find('label[for=' + el.id + ']').text(data.label);
+        $(el).find('label[for=' + $escape(el.id) + ']').text(data.label);
 
       if (data.hasOwnProperty('min'))
         this._setMin($input[0], data.min);
@@ -1876,7 +1881,7 @@
       else if (startview === 0)  startview = 'month';
 
       return {
-        label:       $el.find('label[for=' + el.id + ']').text(),
+        label:       $el.find('label[for=' + $escape(el.id) + ']').text(),
         value:       this.getValue(el),
         valueString: [ $startinput.val(), $endinput.val() ],
         min:         min,
@@ -1897,7 +1902,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $el.find('label[for=' + el.id + ']').text(data.label);
+        $el.find('label[for=' + $escape(el.id) + ']').text(data.label);
 
       if (data.hasOwnProperty('min')) {
         this._setMin($startinput[0], data.min);
@@ -1982,7 +1987,7 @@
       }
 
       return {
-        label: $(el).parent().find('label[for=' + el.id + ']').text(),
+        label: $(el).parent().find('label[for=' + $escape(el.id) + ']').text(),
         value:    this.getValue(el),
         options:  options
       };
@@ -2023,7 +2028,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
 
       $(el).trigger('change');
     },
@@ -2041,7 +2046,7 @@
     _selectize: function(el) {
       if (!$.fn.selectize) return;
       var $el = $(el);
-      var config = $el.parent().find('script[data-for=' + el.id + ']');
+      var config = $el.parent().find('script[data-for=' + $escape(el.id) + ']');
       if (config.length > 0) {
         var options = $.extend({
           labelField: 'label',
@@ -2052,13 +2057,13 @@
           options = $.extend(options, {
             onItemRemove: function(value) {
               if (this.getValue() === "")
-                $("select[id=" + el.id + "]").empty().append($("<option/>", {
+                $("select#" + $escape(el.id)).empty().append($("<option/>", {
                   "value": value, "selected": true
                 })).trigger("change");
             },
             onDropdownClose: function($dropdown) {
               if (this.getValue() === "")
-                this.setValue($("select[id=" + el.id + "]").val());
+                this.setValue($("select#" + $escape(el.id)).val());
             }
           });
         }
@@ -2100,7 +2105,7 @@
       }
 
       return {
-        label:    $(el).parent().find('label[for=' + el.id + ']').text(),
+        label:    $(el).parent().find('label[for=' + $escape(el.id) + ']').text(),
         value:    this.getValue(el),
         options:  options
       };
@@ -2134,7 +2139,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + el.id + ']').text(data.label);
+        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
 
       $(el).trigger('change');
     },
@@ -2150,7 +2155,7 @@
     // that wrap the input as well as labels associated with 'for' attribute.
     _getLabel: function(obj) {
       // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for=' + obj.id + ']');
+      var $label_for = $('label[for=' + $escape(obj.id) + ']');
       if ($label_for.length > 0) {
         return $.trim($label_for.text());
       }
@@ -2166,7 +2171,7 @@
     // that wrap the input as well as labels associated with 'for' attribute.
     _setLabel: function(obj, value) {
       // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for=' + obj.id + ']');
+      var $label_for = $('label[for=' + $escape(obj.id) + ']');
       if ($label_for.length > 0) {
         $label_for.text(value);
       }
@@ -2225,7 +2230,7 @@
                        label:   this._getLabel($objs[i]) };
       }
 
-      return { label:    $(el).find('label[for=' + el.id + ']').text(),
+      return { label:    $(el).find('label[for=' + $escape(el.id) + ']').text(),
                value:    this.getValue(el),
                options:  options
              };
@@ -2259,7 +2264,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $el.find('label[for=' + el.id + ']').text(data.label);
+        $el.find('label[for=' + $escape(el.id) + ']').text(data.label);
 
       $(el).trigger('change');
     },
@@ -2275,7 +2280,7 @@
     // that wrap the input as well as labels associated with 'for' attribute.
     _getLabel: function(obj) {
       // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for=' + obj.id + ']');
+      var $label_for = $('label[for=' + $escape(obj.id) + ']');
       if ($label_for.length > 0) {
         return $.trim($label_for.text());
       }
@@ -2291,7 +2296,7 @@
     // that wrap the input as well as labels associated with 'for' attribute.
     _setLabel: function(obj, value) {
       // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for=' + obj.id + ']');
+      var $label_for = $('label[for=' + $escape(obj.id) + ']');
       if ($label_for.length > 0) {
         $label_for.text(value);
       }
@@ -2485,13 +2490,13 @@
       this.$label().text(file ? file.name : '');
     };
     this.$container = function() {
-      return $('#' + this.id + '_progress.shiny-file-input-progress');
+      return $('#' + $escape(this.id) + '_progress.shiny-file-input-progress');
     };
     this.$bar = function() {
-      return $('#' + this.id + '_progress.shiny-file-input-progress .bar');
+      return $('#' + $escape(this.id) + '_progress.shiny-file-input-progress .bar');
     };
     this.$label = function() {
-      return $('#' + this.id + '_progress.shiny-file-input-progress label');
+      return $('#' + $escape(this.id) + '_progress.shiny-file-input-progress label');
     };
     this.$setVisible = function(visible) {
       this.$container().css('visibility', visible ? 'visible' : 'hidden');
@@ -3002,7 +3007,7 @@
   $(document).on('click', '.slider-animate-button', function(evt) {
     evt.preventDefault();
     var self = $(this);
-    var target = $('#' + self.attr('data-target-id'));
+    var target = $('#' + $escape(self.attr('data-target-id')));
     var slider = target.slider();
     var startLabel = 'Play';
     var stopLabel = 'Pause';

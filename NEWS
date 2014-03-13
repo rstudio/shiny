@@ -133,6 +133,8 @@ shiny 0.9.0
 * Fixed #306: the trailing slash in a path could fail `addResourcePath()`
   under Windows. (Thanks, ZJ Dai)
 
+* Dots ('.') in inputId and outputId arguments are now officially supported.
+
 shiny 0.8.0
 --------------------------------------------------------------------------------
 

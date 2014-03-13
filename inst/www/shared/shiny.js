@@ -1464,13 +1464,13 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
+        $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       $(el).trigger('change');
     },
     getState: function(el) {
       return {
-        label: $(el).parent().find('label[for=' + $escape(el.id) + ']').text(),
+        label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
         value: el.value
       };
     },
@@ -1520,12 +1520,12 @@
       if (data.hasOwnProperty('step'))   el.step  = data.step;
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
+        $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       $(el).trigger('change');
     },
     getState: function(el) {
-      return { label: $(el).parent().find('label[for=' + $escape(el.id) + ']').text(),
+      return { label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
                value: this.getValue(el),
                min:   Number(el.min),
                max:   Number(el.max),
@@ -1603,7 +1603,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
+        $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       // jslider doesn't support setting other properties
 
@@ -1619,7 +1619,7 @@
       var $el = $(el);
       var settings = $el.slider().settings;
 
-      return { label: $el.parent().find('label[for=' + $escape(el.id) + ']').text(),
+      return { label: $el.parent().find('label[for="' + $escape(el.id) + '"]').text(),
                value:  this.getValue(el),
                min:    Number(settings.from),
                max:    Number(settings.to),
@@ -1678,7 +1678,7 @@
       else if (startview === 0)  startview = 'month';
 
       return {
-        label:       $el.find('label[for=' + $escape(el.id) + ']').text(),
+        label:       $el.find('label[for="' + $escape(el.id) + '"]').text(),
         value:       this.getValue(el),
         valueString: $input.val(),
         min:         min,
@@ -1696,7 +1696,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).find('label[for=' + $escape(el.id) + ']').text(data.label);
+        $(el).find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       if (data.hasOwnProperty('min'))
         this._setMin($input[0], data.min);
@@ -1881,7 +1881,7 @@
       else if (startview === 0)  startview = 'month';
 
       return {
-        label:       $el.find('label[for=' + $escape(el.id) + ']').text(),
+        label:       $el.find('label[for="' + $escape(el.id) + '"]').text(),
         value:       this.getValue(el),
         valueString: [ $startinput.val(), $endinput.val() ],
         min:         min,
@@ -1902,7 +1902,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $el.find('label[for=' + $escape(el.id) + ']').text(data.label);
+        $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       if (data.hasOwnProperty('min')) {
         this._setMin($startinput[0], data.min);
@@ -1987,7 +1987,7 @@
       }
 
       return {
-        label: $(el).parent().find('label[for=' + $escape(el.id) + ']').text(),
+        label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
         value:    this.getValue(el),
         options:  options
       };
@@ -2028,7 +2028,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
+        $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       $(el).trigger('change');
     },
@@ -2046,7 +2046,7 @@
     _selectize: function(el) {
       if (!$.fn.selectize) return;
       var $el = $(el);
-      var config = $el.parent().find('script[data-for=' + $escape(el.id) + ']');
+      var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
       if (config.length > 0) {
         var options = $.extend({
           labelField: 'label',
@@ -2105,7 +2105,7 @@
       }
 
       return {
-        label:    $(el).parent().find('label[for=' + $escape(el.id) + ']').text(),
+        label:    $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
         value:    this.getValue(el),
         options:  options
       };
@@ -2139,7 +2139,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for=' + $escape(el.id) + ']').text(data.label);
+        $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       $(el).trigger('change');
     },
@@ -2155,7 +2155,7 @@
     // that wrap the input as well as labels associated with 'for' attribute.
     _getLabel: function(obj) {
       // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for=' + $escape(obj.id) + ']');
+      var $label_for = $('label[for="' + $escape(obj.id) + '"]');
       if ($label_for.length > 0) {
         return $.trim($label_for.text());
       }
@@ -2171,7 +2171,7 @@
     // that wrap the input as well as labels associated with 'for' attribute.
     _setLabel: function(obj, value) {
       // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for=' + $escape(obj.id) + ']');
+      var $label_for = $('label[for="' + $escape(obj.id) + '"]');
       if ($label_for.length > 0) {
         $label_for.text(value);
       }
@@ -2230,7 +2230,7 @@
                        label:   this._getLabel($objs[i]) };
       }
 
-      return { label:    $(el).find('label[for=' + $escape(el.id) + ']').text(),
+      return { label:    $(el).find('label[for="' + $escape(el.id) + '"]').text(),
                value:    this.getValue(el),
                options:  options
              };
@@ -2264,7 +2264,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $el.find('label[for=' + $escape(el.id) + ']').text(data.label);
+        $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       $(el).trigger('change');
     },
@@ -2280,7 +2280,7 @@
     // that wrap the input as well as labels associated with 'for' attribute.
     _getLabel: function(obj) {
       // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for=' + $escape(obj.id) + ']');
+      var $label_for = $('label[for="' + $escape(obj.id) + '"]');
       if ($label_for.length > 0) {
         return $.trim($label_for.text());
       }
@@ -2296,7 +2296,7 @@
     // that wrap the input as well as labels associated with 'for' attribute.
     _setLabel: function(obj, value) {
       // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for=' + $escape(obj.id) + ']');
+      var $label_for = $('label[for="' + $escape(obj.id) + '"]');
       if ($label_for.length > 0) {
         $label_for.text(value);
       }

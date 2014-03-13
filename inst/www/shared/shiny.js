@@ -2089,13 +2089,13 @@
     },
     getValue: function(el) {
       // Select the radio objects that have name equal to the grouping div's id
-      return $('input:radio[name=' + el.id + ']:checked').val();
+      return $('input:radio[name="' + $escape(el.id) + '"]:checked').val();
     },
     setValue: function(el, value) {
-      $('input:radio[name=' + el.id + '][value=' + value + ']').prop('checked', true);
+      $('input:radio[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop('checked', true);
     },
     getState: function(el) {
-      var $objs = $('input:radio[name=' + el.id + ']');
+      var $objs = $('input:radio[name="' + $escape(el.id) + '"]');
 
       // Store options in an array of objects, each with with value and label
       var options = new Array($objs.length);
@@ -2196,7 +2196,7 @@
     },
     getValue: function(el) {
       // Select the checkbox objects that have name equal to the grouping div's id
-      var $objs = $('input:checkbox[name=' + el.id + ']:checked');
+      var $objs = $('input:checkbox[name="' + $escape(el.id) + '"]:checked');
       var values = new Array($objs.length);
       for (var i = 0; i < $objs.length; i ++) {
         values[i] = $objs[i].value;
@@ -2205,23 +2205,23 @@
     },
     setValue: function(el, value) {
       // Clear all checkboxes
-      $('input:checkbox[name=' + el.id + ']').prop('checked', false);
+      $('input:checkbox[name="' + $escape(el.id) + '"]').prop('checked', false);
 
       // Accept array
       if (value instanceof Array) {
         for (var i = 0; i < value.length; i++) {
-          $('input:checkbox[name=' + el.id + '][value=' + value[i] + ']')
+          $('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value[i]) + '"]')
             .prop('checked', true);
         }
       // Else assume it's a single value
       } else {
-        $('input:checkbox[name=' + el.id + '][value=' + value + ']')
+        $('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]')
           .prop('checked', true);
       }
 
     },
     getState: function(el) {
-      var $objs = $('input:checkbox[name=' + el.id + ']');
+      var $objs = $('input:checkbox[name="' + $escape(el.id) + '"]');
 
       // Store options in an array of objects, each with with value and label
       var options = new Array($objs.length);
@@ -2749,8 +2749,8 @@
 
       var els = $(
         'input:checked' +
-        '[type="' + input.type + '"]' +
-        '[name="' + input.name + '"]');
+        '[type="' + $escape(input.type) + '"]' +
+        '[name="' + $escape(input.name) + '"]');
       var values = els.map(function() { return this.value; }).get();
       if (exclusiveValue) {
         if (values.length > 0)

@@ -17,6 +17,12 @@ shiny 0.9.0
   to makes use of selectize.js by default. If you want to revert back to the
   original select input, you have to call selectInput(..., selectize = FALSE).
 
+* Added Showcase mode, which displays the R code for an app right in the app
+  itself. You can invoke Showcase mode by passing `display.mode="showcase"`
+  to the `runApp()` function. Or, if an app is designed to run in Showcase
+  mode by default, add a DESCRIPTION file in the app dir with Title, Author,
+  and License fields; with "Type: Shiny"; and with "DisplayMode: Showcase".
+
 * Upgraded to Bootstrap 2.3.2 and jQuery 1.11.0.
 
 * Make `tags$head()` and `singleton()` behave correctly when used with
@@ -133,7 +139,8 @@ shiny 0.9.0
 * Fixed #306: the trailing slash in a path could fail `addResourcePath()`
   under Windows. (Thanks, ZJ Dai)
 
-* Dots ('.') in inputId and outputId arguments are now officially supported.
+* Dots are now legal characters for inputId/outputId. (Thanks, Kevin
+  Lindquist. #358)
 
 shiny 0.8.0
 --------------------------------------------------------------------------------

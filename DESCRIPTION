@@ -46,6 +46,7 @@ Collate:
     'sessioncontext.R'
     'utils.R'
     'shiny.R'
+    'server.R'
     'shinyui.R'
     'shinywrappers.R'
     'showcase.R'

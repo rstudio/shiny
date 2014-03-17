@@ -22,7 +22,8 @@ list(
         "tabsetPanel",
         "titlePanel",
         "verticalLayout",
-        "wellPanel"
+        "wellPanel",
+        "withMathJax"
       )
     ),
     sd_section("UI Inputs",

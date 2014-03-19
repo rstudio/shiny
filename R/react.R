@@ -92,7 +92,7 @@ ReactiveEnvironment <- setRefClass(
     currentContext = function() {
       if (is.null(.currentContext)) {
         if (isTRUE(getOption('shiny.suppressMissingContextError', FALSE))) {
-          return(dummyContext)
+          return(getDummyContext())
         } else {
           stop('Operation not allowed without an active reactive context. ',
                '(You tried to do something that can only be done from inside a ',
@@ -140,4 +140,12 @@ getCurrentContext <- function() {
   .getReactiveEnvironment()$currentContext()
 }
 
-delayedAssign("dummyContext", Context$new('[none]', type='isolate'))
+getDummyContext <- function() {}
+local({
+  dummyContext <- NULL
+  getDummyContext <<- function() {
+    if (is.null(dummyContext))
+      dummyContext <<- Context$new('[none]', type='isolate')
+    return(dummyContext)
+  }
+})

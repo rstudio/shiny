@@ -1,3 +1,9 @@
+shiny 0.9.1
+--------------------------------------------------------------------------------
+
+* Fixed warning 'Error in Context$new : could not find function "loadMethod"'
+  that was happening to dependent packages on "R CMD check".
+
 shiny 0.9.0
 --------------------------------------------------------------------------------
 

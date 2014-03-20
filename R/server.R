@@ -562,6 +562,16 @@ proxyCallbacks <- function(prefix, targetCallbacks) {
 
   list(
     onHeaders = function(req) {
+      if (identical(req$PATH_INFO, prefix)) {
+        return(list(
+          status = 302L,
+          headers = list(
+            "Location" = paste(prefix, "/", sep = ""),
+            "Content-Type" = "text/plain"
+          ),
+          body = ""
+        ))
+      }
       cat("onHeaders: ", req$PATH_INFO, "\n")
       req <- matchReq(req)
       if (is.null(req))

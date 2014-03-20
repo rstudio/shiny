@@ -602,8 +602,14 @@ ShinySession <- setRefClass(
 #' @S3method $<- shinyoutput
 `$<-.shinyoutput` <- function(x, name, value) {
   label <- deparse(substitute(value))
-  attr(label, "srcref") <- srcrefFromShinyCall(substitute(value)[[2]])
-  attr(label, "srcfile") <- srcFileOfRef(attr(substitute(value)[[2]], "srcref")[[1]])
+  if (length(substitute(value)) > 1) {
+    # value is an object consisting of a call and its arguments. Here we want
+    # to find the source references for the first argument (if there are
+    # arguments), which generally corresponds to the reactive expression--
+    # e.g. in renderTable({ x }), { x } is the expression to trace.
+    attr(label, "srcref") <- srcrefFromShinyCall(substitute(value)[[2]])
+    attr(label, "srcfile") <- srcFileOfRef(attr(substitute(value)[[2]], "srcref")[[1]])
+  }
   .subset2(x, 'impl')$defineOutput(name, value, label)
   return(invisible(x))
 }

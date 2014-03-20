@@ -608,7 +608,9 @@ ShinySession <- setRefClass(
     # arguments), which generally corresponds to the reactive expression--
     # e.g. in renderTable({ x }), { x } is the expression to trace.
     attr(label, "srcref") <- srcrefFromShinyCall(substitute(value)[[2]])
-    attr(label, "srcfile") <- srcFileOfRef(attr(substitute(value)[[2]], "srcref")[[1]])
+    srcref <- attr(substitute(value)[[2]], "srcref")
+    if (length(srcref) > 0)
+      attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   }
   .subset2(x, 'impl')$defineOutput(name, value, label)
   return(invisible(x))

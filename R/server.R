@@ -471,8 +471,7 @@ file.path.ci <- function(dir, name) {
 }
 
 # Instantiates the app in the current working directory.
-# port - The TCP port that the application should listen on.
-startAppDir <- function(port, host, workerId, quiet) {
+createAppDir <- function() {
   globalR <- file.path.ci(getwd(), 'global.R')
   uiR <- file.path.ci(getwd(), 'ui.R')
   serverR <- file.path.ci(getwd(), 'server.R')
@@ -505,17 +504,13 @@ startAppDir <- function(port, host, workerId, quiet) {
     return(.globals$server)
   }
 
-  startApp(
-    c(dynamicHandler(uiR), wwwDir),
-    serverFuncSource,
-    port,
-    host,
-    workerId,
-    quiet
+  list(
+    httpHandlers = c(dynamicHandler(uiR), wwwDir),
+    serverFuncSource = serverFuncSource
   )
 }
 
-startAppObj <- function(ui, serverFunc, port, host, workerId, quiet) {
+createAppObj <- function(ui, serverFunc) {
   uiHandler <- function(req) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
@@ -531,12 +526,66 @@ startAppObj <- function(ui, serverFunc, port, host, workerId, quiet) {
     return(httpResponse(200, content=html))
   }
 
-  startApp(uiHandler,
-           function() { serverFunc },
-           port, host, workerId, quiet)
+  list(
+    httpHandlers = uiHandler,
+    serverFuncSource = function() { serverFunc }
+  )
 }
 
-startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet) {
+proxyCallbacks <- function(prefix, targetCallbacks) {
+  force(prefix)
+  force(targetCallbacks)
+
+  if (identical("", prefix))
+    return(targetCallbacks)
+
+  if (length(prefix) != 1 || !isTRUE(grepl("^/[^\\]+$", prefix))) {
+    stop("Invalid URL prefix \"", prefix, "\"")
+  }
+
+  pathPattern <- paste("^\\Q", prefix, "\\E/", sep = "")
+  matchReq <- function(req) {
+    if (isTRUE(grepl(pathPattern, req$PATH_INFO))) {
+      req <- as.environment(as.list(req))
+      pathInfo <- substr(req$PATH_INFO, nchar(prefix)+1, nchar(req$PATH_INFO))
+      req$SCRIPT_NAME <- paste(req$SCRIPT_NAME, prefix, sep = "")
+      req$PATH_INFO <- pathInfo
+      return(req)
+    } else {
+      return(NULL)
+    }
+  }
+
+  list(
+    onHeaders = function(req) {
+      cat("onHeaders: ", req$PATH_INFO, "\n")
+      req <- matchReq(req)
+      if (is.null(req))
+        return(FALSE)
+      else
+        return(targetCallbacks$onHeaders(req))
+    },
+    call = function(req) {
+      cat("call: ", req$PATH_INFO, "\n")
+      req <- matchReq(req)
+      if (is.null(req))
+        return(FALSE)
+      else
+        return(targetCallbacks$call(req))
+    },
+    onWSOpen = function(ws) {
+      req <- matchReq(ws$request)
+      if (is.null(req))
+        return(FALSE)
+      else {
+        ws$request <- req
+        return(targetCallbacks$onWSOpen(ws))
+      }
+    }
+  )
+}
+
+createAppCallbacks <- function(httpHandlers, serverFuncSource, workerId) {
 
   sys.www.root <- system.file('www', package='shiny')
 
@@ -720,18 +769,98 @@ startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet
       })
     }
   )
+  return(httpuvCallbacks)
+}
+
+httpuvCallbackSet <- local({
+  callbacks <- list()
+  list(
+    add = function(cb) {
+      if (length(callbacks) == 0)
+        callbacks <<- list(cb)
+      else
+        callbacks <<- c(callbacks, list(cb))
+      message("Callback length: ", length(callbacks))
+    },
+    clear = function() {
+      callbacks <<- list()
+    },
+    metaCallbacks = list(
+      onHeaders = function(req) {
+        for (cb in callbacks) {
+          result <- cb$onHeaders(req)
+          if (!identical(result, FALSE))
+            return(result)
+        }
+        stop("onHeaders: should never get here")
+      },
+      call = function(req) {
+        for (cb in callbacks) {
+          result <- cb$call(req)
+          if (!identical(result, FALSE))
+            return(result)
+        }
+        stop("call: should never get here")
+      },
+      onWSOpen = function(ws) {
+        for (cb in callbacks) {
+          result <- cb$onWSOpen(ws)
+          if (!identical(result, FALSE))
+            return(result)
+        }
+        stop("onWSOpen: should never get here")
+      }
+    )
+  )
+})
+
+#' @export
+addSubAppObj <- function(appObj, workerId="") {
+  appParts <- createAppObj(appObj$ui, appObj$server)
+  path <- registerSubApp(appParts$httpHandlers, appParts$serverFuncSource, workerId)
+  message(path)
+  invisible(path)
+}
+
+#' @export
+addSubAppDir <- function(appDir, workerId="") {
+  oldwd <- getwd()
+  setwd(appDir)
+  appParts <- tryCatch(
+    createAppDir(),
+    finally = setwd(oldwd)
+  )
+  path <- registerSubApp(appParts$httpHandlers, appParts$serverFuncSource, workerId)
+  message(path)
+  invisible(path)
+}
+
+registerSubApp <- function(httpHandlers, serverFuncSource, workerId) {
+  path <- sprintf("/%s", createUniqueId(8))
+  httpuvCallbacks <- proxyCallbacks(path,
+    createAppCallbacks(httpHandlers, serverFuncSource, workerId))
+  message("GOT HERE 1")
+  httpuvCallbackSet$add(httpuvCallbacks)
+  return(path)
+}
+
+startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet) {
+  httpuvCallbacks <- proxyCallbacks("",
+    createAppCallbacks(httpHandlers, serverFuncSource, workerId))
+  message("GOT HERE 2")
+  httpuvCallbackSet$add(httpuvCallbacks)
 
   if (is.numeric(port) || is.integer(port)) {
     if (!quiet) {
       message('\n', 'Listening on http://', host, ':', port)
     }
-    return(startServer(host, port, httpuvCallbacks))
+    return(startServer(host, port, httpuvCallbackSet$metaCallbacks))
   } else if (is.character(port)) {
     if (!quiet) {
       message('\n', 'Listening on domain socket ', port)
     }
     mask <- attr(port, 'mask')
-    return(startPipeServer(port, mask, httpuvCallbacks))
+    return(startPipeServer(port, mask, httpuvCallbackSet$metaCallbacks))
   }
 }
 
@@ -900,17 +1029,19 @@ runApp <- function(appDir=getwd(),
     }
   }
 
-  if (is.character(appDir)) {
+  appParts <- if (is.character(appDir)) {
     orig.wd <- getwd()
     setwd(appDir)
     on.exit(setwd(orig.wd), add = TRUE)
-    server <- startAppDir(port=port, host=host, workerId=workerId, quiet=quiet)
+    createAppDir()
   } else {
-    server <- startAppObj(appDir$ui, appDir$server, port=port,
-                          host=host, workerId=workerId, quiet=quiet)
+    createAppObj(appDir$ui, appDir$server)
   }
+  server <- startApp(appParts$httpHandlers, appParts$serverFuncSource,
+    port, host, workerId, quiet)
 
   on.exit({
+    httpuvCallbackSet$clear()
     stopServer(server)
   }, add = TRUE)
 

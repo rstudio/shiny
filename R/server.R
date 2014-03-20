@@ -491,6 +491,8 @@ createAppDir <- function() {
   if (is.null(.globals$server))
     stop("No server was defined in server.R")
 
+  serverFunc <- .globals$server
+
   serverFuncSource <- function() {
     # Check if server.R has changed, and if so, reload
     mtime <- file.info(serverR)$mtime
@@ -500,8 +502,9 @@ createAppDir <- function() {
       sys.source(serverR, envir=new.env(parent=globalenv()), keep.source=TRUE)
       if (is.null(.globals$server))
         stop("No server was defined in server.R")
+      serverFunc <<- .globals$server
     }
-    return(.globals$server)
+    return(serverFunc)
   }
 
   list(
@@ -546,6 +549,7 @@ proxyCallbacks <- function(prefix, targetCallbacks) {
   pathPattern <- paste("^\\Q", prefix, "\\E/", sep = "")
   matchReq <- function(req) {
     if (isTRUE(grepl(pathPattern, req$PATH_INFO))) {
+      message("Matched with ", prefix)
       req <- as.environment(as.list(req))
       pathInfo <- substr(req$PATH_INFO, nchar(prefix)+1, nchar(req$PATH_INFO))
       req$SCRIPT_NAME <- paste(req$SCRIPT_NAME, prefix, sep = "")

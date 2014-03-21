@@ -45,9 +45,10 @@ Create a select list that can be used to choose a single or
 multiple items from a list of values.
 }
 \details{
-\code{selectizeInput()} uses the JavaScript library \pkg{selectize.js}
-(\url{https://github.com/brianreavis/selectize.js}) to extend the basic
-select input element.
+By default, \code{selectInput()} and \code{selectizeInput()} use the
+JavaScript library \pkg{selectize.js} (\url{https://github.com/brianreavis/selectize.js})
+to instead of the basic select input element. To use the standard HTML select
+input element, use \code{selectInput()} with \code{selectize=FALSE}.
 }
 \note{
 The selectize input created from \code{selectizeInput()} allows

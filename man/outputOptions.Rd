@@ -6,12 +6,11 @@
 outputOptions(x, name, ...)
 }
 \arguments{
-  \item{x}{A shinyoutput object (typically \code{output}).}
+\item{x}{A shinyoutput object (typically \code{output}).}
 
-  \item{name}{The name of an output observer in the
-  shinyoutput object.}
+\item{name}{The name of an output observer in the shinyoutput object.}
 
-  \item{...}{Options to set for the output observer.}
+\item{...}{Options to set for the output observer.}
 }
 \description{
 These are the available options for an output object:

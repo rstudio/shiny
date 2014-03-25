@@ -6,7 +6,7 @@
 is.reactivevalues(x)
 }
 \arguments{
-  \item{x}{The object to test.}
+\item{x}{The object to test.}
 }
 \description{
 Checks whether its argument is a reactivevalues object.

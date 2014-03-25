@@ -6,8 +6,7 @@
 helpText(...)
 }
 \arguments{
-  \item{...}{One or more help text strings (or other inline
-  HTML elements)}
+\item{...}{One or more help text strings (or other inline HTML elements)}
 }
 \value{
 A help text element that can be added to a UI definition.

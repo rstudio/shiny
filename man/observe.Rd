@@ -7,31 +7,25 @@ observe(x, env = parent.frame(), quoted = FALSE, label = NULL,
   suspended = FALSE, priority = 0)
 }
 \arguments{
-  \item{x}{An expression (quoted or unquoted). Any return
-  value will be ignored.}
+\item{x}{An expression (quoted or unquoted). Any return value will be ignored.}
 
-  \item{env}{The parent environment for the reactive
-  expression. By default, this is the calling environment,
-  the same as when defining an ordinary non-reactive
-  expression.}
+\item{env}{The parent environment for the reactive expression. By default, this
+is the calling environment, the same as when defining an ordinary
+non-reactive expression.}
 
-  \item{quoted}{Is the expression quoted? By default, this
-  is \code{FALSE}.  This is useful when you want to use an
-  expression that is stored in a variable; to do so, it
-  must be quoted with `quote()`.}
+\item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
+This is useful when you want to use an expression that is stored in a
+variable; to do so, it must be quoted with `quote()`.}
 
-  \item{label}{A label for the observer, useful for
-  debugging.}
+\item{label}{A label for the observer, useful for debugging.}
 
-  \item{suspended}{If \code{TRUE}, start the observer in a
-  suspended state.  If \code{FALSE} (the default), start in
-  a non-suspended state.}
+\item{suspended}{If \code{TRUE}, start the observer in a suspended state.
+If \code{FALSE} (the default), start in a non-suspended state.}
 
-  \item{priority}{An integer or numeric that controls the
-  priority with which this observer should be executed. An
-  observer with a given priority level will always execute
-  sooner than all observers with a lower priority level.
-  Positive, negative, and zero values are allowed.}
+\item{priority}{An integer or numeric that controls the priority with which
+this observer should be executed. An observer with a given priority level
+will always execute sooner than all observers with a lower priority level.
+Positive, negative, and zero values are allowed.}
 }
 \value{
 An observer reference class object. This object has the following

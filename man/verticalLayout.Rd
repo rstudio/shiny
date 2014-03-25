@@ -6,10 +6,10 @@
 verticalLayout(..., fluid = TRUE)
 }
 \arguments{
-  \item{...}{Elements to include within the container}
+\item{...}{Elements to include within the container}
 
-  \item{fluid}{\code{TRUE} to use fluid layout;
-  \code{FALSE} to use fixed layout.}
+\item{fluid}{\code{TRUE} to use fluid layout; \code{FALSE} to use fixed
+  layout.}
 }
 \description{
 Create a container that includes one or more rows of content (each element

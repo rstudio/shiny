@@ -6,13 +6,11 @@
 pageWithSidebar(headerPanel, sidebarPanel, mainPanel)
 }
 \arguments{
-  \item{headerPanel}{The \link{headerPanel} with the
-  application title}
+\item{headerPanel}{The \link{headerPanel} with the application title}
 
-  \item{sidebarPanel}{The \link{sidebarPanel} containing
-  input controls}
+\item{sidebarPanel}{The \link{sidebarPanel} containing input controls}
 
-  \item{mainPanel}{The \link{mainPanel} containing outputs}
+\item{mainPanel}{The \link{mainPanel} containing outputs}
 }
 \value{
 A UI defintion that can be passed to the \link{shinyUI} function

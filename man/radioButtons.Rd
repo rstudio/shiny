@@ -6,17 +6,15 @@
 radioButtons(inputId, label, choices, selected = NULL)
 }
 \arguments{
-  \item{inputId}{Input variable to assign the control's
-  value to}
+\item{inputId}{Input variable to assign the control's value to}
 
-  \item{label}{Display label for the control}
+\item{label}{Display label for the control}
 
-  \item{choices}{List of values to select from (if elements
-  of the list are named then that name rather than the
-  value is displayed to the user)}
+\item{choices}{List of values to select from (if elements of the list are
+named then that name rather than the value is displayed to the user)}
 
-  \item{selected}{The initially selected value (if not
-  specified then defaults to the first value)}
+\item{selected}{The initially selected value (if not specified then
+defaults to the first value)}
 }
 \value{
 A set of radio buttons that can be added to a UI definition.

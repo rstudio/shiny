@@ -6,10 +6,9 @@
 submitButton(text = "Apply Changes", icon = NULL)
 }
 \arguments{
-  \item{text}{Button caption}
+\item{text}{Button caption}
 
-  \item{icon}{Optional \code{\link{icon}} to appear on the
-  button}
+\item{icon}{Optional \code{\link{icon}} to appear on the button}
 }
 \value{
 A submit button that can be added to a UI definition.

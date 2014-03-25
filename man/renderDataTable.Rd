@@ -7,27 +7,22 @@ renderDataTable(expr, options = NULL, searchDelay = 500,
   callback = "function(oTable) {}", env = parent.frame(), quoted = FALSE)
 }
 \arguments{
-  \item{expr}{An expression that returns a data frame or a
-  matrix.}
+\item{expr}{An expression that returns a data frame or a matrix.}
 
-  \item{options}{A list of initialization options to be
-  passed to DataTables, or a function to return such a
-  list.}
+\item{options}{A list of initialization options to be passed to DataTables,
+or a function to return such a list.}
 
-  \item{searchDelay}{The delay for searching, in
-  milliseconds (to avoid too frequent search requests).}
+\item{searchDelay}{The delay for searching, in milliseconds (to avoid too
+frequent search requests).}
 
-  \item{callback}{A JavaScript function to be applied to
-  the DataTable object.  This is useful for DataTables
-  plug-ins, which often require the DataTable instance to
-  be available (\url{http://datatables.net/extras/}).}
+\item{callback}{A JavaScript function to be applied to the DataTable object.
+This is useful for DataTables plug-ins, which often require the DataTable
+instance to be available (\url{http://datatables.net/extras/}).}
 
-  \item{env}{The environment in which to evaluate
-  \code{expr}.}
+\item{env}{The environment in which to evaluate \code{expr}.}
 
-  \item{quoted}{Is \code{expr} a quoted expression (with
-  \code{quote()})? This is useful if you want to save an
-  expression in a variable.}
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
+is useful if you want to save an expression in a variable.}
 }
 \description{
 Makes a reactive version of the given function that returns a data frame (or

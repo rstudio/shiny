@@ -6,19 +6,16 @@
 renderUI(expr, env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
-  \item{expr}{An expression that returns a Shiny tag
-  object, \code{\link{HTML}}, or a list of such objects.}
+\item{expr}{An expression that returns a Shiny tag object, \code{\link{HTML}},
+or a list of such objects.}
 
-  \item{env}{The environment in which to evaluate
-  \code{expr}.}
+\item{env}{The environment in which to evaluate \code{expr}.}
 
-  \item{quoted}{Is \code{expr} a quoted expression (with
-  \code{quote()})? This is useful if you want to save an
-  expression in a variable.}
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
+is useful if you want to save an expression in a variable.}
 
-  \item{func}{A function that returns a Shiny tag object,
-  \code{\link{HTML}}, or a list of such objects
-  (deprecated; use \code{expr} instead).}
+\item{func}{A function that returns a Shiny tag object, \code{\link{HTML}},
+  or a list of such objects (deprecated; use \code{expr} instead).}
 }
 \description{
 \bold{Experimental feature.} Makes a reactive version of a function that

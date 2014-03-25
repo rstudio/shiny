@@ -7,16 +7,15 @@ exprToFunction(expr, env = parent.frame(2), quoted = FALSE,
   caller_offset = 1)
 }
 \arguments{
-  \item{expr}{A quoted or unquoted expression, or a
-  function.}
+\item{expr}{A quoted or unquoted expression, or a function.}
 
-  \item{env}{The desired environment for the function.
-  Defaults to the calling environment two steps back.}
+\item{env}{The desired environment for the function. Defaults to the
+calling environment two steps back.}
 
-  \item{quoted}{Is the expression quoted?}
+\item{quoted}{Is the expression quoted?}
 
-  \item{caller_offset}{If specified, the offset in the
-  callstack of the functiont to be treated as the caller.}
+\item{caller_offset}{If specified, the offset in the callstack of the
+  functiont to be treated as the caller.}
 }
 \description{
 This is to be called from another function, because it will attempt to get

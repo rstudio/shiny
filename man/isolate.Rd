@@ -6,8 +6,7 @@
 isolate(expr)
 }
 \arguments{
-  \item{expr}{An expression that can access reactive values
-  or expressions.}
+\item{expr}{An expression that can access reactive values or expressions.}
 }
 \description{
 Executes the given expression in a scope where reactive values or expression

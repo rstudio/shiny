@@ -6,12 +6,12 @@
 reactiveTimer(intervalMs = 1000, session)
 }
 \arguments{
-  \item{intervalMs}{How often to fire, in milliseconds}
+\item{intervalMs}{How often to fire, in milliseconds}
 
-  \item{session}{A session object. This is needed to cancel
-  any scheduled invalidations after a user has ended the
-  session. If \code{NULL}, then this invalidation will not
-  be tied to any session, and so it will still occur.}
+\item{session}{A session object. This is needed to cancel any scheduled
+invalidations after a user has ended the session. If \code{NULL}, then
+this invalidation will not be tied to any session, and so it will still
+occur.}
 }
 \value{
 A no-parameter function that can be called from a reactive context,

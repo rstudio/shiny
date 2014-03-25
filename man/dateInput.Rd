@@ -8,39 +8,34 @@ dateInput(inputId, label, value = NULL, min = NULL, max = NULL,
   language = "en")
 }
 \arguments{
-  \item{inputId}{Input variable to assign the control's
-  value to.}
+\item{inputId}{Input variable to assign the control's value to.}
 
-  \item{label}{Display label for the control.}
+\item{label}{Display label for the control.}
 
-  \item{value}{The starting date. Either a Date object, or
-  a string in \code{yyyy-mm-dd} format. If NULL (the
-  default), will use the current date in the client's time
-  zone.}
+\item{value}{The starting date. Either a Date object, or a string in
+\code{yyyy-mm-dd} format. If NULL (the default), will use the current
+date in the client's time zone.}
 
-  \item{min}{The minimum allowed date. Either a Date
-  object, or a string in \code{yyyy-mm-dd} format.}
+\item{min}{The minimum allowed date. Either a Date object, or a string in
+\code{yyyy-mm-dd} format.}
 
-  \item{max}{The maximum allowed date. Either a Date
-  object, or a string in \code{yyyy-mm-dd} format.}
+\item{max}{The maximum allowed date. Either a Date object, or a string in
+\code{yyyy-mm-dd} format.}
 
-  \item{format}{The format of the date to display in the
-  browser. Defaults to \code{"yyyy-mm-dd"}.}
+\item{format}{The format of the date to display in the browser. Defaults to
+\code{"yyyy-mm-dd"}.}
 
-  \item{startview}{The date range shown when the input
-  object is first clicked. Can be "month" (the default),
-  "year", or "decade".}
+\item{startview}{The date range shown when the input object is first
+clicked. Can be "month" (the default), "year", or "decade".}
 
-  \item{weekstart}{Which day is the start of the week.
-  Should be an integer from 0 (Sunday) to 6 (Saturday).}
+\item{weekstart}{Which day is the start of the week. Should be an integer
+from 0 (Sunday) to 6 (Saturday).}
 
-  \item{language}{The language used for month and day
-  names. Default is "en".  Other valid values include "bg",
-  "ca", "cs", "da", "de", "el", "es", "fi", "fr", "he",
-  "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv",
-  "ms", "nb", "nl", "pl", "pt", "pt-BR", "ro", "rs",
-  "rs-latin", "ru", "sk", "sl", "sv", "sw", "th", "tr",
-  "uk", "zh-CN", and "zh-TW".}
+\item{language}{The language used for month and day names. Default is "en".
+  Other valid values include "bg", "ca", "cs", "da", "de", "el", "es", "fi",
+  "fr", "he", "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv", "ms",
+  "nb", "nl", "pl", "pt", "pt-BR", "ro", "rs", "rs-latin", "ru", "sk", "sl",
+  "sv", "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".}
 }
 \description{
 Creates a text input which, when clicked on, brings up a calendar that

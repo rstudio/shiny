@@ -6,26 +6,24 @@
 reactiveFileReader(intervalMillis, session, filePath, readFunc, ...)
 }
 \arguments{
-  \item{intervalMillis}{Approximate number of milliseconds
-  to wait between checks of the file's last modified time.
-  This can be a numeric value, or a function that returns a
-  numeric value.}
+\item{intervalMillis}{Approximate number of milliseconds to wait between
+checks of the file's last modified time. This can be a numeric value, or a
+function that returns a numeric value.}
 
-  \item{session}{The user session to associate this file
-  reader with, or \code{NULL} if none. If non-null, the
-  reader will automatically stop when the session ends.}
+\item{session}{The user session to associate this file reader with, or
+\code{NULL} if none. If non-null, the reader will automatically stop when
+the session ends.}
 
-  \item{filePath}{The file path to poll against and to pass
-  to \code{readFunc}.  This can either be a single-element
-  character vector, or a function that returns one.}
+\item{filePath}{The file path to poll against and to pass to \code{readFunc}.
+This can either be a single-element character vector, or a function that
+returns one.}
 
-  \item{readFunc}{The function to use to read the file;
-  must expect the first argument to be the file path to
-  read. The return value of this function is used as the
-  value of the reactive file reader.}
+\item{readFunc}{The function to use to read the file; must expect the first
+argument to be the file path to read. The return value of this function is
+used as the value of the reactive file reader.}
 
-  \item{...}{Any additional arguments to pass to
-  \code{readFunc} whenever it is invoked.}
+\item{...}{Any additional arguments to pass to \code{readFunc} whenever it is
+  invoked.}
 }
 \value{
 A reactive expression that returns the contents of the file, and

@@ -6,10 +6,10 @@
 HTML(text, ...)
 }
 \arguments{
-  \item{text}{The text value to mark with HTML}
+\item{text}{The text value to mark with HTML}
 
-  \item{...}{Any additional values to be converted to
-  character and concatenated together}
+\item{...}{Any additional values to be converted to character and
+concatenated together}
 }
 \value{
 The same value, but marked as HTML.

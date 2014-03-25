@@ -13,41 +13,37 @@ fixedPanel(..., top = NULL, left = NULL, right = NULL, bottom = NULL,
   "default", "inherit"))
 }
 \arguments{
-  \item{...}{Attributes (named arguments) or children
-  (unnamed arguments) that should be included in the
-  panel.}
+\item{...}{Attributes (named arguments) or children (unnamed arguments) that
+  should be included in the panel.}
 
-  \item{top}{Distance between the top of the panel, and the
-  top of the page or parent container.}
+\item{top}{Distance between the top of the panel, and the top of the page or
+parent container.}
 
-  \item{left}{Distance between the left side of the panel,
-  and the left of the page or parent container.}
+\item{left}{Distance between the left side of the panel, and the left of the
+page or parent container.}
 
-  \item{right}{Distance between the right side of the
-  panel, and the right of the page or parent container.}
+\item{right}{Distance between the right side of the panel, and the right of
+the page or parent container.}
 
-  \item{bottom}{Distance between the bottom of the panel,
-  and the bottom of the page or parent container.}
+\item{bottom}{Distance between the bottom of the panel, and the bottom of the
+page or parent container.}
 
-  \item{width}{Width of the panel.}
+\item{width}{Width of the panel.}
 
-  \item{height}{Height of the panel.}
+\item{height}{Height of the panel.}
 
-  \item{draggable}{If \code{TRUE}, allows the user to move
-  the panel by clicking and dragging.}
+\item{draggable}{If \code{TRUE}, allows the user to move the panel by
+clicking and dragging.}
 
-  \item{fixed}{Positions the panel relative to the browser
-  window and prevents it from being scrolled with the rest
-  of the page.}
+\item{fixed}{Positions the panel relative to the browser window and prevents
+it from being scrolled with the rest of the page.}
 
-  \item{cursor}{The type of cursor that should appear when
-  the user mouses over the panel. Use \code{"move"} for a
-  north-east-south-west icon, \code{"default"} for the
-  usual cursor arrow, or \code{"inherit"} for the usual
-  cursor behavior (including changing to an I-beam when the
-  cursor is over text). The default is \code{"auto"}, which
-  is equivalent to \code{ifelse(draggable, "move",
-  "inherit")}.}
+\item{cursor}{The type of cursor that should appear when the user mouses over
+the panel. Use \code{"move"} for a north-east-south-west icon,
+\code{"default"} for the usual cursor arrow, or \code{"inherit"} for the
+usual cursor behavior (including changing to an I-beam when the cursor is
+over text). The default is \code{"auto"}, which is equivalent to
+\code{ifelse(draggable, "move", "inherit")}.}
 }
 \value{
 An HTML element or list of elements.

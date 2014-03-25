@@ -6,10 +6,9 @@
 textOutput(outputId, container = div)
 }
 \arguments{
-  \item{outputId}{output variable to read the value from}
+\item{outputId}{output variable to read the value from}
 
-  \item{container}{a function to generate an HTML element
-  to contain the text}
+\item{container}{a function to generate an HTML element to contain the text}
 }
 \value{
 A text output element that can be included in a panel

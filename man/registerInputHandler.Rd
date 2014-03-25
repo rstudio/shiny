@@ -6,21 +6,23 @@
 registerInputHandler(type, fun, force = FALSE)
 }
 \arguments{
-  \item{type}{The type for which the handler should be
-  added -- should be a single-element character vector.}
+\item{type}{The type for which the handler should be added -- should be a
+single-element character vector.}
 
-  \item{fun}{The handler function. This is the function
-  that will be used to parse the data delivered from the
-  client before it is available in the \code{input}
-  variable. The function will be called with the following
-  three parameters: \enumerate{ \item{The value of this
-  input as provided by the client, deserialized using
-  RJSONIO.} \item{The \code{shinysession} in which the
-  input exists.} \item{The name of the input.} }}
+\item{fun}{The handler function. This is the function that will be used to
+parse the data delivered from the client before it is available in the
+\code{input} variable. The function will be called with the following three
+parameters:
+ \enumerate{
+   \item{The value of this input as provided by the client, deserialized
+   using RJSONIO.}
+   \item{The \code{shinysession} in which the input exists.}
+   \item{The name of the input.}
+ }}
 
-  \item{force}{If \code{TRUE}, will overwrite any existing
-  handler without warning. If \code{FALSE}, will throw an
-  error if this class already has a handler defined.}
+\item{force}{If \code{TRUE}, will overwrite any existing handler without
+warning. If \code{FALSE}, will throw an error if this class already has
+a handler defined.}
 }
 \description{
 Adds an input handler for data of this type. When called, Shiny will use the

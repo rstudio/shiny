@@ -6,13 +6,13 @@
 invalidateLater(millis, session)
 }
 \arguments{
-  \item{millis}{Approximate milliseconds to wait before
-  invalidating the current reactive context.}
+\item{millis}{Approximate milliseconds to wait before invalidating the
+current reactive context.}
 
-  \item{session}{A session object. This is needed to cancel
-  any scheduled invalidations after a user has ended the
-  session. If \code{NULL}, then this invalidation will not
-  be tied to any session, and so it will still occur.}
+\item{session}{A session object. This is needed to cancel any scheduled
+  invalidations after a user has ended the session. If \code{NULL}, then
+  this invalidation will not be tied to any session, and so it will still
+  occur.}
 }
 \description{
 Schedules the current reactive context to be invalidated in the given number

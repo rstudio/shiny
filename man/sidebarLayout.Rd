@@ -7,16 +7,15 @@ sidebarLayout(sidebarPanel, mainPanel, position = c("left", "right"),
   fluid = TRUE)
 }
 \arguments{
-  \item{sidebarPanel}{The \link{sidebarPanel} containing
-  input controls}
+\item{sidebarPanel}{The \link{sidebarPanel} containing input controls}
 
-  \item{mainPanel}{The \link{mainPanel} containing outputs}
+\item{mainPanel}{The \link{mainPanel} containing outputs}
 
-  \item{position}{The position of the sidebar relative to
-  the main area ("left" or "right")}
+\item{position}{The position of the sidebar relative to the main area ("left"
+or "right")}
 
-  \item{fluid}{\code{TRUE} to use fluid layout;
-  \code{FALSE} to use fixed layout.}
+\item{fluid}{\code{TRUE} to use fluid layout; \code{FALSE} to use fixed
+  layout.}
 }
 \description{
 Create a layout with a sidebar and main area. The sidebar is displayed with a

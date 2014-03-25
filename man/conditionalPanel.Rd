@@ -6,11 +6,10 @@
 conditionalPanel(condition, ...)
 }
 \arguments{
-  \item{condition}{A JavaScript expression that will be
-  evaluated repeatedly to determine whether the panel
-  should be displayed.}
+\item{condition}{A JavaScript expression that will be evaluated repeatedly to
+determine whether the panel should be displayed.}
 
-  \item{...}{Elements to include in the panel.}
+\item{...}{Elements to include in the panel.}
 }
 \description{
 Creates a panel that is visible or not, depending on the value of a

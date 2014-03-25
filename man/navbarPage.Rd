@@ -11,45 +11,39 @@ navbarPage(title, ..., id = NULL, header = NULL, footer = NULL,
 navbarMenu(title, ..., icon = NULL)
 }
 \arguments{
-  \item{title}{The title to display in the navbar}
+\item{title}{The title to display in the navbar}
 
-  \item{...}{\code{\link{tabPanel}} elements to include in
-  the page}
+\item{...}{\code{\link{tabPanel}} elements to include in the page}
 
-  \item{id}{If provided, you can use
-  \code{input$}\emph{\code{id}} in your server logic to
-  determine which of the current tabs is active. The value
-  will correspond to the \code{value} argument that is
-  passed to \code{\link{tabPanel}}.}
+\item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
+server logic to determine which of the current tabs is active. The value
+will correspond to the \code{value} argument that is passed to
+\code{\link{tabPanel}}.}
 
-  \item{header}{Tag of list of tags to display as a common
-  header above all tabPanels.}
+\item{header}{Tag of list of tags to display as a common header above all
+tabPanels.}
 
-  \item{footer}{Tag or list of tags to display as a common
-  footer below all tabPanels}
+\item{footer}{Tag or list of tags to display as a common footer below all
+tabPanels}
 
-  \item{inverse}{\code{TRUE} to use a dark background and
-  light text for the navigation bar}
+\item{inverse}{\code{TRUE} to use a dark background and light text for the
+navigation bar}
 
-  \item{collapsable}{\code{TRUE} to automatically collapse
-  the navigation elements into a menu when the width of the
-  browser is less than 940 pixels (useful for viewing on
-  smaller touchscreen device)}
+\item{collapsable}{\code{TRUE} to automatically collapse the navigation
+elements into a menu when the width of the browser is less than 940 pixels
+(useful for viewing on smaller touchscreen device)}
 
-  \item{fluid}{\code{TRUE} to use a fluid layout.
-  \code{FALSE} to use a fixed layout.}
+\item{fluid}{\code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
+layout.}
 
-  \item{responsive}{\code{TRUE} to use responsive layout
-  (automatically adapt and resize page elements based on
-  the size of the viewing device)}
+\item{responsive}{\code{TRUE} to use responsive layout (automatically adapt
+and resize page elements based on the size of the viewing device)}
 
-  \item{theme}{Alternative Bootstrap stylesheet (normally a
-  css file within the www directory). For example, to use
-  the theme located at \code{www/bootstrap.css} you would
-  use \code{theme = "bootstrap.css"}.}
+\item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
+www directory). For example, to use the theme located at
+\code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.}
 
-  \item{icon}{Optional icon to appear on a
-  \code{navbarMenu} tab.}
+\item{icon}{Optional icon to appear on a \code{navbarMenu} tab.}
 }
 \value{
 A UI defintion that can be passed to the \link{shinyUI} function.

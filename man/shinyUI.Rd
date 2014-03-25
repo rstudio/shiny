@@ -6,9 +6,9 @@
 shinyUI(ui, path = "/")
 }
 \arguments{
-  \item{ui}{A user-interace definition}
+\item{ui}{A user-interace definition}
 
-  \item{path}{The web server path to server the UI from}
+\item{path}{The web server path to server the UI from}
 }
 \value{
 Called for its side-effect of registering a UI handler

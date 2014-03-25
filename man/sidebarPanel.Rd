@@ -6,12 +6,11 @@
 sidebarPanel(..., width = 4)
 }
 \arguments{
-  \item{...}{UI elements to include on the sidebar}
+\item{...}{UI elements to include on the sidebar}
 
-  \item{width}{The width of the sidebar. For fluid layouts
-  this is out of 12 total units; for fixed layouts it is
-  out of whatever the width of the sidebar's parent column
-  is.}
+\item{width}{The width of the sidebar. For fluid layouts this is out of 12
+total units; for fixed layouts it is out of whatever the width of the
+sidebar's parent column is.}
 }
 \value{
 A sidebar that can be passed to \code{\link{sidebarLayout}}

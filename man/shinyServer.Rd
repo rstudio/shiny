@@ -6,8 +6,8 @@
 shinyServer(func)
 }
 \arguments{
-  \item{func}{The server function for this application. See
-  the details section for more information.}
+\item{func}{The server function for this application. See the details section
+  for more information.}
 }
 \description{
 Defines the server-side logic of the Shiny application. This generally

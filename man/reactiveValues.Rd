@@ -6,9 +6,8 @@
 reactiveValues(...)
 }
 \arguments{
-  \item{...}{Objects that will be added to the
-  reactivevalues object. All of these objects must be
-  named.}
+\item{...}{Objects that will be added to the reactivevalues object. All of
+  these objects must be named.}
 }
 \description{
 This function returns an object for storing reactive values. It is similar

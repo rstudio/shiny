@@ -10,32 +10,27 @@ selectInput(inputId, label, choices, selected = NULL, multiple = FALSE,
 selectizeInput(inputId, ..., options = NULL)
 }
 \arguments{
-  \item{inputId}{Input variable to assign the control's
-  value to}
+\item{inputId}{Input variable to assign the control's value to}
 
-  \item{label}{Display label for the control}
+\item{label}{Display label for the control}
 
-  \item{choices}{List of values to select from. If elements
-  of the list are named then that name rather than the
-  value is displayed to the user.}
+\item{choices}{List of values to select from. If elements of the list are
+named then that name rather than the value is displayed to the user.}
 
-  \item{selected}{The initially selected value (or multiple
-  values if \code{multiple = TRUE}). If not specified then
-  defaults to the first value for single-select lists and
-  no values for multiple select lists.}
+\item{selected}{The initially selected value (or multiple values if
+\code{multiple = TRUE}). If not specified then defaults to the first value
+for single-select lists and no values for multiple select lists.}
 
-  \item{multiple}{Is selection of multiple items allowed?}
+\item{multiple}{Is selection of multiple items allowed?}
 
-  \item{selectize}{Whether to use \pkg{selectize.js} or
-  not.}
+\item{selectize}{Whether to use \pkg{selectize.js} or not.}
 
-  \item{...}{Arguments passed to \code{selectInput()}.}
+\item{...}{Arguments passed to \code{selectInput()}.}
 
-  \item{options}{A list of options. See the documentation
-  of \pkg{selectize.js} for possible options (character
-  option values inside \code{\link{I}()} will be treated as
-  literal JavaScript code; see
-  \code{\link{renderDataTable}()} for details).}
+\item{options}{A list of options. See the documentation of \pkg{selectize.js}
+for possible options (character option values inside \code{\link{I}()} will
+be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+for details).}
 }
 \value{
 A select list control that can be added to a UI definition.

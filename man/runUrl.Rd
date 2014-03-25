@@ -7,23 +7,21 @@ runUrl(url, filetype = NULL, subdir = NULL, port = NULL,
   launch.browser = getOption("shiny.launch.browser", interactive()))
 }
 \arguments{
-  \item{url}{URL of the application.}
+\item{url}{URL of the application.}
 
-  \item{filetype}{The file type (\code{".zip"},
-  \code{".tar"}, or \code{".tar.gz"}. Defaults to the file
-  extension taken from the url.}
+\item{filetype}{The file type (\code{".zip"}, \code{".tar"}, or
+\code{".tar.gz"}. Defaults to the file extension taken from the url.}
 
-  \item{subdir}{A subdirectory in the repository that
-  contains the app. By default, this function will run an
-  app from the top level of the repo, but you can use a
-  path such as `\code{"inst/shinyapp"}.}
+\item{subdir}{A subdirectory in the repository that contains the app. By
+default, this function will run an app from the top level of the repo, but
+you can use a path such as `\code{"inst/shinyapp"}.}
 
-  \item{port}{The TCP port that the application should
-  listen on. Defaults to choosing a random port.}
+\item{port}{The TCP port that the application should listen on. Defaults to
+choosing a random port.}
 
-  \item{launch.browser}{If true, the system's default web
-  browser will be launched automatically after the app is
-  started. Defaults to true in interactive sessions only.}
+\item{launch.browser}{If true, the system's default web browser will be
+  launched automatically after the app is started. Defaults to true in
+  interactive sessions only.}
 }
 \description{
 Download and launch a Shiny application that is hosted at a downloadable

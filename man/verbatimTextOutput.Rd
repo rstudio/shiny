@@ -6,7 +6,7 @@
 verbatimTextOutput(outputId)
 }
 \arguments{
-  \item{outputId}{output variable to read the value from}
+\item{outputId}{output variable to read the value from}
 }
 \value{
 A verbatim text output element that can be included in a panel

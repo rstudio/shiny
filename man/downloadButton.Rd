@@ -9,13 +9,12 @@ downloadButton(outputId, label = "Download", class = NULL)
 downloadLink(outputId, label = "Download", class = NULL)
 }
 \arguments{
-  \item{outputId}{The name of the output slot that the
-  \code{downloadHandler} is assigned to.}
+\item{outputId}{The name of the output slot that the \code{downloadHandler}
+is assigned to.}
 
-  \item{label}{The label that should appear on the button.}
+\item{label}{The label that should appear on the button.}
 
-  \item{class}{Additional CSS classes to apply to the tag,
-  if any.}
+\item{class}{Additional CSS classes to apply to the tag, if any.}
 }
 \description{
 Use these functions to create a download button or link; when clicked, it

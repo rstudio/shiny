@@ -6,7 +6,7 @@
 withMathJax(...)
 }
 \arguments{
-  \item{...}{any HTML elements to apply MathJax to}
+\item{...}{any HTML elements to apply MathJax to}
 }
 \description{
 This function adds MathJax to the page and typeset the math expressions (if

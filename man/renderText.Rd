@@ -6,19 +6,16 @@
 renderText(expr, env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
-  \item{expr}{An expression that returns an R object that
-  can be used as an argument to \code{cat}.}
+\item{expr}{An expression that returns an R object that can be used as an
+argument to \code{cat}.}
 
-  \item{env}{The environment in which to evaluate
-  \code{expr}.}
+\item{env}{The environment in which to evaluate \code{expr}.}
 
-  \item{quoted}{Is \code{expr} a quoted expression (with
-  \code{quote()})? This is useful if you want to save an
-  expression in a variable.}
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
+is useful if you want to save an expression in a variable.}
 
-  \item{func}{A function that returns an R object that can
-  be used as an argument to \code{cat}.(deprecated; use
-  \code{expr} instead).}
+\item{func}{A function that returns an R object that can be used as an
+  argument to \code{cat}.(deprecated; use \code{expr} instead).}
 }
 \description{
 Makes a reactive version of the given function that also uses

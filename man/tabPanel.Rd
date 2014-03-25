@@ -6,18 +6,16 @@
 tabPanel(title, ..., value = NULL, icon = NULL)
 }
 \arguments{
-  \item{title}{Display title for tab}
+\item{title}{Display title for tab}
 
-  \item{...}{UI elements to include within the tab}
+\item{...}{UI elements to include within the tab}
 
-  \item{value}{The value that should be sent when
-  \code{tabsetPanel} reports that this tab is selected. If
-  omitted and \code{tabsetPanel} has an \code{id}, then the
-  title will be used..}
+\item{value}{The value that should be sent when \code{tabsetPanel} reports
+that this tab is selected. If omitted and \code{tabsetPanel} has an
+\code{id}, then the title will be used..}
 
-  \item{icon}{Optional icon to appear on the tab. This
-  attribute is only valid when using a \code{tabPanel}
-  within a \code{\link{navbarPage}}.}
+\item{icon}{Optional icon to appear on the tab. This attribute is only
+valid when using a \code{tabPanel} within a \code{\link{navbarPage}}.}
 }
 \value{
 A tab that can be passed to \code{\link{tabsetPanel}}

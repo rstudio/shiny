@@ -6,7 +6,7 @@
 reactiveUI(func)
 }
 \arguments{
-  \item{func}{A function.}
+\item{func}{A function.}
 }
 \description{
 See \code{\link{renderUI}}.

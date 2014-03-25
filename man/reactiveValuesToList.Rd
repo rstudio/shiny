@@ -6,11 +6,10 @@
 reactiveValuesToList(x, all.names = FALSE)
 }
 \arguments{
-  \item{x}{A reactivevalues object.}
+\item{x}{A reactivevalues object.}
 
-  \item{all.names}{If \code{TRUE}, include objects with a
-  leading dot. If \code{FALSE} (the default) don't include
-  those objects.}
+\item{all.names}{If \code{TRUE}, include objects with a leading dot. If
+\code{FALSE} (the default) don't include those objects.}
 }
 \description{
 This function does something similar to what you might \code{\link{as.list}}

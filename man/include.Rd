@@ -19,13 +19,11 @@ includeCSS(path, ...)
 includeScript(path, ...)
 }
 \arguments{
-  \item{path}{The path of the file to be included. It is
-  highly recommended to use a relative path (the base path
-  being the Shiny application directory), not an absolute
-  path.}
+\item{path}{The path of the file to be included. It is highly recommended to
+  use a relative path (the base path being the Shiny application directory),
+  not an absolute path.}
 
-  \item{...}{Any additional attributes to be applied to the
-  generated tag.}
+\item{...}{Any additional attributes to be applied to the generated tag.}
 }
 \description{
 Include HTML, text, or rendered Markdown into a \link[=shinyUI]{Shiny UI}.

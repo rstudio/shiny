@@ -6,23 +6,19 @@
 renderTable(expr, ..., env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
-  \item{expr}{An expression that returns an R object that
-  can be used with \code{\link[xtable]{xtable}}.}
+\item{expr}{An expression that returns an R object that can be used with
+\code{\link[xtable]{xtable}}.}
 
-  \item{...}{Arguments to be passed through to
-  \code{\link[xtable]{xtable}} and
-  \code{\link[xtable]{print.xtable}}.}
+\item{...}{Arguments to be passed through to \code{\link[xtable]{xtable}} and
+\code{\link[xtable]{print.xtable}}.}
 
-  \item{env}{The environment in which to evaluate
-  \code{expr}.}
+\item{env}{The environment in which to evaluate \code{expr}.}
 
-  \item{quoted}{Is \code{expr} a quoted expression (with
-  \code{quote()})? This is useful if you want to save an
-  expression in a variable.}
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
+is useful if you want to save an expression in a variable.}
 
-  \item{func}{A function that returns an R object that can
-  be used with \code{\link[xtable]{xtable}} (deprecated;
-  use \code{expr} instead).}
+\item{func}{A function that returns an R object that can be used with
+  \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).}
 }
 \description{
 Creates a reactive table that is suitable for assigning to an \code{output}

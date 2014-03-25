@@ -108,8 +108,7 @@ includeText <- function(path) {
 #' @rdname include
 #' @export
 includeMarkdown <- function(path) {
-  if (!require(markdown))
-    stop("markdown package is not installed")
+  library(markdown)
 
   dependsOnFile(path)
   html <- markdown::markdownToHTML(path, fragment.only=TRUE)

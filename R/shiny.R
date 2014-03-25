@@ -599,7 +599,7 @@ ShinySession <- setRefClass(
   structure(list(impl=shinysession), class='shinyoutput')
 }
 
-#' @S3method $<- shinyoutput
+#' @export
 `$<-.shinyoutput` <- function(x, name, value) {
   label <- deparse(substitute(value))
   attr(label, "srcref") <- srcrefFromShinyCall(substitute(value)[[2]])
@@ -608,23 +608,23 @@ ShinySession <- setRefClass(
   return(invisible(x))
 }
 
-#' @S3method [[<- shinyoutput
+#' @export
 `[[<-.shinyoutput` <- `$<-.shinyoutput`
 
-#' @S3method $ shinyoutput
+#' @export
 `$.shinyoutput` <- function(x, name) {
   stop("Reading objects from shinyoutput object not allowed.")
 }
 
-#' @S3method [[ shinyoutput
+#' @export
 `[[.shinyoutput` <- `$.shinyoutput`
 
-#' @S3method [ shinyoutput
+#' @export
 `[.shinyoutput` <- function(values, name) {
   stop("Single-bracket indexing of shinyoutput object is not allowed.")
 }
 
-#' @S3method [<- shinyoutput
+#' @export
 `[<-.shinyoutput` <- function(values, name, value) {
   stop("Single-bracket indexing of shinyoutput object is not allowed.")
 }

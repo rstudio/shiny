@@ -41,7 +41,10 @@ repeatable <- function(rngfunc, seed = runif(1, 0, .Machine$integer.max)) {
 }
 
 `%OR%` <- function(x, y) {
-  ifelse(is.null(x) || is.na(x), y, x)
+  if (is.null(x) || isTRUE(is.na(x)))
+    y
+  else
+    x
 }
 
 `%AND%` <- function(x, y) {

@@ -549,7 +549,6 @@ proxyCallbacks <- function(prefix, targetCallbacks) {
   pathPattern <- paste("^\\Q", prefix, "\\E/", sep = "")
   matchReq <- function(req) {
     if (isTRUE(grepl(pathPattern, req$PATH_INFO))) {
-      message("Matched with ", prefix)
       req <- as.environment(as.list(req))
       pathInfo <- substr(req$PATH_INFO, nchar(prefix)+1, nchar(req$PATH_INFO))
       req$SCRIPT_NAME <- paste(req$SCRIPT_NAME, prefix, sep = "")
@@ -563,6 +562,20 @@ proxyCallbacks <- function(prefix, targetCallbacks) {
   list(
     onHeaders = function(req) {
       if (identical(req$PATH_INFO, prefix)) {
+        # We could return a 302 response here, but doing so seems to cause
+        # httpuv to report "ERROR: [on_request_read] parse error" for some
+        # reason. Instead, let the request proceed as normal and handle it
+        # in call().
+        return(NULL)
+      }
+      req <- matchReq(req)
+      if (is.null(req))
+        return(FALSE)
+      else
+        return(targetCallbacks$onHeaders(req))
+    },
+    call = function(req) {
+      if (identical(req$PATH_INFO, prefix)) {
         return(list(
           status = 302L,
           headers = list(
@@ -572,15 +585,7 @@ proxyCallbacks <- function(prefix, targetCallbacks) {
           body = ""
         ))
       }
-      cat("onHeaders: ", req$PATH_INFO, "\n")
-      req <- matchReq(req)
-      if (is.null(req))
-        return(FALSE)
-      else
-        return(targetCallbacks$onHeaders(req))
-    },
-    call = function(req) {
-      cat("call: ", req$PATH_INFO, "\n")
+
       req <- matchReq(req)
       if (is.null(req))
         return(FALSE)
@@ -794,7 +799,6 @@ httpuvCallbackSet <- local({
         callbacks <<- list(cb)
       else
         callbacks <<- c(callbacks, list(cb))
-      message("Callback length: ", length(callbacks))
     },
     clear = function() {
       callbacks <<- list()
@@ -832,7 +836,6 @@ httpuvCallbackSet <- local({
 addSubAppObj <- function(appObj, workerId="") {
   appParts <- createAppObj(appObj$ui, appObj$server)
   path <- registerSubApp(appParts$httpHandlers, appParts$serverFuncSource, workerId)
-  message(path)
   invisible(path)
 }
 
@@ -845,7 +848,6 @@ addSubAppDir <- function(appDir, workerId="") {
     finally = setwd(oldwd)
   )
   path <- registerSubApp(appParts$httpHandlers, appParts$serverFuncSource, workerId)
-  message(path)
   invisible(path)
 }
 
@@ -853,7 +855,6 @@ registerSubApp <- function(httpHandlers, serverFuncSource, workerId) {
   path <- sprintf("/%s", createUniqueId(8))
   httpuvCallbacks <- proxyCallbacks(path,
     createAppCallbacks(httpHandlers, serverFuncSource, workerId))
-  message("GOT HERE 1")
   httpuvCallbackSet$add(httpuvCallbacks)
   return(path)
 }
@@ -861,7 +862,6 @@ registerSubApp <- function(httpHandlers, serverFuncSource, workerId) {
 startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet) {
   httpuvCallbacks <- proxyCallbacks("",
     createAppCallbacks(httpHandlers, serverFuncSource, workerId))
-  message("GOT HERE 2")
   httpuvCallbackSet$add(httpuvCallbacks)
 
   if (is.numeric(port) || is.integer(port)) {

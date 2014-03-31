@@ -26,10 +26,12 @@ Suggests:
     datasets,
     markdown,
     Cairo (>= 1.5-5),
-    testthat
+    testthat,
+    knitr
 URL: http://www.rstudio.com/shiny/
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:
+    'app.R'
     'bootstrap-layout.R'
     'bootstrap.R'
     'cache.R'
@@ -43,10 +45,10 @@ Collate:
     'react.R'
     'reactives.R'
     'run-url.R'
+    'server.R'
     'sessioncontext.R'
     'utils.R'
     'shiny.R'
-    'server.R'
     'shinyui.R'
     'shinywrappers.R'
     'showcase.R'

@@ -98,6 +98,14 @@ knit_print.shiny.appdir <- function(x) {
 }
 
 #' @export
+knit_print.shiny.tag <- function(x) {
+  knitr::asis_output(format(x))
+}
+
+#' @export
+knit_print.shiny.tag.list <- knit_print.shiny.tag
+
+#' @export
 runRmdContainer <- function(input, text = NULL, ..., knit.options = list()) {
   appdir <- tempfile()
   dir.create(appdir)
@@ -122,4 +130,24 @@ runRmdContainer <- function(input, text = NULL, ..., knit.options = list()) {
     file.path(appdir, "server.R"))
 
   runApp(appdir, ...)
+}
+
+#' @export
+runReactiveDoc <- function(input) {
+  inputFile <- input
+
+  ui <- fluidPage(
+    uiOutput("__reactivedoc__")
+  )
+
+  server <- function(input, output, session) {
+    doc <- knit2html(text=readLines(inputFile), fragment.only=TRUE,
+      quiet = TRUE)
+
+    output$`__reactivedoc__` <- renderUI({
+      HTML(doc)
+    })
+  }
+
+  shinyAppObj(ui = ui, server = server)
 }

@@ -22,5 +22,6 @@ test_that("All man pages have an entry in staticdocs/index.r", {
   # This test ensures that every documented topic is included in
   # staticdocs/index.r, unless explicitly waived by specifying it
   # in the known_unindexed variable above.
-  expect_equivalent(sort(all_topics), sort(c(known_unindexed, indexed_topics)))
+  expect_equivalent(sort(all_topics), sort(c(known_unindexed, indexed_topics)),
+    info = format(setdiff(sort(all_topics), sort(c(known_unindexed, indexed_topics)))))
 })

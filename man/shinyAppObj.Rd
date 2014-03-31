@@ -34,4 +34,20 @@ use these functions to create/run applications; they are intended for
 interoperability purposes, such as embedding Shiny apps inside a \pkg{knitr}
 document.
 }
+\examples{
+\dontrun{
+shinyAppObj(
+  ui = fluidPage(
+    numericInput("n", "n", 1),
+    plotOutput("plot")
+  ),
+  server = function(input, output) {
+    output$plot <- renderPlot( plot(head(cars, input$n)) )
+  },
+  options=list(launch.browser = rstudio::viewer)
+)
+
+shinyAppDir(system.file("examples/01_hello", package="shiny"))
+}
+}
 

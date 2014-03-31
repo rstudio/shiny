@@ -1,0 +1,26 @@
+# Reactive document 1
+
+Here's some inputs
+
+```{r}
+div(
+  selectInput("dataset", "Dataset", c("cars", "iris", "mtcars")),
+  numericInput("rows", "Rows to show", 5)
+)
+```
+
+Here's some reactive stuff
+
+```{r}
+ds <- reactive({
+  get(input$dataset, pos="package:datasets", inherits=FALSE)
+})
+output$table <- renderTable({
+  head(ds(), input$rows)
+})
+tableOutput("table")
+output$plot <- renderPlot({
+  plot(ds())
+})
+plotOutput("plot")
+```

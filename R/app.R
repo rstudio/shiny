@@ -32,9 +32,7 @@
 #'   options=list(launch.browser = rstudio::viewer)
 #' )
 #'
-#' shinyAppDir(
-#'
-#' )
+#' shinyAppDir(system.file("examples/01_hello", package="shiny"))
 #' }
 #'
 #' @export

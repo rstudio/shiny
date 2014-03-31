@@ -832,14 +832,12 @@ httpuvCallbackSet <- local({
   )
 })
 
-#' @export
 addSubAppObj <- function(appObj, workerId="") {
   appParts <- createAppObj(appObj$ui, appObj$server)
   path <- registerSubApp(appParts$httpHandlers, appParts$serverFuncSource, workerId)
   invisible(path)
 }
 
-#' @export
 addSubAppDir <- function(appDir, workerId="") {
   oldwd <- getwd()
   setwd(appDir)

@@ -30,6 +30,7 @@ Suggests:
     knitr
 URL: http://www.rstudio.com/shiny/
 BugReports: https://github.com/rstudio/shiny/issues
+Roxygen: list(wrap = FALSE)
 Collate:
     'app.R'
     'bootstrap-layout.R'

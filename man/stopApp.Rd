@@ -6,7 +6,7 @@
 stopApp(returnValue = NULL)
 }
 \arguments{
-  \item{returnValue}{The value that should be returned from
+\item{returnValue}{The value that should be returned from
   \code{\link{runApp}}.}
 }
 \description{

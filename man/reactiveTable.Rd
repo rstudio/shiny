@@ -6,9 +6,9 @@
 reactiveTable(func, ...)
 }
 \arguments{
-  \item{func}{A function.}
+\item{func}{A function.}
 
-  \item{...}{Other arguments to pass on.}
+\item{...}{Other arguments to pass on.}
 }
 \description{
 See \code{\link{renderTable}}.

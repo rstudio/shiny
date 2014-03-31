@@ -7,20 +7,19 @@ installExprFunction(expr, name, eval.env = parent.frame(2), quoted = FALSE,
   assign.env = parent.frame(1), label = as.character(sys.call(-1)[[1]]))
 }
 \arguments{
-  \item{expr}{A quoted or unquoted expression}
+\item{expr}{A quoted or unquoted expression}
 
-  \item{name}{The name the function should be given}
+\item{name}{The name the function should be given}
 
-  \item{eval.env}{The desired environment for the function.
-  Defaults to the calling environment two steps back.}
+\item{eval.env}{The desired environment for the function. Defaults to the
+calling environment two steps back.}
 
-  \item{quoted}{Is the expression quoted?}
+\item{quoted}{Is the expression quoted?}
 
-  \item{assign.env}{The environment in which the function
-  should be assigned.}
+\item{assign.env}{The environment in which the function should be assigned.}
 
-  \item{label}{A label for the object to be shown in the
-  debugger. Defaults to the name of the calling function.}
+\item{label}{A label for the object to be shown in the debugger. Defaults to
+  the name of the calling function.}
 }
 \description{
 Installs an expression in the given environment as a function, and registers

@@ -11,65 +11,53 @@ animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
   pauseButton = NULL)
 }
 \arguments{
-  \item{inputId}{Specifies the \code{input} slot that will
-  be used to access the value.}
+\item{inputId}{Specifies the \code{input} slot that will be used to access
+the value.}
 
-  \item{label}{A descriptive label to be displayed with the
-  widget.}
+\item{label}{A descriptive label to be displayed with the widget.}
 
-  \item{min}{The minimum value (inclusive) that can be
-  selected.}
+\item{min}{The minimum value (inclusive) that can be selected.}
 
-  \item{max}{The maximum value (inclusive) that can be
-  selected.}
+\item{max}{The maximum value (inclusive) that can be selected.}
 
-  \item{value}{The initial value of the slider. A numeric
-  vector of length one will create a regular slider; a
-  numeric vector of length two will create a double-ended
-  range slider. A warning will be issued if the value
-  doesn't fit between \code{min} and \code{max}.}
+\item{value}{The initial value of the slider. A numeric vector of length
+one will create a regular slider; a numeric vector of length two will
+create a double-ended range slider. A warning will be issued if the
+value doesn't fit between \code{min} and \code{max}.}
 
-  \item{step}{Specifies the interval between each
-  selectable value on the slider (\code{NULL} means no
-  restriction).}
+\item{step}{Specifies the interval between each selectable value on the
+slider (\code{NULL} means no restriction).}
 
-  \item{round}{\code{TRUE} to round all values to the
-  nearest integer; \code{FALSE} if no rounding is desired;
-  or an integer to round to that number of digits (for
-  example, 1 will round to the nearest 10, and -2 will
-  round to the nearest .01). Any rounding will be applied
-  after snapping to the nearest step.}
+\item{round}{\code{TRUE} to round all values to the nearest integer;
+\code{FALSE} if no rounding is desired; or an integer to round to that
+number of digits (for example, 1 will round to the nearest 10, and -2 will
+round to the nearest .01). Any rounding will be applied after snapping to
+the nearest step.}
 
-  \item{format}{Customize format values in slider labels.
-  See
-  \url{https://code.google.com/p/jquery-numberformatter/}
-  for syntax details.}
+\item{format}{Customize format values in slider labels. See
+\url{https://code.google.com/p/jquery-numberformatter/} for syntax
+details.}
 
-  \item{locale}{The locale to be used when applying
-  \code{format}. See details.}
+\item{locale}{The locale to be used when applying \code{format}. See details.}
 
-  \item{ticks}{\code{FALSE} to hide tick marks, \code{TRUE}
-  to show them according to some simple heuristics.}
+\item{ticks}{\code{FALSE} to hide tick marks, \code{TRUE} to show them
+according to some simple heuristics.}
 
-  \item{animate}{\code{TRUE} to show simple animation
-  controls with default settings; \code{FALSE} not to; or a
-  custom settings list, such as those created using
-  \code{animationOptions}.}
+\item{animate}{\code{TRUE} to show simple animation controls with default
+  settings; \code{FALSE} not to; or a custom settings list, such as those
+  created using \code{animationOptions}.}
 
-  \item{interval}{The interval, in milliseconds, between
-  each animation step.}
+\item{interval}{The interval, in milliseconds, between each animation step.}
 
-  \item{loop}{\code{TRUE} to automatically restart the
-  animation when it reaches the end.}
+\item{loop}{\code{TRUE} to automatically restart the animation when it
+reaches the end.}
 
-  \item{playButton}{Specifies the appearance of the play
-  button. Valid values are a one-element character vector
-  (for a simple text label), an HTML tag or list of tags
-  (using \code{\link{tag}} and friends), or raw HTML (using
-  \code{\link{HTML}}).}
+\item{playButton}{Specifies the appearance of the play button. Valid values
+are a one-element character vector (for a simple text label), an HTML tag
+or list of tags (using \code{\link{tag}} and friends), or raw HTML (using
+\code{\link{HTML}}).}
 
-  \item{pauseButton}{Similar to \code{playButton}, but for
-  the pause button.}
+\item{pauseButton}{Similar to \code{playButton}, but for the pause button.}
 }
 \description{
 Constructs a slider widget to select a numeric value from a range.

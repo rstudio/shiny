@@ -9,7 +9,7 @@ tableOutput(outputId)
 dataTableOutput(outputId)
 }
 \arguments{
-  \item{outputId}{output variable to read the table from}
+\item{outputId}{output variable to read the table from}
 }
 \value{
 A table output element that can be included in a panel

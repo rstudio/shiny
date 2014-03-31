@@ -43,7 +43,7 @@ isTag <- function(x) {
   inherits(x, "shiny.tag")
 }
 
-#' @S3method print shiny.tag
+#' @export
 print.shiny.tag <- function(x, ...) {
   print(as.character(x), ...)
   invisible(x)
@@ -51,32 +51,32 @@ print.shiny.tag <- function(x, ...) {
 
 # indent can be numeric to indicate an initial indent level,
 # or FALSE to suppress
-#' @S3method format shiny.tag
+#' @export
 format.shiny.tag <- function(x, ..., singletons = character(0), indent = 0) {
   as.character(renderTags(x, singletons = singletons, indent = indent)$html)
 }
 
-#' @S3method as.character shiny.tag
+#' @export
 as.character.shiny.tag <- function(x, ...) {
   renderTags(x)$html
 }
 
-#' @S3method print shiny.tag.list
+#' @export
 print.shiny.tag.list <- print.shiny.tag
 
-#' @S3method format shiny.tag.list
+#' @export
 format.shiny.tag.list <- format.shiny.tag
 
-#' @S3method as.character shiny.tag.list
+#' @export
 as.character.shiny.tag.list <- as.character.shiny.tag
 
-#' @S3method print html
+#' @export
 print.html <- function(x, ...) {
   cat(x, "\n")
   invisible(x)
 }
 
-#' @S3method format html
+#' @export
 format.html <- function(x, ...) {
   as.character(x)
 }

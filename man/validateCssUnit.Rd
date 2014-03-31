@@ -6,8 +6,8 @@
 validateCssUnit(x)
 }
 \arguments{
-  \item{x}{The unit to validate. Will be treated as a
-  number of pixels if a unit is not specified.}
+\item{x}{The unit to validate. Will be treated as a number of pixels if a
+unit is not specified.}
 }
 \value{
 A properly formatted CSS unit of length, if possible. Otherwise, will

@@ -675,9 +675,11 @@ choicesWithNames <- function(choices) {
 #' Create a select list that can be used to choose a single or
 #' multiple items from a list of values.
 #'
-#' \code{selectizeInput()} uses the JavaScript library \pkg{selectize.js}
-#' (\url{https://github.com/brianreavis/selectize.js}) to extend the basic
-#' select input element.
+#' By default, \code{selectInput()} and \code{selectizeInput()} use the
+#' JavaScript library \pkg{selectize.js} (\url{https://github.com/brianreavis/selectize.js})
+#' to instead of the basic select input element. To use the standard HTML select
+#' input element, use \code{selectInput()} with \code{selectize=FALSE}.
+#'
 #' @param inputId Input variable to assign the control's value to
 #' @param label Display label for the control
 #' @param choices List of values to select from. If elements of the list are

@@ -7,20 +7,20 @@ updateNumericInput(session, inputId, label = NULL, value = NULL,
   min = NULL, max = NULL, step = NULL)
 }
 \arguments{
-  \item{session}{The \code{session} object passed to
-  function given to \code{shinyServer}.}
+\item{session}{The \code{session} object passed to function given to
+\code{shinyServer}.}
 
-  \item{inputId}{The id of the input object.}
+\item{inputId}{The id of the input object.}
 
-  \item{label}{The label to set for the input object.}
+\item{label}{The label to set for the input object.}
 
-  \item{value}{The value to set for the input object.}
+\item{value}{The value to set for the input object.}
 
-  \item{min}{Minimum value.}
+\item{min}{Minimum value.}
 
-  \item{max}{Maximum value.}
+\item{max}{Maximum value.}
 
-  \item{step}{Step size.}
+\item{step}{Step size.}
 }
 \description{
 Change the value of a number input on the client

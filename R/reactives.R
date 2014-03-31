@@ -208,15 +208,15 @@ setOldClass("reactivevalues")
 #' @export
 is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 
-#' @S3method $ reactivevalues
+#' @export
 `$.reactivevalues` <- function(x, name) {
   .subset2(x, 'impl')$get(name)
 }
 
-#' @S3method [[ reactivevalues
+#' @export
 `[[.reactivevalues` <- `$.reactivevalues`
 
-#' @S3method $<- reactivevalues
+#' @export
 `$<-.reactivevalues` <- function(x, name, value) {
   if (attr(x, 'readonly')) {
     stop("Attempted to assign value to a read-only reactivevalues object")
@@ -228,30 +228,30 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
   }
 }
 
-#' @S3method [[<- reactivevalues
+#' @export
 `[[<-.reactivevalues` <- `$<-.reactivevalues`
 
-#' @S3method [ reactivevalues
+#' @export
 `[.reactivevalues` <- function(values, name) {
   stop("Single-bracket indexing of reactivevalues object is not allowed.")
 }
 
-#' @S3method [<- reactivevalues
+#' @export
 `[<-.reactivevalues` <- function(values, name, value) {
   stop("Single-bracket indexing of reactivevalues object is not allowed.")
 }
 
-#' @S3method names reactivevalues
+#' @export
 names.reactivevalues <- function(x) {
   .subset2(x, 'impl')$names()
 }
 
-#' @S3method names<- reactivevalues
+#' @export
 `names<-.reactivevalues` <- function(x, value) {
   stop("Can't assign names to reactivevalues object")
 }
 
-#' @S3method as.list reactivevalues
+#' @export
 as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
   shinyDeprecated("reactiveValuesToList",
     msg = paste("'as.list.reactivevalues' is deprecated. ",
@@ -422,7 +422,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL) {
   structure(o$getValue@.Data, observable = o, class = "reactive")
 }
 
-#' @S3method print reactive
+#' @export
 print.reactive <- function(x, ...) {
   label <- attr(x, "observable")$.label
   cat(label, "\n")

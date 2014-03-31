@@ -6,23 +6,21 @@
 reactivePoll(intervalMillis, session, checkFunc, valueFunc)
 }
 \arguments{
-  \item{intervalMillis}{Approximate number of milliseconds
-  to wait between calls to \code{checkFunc}. This can be
-  either a numeric value, or a function that returns a
-  numeric value.}
+\item{intervalMillis}{Approximate number of milliseconds to wait between
+calls to \code{checkFunc}. This can be either a numeric value, or a
+function that returns a numeric value.}
 
-  \item{session}{The user session to associate this file
-  reader with, or \code{NULL} if none. If non-null, the
-  reader will automatically stop when the session ends.}
+\item{session}{The user session to associate this file reader with, or
+\code{NULL} if none. If non-null, the reader will automatically stop when
+the session ends.}
 
-  \item{checkFunc}{A relatively cheap function whose values
-  over time will be tested for equality; inequality
-  indicates that the underlying value has changed and needs
-  to be invalidated and re-read using \code{valueFunc}. See
+\item{checkFunc}{A relatively cheap function whose values over time will be
+tested for equality; inequality indicates that the underlying value has
+changed and needs to be invalidated and re-read using \code{valueFunc}. See
+Details.}
+
+\item{valueFunc}{A function that calculates the underlying value. See
   Details.}
-
-  \item{valueFunc}{A function that calculates the
-  underlying value. See Details.}
 }
 \value{
 A reactive expression that returns the result of \code{valueFunc},

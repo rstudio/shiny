@@ -6,14 +6,14 @@
 updateSliderInput(session, inputId, label = NULL, value = NULL)
 }
 \arguments{
-  \item{session}{The \code{session} object passed to
-  function given to \code{shinyServer}.}
+\item{session}{The \code{session} object passed to function given to
+\code{shinyServer}.}
 
-  \item{inputId}{The id of the input object.}
+\item{inputId}{The id of the input object.}
 
-  \item{label}{The label to set for the input object.}
+\item{label}{The label to set for the input object.}
 
-  \item{value}{The value to set for the input object.}
+\item{value}{The value to set for the input object.}
 }
 \description{
 Change the value of a slider input on the client

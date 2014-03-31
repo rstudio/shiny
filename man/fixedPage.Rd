@@ -9,19 +9,16 @@ fixedPage(..., title = NULL, responsive = TRUE, theme = NULL)
 fixedRow(...)
 }
 \arguments{
-  \item{...}{Elements to include within the container}
+\item{...}{Elements to include within the container}
 
-  \item{title}{The browser window title (defaults to the
-  host URL of the page)}
+\item{title}{The browser window title (defaults to the host URL of the page)}
 
-  \item{responsive}{\code{TRUE} to use responsive layout
-  (automatically adapt and resize page elements based on
-  the size of the viewing device)}
+\item{responsive}{\code{TRUE} to use responsive layout (automatically adapt
+and resize page elements based on the size of the viewing device)}
 
-  \item{theme}{Alternative Bootstrap stylesheet (normally a
-  css file within the www directory). For example, to use
-  the theme located at \code{www/bootstrap.css} you would
-  use \code{theme = "bootstrap.css"}.}
+\item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
+  www directory). For example, to use the theme located at
+  \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.}
 }
 \value{
 A UI defintion that can be passed to the \link{shinyUI} function.

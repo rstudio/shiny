@@ -6,8 +6,7 @@
 removeInputHandler(type)
 }
 \arguments{
-  \item{type}{The type for which handlers should be
-  removed.}
+\item{type}{The type for which handlers should be removed.}
 }
 \value{
 The handler previously associated with this \code{type}, if one

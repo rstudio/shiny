@@ -6,11 +6,10 @@
 makeReactiveBinding(symbol, env = parent.frame())
 }
 \arguments{
-  \item{symbol}{A character string indicating the name of
-  the variable that should be made reactive}
+\item{symbol}{A character string indicating the name of the variable that
+should be made reactive}
 
-  \item{env}{The environment that will contain the reactive
-  variable}
+\item{env}{The environment that will contain the reactive variable}
 }
 \value{
 None.

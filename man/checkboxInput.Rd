@@ -6,13 +6,11 @@
 checkboxInput(inputId, label, value = FALSE)
 }
 \arguments{
-  \item{inputId}{Input variable to assign the control's
-  value to.}
+\item{inputId}{Input variable to assign the control's value to.}
 
-  \item{label}{Display label for the control.}
+\item{label}{Display label for the control.}
 
-  \item{value}{Initial value (\code{TRUE} or
-  \code{FALSE}).}
+\item{value}{Initial value (\code{TRUE} or \code{FALSE}).}
 }
 \value{
 A checkbox control that can be added to a UI definition.

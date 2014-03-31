@@ -599,32 +599,40 @@ ShinySession <- setRefClass(
   structure(list(impl=shinysession), class='shinyoutput')
 }
 
-#' @S3method $<- shinyoutput
+#' @export
 `$<-.shinyoutput` <- function(x, name, value) {
   label <- deparse(substitute(value))
-  attr(label, "srcref") <- srcrefFromShinyCall(substitute(value)[[2]])
-  attr(label, "srcfile") <- srcFileOfRef(attr(substitute(value)[[2]], "srcref")[[1]])
+  if (length(substitute(value)) > 1) {
+    # value is an object consisting of a call and its arguments. Here we want
+    # to find the source references for the first argument (if there are
+    # arguments), which generally corresponds to the reactive expression--
+    # e.g. in renderTable({ x }), { x } is the expression to trace.
+    attr(label, "srcref") <- srcrefFromShinyCall(substitute(value)[[2]])
+    srcref <- attr(substitute(value)[[2]], "srcref")
+    if (length(srcref) > 0)
+      attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
+  }
   .subset2(x, 'impl')$defineOutput(name, value, label)
   return(invisible(x))
 }
 
-#' @S3method [[<- shinyoutput
+#' @export
 `[[<-.shinyoutput` <- `$<-.shinyoutput`
 
-#' @S3method $ shinyoutput
+#' @export
 `$.shinyoutput` <- function(x, name) {
   stop("Reading objects from shinyoutput object not allowed.")
 }
 
-#' @S3method [[ shinyoutput
+#' @export
 `[[.shinyoutput` <- `$.shinyoutput`
 
-#' @S3method [ shinyoutput
+#' @export
 `[.shinyoutput` <- function(values, name) {
   stop("Single-bracket indexing of shinyoutput object is not allowed.")
 }
 
-#' @S3method [<- shinyoutput
+#' @export
 `[<-.shinyoutput` <- function(values, name, value) {
   stop("Single-bracket indexing of shinyoutput object is not allowed.")
 }

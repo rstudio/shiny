@@ -9,39 +9,33 @@ runApp(appDir = getwd(), port = NULL,
   quiet = FALSE, display.mode = c("auto", "normal", "showcase"))
 }
 \arguments{
-  \item{appDir}{The directory of the application. Should
-  contain \code{server.R}, plus, either \code{ui.R} or a
-  \code{www} directory that contains the file
-  \code{index.html}. Defaults to the working directory.}
+\item{appDir}{The directory of the application. Should contain
+\code{server.R}, plus, either \code{ui.R} or a \code{www} directory that
+contains the file \code{index.html}. Defaults to the working directory.}
 
-  \item{port}{The TCP port that the application should
-  listen on. Defaults to choosing a random port.}
+\item{port}{The TCP port that the application should listen on. Defaults to
+choosing a random port.}
 
-  \item{launch.browser}{If true, the system's default web
-  browser will be launched automatically after the app is
-  started. Defaults to true in interactive sessions only.
-  This value of this parameter can also be a function to
-  call with the application's URL.}
+\item{launch.browser}{If true, the system's default web browser will be
+launched automatically after the app is started. Defaults to true in
+interactive sessions only. This value of this parameter can also be a
+function to call with the application's URL.}
 
-  \item{host}{The IPv4 address that the application should
-  listen on. Defaults to the \code{shiny.host} option, if
-  set, or \code{"127.0.0.1"} if not. See Details.}
+\item{host}{The IPv4 address that the application should listen on. Defaults
+to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not. See
+Details.}
 
-  \item{workerId}{Can generally be ignored. Exists to help
-  some editions of Shiny Server Pro route requests to the
-  correct process.}
+\item{workerId}{Can generally be ignored. Exists to help some editions of
+Shiny Server Pro route requests to the correct process.}
 
-  \item{quiet}{Should Shiny status messages be shown?
-  Defaults to FALSE.}
+\item{quiet}{Should Shiny status messages be shown? Defaults to FALSE.}
 
-  \item{display.mode}{The mode in which to display the
-  application. If set to the value \code{"showcase"}, shows
-  application code and metadata from a \code{DESCRIPTION}
-  file in the application directory alongside the
-  application. If set to \code{"normal"}, displays the
-  application normally.  Defaults to \code{"auto"}, which
-  displays the application in the mode given in its
-  \code{DESCRIPTION} file, if any.}
+\item{display.mode}{The mode in which to display the application. If set to
+  the value \code{"showcase"}, shows application code and metadata from a
+  \code{DESCRIPTION} file in the application directory alongside the
+  application. If set to \code{"normal"}, displays the application normally.
+  Defaults to \code{"auto"}, which displays the application in the mode
+  given in its \code{DESCRIPTION} file, if any.}
 }
 \description{
 Runs a Shiny application. This function normally does not return; interrupt

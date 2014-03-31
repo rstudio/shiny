@@ -6,13 +6,12 @@
 column(width, ..., offset = 0)
 }
 \arguments{
-  \item{width}{The grid width of the column (must be
-  between 1 and 12)}
+\item{width}{The grid width of the column (must be between 1 and 12)}
 
-  \item{...}{Elements to include within the column}
+\item{...}{Elements to include within the column}
 
-  \item{offset}{The number of columns to offset this column
-  from the end of the previous column.}
+\item{offset}{The number of columns to offset this column from the end of the
+  previous column.}
 }
 \value{
 A column that can be included within a

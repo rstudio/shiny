@@ -7,28 +7,25 @@ navlistPanel(..., id = NULL, selected = NULL, well = TRUE, fluid = TRUE,
   widths = c(4, 8))
 }
 \arguments{
-  \item{...}{\code{\link{tabPanel}} elements to include in
-  the navlist}
+\item{...}{\code{\link{tabPanel}} elements to include in the navlist}
 
-  \item{id}{If provided, you can use
-  \code{input$}\emph{\code{id}} in your server logic to
-  determine which of the current navlist items is active.
-  The value will correspond to the \code{value} argument
-  that is passed to \code{\link{tabPanel}}.}
+\item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
+server logic to determine which of the current navlist items is active. The
+value will correspond to the \code{value} argument that is passed to
+\code{\link{tabPanel}}.}
 
-  \item{selected}{The \code{value} (or, if none was
-  supplied, the \code{title}) of the navigation item that
-  should be selected by default. If \code{NULL}, the first
-  navigation will be selected.}
+\item{selected}{The \code{value} (or, if none was supplied, the \code{title})
+of the navigation item that should be selected by default. If \code{NULL},
+the first navigation will be selected.}
 
-  \item{well}{\code{TRUE} to place a well (gray rounded
-  rectangle) around the navigation list.}
+\item{well}{\code{TRUE} to place a well (gray rounded rectangle) around the
+navigation list.}
 
-  \item{fluid}{\code{TRUE} to use fluid layout;
-  \code{FALSE} to use fixed layout.}
+\item{fluid}{\code{TRUE} to use fluid layout; \code{FALSE} to use fixed
+layout.}
 
-  \item{widths}{Column withs of the navigation list and
-  tabset content areas respectively.}
+\item{widths}{Column withs of the navigation list and tabset content areas
+  respectively.}
 }
 \description{
 Create a navigation list panel that provides a list of links on the left

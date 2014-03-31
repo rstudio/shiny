@@ -6,11 +6,9 @@
 repeatable(rngfunc, seed = runif(1, 0, .Machine$integer.max))
 }
 \arguments{
-  \item{rngfunc}{The function that is affected by the R
-  session's seed.}
+\item{rngfunc}{The function that is affected by the R session's seed.}
 
-  \item{seed}{The seed to set every time the resulting
-  function is called.}
+\item{seed}{The seed to set every time the resulting function is called.}
 }
 \value{
 A repeatable version of the function that was passed in.

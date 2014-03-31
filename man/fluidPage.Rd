@@ -9,20 +9,17 @@ fluidPage(..., title = NULL, responsive = TRUE, theme = NULL)
 fluidRow(...)
 }
 \arguments{
-  \item{...}{Elements to include within the page}
+\item{...}{Elements to include within the page}
 
-  \item{title}{The browser window title (defaults to the
-  host URL of the page).  Can also be set as a side effect
-  of the \code{\link{titlePanel}} function.}
+\item{title}{The browser window title (defaults to the host URL of the page).
+Can also be set as a side effect of the \code{\link{titlePanel}} function.}
 
-  \item{responsive}{\code{TRUE} to use responsive layout
-  (automatically adapt and resize page elements based on
-  the size of the viewing device)}
+\item{responsive}{\code{TRUE} to use responsive layout (automatically adapt
+and resize page elements based on the size of the viewing device)}
 
-  \item{theme}{Alternative Bootstrap stylesheet (normally a
-  css file within the www directory). For example, to use
-  the theme located at \code{www/bootstrap.css} you would
-  use \code{theme = "bootstrap.css"}.}
+\item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
+  www directory). For example, to use the theme located at
+  \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.}
 }
 \value{
 A UI defintion that can be passed to the \link{shinyUI} function.

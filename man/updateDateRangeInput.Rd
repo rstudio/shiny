@@ -7,24 +7,24 @@ updateDateRangeInput(session, inputId, label = NULL, start = NULL,
   end = NULL, min = NULL, max = NULL)
 }
 \arguments{
-  \item{session}{The \code{session} object passed to
-  function given to \code{shinyServer}.}
+\item{session}{The \code{session} object passed to function given to
+\code{shinyServer}.}
 
-  \item{inputId}{The id of the input object.}
+\item{inputId}{The id of the input object.}
 
-  \item{label}{The label to set for the input object.}
+\item{label}{The label to set for the input object.}
 
-  \item{start}{The start date. Either a Date object, or a
-  string in \code{yyyy-mm-dd} format.}
+\item{start}{The start date. Either a Date object, or a string in
+\code{yyyy-mm-dd} format.}
 
-  \item{end}{The end date. Either a Date object, or a
-  string in \code{yyyy-mm-dd} format.}
+\item{end}{The end date. Either a Date object, or a string in
+\code{yyyy-mm-dd} format.}
 
-  \item{min}{The minimum allowed date. Either a Date
-  object, or a string in \code{yyyy-mm-dd} format.}
+\item{min}{The minimum allowed date. Either a Date object, or a string in
+\code{yyyy-mm-dd} format.}
 
-  \item{max}{The maximum allowed date. Either a Date
-  object, or a string in \code{yyyy-mm-dd} format.}
+\item{max}{The maximum allowed date. Either a Date object, or a string in
+  \code{yyyy-mm-dd} format.}
 }
 \description{
 Change the start and end values of a date range input on the client

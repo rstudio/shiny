@@ -6,7 +6,7 @@
 wellPanel(...)
 }
 \arguments{
-  \item{...}{UI elements to include inside the panel.}
+\item{...}{UI elements to include inside the panel.}
 }
 \value{
 The newly created panel.

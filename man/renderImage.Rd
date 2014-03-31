@@ -6,20 +6,17 @@
 renderImage(expr, env = parent.frame(), quoted = FALSE, deleteFile = TRUE)
 }
 \arguments{
-  \item{expr}{An expression that returns a list.}
+\item{expr}{An expression that returns a list.}
 
-  \item{env}{The environment in which to evaluate
-  \code{expr}.}
+\item{env}{The environment in which to evaluate \code{expr}.}
 
-  \item{quoted}{Is \code{expr} a quoted expression (with
-  \code{quote()})? This is useful if you want to save an
-  expression in a variable.}
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
+is useful if you want to save an expression in a variable.}
 
-  \item{deleteFile}{Should the file in \code{func()$src} be
-  deleted after it is sent to the client browser? Generally
-  speaking, if the image is a temp file generated within
-  \code{func}, then this should be \code{TRUE}; if the
-  image is not a temp file, this should be \code{FALSE}.}
+\item{deleteFile}{Should the file in \code{func()$src} be deleted after
+  it is sent to the client browser? Generally speaking, if the image is a
+  temp file generated within \code{func}, then this should be \code{TRUE};
+  if the image is not a temp file, this should be \code{FALSE}.}
 }
 \description{
 Renders a reactive image that is suitable for assigning to an \code{output}

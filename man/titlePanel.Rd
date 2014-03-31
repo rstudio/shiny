@@ -6,10 +6,9 @@
 titlePanel(title, windowTitle = title)
 }
 \arguments{
-  \item{title}{An application title to display}
+\item{title}{An application title to display}
 
-  \item{windowTitle}{The title that should be displayed by
-  the browser window.}
+\item{windowTitle}{The title that should be displayed by the browser window.}
 }
 \description{
 Create a panel containing an application title.

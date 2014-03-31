@@ -108,8 +108,7 @@ includeText <- function(path) {
 #' @rdname include
 #' @export
 includeMarkdown <- function(path) {
-  if (!require(markdown))
-    stop("Markdown package is not installed")
+  library(markdown)
 
   dependsOnFile(path)
   html <- markdown::markdownToHTML(path, fragment.only=TRUE)
@@ -153,9 +152,14 @@ includeScript <- function(path, ...) {
 withMathJax <- function(...) {
   path <- 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
   tagList(
-    tags$head(singleton(tags$script(src = path, type = 'text/javascript'))),
+    tags$head(
+      singleton(tags$script(HTML('window.MathJax = {skipStartupTypeset: true};'))),
+      singleton(tags$script(src = path, type = 'text/javascript'))
+    ),
     ...,
-    tags$script(HTML('MathJax.Hub.Typeset();'))
+    tags$script(HTML('$(function() {
+                        setTimeout(function() {MathJax.Hub.Typeset();}, 200);
+                      });'))
   )
 }
 

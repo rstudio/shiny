@@ -7,19 +7,17 @@ updateCheckboxGroupInput(session, inputId, label = NULL, choices = NULL,
   selected = NULL)
 }
 \arguments{
-  \item{session}{The \code{session} object passed to
-  function given to \code{shinyServer}.}
+\item{session}{The \code{session} object passed to function given to
+\code{shinyServer}.}
 
-  \item{inputId}{The id of the input object.}
+\item{inputId}{The id of the input object.}
 
-  \item{label}{The label to set for the input object.}
+\item{label}{The label to set for the input object.}
 
-  \item{choices}{A named vector or named list of options.
-  For each item, the name will be used as the label, and
-  the value will be used as the value.}
+\item{choices}{A named vector or named list of options. For each item, the
+name will be used as the label, and the value will be used as the value.}
 
-  \item{selected}{A vector or list of options (values)
-  which will be selected.}
+\item{selected}{A vector or list of options (values) which will be selected.}
 }
 \description{
 Change the value of a checkbox group input on the client

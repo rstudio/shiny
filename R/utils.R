@@ -491,6 +491,8 @@ checkAsIs <- function(options) {
 srcrefFromShinyCall <- function(expr) {
   srcrefs <- attr(expr, "srcref")
   num_exprs <- length(srcrefs)
+  if (num_exprs < 1)
+    return(NULL)
   c(srcrefs[[1]][1], srcrefs[[1]][2],
     srcrefs[[num_exprs]][3], srcrefs[[num_exprs]][4],
     srcrefs[[1]][5], srcrefs[[num_exprs]][6])

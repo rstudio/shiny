@@ -6,8 +6,7 @@
 parseQueryString(str)
 }
 \arguments{
-  \item{str}{The query string. It can have a leading
-  \code{"?"} or not.}
+\item{str}{The query string. It can have a leading \code{"?"} or not.}
 }
 \description{
 Returns a named character vector of key-value pairs.

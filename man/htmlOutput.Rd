@@ -9,7 +9,7 @@ htmlOutput(outputId)
 uiOutput(outputId)
 }
 \arguments{
-  \item{outputId}{output variable to read the value from}
+\item{outputId}{output variable to read the value from}
 }
 \value{
 An HTML output element that can be included in a panel

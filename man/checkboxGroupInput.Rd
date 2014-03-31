@@ -6,17 +6,14 @@
 checkboxGroupInput(inputId, label, choices, selected = NULL)
 }
 \arguments{
-  \item{inputId}{Input variable to assign the control's
-  value to.}
+\item{inputId}{Input variable to assign the control's value to.}
 
-  \item{label}{Display label for the control.}
+\item{label}{Display label for the control.}
 
-  \item{choices}{List of values to show checkboxes for. If
-  elements of the list are named then that name rather than
-  the value is displayed to the user.}
+\item{choices}{List of values to show checkboxes for. If elements of the list
+are named then that name rather than the value is displayed to the user.}
 
-  \item{selected}{The values that should be initially
-  selected, if any.}
+\item{selected}{The values that should be initially selected, if any.}
 }
 \value{
 A list of HTML elements that can be added to a UI definition.

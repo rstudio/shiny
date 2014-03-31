@@ -6,13 +6,13 @@
 updateTabsetPanel(session, inputId, selected = NULL)
 }
 \arguments{
-  \item{session}{The \code{session} object passed to
-  function given to \code{shinyServer}.}
+\item{session}{The \code{session} object passed to function given to
+\code{shinyServer}.}
 
-  \item{inputId}{The id of the \code{tabsetPanel},
-  \code{navlistPanel}, or \code{navbarPage} object.}
+\item{inputId}{The id of the \code{tabsetPanel}, \code{navlistPanel},
+or \code{navbarPage} object.}
 
-  \item{selected}{The name of the tab to make active.}
+\item{selected}{The name of the tab to make active.}
 }
 \description{
 Change the selected tab on the client

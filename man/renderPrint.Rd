@@ -6,18 +6,15 @@
 renderPrint(expr, env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
-  \item{expr}{An expression that may print output and/or
-  return a printable R object.}
+\item{expr}{An expression that may print output and/or return a printable R
+object.}
 
-  \item{env}{The environment in which to evaluate
-  \code{expr}.}
+\item{env}{The environment in which to evaluate \code{expr}.}
 
-  \item{quoted}{Is \code{expr} a quoted expression (with
-  \code{quote()})? This}
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This}
 
-  \item{func}{A function that may print output and/or
-  return a printable R object (deprecated; use \code{expr}
-  instead).}
+\item{func}{A function that may print output and/or return a printable R
+  object (deprecated; use \code{expr} instead).}
 }
 \description{
 Makes a reactive version of the given function that captures any printed

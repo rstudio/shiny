@@ -9,18 +9,15 @@ bootstrapPage(..., title = NULL, responsive = TRUE, theme = NULL)
 basicPage(...)
 }
 \arguments{
-  \item{...}{The contents of the document body.}
+\item{...}{The contents of the document body.}
 
-  \item{title}{The browser window title (defaults to the
-  host URL of the page)}
+\item{title}{The browser window title (defaults to the host URL of the page)}
 
-  \item{responsive}{\code{TRUE} to use responsive layout
-  (automatically adapt and resize page elements based on
-  the size of the viewing device)}
+\item{responsive}{\code{TRUE} to use responsive layout (automatically adapt
+and resize page elements based on the size of the viewing device)}
 
-  \item{theme}{Alternative Bootstrap stylesheet (normally a
-  css file within the www directory, e.g.
-  \code{www/bootstrap.css})}
+\item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
+  www directory, e.g. \code{www/bootstrap.css})}
 }
 \value{
 A UI defintion that can be passed to the \link{shinyUI} function.

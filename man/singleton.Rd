@@ -6,8 +6,7 @@
 singleton(x)
 }
 \arguments{
-  \item{x}{A \code{\link{tag}}, text, \code{\link{HTML}},
-  or list.}
+\item{x}{A \code{\link{tag}}, text, \code{\link{HTML}}, or list.}
 }
 \description{
 Use \code{singleton} to wrap contents (tag, text, HTML, or lists) that should

@@ -700,3 +700,10 @@ test_that("{} and NULL also work in reactive()", {
   reactive({})
   reactive(NULL)
 })
+
+test_that("shiny.suppressMissingContextError option works", {
+  options(shiny.suppressMissingContextError=TRUE)
+  on.exit(options(shiny.suppressMissingContextError=FALSE), add = TRUE)
+
+  expect_true(reactive(TRUE)())
+})

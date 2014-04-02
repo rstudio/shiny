@@ -6,13 +6,16 @@
 \usage{
 shinyAppObj(ui, server, onStart = NULL, options = list())
 
-shinyAppDir(dir, options = list())
+shinyAppDir(appDir, options = list())
 }
 \arguments{
 \item{ui}{The UI definition of the app (for example, a call to
 \code{fluidPage()} with nested controls)}
 
 \item{server}{A server function}
+
+\item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
+file and either ui.R or www/index.html)}
 
 \item{onStart}{A function that will be called before the app is actually run.
 This is only needed for \code{shinyAppObj}, since in the \code{shinyAppDir}

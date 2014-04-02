@@ -10,6 +10,8 @@
 #' @param ui The UI definition of the app (for example, a call to
 #'   \code{fluidPage()} with nested controls)
 #' @param server A server function
+#' @param appDir Path to directory that contains a Shiny app (i.e. a server.R
+#'   file and either ui.R or www/index.html)
 #' @param onStart A function that will be called before the app is actually run.
 #'   This is only needed for \code{shinyAppObj}, since in the \code{shinyAppDir}
 #'   case, a \code{global.R} file can be used for this purpose.
@@ -46,10 +48,10 @@ shinyAppObj <- function(ui, server, onStart=NULL, options=list()) {
 
 #' @rdname shinyAppObj
 #' @export
-shinyAppDir <- function(dir, options=list()) {
-  dir <- normalizePath(dir, mustWork = TRUE)
+shinyAppDir <- function(appDir, options=list()) {
+  appDir <- normalizePath(appDir, mustWork = TRUE)
   structure(
-    dir,
+    appDir,
     shiny.options = options,
     class = "shiny.appdir"
   )
@@ -61,7 +63,7 @@ shinyAppDir <- function(dir, options=list()) {
 #'   \code{\link{shinyAppDir}}.
 #'
 #' @export
-print.shiny.appobj <- function(x) {
+print.shiny.appobj <- function(x, ...) {
   opts <- attr(x, "shiny.options")
   opts <- opts[names(opts) %in%
       c("port", "launch.browser", "host", "quiet", "display.mode")]

@@ -4,9 +4,9 @@
 \alias{print.shiny.appobj}
 \title{Run a Shiny app object}
 \usage{
-\method{print}{shiny.appobj}(x)
+\method{print}{shiny.appobj}(x, ...)
 
-\method{print}{shiny.appdir}(x)
+\method{print}{shiny.appdir}(x, ...)
 }
 \arguments{
 \item{x}{A Shiny app, as returned from \code{\link{shinyAppObj}} or

@@ -1,3 +1,26 @@
+# Terminology in this file:
+#
+# httpHandler (or handler): A function that takes an HTTP (non-websocket)
+# request and returns either an httpResponse object (constructed using
+# httpResponse func) or NULL if it didn't know how to handle the request
+# (meaning the caller should try the next handler, or return 404 if none). Note
+# that this is NOT the same as an httpuv (Rook) handler, as the response format
+# is not the same and NULL is not allowed.
+#
+# httpServer: The function that takes an httpHandler and returns a valid Rook
+# handler (something suitable for using as the $call member of an httpuv app
+# object).
+#
+# wsHandler: A function that is suitable for using as the onWSOpen callback of
+# an httpuv app object.
+#
+# appHandlers (as in createAppHandlers): A list whose "http" variable that is an
+# httpHandler and a "ws" variable that is a wsHandler.
+#
+# webserver (not a very good/specific name): A global object where various
+# httpHandlers and wsHandlers can be registered, and it can be used as an httpuv
+# app object.
+
 resolve <- function(dir, relpath) {
   abs.path <- file.path(dir, relpath)
   if (!file.exists(abs.path))
@@ -29,10 +52,7 @@ httpResponse <- function(status = 200,
   return(resp)
 }
 
-httpServer <- function(handlers, sharedSecret) {
-  handler <- joinHandlers(handlers)
-
-  # TODO: Figure out what this means after httpuv migration
+httpServer <- function(handler, sharedSecret) {
   filter <- getOption('shiny.http.response.filter', NULL)
   if (is.null(filter))
     filter <- function(req, response) response
@@ -66,6 +86,9 @@ joinHandlers <- function(handlers) {
     else
       return(h)
   })
+
+  if (is.function(handlers))
+    return(handlers)
 
   # Filter out NULL
   handlers <- handlers[!sapply(handlers, is.null)]
@@ -535,76 +558,68 @@ createAppObj <- function(ui, serverFunc) {
   )
 }
 
-proxyCallbacks <- function(prefix, targetCallbacks) {
+routeHandler <- function(prefix, handler) {
   force(prefix)
-  force(targetCallbacks)
+  force(handler)
 
   if (identical("", prefix))
-    return(targetCallbacks)
+    return(handler)
 
   if (length(prefix) != 1 || !isTRUE(grepl("^/[^\\]+$", prefix))) {
     stop("Invalid URL prefix \"", prefix, "\"")
   }
 
   pathPattern <- paste("^\\Q", prefix, "\\E/", sep = "")
-  matchReq <- function(req) {
+  function(req) {
     if (isTRUE(grepl(pathPattern, req$PATH_INFO))) {
-      req <- as.environment(as.list(req))
+      origScript <- req$SCRIPT_NAME
+      origPath <- req$PATH_INFO
+      on.exit({
+        req$SCRIPT_NAME <- origScript
+        req$PATH_INFO <- origPath
+      }, add = TRUE)
       pathInfo <- substr(req$PATH_INFO, nchar(prefix)+1, nchar(req$PATH_INFO))
       req$SCRIPT_NAME <- paste(req$SCRIPT_NAME, prefix, sep = "")
       req$PATH_INFO <- pathInfo
-      return(req)
+      return(handler(req))
     } else {
       return(NULL)
     }
   }
-
-  list(
-    onHeaders = function(req) {
-      if (identical(req$PATH_INFO, prefix)) {
-        # We could return a 302 response here, but doing so seems to cause
-        # httpuv to report "ERROR: [on_request_read] parse error" for some
-        # reason. Instead, let the request proceed as normal and handle it
-        # in call().
-        return(NULL)
-      }
-      req <- matchReq(req)
-      if (is.null(req))
-        return(FALSE)
-      else
-        return(targetCallbacks$onHeaders(req))
-    },
-    call = function(req) {
-      if (identical(req$PATH_INFO, prefix)) {
-        return(list(
-          status = 302L,
-          headers = list(
-            "Location" = paste(prefix, "/", sep = ""),
-            "Content-Type" = "text/plain"
-          ),
-          body = ""
-        ))
-      }
-
-      req <- matchReq(req)
-      if (is.null(req))
-        return(FALSE)
-      else
-        return(targetCallbacks$call(req))
-    },
-    onWSOpen = function(ws) {
-      req <- matchReq(ws$request)
-      if (is.null(req))
-        return(FALSE)
-      else {
-        ws$request <- req
-        return(targetCallbacks$onWSOpen(ws))
-      }
-    }
-  )
 }
 
-createAppCallbacks <- function(httpHandlers, serverFuncSource, workerId) {
+routeWSHandler <- function(prefix, wshandler) {
+  force(prefix)
+  force(wshandler)
+
+  if (identical("", prefix))
+    return(wshandler)
+
+  if (length(prefix) != 1 || !isTRUE(grepl("^/[^\\]+$", prefix))) {
+    stop("Invalid URL prefix \"", prefix, "\"")
+  }
+
+  pathPattern <- paste("^\\Q", prefix, "\\E/", sep = "")
+  function(ws) {
+    req <- ws$request
+    if (isTRUE(grepl(pathPattern, req$PATH_INFO))) {
+      origScript <- req$SCRIPT_NAME
+      origPath <- req$PATH_INFO
+      on.exit({
+        req$SCRIPT_NAME <- origScript
+        req$PATH_INFO <- origPath
+      }, add = TRUE)
+      pathInfo <- substr(req$PATH_INFO, nchar(prefix)+1, nchar(req$PATH_INFO))
+      req$SCRIPT_NAME <- paste(req$SCRIPT_NAME, prefix, sep = "")
+      req$PATH_INFO <- pathInfo
+      return(wshandler(ws))
+    } else {
+      return(NULL)
+    }
+  }
+}
+
+createAppHandlers <- function(httpHandlers, serverFuncSource, workerId) {
 
   sys.www.root <- system.file('www', package='shiny')
 
@@ -613,38 +628,18 @@ createAppCallbacks <- function(httpHandlers, serverFuncSource, workerId) {
   # denied (403 response for HTTP, and instant close for websocket).
   sharedSecret <- getOption('shiny.sharedSecret', NULL)
 
-  httpuvCallbacks <- list(
-    onHeaders = function(req) {
-      maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
-      if (maxSize <= 0)
-        return(NULL)
-
-      reqSize <- 0
-      if (length(req$CONTENT_LENGTH) > 0)
-        reqSize <- as.numeric(req$CONTENT_LENGTH)
-      else if (length(req$HTTP_TRANSFER_ENCODING) > 0)
-        reqSize <- Inf
-
-      if (reqSize > maxSize) {
-        return(list(status = 413L,
-                    headers = list(
-                      'Content-Type' = 'text/plain'
-                    ),
-                    body = 'Maximum upload size exceeded'))
-      }
-      else {
-        return(NULL)
-      }
-    },
-    call = httpServer(c(sessionHandler,
-                        httpHandlers,
-                        sys.www.root,
-                        resourcePathHandler,
-                        reactLogHandler), sharedSecret),
-    onWSOpen = function(ws) {
+  appHandlers <- list(
+    http = joinHandlers(c(
+      sessionHandler,
+      httpHandlers,
+      sys.www.root,
+      resourcePathHandler,
+      reactLogHandler)),
+    ws = function(ws) {
       if (!is.null(sharedSecret)
           && !identical(sharedSecret, ws$request$HTTP_SHINY_SHARED_SECRET)) {
         ws$close()
+        return(TRUE)
       }
 
       shinysession <- ShinySession$new(ws, workerId)
@@ -786,56 +781,83 @@ createAppCallbacks <- function(httpHandlers, serverFuncSource, workerId) {
         shinysession$close()
         appsByToken$remove(shinysession$token)
       })
+
+      return(TRUE)
     }
   )
-  return(httpuvCallbacks)
+  return(appHandlers)
 }
 
-httpuvCallbackSet <- local({
-  callbacks <- list()
+webserver <- local({
+  handlers <- list()
+  wshandlers <- list()
   list(
-    add = function(cb) {
-      if (length(callbacks) == 0)
-        callbacks <<- list(cb)
+    addHandler = function(handler) {
+      if (length(handlers) == 0)
+        handlers <<- list(handler)
       else
-        callbacks <<- c(callbacks, list(cb))
+        handlers <<- c(handlers, list(handler))
+    },
+    addWSHandler = function(wshandler) {
+      if (length(wshandlers) == 0)
+        wshandlers <<- list(wshandler)
+      else
+        wshandlers <<- c(wshandlers, list(wshandler))
     },
     clear = function() {
-      callbacks <<- list()
+      handlers <<- list()
+      wshandlers <<- list()
     },
-    metaCallbacks = list(
+    createHttpuvApp = function() {list(
       onHeaders = function(req) {
-        for (cb in callbacks) {
-          result <- cb$onHeaders(req)
-          if (!identical(result, FALSE))
-            return(result)
+        maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
+        if (maxSize <= 0)
+          return(NULL)
+
+        reqSize <- 0
+        if (length(req$CONTENT_LENGTH) > 0)
+          reqSize <- as.numeric(req$CONTENT_LENGTH)
+        else if (length(req$HTTP_TRANSFER_ENCODING) > 0)
+          reqSize <- Inf
+
+        if (reqSize > maxSize) {
+          return(list(status = 413L,
+            headers = list(
+              'Content-Type' = 'text/plain'
+            ),
+            body = 'Maximum upload size exceeded'))
         }
-        stop("onHeaders: should never get here")
-      },
-      call = function(req) {
-        for (cb in callbacks) {
-          result <- cb$call(req)
-          if (!identical(result, FALSE))
-            return(result)
+        else {
+          return(NULL)
         }
-        stop("call: should never get here")
       },
+      call = httpServer(
+        function (req) {
+          for (handler in handlers) {
+            result <- handler(req)
+            if (!is.null(result))
+              return(result)
+          }
+          return(NULL)
+        },
+        getOption('shiny.sharedSecret', NULL)
+      ),
       onWSOpen = function(ws) {
-        for (cb in callbacks) {
-          result <- cb$onWSOpen(ws)
-          if (!identical(result, FALSE))
+        for (wshandler in wshandlers) {
+          result <- wshandler(ws)
+          if (!is.null(result))
             return(result)
         }
-        stop("onWSOpen: should never get here")
+        return(NULL)
       }
-    )
+    )}
   )
 })
 
 addSubAppObj <- function(appObj, workerId="") {
   appParts <- createAppObj(appObj$ui, appObj$server)
   path <- registerSubApp(appParts$httpHandlers, appParts$serverFuncSource, workerId)
-  invisible(path)
+  invisible(paste(path, "/", sep=""))
 }
 
 addSubAppDir <- function(appDir, workerId="") {
@@ -846,33 +868,33 @@ addSubAppDir <- function(appDir, workerId="") {
     finally = setwd(oldwd)
   )
   path <- registerSubApp(appParts$httpHandlers, appParts$serverFuncSource, workerId)
-  invisible(path)
+  invisible(paste(path, "/", sep=""))
 }
 
 registerSubApp <- function(httpHandlers, serverFuncSource, workerId) {
   path <- sprintf("/%s", createUniqueId(8))
-  httpuvCallbacks <- proxyCallbacks(path,
-    createAppCallbacks(httpHandlers, serverFuncSource, workerId))
-  httpuvCallbackSet$add(httpuvCallbacks)
+  appHandlers <- createAppHandlers(httpHandlers, serverFuncSource, workerId)
+  webserver$addHandler(routeHandler(path, appHandlers$http))
+  webserver$addWSHandler(routeWSHandler(path, appHandlers$ws))
   return(path)
 }
 
 startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet) {
-  httpuvCallbacks <- proxyCallbacks("",
-    createAppCallbacks(httpHandlers, serverFuncSource, workerId))
-  httpuvCallbackSet$add(httpuvCallbacks)
+  appHandlers <- createAppHandlers(httpHandlers, serverFuncSource, workerId)
+  webserver$addHandler(appHandlers$http)
+  webserver$addWSHandler(appHandlers$ws)
 
   if (is.numeric(port) || is.integer(port)) {
     if (!quiet) {
       message('\n', 'Listening on http://', host, ':', port)
     }
-    return(startServer(host, port, httpuvCallbackSet$metaCallbacks))
+    return(startServer(host, port, webserver$createHttpuvApp()))
   } else if (is.character(port)) {
     if (!quiet) {
       message('\n', 'Listening on domain socket ', port)
     }
     mask <- attr(port, 'mask')
-    return(startPipeServer(port, mask, httpuvCallbackSet$metaCallbacks))
+    return(startPipeServer(port, mask, webserver$createHttpuvApp()))
   }
 }
 
@@ -1053,7 +1075,7 @@ runApp <- function(appDir=getwd(),
     port, host, workerId, quiet)
 
   on.exit({
-    httpuvCallbackSet$clear()
+    webserver$clear()
     stopServer(server)
   }, add = TRUE)
 

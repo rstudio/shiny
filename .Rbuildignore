@@ -7,7 +7,8 @@
 ^run\.R$
 ^\.gitignore$
 ^res$
-^tools$
 ^man-roxygen$
 ^\.travis\.yml$
 ^staticdocs$
+^R/.*\.Rmd1$
+^R/.*\.html$

@@ -9,4 +9,4 @@ all: $(rfiles)
 	$(call purl,$^,$@)
 
 clean:
-	rm $(rfiles)
+	rm -f $(rfiles)

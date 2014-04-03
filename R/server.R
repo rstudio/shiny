@@ -1,12 +1,3 @@
-# Terminology in this file:
-
-- httpHandler (or handler): A function that takes an HTTP (non-websocket) request and returns either an httpResponse object (constructed using httpResponse func) or NULL if it didn't know how to handle the request (meaning the caller should try the next handler, or return 404 if none). Note that this is NOT the same as an httpuv (Rook) handler, as the response format is not the same and NULL is not allowed.
-- httpServer: The function that takes an httpHandler and returns a valid Rook handler (something suitable for using as the $call member of an httpuv app object).
-- wsHandler: A function that is suitable for using as the onWSOpen callback of an httpuv app object.
-- appHandlers (as in createAppHandlers): A list whose "http" variable that is an httpHandler and a "ws" variable that is a wsHandler.
-- webserver (not a very good/specific name): A global object where various httpHandlers and wsHandlers can be registered, and it can be used as an httpuv app object.
-
-```{r eval=FALSE}
 resolve <- function(dir, relpath) {
   abs.path <- file.path(dir, relpath)
   if (!file.exists(abs.path))
@@ -22,170 +13,6 @@ resolve <- function(dir, relpath) {
     return(NULL)
   }
   return(abs.path)
-}
-
-httpResponse <- function(status = 200,
-                         content_type = "text/html; charset=UTF-8",
-                         content = "",
-                         headers = list()) {
-  # Make sure it's a list, not a vector
-  headers <- as.list(headers)
-  if (is.null(headers$`X-UA-Compatible`))
-    headers$`X-UA-Compatible` <- "chrome=1"
-  resp <- list(status = status, content_type = content_type, content = content,
-               headers = headers)
-  class(resp) <- 'httpResponse'
-  return(resp)
-}
-
-httpServer <- function(handler, sharedSecret) {
-  filter <- getOption('shiny.http.response.filter', NULL)
-  if (is.null(filter))
-    filter <- function(req, response) response
-
-  function(req) {
-    if (!is.null(sharedSecret)
-        && !identical(sharedSecret, req$HTTP_SHINY_SHARED_SECRET)) {
-      return(list(status=403,
-                  body='<h1>403 Forbidden</h1><p>Shared secret mismatch</p>',
-                  headers=list('Content-Type' = 'text/html')))
-    }
-
-    response <- handler(req)
-    if (is.null(response))
-      response <- httpResponse(404, content="<h1>Not Found</h1>")
-
-    headers <- as.list(response$headers)
-    headers$'Content-Type' <- response$content_type
-
-    response <- filter(req, response)
-    return(list(status=response$status,
-                body=response$content,
-                headers=headers))
-  }
-}
-
-joinHandlers <- function(handlers) {
-  if (is.function(handlers))
-    return(handlers)
-
-  handlers <- lapply(handlers, function(h) {
-    if (is.character(h))
-      return(staticHandler(h))
-    else
-      return(h)
-  })
-
-  # Filter out NULL
-  handlers <- handlers[!sapply(handlers, is.null)]
-
-  if (length(handlers) == 0)
-    return(function(req) NULL)
-  if (length(handlers) == 1)
-    return(handlers[[1]])
-
-  function(req) {
-    for (handler in handlers) {
-      response <- handler(req)
-      if (!is.null(response))
-        return(response)
-    }
-    return(NULL)
-  }
-}
-
-reactLogHandler <- function(req) {
-  if (!identical(req$PATH_INFO, '/reactlog'))
-    return(NULL)
-
-  if (!getOption('shiny.reactlog', FALSE)) {
-    return(NULL)
-  }
-
-  return(httpResponse(
-    status=200,
-    content=list(file=renderReactLog(), owned=TRUE)
-  ))
-}
-
-sessionHandler <- function(req) {
-  path <- req$PATH_INFO
-  if (is.null(path))
-    return(NULL)
-
-  matches <- regmatches(path, regexec('^(/session/([0-9a-f]+))(/.*)$', path))
-  if (length(matches[[1]]) == 0)
-    return(NULL)
-
-  session <- matches[[1]][3]
-  subpath <- matches[[1]][4]
-
-  shinysession <- appsByToken$get(session)
-  if (is.null(shinysession))
-    return(NULL)
-
-  subreq <- as.environment(as.list(req, all.names=TRUE))
-  subreq$PATH_INFO <- subpath
-  subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, matches[[1]][2], sep='')
-
-  return(shinysession$handleRequest(subreq))
-}
-
-dynamicHandler <- function(filePath, dependencyFiles=filePath) {
-  lastKnownTimestamps <- NA
-  metaHandler <- function(req) NULL
-
-  if (!file.exists(filePath))
-    return(metaHandler)
-
-  cacheContext <- CacheContext$new()
-
-  return (function(req) {
-    # Check if we need to rebuild
-    if (cacheContext$isDirty()) {
-      cacheContext$reset()
-      for (dep in dependencyFiles)
-        cacheContext$addDependencyFile(dep)
-
-      clearClients()
-      if (file.exists(filePath)) {
-        local({
-          cacheContext$with(function() {
-            sys.source(filePath, envir=new.env(parent=globalenv()), keep.source=TRUE)
-          })
-        })
-      }
-      metaHandler <<- joinHandlers(.globals$clients)
-      clearClients()
-    }
-
-    return(metaHandler(req))
-  })
-}
-
-staticHandler <- function(root) {
-  force(root)
-  return(function(req) {
-    if (!identical(req$REQUEST_METHOD, 'GET'))
-      return(NULL)
-
-    path <- req$PATH_INFO
-
-    if (is.null(path))
-      return(httpResponse(400, content="<h1>Bad Request</h1>"))
-
-    if (path == '/')
-      path <- '/index.html'
-
-    abs.path <- resolve(root, path)
-    if (is.null(abs.path))
-      return(NULL)
-
-    ext <- tools::file_ext(abs.path)
-    content.type <- getContentType(ext)
-    response.content <- readBin(abs.path, 'raw', n=file.info(abs.path)$size)
-    return(httpResponse(200, content.type, response.content))
-  })
 }
 
 appsByToken <- Map$new()
@@ -480,67 +307,6 @@ file.path.ci <- function(dir, name) {
   return(matches[[1]])
 }
 
-routeHandler <- function(prefix, handler) {
-  force(prefix)
-  force(handler)
-
-  if (identical("", prefix))
-    return(handler)
-
-  if (length(prefix) != 1 || !isTRUE(grepl("^/[^\\]+$", prefix))) {
-    stop("Invalid URL prefix \"", prefix, "\"")
-  }
-
-  pathPattern <- paste("^\\Q", prefix, "\\E/", sep = "")
-  function(req) {
-    if (isTRUE(grepl(pathPattern, req$PATH_INFO))) {
-      origScript <- req$SCRIPT_NAME
-      origPath <- req$PATH_INFO
-      on.exit({
-        req$SCRIPT_NAME <- origScript
-        req$PATH_INFO <- origPath
-      }, add = TRUE)
-      pathInfo <- substr(req$PATH_INFO, nchar(prefix)+1, nchar(req$PATH_INFO))
-      req$SCRIPT_NAME <- paste(req$SCRIPT_NAME, prefix, sep = "")
-      req$PATH_INFO <- pathInfo
-      return(handler(req))
-    } else {
-      return(NULL)
-    }
-  }
-}
-
-routeWSHandler <- function(prefix, wshandler) {
-  force(prefix)
-  force(wshandler)
-
-  if (identical("", prefix))
-    return(wshandler)
-
-  if (length(prefix) != 1 || !isTRUE(grepl("^/[^\\]+$", prefix))) {
-    stop("Invalid URL prefix \"", prefix, "\"")
-  }
-
-  pathPattern <- paste("^\\Q", prefix, "\\E/", sep = "")
-  function(ws) {
-    req <- ws$request
-    if (isTRUE(grepl(pathPattern, req$PATH_INFO))) {
-      origScript <- req$SCRIPT_NAME
-      origPath <- req$PATH_INFO
-      on.exit({
-        req$SCRIPT_NAME <- origScript
-        req$PATH_INFO <- origPath
-      }, add = TRUE)
-      pathInfo <- substr(req$PATH_INFO, nchar(prefix)+1, nchar(req$PATH_INFO))
-      req$SCRIPT_NAME <- paste(req$SCRIPT_NAME, prefix, sep = "")
-      req$PATH_INFO <- pathInfo
-      return(wshandler(ws))
-    } else {
-      return(NULL)
-    }
-  }
-}
-
 createAppHandlers <- function(httpHandlers, serverFuncSource, workerId) {
 
   sys.www.root <- system.file('www', package='shiny')
@@ -710,78 +476,14 @@ createAppHandlers <- function(httpHandlers, serverFuncSource, workerId) {
   return(appHandlers)
 }
 
-webserver <- local({
-  handlers <- list()
-  wshandlers <- list()
-  list(
-    addHandler = function(handler) {
-      if (length(handlers) == 0)
-        handlers <<- list(handler)
-      else
-        handlers <<- c(handlers, list(handler))
-    },
-    addWSHandler = function(wshandler) {
-      if (length(wshandlers) == 0)
-        wshandlers <<- list(wshandler)
-      else
-        wshandlers <<- c(wshandlers, list(wshandler))
-    },
-    clear = function() {
-      handlers <<- list()
-      wshandlers <<- list()
-    },
-    createHttpuvApp = function() {list(
-      onHeaders = function(req) {
-        maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
-        if (maxSize <= 0)
-          return(NULL)
-
-        reqSize <- 0
-        if (length(req$CONTENT_LENGTH) > 0)
-          reqSize <- as.numeric(req$CONTENT_LENGTH)
-        else if (length(req$HTTP_TRANSFER_ENCODING) > 0)
-          reqSize <- Inf
-
-        if (reqSize > maxSize) {
-          return(list(status = 413L,
-            headers = list(
-              'Content-Type' = 'text/plain'
-            ),
-            body = 'Maximum upload size exceeded'))
-        }
-        else {
-          return(NULL)
-        }
-      },
-      call = httpServer(
-        function (req) {
-          for (handler in handlers) {
-            result <- handler(req)
-            if (!is.null(result))
-              return(result)
-          }
-          return(NULL)
-        },
-        getOption('shiny.sharedSecret', NULL)
-      ),
-      onWSOpen = function(ws) {
-        for (wshandler in wshandlers) {
-          result <- wshandler(ws)
-          if (!is.null(result))
-            return(result)
-        }
-        return(NULL)
-      }
-    )}
-  )
-})
+handlerManager <- HandlerManager$new()
 
 addSubApp <- function(appObj, workerId) {
   path <- sprintf("/%s", createUniqueId(8))
   appHandlers <- createAppHandlers(
     appObj$httpHandler, appObj$serverFuncSource, workerId)
-  webserver$addHandler(routeHandler(path, appHandlers$http))
-  webserver$addWSHandler(routeWSHandler(path, appHandlers$ws))
+  handlerManager$addHandler(routeHandler(path, appHandlers$http))
+  handlerManager$addWSHandler(routeWSHandler(path, appHandlers$ws))
   return(paste(path, "/", sep=""))
 }
 
@@ -790,20 +492,20 @@ startApp <- function(appObj, port, host, workerId, quiet) {
     appObj$httpHandler,
     appObj$serverFuncSource,
     workerId)
-  webserver$addHandler(appHandlers$http)
-  webserver$addWSHandler(appHandlers$ws)
+  handlerManager$addHandler(appHandlers$http)
+  handlerManager$addWSHandler(appHandlers$ws)
 
   if (is.numeric(port) || is.integer(port)) {
     if (!quiet) {
       message('\n', 'Listening on http://', host, ':', port)
     }
-    return(startServer(host, port, webserver$createHttpuvApp()))
+    return(startServer(host, port, handlerManager$createHttpuvApp()))
   } else if (is.character(port)) {
     if (!quiet) {
       message('\n', 'Listening on domain socket ', port)
     }
     mask <- attr(port, 'mask')
-    return(startPipeServer(port, mask, webserver$createHttpuvApp()))
+    return(startPipeServer(port, mask, handlerManager$createHttpuvApp()))
   }
 }
 
@@ -981,7 +683,7 @@ runApp <- function(appDir=getwd(),
   server <- startApp(appParts, port, host, workerId, quiet)
 
   on.exit({
-    webserver$clear()
+    handlerManager$clear()
     stopServer(server)
   }, add = TRUE)
 
@@ -1136,4 +838,73 @@ download <- function(url, ...) {
   } else {
     download.file(url, ...)
   }
+}
+
+reactLogHandler <- function(req) {
+  if (!identical(req$PATH_INFO, '/reactlog'))
+    return(NULL)
+
+  if (!getOption('shiny.reactlog', FALSE)) {
+    return(NULL)
+  }
+
+  return(httpResponse(
+    status=200,
+    content=list(file=renderReactLog(), owned=TRUE)
+  ))
+}
+
+sessionHandler <- function(req) {
+  path <- req$PATH_INFO
+  if (is.null(path))
+    return(NULL)
+
+  matches <- regmatches(path, regexec('^(/session/([0-9a-f]+))(/.*)$', path))
+  if (length(matches[[1]]) == 0)
+    return(NULL)
+
+  session <- matches[[1]][3]
+  subpath <- matches[[1]][4]
+
+  shinysession <- appsByToken$get(session)
+  if (is.null(shinysession))
+    return(NULL)
+
+  subreq <- as.environment(as.list(req, all.names=TRUE))
+  subreq$PATH_INFO <- subpath
+  subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, matches[[1]][2], sep='')
+
+  return(shinysession$handleRequest(subreq))
+}
+
+dynamicHandler <- function(filePath, dependencyFiles=filePath) {
+  lastKnownTimestamps <- NA
+  metaHandler <- function(req) NULL
+
+  if (!file.exists(filePath))
+    return(metaHandler)
+
+  cacheContext <- CacheContext$new()
+
+  return (function(req) {
+    # Check if we need to rebuild
+    if (cacheContext$isDirty()) {
+      cacheContext$reset()
+      for (dep in dependencyFiles)
+        cacheContext$addDependencyFile(dep)
+
+      clearClients()
+      if (file.exists(filePath)) {
+        local({
+          cacheContext$with(function() {
+            sys.source(filePath, envir=new.env(parent=globalenv()), keep.source=TRUE)
+          })
+        })
+      }
+      metaHandler <<- joinHandlers(.globals$clients)
+      clearClients()
+    }
+
+    return(metaHandler(req))
+  })
 }

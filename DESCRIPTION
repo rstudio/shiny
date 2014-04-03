@@ -42,6 +42,7 @@ Collate:
     'hooks.R'
     'imageutils.R'
     'jqueryui.R'
+    'middleware.R'
     'priorityqueue.R'
     'react.R'
     'reactives.R'

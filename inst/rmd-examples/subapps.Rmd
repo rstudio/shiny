@@ -10,7 +10,7 @@ shinyAppDir(
     width="100%", height=250
   )
 )
-shinyAppObj(
+shinyApp(
   ui = fluidPage(
     numericInput("n", "n", 1),
     plotOutput("plot")

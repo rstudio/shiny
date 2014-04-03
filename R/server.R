@@ -80,15 +80,15 @@ httpServer <- function(handler, sharedSecret) {
 }
 
 joinHandlers <- function(handlers) {
+  if (is.function(handlers))
+    return(handlers)
+
   handlers <- lapply(handlers, function(h) {
     if (is.character(h))
       return(staticHandler(h))
     else
       return(h)
   })
-
-  if (is.function(handlers))
-    return(handlers)
 
   # Filter out NULL
   handlers <- handlers[!sapply(handlers, is.null)]
@@ -178,6 +178,7 @@ dynamicHandler <- function(filePath, dependencyFiles=filePath) {
 }
 
 staticHandler <- function(root) {
+  force(root)
   return(function(req) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
@@ -449,7 +450,7 @@ shinyServer <- function(func) {
     attr(.globals$server, "shinyServerFunction") <- TRUE
     registerDebugHook("server", .globals, "Server Function")
   }
-  invisible()
+  invisible(func)
 }
 
 decodeMessage <- function(data) {
@@ -491,71 +492,6 @@ file.path.ci <- function(dir, name) {
   if (length(matches) == 0)
     return(default)
   return(matches[[1]])
-}
-
-# Instantiates the app in the current working directory.
-createAppDir <- function() {
-  globalR <- file.path.ci(getwd(), 'global.R')
-  uiR <- file.path.ci(getwd(), 'ui.R')
-  serverR <- file.path.ci(getwd(), 'server.R')
-  wwwDir <- file.path.ci(getwd(), 'www')
-
-  if (!file.exists(uiR) && !file.exists(wwwDir))
-    stop(paste("Neither ui.R nor a www subdirectory was found in", getwd()))
-  if (!file.exists(serverR))
-    stop(paste("server.R file was not found in", getwd()))
-
-  if (file.exists(globalR))
-    sys.source(globalR, envir=globalenv(), keep.source=TRUE)
-
-  shinyServer(NULL)
-  serverFileTimestamp <- file.info(serverR)$mtime
-  sys.source(serverR, envir=new.env(parent=globalenv()), keep.source=TRUE)
-  if (is.null(.globals$server))
-    stop("No server was defined in server.R")
-
-  serverFunc <- .globals$server
-
-  serverFuncSource <- function() {
-    # Check if server.R has changed, and if so, reload
-    mtime <- file.info(serverR)$mtime
-    if (!identical(mtime, serverFileTimestamp)) {
-      shinyServer(NULL)
-      serverFileTimestamp <<- mtime
-      sys.source(serverR, envir=new.env(parent=globalenv()), keep.source=TRUE)
-      if (is.null(.globals$server))
-        stop("No server was defined in server.R")
-      serverFunc <<- .globals$server
-    }
-    return(serverFunc)
-  }
-
-  list(
-    httpHandlers = c(dynamicHandler(uiR), wwwDir),
-    serverFuncSource = serverFuncSource
-  )
-}
-
-createAppObj <- function(ui, serverFunc) {
-  uiHandler <- function(req) {
-    if (!identical(req$REQUEST_METHOD, 'GET'))
-      return(NULL)
-
-    if (req$PATH_INFO != '/')
-      return(NULL)
-
-    textConn <- textConnection(NULL, "w")
-    on.exit(close(textConn))
-
-    renderPage(ui, textConn)
-    html <- paste(textConnectionValue(textConn), collapse='\n')
-    return(httpResponse(200, content=html))
-  }
-
-  list(
-    httpHandlers = uiHandler,
-    serverFuncSource = function() { serverFunc }
-  )
 }
 
 routeHandler <- function(prefix, handler) {
@@ -854,33 +790,20 @@ webserver <- local({
   )
 })
 
-addSubAppObj <- function(appObj, workerId="") {
-  appParts <- createAppObj(appObj$ui, appObj$server)
-  path <- registerSubApp(appParts$httpHandlers, appParts$serverFuncSource, workerId)
-  invisible(paste(path, "/", sep=""))
-}
-
-addSubAppDir <- function(appDir, workerId="") {
-  oldwd <- getwd()
-  setwd(appDir)
-  appParts <- tryCatch(
-    createAppDir(),
-    finally = setwd(oldwd)
-  )
-  path <- registerSubApp(appParts$httpHandlers, appParts$serverFuncSource, workerId)
-  invisible(paste(path, "/", sep=""))
-}
-
-registerSubApp <- function(httpHandlers, serverFuncSource, workerId) {
+addSubApp <- function(appObj, workerId) {
   path <- sprintf("/%s", createUniqueId(8))
-  appHandlers <- createAppHandlers(httpHandlers, serverFuncSource, workerId)
+  appHandlers <- createAppHandlers(
+    appObj$httpHandler, appObj$serverFuncSource, workerId)
   webserver$addHandler(routeHandler(path, appHandlers$http))
   webserver$addWSHandler(routeWSHandler(path, appHandlers$ws))
-  return(path)
+  return(paste(path, "/", sep=""))
 }
 
-startApp <- function(httpHandlers, serverFuncSource, port, host, workerId, quiet) {
-  appHandlers <- createAppHandlers(httpHandlers, serverFuncSource, workerId)
+startApp <- function(appObj, port, host, workerId, quiet) {
+  appHandlers <- createAppHandlers(
+    appObj$httpHandler,
+    appObj$serverFuncSource,
+    workerId)
   webserver$addHandler(appHandlers$http)
   webserver$addWSHandler(appHandlers$ws)
 
@@ -1063,16 +986,13 @@ runApp <- function(appDir=getwd(),
     }
   }
 
-  appParts <- if (is.character(appDir)) {
-    orig.wd <- getwd()
-    setwd(appDir)
-    on.exit(setwd(orig.wd), add = TRUE)
-    createAppDir()
-  } else {
-    createAppObj(appDir$ui, appDir$server)
-  }
-  server <- startApp(appParts$httpHandlers, appParts$serverFuncSource,
-    port, host, workerId, quiet)
+  appParts <- as.shiny.appobj(appDir)
+  if (!is.null(appParts$onStart))
+    appParts$onStart()
+  if (!is.null(appParts$onEnd))
+    on.exit(appParts$onEnd(), add = TRUE)
+
+  server <- startApp(appParts, port, host, workerId, quiet)
 
   on.exit({
     webserver$clear()

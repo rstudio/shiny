@@ -3,23 +3,19 @@
 \alias{shinyUI}
 \title{Create a Shiny UI handler}
 \usage{
-shinyUI(ui, path = "/")
+shinyUI(x)
 }
 \arguments{
-\item{ui}{A user-interace definition}
-
-\item{path}{The web server path to server the UI from}
+\item{ui}{A user interace definition}
 }
 \value{
-Called for its side-effect of registering a UI handler
+The user interface definition, without modifications or side effects.
 }
 \description{
-Register a UI handler by providing a UI definition (created with e.g.
-\link{pageWithSidebar}) and web server path (typically "/", the default
-value).
-}
-\examples{
-el <- div(HTML("I like <u>turtles</u>"))
-cat(as.character(el))
+Historically this function was used in ui.R files to register a user
+interface with Shiny. It is no longer required; simply ensure that the last
+expression to be returned from ui.R is a user interface. This function is
+kept for backwards compatibility with older applications. It returns the
+value that is passed to it.
 }
 

@@ -535,3 +535,40 @@ formatNoSci <- function(x) {
   if (is.null(x)) return(NULL)
   format(x, scientific = FALSE, digits = 15)
 }
+
+# Returns a function that calls the given func and caches the result for
+# subsequent calls, unless the given file's mtime changes.
+cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
+  dir <- normalizePath(dir, TRUE)
+  mtime <- NA
+  value <- NULL
+  function(...) {
+    fname <- if (case.sensitive)
+      file.path(dir, file)
+    else
+      file.path.ci(dir, file)
+
+    now <- file.info(fname)$mtime
+    if (!identical(mtime, now)) {
+      value <<- func(...)
+      mtime <<- now
+    }
+    value
+  }
+}
+
+# Returns a function that sources the file and caches the result for subsequent
+# calls, unless the file's mtime changes.
+cachedSource <- function(dir, file, case.sensitive = FALSE) {
+  dir <- normalizePath(dir, TRUE)
+  cachedFuncWithFile(dir, file, function(...) {
+    fname <- if (case.sensitive)
+      file.path(dir, file)
+    else
+      file.path.ci(dir, file)
+    if (file.exists(fname))
+      return(source(fname, ...))
+    else
+      return(NULL)
+  })
+}

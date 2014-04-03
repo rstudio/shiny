@@ -187,6 +187,8 @@ staticHandler <- function(root) {
 
 The handler manager gives you a place to register handlers (of both http and websocket varieties) and provides an httpuv-compatible set of callbacks for invoking them.
 
+Create one of these, make zero or more calls to `addHandler` and `addWSHandler` methods (order matters--first one wins!), and then pass the return value of `createHttpuvApp` to httpuv's `startServer` function.
+
 ```{r eval=FALSE}
 HandlerManager <- setRefClass("HandlerManager",
   fields = list(
@@ -216,13 +218,13 @@ HandlerManager <- setRefClass("HandlerManager",
           maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
           if (maxSize <= 0)
             return(NULL)
-          
+
           reqSize <- 0
           if (length(req$CONTENT_LENGTH) > 0)
             reqSize <- as.numeric(req$CONTENT_LENGTH)
           else if (length(req$HTTP_TRANSFER_ENCODING) > 0)
             reqSize <- Inf
-          
+
           if (reqSize > maxSize) {
             return(list(status = 413L,
               headers = list(
@@ -259,7 +261,7 @@ HandlerManager <- setRefClass("HandlerManager",
       filter <- getOption('shiny.http.response.filter', NULL)
       if (is.null(filter))
         filter <- function(req, response) response
-      
+
       function(req) {
         if (!is.null(sharedSecret)
           && !identical(sharedSecret, req$HTTP_SHINY_SHARED_SECRET)) {
@@ -267,14 +269,14 @@ HandlerManager <- setRefClass("HandlerManager",
             body='<h1>403 Forbidden</h1><p>Shared secret mismatch</p>',
             headers=list('Content-Type' = 'text/html')))
         }
-        
+
         response <- handler(req)
         if (is.null(response))
           response <- httpResponse(404, content="<h1>Not Found</h1>")
-        
+
         headers <- as.list(response$headers)
         headers$'Content-Type' <- response$content_type
-        
+
         response <- filter(req, response)
         return(list(status=response$status,
           body=response$content,
@@ -284,3 +286,7 @@ HandlerManager <- setRefClass("HandlerManager",
   )
 )
 ```
+
+## Next steps
+
+See server.R to see actual implementation and usage of handlers in the context of Shiny.

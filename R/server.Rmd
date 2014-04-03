@@ -1,26 +1,12 @@
 # Terminology in this file:
-#
-# httpHandler (or handler): A function that takes an HTTP (non-websocket)
-# request and returns either an httpResponse object (constructed using
-# httpResponse func) or NULL if it didn't know how to handle the request
-# (meaning the caller should try the next handler, or return 404 if none). Note
-# that this is NOT the same as an httpuv (Rook) handler, as the response format
-# is not the same and NULL is not allowed.
-#
-# httpServer: The function that takes an httpHandler and returns a valid Rook
-# handler (something suitable for using as the $call member of an httpuv app
-# object).
-#
-# wsHandler: A function that is suitable for using as the onWSOpen callback of
-# an httpuv app object.
-#
-# appHandlers (as in createAppHandlers): A list whose "http" variable that is an
-# httpHandler and a "ws" variable that is a wsHandler.
-#
-# webserver (not a very good/specific name): A global object where various
-# httpHandlers and wsHandlers can be registered, and it can be used as an httpuv
-# app object.
 
+- httpHandler (or handler): A function that takes an HTTP (non-websocket) request and returns either an httpResponse object (constructed using httpResponse func) or NULL if it didn't know how to handle the request (meaning the caller should try the next handler, or return 404 if none). Note that this is NOT the same as an httpuv (Rook) handler, as the response format is not the same and NULL is not allowed.
+- httpServer: The function that takes an httpHandler and returns a valid Rook handler (something suitable for using as the $call member of an httpuv app object).
+- wsHandler: A function that is suitable for using as the onWSOpen callback of an httpuv app object.
+- appHandlers (as in createAppHandlers): A list whose "http" variable that is an httpHandler and a "ws" variable that is a wsHandler.
+- webserver (not a very good/specific name): A global object where various httpHandlers and wsHandlers can be registered, and it can be used as an httpuv app object.
+
+```{r eval=FALSE}
 resolve <- function(dir, relpath) {
   abs.path <- file.path(dir, relpath)
   if (!file.exists(abs.path))

@@ -100,7 +100,9 @@ shinyAppDir <- function(appDir, options=list()) {
       # changed. (Hmmm, overengineering a bit?)
       uiR <- file.path.ci(appDir, "ui.R")
       if (file.exists(uiR)) {
-        ui <- source(uiR, local=new.env(globalenv()), keep.source=TRUE)$value
+        ui <- source(uiR,
+          local = new.env(parent = globalenv()),
+          keep.source = TRUE)$value
         return(uiHttpHandler(ui))
       } else {
         return(function(req) NULL)
@@ -118,8 +120,8 @@ shinyAppDir <- function(appDir, options=list()) {
   # real server function as necessary whenever server.R changes
   serverFuncSource <- function() {
     serverFunction <- serverSource(
-      local = new.env(globalenv()),
-      keep.source=TRUE)$value
+      local = new.env(parent = globalenv()),
+      keep.source = TRUE)$value
     if (is.null(serverFunction)) {
       return(function(input, output) NULL)
     } else if (is.function(serverFunction)) {
@@ -136,7 +138,7 @@ shinyAppDir <- function(appDir, options=list()) {
     oldwd <<- getwd()
     setwd(appDir)
     if (file.exists(file.path.ci(appDir, "global.R")))
-      source(file.path.ci(appDir, "global.R"))
+      source(file.path.ci(appDir, "global.R"), keep.source = TRUE)
   }
   onEnd <- function() {
     setwd(oldwd)

@@ -191,10 +191,6 @@ print.shiny.appobj <- function(x, ...) {
   do.call(runApp, args)
 }
 
-#' @rdname print.shiny.appobj
-#' @export
-print.shiny.appdir <- print.shiny.appobj
-
 #' @export
 knit_print.shiny.appobj <- function(x) {
   path <- addSubApp(x, "")

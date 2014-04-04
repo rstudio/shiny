@@ -9,5 +9,5 @@
 shinyapps/
 README.html
 
-R/middleware.R
-R/middleware.html
+R/*.GENERATED.R
+Rmd/*.html

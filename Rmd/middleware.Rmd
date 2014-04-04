@@ -289,4 +289,4 @@ HandlerManager <- setRefClass("HandlerManager",
 
 ## Next steps
 
-See server.R to see actual implementation and usage of handlers in the context of Shiny.
+See server.R and middleware-shiny.R to see actual implementation and usage of handlers in the context of Shiny.

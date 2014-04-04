@@ -1,9 +1,6 @@
-# TODO: Showcase mode should work in non-runApp(string) cases
-# TODO: Check that workerId works properly in subapps
 # TODO: Subapp global.R
 # TODO: Ensure that debugger still works (see especially shinyUI and shinyServer
 #       changes)
-# TODO: Figure out why superzip table view doesn't work
 
 #' Create a Shiny app object
 #'

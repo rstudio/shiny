@@ -1,2 +1,2 @@
 all:
-	cd ../R && $(MAKE)
+	cd ../ && $(MAKE)

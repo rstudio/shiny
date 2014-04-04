@@ -71,6 +71,99 @@ dropNullsOrEmpty <- function(x) {
   x[!vapply(x, nullOrEmpty, FUN.VALUE=logical(1))]
 }
 
+# Combine dir and (file)name into a file path. If a file already exists with a
+# name differing only by case, then use it instead.
+file.path.ci <- function(dir, name) {
+  default <- file.path(dir, name)
+  if (file.exists(default))
+    return(default)
+  if (!file.exists(dir))
+    return(default)
+
+  matches <- list.files(dir, name, ignore.case=TRUE, full.names=TRUE,
+    include.dirs=TRUE)
+  if (length(matches) == 0)
+    return(default)
+  return(matches[[1]])
+}
+
+# Attempt to join a path and relative path, and turn the result into a
+# (normalized) absolute path. The result will only be returned if it is an
+# existing file/directory and is a descendant of dir.
+#
+# Example:
+# resolve("/Users/jcheng", "shiny")  # "/Users/jcheng/shiny"
+# resolve("/Users/jcheng", "./shiny")  # "/Users/jcheng/shiny"
+# resolve("/Users/jcheng", "shiny/../shiny/")  # "/Users/jcheng/shiny"
+# resolve("/Users/jcheng", ".")  # NULL
+# resolve("/Users/jcheng", "..")  # NULL
+# resolve("/Users/jcheng", "shiny/..")  # NULL
+resolve <- function(dir, relpath) {
+  abs.path <- file.path(dir, relpath)
+  if (!file.exists(abs.path))
+    return(NULL)
+  abs.path <- normalizePath(abs.path, winslash='/', mustWork=TRUE)
+  dir <- normalizePath(dir, winslash='/', mustWork=TRUE)
+  # trim the possible trailing slash under Windows (#306)
+  if (.Platform$OS.type == 'windows') dir <- sub('/$', '', dir)
+  if (nchar(abs.path) <= nchar(dir) + 1)
+    return(NULL)
+  if (substr(abs.path, 1, nchar(dir)) != dir ||
+      substr(abs.path, nchar(dir)+1, nchar(dir)+1) != '/') {
+    return(NULL)
+  }
+  return(abs.path)
+}
+
+# This is a wrapper for download.file and has the same interface.
+# The only difference is that, if the protocol is https, it changes the
+# download settings, depending on platform.
+download <- function(url, ...) {
+  # First, check protocol. If http or https, check platform:
+  if (grepl('^https?://', url)) {
+
+    # If Windows, call setInternet2, then use download.file with defaults.
+    if (.Platform$OS.type == "windows") {
+      # If we directly use setInternet2, R CMD CHECK gives a Note on Mac/Linux
+      mySI2 <- `::`(utils, 'setInternet2')
+      # Store initial settings
+      internet2_start <- mySI2(NA)
+      on.exit(mySI2(internet2_start))
+
+      # Needed for https
+      mySI2(TRUE)
+      download.file(url, ...)
+
+    } else {
+      # If non-Windows, check for curl/wget/lynx, then call download.file with
+      # appropriate method.
+
+      if (nzchar(Sys.which("wget")[1])) {
+        method <- "wget"
+      } else if (nzchar(Sys.which("curl")[1])) {
+        method <- "curl"
+
+        # curl needs to add a -L option to follow redirects.
+        # Save the original options and restore when we exit.
+        orig_extra_options <- getOption("download.file.extra")
+        on.exit(options(download.file.extra = orig_extra_options))
+
+        options(download.file.extra = paste("-L", orig_extra_options))
+
+      } else if (nzchar(Sys.which("lynx")[1])) {
+        method <- "lynx"
+      } else {
+        stop("no download method found")
+      }
+
+      download.file(url, method = method, ...)
+    }
+
+  } else {
+    download.file(url, ...)
+  }
+}
+
 knownContentTypes <- Map$new()
 knownContentTypes$mset(
   html='text/html; charset=UTF-8',

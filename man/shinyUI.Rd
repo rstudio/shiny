@@ -3,7 +3,7 @@
 \alias{shinyUI}
 \title{Create a Shiny UI handler}
 \usage{
-shinyUI(x)
+shinyUI(ui)
 }
 \arguments{
 \item{ui}{A user interace definition}

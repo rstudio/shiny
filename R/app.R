@@ -5,7 +5,6 @@
 #       changes)
 # TODO: Figure out why superzip table view doesn't work
 
-
 #' Create a Shiny app object
 #'
 #' These functions create Shiny app objects from either an explicit UI/server
@@ -18,8 +17,6 @@
 #' @param ui The UI definition of the app (for example, a call to
 #'   \code{fluidPage()} with nested controls)
 #' @param server A server function
-#' @param appDir Path to directory that contains a Shiny app (i.e. a server.R
-#'   file and either ui.R or www/index.html)
 #' @param onStart A function that will be called before the app is actually run.
 #'   This is only needed for \code{shinyAppObj}, since in the \code{shinyAppDir}
 #'   case, a \code{global.R} file can be used for this purpose.
@@ -81,7 +78,9 @@ shinyApp <- function(ui, server, onStart=NULL, options=list()) {
   )
 }
 
-#' Create a Shiny app object from an existing app directory
+#' @rdname shinyApp
+#' @param appDir Path to directory that contains a Shiny app (i.e. a server.R
+#'   file and either ui.R or www/index.html)
 #' @export
 shinyAppDir <- function(appDir, options=list()) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
@@ -155,31 +154,33 @@ shinyAppDir <- function(appDir, options=list()) {
   )
 }
 
+#' @rdname shinyApp
+#' @param x Object to convert to a Shiny app.
 #' @export
 as.shiny.appobj <- function(x) {
   UseMethod("as.shiny.appobj", x)
 }
 
+#' @rdname shinyApp
 #' @export
 as.shiny.appobj.shiny.appobj <- function(x) {
   x
 }
 
+#' @rdname shinyApp
 #' @export
 as.shiny.appobj.list <- function(x) {
   shinyApp(ui = x$ui, server = x$server)
 }
 
+#' @rdname shinyApp
 #' @export
 as.shiny.appobj.character <- function(x) {
   shinyAppDir(x)
 }
 
-#' Run a Shiny app object
-#'
-#' @param x A Shiny app, as returned from \code{\link{shinyAppObj}} or
-#'   \code{\link{shinyAppDir}}.
-#'
+#' @rdname shinyApp
+#' @param ... Additional parameters to be passed to print.
 #' @export
 print.shiny.appobj <- function(x, ...) {
   opts <- attr(x, "shiny.options")
@@ -191,6 +192,16 @@ print.shiny.appobj <- function(x, ...) {
   do.call(runApp, args)
 }
 
+#' Knitr S3 methods
+#'
+#' These S3 methods are necessary to help Shiny applications and UI chunks embed
+#' themselves in knitr/rmarkdown documents.
+#'
+#' @name knitr_methods
+#' @param x Object to knit_print
+NULL
+
+#' @rdname knitr_methods
 #' @export
 knit_print.shiny.appobj <- function(x) {
   path <- addSubApp(x, "")
@@ -201,14 +212,24 @@ knit_print.shiny.appobj <- function(x) {
   knitr::asis_output(format(iframe))
 }
 
+#' @rdname knitr_methods
 #' @export
 knit_print.shiny.tag <- function(x) {
   knitr::asis_output(format(x))
 }
 
+#' @rdname knitr_methods
 #' @export
 knit_print.shiny.tag.list <- knit_print.shiny.tag
 
+#' Run R Markdown docs with embedded Shiny apps
+#'
+#' Experimental.
+#'
+#' @param input Path to .Rmd file
+#' @param text A character vector as an alternate way to provide input
+#' @param ... Additional parameters to pass to \code{\link{runApp}}
+#' @param knit.options A list of options to pass to \code{knit2html}
 #' @export
 runRmdContainer <- function(input, text = NULL, ..., knit.options = list()) {
   appdir <- tempfile()
@@ -234,24 +255,4 @@ runRmdContainer <- function(input, text = NULL, ..., knit.options = list()) {
     file.path(appdir, "server.R"))
 
   runApp(appdir, ...)
-}
-
-#' @export
-runReactiveDoc <- function(input) {
-  inputFile <- input
-
-  ui <- fluidPage(
-    uiOutput("__reactivedoc__")
-  )
-
-  server <- function(input, output, session) {
-    doc <- knit2html(text=readLines(inputFile), fragment.only=TRUE,
-      quiet = TRUE)
-
-    output$`__reactivedoc__` <- renderUI({
-      HTML(doc)
-    })
-  }
-
-  shinyAppObj(ui = ui, server = server)
 }

@@ -41,7 +41,7 @@ showcaseHead <- function() {
          href="shared/font-awesome/css/font-awesome.min.css"),
     if (file.exists(mdfile))
       script(type="text/markdown", id="showcase-markdown-content",
-        paste(readLines(mdfile), collapse="\n"))
+        paste(readLines(mdfile, warn = FALSE), collapse="\n"))
     else ""
   ))
 }
@@ -95,7 +95,7 @@ showcaseCodeTabs <- function(codeLicense) {
                   # we need to prevent the indentation of <code> ... </code>
                   HTML(format(tags$code(
                     class="language-r",
-                    paste(readLines(file.path.ci(getwd(), rFile)),
+                    paste(readLines(file.path.ci(getwd(), rFile), warn=FALSE),
                           collapse="\n")
                   ), indent = FALSE))))
         })),

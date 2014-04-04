@@ -20,6 +20,32 @@ createUniqueId <- function(bytes) {
   paste(as.character(as.raw(floor(runif(bytes, min=1, max=255)))), collapse='')
 }
 
+# Call the workerId func with no args to get the worker id, and with an arg to
+# set it.
+#
+# A worker ID is an opaque string that is passed in by the caller. The ID is
+# added as a URL parameter (?w=<worker_id>) to any URLs that need to refer back
+# to the app. This can be used as a hint for load balancers to direct requests
+# to this particular process. Since the worker refers to a process, it's
+# inherently global, and should never need to change.
+workerId <- local({
+  .workerId <- NULL
+  function(value) {
+    if (missing(value)) {
+      .workerId
+    } else {
+      if (!is.null(.workerId)) {
+        if (!identical(value, .workerId)) {
+          warning("Ignoring workerId value--",
+            "it's already been set to a different value")
+        }
+      } else {
+        .workerId <<- value
+      }
+    }
+  }
+})
+
 #' @include utils.R
 ShinySession <- setRefClass(
   'ShinySession',
@@ -45,13 +71,11 @@ ShinySession <- setRefClass(
     downloads = 'Map',
     closed = 'logical',
     session = 'environment',      # Object for the server app to access session stuff
-    .workerId = 'character',
     singletons = 'character'  # Tracks singleton HTML fragments sent to the page
   ),
   methods = list(
-    initialize = function(websocket, workerId) {
+    initialize = function(websocket) {
       .websocket <<- websocket
-      .workerId <<- workerId
       .invalidatedOutputValues <<- Map$new()
       .invalidatedOutputErrors <<- Map$new()
       .inputMessageQueue <<- list()
@@ -100,7 +124,7 @@ ShinySession <- setRefClass(
       delayedAssign('request', websocket$request, assign.env = session)
 
       .write(toJSON(list(config = list(
-        workerId = .workerId,
+        workerId = workerId(),
         sessionId = token
       ))))
     },
@@ -332,7 +356,7 @@ ShinySession <- setRefClass(
       jobId <- .fileUploadContext$createUploadOperation(fileInfos)
       return(list(jobId=jobId,
                   uploadUrl=paste('session', token, 'upload',
-                                  paste(jobId, "?w=", .workerId,sep=""),
+                                  paste(jobId, "?w=", workerId(), sep=""),
                                   sep='/')))
     },
     `@uploadEnd` = function(jobId, inputId) {
@@ -467,7 +491,7 @@ ShinySession <- setRefClass(
       return(sprintf('session/%s/file/%s?w=%s&r=%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
-                     .workerId,
+                     workerId(),
                      createUniqueId(8)))
     },
     # Send a file to the client
@@ -496,7 +520,7 @@ ShinySession <- setRefClass(
       return(sprintf('session/%s/download/%s?w=%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
-                     .workerId))
+                     workerId()))
     },
     # this can be more general registrations; not limited to data tables
     registerDataTable = function(name, data) {
@@ -505,7 +529,7 @@ ShinySession <- setRefClass(
       return(sprintf('session/%s/datatable/%s?w=%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
-                     .workerId))
+                     workerId()))
     },
     .getOutputOption = function(outputName, propertyName, defaultValue) {
       opts <- .outputOptions[[outputName]]

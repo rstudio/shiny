@@ -274,7 +274,7 @@ decodeMessage <- function(data) {
   return(mainMessage)
 }
 
-createAppHandlers <- function(httpHandlers, serverFuncSource, workerId) {
+createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
   sys.www.root <- system.file('www', package='shiny')
 
@@ -297,7 +297,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource, workerId) {
         return(TRUE)
       }
 
-      shinysession <- ShinySession$new(ws, workerId)
+      shinysession <- ShinySession$new(ws)
       appsByToken$set(shinysession$token, shinysession)
       showcase <- .globals$showcaseDefault
 
@@ -445,20 +445,16 @@ createAppHandlers <- function(httpHandlers, serverFuncSource, workerId) {
 
 handlerManager <- HandlerManager$new()
 
-addSubApp <- function(appObj, workerId) {
+addSubApp <- function(appObj) {
   path <- sprintf("/%s", createUniqueId(8))
-  appHandlers <- createAppHandlers(
-    appObj$httpHandler, appObj$serverFuncSource, workerId)
+  appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
   handlerManager$addHandler(routeHandler(path, appHandlers$http))
   handlerManager$addWSHandler(routeWSHandler(path, appHandlers$ws))
   return(paste(path, "/", sep=""))
 }
 
-startApp <- function(appObj, port, host, workerId, quiet) {
-  appHandlers <- createAppHandlers(
-    appObj$httpHandler,
-    appObj$serverFuncSource,
-    workerId)
+startApp <- function(appObj, port, host, quiet) {
+  appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
   handlerManager$addHandler(appHandlers$http)
   handlerManager$addWSHandler(appHandlers$ws)
 
@@ -569,6 +565,8 @@ runApp <- function(appDir=getwd(),
   ops <- options(warn = 1)
   on.exit(options(ops))
 
+  workerId(workerId)
+
   if (nzchar(Sys.getenv('SHINY_PORT'))) {
     # If SHINY_PORT is set, we're running under Shiny Server. Check the version
     # to make sure it is compatible. Older versions of Shiny Server don't set
@@ -647,7 +645,7 @@ runApp <- function(appDir=getwd(),
   if (!is.null(appParts$onEnd))
     on.exit(appParts$onEnd(), add = TRUE)
 
-  server <- startApp(appParts, port, host, workerId, quiet)
+  server <- startApp(appParts, port, host, quiet)
 
   on.exit({
     handlerManager$clear()

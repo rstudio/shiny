@@ -147,11 +147,12 @@ sd_section("Utility functions",
     "repeatable",
     "shinyDeprecated"
   )
-),
+)
 sd_section("Embedding",
   "Functions that are intended for third-party packages that embed Shiny applications.",
   c(
-    "shinyAppObj",
-    "print.shiny.appobj"
+    "shinyApp",
+    "runRmdContainer",
+    "knitr_methods"
   )
 )

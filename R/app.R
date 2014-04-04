@@ -1,6 +1,4 @@
 # TODO: Subapp global.R
-# TODO: Ensure that debugger still works (see especially shinyUI and shinyServer
-#       changes)
 
 #' Create a Shiny app object
 #'

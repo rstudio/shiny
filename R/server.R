@@ -202,7 +202,6 @@ resourcePathHandler <- function(req) {
   return(resInfo$func(subreq))
 }
 
-.globals$server <- NULL
 #' Define Server Functionality
 #'
 #' Defines the server-side logic of the Shiny application. This generally
@@ -238,14 +237,6 @@ resourcePathHandler <- function(req) {
 #'
 #' @export
 shinyServer <- function(func) {
-  .globals$server <- func
-  if (!is.null(func))
-  {
-    # Tag this function as the Shiny server function. A debugger may use this
-    # tag to give this function special treatment.
-    attr(.globals$server, "shinyServerFunction") <- TRUE
-    registerDebugHook("server", .globals, "Server Function")
-  }
   invisible(func)
 }
 
@@ -275,6 +266,8 @@ decodeMessage <- function(data) {
 }
 
 createAppHandlers <- function(httpHandlers, serverFuncSource) {
+  appvars <- new.env()
+  appvars$server <- NULL
 
   sys.www.root <- system.file('www', package='shiny')
 
@@ -364,6 +357,18 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
           init = {
 
             serverFunc <- serverFuncSource()
+            if (!identicalFunctionBodies(serverFunc, appvars$server)) {
+              appvars$server <- serverFunc
+              if (!is.null(appvars$server))
+              {
+                # Tag this function as the Shiny server function. A debugger may use this
+                # tag to give this function special treatment.
+                # It's very important that it's appvars$server itself and NOT a copy that
+                # is invoked, otherwise new breakpoints won't be picked up.
+                attr(appvars$server, "shinyServerFunction") <- TRUE
+                registerDebugHook("server", appvars, "Server Function")
+              }
+            }
 
             # Check for switching into/out of showcase mode
             if (.globals$showcaseOverride &&
@@ -395,7 +400,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               if ('session' %in% names(formals(serverFunc)))
                 args$session <- shinysession$session
 
-              do.call(serverFunc, args)
+              do.call(appvars$server, args)
             })
           },
           update = {
@@ -441,6 +446,19 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
     }
   )
   return(appHandlers)
+}
+
+getEffectiveBody <- function(func) {
+  # Note: NULL values are OK. isS4(NULL) returns FALSE, body(NULL)
+  # returns NULL.
+  if (isS4(func) && class(func) == "functionWithTrace")
+    body(func@original)
+  else
+    body(func)
+}
+
+identicalFunctionBodies <- function(a, b) {
+  identical(getEffectiveBody(a), getEffectiveBody(b))
 }
 
 handlerManager <- HandlerManager$new()

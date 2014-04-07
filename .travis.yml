@@ -13,7 +13,8 @@ install:
   - sudo apt-get update
   - sudo apt-get install r-base-dev r-cran-shiny r-cran-cairo r-cran-markdown
   - "[ ! -d ~/R ] && mkdir ~/R"
-  - Rscript -e "install.packages('xtable', repos = 'http://cran.rstudio.org')"
+  - Rscript -e "install.packages(c('xtable', 'devtools'), repos = 'http://cran.rstudio.org')"
+  - Rscript -e "devtools::install_github('yihui/knitr')"
   - Rscript -e "install.packages('$R_MY_PKG', dep = TRUE, repos = 'http://cran.rstudio.org')"
 
 # run tests

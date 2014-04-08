@@ -1,3 +1,5 @@
+#' @include globals.R
+
 appsByToken <- Map$new()
 
 # Create a map for input handlers and register the defaults.
@@ -103,8 +105,6 @@ registerInputHandler("shiny.date", function(val, ...){
 wsToKey <- function(WS) {
   as.character(WS$socket)
 }
-
-.globals <- new.env()
 
 .globals$clients <- function(req) NULL
 
@@ -400,7 +400,9 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               if ('session' %in% names(formals(serverFunc)))
                 args$session <- shinysession$session
 
-              do.call(appvars$server, args)
+              withReactiveDomain(shinysession$session, {
+                do.call(appvars$server, args)
+              })
             })
           },
           update = {
@@ -464,7 +466,7 @@ identicalFunctionBodies <- function(a, b) {
 handlerManager <- HandlerManager$new()
 
 addSubApp <- function(appObj) {
-  path <- sprintf("/%s", createUniqueId(8))
+  path <- sprintf("/%s", createUniqueId(16))
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
   handlerManager$addHandler(routeHandler(path, appHandlers$http))
   handlerManager$addWSHandler(routeWSHandler(path, appHandlers$ws))

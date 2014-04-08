@@ -1,3 +1,5 @@
+#' @include globals.R
+
 #' @rdname builder
 #' @export
 p <- function(...) tags$p(...)

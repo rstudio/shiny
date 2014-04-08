@@ -103,6 +103,7 @@ ShinySession <- setRefClass(
       session$sendCustomMessage <<- .self$.sendCustomMessage
       session$sendInputMessage  <<- .self$.sendInputMessage
       session$onSessionEnded    <<- .self$onSessionEnded
+      session$onEnded           <<- .self$onEnded
       session$onFlush           <<- .self$onFlush
       session$onFlushed         <<- .self$onFlushed
       session$isClosed          <<- .self$isClosed
@@ -134,6 +135,10 @@ ShinySession <- setRefClass(
       is a function which unregisters the callback. If multiple callbacks are
       registered, the order in which they are invoked is not guaranteed."
       return(.closedCallbacks$register(callback))
+    },
+    onEnded = function(callback) {
+      "Synonym for onSessionEnded"
+      return(onSessionEnded(callback))
     },
     close = function() {
       closed <<- TRUE
@@ -432,8 +437,10 @@ ShinySession <- setRefClass(
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
 
         filename <- ifelse(is.function(download$filename),
-                           Context$new('[download]')$run(download$filename),
-                           download$filename)
+          Context$new(getDefaultReactiveDomain(), '[download]')$run(
+            download$filename
+          ),
+          download$filename)
 
         # If the URL does not contain the filename, and the desired filename
         # contains non-ASCII characters, then do a redirect with the desired
@@ -448,7 +455,9 @@ ShinySession <- setRefClass(
         }
 
         tmpdata <- tempfile()
-        result <- try(Context$new('[download]')$run(function() { download$func(tmpdata) }))
+        result <- try(Context$new(getDefaultReactiveDomain(), '[download]')$run(
+          function() { download$func(tmpdata) }
+        ))
         if (is(result, 'try-error')) {
           unlink(tmpdata)
           return(httpResponse(500, 'text/plain',

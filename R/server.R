@@ -458,18 +458,34 @@ identicalFunctionBodies <- function(a, b) {
 
 handlerManager <- HandlerManager$new()
 
-addSubApp <- function(appObj) {
+addSubApp <- function(appObj, autoRemove = TRUE) {
   path <- sprintf("/%s", createUniqueId(16))
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
-  handlerManager$addHandler(routeHandler(path, appHandlers$http))
-  handlerManager$addWSHandler(routeWSHandler(path, appHandlers$ws))
-  return(paste(path, "/", sep=""))
+
+  finalPath <- paste(path, "/?w=", workerId(), sep="")
+  handlerManager$addHandler(routeHandler(path, appHandlers$http), finalPath)
+  handlerManager$addWSHandler(routeWSHandler(path, appHandlers$ws), finalPath)
+
+  if (autoRemove) {
+    # If a session is currently active, remove this subapp automatically when
+    # the current session ends
+    onReactiveDomainEnded(getDefaultReactiveDomain(), function() {
+      removeSubApp(finalPath)
+    })
+  }
+
+  return(finalPath)
+}
+
+removeSubApp <- function(path) {
+  handlerManager$removeHandler(path)
+  handlerManager$removeWSHandler(path)
 }
 
 startApp <- function(appObj, port, host, quiet) {
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
-  handlerManager$addHandler(appHandlers$http)
-  handlerManager$addWSHandler(appHandlers$ws)
+  handlerManager$addHandler(appHandlers$http, "/", tail = TRUE)
+  handlerManager$addWSHandler(appHandlers$ws, "/", tail = TRUE)
 
   if (is.numeric(port) || is.integer(port)) {
     if (!quiet) {

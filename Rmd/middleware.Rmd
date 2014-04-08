@@ -190,27 +190,61 @@ The handler manager gives you a place to register handlers (of both http and web
 Create one of these, make zero or more calls to `addHandler` and `addWSHandler` methods (order matters--first one wins!), and then pass the return value of `createHttpuvApp` to httpuv's `startServer` function.
 
 ```{r eval=FALSE}
-HandlerManager <- setRefClass("HandlerManager",
+HandlerList <- setRefClass("HandlerList",
   fields = list(
-    handlers = "list",
-    wsHandlers = "list"
+    handlers = "list"
   ),
   methods = list(
-    addHandler = function(handler) {
+    add = function(handler, key, tail = FALSE) {
+      if (!is.null(handlers[[key]]))
+        stop("Key ", key, " already in use")
+      newList <- structure(names=key, list(handler))
+      
       if (length(handlers) == 0)
-        handlers <<- list(handler)
+        handlers <<- newList
+      else if (tail)
+        handlers <<- c(handlers, newList)
       else
-        handlers <<- c(handlers, list(handler))
+        handlers <<- c(newList, handlers)
     },
-    addWSHandler = function(wsHandler) {
-      if (length(wsHandlers) == 0)
-        wsHandlers <<- list(wsHandler)
-      else
-        wsHandlers <<- c(wsHandlers, list(wsHandler))
+    remove = function(key) {
+      handlers[key] <<- NULL
     },
     clear = function() {
       handlers <<- list()
-      wsHandlers <<- list()
+    },
+    invoke = function(...) {
+      for (handler in handlers) {
+        result <- handler(...)
+        if (!is.null(result))
+          return(result)
+      }
+      return(NULL)
+    }
+  )
+)
+
+HandlerManager <- setRefClass("HandlerManager",
+  fields = list(
+    handlers = "HandlerList",
+    wsHandlers = "HandlerList"
+  ),
+  methods = list(
+    addHandler = function(handler, key, tail = FALSE) {
+      handlers$add(handler, key, tail)
+    },
+    removeHandler = function(key) {
+      handlers$remove(key)
+    },
+    addWSHandler = function(wsHandler, key, tail = FALSE) {
+      wsHandlers$add(wsHandler, key, tail)
+    },
+    removeWSHandler = function(key) {
+      wsHandlers$remove(key)
+    },
+    clear = function() {
+      handlers$clear()
+      wsHandlers$clear()
     },
     createHttpuvApp = function() {
       list(
@@ -238,22 +272,12 @@ HandlerManager <- setRefClass("HandlerManager",
         },
         call = .httpServer(
           function (req) {
-            for (handler in handlers) {
-              result <- handler(req)
-              if (!is.null(result))
-                return(result)
-            }
-            return(NULL)
+            return(handlers$invoke(req))
           },
           getOption('shiny.sharedSecret', NULL)
         ),
         onWSOpen = function(ws) {
-          for (wsHandler in wsHandlers) {
-            result <- wsHandler(ws)
-            if (!is.null(result))
-              return(result)
-          }
-          return(NULL)
+          return(wsHandlers$invoke(ws))
         }
       )
     },

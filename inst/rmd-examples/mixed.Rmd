@@ -8,7 +8,7 @@ Here's an app
 
 ```{r}
 shinyApp(
-  ui = fluidPage(plotOutput("plot")),
+  ui = fluidPage("Hello", plotOutput("plot")),
   server = function(input, output, session) {
     output$plot <- renderPlot(plot(cars))
   }

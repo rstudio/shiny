@@ -9,7 +9,7 @@ Context <- setRefClass(
     .domain = 'ANY'
   ),
   methods = list(
-    initialize = function(domain=domain, label='', type='other', prevId='') {
+    initialize = function(domain, label='', type='other', prevId='') {
       id <<- .getReactiveEnvironment()$nextId()
       .invalidated <<- FALSE
       .invalidateCallbacks <<- list()

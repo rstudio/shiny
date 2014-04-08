@@ -162,6 +162,9 @@ ShinySession <- setRefClass(
     isClosed = function() {
       return(closed)
     },
+    isEnded = function() {
+      return(isClosed())
+    },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
       take no parameters, or have named parameters for \\code{name} and

@@ -457,6 +457,7 @@ Observer <- setRefClass(
     .label = 'character',
     .domain = 'ANY',
     .priority = 'numeric',
+    .autoDestroy = 'logical',
     .invalidateCallbacks = 'list',
     .execCount = 'integer',
     .onResume = 'function',
@@ -466,7 +467,8 @@ Observer <- setRefClass(
   ),
   methods = list(
     initialize = function(func, label, suspended = FALSE, priority = 0,
-                          domain = getDefaultReactiveDomain()) {
+                          domain = getDefaultReactiveDomain(),
+                          autoDestroy = TRUE) {
       if (length(formals(func)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
@@ -474,6 +476,7 @@ Observer <- setRefClass(
       .func <<- func
       .label <<- label
       .domain <<- domain
+      .autoDestroy <<- autoDestroy
       .priority <<- normalizePriority(priority)
       .execCount <<- 0L
       .suspended <<- suspended
@@ -481,7 +484,7 @@ Observer <- setRefClass(
       .destroyed <<- FALSE
       .prevId <<- ''
 
-      onReactiveDomainEnded(.domain, .self$destroy)
+      onReactiveDomainEnded(.domain, .self$.onDomainEnded)
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
@@ -531,6 +534,17 @@ Observer <- setRefClass(
       which case the priority change will be effective upon resume."
       .priority <<- normalizePriority(priority)
     },
+    setAutoDestroy = function(autoDestroy) {
+      "Sets whether this observer should be automatically destroyed when its
+      domain (if any) ends. If autoDestroy is TRUE and the domain already
+      ended, then destroy() is called immediately."
+      oldValue <- .autoDestroy
+      .autoDestroy <<- autoDestroy
+      if (!is.null(.domain) && .domain$isEnded()) {
+        destroy()
+      }
+      invisible(oldValue)
+    },
     suspend = function() {
       "Causes this observer to stop scheduling flushes (re-executions) in
       response to invalidations. If the observer was invalidated prior to this
@@ -556,6 +570,11 @@ Observer <- setRefClass(
 
       suspend()
       .destroyed <<- TRUE
+    },
+    .onDomainEnded = function() {
+      if (isTRUE(.autoDestroy)) {
+        destroy()
+      }
     }
   )
 )
@@ -622,6 +641,11 @@ Observer <- setRefClass(
 #'       next invalidation--unless the observer is also currently suspended, in
 #'       which case the priority change will be effective upon resume.
 #'     }
+#'     \item{\code{setAutoDestroy(autoDestroy)}}{
+#'       Sets whether this observer should be automatically destroyed when its
+#'       domain (if any) ends. If autoDestroy is TRUE and the domain already
+#'       ended, then destroy() is called immediately."
+#'     }
 #'     \item{\code{onInvalidate(callback)}}{
 #'       Register a callback function to run when this observer is invalidated.
 #'       No arguments will be provided to the callback function when it is
@@ -650,14 +674,14 @@ Observer <- setRefClass(
 #' @export
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
                     suspended=FALSE, priority=0,
-                    domain=getDefaultReactiveDomain()) {
+                    domain=getDefaultReactiveDomain(), autoDestroy = TRUE) {
 
   fun <- exprToFunction(x, env, quoted)
   if (is.null(label))
     label <- sprintf('observe(%s)', paste(deparse(body(fun)), collapse='\n'))
 
   o <- Observer$new(fun, label=label, suspended=suspended, priority=priority,
-                    domain=domain)
+                    domain=domain, autoDestroy=autoDestroy)
   registerDebugHook(".func", o, "Observer")
   invisible(o)
 }

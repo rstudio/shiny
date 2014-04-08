@@ -21,7 +21,31 @@ This notion of ownership is important/helpful for a few scenarios that have come
 
 So what are the rules for establishing ownership?
 
-1. Define the "current domain" as a global variable whose value will own any newly created observer (by default).
+1. Define the "current domain" as a global variable whose value will own any newly created observer (by default). A domain is a reference class or environment that contains the functions `onEnded(callback)`, `isEnded()`, and `reactlog(logEntry)`.
+
+```{r eval=FALSE}
+createMockDomain <- function() {
+  callbacks <- list()
+  ended <- FALSE
+  domain <- new.env(parent = emptyenv())
+  domain$onEnded <- function(callback) {
+    callbacks <<- c(callbacks, callback)
+  }
+  domain$isEnded <- function() {
+    ended
+  }
+  domain$reactlog <- function(logEntry) NULL
+  domain$end <- function() {
+    if (!ended) {
+      ended <<- TRUE
+      lapply(callbacks, do.call, list())
+    }
+    invisible()
+  }
+  return(domain)
+}
+```
+
 2. The initial value of "current domain" is null.
 
 ```{r eval=FALSE}

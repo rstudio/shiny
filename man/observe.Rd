@@ -55,6 +55,11 @@ An observer reference class object. This object has the following
       next invalidation--unless the observer is also currently suspended, in
       which case the priority change will be effective upon resume.
     }
+    \item{\code{setAutoDestroy(autoDestroy)}}{
+      Sets whether this observer should be automatically destroyed when its
+      domain (if any) ends. If autoDestroy is TRUE and the domain already
+      ended, then destroy() is called immediately."
+    }
     \item{\code{onInvalidate(callback)}}{
       Register a callback function to run when this observer is invalidated.
       No arguments will be provided to the callback function when it is

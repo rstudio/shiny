@@ -5,6 +5,7 @@ January 20, 2014
 
 ```{r eval=FALSE}
 #' @include globals.R
+NULL
 ```
 
 Over the last few months we've seen a number of cases where it'd be helpful for objects that are instantiated within a Shiny app to know what Shiny session they are "owned" by. I put "owned" in quotes because there isn't a built-in notion of object ownership in Shiny today, any more than there is a notion of one object owning another in R.

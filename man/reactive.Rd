@@ -23,7 +23,7 @@ variable; to do so, it must be quoted with `quote()`.}
 
 \item{label}{A label for the reactive expression, useful for debugging.}
 
-\item{domain}{See \code{\link{domains}}.}
+\item{domain}{See \link{domains}.}
 }
 \value{
 a function, wrapped in a S3 class "reactive"

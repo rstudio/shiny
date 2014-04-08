@@ -1,3 +1,6 @@
+#' @include globals.R
+NULL
+
 # Given the name of a license, return the appropriate link HTML for the
 # license, which may just be the name of the license if the name is
 # unrecognized.
@@ -144,7 +147,6 @@ showcaseBody <- function(htmlBody) {
 }
 
 # Sets the defaults for showcase mode (for app boot).
-#' @include globals.R
 setShowcaseDefault <- function(showcaseDefault) {
   .globals$showcaseDefault <- showcaseDefault
   .globals$showcaseOverride <- as.logical(showcaseDefault)

@@ -1,3 +1,6 @@
+#' @include globals.R
+NULL
+
 reactLogHandler <- function(req) {
   if (!identical(req$PATH_INFO, '/reactlog'))
     return(NULL)
@@ -35,7 +38,6 @@ sessionHandler <- function(req) {
   return(shinysession$handleRequest(subreq))
 }
 
-#' @include globals.R
 dynamicHandler <- function(filePath, dependencyFiles=filePath) {
   lastKnownTimestamps <- NA
   metaHandler <- function(req) NULL

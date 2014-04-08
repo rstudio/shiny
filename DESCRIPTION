@@ -51,7 +51,6 @@ Collate:
     'reactives.R'
     'run-url.R'
     'server.R'
-    'sessioncontext.R'
     'utils.R'
     'shiny.R'
     'shinyui.R'

@@ -295,13 +295,6 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       showcase <- .globals$showcaseDefault
 
       ws$onMessage(function(binary, msg) {
-        # If in showcase mode, record the session that should receive the reactive
-        # log messages for the duration of the servicing of this message.
-        if (showcase > 0) {
-          .beginShowcaseSessionContext(shinysession)
-          on.exit(.endShowcaseSessionContext(), add = TRUE)
-        }
-
         # To ease transition from websockets-based code. Should remove once we're stable.
         if (is.character(msg))
           msg <- charToRaw(msg)

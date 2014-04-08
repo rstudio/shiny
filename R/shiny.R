@@ -109,6 +109,7 @@ ShinySession <- setRefClass(
       session$isClosed          <<- .self$isClosed
       session$input             <<- .self$input
       session$output            <<- .self$output
+      session$reactlog          <<- .self$reactlog
       session$.impl             <<- .self
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
@@ -332,6 +333,9 @@ ShinySession <- setRefClass(
         })
         return(dereg)
       }
+    },
+    reactlog = function(logEntry) {
+      .sendCustomMessage("reactlog", logEntry)
     },
     .write = function(json) {
       if (closed){

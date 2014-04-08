@@ -16,15 +16,17 @@ Context <- setRefClass(
       .flushCallbacks <<- list()
       .label <<- label
       .domain <<- domain
-      .graphCreateContext(id, label, type, prevId)
+      .graphCreateContext(id, label, type, prevId, domain)
     },
     run = function(func) {
       "Run the provided function under this context."
-      env <- .getReactiveEnvironment()
-      .graphEnterContext(id)
-      on.exit(.graphExitContext(id))
       withReactiveDomain(.domain, {
-        env$runWith(.self, func)
+        env <- .getReactiveEnvironment()
+        .graphEnterContext(id)
+        tryCatch(
+          env$runWith(.self, func),
+          finally = .graphExitContext(id)
+        )
       })
     },
     invalidate = function() {
@@ -34,7 +36,7 @@ Context <- setRefClass(
         return()
       .invalidated <<- TRUE
 
-      .graphInvalidate(id)
+      .graphInvalidate(id, .domain)
       lapply(.invalidateCallbacks, function(func) {
         func()
       })

@@ -1,3 +1,5 @@
+#' @include globals.R
+
 appsByToken <- Map$new()
 
 # Create a map for input handlers and register the defaults.
@@ -103,8 +105,6 @@ registerInputHandler("shiny.date", function(val, ...){
 wsToKey <- function(WS) {
   as.character(WS$socket)
 }
-
-.globals <- new.env()
 
 .globals$clients <- function(req) NULL
 
@@ -295,13 +295,6 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       showcase <- .globals$showcaseDefault
 
       ws$onMessage(function(binary, msg) {
-        # If in showcase mode, record the session that should receive the reactive
-        # log messages for the duration of the servicing of this message.
-        if (showcase > 0) {
-          .beginShowcaseSessionContext(shinysession)
-          on.exit(.endShowcaseSessionContext(), add = TRUE)
-        }
-
         # To ease transition from websockets-based code. Should remove once we're stable.
         if (is.character(msg))
           msg <- charToRaw(msg)
@@ -400,7 +393,9 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               if ('session' %in% names(formals(serverFunc)))
                 args$session <- shinysession$session
 
-              do.call(appvars$server, args)
+              withReactiveDomain(shinysession$session, {
+                do.call(appvars$server, args)
+              })
             })
           },
           update = {
@@ -464,7 +459,7 @@ identicalFunctionBodies <- function(a, b) {
 handlerManager <- HandlerManager$new()
 
 addSubApp <- function(appObj) {
-  path <- sprintf("/%s", createUniqueId(8))
+  path <- sprintf("/%s", createUniqueId(16))
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
   handlerManager$addHandler(routeHandler(path, appHandlers$http))
   handlerManager$addWSHandler(routeWSHandler(path, appHandlers$ws))

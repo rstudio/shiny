@@ -1,3 +1,6 @@
+#' @include globals.R
+NULL
+
 reactLogHandler <- function(req) {
   if (!identical(req$PATH_INFO, '/reactlog'))
     return(NULL)

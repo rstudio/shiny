@@ -4,7 +4,8 @@
 \alias{reactive}
 \title{Create a reactive expression}
 \usage{
-reactive(x, env = parent.frame(), quoted = FALSE, label = NULL)
+reactive(x, env = parent.frame(), quoted = FALSE, label = NULL,
+  domain = getDefaultReactiveDomain())
 
 is.reactive(x)
 }
@@ -21,6 +22,8 @@ This is useful when you want to use an expression that is stored in a
 variable; to do so, it must be quoted with `quote()`.}
 
 \item{label}{A label for the reactive expression, useful for debugging.}
+
+\item{domain}{See \link{domains}.}
 }
 \value{
 a function, wrapped in a S3 class "reactive"

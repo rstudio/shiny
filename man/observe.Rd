@@ -4,13 +4,15 @@
 \title{Create a reactive observer}
 \usage{
 observe(x, env = parent.frame(), quoted = FALSE, label = NULL,
-  suspended = FALSE, priority = 0)
+  suspended = FALSE, priority = 0, domain = getDefaultReactiveDomain(),
+  autoDestroy = TRUE)
 }
 \arguments{
-\item{x}{An expression (quoted or unquoted). Any return value will be ignored.}
+\item{x}{An expression (quoted or unquoted). Any return value will be
+ignored.}
 
-\item{env}{The parent environment for the reactive expression. By default, this
-is the calling environment, the same as when defining an ordinary
+\item{env}{The parent environment for the reactive expression. By default,
+this is the calling environment, the same as when defining an ordinary
 non-reactive expression.}
 
 \item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
@@ -26,6 +28,11 @@ If \code{FALSE} (the default), start in a non-suspended state.}
 this observer should be executed. An observer with a given priority level
 will always execute sooner than all observers with a lower priority level.
 Positive, negative, and zero values are allowed.}
+
+\item{domain}{See \link{domains}.}
+
+\item{autoDestroy}{If \code{TRUE} (the default), the observer will be
+automatically destroyed when its domain (if any) ends.}
 }
 \value{
 An observer reference class object. This object has the following
@@ -42,11 +49,20 @@ An observer reference class object. This object has the following
       invalidations. If the observer was invalidated while suspended, then it
       will schedule itself for re-execution.
     }
+    \item{\code{destroy()}}{
+      Stops the observer from executing ever again, even if it is currently
+      scheduled for re-execution.
+    }
     \item{\code{setPriority(priority = 0)}}{
       Change this observer's priority. Note that if the observer is currently
       invalidated, then the change in priority will not take effect until the
       next invalidation--unless the observer is also currently suspended, in
       which case the priority change will be effective upon resume.
+    }
+    \item{\code{setAutoDestroy(autoDestroy)}}{
+      Sets whether this observer should be automatically destroyed when its
+      domain (if any) ends. If autoDestroy is TRUE and the domain already
+      ended, then destroy() is called immediately."
     }
     \item{\code{onInvalidate(callback)}}{
       Register a callback function to run when this observer is invalidated.
@@ -59,19 +75,23 @@ An observer reference class object. This object has the following
 Creates an observer from the given expression.
 }
 \details{
-An observer is like a reactive
-expression in that it can read reactive values and call reactive expressions, and
-will automatically re-execute when those dependencies change. But unlike
-reactive expressions, it doesn't yield a result and can't be used as an input
-to other reactive expressions. Thus, observers are only useful for their side
-effects (for example, performing I/O).
+An observer is like a reactive expression in that it can read reactive values
+and call reactive expressions, and will automatically re-execute when those
+dependencies change. But unlike reactive expressions, it doesn't yield a
+result and can't be used as an input to other reactive expressions. Thus,
+observers are only useful for their side effects (for example, performing
+I/O).
 
-Another contrast between reactive expressions and observers is their execution
-strategy. Reactive expressions use lazy evaluation; that is, when their
-dependencies change, they don't re-execute right away but rather wait until
-they are called by someone else. Indeed, if they are not called then they
-will never re-execute. In contrast, observers use eager evaluation; as soon
-as their dependencies change, they schedule themselves to re-execute.
+Another contrast between reactive expressions and observers is their
+execution strategy. Reactive expressions use lazy evaluation; that is, when
+their dependencies change, they don't re-execute right away but rather wait
+until they are called by someone else. Indeed, if they are not called then
+they will never re-execute. In contrast, observers use eager evaluation; as
+soon as their dependencies change, they schedule themselves to re-execute.
+
+Starting with Shiny 0.10.0, observers are automatically destroyed by default
+when the \link[=domains]{domain} that owns them ends (e.g. when a Shiny session
+ends).
 }
 \examples{
 values <- reactiveValues(A=1)

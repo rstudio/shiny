@@ -1,6 +1,8 @@
 shiny 0.9.1.9000
 --------------------------------------------------------------------------------
 
+* BREAKING CHANGE: By default, observers now terminate themselves if they were
+  created during a session and that session ends. See ?domains for more details.
 
 shiny 0.9.1
 --------------------------------------------------------------------------------

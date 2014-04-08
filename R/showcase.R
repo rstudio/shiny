@@ -1,3 +1,5 @@
+#' @include globals.R
+NULL
 
 # Given the name of a license, return the appropriate link HTML for the
 # license, which may just be the name of the license if the name is

@@ -6,14 +6,16 @@
 \alias{knitr_methods}
 \title{Knitr S3 methods}
 \usage{
-knit_print.shiny.appobj(x)
+knit_print.shiny.appobj(x, ...)
 
-knit_print.shiny.tag(x)
+knit_print.shiny.tag(x, ...)
 
-knit_print.shiny.tag.list(x)
+knit_print.shiny.tag.list(x, ...)
 }
 \arguments{
 \item{x}{Object to knit_print}
+
+\item{...}{Additional knit_print arguments}
 }
 \description{
 These S3 methods are necessary to help Shiny applications and UI chunks embed

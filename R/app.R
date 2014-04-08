@@ -194,12 +194,13 @@ print.shiny.appobj <- function(x, ...) {
 #'
 #' @name knitr_methods
 #' @param x Object to knit_print
+#' @param ... Additional knit_print arguments
 NULL
 
 #' @rdname knitr_methods
 #' @export
-knit_print.shiny.appobj <- function(x) {
-  path <- addSubApp(x, "")
+knit_print.shiny.appobj <- function(x, ...) {
+  path <- addSubApp(x)
   opts <- attr(x, "shiny.options")
   width <- if (is.null(opts$width)) "100%" else opts$width
   height <- if (is.null(opts$height)) "400" else opts$height
@@ -209,7 +210,7 @@ knit_print.shiny.appobj <- function(x) {
 
 #' @rdname knitr_methods
 #' @export
-knit_print.shiny.tag <- function(x) {
+knit_print.shiny.tag <- function(x, ...) {
   knitr::asis_output(format(x))
 }
 

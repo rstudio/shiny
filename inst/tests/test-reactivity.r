@@ -694,6 +694,8 @@ test_that("classes of reactive object", {
   expect_false(is.reactive(v))
   expect_true(is.reactive(r))
   expect_false(is.reactive(o))
+
+  o$destroy()
 })
 
 test_that("{} and NULL also work in reactive()", {
@@ -706,4 +708,104 @@ test_that("shiny.suppressMissingContextError option works", {
   on.exit(options(shiny.suppressMissingContextError=FALSE), add = TRUE)
 
   expect_true(reactive(TRUE)())
+})
+
+test_that("reactive domains are inherited", {
+
+  domainA <- createMockDomain()
+  domainB <- createMockDomain()
+
+  local({
+    domainY <- NULL
+    domainZ <- NULL
+    x <- observe({
+
+      y <- observe({
+        # Should be domainA (inherited from observer x)
+        domainY <<- getDefaultReactiveDomain()
+      })
+
+      z <- observe({
+        # Should be domainB (explicitly passed in)
+        domainZ <<- getDefaultReactiveDomain()
+      }, domain = domainB)
+
+    }, domain = domainA)
+
+    flushReact()
+    flushReact()
+
+    expect_identical(domainY, domainA)
+    expect_identical(domainZ, domainB)
+  })
+
+  local({
+    domainY <- 1
+    x <- NULL
+    y <- NULL
+    z <- NULL
+    r3 <- NULL
+    domainR3 <- NULL
+
+    r1 <- reactive({
+      y <<- observe({
+        # Should be NULL (r1 has no domain)
+        domainY <<- getDefaultReactiveDomain()
+      })
+    })
+    r2 <- reactive({
+      z <<- observe({
+        # Should be domainB (r2 has explicit domainB)
+        domainZ <<- getDefaultReactiveDomain()
+      })
+    }, domain = domainB)
+
+    observe({
+      r3 <<- reactive({
+        # This should be domainA. Doesn't matter where r3 is invoked, it only
+        # matters where it was created.
+        domainR3 <<- getDefaultReactiveDomain()
+      })
+      r1()
+      r2()
+    }, domain = domainA)
+
+    flushReact()
+    flushReact()
+    isolate(r3())
+
+    expect_identical(execCount(y), 1L)
+    expect_identical(execCount(z), 1L)
+    expect_identical(domainY, NULL)
+    expect_identical(domainZ, domainB)
+    expect_identical(domainR3, domainA)
+  })
+})
+
+test_that("observers autodestroy (or not)", {
+
+  domainA <- createMockDomain()
+  local({
+    a <- observe(NULL, domain = domainA)
+
+    b <- observe(NULL, domain = domainA, autoDestroy = FALSE)
+
+    c <- observe(NULL, domain = domainA)
+    c$setAutoDestroy(FALSE)
+
+    d <- observe(NULL, domain = domainA, autoDestroy = FALSE)
+    d$setAutoDestroy(TRUE)
+
+    e <- observe(NULL)
+
+    domainA$end()
+
+    flushReact()
+
+    expect_identical(execCount(a), 0L)
+    expect_identical(execCount(b), 1L)
+    expect_identical(execCount(c), 1L)
+    expect_identical(execCount(d), 0L)
+    expect_identical(execCount(e), 1L)
+  })
 })

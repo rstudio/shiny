@@ -79,8 +79,8 @@ sd_section("Interface builder functions",
 sd_section("Rendering functions",
   "Functions that you use in your application's server side code, assigning them to outputs that appear in your user interface.",
   c(
-    "renderPlot", 
-    "renderText", 
+    "renderPlot",
+    "renderText",
     "renderPrint",
     "renderDataTable",
     "renderImage",
@@ -146,5 +146,13 @@ sd_section("Utility functions",
     "plotPNG",
     "repeatable",
     "shinyDeprecated"
+  )
+)
+sd_section("Embedding",
+  "Functions that are intended for third-party packages that embed Shiny applications.",
+  c(
+    "shinyApp",
+    "runRmdContainer",
+    "knitr_methods"
   )
 )

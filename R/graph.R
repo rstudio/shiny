@@ -54,12 +54,12 @@ renderReactLog <- function() {
   return(file)
 }
 
-.graphAppend <- function(logEntry) {
+.graphAppend <- function(logEntry, domain = getDefaultReactiveDomain()) {
   if (isTRUE(getOption('shiny.reactlog', FALSE)))
     .graphEnv$log <- c(.graphEnv$log, list(logEntry))
-  session <- .getShowcaseSessionContext()
-  if (!is.null(session)) {
-    session$.sendCustomMessage("reactlog", logEntry)
+
+  if (!is.null(domain)) {
+    domain$reactlog(logEntry)
   }
 }
 
@@ -71,12 +71,12 @@ renderReactLog <- function() {
   .graphAppend(list(action='depId', id=id, dependsOn=dependee))
 }
 
-.graphCreateContext <- function(id, label, type, prevId) {
+.graphCreateContext <- function(id, label, type, prevId, domain) {
   .graphAppend(list(
     action='ctx', id=id, label=paste(label, collapse='\n'),
     srcref=attr(label, "srcref"), srcfile=attr(label, "srcfile"),
     type=type, prevId=prevId
-  ))
+  ), domain = domain)
 }
 
 .graphEnterContext <- function(id) {
@@ -95,8 +95,8 @@ renderReactLog <- function() {
   ))
 }
 
-.graphInvalidate <- function(id) {
-  .graphAppend(list(action='invalidate', id=id))
+.graphInvalidate <- function(id, domain) {
+  .graphAppend(list(action='invalidate', id=id), domain)
 }
 
 .graphEnv <- new.env()

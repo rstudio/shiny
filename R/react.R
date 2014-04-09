@@ -5,23 +5,29 @@ Context <- setRefClass(
     .label = 'character',      # For debug purposes
     .invalidated = 'logical',
     .invalidateCallbacks = 'list',
-    .flushCallbacks = 'list'
+    .flushCallbacks = 'list',
+    .domain = 'ANY'
   ),
   methods = list(
-    initialize = function(label='', type='other', prevId='') {
+    initialize = function(domain, label='', type='other', prevId='') {
       id <<- .getReactiveEnvironment()$nextId()
       .invalidated <<- FALSE
       .invalidateCallbacks <<- list()
       .flushCallbacks <<- list()
       .label <<- label
-      .graphCreateContext(id, label, type, prevId)
+      .domain <<- domain
+      .graphCreateContext(id, label, type, prevId, domain)
     },
     run = function(func) {
       "Run the provided function under this context."
-      env <- .getReactiveEnvironment()
-      .graphEnterContext(id)
-      on.exit(.graphExitContext(id))
-      env$runWith(.self, func)
+      withReactiveDomain(.domain, {
+        env <- .getReactiveEnvironment()
+        .graphEnterContext(id)
+        tryCatch(
+          env$runWith(.self, func),
+          finally = .graphExitContext(id)
+        )
+      })
     },
     invalidate = function() {
       "Invalidate this context. It will immediately call the callbacks
@@ -30,10 +36,11 @@ Context <- setRefClass(
         return()
       .invalidated <<- TRUE
 
-      .graphInvalidate(id)
+      .graphInvalidate(id, .domain)
       lapply(.invalidateCallbacks, function(func) {
         func()
       })
+      .invalidateCallbacks <<- list()
       NULL
     },
     onInvalidate = function(func) {
@@ -144,8 +151,10 @@ getDummyContext <- function() {}
 local({
   dummyContext <- NULL
   getDummyContext <<- function() {
-    if (is.null(dummyContext))
-      dummyContext <<- Context$new('[none]', type='isolate')
+    if (is.null(dummyContext)) {
+      dummyContext <<- Context$new(getDefaultReactiveDomain(), '[none]',
+        type='isolate')
+    }
     return(dummyContext)
   }
 })

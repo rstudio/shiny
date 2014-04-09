@@ -1,3 +1,5 @@
+#' @include globals.R
+
 #' @rdname builder
 #' @export
 p <- function(...) tags$p(...)
@@ -221,67 +223,49 @@ renderPage <- function(ui, connection, showcase=0) {
 
 #' Create a Shiny UI handler
 #'
-#' Register a UI handler by providing a UI definition (created with e.g.
-#' \link{pageWithSidebar}) and web server path (typically "/", the default
-#' value).
+#' Historically this function was used in ui.R files to register a user
+#' interface with Shiny. It is no longer required; simply ensure that the last
+#' expression to be returned from ui.R is a user interface. This function is
+#' kept for backwards compatibility with older applications. It returns the
+#' value that is passed to it.
 #'
-#' @param ui A user-interace definition
-#' @param path The web server path to server the UI from
-#' @return Called for its side-effect of registering a UI handler
-#'
-#' @examples
-#' el <- div(HTML("I like <u>turtles</u>"))
-#' cat(as.character(el))
-#'
-#' @examples
-#' # Define UI
-#' shinyUI(pageWithSidebar(
-#'
-#'   # Application title
-#'   headerPanel("Hello Shiny!"),
-#'
-#'   # Sidebar with a slider input
-#'   sidebarPanel(
-#'     sliderInput("obs",
-#'                 "Number of observations:",
-#'                 min = 0,
-#'                 max = 1000,
-#'                 value = 500)
-#'   ),
-#'
-#'   # Show a plot of the generated distribution
-#'   mainPanel(
-#'     plotOutput("distPlot")
-#'   )
-#' ))
+#' @param ui A user interace definition
+#' @return The user interface definition, without modifications or side effects.
 #'
 #' @export
-shinyUI <- function(ui, path='/') {
+shinyUI <- function(ui) ui
+
+uiHttpHandler <- function(ui, path = "/") {
 
   force(ui)
 
-  registerClient({
+  function(req) {
+    if (!identical(req$REQUEST_METHOD, 'GET'))
+      return(NULL)
 
-    function(req) {
-      if (!identical(req$REQUEST_METHOD, 'GET'))
-        return(NULL)
+    if (req$PATH_INFO != path)
+      return(NULL)
 
-      if (req$PATH_INFO != path)
-        return(NULL)
+    textConn <- textConnection(NULL, "w")
+    on.exit(close(textConn))
 
-      textConn <- textConnection(NULL, "w")
-      on.exit(close(textConn))
-
-      showcaseMode <- .globals$showcaseDefault
-      if (.globals$showcaseOverride) {
-        mode <- showcaseModeOfReq(req)
-        if (!is.null(mode))
-          showcaseMode <- mode
-      }
-      renderPage(ui, textConn, showcaseMode)
-      html <- paste(textConnectionValue(textConn), collapse='\n')
-      return(httpResponse(200, content=html))
+    showcaseMode <- .globals$showcaseDefault
+    if (.globals$showcaseOverride) {
+      mode <- showcaseModeOfReq(req)
+      if (!is.null(mode))
+        showcaseMode <- mode
     }
-  })
+    uiValue <- if (is.function(ui)) {
+      if (length(formals(ui)) > 0)
+        ui(req)
+      else
+        ui()
+    }
+    else
+      ui
+    renderPage(uiValue, textConn, showcaseMode)
+    html <- paste(textConnectionValue(textConn), collapse='\n')
+    return(httpResponse(200, content=html))
+  }
 }
 

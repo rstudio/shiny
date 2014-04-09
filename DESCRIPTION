@@ -26,24 +26,31 @@ Suggests:
     datasets,
     markdown,
     Cairo (>= 1.5-5),
-    testthat
+    testthat,
+    knitr
 URL: http://www.rstudio.com/shiny/
 BugReports: https://github.com/rstudio/shiny/issues
+Roxygen: list(wrap = FALSE)
 Collate:
+    'app.R'
     'bootstrap-layout.R'
     'bootstrap.R'
     'cache.R'
     'map.R'
     'fileupload.R'
+    'globals.R'
     'graph.R'
     'hooks.R'
     'imageutils.R'
     'jqueryui.R'
+    'middleware-shiny.R'
+    'middleware.GENERATED.R'
     'priorityqueue.R'
     'react.R'
+    'reactive-domains.GENERATED.R'
     'reactives.R'
     'run-url.R'
-    'sessioncontext.R'
+    'server.R'
     'utils.R'
     'shiny.R'
     'shinyui.R'

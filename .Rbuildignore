@@ -10,5 +10,3 @@
 ^man-roxygen$
 ^\.travis\.yml$
 ^staticdocs$
-^R/.*\.Rmd1$
-^R/.*\.html$

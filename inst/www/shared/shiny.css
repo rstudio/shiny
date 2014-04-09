@@ -102,3 +102,7 @@ span.jslider {
 .selectize-control {
   margin-bottom: 10px;
 }
+
+.shiny-frame {
+  border: none;
+}

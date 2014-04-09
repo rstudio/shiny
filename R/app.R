@@ -178,7 +178,7 @@ as.shiny.appobj.character <- function(x) {
 #' @param ... Additional parameters to be passed to print.
 #' @export
 print.shiny.appobj <- function(x, ...) {
-  opts <- attr(x, "shiny.options")
+  opts <- x$options %OR% list()
   opts <- opts[names(opts) %in%
       c("port", "launch.browser", "host", "quiet", "display.mode")]
 
@@ -201,10 +201,11 @@ NULL
 #' @export
 knit_print.shiny.appobj <- function(x, ...) {
   path <- addSubApp(x)
-  opts <- attr(x, "shiny.options")
+  opts <- x$options %OR% list()
   width <- if (is.null(opts$width)) "100%" else opts$width
   height <- if (is.null(opts$height)) "400" else opts$height
-  iframe <- tags$iframe(src=path, width=width, height=height)
+  iframe <- tags$iframe(class="shiny-frame", src=path,
+                        width=width, height=height)
   knitr::asis_output(format(iframe))
 }
 
@@ -218,37 +219,15 @@ knit_print.shiny.tag <- function(x, ...) {
 #' @export
 knit_print.shiny.tag.list <- knit_print.shiny.tag
 
-#' Run R Markdown docs with embedded Shiny apps
-#'
-#' Experimental.
-#'
-#' @param input Path to .Rmd file
-#' @param text A character vector as an alternate way to provide input
-#' @param ... Additional parameters to pass to \code{\link{runApp}}
-#' @param knit.options A list of options to pass to \code{knit2html}
+
+# Adapter functions let us use a nicer syntax in knitr chunks than
+# literally calling output$value <- renderFoo(...) and fooOutput().
+
 #' @export
-runRmdContainer <- function(input, text = NULL, ..., knit.options = list()) {
-  appdir <- tempfile()
-  dir.create(appdir)
-  on.exit(unlink(appdir, recursive = TRUE), add = TRUE)
-
-  wwwdir <- file.path(appdir, "www")
-  dir.create(wwwdir)
-
-  if (missing(input))
-    input <- NULL
-  output <- file.path(wwwdir, "index.html")
-  knitArgs <- c(list(
-    input = input, text = text,
-    output = if (!is.null(text)) NULL else output
-  ), knit.options)
-
-  result <- do.call(knitr::knit2html, knitArgs)
-  if (!is.null(text))
-    writeLines(result, output)
-
-  writeLines("shinyServer(function(input, output) NULL)",
-    file.path(appdir, "server.R"))
-
-  runApp(appdir, ...)
+knit_print.shiny.render.function <- function(x, ...) {
+  outputFunction <- attr(x, "outputFunc")
+  id <- shiny:::createUniqueId(8)
+  o <- getDefaultReactiveDomain()$output
+  o[[id]] <- x
+  knit_print(outputFunction(id))
 }

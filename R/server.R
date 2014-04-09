@@ -587,12 +587,17 @@ runApp <- function(appDir=getwd(),
                    host=getOption('shiny.host', '127.0.0.1'),
                    workerId="", quiet=FALSE,
                    display.mode=c("auto", "normal", "showcase")) {
+  on.exit({
+    handlerManager$clear()
+  }, add = TRUE)
+
+
   if (is.null(host) || is.na(host))
     host <- '0.0.0.0'
 
   # Make warnings print immediately
   ops <- options(warn = 1)
-  on.exit(options(ops))
+  on.exit(options(ops), add = TRUE)
 
   workerId(workerId)
 
@@ -677,7 +682,6 @@ runApp <- function(appDir=getwd(),
   server <- startApp(appParts, port, host, quiet)
 
   on.exit({
-    handlerManager$clear()
     stopServer(server)
   }, add = TRUE)
 

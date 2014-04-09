@@ -14,7 +14,7 @@ install:
   - sudo apt-get install r-base-dev r-cran-shiny r-cran-cairo r-cran-markdown
   - "[ ! -d ~/R ] && mkdir ~/R"
   - Rscript -e "install.packages(c('xtable', 'devtools'), repos = 'http://cran.rstudio.org')"
-  - Rscript -e "options(repos=c(CRAN='http://cran.rstudio.org'));devtools::install_github('yihui/knitr')"
+  - Rscript -e "options(repos=c(CRAN='http://cran.rstudio.org'));devtools::install_github('yihui/knitr', build_vignettes = FALSE)"
   - Rscript -e "install.packages('$R_MY_PKG', dep = TRUE, repos = 'http://cran.rstudio.org')"
 
 # run tests

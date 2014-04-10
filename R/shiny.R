@@ -15,10 +15,32 @@
 #' @import httpuv caTools RJSONIO xtable digest methods
 NULL
 
-createUniqueId <- function(bytes) {
-  # TODO: Use a method that isn't affected by the R seed
-  paste(as.character(as.raw(floor(runif(bytes, min=1, max=255)))), collapse='')
-}
+createUniqueId <- local({
+  # Isolate our own randomness from the rest of the R process; we don't want the
+  # user calling set.seed to affect the uniqueness of our IDs
+  ownSeed <- NULL
+
+  function(bytes) {
+    origSeed <- .Random.seed
+    tryCatch(
+      {
+        if (is.null(ownSeed))
+          rm(.Random.seed, pos=.GlobalEnv)
+        else
+          .Random.seed <<- ownSeed
+
+        tryCatch(
+          {
+            paste(as.character(as.raw(floor(
+              runif(bytes, min=1, max=255)))), collapse='')
+          },
+          finally = ownSeed <<- .Random.seed
+        )
+      },
+      finally = .Random.seed <<- origSeed
+    )
+  }
+})
 
 # Call the workerId func with no args to get the worker id, and with an arg to
 # set it.

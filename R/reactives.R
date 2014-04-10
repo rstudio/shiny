@@ -49,7 +49,8 @@ ReactiveValues <- setRefClass(
   ),
   methods = list(
     initialize = function() {
-      .label <<- paste('reactiveValues', runif(1, min=1000, max=9999),
+      .label <<- paste('reactiveValues',
+                       p_runif(1, min=1000, max=9999),
                        sep="")
       .values <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())

@@ -220,9 +220,9 @@ knit_print.shiny.tag <- function(x, ...) {
 knit_print.shiny.tag.list <- knit_print.shiny.tag
 
 
-# Adapter functions let us use a nicer syntax in knitr chunks than
-# literally calling output$value <- renderFoo(...) and fooOutput().
-
+# Lets us use a nicer syntax in knitr chunks than literally
+# calling output$value <- renderFoo(...) and fooOutput().
+#' @rdname knitr_methods
 #' @export
 knit_print.shiny.render.function <- function(x, ...) {
   outputFunction <- attr(x, "outputFunc")

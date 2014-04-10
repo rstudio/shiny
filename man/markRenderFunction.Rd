@@ -10,7 +10,10 @@ markRenderFunction(uiFunc, renderFunc)
 an output ID.}
 
 \item{renderFunc}{A function that is suitable for assigning to a Shiny output
-  slot.}
+slot.}
+}
+\value{
+The \code{renderFunc} function, with annotations.
 }
 \description{
 Should be called by implementers of \code{renderXXX} functions in order to

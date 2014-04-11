@@ -10,7 +10,7 @@ dateInput(inputId, label, value = NULL, min = NULL, max = NULL,
 \arguments{
 \item{inputId}{Input variable to assign the control's value to.}
 
-\item{label}{Display label for the control.}
+\item{label}{Display label for the control, or \code{NULL}.}
 
 \item{value}{The starting date. Either a Date object, or a string in
 \code{yyyy-mm-dd} format. If NULL (the default), will use the current
@@ -82,8 +82,8 @@ dateInput("date", "Date:",
 \seealso{
 \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
 
-Other input.elements: \code{\link{actionButton}};
-  \code{\link{animationOptions}},
+Other input.elements: \code{\link{actionButton}},
+  \code{\link{actionLink}}; \code{\link{animationOptions}},
   \code{\link{sliderInput}};
   \code{\link{checkboxGroupInput}};
   \code{\link{checkboxInput}};

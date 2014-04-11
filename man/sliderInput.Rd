@@ -14,7 +14,8 @@ animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
 \item{inputId}{Specifies the \code{input} slot that will be used to access
 the value.}
 
-\item{label}{A descriptive label to be displayed with the widget.}
+\item{label}{A descriptive label to be displayed with the widget, or
+\code{NULL}.}
 
 \item{min}{The minimum value (inclusive) that can be selected.}
 
@@ -76,7 +77,8 @@ States \tab "us" \cr Vietnam \tab "vn" \cr }
 \seealso{
 \code{\link{updateSliderInput}}
 
-Other input.elements: \code{\link{actionButton}};
+Other input.elements: \code{\link{actionButton}},
+  \code{\link{actionLink}};
   \code{\link{checkboxGroupInput}};
   \code{\link{checkboxInput}}; \code{\link{dateInput}};
   \code{\link{dateRangeInput}}; \code{\link{fileInput}};

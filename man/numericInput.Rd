@@ -31,8 +31,8 @@ numericInput("obs", "Observations:", 10,
 \seealso{
 \code{\link{updateNumericInput}}
 
-Other input.elements: \code{\link{actionButton}};
-  \code{\link{animationOptions}},
+Other input.elements: \code{\link{actionButton}},
+  \code{\link{actionLink}}; \code{\link{animationOptions}},
   \code{\link{sliderInput}};
   \code{\link{checkboxGroupInput}};
   \code{\link{checkboxInput}}; \code{\link{dateInput}};

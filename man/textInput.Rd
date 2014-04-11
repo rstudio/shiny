@@ -24,8 +24,8 @@ textInput("caption", "Caption:", "Data Summary")
 \seealso{
 \code{\link{updateTextInput}}
 
-Other input.elements: \code{\link{actionButton}};
-  \code{\link{animationOptions}},
+Other input.elements: \code{\link{actionButton}},
+  \code{\link{actionLink}}; \code{\link{animationOptions}},
   \code{\link{sliderInput}};
   \code{\link{checkboxGroupInput}};
   \code{\link{checkboxInput}}; \code{\link{dateInput}};

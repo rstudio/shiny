@@ -12,7 +12,7 @@ selectizeInput(inputId, ..., options = NULL)
 \arguments{
 \item{inputId}{Input variable to assign the control's value to}
 
-\item{label}{Display label for the control}
+\item{label}{Display label for the control, or \code{NULL}}
 
 \item{choices}{List of values to select from. If elements of the list are
 named then that name rather than the value is displayed to the user.}
@@ -64,8 +64,8 @@ selectInput("variable", "Variable:",
 \seealso{
 \code{\link{updateSelectInput}}
 
-Other input.elements: \code{\link{actionButton}};
-  \code{\link{animationOptions}},
+Other input.elements: \code{\link{actionButton}},
+  \code{\link{actionLink}}; \code{\link{animationOptions}},
   \code{\link{sliderInput}};
   \code{\link{checkboxGroupInput}};
   \code{\link{checkboxInput}}; \code{\link{dateInput}};

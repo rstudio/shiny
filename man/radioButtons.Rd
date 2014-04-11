@@ -8,7 +8,7 @@ radioButtons(inputId, label, choices, selected = NULL)
 \arguments{
 \item{inputId}{Input variable to assign the control's value to}
 
-\item{label}{Display label for the control}
+\item{label}{Display label for the control, or \code{NULL}}
 
 \item{choices}{List of values to select from (if elements of the list are
 named then that name rather than the value is displayed to the user)}
@@ -32,8 +32,8 @@ radioButtons("dist", "Distribution type:",
 \seealso{
 \code{\link{updateRadioButtons}}
 
-Other input.elements: \code{\link{actionButton}};
-  \code{\link{animationOptions}},
+Other input.elements: \code{\link{actionButton}},
+  \code{\link{actionLink}}; \code{\link{animationOptions}},
   \code{\link{sliderInput}};
   \code{\link{checkboxGroupInput}};
   \code{\link{checkboxInput}}; \code{\link{dateInput}};

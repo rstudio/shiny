@@ -206,7 +206,7 @@ knit_print.shiny.appobj <- function(x, ...) {
   shiny_warning <- NULL
   # if there's an R Markdown runtime option set but it isn't set to Shiny, then
   # emit a warning indicating the runtime is inappropriate for this object
-  runtime <- knitr::opts_knit$get()$rmarkdown.runtime
+  runtime <- knitr::opts_knit$get("rmarkdown.runtime")
   if (!is.null(runtime) && runtime != "shiny") {
     # note that the RStudio IDE checks for this specific string to detect Shiny
     # applications in static document

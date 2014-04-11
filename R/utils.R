@@ -632,7 +632,7 @@ formatNoSci <- function(x) {
 # Returns a function that calls the given func and caches the result for
 # subsequent calls, unless the given file's mtime changes.
 cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
-  dir <- normalizePath(dir, TRUE)
+  dir <- normalizePath(dir, mustWork=TRUE)
   mtime <- NA
   value <- NULL
   function(...) {
@@ -653,7 +653,7 @@ cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
 # Returns a function that sources the file and caches the result for subsequent
 # calls, unless the file's mtime changes.
 cachedSource <- function(dir, file, case.sensitive = FALSE) {
-  dir <- normalizePath(dir, TRUE)
+  dir <- normalizePath(dir, mustWork=TRUE)
   cachedFuncWithFile(dir, file, function(...) {
     fname <- if (case.sensitive)
       file.path(dir, file)

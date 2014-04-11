@@ -226,7 +226,7 @@ knit_print.shiny.tag.list <- knit_print.shiny.tag
 #' @export
 knit_print.shiny.render.function <- function(x, ...) {
   outputFunction <- attr(x, "outputFunc")
-  id <- shiny:::createUniqueId(8)
+  id <- createUniqueId(8)
   o <- getDefaultReactiveDomain()$output
   o[[id]] <- x
   knit_print(outputFunction(id))

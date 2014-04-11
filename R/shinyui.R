@@ -269,3 +269,19 @@ uiHttpHandler <- function(ui, path = "/") {
   }
 }
 
+#' Return HTML dependencies provided by Shiny
+#'
+#' By default, Shiny supplies some framework scripts when it renders a page.
+#' \code{getProvidedHtmlDependencies} returns a list of those provided objects.
+#'
+#' @return A list of objects of type \code{html_dependency}, one per dependency
+#'
+#' @export
+getProvidedHtmlDependencies <- function() {
+  list(structure(
+    list(name = "jquery",
+         version = "1.11.0",
+         path = system.file("www/shared/jquery.js", package="shiny"),
+         script = "jquery.js"),
+    class = "html_dependency"))
+}

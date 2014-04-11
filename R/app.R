@@ -200,19 +200,48 @@ NULL
 #' @rdname knitr_methods
 #' @export
 knit_print.shiny.appobj <- function(x, ...) {
-  path <- addSubApp(x)
   opts <- x$options %OR% list()
   width <- if (is.null(opts$width)) "100%" else opts$width
   height <- if (is.null(opts$height)) "400" else opts$height
-  iframe <- tags$iframe(class="shiny-frame", src=path,
-                        width=width, height=height)
-  knitr::asis_output(format(iframe))
+  shiny_warning <- NULL
+  # if there's an R Markdown runtime option set but it isn't set to Shiny, then
+  # emit a warning indicating the runtime is inappropriate for this object
+  runtime <- knitr::opts_knit$get("rmarkdown.runtime")
+  if (!is.null(runtime) && runtime != "shiny") {
+    # note that the RStudio IDE checks for this specific string to detect Shiny
+    # applications in static document
+    shiny_warning <- list(structure(
+      "Shiny application in a static R Markdown document",
+      class = "rmd_warning"))
+
+    # create a box exactly the same dimensions as the Shiny app would have had
+    # (so the document continues to flow as it would have with the app), and
+    # display a diagnostic message
+    width <- validateCssUnit(width)
+    height <- validateCssUnit(height)
+    output <- tags$div(
+      style=paste("width:", width, "; height:", height, "; text-align: center;",
+                  "box-sizing: border-box;", "-moz-box-sizing: border-box;",
+                  "-webkit-box-sizing: border-box;"),
+      class="muted well",
+      "Shiny applications not supported in static R Markdown documents")
+  }
+  else {
+    path <- addSubApp(x)
+    output <- tags$iframe(src=path, width=width, height=height,
+                          class="shiny-frame")
+  }
+  knitr::asis_output(format(output), meta = shiny_warning)
 }
 
 #' @rdname knitr_methods
 #' @export
 knit_print.shiny.tag <- function(x, ...) {
-  knitr::asis_output(format(x))
+  output <- surroundSingletons(x)
+  content <- takeHeads(output)
+  head_content <- doRenderTags(tagList(content$head))
+  knitr::asis_output(format(content$ui), meta =
+                       list(structure(head_content, class = "shiny_head")))
 }
 
 #' @rdname knitr_methods
@@ -228,6 +257,8 @@ knit_print.shiny.render.function <- function(x, ...) {
   outputFunction <- attr(x, "outputFunc")
   id <- createUniqueId(8)
   o <- getDefaultReactiveDomain()$output
-  o[[id]] <- x
-  knit_print(outputFunction(id))
+  if (!is.null(o))
+    o[[id]] <- x
+  knitr::knit_print(outputFunction(id))
 }
+

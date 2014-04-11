@@ -7,8 +7,8 @@ test_that("CSS unit validation", {
   }
 
   # Test strings and expected results
-  strings  <- c("100x", "10px", "10.4px", ".4px", "1px0", "px", "5", "%", "5%", "auto", "1auto", "")
-  expected <- c(NA,     "10px", "10.4px", ".4px", NA,     NA,   NA,  NA,  "5%", "auto", NA,      NA)
+  strings  <- c("100x", "10px", "10.4px", ".4px", "1px0", "px", "5",  "%", "5%", "auto", "1auto", "")
+  expected <- c(NA,     "10px", "10.4px", ".4px", NA,       NA, "5px", NA, "5%", "auto", NA,      NA)
   results <- vapply(strings, validateCssUnit_wrap, character(1), USE.NAMES = FALSE)
   expect_equal(results, expected)
 

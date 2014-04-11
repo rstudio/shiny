@@ -1774,8 +1774,10 @@ iconClass <- function(icon) {
 #' number plus a suffix of \code{"px"}.
 #'
 #' Single element character vectors must be \code{"auto"} or \code{"inherit"},
-#' or a number followed by a valid suffix: \code{px}, \code{\%}, \code{em},
-#' \code{pt}, \code{in}, \code{cm}, \code{mm}, \code{ex}, or \code{pc}.
+#' or a number. If the number has a suffix, it must be valid: \code{px},
+#' \code{\%}, \code{em}, \code{pt}, \code{in}, \code{cm}, \code{mm}, \code{ex},
+#' or \code{pc}. If the number has no suffix, the suffix \code{"px"} is
+#' appended.
 #'
 #' Any other value will cause an error to be thrown.
 #'
@@ -1793,6 +1795,11 @@ validateCssUnit <- function(x) {
 
   if (length(x) > 1 || (!is.character(x) && !is.numeric(x)))
     stop('CSS units must be a numeric or character vector with a single element')
+
+  # if the input is a character vector consisting only of digits (e.g. "960"), coerce it to a
+  # numeric value
+  if (is.character(x) && nchar(x) > 0 && gsub("\\d*", "", x) == "")
+    x <- as.numeric(x)
 
   if (is.character(x) &&
      !grepl("^(auto|inherit|((\\.\\d+)|(\\d+(\\.\\d+)?))(%|in|cm|mm|em|ex|pt|pc|px))$", x)) {

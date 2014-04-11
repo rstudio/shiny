@@ -86,6 +86,28 @@ p_runif <- function(...) {
   withPrivateSeed(runif(...))
 }
 
+# Version of sample that runs with private seed
+p_sample <- function(...) {
+  withPrivateSeed(sample(...))
+}
+
+# Return a random integral value in the range [min, max).
+# If only one argument is passed, then min=0 and max=argument.
+randomInt <- function(min, max) {
+  if (missing(max)) {
+    max <- min
+    min <- 0
+  }
+  if (min < 0 || max <= min)
+    stop("Invalid min/max values")
+
+  min + sample(max-min, 1)-1
+}
+
+p_randomInt <- function(...) {
+  withPrivateSeed(randomInt(...))
+}
+
 `%OR%` <- function(x, y) {
   if (is.null(x) || isTRUE(is.na(x)))
     y

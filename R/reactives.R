@@ -50,7 +50,7 @@ ReactiveValues <- setRefClass(
   methods = list(
     initialize = function() {
       .label <<- paste('reactiveValues',
-                       p_runif(1, min=1000, max=9999),
+                       p_randomInt(1000, 10000),
                        sep="")
       .values <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())

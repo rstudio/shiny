@@ -666,11 +666,3 @@ cachedSource <- function(dir, file, case.sensitive = FALSE) {
   })
 }
 
-# Given a value, give it CSS units if it doesn't already have them; presumes
-# pixels if no unit is specified (see validateCssUnit).
-ensureCssMeasurementUnits <- function(val) {
-  if (is.character(val) && gsub("\\d*", "", val) == "")
-    val <- as.numeric(val)
-  validateCssUnit(val)
-}
-

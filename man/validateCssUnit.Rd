@@ -6,8 +6,8 @@
 validateCssUnit(x)
 }
 \arguments{
-\item{x}{The unit to validate. Will be treated as a number of pixels if a
-unit is not specified.}
+  \item{x}{The unit to validate. Will be treated as a
+  number of pixels if a unit is not specified.}
 }
 \value{
 A properly formatted CSS unit of length, if possible. Otherwise, will
@@ -23,8 +23,10 @@ Single element numeric vectors are returned as a character vector with the
 number plus a suffix of \code{"px"}.
 
 Single element character vectors must be \code{"auto"} or \code{"inherit"},
-or a number followed by a valid suffix: \code{px}, \code{\%}, \code{em},
-\code{pt}, \code{in}, \code{cm}, \code{mm}, \code{ex}, or \code{pc}.
+or a number. If the number has a suffix, it must be valid: \code{px},
+\code{\%}, \code{em}, \code{pt}, \code{in}, \code{cm}, \code{mm}, \code{ex},
+or \code{pc}. If the number has no suffix, the suffix \code{"px"} is
+appended.
 
 Any other value will cause an error to be thrown.
 }

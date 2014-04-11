@@ -217,8 +217,8 @@ knit_print.shiny.appobj <- function(x, ...) {
     # create a box exactly the same dimensions as the Shiny app would have had
     # (so the document continues to flow as it would have with the app), and
     # display a diagnostic message
-    width <- ensureCssMeasurementUnits(width)
-    height <- ensureCssMeasurementUnits(height)
+    width <- validateCssUnit(width)
+    height <- validateCssUnit(height)
     output <- tags$div(
       style=paste("width:", width, "; height:", height, "; text-align: center;",
                   "box-sizing: border-box;", "-moz-box-sizing: border-box;",

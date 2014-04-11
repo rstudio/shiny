@@ -2,7 +2,8 @@ context("utils")
 
 test_that("Private randomness works at startup", {
 
-  rm(".Random.seed", envir = .GlobalEnv)
+  if (exists(".Random.seed", envir = .GlobalEnv))
+    rm(".Random.seed", envir = .GlobalEnv)
   .globals$ownSeed <- NULL
   # Just make sure this doesn't blow up
   createUniqueId(4)
@@ -45,5 +46,4 @@ test_that("Setting the private seed explicitly results in identical values", {
   id8 <- createUniqueId(4)
 
   expect_identical(id7, id8)
-  expect_identical(id7, "e5445f93")
 })

@@ -45,7 +45,7 @@ repeatable <- function(rngfunc, seed = runif(1, 0, .Machine$integer.max)) {
 
 # Temporarily set x in env to value, evaluate expr, and
 # then restore x to its original state
-tempSet <- function(env, x, value, expr, unset = FALSE) {
+withTemporary <- function(env, x, value, expr, unset = FALSE) {
 
   if (exists(x, envir = env, inherits = FALSE)) {
     oldValue <- get(x, envir = env, inherits = FALSE)
@@ -72,7 +72,7 @@ tempSet <- function(env, x, value, expr, unset = FALSE) {
 # Evaluate an expression using Shiny's own private stream of
 # randomness (not affected by set.seed).
 withPrivateSeed <- function(expr) {
-  tempSet(.GlobalEnv, ".Random.seed",
+  withTemporary(.GlobalEnv, ".Random.seed",
     .globals$ownSeed, unset=is.null(.globals$ownSeed), {
       tryCatch({
         expr

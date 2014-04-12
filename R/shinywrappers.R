@@ -531,7 +531,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     res <- checkAsIs(if (is.function(options)) options() else options)
     data <- func()
     if (length(dim(data)) != 2) return() # expects a rectangular data object
-    action <- shinysession$registerDataTable(name, data)
+    action <- shinysession$registerDataObj(name, data, dataTablesJSON)
     list(
       colnames = colnames(data), action = action, options = res$options,
       evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,

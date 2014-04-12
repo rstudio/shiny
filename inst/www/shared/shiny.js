@@ -2024,6 +2024,30 @@
         }
       }
 
+      if (data.hasOwnProperty('url')) {
+        var selectize = this._selectize(el)[0].selectize;
+        selectize.clearOptions();
+        selectize.settings.load = function(query, callback) {
+          if (!query.length) return callback();
+          $.ajax({
+            url: data.url,
+            data: {
+              query: query,
+              field: JSON.stringify(selectize.settings.searchField),
+              conju: selectize.settings.searchConjunction,
+              maxop: selectize.settings.maxOptions
+            },
+            type: 'GET',
+            error: function() {
+              callback();
+            },
+            success: function(res) {
+              callback(res);
+            }
+          });
+        }
+      }
+
       if (data.hasOwnProperty('value'))
         this.setValue(el, data.value);
 

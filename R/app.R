@@ -231,7 +231,7 @@ knit_print.shiny.appobj <- function(x, ...) {
     output <- tags$iframe(src=path, width=width, height=height,
                           class="shiny-frame")
   }
-  knitr::asis_output(format(output), meta = shiny_warning)
+  knitr::asis_output(format(output, indent=FALSE), meta = shiny_warning)
 }
 
 #' @rdname knitr_methods
@@ -240,7 +240,7 @@ knit_print.shiny.tag <- function(x, ...) {
   output <- surroundSingletons(x)
   content <- takeHeads(output)
   head_content <- doRenderTags(tagList(content$head))
-  knitr::asis_output(format(content$ui), meta =
+  knitr::asis_output(format(content$ui, indent=FALSE), meta =
                        list(structure(head_content, class = "shiny_head")))
 }
 

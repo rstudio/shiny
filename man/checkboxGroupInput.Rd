@@ -8,7 +8,7 @@ checkboxGroupInput(inputId, label, choices, selected = NULL)
 \arguments{
 \item{inputId}{Input variable to assign the control's value to.}
 
-\item{label}{Display label for the control.}
+\item{label}{Display label for the control, or \code{NULL}.}
 
 \item{choices}{List of values to show checkboxes for. If elements of the list
 are named then that name rather than the value is displayed to the user.}
@@ -32,8 +32,8 @@ checkboxGroupInput("variable", "Variable:",
 \seealso{
 \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
 
-Other input.elements: \code{\link{actionButton}};
-  \code{\link{animationOptions}},
+Other input.elements: \code{\link{actionButton}},
+  \code{\link{actionLink}}; \code{\link{animationOptions}},
   \code{\link{sliderInput}}; \code{\link{checkboxInput}};
   \code{\link{dateInput}}; \code{\link{dateRangeInput}};
   \code{\link{fileInput}}; \code{\link{numericInput}};

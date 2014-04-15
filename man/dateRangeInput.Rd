@@ -20,7 +20,7 @@ date in the client's time zone.}
 
 \item{inputId}{Input variable to assign the control's value to.}
 
-\item{label}{Display label for the control.}
+\item{label}{Display label for the control, or \code{NULL}.}
 
 \item{min}{The minimum allowed date. Either a Date object, or a string in
 \code{yyyy-mm-dd} format.}
@@ -99,8 +99,8 @@ dateRangeInput("daterange", "Date range:",
 \seealso{
 \code{\link{dateInput}}, \code{\link{updateDateRangeInput}}
 
-Other input.elements: \code{\link{actionButton}};
-  \code{\link{animationOptions}},
+Other input.elements: \code{\link{actionButton}},
+  \code{\link{actionLink}}; \code{\link{animationOptions}},
   \code{\link{sliderInput}};
   \code{\link{checkboxGroupInput}};
   \code{\link{checkboxInput}}; \code{\link{dateInput}};

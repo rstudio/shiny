@@ -431,7 +431,7 @@ conditionalPanel <- function(condition, ...) {
 #' @export
 textInput <- function(inputId, label, value = "") {
   tagList(
-    tags$label(label, `for` = inputId),
+    label %AND% tags$label(label, `for` = inputId),
     tags$input(id = inputId, type="text", value=value)
   )
 }
@@ -467,7 +467,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
     inputTag$attribs$step = step
 
   tagList(
-    tags$label(label, `for` = inputId),
+    label %AND% tags$label(label, `for` = inputId),
     inputTag
   )
 }
@@ -514,7 +514,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
   tagList(
-    tags$label(label),
+    label %AND% tags$label(label),
     inputTag,
     tags$div(
       id=paste(inputId, "_progress", sep=""),
@@ -556,7 +556,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #' selected values.
 #'
 #' @param inputId Input variable to assign the control's value to.
-#' @param label Display label for the control.
+#' @param label Display label for the control, or \code{NULL}.
 #' @param choices List of values to show checkboxes for. If elements of the list
 #'   are named then that name rather than the value is displayed to the user.
 #' @param selected The values that should be initially selected, if any.
@@ -648,7 +648,7 @@ helpText <- function(...) {
 }
 
 controlLabel <- function(controlName, label) {
-  tags$label(class = "control-label", `for` = controlName, label)
+  label %AND% tags$label(class = "control-label", `for` = controlName, label)
 }
 
 # Takes a vector or list, and adds names (same as the value) to any entries
@@ -681,7 +681,7 @@ choicesWithNames <- function(choices) {
 #' input element, use \code{selectInput()} with \code{selectize=FALSE}.
 #'
 #' @param inputId Input variable to assign the control's value to
-#' @param label Display label for the control
+#' @param label Display label for the control, or \code{NULL}
 #' @param choices List of values to select from. If elements of the list are
 #' named then that name rather than the value is displayed to the user.
 #' @param selected The initially selected value (or multiple values if
@@ -783,7 +783,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #' Create a set of radio buttons used to select an item from a list.
 #'
 #' @param inputId Input variable to assign the control's value to
-#' @param label Display label for the control
+#' @param label Display label for the control, or \code{NULL}
 #' @param choices List of values to select from (if elements of the list are
 #' named then that name rather than the value is displayed to the user)
 #' @param selected The initially selected value (if not specified then
@@ -832,9 +832,9 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
   )
 
   tags$div(id = inputId,
-           class = 'control-group shiny-input-radiogroup',
-           tags$label(class = "control-label", `for` = inputId, label),
-           inputTags)
+    class = 'control-group shiny-input-radiogroup',
+    label %AND% tags$label(class = "control-label", `for` = inputId, label),
+    inputTags)
 }
 
 #' Create a submit button
@@ -865,16 +865,17 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
   )
 }
 
-#' Action button
+#' Action button/link
 #'
-#' Creates an action button whose value is initially zero, and increments by one
+#' Creates an action button or link whose value is initially zero, and increments by one
 #' each time it is pressed.
 #'
 #' @param inputId Specifies the input slot that will be used to access the
 #'   value.
-#' @param label The contents of the button--usually a text label, but you could
-#'   also use any other HTML, like an image.
-#' @param icon Optional \code{\link{icon}} to appear on the button
+#' @param label The contents of the button or link--usually a text label, but
+#'   you could also use any other HTML, like an image.
+#' @param icon An optional \code{\link{icon}} to appear on the button.
+#' @param ... Named attributes to be applied to the button or link.
 #'
 #' @family input elements
 #' @examples
@@ -893,17 +894,31 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 #' actionButton("goButton", "Go!")
 #' }
 #' @export
-actionButton <- function(inputId, label, icon = NULL) {
+actionButton <- function(inputId, label, icon = NULL, ...) {
 
   if (!is.null(icon))
-    buttonContent <- list(icon, label)
+    content <- list(icon, label)
   else
-    buttonContent <- label
+    content <- label
 
   tags$button(id=inputId,
               type="button",
               class="btn action-button",
-              buttonContent)
+              content)
+}
+
+#' @rdname actionButton
+#' @export
+actionLink <- function(inputId, label, icon = NULL, ...) {
+  if (!is.null(icon))
+    content <- list(icon, label)
+  else
+    content <- label
+
+  tags$a(id=inputId,
+         href="#",
+         class="action-button",
+         content)
 }
 
 #' Slider Input Widget
@@ -912,7 +927,8 @@ actionButton <- function(inputId, label, icon = NULL) {
 #'
 #' @param inputId Specifies the \code{input} slot that will be used to access
 #'   the value.
-#' @param label A descriptive label to be displayed with the widget.
+#' @param label A descriptive label to be displayed with the widget, or
+#'   \code{NULL}.
 #' @param min The minimum value (inclusive) that can be selected.
 #' @param max The maximum value (inclusive) that can be selected.
 #' @param value The initial value of the slider. A numeric vector of length
@@ -967,14 +983,17 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   }
 
   # build slider
-  tags$div(
-    tagList(
+  sliderTag <- slider(inputId, min=min, max=max, value=value, step=step,
+    round=round, locale=locale, format=format, ticks=ticks, animate=animate)
+
+  if (is.null(label)) {
+    sliderTag
+  } else {
+    tags$div(
       controlLabel(inputId, label),
-      slider(inputId, min=min, max=max, value=value, step=step, round=round,
-             locale=locale, format=format, ticks=ticks,
-             animate=animate)
+      sliderTag
     )
-  )
+  }
 }
 
 
@@ -1000,7 +1019,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 #' }
 #'
 #' @param inputId Input variable to assign the control's value to.
-#' @param label Display label for the control.
+#' @param label Display label for the control, or \code{NULL}.
 #' @param value The starting date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
 #'   date in the client's time zone.

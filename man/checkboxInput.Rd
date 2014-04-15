@@ -24,8 +24,8 @@ checkboxInput("outliers", "Show outliers", FALSE)
 \seealso{
 \code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
 
-Other input.elements: \code{\link{actionButton}};
-  \code{\link{animationOptions}},
+Other input.elements: \code{\link{actionButton}},
+  \code{\link{actionLink}}; \code{\link{animationOptions}},
   \code{\link{sliderInput}};
   \code{\link{checkboxGroupInput}};
   \code{\link{dateInput}}; \code{\link{dateRangeInput}};

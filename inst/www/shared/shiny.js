@@ -13,6 +13,9 @@
   $(document).on('submit', 'form:not([action])', function(e) {
     e.preventDefault();
   });
+  $(document).on('click', 'a.action-button', function(e) {
+    e.preventDefault();
+  });
 
   // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
   var $escape = exports.$escape = function(val) {

@@ -1,8 +1,13 @@
-shiny 0.9.1.9000
+shiny 0.9.1.9XXX
 --------------------------------------------------------------------------------
 
 * BREAKING CHANGE: By default, observers now terminate themselves if they were
   created during a session and that session ends. See ?domains for more details.
+
+* Most inputs can now accept `NULL` label values to omit the label altogether.
+
+* New `actionLink` input control; like `actionButton`, but with the appearance
+  of a normal link.
 
 shiny 0.9.1
 --------------------------------------------------------------------------------

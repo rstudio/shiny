@@ -2071,35 +2071,34 @@
       if (!$.fn.selectize) return;
       var $el = $(el);
       var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
-      if (config.length > 0) {
-        var options = $.extend({
-          labelField: 'label',
-          valueField: 'value',
-          searchField: ['label']
-        }, JSON.parse(config.html()));
-        if (config.data('nonempty') !== undefined) {
-          options = $.extend(options, {
-            onItemRemove: function(value) {
-              if (this.getValue() === "")
-                $("select#" + $escape(el.id)).empty().append($("<option/>", {
-                  "value": value, "selected": true
-                })).trigger("change");
-            },
-            onDropdownClose: function($dropdown) {
-              if (this.getValue() === "")
-                this.setValue($("select#" + $escape(el.id)).val());
-            }
-          });
-        }
-        // options that should be eval()ed
-        if (config.data('eval') instanceof Array)
-          $.each(config.data('eval'), function(i, x) {
-            /*jshint evil: true*/
-            options[x] = eval('(' + options[x] + ')');
-          });
-
-        return $el.selectize(options);
+      if (config.length == 0) return;
+      var options = $.extend({
+        labelField: 'label',
+        valueField: 'value',
+        searchField: ['label']
+      }, JSON.parse(config.html()));
+      // selectize created from selectInput()
+      if (config.data('nonempty') !== undefined) {
+        options = $.extend(options, {
+          onItemRemove: function(value) {
+            if (this.getValue() === "")
+              $("select#" + $escape(el.id)).empty().append($("<option/>", {
+                "value": value, "selected": true
+              })).trigger("change");
+          },
+          onDropdownClose: function($dropdown) {
+            if (this.getValue() === "")
+              this.setValue($("select#" + $escape(el.id)).val());
+          }
+        });
       }
+      // options that should be eval()ed
+      if (config.data('eval') instanceof Array)
+        $.each(config.data('eval'), function(i, x) {
+          /*jshint evil: true*/
+          options[x] = eval('(' + options[x] + ')');
+        });
+      return $el.selectize(options);
     }
   });
   inputBindings.register(selectInputBinding, 'shiny.selectInput');

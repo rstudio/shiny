@@ -90,7 +90,7 @@ FileUploadContext <- setRefClass(
     },
     createUploadOperation = function(fileInfos) {
       while (TRUE) {
-        id <- paste(as.raw(runif(12, min=0, max=0xFF)), collapse='')
+        id <- paste(as.raw(p_runif(12, min=0, max=0xFF)), collapse='')
         dir <- file.path(.basedir, id)
         if (!dir.create(dir))
           next

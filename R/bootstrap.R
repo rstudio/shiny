@@ -213,7 +213,7 @@ navbarPage <- function(title,
 
   # built the container div dynamically to support optional collapsability
   if (collapsable) {
-    navId <- paste("navbar-", as.integer(stats::runif(1, 1, 10000)), sep="")
+    navId <- paste("navbar-", p_randomInt(1000, 10000), sep="")
     containerDiv <- div(class="container",
                         tags$button(type="button",
                                     class="btn btn-navbar",
@@ -1398,7 +1398,7 @@ buildTabset <- function(tabs,
   tabNavList <- tags$ul(class = ulClass, id = id)
   tabContent <- tags$div(class = "tab-content")
   firstTab <- TRUE
-  tabsetId <- as.integer(stats::runif(1, 1, 10000))
+  tabsetId <- p_randomInt(1000, 10000)
   tabId <- 1
   for (divTag in tabs) {
 

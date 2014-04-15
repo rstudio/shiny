@@ -660,7 +660,7 @@ runApp <- function(appDir=getwd(),
       }
       else {
         # Try up to 20 random ports
-        port <- round(runif(1, min=3000, max=8000))
+        port <- p_randomInt(3000, 8000)
       }
 
       # Test port to see if we can use it

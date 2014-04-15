@@ -476,7 +476,8 @@ Callbacks <- setRefClass(
 )
 
 # convert a data frame to JSON as required by DataTables request
-dataTablesJSON <- function(data, query) {
+dataTablesJSON <- function(data, req) {
+  query <- req$QUERY_STRING
   n <- nrow(data)
   with(parseQueryString(query), {
     useRegex <- function(j, envir = parent.frame()) {
@@ -538,12 +539,13 @@ dataTablesJSON <- function(data, query) {
     fdata <- unname(as.matrix(fdata))
     if (nrow(fdata) == 0) fdata <- list()
 
-    toJSON(list(
+    res <- toJSON(list(
       sEcho = as.integer(sEcho),
       iTotalRecords = n,
       iTotalDisplayRecords = nrow(data),
       aaData = fdata
     ))
+    httpResponse(200, 'application/json', res)
   })
 }
 

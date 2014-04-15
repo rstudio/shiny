@@ -132,6 +132,7 @@ ShinySession <- setRefClass(
       session$input             <<- .self$input
       session$output            <<- .self$output
       session$reactlog          <<- .self$reactlog
+      session$registerDataObj   <<- .self$registerDataObj
       session$.impl             <<- .self
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
@@ -508,16 +509,14 @@ ShinySession <- setRefClass(
             'Cache-Control'='no-cache')))
       }
 
-      if (matches[2] == 'datatable') {
-        # /session/$TOKEN/datatable/$NAME
+      if (matches[2] == 'dataobj') {
+        # /session/$TOKEN/dataobj/$NAME
         dlmatches <- regmatches(matches[3],
                                 regexec("^([^/]+)(/[^/]+)?$",
                                         matches[3]))[[1]]
         dlname <- utils::URLdecode(dlmatches[2])
         download <- downloads$get(dlname)
-        return(httpResponse(
-          200, 'application/json', dataTablesJSON(download$data, req$QUERY_STRING)
-        ))
+        return(download$filter(download$data, req))
       }
 
       return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
@@ -560,11 +559,11 @@ ShinySession <- setRefClass(
                      URLencode(name, TRUE),
                      workerId()))
     },
-    # this can be more general registrations; not limited to data tables
-    registerDataTable = function(name, data) {
+    # register a data object on the server side (for datatable or selectize, etc)
+    registerDataObj = function(name, data, filterFunc) {
       # abusing downloads at the moment
-      downloads$set(name, list(data = data))
-      return(sprintf('session/%s/datatable/%s?w=%s',
+      downloads$set(name, list(data = data, filter = filterFunc))
+      return(sprintf('session/%s/dataobj/%s?w=%s',
                      URLencode(token, TRUE),
                      URLencode(name, TRUE),
                      workerId()))

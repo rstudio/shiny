@@ -1974,8 +1974,8 @@
     },
     setValue: function(el, value) {
       var selectize = this._selectize(el);
-      if (selectize) {
-        selectize[0].selectize.setValue(value);
+      if (selectize !== undefined) {
+        selectize.setValue(value);
       } else $(el).val(value);
     },
     getState: function(el) {
@@ -2000,8 +2000,7 @@
         // Clear existing options and add each new one
         $el.empty();
         var selectize = this._selectize(el);
-        if (selectize) {
-          selectize = selectize[0].selectize;
+        if (selectize !== undefined) {
           selectize.clearOptions();
           // Selectize.js doesn't maintain insertion order on Chrome on Mac
           // with >10 items if inserted using addOption (versus being present
@@ -2024,8 +2023,17 @@
         }
       }
 
+      // re-initialize selectize
+      if (data.hasOwnProperty('newOptions')) {
+        $el.parent()
+           .find('script[data-for="' + $escape(el.id) + '"]')
+           .replaceWith(data.newOptions);
+        this._selectize(el, true);
+      }
+
+      // use server-side processing for selectize
       if (data.hasOwnProperty('url')) {
-        var selectize = this._selectize(el)[0].selectize;
+        var selectize = this._selectize(el);
         selectize.clearOptions();
         selectize.settings.load = function(query, callback) {
           if (!query.length) return callback();
@@ -2067,7 +2075,7 @@
     initialize: function(el) {
       this._selectize(el);
     },
-    _selectize: function(el) {
+    _selectize: function(el, update) {
       if (!$.fn.selectize) return;
       var $el = $(el);
       var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
@@ -2098,7 +2106,14 @@
           /*jshint evil: true*/
           options[x] = eval('(' + options[x] + ')');
         });
-      return $el.selectize(options);
+      var control = $el.selectize(options)[0].selectize;
+      // .selectize() does not really update settings; must destroy and rebuild
+      if (update) {
+        var settings = $.extend(control.settings, options);
+        control.destroy();
+        control = $el.selectize(settings)[0].selectize;
+      }
+      return control;
     }
   });
   inputBindings.register(selectInputBinding, 'shiny.selectInput');

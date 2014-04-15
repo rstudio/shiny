@@ -8,7 +8,7 @@ updateSelectInput(session, inputId, label = NULL, choices = NULL,
   selected = NULL)
 
 updateSelectizeInput(session, inputId, label = NULL, choices = NULL,
-  selected = NULL, server = FALSE)
+  selected = NULL, options = list(), server = FALSE)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -22,6 +22,8 @@ updateSelectizeInput(session, inputId, label = NULL, choices = NULL,
 name will be used as the label, and the value will be used as the value.}
 
 \item{selected}{A vector or list of options (values) which will be selected.}
+
+\item{options}{a list of options (see \code{\link{selectizeInput}})}
 
 \item{server}{whether to store \code{choices} on the server side, and load
 the select options dynamically on searching, instead of writing all

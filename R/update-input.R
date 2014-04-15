@@ -394,15 +394,29 @@ updateRadioButtons <- updateCheckboxGroupInput
 updateSelectInput <- updateCheckboxGroupInput
 
 #' @rdname updateSelectInput
+#' @param options a list of options (see \code{\link{selectizeInput}})
 #' @param server whether to store \code{choices} on the server side, and load
 #'   the select options dynamically on searching, instead of writing all
 #'   \code{choices} into the page at once (i.e., only use the client-side
 #'   version of \pkg{selectize.js})
 #' @export
 updateSelectizeInput <- function(
-  session, inputId, label = NULL, choices = NULL, selected = NULL, server = FALSE
+  session, inputId, label = NULL, choices = NULL, selected = NULL,
+  options = list(), server = FALSE
 ) {
-  if (!server) return(updateSelectInput(session, inputId, label, choices, selected))
+  if (length(options)) {
+    res <- checkAsIs(options)
+    cfg <- tags$script(
+      type = 'application/json',
+      `data-for` = inputId,
+      `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
+      HTML(toJSON(res$options))
+    )
+    session$sendInputMessage(inputId, list(newOptions = as.character(cfg)))
+  }
+  if (!server) {
+    return(updateSelectInput(session, inputId, label, choices, selected))
+  }
   message <- dropNulls(list(
     label = label,
     url = session$registerDataObj(inputId, choices, selectizeJSON)

@@ -18,6 +18,10 @@
 #' @param options Named options that should be passed to the `runApp` call. You
 #'   can also specify \code{width} and \code{height} parameters which provide a
 #'   hint to the embedding environment about the ideal height/width for the app.
+#' @param uiPattern A regular expression that will be applied to each \code{GET}
+#'   request to determine whether the \code{ui} should be used to handle the
+#'   request. Note that the entire request path must match the regular
+#'   expression in order for the match to be considered successful.
 #' @return An object that represents the app. Printing the object will run the
 #'   app.
 #'
@@ -38,22 +42,31 @@
 #' }
 #'
 #' @export
-shinyApp <- function(ui, server, onStart=NULL, options=list()) {
+shinyApp <- function(ui, server, onStart=NULL, options=list(), uiPattern="/") {
+  # Ensure that the entire path is a match
+  uiPattern <- sprintf("^%s$", uiPattern)
+
   httpHandler <- function(req) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
 
-    if (req$PATH_INFO != '/')
+    if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
       return(NULL)
 
     textConn <- textConnection(NULL, "w")
     on.exit(close(textConn))
 
     uiValue <- if (is.function(ui)) {
-      ui()
+      if (length(formals(ui)) > 0)
+        ui(req)
+      else
+        ui()
     } else {
       ui
     }
+    if (is.null(uiValue))
+      return(NULL)
+
     renderPage(uiValue, textConn)
     html <- paste(textConnectionValue(textConn), collapse='\n')
     return(httpResponse(200, content=html))

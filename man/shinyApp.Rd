@@ -9,7 +9,7 @@
 \alias{shinyAppDir}
 \title{Create a Shiny app object}
 \usage{
-shinyApp(ui, server, onStart = NULL, options = list())
+shinyApp(ui, server, onStart = NULL, options = list(), uiPattern = "/")
 
 shinyAppDir(appDir, options = list())
 
@@ -36,6 +36,11 @@ case, a \code{global.R} file can be used for this purpose.}
 \item{options}{Named options that should be passed to the `runApp` call. You
 can also specify \code{width} and \code{height} parameters which provide a
 hint to the embedding environment about the ideal height/width for the app.}
+
+\item{uiPattern}{A regular expression that will be applied to each \code{GET}
+request to determine whether the \code{ui} should be used to handle the
+request. Note that the entire request path must match the regular
+expression in order for the match to be considered successful.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

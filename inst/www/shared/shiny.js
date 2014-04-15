@@ -1993,13 +1993,13 @@
       };
     },
     receiveMessage: function(el, data) {
-      var $el = $(el);
+      var $el = $(el), selectize;
 
       // This will replace all the options
       if (data.hasOwnProperty('options')) {
         // Clear existing options and add each new one
         $el.empty();
-        var selectize = this._selectize(el);
+        selectize = this._selectize(el);
         if (selectize !== undefined) {
           selectize.clearOptions();
           // Selectize.js doesn't maintain insertion order on Chrome on Mac
@@ -2033,7 +2033,7 @@
 
       // use server-side processing for selectize
       if (data.hasOwnProperty('url')) {
-        var selectize = this._selectize(el);
+        selectize = this._selectize(el);
         selectize.clearOptions();
         selectize.settings.load = function(query, callback) {
           if (!query.length) return callback();
@@ -2053,7 +2053,7 @@
               callback(res);
             }
           });
-        }
+        };
       }
 
       if (data.hasOwnProperty('value'))
@@ -2079,7 +2079,7 @@
       if (!$.fn.selectize) return;
       var $el = $(el);
       var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
-      if (config.length == 0) return;
+      if (config.length === 0) return;
       var options = $.extend({
         labelField: 'label',
         valueField: 'value',
@@ -2091,7 +2091,8 @@
           onItemRemove: function(value) {
             if (this.getValue() === "")
               $("select#" + $escape(el.id)).empty().append($("<option/>", {
-                "value": value, "selected": true
+                "value": value,
+                "selected": true
               })).trigger("change");
           },
           onDropdownClose: function($dropdown) {

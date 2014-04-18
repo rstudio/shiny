@@ -437,9 +437,14 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 
     result <- takeSingletons(result, shinysession$singletons, desingleton=FALSE)$ui
     result <- surroundSingletons(result)
+    dependencies <- lapply(getNewestDeps(findDependencies(result)), createWebDependency)
+    names(dependencies) <- NULL
 
     # renderTags returns a list with head, singletons, and html
-    output <- doRenderTags(result)
+    output <- list(
+      html = doRenderTags(result),
+      deps = dependencies
+    )
 
     return(output)
   })

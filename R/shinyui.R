@@ -185,6 +185,12 @@ renderPage <- function(ui, connection, showcase=0) {
 
   result <- renderTags(ui)
 
+  deps <- result$dependencies
+  depStr <- paste(sapply(deps, function(dep) {
+    sprintf("%s[%s]", dep$name, dep$version)
+  }), collapse = ";")
+  depHtml <- html_dependencies_as_character(deps)
+
   # write preamble
   writeLines(c('<!DOCTYPE html>',
                '<html>',
@@ -195,7 +201,12 @@ renderPage <- function(ui, connection, showcase=0) {
                '  <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
                sprintf('  <script type="application/shiny-singletons">%s</script>',
                        paste(result$singletons, collapse = ',')
-               )),
+               ),
+               sprintf('  <script type="application/html-dependencies">%s</script>',
+                       depStr
+               ),
+               depHtml
+              ),
               con = connection)
   if (showcase > 0) {
     writeLines(as.character(showcaseHead()), con = connection)

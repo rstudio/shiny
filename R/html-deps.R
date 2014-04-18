@@ -57,26 +57,3 @@ removeDeps <- function(dependencies, remove, warnOnConflict = TRUE) {
   # Return only deps that weren't in remove
   return(dependencies[!matches])
 }
-
-DependencyContext <- setRefClass(
-  "DependencyContext",
-  fields = list(
-    committed = 'Map'
-  ),
-  methods = list(
-    commitDependency = function(dep) {
-      committed$set(dep$name, dep$version)
-    },
-    resolveDependencies = function(deps) {
-      # 1. Internally resolve the deps. This also turns unnamed lists into named
-      # lists.
-      deps <- getNewestDeps(deps)
-
-      # 2. Remove deps that conflict with committed (with warning if version of
-      # dep is newer than committed)
-      deps <- removeDeps(deps, as.list(committed), warnOnConflict = TRUE)
-
-      return(deps)
-    }
-  )
-)

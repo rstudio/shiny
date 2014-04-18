@@ -1242,7 +1242,7 @@
   function asArray(value) {
     if (value == null)
       return [];
-    if (typeof(value) === 'array')
+    if ($.isArray(value))
       return value;
     return [value];
   }
@@ -3099,7 +3099,7 @@
     singletons.registerNames(singletonText.split(/,/));
 
     var dependencyText = $('script[type="application/html-dependencies"]').text();
-    $.each(dependencyText.split(/;/), function(depStr, i) {
+    $.each(dependencyText.split(/;/), function(i, depStr) {
       var match = /\s*^(.+)\[(.+)\]\s*$/.exec(depStr);
       if (match) {
         registerDependency(match[1], match[2]);

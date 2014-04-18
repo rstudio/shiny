@@ -185,7 +185,15 @@ renderPage <- function(ui, connection, showcase=0) {
 
   result <- renderTags(ui)
 
-  deps <- result$dependencies
+  deps <- c(
+    list(
+      html_dependency("jquery", "1.11.0", "shared", script = "jquery.js"),
+      html_dependency("shiny", packageVersion("shiny"), "shared",
+        script = "shiny.js", stylesheet = "shiny.css")
+    ),
+    result$dependencies
+  )
+  deps <- lapply(deps, createWebDependency)
   depStr <- paste(sapply(deps, function(dep) {
     sprintf("%s[%s]", dep$name, dep$version)
   }), collapse = ";")
@@ -196,9 +204,6 @@ renderPage <- function(ui, connection, showcase=0) {
                '<html>',
                '<head>',
                '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
-               '  <script src="shared/jquery.js" type="text/javascript"></script>',
-               '  <script src="shared/shiny.js" type="text/javascript"></script>',
-               '  <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
                sprintf('  <script type="application/shiny-singletons">%s</script>',
                        paste(result$singletons, collapse = ',')
                ),

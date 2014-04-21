@@ -1,3 +1,6 @@
+#' @include htmltools.R
+NULL
+
 #' Create a Bootstrap page
 #'
 #' Create a Shiny UI page that loads the CSS and JavaScript for
@@ -990,6 +993,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   }
 }
 
+datePickerDependency <- html_dependency("bootstrap-datepicker", "1.0.2",
+  "shared/datepicker", script = "js/bootstrap-datepicker.min.js",
+  stylesheet = "css/datepicker.css")
 
 #' Create date input
 #'
@@ -1067,12 +1073,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
-  tagList(
-    singleton(tags$head(
-      tags$script(src = "shared/datepicker/js/bootstrap-datepicker.min.js"),
-      tags$link(rel = "stylesheet", type = "text/css",
-                href = 'shared/datepicker/css/datepicker.css')
-    )),
+  attach_dependency(
     tags$div(id = inputId,
              class = "shiny-date-input",
 
@@ -1088,7 +1089,8 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                  `data-max-date` = max,
                  `data-initial-date` = value
       )
-    )
+    ),
+    datePickerDependency
   )
 }
 
@@ -1170,12 +1172,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
-  tagList(
-    singleton(tags$head(
-      tags$script(src = "shared/datepicker/js/bootstrap-datepicker.min.js"),
-      tags$link(rel = "stylesheet", type = "text/css",
-                href = 'shared/datepicker/css/datepicker.css')
-    )),
+  attach_dependency(
     tags$div(id = inputId,
              # input-daterange class is needed for dropdown behavior
              class = "shiny-date-range-input input-daterange",
@@ -1202,7 +1199,8 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
                  `data-max-date` = max,
                  `data-initial-date` = end
                  )
-    )
+    ),
+    datePickerDependency
   )
 }
 
@@ -1621,17 +1619,24 @@ tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
 }
 
+dataTableDependency <- list(
+  html_dependency(
+    "datatables", "1.9.4", "shared/datatables",
+    script = "js/jquery.dataTables.min.js"
+  ),
+  html_dependency(
+    "datatables-bootstrap", "1.9.4", "shared/datatables",
+    stylesheet = "css/DT_bootstrap.css",
+    script = "js/DT_bootstrap.js"
+  )
+)
+
 #' @rdname tableOutput
 #' @export
 dataTableOutput <- function(outputId) {
-  tagList(
-    singleton(tags$head(
-      tags$link(rel = "stylesheet", type = "text/css",
-                href = "shared/datatables/css/DT_bootstrap.css"),
-      tags$script(src = "shared/datatables/js/jquery.dataTables.min.js"),
-      tags$script(src = "shared/datatables/js/DT_bootstrap.js")
-    )),
-    div(id = outputId, class="shiny-datatable-output")
+  attach_dependency(
+    div(id = outputId, class="shiny-datatable-output"),
+    dataTableDependency
   )
 }
 

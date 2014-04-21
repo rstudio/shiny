@@ -34,6 +34,7 @@ Roxygen: list(wrap = FALSE)
 Collate:
     'app.R'
     'bootstrap-layout.R'
+    'htmltools.R'
     'bootstrap.R'
     'cache.R'
     'map.R'
@@ -42,7 +43,6 @@ Collate:
     'graph.R'
     'hooks.R'
     'html-deps.R'
-    'htmltools.R'
     'imageutils.R'
     'jqueryui.R'
     'middleware-shiny.R'

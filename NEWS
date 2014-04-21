@@ -9,6 +9,8 @@ shiny 0.9.1.9XXX
 * New `actionLink` input control; like `actionButton`, but with the appearance
   of a normal link.
 
+* New `horizontalLayout` function for putting UI elements side-by-side.
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

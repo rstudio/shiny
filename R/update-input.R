@@ -437,7 +437,8 @@ selectizeJSON <- function(data, req) {
   # convert a single vector to a data frame so it returns {label: , value: }
   # later in JSON; other objects return arbitrary JSON {x: , y: , foo: , ...}
   data <- if (is.atomic(data)) {
-    data.frame(label = as.character(data), value = data, stringsAsFactors = FALSE)
+    data <- choicesWithNames(data)
+    data.frame(label = names(data), value = data, stringsAsFactors = FALSE)
   } else as.data.frame(data, stringsAsFactors = FALSE)
 
   # start searching for keywords in all specified columns

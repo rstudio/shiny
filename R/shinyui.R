@@ -183,6 +183,9 @@ singleton <- function(x) {
 
 renderPage <- function(ui, connection, showcase=0) {
 
+  if (showcase > 0)
+    ui <- tagList(tags$head(showcaseHead()), ui)
+
   result <- renderTags(ui)
 
   deps <- c(
@@ -213,9 +216,6 @@ renderPage <- function(ui, connection, showcase=0) {
                depHtml
               ),
               con = connection)
-  if (showcase > 0) {
-    writeLines(as.character(showcaseHead()), con = connection)
-  }
   writeLines(c(result$head,
                '</head>',
                '<body>',

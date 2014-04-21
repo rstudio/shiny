@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 0.9.1.9002
+Version: 0.9.1.9003
 Date: 2014-03-19
 Author: RStudio, Inc.
 Maintainer: Winston Chang <winston@rstudio.com>

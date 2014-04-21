@@ -16,6 +16,8 @@ shiny 0.9.1.9XXX
   to evaluate expressions that shouldn't use reactive sources directly. (This
   should not be commonly needed.)
 
+* New `horizontalLayout` function for putting UI elements side-by-side.
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

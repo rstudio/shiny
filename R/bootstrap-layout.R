@@ -276,7 +276,7 @@ sidebarLayout <- function(sidebarPanel,
     fixedRow(firstPanel, secondPanel)
 }
 
-#' Layout UI elements vertically
+#' Lay out UI elements vertically
 #'
 #' Create a container that includes one or more rows of content (each element
 #' passed to the container will appear on it's own line in the UI)
@@ -285,7 +285,7 @@ sidebarLayout <- function(sidebarPanel,
 #' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
 #'   layout.
 #'
-#' @seealso \code{\link{fluidPage}}
+#' @seealso \code{\link{fluidPage}}, \code{\link{horizontalLayout}}
 #'
 #' @examples
 #' shinyUI(fluidPage(
@@ -306,5 +306,63 @@ verticalLayout <- function(..., fluid = TRUE) {
   })
 }
 
+#' Lay out UI elements horizontally
+#'
+#' Create a container that lays out elements next to each other.
+#'
+#' This layout is implemented using tables. These days, using HTML tables for
+#' layout purposes is generally frowned upon by experienced web designers as not
+#' being "semantically correct", but it's the only reasonable way to provide
+#' decent vertical alignment options.
+#'
+#' The layout will create a table with a single row (\code{tr}), and a cell
+#' (\code{td}) within that row for each of the child elements. By default, the
+#' width of the cells will be set to (100 / number of children)\%. You can
+#' override this by including a specific \code{width} value in \code{cellArgs},
+#' but you can't customize widths on a per-column basis.
+#'
+#' @param ... Unnamed arguments will become child elements of the layout. Named
+#'   arguments will become HTML attributes on the outermost tag.
+#' @param valign The vertical alignment of the children.
+#' @param cellArgs Any additional attributes that should be used for each cell
+#'   of the layout.
+#'
+#' @seealso \code{\link{verticalLayout}}
+#'
+#' #' @examples
+#' horizontalLayout(
+#'   numericInput("rows", "How many rows?", 5),
+#'   selectInput("letter", "Which letter?", LETTERS),
+#'   sliderInput("value", "What value?", 0, 100, 50)
+#' )
+#' @export
+horizontalLayout <- function(..., valign = c("top", "middle", "bottom"),
+  cellArgs = list()) {
+
+  valign <- match.arg(valign)
+
+  children <- list(...)
+  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  attribs <- children[!childIdx]
+  children <- children[childIdx]
+
+  count <- length(children)
+  width <- 100 / count
+  if (is.null(cellArgs$width))
+    cellArgs$width <- sprintf("%.3f%%", width)
+  if (is.null(cellArgs$valign))
+    cellArgs$valign <- valign
+
+  do.call(tags$table, c(list(class="shiny-horizontal-layout"),
+    attribs,
+    list(tags$tbody(
+      tags$tr(
+        lapply(children, function(x) {
+          do.call(tags$td, c(cellArgs, list(x)))
+        })
+      )
+    ))
+  ))
+}
 
 

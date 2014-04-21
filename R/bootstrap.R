@@ -44,8 +44,6 @@ bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
         script = sprintf("js/bootstrap%s", jsExt),
         stylesheet = if (is.null(theme))
           sprintf("css/bootstrap%s", cssExt)
-        else
-          theme
       ),
       if (responsive) {
         html_dependency("bootstrap-responsive", "2.3.2", path = bs,
@@ -59,6 +57,9 @@ bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
   attach_dependency(
     tagList(
       if (!is.null(title)) tags$head(tags$title(title)),
+      if (!is.null(theme)) {
+        tags$head(tags$link(rel="stylesheet", type="text/css", href = theme))
+      },
 
       # remainder of tags passed to the function
       list(...)

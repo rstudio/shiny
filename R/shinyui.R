@@ -155,7 +155,6 @@ withMathJax <- function(...) {
   path <- 'https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
   tagList(
     tags$head(
-      singleton(tags$script(HTML('window.MathJax = {skipStartupTypeset: true};'))),
       singleton(tags$script(src = path, type = 'text/javascript'))
     ),
     ...,

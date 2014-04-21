@@ -159,9 +159,7 @@ withMathJax <- function(...) {
       singleton(tags$script(src = path, type = 'text/javascript'))
     ),
     ...,
-    tags$script(HTML('$(function() {
-                        setTimeout(function() {MathJax.Hub.Typeset();}, 200);
-                      });'))
+    tags$script(HTML('MathJax.Hub.Queue(["Typeset", MathJax.Hub]);'))
   )
 }
 

@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 #' Create a Bootstrap page
 #'
 #' Create a Shiny UI page that loads the CSS and JavaScript for

@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 Dependents <- setRefClass(
   'Dependents',
   fields = list(

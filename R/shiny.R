@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 #' Web Application Framework for R
 #'
 #' Shiny makes it incredibly easy to build interactive web applications with R.
@@ -59,8 +62,8 @@ ShinySession <- setRefClass(
     .outputOptions = 'list', # Options for each of the output observer objects
     .progressKeys = 'character',
     .fileUploadContext = 'FileUploadContext',
-    .input      = 'ReactiveValues', # Internal object for normal input sent from client
-    .clientData = 'ReactiveValues', # Internal object for other data sent from the client
+    .input      = 'ANY', # Internal ReactiveValues object for normal input sent from client
+    .clientData = 'ANY', # Internal ReactiveValues object for other data sent from the client
     .closedCallbacks = 'Callbacks',
     .flushCallbacks = 'Callbacks',
     .flushedCallbacks = 'Callbacks',
@@ -77,13 +80,8 @@ ShinySession <- setRefClass(
   methods = list(
     initialize = function(websocket) {
       .websocket <<- websocket
-      .invalidatedOutputValues <<- Map$new()
-      .invalidatedOutputErrors <<- Map$new()
-      .inputMessageQueue <<- list()
-      .progressKeys <<- character(0)
       closed <<- FALSE
       # TODO: Put file upload context in user/app-specific dir if possible
-      .fileUploadContext <<- FileUploadContext$new()
 
       .input      <<- ReactiveValues$new()
       .clientData <<- ReactiveValues$new()

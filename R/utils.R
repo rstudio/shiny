@@ -1,4 +1,5 @@
 #' @include globals.R
+#' @include map.R
 NULL
 
 #' Make a random number generator repeatable

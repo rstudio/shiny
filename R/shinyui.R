@@ -180,23 +180,39 @@ singleton <- function(x) {
 
 renderPage <- function(ui, connection, showcase=0) {
 
+  if (showcase > 0)
+    ui <- tagList(tags$head(showcaseHead()), ui)
+
   result <- renderTags(ui)
+
+  deps <- c(
+    list(
+      html_dependency("jquery", "1.11.0", "shared", script = "jquery.js"),
+      html_dependency("shiny", packageVersion("shiny"), "shared",
+        script = "shiny.js", stylesheet = "shiny.css")
+    ),
+    result$dependencies
+  )
+  deps <- lapply(deps, createWebDependency)
+  depStr <- paste(sapply(deps, function(dep) {
+    sprintf("%s[%s]", dep$name, dep$version)
+  }), collapse = ";")
+  depHtml <- html_dependencies_as_character(deps)
 
   # write preamble
   writeLines(c('<!DOCTYPE html>',
                '<html>',
                '<head>',
                '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
-               '  <script src="shared/jquery.js" type="text/javascript"></script>',
-               '  <script src="shared/shiny.js" type="text/javascript"></script>',
-               '  <link rel="stylesheet" type="text/css" href="shared/shiny.css"/>',
                sprintf('  <script type="application/shiny-singletons">%s</script>',
                        paste(result$singletons, collapse = ',')
-               )),
+               ),
+               sprintf('  <script type="application/html-dependencies">%s</script>',
+                       depStr
+               ),
+               depHtml
+              ),
               con = connection)
-  if (showcase > 0) {
-    writeLines(as.character(showcaseHead()), con = connection)
-  }
   writeLines(c(result$head,
                '</head>',
                '<body>',

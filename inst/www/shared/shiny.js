@@ -1212,13 +1212,17 @@
       exports.unbindAll(el);
 
       var html;
+      var dependencies = [];
       if (data === null) {
         html = '';
-      } else {
+      } else if (typeof(data) == 'string') {
         html = data;
+      } else if (typeof(data) == 'object') {
+        html = data.html;
+        dependencies = data.deps;
       }
 
-      exports.renderHtml(html, el);
+      exports.renderHtml(html, el, dependencies);
       exports.initializeInputs(el);
       exports.bindAll(el);
     }
@@ -1226,9 +1230,68 @@
   outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');
 
   // Render HTML in a DOM element, inserting singletons into head as needed
-  exports.renderHtml = function(html, el) {
+  exports.renderHtml = function(html, el, dependencies) {
+    if (dependencies) {
+      $.each(dependencies, function(i, dep) {
+        renderDependency(dep);
+      });
+    }
     return singletons.renderHtml(html, el);
   };
+
+  function asArray(value) {
+    if (value == null)
+      return [];
+    if ($.isArray(value))
+      return value;
+    return [value];
+  }
+
+  var htmlDependencies = {};
+  function registerDependency(name, version) {
+    htmlDependencies[name] = version;
+  }
+
+  // Client-side dependency resolution and rendering
+  function renderDependency(dep) {
+    if (htmlDependencies.hasOwnProperty(dep.name))
+      return false;
+
+    registerDependency(dep.name, dep.version);
+
+    var path = dep.path;
+
+    var $head = $("head").first();
+
+    if (dep.meta) {
+      var metas = $.map(dep.meta, function(content, name) {
+        return $("<meta>").attr("name", name).attr("content", content);
+      });
+      $head.append(metas);
+    }
+
+    if (dep.stylesheet) {
+      var stylesheets = $.map(asArray(dep.stylesheet), function(stylesheet) {
+        return $("<link rel='stylesheet' type='text/css'>")
+          .attr("href", path + "/" + stylesheet);
+      });
+      $head.append(stylesheets);
+    }
+
+    if (dep.script) {
+      var scripts = $.map(asArray(dep.script), function(scriptName) {
+        return $("<script>").attr("src", path + "/" + scriptName);
+      });
+      $head.append(scripts);
+    }
+
+    if (dep.head) {
+      var $newHead = $("<head></head>");
+      $newHead.html(dep.head);
+      $head.append($newHead.children());
+    }
+    return true;
+  }
 
   var singletons = {
     knownSingletons: {},
@@ -3034,6 +3097,14 @@
     var singletonText = initialValues['.clientdata_singletons'] =
         $('script[type="application/shiny-singletons"]').text();
     singletons.registerNames(singletonText.split(/,/));
+
+    var dependencyText = $('script[type="application/html-dependencies"]').text();
+    $.each(dependencyText.split(/;/), function(i, depStr) {
+      var match = /\s*^(.+)\[(.+)\]\s*$/.exec(depStr);
+      if (match) {
+        registerDependency(match[1], match[2]);
+      }
+    });
 
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);

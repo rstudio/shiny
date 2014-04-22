@@ -297,6 +297,17 @@ reactiveValuesToList <- function(x, all.names=FALSE) {
   .subset2(x, 'impl')$toList(all.names)
 }
 
+# This function is needed because str() on a reactivevalues object will call
+# [[.reactivevalues(), which will give an error when it tries to access
+# x[['impl']].
+#' @export
+str.reactivevalues <- function(x, indent.str = " ", ...) {
+  str(unclass(x), indent.str = indent.str, ...)
+  # Need to manually print out the class field,
+  cat(indent.str, '- attr(*, "class")=', sep = "")
+  str(class(x))
+}
+
 # Observable ----------------------------------------------------------------
 
 Observable <- setRefClass(

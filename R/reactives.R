@@ -301,11 +301,11 @@ reactiveValuesToList <- function(x, all.names=FALSE) {
 # [[.reactivevalues(), which will give an error when it tries to access
 # x[['impl']].
 #' @export
-str.reactivevalues <- function(x, indent.str = " ", ...) {
-  str(unclass(x), indent.str = indent.str, ...)
+str.reactivevalues <- function(object, indent.str = " ", ...) {
+  str(unclass(object), indent.str = indent.str, ...)
   # Need to manually print out the class field,
   cat(indent.str, '- attr(*, "class")=', sep = "")
-  str(class(x))
+  str(class(object))
 }
 
 # Observable ----------------------------------------------------------------

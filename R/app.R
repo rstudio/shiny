@@ -249,7 +249,7 @@ knit_print.shiny.appobj <- function(x, ...) {
   # need to grab those and put them in meta, like in knit_print.shiny.tag. But
   # for now it's not an issue, so just return the HTML and warning.
 
-  knitr::asis_output(format(output, indent=FALSE), meta = shiny_warning)
+  knitr::asis_output(html_preserve(format(output, indent=FALSE)), meta = shiny_warning)
 }
 
 #' @rdname knitr_methods
@@ -263,7 +263,12 @@ knit_print.shiny.tag <- function(x, ...) {
   meta <- list(structure(head_content, class = "shiny_head"))
   meta <- c(meta, deps)
 
-  knitr::asis_output(format(content$ui, indent=FALSE), meta = meta)
+  knitr::asis_output(html_preserve(format(content$ui, indent=FALSE)), meta = meta)
+}
+
+knit_print.html <- function(x, ...) {
+  deps <- getNewestDeps(findDependencies(x))
+  knitr::asis_output(html_preserve(as.character(x)), meta = list(deps))
 }
 
 #' @rdname knitr_methods
@@ -284,3 +289,10 @@ knit_print.shiny.render.function <- function(x, ...) {
   knitr::knit_print(outputFunction(id))
 }
 
+html_preserve <- function(x) {
+  x <- paste(x, collapse = "\r\n")
+  if (nzchar(x))
+    sprintf("<!--html_preserve-->%s<!--/html_preserve-->", x)
+  else
+    x
+}

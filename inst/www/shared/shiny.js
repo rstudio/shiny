@@ -1264,7 +1264,7 @@
     var $head = $("head").first();
 
     if (dep.meta) {
-      var metas = $.map(dep.meta, function(content, name) {
+      var metas = $.map(asArray(dep.meta), function(content, name) {
         return $("<meta>").attr("name", name).attr("content", content);
       });
       $head.append(metas);

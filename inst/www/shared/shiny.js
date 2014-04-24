@@ -2746,7 +2746,7 @@
           binding.subscribe(el, thisCallback);
           $(el).data('shiny-input-binding', binding);
           $(el).addClass('shiny-bound-input');
-          var ratePolicy = binding.getRatePolicy();
+          var ratePolicy = binding.getRatePolicy(el);
           if (ratePolicy !== null) {
             inputsRate.setRatePolicy(
               effectiveId,

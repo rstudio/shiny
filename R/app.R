@@ -240,6 +240,8 @@ knit_print.shiny.appobj <- function(x, ...) {
       "Shiny applications not supported in static R Markdown documents")
   }
   else {
+    if (isTRUE(as.logical(knitr::opts_current$get("cache"))))
+      stop("Shiny applications cannot be used in cached chunks.")
     path <- addSubApp(x)
     output <- tags$iframe(src=path, width=width, height=height,
                           class="shiny-frame")

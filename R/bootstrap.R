@@ -1,4 +1,5 @@
 #' @include utils.R
+#' @include htmltools.R
 NULL
 
 #' Create a Bootstrap page
@@ -37,43 +38,34 @@ bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
     }
     cssExt <- ext(".css")
     jsExt = ext(".js")
-    bs <- "shared/bootstrap/"
+    bs <- "shared/bootstrap"
 
-    # apply theme if requested
-    if (is.null(theme))
-      cssHref <- paste(bs, "css/bootstrap", cssExt, sep="")
-    else
-      cssHref <- theme
-
-    result <- tags$head(
-      tags$link(rel="stylesheet", type="text/css", href=cssHref),
-      tags$script(src=paste(bs, "js/bootstrap", jsExt, sep=""))
+    list(
+      html_dependency("bootstrap", "2.3.2", path = bs,
+        script = sprintf("js/bootstrap%s", jsExt),
+        stylesheet = if (is.null(theme))
+          sprintf("css/bootstrap%s", cssExt)
+      ),
+      if (responsive) {
+        html_dependency("bootstrap-responsive", "2.3.2", path = bs,
+          stylesheet = sprintf("css/bootstrap-responsive%s", cssExt),
+          meta = list(viewport = "width=device-width, initial-scale=1.0")
+        )
+      }
     )
-
-    if (!is.null(title))
-      result <- tagAppendChild(result, tags$title(title))
-
-    if (responsive) {
-      result <- tagAppendChild(
-        result,
-        tags$meta(name="viewport",
-                  content="width=device-width, initial-scale=1.0"))
-      result <- tagAppendChild(
-        result,
-        tags$link(rel="stylesheet",
-                  type="text/css",
-                  href=paste(bs, "css/bootstrap-responsive", cssExt, sep="")))
-    }
-
-    result
   }
 
-  tagList(
-    # inject bootstrap requirements into head
-    importBootstrap(),
+  attach_dependency(
+    tagList(
+      if (!is.null(title)) tags$head(tags$title(title)),
+      if (!is.null(theme)) {
+        tags$head(tags$link(rel="stylesheet", type="text/css", href = theme))
+      },
 
-    # remainder of tags passed to the function
-    list(...)
+      # remainder of tags passed to the function
+      list(...)
+    ),
+    importBootstrap()
   )
 }
 
@@ -762,22 +754,26 @@ selectizeInput <- function(inputId, ..., options = NULL) {
 selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
   res <- checkAsIs(options)
 
-  tagList(
-    select,
-    singleton(tags$head(
-      tags$link(rel = 'stylesheet', type = 'text/css',
-                href = 'shared/selectize/css/selectize.bootstrap2.css'),
+  selectizeDep <- html_dependency("selectize", "0.8.5", "shared/selectize",
+    stylesheet = "css/selectize.bootstrap2.css",
+    head = format(tagList(
       HTML('<!--[if lt IE 9]>'),
       tags$script(src = 'shared/selectize/js/es5-shim.min.js'),
       HTML('<![endif]-->'),
       tags$script(src = 'shared/selectize/js/selectize.min.js')
-    )),
-    tags$script(
-      type = 'application/json',
-      `data-for` = inputId, `data-nonempty` = if (nonempty) '',
-      `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
-      if (length(res$options)) HTML(toJSON(res$options)) else '{}'
-    )
+    ))
+  )
+  attach_dependency(
+    tagList(
+      select,
+      tags$script(
+        type = 'application/json',
+        `data-for` = inputId, `data-nonempty` = if (nonempty) '',
+        `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
+        if (length(res$options)) HTML(toJSON(res$options)) else '{}'
+      )
+    ),
+    selectizeDep
   )
 }
 
@@ -999,6 +995,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   }
 }
 
+datePickerDependency <- html_dependency("bootstrap-datepicker", "1.0.2",
+  "shared/datepicker", script = "js/bootstrap-datepicker.min.js",
+  stylesheet = "css/datepicker.css")
 
 #' Create date input
 #'
@@ -1076,12 +1075,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
-  tagList(
-    singleton(tags$head(
-      tags$script(src = "shared/datepicker/js/bootstrap-datepicker.min.js"),
-      tags$link(rel = "stylesheet", type = "text/css",
-                href = 'shared/datepicker/css/datepicker.css')
-    )),
+  attach_dependency(
     tags$div(id = inputId,
              class = "shiny-date-input",
 
@@ -1097,7 +1091,8 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                  `data-max-date` = max,
                  `data-initial-date` = value
       )
-    )
+    ),
+    datePickerDependency
   )
 }
 
@@ -1179,12 +1174,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
-  tagList(
-    singleton(tags$head(
-      tags$script(src = "shared/datepicker/js/bootstrap-datepicker.min.js"),
-      tags$link(rel = "stylesheet", type = "text/css",
-                href = 'shared/datepicker/css/datepicker.css')
-    )),
+  attach_dependency(
     tags$div(id = inputId,
              # input-daterange class is needed for dropdown behavior
              class = "shiny-date-range-input input-daterange",
@@ -1211,7 +1201,8 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
                  `data-max-date` = max,
                  `data-initial-date` = end
                  )
-    )
+    ),
+    datePickerDependency
   )
 }
 
@@ -1630,17 +1621,24 @@ tableOutput <- function(outputId) {
   div(id = outputId, class="shiny-html-output")
 }
 
+dataTableDependency <- list(
+  html_dependency(
+    "datatables", "1.9.4", "shared/datatables",
+    script = "js/jquery.dataTables.min.js"
+  ),
+  html_dependency(
+    "datatables-bootstrap", "1.9.4", "shared/datatables",
+    stylesheet = "css/DT_bootstrap.css",
+    script = "js/DT_bootstrap.js"
+  )
+)
+
 #' @rdname tableOutput
 #' @export
 dataTableOutput <- function(outputId) {
-  tagList(
-    singleton(tags$head(
-      tags$link(rel = "stylesheet", type = "text/css",
-                href = "shared/datatables/css/DT_bootstrap.css"),
-      tags$script(src = "shared/datatables/js/jquery.dataTables.min.js"),
-      tags$script(src = "shared/datatables/js/DT_bootstrap.js")
-    )),
-    div(id = outputId, class="shiny-datatable-output")
+  attach_dependency(
+    div(id = outputId, class="shiny-datatable-output"),
+    dataTableDependency
   )
 }
 

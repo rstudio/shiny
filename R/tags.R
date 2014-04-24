@@ -23,7 +23,7 @@ htmlEscape <- local({
       .htmlSpecialsPattern
 
     # Short circuit in the common case that there's nothing to escape
-    if (!grepl(pattern, text))
+    if (!any(grepl(pattern, text)))
       return(text)
 
     specials <- if(attribute)
@@ -279,6 +279,7 @@ renderTags <- function(ui, singletons = character(0), indent = 0) {
   # Do singleton and head processing before rendering
   singletonInfo <- takeSingletons(ui, singletons)
   headInfo <- takeHeads(singletonInfo$ui)
+  deps <- getNewestDeps(findDependencies(singletonInfo$ui))
 
   headIndent <- if (is.numeric(indent)) indent + 1 else indent
   headHtml <- doRenderTags(headInfo$head, indent = headIndent)
@@ -286,6 +287,7 @@ renderTags <- function(ui, singletons = character(0), indent = 0) {
 
   return(list(head = headHtml,
               singletons = singletonInfo$singletons,
+              dependencies = deps,
               html = bodyHtml))
 }
 
@@ -371,6 +373,21 @@ takeHeads <- function(ui) {
   }, FALSE)
 
   return(list(ui=result, head=headItems))
+}
+
+findDependencies <- function(ui) {
+  dep <- attr(ui, "html_dependency")
+  if (!is.null(dep) && is(dep, "html_dependency"))
+    dep <- list(dep)
+  children <- if (is.list(ui)) {
+    if (isTag(ui)) {
+      ui$children
+    } else {
+      ui
+    }
+  }
+  childDeps <- unlist(lapply(children, findDependencies), recursive = FALSE)
+  c(childDeps, if (!is.null(dep)) dep)
 }
 
 #' HTML Builder Functions

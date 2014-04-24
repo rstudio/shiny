@@ -29,23 +29,32 @@ licenseLink <- function(licenseName) {
 # Returns tags containing showcase directives intended for the <HEAD> of the
 # document.
 showcaseHead <- function() {
+
+  deps  <- list(
+    html_dependency("jqueryui", "1.10.3", "shared/jqueryui/1.10.3",
+      script = "jquery-ui.min.js"),
+    html_dependency("showdown", "0.3.1", "shared/showdown/compressed",
+      script = "showdown.js"),
+    html_dependency("font-awesome", "4.0.3", "shared/font-awesome",
+      stylesheet = "css/font-awesome.min.css"),
+    html_dependency("highlight.js", "6.2", "shared/highlight",
+      script = "highlight.pack.js")
+  )
+
   mdfile <- file.path.ci(getwd(), 'Readme.md')
-  with(tags, tagList(
-    script(src="shared/highlight/highlight.pack.js"),
-    script(src="shared/showdown/compressed/showdown.js"),
-    script(src="shared/jqueryui/1.10.3/jquery-ui.min.js"),
+  html <- with(tags, tagList(
     script(src="shared/shiny-showcase.js"),
     link(rel="stylesheet", type="text/css",
          href="shared/highlight/rstudio.css"),
     link(rel="stylesheet", type="text/css",
          href="shared/shiny-showcase.css"),
-    link(rel="stylesheet", type="text/css",
-         href="shared/font-awesome/css/font-awesome.min.css"),
     if (file.exists(mdfile))
       script(type="text/markdown", id="showcase-markdown-content",
         paste(readLines(mdfile, warn = FALSE), collapse="\n"))
     else ""
   ))
+
+  return(attach_dependency(html, deps))
 }
 
 # Returns tags containing the application metadata (title and author) in

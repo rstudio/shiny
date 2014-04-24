@@ -132,8 +132,8 @@ registerClient <- function(client) {
 #' JavaScript/CSS files available to their components.
 #'
 #' @param prefix The URL prefix (without slashes). Valid characters are a-z,
-#'   A-Z, 0-9, hyphen, and underscore; and must begin with a-z or A-Z. For
-#'   example, a value of 'foo' means that any request paths that begin with
+#'   A-Z, 0-9, hyphen, period, and underscore; and must begin with a-z or A-Z.
+#'   For example, a value of 'foo' means that any request paths that begin with
 #'   '/foo' will be mapped to the given directory.
 #' @param directoryPath The directory that contains the static resources to be
 #'   served.
@@ -151,7 +151,7 @@ registerClient <- function(client) {
 #' @export
 addResourcePath <- function(prefix, directoryPath) {
   prefix <- prefix[1]
-  if (!grepl('^[a-z][a-z0-9\\-_]*$', prefix, ignore.case=TRUE, perl=TRUE)) {
+  if (!grepl('^[a-z][a-z0-9\\-_.]*$', prefix, ignore.case=TRUE, perl=TRUE)) {
     stop("addResourcePath called with invalid prefix; please see documentation")
   }
 
@@ -165,13 +165,11 @@ addResourcePath <- function(prefix, directoryPath) {
   existing <- .globals$resources[[prefix]]
 
   if (!is.null(existing)) {
-    if (existing$directoryPath != directoryPath) {
+    if (!identical(existing$directoryPath, directoryPath)) {
       warning("Overriding existing prefix ", prefix, " => ",
               existing$directoryPath)
     }
   }
-
-  message('Shiny URLs starting with /', prefix, ' will mapped to ', directoryPath)
 
   .globals$resources[[prefix]] <- list(directoryPath=directoryPath,
                                        func=staticHandler(directoryPath))

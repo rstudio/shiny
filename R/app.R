@@ -246,17 +246,31 @@ knit_print.shiny.appobj <- function(x, ...) {
     output <- tags$iframe(src=path, width=width, height=height,
                           class="shiny-frame")
   }
-  knitr::asis_output(format(output, indent=FALSE), meta = shiny_warning)
+
+  # If embedded Shiny apps ever have JS/CSS dependencies (like pym.js) we'll
+  # need to grab those and put them in meta, like in knit_print.shiny.tag. But
+  # for now it's not an issue, so just return the HTML and warning.
+
+  knitr::asis_output(html_preserve(format(output, indent=FALSE)), meta = shiny_warning)
 }
 
 #' @rdname knitr_methods
 #' @export
 knit_print.shiny.tag <- function(x, ...) {
   output <- surroundSingletons(x)
+  deps <- getNewestDeps(findDependencies(x))
   content <- takeHeads(output)
   head_content <- doRenderTags(tagList(content$head))
-  knitr::asis_output(format(content$ui, indent=FALSE), meta =
-                       list(structure(head_content, class = "shiny_head")))
+
+  meta <- list(structure(head_content, class = "shiny_head"))
+  meta <- c(meta, deps)
+
+  knitr::asis_output(html_preserve(format(content$ui, indent=FALSE)), meta = meta)
+}
+
+knit_print.html <- function(x, ...) {
+  deps <- getNewestDeps(findDependencies(x))
+  knitr::asis_output(html_preserve(as.character(x)), meta = list(deps))
 }
 
 #' @rdname knitr_methods
@@ -277,3 +291,10 @@ knit_print.shiny.render.function <- function(x, ...) {
   knitr::knit_print(outputFunction(id))
 }
 
+html_preserve <- function(x) {
+  x <- paste(x, collapse = "\r\n")
+  if (nzchar(x))
+    sprintf("<!--html_preserve-->%s<!--/html_preserve-->", x)
+  else
+    x
+}

@@ -240,8 +240,6 @@ knit_print.shiny.appobj <- function(x, ...) {
       "Shiny applications not supported in static R Markdown documents")
   }
   else {
-    if (isTRUE(as.logical(knitr::opts_current$get("cache"))))
-      stop("Shiny applications cannot be used in cached chunks.")
     path <- addSubApp(x)
     output <- tags$iframe(src=path, width=width, height=height,
                           class="shiny-frame")
@@ -251,7 +249,8 @@ knit_print.shiny.appobj <- function(x, ...) {
   # need to grab those and put them in meta, like in knit_print.shiny.tag. But
   # for now it's not an issue, so just return the HTML and warning.
 
-  knitr::asis_output(html_preserve(format(output, indent=FALSE)), meta = shiny_warning)
+  knitr::asis_output(html_preserve(format(output, indent=FALSE)),
+                     meta = shiny_warning, cacheable = FALSE)
 }
 
 #' @rdname knitr_methods
@@ -288,7 +287,9 @@ knit_print.shiny.render.function <- function(x, ...) {
   o <- getDefaultReactiveDomain()$output
   if (!is.null(o))
     o[[id]] <- x
-  knitr::knit_print(outputFunction(id))
+  output <- knitr::knit_print(outputFunction(id))
+  attr(output, "knit_cacheable") <- FALSE
+  output
 }
 
 html_preserve <- function(x) {

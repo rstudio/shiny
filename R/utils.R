@@ -737,3 +737,13 @@ cachedSource <- function(dir, file, case.sensitive = FALSE) {
   })
 }
 
+# turn column-based data to row-based data (mainly for JSON), e.g. data.frame(x
+# = 1:10, y = 10:1) ==> list(list(x = 1, y = 10), list(x = 2, y = 9), ...)
+columnToRowData <- function(data) {
+  do.call(
+    mapply, c(
+      list(FUN = function(...) list(...), SIMPLIFY = FALSE, USE.NAMES = FALSE),
+      as.list(data)
+    )
+  )
+}

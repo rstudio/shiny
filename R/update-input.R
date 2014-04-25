@@ -301,13 +301,8 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
   if (!is.null(selected))
     selected <- validateSelected(selected, choices, inputId)
 
-  options <- if (length(choices)) mapply(choices, names(choices),
-    SIMPLIFY = FALSE, USE.NAMES = FALSE,
-    FUN = function(value, name) {
-      list(value = value,
-           label = name)
-    }
-  )
+  options <- if (length(choices))
+    columnToRowData(list(value = choices, label = names(choices)))
 
   message <- dropNulls(list(label = label, options = options, value = selected))
 
@@ -458,12 +453,5 @@ selectizeJSON <- function(data, req) {
   idx <- head(which(idx), mop)
   data <- data[idx, ]
 
-  # turn column-based data to row-based data for JSON
-  res <- do.call(
-    mapply, c(
-      list(FUN = function(...) list(...), SIMPLIFY = FALSE, USE.NAMES = FALSE),
-      as.list(data)
-    )
-  )
-  httpResponse(200, 'application/json', toJSON(res))
+  httpResponse(200, 'application/json', toJSON(columnToRowData(data)))
 }

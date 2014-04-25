@@ -261,7 +261,9 @@ knit_print.shiny.tag <- function(x, ...) {
   content <- takeHeads(output)
   head_content <- doRenderTags(tagList(content$head))
 
-  meta <- list(structure(head_content, class = "shiny_head"))
+  meta <- if (length(head_content) > 1 || head_content != "") {
+    list(structure(head_content, class = "shiny_head"))
+  }
   meta <- c(meta, deps)
 
   knitr::asis_output(html_preserve(format(content$ui, indent=FALSE)), meta = meta)
@@ -269,7 +271,8 @@ knit_print.shiny.tag <- function(x, ...) {
 
 knit_print.html <- function(x, ...) {
   deps <- getNewestDeps(findDependencies(x))
-  knitr::asis_output(html_preserve(as.character(x)), meta = list(deps))
+  knitr::asis_output(html_preserve(as.character(x)),
+                     meta = if (length(deps)) list(deps))
 }
 
 #' @rdname knitr_methods

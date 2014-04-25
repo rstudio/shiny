@@ -1061,7 +1061,11 @@
       this.renderError(el, err);
     };
     this.renderError = function(el, err) {
-      $(el).addClass('shiny-output-error').text(err.message);
+      if (err.type.indexOf('shinyUnsatisfiedDeps') < 0) {
+        $(el).addClass('shiny-output-error').text(err.message);
+      } else {
+        if (err.message !== '') alert(err.message);
+      };
     };
     this.clearError = function(el) {
       $(el).removeClass('shiny-output-error');
@@ -2430,6 +2434,9 @@
     },
     setValue: function(el, value) {
       $(el).data('val', value);
+    },
+    getType: function(el) {
+      return 'shiny.action';
     },
     subscribe: function(el, callback) {
       $(el).on("click.actionButtonInputBinding", function(e) {

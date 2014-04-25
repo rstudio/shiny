@@ -99,6 +99,11 @@ registerInputHandler("shiny.date", function(val, ...){
   as.Date(unlist(datelist))
 })
 
+registerInputHandler("shiny.action", function(val, ...) {
+  # mark up the action button value with a special class so we can recognize it later
+  class(val) <- c(class(val), "shinyActionButtonValue")
+  val
+})
 
 # Provide a character representation of the WS that can be used
 # as a key in a Map.

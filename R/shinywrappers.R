@@ -556,6 +556,83 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
   })
 }
 
+#' Check if input values satisfy the output rendering function
+#'
+#' For an output rendering function (e.g. \code{\link{renderPlot}()}), we may
+#' need to check certain input values before we can render the output. If the
+#' input values do not satisfy the rendering function, we can signal an error to
+#' indicate this special situation.
+#'
+#' For the sake of convenience, it is not strictly required that the condition
+#' is a logical value, and we can use input values themselves as the testing
+#' conditions, since there are a few common cases in which the input values are
+#' often considered invalid, including \code{NULL}, \code{NA}, values of length
+#' zero, and a special case for action buttons when they take values of 0 (i.e.
+#' not clicked). If any of these values happen to be valid, you can explicitly
+#' turn them to logical values. For example, if we allow \code{NA} but not
+#' \code{NULL}, we can use the condition \code{!is.null(input$foo)}, because
+#' \code{!is.null(NA) == TRUE}.
+#' @param ... A list of arguments, and each argument takes either a logical
+#'   value or a list of length 2. When an argument takes a logical value, the
+#'   value is the condition on which the rendering function should stop (the
+#'   condition normally returns \code{TRUE} or \code{FALSE}, and this function
+#'   stops when the condition is \code{FALSE}; see Details). When the argument
+#'   is a list, the first element of the list is an error message (a character
+#'   vector), and the second element is the condition explained before.
+#' @export
+#' @examples
+#' # in ui.R
+#' fluidPage(
+#'   actionButton('in1', 'Go!'),
+#'   checkboxGroupInput('in2', 'Check some letters', choices = head(LETTERS)),
+#'   selectizeInput('in3', 'Select a state', choices = state.name),
+#'   plotOutput('plot')
+#' )
+#'
+#' # in server.R
+#' function(input, output) {
+#'   output$plot <- renderPlot({
+#'     validateInput(
+#'       input$in1,  # ensure the button has been clicked
+#'       list('Check at least one letter!', input$in2),
+#'       list('Please choose a state.', input$in3 == '')
+#'     )
+#'     plot(1:10, main = paste(c(input$bar, input$foo), collapse = ', '))
+#'   })
+#' }
+validateInput <- function(...) {
+  ll <- list(...)
+  if (length(ll) == 0)
+    return()  # perhaps should stop(); it does not make sense
+
+  matched <- vapply(ll, isInvalidInput, logical(1), USE.NAMES = FALSE)
+  if (any(matched)) {
+    msg <- lapply(ll[matched], function(x) {
+      if (is.list(x) && length(x) == 2 && is.character(x[[1]])) x[[1]]
+    })
+    msg <- unlist(msg, use.names = FALSE)
+    cond <- structure(
+      list(message = paste(msg, collapse = '\n')),
+      class = c('shinyUnsatisfiedDeps', 'error', 'condition')
+    )
+    stop(cond)
+  }
+}
+
+isInvalidInput <- function(x) {
+  # TODO: what if input$foo is a list? not likely but still possible with
+  # custom bindings and registerInputHandler()
+  if (is.list(x)) {
+    # list(message = ?, condition = ?)
+    if (length(x) != 2)
+      stop('the arguments of ensure() must be of length 2 when they are lists')
+    x <- x[[2]]
+  }
+
+  identical(x, FALSE) || length(x) == 0 || (length(x) == 1 && is.na(x)) ||
+    (inherits(x, 'shinyActionButtonValue') && x == 0)
+}
+
 
 # Deprecated functions ------------------------------------------------------
 

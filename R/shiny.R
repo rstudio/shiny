@@ -211,8 +211,9 @@ ShinySession <- setRefClass(
             cond <- attr(value, 'condition')
             .invalidatedOutputErrors$set(
               name,
-              list(message=cond$message,
-                   call=capture.output(print(cond$call))))
+              list(message = cond$message,
+                   call = capture.output(print(cond$call)),
+                   type = class(cond)))
           }
           else
             .invalidatedOutputValues$set(name, value)

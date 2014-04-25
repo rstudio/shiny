@@ -2120,6 +2120,8 @@
             }
           });
         };
+        if (data.hasOwnProperty('selected'))
+          selectize.addOption(data.selected);
       }
 
       if (data.hasOwnProperty('value'))

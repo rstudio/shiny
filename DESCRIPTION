@@ -14,7 +14,6 @@ Depends:
     R (>= 2.14.1),
     methods
 Imports:
-    stats,
     tools,
     utils,
     httpuv (>= 1.2.0),

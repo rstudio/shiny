@@ -463,7 +463,11 @@ addSubApp <- function(appObj, autoRemove = TRUE) {
   # remove the leading / from the path so a relative path is returned
   # (needed for the case where the root URL for the Shiny app isn't /, such
   # as portmapped URLs)
-  finalPath <- paste(substr(path, 2, nchar(path)), "/?w=", workerId(), sep="")
+  finalPath <- paste(
+    substr(path, 2, nchar(path)),
+    "/?w=", workerId(),
+    "&__subapp__=1",
+    sep="")
   handlerManager$addHandler(routeHandler(path, appHandlers$http), finalPath)
   handlerManager$addWSHandler(routeWSHandler(path, appHandlers$ws), finalPath)
 

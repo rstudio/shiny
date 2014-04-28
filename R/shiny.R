@@ -61,6 +61,7 @@ ShinySession <- setRefClass(
     .outputs = 'list',       # Keeps track of all the output observer objects
     .outputOptions = 'list', # Options for each of the output observer objects
     .progressKeys = 'character',
+    .showcase   = 'ANY',
     .fileUploadContext = 'FileUploadContext',
     .input      = 'ANY', # Internal ReactiveValues object for normal input sent from client
     .clientData = 'ANY', # Internal ReactiveValues object for other data sent from the client
@@ -164,6 +165,9 @@ ShinySession <- setRefClass(
     },
     isEnded = function() {
       return(isClosed())
+    },
+    setShowcase = function(value) {
+      .showcase <<- !is.null(value) && as.logical(value)
     },
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
@@ -338,7 +342,8 @@ ShinySession <- setRefClass(
       }
     },
     reactlog = function(logEntry) {
-      .sendCustomMessage("reactlog", logEntry)
+      if (.showcase)
+        .sendCustomMessage("reactlog", logEntry)
     },
     .write = function(json) {
       if (closed){

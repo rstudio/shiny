@@ -290,7 +290,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
       shinysession <- ShinySession$new(ws)
       appsByToken$set(shinysession$token, shinysession)
-      showcase <- .globals$showcaseDefault
+      shinysession$setShowcase(.globals$showcaseDefault)
 
       ws$onMessage(function(binary, msg) {
         # To ease transition from websockets-based code. Should remove once we're stable.
@@ -366,7 +366,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                 exists(".clientdata_url_search", where = msg$data)) {
               mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
               if (!is.null(mode))
-                showcase <<- mode
+                shinysession$setShowcase(mode)
             }
 
             shinysession$manageInputs(msg$data)

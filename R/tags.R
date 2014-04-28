@@ -625,6 +625,10 @@ flattenTags <- function(x) {
     # like what HTML() produces
     list(x)
 
+  } else if (is.function(x) && is(x, "shiny.render.function")) {
+
+    list(useRenderFunction(x))
+
   } else {
     # For other items, coerce to character and wrap them into a list (which
     # will be unwrapped by caller). Note that this will strip attributes.

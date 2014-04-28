@@ -21,6 +21,15 @@ markRenderFunction <- function(uiFunc, renderFunc) {
   renderFunc
 }
 
+useRenderFunction <- function(renderFunc) {
+  outputFunction <- attr(renderFunc, "outputFunc")
+  id <- createUniqueId(8)
+  o <- getDefaultReactiveDomain()$output
+  if (!is.null(o))
+    o[[id]] <- renderFunc
+  return(outputFunction(id))
+}
+
 #' Plot Output
 #'
 #' Renders a reactive plot that is suitable for assigning to an \code{output}

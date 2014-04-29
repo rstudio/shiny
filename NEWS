@@ -9,6 +9,10 @@ shiny 0.9.1.9XXX
 * New `actionLink` input control; like `actionButton`, but with the appearance
   of a normal link.
 
+* Added `maskReactiveContext` function. It blocks the current reactive context,
+  to evaluate expressions that shouldn't use reactive sources directly. (This
+  should not be commonly needed.)
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

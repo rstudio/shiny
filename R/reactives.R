@@ -1165,3 +1165,22 @@ isolate <- function(expr) {
     expr
   })
 }
+
+#' Evaluate an expression without a reactive context
+#'
+#' Temporarily blocks the current reactive context and evaluates the given
+#' expression. Any attempt to directly access reactive values or expressions in
+#' \code{expr} will give the same results as doing it at the top-level (by
+#' default, an error).
+#'
+#' @param expr An expression to evaluate.
+#' @return The value of \code{expr}.
+#'
+#' @seealso \code{\link{isolate}}
+#'
+#' @export
+maskReactiveContext <- function(expr) {
+  .getReactiveEnvironment()$runWith(NULL, function() {
+    expr
+  })
+}

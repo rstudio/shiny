@@ -108,6 +108,7 @@ sd_section("Reactive constructs",
     "reactiveTimer",
     "reactiveValues",
     "reactiveValuesToList",
+    "domains",
     "showReactLog"
   )
 )
@@ -134,7 +135,8 @@ sd_section("Extending Shiny",
   c(
     "addResourcePath",
     "registerInputHandler",
-    "removeInputHandler"
+    "removeInputHandler",
+    "markRenderFunction"
   )
 )
 sd_section("Utility functions",
@@ -152,7 +154,8 @@ sd_section("Embedding",
   "Functions that are intended for third-party packages that embed Shiny applications.",
   c(
     "shinyApp",
-    "runRmdContainer",
-    "knitr_methods"
+    "maskReactiveContext",
+    "knitr_methods",
+    "getProvidedHtmlDependencies"
   )
 )

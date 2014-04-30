@@ -470,7 +470,7 @@ ShinySession <- setRefClass(
         result <- try(Context$new(getDefaultReactiveDomain(), '[download]')$run(
           function() { download$func(tmpdata) }
         ))
-        if (is(result, 'try-error')) {
+        if (inherits(result, 'try-error')) {
           unlink(tmpdata)
           return(httpResponse(500, 'text/plain',
                               attr(result, 'condition')$message))

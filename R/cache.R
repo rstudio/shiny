@@ -23,7 +23,7 @@ CacheContext <- setRefClass(
       mtime <- file.info(file)$mtime
       .tests <<- c(.tests, function() {
         newMtime <- try(file.info(file)$mtime, silent=TRUE)
-        if (is(newMtime, 'try-error'))
+        if (inherits(newMtime, 'try-error'))
           return(TRUE)
         return(!identical(mtime, newMtime))
       })

@@ -457,7 +457,7 @@ is.reactive <- function(x) inherits(x, "reactive")
 execCount <- function(x) {
   if (is.function(x))
     return(environment(x)$.execCount)
-  else if (is(x, 'Observer'))
+  else if (inherits(x, 'Observer'))
     return(x$.execCount)
   else
     stop('Unexpected argument to execCount')

@@ -285,12 +285,7 @@ knit_print.shiny.tag.list <- knit_print.shiny.tag
 #' @rdname knitr_methods
 #' @export
 knit_print.shiny.render.function <- function(x, ...) {
-  outputFunction <- attr(x, "outputFunc")
-  id <- createUniqueId(8)
-  o <- getDefaultReactiveDomain()$output
-  if (!is.null(o))
-    o[[id]] <- x
-  output <- knitr::knit_print(outputFunction(id))
+  output <- knitr::knit_print(tagList(x))
   attr(output, "knit_cacheable") <- FALSE
   output
 }

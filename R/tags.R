@@ -377,7 +377,7 @@ takeHeads <- function(ui) {
 
 findDependencies <- function(ui) {
   dep <- attr(ui, "html_dependency")
-  if (!is.null(dep) && is(dep, "html_dependency"))
+  if (!is.null(dep) && inherits(dep, "html_dependency"))
     dep <- list(dep)
   children <- if (is.list(ui)) {
     if (isTag(ui)) {
@@ -624,6 +624,10 @@ flattenTags <- function(x) {
     # This will preserve attributes if x is a character with attribute,
     # like what HTML() produces
     list(x)
+
+  } else if (is.function(x) && inherits(x, "shiny.render.function")) {
+
+    list(useRenderFunction(x))
 
   } else {
     # For other items, coerce to character and wrap them into a list (which

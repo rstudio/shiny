@@ -4,7 +4,7 @@ createWebDependency <- function(dependency) {
   if (is.null(dependency))
     return(NULL)
 
-  if (!is(dependency, "html_dependency"))
+  if (!inherits(dependency, "html_dependency"))
     stop("Unexpected non-html_dependency type")
 
   # Does it look like a path on disk? Register it as a resource and replace the

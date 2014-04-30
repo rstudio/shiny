@@ -809,3 +809,15 @@ test_that("observers autodestroy (or not)", {
     expect_identical(execCount(e), 1L)
   })
 })
+
+test_that("maskReactiveContext blocks use of reactives", {
+  vals <- reactiveValues(x = 123)
+
+  # Block reactive contexts (created by isolate)
+  expect_error(isolate(maskReactiveContext(vals$x)))
+  expect_error(isolate(isolate(maskReactiveContext(vals$x))))
+
+  # Reactive contexts within maskReactiveContext shouldn't be blocked
+  expect_identical(maskReactiveContext(isolate(vals$x)), 123)
+  expect_identical(isolate(maskReactiveContext(isolate(vals$x))), 123)
+})

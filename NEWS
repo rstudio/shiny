@@ -12,6 +12,10 @@ shiny 0.9.1.9XXX
 * `renderPlot` now calls `print` on its result if it's visible (i.e. no more
   explicit `print()` required for ggplot2).
 
+* Added `maskReactiveContext` function. It blocks the current reactive context,
+  to evaluate expressions that shouldn't use reactive sources directly. (This
+  should not be commonly needed.)
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

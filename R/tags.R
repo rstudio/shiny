@@ -377,7 +377,7 @@ takeHeads <- function(ui) {
 
 findDependencies <- function(ui) {
   dep <- attr(ui, "html_dependency")
-  if (!is.null(dep) && is(dep, "html_dependency"))
+  if (!is.null(dep) && inherits(dep, "html_dependency"))
     dep <- list(dep)
   children <- if (is.list(ui)) {
     if (isTag(ui)) {
@@ -625,7 +625,7 @@ flattenTags <- function(x) {
     # like what HTML() produces
     list(x)
 
-  } else if (is.function(x) && is(x, "shiny.render.function")) {
+  } else if (is.function(x) && inherits(x, "shiny.render.function")) {
 
     list(useRenderFunction(x))
 

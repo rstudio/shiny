@@ -670,7 +670,7 @@ runApp <- function(appDir=getwd(),
 
       # Test port to see if we can use it
       tmp <- try(startServer(host, port, list()), silent=TRUE)
-      if (!is(tmp, 'try-error')) {
+      if (!inherits(tmp, 'try-error')) {
         stopServer(tmp)
         .globals$lastPort <- port
         break

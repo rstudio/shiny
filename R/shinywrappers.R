@@ -101,7 +101,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     coordmap <- NULL
     plotFunc <- function() {
       # Actually perform the plotting
-      func()
+      result <- withVisible(func())
+      if (result$visible)
+        print(result$value)
 
       # Now capture some graphics device info before we close it
       usrCoords <- par('usr')

@@ -9,6 +9,9 @@ shiny 0.9.1.9XXX
 * New `actionLink` input control; like `actionButton`, but with the appearance
   of a normal link.
 
+* `renderPlot` now calls `print` on its result if it's visible (i.e. no more
+  explicit `print()` required for ggplot2).
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

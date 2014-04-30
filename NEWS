@@ -18,6 +18,9 @@ shiny 0.9.1.9XXX
 
 * New `horizontalLayout` function for putting UI elements side-by-side.
 
+* `sliderInput` and `selectizeInput`/`selectInput` now use a standard horizontal
+  size instead of filling up all available horizontal space.
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

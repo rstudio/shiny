@@ -705,25 +705,20 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     if (!multiple) selected <- choices[[1]]
   } else selected <- validateSelected(selected, choices, inputId)
 
+  # Create tags for each of the options
+  options <- HTML(paste("<option value=\"",
+    htmlEscape(choices),
+    "\"",
+    ifelse(choices %in% selected, " selected", ""),
+    ">",
+    htmlEscape(names(choices)),
+    "</option>",
+    sep = "", collapse = ""));
+
   # create select tag and add options
-  selectTag <- tags$select(id = inputId)
+  selectTag <- tags$select(id = inputId, options)
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
-
-  # Create tags for each of the options
-  optionTags <- mapply(choices, names(choices),
-    SIMPLIFY = FALSE, USE.NAMES = FALSE,
-    FUN = function(choice, name) {
-      optionTag <- tags$option(value = choice, name)
-
-      if (choice %in% selected)
-        optionTag$attribs$selected = "selected"
-
-      optionTag
-    }
-  )
-
-  selectTag <- tagSetChildren(selectTag, list = optionTags)
 
   # return label and select tag
   res <- tagList(controlLabel(inputId, label), selectTag)

@@ -610,12 +610,8 @@ validateInput <- function(...) {
     msg <- lapply(ll[matched], function(x) {
       if (is.list(x) && length(x) == 2 && is.character(x[[2]])) x[[2]]
     })
-    msg <- unlist(msg, use.names = FALSE)
-    cond <- structure(
-      list(message = paste(msg, collapse = '\n')),
-      class = c('shinyUnsatisfiedDeps', 'error', 'condition')
-    )
-    stop(cond)
+    msg <- paste(unlist(msg), collapse = '\n')
+    stopWithCondition(msg, 'validation')
   }
 }
 
@@ -633,6 +629,15 @@ isInvalidInput <- function(x) {
     (inherits(x, 'shinyActionButtonValue') && x == 0)
 }
 
+# add class(es) to the error condition, which will be used as names of CSS
+# classes, e.g. shiny-output-error shiny-output-validation
+stopWithCondition <- function(message, class) {
+  cond <- structure(
+    list(message = message),
+    class = c('error', 'condition', class)
+  )
+  stop(cond)
+}
 
 # Deprecated functions ------------------------------------------------------
 

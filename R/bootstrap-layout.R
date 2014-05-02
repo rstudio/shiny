@@ -342,6 +342,20 @@ flowLayout <- function(..., cellArgs = list()) {
   ))
 }
 
+#' Input panel
+#'
+#' A \code{\link{flowLayout}} with a grey border and light grey background,
+#' suitable for wrapping inputs.
+#'
+#' @param ... Input controls or other HTML elements.
+#'
+#' @export
+inputPanel <- function(...) {
+  div(class = "shiny-input-panel",
+    flowLayout(...)
+  )
+}
+
 #' Split layout
 #'
 #' Lays out elements horizontally, dividing the available horizontal space into

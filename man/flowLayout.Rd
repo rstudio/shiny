@@ -13,7 +13,7 @@ arguments will become HTML attributes on the outermost tag.}
   of the layout.}
 }
 \description{
-Lays out elements horizontally, starting new rows as necessary. The elements
+Lays out elements in a left-to-right, top-to-bottom arrangement. The elements
 on a given row will be top-aligned with each other. This layout will not work
 well with elements that have a percentage-based width (e.g. `plotOutput` at
 its default setting of `width = "100%"`).

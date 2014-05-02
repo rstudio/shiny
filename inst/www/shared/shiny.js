@@ -503,6 +503,11 @@
           protocol = 'wss:';
 
         var defaultPath = window.location.pathname;
+        // some older WebKit browsers return the pathname already decoded;
+        // if we find invalid URL characters in the path, encode them (twice,
+        // to survive decoding by WebSocket below)
+        if (!/^([$#!&-;=?-[\]_a-z~]|%[0-9a-fA-F]{2})+$/.test(defaultPath))
+          defaultPath = encodeURI(encodeURI(defaultPath))
         if (!/\/$/.test(defaultPath))
           defaultPath += '/';
         defaultPath += 'websocket/';

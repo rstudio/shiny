@@ -25,6 +25,6 @@ shinyUI(fluidPage(
 ))
 }
 \seealso{
-\code{\link{fluidPage}}, \code{\link{horizontalLayout}}
+\code{\link{fluidPage}}, \code{\link{flowLayout}}
 }
 

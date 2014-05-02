@@ -112,6 +112,18 @@ span.jslider {
   border: none;
 }
 
-table.shiny-horizontal-layout>tbody>tr>td {
+.shiny-flow-layout>div {
+  display: inline-block;
+  vertical-align: top;
   padding-right: 12px;
+}
+.shiny-split-layout {
+  width: 100%;
+  white-space: nowrap;
+}
+.shiny-split-layout>div {
+  display: inline-block;
+  vertical-align: top;
+  box-sizing: border-box;
+  overflow: auto;
 }

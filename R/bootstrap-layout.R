@@ -285,7 +285,7 @@ sidebarLayout <- function(sidebarPanel,
 #' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
 #'   layout.
 #'
-#' @seealso \code{\link{fluidPage}}, \code{\link{horizontalLayout}}
+#' @seealso \code{\link{fluidPage}}, \code{\link{flowLayout}}
 #'
 #' @examples
 #' shinyUI(fluidPage(
@@ -306,63 +306,102 @@ verticalLayout <- function(..., fluid = TRUE) {
   })
 }
 
-#' Lay out UI elements horizontally
+#' Flow layout
 #'
-#' Create a container that lays out elements next to each other.
-#'
-#' This layout is implemented using tables. These days, using HTML tables for
-#' layout purposes is generally frowned upon by experienced web designers as not
-#' being "semantically correct", but it's the only reasonable way to provide
-#' decent vertical alignment options.
-#'
-#' The layout will create a table with a single row (\code{tr}), and a cell
-#' (\code{td}) within that row for each of the child elements. By default, the
-#' width of the cells will be set to (100 / number of children)\%. You can
-#' override this by including a specific \code{width} value in \code{cellArgs},
-#' but you can't customize widths on a per-column basis.
+#' Lays out elements horizontally, starting new rows as necessary. The elements
+#' on a given row will be top-aligned with each other. This layout will not work
+#' well with elements that have a percentage-based width (e.g. `plotOutput` at
+#' its default setting of `width = "100%"`).
 #'
 #' @param ... Unnamed arguments will become child elements of the layout. Named
 #'   arguments will become HTML attributes on the outermost tag.
-#' @param valign The vertical alignment of the children.
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
 #'
 #' @seealso \code{\link{verticalLayout}}
 #'
 #' #' @examples
-#' horizontalLayout(
+#' flowLayout(
 #'   numericInput("rows", "How many rows?", 5),
 #'   selectInput("letter", "Which letter?", LETTERS),
 #'   sliderInput("value", "What value?", 0, 100, 50)
 #' )
 #' @export
-horizontalLayout <- function(..., valign = c("top", "middle", "bottom"),
-  cellArgs = list()) {
-
-  valign <- match.arg(valign)
+flowLayout <- function(..., cellArgs = list()) {
 
   children <- list(...)
   childIdx <- !nzchar(names(children) %OR% character(length(children)))
   attribs <- children[!childIdx]
   children <- children[childIdx]
 
-  count <- length(children)
-  width <- 100 / count
-  if (is.null(cellArgs$width))
-    cellArgs$width <- sprintf("%.3f%%", width)
-  if (is.null(cellArgs$valign))
-    cellArgs$valign <- valign
-
-  do.call(tags$table, c(list(class="shiny-horizontal-layout"),
+  do.call(tags$div, c(list(class = "shiny-flow-layout"),
     attribs,
-    list(tags$tbody(
-      tags$tr(
-        lapply(children, function(x) {
-          do.call(tags$td, c(cellArgs, list(x)))
-        })
-      )
-    ))
+    lapply(children, function(x) {
+      do.call(tags$div, c(cellArgs, list(x)))
+    })
   ))
 }
 
+#' Split layout
+#'
+#' Lays out elements horizontally, dividing the available horizontal space into
+#' equal parts (by default).
+#'
+#' @param ... Unnamed arguments will become child elements of the layout. Named
+#'   arguments will become HTML attributes on the outermost tag.
+#' @param cellWidths Character or numeric vector indicating the widths of the
+#'   individual cells. Recycling will be used if needed. Character values will
+#'   be interpreted as CSS lengths (see \code{\link{validateCssUnit}}), numeric
+#'   values as pixels.
+#' @param cellArgs Any additional attributes that should be used for each cell
+#'   of the layout.
+#'
+#' #' @examples
+#' # Equal sizing
+#' splitLayout(
+#'   plotOutput("plot1"),
+#'   plotOutput("plot2")
+#' )
+#'
+#' # Custom widths
+#' splitLayout(cellWidths = c("25%", "75%"),
+#'   plotOutput("plot1"),
+#'   plotOutput("plot2")
+#' )
+#'
+#' # All cells at 300 pixels wide, with cell padding
+#' # and a border around everything
+#' splitLayout(
+#'   style = "border: 1px solid silver;",
+#'   cellWidths = 300,
+#'   cellArgs = list(style = "padding: 6px"),
+#'   plotOutput("plot1"),
+#'   plotOutput("plot2"),
+#'   plotOutput("plot3")
+#' )
+#' @export
+splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 
+  children <- list(...)
+  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  attribs <- children[!childIdx]
+  children <- children[childIdx]
+  count <- length(children)
+
+  if (length(cellWidths) == 0 || is.na(cellWidths)) {
+    cellWidths <- sprintf("%.3f%%", 100 / count)
+  }
+  cellWidths <- rep(cellWidths, length.out = count)
+  cellWidths <- sapply(cellWidths, validateCssUnit)
+
+  do.call(tags$div, c(list(class = "shiny-split-layout"),
+    attribs,
+    mapply(children, cellWidths, FUN = function(x, w) {
+      do.call(tags$div, c(
+        list(style = sprintf("width: %s;", w)),
+        cellArgs,
+        list(x)
+      ))
+    }, SIMPLIFY = FALSE)
+  ))
+}

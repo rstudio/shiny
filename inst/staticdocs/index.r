@@ -19,6 +19,8 @@ sd_section("UI Layout",
     "tabPanel",
     "tabsetPanel",
     "titlePanel",
+    "flowLayout",
+    "splitLayout",
     "verticalLayout",
     "wellPanel",
     "withMathJax"

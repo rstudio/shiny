@@ -558,19 +558,19 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 
 #' Check if input values satisfy the output rendering function
 #'
-#' For an output rendering function (e.g. \code{\link{renderPlot}()}), we may
-#' need to check certain input values before we can render the output. If the
-#' input values do not satisfy the rendering function, we can signal an error to
-#' indicate this special situation.
+#' For an output rendering function (e.g. \code{\link{renderPlot}()}), you may
+#' need to check certain input values before you can render the output. If the
+#' input values do not satisfy the rendering function, a special type of error
+#' can be emitted to indicate this special situation.
 #'
 #' For the sake of convenience, it is not strictly required that the condition
-#' is a logical value, and we can use input values themselves as the testing
+#' is a logical value, and you can use input values themselves as the testing
 #' conditions, since there are a few common cases in which the input values are
 #' often considered invalid, including \code{NULL}, \code{NA}, values of length
 #' zero, and a special case for action buttons when they take values of 0 (i.e.
 #' not clicked). If any of these values happen to be valid, you can explicitly
-#' turn them to logical values. For example, if we allow \code{NA} but not
-#' \code{NULL}, we can use the condition \code{!is.null(input$foo)}, because
+#' turn them to logical values. For example, if you allow \code{NA} but not
+#' \code{NULL}, you can use the condition \code{!is.null(input$foo)}, because
 #' \code{!is.null(NA) == TRUE}.
 #' @param ... A list of arguments, and each argument takes either a logical
 #'   value or a list of length 2. When an argument takes a logical value, the

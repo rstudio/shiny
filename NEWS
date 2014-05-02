@@ -16,6 +16,17 @@ shiny 0.9.1.9XXX
   to evaluate expressions that shouldn't use reactive sources directly. (This
   should not be commonly needed.)
 
+* Added `flowLayout`, `splitLayout`, and `inputPanel` functions for putting UI
+  elements side by side. `flowPanel` lays out its children in a left-to-right,
+  top-to-bottom arrangement. `splitLayout` evenly divides its horizontal space
+  among its children (or unevenly divides if `cellWidths` argument is provided).
+  `inputPanel` is like `flowPanel`, but with a light grey background, and is
+  intended to be used to encapsulate small input controls wherever vertical
+  space is at a premium.
+
+* `sliderInput` and `selectizeInput`/`selectInput` now use a standard horizontal
+  size instead of filling up all available horizontal space.
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

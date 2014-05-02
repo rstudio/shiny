@@ -276,7 +276,7 @@ sidebarLayout <- function(sidebarPanel,
     fixedRow(firstPanel, secondPanel)
 }
 
-#' Layout UI elements vertically
+#' Lay out UI elements vertically
 #'
 #' Create a container that includes one or more rows of content (each element
 #' passed to the container will appear on it's own line in the UI)
@@ -285,7 +285,7 @@ sidebarLayout <- function(sidebarPanel,
 #' @param fluid \code{TRUE} to use fluid layout; \code{FALSE} to use fixed
 #'   layout.
 #'
-#' @seealso \code{\link{fluidPage}}
+#' @seealso \code{\link{fluidPage}}, \code{\link{flowLayout}}
 #'
 #' @examples
 #' shinyUI(fluidPage(
@@ -306,5 +306,116 @@ verticalLayout <- function(..., fluid = TRUE) {
   })
 }
 
+#' Flow layout
+#'
+#' Lays out elements in a left-to-right, top-to-bottom arrangement. The elements
+#' on a given row will be top-aligned with each other. This layout will not work
+#' well with elements that have a percentage-based width (e.g. `plotOutput` at
+#' its default setting of `width = "100%"`).
+#'
+#' @param ... Unnamed arguments will become child elements of the layout. Named
+#'   arguments will become HTML attributes on the outermost tag.
+#' @param cellArgs Any additional attributes that should be used for each cell
+#'   of the layout.
+#'
+#' @seealso \code{\link{verticalLayout}}
+#'
+#' #' @examples
+#' flowLayout(
+#'   numericInput("rows", "How many rows?", 5),
+#'   selectInput("letter", "Which letter?", LETTERS),
+#'   sliderInput("value", "What value?", 0, 100, 50)
+#' )
+#' @export
+flowLayout <- function(..., cellArgs = list()) {
 
+  children <- list(...)
+  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  attribs <- children[!childIdx]
+  children <- children[childIdx]
 
+  do.call(tags$div, c(list(class = "shiny-flow-layout"),
+    attribs,
+    lapply(children, function(x) {
+      do.call(tags$div, c(cellArgs, list(x)))
+    })
+  ))
+}
+
+#' Input panel
+#'
+#' A \code{\link{flowLayout}} with a grey border and light grey background,
+#' suitable for wrapping inputs.
+#'
+#' @param ... Input controls or other HTML elements.
+#'
+#' @export
+inputPanel <- function(...) {
+  div(class = "shiny-input-panel",
+    flowLayout(...)
+  )
+}
+
+#' Split layout
+#'
+#' Lays out elements horizontally, dividing the available horizontal space into
+#' equal parts (by default).
+#'
+#' @param ... Unnamed arguments will become child elements of the layout. Named
+#'   arguments will become HTML attributes on the outermost tag.
+#' @param cellWidths Character or numeric vector indicating the widths of the
+#'   individual cells. Recycling will be used if needed. Character values will
+#'   be interpreted as CSS lengths (see \code{\link{validateCssUnit}}), numeric
+#'   values as pixels.
+#' @param cellArgs Any additional attributes that should be used for each cell
+#'   of the layout.
+#'
+#' #' @examples
+#' # Equal sizing
+#' splitLayout(
+#'   plotOutput("plot1"),
+#'   plotOutput("plot2")
+#' )
+#'
+#' # Custom widths
+#' splitLayout(cellWidths = c("25%", "75%"),
+#'   plotOutput("plot1"),
+#'   plotOutput("plot2")
+#' )
+#'
+#' # All cells at 300 pixels wide, with cell padding
+#' # and a border around everything
+#' splitLayout(
+#'   style = "border: 1px solid silver;",
+#'   cellWidths = 300,
+#'   cellArgs = list(style = "padding: 6px"),
+#'   plotOutput("plot1"),
+#'   plotOutput("plot2"),
+#'   plotOutput("plot3")
+#' )
+#' @export
+splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
+
+  children <- list(...)
+  childIdx <- !nzchar(names(children) %OR% character(length(children)))
+  attribs <- children[!childIdx]
+  children <- children[childIdx]
+  count <- length(children)
+
+  if (length(cellWidths) == 0 || is.na(cellWidths)) {
+    cellWidths <- sprintf("%.3f%%", 100 / count)
+  }
+  cellWidths <- rep(cellWidths, length.out = count)
+  cellWidths <- sapply(cellWidths, validateCssUnit)
+
+  do.call(tags$div, c(list(class = "shiny-split-layout"),
+    attribs,
+    mapply(children, cellWidths, FUN = function(x, w) {
+      do.call(tags$div, c(
+        list(style = sprintf("width: %s;", w)),
+        cellArgs,
+        list(x)
+      ))
+    }, SIMPLIFY = FALSE)
+  ))
+}

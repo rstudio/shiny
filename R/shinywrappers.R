@@ -630,7 +630,7 @@ isInvalidInput <- function(x) {
 }
 
 # add class(es) to the error condition, which will be used as names of CSS
-# classes, e.g. shiny-output-error shiny-output-validation
+# classes, e.g. shiny-output-error shiny-output-error-validation
 stopWithCondition <- function(message, class) {
   cond <- structure(
     list(message = message),

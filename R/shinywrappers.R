@@ -594,8 +594,8 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 #'   output$plot <- renderPlot({
 #'     validateInput(
 #'       input$in1,  # ensure the button has been clicked
-#'       list('Check at least one letter!', input$in2),
-#'       list('Please choose a state.', input$in3 == '')
+#'       list(input$in2, 'Check at least one letter!'),
+#'       list(input$in3 == '', 'Please choose a state.')
 #'     )
 #'     plot(1:10, main = paste(c(input$bar, input$foo), collapse = ', '))
 #'   })
@@ -608,7 +608,7 @@ validateInput <- function(...) {
   matched <- vapply(ll, isInvalidInput, logical(1), USE.NAMES = FALSE)
   if (any(matched)) {
     msg <- lapply(ll[matched], function(x) {
-      if (is.list(x) && length(x) == 2 && is.character(x[[1]])) x[[1]]
+      if (is.list(x) && length(x) == 2 && is.character(x[[2]])) x[[2]]
     })
     msg <- unlist(msg, use.names = FALSE)
     cond <- structure(
@@ -626,7 +626,7 @@ isInvalidInput <- function(x) {
     # list(message = ?, condition = ?)
     if (length(x) != 2)
       stop('the arguments of ensure() must be of length 2 when they are lists')
-    x <- x[[2]]
+    x <- x[[1]]
   }
 
   identical(x, FALSE) || length(x) == 0 || (length(x) == 1 && is.na(x)) ||

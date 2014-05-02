@@ -603,11 +603,16 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 #'   })
 #' }
 validateInput <- function(...) {
-  msg <- character(0)
+  msg  <- character(0)
+  fail <- FALSE
   for (i in list(...)) {
-    if (isInvalidInput(i)) msg <- c(msg, x[[2]])
+    verify <- testInvalidInput(i)
+    if (verify$invalid) {
+      fail <- TRUE
+      if (verify$condition) msg <- c(msg, i[[2]])
+    }
   }
-  if (length(msg)) {
+  if (fail) {
     msg <- paste(unlist(msg), collapse = '\n')
     stopWithCondition(msg, 'validation')
   }
@@ -621,16 +626,14 @@ validateCondition <- function(condition, message) {
   structure(list(condition, message), class = 'shinyValidationCondition')
 }
 
-isInvalidInput <- function(x) {
+testInvalidInput <- function(x) {
   cond <- inherits(x, 'shinyValidationCondition')
   # list(condition = ?, message = ?)
   if (cond) x <- x[[1]]
 
   val <- identical(x, FALSE) || length(x) == 0 || (length(x) == 1 && is.na(x)) ||
     (inherits(x, 'shinyActionButtonValue') && x == 0)
-  if (cond || !val) return(val)
-  # silently stop when the condition was not constructed from validateCondition()
-  stopWithCondition('', 'validation')
+  list(condition = cond, invalid = val)
 }
 
 # add class(es) to the error condition, which will be used as names of CSS

@@ -1061,11 +1061,12 @@
       this.renderError(el, err);
     };
     this.renderError = function(el, err) {
-      if (err.type.indexOf('shinyUnsatisfiedDeps') < 0) {
-        $(el).addClass('shiny-output-error').text(err.message);
-      } else {
-        if (err.message !== '') alert(err.message);
-      };
+      if (err.message === '') return;
+      // use the classes of the error condition as CSS class names
+      var errClass = $.map(asArray(err.type), function(type) {
+        return 'shiny-output-' + type;
+      }).join(' ');
+      $(el).addClass(errClass).text(err.message);
     };
     this.clearError = function(el) {
       $(el).removeClass('shiny-output-error');

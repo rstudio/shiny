@@ -603,17 +603,11 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 #'   })
 #' }
 validateInput <- function(...) {
-  ll <- list(...)
-  if (length(ll) == 0)
-    return()  # perhaps should stop(); it does not make sense
-
-  matched <- vapply(ll, isInvalidInput, logical(1), USE.NAMES = FALSE)
-  if (any(matched)) {
-    msg <- lapply(ll[matched], function(x) {
-      if (inherits(x, 'shinyValidationCondition')) x[[2]] else {
-        stopWithCondition('', 'validation')  # just silently stop
-      }
-    })
+  msg <- character(0)
+  for (i in list(...)) {
+    if (isInvalidInput(i)) msg <- c(msg, x[[2]])
+  }
+  if (length(msg)) {
     msg <- paste(unlist(msg), collapse = '\n')
     stopWithCondition(msg, 'validation')
   }
@@ -628,13 +622,15 @@ validateCondition <- function(condition, message) {
 }
 
 isInvalidInput <- function(x) {
-  if (inherits(x, 'shinyValidationCondition')) {
-    # list(condition = ?, message = ?)
-    x <- x[[1]]
-  }
+  cond <- inherits(x, 'shinyValidationCondition')
+  # list(condition = ?, message = ?)
+  if (cond) x <- x[[1]]
 
-  identical(x, FALSE) || length(x) == 0 || (length(x) == 1 && is.na(x)) ||
+  val <- identical(x, FALSE) || length(x) == 0 || (length(x) == 1 && is.na(x)) ||
     (inherits(x, 'shinyActionButtonValue') && x == 0)
+  if (cond || !val) return(val)
+  # silently stop when the condition was not constructed from validateCondition()
+  stopWithCondition('', 'validation')
 }
 
 # add class(es) to the error condition, which will be used as names of CSS

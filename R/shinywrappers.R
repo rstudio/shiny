@@ -561,7 +561,10 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 #' For an output rendering function (e.g. \code{\link{renderPlot}()}), you may
 #' need to check certain input values before you can render the output. If the
 #' input values do not satisfy the rendering function, a special type of error
-#' can be emitted to indicate this special situation.
+#' can be emitted to indicate this special situation. If you need to show the
+#' error message(s), you can use \code{validateCondition()} as the input to
+#' \code{validateInput()}, otherwise \pkg{shiny} will silently stop processing
+#' the input.
 #'
 #' For the sake of convenience, it is not strictly required that the condition
 #' is a logical value, and you can use input values themselves as the testing
@@ -573,12 +576,11 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 #' \code{NULL}, you can use the condition \code{!is.null(input$foo)}, because
 #' \code{!is.null(NA) == TRUE}.
 #' @param ... A list of arguments, and each argument takes either a logical
-#'   value or a list of length 2. When an argument takes a logical value, the
-#'   value is the condition on which the rendering function should stop (the
-#'   condition normally returns \code{TRUE} or \code{FALSE}, and this function
-#'   stops when the condition is \code{FALSE}; see Details). When the argument
-#'   is a list, the first element of the list is an error message (a character
-#'   vector), and the second element is the condition explained before.
+#'   value or an object returned by \code{validateCondition()}. When an argument
+#'   takes a logical value, the value is the condition on which the rendering
+#'   function should stop (the condition normally returns \code{TRUE} or
+#'   \code{FALSE}, and this function stops when the condition is \code{FALSE};
+#'   see Details).
 #' @export
 #' @examples
 #' # in ui.R
@@ -594,8 +596,8 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 #'   output$plot <- renderPlot({
 #'     validateInput(
 #'       input$in1,  # ensure the button has been clicked
-#'       list(input$in2, 'Check at least one letter!'),
-#'       list(input$in3 == '', 'Please choose a state.')
+#'       validateCondition(input$in2, 'Check at least one letter!'),
+#'       validateCondition(input$in3 == '', 'Please choose a state.')
 #'     )
 #'     plot(1:10, main = paste(c(input$bar, input$foo), collapse = ', '))
 #'   })
@@ -608,20 +610,26 @@ validateInput <- function(...) {
   matched <- vapply(ll, isInvalidInput, logical(1), USE.NAMES = FALSE)
   if (any(matched)) {
     msg <- lapply(ll[matched], function(x) {
-      if (is.list(x) && length(x) == 2 && is.character(x[[2]])) x[[2]]
+      if (inherits(x, 'shinyValidationCondition')) x[[2]] else {
+        stopWithCondition('', 'validation')  # just silently stop
+      }
     })
     msg <- paste(unlist(msg), collapse = '\n')
     stopWithCondition(msg, 'validation')
   }
 }
+#' @param condition A condition to be validated.
+#' @param message A character string as the error message if the condition is
+#'   not satisfied.
+#' @export
+#' @rdname validateInput
+validateCondition <- function(condition, message) {
+  structure(list(condition, message), class = 'shinyValidationCondition')
+}
 
 isInvalidInput <- function(x) {
-  # TODO: what if input$foo is a list? not likely but still possible with
-  # custom bindings and registerInputHandler()
-  if (is.list(x)) {
-    # list(message = ?, condition = ?)
-    if (length(x) != 2)
-      stop('the arguments of ensure() must be of length 2 when they are lists')
+  if (inherits(x, 'shinyValidationCondition')) {
+    # list(condition = ?, message = ?)
     x <- x[[1]]
   }
 

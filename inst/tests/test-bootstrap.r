@@ -24,7 +24,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   # Select input
   x <- selectInput('id','label', choices = c(a='x1', a='x2', b='x3'), selectize = FALSE)
   expect_equal(format(x), '<label class="control-label" for="id">label</label>
-<select id="id"><option value="x1" selected>a</option><option value="x2">a</option><option value="x3">b</option></select>')
+<select id="id"><option value="x1" selected>a</option>\n<option value="x2">a</option>\n<option value="x3">b</option></select>')
 
 
   # Radio buttons

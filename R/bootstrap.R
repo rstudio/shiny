@@ -713,7 +713,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     ">",
     htmlEscape(names(choices)),
     "</option>",
-    sep = "", collapse = ""));
+    sep = "", collapse = "\n"));
 
   # create select tag and add options
   selectTag <- tags$select(id = inputId, options)

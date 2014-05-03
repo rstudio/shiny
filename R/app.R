@@ -121,6 +121,7 @@ shinyAppDir <- function(appDir, options=list()) {
   }
 
   wwwDir <- file.path.ci(appDir, "www")
+  fallbackWWWDir <- system.file("www-dir", package = "shiny")
   serverSource <- cachedSource(appDir, "server.R", case.sensitive = FALSE)
 
   # This function stands in for the server function, and reloads the
@@ -153,7 +154,7 @@ shinyAppDir <- function(appDir, options=list()) {
 
   structure(
     list(
-      httpHandler = joinHandlers(c(uiHandler, wwwDir)),
+      httpHandler = joinHandlers(c(uiHandler, wwwDir, fallbackWWWDir)),
       serverFuncSource = serverFuncSource,
       onStart = onStart,
       onEnd = onEnd,

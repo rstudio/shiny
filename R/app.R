@@ -94,6 +94,10 @@ shinyAppDir <- function(appDir, options=list()) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
   # change on disk, or are created, or are removed.
 
+  if (!file.exists(appDir)) {
+    stop("No Shiny application exists at the path \"", appDir, "\"")
+  }
+
   # In case it's a relative path, convert to absolute (so we're not adversely
   # affected by future changes to the path)
   appDir <- normalizePath(appDir, mustWork = TRUE)

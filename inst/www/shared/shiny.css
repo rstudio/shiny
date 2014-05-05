@@ -28,6 +28,11 @@ table.data td[align=right] {
   background-color: transparent !important;
 }
 
+span.jslider, .selectize-control {
+  width: 220px;
+  max-width: 95%;
+}
+
 .recalculating {
   opacity: 0.3;
   transition: opacity 250ms ease 500ms;
@@ -105,4 +110,29 @@ span.jslider {
 
 .shiny-frame {
   border: none;
+}
+
+.shiny-flow-layout>div {
+  display: inline-block;
+  vertical-align: top;
+  padding-right: 12px;
+}
+.shiny-split-layout {
+  width: 100%;
+  white-space: nowrap;
+}
+.shiny-split-layout>div {
+  display: inline-block;
+  vertical-align: top;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.shiny-input-panel {
+  padding: 6px 8px;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  background-color: #f5f5f5;
+  border: 1px solid #e3e3e3;
+  border-radius: 2px;
 }

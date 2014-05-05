@@ -138,5 +138,5 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
                       tags$span(class='pause', animate$pauseButton)))
   }
 
-  return(sliderFragment)
+  return(tagList(sliderFragment))
 }

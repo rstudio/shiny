@@ -5,9 +5,11 @@
 
   var exports = window.Shiny = window.Shiny || {};
 
+  var isQt = false;
   // For easy handling of Qt quirks using CSS
   if (/\bQt\//.test(window.navigator.userAgent)) {
     $(document.documentElement).addClass('qt');
+    isQt = true;
   }
 
   $(document).on('submit', 'form:not([action])', function(e) {
@@ -503,6 +505,15 @@
           protocol = 'wss:';
 
         var defaultPath = window.location.pathname;
+        // some older WebKit browsers return the pathname already decoded;
+        // if we find invalid URL characters in the path, encode them
+        if (!/^([$#!&-;=?-[\]_a-z~]|%[0-9a-fA-F]{2})+$/.test(defaultPath)) {
+          defaultPath = encodeURI(defaultPath);
+          // Bizarrely, QtWebKit requires us to encode these characters *twice*
+          if (isQt) {
+            defaultPath = encodeURI(defaultPath);
+          }
+        }
         if (!/\/$/.test(defaultPath))
           defaultPath += '/';
         defaultPath += 'websocket/';

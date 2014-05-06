@@ -131,7 +131,7 @@ ReactiveEnvironment <- setRefClass(
   )
 )
 
-delayedAssign(".reactiveEnvironment", ReactiveEnvironment$new())
+.reactiveEnvironment <- ReactiveEnvironment$new()
 .getReactiveEnvironment <- function() {
   .reactiveEnvironment
 }

@@ -556,84 +556,144 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
   })
 }
 
-#' Check if input values satisfy the output rendering function
+#' Validate input values and other conditions
 #'
 #' For an output rendering function (e.g. \code{\link{renderPlot}()}), you may
-#' need to check certain input values before you can render the output. If the
-#' input values do not satisfy the rendering function, a special type of error
-#' can be emitted to indicate this special situation. If you need to show the
-#' error message(s), you can use \code{validateCondition()} as the input to
-#' \code{validateInput()}, otherwise \pkg{shiny} will silently stop processing
-#' the input.
+#' need to check that certain input values are available and valid before you
+#' can render the output. \code{validate} gives you a convenient mechanism for
+#' doing so.
 #'
-#' For the sake of convenience, it is not strictly required that the condition
-#' is a logical value, and you can use input values themselves as the testing
-#' conditions, since there are a few common cases in which the input values are
-#' often considered invalid, including \code{NULL}, \code{NA}, values of length
-#' zero, and a special case for action buttons when they take values of 0 (i.e.
-#' not clicked). If any of these values happen to be valid, you can explicitly
-#' turn them to logical values. For example, if you allow \code{NA} but not
-#' \code{NULL}, you can use the condition \code{!is.null(input$foo)}, because
-#' \code{!is.null(NA) == TRUE}.
-#' @param ... A list of arguments, and each argument takes either a logical
-#'   value or an object returned by \code{validateCondition()}. When an argument
-#'   takes a logical value, the value is the condition on which the rendering
-#'   function should stop (the condition normally returns \code{TRUE} or
-#'   \code{FALSE}, and this function stops when the condition is \code{FALSE};
-#'   see Details).
+#' The \code{validate} function takes any number of (unnamed) arguments, each of
+#' which represents a condition to test. If any of the conditions represent
+#' failure, then a special type of error is signaled which stops execution. If
+#' this error is not handled by application-specific code, it is displayed to
+#' the user by Shiny.
+#'
+#' An easy way to provide arguments to \code{validate} is to use the \code{need}
+#' function, which takes an expression and a string; if the expression is
+#' considered a failure, then the string will be used as the error message. The
+#' \code{need} function considers its expression to be a failure if it is any of
+#' the following:
+#'
+#' \itemize{
+#'   \item{\code{FALSE}}
+#'   \item{\code{NULL}}
+#'   \item{\code{""}}
+#'   \item{An empty atomic vector}
+#'   \item{An atomic vector that contains only missing values}
+#'   \item{A logical vector that contains all \code{FALSE} or missing values}
+#'   \item{An object of class \code{"try-error"}}
+#'   \item{A value that represents an unclicked \code{\link{actionButton}}}
+#' }
+#'
+#' If any of these values happen to be valid, you can explicitly turn them to
+#' logical values. For example, if you allow \code{NA} but not \code{NULL}, you
+#' can use the condition \code{!is.null(input$foo)}, because \code{!is.null(NA)
+#' == TRUE}.
+#'
+#' If you need validation logic that differs significantly from \code{need}, you
+#' can create other validation test functions. A passing test should return
+#' \code{NULL}. A failing test should return an error message as a
+#' single-element character vector, or if the failure should happen silently,
+#' \code{FALSE}.
+#'
+#' Because validation failure is signaled as an error, you can use
+#' \code{validate} in reactive expressions, and validation failures will
+#' automatically propagate to outputs that use the reactive expression. In
+#' other words, if reactive expression \code{a} needs \code{input$x}, and two
+#' outputs use \code{a} (and thus depend indirectly on \code{input$x}), it's
+#' not necessary for the outputs to validate \code{input$x} explicitly, as long
+#' as \code{a} does validate it.
+#'
+#' @param ... A list of tests. Each test should equal \code{NULL} for success,
+#'   \code{FALSE} for silent failure, or a string for failure with an error
+#'   message.
+#' @param errorClass A CSS class to apply.
 #' @export
 #' @examples
 #' # in ui.R
 #' fluidPage(
-#'   actionButton('in1', 'Go!'),
-#'   checkboxGroupInput('in2', 'Check some letters', choices = head(LETTERS)),
-#'   selectizeInput('in3', 'Select a state', choices = state.name),
+#'   checkboxGroupInput('in1', 'Check some letters', choices = head(LETTERS)),
+#'   selectizeInput('in2', 'Select a state', choices = state.name),
 #'   plotOutput('plot')
 #' )
 #'
 #' # in server.R
 #' function(input, output) {
 #'   output$plot <- renderPlot({
-#'     validateInput(
-#'       input$in1,  # ensure the button has been clicked
-#'       validateCondition(input$in2, 'Check at least one letter!'),
-#'       validateCondition(input$in3 == '', 'Please choose a state.')
+#'     validate(
+#'       need(input$in1, 'Check at least one letter!'),
+#'       need(input$in2 == '', 'Please choose a state.')
 #'     )
-#'     plot(1:10, main = paste(c(input$bar, input$foo), collapse = ', '))
+#'     plot(1:10, main = paste(c(input$in1, input$in2), collapse = ', '))
 #'   })
 #' }
-validateInput <- function(...) {
-  msg  <- character(0)
-  fail <- FALSE
-  for (i in list(...)) {
-    verify <- testInvalidInput(i)
-    if (verify$invalid) {
-      fail <- TRUE
-      if (verify$condition) msg <- c(msg, i[[2]])
-    }
-  }
-  if (fail) {
-    msg <- paste(unlist(msg), collapse = '\n')
-    stopWithCondition(msg, 'validation')
-  }
+validate <- function(..., errorClass = character(0)) {
+  results <- sapply(list(...), function(x) {
+    # Detect NULL or NA
+    if (is.null(x) || length(x) == 0 || all(is.na(x)))
+      return(NA_character_)
+    # Detect all empty strings
+    else if (is.character(x) && all(!nzchar(x)))
+      return(NA_character_)
+    else if (identical(x, FALSE))
+      return("")
+    else
+      return(paste(as.character(x), collapse = "\n"))
+  })
+
+  results <- na.omit(results)
+  if (length(results) == 0)
+    return(invisible())
+
+  # There may be empty strings remaining; these are message-less failures that
+  # started as FALSE
+  results <- results[nzchar(results)]
+
+  stopWithCondition(paste(results, collapse="\n"), c("validation", errorClass))
 }
-#' @param condition A condition to be validated.
-#' @param message A character string as the error message if the condition is
-#'   not satisfied.
+
+#' @param expr An expression to test. The condition will pass if the expression
+#'   meets the conditions spelled out in Details.
+#' @param message A message to convey to the user if the validation condition is
+#'   not met. If no message is provided, one will be created using \code{label}.
+#'   To fail with no message, use \code{FALSE} for the message.
+#' @param label A human-readable name for the field that may be missing. This
+#'   parameter is not needed if \code{message} is provided, but must be provided
+#'   otherwise.
 #' @export
-#' @rdname validateInput
-validateCondition <- function(condition, message) {
-  structure(list(condition, message), class = 'shinyValidationCondition')
+#' @rdname validate
+need <- function(expr, message = paste(label, "must be provided"), label) {
+
+  force(message) # Fail fast on message/label both being missing
+
+  if (!isTruthy(expr))
+    return(message)
+  else
+    return(invisible(NULL))
 }
 
-testInvalidInput <- function(x) {
-  cond <- inherits(x, 'shinyValidationCondition')
-  # list(condition = ?, message = ?)
-  if (cond) x <- x[[1]]
+isTruthy <- function(x) {
+  if (inherits(x, 'try-error'))
+    return(FALSE)
 
-  val <- identical(x, FALSE) || length(x) == 0 || (length(x) == 1 && is.na(x)) ||
-    (inherits(x, 'shinyActionButtonValue') && x == 0)
-  list(condition = cond, invalid = val)
+  if (!is.atomic(x))
+    return(TRUE)
+
+  if (is.null(x))
+    return(FALSE)
+  if (length(x) == 0)
+    return(FALSE)
+  if (all(is.na(x)))
+    return(FALSE)
+  if (is.character(x) && !any(nzchar(na.omit(x))))
+    return(FALSE)
+  if (inherits(x, 'shinyActionButtonValue') && x == 0)
+    return(FALSE)
+  if (is.logical(x) && !any(na.omit(x)))
+    return(FALSE)
+
+  return(TRUE)
 }
 
 # add class(es) to the error condition, which will be used as names of CSS

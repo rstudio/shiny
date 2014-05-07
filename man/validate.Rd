@@ -61,10 +61,11 @@ logical values. For example, if you allow \code{NA} but not \code{NULL}, you
 can use the condition \code{!is.null(input$foo)}, because \code{!is.null(NA)
 == TRUE}.
 
-If you need validation logic that differs from \code{need}, you can create
-other functions. A passing test should return \code{NULL}. A failing test
-should return an error message as a single-element character vector, or if
-the failure should happen silently, \code{FALSE}.
+If you need validation logic that differs significantly from \code{need}, you
+can create other validation test functions. A passing test should return
+\code{NULL}. A failing test should return an error message as a
+single-element character vector, or if the failure should happen silently,
+\code{FALSE}.
 
 Because validation failure is signaled as an error, you can use
 \code{validate} in reactive expressions, and validation failures will

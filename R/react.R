@@ -131,10 +131,14 @@ ReactiveEnvironment <- setRefClass(
   )
 )
 
-delayedAssign(".reactiveEnvironment", ReactiveEnvironment$new())
-.getReactiveEnvironment <- function() {
-  .reactiveEnvironment
-}
+.getReactiveEnvironment <- local({
+  reactiveEnvironment <- NULL
+  function() {
+    if (is.null(reactiveEnvironment))
+      reactiveEnvironment <<- ReactiveEnvironment$new()
+    return(reactiveEnvironment)
+  }
+}) 
 
 # Causes any pending invalidations to run.
 flushReact <- function() {

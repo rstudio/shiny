@@ -892,7 +892,7 @@ isTruthy <- function(x) {
 stopWithCondition <- function(class, message) {
   cond <- structure(
     list(message = message),
-    class = c('error', 'condition', class)
+    class = c(class, 'error', 'condition')
   )
   stop(cond)
 }

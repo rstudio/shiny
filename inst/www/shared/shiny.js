@@ -1072,10 +1072,24 @@
       this.renderError(el, err);
     };
     this.renderError = function(el, err) {
-      $(el).addClass('shiny-output-error').text(err.message);
+      if (err.message === '') {
+        // not really error, but we just need to wait (e.g. action buttons)
+        $(el).empty();
+        return this.clearError(el);
+      };
+      var errClass = 'shiny-output-error';
+      if (err.type !== null) {
+        // use the classes of the error condition as CSS class names
+        errClass = errClass + ' ' + $.map(asArray(err.type), function(type) {
+          return errClass + '-' + type;
+        }).join(' ');
+      };
+      $(el).addClass(errClass).text(err.message);
     };
     this.clearError = function(el) {
-      $(el).removeClass('shiny-output-error');
+      $(el).attr('class', function(i, c) {
+        return c.replace(/(^|\s)shiny-output-error\S*/g, '');
+      });
     };
     this.showProgress = function(el, show) {
       var RECALC_CLASS = 'recalculating';
@@ -2441,6 +2455,9 @@
     },
     setValue: function(el, value) {
       $(el).data('val', value);
+    },
+    getType: function(el) {
+      return 'shiny.action';
     },
     subscribe: function(el, callback) {
       $(el).on("click.actionButtonInputBinding", function(e) {

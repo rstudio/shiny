@@ -209,10 +209,12 @@ ShinySession <- setRefClass(
 
           if (inherits(value, 'try-error')) {
             cond <- attr(value, 'condition')
+            type <- setdiff(class(cond), c('simpleError', 'error', 'condition'))
             .invalidatedOutputErrors$set(
               name,
-              list(message=cond$message,
-                   call=capture.output(print(cond$call))))
+              list(message = cond$message,
+                   call = capture.output(print(cond$call)),
+                   type = if (length(type)) type))
           }
           else
             .invalidatedOutputValues$set(name, value)

@@ -106,14 +106,18 @@ shinyAppDir <- function(appDir, options=list()) {
   # ui.R as a webpage. The "cachedFuncWithFile" call makes sure that the closure
   # we're creating here only gets executed when ui.R's contents change.
   uiHandlerSource <- cachedFuncWithFile(appDir, "ui.R", case.sensitive = FALSE,
-    function() {
-      # Have to use file.path.ci every time in case the case of ui.R has
-      # changed. (Hmmm, overengineering a bit?)
-      uiR <- file.path.ci(appDir, "ui.R")
+    function(uiR) {
       if (file.exists(uiR)) {
+        # If ui.R contains a call to shinyUI (which sets .globals$ui), use that.
+        # If not, then take the last expression that's returned from ui.R.
+        .globals$ui <- NULL
+        on.exit(.globals$ui <- NULL, add = FALSE)
         ui <- source(uiR,
           local = new.env(parent = globalenv()),
           keep.source = TRUE)$value
+        if (!is.null(.globals$ui)) {
+          ui <- .globals$ui[[1]]
+        }
         return(uiHttpHandler(ui))
       } else {
         return(function(req) NULL)
@@ -126,14 +130,29 @@ shinyAppDir <- function(appDir, options=list()) {
 
   wwwDir <- file.path.ci(appDir, "www")
   fallbackWWWDir <- system.file("www-dir", package = "shiny")
-  serverSource <- cachedSource(appDir, "server.R", case.sensitive = FALSE)
+  serverSource <- cachedFuncWithFile(appDir, "server.R", case.sensitive = FALSE,
+    function(serverR) {
+      # If server.R contains a call to shinyServer (which sets .globals$server),
+      # use that. If not, then take the last expression that's returned from
+      # server.R.
+      .globals$server <- NULL
+      on.exit(.globals$server <- NULL, add = TRUE)
+      result <- source(
+        serverR,
+        local = new.env(parent = globalenv()),
+        keep.source = TRUE
+      )$value
+      if (!is.null(.globals$server)) {
+        result <- .globals$server[[1]]
+      }
+      return(result)
+    }
+  )
 
   # This function stands in for the server function, and reloads the
   # real server function as necessary whenever server.R changes
   serverFuncSource <- function() {
-    serverFunction <- serverSource(
-      local = new.env(parent = globalenv()),
-      keep.source = TRUE)$value
+    serverFunction <- serverSource()
     if (is.null(serverFunction)) {
       return(function(input, output) NULL)
     } else if (is.function(serverFunction)) {

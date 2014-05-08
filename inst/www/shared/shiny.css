@@ -13,10 +13,18 @@ table.data td[align=right] {
 
 .shiny-output-error {
   color: red;
+  white-space: pre-wrap;
 }
 .shiny-output-error:before {
   content: 'Error: ';
   font-weight: bold;
+}
+.shiny-output-error-validation {
+  color: #888;
+}
+.shiny-output-error-validation:before {
+  content: '';
+  font-weight: inherit;
 }
 
 .jslider {

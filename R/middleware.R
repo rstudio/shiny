@@ -1,19 +1,19 @@
----
-title: middleware.Rmd
-output:
-  html_document:
-    toc: yes
----
-
-This file contains a general toolkit for routing and combining bits of HTTP-handling logic. It is similar in spirit to Rook (and Rack, and WSGI, and Connect, and...) but adds cascading and routing.
-
-This file is called "middleware" because that's the term used for these bits of logic in these other frameworks. However, our code uses the word "handler" so we'll stick to that for the rest of this document; just know that they're basically the same concept.
-
-## Intro to handlers
-
-A **handler** (or sometimes, **httpHandler**) is a function that takes a `req` parameter--a request object as described in the Rook specification--and returns `NULL`, or an `httpResponse`.
-
-```{r}
+# This file contains a general toolkit for routing and combining bits of
+# HTTP-handling logic. It is similar in spirit to Rook (and Rack, and WSGI, and
+# Connect, and...) but adds cascading and routing.
+#
+# This file is called "middleware" because that's the term used for these bits
+# of logic in these other frameworks. However, our code uses the word "handler"
+# so we'll stick to that for the rest of this document; just know that they're
+# basically the same concept.
+#
+# ## Intro to handlers
+#
+# A **handler** (or sometimes, **httpHandler**) is a function that takes a
+# `req` parameter--a request object as described in the Rook specification--and
+# returns `NULL`, or an `httpResponse`.
+#
+## ------------------------------------------------------------------------
 httpResponse <- function(status = 200,
                          content_type = "text/html; charset=UTF-8",
                          content = "",
@@ -27,17 +27,31 @@ httpResponse <- function(status = 200,
   class(resp) <- 'httpResponse'
   return(resp)
 }
-```
 
-You can think of a web application as being simply an aggregation of these functions, each of which performs one kind of duty. Each handler in turn gets a look at the request and can decide whether it knows how to handle it. If so, it returns an `httpResponse` and processing terminates; if not, it returns `NULL` and the next handler gets to execute. If the final handler returns `NULL`, a 404 response should be returned.
-
-We have a similar construct for websockets: **websocket handlers** or **wsHandlers**. These take a single `ws` argument which is the websocket connection that was just opened, and they can either return `TRUE` if they are handling the connection, and `NULL` to pass responsibility on to the next wsHandler.
-
-### Combining handlers
-
-Since it's so common for httpHandlers to be invoked in this "cascading" fashion, we'll introduce a function that takes zero or more handlers and returns a single handler. And while we're at it, making a directory of static content available is such a common thing to do, we'll allow strings representing paths to be used instead of handlers; any such strings we encounter will be converted into `staticHandler` objects.
-
-```{r eval=FALSE}
+#
+# You can think of a web application as being simply an aggregation of these
+# functions, each of which performs one kind of duty. Each handler in turn gets
+# a look at the request and can decide whether it knows how to handle it. If
+# so, it returns an `httpResponse` and processing terminates; if not, it
+# returns `NULL` and the next handler gets to execute. If the final handler
+# returns `NULL`, a 404 response should be returned.
+#
+# We have a similar construct for websockets: **websocket handlers** or
+# **wsHandlers**. These take a single `ws` argument which is the websocket
+# connection that was just opened, and they can either return `TRUE` if they
+# are handling the connection, and `NULL` to pass responsibility on to the next
+# wsHandler.
+#
+# ### Combining handlers
+#
+# Since it's so common for httpHandlers to be invoked in this "cascading"
+# fashion, we'll introduce a function that takes zero or more handlers and
+# returns a single handler. And while we're at it, making a directory of static
+# content available is such a common thing to do, we'll allow strings
+# representing paths to be used instead of handlers; any such strings we
+# encounter will be converted into `staticHandler` objects.
+#
+## ------------------------------------------------------------------------
 joinHandlers <- function(handlers) {
   # Zero handlers; return a null handler
   if (length(handlers) == 0)
@@ -71,19 +85,30 @@ joinHandlers <- function(handlers) {
     return(NULL)
   }
 }
-```
 
-Note that we don't have an equivalent of `joinHandlers` for wsHandlers. It's easy to imagine it, we just haven't needed one.
-
-### Handler routing
-
-Handlers do not have a built-in notion of routing. Conceptually, given a list of handlers, all the handlers are peers and they all get to see every request (well, up until the point that a handler returns a response).
-
-You could implement routing in each handler by checking the request's `PATH_INFO` field, but since it's such a common need, let's make it simple by introducing a `routeHandler` function. This is a handler [decorator](http://en.wikipedia.org/wiki/Decorator_pattern) and it's responsible for 1) filtering out requests that don't match the given route, and 2) temporarily modifying the request object to take the matched part of the route off of the `PATH_INFO` (and add it to the end of `SCRIPT_NAME`). This way, the handler doesn't need to figure out about what part of its URL path has already been matched via routing.
-
-(BTW, it's safe for `routeHandler` calls to nest.)
-
-```{r eval=FALSE}
+#
+# Note that we don't have an equivalent of `joinHandlers` for wsHandlers. It's
+# easy to imagine it, we just haven't needed one.
+#
+# ### Handler routing
+#
+# Handlers do not have a built-in notion of routing. Conceptually, given a list
+# of handlers, all the handlers are peers and they all get to see every request
+# (well, up until the point that a handler returns a response).
+#
+# You could implement routing in each handler by checking the request's
+# `PATH_INFO` field, but since it's such a common need, let's make it simple by
+# introducing a `routeHandler` function. This is a handler
+# [decorator](http://en.wikipedia.org/wiki/Decorator_pattern) and it's
+# responsible for 1) filtering out requests that don't match the given route,
+# and 2) temporarily modifying the request object to take the matched part of
+# the route off of the `PATH_INFO` (and add it to the end of `SCRIPT_NAME`).
+# This way, the handler doesn't need to figure out about what part of its URL
+# path has already been matched via routing.
+#
+# (BTW, it's safe for `routeHandler` calls to nest.)
+#
+## ------------------------------------------------------------------------
 routeHandler <- function(prefix, handler) {
   force(prefix)
   force(handler)
@@ -113,11 +138,12 @@ routeHandler <- function(prefix, handler) {
     }
   }
 }
-```
 
-We have a version for websocket handlers as well. Pity about the copy/paste job.
-
-```{r eval=FALSE}
+#
+# We have a version for websocket handlers as well. Pity about the copy/paste
+# job.
+#
+## ------------------------------------------------------------------------
 routeWSHandler <- function(prefix, wshandler) {
   force(prefix)
   force(wshandler)
@@ -148,15 +174,17 @@ routeWSHandler <- function(prefix, wshandler) {
     }
   }
 }
-```
 
-### Handler implementations
-
-Now let's actually write some handlers. Note that these functions aren't *themselves* handlers, you call them and they *return* a handler. Handler factory functions, if you will.
-
-Here's one that serves up static assets from a directory.
-
-```{r eval=FALSE}
+#
+# ### Handler implementations
+#
+# Now let's actually write some handlers. Note that these functions aren't
+# *themselves* handlers, you call them and they *return* a handler. Handler
+# factory functions, if you will.
+#
+# Here's one that serves up static assets from a directory.
+#
+## ------------------------------------------------------------------------
 staticHandler <- function(root) {
   force(root)
   return(function(req) {
@@ -181,15 +209,19 @@ staticHandler <- function(root) {
     return(httpResponse(200, content.type, response.content))
   })
 }
-```
 
-## Handler manager
-
-The handler manager gives you a place to register handlers (of both http and websocket varieties) and provides an httpuv-compatible set of callbacks for invoking them.
-
-Create one of these, make zero or more calls to `addHandler` and `addWSHandler` methods (order matters--first one wins!), and then pass the return value of `createHttpuvApp` to httpuv's `startServer` function.
-
-```{r eval=FALSE}
+#
+# ## Handler manager
+#
+# The handler manager gives you a place to register handlers (of both http and
+# websocket varieties) and provides an httpuv-compatible set of callbacks for
+# invoking them.
+#
+# Create one of these, make zero or more calls to `addHandler` and
+# `addWSHandler` methods (order matters--first one wins!), and then pass the
+# return value of `createHttpuvApp` to httpuv's `startServer` function.
+#
+## ------------------------------------------------------------------------
 HandlerList <- setRefClass("HandlerList",
   fields = list(
     handlers = "list"
@@ -199,7 +231,7 @@ HandlerList <- setRefClass("HandlerList",
       if (!is.null(handlers[[key]]))
         stop("Key ", key, " already in use")
       newList <- structure(names=key, list(handler))
-      
+
       if (length(handlers) == 0)
         handlers <<- newList
       else if (tail)
@@ -309,8 +341,9 @@ HandlerManager <- setRefClass("HandlerManager",
     }
   )
 )
-```
 
-## Next steps
-
-See server.R and middleware-shiny.R to see actual implementation and usage of handlers in the context of Shiny.
+#
+# ## Next steps
+#
+# See server.R and middleware-shiny.R to see actual implementation and usage of
+# handlers in the context of Shiny.

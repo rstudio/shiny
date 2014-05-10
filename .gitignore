@@ -8,6 +8,3 @@
 /src-x86_64/
 shinyapps/
 README.html
-
-R/*.GENERATED.R
-Rmd/*.html

@@ -848,14 +848,8 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
 #' submitButton("Update View", icon("refresh"))
 #' @export
 submitButton <- function(text = "Apply Changes", icon = NULL) {
-
-  if (!is.null(icon))
-    buttonContent <- list(icon, text)
-  else
-    buttonContent <- text
-
   div(
-    tags$button(type="submit", class="btn btn-primary", buttonContent)
+    tags$button(type="submit", class="btn btn-primary", list(icon, text))
   )
 }
 
@@ -889,30 +883,19 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 #' }
 #' @export
 actionButton <- function(inputId, label, icon = NULL, ...) {
-
-  if (!is.null(icon))
-    content <- list(icon, label)
-  else
-    content <- label
-
   tags$button(id=inputId,
               type="button",
               class="btn action-button",
-              content)
+              list(icon, label))
 }
 
 #' @rdname actionButton
 #' @export
 actionLink <- function(inputId, label, icon = NULL, ...) {
-  if (!is.null(icon))
-    content <- list(icon, label)
-  else
-    content <- label
-
   tags$a(id=inputId,
          href="#",
          class="action-button",
-         content)
+         list(icon, label))
 }
 
 #' Slider Input Widget
@@ -1771,10 +1754,7 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
 
 # Helper funtion to extract the class from an icon
 iconClass <- function(icon) {
-  if (is.null(icon))
-    NULL
-  else
-    icon[[2]]$attribs$class
+  if (!is.null(icon)) icon[[2]]$attribs$class
 }
 
 #' Validate proper CSS formatting of a unit

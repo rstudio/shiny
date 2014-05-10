@@ -20,27 +20,23 @@ Map <- setRefClass(
     },
     get = function(key) {
       if (.self$containsKey(key))
-        return(base::get(key, pos=.env, inherits=FALSE))
-      else
-        return(NULL)
+        base::get(key, pos=.env, inherits=FALSE)
     },
     set = function(key, value) {
       assign(key, value, pos=.env, inherits=FALSE)
-      return(value)
+      value
     },
     mset = function(...) {
       args <- list(...)
       for (key in names(args))
         set(key, args[[key]])
-      return()
     },
     remove = function(key) {
       if (.self$containsKey(key)) {
         result <- .self$get(key)
         rm(list = key, pos=.env, inherits=FALSE)
-        return(result)
+        result
       }
-      return(NULL)
     },
     containsKey = function(key) {
       exists(key, where=.env, inherits=FALSE)

@@ -146,6 +146,7 @@ sd_section("Utility functions",
   "Miscellaneous utilities that may be useful to advanced users or when extending Shiny.",
   c(
     "validate",
+    "session",
     "exprToFunction",
     "installExprFunction",
     "parseQueryString",

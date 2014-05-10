@@ -329,14 +329,19 @@ HandlerManager <- setRefClass("HandlerManager",
         response <- handler(req)
         if (is.null(response))
           response <- httpResponse(404, content="<h1>Not Found</h1>")
-
-        headers <- as.list(response$headers)
-        headers$'Content-Type' <- response$content_type
-
-        response <- filter(req, response)
-        return(list(status=response$status,
-          body=response$content,
-          headers=headers))
+        
+        if (inherits(response, "httpResponse")) {
+          headers <- as.list(response$headers)
+          headers$'Content-Type' <- response$content_type
+  
+          response <- filter(req, response)
+          return(list(status=response$status,
+            body=response$content,
+            headers=headers))
+        } else {
+          # Assume it's a Rook-compatible response
+          return(response)
+        }
       }
     }
   )

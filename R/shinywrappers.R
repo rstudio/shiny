@@ -407,6 +407,27 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
   })
 }
 
+#' @export
+renderHTML <- function(expr, env=parent.frame(), quoted=FALSE) {
+
+  installExprFunction(expr, "func", env, quoted)
+
+  markRenderFunction(htmlOutput, function() {
+
+    result <- func()
+    if (is.null(result) || length(result) == 0)
+      return(NULL)
+
+    output <- list(
+      html = result,
+      deps = attr(result, "dependencies")
+    )
+
+    return(output)
+  })
+}
+
+
 #' UI Output
 #'
 #' \bold{Experimental feature.} Makes a reactive version of a function that

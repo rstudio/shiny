@@ -1076,14 +1076,14 @@
         // not really error, but we just need to wait (e.g. action buttons)
         $(el).empty();
         return this.clearError(el);
-      };
+      }
       var errClass = 'shiny-output-error';
       if (err.type !== null) {
         // use the classes of the error condition as CSS class names
         errClass = errClass + ' ' + $.map(asArray(err.type), function(type) {
           return errClass + '-' + type;
         }).join(' ');
-      };
+      }
       $(el).addClass(errClass).text(err.message);
     };
     this.clearError = function(el) {
@@ -1240,9 +1240,9 @@
       var dependencies = [];
       if (data === null) {
         html = '';
-      } else if (typeof(data) == 'string') {
+      } else if (typeof(data) === 'string') {
         html = data;
-      } else if (typeof(data) == 'object') {
+      } else if (typeof(data) === 'object') {
         html = data.html;
         dependencies = data.deps;
       }
@@ -1265,7 +1265,7 @@
   };
 
   function asArray(value) {
-    if (value == null)
+    if (value === null)
       return [];
     if ($.isArray(value))
       return value;

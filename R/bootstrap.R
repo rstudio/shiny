@@ -555,6 +555,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #' @param choices List of values to show checkboxes for. If elements of the list
 #'   are named then that name rather than the value is displayed to the user.
 #' @param selected The values that should be initially selected, if any.
+#' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
 #' @return A list of HTML elements that can be added to a UI definition.
 #'
 #' @family input elements
@@ -567,7 +568,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #'                      "Gears" = "gear"))
 #'
 #' @export
-checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
+checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline = FALSE) {
   # resolve names
   choices <- choicesWithNames(choices)
   if (!is.null(selected))
@@ -587,7 +588,8 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
     if (value %in% selected)
       inputTag$attribs$checked <- "checked"
 
-    tags$label(class = "checkbox",
+    tags$label(class =
+                 if(inline) "checkbox inline" else "checkbox",
                inputTag,
                tags$span(name))
     }
@@ -782,6 +784,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #' named then that name rather than the value is displayed to the user)
 #' @param selected The initially selected value (if not specified then
 #' defaults to the first value)
+#' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
 #' @return A set of radio buttons that can be added to a UI definition.
 #'
 #' @family input elements
@@ -794,7 +797,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #'                "Log-normal" = "lnorm",
 #'                "Exponential" = "exp"))
 #' @export
-radioButtons <- function(inputId, label, choices, selected = NULL) {
+radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALSE) {
   # resolve names
   choices <- choicesWithNames(choices)
 
@@ -818,7 +821,8 @@ radioButtons <- function(inputId, label, choices, selected = NULL) {
         inputTag$attribs$checked = "checked"
 
       # Put the label text in a span
-      tags$label(class = "radio",
+      tags$label(class = 
+                   if(inline) "radio inline" else "radio",
                 inputTag,
                 tags$span(name)
       )

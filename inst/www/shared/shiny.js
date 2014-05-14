@@ -1284,7 +1284,7 @@
 
     registerDependency(dep.name, dep.version);
 
-    var path = dep.path;
+    var href = dep.src.href;
 
     var $head = $("head").first();
 
@@ -1298,14 +1298,14 @@
     if (dep.stylesheet) {
       var stylesheets = $.map(asArray(dep.stylesheet), function(stylesheet) {
         return $("<link rel='stylesheet' type='text/css'>")
-          .attr("href", path + "/" + stylesheet);
+          .attr("href", href + "/" + stylesheet);
       });
       $head.append(stylesheets);
     }
 
     if (dep.script) {
       var scripts = $.map(asArray(dep.script), function(scriptName) {
-        return $("<script>").attr("src", path + "/" + scriptName);
+        return $("<script>").attr("src", href + "/" + scriptName);
       });
       $head.append(scripts);
     }

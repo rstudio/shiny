@@ -1,5 +1,4 @@
 #' @include utils.R
-#' @include htmltools.R
 NULL
 
 #' Create a Bootstrap page
@@ -41,13 +40,13 @@ bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
     bs <- "shared/bootstrap"
 
     list(
-      html_dependency("bootstrap", "2.3.2", path = bs,
+      htmlDependency("bootstrap", "2.3.2", c(href = bs),
         script = sprintf("js/bootstrap%s", jsExt),
         stylesheet = if (is.null(theme))
           sprintf("css/bootstrap%s", cssExt)
       ),
       if (responsive) {
-        html_dependency("bootstrap-responsive", "2.3.2", path = bs,
+        htmlDependency("bootstrap-responsive", "2.3.2", c(href = bs),
           stylesheet = sprintf("css/bootstrap-responsive%s", cssExt),
           meta = list(viewport = "width=device-width, initial-scale=1.0")
         )
@@ -55,7 +54,7 @@ bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
     )
   }
 
-  attach_dependency(
+  attachDependency(
     tagList(
       if (!is.null(title)) tags$head(tags$title(title)),
       if (!is.null(theme)) {
@@ -749,7 +748,8 @@ selectizeInput <- function(inputId, ..., options = NULL) {
 selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
   res <- checkAsIs(options)
 
-  selectizeDep <- html_dependency("selectize", "0.8.5", "shared/selectize",
+  selectizeDep <- htmlDependency(
+    "selectize", "0.8.5", c(href = "shared/selectize"),
     stylesheet = "css/selectize.bootstrap2.css",
     head = format(tagList(
       HTML('<!--[if lt IE 9]>'),
@@ -758,7 +758,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
       tags$script(src = 'shared/selectize/js/selectize.min.js')
     ))
   )
-  attach_dependency(
+  attachDependency(
     tagList(
       select,
       tags$script(
@@ -973,8 +973,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   }
 }
 
-datePickerDependency <- html_dependency("bootstrap-datepicker", "1.0.2",
-  "shared/datepicker", script = "js/bootstrap-datepicker.min.js",
+datePickerDependency <- htmlDependency(
+  "bootstrap-datepicker", "1.0.2", c(href = "shared/datepicker"),
+  script = "js/bootstrap-datepicker.min.js",
   stylesheet = "css/datepicker.css")
 
 #' Create date input
@@ -1053,7 +1054,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
-  attach_dependency(
+  attachDependency(
     tags$div(id = inputId,
              class = "shiny-date-input",
 
@@ -1152,7 +1153,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
-  attach_dependency(
+  attachDependency(
     tags$div(id = inputId,
              # input-daterange class is needed for dropdown behavior
              class = "shiny-date-range-input input-daterange",
@@ -1598,12 +1599,12 @@ tableOutput <- function(outputId) {
 }
 
 dataTableDependency <- list(
-  html_dependency(
-    "datatables", "1.9.4", "shared/datatables",
+  htmlDependency(
+    "datatables", "1.9.4", c(href = "shared/datatables"),
     script = "js/jquery.dataTables.min.js"
   ),
-  html_dependency(
-    "datatables-bootstrap", "1.9.4", "shared/datatables",
+  htmlDependency(
+    "datatables-bootstrap", "1.9.4", c(href = "shared/datatables"),
     stylesheet = "css/DT_bootstrap.css",
     script = "js/DT_bootstrap.js"
   )
@@ -1612,7 +1613,7 @@ dataTableDependency <- list(
 #' @rdname tableOutput
 #' @export
 dataTableOutput <- function(outputId) {
-  attach_dependency(
+  attachDependency(
     div(id = outputId, class="shiny-datatable-output"),
     dataTableDependency
   )
@@ -1755,50 +1756,4 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
 # Helper funtion to extract the class from an icon
 iconClass <- function(icon) {
   if (!is.null(icon)) icon[[2]]$attribs$class
-}
-
-#' Validate proper CSS formatting of a unit
-#'
-#' Checks that the argument is valid for use as a CSS unit of length.
-#'
-#' \code{NULL} and \code{NA} are returned unchanged.
-#'
-#' Single element numeric vectors are returned as a character vector with the
-#' number plus a suffix of \code{"px"}.
-#'
-#' Single element character vectors must be \code{"auto"} or \code{"inherit"},
-#' or a number. If the number has a suffix, it must be valid: \code{px},
-#' \code{\%}, \code{em}, \code{pt}, \code{in}, \code{cm}, \code{mm}, \code{ex},
-#' or \code{pc}. If the number has no suffix, the suffix \code{"px"} is
-#' appended.
-#'
-#' Any other value will cause an error to be thrown.
-#'
-#' @param x The unit to validate. Will be treated as a number of pixels if a
-#'   unit is not specified.
-#' @return A properly formatted CSS unit of length, if possible. Otherwise, will
-#'   throw an error.
-#' @examples
-#' validateCssUnit("10%")
-#' validateCssUnit(400)  #treated as '400px'
-#' @export
-validateCssUnit <- function(x) {
-  if (is.null(x) || is.na(x))
-    return(x)
-
-  if (length(x) > 1 || (!is.character(x) && !is.numeric(x)))
-    stop('CSS units must be a numeric or character vector with a single element')
-
-  # if the input is a character vector consisting only of digits (e.g. "960"), coerce it to a
-  # numeric value
-  if (is.character(x) && nchar(x) > 0 && gsub("\\d*", "", x) == "")
-    x <- as.numeric(x)
-
-  if (is.character(x) &&
-     !grepl("^(auto|inherit|((\\.\\d+)|(\\d+(\\.\\d+)?))(%|in|cm|mm|em|ex|pt|pc|px))$", x)) {
-    stop('"', x, '" is not a valid CSS unit (e.g., "100%", "400px", "auto")')
-  } else if (is.numeric(x)) {
-    x <- paste(x, "px", sep = "")
-  }
-  x
 }

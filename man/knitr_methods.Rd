@@ -2,16 +2,10 @@
 \name{knitr_methods}
 \alias{knit_print.shiny.appobj}
 \alias{knit_print.shiny.render.function}
-\alias{knit_print.shiny.tag}
-\alias{knit_print.shiny.tag.list}
 \alias{knitr_methods}
 \title{Knitr S3 methods}
 \usage{
 knit_print.shiny.appobj(x, ...)
-
-knit_print.shiny.tag(x, ...)
-
-knit_print.shiny.tag.list(x, ...)
 
 knit_print.shiny.render.function(x, ...)
 }

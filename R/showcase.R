@@ -31,13 +31,13 @@ licenseLink <- function(licenseName) {
 showcaseHead <- function() {
 
   deps  <- list(
-    html_dependency("jqueryui", "1.10.4", "shared/jqueryui/1.10.4",
+    htmlDependency("jqueryui", "1.10.4", c(href="shared/jqueryui/1.10.4"),
       script = "jquery-ui.min.js"),
-    html_dependency("showdown", "0.3.1", "shared/showdown/compressed",
+    htmlDependency("showdown", "0.3.1", c(href="shared/showdown/compressed"),
       script = "showdown.js"),
-    html_dependency("font-awesome", "4.0.3", "shared/font-awesome",
+    htmlDependency("font-awesome", "4.0.3", c(href="shared/font-awesome"),
       stylesheet = "css/font-awesome.min.css"),
-    html_dependency("highlight.js", "6.2", "shared/highlight",
+    htmlDependency("highlight.js", "6.2", c(href="shared/highlight"),
       script = "highlight.pack.js")
   )
 
@@ -54,7 +54,7 @@ showcaseHead <- function() {
     else ""
   ))
 
-  return(attach_dependency(html, deps))
+  return(attachDependency(html, deps))
 }
 
 # Returns tags containing the application metadata (title and author) in

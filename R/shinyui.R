@@ -1,143 +1,5 @@
 #' @include globals.R
-
-#' @rdname builder
-#' @export
-p <- function(...) tags$p(...)
-
-#' @rdname builder
-#' @export
-h1 <- function(...) tags$h1(...)
-
-#' @rdname builder
-#' @export
-h2 <- function(...) tags$h2(...)
-
-#' @rdname builder
-#' @export
-h3 <- function(...) tags$h3(...)
-
-#' @rdname builder
-#' @export
-h4 <- function(...) tags$h4(...)
-
-#' @rdname builder
-#' @export
-h5 <- function(...) tags$h5(...)
-
-#' @rdname builder
-#' @export
-h6 <- function(...) tags$h6(...)
-
-#' @rdname builder
-#' @export
-a <- function(...) tags$a(...)
-
-#' @rdname builder
-#' @export
-br <- function(...) tags$br(...)
-
-#' @rdname builder
-#' @export
-div <- function(...) tags$div(...)
-
-#' @rdname builder
-#' @export
-span <- function(...) tags$span(...)
-
-#' @rdname builder
-#' @export
-pre <- function(...) tags$pre(...)
-
-#' @rdname builder
-#' @export
-code <- function(...) tags$code(...)
-
-#' @rdname builder
-#' @export
-img <- function(...) tags$img(...)
-
-#' @rdname builder
-#' @export
-strong <- function(...) tags$strong(...)
-
-#' @rdname builder
-#' @export
-em <- function(...) tags$em(...)
-
-#' @rdname builder
-#' @export
-hr <- function(...) tags$hr(...)
-
-#' Include Content From a File
-#'
-#' Include HTML, text, or rendered Markdown into a \link[=shinyUI]{Shiny UI}.
-#'
-#' These functions provide a convenient way to include an extensive amount of
-#' HTML, textual, Markdown, CSS, or JavaScript content, rather than using a
-#' large literal R string.
-#'
-#' @note \code{includeText} escapes its contents, but does no other processing.
-#'   This means that hard breaks and multiple spaces will be rendered as they
-#'   usually are in HTML: as a single space character. If you are looking for
-#'   preformatted text, wrap the call with \code{\link{pre}}, or consider using
-#'   \code{includeMarkdown} instead.
-#'
-#' @note The \code{includeMarkdown} function requires the \code{markdown}
-#'   package.
-#'
-#' @param path The path of the file to be included. It is highly recommended to
-#'   use a relative path (the base path being the Shiny application directory),
-#'   not an absolute path.
-#'
-#' @rdname include
-#' @name include
-#' @aliases includeHTML
-#' @export
-includeHTML <- function(path) {
-  dependsOnFile(path)
-  lines <- readLines(path, warn=FALSE, encoding='UTF-8')
-  return(HTML(paste(lines, collapse='\r\n')))
-}
-
-#' @rdname include
-#' @export
-includeText <- function(path) {
-  dependsOnFile(path)
-  lines <- readLines(path, warn=FALSE, encoding='UTF-8')
-  return(paste(lines, collapse='\r\n'))
-}
-
-#' @rdname include
-#' @export
-includeMarkdown <- function(path) {
-  library(markdown)
-
-  dependsOnFile(path)
-  html <- markdown::markdownToHTML(path, fragment.only=TRUE)
-  Encoding(html) <- 'UTF-8'
-  return(HTML(html))
-}
-
-#' @param ... Any additional attributes to be applied to the generated tag.
-#' @rdname include
-#' @export
-includeCSS <- function(path, ...) {
-  dependsOnFile(path)
-  lines <- readLines(path, warn=FALSE, encoding='UTF-8')
-  args <- list(...)
-  if (is.null(args$type))
-    args$type <- 'text/css'
-  return(do.call(tags$style,
-                 c(list(HTML(paste(lines, collapse='\r\n'))), args)))
-}
-
-#' @rdname include
-#' @export
-includeScript <- function(path, ...) {
-  dependsOnFile(path)
-  lines <- readLines(path, warn=FALSE, encoding='UTF-8')
-  return(tags$script(HTML(paste(lines, collapse='\r\n')), ...))
-}
+NULL
 
 #' Load the MathJax library and typeset math expressions
 #'
@@ -162,22 +24,6 @@ withMathJax <- function(...) {
   )
 }
 
-#' Include Content Only Once
-#'
-#' Use \code{singleton} to wrap contents (tag, text, HTML, or lists) that should
-#' be included in the generated document only once, yet may appear in the
-#' document-generating code more than once. Only the first appearance of the
-#' content (in document order) will be used. Useful for custom components that
-#' have JavaScript files or stylesheets.
-#'
-#' @param x A \code{\link{tag}}, text, \code{\link{HTML}}, or list.
-#'
-#' @export
-singleton <- function(x) {
-  class(x) <- c(class(x), 'shiny.singleton')
-  return(x)
-}
-
 renderPage <- function(ui, connection, showcase=0) {
 
   if (showcase > 0)
@@ -187,8 +33,8 @@ renderPage <- function(ui, connection, showcase=0) {
 
   deps <- c(
     list(
-      html_dependency("jquery", "1.11.0", "shared", script = "jquery.js"),
-      html_dependency("shiny", packageVersion("shiny"), "shared",
+      htmlDependency("jquery", "1.11.0", c(href="shared"), script = "jquery.js"),
+      htmlDependency("shiny", packageVersion("shiny"), c(href="shared"),
         script = "shiny.js", stylesheet = "shiny.css")
     ),
     result$dependencies
@@ -197,7 +43,7 @@ renderPage <- function(ui, connection, showcase=0) {
   depStr <- paste(sapply(deps, function(dep) {
     sprintf("%s[%s]", dep$name, dep$version)
   }), collapse = ";")
-  depHtml <- html_dependencies_as_character(deps)
+  depHtml <- renderDependencies(deps, "href")
 
   # write preamble
   writeLines(c('<!DOCTYPE html>',
@@ -283,21 +129,4 @@ uiHttpHandler <- function(ui, path = "/") {
     html <- paste(textConnectionValue(textConn), collapse='\n')
     return(httpResponse(200, content=html))
   }
-}
-
-#' Return HTML dependencies provided by Shiny
-#'
-#' By default, Shiny supplies some framework scripts when it renders a page.
-#' \code{getProvidedHtmlDependencies} returns a list of those provided objects.
-#'
-#' @return A list of objects of type \code{html_dependency}, one per dependency
-#'
-#' @export
-getProvidedHtmlDependencies <- function() {
-  list(structure(
-    list(name = "jquery",
-         version = "1.11.0",
-         path = system.file("www/shared/jquery.js", package="shiny"),
-         script = "jquery.js"),
-    class = "html_dependency"))
 }

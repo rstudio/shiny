@@ -12,7 +12,8 @@ Description: Shiny makes it incredibly easy to build interactive web
 License: GPL-3
 Depends:
     R (>= 2.14.1),
-    methods
+    methods,
+    htmltools (>= 0.2.0)
 Imports:
     tools,
     utils,
@@ -23,7 +24,6 @@ Imports:
     digest
 Suggests:
     datasets,
-    markdown,
     Cairo (>= 1.5-5),
     testthat,
     knitr
@@ -36,7 +36,6 @@ Collate:
     'map.R'
     'globals.R'
     'utils.R'
-    'htmltools.R'
     'bootstrap.R'
     'cache.R'
     'fileupload.R'
@@ -58,7 +57,6 @@ Collate:
     'shinywrappers.R'
     'showcase.R'
     'slider.R'
-    'tags.R'
     'tar.R'
     'timer.R'
     'update-input.R'

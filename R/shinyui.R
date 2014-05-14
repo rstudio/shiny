@@ -246,7 +246,10 @@ renderPage <- function(ui, connection, showcase=0) {
 #' @return The user interface definition, without modifications or side effects.
 #'
 #' @export
-shinyUI <- function(ui) ui
+shinyUI <- function(ui) {
+  .globals$ui <- list(ui)
+  ui
+}
 
 uiHttpHandler <- function(ui, path = "/") {
 

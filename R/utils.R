@@ -714,7 +714,7 @@ cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
 
     now <- file.info(fname)$mtime
     if (!identical(mtime, now)) {
-      value <<- func(...)
+      value <<- func(fname, ...)
       mtime <<- now
     }
     value
@@ -725,11 +725,7 @@ cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
 # calls, unless the file's mtime changes.
 cachedSource <- function(dir, file, case.sensitive = FALSE) {
   dir <- normalizePath(dir, mustWork=TRUE)
-  cachedFuncWithFile(dir, file, function(...) {
-    fname <- if (case.sensitive)
-      file.path(dir, file)
-    else
-      file.path.ci(dir, file)
+  cachedFuncWithFile(dir, file, function(fname, ...) {
     if (file.exists(fname))
       return(source(fname, ...))
     else

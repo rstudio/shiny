@@ -67,18 +67,6 @@ sd_section("UI Outputs",
     "downloadButton"
   )
 )
-sd_section("Interface builder functions",
-  "A sub-library for writing HTML using R functions. These functions form the foundation on which the higher level user interface functions are built, and can also be used in your Shiny UI to provide custom HTML, CSS, and JavaScript.",
-  c(
-    "builder",
-    "HTML",
-    "include",
-    "singleton",
-    "tag",
-    "validateCssUnit",
-    "withTags"
-  )
-)
 sd_section("Rendering functions",
   "Functions that you use in your application's server side code, assigning them to outputs that appear in your user interface.",
   c(

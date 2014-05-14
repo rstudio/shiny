@@ -15,7 +15,7 @@ NULL
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @import httpuv caTools RJSONIO xtable digest methods
+#' @import htmltools httpuv caTools RJSONIO xtable digest methods
 NULL
 
 createUniqueId <- function(bytes) {

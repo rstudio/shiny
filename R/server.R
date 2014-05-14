@@ -240,6 +240,7 @@ resourcePathHandler <- function(req) {
 #'
 #' @export
 shinyServer <- function(func) {
+  .globals$server <- list(func)
   invisible(func)
 }
 

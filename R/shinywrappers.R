@@ -30,6 +30,11 @@ useRenderFunction <- function(renderFunc) {
   return(outputFunction(id))
 }
 
+#' @export
+as.tags.shiny.render.function <- function(x) {
+  useRenderFunction(x)
+}
+
 #' Plot Output
 #'
 #' Renders a reactive plot that is suitable for assigning to an \code{output}

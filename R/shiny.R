@@ -18,11 +18,16 @@ NULL
 #' @import htmltools httpuv caTools RJSONIO xtable digest methods
 NULL
 
-createUniqueId <- function(bytes) {
+createUniqueId <- function(bytes, prefix = "", suffix = "") {
   withPrivateSeed({
     paste(
-      format(as.hexmode(sample(256, bytes, replace = TRUE)-1), width=2),
-      collapse = "")
+      prefix,
+      paste(
+        format(as.hexmode(sample(256, bytes, replace = TRUE)-1), width=2),
+        collapse = ""),
+      suffix,
+      sep = ""
+    )
   })
 }
 

@@ -104,7 +104,7 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
     stylesheet = "css/jquery.slider.min.css"
   )
   sliderFragment <- list(
-    attachDependency(
+    attachDependencies(
       tags$input(
         id=inputId, type="slider",
         name=inputId, value=paste(value, collapse=';'), class="jslider",

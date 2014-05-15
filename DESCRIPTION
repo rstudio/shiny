@@ -13,7 +13,7 @@ License: GPL-3
 Depends:
     R (>= 2.14.1),
     methods,
-    htmltools (>= 0.2.0)
+    htmltools (>= 0.2.1)
 Imports:
     tools,
     utils,

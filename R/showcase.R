@@ -54,7 +54,7 @@ showcaseHead <- function() {
     else ""
   ))
 
-  return(attachDependency(html, deps))
+  return(attachDependencies(html, deps))
 }
 
 # Returns tags containing the application metadata (title and author) in

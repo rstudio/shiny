@@ -54,7 +54,7 @@ bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
     )
   }
 
-  attachDependency(
+  attachDependencies(
     tagList(
       if (!is.null(title)) tags$head(tags$title(title)),
       if (!is.null(theme)) {
@@ -758,7 +758,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
       tags$script(src = 'shared/selectize/js/selectize.min.js')
     ))
   )
-  attachDependency(
+  attachDependencies(
     tagList(
       select,
       tags$script(
@@ -1054,7 +1054,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
-  attachDependency(
+  attachDependencies(
     tags$div(id = inputId,
              class = "shiny-date-input",
 
@@ -1153,7 +1153,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
-  attachDependency(
+  attachDependencies(
     tags$div(id = inputId,
              # input-daterange class is needed for dropdown behavior
              class = "shiny-date-range-input input-daterange",
@@ -1613,7 +1613,7 @@ dataTableDependency <- list(
 #' @rdname tableOutput
 #' @export
 dataTableOutput <- function(outputId) {
-  attachDependency(
+  attachDependencies(
     div(id = outputId, class="shiny-datatable-output"),
     dataTableDependency
   )

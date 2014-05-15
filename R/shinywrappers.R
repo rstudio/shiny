@@ -23,7 +23,7 @@ markRenderFunction <- function(uiFunc, renderFunc) {
 
 useRenderFunction <- function(renderFunc) {
   outputFunction <- attr(renderFunc, "outputFunc")
-  id <- createUniqueId(8)
+  id <- createUniqueId(8, "out")
   o <- getDefaultReactiveDomain()$output
   if (!is.null(o))
     o[[id]] <- renderFunc

@@ -148,7 +148,6 @@ sd_section("Embedding",
   c(
     "shinyApp",
     "maskReactiveContext",
-    "knitr_methods",
-    "getProvidedHtmlDependencies"
+    "knitr_methods"
   )
 )

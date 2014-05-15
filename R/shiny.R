@@ -20,7 +20,9 @@ NULL
 
 createUniqueId <- function(bytes) {
   withPrivateSeed({
-    paste(as.hexmode(sample(256, bytes, replace = TRUE)-1), collapse = "")
+    paste(
+      format(as.hexmode(sample(256, bytes, replace = TRUE)-1), width=2),
+      collapse = "")
   })
 }
 

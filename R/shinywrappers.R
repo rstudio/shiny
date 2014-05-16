@@ -368,11 +368,7 @@ renderPrint <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
   }
 
   markRenderFunction(verbatimTextOutput, function() {
-    return(paste(capture.output({
-      result <- withVisible(func())
-      if (result$visible)
-        print(result$value)
-    }), collapse="\n"))
+    paste(capture.output(func()), collapse = "\n")
   })
 }
 

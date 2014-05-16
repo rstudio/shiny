@@ -37,16 +37,19 @@ bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
     }
     cssExt <- ext(".css")
     jsExt = ext(".js")
-    bs <- "shared/bootstrap"
+    bs <- c(
+      href = "shared/bootstrap",
+      file = system.file("www/shared/bootstrap", package = "shiny")
+    )
 
     list(
-      htmlDependency("bootstrap", "2.3.2", c(href = bs),
+      htmlDependency("bootstrap", "2.3.2", bs,
         script = sprintf("js/bootstrap%s", jsExt),
         stylesheet = if (is.null(theme))
           sprintf("css/bootstrap%s", cssExt)
       ),
       if (responsive) {
-        htmlDependency("bootstrap-responsive", "2.3.2", c(href = bs),
+        htmlDependency("bootstrap-responsive", "2.3.2", bs,
           stylesheet = sprintf("css/bootstrap-responsive%s", cssExt),
           meta = list(viewport = "width=device-width, initial-scale=1.0")
         )

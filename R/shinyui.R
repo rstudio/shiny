@@ -39,6 +39,7 @@ renderPage <- function(ui, connection, showcase=0) {
     ),
     result$dependencies
   )
+  deps <- resolveDependencies(deps)
   deps <- lapply(deps, createWebDependency)
   depStr <- paste(sapply(deps, function(dep) {
     sprintf("%s[%s]", dep$name, dep$version)

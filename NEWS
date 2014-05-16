@@ -27,6 +27,9 @@ shiny 0.9.1.9XXX
 * `sliderInput` and `selectizeInput`/`selectInput` now use a standard horizontal
   size instead of filling up all available horizontal space.
 
+* `renderPrint` gained a new argument 'width' to control the width of the text
+  output, e.g. renderPrint({mtcars}, width = 40).
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

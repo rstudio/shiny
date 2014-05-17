@@ -33,7 +33,7 @@ animationOptions <- function(interval=1000,
 # (www/shared/slider contains js, css, and img dependencies)
 slider <- function(inputId, min, max, value, step = NULL, ...,
                    round=FALSE, format='#,##0.#####', locale='us',
-                   ticks=TRUE, animate=FALSE) {
+                   ticks=TRUE, animate=FALSE, width=NULL) {
   # validate inputId
   inputId <- as.character(inputId)
   if (!is.character(inputId))
@@ -112,7 +112,8 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
         'data-from'=min, 'data-to'=max, 'data-step'=step,
         'data-skin'='plastic', 'data-round'=round, 'data-locale'=locale,
         'data-format'=format, 'data-scale'=ticks,
-        'data-smooth'=FALSE
+        'data-smooth'=FALSE,
+        'data-width'=width
       ),
       dep
     )

@@ -113,7 +113,7 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
         'data-skin'='plastic', 'data-round'=round, 'data-locale'=locale,
         'data-format'=format, 'data-scale'=ticks,
         'data-smooth'=FALSE,
-        'data-width'=width
+        'data-width'=validateCssUnit(width)
       ),
       dep
     )

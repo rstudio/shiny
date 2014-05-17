@@ -766,7 +766,7 @@ selectizeIt <- function(inputId, select, options, width = NULL, nonempty = FALSE
         type = 'application/json',
         `data-for` = inputId, `data-nonempty` = if (nonempty) '',
         `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
-        `data-width` = width,
+        `data-width` = validateCssUnit(width),
         if (length(res$options)) HTML(toJSON(res$options)) else '{}'
       )
     ),

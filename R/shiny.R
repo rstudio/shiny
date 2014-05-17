@@ -82,10 +82,10 @@ workerId <- local({
 #'     }
 #'   }
 #'   \code{clientData} also contains information about each output.
-#'   \code{output_\emph{outputId}_width} and \code{output_\emph{outputId}_height}
+#'   \code{output_\var{outputId}_width} and \code{output_\var{outputId}_height}
 #'   give the dimensions (using \code{offsetWidth} and \code{offsetHeight}) of
-#'   the DOM element that is bound to \code{\emph{outputId}}, and
-#'   \code{output_\emph{outputId}_hidden} is a logical that indicates whether
+#'   the DOM element that is bound to \code{\var{outputId}}, and
+#'   \code{output_\var{outputId}_hidden} is a logical that indicates whether
 #'   the element is hidden. These values may be \code{NULL} if the output is
 #'   not bound.
 #' }

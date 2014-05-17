@@ -3,7 +3,8 @@
 \alias{renderPrint}
 \title{Printable Output}
 \usage{
-renderPrint(expr, env = parent.frame(), quoted = FALSE, func = NULL)
+renderPrint(expr, env = parent.frame(), quoted = FALSE, func = NULL,
+  width = getOption("width"))
 }
 \arguments{
 \item{expr}{An expression that may print output and/or return a printable R
@@ -14,7 +15,9 @@ object.}
 \item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This}
 
 \item{func}{A function that may print output and/or return a printable R
-  object (deprecated; use \code{expr} instead).}
+object (deprecated; use \code{expr} instead).}
+
+\item{width}{The value for \code{\link{options}('width')}.}
 }
 \description{
 Makes a reactive version of the given function that captures any printed

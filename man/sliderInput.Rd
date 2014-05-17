@@ -5,7 +5,8 @@
 \title{Slider Input Widget}
 \usage{
 sliderInput(inputId, label, min, max, value, step = NULL, round = FALSE,
-  format = "#,##0.#####", locale = "us", ticks = TRUE, animate = FALSE)
+  format = "#,##0.#####", locale = "us", ticks = TRUE, animate = FALSE,
+  width = NULL)
 
 animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
   pauseButton = NULL)
@@ -45,8 +46,10 @@ details.}
 according to some simple heuristics.}
 
 \item{animate}{\code{TRUE} to show simple animation controls with default
-  settings; \code{FALSE} not to; or a custom settings list, such as those
-  created using \code{animationOptions}.}
+settings; \code{FALSE} not to; or a custom settings list, such as those
+created using \code{animationOptions}.}
+
+\item{width}{The width of the slider.}
 
 \item{interval}{The interval, in milliseconds, between each animation step.}
 

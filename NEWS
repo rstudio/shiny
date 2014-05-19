@@ -33,6 +33,9 @@ shiny 0.9.1.9XXX
 * `renderPrint` gained a new argument 'width' to control the width of the text
   output, e.g. renderPrint({mtcars}, width = 40).
 
+* Fixed #220: the zip file for a directory created by some programs may not have
+  the directory name as its first entry, in which case runUrl() can fail. (#220)
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

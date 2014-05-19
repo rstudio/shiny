@@ -732,7 +732,8 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 #'   for possible options (character option values inside \code{\link{I}()} will
 #'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
 #'   for details).
-#' @param width The width of the selectize input.
+#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+#'   see \code{\link{validateCssUnit}}.
 #' @note The selectize input created from \code{selectizeInput()} allows
 #'   deletion of the selected option even in a single select input, which will
 #'   return an empty string as its value. This is the default behavior of
@@ -930,7 +931,7 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
 #' @param animate \code{TRUE} to show simple animation controls with default
 #'   settings; \code{FALSE} not to; or a custom settings list, such as those
 #'   created using \code{animationOptions}.
-#' @param width The width of the slider.
+#' @inheritParams selectizeInput
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
 #'

@@ -5,7 +5,7 @@
 \title{Create a select list input control}
 \usage{
 selectInput(inputId, label, choices, selected = NULL, multiple = FALSE,
-  selectize = TRUE)
+  selectize = TRUE, width = NULL)
 
 selectizeInput(inputId, ..., options = NULL, width = NULL)
 }
@@ -32,7 +32,8 @@ for possible options (character option values inside \code{\link{I}()} will
 be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
 for details).}
 
-\item{width}{The width of the selectize input.}
+\item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+see \code{\link{validateCssUnit}}.}
 }
 \value{
 A select list control that can be added to a UI definition.

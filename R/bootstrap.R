@@ -696,7 +696,7 @@ choicesWithNames <- function(choices) {
 #'               "Gears" = "gear"))
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,
-                        multiple = FALSE, selectize = TRUE) {
+                        multiple = FALSE, selectize = TRUE, width = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
 
@@ -723,7 +723,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   # return label and select tag
   res <- tagList(controlLabel(inputId, label), selectTag)
   if (!selectize) return(res)
-  selectizeIt(inputId, res, NULL, nonempty = !multiple && !("" %in% choices))
+  selectizeIt(inputId, res, NULL, width, nonempty = !multiple && !("" %in% choices))
 }
 
 #' @rdname selectInput

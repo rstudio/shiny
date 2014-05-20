@@ -603,6 +603,8 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
 # refers to values. Below is a function for backward compatibility.
 validateSelected <- function(selected, choices, inputId) {
+  # drop names, otherwise toJSON() keeps them too
+  selected <- unname(selected)
   if (is.list(choices)) {
     # <optgroup> is not there yet
     if (any(sapply(choices, length) > 1)) return(selected)
@@ -615,7 +617,7 @@ validateSelected <- function(selected, choices, inputId) {
   i <- (selected %in% nms) & !(selected %in% choices)
   if (any(i)) {
     warnFun <- if (all(i)) {
-      # replace names with values; drop names, otherwise toJSON() keeps them too
+      # replace names with values
       selected <- unname(choices[selected])
       warning
     } else stop  # stop when it is ambiguous (some labels == values)

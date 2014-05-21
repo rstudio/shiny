@@ -276,6 +276,8 @@ sidebarLayout <- function(sidebarPanel,
     fixedRow(firstPanel, secondPanel)
 }
 
+columnLayout = sidebarLayout
+
 #' Lay out UI elements vertically
 #'
 #' Create a container that includes one or more rows of content (each element

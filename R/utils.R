@@ -892,7 +892,7 @@ isTruthy <- function(x) {
 stopWithCondition <- function(class, message) {
   cond <- structure(
     list(message = message),
-    class = c(class, 'error', 'condition')
+    class = c(class, 'shiny.silent.error', 'error', 'condition')
   )
   stop(cond)
 }

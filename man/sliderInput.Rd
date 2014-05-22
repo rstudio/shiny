@@ -5,7 +5,8 @@
 \title{Slider Input Widget}
 \usage{
 sliderInput(inputId, label, min, max, value, step = NULL, round = FALSE,
-  format = "#,##0.#####", locale = "us", ticks = TRUE, animate = FALSE)
+  format = "#,##0.#####", locale = "us", ticks = TRUE, animate = FALSE,
+  width = NULL)
 
 animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
   pauseButton = NULL)
@@ -45,8 +46,8 @@ details.}
 according to some simple heuristics.}
 
 \item{animate}{\code{TRUE} to show simple animation controls with default
-  settings; \code{FALSE} not to; or a custom settings list, such as those
-  created using \code{animationOptions}.}
+settings; \code{FALSE} not to; or a custom settings list, such as those
+created using \code{animationOptions}.}
 
 \item{interval}{The interval, in milliseconds, between each animation step.}
 
@@ -59,6 +60,9 @@ or list of tags (using \code{\link{tag}} and friends), or raw HTML (using
 \code{\link{HTML}}).}
 
 \item{pauseButton}{Similar to \code{playButton}, but for the pause button.}
+
+\item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+see \code{\link{validateCssUnit}}.}
 }
 \description{
 Constructs a slider widget to select a numeric value from a range.

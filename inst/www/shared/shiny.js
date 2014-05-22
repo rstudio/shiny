@@ -1721,7 +1721,9 @@
              };
     },
     initialize: function(el) {
-      $(el).slider();
+      var $el = $(el);
+      $el.slider();
+      $el.next('span.jslider').css('width', $el.data('width'));
     }
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
@@ -2207,6 +2209,7 @@
         control.destroy();
         control = $el.selectize(settings)[0].selectize;
       }
+      $el.next('div.selectize-control').css('width', config.data('width'));
       return control;
     }
   });

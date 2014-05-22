@@ -13,7 +13,8 @@ need(expr, message = paste(label, "must be provided"), label)
 \code{FALSE} for silent failure, or a string for failure with an error
 message.}
 
-\item{errorClass}{A CSS class to apply.}
+\item{errorClass}{A CSS class to apply. The actual CSS string will have
+\code{shiny-output-error-} prepended to this value.}
 
 \item{expr}{An expression to test. The condition will pass if the expression
 meets the conditions spelled out in Details.}

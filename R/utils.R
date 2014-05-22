@@ -800,7 +800,8 @@ columnToRowData <- function(data) {
 #' @param ... A list of tests. Each test should equal \code{NULL} for success,
 #'   \code{FALSE} for silent failure, or a string for failure with an error
 #'   message.
-#' @param errorClass A CSS class to apply.
+#' @param errorClass A CSS class to apply. The actual CSS string will have
+#'   \code{shiny-output-error-} prepended to this value.
 #' @export
 #' @examples
 #' # in ui.R

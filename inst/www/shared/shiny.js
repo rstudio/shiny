@@ -1072,10 +1072,11 @@
       this.renderError(el, err);
     };
     this.renderError = function(el, err) {
+      this.clearError(el);
       if (err.message === '') {
         // not really error, but we just need to wait (e.g. action buttons)
         $(el).empty();
-        return this.clearError(el);
+        return;
       }
       var errClass = 'shiny-output-error';
       if (err.type !== null) {

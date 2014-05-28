@@ -137,6 +137,8 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, port = NULL,
 
   message("Downloading ", url)
   filePath <- tempfile('shinyapp', fileext=fileext)
+  fileDir  <- tempfile('shinyapp')
+  dir.create(fileDir, showWarnings = FALSE)
   if (download(url, filePath, mode = "wb", quiet = TRUE) != 0)
     stop("Failed to download URL ", url)
   on.exit(unlink(filePath))
@@ -148,17 +150,18 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, port = NULL,
     #   2) If the internal untar implementation is used, it chokes on the 'g'
     #      type flag that github uses (to stash their commit hash info).
     # By using our own forked/modified untar2 we sidestep both issues.
-    dirname <- untar2(filePath, list=TRUE)[1]
-    untar2(filePath, exdir = dirname(filePath))
+    first <- untar2(filePath, list=TRUE)[1]
+    untar2(filePath, exdir = fileDir)
 
   } else if (fileext == ".zip") {
-    dirname <- as.character(unzip(filePath, list=TRUE)$Name[1])
-    unzip(filePath, exdir = dirname(filePath))
+    first <- as.character(unzip(filePath, list=TRUE)$Name)[1]
+    unzip(filePath, exdir = fileDir)
   }
+  on.exit(unlink(fileDir, recursive = TRUE), add = TRUE)
 
-  appdir <- file.path(dirname(filePath), dirname)
-  on.exit(unlink(appdir, recursive = TRUE), add = TRUE)
+  appdir <- file.path(fileDir, first)
+  if (!file_test('-d', appdir)) appdir <- dirname(appdir)
 
-  appsubdir <- ifelse(is.null(subdir), appdir, file.path(appdir, subdir))
-  runApp(appsubdir, port=port, launch.browser=launch.browser)
+  if (!is.null(subdir)) appdir <- file.path(appdir, subdir)
+  runApp(appdir, port=port, launch.browser=launch.browser)
 }

@@ -87,10 +87,10 @@ workerId <- local({
 #'     }
 #'   }
 #'   \code{clientData} also contains information about each output.
-#'   \code{output_OUTPUTID_width} and \code{output_OUTPUTID_height}
+#'   \code{output_\var{outputId}_width} and \code{output_\var{outputId}_height}
 #'   give the dimensions (using \code{offsetWidth} and \code{offsetHeight}) of
-#'   the DOM element that is bound to \code{OUTPUTID}, and
-#'   \code{output_OUTPUTID_hidden} is a logical that indicates whether
+#'   the DOM element that is bound to \code{\var{outputId}}, and
+#'   \code{output_\var{outputId}_hidden} is a logical that indicates whether
 #'   the element is hidden. These values may be \code{NULL} if the output is
 #'   not bound.
 #' }
@@ -321,7 +321,25 @@ ShinySession <- setRefClass(
 
         obs <- observe({
 
-          value <- try(shinyCallingHandlers(func()), silent=FALSE)
+          value <- try(
+            {
+              tryCatch(
+                shinyCallingHandlers(func()),
+                shiny.silent.error = function(cond) {
+                  # Don't let shiny.silent.error go through the normal stop
+                  # path of try, because we don't want it to print. But we
+                  # do want to try to return the same looking result so that
+                  # the code below can send the error to the browser.
+                  structure(
+                    NULL,
+                    class = "try-error",
+                    condition = cond
+                  )
+                }
+              )
+            },
+            silent=FALSE
+          )
 
           .invalidatedOutputErrors$remove(name)
           .invalidatedOutputValues$remove(name)

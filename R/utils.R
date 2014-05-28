@@ -606,7 +606,11 @@ dataTablesJSON <- function(data, req) {
       fdata <- data[i, , drop = FALSE]  # filtered data
     } else fdata <- data
     fdata <- unname(as.matrix(fdata))
+    # WAT: toJSON(list(x = matrix(nrow = 0, ncol = 1))) => {"x": } (#299)
     if (nrow(fdata) == 0) fdata <- list()
+    # WAT: toJSON(list(x = matrix(1:2))) => {x: [ [1], [2] ]}, however,
+    # toJSON(list(x = matrix(1))) => {x: [ 1 ]} (loss of dimension, #429)
+    if (all(dim(fdata) == 1)) fdata <- list(list(fdata[1, 1]))
 
     res <- toJSON(list(
       sEcho = as.integer(sEcho),
@@ -796,7 +800,8 @@ columnToRowData <- function(data) {
 #' @param ... A list of tests. Each test should equal \code{NULL} for success,
 #'   \code{FALSE} for silent failure, or a string for failure with an error
 #'   message.
-#' @param errorClass A CSS class to apply.
+#' @param errorClass A CSS class to apply. The actual CSS string will have
+#'   \code{shiny-output-error-} prepended to this value.
 #' @export
 #' @examples
 #' # in ui.R
@@ -888,7 +893,7 @@ isTruthy <- function(x) {
 stopWithCondition <- function(class, message) {
   cond <- structure(
     list(message = message),
-    class = c(class, 'error', 'condition')
+    class = c(class, 'shiny.silent.error', 'error', 'condition')
   )
   stop(cond)
 }

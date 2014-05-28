@@ -1072,10 +1072,11 @@
       this.renderError(el, err);
     };
     this.renderError = function(el, err) {
+      this.clearError(el);
       if (err.message === '') {
         // not really error, but we just need to wait (e.g. action buttons)
         $(el).empty();
-        return this.clearError(el);
+        return;
       }
       var errClass = 'shiny-output-error';
       if (err.type !== null) {
@@ -1721,7 +1722,9 @@
              };
     },
     initialize: function(el) {
-      $(el).slider();
+      var $el = $(el);
+      $el.slider();
+      $el.next('span.jslider').css('width', $el.data('width'));
     }
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
@@ -2207,6 +2210,7 @@
         control.destroy();
         control = $el.selectize(settings)[0].selectize;
       }
+      $el.next('div.selectize-control').css('width', config.data('width'));
       return control;
     }
   });

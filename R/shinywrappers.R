@@ -125,8 +125,11 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     plotFunc <- function() {
       # Actually perform the plotting
       result <- withVisible(func())
-      if (result$visible)
-        print(result$value)
+      if (result$visible) {
+        # Use capture.output to squelch printing to the actual console; we
+        # are only interested in plot output
+        capture.output(print(result$value))
+      }
 
       # Now capture some graphics device info before we close it
       usrCoords <- par('usr')
@@ -358,14 +361,15 @@ renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) 
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #' @param func A function that may print output and/or return a printable R
 #'   object (deprecated; use \code{expr} instead).
-#'
+#' @param width The value for \code{\link{options}('width')}.
 #' @seealso \code{\link{renderText}} for displaying the value returned from a
 #'   function, instead of the printed output.
 #'
 #' @example res/text-example.R
 #'
 #' @export
-renderPrint <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
+renderPrint <- function(expr, env = parent.frame(), quoted = FALSE, func = NULL,
+                        width = getOption('width')) {
   if (!is.null(func)) {
     shinyDeprecated(msg="renderPrint: argument 'func' is deprecated. Please use 'expr' instead.")
   } else {
@@ -373,11 +377,9 @@ renderPrint <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
   }
 
   markRenderFunction(verbatimTextOutput, function() {
-    return(paste(capture.output({
-      result <- withVisible(func())
-      if (result$visible)
-        print(result$value)
-    }), collapse="\n"))
+    op <- options(width = width)
+    on.exit(options(op), add = TRUE)
+    paste(capture.output(func()), collapse = "\n")
   })
 }
 

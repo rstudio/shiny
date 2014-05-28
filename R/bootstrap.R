@@ -605,6 +605,8 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL) {
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
 # refers to values. Below is a function for backward compatibility.
 validateSelected <- function(selected, choices, inputId) {
+  # drop names, otherwise toJSON() keeps them too
+  selected <- unname(selected)
   if (is.list(choices)) {
     # <optgroup> is not there yet
     if (any(sapply(choices, length) > 1)) return(selected)
@@ -617,7 +619,7 @@ validateSelected <- function(selected, choices, inputId) {
   i <- (selected %in% nms) & !(selected %in% choices)
   if (any(i)) {
     warnFun <- if (all(i)) {
-      # replace names with values; drop names, otherwise toJSON() keeps them too
+      # replace names with values
       selected <- unname(choices[selected])
       warning
     } else stop  # stop when it is ambiguous (some labels == values)
@@ -698,7 +700,7 @@ choicesWithNames <- function(choices) {
 #'               "Gears" = "gear"))
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,
-                        multiple = FALSE, selectize = TRUE) {
+                        multiple = FALSE, selectize = TRUE, width = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
 
@@ -725,7 +727,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   # return label and select tag
   res <- tagList(controlLabel(inputId, label), selectTag)
   if (!selectize) return(res)
-  selectizeIt(inputId, res, NULL, nonempty = !multiple && !("" %in% choices))
+  selectizeIt(inputId, res, NULL, width, nonempty = !multiple && !("" %in% choices))
 }
 
 #' @rdname selectInput
@@ -734,6 +736,8 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 #'   for possible options (character option values inside \code{\link{I}()} will
 #'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
 #'   for details).
+#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+#'   see \code{\link{validateCssUnit}}.
 #' @note The selectize input created from \code{selectizeInput()} allows
 #'   deletion of the selected option even in a single select input, which will
 #'   return an empty string as its value. This is the default behavior of
@@ -743,12 +747,12 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 #'   \code{choices} argument. This is to keep compatibility with
 #'   \code{selectInput(..., selectize = FALSE)}.
 #' @export
-selectizeInput <- function(inputId, ..., options = NULL) {
-  selectizeIt(inputId, selectInput(inputId, ..., selectize = FALSE), options)
+selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
+  selectizeIt(inputId, selectInput(inputId, ..., selectize = FALSE), options, width)
 }
 
 # given a select input and its id, selectize it
-selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
+selectizeIt <- function(inputId, select, options, width = NULL, nonempty = FALSE) {
   res <- checkAsIs(options)
 
   selectizeDep <- htmlDependency(
@@ -768,6 +772,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
         type = 'application/json',
         `data-for` = inputId, `data-nonempty` = if (nonempty) '',
         `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
+        `data-width` = validateCssUnit(width),
         if (length(res$options)) HTML(toJSON(res$options)) else '{}'
       )
     ),
@@ -931,7 +936,7 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
 #' @param animate \code{TRUE} to show simple animation controls with default
 #'   settings; \code{FALSE} not to; or a custom settings list, such as those
 #'   created using \code{animationOptions}.
-#'
+#' @inheritParams selectizeInput
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
 #'
@@ -950,7 +955,7 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round=FALSE, format='#,##0.#####', locale='us',
-                        ticks=TRUE, animate=FALSE) {
+                        ticks=TRUE, animate=FALSE, width=NULL) {
 
   if (identical(animate, TRUE))
     animate <- animationOptions()
@@ -964,7 +969,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 
   # build slider
   sliderTag <- slider(inputId, min=min, max=max, value=value, step=step,
-    round=round, locale=locale, format=format, ticks=ticks, animate=animate)
+    round=round, locale=locale, format=format, ticks=ticks, animate=animate,
+    width=width)
 
   if (is.null(label)) {
     sliderTag

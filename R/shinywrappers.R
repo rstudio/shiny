@@ -31,7 +31,7 @@ useRenderFunction <- function(renderFunc) {
 }
 
 #' @export
-as.tags.shiny.render.function <- function(x) {
+as.tags.shiny.render.function <- function(x, ...) {
   useRenderFunction(x)
 }
 

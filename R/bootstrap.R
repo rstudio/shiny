@@ -183,7 +183,7 @@ pageWithSidebar <- function(headerPanel,
 #'   )
 #' ))
 #' @export
-navbarPage <- function(title,
+navbarPage <- function(pageTitle,
                        ...,
                        id = NULL,
                        header = NULL,
@@ -192,10 +192,12 @@ navbarPage <- function(title,
                        collapsable = FALSE,
                        fluid = TRUE,
                        responsive = TRUE,
-                       theme = NULL) {
+                       theme = NULL,
+                       title = NULL) {
 
   # alias title so we can avoid conflicts w/ title in withTags
-  pageTitle <- title
+  title <- ifelse(title != NULL, title, pageTitle)
+
 
   # navbar class based on options
   navbarClass <- "navbar navbar-static-top"

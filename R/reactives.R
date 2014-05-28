@@ -373,7 +373,7 @@ Observable <- setRefClass(
       on.exit(.running <<- wasRunning)
 
       ctx$run(function() {
-        result <- withVisible(try(shinyCallingHandlers(.func()), silent=FALSE))
+        result <- withVisible(try(shinyCallingHandlers(.func()), silent=TRUE))
         .visible <<- result$visible
         .value <<- result$value
       })

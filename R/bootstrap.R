@@ -196,6 +196,9 @@ navbarPage <- function(pageTitle,
                        title = NULL) {
 
   # alias title so we can avoid conflicts w/ title in withTags
+  # set title to be either pageTitle or title if not null
+
+
   title <- ifelse(!is.null(title), title, pageTitle)
 
 

@@ -10,3 +10,4 @@
 ^man-roxygen$
 ^\.travis\.yml$
 ^staticdocs$
+^tools$

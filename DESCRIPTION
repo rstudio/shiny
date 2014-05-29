@@ -12,8 +12,7 @@ Description: Shiny makes it incredibly easy to build interactive web
 License: GPL-3
 Depends:
     R (>= 2.14.1),
-    methods,
-    htmltools (>= 0.2.4)
+    methods
 Imports:
     tools,
     utils,
@@ -21,12 +20,14 @@ Imports:
     caTools,
     RJSONIO,
     xtable,
-    digest
+    digest,
+    htmltools (>= 0.2.4)
 Suggests:
     datasets,
     Cairo (>= 1.5-5),
     testthat,
-    knitr
+    knitr (>= 1.6),
+    markdown
 URL: http://www.rstudio.com/shiny/
 BugReports: https://github.com/rstudio/shiny/issues
 Roxygen: list(wrap = FALSE)
@@ -42,6 +43,7 @@ Collate:
     'graph.R'
     'hooks.R'
     'html-deps.R'
+    'htmltools.R'
     'imageutils.R'
     'jqueryui.R'
     'middleware-shiny.R'

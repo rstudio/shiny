@@ -30,7 +30,7 @@ useRenderFunction <- function(renderFunc) {
   return(outputFunction(id))
 }
 
-#' @export
+#' @S3method as.tags shiny.render.function
 as.tags.shiny.render.function <- function(x, ...) {
   useRenderFunction(x)
 }

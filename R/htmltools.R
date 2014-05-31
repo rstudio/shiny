@@ -1,97 +1,101 @@
+#' @export
+a <- htmltools::a
 
+#' @export
+br <- htmltools::br
 
-# Define an HTML dependency
-#
-# Define an HTML dependency (e.g. CSS or Javascript and related library). HTML
-# dependency definitions are required for \code{\link{html_output}} that
-# require CSS or JavaScript within the document head to render correctly.
-#
-# @param name Library name
-# @param version Library version
-# @param path Full path to library
-# @param meta Named list of meta tags to insert into document head
-# @param script Script(s) to include within the document head (should be
-#   specified relative to the \code{path} parameter).
-# @param stylesheet Stylesheet(s) to include within the document (should be
-#   specified relative to the \code{path} parameter).
-# @param head Arbitrary lines of HTML to insert into the document head
-#
-# @return An object that can be included in the list of dependencies passed to
-#   \code{\link{html_print}} or \code{\link{html_knit_print}}.
-#
-# @details See the documentation on
-#   \href{http://rmarkdown.rstudio.com/developer_html_widgets.html}{R
-#   Markdown HTML Widgets} for examples and additional details.
-#
-html_dependency <- function(name,
-  version,
-  path,
-  meta = NULL,
-  script = NULL,
-  stylesheet = NULL,
-  head = NULL) {
-  structure(class = "html_dependency", list(
-    name = name,
-    version = version,
-    path = path,
-    meta = meta,
-    script = script,
-    stylesheet = stylesheet,
-    head = head
-  ))
-}
+#' @export
+code <- htmltools::code
 
+#' @export
+div <- htmltools::div
 
-# Given a list of HTML dependencies produce a character representation
-# suitable for inclusion within the head of an HTML document
-html_dependencies_as_character <- function(dependencies, lib_dir = NULL) {
+#' @export
+em <- htmltools::em
 
-  html <- c()
+#' @export
+h1 <- htmltools::h1
 
-  for (dep in dependencies) {
+#' @export
+h2 <- htmltools::h2
 
-    # copy library files if necessary
-    if (!is.null(lib_dir)) {
+#' @export
+h3 <- htmltools::h3
 
-      if (!file.exists(lib_dir))
-        dir.create(lib_dir)
+#' @export
+h4 <- htmltools::h4
 
-      target_dir <- file.path(lib_dir, basename(dep$path))
-      if (!file.exists(target_dir))
-        file.copy(from = dep$path, to = lib_dir, recursive = TRUE)
+#' @export
+h5 <- htmltools::h5
 
-      dep$path <- file.path(basename(lib_dir), basename(target_dir))
-    }
+#' @export
+h6 <- htmltools::h6
 
-    # add meta content
-    for (name in names(dep$meta)) {
-      html <- c(html, paste("<meta name=\"", name,
-        "\" content=\"", dep$meta[[name]], "\" />",
-        sep = ""))
-    }
+#' @export
+hr <- htmltools::hr
 
-    # add stylesheets
-    for (stylesheet in dep$stylesheet) {
-      stylesheet <- file.path(dep$path, stylesheet)
-      html <- c(html, paste("<link href=\"", stylesheet, "\" ",
-        "rel=\"stylesheet\" />",
-        sep = ""))
-    }
+#' @export
+HTML <- htmltools::HTML
 
-    # add scripts
-    for (script in dep$script) {
-      script <- file.path(dep$path, script)
-      html <- c(html,
-        paste("<script src=\"", script, "\"></script>", sep = ""))
-    }
+#' @export
+img <- htmltools::img
 
-    # add raw head content
-    html <- c(html, dep$head)
-  }
+#' @export
+includeCSS <- htmltools::includeCSS
 
-  html
-}
+#' @export
+includeHTML <- htmltools::includeHTML
 
-attach_dependency <- function(x, dependency) {
-  structure(x, html_dependency = dependency)
-}
+#' @export
+includeMarkdown <- htmltools::includeMarkdown
+
+#' @export
+includeScript <- htmltools::includeScript
+
+#' @export
+includeText <- htmltools::includeText
+
+#' @export
+is.singleton <- htmltools::is.singleton
+
+#' @export
+p <- htmltools::p
+
+#' @export
+pre <- htmltools::pre
+
+#' @export
+singleton <- htmltools::singleton
+
+#' @export
+span <- htmltools::span
+
+#' @export
+strong <- htmltools::strong
+
+#' @export
+tag <- htmltools::tag
+
+#' @export
+tagAppendAttributes <- htmltools::tagAppendAttributes
+
+#' @export
+tagAppendChild <- htmltools::tagAppendChild
+
+#' @export
+tagAppendChildren <- htmltools::tagAppendChildren
+
+#' @export
+tagList <- htmltools::tagList
+
+#' @export
+tags <- htmltools::tags
+
+#' @export
+tagSetChildren <- htmltools::tagSetChildren
+
+#' @export
+validateCssUnit <- htmltools::validateCssUnit
+
+#' @export
+withTags <- htmltools::withTags

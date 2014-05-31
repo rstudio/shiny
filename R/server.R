@@ -463,7 +463,7 @@ identicalFunctionBodies <- function(a, b) {
 handlerManager <- HandlerManager$new()
 
 addSubApp <- function(appObj, autoRemove = TRUE) {
-  path <- sprintf("/%s", createUniqueId(16))
+  path <- createUniqueId(16, "/app")
   appHandlers <- createAppHandlers(appObj$httpHandler, appObj$serverFuncSource)
 
   # remove the leading / from the path so a relative path is returned

@@ -159,8 +159,6 @@ sd_section("Embedding",
   "Functions that are intended for third-party packages that embed Shiny applications.",
   c(
     "shinyApp",
-    "maskReactiveContext",
-    "knitr_methods",
-    "getProvidedHtmlDependencies"
+    "maskReactiveContext"
   )
 )

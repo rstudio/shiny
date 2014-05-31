@@ -99,13 +99,12 @@ slider <- function(inputId, min, max, value, step = NULL, ...,
   }
 
   # build slider
-  dep <- html_dependency(name = "jslider", version = "1",
-    path = "shared/slider",
+  dep <- htmlDependency("jslider", "1", c(href="shared/slider"),
     script = "js/jquery.slider.min.js",
     stylesheet = "css/jquery.slider.min.css"
   )
   sliderFragment <- list(
-    attach_dependency(
+    attachDependencies(
       tags$input(
         id=inputId, type="slider",
         name=inputId, value=paste(value, collapse=';'), class="jslider",

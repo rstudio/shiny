@@ -23,11 +23,16 @@ markRenderFunction <- function(uiFunc, renderFunc) {
 
 useRenderFunction <- function(renderFunc) {
   outputFunction <- attr(renderFunc, "outputFunc")
-  id <- createUniqueId(8)
+  id <- createUniqueId(8, "out")
   o <- getDefaultReactiveDomain()$output
   if (!is.null(o))
     o[[id]] <- renderFunc
   return(outputFunction(id))
+}
+
+#' @S3method as.tags shiny.render.function
+as.tags.shiny.render.function <- function(x, ...) {
+  useRenderFunction(x)
 }
 
 #' Plot Output
@@ -459,7 +464,8 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 
     result <- takeSingletons(result, shinysession$singletons, desingleton=FALSE)$ui
     result <- surroundSingletons(result)
-    dependencies <- lapply(getNewestDeps(findDependencies(result)), createWebDependency)
+    dependencies <- lapply(resolveDependencies(findDependencies(result)),
+      createWebDependency)
     names(dependencies) <- NULL
 
     # renderTags returns a list with head, singletons, and html

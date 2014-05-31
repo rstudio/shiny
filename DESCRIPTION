@@ -20,13 +20,14 @@ Imports:
     caTools,
     RJSONIO,
     xtable,
-    digest
+    digest,
+    htmltools (>= 0.2.4)
 Suggests:
     datasets,
-    markdown,
     Cairo (>= 1.5-5),
     testthat,
-    knitr
+    knitr (>= 1.6),
+    markdown
 URL: http://www.rstudio.com/shiny/
 BugReports: https://github.com/rstudio/shiny/issues
 Roxygen: list(wrap = FALSE)
@@ -36,13 +37,13 @@ Collate:
     'map.R'
     'globals.R'
     'utils.R'
-    'htmltools.R'
     'bootstrap.R'
     'cache.R'
     'fileupload.R'
     'graph.R'
     'hooks.R'
     'html-deps.R'
+    'htmltools.R'
     'imageutils.R'
     'jqueryui.R'
     'middleware-shiny.R'
@@ -58,7 +59,6 @@ Collate:
     'shinywrappers.R'
     'showcase.R'
     'slider.R'
-    'tags.R'
     'tar.R'
     'timer.R'
     'update-input.R'

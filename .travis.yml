@@ -13,8 +13,7 @@ install:
   - sudo apt-get update
   - sudo apt-get install r-base-dev r-cran-shiny r-cran-cairo r-cran-markdown
   - "[ ! -d ~/R ] && mkdir ~/R"
-  - Rscript -e "install.packages(c('xtable'), repos = 'http://cran.rstudio.org')"
-  - Rscript -e "install.packages('knitr', repos = c('http://rforge.net', 'http://cran.rstudio.org'))"
+  - Rscript -e "install.packages(c('xtable', 'knitr', 'htmltools'), repos = 'http://cran.rstudio.org')"
   - Rscript -e "install.packages('$R_MY_PKG', dep = TRUE, repos = 'http://cran.rstudio.org')"
 
 # run tests

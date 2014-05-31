@@ -224,6 +224,20 @@ print.shiny.appobj <- function(x, ...) {
   do.call(runApp, args)
 }
 
+getShinyAppSize <- function(x) {
+  opts <- x$options %OR% list()
+  c(width = opts$width %OR% DEFAULT_WIDTH,
+    height = opts$height %OR% DEFAULT_HEIGHT)
+}
+
+#' @export
+as.tags.shiny.appobj <- function(x, ...) {
+  size <- getShinyAppSize(x)
+  path <- addSubApp(x)
+  tags$iframe(src=path, width=size$width, height=size$height,
+    class="shiny-frame")
+}
+
 #' Knitr S3 methods
 #'
 #' These S3 methods are necessary to help Shiny applications and UI chunks embed
@@ -237,9 +251,7 @@ NULL
 #' @rdname knitr_methods
 #' @export
 knit_print.shiny.appobj <- function(x, ...) {
-  opts <- x$options %OR% list()
-  width <- if (is.null(opts$width)) "100%" else opts$width
-  height <- if (is.null(opts$height)) "400" else opts$height
+  size <- getShinyAppSize(x)
   shiny_warning <- NULL
   # if there's an R Markdown runtime option set but it isn't set to Shiny, then
   # emit a warning indicating the runtime is inappropriate for this object
@@ -254,8 +266,8 @@ knit_print.shiny.appobj <- function(x, ...) {
     # create a box exactly the same dimensions as the Shiny app would have had
     # (so the document continues to flow as it would have with the app), and
     # display a diagnostic message
-    width <- validateCssUnit(width)
-    height <- validateCssUnit(height)
+    width <- validateCssUnit(size$width)
+    height <- validateCssUnit(size$height)
     output <- tags$div(
       style=paste("width:", width, "; height:", height, "; text-align: center;",
                   "box-sizing: border-box;", "-moz-box-sizing: border-box;",
@@ -265,7 +277,7 @@ knit_print.shiny.appobj <- function(x, ...) {
   }
   else {
     path <- addSubApp(x)
-    output <- tags$iframe(src=path, width=width, height=height,
+    output <- tags$iframe(src=path, width=size$width, height=size$height,
                           class="shiny-frame")
   }
 

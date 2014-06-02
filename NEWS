@@ -27,6 +27,10 @@ shiny 0.9.1.9XXX
 * Added `serverInfo` to obtain info about the Shiny Server if the app is served
   through it.
 
+* Added an `inline` argument (TRUE/FALSE) in `checkboxGroupInput()` and
+  `radioButtons()` to allow the horizontal layout (inline = TRUE) of checkboxes
+  or radio buttons. (Thanks, @saurfang, #481)
+
 * `sliderInput` and `selectizeInput`/`selectInput` now use a standard horizontal
   size instead of filling up all available horizontal space.
 

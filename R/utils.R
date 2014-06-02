@@ -77,7 +77,9 @@ withPrivateSeed <- function(expr) {
     .globals$ownSeed, unset=is.null(.globals$ownSeed), {
       tryCatch({
         expr
-      }, finally = {.globals$ownSeed <- .Random.seed})
+      }, finally = {
+        .globals$ownSeed <- getExists('.Random.seed', 'numeric', globalenv())
+      })
     }
   )
 }

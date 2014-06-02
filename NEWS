@@ -34,6 +34,11 @@ shiny 0.9.1.9XXX
 * `sliderInput` and `selectizeInput`/`selectInput` now use a standard horizontal
   size instead of filling up all available horizontal space.
 
+* Added the `updateSelectizeInput()` function to make it possible to process
+  searching on the server side (i.e. using R), which can be much faster than the
+  client side processing (i.e. using HTML and JavaScript). See the article at
+  http://shiny.rstudio.com/articles/selectize.html for a detailed introduction.
+
 * Fixed a bug of renderDataTable() when the data object only has 1 row and 1
   column. (Thanks, ZJ Dai, #429)
 

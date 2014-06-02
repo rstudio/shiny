@@ -24,6 +24,9 @@ shiny 0.9.1.9XXX
   intended to be used to encapsulate small input controls wherever vertical
   space is at a premium.
 
+* Added `serverInfo` to obtain info about the Shiny Server if the app is served
+  through it.
+
 * `sliderInput` and `selectizeInput`/`selectInput` now use a standard horizontal
   size instead of filling up all available horizontal space.
 

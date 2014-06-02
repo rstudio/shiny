@@ -903,13 +903,13 @@ stopWithCondition <- function(class, message) {
 #' This function returns the information about the current Shiny Server, such as
 #' its version, and whether it is the open source edition or professional
 #' edition. If the app is not served through the Shiny Server, this function
-#' just returns an empty list.
+#' just returns \code{list(shinyServer = FALSE)}.
 #' @export
 #' @return A list of the Shiny Server information.
 serverInfo <- function() {
   .globals$serverInfo
 }
-.globals$serverInfo <- list()
+.globals$serverInfo <- list(shinyServer = FALSE)
 
 setServerInfo <- function(...) {
   infoOld <- serverInfo()

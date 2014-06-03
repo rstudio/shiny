@@ -77,9 +77,20 @@ withPrivateSeed <- function(expr) {
     .globals$ownSeed, unset=is.null(.globals$ownSeed), {
       tryCatch({
         expr
-      }, finally = {.globals$ownSeed <- .Random.seed})
+      }, finally = {
+        .globals$ownSeed <- getExists('.Random.seed', 'numeric', globalenv())
+      })
     }
   )
+}
+
+# a homemade version of set.seed(NULL) for backward compatibility with R 2.15.x
+reinitializeSeed <- if (getRversion() >= '3.0.0') {
+  function() set.seed(NULL)
+} else function() {
+  if (exists('.Random.seed', globalenv()))
+    rm(list = '.Random.seed', pos = globalenv())
+  runif(1)  # generate any random numbers so R can reinitialize the seed
 }
 
 # Version of runif that runs with private seed

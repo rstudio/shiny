@@ -30,6 +30,8 @@ useRenderFunction <- function(renderFunc) {
   return(outputFunction(id))
 }
 
+# make sure roxygen2 knows as.tags is an S3 generic function from htmltools
+if ('devtools' %in% loadedNamespaces()) library(htmltools)
 #' @export
 as.tags.shiny.render.function <- function(x, ...) {
   useRenderFunction(x)

@@ -590,8 +590,7 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
     if (value %in% selected)
       inputTag$attribs$checked <- "checked"
 
-    tags$label(class =
-                 if(inline) "checkbox inline" else "checkbox",
+    tags$label(class = if (inline) "checkbox inline" else "checkbox",
                inputTag,
                tags$span(name))
     }
@@ -829,8 +828,7 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
         inputTag$attribs$checked = "checked"
 
       # Put the label text in a span
-      tags$label(class = 
-                   if(inline) "radio inline" else "radio",
+      tags$label(class = if (inline) "radio inline" else "radio",
                 inputTag,
                 tags$span(name)
       )

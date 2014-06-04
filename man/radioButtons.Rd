@@ -3,7 +3,7 @@
 \alias{radioButtons}
 \title{Create radio buttons}
 \usage{
-radioButtons(inputId, label, choices, selected = NULL)
+radioButtons(inputId, label, choices, selected = NULL, inline = FALSE)
 }
 \arguments{
 \item{inputId}{Input variable to assign the control's value to}
@@ -15,6 +15,8 @@ named then that name rather than the value is displayed to the user)}
 
 \item{selected}{The initially selected value (if not specified then
 defaults to the first value)}
+
+\item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 }
 \value{
 A set of radio buttons that can be added to a UI definition.

@@ -3,7 +3,7 @@
 \alias{checkboxGroupInput}
 \title{Checkbox Group Input Control}
 \usage{
-checkboxGroupInput(inputId, label, choices, selected = NULL)
+checkboxGroupInput(inputId, label, choices, selected = NULL, inline = FALSE)
 }
 \arguments{
 \item{inputId}{Input variable to assign the control's value to.}
@@ -14,6 +14,8 @@ checkboxGroupInput(inputId, label, choices, selected = NULL)
 are named then that name rather than the value is displayed to the user.}
 
 \item{selected}{The values that should be initially selected, if any.}
+
+\item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 }
 \value{
 A list of HTML elements that can be added to a UI definition.

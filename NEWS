@@ -4,6 +4,15 @@ shiny 0.9.1.9XXX
 * BREAKING CHANGE: By default, observers now terminate themselves if they were
   created during a session and that session ends. See ?domains for more details.
 
+* Shiny can now be used in R Markdown v2 documents, to create "Shiny Docs":
+  reports and presentations that combine narrative, statically computed output,
+  and fully dynamic inputs and outputs. For more info, including examples, see
+  http://rmarkdown.rstudio.com/authoring_shiny.html.
+
+* The `session` object that can be passed into a server function (e.g.
+  shinyServer(function(input, output, session) {...})) is now documented: see
+  `?session`.
+
 * Most inputs can now accept `NULL` label values to omit the label altogether.
 
 * New `actionLink` input control; like `actionButton`, but with the appearance
@@ -11,6 +20,12 @@ shiny 0.9.1.9XXX
 
 * `renderPlot` now calls `print` on its result if it's visible (i.e. no more
   explicit `print()` required for ggplot2).
+
+* Introduced Shiny app objects (see `?shinyApp`). These essentially replace the
+  little-advertised ability for `runApp` to take a `list(ui=..., server=...)`
+  as the first argument instead of a directory (though that ability remains for
+  backward compatibility). Unlike those lists, Shiny app objects are tagged with
+  class `shiny.appobj` so they can be run simply by printing them.
 
 * Added `maskReactiveContext` function. It blocks the current reactive context,
   to evaluate expressions that shouldn't use reactive sources directly. (This
@@ -32,7 +47,8 @@ shiny 0.9.1.9XXX
   or radio buttons. (Thanks, @saurfang, #481)
 
 * `sliderInput` and `selectizeInput`/`selectInput` now use a standard horizontal
-  size instead of filling up all available horizontal space.
+  size instead of filling up all available horizontal space. Pass `width="100%"`
+  explicitly for the old behavior.
 
 * Added the `updateSelectizeInput()` function to make it possible to process
   searching on the server side (i.e. using R), which can be much faster than the

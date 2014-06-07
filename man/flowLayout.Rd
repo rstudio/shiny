@@ -27,7 +27,5 @@ flowLayout(
 }
 \seealso{
 \code{\link{verticalLayout}}
-
-#'
 }
 

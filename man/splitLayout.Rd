@@ -15,9 +15,7 @@ be interpreted as CSS lengths (see \code{\link{validateCssUnit}}), numeric
 values as pixels.}
 
 \item{cellArgs}{Any additional attributes that should be used for each cell
-  of the layout.
-
-#'}
+  of the layout.}
 }
 \description{
 Lays out elements horizontally, dividing the available horizontal space into

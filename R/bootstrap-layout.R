@@ -320,7 +320,7 @@ verticalLayout <- function(..., fluid = TRUE) {
 #'
 #' @seealso \code{\link{verticalLayout}}
 #'
-#' #' @examples
+#' @examples
 #' flowLayout(
 #'   numericInput("rows", "How many rows?", 5),
 #'   selectInput("letter", "Which letter?", LETTERS),
@@ -370,7 +370,7 @@ inputPanel <- function(...) {
 #' @param cellArgs Any additional attributes that should be used for each cell
 #'   of the layout.
 #'
-#' #' @examples
+#' @examples
 #' # Equal sizing
 #' splitLayout(
 #'   plotOutput("plot1"),

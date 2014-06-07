@@ -4,6 +4,7 @@
 \alias{as.shiny.appobj.character}
 \alias{as.shiny.appobj.list}
 \alias{as.shiny.appobj.shiny.appobj}
+\alias{as.tags.shiny.appobj}
 \alias{print.shiny.appobj}
 \alias{shinyApp}
 \alias{shinyAppDir}
@@ -22,6 +23,8 @@ as.shiny.appobj(x)
 \method{as.shiny.appobj}{character}(x)
 
 \method{print}{shiny.appobj}(x, ...)
+
+\method{as.tags}{shiny.appobj}(x, ...)
 }
 \arguments{
 \item{ui}{The UI definition of the app (for example, a call to

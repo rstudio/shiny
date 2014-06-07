@@ -224,6 +224,21 @@ print.shiny.appobj <- function(x, ...) {
   do.call(runApp, args)
 }
 
+#' @rdname shinyApp
+#' @method as.tags shiny.appobj
+#' @export
+as.tags.shiny.appobj <- function(x, ...) {
+  # jcheng 06/06/2014: Unfortunate copy/paste between this function and
+  # knit_print.shiny.appobj, but I am trying to make the most conservative
+  # change possible due to upcoming release.
+  opts <- x$options %OR% list()
+  width <- if (is.null(opts$width)) "100%" else opts$width
+  height <- if (is.null(opts$height)) "400" else opts$height
+
+  path <- addSubApp(x)
+  tags$iframe(src=path, width=width, height=height, class="shiny-frame")
+}
+
 #' Knitr S3 methods
 #'
 #' These S3 methods are necessary to help Shiny applications and UI chunks embed

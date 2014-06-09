@@ -90,7 +90,7 @@ reinitializeSeed <- if (getRversion() >= '3.0.0') {
 } else function() {
   if (exists('.Random.seed', globalenv()))
     rm(list = '.Random.seed', pos = globalenv())
-  runif(1)  # generate any random numbers so R can reinitialize the seed
+  stats::runif(1)  # generate any random numbers so R can reinitialize the seed
 }
 
 # Version of runif that runs with private seed

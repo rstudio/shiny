@@ -127,11 +127,6 @@ runGitHub <- function(repo, username = getOption("github.user"),
     repo     <- res[2]
   }
 
-  message("Downloading github repo(s) ",
-          paste(repo, ref, sep = "/", collapse = ", "),
-          " from ",
-          paste(username, collapse = ", "))
-
   url <- paste("https://github.com/", username, "/", repo, "/archive/",
                ref, ".tar.gz", sep = "")
 

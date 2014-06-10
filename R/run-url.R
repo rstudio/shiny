@@ -123,7 +123,6 @@ runGitHub <- function(repo, username = getOption("github.user"),
           paste(repo, ref, sep = "/", collapse = ", "),
           " from ",
           paste(username, collapse = ", "))
-  name <- paste(username, "-", repo, sep = "")
 
   url <- paste("https://github.com/", username, "/", repo, "/archive/",
                ref, ".tar.gz", sep = "")

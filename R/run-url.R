@@ -1,85 +1,21 @@
-#' @rdname runUrl
-#' @details \code{runGist()} downloads and launches a Shiny application that is
-#'   hosted on GitHub as a gist (\url{https://gist.github.com}).
-#' @param gist The identifier of the gist. For example, if the gist is
-#'   https://gist.github.com/jcheng5/3239667, then \code{3239667},
-#'   \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'} are
-#'   all valid values.
-#' @param ... Other arguments to be passed to \code{\link{runApp}()}, such as
-#'   \code{port} and \code{launch.browser}.
-#' @export
-#' @examples
-#' \dontrun{
-#' runGist(3239667)
-#' runGist("https://gist.github.com/jcheng5/3239667")
-#'
-#' # Old URL format without username
-#' runGist("https://gist.github.com/3239667")
-#' }
-#'
-runGist <- function(gist, ...) {
-
-  gistUrl <- if (is.numeric(gist) || grepl('^[0-9a-f]+$', gist)) {
-    sprintf('https://gist.github.com/%s/download', gist)
-  } else if(grepl('^https://gist.github.com/([^/]+/)?([0-9a-f]+)$', gist)) {
-    paste(gist, '/download', sep='')
-  } else {
-    stop('Unrecognized gist identifier format')
-  }
-
-  runUrl(gistUrl, filetype=".tar.gz", subdir=NULL, ...)
-}
-
-
-#' @rdname runUrl
-#' @details \code{runGithub()} downloads and launches a Shiny application that is hosted
-#' in a GitHub repository.
-#' @param repo Name of the repository
-#' @param username GitHub username
-#' @param ref Desired git reference. Could be a commit, tag, or branch name.
-#'   Defaults to \code{"master"}.
-#' @export
-#' @examples
-#' \dontrun{
-#' runGitHub("shiny_example", "rstudio")
-#'
-#' # Can run an app from a subdirectory in the repo
-#' runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
-#' }
-runGitHub <- function(repo, username = getOption("github.user"),
-  ref = "master", subdir = NULL, ...) {
-
-  if (is.null(ref)) {
-    stop("Must specify either a ref. ")
-  }
-
-  message("Downloading github repo(s) ",
-    paste(repo, ref, sep = "/", collapse = ", "),
-    " from ",
-    paste(username, collapse = ", "))
-  name <- paste(username, "-", repo, sep = "")
-
-  url <- paste("https://github.com/", username, "/", repo, "/archive/",
-    ref, ".tar.gz", sep = "")
-
-  runUrl(url, subdir=subdir, ...)
-}
-
-
 #' Run a Shiny application from a URL
 #'
 #' \code{runUrl()} downloads and launches a Shiny application that is hosted at
 #' a downloadable URL. The Shiny application must be saved in a .zip, .tar, or
 #' .tar.gz file. The Shiny application files must be contained in the root
 #' directory or a subdirectory in the archive. For example, the files might be
-#' \code{myapp/server.r} and \code{myapp/ui.r}.
-#'
+#' \code{myapp/server.r} and \code{myapp/ui.r}. The functions \code{runGitHub()}
+#' and \code{runGist()} are based on \code{runUrl()}, using URL's from GitHub
+#' (\url{https://github.com}) and GitHub gists (\url{https://gist.github.com}),
+#' respectively.
 #' @param url URL of the application.
 #' @param filetype The file type (\code{".zip"}, \code{".tar"}, or
 #'   \code{".tar.gz"}. Defaults to the file extension taken from the url.
 #' @param subdir A subdirectory in the repository that contains the app. By
 #'   default, this function will run an app from the top level of the repo, but
 #'   you can use a path such as `\code{"inst/shinyapp"}.
+#' @param ... Other arguments to be passed to \code{\link{runApp}()}, such as
+#'   \code{port} and \code{launch.browser}.
 #' @export
 #' @examples
 #' \dontrun{
@@ -135,4 +71,65 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, ...) {
 
   if (!is.null(subdir)) appdir <- file.path(appdir, subdir)
   runApp(appdir, ...)
+}
+
+#' @rdname runUrl
+#' @param gist The identifier of the gist. For example, if the gist is
+#'   https://gist.github.com/jcheng5/3239667, then \code{3239667},
+#'   \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'} are
+#'   all valid values.
+#' @export
+#' @examples
+#' \dontrun{
+#' runGist(3239667)
+#' runGist("https://gist.github.com/jcheng5/3239667")
+#'
+#' # Old URL format without username
+#' runGist("https://gist.github.com/3239667")
+#' }
+#'
+runGist <- function(gist, ...) {
+
+  gistUrl <- if (is.numeric(gist) || grepl('^[0-9a-f]+$', gist)) {
+    sprintf('https://gist.github.com/%s/download', gist)
+  } else if(grepl('^https://gist.github.com/([^/]+/)?([0-9a-f]+)$', gist)) {
+    paste(gist, '/download', sep='')
+  } else {
+    stop('Unrecognized gist identifier format')
+  }
+
+  runUrl(gistUrl, filetype=".tar.gz", subdir=NULL, ...)
+}
+
+
+#' @rdname runUrl
+#' @param repo Name of the repository
+#' @param username GitHub username
+#' @param ref Desired git reference. Could be a commit, tag, or branch name.
+#'   Defaults to \code{"master"}.
+#' @export
+#' @examples
+#' \dontrun{
+#' runGitHub("shiny_example", "rstudio")
+#'
+#' # Can run an app from a subdirectory in the repo
+#' runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
+#' }
+runGitHub <- function(repo, username = getOption("github.user"),
+                      ref = "master", subdir = NULL, ...) {
+
+  if (is.null(ref)) {
+    stop("Must specify either a ref. ")
+  }
+
+  message("Downloading github repo(s) ",
+          paste(repo, ref, sep = "/", collapse = ", "),
+          " from ",
+          paste(username, collapse = ", "))
+  name <- paste(username, "-", repo, sep = "")
+
+  url <- paste("https://github.com/", username, "/", repo, "/archive/",
+               ref, ".tar.gz", sep = "")
+
+  runUrl(url, subdir=subdir, ...)
 }

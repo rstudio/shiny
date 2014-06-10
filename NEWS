@@ -64,6 +64,10 @@ shiny 0.9.1.9XXX
 * Fixed #220: the zip file for a directory created by some programs may not have
   the directory name as its first entry, in which case runUrl() can fail. (#220)
 
+* `runGitHub()` can also take a value of the form "username/repo" in its first
+  argument, e.g. both runGitHub("shiny_example", "rstudio") and
+  runGitHub("rstudio/shiny_example") are valid ways to run the GitHub repo.
+
 shiny 0.9.1
 --------------------------------------------------------------------------------
 

@@ -30,9 +30,10 @@ https://gist.github.com/jcheng5/3239667, then \code{3239667},
 \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'} are
 all valid values.}
 
-\item{repo}{Name of the repository}
+\item{repo}{Name of the repository.}
 
-\item{username}{GitHub username}
+\item{username}{GitHub username. If \code{repo} is of the form
+\code{"username/repo"}, \code{username} will be taken from \code{repo}.}
 
 \item{ref}{Desired git reference. Could be a commit, tag, or branch name.
 Defaults to \code{"master"}.}
@@ -64,6 +65,7 @@ runGist("https://gist.github.com/3239667")
 }
 \dontrun{
 runGitHub("shiny_example", "rstudio")
+# or runGitHub("rstudio/shiny_example")
 
 # Can run an app from a subdirectory in the repo
 runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")

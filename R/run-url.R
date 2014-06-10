@@ -103,14 +103,16 @@ runGist <- function(gist, ...) {
 
 
 #' @rdname runUrl
-#' @param repo Name of the repository
-#' @param username GitHub username
+#' @param repo Name of the repository.
+#' @param username GitHub username. If \code{repo} is of the form
+#'   \code{"username/repo"}, \code{username} will be taken from \code{repo}.
 #' @param ref Desired git reference. Could be a commit, tag, or branch name.
 #'   Defaults to \code{"master"}.
 #' @export
 #' @examples
 #' \dontrun{
 #' runGitHub("shiny_example", "rstudio")
+#' # or runGitHub("rstudio/shiny_example")
 #'
 #' # Can run an app from a subdirectory in the repo
 #' runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
@@ -118,6 +120,12 @@ runGist <- function(gist, ...) {
 runGitHub <- function(repo, username = getOption("github.user"),
                       ref = "master", subdir = NULL, ...) {
 
+  if (grepl('/', repo)) {
+    res <- strsplit(repo, '/')[[1]]
+    if (length(res) != 2) stop("'repo' must be of the form 'username/repo'")
+    username <- res[1]
+    repo     <- res[2]
+  }
 
   message("Downloading github repo(s) ",
           paste(repo, ref, sep = "/", collapse = ", "),

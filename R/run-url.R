@@ -98,7 +98,7 @@ runGist <- function(gist, ...) {
     stop('Unrecognized gist identifier format')
   }
 
-  runUrl(gistUrl, filetype=".tar.gz", subdir=NULL, ...)
+  runUrl(gistUrl, filetype=".tar.gz", ...)
 }
 
 

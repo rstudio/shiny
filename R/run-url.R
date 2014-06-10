@@ -118,9 +118,6 @@ runGist <- function(gist, ...) {
 runGitHub <- function(repo, username = getOption("github.user"),
                       ref = "master", subdir = NULL, ...) {
 
-  if (is.null(ref)) {
-    stop("Must specify either a ref. ")
-  }
 
   message("Downloading github repo(s) ",
           paste(repo, ref, sep = "/", collapse = ", "),

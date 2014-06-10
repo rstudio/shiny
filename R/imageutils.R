@@ -44,7 +44,8 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   pngfun(filename=filename, width=width, height=height, res=res, ...)
   # Call plot.new() so that even if no plotting operations are performed
   # at least we have a blank background
-  plot.new()
+  op <- par(mar = rep(0, 4))
+  tryCatch(plot.new(), finally = par(op))
   dv <- dev.cur()
   tryCatch(shinyCallingHandlers(func()), finally = dev.off(dv))
 

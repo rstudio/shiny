@@ -1,17 +1,13 @@
-#' Run a Shiny application from https://gist.github.com
-#'
-#' Download and launch a Shiny application that is hosted on GitHub as a gist.
-#'
+#' @rdname runUrl
+#' @details \code{runGist()} downloads and launches a Shiny application that is
+#'   hosted on GitHub as a gist (\url{https://gist.github.com}).
 #' @param gist The identifier of the gist. For example, if the gist is
 #'   https://gist.github.com/jcheng5/3239667, then \code{3239667},
-#'   \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'}
-#'   are all valid values.
-#' @param port The TCP port that the application should listen on. Defaults to
-#'   choosing a random port.
-#' @param launch.browser If true, the system's default web browser will be
-#'   launched automatically after the app is started. Defaults to true in
-#'   interactive sessions only.
-#'
+#'   \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'} are
+#'   all valid values.
+#' @param ... Other arguments to be passed to \code{\link{runApp}()}, such as
+#'   \code{port} and \code{launch.browser}.
+#' @export
 #' @examples
 #' \dontrun{
 #' runGist(3239667)
@@ -21,11 +17,7 @@
 #' runGist("https://gist.github.com/3239667")
 #' }
 #'
-#' @export
-runGist <- function(gist,
-                    port=NULL,
-                    launch.browser=getOption('shiny.launch.browser',
-                                             interactive())) {
+runGist <- function(gist, ...) {
 
   gistUrl <- if (is.numeric(gist) || grepl('^[0-9a-f]+$', gist)) {
     sprintf('https://gist.github.com/%s/download', gist)
@@ -35,28 +27,18 @@ runGist <- function(gist,
     stop('Unrecognized gist identifier format')
   }
 
-  runUrl(gistUrl, filetype=".tar.gz", subdir=NULL, port=port,
-    launch.browser=launch.browser)
+  runUrl(gistUrl, filetype=".tar.gz", subdir=NULL, ...)
 }
 
 
-#' Run a Shiny application from a GitHub repository
-#'
-#' Download and launch a Shiny application that is hosted in a GitHub repository.
-#'
+#' @rdname runUrl
+#' @details \code{runGithub()} downloads and launches a Shiny application that is hosted
+#' in a GitHub repository.
 #' @param repo Name of the repository
 #' @param username GitHub username
-#' @param ref Desired git reference. Could be a commit, tag, or branch
-#'   name. Defaults to \code{"master"}.
-#' @param subdir A subdirectory in the repository that contains the app. By
-#'   default, this function will run an app from the top level of the repo, but
-#'   you can use a path such as `\code{"inst/shinyapp"}.
-#' @param port The TCP port that the application should listen on. Defaults to
-#'   choosing a random port.
-#' @param launch.browser If true, the system's default web browser will be
-#'   launched automatically after the app is started. Defaults to true in
-#'   interactive sessions only.
-#'
+#' @param ref Desired git reference. Could be a commit, tag, or branch name.
+#'   Defaults to \code{"master"}.
+#' @export
 #' @examples
 #' \dontrun{
 #' runGitHub("shiny_example", "rstudio")
@@ -64,11 +46,8 @@ runGist <- function(gist,
 #' # Can run an app from a subdirectory in the repo
 #' runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
 #' }
-#'
-#' @export
 runGitHub <- function(repo, username = getOption("github.user"),
-  ref = "master", subdir = NULL, port = NULL,
-  launch.browser = getOption('shiny.launch.browser', interactive())) {
+  ref = "master", subdir = NULL, ...) {
 
   if (is.null(ref)) {
     stop("Must specify either a ref. ")
@@ -83,17 +62,17 @@ runGitHub <- function(repo, username = getOption("github.user"),
   url <- paste("https://github.com/", username, "/", repo, "/archive/",
     ref, ".tar.gz", sep = "")
 
-  runUrl(url, subdir=subdir, port=port, launch.browser=launch.browser)
+  runUrl(url, subdir=subdir, ...)
 }
 
 
 #' Run a Shiny application from a URL
 #'
-#' Download and launch a Shiny application that is hosted at a downloadable
-#' URL. The Shiny application must be saved in a .zip, .tar, or .tar.gz file.
-#' The Shiny application files must be contained in a subdirectory in the
-#' archive. For example, the files might be \code{myapp/server.r} and
-#' \code{myapp/ui.r}.
+#' \code{runUrl()} downloads and launches a Shiny application that is hosted at
+#' a downloadable URL. The Shiny application must be saved in a .zip, .tar, or
+#' .tar.gz file. The Shiny application files must be contained in the root
+#' directory or a subdirectory in the archive. For example, the files might be
+#' \code{myapp/server.r} and \code{myapp/ui.r}.
 #'
 #' @param url URL of the application.
 #' @param filetype The file type (\code{".zip"}, \code{".tar"}, or
@@ -101,12 +80,7 @@ runGitHub <- function(repo, username = getOption("github.user"),
 #' @param subdir A subdirectory in the repository that contains the app. By
 #'   default, this function will run an app from the top level of the repo, but
 #'   you can use a path such as `\code{"inst/shinyapp"}.
-#' @param port The TCP port that the application should listen on. Defaults to
-#'   choosing a random port.
-#' @param launch.browser If true, the system's default web browser will be
-#'   launched automatically after the app is started. Defaults to true in
-#'   interactive sessions only.
-#'
+#' @export
 #' @examples
 #' \dontrun{
 #' runUrl('https://github.com/rstudio/shiny_example/archive/master.tar.gz')
@@ -115,10 +89,7 @@ runGitHub <- function(repo, username = getOption("github.user"),
 #' runUrl("https://github.com/rstudio/shiny_example/archive/master.zip",
 #'  subdir = "inst/shinyapp/")
 #' }
-#'
-#' @export
-runUrl <- function(url, filetype = NULL, subdir = NULL, port = NULL,
-  launch.browser = getOption('shiny.launch.browser', interactive())) {
+runUrl <- function(url, filetype = NULL, subdir = NULL, ...) {
 
   if (!is.null(subdir) && ".." %in% strsplit(subdir, '/')[[1]])
     stop("'..' not allowed in subdir")
@@ -163,5 +134,5 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, port = NULL,
   if (!file_test('-d', appdir)) appdir <- dirname(appdir)
 
   if (!is.null(subdir)) appdir <- file.path(appdir, subdir)
-  runApp(appdir, port=port, launch.browser=launch.browser)
+  runApp(appdir, ...)
 }

@@ -42,8 +42,13 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   }
 
   pngfun(filename=filename, width=width, height=height, res=res, ...)
-  # Call plot.new() so that even if no plotting operations are performed
-  # at least we have a blank background
+  # Call plot.new() so that even if no plotting operations are performed at
+  # least we have a blank background. N.B. we need to set the margin to 0
+  # temporarily before plot.new() because when the plot size is small (e.g.
+  # 200x50), we will get an error "figure margin too large", which is triggered
+  # by plot.new() with the default (large) margin. However, this does not
+  # guarantee user's code in func() will not trigger the error -- they may have
+  # to set par(mar = smaller_value) before they draw base graphics.
   op <- par(mar = rep(0, 4))
   tryCatch(plot.new(), finally = par(op))
   dv <- dev.cur()

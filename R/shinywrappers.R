@@ -96,10 +96,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   # div needs to adapt to the height of renderPlot. By default, plotOutput
   # sets the height to 400px, so to make it adapt we need to override it
   # with NULL.
-  outputFunc <- if (identical(height, 'auto'))
-    plotOutput
-  else
-    function(outputId) plotOutput(outputId, height = NULL)
+  outputFunc <- plotOutput
+  if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
   return(markRenderFunction(outputFunc, function(shinysession, name, ...) {
     if (!is.null(widthWrapper))

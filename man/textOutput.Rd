@@ -3,12 +3,15 @@
 \alias{textOutput}
 \title{Create a text output element}
 \usage{
-textOutput(outputId, container = div)
+textOutput(outputId, container = if (inline) span else div, inline = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the value from}
 
 \item{container}{a function to generate an HTML element to contain the text}
+
+\item{inline}{use an inline (\code{span()}) or block container (\code{div()})
+for the output}
 }
 \value{
 A text output element that can be included in a panel
@@ -19,7 +22,7 @@ text will be included within an HTML \code{div} tag by default.
 }
 \details{
 Text is HTML-escaped prior to rendering. This element is often used
-to display \link{renderText} output variables.
+  to display \link{renderText} output variables.
 }
 \examples{
 h3(textOutput("caption"))

@@ -3,7 +3,7 @@
 \alias{imageOutput}
 \title{Create a image output element}
 \usage{
-imageOutput(outputId, width = "100\%", height = "400px")
+imageOutput(outputId, width = "100\%", height = "400px", inline = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the image from}
@@ -13,6 +13,9 @@ imageOutput(outputId, width = "100\%", height = "400px")
 string and have \code{"px"} appended.}
 
 \item{height}{Image height}
+
+\item{inline}{use an inline (\code{span()}) or block container (\code{div()})
+for the output}
 }
 \value{
 An image output element that can be included in a panel

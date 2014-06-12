@@ -293,11 +293,13 @@ knit_print.shiny.appobj <- function(x, ...) {
                      meta = shiny_warning, cacheable = FALSE)
 }
 
-# Lets us use a nicer syntax in knitr chunks than literally
+# Let us use a nicer syntax in knitr chunks than literally
 # calling output$value <- renderFoo(...) and fooOutput().
 #' @rdname knitr_methods
+#' @param inline Whether the object is printed inline.
 #' @export
-knit_print.shiny.render.function <- function(x, ...) {
+knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
+  x <- htmltools::as.tags(x, inline = inline)
   output <- knitr::knit_print(tagList(x))
   attr(output, "knit_cacheable") <- FALSE
   output

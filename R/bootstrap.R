@@ -1490,13 +1490,15 @@ buildTabset <- function(tabs,
 #' text will be included within an HTML \code{div} tag by default.
 #' @param outputId output variable to read the value from
 #' @param container a function to generate an HTML element to contain the text
+#' @param inline use an inline (\code{span()}) or block container (\code{div()})
+#'   for the output
 #' @return A text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
-#' to display \link{renderText} output variables.
+#'   to display \link{renderText} output variables.
 #' @examples
 #' h3(textOutput("caption"))
 #' @export
-textOutput <- function(outputId, container = div) {
+textOutput <- function(outputId, container = if (inline) span else div, inline = FALSE) {
   container(id = outputId, class = "shiny-text-output")
 }
 
@@ -1530,6 +1532,7 @@ verbatimTextOutput <- function(outputId) {
 #'   \code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
 #'   string and have \code{"px"} appended.
 #' @param height Image height
+#' @inheritParams textOutput
 #' @return An image output element that can be included in a panel
 #' @examples
 #' # Show an image
@@ -1537,10 +1540,11 @@ verbatimTextOutput <- function(outputId) {
 #'   imageOutput("dataImage")
 #' )
 #' @export
-imageOutput <- function(outputId, width = "100%", height="400px") {
+imageOutput <- function(outputId, width = "100%", height="400px", inline=FALSE) {
   style <- paste("width:", validateCssUnit(width), ";",
     "height:", validateCssUnit(height))
-  div(id = outputId, class = "shiny-image-output", style = style)
+  container <- if (inline) span else div
+  container(id = outputId, class = "shiny-image-output", style = style)
 }
 
 #' Create an plot output element
@@ -1569,6 +1573,7 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 #'   every \code{hoverDelay} milliseconds. Use \code{"debounce"} to suspend
 #'   events while the cursor is moving, and wait until the cursor has been at
 #'   rest for \code{hoverDelay} milliseconds before sending an event.
+#' @inheritParams textOutput
 #' @return A plot output element that can be included in a panel
 #' @examples
 #' # Show a plot of the generated distribution
@@ -1578,7 +1583,7 @@ imageOutput <- function(outputId, width = "100%", height="400px") {
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
                        clickId = NULL, hoverId = NULL, hoverDelay = 300,
-                       hoverDelayType = c("debounce", "throttle")) {
+                       hoverDelayType = c("debounce", "throttle"), inline = FALSE) {
   if (is.null(clickId) && is.null(hoverId)) {
     hoverDelay <- NULL
     hoverDelayType <- NULL
@@ -1588,7 +1593,8 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 
   style <- paste("width:", validateCssUnit(width), ";",
     "height:", validateCssUnit(height))
-  div(id = outputId, class = "shiny-plot-output", style = style,
+  container <- if (inline) span else div
+  container(id = outputId, class = "shiny-plot-output", style = style,
       `data-click-id` = clickId,
       `data-hover-id` = hoverId,
       `data-hover-delay` = hoverDelay,
@@ -1640,19 +1646,19 @@ dataTableOutput <- function(outputId) {
 #' server side. It is currently just an alias for \code{htmlOutput}.
 #'
 #' @param outputId output variable to read the value from
+#' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples
 #' htmlOutput("summary")
 #' @export
-htmlOutput <- function(outputId) {
-  div(id = outputId, class="shiny-html-output")
+htmlOutput <- function(outputId, inline = FALSE) {
+  container <- if (inline) span else div
+  container(id = outputId, class="shiny-html-output")
 }
 
 #' @rdname htmlOutput
 #' @export
-uiOutput <- function(outputId) {
-  htmlOutput(outputId)
-}
+uiOutput <- htmlOutput
 
 #' Create a download button or link
 #'

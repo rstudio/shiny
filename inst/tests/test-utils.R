@@ -21,6 +21,10 @@ test_that("Setting process-wide seed doesn't affect private randomness", {
 test_that("Resetting private seed doesn't result in dupes", {
   .globals$ownSeed <- NULL
   id3 <- createUniqueId(4)
+  # Make sure we let enough time pass that reinitializing the seed is
+  # going to result in a different value. This is especially required
+  # on Windows.
+  Sys.sleep(1)
   set.seed(0)
   .globals$ownSeed <- NULL
   id4 <- createUniqueId(4)

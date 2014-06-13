@@ -73,6 +73,12 @@ withTemporary <- function(env, x, value, expr, unset = FALSE) {
 # Evaluate an expression using Shiny's own private stream of
 # randomness (not affected by set.seed).
 withPrivateSeed <- function(expr) {
+  # The random seed generator may not have a fine enough time granularity on
+  # Windows (see r-source/src/main/times.c), so we need to wait for a short
+  # while before generating the next random object, otherwise clashes may occur
+  if (.Platform$OS.type == 'windows' && is.null(.globals$ownSeed))
+    Sys.sleep(0.001)
+
   withTemporary(.GlobalEnv, ".Random.seed",
     .globals$ownSeed, unset=is.null(.globals$ownSeed), {
       tryCatch({

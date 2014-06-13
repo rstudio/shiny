@@ -736,18 +736,6 @@ cachedFuncWithFile <- function(dir, file, func, case.sensitive = FALSE) {
   }
 }
 
-# Returns a function that sources the file and caches the result for subsequent
-# calls, unless the file's mtime changes.
-cachedSource <- function(dir, file, case.sensitive = FALSE) {
-  dir <- normalizePath(dir, mustWork=TRUE)
-  cachedFuncWithFile(dir, file, function(fname, ...) {
-    if (file.exists(fname))
-      return(source(fname, ...))
-    else
-      return(NULL)
-  })
-}
-
 # turn column-based data to row-based data (mainly for JSON), e.g. data.frame(x
 # = 1:10, y = 10:1) ==> list(list(x = 1, y = 10), list(x = 2, y = 9), ...)
 columnToRowData <- function(data) {

@@ -128,6 +128,6 @@ uiHttpHandler <- function(ui, path = "/") {
       ui
     renderPage(uiValue, textConn, showcaseMode)
     html <- paste(textConnectionValue(textConn), collapse='\n')
-    return(httpResponse(200, content=html))
+    return(httpResponse(200, content=enc2utf8(html)))
   }
 }

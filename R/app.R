@@ -69,7 +69,7 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(), uiPattern="/") {
 
     renderPage(uiValue, textConn)
     html <- paste(textConnectionValue(textConn), collapse='\n')
-    return(httpResponse(200, content=html))
+    return(httpResponse(200, content=enc2utf8(html)))
   }
 
   serverFuncSource <- function() {

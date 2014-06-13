@@ -1,4 +1,4 @@
-shiny 0.9.1.9XXX
+shiny 0.10.0
 --------------------------------------------------------------------------------
 
 * BREAKING CHANGE: By default, observers now terminate themselves if they were

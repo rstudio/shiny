@@ -491,8 +491,10 @@ ShinySession <- setRefClass(
       if (getOption('shiny.trace', FALSE))
         message('SEND ',
            gsub('(?m)base64,[a-zA-Z0-9+/=]+','[base64 data]',json,perl=TRUE))
-      if (getOption('shiny.transcode.json', TRUE))
-        json <- iconv(json, to='UTF-8')
+      # first convert to native encoding, then to UTF8, otherwise we may get the
+      # error in Chrome "WebSocket connection failed: Could not decode a text
+      # frame as UTF-8"
+      json <- enc2utf8(enc2native(json))
       .websocket$send(json)
     },
 

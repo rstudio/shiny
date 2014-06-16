@@ -5,6 +5,9 @@ shiny 0.10.0.9xxx
   UTF-8 encoding for ui.R and server.R (also the optional global.R) if they
   contain non-ASCII characters. (#516)
 
+* `runGitHub()` also allows the 'username/repo' syntax now, which is equivalent
+  to `runGitHub('repo', 'username')`. (#427)
+
 shiny 0.10.0
 --------------------------------------------------------------------------------
 

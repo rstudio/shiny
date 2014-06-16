@@ -69,7 +69,7 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(), uiPattern="/") {
 
     renderPage(uiValue, textConn)
     html <- paste(textConnectionValue(textConn), collapse='\n')
-    return(httpResponse(200, content=html))
+    return(httpResponse(200, content=enc2utf8(html)))
   }
 
   serverFuncSource <- function() {
@@ -114,7 +114,7 @@ shinyAppDir <- function(appDir, options=list()) {
         on.exit(.globals$ui <- NULL, add = FALSE)
         ui <- source(uiR,
           local = new.env(parent = globalenv()),
-          keep.source = TRUE)$value
+          keep.source = TRUE, encoding = 'UTF-8')$value
         if (!is.null(.globals$ui)) {
           ui <- .globals$ui[[1]]
         }
@@ -140,7 +140,7 @@ shinyAppDir <- function(appDir, options=list()) {
       result <- source(
         serverR,
         local = new.env(parent = globalenv()),
-        keep.source = TRUE
+        keep.source = TRUE, encoding = 'UTF-8'
       )$value
       if (!is.null(.globals$server)) {
         result <- .globals$server[[1]]
@@ -169,7 +169,8 @@ shinyAppDir <- function(appDir, options=list()) {
     oldwd <<- getwd()
     setwd(appDir)
     if (file.exists(file.path.ci(appDir, "global.R")))
-      source(file.path.ci(appDir, "global.R"), keep.source = TRUE)
+      source(file.path.ci(appDir, "global.R"), keep.source = TRUE,
+             encoding = 'UTF-8')
   }
   onEnd <- function() {
     setwd(oldwd)

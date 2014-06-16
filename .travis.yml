@@ -11,7 +11,7 @@ install:
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
   - sudo apt-add-repository -y ppa:marutter/c2d4u
   - sudo apt-get update
-  - sudo apt-get install r-base-dev r-cran-shiny r-cran-cairo r-cran-markdown
+  - sudo apt-get install r-base r-cran-shiny r-cran-cairo r-cran-markdown
   - "[ ! -d ~/R ] && mkdir ~/R"
   - Rscript -e "install.packages(c('xtable'), repos = 'http://cran.rstudio.org')"
   - Rscript -e "install.packages('$R_MY_PKG', dep = TRUE, repos = 'http://cran.rstudio.org')"

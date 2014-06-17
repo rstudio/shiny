@@ -15,7 +15,8 @@ NULL
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @import htmltools httpuv caTools RJSONIO xtable digest methods
+#' @import htmltools httpuv caTools xtable digest methods
+#' @importFrom RJSONIO fromJSON
 NULL
 
 createUniqueId <- function(bytes, prefix = "", suffix = "") {
@@ -29,6 +30,10 @@ createUniqueId <- function(bytes, prefix = "", suffix = "") {
       sep = ""
     )
   })
+}
+
+toJSON <- function(x, ..., digits = getOption("shiny.json.digits", 16)) {
+  RJSONIO::toJSON(x, digits = digits, ...)
 }
 
 # Call the workerId func with no args to get the worker id, and with an arg to

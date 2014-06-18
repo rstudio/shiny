@@ -50,16 +50,11 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'   the output, see \code{\link{plotPNG}}.
 #'
 #' @param expr An expression that generates a plot.
-#' @param width The width of the rendered plot, in pixels; or \code{'auto'} to
-#'   use the \code{offsetWidth} of the HTML element that is bound to this plot.
-#'   You can also pass in a function that returns the width in pixels or
-#'   \code{'auto'}; in the body of the function you may reference reactive
-#'   values and functions.
-#' @param height The height of the rendered plot, in pixels; or \code{'auto'} to
-#'   use the \code{offsetHeight} of the HTML element that is bound to this plot.
-#'   You can also pass in a function that returns the width in pixels or
-#'   \code{'auto'}; in the body of the function you may reference reactive
-#'   values and functions.
+#' @param width,height The width/height of the rendered plot, in pixels; or
+#'   \code{'auto'} to use the \code{offsetWidth}/\code{offsetHeight} of the HTML
+#'   element that is bound to this plot. You can also pass in a function that
+#'   returns the width/height in pixels or \code{'auto'}; in the body of the
+#'   function you may reference reactive values and functions.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to \code{\link{png}}. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.

@@ -75,6 +75,7 @@ createMockDomain <- function() {
 #
 ## ------------------------------------------------------------------------
 
+#' @name domains
 #' @rdname domains
 #' @export
 getDefaultReactiveDomain <- function() {

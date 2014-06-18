@@ -1,4 +1,4 @@
-\name{tagList}
+\name{tag}
 \alias{tag}
 \alias{tagAppendAttributes}
 \alias{tagAppendChild}

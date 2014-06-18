@@ -9,17 +9,13 @@ renderPlot(expr, width = "auto", height = "auto", res = 72, ...,
 \arguments{
 \item{expr}{An expression that generates a plot.}
 
-\item{width}{The width of the rendered plot, in pixels; or \code{'auto'} to
-use the \code{offsetWidth} of the HTML element that is bound to this plot.
-You can also pass in a function that returns the width in pixels or
-\code{'auto'}; in the body of the function you may reference reactive
-values and functions.}
-
-\item{height}{The height of the rendered plot, in pixels; or \code{'auto'} to
-use the \code{offsetHeight} of the HTML element that is bound to this plot.
-You can also pass in a function that returns the width in pixels or
-\code{'auto'}; in the body of the function you may reference reactive
-values and functions.}
+\item{width,height}{The width/height of the rendered plot, in pixels; or
+\code{'auto'} to use the \code{offsetWidth}/\code{offsetHeight} of the HTML
+element that is bound to this plot. You can also pass in a function that
+returns the width/height in pixels or \code{'auto'}; in the body of the
+function you may reference reactive values and functions. When rendering an
+inline plot, you must provide numeric values (in pixels) to both
+\code{width} and \code{height}.}
 
 \item{res}{Resolution of resulting plot, in pixels per inch. This value is
 passed to \code{\link{png}}. Note that this affects the resolution of PNG

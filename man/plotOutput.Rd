@@ -10,11 +10,11 @@ plotOutput(outputId, width = "100\%", height = "400px", clickId = NULL,
 \arguments{
 \item{outputId}{output variable to read the plot from}
 
-\item{width}{Plot width. Must be a valid CSS unit (like \code{"100\%"},
-\code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
-string and have \code{"px"} appended.}
-
-\item{height}{Plot height}
+\item{width,height}{Plot width/height. Must be a valid CSS unit (like
+\code{"100\%"}, \code{"400px"}, \code{"auto"}) or a number, which will be
+coerced to a string and have \code{"px"} appended. These two arguments are
+ignored when \code{inline = TRUE}, in which case the width/height of a plot
+must be specified in \code{renderPlot()}.}
 
 \item{clickId}{If not \code{NULL}, the plot will send coordinates to the
 server whenever it is clicked. This information will be accessible on the

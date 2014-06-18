@@ -54,7 +54,9 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'   \code{'auto'} to use the \code{offsetWidth}/\code{offsetHeight} of the HTML
 #'   element that is bound to this plot. You can also pass in a function that
 #'   returns the width/height in pixels or \code{'auto'}; in the body of the
-#'   function you may reference reactive values and functions.
+#'   function you may reference reactive values and functions. When rendering an
+#'   inline plot, you must provide numeric values (in pixels) to both
+#'   \code{width} and \code{height}.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to \code{\link{png}}. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.

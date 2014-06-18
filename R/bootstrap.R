@@ -1553,7 +1553,9 @@ imageOutput <- function(outputId, width = "100%", height="400px", inline=FALSE) 
 #' @param outputId output variable to read the plot from
 #' @param width,height Plot width/height. Must be a valid CSS unit (like
 #'   \code{"100\%"}, \code{"400px"}, \code{"auto"}) or a number, which will be
-#'   coerced to a string and have \code{"px"} appended.
+#'   coerced to a string and have \code{"px"} appended. These two arguments are
+#'   ignored when \code{inline = TRUE}, in which case the width/height of a plot
+#'   must be specified in \code{renderPlot()}.
 #' @param clickId If not \code{NULL}, the plot will send coordinates to the
 #'   server whenever it is clicked. This information will be accessible on the
 #'   \code{input} object using \code{input$}\emph{\code{clickId}}. The value will be a
@@ -1590,8 +1592,10 @@ plotOutput <- function(outputId, width = "100%", height="400px",
     hoverDelayType <- match.arg(hoverDelayType)[[1]]
   }
 
-  style <- paste("width:", validateCssUnit(width), ";",
-    "height:", validateCssUnit(height))
+  style <- if (!inline) {
+    paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
+  }
+
   container <- if (inline) span else div
   container(id = outputId, class = "shiny-plot-output", style = style,
       `data-click-id` = clickId,

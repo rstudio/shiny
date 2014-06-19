@@ -584,31 +584,13 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
   if (!is.null(selected))
     selected <- validateSelected(selected, choices, inputId)
 
-  # Create tags for each of the options
-  ids <- paste0(inputId, seq_along(choices))
-
-  checkboxes <- mapply(ids, choices, names(choices),
-    SIMPLIFY = FALSE, USE.NAMES = FALSE,
-    FUN = function(id, value, name) {
-      inputTag <- tags$input(type = "checkbox",
-                             name = inputId,
-                             id = id,
-                             value = value)
-
-    if (value %in% selected)
-      inputTag$attribs$checked <- "checked"
-
-    tags$label(class = if (inline) "checkbox inline" else "checkbox",
-               inputTag,
-               tags$span(name))
-    }
-  )
+  options <- generateOptions(inputId, choices, selected, inline)
 
   # return label and select tag
   tags$div(id = inputId,
            class = "control-group shiny-input-checkboxgroup",
            controlLabel(inputId, label),
-           checkboxes)
+           options)
 }
 
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
@@ -636,6 +618,29 @@ validateSelected <- function(selected, choices, inputId) {
             "for the input '", inputId, "'")
   }
   selected
+}
+
+# generate options for radio buttons and checkbox groups (type = 'checkbox' or
+# 'radio')
+generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox') {
+  # create tags for each of the options
+  ids <- paste0(inputId, seq_along(choices))
+  # generate a list of <input type=? [checked] />
+  mapply(
+    ids, choices, names(choices),
+    FUN = function(id, value, name) {
+      inputTag <- tags$input(
+        type = type, name = inputId, id = id, value = value
+      )
+      if (value %in% selected)
+        inputTag$attribs$checked <- "checked"
+      tags$label(
+        class = paste(type, if (inline) "inline"),
+        inputTag, tags$span(name)
+      )
+    },
+    SIMPLIFY = FALSE, USE.NAMES = FALSE
+  )
 }
 
 #' Create a help text element
@@ -855,33 +860,14 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
   selected <- if (is.null(selected)) choices[[1]] else {
     validateSelected(selected, choices, inputId)
   }
+  if (length(selected) > 1) stop("The 'selected' argument must be of length 1")
 
-  # Create tags for each of the options
-  ids <- paste0(inputId, seq_along(choices))
-
-  inputTags <- mapply(ids, choices, names(choices),
-    SIMPLIFY = FALSE, USE.NAMES = FALSE,
-    FUN = function(id, value, name) {
-      inputTag <- tags$input(type = "radio",
-                             name = inputId,
-                             id = id,
-                             value = value)
-
-      if (identical(value, selected))
-        inputTag$attribs$checked = "checked"
-
-      # Put the label text in a span
-      tags$label(class = if (inline) "radio inline" else "radio",
-                inputTag,
-                tags$span(name)
-      )
-    }
-  )
+  options <- generateOptions(inputId, choices, selected, inline, type = 'radio')
 
   tags$div(id = inputId,
     class = 'control-group shiny-input-radiogroup',
     label %AND% tags$label(class = "control-label", `for` = inputId, label),
-    inputTags)
+    options)
 }
 
 #' Create a submit button

@@ -4,12 +4,15 @@
 \alias{uiOutput}
 \title{Create an HTML output element}
 \usage{
-htmlOutput(outputId)
+htmlOutput(outputId, inline = FALSE)
 
-uiOutput(outputId)
+uiOutput(outputId, inline = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the value from}
+
+\item{inline}{use an inline (\code{span()}) or block container (\code{div()})
+for the output}
 }
 \value{
 An HTML output element that can be included in a panel

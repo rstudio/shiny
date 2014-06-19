@@ -16,24 +16,26 @@ globalVariables('func')
 #'
 #' @export
 markRenderFunction <- function(uiFunc, renderFunc) {
-  class(renderFunc) <- c("shiny.render.function", "function")
-  attr(renderFunc, "outputFunc") <- uiFunc
-  renderFunc
+  structure(renderFunc,
+            class      = c("shiny.render.function", "function"),
+            outputFunc = uiFunc)
 }
 
-useRenderFunction <- function(renderFunc) {
+useRenderFunction <- function(renderFunc, inline = FALSE) {
   outputFunction <- attr(renderFunc, "outputFunc")
   id <- createUniqueId(8, "out")
   o <- getDefaultReactiveDomain()$output
   if (!is.null(o))
     o[[id]] <- renderFunc
-  return(outputFunction(id))
+  if (is.logical(formals(outputFunction)[["inline"]])) {
+    outputFunction(id, inline = inline)
+  } else outputFunction(id)
 }
 
 #' @export
 #' @method as.tags shiny.render.function
-as.tags.shiny.render.function <- function(x, ...) {
-  useRenderFunction(x)
+as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
+  useRenderFunction(x, inline = inline)
 }
 
 #' Plot Output
@@ -48,16 +50,13 @@ as.tags.shiny.render.function <- function(x, ...) {
 #'   the output, see \code{\link{plotPNG}}.
 #'
 #' @param expr An expression that generates a plot.
-#' @param width The width of the rendered plot, in pixels; or \code{'auto'} to
-#'   use the \code{offsetWidth} of the HTML element that is bound to this plot.
-#'   You can also pass in a function that returns the width in pixels or
-#'   \code{'auto'}; in the body of the function you may reference reactive
-#'   values and functions.
-#' @param height The height of the rendered plot, in pixels; or \code{'auto'} to
-#'   use the \code{offsetHeight} of the HTML element that is bound to this plot.
-#'   You can also pass in a function that returns the width in pixels or
-#'   \code{'auto'}; in the body of the function you may reference reactive
-#'   values and functions.
+#' @param width,height The width/height of the rendered plot, in pixels; or
+#'   \code{'auto'} to use the \code{offsetWidth}/\code{offsetHeight} of the HTML
+#'   element that is bound to this plot. You can also pass in a function that
+#'   returns the width/height in pixels or \code{'auto'}; in the body of the
+#'   function you may reference reactive values and functions. When rendering an
+#'   inline plot, you must provide numeric values (in pixels) to both
+#'   \code{width} and \code{height}.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to \code{\link{png}}. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
@@ -94,10 +93,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   # div needs to adapt to the height of renderPlot. By default, plotOutput
   # sets the height to 400px, so to make it adapt we need to override it
   # with NULL.
-  outputFunc <- if (identical(height, 'auto'))
-    plotOutput
-  else
-    function(outputId) plotOutput(outputId, height = NULL)
+  outputFunc <- plotOutput
+  if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
   return(markRenderFunction(outputFunc, function(shinysession, name, ...) {
     if (!is.null(widthWrapper))

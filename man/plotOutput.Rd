@@ -5,16 +5,16 @@
 \usage{
 plotOutput(outputId, width = "100\%", height = "400px", clickId = NULL,
   hoverId = NULL, hoverDelay = 300, hoverDelayType = c("debounce",
-  "throttle"))
+  "throttle"), inline = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the plot from}
 
-\item{width}{Plot width. Must be a valid CSS unit (like \code{"100\%"},
-\code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
-string and have \code{"px"} appended.}
-
-\item{height}{Plot height}
+\item{width,height}{Plot width/height. Must be a valid CSS unit (like
+\code{"100\%"}, \code{"400px"}, \code{"auto"}) or a number, which will be
+coerced to a string and have \code{"px"} appended. These two arguments are
+ignored when \code{inline = TRUE}, in which case the width/height of a plot
+must be specified in \code{renderPlot()}.}
 
 \item{clickId}{If not \code{NULL}, the plot will send coordinates to the
 server whenever it is clicked. This information will be accessible on the
@@ -36,6 +36,9 @@ events. Use \code{"throttle"} to limit the number of hover events to one
 every \code{hoverDelay} milliseconds. Use \code{"debounce"} to suspend
 events while the cursor is moving, and wait until the cursor has been at
 rest for \code{hoverDelay} milliseconds before sending an event.}
+
+\item{inline}{use an inline (\code{span()}) or block container (\code{div()})
+for the output}
 }
 \value{
 A plot output element that can be included in a panel

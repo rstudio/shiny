@@ -7,12 +7,14 @@
 \usage{
 knit_print.shiny.appobj(x, ...)
 
-knit_print.shiny.render.function(x, ...)
+knit_print.shiny.render.function(x, ..., inline = FALSE)
 }
 \arguments{
 \item{x}{Object to knit_print}
 
 \item{...}{Additional knit_print arguments}
+
+\item{inline}{Whether the object is printed inline.}
 }
 \description{
 These S3 methods are necessary to help Shiny applications and UI chunks embed

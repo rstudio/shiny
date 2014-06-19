@@ -160,6 +160,8 @@ pageWithSidebar <- function(headerPanel,
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
+#' @param windowTitle The title that should be displayed by the browser window.
+#'   Useful if \code{title} is not a string.
 #' @param icon Optional icon to appear on a \code{navbarMenu} tab.
 #'
 #' @return A UI defintion that can be passed to the \link{shinyUI} function.
@@ -194,7 +196,8 @@ navbarPage <- function(title,
                        collapsable = FALSE,
                        fluid = TRUE,
                        responsive = TRUE,
-                       theme = NULL) {
+                       theme = NULL,
+                       windowTitle = title) {
 
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title
@@ -259,7 +262,7 @@ navbarPage <- function(title,
 
   # build the page
   bootstrapPage(
-    title = title,
+    title = windowTitle,
     responsive = responsive,
     theme = theme,
     div(class=navbarClass,

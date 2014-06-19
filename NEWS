@@ -8,6 +8,9 @@ shiny 0.10.0.9xxx
 * `runGitHub()` also allows the 'username/repo' syntax now, which is equivalent
   to `runGitHub('repo', 'username')`. (#427)
 
+* `navbarPage()` now accepts a `windowTitle` parameter to set the web browser
+  page title to something other than the title displayed in the navbar.
+
 shiny 0.10.0
 --------------------------------------------------------------------------------
 

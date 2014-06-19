@@ -11,6 +11,12 @@ shiny 0.10.0.9xxx
 * `navbarPage()` now accepts a `windowTitle` parameter to set the web browser
   page title to something other than the title displayed in the navbar.
 
+* Added an `inline` argument to `textOutput()`, `imageOutput()`, `plotOutput()`,
+  and `htmlOutput()`. When `inline = TRUE`, these outputs will be put in
+  `span()` instead of the default `div()`. This occurs automatically when these
+  outputs are created via the inline expressions (e.g. `r textOutput(expr)`) in
+  R Markdown documents. (#512)
+
 shiny 0.10.0
 --------------------------------------------------------------------------------
 

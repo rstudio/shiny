@@ -718,18 +718,8 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     if (!multiple) selected <- firstChoice(choices)
   } else selected <- validateSelected(selected, choices, inputId)
 
-  # Create tags for each of the options
-  options <- HTML(paste("<option value=\"",
-    htmlEscape(choices),
-    "\"",
-    ifelse(choices %in% selected, " selected", ""),
-    ">",
-    htmlEscape(names(choices)),
-    "</option>",
-    sep = "", collapse = "\n"));
-
   # create select tag and add options
-  selectTag <- tags$select(id = inputId, options)
+  selectTag <- tags$select(id = inputId, HTML(selectOptions(choices, selected)))
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
 
@@ -743,6 +733,41 @@ firstChoice <- function(choices) {
   choice <- choices[[1]]
   if (is.list(choice)) firstChoice(choice) else choice
 }
+
+# Create tags for each of the options; use <optgroup> if necessary
+selectOptions <- function(choices, selected, labels = names(choices)) {
+  if (length(choices) == 0) return()
+  if (needOptgroup(choices)) {
+    n      <- length(choices)
+    html   <- character(n)
+    labels <- names(choices)
+    for (i in seq_len(n)) {
+      choice <- choices[[i]]
+      html[i] <- if (!is.list(choice) && length(choice) <= 1) {
+        selectOptions(choice, selected, labels[i])
+      } else {
+        sprintf(
+          '<optgroup label="%s">\n%s\n</optgroup>',
+          htmlEscape(labels[i]),
+          selectOptions(choice, selected)
+        )
+      }
+    }
+    return(paste(html, collapse = '\n'))
+  }
+  paste(sprintf(
+    '<option value="%s"%s>%s</option>',
+    htmlEscape(choices),
+    ifelse(choices %in% selected, ' selected', ''),
+    htmlEscape(labels)
+  ), collapse = '\n')
+}
+
+# need <optgroup> when choices is a list of sub elements that are not scalars
+needOptgroup <- function(choices) {
+  is.list(choices) && any(sapply(choices, function(x) is.list(x) || length(x) > 1))
+}
+
 #' @rdname selectInput
 #' @param ... Arguments passed to \code{selectInput()}.
 #' @param options A list of options. See the documentation of \pkg{selectize.js}

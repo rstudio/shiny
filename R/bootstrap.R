@@ -715,7 +715,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 
   # default value if it's not specified
   if (is.null(selected)) {
-    if (!multiple) selected <- choices[[1]]
+    if (!multiple) selected <- firstChoice(choices)
   } else selected <- validateSelected(selected, choices, inputId)
 
   # Create tags for each of the options
@@ -739,6 +739,10 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   selectizeIt(inputId, res, NULL, width, nonempty = !multiple && !("" %in% choices))
 }
 
+firstChoice <- function(choices) {
+  choice <- choices[[1]]
+  if (is.list(choice)) firstChoice(choice) else choice
+}
 #' @rdname selectInput
 #' @param ... Arguments passed to \code{selectInput()}.
 #' @param options A list of options. See the documentation of \pkg{selectize.js}

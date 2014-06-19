@@ -4,14 +4,14 @@
 \alias{navbarPage}
 \title{Create a page with a top level navigation bar}
 \usage{
-navbarPage(title, ..., id = NULL, header = NULL, footer = NULL,
+navbarPage(pageTitle, ..., id = NULL, header = NULL, footer = NULL,
   inverse = FALSE, collapsable = FALSE, fluid = TRUE, responsive = TRUE,
-  theme = NULL)
+  theme = NULL, title = NULL)
 
 navbarMenu(title, ..., icon = NULL)
 }
 \arguments{
-\item{title}{The title to display in the navbar}
+\item{pageTitle}{The title to display in the navbar}
 
 \item{...}{\code{\link{tabPanel}} elements to include in the page}
 
@@ -42,6 +42,7 @@ and resize page elements based on the size of the viewing device)}
 \item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
 www directory). For example, to use the theme located at
 \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.}
+\item{title}{Title you want to display in the web browser title bar.}
 
 \item{icon}{Optional icon to appear on a \code{navbarMenu} tab.}
 }

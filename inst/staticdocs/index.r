@@ -127,8 +127,6 @@ sd_section("Running",
   c(
     "runApp",
     "runExample",
-    "runGist",
-    "runGitHub",
     "runUrl",
     "stopApp"
   )
@@ -152,7 +150,8 @@ sd_section("Utility functions",
     "parseQueryString",
     "plotPNG",
     "repeatable",
-    "shinyDeprecated"
+    "shinyDeprecated",
+    "serverInfo"
   )
 )
 sd_section("Embedding",

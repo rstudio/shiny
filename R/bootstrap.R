@@ -664,6 +664,12 @@ controlLabel <- function(controlName, label) {
 choicesWithNames <- function(choices) {
   if (is.null(choices)) return(choices)  # ignore NULL
 
+  # if choices is a list with certain child elements of length > 1, recursively
+  # apply choicesWithNames() on its child elements
+  if (needOptgroup(choices)) {
+    if (any(names(choices) == "")) stop('"choices" must be a named list')
+    return(sapply(choices, choicesWithNames, simplify = FALSE))
+  }
   # get choice names
   choiceNames <- names(choices)
   if (is.null(choiceNames))
@@ -671,11 +677,11 @@ choicesWithNames <- function(choices) {
 
   # default missing names to choice values
   missingNames <- choiceNames == ""
+  if (!any(missingNames)) return(choices)
   choiceNames[missingNames] <- paste(choices)[missingNames]
   names(choices) <- choiceNames
 
-  # return choices
-  return (choices)
+  choices
 }
 
 #' Create a select list input control

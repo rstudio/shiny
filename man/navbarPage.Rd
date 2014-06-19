@@ -6,7 +6,7 @@
 \usage{
 navbarPage(title, ..., id = NULL, header = NULL, footer = NULL,
   inverse = FALSE, collapsable = FALSE, fluid = TRUE, responsive = TRUE,
-  theme = NULL)
+  theme = NULL, windowTitle = title)
 
 navbarMenu(title, ..., icon = NULL)
 }
@@ -42,6 +42,9 @@ and resize page elements based on the size of the viewing device)}
 \item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
 www directory). For example, to use the theme located at
 \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.}
+
+\item{windowTitle}{The title that should be displayed by the browser window.
+Useful if \code{title} is not a string.}
 
 \item{icon}{Optional icon to appear on a \code{navbarMenu} tab.}
 }

@@ -281,9 +281,7 @@ updateInputOptions <- function(
 #' Change the value of a checkbox group input on the client
 #'
 #' @template update-input
-#' @param choices A named vector or named list of options. For each item, the
-#'   name will be used as the label, and the value will be used as the value.
-#' @param selected A vector or list of options (values) which will be selected.
+#' @inheritParams checkboxGroupInput
 #'
 #' @seealso \code{\link{checkboxGroupInput}}
 #'
@@ -325,9 +323,7 @@ updateCheckboxGroupInput <- function(
 #' Change the value of a radio input on the client
 #'
 #' @template update-input
-#' @param choices A named vector or named list of options. For each item, the
-#'   name will be used as the label, and the value will be used as the value.
-#' @param selected A vector or list of options (values) which will be selected.
+#' @inheritParams radioButtons
 #'
 #' @seealso \code{\link{radioButtons}}
 #'
@@ -369,9 +365,7 @@ updateRadioButtons <- function(
 #' Change the value of a select input on the client
 #'
 #' @template update-input
-#' @param choices A named vector or named list of options. For each item, the
-#'   name will be used as the label, and the value will be used as the value.
-#' @param selected A vector or list of options (values) which will be selected.
+#' @inheritParams selectInput
 #'
 #' @seealso \code{\link{selectInput}}
 #'
@@ -417,7 +411,7 @@ formals(updateSelectInput2)[c('inline', 'type')] <- NULL
 formals(updateSelectInput2)['options'] <- alist(options = selectOptions(choices, selected))
 
 #' @rdname updateSelectInput
-#' @param options a list of options (see \code{\link{selectizeInput}})
+#' @inheritParams selectizeInput
 #' @param server whether to store \code{choices} on the server side, and load
 #'   the select options dynamically on searching, instead of writing all
 #'   \code{choices} into the page at once (i.e., only use the client-side

@@ -753,16 +753,11 @@ selectOptions <- function(choices, selected, labels = names(choices)) {
     html   <- character(n)
     labels <- names(choices)
     for (i in seq_len(n)) {
-      choice <- choices[[i]]
-      html[i] <- if (!is.list(choice) && length(choice) <= 1) {
-        selectOptions(choice, selected, labels[i])
-      } else {
-        sprintf(
-          '<optgroup label="%s">\n%s\n</optgroup>',
-          htmlEscape(labels[i]),
-          selectOptions(choice, selected)
-        )
-      }
+      html[i] <- sprintf(
+        '<optgroup label="%s">\n%s\n</optgroup>',
+        htmlEscape(labels[i]),
+        selectOptions(choices[[i]], selected)
+      )
     }
     return(paste(html, collapse = '\n'))
   }

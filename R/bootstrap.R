@@ -742,7 +742,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 
 firstChoice <- function(choices) {
   choice <- choices[[1]]
-  if (is.list(choice)) firstChoice(choice) else choice
+  if (is.list(choice)) firstChoice(choice) else choice[1]
 }
 
 # Create tags for each of the options; use <optgroup> if necessary

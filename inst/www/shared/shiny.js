@@ -2091,30 +2091,13 @@
 
       // This will replace all the options
       if (data.hasOwnProperty('options')) {
-        // Clear existing options and add each new one
-        $el.empty();
         selectize = this._selectize(el);
-        if (selectize !== undefined) {
-          selectize.clearOptions();
-          // Selectize.js doesn't maintain insertion order on Chrome on Mac
-          // with >10 items if inserted using addOption (versus being present
-          // in the DOM at selectize() time). Putting $order on each option
-          // makes it work.
-          $.each(data.options, function(i, opt) {
-            opt.$order = i;
-          });
-          selectize.addOption(data.options);
-        }
-        for (var i = 0; i < data.options.length; i++) {
-          var in_opt = data.options[i];
-
-          var $newopt = $('<option/>', {
-            value: in_opt.value,
-            text: in_opt.label
-          });
-
-          $el.append($newopt);
-        }
+        // Must destroy selectize before appending new options, otherwise
+        // selectize will restore the original select
+        if (selectize) selectize.destroy();
+        // Clear existing options and add each new one
+        $el.empty().append(data.options);
+        this._selectize(el);
       }
 
       // re-initialize selectize
@@ -2253,22 +2236,7 @@
       if (data.hasOwnProperty('options')) {
         // Clear existing options and add each new one
         $el.find('label.radio').remove();
-        for (var i = 0; i < data.options.length; i++) {
-          var in_opt = data.options[i];
-
-          var $newopt = $('<label class="radio"/>');
-          var $radio = $('<input/>', {
-            type:  "radio",
-            name:  el.id,
-            id:    el.id + (i+1).toString(),
-            value: in_opt.value
-          });
-
-          $newopt.append($radio);
-          $newopt.append('<span>' + in_opt.label + '</span>');
-
-          $el.append($newopt);
-        }
+        $el.append(data.options);
       }
 
       if (data.hasOwnProperty('value'))
@@ -2378,22 +2346,7 @@
       if (data.hasOwnProperty('options')) {
         // Clear existing options and add each new one
         $el.find('label.checkbox').remove();
-        for (var i = 0; i < data.options.length; i++) {
-          var in_opt = data.options[i];
-
-          var $newopt = $('<label class="checkbox"/>');
-          var $checkbox = $('<input/>', {
-            type:  "checkbox",
-            name:  el.id,
-            id:    el.id + (i+1).toString(),
-            value: in_opt.value
-          });
-
-          $newopt.append($checkbox);
-          $newopt.append('<span>' + in_opt.label + '</span>');
-
-          $el.append($newopt);
-        }
+        $el.append(data.options);
       }
 
       if (data.hasOwnProperty('value'))

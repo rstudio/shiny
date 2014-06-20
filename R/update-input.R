@@ -256,6 +256,27 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
   session$sendInputMessage(inputId, message)
 }
 
+updateInputOptions <- function(
+  session, inputId, label = NULL, choices = NULL, selected = NULL,
+  inline = FALSE, type = 'checkbox', options = NULL, ...
+) {
+
+  choices <- choicesWithNames(choices)
+  if (!is.null(selected))
+    selected <- validateSelected(selected, choices, inputId)
+
+  # if you have not prepared an HTML string for `options` yet
+  if (is.null(options)) {
+    options <- if (length(choices))
+      format(tagList(
+        generateOptions(inputId, choices, selected, inline, type = type)
+      ))
+  }
+
+  message <- dropNulls(list(label = label, options = options, value = selected, ...))
+
+  session$sendInputMessage(inputId, message)
+}
 
 #' Change the value of a checkbox group input on the client
 #'
@@ -294,19 +315,10 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #' })
 #' }
 #' @export
-updateCheckboxGroupInput <- function(session, inputId, label = NULL,
-  choices = NULL, selected = NULL) {
-
-  choices <- choicesWithNames(choices)
-  if (!is.null(selected))
-    selected <- validateSelected(selected, choices, inputId)
-
-  options <- if (length(choices))
-    columnToRowData(list(value = choices, label = names(choices)))
-
-  message <- dropNulls(list(label = label, options = options, value = selected))
-
-  session$sendInputMessage(inputId, message)
+updateCheckboxGroupInput <- function(
+  session, inputId, label = NULL, choices = NULL, selected = NULL, inline = FALSE
+) {
+  updateInputOptions(session, inputId, label, choices, selected, inline)
 }
 
 
@@ -345,7 +357,13 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #' })
 #' }
 #' @export
-updateRadioButtons <- updateCheckboxGroupInput
+updateRadioButtons <- function(
+  session, inputId, label = NULL, choices = NULL, selected = NULL, inline = FALSE
+) {
+  # you must select at least one radio button
+  if (is.null(selected) && !is.null(choices)) selected <- choices[[1]]
+  updateInputOptions(session, inputId, label, choices, selected, inline, type = 'radio')
+}
 
 
 #' Change the value of a select input on the client
@@ -386,7 +404,17 @@ updateRadioButtons <- updateCheckboxGroupInput
 #' })
 #' }
 #' @export
-updateSelectInput <- updateCheckboxGroupInput
+updateSelectInput <- function(
+  session, inputId, label = NULL, choices = NULL, selected = NULL
+) {
+  updateSelectInput2(session, inputId, label, choices, selected)
+}
+# the reason for constructing this function is to assign a default value to the
+# `options` argument of updateInputOptions(), and we want the evaluation of this
+# argument to be delayed until `choices` has been named and `selected` validated
+updateSelectInput2 <- updateInputOptions
+formals(updateSelectInput2)[c('inline', 'type')] <- NULL
+formals(updateSelectInput2)['options'] <- alist(options = selectOptions(choices, selected))
 
 #' @rdname updateSelectInput
 #' @param options a list of options (see \code{\link{selectizeInput}})

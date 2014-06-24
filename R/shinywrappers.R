@@ -124,9 +124,13 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
     coordmap <- NULL
     plotFunc <- function() {
-      # Actually perform the plotting: use capture.output() to suppress output
-      # to console, and print func() if it returns a visible value
-      capture.output(func())
+      # Actually perform the plotting
+      result <- withVisible(func())
+      if (result$visible) {
+        # Use capture.output to squelch printing to the actual console; we
+        # are only interested in plot output
+        capture.output(print(result$value))
+      }
 
       # Now capture some graphics device info before we close it
       usrCoords <- par('usr')

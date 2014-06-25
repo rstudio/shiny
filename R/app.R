@@ -250,26 +250,33 @@ as.tags.shiny.appobj <- function(x, ...) {
 #' @param ... Additional knit_print arguments
 NULL
 
+# If there's an R Markdown runtime option set but it isn't set to Shiny, then
+# return a warning indicating the runtime is inappropriate for this object.
+# Returns NULL in all other cases.
+shiny_rmd_warning <- function() {
+  runtime <- knitr::opts_knit$get("rmarkdown.runtime")
+  if (!is.null(runtime) && runtime != "shiny")
+    # note that the RStudio IDE checks for this specific string to detect Shiny
+    # applications in static document
+    list(structure(
+      "Shiny application in a static R Markdown document",
+      class = "rmd_warning"))
+  else
+    NULL
+}
+
 #' @rdname knitr_methods
 #' @export
 knit_print.shiny.appobj <- function(x, ...) {
   opts <- x$options %OR% list()
   width <- if (is.null(opts$width)) "100%" else opts$width
   height <- if (is.null(opts$height)) "400" else opts$height
-  shiny_warning <- NULL
-  # if there's an R Markdown runtime option set but it isn't set to Shiny, then
-  # emit a warning indicating the runtime is inappropriate for this object
+
   runtime <- knitr::opts_knit$get("rmarkdown.runtime")
   if (!is.null(runtime) && runtime != "shiny") {
-    # note that the RStudio IDE checks for this specific string to detect Shiny
-    # applications in static document
-    shiny_warning <- list(structure(
-      "Shiny application in a static R Markdown document",
-      class = "rmd_warning"))
-
-    # create a box exactly the same dimensions as the Shiny app would have had
-    # (so the document continues to flow as it would have with the app), and
-    # display a diagnostic message
+    # If not rendering to a Shiny document, create a box exactly the same
+    # dimensions as the Shiny app would have had (so the document continues to
+    # flow as it would have with the app), and display a diagnostic message
     width <- validateCssUnit(width)
     height <- validateCssUnit(height)
     output <- tags$div(
@@ -290,7 +297,7 @@ knit_print.shiny.appobj <- function(x, ...) {
   # for now it's not an issue, so just return the HTML and warning.
 
   knitr::asis_output(htmlPreserve(format(output, indent=FALSE)),
-                     meta = shiny_warning, cacheable = FALSE)
+                     meta = shiny_rmd_warning(), cacheable = FALSE)
 }
 
 # Let us use a nicer syntax in knitr chunks than literally
@@ -302,5 +309,7 @@ knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
   x <- htmltools::as.tags(x, inline = inline)
   output <- knitr::knit_print(tagList(x))
   attr(output, "knit_cacheable") <- FALSE
+  attr(output, "knit_meta") <- append(attr(output, "knit_meta"),
+                                      shiny_rmd_warning())
   output
 }

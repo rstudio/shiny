@@ -309,6 +309,7 @@ knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
   x <- htmltools::as.tags(x, inline = inline)
   output <- knitr::knit_print(tagList(x))
   attr(output, "knit_cacheable") <- FALSE
-  attr(output, "knit_meta") <- shiny_rmd_warning()
+  attr(output, "knit_meta") <- append(attr(output, "knit_meta"),
+                                      shiny_rmd_warning())
   output
 }

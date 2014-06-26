@@ -634,7 +634,9 @@ runApp <- function(appDir=getwd(),
   if (is.character(appDir)) {
     desc <- file.path.ci(appDir, "DESCRIPTION")
     if (file.exists(desc)) {
-      settings <- read.dcf(desc)
+      con <- file(desc, encoding = 'UTF-8')
+      on.exit(close(con), add = TRUE)
+      settings <- read.dcf(con)
       if ("DisplayMode" %in% colnames(settings)) {
         mode <- settings[1,"DisplayMode"]
         if (mode == "Showcase") {

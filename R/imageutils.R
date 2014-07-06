@@ -34,7 +34,7 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   # Finally, if neither quartz nor Cairo, use png().
   if (capabilities("aqua")) {
     pngfun <- png
-  } else if (getOption('shiny.usecairo', TRUE) &&
+  } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
              nchar(system.file(package = "Cairo"))) {
     pngfun <- Cairo::CairoPNG
   } else {

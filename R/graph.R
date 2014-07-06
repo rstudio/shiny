@@ -55,7 +55,7 @@ renderReactLog <- function() {
 }
 
 .graphAppend <- function(logEntry, domain = getDefaultReactiveDomain()) {
-  if (isTRUE(getOption('shiny.reactlog', FALSE)))
+  if (isTRUE(getOption('shiny.reactlog')))
     .graphEnv$log <- c(.graphEnv$log, list(logEntry))
 
   if (!is.null(domain)) {

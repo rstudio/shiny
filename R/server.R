@@ -278,7 +278,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
   # This value, if non-NULL, must be present on all HTTP and WebSocket
   # requests as the Shiny-Shared-Secret header or else access will be
   # denied (403 response for HTTP, and instant close for websocket).
-  sharedSecret <- getOption('shiny.sharedSecret', NULL)
+  sharedSecret <- getOption('shiny.sharedSecret')
 
   appHandlers <- list(
     http = joinHandlers(c(
@@ -303,7 +303,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
         if (is.character(msg))
           msg <- charToRaw(msg)
 
-        if (getOption('shiny.trace', FALSE)) {
+        if (isTRUE(getOption('shiny.trace'))) {
           if (binary)
             message("RECV ", '$$binary data$$')
           else

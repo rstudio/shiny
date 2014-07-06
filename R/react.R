@@ -98,7 +98,7 @@ ReactiveEnvironment <- setRefClass(
     },
     currentContext = function() {
       if (is.null(.currentContext)) {
-        if (isTRUE(getOption('shiny.suppressMissingContextError', FALSE))) {
+        if (isTRUE(getOption('shiny.suppressMissingContextError'))) {
           return(getDummyContext())
         } else {
           stop('Operation not allowed without an active reactive context. ',
@@ -138,7 +138,7 @@ ReactiveEnvironment <- setRefClass(
       reactiveEnvironment <<- ReactiveEnvironment$new()
     return(reactiveEnvironment)
   }
-}) 
+})
 
 # Causes any pending invalidations to run.
 flushReact <- function() {

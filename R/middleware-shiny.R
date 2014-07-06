@@ -5,7 +5,7 @@ reactLogHandler <- function(req) {
   if (!identical(req$PATH_INFO, '/reactlog'))
     return(NULL)
 
-  if (!getOption('shiny.reactlog', FALSE)) {
+  if (!isTRUE(getOption('shiny.reactlog'))) {
     return(NULL)
   }
 

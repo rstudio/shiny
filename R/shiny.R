@@ -493,7 +493,7 @@ ShinySession <- setRefClass(
       if (closed){
         return()
       }
-      if (getOption('shiny.trace', FALSE))
+      if (isTRUE(getOption('shiny.trace')))
         message('SEND ',
            gsub('(?m)base64,[a-zA-Z0-9+/=]+','[base64 data]',json,perl=TRUE))
       # first convert to native encoding, then to UTF8, otherwise we may get the

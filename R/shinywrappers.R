@@ -317,7 +317,7 @@ renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) 
   }
 
   markRenderFunction(tableOutput, function() {
-    classNames <- getOption('shiny.table.class', 'data table table-bordered table-condensed')
+    classNames <- getOption('shiny.table.class') %OR% 'data table table-bordered table-condensed'
     data <- func()
 
     if (is.null(data) || identical(data, data.frame()))

@@ -487,7 +487,7 @@ shinyCallingHandlers <- function(expr) {
 shinyDeprecated <- function(new=NULL, msg=NULL,
                             old=as.character(sys.call(sys.parent()))[1L]) {
 
-  if (getOption("shiny.deprecation.messages", default=TRUE) == FALSE)
+  if (getOption("shiny.deprecation.messages") %OR% TRUE == FALSE)
     return(invisible())
 
   if (is.null(msg)) {

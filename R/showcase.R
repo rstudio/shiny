@@ -50,7 +50,7 @@ showcaseHead <- function() {
          href="shared/shiny-showcase.css"),
     if (file.exists(mdfile))
       script(type="text/markdown", id="showcase-markdown-content",
-        paste(readLines(mdfile, warn = FALSE), collapse="\n"))
+        paste(readLines(mdfile, warn = FALSE, encoding='UTF-8'), collapse="\n"))
     else ""
   ))
 
@@ -106,7 +106,8 @@ showcaseCodeTabs <- function(codeLicense) {
                   # we need to prevent the indentation of <code> ... </code>
                   HTML(format(tags$code(
                     class="language-r",
-                    paste(readLines(file.path.ci(getwd(), rFile), warn=FALSE),
+                    paste(readLines(file.path.ci(getwd(), rFile), warn=FALSE,
+                                    encoding='UTF-8'),
                           collapse="\n")
                   ), indent = FALSE))))
         })),

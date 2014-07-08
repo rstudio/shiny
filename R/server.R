@@ -249,8 +249,11 @@ decodeMessage <- function(data) {
     packBits(rawToBits(data[pos:(pos+3)]), type='integer')
   }
 
-  if (readInt(1) != 0x01020202L)
-    return(fromJSON(rawToChar(data), asText=TRUE, simplify=FALSE, encoding='UTF-8'))
+  if (readInt(1) != 0x01020202L) {
+    # use native encoding for the message
+    nativeData <- iconv(rawToChar(data), 'UTF-8')
+    return(fromJSON(nativeData, asText=TRUE, simplify=FALSE))
+  }
 
   i <- 5
   parts <- list()

@@ -144,3 +144,7 @@ span.jslider {
   border: 1px solid #e3e3e3;
   border-radius: 2px;
 }
+
+.shiny-text-disabled {
+  color: #c2c2c2;
+}

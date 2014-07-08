@@ -9,19 +9,42 @@ conditionalPanel(condition, ...)
 \item{condition}{A JavaScript expression that will be evaluated repeatedly to
 determine whether the panel should be displayed.}
 
+\item{disable}{A JavaScript expression that will be evaluated repeatedly
+to determine whether the panel should be disabled (shown but subdued).}
+
+\item{hide}{A JavaScript expression that will be evaluated repeatedly to
+determine whether the panel should be hidden (not shown at all).}
+
 \item{...}{Elements to include in the panel.}
 }
 \description{
-Creates a panel that is visible or not, depending on the value of a
-JavaScript expression. The JS expression is evaluated once at startup and
-whenever Shiny detects a relevant change in input/output.
+Creates a panel that is visible, visible but subdued, or hidden,
+depending on the arguments provided. The JS expression(s) is evaluated
+once at startup and whenever Shiny detects a relevant change in
+input/output.
 }
 \details{
+If condition is provided then it does not make sense to provide disable
+or hide (therefore they are ignored if provided). However, disable and
+hide may be provided individually or together (with distinct logic).
+During the JavaScript execution, the check for hide is run last so it
+will take precedence.
+
 In the JS expression, you can refer to \code{input} and \code{output}
 JavaScript objects that contain the current values of input and output. For
 example, if you have an input with an id of \code{foo}, then you can use
 \code{input.foo} to read its value. (Be sure not to modify the input/output
 objects, as this may cause unpredictable behavior.)
+
+The use of condition and hide are logically opposite but are otherwise
+functionally identical: they cause the element to 'hide' or 'show' via
+jQuery UI events.
+
+When a disable expression is true, all encapsulated elements have their
+text color changed to #c2c2c2, and all encapsulated input elements have
+the "disabled" property set to true and have the "ui-state-disabled"
+class added to it. These elements are all reversed when the disable
+expression is false.
 }
 \examples{
 sidebarPanel(
@@ -47,5 +70,49 @@ sidebarPanel(
       )
    )
 )
+
+## equivalent functionally but with different visual results
+sidebarPanel(
+  selectInput(
+    "plotType", "Plot Type",
+      c(Scatter = "scatter",
+        Histogram = "hist")),
+
+   # Only show this panel if the plot type is a histogram
+   conditionalPanel(
+      disable = "input.plotType !== 'hist'",
+      selectInput(
+         "breaks", "Breaks",
+         c("Sturges",
+           "Scott",
+           "Freedman-Diaconis",
+           "[Custom]" = "custom")),
+
+      # Only show this panel if Custom is selected
+      conditionalPanel(
+         hide = "input.breaks !== 'custom'",
+         sliderInput("breakCount", "Break Count", min=1, max=1000, value=10)
+      )
+   )
+)
+
+## using both disable and hide in the same conditionalPanel,
+## derived from http://shiny.rstudio.com/gallery/kmeans-example.html
+shinyUI(pageWithSidebar(
+  headerPanel('Iris k-means clustering'),
+  sidebarPanel(
+    selectInput('xcol', 'X Variable', names(iris)),
+    selectInput('ycol', 'Y Variable', names(iris),
+                selected=names(iris)[[2]]),
+    conditionalPanel(disable='input.xcol == "Sepal.Width"',
+                     hide='input.ycol == "Species"',
+                     numericInput('clusters', 'Cluster count', 3,
+                                  min = 1, max = 9)
+                     )
+  ),
+  mainPanel(
+      plotOutput('plot1')
+  )
+))
 }
 

@@ -734,6 +734,7 @@
       var scope = {input: inputs, output: this.$values};
 
       var triggerShown  = function() { $(this).trigger('shown'); };
+      var triggerDisabled = function() { $(this).trigger('disabled'); };
       var triggerHidden = function() { $(this).trigger('hidden'); };
 
       var conditionals = $(document).find('[data-display-if]');
@@ -754,6 +755,55 @@
         else {
           el.trigger('hide');
           el.hide(0, triggerHidden);
+        }
+      }
+
+      var disables = $(document).find('[data-disable-if]');
+      for (var i = 0; i < disables.length; i++) {
+        var el = $(disables[i]);
+        var condFunc = el.data('data-disable-if-func');
+
+        if (!condFunc) {
+          var condExpr = el.attr('data-disable-if');
+          condFunc = scopeExprToFunc(condExpr);
+          el.data('data-disable-if-func', condFunc);
+        }
+
+        var elins = el.find('input');
+        if (condFunc(scope)) {
+          el.trigger('disable');
+          elins.prop('disabled', true);
+          elins.addClass('ui-state-disabled');
+          el.addClass('shiny-text-disabled');
+          el.show(0, triggerDisabled);
+        }
+        else {
+          el.trigger('show');
+          elins.prop('disabled', false);
+          elins.removeClass('ui-state-disabled');
+          el.removeClass('shiny-text-disabled');
+          el.show(0, triggerShown);
+        }
+      }
+
+      var hides = $(document).find('[data-hide-if]');
+      for (var i = 0; i < hides.length; i++) {
+        var el = $(hides[i]);
+        var condFunc = el.data('data-hide-if-func');
+
+        if (!condFunc) {
+          var condExpr = el.attr('data-hide-if');
+          condFunc = scopeExprToFunc(condExpr);
+          el.data('data-hide-if-func', condFunc);
+        }
+
+        if (condFunc(scope)) {
+          el.trigger('hide');
+          el.hide(0, triggerHidden);
+        }
+        else {
+          el.trigger('show');
+          el.show(0, triggerShown);
         }
       }
     };

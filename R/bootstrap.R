@@ -464,8 +464,7 @@ mainPanel <- function(..., width = 8) {
 #'     selectInput('ycol', 'Y Variable', names(iris),
 #'                 selected=names(iris)[[2]]),
 #'     conditionalPanel(disable='input.xcol == "Sepal.Width"',
-#'                      hide='input.ycol == "Sepal.Width"',
-#'                      'Hello World',
+#'                      hide='input.ycol == "Species"',
 #'                      numericInput('clusters', 'Cluster count', 3,
 #'                                   min = 1, max = 9)
 #'                      )
@@ -476,15 +475,13 @@ mainPanel <- function(..., width = 8) {
 #' ))
 #' @export
 conditionalPanel <- function(..., condition, disable, hide) {
-    if (! missing(condition)) {
-        args <- list('data-display-if'=condition)
-        div('data-display-if'=condition, ...)
-    } else {
-        args <- list()
+    args <- list()
+    if (! missing(condition)) args$'data-display-if' <- condition
+    else {
         if (! missing(disable)) args$'data-disable-if' <- disable
         if (! missing(hide)) args$'data-hide-if' <- hide
     }
-    do.call(div, c(args, ...))
+    do.call(div, c(args, substitute(...)))
 }
 
 #' Create a text input control

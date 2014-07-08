@@ -372,7 +372,7 @@ mainPanel <- function(..., width = 8) {
 #'
 #' Creates a panel that is visible, visible but subdued, or hidden,
 #' depending on the arguments provided. The JS expression(s) is
-#' evaluted once at startup and whenever Shiny detects a relevant
+#' evaluated once at startup and whenever Shiny detects a relevant
 #' change in input/output.
 #'
 #' If condition is provided then it does not make sense to provide

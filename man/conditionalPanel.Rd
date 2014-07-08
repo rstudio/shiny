@@ -3,7 +3,7 @@
 \alias{conditionalPanel}
 \title{Conditional Panel}
 \usage{
-conditionalPanel(condition, ...)
+conditionalPanel(..., condition, disable, hide)
 }
 \arguments{
 \item{condition}{A JavaScript expression that will be evaluated repeatedly to

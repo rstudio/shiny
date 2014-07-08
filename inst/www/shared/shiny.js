@@ -771,18 +771,18 @@
 
         var elins = el.find('input');
         if (condFunc(scope)) {
-          elins.trigger('disable');
+          el.trigger('disable');
           elins.prop('disabled', true);
           elins.addClass('ui-state-disabled');
           el.addClass('shiny-text-disabled');
-          elins.show(0, triggerDisabled);
+          el.show(0, triggerDisabled);
         }
         else {
-          elins.trigger('show');
+          el.trigger('show');
           elins.prop('disabled', false);
           elins.removeClass('ui-state-disabled');
           el.removeClass('shiny-text-disabled');
-          elins.show(0, triggerShown);
+          el.show(0, triggerShown);
         }
       }
 

@@ -916,3 +916,8 @@ setServerInfo <- function(...) {
   infoOld[names(infoNew)] <- infoNew
   .globals$serverInfo <- infoOld
 }
+
+readUTF8 <- function(file) {
+  x <- readLines(file, encoding = 'UTF-8', warn = FALSE)
+  enc2native(x)
+}

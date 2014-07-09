@@ -85,6 +85,11 @@
       var code = document.getElementById(srcfile.replace(/\./g, "_") + "_code");
       var start = findTextPoint(code, ref[0], ref[4]);
       var end = findTextPoint(code, ref[2], ref[5]);
+      
+      // If the insertion point can't be found, bail out now
+      if (start.element === null || end.element === null)
+         return;
+
       var range = document.createRange();
       // If the text points are inside different <SPAN>s, we may not be able to
       // surround them without breaking apart the elements to keep the DOM tree

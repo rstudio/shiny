@@ -23,6 +23,13 @@ example, if you have an input with an id of \code{foo}, then you can use
 \code{input.foo} to read its value. (Be sure not to modify the input/output
 objects, as this may cause unpredictable behavior.)
 }
+\note{
+You are not recommended to use special JavaScript characters such as a
+  period \code{.} in the input id's, but if you do use them anyway, for
+  example, \code{inputId = "foo.bar"}, you will have to use
+  \code{input["foo.bar"]} instead of \code{input.foo.bar} to read the input
+  value.
+}
 \examples{
 sidebarPanel(
    selectInput(

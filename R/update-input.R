@@ -407,7 +407,6 @@ updateSelectInput <- function(
 # `options` argument of updateInputOptions(), and we want the evaluation of this
 # argument to be delayed until `choices` has been named and `selected` validated
 updateSelectInput2 <- updateInputOptions
-formals(updateSelectInput2)[c('inline', 'type')] <- NULL
 formals(updateSelectInput2)['options'] <- alist(options = selectOptions(choices, selected))
 
 #' @rdname updateSelectInput

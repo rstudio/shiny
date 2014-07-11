@@ -2101,10 +2101,10 @@
       }
 
       // re-initialize selectize
-      if (data.hasOwnProperty('newOptions')) {
+      if (data.hasOwnProperty('config')) {
         $el.parent()
            .find('script[data-for="' + $escape(el.id) + '"]')
-           .replaceWith(data.newOptions);
+           .replaceWith(data.config);
         this._selectize(el, true);
       }
 

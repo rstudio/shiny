@@ -429,7 +429,7 @@ updateSelectizeInput <- function(
       `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
       HTML(toJSON(res$options))
     )
-    session$sendInputMessage(inputId, list(newOptions = as.character(cfg)))
+    session$sendInputMessage(inputId, list(config = as.character(cfg)))
   }
   if (!server) {
     return(updateSelectInput(session, inputId, label, choices, selected))

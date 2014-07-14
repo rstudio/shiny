@@ -18,16 +18,17 @@ must be specified in \code{renderPlot()}.}
 
 \item{clickId}{If not \code{NULL}, the plot will send coordinates to the
 server whenever it is clicked. This information will be accessible on the
-\code{input} object using \code{input$}\emph{\code{clickId}}. The value will be a
-named list or vector with \code{x} and \code{y} elements indicating the
-mouse position in user units.}
+\code{input} object using \code{input$}\emph{\code{clickId}}. The value
+will be a named list or vector with \code{x} and \code{y} elements
+indicating the mouse position in user units.}
 
 \item{hoverId}{If not \code{NULL}, the plot will send coordinates to the
 server whenever the mouse pauses on the plot for more than the number of
 milliseconds determined by \code{hoverTimeout}. This information will be
-The value will be \code{NULL} if the user is not hovering, and a named
-list or vector with \code{x} and \code{y} elements indicating the mouse
-position in user units.}
+accessible on the \code{input} object using
+\code{input$}\emph{\code{clickId}}. The value will be \code{NULL} if the
+user is not hovering, and a named list or vector with \code{x} and \code{y}
+elements indicating the mouse position in user units.}
 
 \item{hoverDelay}{The delay for hovering, in milliseconds.}
 
@@ -45,6 +46,12 @@ A plot output element that can be included in a panel
 }
 \description{
 Render a \link{renderPlot} within an application page.
+}
+\note{
+The arguments \code{clickId} and \code{hoverId} only work for R base
+  graphics (see the \pkg{\link{graphics}} package). They do not work for
+  \pkg{\link[grid:grid-package]{grid}}-based graphics, such as \pkg{ggplot2},
+  \pkg{lattice}, and so on.
 }
 \examples{
 # Show a plot of the generated distribution

@@ -637,7 +637,7 @@ runApp <- function(appDir=getwd(),
   if (is.character(appDir)) {
     desc <- file.path.ci(appDir, "DESCRIPTION")
     if (file.exists(desc)) {
-      con <- file(desc, encoding = 'UTF-8')
+      con <- file(desc, encoding = checkEncoding(desc))
       on.exit(close(con), add = TRUE)
       settings <- read.dcf(con)
       if ("DisplayMode" %in% colnames(settings)) {

@@ -919,7 +919,28 @@ setServerInfo <- function(...) {
   .globals$serverInfo <- infoOld
 }
 
-readUTF8 <- function(file) {
+# see if the file can be read as UTF-8 on Windows, and converted from UTF-8 to
+# native encoding; if the conversion fails, it will produce NA's in the results
+checkEncoding <- function(file) {
+  if (!isWindows()) return('UTF-8')
+
   x <- readLines(file, encoding = 'UTF-8', warn = FALSE)
+  isUTF8 <- !any(is.na(iconv(x, 'UTF-8')))
+  if (isUTF8) return('UTF-8')
+
+  # if you publish the app to ShinyApps.io, you will be in trouble
+  warning('the source file "', file, '" is not encoded in UTF-8')
+  getOption('encoding')
+}
+
+# try to read a file using UTF-8 (fall back to getOption('encoding') in case of
+# failure, which defaults to native.enc, i.e. native encoding)
+readUTF8 <- function(file) {
+  x <- readLines(file, encoding = checkEncoding(file), warn = FALSE)
   enc2native(x)
+}
+
+# similarly, try to source() a file with UTF-8
+sourceUTF8 <- function(file, ...) {
+  source(file, ..., keep.source = TRUE, encoding = checkEncoding(file))
 }

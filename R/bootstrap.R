@@ -667,24 +667,36 @@ controlLabel <- function(controlName, label) {
 # Takes a vector or list, and adds names (same as the value) to any entries
 # without names.
 choicesWithNames <- function(choices) {
-  if (is.null(choices)) return(choices)  # ignore NULL
+  # Take a vector or list, and convert to list. Also, if any children are
+  # vectors with length > 1, convert those to list. If the list is unnamed,
+  # convert it to a named list with blank names.
+  listify <- function(obj) {
+    res <- lapply(obj, function(val) {
+      if (is.list(val) || length(val) == 1)
+        val
+      else
+        as.list(val)
+    })
 
-  # if choices is a list with certain child elements of length > 1, recursively
-  # apply choicesWithNames() on its child elements
-  if (needOptgroup(choices)) {
-    if (any(names(choices) == "")) stop('"choices" must be a named list')
-    return(sapply(choices, choicesWithNames, simplify = FALSE))
+    if (is.null(names(res)))
+      names(res) <- character(length(res))
+
+    res
   }
-  # get choice names
-  choiceNames <- names(choices)
-  if (is.null(choiceNames))
-    choiceNames <- character(length(choices))
+
+  choices <- listify(choices)
+  if (length(choices) == 0) return(choices)
+
+  # Recurse into any subgroups
+  choices <- mapply(choices, names(choices), FUN = function(choice, name) {
+    if (!is.list(choice)) return(choice)
+    if (name == "") stop('All sub-lists in "choices" must be named.')
+    choicesWithNames(choice)
+  }, SIMPLIFY = FALSE)
 
   # default missing names to choice values
-  missingNames <- choiceNames == ""
-  if (!any(missingNames)) return(choices)
-  choiceNames[missingNames] <- paste(choices)[missingNames]
-  names(choices) <- choiceNames
+  missing <- names(choices) == ""
+  names(choices)[missing] <- as.character(choices)[missing]
 
   choices
 }
@@ -742,7 +754,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 
 firstChoice <- function(choices) {
   choice <- choices[[1]]
-  if (is.list(choice)) firstChoice(choice) else choice[1]
+  if (is.list(choice)) firstChoice(choice) else choice
 }
 
 # Create tags for each of the options; use <optgroup> if necessary
@@ -769,9 +781,9 @@ selectOptions <- function(choices, selected, labels = names(choices)) {
   ), collapse = '\n')
 }
 
-# need <optgroup> when choices is a list of sub elements that are not scalars
+# need <optgroup> when choices contains sub-lists
 needOptgroup <- function(choices) {
-  is.list(choices) && any(sapply(choices, function(x) is.list(x) || length(x) > 1))
+  any(vapply(choices, function(x) is.list(x), logical(1)))
 }
 
 #' @rdname selectInput

@@ -598,9 +598,10 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
 validateSelected <- function(selected, choices, inputId) {
   # drop names, otherwise toJSON() keeps them too
   selected <- unname(selected)
-  # if you are using shiny > 0.10.0, you are supposed to know that `selected`
-  # must be a value instead of a label
+  # if you are using optgroups, you're using shiny > 0.10.0, and you should
+  # already know that `selected` must be a value instead of a label
   if (needOptgroup(choices)) return(selected)
+
   if (is.list(choices)) choices <- unlist(choices)
 
   nms <- names(choices)

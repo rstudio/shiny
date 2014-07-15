@@ -185,7 +185,7 @@ resolve <- function(dir, relpath) {
   abs.path <- normalizePath(abs.path, winslash='/', mustWork=TRUE)
   dir <- normalizePath(dir, winslash='/', mustWork=TRUE)
   # trim the possible trailing slash under Windows (#306)
-  if (.Platform$OS.type == 'windows') dir <- sub('/$', '', dir)
+  if (isWindows()) dir <- sub('/$', '', dir)
   if (nchar(abs.path) <= nchar(dir) + 1)
     return(NULL)
   if (substr(abs.path, 1, nchar(dir)) != dir ||
@@ -195,6 +195,8 @@ resolve <- function(dir, relpath) {
   return(abs.path)
 }
 
+isWindows <- function() .Platform$OS.type == 'windows'
+
 # This is a wrapper for download.file and has the same interface.
 # The only difference is that, if the protocol is https, it changes the
 # download settings, depending on platform.
@@ -203,7 +205,7 @@ download <- function(url, ...) {
   if (grepl('^https?://', url)) {
 
     # If Windows, call setInternet2, then use download.file with defaults.
-    if (.Platform$OS.type == "windows") {
+    if (isWindows()) {
       # If we directly use setInternet2, R CMD CHECK gives a Note on Mac/Linux
       mySI2 <- `::`(utils, 'setInternet2')
       # Store initial settings

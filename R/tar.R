@@ -141,7 +141,7 @@ untar2 <- function(tarfile, files = NULL, list = FALSE, exdir = ".")
                             warning(gettextf("failed to copy %s to %s", sQuote(name2), sQuote(name)), domain = NA)
                     }
                 } else {
-                    if(.Platform$OS.type == "windows") {
+                    if(isWindows()) {
                         ## this will not work for links to dirs
                         from <- file.path(dirname(name), name2)
                         if (!file.copy(from, name))

@@ -43,3 +43,44 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   expect_equal(choices[[2]][[3]]$children[[1]]$attribs$value, 'x3')
   expect_equal(choices[[2]][[3]]$children[[1]]$attribs$checked, NULL)
 })
+
+
+test_that("Choices are correctly assigned names", {
+  # Unnamed vector
+  expect_identical(
+    choicesWithNames(c("a","b","3")),
+    list(a="a", b="b", "3"="3")
+  )
+  # Unnamed list
+  expect_identical(
+    choicesWithNames(list("a","b",3)),
+    list(a="a", b="b", "3"=3)
+  )
+  # Vector, with some named, some not
+  expect_identical(
+    choicesWithNames(c(A="a", "b", C="3", "4")),
+    list(A="a", "b"="b", C="3", "4"="4")
+  )
+  # List, with some named, some not
+  expect_identical(
+    choicesWithNames(list(A="a", "b", C=3, 4)),
+    list(A="a", "b"="b", C=3, "4"=4)
+  )
+  # List, named, with a sub-vector
+  expect_identical(
+    choicesWithNames(list(A="a", B="b", C=c("d", "e"))),
+    list(A="a", B="b", C=list(d="d", e="e"))
+  )
+  # List, named, with sublist
+  expect_identical(
+    choicesWithNames(list(A="a", B="b", C=list("d", "e"))),
+    list(A="a", B="b", C=list(d="d", e="e"))
+  )
+  # List, some named, with sublist
+  expect_identical(
+    choicesWithNames(list(A="a", "b", C=list("d", E="e"))),
+    list(A="a", b="b", C=list(d="d", E="e"))
+  )
+  # Error when sublist is unnamed
+  expect_error(choicesWithNames(list(A="a", "b", list(1,2))))
+})

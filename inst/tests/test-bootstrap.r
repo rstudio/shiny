@@ -84,3 +84,33 @@ test_that("Choices are correctly assigned names", {
   # Error when sublist is unnamed
   expect_error(choicesWithNames(list(A="a", "b", list(1,2))))
 })
+
+
+test_that("selectOptions returns correct HTML", {
+  # None selected
+  expect_identical(
+    selectOptions(choicesWithNames(list("a", "b")), list()),
+    HTML("<option value=\"a\">a</option>\n<option value=\"b\">b</option>")
+  )
+  # One selected
+  expect_identical(
+    selectOptions(choicesWithNames(list("a", "b")), "a"),
+    HTML("<option value=\"a\" selected>a</option>\n<option value=\"b\">b</option>")
+  )
+  # One selected, with named items
+  expect_identical(
+    selectOptions(choicesWithNames(list(A="a", B="b")), "a"),
+    HTML("<option value=\"a\" selected>A</option>\n<option value=\"b\">B</option>")
+  )
+  # Two selected, with optgroup
+  expect_identical(
+    selectOptions(choicesWithNames(list("a", B=list("c", D="d"))), c("a", "d")),
+    HTML("<option value=\"a\" selected>a</option>\n<optgroup label=\"B\">\n<option value=\"c\">c</option>\n<option value=\"d\" selected>D</option>\n</optgroup>")
+  )
+
+  # Escape HTML in strings
+  expect_identical(
+    selectOptions(choicesWithNames(list("<A>"="a", B="b")), "a"),
+    HTML("<option value=\"a\" selected>&lt;A&gt;</option>\n<option value=\"b\">B</option>")
+  )
+})

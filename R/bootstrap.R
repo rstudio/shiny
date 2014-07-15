@@ -743,7 +743,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   } else selected <- validateSelected(selected, choices, inputId)
 
   # create select tag and add options
-  selectTag <- tags$select(id = inputId, HTML(selectOptions(choices, selected)))
+  selectTag <- tags$select(id = inputId, selectOptions(choices, selected))
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
 
@@ -758,28 +758,31 @@ firstChoice <- function(choices) {
   if (is.list(choice)) firstChoice(choice) else choice
 }
 
-# Create tags for each of the options; use <optgroup> if necessary
-selectOptions <- function(choices, selected, labels = names(choices)) {
-  if (length(choices) == 0) return()
-  if (needOptgroup(choices)) {
-    n      <- length(choices)
-    html   <- character(n)
-    labels <- names(choices)
-    for (i in seq_len(n)) {
-      html[i] <- sprintf(
+# Create tags for each of the options; use <optgroup> if necessary.
+# This returns a HTML string instead of tags, because of the 'selected'
+# attribute.
+selectOptions <- function(choices, selected = NULL) {
+  html <- mapply(choices, names(choices), FUN = function(choice, label) {
+    if (is.list(choice)) {
+      # If sub-list, create an optgroup and recurse into the sublist
+      sprintf(
         '<optgroup label="%s">\n%s\n</optgroup>',
-        htmlEscape(labels[i]),
-        selectOptions(choices[[i]], selected)
+        htmlEscape(label),
+        selectOptions(choice, selected)
+      )
+
+    } else {
+      # If single item, just return option string
+      sprintf(
+        '<option value="%s"%s>%s</option>',
+        htmlEscape(choice),
+        if (choice %in% selected) ' selected' else '',
+        htmlEscape(label)
       )
     }
-    return(paste(html, collapse = '\n'))
-  }
-  paste(sprintf(
-    '<option value="%s"%s>%s</option>',
-    htmlEscape(choices),
-    ifelse(choices %in% selected, ' selected', ''),
-    htmlEscape(labels)
-  ), collapse = '\n')
+  })
+
+  HTML(paste(html, collapse = '\n'))
 }
 
 # need <optgroup> when choices contains sub-lists

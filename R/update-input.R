@@ -118,7 +118,7 @@ updateSliderInput <- updateTextInput
 #' }
 #' @export
 updateDateInput <- function(session, inputId, label = NULL, value = NULL,
-    min = NULL, max = NULL) {
+                            min = NULL, max = NULL) {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
@@ -163,8 +163,8 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #' }
 #' @export
 updateDateRangeInput <- function(session, inputId, label = NULL,
-    start = NULL, end = NULL, min = NULL, max = NULL) {
-
+                                 start = NULL, end = NULL, min = NULL,
+                                 max = NULL) {
   # Make sure start and end are strings, not date objects. This is for
   # consistency across different locales.
   if (inherits(start, "Date"))  start <- format(start, '%Y-%m-%d')
@@ -256,10 +256,9 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
   session$sendInputMessage(inputId, message)
 }
 
-updateInputOptions <- function(
-  session, inputId, label = NULL, choices = NULL, selected = NULL,
-  inline = FALSE, type = 'checkbox'
-) {
+updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
+                               selected = NULL, inline = FALSE,
+                               type = 'checkbox') {
 
   choices <- choicesWithNames(choices)
   if (!is.null(selected))
@@ -310,9 +309,9 @@ updateInputOptions <- function(
 #' })
 #' }
 #' @export
-updateCheckboxGroupInput <- function(
-  session, inputId, label = NULL, choices = NULL, selected = NULL, inline = FALSE
-) {
+updateCheckboxGroupInput <- function(session, inputId, label = NULL,
+                                     choices = NULL, selected = NULL,
+                                     inline = FALSE) {
   updateInputOptions(session, inputId, label, choices, selected, inline)
 }
 
@@ -350,9 +349,8 @@ updateCheckboxGroupInput <- function(
 #' })
 #' }
 #' @export
-updateRadioButtons <- function(
-  session, inputId, label = NULL, choices = NULL, selected = NULL, inline = FALSE
-) {
+updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
+                               selected = NULL, inline = FALSE) {
   # you must select at least one radio button
   if (is.null(selected) && !is.null(choices)) selected <- choices[[1]]
   updateInputOptions(session, inputId, label, choices, selected, inline, type = 'radio')
@@ -395,9 +393,8 @@ updateRadioButtons <- function(
 #' })
 #' }
 #' @export
-updateSelectInput <- function(
-  session, inputId, label = NULL, choices = NULL, selected = NULL
-) {
+updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
+                              selected = NULL) {
   choices <- choicesWithNames(choices)
   if (!is.null(selected))
     selected <- validateSelected(selected, choices, inputId)
@@ -413,10 +410,9 @@ updateSelectInput <- function(
 #'   \code{choices} into the page at once (i.e., only use the client-side
 #'   version of \pkg{selectize.js})
 #' @export
-updateSelectizeInput <- function(
-  session, inputId, label = NULL, choices = NULL, selected = NULL,
-  options = list(), server = FALSE
-) {
+updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
+                                 selected = NULL, options = list(),
+                                 server = FALSE) {
   if (length(options)) {
     res <- checkAsIs(options)
     cfg <- tags$script(

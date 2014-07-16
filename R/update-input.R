@@ -401,13 +401,13 @@ updateRadioButtons <- function(
 updateSelectInput <- function(
   session, inputId, label = NULL, choices = NULL, selected = NULL
 ) {
-  updateSelectInput2(session, inputId, label, choices, selected)
+  choices <- choicesWithNames(choices)
+  if (!is.null(selected))
+    selected <- validateSelected(selected, choices, inputId)
+  options <- if (length(choices)) selectOptions(choices, selected)
+  message <- dropNulls(list(label = label, options = options, value = selected))
+  session$sendInputMessage(inputId, message)
 }
-# the reason for constructing this function is to assign a default value to the
-# `options` argument of updateInputOptions(), and we want the evaluation of this
-# argument to be delayed until `choices` has been named and `selected` validated
-updateSelectInput2 <- updateInputOptions
-formals(updateSelectInput2)['options'] <- alist(options = selectOptions(choices, selected))
 
 #' @rdname updateSelectInput
 #' @inheritParams selectizeInput

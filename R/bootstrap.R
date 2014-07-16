@@ -672,17 +672,22 @@ choicesWithNames <- function(choices) {
   # vectors with length > 1, convert those to list. If the list is unnamed,
   # convert it to a named list with blank names.
   listify <- function(obj) {
+    # If a list/vector is unnamed, give it blank names
+    makeNamed <- function(x) {
+      if (is.null(names(x))) names(x) <- character(length(x))
+      x
+    }
+
     res <- lapply(obj, function(val) {
-      if (is.list(val) || length(val) == 1)
+      if (is.list(val))
+        listify(val)
+      else if (length(val) == 1)
         val
       else
-        as.list(val)
+        makeNamed(as.list(val))
     })
 
-    if (is.null(names(res)))
-      names(res) <- character(length(res))
-
-    res
+    makeNamed(res)
   }
 
   choices <- listify(choices)

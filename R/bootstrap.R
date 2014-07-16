@@ -675,7 +675,7 @@ choicesWithNames <- function(choices) {
     nms <- names(choices)
     if (length(nms) == 0L || any(nms == ""))
       stop('"choices" must be a named list')
-    return(sapply(choices, choicesWithNames, simplify = FALSE))
+    return(lapply(choices, choicesWithNames))
   }
   # get choice names
   choiceNames <- names(choices)

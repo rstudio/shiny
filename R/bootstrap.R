@@ -792,7 +792,7 @@ selectOptions <- function(choices, selected = NULL) {
 
 # need <optgroup> when choices contains sub-lists
 needOptgroup <- function(choices) {
-  any(vapply(choices, function(x) is.list(x), logical(1)))
+  any(vapply(choices, is.list, logical(1)))
 }
 
 #' @rdname selectInput

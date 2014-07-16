@@ -584,31 +584,13 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
   if (!is.null(selected))
     selected <- validateSelected(selected, choices, inputId)
 
-  # Create tags for each of the options
-  ids <- paste0(inputId, seq_along(choices))
-
-  checkboxes <- mapply(ids, choices, names(choices),
-    SIMPLIFY = FALSE, USE.NAMES = FALSE,
-    FUN = function(id, value, name) {
-      inputTag <- tags$input(type = "checkbox",
-                             name = inputId,
-                             id = id,
-                             value = value)
-
-    if (value %in% selected)
-      inputTag$attribs$checked <- "checked"
-
-    tags$label(class = if (inline) "checkbox inline" else "checkbox",
-               inputTag,
-               tags$span(name))
-    }
-  )
+  options <- generateOptions(inputId, choices, selected, inline)
 
   # return label and select tag
   tags$div(id = inputId,
            class = "control-group shiny-input-checkboxgroup",
            controlLabel(inputId, label),
-           checkboxes)
+           options)
 }
 
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
@@ -616,11 +598,12 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
 validateSelected <- function(selected, choices, inputId) {
   # drop names, otherwise toJSON() keeps them too
   selected <- unname(selected)
-  if (is.list(choices)) {
-    # <optgroup> is not there yet
-    if (any(sapply(choices, length) > 1)) return(selected)
-    choices <- unlist(choices)
-  }
+  # if you are using optgroups, you're using shiny > 0.10.0, and you should
+  # already know that `selected` must be a value instead of a label
+  if (needOptgroup(choices)) return(selected)
+
+  if (is.list(choices)) choices <- unlist(choices)
+
   nms <- names(choices)
   # labels and values are identical, no need to validate
   if (identical(nms, unname(choices))) return(selected)
@@ -636,6 +619,29 @@ validateSelected <- function(selected, choices, inputId) {
             "for the input '", inputId, "'")
   }
   selected
+}
+
+# generate options for radio buttons and checkbox groups (type = 'checkbox' or
+# 'radio')
+generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox') {
+  # create tags for each of the options
+  ids <- paste0(inputId, seq_along(choices))
+  # generate a list of <input type=? [checked] />
+  mapply(
+    ids, choices, names(choices),
+    FUN = function(id, value, name) {
+      inputTag <- tags$input(
+        type = type, name = inputId, id = id, value = value
+      )
+      if (value %in% selected)
+        inputTag$attribs$checked <- "checked"
+      tags$label(
+        class = paste(type, if (inline) "inline"),
+        inputTag, tags$span(name)
+      )
+    },
+    SIMPLIFY = FALSE, USE.NAMES = FALSE
+  )
 }
 
 #' Create a help text element
@@ -662,20 +668,43 @@ controlLabel <- function(controlName, label) {
 # Takes a vector or list, and adds names (same as the value) to any entries
 # without names.
 choicesWithNames <- function(choices) {
-  if (is.null(choices)) return(choices)  # ignore NULL
+  # Take a vector or list, and convert to list. Also, if any children are
+  # vectors with length > 1, convert those to list. If the list is unnamed,
+  # convert it to a named list with blank names.
+  listify <- function(obj) {
+    # If a list/vector is unnamed, give it blank names
+    makeNamed <- function(x) {
+      if (is.null(names(x))) names(x) <- character(length(x))
+      x
+    }
 
-  # get choice names
-  choiceNames <- names(choices)
-  if (is.null(choiceNames))
-    choiceNames <- character(length(choices))
+    res <- lapply(obj, function(val) {
+      if (is.list(val))
+        listify(val)
+      else if (length(val) == 1)
+        val
+      else
+        makeNamed(as.list(val))
+    })
+
+    makeNamed(res)
+  }
+
+  choices <- listify(choices)
+  if (length(choices) == 0) return(choices)
+
+  # Recurse into any subgroups
+  choices <- mapply(choices, names(choices), FUN = function(choice, name) {
+    if (!is.list(choice)) return(choice)
+    if (name == "") stop('All sub-lists in "choices" must be named.')
+    choicesWithNames(choice)
+  }, SIMPLIFY = FALSE)
 
   # default missing names to choice values
-  missingNames <- choiceNames == ""
-  choiceNames[missingNames] <- paste(choices)[missingNames]
-  names(choices) <- choiceNames
+  missing <- names(choices) == ""
+  names(choices)[missing] <- as.character(choices)[missing]
 
-  # return choices
-  return (choices)
+  choices
 }
 
 #' Create a select list input control
@@ -715,21 +744,11 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 
   # default value if it's not specified
   if (is.null(selected)) {
-    if (!multiple) selected <- choices[[1]]
+    if (!multiple) selected <- firstChoice(choices)
   } else selected <- validateSelected(selected, choices, inputId)
 
-  # Create tags for each of the options
-  options <- HTML(paste("<option value=\"",
-    htmlEscape(choices),
-    "\"",
-    ifelse(choices %in% selected, " selected", ""),
-    ">",
-    htmlEscape(names(choices)),
-    "</option>",
-    sep = "", collapse = "\n"));
-
   # create select tag and add options
-  selectTag <- tags$select(id = inputId, options)
+  selectTag <- tags$select(id = inputId, selectOptions(choices, selected))
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
 
@@ -737,6 +756,43 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   res <- tagList(controlLabel(inputId, label), selectTag)
   if (!selectize) return(res)
   selectizeIt(inputId, res, NULL, width, nonempty = !multiple && !("" %in% choices))
+}
+
+firstChoice <- function(choices) {
+  choice <- choices[[1]]
+  if (is.list(choice)) firstChoice(choice) else choice
+}
+
+# Create tags for each of the options; use <optgroup> if necessary.
+# This returns a HTML string instead of tags, because of the 'selected'
+# attribute.
+selectOptions <- function(choices, selected = NULL) {
+  html <- mapply(choices, names(choices), FUN = function(choice, label) {
+    if (is.list(choice)) {
+      # If sub-list, create an optgroup and recurse into the sublist
+      sprintf(
+        '<optgroup label="%s">\n%s\n</optgroup>',
+        htmlEscape(label),
+        selectOptions(choice, selected)
+      )
+
+    } else {
+      # If single item, just return option string
+      sprintf(
+        '<option value="%s"%s>%s</option>',
+        htmlEscape(choice),
+        if (choice %in% selected) ' selected' else '',
+        htmlEscape(label)
+      )
+    }
+  })
+
+  HTML(paste(html, collapse = '\n'))
+}
+
+# need <optgroup> when choices contains sub-lists
+needOptgroup <- function(choices) {
+  any(vapply(choices, is.list, logical(1)))
 }
 
 #' @rdname selectInput
@@ -820,33 +876,14 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
   selected <- if (is.null(selected)) choices[[1]] else {
     validateSelected(selected, choices, inputId)
   }
+  if (length(selected) > 1) stop("The 'selected' argument must be of length 1")
 
-  # Create tags for each of the options
-  ids <- paste0(inputId, seq_along(choices))
-
-  inputTags <- mapply(ids, choices, names(choices),
-    SIMPLIFY = FALSE, USE.NAMES = FALSE,
-    FUN = function(id, value, name) {
-      inputTag <- tags$input(type = "radio",
-                             name = inputId,
-                             id = id,
-                             value = value)
-
-      if (identical(value, selected))
-        inputTag$attribs$checked = "checked"
-
-      # Put the label text in a span
-      tags$label(class = if (inline) "radio inline" else "radio",
-                inputTag,
-                tags$span(name)
-      )
-    }
-  )
+  options <- generateOptions(inputId, choices, selected, inline, type = 'radio')
 
   tags$div(id = inputId,
     class = 'control-group shiny-input-radiogroup',
     label %AND% tags$label(class = "control-label", `for` = inputId, label),
-    inputTags)
+    options)
 }
 
 #' Create a submit button

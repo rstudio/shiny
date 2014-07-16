@@ -18,17 +18,22 @@ updateSelectizeInput(session, inputId, label = NULL, choices = NULL,
 
 \item{label}{The label to set for the input object.}
 
-\item{choices}{A named vector or named list of options. For each item, the
-name will be used as the label, and the value will be used as the value.}
-
-\item{selected}{A vector or list of options (values) which will be selected.}
-
-\item{options}{a list of options (see \code{\link{selectizeInput}})}
-
 \item{server}{whether to store \code{choices} on the server side, and load
 the select options dynamically on searching, instead of writing all
 \code{choices} into the page at once (i.e., only use the client-side
 version of \pkg{selectize.js})}
+
+\item{choices}{List of values to select from. If elements of the list are
+named then that name rather than the value is displayed to the user.}
+
+\item{selected}{The initially selected value (or multiple values if
+\code{multiple = TRUE}). If not specified then defaults to the first value
+for single-select lists and no values for multiple select lists.}
+
+\item{options}{A list of options. See the documentation of \pkg{selectize.js}
+for possible options (character option values inside \code{\link{I}()} will
+be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+for details).}
 }
 \description{
 Change the value of a select input on the client

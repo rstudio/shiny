@@ -43,3 +43,99 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   expect_equal(choices[[2]][[3]]$children[[1]]$attribs$value, 'x3')
   expect_equal(choices[[2]][[3]]$children[[1]]$attribs$checked, NULL)
 })
+
+
+test_that("Choices are correctly assigned names", {
+  # Unnamed vector
+  expect_identical(
+    choicesWithNames(c("a","b","3")),
+    list(a="a", b="b", "3"="3")
+  )
+  # Unnamed list
+  expect_identical(
+    choicesWithNames(list("a","b",3)),
+    list(a="a", b="b", "3"=3)
+  )
+  # Vector, with some named, some not
+  expect_identical(
+    choicesWithNames(c(A="a", "b", C="3", "4")),
+    list(A="a", "b"="b", C="3", "4"="4")
+  )
+  # List, with some named, some not
+  expect_identical(
+    choicesWithNames(list(A="a", "b", C=3, 4)),
+    list(A="a", "b"="b", C=3, "4"=4)
+  )
+  # List, named, with a sub-vector
+  expect_identical(
+    choicesWithNames(list(A="a", B="b", C=c("d", "e"))),
+    list(A="a", B="b", C=list(d="d", e="e"))
+  )
+  # List, named, with sublist
+  expect_identical(
+    choicesWithNames(list(A="a", B="b", C=list("d", "e"))),
+    list(A="a", B="b", C=list(d="d", e="e"))
+  )
+  # List, some named, with sublist
+  expect_identical(
+    choicesWithNames(list(A="a", "b", C=list("d", E="e"))),
+    list(A="a", b="b", C=list(d="d", E="e"))
+  )
+  # Deeper nesting
+  expect_identical(
+    choicesWithNames(list(A="a", "b", C=list(D=list("e", "f"), G=c(H="h", "i")))),
+    list(A="a", b="b", C=list(D=list(e="e", f="f"), G=list(H="h", i="i")))
+  )
+  # Error when sublist is unnamed
+  expect_error(choicesWithNames(list(A="a", "b", list(1,2))))
+})
+
+
+test_that("selectOptions returns correct HTML", {
+  # None selected
+  expect_identical(
+    selectOptions(choicesWithNames(list("a", "b")), list()),
+    HTML("<option value=\"a\">a</option>\n<option value=\"b\">b</option>")
+  )
+  # One selected
+  expect_identical(
+    selectOptions(choicesWithNames(list("a", "b")), "a"),
+    HTML("<option value=\"a\" selected>a</option>\n<option value=\"b\">b</option>")
+  )
+  # One selected, with named items
+  expect_identical(
+    selectOptions(choicesWithNames(list(A="a", B="b")), "a"),
+    HTML("<option value=\"a\" selected>A</option>\n<option value=\"b\">B</option>")
+  )
+  # Two selected, with optgroup
+  expect_identical(
+    selectOptions(choicesWithNames(list("a", B=list("c", D="d"))), c("a", "d")),
+    HTML("<option value=\"a\" selected>a</option>\n<optgroup label=\"B\">\n<option value=\"c\">c</option>\n<option value=\"d\" selected>D</option>\n</optgroup>")
+  )
+
+  # Escape HTML in strings
+  expect_identical(
+    selectOptions(choicesWithNames(list("<A>"="a", B="b")), "a"),
+    HTML("<option value=\"a\" selected>&lt;A&gt;</option>\n<option value=\"b\">B</option>")
+  )
+})
+
+test_that("selectInput selects items by default", {
+  # None specified as selected (defaults to first)
+  expect_true(grepl(
+    '<option value="a" selected>',
+    selectInput('x', 'x', list("a", "b"))
+  ))
+
+  # Nested list (optgroup)
+  expect_true(grepl(
+    '<option value="a" selected>',
+    selectInput('x', 'x', list(A=list("a", "b"), "c"))
+  ))
+
+  # None specified as selected. With multiple=TRUE, none selected by default.
+  expect_true(grepl(
+    '<option value="a">',
+    selectInput('x', 'x', list("a", "b"), multiple = TRUE)
+  ))
+})

@@ -4,7 +4,7 @@
 \title{Change the value of a checkbox group input on the client}
 \usage{
 updateCheckboxGroupInput(session, inputId, label = NULL, choices = NULL,
-  selected = NULL)
+  selected = NULL, inline = FALSE)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -14,10 +14,12 @@ updateCheckboxGroupInput(session, inputId, label = NULL, choices = NULL,
 
 \item{label}{The label to set for the input object.}
 
-\item{choices}{A named vector or named list of options. For each item, the
-name will be used as the label, and the value will be used as the value.}
+\item{choices}{List of values to show checkboxes for. If elements of the list
+are named then that name rather than the value is displayed to the user.}
 
-\item{selected}{A vector or list of options (values) which will be selected.}
+\item{selected}{The values that should be initially selected, if any.}
+
+\item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 }
 \description{
 Change the value of a checkbox group input on the client

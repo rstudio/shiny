@@ -672,7 +672,9 @@ choicesWithNames <- function(choices) {
   # if choices is a list with certain child elements of length > 1, recursively
   # apply choicesWithNames() on its child elements
   if (needOptgroup(choices)) {
-    if (any(names(choices) == "")) stop('"choices" must be a named list')
+    nms <- names(choices)
+    if (length(nms) == 0L || any(nms == ""))
+      stop('"choices" must be a named list')
     return(sapply(choices, choicesWithNames, simplify = FALSE))
   }
   # get choice names

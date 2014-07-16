@@ -258,22 +258,19 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 
 updateInputOptions <- function(
   session, inputId, label = NULL, choices = NULL, selected = NULL,
-  inline = FALSE, type = 'checkbox', options = NULL, ...
+  inline = FALSE, type = 'checkbox'
 ) {
 
   choices <- choicesWithNames(choices)
   if (!is.null(selected))
     selected <- validateSelected(selected, choices, inputId)
 
-  # if you have not prepared an HTML string for `options` yet
-  if (is.null(options)) {
-    options <- if (length(choices))
-      format(tagList(
-        generateOptions(inputId, choices, selected, inline, type = type)
-      ))
-  }
+  options <- if (length(choices))
+    format(tagList(
+      generateOptions(inputId, choices, selected, inline, type = type)
+    ))
 
-  message <- dropNulls(list(label = label, options = options, value = selected, ...))
+  message <- dropNulls(list(label = label, options = options, value = selected))
 
   session$sendInputMessage(inputId, message)
 }

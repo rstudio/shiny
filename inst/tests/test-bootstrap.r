@@ -114,3 +114,23 @@ test_that("selectOptions returns correct HTML", {
     HTML("<option value=\"a\" selected>&lt;A&gt;</option>\n<option value=\"b\">B</option>")
   )
 })
+
+test_that("selectInput selects items by default", {
+  # None specified as selected (defaults to first)
+  expect_true(grepl(
+    '<option value="a" selected>',
+    selectInput('x', 'x', list("a", "b"))
+  ))
+
+  # Nested list (optgroup)
+  expect_true(grepl(
+    '<option value="a" selected>',
+    selectInput('x', 'x', list(A=list("a", "b"), "c"))
+  ))
+
+  # None specified as selected. With multiple=TRUE, none selected by default.
+  expect_true(grepl(
+    '<option value="a">',
+    selectInput('x', 'x', list("a", "b"), multiple = TRUE)
+  ))
+})

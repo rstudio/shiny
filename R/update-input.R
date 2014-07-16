@@ -256,13 +256,32 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
   session$sendInputMessage(inputId, message)
 }
 
+updateInputOptions <- function(
+  session, inputId, label = NULL, choices = NULL, selected = NULL,
+  inline = FALSE, type = 'checkbox', options = NULL, ...
+) {
+
+  choices <- choicesWithNames(choices)
+  if (!is.null(selected))
+    selected <- validateSelected(selected, choices, inputId)
+
+  # if you have not prepared an HTML string for `options` yet
+  if (is.null(options)) {
+    options <- if (length(choices))
+      format(tagList(
+        generateOptions(inputId, choices, selected, inline, type = type)
+      ))
+  }
+
+  message <- dropNulls(list(label = label, options = options, value = selected, ...))
+
+  session$sendInputMessage(inputId, message)
+}
 
 #' Change the value of a checkbox group input on the client
 #'
 #' @template update-input
-#' @param choices A named vector or named list of options. For each item, the
-#'   name will be used as the label, and the value will be used as the value.
-#' @param selected A vector or list of options (values) which will be selected.
+#' @inheritParams checkboxGroupInput
 #'
 #' @seealso \code{\link{checkboxGroupInput}}
 #'
@@ -294,28 +313,17 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #' })
 #' }
 #' @export
-updateCheckboxGroupInput <- function(session, inputId, label = NULL,
-  choices = NULL, selected = NULL) {
-
-  choices <- choicesWithNames(choices)
-  if (!is.null(selected))
-    selected <- validateSelected(selected, choices, inputId)
-
-  options <- if (length(choices))
-    columnToRowData(list(value = choices, label = names(choices)))
-
-  message <- dropNulls(list(label = label, options = options, value = selected))
-
-  session$sendInputMessage(inputId, message)
+updateCheckboxGroupInput <- function(
+  session, inputId, label = NULL, choices = NULL, selected = NULL, inline = FALSE
+) {
+  updateInputOptions(session, inputId, label, choices, selected, inline)
 }
 
 
 #' Change the value of a radio input on the client
 #'
 #' @template update-input
-#' @param choices A named vector or named list of options. For each item, the
-#'   name will be used as the label, and the value will be used as the value.
-#' @param selected A vector or list of options (values) which will be selected.
+#' @inheritParams radioButtons
 #'
 #' @seealso \code{\link{radioButtons}}
 #'
@@ -345,15 +353,19 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #' })
 #' }
 #' @export
-updateRadioButtons <- updateCheckboxGroupInput
+updateRadioButtons <- function(
+  session, inputId, label = NULL, choices = NULL, selected = NULL, inline = FALSE
+) {
+  # you must select at least one radio button
+  if (is.null(selected) && !is.null(choices)) selected <- choices[[1]]
+  updateInputOptions(session, inputId, label, choices, selected, inline, type = 'radio')
+}
 
 
 #' Change the value of a select input on the client
 #'
 #' @template update-input
-#' @param choices A named vector or named list of options. For each item, the
-#'   name will be used as the label, and the value will be used as the value.
-#' @param selected A vector or list of options (values) which will be selected.
+#' @inheritParams selectInput
 #'
 #' @seealso \code{\link{selectInput}}
 #'
@@ -386,10 +398,19 @@ updateRadioButtons <- updateCheckboxGroupInput
 #' })
 #' }
 #' @export
-updateSelectInput <- updateCheckboxGroupInput
+updateSelectInput <- function(
+  session, inputId, label = NULL, choices = NULL, selected = NULL
+) {
+  updateSelectInput2(session, inputId, label, choices, selected)
+}
+# the reason for constructing this function is to assign a default value to the
+# `options` argument of updateInputOptions(), and we want the evaluation of this
+# argument to be delayed until `choices` has been named and `selected` validated
+updateSelectInput2 <- updateInputOptions
+formals(updateSelectInput2)['options'] <- alist(options = selectOptions(choices, selected))
 
 #' @rdname updateSelectInput
-#' @param options a list of options (see \code{\link{selectizeInput}})
+#' @inheritParams selectizeInput
 #' @param server whether to store \code{choices} on the server side, and load
 #'   the select options dynamically on searching, instead of writing all
 #'   \code{choices} into the page at once (i.e., only use the client-side
@@ -407,7 +428,7 @@ updateSelectizeInput <- function(
       `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
       HTML(toJSON(res$options))
     )
-    session$sendInputMessage(inputId, list(newOptions = as.character(cfg)))
+    session$sendInputMessage(inputId, list(config = as.character(cfg)))
   }
   if (!server) {
     return(updateSelectInput(session, inputId, label, choices, selected))

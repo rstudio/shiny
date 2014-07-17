@@ -928,9 +928,15 @@ checkEncoding <- function(file) {
   isUTF8 <- !any(is.na(iconv(x, 'UTF-8')))
   if (isUTF8) return('UTF-8')
 
+  enc <- getOption('encoding')
+  msg <- c(sprintf('The source file "%s" is not encoded in UTF-8. ', file),
+           'Please convert its encoding to UTF-8 ',
+           '(e.g. use the menu `File -> Save with Encoding` in RStudio).')
+  if (enc == 'UTF-8') stop(msg)
   # if you publish the app to ShinyApps.io, you will be in trouble
-  warning('the source file "', file, '" is not encoded in UTF-8')
-  getOption('encoding')
+  warning(c(msg, ' Falling back to the encoding "', enc, '".'))
+
+  enc
 }
 
 # try to read a file using UTF-8 (fall back to getOption('encoding') in case of

@@ -33,6 +33,7 @@ renderPage <- function(ui, connection, showcase=0) {
 
   deps <- c(
     list(
+      htmlDependency("json2", "2014.02.04", c(href="shared"), script = "json2-min.js"),
       htmlDependency("jquery", "1.11.0", c(href="shared"), script = "jquery.js"),
       htmlDependency("shiny", packageVersion("shiny"), c(href="shared"),
         script = "shiny.js", stylesheet = "shiny.css")

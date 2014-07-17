@@ -112,9 +112,7 @@ shinyAppDir <- function(appDir, options=list()) {
         # If not, then take the last expression that's returned from ui.R.
         .globals$ui <- NULL
         on.exit(.globals$ui <- NULL, add = FALSE)
-        ui <- source(uiR,
-          local = new.env(parent = globalenv()),
-          keep.source = TRUE, encoding = 'UTF-8')$value
+        ui <- sourceUTF8(uiR, local = new.env(parent = globalenv()))$value
         if (!is.null(.globals$ui)) {
           ui <- .globals$ui[[1]]
         }
@@ -137,11 +135,7 @@ shinyAppDir <- function(appDir, options=list()) {
       # server.R.
       .globals$server <- NULL
       on.exit(.globals$server <- NULL, add = TRUE)
-      result <- source(
-        serverR,
-        local = new.env(parent = globalenv()),
-        keep.source = TRUE, encoding = 'UTF-8'
-      )$value
+      result <- sourceUTF8(serverR, local = new.env(parent = globalenv()))$value
       if (!is.null(.globals$server)) {
         result <- .globals$server[[1]]
       }
@@ -169,8 +163,7 @@ shinyAppDir <- function(appDir, options=list()) {
     oldwd <<- getwd()
     setwd(appDir)
     if (file.exists(file.path.ci(appDir, "global.R")))
-      source(file.path.ci(appDir, "global.R"), keep.source = TRUE,
-             encoding = 'UTF-8')
+      sourceUTF8(file.path.ci(appDir, "global.R"))
   }
   onEnd <- function() {
     setwd(oldwd)

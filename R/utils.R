@@ -185,7 +185,7 @@ resolve <- function(dir, relpath) {
   abs.path <- normalizePath(abs.path, winslash='/', mustWork=TRUE)
   dir <- normalizePath(dir, winslash='/', mustWork=TRUE)
   # trim the possible trailing slash under Windows (#306)
-  if (.Platform$OS.type == 'windows') dir <- sub('/$', '', dir)
+  if (isWindows()) dir <- sub('/$', '', dir)
   if (nchar(abs.path) <= nchar(dir) + 1)
     return(NULL)
   if (substr(abs.path, 1, nchar(dir)) != dir ||
@@ -195,6 +195,8 @@ resolve <- function(dir, relpath) {
   return(abs.path)
 }
 
+isWindows <- function() .Platform$OS.type == 'windows'
+
 # This is a wrapper for download.file and has the same interface.
 # The only difference is that, if the protocol is https, it changes the
 # download settings, depending on platform.
@@ -203,7 +205,7 @@ download <- function(url, ...) {
   if (grepl('^https?://', url)) {
 
     # If Windows, call setInternet2, then use download.file with defaults.
-    if (.Platform$OS.type == "windows") {
+    if (isWindows()) {
       # If we directly use setInternet2, R CMD CHECK gives a Note on Mac/Linux
       mySI2 <- `::`(utils, 'setInternet2')
       # Store initial settings
@@ -915,4 +917,36 @@ setServerInfo <- function(...) {
   infoNew <- list(...)
   infoOld[names(infoNew)] <- infoNew
   .globals$serverInfo <- infoOld
+}
+
+# see if the file can be read as UTF-8 on Windows, and converted from UTF-8 to
+# native encoding; if the conversion fails, it will produce NA's in the results
+checkEncoding <- function(file) {
+  if (!isWindows()) return('UTF-8')
+
+  x <- readLines(file, encoding = 'UTF-8', warn = FALSE)
+  isUTF8 <- !any(is.na(iconv(x, 'UTF-8')))
+  if (isUTF8) return('UTF-8')
+
+  enc <- getOption('encoding')
+  msg <- c(sprintf('The source file "%s" is not encoded in UTF-8. ', file),
+           'Please convert its encoding to UTF-8 ',
+           '(e.g. use the menu `File -> Save with Encoding` in RStudio).')
+  if (enc == 'UTF-8') stop(msg)
+  # if you publish the app to ShinyApps.io, you will be in trouble
+  warning(c(msg, ' Falling back to the encoding "', enc, '".'))
+
+  enc
+}
+
+# try to read a file using UTF-8 (fall back to getOption('encoding') in case of
+# failure, which defaults to native.enc, i.e. native encoding)
+readUTF8 <- function(file) {
+  x <- readLines(file, encoding = checkEncoding(file), warn = FALSE)
+  enc2native(x)
+}
+
+# similarly, try to source() a file with UTF-8
+sourceUTF8 <- function(file, ...) {
+  source(file, ..., keep.source = TRUE, encoding = checkEncoding(file))
 }

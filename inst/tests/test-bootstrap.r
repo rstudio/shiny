@@ -133,6 +133,12 @@ test_that("selectInput selects items by default", {
     selectInput('x', 'x', list(A=list("a", "b"), "c"))
   ))
 
+  # Nothing selected when choices=NULL
+  expect_identical(
+    '<select id="x"></select>',
+    format(selectInput('x', NULL, NULL, selectize = FALSE))
+  )
+
   # None specified as selected. With multiple=TRUE, none selected by default.
   expect_true(grepl(
     '<option value="a">',

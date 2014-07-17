@@ -759,6 +759,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 }
 
 firstChoice <- function(choices) {
+  if (length(choices) == 0L) return()
   choice <- choices[[1]]
   if (is.list(choice)) firstChoice(choice) else choice
 }

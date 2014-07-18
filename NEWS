@@ -19,6 +19,12 @@ shiny 0.10.0.9xxx
   R Markdown documents. See an R Markdown example at
   http://shiny.rstudio.com/gallery/inline-output.html (#512)
 
+* Added support for option groups in the select/selectize inputs. When the
+  `choices` argument for `selectInput()`/`selectizeInput()` is a list of
+  sub-lists and any sub-list is of length greater than 1, the HTML tag
+  `<optgroup>` will be used. See an example at
+  http://shiny.rstudio.com/gallery/option-groups-for-selectize-input.html (#542)
+
 shiny 0.10.0
 --------------------------------------------------------------------------------
 

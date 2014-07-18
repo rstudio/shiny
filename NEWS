@@ -3,7 +3,8 @@ shiny 0.10.0.9xxx
 
 * Added Unicode support for Windows. Shiny apps running on Windows must use the
   UTF-8 encoding for ui.R and server.R (also the optional global.R) if they
-  contain non-ASCII characters. (#516)
+  contain non-ASCII characters. See this article for details and examples:
+  http://shiny.rstudio.com/gallery/unicode-characters.html (#516)
 
 * `runGitHub()` also allows the 'username/repo' syntax now, which is equivalent
   to `runGitHub('repo', 'username')`. (#427)
@@ -15,7 +16,8 @@ shiny 0.10.0.9xxx
   and `htmlOutput()`. When `inline = TRUE`, these outputs will be put in
   `span()` instead of the default `div()`. This occurs automatically when these
   outputs are created via the inline expressions (e.g. `r textOutput(expr)`) in
-  R Markdown documents. (#512)
+  R Markdown documents. See an R Markdown example at
+  http://shiny.rstudio.com/gallery/inline-output.html (#512)
 
 shiny 0.10.0
 --------------------------------------------------------------------------------

@@ -96,6 +96,29 @@ span.jslider {
   transition: none;
 }
 
+.shiny-progress {
+  position: absolute;
+  width: 300px;
+  top: 20px;
+  right: 20px;
+  padding: 12px;
+  border: 1px solid #CCC;
+  border-radius: 8px;
+  background-color: white;
+  opacity: 0.9;
+}
+
+.shiny-progress .progress-message {
+  font-weight: bold;
+}
+
+.shiny-progress .progress {
+  margin-bottom: 0;
+}
+.shiny-progress .bar {
+  transition-duration: 250ms;
+}
+
 .crosshair {
   cursor: crosshair;
 }

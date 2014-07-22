@@ -927,9 +927,17 @@ checkEncoding <- function(file) {
   x <- readLines(file, encoding = 'UTF-8', warn = FALSE)
   isUTF8 <- !any(is.na(iconv(x, 'UTF-8')))
   if (isUTF8) return('UTF-8')
+  # check if there is a BOM character
+  if (identical(charToRaw(readChar(file, 3L, TRUE)), charToRaw('\UFEFF'))) {
+    warning('You should not include the Byte Order Mark (BOM) in ', file, '. ',
+            'Please re-save it in UTF-8 without BOM.')
+    if (getRversion() < '3.0.0')
+      stop('R does not support UTF-8-BOM before 3.0.0. Please upgrade R.')
+    return('UTF-8-BOM')
+  }
 
   enc <- getOption('encoding')
-  msg <- c(sprintf('The source file "%s" is not encoded in UTF-8. ', file),
+  msg <- c(sprintf('The file "%s" is not encoded in UTF-8. ', file),
            'Please convert its encoding to UTF-8 ',
            '(e.g. use the menu `File -> Save with Encoding` in RStudio).')
   if (enc == 'UTF-8') stop(msg)
@@ -942,7 +950,13 @@ checkEncoding <- function(file) {
 # try to read a file using UTF-8 (fall back to getOption('encoding') in case of
 # failure, which defaults to native.enc, i.e. native encoding)
 readUTF8 <- function(file) {
-  x <- readLines(file, encoding = checkEncoding(file), warn = FALSE)
+  enc <- checkEncoding(file)
+  # readLines() does not support UTF-8-BOM directly; has to go through file()
+  if (enc == 'UTF-8-BOM') {
+    file <- base::file(file, encoding = enc)
+    on.exit(close(file), add = TRUE)
+  }
+  x <- readLines(file, encoding = enc, warn = FALSE)
   enc2native(x)
 }
 

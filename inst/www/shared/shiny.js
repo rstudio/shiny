@@ -34,9 +34,13 @@
     var x;
     if (el.currentStyle)
       x = el.currentStyle[styleProp];
-    else if (window.getComputedStyle)
-      x = document.defaultView.getComputedStyle(el, null)
-          .getPropertyValue(styleProp);
+    else if (window.getComputedStyle) {
+      // On some browsers, getComputedStyle can return null for elements that 
+      // aren't visible; don't attempt to retrieve style props in this case.
+      var style = document.defaultView.getComputedStyle(el, null);
+      if (style)
+        x = style.getPropertyValue(styleProp);
+    }
     return x;
   }
 

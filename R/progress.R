@@ -69,14 +69,17 @@
 Progress <- setRefClass(
   'Progress',
   fields = list(
-    .session = 'ANY',
+    .session = 'environment',
     .id = 'character',
     .min = 'numeric',
     .max = 'numeric',
     .closed = 'logical'
   ),
   methods = list(
-    initialize = function(session, min = 0, max = 1) {
+    initialize = function(session = getDefaultReactiveDomain(), min = 0, max = 1) {
+      # A hacky check to make sure the session object is indeed a session object.
+      if (is.null(session$onFlush)) stop("'session' is not a session object.")
+
       .closed <<- FALSE
       .session <<- session
       .id <<- paste(as.character(as.raw(runif(8, min=0, max=255))), collapse='')
@@ -180,8 +183,12 @@ Progress <- setRefClass(
 #' @seealso \code{\link{progressInit}}, \code{\link{Progress}}
 #' @rdname withProgress
 #' @export
-withProgress <- function(session, expr, min = 0, max = 1,
-                         env=parent.frame(), quoted=FALSE) {
+withProgress <- function(session = getDefaultReactiveDomain(), expr,
+                         min = 0, max = 1, env=parent.frame(), quoted=FALSE) {
+
+  # A hacky check to make sure the session object is indeed a session object.
+  if (is.null(session$onFlush)) stop("'session' is not a session object.")
+
   func <- exprToFunction(expr, env, quoted)
 
   p <- Progress$new(session, min = min, max = max)

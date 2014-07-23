@@ -90,7 +90,7 @@ Progress <- setRefClass(
     },
     set = function(message = NULL, detail = NULL, value = NULL) {
       if (.closed) {
-        # TODO: Warn?
+        warning("Attempting to set progress, but progress already closed.")
         return()
       }
 
@@ -111,11 +111,12 @@ Progress <- setRefClass(
     },
     close = function() {
       if (.closed) {
-        # TODO: Warn?
+        warning("Attempting to close progress, but progress already closed.")
         return()
       }
 
       .session$sendCustomMessage('shiny-progress-close', list(id = .id))
+      .closed <<- TRUE
     }
   )
 )

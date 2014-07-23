@@ -120,8 +120,6 @@ Progress <- setRefClass(
   )
 )
 
-.currentProgress <- new.env()
-
 #' Reporting progress (functional API)
 #' 
 #' Reports progress to the user during long-running operations.
@@ -183,8 +181,9 @@ Progress <- setRefClass(
 #' @seealso \code{\link{progressInit}}, \code{\link{Progress}}
 #' @rdname withProgress
 #' @export
-withProgress <- function(session = getDefaultReactiveDomain(), expr,
-                         min = 0, max = 1, env=parent.frame(), quoted=FALSE) {
+withProgress <- function(expr, min = 0, max = 1,
+                         session = getDefaultReactiveDomain(),
+                         env=parent.frame(), quoted=FALSE) {
 
   # A hacky check to make sure the session object is indeed a session object.
   if (is.null(session$onFlush)) stop("'session' is not a session object.")
@@ -193,9 +192,9 @@ withProgress <- function(session = getDefaultReactiveDomain(), expr,
 
   p <- Progress$new(session, min = min, max = max)
   
-  .currentProgress$stack <- c(p, .currentProgress$stack)
+  session$progressStack$push(p)
   on.exit({
-    .currentProgress$stack <- .currentProgress$stack[-1]
+    session$progressStack$pop()
     p$close()
   })
 
@@ -205,7 +204,11 @@ withProgress <- function(session = getDefaultReactiveDomain(), expr,
 #' @rdname withProgress
 #' @export
 setProgress <- function(message = NULL, detail = NULL, value = NULL) {
-  if (is.null(.currentProgress$stack) || length(.currentProgress$stack) == 0) {
+  session <- getDefaultReactiveDomain()
+  # A hacky check to make sure the session object is indeed a session object.
+  if (is.null(session$onFlush)) stop("'session' is not a session object.")
+
+  if (session$progressStack$size() == 0) {
     warning('setProgress was called outside of withProgress; ignoring')
     return()
   }
@@ -217,6 +220,6 @@ setProgress <- function(message = NULL, detail = NULL, value = NULL) {
     args$detail <- detail
   if (!missing(value))
     args$value <- value
-  do.call(.currentProgress$stack[[1]]$set, args)
+  do.call(session$progressStack$peek()$set, args)
   invisible()
 }

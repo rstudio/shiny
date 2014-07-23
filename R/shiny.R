@@ -1,4 +1,4 @@
-#' @include utils.R
+#' @include utils.R stack.R
 NULL
 
 #' Web Application Framework for R
@@ -192,6 +192,7 @@ ShinySession <- setRefClass(
     .closedCallbacks = 'Callbacks',
     .flushCallbacks = 'Callbacks',
     .flushedCallbacks = 'Callbacks',
+    progressStack = Stack, # Stack of progress objects
     input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
     output      = 'ANY',    # Externally-usable S3 wrapper object for .outputs
     clientData  = 'reactivevalues', # Externally-usable S3 wrapper object for .clientData
@@ -235,6 +236,7 @@ ShinySession <- setRefClass(
       session$output            <<- .self$output
       session$reactlog          <<- .self$reactlog
       session$registerDataObj   <<- .self$registerDataObj
+      session$progressStack     <<- .self$progressStack
       session$.impl             <<- .self
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {

@@ -97,26 +97,38 @@ span.jslider {
 }
 
 .shiny-progress {
-  position: absolute;
-  width: 300px;
-  top: 20px;
-  right: 20px;
-  padding: 12px;
-  border: 1px solid #CCC;
-  border-radius: 8px;
-  background-color: white;
-  opacity: 0.9;
-}
-
-.shiny-progress .progress-message {
-  font-weight: bold;
+  position: fixed;
+  width: 100%;
 }
 
 .shiny-progress .progress {
-  margin-bottom: 0;
+  height: 3px;
+  margin: 0px;
 }
+
 .shiny-progress .bar {
+  opacity: 0.6;
   transition-duration: 250ms;
+}
+
+.shiny-progress .progress-text {
+  background-color: #eef8ff;
+  margin: 6px 15px 0px 0px;
+  padding: 0px 3px;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  opacity: 0.85;
+  float: right;
+  width: 240px;
+}
+
+.shiny-progress .progress-text .progress-message {
+  font-weight: bold;
+  font-size: 90%;
+}
+
+.shiny-progress .progress-text .progress-detail {
+  font-size: 80%;
 }
 
 .crosshair {

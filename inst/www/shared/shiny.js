@@ -950,14 +950,19 @@
 
     // Open a page-level progress bar
     setProgressHandler('open', function(message) {
-      var num = $('.shiny-progress.open').length + 1;
+      var depth = $('.shiny-progress.open').length;
 
-      var $progress = $('<div class="shiny-progress open"><div class="progress-message"></div><div class="progress-detail"></div><div class="progress progress-striped active"><div class="bar"></div></div></div>');
+      var $progress = $(
+        '<div class="shiny-progress open">\
+          <div class="progress progress-striped active"><div class="bar"></div></div>\
+          <div class="progress-text">\
+            <span class="progress-message"></span>\
+            <span class="progress-detail"></span>\
+          </div>\
+        </div>');
       $progress.attr('id', message.id);
-      $progress.css('top', (20 * num) + 'px');
-      $progress.css('right', (20 * num) + 'px');
+      $progress.css('top', depth*3 + 'px');
       $progress.hide();
-      $progress.find('.progress').hide();
       $('body').append($progress);
     });
 

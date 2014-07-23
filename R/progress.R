@@ -94,18 +94,18 @@ Progress <- setRefClass(
         return()
       }
 
-      data <- list(id = .id)
-      if (!missing(message))
-        data$message <- message
-      if (!missing(detail))
-        data$detail <- detail
-      if (!missing(value)) {
-        if (is.null(value) || is.na(value))
-          data$value <- NULL
-        else {
-          data$value <- min(1, max(0, (value - .min) / (.max - .min)))
-        }
+      if (is.null(value) || is.na(value)) {
+        value <- NULL
+      } else {
+        value <- min(1, max(0, (value - .min) / (.max - .min)))
       }
+
+      data <- dropNulls(list(
+        id = .id,
+        message = message,
+        detail = detail,
+        value = value
+      ))
 
       .session$sendProgress('update', data)
     },
@@ -211,13 +211,6 @@ setProgress <- function(message = NULL, detail = NULL, value = NULL,
     return()
   }
 
-  args <- list()
-  if (!missing(message))
-    args$message <- message
-  if (!missing(detail))
-    args$detail <- detail
-  if (!missing(value))
-    args$value <- value
-  do.call(session$progressStack$peek()$set, args)
+  session$progressStack$peek()$set(message, detail, value)
   invisible()
 }

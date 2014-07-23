@@ -34,9 +34,14 @@
     var x;
     if (el.currentStyle)
       x = el.currentStyle[styleProp];
-    else if (window.getComputedStyle)
-      x = document.defaultView.getComputedStyle(el, null)
-          .getPropertyValue(styleProp);
+    else if (window.getComputedStyle) {
+      // getComputedStyle can return null when we're inside a hidden iframe on
+      // Firefox; don't attempt to retrieve style props in this case.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=548397 
+      var style = document.defaultView.getComputedStyle(el, null);
+      if (style)
+        x = style.getPropertyValue(styleProp);
+    }
     return x;
   }
 

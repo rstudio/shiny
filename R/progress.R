@@ -183,11 +183,7 @@ Progress <- setRefClass(
 #' @export
 withProgress <- function(expr, min = 0, max = 1,
                          session = getDefaultReactiveDomain(),
-                         env=parent.frame(), quoted=FALSE) {
-
-  # A hacky check to make sure the session object is indeed a session object.
-  if (is.null(session$onFlush)) stop("'session' is not a session object.")
-
+                         env = parent.frame(), quoted = FALSE) {
   func <- exprToFunction(expr, env, quoted)
 
   p <- Progress$new(session, min = min, max = max)
@@ -203,8 +199,9 @@ withProgress <- function(expr, min = 0, max = 1,
 
 #' @rdname withProgress
 #' @export
-setProgress <- function(message = NULL, detail = NULL, value = NULL) {
-  session <- getDefaultReactiveDomain()
+setProgress <- function(message = NULL, detail = NULL, value = NULL,
+                        session = getDefaultReactiveDomain()) {
+
   # A hacky check to make sure the session object is indeed a session object.
   if (is.null(session$onFlush)) stop("'session' is not a session object.")
 

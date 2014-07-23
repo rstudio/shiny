@@ -237,6 +237,7 @@ ShinySession <- setRefClass(
       session$reactlog          <<- .self$reactlog
       session$registerDataObj   <<- .self$registerDataObj
       session$progressStack     <<- .self$progressStack
+      session$sendProgress      <<- .self$sendProgress
       session$.impl             <<- .self
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
@@ -419,13 +420,12 @@ ShinySession <- setRefClass(
 
       .progressKeys <<- c(.progressKeys, id)
 
+      sendProgress('binding', list(id = id))
+    },
+    sendProgress = function(type, message) {
       json <- toJSON(list(
-        progress = list(
-          type = 'binding',
-          id = id
-        )
+        progress = list(type = type, message = message)
       ))
-
       .write(json)
     },
     dispatch = function(msg) {

@@ -886,13 +886,10 @@
     });
 
     addMessageHandler('progress', function(message) {
-      $(document.documentElement).addClass('shiny-busy');
-      if (message.type === 'binding') {
-        var key = message.id;
-        var binding = this.$bindings[key];
-        if (binding && binding.showProgress) {
-          binding.showProgress(true);
-        }
+      if (message.type && message.message) {
+        var handler = progressHandlers[message.type];
+        if (handler)
+          handler.call(this, message.message);
       }
     });
 
@@ -941,11 +938,22 @@
     }
     exports.setProgressHandler = setProgressHandler;
 
-    setProgressHandler('open', function(data) {
+    // Progress for a particular object
+    setProgressHandler('binding', function(message) {
+      $(document.documentElement).addClass('shiny-busy');
+      var key = message.id;
+      var binding = this.$bindings[key];
+      if (binding && binding.showProgress) {
+        binding.showProgress(true);
+      }
+    });
+
+    // Open a page-level progress bar
+    setProgressHandler('open', function(message) {
       var num = $('.shiny-progress.open').length + 1;
 
       var $progress = $('<div class="shiny-progress open"><div class="progress-message"></div><div class="progress-detail"></div><div class="progress progress-striped active"><div class="bar"></div></div></div>');
-      $progress.attr('id', data.id);
+      $progress.attr('id', message.id);
       $progress.css('top', (20 * num) + 'px');
       $progress.css('right', (20 * num) + 'px');
       $progress.hide();
@@ -953,18 +961,19 @@
       $('body').append($progress);
     });
 
-    setProgressHandler('update', function(data) {
-      var $progress = $('#' + data.id + '.shiny-progress');
-      if (typeof(data.message) !== 'undefined') {
-        $progress.find('.progress-message').text(data.message);
+    // Update page-level progress bar
+    setProgressHandler('update', function(message) {
+      var $progress = $('#' + message.id + '.shiny-progress');
+      if (typeof(message.message) !== 'undefined') {
+        $progress.find('.progress-message').text(message.message);
       }
-      if (typeof(data.detail) !== 'undefined') {
-        $progress.find('.progress-detail').text(data.detail);
+      if (typeof(message.detail) !== 'undefined') {
+        $progress.find('.progress-detail').text(message.detail);
       }
-      if (typeof(data.value) !== 'undefined') {
-        if (data.value !== null) {
+      if (typeof(message.value) !== 'undefined') {
+        if (message.value !== null) {
           $progress.find('.progress').show();
-          $progress.find('.bar').width((data.value*100) + '%');
+          $progress.find('.bar').width((message.value*100) + '%');
         }
         else {
           $progress.find('.progress').hide();
@@ -973,25 +982,14 @@
       $progress.show();
     });
 
-    setProgressHandler('close', function(data) {
-      var $progress = $('#' + data.id + '.shiny-progress');
+    // Close page-level progress bar
+    setProgressHandler('close', function(message) {
+      var $progress = $('#' + message.id + '.shiny-progress');
       $progress.removeClass('open');
       $progress.fadeOut({
         complete: function() {$progress.remove();}
       });
     });
-
-
-    addCustomMessageHandler('shiny-progress-open', function(data) {
-      progressHandlers.open(data);
-    });
-    addCustomMessageHandler('shiny-progress-update', function(data) {
-      progressHandlers.update(data);
-    });
-    addCustomMessageHandler('shiny-progress-close', function(data) {
-      progressHandlers.close(data);
-    });
-
 
   }).call(ShinyApp.prototype);
 

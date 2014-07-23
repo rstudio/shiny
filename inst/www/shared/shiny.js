@@ -927,7 +927,7 @@
 
     // Progress reporting ====================================================
 
-    progressHandlers = {};
+    var progressHandlers = {};
 
     function setProgressHandler(type, handler) {
       if (typeof(handler) !== 'function') {

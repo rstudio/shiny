@@ -54,6 +54,7 @@ Collate:
     'reactives.R'
     'run-url.R'
     'server.R'
+    'stack.R'
     'shiny.R'
     'shinyui.R'
     'shinywrappers.R'

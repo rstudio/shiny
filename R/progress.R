@@ -66,6 +66,7 @@
 #' @seealso \code{\link{progressInit}}, \code{\link{withProgress}}
 #' @rdname Progress
 #' @export
+#' @export Progress
 Progress <- setRefClass(
   'Progress',
   fields = list(

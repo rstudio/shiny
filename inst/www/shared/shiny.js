@@ -887,8 +887,8 @@
 
     addMessageHandler('progress', function(message) {
       $(document.documentElement).addClass('shiny-busy');
-      for (var i = 0; i < message.length; i++) {
-        var key = message[i];
+      if (message.type === 'binding') {
+        var key = message.id;
         var binding = this.$bindings[key];
         if (binding && binding.showProgress) {
           binding.showProgress(true);

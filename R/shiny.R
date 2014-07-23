@@ -419,7 +419,12 @@ ShinySession <- setRefClass(
 
       .progressKeys <<- c(.progressKeys, id)
 
-      json <- toJSON(list(progress=list(id)))
+      json <- toJSON(list(
+        progress = list(
+          type = 'binding',
+          id = id
+        )
+      ))
 
       .write(json)
     },

@@ -929,10 +929,15 @@ checkEncoding <- function(file) {
   # world of consistency (falling back to getOption('encoding') will not help
   # because native.enc is also normally UTF-8 based on *nix)
   if (!isWindows()) return('UTF-8')
+  # an empty file?
+  size <- file.info(file)[, 'size']
+  if (size == 0) return('UTF-8')
 
   x <- readLines(file, encoding = 'UTF-8', warn = FALSE)
-  isUTF8 <- !any(is.na(iconv(x, 'UTF-8')))
-  if (isUTF8) return('UTF-8')
+  # if conversion is successful and there are no embedded nul's, use UTF-8
+  if (!any(is.na(iconv(x, 'UTF-8'))) &&
+        !any(readBin(file, 'raw', size) == as.raw(0))) return('UTF-8')
+
   # check if there is a BOM character: this is also skipped on *nix, because R
   # on *nix simply ignores this meaningless character if present, but it hurts
   # on Windows

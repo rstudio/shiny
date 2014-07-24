@@ -922,16 +922,39 @@ setServerInfo <- function(...) {
 # see if the file can be read as UTF-8 on Windows, and converted from UTF-8 to
 # native encoding; if the conversion fails, it will produce NA's in the results
 checkEncoding <- function(file) {
+  # skip *nix because its locale is normally UTF-8 based (e.g. en_US.UTF-8), and
+  # *nix users have to make a conscious effort to save a file with an encoding
+  # that is not UTF-8; if they choose to do so, we cannot do much about it
+  # except sitting back and seeing them punished after they choose to escape a
+  # world of consistency (falling back to getOption('encoding') will not help
+  # because native.enc is also normally UTF-8 based on *nix)
   if (!isWindows()) return('UTF-8')
+  # an empty file?
+  size <- file.info(file)[, 'size']
+  if (size == 0) return('UTF-8')
 
   x <- readLines(file, encoding = 'UTF-8', warn = FALSE)
-  isUTF8 <- !any(is.na(iconv(x, 'UTF-8')))
-  if (isUTF8) return('UTF-8')
+  # if conversion is successful and there are no embedded nul's, use UTF-8
+  if (!any(is.na(iconv(x, 'UTF-8'))) &&
+        !any(readBin(file, 'raw', size) == as.raw(0))) return('UTF-8')
+
+  # check if there is a BOM character: this is also skipped on *nix, because R
+  # on *nix simply ignores this meaningless character if present, but it hurts
+  # on Windows
+  if (identical(charToRaw(readChar(file, 3L, TRUE)), charToRaw('\UFEFF'))) {
+    warning('You should not include the Byte Order Mark (BOM) in ', file, '. ',
+            'Please re-save it in UTF-8 without BOM. See ',
+            'http://shiny.rstudio.com/articles/unicode.html for more info.')
+    if (getRversion() < '3.0.0')
+      stop('R does not support UTF-8-BOM before 3.0.0. Please upgrade R.')
+    return('UTF-8-BOM')
+  }
 
   enc <- getOption('encoding')
-  msg <- c(sprintf('The source file "%s" is not encoded in UTF-8. ', file),
+  msg <- c(sprintf('The file "%s" is not encoded in UTF-8. ', file),
            'Please convert its encoding to UTF-8 ',
-           '(e.g. use the menu `File -> Save with Encoding` in RStudio).')
+           '(e.g. use the menu `File -> Save with Encoding` in RStudio). ',
+           'See http://shiny.rstudio.com/articles/unicode.html for more info.')
   if (enc == 'UTF-8') stop(msg)
   # if you publish the app to ShinyApps.io, you will be in trouble
   warning(c(msg, ' Falling back to the encoding "', enc, '".'))
@@ -942,7 +965,13 @@ checkEncoding <- function(file) {
 # try to read a file using UTF-8 (fall back to getOption('encoding') in case of
 # failure, which defaults to native.enc, i.e. native encoding)
 readUTF8 <- function(file) {
-  x <- readLines(file, encoding = checkEncoding(file), warn = FALSE)
+  enc <- checkEncoding(file)
+  # readLines() does not support UTF-8-BOM directly; has to go through file()
+  if (enc == 'UTF-8-BOM') {
+    file <- base::file(file, encoding = enc)
+    on.exit(close(file), add = TRUE)
+  }
+  x <- readLines(file, encoding = enc, warn = FALSE)
   enc2native(x)
 }
 

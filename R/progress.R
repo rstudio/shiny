@@ -74,6 +74,7 @@ Progress <- setRefClass(
     .id = 'character',
     .min = 'numeric',
     .max = 'numeric',
+    .value = 'ANY',
     .closed = 'logical'
   ),
   methods = list(
@@ -86,6 +87,7 @@ Progress <- setRefClass(
       .id <<- paste(as.character(as.raw(runif(8, min=0, max=255))), collapse='')
       .min <<- min
       .max <<- max
+      .value <<- NULL
 
       .session$sendProgress('open', list(id = .id))
     },
@@ -101,6 +103,8 @@ Progress <- setRefClass(
         value <- min(1, max(0, (value - .min) / (.max - .min)))
       }
 
+      .value <<- value
+
       data <- dropNulls(list(
         id = .id,
         message = message,
@@ -110,6 +114,9 @@ Progress <- setRefClass(
 
       .session$sendProgress('update', data)
     },
+    getMin = function() .min,
+    getMax = function() .max,
+    getValue = function() .value,
     close = function() {
       if (.closed) {
         warning("Attempting to close progress, but progress already closed.")
@@ -149,6 +156,8 @@ Progress <- setRefClass(
 #'   progress bar. Must be less tham \code{max}.
 #' @param max The value that represents the end of the progress bar.
 #'   Must be greater than \code{min}.
+#' @param value The starting value of the progress indicator. Defaults to
+#'   \code{min}
 #' @param env The environment in which \code{expr} should be evaluated.
 #' @param quoted Whether \code{expr} is a quoted expression (this is not
 #'   common).
@@ -184,6 +193,8 @@ Progress <- setRefClass(
 #' @rdname withProgress
 #' @export
 withProgress <- function(expr, min = 0, max = 1,
+                         value = min + (max - min) * 0.1,
+                         message = NULL, detail = NULL,
                          session = getDefaultReactiveDomain(),
                          env = parent.frame(), quoted = FALSE) {
   func <- exprToFunction(expr, env, quoted)
@@ -196,12 +207,14 @@ withProgress <- function(expr, min = 0, max = 1,
     p$close()
   })
 
+  p$set(message, detail, value)
+
   return(func())
 }
 
 #' @rdname withProgress
 #' @export
-setProgress <- function(message = NULL, detail = NULL, value = NULL,
+setProgress <- function(value = NULL, message = NULL, detail = NULL,
                         session = getDefaultReactiveDomain()) {
 
   # A hacky check to make sure the session object is indeed a session object.
@@ -213,5 +226,24 @@ setProgress <- function(message = NULL, detail = NULL, value = NULL,
   }
 
   session$progressStack$peek()$set(message, detail, value)
+  invisible()
+}
+
+#' @rdname incProgress
+#' @export
+incProgress <- function(amount = 0.1, message = NULL, detail = NULL,
+                        session = getDefaultReactiveDomain()) {
+
+  # A hacky check to make sure the session object is indeed a session object.
+  if (is.null(session$onFlush)) stop("'session' is not a session object.")
+
+  if (session$progressStack$size() == 0) {
+    warning('incProgress was called outside of withProgress; ignoring')
+    return()
+  }
+
+  p <- session$progressStack$peek()
+  value <- min(p$getValue() + amount, p$getMax())
+  p$set(message, detail, value)
   invisible()
 }

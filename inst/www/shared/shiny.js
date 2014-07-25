@@ -984,7 +984,7 @@
           $progress.find('.progress').hide();
         }
       }
-      $progress.show();
+      $progress.fadeIn();
     });
 
     // Close page-level progress bar

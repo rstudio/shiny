@@ -1,4 +1,4 @@
-shiny 0.10.0.9xxx
+shiny 0.10.1
 --------------------------------------------------------------------------------
 
 * Added Unicode support for Windows. Shiny apps running on Windows must use the

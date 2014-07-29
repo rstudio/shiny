@@ -649,7 +649,7 @@ dataTablesJSON <- function(data, req) {
     if (nrow(fdata) == 0) fdata <- list()
     # WAT: toJSON(list(x = matrix(1:2))) => {x: [ [1], [2] ]}, however,
     # toJSON(list(x = matrix(1))) => {x: [ 1 ]} (loss of dimension, #429)
-    if (all(dim(fdata) == 1)) fdata <- list(list(fdata[1, 1]))
+    if (length(fdata) && all(dim(fdata) == 1)) fdata <- list(list(fdata[1, 1]))
 
     res <- toJSON(list(
       sEcho = as.integer(sEcho),

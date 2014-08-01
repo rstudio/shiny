@@ -490,8 +490,8 @@ parseQueryString <- function(str) {
   keys   <- gsub('+', ' ', keys,   fixed = TRUE)
   values <- gsub('+', ' ', values, fixed = TRUE)
 
-  keys   <- vapply(keys,   function(x) URLdecode(x), FUN.VALUE = character(1))
-  values <- vapply(values, function(x) URLdecode(x), FUN.VALUE = character(1))
+  keys   <- vapply(keys,   URLdecode, character(1), USE.NAMES = FALSE)
+  values <- vapply(values, URLdecode, character(1), USE.NAMES = FALSE)
 
   setNames(as.list(values), keys)
 }

@@ -445,6 +445,12 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #' Returns a named character vector of key-value pairs.
 #'
 #' @param str The query string. It can have a leading \code{"?"} or not.
+#' @param nested Whether to parse the query string of as a nested list when it
+#'   contains pairs of square brackets \code{[]}. For example, the query
+#'   \samp{a[i1][j1]=x&b[i1][j1]=y&b[i2][j1]=z} will be parsed as \code{list(a =
+#'   list(i1 = list(j1 = 'x')), b = list(i1 = list(j1 = 'y'), i2 = list(j1 =
+#'   'z')))} when \code{nested = TRUE}, and \code{list(`a[i1][j1]` = 'x',
+#'   `b[i1][j1]` = 'y', `b[i2][j1]` = 'z')} when \code{nested = FALSE}.
 #' @export
 #' @examples
 #' parseQueryString("?foo=1&bar=b%20a%20r")
@@ -470,7 +476,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #' })
 #' }
 #'
-parseQueryString <- function(str) {
+parseQueryString <- function(str, nested = FALSE) {
   if (is.null(str) || nchar(str) == 0)
     return(list())
 
@@ -493,7 +499,30 @@ parseQueryString <- function(str) {
   keys   <- vapply(keys,   URLdecode, character(1), USE.NAMES = FALSE)
   values <- vapply(values, URLdecode, character(1), USE.NAMES = FALSE)
 
-  setNames(as.list(values), keys)
+  res <- setNames(as.list(values), keys)
+  if (!nested) return(res)
+
+  # turn square brackets from a[1][2][3] to a[[1]][[2]][3]
+  sqbToIndices <- function(x) {
+    x <- gsub('\\[', '[["', x)
+    x <- gsub('\\]', '"]]', x)
+    # the last pair of square backets are not [[]] but []
+    x <- gsub('(.*)\\[', '\\1', x)
+    x <- gsub('(.*)\\]', '\\1', x)
+    x
+  }
+
+  # Make a nested list from a query of the form ?a[1][1]=x11&a[1][2]=x12&...
+  for (i in grep('\\[.+\\]', keys)) {
+    # extract the real key 'a' from 'a[1][1]...'
+    k <- sub('^([^\\[]+).*$', '\\1', keys[i])
+    if (length(res[[k]]) == 0L) res[[k]] <- list()  # add res[['a']]
+    eval(parse(text = paste(
+      'res$', sqbToIndices(keys[i]), ' <- list(', deparse(values[i]), ')'
+    )), envir = environment())
+    res[[keys[i]]] <- NULL    # remove res[['a[1][1]']]
+  }
+  res
 }
 
 # decide what to do in case of errors; it is customizable using the shiny.error

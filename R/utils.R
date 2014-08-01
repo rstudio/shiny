@@ -502,27 +502,23 @@ parseQueryString <- function(str, nested = FALSE) {
   res <- setNames(as.list(values), keys)
   if (!nested) return(res)
 
-  # turn square brackets from a[1][2][3] to a[[1]][[2]][3]
-  sqbToIndices <- function(x) {
-    x <- gsub('\\[', '[["', x)
-    x <- gsub('\\]', '"]]', x)
-    # the last pair of square backets are not [[]] but []
-    x <- gsub('(.*)\\[', '\\1', x)
-    x <- gsub('(.*)\\]', '\\1', x)
-    x
-  }
-
   # Make a nested list from a query of the form ?a[1][1]=x11&a[1][2]=x12&...
   for (i in grep('\\[.+\\]', keys)) {
-    # extract the real key 'a' from 'a[1][1]...'
-    k <- sub('^([^\\[]+).*$', '\\1', keys[i])
-    if (length(res[[k]]) == 0L) res[[k]] <- list()  # add res[['a']]
-    eval(parse(text = paste(
-      'res$', sqbToIndices(keys[i]), ' <- list(', deparse(values[i]), ')'
-    )), envir = environment())
+    k <- strsplit(keys[i], '[][]')[[1L]]  # split by [ or ]
+    res <- assignNestedList(res, k[k != ''], values[i])
     res[[keys[i]]] <- NULL    # remove res[['a[1][1]']]
   }
   res
+}
+
+# Assign value to the bottom element of the list x using recursive indices idx
+assignNestedList <- function(x = list(), idx, value) {
+  for (i in seq_along(idx)) {
+    sub <- idx[seq_len(i)]
+    if (is.null(x[[sub]])) x[[sub]] <- list()
+  }
+  x[[idx]] <- value
+  x
 }
 
 # decide what to do in case of errors; it is customizable using the shiny.error

@@ -924,77 +924,65 @@
 
     // Progress reporting ====================================================
 
-    var progressHandlers = {};
-
-    function setProgressHandler(type, handler) {
-      if (typeof(handler) !== 'function') {
-        throw('handler must be a function.');
-      }
-      if (handler.length !== 1) {
-        throw('handler must be a function that takes one argument.');
-      }
-
-      progressHandlers[type] = handler;
-    }
-    exports.setProgressHandler = setProgressHandler;
-
-    // Progress for a particular object
-    setProgressHandler('binding', function(message) {
-      $(document.documentElement).addClass('shiny-busy');
-      var key = message.id;
-      var binding = this.$bindings[key];
-      if (binding && binding.showProgress) {
-        binding.showProgress(true);
-      }
-    });
-
-    // Open a page-level progress bar
-    setProgressHandler('open', function(message) {
-      var depth = $('.shiny-progress.open').length;
-
-      var $progress = $(
-        '<div class="shiny-progress open">\
-          <div class="progress progress-striped active"><div class="bar"></div></div>\
-          <div class="progress-text">\
-            <span class="progress-message"></span>\
-            <span class="progress-detail"></span>\
-          </div>\
-        </div>');
-      $progress.attr('id', message.id);
-      $progress.css('top', depth*3 + 'px');
-      $progress.hide();
-      $('body').append($progress);
-    });
-
-    // Update page-level progress bar
-    setProgressHandler('update', function(message) {
-      var $progress = $('#' + message.id + '.shiny-progress');
-      if (typeof(message.message) !== 'undefined') {
-        $progress.find('.progress-message').text(message.message);
-      }
-      if (typeof(message.detail) !== 'undefined') {
-        $progress.find('.progress-detail').text(message.detail);
-      }
-      if (typeof(message.value) !== 'undefined') {
-        if (message.value !== null) {
-          $progress.find('.progress').show();
-          $progress.find('.bar').width((message.value*100) + '%');
+    var progressHandlers = {
+      // Progress for a particular object
+      binding: function(message) {
+        $(document.documentElement).addClass('shiny-busy');
+        var key = message.id;
+        var binding = this.$bindings[key];
+        if (binding && binding.showProgress) {
+          binding.showProgress(true);
         }
-        else {
-          $progress.find('.progress').hide();
+      },
+      // Open a page-level progress bar
+      open: function(message) {
+        var depth = $('.shiny-progress.open').length;
+        var $progress = $(progressHandlers.progressHTML);
+        $progress.attr('id', message.id);
+        $progress.css('top', depth * 3 + 'px');
+        var $progressText = $progress.find('.progress-text');
+        $progress.hide();
+        $('body').append($progress);
+      },
+      // Update page-level progress bar
+      update: function(message) {
+        var $progress = $('#' + message.id + '.shiny-progress');
+        if (typeof(message.message) !== 'undefined') {
+          $progress.find('.progress-message').text(message.message);
         }
-      }
-      $progress.fadeIn();
-    });
+        if (typeof(message.detail) !== 'undefined') {
+          $progress.find('.progress-detail').text(message.detail);
+        }
+        if (typeof(message.value) !== 'undefined') {
+          if (message.value !== null) {
+            $progress.find('.progress').show();
+            $progress.find('.bar').width((message.value*100) + '%');
+          }
+          else {
+            $progress.find('.progress').hide();
+          }
+        }
+        $progress.fadeIn();
+      },
+      // Close page-level progress bar
+      close: function(message) {
+        var $progress = $('#' + message.id + '.shiny-progress');
+        $progress.removeClass('open');
+        $progress.fadeOut({
+          complete: function() {$progress.remove();}
+        });
+      },
+      progressHTML: '<div class="shiny-progress open">\
+        <div class="progress progress-striped active"><div class="bar"></div></div>\
+        <div class="progress-text">\
+          <span class="progress-message">foo</span>\
+          <span class="progress-detail"></span>\
+        </div>\
+      </div>'
+    };
 
-    // Close page-level progress bar
-    setProgressHandler('close', function(message) {
-      var $progress = $('#' + message.id + '.shiny-progress');
-      $progress.removeClass('open');
-      $progress.fadeOut({
-        complete: function() {$progress.remove();}
-      });
-    });
+    exports.progressHandlers = progressHandlers;
+
 
   }).call(ShinyApp.prototype);
 

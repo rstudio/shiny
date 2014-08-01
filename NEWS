@@ -1,3 +1,9 @@
+shiny 0.10.1.9xxx
+--------------------------------------------------------------------------------
+
+* Fixed #557: updateSelectizeInput(choices, server = TRUE) did not work when
+  `chocies` is a character vector.
+
 shiny 0.10.1
 --------------------------------------------------------------------------------
 

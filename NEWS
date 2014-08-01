@@ -21,7 +21,7 @@ shiny 0.10.1
 * Added an `inline` argument to `textOutput()`, `imageOutput()`, `plotOutput()`,
   and `htmlOutput()`. When `inline = TRUE`, these outputs will be put in
   `span()` instead of the default `div()`. This occurs automatically when these
-  outputs are created via the inline expressions (e.g. `r textOutput(expr)`) in
+  outputs are created via the inline expressions (e.g. `r renderText(expr)`) in
   R Markdown documents. See an R Markdown example at
   http://shiny.rstudio.com/gallery/inline-output.html (#512)
 

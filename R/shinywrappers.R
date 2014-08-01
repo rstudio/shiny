@@ -549,8 +549,8 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' @examples  # pass a callback function to DataTables using I()
 #' renderDataTable(iris,
 #'   options = list(
-#'     iDisplayLength = 5,
-#'     fnInitComplete = I("function(oSettings, json) {alert('Done.');}")
+#'     pageLength = 5,
+#'     initComplete = I("function(settings, json) {alert('Done.');}")
 #'   )
 #' )
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,

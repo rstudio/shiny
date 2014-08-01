@@ -614,80 +614,74 @@ Callbacks <- setRefClass(
 
 # convert a data frame to JSON as required by DataTables request
 dataTablesJSON <- function(data, req) {
-  query <- req$QUERY_STRING
   n <- nrow(data)
-  with(parseQueryString(query), {
-    useRegex <- function(j, envir = parent.frame()) {
-      # FIXME: bRegex is not part of the query string yet (DataTables 1.9.4)
-      return(TRUE)
-      ex <- getExists(
-        if (missing(j)) 'bRegex' else sprintf('bRegex_%s', j), 'character', envir
-      )
-      is.null(ex) || ex == 'true'
-    }
-    # global searching
-    i <- seq_len(n)
-    sSearch <- getExists('sSearch', 'character')
-    if (length(sSearch) && nzchar(sSearch)) {
-      bRegex <- useRegex()
-      i0 <- apply(data, 2, function(x) grep(sSearch, as.character(x), fixed = !bRegex))
-      i <- intersect(i, unique(unlist(i0)))
-    }
-    # search by columns
-    if (length(i)) for (j in seq_len(as.integer(iColumns)) - 1) {
-      if (is.null(s <- getExists(sprintf('bSearchable_%d', j), 'character')) ||
-            s == "0" || s == "false") next  # the j-th column is not searchable
-      if (is.null(k <- getExists(sprintf('sSearch_%d', j), 'character'))) next
-      if (nzchar(k)) {
-        dj <- data[, j + 1]
-        r  <- commaToRange(k)
-        ij <- if (length(r) == 2 && is.numeric(dj)) {
-          which(dj >= r[1] & dj <= r[2])
-        } else {
-          grep(k, as.character(dj), fixed = !useRegex(j))
-        }
-        i <- intersect(ij, i)
-      }
-      if (length(i) == 0) break
-    }
-    if (length(i) != n) data <- data[i, , drop = FALSE]
-    # sorting
-    oList <- list()
-    for (j in seq_len(as.integer(iSortingCols)) - 1) {
-      if (is.null(k <- getExists(sprintf('iSortCol_%d', j), 'character'))) break
-      desc <- getExists(sprintf('sSortDir_%d', j), 'character')
-      if (is.character(desc)) {
-        col <- data[, as.integer(k) + 1]
-        oList[[length(oList) + 1]] <- (if (desc == 'asc') identity else `-`)(
-          if (is.numeric(col)) col else xtfrm(col)
-        )
-      }
-    }
-    if (length(oList)) {
-      i <- do.call(order, oList)
-      data <- data[i, , drop = FALSE]
-    }
-    # paging
-    if (iDisplayLength != '-1') {
-      i <- seq(as.integer(iDisplayStart) + 1L, length.out = as.integer(iDisplayLength))
-      i <- i[i <= nrow(data)]
-      fdata <- data[i, , drop = FALSE]  # filtered data
-    } else fdata <- data
-    fdata <- unname(as.matrix(fdata))
-    # WAT: toJSON(list(x = matrix(nrow = 0, ncol = 1))) => {"x": } (#299)
-    if (nrow(fdata) == 0) fdata <- list()
-    # WAT: toJSON(list(x = matrix(1:2))) => {x: [ [1], [2] ]}, however,
-    # toJSON(list(x = matrix(1))) => {x: [ 1 ]} (loss of dimension, #429)
-    if (length(fdata) && all(dim(fdata) == 1)) fdata <- list(list(fdata[1, 1]))
+  q <- parseQueryString(req$QUERY_STRING, nested = TRUE)
 
-    res <- toJSON(list(
-      sEcho = as.integer(sEcho),
-      iTotalRecords = n,
-      iTotalDisplayRecords = nrow(data),
-      aaData = fdata
-    ))
-    httpResponse(200, 'application/json', res)
-  })
+  # global searching
+  i <- seq_len(n)
+  if (q$search[['value']] != '') {
+    i0 <- apply(data, 2, function(x) {
+      grep(q$search[['value']], as.character(x),
+           fixed = q$search[['regex']] == 'false')
+    })
+    i <- intersect(i, unique(unlist(i0)))
+  }
+
+  # search by columns
+  if (length(i)) for (j in names(q$columns)) {
+    col <- q$columns[[j]]
+    # if the j-th column is not searchable or the search string is "", skip it
+    if (col[['searchable']] != 'true') next
+    if ((k <- col[['search']][['value']]) == '') next
+    j <- as.integer(j)
+    dj <- data[, j + 1]
+    r  <- commaToRange(k)
+    ij <- if (length(r) == 2 && is.numeric(dj)) {
+      which(dj >= r[1] & dj <= r[2])
+    } else {
+      grep(k, as.character(dj), fixed = col[['search']][['regex']] == 'false')
+    }
+    i <- intersect(ij, i)
+    if (length(i) == 0) break
+  }
+  if (length(i) != n) data <- data[i, , drop = FALSE]
+
+  # sorting
+  oList <- list()
+  for (ord in q$order) {
+    k <- ord[['column']]  # which column to sort
+    d <- ord[['dir']]     # direction asc/desc
+    if (q$columns[[k]][['orderable']] != 'true') next
+    col <- data[, as.integer(k) + 1]
+    oList[[length(oList) + 1]] <- (if (d == 'asc') identity else `-`)(
+      if (is.numeric(col)) col else xtfrm(col)
+    )
+  }
+  if (length(oList)) {
+    i <- do.call(order, oList)
+    data <- data[i, , drop = FALSE]
+  }
+  # paging
+  if (q$length != '-1') {
+    i <- seq(as.integer(q$start) + 1L, length.out = as.integer(q$length))
+    i <- i[i <= nrow(data)]
+    fdata <- data[i, , drop = FALSE]  # filtered data
+  } else fdata <- data
+
+  fdata <- unname(as.matrix(fdata))
+  # WAT: toJSON(list(x = matrix(nrow = 0, ncol = 1))) => {"x": } (#299)
+  if (nrow(fdata) == 0) fdata <- list()
+  # WAT: toJSON(list(x = matrix(1:2))) => {x: [ [1], [2] ]}, however,
+  # toJSON(list(x = matrix(1))) => {x: [ 1 ]} (loss of dimension, #429)
+  if (length(fdata) && all(dim(fdata) == 1)) fdata <- list(list(fdata[1, 1]))
+
+  res <- toJSON(list(
+    draw = q$draw,
+    recordsTotal = n,
+    recordsFiltered = nrow(data),
+    data = fdata
+  ))
+  httpResponse(200, 'application/json', res)
 }
 
 getExists <- function(x, mode, envir = parent.frame()) {

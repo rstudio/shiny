@@ -1556,7 +1556,7 @@
       }).join('');
       header = '<thead><tr>' + header + '</tr></thead>';
       var footer = '';
-      if (data.options === null || data.options.bFilter !== false) {
+      if (data.options === null || data.options.searching !== false) {
         footer = $.map(colnames, function(x) {
           return '<th><input type="text" placeholder="' + x + '" /></th>';
         }).join('');
@@ -1573,13 +1573,13 @@
           data.options[x] = eval('(' + data.options[x] + ')');
         });
 
-      var oTable = $(el).children("table").dataTable($.extend({
-        "bProcessing": true,
-        "bServerSide": true,
-        "aaSorting": [],
-        "bSortClasses": false,
-        "iDisplayLength": 25,
-        "sAjaxSource": data.action
+      var oTable = $(el).children("table").DataTable($.extend({
+        "processing": true,
+        "serverSide": true,
+        "order": [],
+        "orderClasses": false,
+        "pageLength": 25,
+        "ajax": data.action
       }, data.options));
       // the table object may need post-processing
       if (typeof data.callback === 'string') {
@@ -1591,16 +1591,18 @@
       // use debouncing for searching boxes
       $el.find('label input').first().unbind('keyup')
            .keyup(debounce(data.searchDelay, function() {
-              oTable.fnFilter(this.value);
+              oTable.search(this.value).draw();
             }));
       var searchInputs = $el.find("tfoot input");
       if (searchInputs.length > 0) {
-        $.each(oTable.fnSettings().aoColumns, function(i, x) {
+        // this is a little weird: aoColumns/bSearchable are still in DT 1.10
+        // https://github.com/DataTables/DataTables/issues/388
+        $.each(oTable.settings()[0].aoColumns, function(i, x) {
           // hide the text box if not searchable
           if (!x.bSearchable) searchInputs.eq(i).hide();
         });
         searchInputs.keyup(debounce(data.searchDelay, function() {
-          oTable.fnFilter(this.value, searchInputs.index(this));
+          oTable.column(searchInputs.index(this)).search(this.value).draw();
         }));
       }
       // FIXME: ugly scrollbars in tab panels b/c Bootstrap uses 'visible: auto'

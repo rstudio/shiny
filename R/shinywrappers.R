@@ -542,7 +542,7 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #'   frequent search requests).
 #' @param callback A JavaScript function to be applied to the DataTable object.
 #'   This is useful for DataTables plug-ins, which often require the DataTable
-#'   instance to be available (\url{http://datatables.net/extras/}).
+#'   instance to be available (\url{http://datatables.net/extensions/}).
 #' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot

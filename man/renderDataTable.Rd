@@ -17,7 +17,7 @@ frequent search requests).}
 
 \item{callback}{A JavaScript function to be applied to the DataTable object.
 This is useful for DataTables plug-ins, which often require the DataTable
-instance to be available (\url{http://datatables.net/extras/}).}
+instance to be available (\url{http://datatables.net/extensions/}).}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 
@@ -41,8 +41,8 @@ character string.
 # pass a callback function to DataTables using I()
 renderDataTable(iris,
   options = list(
-    iDisplayLength = 5,
-    fnInitComplete = I("function(oSettings, json) {alert('Done.');}")
+    pageLength = 5,
+    initComplete = I("function(settings, json) {alert('Done.');}")
   )
 )
 }

@@ -681,7 +681,7 @@ choicesWithNames <- function(choices) {
     res <- lapply(obj, function(val) {
       if (is.list(val))
         listify(val)
-      else if (length(val) == 1)
+      else if (length(val) == 1 && is.null(names(val)))
         val
       else
         makeNamed(as.list(val))

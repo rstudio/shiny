@@ -76,6 +76,11 @@ test_that("Choices are correctly assigned names", {
     choicesWithNames(list(A="a", B="b", C=list("d", "e"))),
     list(A="a", B="b", C=list(d="d", e="e"))
   )
+  # List, named, with a named sub-vector of length 1
+  expect_identical(
+    choicesWithNames(list(A="a", B="b", C=c(D="d"))),
+    list(A="a", B="b", C=list(D="d"))
+  )
   # List, some named, with sublist
   expect_identical(
     choicesWithNames(list(A="a", "b", C=list("d", E="e"))),

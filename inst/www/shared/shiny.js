@@ -980,13 +980,13 @@
           complete: function() {$progress.remove();}
         });
       },
-      progressHTML: '<div class="shiny-progress open">\
-        <div class="progress progress-striped active"><div class="bar"></div></div>\
-        <div class="progress-text">\
-          <span class="progress-message">foo</span>\
-          <span class="progress-detail"></span>\
-        </div>\
-      </div>',
+      progressHTML: '<div class="shiny-progress open">' +
+        '<div class="progress progress-striped active"><div class="bar"></div></div>' +
+        '<div class="progress-text">' +
+          '<span class="progress-message">foo</span>' +
+          '<span class="progress-detail"></span>' +
+        '</div>' +
+      '</div>',
       // Distance from top (in pixels) to start the text objects
       yOffsetText: 5
     };

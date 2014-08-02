@@ -98,10 +98,14 @@ span.jslider {
 
 .shiny-progress {
   position: fixed;
+  top: 0px;
   width: 100%;
 }
 
 .shiny-progress .progress {
+  position: absolute;
+  width: 100%;
+  top: 0px;
   height: 3px;
   margin: 0px;
 }
@@ -112,22 +116,24 @@ span.jslider {
 }
 
 .shiny-progress .progress-text {
-  background-color: #eef8ff;
-  margin: 6px 15px 0px 0px;
-  padding: 0px 3px;
-  border: 1px solid #aaa;
-  border-radius: 3px;
-  opacity: 0.85;
-  float: right;
+  position: absolute;
+  right: 10px;
+  height: 18px;
   width: 240px;
+  background-color: #eef8ff;
+  margin: 0px;
+  padding: 2px 3px;
+  opacity: 0.85;
 }
 
 .shiny-progress .progress-text .progress-message {
+  padding: 0px 3px;
   font-weight: bold;
   font-size: 90%;
 }
 
 .shiny-progress .progress-text .progress-detail {
+  padding: 0px 3px;
   font-size: 80%;
 }
 

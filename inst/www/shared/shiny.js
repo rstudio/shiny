@@ -939,10 +939,18 @@
         var depth = $('.shiny-progress.open').length;
         var $progress = $(progressHandlers.progressHTML);
         $progress.attr('id', message.id);
-        $progress.css('top', depth * 3 + 'px');
-        var $progressText = $progress.find('.progress-text');
-        $progress.hide();
+
         $('body').append($progress);
+
+        // Stack bars
+        var $progressBar = $progress.find('.progress');
+        $progressBar.css('top', depth * $progressBar.height() + 'px');
+
+        // Stack text objects
+        var $progressText = $progress.find('.progress-text');
+        $progressText.css('top', progressHandlers.yOffsetText +
+          depth * $progressText.outerHeight() + 'px');
+        $progress.hide();
       },
       // Update page-level progress bar
       update: function(message) {
@@ -978,7 +986,9 @@
           <span class="progress-message">foo</span>\
           <span class="progress-detail"></span>\
         </div>\
-      </div>'
+      </div>',
+      // Distance from top (in pixels) to start the text objects
+      yOffsetText: 5
     };
 
     exports.progressHandlers = progressHandlers;

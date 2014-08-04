@@ -96,7 +96,7 @@ span.jslider {
   transition: none;
 }
 
-.shiny-progress {
+.shiny-progress-container {
   position: fixed;
   top: 0px;
   width: 100%;

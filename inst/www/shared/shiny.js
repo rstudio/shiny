@@ -2250,7 +2250,8 @@
             url: data.url,
             data: {
               query: query,
-              field: JSON.stringify(selectize.settings.searchField),
+              field: JSON.stringify($.makeArray(
+                      selectize.settings.searchField)),
               conju: selectize.settings.searchConjunction,
               maxop: selectize.settings.maxOptions
             },

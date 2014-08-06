@@ -160,11 +160,13 @@ file.path.ci <- function(dir, name) {
   if (!file.exists(dir))
     return(default)
 
-  matches <- list.files(dir, name, ignore.case=TRUE, full.names=TRUE,
-    include.dirs=TRUE)
+  all_files <- list.files(dir, all.files=TRUE, full.names=TRUE,
+                          include.dirs=TRUE)
+  match_idx <- tolower(name) == tolower(basename(all_files))
+  matches <- all_files[match_idx]
   if (length(matches) == 0)
     return(default)
-  return(matches[[1]])
+  return(matches[1])
 }
 
 # Attempt to join a path and relative path, and turn the result into a

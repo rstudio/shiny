@@ -695,7 +695,6 @@ runApp <- function(appDir=getwd(),
   if (!is.null(appParts$onEnd))
     on.exit(appParts$onEnd(), add = TRUE)
 
-browser()
   server <- startApp(appParts, port, host, quiet)
 
   on.exit({

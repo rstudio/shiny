@@ -42,7 +42,12 @@
 #' }
 #'
 #' @export
-shinyApp <- function(ui, server, onStart=NULL, options=list(), uiPattern="/") {
+shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
+                     uiPattern="/") {
+  if (is.null(server)) {
+    stop("`server` missing from shinyApp")
+  }
+
   # Ensure that the entire path is a match
   uiPattern <- sprintf("^%s$", uiPattern)
 

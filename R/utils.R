@@ -153,19 +153,43 @@ dropNullsOrEmpty <- function(x) {
 
 # Combine dir and (file)name into a file path. If a file already exists with a
 # name differing only by case, then use it instead.
-file.path.ci <- function(dir, name) {
-  default <- file.path(dir, name)
+file.path.ci <- function(...) {
+  result <- find.file.ci(...)
+  if (!is.null(result))
+    return(result)
+
+  # If not found, return the file path that was given to us.
+  return(file.path(...))
+}
+
+# Does a particular file exist? Case-insensitive for filename, case-sensitive
+# for path (on platforms with case-sensitive file system).
+file.exists.ci <- function(...) {
+  !is.null(find.file.ci(...))
+}
+
+# Look for a file, case-insensitive for filename, case-sensitive for path (on
+# platforms with case-sensitive filesystem). If found, return the path to the
+# file, with the correct case. If not found, return NULL.
+find.file.ci <- function(...) {
+  default <- file.path(...)
+  if (length(default) > 1)
+    stop("find.file.ci can only check for one file at a time.")
   if (file.exists(default))
     return(default)
-  if (!file.exists(dir))
-    return(default)
 
+  dir <- dirname(default)
+  name <- basename(default)
+
+  # If we got here, then we'll check for a directory with the exact case, and a
+  # name with any case.
   all_files <- list.files(dir, all.files=TRUE, full.names=TRUE,
                           include.dirs=TRUE)
   match_idx <- tolower(name) == tolower(basename(all_files))
   matches <- all_files[match_idx]
   if (length(matches) == 0)
-    return(default)
+    return(NULL)
+
   return(matches[1])
 }
 

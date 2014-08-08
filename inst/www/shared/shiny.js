@@ -72,6 +72,28 @@
     throw "Blob doesn't support slice";
   }
 
+  // Given an element and a function(width, height), returns a function(). When
+  // the output function is called, it calls the input function with the offset
+  // width and height of the input element--but only if the size of the element
+  // is non-zero and the size is different than the last time the output
+  // function was called.
+  //
+  // Basically we are trying to filter out extraneous calls to func, so that
+  // when the window size changes or whatever, we don't run resize logic for
+  // elements that haven't actually changed size or aren't visible anyway.
+  function makeResizeFilter(el, func) {
+    var lastSize = {};
+    return function() {
+      var size = { w: el.offsetWidth, h: el.offsetHeight };
+      if (size.w === 0 && size.h === 0)
+        return;
+      if (size.w === lastSize.w && size.h === lastSize.h)
+        return;
+      lastSize = size;
+      func(size.w, size.h);
+    }
+  }
+
   var _BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder ||
       window.MozBlobBuilder || window.MSBlobBuilder;
 
@@ -2655,6 +2677,14 @@
   var OutputBindingAdapter = function(el, binding) {
     this.el = el;
     this.binding = binding;
+
+    // If the binding actually has a resize method, override the prototype of
+    // onResize with a version that does a makeResizeFilter on the element.
+    if (binding.resize) {
+      this.onResize = makeResizeFilter(el, function(width, height) {
+        binding.resize(el, width, height);
+      });
+    }
   };
   (function() {
     this.onValueChange = function(data) {
@@ -2665,6 +2695,9 @@
     };
     this.showProgress = function(show) {
       this.binding.showProgress(this.el, show);
+    };
+    this.onResize = function() {
+      // Intentionally left blank; see constructor
     };
   }).call(OutputBindingAdapter.prototype);
 
@@ -2995,6 +3028,9 @@
           inputs.setInput('.clientdata_output_' + this.id + '_width', this.offsetWidth);
           inputs.setInput('.clientdata_output_' + this.id + '_height', this.offsetHeight);
         }
+      });
+      $('.shiny-bound-output').each(function() {
+        $(this).data('shiny-output-binding').onResize();
       });
     }
 

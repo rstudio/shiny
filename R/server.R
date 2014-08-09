@@ -169,13 +169,6 @@ addResourcePath <- function(prefix, directoryPath) {
 
   existing <- .globals$resources[[prefix]]
 
-  if (!is.null(existing)) {
-    if (!identical(existing$directoryPath, directoryPath)) {
-      warning("Overriding existing prefix ", prefix, " => ",
-              existing$directoryPath)
-    }
-  }
-
   .globals$resources[[prefix]] <- list(directoryPath=directoryPath,
                                        func=staticHandler(directoryPath))
 }

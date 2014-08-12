@@ -99,7 +99,7 @@ shinyUI <- function(ui) {
   ui
 }
 
-uiHttpHandler <- function(ui, path = "/") {
+uiHttpHandler <- function(ui, uiPattern = "^/$") {
 
   force(ui)
 
@@ -107,7 +107,7 @@ uiHttpHandler <- function(ui, path = "/") {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
 
-    if (req$PATH_INFO != path)
+    if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
       return(NULL)
 
     textConn <- textConnection(NULL, "w")

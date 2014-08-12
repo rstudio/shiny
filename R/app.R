@@ -51,31 +51,7 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
   # Ensure that the entire path is a match
   uiPattern <- sprintf("^%s$", uiPattern)
 
-  httpHandler <- function(req) {
-    if (!identical(req$REQUEST_METHOD, 'GET'))
-      return(NULL)
-
-    if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
-      return(NULL)
-
-    textConn <- textConnection(NULL, "w")
-    on.exit(close(textConn))
-
-    uiValue <- if (is.function(ui)) {
-      if (length(formals(ui)) > 0)
-        ui(req)
-      else
-        ui()
-    } else {
-      ui
-    }
-    if (is.null(uiValue))
-      return(NULL)
-
-    renderPage(uiValue, textConn)
-    html <- paste(textConnectionValue(textConn), collapse='\n')
-    return(httpResponse(200, content=enc2utf8(html)))
-  }
+  httpHandler <- uiHttpHandler(ui, uiPattern)
 
   serverFuncSource <- function() {
     server

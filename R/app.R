@@ -80,10 +80,10 @@ shinyAppDir <- function(appDir, options=list()) {
   # affected by future changes to the path)
   appDir <- normalizePath(appDir, mustWork = TRUE)
 
-  if (file.exists.ci(appDir, "app.R")) {
-    shinyAppDir_appR(appDir, options = options)
-  } else if (file.exists.ci(appDir, "server.R")) {
+  if (file.exists.ci(appDir, "server.R")) {
     shinyAppDir_serverR(appDir, options = options)
+  } else if (file.exists.ci(appDir, "app.R")) {
+    shinyAppDir_appR(appDir, options = options)
   } else {
     stop("App dir must contain either app.R or server.R.")
   }

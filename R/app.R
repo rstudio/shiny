@@ -42,35 +42,16 @@
 #' }
 #'
 #' @export
-shinyApp <- function(ui, server, onStart=NULL, options=list(), uiPattern="/") {
+shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
+                     uiPattern="/") {
+  if (is.null(server)) {
+    stop("`server` missing from shinyApp")
+  }
+
   # Ensure that the entire path is a match
   uiPattern <- sprintf("^%s$", uiPattern)
 
-  httpHandler <- function(req) {
-    if (!identical(req$REQUEST_METHOD, 'GET'))
-      return(NULL)
-
-    if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
-      return(NULL)
-
-    textConn <- textConnection(NULL, "w")
-    on.exit(close(textConn))
-
-    uiValue <- if (is.function(ui)) {
-      if (length(formals(ui)) > 0)
-        ui(req)
-      else
-        ui()
-    } else {
-      ui
-    }
-    if (is.null(uiValue))
-      return(NULL)
-
-    renderPage(uiValue, textConn)
-    html <- paste(textConnectionValue(textConn), collapse='\n')
-    return(httpResponse(200, content=enc2utf8(html)))
-  }
+  httpHandler <- uiHttpHandler(ui, uiPattern)
 
   serverFuncSource <- function() {
     server
@@ -91,9 +72,6 @@ shinyApp <- function(ui, server, onStart=NULL, options=list(), uiPattern="/") {
 #'   file and either ui.R or www/index.html)
 #' @export
 shinyAppDir <- function(appDir, options=list()) {
-  # Most of the complexity here comes from needing to hot-reload if the .R files
-  # change on disk, or are created, or are removed.
-
   if (!file.exists(appDir)) {
     stop("No Shiny application exists at the path \"", appDir, "\"")
   }
@@ -101,6 +79,21 @@ shinyAppDir <- function(appDir, options=list()) {
   # In case it's a relative path, convert to absolute (so we're not adversely
   # affected by future changes to the path)
   appDir <- normalizePath(appDir, mustWork = TRUE)
+
+  if (file.exists.ci(appDir, "app.R")) {
+    shinyAppDir_appR(appDir, options = options)
+  } else if (file.exists.ci(appDir, "server.R")) {
+    shinyAppDir_serverR(appDir, options = options)
+  } else {
+    stop("App dir must contain either app.R or server.R.")
+  }
+}
+
+# This reads in an app dir in the case that there's a server.R (and ui.R/www)
+# present, and returns a shiny.appobj.
+shinyAppDir_serverR <- function(appDir, options=list()) {
+  # Most of the complexity here comes from needing to hot-reload if the .R files
+  # change on disk, or are created, or are removed.
 
   # uiHandlerSource is a function that returns an HTTP handler for serving up
   # ui.R as a webpage. The "cachedFuncWithFile" call makes sure that the closure
@@ -180,6 +173,60 @@ shinyAppDir <- function(appDir, options=list()) {
   )
 }
 
+# This reads in an app dir in the case that there's a app.R present, and returns
+# a shiny.appobj.
+shinyAppDir_appR <- function(appDir, options=list()) {
+  fullpath <- file.path.ci(appDir, "app.R")
+
+  # This sources app.R and caches the content. When appObj() is called but
+  # app.R hasn't changed, it won't re-source the file. But if called and
+  # app.R has changed, it'll re-source the file and return the result.
+  appObj <- cachedFuncWithFile(appDir, "app.R", case.sensitive = FALSE,
+    function(appR) {
+      result <- sourceUTF8(fullpath, local = new.env(parent = globalenv()))$value
+
+      if (!is.shiny.appobj(result))
+        stop("app.R did not return a shiny.appobj object.")
+
+      return(result)
+    }
+  )
+
+  # A function that invokes the http handler from the appObj in app.R, but
+  # since this uses appObj(), it only re-sources the file when it changes.
+  dynHttpHandler <- function(...) {
+    appObj()$httpHandler(...)
+  }
+
+  dynServerFuncSource <- function(...) {
+    appObj()$serverFuncSource(...)
+  }
+
+  wwwDir <- file.path.ci(appDir, "www")
+  fallbackWWWDir <- system.file("www-dir", package = "shiny")
+
+  oldwd <- NULL
+  onStart <- function() {
+    oldwd <<- getwd()
+    setwd(appDir)
+  }
+  onEnd <- function() {
+    setwd(oldwd)
+  }
+
+  structure(
+    list(
+      httpHandler = joinHandlers(c(dynHttpHandler, wwwDir, fallbackWWWDir)),
+      serverFuncSource = dynServerFuncSource,
+      onStart = onStart,
+      onEnd = onEnd,
+      options = options
+    ),
+    class = "shiny.appobj"
+  )
+}
+
+
 #' @rdname shinyApp
 #' @param x Object to convert to a Shiny app.
 #' @export
@@ -203,6 +250,12 @@ as.shiny.appobj.list <- function(x) {
 #' @export
 as.shiny.appobj.character <- function(x) {
   shinyAppDir(x)
+}
+
+#' @rdname shinyApp
+#' @export
+is.shiny.appobj <- function(x) {
+  inherits(x, "shiny.appobj")
 }
 
 #' @rdname shinyApp

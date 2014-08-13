@@ -90,7 +90,7 @@ showcaseCodeTabs <- function(codeLicense) {
       i(class="fa fa-level-up", "show with app")),
     ul(class="nav nav-tabs",
        lapply(rFiles, function(rFile) {
-         li(class=if (tolower(rFile) == "server.r") "active" else "",
+         li(class=if (tolower(rFile) %in% c("app.r", "server.r")) "active" else "",
             a(href=paste("#", gsub(".", "_", rFile, fixed=TRUE),
                          "_code", sep=""),
               "data-toggle"="tab", rFile))
@@ -98,7 +98,8 @@ showcaseCodeTabs <- function(codeLicense) {
     div(class="tab-content", id="showcase-code-content",
         lapply(rFiles, function(rFile) {
           div(class=paste("tab-pane",
-                          if (tolower(rFile) == "server.r") " active" else "",
+                          if (tolower(rFile) %in% c("app.r", "server.r")) " active"
+                          else "",
                           sep=""),
               id=paste(gsub(".", "_", rFile, fixed=TRUE),
                        "_code", sep=""),

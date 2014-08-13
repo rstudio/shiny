@@ -124,9 +124,12 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
         ui(req)
       else
         ui()
-    }
-    else
+    } else {
       ui
+    }
+    if (is.null(uiValue))
+      return(NULL)
+
     renderPage(uiValue, textConn, showcaseMode)
     html <- paste(textConnectionValue(textConn), collapse='\n')
     return(httpResponse(200, content=enc2utf8(html)))

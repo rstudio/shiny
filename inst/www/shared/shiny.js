@@ -91,7 +91,7 @@
         return;
       lastSize = size;
       func(size.w, size.h);
-    }
+    };
   }
 
   var _BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder ||

@@ -5,12 +5,14 @@
 \alias{as.shiny.appobj.list}
 \alias{as.shiny.appobj.shiny.appobj}
 \alias{as.tags.shiny.appobj}
+\alias{is.shiny.appobj}
 \alias{print.shiny.appobj}
 \alias{shinyApp}
 \alias{shinyAppDir}
 \title{Create a Shiny app object}
 \usage{
-shinyApp(ui, server, onStart = NULL, options = list(), uiPattern = "/")
+shinyApp(ui = NULL, server = NULL, onStart = NULL, options = list(),
+  uiPattern = "/")
 
 shinyAppDir(appDir, options = list())
 
@@ -21,6 +23,8 @@ as.shiny.appobj(x)
 \method{as.shiny.appobj}{list}(x)
 
 \method{as.shiny.appobj}{character}(x)
+
+is.shiny.appobj(x)
 
 \method{print}{shiny.appobj}(x, ...)
 

@@ -37,7 +37,7 @@
     else if (window.getComputedStyle) {
       // getComputedStyle can return null when we're inside a hidden iframe on
       // Firefox; don't attempt to retrieve style props in this case.
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=548397 
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=548397
       var style = document.defaultView.getComputedStyle(el, null);
       if (style)
         x = style.getPropertyValue(styleProp);
@@ -1282,13 +1282,17 @@
   });
   outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');
 
-  // Render HTML in a DOM element, inserting singletons into head as needed
-  exports.renderHtml = function(html, el, dependencies) {
+  var renderDependencies = exports.renderDependencies = function(dependencies) {
     if (dependencies) {
       $.each(dependencies, function(i, dep) {
         renderDependency(dep);
       });
     }
+  };
+
+  // Render HTML in a DOM element, inserting singletons into head as needed
+  exports.renderHtml = function(html, el, dependencies) {
+    renderDependencies(dependencies)
     return singletons.renderHtml(html, el);
   };
 
@@ -1326,16 +1330,30 @@
     if (dep.stylesheet) {
       var stylesheets = $.map(asArray(dep.stylesheet), function(stylesheet) {
         return $("<link rel='stylesheet' type='text/css'>")
-          .attr("href", href + "/" + stylesheet);
+          .attr("href", href + "/" + escape(stylesheet));
       });
       $head.append(stylesheets);
     }
 
     if (dep.script) {
       var scripts = $.map(asArray(dep.script), function(scriptName) {
-        return $("<script>").attr("src", href + "/" + scriptName);
+        return $("<script>").attr("src", href + "/" + escape(scriptName));
       });
       $head.append(scripts);
+    }
+
+    if (dep.attachment) {
+      // dep.attachment might be a single string, an array, or an object.
+      var attachments = dep.attachment;
+      if (typeof(attachments) === "string")
+        attachments = [attachments];
+
+      var attach = $.map(attachments, function(attachment, key) {
+        return $("<link rel='attachment'>")
+          .attr("id", dep.name + "-" + key + "-attachment")
+          .attr("href", href + "/" + escape(attachment));
+      });
+      $head.append(attach);
     }
 
     if (dep.head) {

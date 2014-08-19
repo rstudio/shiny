@@ -7,6 +7,15 @@ shiny 0.10.1.9xxx
 * Fixed #557: updateSelectizeInput(choices, server = TRUE) did not work when
   `chocies` is a character vector.
 
+* Added support for `htmltools::htmlDependency`'s new `attachment` parameter to
+  `renderUI`/`uiOutput`.
+
+* Exported `createWebDependency`. It takes an `htmltools::htmlDependency` object
+  and makes it available over Shiny's built-in web server.
+
+* Custom output bindings can now render `htmltools::htmlDependency` objects at
+  runtime using `Shiny.renderDependencies()`.
+
 shiny 0.10.1
 --------------------------------------------------------------------------------
 

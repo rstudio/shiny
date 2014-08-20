@@ -49,7 +49,7 @@
 #' # server.R
 #' shinyServer(function(input, output, session) {
 #'   output$plot <- renderPlot({
-#'     progress <- Progress$new(session, min=1, max=15)
+#'     progress <- shiny::Progress$new(session, min=1, max=15)
 #'     on.exit(progress$close())
 #'
 #'     progress$set(message = 'Calculation in progress',
@@ -63,7 +63,7 @@
 #'   })
 #' })
 #' }
-#' @seealso \code{\link{progressInit}}, \code{\link{withProgress}}
+#' @seealso \code{\link{withProgress}}
 #' @rdname Progress
 #' @export
 #' @export Progress
@@ -133,63 +133,66 @@ Progress <- setRefClass(
 #'
 #' Reports progress to the user during long-running operations.
 #'
-#' This package exposes two distinct programming APIs for working with
-#' progress. \code{withProgress} and \code{setProgress} together provide
-#' a simple function-based interface, while the \code{\link{Progress}}
+#' This package exposes two distinct programming APIs for working with progress.
+#' Using \code{withProgress} with \code{incProgress} or \code{setProgress}
+#' provide a simple function-based interface, while the \code{\link{Progress}}
 #' reference class provides an object-oriented API.
 #'
-#' Use \code{withProgress} to wrap the scope of your work; doing so will
-#' cause a new progress panel to be created, and it will be displayed the
-#' first time \code{setProgress} is called. When \code{withProgress} exits,
-#' the corresponding progress panel will be removed.
+#' Use \code{withProgress} to wrap the scope of your work; doing so will cause a
+#' new progress panel to be created, and it will be displayed the first time
+#' \code{incProgress} or \code{setProgress} are called. When \code{withProgress}
+#' exits, the corresponding progress panel will be removed.
 #'
-#' Generally, \code{withProgress}/\code{setProgress} should be
-#' sufficient; the exception is if the work to be done is asynchronous
-#' (this is not common) or otherwise cannot be encapsulated by a single
-#' scope. In that case, you can use the \code{Progress} reference class.
+#' The \code{incProgress} function increments the status bar by a specified
+#' amount, whereas the \code{setProgress} function sets it to a specific value,
+#' and can also set the text displayed.
 #'
-#' @param session The Shiny session object, as provided by
-#'   \code{shinyServer} to the server function.
-#' @param expr The work to be done. This expression should contain calls
-#'   to \code{setProgress}.
-#' @param min The value that represents the starting point of the
-#'   progress bar. Must be less tham \code{max}.
-#' @param max The value that represents the end of the progress bar.
-#'   Must be greater than \code{min}.
-#' @param value The starting value of the progress indicator. Defaults to
-#'   \code{min}
+#' Generally, \code{withProgress}/\code{incProgress}/\code{setProgress} should
+#' be sufficient; the exception is if the work to be done is asynchronous (this
+#' is not common) or otherwise cannot be encapsulated by a single scope. In that
+#' case, you can use the \code{Progress} reference class.
+#'
+#' @param session The Shiny session object, as provided by \code{shinyServer} to
+#'   the server function. The default is to automatically find the session by
+#'   using the current reactive domain.
+#' @param expr The work to be done. This expression should contain calls to
+#'   \code{setProgress}.
+#' @param min The value that represents the starting point of the progress bar.
+#'   Must be less tham \code{max}. Default is 0.
+#' @param max The value that represents the end of the progress bar. Must be
+#'   greater than \code{min}. Default is 1.
+#' @param amount For \code{incProgress}, the amount to increment the status bar.
+#'   Default is 0.1.
 #' @param env The environment in which \code{expr} should be evaluated.
 #' @param quoted Whether \code{expr} is a quoted expression (this is not
 #'   common).
-#' @param message A single-element character vector; the message to be
-#'   displayed to the user, or \code{NULL} to hide the current message
-#'   (if any).
-#' @param detail A single-element character vector; the detail message
-#'   to be displayed to the user, or \code{NULL} to hide the current
-#'   detail message (if any). The detail message will be shown with a
-#'   de-emphasized appearance relative to \code{message}.
-#' @param value Single-element numeric vector; the value at which to set
-#'   the progress bar, relative to \code{min} and \code{max}.
-#'   \code{NULL} hides the progress bar, if it is currently visible.
+#' @param message A single-element character vector; the message to be displayed
+#'   to the user, or \code{NULL} to hide the current message (if any).
+#' @param detail A single-element character vector; the detail message to be
+#'   displayed to the user, or \code{NULL} to hide the current detail message
+#'   (if any). The detail message will be shown with a de-emphasized appearance
+#'   relative to \code{message}.
+#' @param value Single-element numeric vector; the value at which to set the
+#'   progress bar, relative to \code{min} and \code{max}. \code{NULL} hides the
+#'   progress bar, if it is currently visible.
 #'
 #' @examples
 #' \dontrun{
 #' # server.R
-#' shinyServer(function(input, output, session) {
+#' shinyServer(function(input, output) {
 #'   output$plot <- renderPlot({
-#'     withProgress(session, min=1, max=15, {
-#'       setProgress(message = 'Calculation in progress',
-#'                   detail = 'This may take a while...')
+#'     withProgress(message = 'Calculation in progress',
+#'                  detail = 'This may take a while...', value = 0, {
 #'       for (i in 1:15) {
-#'         setProgress(value = i)
-#'         Sys.sleep(0.5)
+#'         incProgress(1/15)
+#'         Sys.sleep(0.25)
 #'       }
 #'     })
 #'     plot(cars)
 #'   })
 #' })
 #' }
-#' @seealso \code{\link{progressInit}}, \code{\link{Progress}}
+#' @seealso \code{\link{Progress}}
 #' @rdname withProgress
 #' @export
 withProgress <- function(expr, min = 0, max = 1,
@@ -229,7 +232,7 @@ setProgress <- function(value = NULL, message = NULL, detail = NULL,
   invisible()
 }
 
-#' @rdname incProgress
+#' @rdname withProgress
 #' @export
 incProgress <- function(amount = 0.1, message = NULL, detail = NULL,
                         session = getDefaultReactiveDomain()) {

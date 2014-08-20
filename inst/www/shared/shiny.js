@@ -1292,7 +1292,7 @@
 
   // Render HTML in a DOM element, inserting singletons into head as needed
   exports.renderHtml = function(html, el, dependencies) {
-    renderDependencies(dependencies)
+    renderDependencies(dependencies);
     return singletons.renderHtml(html, el);
   };
 

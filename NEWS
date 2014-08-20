@@ -4,6 +4,9 @@ shiny 0.10.1.9xxx
 * Shiny apps can now consist of a single file, app.R, instead of ui.R and
   server.R.
 
+* Added `Progress` and `withProgress`, to display the progress of computation
+  on the client browser.
+
 * Fixed #557: updateSelectizeInput(choices, server = TRUE) did not work when
   `chocies` is a character vector.
 

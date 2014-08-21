@@ -1675,7 +1675,7 @@ dataTableDependency <- list(
   ),
   htmlDependency(
     "datatables-bootstrap", "1.10.2", c(href = "shared/datatables"),
-    stylesheet = "css/dataTables.bootstrap.css",
+    stylesheet = c("css/dataTables.bootstrap.css", "css/dataTables.extra.css"),
     script = "js/dataTables.bootstrap.js"
   )
 )

@@ -702,6 +702,7 @@ commaToRange <- function(string) {
 checkAsIs <- function(options) {
   evalOptions <- if (length(options)) {
     nms <- names(options)
+    if (length(nms) == 0L || any(nms == '')) stop("'options' must be a named list")
     i <- unlist(lapply(options, function(x) {
       is.character(x) && inherits(x, 'AsIs')
     }))

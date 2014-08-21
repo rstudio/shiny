@@ -21,7 +21,7 @@ Imports:
     RJSONIO,
     xtable,
     digest,
-    htmltools (>= 0.2.4)
+    htmltools (>= 0.2.6)
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

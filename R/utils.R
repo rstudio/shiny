@@ -445,6 +445,12 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #' Returns a named character vector of key-value pairs.
 #'
 #' @param str The query string. It can have a leading \code{"?"} or not.
+#' @param nested Whether to parse the query string of as a nested list when it
+#'   contains pairs of square brackets \code{[]}. For example, the query
+#'   \samp{a[i1][j1]=x&b[i1][j1]=y&b[i2][j1]=z} will be parsed as \code{list(a =
+#'   list(i1 = list(j1 = 'x')), b = list(i1 = list(j1 = 'y'), i2 = list(j1 =
+#'   'z')))} when \code{nested = TRUE}, and \code{list(`a[i1][j1]` = 'x',
+#'   `b[i1][j1]` = 'y', `b[i2][j1]` = 'z')} when \code{nested = FALSE}.
 #' @export
 #' @examples
 #' parseQueryString("?foo=1&bar=b%20a%20r")
@@ -470,7 +476,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #' })
 #' }
 #'
-parseQueryString <- function(str) {
+parseQueryString <- function(str, nested = FALSE) {
   if (is.null(str) || nchar(str) == 0)
     return(list())
 
@@ -490,10 +496,29 @@ parseQueryString <- function(str) {
   keys   <- gsub('+', ' ', keys,   fixed = TRUE)
   values <- gsub('+', ' ', values, fixed = TRUE)
 
-  keys   <- vapply(keys,   function(x) URLdecode(x), FUN.VALUE = character(1))
-  values <- vapply(values, function(x) URLdecode(x), FUN.VALUE = character(1))
+  keys   <- vapply(keys,   URLdecode, character(1), USE.NAMES = FALSE)
+  values <- vapply(values, URLdecode, character(1), USE.NAMES = FALSE)
 
-  setNames(as.list(values), keys)
+  res <- setNames(as.list(values), keys)
+  if (!nested) return(res)
+
+  # Make a nested list from a query of the form ?a[1][1]=x11&a[1][2]=x12&...
+  for (i in grep('\\[.+\\]', keys)) {
+    k <- strsplit(keys[i], '[][]')[[1L]]  # split by [ or ]
+    res <- assignNestedList(res, k[k != ''], values[i])
+    res[[keys[i]]] <- NULL    # remove res[['a[1][1]']]
+  }
+  res
+}
+
+# Assign value to the bottom element of the list x using recursive indices idx
+assignNestedList <- function(x = list(), idx, value) {
+  for (i in seq_along(idx)) {
+    sub <- idx[seq_len(i)]
+    if (is.null(x[[sub]])) x[[sub]] <- list()
+  }
+  x[[idx]] <- value
+  x
 }
 
 # decide what to do in case of errors; it is customizable using the shiny.error
@@ -585,80 +610,74 @@ Callbacks <- setRefClass(
 
 # convert a data frame to JSON as required by DataTables request
 dataTablesJSON <- function(data, req) {
-  query <- req$QUERY_STRING
   n <- nrow(data)
-  with(parseQueryString(query), {
-    useRegex <- function(j, envir = parent.frame()) {
-      # FIXME: bRegex is not part of the query string yet (DataTables 1.9.4)
-      return(TRUE)
-      ex <- getExists(
-        if (missing(j)) 'bRegex' else sprintf('bRegex_%s', j), 'character', envir
-      )
-      is.null(ex) || ex == 'true'
-    }
-    # global searching
-    i <- seq_len(n)
-    sSearch <- getExists('sSearch', 'character')
-    if (length(sSearch) && nzchar(sSearch)) {
-      bRegex <- useRegex()
-      i0 <- apply(data, 2, function(x) grep(sSearch, as.character(x), fixed = !bRegex))
-      i <- intersect(i, unique(unlist(i0)))
-    }
-    # search by columns
-    if (length(i)) for (j in seq_len(as.integer(iColumns)) - 1) {
-      if (is.null(s <- getExists(sprintf('bSearchable_%d', j), 'character')) ||
-            s == "0" || s == "false") next  # the j-th column is not searchable
-      if (is.null(k <- getExists(sprintf('sSearch_%d', j), 'character'))) next
-      if (nzchar(k)) {
-        dj <- data[, j + 1]
-        r  <- commaToRange(k)
-        ij <- if (length(r) == 2 && is.numeric(dj)) {
-          which(dj >= r[1] & dj <= r[2])
-        } else {
-          grep(k, as.character(dj), fixed = !useRegex(j))
-        }
-        i <- intersect(ij, i)
-      }
-      if (length(i) == 0) break
-    }
-    if (length(i) != n) data <- data[i, , drop = FALSE]
-    # sorting
-    oList <- list()
-    for (j in seq_len(as.integer(iSortingCols)) - 1) {
-      if (is.null(k <- getExists(sprintf('iSortCol_%d', j), 'character'))) break
-      desc <- getExists(sprintf('sSortDir_%d', j), 'character')
-      if (is.character(desc)) {
-        col <- data[, as.integer(k) + 1]
-        oList[[length(oList) + 1]] <- (if (desc == 'asc') identity else `-`)(
-          if (is.numeric(col)) col else xtfrm(col)
-        )
-      }
-    }
-    if (length(oList)) {
-      i <- do.call(order, oList)
-      data <- data[i, , drop = FALSE]
-    }
-    # paging
-    if (iDisplayLength != '-1') {
-      i <- seq(as.integer(iDisplayStart) + 1L, length.out = as.integer(iDisplayLength))
-      i <- i[i <= nrow(data)]
-      fdata <- data[i, , drop = FALSE]  # filtered data
-    } else fdata <- data
-    fdata <- unname(as.matrix(fdata))
-    # WAT: toJSON(list(x = matrix(nrow = 0, ncol = 1))) => {"x": } (#299)
-    if (nrow(fdata) == 0) fdata <- list()
-    # WAT: toJSON(list(x = matrix(1:2))) => {x: [ [1], [2] ]}, however,
-    # toJSON(list(x = matrix(1))) => {x: [ 1 ]} (loss of dimension, #429)
-    if (all(dim(fdata) == 1)) fdata <- list(list(fdata[1, 1]))
+  q <- parseQueryString(req$QUERY_STRING, nested = TRUE)
 
-    res <- toJSON(list(
-      sEcho = as.integer(sEcho),
-      iTotalRecords = n,
-      iTotalDisplayRecords = nrow(data),
-      aaData = fdata
-    ))
-    httpResponse(200, 'application/json', res)
-  })
+  # global searching
+  i <- seq_len(n)
+  if (q$search[['value']] != '') {
+    i0 <- apply(data, 2, function(x) {
+      grep(q$search[['value']], as.character(x),
+           fixed = q$search[['regex']] == 'false')
+    })
+    i <- intersect(i, unique(unlist(i0)))
+  }
+
+  # search by columns
+  if (length(i)) for (j in names(q$columns)) {
+    col <- q$columns[[j]]
+    # if the j-th column is not searchable or the search string is "", skip it
+    if (col[['searchable']] != 'true') next
+    if ((k <- col[['search']][['value']]) == '') next
+    j <- as.integer(j)
+    dj <- data[, j + 1]
+    r  <- commaToRange(k)
+    ij <- if (length(r) == 2 && is.numeric(dj)) {
+      which(dj >= r[1] & dj <= r[2])
+    } else {
+      grep(k, as.character(dj), fixed = col[['search']][['regex']] == 'false')
+    }
+    i <- intersect(ij, i)
+    if (length(i) == 0) break
+  }
+  if (length(i) != n) data <- data[i, , drop = FALSE]
+
+  # sorting
+  oList <- list()
+  for (ord in q$order) {
+    k <- ord[['column']]  # which column to sort
+    d <- ord[['dir']]     # direction asc/desc
+    if (q$columns[[k]][['orderable']] != 'true') next
+    col <- data[, as.integer(k) + 1]
+    oList[[length(oList) + 1]] <- (if (d == 'asc') identity else `-`)(
+      if (is.numeric(col)) col else xtfrm(col)
+    )
+  }
+  if (length(oList)) {
+    i <- do.call(order, oList)
+    data <- data[i, , drop = FALSE]
+  }
+  # paging
+  if (q$length != '-1') {
+    i <- seq(as.integer(q$start) + 1L, length.out = as.integer(q$length))
+    i <- i[i <= nrow(data)]
+    fdata <- data[i, , drop = FALSE]  # filtered data
+  } else fdata <- data
+
+  fdata <- unname(as.matrix(fdata))
+  # WAT: toJSON(list(x = matrix(nrow = 0, ncol = 1))) => {"x": } (#299)
+  if (nrow(fdata) == 0) fdata <- list()
+  # WAT: toJSON(list(x = matrix(1:2))) => {x: [ [1], [2] ]}, however,
+  # toJSON(list(x = matrix(1))) => {x: [ 1 ]} (loss of dimension, #429)
+  if (length(fdata) && all(dim(fdata) == 1)) fdata <- list(list(fdata[1, 1]))
+
+  res <- toJSON(list(
+    draw = q$draw,
+    recordsTotal = n,
+    recordsFiltered = nrow(data),
+    data = fdata
+  ))
+  httpResponse(200, 'application/json', res)
 }
 
 getExists <- function(x, mode, envir = parent.frame()) {
@@ -683,6 +702,7 @@ commaToRange <- function(string) {
 checkAsIs <- function(options) {
   evalOptions <- if (length(options)) {
     nms <- names(options)
+    if (length(nms) == 0L || any(nms == '')) stop("'options' must be a named list")
     i <- unlist(lapply(options, function(x) {
       is.character(x) && inherits(x, 'AsIs')
     }))

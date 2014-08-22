@@ -3,10 +3,17 @@
 \alias{parseQueryString}
 \title{Parse a GET query string from a URL}
 \usage{
-parseQueryString(str)
+parseQueryString(str, nested = FALSE)
 }
 \arguments{
 \item{str}{The query string. It can have a leading \code{"?"} or not.}
+
+\item{nested}{Whether to parse the query string of as a nested list when it
+contains pairs of square brackets \code{[]}. For example, the query
+\samp{a[i1][j1]=x&b[i1][j1]=y&b[i2][j1]=z} will be parsed as \code{list(a =
+list(i1 = list(j1 = 'x')), b = list(i1 = list(j1 = 'y'), i2 = list(j1 =
+'z')))} when \code{nested = TRUE}, and \code{list(`a[i1][j1]` = 'x',
+`b[i1][j1]` = 'y', `b[i2][j1]` = 'z')} when \code{nested = FALSE}.}
 }
 \description{
 Returns a named character vector of key-value pairs.

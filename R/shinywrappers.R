@@ -542,15 +542,15 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #'   frequent search requests).
 #' @param callback A JavaScript function to be applied to the DataTable object.
 #'   This is useful for DataTables plug-ins, which often require the DataTable
-#'   instance to be available (\url{http://datatables.net/extras/}).
+#'   instance to be available (\url{http://datatables.net/extensions/}).
 #' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot
 #' @examples  # pass a callback function to DataTables using I()
 #' renderDataTable(iris,
 #'   options = list(
-#'     iDisplayLength = 5,
-#'     fnInitComplete = I("function(oSettings, json) {alert('Done.');}")
+#'     pageLength = 5,
+#'     initComplete = I("function(settings, json) {alert('Done.');}")
 #'   )
 #' )
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
@@ -559,7 +559,9 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
   installExprFunction(expr, "func", env, quoted)
 
   markRenderFunction(dataTableOutput, function(shinysession, name, ...) {
-    res <- checkAsIs(if (is.function(options)) options() else options)
+    if (is.function(options)) options <- options()
+    options <- checkDT9(options)
+    res <- checkAsIs(options)
     data <- func()
     if (length(dim(data)) != 2) return() # expects a rectangular data object
     action <- shinysession$registerDataObj(name, data, dataTablesJSON)
@@ -571,6 +573,43 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
   })
 }
 
+# a data frame containing the DataTables 1.9 and 1.10 names
+DT10Names <- function() {
+  rbind(
+    read.table(system.file('www/shared/datatables/upgrade1.10.txt', package = 'shiny'),
+               stringsAsFactors = FALSE),
+    c('aoColumns', 'Removed')  # looks like an omission on the upgrade guide
+  )
+}
+
+# check DataTables 1.9.x options, and give instructions for upgrading to 1.10.x
+checkDT9 <- function(options) {
+  nms <- names(options)
+  if (length(nms) == 0L) return(options)
+  DT10 <- DT10Names()
+  # e.g. the top level option name for oLanguage.sSearch should be oLanguage
+  i <- nms %in% gsub('[.].*', '', DT10[, 1])
+  if (!any(i)) return(options)  # did not see old option names, ready to go!
+  msg <- paste(
+    'shiny (>= 0.10.2) has upgraded DataTables from 1.9.4 to 1.10.2, ',
+    'and DataTables 1.10.x uses different parameter names with 1.9.x. ',
+    'Please follow the upgrade guide https://datatables.net/upgrade/1.10-convert',
+    ' to change your DataTables parameter names:\n\n',
+    paste(formatUL(nms[i]), collapse = '\n'), '\n', sep = ''
+  )
+  j <- gsub('[.].*', '', DT10[, 1]) %in% nms
+  # I cannot help you upgrade automatically in these cases, so I have to stop
+  if (any(grepl('[.]', DT10[j, 1])) || any(grepl('[.]', DT10[j, 2]))) stop(msg)
+  warning(msg)
+  nms10 <- DT10[match(nms[i], DT10[, 1]), 2]
+  if (any(nms10 == 'Removed')) stop(
+    "These parameters have been removed in DataTables 1.10.x:\n\n",
+    paste(formatUL(nms[i][nms10 == 'Removed']), collapse = '\n'),
+    "\n\n", msg
+  )
+  names(options)[i] <- nms10
+  options
+}
 
 # Deprecated functions ------------------------------------------------------
 

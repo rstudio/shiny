@@ -2246,14 +2246,14 @@
         selectize.clearOptions();
         selectize.settings.load = function(query, callback) {
           if (!query.length) return callback();
+          var settings = selectize.settings;
           $.ajax({
             url: data.url,
             data: {
               query: query,
-              field: JSON.stringify($.makeArray(
-                      selectize.settings.searchField)),
-              conju: selectize.settings.searchConjunction,
-              maxop: selectize.settings.maxOptions
+              field: JSON.stringify([settings.searchField]),
+              conju: settings.searchConjunction,
+              maxop: settings.maxOptions
             },
             type: 'GET',
             error: function() {

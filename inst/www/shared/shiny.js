@@ -24,6 +24,15 @@
     return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
   };
 
+  function escapeHTML(str) {
+    return str.replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;")
+              .replace(/\//g,"&#x2F;");
+  }
+
   function randomId() {
     return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
   }
@@ -1558,7 +1567,10 @@
       var footer = '';
       if (data.options === null || data.options.searching !== false) {
         footer = $.map(colnames, function(x) {
-          return '<th><input type="text" placeholder="' + x + '" /></th>';
+          // placeholder needs to be escaped (and HTML tags are stripped off)
+          return '<th><input type="text" placeholder="' +
+                 escapeHTML(x.replace(/(<([^>]+)>)/ig, '')) +
+                 '" /></th>';
         }).join('');
         footer = '<tfoot>' + footer + '</tfoot>';
       }

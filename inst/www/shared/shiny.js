@@ -969,7 +969,7 @@
       open: function(message) {
         // Add progress container (for all progress items) if not already present
         var $container = $('.shiny-progress-container');
-        if ($container.length == 0) {
+        if ($container.length === 0) {
           $container = $('<div class="shiny-progress-container"></div>');
           $('body').append($container);
         }
@@ -1024,7 +1024,7 @@
             $progress.remove();
 
             // If this was the last shiny-progress, remove container
-            if ($('.shiny-progress').length == 0)
+            if ($('.shiny-progress').length === 0)
               $('.shiny-progress-container').remove();
           }
         });

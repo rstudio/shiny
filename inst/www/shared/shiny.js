@@ -1426,14 +1426,14 @@
     if (dep.stylesheet) {
       var stylesheets = $.map(asArray(dep.stylesheet), function(stylesheet) {
         return $("<link rel='stylesheet' type='text/css'>")
-          .attr("href", href + "/" + escape(stylesheet));
+          .attr("href", href + "/" + encodeURI(stylesheet));
       });
       $head.append(stylesheets);
     }
 
     if (dep.script) {
       var scripts = $.map(asArray(dep.script), function(scriptName) {
-        return $("<script>").attr("src", href + "/" + escape(scriptName));
+        return $("<script>").attr("src", href + "/" + encodeURI(scriptName));
       });
       $head.append(scripts);
     }
@@ -1447,7 +1447,7 @@
       var attach = $.map(attachments, function(attachment, key) {
         return $("<link rel='attachment'>")
           .attr("id", dep.name + "-" + key + "-attachment")
-          .attr("href", href + "/" + escape(attachment));
+          .attr("href", href + "/" + encodeURI(attachment));
       });
       $head.append(attach);
     }

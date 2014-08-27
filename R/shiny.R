@@ -192,7 +192,7 @@ ShinySession <- setRefClass(
     .closedCallbacks = 'Callbacks',
     .flushCallbacks = 'Callbacks',
     .flushedCallbacks = 'Callbacks',
-    progressStack = Stack, # Stack of progress objects
+    progressStack = 'Stack', # Stack of progress objects
     input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
     output      = 'ANY',    # Externally-usable S3 wrapper object for .outputs
     clientData  = 'reactivevalues', # Externally-usable S3 wrapper object for .clientData

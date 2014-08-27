@@ -2669,7 +2669,7 @@
       this.form.method = 'POST';
       this.form.setAttribute('enctype', 'multipart/form-data');
       this.form.action = "session/" + encodeURI(this.shinyapp.config.sessionId)
-                         + "/upload2/" + encodeURI(this.id);
+                         + "/uploadie/" + encodeURI(this.id);
       this.form.id = 'shinyupload_form_' + this.id;
       this.form.target = iframeId;
       $(this.form).insertAfter(this.fileEl).append(this.fileEl);

@@ -583,8 +583,9 @@ ShinySession <- R6Class(
         }
       }
 
-      if (matches[2] == 'upload2' && identical(req$REQUEST_METHOD, "POST")) {
+      if (matches[2] == 'uploadie' && identical(req$REQUEST_METHOD, "POST")) {
         id <- URLdecode(matches[3])
+        browser()
         .input$set(id, Math.runif(1))
       }
 

@@ -2810,9 +2810,10 @@
       uploader.abort();
 
     var files = evt.target.files;
+    var IE8 = files === undefined;
     var id = fileInputBinding.getId(evt.target);
 
-    if (files.length === 0)
+    if (!IE8 && files.length === 0)
       return;
 
     // Start the new upload and put the uploader in 'currentUploader'.

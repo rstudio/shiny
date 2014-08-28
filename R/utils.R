@@ -612,13 +612,14 @@ Callbacks <- setRefClass(
 dataTablesJSON <- function(data, req) {
   n <- nrow(data)
   q <- parseQueryString(req$QUERY_STRING, nested = TRUE)
+  ci <- q$search[['caseInsensitive']] == 'true'
 
   # global searching
   i <- seq_len(n)
   if (q$search[['value']] != '') {
     i0 <- apply(data, 2, function(x) {
-      grep(q$search[['value']], as.character(x),
-           fixed = q$search[['regex']] == 'false')
+      grep2(q$search[['value']], as.character(x),
+            fixed = q$search[['regex']] == 'false', ignore.case = ci)
     })
     i <- intersect(i, unique(unlist(i0)))
   }
@@ -635,7 +636,8 @@ dataTablesJSON <- function(data, req) {
     ij <- if (length(r) == 2 && is.numeric(dj)) {
       which(dj >= r[1] & dj <= r[2])
     } else {
-      grep(k, as.character(dj), fixed = col[['search']][['regex']] == 'false')
+      grep2(k, as.character(dj), fixed = col[['search']][['regex']] == 'false',
+            ignore.case = ci)
     }
     i <- intersect(ij, i)
     if (length(i) == 0) break
@@ -678,6 +680,21 @@ dataTablesJSON <- function(data, req) {
     data = fdata
   ))
   httpResponse(200, 'application/json', res)
+}
+
+# when both ignore.case and fixed are TRUE, we use grep(ignore.case = FALSE,
+# fixed = TRUE) to do lower-case matching of pattern on x
+grep2 <- function(pattern, x, ignore.case = FALSE, fixed = FALSE, ...) {
+  if (fixed && ignore.case) {
+    pattern <- tolower(pattern)
+    x <- tolower(x)
+    ignore.case <- FALSE
+  }
+  # when the user types in the search box, the regular expression may not be
+  # complete before it is sent to the server, in which case we do not search
+  if (!fixed && inherits(try(grep(pattern, ''), silent = TRUE), 'try-error'))
+    return(seq_along(x))
+  grep(pattern, x, ignore.case = ignore.case, fixed = fixed, ...)
 }
 
 getExists <- function(x, mode, envir = parent.frame()) {

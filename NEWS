@@ -8,6 +8,8 @@ shiny 0.10.1.9xxx
   you have customized the DataTables options in your apps. (More info:
   https://github.com/rstudio/shiny/pull/558)
 
+* Switched away from reference classes to R6.
+
 * Added `Progress` and `withProgress`, to display the progress of computation
   on the client browser.
 

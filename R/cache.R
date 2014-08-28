@@ -2,18 +2,14 @@
 # files changes on disk. Each time the cache is dirtied, the set of files is
 # cleared. Therefore, the set of files needs to be re-built each time the cached
 # code executes. This approach allows for dynamic dependency graphs.
-CacheContext <- setRefClass(
+CacheContext <- R6Class(
   'CacheContext',
-  fields = list(
-    .dirty = 'logical',
-    .tests = 'list'
-  ),
-  methods = list(
-    initialize = function() {
-      .dirty <<- TRUE
-      # List of functions that return TRUE if dirty
-      .tests <<- list()
-    },
+  portable = FALSE,
+  public = list(
+    .dirty = TRUE,
+    # List of functions that return TRUE if dirty
+    .tests = list(),
+
     addDependencyFile = function(file) {
       if (.dirty)
         return()
@@ -53,7 +49,7 @@ CacheContext <- setRefClass(
     },
     with = function(func) {
       oldCC <- .currentCacheContext$cc
-      .currentCacheContext$cc <- .self
+      .currentCacheContext$cc <- self
       on.exit(.currentCacheContext$cc <- oldCC)
 
       return(func())

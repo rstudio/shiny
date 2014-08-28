@@ -1,19 +1,16 @@
-Context <- setRefClass(
+Context <- R6Class(
   'Context',
-  fields = list(
-    id = 'character',
-    .label = 'character',      # For debug purposes
-    .invalidated = 'logical',
-    .invalidateCallbacks = 'list',
-    .flushCallbacks = 'list',
-    .domain = 'ANY'
-  ),
-  methods = list(
+  portable = FALSE,
+  public = list(
+    id = character(0),
+    .label = character(0),      # For debug purposes
+    .invalidated = FALSE,
+    .invalidateCallbacks = list(),
+    .flushCallbacks = list(),
+    .domain = NULL,
+
     initialize = function(domain, label='', type='other', prevId='') {
       id <<- .getReactiveEnvironment()$nextId()
-      .invalidated <<- FALSE
-      .invalidateCallbacks <<- list()
-      .flushCallbacks <<- list()
       .label <<- label
       .domain <<- domain
       .graphCreateContext(id, label, type, prevId, domain)
@@ -24,7 +21,7 @@ Context <- setRefClass(
         env <- .getReactiveEnvironment()
         .graphEnterContext(id)
         tryCatch(
-          env$runWith(.self, func),
+          env$runWith(self, func),
           finally = .graphExitContext(id)
         )
       })
@@ -56,7 +53,7 @@ Context <- setRefClass(
     addPendingFlush = function(priority) {
       "Tell the reactive environment that this context should be flushed the
         next time flushReact() called."
-      .getReactiveEnvironment()$addPendingFlush(.self, priority)
+      .getReactiveEnvironment()$addPendingFlush(self, priority)
     },
     onFlush = function(func) {
       "Register a function to be called when this context is flushed."
@@ -77,20 +74,17 @@ Context <- setRefClass(
   )
 )
 
-ReactiveEnvironment <- setRefClass(
+ReactiveEnvironment <- R6Class(
   'ReactiveEnvironment',
-  fields = list(
-    .currentContext = 'ANY',
-    .nextId = 'integer',
+  portable = FALSE,
+  public = list(
+    .currentContext = NULL,
+    .nextId = 0L,
     .pendingFlush = 'PriorityQueue',
-    .inFlush = 'logical'
-  ),
-  methods = list(
+    .inFlush = FALSE,
+
     initialize = function() {
-      .currentContext <<- NULL
-      .nextId <<- 0L
       .pendingFlush <<- PriorityQueue$new()
-      .inFlush <<- FALSE
     },
     nextId = function() {
       .nextId <<- .nextId + 1L

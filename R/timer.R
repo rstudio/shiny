@@ -4,16 +4,16 @@ now <- function() {
   as.numeric(Sys.time()) * 1000
 }
 
-TimerCallbacks <- setRefClass(
+TimerCallbacks <- R6Class(
   'TimerCallbacks',
-  fields = list(
-    .nextId = 'integer',
+  portable = FALSE,
+  public = list(
+    .nextId = 0L,
     .funcs = 'Map',
-    .times = 'data.frame'
-  ),
-  methods = list(
+    .times = data.frame(),
+
     initialize = function() {
-      .nextId <<- 0L
+      .funcs <<- Map$new()
     },
     clear = function() {
       .nextId <<- 0L

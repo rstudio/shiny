@@ -64,20 +64,20 @@
 #' })
 #' }
 #' @seealso \code{\link{withProgress}}
-#' @rdname Progress
+#' @format NULL
+#' @usage NULL
 #' @export
-#' @export Progress
-Progress <- setRefClass(
+Progress <- R6Class(
   'Progress',
-  fields = list(
+  portable = FALSE,
+  public = list(
     .session = 'environment',
     .id = 'character',
     .min = 'numeric',
     .max = 'numeric',
     .value = 'ANY',
-    .closed = 'logical'
-  ),
-  methods = list(
+    .closed = 'logical',
+
     initialize = function(session = getDefaultReactiveDomain(), min = 0, max = 1) {
       # A hacky check to make sure the session object is indeed a session object.
       if (is.null(session$onFlush)) stop("'session' is not a session object.")

@@ -1,12 +1,12 @@
-Stack <- setRefClass(
+Stack <- R6Class(
   'Stack',
-  fields = list(
-    .stack = 'list'
-  ),
-  methods = list(
+  portable = FALSE,
+  public = list(
+    .stack = list(),
+
     push = function(obj) {
       .stack <<- c(.stack, list(obj))
-      invisible(.self)
+      invisible(self)
     },
     pop = function() {
       len <- length(.stack) 

@@ -9,17 +9,17 @@
 # Remove of unknown key does nothing
 # Setting a key twice always results in last-one-wins
 # /TESTS
-Map <- setRefClass(
+Map <- R6Class(
   'Map',
-  fields = list(
-    .env = 'environment'
-  ),
-  methods = list(
+  portable = FALSE,
+  public = list(
+    .env = NULL,
+
     initialize = function() {
       .env <<- new.env(parent=emptyenv())
     },
     get = function(key) {
-      if (.self$containsKey(key))
+      if (self$containsKey(key))
         base::get(key, pos=.env, inherits=FALSE)
     },
     set = function(key, value) {
@@ -32,8 +32,8 @@ Map <- setRefClass(
         set(key, args[[key]])
     },
     remove = function(key) {
-      if (.self$containsKey(key)) {
-        result <- .self$get(key)
+      if (self$containsKey(key)) {
+        result <- self$get(key)
         rm(list = key, pos=.env, inherits=FALSE)
         result
       }
@@ -45,7 +45,7 @@ Map <- setRefClass(
       ls(envir=.env, all.names=TRUE)
     },
     values = function() {
-      mget(.self$keys(), envir=.env, inherits=FALSE)
+      mget(self$keys(), envir=.env, inherits=FALSE)
     },
     clear = function() {
       .env <<- new.env(parent=emptyenv())

@@ -222,11 +222,11 @@ staticHandler <- function(root) {
 # return value of `createHttpuvApp` to httpuv's `startServer` function.
 #
 ## ------------------------------------------------------------------------
-HandlerList <- setRefClass("HandlerList",
-  fields = list(
-    handlers = "list"
-  ),
-  methods = list(
+HandlerList <- R6Class("HandlerList",
+  portable = FALSE,
+  public = list(
+    handlers = list(),
+
     add = function(handler, key, tail = FALSE) {
       if (!is.null(handlers[[key]]))
         stop("Key ", key, " already in use")
@@ -256,12 +256,17 @@ HandlerList <- setRefClass("HandlerList",
   )
 )
 
-HandlerManager <- setRefClass("HandlerManager",
-  fields = list(
+HandlerManager <- R6Class("HandlerManager",
+  portable = FALSE,
+  public = list(
     handlers = "HandlerList",
-    wsHandlers = "HandlerList"
-  ),
-  methods = list(
+    wsHandlers = "HandlerList",
+
+    initialize = function() {
+      handlers <<- HandlerList$new()
+      wsHandlers <<- HandlerList$new()
+    },
+
     addHandler = function(handler, key, tail = FALSE) {
       handlers$add(handler, key, tail)
     },

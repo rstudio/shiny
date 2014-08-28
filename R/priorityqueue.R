@@ -4,15 +4,18 @@
 # elements have the same priority, they are served according to their order in
 # the queue." (http://en.wikipedia.org/wiki/Priority_queue)
 
-PriorityQueue <- setRefClass(
+PriorityQueue <- R6Class(
   'PriorityQueue',
-  fields = list(
+  portable = FALSE,
+  public = list(
     # Keys are priorities, values are subqueues (implemented as list)
     .itemsByPriority = 'Map',
     # Sorted vector (largest first)
-    .priorities = 'numeric'
-  ),
-  methods = list(
+    .priorities = numeric(0),
+
+    initialize = function() {
+      .itemsByPriority <<- Map$new()
+    },
     # Enqueue an item, with the given priority level (must be integer). Higher
     # priority numbers are dequeued earlier than lower.
     enqueue = function(item, priority) {

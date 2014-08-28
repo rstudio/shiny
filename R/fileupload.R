@@ -20,18 +20,18 @@
 # form upload, i.e. traditional HTTP POST-based file upload) doesn't work with
 # the websockets package's HTTP server at the moment.
 
-FileUploadOperation <- setRefClass(
+FileUploadOperation <- R6Class(
   'FileUploadOperation',
-  fields = list(
-    .parent = 'ANY',
-    .id = 'character',
-    .files = 'data.frame',
-    .dir = 'character',
-    .currentFileInfo = 'list',
-    .currentFileData = 'ANY',
-    .pendingFileInfos = 'list'
-  ),
-  methods = list(
+  portable = FALSE,
+  public = list(
+    .parent = NULL,
+    .id = character(0),
+    .files = data.frame(),
+    .dir = character(0),
+    .currentFileInfo = list(),
+    .currentFileData = NULL,
+    .pendingFileInfos = list(),
+
     initialize = function(parent, id, dir, fileInfos) {
       .parent <<- parent
       .id <<- id
@@ -78,15 +78,16 @@ FileUploadOperation <- setRefClass(
 )
 
 #' @include map.R
-FileUploadContext <- setRefClass(
+FileUploadContext <- R6Class(
   'FileUploadContext',
-  fields = list(
-    .basedir = 'character',
-    .operations = 'Map'
-  ),
-  methods = list(
+  portable = FALSE,
+  public = list(
+    .basedir = character(0),
+    .operations = 'Map',
+
     initialize = function(dir=tempdir()) {
       .basedir <<- dir
+      .operations <<- Map$new()
     },
     createUploadOperation = function(fileInfos) {
       while (TRUE) {
@@ -95,7 +96,7 @@ FileUploadContext <- setRefClass(
         if (!dir.create(dir))
           next
 
-        op <- FileUploadOperation$new(.self, id, dir, fileInfos)
+        op <- FileUploadOperation$new(self, id, dir, fileInfos)
         .operations$set(id, op)
         return(id)
       }

@@ -11,8 +11,7 @@ Description: Shiny makes it incredibly easy to build interactive web
     beautiful, responsive, and powerful applications with minimal effort.
 License: GPL-3
 Depends:
-    R (>= 3.0.0),
-    methods
+    R (>= 3.0.0)
 Imports:
     tools,
     utils,
@@ -21,7 +20,8 @@ Imports:
     RJSONIO,
     xtable,
     digest,
-    htmltools (>= 0.2.6)
+    htmltools (>= 0.2.6),
+    R6 (>= 2.0)
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

@@ -1,12 +1,15 @@
 #' @include utils.R
 NULL
 
-Dependents <- setRefClass(
+Dependents <- R6Class(
   'Dependents',
-  fields = list(
-    .dependents = 'Map'
-  ),
-  methods = list(
+  portable = FALSE,
+  public = list(
+    .dependents = 'Map',
+
+    initialize = function() {
+      .dependents <<- Map$new()
+    },
     register = function(depId=NULL, depLabel=NULL) {
       ctx <- .getReactiveEnvironment()$currentContext()
       if (!.dependents$containsKey(ctx$id)) {
@@ -36,11 +39,12 @@ Dependents <- setRefClass(
 
 # ReactiveValues ------------------------------------------------------------
 
-ReactiveValues <- setRefClass(
+ReactiveValues <- R6Class(
   'ReactiveValues',
-  fields = list(
+  portable = FALSE,
+  public = list(
     # For debug purposes
-    .label = 'character',
+    .label = character(0),
     .values = 'environment',
     .dependents = 'environment',
     # Dependents for the list of all names, including hidden
@@ -48,15 +52,17 @@ ReactiveValues <- setRefClass(
     # Dependents for all values, including hidden
     .allValuesDeps = 'Dependents',
     # Dependents for all values
-    .valuesDeps = 'Dependents'
-  ),
-  methods = list(
+    .valuesDeps = 'Dependents',
+
     initialize = function() {
       .label <<- paste('reactiveValues',
                        p_randomInt(1000, 10000),
                        sep="")
       .values <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
+      .namesDeps <<- Dependents$new()
+      .allValuesDeps <<- Dependents$new()
+      .valuesDeps <<- Dependents$new()
     },
     get = function(key) {
       ctx <- .getReactiveEnvironment()$currentContext()
@@ -114,7 +120,7 @@ ReactiveValues <- setRefClass(
     mset = function(lst) {
       lapply(base::names(lst),
              function(name) {
-               .self$set(name, lst[[name]])
+               self$set(name, lst[[name]])
              })
     },
     names = function() {
@@ -191,9 +197,6 @@ reactiveValues <- function(...) {
   .subset2(values, 'impl')$mset(args)
   values
 }
-
-# Register the S3 class so that it can be used for a field in a Reference Class
-setOldClass("reactivevalues")
 
 # Create a reactivevalues object
 #
@@ -310,21 +313,21 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 
 # Observable ----------------------------------------------------------------
 
-Observable <- setRefClass(
+Observable <- R6Class(
   'Observable',
-  fields = list(
+  portable = FALSE,
+  public = list(
     .func = 'function',
-    .label = 'character',
-    .domain = 'ANY',
+    .label = character(0),
+    .domain = NULL,
     .dependents = 'Dependents',
-    .invalidated = 'logical',
-    .running = 'logical',
-    .value = 'ANY',
-    .visible = 'logical',
-    .execCount = 'integer',
-    .mostRecentCtxId = 'character'
-  ),
-  methods = list(
+    .invalidated = logical(0),
+    .running = logical(0),
+    .value = NULL,
+    .visible = logical(0),
+    .execCount = integer(0),
+    .mostRecentCtxId = character(0),
+
     initialize = function(func, label = deparse(substitute(func)),
                           domain = getDefaultReactiveDomain()) {
       if (length(formals(func)) > 0)
@@ -332,10 +335,11 @@ Observable <- setRefClass(
              "or more parameters; only functions without parameters can be ",
              "reactive.")
       .func <<- func
-      .invalidated <<- TRUE
-      .running <<- FALSE
       .label <<- label
       .domain <<- domain
+      .dependents <<- Dependents$new()
+      .invalidated <<- TRUE
+      .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
     },
@@ -343,7 +347,7 @@ Observable <- setRefClass(
       .dependents$register()
 
       if (.invalidated || .running) {
-        .self$.updateValue()
+        self$.updateValue()
       }
 
       .graphDependsOnId(getCurrentContext()$id, .mostRecentCtxId)
@@ -465,22 +469,22 @@ execCount <- function(x) {
 
 # Observer ------------------------------------------------------------------
 
-Observer <- setRefClass(
+Observer <- R6Class(
   'Observer',
-  fields = list(
+  portable = FALSE,
+  public = list(
     .func = 'function',
-    .label = 'character',
+    .label = character(0),
     .domain = 'ANY',
-    .priority = 'numeric',
-    .autoDestroy = 'logical',
-    .invalidateCallbacks = 'list',
-    .execCount = 'integer',
+    .priority = numeric(0),
+    .autoDestroy = logical(0),
+    .invalidateCallbacks = list(),
+    .execCount = integer(0),
     .onResume = 'function',
-    .suspended = 'logical',
-    .destroyed = 'logical',
-    .prevId = 'character'
-  ),
-  methods = list(
+    .suspended = logical(0),
+    .destroyed = logical(0),
+    .prevId = character(0),
+
     initialize = function(func, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
                           autoDestroy = TRUE) {
@@ -499,7 +503,7 @@ Observer <- setRefClass(
       .destroyed <<- FALSE
       .prevId <<- ''
 
-      onReactiveDomainEnded(.domain, .self$.onDomainEnded)
+      onReactiveDomainEnded(.domain, self$.onDomainEnded)
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()

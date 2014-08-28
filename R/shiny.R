@@ -15,7 +15,7 @@ NULL
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @import htmltools httpuv caTools xtable digest methods
+#' @import htmltools httpuv caTools xtable digest R6
 #' @importFrom RJSONIO fromJSON
 NULL
 
@@ -175,15 +175,16 @@ NULL
 
 
 #' @include utils.R
-ShinySession <- setRefClass(
+ShinySession <- R6Class(
   'ShinySession',
-  fields = list(
+  portable = FALSE,
+  public = list(
     .websocket = 'ANY',
     .invalidatedOutputValues = 'Map',
     .invalidatedOutputErrors = 'Map',
-    .inputMessageQueue = 'list',    # A list of inputMessages to send when flushed
-    .outputs = 'list',       # Keeps track of all the output observer objects
-    .outputOptions = 'list', # Options for each of the output observer objects
+    .inputMessageQueue = list(),    # A list of inputMessages to send when flushed
+    .outputs = list(),       # Keeps track of all the output observer objects
+    .outputOptions = list(), # Options for each of the output observer objects
     .progressKeys = 'character',
     .showcase   = 'ANY',
     .fileUploadContext = 'FileUploadContext',
@@ -199,25 +200,33 @@ ShinySession <- setRefClass(
     token = 'character',  # Used to identify this instance in URLs
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
-    closed = 'logical',
+    closed = logical(0),
     session = 'environment',      # Object for the server app to access session stuff
-    singletons = 'character'  # Tracks singleton HTML fragments sent to the page
-  ),
-  methods = list(
+    singletons = character(0),  # Tracks singleton HTML fragments sent to the page
+
     initialize = function(websocket) {
       .websocket <<- websocket
       closed <<- FALSE
       # TODO: Put file upload context in user/app-specific dir if possible
 
+      .invalidatedOutputValues <<- Map$new()
+      .invalidatedOutputErrors <<- Map$new()
+      .fileUploadContext <<- FileUploadContext$new()
+      .closedCallbacks <<- Callbacks$new()
+      .flushCallbacks <<- Callbacks$new()
+      .flushedCallbacks <<- Callbacks$new()
       .input      <<- ReactiveValues$new()
       .clientData <<- ReactiveValues$new()
+      progressStack <<- Stack$new()
+      files <<- Map$new()
+      downloads <<- Map$new()
 
       input      <<- .createReactiveValues(.input,      readonly=TRUE)
       .setLabel(input, 'input')
       clientData <<- .createReactiveValues(.clientData, readonly=TRUE)
       .setLabel(clientData, 'clientData')
 
-      output     <<- .createOutputWriter(.self)
+      output     <<- .createOutputWriter(self)
 
       token <<- createUniqueId(16)
       .outputs <<- list()
@@ -225,20 +234,20 @@ ShinySession <- setRefClass(
 
       session <<- new.env(parent=emptyenv())
       session$clientData        <<- clientData
-      session$sendCustomMessage <<- .self$.sendCustomMessage
-      session$sendInputMessage  <<- .self$.sendInputMessage
-      session$onSessionEnded    <<- .self$onSessionEnded
-      session$onEnded           <<- .self$onEnded
-      session$onFlush           <<- .self$onFlush
-      session$onFlushed         <<- .self$onFlushed
-      session$isClosed          <<- .self$isClosed
-      session$input             <<- .self$input
-      session$output            <<- .self$output
-      session$reactlog          <<- .self$reactlog
-      session$registerDataObj   <<- .self$registerDataObj
-      session$progressStack     <<- .self$progressStack
-      session$sendProgress      <<- .self$sendProgress
-      session$.impl             <<- .self
+      session$sendCustomMessage <<- self$.sendCustomMessage
+      session$sendInputMessage  <<- self$.sendInputMessage
+      session$onSessionEnded    <<- self$onSessionEnded
+      session$onEnded           <<- self$onEnded
+      session$onFlush           <<- self$onFlush
+      session$onFlushed         <<- self$onFlushed
+      session$isClosed          <<- self$isClosed
+      session$input             <<- self$input
+      session$output            <<- self$output
+      session$reactlog          <<- self$reactlog
+      session$registerDataObj   <<- self$registerDataObj
+      session$progressStack     <<- self$progressStack
+      session$sendProgress      <<- self$sendProgress
+      session$.impl             <<- self
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
         try({
@@ -315,7 +324,7 @@ ShinySession <- setRefClass(
         if (length(formals(func)) != 0) {
           orig <- func
           func <- function() {
-            orig(name=name, shinysession=.self)
+            orig(name=name, shinysession=self)
           }
         }
 
@@ -432,7 +441,7 @@ ShinySession <- setRefClass(
       method <- paste('@', msg$method, sep='')
       # we must use $ instead of [[ here at the moment; see
       # https://github.com/rstudio/shiny/issues/274
-      func <- try(do.call(`$`, list(.self, method)), silent=TRUE)
+      func <- try(do.call(`$`, list(self, method)), silent=TRUE)
       if (inherits(func, 'try-error')) {
         .sendErrorResponse(msg, paste('Unknown method', msg$method))
       }

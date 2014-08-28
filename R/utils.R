@@ -575,15 +575,16 @@ registerDebugHook <- function(name, where, label) {
   }
 }
 
-Callbacks <- setRefClass(
+Callbacks <- R6Class(
   'Callbacks',
-  fields = list(
-    .nextId = 'integer',
-    .callbacks = 'Map'
-  ),
-  methods = list(
+  portable = FALSE,
+  public = list(
+    .nextId = integer(0),
+    .callbacks = 'Map',
+
     initialize = function() {
       .nextId <<- as.integer(.Machine$integer.max)
+      .callbacks <<- Map$new()
     },
     register = function(callback) {
       id <- as.character(.nextId)

@@ -1,6 +1,8 @@
 shiny 0.10.1.9xxx
 --------------------------------------------------------------------------------
 
+* The minimal version of R required for the shiny package is 3.0.0 now.
+
 * Shiny apps can now consist of a single file, app.R, instead of ui.R and
   server.R.
 

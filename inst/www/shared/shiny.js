@@ -1585,13 +1585,21 @@
           data.options[x] = eval('(' + data.options[x] + ')');
         });
 
+      // caseInsensitive searching? default true
+      var searchCI = data.options === null || data.options.search === null ||
+                     data.options.search.caseInsensitive !== false;
       var oTable = $(el).children("table").DataTable($.extend({
         "processing": true,
         "serverSide": true,
         "order": [],
         "orderClasses": false,
         "pageLength": 25,
-        "ajax": data.action
+        "ajax": {
+          "url": data.action,
+          "data": function(d) {
+            d.search.caseInsensitive = searchCI;
+          }
+        }
       }, data.options));
       // the table object may need post-processing
       if (typeof data.callback === 'string') {

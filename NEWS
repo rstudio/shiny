@@ -4,11 +4,21 @@ shiny 0.10.1.9xxx
 * Shiny apps can now consist of a single file, app.R, instead of ui.R and
   server.R.
 
+* Upgraded DataTables from 1.9.4 to 1.10.2. This might be a breaking change if
+  you have customized the DataTables options in your apps. (More info:
+  https://github.com/rstudio/shiny/pull/558)
+
 * Added `Progress` and `withProgress`, to display the progress of computation
   on the client browser.
 
 * Fixed #557: updateSelectizeInput(choices, server = TRUE) did not work when
   `chocies` is a character vector.
+
+* Searching in DataTables is case-insensitive and the search strings are not
+  treated as regular expressions by default now. If you want case-sensitive
+  searching or regular expressions, you can use the configuration options
+  `search$caseInsensitive` and `search$regex`, e.g. `renderDataTable(...,
+  options = list(search = list(caseInsensitve = FALSE, regex = TRUE)))`.
 
 * Added support for `htmltools::htmlDependency`'s new `attachment` parameter to
   `renderUI`/`uiOutput`.

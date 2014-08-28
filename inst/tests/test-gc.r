@@ -7,10 +7,8 @@ test_that("unreferenced observers are garbage collected", {
   obs  <- observe({ vals$A })
 
   # These are called when the objects are garbage-collected
-  reg.finalizer(attr(.subset2(vals,'impl'), ".xData"),
-                function(e) vals_removed <<- TRUE)
-  reg.finalizer(attr(obs, ".xData"),
-                function(e) obs_removed  <<- TRUE)
+  reg.finalizer(.subset2(vals,'impl'), function(e) vals_removed <<- TRUE)
+  reg.finalizer(obs, function(e) obs_removed  <<- TRUE)
 
   flushReact()
 
@@ -42,10 +40,8 @@ test_that("suspended observers are garbage collected", {
   obs  <- observe({ vals$A })
 
   # These are called when the objects are garbage-collected
-  reg.finalizer(attr(.subset2(vals,'impl'), ".xData"),
-                function(e) vals_removed <<- TRUE)
-  reg.finalizer(attr(obs, ".xData"),
-                function(e) obs_removed  <<- TRUE)
+  reg.finalizer(.subset2(vals,'impl'), function(e) vals_removed <<- TRUE)
+  reg.finalizer(obs, function(e) obs_removed <<- TRUE)
 
   flushReact()
 

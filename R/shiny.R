@@ -15,7 +15,7 @@ NULL
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @import htmltools httpuv caTools xtable digest R6
+#' @import htmltools httpuv xtable digest R6
 #' @importFrom RJSONIO fromJSON
 NULL
 
@@ -687,7 +687,7 @@ ShinySession <- R6Class(
       fileData <- readBin(file, 'raw', n=bytes)
 
       if (isTRUE(.clientData$.values$allowDataUriScheme)) {
-        b64 <- base64encode(fileData)
+        b64 <- rawToBase64(fileData)
         return(paste('data:', contentType, ';base64,', b64, sep=''))
       } else {
         return(saveFileUrl(name, fileData, contentType))

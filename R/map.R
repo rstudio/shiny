@@ -12,7 +12,6 @@
 Map <- R6Class(
   'Map',
   portable = FALSE,
-  class = FALSE,
   public = list(
     .env = NULL,
 

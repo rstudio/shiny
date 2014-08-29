@@ -4,6 +4,7 @@ NULL
 Dependents <- R6Class(
   'Dependents',
   portable = FALSE,
+  class = FALSE,
   public = list(
     .dependents = 'Map',
 

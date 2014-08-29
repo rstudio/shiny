@@ -7,6 +7,7 @@ now <- function() {
 TimerCallbacks <- R6Class(
   'TimerCallbacks',
   portable = FALSE,
+  class = FALSE,
   public = list(
     .nextId = 0L,
     .funcs = 'Map',

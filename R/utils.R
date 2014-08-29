@@ -578,6 +578,7 @@ registerDebugHook <- function(name, where, label) {
 Callbacks <- R6Class(
   'Callbacks',
   portable = FALSE,
+  class = FALSE,
   public = list(
     .nextId = integer(0),
     .callbacks = 'Map',

@@ -23,6 +23,7 @@
 FileUploadOperation <- R6Class(
   'FileUploadOperation',
   portable = FALSE,
+  class = FALSE,
   public = list(
     .parent = NULL,
     .id = character(0),
@@ -81,6 +82,7 @@ FileUploadOperation <- R6Class(
 FileUploadContext <- R6Class(
   'FileUploadContext',
   portable = FALSE,
+  class = FALSE,
   public = list(
     .basedir = character(0),
     .operations = 'Map',

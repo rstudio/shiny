@@ -3,6 +3,7 @@
 Stack <- R6Class(
   'Stack',
   portable = FALSE,
+  class = FALSE,
   public = list(
 
     initialize = function(init = 20L) {

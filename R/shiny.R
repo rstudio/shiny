@@ -178,6 +178,7 @@ NULL
 ShinySession <- R6Class(
   'ShinySession',
   portable = FALSE,
+  class = FALSE,
   public = list(
     .websocket = 'ANY',
     .invalidatedOutputValues = 'Map',

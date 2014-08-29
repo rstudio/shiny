@@ -224,6 +224,7 @@ staticHandler <- function(root) {
 ## ------------------------------------------------------------------------
 HandlerList <- R6Class("HandlerList",
   portable = FALSE,
+  class = FALSE,
   public = list(
     handlers = list(),
 
@@ -258,6 +259,7 @@ HandlerList <- R6Class("HandlerList",
 
 HandlerManager <- R6Class("HandlerManager",
   portable = FALSE,
+  class = FALSE,
   public = list(
     handlers = "HandlerList",
     wsHandlers = "HandlerList",

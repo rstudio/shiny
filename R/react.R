@@ -1,6 +1,7 @@
 Context <- R6Class(
   'Context',
   portable = FALSE,
+  class = FALSE,
   public = list(
     id = character(0),
     .label = character(0),      # For debug purposes
@@ -77,6 +78,7 @@ Context <- R6Class(
 ReactiveEnvironment <- R6Class(
   'ReactiveEnvironment',
   portable = FALSE,
+  class = FALSE,
   public = list(
     .currentContext = NULL,
     .nextId = 0L,

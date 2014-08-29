@@ -7,6 +7,7 @@
 PriorityQueue <- R6Class(
   'PriorityQueue',
   portable = FALSE,
+  class = FALSE,
   public = list(
     # Keys are priorities, values are subqueues (implemented as list)
     .itemsByPriority = 'Map',

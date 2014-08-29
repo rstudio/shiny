@@ -5,6 +5,7 @@
 CacheContext <- R6Class(
   'CacheContext',
   portable = FALSE,
+  class = FALSE,
   public = list(
     .dirty = TRUE,
     # List of functions that return TRUE if dirty

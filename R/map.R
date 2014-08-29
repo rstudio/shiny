@@ -13,54 +13,61 @@ Map <- R6Class(
   'Map',
   portable = FALSE,
   public = list(
-    .env = NULL,
-
     initialize = function() {
-      .env <<- new.env(parent=emptyenv())
+      private$env <- new.env(parent=emptyenv())
     },
     get = function(key) {
-      if (self$containsKey(key))
-        base::get(key, pos=.env, inherits=FALSE)
+      env[[key]]
     },
     set = function(key, value) {
-      assign(key, value, pos=.env, inherits=FALSE)
+      env[[key]] <- value
       value
     },
     mset = function(...) {
       args <- list(...)
-      for (key in names(args))
-        set(key, args[[key]])
+      if (length(args) == 0)
+        return()
+
+      arg_names <- names(args)
+      if (is.null(arg_names) || any(!nzchar(arg_names)))
+        stop("All elements must be named")
+
+      list2env(args, envir = env)
     },
     remove = function(key) {
-      if (self$containsKey(key)) {
-        result <- self$get(key)
-        rm(list = key, pos=.env, inherits=FALSE)
-        result
-      }
+      if (!self$containsKey(key))
+        return(NULL)
+
+      result <- env[[key]]
+      rm(list=key, envir=env, inherits=FALSE)
+      result
     },
     containsKey = function(key) {
-      exists(key, where=.env, inherits=FALSE)
+      exists(key, envir=env, inherits=FALSE)
     },
     keys = function() {
-      ls(envir=.env, all.names=TRUE)
+      # Sadly, this is much faster than ls(), because it doesn't sort the keys.
+      names(as.list(env, all.names=TRUE))
     },
     values = function() {
-      mget(self$keys(), envir=.env, inherits=FALSE)
+      as.list(env, all.names=TRUE)
     },
     clear = function() {
-      .env <<- new.env(parent=emptyenv())
+      private$env <- new.env(parent=emptyenv())
       invisible(NULL)
     },
     size = function() {
-      length(.env)
+      length(env)
     }
+  ),
+
+  private = list(
+    env = 'environment'
   )
 )
 
 as.list.Map <- function(map) {
-  sapply(map$keys(),
-         map$get,
-         simplify=FALSE)
+  map$values()
 }
 length.Map <- function(map) {
   map$size()

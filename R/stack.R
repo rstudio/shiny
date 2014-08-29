@@ -54,10 +54,10 @@ Stack <- R6Class(
       count
     },
 
-    # Return the entire queue as a list, where the first item in the list is the
+    # Return the entire stack as a list, where the first item in the list is the
     # oldest item in the stack, and the last item is the most recently added.
     as_list = function() {
-      stack[rev(seq_len(count))]
+      stack[seq_len(count)]
     }
   ),
 

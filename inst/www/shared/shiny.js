@@ -1586,7 +1586,7 @@
         });
 
       // caseInsensitive searching? default true
-      var searchCI = data.options === null || data.options.search === null ||
+      var searchCI = data.options === null || data.options.search === undefined ||
                      data.options.search.caseInsensitive !== false;
       var oTable = $(el).children("table").DataTable($.extend({
         "processing": true,

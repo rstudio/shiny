@@ -12,6 +12,8 @@ shiny 0.10.1.9xxx
 
 * Switched away from reference classes to R6.
 
+* Reactive log performance has been greatly improved.
+
 * Added `Progress` and `withProgress`, to display the progress of computation
   on the client browser.
 

@@ -445,7 +445,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   o <- Observable$new(fun, label, domain)
   registerDebugHook(".func", o, "Reactive")
-  structure(o$getValue@.Data, observable = o, class = "reactive")
+  structure(o$getValue, observable = o, class = "reactive")
 }
 
 #' @export

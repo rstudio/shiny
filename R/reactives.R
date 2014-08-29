@@ -460,8 +460,8 @@ is.reactive <- function(x) inherits(x, "reactive")
 
 # Return the number of times that a reactive expression or observer has been run
 execCount <- function(x) {
-  if (is.function(x))
-    return(environment(x)$.execCount)
+  if (is.reactive(x))
+    return(attr(x, "observable")$.execCount)
   else if (inherits(x, 'Observer'))
     return(x$.execCount)
   else

@@ -72,7 +72,7 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
 #'   file and either ui.R or www/index.html)
 #' @export
 shinyAppDir <- function(appDir, options=list()) {
-  if (!file.exists(appDir)) {
+  if (!file_test('-d', appDir)) {
     stop("No Shiny application exists at the path \"", appDir, "\"")
   }
 

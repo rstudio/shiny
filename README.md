@@ -4,7 +4,7 @@
 
 Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
 
-For an introduction and examples, visit the [Shiny homepage](http://www.rstudio.com/shiny/).
+For an introduction and examples, visit the [Shiny Dev Center](http://shiny.rstudio.com/).
 
 ## Features
 
@@ -37,7 +37,7 @@ devtools::install_github("shiny", "rstudio")
 
 ## Getting Started
 
-To learn more we highly recommend you check out the [Shiny Tutorial](http://rstudio.github.com/shiny/tutorial). The tutorial explains the framework in-depth, walks you through building a simple application, and includes extensive annotated examples.
+To learn more we highly recommend you check out the [Shiny Tutorial](http://shiny.rstudio.com/tutorial/). The tutorial explains the framework in-depth, walks you through building a simple application, and includes extensive annotated examples.
 
 We hope you enjoy using Shiny. If you have general questions about using Shiny, please use the Shiny [mailing list](https://groups.google.com/forum/#!forum/shiny-discuss). For bug reports, please use the [issue tracker](https://github.com/rstudio/shiny/issues).
 

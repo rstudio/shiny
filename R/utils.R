@@ -970,6 +970,9 @@ stopWithCondition <- function(class, message) {
 #' its version, and whether it is the open source edition or professional
 #' edition. If the app is not served through the Shiny Server, this function
 #' just returns \code{list(shinyServer = FALSE)}.
+#'
+#' This function will only return meaningful data when using Shiny Server
+#' version 1.2.2 or later.
 #' @export
 #' @return A list of the Shiny Server information.
 serverInfo <- function() {

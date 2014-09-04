@@ -18,7 +18,7 @@ shiny 0.10.1.9xxx
   on the client browser.
 
 * Fixed #557: updateSelectizeInput(choices, server = TRUE) did not work when
-  `chocies` is a character vector.
+  `choices` is a character vector.
 
 * Searching in DataTables is case-insensitive and the search strings are not
   treated as regular expressions by default now. If you want case-sensitive
@@ -34,6 +34,8 @@ shiny 0.10.1.9xxx
 
 * Custom output bindings can now render `htmltools::htmlDependency` objects at
   runtime using `Shiny.renderDependencies()`.
+
+* Fixes to rounding behavior of sliderInput. (#301, #502)
 
 shiny 0.10.1
 --------------------------------------------------------------------------------

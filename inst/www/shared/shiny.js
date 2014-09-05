@@ -1443,6 +1443,15 @@
       var attachments = dep.attachment;
       if (typeof(attachments) === "string")
         attachments = [attachments];
+      if ($.isArray(attachments)) {
+        // The contract for attachments is that arrays of attachments are
+        // addressed using 1-based indexes. Convert this array to an object.
+        var tmp = {};
+        $.each(attachments, function(index, attachment) {
+          tmp[(index + 1) + ""] = attachment;
+        });
+        attachments = tmp;
+      }
 
       var attach = $.map(attachments, function(attachment, key) {
         return $("<link rel='attachment'>")

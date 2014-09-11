@@ -69,30 +69,25 @@
 #' @export
 Progress <- R6Class(
   'Progress',
-  portable = FALSE,
+  portable = TRUE,
   public = list(
-    .session = 'environment',
-    .id = 'character',
-    .min = 'numeric',
-    .max = 'numeric',
-    .value = 'ANY',
-    .closed = 'logical',
 
     initialize = function(session = getDefaultReactiveDomain(), min = 0, max = 1) {
       # A hacky check to make sure the session object is indeed a session object.
       if (is.null(session$onFlush)) stop("'session' is not a session object.")
 
-      .closed <<- FALSE
-      .session <<- session
-      .id <<- paste(as.character(as.raw(runif(8, min=0, max=255))), collapse='')
-      .min <<- min
-      .max <<- max
-      .value <<- NULL
+      private$session <- session
+      private$id <- paste(as.character(as.raw(runif(8, min=0, max=255))), collapse='')
+      private$min <- min
+      private$max <- max
+      private$value <- NULL
+      private$closed <- FALSE
 
-      .session$sendProgress('open', list(id = .id))
+      session$sendProgress('open', list(id = private$id))
     },
+
     set = function(message = NULL, detail = NULL, value = NULL) {
-      if (.closed) {
+      if (private$closed) {
         warning("Attempting to set progress, but progress already closed.")
         return()
       }
@@ -100,32 +95,45 @@ Progress <- R6Class(
       if (is.null(value) || is.na(value)) {
         value <- NULL
       } else {
-        value <- min(1, max(0, (value - .min) / (.max - .min)))
+        value <- min(1, max(0, (value - private$min) / (private$max - private$min)))
       }
 
-      .value <<- value
+      private$value <- value
 
       data <- dropNulls(list(
-        id = .id,
+        id = private$id,
         message = message,
         detail = detail,
         value = value
       ))
 
-      .session$sendProgress('update', data)
+       private$session$sendProgress('update', data)
     },
-    getMin = function() .min,
-    getMax = function() .max,
-    getValue = function() .value,
+
+    getMin = function() private$min,
+
+    getMax = function() private$max,
+
+    getValue = function() private$value,
+
     close = function() {
-      if (.closed) {
+      if (private$closed) {
         warning("Attempting to close progress, but progress already closed.")
         return()
       }
 
-      .session$sendProgress('close', list(id = .id))
-      .closed <<- TRUE
+      private$session$sendProgress('close', list(id = private$id))
+      private$closed <- TRUE
     }
+  ),
+
+  private = list(
+    session = 'environment',
+    id = character(0),
+    min = numeric(0),
+    max = numeric(0),
+    value = NULL,
+    closed = logical(0)
   )
 )
 

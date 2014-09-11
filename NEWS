@@ -37,6 +37,8 @@ shiny 0.10.1.9xxx
 
 * Fixes to rounding behavior of sliderInput. (#301, #502)
 
+* Added `position` parameter to `navbarPage`.
+
 shiny 0.10.1
 --------------------------------------------------------------------------------
 

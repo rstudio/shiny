@@ -200,7 +200,9 @@ withProgress <- function(expr, min = 0, max = 1,
                          message = NULL, detail = NULL,
                          session = getDefaultReactiveDomain(),
                          env = parent.frame(), quoted = FALSE) {
-  func <- exprToFunction(expr, env, quoted)
+
+  if (!quoted)
+    expr <- substitute(expr)
 
   p <- Progress$new(session, min = min, max = max)
 
@@ -212,7 +214,7 @@ withProgress <- function(expr, min = 0, max = 1,
 
   p$set(message, detail, value)
 
-  return(func())
+  eval(expr, env)
 }
 
 #' @rdname withProgress

@@ -2658,12 +2658,11 @@
       this.iframe = document.createElement('iframe');
       this.iframe.id = iframeId;
       this.iframe.name = iframeId;
-      this.iframe.src = 'about:blank';
       this.iframe.setAttribute('style', 'position: fixed; top: 0; left: 0; width: 0; height: 0; border: none');
+      $('body').append(this.iframe);
       this.iframe.onload = function() {
         $(self.iframe).remove();
       };
-      $('body').append(this.iframe);
 
       this.form = document.createElement('form');
       this.form.method = 'POST';

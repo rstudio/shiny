@@ -585,7 +585,8 @@ ShinySession <- R6Class(
 
       if (matches[2] == 'uploadie' && identical(req$REQUEST_METHOD, "POST")) {
         id <- URLdecode(matches[3])
-        browser()
+        res <- mime::parse_multipart(req)
+        .input$set(id, res[[id]])
         return(httpResponse(200, 'text/plain', 'OK'))
       }
 

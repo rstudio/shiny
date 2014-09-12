@@ -512,7 +512,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 #'
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
-  inputTag <- tags$input(id = inputId, type = "file")
+  inputTag <- tags$input(id = inputId, name = inputId, type = "file")
   if (multiple)
     inputTag$attribs$multiple <- "multiple"
   if (length(accept) > 0)

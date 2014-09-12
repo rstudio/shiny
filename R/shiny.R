@@ -586,7 +586,7 @@ ShinySession <- R6Class(
       if (matches[2] == 'uploadie' && identical(req$REQUEST_METHOD, "POST")) {
         id <- URLdecode(matches[3])
         browser()
-        .input$set(id, Math.runif(1))
+        return(httpResponse(200, 'text/plain', 'OK'))
       }
 
       if (matches[2] == 'download') {

@@ -521,6 +521,9 @@ ShinySession <- R6Class(
     },
 
     # Public RPC methods
+    `@uploadieFinish` = function() {
+      # Do nothing; just want the side effect of flushReact, output flush, etc.
+    },
     `@uploadInit` = function(fileInfos = list()) {
       maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
       fileInfos <- lapply(fileInfos, function(fi) {

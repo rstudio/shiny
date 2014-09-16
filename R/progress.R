@@ -17,9 +17,13 @@
 #'     \item{\code{initialize(session, min = 0, max = 1)}}{
 #'       Creates a new progress panel (but does not display it).
 #'     }
-#'     \item{\code{set(message = NULL, detail = NULL, value = NULL)}}{
+#'     \item{\code{set(value = NULL, message = NULL, detail = NULL)}}{
 #'       Updates the progress panel. When called the first time, the
 #'       progress panel is displayed.
+#'     }
+#'     \item{\code{inc(amount = 0.1, message = NULL, detail = NULL)}}{
+#'       Like \code{set}, this updates the progress panel. The difference is
+#'       that \code{inc} increases
 #'     }
 #'     \item{\code{close()}}{
 #'       Removes the progress panel. Future calls to \code{set} and
@@ -40,9 +44,14 @@
 #'   to be displayed to the user, or \code{NULL} to hide the current
 #'   detail message (if any). The detail message will be shown with a
 #'   de-emphasized appearance relative to \code{message}.
-#' @param value Single-element numeric vector; the value at which to set
+#' @param value A numeric value at which to set
 #'   the progress bar, relative to \code{min} and \code{max}.
 #'   \code{NULL} hides the progress bar, if it is currently visible.
+#' @param amount Single-element numeric vector; the value at which to set
+#'   the progress bar, relative to \code{min} and \code{max}.
+#'   \code{NULL} hides the progress bar, if it is currently visible.
+#' @param amount For the \code{inc()} method, a numeric value to increment the
+#'   progress bar.
 #'
 #' @examples
 #' \dontrun{
@@ -86,7 +95,7 @@ Progress <- R6Class(
       session$sendProgress('open', list(id = private$id))
     },
 
-    set = function(message = NULL, detail = NULL, value = NULL) {
+    set = function(value = NULL, message = NULL, detail = NULL) {
       if (private$closed) {
         warning("Attempting to set progress, but progress already closed.")
         return()
@@ -108,6 +117,11 @@ Progress <- R6Class(
       ))
 
        private$session$sendProgress('update', data)
+    },
+
+    inc = function(amount = 0.1, message = NULL, detail = NULL) {
+      value <- min(private$value + amount, private$max)
+      self$set(value, message, detail)
     },
 
     getMin = function() private$min,
@@ -220,7 +234,7 @@ withProgress <- function(expr, min = 0, max = 1,
     p$close()
   })
 
-  p$set(message, detail, value)
+  p$set(value, message, detail)
 
   eval(expr, env)
 }
@@ -238,7 +252,7 @@ setProgress <- function(value = NULL, message = NULL, detail = NULL,
     return()
   }
 
-  session$progressStack$peek()$set(message, detail, value)
+  session$progressStack$peek()$set(value, message, detail)
   invisible()
 }
 
@@ -256,7 +270,6 @@ incProgress <- function(amount = 0.1, message = NULL, detail = NULL,
   }
 
   p <- session$progressStack$peek()
-  value <- min(p$getValue() + amount, p$getMax())
-  p$set(message, detail, value)
+  p$inc(amount, message, detail)
   invisible()
 }

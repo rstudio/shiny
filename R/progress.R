@@ -23,7 +23,8 @@
 #'     }
 #'     \item{\code{inc(amount = 0.1, message = NULL, detail = NULL)}}{
 #'       Like \code{set}, this updates the progress panel. The difference is
-#'       that \code{inc} increases
+#'       that \code{inc} increases the progress bar by \code{amount}, instead
+#'       of setting it to a specific value.
 #'     }
 #'     \item{\code{close()}}{
 #'       Removes the progress panel. Future calls to \code{set} and

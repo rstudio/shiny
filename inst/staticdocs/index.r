@@ -64,7 +64,9 @@ sd_section("UI Outputs",
     "tableOutput",
     "textOutput",
     "verbatimTextOutput",
-    "downloadButton"
+    "downloadButton",
+    "Progress",
+    "withProgress"
   )
 )
 sd_section("Interface builder functions",
@@ -134,6 +136,7 @@ sd_section("Running",
 sd_section("Extending Shiny",
   "Functions that are intended to be called by third-party packages that extend Shiny.",
   c(
+    "createWebDependency",
     "addResourcePath",
     "registerInputHandler",
     "removeInputHandler",

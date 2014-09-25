@@ -2825,8 +2825,12 @@
       return;
 
     // Start the new upload and put the uploader in 'currentUploader'.
-    //el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
-    el.data('currentUploader', new IE8FileUploader(exports.shinyapp, id, evt.target));
+    if (IE8) {
+      var uploader = new IE8FileUploader(exports.shinyapp, id, evt.target);
+    } else {
+      var uploader = new FileUploader(exports.shinyapp, id, files);
+    }
+    el.data('currentUploader', uploader);
   }
 
   var fileInputBinding = new InputBinding();

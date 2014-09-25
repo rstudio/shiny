@@ -15,7 +15,7 @@ NULL
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @import htmltools httpuv xtable digest R6
+#' @import htmltools httpuv xtable digest R6 mime
 #' @importFrom RJSONIO fromJSON
 NULL
 

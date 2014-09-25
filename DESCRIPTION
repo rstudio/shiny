@@ -16,6 +16,7 @@ Imports:
     tools,
     utils,
     httpuv (>= 1.2.2),
+    mime (>= 0.1.3),
     RJSONIO,
     xtable,
     digest,

@@ -2660,13 +2660,18 @@
       this.iframe.name = iframeId;
       this.iframe.setAttribute('style', 'position: fixed; top: 0; left: 0; width: 0; height: 0; border: none');
       $('body').append(this.iframe);
-      this.iframe.onload = function() {
+      var iframeDestroy = function() {
         // Forces Shiny to flushReact, flush outputs, etc. Without this we get
         // invalidated reactives, but observers don't actually execute.
         self.shinyapp.makeRequest('uploadieFinish', [], function(){}, function(){});
 
         $(self.iframe).remove();
       };
+      if (this.iframe.attachEvent) {
+        this.iframe.attachEvent('onload', iframeDestroy);
+      } else {
+        this.iframe.onload = iframeDestroy;
+      }
 
       this.form = document.createElement('form');
       this.form.method = 'POST';

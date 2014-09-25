@@ -2664,7 +2664,6 @@
         // Forces Shiny to flushReact, flush outputs, etc. Without this we get
         // invalidated reactives, but observers don't actually execute.
         self.shinyapp.makeRequest('uploadieFinish', [], function(){}, function(){});
-
         $(self.iframe).remove();
       };
       if (this.iframe.attachEvent) {
@@ -2826,11 +2825,10 @@
 
     // Start the new upload and put the uploader in 'currentUploader'.
     if (IE8) {
-      var uploader = new IE8FileUploader(exports.shinyapp, id, evt.target);
+      new IE8FileUploader(exports.shinyapp, id, evt.target);
     } else {
-      var uploader = new FileUploader(exports.shinyapp, id, files);
+      el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
     }
-    el.data('currentUploader', uploader);
   }
 
   var fileInputBinding = new InputBinding();

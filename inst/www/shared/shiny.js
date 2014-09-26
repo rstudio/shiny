@@ -1595,7 +1595,7 @@
         });
 
       // caseInsensitive searching? default true
-      var searchCI = data.options === null || data.options.search === undefined ||
+      var searchCI = data.options === null || typeof(data.options.search) === 'undefined' ||
                      data.options.search.caseInsensitive !== false;
       var oTable = $(el).children("table").DataTable($.extend({
         "processing": true,
@@ -2231,7 +2231,7 @@
     },
     setValue: function(el, value) {
       var selectize = this._selectize(el);
-      if (selectize !== undefined) {
+      if (typeof(selectize) !== 'undefined') {
         selectize.setValue(value);
       } else $(el).val(value);
     },
@@ -2329,7 +2329,7 @@
         searchField: ['label']
       }, JSON.parse(config.html()));
       // selectize created from selectInput()
-      if (config.data('nonempty') !== undefined) {
+      if (typeof(config.data('nonempty')) !== 'undefined') {
         options = $.extend(options, {
           onItemRemove: function(value) {
             if (this.getValue() === "")
@@ -2817,7 +2817,7 @@
       uploader.abort();
 
     var files = evt.target.files;
-    var IE8 = files === undefined;
+    var IE8 = typeof(files) === 'undefined';
     var id = fileInputBinding.getId(evt.target);
 
     if (!IE8 && files.length === 0)

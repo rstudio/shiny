@@ -11,15 +11,14 @@ fileInput(inputId, label, multiple = FALSE, accept = NULL)
 \item{label}{Display label for the control.}
 
 \item{multiple}{Whether the user should be allowed to select and upload
-multiple files at once.}
+multiple files at once. \bold{Does not work on older browsers, including
+Internet Explorer 9 and earlier.}}
 
 \item{accept}{A character vector of MIME types; gives the browser a hint of
   what kind of files the server is expecting.}
 }
 \description{
 Create a file upload control that can be used to upload one or more files.
-\bold{Does not work on older browsers, including Internet Explorer 9 and
-earlier.}
 }
 \details{
 Whenever a file upload completes, the corresponding input variable is set

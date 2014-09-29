@@ -481,8 +481,6 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 #' File Upload Control
 #'
 #' Create a file upload control that can be used to upload one or more files.
-#' \bold{Does not work on older browsers, including Internet Explorer 9 and
-#' earlier.}
 #'
 #' Whenever a file upload completes, the corresponding input variable is set
 #' to a dataframe. This dataframe contains one row for each selected file, and
@@ -506,13 +504,14 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
 #' @param multiple Whether the user should be allowed to select and upload
-#'   multiple files at once.
+#'   multiple files at once. \bold{Does not work on older browsers, including
+#'   Internet Explorer 9 and earlier.}
 #' @param accept A character vector of MIME types; gives the browser a hint of
 #'   what kind of files the server is expecting.
 #'
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
-  inputTag <- tags$input(id = inputId, type = "file")
+  inputTag <- tags$input(id = inputId, name = inputId, type = "file")
   if (multiple)
     inputTag$attribs$multiple <- "multiple"
   if (length(accept) > 0)

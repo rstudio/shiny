@@ -10,6 +10,10 @@ shiny 0.10.1.9xxx
   you have customized the DataTables options in your apps. (More info:
   https://github.com/rstudio/shiny/pull/558)
 
+* File uploading via `fileInput()` works for Internet Explorer 8 and 9 now. Note
+  IE8/9 do not support multiple files from a single file input. If you need to
+  upload multiple files, you have to use one file input for each file.
+
 * Switched away from reference classes to R6.
 
 * Reactive log performance has been greatly improved.

@@ -15,7 +15,7 @@ NULL
 #' @name shiny-package
 #' @aliases shiny
 #' @docType package
-#' @import htmltools httpuv xtable digest R6
+#' @import htmltools httpuv xtable digest R6 mime
 #' @importFrom RJSONIO fromJSON
 NULL
 
@@ -521,6 +521,9 @@ ShinySession <- R6Class(
     },
 
     # Public RPC methods
+    `@uploadieFinish` = function() {
+      # Do nothing; just want the side effect of flushReact, output flush, etc.
+    },
     `@uploadInit` = function(fileInfos) {
       maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
       fileInfos <- lapply(fileInfos, function(fi) {
@@ -581,6 +584,13 @@ ShinySession <- R6Class(
 
           return(httpResponse(200, 'text/plain', 'OK'))
         }
+      }
+
+      if (matches[2] == 'uploadie' && identical(req$REQUEST_METHOD, "POST")) {
+        id <- URLdecode(matches[3])
+        res <- mime::parse_multipart(req)
+        .input$set(id, res[[id]])
+        return(httpResponse(200, 'text/plain', 'OK'))
       }
 
       if (matches[2] == 'download') {

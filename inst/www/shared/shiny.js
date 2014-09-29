@@ -1595,7 +1595,7 @@
         });
 
       // caseInsensitive searching? default true
-      var searchCI = data.options === null || data.options.search === undefined ||
+      var searchCI = data.options === null || typeof(data.options.search) === 'undefined' ||
                      data.options.search.caseInsensitive !== false;
       var oTable = $(el).children("table").DataTable($.extend({
         "processing": true,
@@ -2231,7 +2231,7 @@
     },
     setValue: function(el, value) {
       var selectize = this._selectize(el);
-      if (selectize !== undefined) {
+      if (typeof(selectize) !== 'undefined') {
         selectize.setValue(value);
       } else $(el).val(value);
     },
@@ -2329,7 +2329,7 @@
         searchField: ['label']
       }, JSON.parse(config.html()));
       // selectize created from selectInput()
-      if (config.data('nonempty') !== undefined) {
+      if (typeof(config.data('nonempty')) !== 'undefined') {
         options = $.extend(options, {
           onItemRemove: function(value) {
             if (this.getValue() === "")
@@ -2644,6 +2644,45 @@
   });
   inputBindings.register(bootstrapTabInputBinding, 'shiny.bootstrapTabInput');
 
+  var IE8FileUploader = function(shinyapp, id, fileEl) {
+    this.shinyapp = shinyapp;
+    this.id = id;
+    this.fileEl = fileEl;
+    this.beginUpload();
+  };
+  (function() {
+    this.beginUpload = function() {
+      var self = this;
+      // Create invisible frame
+      var iframeId = 'shinyupload_iframe_' + this.id;
+      this.iframe = document.createElement('iframe');
+      this.iframe.id = iframeId;
+      this.iframe.name = iframeId;
+      this.iframe.setAttribute('style', 'position: fixed; top: 0; left: 0; width: 0; height: 0; border: none');
+      $('body').append(this.iframe);
+      var iframeDestroy = function() {
+        // Forces Shiny to flushReact, flush outputs, etc. Without this we get
+        // invalidated reactives, but observers don't actually execute.
+        self.shinyapp.makeRequest('uploadieFinish', [], function(){}, function(){});
+        $(self.iframe).remove();
+      };
+      if (this.iframe.attachEvent) {
+        this.iframe.attachEvent('onload', iframeDestroy);
+      } else {
+        this.iframe.onload = iframeDestroy;
+      }
+
+      this.form = document.createElement('form');
+      this.form.method = 'POST';
+      this.form.setAttribute('enctype', 'multipart/form-data');
+      this.form.action = "session/" + encodeURI(this.shinyapp.config.sessionId)
+                         + "/uploadie/" + encodeURI(this.id);
+      this.form.id = 'shinyupload_form_' + this.id;
+      this.form.target = iframeId;
+      $(this.form).insertAfter(this.fileEl).append(this.fileEl);
+      this.form.submit();
+    };
+  }).call(IE8FileUploader.prototype);
 
   var FileUploader = function(shinyapp, id, files) {
     this.shinyapp = shinyapp;
@@ -2778,13 +2817,18 @@
       uploader.abort();
 
     var files = evt.target.files;
+    var IE8 = typeof(files) === 'undefined';
     var id = fileInputBinding.getId(evt.target);
 
-    if (files.length === 0)
+    if (!IE8 && files.length === 0)
       return;
 
     // Start the new upload and put the uploader in 'currentUploader'.
-    el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+    if (IE8) {
+      new IE8FileUploader(exports.shinyapp, id, evt.target);
+    } else {
+      el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+    }
   }
 
   var fileInputBinding = new InputBinding();

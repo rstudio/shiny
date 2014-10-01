@@ -480,9 +480,9 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 
 #' File Upload Control
 #'
-#' Create a file upload control that can be used to upload one or more files.
-#' \bold{Does not work on older browsers, including Internet Explorer 9 and
-#' earlier.}
+#' Create a file upload control that can be used to upload one or more files.  This
+#' input incorporates the method of Trevor Davis to allow the 'Browse' button to be styled:
+#' \url{https://gist.github.com/davist11/645816}
 #'
 #' Whenever a file upload completes, the corresponding input variable is set
 #' to a dataframe. This dataframe contains one row for each selected file, and
@@ -506,24 +506,47 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 #' @param inputId Input variable to assign the control's value to.
 #' @param label Display label for the control.
 #' @param multiple Whether the user should be allowed to select and upload
-#'   multiple files at once.
+#'   multiple files at once. \bold{Does not work on older browsers, including
+#'   Internet Explorer 9 and earlier.}
 #' @param accept A character vector of MIME types; gives the browser a hint of
 #'   what kind of files the server is expecting.
+#' @param style A character vector containing a Bootstrap style class:
+#'  "", primary", "info", "success", "warning", "danger", "inverse", "link".
+#' @param barStyle A character vector containing a Bootstrap style class:
+#'  "", primary", "info", "success", "warning", "danger", "inverse", "link".
+#'
+#'  @examples
+#'   shinyApp(ui=fluidPage(fileInput('text', label="Text")),
+#'            server= function(input, output){ file <- reactive({input$test}) },
+#'            options=list(launch.browser=T))
 #'
 #' @export
-fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
-  inputTag <- tags$input(id = inputId, type = "file")
+fileInput <- function(inputId, label, multiple = FALSE, accept = NULL, style = NULL, barStyle = NULL) {
+  style <- match.arg(style, c("", "primary", "info", "success", "warning", "danger", "inverse", "link"))
+  barStyle <- if( is.null(barStyle) ) style else match.arg(barStyle, c("", "primary", "info", "success", "warning", "danger", "inverse", "link"))
+  barClass <- if(style != "") paste0(" progress-", barStyle) else ""
+
+  buttonClass <- paste0("btn btn-", style, " browse-btn")
+  buttonTag <- tags$button(class=buttonClass, "Browse")
+
+  fileHolderTag <- tags$span(class="file-holder", "No file selected")
+
+  inputTag <- tags$input(id = inputId, name = inputId, type = "file")
   if (multiple)
     inputTag$attribs$multiple <- "multiple"
   if (length(accept) > 0)
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
   tagList(
+    tags$head(
+      singleton(tags$script(src="shared/file/js/fileInput.js", type="text/javascript")),
+      singleton(tags$link(rel = "stylesheet", type="text/css",
+                          href="shared/file/css/fileInput.css")) ),
     label %AND% tags$label(label),
-    inputTag,
+    tags$span(class="file-wrapper", inputTag, buttonTag, fileHolderTag),
     tags$div(
       id=paste(inputId, "_progress", sep=""),
-      class="progress progress-striped active shiny-file-input-progress",
+      class=paste0("progress progress-striped active shiny-file-input-progress", barClass),
       tags$div(class="bar"),
       tags$label()
     )
@@ -923,7 +946,7 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 #' @param size The size of the button--options are large, small, mini
 #' @param block Whether the button should fill the block
 #' @param icon An optional \code{\link{icon}} to appear on the button.
-#' @param specify icon set to use
+#' @param icon.library specify icon set to use
 #'   \url{http://www.fontawesome.io/icons} or
 #'   \url{http://getbootstrap.com/2.3.2/base-css.html#icons}
 #' @param class Any additional CSS class one wishes to add to the action
@@ -933,51 +956,88 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 #' @family input elements
 #'
 #' @examples
-#' \dontrun{
-#' # In server.R
-#' output$distPlot <- renderPlot({
-#'   # Take a dependency on input$goButton
-#'   input$goButton
+#' shinyApp(ui=fluidPage(titlePanel("Types of Action Buttons"),
+#'                          wellPanel(
+#'                            h4("Default Width  [block=FALSE]"),
+#'                            fluidRow(
+#'                              column(2, actionButton('default', label="Default"), offset=2),
+#'                              column(2, actionButton('primary', label="Primary", style="primary")),
+#'                              column(2, actionButton('info', label="Info", style="info")),
+#'                              column(2, actionButton('success', label="Success", style="success"))
+#'                            ),
+#'                            br(),
+#'                            fluidRow(
+#'                              column(2, actionButton('warning', label="Warning", style="warning"), offset=2),
+#'                              column(2, actionButton('danger', label="Danger", style="danger")),
+#'                              column(2, actionButton('inverse', label="Inverse", style="inverse")),
+#'                              column(2, actionButton('link', label="Link", style="link"))
+#'                            )
+#'                          ),
+#'                          wellPanel(
+#'                            h4("Fill Block  [block=TRUE]"),
+#'                            fluidRow(
+#'                              column(4, actionButton('default-block', label="Default", block=TRUE), offset=2),
+#'                              column(4, actionButton('success', label="Success", style="success", block=TRUE))
+#'                            )
+#'                          ),
+#'                          wellPanel(
+#'                            h4("Button Size"),
+#'                            fluidRow(
+#'                              column(2, actionButton('default-size', label="Default"), offset=2),
+#'                              column(2, actionButton('mini', label="Mini", size="mini")),
+#'                              column(2, actionButton('small', label="Small", size="small")),
+#'                              column(2, actionButton('large', label="Large", size="large"))
+#'                            )
+#'                          ),
+#'                          wellPanel(
+#'                            h4("Icons"),
+#'                            fluidRow(
+#'                              column(2, actionButton('default-icon', label="No Icon"), offset=2),
+#'                              column(2, actionButton('primary-icon', label="Primary", style="primary", icon="plus")),
+#'                              column(2, actionButton('info-icon', label="Info", style="info", icon="info-circle")),
+#'                              column(2, actionButton('success-icon', label="Success", style="success", icon="trophy"))
+#'                            ),
+#'                            br(),
+#'                            fluidRow(
+#'                              column(2, actionButton('warning-icon', label="Warning", style="warning", icon="warning"), offset=2),
+#'                              column(2, actionButton('danger-icon', label="Danger", style="danger", icon="ban")),
+#'                              column(2, actionButton('inverse-icon', label="Inverse", style="inverse", icon="adjust")),
+#'                              column(2, actionButton('link-icon', label="Link", style="link", icon="cog"))
+#'                            )
+#'                          ),
+#'                          wellPanel(
+#'                              column(4, actionButton('bootstrap-icon', label="Bootstrap Icon", icon="user", icon.library="bootstrap", block=TRUE), offset=2),
+#'                              column(4, actionButton('fontawesome-icon', label="Font Awesome Icon", icon="user", icon.library="font awesome", block=TRUE))
+#'                          )),
+#'                          server= function(input, output){  },
+#'                          options=list(launch.browser=T))
 #'
-#'   # Use isolate() to avoid dependency on input$obs
-#'   dist <- isolate(rnorm(input$obs))
-#'   hist(dist)
-#' })
 #'
-#' # In ui.R
-#' actionButton("goButton", "Go!", icon="space-shuttle", style="success")
-#' }
 #' @export
 actionButton <- function(inputId, label, style = c("", "primary", "info", "success", "warning",
-                                                   "danger", "inverse", "link"), size = "", block = F, icon = NULL,
+                                                   "danger", "inverse", "link"), size = c("", "large", "small", "mini"), block = F, icon = NULL,
                          icon.library = c("font awesome", "bootstrap"), class = "", ...) {
 
 
-  style <- match.arg(style, c("", "primary", "info", "success", "warning",
-                              "danger", "inverse", "link")) {
-    btn.css.class <- paste("btn", style, sep = "-")
-  } else btn.css.class = ""
+  style <- match.arg(style, c("", "primary", "info", "success", "warning", "danger", "inverse", "link"))
+  btn.css.class <- if( style != "" ) paste("btn", style, sep = "-") else style
 
-  size <- match.arg(size, c("large", "small", "mini")) {
-    btn.size.class <- paste("btn", size, sep = "-")
-  } else btn.size.class = ""
+  size <- match.arg(size, c("", "large", "small", "mini"))
+  btn.size.class <- if(size != "") paste("btn", size, sep = "-") else size
 
-  if (block) {
-    btn.block = "btn-block"
-  } else btn.block = ""
+  btn.block <- if (block) "btn-block" else ""
 
   icon.set <- match.arg(icon.library, c("font awesome", "bootstrap"))
   if (!is.null(icon)) {
-    set = switch(icon.set,
-                 "font awesome" = "fa fa-",
-                 "bootstrap" = "icon-")
+    set <- switch(icon.set,
+                  "font awesome" = "fa fa-",
+                  "bootstrap" = "icon-")
     icon.code <- HTML(paste0("<i class='", set, icon, "'></i>"))
-  } else icon.code = ""
+  } else icon.code <- ""
 
   tagList(
     tags$head(
-      singleton(tags$link(rel = "stylesheet", type = "text/css", href = "shared/font-awesome/css/font-awesome.min.css")),
-      singleton(tags$script(src = "shinythings/actionButton-bindings.js"))
+      singleton(tags$link(rel = "stylesheet", type = "text/css", href = "shared/font-awesome/css/font-awesome.min.css"))
     ),
 
     tags$button(id = inputId, type = "button",

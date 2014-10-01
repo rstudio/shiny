@@ -4,7 +4,10 @@
 \alias{actionLink}
 \title{Action button/link}
 \usage{
-actionButton(inputId, label, icon = NULL, ...)
+actionButton(inputId, label, style = c("", "primary", "info", "success",
+  "warning", "danger", "inverse", "link"), size = c("", "large", "small",
+  "mini"), block = F, icon = NULL, icon.library = c("font awesome",
+  "bootstrap"), class = "", ...)
 
 actionLink(inputId, label, icon = NULL, ...)
 }
@@ -12,32 +15,87 @@ actionLink(inputId, label, icon = NULL, ...)
 \item{inputId}{Specifies the input slot that will be used to access the
 value.}
 
-\item{label}{The contents of the button or link--usually a text label, but
-you could also use any other HTML, like an image.}
+\item{label}{The contents of the button--usually a text label, but you could
+also use any other HTML, like an image.}
+
+\item{style}{The Bootstrap style of the button--options are
+primary, info, success, warning, danger, inverse, link or blank}
+
+\item{size}{The size of the button--options are large, small, mini}
+
+\item{block}{Whether the button should fill the block}
 
 \item{icon}{An optional \code{\link{icon}} to appear on the button.}
+
+\item{icon.library}{specify icon set to use
+\url{http://www.fontawesome.io/icons} or
+\url{http://getbootstrap.com/2.3.2/base-css.html#icons}}
+
+\item{class}{Any additional CSS class one wishes to add to the action
+button}
 
 \item{...}{Named attributes to be applied to the button or link.}
 }
 \description{
-Creates an action button or link whose value is initially zero, and increments by one
+Creates an action button whose value is initially zero, and increments by one
 each time it is pressed.
 }
 \examples{
-\dontrun{
-# In server.R
-output$distPlot <- renderPlot({
-  # Take a dependency on input$goButton
-  input$goButton
-
-  # Use isolate() to avoid dependency on input$obs
-  dist <- isolate(rnorm(input$obs))
-  hist(dist)
-})
-
-# In ui.R
-actionButton("goButton", "Go!")
-}
+shinyApp(ui=fluidPage(titlePanel("Types of Action Buttons"),
+                         wellPanel(
+                           h4("Default Width  [block=FALSE]"),
+                           fluidRow(
+                             column(2, actionButton('default', label="Default"), offset=2),
+                             column(2, actionButton('primary', label="Primary", style="primary")),
+                             column(2, actionButton('info', label="Info", style="info")),
+                             column(2, actionButton('success', label="Success", style="success"))
+                           ),
+                           br(),
+                           fluidRow(
+                             column(2, actionButton('warning', label="Warning", style="warning"), offset=2),
+                             column(2, actionButton('danger', label="Danger", style="danger")),
+                             column(2, actionButton('inverse', label="Inverse", style="inverse")),
+                             column(2, actionButton('link', label="Link", style="link"))
+                           )
+                         ),
+                         wellPanel(
+                           h4("Fill Block  [block=TRUE]"),
+                           fluidRow(
+                             column(4, actionButton('default-block', label="Default", block=TRUE), offset=2),
+                             column(4, actionButton('success', label="Success", style="success", block=TRUE))
+                           )
+                         ),
+                         wellPanel(
+                           h4("Button Size"),
+                           fluidRow(
+                             column(2, actionButton('default-size', label="Default"), offset=2),
+                             column(2, actionButton('mini', label="Mini", size="mini")),
+                             column(2, actionButton('small', label="Small", size="small")),
+                             column(2, actionButton('large', label="Large", size="large"))
+                           )
+                         ),
+                         wellPanel(
+                           h4("Icons"),
+                           fluidRow(
+                             column(2, actionButton('default-icon', label="No Icon"), offset=2),
+                             column(2, actionButton('primary-icon', label="Primary", style="primary", icon="plus")),
+                             column(2, actionButton('info-icon', label="Info", style="info", icon="info-circle")),
+                             column(2, actionButton('success-icon', label="Success", style="success", icon="trophy"))
+                           ),
+                           br(),
+                           fluidRow(
+                             column(2, actionButton('warning-icon', label="Warning", style="warning", icon="warning"), offset=2),
+                             column(2, actionButton('danger-icon', label="Danger", style="danger", icon="ban")),
+                             column(2, actionButton('inverse-icon', label="Inverse", style="inverse", icon="adjust")),
+                             column(2, actionButton('link-icon', label="Link", style="link", icon="cog"))
+                           )
+                         ),
+                         wellPanel(
+                             column(4, actionButton('bootstrap-icon', label="Bootstrap Icon", icon="user", icon.library="bootstrap", block=TRUE), offset=2),
+                             column(4, actionButton('fontawesome-icon', label="Font Awesome Icon", icon="user", icon.library="font awesome", block=TRUE))
+                         )),
+                         server= function(input, output){  },
+                         options=list(launch.browser=T))
 }
 \seealso{
 Other input.elements: \code{\link{animationOptions}},

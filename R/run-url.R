@@ -18,7 +18,7 @@
 #'   \code{port} and \code{launch.browser}.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' runUrl('https://github.com/rstudio/shiny_example/archive/master.tar.gz')
 #'
 #' # Can run an app from a subdirectory in the archive
@@ -80,7 +80,7 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, ...) {
 #'   all valid values.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' runGist(3239667)
 #' runGist("https://gist.github.com/jcheng5/3239667")
 #'
@@ -110,7 +110,7 @@ runGist <- function(gist, ...) {
 #'   Defaults to \code{"master"}.
 #' @export
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' runGitHub("shiny_example", "rstudio")
 #' # or runGitHub("rstudio/shiny_example")
 #'

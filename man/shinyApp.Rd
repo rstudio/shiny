@@ -69,7 +69,7 @@ interoperability purposes, such as embedding Shiny apps inside a \pkg{knitr}
 document.
 }
 \examples{
-\dontrun{
+\donttest{
 shinyApp(
   ui = fluidPage(
     numericInput("n", "n", 1),

@@ -55,8 +55,9 @@ runApp()
 
 # Start app in a subdirectory called myapp
 runApp("myapp")
+}
 
-
+\donttest{
 # Apps can be run without a server.r and ui.r file
 runApp(list(
   ui = bootstrapPage(

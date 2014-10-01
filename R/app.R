@@ -26,7 +26,7 @@
 #'   app.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' shinyApp(
 #'   ui = fluidPage(
 #'     numericInput("n", "n", 1),

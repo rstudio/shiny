@@ -30,7 +30,7 @@ to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not.}
 Launch Shiny example applications, and optionally, your system's web browser.
 }
 \examples{
-\dontrun{
+\donttest{
 # List all available examples
 runExample()
 

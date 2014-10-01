@@ -573,8 +573,9 @@ serviceApp <- function() {
 #'
 #' # Start app in a subdirectory called myapp
 #' runApp("myapp")
+#' }
 #'
-#'
+#' \donttest{
 #' # Apps can be run without a server.r and ui.r file
 #' runApp(list(
 #'   ui = bootstrapPage(
@@ -758,7 +759,7 @@ stopApp <- function(returnValue = NULL) {
 #'   code or commentary.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # List all available examples
 #' runExample()
 #'

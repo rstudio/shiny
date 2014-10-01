@@ -3,7 +3,8 @@
 \alias{fileInput}
 \title{File Upload Control}
 \usage{
-fileInput(inputId, label, multiple = FALSE, accept = NULL)
+fileInput(inputId, label, multiple = FALSE, accept = NULL, style = NULL,
+  barStyle = NULL)
 }
 \arguments{
 \item{inputId}{Input variable to assign the control's value to.}
@@ -11,15 +12,22 @@ fileInput(inputId, label, multiple = FALSE, accept = NULL)
 \item{label}{Display label for the control.}
 
 \item{multiple}{Whether the user should be allowed to select and upload
-multiple files at once.}
+multiple files at once. \bold{Does not work on older browsers, including
+Internet Explorer 9 and earlier.}}
 
 \item{accept}{A character vector of MIME types; gives the browser a hint of
-  what kind of files the server is expecting.}
+what kind of files the server is expecting.}
+
+\item{style}{A character vector containing a Bootstrap style class:
+"", primary", "info", "success", "warning", "danger", "inverse", "link".}
+
+\item{barStyle}{A character vector containing a Bootstrap style class:
+ "", primary", "info", "success", "warning", "danger", "inverse", "link".}
 }
 \description{
-Create a file upload control that can be used to upload one or more files.
-\bold{Does not work on older browsers, including Internet Explorer 9 and
-earlier.}
+Create a file upload control that can be used to upload one or more files.  This
+input incorporates the method of Trevor Davis to allow the 'Browse' button to be styled:
+\url{https://gist.github.com/davist11/645816}
 }
 \details{
 Whenever a file upload completes, the corresponding input variable is set
@@ -38,6 +46,11 @@ the following columns:
   uploaded. This file may be deleted if the user performs another upload
   operation.}
 }
+}
+\examples{
+shinyApp(ui=fluidPage(fileInput('text', label="Text")),
+           server= function(input, output){ file <- reactive({input$test}) },
+           options=list(launch.browser=T))
 }
 \seealso{
 Other input.elements: \code{\link{actionButton}},

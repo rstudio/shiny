@@ -530,8 +530,16 @@ Observer <- R6Class(
       })
 
       ctx$onFlush(function() {
-        if (!.destroyed)
-          run()
+        tryCatch({
+          if (!.destroyed)
+            run()
+        }, error = function(e) {
+          warning("Unhandled error in observer: ",
+            e$message, "\n", .label, immediate. = TRUE, call. = FALSE)
+          if (!is.null(.domain)) {
+            .domain$unhandledError(e)
+          }
+        })
       })
 
       return(ctx)

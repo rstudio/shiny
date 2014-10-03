@@ -490,30 +490,30 @@ test_that("names() and reactiveValuesToList()", {
 
 test_that("Observer pausing works", {
   values <- reactiveValues(a=1)
-  
+
   funcA <- reactive({
     values$a
   })
-  
+
   obsB <- observe({
     funcA()
   })
-  
+
   # Important: suspend() only affects observer at invalidation time
-  
+
   # Observers are invalidated at creation time, so it will run once regardless
   # of being suspended
   obsB$suspend()
   flushReact()
   expect_equal(execCount(funcA), 1)
   expect_equal(execCount(obsB), 1)
-  
+
   # When resuming, if nothing changed, don't do anything
   obsB$resume()
   flushReact()
   expect_equal(execCount(funcA), 1)
   expect_equal(execCount(obsB), 1)
-  
+
   # Make sure suspended observers do not flush, but do invalidate
   obsB_invalidated <- FALSE
   obsB$onInvalidate(function() {obsB_invalidated <<- TRUE})
@@ -523,20 +523,20 @@ test_that("Observer pausing works", {
   expect_equal(obsB_invalidated, TRUE)
   expect_equal(execCount(funcA), 1)
   expect_equal(execCount(obsB), 1)
-  
+
   obsB$resume()
   values$a <- 2.5
   obsB$suspend()
   flushReact()
   expect_equal(execCount(funcA), 2)
   expect_equal(execCount(obsB), 2)
-  
+
   values$a <- 3
   flushReact()
 
   expect_equal(execCount(funcA), 2)
   expect_equal(execCount(obsB), 2)
-  
+
   # If onInvalidate() is added _after_ obsB is suspended and the values$a
   # changes, then it shouldn't get run (onInvalidate runs on invalidation, not
   # on flush)
@@ -558,7 +558,7 @@ test_that("suspended/resumed observers run at most once", {
     values$A
   })
   expect_equal(execCount(obs), 0)
-  
+
   # First flush should run obs once
   flushReact()
   expect_equal(execCount(obs), 1)
@@ -658,9 +658,9 @@ test_that("Observer priorities are respected", {
   observe(results <<- c(results, 20), priority=20L)
   observe(results <<- c(results, 21), priority=20)
   observe(results <<- c(results, 22), priority=20L)
-  
+
   flushReact()
-  
+
   expect_identical(results, c(30, 20, 21, 22, 10))
 })
 
@@ -670,7 +670,7 @@ test_that("reactivePoll and reactiveFileReader", {
   write.csv(cars, file=path, row.names=FALSE)
   rfr <- reactiveFileReader(100, NULL, path, read.csv)
   expect_equal(isolate(rfr()), cars)
-  
+
   write.csv(rbind(cars, cars), file=path, row.names=FALSE)
   Sys.sleep(0.15)
   timerCallbacks$executeElapsed()
@@ -820,4 +820,42 @@ test_that("maskReactiveContext blocks use of reactives", {
   # Reactive contexts within maskReactiveContext shouldn't be blocked
   expect_identical(maskReactiveContext(isolate(vals$x)), 123)
   expect_identical(isolate(maskReactiveContext(isolate(vals$x))), 123)
+})
+
+
+test_that("Flush completes even when errors occur", {
+  vals <- reactiveValues(x = 1)
+
+  r <- reactive({
+    if (vals$x == 0) stop("x is zero!")
+    else vals$x
+  })
+
+  # Set up counters
+  n11 <- n12 <- n21 <- n22 <- 0
+
+  observe({
+    n11 <<- n11 + 1
+    r()
+    n12 <<- n12 + 1
+  })
+  observe({
+    n21 <<- n21 + 1
+    r()
+    n22 <<- n22 + 1
+  })
+
+  flushReact()
+  expect_true(all(c(n11, n12, n21, n22) == 1))
+
+  # Trigger an error
+  vals$x <- 0
+  # Errors in reactive are translated to warnings in observers by default
+  expect_warning(flushReact())
+  # Both observers should run up until the reactive that errors
+  expect_true(all(c(n11, n12, n21, n22) == c(2,1,2,1)))
+
+  # Nothing should happen on next flush
+  flushReact()
+  expect_true(all(c(n11, n12, n21, n22) == c(2,1,2,1)))
 })

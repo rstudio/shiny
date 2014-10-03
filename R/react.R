@@ -63,13 +63,7 @@ Context <- R6Class(
     executeFlushCallbacks = function() {
       "For internal use only."
       lapply(.flushCallbacks, function(func) {
-        withCallingHandlers({
-          func()
-        }, warning = function(e) {
-          # TODO: Callbacks in app
-        }, error = function(e) {
-          # TODO: Callbacks in app
-        })
+        func()
       })
     }
   )

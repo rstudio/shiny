@@ -941,7 +941,8 @@ actionButton <- function(inputId, label, icon = NULL, ...) {
   tags$button(id=inputId,
               type="button",
               class="btn action-button",
-              list(icon, label))
+              list(icon, label),
+              ...)
 }
 
 #' @rdname actionButton
@@ -950,7 +951,8 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
   tags$a(id=inputId,
          href="#",
          class="action-button",
-         list(icon, label))
+         list(icon, label),
+         ...)
 }
 
 #' Slider Input Widget

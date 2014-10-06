@@ -554,7 +554,7 @@ test_that("Observer pausing works", {
 test_that("suspended/resumed observers run at most once", {
 
   values <- reactiveValues(A=1)
-  obs <- observe(function() {
+  obs <- observe({
     values$A
   })
   expect_equal(execCount(obs), 0)

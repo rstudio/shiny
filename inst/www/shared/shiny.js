@@ -1605,6 +1605,7 @@
         "pageLength": 25,
         "ajax": {
           "url": data.action,
+          "type": "POST",
           "data": function(d) {
             d.search.caseInsensitive = searchCI;
           }

@@ -613,7 +613,9 @@ Callbacks <- R6Class(
 # convert a data frame to JSON as required by DataTables request
 dataTablesJSON <- function(data, req) {
   n <- nrow(data)
-  q <- parseQueryString(req$QUERY_STRING, nested = TRUE)
+  # DataTables requests were sent via POST
+  params <- URLdecode(rawToChar(req$rook.input$read()))
+  q <- parseQueryString(params, nested = TRUE)
   ci <- q$search[['caseInsensitive']] == 'true'
 
   # global searching

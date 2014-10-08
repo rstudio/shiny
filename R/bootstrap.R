@@ -446,7 +446,7 @@ conditionalPanel <- function(condition, ...) {
 textInput <- function(inputId, label, value = "") {
   tagList(
     label %AND% tags$label(label, `for` = inputId),
-    tags$input(id = inputId, type="text", value=value)
+    tags$input(id = inputId, type="text", class="form-control", value=value)
   )
 }
 
@@ -472,7 +472,8 @@ textInput <- function(inputId, label, value = "") {
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 
   # build input tag
-  inputTag <- tags$input(id = inputId, type = "number", value = formatNoSci(value))
+  inputTag <- tags$input(id = inputId, type = "number", class="form-control",
+                         value = formatNoSci(value))
   if (!is.na(min))
     inputTag$attribs$min = min
   if (!is.na(max))
@@ -558,7 +559,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   inputTag <- tags$input(id = inputId, type="checkbox")
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
-  tags$label(class = "checkbox", `for` = inputId, inputTag, tags$span(label))
+  tags$label(`for` = inputId, inputTag, tags$span(label))
 }
 
 
@@ -596,8 +597,8 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
 
   # return label and select tag
   tags$div(id = inputId,
-           class = "control-group shiny-input-checkboxgroup",
-           controlLabel(inputId, label),
+           class = "checkbox control-group shiny-input-checkboxgroup",
+           label,
            options)
 }
 
@@ -643,9 +644,12 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
       )
       if (value %in% selected)
         inputTag$attribs$checked <- "checked"
-      tags$label(
-        class = paste(type, if (inline) "inline"),
-        inputTag, tags$span(name)
+
+      tags$div(
+        class = type,
+        tags$label(
+          inputTag, tags$span(name)
+        )
       )
     },
     SIMPLIFY = FALSE, USE.NAMES = FALSE
@@ -890,8 +894,8 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
   options <- generateOptions(inputId, choices, selected, inline, type = 'radio')
 
   tags$div(id = inputId,
-    class = 'control-group shiny-input-radiogroup',
-    label %AND% tags$label(class = "control-label", `for` = inputId, label),
+    class = 'radio control-group shiny-input-radiogroup',
+    label,
     options)
 }
 

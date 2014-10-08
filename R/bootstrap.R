@@ -4,7 +4,7 @@ NULL
 #' Create a Bootstrap page
 #'
 #' Create a Shiny UI page that loads the CSS and JavaScript for
-#' \href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and has no content in the
+#' \href{http://getbootstrap.com/3.3.0/}{Bootstrap}, and has no content in the
 #' page body (other than what you provide).
 #'
 #' This function is primarily intended for users who are proficient in
@@ -14,8 +14,8 @@ NULL
 #'
 #' @param ... The contents of the document body.
 #' @param title The browser window title (defaults to the host URL of the page)
-#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
-#'   and resize page elements based on the size of the viewing device)
+#' @param responsive This option is deprecated; it is no longer optional with
+#'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory, e.g. \code{www/bootstrap.css})
 #'
@@ -27,7 +27,11 @@ NULL
 #' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
 #'
 #' @export
-bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
+bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+
+  if (!is.null(responsive)) {
+    shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
+  }
 
   # required head tags for boostrap
   importBootstrap <- function(min = TRUE) {
@@ -43,17 +47,11 @@ bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
     )
 
     list(
-      htmlDependency("bootstrap", "2.3.2", bs,
+      htmlDependency("bootstrap", "3.3.1", bs,
         script = sprintf("js/bootstrap%s", jsExt),
         stylesheet = if (is.null(theme))
           sprintf("css/bootstrap%s", cssExt)
-      ),
-      if (responsive) {
-        htmlDependency("bootstrap-responsive", "2.3.2", bs,
-          stylesheet = sprintf("css/bootstrap-responsive%s", cssExt),
-          meta = list(viewport = "width=device-width, initial-scale=1.0")
-        )
-      }
+      )
     )
   }
 
@@ -122,10 +120,10 @@ pageWithSidebar <- function(headerPanel,
     # basic application container divs
     div(
       class="container-fluid",
-      div(class="row-fluid",
+      div(class="row",
           headerPanel
       ),
-      div(class="row-fluid",
+      div(class="row",
           sidebarPanel,
           mainPanel
       )
@@ -162,8 +160,8 @@ pageWithSidebar <- function(headerPanel,
 #'   (useful for viewing on smaller touchscreen device)
 #' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
 #'   layout.
-#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
-#'   and resize page elements based on the size of the viewing device)
+#' @param responsive This option is deprecated; it is no longer optional with
+#'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
@@ -203,7 +201,7 @@ navbarPage <- function(title,
                        inverse = FALSE,
                        collapsable = FALSE,
                        fluid = TRUE,
-                       responsive = TRUE,
+                       responsive = NULL,
                        theme = NULL,
                        windowTitle = title) {
 
@@ -266,10 +264,10 @@ navbarPage <- function(title,
   # build the main tab content div
   contentDiv <- div(class=className("container"))
   if (!is.null(header))
-    contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), header))
+    contentDiv <- tagAppendChild(contentDiv, div(class="row", header))
   contentDiv <- tagAppendChild(contentDiv, tabset$content)
   if (!is.null(footer))
-    contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), footer))
+    contentDiv <- tagAppendChild(contentDiv, div(class="row", footer))
 
   # build the page
   bootstrapPage(
@@ -307,7 +305,7 @@ navbarMenu <- function(title, ..., icon = NULL) {
 headerPanel <- function(title, windowTitle=title) {
   tagList(
     tags$head(tags$title(windowTitle)),
-    div(class="span12", style="padding: 10px 0px;",
+    div(class="col-sm-12", style="padding: 10px 0px;",
       h1(title)
     )
   )
@@ -348,7 +346,7 @@ wellPanel <- function(...) {
 #' )
 #' @export
 sidebarPanel <- function(..., width = 4) {
-  div(class=paste0("span", width),
+  div(class=paste0("col-sm-", width),
     tags$form(class="well",
       ...
     )
@@ -374,7 +372,7 @@ sidebarPanel <- function(..., width = 4) {
 #' )
 #' @export
 mainPanel <- function(..., width = 8) {
-  div(class=paste0("span", width),
+  div(class=paste0("col-sm-", width),
     ...
   )
 }

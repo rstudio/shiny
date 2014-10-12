@@ -8,7 +8,7 @@ NULL
 #' pre-built widgets make it possible to build beautiful, responsive, and
 #' powerful applications with minimal effort.
 #'
-#' The Shiny tutorial at \url{http://rstudio.github.com/shiny/tutorial} explains
+#' The Shiny tutorial at \url{http://shiny.rstudio.com/tutorial/} explains
 #' the framework in depth, walks you through building a simple application, and
 #' includes extensive annotated examples.
 #'

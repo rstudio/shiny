@@ -1189,3 +1189,50 @@ maskReactiveContext <- function(expr) {
     expr
   })
 }
+
+#' Event handler
+#'
+#' @seealso \code{\link{actionButton}}
+#'
+#' @examples
+#' \dontrun{
+#' # In ui.R:
+#' shinyUI(basicPage(
+#'   numericInput("n", "Number of observations", 5),
+#'   actionButton("saveButton", "Save")
+#' ))
+#' # In server.R:
+#' shinyServer(function(input, output) {
+#'   observeEvent(input$saveButton, function() {
+#'     write.csv(runif(input$n), file = "data.csv")
+#'   })
+#' })
+#' }
+#'
+#' @export
+observeEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) {
+  eventFunc <- exprToFunction(eventExpr, env, quoted)
+
+  initialized <- FALSE
+  invisible(observe({
+    eventVal <- eventFunc()
+    if (!initialized)
+      initialized <<- TRUE
+    else
+      isolate(callback())
+  }))
+}
+
+#' @rdname observeEvent
+#' @export
+eventFilter <- function(eventExpr, valueFunc, env=parent.frame(), quoted=FALSE) {
+  if (is.null(eventExpr))
+    return(invisible())
+
+  # Legacy logic. We'd prefer to have actionButton initialize to NULL, but too
+  # much code already expects it to be 0.
+  if (isTRUE(eventExpr == 0) && identical(attr(eventExpr, 'actionButton'), TRUE))
+    return(invisible())
+
+  return(isolate(valueFunc()))
+}

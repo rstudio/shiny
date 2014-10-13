@@ -936,6 +936,9 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 #' # In ui.R
 #' actionButton("goButton", "Go!")
 #' }
+#'
+#' @seealso \code{\link{observeEvent}} and \code{\link{eventFilter}}
+#'
 #' @export
 actionButton <- function(inputId, label, icon = NULL, ...) {
   tags$button(id=inputId,

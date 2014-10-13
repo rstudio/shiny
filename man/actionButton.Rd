@@ -40,6 +40,8 @@ actionButton("goButton", "Go!")
 }
 }
 \seealso{
+\code{\link{observeEvent}} and \code{\link{eventFilter}}
+
 Other input.elements: \code{\link{animationOptions}},
   \code{\link{sliderInput}};
   \code{\link{checkboxGroupInput}};

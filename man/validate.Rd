@@ -89,7 +89,7 @@ function(input, output) {
   output$plot <- renderPlot({
     validate(
       need(input$in1, 'Check at least one letter!'),
-      need(input$in2 == '', 'Please choose a state.')
+      need(input$in2 != '', 'Please choose a state.')
     )
     plot(1:10, main = paste(c(input$in1, input$in2), collapse = ', '))
   })

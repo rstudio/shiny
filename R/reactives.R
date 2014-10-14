@@ -1231,7 +1231,7 @@ eventFilter <- function(eventExpr, valueFunc, env=parent.frame(), quoted=FALSE) 
 
   # Legacy logic. We'd prefer to have actionButton initialize to NULL, but too
   # much code already expects it to be 0.
-  if (isTRUE(eventExpr == 0) && identical(attr(eventExpr, 'shiny.action'), TRUE))
+  if (isTRUE(eventExpr == 0) && inherits(eventExpr, 'shinyActionButtonValue'))
     return(invisible())
 
   return(isolate(valueFunc()))

@@ -1222,17 +1222,3 @@ observeEvent <- function(eventExpr, callback, env=parent.frame(), quoted=FALSE) 
       isolate(callback())
   }))
 }
-
-#' @rdname observeEvent
-#' @export
-eventFilter <- function(eventExpr, valueFunc, env=parent.frame(), quoted=FALSE) {
-  if (is.null(eventExpr))
-    return(invisible())
-
-  # Legacy logic. We'd prefer to have actionButton initialize to NULL, but too
-  # much code already expects it to be 0.
-  if (isTRUE(eventExpr == 0) && inherits(eventExpr, 'shinyActionButtonValue'))
-    return(invisible())
-
-  return(isolate(valueFunc()))
-}

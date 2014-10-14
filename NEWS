@@ -4,8 +4,8 @@ shiny 0.10.2.9xxx
 * `actionButton` and `actionLink` now pass their `...` arguments to the
   underlying tag function. (#607)
 
-* Added `observeEvent` and `eventFilter` functions for clearer, terser handling
-  of `actionButton`, plot clicks, and other naturally-imperative inputs.
+* Added `observeEvent` function for clearer, terser handling of `actionButton`,
+  plot clicks, and other naturally-imperative inputs.
 
 shiny 0.10.2.1
 --------------------------------------------------------------------------------

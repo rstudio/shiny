@@ -671,7 +671,13 @@ dataTablesJSON <- function(data, req) {
   } else fdata <- data
 
   fdata <- unname(as.matrix(fdata))
-  if (q$escape == 'true' && is.character(fdata)) fdata <- htmlEscape(fdata)
+  if (is.character(fdata) && q$escape != 'false') {
+    if (q$escape == 'true') fdata <- htmlEscape(fdata) else {
+      k <- as.integer(strsplit(q$escape, ',')[[1]])
+      # use seq_len() in case escape = negative indices, e.g. c(-1, -5)
+      for (j in seq_len(ncol(fdata))[k]) fdata[, j] <- htmlEscape(fdata[, j])
+    }
+  }
   # WAT: toJSON(list(x = matrix(nrow = 0, ncol = 1))) => {"x": } (#299)
   if (nrow(fdata) == 0) fdata <- list()
   # WAT: toJSON(list(x = matrix(1:2))) => {x: [ [1], [2] ]}, however,

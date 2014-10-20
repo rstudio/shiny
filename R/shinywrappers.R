@@ -543,7 +543,11 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' @param callback A JavaScript function to be applied to the DataTable object.
 #'   This is useful for DataTables plug-ins, which often require the DataTable
 #'   instance to be available (\url{http://datatables.net/extensions/}).
-#' @param escape whether to escape HTML entities in the table
+#' @param escape Whether to escape HTML entities in the table: \code{TRUE} means
+#'   to escape the whole table, and \code{FALSE} means not to escape it.
+#'   Alternatively, you can specify numeric column indices to indicate which
+#'   columns to escape, e.g. \code{1:5} (the first 5 columns), \code{c(1, 3,
+#'   4)}, or \code{c(-1, -3)} (all columns except the first and third).
 #' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot
@@ -566,6 +570,11 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     data <- func()
     if (length(dim(data)) != 2) return() # expects a rectangular data object
     action <- shinysession$registerDataObj(name, data, dataTablesJSON)
+    if (!is.logical(escape)) {
+      if (!is.numeric(escape))
+        stop("'escape' must be TRUE, FALSE, or a numeric vector")
+      escape <- paste(escape, collapse = ',')
+    }
     list(
       colnames = colnames(data), action = action, options = res$options,
       evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,

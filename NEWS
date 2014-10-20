@@ -55,6 +55,8 @@ shiny 0.10.2
 
 * Fixes to rounding behavior of sliderInput. (#301, #502)
 
+* Updated selectize.js to version 0.11.2. (#596)
+
 shiny 0.10.1
 --------------------------------------------------------------------------------
 

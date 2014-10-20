@@ -569,6 +569,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     res <- checkAsIs(options)
     data <- func()
     if (length(dim(data)) != 2) return() # expects a rectangular data object
+    if (is.data.frame(data)) data <- as.data.frame(data)
     action <- shinysession$registerDataObj(name, data, dataTablesJSON)
     colnames <- colnames(data)
     colnames[escape] <- htmlEscape(colnames[escape])

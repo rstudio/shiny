@@ -570,13 +570,15 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     data <- func()
     if (length(dim(data)) != 2) return() # expects a rectangular data object
     action <- shinysession$registerDataObj(name, data, dataTablesJSON)
+    colnames <- colnames(data)
+    colnames[escape] <- htmlEscape(colnames[escape])
     if (!is.logical(escape)) {
       if (!is.numeric(escape))
         stop("'escape' must be TRUE, FALSE, or a numeric vector")
       escape <- paste(escape, collapse = ',')
     }
     list(
-      colnames = colnames(data), action = action, options = res$options,
+      colnames = colnames, action = action, options = res$options,
       evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,
       callback = paste(callback, collapse = '\n'), escape = escape
     )

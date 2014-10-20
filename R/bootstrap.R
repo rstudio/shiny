@@ -144,6 +144,13 @@ pageWithSidebar <- function(headerPanel,
 #'   server logic to determine which of the current tabs is active. The value
 #'   will correspond to the \code{value} argument that is passed to
 #'   \code{\link{tabPanel}}.
+#' @param position Determines whether the navbar should be displayed at the top
+#'   of the page with normal scrolling behavior (\code{"static-top"}), pinned
+#'   at the top (\code{"fixed-top"}), or pinned at the bottom
+#'   (\code{"fixed-bottom"}). Note that using \code{"fixed-top"} or
+#'   \code{"fixed-bottom"} will cause the navbar to overlay your body content,
+#'   unless you add padding, e.g.:
+#'   \code{tags$style(type="text/css", "body {padding-top: 70px;}")}
 #' @param header Tag of list of tags to display as a common header above all
 #'   tabPanels.
 #' @param footer Tag or list of tags to display as a common footer below all
@@ -190,6 +197,7 @@ pageWithSidebar <- function(headerPanel,
 navbarPage <- function(title,
                        ...,
                        id = NULL,
+                       position = c("static-top", "fixed-top", "fixed-bottom"),
                        header = NULL,
                        footer = NULL,
                        inverse = FALSE,
@@ -203,7 +211,10 @@ navbarPage <- function(title,
   pageTitle <- title
 
   # navbar class based on options
-  navbarClass <- "navbar navbar-static-top"
+  navbarClass <- "navbar"
+  position <- match.arg(position)
+  if (!is.null(position))
+    navbarClass <- paste(navbarClass, " navbar-", position, sep = "")
   if (inverse)
     navbarClass <- paste(navbarClass, "navbar-inverse")
 

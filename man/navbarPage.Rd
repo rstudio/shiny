@@ -4,9 +4,10 @@
 \alias{navbarPage}
 \title{Create a page with a top level navigation bar}
 \usage{
-navbarPage(title, ..., id = NULL, header = NULL, footer = NULL,
-  inverse = FALSE, collapsable = FALSE, fluid = TRUE, responsive = TRUE,
-  theme = NULL, windowTitle = title)
+navbarPage(title, ..., id = NULL, position = c("static-top", "fixed-top",
+  "fixed-bottom"), header = NULL, footer = NULL, inverse = FALSE,
+  collapsable = FALSE, fluid = TRUE, responsive = TRUE, theme = NULL,
+  windowTitle = title)
 
 navbarMenu(title, ..., icon = NULL)
 }
@@ -19,6 +20,14 @@ navbarMenu(title, ..., icon = NULL)
 server logic to determine which of the current tabs is active. The value
 will correspond to the \code{value} argument that is passed to
 \code{\link{tabPanel}}.}
+
+\item{position}{Determines whether the navbar should be displayed at the top
+of the page with normal scrolling behavior (\code{"static-top"}), pinned
+at the top (\code{"fixed-top"}), or pinned at the bottom
+(\code{"fixed-bottom"}). Note that using \code{"fixed-top"} or
+\code{"fixed-bottom"} will cause the navbar to overlay your body content,
+unless you add padding, e.g.:
+\code{tags$style(type="text/css", "body {padding-top: 70px;}")}}
 
 \item{header}{Tag of list of tags to display as a common header above all
 tabPanels.}

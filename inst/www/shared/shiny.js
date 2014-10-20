@@ -1608,6 +1608,7 @@
           "type": "POST",
           "data": function(d) {
             d.search.caseInsensitive = searchCI;
+            d.escape = data.escape;
           }
         }
       }, data.options));

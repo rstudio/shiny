@@ -543,6 +543,7 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' @param callback A JavaScript function to be applied to the DataTable object.
 #'   This is useful for DataTables plug-ins, which often require the DataTable
 #'   instance to be available (\url{http://datatables.net/extensions/}).
+#' @param escape whether to escape HTML entities in the table
 #' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot
@@ -554,7 +555,7 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #'   )
 #' )
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
-                            callback = 'function(oTable) {}',
+                            callback = 'function(oTable) {}', escape = TRUE,
                             env = parent.frame(), quoted = FALSE) {
   installExprFunction(expr, "func", env, quoted)
 
@@ -568,7 +569,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     list(
       colnames = colnames(data), action = action, options = res$options,
       evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,
-      callback = paste(callback, collapse = '\n')
+      callback = paste(callback, collapse = '\n'), escape = escape
     )
   })
 }

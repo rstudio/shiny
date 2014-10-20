@@ -671,6 +671,7 @@ dataTablesJSON <- function(data, req) {
   } else fdata <- data
 
   fdata <- unname(as.matrix(fdata))
+  if (q$escape == 'true' && is.character(fdata)) fdata <- htmlEscape(fdata)
   # WAT: toJSON(list(x = matrix(nrow = 0, ncol = 1))) => {"x": } (#299)
   if (nrow(fdata) == 0) fdata <- list()
   # WAT: toJSON(list(x = matrix(1:2))) => {x: [ [1], [2] ]}, however,
@@ -678,7 +679,7 @@ dataTablesJSON <- function(data, req) {
   if (length(fdata) && all(dim(fdata) == 1)) fdata <- list(list(fdata[1, 1]))
 
   res <- toJSON(list(
-    draw = q$draw,
+    draw = as.integer(q$draw),
     recordsTotal = n,
     recordsFiltered = nrow(data),
     data = fdata

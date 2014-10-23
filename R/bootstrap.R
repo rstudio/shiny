@@ -948,7 +948,7 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 #' actionButton("goButton", "Go!")
 #' }
 #'
-#' @seealso \code{\link{observeEvent}} and \code{\link{eventFilter}}
+#' @seealso \code{\link{observeEvent}} and \code{\link{eventReactive}}
 #'
 #' @export
 actionButton <- function(inputId, label, icon = NULL, ...) {

@@ -40,7 +40,7 @@ actionButton("goButton", "Go!")
 }
 }
 \seealso{
-\code{\link{observeEvent}} and \code{\link{eventFilter}}
+\code{\link{observeEvent}} and \code{\link{eventReactive}}
 
 Other input.elements: \code{\link{animationOptions}},
   \code{\link{sliderInput}};

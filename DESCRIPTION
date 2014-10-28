@@ -56,6 +56,7 @@ Collate:
     'run-url.R'
     'server.R'
     'shiny.R'
+    'shiny_demo.R'
     'shinyui.R'
     'shinywrappers.R'
     'showcase.R'

@@ -7,6 +7,11 @@ shiny 0.10.2.9xxx
 * Added `observeEvent` function for clearer, terser handling of `actionButton`,
   plot clicks, and other naturally-imperative inputs.
 
+* Errors that happen in reactives no longer prevent any remaining pending
+  observers from executing. It is also now possible for users to control how
+  errors are handled, with the 'shiny.observer.error' global option. (#603,
+  #604)
+
 shiny 0.10.2.1
 --------------------------------------------------------------------------------
 

@@ -11,11 +11,11 @@ install:
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
   - sudo apt-add-repository -y ppa:marutter/c2d4u
   - sudo apt-get -qq update
-  - sudo apt-get -qq install r-base r-cran-shiny r-cran-cairo r-cran-markdown r-cran-knitr
+  - sudo apt-get -qq install r-base r-cran-shiny r-cran-cairo r-cran-devtools r-cran-knitr
   - "[ ! -d ~/R ] && mkdir ~/R"
   - echo "options(repos = c(CRAN = 'http://cran.rstudio.com'))" > ~/.Rprofile
   - Rscript -e "update.packages(instlib = '~/R', ask = FALSE, quiet = TRUE)"
-  - Rscript -e "install.packages('$R_MY_PKG', dep = TRUE, quiet = TRUE)"
+  - Rscript -e "devtools::install_deps(dep = TRUE)"
 
 # run tests
 script:

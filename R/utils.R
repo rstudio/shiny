@@ -496,8 +496,8 @@ parseQueryString <- function(str, nested = FALSE) {
   keys   <- gsub('+', ' ', keys,   fixed = TRUE)
   values <- gsub('+', ' ', values, fixed = TRUE)
 
-  keys   <- vapply(keys,   URLdecode, character(1), USE.NAMES = FALSE)
-  values <- vapply(values, URLdecode, character(1), USE.NAMES = FALSE)
+  keys   <- URLdecode(keys)
+  values <- URLdecode(values)
 
   res <- setNames(as.list(values), keys)
   if (!nested) return(res)
@@ -1048,4 +1048,11 @@ readUTF8 <- function(file) {
 # similarly, try to source() a file with UTF-8
 sourceUTF8 <- function(file, ...) {
   source(file, ..., keep.source = TRUE, encoding = checkEncoding(file))
+}
+
+
+URLdecode <- decodeURIComponent
+URLencode <- function(value, reserved = FALSE) {
+  value <- enc2utf8(value)
+  if (reserved) encodeURIComponent(value) else encodeURI(value)
 }

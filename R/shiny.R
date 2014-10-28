@@ -561,7 +561,7 @@ ShinySession <- R6Class(
         return(httpResponse(400, 'text/html', '<h1>Bad Request</h1>'))
 
       if (matches[2] == 'file') {
-        savedFile <- files$get(utils::URLdecode(matches[3]))
+        savedFile <- files$get(URLdecode(matches[3]))
         if (is.null(savedFile))
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
 
@@ -616,7 +616,7 @@ ShinySession <- R6Class(
         dlmatches <- regmatches(matches[3],
                                 regexec("^([^/]+)(/[^/]+)?$",
                                         matches[3]))[[1]]
-        dlname <- utils::URLdecode(dlmatches[2])
+        dlname <- URLdecode(dlmatches[2])
         download <- downloads$get(dlname)
         if (is.null(download))
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
@@ -634,8 +634,8 @@ ShinySession <- R6Class(
 
           return(httpResponse(302, 'text/html', '<h1>Found</h1>', c(
             'Location' = sprintf('%s/%s',
-                                 utils::URLencode(dlname, TRUE),
-                                 utils::URLencode(filename, TRUE)),
+                                 URLencode(dlname, TRUE),
+                                 URLencode(filename, TRUE)),
             'Cache-Control' = 'no-cache')))
         }
 
@@ -669,7 +669,7 @@ ShinySession <- R6Class(
         dlmatches <- regmatches(matches[3],
                                 regexec("^([^/]+)(/[^/]+)?$",
                                         matches[3]))[[1]]
-        dlname <- utils::URLdecode(dlmatches[2])
+        dlname <- URLdecode(dlmatches[2])
         download <- downloads$get(dlname)
         return(download$filter(download$data, req))
       }

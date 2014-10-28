@@ -237,6 +237,8 @@ ShinySession <- R6Class(
       session$clientData        <<- clientData
       session$sendCustomMessage <<- self$.sendCustomMessage
       session$sendInputMessage  <<- self$.sendInputMessage
+      session$unhandledError    <<- self$unhandledError
+      session$close             <<- self$close
       session$onSessionEnded    <<- self$onSessionEnded
       session$onEnded           <<- self$onEnded
       session$onFlush           <<- self$onFlush
@@ -279,7 +281,15 @@ ShinySession <- R6Class(
       "Synonym for onSessionEnded"
       return(onSessionEnded(callback))
     },
+    unhandledError = function(e) {
+      close()
+    },
     close = function() {
+      if (!closed) {
+        .websocket$close()
+      }
+    },
+    wsClosed = function() {
       closed <<- TRUE
       for (output in .outputs) {
         output$suspend()

@@ -433,7 +433,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       })
 
       ws$onClose(function() {
-        shinysession$close()
+        shinysession$wsClosed()
         appsByToken$remove(shinysession$token)
       })
 

@@ -530,8 +530,27 @@ Observer <- R6Class(
       })
 
       ctx$onFlush(function() {
-        if (!.destroyed)
-          run()
+        tryCatch({
+          if (!.destroyed)
+            run()
+
+        }, error = function(e) {
+          # A function to handle errors that occur during a flush
+          flushErrorHandler <- getOption('shiny.observer.error')
+
+          # Default handler function, if not available from global option
+          if (is.null(flushErrorHandler)) {
+            flushErrorHandler <- function(e, label, domain) {
+              warning("Unhandled error in observer: ",
+                e$message, "\n", label, immediate. = TRUE, call. = FALSE)
+              if (!is.null(domain)) {
+                domain$unhandledError(e)
+              }
+            }
+          }
+
+          flushErrorHandler(e, .label, .domain)
+        })
       })
 
       return(ctx)

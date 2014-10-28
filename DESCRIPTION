@@ -15,7 +15,7 @@ Depends:
 Imports:
     tools,
     utils,
-    httpuv (>= 1.2.2),
+    httpuv (>= 1.3.2),
     mime (>= 0.1.3),
     RJSONIO,
     xtable,

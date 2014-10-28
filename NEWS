@@ -12,6 +12,10 @@ shiny 0.10.2.9xxx
   errors are handled, with the 'shiny.observer.error' global option. (#603,
   #604)
 
+* Changed the URI encoding/decoding functions internally to use `encodeURI()`,
+  `encodeURIComponent()`, and `decodeURIComponent()` from the httpuv package
+  instead of `utils::URLencode()` and `utils::URLdecode()`. (#630)
+
 shiny 0.10.2.1
 --------------------------------------------------------------------------------
 

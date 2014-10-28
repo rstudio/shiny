@@ -22,9 +22,10 @@ instance to be available (\url{http://datatables.net/extensions/}).}
 
 \item{escape}{Whether to escape HTML entities in the table: \code{TRUE} means
 to escape the whole table, and \code{FALSE} means not to escape it.
-Alternatively, you can specify numeric column indices to indicate which
-columns to escape, e.g. \code{1:5} (the first 5 columns), \code{c(1, 3,
-4)}, or \code{c(-1, -3)} (all columns except the first and third).}
+Alternatively, you can specify numeric column indices or column names to
+indicate which columns to escape, e.g. \code{1:5} (the first 5 columns),
+\code{c(1, 3, 4)}, or \code{c(-1, -3)} (all columns except the first and
+third), or \code{c('Species', 'Sepal.Length')}.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 

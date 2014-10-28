@@ -545,9 +545,10 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #'   instance to be available (\url{http://datatables.net/extensions/}).
 #' @param escape Whether to escape HTML entities in the table: \code{TRUE} means
 #'   to escape the whole table, and \code{FALSE} means not to escape it.
-#'   Alternatively, you can specify numeric column indices to indicate which
-#'   columns to escape, e.g. \code{1:5} (the first 5 columns), \code{c(1, 3,
-#'   4)}, or \code{c(-1, -3)} (all columns except the first and third).
+#'   Alternatively, you can specify numeric column indices or column names to
+#'   indicate which columns to escape, e.g. \code{1:5} (the first 5 columns),
+#'   \code{c(1, 3, 4)}, or \code{c(-1, -3)} (all columns except the first and
+#'   third), or \code{c('Species', 'Sepal.Length')}.
 #' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot
@@ -572,10 +573,16 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     if (is.data.frame(data)) data <- as.data.frame(data)
     action <- shinysession$registerDataObj(name, data, dataTablesJSON)
     colnames <- colnames(data)
+    # if escape is column names, turn names to numeric indices
+    if (is.character(escape)) {
+      escape <- setNames(seq_len(ncol(data)), colnames)[escape]
+      if (any(is.na(escape)))
+        stop("Some column names in the 'escape' argument not found in data")
+    }
     colnames[escape] <- htmlEscape(colnames[escape])
     if (!is.logical(escape)) {
       if (!is.numeric(escape))
-        stop("'escape' must be TRUE, FALSE, or a numeric vector")
+        stop("'escape' must be TRUE, FALSE, or a numeric vector, or column names")
       escape <- paste(escape, collapse = ',')
     }
     list(

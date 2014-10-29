@@ -4,7 +4,8 @@
 \title{Table output with the JavaScript library DataTables}
 \usage{
 renderDataTable(expr, options = NULL, searchDelay = 500,
-  callback = "function(oTable) {}", env = parent.frame(), quoted = FALSE)
+  callback = "function(oTable) {}", escape = TRUE, env = parent.frame(),
+  quoted = FALSE)
 }
 \arguments{
 \item{expr}{An expression that returns a data frame or a matrix.}
@@ -18,6 +19,13 @@ frequent search requests).}
 \item{callback}{A JavaScript function to be applied to the DataTable object.
 This is useful for DataTables plug-ins, which often require the DataTable
 instance to be available (\url{http://datatables.net/extensions/}).}
+
+\item{escape}{Whether to escape HTML entities in the table: \code{TRUE} means
+to escape the whole table, and \code{FALSE} means not to escape it.
+Alternatively, you can specify numeric column indices or column names to
+indicate which columns to escape, e.g. \code{1:5} (the first 5 columns),
+\code{c(1, 3, 4)}, or \code{c(-1, -3)} (all columns except the first and
+third), or \code{c('Species', 'Sepal.Length')}.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 

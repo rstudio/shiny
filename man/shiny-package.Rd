@@ -15,4 +15,7 @@ The Shiny tutorial at \url{http://shiny.rstudio.com/tutorial/} explains
 the framework in depth, walks you through building a simple application, and
 includes extensive annotated examples.
 }
+\seealso{
+\link{shiny-options} for documentation about global options.
+}
 

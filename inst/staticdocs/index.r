@@ -155,7 +155,8 @@ sd_section("Utility functions",
     "plotPNG",
     "repeatable",
     "shinyDeprecated",
-    "serverInfo"
+    "serverInfo",
+    "shiny-options"
   )
 )
 sd_section("Embedding",

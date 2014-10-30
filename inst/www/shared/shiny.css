@@ -29,7 +29,7 @@ table.data td[align=right] {
 
 .jslider {
   /* Fix jslider running into the control above it */
-  margin-top: 18px;
+  margin-top: 5px;
 }
 .jslider-value {
   /* Remove box around jslider values on colored bg */

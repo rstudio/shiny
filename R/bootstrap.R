@@ -305,7 +305,7 @@ navbarMenu <- function(title, ..., icon = NULL) {
 headerPanel <- function(title, windowTitle=title) {
   tagList(
     tags$head(tags$title(windowTitle)),
-    div(class="col-sm-12", style="padding: 10px 0px;",
+    div(class="col-sm-12",
       h1(title)
     )
   )

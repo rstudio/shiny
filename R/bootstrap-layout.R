@@ -210,7 +210,7 @@ column <- function(width, ..., offset = 0) {
 titlePanel <- function(title, windowTitle=title) {
   tagList(
     tags$head(tags$title(windowTitle)),
-    h2(style = "padding: 10px 0px;", title)
+    h2(title)
   )
 }
 

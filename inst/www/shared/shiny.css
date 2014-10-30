@@ -36,11 +36,6 @@ table.data td[align=right] {
   background-color: transparent !important;
 }
 
-span.jslider, .selectize-control {
-  width: 220px;
-  max-width: 95%;
-}
-
 .recalculating {
   opacity: 0.3;
   transition: opacity 250ms ease 500ms;

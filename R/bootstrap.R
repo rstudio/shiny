@@ -444,7 +444,7 @@ conditionalPanel <- function(condition, ...) {
 #' textInput("caption", "Caption:", "Data Summary")
 #' @export
 textInput <- function(inputId, label, value = "") {
-  tagList(
+  div(class = "form-group",
     label %AND% tags$label(label, `for` = inputId),
     tags$input(id = inputId, type="text", class="form-control", value=value)
   )
@@ -481,7 +481,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
   if (!is.na(step))
     inputTag$attribs$step = step
 
-  tagList(
+  div(class = "form-group",
     label %AND% tags$label(label, `for` = inputId),
     inputTag
   )
@@ -1038,9 +1038,11 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     width=width)
 
   if (is.null(label)) {
-    sliderTag
+    div(class = "form-group",
+      sliderTag
+    )
   } else {
-    tags$div(
+    div(class = "form-group",
       controlLabel(inputId, label),
       sliderTag
     )
@@ -1130,7 +1132,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 
   attachDependencies(
     tags$div(id = inputId,
-             class = "shiny-date-input",
+             class = "shiny-date-input form-group",
 
       controlLabel(inputId, label),
       tags$input(type = "text",
@@ -1230,7 +1232,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   attachDependencies(
     tags$div(id = inputId,
              # input-daterange class is needed for dropdown behavior
-             class = "shiny-date-range-input input-daterange",
+             class = "shiny-date-range-input input-daterange form-group",
 
       controlLabel(inputId, label),
       tags$input(class = "form-control",

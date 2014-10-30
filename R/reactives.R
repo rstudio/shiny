@@ -1333,7 +1333,7 @@ observeEvent <- function(eventExpr, handlerExpr,
   invisible(observe({
     e <- eventFunc()
 
-    if (ignoreNULL && (is.null(e) || (inherits(e, 'shinyActionButtonValue') && e == 0))) {
+    if (ignoreNULL && isNullEvent(e)) {
       return()
     }
 
@@ -1344,7 +1344,7 @@ observeEvent <- function(eventExpr, handlerExpr,
 
 #' @rdname observeEvent
 #' @export
-eventReactive  <- function(eventExpr, valueExpr,
+eventReactive <- function(eventExpr, valueExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   value.env = parent.frame(), value.quoted = FALSE,
   label=NULL, domain=getDefaultReactiveDomain(),
@@ -1360,10 +1360,14 @@ eventReactive  <- function(eventExpr, valueExpr,
     e <- eventFunc()
 
     validate(need(
-      !ignoreNULL || (!is.null(e) && !(inherits(e, 'shinyActionButtonValue') && e == 0)),
+      !ignoreNULL || !isNullEvent(e),
       message = FALSE
     ))
 
     isolate(handlerFunc())
   }, label = label, domain = domain))
+}
+
+isNullEvent <- function(value) {
+  is.null(value) || (inherits(value, 'shinyActionButtonValue') && value == 0)
 }

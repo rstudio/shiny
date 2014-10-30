@@ -822,7 +822,6 @@ test_that("maskReactiveContext blocks use of reactives", {
   expect_identical(isolate(maskReactiveContext(isolate(vals$x))), 123)
 })
 
-
 test_that("Flush completes even when errors occur", {
   vals <- reactiveValues(x = 1)
 
@@ -884,4 +883,53 @@ test_that("Alternate error handler function", {
 
   flushReact()
   expect_identical(ec, 2)
+})
+
+test_that("event handling helpers take correct dependencies", {
+  vals <- reactiveValues(action = NULL, x = 1)
+
+  o1_count <- 0
+  o1 <- observeEvent(vals$action, {
+    vals$x
+    o1_count <<- o1_count + 1
+  })
+  o2_count <- 0
+  o2 <- observeEvent(ignoreNULL = FALSE, vals$action, {
+    vals$x
+    o2_count <<- o2_count + 1
+  })
+  r1 <- eventReactive(vals$action, {
+    vals$x
+  })
+  r2 <- eventReactive(ignoreNULL = FALSE, vals$action, {
+    vals$x
+  })
+
+  flushReact()
+
+  expect_error(isolate(r1()))
+  expect_identical(isolate(r2()), 1)
+  expect_equal(o1_count, 0)
+  expect_equal(o2_count, 1)
+  expect_equal(execCount(o1), 1)
+  expect_equal(execCount(o2), 1)
+
+  vals$x <- 2
+  flushReact()
+
+  expect_error(isolate(r1()))
+  expect_identical(isolate(r2()), 1)
+  expect_equal(o1_count, 0)
+  expect_equal(o2_count, 1)
+  expect_equal(execCount(o1), 1)
+  expect_equal(execCount(o2), 1)
+
+  vals$action <- 1
+  flushReact()
+  expect_identical(isolate(r1()), 2)
+  expect_identical(isolate(r2()), 2)
+  expect_equal(o1_count, 1)
+  expect_equal(o2_count, 2)
+  expect_equal(execCount(o1), 2)
+  expect_equal(execCount(o2), 2)
 })

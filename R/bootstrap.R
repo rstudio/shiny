@@ -1027,9 +1027,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 
   if (!is.null(animate) && !identical(animate, FALSE)) {
     if (is.null(animate$playButton))
-      animate$playButton <- tags$i(class='icon-play')
+      animate$playButton <- tags$span(class='glyphicon glyphicon-play')
     if (is.null(animate$pauseButton))
-      animate$pauseButton <- tags$i(class='icon-pause')
+      animate$pauseButton <- tags$span(class='glyphicon glyphicon-pause')
   }
 
   # build slider

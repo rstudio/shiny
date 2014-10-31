@@ -31,17 +31,17 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   x <- radioButtons('id','label', choices = c(a='x1', a='x2', b='x3'))
   choices <- x$children
 
-  expect_equal(choices[[2]][[1]]$children[[1]]$children[[2]]$children[[1]], 'a')
-  expect_equal(choices[[2]][[1]]$children[[1]]$children[[1]]$attribs$value, 'x1')
-  expect_equal(choices[[2]][[1]]$children[[1]]$children[[1]]$attribs$checked, 'checked')
+  expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[2]]$children[[1]], 'a')
+  expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$value, 'x1')
+  expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$checked, 'checked')
 
-  expect_equal(choices[[2]][[2]]$children[[1]]$children[[2]]$children[[1]], 'a')
-  expect_equal(choices[[2]][[2]]$children[[1]]$children[[1]]$attribs$value, 'x2')
-  expect_equal(choices[[2]][[2]]$children[[1]]$children[[1]]$attribs$checked, NULL)
+  expect_equal(choices[[2]]$children[[1]][[2]]$children[[1]]$children[[2]]$children[[1]], 'a')
+  expect_equal(choices[[2]]$children[[1]][[2]]$children[[1]]$children[[1]]$attribs$value, 'x2')
+  expect_equal(choices[[2]]$children[[1]][[2]]$children[[1]]$children[[1]]$attribs$checked, NULL)
 
-  expect_equal(choices[[2]][[3]]$children[[1]]$children[[2]]$children[[1]], 'b')
-  expect_equal(choices[[2]][[3]]$children[[1]]$children[[1]]$attribs$value, 'x3')
-  expect_equal(choices[[2]][[3]]$children[[1]]$children[[1]]$attribs$checked, NULL)
+  expect_equal(choices[[2]]$children[[1]][[3]]$children[[1]]$children[[2]]$children[[1]], 'b')
+  expect_equal(choices[[2]]$children[[1]][[3]]$children[[1]]$children[[1]]$attribs$value, 'x3')
+  expect_equal(choices[[2]]$children[[1]][[3]]$children[[1]]$children[[1]]$attribs$checked, NULL)
 })
 
 

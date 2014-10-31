@@ -635,8 +635,12 @@ validateSelected <- function(selected, choices, inputId) {
 generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox') {
   # create tags for each of the options
   ids <- paste0(inputId, seq_along(choices))
+
+  divclass <- if (inline) paste0(type, "-inline") else type
+  divclass <- paste("shiny-options-item", divclass)
+
   # generate a list of <input type=? [checked] />
-  mapply(
+  options <- mapply(
     ids, choices, names(choices),
     FUN = function(id, value, name) {
       inputTag <- tags$input(
@@ -646,7 +650,7 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
         inputTag$attribs$checked <- "checked"
 
       tags$div(
-        class = type,
+        class = divclass,
         tags$label(
           inputTag, tags$span(name)
         )
@@ -654,6 +658,8 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
     },
     SIMPLIFY = FALSE, USE.NAMES = FALSE
   )
+
+  div(class = "shiny-options-group", options)
 }
 
 #' Create a help text element

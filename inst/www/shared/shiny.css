@@ -160,6 +160,7 @@ span.jslider {
   display: inline-block;
   vertical-align: top;
   padding-right: 12px;
+  width: 220px;
 }
 .shiny-split-layout {
   width: 100%;

@@ -3286,9 +3286,14 @@
     // of 0x0). It's OK to over-report sizes because the input pipeline will
     // filter out values that haven't changed.
     $(window).resize(debounce(500, sendImageSize));
-    $('body').on('shown.bs.tab.sendImageSize', '*', sendImageSize);
-    $('body').on('shown.bs.tab.sendOutputHiddenState hidden.bs.tab.sendOutputHiddenState', '*',
-                 sendOutputHiddenState);
+    // Need to register callbacks for each Bootstrap 3 class.
+    var bs3classes = ['modal', 'dropdown', 'tab', 'tooltip', 'popover', 'collapse'];
+    $.each(bs3classes, function(idx, classname) {
+      $('body').on('shown.bs.' + classname + '.sendImageSize', '*', sendImageSize);
+      $('body').on('shown.bs.' + classname + '.sendOutputHiddenState ' +
+                   'hidden.bs.' + classname + '.sendOutputHiddenState',
+                   '*', sendOutputHiddenState);
+    });
 
     // This is needed for Bootstrap 2 compatibility
     $('body').on('shown.sendImageSize', '*', sendImageSize);

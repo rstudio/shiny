@@ -2677,8 +2677,8 @@
       this.form = document.createElement('form');
       this.form.method = 'POST';
       this.form.setAttribute('enctype', 'multipart/form-data');
-      this.form.action = "session/" + encodeURI(this.shinyapp.config.sessionId)
-                         + "/uploadie/" + encodeURI(this.id);
+      this.form.action = "session/" + encodeURI(this.shinyapp.config.sessionId) +
+                         "/uploadie/" + encodeURI(this.id);
       this.form.id = 'shinyupload_form_' + this.id;
       this.form.target = iframeId;
       $(this.form).insertAfter(this.fileEl).append(this.fileEl);
@@ -2827,6 +2827,7 @@
 
     // Start the new upload and put the uploader in 'currentUploader'.
     if (IE8) {
+      /*jshint nonew:false */
       new IE8FileUploader(exports.shinyapp, id, evt.target);
     } else {
       el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));

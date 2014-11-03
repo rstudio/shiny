@@ -1,6 +1,10 @@
 shiny 0.10.2.9xxx
 --------------------------------------------------------------------------------
 
+* Switched from Bootstrap 2 to Bootstrap 3. For most users, this will work
+  seamlessly, but some users may need to use the shinyBootstrap2 package for
+  backward compatibility.
+
 * `actionButton` and `actionLink` now pass their `...` arguments to the
   underlying tag function. (#607)
 

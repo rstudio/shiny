@@ -216,7 +216,7 @@ navbarPage <- function(title,
   pageTitle <- title
 
   # navbar class based on options
-  navbarClass <- "navbar"
+  navbarClass <- "navbar navbar-default"
   position <- match.arg(position)
   if (!is.null(position))
     navbarClass <- paste(navbarClass, " navbar-", position, sep = "")
@@ -225,35 +225,31 @@ navbarPage <- function(title,
 
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, "nav", NULL, id)
+  tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id)
 
   # built the container div dynamically to support optional collapsibility
   if (collapsible) {
-    navId <- paste("navbar-", p_randomInt(1000, 10000), sep="")
+    navId <- paste("navbar-collapse-", p_randomInt(1000, 10000), sep="")
     containerDiv <- div(class="container",
-                        tags$button(type="button",
-                                    class="btn btn-navbar",
-                                    `data-toggle`="collapse",
-                                    `data-target`=".nav-collapse",
-                          span(class="icon-bar"),
-                          span(class="icon-bar"),
-                          span(class="icon-bar")
-                        ),
-                        span(class="brand pull-left", pageTitle),
-                        div(class="nav-collapse collapse",
-                            id=navId,
-                            tabset$navList),
-                            tags$script(paste(
-                              "$('#", navId, " a:not(.dropdown-toggle)').click(function (e) {
-                                  e.preventDefault();
-                                  $(this).tab('show');
-                                  if ($('.navbar .btn-navbar').is(':visible'))
-                                    $('.navbar .btn-navbar').click();
-                               });", sep="")))
+      div(class="navbar-header",
+        tags$button(type="button", class="navbar-toggle collapsed",
+          `data-toggle`="collapse", `data-target`=paste0("#", navId),
+          span(class="sr-only", "Toggle navigation"),
+          span(class="icon-bar"),
+          span(class="icon-bar"),
+          span(class="icon-bar")
+        ),
+        span(class="navbar-brand", pageTitle)
+      ),
+      div(class="navbar-collapse collapse", id=navId, tabset$navList)
+    )
   } else {
     containerDiv <- div(class="container",
-                        span(class="brand pull-left", pageTitle),
-                        tabset$navList)
+      div(class="navbar-header",
+        span(class="navbar-brand", pageTitle)
+      ),
+      tabset$navList
+    )
   }
 
   # create a default header if necessary
@@ -281,9 +277,7 @@ navbarPage <- function(title,
     title = windowTitle,
     responsive = responsive,
     theme = theme,
-    div(class=navbarClass,
-      div(class="navbar-inner", containerDiv)
-    ),
+    tags$nav(class=navbarClass, role="navigation", containerDiv),
     contentDiv
   )
 }

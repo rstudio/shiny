@@ -963,7 +963,7 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 actionButton <- function(inputId, label, icon = NULL, ...) {
   tags$button(id=inputId,
               type="button",
-              class="btn action-button",
+              class="btn btn-default action-button",
               list(icon, label),
               ...)
 }

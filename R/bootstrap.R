@@ -155,9 +155,10 @@ pageWithSidebar <- function(headerPanel,
 #'   tabPanels
 #' @param inverse \code{TRUE} to use a dark background and light text for the
 #'   navigation bar
-#' @param collapsable \code{TRUE} to automatically collapse the navigation
+#' @param collapsible \code{TRUE} to automatically collapse the navigation
 #'   elements into a menu when the width of the browser is less than 940 pixels
 #'   (useful for viewing on smaller touchscreen device)
+#' @param collapsable Deprecated; use \code{collapsible} instead.
 #' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
 #'   layout.
 #' @param responsive This option is deprecated; it is no longer optional with
@@ -199,11 +200,17 @@ navbarPage <- function(title,
                        header = NULL,
                        footer = NULL,
                        inverse = FALSE,
-                       collapsable = FALSE,
+                       collapsible = FALSE,
+                       collapsable,
                        fluid = TRUE,
                        responsive = NULL,
                        theme = NULL,
                        windowTitle = title) {
+
+  if (!missing(collapsable)) {
+    shinyDeprecated("`collapsable` is deprecated; use `collapsible` instead.")
+    collapsible <- collapsable
+  }
 
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title
@@ -220,8 +227,8 @@ navbarPage <- function(title,
   tabs <- list(...)
   tabset <- buildTabset(tabs, "nav", NULL, id)
 
-  # built the container div dynamically to support optional collapsability
-  if (collapsable) {
+  # built the container div dynamically to support optional collapsibility
+  if (collapsible) {
     navId <- paste("navbar-", p_randomInt(1000, 10000), sep="")
     containerDiv <- div(class="container",
                         tags$button(type="button",

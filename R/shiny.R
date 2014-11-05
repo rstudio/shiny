@@ -18,7 +18,6 @@ NULL
 #' @aliases shiny
 #' @docType package
 #' @import htmltools httpuv xtable digest R6 mime
-#' @importFrom RJSONIO fromJSON
 NULL
 
 
@@ -80,7 +79,8 @@ createUniqueId <- function(bytes, prefix = "", suffix = "") {
 }
 
 toJSON <- function(x, ..., digits = getOption("shiny.json.digits", 16)) {
-  RJSONIO::toJSON(x, digits = digits, ...)
+  jsonlite::toJSON(x, dataframe = "columns", null = "null", na = "null",
+                   auto_unbox = TRUE, digits = digits, use_signif = TRUE, ...)
 }
 
 # Call the workerId func with no args to get the worker id, and with an arg to
@@ -301,7 +301,7 @@ ShinySession <- R6Class(
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
         try({
-          creds <- fromJSON(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)
+          creds <- jsonlite::fromJSON(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)
           session$user <<- creds$user
           session$groups <<- creds$groups
         }, silent=FALSE)

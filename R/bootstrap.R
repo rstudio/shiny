@@ -1382,9 +1382,11 @@ tabsetPanel <- function(...,
 #' @param widths Column withs of the navigation list and tabset content areas
 #'   respectively.
 #'
-#' @details You can include headers within the \code{navlistPanel} by
-#' including plain text elements in the list; you can include separators by
-#' including "------" (any number of dashes works).
+#' @details You can include headers within the \code{navlistPanel} by including
+#'   plain text elements in the list. Versions of Shiny before 0.11 supported
+#'   separators with "------", but as of 0.11, separators were no longer
+#'   supported. This is because version 0.11 switched to Bootstrap 3, which
+#'   doesn't support separators.
 #'
 #' @examples
 #' shinyUI(fluidPage(
@@ -1395,7 +1397,6 @@ tabsetPanel <- function(...,
 #'     "Header",
 #'     tabPanel("First"),
 #'     tabPanel("Second"),
-#'     "-----",
 #'     tabPanel("Third")
 #'   )
 #' ))
@@ -1407,18 +1408,15 @@ navlistPanel <- function(...,
                          fluid = TRUE,
                          widths = c(4, 8)) {
 
-  # text filter for defining separtors and headers
+  # text filter for headers
   textFilter <- function(text) {
-    if (grepl("^\\-+$", text))
-      tags$li(class="divider")
-    else
-      tags$li(class="nav-header", text)
+      tags$li(class="navbar-brand", text)
   }
 
   # build the tabset
   tabs <- list(...)
   tabset <- buildTabset(tabs,
-                        "nav nav-list",
+                        "nav nav-pills nav-stacked",
                         textFilter,
                         id,
                         selected)

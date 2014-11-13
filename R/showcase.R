@@ -35,8 +35,6 @@ showcaseHead <- function() {
       script = "jquery-ui.min.js"),
     htmlDependency("showdown", "0.3.1", c(href="shared/showdown/compressed"),
       script = "showdown.js"),
-    htmlDependency("font-awesome", "4.0.3", c(href="shared/font-awesome"),
-      stylesheet = "css/font-awesome.min.css"),
     htmlDependency("highlight.js", "6.2", c(href="shared/highlight"),
       script = "highlight.pack.js")
   )
@@ -87,7 +85,8 @@ showcaseCodeTabs <- function(codeLicense) {
     a(id="showcase-code-position-toggle",
       class="btn btn-default btn-sm",
       onclick="toggleCodePosition()",
-      i(class="fa fa-level-up", "show with app")),
+      icon("level-up"),
+      "show with app"),
     ul(class="nav nav-tabs",
        lapply(rFiles, function(rFile) {
          li(class=if (tolower(rFile) %in% c("app.r", "server.r")) "active" else "",

@@ -1829,12 +1829,10 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
     iconClass <- paste(iconClass, class)
 
   # return the element and css dependency
-  tagList(
-    singleton(tags$head(
-      tags$link(rel = "stylesheet", type = "text/css",
-                href = 'shared/font-awesome/css/font-awesome.min.css')
-    )),
-    tags$i(class = iconClass)
+  attachDependencies(
+    tags$i(class = iconClass),
+    htmlDependency("font-awesome", "4.2.0", c(href="shared/font-awesome"),
+      stylesheet = "css/font-awesome.min.css")
   )
 }
 

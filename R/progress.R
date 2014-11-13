@@ -105,6 +105,7 @@ Progress <- R6Class(
       if (is.null(value) || is.na(value)) {
         value <- NULL
       } else {
+        # Normalize value to number between 0 and 1
         value <- min(1, max(0, (value - private$min) / (private$max - private$min)))
       }
 
@@ -121,7 +122,7 @@ Progress <- R6Class(
     },
 
     inc = function(amount = 0.1, message = NULL, detail = NULL) {
-      value <- min(private$value + amount, private$max)
+      value <- min(self$getValue() + amount, private$max)
       self$set(value, message, detail)
     },
 
@@ -129,7 +130,10 @@ Progress <- R6Class(
 
     getMax = function() private$max,
 
-    getValue = function() private$value,
+    # Return value (not the normalized 0-1 value, but in the original range)
+    getValue = function() {
+      private$value * (private$max - private$min) + private$min
+    },
 
     close = function() {
       if (private$closed) {

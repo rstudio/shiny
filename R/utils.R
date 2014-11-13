@@ -690,7 +690,7 @@ dataTablesJSON <- function(data, req) {
     recordsFiltered = nrow(data),
     data = fdata
   ))
-  httpResponse(200, 'application/json', res)
+  httpResponse(200, 'application/json', enc2utf8(res))
 }
 
 # when both ignore.case and fixed are TRUE, we use grep(ignore.case = FALSE,

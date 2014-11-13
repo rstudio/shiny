@@ -476,5 +476,6 @@ selectizeJSON <- function(data, req) {
   idx <- head(which(idx), mop)
   data <- data[idx, ]
 
-  httpResponse(200, 'application/json', toJSON(columnToRowData(data)))
+  res <- toJSON(columnToRowData(data))
+  httpResponse(200, 'application/json', enc2utf8(res))
 }

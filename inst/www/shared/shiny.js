@@ -1896,6 +1896,66 @@
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
 
 
+  var slider2InputBinding = {};
+  $.extend(slider2InputBinding, textInputBinding, {
+    find: function(scope) {
+      // Check if ionRangeSlider plugin is loaded
+      if (!$.fn.ionRangeSlider)
+        return [];
+
+      return $(scope).find('input.js-range-slider');
+    },
+    getValue: function(el) {
+      var result = $(el).data('ionRangeSlider').result;
+      if (this._numValues(el) == 2) {
+        return [+result.from, +result.to];
+      }
+      else {
+        return +result.from;
+      }
+    },
+    setValue: function(el, value) {
+      var slider = $(el).data('ionRangeSlider');
+
+      var data = { from: value[0] };
+      if (this._numValues(el) == 2 && value instanceof Array)
+        data.to = value[1];
+
+      slider.update(data);
+    },
+    subscribe: function(el, callback) {
+      $(el).on('change.slider2InputBinding', function(event) {
+        callback(!$(el).data('animating'));
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.slider2InputBinding');
+    },
+    receiveMessage: function(el, data) {
+    },
+    getRatePolicy: function() {
+      return {
+        policy: 'debounce',
+        delay: 250
+      };
+    },
+    getState: function(el) {
+    },
+    initialize: function(el) {
+      $(el).ionRangeSlider();
+    },
+
+    // Number of values; 1 for single slider, 2 for range slider
+    _numValues: function(el) {
+      if ($(el).data('ionRangeSlider').options.type === 'double')
+        return 2;
+      else
+        return 1;
+    }
+  });
+  inputBindings.register(slider2InputBinding, 'shiny.slider2Input');
+
+
   var dateInputBinding = new InputBinding();
   $.extend(dateInputBinding, {
     find: function(scope) {

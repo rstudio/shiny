@@ -7,28 +7,30 @@ icon(name, class = NULL, lib = "font-awesome")
 }
 \arguments{
 \item{name}{Name of icon. Icons are drawn from the
-\href{http://fontawesome.io/icons/}{Font Awesome} library. Note that the
-"fa-" prefix should not be used in icon names (i.e. the "fa-calendar" icon
-should be referred to as "calendar")}
+\href{http://fontawesome.io/icons/}{Font Awesome} and
+\href{http://getbootstrap.com/components/#glyphicons}{Glypicons"}
+libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
+in icon names (i.e. the "fa-calendar" icon should be referred to as
+"calendar")}
 
 \item{class}{Additional classes to customize the style of the icon (see the
-\href{http://fontawesome.io/examples/}{usage examples} for
- details on supported styles).}
+\href{http://fontawesome.io/examples/}{usage examples} for details on
+supported styles).}
 
-\item{lib}{Icon library to use ("font-awesome" is only one currently
-  supported)}
+\item{lib}{Icon library to use ("font-awesome" or "glyphicon")}
 }
 \value{
 An icon element
 }
 \description{
-Create an icon for use within a page. Icons can appear on their own,
-inside of a button, or as an icon for a \code{\link{tabPanel}} within a
+Create an icon for use within a page. Icons can appear on their own, inside
+of a button, or as an icon for a \code{\link{tabPanel}} within a
 \code{\link{navbarPage}}.
 }
 \examples{
-icon("calendar")            # standard icon
-icon("calendar", "fa-3x")   # 3x normal size
+icon("calendar")               # standard icon
+icon("calendar", "fa-3x")      # 3x normal size
+icon("cog", lib = "glyphicon") # From glyphicon library
 
 # add an icon to a submit button
 submitButton("Update View", icon = icon("refresh"))
@@ -38,5 +40,10 @@ shinyUI(navbarPage("App Title",
   tabPanel("Summary", icon = icon("list-alt")),
   tabPanel("Table", icon = icon("table"))
 ))
+}
+\seealso{
+For lists of available icons, see
+  \href{http://fontawesome.io/icons/}{http://fontawesome.io/icons/} and
+  \href{http://getbootstrap.com/components/#glyphicons}{http://getbootstrap.com/components/#glyphicons}.
 }
 

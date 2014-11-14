@@ -1792,26 +1792,32 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
 
 #' Create an icon
 #'
-#' Create an icon for use within a page. Icons can appear on their own,
-#' inside of a button, or as an icon for a \code{\link{tabPanel}} within a
+#' Create an icon for use within a page. Icons can appear on their own, inside
+#' of a button, or as an icon for a \code{\link{tabPanel}} within a
 #' \code{\link{navbarPage}}.
 #'
 #' @param name Name of icon. Icons are drawn from the
-#'   \href{http://fontawesome.io/icons/}{Font Awesome} library. Note that the
-#'   "fa-" prefix should not be used in icon names (i.e. the "fa-calendar" icon
-#'   should be referred to as "calendar")
+#'   \href{http://fontawesome.io/icons/}{Font Awesome} and
+#'   \href{http://getbootstrap.com/components/#glyphicons}{Glypicons"}
+#'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
+#'   in icon names (i.e. the "fa-calendar" icon should be referred to as
+#'   "calendar")
 #' @param class Additional classes to customize the style of the icon (see the
-#'  \href{http://fontawesome.io/examples/}{usage examples} for
-#'   details on supported styles).
-#' @param lib Icon library to use ("font-awesome" is only one currently
-#'   supported)
+#'   \href{http://fontawesome.io/examples/}{usage examples} for details on
+#'   supported styles).
+#' @param lib Icon library to use ("font-awesome" or "glyphicon")
 #'
 #' @return An icon element
 #'
+#' @seealso For lists of available icons, see
+#'   \href{http://fontawesome.io/icons/}{http://fontawesome.io/icons/} and
+#'   \href{http://getbootstrap.com/components/#glyphicons}{http://getbootstrap.com/components/#glyphicons}.
+#'
 #'
 #' @examples
-#' icon("calendar")            # standard icon
-#' icon("calendar", "fa-3x")   # 3x normal size
+#' icon("calendar")               # standard icon
+#' icon("calendar", "fa-3x")      # 3x normal size
+#' icon("cog", lib = "glyphicon") # From glyphicon library
 #'
 #' # add an icon to a submit button
 #' submitButton("Update View", icon = icon("refresh"))
@@ -1824,25 +1830,37 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
 #'
 #' @export
 icon <- function(name, class = NULL, lib = "font-awesome") {
+  prefixes <- list(
+    "font-awesome" = "fa",
+    "glyphicon" = "glyphicon"
+  )
+  prefix <- prefixes[[lib]]
 
   # determine stylesheet
-  if (!identical(lib, "font-awesome"))
-    stop("Unknown font library '", lib, "' specified")
+  if (is.null(prefix)) {
+    stop("Unknown font library '", lib, "' specified. Must be one of ",
+         paste0('"', names(prefixes), '"', collapse = ", "))
+  }
 
   # build the icon class (allow name to be null so that other functions
-  # e.g. builtTabset can pass an explict class value)
+  # e.g. buildTabset can pass an explicit class value)
   iconClass <- ""
   if (!is.null(name))
-    iconClass <- paste0("fa fa-", name)
+    iconClass <- paste0(prefix, " ", prefix, "-", name)
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
 
-  # return the element and css dependency
-  attachDependencies(
-    tags$i(class = iconClass),
-    htmlDependency("font-awesome", "4.2.0", c(href="shared/font-awesome"),
-      stylesheet = "css/font-awesome.min.css")
-  )
+  iconTag <- tags$i(class = iconClass)
+
+  # font-awesome needs an additional dependency (glyphicon is in bootstrap)
+  if (lib == "font-awesome") {
+    htmlDependencies(iconTag) <- htmlDependency(
+      "font-awesome", "4.2.0", c(href="shared/font-awesome"),
+      stylesheet = "css/font-awesome.min.css"
+    )
+  }
+
+  iconTag
 }
 
 # Helper funtion to extract the class from an icon

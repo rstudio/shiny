@@ -55,7 +55,8 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
           "shim/respond.min.js"
         ),
         stylesheet = if (is.null(theme))
-          sprintf("css/bootstrap%s", cssExt)
+          sprintf("css/bootstrap%s", cssExt),
+        meta = list(viewport = "width=device-width, initial-scale=1")
       )
     )
   }

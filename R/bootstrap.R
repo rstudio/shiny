@@ -50,7 +50,13 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
       htmlDependency("bootstrap", "3.3.1", bs,
         script = sprintf("js/bootstrap%s", jsExt),
         stylesheet = if (is.null(theme))
-          sprintf("css/bootstrap%s", cssExt)
+          sprintf("css/bootstrap%s", cssExt),
+        head = '      <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn\'t work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="shared/shim/html5shiv.min.js"></script>
+          <script src="shared/shim/respond.min.js"></script>
+        <![endif]-->'
       )
     )
   }

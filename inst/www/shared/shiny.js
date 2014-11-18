@@ -1917,11 +1917,11 @@
     setValue: function(el, value) {
       var slider = $(el).data('ionRangeSlider');
 
-      var data = { from: value[0] };
-      if (this._numValues(el) == 2 && value instanceof Array)
-        data.to = value[1];
-
-      slider.update(data);
+      if (this._numValues(el) == 2 && value instanceof Array) {
+        slider.update({ from: value[0], to: value[1] });
+      } else {
+        slider.update({ from: value });
+      }
     },
     subscribe: function(el, callback) {
       $(el).on('change.slider2InputBinding', function(event) {
@@ -1932,6 +1932,27 @@
       $(el).off('.slider2InputBinding');
     },
     receiveMessage: function(el, data) {
+      var slider = $(el).data('ionRangeSlider');
+      var msg = {};
+
+      if (data.hasOwnProperty('value')) {
+        if (this._numValues(el) == 2 && data.value instanceof Array) {
+          msg.from = data.value[0];
+          msg.to = data.value[1];
+        } else {
+          msg.from = data.value;
+          // Workaround for ionRangeSlider issue #143
+          msg.to = data.value;
+        }
+      }
+      if (data.hasOwnProperty('min'))  msg.min   = data.min;
+      if (data.hasOwnProperty('max'))  msg.max   = data.max;
+      if (data.hasOwnProperty('step')) msg.step  = data.step;
+
+      if (data.hasOwnProperty('label'))
+        $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+
+      slider.update(msg);
     },
     getRatePolicy: function() {
       return {

@@ -256,6 +256,45 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
   session$sendInputMessage(inputId, message)
 }
 
+#' Change the value of a slider2 input on the client
+#'
+#' @template update-input
+#' @param value The value to set for the input object.
+#' @param min Minimum value.
+#' @param max Maximum value.
+#' @param step Step size.
+#'
+#' @seealso \code{\link{slider2Input}}
+#'
+#' @examples
+#' \donttest{
+#' shinyApp(
+#'   ui = fluidPage(
+#'     sidebarLayout(
+#'       sidebarPanel(
+#'         p("The first slider controls the second"),
+#'         slider2Input("control", "Controller:", min=0, max=20, value=10,
+#'                      step=1),
+#'         slider2Input("receive", "Receiver:", min=0, max=20, value=10,
+#'                      step=1)
+#'       ),
+#'       mainPanel()
+#'     )
+#'   ),
+#'   server = function(input, output, session) {
+#'     observe({
+#'       val <- input$control
+#'       # Control the value, min, max, and step.
+#'       # Step size is 2 when input value is even; 1 when value is odd.
+#'       updateSlider2Input(session, "receive", value = val,
+#'         min = floor(val/2), max = val+4, step = (val+1)%%2 + 1)
+#'     })
+#'   }
+#' )
+#' }
+#' @export
+updateSlider2Input <- updateNumericInput
+
 updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
                                selected = NULL, inline = FALSE,
                                type = 'checkbox') {

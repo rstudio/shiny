@@ -3404,7 +3404,6 @@
     evt.preventDefault();
     var self = $(this);
     var target = $('#' + $escape(self.attr('data-target-id')));
-    var slider = target.slider();
     var startLabel = 'Play';
     var stopLabel = 'Pause';
     var loop = self.attr('data-loop') !== undefined &&
@@ -3416,23 +3415,60 @@
       animInterval = +animInterval;
 
     if (!target.data('animTimer')) {
-      // If we're currently at the end, restart
-      if (!slider.canStepNext())
-        slider.resetToStart();
+      var slider;
+      var timer;
 
-      var timer = setInterval(function() {
-        if (loop && !slider.canStepNext()) {
+      // Separate code paths:
+      // Backward compatible code for old-style jsliders (Shiny <= 0.10.2),
+      // and new-style ionsliders.
+      if (target.hasClass('jslider')) {
+        slider = target.slider();
+
+        // If we're currently at the end, restart
+        if (!slider.canStepNext())
           slider.resetToStart();
-        }
-        else {
 
-          slider.stepNext();
-
-          if (!loop && !slider.canStepNext()) {
-            self.click(); // stop the animation
+        timer = setInterval(function() {
+          if (loop && !slider.canStepNext()) {
+            slider.resetToStart();
           }
-        }
-      }, animInterval);
+          else {
+            slider.stepNext();
+            if (!loop && !slider.canStepNext()) {
+              self.click(); // stop the animation
+            }
+          }
+        }, animInterval);
+
+      } else {
+        slider = target.data('ionRangeSlider');
+        var sliderCanStep = function() {
+          return slider.result.from < slider.result.max;
+        };
+        var sliderReset = function() {
+          slider.update({from: slider.result.min});
+        };
+        var sliderStep = function() {
+          slider.update({from: slider.result.from + slider.options.step});
+        };
+
+        // If we're currently at the end, restart
+        if (!sliderCanStep())
+          sliderReset();
+
+        timer = setInterval(function() {
+          if (loop && !sliderCanStep()) {
+            sliderReset();
+          }
+          else {
+            sliderStep();
+            if (!loop && !sliderCanStep()) {
+              self.click(); // stop the animation
+            }
+          }
+        }, animInterval);
+      }
+
       target.data('animTimer', timer);
       self.attr('title', stopLabel);
       self.addClass('playing');

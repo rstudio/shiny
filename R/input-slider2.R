@@ -29,6 +29,13 @@ slider2Input <- function(inputId, label, min, max, value, step = NULL,
     `data-postfix` = post
   ))
 
+  # Replace any TRUE and FALSE with "true" and "false"
+  sliderProps <- lapply(sliderProps, function(x) {
+    if (identical(x, TRUE)) "true"
+    else if (identical(x, FALSE)) "false"
+    else x
+  })
+
   sliderTag <- div(class = "form-group",
     if (!is.null(label)) controlLabel(inputId, label),
     do.call(tags$input, sliderProps)

@@ -32,7 +32,10 @@
         return false;
     } ());
 
-    var is_touch = (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
+    // Add an explicit check for the qt class (set by shiny), so that the qt
+    // window is not mistakenly treated as a touch device.
+    var is_touch = !($(document.documentElement).hasClass('qt')) &&
+                    (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
 
 
     // IE8 fix

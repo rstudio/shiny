@@ -29,19 +29,10 @@ slider2Input <- function(inputId, label, min, max, value, step = NULL,
     `data-postfix` = post
   ))
 
-  sliderTag <- do.call(tags$input, sliderProps)
-
-
-  if (is.null(label)) {
-    sliderTag <- div(class = "form-group",
-      sliderTag
-    )
-  } else {
-    sliderTag <- div(class = "form-group",
-      controlLabel(inputId, label),
-      sliderTag
-    )
-  }
+  sliderTag <- div(class = "form-group",
+    if (!is.null(label)) controlLabel(inputId, label),
+    do.call(tags$input, sliderProps)
+  )
 
 
   if (identical(animate, TRUE))

@@ -1,3 +1,38 @@
+#' Slider Input Widget
+#'
+#' Constructs a slider widget to select a numeric value from a range.
+#'
+#' @param inputId Specifies the \code{input} slot that will be used to access
+#'   the value.
+#' @param label A descriptive label to be displayed with the widget, or
+#'   \code{NULL}.
+#' @param min The minimum value (inclusive) that can be selected.
+#' @param max The maximum value (inclusive) that can be selected.
+#' @param value The initial value of the slider. A numeric vector of length
+#'   one will create a regular slider; a numeric vector of length two will
+#'   create a double-ended range slider. A warning will be issued if the
+#'   value doesn't fit between \code{min} and \code{max}.
+#' @param step Specifies the interval between each selectable value on the
+#'   slider (\code{NULL} results a step size of 1).
+#' @param round \code{TRUE} to round all values to the nearest integer;
+#'   \code{FALSE} if no rounding is desired; or an integer to round to that
+#'   number of digits (for example, 1 will round to the nearest 10, and -2 will
+#'   round to the nearest .01). Any rounding will be applied after snapping to
+#'   the nearest step.
+#' @param format Deprecated.
+#' @param locale Deprecated.
+#' @param ticks \code{FALSE} to hide tick marks, \code{TRUE} to show them
+#'   according to some simple heuristics.
+#' @param animate \code{TRUE} to show simple animation controls with default
+#'   settings; \code{FALSE} not to; or a custom settings list, such as those
+#'   created using \code{\link{animationOptions}}.
+#' @param sep Separator between thousands places in numbers.
+#' @param pre A prefix string to put in front of the value.
+#' @param post A suffix string to put after the value.
+#' @inheritParams selectizeInput
+#' @family input elements
+#' @seealso \code{\link{updateSlider2Input}}
+#'
 #' @export
 slider2Input <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,

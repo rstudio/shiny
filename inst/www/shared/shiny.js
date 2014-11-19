@@ -1030,10 +1030,11 @@
         });
       },
 
+      // The 'bar' class is needed for backward compatibility with Bootstrap 2.
       progressHTML: '<div class="shiny-progress open">' +
-        '<div class="progress progress-striped active"><div class="bar"></div></div>' +
+        '<div class="progress progress-striped active"><div class="progress-bar bar"></div></div>' +
         '<div class="progress-text">' +
-          '<span class="progress-message">foo</span>' +
+          '<span class="progress-message">message</span>' +
           '<span class="progress-detail"></span>' +
         '</div>' +
       '</div>'

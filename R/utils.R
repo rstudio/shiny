@@ -120,6 +120,10 @@ p_randomInt <- function(...) {
   withPrivateSeed(randomInt(...))
 }
 
+isWholeNum <- function(x, tol = .Machine$double.eps^0.5) {
+  abs(x - round(x)) < tol
+}
+
 `%OR%` <- function(x, y) {
   if (is.null(x) || isTRUE(is.na(x)))
     y

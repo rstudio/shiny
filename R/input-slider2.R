@@ -13,6 +13,27 @@ slider2Input <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2")
   }
 
+  # If no step size specified, use approx. 100 step points
+  if (is.null(step)) {
+    step <- pretty(c(min, max), n = 100)
+    step <- step[2] - step[1]
+  }
+
+  # Try to get a sane number of grid marks - between 4 and 16
+  if (ticks) {
+    range <- max - min
+    n_steps <- range / step
+
+    # Make sure there are <= 10 steps.
+    # n_ticks can be a noninteger, which is good when the range is not an
+    # integer multiple of the step size, e.g., min=1, max=10, step=4
+    scale_factor <- ceiling(n_steps / 10)
+    n_ticks <- n_steps / scale_factor
+
+  } else {
+    n_ticks <- NULL
+  }
+
   sliderProps <- dropNulls(list(
     class = "js-range-slider",
     id = inputId,
@@ -22,8 +43,9 @@ slider2Input <- function(inputId, label, min, max, value, step = NULL,
     `data-from` = value[1],
     `data-to` = if (length(value) > 1) value[2],
     `data-step` = step,
-    `data-grid` = if(ticks) TRUE,
-    `data-grid-snap` = if (!is.null(step)) TRUE,
+    `data-grid` = ticks,
+    `data-grid-num` = n_ticks,
+    `data-grid-snap` = FALSE,
     `data-prettify-separator` = sep,
     `data-prefix` = pre,
     `data-postfix` = post

@@ -1,7 +1,8 @@
 #' @export
 slider2Input <- function(inputId, label, min, max, value, step = NULL,
-                        round = FALSE, format = '#,##0.#####', locale = 'us',
-                        ticks = TRUE, animate = FALSE, width = NULL) {
+                        round = FALSE, format = NULL, locale = 'us',
+                        ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
+                        pre = NULL, post = NULL) {
 
   sliderProps <- dropNulls(list(
     class = "js-range-slider",
@@ -13,7 +14,10 @@ slider2Input <- function(inputId, label, min, max, value, step = NULL,
     `data-to` = if (length(value) > 1) value[2],
     `data-step` = step,
     `data-grid` = if(ticks) TRUE,
-    `data-grid-snap` = if (!is.null(step)) TRUE
+    `data-grid-snap` = if (!is.null(step)) TRUE,
+    `data-prettify-separator` = sep,
+    `data-prefix` = pre,
+    `data-postfix` = post
   ))
 
   sliderTag <- do.call(tags$input, sliderProps)

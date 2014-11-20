@@ -48,15 +48,20 @@ slider2Input <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2")
   }
 
-  # If no step size specified, use approx. 100 step points
+  # Auto step size
+  range <- max - min
   if (is.null(step)) {
-    step <- pretty(c(min, max), n = 100)
-    step <- step[2] - step[1]
+    # If short range or decimals, use means continuous decimal with ~100 points
+    if (range < 2 || hasDecimals(min) || hasDecimals(max)) {
+      step <- pretty(c(min, max), n = 100)
+      step <- step[2] - step[1]
+    } else {
+      step <- 1
+    }
   }
 
   # Try to get a sane number of grid marks - between 4 and 16
   if (ticks) {
-    range <- max - min
     n_steps <- range / step
 
     # Make sure there are <= 10 steps.

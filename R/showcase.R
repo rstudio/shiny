@@ -62,7 +62,7 @@ showcaseHead <- function() {
 appMetadata <- function(desc) {
   cols <- colnames(desc)
   if ("Title" %in% cols)
-    with(tags, h4(class="muted shiny-showcase-apptitle", desc[1,"Title"],
+    with(tags, h4(class="text-muted shiny-showcase-apptitle", desc[1,"Title"],
       if ("Author" %in% cols) small(
         br(), "by",
         if ("AuthorUrl" %in% cols)
@@ -85,7 +85,7 @@ showcaseCodeTabs <- function(codeLicense) {
   rFiles <- list.files(pattern = "\\.[rR]$")
   with(tags, div(id="showcase-code-tabs",
     a(id="showcase-code-position-toggle",
-      class="btn btn-default btn-small",
+      class="btn btn-default btn-sm",
       onclick="toggleCodePosition()",
       i(class="fa fa-level-up", "show with app")),
     ul(class="nav nav-tabs",
@@ -128,17 +128,17 @@ showcaseAppInfo <- function() {
   with(tags,
     div(class="container-fluid shiny-code-container well",
         id="showcase-well",
-        div(class="row-fluid",
+        div(class="row",
           if (hasDesc || hasReadme) {
-            div(id="showcase-app-metadata", class="span4",
+            div(id="showcase-app-metadata", class="col-sm-4",
                 if (hasDesc) appMetadata(desc) else "",
                 if (hasReadme) div(id="readme-md"))
           } else "",
           div(id="showcase-code-inline",
-              class=if (hasReadme || hasDesc) "span8" else "span10 offset1",
+              class=if (hasReadme || hasDesc) "col-sm-8" else "col-sm-10 col-sm-offset-1",
               showcaseCodeTabs(
                 if (hasDesc && "License" %in% colnames(desc)) {
-                  small(class="showcase-code-license muted",
+                  small(class="showcase-code-license text-muted",
                         "Code license: ",
                         licenseLink(desc[1,"License"]))
                 } else "")))))

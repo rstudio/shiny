@@ -6,8 +6,8 @@
 \usage{
 navbarPage(title, ..., id = NULL, position = c("static-top", "fixed-top",
   "fixed-bottom"), header = NULL, footer = NULL, inverse = FALSE,
-  collapsable = FALSE, fluid = TRUE, responsive = TRUE, theme = NULL,
-  windowTitle = title)
+  collapsible = FALSE, collapsable, fluid = TRUE, responsive = NULL,
+  theme = NULL, windowTitle = title)
 
 navbarMenu(title, ..., icon = NULL)
 }
@@ -38,15 +38,17 @@ tabPanels}
 \item{inverse}{\code{TRUE} to use a dark background and light text for the
 navigation bar}
 
-\item{collapsable}{\code{TRUE} to automatically collapse the navigation
+\item{collapsible}{\code{TRUE} to automatically collapse the navigation
 elements into a menu when the width of the browser is less than 940 pixels
 (useful for viewing on smaller touchscreen device)}
+
+\item{collapsable}{Deprecated; use \code{collapsible} instead.}
 
 \item{fluid}{\code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
 layout.}
 
-\item{responsive}{\code{TRUE} to use responsive layout (automatically adapt
-and resize page elements based on the size of the viewing device)}
+\item{responsive}{This option is deprecated; it is no longer optional with
+Bootstrap 3.}
 
 \item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
 www directory). For example, to use the theme located at

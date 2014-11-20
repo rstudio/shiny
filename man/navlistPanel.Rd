@@ -32,9 +32,11 @@ Create a navigation list panel that provides a list of links on the left
 which navigate to a set of tabPanels displayed to the right.
 }
 \details{
-You can include headers within the \code{navlistPanel} by
-including plain text elements in the list; you can include separators by
-including "------" (any number of dashes works).
+You can include headers within the \code{navlistPanel} by including
+  plain text elements in the list. Versions of Shiny before 0.11 supported
+  separators with "------", but as of 0.11, separators were no longer
+  supported. This is because version 0.11 switched to Bootstrap 3, which
+  doesn't support separators.
 }
 \examples{
 shinyUI(fluidPage(
@@ -45,7 +47,6 @@ shinyUI(fluidPage(
     "Header",
     tabPanel("First"),
     tabPanel("Second"),
-    "-----",
     tabPanel("Third")
   )
 ))

@@ -4,7 +4,7 @@ NULL
 #' Create a Bootstrap page
 #'
 #' Create a Shiny UI page that loads the CSS and JavaScript for
-#' \href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and has no content in the
+#' \href{http://getbootstrap.com/3.3.0/}{Bootstrap}, and has no content in the
 #' page body (other than what you provide).
 #'
 #' This function is primarily intended for users who are proficient in
@@ -14,8 +14,8 @@ NULL
 #'
 #' @param ... The contents of the document body.
 #' @param title The browser window title (defaults to the host URL of the page)
-#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
-#'   and resize page elements based on the size of the viewing device)
+#' @param responsive This option is deprecated; it is no longer optional with
+#'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory, e.g. \code{www/bootstrap.css})
 #'
@@ -27,7 +27,11 @@ NULL
 #' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
 #'
 #' @export
-bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
+bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
+
+  if (!is.null(responsive)) {
+    shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
+  }
 
   # required head tags for boostrap
   importBootstrap <- function(min = TRUE) {
@@ -43,17 +47,17 @@ bootstrapPage <- function(..., title = NULL, responsive = TRUE, theme = NULL) {
     )
 
     list(
-      htmlDependency("bootstrap", "2.3.2", bs,
-        script = sprintf("js/bootstrap%s", jsExt),
+      htmlDependency("bootstrap", "3.3.1", bs,
+        script = c(
+          sprintf("js/bootstrap%s", jsExt),
+          # These shims are necessary for IE 8 compatibility
+          "shim/html5shiv.min.js",
+          "shim/respond.min.js"
+        ),
         stylesheet = if (is.null(theme))
-          sprintf("css/bootstrap%s", cssExt)
-      ),
-      if (responsive) {
-        htmlDependency("bootstrap-responsive", "2.3.2", bs,
-          stylesheet = sprintf("css/bootstrap-responsive%s", cssExt),
-          meta = list(viewport = "width=device-width, initial-scale=1.0")
-        )
-      }
+          sprintf("css/bootstrap%s", cssExt),
+        meta = list(viewport = "width=device-width, initial-scale=1")
+      )
     )
   }
 
@@ -122,10 +126,10 @@ pageWithSidebar <- function(headerPanel,
     # basic application container divs
     div(
       class="container-fluid",
-      div(class="row-fluid",
+      div(class="row",
           headerPanel
       ),
-      div(class="row-fluid",
+      div(class="row",
           sidebarPanel,
           mainPanel
       )
@@ -157,13 +161,14 @@ pageWithSidebar <- function(headerPanel,
 #'   tabPanels
 #' @param inverse \code{TRUE} to use a dark background and light text for the
 #'   navigation bar
-#' @param collapsable \code{TRUE} to automatically collapse the navigation
+#' @param collapsible \code{TRUE} to automatically collapse the navigation
 #'   elements into a menu when the width of the browser is less than 940 pixels
 #'   (useful for viewing on smaller touchscreen device)
+#' @param collapsable Deprecated; use \code{collapsible} instead.
 #' @param fluid \code{TRUE} to use a fluid layout. \code{FALSE} to use a fixed
 #'   layout.
-#' @param responsive \code{TRUE} to use responsive layout (automatically adapt
-#'   and resize page elements based on the size of the viewing device)
+#' @param responsive This option is deprecated; it is no longer optional with
+#'   Bootstrap 3.
 #' @param theme Alternative Bootstrap stylesheet (normally a css file within the
 #'   www directory). For example, to use the theme located at
 #'   \code{www/bootstrap.css} you would use \code{theme = "bootstrap.css"}.
@@ -201,17 +206,23 @@ navbarPage <- function(title,
                        header = NULL,
                        footer = NULL,
                        inverse = FALSE,
-                       collapsable = FALSE,
+                       collapsible = FALSE,
+                       collapsable,
                        fluid = TRUE,
-                       responsive = TRUE,
+                       responsive = NULL,
                        theme = NULL,
                        windowTitle = title) {
+
+  if (!missing(collapsable)) {
+    shinyDeprecated("`collapsable` is deprecated; use `collapsible` instead.")
+    collapsible <- collapsable
+  }
 
   # alias title so we can avoid conflicts w/ title in withTags
   pageTitle <- title
 
   # navbar class based on options
-  navbarClass <- "navbar"
+  navbarClass <- "navbar navbar-default"
   position <- match.arg(position)
   if (!is.null(position))
     navbarClass <- paste(navbarClass, " navbar-", position, sep = "")
@@ -220,35 +231,31 @@ navbarPage <- function(title,
 
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, "nav", NULL, id)
+  tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id)
 
-  # built the container div dynamically to support optional collapsability
-  if (collapsable) {
-    navId <- paste("navbar-", p_randomInt(1000, 10000), sep="")
+  # built the container div dynamically to support optional collapsibility
+  if (collapsible) {
+    navId <- paste("navbar-collapse-", p_randomInt(1000, 10000), sep="")
     containerDiv <- div(class="container",
-                        tags$button(type="button",
-                                    class="btn btn-navbar",
-                                    `data-toggle`="collapse",
-                                    `data-target`=".nav-collapse",
-                          span(class="icon-bar"),
-                          span(class="icon-bar"),
-                          span(class="icon-bar")
-                        ),
-                        span(class="brand pull-left", pageTitle),
-                        div(class="nav-collapse collapse",
-                            id=navId,
-                            tabset$navList),
-                            tags$script(paste(
-                              "$('#", navId, " a:not(.dropdown-toggle)').click(function (e) {
-                                  e.preventDefault();
-                                  $(this).tab('show');
-                                  if ($('.navbar .btn-navbar').is(':visible'))
-                                    $('.navbar .btn-navbar').click();
-                               });", sep="")))
+      div(class="navbar-header",
+        tags$button(type="button", class="navbar-toggle collapsed",
+          `data-toggle`="collapse", `data-target`=paste0("#", navId),
+          span(class="sr-only", "Toggle navigation"),
+          span(class="icon-bar"),
+          span(class="icon-bar"),
+          span(class="icon-bar")
+        ),
+        span(class="navbar-brand", pageTitle)
+      ),
+      div(class="navbar-collapse collapse", id=navId, tabset$navList)
+    )
   } else {
     containerDiv <- div(class="container",
-                        span(class="brand pull-left", pageTitle),
-                        tabset$navList)
+      div(class="navbar-header",
+        span(class="navbar-brand", pageTitle)
+      ),
+      tabset$navList
+    )
   }
 
   # create a default header if necessary
@@ -266,19 +273,17 @@ navbarPage <- function(title,
   # build the main tab content div
   contentDiv <- div(class=className("container"))
   if (!is.null(header))
-    contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), header))
+    contentDiv <- tagAppendChild(contentDiv, div(class="row", header))
   contentDiv <- tagAppendChild(contentDiv, tabset$content)
   if (!is.null(footer))
-    contentDiv <- tagAppendChild(contentDiv,div(class=className("row"), footer))
+    contentDiv <- tagAppendChild(contentDiv, div(class="row", footer))
 
   # build the page
   bootstrapPage(
     title = windowTitle,
     responsive = responsive,
     theme = theme,
-    div(class=navbarClass,
-      div(class="navbar-inner", containerDiv)
-    ),
+    tags$nav(class=navbarClass, role="navigation", containerDiv),
     contentDiv
   )
 }
@@ -307,7 +312,7 @@ navbarMenu <- function(title, ..., icon = NULL) {
 headerPanel <- function(title, windowTitle=title) {
   tagList(
     tags$head(tags$title(windowTitle)),
-    div(class="span12", style="padding: 10px 0px;",
+    div(class="col-sm-12",
       h1(title)
     )
   )
@@ -348,7 +353,7 @@ wellPanel <- function(...) {
 #' )
 #' @export
 sidebarPanel <- function(..., width = 4) {
-  div(class=paste0("span", width),
+  div(class=paste0("col-sm-", width),
     tags$form(class="well",
       ...
     )
@@ -374,7 +379,7 @@ sidebarPanel <- function(..., width = 4) {
 #' )
 #' @export
 mainPanel <- function(..., width = 8) {
-  div(class=paste0("span", width),
+  div(class=paste0("col-sm-", width),
     ...
   )
 }
@@ -446,9 +451,9 @@ conditionalPanel <- function(condition, ...) {
 #' textInput("caption", "Caption:", "Data Summary")
 #' @export
 textInput <- function(inputId, label, value = "") {
-  tagList(
+  div(class = "form-group",
     label %AND% tags$label(label, `for` = inputId),
-    tags$input(id = inputId, type="text", value=value)
+    tags$input(id = inputId, type="text", class="form-control", value=value)
   )
 }
 
@@ -474,7 +479,8 @@ textInput <- function(inputId, label, value = "") {
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 
   # build input tag
-  inputTag <- tags$input(id = inputId, type = "number", value = formatNoSci(value))
+  inputTag <- tags$input(id = inputId, type = "number", class="form-control",
+                         value = formatNoSci(value))
   if (!is.na(min))
     inputTag$attribs$min = min
   if (!is.na(max))
@@ -482,7 +488,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
   if (!is.na(step))
     inputTag$attribs$step = step
 
-  tagList(
+  div(class = "form-group",
     label %AND% tags$label(label, `for` = inputId),
     inputTag
   )
@@ -560,7 +566,12 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   inputTag <- tags$input(id = inputId, type="checkbox")
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
-  tags$label(class = "checkbox", `for` = inputId, inputTag, tags$span(label))
+
+  div(class = "form-group",
+    div(class = "checkbox",
+      tags$label(inputTag, tags$span(label))
+    )
+  )
 }
 
 
@@ -598,7 +609,7 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
 
   # return label and select tag
   tags$div(id = inputId,
-           class = "control-group shiny-input-checkboxgroup",
+           class = "form-group shiny-input-checkboxgroup",
            controlLabel(inputId, label),
            options)
 }
@@ -636,8 +647,12 @@ validateSelected <- function(selected, choices, inputId) {
 generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox') {
   # create tags for each of the options
   ids <- paste0(inputId, seq_along(choices))
+
+  divclass <- if (inline) paste0(type, "-inline") else type
+  divclass <- paste("shiny-options-item", divclass)
+
   # generate a list of <input type=? [checked] />
-  mapply(
+  options <- mapply(
     ids, choices, names(choices),
     FUN = function(id, value, name) {
       inputTag <- tags$input(
@@ -645,13 +660,18 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
       )
       if (value %in% selected)
         inputTag$attribs$checked <- "checked"
-      tags$label(
-        class = paste(type, if (inline) "inline"),
-        inputTag, tags$span(name)
+
+      tags$div(
+        class = divclass,
+        tags$label(
+          inputTag, tags$span(name)
+        )
       )
     },
     SIMPLIFY = FALSE, USE.NAMES = FALSE
   )
+
+  div(class = "shiny-options-group", options)
 }
 
 #' Create a help text element
@@ -833,7 +853,7 @@ selectizeIt <- function(inputId, select, options, width = NULL, nonempty = FALSE
 
   selectizeDep <- htmlDependency(
     "selectize", "0.11.2", c(href = "shared/selectize"),
-    stylesheet = "css/selectize.bootstrap2.css",
+    stylesheet = "css/selectize.bootstrap3.css",
     head = format(tagList(
       HTML('<!--[if lt IE 9]>'),
       tags$script(src = 'shared/selectize/js/es5-shim.min.js'),
@@ -892,8 +912,8 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
   options <- generateOptions(inputId, choices, selected, inline, type = 'radio')
 
   tags$div(id = inputId,
-    class = 'control-group shiny-input-radiogroup',
-    label %AND% tags$label(class = "control-label", `for` = inputId, label),
+    class = 'form-group shiny-input-radiogroup',
+    controlLabel(inputId, label),
     options)
 }
 
@@ -954,7 +974,7 @@ submitButton <- function(text = "Apply Changes", icon = NULL) {
 actionButton <- function(inputId, label, icon = NULL, ...) {
   tags$button(id=inputId,
               type="button",
-              class="btn action-button",
+              class="btn btn-default action-button",
               list(icon, label),
               ...)
 }
@@ -1025,9 +1045,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 
   if (!is.null(animate) && !identical(animate, FALSE)) {
     if (is.null(animate$playButton))
-      animate$playButton <- tags$i(class='icon-play')
+      animate$playButton <- tags$span(class='glyphicon glyphicon-play')
     if (is.null(animate$pauseButton))
-      animate$pauseButton <- tags$i(class='icon-pause')
+      animate$pauseButton <- tags$span(class='glyphicon glyphicon-pause')
   }
 
   # build slider
@@ -1036,9 +1056,11 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     width=width)
 
   if (is.null(label)) {
-    sliderTag
+    div(class = "form-group",
+      sliderTag
+    )
   } else {
-    tags$div(
+    div(class = "form-group",
       controlLabel(inputId, label),
       sliderTag
     )
@@ -1128,12 +1150,12 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 
   attachDependencies(
     tags$div(id = inputId,
-             class = "shiny-date-input",
+             class = "shiny-date-input form-group",
 
       controlLabel(inputId, label),
       tags$input(type = "text",
                  # datepicker class necessary for dropdown to display correctly
-                 class = "input-medium datepicker",
+                 class = "form-control datepicker",
                  `data-date-language` = language,
                  `data-date-weekstart` = weekstart,
                  `data-date-format` = format,
@@ -1226,32 +1248,36 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
   attachDependencies(
-    tags$div(id = inputId,
+    div(id = inputId,
              # input-daterange class is needed for dropdown behavior
-             class = "shiny-date-range-input input-daterange",
+             class = "shiny-date-range-input form-group",
 
       controlLabel(inputId, label),
-      tags$input(class = "input-small",
-                 type = "text",
-                 `data-date-language` = language,
-                 `data-date-weekstart` = weekstart,
-                 `data-date-format` = format,
-                 `data-date-start-view` = startview,
-                 `data-min-date` = min,
-                 `data-max-date` = max,
-                 `data-initial-date` = start
-                 ),
-      HTML(separator),
-      tags$input(class = "input-small",
-                 type = "text",
-                 `data-date-language` = language,
-                 `data-date-weekstart` = weekstart,
-                 `data-date-format` = format,
-                 `data-date-start-view` = startview,
-                 `data-min-date` = min,
-                 `data-max-date` = max,
-                 `data-initial-date` = end
-                 )
+      div(class = "input-daterange input-group",
+        tags$input(
+          class = "input-sm form-control",
+          type = "text",
+          `data-date-language` = language,
+          `data-date-weekstart` = weekstart,
+          `data-date-format` = format,
+          `data-date-start-view` = startview,
+          `data-min-date` = min,
+          `data-max-date` = max,
+          `data-initial-date` = start
+        ),
+        span(class = "input-group-addon", separator),
+        tags$input(
+          class = "input-sm form-control",
+          type = "text",
+          `data-date-language` = language,
+          `data-date-weekstart` = weekstart,
+          `data-date-format` = format,
+          `data-date-start-view` = startview,
+          `data-min-date` = min,
+          `data-max-date` = max,
+          `data-initial-date` = end
+        )
+      )
     ),
     datePickerDependency
   )
@@ -1371,9 +1397,11 @@ tabsetPanel <- function(...,
 #' @param widths Column withs of the navigation list and tabset content areas
 #'   respectively.
 #'
-#' @details You can include headers within the \code{navlistPanel} by
-#' including plain text elements in the list; you can include separators by
-#' including "------" (any number of dashes works).
+#' @details You can include headers within the \code{navlistPanel} by including
+#'   plain text elements in the list. Versions of Shiny before 0.11 supported
+#'   separators with "------", but as of 0.11, separators were no longer
+#'   supported. This is because version 0.11 switched to Bootstrap 3, which
+#'   doesn't support separators.
 #'
 #' @examples
 #' shinyUI(fluidPage(
@@ -1384,7 +1412,6 @@ tabsetPanel <- function(...,
 #'     "Header",
 #'     tabPanel("First"),
 #'     tabPanel("Second"),
-#'     "-----",
 #'     tabPanel("Third")
 #'   )
 #' ))
@@ -1396,18 +1423,15 @@ navlistPanel <- function(...,
                          fluid = TRUE,
                          widths = c(4, 8)) {
 
-  # text filter for defining separtors and headers
+  # text filter for headers
   textFilter <- function(text) {
-    if (grepl("^\\-+$", text))
-      tags$li(class="divider")
-    else
-      tags$li(class="nav-header", text)
+      tags$li(class="navbar-brand", text)
   }
 
   # build the tabset
   tabs <- list(...)
   tabset <- buildTabset(tabs,
-                        "nav nav-list",
+                        "nav nav-pills nav-stacked",
                         textFilter,
                         id,
                         selected)
@@ -1783,26 +1807,32 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
 
 #' Create an icon
 #'
-#' Create an icon for use within a page. Icons can appear on their own,
-#' inside of a button, or as an icon for a \code{\link{tabPanel}} within a
+#' Create an icon for use within a page. Icons can appear on their own, inside
+#' of a button, or as an icon for a \code{\link{tabPanel}} within a
 #' \code{\link{navbarPage}}.
 #'
 #' @param name Name of icon. Icons are drawn from the
-#'   \href{http://fontawesome.io/icons/}{Font Awesome} library. Note that the
-#'   "fa-" prefix should not be used in icon names (i.e. the "fa-calendar" icon
-#'   should be referred to as "calendar")
+#'   \href{http://fontawesome.io/icons/}{Font Awesome} and
+#'   \href{http://getbootstrap.com/components/#glyphicons}{Glypicons"}
+#'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
+#'   in icon names (i.e. the "fa-calendar" icon should be referred to as
+#'   "calendar")
 #' @param class Additional classes to customize the style of the icon (see the
-#'  \href{http://fontawesome.io/examples/}{usage examples} for
-#'   details on supported styles).
-#' @param lib Icon library to use ("font-awesome" is only one currently
-#'   supported)
+#'   \href{http://fontawesome.io/examples/}{usage examples} for details on
+#'   supported styles).
+#' @param lib Icon library to use ("font-awesome" or "glyphicon")
 #'
 #' @return An icon element
 #'
+#' @seealso For lists of available icons, see
+#'   \href{http://fontawesome.io/icons/}{http://fontawesome.io/icons/} and
+#'   \href{http://getbootstrap.com/components/#glyphicons}{http://getbootstrap.com/components/#glyphicons}.
+#'
 #'
 #' @examples
-#' icon("calendar")            # standard icon
-#' icon("calendar", "fa-3x")   # 3x normal size
+#' icon("calendar")               # standard icon
+#' icon("calendar", "fa-3x")      # 3x normal size
+#' icon("cog", lib = "glyphicon") # From glyphicon library
 #'
 #' # add an icon to a submit button
 #' submitButton("Update View", icon = icon("refresh"))
@@ -1815,25 +1845,37 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
 #'
 #' @export
 icon <- function(name, class = NULL, lib = "font-awesome") {
+  prefixes <- list(
+    "font-awesome" = "fa",
+    "glyphicon" = "glyphicon"
+  )
+  prefix <- prefixes[[lib]]
 
   # determine stylesheet
-  if (!identical(lib, "font-awesome"))
-    stop("Unknown font library '", lib, "' specified")
+  if (is.null(prefix)) {
+    stop("Unknown font library '", lib, "' specified. Must be one of ",
+         paste0('"', names(prefixes), '"', collapse = ", "))
+  }
 
   # build the icon class (allow name to be null so that other functions
-  # e.g. builtTabset can pass an explict class value)
+  # e.g. buildTabset can pass an explicit class value)
   iconClass <- ""
   if (!is.null(name))
-    iconClass <- paste0("fa fa-", name)
+    iconClass <- paste0(prefix, " ", prefix, "-", name)
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
 
-  # return the element and css dependency
-  attachDependencies(
-    tags$i(class = iconClass),
-    htmlDependency("font-awesome", "4.2.0", c(href="shared/font-awesome"),
-      stylesheet = "css/font-awesome.min.css")
-  )
+  iconTag <- tags$i(class = iconClass)
+
+  # font-awesome needs an additional dependency (glyphicon is in bootstrap)
+  if (lib == "font-awesome") {
+    htmlDependencies(iconTag) <- htmlDependency(
+      "font-awesome", "4.2.0", c(href="shared/font-awesome"),
+      stylesheet = "css/font-awesome.min.css"
+    )
+  }
+
+  iconTag
 }
 
 # Helper funtion to extract the class from an icon

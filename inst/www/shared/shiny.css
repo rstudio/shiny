@@ -29,16 +29,11 @@ table.data td[align=right] {
 
 .jslider {
   /* Fix jslider running into the control above it */
-  margin-top: 18px;
+  margin-top: 5px;
 }
 .jslider-value {
   /* Remove box around jslider values on colored bg */
   background-color: transparent !important;
-}
-
-span.jslider, .selectize-control {
-  width: 220px;
-  max-width: 95%;
 }
 
 .recalculating {
@@ -118,7 +113,7 @@ span.jslider {
 .shiny-progress .progress-text {
   position: absolute;
   right: 10px;
-  height: 18px;
+  height: 24px;
   width: 240px;
   background-color: #eef8ff;
   margin: 0px;
@@ -141,12 +136,6 @@ span.jslider {
   cursor: crosshair;
 }
 
-.well input[type="text"],
-.well input[type="number"],
-.well select {
-  max-width: 95%;
-}
-
 /* Workaround for Qt, which doesn't use font fallbacks */
 .qt pre, .qt code {
   font-family: monospace !important;
@@ -165,6 +154,7 @@ span.jslider {
   display: inline-block;
   vertical-align: top;
   padding-right: 12px;
+  width: 220px;
 }
 .shiny-split-layout {
   width: 100%;
@@ -184,4 +174,11 @@ span.jslider {
   background-color: #f5f5f5;
   border: 1px solid #e3e3e3;
   border-radius: 2px;
+}
+
+/* For checkbox groups and radio buttons, bring the options closer to the label.
+ */
+.shiny-input-checkboxgroup .shiny-options-group,
+.shiny-input-radiogroup .shiny-options-group {
+  margin-top: -10px;
 }

@@ -4,7 +4,7 @@
 \alias{bootstrapPage}
 \title{Create a Bootstrap page}
 \usage{
-bootstrapPage(..., title = NULL, responsive = TRUE, theme = NULL)
+bootstrapPage(..., title = NULL, responsive = NULL, theme = NULL)
 
 basicPage(...)
 }
@@ -13,8 +13,8 @@ basicPage(...)
 
 \item{title}{The browser window title (defaults to the host URL of the page)}
 
-\item{responsive}{\code{TRUE} to use responsive layout (automatically adapt
-and resize page elements based on the size of the viewing device)}
+\item{responsive}{This option is deprecated; it is no longer optional with
+Bootstrap 3.}
 
 \item{theme}{Alternative Bootstrap stylesheet (normally a css file within the
   www directory, e.g. \code{www/bootstrap.css})}
@@ -24,7 +24,7 @@ A UI defintion that can be passed to the \link{shinyUI} function.
 }
 \description{
 Create a Shiny UI page that loads the CSS and JavaScript for
-\href{http://getbootstrap.com/2.3.2/}{Bootstrap}, and has no content in the
+\href{http://getbootstrap.com/3.3.0/}{Bootstrap}, and has no content in the
 page body (other than what you provide).
 }
 \details{

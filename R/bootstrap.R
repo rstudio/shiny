@@ -566,7 +566,12 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   inputTag <- tags$input(id = inputId, type="checkbox")
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
-  tags$label(`for` = inputId, inputTag, tags$span(label))
+
+  div(class = "form-group",
+    div(class = "checkbox",
+      tags$label(inputTag, tags$span(label))
+    )
+  )
 }
 
 

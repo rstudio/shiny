@@ -83,7 +83,9 @@ slider2Input <- function(inputId, label, min, max, value, step = NULL,
     `data-grid-snap` = FALSE,
     `data-prettify-separator` = sep,
     `data-prefix` = pre,
-    `data-postfix` = post
+    `data-postfix` = post,
+    `data-keyboard` = TRUE,
+    `data-keyboard-step` = step / (max - min) * 100
   ))
 
   # Replace any TRUE and FALSE with "true" and "false"

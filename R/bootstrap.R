@@ -1838,5 +1838,5 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
 
 # Helper funtion to extract the class from an icon
 iconClass <- function(icon) {
-  if (!is.null(icon)) icon[[2]]$attribs$class
+  if (!is.null(icon)) icon$attribs$class
 }

@@ -1248,32 +1248,36 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
   attachDependencies(
-    tags$div(id = inputId,
+    div(id = inputId,
              # input-daterange class is needed for dropdown behavior
-             class = "shiny-date-range-input input-daterange form-group",
+             class = "shiny-date-range-input form-group",
 
       controlLabel(inputId, label),
-      tags$input(class = "form-control",
-                 type = "text",
-                 `data-date-language` = language,
-                 `data-date-weekstart` = weekstart,
-                 `data-date-format` = format,
-                 `data-date-start-view` = startview,
-                 `data-min-date` = min,
-                 `data-max-date` = max,
-                 `data-initial-date` = start
-                 ),
-      HTML(separator),
-      tags$input(class = "form-control",
-                 type = "text",
-                 `data-date-language` = language,
-                 `data-date-weekstart` = weekstart,
-                 `data-date-format` = format,
-                 `data-date-start-view` = startview,
-                 `data-min-date` = min,
-                 `data-max-date` = max,
-                 `data-initial-date` = end
-                 )
+      div(class = "input-daterange input-group",
+        tags$input(
+          class = "input-sm form-control",
+          type = "text",
+          `data-date-language` = language,
+          `data-date-weekstart` = weekstart,
+          `data-date-format` = format,
+          `data-date-start-view` = startview,
+          `data-min-date` = min,
+          `data-max-date` = max,
+          `data-initial-date` = start
+        ),
+        span(class = "input-group-addon", separator),
+        tags$input(
+          class = "input-sm form-control",
+          type = "text",
+          `data-date-language` = language,
+          `data-date-weekstart` = weekstart,
+          `data-date-format` = format,
+          `data-date-start-view` = startview,
+          `data-min-date` = min,
+          `data-max-date` = max,
+          `data-initial-date` = end
+        )
+      )
     ),
     datePickerDependency
   )

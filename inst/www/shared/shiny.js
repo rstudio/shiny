@@ -2114,10 +2114,6 @@
         var end = this._newDate(value[1]);
         $inputs.eq(1).datepicker('update', end);
       }
-
-      // Make it so that the correct items are highlighted when the calendar is
-      // displayed
-      $(el).datepicker('updateDates');
     },
     getState: function(el) {
       var $el = $(el);

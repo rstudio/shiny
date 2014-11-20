@@ -175,3 +175,10 @@ span.jslider {
   border: 1px solid #e3e3e3;
   border-radius: 2px;
 }
+
+/* For checkbox groups and radio buttons, bring the options closer to the label.
+ */
+.shiny-input-checkboxgroup .shiny-options-group,
+.shiny-input-radiogroup .shiny-options-group {
+  margin-top: -10px;
+}

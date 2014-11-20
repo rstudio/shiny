@@ -604,8 +604,8 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
 
   # return label and select tag
   tags$div(id = inputId,
-           class = "checkbox control-group shiny-input-checkboxgroup",
-           label,
+           class = "form-group shiny-input-checkboxgroup",
+           controlLabel(inputId, label),
            options)
 }
 
@@ -907,8 +907,8 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
   options <- generateOptions(inputId, choices, selected, inline, type = 'radio')
 
   tags$div(id = inputId,
-    class = 'radio control-group shiny-input-radiogroup',
-    label,
+    class = 'form-group shiny-input-radiogroup',
+    controlLabel(inputId, label),
     options)
 }
 

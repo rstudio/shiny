@@ -54,38 +54,6 @@ updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
 updateCheckboxInput <- updateTextInput
 
 
-#' Change the value of a slider input on the client
-#'
-#' @template update-input
-#' @param value The value to set for the input object.
-#'
-#' @seealso \code{\link{sliderInput}}
-#'
-#' @examples
-#' \dontrun{
-#' shinyServer(function(input, output, session) {
-#'
-#'   observe({
-#'     # We'll use the input$controller variable multiple times, so save it as x
-#'     # for convenience.
-#'     x <- input$controller
-#'
-#'     # Similar to number and text. only label and value can be set for slider
-#'     updateSliderInput(session, "inSlider",
-#'       label = paste("Slider label", x),
-#'       value = x)
-#'
-#'     # For sliders that pick out a range, pass in a vector of 2 values.
-#'     updateSliderInput(session, "inSlider2", value = c(x-1, x+1))
-#'
-#'     # An NA means to not change that value (the low or high one)
-#'     updateSliderInput(session, "inSlider3", value = c(NA, x+2))
-#'   })
-#' })
-#' }
-#' @export
-updateSliderInput <- updateTextInput
-
 #' Change the value of a date input on the client
 #'
 #' @template update-input
@@ -256,7 +224,7 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
   session$sendInputMessage(inputId, message)
 }
 
-#' Change the value of a slider2 input on the client
+#' Change the value of a slider input on the client
 #'
 #' @template update-input
 #' @param value The value to set for the input object.
@@ -264,7 +232,7 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #' @param max Maximum value.
 #' @param step Step size.
 #'
-#' @seealso \code{\link{slider2Input}}
+#' @seealso \code{\link{sliderInput}}
 #'
 #' @examples
 #' \donttest{
@@ -286,14 +254,14 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #'       val <- input$control
 #'       # Control the value, min, max, and step.
 #'       # Step size is 2 when input value is even; 1 when value is odd.
-#'       updateSlider2Input(session, "receive", value = val,
+#'       updateSliderInput(session, "receive", value = val,
 #'         min = floor(val/2), max = val+4, step = (val+1)%%2 + 1)
 #'     })
 #'   }
 #' )
 #' }
 #' @export
-updateSlider2Input <- updateNumericInput
+updateSliderInput <- updateNumericInput
 
 updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
                                selected = NULL, inline = FALSE,

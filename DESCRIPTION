@@ -45,7 +45,6 @@ Collate:
     'html-deps.R'
     'htmltools.R'
     'imageutils.R'
-    'input-slider2.R'
     'jqueryui.R'
     'middleware-shiny.R'
     'middleware.R'

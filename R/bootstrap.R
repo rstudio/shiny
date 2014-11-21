@@ -1011,67 +1011,130 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
 #'   create a double-ended range slider. A warning will be issued if the
 #'   value doesn't fit between \code{min} and \code{max}.
 #' @param step Specifies the interval between each selectable value on the
-#'   slider (\code{NULL} means no restriction).
+#'   slider (\code{NULL} results a step size of 1).
 #' @param round \code{TRUE} to round all values to the nearest integer;
 #'   \code{FALSE} if no rounding is desired; or an integer to round to that
 #'   number of digits (for example, 1 will round to the nearest 10, and -2 will
 #'   round to the nearest .01). Any rounding will be applied after snapping to
 #'   the nearest step.
-#' @param format Customize format values in slider labels. See
-#'   \url{https://code.google.com/p/jquery-numberformatter/} for syntax
-#'   details.
-#' @param locale The locale to be used when applying \code{format}. See details.
+#' @param format Deprecated.
+#' @param locale Deprecated.
 #' @param ticks \code{FALSE} to hide tick marks, \code{TRUE} to show them
 #'   according to some simple heuristics.
 #' @param animate \code{TRUE} to show simple animation controls with default
 #'   settings; \code{FALSE} not to; or a custom settings list, such as those
-#'   created using \code{animationOptions}.
+#'   created using \code{\link{animationOptions}}.
+#' @param sep Separator between thousands places in numbers.
+#' @param pre A prefix string to put in front of the value.
+#' @param post A suffix string to put after the value.
 #' @inheritParams selectizeInput
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
 #'
-#' @details
-#'
-#' Valid values for \code{locale} are: \tabular{ll}{ Arab Emirates \tab "ae" \cr
-#' Australia \tab "au" \cr Austria \tab "at" \cr Brazil \tab "br" \cr Canada
-#' \tab "ca" \cr China \tab "cn" \cr Czech \tab "cz" \cr Denmark \tab "dk" \cr
-#' Egypt \tab "eg" \cr Finland \tab "fi" \cr France  \tab "fr" \cr Germany \tab
-#' "de" \cr Greece \tab "gr" \cr Great Britain \tab "gb" \cr Hong Kong \tab "hk"
-#' \cr India \tab "in" \cr Israel \tab "il" \cr Japan \tab "jp" \cr Russia \tab
-#' "ru" \cr South Korea \tab "kr" \cr Spain \tab "es" \cr Sweden \tab "se" \cr
-#' Switzerland \tab "ch" \cr Taiwan \tab "tw" \cr Thailand \tab "th" \cr United
-#' States \tab "us" \cr Vietnam \tab "vn" \cr }
-#'
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
-                        round=FALSE, format='#,##0.#####', locale='us',
-                        ticks=TRUE, animate=FALSE, width=NULL) {
+                        round = FALSE, format = NULL, locale = NULL,
+                        ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
+                        pre = NULL, post = NULL) {
 
+  if (!missing(format)) {
+    shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
+                    version = "0.10.2")
+  }
+  if (!missing(locale)) {
+    shinyDeprecated(msg = "The `locale` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
+                    version = "0.10.2")
+  }
+
+  # Auto step size
+  range <- max - min
+  if (is.null(step)) {
+    # If short range or decimals, use means continuous decimal with ~100 points
+    if (range < 2 || hasDecimals(min) || hasDecimals(max)) {
+      step <- pretty(c(min, max), n = 100)
+      step <- step[2] - step[1]
+    } else {
+      step <- 1
+    }
+  }
+
+  # Try to get a sane number of tick marks
+  if (ticks) {
+    n_steps <- range / step
+
+    # Make sure there are <= 10 steps.
+    # n_ticks can be a noninteger, which is good when the range is not an
+    # integer multiple of the step size, e.g., min=1, max=10, step=4
+    scale_factor <- ceiling(n_steps / 10)
+    n_ticks <- n_steps / scale_factor
+
+  } else {
+    n_ticks <- NULL
+  }
+
+  sliderProps <- dropNulls(list(
+    class = "js-range-slider",
+    id = inputId,
+    `data-type` = if (length(value) > 1) "double",
+    `data-min` = min,
+    `data-max` = max,
+    `data-from` = value[1],
+    `data-to` = if (length(value) > 1) value[2],
+    `data-step` = step,
+    `data-grid` = ticks,
+    `data-grid-num` = n_ticks,
+    `data-grid-snap` = FALSE,
+    `data-prettify-separator` = sep,
+    `data-prefix` = pre,
+    `data-postfix` = post,
+    `data-keyboard` = TRUE,
+    `data-keyboard-step` = step / (max - min) * 100
+  ))
+
+  # Replace any TRUE and FALSE with "true" and "false"
+  sliderProps <- lapply(sliderProps, function(x) {
+    if (identical(x, TRUE)) "true"
+    else if (identical(x, FALSE)) "false"
+    else x
+  })
+
+  sliderTag <- div(class = "form-group shiny-input-container",
+    if (!is.null(label)) controlLabel(inputId, label),
+    do.call(tags$input, sliderProps)
+  )
+
+  # Add animation buttons
   if (identical(animate, TRUE))
     animate <- animationOptions()
 
   if (!is.null(animate) && !identical(animate, FALSE)) {
     if (is.null(animate$playButton))
-      animate$playButton <- tags$span(class='glyphicon glyphicon-play')
+      animate$playButton <- icon('play', lib = 'glyphicon')
     if (is.null(animate$pauseButton))
-      animate$pauseButton <- tags$span(class='glyphicon glyphicon-pause')
-  }
+      animate$pauseButton <- icon('pause', lib = 'glyphicon')
 
-  # build slider
-  sliderTag <- slider(inputId, min=min, max=max, value=value, step=step,
-    round=round, locale=locale, format=format, ticks=ticks, animate=animate,
-    width=width)
-
-  if (is.null(label)) {
-    div(class = "form-group shiny-input-container",
-      sliderTag
-    )
-  } else {
-    div(class = "form-group shiny-input-container",
-      controlLabel(inputId, label),
-      sliderTag
+    sliderTag <- tagAppendChild(
+      sliderTag,
+      tags$div(class='slider-animate-container',
+        tags$a(href='#',
+          class='slider-animate-button',
+          'data-target-id'=inputId,
+          'data-interval'=animate$interval,
+          'data-loop'=animate$loop,
+          span(class = 'play', icon('play', lib = 'glyphicon')),
+          span(class = 'pause', icon('pause', lib = 'glyphicon'))
+        )
+      )
     )
   }
+
+  dep <- htmlDependency("ionrangeslider", "2.0.1", c(href="shared/ionrangeslider"),
+    script = "js/ion.rangeSlider.min.js",
+    stylesheet = c("css/normalize.css", "css/ion.rangeSlider.css",
+                   "css/ion.rangeSlider.skinShiny.css")
+  )
+
+  attachDependencies(sliderTag, dep)
 }
 
 datePickerDependency <- htmlDependency(

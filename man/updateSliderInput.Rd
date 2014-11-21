@@ -3,7 +3,8 @@
 \alias{updateSliderInput}
 \title{Change the value of a slider input on the client}
 \usage{
-updateSliderInput(session, inputId, label = NULL, value = NULL)
+updateSliderInput(session, inputId, label = NULL, value = NULL,
+  min = NULL, max = NULL, step = NULL)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -14,6 +15,12 @@ updateSliderInput(session, inputId, label = NULL, value = NULL)
 \item{label}{The label to set for the input object.}
 
 \item{value}{The value to set for the input object.}
+
+\item{min}{Minimum value.}
+
+\item{max}{Maximum value.}
+
+\item{step}{Step size.}
 }
 \description{
 Change the value of a slider input on the client
@@ -31,26 +38,30 @@ Any arguments with NULL values will be ignored; they will not result in any
 changes to the input object on the client.
 }
 \examples{
-\dontrun{
-shinyServer(function(input, output, session) {
-
-  observe({
-    # We'll use the input$controller variable multiple times, so save it as x
-    # for convenience.
-    x <- input$controller
-
-    # Similar to number and text. only label and value can be set for slider
-    updateSliderInput(session, "inSlider",
-      label = paste("Slider label", x),
-      value = x)
-
-    # For sliders that pick out a range, pass in a vector of 2 values.
-    updateSliderInput(session, "inSlider2", value = c(x-1, x+1))
-
-    # An NA means to not change that value (the low or high one)
-    updateSliderInput(session, "inSlider3", value = c(NA, x+2))
-  })
-})
+\donttest{
+shinyApp(
+  ui = fluidPage(
+    sidebarLayout(
+      sidebarPanel(
+        p("The first slider controls the second"),
+        slider2Input("control", "Controller:", min=0, max=20, value=10,
+                     step=1),
+        slider2Input("receive", "Receiver:", min=0, max=20, value=10,
+                     step=1)
+      ),
+      mainPanel()
+    )
+  ),
+  server = function(input, output, session) {
+    observe({
+      val <- input$control
+      # Control the value, min, max, and step.
+      # Step size is 2 when input value is even; 1 when value is odd.
+      updateSliderInput(session, "receive", value = val,
+        min = floor(val/2), max = val+4, step = (val+1)\%\%2 + 1)
+    })
+  }
+)
 }
 }
 \seealso{

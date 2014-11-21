@@ -49,7 +49,6 @@ Other input.elements: \code{\link{animationOptions}},
   \code{\link{dateRangeInput}}; \code{\link{fileInput}};
   \code{\link{numericInput}}; \code{\link{radioButtons}};
   \code{\link{selectInput}}, \code{\link{selectizeInput}};
-  \code{\link{slider2Input}}; \code{\link{submitButton}};
-  \code{\link{textInput}}
+  \code{\link{submitButton}}; \code{\link{textInput}}
 }
 

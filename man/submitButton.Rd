@@ -31,6 +31,6 @@ Other input.elements: \code{\link{actionButton}},
   \code{\link{dateRangeInput}}; \code{\link{fileInput}};
   \code{\link{numericInput}}; \code{\link{radioButtons}};
   \code{\link{selectInput}}, \code{\link{selectizeInput}};
-  \code{\link{slider2Input}}; \code{\link{textInput}}
+  \code{\link{textInput}}
 }
 

@@ -46,13 +46,22 @@ in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
 character string.
 }
 \examples{
+\donttest{
 # pass a callback function to DataTables using I()
-renderDataTable(iris,
-  options = list(
-    pageLength = 5,
-    initComplete = I("function(settings, json) {alert('Done.');}")
-  )
+shinyApp(
+  ui = bootstrapPage(
+    dataTableOutput('table')
+  ),
+  server = function(input, output) {
+    output$table <- renderDataTable(iris,
+      options = list(
+        pageLength = 5,
+        initComplete = I("function(settings, json) {alert('Done.');}")
+      )
+    )
+  }
 )
+}
 }
 \references{
 \url{http://datatables.net}

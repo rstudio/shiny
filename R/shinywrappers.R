@@ -552,13 +552,23 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' @references \url{http://datatables.net}
 #' @export
 #' @inheritParams renderPlot
-#' @examples  # pass a callback function to DataTables using I()
-#' renderDataTable(iris,
-#'   options = list(
-#'     pageLength = 5,
-#'     initComplete = I("function(settings, json) {alert('Done.');}")
-#'   )
+#' @examples
+#' \donttest{
+#' # pass a callback function to DataTables using I()
+#' shinyApp(
+#'   ui = bootstrapPage(
+#'     dataTableOutput('table')
+#'   ),
+#'   server = function(input, output) {
+#'     output$table <- renderDataTable(iris,
+#'       options = list(
+#'         pageLength = 5,
+#'         initComplete = I("function(settings, json) {alert('Done.');}")
+#'       )
+#'     )
+#'   }
 #' )
+#' }
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
                             env = parent.frame(), quoted = FALSE) {

@@ -15,11 +15,36 @@ dataTableOutput(outputId)
 A table output element that can be included in a panel
 }
 \description{
-Render a \link{renderTable} within an application page.
+Render a \code{\link{renderTable}} or \code{\link{renderDataTable}} within an
+application page. \code{renderTable} uses a standard HTML table, while
+\code{renderDataTable} uses the DataTables Javascript library to create an
+interactive table with more features.
 }
 \examples{
-mainPanel(
-  tableOutput("view")
+\donttest{
+# table example
+shinyApp(
+  ui = bootstrapPage(
+    tableOutput('table')
+  ),
+  server = function(input, output) {
+    output$table <- renderTable(iris)
+  }
 )
+
+
+# DataTables example
+shinyApp(
+  ui = bootstrapPage(
+    dataTableOutput('table')
+  ),
+  server = function(input, output) {
+    output$table <- renderDataTable(iris)
+  }
+)
+}
+}
+\seealso{
+\code{\link{renderTable}}, \code{\link{renderDataTable}}.
 }
 

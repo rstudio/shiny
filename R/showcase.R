@@ -151,7 +151,7 @@ showcaseBody <- function(htmlBody) {
     table(id="showcase-app-code",
           tr(td(id="showcase-app-container",
                 class="showcase-app-container-expanded",
-                HTML(htmlBody),
+                htmlBody,
              td(id="showcase-sxs-code",
                 class="showcase-sxs-code-collapsed")))),
     showcaseAppInfo()))
@@ -161,4 +161,20 @@ showcaseBody <- function(htmlBody) {
 setShowcaseDefault <- function(showcaseDefault) {
   .globals$showcaseDefault <- showcaseDefault
   .globals$showcaseOverride <- as.logical(showcaseDefault)
+}
+
+
+# Given a UI tag/tagList, wrap it in appropriate tags for showcase mode.
+showcaseUI <- function(ui) {
+  # If top-level tag is a body, replace its children with children wrapped in
+    # showcase stuff.
+  if (inherits(ui, "shiny.tag") && ui$name == "body") {
+    ui$children <- showcaseUI(ui$children)
+    return(ui)
+  }
+
+  tagList(
+    tags$head(showcaseHead()),
+    showcaseBody(ui)
+  )
 }

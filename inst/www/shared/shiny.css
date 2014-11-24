@@ -95,6 +95,8 @@ span.jslider {
   position: fixed;
   top: 0px;
   width: 100%;
+  /* Make sure it draws above all Bootstrap components */
+  z-index: 2000;
 }
 
 .shiny-progress .progress {

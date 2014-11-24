@@ -29,6 +29,10 @@ renderPage <- function(ui, connection, showcase=0) {
   if (showcase > 0)
     ui <- tagList(tags$head(showcaseHead()), ui)
 
+  # Wrap ui in body tag if it doesn't already have a single top-level body tag.
+  if (!(inherits(ui, "shiny.tag") && ui$name == "body"))
+    ui <- tags$body(ui)
+
   result <- renderTags(ui)
 
   deps <- c(
@@ -63,7 +67,6 @@ renderPage <- function(ui, connection, showcase=0) {
               con = connection)
   writeLines(c(result$head,
                '</head>',
-               '<body>',
                recursive=TRUE),
              con = connection)
 
@@ -77,8 +80,7 @@ renderPage <- function(ui, connection, showcase=0) {
   }
 
   # write end document
-  writeLines(c('</body>',
-               '</html>'),
+  writeLines('</html>',
              con = connection)
 }
 

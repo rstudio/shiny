@@ -5,6 +5,9 @@ shiny 0.10.2.9xxx
   seamlessly, but some users may need to use the shinyBootstrap2 package for
   backward compatibility.
 
+* The UI of a Shiny app can now have a body tag. This is useful for CSS
+  templates that use classes on the body tag.
+
 * `actionButton` and `actionLink` now pass their `...` arguments to the
   underlying tag function. (#607)
 

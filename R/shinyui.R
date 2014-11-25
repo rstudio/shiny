@@ -27,7 +27,11 @@ withMathJax <- function(...) {
 renderPage <- function(ui, connection, showcase=0) {
 
   if (showcase > 0)
-    ui <- tagList(tags$head(showcaseHead()), ui)
+    ui <- showcaseUI(ui)
+
+  # Wrap ui in body tag if it doesn't already have a single top-level body tag.
+  if (!(inherits(ui, "shiny.tag") && ui$name == "body"))
+    ui <- tags$body(ui)
 
   result <- renderTags(ui)
 
@@ -63,22 +67,13 @@ renderPage <- function(ui, connection, showcase=0) {
               con = connection)
   writeLines(c(result$head,
                '</head>',
-               '<body>',
                recursive=TRUE),
              con = connection)
 
-  if (showcase > 0) {
-    # in showcase mode, emit containing elements and app HTML
-    writeLines(as.character(showcaseBody(result$html)),
-               con = connection)
-  } else {
-    # in normal mode, write UI html directly to connection
-    writeLines(result$html, con = connection)
-  }
+  writeLines(result$html, con = connection)
 
   # write end document
-  writeLines(c('</body>',
-               '</html>'),
+  writeLines('</html>',
              con = connection)
 }
 

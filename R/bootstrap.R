@@ -861,19 +861,20 @@ selectizeIt <- function(inputId, select, options, width = NULL, nonempty = FALSE
       tags$script(src = 'shared/selectize/js/selectize.min.js')
     ))
   )
-  attachDependencies(
-    tagList(
-      select,
-      tags$script(
-        type = 'application/json',
-        `data-for` = inputId, `data-nonempty` = if (nonempty) '',
-        `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
-        `data-width` = validateCssUnit(width),
-        if (length(res$options)) HTML(toJSON(res$options)) else '{}'
-      )
-    ),
-    selectizeDep
+
+  # Insert script on same level as <select> tag
+  select$children[[2]] <- tagAppendChild(
+    select$children[[2]],
+    tags$script(
+      type = 'application/json',
+      `data-for` = inputId, `data-nonempty` = if (nonempty) '',
+      `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
+      `data-width` = validateCssUnit(width),
+      if (length(res$options)) HTML(toJSON(res$options)) else '{}'
+    )
   )
+
+  attachDependencies(select, selectizeDep)
 }
 
 #' Create radio buttons

@@ -783,8 +783,14 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     selectTag$attribs$multiple <- "multiple"
 
   # return label and select tag
-  res <- tagList(controlLabel(inputId, label), selectTag)
+  res <- div(
+    class = "form-group",
+    controlLabel(inputId, label),
+    div(selectTag)
+  )
+
   if (!selectize) return(res)
+
   selectizeIt(inputId, res, NULL, width, nonempty = !multiple && !("" %in% choices))
 }
 

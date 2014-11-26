@@ -1715,8 +1715,12 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #' \donttest{
 #' # table example
 #' shinyApp(
-#'   ui = bootstrapPage(
-#'     tableOutput('table')
+#'   ui = fluidPage(
+#'     fluidRow(
+#'       column(12,
+#'         tableOutput('table')
+#'       )
+#'     )
 #'   ),
 #'   server = function(input, output) {
 #'     output$table <- renderTable(iris)
@@ -1726,8 +1730,12 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #'
 #' # DataTables example
 #' shinyApp(
-#'   ui = bootstrapPage(
-#'     dataTableOutput('table')
+#'   ui = fluidPage(
+#'     fluidRow(
+#'       column(12,
+#'         dataTableOutput('table')
+#'       )
+#'     )
 #'   ),
 #'   server = function(input, output) {
 #'     output$table <- renderDataTable(iris)

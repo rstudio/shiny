@@ -49,8 +49,12 @@ character string.
 \donttest{
 # pass a callback function to DataTables using I()
 shinyApp(
-  ui = bootstrapPage(
-    dataTableOutput('table')
+  ui = fluidPage(
+    fluidRow(
+      column(12,
+        dataTableOutput('table')
+      )
+    )
   ),
   server = function(input, output) {
     output$table <- renderDataTable(iris,

@@ -23,8 +23,10 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
   # Select input
   x <- selectInput('id','label', choices = c(a='x1', a='x2', b='x3'), selectize = FALSE)
-  expect_equal(format(x), '<label class="control-label" for="id">label</label>
-<select id="id"><option value="x1" selected>a</option>\n<option value="x2">a</option>\n<option value="x3">b</option></select>')
+  expect_true(grepl(fixed = TRUE,
+    '<select id="id"><option value="x1" selected>a</option>\n<option value="x2">a</option>\n<option value="x3">b</option></select>',
+     format(x)
+  ))
 
 
   # Radio buttons
@@ -127,25 +129,25 @@ test_that("selectOptions returns correct HTML", {
 
 test_that("selectInput selects items by default", {
   # None specified as selected (defaults to first)
-  expect_true(grepl(
+  expect_true(grepl(fixed = TRUE,
     '<option value="a" selected>',
     selectInput('x', 'x', list("a", "b"))
   ))
 
   # Nested list (optgroup)
-  expect_true(grepl(
+  expect_true(grepl(fixed = TRUE,
     '<option value="a" selected>',
     selectInput('x', 'x', list(A=list("a", "b"), "c"))
   ))
 
   # Nothing selected when choices=NULL
-  expect_identical(
+  expect_true(grepl(fixed = TRUE,
     '<select id="x"></select>',
     format(selectInput('x', NULL, NULL, selectize = FALSE))
-  )
+  ))
 
   # None specified as selected. With multiple=TRUE, none selected by default.
-  expect_true(grepl(
+  expect_true(grepl(fixed = TRUE,
     '<option value="a">',
     selectInput('x', 'x', list("a", "b"), multiple = TRUE)
   ))

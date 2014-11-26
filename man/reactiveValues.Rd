@@ -10,11 +10,12 @@ reactiveValues(...)
   these objects must be named.}
 }
 \description{
-This function returns an object for storing reactive values. It is similar
-to a list, but with special capabilities for reactive programming. When you
-read a value from it, the calling reactive expression takes a reactive
-dependency on that value, and when you write to it, it notifies any reactive
-functions that depend on that value.
+This function returns an object for storing reactive values. It is similar to
+a list, but with special capabilities for reactive programming. When you read
+a value from it, the calling reactive expression takes a reactive dependency
+on that value, and when you write to it, it notifies any reactive functions
+that depend on that value. Note that values taken from the reactiveValues
+object are reactive, but the reactiveValues object itself is not.
 }
 \examples{
 # Create the object with no values

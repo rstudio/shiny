@@ -184,3 +184,14 @@ span.jslider {
 .shiny-input-radiogroup .shiny-options-group {
   margin-top: -10px;
 }
+
+/* Limit the width of inputs in the general case. */
+.shiny-input-container {
+  width: 300px;
+  max-width: 100%;
+}
+
+/* Don't limit the width of inputs in a sidebar. */
+.well .shiny-input-container {
+  width: auto;
+}

@@ -451,7 +451,7 @@ conditionalPanel <- function(condition, ...) {
 #' textInput("caption", "Caption:", "Data Summary")
 #' @export
 textInput <- function(inputId, label, value = "") {
-  div(class = "form-group",
+  div(class = "form-group shiny-input-container",
     label %AND% tags$label(label, `for` = inputId),
     tags$input(id = inputId, type="text", class="form-control", value=value)
   )
@@ -488,7 +488,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
   if (!is.na(step))
     inputTag$attribs$step = step
 
-  div(class = "form-group",
+  div(class = "form-group shiny-input-container",
     label %AND% tags$label(label, `for` = inputId),
     inputTag
   )
@@ -567,7 +567,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
 
-  div(class = "form-group",
+  div(class = "form-group shiny-input-container",
     div(class = "checkbox",
       tags$label(inputTag, tags$span(label))
     )
@@ -609,7 +609,7 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
 
   # return label and select tag
   tags$div(id = inputId,
-           class = "form-group shiny-input-checkboxgroup",
+           class = "form-group shiny-input-checkboxgroup shiny-input-container",
            controlLabel(inputId, label),
            options)
 }
@@ -784,7 +784,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 
   # return label and select tag
   res <- div(
-    class = "form-group",
+    class = "form-group shiny-input-container",
     controlLabel(inputId, label),
     div(selectTag)
   )
@@ -919,7 +919,7 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
   options <- generateOptions(inputId, choices, selected, inline, type = 'radio')
 
   tags$div(id = inputId,
-    class = 'form-group shiny-input-radiogroup',
+    class = 'form-group shiny-input-radiogroup shiny-input-container',
     controlLabel(inputId, label),
     options)
 }
@@ -1063,11 +1063,11 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     width=width)
 
   if (is.null(label)) {
-    div(class = "form-group",
+    div(class = "form-group shiny-input-container",
       sliderTag
     )
   } else {
-    div(class = "form-group",
+    div(class = "form-group shiny-input-container",
       controlLabel(inputId, label),
       sliderTag
     )
@@ -1157,7 +1157,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 
   attachDependencies(
     tags$div(id = inputId,
-             class = "shiny-date-input form-group",
+             class = "shiny-date-input form-group shiny-input-container",
 
       controlLabel(inputId, label),
       tags$input(type = "text",
@@ -1257,7 +1257,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   attachDependencies(
     div(id = inputId,
              # input-daterange class is needed for dropdown behavior
-             class = "shiny-date-range-input form-group",
+             class = "shiny-date-range-input form-group shiny-input-container",
 
       controlLabel(inputId, label),
       div(class = "input-daterange input-group",

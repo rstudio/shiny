@@ -68,27 +68,18 @@ span.jslider {
 }
 
 .progress.shiny-file-input-progress {
-  position: relative;
   visibility: hidden;
 }
-.progress.shiny-file-input-progress .bar {
-  overflow: hidden;
-}
-.progress.shiny-file-input-progress label {
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  font-size: 12px;
-  padding: 0 6px;
-}
-.progress.shiny-file-input-progress .bar.bar-danger {
+.progress.shiny-file-input-progress .progress-bar.bar-danger {
   -webkit-transition: none;
   -moz-transition: none;
   -o-transition: none;
   transition: none;
+}
+/* Make sure the filename doesn't extend past the bounds of the container */
+.shiny-input-container input[type=file] {
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .shiny-progress-container {

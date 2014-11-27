@@ -534,14 +534,13 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
   if (length(accept) > 0)
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
-  tagList(
+  div(class = "form-group shiny-input-container",
     label %AND% tags$label(label),
     inputTag,
     tags$div(
       id=paste(inputId, "_progress", sep=""),
       class="progress progress-striped active shiny-file-input-progress",
-      tags$div(class="bar"),
-      tags$label()
+      tags$div(class="progress-bar")
     )
   )
 }

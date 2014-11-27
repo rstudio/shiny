@@ -2769,12 +2769,12 @@
         function(response) {
           self.$setActive(false);
           self.onProgress(null, 1);
-          self.$label().text('Upload complete');
+          self.$bar().text('Upload complete');
         },
         function(error) {
           self.onError(error);
         });
-      this.$label().text('Finishing upload');
+      this.$bar().text('Finishing upload');
     };
     this.onError = function(message) {
       this.$setError(message || '');
@@ -2785,16 +2785,13 @@
     };
     this.onProgress = function(file, completed) {
       this.$bar().width(Math.round(completed*100) + '%');
-      this.$label().text(file ? file.name : '');
+      this.$bar().text(file ? file.name : '');
     };
     this.$container = function() {
       return $('#' + $escape(this.id) + '_progress.shiny-file-input-progress');
     };
     this.$bar = function() {
-      return $('#' + $escape(this.id) + '_progress.shiny-file-input-progress .bar');
-    };
-    this.$label = function() {
-      return $('#' + $escape(this.id) + '_progress.shiny-file-input-progress label');
+      return $('#' + $escape(this.id) + '_progress.shiny-file-input-progress .progress-bar');
     };
     this.$setVisible = function(visible) {
       this.$container().css('visibility', visible ? 'visible' : 'hidden');
@@ -2803,7 +2800,7 @@
       this.$bar().toggleClass('bar-danger', (error !== null));
       if (error !== null) {
         this.onProgress(null, 1);
-        this.$label().text(error);
+        this.$bar().text(error);
       }
     };
     this.$setActive = function(active) {

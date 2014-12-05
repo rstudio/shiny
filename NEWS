@@ -1,6 +1,10 @@
 shiny 0.10.2.9xxx
 --------------------------------------------------------------------------------
 
+* Changed sliders from jquery-slider to ion.rangeSlider. These sliders have
+  an improved appearance, support updating more properties from the server,
+  and can be controlled with keyboard input.
+
 * Switched from Bootstrap 2 to Bootstrap 3. For most users, this will work
   seamlessly, but some users may need to use the shinyBootstrap2 package for
   backward compatibility.

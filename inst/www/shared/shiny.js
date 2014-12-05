@@ -1822,30 +1822,32 @@
   });
   inputBindings.register(checkboxInputBinding, 'shiny.checkboxInput');
 
+
   var sliderInputBinding = {};
   $.extend(sliderInputBinding, textInputBinding, {
     find: function(scope) {
-      // Check if jslider plugin is loaded
-      if (!$.fn.slider)
+      // Check if ionRangeSlider plugin is loaded
+      if (!$.fn.ionRangeSlider)
         return [];
 
-      return $(scope).find('input.jslider');
+      return $(scope).find('input.js-range-slider');
     },
     getValue: function(el) {
-      var sliderVal = $(el).slider("value");
-      if (/;/.test(sliderVal)) {
-        var chunks = sliderVal.split(/;/, 2);
-        return [+chunks[0], +chunks[1]];
+      var result = $(el).data('ionRangeSlider').result;
+      if (this._numValues(el) == 2) {
+        return [+result.from, +result.to];
       }
       else {
-        return +sliderVal;
+        return +result.from;
       }
     },
     setValue: function(el, value) {
-      if (value instanceof Array) {
-        $(el).slider("value", value[0], value[1]);
+      var slider = $(el).data('ionRangeSlider');
+
+      if (this._numValues(el) == 2 && value instanceof Array) {
+        slider.update({ from: value[0], to: value[1] });
       } else {
-        $(el).slider("value", value);
+        slider.update({ from: value });
       }
     },
     subscribe: function(el, callback) {
@@ -1857,15 +1859,27 @@
       $(el).off('.sliderInputBinding');
     },
     receiveMessage: function(el, data) {
-      if (data.hasOwnProperty('value'))
-        this.setValue(el, data.value);
+      var slider = $(el).data('ionRangeSlider');
+      var msg = {};
+
+      if (data.hasOwnProperty('value')) {
+        if (this._numValues(el) == 2 && data.value instanceof Array) {
+          msg.from = data.value[0];
+          msg.to = data.value[1];
+        } else {
+          msg.from = data.value;
+          // Workaround for ionRangeSlider issue #143
+          msg.to = data.value;
+        }
+      }
+      if (data.hasOwnProperty('min'))  msg.min   = data.min;
+      if (data.hasOwnProperty('max'))  msg.max   = data.max;
+      if (data.hasOwnProperty('step')) msg.step  = data.step;
 
       if (data.hasOwnProperty('label'))
         $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
-      // jslider doesn't support setting other properties
-
-      $(el).trigger('change');
+      slider.update(msg);
     },
     getRatePolicy: function() {
       return {
@@ -1874,23 +1888,17 @@
       };
     },
     getState: function(el) {
-      var $el = $(el);
-      var settings = $el.slider().settings;
-
-      return { label: $el.parent().find('label[for="' + $escape(el.id) + '"]').text(),
-               value:  this.getValue(el),
-               min:    Number(settings.from),
-               max:    Number(settings.to),
-               step:   Number(settings.step),
-               round:  settings.round,
-               format: settings.format.format,
-               locale: settings.format.locale
-             };
     },
     initialize: function(el) {
-      var $el = $(el);
-      $el.slider();
-      $el.next('span.jslider').css('width', $el.data('width'));
+      $(el).ionRangeSlider();
+    },
+
+    // Number of values; 1 for single slider, 2 for range slider
+    _numValues: function(el) {
+      if ($(el).data('ionRangeSlider').options.type === 'double')
+        return 2;
+      else
+        return 1;
     }
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
@@ -3341,7 +3349,6 @@
     evt.preventDefault();
     var self = $(this);
     var target = $('#' + $escape(self.attr('data-target-id')));
-    var slider = target.slider();
     var startLabel = 'Play';
     var stopLabel = 'Pause';
     var loop = self.attr('data-loop') !== undefined &&
@@ -3353,23 +3360,60 @@
       animInterval = +animInterval;
 
     if (!target.data('animTimer')) {
-      // If we're currently at the end, restart
-      if (!slider.canStepNext())
-        slider.resetToStart();
+      var slider;
+      var timer;
 
-      var timer = setInterval(function() {
-        if (loop && !slider.canStepNext()) {
+      // Separate code paths:
+      // Backward compatible code for old-style jsliders (Shiny <= 0.10.2),
+      // and new-style ionsliders.
+      if (target.hasClass('jslider')) {
+        slider = target.slider();
+
+        // If we're currently at the end, restart
+        if (!slider.canStepNext())
           slider.resetToStart();
-        }
-        else {
 
-          slider.stepNext();
-
-          if (!loop && !slider.canStepNext()) {
-            self.click(); // stop the animation
+        timer = setInterval(function() {
+          if (loop && !slider.canStepNext()) {
+            slider.resetToStart();
           }
-        }
-      }, animInterval);
+          else {
+            slider.stepNext();
+            if (!loop && !slider.canStepNext()) {
+              self.click(); // stop the animation
+            }
+          }
+        }, animInterval);
+
+      } else {
+        slider = target.data('ionRangeSlider');
+        var sliderCanStep = function() {
+          return slider.result.from < slider.result.max;
+        };
+        var sliderReset = function() {
+          slider.update({from: slider.result.min});
+        };
+        var sliderStep = function() {
+          slider.update({from: slider.result.from + slider.options.step});
+        };
+
+        // If we're currently at the end, restart
+        if (!sliderCanStep())
+          sliderReset();
+
+        timer = setInterval(function() {
+          if (loop && !sliderCanStep()) {
+            sliderReset();
+          }
+          else {
+            sliderStep();
+            if (!loop && !sliderCanStep()) {
+              self.click(); // stop the animation
+            }
+          }
+        }, animInterval);
+      }
+
       target.data('animTimer', timer);
       self.attr('title', stopLabel);
       self.addClass('playing');

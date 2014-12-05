@@ -7,7 +7,7 @@ these components are included below):
 - bootstrap-datepicker, from https://github.com/eternicode/bootstrap-datepicker
 - selectize, from https://github.com/brianreavis/selectize.js
 - es5-shim
-- jslider
+- ion.rangeSlider
 - DataTables
 
 jQuery License
@@ -268,11 +268,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 
-jslider License
+ion.rangeSlider License
 ----------------------------------------------------------------------
 
-The MIT License (MIT)
-Copyright (c) 2012 Egor Khmelev
+Copyright (C) 2014 by Denis Ineshin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

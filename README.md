@@ -47,6 +47,12 @@ Shiny versions 0.10.2 and below used the Bootstrap 2 web framework. After 0.10.2
 
 If you do not wish to update your code at this time, you can use the [shinyBootstrap2](https://github.com/rstudio/shinyBootstrap2) package for backward compatibility.
 
+If you prefer to install an older version of Shiny, you can do it using the devtools package:
+
+```R
+devtools::install_version("shiny", version = "0.10.2")
+```
+
 ## License
 
 The shiny package is licensed under the GPLv3. See these files in the inst directory for additional details:

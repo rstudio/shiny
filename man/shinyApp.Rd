@@ -77,8 +77,7 @@ shinyApp(
   ),
   server = function(input, output) {
     output$plot <- renderPlot( plot(head(cars, input$n)) )
-  },
-  options=list(launch.browser = rstudio::viewer)
+  }
 )
 
 shinyAppDir(system.file("examples/01_hello", package="shiny"))

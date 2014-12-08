@@ -34,6 +34,11 @@ shiny 0.10.2.9xxx
   `encodeURIComponent()`, and `decodeURIComponent()` from the httpuv package
   instead of `utils::URLencode()` and `utils::URLdecode()`. (#630)
 
+shiny 0.10.2.2
+--------------------------------------------------------------------------------
+
+* Remove use of `rstudio::viewer` in a code example, for R CMD check.
+
 shiny 0.10.2.1
 --------------------------------------------------------------------------------
 

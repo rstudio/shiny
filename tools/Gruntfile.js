@@ -5,14 +5,21 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: pkgInfo(),
     uglify: {
-      options: {
-        banner: '/*! <%= pkg.name %> <%= pkg.version %> | ' +
-                '(c) 2012-<%= grunt.template.today("yyyy") %> RStudio, Inc. | ' +
-                'License: <%= pkg.license %> */\n'
-      },
-      build: {
+      shiny: {
+        options: {
+          banner: '/*! <%= pkg.name %> <%= pkg.version %> | ' +
+                  '(c) 2012-<%= grunt.template.today("yyyy") %> RStudio, Inc. | ' +
+                  'License: <%= pkg.license %> */\n'
+        },
         src: srcdir + 'www/shared/<%= pkg.name %>.js',
         dest: srcdir + 'www/shared/<%= pkg.name %>.min.js'
+      },
+      datepicker: {
+        src: [
+          srcdir + 'www/shared/datepicker/js/bootstrap-datepicker.js',
+          srcdir + 'www/shared/datepicker/js/locales/bootstrap-datepicker.*.js'
+        ],
+        dest: srcdir + 'www/shared/datepicker/js/bootstrap-datepicker.min.js'
       }
     }
   });

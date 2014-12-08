@@ -40,7 +40,7 @@ renderPage <- function(ui, connection, showcase=0) {
       htmlDependency("json2", "2014.02.04", c(href="shared"), script = "json2-min.js"),
       htmlDependency("jquery", "1.11.0", c(href="shared"), script = "jquery.min.js"),
       htmlDependency("shiny", packageVersion("shiny"), c(href="shared"),
-        script = "shiny.js", stylesheet = "shiny.css")
+        script = "shiny.min.js", stylesheet = "shiny.css")
     ),
     result$dependencies
   )

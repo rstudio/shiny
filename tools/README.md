@@ -28,3 +28,7 @@ It's also useful to run `grunt` so that it monitors files for changes and run ta
 ```
 grunt watch
 ```
+
+One of the tasks minifies `shiny.js` to generate `shiny.min.js`. The minified file is supplied to the browser, along with a source map file, `shiny.min.js.map`, which allows a user to view the original Javascript source when using the debugging console in the browser.
+
+During development of Shiny's Javascript code, it's best to use `grunt watch` so that the minified file will get updated whenever you make changes to `shiny.js`.

@@ -24,7 +24,7 @@ A UI defintion that can be passed to the \link{shinyUI} function.
 }
 \description{
 Create a Shiny UI page that loads the CSS and JavaScript for
-\href{http://getbootstrap.com/3.3.0/}{Bootstrap}, and has no content in the
+\href{http://getbootstrap.com/3.3.1/}{Bootstrap}, and has no content in the
 page body (other than what you provide).
 }
 \details{

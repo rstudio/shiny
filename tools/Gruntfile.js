@@ -5,15 +5,16 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: pkgInfo(),
     uglify: {
-      shiny: {
-        options: {
-          banner: '/*! <%= pkg.name %> <%= pkg.version %> | ' +
-                  '(c) 2012-<%= grunt.template.today("yyyy") %> RStudio, Inc. | ' +
-                  'License: <%= pkg.license %> */\n'
-        },
-        src: srcdir + 'www/shared/<%= pkg.name %>.js',
-        dest: srcdir + 'www/shared/<%= pkg.name %>.min.js'
-      },
+      // NOTE: Don't run shiny minification yet
+      // shiny: {
+      //   options: {
+      //     banner: '/*! <%= pkg.name %> <%= pkg.version %> | ' +
+      //             '(c) 2012-<%= grunt.template.today("yyyy") %> RStudio, Inc. | ' +
+      //             'License: <%= pkg.license %> */\n'
+      //   },
+      //   src: srcdir + 'www/shared/<%= pkg.name %>.js',
+      //   dest: srcdir + 'www/shared/<%= pkg.name %>.min.js'
+      // },
       datepicker: {
         src: [
           srcdir + 'www/shared/datepicker/js/bootstrap-datepicker.js',
@@ -31,8 +32,9 @@ module.exports = function(grunt) {
 
     watch: {
       shiny: {
-        files: '<%= uglify.shiny.src %>',
-        tasks: ['newer:jshint:shiny', 'newer:uglify:shiny']
+        files: '<%= jshint.shiny.src %>',
+        // tasks: ['newer:jshint:shiny', 'newer:uglify:shiny']
+        tasks: ['newer:jshint:shiny']
       },
       datepicker: {
         files: '<%= uglify.datepicker.src %>',

@@ -34,28 +34,20 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
   }
 
   # required head tags for boostrap
-  importBootstrap <- function(min = TRUE) {
-
-    ext <- function(ext) {
-      ifelse(min, paste(".min", ext, sep=""), ext)
-    }
-    cssExt <- ext(".css")
-    jsExt = ext(".js")
-    bs <- c(
-      href = "shared/bootstrap",
-      file = system.file("www/shared/bootstrap", package = "shiny")
-    )
-
+  importBootstrap <- function() {
     list(
-      htmlDependency("bootstrap", "3.3.1", bs,
+      htmlDependency("bootstrap", "3.3.1",
+        c(
+          href = "shared/bootstrap",
+          file = system.file("www/shared/bootstrap", package = "shiny")
+        ),
         script = c(
-          sprintf("js/bootstrap%s", jsExt),
+          "js/bootstrap.min.js",
           # These shims are necessary for IE 8 compatibility
           "shim/html5shiv.min.js",
           "shim/respond.min.js"
         ),
-        stylesheet = if (is.null(theme))
-          sprintf("css/bootstrap%s", cssExt),
+        stylesheet = if (is.null(theme)) "css/bootstrap.min.css",
         meta = list(viewport = "width=device-width, initial-scale=1")
       )
     )

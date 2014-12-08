@@ -27,13 +27,27 @@ module.exports = function(grunt) {
       shiny: {
         src: srcdir + 'www/shared/shiny.js'
       }
+    },
+
+    watch: {
+      shiny: {
+        files: '<%= uglify.shiny.src %>',
+        tasks: ['newer:jshint:shiny', 'newer:uglify:shiny']
+      },
+      datepicker: {
+        files: '<%= uglify.datepicker.src %>',
+        tasks: ['newer:uglify:datepicker']
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-newer');
 
-  grunt.registerTask('default', ['uglify', 'jshint']);
+
+  grunt.registerTask('default', ['newer:uglify', 'newer:jshint']);
 
 
 

@@ -21,12 +21,19 @@ module.exports = function(grunt) {
         ],
         dest: srcdir + 'www/shared/datepicker/js/bootstrap-datepicker.min.js'
       }
+    },
+
+    jshint: {
+      shiny: {
+        src: srcdir + 'www/shared/shiny.js'
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
 
-  grunt.registerTask('default', ['uglify']);
+  grunt.registerTask('default', ['uglify', 'jshint']);
 
 
 

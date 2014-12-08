@@ -1,4 +1,12 @@
-/*jshint browser:true, jquery:true, strict:false, curly:false, indent:2*/
+/*jshint
+  undef:true,
+  browser:true,
+  devel: true,
+  jquery:true,
+  strict:false,
+  curly:false,
+  indent:2
+*/
 
 (function() {
   var $ = jQuery;

@@ -1,20 +1,18 @@
-The contents in this subdirectory are used for building web assets.
+This directory contains build tools for Shiny.
 
-To build, install the requirements (below), then go to this directory and run:
 
-```
-make
-```
+## Grunt
 
-## Requirements
-
-### UglifyJS
-
-UglifyJS is a module for node.js which minifies Javascript files. It should be
-installed with the following command (run from this directory):
+Grunt is a built tool that runs on node.js. Once node.js is installed, you can install grunt (run from this directory):
 
 ```
-npm install uglify-js
+sudo npm install -g grunt-cli
+npm install grunt
 ```
 
-This will install the UglifyJS into `./node_modules/`.
+You will also need to install some modules to run the grunt tasks:
+
+```
+npm install grunt-contrib-uglify
+npm install grunt-contrib-jshint
+```

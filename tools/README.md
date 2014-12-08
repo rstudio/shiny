@@ -8,17 +8,11 @@ Grunt is a built tool that runs on node.js. Once node.js is installed, you can i
 ### Installing Grunt
 
 ```
+# Install grunt command line tool globally
 sudo npm install -g grunt-cli
-npm install grunt
-```
 
-You will also need to install some modules to run the grunt tasks:
-
-```
-npm install grunt-contrib-uglify
-npm install grunt-contrib-jshint
-npm install grunt-contrib-watch
-npm install grunt-newer
+# Install grunt plus modules for this project
+npm install
 ```
 
 ### Using Grunt

@@ -25,6 +25,9 @@ module.exports = function(grunt) {
     },
 
     jshint: {
+      options: {
+        force: true  // Don't abort if there are JSHint warnings
+      },
       shiny: {
         src: srcdir + 'www/shared/shiny.js'
       }

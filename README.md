@@ -50,8 +50,12 @@ If you do not wish to update your code at this time, you can use the [shinyBoots
 If you prefer to install an older version of Shiny, you can do it using the devtools package:
 
 ```R
-devtools::install_version("shiny", version = "0.10.2")
+devtools::install_version("shiny", version = "0.10.2.2")
 ```
+
+## Development notes
+
+The Javascript code in Shiny is minified using tools that run on Node.js. See the tools/ directory for more information.
 
 ## License
 

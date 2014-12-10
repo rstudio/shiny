@@ -231,6 +231,9 @@ withProgress <- function(expr, min = 0, max = 1,
   if (!quoted)
     expr <- substitute(expr)
 
+  # A hacky check to make sure the session object is indeed a session object.
+  if (is.null(session$onFlush)) stop("'session' is not a session object.")
+
   p <- Progress$new(session, min = min, max = max)
 
   session$progressStack$push(p)

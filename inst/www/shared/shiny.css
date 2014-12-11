@@ -27,15 +27,6 @@ table.data td[align=right] {
   font-weight: inherit;
 }
 
-.jslider {
-  /* Fix jslider running into the control above it */
-  margin-top: 5px;
-}
-.jslider-value {
-  /* Remove box around jslider values on colored bg */
-  background-color: transparent !important;
-}
-
 .recalculating {
   opacity: 0.3;
   transition: opacity 250ms ease 500ms;
@@ -44,9 +35,6 @@ table.data td[align=right] {
   -o-transition: opacity 250ms ease 500ms;
 }
 
-span.jslider {
-  margin-bottom: 12px;
-}
 .slider-animate-container {
   text-align: right;
   margin-top: -9px;

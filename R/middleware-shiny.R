@@ -35,7 +35,9 @@ sessionHandler <- function(req) {
   subreq$PATH_INFO <- subpath
   subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, matches[[1]][2], sep='')
 
-  return(shinysession$handleRequest(subreq))
+  withReactiveDomain(shinysession$session, {
+    shinysession$handleRequest(subreq)
+  })
 }
 
 dynamicHandler <- function(filePath, dependencyFiles=filePath) {

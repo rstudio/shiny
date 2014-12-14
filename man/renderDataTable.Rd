@@ -43,7 +43,9 @@ For the \code{options} argument, the character elements that have the class
 \code{"AsIs"} (usually returned from \code{\link{I}()}) will be evaluated in
 JavaScript. This is useful when the type of the option value is not supported
 in JSON, e.g., a JavaScript function, which can be obtained by evaluating a
-character string.
+character string. Note this only applies to the root-level elements of the
+options list, and the \code{I()} notation does not work for lower-level
+elements in the list.
 }
 \examples{
 \donttest{

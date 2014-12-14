@@ -2650,7 +2650,7 @@
         this.setValue(el, data.value);
     },
     subscribe: function(el, callback) {
-      $(el).on('shown.bootstrapTabInputBinding', function(event) {
+      $(el).on('shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function(event) {
         callback();
       });
     },

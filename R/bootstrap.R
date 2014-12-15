@@ -618,9 +618,13 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
 
   options <- generateOptions(inputId, choices, selected, inline)
 
+  divClass <- "form-group shiny-input-checkboxgroup shiny-input-container"
+  if (inline)
+    divClass <- paste(divClass, "shiny-input-container-inline")
+
   # return label and select tag
   tags$div(id = inputId,
-           class = "form-group shiny-input-checkboxgroup shiny-input-container",
+           class = divClass,
            controlLabel(inputId, label),
            options)
 }
@@ -930,8 +934,12 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
 
   options <- generateOptions(inputId, choices, selected, inline, type = 'radio')
 
+  divClass <- "form-group shiny-input-checkboxgroup shiny-input-container"
+  if (inline)
+    divClass <- paste(divClass, "shiny-input-container-inline")
+
   tags$div(id = inputId,
-    class = 'form-group shiny-input-radiogroup shiny-input-container',
+    class = divClass,
     controlLabel(inputId, label),
     options)
 }

@@ -165,7 +165,7 @@ table.data td[align=right] {
 }
 
 /* Limit the width of inputs in the general case. */
-.shiny-input-container {
+.shiny-input-container:not(.shiny-input-container-inline) {
   width: 300px;
   max-width: 100%;
 }

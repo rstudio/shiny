@@ -659,9 +659,6 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
   # create tags for each of the options
   ids <- paste0(inputId, seq_along(choices))
 
-  divclass <- if (inline) paste0(type, "-inline") else type
-  divclass <- paste("shiny-options-item", divclass)
-
   # generate a list of <input type=? [checked] />
   options <- mapply(
     ids, choices, names(choices),
@@ -672,12 +669,16 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
       if (value %in% selected)
         inputTag$attribs$checked <- "checked"
 
-      tags$div(
-        class = divclass,
-        tags$label(
-          inputTag, tags$span(name)
-        )
-      )
+      # If inline, there's no wrapper div, and the label needs a class like
+      # checkbox-inline.
+      labelTag <- tags$label(class = paste0(type, "-inline"), inputTag,
+                             tags$span(name))
+
+      if (inline) {
+        labelTag
+      } else {
+        tags$div(class = type, labelTag)
+      }
     },
     SIMPLIFY = FALSE, USE.NAMES = FALSE
   )

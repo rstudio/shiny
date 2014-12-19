@@ -934,7 +934,7 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
 
   options <- generateOptions(inputId, choices, selected, inline, type = 'radio')
 
-  divClass <- "form-group shiny-input-checkboxgroup shiny-input-container"
+  divClass <- "form-group shiny-input-radiogroup shiny-input-container"
   if (inline)
     divClass <- paste(divClass, "shiny-input-container-inline")
 

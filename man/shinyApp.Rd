@@ -57,16 +57,22 @@ file and either ui.R or www/index.html)}
 \item{...}{Additional parameters to be passed to print.}
 }
 \value{
-An object that represents the app. Printing the object will run the
-  app.
+An object that represents the app. Printing the object or passing it
+  to \code{\link{runApp}} will run the app.
 }
 \description{
 These functions create Shiny app objects from either an explicit UI/server
-pair (\code{shinyApp}), or by passing the path of a directory that
-contains a Shiny app (\code{shinyAppDir}). You generally shouldn't need to
-use these functions to create/run applications; they are intended for
-interoperability purposes, such as embedding Shiny apps inside a \pkg{knitr}
-document.
+pair (\code{shinyApp}), or by passing the path of a directory that contains a
+Shiny app (\code{shinyAppDir}). You generally shouldn't need to use these
+functions to create/run applications; they are intended for interoperability
+purposes, such as embedding Shiny apps inside a \pkg{knitr} document.
+}
+\details{
+Normally when this function is used at the R console, the Shiny app object is
+automatically passed to the \code{print()} function, which runs the app. If
+this is called in the middle of a function, the value will not be passed to
+\code{print()} and the app will not be run. To make the app run, pass the app
+object to \code{print()} or \code{\link{runApp}()}.
 }
 \examples{
 \donttest{
@@ -81,6 +87,20 @@ shinyApp(
 )
 
 shinyAppDir(system.file("examples/01_hello", package="shiny"))
+
+
+# The object can be passed to runApp()
+app <- shinyApp(
+  ui = fluidPage(
+    numericInput("n", "n", 1),
+    plotOutput("plot")
+  ),
+  server = function(input, output) {
+    output$plot <- renderPlot( plot(head(cars, input$n)) )
+  }
+)
+
+runApp(app)
 }
 }
 

@@ -11,7 +11,10 @@ runApp(appDir = getwd(), port = NULL,
 \arguments{
 \item{appDir}{The directory of the application. Should contain
 \code{server.R}, plus, either \code{ui.R} or a \code{www} directory that
-contains the file \code{index.html}. Defaults to the working directory.}
+contains the file \code{index.html}. Defaults to the working directory.
+Instead of a directory, this could be a list with \code{ui} and
+\code{server} components, or a Shiny app object created by
+\code{\link{shinyApp}}.}
 
 \item{port}{The TCP port that the application should listen on. Defaults to
 choosing a random port.}
@@ -34,12 +37,12 @@ Shiny Server Pro route requests to the correct process.}
   the value \code{"showcase"}, shows application code and metadata from a
   \code{DESCRIPTION} file in the application directory alongside the
   application. If set to \code{"normal"}, displays the application normally.
-  Defaults to \code{"auto"}, which displays the application in the mode
-  given in its \code{DESCRIPTION} file, if any.}
+  Defaults to \code{"auto"}, which displays the application in the mode given
+  in its \code{DESCRIPTION} file, if any.}
 }
 \description{
-Runs a Shiny application. This function normally does not return; interrupt
-R to stop the application (usually by pressing Ctrl+C or Esc).
+Runs a Shiny application. This function normally does not return; interrupt R
+to stop the application (usually by pressing Ctrl+C or Esc).
 }
 \details{
 The host parameter was introduced in Shiny 0.9.0. Its default value of
@@ -68,6 +71,20 @@ runApp(list(
     output$plot <- renderPlot({ hist(runif(input$n)) })
   }
 ))
+
+
+# Running a Shiny app object
+app <- shinyApp(
+  ui = bootstrapPage(
+    numericInput('n', 'Number of obs', 100),
+    plotOutput('plot')
+  ),
+  server = function(input, output) {
+    output$plot <- renderPlot({ hist(runif(input$n)) })
+  }
+)
+
+runApp(app)
 }
 }
 

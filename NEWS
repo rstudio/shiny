@@ -34,6 +34,12 @@ shiny 0.10.2.9xxx
   `encodeURIComponent()`, and `decodeURIComponent()` from the httpuv package
   instead of `utils::URLencode()` and `utils::URLdecode()`. (#630)
 
+* Shiny's web assets are now minified.
+
+* The default reactive domain is now available in event handler functions. (#669)
+
+* Password input fields can now be used, with `passwordInput()`. (#672)
+
 shiny 0.10.2.2
 --------------------------------------------------------------------------------
 

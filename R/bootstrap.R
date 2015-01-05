@@ -1031,7 +1031,7 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
 #'   create a double-ended range slider. A warning will be issued if the
 #'   value doesn't fit between \code{min} and \code{max}.
 #' @param step Specifies the interval between each selectable value on the
-#'   slider (\code{NULL} results a step size of 1).
+#'   slider (if \code{NULL}, a heuristic is used to determine the step size).
 #' @param round \code{TRUE} to round all values to the nearest integer;
 #'   \code{FALSE} if no rounding is desired; or an integer to round to that
 #'   number of digits (for example, 1 will round to the nearest 10, and -2 will

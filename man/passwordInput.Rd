@@ -5,6 +5,13 @@
 \usage{
 passwordInput(inputId, label, value = "")
 }
+\arguments{
+\item{inputId}{Input variable to assign the control's value to}
+
+\item{label}{Display label for the control}
+
+\item{value}{Initial value}
+}
 \value{
 A text input control that can be added to a UI definition.
 }

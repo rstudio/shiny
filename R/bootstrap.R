@@ -453,7 +453,7 @@ textInput <- function(inputId, label, value = "") {
 #'
 #' Create an password control for entry of passwords.
 #'
-#' @inheritParams passwordInput
+#' @inheritParams textInput
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements

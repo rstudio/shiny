@@ -40,8 +40,7 @@ To create a fixed page use the \code{fixedPage} function and include
   with \code{fixedRow} and \code{column}.
 }
 \note{
-See the
-  \href{https://github.com/rstudio/shiny/wiki/Shiny-Application-Layout-Guide}{
+See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
   Shiny Application Layout Guide} for additional details on laying out fixed
   pages.
 }

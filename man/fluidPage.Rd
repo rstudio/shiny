@@ -39,9 +39,8 @@ To create a fluid page use the \code{fluidPage} function and include
   higher-level layout functions like \code{\link{sidebarLayout}}.
 }
 \note{
-See the
-  \href{https://github.com/rstudio/shiny/wiki/Shiny-Application-Layout-Guide}{
-   Shiny-Application-Layout-Guide} for additional details on laying out fluid
+See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
+  Shiny-Application-Layout-Guide} for additional details on laying out fluid
   pages.
 }
 \examples{

@@ -552,6 +552,12 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #'   \code{c(1, 3, 4)}, or \code{c(-1, -3)} (all columns except the first and
 #'   third), or \code{c('Species', 'Sepal.Length')}.
 #' @references \url{http://datatables.net}
+#' @note This function only provides the server-side version of DataTables
+#'   (using R to process the data object on the server side). There is a
+#'   separate package \pkg{DT} (\url{https://github.com/rstudio/DT}) that allows
+#'   you to create both server-side and client-side DataTables. We may deprecate
+#'   \code{renderDataTable()} and \code{dataTableOutput()} in the future when
+#'   the \pkg{DT} package is mature enough.
 #' @export
 #' @inheritParams renderPlot
 #' @examples

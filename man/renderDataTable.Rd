@@ -47,6 +47,14 @@ character string. Note this only applies to the root-level elements of the
 options list, and the \code{I()} notation does not work for lower-level
 elements in the list.
 }
+\note{
+This function only provides the server-side version of DataTables
+  (using R to process the data object on the server side). There is a
+  separate package \pkg{DT} (\url{https://github.com/rstudio/DT}) that allows
+  you to create both server-side and client-side DataTables. We may deprecate
+  \code{renderDataTable()} and \code{dataTableOutput()} in the future when
+  the \pkg{DT} package is mature enough.
+}
 \examples{
 \donttest{
 # pass a callback function to DataTables using I()

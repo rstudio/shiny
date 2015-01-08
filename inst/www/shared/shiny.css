@@ -122,6 +122,13 @@ table.data td[align=right] {
   font-family: monospace !important;
 }
 
+/* Workaround for Qt 5, which draws its own margins around checks and radios;
+   overrides the top margin on these elements set by Bootstrap */
+.qt5 .radio input[type="radio"],
+.qt5 .checkbox input[type="checkbox"] {
+  margin-top: 0px;
+}
+
 /* consistency with bootstrap.css for selectize.js */
 .selectize-control {
   margin-bottom: 10px;

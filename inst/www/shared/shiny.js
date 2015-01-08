@@ -20,8 +20,9 @@
     isQt = true;
   }
 
-  // Enable special treatment for Qt 5 quirks
-  if (/\bQt\/5/.test(window.navigator.userAgent)) {
+  // Enable special treatment for Qt 5 quirks on Linux
+  if (/\bQt\/5/.test(window.navigator.userAgent) &&
+      /Linux/.test(window.navigator.userAgent)) {
     $(document.documentElement).addClass('qt5');
   }
 

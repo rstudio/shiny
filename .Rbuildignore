@@ -11,3 +11,4 @@
 ^\.travis\.yml$
 ^staticdocs$
 ^tools$
+^CONTRIBUTING.md$

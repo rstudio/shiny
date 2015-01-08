@@ -6,7 +6,7 @@ shiny 0.10.2.9xxx
   and can be controlled with keyboard input.
 
 * Switched from Bootstrap 2 to Bootstrap 3. For most users, this will work
-  seamlessly, but some users may need to use the shinyBootstrap2 package for
+  seamlessly, but some users may need to use the shinybootstrap2 package for
   backward compatibility.
 
 * The UI of a Shiny app can now have a body tag. This is useful for CSS

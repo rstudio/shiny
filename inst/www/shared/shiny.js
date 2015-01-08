@@ -3372,7 +3372,7 @@
       var timer;
 
       // Separate code paths:
-      // Backward compatible code for old-style jsliders (Shiny <= 0.10.2),
+      // Backward compatible code for old-style jsliders (Shiny <= 0.10.2.2),
       // and new-style ionsliders.
       if (target.hasClass('jslider')) {
         slider = target.slider();

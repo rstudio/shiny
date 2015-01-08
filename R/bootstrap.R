@@ -1058,11 +1058,11 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 
   if (!missing(format)) {
     shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
-                    version = "0.10.2")
+                    version = "0.10.2.2")
   }
   if (!missing(locale)) {
     shinyDeprecated(msg = "The `locale` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
-                    version = "0.10.2")
+                    version = "0.10.2.2")
   }
 
   # Auto step size

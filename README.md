@@ -43,7 +43,7 @@ We hope you enjoy using Shiny. If you have general questions about using Shiny, 
 
 ## Bootstrap 3 migration
 
-Shiny versions 0.10.2 and below used the Bootstrap 2 web framework. After 0.10.2, Shiny switched to Bootstrap 3. For most users, the upgrade should be seamless. However, if you have have customized your HTML-generating code to use features specific to Bootstrap 2, you may need to update your code to work with Bootstrap 3.
+Shiny versions 0.10.2.2 and below used the Bootstrap 2 web framework. After 0.10.2.2, Shiny switched to Bootstrap 3. For most users, the upgrade should be seamless. However, if you have have customized your HTML-generating code to use features specific to Bootstrap 2, you may need to update your code to work with Bootstrap 3.
 
 If you do not wish to update your code at this time, you can use the [shinyBootstrap2](https://github.com/rstudio/shinyBootstrap2) package for backward compatibility.
 

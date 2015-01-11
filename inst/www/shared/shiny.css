@@ -164,10 +164,10 @@ table.data td[align=right] {
   border-radius: 2px;
 }
 
-/* For checkbox groups and radio buttons, bring the options closer to the label.
- */
-.shiny-input-checkboxgroup .shiny-options-group,
-.shiny-input-radiogroup .shiny-options-group {
+/* For checkbox groups and radio buttons, bring the options closer to label,
+   if label is present. */
+.shiny-input-checkboxgroup label ~ .shiny-options-group,
+.shiny-input-radiogroup label ~ .shiny-options-group {
   margin-top: -10px;
 }
 

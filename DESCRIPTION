@@ -3,13 +3,47 @@ Type: Package
 Title: Web Application Framework for R
 Version: 0.11
 Date: 2015-01-08
-Author: RStudio, Inc.
-Maintainer: Winston Chang <winston@rstudio.com>
+Authors@R: c(
+    person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
+    person(family = "RStudio", role = "cph"),
+    person(family = "jQuery Foundation", role = "cph",
+    comment = "jQuery Library"),
+    person(family = "jQuery contributors", role = c("ctb", "cph"),
+    comment = "jQuery Library"),
+    person("Mark", "Otto", role = "ctb",
+    comment = "Bootstrap library"),
+    person("Jacob", "Thornton", role = "ctb",
+    comment = "Bootstrap library"),
+    person(family = "Bootstrap contributors", role = "ctb",
+    comment = "Bootstrap library"),
+    person(family = "Twitter, Inc", role = "cph",
+    comment = "Bootstrap library"),
+    person("Scott", "Jehl", role = c("ctb", "cph"),
+    comment = "Respond.js library"),
+    person("Stefan", "Petre", role = c("ctb", "cph"),
+    comment = "Bootstrap-datepicker library"),
+    person("Andrew", "Rowls", role = c("ctb", "cph"),
+    comment = "Bootstrap-datepicker library"),
+    person("Brian", "Reavis", role = c("ctb", "cph"),
+    comment = "selectize.js library"),
+    person("Kristopher Michael", "Kowal", role = c("ctb", "cph"),
+    comment = "es5-shim library"),
+    person(family = "es5-shim contributors", role = c("ctb", "cph"),
+    comment = "es5-shim library"),
+    person("Denis", "Ineshin", role = c("ctb", "cph"),
+    comment = "ion.rangeSlider library"),
+    person(family = "SpryMedia Limited", role = c("ctb", "cph"),
+    comment = "DataTables library"),
+    person("John", "Fraser", role = c("ctb", "cph"),
+    comment = "showdown.js library"),
+    person("John", "Gruber", role = c("ctb", "cph"),
+    comment = "showdown.js library")
+    )
 Description: Shiny makes it incredibly easy to build interactive web
     applications with R. Automatic "reactive" binding between inputs and
     outputs and extensive pre-built widgets make it possible to build
     beautiful, responsive, and powerful applications with minimal effort.
-License: GPL-3
+License: GPL-3 | file LICENSE
 Depends:
     R (>= 3.0.0)
 Imports:

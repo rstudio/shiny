@@ -25,7 +25,7 @@
 #' runUrl("https://github.com/rstudio/shiny_example/archive/master.zip",
 #'  subdir = "inst/shinyapp/")
 #' }
-runUrl <- function(url, filetype = NULL, subdir = NULL, ...) {
+runUrl <- function(url, filetype = NULL, subdir = NULL, destFile = NULL, ...) {
 
   if (!is.null(subdir) && ".." %in% strsplit(subdir, '/')[[1]])
     stop("'..' not allowed in subdir")
@@ -43,8 +43,14 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, ...) {
     stop("Unknown file extension.")
 
   message("Downloading ", url)
-  filePath <- tempfile('shinyapp', fileext=fileext)
-  fileDir  <- tempfile('shinyapp')
+  if (is.null(destFile)) {
+    filePath <- tempfile('shinyapp', fileext = fileext)
+    fileDir  <- tempfile('shinyapp')
+  } else {
+    fileDir <- destFile
+    filePath <- paste(destFile, fileext)
+  }
+  message("App data files in ", fileDir)
   dir.create(fileDir, showWarnings = FALSE)
   if (download(url, filePath, mode = "wb", quiet = TRUE) != 0)
     stop("Failed to download URL ", url)
@@ -88,7 +94,7 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, ...) {
 #' runGist("https://gist.github.com/3239667")
 #' }
 #'
-runGist <- function(gist, ...) {
+runGist <- function(gist, destFile = NULL, ...) {
 
   gistUrl <- if (is.numeric(gist) || grepl('^[0-9a-f]+$', gist)) {
     sprintf('https://gist.github.com/%s/download', gist)
@@ -98,7 +104,7 @@ runGist <- function(gist, ...) {
     stop('Unrecognized gist identifier format')
   }
 
-  runUrl(gistUrl, filetype=".tar.gz", ...)
+  runUrl(gistUrl, filetype = ".tar.gz", destFile = destFile, ...)
 }
 
 
@@ -118,7 +124,7 @@ runGist <- function(gist, ...) {
 #' runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
 #' }
 runGitHub <- function(repo, username = getOption("github.user"),
-                      ref = "master", subdir = NULL, ...) {
+                      ref = "master", subdir = NULL, destFile = NULL, ...) {
 
   if (grepl('/', repo)) {
     res <- strsplit(repo, '/')[[1]]
@@ -130,5 +136,5 @@ runGitHub <- function(repo, username = getOption("github.user"),
   url <- paste("https://github.com/", username, "/", repo, "/archive/",
                ref, ".tar.gz", sep = "")
 
-  runUrl(url, subdir=subdir, ...)
+  runUrl(url, subdir = subdir, destFile = destFile, ...)
 }

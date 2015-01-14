@@ -14,6 +14,7 @@
 #' @param subdir A subdirectory in the repository that contains the app. By
 #'   default, this function will run an app from the top level of the repo, but
 #'   you can use a path such as `\code{"inst/shinyapp"}.
+#' @param destDir Directory to store the downloaded application files
 #' @param ... Other arguments to be passed to \code{\link{runApp}()}, such as
 #'   \code{port} and \code{launch.browser}.
 #' @export
@@ -25,7 +26,7 @@
 #' runUrl("https://github.com/rstudio/shiny_example/archive/master.zip",
 #'  subdir = "inst/shinyapp/")
 #' }
-runUrl <- function(url, filetype = NULL, subdir = NULL, destFile = NULL, ...) {
+runUrl <- function(url, filetype = NULL, subdir = NULL, destDir = NULL, ...) {
 
   if (!is.null(subdir) && ".." %in% strsplit(subdir, '/')[[1]])
     stop("'..' not allowed in subdir")
@@ -43,12 +44,12 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, destFile = NULL, ...) {
     stop("Unknown file extension.")
 
   message("Downloading ", url)
-  if (is.null(destFile)) {
+  if (is.null(destDir)) {
     filePath <- tempfile('shinyapp', fileext = fileext)
     fileDir  <- tempfile('shinyapp')
   } else {
-    fileDir <- destFile
-    filePath <- paste(destFile, fileext)
+    fileDir <- destDir
+    filePath <- paste(destDir, fileext)
   }
   message("App data files in ", fileDir)
   dir.create(fileDir, showWarnings = FALSE)
@@ -84,6 +85,7 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, destFile = NULL, ...) {
 #'   https://gist.github.com/jcheng5/3239667, then \code{3239667},
 #'   \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'} are
 #'   all valid values.
+#' @param destDir Directory to store the downloaded gist.
 #' @export
 #' @examples
 #' \donttest{
@@ -94,7 +96,7 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, destFile = NULL, ...) {
 #' runGist("https://gist.github.com/3239667")
 #' }
 #'
-runGist <- function(gist, destFile = NULL, ...) {
+runGist <- function(gist, destDir = NULL, ...) {
 
   gistUrl <- if (is.numeric(gist) || grepl('^[0-9a-f]+$', gist)) {
     sprintf('https://gist.github.com/%s/download', gist)
@@ -104,7 +106,7 @@ runGist <- function(gist, destFile = NULL, ...) {
     stop('Unrecognized gist identifier format')
   }
 
-  runUrl(gistUrl, filetype = ".tar.gz", destFile = destFile, ...)
+  runUrl(gistUrl, filetype = ".tar.gz", destDir = destDir, ...)
 }
 
 
@@ -114,6 +116,7 @@ runGist <- function(gist, destFile = NULL, ...) {
 #'   \code{"username/repo"}, \code{username} will be taken from \code{repo}.
 #' @param ref Desired git reference. Could be a commit, tag, or branch name.
 #'   Defaults to \code{"master"}.
+#' @param destDir Directory to store the downloaded repository.
 #' @export
 #' @examples
 #' \donttest{
@@ -124,7 +127,7 @@ runGist <- function(gist, destFile = NULL, ...) {
 #' runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
 #' }
 runGitHub <- function(repo, username = getOption("github.user"),
-                      ref = "master", subdir = NULL, destFile = NULL, ...) {
+                      ref = "master", subdir = NULL, destDir = NULL, ...) {
 
   if (grepl('/', repo)) {
     res <- strsplit(repo, '/')[[1]]
@@ -136,5 +139,5 @@ runGitHub <- function(repo, username = getOption("github.user"),
   url <- paste("https://github.com/", username, "/", repo, "/archive/",
                ref, ".tar.gz", sep = "")
 
-  runUrl(url, subdir = subdir, destFile = destFile, ...)
+  runUrl(url, subdir = subdir, destDir = destDir, ...)
 }

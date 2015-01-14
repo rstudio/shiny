@@ -71,8 +71,11 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, destDir = NULL, ...) {
     first <- as.character(unzip(filePath, list=TRUE)$Name)[1]
     unzip(filePath, exdir = fileDir)
   }
-  on.exit(unlink(fileDir, recursive = is.null(destDir)), add = TRUE)
 
+  if(is.null(destDir)){
+    on.exit(unlink(fileDir, recursive = TRUE), add = TRUE)
+  }
+  
   appdir <- file.path(fileDir, first)
   if (!file_test('-d', appdir)) appdir <- dirname(appdir)
 

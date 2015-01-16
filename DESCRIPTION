@@ -7,9 +7,11 @@ Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person(family = "RStudio", role = "cph"),
     person(family = "jQuery Foundation", role = "cph",
-    comment = "jQuery Library"),
+    comment = "jQuery library and jQuery UI library"),
     person(family = "jQuery contributors", role = c("ctb", "cph"),
-    comment = "jQuery Library"),
+    comment = "jQuery library; authors listed in inst/www/shared/jquery-AUTHORS.txt"),
+    person(family = "jQuery UI contributors", role = c("ctb", "cph"),
+    comment = "jQuery UI library; authors listed in inst/www/shared/jqueryui/1.10.4/AUTHORS.txt"),
     person("Mark", "Otto", role = "ctb",
     comment = "Bootstrap library"),
     person("Jacob", "Thornton", role = "ctb",
@@ -18,12 +20,16 @@ Authors@R: c(
     comment = "Bootstrap library"),
     person(family = "Twitter, Inc", role = "cph",
     comment = "Bootstrap library"),
+    person("Alexander", "Farkas", role = c("ctb", "cph"),
+    comment = "html5shiv library"),
     person("Scott", "Jehl", role = c("ctb", "cph"),
     comment = "Respond.js library"),
     person("Stefan", "Petre", role = c("ctb", "cph"),
     comment = "Bootstrap-datepicker library"),
     person("Andrew", "Rowls", role = c("ctb", "cph"),
     comment = "Bootstrap-datepicker library"),
+    person("Dave", "Gandy", role = c("ctb", "cph"),
+    comment = "Font-Awesome font"),
     person("Brian", "Reavis", role = c("ctb", "cph"),
     comment = "selectize.js library"),
     person("Kristopher Michael", "Kowal", role = c("ctb", "cph"),
@@ -37,7 +43,11 @@ Authors@R: c(
     person("John", "Fraser", role = c("ctb", "cph"),
     comment = "showdown.js library"),
     person("John", "Gruber", role = c("ctb", "cph"),
-    comment = "showdown.js library")
+    comment = "showdown.js library"),
+    person("Ivan", "Sagalaev", role = c("ctb", "cph"),
+    comment = "highlight.js library"),
+    person(family = "R Core Team", role = c("ctb", "cph"),
+    comment = "tar implementation from R")
     )
 Description: Shiny makes it incredibly easy to build interactive web
     applications with R. Automatic "reactive" binding between inputs and

@@ -1,15 +1,59 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 0.10.2.9006
-Date: 2014-10-13
-Author: RStudio, Inc.
-Maintainer: Winston Chang <winston@rstudio.com>
+Version: 0.11
+Date: 2015-01-08
+Authors@R: c(
+    person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
+    person(family = "RStudio", role = "cph"),
+    person(family = "jQuery Foundation", role = "cph",
+    comment = "jQuery library and jQuery UI library"),
+    person(family = "jQuery contributors", role = c("ctb", "cph"),
+    comment = "jQuery library; authors listed in inst/www/shared/jquery-AUTHORS.txt"),
+    person(family = "jQuery UI contributors", role = c("ctb", "cph"),
+    comment = "jQuery UI library; authors listed in inst/www/shared/jqueryui/1.10.4/AUTHORS.txt"),
+    person("Mark", "Otto", role = "ctb",
+    comment = "Bootstrap library"),
+    person("Jacob", "Thornton", role = "ctb",
+    comment = "Bootstrap library"),
+    person(family = "Bootstrap contributors", role = "ctb",
+    comment = "Bootstrap library"),
+    person(family = "Twitter, Inc", role = "cph",
+    comment = "Bootstrap library"),
+    person("Alexander", "Farkas", role = c("ctb", "cph"),
+    comment = "html5shiv library"),
+    person("Scott", "Jehl", role = c("ctb", "cph"),
+    comment = "Respond.js library"),
+    person("Stefan", "Petre", role = c("ctb", "cph"),
+    comment = "Bootstrap-datepicker library"),
+    person("Andrew", "Rowls", role = c("ctb", "cph"),
+    comment = "Bootstrap-datepicker library"),
+    person("Dave", "Gandy", role = c("ctb", "cph"),
+    comment = "Font-Awesome font"),
+    person("Brian", "Reavis", role = c("ctb", "cph"),
+    comment = "selectize.js library"),
+    person("Kristopher Michael", "Kowal", role = c("ctb", "cph"),
+    comment = "es5-shim library"),
+    person(family = "es5-shim contributors", role = c("ctb", "cph"),
+    comment = "es5-shim library"),
+    person("Denis", "Ineshin", role = c("ctb", "cph"),
+    comment = "ion.rangeSlider library"),
+    person(family = "SpryMedia Limited", role = c("ctb", "cph"),
+    comment = "DataTables library"),
+    person("John", "Fraser", role = c("ctb", "cph"),
+    comment = "showdown.js library"),
+    person("John", "Gruber", role = c("ctb", "cph"),
+    comment = "showdown.js library"),
+    person("Ivan", "Sagalaev", role = c("ctb", "cph"),
+    comment = "highlight.js library"),
+    person(family = "R Core Team", role = c("ctb", "cph"),
+    comment = "tar implementation from R")
+    )
 Description: Shiny makes it incredibly easy to build interactive web
     applications with R. Automatic "reactive" binding between inputs and
     outputs and extensive pre-built widgets make it possible to build
     beautiful, responsive, and powerful applications with minimal effort.
-License: GPL-3
+License: GPL-3 | file LICENSE
 Depends:
     R (>= 3.0.0)
 Imports:

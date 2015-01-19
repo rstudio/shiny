@@ -1,4 +1,4 @@
-shiny 0.10.2.9xxx
+shiny 0.11
 --------------------------------------------------------------------------------
 
 * Changed sliders from jquery-slider to ion.rangeSlider. These sliders have

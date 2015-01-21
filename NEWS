@@ -1,3 +1,9 @@
+shiny 0.11.0.9xxx
+--------------------------------------------------------------------------------
+
+* Switched from RJSONIO to jsonlite. This improves consistency and speed when
+  converting between R data structures and JSON.
+
 shiny 0.11
 --------------------------------------------------------------------------------
 

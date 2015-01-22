@@ -84,7 +84,7 @@
 \item{sendCustomMessage(type, message)}{
   Sends a custom message to the web page. \code{type} must be a
   single-element character vector giving the type of message, while
-  \code{message} can be any RJSONIO-encodable value. Custom messages
+  \code{message} can be any jsonlite-encodable value. Custom messages
   have no meaning to Shiny itself; they are used soley to convey information
   to custom JavaScript logic in the browser. You can do this by adding
   JavaScript code to the browser that calls

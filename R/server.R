@@ -9,7 +9,7 @@ inputHandlers <- Map$new()
 #'
 #' Adds an input handler for data of this type. When called, Shiny will use the
 #' function provided to refine the data passed back from the client (after being
-#' deserialized by RJSONIO) before making it available in the \code{input}
+#' deserialized by jsonlite) before making it available in the \code{input}
 #' variable of the \code{server.R} file.
 #'
 #' This function will register the handler for the duration of the R process
@@ -31,7 +31,7 @@ inputHandlers <- Map$new()
 #'   parameters:
 #'    \enumerate{
 #'      \item{The value of this input as provided by the client, deserialized
-#'      using RJSONIO.}
+#'      using jsonlite.}
 #'      \item{The \code{shinysession} in which the input exists.}
 #'      \item{The name of the input.}
 #'    }
@@ -64,7 +64,7 @@ registerInputHandler <- function(type, fun, force=FALSE){
 #' Deregister an Input Handler
 #'
 #' Removes an Input Handler. Rather than using the previously specified handler
-#' for data of this type, the default RJSONIO serialization will be used.
+#' for data of this type, the default jsonlite serialization will be used.
 #'
 #' @param type The type for which handlers should be removed.
 #' @return The handler previously associated with this \code{type}, if one

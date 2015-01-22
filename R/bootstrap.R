@@ -1794,35 +1794,36 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 #'
 #' @seealso \code{\link{renderTable}}, \code{\link{renderDataTable}}.
 #' @examples
-#' \donttest{
-#' # table example
-#' shinyApp(
-#'   ui = fluidPage(
-#'     fluidRow(
-#'       column(12,
-#'         tableOutput('table')
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   # table example
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       fluidRow(
+#'         column(12,
+#'           tableOutput('table')
+#'         )
 #'       )
-#'     )
-#'   ),
-#'   server = function(input, output) {
-#'     output$table <- renderTable(iris)
-#'   }
-#' )
+#'     ),
+#'     server = function(input, output) {
+#'       output$table <- renderTable(iris)
+#'     }
+#'   )
 #'
 #'
-#' # DataTables example
-#' shinyApp(
-#'   ui = fluidPage(
-#'     fluidRow(
-#'       column(12,
-#'         dataTableOutput('table')
+#'   # DataTables example
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       fluidRow(
+#'         column(12,
+#'           dataTableOutput('table')
+#'         )
 #'       )
-#'     )
-#'   ),
-#'   server = function(input, output) {
-#'     output$table <- renderDataTable(iris)
-#'   }
-#' )
+#'     ),
+#'     server = function(input, output) {
+#'       output$table <- renderDataTable(iris)
+#'     }
+#'   )
 #' }
 #' @export
 tableOutput <- function(outputId) {

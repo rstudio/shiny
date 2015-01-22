@@ -22,35 +22,36 @@ application page. \code{renderTable} uses a standard HTML table, while
 interactive table with more features.
 }
 \examples{
-\donttest{
-# table example
-shinyApp(
-  ui = fluidPage(
-    fluidRow(
-      column(12,
-        tableOutput('table')
+## Only run this example in interactive R sessions
+if (interactive()) {
+  # table example
+  shinyApp(
+    ui = fluidPage(
+      fluidRow(
+        column(12,
+          tableOutput('table')
+        )
       )
-    )
-  ),
-  server = function(input, output) {
-    output$table <- renderTable(iris)
-  }
-)
+    ),
+    server = function(input, output) {
+      output$table <- renderTable(iris)
+    }
+  )
 
 
-# DataTables example
-shinyApp(
-  ui = fluidPage(
-    fluidRow(
-      column(12,
-        dataTableOutput('table')
+  # DataTables example
+  shinyApp(
+    ui = fluidPage(
+      fluidRow(
+        column(12,
+          dataTableOutput('table')
+        )
       )
-    )
-  ),
-  server = function(input, output) {
-    output$table <- renderDataTable(iris)
-  }
-)
+    ),
+    server = function(input, output) {
+      output$table <- renderDataTable(iris)
+    }
+  )
 }
 }
 \seealso{

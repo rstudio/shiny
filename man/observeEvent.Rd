@@ -122,31 +122,32 @@ the action/calculation and just let the user re-initiate it (like a
 "Recalculate" button).
 }
 \examples{
-\donttest{
-ui <- fluidPage(
-  column(4,
-    numericInput("x", "Value", 5),
-    br(),
-    actionButton("button", "Show")
-  ),
-  column(8, tableOutput("table"))
-)
-server <- function(input, output) {
-  # Take an action every time button is pressed;
-  # here, we just print a message to the console
-  observeEvent(input$button, function() {
-    cat("Showing", input$x, "rows\\n")
-  })
-  # Take a reactive dependency on input$button, but
-  # not on any of the stuff inside the function
-  df <- eventReactive(input$button, function() {
-    head(cars, input$x)
-  })
-  output$table <- renderTable({
-    df()
-  })
-}
-shinyApp(ui=ui, server=server)
+## Only run this example in interactive R sessions
+if (interactive()) {
+  ui <- fluidPage(
+    column(4,
+      numericInput("x", "Value", 5),
+      br(),
+      actionButton("button", "Show")
+    ),
+    column(8, tableOutput("table"))
+  )
+  server <- function(input, output) {
+    # Take an action every time button is pressed;
+    # here, we just print a message to the console
+    observeEvent(input$button, function() {
+      cat("Showing", input$x, "rows\\n")
+    })
+    # Take a reactive dependency on input$button, but
+    # not on any of the stuff inside the function
+    df <- eventReactive(input$button, function() {
+      head(cars, input$x)
+    })
+    output$table <- renderTable({
+      df()
+    })
+  }
+  shinyApp(ui=ui, server=server)
 }
 }
 \seealso{

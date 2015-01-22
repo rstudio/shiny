@@ -39,30 +39,31 @@ Any arguments with NULL values will be ignored; they will not result in any
 changes to the input object on the client.
 }
 \examples{
-\donttest{
-shinyApp(
-  ui = fluidPage(
-    sidebarLayout(
-      sidebarPanel(
-        p("The first slider controls the second"),
-        slider2Input("control", "Controller:", min=0, max=20, value=10,
-                     step=1),
-        slider2Input("receive", "Receiver:", min=0, max=20, value=10,
-                     step=1)
-      ),
-      mainPanel()
-    )
-  ),
-  server = function(input, output, session) {
-    observe({
-      val <- input$control
-      # Control the value, min, max, and step.
-      # Step size is 2 when input value is even; 1 when value is odd.
-      updateSliderInput(session, "receive", value = val,
-        min = floor(val/2), max = val+4, step = (val+1)\%\%2 + 1)
-    })
-  }
-)
+## Only run this example in interactive R sessions
+if (interactive()) {
+  shinyApp(
+    ui = fluidPage(
+      sidebarLayout(
+        sidebarPanel(
+          p("The first slider controls the second"),
+          slider2Input("control", "Controller:", min=0, max=20, value=10,
+                       step=1),
+          slider2Input("receive", "Receiver:", min=0, max=20, value=10,
+                       step=1)
+        ),
+        mainPanel()
+      )
+    ),
+    server = function(input, output, session) {
+      observe({
+        val <- input$control
+        # Control the value, min, max, and step.
+        # Step size is 2 when input value is even; 1 when value is odd.
+        updateSliderInput(session, "receive", value = val,
+          min = floor(val/2), max = val+4, step = (val+1)\%\%2 + 1)
+      })
+    }
+  )
 }
 }
 \seealso{

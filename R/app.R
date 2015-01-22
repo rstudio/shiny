@@ -31,32 +31,33 @@
 #'   to \code{\link{runApp}} will run the app.
 #'
 #' @examples
-#' \donttest{
-#' shinyApp(
-#'   ui = fluidPage(
-#'     numericInput("n", "n", 1),
-#'     plotOutput("plot")
-#'   ),
-#'   server = function(input, output) {
-#'     output$plot <- renderPlot( plot(head(cars, input$n)) )
-#'   }
-#' )
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       numericInput("n", "n", 1),
+#'       plotOutput("plot")
+#'     ),
+#'     server = function(input, output) {
+#'       output$plot <- renderPlot( plot(head(cars, input$n)) )
+#'     }
+#'   )
 #'
-#' shinyAppDir(system.file("examples/01_hello", package="shiny"))
+#'   shinyAppDir(system.file("examples/01_hello", package="shiny"))
 #'
 #'
-#' # The object can be passed to runApp()
-#' app <- shinyApp(
-#'   ui = fluidPage(
-#'     numericInput("n", "n", 1),
-#'     plotOutput("plot")
-#'   ),
-#'   server = function(input, output) {
-#'     output$plot <- renderPlot( plot(head(cars, input$n)) )
-#'   }
-#' )
+#'   # The object can be passed to runApp()
+#'   app <- shinyApp(
+#'     ui = fluidPage(
+#'       numericInput("n", "n", 1),
+#'       plotOutput("plot")
+#'     ),
+#'     server = function(input, output) {
+#'       output$plot <- renderPlot( plot(head(cars, input$n)) )
+#'     }
+#'   )
 #'
-#' runApp(app)
+#'   runApp(app)
 #' }
 #'
 #' @export

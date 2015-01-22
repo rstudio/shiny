@@ -18,12 +18,13 @@
 #'   \code{port} and \code{launch.browser}.
 #' @export
 #' @examples
-#' \donttest{
-#' runUrl('https://github.com/rstudio/shiny_example/archive/master.tar.gz')
+#' ## Only run this example in interactive R sessions
+#'   if (interactive()) {
+#'   runUrl('https://github.com/rstudio/shiny_example/archive/master.tar.gz')
 #'
-#' # Can run an app from a subdirectory in the archive
-#' runUrl("https://github.com/rstudio/shiny_example/archive/master.zip",
-#'  subdir = "inst/shinyapp/")
+#'   # Can run an app from a subdirectory in the archive
+#'   runUrl("https://github.com/rstudio/shiny_example/archive/master.zip",
+#'     subdir = "inst/shinyapp/")
 #' }
 runUrl <- function(url, filetype = NULL, subdir = NULL, ...) {
 
@@ -80,12 +81,13 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, ...) {
 #'   all valid values.
 #' @export
 #' @examples
-#' \donttest{
-#' runGist(3239667)
-#' runGist("https://gist.github.com/jcheng5/3239667")
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   runGist(3239667)
+#'   runGist("https://gist.github.com/jcheng5/3239667")
 #'
-#' # Old URL format without username
-#' runGist("https://gist.github.com/3239667")
+#'   # Old URL format without username
+#'   runGist("https://gist.github.com/3239667")
 #' }
 #'
 runGist <- function(gist, ...) {
@@ -110,12 +112,13 @@ runGist <- function(gist, ...) {
 #'   Defaults to \code{"master"}.
 #' @export
 #' @examples
-#' \donttest{
-#' runGitHub("shiny_example", "rstudio")
-#' # or runGitHub("rstudio/shiny_example")
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   runGitHub("shiny_example", "rstudio")
+#'   # or runGitHub("rstudio/shiny_example")
 #'
-#' # Can run an app from a subdirectory in the repo
-#' runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
+#'   # Can run an app from a subdirectory in the repo
+#'   runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
 #' }
 runGitHub <- function(repo, username = getOption("github.user"),
                       ref = "master", subdir = NULL, ...) {

@@ -578,31 +578,31 @@ serviceApp <- function() {
 #' runApp("myapp")
 #' }
 #'
-#' \donttest{
-#' # Apps can be run without a server.r and ui.r file
-#' runApp(list(
-#'   ui = bootstrapPage(
-#'     numericInput('n', 'Number of obs', 100),
-#'     plotOutput('plot')
-#'   ),
-#'   server = function(input, output) {
-#'     output$plot <- renderPlot({ hist(runif(input$n)) })
-#'   }
-#' ))
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   # Apps can be run without a server.r and ui.r file
+#'   runApp(list(
+#'     ui = bootstrapPage(
+#'       numericInput('n', 'Number of obs', 100),
+#'       plotOutput('plot')
+#'     ),
+#'     server = function(input, output) {
+#'       output$plot <- renderPlot({ hist(runif(input$n)) })
+#'     }
+#'   ))
 #'
 #'
-#' # Running a Shiny app object
-#' app <- shinyApp(
-#'   ui = bootstrapPage(
-#'     numericInput('n', 'Number of obs', 100),
-#'     plotOutput('plot')
-#'   ),
-#'   server = function(input, output) {
-#'     output$plot <- renderPlot({ hist(runif(input$n)) })
-#'   }
-#' )
-#'
-#' runApp(app)
+#'   # Running a Shiny app object
+#'   app <- shinyApp(
+#'     ui = bootstrapPage(
+#'       numericInput('n', 'Number of obs', 100),
+#'       plotOutput('plot')
+#'     ),
+#'     server = function(input, output) {
+#'       output$plot <- renderPlot({ hist(runif(input$n)) })
+#'     }
+#'   )
+#'   runApp(app)
 #' }
 #' @export
 runApp <- function(appDir=getwd(),
@@ -776,15 +776,16 @@ stopApp <- function(returnValue = NULL) {
 #'   code or commentary.
 #'
 #' @examples
-#' \donttest{
-#' # List all available examples
-#' runExample()
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   # List all available examples
+#'   runExample()
 #'
-#' # Run one of the examples
-#' runExample("01_hello")
+#'   # Run one of the examples
+#'   runExample("01_hello")
 #'
-#' # Print the directory containing the code for all examples
-#' system.file("examples", package="shiny")
+#'   # Print the directory containing the code for all examples
+#'   system.file("examples", package="shiny")
 #' }
 #' @export
 runExample <- function(example=NA,

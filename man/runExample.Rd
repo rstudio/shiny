@@ -31,15 +31,16 @@ to the \code{shiny.host} option, if set, or \code{"127.0.0.1"} if not.}
 Launch Shiny example applications, and optionally, your system's web browser.
 }
 \examples{
-\donttest{
-# List all available examples
-runExample()
+## Only run this example in interactive R sessions
+if (interactive()) {
+  # List all available examples
+  runExample()
 
-# Run one of the examples
-runExample("01_hello")
+  # Run one of the examples
+  runExample("01_hello")
 
-# Print the directory containing the code for all examples
-system.file("examples", package="shiny")
+  # Print the directory containing the code for all examples
+  system.file("examples", package="shiny")
 }
 }
 

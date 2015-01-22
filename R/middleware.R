@@ -21,7 +21,7 @@ httpResponse <- function(status = 200,
   # Make sure it's a list, not a vector
   headers <- as.list(headers)
   if (is.null(headers$`X-UA-Compatible`))
-    headers$`X-UA-Compatible` <- "chrome=1"
+    headers$`X-UA-Compatible` <- "IE=edge,chrome=1"
   resp <- list(status = status, content_type = content_type, content = content,
                headers = headers)
   class(resp) <- 'httpResponse'

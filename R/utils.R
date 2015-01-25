@@ -446,7 +446,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 
 #' Parse a GET query string from a URL
 #'
-#' Returns a named character vector of key-value pairs.
+#' Returns a named list of key-value pairs.
 #'
 #' @param str The query string. It can have a leading \code{"?"} or not.
 #' @param nested Whether to parse the query string of as a nested list when it

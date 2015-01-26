@@ -1386,7 +1386,9 @@
         dependencies = data.deps;
       }
 
-      exports.renderHtml(html, el, dependencies);
+      var replace = $(el).hasClass('shiny-html-replace-output');
+
+      exports.renderHtml(html, el, dependencies, replace);
       exports.initializeInputs(el);
       exports.bindAll(el);
     }
@@ -1402,9 +1404,9 @@
   };
 
   // Render HTML in a DOM element, inserting singletons into head as needed
-  exports.renderHtml = function(html, el, dependencies) {
+  exports.renderHtml = function(html, el, dependencies, replace) {
     renderDependencies(dependencies);
-    return singletons.renderHtml(html, el);
+    return singletons.renderHtml(html, el, replace);
   };
 
   function asArray(value) {
@@ -1486,11 +1488,36 @@
 
   var singletons = {
     knownSingletons: {},
-    renderHtml: function(html, el) {
+    renderHtml: function(html, el, replace) {
+      if (replace === undefined)
+        replace = false;
+
       var processed = this._processHtml(html);
       this._addToHead(processed.head);
       this.register(processed.singletons);
-      $(el).html(processed.html);
+
+      if (replace) {
+        var newHTML = $.parseHTML(processed.html);
+
+        // Make sure newHTML is a single element, and is wrapped in a tag (not
+        // bare text). It needs these properties to replace the original DOM
+        // element. If not, use the non-replace code path.
+        if (newHTML.length === 1 && $(newHTML).prop('tagName') !== undefined) {
+
+          // Replace target DOM node with the new HTML
+          $(newHTML).addClass("shiny-html-output shiny-html-replace-output")
+            .attr("id", el.id);
+          $(el).replaceWith(newHTML);
+
+        } else {
+          replace = false;
+        }
+      }
+
+      if (!replace) {
+        // Put new content inside of DOM element.
+        $(el).html(processed.html);
+      }
       return processed;
     },
     // Take an object where keys are names of singletons, and merges it into

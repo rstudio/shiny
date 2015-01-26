@@ -5,29 +5,75 @@
 \alias{uiOutput}
 \title{Create an HTML output element}
 \usage{
-htmlOutput(outputId, inline = FALSE)
+htmlOutput(outputId, inline = FALSE, replace = FALSE)
 
-uiOutput(outputId, inline = FALSE)
+uiOutput(outputId, inline = FALSE, replace = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the value from}
 
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}
+
+\item{replace}{Should the DOM element be replaced with the output of
+\code{renderUI}?.}
 }
 \value{
 An HTML output element that can be included in a panel
 }
 \description{
-Render a reactive output variable as HTML within an application page. The
-text will be included within an HTML \code{div} tag, and is presumed to
-contain HTML content which should not be escaped.
+Render a reactive output variable as HTML within an application page. By
+default, the text will be included within an HTML \code{div} tag, and is
+presumed to contain HTML content which should not be escaped.
 }
 \details{
-\code{uiOutput} is intended to be used with \code{renderUI} on the
-server side. It is currently just an alias for \code{htmlOutput}.
+If \code{replace} is set to \code{FALSE} (the default), the output of
+\code{renderUI} will be put inside the DOM element (a div or span). If it is
+set to \code{TRUE}, then the output of \code{renderUI} will replace the DOM
+element. Sometimes it is necessary to use \code{replace=TRUE}. For example,
+if you have dynamic \code{li} content, it should be directly beneath a
+\code{ul} in the DOM tree; there should not be an intervening \code{div}, and
+if one is present, it may interfere with CSS selectors.
+
+When \code{replace=TRUE}, \code{renderUI} must return a single tag object for
+replacement to occur; if it returns a list of tags or bare text, then
+replacement isn't possible, and the content will be placed inside the DOM
+element, as though \code{replace=FALSE}.
+
+\code{uiOutput} is intended to be used with \code{renderUI} on the server
+side. It is currently just an alias for \code{htmlOutput}.
 }
 \examples{
 htmlOutput("summary")
+
+\donttest{
+shinyApp(
+  ui = bootstrapPage(
+    sliderInput("n", "N", 10, 100, 50),
+    uiOutput("summary")
+  ),
+  server = function(input, output) {
+    output$summary <- renderUI(
+      h2("Value of n: ", input$n)
+    )
+  }
+)
+
+# An example where replace=TRUE is useful; without it, the <li> won't get
+# the correct styling.
+shinyApp(
+  ui = bootstrapPage(
+    # Each li should be red
+    tags$head(tags$style(HTML("ul > li { color: red; }"))),
+    tags$ul(
+      tags$li("static item"),
+      uiOutput("item", replace = TRUE)
+    )
+  ),
+  server = function(input, output) {
+    output$item <- renderUI(tags$li("dynamic item"))
+  }
+)
+}
 }
 

@@ -1858,18 +1858,26 @@ dataTableOutput <- function(outputId) {
 #' text will be included within an HTML \code{div} tag, and is presumed to
 #' contain HTML content which should not be escaped.
 #'
-#' \code{uiOutput} is intended to be used with \code{renderUI} on the
-#' server side. It is currently just an alias for \code{htmlOutput}.
+#' \code{uiOutput} is intended to be used with \code{renderUI} on the server
+#' side. It is currently just an alias for \code{htmlOutput}.
 #'
 #' @param outputId output variable to read the value from
+#' @param ... Other arguments to pass to the container tag function. This is
+#'   useful for providing additional classes for the tag.
 #' @inheritParams textOutput
 #' @return An HTML output element that can be included in a panel
 #' @examples
 #' htmlOutput("summary")
+#'
+#' # Using a custom container and class
+#' tags$ul(
+#'   htmlOutput("summary", container = tags$li, class = "custom-li-output")
+#' )
 #' @export
-htmlOutput <- function(outputId, inline = FALSE) {
-  container <- if (inline) span else div
-  container(id = outputId, class="shiny-html-output")
+htmlOutput <- function(outputId, inline = FALSE,
+  container = if (inline) span else div, ...)
+{
+  container(id = outputId, class="shiny-html-output", ...)
 }
 
 #' @rdname htmlOutput

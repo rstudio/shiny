@@ -181,3 +181,8 @@ table.data td[align=right] {
 .well .shiny-input-container {
   width: auto;
 }
+
+/* Width of non-selectize select inputs */
+.shiny-input-container > div > select:not(.selectized) {
+  width: 100%;
+}

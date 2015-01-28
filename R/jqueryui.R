@@ -97,8 +97,8 @@ fixedPanel <- function(...,
                        top = NULL, left = NULL, right = NULL, bottom = NULL,
                        width = NULL, height = NULL,
                        draggable = FALSE,
-                       cursor = c('move', 'default', 'inherit')) {
+                       cursor = c('auto', 'move', 'default', 'inherit')) {
   absolutePanel(..., top=top, left=left, right=right, bottom=bottom,
-                width=width, height=height, draggable=draggable, cursor=cursor,
+                width=width, height=height, draggable=draggable, cursor=match.arg(cursor),
                 fixed=TRUE)
 }

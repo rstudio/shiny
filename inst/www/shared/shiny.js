@@ -2378,7 +2378,6 @@
         control.destroy();
         control = $el.selectize(settings)[0].selectize;
       }
-      $el.next('div.selectize-control').css('width', config.data('width'));
       return control;
     }
   });

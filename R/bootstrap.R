@@ -800,13 +800,14 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   # return label and select tag
   res <- div(
     class = "form-group shiny-input-container",
+    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width)),
     controlLabel(inputId, label),
     div(selectTag)
   )
 
   if (!selectize) return(res)
 
-  selectizeIt(inputId, res, NULL, width, nonempty = !multiple && !("" %in% choices))
+  selectizeIt(inputId, res, NULL, nonempty = !multiple && !("" %in% choices))
 }
 
 firstChoice <- function(choices) {
@@ -865,11 +866,15 @@ needOptgroup <- function(choices) {
 #'   \code{selectInput(..., selectize = FALSE)}.
 #' @export
 selectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
-  selectizeIt(inputId, selectInput(inputId, ..., selectize = FALSE), options, width)
+  selectizeIt(
+    inputId,
+    selectInput(inputId, ..., selectize = FALSE, width = width),
+    options
+  )
 }
 
 # given a select input and its id, selectize it
-selectizeIt <- function(inputId, select, options, width = NULL, nonempty = FALSE) {
+selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
   res <- checkAsIs(options)
 
   selectizeDep <- htmlDependency(
@@ -890,7 +895,6 @@ selectizeIt <- function(inputId, select, options, width = NULL, nonempty = FALSE
       type = 'application/json',
       `data-for` = inputId, `data-nonempty` = if (nonempty) '',
       `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
-      `data-width` = validateCssUnit(width),
       if (length(res$options)) HTML(toJSON(res$options)) else '{}'
     )
   )

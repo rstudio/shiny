@@ -1,6 +1,13 @@
 shiny 0.11.0.9xxx
 --------------------------------------------------------------------------------
 
+* Sliders problems in IE 11 and Chrome 40.0.2214.93 m (Windows) have been
+  fixed. (#700)
+
+* Sliders now work correctly with draggable panels. (#711)
+
+* Fixed arguments in `fixedPanel`. (#709)
+
 * Switched from RJSONIO to jsonlite. This improves consistency and speed when
   converting between R data structures and JSON.
 

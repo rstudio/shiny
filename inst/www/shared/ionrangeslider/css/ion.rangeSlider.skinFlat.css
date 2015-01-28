@@ -1,5 +1,5 @@
 /* Ion.RangeSlider, Flat UI Skin
-// css version 2.0.0
+// css version 2.0.3
 // © Denis Ineshin, 2014    https://github.com/IonDen
 // ===================================================================================================================*/
 
@@ -61,7 +61,7 @@
     top: 22px;
     background-position: 0 -120px;
 }
-#irs-active-slider, .irs-slider:hover {
+.irs-slider.state_hover, .irs-slider:hover {
     background-position: 0 -150px;
 }
 

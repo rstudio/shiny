@@ -1,5 +1,5 @@
 /* Ion.RangeSlider
-// css version 2.0.2
+// css version 2.0.3
 // © 2013-2014 Denis Ineshin | IonDen.com
 // ===================================================================================================================*/
 
@@ -119,11 +119,14 @@
     background: rgba(0,0,0,0.0);
     z-index: 2;
 }
+.lt-ie9 .irs-disable-mask {
+    background: #000;
+    filter: alpha(opacity=0);
+    cursor: not-allowed;
+}
+
 .irs-disabled {
     opacity: 0.4;
-}
-.lt-ie9 .irs-disabled {
-    filter: alpha(opacity=40);
 }
 
 

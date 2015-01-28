@@ -1,5 +1,5 @@
 ﻿// Ion.RangeSlider
-// version 2.0.2 Build: 287
+// version 2.0.3 Build: 293
 // © Denis Ineshin, 2014    https://github.com/IonDen
 //
 // Project page:    http://ionden.com/a/plugins/ion.rangeSlider/en.html
@@ -31,12 +31,6 @@
         }
         return false;
     } ());
-
-    // Add an explicit check for the qt class (set by shiny), so that the qt
-    // window is not mistakenly treated as a touch device.
-    var is_touch = !($(document.documentElement).hasClass('qt')) &&
-                    (('ontouchstart' in window) || (navigator.msMaxTouchPoints > 0));
-
 
     // IE8 fix
     if (!Function.prototype.bind) {
@@ -116,7 +110,7 @@
     // Core
 
     var IonRangeSlider = function (input, options, plugin_count) {
-        this.VERSION = "2.0.2";
+        this.VERSION = "2.0.3";
         this.input = input;
         this.plugin_count = plugin_count;
         this.current_plugin = 0;
@@ -414,8 +408,10 @@
 
             if (this.options.disable) {
                 this.appendDisableMask();
+                this.$cache.input[0].disabled = true;
             } else {
                 this.$cache.cont.removeClass("irs-disabled");
+                this.$cache.input[0].disabled = false;
                 this.bindEvents();
             }
         },
@@ -431,21 +427,15 @@
 
             this.$cache.line.off("keydown.irs_" + this.plugin_count);
 
-            if (is_touch) {
+            this.$cache.body.off("touchmove.irs_" + this.plugin_count);
+            this.$cache.body.off("mousemove.irs_" + this.plugin_count);
 
-                this.$cache.body.off("touchmove.irs_" + this.plugin_count);
-                this.$cache.win.off("touchend.irs_" + this.plugin_count);
+            this.$cache.win.off("touchend.irs_" + this.plugin_count);
+            this.$cache.win.off("mouseup.irs_" + this.plugin_count);
 
-            } else {
-
-                this.$cache.body.off("mousemove.irs_" + this.plugin_count);
-                this.$cache.win.off("mouseup.irs_" + this.plugin_count);
-
-                if (is_old_ie) {
-                    this.$cache.body.off("mouseup.irs_" + this.plugin_count);
-                    this.$cache.body.off("mouseleave.irs_" + this.plugin_count);
-                }
-
+            if (is_old_ie) {
+                this.$cache.body.off("mouseup.irs_" + this.plugin_count);
+                this.$cache.body.off("mouseleave.irs_" + this.plugin_count);
             }
 
             this.$cache.grid_labels = [];
@@ -458,62 +448,48 @@
         },
 
         bindEvents: function () {
-            if (is_touch) {
+            this.$cache.body.on("touchmove.irs_" + this.plugin_count, this.pointerMove.bind(this));
+            this.$cache.body.on("mousemove.irs_" + this.plugin_count, this.pointerMove.bind(this));
 
-                this.$cache.body.on("touchmove.irs_" + this.plugin_count, this.pointerMove.bind(this));
-                this.$cache.win.on("touchend.irs_" + this.plugin_count, this.pointerUp.bind(this));
+            this.$cache.win.on("touchend.irs_" + this.plugin_count, this.pointerUp.bind(this));
+            this.$cache.win.on("mouseup.irs_" + this.plugin_count, this.pointerUp.bind(this));
 
-                this.$cache.line.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
+            this.$cache.line.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
+            this.$cache.line.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
 
-                if (this.options.drag_interval && this.options.type === "double") {
-                    this.$cache.bar.on("touchstart.irs_" + this.plugin_count, this.pointerDown.bind(this, "both"));
-                } else {
-                    this.$cache.bar.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
-                }
-
-                if (this.options.type === "single") {
-                    this.$cache.s_single.on("touchstart.irs_" + this.plugin_count, this.pointerDown.bind(this, "single"));
-                    this.$cache.shad_single.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
-                } else {
-                    this.$cache.s_from.on("touchstart.irs_" + this.plugin_count, this.pointerDown.bind(this, "from"));
-                    this.$cache.s_to.on("touchstart.irs_" + this.plugin_count, this.pointerDown.bind(this, "to"));
-                    this.$cache.shad_from.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
-                    this.$cache.shad_to.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
-                }
-
+            if (this.options.drag_interval && this.options.type === "double") {
+                this.$cache.bar.on("touchstart.irs_" + this.plugin_count, this.pointerDown.bind(this, "both"));
+                this.$cache.bar.on("mousedown.irs_" + this.plugin_count, this.pointerDown.bind(this, "both"));
             } else {
+                this.$cache.bar.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
+                this.$cache.bar.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
+            }
 
-                if (this.options.keyboard) {
-                    this.$cache.line.on("keydown.irs_" + this.plugin_count, this.key.bind(this, "keyboard"));
-                }
+            if (this.options.type === "single") {
+                this.$cache.s_single.on("touchstart.irs_" + this.plugin_count, this.pointerDown.bind(this, "single"));
+                this.$cache.shad_single.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
 
-                this.$cache.body.on("mousemove.irs_" + this.plugin_count, this.pointerMove.bind(this));
-                this.$cache.win.on("mouseup.irs_" + this.plugin_count, this.pointerUp.bind(this));
+                this.$cache.s_single.on("mousedown.irs_" + this.plugin_count, this.pointerDown.bind(this, "single"));
+                this.$cache.shad_single.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
+            } else {
+                this.$cache.s_from.on("touchstart.irs_" + this.plugin_count, this.pointerDown.bind(this, "from"));
+                this.$cache.s_to.on("touchstart.irs_" + this.plugin_count, this.pointerDown.bind(this, "to"));
+                this.$cache.shad_from.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
+                this.$cache.shad_to.on("touchstart.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
 
-                if (is_old_ie) {
-                    this.$cache.body.on("mouseup.irs_" + this.plugin_count, this.pointerUp.bind(this));
-                    this.$cache.body.on("mouseleave.irs_" + this.plugin_count, this.pointerUp.bind(this));
-                }
+                this.$cache.s_from.on("mousedown.irs_" + this.plugin_count, this.pointerDown.bind(this, "from"));
+                this.$cache.s_to.on("mousedown.irs_" + this.plugin_count, this.pointerDown.bind(this, "to"));
+                this.$cache.shad_from.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
+                this.$cache.shad_to.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
+            }
 
-                this.$cache.line.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
+            if (this.options.keyboard) {
+                this.$cache.line.on("keydown.irs_" + this.plugin_count, this.key.bind(this, "keyboard"));
+            }
 
-                if (this.options.drag_interval && this.options.type === "double") {
-                    this.$cache.bar.on("mousedown.irs_" + this.plugin_count, this.pointerDown.bind(this, "both"));
-                } else {
-                    this.$cache.bar.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
-                }
-
-
-                if (this.options.type === "single") {
-                    this.$cache.s_single.on("mousedown.irs_" + this.plugin_count, this.pointerDown.bind(this, "single"));
-                    this.$cache.shad_single.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
-                } else {
-                    this.$cache.s_from.on("mousedown.irs_" + this.plugin_count, this.pointerDown.bind(this, "from"));
-                    this.$cache.s_to.on("mousedown.irs_" + this.plugin_count, this.pointerDown.bind(this, "to"));
-                    this.$cache.shad_from.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
-                    this.$cache.shad_to.on("mousedown.irs_" + this.plugin_count, this.pointerClick.bind(this, "click"));
-                }
-
+            if (is_old_ie) {
+                this.$cache.body.on("mouseup.irs_" + this.plugin_count, this.pointerUp.bind(this));
+                this.$cache.body.on("mouseleave.irs_" + this.plugin_count, this.pointerUp.bind(this));
             }
         },
 
@@ -521,8 +497,9 @@
             if (!this.dragging) {
                 return;
             }
-            var e_base = is_touch ? e.originalEvent.touches[0] : e;
-            this.coords.x_pointer = e_base.pageX - this.coords.x_gap;
+
+            var x = e.pageX || e.originalEvent.touches && e.originalEvent.touches[0].pageX;
+            this.coords.x_pointer = x - this.coords.x_gap;
 
             this.calc();
         },
@@ -545,6 +522,8 @@
                 this.options.onFinish(this.result);
             }
 
+            this.$cache.cont.find(".state_hover").removeClass("state_hover");
+
             this.force_redraw = true;
             this.dragging = false;
 
@@ -555,7 +534,8 @@
 
         pointerDown: function (target, e) {
             e.preventDefault();
-            var e_base = is_touch ? e.originalEvent.touches[0] : e;
+            e.stopPropagation();
+            var x = e.pageX || e.originalEvent.touches && e.originalEvent.touches[0].pageX;
             if (e.button === 2) {
                 return;
             }
@@ -567,7 +547,7 @@
             this.dragging = true;
 
             this.coords.x_gap = this.$cache.rs.offset().left;
-            this.coords.x_pointer = e_base.pageX - this.coords.x_gap;
+            this.coords.x_pointer = x - this.coords.x_gap;
 
             this.calcPointer();
 
@@ -577,11 +557,13 @@
                     break;
                 case "from":
                     this.coords.p_gap = this.toFixed(this.coords.p_pointer - this.coords.p_from);
+                    this.$cache.s_from.addClass("state_hover");
                     this.$cache.s_from.addClass("type_last");
                     this.$cache.s_to.removeClass("type_last");
                     break;
                 case "to":
                     this.coords.p_gap = this.toFixed(this.coords.p_pointer - this.coords.p_to);
+                    this.$cache.s_to.addClass("state_hover");
                     this.$cache.s_to.addClass("type_last");
                     this.$cache.s_from.removeClass("type_last");
                     break;
@@ -602,7 +584,8 @@
 
         pointerClick: function (target, e) {
             e.preventDefault();
-            var e_base = is_touch ? e.originalEvent.touches[0] : e;
+            e.stopPropagation();
+            var x = e.pageX || e.originalEvent.touches && e.originalEvent.touches[0].pageX;
             if (e.button === 2) {
                 return;
             }
@@ -612,7 +595,7 @@
 
             this.is_click = true;
             this.coords.x_gap = this.$cache.rs.offset().left;
-            this.coords.x_pointer = +(e_base.pageX - this.coords.x_gap).toFixed();
+            this.coords.x_pointer = +(x - this.coords.x_gap).toFixed();
 
             this.force_redraw = true;
             this.calc();
@@ -663,6 +646,10 @@
         },
 
         setMinMax: function () {
+            if (!this.options) {
+                return;
+            }
+
             if (this.options.hide_min_max) {
                 this.$cache.min[0].style.display = "none";
                 this.$cache.max[0].style.display = "none";
@@ -687,6 +674,10 @@
         // Calculations
 
         calc: function (update) {
+            if (!this.options) {
+                return;
+            }
+
             this.calc_count++;
 
             if (this.calc_count === 10 || update) {
@@ -906,6 +897,10 @@
         // Drawings
 
         updateScene: function () {
+            if (!this.options) {
+                return;
+            }
+
             this.drawHandles();
 
             this.raf_id = requestAnimationFrame(this.updateScene.bind(this));
@@ -913,6 +908,10 @@
 
         drawHandles: function () {
             this.coords.w_rs = this.$cache.rs.outerWidth(false);
+
+            if (!this.coords.w_rs) {
+                return;
+            }
 
             if (this.coords.w_rs !== this.coords.w_rs_old) {
                 this.target = "base";
@@ -1011,6 +1010,10 @@
         },
 
         drawLabels: function () {
+            if (!this.options) {
+                return;
+            }
+
             var values_num = this.options.values.length,
                 p_values = this.options.p_values,
                 text_single,
@@ -1744,6 +1747,10 @@
 
         update: function (options) {
             this.is_update = true;
+
+            this.options.from = this.result.from;
+            this.options.to = this.result.to;
+
             this.options = $.extend(this.options, options);
             this.validate();
             this.updateResult(options);

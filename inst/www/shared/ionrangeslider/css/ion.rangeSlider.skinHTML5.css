@@ -1,5 +1,5 @@
 /* Ion.RangeSlider, Simple Skin
-// css version 2.0.0
+// css version 2.0.3
 // © Denis Ineshin, 2014    https://github.com/IonDen
 // © guybowden, 2014        https://github.com/guybowden
 // ===================================================================================================================*/
@@ -72,7 +72,7 @@
     cursor: pointer;
 }
 
-#irs-active-slider, .irs-slider:hover {
+.irs-slider.state_hover, .irs-slider:hover {
     background: #FFF;
 }
 

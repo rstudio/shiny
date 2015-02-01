@@ -11,6 +11,11 @@ shiny 0.11.0.9xxx
 * Switched from RJSONIO to jsonlite. This improves consistency and speed when
   converting between R data structures and JSON.
 
+* downloadHandler content callback functions are now invoked with a temp file
+  name that has the same extension as the final filename that will be used by
+  the download. This is to deal with the fact that some file writing functions
+  in R will auto-append the extension for their file type (pdf, zip).
+
 shiny 0.11
 --------------------------------------------------------------------------------
 

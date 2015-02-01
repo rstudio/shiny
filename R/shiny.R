@@ -697,7 +697,15 @@ ShinySession <- R6Class(
             'Cache-Control' = 'no-cache')))
         }
 
-        tmpdata <- tempfile()
+        # Make temp file with the same extension as the user-visible filename.
+        # If the extension is not used, some functions such as pdf() and zip()
+        # may append the extension they expect, meaning the data we want will
+        # be written to a file other than our temp file (e.g. file1231.zip
+        # instead of file1231.zip).
+        ext <- tools::file_ext(filename)
+        if (nzchar(ext))
+          ext <- paste(".", ext, sep = "")
+        tmpdata <- tempfile(fileext = ext)
         result <- try(Context$new(getDefaultReactiveDomain(), '[download]')$run(
           function() { download$func(tmpdata) }
         ))

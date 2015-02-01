@@ -17,7 +17,7 @@ list(i1 = list(j1 = 'x')), b = list(i1 = list(j1 = 'y'), i2 = list(j1 =
 `b[i1][j1]` = 'y', `b[i2][j1]` = 'z')} when \code{nested = FALSE}.}
 }
 \description{
-Returns a named character vector of key-value pairs.
+Returns a named list of key-value pairs.
 }
 \examples{
 parseQueryString("?foo=1&bar=b\%20a\%20r")

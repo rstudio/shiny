@@ -783,9 +783,6 @@
 
       var scope = {input: inputs, output: this.$values};
 
-      var triggerShown  = function() { $(this).trigger('shown'); };
-      var triggerHidden = function() { $(this).trigger('hidden'); };
-
       var conditionals = $(document).find('[data-display-if]');
       for (var i = 0; i < conditionals.length; i++) {
         var el = $(conditionals[i]);
@@ -797,13 +794,19 @@
           el.data('data-display-if-func', condFunc);
         }
 
-        if (condFunc(scope)) {
-          el.trigger('show');
-          el.show(0, triggerShown);
-        }
-        else {
-          el.trigger('hide');
-          el.hide(0, triggerHidden);
+        var show = condFunc(scope);
+        var showing = el.css("display") !== "none";
+        if (show !== showing) {
+          if (show) {
+            el.trigger('show');
+            el.show();
+            el.trigger('shown');
+          }
+          else {
+            el.trigger('hide');
+            el.hide();
+            el.trigger('hidden');
+          }
         }
       }
     };
@@ -3296,6 +3299,14 @@
         sendOutputHiddenStateDebouncer.immediateCall();
     });
 
+    function filterEventsByNamespace(namespace, handler) {
+      return function(e) {
+        if (e.namespace.indexOf(namespace) === 0) {
+          handler.apply(this, arguments);
+        }
+      };
+    }
+
     // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size
     // of 0x0). It's OK to over-report sizes because the input pipeline will
@@ -3304,13 +3315,15 @@
     // Need to register callbacks for each Bootstrap 3 class.
     var bs3classes = ['modal', 'dropdown', 'tab', 'tooltip', 'popover', 'collapse'];
     $.each(bs3classes, function(idx, classname) {
-      $('body').on('shown.bs.' + classname + '.sendImageSize', '*', sendImageSize);
+      $('body').on('shown.bs.' + classname + '.sendImageSize', '*',
+        filterEventsByNamespace('bs.', sendImageSize));
       $('body').on('shown.bs.' + classname + '.sendOutputHiddenState ' +
                    'hidden.bs.' + classname + '.sendOutputHiddenState',
-                   '*', sendOutputHiddenState);
+                   '*', filterEventsByNamespace('bs.', sendOutputHiddenState));
     });
 
-    // This is needed for Bootstrap 2 compatibility
+    // This is needed for Bootstrap 2 compatibility and for non-Bootstrap
+    // related shown/hidden events (like conditionalPanel)
     $('body').on('shown.sendImageSize', '*', sendImageSize);
     $('body').on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*',
                  sendOutputHiddenState);

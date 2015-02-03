@@ -3225,7 +3225,8 @@
         initialValues['.clientdata_output_' + this.id + '_height'] = this.offsetHeight;
       }
     });
-    function sendImageSize() {
+
+    function doSendImageSize() {
       $('.shiny-image-output, .shiny-plot-output').each(function() {
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput('.clientdata_output_' + this.id + '_width', this.offsetWidth);
@@ -3236,6 +3237,11 @@
         $(this).data('shiny-output-binding').onResize();
       });
     }
+    var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
+    function sendImageSize() {
+      sendImageSizeDebouncer.normalCall();
+    }
+
 
     // Return true if the object or one of its ancestors in the DOM tree has
     // style='display:none'; otherwise return false.
@@ -3298,9 +3304,9 @@
 
     // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size
-    // of 0x0). It's OK to over-report sizes because the input pipeline will
-    // filter out values that haven't changed.
+    // of 0x0).
     $(window).resize(debounce(500, sendImageSize));
+
     // Need to register callbacks for each Bootstrap 3 class.
     var bs3classes = ['modal', 'dropdown', 'tab', 'tooltip', 'popover', 'collapse'];
     $.each(bs3classes, function(idx, classname) {

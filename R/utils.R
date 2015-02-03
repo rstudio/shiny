@@ -155,6 +155,20 @@ dropNullsOrEmpty <- function(x) {
   x[!vapply(x, nullOrEmpty, FUN.VALUE=logical(1))]
 }
 
+# Given a vector/list, return TRUE if any elements are unnamed, FALSE otherwise.
+anyUnnamed <- function(x) {
+  # Zero-length vector
+  if (length(x) == 0) return(FALSE)
+
+  nms <- names(x)
+
+  # List with no name attribute
+  if (is.null(nms)) return(TRUE)
+
+  # List with name attribute; check for any ""
+  any(!nzchar(nms))
+}
+
 # Combine dir and (file)name into a file path. If a file already exists with a
 # name differing only by case, then use it instead.
 file.path.ci <- function(...) {

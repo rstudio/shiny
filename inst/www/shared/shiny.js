@@ -783,9 +783,6 @@
 
       var scope = {input: inputs, output: this.$values};
 
-      var triggerShown  = function() { $(this).trigger('shown'); };
-      var triggerHidden = function() { $(this).trigger('hidden'); };
-
       var conditionals = $(document).find('[data-display-if]');
       for (var i = 0; i < conditionals.length; i++) {
         var el = $(conditionals[i]);
@@ -797,13 +794,18 @@
           el.data('data-display-if-func', condFunc);
         }
 
-        if (condFunc(scope)) {
+        // Trigger show or hide events for elements that have a state change.
+        var shouldShow = condFunc(scope);
+        var isShowing = el.css("display") !== "none";
+        if (shouldShow && !isShowing) {
           el.trigger('show');
-          el.show(0, triggerShown);
+          el.show();
+          el.trigger("shown");
         }
-        else {
+        else if (!shouldShow && isShowing) {
           el.trigger('hide');
-          el.hide(0, triggerHidden);
+          el.hide();
+          el.trigger('hidden');
         }
       }
     };

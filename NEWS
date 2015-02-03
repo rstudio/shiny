@@ -1,8 +1,8 @@
 shiny 0.11.0.9xxx
 --------------------------------------------------------------------------------
 
-* Sliders problems in IE 11 and Chrome 40.0.2214.93 m (Windows) have been
-  fixed. (#700)
+* Slider problems in IE 11 and Chrome on touchscreen-equipped Windows computers
+  have been fixed. (#700)
 
 * Sliders now work correctly with draggable panels. (#711)
 

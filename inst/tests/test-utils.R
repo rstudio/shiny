@@ -88,3 +88,15 @@ test_that("need() works as expected", {
   expect_null(need(c(NA, NA, TRUE), FALSE))
   expect_null(need(c(FALSE, FALSE, TRUE), FALSE))
 })
+
+test_that("anyUnnamed works as expected", {
+  expect_false(anyUnnamed(list()))
+  expect_true(anyUnnamed(list(1,2,3)))
+  expect_true(anyUnnamed(list(A = 1,2,3)))
+  expect_false(anyUnnamed(list(A = 1,B = 2,C = 3)))
+
+  # List with named elements removed
+  x <- list(A = 1, B = 2, 3, 4)
+  x <- x[3:4]
+  expect_true(anyUnnamed(x))
+})

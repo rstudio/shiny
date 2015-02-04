@@ -3228,7 +3228,7 @@
         initialValues['.clientdata_output_' + this.id + '_height'] = this.offsetHeight;
       }
     });
-    function sendImageSize() {
+    function doSendImageSize() {
       $('.shiny-image-output, .shiny-plot-output').each(function() {
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput('.clientdata_output_' + this.id + '_width', this.offsetWidth);
@@ -3239,6 +3239,16 @@
         $(this).data('shiny-output-binding').onResize();
       });
     }
+    var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
+    function sendImageSize() {
+      sendImageSizeDebouncer.normalCall();
+    }
+    // Make sure sendImageSize actually gets called before the inputBatchSender
+    // sends data to the server.
+    inputBatchSender.lastChanceCallback.push(function() {
+      if (sendImageSizeDebouncer.isPending())
+        sendImageSizeDebouncer.immediateCall();
+    });
 
     // Return true if the object or one of its ancestors in the DOM tree has
     // style='display:none'; otherwise return false.

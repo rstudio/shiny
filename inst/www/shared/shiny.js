@@ -783,9 +783,6 @@
 
       var scope = {input: inputs, output: this.$values};
 
-      var triggerShown  = function() { $(this).trigger('shown'); };
-      var triggerHidden = function() { $(this).trigger('hidden'); };
-
       var conditionals = $(document).find('[data-display-if]');
       for (var i = 0; i < conditionals.length; i++) {
         var el = $(conditionals[i]);
@@ -797,13 +794,19 @@
           el.data('data-display-if-func', condFunc);
         }
 
-        if (condFunc(scope)) {
-          el.trigger('show');
-          el.show(0, triggerShown);
-        }
-        else {
-          el.trigger('hide');
-          el.hide(0, triggerHidden);
+        var show = condFunc(scope);
+        var showing = el.css("display") !== "none";
+        if (show !== showing) {
+          if (show) {
+            el.trigger('show');
+            el.show();
+            el.trigger('shown');
+          }
+          else {
+            el.trigger('hide');
+            el.hide();
+            el.trigger('hidden');
+          }
         }
       }
     };
@@ -3225,7 +3228,7 @@
         initialValues['.clientdata_output_' + this.id + '_height'] = this.offsetHeight;
       }
     });
-    function sendImageSize() {
+    function doSendImageSize() {
       $('.shiny-image-output, .shiny-plot-output').each(function() {
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput('.clientdata_output_' + this.id + '_width', this.offsetWidth);
@@ -3236,6 +3239,16 @@
         $(this).data('shiny-output-binding').onResize();
       });
     }
+    var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
+    function sendImageSize() {
+      sendImageSizeDebouncer.normalCall();
+    }
+    // Make sure sendImageSize actually gets called before the inputBatchSender
+    // sends data to the server.
+    inputBatchSender.lastChanceCallback.push(function() {
+      if (sendImageSizeDebouncer.isPending())
+        sendImageSizeDebouncer.immediateCall();
+    });
 
     // Return true if the object or one of its ancestors in the DOM tree has
     // style='display:none'; otherwise return false.
@@ -3296,6 +3309,26 @@
         sendOutputHiddenStateDebouncer.immediateCall();
     });
 
+    // Given a namespace and a handler function, return a function that invokes
+    // the handler only when e's namespace matches. For example, if the
+    // namespace is "bs", it would match when e.namespace is "bs" or "bs.tab".
+    // If the namespace is "bs.tab", it would match for "bs.tab", but not "bs".
+    function filterEventsByNamespace(namespace, handler) {
+      namespace = namespace.split(".");
+
+      return function(e) {
+        var eventNamespace = e.namespace.split(".");
+
+        // If any of the namespace strings aren't present in this event, quit.
+        for (var i=0; i<namespace.length; i++) {
+          if (eventNamespace.indexOf(namespace[i]) === -1)
+            return;
+        }
+
+        handler.apply(this, arguments);
+      };
+    }
+
     // The size of each image may change either because the browser window was
     // resized, or because a tab was shown/hidden (hidden elements report size
     // of 0x0). It's OK to over-report sizes because the input pipeline will
@@ -3304,13 +3337,15 @@
     // Need to register callbacks for each Bootstrap 3 class.
     var bs3classes = ['modal', 'dropdown', 'tab', 'tooltip', 'popover', 'collapse'];
     $.each(bs3classes, function(idx, classname) {
-      $('body').on('shown.bs.' + classname + '.sendImageSize', '*', sendImageSize);
+      $('body').on('shown.bs.' + classname + '.sendImageSize', '*',
+        filterEventsByNamespace('bs', sendImageSize));
       $('body').on('shown.bs.' + classname + '.sendOutputHiddenState ' +
                    'hidden.bs.' + classname + '.sendOutputHiddenState',
-                   '*', sendOutputHiddenState);
+                   '*', filterEventsByNamespace('bs', sendOutputHiddenState));
     });
 
-    // This is needed for Bootstrap 2 compatibility
+    // This is needed for Bootstrap 2 compatibility and for non-Bootstrap
+    // related shown/hidden events (like conditionalPanel)
     $('body').on('shown.sendImageSize', '*', sendImageSize);
     $('body').on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*',
                  sendOutputHiddenState);

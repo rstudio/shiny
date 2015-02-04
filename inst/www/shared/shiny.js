@@ -3309,11 +3309,23 @@
         sendOutputHiddenStateDebouncer.immediateCall();
     });
 
+    // Given a namespace and a handler function, return a function that invokes
+    // the handler only when e's namespace matches. For example, if the
+    // namespace is "bs", it would match when e.namespace is "bs" or "bs.tab".
+    // If the namespace is "bs.tab", it would match for "bs.tab", but not "bs".
     function filterEventsByNamespace(namespace, handler) {
+      namespace = namespace.split(".");
+
       return function(e) {
-        if (e.namespace.indexOf(namespace) === 0) {
-          handler.apply(this, arguments);
+        var eventNamespace = e.namespace.split(".");
+
+        // If any of the namespace strings aren't present in this event, quit.
+        for (var i=0; i<namespace.length; i++) {
+          if (eventNamespace.indexOf(namespace[i]) === -1)
+            return;
         }
+
+        handler.apply(this, arguments);
       };
     }
 
@@ -3326,10 +3338,10 @@
     var bs3classes = ['modal', 'dropdown', 'tab', 'tooltip', 'popover', 'collapse'];
     $.each(bs3classes, function(idx, classname) {
       $('body').on('shown.bs.' + classname + '.sendImageSize', '*',
-        filterEventsByNamespace('bs.', sendImageSize));
+        filterEventsByNamespace('bs', sendImageSize));
       $('body').on('shown.bs.' + classname + '.sendOutputHiddenState ' +
                    'hidden.bs.' + classname + '.sendOutputHiddenState',
-                   '*', filterEventsByNamespace('bs.', sendOutputHiddenState));
+                   '*', filterEventsByNamespace('bs', sendOutputHiddenState));
     });
 
     // This is needed for Bootstrap 2 compatibility and for non-Bootstrap

@@ -24,7 +24,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   # Select input
   x <- selectInput('id','label', choices = c(a='x1', a='x2', b='x3'), selectize = FALSE)
   expect_true(grepl(fixed = TRUE,
-    '<select id="id"><option value="x1" selected>a</option>\n<option value="x2">a</option>\n<option value="x3">b</option></select>',
+    '<select id="id" class="form-control"><option value="x1" selected>a</option>\n<option value="x2">a</option>\n<option value="x3">b</option></select>',
      format(x)
   ))
 
@@ -142,7 +142,7 @@ test_that("selectInput selects items by default", {
 
   # Nothing selected when choices=NULL
   expect_true(grepl(fixed = TRUE,
-    '<select id="x"></select>',
+    '<select id="x" class="form-control"></select>',
     format(selectInput('x', NULL, NULL, selectize = FALSE))
   ))
 

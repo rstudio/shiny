@@ -745,22 +745,27 @@ choicesWithNames <- function(choices) {
 
 #' Create a select list input control
 #'
-#' Create a select list that can be used to choose a single or
-#' multiple items from a list of values.
+#' Create a select list that can be used to choose a single or multiple items
+#' from a list of values.
 #'
 #' By default, \code{selectInput()} and \code{selectizeInput()} use the
-#' JavaScript library \pkg{selectize.js} (\url{https://github.com/brianreavis/selectize.js})
-#' to instead of the basic select input element. To use the standard HTML select
-#' input element, use \code{selectInput()} with \code{selectize=FALSE}.
+#' JavaScript library \pkg{selectize.js}
+#' (\url{https://github.com/brianreavis/selectize.js}) to instead of the basic
+#' select input element. To use the standard HTML select input element, use
+#' \code{selectInput()} with \code{selectize=FALSE}.
 #'
 #' @inheritParams textInput
 #' @param choices List of values to select from. If elements of the list are
-#' named then that name rather than the value is displayed to the user.
+#'   named then that name rather than the value is displayed to the user.
 #' @param selected The initially selected value (or multiple values if
-#' \code{multiple = TRUE}). If not specified then defaults to the first value
-#' for single-select lists and no values for multiple select lists.
+#'   \code{multiple = TRUE}). If not specified then defaults to the first value
+#'   for single-select lists and no values for multiple select lists.
 #' @param multiple Is selection of multiple items allowed?
 #' @param selectize Whether to use \pkg{selectize.js} or not.
+#' @param size Number of items to show in the selection box; a larger number
+#'   will result in a taller box. Not compatible with \code{selectize=TRUE}.
+#'   Normally, when \code{multiple=FALSE}, a select input will be a drop-down
+#'   list, but when \code{size} is set, it will be a box instead.
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -773,7 +778,8 @@ choicesWithNames <- function(choices) {
 #'               "Gears" = "gear"))
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,
-                        multiple = FALSE, selectize = TRUE, width = NULL) {
+                        multiple = FALSE, selectize = TRUE, width = NULL,
+                        size = NULL) {
   # resolve names
   choices <- choicesWithNames(choices)
 
@@ -782,10 +788,15 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     if (!multiple) selected <- firstChoice(choices)
   } else selected <- validateSelected(selected, choices, inputId)
 
+  if (!is.null(size) && selectize) {
+    stop("'size' argument is incompatible with 'selectize=TRUE'.")
+  }
+
   # create select tag and add options
   selectTag <- tags$select(
     id = inputId,
     class = if (!selectize) "form-control",
+    size = size,
     selectOptions(choices, selected)
   )
   if (multiple)

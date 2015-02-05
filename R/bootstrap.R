@@ -250,10 +250,6 @@ navbarPage <- function(title,
     )
   }
 
-  # create a default header if necessary
-  if (length(header) == 0)
-    header <- HTML("&nbsp;")
-
   # function to return plain or fluid class name
   className <- function(name) {
     if (fluid)

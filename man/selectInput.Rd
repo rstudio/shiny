@@ -6,7 +6,7 @@
 \title{Create a select list input control}
 \usage{
 selectInput(inputId, label, choices, selected = NULL, multiple = FALSE,
-  selectize = TRUE, width = NULL)
+  selectize = TRUE, width = NULL, size = NULL)
 
 selectizeInput(inputId, ..., options = NULL, width = NULL)
 }
@@ -29,6 +29,11 @@ for single-select lists and no values for multiple select lists.}
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
 
+\item{size}{Number of items to show in the selection box; a larger number
+will result in a taller box. Not compatible with \code{selectize=TRUE}.
+Normally, when \code{multiple=FALSE}, a select input will be a drop-down
+list, but when \code{size} is set, it will be a box instead.}
+
 \item{...}{Arguments passed to \code{selectInput()}.}
 
 \item{options}{A list of options. See the documentation of \pkg{selectize.js}
@@ -40,14 +45,15 @@ for details).}
 A select list control that can be added to a UI definition.
 }
 \description{
-Create a select list that can be used to choose a single or
-multiple items from a list of values.
+Create a select list that can be used to choose a single or multiple items
+from a list of values.
 }
 \details{
 By default, \code{selectInput()} and \code{selectizeInput()} use the
-JavaScript library \pkg{selectize.js} (\url{https://github.com/brianreavis/selectize.js})
-to instead of the basic select input element. To use the standard HTML select
-input element, use \code{selectInput()} with \code{selectize=FALSE}.
+JavaScript library \pkg{selectize.js}
+(\url{https://github.com/brianreavis/selectize.js}) to instead of the basic
+select input element. To use the standard HTML select input element, use
+\code{selectInput()} with \code{selectize=FALSE}.
 }
 \note{
 The selectize input created from \code{selectizeInput()} allows

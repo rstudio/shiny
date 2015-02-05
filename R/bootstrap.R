@@ -1404,7 +1404,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #'   )
 #' )
 #' @export
-tabPanel <- function(title, ..., value = NULL, icon = NULL) {
+tabPanel <- function(title, ..., value = title, icon = NULL) {
   divTag <- div(class="tab-pane",
                 title=title,
                 `data-value`=value,

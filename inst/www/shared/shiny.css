@@ -171,6 +171,13 @@ table.data td[align=right] {
   margin-top: -10px;
 }
 
+/* Checkbox groups and radios that are inline need less negative margin to
+   separate from label. */
+.shiny-input-checkboxgroup.shiny-input-container-inline label ~ .shiny-options-group,
+.shiny-input-radiogroup.shiny-input-container-inline label ~ .shiny-options-group {
+  margin-top: -1px;
+}
+
 /* Limit the width of inputs in the general case. */
 .shiny-input-container:not(.shiny-input-container-inline) {
   width: 300px;

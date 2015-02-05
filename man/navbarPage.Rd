@@ -30,7 +30,7 @@ at the top (\code{"fixed-top"}), or pinned at the bottom
 unless you add padding, e.g.:
 \code{tags$style(type="text/css", "body {padding-top: 70px;}")}}
 
-\item{header}{Tag of list of tags to display as a common header above all
+\item{header}{Tag or list of tags to display as a common header above all
 tabPanels.}
 
 \item{footer}{Tag or list of tags to display as a common footer below all

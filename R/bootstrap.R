@@ -147,7 +147,7 @@ pageWithSidebar <- function(headerPanel,
 #'   \code{"fixed-bottom"} will cause the navbar to overlay your body content,
 #'   unless you add padding, e.g.:
 #'   \code{tags$style(type="text/css", "body {padding-top: 70px;}")}
-#' @param header Tag of list of tags to display as a common header above all
+#' @param header Tag or list of tags to display as a common header above all
 #'   tabPanels.
 #' @param footer Tag or list of tags to display as a common footer below all
 #'   tabPanels

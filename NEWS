@@ -4,6 +4,13 @@ shiny 0.11.0.9xxx
 * Major client-side performance improvements for pages that have many
   conditionalPanels, tabPanels, and plotOutputs. (#693, #717, #723)
 
+* `tabPanel`s now use the `title` for `value` by default. This fixes a bug
+  in which an icon in the title caused problems with a conditionalPanel's test
+  condition. (#725, #728)
+
+* `selectInput` now has a `size` argument to control the height of the input
+  box. (#729)
+
 * `navbarPage` no longer includes a first row of extra whitespace when
   `header=NULL`. (#722)
 

@@ -785,7 +785,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   # create select tag and add options
   selectTag <- tags$select(
     id = inputId,
-    class = if (multiple && !selectize) "form-control",
+    class = if (!selectize) "form-control",
     selectOptions(choices, selected)
   )
   if (multiple)

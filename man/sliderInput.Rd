@@ -13,11 +13,9 @@ animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
   pauseButton = NULL)
 }
 \arguments{
-\item{inputId}{Specifies the \code{input} slot that will be used to access
-the value.}
+\item{inputId}{The \code{input} slot that will be used to access the value.}
 
-\item{label}{A descriptive label to be displayed with the widget, or
-\code{NULL}.}
+\item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{min}{The minimum value (inclusive) that can be selected.}
 

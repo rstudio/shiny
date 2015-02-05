@@ -11,9 +11,9 @@ selectInput(inputId, label, choices, selected = NULL, multiple = FALSE,
 selectizeInput(inputId, ..., options = NULL, width = NULL)
 }
 \arguments{
-\item{inputId}{Input variable to assign the control's value to}
+\item{inputId}{The \code{input} slot that will be used to access the value.}
 
-\item{label}{Display label for the control, or \code{NULL}}
+\item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{choices}{List of values to select from. If elements of the list are
 named then that name rather than the value is displayed to the user.}

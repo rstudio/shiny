@@ -9,9 +9,9 @@ dateRangeInput(inputId, label, start = NULL, end = NULL, min = NULL,
   language = "en", separator = " to ")
 }
 \arguments{
-\item{inputId}{Input variable to assign the control's value to.}
+\item{inputId}{The \code{input} slot that will be used to access the value.}
 
-\item{label}{Display label for the control, or \code{NULL}.}
+\item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{start}{The initial start date. Either a Date object, or a string in
 \code{yyyy-mm-dd} format. If NULL (the default), will use the current

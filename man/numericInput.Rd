@@ -7,11 +7,11 @@
 numericInput(inputId, label, value, min = NA, max = NA, step = NA)
 }
 \arguments{
-\item{inputId}{Input variable to assign the control's value to}
+\item{inputId}{The \code{input} slot that will be used to access the value.}
 
-\item{label}{Display label for the control}
+\item{label}{Display label for the control, or \code{NULL} for no label.}
 
-\item{value}{Initial value}
+\item{value}{Initial value.}
 
 \item{min}{Minimum allowed value}
 

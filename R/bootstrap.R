@@ -427,9 +427,9 @@ conditionalPanel <- function(condition, ...) {
 #'
 #' Create an input control for entry of unstructured text values
 #'
-#' @param inputId Input variable to assign the control's value to
-#' @param label Display label for the control
-#' @param value Initial value
+#' @param inputId The \code{input} slot that will be used to access the value.
+#' @param label Display label for the control, or \code{NULL} for no label.
+#' @param value Initial value.
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -469,9 +469,7 @@ passwordInput <- function(inputId, label, value = "") {
 #'
 #' Create an input control for entry of numeric values
 #'
-#' @param inputId Input variable to assign the control's value to
-#' @param label Display label for the control
-#' @param value Initial value
+#' @inheritParams textInput
 #' @param min Minimum allowed value
 #' @param max Maximum allowed value
 #' @param step Interval to use when stepping between min and max
@@ -526,8 +524,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA) {
 #'
 #' @family input elements
 #'
-#' @param inputId Input variable to assign the control's value to.
-#' @param label Display label for the control.
+#' @inheritParams textInput
 #' @param multiple Whether the user should be allowed to select and upload
 #'   multiple files at once. \bold{Does not work on older browsers, including
 #'   Internet Explorer 9 and earlier.}
@@ -558,8 +555,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
 #'
 #' Create a checkbox that can be used to specify logical values.
 #'
-#' @param inputId Input variable to assign the control's value to.
-#' @param label Display label for the control.
+#' @inheritParams textInput
 #' @param value Initial value (\code{TRUE} or \code{FALSE}).
 #' @return A checkbox control that can be added to a UI definition.
 #'
@@ -588,8 +584,7 @@ checkboxInput <- function(inputId, label, value = FALSE) {
 #' independently. The server will receive the input as a character vector of the
 #' selected values.
 #'
-#' @param inputId Input variable to assign the control's value to.
-#' @param label Display label for the control, or \code{NULL}.
+#' @inheritParams textInput
 #' @param choices List of values to show checkboxes for. If elements of the list
 #'   are named then that name rather than the value is displayed to the user.
 #' @param selected The values that should be initially selected, if any.
@@ -758,8 +753,7 @@ choicesWithNames <- function(choices) {
 #' to instead of the basic select input element. To use the standard HTML select
 #' input element, use \code{selectInput()} with \code{selectize=FALSE}.
 #'
-#' @param inputId Input variable to assign the control's value to
-#' @param label Display label for the control, or \code{NULL}
+#' @inheritParams textInput
 #' @param choices List of values to select from. If elements of the list are
 #' named then that name rather than the value is displayed to the user.
 #' @param selected The initially selected value (or multiple values if
@@ -906,8 +900,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #'
 #' Create a set of radio buttons used to select an item from a list.
 #'
-#' @param inputId Input variable to assign the control's value to
-#' @param label Display label for the control, or \code{NULL}
+#' @inheritParams textInput
 #' @param choices List of values to select from (if elements of the list are
 #' named then that name rather than the value is displayed to the user)
 #' @param selected The initially selected value (if not specified then
@@ -1023,10 +1016,7 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
 #'
 #' Constructs a slider widget to select a numeric value from a range.
 #'
-#' @param inputId Specifies the \code{input} slot that will be used to access
-#'   the value.
-#' @param label A descriptive label to be displayed with the widget, or
-#'   \code{NULL}.
+#' @inheritParams textInput
 #' @param min The minimum value (inclusive) that can be selected.
 #' @param max The maximum value (inclusive) that can be selected.
 #' @param value The initial value of the slider. A numeric vector of length
@@ -1187,8 +1177,7 @@ datePickerDependency <- htmlDependency(
 #'   \item \code{DD} Full weekday name
 #' }
 #'
-#' @param inputId Input variable to assign the control's value to.
-#' @param label Display label for the control, or \code{NULL}.
+#' @inheritParams textInput
 #' @param value The starting date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format. If NULL (the default), will use the current
 #'   date in the client's time zone.

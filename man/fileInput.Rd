@@ -7,9 +7,9 @@
 fileInput(inputId, label, multiple = FALSE, accept = NULL)
 }
 \arguments{
-\item{inputId}{Input variable to assign the control's value to.}
+\item{inputId}{The \code{input} slot that will be used to access the value.}
 
-\item{label}{Display label for the control.}
+\item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{multiple}{Whether the user should be allowed to select and upload
 multiple files at once. \bold{Does not work on older browsers, including

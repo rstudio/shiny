@@ -7,9 +7,9 @@
 checkboxInput(inputId, label, value = FALSE)
 }
 \arguments{
-\item{inputId}{Input variable to assign the control's value to.}
+\item{inputId}{The \code{input} slot that will be used to access the value.}
 
-\item{label}{Display label for the control.}
+\item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{value}{Initial value (\code{TRUE} or \code{FALSE}).}
 }

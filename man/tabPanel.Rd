@@ -4,7 +4,7 @@
 \alias{tabPanel}
 \title{Create a tab panel}
 \usage{
-tabPanel(title, ..., value = NULL, icon = NULL)
+tabPanel(title, ..., value = title, icon = NULL)
 }
 \arguments{
 \item{title}{Display title for tab}

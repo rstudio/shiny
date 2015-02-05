@@ -1404,7 +1404,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 #'   )
 #' )
 #' @export
-tabPanel <- function(title, ..., value = NULL, icon = NULL) {
+tabPanel <- function(title, ..., value = title, icon = NULL) {
   divTag <- div(class="tab-pane",
                 title=title,
                 `data-value`=value,
@@ -1576,11 +1576,6 @@ buildTabset <- function(tabs,
     tabId <- tabId + 1
 
     tabValue <- divTag$attribs$`data-value`
-    if (!is.null(tabValue) && is.null(id)) {
-      stop("tabsetPanel doesn't have an id assigned, but one of its tabPanels ",
-           "has a value. The value won't be sent without an id.")
-    }
-
 
     # function to append an optional icon to an aTag
     appendIcon <- function(aTag, iconClass) {

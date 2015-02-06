@@ -705,6 +705,11 @@ dataTablesJSON <- function(data, req) {
       for (j in seq_len(ncol(fdata))[k]) fdata[, j] <- htmlEscape(fdata[, j])
     }
   }
+  # WAT: toJSON(list(x = matrix(nrow = 0, ncol = 1))) => {"x": } (#299)
+  if (nrow(fdata) == 0) fdata <- list()
+  # WAT: toJSON(list(x = matrix(1:2))) => {x: [ [1], [2] ]}, however,
+  # toJSON(list(x = matrix(1))) => {x: [ 1 ]} (loss of dimension, #429)
+  if (length(fdata) && all(dim(fdata) == 1)) fdata <- list(list(fdata[1, 1]))
 
   res <- toJSON(list(
     draw = as.integer(q$draw),

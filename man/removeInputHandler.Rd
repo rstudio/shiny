@@ -15,7 +15,7 @@ The handler previously associated with this \code{type}, if one
 }
 \description{
 Removes an Input Handler. Rather than using the previously specified handler
-for data of this type, the default jsonlite serialization will be used.
+for data of this type, the default RJSONIO serialization will be used.
 }
 \seealso{
 \code{\link{registerInputHandler}}

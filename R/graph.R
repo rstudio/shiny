@@ -1,5 +1,5 @@
 writeReactLog <- function(file=stdout()) {
-  cat(toJSON(.graphStack$as_list(), pretty=TRUE), file=file)
+  cat(RJSONIO::toJSON(.graphStack$as_list(), pretty=TRUE), file=file)
 }
 
 #' Reactive Log Visualizer

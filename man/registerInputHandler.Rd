@@ -16,7 +16,7 @@ parse the data delivered from the client before it is available in the
 parameters:
  \enumerate{
    \item{The value of this input as provided by the client, deserialized
-   using jsonlite.}
+   using RJSONIO.}
    \item{The \code{shinysession} in which the input exists.}
    \item{The name of the input.}
  }}
@@ -28,7 +28,7 @@ a handler defined.}
 \description{
 Adds an input handler for data of this type. When called, Shiny will use the
 function provided to refine the data passed back from the client (after being
-deserialized by jsonlite) before making it available in the \code{input}
+deserialized by RJSONIO) before making it available in the \code{input}
 variable of the \code{server.R} file.
 }
 \details{

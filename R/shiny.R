@@ -18,6 +18,7 @@ NULL
 #' @aliases shiny
 #' @docType package
 #' @import htmltools httpuv xtable digest R6 mime
+#' @importFrom RJSONIO fromJSON
 NULL
 
 
@@ -79,9 +80,7 @@ createUniqueId <- function(bytes, prefix = "", suffix = "") {
 }
 
 toJSON <- function(x, ..., digits = getOption("shiny.json.digits", 16)) {
-  jsonlite::toJSON(x, dataframe = "columns", null = "null", na = "null",
-                   auto_unbox = TRUE, digits = digits, use_signif = TRUE,
-                   force = TRUE, ...)
+  RJSONIO::toJSON(x, digits = digits, ...)
 }
 
 # Call the workerId func with no args to get the worker id, and with an arg to
@@ -200,7 +199,7 @@ workerId <- local({
 #' \item{sendCustomMessage(type, message)}{
 #'   Sends a custom message to the web page. \code{type} must be a
 #'   single-element character vector giving the type of message, while
-#'   \code{message} can be any jsonlite-encodable value. Custom messages
+#'   \code{message} can be any RJSONIO-encodable value. Custom messages
 #'   have no meaning to Shiny itself; they are used soley to convey information
 #'   to custom JavaScript logic in the browser. You can do this by adding
 #'   JavaScript code to the browser that calls
@@ -302,7 +301,7 @@ ShinySession <- R6Class(
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
         try({
-          creds <- jsonlite::fromJSON(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)
+          creds <- fromJSON(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)
           session$user <<- creds$user
           session$groups <<- creds$groups
         }, silent=FALSE)

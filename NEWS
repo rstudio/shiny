@@ -29,9 +29,6 @@ shiny 0.11.0.9xxx
 
 * Fixed arguments in `fixedPanel`. (#709)
 
-* Switched from RJSONIO to jsonlite. This improves consistency and speed when
-  converting between R data structures and JSON.
-
 * downloadHandler content callback functions are now invoked with a temp file
   name that has the same extension as the final filename that will be used by
   the download. This is to deal with the fact that some file writing functions

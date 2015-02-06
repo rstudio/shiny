@@ -35,12 +35,27 @@ module.exports = function(grunt) {
 
     watch: {
       shiny: {
-        files: '<%= uglify.shiny.src %>',
+        files: ['<%= uglify.shiny.src %>', '../DESCRIPTION'],
         tasks: ['newer:jshint:shiny', 'newer:uglify:shiny']
       },
       datepicker: {
         files: '<%= uglify.datepicker.src %>',
         tasks: ['newer:uglify:datepicker']
+      }
+    },
+
+    newer: {
+      options: {
+        override: function(detail, include) {
+          // If DESCRIPTION is updated, we'll also need to re-minify shiny.js
+          // because the min.js file embeds the version number.
+          if (detail.task === 'uglify' && detail.target === 'shiny') {
+            include(isNewer('../DESCRIPTION', detail.time));
+          } else {
+            include(false);
+          }
+
+        }
       }
     }
   });
@@ -54,6 +69,9 @@ module.exports = function(grunt) {
   grunt.registerTask('default', ['newer:uglify', 'newer:jshint']);
 
 
+  // ---------------------------------------------------------------------------
+  // Utility functions
+  // ---------------------------------------------------------------------------
 
   // Return an object which merges information from package.json and the
   // DESCRIPTION file.
@@ -84,5 +102,9 @@ module.exports = function(grunt) {
 
     return txt;
   }
-};
 
+  // Return true if file's mtime is newer than mtime; false otherwise.
+  function isNewer(file, mtime) {
+    return require('fs').statSync(file).mtime > mtime;
+  }
+};

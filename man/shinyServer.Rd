@@ -13,11 +13,16 @@ shinyServer(func)
 \description{
 Defines the server-side logic of the Shiny application. This generally
 involves creating functions that map user inputs to various kinds of output.
+In older versions of Shiny, it was necessary to call \code{shinyServer()} in
+the \code{server.R} file, but this is no longer required as of Shiny 0.10.
+Now the \code{server.R} file may simply return the appropriate server
+function (as the last expression in the code), without calling
+\code{shinyServer()}.
 }
 \details{
-Call \code{shinyServer} from your application's \code{server.R} file, passing
-in a "server function" that provides the server-side logic of your
-application.
+Call \code{shinyServer} from your application's \code{server.R}
+file, passing in a "server function" that provides the server-side logic of
+your application.
 
 The server function will be called when each client (web browser) first loads
 the Shiny application's page. It must take an \code{input} and an
@@ -37,6 +42,16 @@ shinyServer(function(input, output, session) {
     toupper(input$message)
   })
 })
+
+
+# It is also possible for a server.R file to simply return the function,
+# without calling shinyServer().
+# For example, the server.R file could contain just the following:
+function(input, output, session) {
+  output$uppercase <- renderText({
+    toupper(input$message)
+  })
+}
 }
 }
 

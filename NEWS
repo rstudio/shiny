@@ -1,4 +1,4 @@
-shiny 0.11.0.9xxx
+shiny 0.11.1
 --------------------------------------------------------------------------------
 
 * Major client-side performance improvements for pages that have many

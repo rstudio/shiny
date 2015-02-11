@@ -80,10 +80,10 @@ renderPage <- function(ui, connection, showcase=0) {
 #' Create a Shiny UI handler
 #'
 #' Historically this function was used in ui.R files to register a user
-#' interface with Shiny. It is no longer required; simply ensure that the last
-#' expression to be returned from ui.R is a user interface. This function is
-#' kept for backwards compatibility with older applications. It returns the
-#' value that is passed to it.
+#' interface with Shiny. It is no longer required as of Shiny 0.10; simply
+#' ensure that the last expression to be returned from ui.R is a user interface.
+#' This function is kept for backwards compatibility with older applications. It
+#' returns the value that is passed to it.
 #'
 #' @param ui A user interace definition
 #' @return The user interface definition, without modifications or side effects.

@@ -25,13 +25,13 @@ A UI defintion that can be passed to the \link{shinyUI} function.
 }
 \description{
 Create a Shiny UI page that loads the CSS and JavaScript for
-\href{http://getbootstrap.com/3.3.1/}{Bootstrap}, and has no content in the
-page body (other than what you provide).
+\href{http://getbootstrap.com/}{Bootstrap}, and has no content in the page
+body (other than what you provide).
 }
 \details{
-This function is primarily intended for users who are proficient in
-HTML/CSS, and know how to lay out pages in Bootstrap. Most applications
-should use \code{\link{fluidPage}} along with layout functions like
+This function is primarily intended for users who are proficient in HTML/CSS,
+and know how to lay out pages in Bootstrap. Most applications should use
+\code{\link{fluidPage}} along with layout functions like
 \code{\link{fluidRow}} and \code{\link{sidebarLayout}}.
 }
 \note{

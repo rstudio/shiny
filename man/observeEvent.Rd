@@ -17,9 +17,9 @@ eventReactive(eventExpr, valueExpr, event.env = parent.frame(),
 }
 \arguments{
 \item{eventExpr}{A (quoted or unquoted) expression that represents the event;
-this can be a simple reactive value like `input$click`, a call to a
-reactive expression like `dataset()`, or even a complex expression inside
-curly braces}
+this can be a simple reactive value like \code{input$click}, a call to a
+reactive expression like \code{dataset()}, or even a complex expression
+inside curly braces}
 
 \item{handlerExpr}{The expression to call whenever \code{eventExpr} is
 invalidated. This should be a side-effect-producing action (the return
@@ -31,7 +31,8 @@ this is the calling environment.}
 
 \item{event.quoted}{Is the \code{eventExpr} expression quoted? By default,
 this is \code{FALSE}. This is useful when you want to use an expression
-that is stored in a variable; to do so, it must be quoted with `quote()`.}
+that is stored in a variable; to do so, it must be quoted with
+\code{quote()}.}
 
 \item{handler.env}{The parent environment for \code{handlerExpr}. By default,
 this is the calling environment.}
@@ -39,7 +40,7 @@ this is the calling environment.}
 \item{handler.quoted}{Is the \code{handlerExpr} expression quoted? By
 default, this is \code{FALSE}. This is useful when you want to use an
 expression that is stored in a variable; to do so, it must be quoted with
-`quote()`.}
+\code{quote()}.}
 
 \item{label}{A label for the observer or reactive, useful for debugging.}
 
@@ -67,10 +68,9 @@ scope.}
 \item{value.env}{The parent environment for \code{valueExpr}. By default,
 this is the calling environment.}
 
-\item{value.quoted}{Is the \code{valueExpr} expression quoted? By
-default, this is \code{FALSE}. This is useful when you want to use an
-expression that is stored in a variable; to do so, it must be quoted with
-`quote()`.}
+\item{value.quoted}{Is the \code{valueExpr} expression quoted? By default,
+this is \code{FALSE}. This is useful when you want to use an expression
+that is stored in a variable; to do so, it must be quoted with \code{quote()}.}
 }
 \value{
 \code{observeEvent} returns an observer reference class object (see

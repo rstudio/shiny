@@ -392,25 +392,25 @@ Observable <- R6Class(
 #' Wraps a normal expression to create a reactive expression. Conceptually, a
 #' reactive expression is a expression whose result will change over time.
 #'
-#' Reactive expressions are expressions that can read reactive values and call other
-#' reactive expressions. Whenever a reactive value changes, any reactive expressions
-#' that depended on it are marked as "invalidated" and will automatically
-#' re-execute if necessary. If a reactive expression is marked as invalidated, any
-#' other reactive expressions that recently called it are also marked as
-#' invalidated. In this way, invalidations ripple through the expressions that
-#' depend on each other.
+#' Reactive expressions are expressions that can read reactive values and call
+#' other reactive expressions. Whenever a reactive value changes, any reactive
+#' expressions that depended on it are marked as "invalidated" and will
+#' automatically re-execute if necessary. If a reactive expression is marked as
+#' invalidated, any other reactive expressions that recently called it are also
+#' marked as invalidated. In this way, invalidations ripple through the
+#' expressions that depend on each other.
 #'
 #' See the \href{http://rstudio.github.com/shiny/tutorial/}{Shiny tutorial} for
 #' more information about reactive expressions.
 #'
 #' @param x For \code{reactive}, an expression (quoted or unquoted). For
 #'   \code{is.reactive}, an object to test.
-#' @param env The parent environment for the reactive expression. By default, this
-#'   is the calling environment, the same as when defining an ordinary
+#' @param env The parent environment for the reactive expression. By default,
+#'   this is the calling environment, the same as when defining an ordinary
 #'   non-reactive expression.
 #' @param quoted Is the expression quoted? By default, this is \code{FALSE}.
 #'   This is useful when you want to use an expression that is stored in a
-#'   variable; to do so, it must be quoted with `quote()`.
+#'   variable; to do so, it must be quoted with \code{quote()}.
 #' @param label A label for the reactive expression, useful for debugging.
 #' @param domain See \link{domains}.
 #' @return a function, wrapped in a S3 class "reactive"
@@ -656,7 +656,7 @@ Observer <- R6Class(
 #'   non-reactive expression.
 #' @param quoted Is the expression quoted? By default, this is \code{FALSE}.
 #'   This is useful when you want to use an expression that is stored in a
-#'   variable; to do so, it must be quoted with `quote()`.
+#'   variable; to do so, it must be quoted with \code{quote()}.
 #' @param label A label for the observer, useful for debugging.
 #' @param suspended If \code{TRUE}, start the observer in a suspended state.
 #'   If \code{FALSE} (the default), start in a non-suspended state.
@@ -1263,9 +1263,9 @@ maskReactiveContext <- function(expr) {
 #' "Recalculate" button).
 #'
 #' @param eventExpr A (quoted or unquoted) expression that represents the event;
-#'   this can be a simple reactive value like `input$click`, a call to a
-#'   reactive expression like `dataset()`, or even a complex expression inside
-#'   curly braces
+#'   this can be a simple reactive value like \code{input$click}, a call to a
+#'   reactive expression like \code{dataset()}, or even a complex expression
+#'   inside curly braces
 #' @param handlerExpr The expression to call whenever \code{eventExpr} is
 #'   invalidated. This should be a side-effect-producing action (the return
 #'   value will be ignored). It will be executed within an \code{\link{isolate}}
@@ -1277,19 +1277,19 @@ maskReactiveContext <- function(expr) {
 #'   this is the calling environment.
 #' @param event.quoted Is the \code{eventExpr} expression quoted? By default,
 #'   this is \code{FALSE}. This is useful when you want to use an expression
-#'   that is stored in a variable; to do so, it must be quoted with `quote()`.
+#'   that is stored in a variable; to do so, it must be quoted with
+#'   \code{quote()}.
 #' @param handler.env The parent environment for \code{handlerExpr}. By default,
 #'   this is the calling environment.
 #' @param handler.quoted Is the \code{handlerExpr} expression quoted? By
 #'   default, this is \code{FALSE}. This is useful when you want to use an
 #'   expression that is stored in a variable; to do so, it must be quoted with
-#'   `quote()`.
+#'   \code{quote()}.
 #' @param value.env The parent environment for \code{valueExpr}. By default,
 #'   this is the calling environment.
-#' @param value.quoted Is the \code{valueExpr} expression quoted? By
-#'   default, this is \code{FALSE}. This is useful when you want to use an
-#'   expression that is stored in a variable; to do so, it must be quoted with
-#'   `quote()`.
+#' @param value.quoted Is the \code{valueExpr} expression quoted? By default,
+#'   this is \code{FALSE}. This is useful when you want to use an expression
+#'   that is stored in a variable; to do so, it must be quoted with \code{quote()}.
 #' @param label A label for the observer or reactive, useful for debugging.
 #' @param suspended If \code{TRUE}, start the observer in a suspended state. If
 #'   \code{FALSE} (the default), start in a non-suspended state.

@@ -18,7 +18,7 @@ non-reactive expression.}
 
 \item{quoted}{Is the expression quoted? By default, this is \code{FALSE}.
 This is useful when you want to use an expression that is stored in a
-variable; to do so, it must be quoted with `quote()`.}
+variable; to do so, it must be quoted with \code{quote()}.}
 
 \item{label}{A label for the observer, useful for debugging.}
 

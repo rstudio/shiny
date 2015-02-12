@@ -1,3 +1,9 @@
+shiny 0.11.1.9xxx
+--------------------------------------------------------------------------------
+
+* `runUrl`, `runGist`, and `runGitHub` now can save downloaded applications,
+  with the `destdir` argument. (#688)
+
 shiny 0.11.1
 --------------------------------------------------------------------------------
 

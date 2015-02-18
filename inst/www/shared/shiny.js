@@ -2327,7 +2327,7 @@
         this.setValue(el, data.value);
 
       if (data.hasOwnProperty('label'))
-        $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+        $(el).parent().parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       $(el).trigger('change');
     },

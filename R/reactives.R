@@ -1323,12 +1323,12 @@ maskReactiveContext <- function(expr) {
 #'   server <- function(input, output) {
 #'     # Take an action every time button is pressed;
 #'     # here, we just print a message to the console
-#'     observeEvent(input$button, function() {
+#'     observeEvent(input$button, {
 #'       cat("Showing", input$x, "rows\n")
 #'     })
 #'     # Take a reactive dependency on input$button, but
 #'     # not on any of the stuff inside the function
-#'     df <- eventReactive(input$button, function() {
+#'     df <- eventReactive(input$button, {
 #'       head(cars, input$x)
 #'     })
 #'     output$table <- renderTable({

@@ -1,6 +1,9 @@
 shiny 0.11.1.9xxx
 --------------------------------------------------------------------------------
 
+* Switched from RJSONIO to jsonlite. This improves consistency and speed when
+  converting between R data structures and JSON.
+
 * `runUrl`, `runGist`, and `runGitHub` now can save downloaded applications,
   with the `destdir` argument. (#688)
 

@@ -15,7 +15,7 @@ test_that("Date converts to date", {
   x <- "2013/01/01"
   class(x) <- "shiny.date"
   handler <- inputHandlers$get('shiny.date')
-  expect_identical(    
+  expect_identical(
     handler(x), as.Date(unclass(x))
   )
 })
@@ -24,7 +24,7 @@ test_that("List of dates converts to vector", {
   x <- list("2013/01/01", "2014/01/01")
   class(x) <- "shiny.date"
   handler <- inputHandlers$get('shiny.date')
-  expect_identical(    
+  expect_identical(
     handler(x), as.Date(unlist(x))
   )
 })
@@ -41,7 +41,7 @@ test_that("Matrix converts list of lists to matrix", {
 test_that("Nulls are not converted to NAs in parsing", {
   msg <- charToRaw("{\"method\":\"init\",\"data\":{\"obs\":500,\"nullObs\":null}}")
   expect_identical(
-    decodeMessage(msg), 
-    list(method="init", data=list(obs=500, nullObs=NULL)) 
+    decodeMessage(msg),
+    list(method="init", data=list(obs=500L, nullObs=NULL))
   )
 })

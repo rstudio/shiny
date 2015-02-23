@@ -6,12 +6,12 @@
 \alias{runUrl}
 \title{Run a Shiny application from a URL}
 \usage{
-runUrl(url, filetype = NULL, subdir = NULL, ...)
+runUrl(url, filetype = NULL, subdir = NULL, destdir = NULL, ...)
 
-runGist(gist, ...)
+runGist(gist, destdir = NULL, ...)
 
 runGitHub(repo, username = getOption("github.user"), ref = "master",
-  subdir = NULL, ...)
+  subdir = NULL, destdir = NULL, ...)
 }
 \arguments{
 \item{url}{URL of the application.}
@@ -22,6 +22,10 @@ runGitHub(repo, username = getOption("github.user"), ref = "master",
 \item{subdir}{A subdirectory in the repository that contains the app. By
 default, this function will run an app from the top level of the repo, but
 you can use a path such as `\code{"inst/shinyapp"}.}
+
+\item{destdir}{Directory to store the downloaded application files. If \code{NULL}
+(the default), the application files will be stored in a temporary directory
+and removed when the app exits}
 
 \item{...}{Other arguments to be passed to \code{\link{runApp}()}, such as
 \code{port} and \code{launch.browser}.}
@@ -38,6 +42,14 @@ all valid values.}
 
 \item{ref}{Desired git reference. Could be a commit, tag, or branch name.
 Defaults to \code{"master"}.}
+
+\item{destdir}{Directory to store the downloaded gist. If \code{NULL}
+(the default), the application files will be stored in a temporary directory
+and removed when the app exits}
+
+\item{destdir}{Directory to store the downloaded repository. If \code{NULL}
+(the default), the application files will be stored in a temporary directory
+and removed when the app exits}
 }
 \description{
 \code{runUrl()} downloads and launches a Shiny application that is hosted at

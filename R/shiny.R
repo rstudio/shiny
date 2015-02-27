@@ -283,8 +283,8 @@ ShinySession <- R6Class(
 
       session <<- new.env(parent=emptyenv())
       session$clientData        <<- clientData
-      session$sendCustomMessage <<- self$.sendCustomMessage
-      session$sendInputMessage  <<- self$.sendInputMessage
+      session$sendCustomMessage <<- self$sendCustomMessage
+      session$sendInputMessage  <<- self$sendInputMessage
       session$unhandledError    <<- self$unhandledError
       session$close             <<- self$close
       session$onSessionEnded    <<- self$onSessionEnded
@@ -527,12 +527,12 @@ ShinySession <- R6Class(
         return()
       .write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
     },
-    .sendCustomMessage = function(type, message) {
+    sendCustomMessage = function(type, message) {
       data <- list()
       data[[type]] <- message
       .write(toJSON(list(custom=data)))
     },
-    .sendInputMessage = function(inputId, message) {
+    sendInputMessage = function(inputId, message) {
       data <- list(id = inputId, message = message)
 
       # Add to input message queue
@@ -562,7 +562,7 @@ ShinySession <- R6Class(
     },
     reactlog = function(logEntry) {
       if (.showcase)
-        .sendCustomMessage("reactlog", logEntry)
+        sendCustomMessage("reactlog", logEntry)
     },
     .write = function(json) {
       if (closed){

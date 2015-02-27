@@ -1,27 +1,12 @@
-# it is not really python, but there is no R support on Travis CI yet
-language: python
+language: r
+warnings_are_errors: true
 
-# environment variables
-env:
-  - R_LIBS_USER=~/R R_MY_PKG="$(basename $TRAVIS_REPO_SLUG)"
+r_binary_packages:
+  - Rcpp
+  - cairo
+  - knitr
 
-# install dependencies
-install:
-  - sudo apt-add-repository -y "deb http://cran.rstudio.com/bin/linux/ubuntu `lsb_release -cs`/"
-  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-  - sudo apt-add-repository -y ppa:marutter/c2d4u
-  - sudo apt-get -qq update
-  - sudo apt-get -qq install r-base r-cran-shiny r-cran-cairo r-cran-devtools r-cran-knitr
-  - "[ ! -d ~/R ] && mkdir ~/R"
-  - echo "options(repos = c(CRAN = 'http://cran.rstudio.com'))" > ~/.Rprofile
-  - Rscript -e "update.packages(instlib = '~/R', ask = FALSE, quiet = TRUE)"
-  - Rscript -e "devtools::install_deps(dep = TRUE)"
-
-# run tests
-script:
-  - cd ..; rm -f *.tar.gz; R CMD build $R_MY_PKG
-  - R CMD check $R_MY_PKG*.tar.gz --no-manual
-
-after_failure:
-  - cat $R_MY_PKG.Rcheck/00install.out || true
-  - cat $R_MY_PKG.Rcheck/00check.log || true
+notifications:
+  email:
+    on_success: change
+    on_failure: change

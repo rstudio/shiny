@@ -303,6 +303,7 @@ ShinySession <- R6Class(
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
     closed = logical(0),
+    request = 'ANY',      # Websocket request object
     singletons = character(0),  # Tracks singleton HTML fragments sent to the page
     user = character(0),
     groups = character(0),
@@ -346,7 +347,7 @@ ShinySession <- R6Class(
       # session$request should throw an error if httpuv doesn't have
       # websocket$request, but don't throw it until a caller actually
       # tries to access session$request
-      delayedAssign('request', websocket$request, assign.env = session)
+      delayedAssign('request', websocket$request, assign.env = self)
 
       private$write(toJSON(list(config = list(
         workerId = workerId(),

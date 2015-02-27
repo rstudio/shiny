@@ -42,14 +42,6 @@ all valid values.}
 
 \item{ref}{Desired git reference. Could be a commit, tag, or branch name.
 Defaults to \code{"master"}.}
-
-\item{destdir}{Directory to store the downloaded gist. If \code{NULL}
-(the default), the application files will be stored in a temporary directory
-and removed when the app exits}
-
-\item{destdir}{Directory to store the downloaded repository. If \code{NULL}
-(the default), the application files will be stored in a temporary directory
-and removed when the app exits}
 }
 \description{
 \code{runUrl()} downloads and launches a Shiny application that is hosted at

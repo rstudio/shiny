@@ -78,7 +78,7 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, destdir = NULL, ...) {
   if(is.null(destdir)){
     on.exit(unlink(fileDir, recursive = TRUE), add = TRUE)
   }
-  
+
   appdir <- file.path(fileDir, first)
   if (!file_test('-d', appdir)) appdir <- dirname(appdir)
 
@@ -91,9 +91,6 @@ runUrl <- function(url, filetype = NULL, subdir = NULL, destdir = NULL, ...) {
 #'   https://gist.github.com/jcheng5/3239667, then \code{3239667},
 #'   \code{'3239667'}, and \code{'https://gist.github.com/jcheng5/3239667'} are
 #'   all valid values.
-#' @param destdir Directory to store the downloaded gist. If \code{NULL}
-#'   (the default), the application files will be stored in a temporary directory
-#'   and removed when the app exits
 #' @export
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -125,9 +122,6 @@ runGist <- function(gist, destdir = NULL, ...) {
 #'   \code{"username/repo"}, \code{username} will be taken from \code{repo}.
 #' @param ref Desired git reference. Could be a commit, tag, or branch name.
 #'   Defaults to \code{"master"}.
-#' @param destdir Directory to store the downloaded repository. If \code{NULL}
-#'   (the default), the application files will be stored in a temporary directory
-#'   and removed when the app exits
 #' @export
 #' @examples
 #' ## Only run this example in interactive R sessions

@@ -35,7 +35,7 @@ sessionHandler <- function(req) {
   subreq$PATH_INFO <- subpath
   subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, matches[[1]][2], sep='')
 
-  withReactiveDomain(shinysession$session, {
+  withReactiveDomain(shinysession, {
     shinysession$handleRequest(subreq)
   })
 }

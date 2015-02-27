@@ -7,6 +7,16 @@ shiny 0.11.1.9xxx
 * `runUrl`, `runGist`, and `runGitHub` now can save downloaded applications,
   with the `destdir` argument. (#688)
 
+* Restored ability to set labels for `selectInput`. (#741)
+
+* Travis continuous integration now uses Travis's native R support.
+
+* Fixed encoding issue when the server receives data from the client browser.
+  (#742)
+
+* The `session` object now has class `ShinySession`, making it easier to test
+  whether an object is indeed a session object. (#720, #746)
+
 shiny 0.11.1
 --------------------------------------------------------------------------------
 

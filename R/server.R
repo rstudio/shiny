@@ -257,9 +257,10 @@ decodeMessage <- function(data) {
   }
 
   if (readInt(1) != 0x01020202L) {
-    # use native encoding for the message
-    nativeData <- iconv(rawToChar(data), 'UTF-8')
-    return(jsonlite::fromJSON(nativeData, simplifyVector=FALSE))
+    # Treat message as UTF-8
+    charData <- rawToChar(data)
+    Encoding(charData) <- 'UTF-8'
+    return(jsonlite::fromJSON(charData, simplifyVector=FALSE))
   }
 
   i <- 5

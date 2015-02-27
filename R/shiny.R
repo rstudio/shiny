@@ -225,7 +225,6 @@ NULL
 #' @include utils.R
 ShinySession <- R6Class(
   'ShinySession',
-  class = FALSE,
   private = list(
     .websocket = 'ANY',
     .invalidatedOutputValues = 'Map',

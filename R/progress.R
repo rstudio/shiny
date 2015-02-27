@@ -83,8 +83,8 @@ Progress <- R6Class(
   public = list(
 
     initialize = function(session = getDefaultReactiveDomain(), min = 0, max = 1) {
-      # A hacky check to make sure the session object is indeed a session object.
-      if (is.null(session$onFlush)) stop("'session' is not a session object.")
+      if (!inherits(session, "ShinySession"))
+        stop("'session' is not a ShinySession object.")
 
       private$session <- session
       private$id <- paste(as.character(as.raw(runif(8, min=0, max=255))), collapse='')
@@ -231,8 +231,8 @@ withProgress <- function(expr, min = 0, max = 1,
   if (!quoted)
     expr <- substitute(expr)
 
-  # A hacky check to make sure the session object is indeed a session object.
-  if (is.null(session$onFlush)) stop("'session' is not a session object.")
+  if (!inherits(session, "ShinySession"))
+    stop("'session' is not a ShinySession object.")
 
   p <- Progress$new(session, min = min, max = max)
 
@@ -252,8 +252,8 @@ withProgress <- function(expr, min = 0, max = 1,
 setProgress <- function(value = NULL, message = NULL, detail = NULL,
                         session = getDefaultReactiveDomain()) {
 
-  # A hacky check to make sure the session object is indeed a session object.
-  if (is.null(session$onFlush)) stop("'session' is not a session object.")
+  if (!inherits(session, "ShinySession"))
+    stop("'session' is not a ShinySession object.")
 
   if (session$progressStack$size() == 0) {
     warning('setProgress was called outside of withProgress; ignoring')
@@ -269,8 +269,8 @@ setProgress <- function(value = NULL, message = NULL, detail = NULL,
 incProgress <- function(amount = 0.1, message = NULL, detail = NULL,
                         session = getDefaultReactiveDomain()) {
 
-  # A hacky check to make sure the session object is indeed a session object.
-  if (is.null(session$onFlush)) stop("'session' is not a session object.")
+  if (!inherits(session, "ShinySession"))
+    stop("'session' is not a ShinySession object.")
 
   if (session$progressStack$size() == 0) {
     warning('incProgress was called outside of withProgress; ignoring')

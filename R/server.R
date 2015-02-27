@@ -406,9 +406,9 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                 args$clientData <- shinysession$clientData
 
               if ('session' %in% names(formals(serverFunc)))
-                args$session <- shinysession$session
+                args$session <- shinysession
 
-              withReactiveDomain(shinysession$session, {
+              withReactiveDomain(shinysession, {
                 do.call(appvars$server, args)
               })
             })

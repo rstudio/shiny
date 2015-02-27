@@ -302,7 +302,6 @@ ShinySession <- R6Class(
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
     closed = logical(0),
-    session = 'environment',      # Object for the server app to access session stuff
     singletons = character(0),  # Tracks singleton HTML fragments sent to the page
     user = character(0),
     groups = character(0),
@@ -334,25 +333,6 @@ ShinySession <- R6Class(
       self$token <- createUniqueId(16)
       private$.outputs <- list()
       private$.outputOptions <- list()
-
-      self$session <<- new.env(parent=emptyenv())
-      self$session$clientData        <<- self$clientData
-      self$session$sendCustomMessage <<- self$sendCustomMessage
-      self$session$sendInputMessage  <<- self$sendInputMessage
-      self$session$unhandledError    <<- self$unhandledError
-      self$session$close             <<- self$close
-      self$session$onSessionEnded    <<- self$onSessionEnded
-      self$session$onEnded           <<- self$onEnded
-      self$session$onFlush           <<- self$onFlush
-      self$session$onFlushed         <<- self$onFlushed
-      self$session$isClosed          <<- self$isClosed
-      self$session$input             <<- self$input
-      self$session$output            <<- self$output
-      self$session$reactlog          <<- self$reactlog
-      self$session$registerDataObj   <<- self$registerDataObj
-      self$session$progressStack     <<- self$progressStack
-      self$session$sendProgress      <<- self$sendProgress
-      self$session$.impl             <<- self
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
         try({

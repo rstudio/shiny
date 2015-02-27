@@ -716,10 +716,12 @@ runApp <- function(appDir=getwd(),
   }
 
   appParts <- as.shiny.appobj(appDir)
-  if (!is.null(appParts$onStart))
-    appParts$onStart()
+  # Set up the onEnd before we call onStart, so that it gets called even if an
+  # error happens in onStart.
   if (!is.null(appParts$onEnd))
     on.exit(appParts$onEnd(), add = TRUE)
+  if (!is.null(appParts$onStart))
+    appParts$onStart()
 
   server <- startApp(appParts, port, host, quiet)
 

@@ -225,7 +225,6 @@ NULL
 #' @include utils.R
 ShinySession <- R6Class(
   'ShinySession',
-  portable = FALSE,
   class = FALSE,
   private = list(
     .websocket = 'ANY',
@@ -256,7 +255,7 @@ ShinySession <- R6Class(
       private$.write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
     },
     .write = function(json) {
-      if (closed){
+      if (self$closed){
         return()
       }
       if (isTRUE(getOption('shiny.trace')))
@@ -305,10 +304,12 @@ ShinySession <- R6Class(
     closed = logical(0),
     session = 'environment',      # Object for the server app to access session stuff
     singletons = character(0),  # Tracks singleton HTML fragments sent to the page
+    user = character(0),
+    groups = character(0),
 
     initialize = function(websocket) {
       private$.websocket <- websocket
-      closed <<- FALSE
+      self$closed <- FALSE
       # TODO: Put file upload context in user/app-specific dir if possible
 
       private$.invalidatedOutputValues <- Map$new()
@@ -319,45 +320,45 @@ ShinySession <- R6Class(
       private$.flushedCallbacks <- Callbacks$new()
       private$.input      <- ReactiveValues$new()
       private$.clientData <- ReactiveValues$new()
-      progressStack <<- Stack$new()
-      files <<- Map$new()
-      downloads <<- Map$new()
+      self$progressStack <- Stack$new()
+      self$files <- Map$new()
+      self$downloads <- Map$new()
 
-      input      <<- .createReactiveValues(private$.input,      readonly=TRUE)
-      .setLabel(input, 'input')
-      clientData <<- .createReactiveValues(private$.clientData, readonly=TRUE)
-      .setLabel(clientData, 'clientData')
+      self$input <- .createReactiveValues(private$.input, readonly=TRUE)
+      .setLabel(self$input, 'input')
+      self$clientData <- .createReactiveValues(private$.clientData, readonly=TRUE)
+      .setLabel(self$clientData, 'clientData')
 
-      output     <<- .createOutputWriter(self)
+      self$output <- .createOutputWriter(self)
 
-      token <<- createUniqueId(16)
+      self$token <- createUniqueId(16)
       private$.outputs <- list()
       private$.outputOptions <- list()
 
-      session <<- new.env(parent=emptyenv())
-      session$clientData        <<- clientData
-      session$sendCustomMessage <<- self$sendCustomMessage
-      session$sendInputMessage  <<- self$sendInputMessage
-      session$unhandledError    <<- self$unhandledError
-      session$close             <<- self$close
-      session$onSessionEnded    <<- self$onSessionEnded
-      session$onEnded           <<- self$onEnded
-      session$onFlush           <<- self$onFlush
-      session$onFlushed         <<- self$onFlushed
-      session$isClosed          <<- self$isClosed
-      session$input             <<- self$input
-      session$output            <<- self$output
-      session$reactlog          <<- self$reactlog
-      session$registerDataObj   <<- self$registerDataObj
-      session$progressStack     <<- self$progressStack
-      session$sendProgress      <<- self$sendProgress
-      session$.impl             <<- self
+      self$session <<- new.env(parent=emptyenv())
+      self$session$clientData        <<- self$clientData
+      self$session$sendCustomMessage <<- self$sendCustomMessage
+      self$session$sendInputMessage  <<- self$sendInputMessage
+      self$session$unhandledError    <<- self$unhandledError
+      self$session$close             <<- self$close
+      self$session$onSessionEnded    <<- self$onSessionEnded
+      self$session$onEnded           <<- self$onEnded
+      self$session$onFlush           <<- self$onFlush
+      self$session$onFlushed         <<- self$onFlushed
+      self$session$isClosed          <<- self$isClosed
+      self$session$input             <<- self$input
+      self$session$output            <<- self$output
+      self$session$reactlog          <<- self$reactlog
+      self$session$registerDataObj   <<- self$registerDataObj
+      self$session$progressStack     <<- self$progressStack
+      self$session$sendProgress      <<- self$sendProgress
+      self$session$.impl             <<- self
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
         try({
           creds <- jsonlite::fromJSON(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)
-          session$user <<- creds$user
-          session$groups <<- creds$groups
+          self$user <- creds$user
+          self$groups <- creds$groups
         }, silent=FALSE)
       }
 
@@ -368,7 +369,7 @@ ShinySession <- R6Class(
 
       private$.write(toJSON(list(config = list(
         workerId = workerId(),
-        sessionId = token
+        sessionId = self$token
       ))))
     },
     onSessionEnded = function(callback) {
@@ -380,18 +381,18 @@ ShinySession <- R6Class(
     },
     onEnded = function(callback) {
       "Synonym for onSessionEnded"
-      return(onSessionEnded(callback))
+      return(self$onSessionEnded(callback))
     },
     unhandledError = function(e) {
-      close()
+      self$close()
     },
     close = function() {
-      if (!closed) {
+      if (!self$closed) {
         private$.websocket$close()
       }
     },
     wsClosed = function() {
-      closed <<- TRUE
+      self$closed <- TRUE
       for (output in private$.outputs) {
         output$suspend()
       }
@@ -409,10 +410,10 @@ ShinySession <- R6Class(
       })
     },
     isClosed = function() {
-      return(closed)
+      return(self$closed)
     },
     isEnded = function() {
-      return(isClosed())
+      return(self$isClosed())
     },
     setShowcase = function(value) {
       private$.showcase <- !is.null(value) && as.logical(value)
@@ -487,7 +488,7 @@ ShinySession <- R6Class(
         }, suspended=private$.shouldSuspend(name), label=label)
 
         obs$onInvalidate(function() {
-          showProgress(name)
+          self$showProgress(name)
         })
 
         private$.outputs[[name]] <- obs
@@ -533,7 +534,7 @@ ShinySession <- R6Class(
 
       # If app is already closed, be sure not to show progress, otherwise we
       # will get an error because of the closed websocket
-      if (closed)
+      if (self$closed)
         return()
 
       if (id %in% private$.progressKeys)
@@ -541,7 +542,7 @@ ShinySession <- R6Class(
 
       private$.progressKeys <- c(private$.progressKeys, id)
 
-      sendProgress('binding', list(id = id))
+      self$sendProgress('binding', list(id = id))
     },
     sendProgress = function(type, message) {
       json <- toJSON(list(
@@ -602,7 +603,7 @@ ShinySession <- R6Class(
     },
     reactlog = function(logEntry) {
       if (private$.showcase)
-        sendCustomMessage("reactlog", logEntry)
+        self$sendCustomMessage("reactlog", logEntry)
     },
 
     # Public RPC methods
@@ -623,7 +624,7 @@ ShinySession <- R6Class(
 
       jobId <- private$.fileUploadContext$createUploadOperation(fileInfos)
       return(list(jobId=jobId,
-                  uploadUrl=paste('session', token, 'upload',
+                  uploadUrl=paste('session', self$token, 'upload',
                                   paste(jobId, "?w=", workerId(), sep=""),
                                   sep='/')))
     },
@@ -646,7 +647,7 @@ ShinySession <- R6Class(
         return(httpResponse(400, 'text/html', '<h1>Bad Request</h1>'))
 
       if (matches[2] == 'file') {
-        savedFile <- files$get(URLdecode(matches[3]))
+        savedFile <- self$files$get(URLdecode(matches[3]))
         if (is.null(savedFile))
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
 
@@ -702,7 +703,7 @@ ShinySession <- R6Class(
                                 regexec("^([^/]+)(/[^/]+)?$",
                                         matches[3]))[[1]]
         dlname <- URLdecode(dlmatches[2])
-        download <- downloads$get(dlname)
+        download <- self$downloads$get(dlname)
         if (is.null(download))
           return(httpResponse(404, 'text/html', '<h1>Not Found</h1>'))
 
@@ -763,7 +764,7 @@ ShinySession <- R6Class(
                                 regexec("^([^/]+)(/[^/]+)?$",
                                         matches[3]))[[1]]
         dlname <- URLdecode(dlmatches[2])
-        download <- downloads$get(dlname)
+        download <- self$downloads$get(dlname)
         return(download$filter(download$data, req))
       }
 
@@ -772,9 +773,9 @@ ShinySession <- R6Class(
     saveFileUrl = function(name, data, contentType, extra=list()) {
       "Creates an entry in the file map for the data, and returns a URL pointing
       to the file."
-      files$set(name, list(data=data, contentType=contentType))
+      self$files$set(name, list(data=data, contentType=contentType))
       return(sprintf('session/%s/file/%s?w=%s&r=%s',
-                     URLencode(token, TRUE),
+                     URLencode(self$token, TRUE),
                      URLencode(name, TRUE),
                      workerId(),
                      createUniqueId(8)))
@@ -794,25 +795,25 @@ ShinySession <- R6Class(
         b64 <- rawToBase64(fileData)
         return(paste('data:', contentType, ';base64,', b64, sep=''))
       } else {
-        return(saveFileUrl(name, fileData, contentType))
+        return(self$saveFileUrl(name, fileData, contentType))
       }
     },
     registerDownload = function(name, filename, contentType, func) {
 
-      downloads$set(name, list(filename = filename,
+      self$downloads$set(name, list(filename = filename,
                                contentType = contentType,
                                func = func))
       return(sprintf('session/%s/download/%s?w=%s',
-                     URLencode(token, TRUE),
+                     URLencode(self$token, TRUE),
                      URLencode(name, TRUE),
                      workerId()))
     },
     # register a data object on the server side (for datatable or selectize, etc)
     registerDataObj = function(name, data, filterFunc) {
       # abusing downloads at the moment
-      downloads$set(name, list(data = data, filter = filterFunc))
+      self$downloads$set(name, list(data = data, filter = filterFunc))
       return(sprintf('session/%s/dataobj/%s?w=%s',
-                     URLencode(token, TRUE),
+                     URLencode(self$token, TRUE),
                      URLencode(name, TRUE),
                      workerId()))
     },
@@ -867,7 +868,7 @@ ShinySession <- R6Class(
 
       # If any changes to suspendWhenHidden, need to re-run manageHiddenOutputs
       if ("suspendWhenHidden" %in% names(opts)) {
-        manageHiddenOutputs()
+        self$manageHiddenOutputs()
       }
 
       if ("priority" %in% names(opts)) {

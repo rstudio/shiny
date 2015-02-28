@@ -79,8 +79,15 @@ createUniqueId <- function(bytes, prefix = "", suffix = "") {
 }
 
 toJSON <- function(x, ..., digits = getOption("shiny.json.digits", 16)) {
+  # Need to special case length-1 atomic vectors, so that jsonlite::toJSON will
+  # create valid JSON. https://github.com/jeroenooms/jsonlite/issues/71
+  if (is.atomic(x) && length(x) == 1)
+    unbox <- FALSE
+  else
+    unbox <- TRUE
+
   jsonlite::toJSON(x, dataframe = "columns", null = "null", na = "null",
-                   auto_unbox = TRUE, digits = digits, use_signif = TRUE,
+                   auto_unbox = unbox, digits = digits, use_signif = TRUE,
                    force = TRUE, ...)
 }
 

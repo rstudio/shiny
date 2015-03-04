@@ -17,6 +17,9 @@ shiny 0.11.1.9xxx
 * The `session` object now has class `ShinySession`, making it easier to test
   whether an object is indeed a session object. (#720, #746)
 
+* Fix JavaScript error when an output appears in nested uiOutputs. (Thanks,
+  Gregory Zhang. #749)
+
 shiny 0.11.1
 --------------------------------------------------------------------------------
 

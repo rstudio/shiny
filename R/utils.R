@@ -290,8 +290,7 @@ download <- function(url, ...) {
   }
 }
 
-knownContentTypes <- Map$new()
-knownContentTypes$mset(
+knownContentTypes <- list(
   html='text/html; charset=UTF-8',
   htm='text/html; charset=UTF-8',
   js='text/javascript',
@@ -332,10 +331,11 @@ knownContentTypes$mset(
   docx='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   dotx='application/vnd.openxmlformats-officedocument.wordprocessingml.template',
   xlam='application/vnd.ms-excel.addin.macroEnabled.12',
-  xlsb='application/vnd.ms-excel.sheet.binary.macroEnabled.12')
+  xlsb='application/vnd.ms-excel.sheet.binary.macroEnabled.12'
+)
 
 getContentType <- function(ext, defaultType='application/octet-stream') {
-  knownContentTypes$get(tolower(ext)) %OR% defaultType
+  knownContentTypes[[tolower(ext)]] %OR% defaultType
 }
 
 # Create a zero-arg function from a quoted expression and environment

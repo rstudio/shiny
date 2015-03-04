@@ -651,15 +651,12 @@ validateSelected <- function(selected, choices, inputId) {
 # generate options for radio buttons and checkbox groups (type = 'checkbox' or
 # 'radio')
 generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox') {
-  # create tags for each of the options
-  ids <- paste0(inputId, seq_along(choices))
-
   # generate a list of <input type=? [checked] />
   options <- mapply(
-    ids, choices, names(choices),
-    FUN = function(id, value, name) {
+    choices, names(choices),
+    FUN = function(value, name) {
       inputTag <- tags$input(
-        type = type, name = inputId, id = id, value = value
+        type = type, name = inputId, value = value
       )
       if (value %in% selected)
         inputTag$attribs$checked <- "checked"

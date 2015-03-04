@@ -2447,12 +2447,6 @@
     // Given an input DOM object, get the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.
     _getLabel: function(obj) {
-      // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for="' + $escape(obj.id) + '"]');
-      if ($label_for.length > 0) {
-        return $.trim($label_for.text());
-      }
-
       // If <label><input /><span>label text</span></label>
       if (obj.parentNode.tagName === "LABEL") {
         return $.trim($(obj.parentNode).find('span').text());
@@ -2463,12 +2457,6 @@
     // Given an input DOM object, set the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.
     _setLabel: function(obj, value) {
-      // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for="' + $escape(obj.id) + '"]');
-      if ($label_for.length > 0) {
-        $label_for.text(value);
-      }
-
       // If <label><input /><span>label text</span></label>
       if (obj.parentNode.tagName === "LABEL") {
         $(obj.parentNode).find('span').text(value);
@@ -2559,12 +2547,6 @@
     // Given an input DOM object, get the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.
     _getLabel: function(obj) {
-      // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for="' + $escape(obj.id) + '"]');
-      if ($label_for.length > 0) {
-        return $.trim($label_for.text());
-      }
-
       // If <label><input /><span>label text</span></label>
       if (obj.parentNode.tagName === "LABEL") {
         return $.trim($(obj.parentNode).find('span').text());
@@ -2575,12 +2557,6 @@
     // Given an input DOM object, set the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.
     _setLabel: function(obj, value) {
-      // If <input id='myid'><label for='myid'>label text</label>
-      var $label_for = $('label[for="' + $escape(obj.id) + '"]');
-      if ($label_for.length > 0) {
-        $label_for.text(value);
-      }
-
       // If <label><input /><span>label text</span></label>
       if (obj.parentNode.tagName === "LABEL") {
         $(obj.parentNode).find('span').text(value);

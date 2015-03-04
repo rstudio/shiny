@@ -2935,10 +2935,17 @@
           if (!id)
             continue;
 
+          var $el = $(el);
+          if ($el.data('shiny-output-binding')) {
+            // Already bound; can happen with nested uiOutput (bindAll
+            // gets called on two ancestors)
+            continue;
+          }
+
           var bindingAdapter = new OutputBindingAdapter(el, binding);
           shinyapp.bindOutput(id, bindingAdapter);
-          $(el).data('shiny-output-binding', bindingAdapter);
-          $(el).addClass('shiny-bound-output');
+          $el.data('shiny-output-binding', bindingAdapter);
+          $el.addClass('shiny-bound-output');
         }
       }
 

@@ -730,8 +730,8 @@ ShinySession <- R6Class(
         ))
         if (inherits(result, 'try-error')) {
           unlink(tmpdata)
-          return(httpResponse(500, 'text/plain',
-                              attr(result, 'condition')$message))
+          return(httpResponse(500, 'text/plain; charset=UTF-8',
+                              enc2utf8(attr(result, 'condition')$message)))
         }
         return(httpResponse(
           200,

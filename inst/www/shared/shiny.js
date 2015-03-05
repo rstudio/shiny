@@ -3063,10 +3063,7 @@
 
     function _bindAll(scope) {
       bindOutputs(scope);
-      return $.extend(
-        {},
-        bindInputs(scope)
-      );
+      return bindInputs(scope);
     }
     function unbindAll(scope) {
       unbindInputs(scope);

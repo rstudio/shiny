@@ -561,10 +561,11 @@ serviceApp <- function() {
 #'
 #' @param appDir The directory of the application. Should contain
 #'   \code{server.R}, plus, either \code{ui.R} or a \code{www} directory that
-#'   contains the file \code{index.html}. Defaults to the working directory.
-#'   Instead of a directory, this could be a list with \code{ui} and
-#'   \code{server} components, or a Shiny app object created by
-#'   \code{\link{shinyApp}}.
+#'   contains the file \code{index.html}. Alternately, instead of
+#'   \code{server.R} and \code{ui.R}, the directory may contain just
+#'   \code{app.R}. Defaults to the working directory. Instead of a directory,
+#'   this could be a list with \code{ui} and \code{server} components, or a
+#'   Shiny app object created by \code{\link{shinyApp}}.
 #' @param port The TCP port that the application should listen on. Defaults to
 #'   choosing a random port.
 #' @param launch.browser If true, the system's default web browser will be

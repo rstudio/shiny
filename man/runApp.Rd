@@ -4,7 +4,7 @@
 \alias{runApp}
 \title{Run Shiny Application}
 \usage{
-runApp(appDir = getwd(), port = NULL,
+runApp(appDir = getwd(), port = getOption("shiny.port"),
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"), workerId = "",
   quiet = FALSE, display.mode = c("auto", "normal", "showcase"))
@@ -18,8 +18,10 @@ contains the file \code{index.html}. Alternately, instead of
 this could be a list with \code{ui} and \code{server} components, or a
 Shiny app object created by \code{\link{shinyApp}}.}
 
-\item{port}{The TCP port that the application should listen on. Defaults to
-choosing a random port.}
+\item{port}{The TCP port that the application should listen on. If the
+\code{port} is not specified, and the \code{shiny.port} option is set (with
+\code{options(shiny.port = XX)}), then that port will be used. Otherwise,
+use a random port.}
 
 \item{launch.browser}{If true, the system's default web browser will be
 launched automatically after the app is started. Defaults to true in

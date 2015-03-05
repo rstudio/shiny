@@ -11,6 +11,8 @@ be set with (for example) \code{options(shiny.trace=TRUE)}.
 \describe{
   \item{shiny.launch.browser}{A boolean which controls the default behavior
     when an app is run. See \code{\link{runApp}} for more information.}
+  \item{shiny.port}{A port number that Shiny will listen on. See
+    \code{\link{runApp}} for more information.}
   \item{shiny.trace}{If \code{TRUE}, all of the messages sent between the R
     server and the web browser client will be printed on the console. This
     is useful for debugging.}

@@ -274,11 +274,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
     }
 
     # If contentType not specified, autodetect based on extension
-    if (is.null(imageinfo$contentType)) {
-      contentType <- getContentType(sub('^.*\\.', '', basename(imageinfo$src)))
-    } else {
-      contentType <- imageinfo$contentType
-    }
+    contentType <- imageinfo$contentType %OR% getContentType(imageinfo$src)
 
     # Extra values are everything in imageinfo except 'src' and 'contentType'
     extra_attr <- imageinfo[!names(imageinfo) %in% c('src', 'contentType')]

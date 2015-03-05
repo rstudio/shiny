@@ -203,8 +203,7 @@ staticHandler <- function(root) {
     if (is.null(abs.path))
       return(NULL)
 
-    ext <- tools::file_ext(abs.path)
-    content.type <- getContentType(ext)
+    content.type <- getContentType(abs.path)
     response.content <- readBin(abs.path, 'raw', n=file.info(abs.path)$size)
     return(httpResponse(200, content.type, response.content))
   })

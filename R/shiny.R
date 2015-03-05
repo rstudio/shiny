@@ -603,7 +603,7 @@ ShinySession <- R6Class(
       maxSize <- getOption('shiny.maxRequestSize', 5 * 1024 * 1024)
       fileInfos <- lapply(fileInfos, function(fi) {
         if (is.null(fi$type))
-          fi$type <- getContentType(tools::file_ext(fi$name))
+          fi$type <- getContentType(fi$name)
         fi
       })
       sizes <- sapply(fileInfos, function(fi){ fi$size })
@@ -733,7 +733,7 @@ ShinySession <- R6Class(
         }
         return(httpResponse(
           200,
-          download$contentType %OR% getContentType(tools::file_ext(filename)),
+          download$contentType %OR% getContentType(filename),
           # owned=TRUE means tmpdata will be deleted after response completes
           list(file=tmpdata, owned=TRUE),
           c(

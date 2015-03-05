@@ -205,7 +205,19 @@ staticHandler <- function(root) {
 
     ext <- tools::file_ext(abs.path)
     content.type <- getContentType(ext)
-    response.content <- readBin(abs.path, 'raw', n=file.info(abs.path)$size)
+        if(length(req$HTTP_RANGE) && grepl('^bytes=.+', req$HTTP_RANGE)) {
+        rng <- as.integer(
+            strsplit(gsub('^bytes=', '', req$HTTP_RANGE), '-')[[1]]
+        )
+        file.connection <- file(abs.path, "rb")
+        seek(file.connection, where = rng[1], origin = "start")
+        response.content <- readBin(
+            file.connection, 'raw', n=length(rng[1]:rng[2])
+        )
+        close(file.connection)
+    } else {
+        response.content <- readBin(abs.path, 'raw', n=file.info(abs.path)$size)
+    }
     return(httpResponse(200, content.type, response.content))
   })
 }

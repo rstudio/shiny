@@ -1821,6 +1821,14 @@
     setValue: function(el, value) {
       el.checked = value;
     },
+    subscribe: function(el, callback) {
+      $(el).on('change.checkboxInputBinding', function(event) {
+        callback(true);
+      });
+    },
+    unsubscribe: function(el) {
+      $(el).off('.checkboxInputBinding');
+    },
     getState: function(el) {
       return {
         label: $(el).parent().find('span').text(),

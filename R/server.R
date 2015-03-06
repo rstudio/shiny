@@ -566,8 +566,10 @@ serviceApp <- function() {
 #'   \code{app.R}. Defaults to the working directory. Instead of a directory,
 #'   this could be a list with \code{ui} and \code{server} components, or a
 #'   Shiny app object created by \code{\link{shinyApp}}.
-#' @param port The TCP port that the application should listen on. Defaults to
-#'   choosing a random port.
+#' @param port The TCP port that the application should listen on. If the
+#'   \code{port} is not specified, and the \code{shiny.port} option is set (with
+#'   \code{options(shiny.port = XX)}), then that port will be used. Otherwise,
+#'   use a random port.
 #' @param launch.browser If true, the system's default web browser will be
 #'   launched automatically after the app is started. Defaults to true in
 #'   interactive sessions only. This value of this parameter can also be a
@@ -622,7 +624,7 @@ serviceApp <- function() {
 #' }
 #' @export
 runApp <- function(appDir=getwd(),
-                   port=NULL,
+                   port=getOption('shiny.port'),
                    launch.browser=getOption('shiny.launch.browser',
                                             interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),

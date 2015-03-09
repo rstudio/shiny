@@ -140,20 +140,20 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       }
 
       coordmap <<- list(
-        usr = c(
+        usr = list(
           left = usrCoords[1],
           right = usrCoords[2],
           bottom = usrCoords[3],
           top = usrCoords[4]
         ),
         # The bounds of the plot area, in DOM pixels
-        bounds = c(
+        bounds = list(
           left = grconvertX(usrBounds[1], 'user', 'nfc') * width,
           right = grconvertX(usrBounds[2], 'user', 'nfc') * width,
           bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height,
           top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height
         ),
-        log = c(
+        log = list(
           x = par('xlog'),
           y = par('ylog')
         ),

@@ -1296,6 +1296,37 @@
           };
         };
 
+        var getMouseCoordinates = function(offset) {
+          // TODO: Account for scrolling within the image??
+
+          var coordmap = $el.data('coordmap');
+          function devToUsrX(deviceX) {
+            var x = deviceX - coordmap.bounds.left;
+            var factor = (coordmap.usr.right - coordmap.usr.left) /
+                (coordmap.bounds.right - coordmap.bounds.left);
+            return (x * factor) + coordmap.usr.left;
+          }
+          function devToUsrY(deviceY) {
+            var y = deviceY - coordmap.bounds.bottom;
+            var factor = (coordmap.usr.top - coordmap.usr.bottom) /
+                (coordmap.bounds.top - coordmap.bounds.bottom);
+            return (y * factor) + coordmap.usr.bottom;
+          }
+
+          var userX = devToUsrX(offset.x);
+          if (coordmap.log.x)
+            userX = Math.pow(10, userX);
+
+          var userY = devToUsrY(offset.y);
+          if (coordmap.log.y)
+            userY = Math.pow(10, userY);
+
+          return {
+            x: userX,
+            y: userY
+          };
+        };
+
         var createMouseHandler = function(inputId) {
           return function(e) {
             if (e === null) {
@@ -1303,37 +1334,11 @@
               return;
             }
 
-            // TODO: Account for scrolling within the image??
-
-            var coordmap = $el.data('coordmap');
-            function devToUsrX(deviceX) {
-              var x = deviceX - coordmap.bounds.left;
-              var factor = (coordmap.usr.right - coordmap.usr.left) /
-                  (coordmap.bounds.right - coordmap.bounds.left);
-              return (x * factor) + coordmap.usr.left;
-            }
-            function devToUsrY(deviceY) {
-              var y = deviceY - coordmap.bounds.bottom;
-              var factor = (coordmap.usr.top - coordmap.usr.bottom) /
-                  (coordmap.bounds.top - coordmap.bounds.bottom);
-              return (y * factor) + coordmap.usr.bottom;
-            }
-
             var offset = mouseOffset(e);
+            var coords = getMouseCoordinates(offset);
+            coords[".nonce"] = Math.random();
 
-            var userX = devToUsrX(offset.x);
-            if (coordmap.log.x)
-              userX = Math.pow(10, userX);
-
-            var userY = devToUsrY(offset.y);
-            if (coordmap.log.y)
-              userY = Math.pow(10, userY);
-
-            exports.onInputChange(inputId, {
-              x: userX,
-              y: userY,
-              ".nonce": Math.random()
-            });
+            exports.onInputChange(inputId, coords);
           };
         };
 

@@ -1327,7 +1327,7 @@
           };
         };
 
-        var createMouseHandler = function(inputId) {
+        var createClickHandler = function(inputId) {
           return function(e) {
             if (e === null) {
               exports.onInputChange(inputId, null);
@@ -1342,16 +1342,21 @@
           };
         };
 
-        if (!$el.data('hover-func')) {
+        var createHoverHandler = function(inputId) {
           var hoverDelayType = $el.data('hover-delay-type') || 'debounce';
           var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
+          // Hover handler is basically a throttled/debounced click handler
           var hoverFunc = delayFunc($el.data('hover-delay') || 300,
-                                    createMouseHandler(hoverId));
-          $el.data('hover-func', hoverFunc);
+                                    createClickHandler(inputId));
+          return hoverFunc;
+        };
+
+        if (!$el.data('hover-func')) {
+          $el.data('hover-func', createHoverHandler(hoverId));
         }
 
         if (clickId)
-          $(img).on('mousedown', createMouseHandler(clickId));
+          $(img).on('mousedown', createClickHandler(clickId));
         if (hoverId) {
           $(img).on('mousemove', $el.data('hover-func'));
           $(img).on('mouseout', function(e) {

@@ -1264,11 +1264,12 @@
       var $el = $(el);
       // Load the image before emptying, to minimize flicker
       var img = null;
-      var clickId, hoverId;
+      var clickId, hoverId, brushId;
 
       if (data) {
         clickId = $el.data('click-id');
         hoverId = $el.data('hover-id');
+        brushId = $el.data('brush-id');
 
         $el.data('coordmap', data.coordmap);
         delete data.coordmap;
@@ -1351,6 +1352,36 @@
           return hoverFunc;
         };
 
+        var createBrushHandler = function(inputId) {
+          var isBrushing = false;
+          var startBrushCoords = null;
+
+          return function(e) {
+            var mouseCoords = getMouseCoordinates(mouseOffset(e));
+
+            if (e.type === 'mousedown') {
+              startBrushCoords = mouseCoords;
+              isBrushing = true;
+              return;
+
+            } else if (e.type === 'mouseup') {
+              if (!isBrushing) return;
+
+              isBrushing = false;
+
+              // Get the end coordinates as xend and yend
+              var coords = startBrushCoords;
+              coords.xend = mouseCoords.x;
+              coords.yend = mouseCoords.y;
+
+              // Send data to server
+              coords[".nonce"] = Math.random();
+              exports.onInputChange(inputId, coords);
+            }
+
+          };
+        };
+
         if (!$el.data('hover-func')) {
           $el.data('hover-func', createHoverHandler(hoverId));
         }
@@ -1362,6 +1393,14 @@
           $(img).on('mouseout', function(e) {
             $el.data('hover-func')(null);
           });
+        }
+        if (brushId) {
+          // Make image non-draggable
+          $(img).css('-webkit-user-drag', 'none');
+
+          var brushHandler = createBrushHandler(brushId);
+          $(img).on('mousedown', brushHandler);
+          $(img).on('mouseup', brushHandler);
         }
 
         if (clickId || hoverId) {

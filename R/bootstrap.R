@@ -1761,7 +1761,8 @@ imageOutput <- function(outputId, width = "100%", height="400px", inline=FALSE) 
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
                        clickId = NULL, hoverId = NULL, hoverDelay = 300,
-                       hoverDelayType = c("debounce", "throttle"), inline = FALSE) {
+                       hoverDelayType = c("debounce", "throttle"),
+                       brushId = NULL, inline = FALSE) {
   if (is.null(clickId) && is.null(hoverId)) {
     hoverDelay <- NULL
     hoverDelayType <- NULL
@@ -1775,10 +1776,12 @@ plotOutput <- function(outputId, width = "100%", height="400px",
 
   container <- if (inline) span else div
   container(id = outputId, class = "shiny-plot-output", style = style,
-      `data-click-id` = clickId,
-      `data-hover-id` = hoverId,
-      `data-hover-delay` = hoverDelay,
-      `data-hover-delay-type` = hoverDelayType)
+    `data-click-id` = clickId,
+    `data-hover-id` = hoverId,
+    `data-hover-delay` = hoverDelay,
+    `data-hover-delay-type` = hoverDelayType,
+    `data-brush-id` = brushId
+  )
 }
 
 #' Create a table output element

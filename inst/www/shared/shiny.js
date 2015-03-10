@@ -1275,16 +1275,21 @@
 
       var opts = {
         clickId: $el.data('click-id'),
+        clickClip: $el.data('click-clip') || true,
+
         hoverId: $el.data('hover-id'),
+        hoverClip: $el.data('hover-clip') || true,
         hoverDelayType: $el.data('hover-delay-type') || 'debounce',
         hoverDelay: $el.data('hover-delay') || 300,
+
         brushId: $el.data('brush-id'),
+        brushClip: $el.data('brush-clip') || true,
         brushDelayType: $el.data('brush-delay-type') || 'debounce',
         brushDelay: $el.data('brush-delay') || 300,
         brushColor: $el.data('brush-color') || '#666',
         brushOutline: $el.data('brush-outline') || '#000',
         brushOpacity: $el.data('brush-opacity') || 0.3,
-        coordmap: data.coordmap,
+        coordmap: data.coordmap
       };
 
       img = document.createElement('img');
@@ -1310,24 +1315,47 @@
         };
       };
 
-      // Mouse coordinates in the data space
-      var getMouseCoordinates = function(offset) {
-        // TODO: Account for scrolling within the image??
-        var coordmap = opts.coordmap;
+      // Transform offset coordinates to data space coordinates
+      var getScaledCoordinates = function(offset, clip) {
+        // By default, clip to plotting region
+        clip = clip || true;
 
+        var coordmap = opts.coordmap;
         if (!coordmap) return offset;
 
         function devToUsrX(deviceX) {
           var x = deviceX - coordmap.bounds.left;
           var factor = (coordmap.usr.right - coordmap.usr.left) /
-              (coordmap.bounds.right - coordmap.bounds.left);
-          return (x * factor) + coordmap.usr.left;
+                       (coordmap.bounds.right - coordmap.bounds.left);
+          var newx = (x * factor) + coordmap.usr.left;
+
+          if (clip) {
+            var max = Math.max(coordmap.usr.right, coordmap.usr.left);
+            var min = Math.min(coordmap.usr.right, coordmap.usr.left);
+            if (newx > max)
+              newx = max;
+            else if (newx < min)
+              newx = min;
+          }
+
+          return newx;
         }
         function devToUsrY(deviceY) {
           var y = deviceY - coordmap.bounds.bottom;
           var factor = (coordmap.usr.top - coordmap.usr.bottom) /
-              (coordmap.bounds.top - coordmap.bounds.bottom);
-          return (y * factor) + coordmap.usr.bottom;
+                       (coordmap.bounds.top - coordmap.bounds.bottom);
+          var newy = (y * factor) + coordmap.usr.bottom;
+
+          if (clip) {
+            var max = Math.max(coordmap.usr.top, coordmap.usr.bottom);
+            var min = Math.min(coordmap.usr.top, coordmap.usr.bottom);
+            if (newy > max)
+              newy = max;
+            else if (newy < min)
+              newy = min;
+          }
+
+          return newy;
         }
 
         var userX = devToUsrX(offset.x);
@@ -1344,26 +1372,81 @@
         };
       };
 
+      var isInPlottingRegion = function(offset) {
+        if (!opts.coordmap) return offset;
+        var bounds = opts.coordmap.bounds;
+        return offset.x < bounds.right &&
+               offset.x > bounds.left &&
+               offset.y < bounds.bottom &&
+               offset.y > bounds.top;
+      };
+
+      // Given an offset, clip it to the plotting region as specified by
+      // coordmap. If there is no coordmap, clip it to bounds of the DOM
+      // element.
+      var clipToPlottingRegion = function(offset) {
+        var bounds;
+        if (opts.coordmap) {
+          bounds = opts.coordmap.bounds;
+        } else {
+          bounds = {
+            top: 0,
+            left: 0,
+            right: img.clientWidth,
+            bottom: img.clientHeight
+          };
+        }
+
+        var newOffset = {
+          x: offset.x,
+          y: offset.y
+        };
+
+        if (offset.x > bounds.right)
+          newOffset.x = bounds.right;
+        else if (offset.x < bounds.left)
+          newOffset.x = bounds.left;
+
+        if (offset.y > bounds.bottom)
+          newOffset.y = bounds.bottom;
+        else if (offset.y < bounds.top)
+          newOffset.y = bounds.top;
+
+        return newOffset;
+      };
+
       var createClickHandler = function(inputId) {
         return function(e) {
+          var offset = mouseOffset(e);
+          // Ignore events outside of plotting region
+          if (opts.clickClip && !isInPlottingRegion(offset)) return;
+
+          var coords = getScaledCoordinates(offset);
+          coords[".nonce"] = Math.random();
+          exports.onInputChange(inputId, coords);
+        };
+      };
+
+      var createHoverHandler = function(inputId) {
+        var sendInfo = function(e) {
           if (e === null) {
             exports.onInputChange(inputId, null);
             return;
           }
 
           var offset = mouseOffset(e);
-          var coords = getMouseCoordinates(offset);
-          coords[".nonce"] = Math.random();
+          // Ignore events outside of plotting region
+          if (opts.hoverClip && !isInPlottingRegion(offset)) return;
 
+          var coords = getScaledCoordinates(offset);
+          coords[".nonce"] = Math.random();
           exports.onInputChange(inputId, coords);
         };
-      };
 
-      var createHoverHandler = function(inputId) {
         var hoverDelayType = opts.hoverDelayType;
         var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
         // Hover handler is basically a throttled/debounced click handler
-        var hoverFunc = delayFunc(opts.hoverDelay, createClickHandler(inputId));
+        var hoverFunc = delayFunc(opts.hoverDelay, sendInfo);
 
         return {
           mousemove: hoverFunc,
@@ -1418,8 +1501,8 @@
         function sendBrushInfo() {
           // Transform coordinates of brush to data space
           var prev = prevBrushMinMax();
-          var min = getMouseCoordinates(prev.min);
-          var max = getMouseCoordinates(prev.max);
+          var min = getScaledCoordinates(prev.min, opts.brushClip);
+          var max = getScaledCoordinates(prev.max, opts.brushClip);
 
           // Because the x and y directions of the pixel space may differ from
           // the x and y directions of the data space, we need to recalculate
@@ -1460,6 +1543,9 @@
 
           var offset = mouseOffset(e);
 
+          // Ignore mousedown events outside of plotting region
+          if (opts.brushClip && !isInPlottingRegion(offset)) return;
+
           if (mouseInsideLastBrush()) {
             isDragging = true;
             dragPrev = offset;
@@ -1487,6 +1573,9 @@
           var offset = mouseOffset(e);
 
           if (isBrushing) {
+            if (opts.brushClip)
+              offset = clipToPlottingRegion(offset);
+
             end = offset;
 
             $brushDiv.offset({
@@ -1501,14 +1590,55 @@
             var dx = dragPrev.x - offset.x;
             var dy = dragPrev.y - offset.y;
 
-            dragPrev = offset;
+            // Calculate new start/end positions
+            var newStart = {
+              x: start.x - dx,
+              y: start.y - dy
+            };
+            var newEnd = {
+              x: end.x - dx,
+              y: end.y - dy
+            };
 
-            // Now offset the start and end by the drag amount
-            start.x = start.x - dx;
-            start.y = start.y - dy;
-            end.x   = end.x   - dx;
-            end.y   = end.y   - dy;
+            if (opts.brushClip) {
+              // Check that the start/end positions are in the plotting region.
+              // If not, adjust the values so that they're inside.
+              var newStartClipped = clipToPlottingRegion(newStart);
+              var clipdx = newStartClipped.x - newStart.x;
+              var clipdy = newStartClipped.y - newStart.y;
+              if (clipdx !== 0) {
+                newStart.x += clipdx;
+                newEnd.x   += clipdx;
+              }
+              if (clipdy !== 0) {
+                newStart.y += clipdy;
+                newEnd.y   += clipdy;
+              }
 
+              var newEndClipped = clipToPlottingRegion(newEnd);
+              clipdx = newEndClipped.x - newEnd.x;
+              clipdy = newEndClipped.y - newEnd.y;
+              if (clipdx !== 0) {
+                newStart.x += clipdx;
+                newEnd.x   += clipdx;
+              }
+              if (clipdy !== 0) {
+                newStart.y += clipdy;
+                newEnd.y   += clipdy;
+              }
+
+              // Recalculate dx and dy from the adjusted values
+              dx = start.x - newStart.x;
+              dy = start.y - newStart.y;
+            }
+
+            start = newStart;
+            end = newEnd;
+
+            dragPrev.x -= dx;
+            dragPrev.y -= dy;
+
+            // Move the div
             var prev = prevBrushMinMax();
             $brushDiv.offset({
               top: imgOffset.top + prev.min.y - dy,

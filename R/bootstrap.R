@@ -1712,12 +1712,15 @@ verbatimTextOutput <- function(outputId) {
 #' )
 #' @export
 imageOutput <- function(outputId, width = "100%", height="400px",
-                        clickId = NULL, hoverId = NULL, hoverDelay = 300,
+                        clickId = NULL, clickClip = TRUE,
+                        hoverId = NULL, hoverClip = TRUE,
+                        hoverDelay = 300,
                         hoverDelayType = c("debounce", "throttle"),
                         brushId = NULL, brushColor = "#666",
                         brushOutline = "#000", brushOpacity = 0.3,
                         brushDelay = 300,
                         brushDelayType = c("debounce", "throttle"),
+                        brushClip = TRUE,
                         inline = FALSE) {
   if (is.null(hoverId)) {
     hoverDelay <- NULL
@@ -1740,10 +1743,13 @@ imageOutput <- function(outputId, width = "100%", height="400px",
   container <- if (inline) span else div
   container(id = outputId, class = "shiny-image-output", style = style,
     `data-click-id` = clickId,
+    `data-click-clip` = clickClip,
     `data-hover-id` = hoverId,
+    `data-hover-clip` = hoverClip,
     `data-hover-delay` = hoverDelay,
     `data-hover-delay-type` = hoverDelayType,
     `data-brush-id` = brushId,
+    `data-brush-clip` = brushClip,
     `data-brush-color` = brushColor,
     `data-brush-outline` = brushOutline,
     `data-brush-opacity` = brushOpacity,
@@ -1794,12 +1800,15 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #' )
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
-                       clickId = NULL, hoverId = NULL, hoverDelay = 300,
+                       clickId = NULL, clickClip = TRUE,
+                       hoverId = NULL, hoverClip = TRUE,
+                       hoverDelay = 300,
                        hoverDelayType = c("debounce", "throttle"),
                        brushId = NULL, brushColor = "#666",
                        brushOutline = "#000", brushOpacity = 0.3,
                        brushDelay = 300,
                        brushDelayType = c("debounce", "throttle"),
+                       brushClip = TRUE,
                        inline = FALSE) {
   if (is.null(hoverId)) {
     hoverDelay <- NULL
@@ -1820,12 +1829,15 @@ plotOutput <- function(outputId, width = "100%", height="400px",
   }
 
   container <- if (inline) span else div
-  container(id = outputId, class = "shiny-plot-output", style = style,
+  container(id = outputId, class = "shiny-image-output", style = style,
     `data-click-id` = clickId,
+    `data-click-clip` = clickClip,
     `data-hover-id` = hoverId,
+    `data-hover-clip` = hoverClip,
     `data-hover-delay` = hoverDelay,
     `data-hover-delay-type` = hoverDelayType,
     `data-brush-id` = brushId,
+    `data-brush-clip` = brushClip,
     `data-brush-color` = brushColor,
     `data-brush-outline` = brushOutline,
     `data-brush-opacity` = brushOpacity,

@@ -1531,7 +1531,7 @@
           $img.on('mouseup', brushHandler.mouseup);
         }
 
-        if (clickId || hoverId) {
+        if (clickId || hoverId || brushId) {
           $img.addClass('crosshair');
         }
       }

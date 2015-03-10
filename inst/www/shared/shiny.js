@@ -1266,280 +1266,285 @@
       var img = null;
       var clickId, hoverId, brushId;
 
-      if (data) {
-        clickId = $el.data('click-id');
-        hoverId = $el.data('hover-id');
-        brushId = $el.data('brush-id');
+      if (!data) {
+        $el.empty();
+        return;
+      }
 
-        $el.data('coordmap', data.coordmap);
-        delete data.coordmap;
+      clickId = $el.data('click-id');
+      hoverId = $el.data('hover-id');
+      brushId = $el.data('brush-id');
 
-        img = document.createElement('img');
-        // Copy items from data to img. This should include 'src'
-        $.each(data, function(key, value) {
-          if (value !== null)
-            img[key] = value;
-        });
+      $el.data('coordmap', data.coordmap);
+      delete data.coordmap;
 
-        // Firefox doesn't have offsetX/Y, so we need to use an alternate
-        // method of calculation for it
-        var mouseOffset = function(mouseEvent) {
-          if (typeof(mouseEvent.offsetX) !== 'undefined') {
-            return {
-              x: mouseEvent.offsetX,
-              y: mouseEvent.offsetY
-            };
-          }
-          var offset = $el.offset();
+      img = document.createElement('img');
+      // Copy items from data to img. This should include 'src'
+      $.each(data, function(key, value) {
+        if (value !== null)
+          img[key] = value;
+      });
+
+      // Firefox doesn't have offsetX/Y, so we need to use an alternate
+      // method of calculation for it
+      var mouseOffset = function(mouseEvent) {
+        if (typeof(mouseEvent.offsetX) !== 'undefined') {
           return {
-            x: mouseEvent.pageX - offset.left,
-            y: mouseEvent.pageY - offset.top
+            x: mouseEvent.offsetX,
+            y: mouseEvent.offsetY
           };
+        }
+        var offset = $el.offset();
+        return {
+          x: mouseEvent.pageX - offset.left,
+          y: mouseEvent.pageY - offset.top
         };
+      };
 
-        // Mouse coordinates in the data space
-        var getMouseCoordinates = function(offset) {
-          // TODO: Account for scrolling within the image??
-          var coordmap = $el.data('coordmap');
+      // Mouse coordinates in the data space
+      var getMouseCoordinates = function(offset) {
+        // TODO: Account for scrolling within the image??
+        var coordmap = $el.data('coordmap');
 
-          if (!coordmap) return offset;
+        if (!coordmap) return offset;
 
-          function devToUsrX(deviceX) {
-            var x = deviceX - coordmap.bounds.left;
-            var factor = (coordmap.usr.right - coordmap.usr.left) /
-                (coordmap.bounds.right - coordmap.bounds.left);
-            return (x * factor) + coordmap.usr.left;
+        function devToUsrX(deviceX) {
+          var x = deviceX - coordmap.bounds.left;
+          var factor = (coordmap.usr.right - coordmap.usr.left) /
+              (coordmap.bounds.right - coordmap.bounds.left);
+          return (x * factor) + coordmap.usr.left;
+        }
+        function devToUsrY(deviceY) {
+          var y = deviceY - coordmap.bounds.bottom;
+          var factor = (coordmap.usr.top - coordmap.usr.bottom) /
+              (coordmap.bounds.top - coordmap.bounds.bottom);
+          return (y * factor) + coordmap.usr.bottom;
+        }
+
+        var userX = devToUsrX(offset.x);
+        if (coordmap.log.x)
+          userX = Math.pow(10, userX);
+
+        var userY = devToUsrY(offset.y);
+        if (coordmap.log.y)
+          userY = Math.pow(10, userY);
+
+        return {
+          x: userX,
+          y: userY
+        };
+      };
+
+      var createClickHandler = function(inputId) {
+        return function(e) {
+          if (e === null) {
+            exports.onInputChange(inputId, null);
+            return;
           }
-          function devToUsrY(deviceY) {
-            var y = deviceY - coordmap.bounds.bottom;
-            var factor = (coordmap.usr.top - coordmap.usr.bottom) /
-                (coordmap.bounds.top - coordmap.bounds.bottom);
-            return (y * factor) + coordmap.usr.bottom;
-          }
 
-          var userX = devToUsrX(offset.x);
-          if (coordmap.log.x)
-            userX = Math.pow(10, userX);
+          var offset = mouseOffset(e);
+          var coords = getMouseCoordinates(offset);
+          coords[".nonce"] = Math.random();
 
-          var userY = devToUsrY(offset.y);
-          if (coordmap.log.y)
-            userY = Math.pow(10, userY);
+          exports.onInputChange(inputId, coords);
+        };
+      };
 
+      var createHoverHandler = function(inputId) {
+        var hoverDelayType = $el.data('hover-delay-type') || 'debounce';
+        var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
+        // Hover handler is basically a throttled/debounced click handler
+        var hoverFunc = delayFunc($el.data('hover-delay') || 300,
+                                  createClickHandler(inputId));
+
+        return {
+          mousemove: hoverFunc,
+          // Need to call hoverFunc instead of setting input value directly
+          // because of the debouncing. If we set input value directly, there
+          // could be a pending debounced hoverFunc call that will set value
+          // later.
+          mouseout: function(e) { hoverFunc(null); }
+        };
+      };
+
+      // Returns a brush handler object. This has three public functions:
+      // mousedown, mousemove, and mouseup.
+      var createBrushHandler = function(inputId) {
+        var isBrushing = false;
+        // Brush starting position in pixels
+        var start = { x: NaN, y: NaN };
+        // Ending position of previous brush
+        var end = { x: NaN, y: NaN };
+
+        var isDragging = false;
+        var dragStart = { x: NaN, y: NaN };
+
+        // Return page x/y coordinates of previous brush, in min/max values
+        // instead of start/end.
+        function prevBrushMinMax() {
           return {
-            x: userX,
-            y: userY
+            min: {
+              x: Math.min(start.x, end.x),
+              y: Math.min(start.y, end.y)
+            },
+            max: {
+              x: Math.max(start.x, end.x),
+              y: Math.max(start.y, end.y)
+            }
           };
-        };
+        }
 
-        var createClickHandler = function(inputId) {
-          return function(e) {
-            if (e === null) {
+        var $brushDiv = $(document.createElement('div'))
+          .attr('id', el.id + '_brush')
+          .css({
+            'background-color': $el.data('brush-color'),
+            'border-color': $el.data('brush-outline'),
+            'border-style': 'solid',
+            'border-width': '1px',
+            'opacity': $el.data('brush-opacity'),
+            'pointer-events': 'none',
+            'position': 'absolute'
+          });
+
+
+        function mousedown(e) {
+          // This can happen when mousedown inside the graphic, then mouseup
+          // outside, then mousedown inside. Just ignore the second
+          // mousedown.
+          if (isBrushing || isDragging) return;
+
+          // Return true if the mouse is inside the previous brush
+          function mouseInsideLastBrush() {
+            var prev = prevBrushMinMax();
+            var cur = mouseOffset(e);
+            return cur.x <= prev.max.x && cur.x >= prev.min.x &&
+                   cur.y <= prev.max.y && cur.y >= prev.min.y;
+          }
+
+          var offset = mouseOffset(e);
+
+          if (mouseInsideLastBrush()) {
+            isDragging = true;
+            dragStart = offset;
+
+          } else {
+            start = offset;
+            isBrushing = true;
+
+            // Add the brushing div
+            $el.append($brushDiv);
+            $brushDiv.offset({ top: e.pageY, left: e.pageX })
+              .width(0)
+              .height(0)
+              .show();
+          }
+        }
+
+        function mousemove(e) {
+          // Need parent offset relative to page to calculate mouse offset
+          // relative to page.
+          var imgOffset = $brushDiv.parent().offset();
+
+          var offset = mouseOffset(e);
+
+          if (isBrushing) {
+            $brushDiv.offset({
+                top: imgOffset.top + Math.min(start.y, offset.y),
+                left: imgOffset.left + Math.min(start.x, offset.x)
+              })
+              .width(Math.abs(start.x - offset.x))
+              .height(Math.abs(start.y - offset.y));
+
+          } else if (isDragging) {
+            var prev = prevBrushMinMax();
+            $brushDiv.offset({
+              top: imgOffset.top + prev.min.y + offset.y - dragStart.y,
+              left: imgOffset.left + prev.min.x + offset.x - dragStart.x
+            });
+          }
+
+
+        }
+
+        function mouseup(e) {
+          if (!(isBrushing || isDragging)) return;
+
+          var offset = mouseOffset(e);
+
+          if (isBrushing) {
+            isBrushing = false;
+            end = offset;
+
+            // If the brush didn't go anywhere, hide the brush, clear value,
+            // and return.
+            if (start.x === end.x && start.y === end.y) {
+              $brushDiv.hide();
               exports.onInputChange(inputId, null);
               return;
             }
 
-            var offset = mouseOffset(e);
-            var coords = getMouseCoordinates(offset);
-            coords[".nonce"] = Math.random();
+          } else if (isDragging) {
+            isDragging = false;
 
-            exports.onInputChange(inputId, coords);
+            // How far the brush was dragged
+            var dx = dragStart.x - offset.x;
+            var dy = dragStart.y - offset.y;
+
+            // Now offset the start and end by the drag amount
+            start.x = start.x - dx;
+            start.y = start.y - dy;
+            end.x   = end.x   - dx;
+            end.y   = end.y   - dy;
+          }
+
+          // Transform coordinates of brush to data space
+          var prev = prevBrushMinMax();
+          var min = getMouseCoordinates(prev.min);
+          var max = getMouseCoordinates(prev.max);
+
+          // Because the x and y directions of the pixel space may differ from
+          // the x and y directions of the data space, we need to recalculate
+          // the min and max.
+          var coords = {
+            xmin: Math.min(min.x, max.x),
+            xmax: Math.max(min.x, max.x),
+            ymin: Math.min(min.y, max.y),
+            ymax: Math.max(min.y, max.y),
+            '.nonce': Math.random()
           };
-        };
 
-        var createHoverHandler = function(inputId) {
-          var hoverDelayType = $el.data('hover-delay-type') || 'debounce';
-          var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
-          // Hover handler is basically a throttled/debounced click handler
-          var hoverFunc = delayFunc($el.data('hover-delay') || 300,
-                                    createClickHandler(inputId));
-
-          return {
-            mousemove: hoverFunc,
-            // Need to call hoverFunc instead of setting input value directly
-            // because of the debouncing. If we set input value directly, there
-            // could be a pending debounced hoverFunc call that will set value
-            // later.
-            mouseout: function(e) { hoverFunc(null); }
-          };
-        };
-
-        // Returns a brush handler object. This has three public functions:
-        // mousedown, mousemove, and mouseup.
-        var createBrushHandler = function(inputId) {
-          var isBrushing = false;
-          // Brush starting position in pixels
-          var start = { x: NaN, y: NaN };
-          // Ending position of previous brush
-          var end = { x: NaN, y: NaN };
-
-          var isDragging = false;
-          var dragStart = { x: NaN, y: NaN };
-
-          // Return page x/y coordinates of previous brush, in min/max values
-          // instead of start/end.
-          function prevBrushMinMax() {
-            return {
-              min: {
-                x: Math.min(start.x, end.x),
-                y: Math.min(start.y, end.y)
-              },
-              max: {
-                x: Math.max(start.x, end.x),
-                y: Math.max(start.y, end.y)
-              }
-            };
-          }
-
-          var $brushDiv = $(document.createElement('div'))
-            .attr('id', el.id + '_brush')
-            .css({
-              'background-color': $el.data('brush-color'),
-              'border-color': $el.data('brush-outline'),
-              'border-style': 'solid',
-              'border-width': '1px',
-              'opacity': $el.data('brush-opacity'),
-              'pointer-events': 'none',
-              'position': 'absolute'
-            });
-
-
-          function mousedown(e) {
-            // This can happen when mousedown inside the graphic, then mouseup
-            // outside, then mousedown inside. Just ignore the second
-            // mousedown.
-            if (isBrushing || isDragging) return;
-
-            // Return true if the mouse is inside the previous brush
-            function mouseInsideLastBrush() {
-              var prev = prevBrushMinMax();
-              var cur = mouseOffset(e);
-              return cur.x <= prev.max.x && cur.x >= prev.min.x &&
-                     cur.y <= prev.max.y && cur.y >= prev.min.y;
-            }
-
-            var offset = mouseOffset(e);
-
-            if (mouseInsideLastBrush()) {
-              isDragging = true;
-              dragStart = offset;
-
-            } else {
-              start = offset;
-              isBrushing = true;
-
-              // Add the brushing div
-              $el.append($brushDiv);
-              $brushDiv.offset({ top: e.pageY, left: e.pageX })
-                .width(0)
-                .height(0)
-                .show();
-            }
-          }
-
-          function mousemove(e) {
-            // Need parent offset relative to page to calculate mouse offset
-            // relative to page.
-            var imgOffset = $brushDiv.parent().offset();
-
-            var offset = mouseOffset(e);
-
-            if (isBrushing) {
-              $brushDiv.offset({
-                  top: imgOffset.top + Math.min(start.y, offset.y),
-                  left: imgOffset.left + Math.min(start.x, offset.x)
-                })
-                .width(Math.abs(start.x - offset.x))
-                .height(Math.abs(start.y - offset.y));
-
-            } else if (isDragging) {
-              var prev = prevBrushMinMax();
-              $brushDiv.offset({
-                top: imgOffset.top + prev.min.y + offset.y - dragStart.y,
-                left: imgOffset.left + prev.min.x + offset.x - dragStart.x
-              });
-            }
-          }
-
-          function mouseup(e) {
-            if (!(isBrushing || isDragging)) return;
-
-            var offset = mouseOffset(e);
-
-            if (isBrushing) {
-              isBrushing = false;
-              end = offset;
-
-              // If the brush didn't go anywhere, hide the brush, clear value,
-              // and return.
-              if (start.x === end.x && start.y === end.y) {
-                $brushDiv.hide();
-                exports.onInputChange(inputId, null);
-                return;
-              }
-
-            } else if (isDragging) {
-              isDragging = false;
-
-              // How far the brush was dragged
-              var dx = dragStart.x - offset.x;
-              var dy = dragStart.y - offset.y;
-
-              // Now offset the start and end by the drag amount
-              start.x = start.x - dx;
-              start.y = start.y - dy;
-              end.x   = end.x   - dx;
-              end.y   = end.y   - dy;
-            }
-
-            // Transform coordinates of brush to data space
-            var prev = prevBrushMinMax();
-            var min = getMouseCoordinates(prev.min);
-            var max = getMouseCoordinates(prev.max);
-
-            // Because the x and y directions of the pixel space may differ from
-            // the x and y directions of the data space, we need to recalculate
-            // the min and max.
-            var coords = {
-              xmin: Math.min(min.x, max.x),
-              xmax: Math.max(min.x, max.x),
-              ymin: Math.min(min.y, max.y),
-              ymax: Math.max(min.y, max.y),
-              '.nonce': Math.random()
-            };
-
-            // Send data to server
-            exports.onInputChange(inputId, coords);
-          }
-
-          return {
-            mousedown: mousedown,
-            mousemove: mousemove,
-            mouseup: mouseup
-          };
-        };
-
-        var $img = $(img);
-
-        if (clickId)
-          $img.on('mousedown', createClickHandler(clickId));
-        if (hoverId) {
-          var hoverHandler = createHoverHandler(hoverId);
-          $img.on('mousemove', hoverHandler.mousemove);
-          $img.on('mouseout', hoverHandler.mouseout);
-        }
-        if (brushId) {
-          // Make image non-draggable
-          $img.css('-webkit-user-drag', 'none');
-
-          var brushHandler = createBrushHandler(brushId);
-          $img.on('mousedown', brushHandler.mousedown);
-          $img.on('mousemove', brushHandler.mousemove);
-          $img.on('mouseup', brushHandler.mouseup);
+          // Send data to server
+          exports.onInputChange(inputId, coords);
         }
 
-        if (clickId || hoverId || brushId) {
-          $img.addClass('crosshair');
-        }
+        return {
+          mousedown: mousedown,
+          mousemove: mousemove,
+          mouseup: mouseup
+        };
+      };
+
+      var $img = $(img);
+
+      if (clickId)
+        $img.on('mousedown', createClickHandler(clickId));
+      if (hoverId) {
+        var hoverHandler = createHoverHandler(hoverId);
+        $img.on('mousemove', hoverHandler.mousemove);
+        $img.on('mouseout', hoverHandler.mouseout);
+      }
+      if (brushId) {
+        // Make image non-draggable
+        $img.css('-webkit-user-drag', 'none');
+
+        var brushHandler = createBrushHandler(brushId);
+        $img.on('mousedown', brushHandler.mousedown);
+        $img.on('mousemove', brushHandler.mousemove);
+        $img.on('mouseup', brushHandler.mouseup);
+      }
+
+      if (clickId || hoverId || brushId) {
+        $img.addClass('crosshair');
       }
 
       $el.empty();

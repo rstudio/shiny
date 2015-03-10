@@ -1415,20 +1415,12 @@
         return newOffset;
       };
 
-      var createClickHandler = function(inputId) {
+      // Returns a function that sends mouse coordinates, scaled to data space.
+      // If that function is passed a null event, it will send null.
+      function mouseCoordinateSender(inputId, clip) {
+        clip = clip || true;
+
         return function(e) {
-          var offset = mouseOffset(e);
-          // Ignore events outside of plotting region
-          if (opts.clickClip && !isInPlottingRegion(offset)) return;
-
-          var coords = getScaledCoordinates(offset);
-          coords[".nonce"] = Math.random();
-          exports.onInputChange(inputId, coords);
-        };
-      };
-
-      var createHoverHandler = function(inputId) {
-        var sendInfo = function(e) {
           if (e === null) {
             exports.onInputChange(inputId, null);
             return;
@@ -1436,31 +1428,36 @@
 
           var offset = mouseOffset(e);
           // Ignore events outside of plotting region
-          if (opts.hoverClip && !isInPlottingRegion(offset)) return;
+          if (clip && !isInPlottingRegion(offset)) return;
 
           var coords = getScaledCoordinates(offset);
           coords[".nonce"] = Math.random();
           exports.onInputChange(inputId, coords);
         };
+      }
 
-        var hoverDelayType = opts.hoverDelayType;
-        var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
-        // Hover handler is basically a throttled/debounced click handler
-        var hoverFunc = delayFunc(opts.hoverDelay, sendInfo);
+      function createClickHandler(inputId) {
+        return mouseCoordinateSender(inputId, opts.clickClip);
+      }
+
+      function createHoverHandler(inputId) {
+        var sendHoverInfo = mouseCoordinateSender(inputId, opts.hoverClip);
+
+        var hoverInfoSender;
+        if (opts.hoverDelayType === 'throttle')
+          hoverInfoSender = new Throttler(null, sendHoverInfo, opts.hoverDelay);
+        else
+          hoverInfoSender = new Debouncer(null, sendHoverInfo, opts.hoverDelay);
 
         return {
-          mousemove: hoverFunc,
-          // Need to call hoverFunc instead of setting input value directly
-          // because of the debouncing. If we set input value directly, there
-          // could be a pending debounced hoverFunc call that will set value
-          // later.
-          mouseout: function(e) { hoverFunc(null); }
+          mousemove: hoverInfoSender.normalCall.bind(hoverInfoSender),
+          mouseout: hoverInfoSender.immediateCall.bind(hoverInfoSender)
         };
-      };
+      }
 
       // Returns a brush handler object. This has three public functions:
       // mousedown, mousemove, and mouseup.
-      var createBrushHandler = function(inputId) {
+      function createBrushHandler(inputId) {
         var isBrushing = false;
         // Brush starting position in pixels
         var start = { x: NaN, y: NaN };
@@ -1522,7 +1519,6 @@
         var brushInfoSender;
         if (opts.brushDelayType === 'throttle') {
           brushInfoSender = new Throttler(null, sendBrushInfo, opts.brushDelay);
-
         } else {
           brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
         }
@@ -1682,12 +1678,14 @@
           mousemove: mousemove,
           mouseup: mouseup
         };
-      };
+      }
 
       var $img = $(img);
 
-      if (opts.clickId)
-        $img.on('mousedown', createClickHandler(opts.clickId));
+      if (opts.clickId) {
+        var clickHandler = createClickHandler(opts.clickId);
+        $img.on('mousedown', clickHandler);
+      }
       if (opts.hoverId) {
         var hoverHandler = createHoverHandler(opts.hoverId);
         $img.on('mousemove', hoverHandler.mousemove);

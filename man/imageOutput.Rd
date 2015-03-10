@@ -7,7 +7,8 @@
 imageOutput(outputId, width = "100\%", height = "400px", clickId = NULL,
   hoverId = NULL, hoverDelay = 300, hoverDelayType = c("debounce",
   "throttle"), brushId = NULL, brushColor = "#666", brushOutline = "#000",
-  brushOpacity = 0.3, inline = FALSE)
+  brushOpacity = 0.3, brushDelay = 300, brushDelayType = c("debounce",
+  "throttle"), inline = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the image from}

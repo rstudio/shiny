@@ -1716,12 +1716,21 @@ imageOutput <- function(outputId, width = "100%", height="400px",
                         hoverDelayType = c("debounce", "throttle"),
                         brushId = NULL, brushColor = "#666",
                         brushOutline = "#000", brushOpacity = 0.3,
+                        brushDelay = 300,
+                        brushDelayType = c("debounce", "throttle"),
                         inline = FALSE) {
-  if (is.null(clickId) && is.null(hoverId)) {
+  if (is.null(hoverId)) {
     hoverDelay <- NULL
     hoverDelayType <- NULL
   } else {
-    hoverDelayType <- match.arg(hoverDelayType)[[1]]
+    hoverDelayType <- match.arg(hoverDelayType)
+  }
+
+  if (is.null(brushId)) {
+    brushDelay <- NULL
+    brushDelayType <- NULL
+  } else {
+    brushDelayType <- match.arg(brushDelayType)
   }
 
   style <- if (!inline) {
@@ -1737,7 +1746,9 @@ imageOutput <- function(outputId, width = "100%", height="400px",
     `data-brush-id` = brushId,
     `data-brush-color` = brushColor,
     `data-brush-outline` = brushOutline,
-    `data-brush-opacity` = brushOpacity
+    `data-brush-opacity` = brushOpacity,
+    `data-brush-delay` = brushDelay,
+    `data-brush-delay-type` = brushDelayType
   )
 }
 
@@ -1787,12 +1798,21 @@ plotOutput <- function(outputId, width = "100%", height="400px",
                        hoverDelayType = c("debounce", "throttle"),
                        brushId = NULL, brushColor = "#666",
                        brushOutline = "#000", brushOpacity = 0.3,
+                       brushDelay = 300,
+                       brushDelayType = c("debounce", "throttle"),
                        inline = FALSE) {
-  if (is.null(clickId) && is.null(hoverId)) {
+  if (is.null(hoverId)) {
     hoverDelay <- NULL
     hoverDelayType <- NULL
   } else {
-    hoverDelayType <- match.arg(hoverDelayType)[[1]]
+    hoverDelayType <- match.arg(hoverDelayType)
+  }
+
+  if (is.null(brushId)) {
+    brushDelay <- NULL
+    brushDelayType <- NULL
+  } else {
+    brushDelayType <- match.arg(brushDelayType)
   }
 
   style <- if (!inline) {
@@ -1808,7 +1828,9 @@ plotOutput <- function(outputId, width = "100%", height="400px",
     `data-brush-id` = brushId,
     `data-brush-color` = brushColor,
     `data-brush-outline` = brushOutline,
-    `data-brush-opacity` = brushOpacity
+    `data-brush-opacity` = brushOpacity,
+    `data-brush-delay` = brushDelay,
+    `data-brush-delay-type` = brushDelayType
   )
 }
 

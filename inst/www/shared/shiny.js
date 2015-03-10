@@ -1377,7 +1377,7 @@
         var end = { x: NaN, y: NaN };
 
         var isDragging = false;
-        var dragStart = { x: NaN, y: NaN };
+        var dragPrev = { x: NaN, y: NaN };
 
         // Return page x/y coordinates of previous brush, in min/max values
         // instead of start/end.
@@ -1407,6 +1407,37 @@
           });
 
 
+        function sendBrushInfo() {
+          // Transform coordinates of brush to data space
+          var prev = prevBrushMinMax();
+          var min = getMouseCoordinates(prev.min);
+          var max = getMouseCoordinates(prev.max);
+
+          // Because the x and y directions of the pixel space may differ from
+          // the x and y directions of the data space, we need to recalculate
+          // the min and max.
+          var coords = {
+            xmin: Math.min(min.x, max.x),
+            xmax: Math.max(min.x, max.x),
+            ymin: Math.min(min.y, max.y),
+            ymax: Math.max(min.y, max.y),
+            '.nonce': Math.random()
+          };
+
+          // Send data to server
+          exports.onInputChange(inputId, coords);
+        }
+
+        var brushInfoSender;
+        if ($el.data('brush-delay-type') === 'throttle') {
+          brushInfoSender = new Throttler(null, sendBrushInfo,
+                                          $el.data('brush-delay'));
+
+        } else {
+          brushInfoSender = new Debouncer(null, sendBrushInfo,
+                                          $el.data('brush-delay'));
+        }
+
         function mousedown(e) {
           // This can happen when mousedown inside the graphic, then mouseup
           // outside, then mousedown inside. Just ignore the second
@@ -1425,7 +1456,7 @@
 
           if (mouseInsideLastBrush()) {
             isDragging = true;
-            dragStart = offset;
+            dragPrev = offset;
 
           } else {
             start = offset;
@@ -1441,6 +1472,8 @@
         }
 
         function mousemove(e) {
+          if (!(isBrushing || isDragging)) return;
+
           // Need parent offset relative to page to calculate mouse offset
           // relative to page.
           var imgOffset = $brushDiv.parent().offset();
@@ -1448,6 +1481,8 @@
           var offset = mouseOffset(e);
 
           if (isBrushing) {
+            end = offset;
+
             $brushDiv.offset({
                 top: imgOffset.top + Math.min(start.y, offset.y),
                 left: imgOffset.left + Math.min(start.x, offset.x)
@@ -1456,14 +1491,26 @@
               .height(Math.abs(start.y - offset.y));
 
           } else if (isDragging) {
+            // How far the brush was dragged
+            var dx = dragPrev.x - offset.x;
+            var dy = dragPrev.y - offset.y;
+
+            dragPrev = offset;
+
+            // Now offset the start and end by the drag amount
+            start.x = start.x - dx;
+            start.y = start.y - dy;
+            end.x   = end.x   - dx;
+            end.y   = end.y   - dy;
+
             var prev = prevBrushMinMax();
             $brushDiv.offset({
-              top: imgOffset.top + prev.min.y + offset.y - dragStart.y,
-              left: imgOffset.left + prev.min.x + offset.x - dragStart.x
+              top: imgOffset.top + prev.min.y - dy,
+              left: imgOffset.left + prev.min.x - dx
             });
           }
 
-
+          brushInfoSender.normalCall();
         }
 
         function mouseup(e) {
@@ -1485,36 +1532,9 @@
 
           } else if (isDragging) {
             isDragging = false;
-
-            // How far the brush was dragged
-            var dx = dragStart.x - offset.x;
-            var dy = dragStart.y - offset.y;
-
-            // Now offset the start and end by the drag amount
-            start.x = start.x - dx;
-            start.y = start.y - dy;
-            end.x   = end.x   - dx;
-            end.y   = end.y   - dy;
           }
 
-          // Transform coordinates of brush to data space
-          var prev = prevBrushMinMax();
-          var min = getMouseCoordinates(prev.min);
-          var max = getMouseCoordinates(prev.max);
-
-          // Because the x and y directions of the pixel space may differ from
-          // the x and y directions of the data space, we need to recalculate
-          // the min and max.
-          var coords = {
-            xmin: Math.min(min.x, max.x),
-            xmax: Math.max(min.x, max.x),
-            ymin: Math.min(min.y, max.y),
-            ymax: Math.max(min.y, max.y),
-            '.nonce': Math.random()
-          };
-
-          // Send data to server
-          exports.onInputChange(inputId, coords);
+          brushInfoSender.immediateCall();
         }
 
         return {

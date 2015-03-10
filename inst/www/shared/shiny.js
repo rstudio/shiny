@@ -1877,7 +1877,7 @@
     },
     subscribe: function(el, callback) {
       $(el).on('change.sliderInputBinding', function(event) {
-        callback(!$(el).data('animating'));
+        callback(!$(el).data('updating') && !$(el).data('animating'));
       });
     },
     unsubscribe: function(el) {
@@ -1904,7 +1904,12 @@
       if (data.hasOwnProperty('label'))
         $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
-      slider.update(msg);
+      $(el).data('updating', true);
+      try {
+        slider.update(msg);
+      } finally {
+        $(el).data('updating', false);
+      }
     },
     getRatePolicy: function() {
       return {

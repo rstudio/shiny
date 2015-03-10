@@ -6,7 +6,8 @@
 \usage{
 plotOutput(outputId, width = "100\%", height = "400px", clickId = NULL,
   hoverId = NULL, hoverDelay = 300, hoverDelayType = c("debounce",
-  "throttle"), inline = FALSE)
+  "throttle"), brushId = NULL, brushColor = "#666", brushOutline = "#000",
+  brushOpacity = 0.3, inline = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the plot from}

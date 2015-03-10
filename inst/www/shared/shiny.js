@@ -1300,8 +1300,10 @@
         // Mouse coordinates in the data space
         var getMouseCoordinates = function(offset) {
           // TODO: Account for scrolling within the image??
-
           var coordmap = $el.data('coordmap');
+
+          if (!coordmap) return offset;
+
           function devToUsrX(deviceX) {
             var x = deviceX - coordmap.bounds.left;
             var factor = (coordmap.usr.right - coordmap.usr.left) /

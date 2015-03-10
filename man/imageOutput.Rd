@@ -4,7 +4,10 @@
 \alias{imageOutput}
 \title{Create a image output element}
 \usage{
-imageOutput(outputId, width = "100\%", height = "400px", inline = FALSE)
+imageOutput(outputId, width = "100\%", height = "400px", clickId = NULL,
+  hoverId = NULL, hoverDelay = 300, hoverDelayType = c("debounce",
+  "throttle"), brushId = NULL, brushColor = "#666", brushOutline = "#000",
+  brushOpacity = 0.3, inline = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the image from}

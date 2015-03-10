@@ -1511,26 +1511,28 @@
           $el.data('hover-func', createHoverHandler(hoverId));
         }
 
+        var $img = $(img);
+
         if (clickId)
-          $(img).on('mousedown', createClickHandler(clickId));
+          $img.on('mousedown', createClickHandler(clickId));
         if (hoverId) {
-          $(img).on('mousemove', $el.data('hover-func'));
-          $(img).on('mouseout', function(e) {
+          $img.on('mousemove', $el.data('hover-func'));
+          $img.on('mouseout', function(e) {
             $el.data('hover-func')(null);
           });
         }
         if (brushId) {
           // Make image non-draggable
-          $(img).css('-webkit-user-drag', 'none');
+          $img.css('-webkit-user-drag', 'none');
 
           var brushHandler = createBrushHandler(brushId);
-          $(img).on('mousedown', brushHandler.mousedown);
-          $(img).on('mousemove', brushHandler.mousemove);
-          $(img).on('mouseup', brushHandler.mouseup);
+          $img.on('mousedown', brushHandler.mousedown);
+          $img.on('mousemove', brushHandler.mousemove);
+          $img.on('mouseup', brushHandler.mouseup);
         }
 
         if (clickId || hoverId) {
-          $(img).addClass('crosshair');
+          $img.addClass('crosshair');
         }
       }
 

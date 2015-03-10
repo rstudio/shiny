@@ -1537,7 +1537,11 @@
             isDragging = false;
           }
 
-          brushInfoSender.immediateCall();
+          // Send info immediately on mouseup, but only if needed. If we don't
+          // do the pending check, we might send the same data twice (with
+          // with difference nonce).
+          if (brushInfoSender.isPending())
+            brushInfoSender.immediateCall();
         }
 
         return {

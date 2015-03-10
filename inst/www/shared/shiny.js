@@ -1350,7 +1350,15 @@
           // Hover handler is basically a throttled/debounced click handler
           var hoverFunc = delayFunc($el.data('hover-delay') || 300,
                                     createClickHandler(inputId));
-          return hoverFunc;
+
+          return {
+            mousemove: hoverFunc,
+            // Need to call hoverFunc instead of setting input value directly
+            // because of the debouncing. If we set input value directly, there
+            // could be a pending debounced hoverFunc call that will set value
+            // later.
+            mouseout: function(e) { hoverFunc(null); }
+          };
         };
 
         // Returns a brush handler object. This has three public functions:
@@ -1507,19 +1515,14 @@
           };
         };
 
-        if (!$el.data('hover-func')) {
-          $el.data('hover-func', createHoverHandler(hoverId));
-        }
-
         var $img = $(img);
 
         if (clickId)
           $img.on('mousedown', createClickHandler(clickId));
         if (hoverId) {
-          $img.on('mousemove', $el.data('hover-func'));
-          $img.on('mouseout', function(e) {
-            $el.data('hover-func')(null);
-          });
+          var hoverHandler = createHoverHandler(hoverId);
+          $img.on('mousemove', hoverHandler.mousemove);
+          $img.on('mouseout', hoverHandler.mouseout);
         }
         if (brushId) {
           // Make image non-draggable

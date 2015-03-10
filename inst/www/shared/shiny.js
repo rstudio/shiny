@@ -1352,6 +1352,8 @@
           return hoverFunc;
         };
 
+        // Returns a brush handler object. This has three public functions:
+        // mousedown, mousemove, and mouseup.
         var createBrushHandler = function(inputId) {
           var isBrushing = false;
           // Starting coordinates, in data space
@@ -1372,48 +1374,56 @@
             'position': 'absolute'
           });
 
-          return function(e) {
+
+          function mousedown(e) {
             var mouseCoords = getMouseCoordinates(mouseOffset(e));
 
-            if (e.type === 'mousedown') {
-              startBrushCoords = mouseCoords;
-              startX = e.pageX;
-              startY = e.pageY;
-              isBrushing = true;
+            startBrushCoords = mouseCoords;
+            startX = e.pageX;
+            startY = e.pageY;
+            isBrushing = true;
 
-              // Add the brushing div
-              $el.append($brushDiv);
-              $brushDiv.offset({ top: e.pageY, left: e.pageX });
-              $brushDiv.width(0);
-              $brushDiv.height(0);
-              $brushDiv.show();
+            // Add the brushing div
+            $el.append($brushDiv);
+            $brushDiv.offset({ top: e.pageY, left: e.pageX });
+            $brushDiv.width(0);
+            $brushDiv.height(0);
+            $brushDiv.show();
+          }
 
-            } else if (e.type === 'mousemove') {
-              if (!isBrushing) return;
+          function mousemove(e) {
+            if (!isBrushing) return;
 
-              $brushDiv.offset({
-                top: Math.min(startY, e.pageY),
-                left: Math.min(startX, e.pageX)
-              });
+            $brushDiv.offset({
+              top: Math.min(startY, e.pageY),
+              left: Math.min(startX, e.pageX)
+            });
 
-              $brushDiv.width(Math.abs(startX - e.pageX));
-              $brushDiv.height(Math.abs(startY - e.pageY));
+            $brushDiv.width(Math.abs(startX - e.pageX));
+            $brushDiv.height(Math.abs(startY - e.pageY));
+          }
 
-            } else if (e.type === 'mouseup') {
-              if (!isBrushing) return;
+          function mouseup(e) {
+            if (!isBrushing) return;
 
-              isBrushing = false;
+            isBrushing = false;
 
-              // Get the end coordinates as xend and yend
-              var coords = startBrushCoords;
-              coords.xend = mouseCoords.x;
-              coords.yend = mouseCoords.y;
+            var mouseCoords = getMouseCoordinates(mouseOffset(e));
 
-              // Send data to server
-              coords[".nonce"] = Math.random();
-              exports.onInputChange(inputId, coords);
-            }
+            // Get the end coordinates as xend and yend
+            var coords = startBrushCoords;
+            coords.xend = mouseCoords.x;
+            coords.yend = mouseCoords.y;
 
+            // Send data to server
+            coords[".nonce"] = Math.random();
+            exports.onInputChange(inputId, coords);
+          }
+
+          return {
+            mousedown: mousedown,
+            mousemove: mousemove,
+            mouseup: mouseup
           };
         };
 
@@ -1434,9 +1444,9 @@
           $(img).css('-webkit-user-drag', 'none');
 
           var brushHandler = createBrushHandler(brushId);
-          $(img).on('mousedown', brushHandler);
-          $(img).on('mousemove', brushHandler);
-          $(img).on('mouseup', brushHandler);
+          $(img).on('mousedown', brushHandler.mousedown);
+          $(img).on('mousemove', brushHandler.mousemove);
+          $(img).on('mouseup', brushHandler.mouseup);
         }
 
         if (clickId || hoverId) {

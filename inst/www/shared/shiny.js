@@ -1354,15 +1354,50 @@
 
         var createBrushHandler = function(inputId) {
           var isBrushing = false;
+          // Starting coordinates, in data space
           var startBrushCoords = null;
+
+          // Starting position in pixels, relative to page.
+          var startX;
+          var startY;
+
+          var $brushDiv = $($.parseHTML('<div id = "' + el.id + '_brush"></div>'));
+          $brushDiv.css({
+            'background-color': $el.data('brush-color'),
+            'border-color': $el.data('brush-outline'),
+            'border-style': 'solid',
+            'border-width': '1px',
+            'opacity': $el.data('brush-opacity'),
+            'pointer-events': 'none',
+            'position': 'absolute'
+          });
 
           return function(e) {
             var mouseCoords = getMouseCoordinates(mouseOffset(e));
 
             if (e.type === 'mousedown') {
               startBrushCoords = mouseCoords;
+              startX = e.pageX;
+              startY = e.pageY;
               isBrushing = true;
-              return;
+
+              // Add the brushing div
+              $el.append($brushDiv);
+              $brushDiv.offset({ top: e.pageY, left: e.pageX });
+              $brushDiv.width(0);
+              $brushDiv.height(0);
+              $brushDiv.show();
+
+            } else if (e.type === 'mousemove') {
+              if (!isBrushing) return;
+
+              $brushDiv.offset({
+                top: Math.min(startY, e.pageY),
+                left: Math.min(startX, e.pageX)
+              });
+
+              $brushDiv.width(Math.abs(startX - e.pageX));
+              $brushDiv.height(Math.abs(startY - e.pageY));
 
             } else if (e.type === 'mouseup') {
               if (!isBrushing) return;
@@ -1400,6 +1435,7 @@
 
           var brushHandler = createBrushHandler(brushId);
           $(img).on('mousedown', brushHandler);
+          $(img).on('mousemove', brushHandler);
           $(img).on('mouseup', brushHandler);
         }
 

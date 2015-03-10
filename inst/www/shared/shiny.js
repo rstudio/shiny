@@ -1388,16 +1388,17 @@
             };
           }
 
-          var $brushDiv = $($.parseHTML('<div id = "' + el.id + '_brush"></div>'));
-          $brushDiv.css({
-            'background-color': $el.data('brush-color'),
-            'border-color': $el.data('brush-outline'),
-            'border-style': 'solid',
-            'border-width': '1px',
-            'opacity': $el.data('brush-opacity'),
-            'pointer-events': 'none',
-            'position': 'absolute'
-          });
+          var $brushDiv = $(document.createElement('div'))
+            .attr('id', el.id + '_brush')
+            .css({
+              'background-color': $el.data('brush-color'),
+              'border-color': $el.data('brush-outline'),
+              'border-style': 'solid',
+              'border-width': '1px',
+              'opacity': $el.data('brush-opacity'),
+              'pointer-events': 'none',
+              'position': 'absolute'
+            });
 
 
           function mousedown(e) {
@@ -1425,10 +1426,10 @@
 
               // Add the brushing div
               $el.append($brushDiv);
-              $brushDiv.offset({ top: e.pageY, left: e.pageX });
-              $brushDiv.width(0);
-              $brushDiv.height(0);
-              $brushDiv.show();
+              $brushDiv.offset({ top: e.pageY, left: e.pageX })
+                .width(0)
+                .height(0)
+                .show();
             }
           }
 
@@ -1441,12 +1442,11 @@
 
             if (isBrushing) {
               $brushDiv.offset({
-                top: imgOffset.top + Math.min(start.y, offset.y),
-                left: imgOffset.left + Math.min(start.x, offset.x)
-              });
-
-              $brushDiv.width(Math.abs(start.x - offset.x));
-              $brushDiv.height(Math.abs(start.y - offset.y));
+                  top: imgOffset.top + Math.min(start.y, offset.y),
+                  left: imgOffset.left + Math.min(start.x, offset.x)
+                })
+                .width(Math.abs(start.x - offset.x))
+                .height(Math.abs(start.y - offset.y));
 
             } else if (isDragging) {
               var prev = prevBrushMinMax();

@@ -266,6 +266,9 @@
       this.args = arguments;
       this.$invoke();
     };
+    this.isPending = function() {
+      return this.timerId !== null;
+    };
     this.$clearTimer = function() {
       if (this.timerId !== null) {
         clearTimeout(this.timerId);

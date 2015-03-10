@@ -1297,6 +1297,7 @@
           };
         };
 
+        // Mouse coordinates in the data space
         var getMouseCoordinates = function(offset) {
           // TODO: Account for scrolling within the image??
 
@@ -1356,12 +1357,28 @@
         // mousedown, mousemove, and mouseup.
         var createBrushHandler = function(inputId) {
           var isBrushing = false;
-          // Starting coordinates, in data space
-          var startBrushCoords = null;
+          // Brush starting position in pixels
+          var start = { x: NaN, y: NaN };
+          // Ending position of previous brush
+          var end = { x: NaN, y: NaN };
 
-          // Starting position in pixels, relative to page.
-          var startX;
-          var startY;
+          var isDragging = false;
+          var dragStart = { x: NaN, y: NaN };
+
+          // Return page x/y coordinates of previous brush, in min/max values
+          // instead of start/end.
+          function prevBrushMinMax() {
+            return {
+              min: {
+                x: Math.min(start.x, end.x),
+                y: Math.min(start.y, end.y)
+              },
+              max: {
+                x: Math.max(start.x, end.x),
+                y: Math.max(start.y, end.y)
+              }
+            };
+          }
 
           var $brushDiv = $($.parseHTML('<div id = "' + el.id + '_brush"></div>'));
           $brushDiv.css({
@@ -1376,47 +1393,102 @@
 
 
           function mousedown(e) {
-            var mouseCoords = getMouseCoordinates(mouseOffset(e));
+            // This can happen when mousedown inside the graphic, then mouseup
+            // outside, then mousedown inside. Just ignore the second
+            // mousedown.
+            if (isBrushing || isDragging) return;
 
-            startBrushCoords = mouseCoords;
-            startX = e.pageX;
-            startY = e.pageY;
-            isBrushing = true;
+            // Return true if the mouse is inside the previous brush
+            function mouseInsideLastBrush() {
+              var prev = prevBrushMinMax();
+              return e.pageX <= prev.max.x && e.pageX >= prev.min.x &&
+                     e.pageY <= prev.max.y && e.pageY >= prev.min.y;
+            }
 
-            // Add the brushing div
-            $el.append($brushDiv);
-            $brushDiv.offset({ top: e.pageY, left: e.pageX });
-            $brushDiv.width(0);
-            $brushDiv.height(0);
-            $brushDiv.show();
+            var offset = mouseOffset(e);
+
+            if (mouseInsideLastBrush()) {
+              isDragging = true;
+              dragStart = offset;
+
+            } else {
+              start = offset;
+              isBrushing = true;
+
+              // Add the brushing div
+              $el.append($brushDiv);
+              $brushDiv.offset({ top: e.pageY, left: e.pageX });
+              $brushDiv.width(0);
+              $brushDiv.height(0);
+              $brushDiv.show();
+            }
           }
 
           function mousemove(e) {
-            if (!isBrushing) return;
+            // Need parent offset relative to page to calculate mouse offset
+            // relative to page.
+            var imgOffset = $brushDiv.parent().offset();
 
-            $brushDiv.offset({
-              top: Math.min(startY, e.pageY),
-              left: Math.min(startX, e.pageX)
-            });
+            var offset = mouseOffset(e);
 
-            $brushDiv.width(Math.abs(startX - e.pageX));
-            $brushDiv.height(Math.abs(startY - e.pageY));
+            if (isBrushing) {
+              $brushDiv.offset({
+                top: imgOffset.top + Math.min(start.y, offset.y),
+                left: imgOffset.left + Math.min(start.x, offset.x)
+              });
+
+              $brushDiv.width(Math.abs(start.x - offset.x));
+              $brushDiv.height(Math.abs(start.y - offset.y));
+
+            } else if (isDragging) {
+              var prev = prevBrushMinMax();
+              $brushDiv.offset({
+                top: imgOffset.top + prev.min.y + offset.y - dragStart.y,
+                left: imgOffset.left + prev.min.x + offset.x - dragStart.x
+              });
+            }
           }
 
           function mouseup(e) {
-            if (!isBrushing) return;
+            if (!(isBrushing || isDragging)) return;
 
-            isBrushing = false;
+            var offset = mouseOffset(e);
 
-            var mouseCoords = getMouseCoordinates(mouseOffset(e));
+            if (isBrushing) {
+              isBrushing = false;
+              end = offset;
 
-            // Get the end coordinates as xend and yend
-            var coords = startBrushCoords;
-            coords.xend = mouseCoords.x;
-            coords.yend = mouseCoords.y;
+            } else if (isDragging) {
+              isDragging = false;
+
+              // How far the brush was dragged
+              var dx = dragStart.x - offset.x;
+              var dy = dragStart.y - offset.y;
+
+              // Now offset the start and end by the drag amount
+              start.x = start.x - dx;
+              start.y = start.y - dy;
+              end.x   = end.x   - dx;
+              end.y   = end.y   - dy;
+            }
+
+            // Transform coordinates of brush to data space
+            var prev = prevBrushMinMax();
+            var min = getMouseCoordinates(prev.min);
+            var max = getMouseCoordinates(prev.max);
+
+            // Because the x and y directions of the pixel space may differ from
+            // the x and y directions of the data space, we need to recalculate
+            // the min and max.
+            var coords = {
+              xmin: Math.min(min.x, max.x),
+              xmax: Math.max(min.x, max.x),
+              ymin: Math.min(min.y, max.y),
+              ymax: Math.max(min.y, max.y),
+              '.nonce': Math.random()
+            };
 
             // Send data to server
-            coords[".nonce"] = Math.random();
             exports.onInputChange(inputId, coords);
           }
 

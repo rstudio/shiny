@@ -1264,19 +1264,25 @@
       var $el = $(el);
       // Load the image before emptying, to minimize flicker
       var img = null;
-      var clickId, hoverId, brushId;
 
       if (!data) {
         $el.empty();
         return;
       }
 
-      clickId = $el.data('click-id');
-      hoverId = $el.data('hover-id');
-      brushId = $el.data('brush-id');
-
-      $el.data('coordmap', data.coordmap);
-      delete data.coordmap;
+      var opts = {
+        clickId: $el.data('click-id'),
+        hoverId: $el.data('hover-id'),
+        hoverDelayType: $el.data('hover-delay-type') || 'debounce',
+        hoverDelay: $el.data('hover-delay') || 300,
+        brushId: $el.data('brush-id'),
+        brushDelayType: $el.data('brush-delay-type') || 'debounce',
+        brushDelay: $el.data('brush-delay') || 300,
+        brushColor: $el.data('brush-color') || '#666',
+        brushOutline: $el.data('brush-outline') || '#000',
+        brushOpacity: $el.data('brush-opacity') || 0.3,
+        coordmap: data.coordmap,
+      };
 
       img = document.createElement('img');
       // Copy items from data to img. This should include 'src'
@@ -1304,7 +1310,7 @@
       // Mouse coordinates in the data space
       var getMouseCoordinates = function(offset) {
         // TODO: Account for scrolling within the image??
-        var coordmap = $el.data('coordmap');
+        var coordmap = opts.coordmap;
 
         if (!coordmap) return offset;
 
@@ -1351,11 +1357,10 @@
       };
 
       var createHoverHandler = function(inputId) {
-        var hoverDelayType = $el.data('hover-delay-type') || 'debounce';
+        var hoverDelayType = opts.hoverDelayType;
         var delayFunc = (hoverDelayType === 'throttle') ? throttle : debounce;
         // Hover handler is basically a throttled/debounced click handler
-        var hoverFunc = delayFunc($el.data('hover-delay') || 300,
-                                  createClickHandler(inputId));
+        var hoverFunc = delayFunc(opts.hoverDelay, createClickHandler(inputId));
 
         return {
           mousemove: hoverFunc,
@@ -1397,11 +1402,11 @@
         var $brushDiv = $(document.createElement('div'))
           .attr('id', el.id + '_brush')
           .css({
-            'background-color': $el.data('brush-color'),
-            'border-color': $el.data('brush-outline'),
+            'background-color': opts.brushColor,
+            'border-color': opts.brushOutline,
             'border-style': 'solid',
             'border-width': '1px',
-            'opacity': $el.data('brush-opacity'),
+            'opacity': opts.brushOpacity,
             'pointer-events': 'none',
             'position': 'absolute'
           });
@@ -1429,13 +1434,11 @@
         }
 
         var brushInfoSender;
-        if ($el.data('brush-delay-type') === 'throttle') {
-          brushInfoSender = new Throttler(null, sendBrushInfo,
-                                          $el.data('brush-delay'));
+        if (opts.brushDelayType === 'throttle') {
+          brushInfoSender = new Throttler(null, sendBrushInfo, opts.brushDelay);
 
         } else {
-          brushInfoSender = new Debouncer(null, sendBrushInfo,
-                                          $el.data('brush-delay'));
+          brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
         }
 
         function mousedown(e) {
@@ -1546,25 +1549,25 @@
 
       var $img = $(img);
 
-      if (clickId)
-        $img.on('mousedown', createClickHandler(clickId));
-      if (hoverId) {
-        var hoverHandler = createHoverHandler(hoverId);
+      if (opts.clickId)
+        $img.on('mousedown', createClickHandler(opts.clickId));
+      if (opts.hoverId) {
+        var hoverHandler = createHoverHandler(opts.hoverId);
         $img.on('mousemove', hoverHandler.mousemove);
         $img.on('mouseout', hoverHandler.mouseout);
       }
-      if (brushId) {
+      if (opts.brushId) {
         // Make image non-draggable
         $img.css('-webkit-user-drag', 'none');
         $img.on("dragstart", function() { return false; }); // For Firefox
 
-        var brushHandler = createBrushHandler(brushId);
+        var brushHandler = createBrushHandler(opts.brushId);
         $img.on('mousedown', brushHandler.mousedown);
         $img.on('mousemove', brushHandler.mousemove);
         $img.on('mouseup', brushHandler.mouseup);
       }
 
-      if (clickId || hoverId || brushId) {
+      if (opts.clickId || opts.hoverId || opts.brushId) {
         $img.addClass('crosshair');
       }
 

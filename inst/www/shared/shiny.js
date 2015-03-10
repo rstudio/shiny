@@ -1412,8 +1412,9 @@
             // Return true if the mouse is inside the previous brush
             function mouseInsideLastBrush() {
               var prev = prevBrushMinMax();
-              return e.pageX <= prev.max.x && e.pageX >= prev.min.x &&
-                     e.pageY <= prev.max.y && e.pageY >= prev.min.y;
+              var cur = mouseOffset(e);
+              return cur.x <= prev.max.x && cur.x >= prev.min.x &&
+                     cur.y <= prev.max.y && cur.y >= prev.min.y;
             }
 
             var offset = mouseOffset(e);

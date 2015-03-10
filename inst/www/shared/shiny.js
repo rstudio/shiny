@@ -1536,6 +1536,7 @@
       if (brushId) {
         // Make image non-draggable
         $img.css('-webkit-user-drag', 'none');
+        $img.on("dragstart", function() { return false; }); // For Firefox
 
         var brushHandler = createBrushHandler(brushId);
         $img.on('mousedown', brushHandler.mousedown);

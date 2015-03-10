@@ -1458,6 +1458,14 @@
               isBrushing = false;
               end = offset;
 
+              // If the brush didn't go anywhere, hide the brush, clear value,
+              // and return.
+              if (start.x === end.x && start.y === end.y) {
+                $brushDiv.hide();
+                exports.onInputChange(inputId, null);
+                return;
+              }
+
             } else if (isDragging) {
               isDragging = false;
 

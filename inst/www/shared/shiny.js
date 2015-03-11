@@ -1461,9 +1461,8 @@
           hoverInfoSender = new Debouncer(null, sendHoverInfo, opts.hoverDelay);
 
         return {
-          mousemove: hoverInfoSender.normalCall.bind(hoverInfoSender),
-          mouseout: hoverInfoSender.immediateCall.bind(hoverInfoSender),
-          remove: function() { hoverInfoSender.immediateCall(null); }
+          mousemove: function(e) { hoverInfoSender.normalCall(e); },
+          remove:    function()  { hoverInfoSender.immediateCall(null); }
         };
       }
 
@@ -1734,7 +1733,6 @@
       if (opts.hoverId) {
         var hoverHandler = createHoverHandler(opts.hoverId);
         $img.on('mousemove', hoverHandler.mousemove);
-        $img.on('mouseout', hoverHandler.mouseout);
         $img.on('remove', hoverHandler.remove);
       }
       if (opts.brushId) {

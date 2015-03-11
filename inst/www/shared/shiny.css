@@ -117,6 +117,18 @@ table.data td[align=right] {
   cursor: crosshair;
 }
 
+.grabbable {
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.grabbing {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+
 /* Workaround for Qt, which doesn't use font fallbacks */
 .qt pre, .qt code {
   font-family: monospace !important;

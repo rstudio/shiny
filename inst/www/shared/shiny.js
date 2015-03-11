@@ -1446,7 +1446,11 @@
         var clickInfoSender =  mouseCoordinateSender(inputId, opts.clickClip);
 
         return {
-          mousedown: clickInfoSender,
+          mousedown: function(e) {
+            // Listen for left mouse button only
+            if (e.which !== 1) return;
+            clickInfoSender(e);
+          },
           remove: function() { clickInfoSender(null); }
         };
       }
@@ -1557,6 +1561,9 @@
           // outside, then mousedown inside. Just ignore the second
           // mousedown.
           if (isBrushing || isDragging) return;
+
+          // Listen for left mouse button only
+          if (e.which !== 1) return;
 
           // Return true if the mouse is inside the previous brush
           function mouseInsideLastBrush() {
@@ -1681,6 +1688,9 @@
 
         function mouseup(e) {
           if (!(isBrushing || isDragging)) return;
+
+          // Listen for left mouse button only
+          if (e.which !== 1) return;
 
           var offset = mouseOffset(e);
 

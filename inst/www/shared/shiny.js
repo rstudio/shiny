@@ -1268,8 +1268,14 @@
       // Load the image before emptying, to minimize flicker
       var img = null;
 
-      if (!data) {
+      function clearEl() {
+        // Trigger custom 'remove' event for any existing images in the div
+        $el.find('img').trigger('remove');
         $el.empty();
+      }
+
+      if (!data) {
+        clearEl();
         return;
       }
 
@@ -1437,7 +1443,12 @@
       }
 
       function createClickHandler(inputId) {
-        return mouseCoordinateSender(inputId, opts.clickClip);
+        var clickInfoSender =  mouseCoordinateSender(inputId, opts.clickClip);
+
+        return {
+          mousedown: clickInfoSender,
+          remove: function() { clickInfoSender(null); }
+        };
       }
 
       function createHoverHandler(inputId) {
@@ -1451,7 +1462,8 @@
 
         return {
           mousemove: hoverInfoSender.normalCall.bind(hoverInfoSender),
-          mouseout: hoverInfoSender.immediateCall.bind(hoverInfoSender)
+          mouseout: hoverInfoSender.immediateCall.bind(hoverInfoSender),
+          remove: function() { hoverInfoSender.immediateCall(null); }
         };
       }
 
@@ -1460,12 +1472,37 @@
       function createBrushHandler(inputId) {
         var isBrushing = false;
         // Brush starting position in pixels
-        var start = { x: NaN, y: NaN };
+        var start;
         // Ending position of previous brush
-        var end = { x: NaN, y: NaN };
+        var end;
 
         var isDragging = false;
-        var dragPrev = { x: NaN, y: NaN };
+        // Offset of previous drag coordinate
+        var dragPrev;
+
+        // The div that represents the brush
+        var $brushDiv;
+
+        function resetBrush() {
+          start    = { x: NaN, y: NaN };
+          end      = { x: NaN, y: NaN };
+          dragPrev = { x: NaN, y: NaN };
+
+          if ($brushDiv) $brushDiv.remove();
+
+          $brushDiv = $(document.createElement('div'))
+            .attr('id', el.id + '_brush')
+            .css({
+              'background-color': opts.brushColor,
+              'border-color': opts.brushOutline,
+              'border-style': 'solid',
+              'border-width': '1px',
+              'opacity': opts.brushOpacity,
+              'pointer-events': 'none',
+              'position': 'absolute'
+            });
+        }
+        resetBrush();
 
         // Return page x/y coordinates of previous brush, in min/max values
         // instead of start/end.
@@ -1482,20 +1519,13 @@
           };
         }
 
-        var $brushDiv = $(document.createElement('div'))
-          .attr('id', el.id + '_brush')
-          .css({
-            'background-color': opts.brushColor,
-            'border-color': opts.brushOutline,
-            'border-style': 'solid',
-            'border-width': '1px',
-            'opacity': opts.brushOpacity,
-            'pointer-events': 'none',
-            'position': 'absolute'
-          });
-
-
         function sendBrushInfo() {
+          // We're in a new or reset state
+          if (isNaN(start.x)) {
+            exports.onInputChange(inputId, null);
+            return;
+          }
+
           // Transform coordinates of brush to data space
           var prev = prevBrushMinMax();
           var min = getScaledCoordinates(prev.min, opts.brushClip);
@@ -1665,8 +1695,8 @@
             // If the brush didn't go anywhere, hide the brush, clear value,
             // and return.
             if (start.x === end.x && start.y === end.y) {
-              $brushDiv.hide();
-              exports.onInputChange(inputId, null);
+              resetBrush();
+              brushInfoSender.immediateCall();
               return;
             }
 
@@ -1681,10 +1711,16 @@
             brushInfoSender.immediateCall();
         }
 
+        function remove() {
+          resetBrush();
+          brushInfoSender.immediateCall();
+        }
+
         return {
           mousedown: mousedown,
           mousemove: mousemove,
-          mouseup: mouseup
+          mouseup: mouseup,
+          remove: remove
         };
       }
 
@@ -1692,12 +1728,14 @@
 
       if (opts.clickId) {
         var clickHandler = createClickHandler(opts.clickId);
-        $img.on('mousedown', clickHandler);
+        $img.on('mousedown', clickHandler.mousedown);
+        $img.on('remove', clickHandler.remove);
       }
       if (opts.hoverId) {
         var hoverHandler = createHoverHandler(opts.hoverId);
         $img.on('mousemove', hoverHandler.mousemove);
         $img.on('mouseout', hoverHandler.mouseout);
+        $img.on('remove', hoverHandler.remove);
       }
       if (opts.brushId) {
         // Make image non-draggable
@@ -1708,13 +1746,14 @@
         $img.on('mousedown', brushHandler.mousedown);
         $img.on('mousemove', brushHandler.mousemove);
         $img.on('mouseup', brushHandler.mouseup);
+        $img.on('remove', brushHandler.remove);
       }
 
       if (opts.clickId || opts.hoverId || opts.brushId) {
         $img.addClass('crosshair');
       }
 
-      $el.empty();
+      clearEl();
       if (img)
         $el.append(img);
     }

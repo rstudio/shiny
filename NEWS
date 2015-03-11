@@ -20,6 +20,9 @@ shiny 0.11.1.9xxx
 * Fix JavaScript error when an output appears in nested uiOutputs. (Thanks,
   Gregory Zhang. #749)
 
+* Eliminate delay on receiving new value when `updateSliderInput(value=...)` is
+  called.
+
 shiny 0.11.1
 --------------------------------------------------------------------------------
 

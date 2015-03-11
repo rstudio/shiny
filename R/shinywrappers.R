@@ -148,10 +148,10 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         ),
         # The bounds of the plot area, in DOM pixels
         bounds = list(
-          left = grconvertX(usrBounds[1], 'user', 'nfc') * width,
-          right = grconvertX(usrBounds[2], 'user', 'nfc') * width,
-          bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height,
-          top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height
+          left = grconvertX(usrBounds[1], 'user', 'nfc') * width - 1,
+          right = grconvertX(usrBounds[2], 'user', 'nfc') * width - 1,
+          bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height - 1,
+          top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height - 1
         ),
         log = list(
           x = par('xlog'),

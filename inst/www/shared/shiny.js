@@ -1583,17 +1583,18 @@
 
           } else if (isDragging) {
             // How far the brush was dragged
-            var dx = dragPrev.x - offset.x;
-            var dy = dragPrev.y - offset.y;
+            var dx = offset.x - dragPrev.x;
+            var dy = offset.y - dragPrev.y;
 
-            // Calculate new start/end positions
+            // Calculate what new start/end positions would be, if we were not
+            // to clip.
             var newStart = {
-              x: start.x - dx,
-              y: start.y - dy
+              x: start.x + dx,
+              y: start.y + dy
             };
             var newEnd = {
-              x: end.x - dx,
-              y: end.y - dy
+              x: end.x + dx,
+              y: end.y + dy
             };
 
             if (opts.brushClip) {
@@ -1610,6 +1611,9 @@
                 newStart.y += clipdy;
                 newEnd.y   += clipdy;
               }
+              // Adjust dx and dy by the clip amount
+              dx += clipdx;
+              dy += clipdy;
 
               var newEndClipped = clipToPlottingRegion(newEnd);
               clipdx = newEndClipped.x - newEnd.x;
@@ -1622,23 +1626,24 @@
                 newStart.y += clipdy;
                 newEnd.y   += clipdy;
               }
-
-              // Recalculate dx and dy from the adjusted values
-              dx = start.x - newStart.x;
-              dy = start.y - newStart.y;
+              // Adjust dx and dy by the clip amount
+              dx += clipdx;
+              dy += clipdy;
             }
 
+            // Record the adjusted dragPrev coordinate
+            dragPrev.x += dx;
+            dragPrev.y += dy;
+
+            // Record the adjusted start/end positions
             start = newStart;
             end = newEnd;
-
-            dragPrev.x -= dx;
-            dragPrev.y -= dy;
 
             // Move the div
             var prev = prevBrushMinMax();
             $brushDiv.offset({
-              top: imgOffset.top + prev.min.y - dy,
-              left: imgOffset.left + prev.min.x - dx
+              top: imgOffset.top + prev.min.y,
+              left: imgOffset.left + prev.min.x
             });
           }
 
@@ -1651,6 +1656,9 @@
           var offset = mouseOffset(e);
 
           if (isBrushing) {
+            if (opts.brushClip)
+              offset = clipToPlottingRegion(offset);
+
             isBrushing = false;
             end = offset;
 

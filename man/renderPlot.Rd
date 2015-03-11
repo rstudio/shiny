@@ -42,7 +42,8 @@ The corresponding HTML output tag should be \code{div} or \code{img} and have
 the CSS class name \code{shiny-plot-output}.
 }
 \seealso{
-For more details on how the plots are generated, and how to control
-  the output, see \code{\link{plotPNG}}.
+For the corresponding client-side output function, and example
+  usage, see \code{\link{plotOutput}}. For more details on how the plots are
+  generated, and how to control the output, see \code{\link{plotPNG}}.
 }
 

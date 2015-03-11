@@ -90,6 +90,7 @@ Collate:
     'stack.R'
     'graph.R'
     'hooks.R'
+    'hover-brush-options.R'
     'html-deps.R'
     'htmltools.R'
     'imageutils.R'

@@ -46,8 +46,9 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
 #' the CSS class name \code{shiny-plot-output}.
 #'
-#' @seealso For more details on how the plots are generated, and how to control
-#'   the output, see \code{\link{plotPNG}}.
+#' @seealso For the corresponding client-side output function, and example
+#'   usage, see \code{\link{plotOutput}}. For more details on how the plots are
+#'   generated, and how to control the output, see \code{\link{plotPNG}}.
 #'
 #' @param expr An expression that generates a plot.
 #' @param width,height The width/height of the rendered plot, in pixels; or

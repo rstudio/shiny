@@ -1392,8 +1392,8 @@
           bounds = {
             top: 0,
             left: 0,
-            right: img.clientWidth,
-            bottom: img.clientHeight
+            right: img.clientWidth - 1,
+            bottom: img.clientHeight - 1
           };
         }
 

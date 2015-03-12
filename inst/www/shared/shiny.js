@@ -1307,7 +1307,7 @@
 
       // Firefox doesn't have offsetX/Y, so we need to use an alternate
       // method of calculation for it
-      var mouseOffset = function(mouseEvent) {
+      function mouseOffset(mouseEvent) {
         if (typeof(mouseEvent.offsetX) !== 'undefined') {
           return {
             x: mouseEvent.offsetX,
@@ -1319,10 +1319,10 @@
           x: mouseEvent.pageX - offset.left,
           y: mouseEvent.pageY - offset.top
         };
-      };
+      }
 
       // Transform offset coordinates to data space coordinates
-      var getScaledCoordinates = function(offset, clip) {
+      function offsetToScaledCoords(offset, clip) {
         // By default, clip to plotting region
         clip = clip || true;
 
@@ -1376,32 +1376,36 @@
           x: userX,
           y: userY
         };
-      };
+      }
 
-      var isInPlottingRegion = function(offset) {
-        if (!opts.coordmap) return offset;
-        var bounds = opts.coordmap.bounds;
-        return offset.x < bounds.right &&
-               offset.x > bounds.left &&
-               offset.y < bounds.bottom &&
-               offset.y > bounds.top;
-      };
-
-      // Given an offset, clip it to the plotting region as specified by
-      // coordmap. If there is no coordmap, clip it to bounds of the DOM
-      // element.
-      var clipToPlottingRegion = function(offset) {
-        var bounds;
+      // Get the pixel bounds of the coordmap; if there's no coordmap, return
+      // the bounds of the image.
+      function getBounds() {
         if (opts.coordmap) {
-          bounds = opts.coordmap.bounds;
+          return opts.coordmap.bounds;
         } else {
-          bounds = {
+          return {
             top: 0,
             left: 0,
             right: img.clientWidth - 1,
             bottom: img.clientHeight - 1
           };
         }
+      }
+
+      function isInPlottingRegion(offset) {
+        var bounds = getBounds();
+        return offset.x < bounds.right &&
+               offset.x > bounds.left &&
+               offset.y < bounds.bottom &&
+               offset.y > bounds.top;
+      }
+
+      // Given an offset, clip it to the plotting region as specified by
+      // coordmap. If there is no coordmap, clip it to bounds of the DOM
+      // element.
+      function clipToPlottingRegion(offset) {
+        var bounds = getBounds();
 
         var newOffset = {
           x: offset.x,
@@ -1419,7 +1423,7 @@
           newOffset.y = bounds.top;
 
         return newOffset;
-      };
+      }
 
       // Returns a function that sends mouse coordinates, scaled to data space.
       // If that function is passed a null event, it will send null.
@@ -1436,7 +1440,7 @@
           // Ignore events outside of plotting region
           if (clip && !isInPlottingRegion(offset)) return;
 
-          var coords = getScaledCoordinates(offset);
+          var coords = offsetToScaledCoords(offset);
           coords[".nonce"] = Math.random();
           exports.onInputChange(inputId, coords);
         };
@@ -1558,8 +1562,8 @@
 
           // Transform coordinates of brush to data space
           var prev = prevBrushMinMax();
-          var min = getScaledCoordinates(prev.min, opts.brushClip);
-          var max = getScaledCoordinates(prev.max, opts.brushClip);
+          var min = offsetToScaledCoords(prev.min, opts.brushClip);
+          var max = offsetToScaledCoords(prev.max, opts.brushClip);
 
           // Because the x and y directions of the pixel space may differ from
           // the x and y directions of the data space, we need to recalculate

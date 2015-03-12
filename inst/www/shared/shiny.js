@@ -1527,11 +1527,10 @@
         }
 
         // Return true if the offset is inside the previous brush
-        function offsetInsideLastBrush(e) {
+        function offsetInsideLastBrush(offset) {
           var prev = prevBrushMinMax();
-          var cur = mouseOffset(e);
-          return cur.x <= prev.max.x && cur.x >= prev.min.x &&
-                 cur.y <= prev.max.y && cur.y >= prev.min.y;
+          return offset.x <= prev.max.x && offset.x >= prev.min.x &&
+                 offset.y <= prev.max.y && offset.y >= prev.min.y;
         }
 
         // Set cursor to one of 3 styles
@@ -1601,7 +1600,7 @@
           // Ignore mousedown events outside of plotting region
           if (opts.brushClip && !isInPlottingRegion(offset)) return;
 
-          if (offsetInsideLastBrush(e)) {
+          if (offsetInsideLastBrush(offset)) {
             isDragging = true;
             dragPrev = offset;
             setCursorStyle('grabbing');
@@ -1620,9 +1619,11 @@
         }
 
         function mousemove(e) {
+          var offset = mouseOffset(e);
+
           if (!(isBrushing || isDragging)) {
             // Set the cursor depending on where it is
-            if (offsetInsideLastBrush(e)) {
+            if (offsetInsideLastBrush(offset)) {
               setCursorStyle('grabbable');
             } else {
               setCursorStyle('crosshair');
@@ -1633,8 +1634,6 @@
           // Need parent offset relative to page to calculate mouse offset
           // relative to page.
           var imgOffset = $brushDiv.parent().offset();
-
-          var offset = mouseOffset(e);
 
           if (isBrushing) {
             if (opts.brushClip)

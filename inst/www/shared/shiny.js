@@ -1543,26 +1543,34 @@
           // bounds accordingly.
           setBounds: function(box) {
             var plotBounds = getPlotBounds();
-            var b = this.bounds;
+
+            var min = { x: box.xmin, y: box.ymin };
+            var max = { x: box.xmax, y: box.ymax };
+
+            if (opts.brushClip) {
+              min = clipToPlottingRegion(min);
+              max = clipToPlottingRegion(max);
+            }
 
             if (opts.brushDirection === 'xy') {
-              b.xmin = box.xmin;
-              b.xmax = box.xmax;
-              b.ymin = box.ymin;
-              b.ymax = box.ymax;
+              // No change
 
             } else if (opts.brushDirection === 'x') {
-              b.xmin = box.xmin;
-              b.xmax = box.xmax;
-              b.ymin = plotBounds.top;
-              b.ymax = plotBounds.bottom;
+              // Extend top and bottom of plotting area
+              min.y = plotBounds.top;
+              max.y = plotBounds.bottom;
 
             } else if (opts.brushDirection === 'y') {
-              b.xmin = plotBounds.left;
-              b.xmax = plotBounds.right;
-              b.ymin = box.ymin;
-              b.ymax = box.ymax;
+              min.x = plotBounds.left;
+              max.x = plotBounds.right;
             }
+
+            this.bounds = {
+              xmin: min.x,
+              xmax: max.x,
+              ymin: min.y,
+              ymax: max.y
+            };
           },
 
           // Add a new div representing the brush.

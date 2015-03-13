@@ -43,6 +43,9 @@ hoverOptions <- function(delay = 300, delayType = c("debounce", "throttle"),
 #' @param clip Should the brush area be clipped to the plotting area? If FALSE,
 #'   then the user will be able to brush outside the plotting area, as long as
 #'   it is still inside the image.
+#' @param direction The direction for brushing. If \code{"xy"}, the brush can be
+#'   drawn and moved in both x and y directions. If \code{"x"}, or \code{"y"},
+#'   the brush wil work horizontally or vertically.
 #' @export
 brushOptions <- function(color = "#666", outline = "#000", opacity = 0.3,
                          delay = 300, delayType = c("debounce", "throttle"),

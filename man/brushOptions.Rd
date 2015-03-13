@@ -5,7 +5,8 @@
 \title{Create an object representing brushing options}
 \usage{
 brushOptions(color = "#666", outline = "#000", opacity = 0.3,
-  delay = 300, delayType = c("debounce", "throttle"), clip = TRUE)
+  delay = 300, delayType = c("debounce", "throttle"), clip = TRUE,
+  direction = c("xy", "x", "y"))
 }
 \arguments{
 \item{color}{Fill color of the brush.}
@@ -26,6 +27,10 @@ while the cursor is moving, and wait until the cursor has been at rest for
 \item{clip}{Should the brush area be clipped to the plotting area? If FALSE,
 then the user will be able to brush outside the plotting area, as long as
 it is still inside the image.}
+
+\item{direction}{The direction for brushing. If \code{"xy"}, the brush can be
+drawn and moved in both x and y directions. If \code{"x"}, or \code{"y"},
+the brush wil work horizontally or vertically.}
 }
 \description{
 This generates an object representing brushing options, to be passed as the

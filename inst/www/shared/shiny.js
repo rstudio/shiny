@@ -1295,6 +1295,7 @@
         brushColor: $el.data('brush-color') || '#666',
         brushOutline: $el.data('brush-outline') || '#000',
         brushOpacity: $el.data('brush-opacity') || 0.3,
+        brushDirection: $el.data('brush-direction') || 'xy',
         coordmap: data.coordmap
       };
 
@@ -1380,7 +1381,7 @@
 
       // Get the pixel bounds of the coordmap; if there's no coordmap, return
       // the bounds of the image.
-      function getBounds() {
+      function getPlotBounds() {
         if (opts.coordmap) {
           return opts.coordmap.bounds;
         } else {
@@ -1394,7 +1395,7 @@
       }
 
       function isInPlottingRegion(offset) {
-        var bounds = getBounds();
+        var bounds = getPlotBounds();
         return offset.x < bounds.right &&
                offset.x > bounds.left &&
                offset.y < bounds.bottom &&
@@ -1405,7 +1406,7 @@
       // coordmap. If there is no coordmap, clip it to bounds of the DOM
       // element.
       function clipToPlottingRegion(offset) {
-        var bounds = getBounds();
+        var bounds = getPlotBounds();
 
         var newOffset = {
           x: offset.x,
@@ -1477,63 +1478,237 @@
       // Returns a brush handler object. This has three public functions:
       // mousedown, mousemove, and mouseup.
       function createBrushHandler(inputId) {
-        var isBrushing = false;
-        // Brush starting position in pixels
-        var start;
-        // Ending position of previous brush
-        var end;
 
-        var isDragging = false;
-        // Offset of previous drag coordinate
-        var dragPrev;
+        // Object that encapsulates brush state
+        var brush = {
+          // Current brushing and dragging state
+          brushing: false,
+          dragging: false,
 
-        // The div that represents the brush
-        var $brushDiv;
+          // Offset of last mouse down and up events
+          down: { x: NaN, y: NaN },
+          up: { x: NaN, y: NaN },
 
-        function resetBrush() {
-          start    = { x: NaN, y: NaN };
-          end      = { x: NaN, y: NaN };
-          dragPrev = { x: NaN, y: NaN };
+          // Bounding rectangle of the brush
+          bounds: {
+            xmin: NaN,
+            xmax: NaN,
+            ymin: NaN,
+            ymax: NaN
+          },
 
-          if ($brushDiv) $brushDiv.remove();
+          // The bounds at the start of a drag
+          dragStartBounds: {
+            xmin: NaN,
+            xmax: NaN,
+            ymin: NaN,
+            ymax: NaN
+          },
 
-          $brushDiv = $(document.createElement('div'))
-            .attr('id', el.id + '_brush')
-            .css({
-              'background-color': opts.brushColor,
-              'border-color': opts.brushOutline,
-              'border-style': 'solid',
-              'border-width': '1px',
-              'opacity': opts.brushOpacity,
-              'pointer-events': 'none',
-              'position': 'absolute'
-            });
-        }
-        resetBrush();
+          // div that displays the brush
+          $div: null,
 
-        // Return page x/y coordinates of previous brush, in min/max values
-        // instead of start/end.
-        function prevBrushMinMax() {
-          return {
-            min: {
-              x: Math.min(start.x, end.x),
-              y: Math.min(start.y, end.y)
-            },
-            max: {
-              x: Math.max(start.x, end.x),
-              y: Math.max(start.y, end.y)
+          reset: function() {
+            this.brushing = false;
+            this.dragging = false;
+            this.down = { x: NaN, y: NaN };
+            this.up   = { x: NaN, y: NaN };
+            this.bounds = {
+              xmin: NaN,
+              xmax: NaN,
+              ymin: NaN,
+              ymax: NaN
+            };
+            this.dragStartBounds = {
+              xmin: NaN,
+              xmax: NaN,
+              ymin: NaN,
+              ymax: NaN
+            };
+
+            if (this.$div) this.$div.remove();
+
+            return this;
+          },
+
+          // Return true if the offset is inside min/max coords
+          isOffsetInsideBrush: function(offset) {
+            var bounds = this.bounds;
+            return offset.x <= bounds.xmax && offset.x >= bounds.xmin &&
+                   offset.y <= bounds.ymax && offset.y >= bounds.ymin;
+          },
+
+          // Sets the bounds of the brush, given a bounding box. This knows
+          // whether we're brushing in the x, y, or xy directions and sets
+          // bounds accordingly.
+          setBounds: function(box) {
+            var plotBounds = getPlotBounds();
+            var b = this.bounds;
+
+            if (opts.brushDirection === 'xy') {
+              b.xmin = box.xmin;
+              b.xmax = box.xmax;
+              b.ymin = box.ymin;
+              b.ymax = box.ymax;
+
+            } else if (opts.brushDirection === 'x') {
+              b.xmin = box.xmin;
+              b.xmax = box.xmax;
+              b.ymin = plotBounds.top;
+              b.ymax = plotBounds.bottom;
+
+            } else if (opts.brushDirection === 'y') {
+              b.xmin = plotBounds.left;
+              b.xmax = plotBounds.right;
+              b.ymin = box.ymin;
+              b.ymax = box.ymax;
             }
+          },
+
+          // Add a new div representing the brush.
+          addDiv: function() {
+            if (this.$div) this.$div.remove();
+
+            this.$div = $(document.createElement('div'))
+              .attr('id', el.id + '_brush')
+              .css({
+                'background-color': opts.brushColor,
+                'border-color': opts.brushOutline,
+                'border-style': 'solid',
+                'border-width': '1px',
+                'opacity': opts.brushOpacity,
+                'pointer-events': 'none',
+                'position': 'absolute'
+              });
+
+            $el.append(this.$div);
+            this.$div.offset({x:0, y:0}).width(0).height(0).show();
+          },
+
+          // Update the brush div to reflect the current brush bounds.
+          updateDiv: function() {
+            // Need parent offset relative to page to calculate mouse offset
+            // relative to page.
+            var imgOffset = $el.offset();
+            var b = this.bounds;
+            this.$div.offset({
+                top: imgOffset.top + b.ymin,
+                left: imgOffset.left + b.xmin
+              })
+              .width(b.xmax - b.xmin)
+              .height(b.ymax - b.ymin)
+              .show();
+          },
+
+          startBrushing: function(offset) {
+            this.brushing = true;
+            this.addDiv();
+
+            this.setBounds(findBox(this.down, offset));
+            this.updateDiv();
+          },
+
+          brushTo: function(offset) {
+            this.setBounds(findBox(this.down, offset));
+            this.updateDiv();
+          },
+
+          stopBrushing: function(offset) {
+            this.brushing = false;
+
+            // Save the final bounding box of the brush
+            this.setBounds(findBox(this.down, this.up));
+          },
+
+          startDragging: function(offset) {
+            this.dragging = true;
+            this.dragStartBounds = $.extend({}, this.bounds);
+          },
+
+          dragTo: function(offset) {
+            // How far the brush was dragged
+            var dx = offset.x - this.down.x;
+            var dy = offset.y - this.down.y;
+
+            // Calculate what new start/end positions would be, before clipping.
+            var start = this.dragStartBounds;
+            var newBounds = {
+              xmin: start.xmin + dx,
+              xmax: start.xmax + dx,
+              ymin: start.ymin + dy,
+              ymax: start.ymax + dy
+            };
+
+            // Clip to the plotting area
+            if (opts.brushClip) {
+              var plotBounds = getPlotBounds();
+
+              // Convert to format for shiftToRange
+              var xvals = [ newBounds.xmin, newBounds.xmax ];
+              var yvals = [ newBounds.ymin, newBounds.ymax ];
+
+              xvals = shiftToRange(xvals, plotBounds.left, plotBounds.right); 
+              yvals = shiftToRange(yvals, plotBounds.top, plotBounds.bottom);
+
+              // Convert back to bounds format
+              newBounds = {
+                xmin: xvals[0],
+                xmax: xvals[1],
+                ymin: yvals[0],
+                ymax: yvals[1]
+              };
+            }
+
+            this.setBounds(newBounds);
+            this.updateDiv();
+          },
+
+          stopDragging: function(offset) {
+            this.dragging = false;
+          }
+        };
+
+
+        // Given two sets of x/y coordinates, return an object representing the
+        // min and max x and y values. (This could be generalized to any number
+        // of points).
+        function findBox(offset1, offset2) {
+          return {
+            xmin: Math.min(offset1.x, offset2.x),
+            xmax: Math.max(offset1.x, offset2.x),
+            ymin: Math.min(offset1.y, offset2.y),
+            ymax: Math.max(offset1.y, offset2.y)
           };
         }
 
-        // Return true if the offset is inside the previous brush
-        function offsetInsideLastBrush(offset) {
-          var prev = prevBrushMinMax();
-          return offset.x <= prev.max.x && offset.x >= prev.min.x &&
-                 offset.y <= prev.max.y && offset.y >= prev.min.y;
+        // Shift an array of values so that they are within a min and max.
+        // The vals will be shifted so that they maintain the same spacing
+        // internally. If the range in vals is larger than the range of
+        // min and max, the result might not make sense.
+        function shiftToRange(vals, min, max) {
+          if (!(vals instanceof Array))
+            vals = [vals];
+
+          var maxval = Math.max.apply(null, vals);
+          var minval = Math.min.apply(null, vals);
+          var shiftAmount = 0;
+          if (maxval > max) {
+            shiftAmount = max - maxval;
+          } else if (minval < min) {
+            shiftAmount = min - minval;
+          }
+
+          var newvals = [];
+          for (var i=0; i<vals.length; i++) {
+            newvals[i] = vals[i] + shiftAmount;
+          }
+          return newvals;
         }
 
-        // Set cursor to one of 3 styles
+        // Set cursor to one of 3 styles. We need to set the cursor on the whole
+        // img instead of the brush dive, because the brush div has
+        // 'pointer-events:none' so that pointer events will pass through to the
+        // img.
         function setCursorStyle(style) {
           if (style === 'crosshair') {
             $img.addClass('crosshair');
@@ -1553,16 +1728,17 @@
         }
 
         function sendBrushInfo() {
+          var bounds = brush.bounds;
+
           // We're in a new or reset state
-          if (isNaN(start.x)) {
+          if (isNaN(bounds.xmin)) {
             exports.onInputChange(inputId, null);
             return;
           }
 
           // Transform coordinates of brush to data space
-          var prev = prevBrushMinMax();
-          var min = offsetToScaledCoords(prev.min, opts.brushClip);
-          var max = offsetToScaledCoords(prev.max, opts.brushClip);
+          var min = offsetToScaledCoords({ x: bounds.xmin, y: bounds.ymin }, opts.brushClip);
+          var max = offsetToScaledCoords({ x: bounds.xmax, y: bounds.ymax }, opts.brushClip);
 
           // Because the x and y directions of the pixel space may differ from
           // the x and y directions of the data space, we need to recalculate
@@ -1590,7 +1766,7 @@
           // This can happen when mousedown inside the graphic, then mouseup
           // outside, then mousedown inside. Just ignore the second
           // mousedown.
-          if (isBrushing || isDragging) return;
+          if (brush.brushing || brush.dragging) return;
 
           // Listen for left mouse button only
           if (e.which !== 1) return;
@@ -1600,30 +1776,24 @@
           // Ignore mousedown events outside of plotting region
           if (opts.brushClip && !isInPlottingRegion(offset)) return;
 
-          if (offsetInsideLastBrush(offset)) {
-            isDragging = true;
-            dragPrev = offset;
+          brush.up = { x: NaN, y: NaN };
+          brush.down = offset;
+
+          if (brush.isOffsetInsideBrush(offset)) {
+            brush.startDragging(offset);
             setCursorStyle('grabbing');
 
           } else {
-            start = offset;
-            isBrushing = true;
-
-            // Add the brushing div
-            $el.append($brushDiv);
-            $brushDiv.offset({ top: e.pageY, left: e.pageX })
-              .width(0)
-              .height(0)
-              .show();
+            brush.startBrushing(offset);
           }
         }
 
         function mousemove(e) {
           var offset = mouseOffset(e);
 
-          if (!(isBrushing || isDragging)) {
+          if (!(brush.brushing || brush.dragging)) {
             // Set the cursor depending on where it is
-            if (offsetInsideLastBrush(offset)) {
+            if (brush.isOffsetInsideBrush(offset)) {
               setCursorStyle('grabbable');
             } else {
               setCursorStyle('crosshair');
@@ -1633,116 +1803,52 @@
 
           // Need parent offset relative to page to calculate mouse offset
           // relative to page.
-          var imgOffset = $brushDiv.parent().offset();
+          var imgOffset = $el.offset();
 
-          if (isBrushing) {
+          if (brush.brushing) {
             if (opts.brushClip)
               offset = clipToPlottingRegion(offset);
 
-            end = offset;
+            brush.brushTo(offset);
 
-            $brushDiv.offset({
-                top: imgOffset.top + Math.min(start.y, offset.y),
-                left: imgOffset.left + Math.min(start.x, offset.x)
-              })
-              .width(Math.abs(start.x - offset.x))
-              .height(Math.abs(start.y - offset.y));
+          } else if (brush.dragging) {
+            // The general strategy for dragging:
+            // First, calculate what the new start/end positions would be, if
+            // we didn't clip. Then adjust the coordinates so that the brush
+            // will stay inside the clipping region.
 
-          } else if (isDragging) {
-            // How far the brush was dragged
-            var dx = offset.x - dragPrev.x;
-            var dy = offset.y - dragPrev.y;
-
-            // Calculate what new start/end positions would be, if we were not
-            // to clip.
-            var newStart = {
-              x: start.x + dx,
-              y: start.y + dy
-            };
-            var newEnd = {
-              x: end.x + dx,
-              y: end.y + dy
-            };
-
-            if (opts.brushClip) {
-              // Check that the start/end positions are in the plotting region.
-              // If not, adjust the values so that they're inside.
-              var newStartClipped = clipToPlottingRegion(newStart);
-              var clipdx = newStartClipped.x - newStart.x;
-              var clipdy = newStartClipped.y - newStart.y;
-              if (clipdx !== 0) {
-                newStart.x += clipdx;
-                newEnd.x   += clipdx;
-              }
-              if (clipdy !== 0) {
-                newStart.y += clipdy;
-                newEnd.y   += clipdy;
-              }
-              // Adjust dx and dy by the clip amount
-              dx += clipdx;
-              dy += clipdy;
-
-              var newEndClipped = clipToPlottingRegion(newEnd);
-              clipdx = newEndClipped.x - newEnd.x;
-              clipdy = newEndClipped.y - newEnd.y;
-              if (clipdx !== 0) {
-                newStart.x += clipdx;
-                newEnd.x   += clipdx;
-              }
-              if (clipdy !== 0) {
-                newStart.y += clipdy;
-                newEnd.y   += clipdy;
-              }
-              // Adjust dx and dy by the clip amount
-              dx += clipdx;
-              dy += clipdy;
-            }
-
-            // Record the adjusted dragPrev coordinate
-            dragPrev.x += dx;
-            dragPrev.y += dy;
-
-            // Record the adjusted start/end positions
-            start = newStart;
-            end = newEnd;
-
-            // Move the div
-            var prev = prevBrushMinMax();
-            $brushDiv.offset({
-              top: imgOffset.top + prev.min.y,
-              left: imgOffset.left + prev.min.x
-            });
+            brush.dragTo(offset);
           }
 
           brushInfoSender.normalCall();
         }
 
         function mouseup(e) {
-          if (!(isBrushing || isDragging)) return;
+          if (!(brush.brushing || brush.dragging)) return;
 
           // Listen for left mouse button only
           if (e.which !== 1) return;
 
           var offset = mouseOffset(e);
+          brush.up = offset;
 
-          if (isBrushing) {
+          if (brush.brushing) {
             if (opts.brushClip)
               offset = clipToPlottingRegion(offset);
 
-            isBrushing = false;
-            end = offset;
+            brush.stopBrushing(offset);
+            setCursorStyle('crosshair');
 
             // If the brush didn't go anywhere, hide the brush, clear value,
             // and return.
-            if (start.x === end.x && start.y === end.y) {
-              resetBrush();
+            if (brush.down.x === brush.up.x && brush.down.y === brush.up.y) {
+              brush.reset();
               brushInfoSender.immediateCall();
               return;
             }
-            setCursorStyle('crosshair');
 
-          } else if (isDragging) {
-            isDragging = false;
+          } else if (brush.dragging) {
+            brush.stopDragging(offset);
             setCursorStyle('grabbable');
           }
 
@@ -1754,7 +1860,7 @@
         }
 
         function remove() {
-          resetBrush();
+          brush.reset();
           brushInfoSender.immediateCall();
         }
 

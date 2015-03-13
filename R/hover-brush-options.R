@@ -46,13 +46,14 @@ hoverOptions <- function(delay = 300, delayType = c("debounce", "throttle"),
 #' @export
 brushOptions <- function(color = "#666", outline = "#000", opacity = 0.3,
                          delay = 300, delayType = c("debounce", "throttle"),
-                         clip = TRUE) {
+                         clip = TRUE, direction = c("xy", "x", "y")) {
   list(
     color = color,
     outline = outline,
     opacity = opacity,
     delay = delay,
     delayType = match.arg(delayType),
-    clip = clip
+    clip = clip,
+    direction = match.arg(direction)
   )
 }

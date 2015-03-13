@@ -1947,7 +1947,8 @@ imageOutput <- function(outputId, width = "100%", height="400px",
       `data-brush-outline` = brushOpts$outline,
       `data-brush-opacity` = brushOpts$opacity,
       `data-brush-delay` = brushOpts$delay,
-      `data-brush-delay-type` = brushOpts$delayType
+      `data-brush-delay-type` = brushOpts$delayType,
+      `data-brush-direction` = brushOpts$direction
     ))
   }
 

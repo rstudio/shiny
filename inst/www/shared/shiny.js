@@ -1900,9 +1900,13 @@
         $img.on('remove', hoverHandler.remove);
       }
       if (opts.brushId) {
-        // Make image non-draggable
+        // Make image non-draggable (Chrome, Safari)
         $img.css('-webkit-user-drag', 'none');
-        $img.on("dragstart", function() { return false; }); // For Firefox
+        // Firefox, IE<=10
+        $img.on("dragstart", function(e) { return false; });
+
+        // Disable selection of image when dragging in IE<=10
+        $el.on("selectstart", function(e) { return false; });
 
         var brushHandler = createBrushHandler(opts.brushId);
         $img.on('mousedown', brushHandler.mousedown);

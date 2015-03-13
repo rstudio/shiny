@@ -1306,15 +1306,14 @@
           img[key] = value;
       });
 
+      var $img = $(img);
+
       // Firefox doesn't have offsetX/Y, so we need to use an alternate
-      // method of calculation for it
+      // method of calculation for it. Even though other browsers do have
+      // offsetX/Y, we need to calculate relative to $el, because sometimes the
+      // mouse event can come with offset relative to other elements on the
+      // page. This happens when the event listener is bound to, say, window.
       function mouseOffset(mouseEvent) {
-        if (typeof(mouseEvent.offsetX) !== 'undefined') {
-          return {
-            x: mouseEvent.offsetX,
-            y: mouseEvent.offsetY
-          };
-        }
         var offset = $el.offset();
         return {
           x: mouseEvent.pageX - offset.left,
@@ -1779,6 +1778,12 @@
           // Listen for left mouse button only
           if (e.which !== 1) return;
 
+          // Attach the move and up handlers to the window so that they respond
+          // even when the mouse is moved outside of the image.
+          $(window)
+            .on('mousemove.brush', mousemove)
+            .on('mouseup.brush', mouseup);
+
           var offset = mouseOffset(e);
 
           // Ignore mousedown events outside of plotting region
@@ -1837,6 +1842,10 @@
           // Listen for left mouse button only
           if (e.which !== 1) return;
 
+          $(window)
+            .off('mousemove.brush')
+            .off('mouseup.brush');
+
           var offset = mouseOffset(e);
           brush.up = offset;
 
@@ -1880,8 +1889,6 @@
         };
       }
 
-      var $img = $(img);
-
       if (opts.clickId) {
         var clickHandler = createClickHandler(opts.clickId);
         $img.on('mousedown', clickHandler.mousedown);
@@ -1899,8 +1906,7 @@
 
         var brushHandler = createBrushHandler(opts.brushId);
         $img.on('mousedown', brushHandler.mousedown);
-        $img.on('mousemove', brushHandler.mousemove);
-        $img.on('mouseup', brushHandler.mouseup);
+        // mousemove and mouseup listeners are bound when mousedown happens.
         $img.on('remove', brushHandler.remove);
       }
 

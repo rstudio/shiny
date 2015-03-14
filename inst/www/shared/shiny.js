@@ -1603,11 +1603,11 @@
               .show();
           },
 
-          startBrushing: function(offset) {
+          startBrushing: function() {
             this.brushing = true;
             this.addDiv();
 
-            this.setBounds(findBox(this.down, offset));
+            this.setBounds(findBox(this.down, this.down));
             this.updateDiv();
           },
 
@@ -1774,12 +1774,6 @@
           // Listen for left mouse button only
           if (e.which !== 1) return;
 
-          // Attach the move and up handlers to the window so that they respond
-          // even when the mouse is moved outside of the image.
-          $(window)
-            .on('mousemove.image_brush', mousemoveBrushing)
-            .on('mouseup.image_brush', mouseupBrushing);
-
           var offset = mouseOffset(e);
 
           // Ignore mousedown events outside of plotting region
@@ -1792,8 +1786,20 @@
             brush.startDragging(offset);
             setCursorStyle('grabbing');
 
+            // Attach the move and up handlers to the window so that they respond
+            // even when the mouse is moved outside of the image.
+            $(window)
+              .on('mousemove.image_brush', mousemoveDragging)
+              .on('mouseup.image_brush', mouseupDragging );
+
           } else {
             brush.startBrushing(offset);
+
+            // Attach the move and up handlers to the window so that they respond
+            // even when the mouse is moved outside of the image.
+            $(window)
+              .on('mousemove.image_brush', mousemoveBrushing)
+              .on('mouseup.image_brush', mouseupBrushing);
           }
         }
 
@@ -1811,24 +1817,19 @@
           }
         }
 
-        // mousemove handler while brushing or dragging
+        // mousemove handlers while brushing or dragging
         function mousemoveBrushing(e) {
-          var offset = mouseOffset(e);
-
-          if (brush.brushing) {
-            brush.brushTo(offset);
-
-          } else if (brush.dragging) {
-            brush.dragTo(offset);
-          }
-
+          brush.brushTo(mouseOffset(e));
           brushInfoSender.normalCall();
         }
 
-        // mouseup handler while brushing or dragging
-        function mouseupBrushing(e) {
-          if (!(brush.brushing || brush.dragging)) return;
+        function mousemoveDragging(e) {
+          brush.dragTo(mouseOffset(e));
+          brushInfoSender.normalCall();
+        }
 
+        // mouseup handlers while brushing or dragging
+        function mouseupBrushing(e) {
           // Listen for left mouse button only
           if (e.which !== 1) return;
 
@@ -1836,24 +1837,17 @@
             .off('mousemove.image_brush')
             .off('mouseup.image_brush');
 
-          var offset = mouseOffset(e);
-          brush.up = offset;
+          brush.up = mouseOffset(e);
 
-          if (brush.brushing) {
-            brush.stopBrushing(offset);
-            setCursorStyle('crosshair');
+          brush.stopBrushing();
+          setCursorStyle('crosshair');
 
-            // If the brush didn't go anywhere, hide the brush, clear value,
-            // and return.
-            if (brush.down.x === brush.up.x && brush.down.y === brush.up.y) {
-              brush.reset();
-              brushInfoSender.immediateCall();
-              return;
-            }
-
-          } else if (brush.dragging) {
-            brush.stopDragging(offset);
-            setCursorStyle('grabbable');
+          // If the brush didn't go anywhere, hide the brush, clear value,
+          // and return.
+          if (brush.down.x === brush.up.x && brush.down.y === brush.up.y) {
+            brush.reset();
+            brushInfoSender.immediateCall();
+            return;
           }
 
           // Send info immediately on mouseup, but only if needed. If we don't
@@ -1862,6 +1856,25 @@
           if (brushInfoSender.isPending())
             brushInfoSender.immediateCall();
         }
+
+        function mouseupDragging(e) {
+          // Listen for left mouse button only
+          if (e.which !== 1) return;
+
+          $(window)
+            .off('mousemove.image_brush')
+            .off('mouseup.image_brush');
+
+          brush.up = mouseOffset(e);
+
+          brush.stopDragging();
+          setCursorStyle('grabbable');
+
+          if (brushInfoSender.isPending())
+            brushInfoSender.immediateCall();
+        }
+
+
 
         // This should be called when the img (not the el) is removed
         function onRemoveImg() {

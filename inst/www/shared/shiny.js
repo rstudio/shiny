@@ -1816,17 +1816,9 @@
           var offset = mouseOffset(e);
 
           if (brush.brushing) {
-            if (opts.brushClip)
-              offset = clipToPlottingRegion(offset);
-
             brush.brushTo(offset);
 
           } else if (brush.dragging) {
-            // The general strategy for dragging:
-            // First, calculate what the new start/end positions would be, if
-            // we didn't clip. Then adjust the coordinates so that the brush
-            // will stay inside the clipping region.
-
             brush.dragTo(offset);
           }
 
@@ -1848,9 +1840,6 @@
           brush.up = offset;
 
           if (brush.brushing) {
-            if (opts.brushClip)
-              offset = clipToPlottingRegion(offset);
-
             brush.stopBrushing(offset);
             setCursorStyle('crosshair');
 

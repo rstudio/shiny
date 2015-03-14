@@ -1263,19 +1263,15 @@
       return $(scope).find('.shiny-image-output, .shiny-plot-output');
     },
     renderValue: function(el, data) {
-      var self = this;
       var $el = $(el);
       // Load the image before emptying, to minimize flicker
       var img = null;
 
-      function clearEl() {
-        // Trigger custom 'remove' event for any existing images in the div
-        $el.find('img').trigger('remove');
-        $el.empty();
-      }
+      // Trigger custom 'remove' event for any existing images in the div
+      $el.find('img').trigger('remove');
 
       if (!data) {
-        clearEl();
+        $el.empty();
         return;
       }
 
@@ -1455,7 +1451,7 @@
             if (e.which !== 1) return;
             clickInfoSender(e);
           },
-          remove: function() { clickInfoSender(null); }
+          onRemoveImg: function() { clickInfoSender(null); }
         };
       }
 
@@ -1469,8 +1465,8 @@
           hoverInfoSender = new Debouncer(null, sendHoverInfo, opts.hoverDelay);
 
         return {
-          mousemove: function(e) { hoverInfoSender.normalCall(e); },
-          remove:    function()  { hoverInfoSender.immediateCall(null); }
+          mousemove:   function(e) { hoverInfoSender.normalCall(e); },
+          onRemoveImg: function()  { hoverInfoSender.immediateCall(null); }
         };
       }
 
@@ -1620,14 +1616,14 @@
             this.updateDiv();
           },
 
-          stopBrushing: function(offset) {
+          stopBrushing: function() {
             this.brushing = false;
 
             // Save the final bounding box of the brush
             this.setBounds(findBox(this.down, this.up));
           },
 
-          startDragging: function(offset) {
+          startDragging: function() {
             this.dragging = true;
             this.dragStartBounds = $.extend({}, this.bounds);
           },
@@ -1670,7 +1666,7 @@
             this.updateDiv();
           },
 
-          stopDragging: function(offset) {
+          stopDragging: function() {
             this.dragging = false;
           }
         };
@@ -1718,19 +1714,19 @@
         // img.
         function setCursorStyle(style) {
           if (style === 'crosshair') {
-            $img.addClass('crosshair');
-            $img.removeClass('grabbable');
-            $img.removeClass('grabbable');
+            $el.addClass('crosshair');
+            $el.removeClass('grabbable');
+            $el.removeClass('grabbable');
 
           } else if (style === 'grabbable') {
-            $img.removeClass('crosshair');
-            $img.addClass('grabbable');
-            $img.removeClass('grabbing');
+            $el.removeClass('crosshair');
+            $el.addClass('grabbable');
+            $el.removeClass('grabbing');
 
           } else if (style === 'grabbing') {
-            $img.removeClass('crosshair');
-            $img.removeClass('grabbable');
-            $img.addClass('grabbing');
+            $el.removeClass('crosshair');
+            $el.removeClass('grabbable');
+            $el.addClass('grabbing');
           }
         }
 
@@ -1781,8 +1777,8 @@
           // Attach the move and up handlers to the window so that they respond
           // even when the mouse is moved outside of the image.
           $(window)
-            .on('mousemove.brush', mousemove)
-            .on('mouseup.brush', mouseup);
+            .on('mousemove.image_brush', mousemoveBrushing)
+            .on('mouseup.image_brush', mouseupBrushing);
 
           var offset = mouseOffset(e);
 
@@ -1801,6 +1797,7 @@
           }
         }
 
+        // This sets the cursor style when it's in the el
         function mousemove(e) {
           var offset = mouseOffset(e);
 
@@ -1811,12 +1808,12 @@
             } else {
               setCursorStyle('crosshair');
             }
-            return;
           }
+        }
 
-          // Need parent offset relative to page to calculate mouse offset
-          // relative to page.
-          var imgOffset = $el.offset();
+        // mousemove handler while brushing or dragging
+        function mousemoveBrushing(e) {
+          var offset = mouseOffset(e);
 
           if (brush.brushing) {
             if (opts.brushClip)
@@ -1836,15 +1833,16 @@
           brushInfoSender.normalCall();
         }
 
-        function mouseup(e) {
+        // mouseup handler while brushing or dragging
+        function mouseupBrushing(e) {
           if (!(brush.brushing || brush.dragging)) return;
 
           // Listen for left mouse button only
           if (e.which !== 1) return;
 
           $(window)
-            .off('mousemove.brush')
-            .off('mouseup.brush');
+            .off('mousemove.image_brush')
+            .off('mouseup.image_brush');
 
           var offset = mouseOffset(e);
           brush.up = offset;
@@ -1876,7 +1874,8 @@
             brushInfoSender.immediateCall();
         }
 
-        function remove() {
+        // This should be called when the img (not the el) is removed
+        function onRemoveImg() {
           brush.reset();
           brushInfoSender.immediateCall();
         }
@@ -1884,41 +1883,57 @@
         return {
           mousedown: mousedown,
           mousemove: mousemove,
-          mouseup: mouseup,
-          remove: remove
+          onRemoveImg: onRemoveImg
         };
       }
 
       if (opts.clickId) {
         var clickHandler = createClickHandler(opts.clickId);
-        $img.on('mousedown', clickHandler.mousedown);
-        $img.on('remove', clickHandler.remove);
+        $el.on('mousedown.image_click', clickHandler.mousedown);
+
+        // When img is removed, do housekeeping: clear $el's mouse listener and
+        // call the handler's onRemoveImg callback.
+        $img.on('remove', function() {
+          $el.off('.image_click');
+          clickHandler.onRemoveImg();
+        });
       }
       if (opts.hoverId) {
         var hoverHandler = createHoverHandler(opts.hoverId);
-        $img.on('mousemove', hoverHandler.mousemove);
-        $img.on('remove', hoverHandler.remove);
+        $el.on('mousemove.image_hover', hoverHandler.mousemove);
+
+        $img.on('remove', function() {
+          $el.off('.image_hover');
+          hoverHandler.onRemoveImg();
+        });
       }
       if (opts.brushId) {
         // Make image non-draggable (Chrome, Safari)
         $img.css('-webkit-user-drag', 'none');
         // Firefox, IE<=10
-        $img.on("dragstart", function(e) { return false; });
+        $img.on('dragstart', function() { return false; });
 
-        // Disable selection of image when dragging in IE<=10
-        $el.on("selectstart", function(e) { return false; });
+        // Disable selection of image and text when dragging in IE<=10
+        $el.on('selectstart.image_brush', function() { return false; });
 
         var brushHandler = createBrushHandler(opts.brushId);
-        $img.on('mousedown', brushHandler.mousedown);
-        // mousemove and mouseup listeners are bound when mousedown happens.
-        $img.on('remove', brushHandler.remove);
+        $el.on('mousedown.image_brush', brushHandler.mousedown);
+        $el.on('mousemove.image_brush', brushHandler.mousemove);
+
+        $img.on('remove', function() {
+          // Remove any events attached to the $el so that we don't end up with
+          // multiple copies.
+          $el.off('.image_brush');
+          brushHandler.onRemoveImg();
+        });
+
       }
 
       if (opts.clickId || opts.hoverId || opts.brushId) {
-        $img.addClass('crosshair');
+        $el.addClass('crosshair');
       }
 
-      clearEl();
+      $el.empty();
       if (img)
         $el.append(img);
     }

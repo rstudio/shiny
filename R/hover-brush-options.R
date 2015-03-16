@@ -1,9 +1,34 @@
+#' Create an object representing click options
+#'
+#' This generates an object representing click options, to be passed as the
+#' \code{click} or \code{dblclick} argument of \code{\link{imageOutput}} or
+#' \code{\link{plotOutput}}.
+#'
+#' @param id Input value name. For example, if the value is \code{"plot_click"},
+#'   then the click coordinates will be available as \code{input$plot_click}.
+#' @param clip Should the click area be clipped to the plotting area? If FALSE,
+#'   then the server will receive click events even when the mouse is outside
+#'   the plotting area, as long as it is still inside the image.
+#' @export
+clickOpts <- function(id = NULL, clip = TRUE) {
+  if (is.null(id))
+    stop("id must not be NULL")
+
+  list(
+    id = id,
+    clip = clip
+  )
+}
+
+
 #' Create an object representing hover options
 #'
 #' This generates an object representing hovering options, to be passed as the
-#' \code{hoverOpts} argument of \code{\link{imageOutput}} or
+#' \code{hover} argument of \code{\link{imageOutput}} or
 #' \code{\link{plotOutput}}.
 #'
+#' @param id Input value name. For example, if the value is \code{"plot_hover"},
+#'   then the hover coordinates will be available as \code{input$plot_hover}.
 #' @param delay How long to delay (in milliseconds) when debouncing or
 #'   throttling, before sending the mouse location to the server.
 #' @param delayType The type of algorithm for limiting the number of hover
@@ -15,9 +40,13 @@
 #'   then the server will receive hover events even when the mouse is outside
 #'   the plotting area, as long as it is still inside the image.
 #' @export
-hoverOptions <- function(delay = 300, delayType = c("debounce", "throttle"),
-                         clip = TRUE) {
+hoverOpts <- function(id = NULL, delay = 300,
+                         delayType = c("debounce", "throttle"), clip = TRUE) {
+  if (is.null(id))
+    stop("id must not be NULL")
+
   list(
+    id = id,
     delay = delay,
     delayType = match.arg(delayType),
     clip = clip
@@ -27,9 +56,11 @@ hoverOptions <- function(delay = 300, delayType = c("debounce", "throttle"),
 #' Create an object representing brushing options
 #'
 #' This generates an object representing brushing options, to be passed as the
-#' \code{brushOpts} argument of \code{\link{imageOutput}} or
+#' \code{brush} argument of \code{\link{imageOutput}} or
 #' \code{\link{plotOutput}}.
 #'
+#' @param id Input value name. For example, if the value is \code{"plot_brush"},
+#'   then the coordinates will be available as \code{input$plot_brush}.
 #' @param color Fill color of the brush.
 #' @param outline Outline color of the brush.
 #' @param opacity Opacity of the brush
@@ -47,10 +78,15 @@ hoverOptions <- function(delay = 300, delayType = c("debounce", "throttle"),
 #'   drawn and moved in both x and y directions. If \code{"x"}, or \code{"y"},
 #'   the brush wil work horizontally or vertically.
 #' @export
-brushOptions <- function(color = "#666", outline = "#000", opacity = 0.3,
-                         delay = 300, delayType = c("debounce", "throttle"),
-                         clip = TRUE, direction = c("xy", "x", "y")) {
+brushOpts <- function(id = NULL, color = "#666", outline = "#000",
+                         opacity = 0.3, delay = 300,
+                         delayType = c("debounce", "throttle"), clip = TRUE,
+                         direction = c("xy", "x", "y")) {
+  if (is.null(id))
+    stop("id must not be NULL")
+
   list(
+    id = id,
     color = color,
     outline = outline,
     opacity = opacity,

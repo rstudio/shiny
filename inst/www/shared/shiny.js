@@ -1788,7 +1788,7 @@
 
             // Attach the move and up handlers to the window so that they respond
             // even when the mouse is moved outside of the image.
-            $(window)
+            $(document)
               .on('mousemove.image_brush', mousemoveDragging)
               .on('mouseup.image_brush', mouseupDragging );
 
@@ -1797,7 +1797,7 @@
 
             // Attach the move and up handlers to the window so that they respond
             // even when the mouse is moved outside of the image.
-            $(window)
+            $(document)
               .on('mousemove.image_brush', mousemoveBrushing)
               .on('mouseup.image_brush', mouseupBrushing);
           }
@@ -1833,7 +1833,7 @@
           // Listen for left mouse button only
           if (e.which !== 1) return;
 
-          $(window)
+          $(document)
             .off('mousemove.image_brush')
             .off('mouseup.image_brush');
 
@@ -1861,7 +1861,7 @@
           // Listen for left mouse button only
           if (e.which !== 1) return;
 
-          $(window)
+          $(document)
             .off('mousemove.image_brush')
             .off('mouseup.image_brush');
 

@@ -1576,13 +1576,28 @@
               .attr('id', el.id + '_brush')
               .css({
                 'background-color': opts.brushColor,
-                'border-color': opts.brushOutline,
-                'border-style': 'solid',
-                'border-width': '1px',
                 'opacity': opts.brushOpacity,
                 'pointer-events': 'none',
                 'position': 'absolute'
               });
+
+          var borderStyle = '1px solid ' + opts.brushOutline;
+          if (opts.brushDirection === 'xy') {
+            this.$div.css({
+              'border': borderStyle
+            });
+          } else if (opts.brushDirection === 'x') {
+            this.$div.css({
+              'border-left': borderStyle,
+              'border-right': borderStyle
+            });
+          } else if (opts.brushDirection === 'y') {
+            this.$div.css({
+              'border-top': borderStyle,
+              'border-bottom': borderStyle
+            });
+          }
+
 
             $el.append(this.$div);
             this.$div.offset({x:0, y:0}).width(0).height(0).show();

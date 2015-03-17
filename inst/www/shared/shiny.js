@@ -1283,6 +1283,8 @@
       // Load the image before emptying, to minimize flicker
       var img = null;
 
+      // Remove event handlers that were added in previous renderValue()
+      $el.off('.image_output');
       // Trigger custom 'remove' event for any existing images in the div
       $el.find('img').trigger('remove');
 
@@ -1931,7 +1933,7 @@
       // mousedown2 and dblclick2 events with this mousedown listener.
       var clickCount = 0;
       var clickTimer = null;
-      $el.on('mousedown', function(e) {
+      $el.on('mousedown.image_output', function(e) {
         // Listen for left mouse button only
         if (e.which !== 1) return;
 
@@ -1994,36 +1996,27 @@
       // Register the various event handlers --------------------------
       if (opts.clickId) {
         var clickHandler = createClickHandler(opts.clickId);
-        $el.on('mousedown2.image_click', clickHandler.mousedown);
+        $el.on('mousedown2.image_output', clickHandler.mousedown);
 
         // When img is removed, do housekeeping: clear $el's mouse listener and
         // call the handler's onRemoveImg callback.
-        $img.on('remove', function() {
-          $el.off('.image_click');
-          clickHandler.onRemoveImg();
-        });
+        $img.on('remove', clickHandler.onRemoveImg);
       }
 
       if (opts.dblclickId) {
         // We'll use the clickHandler's mousedown function, but register it to
         // our custom 'dblclick2' event.
         var dblclickHandler = createClickHandler(opts.dblclickId);
-        $el.on('dblclick2.image_dblclick', dblclickHandler.mousedown);
+        $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
-        $img.on('remove', function() {
-          $el.off('.image_dblclick');
-          dblclickHandler.onRemoveImg();
-        });
+        $img.on('remove', dblclickHandler.onRemoveImg);
       }
 
       if (opts.hoverId) {
         var hoverHandler = createHoverHandler(opts.hoverId);
-        $el.on('mousemove.image_hover', hoverHandler.mousemove);
+        $el.on('mousemove.image_output', hoverHandler.mousemove);
 
-        $img.on('remove', function() {
-          $el.off('.image_hover');
-          hoverHandler.onRemoveImg();
-        });
+        $img.on('remove', hoverHandler.onRemoveImg);
       }
 
       if (opts.brushId) {
@@ -2033,19 +2026,13 @@
         $img.on('dragstart', function() { return false; });
 
         // Disable selection of image and text when dragging in IE<=10
-        $el.on('selectstart.image_brush', function() { return false; });
+        $el.on('selectstart.image_output', function() { return false; });
 
         var brushHandler = createBrushHandler(opts.brushId);
-        $el.on('mousedown.image_brush', brushHandler.mousedown);
-        $el.on('mousemove.image_brush', brushHandler.mousemove);
+        $el.on('mousedown.image_output', brushHandler.mousedown);
+        $el.on('mousemove.image_output', brushHandler.mousemove);
 
-        $img.on('remove', function() {
-          // Remove any events attached to the $el so that we don't end up with
-          // multiple copies.
-          $el.off('.image_brush');
-          brushHandler.onRemoveImg();
-        });
-
+        $img.on('remove', brushHandler.onRemoveImg);
       }
 
       if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {

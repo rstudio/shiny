@@ -1976,6 +1976,21 @@
         }
       });
 
+      // IE8 needs a special hack because when you do a double-click it doesn't
+      // trigger the click event twice - it directly triggers dblclick.
+      if (browser.isIE && browser.IEVersion === 8) {
+        $el.on('dblclick', function(e) {
+          var e2 = $.Event('dblclick2', {
+            which:   1,        // In IE8, e.which is 0 instead of 1. ???
+            pageX:   e.pageX,
+            pageY:   e.pageY,
+            offsetX: e.offsetX,
+            offsetY: e.offsetY
+          });
+          $el.trigger(e2);
+        });
+      }
+
       // Register the various event handlers --------------------------
       if (opts.clickId) {
         var clickHandler = createClickHandler(opts.clickId);

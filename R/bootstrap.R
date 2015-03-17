@@ -1729,6 +1729,8 @@ verbatimTextOutput <- function(outputId) {
 #'   the value will be accessible via \code{input$plot_click}. The value will
 #'   be a named list  with \code{x} and \code{y} elements indicating the mouse
 #'   position.
+#' @param dblclick This is just like the \code{click} argument, but for
+#'   double-click events.
 #' @param hover Similar to the \code{click} argument, this can be \code{NULL}
 #'   (the default), a string, or an object created by the
 #'   \code{\link{hoverOpts}} function. If you use a value like
@@ -1906,7 +1908,7 @@ verbatimTextOutput <- function(outputId) {
 #' }
 #' @export
 imageOutput <- function(outputId, width = "100%", height="400px",
-                        click = NULL,
+                        click = NULL, dblclick = NULL,
                         hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                         brush = NULL,
                         clickId = NULL, hoverId = NULL,
@@ -1966,6 +1968,17 @@ imageOutput <- function(outputId, width = "100%", height="400px",
     ))
   }
 
+  if (!is.null(dblclick)) {
+    if (is.character(dblclick)) {
+      dblclick <- clickOpts(id = dblclick)
+    }
+
+    args <- c(args, list(
+      `data-dblclick-id` = dblclick$id,
+      `data-dblclick-clip` = dblclick$clip
+    ))
+  }
+
   if (!is.null(hover)) {
     if (is.character(hover)) {
       hover <- hoverOpts(id = hover)
@@ -2003,15 +2016,15 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #' @rdname imageOutput
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
-                       click = NULL,
+                       click = NULL, dblclick = NULL,
                        hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
                        brush = NULL,
                        clickId = NULL, hoverId = NULL,
                        inline = FALSE) {
 
   # Result is the same as imageOutput, except for HTML class
-  res <- imageOutput(outputId, width, height, click, hover,
-                     hoverDelay, hoverDelayType, brush,
+  res <- imageOutput(outputId, width, height, click, dblclick,
+                     hover, hoverDelay, hoverDelayType, brush,
                      clickId, hoverId, inline)
 
   res$attribs$class <- "shiny-plot-output"

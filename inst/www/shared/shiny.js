@@ -1279,6 +1279,9 @@
         clickId: $el.data('click-id'),
         clickClip: $el.data('click-clip') || true,
 
+        dblclickId: $el.data('dblclick-id'),
+        dblclickClip: $el.data('dblclick-clip') || true,
+
         hoverId: $el.data('hover-id'),
         hoverClip: $el.data('hover-clip') || true,
         hoverDelayType: $el.data('hover-delay-type') || 'debounce',
@@ -1521,7 +1524,9 @@
               ymax: NaN
             };
 
-            if (this.$div) this.$div.remove();
+            // For some reason, calling this.$div.remove() causes IE9 and 10 to
+            // not trigger the dblclick event, so we'll just hide it instead.
+            if (this.$div) this.$div.hide();
 
             return this;
           },
@@ -1889,8 +1894,6 @@
             brushInfoSender.immediateCall();
         }
 
-
-
         // This should be called when the img (not the el) is removed
         function onRemoveImg() {
           brush.reset();
@@ -1915,6 +1918,20 @@
           clickHandler.onRemoveImg();
         });
       }
+
+      if (opts.dblclickId) {
+        // TODO: IE8 doesn't have dblclick event
+        // We'll use the clickHandler's mousedown event listener, but register
+        // it to the dblclick event.
+        var dblclickHandler = createClickHandler(opts.dblclickId);
+        $el.on('dblclick.image_dblclick', dblclickHandler.mousedown);
+
+        $img.on('remove', function() {
+          $el.off('.image_dblclick');
+          dblclickHandler.onRemoveImg();
+        });
+      }
+
       if (opts.hoverId) {
         var hoverHandler = createHoverHandler(opts.hoverId);
         $el.on('mousemove.image_hover', hoverHandler.mousemove);
@@ -1924,6 +1941,7 @@
           hoverHandler.onRemoveImg();
         });
       }
+
       if (opts.brushId) {
         // Make image non-draggable (Chrome, Safari)
         $img.css('-webkit-user-drag', 'none');
@@ -1946,7 +1964,7 @@
 
       }
 
-      if (opts.clickId || opts.hoverId || opts.brushId) {
+      if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
         $el.addClass('crosshair');
       }
 

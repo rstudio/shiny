@@ -6,12 +6,14 @@
 \title{Create an plot or image output element}
 \usage{
 imageOutput(outputId, width = "100\%", height = "400px", click = NULL,
-  hover = NULL, hoverDelay = NULL, hoverDelayType = NULL, brush = NULL,
-  clickId = NULL, hoverId = NULL, inline = FALSE)
+  dblclick = NULL, hover = NULL, hoverDelay = NULL,
+  hoverDelayType = NULL, brush = NULL, clickId = NULL, hoverId = NULL,
+  inline = FALSE)
 
 plotOutput(outputId, width = "100\%", height = "400px", click = NULL,
-  hover = NULL, hoverDelay = NULL, hoverDelayType = NULL, brush = NULL,
-  clickId = NULL, hoverId = NULL, inline = FALSE)
+  dblclick = NULL, hover = NULL, hoverDelay = NULL,
+  hoverDelayType = NULL, brush = NULL, clickId = NULL, hoverId = NULL,
+  inline = FALSE)
 }
 \arguments{
 \item{outputId}{output variable to read the plot/image from.}
@@ -31,6 +33,9 @@ the plot will send coordinates to the server whenever it is clicked, and
 the value will be accessible via \code{input$plot_click}. The value will
 be a named list  with \code{x} and \code{y} elements indicating the mouse
 position.}
+
+\item{dblclick}{This is just like the \code{click} argument, but for
+double-click events.}
 
 \item{hover}{Similar to the \code{click} argument, this can be \code{NULL}
 (the default), a string, or an object created by the

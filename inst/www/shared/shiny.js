@@ -1544,9 +1544,8 @@
               ymax: NaN
             };
 
-            // For some reason, calling this.$div.remove() causes IE9 and 10 to
-            // not trigger the dblclick event, so we'll just hide it instead.
-            if (this.$div) this.$div.hide();
+            if (this.$div)
+              this.$div.remove();
 
             return this;
           },

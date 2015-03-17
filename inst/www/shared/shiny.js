@@ -1605,22 +1605,22 @@
                 'position': 'absolute'
               });
 
-          var borderStyle = '1px solid ' + opts.brushOutline;
-          if (opts.brushDirection === 'xy') {
-            this.$div.css({
-              'border': borderStyle
-            });
-          } else if (opts.brushDirection === 'x') {
-            this.$div.css({
-              'border-left': borderStyle,
-              'border-right': borderStyle
-            });
-          } else if (opts.brushDirection === 'y') {
-            this.$div.css({
-              'border-top': borderStyle,
-              'border-bottom': borderStyle
-            });
-          }
+            var borderStyle = '1px solid ' + opts.brushOutline;
+            if (opts.brushDirection === 'xy') {
+              this.$div.css({
+                'border': borderStyle
+              });
+            } else if (opts.brushDirection === 'x') {
+              this.$div.css({
+                'border-left': borderStyle,
+                'border-right': borderStyle
+              });
+            } else if (opts.brushDirection === 'y') {
+              this.$div.css({
+                'border-top': borderStyle,
+                'border-bottom': borderStyle
+              });
+            }
 
 
             $el.append(this.$div);

@@ -1,7 +1,7 @@
 #' Create an object representing click options
 #'
 #' This generates an object representing click options, to be passed as the
-#' \code{click} or \code{dblclick} argument of \code{\link{imageOutput}} or
+#' \code{click} argument of \code{\link{imageOutput}} or
 #' \code{\link{plotOutput}}.
 #'
 #' @param id Input value name. For example, if the value is \code{"plot_click"},
@@ -20,6 +20,27 @@ clickOpts <- function(id = NULL, clip = TRUE) {
   )
 }
 
+
+#' Create an object representing double-click options
+#'
+#' This generates an object representing dobule-click options, to be passed as
+#' the \code{dblclick} argument of \code{\link{imageOutput}} or
+#' \code{\link{plotOutput}}.
+#'
+#' @inheritParams clickOpts
+#' @param delay Maximum delay (in ms) between a pair clicks for them to be
+#'   counted as a double-click.
+#' @export
+dblclickOpts <- function(id = NULL, clip = TRUE, delay = 400) {
+  if (is.null(id))
+    stop("id must not be NULL")
+
+  list(
+    id = id,
+    clip = clip,
+    delay = delay
+  )
+}
 
 #' Create an object representing hover options
 #'

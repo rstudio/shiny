@@ -1975,7 +1975,8 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 
     args <- c(args, list(
       `data-dblclick-id` = dblclick$id,
-      `data-dblclick-clip` = dblclick$clip
+      `data-dblclick-clip` = dblclick$clip,
+      `data-dblclick-delay` = dblclick$delay
     ))
   }
 

@@ -1281,6 +1281,7 @@
 
         dblclickId: $el.data('dblclick-id'),
         dblclickClip: $el.data('dblclick-clip') || true,
+        dblclickDelay: $el.data('dblclick-delay') || 400,
 
         hoverId: $el.data('hover-id'),
         hoverClip: $el.data('hover-clip') || true,
@@ -1295,6 +1296,7 @@
         brushOutline: $el.data('brush-outline') || '#000',
         brushOpacity: $el.data('brush-opacity') || 0.3,
         brushDirection: $el.data('brush-direction') || 'xy',
+
         coordmap: data.coordmap
       };
 
@@ -1907,9 +1909,61 @@
         };
       }
 
+
+      // We need to make sure that, if there's a dblClick listener, that a
+      // double-click doesn't trigger two click events. We'll trigger custom
+      // mousedown2 and dblclick2 events with this mousedown listener.
+      var clickCount = 0;
+      var clickTimer = null;
+      $el.on('mousedown', function(e) {
+        // Listen for left mouse button only
+        if (e.which !== 1) return;
+
+        // Information extracted from e that will get passed to the triggered
+        // event.
+        var eInfo = {
+          which:   e.which,
+          pageX:   e.pageX,
+          pageY:   e.pageY,
+          offsetX: e.offsetX,
+          offsetY: e.offsetY
+        };
+        var e2;
+
+        // If no dblclick listener, immediately trigger a click2 event.
+        if (!opts.dblclickId) {
+          e2 = $.Event('mousedown2', eInfo);
+          $el.trigger(e2);
+          return;
+        }
+
+        // If there's a dblclick listener, make sure not to count this as a
+        // click on the first mousedown; we need to wait for the dblclick
+        // delay before we can be sure this click was a single-click.
+        clickCount++;
+        if (clickCount === 1) {
+          clickTimer = setTimeout(function() {
+            e2 = $.Event('mousedown2', eInfo);
+            $el.trigger(e2);
+            clickCount = 0;
+
+          }, opts.dblclickDelay);
+
+        } else {
+          // If second click happens within specified delay, trigger our
+          // custom 'dblclick2' event.
+          clearTimeout(clickTimer);
+          e2 = $.Event('dblclick2', eInfo);
+
+          $el.trigger(e2);
+          clickCount = 0;
+        }
+      });
+
+      // Register the various event handlers --------------------------
       if (opts.clickId) {
         var clickHandler = createClickHandler(opts.clickId);
-        $el.on('mousedown.image_click', clickHandler.mousedown);
+        $el.on('mousedown2.image_click', clickHandler.mousedown);
 
         // When img is removed, do housekeeping: clear $el's mouse listener and
         // call the handler's onRemoveImg callback.
@@ -1920,11 +1974,10 @@
       }
 
       if (opts.dblclickId) {
-        // TODO: IE8 doesn't have dblclick event
-        // We'll use the clickHandler's mousedown event listener, but register
-        // it to the dblclick event.
+        // We'll use the clickHandler's mousedown function, but register it to
+        // our custom 'dblclick2' event.
         var dblclickHandler = createClickHandler(opts.dblclickId);
-        $el.on('dblclick.image_dblclick', dblclickHandler.mousedown);
+        $el.on('dblclick2.image_dblclick', dblclickHandler.mousedown);
 
         $img.on('remove', function() {
           $el.off('.image_dblclick');

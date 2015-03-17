@@ -1293,12 +1293,21 @@
         return;
       }
 
+      function strToBool(str) {
+        if (str.toLowerCase() === 'true')
+          return true;
+        else if (str.toLowerCase() === 'false')
+          return false;
+        else
+          return undefined;
+      }
+
       var opts = {
         clickId: $el.data('click-id'),
-        clickClip: $el.data('click-clip') || true,
+        clickClip: strToBool($el.data('click-clip')) || true,
 
         dblclickId: $el.data('dblclick-id'),
-        dblclickClip: $el.data('dblclick-clip') || true,
+        dblclickClip: strToBool($el.data('dblclick-clip')) || true,
         dblclickDelay: $el.data('dblclick-delay') || 400,
 
         hoverId: $el.data('hover-id'),
@@ -1307,13 +1316,14 @@
         hoverDelay: $el.data('hover-delay') || 300,
 
         brushId: $el.data('brush-id'),
-        brushClip: $el.data('brush-clip') || true,
+        brushClip: strToBool($el.data('brush-clip')) || true,
         brushDelayType: $el.data('brush-delay-type') || 'debounce',
         brushDelay: $el.data('brush-delay') || 300,
         brushColor: $el.data('brush-color') || '#666',
         brushOutline: $el.data('brush-outline') || '#000',
         brushOpacity: $el.data('brush-opacity') || 0.3,
         brushDirection: $el.data('brush-direction') || 'xy',
+        brushResetOnNew: strToBool($el.data('brush-reset-on-new')) || false,
 
         coordmap: data.coordmap
       };
@@ -1548,6 +1558,25 @@
               this.$div.remove();
 
             return this;
+          },
+
+          // If there's an existing brush div, use that div to set the new
+          // brush's settings.
+          importOldBrush: function() {
+            var oldDiv = $el.find('#' + el.id + '_brush');
+            if (oldDiv.length === 0)
+              return;
+
+            var elOffset = $el.offset();
+            var divOffset = oldDiv.offset();
+            this.bounds = {
+              xmin: divOffset.left - elOffset.left,
+              xmax: divOffset.left - elOffset.left + oldDiv.width(),
+              ymin: divOffset.top - elOffset.top,
+              ymax: divOffset.top - elOffset.top + oldDiv.height()
+            };
+
+            this.$div = oldDiv;
           },
 
           // Return true if the offset is inside min/max coords
@@ -1915,8 +1944,14 @@
 
         // This should be called when the img (not the el) is removed
         function onRemoveImg() {
-          brush.reset();
-          brushInfoSender.immediateCall();
+          if (opts.brushResetOnNew) {
+            brush.reset();
+            brushInfoSender.immediateCall();
+          }
+        }
+
+        if (!opts.brushResetOnNew) {
+          brush.importOldBrush();
         }
 
         return {
@@ -2038,7 +2073,7 @@
         $el.addClass('crosshair');
       }
 
-      $el.empty();
+      $el.find('img').remove();
       if (img)
         $el.append(img);
     }

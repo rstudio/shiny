@@ -2006,7 +2006,8 @@ imageOutput <- function(outputId, width = "100%", height="400px",
       `data-brush-opacity` = brush$opacity,
       `data-brush-delay` = brush$delay,
       `data-brush-delay-type` = brush$delayType,
-      `data-brush-direction` = brush$direction
+      `data-brush-direction` = brush$direction,
+      `data-brush-reset-on-new` = brush$resetOnNew
     ))
   }
 

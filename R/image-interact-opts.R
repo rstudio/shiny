@@ -98,11 +98,17 @@ hoverOpts <- function(id = NULL, delay = 300,
 #' @param direction The direction for brushing. If \code{"xy"}, the brush can be
 #'   drawn and moved in both x and y directions. If \code{"x"}, or \code{"y"},
 #'   the brush wil work horizontally or vertically.
+#' @param resetOnNew When a new image is sent to the browser (via
+#'   \code{\link{renderImage}}), should the brush be reset? The default,
+#'   \code{FALSE}, is useful if you want to update the plot while keeping the
+#'   brush. Using \code{TRUE} is useful if you want to clear the brush whenever
+#'   the plot is updated.
 #' @export
 brushOpts <- function(id = NULL, color = "#666", outline = "#000",
                          opacity = 0.3, delay = 300,
                          delayType = c("debounce", "throttle"), clip = TRUE,
-                         direction = c("xy", "x", "y")) {
+                         direction = c("xy", "x", "y"),
+                         resetOnNew = FALSE) {
   if (is.null(id))
     stop("id must not be NULL")
 
@@ -114,6 +120,7 @@ brushOpts <- function(id = NULL, color = "#666", outline = "#000",
     delay = delay,
     delayType = match.arg(delayType),
     clip = clip,
-    direction = match.arg(direction)
+    direction = match.arg(direction),
+    resetOnNew = resetOnNew
   )
 }

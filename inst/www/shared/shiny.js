@@ -13,17 +13,33 @@
 
   var exports = window.Shiny = window.Shiny || {};
 
-  var isQt = false;
+  var browser = {};
+  browser.isQt = false;
   // For easy handling of Qt quirks using CSS
   if (/\bQt\//.test(window.navigator.userAgent)) {
     $(document.documentElement).addClass('qt');
-    isQt = true;
+    browser.isQt = true;
   }
 
   // Enable special treatment for Qt 5 quirks on Linux
   if (/\bQt\/5/.test(window.navigator.userAgent) &&
       /Linux/.test(window.navigator.userAgent)) {
     $(document.documentElement).addClass('qt5');
+  }
+
+  // Detect IE information
+  browser.isIE = (navigator.appName === 'Microsoft Internet Explorer');
+  browser.IEVersion = getIEVersion();
+
+  function getIEVersion() {
+    var rv = -1;
+    if (browser.isIE) {
+      var ua = navigator.userAgent;
+      var re  = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
+      if (re.exec(ua) !== null)
+        rv = parseFloat(RegExp.$1);
+    }
+    return rv;
   }
 
   $(document).on('submit', 'form:not([action])', function(e) {
@@ -563,7 +579,7 @@
         if (!/^([$#!&-;=?-[\]_a-z~]|%[0-9a-fA-F]{2})+$/.test(defaultPath)) {
           defaultPath = encodeURI(defaultPath);
           // Bizarrely, QtWebKit requires us to encode these characters *twice*
-          if (isQt) {
+          if (browser.isQt) {
             defaultPath = encodeURI(defaultPath);
           }
         }
@@ -3487,7 +3503,7 @@
       uploader.abort();
 
     var files = evt.target.files;
-    var IE8 = typeof(files) === 'undefined';
+    var IE8 = (browser.isIE && browser.IEVersion === 8);
     var id = fileInputBinding.getId(evt.target);
 
     if (!IE8 && files.length === 0)

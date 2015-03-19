@@ -90,7 +90,7 @@ toJSON <- function(x, ..., digits = getOption("shiny.json.digits", 16)) {
 
   jsonlite::toJSON(x, dataframe = "columns", null = "null", na = "null",
                    auto_unbox = unbox, digits = digits, use_signif = TRUE,
-                   force = TRUE, ...)
+                   force = TRUE, POSIXt = "ISO8601", UTC = TRUE, ...)
 }
 
 # Call the workerId func with no args to get the worker id, and with an arg to

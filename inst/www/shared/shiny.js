@@ -1434,12 +1434,15 @@
         }
       }
 
-      function isInPlottingRegion(offset) {
+      // Is an offset in the plotting region? If supplied, `expand` tells us to
+      // expand the region by that many pixels in all directions.
+      function isInPlottingRegion(offset, expand) {
+        expand = expand || 0;
         var bounds = getPlotBounds();
-        return offset.x < bounds.right &&
-               offset.x > bounds.left &&
-               offset.y < bounds.bottom &&
-               offset.y > bounds.top;
+        return offset.x < bounds.right + expand &&
+               offset.x > bounds.left - expand &&
+               offset.y < bounds.bottom + expand &&
+               offset.y > bounds.top - expand;
       }
 
       // Given an offset, clip it to the plotting region as specified by
@@ -1525,6 +1528,9 @@
       // Returns a brush handler object. This has three public functions:
       // mousedown, mousemove, and onRemoveImg.
       function createBrushHandler(inputId) {
+        // Parameter: expand the area in which a brush can be started, by this
+        // many pixels in all directions.
+        var expandPixels = 20;
 
         // Object that encapsulates brush state
         var brush = {
@@ -1599,7 +1605,7 @@
           },
 
           // Return true if the offset is inside min/max coords
-          isOffsetInsideBrush: function(offset) {
+          isInsideBrush: function(offset) {
             var bounds = this.bounds;
             return offset.x <= bounds.xmax && offset.x >= bounds.xmin &&
                    offset.y <= bounds.ymax && offset.y >= bounds.ymin;
@@ -1796,25 +1802,15 @@
         }
 
         // Set cursor to one of 3 styles. We need to set the cursor on the whole
-        // img instead of the brush dive, because the brush div has
-        // 'pointer-events:none' so that pointer events will pass through to the
-        // img.
+        // el instead of the brush div, because the brush div has
+        // 'pointer-events:none' so that it won't intercept pointer events.
+        // If `style` is null, don't add a cursor style.
         function setCursorStyle(style) {
-          if (style === 'crosshair') {
-            $el.addClass('crosshair');
-            $el.removeClass('grabbable');
-            $el.removeClass('grabbable');
+          $el.removeClass('crosshair');
+          $el.removeClass('grabbable');
+          $el.removeClass('grabbing');
 
-          } else if (style === 'grabbable') {
-            $el.removeClass('crosshair');
-            $el.addClass('grabbable');
-            $el.removeClass('grabbing');
-
-          } else if (style === 'grabbing') {
-            $el.removeClass('crosshair');
-            $el.removeClass('grabbable');
-            $el.addClass('grabbing');
-          }
+          if (style) $el.addClass(style);
         }
 
         function sendBrushInfo() {
@@ -1862,13 +1858,15 @@
 
           var offset = mouseOffset(e);
 
-          // Ignore mousedown events outside of plotting region
-          if (opts.brushClip && !isInPlottingRegion(offset)) return;
+          // Ignore mousedown events outside of plotting region, expanded by
+          // a number of pixels specified in expandPixels.
+          if (opts.brushClip && !isInPlottingRegion(offset, expandPixels))
+            return;
 
           brush.up = { x: NaN, y: NaN };
           brush.down = offset;
 
-          if (brush.isOffsetInsideBrush(offset)) {
+          if (brush.isInsideBrush(offset)) {
             brush.startDragging(offset);
             setCursorStyle('grabbing');
 
@@ -1879,7 +1877,7 @@
               .on('mouseup.image_brush', mouseupDragging );
 
           } else {
-            brush.startBrushing(offset);
+            brush.startBrushing(clipToPlottingRegion(offset));
 
             // Attach the move and up handlers to the window so that they respond
             // even when the mouse is moved outside of the image.
@@ -1895,10 +1893,12 @@
 
           if (!(brush.brushing || brush.dragging)) {
             // Set the cursor depending on where it is
-            if (brush.isOffsetInsideBrush(offset)) {
+            if (brush.isInsideBrush(offset)) {
               setCursorStyle('grabbable');
-            } else {
+            } else if (isInPlottingRegion(offset, expandPixels)) {
               setCursorStyle('crosshair');
+            } else {
+              setCursorStyle(null);
             }
           }
         }

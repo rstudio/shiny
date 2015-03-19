@@ -1956,59 +1956,43 @@ imageOutput <- function(outputId, width = "100%", height="400px",
     style = style
   )
 
+  # Given a named list with options, replace names like "delayType" with
+  # "data-hover-delay-type" (given a prefix "hover")
+  formatOptNames <- function(opts, prefix) {
+    newNames <- paste("data", prefix, names(opts), sep = "-")
+    # Replace capital letters with "-" and lowercase letter
+    newNames <- gsub("([A-Z])", "-\\L\\1", newNames, perl = TRUE)
+    names(opts) <- newNames
+    opts
+  }
+
   if (!is.null(click)) {
     # If click is a string, turn it into clickOpts object
     if (is.character(click)) {
       click <- clickOpts(id = click)
     }
-
-    args <- c(args, list(
-      `data-click-id` = click$id,
-      `data-click-clip` = click$clip
-    ))
+    args <- c(args, formatOptNames(click, "click"))
   }
 
   if (!is.null(dblclick)) {
     if (is.character(dblclick)) {
       dblclick <- clickOpts(id = dblclick)
     }
-
-    args <- c(args, list(
-      `data-dblclick-id` = dblclick$id,
-      `data-dblclick-clip` = dblclick$clip,
-      `data-dblclick-delay` = dblclick$delay
-    ))
+    args <- c(args, formatOptNames(dblclick, "dblclick"))
   }
 
   if (!is.null(hover)) {
     if (is.character(hover)) {
       hover <- hoverOpts(id = hover)
     }
-
-    args <- c(args, list(
-      `data-hover-id` = hover$id,
-      `data-hover-clip` = hover$clip,
-      `data-hover-delay` = hover$delay,
-      `data-hover-delay-type` = hover$delayType
-    ))
+    args <- c(args, formatOptNames(hover, "hover"))
   }
 
   if (!is.null(brush)) {
     if (is.character(brush)) {
       brush <- brushOpts(id = brush)
     }
-
-    args <- c(args, list(
-      `data-brush-id` = brush$id,
-      `data-brush-clip` = brush$clip,
-      `data-brush-fill` = brush$fill,
-      `data-brush-stroke` = brush$stroke,
-      `data-brush-opacity` = brush$opacity,
-      `data-brush-delay` = brush$delay,
-      `data-brush-delay-type` = brush$delayType,
-      `data-brush-direction` = brush$direction,
-      `data-brush-reset-on-new` = brush$resetOnNew
-    ))
+    args <- c(args, formatOptNames(brush, "brush"))
   }
 
   container <- if (inline) span else div

@@ -1989,8 +1989,7 @@
       var clickInfo = {
         clickCount: 0,
         clickTimer: null,
-        last_e: null,
-        pendingMousedown2: false, // Is there a mousedown2 event scheduled?
+        pending_e: null,    // A pending mousedown2 event
 
         // Create a new event of type eventType (like 'mousedown2'), and trigger
         // it with the information stored in this.e.
@@ -2012,16 +2011,16 @@
           // It's possible that between the scheduling of a mousedown2 and the
           // time this callback is executed, someone else triggers a
           // mousedown2, so check for that.
-          if (this.pendingMousedown2) {
-            this.triggerEvent('mousedown2', this.last_e);
-            this.pendingMousedown2 = false;
+          if (this.pending_e) {
+            this.triggerEvent('mousedown2', this.pending_e);
+            this.pending_e = null;
           }
         },
 
         // Set a timer to trigger a mousedown2 event, using information from the
         // last recorded mousdown event.
-        scheduleMousedown2: function() {
-          this.pendingMousedown2 = true;
+        scheduleMousedown2: function(e) {
+          this.pending_e = e;
 
           var self = this;
           this.clickTimer = setTimeout(function() {
@@ -2042,10 +2041,8 @@
           // If there's a dblclick listener, make sure not to count this as a
           // click on the first mousedown; we need to wait for the dblclick
           // delay before we can be sure this click was a single-click.
-          this.clickCount++;
-          if (this.clickCount === 1) {
-            this.last_e = e;
-            this.scheduleMousedown2();
+          if (this.pending_e === null) {
+            this.scheduleMousedown2(e);
 
           } else {
             clearTimeout(this.clickTimer);
@@ -2053,19 +2050,16 @@
             // If second click is too far away, it doesn't count as a double
             // click. Instead, immediately trigger a mousedown2 for the previous
             // click, and set this click as a new first click.
-            if (Math.abs(this.last_e.offsetX - e.offsetX) > 2 ||
-                Math.abs(this.last_e.offsetY - e.offsetY) > 2) {
+            if (this.pending_e &&
+                Math.abs(this.pending_e.offsetX - e.offsetX) > 2 ||
+                Math.abs(this.pending_e.offsetY - e.offsetY) > 2) {
 
               this.triggerPendingMousedown2();
-
-              this.clickCount = 1;
-              this.last_e = e;
-              this.scheduleMousedown2();
+              this.scheduleMousedown2(e);
 
             } else {
               // The second click was close to the first one. If it happened
               // within specified delay, trigger our custom 'dblclick2' event.
-              this.clickCount = 0;
               this.triggerEvent('dblclick2', e);
             }
           }

@@ -1741,7 +1741,7 @@ verbatimTextOutput <- function(outputId) {
 #'   position. To control the hover time or hover delay type, you must use
 #'   \code{\link{hoverOpts}}.
 #' @param clickId Deprecated; use \code{click} instead. Also see the
-#'   \code{\link{hoverOpts}} function.
+#'   \code{\link{clickOpts}} function.
 #' @param hoverId Deprecated; use \code{hover} instead. Also see the
 #'   \code{\link{hoverOpts}} function.
 #' @param hoverDelay Deprecated; use \code{hover} instead. Also see the
@@ -1804,7 +1804,7 @@ verbatimTextOutput <- function(outputId) {
 #'         plotOutput("plot", height=300,
 #'           click = "plot_click",  # Equiv, to click=clickOpts(id="plot_click")
 #'           hover = hoverOpts(id = "plot_hover", delayType = "throttle"),
-#'           brush = brushOpts(id = "plot_brush", color = "red")
+#'           brush = brushOpts(id = "plot_brush", fill = "red")
 #'         )
 #'       ),
 #'       column(width = 3,
@@ -1853,7 +1853,7 @@ verbatimTextOutput <- function(outputId) {
 #'             delay = 500,
 #'             delayType = "throttle"
 #'           ),
-#'           brush = brushOpts(id = "image_brush", color = "red")
+#'           brush = brushOpts(id = "image_brush", fill = "red")
 #'         )
 #'       ),
 #'       column(width = 3,
@@ -2001,8 +2001,8 @@ imageOutput <- function(outputId, width = "100%", height="400px",
     args <- c(args, list(
       `data-brush-id` = brush$id,
       `data-brush-clip` = brush$clip,
-      `data-brush-color` = brush$color,
-      `data-brush-outline` = brush$outline,
+      `data-brush-fill` = brush$fill,
+      `data-brush-stroke` = brush$stroke,
       `data-brush-opacity` = brush$opacity,
       `data-brush-delay` = brush$delay,
       `data-brush-delay-type` = brush$delayType,

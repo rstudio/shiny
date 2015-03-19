@@ -4,7 +4,7 @@
 \alias{brushOpts}
 \title{Create an object representing brushing options}
 \usage{
-brushOpts(id = NULL, color = "#666", outline = "#000", opacity = 0.3,
+brushOpts(id = NULL, fill = "#666", stroke = "#000", opacity = 0.3,
   delay = 300, delayType = c("debounce", "throttle"), clip = TRUE,
   direction = c("xy", "x", "y"), resetOnNew = FALSE)
 }
@@ -12,9 +12,9 @@ brushOpts(id = NULL, color = "#666", outline = "#000", opacity = 0.3,
 \item{id}{Input value name. For example, if the value is \code{"plot_brush"},
 then the coordinates will be available as \code{input$plot_brush}.}
 
-\item{color}{Fill color of the brush.}
+\item{fill}{Fill color of the brush.}
 
-\item{outline}{Outline color of the brush.}
+\item{stroke}{Outline color of the brush.}
 
 \item{opacity}{Opacity of the brush}
 

@@ -66,7 +66,7 @@ value will be a named list with \code{xmin}, \code{xmax}, \code{ymin}, and
 behavior, use \code{\link{brushOpts}}.}
 
 \item{clickId}{Deprecated; use \code{click} instead. Also see the
-\code{\link{hoverOpts}} function.}
+\code{\link{clickOpts}} function.}
 
 \item{hoverId}{Deprecated; use \code{hover} instead. Also see the
 \code{\link{hoverOpts}} function.}
@@ -137,7 +137,7 @@ shinyApp(
         plotOutput("plot", height=300,
           click = "plot_click",  # Equiv, to click=clickOpts(id="plot_click")
           hover = hoverOpts(id = "plot_hover", delayType = "throttle"),
-          brush = brushOpts(id = "plot_brush", color = "red")
+          brush = brushOpts(id = "plot_brush", fill = "red")
         )
       ),
       column(width = 3,
@@ -186,7 +186,7 @@ shinyApp(
             delay = 500,
             delayType = "throttle"
           ),
-          brush = brushOpts(id = "image_brush", color = "red")
+          brush = brushOpts(id = "image_brush", fill = "red")
         )
       ),
       column(width = 3,

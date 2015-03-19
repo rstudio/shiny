@@ -7,12 +7,13 @@
 dblclickOpts(id = NULL, clip = TRUE, delay = 400)
 }
 \arguments{
-\item{id}{Input value name. For example, if the value is \code{"plot_click"},
-then the click coordinates will be available as \code{input$plot_click}.}
+\item{id}{Input value name. For example, if the value is
+\code{"plot_dblclick"}, then the click coordinates will be available as
+\code{input$plot_dblclick}.}
 
 \item{clip}{Should the click area be clipped to the plotting area? If FALSE,
-then the server will receive click events even when the mouse is outside
-the plotting area, as long as it is still inside the image.}
+then the server will receive double-click events even when the mouse is
+outside the plotting area, as long as it is still inside the image.}
 
 \item{delay}{Maximum delay (in ms) between a pair clicks for them to be
 counted as a double-click.}

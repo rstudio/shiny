@@ -27,7 +27,12 @@ clickOpts <- function(id = NULL, clip = TRUE) {
 #' the \code{dblclick} argument of \code{\link{imageOutput}} or
 #' \code{\link{plotOutput}}.
 #'
-#' @inheritParams clickOpts
+#' @param id Input value name. For example, if the value is
+#'   \code{"plot_dblclick"}, then the click coordinates will be available as
+#'   \code{input$plot_dblclick}.
+#' @param clip Should the click area be clipped to the plotting area? If FALSE,
+#'   then the server will receive double-click events even when the mouse is
+#'   outside the plotting area, as long as it is still inside the image.
 #' @param delay Maximum delay (in ms) between a pair clicks for them to be
 #'   counted as a double-click.
 #' @export
@@ -62,7 +67,7 @@ dblclickOpts <- function(id = NULL, clip = TRUE, delay = 400) {
 #'   the plotting area, as long as it is still inside the image.
 #' @export
 hoverOpts <- function(id = NULL, delay = 300,
-                         delayType = c("debounce", "throttle"), clip = TRUE) {
+                      delayType = c("debounce", "throttle"), clip = TRUE) {
   if (is.null(id))
     stop("id must not be NULL")
 
@@ -82,8 +87,8 @@ hoverOpts <- function(id = NULL, delay = 300,
 #'
 #' @param id Input value name. For example, if the value is \code{"plot_brush"},
 #'   then the coordinates will be available as \code{input$plot_brush}.
-#' @param color Fill color of the brush.
-#' @param outline Outline color of the brush.
+#' @param fill Fill color of the brush.
+#' @param stroke Outline color of the brush.
 #' @param opacity Opacity of the brush
 #' @param delay How long to delay (in milliseconds) when debouncing or
 #'   throttling, before sending the brush data to the server.
@@ -104,18 +109,18 @@ hoverOpts <- function(id = NULL, delay = 300,
 #'   brush. Using \code{TRUE} is useful if you want to clear the brush whenever
 #'   the plot is updated.
 #' @export
-brushOpts <- function(id = NULL, color = "#666", outline = "#000",
-                         opacity = 0.3, delay = 300,
-                         delayType = c("debounce", "throttle"), clip = TRUE,
-                         direction = c("xy", "x", "y"),
-                         resetOnNew = FALSE) {
+brushOpts <- function(id = NULL, fill = "#666", stroke = "#000",
+                      opacity = 0.3, delay = 300,
+                      delayType = c("debounce", "throttle"), clip = TRUE,
+                      direction = c("xy", "x", "y"),
+                      resetOnNew = FALSE) {
   if (is.null(id))
     stop("id must not be NULL")
 
   list(
     id = id,
-    color = color,
-    outline = outline,
+    fill = fill,
+    stroke = stroke,
     opacity = opacity,
     delay = delay,
     delayType = match.arg(delayType),

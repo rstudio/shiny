@@ -67,6 +67,20 @@
     return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
   }
 
+  function strToBool(str) {
+    if (!str || !str.toLowerCase)
+      return undefined;
+
+    switch(str.toLowerCase()) {
+      case 'true':
+        return true;
+      case 'false':
+        return false;
+      default:
+        return undefined;
+    }
+  }
+
   // A wrapper for getComputedStyle that is compatible with older browsers.
   // This is significantly faster than jQuery's .css() function.
   function getStyle(el, styleProp) {
@@ -1293,15 +1307,6 @@
         return;
       }
 
-      function strToBool(str) {
-        if (str.toLowerCase() === 'true')
-          return true;
-        else if (str.toLowerCase() === 'false')
-          return false;
-        else
-          return undefined;
-      }
-
       var opts = {
         clickId: $el.data('click-id'),
         clickClip: strToBool($el.data('click-clip')) || true,
@@ -1319,8 +1324,8 @@
         brushClip: strToBool($el.data('brush-clip')) || true,
         brushDelayType: $el.data('brush-delay-type') || 'debounce',
         brushDelay: $el.data('brush-delay') || 300,
-        brushColor: $el.data('brush-color') || '#666',
-        brushOutline: $el.data('brush-outline') || '#000',
+        brushFill: $el.data('brush-fill') || '#666',
+        brushStroke: $el.data('brush-stroke') || '#000',
         brushOpacity: $el.data('brush-opacity') || 0.3,
         brushDirection: $el.data('brush-direction') || 'xy',
         brushResetOnNew: strToBool($el.data('brush-reset-on-new')) || false,
@@ -1504,7 +1509,7 @@
       }
 
       // Returns a brush handler object. This has three public functions:
-      // mousedown, mousemove, and mouseup.
+      // mousedown, mousemove, and onRemoveImg.
       function createBrushHandler(inputId) {
 
         // Object that encapsulates brush state
@@ -1628,13 +1633,13 @@
             this.$div = $(document.createElement('div'))
               .attr('id', el.id + '_brush')
               .css({
-                'background-color': opts.brushColor,
+                'background-color': opts.brushFill,
                 'opacity': opts.brushOpacity,
                 'pointer-events': 'none',
                 'position': 'absolute'
               });
 
-            var borderStyle = '1px solid ' + opts.brushOutline;
+            var borderStyle = '1px solid ' + opts.brushStroke;
             if (opts.brushDirection === 'xy') {
               this.$div.css({
                 'border': borderStyle
@@ -1818,8 +1823,7 @@
             xmin: Math.min(min.x, max.x),
             xmax: Math.max(min.x, max.x),
             ymin: Math.min(min.y, max.y),
-            ymax: Math.max(min.y, max.y),
-            '.nonce': Math.random()
+            ymax: Math.max(min.y, max.y)
           };
 
           // Send data to server
@@ -1982,7 +1986,7 @@
         };
         var e2;
 
-        // If no dblclick listener, immediately trigger a click2 event.
+        // If no dblclick listener, immediately trigger a mousedown2 event.
         if (!opts.dblclickId) {
           e2 = $.Event('mousedown2', eInfo);
           $el.trigger(e2);
@@ -1996,8 +2000,8 @@
         if (clickCount === 1) {
           clickTimer = setTimeout(function() {
             e2 = $.Event('mousedown2', eInfo);
-            $el.trigger(e2);
             clickCount = 0;
+            $el.trigger(e2);
 
           }, opts.dblclickDelay);
 
@@ -2007,15 +2011,15 @@
           clearTimeout(clickTimer);
           e2 = $.Event('dblclick2', eInfo);
 
-          $el.trigger(e2);
           clickCount = 0;
+          $el.trigger(e2);
         }
       });
 
       // IE8 needs a special hack because when you do a double-click it doesn't
       // trigger the click event twice - it directly triggers dblclick.
       if (browser.isIE && browser.IEVersion === 8) {
-        $el.on('dblclick', function(e) {
+        $el.on('dblclick.image_output', function(e) {
           var e2 = $.Event('dblclick2', {
             which:   1,        // In IE8, e.which is 0 instead of 1. ???
             pageX:   e.pageX,

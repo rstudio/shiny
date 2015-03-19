@@ -1293,6 +1293,13 @@
       return $(scope).find('.shiny-image-output, .shiny-plot-output');
     },
     renderValue: function(el, data) {
+      // The overall strategy:
+      // * Clear out existing image and event handlers.
+      // * Create new image.
+      // * Create various event handlers.
+      // * Bind those event handlers to events.
+      // * Insert the new image.
+
       var $el = $(el);
       // Load the image before emptying, to minimize flicker
       var img = null;
@@ -1479,6 +1486,13 @@
           exports.onInputChange(inputId, coords);
         };
       }
+
+      // ----------------------------------------------------------
+      // Handler creators for click, hover, brush.
+      // Each of these returns an object with a few public members. These public
+      // members are callbacks that are meant to be bound to events on $el with
+      // the same name (like 'mousedown').
+      // ----------------------------------------------------------
 
       function createClickHandler(inputId) {
         var clickInfoSender =  mouseCoordinateSender(inputId, opts.clickClip);
@@ -2071,7 +2085,9 @@
         $el.on('dblclick.image_output', function(e) { clickInfo.dblclickIE8(e); });
       }
 
-      // Register the various event handlers --------------------------
+      // ----------------------------------------------------------
+      // Register the various event handlers
+      // ----------------------------------------------------------
       if (opts.clickId) {
         var clickHandler = createClickHandler(opts.clickId);
         $el.on('mousedown2.image_output', clickHandler.mousedown);

@@ -1966,69 +1966,109 @@
       }
 
 
-      // We need to make sure that, if there's a dblClick listener, that a
-      // double-click doesn't trigger two click events. We'll trigger custom
-      // mousedown2 and dblclick2 events with this mousedown listener.
-      var clickCount = 0;
-      var clickTimer = null;
-      $el.on('mousedown.image_output', function(e) {
-        // Listen for left mouse button only
-        if (e.which !== 1) return;
+      // This object provides two public event listeners: mousedown, and
+      // dblclickIE8.
+      // We need to make sure that, when the image is listening for double-
+      // clicks, that a double-click doesn't trigger two click events. We'll
+      // trigger custom mousedown2 and dblclick2 events with this mousedown
+      // listener.
+      var clickInfo = {
+        clickCount: 0,
+        clickTimer: null,
+        last_e: null,
+        pendingMousedown2: false, // Is there a mousedown2 event scheduled?
 
-        // Information extracted from e that will get passed to the triggered
-        // event.
-        var eInfo = {
-          which:   e.which,
-          pageX:   e.pageX,
-          pageY:   e.pageY,
-          offsetX: e.offsetX,
-          offsetY: e.offsetY
-        };
-        var e2;
-
-        // If no dblclick listener, immediately trigger a mousedown2 event.
-        if (!opts.dblclickId) {
-          e2 = $.Event('mousedown2', eInfo);
-          $el.trigger(e2);
-          return;
-        }
-
-        // If there's a dblclick listener, make sure not to count this as a
-        // click on the first mousedown; we need to wait for the dblclick
-        // delay before we can be sure this click was a single-click.
-        clickCount++;
-        if (clickCount === 1) {
-          clickTimer = setTimeout(function() {
-            e2 = $.Event('mousedown2', eInfo);
-            clickCount = 0;
-            $el.trigger(e2);
-
-          }, opts.dblclickDelay);
-
-        } else {
-          // If second click happens within specified delay, trigger our
-          // custom 'dblclick2' event.
-          clearTimeout(clickTimer);
-          e2 = $.Event('dblclick2', eInfo);
-
-          clickCount = 0;
-          $el.trigger(e2);
-        }
-      });
-
-      // IE8 needs a special hack because when you do a double-click it doesn't
-      // trigger the click event twice - it directly triggers dblclick.
-      if (browser.isIE && browser.IEVersion === 8) {
-        $el.on('dblclick.image_output', function(e) {
-          var e2 = $.Event('dblclick2', {
-            which:   1,        // In IE8, e.which is 0 instead of 1. ???
+        // Create a new event of type eventType (like 'mousedown2'), and trigger
+        // it with the information stored in this.e.
+        triggerEvent: function(newEventType, e) {
+          // Extract important info from e and construct a new event with type
+          // eventType.
+          var e2 = $.Event(newEventType, {
+            which:   e.which,
             pageX:   e.pageX,
             pageY:   e.pageY,
             offsetX: e.offsetX,
             offsetY: e.offsetY
           });
+
           $el.trigger(e2);
-        });
+        },
+
+        triggerPendingMousedown2: function() {
+          // It's possible that between the scheduling of a mousedown2 and the
+          // time this callback is executed, someone else triggers a
+          // mousedown2, so check for that.
+          if (this.pendingMousedown2) {
+            this.triggerEvent('mousedown2', this.last_e);
+            this.pendingMousedown2 = false;
+          }
+        },
+
+        // Set a timer to trigger a mousedown2 event, using information from the
+        // last recorded mousdown event.
+        scheduleMousedown2: function() {
+          this.pendingMousedown2 = true;
+
+          var self = this;
+          this.clickTimer = setTimeout(function() {
+            self.triggerPendingMousedown2();
+          }, opts.dblclickDelay);
+        },
+
+        mousedown: function(e) {
+          // Listen for left mouse button only
+          if (e.which !== 1) return;
+
+          // If no dblclick listener, immediately trigger a mousedown2 event.
+          if (!opts.dblclickId) {
+            this.triggerEvent('mousedown2', e);
+            return;
+          }
+
+          // If there's a dblclick listener, make sure not to count this as a
+          // click on the first mousedown; we need to wait for the dblclick
+          // delay before we can be sure this click was a single-click.
+          this.clickCount++;
+          if (this.clickCount === 1) {
+            this.last_e = e;
+            this.scheduleMousedown2();
+
+          } else {
+            clearTimeout(this.clickTimer);
+
+            // If second click is too far away, it doesn't count as a double
+            // click. Instead, immediately trigger a mousedown2 for the previous
+            // click, and set this click as a new first click.
+            if (Math.abs(this.last_e.offsetX - e.offsetX) > 2 ||
+                Math.abs(this.last_e.offsetY - e.offsetY) > 2) {
+
+              this.triggerPendingMousedown2();
+
+              this.clickCount = 1;
+              this.last_e = e;
+              this.scheduleMousedown2();
+
+            } else {
+              // The second click was close to the first one. If it happened
+              // within specified delay, trigger our custom 'dblclick2' event.
+              this.clickCount = 0;
+              this.triggerEvent('dblclick2', e);
+            }
+          }
+        },
+
+        // IE8 needs a special hack because when you do a double-click it doesn't
+        // trigger the click event twice - it directly triggers dblclick.
+        dblclickIE8: function(e) {
+          e.which = 1;   // In IE8, e.which is 0 instead of 1. ???
+          this.triggerEvent('dblclick2', e);
+        }
+      };
+
+      $el.on('mousedown.image_output', function(e) { clickInfo.mousedown(e); });
+
+      if (browser.isIE && browser.IEVersion === 8) {
+        $el.on('dblclick.image_output', function(e) { clickInfo.dblclickIE8(e); });
       }
 
       // Register the various event handlers --------------------------

@@ -92,6 +92,7 @@ Collate:
     'hooks.R'
     'html-deps.R'
     'htmltools.R'
+    'image-interact-opts.R'
     'imageutils.R'
     'jqueryui.R'
     'middleware-shiny.R'

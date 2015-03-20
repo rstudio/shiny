@@ -2,32 +2,246 @@
 % Please edit documentation in R/bootstrap.R
 \name{imageOutput}
 \alias{imageOutput}
-\title{Create a image output element}
+\alias{plotOutput}
+\title{Create an plot or image output element}
 \usage{
-imageOutput(outputId, width = "100\%", height = "400px", inline = FALSE)
+imageOutput(outputId, width = "100\%", height = "400px", click = NULL,
+  dblclick = NULL, hover = NULL, hoverDelay = NULL,
+  hoverDelayType = NULL, brush = NULL, clickId = NULL, hoverId = NULL,
+  inline = FALSE)
+
+plotOutput(outputId, width = "100\%", height = "400px", click = NULL,
+  dblclick = NULL, hover = NULL, hoverDelay = NULL,
+  hoverDelayType = NULL, brush = NULL, clickId = NULL, hoverId = NULL,
+  inline = FALSE)
 }
 \arguments{
-\item{outputId}{output variable to read the image from}
+\item{outputId}{output variable to read the plot/image from.}
 
-\item{width}{Image width. Must be a valid CSS unit (like \code{"100\%"},
-\code{"400px"}, \code{"auto"}) or a number, which will be coerced to a
-string and have \code{"px"} appended.}
+\item{width,height}{Image width/height. Must be a valid CSS unit (like
+\code{"100\%"}, \code{"400px"}, \code{"auto"}) or a number, which will be
+coerced to a string and have \code{"px"} appended. These two arguments are
+ignored when \code{inline = TRUE}, in which case the width/height of a plot
+must be specified in \code{renderPlot()}. Note that, for height, using
+\code{"auto"} or \code{"100\%"} generally will not work as expected,
+because of how height is computed with HTML/CSS.}
 
-\item{height}{Image height}
+\item{click}{This can be \code{NULL} (the default), a string, or an object
+created by the \code{\link{clickOpts}} function. If you use a value like
+\code{"plot_click"} (or equivalently, \code{clickOpts(id="plot_click")}),
+the plot will send coordinates to the server whenever it is clicked, and
+the value will be accessible via \code{input$plot_click}. The value will
+be a named list  with \code{x} and \code{y} elements indicating the mouse
+position.}
+
+\item{dblclick}{This is just like the \code{click} argument, but for
+double-click events.}
+
+\item{hover}{Similar to the \code{click} argument, this can be \code{NULL}
+(the default), a string, or an object created by the
+\code{\link{hoverOpts}} function. If you use a value like
+\code{"plot_hover"} (or equivalently, \code{hoverOpts(id="plot_hover")}),
+the plot will send coordinates to the server pauses on the plot, and the
+value will be accessible via \code{input$plot_hover}. The value will be a
+named list with \code{x} and \code{y} elements indicating the mouse
+position. To control the hover time or hover delay type, you must use
+\code{\link{hoverOpts}}.}
+
+\item{hoverDelay}{Deprecated; use \code{hover} instead. Also see the
+\code{\link{hoverOpts}} function.}
+
+\item{hoverDelayType}{Deprecated; use \code{hover} instead. Also see the
+\code{\link{hoverOpts}} function.}
+
+\item{brush}{Similar to the \code{click} argument, this can be \code{NULL}
+(the default), a string, or an object created by the
+\code{\link{brushOpts}} function. If you use a value like
+\code{"plot_brush"} (or equivalently, \code{brushOpts(id="plot_brush")}),
+the plot will allow the user to "brush" in the plotting area, and will send
+information about the brushed area to the server, and the value will be
+accessible via \code{input$plot_brush}. Brushing means that the user will
+be able to draw a rectangle in the plotting area and drag it around. The
+value will be a named list with \code{xmin}, \code{xmax}, \code{ymin}, and
+\code{ymax} elements indicating the brush area. To control the brush
+behavior, use \code{\link{brushOpts}}.}
+
+\item{clickId}{Deprecated; use \code{click} instead. Also see the
+\code{\link{clickOpts}} function.}
+
+\item{hoverId}{Deprecated; use \code{hover} instead. Also see the
+\code{\link{hoverOpts}} function.}
 
 \item{inline}{use an inline (\code{span()}) or block container (\code{div()})
 for the output}
 }
 \value{
-An image output element that can be included in a panel
+A plot or image output element that can be included in a panel.
 }
 \description{
-Render a \link{renderImage} within an application page.
+Render a \code{\link{renderPlot}} or \code{\link{renderImage}} within an
+application page.
+}
+\note{
+The arguments \code{clickId} and \code{hoverId} only work for R base
+  graphics (see the \pkg{\link{graphics}} package). They do not work for
+  \pkg{\link[grid:grid-package]{grid}}-based graphics, such as \pkg{ggplot2},
+  \pkg{lattice}, and so on.
+}
+\section{Interactive plots}{
+
+
+  Plots and images in Shiny support mouse-based interaction, via clicking,
+  double-clicking, hovering, and brushing. When these interaction events
+  occur, the mouse coordinates will be sent to the server as \code{input$}
+  variables, as specified by \code{click}, \code{dblclick}, \code{hover}, or
+  \code{brush}.
+
+  For \code{plotOutput}, the coordinates will be sent scaled to the data
+  space, if possible. (At the moment, plots generated by base graphics
+  support this scaling, although plots generated by grid or ggplot2 do not.)
+  If scaling is not possible, the raw pixel coordinates will be sent. For
+  \code{imageOutput}, the coordinates will be sent in raw pixel coordinates.
 }
 \examples{
-# Show an image
-mainPanel(
-  imageOutput("dataImage")
+# Only run these examples in interactive R sessions
+if (interactive()) {
+
+# A basic shiny app with a plotOutput
+shinyApp(
+  ui = fluidPage(
+    sidebarLayout(
+      sidebarPanel(
+        actionButton("newplot", "New plot")
+      ),
+      mainPanel(
+        plotOutput("plot")
+      )
+    )
+  ),
+  server = function(input, output) {
+    output$plot <- renderPlot({
+      input$newplot
+      # Add a little noise to the cars data
+      cars2 <- cars + rnorm(nrow(cars))
+      plot(cars2)
+    })
+  }
 )
+
+
+# A demonstration of clicking, hovering, and brushing
+shinyApp(
+  ui = basicPage(
+    fluidRow(
+      column(width = 4,
+        plotOutput("plot", height=300,
+          click = "plot_click",  # Equiv, to click=clickOpts(id="plot_click")
+          hover = hoverOpts(id = "plot_hover", delayType = "throttle"),
+          brush = brushOpts(id = "plot_brush", fill = "red")
+        )
+      ),
+      column(width = 3,
+        verbatimTextOutput("plot_clickinfo"),
+        verbatimTextOutput("plot_hoverinfo")
+      ),
+      column(width = 3,
+        wellPanel(actionButton("newplot", "New plot")),
+        verbatimTextOutput("plot_brushinfo")
+      )
+    )
+  ),
+  server = function(input, output, session) {
+    output$plot <- renderPlot({
+      input$newplot
+      # Add a little noise to the cars data
+      cars2 <- cars + rnorm(nrow(cars))
+      plot(cars2)
+    })
+    output$plot_clickinfo <- renderPrint({
+      cat("Click:\\n")
+      str(input$plot_click)
+    })
+    output$plot_hoverinfo <- renderPrint({
+      cat("Hover (throttled):\\n")
+      str(input$plot_hover)
+    })
+    output$plot_brushinfo <- renderPrint({
+      cat("Brush (debounced):\\n")
+      str(input$plot_brush)
+    })
+  }
+)
+
+
+# Demo of clicking, hovering, brushing with imageOutput
+# Note that coordinates are in pixels
+shinyApp(
+  ui = basicPage(
+    fluidRow(
+      column(width = 4,
+        imageOutput("image", height=300,
+          click = "image_click",
+          hover = hoverOpts(
+            id = "image_hover",
+            delay = 500,
+            delayType = "throttle"
+          ),
+          brush = brushOpts(id = "image_brush", fill = "red")
+        )
+      ),
+      column(width = 3,
+        verbatimTextOutput("image_clickinfo"),
+        verbatimTextOutput("image_hoverinfo")
+      ),
+      column(width = 3,
+        wellPanel(actionButton("newimage", "New image")),
+        verbatimTextOutput("image_brushinfo")
+      )
+    )
+  ),
+  server = function(input, output, session) {
+    output$image <- renderImage({
+      input$newimage
+
+      # Get width and height of image output
+      width  <- session$clientData$output_image_width
+      height <- session$clientData$output_image_height
+
+      # Write to a temporary PNG file
+      outfile <- tempfile(fileext = ".png")
+
+      png(outfile, width=width, height=height)
+      plot(rnorm(200), rnorm(200))
+      dev.off()
+
+      # Return a list containing information about the image
+      list(
+        src = outfile,
+        contentType = "image/png",
+        width = width,
+        height = height,
+        alt = "This is alternate text"
+      )
+    })
+    output$image_clickinfo <- renderPrint({
+      cat("Click:\\n")
+      str(input$image_click)
+    })
+    output$image_hoverinfo <- renderPrint({
+      cat("Hover (throttled):\\n")
+      str(input$image_hover)
+    })
+    output$image_brushinfo <- renderPrint({
+      cat("Brush (debounced):\\n")
+      str(input$image_brush)
+    })
+  }
+)
+
+}
+}
+\seealso{
+For the corresponding server-side functions, see
+  \code{\link{renderPlot}} and  \code{\link{renderImage}}.
 }
 

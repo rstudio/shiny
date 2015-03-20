@@ -46,8 +46,9 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #' The corresponding HTML output tag should be \code{div} or \code{img} and have
 #' the CSS class name \code{shiny-plot-output}.
 #'
-#' @seealso For more details on how the plots are generated, and how to control
-#'   the output, see \code{\link{plotPNG}}.
+#' @seealso For the corresponding client-side output function, and example
+#'   usage, see \code{\link{plotOutput}}. For more details on how the plots are
+#'   generated, and how to control the output, see \code{\link{plotPNG}}.
 #'
 #' @param expr An expression that generates a plot.
 #' @param width,height The width/height of the rendered plot, in pixels; or
@@ -140,20 +141,20 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       }
 
       coordmap <<- list(
-        usr = c(
+        usr = list(
           left = usrCoords[1],
           right = usrCoords[2],
           bottom = usrCoords[3],
           top = usrCoords[4]
         ),
         # The bounds of the plot area, in DOM pixels
-        bounds = c(
-          left = grconvertX(usrBounds[1], 'user', 'nfc') * width,
-          right = grconvertX(usrBounds[2], 'user', 'nfc') * width,
-          bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height,
-          top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height
+        bounds = list(
+          left = grconvertX(usrBounds[1], 'user', 'nfc') * width - 1,
+          right = grconvertX(usrBounds[2], 'user', 'nfc') * width - 1,
+          bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height - 1,
+          top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height - 1
         ),
-        log = c(
+        log = list(
           x = par('xlog'),
           y = par('ylog')
         ),

@@ -2060,6 +2060,7 @@
             } else {
               // The second click was close to the first one. If it happened
               // within specified delay, trigger our custom 'dblclick2' event.
+              this.pending_e = null;
               this.triggerEvent('dblclick2', e);
             }
           }

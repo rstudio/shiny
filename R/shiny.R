@@ -80,17 +80,16 @@ createUniqueId <- function(bytes, prefix = "", suffix = "") {
   })
 }
 
-toJSON <- function(x, ..., digits = getOption("shiny.json.digits", 16)) {
-  # Need to special case length-1 atomic vectors, so that jsonlite::toJSON will
-  # create valid JSON. https://github.com/jeroenooms/jsonlite/issues/71
-  if (is.atomic(x) && length(x) == 1)
-    unbox <- FALSE
-  else
-    unbox <- TRUE
+toJSON <- function(x, ...,  dataframe = "columns", null = "null", na = "null",
+  auto_unbox = TRUE, digits = getOption("shiny.json.digits", 16),
+  use_signif = TRUE, force = TRUE, POSIXt = "ISO8601", UTC = TRUE,
+  rownames = FALSE, keep_vec_names = TRUE) {
 
-  jsonlite::toJSON(x, dataframe = "columns", null = "null", na = "null",
-                   auto_unbox = unbox, digits = digits, use_signif = TRUE,
-                   force = TRUE, POSIXt = "ISO8601", UTC = TRUE, ...)
+  # I(x) is so that length-1 atomic vectors get put in [].
+  jsonlite::toJSON(I(x), dataframe = dataframe, null = null, na = na,
+   auto_unbox = auto_unbox, digits = digits, use_signif = use_signif,
+   force = force, POSIXt = POSIXt, UTC = UTC, rownames = rownames,
+   keep_vec_names = keep_vec_names, ...)
 }
 
 # Call the workerId func with no args to get the worker id, and with an arg to

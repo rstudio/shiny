@@ -2,7 +2,15 @@ shiny 0.11.1.9xxx
 --------------------------------------------------------------------------------
 
 * Switched from RJSONIO to jsonlite. This improves consistency and speed when
-  converting between R data structures and JSON.
+  converting between R data structures and JSON. One notable change is that
+  POSIXt objects are now serialized to JSON in UTC8601 format (like
+  "2015-03-20T20:00:00Z"), instead of as seconds from the epoch).
+
+* In addition to existing support for clicking and hovering on plots (created by
+  base graphics), added support for double-clicking and brushing. (#769)
+
+* Added `shiny.port` option. If this is option is set, `runApp()` will listen on
+  this port by default. (#756)
 
 * `runUrl`, `runGist`, and `runGitHub` now can save downloaded applications,
   with the `destdir` argument. (#688)
@@ -22,6 +30,18 @@ shiny 0.11.1.9xxx
 
 * Eliminate delay on receiving new value when `updateSliderInput(value=...)` is
   called.
+
+* Updated to DataTables (Javascript library) 1.10.5.
+
+* Fixed downloading of files that have no filename extension. (#575, #753)
+
+* Fixed bug where nested UI outputs broke outputs. (#749, #750)
+
+* Removed unneeded HTML ID attributes for `checkboxGroupInputs` and
+  `radioButtons`. (#684)
+
+* Fixed bug where checkboxes were still active even after `Shiny.unbindAll()`
+  was called. (#206)
 
 shiny 0.11.1
 --------------------------------------------------------------------------------

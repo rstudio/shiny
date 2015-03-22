@@ -3729,13 +3729,6 @@
       setTimeout(sendOutputHiddenState, 0);
     }
 
-    function elementToValue(el) {
-      if (el.type === 'checkbox' || el.type === 'radio')
-        return el.checked ? true : false;
-      else
-        return $(el).val();
-    }
-
     var inputBatchSender = new InputBatchSender(shinyapp);
     var inputsNoResend = new InputNoResendDecorator(inputBatchSender);
     var inputsRate = new InputRateDecorator(inputsNoResend);

@@ -1,32 +1,82 @@
 module.exports = function(grunt) {
 
-  var srcdir = '../inst/';
+  var instdir = '../inst/';
+  var js_srcdir = '../srcjs/'
 
   grunt.initConfig({
     pkg: pkgInfo(),
+
+    concat: {
+      options: {
+        process: function(src, filepath) {
+          return '//---------------------------------------------------------------------\n' +
+            '// Source file: ' + filepath + '\n\n' + src;
+        },
+        sourceMap: true
+      },
+      dist: {
+        src: [
+          js_srcdir + '_start.js',
+          js_srcdir + 'utils.js',
+          js_srcdir + 'browser.js',
+          js_srcdir + 'input_rate.js',
+          js_srcdir + 'shinyapp.js',
+          js_srcdir + 'file_processor.js',
+          js_srcdir + 'binding_registry.js',
+          js_srcdir + 'output_binding.js',
+          js_srcdir + 'output_binding_text.js',
+          js_srcdir + 'output_binding_image.js',
+          js_srcdir + 'output_binding_html.js',
+          js_srcdir + 'output_binding_downloadlink.js',
+          js_srcdir + 'output_binding_datatable.js',
+          js_srcdir + 'output_binding_adapter.js',
+          js_srcdir + 'input_binding.js',
+          js_srcdir + 'input_binding_text.js',
+          js_srcdir + 'input_binding_textarea.js',
+          js_srcdir + 'input_binding_number.js',
+          js_srcdir + 'input_binding_checkbox.js',
+          js_srcdir + 'input_binding_slider.js',
+          js_srcdir + 'input_binding_date.js',
+          js_srcdir + 'input_binding_daterange.js',
+          js_srcdir + 'input_binding_select.js',
+          js_srcdir + 'input_binding_radio.js',
+          js_srcdir + 'input_binding_checkboxgroup.js',
+          js_srcdir + 'input_binding_actionbutton.js',
+          js_srcdir + 'input_binding_tabinput.js',
+          js_srcdir + 'input_binding_fileinput.js',
+          js_srcdir + 'init_shiny.js',
+          js_srcdir + '_end.js'
+        ],
+        dest: instdir + 'www/shared/shiny.js',
+        nonull: true
+      },
+    },
+
     uglify: {
       shiny: {
         options: {
           banner: '/*! <%= pkg.name %> <%= pkg.version %> | ' +
                   '(c) 2012-<%= grunt.template.today("yyyy") %> RStudio, Inc. | ' +
                   'License: <%= pkg.license %> */\n',
-          sourceMap: true
+          sourceMap: true,
+          // Base the .min.js sourcemap off of the .js sourcemap created by concat
+          sourceMapIn: instdir + 'www/shared/shiny.js.map',
+          sourceMapIncludeSources: true
         },
-        src: srcdir + 'www/shared/<%= pkg.name %>.js',
-        dest: srcdir + 'www/shared/<%= pkg.name %>.min.js'
+        src: instdir + 'www/shared/shiny.js',
+        dest: instdir + 'www/shared/shiny.min.js'
       },
       datepicker: {
         src: [
-          srcdir + 'www/shared/datepicker/js/bootstrap-datepicker.js',
-          srcdir + 'www/shared/datepicker/js/locales/bootstrap-datepicker.*.js'
+          instdir + 'www/shared/datepicker/js/bootstrap-datepicker.js',
+          instdir + 'www/shared/datepicker/js/locales/bootstrap-datepicker.*.js'
         ],
-        dest: srcdir + 'www/shared/datepicker/js/bootstrap-datepicker.min.js'
+        dest: instdir + 'www/shared/datepicker/js/bootstrap-datepicker.min.js'
       },
       ionrangeslider: {
-        src: srcdir + 'www/shared/ionrangeslider/js/ion.rangeSlider.js',
-        dest: srcdir + 'www/shared/ionrangeslider/js/ion.rangeSlider.min.js'
+        src: instdir + 'www/shared/ionrangeslider/js/ion.rangeSlider.js',
+        dest: instdir + 'www/shared/ionrangeslider/js/ion.rangeSlider.min.js'
       }
-
     },
 
     jshint: {
@@ -34,7 +84,7 @@ module.exports = function(grunt) {
         force: true  // Don't abort if there are JSHint warnings
       },
       shiny: {
-        src: srcdir + 'www/shared/shiny.js'
+        src: instdir + 'www/shared/shiny.js'
       }
     },
 
@@ -65,13 +115,14 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-newer');
 
 
-  grunt.registerTask('default', ['newer:uglify', 'newer:jshint']);
+  grunt.registerTask('default', ['newer:concat', 'newer:uglify', 'newer:jshint']);
 
 
   // ---------------------------------------------------------------------------

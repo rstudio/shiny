@@ -1,3 +1,6 @@
+//---------------------------------------------------------------------
+// Source file: ../srcjs/_start.js
+
 /*jshint
   undef:true,
   browser:true,
@@ -13,46 +16,13 @@
 
   var exports = window.Shiny = window.Shiny || {};
 
-  var browser = {};
-  browser.isQt = false;
-  // For easy handling of Qt quirks using CSS
-  if (/\bQt\//.test(window.navigator.userAgent)) {
-    $(document.documentElement).addClass('qt');
-    browser.isQt = true;
-  }
-
-  // Enable special treatment for Qt 5 quirks on Linux
-  if (/\bQt\/5/.test(window.navigator.userAgent) &&
-      /Linux/.test(window.navigator.userAgent)) {
-    $(document.documentElement).addClass('qt5');
-  }
-
-  // Detect IE information
-  browser.isIE = (navigator.appName === 'Microsoft Internet Explorer');
-  browser.IEVersion = getIEVersion();
-
-  function getIEVersion() {
-    var rv = -1;
-    if (browser.isIE) {
-      var ua = navigator.userAgent;
-      var re  = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
-      if (re.exec(ua) !== null)
-        rv = parseFloat(RegExp.$1);
-    }
-    return rv;
-  }
 
   $(document).on('submit', 'form:not([action])', function(e) {
     e.preventDefault();
   });
-  $(document).on('click', 'a.action-button', function(e) {
-    e.preventDefault();
-  });
 
-  // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
-  var $escape = exports.$escape = function(val) {
-    return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
-  };
+//---------------------------------------------------------------------
+// Source file: ../srcjs/utils.js
 
   function escapeHTML(str) {
     return str.replace(/&/g, "&amp;")
@@ -115,16 +85,6 @@
     return date;
   }
 
-  function slice(blob, start, end) {
-    if (blob.slice)
-      return blob.slice(start, end);
-    if (blob.mozSlice)
-      return blob.mozSlice(start, end);
-    if (blob.webkitSlice)
-      return blob.webkitSlice(start, end);
-    throw "Blob doesn't support slice";
-  }
-
   // Given an element and a function(width, height), returns a function(). When
   // the output function is called, it calls the input function with the offset
   // width and height of the input element--but only if the size of the element
@@ -182,6 +142,16 @@
     }
   }
 
+  function slice(blob, start, end) {
+    if (blob.slice)
+      return blob.slice(start, end);
+    if (blob.mozSlice)
+      return blob.mozSlice(start, end);
+    if (blob.webkitSlice)
+      return blob.webkitSlice(start, end);
+    throw "Blob doesn't support slice";
+  }
+
   function pixelRatio() {
     if (window.devicePixelRatio) {
       return window.devicePixelRatio;
@@ -202,10 +172,101 @@
     };
   }
 
+  function asArray(value) {
+    if (value === null)
+      return [];
+    if ($.isArray(value))
+      return value;
+    return [value];
+  }
 
-  // =========================================================================
-  // Input rate stuff
-  // =========================================================================
+  // We need a stable sorting algorithm for ordering
+  // bindings by priority and insertion order.
+  function mergeSort(list, sortfunc) {
+    function merge(sortfunc, a, b) {
+      var ia = 0;
+      var ib = 0;
+      var sorted = [];
+      while (ia < a.length && ib < b.length) {
+        if (sortfunc(a[ia], b[ib]) <= 0) {
+          sorted.push(a[ia++]);
+        }
+        else {
+          sorted.push(b[ib++]);
+        }
+      }
+      while (ia < a.length)
+        sorted.push(a[ia++]);
+      while (ib < b.length)
+        sorted.push(b[ib++]);
+      return sorted;
+    }
+
+    // Don't mutate list argument
+    list = list.slice(0);
+
+    for (var chunkSize = 1; chunkSize < list.length; chunkSize *= 2) {
+      for (var i = 0; i < list.length; i += chunkSize * 2) {
+        var listA = list.slice(i, i + chunkSize);
+        var listB = list.slice(i + chunkSize, i + chunkSize * 2);
+        var merged = merge(sortfunc, listA, listB);
+        var args = [i, merged.length];
+        Array.prototype.push.apply(args, merged);
+        Array.prototype.splice.apply(list, args);
+      }
+    }
+
+    return list;
+  }
+
+  // Escape jQuery selector metacharacters: !"#$%&'()*+,./:;<=>?@[\]^`{|}~
+  var $escape = exports.$escape = function(val) {
+    return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
+  };
+
+
+//---------------------------------------------------------------------
+// Source file: ../srcjs/browser.js
+
+var browser = (function() {
+
+  var isQt = false;
+  // For easy handling of Qt quirks using CSS
+  if (/\bQt\//.test(window.navigator.userAgent)) {
+    $(document.documentElement).addClass('qt');
+    isQt = true;
+  }
+
+  // Enable special treatment for Qt 5 quirks on Linux
+  if (/\bQt\/5/.test(window.navigator.userAgent) &&
+      /Linux/.test(window.navigator.userAgent)) {
+    $(document.documentElement).addClass('qt5');
+  }
+
+  // Detect IE information
+  var isIE = (navigator.appName === 'Microsoft Internet Explorer');
+
+  function getIEVersion() {
+    var rv = -1;
+    if (isIE) {
+      var ua = navigator.userAgent;
+      var re  = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
+      if (re.exec(ua) !== null)
+        rv = parseFloat(RegExp.$1);
+    }
+    return rv;
+  }
+
+  return {
+    isQt: isQt,
+    isIE: isIE,
+    IEVersion: getIEVersion()
+  };
+
+})();
+
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_rate.js
 
   var Invoker = function(target, func) {
     this.target = target;
@@ -491,51 +552,10 @@
       this.target.setInput(name, value);
     };
   }).call(InputRateDecorator.prototype);
+  
+//---------------------------------------------------------------------
+// Source file: ../srcjs/shinyapp.js
 
-
-  // We need a stable sorting algorithm for ordering
-  // bindings by priority and insertion order.
-  function mergeSort(list, sortfunc) {
-    function merge(sortfunc, a, b) {
-      var ia = 0;
-      var ib = 0;
-      var sorted = [];
-      while (ia < a.length && ib < b.length) {
-        if (sortfunc(a[ia], b[ib]) <= 0) {
-          sorted.push(a[ia++]);
-        }
-        else {
-          sorted.push(b[ib++]);
-        }
-      }
-      while (ia < a.length)
-        sorted.push(a[ia++]);
-      while (ib < b.length)
-        sorted.push(b[ib++]);
-      return sorted;
-    }
-
-    // Don't mutate list argument
-    list = list.slice(0);
-
-    for (var chunkSize = 1; chunkSize < list.length; chunkSize *= 2) {
-      for (var i = 0; i < list.length; i += chunkSize * 2) {
-        var listA = list.slice(i, i + chunkSize);
-        var listB = list.slice(i + chunkSize, i + chunkSize * 2);
-        var merged = merge(sortfunc, listA, listB);
-        var args = [i, merged.length];
-        Array.prototype.push.apply(args, merged);
-        Array.prototype.splice.apply(list, args);
-      }
-    }
-
-    return list;
-  }
-
-
-  // =========================================================================
-  // ShinyApp
-  // =========================================================================
   var ShinyApp = function() {
     this.$socket = null;
 
@@ -1095,10 +1115,8 @@
 
   }).call(ShinyApp.prototype);
 
-
-  // =========================================================================
-  // File Processor
-  // =========================================================================
+//---------------------------------------------------------------------
+// Source file: ../srcjs/file_processor.js
 
   // Generic driver class for doing chunk-wise asynchronous processing of a
   // FileList object. Subclass/clone it and override the `on*` functions to
@@ -1182,10 +1200,9 @@
     };
   }).call(FileProcessor.prototype);
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/binding_registry.js
 
-  // =========================================================================
-  // Binding registry
-  // =========================================================================
   var BindingRegistry = function() {
     this.bindings = [];
     this.bindingNames = {};
@@ -1224,9 +1241,8 @@
   var inputBindings = exports.inputBindings = new BindingRegistry();
   var outputBindings = exports.outputBindings = new BindingRegistry();
 
-  // =========================================================================
-  // Output bindings
-  // =========================================================================
+//---------------------------------------------------------------------
+// Source file: ../srcjs/output_binding.js
 
   var OutputBinding = exports.OutputBinding = function() {};
   (function() {
@@ -1275,6 +1291,8 @@
     };
   }).call(OutputBinding.prototype);
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/output_binding_text.js
 
   var textOutputBinding = new OutputBinding();
   $.extend(textOutputBinding, {
@@ -1286,6 +1304,10 @@
     }
   });
   outputBindings.register(textOutputBinding, 'shiny.textOutput');
+
+
+//---------------------------------------------------------------------
+// Source file: ../srcjs/output_binding_image.js
 
   var imageOutputBinding = new OutputBinding();
   $.extend(imageOutputBinding, {
@@ -2141,6 +2163,9 @@
   });
   outputBindings.register(imageOutputBinding, 'shiny.imageOutput');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/output_binding_html.js
+
   var htmlOutputBinding = new OutputBinding();
   $.extend(htmlOutputBinding, {
     find: function(scope) {
@@ -2184,14 +2209,6 @@
     renderDependencies(dependencies);
     return singletons.renderHtml(html, el);
   };
-
-  function asArray(value) {
-    if (value === null)
-      return [];
-    if ($.isArray(value))
-      return value;
-    return [value];
-  }
 
   var htmlDependencies = {};
   function registerDependency(name, version) {
@@ -2337,6 +2354,9 @@
     _reHead: /<head(?:\s[^>]*)?>([\s\S]*?)<\/head>/
   };
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/output_binding_downloadlink.js
+
   var downloadLinkOutputBinding = new OutputBinding();
   $.extend(downloadLinkOutputBinding, {
     find: function(scope) {
@@ -2347,6 +2367,9 @@
     }
   });
   outputBindings.register(downloadLinkOutputBinding, 'shiny.downloadLink');
+
+//---------------------------------------------------------------------
+// Source file: ../srcjs/output_binding_datatable.js
 
   var datatableOutputBinding = new OutputBinding();
   $.extend(datatableOutputBinding, {
@@ -2435,12 +2458,40 @@
   });
   outputBindings.register(datatableOutputBinding, 'shiny.datatableOutput');
 
-  // =========================================================================
-  // Input bindings
-  // =========================================================================
+//---------------------------------------------------------------------
+// Source file: ../srcjs/output_binding_adapter.js
 
-  var InputBinding = exports.InputBinding = function() {
+  var OutputBindingAdapter = function(el, binding) {
+    this.el = el;
+    this.binding = binding;
+
+    // If the binding actually has a resize method, override the prototype of
+    // onResize with a version that does a makeResizeFilter on the element.
+    if (binding.resize) {
+      this.onResize = makeResizeFilter(el, function(width, height) {
+        binding.resize(el, width, height);
+      });
+    }
   };
+  (function() {
+    this.onValueChange = function(data) {
+      this.binding.onValueChange(this.el, data);
+    };
+    this.onValueError = function(err) {
+      this.binding.onValueError(this.el, err);
+    };
+    this.showProgress = function(show) {
+      this.binding.showProgress(this.el, show);
+    };
+    this.onResize = function() {
+      // Intentionally left blank; see constructor
+    };
+  }).call(OutputBindingAdapter.prototype);
+
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding.js
+
+  var InputBinding = exports.InputBinding = function() {};
 
   (function() {
 
@@ -2481,7 +2532,8 @@
 
   }).call(InputBinding.prototype);
 
-
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_text.js
 
   // Text input
   var textInputBinding = new InputBinding();
@@ -2533,6 +2585,8 @@
   });
   inputBindings.register(textInputBinding, 'shiny.textInput');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_textarea.js
 
   var textareaInputBinding = {};
   $.extend(textareaInputBinding, textInputBinding, {
@@ -2541,6 +2595,9 @@
     }
   });
   inputBindings.register(textareaInputBinding, 'shiny.textareaInput');
+
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_number.js
 
 
   var numberInputBinding = {};
@@ -2584,6 +2641,8 @@
   });
   inputBindings.register(numberInputBinding, 'shiny.numberInput');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_checkbox.js
 
   var checkboxInputBinding = new InputBinding();
   $.extend(checkboxInputBinding, {
@@ -2622,6 +2681,8 @@
   });
   inputBindings.register(checkboxInputBinding, 'shiny.checkboxInput');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_slider.js
 
   var sliderInputBinding = {};
   $.extend(sliderInputBinding, textInputBinding, {
@@ -2708,6 +2769,93 @@
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
 
+
+
+  $(document).on('click', '.slider-animate-button', function(evt) {
+    evt.preventDefault();
+    var self = $(this);
+    var target = $('#' + $escape(self.attr('data-target-id')));
+    var startLabel = 'Play';
+    var stopLabel = 'Pause';
+    var loop = self.attr('data-loop') !== undefined &&
+               !/^\s*false\s*$/i.test(self.attr('data-loop'));
+    var animInterval = self.attr('data-interval');
+    if (isNaN(animInterval))
+      animInterval = 1500;
+    else
+      animInterval = +animInterval;
+
+    if (!target.data('animTimer')) {
+      var slider;
+      var timer;
+
+      // Separate code paths:
+      // Backward compatible code for old-style jsliders (Shiny <= 0.10.2.2),
+      // and new-style ionsliders.
+      if (target.hasClass('jslider')) {
+        slider = target.slider();
+
+        // If we're currently at the end, restart
+        if (!slider.canStepNext())
+          slider.resetToStart();
+
+        timer = setInterval(function() {
+          if (loop && !slider.canStepNext()) {
+            slider.resetToStart();
+          }
+          else {
+            slider.stepNext();
+            if (!loop && !slider.canStepNext()) {
+              self.click(); // stop the animation
+            }
+          }
+        }, animInterval);
+
+      } else {
+        slider = target.data('ionRangeSlider');
+        var sliderCanStep = function() {
+          return slider.result.from < slider.result.max;
+        };
+        var sliderReset = function() {
+          slider.update({from: slider.result.min});
+        };
+        var sliderStep = function() {
+          slider.update({from: slider.result.from + slider.options.step});
+        };
+
+        // If we're currently at the end, restart
+        if (!sliderCanStep())
+          sliderReset();
+
+        timer = setInterval(function() {
+          if (loop && !sliderCanStep()) {
+            sliderReset();
+          }
+          else {
+            sliderStep();
+            if (!loop && !sliderCanStep()) {
+              self.click(); // stop the animation
+            }
+          }
+        }, animInterval);
+      }
+
+      target.data('animTimer', timer);
+      self.attr('title', stopLabel);
+      self.addClass('playing');
+      target.data('animating', true);
+    }
+    else {
+      clearTimeout(target.data('animTimer'));
+      target.removeData('animTimer');
+      self.attr('title', startLabel);
+      self.removeClass('playing');
+      target.removeData('animating');
+    }
+  });
+
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_date.js
 
   var dateInputBinding = new InputBinding();
   $.extend(dateInputBinding, {
@@ -2893,6 +3041,8 @@
   });
   inputBindings.register(dateInputBinding, 'shiny.dateInput');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_daterange.js
 
   var dateRangeInputBinding = {};
   $.extend(dateRangeInputBinding, dateInputBinding, {
@@ -3028,6 +3178,8 @@
   });
   inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_select.js
 
   // Select input
   var selectInputBinding = new InputBinding();
@@ -3174,6 +3326,8 @@
   });
   inputBindings.register(selectInputBinding, 'shiny.selectInput');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_radio.js
 
   // Radio input groups
   var radioInputBinding = new InputBinding();
@@ -3256,8 +3410,9 @@
   });
   inputBindings.register(radioInputBinding, 'shiny.radioInput');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_checkboxgroup.js
 
-  // Checkbox input groups
   var checkboxGroupInputBinding = new InputBinding();
   $.extend(checkboxGroupInputBinding, {
     find: function(scope) {
@@ -3356,6 +3511,8 @@
   });
   inputBindings.register(checkboxGroupInputBinding, 'shiny.checkboxGroupInput');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_actionbutton.js
 
   var actionButtonInputBinding = new InputBinding();
   $.extend(actionButtonInputBinding, {
@@ -3391,6 +3548,13 @@
   });
   inputBindings.register(actionButtonInputBinding, 'shiny.actionButtonInput');
 
+
+  $(document).on('click', 'a.action-button', function(e) {
+    e.preventDefault();
+  });
+
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_tabinput.js
 
   var bootstrapTabInputBinding = new InputBinding();
   $.extend(bootstrapTabInputBinding, {
@@ -3434,6 +3598,9 @@
     }
   });
   inputBindings.register(bootstrapTabInputBinding, 'shiny.bootstrapTabInput');
+
+//---------------------------------------------------------------------
+// Source file: ../srcjs/input_binding_fileinput.js
 
   var IE8FileUploader = function(shinyapp, id, fileEl) {
     this.shinyapp = shinyapp;
@@ -3643,38 +3810,9 @@
   });
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');
 
+//---------------------------------------------------------------------
+// Source file: ../srcjs/init_shiny.js
 
-  var OutputBindingAdapter = function(el, binding) {
-    this.el = el;
-    this.binding = binding;
-
-    // If the binding actually has a resize method, override the prototype of
-    // onResize with a version that does a makeResizeFilter on the element.
-    if (binding.resize) {
-      this.onResize = makeResizeFilter(el, function(width, height) {
-        binding.resize(el, width, height);
-      });
-    }
-  };
-  (function() {
-    this.onValueChange = function(data) {
-      this.binding.onValueChange(this.el, data);
-    };
-    this.onValueError = function(err) {
-      this.binding.onValueError(this.el, err);
-    };
-    this.showProgress = function(show) {
-      this.binding.showProgress(this.el, show);
-    };
-    this.onResize = function() {
-      // Intentionally left blank; see constructor
-    };
-  }).call(OutputBindingAdapter.prototype);
-
-
-  // =========================================================================
-  // initShiny
-  // =========================================================================
   function initShiny() {
 
     var shinyapp = exports.shinyapp = new ShinyApp();
@@ -4062,95 +4200,9 @@
     setTimeout(initShiny, 1);
   });
 
-  $(document).on('click', '.slider-animate-button', function(evt) {
-    evt.preventDefault();
-    var self = $(this);
-    var target = $('#' + $escape(self.attr('data-target-id')));
-    var startLabel = 'Play';
-    var stopLabel = 'Pause';
-    var loop = self.attr('data-loop') !== undefined &&
-               !/^\s*false\s*$/i.test(self.attr('data-loop'));
-    var animInterval = self.attr('data-interval');
-    if (isNaN(animInterval))
-      animInterval = 1500;
-    else
-      animInterval = +animInterval;
-
-    if (!target.data('animTimer')) {
-      var slider;
-      var timer;
-
-      // Separate code paths:
-      // Backward compatible code for old-style jsliders (Shiny <= 0.10.2.2),
-      // and new-style ionsliders.
-      if (target.hasClass('jslider')) {
-        slider = target.slider();
-
-        // If we're currently at the end, restart
-        if (!slider.canStepNext())
-          slider.resetToStart();
-
-        timer = setInterval(function() {
-          if (loop && !slider.canStepNext()) {
-            slider.resetToStart();
-          }
-          else {
-            slider.stepNext();
-            if (!loop && !slider.canStepNext()) {
-              self.click(); // stop the animation
-            }
-          }
-        }, animInterval);
-
-      } else {
-        slider = target.data('ionRangeSlider');
-        var sliderCanStep = function() {
-          return slider.result.from < slider.result.max;
-        };
-        var sliderReset = function() {
-          slider.update({from: slider.result.min});
-        };
-        var sliderStep = function() {
-          slider.update({from: slider.result.from + slider.options.step});
-        };
-
-        // If we're currently at the end, restart
-        if (!sliderCanStep())
-          sliderReset();
-
-        timer = setInterval(function() {
-          if (loop && !sliderCanStep()) {
-            sliderReset();
-          }
-          else {
-            sliderStep();
-            if (!loop && !sliderCanStep()) {
-              self.click(); // stop the animation
-            }
-          }
-        }, animInterval);
-      }
-
-      target.data('animTimer', timer);
-      self.attr('title', stopLabel);
-      self.addClass('playing');
-      target.data('animating', true);
-    }
-    else {
-      clearTimeout(target.data('animTimer'));
-      target.removeData('animTimer');
-      self.attr('title', startLabel);
-      self.removeClass('playing');
-      target.removeData('animating');
-    }
-  });
-
-  $(document).on('keydown', function(e) {
-    if (e.which !== 114 || (!e.ctrlKey && !e.metaKey) || (e.shiftKey || e.altKey))
-      return;
-    var url = 'reactlog?w=' + exports.shinyapp.config.workerId;
-    window.open(url);
-    e.preventDefault();
-  });
+//---------------------------------------------------------------------
+// Source file: ../srcjs/_end.js
 
 })();
+
+//# sourceMappingURL=shiny.js.map

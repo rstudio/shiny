@@ -2128,7 +2128,13 @@
         $el.addClass('crosshair');
       }
 
-      $el.find('img').remove();
+      // Remove all elements except brush, usually image plus error messages.
+      // These extra contortions are needed to select the bare text of error
+      // message.
+      $el.contents().filter(function() {
+        return this.id !== el.id + '_brush';
+      }).remove();
+
       if (img)
         $el.append(img);
     }

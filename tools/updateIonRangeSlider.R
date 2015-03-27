@@ -23,6 +23,7 @@ thisFile <- function() {
 srcdir <- file.path(dirname(thisFile()), "../../ion.rangeSlider")
 destdir <- file.path(dirname(thisFile()), "../inst/www/shared/ionrangeslider")
 
-file.copy(file.path(srcdir, "js"), destdir, recursive = TRUE)
+file.copy(file.path(srcdir, "js/ion.rangeSlider.js"), file.path(destdir, "js"),
+          overwrite = TRUE)
 file.copy(file.path(srcdir, "css"), destdir, recursive = TRUE)
 file.copy(file.path(srcdir, "img"), destdir, recursive = TRUE)

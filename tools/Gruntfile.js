@@ -21,7 +21,12 @@ module.exports = function(grunt) {
           srcdir + 'www/shared/datepicker/js/locales/bootstrap-datepicker.*.js'
         ],
         dest: srcdir + 'www/shared/datepicker/js/bootstrap-datepicker.min.js'
+      },
+      ionrangeslider: {
+        src: srcdir + 'www/shared/ionrangeslider/js/ion.rangeSlider.js',
+        dest: srcdir + 'www/shared/ionrangeslider/js/ion.rangeSlider.min.js'
       }
+
     },
 
     jshint: {

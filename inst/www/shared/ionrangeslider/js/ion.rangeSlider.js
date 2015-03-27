@@ -1,6 +1,7 @@
 ﻿// Ion.RangeSlider
-// version 2.0.3 Build: 293
-// © Denis Ineshin, 2014    https://github.com/IonDen
+// version 2.0.6 Build: 300
+// © Denis Ineshin, 2015
+// https://github.com/IonDen
 //
 // Project page:    http://ionden.com/a/plugins/ion.rangeSlider/en.html
 // GitHub page:     https://github.com/IonDen/ion.rangeSlider
@@ -75,6 +76,34 @@
             return bound;
         };
     }
+    if (!Array.prototype.indexOf) {
+        Array.prototype.indexOf = function(searchElement, fromIndex) {
+            var k;
+            if (this == null) {
+                throw new TypeError('"this" is null or not defined');
+            }
+            var O = Object(this);
+            var len = O.length >>> 0;
+            if (len === 0) {
+                return -1;
+            }
+            var n = +fromIndex || 0;
+            if (Math.abs(n) === Infinity) {
+                n = 0;
+            }
+            if (n >= len) {
+                return -1;
+            }
+            k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+            while (k < len) {
+                if (k in O && O[k] === searchElement) {
+                    return k;
+                }
+                k++;
+            }
+            return -1;
+        };
+    }
 
 
 
@@ -110,7 +139,7 @@
     // Core
 
     var IonRangeSlider = function (input, options, plugin_count) {
-        this.VERSION = "2.0.3";
+        this.VERSION = "2.0.6";
         this.input = input;
         this.plugin_count = plugin_count;
         this.current_plugin = 0;
@@ -203,6 +232,27 @@
         };
         data.values = data.values && data.values.split(",");
         options = $.extend(data, options);
+
+        // get from and to out of input
+        var val = $inp.prop("value");
+        if (val) {
+            val = val.split(";");
+
+            if (val[0] && val[0] == +val[0]) {
+                val[0] = +val[0];
+            }
+            if (val[1] && val[1] == +val[1]) {
+                val[1] = +val[1];
+            }
+
+            if (options.values && options.values.length) {
+                data.from = val[0] && options.values.indexOf(val[0]);
+                data.to = val[1] && options.values.indexOf(val[1]);
+            } else {
+                data.from = val[0] && +val[0];
+                data.to = val[1] && +val[1];
+            }
+        }
 
         // get config from options
         this.options = $.extend({
@@ -825,7 +875,7 @@
                 return;
             }
 
-            if (this.coords.x_pointer < 0) {
+            if (this.coords.x_pointer < 0 || isNaN(this.coords.x_pointer)  ) {
                 this.coords.x_pointer = 0;
             } else if (this.coords.x_pointer > this.coords.w_rs) {
                 this.coords.x_pointer = this.coords.w_rs;
@@ -1129,13 +1179,19 @@
         drawShadow: function () {
             var o = this.options,
                 c = this.$cache,
+
+                is_from_min = typeof o.from_min === "number" && !isNaN(o.from_min),
+                is_from_max = typeof o.from_max === "number" && !isNaN(o.from_max),
+                is_to_min = typeof o.to_min === "number" && !isNaN(o.to_min),
+                is_to_max = typeof o.to_max === "number" && !isNaN(o.to_max),
+
                 from_min,
                 from_max,
                 to_min,
                 to_max;
 
             if (o.type === "single") {
-                if (o.from_shadow && (o.from_min || o.from_max)) {
+                if (o.from_shadow && (is_from_min || is_from_max)) {
                     from_min = this.calcPercent(o.from_min || o.min);
                     from_max = this.calcPercent(o.from_max || o.max) - from_min;
                     from_min = this.toFixed(from_min - (this.coords.p_handle / 100 * from_min));
@@ -1149,7 +1205,7 @@
                     c.shad_single[0].style.display = "none";
                 }
             } else {
-                if (o.from_shadow && (o.from_min || o.from_max)) {
+                if (o.from_shadow && (is_from_min || is_from_max)) {
                     from_min = this.calcPercent(o.from_min || o.min);
                     from_max = this.calcPercent(o.from_max || o.max) - from_min;
                     from_min = this.toFixed(from_min - (this.coords.p_handle / 100 * from_min));
@@ -1163,7 +1219,7 @@
                     c.shad_from[0].style.display = "none";
                 }
 
-                if (o.to_shadow && (o.to_min || o.to_max)) {
+                if (o.to_shadow && (is_to_min || is_to_max)) {
                     to_min = this.calcPercent(o.to_min || o.min);
                     to_max = this.calcPercent(o.to_max || o.max) - to_min;
                     to_min = this.toFixed(to_min - (this.coords.p_handle / 100 * to_min));
@@ -1746,6 +1802,10 @@
         // Public methods
 
         update: function (options) {
+            if (!this.input) {
+                return;
+            }
+
             this.is_update = true;
 
             this.options.from = this.result.from;
@@ -1761,11 +1821,19 @@
         },
 
         reset: function () {
+            if (!this.input) {
+                return;
+            }
+
             this.updateResult();
             this.update();
         },
 
         destroy: function () {
+            if (!this.input) {
+                return;
+            }
+
             this.toggleInput();
             this.$cache.input.prop("readonly", false);
             $.data(this.input, "ionRangeSlider", null);

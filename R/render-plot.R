@@ -120,14 +120,15 @@ getPrevPlotCoordmap <- function(width, height) {
   }
 
   list(
-    usr = list(
+    # Bounds of the plot area, in data space
+    domain = list(
       left = usrCoords[1],
       right = usrCoords[2],
       bottom = usrCoords[3],
       top = usrCoords[4]
     ),
     # The bounds of the plot area, in DOM pixels
-    bounds = list(
+    range = list(
       left = grconvertX(usrBounds[1], 'user', 'nfc') * width - 1,
       right = grconvertX(usrBounds[2], 'user', 'nfc') * width - 1,
       bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height - 1,

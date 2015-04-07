@@ -1392,15 +1392,15 @@ $.extend(imageOutputBinding, {
       var coordmap = opts.coordmap;
       if (!coordmap) return offset;
 
-      function devToUsrX(deviceX) {
-        var x = deviceX - coordmap.bounds.left;
-        var factor = (coordmap.usr.right - coordmap.usr.left) /
-                     (coordmap.bounds.right - coordmap.bounds.left);
-        var newx = (x * factor) + coordmap.usr.left;
+      function devToDataX(deviceX) {
+        var x = deviceX - coordmap.range.left;
+        var factor = (coordmap.domain.right - coordmap.domain.left) /
+                     (coordmap.range.right - coordmap.range.left);
+        var newx = (x * factor) + coordmap.domain.left;
 
         if (clip) {
-          var max = Math.max(coordmap.usr.right, coordmap.usr.left);
-          var min = Math.min(coordmap.usr.right, coordmap.usr.left);
+          var max = Math.max(coordmap.domain.right, coordmap.domain.left);
+          var min = Math.min(coordmap.domain.right, coordmap.domain.left);
           if (newx > max)
             newx = max;
           else if (newx < min)
@@ -1409,15 +1409,15 @@ $.extend(imageOutputBinding, {
 
         return newx;
       }
-      function devToUsrY(deviceY) {
-        var y = deviceY - coordmap.bounds.bottom;
-        var factor = (coordmap.usr.top - coordmap.usr.bottom) /
-                     (coordmap.bounds.top - coordmap.bounds.bottom);
-        var newy = (y * factor) + coordmap.usr.bottom;
+      function devToDataY(deviceY) {
+        var y = deviceY - coordmap.range.bottom;
+        var factor = (coordmap.domain.top - coordmap.domain.bottom) /
+                     (coordmap.range.top - coordmap.range.bottom);
+        var newy = (y * factor) + coordmap.domain.bottom;
 
         if (clip) {
-          var max = Math.max(coordmap.usr.top, coordmap.usr.bottom);
-          var min = Math.min(coordmap.usr.top, coordmap.usr.bottom);
+          var max = Math.max(coordmap.domain.top, coordmap.domain.bottom);
+          var min = Math.min(coordmap.domain.top, coordmap.domain.bottom);
           if (newy > max)
             newy = max;
           else if (newy < min)
@@ -1427,11 +1427,11 @@ $.extend(imageOutputBinding, {
         return newy;
       }
 
-      var userX = devToUsrX(offset.x);
+      var userX = devToDataX(offset.x);
       if (coordmap.log.x)
         userX = Math.pow(10, userX);
 
-      var userY = devToUsrY(offset.y);
+      var userY = devToDataY(offset.y);
       if (coordmap.log.y)
         userY = Math.pow(10, userY);
 
@@ -1445,7 +1445,7 @@ $.extend(imageOutputBinding, {
     // the bounds of the image.
     function getPlotBounds() {
       if (opts.coordmap) {
-        return opts.coordmap.bounds;
+        return opts.coordmap.range;
       } else {
         return {
           top: 0,

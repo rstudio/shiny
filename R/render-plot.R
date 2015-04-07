@@ -179,12 +179,24 @@ getGgplotCoordmap <- function(p) {
   # Given a built ggplot object, return x and y domains (in data space).
   find_panel_domains <- function(b) {
     ranges <- b$panel$ranges[[1]]
-    list(
+    res <- list(
       left   = ranges$x.range[1],
       right  = ranges$x.range[2],
       bottom = ranges$y.range[1],
       top    = ranges$y.range[2]
     )
+
+    # Check for reversed scales
+    if (b$panel$x_scales[[1]]$trans$name == "reverse") {
+      res$left  <- -res$left
+      res$right <- -res$right
+    }
+    if (b$panel$y_scales[[1]]$trans$name == "reverse") {
+      res$top    <- -res$top
+      res$bottom <- -res$bottom
+    }
+
+    res
   }
 
   # Given a gtable object, return the x and y ranges ( in pixel dimensions)

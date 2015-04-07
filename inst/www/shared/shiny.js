@@ -1429,11 +1429,11 @@ $.extend(imageOutputBinding, {
 
       var userX = devToDataX(offset.x);
       if (coordmap.log.x)
-        userX = Math.pow(10, userX);
+        userX = Math.pow(coordmap.log.x, userX);
 
       var userY = devToDataY(offset.y);
       if (coordmap.log.y)
-        userY = Math.pow(10, userY);
+        userY = Math.pow(coordmap.log.x, userY);
 
       return {
         x: userX,

@@ -149,8 +149,8 @@ getPrevPlotCoordmap <- function(width, height) {
       top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height - 1
     ),
     log = list(
-      x = par('xlog'),
-      y = par('ylog')
+      x = if (par('xlog')) 10 else NULL,
+      y = if (par('ylog')) 10 else NULL
     )
   )
 }
@@ -194,6 +194,24 @@ getGgplotCoordmap <- function(p) {
     if (b$panel$y_scales[[1]]$trans$name == "reverse") {
       res$top    <- -res$top
       res$bottom <- -res$bottom
+    }
+
+    res
+  }
+
+  # Given built ggplot object, return whether the scales are log scales
+  check_log_scales <- function(b) {
+    res <- list(x = NULL, y = NULL)
+
+    x_name <- b$panel$x_scales[[1]]$trans$name
+    y_name <- b$panel$y_scales[[1]]$trans$name
+
+    # Extract the log base from the trans name -- a string like "log-10".
+    if (grepl("^log-", x_name)) {
+      res$x = as.numeric(sub("^log-", "", x_name))
+    }
+    if (grepl("^log-", y_name)) {
+      res$y = as.numeric(sub("^log-", "", y_name))
     }
 
     res
@@ -247,6 +265,6 @@ getGgplotCoordmap <- function(p) {
   list(
     domain = find_panel_domains(res$build),
     range = find_panel_dims(res$gtable),
-    log = list(x = NULL, y = NULL)
+    log = check_log_scales(res$build)
   )
 }

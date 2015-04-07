@@ -199,22 +199,42 @@ getGgplotCoordmap <- function(p) {
     res
   }
 
-  # Given built ggplot object, return whether the scales are log scales
+  # Given built ggplot object, return object with the log base for x and y if
+  # there are log scales or coord transforms.
   check_log_scales <- function(b) {
-    res <- list(x = NULL, y = NULL)
 
-    x_name <- b$panel$x_scales[[1]]$trans$name
-    y_name <- b$panel$y_scales[[1]]$trans$name
+    # Given a vector of transformation names like c("log-10", "identity"),
+    # return the first log base, like 10. If none are present, return NULL.
+    extract_log_base <- function(names) {
+      names <- names[grepl("^log-", names)]
+
+      if (length(names) == 0)
+        return(NULL)
+
+      names <- names[1]
+
+      as.numeric(sub("^log-", "", names))
+    }
+
+    # Look for log scales and log coord transforms. People shouldn't use both.
+    x_names <- b$panel$x_scales[[1]]$trans$name
+    y_names <- b$panel$y_scales[[1]]$trans$name
+
+    coords <- b$plot$coordinates
+    if (!is.null(coords$trans)) {
+      x_names <- c(x_names, coords$trans$x$name)
+      y_names <- c(y_names, coords$trans$y$name)
+    }
+
+    # Keep only scale/trans names that start with "log-"
+    x_names <- x_names[grepl("^log-", x_names)]
+    y_names <- y_names[grepl("^log-", y_names)]
 
     # Extract the log base from the trans name -- a string like "log-10".
-    if (grepl("^log-", x_name)) {
-      res$x = as.numeric(sub("^log-", "", x_name))
-    }
-    if (grepl("^log-", y_name)) {
-      res$y = as.numeric(sub("^log-", "", y_name))
-    }
-
-    res
+    list(
+      x = extract_log_base(x_names),
+      y = extract_log_base(y_names)
+    )
   }
 
   # Given a gtable object, return the x and y ranges ( in pixel dimensions)

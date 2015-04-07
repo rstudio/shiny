@@ -1,1 +1,3 @@
 /NEWS merge=union
+*.min.js -merge -diff
+*.js.map -merge -diff

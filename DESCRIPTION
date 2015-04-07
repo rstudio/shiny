@@ -75,7 +75,8 @@ Suggests:
     Cairo (>= 1.5-5),
     testthat,
     knitr (>= 1.6),
-    markdown
+    markdown,
+    ggplot2
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

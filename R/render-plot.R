@@ -84,14 +84,28 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     plotFunc <- function() {
       # Actually perform the plotting
       result <- withVisible(func())
+
+      coordmap <<- NULL
+
       if (result$visible) {
         # Use capture.output to squelch printing to the actual console; we
         # are only interested in plot output
-        capture.output(print(result$value))
+
+        # Special case for ggplot objects - need to capture coordmap
+        if (inherits(result$value, "ggplot")) {
+          capture.output(coordmap <<- getGgplotCoordmap(result$value))
+        } else {
+          capture.output(print(result$value))
+        }
       }
 
-      coordmap <<- getPrevPlotCoordmap(width, height)
-      coordmap$pixelratio <- pixelratio
+      if (is.null(coordmap)) {
+        coordmap <<- getPrevPlotCoordmap(width, height)
+      }
+
+      if (!is.null(coordmap)) {
+        coordmap$pixelratio <<- pixelratio
+      }
     }
 
     outfile <- do.call(plotPNG, c(plotFunc, width=width*pixelratio,
@@ -138,5 +152,89 @@ getPrevPlotCoordmap <- function(width, height) {
       x = par('xlog'),
       y = par('ylog')
     )
+  )
+}
+
+# Print a ggplot object and return a coordmap for it.
+getGgplotCoordmap <- function(p) {
+  if (!inherits(p, "ggplot"))
+    return(NULL)
+
+  # A modified version of print.ggplot which returns the built ggplot object
+  # as well as the gtable grob.
+  print_ggplot <- function(x) {
+    grid::grid.newpage()
+
+    build <- ggplot2::ggplot_build(x)
+
+    gtable <- ggplot2::ggplot_gtable(build)
+    grid::grid.draw(gtable)
+
+    list(
+      build = build,
+      gtable = gtable
+    )
+  }
+
+  # Given a built ggplot object, return x and y domains (in data space).
+  find_panel_domains <- function(b) {
+    ranges <- b$panel$ranges[[1]]
+    list(
+      left   = ranges$x.range[1],
+      right  = ranges$x.range[2],
+      bottom = ranges$y.range[1],
+      top    = ranges$y.range[2]
+    )
+  }
+
+  # Given a gtable object, return the x and y ranges ( in pixel dimensions)
+  find_panel_dims <- function(g) {
+    # Given a vector of unit objects, return logical vector indicating which ones
+    # are "null" units. These units use the remaining available width/height --
+    # that is, the space not occupied by elements that have an absolute size.
+    is_null_unit <- function(x) {
+      vapply(x, FUN.VALUE = logical(1), function(u) {
+        isTRUE(attr(u, "unit", exact = TRUE) == "null")
+      })
+    }
+
+    # Heights
+    null_idx <- is_null_unit(g$heights)
+    abs_heights <- g$heights[!null_idx]
+    panel_height <- grid::convertHeight(grid::unit(1,"npc") - sum(abs_heights),
+                                        "native")
+
+    # Get all the abs heights that come before (above) the null item
+    abs_heights <- g$heights[seq(1, which(null_idx) - 1)]
+    above_panel_height <- grid::convertHeight(sum(abs_heights), "native")
+
+    # Widths
+    null_idx <- is_null_unit(g$widths)
+    abs_widths <- g$widths[!null_idx]
+    panel_width <- grid::convertWidth(grid::unit(1,"npc") - sum(abs_widths),
+                                      "native")
+
+    # Get all the abs widths that come before (left of) the null item
+    abs_widths <- g$widths[seq(1, which(null_idx) - 1)]
+    leftof_panel_width <- grid::convertWidth(sum(abs_widths), "native")
+
+    top <- -as.numeric(above_panel_height)
+    left <- as.numeric(leftof_panel_width)
+
+    list(
+      left = left,
+      right = left + as.numeric(panel_width),
+      bottom = top - as.numeric(panel_height),
+      top = top
+    )
+  }
+
+
+  res <- print_ggplot(p)
+
+  list(
+    domain = find_panel_domains(res$build),
+    range = find_panel_dims(res$gtable),
+    log = list(x = NULL, y = NULL)
   )
 }

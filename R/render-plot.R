@@ -90,36 +90,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         capture.output(print(result$value))
       }
 
-      # Now capture some graphics device info before we close it
-      usrCoords <- par('usr')
-      usrBounds <- usrCoords
-      if (par('xlog')) {
-        usrBounds[c(1,2)] <- 10 ^ usrBounds[c(1,2)]
-      }
-      if (par('ylog')) {
-        usrBounds[c(3,4)] <- 10 ^ usrBounds[c(3,4)]
-      }
-
-      coordmap <<- list(
-        usr = list(
-          left = usrCoords[1],
-          right = usrCoords[2],
-          bottom = usrCoords[3],
-          top = usrCoords[4]
-        ),
-        # The bounds of the plot area, in DOM pixels
-        bounds = list(
-          left = grconvertX(usrBounds[1], 'user', 'nfc') * width - 1,
-          right = grconvertX(usrBounds[2], 'user', 'nfc') * width - 1,
-          bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height - 1,
-          top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height - 1
-        ),
-        log = list(
-          x = par('xlog'),
-          y = par('ylog')
-        ),
-        pixelratio = pixelratio
-      )
+      coordmap <<- getPrevPlotCoordmap(width, height)
+      coordmap$pixelratio <- pixelratio
     }
 
     outfile <- do.call(plotPNG, c(plotFunc, width=width*pixelratio,
@@ -132,4 +104,38 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       width=width, height=height, coordmap=coordmap
     ))
   }))
+}
+
+# Get a coordmap for the previous plot made with base graphics.
+# Requires width and height of output image, in pixels.
+# Must be called before the graphics device is closed.
+getPrevPlotCoordmap <- function(width, height) {
+  usrCoords <- par('usr')
+  usrBounds <- usrCoords
+  if (par('xlog')) {
+    usrBounds[c(1,2)] <- 10 ^ usrBounds[c(1,2)]
+  }
+  if (par('ylog')) {
+    usrBounds[c(3,4)] <- 10 ^ usrBounds[c(3,4)]
+  }
+
+  list(
+    usr = list(
+      left = usrCoords[1],
+      right = usrCoords[2],
+      bottom = usrCoords[3],
+      top = usrCoords[4]
+    ),
+    # The bounds of the plot area, in DOM pixels
+    bounds = list(
+      left = grconvertX(usrBounds[1], 'user', 'nfc') * width - 1,
+      right = grconvertX(usrBounds[2], 'user', 'nfc') * width - 1,
+      bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height - 1,
+      top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height - 1
+    ),
+    log = list(
+      x = par('xlog'),
+      y = par('ylog')
+    )
+  )
 }

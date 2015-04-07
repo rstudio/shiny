@@ -102,6 +102,7 @@ Collate:
     'react.R'
     'reactive-domains.R'
     'reactives.R'
+    'render-plot.R'
     'run-url.R'
     'server.R'
     'shiny.R'

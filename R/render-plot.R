@@ -187,11 +187,13 @@ getGgplotCoordmap <- function(p) {
     )
 
     # Check for reversed scales
-    if (b$panel$x_scales[[1]]$trans$name == "reverse") {
+    xscale <- b$panel$x_scales[[1]]
+    if (!is.null(xscale$trans) && xscale$trans$name == "reverse") {
       res$left  <- -res$left
       res$right <- -res$right
     }
-    if (b$panel$y_scales[[1]]$trans$name == "reverse") {
+    yscale <- b$panel$y_scales[[1]]
+    if (!is.null(yscale$trans) && yscale$trans$name == "reverse") {
       res$top    <- -res$top
       res$bottom <- -res$bottom
     }
@@ -217,13 +219,21 @@ getGgplotCoordmap <- function(p) {
     }
 
     # Look for log scales and log coord transforms. People shouldn't use both.
-    x_names <- b$panel$x_scales[[1]]$trans$name
-    y_names <- b$panel$y_scales[[1]]$trans$name
+    x_names <- character(0)
+    y_names <- character(0)
+
+    # Continuous scales have a trans; discrete ones don't
+    if (!is.null(b$panel$x_scales[[1]]$trans))
+      x_names <- b$panel$x_scales[[1]]$trans$name
+    if (!is.null(b$panel$y_scales[[1]]$trans))
+      y_names <- b$panel$y_scales[[1]]$trans$name
 
     coords <- b$plot$coordinates
     if (!is.null(coords$trans)) {
-      x_names <- c(x_names, coords$trans$x$name)
-      y_names <- c(y_names, coords$trans$y$name)
+      if (!is.null(coords$trans$x))
+        x_names <- c(x_names, coords$trans$x$name)
+      if (!is.null(coords$trans$y))
+        y_names <- c(y_names, coords$trans$y$name)
     }
 
     # Keep only scale/trans names that start with "log-"

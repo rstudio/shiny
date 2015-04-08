@@ -247,8 +247,8 @@ getGgplotCoordmap <- function(p) {
     )
   }
 
-  # Given a gtable object, return the x and y ranges ( in pixel dimensions)
-  find_panel_dims <- function(g) {
+  # Given a gtable object, return the x and y ranges (in pixel dimensions)
+  find_panel_ranges <- function(g) {
     # Given a vector of unit objects, return logical vector indicating which ones
     # are "null" units. These units use the remaining available width/height --
     # that is, the space not occupied by elements that have an absolute size.
@@ -294,7 +294,7 @@ getGgplotCoordmap <- function(p) {
 
   list(
     domain = find_panel_domains(res$build),
-    range = find_panel_dims(res$gtable),
+    range = find_panel_ranges(res$gtable),
     log = check_log_scales(res$build)
   )
 }

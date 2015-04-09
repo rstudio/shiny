@@ -81,46 +81,30 @@ $.extend(imageOutputBinding, {
       var coordmap = opts.coordmap;
       if (!coordmap) return offset;
 
-      function devToDataX(deviceX) {
-        var x = deviceX - coordmap.range.left;
-        var factor = (coordmap.domain.right - coordmap.domain.left) /
-                     (coordmap.range.right - coordmap.range.left);
-        var newx = (x * factor) + coordmap.domain.left;
+      function pxToData(px, domainMin, domainMax, rangeMin, rangeMax) {
+        var val = px - rangeMin;
+        var factor = (domainMax - domainMin) / (rangeMax - rangeMin);
+        var newval = (val * factor) + domainMin;
 
         if (clip) {
-          var max = Math.max(coordmap.domain.right, coordmap.domain.left);
-          var min = Math.min(coordmap.domain.right, coordmap.domain.left);
-          if (newx > max)
-            newx = max;
-          else if (newx < min)
-            newx = min;
+          var max = Math.max(domainMax, domainMin);
+          var min = Math.min(domainMax, domainMin);
+          if (newval > max)
+            newval = max;
+          else if (newval < min)
+            newval = min;
         }
 
-        return newx;
-      }
-      function devToDataY(deviceY) {
-        var y = deviceY - coordmap.range.bottom;
-        var factor = (coordmap.domain.top - coordmap.domain.bottom) /
-                     (coordmap.range.top - coordmap.range.bottom);
-        var newy = (y * factor) + coordmap.domain.bottom;
-
-        if (clip) {
-          var max = Math.max(coordmap.domain.top, coordmap.domain.bottom);
-          var min = Math.min(coordmap.domain.top, coordmap.domain.bottom);
-          if (newy > max)
-            newy = max;
-          else if (newy < min)
-            newy = min;
-        }
-
-        return newy;
+        return newval;
       }
 
-      var userX = devToDataX(offset.x);
+      var d = coordmap.domain;
+      var r = coordmap.range;
+      var userX = pxToData(offset.x, d.left, d.right, r.left, r.right);
+      var userY = pxToData(offset.y, d.bottom, d.top, r.bottom, r.top);
+
       if (coordmap.log.x)
         userX = Math.pow(coordmap.log.x, userX);
-
-      var userY = devToDataY(offset.y);
       if (coordmap.log.y)
         userY = Math.pow(coordmap.log.x, userY);
 

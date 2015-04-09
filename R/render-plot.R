@@ -102,10 +102,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       if (is.null(coordmap)) {
         coordmap <<- getPrevPlotCoordmap(width, height)
       }
-
-      if (!is.null(coordmap)) {
-        coordmap$pixelratio <<- pixelratio
-      }
     }
 
     outfile <- do.call(plotPNG, c(plotFunc, width=width*pixelratio,
@@ -133,7 +129,8 @@ getPrevPlotCoordmap <- function(width, height) {
     usrBounds[c(3,4)] <- 10 ^ usrBounds[c(3,4)]
   }
 
-  list(
+  # Wrapped in double list because other types of plots can have multiple panels.
+  list(list(
     # Bounds of the plot area, in data space
     domain = list(
       left = usrCoords[1],
@@ -151,7 +148,7 @@ getPrevPlotCoordmap <- function(width, height) {
     log = list(
       x = if (par('xlog')) 10 else NULL,
       y = if (par('ylog')) 10 else NULL
-    )
+    ))
   )
 }
 
@@ -176,23 +173,66 @@ getGgplotCoordmap <- function(p) {
     )
   }
 
-  # Given a built ggplot object, return x and y domains (in data space).
-  find_panel_domains <- function(b) {
-    ranges <- b$panel$ranges[[1]]
+  # Given a built ggplot object and corresponding gtable, return x and y domains
+  # (data space coords) and ranges (pixel coords).
+  find_panel_info <- function(b) {
+    layout <- b$panel$layout
+    # Convert factor to numbers
+    layout$PANEL <- as.integer(as.character(layout$PANEL))
+
+    # Names of facets
+    facet <- b$plot$facet
+    facet_vars <- NULL
+    if (inherits(facet, "grid")) {
+      facet_vars <- vapply(c(facet$cols, facet$rows), as.character, character(1))
+    } else if (inherits(facet, "wrap")) {
+      facet_vars <- vapply(b$plot$facet$facets, as.character, character(1))
+    }
+
+    # Iterate over each row in the layout data frame
+    lapply(seq_len(nrow(layout)), function(i) {
+      # Slice out one row
+      l <- layout[i, ]
+
+      scale_x <- l$SCALE_X
+      scale_y <- l$SCALE_Y
+
+      vars <- lapply(facet_vars, function(var) {
+        list(name = var, value = l[[var]])
+      })
+
+      list(
+        panel   = l$PANEL,
+        row     = l$ROW,
+        col     = l$COL,
+        vars    = vars,
+        scale_x = scale_x,
+        scale_y = scale_x,
+        log     = check_log_scales(b, scale_x, scale_y),
+        domain  = find_panel_domain(b, l$PANEL, scale_x, scale_y)
+      )
+    })
+  }
+
+  # Given a single range object (representing the data domain) from a built
+  # ggplot object, return the domain.
+  find_panel_domain <- function(b, panel_num, scalex_num = 1, scaley_num = 1) {
+    range <- b$panel$ranges[[panel_num]]
     res <- list(
-      left   = ranges$x.range[1],
-      right  = ranges$x.range[2],
-      bottom = ranges$y.range[1],
-      top    = ranges$y.range[2]
+      left   = range$x.range[1],
+      right  = range$x.range[2],
+      bottom = range$y.range[1],
+      top    = range$y.range[2]
     )
 
     # Check for reversed scales
-    xscale <- b$panel$x_scales[[1]]
+    xscale <- b$panel$x_scales[[scalex_num]]
+    yscale <- b$panel$y_scales[[scaley_num]]
+
     if (!is.null(xscale$trans) && xscale$trans$name == "reverse") {
       res$left  <- -res$left
       res$right <- -res$right
     }
-    yscale <- b$panel$y_scales[[1]]
     if (!is.null(yscale$trans) && yscale$trans$name == "reverse") {
       res$top    <- -res$top
       res$bottom <- -res$bottom
@@ -203,7 +243,7 @@ getGgplotCoordmap <- function(p) {
 
   # Given built ggplot object, return object with the log base for x and y if
   # there are log scales or coord transforms.
-  check_log_scales <- function(b) {
+  check_log_scales <- function(b, scalex_num = 1, scaley_num = 1) {
 
     # Given a vector of transformation names like c("log-10", "identity"),
     # return the first log base, like 10. If none are present, return NULL.
@@ -223,10 +263,10 @@ getGgplotCoordmap <- function(p) {
     y_names <- character(0)
 
     # Continuous scales have a trans; discrete ones don't
-    if (!is.null(b$panel$x_scales[[1]]$trans))
-      x_names <- b$panel$x_scales[[1]]$trans$name
-    if (!is.null(b$panel$y_scales[[1]]$trans))
-      y_names <- b$panel$y_scales[[1]]$trans$name
+    if (!is.null(b$panel$x_scales[[scalex_num]]$trans))
+      x_names <- b$panel$x_scales[[scalex_num]]$trans$name
+    if (!is.null(b$panel$y_scales[[scaley_num]]$trans))
+      y_names <- b$panel$y_scales[[scaley_num]]$trans$name
 
     coords <- b$plot$coordinates
     if (!is.null(coords$trans)) {
@@ -258,43 +298,88 @@ getGgplotCoordmap <- function(p) {
       })
     }
 
-    # Heights
+    # Given a vector of values (pixel sizes) and a logical vector indicating
+    # whether each value is a panel or not, collapse the value vector by
+    # summing each run of panels and non-panels.
+    collapse_to_panels <- function(values, panel_idx) {
+      n <- length(panel_idx)
+      y <- (panel_idx[-1] != panel_idx[-n])
+
+      # Indices where the value changes
+      run_lengths <- diff(c(0, which(y), n))
+      group_ids <- rep.int(seq_along(run_lengths), run_lengths)
+
+      unname(tapply(values, group_ids, sum))
+    }
+
+    # Convert a unit (or vector of units) to a numeric vector of pixel sizes
+    h_px <- function(x) as.numeric(grid::convertHeight(x, "native"))
+    w_px <- function(x) as.numeric(grid::convertWidth(x, "native"))
+
+    # Pixel dimensions of image
+    img_height <- h_px(grid::unit(1, "npc"))
+    img_width  <- w_px(grid::unit(1, "npc"))
+
+    # Calculate height of all panel(s) together. Panels (and only panels) have
+    # null height.
     null_idx <- is_null_unit(g$heights)
-    abs_heights <- g$heights[!null_idx]
-    panel_height <- grid::convertHeight(grid::unit(1,"npc") - sum(abs_heights),
-                                        "native")
+    # All the absolute heights. At this point, null heights are 0. We need to
+    # calculate them separately and add them in later.
+    abs_heights <- h_px(g$heights)
+    panel_height_total <- img_height - sum(abs_heights)
+    # Divide up the total panel height up into the panels (scaled by height)
+    panel_height_prop <- as.numeric(g$heights[null_idx])
+    panel_height_prop <- panel_height_prop / sum(panel_height_prop)
+    abs_heights[null_idx] <- panel_height_total * panel_height_prop
+    # Collapse absolute heights
+    abs_heights <- abs(collapse_to_panels(abs_heights, null_idx))
 
-    # Get all the abs heights that come before (above) the null item
-    abs_heights <- g$heights[seq(1, which(null_idx) - 1)]
-    above_panel_height <- grid::convertHeight(sum(abs_heights), "native")
-
-    # Widths
+    # Same for widths
     null_idx <- is_null_unit(g$widths)
-    abs_widths <- g$widths[!null_idx]
-    panel_width <- grid::convertWidth(grid::unit(1,"npc") - sum(abs_widths),
-                                      "native")
+    abs_widths <- w_px(g$widths)
+    panel_width_total <- img_width - sum(abs_widths)
+    panel_width_prop <- as.numeric(g$widths[null_idx])
+    panel_width_prop <- panel_width_prop / sum(panel_width_prop)
+    abs_widths[null_idx] <- panel_width_total * panel_width_prop
+    abs_widths <- abs(collapse_to_panels(abs_widths, null_idx))
 
-    # Get all the abs widths that come before (left of) the null item
-    abs_widths <- g$widths[seq(1, which(null_idx) - 1)]
-    leftof_panel_width <- grid::convertWidth(sum(abs_widths), "native")
+    # Convert to absolute pixel positions
+    x_pos <- cumsum(abs_widths)
+    y_pos <- cumsum(abs_heights)
 
-    top <- -as.numeric(above_panel_height)
-    left <- as.numeric(leftof_panel_width)
+    # Number of panels in each direction
+    x_npanels <- (length(x_pos) - 1) / 2
+    y_npanels <- (length(y_pos) - 1) / 2
 
-    list(
-      left = left,
-      right = left + as.numeric(panel_width),
-      bottom = top - as.numeric(panel_height),
-      top = top
-    )
+    # Return list of lists, where each inner list has left, right, top, bottom
+    # values for a panel
+    res <- lapply(seq_len(x_npanels), function(i) {
+      lapply(seq_len(y_npanels), function(j) {
+        list(
+          left   = x_pos[i*2 - 1],
+          right  = x_pos[i*2],
+          bottom = y_pos[j*2 - 1],
+          top    = y_pos[j*2]
+        )
+      })
+    })
+    unlist(res, recursive = FALSE)
   }
 
 
   res <- print_ggplot(p)
 
-  list(
-    domain = find_panel_domains(res$build),
-    range = find_panel_ranges(res$gtable),
-    log = check_log_scales(res$build)
-  )
+  # Get info from built ggplot object
+  info <- find_panel_info(res$build)
+
+  # Get ranges from gtable - it's possible for this to return more elements than
+  # info, because it calculates positions even for panels that aren't present.
+  # This can happen with facet_wrap.
+  ranges <- find_panel_ranges(res$gtable)
+
+  for (i in seq_along(info)) {
+    info[[i]]$range <- ranges[[i]]
+  }
+
+  info
 }

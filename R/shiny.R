@@ -89,7 +89,7 @@ toJSON <- function(x, ...,  dataframe = "columns", null = "null", na = "null",
   jsonlite::toJSON(I(x), dataframe = dataframe, null = null, na = na,
    auto_unbox = auto_unbox, digits = digits, use_signif = use_signif,
    force = force, POSIXt = POSIXt, UTC = UTC, rownames = rownames,
-   keep_vec_names = keep_vec_names, ...)
+   keep_vec_names = keep_vec_names, json_verbatim = TRUE, ...)
 }
 
 # Call the workerId func with no args to get the worker id, and with an arg to

@@ -474,7 +474,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
   }
 
   function sendBrushInfo() {
-    var bounds = brush.bounds;
+    var bounds = brush.bounds();
 
     // We're in a new or reset state
     if (isNaN(bounds.xmin)) {
@@ -523,8 +523,8 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
     if (opts.brushClip && !mapper.isInPlottingRegion(offset, expandPixels))
       return;
 
-    brush.up = { x: NaN, y: NaN };
-    brush.down = offset;
+    brush.up({ x: NaN, y: NaN });
+    brush.down(offset);
 
     if (brush.isInsideBrush(offset)) {
       brush.startDragging(offset);
@@ -551,7 +551,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
   function mousemove(e) {
     var offset = mapper.mouseOffset(e);
 
-    if (!(brush.brushing || brush.dragging)) {
+    if (!(brush.isBrushing() || brush.isDragging())) {
       // Set the cursor depending on where it is
       if (brush.isInsideBrush(offset)) {
         setCursorStyle('grabbable');
@@ -583,14 +583,14 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
       .off('mousemove.image_brush')
       .off('mouseup.image_brush');
 
-    brush.up = mapper.mouseOffset(e);
+    brush.up(mapper.mouseOffset(e));
 
     brush.stopBrushing();
     setCursorStyle('crosshair');
 
     // If the brush didn't go anywhere, hide the brush, clear value,
     // and return.
-    if (brush.down.x === brush.up.x && brush.down.y === brush.up.y) {
+    if (brush.down().x === brush.up().x && brush.down().y === brush.up().y) {
       brush.reset();
       brushInfoSender.immediateCall();
       return;
@@ -611,7 +611,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
       .off('mousemove.image_brush')
       .off('mouseup.image_brush');
 
-    brush.up = mapper.mouseOffset(e);
+    brush.up(mapper.mouseOffset(e));
 
     brush.stopDragging();
     setCursorStyle('grabbable');
@@ -643,20 +643,22 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
 // in a brushHandler, which provides various event listeners.
 imageutils.createBrush = function($el, opts, mapper) {
   var el = $el[0];
+  var $div = null;  // The div representing the brush
 
-  var brush = {};
+  var state = {};
+  reset();
 
-  brush.reset = function() {
+  function reset() {
     // Current brushing and dragging state
-    this.brushing = false;
-    this.dragging = false;
+    state.brushing = false;
+    state.dragging = false;
 
     // Offset of last mouse down and up events
-    this.down = { x: NaN, y: NaN };
-    this.up   = { x: NaN, y: NaN };
+    state.down = { x: NaN, y: NaN };
+    state.up   = { x: NaN, y: NaN };
 
     // Bounding rectangle of the brush
-    this.bounds = {
+    state.bounds = {
       xmin: NaN,
       xmax: NaN,
       ymin: NaN,
@@ -664,51 +666,50 @@ imageutils.createBrush = function($el, opts, mapper) {
     };
 
     // The bounds at the start of a drag
-    this.dragStartBounds = {
+    state.dragStartBounds = {
       xmin: NaN,
       xmax: NaN,
       ymin: NaN,
       ymax: NaN
     };
 
-    if (this.$div instanceof jQuery)
-      this.$div.remove();
-
-    return this;
-  };
-
-  brush.reset();
+    if ($div)
+      $div.remove();
+  }
 
   // If there's an existing brush div, use that div to set the new
   // brush's settings.
-  brush.importOldBrush = function() {
+  function importOldBrush() {
     var oldDiv = $el.find('#' + el.id + '_brush');
     if (oldDiv.length === 0)
       return;
 
     var elOffset = $el.offset();
     var divOffset = oldDiv.offset();
-    this.bounds = {
+    state.bounds = {
       xmin: divOffset.left - elOffset.left,
       xmax: divOffset.left - elOffset.left + oldDiv.width(),
       ymin: divOffset.top - elOffset.top,
       ymax: divOffset.top - elOffset.top + oldDiv.height()
     };
 
-    this.$div = oldDiv;
-  };
+    $div = oldDiv;
+  }
 
   // Return true if the offset is inside min/max coords
-  brush.isInsideBrush = function(offset) {
-    var bounds = this.bounds;
+  function isInsideBrush(offset) {
+    var bounds = state.bounds;
     return offset.x <= bounds.xmax && offset.x >= bounds.xmin &&
            offset.y <= bounds.ymax && offset.y >= bounds.ymin;
-  };
+  }
 
   // Sets the bounds of the brush, given a bounding box. This knows
   // whether we're brushing in the x, y, or xy directions and sets
   // bounds accordingly.
-  brush._setBounds = function(box) {
+  function bounds(box) {
+    if (box === undefined)
+      return state.bounds;
+
     var plotBounds = mapper.getPlotBounds();
 
     var min = { x: box.xmin, y: box.ymin };
@@ -732,19 +733,19 @@ imageutils.createBrush = function($el, opts, mapper) {
       max.x = plotBounds.right;
     }
 
-    this.bounds = {
+    state.bounds = {
       xmin: min.x,
       xmax: max.x,
       ymin: min.y,
       ymax: max.y
     };
-  };
+  }
 
   // Add a new div representing the brush.
-  brush._addDiv = function() {
-    if (this.$div) this.$div.remove();
+  function addDiv() {
+    if ($div) $div.remove();
 
-    this.$div = $(document.createElement('div'))
+    $div = $(document.createElement('div'))
       .attr('id', el.id + '_brush')
       .css({
         'background-color': opts.brushFill,
@@ -755,72 +756,94 @@ imageutils.createBrush = function($el, opts, mapper) {
 
     var borderStyle = '1px solid ' + opts.brushStroke;
     if (opts.brushDirection === 'xy') {
-      this.$div.css({
+      $div.css({
         'border': borderStyle
       });
     } else if (opts.brushDirection === 'x') {
-      this.$div.css({
+      $div.css({
         'border-left': borderStyle,
         'border-right': borderStyle
       });
     } else if (opts.brushDirection === 'y') {
-      this.$div.css({
+      $div.css({
         'border-top': borderStyle,
         'border-bottom': borderStyle
       });
     }
 
-    $el.append(this.$div);
-    this.$div.offset({x:0, y:0}).width(0).height(0).show();
-  };
+    $el.append($div);
+    $div.offset({x:0, y:0}).width(0).height(0).show();
+  }
 
   // Update the brush div to reflect the current brush bounds.
-  brush._updateDiv = function() {
+  function updateDiv() {
     // Need parent offset relative to page to calculate mouse offset
     // relative to page.
     var imgOffset = $el.offset();
-    var b = this.bounds;
-    this.$div.offset({
+    var b = state.bounds;
+    $div.offset({
         top: imgOffset.top + b.ymin,
         left: imgOffset.left + b.xmin
       })
       .width(b.xmax - b.xmin)
       .height(b.ymax - b.ymin)
       .show();
-  };
+  }
 
-  brush.startBrushing = function() {
-    this.brushing = true;
-    this._addDiv();
+  function down(offset) {
+    if (offset === undefined)
+      return state.down;
 
-    this._setBounds(mapper.findBox(this.down, this.down));
-    this._updateDiv();
-  };
+    state.down = offset;
+  }
 
-  brush.brushTo = function(offset) {
-    this._setBounds(mapper.findBox(this.down, offset));
-    this._updateDiv();
-  };
+  function up(offset) {
+    if (offset === undefined)
+      return state.up;
 
-  brush.stopBrushing = function() {
-    this.brushing = false;
+    state.up = offset;
+  }
+
+  function isBrushing() {
+    return state.brushing;
+  }
+
+  function startBrushing() {
+    state.brushing = true;
+    addDiv();
+
+    bounds(mapper.findBox(state.down, state.down));
+    updateDiv();
+  }
+
+  function brushTo(offset) {
+    bounds(mapper.findBox(state.down, offset));
+    updateDiv();
+  }
+
+  function stopBrushing() {
+    state.brushing = false;
 
     // Save the final bounding box of the brush
-    this._setBounds(mapper.findBox(this.down, this.up));
-  };
+    bounds(mapper.findBox(state.down, state.up));
+  }
 
-  brush.startDragging = function() {
-    this.dragging = true;
-    this.dragStartBounds = $.extend({}, this.bounds);
-  };
+  function isDragging() {
+    return state.dragging;
+  }
 
-  brush.dragTo = function(offset) {
+  function startDragging() {
+    state.dragging = true;
+    state.dragStartBounds = $.extend({}, state.bounds);
+  }
+
+  function dragTo(offset) {
     // How far the brush was dragged
-    var dx = offset.x - this.down.x;
-    var dy = offset.y - this.down.y;
+    var dx = offset.x - state.down.x;
+    var dy = offset.y - state.down.y;
 
     // Calculate what new start/end positions would be, before clipping.
-    var start = this.dragStartBounds;
+    var start = state.dragStartBounds;
     var newBounds = {
       xmin: start.xmin + dx,
       xmax: start.xmax + dx,
@@ -848,13 +871,33 @@ imageutils.createBrush = function($el, opts, mapper) {
       };
     }
 
-    this._setBounds(newBounds);
-    this._updateDiv();
-  };
+    bounds(newBounds);
+    updateDiv();
+  }
 
-  brush.stopDragging = function() {
-    this.dragging = false;
-  };
+  function stopDragging() {
+    state.dragging = false;
+  }
 
-  return brush;
+  return {
+    reset: reset,
+
+    importOldBrush: importOldBrush,
+    isInsideBrush: isInsideBrush,
+
+    bounds: bounds,
+
+    down: down,
+    up: up,
+
+    isBrushing: isBrushing,
+    startBrushing: startBrushing,
+    brushTo: brushTo,
+    stopBrushing: stopBrushing,
+
+    isDragging: isDragging,
+    startDragging: startDragging,
+    dragTo: dragTo,
+    stopDragging: stopDragging
+  };
 };

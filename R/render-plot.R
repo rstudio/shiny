@@ -358,8 +358,8 @@ getGgplotCoordmap <- function(p) {
         list(
           left   = x_pos[i*2 - 1],
           right  = x_pos[i*2],
-          bottom = y_pos[j*2 - 1],
-          top    = y_pos[j*2]
+          bottom = y_pos[j*2],
+          top    = y_pos[j*2 - 1]
         )
       })
     })

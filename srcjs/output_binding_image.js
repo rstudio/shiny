@@ -185,6 +185,30 @@ imageutils.createCoordMapper = function($el, coordmap) {
     return newval;
   }
 
+  // Shift an array of values so that they are within a min and max.
+  // The vals will be shifted so that they maintain the same spacing
+  // internally. If the range in vals is larger than the range of
+  // min and max, the result might not make sense.
+  function shiftToRange(vals, min, max) {
+    if (!(vals instanceof Array))
+      vals = [vals];
+
+    var maxval = Math.max.apply(null, vals);
+    var minval = Math.min.apply(null, vals);
+    var shiftAmount = 0;
+    if (maxval > max) {
+      shiftAmount = max - maxval;
+    } else if (minval < min) {
+      shiftAmount = min - minval;
+    }
+
+    var newvals = [];
+    for (var i=0; i<vals.length; i++) {
+      newvals[i] = vals[i] + shiftAmount;
+    }
+    return newvals;
+  }
+
   // Transform offset coordinates to data space coordinates
   function scale(offset, clip) {
     // By default, clip to plotting region
@@ -282,6 +306,7 @@ imageutils.createCoordMapper = function($el, coordmap) {
   return {
     mouseOffset: mouseOffset,
     findBox: findBox,
+    shiftToRange: shiftToRange,
     scale: scale,
     getPlotBounds: getPlotBounds,
     isInPlottingRegion: isInPlottingRegion,
@@ -436,30 +461,6 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
 
   // Represents the state of the brush
   var brush = imageutils.createBrush($el, opts, mapper);
-
-  // Shift an array of values so that they are within a min and max.
-  // The vals will be shifted so that they maintain the same spacing
-  // internally. If the range in vals is larger than the range of
-  // min and max, the result might not make sense.
-  function shiftToRange(vals, min, max) {
-    if (!(vals instanceof Array))
-      vals = [vals];
-
-    var maxval = Math.max.apply(null, vals);
-    var minval = Math.min.apply(null, vals);
-    var shiftAmount = 0;
-    if (maxval > max) {
-      shiftAmount = max - maxval;
-    } else if (minval < min) {
-      shiftAmount = min - minval;
-    }
-
-    var newvals = [];
-    for (var i=0; i<vals.length; i++) {
-      newvals[i] = vals[i] + shiftAmount;
-    }
-    return newvals;
-  }
 
   // Set cursor to one of 3 styles. We need to set the cursor on the whole
   // el instead of the brush div, because the brush div has

@@ -828,8 +828,8 @@ imageutils.createBrush = function($el, opts, mapper) {
         top: imgOffset.top + b.ymin,
         left: imgOffset.left + b.xmin
       })
-      .width(b.xmax - b.xmin)
-      .height(b.ymax - b.ymin)
+      .outerWidth(b.xmax - b.xmin)
+      .outerHeight(b.ymax - b.ymin)
       .show();
   }
 

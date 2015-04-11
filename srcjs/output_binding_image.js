@@ -144,6 +144,19 @@ var imageutils = {};
 imageutils.createCoordMapper = function($el, coordmap) {
   var el = $el[0];
 
+  // If we didn't get a coordmap, create a dummy one where the domain and range
+  // are simply the pixel dimensions.
+  if (!coordmap) {
+    var bounds = {
+      top: 0,
+      left: 0,
+      right: el.clientWidth - 1,
+      bottom: el.clientHeight - 1
+    };
+
+    coordmap = [{ domain: bounds, range: bounds }];
+  }
+
   // Firefox doesn't have offsetX/Y, so we need to use an alternate
   // method of calculation for it. Even though other browsers do have
   // offsetX/Y, we need to calculate relative to $el, because sometimes the
@@ -210,21 +223,21 @@ imageutils.createCoordMapper = function($el, coordmap) {
   }
 
   // Transform offset coordinates to data space coordinates
-  function scale(offset, clip) {
+  function scale(offset, panel, clip) {
     // By default, clip to plotting region
     clip = clip || true;
 
-    if (!coordmap) return offset;
-
-    var d = coordmap.domain;
-    var r = coordmap.range;
+    var d = panel.domain;
+    var r = panel.range;
     var userX = _pxToData(offset.x, d.left, d.right, r.left, r.right, clip);
     var userY = _pxToData(offset.y, d.bottom, d.top, r.bottom, r.top, clip);
 
-    if (coordmap.log.x)
-      userX = Math.pow(coordmap.log.x, userX);
-    if (coordmap.log.y)
-      userY = Math.pow(coordmap.log.x, userY);
+    if (panel.log) {
+      if (panel.log.x)
+        userX = Math.pow(panel.log.x, userX);
+      if (panel.log.y)
+        userY = Math.pow(panel.log.x, userY);
+    }
 
     return {
       x: userX,
@@ -232,38 +245,40 @@ imageutils.createCoordMapper = function($el, coordmap) {
     };
   }
 
-  // Get the pixel bounds of the coordmap; if there's no coordmap, return
-  // the bounds of the image.
-  function getPlotBounds() {
-    if (coordmap) {
-      return coordmap.range;
-    } else {
-      return {
-        top: 0,
-        left: 0,
-        right: el.clientWidth - 1,
-        bottom: el.clientHeight - 1
-      };
-    }
-  }
-
-  // Is an offset in the plotting region? If supplied, `expand` tells us to
-  // expand the region by that many pixels in all directions.
-  function isInPlottingRegion(offset, expand) {
+  // Given an offset, return an object representing which panel it's in.
+  function getPanel(offset, expand) {
     expand = expand || 0;
-    var bounds = getPlotBounds();
-    return offset.x < bounds.right + expand &&
-           offset.x > bounds.left - expand &&
-           offset.y < bounds.bottom + expand &&
-           offset.y > bounds.top - expand;
+    var bounds;
+    for (var i=0; i<coordmap.length; i++) {
+      bounds = coordmap[i].range;
+      if (offset.x <= bounds.right + expand &&
+          offset.x >= bounds.left - expand &&
+          offset.y <= bounds.bottom + expand &&
+          offset.y >= bounds.top - expand) {
+
+        return coordmap[i];
+      }
+    }
+
+    return null;
   }
 
-  // Given an offset, clip it to the plotting region as specified by
+  // Is an offset in a panel? If supplied, `expand` tells us to expand the
+  // panels by that many pixels in all directions.
+  function isInPanel(offset, expand) {
+    expand = expand || 0;
+
+    // TODO: use expand
+    if (getPanel(offset))
+      return true;
+
+    return false;
+  }
+
+  // Given an offset, clip it to the nearest panel region as specified by
   // coordmap. If there is no coordmap, clip it to bounds of the DOM
   // element.
-  function clipToPlottingRegion(offset) {
-    var bounds = getPlotBounds();
-
+  function clipToBounds(offset, bounds) {
     var newOffset = {
       x: offset.x,
       y: offset.y
@@ -295,9 +310,20 @@ imageutils.createCoordMapper = function($el, coordmap) {
 
       var offset = mouseOffset(e);
       // Ignore events outside of plotting region
-      if (clip && !isInPlottingRegion(offset)) return;
+      if (clip && !isInPanel(offset)) return;
 
-      var coords = scale(offset);
+      var panel = getPanel(offset);
+      var coords = scale(offset, panel);
+
+      // Add the panel (facet) variables, if present
+      if (panel.vars) {
+        var v;
+        for (var i=0; i<panel.vars.length; i++) {
+          v = panel.vars[i];
+          coords[v.name] = v.value;
+        }
+      }
+
       coords[".nonce"] = Math.random();
       exports.onInputChange(inputId, coords);
     };
@@ -308,9 +334,9 @@ imageutils.createCoordMapper = function($el, coordmap) {
     findBox: findBox,
     shiftToRange: shiftToRange,
     scale: scale,
-    getPlotBounds: getPlotBounds,
-    isInPlottingRegion: isInPlottingRegion,
-    clipToPlottingRegion: clipToPlottingRegion,
+    getPanel: getPanel,
+    isInPanel: isInPanel,
+    clipToBounds: clipToBounds,
     mouseCoordinateSender: mouseCoordinateSender
   };
 };
@@ -484,8 +510,9 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
     }
 
     // Transform coordinates of brush to data space
-    var min = mapper.scale({ x: bounds.xmin, y: bounds.ymin }, opts.brushClip);
-    var max = mapper.scale({ x: bounds.xmax, y: bounds.ymax }, opts.brushClip);
+    var panel = mapper.getPanel({ x: bounds.xmin, y: bounds.ymin });
+    var min = mapper.scale({ x: bounds.xmin, y: bounds.ymin }, panel, opts.brushClip);
+    var max = mapper.scale({ x: bounds.xmax, y: bounds.ymax }, panel, opts.brushClip);
 
     // Because the x and y directions of the pixel space may differ from
     // the x and y directions of the data space, we need to recalculate
@@ -496,6 +523,15 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
       ymin: Math.min(min.y, max.y),
       ymax: Math.max(min.y, max.y)
     };
+
+    // Add the panel (facet) variables, if present
+    if (panel.vars) {
+      var v;
+      for (var i=0; i<panel.vars.length; i++) {
+        v = panel.vars[i];
+        coords[v.name] = v.value;
+      }
+    }
 
     // Send data to server
     exports.onInputChange(inputId, coords);
@@ -512,7 +548,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
     // This can happen when mousedown inside the graphic, then mouseup
     // outside, then mousedown inside. Just ignore the second
     // mousedown.
-    if (brush.brushing || brush.dragging) return;
+    if (brush.isBrushing() || brush.isDragging()) return;
 
     // Listen for left mouse button only
     if (e.which !== 1) return;
@@ -521,7 +557,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
 
     // Ignore mousedown events outside of plotting region, expanded by
     // a number of pixels specified in expandPixels.
-    if (opts.brushClip && !mapper.isInPlottingRegion(offset, expandPixels))
+    if (opts.brushClip && !mapper.isInPanel(offset, expandPixels))
       return;
 
     brush.up({ x: NaN, y: NaN });
@@ -538,7 +574,8 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
         .on('mouseup.image_brush', mouseupDragging);
 
     } else {
-      brush.startBrushing(mapper.clipToPlottingRegion(offset));
+      var panel = mapper.getPanel(offset);
+      brush.startBrushing(mapper.clipToBounds(offset, panel.range));
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
@@ -556,7 +593,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
       // Set the cursor depending on where it is
       if (brush.isInsideBrush(offset)) {
         setCursorStyle('grabbable');
-      } else if (mapper.isInPlottingRegion(offset, expandPixels)) {
+      } else if (mapper.isInPanel(offset, expandPixels)) {
         setCursorStyle('crosshair');
       } else {
         setCursorStyle(null);
@@ -666,6 +703,9 @@ imageutils.createBrush = function($el, opts, mapper) {
       ymax: NaN
     };
 
+    // Panel object that the brush is in
+    state.panel = null;
+
     // The bounds at the start of a drag
     state.dragStartBounds = {
       xmin: NaN,
@@ -704,21 +744,23 @@ imageutils.createBrush = function($el, opts, mapper) {
            offset.y <= bounds.ymax && offset.y >= bounds.ymin;
   }
 
-  // Sets the bounds of the brush, given a bounding box. This knows
-  // whether we're brushing in the x, y, or xy directions and sets
+  // Sets the bounds of the brush, given a box and optional panel. This
+  // will fit the box bounds into the panel, so we don't brush outside of it.
+  // This knows whether we're brushing in the x, y, or xy directions, and sets
   // bounds accordingly.
+  // If no box is passed in, return current bounds.
   function bounds(box) {
     if (box === undefined)
       return state.bounds;
 
-    var plotBounds = mapper.getPlotBounds();
-
     var min = { x: box.xmin, y: box.ymin };
     var max = { x: box.xmax, y: box.ymax };
 
+    var panelBounds = state.panel.range;
+
     if (opts.brushClip) {
-      min = mapper.clipToPlottingRegion(min);
-      max = mapper.clipToPlottingRegion(max);
+      min = mapper.clipToBounds(min, panelBounds);
+      max = mapper.clipToBounds(max, panelBounds);
     }
 
     if (opts.brushDirection === 'xy') {
@@ -726,12 +768,12 @@ imageutils.createBrush = function($el, opts, mapper) {
 
     } else if (opts.brushDirection === 'x') {
       // Extend top and bottom of plotting area
-      min.y = plotBounds.top;
-      max.y = plotBounds.bottom;
+      min.y = panelBounds.top;
+      max.y = panelBounds.bottom;
 
     } else if (opts.brushDirection === 'y') {
-      min.x = plotBounds.left;
-      max.x = plotBounds.right;
+      min.x = panelBounds.left;
+      max.x = panelBounds.right;
     }
 
     state.bounds = {
@@ -812,6 +854,7 @@ imageutils.createBrush = function($el, opts, mapper) {
   function startBrushing() {
     state.brushing = true;
     addDiv();
+    state.panel = mapper.getPanel(state.down);
 
     bounds(mapper.findBox(state.down, state.down));
     updateDiv();
@@ -854,14 +897,15 @@ imageutils.createBrush = function($el, opts, mapper) {
 
     // Clip to the plotting area
     if (opts.brushClip) {
-      var plotBounds = mapper.getPlotBounds();
+      // Get the panel that we started dragging in
+      var panelBounds = mapper.getPanel(state.down).range;
 
       // Convert to format for shiftToRange
       var xvals = [ newBounds.xmin, newBounds.xmax ];
       var yvals = [ newBounds.ymin, newBounds.ymax ];
 
-      xvals = mapper.shiftToRange(xvals, plotBounds.left, plotBounds.right);
-      yvals = mapper.shiftToRange(yvals, plotBounds.top, plotBounds.bottom);
+      xvals = mapper.shiftToRange(xvals, panelBounds.left, panelBounds.right);
+      yvals = mapper.shiftToRange(yvals, panelBounds.top,  panelBounds.bottom);
 
       // Convert back to bounds format
       newBounds = {

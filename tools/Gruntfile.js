@@ -14,7 +14,7 @@ module.exports = function(grunt) {
         },
         sourceMap: true
       },
-      dist: {
+      shiny: {
         src: [
           js_srcdir + '_start.js',
           js_srcdir + 'utils.js',
@@ -90,8 +90,8 @@ module.exports = function(grunt) {
 
     watch: {
       shiny: {
-        files: ['<%= uglify.shiny.src %>', '../DESCRIPTION'],
-        tasks: ['newer:jshint:shiny', 'newer:uglify:shiny']
+        files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
+        tasks: ['newer:concat', 'newer:uglify:shiny', 'newer:jshint:shiny']
       },
       datepicker: {
         files: '<%= uglify.datepicker.src %>',

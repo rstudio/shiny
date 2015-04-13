@@ -767,30 +767,46 @@ imageutils.createBrush = function($el, opts, coordmap) {
     if (oldDiv.length === 0)
       return;
 
-    var elOffset = $el.offset();
-    var divOffset = oldDiv.offset();
-    var min = {
-      x: divOffset.left - elOffset.left,
-      y: divOffset.top - elOffset.top
-    };
-    var max = {
-      x: divOffset.left - elOffset.left + oldDiv.width(),
-      y: divOffset.top - elOffset.top + oldDiv.height()
-    };
+    var oldBoundsData = oldDiv.data('bounds-data');
+    var oldPanel = oldDiv.data('panel');
 
-    // Check that the min and max are in the same panel. This is needed because
-    // then panel dimensions could change.
-    // minPanel mapper.getPanel(min);
-    // mapper
+    if (!oldBoundsData || !oldPanel)
+      return;
 
-    state.boundsPx = {
-      xmin: min.x,
-      xmax: max.x,
-      ymin: min.y,
-      ymax: max.y
-    };
+    // Find a panel that has matching vars; if none found, we can't restore.
+    var oldVars = asArray(oldPanel.vars).sort();
+    for (var i=0; i<coordmap.length; i++){
+      var vars = asArray(coordmap[i].vars).sort();
+
+      if (vars.length !== oldVars.length)
+        continue;
+
+      // If both old and new have no panel vars, that counts as a match.
+      if (vars.length === 0 && oldVars.length === 0) {
+        state.panel = coordmap[i];
+        break;
+      }
+
+      for (var j=0; j<vars.length; j++) {
+        // Check that name and value match
+        if (vars[j].name === oldVars[j].name && vars[j].value === oldVars[j].value) {
+
+          state.panel = coordmap[i];
+          break;
+        }
+      }
+    }
+
+    // If we didn't find a matching panel, remove the old div and return
+    if (state.panel === null) {
+      oldDiv.remove();
+      return;
+    }
 
     $div = oldDiv;
+
+    boundsData(oldBoundsData);
+    updateDiv();
   }
 
   // Return true if the offset is inside min/max coords
@@ -838,15 +854,42 @@ imageutils.createBrush = function($el, opts, coordmap) {
       ymin: min.y,
       ymax: max.y
     };
+
+    // Positions in data space
+    var minData = state.panel.scaleInv(min);
+    var maxData = state.panel.scaleInv(max);
+    state.boundsData = {
+      xmin: minData.x,
+      xmax: maxData.x,
+      ymin: minData.y,
+      ymax: maxData.y
+    };
+
+    // We also need to attach the data bounds and panel as data attributes, so
+    // that if the image is re-sent, we can grab the data bounds to create a new
+    // brush. This should be fast because it doesn't actually modify the DOM.
+    $div.data('bounds-data', state.boundsData);
+    $div.data('panel', state.panel);
   }
 
   // Get or set the bounds of the brush using coordinates in the data space.
-  function boundsScaled(box) {
+  function boundsData(box) {
     if (box === undefined) {
       coordmap.scaleInvBox(boundsPx());
     }
 
-    coordmap.scaleInvBox(boundsPx());
+    var min = { x: box.xmin, y: box.ymin };
+    var max = { x: box.xmax, y: box.ymax };
+
+    var minPx = state.panel.scale(min);
+    var maxPx = state.panel.scale(max);
+
+    boundsPx({
+      xmin: minPx.x,
+      xmax: maxPx.x,
+      ymin: minPx.y,
+      ymax: maxPx.y
+    });
   }
 
   // Add a new div representing the brush.

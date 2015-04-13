@@ -196,8 +196,9 @@ imageutils.initPanelScales = function(coordmap) {
     };
   }
 
-  // Create scale and inverse-scale functions that take objects like {x:1, y:3}.
-  function scaleFun(panel) {
+  // Modify panel, adding scale and inverse-scale functions that take objects
+  // like {x:1, y:3}, and also add clip function.
+  function addScaleFuns(panel) {
     var d = panel.domain;
     var r = panel.range;
     var xlog = (panel.log && panel.log.x) ? panel.log.x : null;
@@ -205,28 +206,43 @@ imageutils.initPanelScales = function(coordmap) {
     var xscaler = scaler1D(d.left, d.right, r.left, r.right, xlog);
     var yscaler = scaler1D(d.bottom, d.top, r.bottom, r.top, ylog);
 
-    return {
-      scale: function(val, clip) {
-        return {
-          x: xscaler.scale(val.x, clip),
-          y: yscaler.scale(val.y, clip)
-        };
-      },
-      scaleInv: function(val, clip) {
-        return {
-          x: xscaler.scaleInv(val.x, clip),
-          y: yscaler.scaleInv(val.y, clip)
-        };
-      }
+    panel.scale = function(val, clip) {
+      return {
+        x: xscaler.scale(val.x, clip),
+        y: yscaler.scale(val.y, clip)
+      };
+    };
+
+    panel.scaleInv = function(val, clip) {
+      return {
+        x: xscaler.scaleInv(val.x, clip),
+        y: yscaler.scaleInv(val.y, clip)
+      };
+    };
+
+    // Given a scaled offset (in pixels), clip it to the nearest panel region.
+    panel.clip = function(offset) {
+      var newOffset = {
+        x: offset.x,
+        y: offset.y
+      };
+
+      var bounds = panel.range;
+
+      if      (offset.x > bounds.right)  newOffset.x = bounds.right;
+      else if (offset.x < bounds.left)   newOffset.x = bounds.left;
+
+      if      (offset.y > bounds.bottom) newOffset.y = bounds.bottom;
+      else if (offset.y < bounds.top)    newOffset.y = bounds.top;
+
+      return newOffset;
     };
   }
 
-  // Add the .scale and .scaleInv functions to each panel object.
+  // Add the functions to each panel object.
   for (var i=0; i<coordmap.length; i++) {
     var panel = coordmap[i];
-    var funs = scaleFun(panel);
-    panel.scale = funs.scale;
-    panel.scaleInv = funs.scaleInv;
+    addScaleFuns(panel);
   }
 };
 
@@ -317,28 +333,6 @@ imageutils.initCoordmap = function($el, coordmap) {
       return true;
 
     return false;
-  };
-
-  // Given an offset, clip it to the nearest panel region as specified by
-  // coordmap. If there is no coordmap, clip it to bounds of the DOM
-  // element.
-  coordmap.clipToBounds = function(offset, bounds) {
-    var newOffset = {
-      x: offset.x,
-      y: offset.y
-    };
-
-    if (offset.x > bounds.right)
-      newOffset.x = bounds.right;
-    else if (offset.x < bounds.left)
-      newOffset.x = bounds.left;
-
-    if (offset.y > bounds.bottom)
-      newOffset.y = bounds.bottom;
-    else if (offset.y < bounds.top)
-      newOffset.y = bounds.top;
-
-    return newOffset;
   };
 
   // Returns a function that sends mouse coordinates, scaled to data space.
@@ -609,7 +603,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
 
     } else {
       var panel = coordmap.getPanel(offset);
-      brush.startBrushing(coordmap.clipToBounds(offset, panel.range));
+      brush.startBrushing(panel.clip(offset));
 
       // Attach the move and up handlers to the window so that they respond
       // even when the mouse is moved outside of the image.
@@ -828,11 +822,12 @@ imageutils.createBrush = function($el, opts, coordmap) {
     var min = { x: box.xmin, y: box.ymin };
     var max = { x: box.xmax, y: box.ymax };
 
-    var panelBounds = state.panel.range;
+    var panel = state.panel;
+    var panelBounds = panel.range;
 
     if (opts.brushClip) {
-      min = coordmap.clipToBounds(min, panelBounds);
-      max = coordmap.clipToBounds(max, panelBounds);
+      min = panel.clip(min);
+      max = panel.clip(max);
     }
 
     if (opts.brushDirection === 'xy') {

@@ -182,14 +182,17 @@ imageutils.createCoordMapper = function($el, coordmap) {
     };
   }
 
-  function _pxToData(px, domainMin, domainMax, rangeMin, rangeMax, clip) {
-    var val = px - rangeMin;
-    var factor = (domainMax - domainMin) / (rangeMax - rangeMin);
-    var newval = (val * factor) + domainMin;
+  // Map a value x from a domain to a range. If the domain is in data space and
+  // range is in px, this is scaling. If the reverse, then this is inverse
+  // scaling.
+  function _map(x, domainMin, domainMax, rangeMin, rangeMax, clip) {
+    var factor = (rangeMax - rangeMin) / (domainMax - domainMin);
+    var val = x - domainMin;
+    var newval = (val * factor) + rangeMin;
 
     if (clip) {
-      var max = Math.max(domainMax, domainMin);
-      var min = Math.min(domainMax, domainMin);
+      var max = Math.max(rangeMax, rangeMin);
+      var min = Math.min(rangeMax, rangeMin);
       if (newval > max)
         newval = max;
       else if (newval < min)
@@ -223,14 +226,14 @@ imageutils.createCoordMapper = function($el, coordmap) {
   }
 
   // Transform offset coordinates to data space coordinates
-  function scale(offset, panel, clip) {
+  function scaleInv(offset, panel, clip) {
     // By default, clip to plotting region
     clip = clip || true;
 
     var d = panel.domain;
     var r = panel.range;
-    var userX = _pxToData(offset.x, d.left, d.right, r.left, r.right, clip);
-    var userY = _pxToData(offset.y, d.bottom, d.top, r.bottom, r.top, clip);
+    var userX = _map(offset.x, r.left, r.right, d.left, d.right, clip);
+    var userY = _map(offset.y, r.bottom, r.top, d.bottom, d.top, clip);
 
     if (panel.log) {
       if (panel.log.x)
@@ -243,6 +246,27 @@ imageutils.createCoordMapper = function($el, coordmap) {
       x: userX,
       y: userY
     };
+  }
+
+  // Transform offset coordinates to data space coordinates, for a box
+  function scaleInvBox(box, panel, clip) {
+    var min = scaleInv({ x: box.xmin, y: box.ymin }, panel, clip);
+    var max = scaleInv({ x: box.xmax, y: box.ymax }, panel, clip);
+    return {
+      xmin: min.x,
+      xmax: max.x,
+      ymin: min.y,
+      ymax: max.y
+    };
+  }
+
+  // Transform data space coordinates to offset coordinates
+  function scale(offset, panel, clip) {
+    // By default, clip to plotting region
+    clip = clip || true;
+
+
+
   }
 
   // Given an offset, return an object representing which panel it's in.
@@ -313,7 +337,7 @@ imageutils.createCoordMapper = function($el, coordmap) {
       if (clip && !isInPanel(offset)) return;
 
       var panel = getPanel(offset);
-      var coords = scale(offset, panel);
+      var coords = scaleInv(offset, panel);
 
       // Add the panel (facet) variables, if present
       if (panel.vars) {
@@ -333,7 +357,8 @@ imageutils.createCoordMapper = function($el, coordmap) {
     mouseOffset: mouseOffset,
     findBox: findBox,
     shiftToRange: shiftToRange,
-    scale: scale,
+    scaleInv: scaleInv,
+    scaleInvBox: scaleInvBox,
     getPanel: getPanel,
     isInPanel: isInPanel,
     clipToBounds: clipToBounds,
@@ -501,7 +526,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
   }
 
   function sendBrushInfo() {
-    var bounds = brush.bounds();
+    var bounds = brush.boundsPx();
 
     // We're in a new or reset state
     if (isNaN(bounds.xmin)) {
@@ -510,9 +535,10 @@ imageutils.createBrushHandler = function(inputId, $el, opts, mapper) {
     }
 
     // Transform coordinates of brush to data space
+    // TODO: remove this - use brush API
     var panel = mapper.getPanel({ x: bounds.xmin, y: bounds.ymin });
-    var min = mapper.scale({ x: bounds.xmin, y: bounds.ymin }, panel, opts.brushClip);
-    var max = mapper.scale({ x: bounds.xmax, y: bounds.ymax }, panel, opts.brushClip);
+    var min = mapper.scaleInv({ x: bounds.xmin, y: bounds.ymin }, panel, opts.brushClip);
+    var max = mapper.scaleInv({ x: bounds.xmax, y: bounds.ymax }, panel, opts.brushClip);
 
     // Because the x and y directions of the pixel space may differ from
     // the x and y directions of the data space, we need to recalculate
@@ -695,8 +721,16 @@ imageutils.createBrush = function($el, opts, mapper) {
     state.down = { x: NaN, y: NaN };
     state.up   = { x: NaN, y: NaN };
 
-    // Bounding rectangle of the brush
-    state.bounds = {
+    // Bounding rectangle of the brush, in pixel and data dimensions. We need to
+    // record data dimensions along with pixel dimensions so that when a new
+    // plot is sent, we can re-draw the brush div with the appropriate coords.
+    state.boundsPx = {
+      xmin: NaN,
+      xmax: NaN,
+      ymin: NaN,
+      ymax: NaN
+    };
+    state.boundsData = {
       xmin: NaN,
       xmax: NaN,
       ymin: NaN,
@@ -727,11 +761,25 @@ imageutils.createBrush = function($el, opts, mapper) {
 
     var elOffset = $el.offset();
     var divOffset = oldDiv.offset();
-    state.bounds = {
-      xmin: divOffset.left - elOffset.left,
-      xmax: divOffset.left - elOffset.left + oldDiv.width(),
-      ymin: divOffset.top - elOffset.top,
-      ymax: divOffset.top - elOffset.top + oldDiv.height()
+    var min = {
+      x: divOffset.left - elOffset.left,
+      y: divOffset.top - elOffset.top
+    };
+    var max = {
+      x: divOffset.left - elOffset.left + oldDiv.width(),
+      y: divOffset.top - elOffset.top + oldDiv.height()
+    };
+
+    // Check that the min and max are in the same panel. This is needed because
+    // then panel dimensions could change.
+    // minPanel mapper.getPanel(min);
+    // mapper
+
+    state.boundsPx = {
+      xmin: min.x,
+      xmax: max.x,
+      ymin: min.y,
+      ymax: max.y
     };
 
     $div = oldDiv;
@@ -739,7 +787,7 @@ imageutils.createBrush = function($el, opts, mapper) {
 
   // Return true if the offset is inside min/max coords
   function isInsideBrush(offset) {
-    var bounds = state.bounds;
+    var bounds = state.boundsPx;
     return offset.x <= bounds.xmax && offset.x >= bounds.xmin &&
            offset.y <= bounds.ymax && offset.y >= bounds.ymin;
   }
@@ -749,9 +797,9 @@ imageutils.createBrush = function($el, opts, mapper) {
   // This knows whether we're brushing in the x, y, or xy directions, and sets
   // bounds accordingly.
   // If no box is passed in, return current bounds.
-  function bounds(box) {
+  function boundsPx(box) {
     if (box === undefined)
-      return state.bounds;
+      return state.boundsPx;
 
     var min = { x: box.xmin, y: box.ymin };
     var max = { x: box.xmax, y: box.ymax };
@@ -776,12 +824,21 @@ imageutils.createBrush = function($el, opts, mapper) {
       max.x = panelBounds.right;
     }
 
-    state.bounds = {
+    state.boundsPx = {
       xmin: min.x,
       xmax: max.x,
       ymin: min.y,
       ymax: max.y
     };
+  }
+
+  // Get or set the bounds of the brush using coordinates in the data space.
+  function boundsScaled(box) {
+    if (box === undefined) {
+      mapper.scaleInvBox(boundsPx());
+    }
+
+    mapper.scaleInvBox(boundsPx());
   }
 
   // Add a new div representing the brush.
@@ -815,7 +872,7 @@ imageutils.createBrush = function($el, opts, mapper) {
     }
 
     $el.append($div);
-    $div.offset({x:0, y:0}).width(0).height(0).show();
+    $div.offset({x:0, y:0}).width(0).outerHeight(0).show();
   }
 
   // Update the brush div to reflect the current brush bounds.
@@ -823,7 +880,7 @@ imageutils.createBrush = function($el, opts, mapper) {
     // Need parent offset relative to page to calculate mouse offset
     // relative to page.
     var imgOffset = $el.offset();
-    var b = state.bounds;
+    var b = state.boundsPx;
     $div.offset({
         top: imgOffset.top + b.ymin,
         left: imgOffset.left + b.xmin
@@ -856,12 +913,12 @@ imageutils.createBrush = function($el, opts, mapper) {
     addDiv();
     state.panel = mapper.getPanel(state.down);
 
-    bounds(mapper.findBox(state.down, state.down));
+    boundsPx(mapper.findBox(state.down, state.down));
     updateDiv();
   }
 
   function brushTo(offset) {
-    bounds(mapper.findBox(state.down, offset));
+    boundsPx(mapper.findBox(state.down, offset));
     updateDiv();
   }
 
@@ -869,7 +926,7 @@ imageutils.createBrush = function($el, opts, mapper) {
     state.brushing = false;
 
     // Save the final bounding box of the brush
-    bounds(mapper.findBox(state.down, state.up));
+    boundsPx(mapper.findBox(state.down, state.up));
   }
 
   function isDragging() {
@@ -878,7 +935,7 @@ imageutils.createBrush = function($el, opts, mapper) {
 
   function startDragging() {
     state.dragging = true;
-    state.dragStartBounds = $.extend({}, state.bounds);
+    state.dragStartBounds = $.extend({}, state.boundsPx);
   }
 
   function dragTo(offset) {
@@ -916,7 +973,7 @@ imageutils.createBrush = function($el, opts, mapper) {
       };
     }
 
-    bounds(newBounds);
+    boundsPx(newBounds);
     updateDiv();
   }
 
@@ -930,7 +987,7 @@ imageutils.createBrush = function($el, opts, mapper) {
     importOldBrush: importOldBrush,
     isInsideBrush: isInsideBrush,
 
-    bounds: bounds,
+    boundsPx: boundsPx,
 
     down: down,
     up: up,

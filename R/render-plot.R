@@ -298,20 +298,6 @@ getGgplotCoordmap <- function(p) {
       })
     }
 
-    # Given a vector of values (pixel sizes) and a logical vector indicating
-    # whether each value is a panel or not, collapse the value vector by
-    # summing each run of panels and non-panels.
-    collapse_to_panels <- function(values, panel_idx) {
-      n <- length(panel_idx)
-      y <- (panel_idx[-1] != panel_idx[-n])
-
-      # Indices where the value changes
-      run_lengths <- diff(c(0, which(y), n))
-      group_ids <- rep.int(seq_along(run_lengths), run_lengths)
-
-      unname(tapply(values, group_ids, sum))
-    }
-
     # Convert a unit (or vector of units) to a numeric vector of pixel sizes
     h_px <- function(x) as.numeric(grid::convertHeight(x, "native"))
     w_px <- function(x) as.numeric(grid::convertWidth(x, "native"))
@@ -331,8 +317,7 @@ getGgplotCoordmap <- function(p) {
     panel_height_prop <- as.numeric(g$heights[null_idx])
     panel_height_prop <- panel_height_prop / sum(panel_height_prop)
     abs_heights[null_idx] <- panel_height_total * panel_height_prop
-    # Collapse absolute heights
-    abs_heights <- abs(collapse_to_panels(abs_heights, null_idx))
+    abs_heights <- abs(abs_heights)
 
     # Same for widths
     null_idx <- is_null_unit(g$widths)
@@ -341,29 +326,31 @@ getGgplotCoordmap <- function(p) {
     panel_width_prop <- as.numeric(g$widths[null_idx])
     panel_width_prop <- panel_width_prop / sum(panel_width_prop)
     abs_widths[null_idx] <- panel_width_total * panel_width_prop
-    abs_widths <- abs(collapse_to_panels(abs_widths, null_idx))
+    abs_widths <- abs(abs_widths)
 
     # Convert to absolute pixel positions
     x_pos <- cumsum(abs_widths)
     y_pos <- cumsum(abs_heights)
 
-    # Number of panels in each direction
-    x_npanels <- (length(x_pos) - 1) / 2
-    y_npanels <- (length(y_pos) - 1) / 2
+    # Get panel names
+    layout <- g$layout
+    # If multiple panels, they'll be named "panel-1", "panel-2", etc. If just
+    # one, it'll be named "panel". Rename it to "panel-1" to keep things simple.
+    layout$name[layout$name == "panel"] <- "panel-1"
+    layout <- layout[grepl("^panel", layout$name), ]
+    layout$panel <- as.integer(sub("^panel", "", layout$name))
 
     # Return list of lists, where each inner list has left, right, top, bottom
     # values for a panel
-    res <- lapply(seq_len(x_npanels), function(i) {
-      lapply(seq_len(y_npanels), function(j) {
-        list(
-          left   = x_pos[i*2 - 1],
-          right  = x_pos[i*2],
-          bottom = y_pos[j*2],
-          top    = y_pos[j*2 - 1]
-        )
-      })
+    lapply(seq_len(nrow(layout)), function(i) {
+      p <- layout[i, , drop = FALSE]
+      list(
+        left   = x_pos[p$l - 1],
+        right  = x_pos[p$r],
+        bottom = y_pos[p$b],
+        top    = y_pos[p$t - 1]
+      )
     })
-    unlist(res, recursive = FALSE)
   }
 
 

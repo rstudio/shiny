@@ -182,10 +182,9 @@ imageutils.initPanelScales = function(coordmap) {
   function scaler1D(domainMin, domainMax, rangeMin, rangeMax, logbase) {
     return {
       scale: function(val, clip) {
-        var res = mapLinear(val, domainMin, domainMax, rangeMin, rangeMax, clip);
         if (logbase)
-          res = Math.log(res) / Math.log(logbase);
-        return res;
+          val = Math.log(val) / Math.log(logbase);
+        return mapLinear(val, domainMin, domainMax, rangeMin, rangeMax, clip);
       },
 
       scaleInv: function(val, clip) {
@@ -201,8 +200,10 @@ imageutils.initPanelScales = function(coordmap) {
   function scaleFun(panel) {
     var d = panel.domain;
     var r = panel.range;
-    var xscaler = scaler1D(d.left, d.right, r.left, r.right);
-    var yscaler = scaler1D(d.bottom, d.top, r.bottom, r.top);
+    var xlog = (panel.log && panel.log.x) ? panel.log.x : null;
+    var ylog = (panel.log && panel.log.y) ? panel.log.y : null;
+    var xscaler = scaler1D(d.left, d.right, r.left, r.right, xlog);
+    var yscaler = scaler1D(d.bottom, d.top, r.bottom, r.top, ylog);
 
     return {
       scale: function(val, clip) {

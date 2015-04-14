@@ -739,6 +739,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
 
   if (!opts.brushResetOnNew) {
     brush.importOldBrush();
+    brushInfoSender.immediateCall();
   }
 
   return {

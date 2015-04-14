@@ -16,8 +16,8 @@ arguments will become HTML attributes on the outermost tag.}
 \description{
 Lays out elements in a left-to-right, top-to-bottom arrangement. The elements
 on a given row will be top-aligned with each other. This layout will not work
-well with elements that have a percentage-based width (e.g. `plotOutput` at
-its default setting of `width = "100%"`).
+well with elements that have a percentage-based width (e.g.
+\code{\link{plotOutput}} at its default setting of \code{width = "100\%"}).
 }
 \examples{
 flowLayout(

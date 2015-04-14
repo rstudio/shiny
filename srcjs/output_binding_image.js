@@ -571,35 +571,21 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
   }
 
   function sendBrushInfo() {
-    var bounds = brush.boundsPx();
+    var coords = brush.boundsData();
 
     // We're in a new or reset state
-    if (isNaN(bounds.xmin)) {
+    if (isNaN(coords.xmin)) {
       exports.onInputChange(inputId, null);
       return;
     }
 
-    // Transform coordinates of brush to data space
-    // TODO: remove this - use brush API
-    var panel = coordmap.getPanel({ x: bounds.xmin, y: bounds.ymin }, expandPixels);
-    var min = panel.scaleInv({ x: bounds.xmin, y: bounds.ymin }, opts.brushClip);
-    var max = panel.scaleInv({ x: bounds.xmax, y: bounds.ymax }, opts.brushClip);
-
-    // Because the x and y directions of the pixel space may differ from
-    // the x and y directions of the data space, we need to recalculate
-    // the min and max.
-    var coords = {
-      xmin: Math.min(min.x, max.x),
-      xmax: Math.max(min.x, max.x),
-      ymin: Math.min(min.y, max.y),
-      ymax: Math.max(min.y, max.y)
-    };
+    var panel_vars = brush.getPanel().vars;
 
     // Add the panel (facet) variables, if present
-    if (panel.vars) {
+    if (panel_vars) {
       var v;
-      for (var i=0; i<panel.vars.length; i++) {
-        v = panel.vars[i];
+      for (var i=0; i<panel_vars.length; i++) {
+        v = panel_vars[i];
         coords[v.name] = v.value;
       }
     }
@@ -914,7 +900,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   // Get or set the bounds of the brush using coordinates in the data space.
   function boundsData(box) {
     if (box === undefined) {
-      coordmap.scaleInvBox(boundsPx());
+      return state.boundsData;
     }
 
     var min = { x: box.xmin, y: box.ymin };
@@ -931,6 +917,10 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
       ymin: Math.min(minPx.y, maxPx.y),
       ymax: Math.max(minPx.y, maxPx.y)
     });
+  }
+
+  function getPanel() {
+    return state.panel;
   }
 
   // Add a new div representing the brush.
@@ -1080,6 +1070,8 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     isInsideBrush: isInsideBrush,
 
     boundsPx: boundsPx,
+    boundsData: boundsData,
+    getPanel: getPanel,
 
     down: down,
     up: up,

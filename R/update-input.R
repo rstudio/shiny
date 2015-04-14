@@ -403,10 +403,10 @@ updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
 #' @export
 updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
                               selected = NULL) {
-  choices <- choicesWithNames(choices)
+  choices <- if (!is.null(choices)) choicesWithNames(choices)
   if (!is.null(selected))
     selected <- validateSelected(selected, choices, inputId)
-  options <- if (length(choices)) selectOptions(choices, selected)
+  options <- if (!is.null(choices)) selectOptions(choices, selected)
   message <- dropNulls(list(label = label, options = options, value = selected))
   session$sendInputMessage(inputId, message)
 }

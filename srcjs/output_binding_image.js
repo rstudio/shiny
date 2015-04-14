@@ -60,18 +60,8 @@ $.extend(imageOutputBinding, {
 
     var $img = $(img);
 
-    // If we didn't get a coordmap, create a dummy one where the domain and range
-    // are simply the pixel dimensions.
-    if (!opts.coordmap) {
-      var bounds = {
-        top: 0,
-        left: 0,
-        right: el.clientWidth - 1,
-        bottom: el.clientHeight - 1
-      };
-
-      opts.coordmap = [{ domain: bounds, range: bounds }];
-    }
+    if (!opts.coordmap)
+      opts.coordmap = [];
 
     imageutils.initCoordmap($el, opts.coordmap);
 
@@ -249,8 +239,25 @@ imageutils.initPanelScales = function(coordmap) {
 
 // This adds functions to the coordmap object to handles various
 // coordinate-mapping tasks, and sends information to the server.
+// The coordmap is an array of objects, each of which represents a panel.
+// coordmap must be an array, even if empty, so that it can be modified in
+// place; when empty, we add a dummy panel to the array.
 imageutils.initCoordmap = function($el, coordmap) {
   var el = $el[0];
+
+  // If we didn't get any panels, create a dummy one where the domain and range
+  // are simply the pixel dimensions.
+  // that we modify.
+  if (coordmap.length === 0) {
+    var bounds = {
+      top: 0,
+      left: 0,
+      right: el.clientWidth - 1,
+      bottom: el.clientHeight - 1
+    };
+
+    coordmap[0] = { domain: bounds, range: bounds };
+  }
 
   // Add scaling functions to each panel
   imageutils.initPanelScales(coordmap);

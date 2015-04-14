@@ -334,11 +334,16 @@ getGgplotCoordmap <- function(p) {
 
     # Get panel names
     layout <- g$layout
-    # If multiple panels, they'll be named "panel-1", "panel-2", etc. If just
-    # one, it'll be named "panel". Rename it to "panel-1" to keep things simple.
-    layout$name[layout$name == "panel"] <- "panel-1"
+    # For panels:
+    # * For facet_wrap, they'll be named "panel-1", "panel-2", etc.
+    # * For no facet or facet_grid, they'll just be named "panel". For
+    #   facet_grid, we need to re-order the layout table. Assume that panel
+    #   numbers go from left to right, then next row.
+    # Assign a number to each panel, corresponding to PANEl in the built ggplot
+    # object.
     layout <- layout[grepl("^panel", layout$name), ]
-    layout$panel <- as.integer(sub("^panel", "", layout$name))
+    layout <- layout[order(layout$t, layout$l), ]
+    layout$panel <- seq_len(nrow(layout))
 
     # Return list of lists, where each inner list has left, right, top, bottom
     # values for a panel

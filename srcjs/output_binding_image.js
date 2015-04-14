@@ -922,11 +922,13 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     var minPx = state.panel.scale(min);
     var maxPx = state.panel.scale(max);
 
+    // The scaling function can reverse the direction of the axes, so we need to
+    // find the min and max again.
     boundsPx({
-      xmin: minPx.x,
-      xmax: maxPx.x,
-      ymin: minPx.y,
-      ymax: maxPx.y
+      xmin: Math.min(minPx.x, maxPx.x),
+      xmax: Math.max(minPx.x, maxPx.x),
+      ymin: Math.min(minPx.y, maxPx.y),
+      ymax: Math.max(minPx.y, maxPx.y)
     });
   }
 

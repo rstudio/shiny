@@ -312,18 +312,55 @@ imageutils.initCoordmap = function($el, coordmap) {
     return newvals;
   };
 
-  // Given an offset, return an object representing which panel it's in.
+  // Given an offset, return an object representing which panel it's in. The
+  // `expand` argument tells it to expand the panel area by that many pixels.
+  // It's possible for an offset to be within more than one panel, because
+  // of the `expand` value. If that's the case, find the nearest panel.
   coordmap.getPanel = function(offset, expand) {
     expand = expand || 0;
-    var bounds;
-    for (var i=0; i<coordmap.length; i++) {
-      bounds = coordmap[i].range;
-      if (offset.x <= bounds.right + expand &&
-          offset.x >= bounds.left - expand &&
-          offset.y <= bounds.bottom + expand &&
-          offset.y >= bounds.top - expand) {
 
-        return coordmap[i];
+    var x = offset.x;
+    var y = offset.y;
+
+    var matches = []; // Panels that match
+    var dists = [];   // Distance of offset to each matching panel
+    var b;
+    for (var i=0; i<coordmap.length; i++) {
+      b = coordmap[i].range;
+
+      if (x <= b.right  + expand &&
+          x >= b.left   - expand &&
+          y <= b.bottom + expand &&
+          y >= b.top    - expand)
+      {
+        matches.push(coordmap[i]);
+
+        // Find distance from edges for x and y
+        var xdist = 0;
+        var ydist = 0;
+        if (x > b.right && x <= b.right + expand) {
+          xdist = x - b.right;
+        } else if (x < b.left && x >= b.left - expand) {
+          xdist = x - b.left;
+        }
+        if (y > b.bottom && y <= b.bottom + expand) {
+          ydist = y - b.bottom;
+        } else if (y < b.top && y >= b.top - expand) {
+          ydist = y - b.top;
+        }
+
+        // Cartesian distance
+        dists.push(Math.sqrt( Math.pow(xdist, 2) + Math.pow(ydist, 2) ));
+      }
+    }
+
+    if (matches.length) {
+      // Find shortest distance
+      var min_dist = Math.min.apply(null, dists);
+      for (i=0; i<matches.length; i++) {
+        if (dists[i] === min_dist) {
+          return matches[i];
+        }
       }
     }
 
@@ -335,8 +372,7 @@ imageutils.initCoordmap = function($el, coordmap) {
   coordmap.isInPanel = function(offset, expand) {
     expand = expand || 0;
 
-    // TODO: use expand
-    if (coordmap.getPanel(offset))
+    if (coordmap.getPanel(offset, expand))
       return true;
 
     return false;
@@ -516,11 +552,11 @@ imageutils.createHoverHandler = function(inputId, delay, delayType, clip, coordm
 // mousedown, mousemove, and onRemoveImg.
 imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
   // Parameter: expand the area in which a brush can be started, by this
-  // many pixels in all directions.
+  // many pixels in all directions. (This should probably be a brush option)
   var expandPixels = 20;
 
   // Represents the state of the brush
-  var brush = imageutils.createBrush($el, opts, coordmap);
+  var brush = imageutils.createBrush($el, opts, coordmap, expandPixels);
 
   // Set cursor to one of 3 styles. We need to set the cursor on the whole
   // el instead of the brush div, because the brush div has
@@ -545,7 +581,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
 
     // Transform coordinates of brush to data space
     // TODO: remove this - use brush API
-    var panel = coordmap.getPanel({ x: bounds.xmin, y: bounds.ymin });
+    var panel = coordmap.getPanel({ x: bounds.xmin, y: bounds.ymin }, expandPixels);
     var min = panel.scaleInv({ x: bounds.xmin, y: bounds.ymin }, opts.brushClip);
     var max = panel.scaleInv({ x: bounds.xmax, y: bounds.ymax }, opts.brushClip);
 
@@ -609,7 +645,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
         .on('mouseup.image_brush', mouseupDragging);
 
     } else {
-      var panel = coordmap.getPanel(offset);
+      var panel = coordmap.getPanel(offset, expandPixels);
       brush.startBrushing(panel.clip(offset));
 
       // Attach the move and up handlers to the window so that they respond
@@ -714,7 +750,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
 
 // Returns an object that represents the state of the brush. This gets wrapped
 // in a brushHandler, which provides various event listeners.
-imageutils.createBrush = function($el, opts, coordmap) {
+imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   var el = $el[0];
   var $div = null;  // The div representing the brush
 
@@ -964,7 +1000,7 @@ imageutils.createBrush = function($el, opts, coordmap) {
   function startBrushing() {
     state.brushing = true;
     addDiv();
-    state.panel = coordmap.getPanel(state.down);
+    state.panel = coordmap.getPanel(state.down, expandPixels);
 
     boundsPx(coordmap.findBox(state.down, state.down));
     updateDiv();
@@ -1008,7 +1044,7 @@ imageutils.createBrush = function($el, opts, coordmap) {
     // Clip to the plotting area
     if (opts.brushClip) {
       // Get the panel that we started dragging in
-      var panelBounds = coordmap.getPanel(state.down).range;
+      var panelBounds = coordmap.getPanel(state.down, expandPixels).range;
 
       // Convert to format for shiftToRange
       var xvals = [ newBounds.xmin, newBounds.xmax ];

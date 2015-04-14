@@ -93,7 +93,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
         # Special case for ggplot objects - need to capture coordmap
         if (inherits(result$value, "ggplot")) {
-          capture.output(coordmap <<- getGgplotCoordmap(result$value))
+          capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
         } else {
           capture.output(print(result$value))
         }
@@ -153,7 +153,7 @@ getPrevPlotCoordmap <- function(width, height) {
 }
 
 # Print a ggplot object and return a coordmap for it.
-getGgplotCoordmap <- function(p) {
+getGgplotCoordmap <- function(p, pixelratio) {
   if (!inherits(p, "ggplot"))
     return(NULL)
 
@@ -288,7 +288,7 @@ getGgplotCoordmap <- function(p) {
   }
 
   # Given a gtable object, return the x and y ranges (in pixel dimensions)
-  find_panel_ranges <- function(g) {
+  find_panel_ranges <- function(g, pixelratio) {
     # Given a vector of unit objects, return logical vector indicating which ones
     # are "null" units. These units use the remaining available width/height --
     # that is, the space not occupied by elements that have an absolute size.
@@ -345,15 +345,26 @@ getGgplotCoordmap <- function(p) {
     layout <- layout[order(layout$t, layout$l), ]
     layout$panel <- seq_len(nrow(layout))
 
+    # When using a Retina client on a Linux server, the pixel
+    # dimensions are doubled, so we have to divide the dimensions by
+    # `pixelratio`. When a Retina client is used on a Mac server (with
+    # the quartz device), the pixel dimensions _aren't_ doubled, even though
+    # the image has double size. In the latter case we don't have to scale the
+    # numbers down.
+    pix_ratio <- 1
+    if (!grepl("^quartz", names(dev.cur()))) {
+      pix_ratio <- pixelratio
+    }
+
     # Return list of lists, where each inner list has left, right, top, bottom
     # values for a panel
     lapply(seq_len(nrow(layout)), function(i) {
       p <- layout[i, , drop = FALSE]
       list(
-        left   = x_pos[p$l - 1],
-        right  = x_pos[p$r],
-        bottom = y_pos[p$b],
-        top    = y_pos[p$t - 1]
+        left   = x_pos[p$l - 1] / pix_ratio,
+        right  = x_pos[p$r] / pix_ratio,
+        bottom = y_pos[p$b] / pix_ratio,
+        top    = y_pos[p$t - 1] / pix_ratio
       )
     })
   }
@@ -367,7 +378,7 @@ getGgplotCoordmap <- function(p) {
   # Get ranges from gtable - it's possible for this to return more elements than
   # info, because it calculates positions even for panels that aren't present.
   # This can happen with facet_wrap.
-  ranges <- find_panel_ranges(res$gtable)
+  ranges <- find_panel_ranges(res$gtable, pixelratio)
 
   for (i in seq_along(info)) {
     info[[i]]$range <- ranges[[i]]

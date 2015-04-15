@@ -91,7 +91,7 @@ module.exports = function(grunt) {
     watch: {
       shiny: {
         files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
-        tasks: ['newer:concat', 'newer:uglify:shiny', 'newer:jshint:shiny']
+        tasks: ['newer:concat', 'newer:jshint:shiny', 'newer:uglify:shiny']
       },
       datepicker: {
         files: '<%= uglify.datepicker.src %>',
@@ -122,7 +122,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-newer');
 
 
-  grunt.registerTask('default', ['newer:concat', 'newer:uglify', 'newer:jshint']);
+  grunt.registerTask('default', ['newer:concat', 'newer:jshint', 'newer:uglify']);
 
 
   // ---------------------------------------------------------------------------

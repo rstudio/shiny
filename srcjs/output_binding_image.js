@@ -883,12 +883,9 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     // Positions in data space
     var minData = state.panel.scaleInv(min);
     var maxData = state.panel.scaleInv(max);
-    state.boundsData = {
-      xmin: minData.x,
-      xmax: maxData.x,
-      ymin: minData.y,
-      ymax: maxData.y
-    };
+    // For reversed scales, the min and max can be reversed, so use findBox
+    // to ensure correct order.
+    state.boundsData = coordmap.findBox(minData, maxData);
 
     // We also need to attach the data bounds and panel as data attributes, so
     // that if the image is re-sent, we can grab the data bounds to create a new

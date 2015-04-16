@@ -558,14 +558,12 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
   // Represents the state of the brush
   var brush = imageutils.createBrush($el, opts, coordmap, expandPixels);
 
-  // Set cursor to one of 3 styles. We need to set the cursor on the whole
+  // Set cursor to one of 7 styles. We need to set the cursor on the whole
   // el instead of the brush div, because the brush div has
   // 'pointer-events:none' so that it won't intercept pointer events.
   // If `style` is null, don't add a cursor style.
   function setCursorStyle(style) {
-    $el.removeClass('crosshair');
-    $el.removeClass('grabbable');
-    $el.removeClass('grabbing');
+    $el.removeClass('crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize');
 
     if (style) $el.addClass(style);
   }
@@ -605,7 +603,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
     // This can happen when mousedown inside the graphic, then mouseup
     // outside, then mousedown inside. Just ignore the second
     // mousedown.
-    if (brush.isBrushing() || brush.isDragging()) return;
+    if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) return;
 
     // Listen for left mouse button only
     if (e.which !== 1) return;
@@ -620,7 +618,17 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
     brush.up({ x: NaN, y: NaN });
     brush.down(offset);
 
-    if (brush.isInsideBrush(offset)) {
+
+    if (brush.isInResizeArea(offset)) {
+      brush.startResizing(offset);
+
+      // Attach the move and up handlers to the window so that they respond
+      // even when the mouse is moved outside of the image.
+      $(document)
+        .on('mousemove.image_brush', mousemoveResizing)
+        .on('mouseup.image_brush', mouseupResizing);
+
+    } else if (brush.isInsideBrush(offset)) {
       brush.startDragging(offset);
       setCursorStyle('grabbing');
 
@@ -646,9 +654,21 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
   function mousemove(e) {
     var offset = coordmap.mouseOffset(e);
 
-    if (!(brush.isBrushing() || brush.isDragging())) {
+    if (!(brush.isBrushing() || brush.isDragging() || brush.isResizing())) {
       // Set the cursor depending on where it is
-      if (brush.isInsideBrush(offset)) {
+      if (brush.isInResizeArea(offset)) {
+        var r = brush.whichResizeSides(offset);
+
+        if ((r.left && r.top) || (r.right && r.bottom)) {
+          setCursorStyle('nwse-resize');
+        } else if ((r.left && r.bottom) || (r.right && r.top)) {
+          setCursorStyle('nesw-resize');
+        } else if (r.left || r.right) {
+          setCursorStyle('ew-resize');
+        } else if (r.top || r.bottom) {
+          setCursorStyle('ns-resize');
+        }
+      } else if (brush.isInsideBrush(offset)) {
         setCursorStyle('grabbable');
       } else if (coordmap.isInPanel(offset, expandPixels)) {
         setCursorStyle('crosshair');
@@ -666,6 +686,11 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
 
   function mousemoveDragging(e) {
     brush.dragTo(coordmap.mouseOffset(e));
+    brushInfoSender.normalCall();
+  }
+
+  function mousemoveResizing(e) {
+    brush.resizeTo(coordmap.mouseOffset(e));
     brushInfoSender.normalCall();
   }
 
@@ -715,6 +740,22 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
       brushInfoSender.immediateCall();
   }
 
+  function mouseupResizing(e) {
+    // Listen for left mouse button only
+    if (e.which !== 1) return;
+
+    $(document)
+      .off('mousemove.image_brush')
+      .off('mouseup.image_brush');
+
+    brush.up(coordmap.mouseOffset(e));
+    brush.stopResizing();
+
+    if (brushInfoSender.isPending())
+      brushInfoSender.immediateCall();
+
+  }
+
   // This should be called when the img (not the el) is removed
   function onRemoveImg() {
     if (opts.brushResetOnNew) {
@@ -738,6 +779,9 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
 // Returns an object that represents the state of the brush. This gets wrapped
 // in a brushHandler, which provides various event listeners.
 imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
+  // Number of pixels outside of brush to allow start resizing
+  var resizeExpand = 10;
+
   var el = $el[0];
   var $div = null;  // The div representing the brush
 
@@ -745,13 +789,22 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   reset();
 
   function reset() {
-    // Current brushing and dragging state
+    // Current brushing/dragging/resizing state
     state.brushing = false;
     state.dragging = false;
+    state.resizing = false;
 
     // Offset of last mouse down and up events
     state.down = { x: NaN, y: NaN };
     state.up   = { x: NaN, y: NaN };
+
+    // Which side(s) we're currently resizing
+    state.resizeSides = {
+      left: false,
+      right: false,
+      top: false,
+      bottom: false
+    };
 
     // Bounding rectangle of the brush, in pixel and data dimensions. We need to
     // record data dimensions along with pixel dimensions so that when a new
@@ -772,8 +825,8 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     // Panel object that the brush is in
     state.panel = null;
 
-    // The bounds at the start of a drag
-    state.dragStartBounds = {
+    // The bounds at the start of a drag/resize
+    state.changeStartBounds = {
       xmin: NaN,
       xmax: NaN,
       ymin: NaN,
@@ -839,6 +892,51 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     return offset.x <= bounds.xmax && offset.x >= bounds.xmin &&
            offset.y <= bounds.ymax && offset.y >= bounds.ymin;
   }
+
+  // Return true if offset is inside a region to start a resize
+  function isInResizeArea(offset) {
+    var sides = whichResizeSides(offset);
+    return sides.left || sides.right || sides.top || sides.bottom;
+  }
+
+  // Return an object representing which resize region(s) the cursor is in.
+  function whichResizeSides(offset) {
+    var b = state.boundsPx;
+    // Bounds with expansion
+    var e = {
+      xmin: b.xmin - resizeExpand,
+      xmax: b.xmax + resizeExpand,
+      ymin: b.ymin - resizeExpand,
+      ymax: b.ymax + resizeExpand
+    };
+    var res = {
+      left: false,
+      right: false,
+      top: false,
+      bottom: false
+    };
+
+    if ((opts.brushDirection === 'xy' || opts.brushDirection === 'x') &&
+        (offset.y <= e.ymax && offset.y >= e.ymin))
+    {
+      if (offset.x < b.xmin && offset.x >= e.xmin)
+        res.left = true;
+      else if (offset.x > b.xmax && offset.x <= e.xmax)
+        res.right = true;
+    }
+
+    if ((opts.brushDirection === 'xy' || opts.brushDirection === 'y') &&
+        (offset.x <= e.xmax && offset.x >= e.xmin))
+    {
+      if (offset.y < b.ymin && offset.y >= e.ymin)
+        res.top = true;
+      else if (offset.y > b.ymax && offset.y <= e.ymax)
+        res.bottom = true;
+    }
+
+    return res;
+  }
+
 
   // Sets the bounds of the brush, given a box and optional panel. This
   // will fit the box bounds into the panel, so we don't brush outside of it.
@@ -1014,7 +1112,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
 
   function startDragging() {
     state.dragging = true;
-    state.dragStartBounds = $.extend({}, state.boundsPx);
+    state.changeStartBounds = $.extend({}, state.boundsPx);
   }
 
   function dragTo(offset) {
@@ -1022,8 +1120,8 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     var dx = offset.x - state.down.x;
     var dy = offset.y - state.down.y;
 
-    // Calculate what new start/end positions would be, before clipping.
-    var start = state.dragStartBounds;
+    // Calculate what new positions would be, before clipping.
+    var start = state.changeStartBounds;
     var newBounds = {
       xmin: start.xmin + dx,
       xmax: start.xmax + dx,
@@ -1033,8 +1131,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
 
     // Clip to the plotting area
     if (opts.brushClip) {
-      // Get the panel that we started dragging in
-      var panelBounds = coordmap.getPanel(state.down, expandPixels).range;
+      var panelBounds = state.panel.range;
 
       // Convert to format for shiftToRange
       var xvals = [ newBounds.xmin, newBounds.xmax ];
@@ -1060,11 +1157,52 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     state.dragging = false;
   }
 
+  function isResizing() {
+    return state.resizing;
+  }
+
+  function startResizing() {
+    state.resizing = true;
+    state.changeStartBounds = $.extend({}, state.boundsPx);
+    state.resizeSides = whichResizeSides(state.down);
+  }
+
+  function resizeTo(offset) {
+    // How far the brush was dragged
+    var dx = offset.x - state.down.x;
+    var dy = offset.y - state.down.y;
+
+    // Calculate what new positions would be, before clipping.
+    var b = $.extend({}, state.changeStartBounds);
+    var panelBounds = state.panel.range;
+
+    if (state.resizeSides.left) {
+      b.xmin = coordmap.shiftToRange([b.xmin + dx], panelBounds.left, b.xmax)[0];
+    } else if (state.resizeSides.right) {
+      b.xmax = coordmap.shiftToRange([b.xmax + dx], b.xmin, panelBounds.right)[0];
+    }
+
+    if (state.resizeSides.top) {
+      b.ymin = coordmap.shiftToRange([b.ymin + dy], panelBounds.top, b.ymax)[0];
+    } else if (state.resizeSides.bottom) {
+      b.ymax = coordmap.shiftToRange([b.ymax + dy], b.ymin, panelBounds.bottom)[0];
+    }
+
+    boundsPx(b);
+    updateDiv();
+  }
+
+  function stopResizing() {
+    state.resizing = false;
+  }
+
   return {
     reset: reset,
 
     importOldBrush: importOldBrush,
     isInsideBrush: isInsideBrush,
+    isInResizeArea: isInResizeArea,
+    whichResizeSides: whichResizeSides,
 
     boundsPx: boundsPx,
     boundsData: boundsData,
@@ -1081,6 +1219,11 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     isDragging: isDragging,
     startDragging: startDragging,
     dragTo: dragTo,
-    stopDragging: stopDragging
+    stopDragging: stopDragging,
+
+    isResizing: isResizing,
+    startResizing: startResizing,
+    resizeTo: resizeTo,
+    stopResizing: stopResizing
   };
 };

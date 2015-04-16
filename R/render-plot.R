@@ -302,37 +302,35 @@ getGgplotCoordmap <- function(p, pixelratio) {
     h_px <- function(x) as.numeric(grid::convertHeight(x, "native"))
     w_px <- function(x) as.numeric(grid::convertWidth(x, "native"))
 
-    # Pixel dimensions of image
-    img_height <- h_px(grid::unit(1, "npc"))
-    img_width  <- w_px(grid::unit(1, "npc"))
+    # Given a vector of relative sizes (in grid units), and a function for
+    # converting grid units to numeric pixels, return a numeric vector of
+    # pixel sizes.
+    find_px_sizes <- function(rel_sizes, unit_to_px) {
+      # Total pixels (in height or width)
+      total_px <- unit_to_px(grid::unit(1, "npc"))
+      # Calculate size of all panel(s) together. Panels (and only panels) have
+      # null size.
+      null_idx <- is_null_unit(rel_sizes)
+      # All the absolute heights. At this point, null heights are 0. We need to
+      # calculate them separately and add them in later.
+      px_sizes <- unit_to_px(rel_sizes)
+      # Total size for panels is image size minus absolute (non-panel) elements
+      panel_px_total <- total_px - sum(px_sizes)
+      # Divide up the total panel size up into the panels (scaled by size)
+      panel_sizes_rel <- as.numeric(rel_sizes[null_idx])
+      panel_sizes_rel <- panel_sizes_rel / sum(panel_sizes_rel)
+      px_sizes[null_idx] <- panel_px_total * panel_sizes_rel
+      abs(px_sizes)
+    }
 
-    # Calculate height of all panel(s) together. Panels (and only panels) have
-    # null height.
-    null_idx <- is_null_unit(g$heights)
-    # All the absolute heights. At this point, null heights are 0. We need to
-    # calculate them separately and add them in later.
-    abs_heights <- h_px(g$heights)
-    panel_height_total <- img_height - sum(abs_heights)
-    # Divide up the total panel height up into the panels (scaled by height)
-    panel_height_prop <- as.numeric(g$heights[null_idx])
-    panel_height_prop <- panel_height_prop / sum(panel_height_prop)
-    abs_heights[null_idx] <- panel_height_total * panel_height_prop
-    abs_heights <- abs(abs_heights)
-
-    # Same for widths
-    null_idx <- is_null_unit(g$widths)
-    abs_widths <- w_px(g$widths)
-    panel_width_total <- img_width - sum(abs_widths)
-    panel_width_prop <- as.numeric(g$widths[null_idx])
-    panel_width_prop <- panel_width_prop / sum(panel_width_prop)
-    abs_widths[null_idx] <- panel_width_total * panel_width_prop
-    abs_widths <- abs(abs_widths)
+    px_heights <- find_px_sizes(g$heights, h_px)
+    px_widths <- find_px_sizes(g$widths, w_px)
 
     # Convert to absolute pixel positions
-    x_pos <- cumsum(abs_widths)
-    y_pos <- cumsum(abs_heights)
+    x_pos <- cumsum(px_widths)
+    y_pos <- cumsum(px_heights)
 
-    # Get panel names
+    # Match up the pixel dimensions to panels
     layout <- g$layout
     # For panels:
     # * For facet_wrap, they'll be named "panel-1", "panel-2", etc.
@@ -345,9 +343,9 @@ getGgplotCoordmap <- function(p, pixelratio) {
     layout <- layout[order(layout$t, layout$l), ]
     layout$panel <- seq_len(nrow(layout))
 
-    # When using a Retina client on a Linux server, the pixel
+    # When using a HiDPI client on a Linux server, the pixel
     # dimensions are doubled, so we have to divide the dimensions by
-    # `pixelratio`. When a Retina client is used on a Mac server (with
+    # `pixelratio`. When a HiDPI client is used on a Mac server (with
     # the quartz device), the pixel dimensions _aren't_ doubled, even though
     # the image has double size. In the latter case we don't have to scale the
     # numbers down.

@@ -851,6 +851,8 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
       return;
 
     // Find a panel that has matching vars; if none found, we can't restore.
+    // vars and oldVars will be something like:
+    //   [ {name: "cyl", value: "4"}, {name: "am", value: "0"} ]
     var oldVars = asArray(oldPanel.vars).sort();
     for (var i=0; i<coordmap.length; i++){
       var vars = asArray(coordmap[i].vars).sort();
@@ -864,13 +866,19 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
         break;
       }
 
+      // Check the variables in this panel; start off assuming we have a match
+      // and mark it if we find a mismatch.
+      var allMatch = true;
       for (var j=0; j<vars.length; j++) {
-        // Check that name and value match
-        if (vars[j].name === oldVars[j].name && vars[j].value === oldVars[j].value) {
-
-          state.panel = coordmap[i];
+        if (vars[j].name !== oldVars[j].name || vars[j].value !== oldVars[j].value) {
+          allMatch = false;
           break;
         }
+      }
+
+      if (allMatch) {
+        state.panel = coordmap[i];
+        break;
       }
     }
 

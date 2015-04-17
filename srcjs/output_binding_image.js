@@ -25,28 +25,35 @@ $.extend(imageOutputBinding, {
       return;
     }
 
+    // If value is undefined, return alternate. Sort of like ||, except it won't
+    // return alternate for other falsy values (0, false, null).
+    function OR(value, alternate) {
+      if (value === undefined) return alternate;
+      return value;
+    }
+
     var opts = {
       clickId: $el.data('click-id'),
-      clickClip: strToBool($el.data('click-clip')) || true,
+      clickClip: OR(strToBool($el.data('click-clip')), true),
 
       dblclickId: $el.data('dblclick-id'),
-      dblclickClip: strToBool($el.data('dblclick-clip')) || true,
-      dblclickDelay: $el.data('dblclick-delay') || 400,
+      dblclickClip: OR(strToBool($el.data('dblclick-clip')), true),
+      dblclickDelay: OR($el.data('dblclick-delay'), 400),
 
       hoverId: $el.data('hover-id'),
-      hoverClip: $el.data('hover-clip') || true,
-      hoverDelayType: $el.data('hover-delay-type') || 'debounce',
-      hoverDelay: $el.data('hover-delay') || 300,
+      hoverClip: OR($el.data('hover-clip'), true),
+      hoverDelayType: OR($el.data('hover-delay-type'), 'debounce'),
+      hoverDelay: OR($el.data('hover-delay'), 300),
 
       brushId: $el.data('brush-id'),
-      brushClip: strToBool($el.data('brush-clip')) || true,
-      brushDelayType: $el.data('brush-delay-type') || 'debounce',
-      brushDelay: $el.data('brush-delay') || 300,
-      brushFill: $el.data('brush-fill') || '#666',
-      brushStroke: $el.data('brush-stroke') || '#000',
-      brushOpacity: $el.data('brush-opacity') || 0.3,
-      brushDirection: $el.data('brush-direction') || 'xy',
-      brushResetOnNew: strToBool($el.data('brush-reset-on-new')) || false,
+      brushClip: OR(strToBool($el.data('brush-clip')), true),
+      brushDelayType: OR($el.data('brush-delay-type'), 'debounce'),
+      brushDelay: OR($el.data('brush-delay'), 300),
+      brushFill: OR($el.data('brush-fill'), '#666'),
+      brushStroke: OR($el.data('brush-stroke'), '#000'),
+      brushOpacity: OR($el.data('brush-opacity'), 0.3),
+      brushDirection: OR($el.data('brush-direction'), 'xy'),
+      brushResetOnNew: OR(strToBool($el.data('brush-reset-on-new')), false),
 
       coordmap: data.coordmap
     };

@@ -857,12 +857,20 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     if (!oldBoundsData || !oldPanel)
       return;
 
+    // Function for comparing a panel var object - needed because Array.sort()
+    // for objects in IE<=9 is weird.
+    function compareVar(a, b) {
+      if (a.name < b.name) return -1;
+      if (a.name > b.name) return 1;
+      return 0;
+    }
+
     // Find a panel that has matching vars; if none found, we can't restore.
     // vars and oldVars will be something like:
     //   [ {name: "cyl", value: "4"}, {name: "am", value: "0"} ]
-    var oldVars = asArray(oldPanel.vars).sort();
+    var oldVars = asArray(oldPanel.vars).sort(compareVar);
     for (var i=0; i<coordmap.length; i++){
-      var vars = asArray(coordmap[i].vars).sort();
+      var vars = asArray(coordmap[i].vars).sort(compareVar);
 
       if (vars.length !== oldVars.length)
         continue;

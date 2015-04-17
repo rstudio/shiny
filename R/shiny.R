@@ -313,8 +313,8 @@ ShinySession <- R6Class(
     closed = logical(0),
     request = 'ANY',      # Websocket request object
     singletons = character(0),  # Tracks singleton HTML fragments sent to the page
-    user = character(0),
-    groups = character(0),
+    user = NULL,
+    groups = NULL,
 
     initialize = function(websocket) {
       private$websocket <- websocket

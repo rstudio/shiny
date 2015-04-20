@@ -11,5 +11,6 @@
 ^\.travis\.yml$
 ^staticdocs$
 ^tools$
+^srcjs$
 ^CONTRIBUTING.md$
 ^cran-comments.md$

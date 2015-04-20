@@ -109,8 +109,8 @@ hoverOpts <- function(id = NULL, delay = 300,
 #'   brush. Using \code{TRUE} is useful if you want to clear the brush whenever
 #'   the plot is updated.
 #' @export
-brushOpts <- function(id = NULL, fill = "#666", stroke = "#000",
-                      opacity = 0.3, delay = 300,
+brushOpts <- function(id = NULL, fill = "#9cf", stroke = "#036",
+                      opacity = 0.25, delay = 300,
                       delayType = c("debounce", "throttle"), clip = TRUE,
                       direction = c("xy", "x", "y"),
                       resetOnNew = FALSE) {

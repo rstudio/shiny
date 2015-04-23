@@ -173,8 +173,8 @@ getGgplotCoordmap <- function(p, pixelratio) {
     )
   }
 
-  # Given a built ggplot object and corresponding gtable, return x and y domains
-  # (data space coords) and ranges (pixel coords).
+  # Given a built ggplot object, return x and y domains (data space coords) for
+  # each panel.
   find_panel_info <- function(b) {
     layout <- b$panel$layout
     # Convert factor to numbers
@@ -197,6 +197,8 @@ getGgplotCoordmap <- function(p, pixelratio) {
       scale_x <- l$SCALE_X
       scale_y <- l$SCALE_Y
 
+      # For each of the faceting variables, get the value of that variable in
+      # the current panel.
       vars <- lapply(facet_vars, function(var) {
         list(name = var, value = l[[var]])
       })

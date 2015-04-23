@@ -151,8 +151,8 @@ outputBindings.register(imageOutputBinding, 'shiny.imageOutput');
 var imageutils = {};
 
 
-// Modifies the panel objects in a coordmap, adding scale_x, scale_y,
-// scaleinv_x, scaleinv_y functions to each one.
+// Modifies the panel objects in a coordmap, adding scale(), scaleInv(),
+// and clip() functions to each one.
 imageutils.initPanelScales = function(coordmap) {
   // Map a value x from a domain to a range. If clip is true, clip it to the
   // range.
@@ -244,11 +244,13 @@ imageutils.initPanelScales = function(coordmap) {
 };
 
 
-// This adds functions to the coordmap object to handles various
-// coordinate-mapping tasks, and sends information to the server.
-// The coordmap is an array of objects, each of which represents a panel.
+// This adds functions to the coordmap object to handle various
+// coordinate-mapping tasks, and send information to the server.
+// The input coordmap is an array of objects, each of which represents a panel.
 // coordmap must be an array, even if empty, so that it can be modified in
 // place; when empty, we add a dummy panel to the array.
+// It also calls initPanelScales, which modifies each panel object to have
+// scale, scaleInv, and clip functions.
 imageutils.initCoordmap = function($el, coordmap) {
   var el = $el[0];
 

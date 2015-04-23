@@ -186,7 +186,7 @@ getGgplotCoordmap <- function(p, pixelratio) {
     if (inherits(facet, "grid")) {
       facet_vars <- vapply(c(facet$cols, facet$rows), as.character, character(1))
     } else if (inherits(facet, "wrap")) {
-      facet_vars <- vapply(b$plot$facet$facets, as.character, character(1))
+      facet_vars <- vapply(facet$facets, as.character, character(1))
     }
 
     # Iterate over each row in the layout data frame

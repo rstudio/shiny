@@ -174,7 +174,7 @@ shinyApp(
       str(input$plot_brush)
     })
     output$plot_brushedpoints <- renderTable({
-      underBrush(input$plot_brush, data(), "speed", "dist")
+      selectBrush(input$plot_brush, data(), "speed", "dist")
     })
   }
 )

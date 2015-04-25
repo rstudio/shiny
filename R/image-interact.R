@@ -1,4 +1,4 @@
-#' Find points that are under a brush
+#' Find rows of data that are selected by a brush
 #'
 #' This function returns rows from a data frame which are under a brush used
 #' with \code{\link{plotOutput}}.
@@ -17,7 +17,7 @@
 #'
 #' @seealso \code{\link{plotOutput}} for example usage.
 #' @export
-underBrush <- function(brush, df, xvar, yvar) {
+selectBrush <- function(df, brush, xvar, yvar) {
   if (is.null(brush)) {
     return(df[0, , drop = FALSE])
   }

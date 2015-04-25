@@ -143,6 +143,9 @@ $.extend(imageOutputBinding, {
 
     if (img)
       $el.append(img);
+
+    if (data.error)
+      console.log('Error on server extracting coordmap: ' + data.error);
   }
 });
 outputBindings.register(imageOutputBinding, 'shiny.imageOutput');

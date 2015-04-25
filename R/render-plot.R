@@ -108,11 +108,19 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                                   height=height*pixelratio, res=res*pixelratio, args))
     on.exit(unlink(outfile))
 
-    # Return a list of attributes for the img
-    return(list(
+    # A list of attributes for the img
+    res <- list(
       src=shinysession$fileUrl(name, outfile, contentType='image/png'),
       width=width, height=height, coordmap=coordmap
-    ))
+    )
+
+    # Get error message if present (from attribute on the coordmap)
+    error <- attr(coordmap, "error", exact = TRUE)
+    if (!is.null(error)) {
+      res$error <- error
+    }
+
+    res
   }))
 }
 
@@ -372,17 +380,24 @@ getGgplotCoordmap <- function(p, pixelratio) {
 
   res <- print_ggplot(p)
 
-  # Get info from built ggplot object
-  info <- find_panel_info(res$build)
+  tryCatch({
+    # Get info from built ggplot object
+    info <- find_panel_info(res$build)
 
-  # Get ranges from gtable - it's possible for this to return more elements than
-  # info, because it calculates positions even for panels that aren't present.
-  # This can happen with facet_wrap.
-  ranges <- find_panel_ranges(res$gtable, pixelratio)
+    # Get ranges from gtable - it's possible for this to return more elements than
+    # info, because it calculates positions even for panels that aren't present.
+    # This can happen with facet_wrap.
+    ranges <- find_panel_ranges(res$gtable, pixelratio)
 
-  for (i in seq_along(info)) {
-    info[[i]]$range <- ranges[[i]]
-  }
+    for (i in seq_along(info)) {
+      info[[i]]$range <- ranges[[i]]
+    }
 
-  info
+    return(info)
+
+  }, error = function(e) {
+    # If there was an error extracting info from the ggplot object, just return
+    # a list with the error message.
+    return(structure(list(), error = e$message))
+  })
 }

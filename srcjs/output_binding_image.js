@@ -268,7 +268,11 @@ imageutils.initCoordmap = function($el, coordmap) {
       bottom: el.clientHeight - 1
     };
 
-    coordmap[0] = { domain: bounds, range: bounds };
+    coordmap[0] = {
+      domain: bounds,
+      range: bounds,
+      mapping: {}
+    };
   }
 
   // Add scaling functions to each panel
@@ -416,6 +420,9 @@ imageutils.initCoordmap = function($el, coordmap) {
           coords[v.name] = v.value;
         }
       }
+
+      // Add variable name mappings
+      coords.mapping = panel.mapping;
 
       coords[".nonce"] = Math.random();
       exports.onInputChange(inputId, coords);
@@ -589,16 +596,19 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
       return;
     }
 
-    var panel_vars = brush.getPanel().vars;
+    var panel = brush.getPanel();
 
     // Add the panel (facet) variables, if present
-    if (panel_vars) {
+    if (panel.vars) {
       var v;
-      for (var i=0; i<panel_vars.length; i++) {
-        v = panel_vars[i];
+      for (var i=0; i<panel.vars.length; i++) {
+        v = panel.vars[i];
         coords[v.name] = v.value;
       }
     }
+
+    // Add variable name mappings
+    coords.mapping = panel.mapping;
 
     // Send data to server
     exports.onInputChange(inputId, coords);

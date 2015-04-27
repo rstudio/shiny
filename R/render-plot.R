@@ -156,8 +156,12 @@ getPrevPlotCoordmap <- function(width, height) {
     log = list(
       x = if (par('xlog')) 10 else NULL,
       y = if (par('ylog')) 10 else NULL
-    ))
-  )
+    ),
+    # We can't extract the original variable names from a base graphic.
+    # `mapping` is an empty _named_ list, so that it is converted to an object
+    # (not an array) in JSON.
+    mapping = list(x = NULL)[0]
+  ))
 }
 
 # Print a ggplot object and return a coordmap for it.
@@ -219,7 +223,8 @@ getGgplotCoordmap <- function(p, pixelratio) {
         scale_x = scale_x,
         scale_y = scale_x,
         log     = check_log_scales(b, scale_x, scale_y),
-        domain  = find_panel_domain(b, l$PANEL, scale_x, scale_y)
+        domain  = find_panel_domain(b, l$PANEL, scale_x, scale_y),
+        mapping = find_mappings(b)
       )
     })
   }
@@ -295,6 +300,41 @@ getGgplotCoordmap <- function(p, pixelratio) {
       x = extract_log_base(x_names),
       y = extract_log_base(y_names)
     )
+  }
+
+  # Given a built ggplot object, return a named list of variables mapped to x
+  # and y. This function will be called for each panel, but in practice the
+  # result is always the same across panels, so we'll cache the result.
+  mappings_cache <- NULL
+  find_mappings <- function(b) {
+    if (!is.null(mappings_cache))
+      return(mappings_cache)
+
+    mappings <- lapply(b$plot$mapping, as.character)
+
+    # If x or y mapping is missing, look in each layer for mappings and return
+    # the first one.
+    missing_mappings <- setdiff(c("x", "y"), names(mappings))
+    if (length(missing_mappings) != 0) {
+      # Grab mappings for each layer
+      layer_mappings <- lapply(b$plot$layers, function(layer) {
+        lapply(layer$mapping, as.character)
+      })
+
+      # Get just the first x or y value in the combined list of plot and layer
+      # mappings.
+      mappings <- c(list(mappings), layer_mappings)
+      mappings <- Reduce(x = mappings, init = list(x = NULL, y = NULL),
+        function(init, m) {
+          if (is.null(init$x) && !is.null(m$x)) init$x <- m$x
+          if (is.null(init$y) && !is.null(m$y)) init$y <- m$y
+          init
+        }
+      )
+    }
+
+    mappings_cache <<- mappings
+    mappings
   }
 
   # Given a gtable object, return the x and y ranges (in pixel dimensions)

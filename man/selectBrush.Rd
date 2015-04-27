@@ -4,7 +4,8 @@
 \alias{selectBrush}
 \title{Find rows of data that are selected by a brush}
 \usage{
-selectBrush(df, brush, xvar, yvar)
+selectBrush(df, brush, xvar = NULL, yvar = NULL, panelvar1 = NULL,
+  panelvar2 = NULL)
 }
 \arguments{
 \item{df}{A data frame from which to select rows.}
@@ -12,16 +13,44 @@ selectBrush(df, brush, xvar, yvar)
 \item{brush}{The data from a brush, such as \code{input$plot_brush}.}
 
 \item{xvar}{A string with the name of the variable on the x axis. This must
-also be the name of a column in \code{df}.}
+also be the name of a column in \code{df}. If absent, then
+\code{selectBrush} will try to infer the variable from the brush (only
+works for ggplot2).}
 
 \item{yvar}{A string with the name of the variable on the y axis. This must
-  also be the name of a column in \code{df}.}
+also be the name of a column in \code{df}. If absent, then
+\code{selectBrush} will try to infer the variable from the brush (only
+works for ggplot2).}
+
+\item{panelvar1,panelvar2}{Each of these is a string with the name of a panel
+  variable. For example, if with ggplot2, you facet on a variable called
+  \code{cyl}, then you can use \code{"cyl"} here. However, specifying the
+  panel variable should not be necessary with ggplot2; Shiny should be able
+  to auto-detect the panel variable.}
 }
 \description{
 This function returns rows from a data frame which are under a brush used
 with \code{\link{plotOutput}}.
 }
 \details{
+The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2}
+arguments specify which columns in the data correspond to the x variable, y
+variable, and panel variables of the plot. For example, if your plot is
+\code{plot(x=cars$speed, y=cars$dist)}, and your brush is named
+\code{"cars_brush"}, then you would use \code{selectBrush(cars,
+input$cars_brush, "speed", "dist")}.
+
+For plots created with ggplot2, it should not be necessary to specify the
+column names; that information will already be contained in the brush,
+provided that variables are in the original data, and not computed. For
+example, with \code{ggplot(cars, aes(x=speed, y=dist)) + geom_point()}, you
+could use \code{selectBrush(cars, input$cars_brush)}. If, however, you use a
+computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) +
+geom_point()}, then it will not be able to automatically extract column names
+and filter on them. If you want to use this function to filter data, it is
+recommended that you not use computed columns; instead, modify the data
+first, and then make the plot with "raw" columns in the modified data.
+
 If a specified x or y column is a factor, then it will be coerced to an
 integer vector. If it is a character vector, then it will be coerced to a
 factor and then integer vector. This means that the brush will be considered

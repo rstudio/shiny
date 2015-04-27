@@ -209,22 +209,30 @@ getGgplotCoordmap <- function(p, pixelratio) {
       scale_x <- l$SCALE_X
       scale_y <- l$SCALE_Y
 
+      mapping <- find_plot_mappings(b)
+
       # For each of the faceting variables, get the value of that variable in
-      # the current panel.
-      vars <- lapply(facet_vars, function(var) {
-        list(name = var, value = l[[var]])
-      })
+      # the current panel. Default to empty _named_ list so that it's sent as a
+      # JSON object, not array.
+      panel_vars <- list(a = NULL)[0]
+      for (i in seq_along(facet_vars)) {
+        var_name <- facet_vars[[i]]
+        vname <- paste0("panelvar", i)
+
+        mapping[[vname]] <- var_name
+        panel_vars[[vname]] <- l[[var_name]]
+      }
 
       list(
         panel   = l$PANEL,
         row     = l$ROW,
         col     = l$COL,
-        vars    = vars,
+        panel_vars = panel_vars,
         scale_x = scale_x,
         scale_y = scale_x,
         log     = check_log_scales(b, scale_x, scale_y),
         domain  = find_panel_domain(b, l$PANEL, scale_x, scale_y),
-        mapping = find_mappings(b)
+        mapping = mapping
       )
     })
   }
@@ -306,11 +314,13 @@ getGgplotCoordmap <- function(p, pixelratio) {
   # and y. This function will be called for each panel, but in practice the
   # result is always the same across panels, so we'll cache the result.
   mappings_cache <- NULL
-  find_mappings <- function(b) {
+  find_plot_mappings <- function(b) {
     if (!is.null(mappings_cache))
       return(mappings_cache)
 
-    mappings <- lapply(b$plot$mapping, as.character)
+    # lapply'ing as.character results in unexpected behavior for expressions
+    # like `wt/2`. This works better.
+    mappings <- as.list(as.character(b$plot$mapping))
 
     # If x or y mapping is missing, look in each layer for mappings and return
     # the first one.

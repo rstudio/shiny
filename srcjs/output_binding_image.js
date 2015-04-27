@@ -413,13 +413,7 @@ imageutils.initCoordmap = function($el, coordmap) {
       var coords = panel.scaleInv(offset);
 
       // Add the panel (facet) variables, if present
-      if (panel.vars) {
-        var v;
-        for (var i=0; i<panel.vars.length; i++) {
-          v = panel.vars[i];
-          coords[v.name] = v.value;
-        }
-      }
+      $.extend(coords, panel.panel_vars);
 
       // Add variable name mappings
       coords.mapping = panel.mapping;
@@ -599,13 +593,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
     var panel = brush.getPanel();
 
     // Add the panel (facet) variables, if present
-    if (panel.vars) {
-      var v;
-      for (var i=0; i<panel.vars.length; i++) {
-        v = panel.vars[i];
-        coords[v.name] = v.value;
-      }
-    }
+    $.extend(coords, panel.panel_vars);
 
     // Add variable name mappings
     coords.mapping = panel.mapping;

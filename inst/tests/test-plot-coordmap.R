@@ -19,6 +19,7 @@ test_that("ggplot coordmap", {
   png(tmpfile)
   m <- getGgplotCoordmap(p, 1)
   dev.off()
+
   # Check mapping vars
   expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar"))
   # Check domain
@@ -33,15 +34,7 @@ test_that("ggplot coordmap", {
   png(tmpfile)
   m <- getGgplotCoordmap(p, 1)
   dev.off()
-  # Check mapping vars
-  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar"))
 
-
-  # Scatterplot where aes() is declared in plot and in geom
-  p <- ggplot(dat, aes(xvar, yvar)) + geom_point(aes(y=xvar))
-  png(tmpfile)
-  m <- getGgplotCoordmap(p, 1)
-  dev.off()
   # Check mapping vars
   expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar"))
 
@@ -51,6 +44,7 @@ test_that("ggplot coordmap", {
   png(tmpfile)
   m <- getGgplotCoordmap(p, 1)
   dev.off()
+
   # Check mapping vars - no value for y
   expect_equal(m[[1]]$mapping, list(x = "xvar", y = NULL))
 })
@@ -85,7 +79,7 @@ test_that("ggplot coordmap with facet_wrap", {
   expect_equal(m[[3]]$col, 1)
 
   # Check mapping vars
-  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar"))
+  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar", panelvar1 = "g"))
   expect_equal(m[[1]]$mapping, m[[2]]$mapping)
   expect_equal(m[[2]]$mapping, m[[3]]$mapping)
   # Check domain
@@ -98,9 +92,9 @@ test_that("ggplot coordmap with facet_wrap", {
 
   # Check panel vars
   factor_vals <- dat$g
-  expect_equal(m[[1]]$vars, list(list(name = "g", value = factor_vals[1])))
-  expect_equal(m[[2]]$vars, list(list(name = "g", value = factor_vals[2])))
-  expect_equal(m[[3]]$vars, list(list(name = "g", value = factor_vals[3])))
+  expect_equal(m[[1]]$panel_vars, list(panelvar1 = factor_vals[1]))
+  expect_equal(m[[2]]$panel_vars, list(panelvar1 = factor_vals[2]))
+  expect_equal(m[[3]]$panel_vars, list(panelvar1 = factor_vals[3]))
 })
 
 
@@ -134,7 +128,7 @@ test_that("ggplot coordmap with facet_grid", {
   expect_equal(m[[3]]$col, 3)
 
   # Check mapping vars
-  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar"))
+  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar", panelvar1 = "g"))
   expect_equal(m[[1]]$mapping, m[[2]]$mapping)
   expect_equal(m[[2]]$mapping, m[[3]]$mapping)
   # Check domain
@@ -147,9 +141,9 @@ test_that("ggplot coordmap with facet_grid", {
 
   # Check panel vars
   factor_vals <- dat$g
-  expect_equal(m[[1]]$vars, list(list(name = "g", value = factor_vals[1])))
-  expect_equal(m[[2]]$vars, list(list(name = "g", value = factor_vals[2])))
-  expect_equal(m[[3]]$vars, list(list(name = "g", value = factor_vals[3])))
+  expect_equal(m[[1]]$panel_vars, list(panelvar1 = factor_vals[1]))
+  expect_equal(m[[2]]$panel_vars, list(panelvar1 = factor_vals[2]))
+  expect_equal(m[[3]]$panel_vars, list(panelvar1 = factor_vals[3]))
 
 
   # facet_grid vertical
@@ -171,7 +165,7 @@ test_that("ggplot coordmap with facet_grid", {
   expect_equal(m[[3]]$col, 1)
 
   # Check mapping vars
-  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar"))
+  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar", panelvar1 = "g"))
   expect_equal(m[[1]]$mapping, m[[2]]$mapping)
   expect_equal(m[[2]]$mapping, m[[3]]$mapping)
   # Check domain
@@ -184,9 +178,9 @@ test_that("ggplot coordmap with facet_grid", {
 
   # Check panel vars
   factor_vals <- dat$g
-  expect_equal(m[[1]]$vars, list(list(name = "g", value = factor_vals[1])))
-  expect_equal(m[[2]]$vars, list(list(name = "g", value = factor_vals[2])))
-  expect_equal(m[[3]]$vars, list(list(name = "g", value = factor_vals[3])))
+  expect_equal(m[[1]]$panel_vars, list(panelvar1 = factor_vals[1]))
+  expect_equal(m[[2]]$panel_vars, list(panelvar1 = factor_vals[2]))
+  expect_equal(m[[3]]$panel_vars, list(panelvar1 = factor_vals[3]))
 })
 
 
@@ -222,7 +216,7 @@ test_that("ggplot coordmap with 2D facet_grid", {
   expect_equal(m[[4]]$col, 2)
 
   # Check mapping vars
-  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar"))
+  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar", panelvar1 = "h", panelvar2 = "g"))
   expect_equal(m[[1]]$mapping, m[[2]]$mapping)
   expect_equal(m[[2]]$mapping, m[[3]]$mapping)
   expect_equal(m[[4]]$mapping, m[[4]]$mapping)
@@ -236,32 +230,8 @@ test_that("ggplot coordmap with 2D facet_grid", {
   expect_equal(sortList(m[[3]]$domain), sortList(m[[4]]$domain))
 
   # Check panel vars
-  expect_equal(
-    m[[1]]$vars,
-    list(
-      list(name = "h", value = dat$h[1]),
-      list(name = "g", value = dat$g[1])
-    )
-  )
-  expect_equal(
-    m[[2]]$vars,
-    list(
-      list(name = "h", value = dat$h[2]),
-      list(name = "g", value = dat$g[1])
-    )
-  )
-  expect_equal(
-    m[[3]]$vars,
-    list(
-      list(name = "h", value = dat$h[1]),
-      list(name = "g", value = dat$g[2])
-    )
-  )
-  expect_equal(
-    m[[4]]$vars,
-    list(
-      list(name = "h", value = dat$h[2]),
-      list(name = "g", value = dat$g[2])
-    )
-  )
+  expect_equal(m[[1]]$panel_vars, list(panelvar1 = dat$h[1], panelvar2 = dat$g[1]))
+  expect_equal(m[[2]]$panel_vars, list(panelvar1 = dat$h[2], panelvar2 = dat$g[1]))
+  expect_equal(m[[3]]$panel_vars, list(panelvar1 = dat$h[1], panelvar2 = dat$g[2]))
+  expect_equal(m[[4]]$panel_vars, list(panelvar1 = dat$h[2], panelvar2 = dat$g[2]))
 })

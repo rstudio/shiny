@@ -10,6 +10,8 @@ nearPoints(df, coordinfo, xvar = NULL, yvar = NULL, panelvar1 = NULL,
 \arguments{
 \item{df}{A data frame from which to select rows.}
 
+\item{coordinfo}{The data from a mouse event, such as \code{input$plot_click}.}
+
 \item{xvar}{A string with the name of the variable on the x axis. This must
 also be the name of a column in \code{df}. If absent, then
 \code{selectBrush} will try to infer the variable from the brush (only

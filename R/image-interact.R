@@ -92,6 +92,7 @@ selectBrush <- function(df, brush, xvar = NULL, yvar = NULL,
 #' input$cars_brush, "speed", "dist")}.
 #'
 #' @inheritParams selectBrush
+#' @param coordinfo The data from a mouse event, such as \code{input$plot_click}.
 #' @param threshold A maxmimum distance to the click point; rows in the data
 #'   frame where the distance to the click is less than \code{threshold} will be
 #'   returned.

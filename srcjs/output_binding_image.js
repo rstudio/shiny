@@ -857,8 +857,9 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
       $div.remove();
   }
 
-  // If there's an existing brush div, use that div to set the new
-  // brush's settings.
+  // If there's an existing brush div, use that div to set the new brush's
+  // settings, provided that the x, y, and panel variables have the same names,
+  // and there's a panel with matching panel variable values.
   function importOldBrush() {
     var oldDiv = $el.find('#' + el.id + '_brush');
     if (oldDiv.length === 0)
@@ -870,41 +871,47 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     if (!oldBoundsData || !oldPanel)
       return;
 
-    // Function for comparing a panel var object - needed because Array.sort()
-    // for objects in IE<=9 is weird.
-    function compareVar(a, b) {
-      if (a.name < b.name) return -1;
-      if (a.name > b.name) return 1;
-      return 0;
+    // Compare two objects. This checks that objects a and b have the same est
+    // of keys, and that each key has the same value. This function isn't
+    // perfect, but it's good enough for comparing variable mappings, below.
+    function isEquivalent(a, b) {
+      if (a === undefined) {
+        if (b === undefined)
+          return true;
+        else
+          return false;
+      }
+      if (a === null) {
+        if (b === null)
+          return true;
+        else
+          return false;
+      }
+
+      var aProps = Object.getOwnPropertyNames(a);
+      var bProps = Object.getOwnPropertyNames(b);
+
+      if (aProps.length != bProps.length)
+        return false;
+
+      for (var i=0; i<aProps.length; i++) {
+        var propName = aProps[i];
+        if (a[propName] !== b[propName]) {
+          return false;
+        }
+      }
+      return true;
     }
 
     // Find a panel that has matching vars; if none found, we can't restore.
-    // vars and oldVars will be something like:
-    //   [ {name: "cyl", value: "4"}, {name: "am", value: "0"} ]
-    var oldVars = asArray(oldPanel.vars).sort(compareVar);
+    // The oldPanel and new panel must match on their mapping vars, and the
+    // values.
     for (var i=0; i<coordmap.length; i++){
-      var vars = asArray(coordmap[i].vars).sort(compareVar);
+      var curPanel = coordmap[i];
 
-      if (vars.length !== oldVars.length)
-        continue;
-
-      // If both old and new have no panel vars, that counts as a match.
-      if (vars.length === 0 && oldVars.length === 0) {
-        state.panel = coordmap[i];
-        break;
-      }
-
-      // Check the variables in this panel; start off assuming we have a match
-      // and mark it if we find a mismatch.
-      var allMatch = true;
-      for (var j=0; j<vars.length; j++) {
-        if (vars[j].name !== oldVars[j].name || vars[j].value !== oldVars[j].value) {
-          allMatch = false;
-          break;
-        }
-      }
-
-      if (allMatch) {
+      if (isEquivalent(oldPanel.mapping, curPanel.mapping) &&
+          isEquivalent(oldPanel.panel_vars, curPanel.panel_vars)) {
+        // We've found a matching panel
         state.panel = coordmap[i];
         break;
       }

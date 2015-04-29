@@ -7,14 +7,14 @@
 #' arguments specify which columns in the data correspond to the x variable, y
 #' variable, and panel variables of the plot. For example, if your plot is
 #' \code{plot(x=cars$speed, y=cars$dist)}, and your brush is named
-#' \code{"cars_brush"}, then you would use \code{selectBrush(cars,
+#' \code{"cars_brush"}, then you would use \code{brushedPoints(cars,
 #' input$cars_brush, "speed", "dist")}.
 #'
 #' For plots created with ggplot2, it should not be necessary to specify the
 #' column names; that information will already be contained in the brush,
 #' provided that variables are in the original data, and not computed. For
 #' example, with \code{ggplot(cars, aes(x=speed, y=dist)) + geom_point()}, you
-#' could use \code{selectBrush(cars, input$cars_brush)}. If, however, you use a
+#' could use \code{brushedPoints(cars, input$cars_brush)}. If, however, you use a
 #' computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) +
 #' geom_point()}, then it will not be able to automatically extract column names
 #' and filter on them. If you want to use this function to filter data, it is
@@ -28,13 +28,9 @@
 #'
 #' @param brush The data from a brush, such as \code{input$plot_brush}.
 #' @param df A data frame from which to select rows.
-#' @param xvar A string with the name of the variable on the x axis. This must
+#' @param xvar,yvar A string with the name of the variable on the x or y axis. This must
 #'   also be the name of a column in \code{df}. If absent, then
-#'   \code{selectBrush} will try to infer the variable from the brush (only
-#'   works for ggplot2).
-#' @param yvar A string with the name of the variable on the y axis. This must
-#'   also be the name of a column in \code{df}. If absent, then
-#'   \code{selectBrush} will try to infer the variable from the brush (only
+#'   this function will try to infer the variable from the brush (only
 #'   works for ggplot2).
 #' @param panelvar1,panelvar2 Each of these is a string with the name of a panel
 #'   variable. For example, if with ggplot2, you facet on a variable called
@@ -44,10 +40,14 @@
 #'
 #' @seealso \code{\link{plotOutput}} for example usage.
 #' @export
-selectBrush <- function(df, brush, xvar = NULL, yvar = NULL,
+brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
                         panelvar1 = NULL, panelvar2 = NULL) {
   if (is.null(brush)) {
     return(df[0, , drop = FALSE])
+  }
+
+  if (is.null(brush$xmin)) {
+    stop("brushedPoints requires a brush object with xmin, xmax, ymin, and ymax.")
   }
 
   # Try to extract vars from brush object
@@ -57,9 +57,9 @@ selectBrush <- function(df, brush, xvar = NULL, yvar = NULL,
   panelvar2 <- panelvar2 %OR% brush$mapping$panelvar2
 
   if (is.null(xvar))
-    stop("selectBrush: not able to automatically infer `xvar` from brush")
+    stop("brushedPoints: not able to automatically infer `xvar` from brush")
   if (is.null(yvar))
-    stop("selectBrush: not able to automatically infer `yvar` from brush")
+    stop("brushedPoints: not able to automatically infer `yvar` from brush")
 
   # Extract data values from the data frame
   x <- asNumber(df[[xvar]])
@@ -91,7 +91,7 @@ selectBrush <- function(df, brush, xvar = NULL, yvar = NULL,
 #' \code{"cars_click"}, then you would use \code{nearPoints(cars,
 #' input$cars_brush, "speed", "dist")}.
 #'
-#' @inheritParams selectBrush
+#' @inheritParams brushedPoints
 #' @param coordinfo The data from a mouse event, such as \code{input$plot_click}.
 #' @param threshold A maxmimum distance to the click point; rows in the data
 #'   frame where the distance to the click is less than \code{threshold} will be
@@ -121,6 +121,10 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
                        threshold = 5, maxrows = NULL, addDist = FALSE) {
   if (is.null(coordinfo)) {
     return(df[0, , drop = FALSE])
+  }
+
+  if (is.null(coordinfo$x)) {
+    stop("nearPoints requires a click/hover/double-click object with x and y values.")
   }
 
   # Try to extract vars from coordinfo object

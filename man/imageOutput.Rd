@@ -185,7 +185,7 @@ shinyApp(
       res
     })
     output$plot_brushedpoints <- renderTable({
-      res <- selectBrush(data(), input$plot_brush, "speed", "dist")
+      res <- brushedPoints(data(), input$plot_brush, "speed", "dist")
       if (nrow(res) == 0)
         return()
       res

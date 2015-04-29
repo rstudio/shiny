@@ -12,14 +12,14 @@ nearPoints(df, coordinfo, xvar = NULL, yvar = NULL, panelvar1 = NULL,
 
 \item{coordinfo}{The data from a mouse event, such as \code{input$plot_click}.}
 
-\item{xvar}{A string with the name of the variable on the x axis. This must
+\item{xvar}{A string with the name of the variable on the x or y axis. This must
 also be the name of a column in \code{df}. If absent, then
-\code{selectBrush} will try to infer the variable from the brush (only
+this function will try to infer the variable from the brush (only
 works for ggplot2).}
 
-\item{yvar}{A string with the name of the variable on the y axis. This must
+\item{yvar}{A string with the name of the variable on the x or y axis. This must
 also be the name of a column in \code{df}. If absent, then
-\code{selectBrush} will try to infer the variable from the brush (only
+this function will try to infer the variable from the brush (only
 works for ggplot2).}
 
 \item{panelvar1}{Each of these is a string with the name of a panel

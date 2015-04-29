@@ -51,57 +51,29 @@ selectBrush <- function(df, brush, xvar = NULL, yvar = NULL,
   }
 
   # Try to extract vars from brush object
-  if (is.null(xvar))      xvar      <- brush$mapping$x
-  if (is.null(yvar))      yvar      <- brush$mapping$y
-  if (is.null(panelvar1)) panelvar1 <- brush$mapping$panelvar1
-  if (is.null(panelvar2)) panelvar2 <- brush$mapping$panelvar2
+  xvar      <- xvar      %OR% brush$mapping$x
+  yvar      <- yvar      %OR% brush$mapping$y
+  panelvar1 <- panelvar1 %OR% brush$mapping$panelvar1
+  panelvar2 <- panelvar2 %OR% brush$mapping$panelvar2
 
   if (is.null(xvar))
-    stop("selectBrush: not able to automatically infer `xvar` from brush data.")
+    stop("selectBrush: not able to automatically infer `xvar` from brush")
   if (is.null(yvar))
-    stop("selectBrush: not able to automatically infer `yvar` from brush data.")
+    stop("selectBrush: not able to automatically infer `yvar` from brush")
 
   # Extract data values from the data frame
-  x <- df[[xvar]]
-  y <- df[[yvar]]
-
-  # Coerce characters and factors to integers, since the brush has numeric
-  # coordinates.
-  if (is.character(x)) x <- as.factor(x)
-  if (is.factor(x)) x <- as.integer(x)
-
-  if (is.character(y)) x <- as.factor(y)
-  if (is.factor(y)) x <- as.integer(y)
-
-  # Find which rows are matches for the panel vars (if present)
-  keep_rows <- rep.int(TRUE, nrow(df))
-  if (!is.null(panelvar1)) {
-    brush_value <- brush$panelvar1
-    col_vals <- df[[panelvar1]]
-
-    # brush_value is always a character; may need to coerce to number
-    if (is.numeric(col_vals))
-      brush_value <- as.numeric(brush_value)
-
-    keep_rows <- keep_rows & (brush_value == col_vals)
-  }
-
-  if (!is.null(panelvar2)) {
-    brush_value <- brush$panelvar2
-    col_vals <- df[[panelvar2]]
-
-    # brush_value is always a character; may need to coerce to number
-    if (is.numeric(col_vals))
-      brush_value <- as.numeric(brush_value)
-
-    keep_rows <- keep_rows & (brush_value == col_vals)
-  }
-
+  x <- asNumber(df[[xvar]])
+  y <- asNumber(df[[yvar]])
 
   # Filter out x and y values
-  keep_rows <- keep_rows &
-               x >= brush$xmin & x <= brush$xmax &
-               y >= brush$ymin & y <= brush$ymax
+  keep_rows <- (x >= brush$xmin & x <= brush$xmax &
+                y >= brush$ymin & y <= brush$ymax)
+
+  # Find which rows are matches for the panel vars (if present)
+  if (!is.null(panelvar1))
+    keep_rows <- keep_rows & panelMatch(brush$panelvar1, df[[panelvar1]])
+  if (!is.null(panelvar2))
+    keep_rows <- keep_rows & panelMatch(brush$panelvar2, df[[panelvar2]])
 
   df[keep_rows, , drop = FALSE]
 }
@@ -150,11 +122,20 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     return(df[0, , drop = FALSE])
   }
 
-  vars <- findCoordmapVars(coordinfo, xvar, yvar, panelvar1, panelvar2)
+  # Try to extract vars from coordinfo object
+  xvar      <- xvar      %OR% coordinfo$mapping$x
+  yvar      <- yvar      %OR% coordinfo$mapping$y
+  panelvar1 <- panelvar1 %OR% coordinfo$mapping$panelvar1
+  panelvar2 <- panelvar2 %OR% coordinfo$mapping$panelvar2
+
+  if (is.null(xvar))
+    stop("nearPoints: not able to automatically infer `xvar` from coordinfo")
+  if (is.null(yvar))
+    stop("nearPoints: not able to automatically infer `yvar` from coordinfo")
 
   # Extract data values from the data frame
-  x <- asNumber(df[[vars$xvar]])
-  y <- asNumber(df[[vars$yvar]])
+  x <- asNumber(df[[xvar]])
+  y <- asNumber(df[[yvar]])
 
   # Get the pixel coordinates of the point
   coordPx <- scaleCoords(coordinfo$x, coordinfo$y, coordinfo)
@@ -168,10 +149,10 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   keep_rows <- (dists <= threshold)
 
   # Find which rows are matches for the panel vars (if present)
-  if (!is.null(vars$panelvar1))
-    keep_rows <- keep_rows & panelMatch(coordinfo$panelvar1, df[[vars$panelvar1]])
-  if (!is.null(vars$panelvar2))
-    keep_rows <- keep_rows & panelMatch(coordinfo$panelvar2, df[[vars$panelvar2]])
+  if (!is.null(panelvar1))
+    keep_rows <- keep_rows & panelMatch(coordinfo$panelvar1, df[[panelvar1]])
+  if (!is.null(panelvar2))
+    keep_rows <- keep_rows & panelMatch(coordinfo$panelvar2, df[[panelvar2]])
 
   if (addDist)
     df$`_dist` <- dists
@@ -188,29 +169,6 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   }
 
   df
-}
-
-
-findCoordmapVars <- function(coordmap, xvar = NULL, yvar = NULL,
-                             panelvar1 = NULL, panelvar2 = NULL) {
-
-  # Try to extract vars from coordmap. object
-  if (is.null(xvar))      xvar      <- coordmap$mapping$x
-  if (is.null(yvar))      yvar      <- coordmap$mapping$y
-  if (is.null(panelvar1)) panelvar1 <- coordmap$mapping$panelvar1
-  if (is.null(panelvar2)) panelvar2 <- coordmap$mapping$panelvar2
-
-  if (is.null(xvar))
-    stop("findCoordmapVars: not able to automatically infer `xvar` from coordmap.")
-  if (is.null(yvar))
-    stop("findCoordmapVars: not able to automatically infer `yvar` from coordmap.")
-
-  list(
-    xvar = xvar,
-    yvar = yvar,
-    panelvar1 = panelvar1,
-    panelvar2 = panelvar2
-  )
 }
 
 # Coerce characters and factors to integers. Used because the mouse coords

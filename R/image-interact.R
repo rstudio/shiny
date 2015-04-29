@@ -184,7 +184,7 @@ asNumber <- function(x) {
 panelMatch <- function(search_value, x) {
   # search_value is always a character; may need to coerce to number to match
   # x, because the faceting var might be numeric.
-  if (is.numeric(x)) search_value <- as.numeric(match_value)
+  if (is.numeric(x)) search_value <- as.numeric(search_value)
 
   x == search_value
 }

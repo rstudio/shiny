@@ -1143,8 +1143,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
           'data-target-id'=inputId,
           'data-interval'=animate$interval,
           'data-loop'=animate$loop,
-          span(class = 'play', icon('play', lib = 'glyphicon')),
-          span(class = 'pause', icon('pause', lib = 'glyphicon'))
+          span(class = 'play', animate$playButton),
+          span(class = 'pause', animate$pauseButton)
         )
       )
     )

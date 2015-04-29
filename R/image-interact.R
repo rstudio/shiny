@@ -106,3 +106,200 @@ selectBrush <- function(df, brush, xvar = NULL, yvar = NULL,
   df[keep_rows, , drop = FALSE]
 }
 
+#' Find rows of data that are near a click/hover/double-click
+#'
+#' This function returns rows from a data frame which are near a click, hover,
+#' or double-click, when used with \code{\link{plotOutput}}. The rows will be
+#' sorted by their distance to the mouse event.
+#'
+#' The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2}
+#' arguments specify which columns in the data correspond to the x variable, y
+#' variable, and panel variables of the plot. For example, if your plot is
+#' \code{plot(x=cars$speed, y=cars$dist)}, and your click variable is named
+#' \code{"cars_click"}, then you would use \code{nearPoints(cars,
+#' input$cars_brush, "speed", "dist")}.
+#'
+#' @inheritParams selectBrush
+#' @param threshold A maxmimum distance to the click point; rows in the data
+#'   frame where the distance to the click is less than \code{threshold} will be
+#'   returned.
+#' @param maxrows Maximum number of rows to return. If NULL (the default),
+#'   return all rows that are within the threshold distance.
+#' @param addDist If TRUE, add a column named \code{_dist} that contains the
+#'   distance from the coordinate to the point, in pixels.
+#'
+#' @seealso \code{\link{plotOutput}} for more examples.
+#'
+#' @examples
+#' \dontrun{
+#' # Note that in practice, these examples would need to go in reactives
+#' # or observers.
+#'
+#' # This would select all points within 5 pixels of the click
+#' nearPoints(mtcars, input$plot_click)
+#'
+#' # Select just the nearest point within 10 pixels of the click
+#' nearPoints(mtcars, input$plot_click, threshold = 10, maxrows = 1)
+#'
+#' }
+#' @export
+nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
+                       panelvar1 = NULL, panelvar2 = NULL,
+                       threshold = 5, maxrows = NULL, addDist = FALSE) {
+  if (is.null(coordinfo)) {
+    return(df[0, , drop = FALSE])
+  }
+
+  vars <- findCoordmapVars(coordinfo, xvar, yvar, panelvar1, panelvar2)
+
+  # Extract data values from the data frame
+  x <- asNumber(df[[vars$xvar]])
+  y <- asNumber(df[[vars$yvar]])
+
+  # Get the pixel coordinates of the point
+  coordPx <- scaleCoords(coordinfo$x, coordinfo$y, coordinfo)
+
+  # Get pixel coordinates of data points
+  dataPx <- scaleCoords(x, y, coordinfo)
+
+  # Distances of data points to coordPx
+  dists <- sqrt((dataPx$x - coordPx$x) ^ 2 + (dataPx$y - coordPx$y) ^ 2)
+
+  keep_rows <- (dists <= threshold)
+
+  # Find which rows are matches for the panel vars (if present)
+  if (!is.null(vars$panelvar1))
+    keep_rows <- keep_rows & panelMatch(coordinfo$panelvar1, df[[vars$panelvar1]])
+  if (!is.null(vars$panelvar2))
+    keep_rows <- keep_rows & panelMatch(coordinfo$panelvar2, df[[vars$panelvar2]])
+
+  if (addDist)
+    df$`_dist` <- dists
+
+  df <- df[keep_rows, , drop = FALSE]
+
+  # Sort by distance
+  dists <- dists[keep_rows]
+  df <- df[order(dists), , drop = FALSE]
+
+  # Keep max number of rows
+  if (!is.null(maxrows) && nrow(df) > maxrows) {
+    df <- df[seq_len(maxrows), , drop = FALSE]
+  }
+
+  df
+}
+
+
+findCoordmapVars <- function(coordmap, xvar = NULL, yvar = NULL,
+                             panelvar1 = NULL, panelvar2 = NULL) {
+
+  # Try to extract vars from coordmap. object
+  if (is.null(xvar))      xvar      <- coordmap$mapping$x
+  if (is.null(yvar))      yvar      <- coordmap$mapping$y
+  if (is.null(panelvar1)) panelvar1 <- coordmap$mapping$panelvar1
+  if (is.null(panelvar2)) panelvar2 <- coordmap$mapping$panelvar2
+
+  if (is.null(xvar))
+    stop("findCoordmapVars: not able to automatically infer `xvar` from coordmap.")
+  if (is.null(yvar))
+    stop("findCoordmapVars: not able to automatically infer `yvar` from coordmap.")
+
+  list(
+    xvar = xvar,
+    yvar = yvar,
+    panelvar1 = panelvar1,
+    panelvar2 = panelvar2
+  )
+}
+
+# Coerce characters and factors to integers. Used because the mouse coords
+# are numeric.
+asNumber <- function(x) {
+  if (is.character(x)) x <- as.factor(x)
+  if (is.factor(x)) x <- as.integer(x)
+  x
+}
+
+# Given
+panelMatch <- function(search_value, x) {
+  # search_value is always a character; may need to coerce to number to match
+  # x, because the faceting var might be numeric.
+  if (is.numeric(x)) search_value <- as.numeric(match_value)
+
+  x == search_value
+}
+
+#  ----------------------------------------------------------------------------
+# Scaling functions
+# These functions have direct analogs in Javascript code, except these are
+# vectorized for x and y.
+
+# Map a value x from a domain to a range. If clip is true, clip it to the
+# range.
+mapLinear <- function(x, domainMin, domainMax, rangeMin, rangeMax, clip = TRUE) {
+  factor <- (rangeMax - rangeMin) / (domainMax - domainMin)
+  val <- x - domainMin
+  newval <- (val * factor) + rangeMin
+
+  if (clip) {
+    maxval <- max(rangeMax, rangeMin)
+    minval <- min(rangeMax, rangeMin)
+    newval[newval > maxval] <- maxval
+    newval[newval < minval] <- minval
+  }
+  newval
+}
+
+# Scale val from domain to range. If logbase is present, use log scaling.
+scale1D <- function(val, domainMin, domainMax, rangeMin, rangeMax,
+                    logbase = NULL, clip = TRUE) {
+  if (!is.null(logbase))
+    val <- log(val, logbase)
+  mapLinear(val, domainMin, domainMax, rangeMin, rangeMax, clip)
+}
+
+# Inverse scale val, from range to domain. If logbase is present, use inverse
+# log (power) transformation.
+scaleInv1D <- function(val, domainMin, domainMax, rangeMin, rangeMax,
+                       logbase = NULL, clip = TRUE) {
+    res <- mapLinear(val, rangeMin, rangeMax, domainMin, domainMax, clip)
+    if (!is.null(logbase))
+      res <- logbase ^ res
+    res
+}
+
+# Scale x and y coordinates from domain to range, using information in
+# scaleinfo. scaleinfo must contain items $domain, $range, and $log. The
+# scaleinfo object corresponds to one element from the coordmap object generated
+# by getPrevPlotCoordmap or getGgplotCoordmap; it is the scaling information for
+# one panel in a plot.
+scaleCoords <- function(x, y, scaleinfo) {
+  if (is.null(scaleinfo))
+    return(NULL)
+
+  domain <- scaleinfo$domain
+  range <- scaleinfo$range
+  log <- scaleinfo$log
+
+  list(
+    x = scale1D(x, domain$left, domain$right, range$left, range$right, log$x),
+    y = scale1D(y, domain$bottom, domain$top, range$bottom, range$top, log$y)
+  )
+}
+
+# Inverse scale x and y coordinates from range to domain, using information in
+# scaleinfo.
+scaleInvCoords <- function(x, y, scaleinfo) {
+  if (is.null(scaleinfo))
+    return(NULL)
+
+  domain <- scaleinfo$domain
+  range <- scaleinfo$range
+  log <- scaleinfo$log
+
+  list(
+    x = scaleInv1D(x, domain$left, domain$right, range$left, range$right, log$x),
+    y = scaleInv1D(y, domain$bottom, domain$top, range$bottom, range$top, log$y)
+  )
+}

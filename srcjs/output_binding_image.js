@@ -418,6 +418,11 @@ imageutils.initCoordmap = function($el, coordmap) {
       // Add variable name mappings
       coords.mapping = panel.mapping;
 
+      // Add scaling information
+      coords.domain = panel.domain;
+      coords.range  = panel.range;
+      coords.log    = panel.log;
+
       coords[".nonce"] = Math.random();
       exports.onInputChange(inputId, coords);
     };
@@ -597,6 +602,11 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
 
     // Add variable name mappings
     coords.mapping = panel.mapping;
+
+    // Add scaling information
+    coords.domain = panel.domain;
+    coords.range  = panel.range;
+    coords.log    = panel.log;
 
     // Send data to server
     exports.onInputChange(inputId, coords);

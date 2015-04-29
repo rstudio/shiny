@@ -138,18 +138,21 @@ shinyApp(
           click = "plot_click",  # Equiv, to click=clickOpts(id="plot_click")
           hover = hoverOpts(id = "plot_hover", delayType = "throttle"),
           brush = brushOpts(id = "plot_brush")
-        )
+        ),
+        h4("Clicked points"),
+        tableOutput("plot_clickedpoints"),
+        h4("Brushed points"),
+        tableOutput("plot_brushedpoints")
       ),
-      column(width = 3,
+      column(width = 4,
         verbatimTextOutput("plot_clickinfo"),
         verbatimTextOutput("plot_hoverinfo")
       ),
-      column(width = 3,
+      column(width = 4,
         wellPanel(actionButton("newplot", "New plot")),
         verbatimTextOutput("plot_brushinfo")
       )
-    ),
-    tableOutput("plot_brushedpoints")
+    )
   ),
   server = function(input, output, session) {
     data <- reactive({
@@ -173,8 +176,19 @@ shinyApp(
       cat("Brush (debounced):\\n")
       str(input$plot_brush)
     })
+    output$plot_clickedpoints <- renderTable({
+      # For base graphics, we need to specify columns, though for ggplot2,
+      # it's usually not necessary.
+      res <- nearPoints(data(), input$plot_click, "speed", "dist")
+      if (nrow(res) == 0)
+        return()
+      res
+    })
     output$plot_brushedpoints <- renderTable({
-      selectBrush(input$plot_brush, data(), "speed", "dist")
+      res <- selectBrush(data(), input$plot_brush, "speed", "dist")
+      if (nrow(res) == 0)
+        return()
+      res
     })
   }
 )
@@ -196,11 +210,11 @@ shinyApp(
           brush = brushOpts(id = "image_brush")
         )
       ),
-      column(width = 3,
+      column(width = 4,
         verbatimTextOutput("image_clickinfo"),
         verbatimTextOutput("image_hoverinfo")
       ),
-      column(width = 3,
+      column(width = 4,
         wellPanel(actionButton("newimage", "New image")),
         verbatimTextOutput("image_brushinfo")
       )

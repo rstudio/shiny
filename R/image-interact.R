@@ -176,12 +176,12 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   df
 }
 
-# Coerce characters and factors to integers. Used because the mouse coords
-# are numeric.
+# Coerce various types of variables to numbers. This works for Date, POSIXt,
+# characters, and factors. Used because the mouse coords are numeric.
 asNumber <- function(x) {
   if (is.character(x)) x <- as.factor(x)
   if (is.factor(x)) x <- as.integer(x)
-  x
+  as.numeric(x)
 }
 
 # Given

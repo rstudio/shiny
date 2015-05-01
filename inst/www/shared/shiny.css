@@ -129,6 +129,23 @@ table.data td[align=right] {
   cursor: -webkit-grabbing;
 }
 
+.ns-resize {
+  cursor: ns-resize;
+}
+
+.ew-resize {
+  cursor: ew-resize;
+}
+
+.nesw-resize {
+  cursor: nesw-resize;
+}
+
+.nwse-resize {
+  cursor: nwse-resize;
+}
+
+
 /* Workaround for Qt, which doesn't use font fallbacks */
 .qt pre, .qt code {
   font-family: monospace !important;

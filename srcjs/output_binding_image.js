@@ -25,28 +25,35 @@ $.extend(imageOutputBinding, {
       return;
     }
 
+    // If value is undefined, return alternate. Sort of like ||, except it won't
+    // return alternate for other falsy values (0, false, null).
+    function OR(value, alternate) {
+      if (value === undefined) return alternate;
+      return value;
+    }
+
     var opts = {
       clickId: $el.data('click-id'),
-      clickClip: strToBool($el.data('click-clip')) || true,
+      clickClip: OR(strToBool($el.data('click-clip')), true),
 
       dblclickId: $el.data('dblclick-id'),
-      dblclickClip: strToBool($el.data('dblclick-clip')) || true,
-      dblclickDelay: $el.data('dblclick-delay') || 400,
+      dblclickClip: OR(strToBool($el.data('dblclick-clip')), true),
+      dblclickDelay: OR($el.data('dblclick-delay'), 400),
 
       hoverId: $el.data('hover-id'),
-      hoverClip: $el.data('hover-clip') || true,
-      hoverDelayType: $el.data('hover-delay-type') || 'debounce',
-      hoverDelay: $el.data('hover-delay') || 300,
+      hoverClip: OR($el.data('hover-clip'), true),
+      hoverDelayType: OR($el.data('hover-delay-type'), 'debounce'),
+      hoverDelay: OR($el.data('hover-delay'), 300),
 
       brushId: $el.data('brush-id'),
-      brushClip: strToBool($el.data('brush-clip')) || true,
-      brushDelayType: $el.data('brush-delay-type') || 'debounce',
-      brushDelay: $el.data('brush-delay') || 300,
-      brushFill: $el.data('brush-fill') || '#666',
-      brushStroke: $el.data('brush-stroke') || '#000',
-      brushOpacity: $el.data('brush-opacity') || 0.3,
-      brushDirection: $el.data('brush-direction') || 'xy',
-      brushResetOnNew: strToBool($el.data('brush-reset-on-new')) || false,
+      brushClip: OR(strToBool($el.data('brush-clip')), true),
+      brushDelayType: OR($el.data('brush-delay-type'), 'debounce'),
+      brushDelay: OR($el.data('brush-delay'), 300),
+      brushFill: OR($el.data('brush-fill'), '#666'),
+      brushStroke: OR($el.data('brush-stroke'), '#000'),
+      brushOpacity: OR($el.data('brush-opacity'), 0.3),
+      brushDirection: OR($el.data('brush-direction'), 'xy'),
+      brushResetOnNew: OR(strToBool($el.data('brush-reset-on-new')), false),
 
       coordmap: data.coordmap
     };
@@ -60,742 +67,27 @@ $.extend(imageOutputBinding, {
 
     var $img = $(img);
 
-    // Firefox doesn't have offsetX/Y, so we need to use an alternate
-    // method of calculation for it. Even though other browsers do have
-    // offsetX/Y, we need to calculate relative to $el, because sometimes the
-    // mouse event can come with offset relative to other elements on the
-    // page. This happens when the event listener is bound to, say, window.
-    function mouseOffset(mouseEvent) {
-      var offset = $el.offset();
-      return {
-        x: mouseEvent.pageX - offset.left,
-        y: mouseEvent.pageY - offset.top
-      };
-    }
+    if (!opts.coordmap)
+      opts.coordmap = [];
 
-    // Transform offset coordinates to data space coordinates
-    function offsetToScaledCoords(offset, clip) {
-      // By default, clip to plotting region
-      clip = clip || true;
+    imageutils.initCoordmap($el, opts.coordmap);
 
-      var coordmap = opts.coordmap;
-      if (!coordmap) return offset;
+    // This object listens for mousedowns, and triggers mousedown2 and dblclick2
+    // events as appropriate.
+    var clickInfo = imageutils.createClickInfo($el, opts.dblclickId, opts.dblclickDelay);
 
-      function devToUsrX(deviceX) {
-        var x = deviceX - coordmap.bounds.left;
-        var factor = (coordmap.usr.right - coordmap.usr.left) /
-                     (coordmap.bounds.right - coordmap.bounds.left);
-        var newx = (x * factor) + coordmap.usr.left;
-
-        if (clip) {
-          var max = Math.max(coordmap.usr.right, coordmap.usr.left);
-          var min = Math.min(coordmap.usr.right, coordmap.usr.left);
-          if (newx > max)
-            newx = max;
-          else if (newx < min)
-            newx = min;
-        }
-
-        return newx;
-      }
-      function devToUsrY(deviceY) {
-        var y = deviceY - coordmap.bounds.bottom;
-        var factor = (coordmap.usr.top - coordmap.usr.bottom) /
-                     (coordmap.bounds.top - coordmap.bounds.bottom);
-        var newy = (y * factor) + coordmap.usr.bottom;
-
-        if (clip) {
-          var max = Math.max(coordmap.usr.top, coordmap.usr.bottom);
-          var min = Math.min(coordmap.usr.top, coordmap.usr.bottom);
-          if (newy > max)
-            newy = max;
-          else if (newy < min)
-            newy = min;
-        }
-
-        return newy;
-      }
-
-      var userX = devToUsrX(offset.x);
-      if (coordmap.log.x)
-        userX = Math.pow(10, userX);
-
-      var userY = devToUsrY(offset.y);
-      if (coordmap.log.y)
-        userY = Math.pow(10, userY);
-
-      return {
-        x: userX,
-        y: userY
-      };
-    }
-
-    // Get the pixel bounds of the coordmap; if there's no coordmap, return
-    // the bounds of the image.
-    function getPlotBounds() {
-      if (opts.coordmap) {
-        return opts.coordmap.bounds;
-      } else {
-        return {
-          top: 0,
-          left: 0,
-          right: img.clientWidth - 1,
-          bottom: img.clientHeight - 1
-        };
-      }
-    }
-
-    // Is an offset in the plotting region? If supplied, `expand` tells us to
-    // expand the region by that many pixels in all directions.
-    function isInPlottingRegion(offset, expand) {
-      expand = expand || 0;
-      var bounds = getPlotBounds();
-      return offset.x < bounds.right + expand &&
-             offset.x > bounds.left - expand &&
-             offset.y < bounds.bottom + expand &&
-             offset.y > bounds.top - expand;
-    }
-
-    // Given an offset, clip it to the plotting region as specified by
-    // coordmap. If there is no coordmap, clip it to bounds of the DOM
-    // element.
-    function clipToPlottingRegion(offset) {
-      var bounds = getPlotBounds();
-
-      var newOffset = {
-        x: offset.x,
-        y: offset.y
-      };
-
-      if (offset.x > bounds.right)
-        newOffset.x = bounds.right;
-      else if (offset.x < bounds.left)
-        newOffset.x = bounds.left;
-
-      if (offset.y > bounds.bottom)
-        newOffset.y = bounds.bottom;
-      else if (offset.y < bounds.top)
-        newOffset.y = bounds.top;
-
-      return newOffset;
-    }
-
-    // Returns a function that sends mouse coordinates, scaled to data space.
-    // If that function is passed a null event, it will send null.
-    function mouseCoordinateSender(inputId, clip) {
-      clip = clip || true;
-
-      return function(e) {
-        if (e === null) {
-          exports.onInputChange(inputId, null);
-          return;
-        }
-
-        var offset = mouseOffset(e);
-        // Ignore events outside of plotting region
-        if (clip && !isInPlottingRegion(offset)) return;
-
-        var coords = offsetToScaledCoords(offset);
-        coords[".nonce"] = Math.random();
-        exports.onInputChange(inputId, coords);
-      };
-    }
-
-    // ----------------------------------------------------------
-    // Handler creators for click, hover, brush.
-    // Each of these returns an object with a few public members. These public
-    // members are callbacks that are meant to be bound to events on $el with
-    // the same name (like 'mousedown').
-    // ----------------------------------------------------------
-
-    function createClickHandler(inputId) {
-      var clickInfoSender =  mouseCoordinateSender(inputId, opts.clickClip);
-
-      return {
-        mousedown: function(e) {
-          // Listen for left mouse button only
-          if (e.which !== 1) return;
-          clickInfoSender(e);
-        },
-        onRemoveImg: function() { clickInfoSender(null); }
-      };
-    }
-
-    function createHoverHandler(inputId) {
-      var sendHoverInfo = mouseCoordinateSender(inputId, opts.hoverClip);
-
-      var hoverInfoSender;
-      if (opts.hoverDelayType === 'throttle')
-        hoverInfoSender = new Throttler(null, sendHoverInfo, opts.hoverDelay);
-      else
-        hoverInfoSender = new Debouncer(null, sendHoverInfo, opts.hoverDelay);
-
-      return {
-        mousemove:   function(e) { hoverInfoSender.normalCall(e); },
-        onRemoveImg: function()  { hoverInfoSender.immediateCall(null); }
-      };
-    }
-
-    // Returns a brush handler object. This has three public functions:
-    // mousedown, mousemove, and onRemoveImg.
-    function createBrushHandler(inputId) {
-      // Parameter: expand the area in which a brush can be started, by this
-      // many pixels in all directions.
-      var expandPixels = 20;
-
-      // Object that encapsulates brush state
-      var brush = {
-        // Current brushing and dragging state
-        brushing: false,
-        dragging: false,
-
-        // Offset of last mouse down and up events
-        down: { x: NaN, y: NaN },
-        up: { x: NaN, y: NaN },
-
-        // Bounding rectangle of the brush
-        bounds: {
-          xmin: NaN,
-          xmax: NaN,
-          ymin: NaN,
-          ymax: NaN
-        },
-
-        // The bounds at the start of a drag
-        dragStartBounds: {
-          xmin: NaN,
-          xmax: NaN,
-          ymin: NaN,
-          ymax: NaN
-        },
-
-        // div that displays the brush
-        $div: null,
-
-        reset: function() {
-          this.brushing = false;
-          this.dragging = false;
-          this.down = { x: NaN, y: NaN };
-          this.up   = { x: NaN, y: NaN };
-          this.bounds = {
-            xmin: NaN,
-            xmax: NaN,
-            ymin: NaN,
-            ymax: NaN
-          };
-          this.dragStartBounds = {
-            xmin: NaN,
-            xmax: NaN,
-            ymin: NaN,
-            ymax: NaN
-          };
-
-          if (this.$div)
-            this.$div.remove();
-
-          return this;
-        },
-
-        // If there's an existing brush div, use that div to set the new
-        // brush's settings.
-        importOldBrush: function() {
-          var oldDiv = $el.find('#' + el.id + '_brush');
-          if (oldDiv.length === 0)
-            return;
-
-          var elOffset = $el.offset();
-          var divOffset = oldDiv.offset();
-          this.bounds = {
-            xmin: divOffset.left - elOffset.left,
-            xmax: divOffset.left - elOffset.left + oldDiv.width(),
-            ymin: divOffset.top - elOffset.top,
-            ymax: divOffset.top - elOffset.top + oldDiv.height()
-          };
-
-          this.$div = oldDiv;
-        },
-
-        // Return true if the offset is inside min/max coords
-        isInsideBrush: function(offset) {
-          var bounds = this.bounds;
-          return offset.x <= bounds.xmax && offset.x >= bounds.xmin &&
-                 offset.y <= bounds.ymax && offset.y >= bounds.ymin;
-        },
-
-        // Sets the bounds of the brush, given a bounding box. This knows
-        // whether we're brushing in the x, y, or xy directions and sets
-        // bounds accordingly.
-        setBounds: function(box) {
-          var plotBounds = getPlotBounds();
-
-          var min = { x: box.xmin, y: box.ymin };
-          var max = { x: box.xmax, y: box.ymax };
-
-          if (opts.brushClip) {
-            min = clipToPlottingRegion(min);
-            max = clipToPlottingRegion(max);
-          }
-
-          if (opts.brushDirection === 'xy') {
-            // No change
-
-          } else if (opts.brushDirection === 'x') {
-            // Extend top and bottom of plotting area
-            min.y = plotBounds.top;
-            max.y = plotBounds.bottom;
-
-          } else if (opts.brushDirection === 'y') {
-            min.x = plotBounds.left;
-            max.x = plotBounds.right;
-          }
-
-          this.bounds = {
-            xmin: min.x,
-            xmax: max.x,
-            ymin: min.y,
-            ymax: max.y
-          };
-        },
-
-        // Add a new div representing the brush.
-        addDiv: function() {
-          if (this.$div) this.$div.remove();
-
-          this.$div = $(document.createElement('div'))
-            .attr('id', el.id + '_brush')
-            .css({
-              'background-color': opts.brushFill,
-              'opacity': opts.brushOpacity,
-              'pointer-events': 'none',
-              'position': 'absolute'
-            });
-
-          var borderStyle = '1px solid ' + opts.brushStroke;
-          if (opts.brushDirection === 'xy') {
-            this.$div.css({
-              'border': borderStyle
-            });
-          } else if (opts.brushDirection === 'x') {
-            this.$div.css({
-              'border-left': borderStyle,
-              'border-right': borderStyle
-            });
-          } else if (opts.brushDirection === 'y') {
-            this.$div.css({
-              'border-top': borderStyle,
-              'border-bottom': borderStyle
-            });
-          }
-
-
-          $el.append(this.$div);
-          this.$div.offset({x:0, y:0}).width(0).height(0).show();
-        },
-
-        // Update the brush div to reflect the current brush bounds.
-        updateDiv: function() {
-          // Need parent offset relative to page to calculate mouse offset
-          // relative to page.
-          var imgOffset = $el.offset();
-          var b = this.bounds;
-          this.$div.offset({
-              top: imgOffset.top + b.ymin,
-              left: imgOffset.left + b.xmin
-            })
-            .width(b.xmax - b.xmin)
-            .height(b.ymax - b.ymin)
-            .show();
-        },
-
-        startBrushing: function() {
-          this.brushing = true;
-          this.addDiv();
-
-          this.setBounds(findBox(this.down, this.down));
-          this.updateDiv();
-        },
-
-        brushTo: function(offset) {
-          this.setBounds(findBox(this.down, offset));
-          this.updateDiv();
-        },
-
-        stopBrushing: function() {
-          this.brushing = false;
-
-          // Save the final bounding box of the brush
-          this.setBounds(findBox(this.down, this.up));
-        },
-
-        startDragging: function() {
-          this.dragging = true;
-          this.dragStartBounds = $.extend({}, this.bounds);
-        },
-
-        dragTo: function(offset) {
-          // How far the brush was dragged
-          var dx = offset.x - this.down.x;
-          var dy = offset.y - this.down.y;
-
-          // Calculate what new start/end positions would be, before clipping.
-          var start = this.dragStartBounds;
-          var newBounds = {
-            xmin: start.xmin + dx,
-            xmax: start.xmax + dx,
-            ymin: start.ymin + dy,
-            ymax: start.ymax + dy
-          };
-
-          // Clip to the plotting area
-          if (opts.brushClip) {
-            var plotBounds = getPlotBounds();
-
-            // Convert to format for shiftToRange
-            var xvals = [ newBounds.xmin, newBounds.xmax ];
-            var yvals = [ newBounds.ymin, newBounds.ymax ];
-
-            xvals = shiftToRange(xvals, plotBounds.left, plotBounds.right); 
-            yvals = shiftToRange(yvals, plotBounds.top, plotBounds.bottom);
-
-            // Convert back to bounds format
-            newBounds = {
-              xmin: xvals[0],
-              xmax: xvals[1],
-              ymin: yvals[0],
-              ymax: yvals[1]
-            };
-          }
-
-          this.setBounds(newBounds);
-          this.updateDiv();
-        },
-
-        stopDragging: function() {
-          this.dragging = false;
-        }
-      };
-
-
-      // Given two sets of x/y coordinates, return an object representing the
-      // min and max x and y values. (This could be generalized to any number
-      // of points).
-      function findBox(offset1, offset2) {
-        return {
-          xmin: Math.min(offset1.x, offset2.x),
-          xmax: Math.max(offset1.x, offset2.x),
-          ymin: Math.min(offset1.y, offset2.y),
-          ymax: Math.max(offset1.y, offset2.y)
-        };
-      }
-
-      // Shift an array of values so that they are within a min and max.
-      // The vals will be shifted so that they maintain the same spacing
-      // internally. If the range in vals is larger than the range of
-      // min and max, the result might not make sense.
-      function shiftToRange(vals, min, max) {
-        if (!(vals instanceof Array))
-          vals = [vals];
-
-        var maxval = Math.max.apply(null, vals);
-        var minval = Math.min.apply(null, vals);
-        var shiftAmount = 0;
-        if (maxval > max) {
-          shiftAmount = max - maxval;
-        } else if (minval < min) {
-          shiftAmount = min - minval;
-        }
-
-        var newvals = [];
-        for (var i=0; i<vals.length; i++) {
-          newvals[i] = vals[i] + shiftAmount;
-        }
-        return newvals;
-      }
-
-      // Set cursor to one of 3 styles. We need to set the cursor on the whole
-      // el instead of the brush div, because the brush div has
-      // 'pointer-events:none' so that it won't intercept pointer events.
-      // If `style` is null, don't add a cursor style.
-      function setCursorStyle(style) {
-        $el.removeClass('crosshair');
-        $el.removeClass('grabbable');
-        $el.removeClass('grabbing');
-
-        if (style) $el.addClass(style);
-      }
-
-      function sendBrushInfo() {
-        var bounds = brush.bounds;
-
-        // We're in a new or reset state
-        if (isNaN(bounds.xmin)) {
-          exports.onInputChange(inputId, null);
-          return;
-        }
-
-        // Transform coordinates of brush to data space
-        var min = offsetToScaledCoords({ x: bounds.xmin, y: bounds.ymin }, opts.brushClip);
-        var max = offsetToScaledCoords({ x: bounds.xmax, y: bounds.ymax }, opts.brushClip);
-
-        // Because the x and y directions of the pixel space may differ from
-        // the x and y directions of the data space, we need to recalculate
-        // the min and max.
-        var coords = {
-          xmin: Math.min(min.x, max.x),
-          xmax: Math.max(min.x, max.x),
-          ymin: Math.min(min.y, max.y),
-          ymax: Math.max(min.y, max.y)
-        };
-
-        // Send data to server
-        exports.onInputChange(inputId, coords);
-      }
-
-      var brushInfoSender;
-      if (opts.brushDelayType === 'throttle') {
-        brushInfoSender = new Throttler(null, sendBrushInfo, opts.brushDelay);
-      } else {
-        brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
-      }
-
-      function mousedown(e) {
-        // This can happen when mousedown inside the graphic, then mouseup
-        // outside, then mousedown inside. Just ignore the second
-        // mousedown.
-        if (brush.brushing || brush.dragging) return;
-
-        // Listen for left mouse button only
-        if (e.which !== 1) return;
-
-        var offset = mouseOffset(e);
-
-        // Ignore mousedown events outside of plotting region, expanded by
-        // a number of pixels specified in expandPixels.
-        if (opts.brushClip && !isInPlottingRegion(offset, expandPixels))
-          return;
-
-        brush.up = { x: NaN, y: NaN };
-        brush.down = offset;
-
-        if (brush.isInsideBrush(offset)) {
-          brush.startDragging(offset);
-          setCursorStyle('grabbing');
-
-          // Attach the move and up handlers to the window so that they respond
-          // even when the mouse is moved outside of the image.
-          $(document)
-            .on('mousemove.image_brush', mousemoveDragging)
-            .on('mouseup.image_brush', mouseupDragging );
-
-        } else {
-          brush.startBrushing(clipToPlottingRegion(offset));
-
-          // Attach the move and up handlers to the window so that they respond
-          // even when the mouse is moved outside of the image.
-          $(document)
-            .on('mousemove.image_brush', mousemoveBrushing)
-            .on('mouseup.image_brush', mouseupBrushing);
-        }
-      }
-
-      // This sets the cursor style when it's in the el
-      function mousemove(e) {
-        var offset = mouseOffset(e);
-
-        if (!(brush.brushing || brush.dragging)) {
-          // Set the cursor depending on where it is
-          if (brush.isInsideBrush(offset)) {
-            setCursorStyle('grabbable');
-          } else if (isInPlottingRegion(offset, expandPixels)) {
-            setCursorStyle('crosshair');
-          } else {
-            setCursorStyle(null);
-          }
-        }
-      }
-
-      // mousemove handlers while brushing or dragging
-      function mousemoveBrushing(e) {
-        brush.brushTo(mouseOffset(e));
-        brushInfoSender.normalCall();
-      }
-
-      function mousemoveDragging(e) {
-        brush.dragTo(mouseOffset(e));
-        brushInfoSender.normalCall();
-      }
-
-      // mouseup handlers while brushing or dragging
-      function mouseupBrushing(e) {
-        // Listen for left mouse button only
-        if (e.which !== 1) return;
-
-        $(document)
-          .off('mousemove.image_brush')
-          .off('mouseup.image_brush');
-
-        brush.up = mouseOffset(e);
-
-        brush.stopBrushing();
-        setCursorStyle('crosshair');
-
-        // If the brush didn't go anywhere, hide the brush, clear value,
-        // and return.
-        if (brush.down.x === brush.up.x && brush.down.y === brush.up.y) {
-          brush.reset();
-          brushInfoSender.immediateCall();
-          return;
-        }
-
-        // Send info immediately on mouseup, but only if needed. If we don't
-        // do the pending check, we might send the same data twice (with
-        // with difference nonce).
-        if (brushInfoSender.isPending())
-          brushInfoSender.immediateCall();
-      }
-
-      function mouseupDragging(e) {
-        // Listen for left mouse button only
-        if (e.which !== 1) return;
-
-        $(document)
-          .off('mousemove.image_brush')
-          .off('mouseup.image_brush');
-
-        brush.up = mouseOffset(e);
-
-        brush.stopDragging();
-        setCursorStyle('grabbable');
-
-        if (brushInfoSender.isPending())
-          brushInfoSender.immediateCall();
-      }
-
-      // This should be called when the img (not the el) is removed
-      function onRemoveImg() {
-        if (opts.brushResetOnNew) {
-          brush.reset();
-          brushInfoSender.immediateCall();
-        }
-      }
-
-      if (!opts.brushResetOnNew) {
-        brush.importOldBrush();
-      }
-
-      return {
-        mousedown: mousedown,
-        mousemove: mousemove,
-        onRemoveImg: onRemoveImg
-      };
-    }
-
-
-    // This object provides two public event listeners: mousedown, and
-    // dblclickIE8.
-    // We need to make sure that, when the image is listening for double-
-    // clicks, that a double-click doesn't trigger two click events. We'll
-    // trigger custom mousedown2 and dblclick2 events with this mousedown
-    // listener.
-    var clickInfo = {
-      clickCount: 0,
-      clickTimer: null,
-      pending_e: null,    // A pending mousedown2 event
-
-      // Create a new event of type eventType (like 'mousedown2'), and trigger
-      // it with the information stored in this.e.
-      triggerEvent: function(newEventType, e) {
-        // Extract important info from e and construct a new event with type
-        // eventType.
-        var e2 = $.Event(newEventType, {
-          which:   e.which,
-          pageX:   e.pageX,
-          pageY:   e.pageY,
-          offsetX: e.offsetX,
-          offsetY: e.offsetY
-        });
-
-        $el.trigger(e2);
-      },
-
-      triggerPendingMousedown2: function() {
-        // It's possible that between the scheduling of a mousedown2 and the
-        // time this callback is executed, someone else triggers a
-        // mousedown2, so check for that.
-        if (this.pending_e) {
-          this.triggerEvent('mousedown2', this.pending_e);
-          this.pending_e = null;
-        }
-      },
-
-      // Set a timer to trigger a mousedown2 event, using information from the
-      // last recorded mousdown event.
-      scheduleMousedown2: function(e) {
-        this.pending_e = e;
-
-        var self = this;
-        this.clickTimer = setTimeout(function() {
-          self.triggerPendingMousedown2();
-        }, opts.dblclickDelay);
-      },
-
-      mousedown: function(e) {
-        // Listen for left mouse button only
-        if (e.which !== 1) return;
-
-        // If no dblclick listener, immediately trigger a mousedown2 event.
-        if (!opts.dblclickId) {
-          this.triggerEvent('mousedown2', e);
-          return;
-        }
-
-        // If there's a dblclick listener, make sure not to count this as a
-        // click on the first mousedown; we need to wait for the dblclick
-        // delay before we can be sure this click was a single-click.
-        if (this.pending_e === null) {
-          this.scheduleMousedown2(e);
-
-        } else {
-          clearTimeout(this.clickTimer);
-
-          // If second click is too far away, it doesn't count as a double
-          // click. Instead, immediately trigger a mousedown2 for the previous
-          // click, and set this click as a new first click.
-          if (this.pending_e &&
-              Math.abs(this.pending_e.offsetX - e.offsetX) > 2 ||
-              Math.abs(this.pending_e.offsetY - e.offsetY) > 2) {
-
-            this.triggerPendingMousedown2();
-            this.scheduleMousedown2(e);
-
-          } else {
-            // The second click was close to the first one. If it happened
-            // within specified delay, trigger our custom 'dblclick2' event.
-            this.pending_e = null;
-            this.triggerEvent('dblclick2', e);
-          }
-        }
-      },
-
-      // IE8 needs a special hack because when you do a double-click it doesn't
-      // trigger the click event twice - it directly triggers dblclick.
-      dblclickIE8: function(e) {
-        e.which = 1;   // In IE8, e.which is 0 instead of 1. ???
-        this.triggerEvent('dblclick2', e);
-      }
-    };
-
-    $el.on('mousedown.image_output', function(e) { clickInfo.mousedown(e); });
+    $el.on('mousedown.image_output', clickInfo.mousedown);
 
     if (browser.isIE && browser.IEVersion === 8) {
-      $el.on('dblclick.image_output', function(e) { clickInfo.dblclickIE8(e); });
+      $el.on('dblclick.image_output', clickInfo.dblclickIE8);
     }
 
     // ----------------------------------------------------------
     // Register the various event handlers
     // ----------------------------------------------------------
     if (opts.clickId) {
-      var clickHandler = createClickHandler(opts.clickId);
+      var clickHandler = imageutils.createClickHandler(opts.clickId,
+        opts.clickClip, opts.coordmap);
       $el.on('mousedown2.image_output', clickHandler.mousedown);
 
       // When img is removed, do housekeeping: clear $el's mouse listener and
@@ -806,14 +98,16 @@ $.extend(imageOutputBinding, {
     if (opts.dblclickId) {
       // We'll use the clickHandler's mousedown function, but register it to
       // our custom 'dblclick2' event.
-      var dblclickHandler = createClickHandler(opts.dblclickId);
+      var dblclickHandler = imageutils.createClickHandler(opts.dblclickId,
+        opts.clickClip, opts.coordmap);
       $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
       $img.on('remove', dblclickHandler.onRemoveImg);
     }
 
     if (opts.hoverId) {
-      var hoverHandler = createHoverHandler(opts.hoverId);
+      var hoverHandler = imageutils.createHoverHandler(opts.hoverId,
+        opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.coordmap);
       $el.on('mousemove.image_output', hoverHandler.mousemove);
 
       $img.on('remove', hoverHandler.onRemoveImg);
@@ -828,7 +122,8 @@ $.extend(imageOutputBinding, {
       // Disable selection of image and text when dragging in IE<=10
       $el.on('selectstart.image_output', function() { return false; });
 
-      var brushHandler = createBrushHandler(opts.brushId);
+      var brushHandler = imageutils.createBrushHandler(opts.brushId, $el, opts,
+        opts.coordmap);
       $el.on('mousedown.image_output', brushHandler.mousedown);
       $el.on('mousemove.image_output', brushHandler.mousemove);
 
@@ -848,6 +143,1132 @@ $.extend(imageOutputBinding, {
 
     if (img)
       $el.append(img);
+
+    if (data.error)
+      console.log('Error on server extracting coordmap: ' + data.error);
   }
 });
 outputBindings.register(imageOutputBinding, 'shiny.imageOutput');
+
+
+var imageutils = {};
+
+
+// Modifies the panel objects in a coordmap, adding scale(), scaleInv(),
+// and clip() functions to each one.
+imageutils.initPanelScales = function(coordmap) {
+  // Map a value x from a domain to a range. If clip is true, clip it to the
+  // range.
+  function mapLinear(x, domainMin, domainMax, rangeMin, rangeMax, clip) {
+    // By default, clip to range
+    clip = clip || true;
+
+    var factor = (rangeMax - rangeMin) / (domainMax - domainMin);
+    var val = x - domainMin;
+    var newval = (val * factor) + rangeMin;
+
+    if (clip) {
+      var max = Math.max(rangeMax, rangeMin);
+      var min = Math.min(rangeMax, rangeMin);
+      if (newval > max)
+        newval = max;
+      else if (newval < min)
+        newval = min;
+    }
+    return newval;
+  }
+
+  // Create scale and inverse-scale functions for a single direction (x or y).
+  function scaler1D(domainMin, domainMax, rangeMin, rangeMax, logbase) {
+    return {
+      scale: function(val, clip) {
+        if (logbase)
+          val = Math.log(val) / Math.log(logbase);
+        return mapLinear(val, domainMin, domainMax, rangeMin, rangeMax, clip);
+      },
+
+      scaleInv: function(val, clip) {
+        var res = mapLinear(val, rangeMin, rangeMax, domainMin, domainMax, clip);
+        if (logbase)
+          res = Math.pow(logbase, res);
+        return res;
+      }
+    };
+  }
+
+  // Modify panel, adding scale and inverse-scale functions that take objects
+  // like {x:1, y:3}, and also add clip function.
+  function addScaleFuns(panel) {
+    var d = panel.domain;
+    var r = panel.range;
+    var xlog = (panel.log && panel.log.x) ? panel.log.x : null;
+    var ylog = (panel.log && panel.log.y) ? panel.log.y : null;
+    var xscaler = scaler1D(d.left, d.right, r.left, r.right, xlog);
+    var yscaler = scaler1D(d.bottom, d.top, r.bottom, r.top, ylog);
+
+    panel.scale = function(val, clip) {
+      return {
+        x: xscaler.scale(val.x, clip),
+        y: yscaler.scale(val.y, clip)
+      };
+    };
+
+    panel.scaleInv = function(val, clip) {
+      return {
+        x: xscaler.scaleInv(val.x, clip),
+        y: yscaler.scaleInv(val.y, clip)
+      };
+    };
+
+    // Given a scaled offset (in pixels), clip it to the nearest panel region.
+    panel.clip = function(offset) {
+      var newOffset = {
+        x: offset.x,
+        y: offset.y
+      };
+
+      var bounds = panel.range;
+
+      if      (offset.x > bounds.right)  newOffset.x = bounds.right;
+      else if (offset.x < bounds.left)   newOffset.x = bounds.left;
+
+      if      (offset.y > bounds.bottom) newOffset.y = bounds.bottom;
+      else if (offset.y < bounds.top)    newOffset.y = bounds.top;
+
+      return newOffset;
+    };
+  }
+
+  // Add the functions to each panel object.
+  for (var i=0; i<coordmap.length; i++) {
+    var panel = coordmap[i];
+    addScaleFuns(panel);
+  }
+};
+
+
+// This adds functions to the coordmap object to handle various
+// coordinate-mapping tasks, and send information to the server.
+// The input coordmap is an array of objects, each of which represents a panel.
+// coordmap must be an array, even if empty, so that it can be modified in
+// place; when empty, we add a dummy panel to the array.
+// It also calls initPanelScales, which modifies each panel object to have
+// scale, scaleInv, and clip functions.
+imageutils.initCoordmap = function($el, coordmap) {
+  var el = $el[0];
+
+  // If we didn't get any panels, create a dummy one where the domain and range
+  // are simply the pixel dimensions.
+  // that we modify.
+  if (coordmap.length === 0) {
+    var bounds = {
+      top: 0,
+      left: 0,
+      right: el.clientWidth - 1,
+      bottom: el.clientHeight - 1
+    };
+
+    coordmap[0] = {
+      domain: bounds,
+      range: bounds,
+      mapping: {}
+    };
+  }
+
+  // Add scaling functions to each panel
+  imageutils.initPanelScales(coordmap);
+
+  // Firefox doesn't have offsetX/Y, so we need to use an alternate
+  // method of calculation for it. Even though other browsers do have
+  // offsetX/Y, we need to calculate relative to $el, because sometimes the
+  // mouse event can come with offset relative to other elements on the
+  // page. This happens when the event listener is bound to, say, window.
+  coordmap.mouseOffset = function(mouseEvent) {
+    var offset = $el.offset();
+    return {
+      x: mouseEvent.pageX - offset.left,
+      y: mouseEvent.pageY - offset.top
+    };
+  };
+
+  // Given two sets of x/y coordinates, return an object representing the
+  // min and max x and y values. (This could be generalized to any number
+  // of points).
+  coordmap.findBox = function(offset1, offset2) {
+    return {
+      xmin: Math.min(offset1.x, offset2.x),
+      xmax: Math.max(offset1.x, offset2.x),
+      ymin: Math.min(offset1.y, offset2.y),
+      ymax: Math.max(offset1.y, offset2.y)
+    };
+  };
+
+
+  // Shift an array of values so that they are within a min and max.
+  // The vals will be shifted so that they maintain the same spacing
+  // internally. If the range in vals is larger than the range of
+  // min and max, the result might not make sense.
+  coordmap.shiftToRange = function(vals, min, max) {
+    if (!(vals instanceof Array))
+      vals = [vals];
+
+    var maxval = Math.max.apply(null, vals);
+    var minval = Math.min.apply(null, vals);
+    var shiftAmount = 0;
+    if (maxval > max) {
+      shiftAmount = max - maxval;
+    } else if (minval < min) {
+      shiftAmount = min - minval;
+    }
+
+    var newvals = [];
+    for (var i=0; i<vals.length; i++) {
+      newvals[i] = vals[i] + shiftAmount;
+    }
+    return newvals;
+  };
+
+  // Given an offset, return an object representing which panel it's in. The
+  // `expand` argument tells it to expand the panel area by that many pixels.
+  // It's possible for an offset to be within more than one panel, because
+  // of the `expand` value. If that's the case, find the nearest panel.
+  coordmap.getPanel = function(offset, expand) {
+    expand = expand || 0;
+
+    var x = offset.x;
+    var y = offset.y;
+
+    var matches = []; // Panels that match
+    var dists = [];   // Distance of offset to each matching panel
+    var b;
+    for (var i=0; i<coordmap.length; i++) {
+      b = coordmap[i].range;
+
+      if (x <= b.right  + expand &&
+          x >= b.left   - expand &&
+          y <= b.bottom + expand &&
+          y >= b.top    - expand)
+      {
+        matches.push(coordmap[i]);
+
+        // Find distance from edges for x and y
+        var xdist = 0;
+        var ydist = 0;
+        if (x > b.right && x <= b.right + expand) {
+          xdist = x - b.right;
+        } else if (x < b.left && x >= b.left - expand) {
+          xdist = x - b.left;
+        }
+        if (y > b.bottom && y <= b.bottom + expand) {
+          ydist = y - b.bottom;
+        } else if (y < b.top && y >= b.top - expand) {
+          ydist = y - b.top;
+        }
+
+        // Cartesian distance
+        dists.push(Math.sqrt( Math.pow(xdist, 2) + Math.pow(ydist, 2) ));
+      }
+    }
+
+    if (matches.length) {
+      // Find shortest distance
+      var min_dist = Math.min.apply(null, dists);
+      for (i=0; i<matches.length; i++) {
+        if (dists[i] === min_dist) {
+          return matches[i];
+        }
+      }
+    }
+
+    return null;
+  };
+
+  // Is an offset in a panel? If supplied, `expand` tells us to expand the
+  // panels by that many pixels in all directions.
+  coordmap.isInPanel = function(offset, expand) {
+    expand = expand || 0;
+
+    if (coordmap.getPanel(offset, expand))
+      return true;
+
+    return false;
+  };
+
+  // Returns a function that sends mouse coordinates, scaled to data space.
+  // If that function is passed a null event, it will send null.
+  coordmap.mouseCoordinateSender = function(inputId, clip) {
+    clip = clip || true;
+
+    return function(e) {
+      if (e === null) {
+        exports.onInputChange(inputId, null);
+        return;
+      }
+
+      var offset = coordmap.mouseOffset(e);
+      // Ignore events outside of plotting region
+      if (clip && !coordmap.isInPanel(offset)) return;
+
+      var panel = coordmap.getPanel(offset);
+      var coords = panel.scaleInv(offset);
+
+      // Add the panel (facet) variables, if present
+      $.extend(coords, panel.panel_vars);
+
+      // Add variable name mappings
+      coords.mapping = panel.mapping;
+
+      // Add scaling information
+      coords.domain = panel.domain;
+      coords.range  = panel.range;
+      coords.log    = panel.log;
+
+      coords[".nonce"] = Math.random();
+      exports.onInputChange(inputId, coords);
+    };
+  };
+};
+
+
+// This object provides two public event listeners: mousedown, and
+// dblclickIE8.
+// We need to make sure that, when the image is listening for double-
+// clicks, that a double-click doesn't trigger two click events. We'll
+// trigger custom mousedown2 and dblclick2 events with this mousedown
+// listener.
+imageutils.createClickInfo = function($el, dblclickId, dblclickDelay) {
+  var clickCount = 0;
+  var clickTimer = null;
+  var pending_e = null;    // A pending mousedown2 event
+
+  // Create a new event of type eventType (like 'mousedown2'), and trigger
+  // it with the information stored in this.e.
+  function triggerEvent(newEventType, e) {
+    // Extract important info from e and construct a new event with type
+    // eventType.
+    var e2 = $.Event(newEventType, {
+      which:   e.which,
+      pageX:   e.pageX,
+      pageY:   e.pageY,
+      offsetX: e.offsetX,
+      offsetY: e.offsetY
+    });
+
+    $el.trigger(e2);
+  }
+
+  function triggerPendingMousedown2() {
+    // It's possible that between the scheduling of a mousedown2 and the
+    // time this callback is executed, someone else triggers a
+    // mousedown2, so check for that.
+    if (pending_e) {
+      triggerEvent('mousedown2', pending_e);
+      pending_e = null;
+    }
+  }
+
+  // Set a timer to trigger a mousedown2 event, using information from the
+  // last recorded mousdown event.
+  function scheduleMousedown2(e) {
+    pending_e = e;
+
+    clickTimer = setTimeout(function() {
+      triggerPendingMousedown2();
+    }, dblclickDelay);
+  }
+
+  function mousedown(e) {
+    // Listen for left mouse button only
+    if (e.which !== 1) return;
+
+    // If no dblclick listener, immediately trigger a mousedown2 event.
+    if (!dblclickId) {
+      triggerEvent('mousedown2', e);
+      return;
+    }
+
+    // If there's a dblclick listener, make sure not to count this as a
+    // click on the first mousedown; we need to wait for the dblclick
+    // delay before we can be sure this click was a single-click.
+    if (pending_e === null) {
+      scheduleMousedown2(e);
+
+    } else {
+      clearTimeout(clickTimer);
+
+      // If second click is too far away, it doesn't count as a double
+      // click. Instead, immediately trigger a mousedown2 for the previous
+      // click, and set this click as a new first click.
+      if (pending_e &&
+          Math.abs(pending_e.offsetX - e.offsetX) > 2 ||
+          Math.abs(pending_e.offsetY - e.offsetY) > 2) {
+
+        triggerPendingMousedown2();
+        scheduleMousedown2(e);
+
+      } else {
+        // The second click was close to the first one. If it happened
+        // within specified delay, trigger our custom 'dblclick2' event.
+        pending_e = null;
+        triggerEvent('dblclick2', e);
+      }
+    }
+  }
+
+  // IE8 needs a special hack because when you do a double-click it doesn't
+  // trigger the click event twice - it directly triggers dblclick.
+  function dblclickIE8(e) {
+    e.which = 1;   // In IE8, e.which is 0 instead of 1. ???
+    triggerEvent('dblclick2', e);
+  }
+
+  return {
+    mousedown: mousedown,
+    dblclickIE8: dblclickIE8
+  };
+};
+
+
+// ----------------------------------------------------------
+// Handler creators for click, hover, brush.
+// Each of these returns an object with a few public members. These public
+// members are callbacks that are meant to be bound to events on $el with
+// the same name (like 'mousedown').
+// ----------------------------------------------------------
+
+imageutils.createClickHandler = function(inputId, clip, coordmap) {
+  var clickInfoSender = coordmap.mouseCoordinateSender(inputId, clip);
+
+  return {
+    mousedown: function(e) {
+      // Listen for left mouse button only
+      if (e.which !== 1) return;
+      clickInfoSender(e);
+    },
+    onRemoveImg: function() { clickInfoSender(null); }
+  };
+};
+
+
+imageutils.createHoverHandler = function(inputId, delay, delayType, clip, coordmap) {
+  var sendHoverInfo = coordmap.mouseCoordinateSender(inputId, clip);
+
+  var hoverInfoSender;
+  if (delayType === 'throttle')
+    hoverInfoSender = new Throttler(null, sendHoverInfo, delay);
+  else
+    hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
+
+  return {
+    mousemove:   function(e) { hoverInfoSender.normalCall(e); },
+    onRemoveImg: function()  { hoverInfoSender.immediateCall(null); }
+  };
+};
+
+
+// Returns a brush handler object. This has three public functions:
+// mousedown, mousemove, and onRemoveImg.
+imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
+  // Parameter: expand the area in which a brush can be started, by this
+  // many pixels in all directions. (This should probably be a brush option)
+  var expandPixels = 20;
+
+  // Represents the state of the brush
+  var brush = imageutils.createBrush($el, opts, coordmap, expandPixels);
+
+  // Set cursor to one of 7 styles. We need to set the cursor on the whole
+  // el instead of the brush div, because the brush div has
+  // 'pointer-events:none' so that it won't intercept pointer events.
+  // If `style` is null, don't add a cursor style.
+  function setCursorStyle(style) {
+    $el.removeClass('crosshair grabbable grabbing ns-resize ew-resize nesw-resize nwse-resize');
+
+    if (style) $el.addClass(style);
+  }
+
+  function sendBrushInfo() {
+    var coords = brush.boundsData();
+
+    // We're in a new or reset state
+    if (isNaN(coords.xmin)) {
+      exports.onInputChange(inputId, null);
+      return;
+    }
+
+    var panel = brush.getPanel();
+
+    // Add the panel (facet) variables, if present
+    $.extend(coords, panel.panel_vars);
+
+    // Add variable name mappings
+    coords.mapping = panel.mapping;
+
+    // Add scaling information
+    coords.domain = panel.domain;
+    coords.range  = panel.range;
+    coords.log    = panel.log;
+
+    coords.direction = opts.brushDirection;
+
+    // Send data to server
+    exports.onInputChange(inputId, coords);
+  }
+
+  var brushInfoSender;
+  if (opts.brushDelayType === 'throttle') {
+    brushInfoSender = new Throttler(null, sendBrushInfo, opts.brushDelay);
+  } else {
+    brushInfoSender = new Debouncer(null, sendBrushInfo, opts.brushDelay);
+  }
+
+  function mousedown(e) {
+    // This can happen when mousedown inside the graphic, then mouseup
+    // outside, then mousedown inside. Just ignore the second
+    // mousedown.
+    if (brush.isBrushing() || brush.isDragging() || brush.isResizing()) return;
+
+    // Listen for left mouse button only
+    if (e.which !== 1) return;
+
+    var offset = coordmap.mouseOffset(e);
+
+    // Ignore mousedown events outside of plotting region, expanded by
+    // a number of pixels specified in expandPixels.
+    if (opts.brushClip && !coordmap.isInPanel(offset, expandPixels))
+      return;
+
+    brush.up({ x: NaN, y: NaN });
+    brush.down(offset);
+
+
+    if (brush.isInResizeArea(offset)) {
+      brush.startResizing(offset);
+
+      // Attach the move and up handlers to the window so that they respond
+      // even when the mouse is moved outside of the image.
+      $(document)
+        .on('mousemove.image_brush', mousemoveResizing)
+        .on('mouseup.image_brush', mouseupResizing);
+
+    } else if (brush.isInsideBrush(offset)) {
+      brush.startDragging(offset);
+      setCursorStyle('grabbing');
+
+      // Attach the move and up handlers to the window so that they respond
+      // even when the mouse is moved outside of the image.
+      $(document)
+        .on('mousemove.image_brush', mousemoveDragging)
+        .on('mouseup.image_brush', mouseupDragging);
+
+    } else {
+      var panel = coordmap.getPanel(offset, expandPixels);
+      brush.startBrushing(panel.clip(offset));
+
+      // Attach the move and up handlers to the window so that they respond
+      // even when the mouse is moved outside of the image.
+      $(document)
+        .on('mousemove.image_brush', mousemoveBrushing)
+        .on('mouseup.image_brush', mouseupBrushing);
+    }
+  }
+
+  // This sets the cursor style when it's in the el
+  function mousemove(e) {
+    var offset = coordmap.mouseOffset(e);
+
+    if (!(brush.isBrushing() || brush.isDragging() || brush.isResizing())) {
+      // Set the cursor depending on where it is
+      if (brush.isInResizeArea(offset)) {
+        var r = brush.whichResizeSides(offset);
+
+        if ((r.left && r.top) || (r.right && r.bottom)) {
+          setCursorStyle('nwse-resize');
+        } else if ((r.left && r.bottom) || (r.right && r.top)) {
+          setCursorStyle('nesw-resize');
+        } else if (r.left || r.right) {
+          setCursorStyle('ew-resize');
+        } else if (r.top || r.bottom) {
+          setCursorStyle('ns-resize');
+        }
+      } else if (brush.isInsideBrush(offset)) {
+        setCursorStyle('grabbable');
+      } else if (coordmap.isInPanel(offset, expandPixels)) {
+        setCursorStyle('crosshair');
+      } else {
+        setCursorStyle(null);
+      }
+    }
+  }
+
+  // mousemove handlers while brushing or dragging
+  function mousemoveBrushing(e) {
+    brush.brushTo(coordmap.mouseOffset(e));
+    brushInfoSender.normalCall();
+  }
+
+  function mousemoveDragging(e) {
+    brush.dragTo(coordmap.mouseOffset(e));
+    brushInfoSender.normalCall();
+  }
+
+  function mousemoveResizing(e) {
+    brush.resizeTo(coordmap.mouseOffset(e));
+    brushInfoSender.normalCall();
+  }
+
+  // mouseup handlers while brushing or dragging
+  function mouseupBrushing(e) {
+    // Listen for left mouse button only
+    if (e.which !== 1) return;
+
+    $(document)
+      .off('mousemove.image_brush')
+      .off('mouseup.image_brush');
+
+    brush.up(coordmap.mouseOffset(e));
+
+    brush.stopBrushing();
+    setCursorStyle('crosshair');
+
+    // If the brush didn't go anywhere, hide the brush, clear value,
+    // and return.
+    if (brush.down().x === brush.up().x && brush.down().y === brush.up().y) {
+      brush.reset();
+      brushInfoSender.immediateCall();
+      return;
+    }
+
+    // Send info immediately on mouseup, but only if needed. If we don't
+    // do the pending check, we might send the same data twice (with
+    // with difference nonce).
+    if (brushInfoSender.isPending())
+      brushInfoSender.immediateCall();
+  }
+
+  function mouseupDragging(e) {
+    // Listen for left mouse button only
+    if (e.which !== 1) return;
+
+    $(document)
+      .off('mousemove.image_brush')
+      .off('mouseup.image_brush');
+
+    brush.up(coordmap.mouseOffset(e));
+
+    brush.stopDragging();
+    setCursorStyle('grabbable');
+
+    if (brushInfoSender.isPending())
+      brushInfoSender.immediateCall();
+  }
+
+  function mouseupResizing(e) {
+    // Listen for left mouse button only
+    if (e.which !== 1) return;
+
+    $(document)
+      .off('mousemove.image_brush')
+      .off('mouseup.image_brush');
+
+    brush.up(coordmap.mouseOffset(e));
+    brush.stopResizing();
+
+    if (brushInfoSender.isPending())
+      brushInfoSender.immediateCall();
+
+  }
+
+  // This should be called when the img (not the el) is removed
+  function onRemoveImg() {
+    if (opts.brushResetOnNew) {
+      brush.reset();
+      brushInfoSender.immediateCall();
+    }
+  }
+
+  if (!opts.brushResetOnNew) {
+    brush.importOldBrush();
+    brushInfoSender.immediateCall();
+  }
+
+  return {
+    mousedown: mousedown,
+    mousemove: mousemove,
+    onRemoveImg: onRemoveImg
+  };
+};
+
+// Returns an object that represents the state of the brush. This gets wrapped
+// in a brushHandler, which provides various event listeners.
+imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
+  // Number of pixels outside of brush to allow start resizing
+  var resizeExpand = 10;
+
+  var el = $el[0];
+  var $div = null;  // The div representing the brush
+
+  var state = {};
+  reset();
+
+  function reset() {
+    // Current brushing/dragging/resizing state
+    state.brushing = false;
+    state.dragging = false;
+    state.resizing = false;
+
+    // Offset of last mouse down and up events
+    state.down = { x: NaN, y: NaN };
+    state.up   = { x: NaN, y: NaN };
+
+    // Which side(s) we're currently resizing
+    state.resizeSides = {
+      left: false,
+      right: false,
+      top: false,
+      bottom: false
+    };
+
+    // Bounding rectangle of the brush, in pixel and data dimensions. We need to
+    // record data dimensions along with pixel dimensions so that when a new
+    // plot is sent, we can re-draw the brush div with the appropriate coords.
+    state.boundsPx = {
+      xmin: NaN,
+      xmax: NaN,
+      ymin: NaN,
+      ymax: NaN
+    };
+    state.boundsData = {
+      xmin: NaN,
+      xmax: NaN,
+      ymin: NaN,
+      ymax: NaN
+    };
+
+    // Panel object that the brush is in
+    state.panel = null;
+
+    // The bounds at the start of a drag/resize
+    state.changeStartBounds = {
+      xmin: NaN,
+      xmax: NaN,
+      ymin: NaN,
+      ymax: NaN
+    };
+
+    if ($div)
+      $div.remove();
+  }
+
+  // If there's an existing brush div, use that div to set the new brush's
+  // settings, provided that the x, y, and panel variables have the same names,
+  // and there's a panel with matching panel variable values.
+  function importOldBrush() {
+    var oldDiv = $el.find('#' + el.id + '_brush');
+    if (oldDiv.length === 0)
+      return;
+
+    var oldBoundsData = oldDiv.data('bounds-data');
+    var oldPanel = oldDiv.data('panel');
+
+    if (!oldBoundsData || !oldPanel)
+      return;
+
+    // Compare two objects. This checks that objects a and b have the same est
+    // of keys, and that each key has the same value. This function isn't
+    // perfect, but it's good enough for comparing variable mappings, below.
+    function isEquivalent(a, b) {
+      if (a === undefined) {
+        if (b === undefined)
+          return true;
+        else
+          return false;
+      }
+      if (a === null) {
+        if (b === null)
+          return true;
+        else
+          return false;
+      }
+
+      var aProps = Object.getOwnPropertyNames(a);
+      var bProps = Object.getOwnPropertyNames(b);
+
+      if (aProps.length != bProps.length)
+        return false;
+
+      for (var i=0; i<aProps.length; i++) {
+        var propName = aProps[i];
+        if (a[propName] !== b[propName]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Find a panel that has matching vars; if none found, we can't restore.
+    // The oldPanel and new panel must match on their mapping vars, and the
+    // values.
+    for (var i=0; i<coordmap.length; i++){
+      var curPanel = coordmap[i];
+
+      if (isEquivalent(oldPanel.mapping, curPanel.mapping) &&
+          isEquivalent(oldPanel.panel_vars, curPanel.panel_vars)) {
+        // We've found a matching panel
+        state.panel = coordmap[i];
+        break;
+      }
+    }
+
+    // If we didn't find a matching panel, remove the old div and return
+    if (state.panel === null) {
+      oldDiv.remove();
+      return;
+    }
+
+    $div = oldDiv;
+
+    boundsData(oldBoundsData);
+    updateDiv();
+  }
+
+  // Return true if the offset is inside min/max coords
+  function isInsideBrush(offset) {
+    var bounds = state.boundsPx;
+    return offset.x <= bounds.xmax && offset.x >= bounds.xmin &&
+           offset.y <= bounds.ymax && offset.y >= bounds.ymin;
+  }
+
+  // Return true if offset is inside a region to start a resize
+  function isInResizeArea(offset) {
+    var sides = whichResizeSides(offset);
+    return sides.left || sides.right || sides.top || sides.bottom;
+  }
+
+  // Return an object representing which resize region(s) the cursor is in.
+  function whichResizeSides(offset) {
+    var b = state.boundsPx;
+    // Bounds with expansion
+    var e = {
+      xmin: b.xmin - resizeExpand,
+      xmax: b.xmax + resizeExpand,
+      ymin: b.ymin - resizeExpand,
+      ymax: b.ymax + resizeExpand
+    };
+    var res = {
+      left: false,
+      right: false,
+      top: false,
+      bottom: false
+    };
+
+    if ((opts.brushDirection === 'xy' || opts.brushDirection === 'x') &&
+        (offset.y <= e.ymax && offset.y >= e.ymin))
+    {
+      if (offset.x < b.xmin && offset.x >= e.xmin)
+        res.left = true;
+      else if (offset.x > b.xmax && offset.x <= e.xmax)
+        res.right = true;
+    }
+
+    if ((opts.brushDirection === 'xy' || opts.brushDirection === 'y') &&
+        (offset.x <= e.xmax && offset.x >= e.xmin))
+    {
+      if (offset.y < b.ymin && offset.y >= e.ymin)
+        res.top = true;
+      else if (offset.y > b.ymax && offset.y <= e.ymax)
+        res.bottom = true;
+    }
+
+    return res;
+  }
+
+
+  // Sets the bounds of the brush, given a box and optional panel. This
+  // will fit the box bounds into the panel, so we don't brush outside of it.
+  // This knows whether we're brushing in the x, y, or xy directions, and sets
+  // bounds accordingly.
+  // If no box is passed in, return current bounds.
+  function boundsPx(box) {
+    if (box === undefined)
+      return state.boundsPx;
+
+    var min = { x: box.xmin, y: box.ymin };
+    var max = { x: box.xmax, y: box.ymax };
+
+    var panel = state.panel;
+    var panelBounds = panel.range;
+
+    if (opts.brushClip) {
+      min = panel.clip(min);
+      max = panel.clip(max);
+    }
+
+    if (opts.brushDirection === 'xy') {
+      // No change
+
+    } else if (opts.brushDirection === 'x') {
+      // Extend top and bottom of plotting area
+      min.y = panelBounds.top;
+      max.y = panelBounds.bottom;
+
+    } else if (opts.brushDirection === 'y') {
+      min.x = panelBounds.left;
+      max.x = panelBounds.right;
+    }
+
+    state.boundsPx = {
+      xmin: min.x,
+      xmax: max.x,
+      ymin: min.y,
+      ymax: max.y
+    };
+
+    // Positions in data space
+    var minData = state.panel.scaleInv(min);
+    var maxData = state.panel.scaleInv(max);
+    // For reversed scales, the min and max can be reversed, so use findBox
+    // to ensure correct order.
+    state.boundsData = coordmap.findBox(minData, maxData);
+
+    // We also need to attach the data bounds and panel as data attributes, so
+    // that if the image is re-sent, we can grab the data bounds to create a new
+    // brush. This should be fast because it doesn't actually modify the DOM.
+    $div.data('bounds-data', state.boundsData);
+    $div.data('panel', state.panel);
+  }
+
+  // Get or set the bounds of the brush using coordinates in the data space.
+  function boundsData(box) {
+    if (box === undefined) {
+      return state.boundsData;
+    }
+
+    var min = { x: box.xmin, y: box.ymin };
+    var max = { x: box.xmax, y: box.ymax };
+
+    var minPx = state.panel.scale(min);
+    var maxPx = state.panel.scale(max);
+
+    // The scaling function can reverse the direction of the axes, so we need to
+    // find the min and max again.
+    boundsPx({
+      xmin: Math.min(minPx.x, maxPx.x),
+      xmax: Math.max(minPx.x, maxPx.x),
+      ymin: Math.min(minPx.y, maxPx.y),
+      ymax: Math.max(minPx.y, maxPx.y)
+    });
+  }
+
+  function getPanel() {
+    return state.panel;
+  }
+
+  // Add a new div representing the brush.
+  function addDiv() {
+    if ($div) $div.remove();
+
+    $div = $(document.createElement('div'))
+      .attr('id', el.id + '_brush')
+      .css({
+        'background-color': opts.brushFill,
+        'opacity': opts.brushOpacity,
+        'pointer-events': 'none',
+        'position': 'absolute'
+      });
+
+    var borderStyle = '1px solid ' + opts.brushStroke;
+    if (opts.brushDirection === 'xy') {
+      $div.css({
+        'border': borderStyle
+      });
+    } else if (opts.brushDirection === 'x') {
+      $div.css({
+        'border-left': borderStyle,
+        'border-right': borderStyle
+      });
+    } else if (opts.brushDirection === 'y') {
+      $div.css({
+        'border-top': borderStyle,
+        'border-bottom': borderStyle
+      });
+    }
+
+    $el.append($div);
+    $div.offset({x:0, y:0}).width(0).outerHeight(0).show();
+  }
+
+  // Update the brush div to reflect the current brush bounds.
+  function updateDiv() {
+    // Need parent offset relative to page to calculate mouse offset
+    // relative to page.
+    var imgOffset = $el.offset();
+    var b = state.boundsPx;
+    $div.offset({
+        top: imgOffset.top + b.ymin,
+        left: imgOffset.left + b.xmin
+      })
+      .outerWidth(b.xmax - b.xmin + 1)
+      .outerHeight(b.ymax - b.ymin + 1)
+      .show();
+  }
+
+  function down(offset) {
+    if (offset === undefined)
+      return state.down;
+
+    state.down = offset;
+  }
+
+  function up(offset) {
+    if (offset === undefined)
+      return state.up;
+
+    state.up = offset;
+  }
+
+  function isBrushing() {
+    return state.brushing;
+  }
+
+  function startBrushing() {
+    state.brushing = true;
+    addDiv();
+    state.panel = coordmap.getPanel(state.down, expandPixels);
+
+    boundsPx(coordmap.findBox(state.down, state.down));
+    updateDiv();
+  }
+
+  function brushTo(offset) {
+    boundsPx(coordmap.findBox(state.down, offset));
+    updateDiv();
+  }
+
+  function stopBrushing() {
+    state.brushing = false;
+
+    // Save the final bounding box of the brush
+    boundsPx(coordmap.findBox(state.down, state.up));
+  }
+
+  function isDragging() {
+    return state.dragging;
+  }
+
+  function startDragging() {
+    state.dragging = true;
+    state.changeStartBounds = $.extend({}, state.boundsPx);
+  }
+
+  function dragTo(offset) {
+    // How far the brush was dragged
+    var dx = offset.x - state.down.x;
+    var dy = offset.y - state.down.y;
+
+    // Calculate what new positions would be, before clipping.
+    var start = state.changeStartBounds;
+    var newBounds = {
+      xmin: start.xmin + dx,
+      xmax: start.xmax + dx,
+      ymin: start.ymin + dy,
+      ymax: start.ymax + dy
+    };
+
+    // Clip to the plotting area
+    if (opts.brushClip) {
+      var panelBounds = state.panel.range;
+
+      // Convert to format for shiftToRange
+      var xvals = [ newBounds.xmin, newBounds.xmax ];
+      var yvals = [ newBounds.ymin, newBounds.ymax ];
+
+      xvals = coordmap.shiftToRange(xvals, panelBounds.left, panelBounds.right);
+      yvals = coordmap.shiftToRange(yvals, panelBounds.top,  panelBounds.bottom);
+
+      // Convert back to bounds format
+      newBounds = {
+        xmin: xvals[0],
+        xmax: xvals[1],
+        ymin: yvals[0],
+        ymax: yvals[1]
+      };
+    }
+
+    boundsPx(newBounds);
+    updateDiv();
+  }
+
+  function stopDragging() {
+    state.dragging = false;
+  }
+
+  function isResizing() {
+    return state.resizing;
+  }
+
+  function startResizing() {
+    state.resizing = true;
+    state.changeStartBounds = $.extend({}, state.boundsPx);
+    state.resizeSides = whichResizeSides(state.down);
+  }
+
+  function resizeTo(offset) {
+    // How far the brush was dragged
+    var dx = offset.x - state.down.x;
+    var dy = offset.y - state.down.y;
+
+    // Calculate what new positions would be, before clipping.
+    var b = $.extend({}, state.changeStartBounds);
+    var panelBounds = state.panel.range;
+
+    if (state.resizeSides.left) {
+      b.xmin = coordmap.shiftToRange([b.xmin + dx], panelBounds.left, b.xmax)[0];
+    } else if (state.resizeSides.right) {
+      b.xmax = coordmap.shiftToRange([b.xmax + dx], b.xmin, panelBounds.right)[0];
+    }
+
+    if (state.resizeSides.top) {
+      b.ymin = coordmap.shiftToRange([b.ymin + dy], panelBounds.top, b.ymax)[0];
+    } else if (state.resizeSides.bottom) {
+      b.ymax = coordmap.shiftToRange([b.ymax + dy], b.ymin, panelBounds.bottom)[0];
+    }
+
+    boundsPx(b);
+    updateDiv();
+  }
+
+  function stopResizing() {
+    state.resizing = false;
+  }
+
+  return {
+    reset: reset,
+
+    importOldBrush: importOldBrush,
+    isInsideBrush: isInsideBrush,
+    isInResizeArea: isInResizeArea,
+    whichResizeSides: whichResizeSides,
+
+    boundsPx: boundsPx,
+    boundsData: boundsData,
+    getPanel: getPanel,
+
+    down: down,
+    up: up,
+
+    isBrushing: isBrushing,
+    startBrushing: startBrushing,
+    brushTo: brushTo,
+    stopBrushing: stopBrushing,
+
+    isDragging: isDragging,
+    startDragging: startDragging,
+    dragTo: dragTo,
+    stopDragging: stopDragging,
+
+    isResizing: isResizing,
+    startResizing: startResizing,
+    resizeTo: resizeTo,
+    stopResizing: stopResizing
+  };
+};

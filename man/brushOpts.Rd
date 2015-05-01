@@ -4,7 +4,7 @@
 \alias{brushOpts}
 \title{Create an object representing brushing options}
 \usage{
-brushOpts(id = NULL, fill = "#666", stroke = "#000", opacity = 0.3,
+brushOpts(id = NULL, fill = "#9cf", stroke = "#036", opacity = 0.25,
   delay = 300, delayType = c("debounce", "throttle"), clip = TRUE,
   direction = c("xy", "x", "y"), resetOnNew = FALSE)
 }

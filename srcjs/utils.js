@@ -147,7 +147,7 @@ function scopeExprToFunc(expr) {
 }
 
 function asArray(value) {
-  if (value === null)
+  if (value === null || value === undefined)
     return [];
   if ($.isArray(value))
     return value;

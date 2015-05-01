@@ -78,6 +78,57 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   df[keep_rows, , drop = FALSE]
 }
 
+# The `brush` data structure will look something like the examples below.
+# For base graphics, `mapping` is empty, and there are no panelvars:
+# List of 8
+#  $ xmin   : num 3.73
+#  $ xmax   : num 4.22
+#  $ ymin   : num 13.9
+#  $ ymax   : num 19.8
+#  $ mapping: Named list()
+#  $ domain :List of 4
+#   ..$ left  : num 1.36
+#   ..$ right : num 5.58
+#   ..$ bottom: num 9.46
+#   ..$ top   : num 34.8
+#  $ range  :List of 4
+#   ..$ left  : num 58
+#   ..$ right : num 429
+#   ..$ bottom: num 226
+#   ..$ top   : num 58
+#  $ log    :List of 2
+#   ..$ x: NULL
+#   ..$ y: NULL
+#
+# For ggplot2, the mapping vars usually will be included, and if faceting is
+# used, they will be listed as panelvars:
+# List of 10
+#  $ xmin     : num 3.18
+#  $ xmax     : num 3.78
+#  $ ymin     : num 17.1
+#  $ ymax     : num 20.4
+#  $ panelvar1: int 6
+#  $ panelvar2: int 0
+#  $ mapping  :List of 4
+#   ..$ x        : chr "wt"
+#   ..$ y        : chr "mpg"
+#   ..$ panelvar1: chr "cyl"
+#   ..$ panelvar2: chr "am"
+#  $ domain   :List of 4
+#   ..$ left  : num 1.32
+#   ..$ right : num 5.62
+#   ..$ bottom: num 9.22
+#   ..$ top   : num 35.1
+#  $ range    :List of 4
+#   ..$ left  : num 172
+#   ..$ right : num 300
+#   ..$ bottom: num 144
+#   ..$ top   : num 28.5
+#  $ log      :List of 2
+#   ..$ x: NULL
+#   ..$ y: NULL
+
+
 #' Find rows of data that are near a click/hover/double-click
 #'
 #' This function returns rows from a data frame which are near a click, hover,
@@ -176,6 +227,56 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   df
 }
 
+# The coordinfo data structure will look something like the examples below.
+# For base graphics, `mapping` is empty, and there are no panelvars:
+# List of 7
+#  $ x      : num 4.37
+#  $ y      : num 12
+#  $ mapping: Named list()
+#  $ domain :List of 4
+#   ..$ left  : num 1.36
+#   ..$ right : num 5.58
+#   ..$ bottom: num 9.46
+#   ..$ top   : num 34.8
+#  $ range  :List of 4
+#   ..$ left  : num 58
+#   ..$ right : num 429
+#   ..$ bottom: num 226
+#   ..$ top   : num 58
+#  $ log    :List of 2
+#   ..$ x: NULL
+#   ..$ y: NULL
+#  $ .nonce : num 0.343
+#
+# For ggplot2, the mapping vars usually will be included, and if faceting is
+# used, they will be listed as panelvars:
+# List of 9
+#  $ x        : num 3.78
+#  $ y        : num 17.1
+#  $ panelvar1: int 6
+#  $ panelvar2: int 0
+#  $ mapping  :List of 4
+#   ..$ x        : chr "wt"
+#   ..$ y        : chr "mpg"
+#   ..$ panelvar1: chr "cyl"
+#   ..$ panelvar2: chr "am"
+#  $ domain   :List of 4
+#   ..$ left  : num 1.32
+#   ..$ right : num 5.62
+#   ..$ bottom: num 9.22
+#   ..$ top   : num 35.1
+#  $ range    :List of 4
+#   ..$ left  : num 172
+#   ..$ right : num 300
+#   ..$ bottom: num 144
+#   ..$ top   : num 28.5
+#  $ log      :List of 2
+#   ..$ x: NULL
+#   ..$ y: NULL
+#  $ .nonce   : num 0.603
+
+
+
 # Coerce various types of variables to numbers. This works for Date, POSIXt,
 # characters, and factors. Used because the mouse coords are numeric.
 asNumber <- function(x) {
@@ -184,12 +285,12 @@ asNumber <- function(x) {
   as.numeric(x)
 }
 
-# Given
+# Given a panelvar value and a vector x, return logical vector indicating which
+# items match the panelvar value. Because the panelvar value is always a
+# string but the vector could be numeric, it might be necessary to coerce the
+# panelvar to a number before comparing to the vector.
 panelMatch <- function(search_value, x) {
-  # search_value is always a character; may need to coerce to number to match
-  # x, because the faceting var might be numeric.
   if (is.numeric(x)) search_value <- as.numeric(search_value)
-
   x == search_value
 }
 

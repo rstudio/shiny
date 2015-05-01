@@ -124,6 +124,115 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   }))
 }
 
+# The coordmap extraction functions below return something like the examples
+# below. For base graphics:
+# plot(mtcars$wt, mtcars$mpg)
+# str(getPrevPlotCoordmap(400, 300))
+# List of 1
+#  $ :List of 4
+#   ..$ domain :List of 4
+#   .. ..$ left  : num 1.36
+#   .. ..$ right : num 5.58
+#   .. ..$ bottom: num 9.46
+#   .. ..$ top   : num 34.8
+#   ..$ range  :List of 4
+#   .. ..$ left  : num 50.4
+#   .. ..$ right : num 373
+#   .. ..$ bottom: num 199
+#   .. ..$ top   : num 79.6
+#   ..$ log    :List of 2
+#   .. ..$ x: NULL
+#   .. ..$ y: NULL
+#   ..$ mapping: Named list()
+#
+# For ggplot2, it might be something like:
+# p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
+# str(getGgplotCoordmap(p, 1))
+# List of 1
+#  $ :List of 10
+#   ..$ panel     : int 1
+#   ..$ row       : int 1
+#   ..$ col       : int 1
+#   ..$ panel_vars: Named list()
+#   ..$ scale_x   : int 1
+#   ..$ scale_y   : int 1
+#   ..$ log       :List of 2
+#   .. ..$ x: NULL
+#   .. ..$ y: NULL
+#   ..$ domain    :List of 4
+#   .. ..$ left  : num 1.32
+#   .. ..$ right : num 5.62
+#   .. ..$ bottom: num 9.22
+#   .. ..$ top   : num 35.1
+#   ..$ mapping   :List of 2
+#   .. ..$ x: chr "wt"
+#   .. ..$ y: chr "mpg"
+#   ..$ range     :List of 4
+#   .. ..$ left  : num 40.8
+#   .. ..$ right : num 446
+#   .. ..$ bottom: num 263
+#   .. ..$ top   : num 14.4
+#
+# With a faceted ggplot2 plot, the outer list contains two objects, each of
+# which represents one panel. In this example, there is one panelvar, but there
+# can be up to two of them.
+# mtc <- mtcars
+# mtc$am <- factor(mtc$am)
+# p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + facet_wrap(~ am)
+# str(getGgplotCoordmap(p, 1))
+# List of 2
+#  $ :List of 10
+#   ..$ panel     : int 1
+#   ..$ row       : int 1
+#   ..$ col       : int 1
+#   ..$ panel_vars:List of 1
+#   .. ..$ panelvar1: Factor w/ 2 levels "0","1": 1
+#   ..$ scale_x   : int 1
+#   ..$ scale_y   : int 1
+#   ..$ log       :List of 2
+#   .. ..$ x: NULL
+#   .. ..$ y: NULL
+#   ..$ domain    :List of 4
+#   .. ..$ left  : num 1.32
+#   .. ..$ right : num 5.62
+#   .. ..$ bottom: num 9.22
+#   .. ..$ top   : num 35.1
+#   ..$ mapping   :List of 3
+#   .. ..$ x        : chr "wt"
+#   .. ..$ y        : chr "mpg"
+#   .. ..$ panelvar1: chr "am"
+#   ..$ range     :List of 4
+#   .. ..$ left  : num 45.6
+#   .. ..$ right : num 317
+#   .. ..$ bottom: num 251
+#   .. ..$ top   : num 35.7
+#  $ :List of 10
+#   ..$ panel     : int 2
+#   ..$ row       : int 1
+#   ..$ col       : int 2
+#   ..$ panel_vars:List of 1
+#   .. ..$ panelvar1: Factor w/ 2 levels "0","1": 2
+#   ..$ scale_x   : int 1
+#   ..$ scale_y   : int 1
+#   ..$ log       :List of 2
+#   .. ..$ x: NULL
+#   .. ..$ y: NULL
+#   ..$ domain    :List of 4
+#   .. ..$ left  : num 1.32
+#   .. ..$ right : num 5.62
+#   .. ..$ bottom: num 9.22
+#   .. ..$ top   : num 35.1
+#   ..$ mapping   :List of 3
+#   .. ..$ x        : chr "wt"
+#   .. ..$ y        : chr "mpg"
+#   .. ..$ panelvar1: chr "am"
+#   ..$ range     :List of 4
+#   .. ..$ left  : num 322
+#   .. ..$ right : num 594
+#   .. ..$ bottom: num 251
+#   .. ..$ top   : num 35.7
+
+
 # Get a coordmap for the previous plot made with base graphics.
 # Requires width and height of output image, in pixels.
 # Must be called before the graphics device is closed.

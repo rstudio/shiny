@@ -257,8 +257,8 @@ getPrevPlotCoordmap <- function(width, height) {
     ),
     # The bounds of the plot area, in DOM pixels
     range = list(
-      left = grconvertX(usrBounds[1], 'user', 'nfc') * width - 1,
-      right = grconvertX(usrBounds[2], 'user', 'nfc') * width - 1,
+      left = grconvertX(usrBounds[1], 'user', 'nfc') * width,
+      right = grconvertX(usrBounds[2], 'user', 'nfc') * width,
       bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height - 1,
       top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height - 1
     ),

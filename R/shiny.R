@@ -250,6 +250,7 @@ ShinySession <- R6Class(
     closedCallbacks = 'Callbacks',
     flushCallbacks = 'Callbacks',
     flushedCallbacks = 'Callbacks',
+    inputReceivedCallbacks = 'Callbacks',
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
         warning("Tried to send response for untagged message; method: ",
@@ -327,6 +328,7 @@ ShinySession <- R6Class(
       private$closedCallbacks <- Callbacks$new()
       private$flushCallbacks <- Callbacks$new()
       private$flushedCallbacks <- Callbacks$new()
+      private$inputReceivedCallbacks <- Callbacks$new()
       private$.input      <- ReactiveValues$new()
       private$.clientData <- ReactiveValues$new()
       self$progressStack <- Stack$new()
@@ -372,6 +374,11 @@ ShinySession <- R6Class(
     onEnded = function(callback) {
       "Synonym for onSessionEnded"
       return(self$onSessionEnded(callback))
+    },
+    onInputReceived = function(callback) {
+      "Registers the given callback to be invoked when the session receives
+      new data from the client."
+      return(private$inputReceivedCallbacks$register(callback))
     },
     unhandledError = function(e) {
       self$close()
@@ -821,6 +828,9 @@ ShinySession <- R6Class(
     },
     # Set the normal and client data input variables
     manageInputs = function(data) {
+
+      private$inputReceivedCallbacks$invoke(data)
+
       data_names <- names(data)
 
       # Separate normal input variables from client data input variables

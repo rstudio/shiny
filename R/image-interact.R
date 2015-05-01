@@ -14,8 +14,8 @@
 #' column names; that information will already be contained in the brush,
 #' provided that variables are in the original data, and not computed. For
 #' example, with \code{ggplot(cars, aes(x=speed, y=dist)) + geom_point()}, you
-#' could use \code{brushedPoints(cars, input$cars_brush)}. If, however, you use a
-#' computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) +
+#' could use \code{brushedPoints(cars, input$cars_brush)}. If, however, you use
+#' a computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) +
 #' geom_point()}, then it will not be able to automatically extract column names
 #' and filter on them. If you want to use this function to filter data, it is
 #' recommended that you not use computed columns; instead, modify the data
@@ -26,12 +26,16 @@
 #' factor and then integer vector. This means that the brush will be considered
 #' to cover a given character/factor value when it covers the center value.
 #'
+#' If the brush is operating in just the x or y directions (e.g., with
+#' \code{brushOpts(direction = "x")}, then this function will filter out points
+#' using just the x or y variable, whichever is appropriate.
+#'
 #' @param brush The data from a brush, such as \code{input$plot_brush}.
 #' @param df A data frame from which to select rows.
-#' @param xvar,yvar A string with the name of the variable on the x or y axis. This must
-#'   also be the name of a column in \code{df}. If absent, then
-#'   this function will try to infer the variable from the brush (only
-#'   works for ggplot2).
+#' @param xvar,yvar A string with the name of the variable on the x or y axis.
+#'   This must also be the name of a column in \code{df}. If absent, then this
+#'   function will try to infer the variable from the brush (only works for
+#'   ggplot2).
 #' @param panelvar1,panelvar2 Each of these is a string with the name of a panel
 #'   variable. For example, if with ggplot2, you facet on a variable called
 #'   \code{cyl}, then you can use \code{"cyl"} here. However, specifying the
@@ -41,7 +45,7 @@
 #' @seealso \code{\link{plotOutput}} for example usage.
 #' @export
 brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
-                        panelvar1 = NULL, panelvar2 = NULL) {
+                          panelvar1 = NULL, panelvar2 = NULL) {
   if (is.null(brush)) {
     return(df[0, , drop = FALSE])
   }
@@ -50,24 +54,32 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
     stop("brushedPoints requires a brush object with xmin, xmax, ymin, and ymax.")
   }
 
+  # Which direction(s) the brush is selecting over. Direction can be 'x', 'y',
+  # or 'xy'.
+  use_x <- grepl("x", brush$direction)
+  use_y <- grepl("y", brush$direction)
+
   # Try to extract vars from brush object
   xvar      <- xvar      %OR% brush$mapping$x
   yvar      <- yvar      %OR% brush$mapping$y
   panelvar1 <- panelvar1 %OR% brush$mapping$panelvar1
   panelvar2 <- panelvar2 %OR% brush$mapping$panelvar2
 
-  if (is.null(xvar))
-    stop("brushedPoints: not able to automatically infer `xvar` from brush")
-  if (is.null(yvar))
-    stop("brushedPoints: not able to automatically infer `yvar` from brush")
-
-  # Extract data values from the data frame
-  x <- asNumber(df[[xvar]])
-  y <- asNumber(df[[yvar]])
-
   # Filter out x and y values
-  keep_rows <- (x >= brush$xmin & x <= brush$xmax &
-                y >= brush$ymin & y <= brush$ymax)
+  keep_rows <- rep(TRUE, nrow(df))
+  if (use_x) {
+    if (is.null(xvar))
+      stop("brushedPoints: not able to automatically infer `xvar` from brush")
+    # Extract data values from the data frame
+    x <- asNumber(df[[xvar]])
+    keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
+  }
+  if (use_y) {
+    if (is.null(yvar))
+      stop("brushedPoints: not able to automatically infer `yvar` from brush")
+    y <- asNumber(df[[yvar]])
+    keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
+  }
 
   # Find which rows are matches for the panel vars (if present)
   if (!is.null(panelvar1))
@@ -99,6 +111,7 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ log    :List of 2
 #   ..$ x: NULL
 #   ..$ y: NULL
+#  $ direction: chr "y"
 #
 # For ggplot2, the mapping vars usually will be included, and if faceting is
 # used, they will be listed as panelvars:
@@ -127,6 +140,7 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ log      :List of 2
 #   ..$ x: NULL
 #   ..$ y: NULL
+#  $ direction: chr "y"
 
 
 #' Find rows of data that are near a click/hover/double-click

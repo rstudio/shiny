@@ -608,6 +608,8 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
     coords.range  = panel.range;
     coords.log    = panel.log;
 
+    coords.direction = opts.brushDirection;
+
     // Send data to server
     exports.onInputChange(inputId, coords);
   }

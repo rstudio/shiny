@@ -6,8 +6,15 @@ shiny 0.11.1.9xxx
   POSIXt objects are now serialized to JSON in UTC8601 format (like
   "2015-03-20T20:00:00Z"), instead of as seconds from the epoch).
 
-* In addition to existing support for clicking and hovering on plots (created by
-  base graphics), added support for double-clicking and brushing. (#769)
+* In addition to the existing support for clicking and hovering on plots
+  created by base graphics, added support for double-clicking and brushing.
+  (#769)
+
+* Added support for clicking, hovering, double-clicking, and brushing for
+  plots created by ggplot2, including support for facets. (#802)
+
+* Added `nearPoints` and `brushedPoints` functions for easily selecting rows of
+  data that are clicked/hovered, or brushed. (#802)
 
 * Added `shiny.port` option. If this is option is set, `runApp()` will listen on
   this port by default. (#756)

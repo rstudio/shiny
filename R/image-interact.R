@@ -185,7 +185,11 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
                        panelvar1 = NULL, panelvar2 = NULL,
                        threshold = 5, maxrows = NULL, addDist = FALSE) {
   if (is.null(coordinfo)) {
-    return(df[0, , drop = FALSE])
+    res <- df[0, , drop = FALSE]
+    if (addDist)
+      res$`_dist` <- numeric(0)
+
+    return(res)
   }
 
   if (is.null(coordinfo$x)) {

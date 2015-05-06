@@ -17,6 +17,9 @@ sudo npm install -g grunt-cli
 
 # Install grunt plus modules for this project
 npm install
+
+# To update modules in the future
+npm update
 ```
 
 ### Using Grunt

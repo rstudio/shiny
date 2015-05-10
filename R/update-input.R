@@ -481,7 +481,7 @@ selectizeJSON <- function(data, req) {
     idx <- idx | apply(matches, 1, cjn)
   }
   # only return the first n rows (n = maximum options in configuration)
-  idx <- head(which(idx), mop)
+  idx <- head(if (length(key)) which(idx) else seq_along(idx), mop)
   data <- data[idx, ]
 
   res <- toJSON(columnToRowData(data))

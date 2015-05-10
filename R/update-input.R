@@ -434,9 +434,6 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
   if (!server) {
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
-  # in the server mode, the choices are not available before we type, so we
-  # cannot really pre-select any options, but here we insert the `selected`
-  # options into selectize forcibly
   value <- unname(selected)
   selected <- choicesWithNames(selected)
   message <- dropNulls(list(

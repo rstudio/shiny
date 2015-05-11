@@ -5,7 +5,8 @@
 \title{Find rows of data that are near a click/hover/double-click}
 \usage{
 nearPoints(df, coordinfo, xvar = NULL, yvar = NULL, panelvar1 = NULL,
-  panelvar2 = NULL, threshold = 5, maxrows = NULL, addDist = FALSE)
+  panelvar2 = NULL, threshold = 5, maxpoints = NULL, addDist = FALSE,
+  allRows = FALSE)
 }
 \arguments{
 \item{df}{A data frame from which to select rows.}
@@ -23,36 +24,49 @@ function will try to infer the variable from the brush (only works for
 ggplot2).}
 
 \item{panelvar1}{Each of these is a string with the name of a panel
-  variable. For example, if with ggplot2, you facet on a variable called
-  \code{cyl}, then you can use \code{"cyl"} here. However, specifying the
-  panel variable should not be necessary with ggplot2; Shiny should be able
-  to auto-detect the panel variable.}
+variable. For example, if with ggplot2, you facet on a variable called
+\code{cyl}, then you can use \code{"cyl"} here. However, specifying the
+panel variable should not be necessary with ggplot2; Shiny should be able
+to auto-detect the panel variable.}
 
 \item{panelvar2}{Each of these is a string with the name of a panel
-  variable. For example, if with ggplot2, you facet on a variable called
-  \code{cyl}, then you can use \code{"cyl"} here. However, specifying the
-  panel variable should not be necessary with ggplot2; Shiny should be able
-  to auto-detect the panel variable.}
+variable. For example, if with ggplot2, you facet on a variable called
+\code{cyl}, then you can use \code{"cyl"} here. However, specifying the
+panel variable should not be necessary with ggplot2; Shiny should be able
+to auto-detect the panel variable.}
 
 \item{threshold}{A maxmimum distance to the click point; rows in the data
 frame where the distance to the click is less than \code{threshold} will be
 returned.}
 
-\item{maxrows}{Maximum number of rows to return. If NULL (the default),
+\item{maxpoints}{Maximum number of rows to return. If NULL (the default),
 return all rows that are within the threshold distance.}
 
-\item{addDist}{If TRUE, add a column named \code{_dist} that contains the
-  distance from the coordinate to the point, in pixels.}
+\item{addDist}{If TRUE, add a column named \code{dist_} that contains the
+distance from the coordinate to the point, in pixels. When no mouse event
+has yet occured, the value of \code{dist_} will be \code{NA}.}
+
+\item{allRows}{If \code{FALSE} (the default) return a data frame containing
+ the selected rows. If \code{TRUE}, the input data frame will have a new
+ column, \code{selected_}, which indicates whether the row was inside the
+ selected by the mouse event (\code{TRUE}) or not (\code{FALSE}).}
 }
 \description{
-This function returns rows from a data frame which are near a click, hover,
-or double-click, when used with \code{\link{plotOutput}}. The rows will be
-sorted by their distance to the mouse event.
+This function returns rows from a data frame which are near a click, hover, or
+double-click, when used with \code{\link{plotOutput}}. The rows will be sorted
+by their distance to the mouse event.
 }
 \details{
-The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2}
-arguments specify which columns in the data correspond to the x variable, y
-variable, and panel variables of the plot. For example, if your plot is
+It is also possible for this function to return all rows from the input data
+frame, but with an additional column \code{selected_}, which indicates which
+rows of the input data frame are selected by the brush (\code{TRUE} for
+selected, \code{FALSE} for not-selected). This is enabled by setting
+\code{allRows=TRUE} option. If this is used, the resulting data frame will not
+be sorted by distance to the mouse event.
+
+The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2} arguments
+specify which columns in the data correspond to the x variable, y variable,
+and panel variables of the plot. For example, if your plot is
 \code{plot(x=cars$speed, y=cars$dist)}, and your click variable is named
 \code{"cars_click"}, then you would use \code{nearPoints(cars,
 input$cars_brush, "speed", "dist")}.
@@ -66,7 +80,7 @@ input$cars_brush, "speed", "dist")}.
 nearPoints(mtcars, input$plot_click)
 
 # Select just the nearest point within 10 pixels of the click
-nearPoints(mtcars, input$plot_click, threshold = 10, maxrows = 1)
+nearPoints(mtcars, input$plot_click, threshold = 10, maxpoints = 1)
 
 }
 }

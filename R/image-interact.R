@@ -3,6 +3,12 @@
 #' This function returns rows from a data frame which are under a brush used
 #' with \code{\link{plotOutput}}.
 #'
+#' It is also possible for this function to return all rows from the input data
+#' frame, but with an additional column \code{selected_}, which indicates which
+#' rows of the input data frame are selected by the brush (\code{TRUE} for
+#' selected, \code{FALSE} for not-selected). This is enabled by setting
+#' \code{allRows=TRUE} option.
+#'
 #' The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2}
 #' arguments specify which columns in the data correspond to the x variable, y
 #' variable, and panel variables of the plot. For example, if your plot is
@@ -41,13 +47,23 @@
 #'   \code{cyl}, then you can use \code{"cyl"} here. However, specifying the
 #'   panel variable should not be necessary with ggplot2; Shiny should be able
 #'   to auto-detect the panel variable.
+#' @param allRows If \code{FALSE} (the default) return a data frame containing
+#'   the selected rows. If \code{TRUE}, the input data frame will have a new
+#'   column, \code{selected_}, which indicates whether the row was inside the
+#'   brush (\code{TRUE}) or outside the brush (\code{FALSE}).
 #'
 #' @seealso \code{\link{plotOutput}} for example usage.
 #' @export
 brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
-                          panelvar1 = NULL, panelvar2 = NULL) {
+                          panelvar1 = NULL, panelvar2 = NULL,
+                          allRows = FALSE) {
   if (is.null(brush)) {
-    return(df[0, , drop = FALSE])
+    if (allRows)
+      df$selected_ <- FALSE
+    else
+      df <- df[0, , drop = FALSE]
+
+    return(df)
   }
 
   if (is.null(brush$xmin)) {
@@ -87,7 +103,12 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   if (!is.null(panelvar2))
     keep_rows <- keep_rows & panelMatch(brush$panelvar2, df[[panelvar2]])
 
-  df[keep_rows, , drop = FALSE]
+  if (allRows) {
+    df$selected_ <- keep_rows
+    df
+  } else {
+    df[keep_rows, , drop = FALSE]
+  }
 }
 
 # The `brush` data structure will look something like the examples below.
@@ -143,30 +164,42 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ direction: chr "y"
 
 
-#' Find rows of data that are near a click/hover/double-click
+#'Find rows of data that are near a click/hover/double-click
 #'
-#' This function returns rows from a data frame which are near a click, hover,
-#' or double-click, when used with \code{\link{plotOutput}}. The rows will be
-#' sorted by their distance to the mouse event.
+#'This function returns rows from a data frame which are near a click, hover, or
+#'double-click, when used with \code{\link{plotOutput}}. The rows will be sorted
+#'by their distance to the mouse event.
 #'
-#' The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2}
-#' arguments specify which columns in the data correspond to the x variable, y
-#' variable, and panel variables of the plot. For example, if your plot is
-#' \code{plot(x=cars$speed, y=cars$dist)}, and your click variable is named
-#' \code{"cars_click"}, then you would use \code{nearPoints(cars,
-#' input$cars_brush, "speed", "dist")}.
+#'It is also possible for this function to return all rows from the input data
+#'frame, but with an additional column \code{selected_}, which indicates which
+#'rows of the input data frame are selected by the brush (\code{TRUE} for
+#'selected, \code{FALSE} for not-selected). This is enabled by setting
+#'\code{allRows=TRUE} option. If this is used, the resulting data frame will not
+#'be sorted by distance to the mouse event.
 #'
-#' @inheritParams brushedPoints
-#' @param coordinfo The data from a mouse event, such as \code{input$plot_click}.
-#' @param threshold A maxmimum distance to the click point; rows in the data
-#'   frame where the distance to the click is less than \code{threshold} will be
-#'   returned.
-#' @param maxrows Maximum number of rows to return. If NULL (the default),
-#'   return all rows that are within the threshold distance.
-#' @param addDist If TRUE, add a column named \code{_dist} that contains the
-#'   distance from the coordinate to the point, in pixels.
+#'The \code{xvar}, \code{yvar}, \code{panelvar1}, and \code{panelvar2} arguments
+#'specify which columns in the data correspond to the x variable, y variable,
+#'and panel variables of the plot. For example, if your plot is
+#'\code{plot(x=cars$speed, y=cars$dist)}, and your click variable is named
+#'\code{"cars_click"}, then you would use \code{nearPoints(cars,
+#'input$cars_brush, "speed", "dist")}.
 #'
-#' @seealso \code{\link{plotOutput}} for more examples.
+#'@inheritParams brushedPoints
+#'@param coordinfo The data from a mouse event, such as \code{input$plot_click}.
+#'@param threshold A maxmimum distance to the click point; rows in the data
+#'  frame where the distance to the click is less than \code{threshold} will be
+#'  returned.
+#'@param maxpoints Maximum number of rows to return. If NULL (the default),
+#'  return all rows that are within the threshold distance.
+#'@param addDist If TRUE, add a column named \code{dist_} that contains the
+#'  distance from the coordinate to the point, in pixels. When no mouse event
+#'  has yet occured, the value of \code{dist_} will be \code{NA}.
+#'@param allRows If \code{FALSE} (the default) return a data frame containing
+#'  the selected rows. If \code{TRUE}, the input data frame will have a new
+#'  column, \code{selected_}, which indicates whether the row was inside the
+#'  selected by the mouse event (\code{TRUE}) or not (\code{FALSE}).
+#'
+#'@seealso \code{\link{plotOutput}} for more examples.
 #'
 #' @examples
 #' \dontrun{
@@ -177,19 +210,24 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #' nearPoints(mtcars, input$plot_click)
 #'
 #' # Select just the nearest point within 10 pixels of the click
-#' nearPoints(mtcars, input$plot_click, threshold = 10, maxrows = 1)
+#' nearPoints(mtcars, input$plot_click, threshold = 10, maxpoints = 1)
 #'
 #' }
-#' @export
+#'@export
 nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
                        panelvar1 = NULL, panelvar2 = NULL,
-                       threshold = 5, maxrows = NULL, addDist = FALSE) {
+                       threshold = 5, maxpoints = NULL, addDist = FALSE,
+                       allRows = FALSE) {
   if (is.null(coordinfo)) {
-    res <- df[0, , drop = FALSE]
     if (addDist)
-      res$`_dist` <- numeric(0)
+      df$dist_ <- NA_real_
 
-    return(res)
+    if (allRows)
+      df$selected_ <- FALSE
+    else
+      df <- df[0, , drop = FALSE]
+
+    return(df)
   }
 
   if (is.null(coordinfo$x)) {
@@ -220,6 +258,9 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   # Distances of data points to coordPx
   dists <- sqrt((dataPx$x - coordPx$x) ^ 2 + (dataPx$y - coordPx$y) ^ 2)
 
+  if (addDist)
+    df$dist_ <- dists
+
   keep_rows <- (dists <= threshold)
 
   # Find which rows are matches for the panel vars (if present)
@@ -228,18 +269,27 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   if (!is.null(panelvar2))
     keep_rows <- keep_rows & panelMatch(coordinfo$panelvar2, df[[panelvar2]])
 
-  if (addDist)
-    df$`_dist` <- dists
+  # Track the indices to keep
+  keep_idx <- which(keep_rows)
 
-  df <- df[keep_rows, , drop = FALSE]
-
-  # Sort by distance
-  dists <- dists[keep_rows]
-  df <- df[order(dists), , drop = FALSE]
+  # Order by distance
+  dists <- dists[keep_idx]
+  keep_idx <- keep_idx[order(dists)]
 
   # Keep max number of rows
-  if (!is.null(maxrows) && nrow(df) > maxrows) {
-    df <- df[seq_len(maxrows), , drop = FALSE]
+  if (!is.null(maxpoints) && length(keep_idx) > maxpoints) {
+    keep_idx <- keep_idx[seq_len(maxpoints)]
+  }
+
+  if (allRows) {
+    # Add selected_ column if needed
+    df$selected_ <- FALSE
+    df$selected_[keep_idx] <- TRUE
+
+  } else {
+    # If we don't keep all rows, return just the selected rows, sorted by
+    # distance.
+    df <- df[keep_idx, , drop = FALSE]
   }
 
   df

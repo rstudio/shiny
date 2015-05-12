@@ -44,6 +44,7 @@ $.extend(imageOutputBinding, {
       hoverClip: OR($el.data('hover-clip'), true),
       hoverDelayType: OR($el.data('hover-delay-type'), 'debounce'),
       hoverDelay: OR($el.data('hover-delay'), 300),
+      hoverNullOutside: OR(strToBool($el.data('hover-null-outside')), false),
 
       brushId: $el.data('brush-id'),
       brushClip: OR(strToBool($el.data('brush-clip')), true),
@@ -107,8 +108,10 @@ $.extend(imageOutputBinding, {
 
     if (opts.hoverId) {
       var hoverHandler = imageutils.createHoverHandler(opts.hoverId,
-        opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.coordmap);
+        opts.hoverDelay, opts.hoverDelayType, opts.hoverClip,
+        opts.hoverNullOutside, opts.coordmap);
       $el.on('mousemove.image_output', hoverHandler.mousemove);
+      $el.on('mouseout.image_output', hoverHandler.mouseout);
 
       $img.on('remove', hoverHandler.onRemoveImg);
     }
@@ -396,8 +399,9 @@ imageutils.initCoordmap = function($el, coordmap) {
 
   // Returns a function that sends mouse coordinates, scaled to data space.
   // If that function is passed a null event, it will send null.
-  coordmap.mouseCoordinateSender = function(inputId, clip) {
-    clip = clip || true;
+  coordmap.mouseCoordinateSender = function(inputId, clip, nullOutside) {
+    if (clip === undefined) clip = true;
+    if (nullOutside === undefined) nullOutside = false;
 
     return function(e) {
       if (e === null) {
@@ -406,7 +410,15 @@ imageutils.initCoordmap = function($el, coordmap) {
       }
 
       var offset = coordmap.mouseOffset(e);
-      // Ignore events outside of plotting region
+      // If outside of plotting region
+      if (!coordmap.isInPanel(offset)) {
+        if (nullOutside) {
+          exports.onInputChange(inputId, null);
+          return;
+        }
+        if (clip)
+          return;
+      }
       if (clip && !coordmap.isInPanel(offset)) return;
 
       var panel = coordmap.getPanel(offset);
@@ -550,8 +562,10 @@ imageutils.createClickHandler = function(inputId, clip, coordmap) {
 };
 
 
-imageutils.createHoverHandler = function(inputId, delay, delayType, clip, coordmap) {
-  var sendHoverInfo = coordmap.mouseCoordinateSender(inputId, clip);
+imageutils.createHoverHandler = function(inputId, delay, delayType, clip,
+  nullOutside, coordmap)
+{
+  var sendHoverInfo = coordmap.mouseCoordinateSender(inputId, clip, nullOutside);
 
   var hoverInfoSender;
   if (delayType === 'throttle')
@@ -559,8 +573,16 @@ imageutils.createHoverHandler = function(inputId, delay, delayType, clip, coordm
   else
     hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
 
+  // What to do when mouse exits the image
+  var mouseout;
+  if (nullOutside)
+    mouseout = function() { hoverInfoSender.normalCall(null); };
+  else
+    mouseout = function() {};
+
   return {
     mousemove:   function(e) { hoverInfoSender.normalCall(e); },
+    mouseout: mouseout,
     onRemoveImg: function()  { hoverInfoSender.immediateCall(null); }
   };
 };

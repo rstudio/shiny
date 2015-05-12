@@ -1067,6 +1067,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   function addDiv() {
     if ($div) $div.remove();
 
+    // Start hidden; we'll show it when movement occurs
     $div = $(document.createElement('div'))
       .attr('id', el.id + '_brush')
       .css({
@@ -1074,7 +1075,8 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
         'opacity': opts.brushOpacity,
         'pointer-events': 'none',
         'position': 'absolute'
-      });
+      })
+      .hide();
 
     var borderStyle = '1px solid ' + opts.brushStroke;
     if (opts.brushDirection === 'xy') {
@@ -1094,7 +1096,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     }
 
     $el.append($div);
-    $div.offset({x:0, y:0}).width(0).outerHeight(0).show();
+    $div.offset({x:0, y:0}).width(0).outerHeight(0);
   }
 
   // Update the brush div to reflect the current brush bounds.
@@ -1108,8 +1110,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
         left: imgOffset.left + b.xmin
       })
       .outerWidth(b.xmax - b.xmin + 1)
-      .outerHeight(b.ymax - b.ymin + 1)
-      .show();
+      .outerHeight(b.ymax - b.ymin + 1);
   }
 
   function down(offset) {
@@ -1141,6 +1142,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
 
   function brushTo(offset) {
     boundsPx(coordmap.findBox(state.down, offset));
+    $div.show();
     updateDiv();
   }
 

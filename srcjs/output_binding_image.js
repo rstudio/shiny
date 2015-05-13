@@ -41,7 +41,7 @@ $.extend(imageOutputBinding, {
       dblclickDelay: OR($el.data('dblclick-delay'), 400),
 
       hoverId: $el.data('hover-id'),
-      hoverClip: OR($el.data('hover-clip'), true),
+      hoverClip: OR(strToBool($el.data('hover-clip')), true),
       hoverDelayType: OR($el.data('hover-delay-type'), 'debounce'),
       hoverDelay: OR($el.data('hover-delay'), 300),
       hoverNullOutside: OR(strToBool($el.data('hover-null-outside')), false),

@@ -5,7 +5,7 @@
 \title{Create an object representing hover options}
 \usage{
 hoverOpts(id = NULL, delay = 300, delayType = c("debounce", "throttle"),
-  clip = TRUE, nullOutside = FALSE)
+  clip = TRUE, nullOutside = TRUE)
 }
 \arguments{
 \item{id}{Input value name. For example, if the value is \code{"plot_hover"},
@@ -24,9 +24,9 @@ while the cursor is moving, and wait until the cursor has been at rest for
 then the server will receive hover events even when the mouse is outside
 the plotting area, as long as it is still inside the image.}
 
-\item{nullOutside}{If \code{FALSE} (the default), the value will stop
-changing when the cursor exits the plotting area. If \code{TRUE}, the value
-will be set to \code{NULL} when the mouse exits the plotting area.}
+\item{nullOutside}{If \code{TRUE} (the default), the value will be set to
+\code{NULL} when the mouse exits the plotting area. If \code{FALSE}, the
+value will stop changing when the cursor exits the plotting area.}
 }
 \description{
 This generates an object representing hovering options, to be passed as the

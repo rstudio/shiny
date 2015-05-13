@@ -65,13 +65,13 @@ dblclickOpts <- function(id = NULL, clip = TRUE, delay = 400) {
 #' @param clip Should the hover area be clipped to the plotting area? If FALSE,
 #'   then the server will receive hover events even when the mouse is outside
 #'   the plotting area, as long as it is still inside the image.
-#' @param nullOutside If \code{FALSE} (the default), the value will stop
-#'   changing when the cursor exits the plotting area. If \code{TRUE}, the value
-#'   will be set to \code{NULL} when the mouse exits the plotting area.
+#' @param nullOutside If \code{TRUE} (the default), the value will be set to
+#'   \code{NULL} when the mouse exits the plotting area. If \code{FALSE}, the
+#'   value will stop changing when the cursor exits the plotting area.
 #' @export
 hoverOpts <- function(id = NULL, delay = 300,
                       delayType = c("debounce", "throttle"), clip = TRUE,
-                      nullOutside = FALSE) {
+                      nullOutside = TRUE) {
   if (is.null(id))
     stop("id must not be NULL")
 

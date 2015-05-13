@@ -44,6 +44,7 @@ $.extend(imageOutputBinding, {
       hoverClip: OR($el.data('hover-clip'), true),
       hoverDelayType: OR($el.data('hover-delay-type'), 'debounce'),
       hoverDelay: OR($el.data('hover-delay'), 300),
+      hoverNullOutside: OR(strToBool($el.data('hover-null-outside')), false),
 
       brushId: $el.data('brush-id'),
       brushClip: OR(strToBool($el.data('brush-clip')), true),
@@ -107,8 +108,10 @@ $.extend(imageOutputBinding, {
 
     if (opts.hoverId) {
       var hoverHandler = imageutils.createHoverHandler(opts.hoverId,
-        opts.hoverDelay, opts.hoverDelayType, opts.hoverClip, opts.coordmap);
+        opts.hoverDelay, opts.hoverDelayType, opts.hoverClip,
+        opts.hoverNullOutside, opts.coordmap);
       $el.on('mousemove.image_output', hoverHandler.mousemove);
+      $el.on('mouseout.image_output', hoverHandler.mouseout);
 
       $img.on('remove', hoverHandler.onRemoveImg);
     }
@@ -396,8 +399,9 @@ imageutils.initCoordmap = function($el, coordmap) {
 
   // Returns a function that sends mouse coordinates, scaled to data space.
   // If that function is passed a null event, it will send null.
-  coordmap.mouseCoordinateSender = function(inputId, clip) {
-    clip = clip || true;
+  coordmap.mouseCoordinateSender = function(inputId, clip, nullOutside) {
+    if (clip === undefined) clip = true;
+    if (nullOutside === undefined) nullOutside = false;
 
     return function(e) {
       if (e === null) {
@@ -406,7 +410,15 @@ imageutils.initCoordmap = function($el, coordmap) {
       }
 
       var offset = coordmap.mouseOffset(e);
-      // Ignore events outside of plotting region
+      // If outside of plotting region
+      if (!coordmap.isInPanel(offset)) {
+        if (nullOutside) {
+          exports.onInputChange(inputId, null);
+          return;
+        }
+        if (clip)
+          return;
+      }
       if (clip && !coordmap.isInPanel(offset)) return;
 
       var panel = coordmap.getPanel(offset);
@@ -550,8 +562,10 @@ imageutils.createClickHandler = function(inputId, clip, coordmap) {
 };
 
 
-imageutils.createHoverHandler = function(inputId, delay, delayType, clip, coordmap) {
-  var sendHoverInfo = coordmap.mouseCoordinateSender(inputId, clip);
+imageutils.createHoverHandler = function(inputId, delay, delayType, clip,
+  nullOutside, coordmap)
+{
+  var sendHoverInfo = coordmap.mouseCoordinateSender(inputId, clip, nullOutside);
 
   var hoverInfoSender;
   if (delayType === 'throttle')
@@ -559,8 +573,16 @@ imageutils.createHoverHandler = function(inputId, delay, delayType, clip, coordm
   else
     hoverInfoSender = new Debouncer(null, sendHoverInfo, delay);
 
+  // What to do when mouse exits the image
+  var mouseout;
+  if (nullOutside)
+    mouseout = function() { hoverInfoSender.normalCall(null); };
+  else
+    mouseout = function() {};
+
   return {
     mousemove:   function(e) { hoverInfoSender.normalCall(e); },
+    mouseout: mouseout,
     onRemoveImg: function()  { hoverInfoSender.immediateCall(null); }
   };
 };
@@ -1067,6 +1089,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   function addDiv() {
     if ($div) $div.remove();
 
+    // Start hidden; we'll show it when movement occurs
     $div = $(document.createElement('div'))
       .attr('id', el.id + '_brush')
       .css({
@@ -1074,7 +1097,8 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
         'opacity': opts.brushOpacity,
         'pointer-events': 'none',
         'position': 'absolute'
-      });
+      })
+      .hide();
 
     var borderStyle = '1px solid ' + opts.brushStroke;
     if (opts.brushDirection === 'xy') {
@@ -1094,7 +1118,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     }
 
     $el.append($div);
-    $div.offset({x:0, y:0}).width(0).outerHeight(0).show();
+    $div.offset({x:0, y:0}).width(0).outerHeight(0);
   }
 
   // Update the brush div to reflect the current brush bounds.
@@ -1108,8 +1132,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
         left: imgOffset.left + b.xmin
       })
       .outerWidth(b.xmax - b.xmin + 1)
-      .outerHeight(b.ymax - b.ymin + 1)
-      .show();
+      .outerHeight(b.ymax - b.ymin + 1);
   }
 
   function down(offset) {
@@ -1141,6 +1164,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
 
   function brushTo(offset) {
     boundsPx(coordmap.findBox(state.down, offset));
+    $div.show();
     updateDiv();
   }
 

@@ -53,6 +53,10 @@ shiny 0.11.1.9xxx
 * The server side selectize input will load the first 1000 options by default
   before users start to type and search in the box. (#823)
 
+* renderDataTable() and dataTableOutput() have been deprecated in shiny and will
+  be removed in future versions of shiny. Please use the DT package instead:
+  http://rstudio.github.io/DT/ (#807)
+
 shiny 0.11.1
 --------------------------------------------------------------------------------
 

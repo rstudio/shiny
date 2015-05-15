@@ -50,6 +50,9 @@ shiny 0.11.1.9xxx
 * Fixed bug where checkboxes were still active even after `Shiny.unbindAll()`
   was called. (#206)
 
+* The server side selectize input will load the first 1000 options by default
+  before users start to type and search in the box. (#823)
+
 shiny 0.11.1
 --------------------------------------------------------------------------------
 

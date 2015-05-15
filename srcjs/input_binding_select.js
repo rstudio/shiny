@@ -56,7 +56,6 @@ $.extend(selectInputBinding, {
       selectize = this._selectize(el);
       selectize.clearOptions();
       selectize.settings.load = function(query, callback) {
-        if (!query.length) return callback();
         var settings = selectize.settings;
         $.ajax({
           url: data.url,
@@ -75,6 +74,10 @@ $.extend(selectInputBinding, {
           }
         });
       };
+      // perform an empty search after changing the `load` function
+      selectize.load(function(callback) {
+        selectize.settings.load.apply(selectize, ['', callback]);
+      });
       if (data.hasOwnProperty('selected'))
         selectize.addOption(data.selected);
     }

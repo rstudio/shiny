@@ -434,9 +434,6 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
   if (!server) {
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
-  # in the server mode, the choices are not available before we type, so we
-  # cannot really pre-select any options, but here we insert the `selected`
-  # options into selectize forcibly
   value <- unname(selected)
   selected <- choicesWithNames(selected)
   message <- dropNulls(list(
@@ -481,7 +478,7 @@ selectizeJSON <- function(data, req) {
     idx <- idx | apply(matches, 1, cjn)
   }
   # only return the first n rows (n = maximum options in configuration)
-  idx <- head(which(idx), mop)
+  idx <- head(if (length(key)) which(idx) else seq_along(idx), mop)
   data <- data[idx, ]
 
   res <- toJSON(columnToRowData(data))

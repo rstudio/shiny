@@ -604,7 +604,7 @@ dataTablesJSON <- function(data, req) {
 
   # global searching
   i <- seq_len(n)
-  if (q$search[['value']] != '') {
+  if (length(q$search[['value']]) && q$search[['value']] != '') {
     i0 <- apply(data, 2, function(x) {
       grep2(q$search[['value']], as.character(x),
             fixed = q$search[['regex']] == 'false', ignore.case = ci)

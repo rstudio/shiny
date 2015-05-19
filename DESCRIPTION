@@ -1,8 +1,8 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 0.11.1.9006
-Date: 2015-05-01
+Version: 0.12.0
+Date: 2015-05-18
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),

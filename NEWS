@@ -1,4 +1,4 @@
-shiny 0.11.1.9xxx
+shiny 0.12.0
 --------------------------------------------------------------------------------
 
 * Switched from RJSONIO to jsonlite. This improves consistency and speed when

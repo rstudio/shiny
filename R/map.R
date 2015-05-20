@@ -23,6 +23,9 @@ Map <- R6Class(
       env[[key]] <- value
       value
     },
+    mget = function(keys) {
+      base::mget(keys, env)
+    },
     mset = function(...) {
       args <- list(...)
       if (length(args) == 0)

@@ -580,7 +580,11 @@ Callbacks <- R6Class(
       })
     },
     invoke = function(..., onError=NULL) {
-      for (callback in .callbacks$values()) {
+      # Ensure that calls are invoked in the order that they were registered
+      keys <- as.character(sort(as.integer(.callbacks$keys()), decreasing = TRUE))
+      callbacks <- .callbacks$mget(keys)
+
+      for (callback in callbacks) {
         if (is.null(onError)) {
           callback(...)
         } else {

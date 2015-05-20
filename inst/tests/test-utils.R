@@ -100,3 +100,20 @@ test_that("anyUnnamed works as expected", {
   x <- x[3:4]
   expect_true(anyUnnamed(x))
 })
+
+test_that("Callbacks fire in predictable order", {
+  cb <- Callbacks$new()
+
+  x <- numeric(0)
+  cb$register(function() {
+    x <<- c(x, 1)
+  })
+  cb$register(function() {
+    x <<- c(x, 2)
+  })
+  cb$register(function() {
+    x <<- c(x, 3)
+  })
+  cb$invoke()
+  expect_equal(x, c(1, 2, 3))
+})

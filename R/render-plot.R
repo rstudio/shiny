@@ -541,27 +541,36 @@ getGgplotCoordmap <- function(p, pixelratio) {
     })
   }
 
+  # If print(p) gets dispatched to print.ggplot(p), attempt to extract coordmap.
+  # If dispatched to another method, just print the object and don't attempt to
+  # extract the coordmap. This can happen if there's another print method that
+  # takes precedence.
+  if (identical(getS3method("print", class(p)), print.ggplot)) {
+    res <- print(p)
 
-  res <- print(p)
+    tryCatch({
+      # Get info from built ggplot object
+      info <- find_panel_info(res$build)
 
-  tryCatch({
-    # Get info from built ggplot object
-    info <- find_panel_info(res$build)
+      # Get ranges from gtable - it's possible for this to return more elements than
+      # info, because it calculates positions even for panels that aren't present.
+      # This can happen with facet_wrap.
+      ranges <- find_panel_ranges(res$gtable, pixelratio)
 
-    # Get ranges from gtable - it's possible for this to return more elements than
-    # info, because it calculates positions even for panels that aren't present.
-    # This can happen with facet_wrap.
-    ranges <- find_panel_ranges(res$gtable, pixelratio)
+      for (i in seq_along(info)) {
+        info[[i]]$range <- ranges[[i]]
+      }
 
-    for (i in seq_along(info)) {
-      info[[i]]$range <- ranges[[i]]
-    }
+      return(info)
 
-    return(info)
+    }, error = function(e) {
+      # If there was an error extracting info from the ggplot object, just return
+      # a list with the error message.
+      return(structure(list(), error = e$message))
+    })
 
-  }, error = function(e) {
-    # If there was an error extracting info from the ggplot object, just return
-    # a list with the error message.
-    return(structure(list(), error = e$message))
-  })
+  } else {
+    print(p)
+    return(list())
+  }
 }

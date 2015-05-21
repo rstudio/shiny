@@ -278,9 +278,14 @@ getGgplotCoordmap <- function(p, pixelratio) {
   if (!inherits(p, "ggplot"))
     return(NULL)
 
-  # A modified version of print.ggplot which returns the built ggplot object
-  # as well as the gtable grob.
-  print_ggplot <- function(x) {
+  # A modified version of print.ggplot which returns the built ggplot object as
+  # well as the gtable grob. This overrides the ggplot::print.ggplot method, but
+  # only within the context of getGgplotCoordmap. The reason this needs to be an
+  # (pseudo) S3 method is so that, if an object has a class in addition to
+  # ggplot, and there's a print method for that class, that we won't override
+  # that method.
+  # https://github.com/rstudio/shiny/issues/841
+  print.ggplot <- function(x) {
     grid::grid.newpage()
 
     build <- ggplot2::ggplot_build(x)
@@ -537,7 +542,7 @@ getGgplotCoordmap <- function(p, pixelratio) {
   }
 
 
-  res <- print_ggplot(p)
+  res <- print(p)
 
   tryCatch({
     # Get info from built ggplot object

@@ -20,6 +20,14 @@ NULL
 #' @import htmltools httpuv xtable digest R6 mime
 NULL
 
+# It's necessary to Depend on methods so Rscript doesn't fail. It's necessary
+# to import(methods) in NAMESPACE so R CMD check doesn't complain. This
+# approach isn't foolproof because Rscript -e pkgname::func() doesn't actually
+# cause methods to be attached, but it's not a problem for shiny::runApp()
+# since we call require(shiny) as part of loading the app.
+#' @import methods
+NULL
+
 
 #' Global options for Shiny
 #'

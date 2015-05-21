@@ -59,7 +59,8 @@ Description: Makes it incredibly easy to build interactive web
     beautiful, responsive, and powerful applications with minimal effort.
 License: GPL-3 | file LICENSE
 Depends:
-    R (>= 3.0.0)
+    R (>= 3.0.0),
+    methods
 Imports:
     utils,
     httpuv (>= 1.3.2),

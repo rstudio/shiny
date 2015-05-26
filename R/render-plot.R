@@ -299,6 +299,21 @@ getGgplotCoordmap <- function(p, pixelratio) {
     )
   }
 
+  # Given the name of a generic function and an object, return the class name
+  # for the method that would be used on the object.
+  which_method <- function(generic, x) {
+    classes <- class(x)
+    method_names <- paste(generic, classes, sep = ".")
+    idx <- which(method_names %in% .S3methods(generic))
+
+    if (length(idx) == 0)
+      return(NULL)
+
+    # Return name of first class with matching method
+    classes[idx[1]]
+  }
+
+
   # Given a built ggplot object, return x and y domains (data space coords) for
   # each panel.
   find_panel_info <- function(b) {
@@ -545,7 +560,7 @@ getGgplotCoordmap <- function(p, pixelratio) {
   # If dispatched to another method, just print the object and don't attempt to
   # extract the coordmap. This can happen if there's another print method that
   # takes precedence.
-  if (identical(getS3method("print", class(p)), print.ggplot)) {
+  if (identical(which_method("print", p), "ggplot")) {
     res <- print(p)
 
     tryCatch({

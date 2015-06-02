@@ -304,7 +304,7 @@ getGgplotCoordmap <- function(p, pixelratio) {
   which_method <- function(generic, x) {
     classes <- class(x)
     method_names <- paste(generic, classes, sep = ".")
-    idx <- which(method_names %in% .S3methods(generic))
+    idx <- which(method_names %in% methods(generic))
 
     if (length(idx) == 0)
       return(NULL)

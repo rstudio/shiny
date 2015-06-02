@@ -35,6 +35,10 @@ be set with (for example) \code{options(shiny.trace=TRUE)}.
     \code{\link{runApp}} for more information.}
   \item{shiny.json.digits}{The number of digits to use when converting
     numbers to JSON format to send to the client web browser.}
+  \item{shiny.minified}{If this is \code{TRUE} or unset (the default), then
+    Shiny will use minified JavaScript (\code{shiny.min.js}). If
+    \code{FALSE}, then Shiny will use the un-minified JavaScript
+    (\code{shiny.js}); this can be useful during development.}
   \item{shiny.error}{This can be a function which is called when an error
     occurs. For example, \code{options(shiny.error=recover)} will result a
     the debugger prompt when an error occurs.}

@@ -43,8 +43,6 @@ $.extend(sliderInputBinding, textInputBinding, {
         msg.to = data.value[1];
       } else {
         msg.from = data.value;
-        // Workaround for ionRangeSlider issue #143
-        msg.to = data.value;
       }
     }
     if (data.hasOwnProperty('min'))  msg.min   = data.min;

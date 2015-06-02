@@ -127,14 +127,29 @@ $(document).on('click', '.slider-animate-button', function(evt) {
 
     } else {
       slider = target.data('ionRangeSlider');
+      // Single sliders have slider.options.type == "single", and only the
+      // `from` value is used. Double sliders have type == "double", and also
+      // use the `to` value for the right handle.
       var sliderCanStep = function() {
-        return slider.result.from < slider.result.max;
+        if (slider.options.type === "double")
+          return slider.result.to < slider.result.max;
+        else
+          return slider.result.from < slider.result.max;
       };
       var sliderReset = function() {
-        slider.update({from: slider.result.min});
+        var val = { from: slider.result.min };
+        // Preserve the current spacing for double sliders
+        if (slider.options.type === "double")
+          val.to = val.from + (slider.result.to - slider.result.from);
+
+        slider.update(val);
       };
       var sliderStep = function() {
-        slider.update({from: slider.result.from + slider.options.step});
+        var val = { from: slider.result.from + slider.options.step };
+        if (slider.options.type === "double")
+          val.to = slider.result.to + slider.options.step;
+
+        slider.update(val);
       };
 
       // If we're currently at the end, restart

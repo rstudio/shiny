@@ -145,9 +145,12 @@ $(document).on('click', '.slider-animate-button', function(evt) {
         slider.update(val);
       };
       var sliderStep = function() {
-        var val = { from: slider.result.from + slider.options.step };
+        // Don't overshoot the end
+        var val = {
+          from: Math.min(slider.result.max, slider.result.from + slider.options.step)
+        };
         if (slider.options.type === "double")
-          val.to = slider.result.to + slider.options.step;
+          val.to = Math.min(slider.result.max, slider.result.to + slider.options.step);
 
         slider.update(val);
       };

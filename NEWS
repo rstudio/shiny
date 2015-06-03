@@ -4,6 +4,17 @@ shiny 0.12.0.9000
 * Callbacks from the session object are now guaranteed to execute in the order
   in which registration occurred.
 
+* Minor bugs in sliderInput's animation behavior have been fixed. (#852)
+
+* Added `shiny.minified` option, which controls whether the minified version
+  of shiny.js is used. Setting it to FALSe can be useful for debugging. (#826,
+  #850)
+
+* Fixed an issue for outputting plots from ggplot objects which also have an
+  additional class whose print method takes precedence over `print.ggplot`.
+  (#840, 841)
+
+
 shiny 0.12.0
 --------------------------------------------------------------------------------
 

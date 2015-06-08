@@ -4282,7 +4282,7 @@ function initShiny() {
           continue;
 
         var $el = $(el);
-        if ($el.data('shiny-output-binding')) {
+        if ($el.hasClass('shiny-bound-output')) {
           // Already bound; can happen with nested uiOutput (bindAll
           // gets called on two ancestors)
           continue;
@@ -4306,12 +4306,14 @@ function initShiny() {
 
     var outputs = $(scope).find('.shiny-bound-output');
     for (var i = 0; i < outputs.length; i++) {
-      var bindingAdapter = $(outputs[i]).data('shiny-output-binding');
+      var $el = $(outputs[i]);
+      var bindingAdapter = $el.data('shiny-output-binding');
       if (!bindingAdapter)
         continue;
       var id = bindingAdapter.binding.getId(outputs[i]);
       shinyapp.unbindOutput(id, bindingAdapter);
-      $(outputs[i]).removeClass('shiny-bound-output');
+      $el.removeClass('shiny-bound-output');
+      $el.removeData('shiny-output-binding');
     }
 
     setTimeout(sendOutputHiddenState, 0);

@@ -416,10 +416,9 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' @note This function only provides the server-side version of DataTables
 #'   (using R to process the data object on the server side). There is a
 #'   separate package \pkg{DT} (\url{https://github.com/rstudio/DT}) that allows
-#'   you to create both server-side and client-side DataTables. The functions
-#'   \code{renderDataTable()} and \code{dataTableOutput()} in \pkg{shiny} have
-#'   been deprecated since v0.11.1. Please use \code{DT::renderDataTable()} and
-#'   \code{DT::dataTableOutput()} (see
+#'   you to create both server-side and client-side DataTables, and supports
+#'   additional DataTables features. Consider using \code{DT::renderDataTable()}
+#'   and \code{DT::dataTableOutput()} (see
 #'   \url{http://rstudio.github.io/DT/shiny.html} for more information).
 #' @export
 #' @inheritParams renderPlot
@@ -448,9 +447,6 @@ downloadHandler <- function(filename, content, contentType=NA) {
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
                             env = parent.frame(), quoted = FALSE) {
-  shinyDeprecated(
-    'DT::renderDataTable', old = 'shiny::renderDataTable', version = '0.11.1'
-  )
   installExprFunction(expr, "func", env, quoted)
 
   markRenderFunction(dataTableOutput, function(shinysession, name, ...) {

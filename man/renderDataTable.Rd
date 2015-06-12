@@ -52,10 +52,9 @@ elements in the list.
 This function only provides the server-side version of DataTables
   (using R to process the data object on the server side). There is a
   separate package \pkg{DT} (\url{https://github.com/rstudio/DT}) that allows
-  you to create both server-side and client-side DataTables. The functions
-  \code{renderDataTable()} and \code{dataTableOutput()} in \pkg{shiny} have
-  been deprecated since v0.11.1. Please use \code{DT::renderDataTable()} and
-  \code{DT::dataTableOutput()} (see
+  you to create both server-side and client-side DataTables, and supports
+  additional DataTables features. Consider using \code{DT::renderDataTable()}
+  and \code{DT::dataTableOutput()} (see
   \url{http://rstudio.github.io/DT/shiny.html} for more information).
 }
 \examples{

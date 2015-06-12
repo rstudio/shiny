@@ -2101,9 +2101,6 @@ dataTableDependency <- list(
 #' @rdname tableOutput
 #' @export
 dataTableOutput <- function(outputId) {
-  shinyDeprecated(
-    'DT::dataTableOutput', old = 'shiny::dataTableOutput', version = '0.11.1'
-  )
   attachDependencies(
     div(id = outputId, class="shiny-datatable-output"),
     dataTableDependency

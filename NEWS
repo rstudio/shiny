@@ -1,9 +1,13 @@
-shiny 0.12.0.9000
+shiny 0.12.1
 --------------------------------------------------------------------------------
 
 * Fixed an issue where unbindAll() causes subsequent bindAll() to be ignored for
   previously bound outputs. (#856)
 
+* Undeprecate `dataTableOutput` and `renderDataTable`, which had been deprecated
+  in favor of the new DT package. The DT package is a bit too new and has a
+  slightly different API, we were too hasty in deprecating the existing Shiny
+  functions.
 
 shiny 0.12.0
 --------------------------------------------------------------------------------

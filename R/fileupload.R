@@ -81,33 +81,33 @@ FileUploadOperation <- R6Class(
 #' @include map.R
 FileUploadContext <- R6Class(
   'FileUploadContext',
-  portable = FALSE,
   class = FALSE,
+  private = list(
+    basedir = character(0),
+    operations = 'Map'
+  ),
   public = list(
-    .basedir = character(0),
-    .operations = 'Map',
-
     initialize = function(dir=tempdir()) {
-      .basedir <<- dir
-      .operations <<- Map$new()
+      private$basedir <- dir
+      private$operations <- Map$new()
     },
     createUploadOperation = function(fileInfos) {
       while (TRUE) {
         id <- paste(as.raw(p_runif(12, min=0, max=0xFF)), collapse='')
-        dir <- file.path(.basedir, id)
+        dir <- file.path(private$basedir, id)
         if (!dir.create(dir))
           next
 
         op <- FileUploadOperation$new(self, id, dir, fileInfos)
-        .operations$set(id, op)
+        private$operations$set(id, op)
         return(id)
       }
     },
     getUploadOperation = function(jobId) {
-      .operations$get(jobId)
+      private$operations$get(jobId)
     },
     onJobFinished = function(jobId) {
-      .operations$remove(jobId)
+      private$operations$remove(jobId)
     }
   )
 )

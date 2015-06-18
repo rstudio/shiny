@@ -84,7 +84,8 @@ FileUploadContext <- R6Class(
   class = FALSE,
   private = list(
     basedir = character(0),
-    operations = 'Map'
+    operations = 'Map',
+    ids = character(0)  # Keep track of all ids used for file uploads
   ),
   public = list(
     initialize = function(dir=tempdir()) {
@@ -94,6 +95,7 @@ FileUploadContext <- R6Class(
     createUploadOperation = function(fileInfos) {
       while (TRUE) {
         id <- paste(as.raw(p_runif(12, min=0, max=0xFF)), collapse='')
+        private$ids <- c(private$ids, id)
         dir <- file.path(private$basedir, id)
         if (!dir.create(dir))
           next
@@ -108,6 +110,12 @@ FileUploadContext <- R6Class(
     },
     onJobFinished = function(jobId) {
       private$operations$remove(jobId)
+    },
+    # Remove the directories containing file uploads; this is to be called when
+    # a session ends.
+    rmUploadDirs = function() {
+      all_paths <- file.path(private$basedir, private$ids)
+      unlink(all_paths, recursive = TRUE)
     }
   )
 )

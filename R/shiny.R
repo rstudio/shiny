@@ -313,6 +313,14 @@ ShinySession <- R6Class(
       if (is.null(hidden)) hidden <- TRUE
 
       return(hidden && private$getOutputOption(name, 'suspendWhenHidden', TRUE))
+    },
+
+    registerSessionEndCallbacks = function() {
+      # This is to be called from the initialization. It registers functions
+      # that are called when a session ends.
+
+      # Clear file upload directories, if present
+      self$onSessionEnded(private$fileUploadContext$rmUploadDirs)
     }
   ),
   public = list(
@@ -357,6 +365,8 @@ ShinySession <- R6Class(
       self$token <- createUniqueId(16)
       private$.outputs <- list()
       private$.outputOptions <- list()
+
+      private$registerSessionEndCallbacks()
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
         try({

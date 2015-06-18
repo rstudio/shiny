@@ -31,14 +31,29 @@ renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) 
     if (is.null(data) || identical(data, data.frame()))
       return("")
 
+    # Separate the ... args to pass to xtable() vs print.xtable()
+    dots <- list(...)
+    xtable_argnames <- c("caption", "label", "align", "digits", "display")
+    xtable_args <- dots[intersect(names(dots), xtable_argnames)]
+    non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
+
+    # Call xtable with its args
+    xtable_res <- do.call(xtable, c(list(data), xtable_args))
+
+    # Set up print args
+    print_args <- list(
+      xtable_res,
+      type = 'html',
+      html.table.attributes = paste('class="', htmlEscape(classNames, TRUE),
+                                    '"', sep='')
+    )
+    print_args <- c(print_args, non_xtable_args)
+
     return(paste(
       utils::capture.output(
-        print(xtable(data, ...),
-              type='html',
-              html.table.attributes=paste('class="',
-                                          htmlEscape(classNames, TRUE),
-                                          '"',
-                                          sep=''), ...)),
-      collapse="\n"))
+        do.call(print, print_args)
+      ),
+      collapse="\n"
+    ))
   })
 }

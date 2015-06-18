@@ -21,7 +21,9 @@
 #'                      "Gears" = "gear"))
 #'
 #' @export
-checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline = FALSE) {
+checkboxGroupInput <- function(inputId, label, choices, selected = NULL,
+  inline = FALSE, width = NULL) {
+
   # resolve names
   choices <- choicesWithNames(choices)
   if (!is.null(selected))
@@ -35,7 +37,9 @@ checkboxGroupInput <- function(inputId, label, choices, selected = NULL, inline 
 
   # return label and select tag
   tags$div(id = inputId,
-           class = divClass,
-           controlLabel(inputId, label),
-           options)
+    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    class = divClass,
+    controlLabel(inputId, label),
+    options
+  )
 }

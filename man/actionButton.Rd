@@ -5,18 +5,20 @@
 \alias{actionLink}
 \title{Action button/link}
 \usage{
-actionButton(inputId, label, icon = NULL, ...)
+actionButton(inputId, label, icon = NULL, width = NULL, ...)
 
 actionLink(inputId, label, icon = NULL, ...)
 }
 \arguments{
-\item{inputId}{Specifies the input slot that will be used to access the
-value.}
+\item{inputId}{The \code{input} slot that will be used to access the value.}
 
 \item{label}{The contents of the button or link--usually a text label, but
 you could also use any other HTML, like an image.}
 
 \item{icon}{An optional \code{\link{icon}} to appear on the button.}
+
+\item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+see \code{\link{validateCssUnit}}.}
 
 \item{...}{Named attributes to be applied to the button or link.}
 }

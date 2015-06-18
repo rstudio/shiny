@@ -3,8 +3,7 @@
 #' Creates an action button or link whose value is initially zero, and increments by one
 #' each time it is pressed.
 #'
-#' @param inputId Specifies the input slot that will be used to access the
-#'   value.
+#' @inheritParams textInput
 #' @param label The contents of the button or link--usually a text label, but
 #'   you could also use any other HTML, like an image.
 #' @param icon An optional \code{\link{icon}} to appear on the button.
@@ -30,20 +29,23 @@
 #' @seealso \code{\link{observeEvent}} and \code{\link{eventReactive}}
 #'
 #' @export
-actionButton <- function(inputId, label, icon = NULL, ...) {
+actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
   tags$button(id=inputId,
-              type="button",
-              class="btn btn-default action-button",
-              list(icon, label),
-              ...)
+    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+    type="button",
+    class="btn btn-default action-button",
+    list(icon, label),
+    ...
+  )
 }
 
 #' @rdname actionButton
 #' @export
 actionLink <- function(inputId, label, icon = NULL, ...) {
   tags$a(id=inputId,
-         href="#",
-         class="action-button",
-         list(icon, label),
-         ...)
+    href="#",
+    class="action-button",
+    list(icon, label),
+    ...
+  )
 }

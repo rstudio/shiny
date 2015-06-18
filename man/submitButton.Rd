@@ -4,7 +4,7 @@
 \alias{submitButton}
 \title{Create a submit button}
 \usage{
-submitButton(text = "Apply Changes", icon = NULL)
+submitButton(text = "Apply Changes", icon = NULL, width = NULL)
 }
 \arguments{
 \item{text}{Button caption}

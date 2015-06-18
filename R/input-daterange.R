@@ -66,7 +66,7 @@
 #' @export
 dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     min = NULL, max = NULL, format = "yyyy-mm-dd", startview = "month",
-    weekstart = 0, language = "en", separator = " to ") {
+    weekstart = 0, language = "en", separator = " to ", width = NULL) {
 
   # If start and end are date objects, convert to a string with yyyy-mm-dd format
   # Same for min and max
@@ -77,10 +77,11 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
 
   attachDependencies(
     div(id = inputId,
-             # input-daterange class is needed for dropdown behavior
-             class = "shiny-date-range-input form-group shiny-input-container",
+      class = "shiny-date-range-input form-group shiny-input-container",
+      style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
 
       controlLabel(inputId, label),
+      # input-daterange class is needed for dropdown behavior
       div(class = "input-daterange input-group",
         tags$input(
           class = "input-sm form-control",

@@ -20,7 +20,9 @@
 #'                "Log-normal" = "lnorm",
 #'                "Exponential" = "exp"))
 #' @export
-radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALSE) {
+radioButtons <- function(inputId, label, choices, selected = NULL,
+  inline = FALSE, width = NULL) {
+
   # resolve names
   choices <- choicesWithNames(choices)
 
@@ -37,7 +39,9 @@ radioButtons <- function(inputId, label, choices, selected = NULL, inline = FALS
     divClass <- paste(divClass, "shiny-input-container-inline")
 
   tags$div(id = inputId,
+    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     class = divClass,
     controlLabel(inputId, label),
-    options)
+    options
+  )
 }

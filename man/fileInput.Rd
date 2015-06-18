@@ -4,7 +4,7 @@
 \alias{fileInput}
 \title{File Upload Control}
 \usage{
-fileInput(inputId, label, multiple = FALSE, accept = NULL)
+fileInput(inputId, label, multiple = FALSE, accept = NULL, width = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -17,6 +17,9 @@ Internet Explorer 9 and earlier.}}
 
 \item{accept}{A character vector of MIME types; gives the browser a hint of
   what kind of files the server is expecting.}
+
+\item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+see \code{\link{validateCssUnit}}.}
 }
 \description{
 Create a file upload control that can be used to upload one or more files.

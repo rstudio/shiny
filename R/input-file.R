@@ -29,7 +29,9 @@
 #'   what kind of files the server is expecting.
 #'
 #' @export
-fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
+fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
+  width = NULL) {
+
   inputTag <- tags$input(id = inputId, name = inputId, type = "file")
   if (multiple)
     inputTag$attribs$multiple <- "multiple"
@@ -37,6 +39,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL) {
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
   div(class = "form-group shiny-input-container",
+    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     label %AND% tags$label(label),
     inputTag,
     tags$div(

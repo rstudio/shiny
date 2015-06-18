@@ -65,7 +65,8 @@
 #'
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
-    format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en") {
+  format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en",
+  width = NULL) {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
@@ -75,7 +76,8 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 
   attachDependencies(
     tags$div(id = inputId,
-             class = "shiny-date-input form-group shiny-input-container",
+      class = "shiny-date-input form-group shiny-input-container",
+      style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
 
       controlLabel(inputId, label),
       tags$input(type = "text",

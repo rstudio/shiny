@@ -4,7 +4,7 @@
 \alias{passwordInput}
 \title{Create a password input control}
 \usage{
-passwordInput(inputId, label, value = "")
+passwordInput(inputId, label, value = "", width = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -12,6 +12,9 @@ passwordInput(inputId, label, value = "")
 \item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{value}{Initial value.}
+
+\item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+see \code{\link{validateCssUnit}}.}
 }
 \value{
 A text input control that can be added to a UI definition.

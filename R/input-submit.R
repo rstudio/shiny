@@ -14,8 +14,13 @@
 #' submitButton("Update View")
 #' submitButton("Update View", icon("refresh"))
 #' @export
-submitButton <- function(text = "Apply Changes", icon = NULL) {
+submitButton <- function(text = "Apply Changes", icon = NULL, width = NULL) {
   div(
-    tags$button(type="submit", class="btn btn-primary", list(icon, text))
+    tags$button(
+      type="submit",
+      class="btn btn-primary",
+      style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
+      list(icon, text)
+    )
   )
 }

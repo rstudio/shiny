@@ -4,7 +4,8 @@
 \alias{radioButtons}
 \title{Create radio buttons}
 \usage{
-radioButtons(inputId, label, choices, selected = NULL, inline = FALSE)
+radioButtons(inputId, label, choices, selected = NULL, inline = FALSE,
+  width = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -18,6 +19,9 @@ named then that name rather than the value is displayed to the user)}
 defaults to the first value)}
 
 \item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
+
+\item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+see \code{\link{validateCssUnit}}.}
 }
 \value{
 A set of radio buttons that can be added to a UI definition.

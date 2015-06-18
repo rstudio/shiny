@@ -12,12 +12,13 @@
 #' @examples
 #' checkboxInput("outliers", "Show outliers", FALSE)
 #' @export
-checkboxInput <- function(inputId, label, value = FALSE) {
+checkboxInput <- function(inputId, label, value = FALSE, width = NULL) {
   inputTag <- tags$input(id = inputId, type="checkbox")
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"
 
   div(class = "form-group shiny-input-container",
+    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     div(class = "checkbox",
       tags$label(inputTag, tags$span(label))
     )

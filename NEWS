@@ -14,6 +14,8 @@ shiny 0.12.1.9xxx
   additional class whose print method takes precedence over `print.ggplot`.
   (#840, 841)
 
+* Added `width` option to Shiny's input functions. (#589, #834)
+
 shiny 0.12.1
 --------------------------------------------------------------------------------
 

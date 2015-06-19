@@ -332,6 +332,15 @@ HandlerManager <- R6Class("HandlerManager",
             headers=list('Content-Type' = 'text/html')))
         }
 
+        # Catch HEAD requests. For the purposes of handler functions, they
+        # should be treated like GET. The difference is that  they shouldn't
+        # return a body in the http response.
+        head_request <- FALSE
+        if (identical(req$REQUEST_METHOD, "HEAD")) {
+          head_request <- TRUE
+          req$REQUEST_METHOD <- "GET"
+        }
+
         response <- handler(req)
         if (is.null(response))
           response <- httpResponse(404, content="<h1>Not Found</h1>")
@@ -341,9 +350,21 @@ HandlerManager <- R6Class("HandlerManager",
           headers$'Content-Type' <- response$content_type
 
           response <- filter(req, response)
-          return(list(status=response$status,
-            body=response$content,
-            headers=headers))
+          if (head_request) {
+            headers$`Content-Length` <- nchar(response$content, type = "bytes")
+            return(list(
+              status = response$status,
+              body = "",
+              headers = headers
+            ))
+          } else {
+            return(list(
+              status = response$status,
+              body = response$content,
+              headers = headers
+            ))
+          }
+
         } else {
           # Assume it's a Rook-compatible response
           return(response)

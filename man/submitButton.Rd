@@ -10,6 +10,9 @@ submitButton(text = "Apply Changes", icon = NULL, width = NULL)
 \item{text}{Button caption}
 
 \item{icon}{Optional \code{\link{icon}} to appear on the button}
+
+\item{width}{The width of the button, e.g. \code{'400px'}, or \code{'100\%'};
+see \code{\link{validateCssUnit}}.}
 }
 \value{
 A submit button that can be added to a UI definition.

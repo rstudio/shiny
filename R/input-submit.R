@@ -6,6 +6,8 @@
 #'
 #' @param text Button caption
 #' @param icon Optional \code{\link{icon}} to appear on the button
+#' @param width The width of the button, e.g. \code{'400px'}, or \code{'100\%'};
+#'   see \code{\link{validateCssUnit}}.
 #' @return A submit button that can be added to a UI definition.
 #'
 #' @family input elements

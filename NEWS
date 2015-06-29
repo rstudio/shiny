@@ -16,6 +16,8 @@ shiny 0.12.1.9xxx
 
 * Added `width` option to Shiny's input functions. (#589, #834)
 
+* Shiny now correctly handles HTTP HEAD requests. (#876)
+
 shiny 0.12.1
 --------------------------------------------------------------------------------
 

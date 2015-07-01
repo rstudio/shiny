@@ -114,6 +114,12 @@ FileUploadContext <- R6Class(
     # Remove the directories containing file uploads; this is to be called when
     # a session ends.
     rmUploadDirs = function() {
+      # Make sure all_paths is underneath the tempdir()
+      if (!grepl(normalizePath(tempdir()), normalizePath(private$basedir), fixed = TRUE)) {
+        stop("Won't remove upload path ", private$basedir,
+          "because it is not under tempdir(): ", tempdir())
+      }
+
       all_paths <- file.path(private$basedir, private$ids)
       unlink(all_paths, recursive = TRUE)
     }

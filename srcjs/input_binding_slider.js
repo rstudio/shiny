@@ -99,17 +99,12 @@ $.extend(sliderInputBinding, textInputBinding, {
     var opts = {};
     var $el = $(el);
     var dataType = $el.data('data-type');
+    var timeFormat = $el.data('time-format');
 
     // Set up formatting functions
-    if (dataType === 'date') {
+    if (dataType === 'date' || dataType === 'datetime') {
       opts.prettify = function(num) {
-        return formatDateUTC(new Date(num));
-      };
-
-    } else if (dataType === 'datetime') {
-      opts.prettify = function(num) {
-        var date = new Date(num);
-        return date.toUTCString();
+        return strftime(timeFormat, new Date(num));
       };
     }
 

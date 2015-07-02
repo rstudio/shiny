@@ -32,6 +32,13 @@
 #'   values). If \code{TRUE}, the range can be dragged. In other words, the min
 #'   and max can be dragged together. If \code{FALSE} (the default), the range
 #'   cannot be dragged.
+#' @param timeFormat Only used if the values are Date or POSIXt objects. A time
+#'   format string, to be passed to the Javascript strftime library. See
+#'   \url{https://github.com/samsonjs/strftime} for more details. The allowed
+#'   format specifications are very similar, but not identical to those for R's
+#'   \code{\link{strftime}} function. For Dates, the default is \code{"\%F"}
+#'   (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
+#'   (like \code{"2015-07-01 15:32:10"}).
 #' @inheritParams selectizeInput
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
@@ -40,8 +47,9 @@
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,
                         ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
-                        pre = NULL, post = NULL, dragRange = FALSE) {
-
+                        pre = NULL, post = NULL, timeFormat = NULL,
+                        dragRange = FALSE)
+{
   if (!missing(format)) {
     shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
                     version = "0.10.2.2")
@@ -70,10 +78,16 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
       stop("`min`, `max`, and `value must all be Date or non-Date objects")
     dataType <- "date"
 
+    if (is.null(timeFormat))
+      timeFormat <- "%F"
+
   } else if (inherits(min, "POSIXt")) {
     if (!inherits(max, "POSIXt") || !inherits(value, "POSIXt"))
       stop("`min`, `max`, and `value must all be POSIXt or non-POSIXt objects")
     dataType <- "datetime"
+
+    if (is.null(timeFormat))
+      timeFormat <- "%F %T"
 
   } else {
     dataType <- "number"
@@ -126,7 +140,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-keyboard` = TRUE,
     `data-keyboard-step` = step / (max - min) * 100,
     `data-drag-interval` = dragRange,
-    `data-data-type` = dataType
+    # The following are ignored by the ion.rangeSlider, but are used by Shiny.
+    `data-data-type` = dataType,
+    `data-time-format` = timeFormat
   ))
 
   # Replace any TRUE and FALSE with "true" and "false"

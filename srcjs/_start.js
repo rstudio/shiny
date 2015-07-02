@@ -7,6 +7,7 @@
   curly:false,
   indent:2
 */
+/* global strftime */
 
 (function() {
   var $ = jQuery;

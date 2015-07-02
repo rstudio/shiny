@@ -10,6 +10,7 @@
   curly:false,
   indent:2
 */
+/* global strftime */
 
 (function() {
   var $ = jQuery;
@@ -3242,17 +3243,25 @@ $.extend(sliderInputBinding, textInputBinding, {
     var opts = {};
     var $el = $(el);
     var dataType = $el.data('data-type');
+    var timeFormat = $el.data('time-format');
+    var timeFormatter;
 
     // Set up formatting functions
     if (dataType === 'date') {
+      timeFormatter = strftime.utc();
       opts.prettify = function(num) {
-        return formatDateUTC(new Date(num));
+        return timeFormatter(timeFormat, new Date(num));
       };
 
     } else if (dataType === 'datetime') {
+      var timezone = $el.data('timezone');
+      if (timezone)
+        timeFormatter = strftime.timezone(timezone);
+      else
+        timeFormatter = strftime;
+
       opts.prettify = function(num) {
-        var date = new Date(num);
-        return date.toUTCString();
+        return timeFormatter(timeFormat, new Date(num));
       };
     }
 

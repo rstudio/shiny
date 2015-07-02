@@ -42,6 +42,8 @@ Authors@R: c(
     comment = "es5-shim library"),
     person("Denis", "Ineshin", role = c("ctb", "cph"),
     comment = "ion.rangeSlider library"),
+    person("Sami", "Samhuri", role = c("ctb", "cph"),
+    comment = "Javascript strftime library"),
     person(family = "SpryMedia Limited", role = c("ctb", "cph"),
     comment = "DataTables library"),
     person("John", "Fraser", role = c("ctb", "cph"),

@@ -185,6 +185,13 @@ updateTabsetPanel <- function(session, inputId, selected = NULL) {
   session$sendInputMessage(inputId, message)
 }
 
+#' @rdname updateTabsetPanel
+#' @export
+updateNavbarPage <- updateTabsetPanel
+
+#' @rdname updateTabsetPanel
+#' @export
+updateNavlistPanel <- updateTabsetPanel
 
 #' Change the value of a number input on the client
 #'

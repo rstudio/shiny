@@ -16,6 +16,9 @@ shiny 0.12.1.9xxx
 
 * Added `width` option to Shiny's input functions. (#589, #834)
 
+* Added two alias functions of `updateTabsetPanel()` to update the selected tab:
+  `updateNavbarPage()` and `updateNavlistPanel()`. (#881)
+
 shiny 0.12.1
 --------------------------------------------------------------------------------
 

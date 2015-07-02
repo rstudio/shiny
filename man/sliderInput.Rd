@@ -8,7 +8,7 @@
 sliderInput(inputId, label, min, max, value, step = NULL, round = FALSE,
   format = NULL, locale = NULL, ticks = TRUE, animate = FALSE,
   width = NULL, sep = ",", pre = NULL, post = NULL, timeFormat = NULL,
-  dragRange = FALSE)
+  timezone = NULL, dragRange = FALSE)
 
 animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
   pauseButton = NULL)
@@ -61,10 +61,16 @@ see \code{\link{validateCssUnit}}.}
 \item{timeFormat}{Only used if the values are Date or POSIXt objects. A time
 format string, to be passed to the Javascript strftime library. See
 \url{https://github.com/samsonjs/strftime} for more details. The allowed
-format specifications are very similar, but not identical to those for R's
+format specifications are very similar, but not identical, to those for R's
 \code{\link{strftime}} function. For Dates, the default is \code{"\%F"}
 (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
 (like \code{"2015-07-01 15:32:10"}).}
+
+\item{timezone}{Only used if the values are POSIXt objects. A string
+specifying the time zone offset for the displayed times, in the format
+\code{"+HHMM"} or \code{"-HHMM"}. If \code{NULL} (the default), times will
+be displayed in the browser's time zone. The value \code{"+0000"} will
+result in UTC time.}
 
 \item{dragRange}{This option is used only if it is a range slider (with two
 values). If \code{TRUE}, the range can be dragged. In other words, the min

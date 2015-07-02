@@ -100,11 +100,24 @@ $.extend(sliderInputBinding, textInputBinding, {
     var $el = $(el);
     var dataType = $el.data('data-type');
     var timeFormat = $el.data('time-format');
+    var timeFormatter;
 
     // Set up formatting functions
-    if (dataType === 'date' || dataType === 'datetime') {
+    if (dataType === 'date') {
+      timeFormatter = strftime.utc();
       opts.prettify = function(num) {
-        return strftime(timeFormat, new Date(num));
+        return timeFormatter(timeFormat, new Date(num));
+      };
+
+    } else if (dataType === 'datetime') {
+      var timezone = $el.data('timezone');
+      if (timezone)
+        timeFormatter = strftime.timezone(timezone);
+      else
+        timeFormatter = strftime;
+
+      opts.prettify = function(num) {
+        return timeFormatter(timeFormat, new Date(num));
       };
     }
 

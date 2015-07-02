@@ -35,10 +35,15 @@
 #' @param timeFormat Only used if the values are Date or POSIXt objects. A time
 #'   format string, to be passed to the Javascript strftime library. See
 #'   \url{https://github.com/samsonjs/strftime} for more details. The allowed
-#'   format specifications are very similar, but not identical to those for R's
+#'   format specifications are very similar, but not identical, to those for R's
 #'   \code{\link{strftime}} function. For Dates, the default is \code{"\%F"}
 #'   (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
 #'   (like \code{"2015-07-01 15:32:10"}).
+#' @param timezone Only used if the values are POSIXt objects. A string
+#'   specifying the time zone offset for the displayed times, in the format
+#'   \code{"+HHMM"} or \code{"-HHMM"}. If \code{NULL} (the default), times will
+#'   be displayed in the browser's time zone. The value \code{"+0000"} will
+#'   result in UTC time.
 #' @inheritParams selectizeInput
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
@@ -48,7 +53,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,
                         ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
                         pre = NULL, post = NULL, timeFormat = NULL,
-                        dragRange = FALSE)
+                        timezone = NULL, dragRange = FALSE)
 {
   if (!missing(format)) {
     shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
@@ -96,6 +101,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   step <- findStepSize(min, max, step)
 
   if (dataType %in% c("date", "datetime")) {
+    # For Dates, this conversion uses midnight on that date in UTC
     to_ms <- function(x) 1000 * as.numeric(as.POSIXct(x))
 
     # Convert values to milliseconds since epoch (this is the value JS uses)
@@ -142,7 +148,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-drag-interval` = dragRange,
     # The following are ignored by the ion.rangeSlider, but are used by Shiny.
     `data-data-type` = dataType,
-    `data-time-format` = timeFormat
+    `data-time-format` = timeFormat,
+    `data-timezone` = timezone
   ))
 
   # Replace any TRUE and FALSE with "true" and "false"

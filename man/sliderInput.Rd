@@ -7,7 +7,7 @@
 \usage{
 sliderInput(inputId, label, min, max, value, step = NULL, round = FALSE,
   format = NULL, locale = NULL, ticks = TRUE, animate = FALSE,
-  width = NULL, sep = ",", pre = NULL, post = NULL)
+  width = NULL, sep = ",", pre = NULL, post = NULL, dragRange = FALSE)
 
 animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
   pauseButton = NULL)
@@ -21,14 +21,14 @@ animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
 
 \item{max}{The maximum value (inclusive) that can be selected.}
 
-\item{value}{The initial value of the slider. A numeric vector of length
-one will create a regular slider; a numeric vector of length two will
-create a double-ended range slider. A warning will be issued if the
-value doesn't fit between \code{min} and \code{max}.}
+\item{value}{The initial value of the slider. A numeric vector of length one
+will create a regular slider; a numeric vector of length two will create a
+double-ended range slider. A warning will be issued if the value doesn't
+fit between \code{min} and \code{max}.}
 
 \item{step}{Specifies the interval between each selectable value on the
-slider (if \code{NULL}, a heuristic is used to determine the step size).
-If the values are dates, \code{step} is in days; if the values are times
+slider (if \code{NULL}, a heuristic is used to determine the step size). If
+the values are dates, \code{step} is in days; if the values are times
 (POSIXt), \code{step} is in seconds.}
 
 \item{round}{\code{TRUE} to round all values to the nearest integer;
@@ -56,6 +56,11 @@ see \code{\link{validateCssUnit}}.}
 \item{pre}{A prefix string to put in front of the value.}
 
 \item{post}{A suffix string to put after the value.}
+
+\item{dragRange}{This option is used only if it is a range slider (with two
+values). If \code{TRUE}, the range can be dragged. In other words, the min
+and max can be dragged together. If \code{FALSE} (the default), the range
+cannot be dragged.}
 
 \item{interval}{The interval, in milliseconds, between each animation step.}
 

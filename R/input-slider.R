@@ -5,13 +5,13 @@
 #' @inheritParams textInput
 #' @param min The minimum value (inclusive) that can be selected.
 #' @param max The maximum value (inclusive) that can be selected.
-#' @param value The initial value of the slider. A numeric vector of length
-#'   one will create a regular slider; a numeric vector of length two will
-#'   create a double-ended range slider. A warning will be issued if the
-#'   value doesn't fit between \code{min} and \code{max}.
+#' @param value The initial value of the slider. A numeric vector of length one
+#'   will create a regular slider; a numeric vector of length two will create a
+#'   double-ended range slider. A warning will be issued if the value doesn't
+#'   fit between \code{min} and \code{max}.
 #' @param step Specifies the interval between each selectable value on the
-#'   slider (if \code{NULL}, a heuristic is used to determine the step size).
-#'   If the values are dates, \code{step} is in days; if the values are times
+#'   slider (if \code{NULL}, a heuristic is used to determine the step size). If
+#'   the values are dates, \code{step} is in days; if the values are times
 #'   (POSIXt), \code{step} is in seconds.
 #' @param round \code{TRUE} to round all values to the nearest integer;
 #'   \code{FALSE} if no rounding is desired; or an integer to round to that
@@ -28,6 +28,10 @@
 #' @param sep Separator between thousands places in numbers.
 #' @param pre A prefix string to put in front of the value.
 #' @param post A suffix string to put after the value.
+#' @param dragRange This option is used only if it is a range slider (with two
+#'   values). If \code{TRUE}, the range can be dragged. In other words, the min
+#'   and max can be dragged together. If \code{FALSE} (the default), the range
+#'   cannot be dragged.
 #' @inheritParams selectizeInput
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
@@ -36,7 +40,7 @@
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,
                         ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
-                        pre = NULL, post = NULL) {
+                        pre = NULL, post = NULL, dragRange = FALSE) {
 
   if (!missing(format)) {
     shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
@@ -121,6 +125,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-postfix` = post,
     `data-keyboard` = TRUE,
     `data-keyboard-step` = step / (max - min) * 100,
+    `data-drag-interval` = dragRange,
     `data-data-type` = dataType
   ))
 

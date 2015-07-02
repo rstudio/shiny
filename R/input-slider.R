@@ -130,7 +130,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 
   dep <- htmlDependency("ionrangeslider", "2.0.6", c(href="shared/ionrangeslider"),
     script = "js/ion.rangeSlider.min.js",
-    stylesheet = c("css/normalize.css", "css/ion.rangeSlider.css",
+    # ion.rangeSlider also needs normalize.css, which is already included in
+    # Bootstrap.
+    stylesheet = c("css/ion.rangeSlider.css",
                    "css/ion.rangeSlider.skinShiny.css")
   )
 

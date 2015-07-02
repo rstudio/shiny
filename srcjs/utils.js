@@ -59,6 +59,20 @@ function parseDate(dateString) {
   return date;
 }
 
+// Given a Date object, return a string in yyyy-mm-dd format, using the
+// UTC date. This may be a day off from the date in the local time zone.
+function formatDateUTC(date) {
+  if (date instanceof Date) {
+    return date.getUTCFullYear() + '-' +
+           padZeros(date.getUTCMonth()+1, 2) + '-' +
+           padZeros(date.getUTCDate(), 2);
+
+  } else {
+    return null;
+  }
+}
+
+
 // Given an element and a function(width, height), returns a function(). When
 // the output function is called, it calls the input function with the offset
 // width and height of the input element--but only if the size of the element

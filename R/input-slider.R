@@ -11,6 +11,8 @@
 #'   value doesn't fit between \code{min} and \code{max}.
 #' @param step Specifies the interval between each selectable value on the
 #'   slider (if \code{NULL}, a heuristic is used to determine the step size).
+#'   If the values are dates, \code{step} is in days; if the values are times
+#'   (POSIXt), \code{step} is in seconds.
 #' @param round \code{TRUE} to round all values to the nearest integer;
 #'   \code{FALSE} if no rounding is desired; or an integer to round to that
 #'   number of digits (for example, 1 will round to the nearest 10, and -2 will
@@ -45,17 +47,48 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
-  # Auto step size
-  range <- max - min
-  if (is.null(step)) {
-    # If short range or decimals, use means continuous decimal with ~100 points
+  # If step is NULL, use heuristic to set the step size.
+  findStepSize <- function(min, max, step) {
+    if (!is.null(step)) return(step)
+
+    range <- max - min
+    # If short range or decimals, use continuous decimal with ~100 points
     if (range < 2 || hasDecimals(min) || hasDecimals(max)) {
       step <- pretty(c(min, max), n = 100)
-      step <- step[2] - step[1]
+      step[2] - step[1]
     } else {
-      step <- 1
+      1
     }
   }
+
+  if (inherits(min, "Date")) {
+    if (!inherits(max, "Date") || !inherits(value, "Date"))
+      stop("`min`, `max`, and `value must all be Date or non-Date objects")
+    dataType <- "date"
+
+  } else if (inherits(min, "POSIXt")) {
+    if (!inherits(max, "POSIXt") || !inherits(value, "POSIXt"))
+      stop("`min`, `max`, and `value must all be POSIXt or non-POSIXt objects")
+    dataType <- "datetime"
+
+  } else {
+    dataType <- "number"
+  }
+
+  step <- findStepSize(min, max, step)
+
+  if (dataType %in% c("date", "datetime")) {
+    to_ms <- function(x) 1000 * as.numeric(as.POSIXct(x))
+
+    # Convert values to milliseconds since epoch (this is the value JS uses)
+    # Find step size in ms
+    step  <- to_ms(max) - to_ms(max - step)
+    min   <- to_ms(min)
+    max   <- to_ms(max)
+    value <- to_ms(value)
+  }
+
+  range <- max - min
 
   # Try to get a sane number of tick marks
   if (ticks) {
@@ -87,7 +120,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-prefix` = pre,
     `data-postfix` = post,
     `data-keyboard` = TRUE,
-    `data-keyboard-step` = step / (max - min) * 100
+    `data-keyboard-step` = step / (max - min) * 100,
+    `data-data-type` = dataType
   ))
 
   # Replace any TRUE and FALSE with "true" and "false"

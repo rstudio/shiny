@@ -27,7 +27,9 @@ create a double-ended range slider. A warning will be issued if the
 value doesn't fit between \code{min} and \code{max}.}
 
 \item{step}{Specifies the interval between each selectable value on the
-slider (if \code{NULL}, a heuristic is used to determine the step size).}
+slider (if \code{NULL}, a heuristic is used to determine the step size).
+If the values are dates, \code{step} is in days; if the values are times
+(POSIXt), \code{step} is in seconds.}
 
 \item{round}{\code{TRUE} to round all values to the nearest integer;
 \code{FALSE} if no rounding is desired; or an integer to round to that

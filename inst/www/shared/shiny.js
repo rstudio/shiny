@@ -85,6 +85,20 @@ function parseDate(dateString) {
   return date;
 }
 
+// Given a Date object, return a string in yyyy-mm-dd format, using the
+// UTC date. This may be a day off from the date in the local time zone.
+function formatDateUTC(date) {
+  if (date instanceof Date) {
+    return date.getUTCFullYear() + '-' +
+           padZeros(date.getUTCMonth()+1, 2) + '-' +
+           padZeros(date.getUTCDate(), 2);
+
+  } else {
+    return null;
+  }
+}
+
+
 // Given an element and a function(width, height), returns a function(). When
 // the output function is called, it calls the input function with the offset
 // width and height of the input element--but only if the size of the element
@@ -3136,14 +3150,42 @@ $.extend(sliderInputBinding, textInputBinding, {
 
     return $(scope).find('input.js-range-slider');
   },
+  getType: function(el) {
+    var dataType = $(el).data('data-type');
+    if (dataType === 'date')
+      return 'shiny.date';
+    else if (dataType === 'datetime')
+      return 'shiny.datetime';
+    else
+      return false;
+  },
   getValue: function(el) {
+    var $el = $(el);
     var result = $(el).data('ionRangeSlider').result;
+
+    // Function for converting numeric value from slider to appropriate type.
+    var convert;
+    var dataType = $el.data('data-type');
+    if (dataType === 'date') {
+      convert = function(val) {
+        return formatDateUTC(new Date(+val));
+      };
+    } else if (dataType === 'datetime') {
+      convert = function(val) {
+        // Convert ms to s
+        return +val / 1000;
+      };
+    } else {
+      convert = function(val) { return +val; };
+    }
+
     if (this._numValues(el) == 2) {
-      return [+result.from, +result.to];
+      return [convert(result.from), convert(result.to)];
     }
     else {
-      return +result.from;
+      return convert(result.from);
     }
+
   },
   setValue: function(el, value) {
     var slider = $(el).data('ionRangeSlider');
@@ -3197,7 +3239,24 @@ $.extend(sliderInputBinding, textInputBinding, {
   getState: function(el) {
   },
   initialize: function(el) {
-    $(el).ionRangeSlider();
+    var opts = {};
+    var $el = $(el);
+    var dataType = $el.data('data-type');
+
+    // Set up formatting functions
+    if (dataType === 'date') {
+      opts.prettify = function(num) {
+        return formatDateUTC(new Date(num));
+      };
+
+    } else if (dataType === 'datetime') {
+      opts.prettify = function(num) {
+        var date = new Date(num);
+        return date.toUTCString();
+      };
+    }
+
+    $el.ionRangeSlider(opts);
   },
 
   // Number of values; 1 for single slider, 2 for range slider
@@ -3328,7 +3387,7 @@ $.extend(dateInputBinding, {
   // format like mm/dd/yyyy)
   getValue: function(el) {
     var date = $(el).find('input').data('datepicker').getUTCDate();
-    return this._formatDate(date);
+    return formatDateUTC(date);
   },
   // value must be an unambiguous string like '2001-01-01', or a Date object.
   setValue: function(el, value) {
@@ -3348,8 +3407,8 @@ $.extend(dateInputBinding, {
 
     // Stringify min and max. If min and max aren't set, they will be
     // -Infinity and Infinity; replace these with null.
-    min = (min === -Infinity) ? null : this._formatDate(min);
-    max = (max ===  Infinity) ? null : this._formatDate(max);
+    min = (min === -Infinity) ? null : formatDateUTC(min);
+    max = (max ===  Infinity) ? null : formatDateUTC(max);
 
     // startViewMode is stored as a number; convert to string
     var startview = $input.data('datepicker').startViewMode;
@@ -3423,18 +3482,6 @@ $.extend(dateInputBinding, {
     // date format.
     this._setMin($input[0], $input.data('min-date'));
     this._setMax($input[0], $input.data('max-date'));
-  },
-  // Given a Date object, return a string in yyyy-mm-dd format, using the
-  // UTC date. This may be a day off from the date in the local time zone.
-  _formatDate: function(date) {
-    if (date instanceof Date) {
-      return date.getUTCFullYear() + '-' +
-             padZeros(date.getUTCMonth()+1, 2) + '-' +
-             padZeros(date.getUTCDate(), 2);
-
-    } else {
-      return null;
-    }
   },
   // Given a format object from a date picker, return a string
   _formatToString: function(format) {
@@ -3515,7 +3562,7 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     var start = $inputs.eq(0).data('datepicker').getUTCDate();
     var end   = $inputs.eq(1).data('datepicker').getUTCDate();
 
-    return [this._formatDate(start), this._formatDate(end)];
+    return [formatDateUTC(start), formatDateUTC(end)];
   },
   // value must be an array of unambiguous strings like '2001-01-01', or
   // Date objects.
@@ -3549,8 +3596,8 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
 
     // Stringify min and max. If min and max aren't set, they will be
     // -Infinity and Infinity; replace these with null.
-    min = (min === -Infinity) ? null : this._formatDate(min);
-    max = (max ===  Infinity) ? null : this._formatDate(max);
+    min = (min === -Infinity) ? null : formatDateUTC(min);
+    max = (max ===  Infinity) ? null : formatDateUTC(max);
 
     // startViewMode is stored as a number; convert to string
     var startview = $startinput.data('datepicker').startViewMode;

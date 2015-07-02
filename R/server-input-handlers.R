@@ -95,6 +95,15 @@ registerInputHandler("shiny.date", function(val, ...){
   as.Date(unlist(datelist))
 })
 
+registerInputHandler("shiny.datetime", function(val, ...){
+  # First replace NULLs with NA, then convert to POSIXct vector
+  times <- lapply(val, function(x) {
+    if (is.null(x)) NA
+    else x
+  })
+  as.POSIXct(unlist(times), origin = "1970-01-01", tz = "UTC")
+})
+
 registerInputHandler("shiny.action", function(val, ...) {
   # mark up the action button value with a special class so we can recognize it later
   class(val) <- c(class(val), "shinyActionButtonValue")

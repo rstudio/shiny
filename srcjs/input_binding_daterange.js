@@ -10,7 +10,7 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     var start = $inputs.eq(0).data('datepicker').getUTCDate();
     var end   = $inputs.eq(1).data('datepicker').getUTCDate();
 
-    return [this._formatDate(start), this._formatDate(end)];
+    return [formatDateUTC(start), formatDateUTC(end)];
   },
   // value must be an array of unambiguous strings like '2001-01-01', or
   // Date objects.
@@ -44,8 +44,8 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
 
     // Stringify min and max. If min and max aren't set, they will be
     // -Infinity and Infinity; replace these with null.
-    min = (min === -Infinity) ? null : this._formatDate(min);
-    max = (max ===  Infinity) ? null : this._formatDate(max);
+    min = (min === -Infinity) ? null : formatDateUTC(min);
+    max = (max ===  Infinity) ? null : formatDateUTC(max);
 
     // startViewMode is stored as a number; convert to string
     var startview = $startinput.data('datepicker').startViewMode;

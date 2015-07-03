@@ -8,7 +8,7 @@
 sliderInput(inputId, label, min, max, value, step = NULL, round = FALSE,
   format = NULL, locale = NULL, ticks = TRUE, animate = FALSE,
   width = NULL, sep = ",", pre = NULL, post = NULL, timeFormat = NULL,
-  timezone = NULL, dragRange = FALSE)
+  timezone = NULL, dragRange = TRUE)
 
 animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
   pauseButton = NULL)
@@ -73,8 +73,8 @@ be displayed in the browser's time zone. The value \code{"+0000"} will
 result in UTC time.}
 
 \item{dragRange}{This option is used only if it is a range slider (with two
-values). If \code{TRUE}, the range can be dragged. In other words, the min
-and max can be dragged together. If \code{FALSE} (the default), the range
+values). If \code{TRUE} (the default), the range can be dragged. In other
+words, the min and max can be dragged together. If \code{FALSE}, the range
 cannot be dragged.}
 
 \item{interval}{The interval, in milliseconds, between each animation step.}

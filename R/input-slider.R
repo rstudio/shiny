@@ -29,8 +29,8 @@
 #' @param pre A prefix string to put in front of the value.
 #' @param post A suffix string to put after the value.
 #' @param dragRange This option is used only if it is a range slider (with two
-#'   values). If \code{TRUE}, the range can be dragged. In other words, the min
-#'   and max can be dragged together. If \code{FALSE} (the default), the range
+#'   values). If \code{TRUE} (the default), the range can be dragged. In other
+#'   words, the min and max can be dragged together. If \code{FALSE}, the range
 #'   cannot be dragged.
 #' @param timeFormat Only used if the values are Date or POSIXt objects. A time
 #'   format string, to be passed to the Javascript strftime library. See
@@ -53,7 +53,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,
                         ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
                         pre = NULL, post = NULL, timeFormat = NULL,
-                        timezone = NULL, dragRange = FALSE)
+                        timezone = NULL, dragRange = TRUE)
 {
   if (!missing(format)) {
     shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",

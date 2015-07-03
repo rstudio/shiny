@@ -174,7 +174,8 @@ pageWithSidebar <- function(headerPanel,
 #'   menu within the navbar that in turns includes additional tabPanels (see
 #'   example below).
 #'
-#' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}}
+#' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}},
+#'   \code{\link{updateNavbarPage}}
 #'
 #' @examples
 #' shinyUI(navbarPage("App Title",
@@ -560,6 +561,7 @@ tabsetPanel <- function(...,
 #'   supported. This is because version 0.11 switched to Bootstrap 3, which
 #'   doesn't support separators.
 #'
+#' @seealso \code{\link{tabPanel}}, \code{\link{updateNavlistPanel}}
 #' @examples
 #' shinyUI(fluidPage(
 #'

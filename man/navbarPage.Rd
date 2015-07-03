@@ -88,6 +88,7 @@ shinyUI(navbarPage("App Title",
 ))
 }
 \seealso{
-\code{\link{tabPanel}}, \code{\link{tabsetPanel}}
+\code{\link{tabPanel}}, \code{\link{tabsetPanel}},
+  \code{\link{updateNavbarPage}}
 }
 

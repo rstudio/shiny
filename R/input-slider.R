@@ -5,12 +5,14 @@
 #' @inheritParams textInput
 #' @param min The minimum value (inclusive) that can be selected.
 #' @param max The maximum value (inclusive) that can be selected.
-#' @param value The initial value of the slider. A numeric vector of length
-#'   one will create a regular slider; a numeric vector of length two will
-#'   create a double-ended range slider. A warning will be issued if the
-#'   value doesn't fit between \code{min} and \code{max}.
+#' @param value The initial value of the slider. A numeric vector of length one
+#'   will create a regular slider; a numeric vector of length two will create a
+#'   double-ended range slider. A warning will be issued if the value doesn't
+#'   fit between \code{min} and \code{max}.
 #' @param step Specifies the interval between each selectable value on the
-#'   slider (if \code{NULL}, a heuristic is used to determine the step size).
+#'   slider (if \code{NULL}, a heuristic is used to determine the step size). If
+#'   the values are dates, \code{step} is in days; if the values are times
+#'   (POSIXt), \code{step} is in seconds.
 #' @param round \code{TRUE} to round all values to the nearest integer;
 #'   \code{FALSE} if no rounding is desired; or an integer to round to that
 #'   number of digits (for example, 1 will round to the nearest 10, and -2 will
@@ -26,6 +28,22 @@
 #' @param sep Separator between thousands places in numbers.
 #' @param pre A prefix string to put in front of the value.
 #' @param post A suffix string to put after the value.
+#' @param dragRange This option is used only if it is a range slider (with two
+#'   values). If \code{TRUE} (the default), the range can be dragged. In other
+#'   words, the min and max can be dragged together. If \code{FALSE}, the range
+#'   cannot be dragged.
+#' @param timeFormat Only used if the values are Date or POSIXt objects. A time
+#'   format string, to be passed to the Javascript strftime library. See
+#'   \url{https://github.com/samsonjs/strftime} for more details. The allowed
+#'   format specifications are very similar, but not identical, to those for R's
+#'   \code{\link{strftime}} function. For Dates, the default is \code{"\%F"}
+#'   (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
+#'   (like \code{"2015-07-01 15:32:10"}).
+#' @param timezone Only used if the values are POSIXt objects. A string
+#'   specifying the time zone offset for the displayed times, in the format
+#'   \code{"+HHMM"} or \code{"-HHMM"}. If \code{NULL} (the default), times will
+#'   be displayed in the browser's time zone. The value \code{"+0000"} will
+#'   result in UTC time.
 #' @inheritParams selectizeInput
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
@@ -34,8 +52,9 @@
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,
                         ticks = TRUE, animate = FALSE, width = NULL, sep = ",",
-                        pre = NULL, post = NULL) {
-
+                        pre = NULL, post = NULL, timeFormat = NULL,
+                        timezone = NULL, dragRange = TRUE)
+{
   if (!missing(format)) {
     shinyDeprecated(msg = "The `format` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
                     version = "0.10.2.2")
@@ -45,17 +64,55 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
-  # Auto step size
-  range <- max - min
-  if (is.null(step)) {
-    # If short range or decimals, use means continuous decimal with ~100 points
+  # If step is NULL, use heuristic to set the step size.
+  findStepSize <- function(min, max, step) {
+    if (!is.null(step)) return(step)
+
+    range <- max - min
+    # If short range or decimals, use continuous decimal with ~100 points
     if (range < 2 || hasDecimals(min) || hasDecimals(max)) {
       step <- pretty(c(min, max), n = 100)
-      step <- step[2] - step[1]
+      step[2] - step[1]
     } else {
-      step <- 1
+      1
     }
   }
+
+  if (inherits(min, "Date")) {
+    if (!inherits(max, "Date") || !inherits(value, "Date"))
+      stop("`min`, `max`, and `value must all be Date or non-Date objects")
+    dataType <- "date"
+
+    if (is.null(timeFormat))
+      timeFormat <- "%F"
+
+  } else if (inherits(min, "POSIXt")) {
+    if (!inherits(max, "POSIXt") || !inherits(value, "POSIXt"))
+      stop("`min`, `max`, and `value must all be POSIXt or non-POSIXt objects")
+    dataType <- "datetime"
+
+    if (is.null(timeFormat))
+      timeFormat <- "%F %T"
+
+  } else {
+    dataType <- "number"
+  }
+
+  step <- findStepSize(min, max, step)
+
+  if (dataType %in% c("date", "datetime")) {
+    # For Dates, this conversion uses midnight on that date in UTC
+    to_ms <- function(x) 1000 * as.numeric(as.POSIXct(x))
+
+    # Convert values to milliseconds since epoch (this is the value JS uses)
+    # Find step size in ms
+    step  <- to_ms(max) - to_ms(max - step)
+    min   <- to_ms(min)
+    max   <- to_ms(max)
+    value <- to_ms(value)
+  }
+
+  range <- max - min
 
   # Try to get a sane number of tick marks
   if (ticks) {
@@ -87,7 +144,12 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-prefix` = pre,
     `data-postfix` = post,
     `data-keyboard` = TRUE,
-    `data-keyboard-step` = step / (max - min) * 100
+    `data-keyboard-step` = step / (max - min) * 100,
+    `data-drag-interval` = dragRange,
+    # The following are ignored by the ion.rangeSlider, but are used by Shiny.
+    `data-data-type` = dataType,
+    `data-time-format` = timeFormat,
+    `data-timezone` = timezone
   ))
 
   # Replace any TRUE and FALSE with "true" and "false"
@@ -128,12 +190,17 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     )
   }
 
-  dep <- htmlDependency("ionrangeslider", "2.0.6", c(href="shared/ionrangeslider"),
-    script = "js/ion.rangeSlider.min.js",
-    # ion.rangeSlider also needs normalize.css, which is already included in
-    # Bootstrap.
-    stylesheet = c("css/ion.rangeSlider.css",
-                   "css/ion.rangeSlider.skinShiny.css")
+  dep <- list(
+    htmlDependency("ionrangeslider", "2.0.6", c(href="shared/ionrangeslider"),
+      script = "js/ion.rangeSlider.min.js",
+      # ion.rangeSlider also needs normalize.css, which is already included in
+      # Bootstrap.
+      stylesheet = c("css/ion.rangeSlider.css",
+                     "css/ion.rangeSlider.skinShiny.css")
+    ),
+    htmlDependency("strftime", "0.9.2", c(href="shared/strftime"),
+      script = "strftime-min.js"
+    )
   )
 
   attachDependencies(sliderTag, dep)

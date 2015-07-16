@@ -7,14 +7,42 @@ $.extend(sliderInputBinding, textInputBinding, {
 
     return $(scope).find('input.js-range-slider');
   },
+  getType: function(el) {
+    var dataType = $(el).data('data-type');
+    if (dataType === 'date')
+      return 'shiny.date';
+    else if (dataType === 'datetime')
+      return 'shiny.datetime';
+    else
+      return false;
+  },
   getValue: function(el) {
+    var $el = $(el);
     var result = $(el).data('ionRangeSlider').result;
+
+    // Function for converting numeric value from slider to appropriate type.
+    var convert;
+    var dataType = $el.data('data-type');
+    if (dataType === 'date') {
+      convert = function(val) {
+        return formatDateUTC(new Date(+val));
+      };
+    } else if (dataType === 'datetime') {
+      convert = function(val) {
+        // Convert ms to s
+        return +val / 1000;
+      };
+    } else {
+      convert = function(val) { return +val; };
+    }
+
     if (this._numValues(el) == 2) {
-      return [+result.from, +result.to];
+      return [convert(result.from), convert(result.to)];
     }
     else {
-      return +result.from;
+      return convert(result.from);
     }
+
   },
   setValue: function(el, value) {
     var slider = $(el).data('ionRangeSlider');
@@ -68,7 +96,32 @@ $.extend(sliderInputBinding, textInputBinding, {
   getState: function(el) {
   },
   initialize: function(el) {
-    $(el).ionRangeSlider();
+    var opts = {};
+    var $el = $(el);
+    var dataType = $el.data('data-type');
+    var timeFormat = $el.data('time-format');
+    var timeFormatter;
+
+    // Set up formatting functions
+    if (dataType === 'date') {
+      timeFormatter = strftime.utc();
+      opts.prettify = function(num) {
+        return timeFormatter(timeFormat, new Date(num));
+      };
+
+    } else if (dataType === 'datetime') {
+      var timezone = $el.data('timezone');
+      if (timezone)
+        timeFormatter = strftime.timezone(timezone);
+      else
+        timeFormatter = strftime;
+
+      opts.prettify = function(num) {
+        return timeFormatter(timeFormat, new Date(num));
+      };
+    }
+
+    $el.ionRangeSlider(opts);
   },
 
   // Number of values; 1 for single slider, 2 for range slider

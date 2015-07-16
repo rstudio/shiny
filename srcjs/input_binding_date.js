@@ -10,7 +10,7 @@ $.extend(dateInputBinding, {
   // format like mm/dd/yyyy)
   getValue: function(el) {
     var date = $(el).find('input').data('datepicker').getUTCDate();
-    return this._formatDate(date);
+    return formatDateUTC(date);
   },
   // value must be an unambiguous string like '2001-01-01', or a Date object.
   setValue: function(el, value) {
@@ -30,8 +30,8 @@ $.extend(dateInputBinding, {
 
     // Stringify min and max. If min and max aren't set, they will be
     // -Infinity and Infinity; replace these with null.
-    min = (min === -Infinity) ? null : this._formatDate(min);
-    max = (max ===  Infinity) ? null : this._formatDate(max);
+    min = (min === -Infinity) ? null : formatDateUTC(min);
+    max = (max ===  Infinity) ? null : formatDateUTC(max);
 
     // startViewMode is stored as a number; convert to string
     var startview = $input.data('datepicker').startViewMode;
@@ -105,18 +105,6 @@ $.extend(dateInputBinding, {
     // date format.
     this._setMin($input[0], $input.data('min-date'));
     this._setMax($input[0], $input.data('max-date'));
-  },
-  // Given a Date object, return a string in yyyy-mm-dd format, using the
-  // UTC date. This may be a day off from the date in the local time zone.
-  _formatDate: function(date) {
-    if (date instanceof Date) {
-      return date.getUTCFullYear() + '-' +
-             padZeros(date.getUTCMonth()+1, 2) + '-' +
-             padZeros(date.getUTCDate(), 2);
-
-    } else {
-      return null;
-    }
   },
   // Given a format object from a date picker, return a string
   _formatToString: function(format) {

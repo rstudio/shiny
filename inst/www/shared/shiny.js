@@ -643,6 +643,10 @@ var ShinyApp = function() {
 
     var socket = createSocketFunc();
     socket.onopen = function() {
+      $(document).trigger({
+        type: 'shiny:connected',
+        socket: socket
+      });
       socket.send(JSON.stringify({
         method: 'init',
         data: self.$initialInput
@@ -657,6 +661,10 @@ var ShinyApp = function() {
       self.dispatchMessage(e.data);
     };
     socket.onclose = function() {
+      $(document).trigger({
+        type: 'shiny:disconnected',
+        socket: socket
+      });
       $(document.body).addClass('disconnected');
       self.$notifyDisconnected();
     };

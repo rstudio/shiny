@@ -1,0 +1,6 @@
+name: 01_hello
+account: admin
+server: localhost
+bundleId: 1
+url: http://localhost:3939/admin/01_hello/
+when: 1436550957.65385

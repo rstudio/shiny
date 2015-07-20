@@ -6,6 +6,8 @@ shiny 0.12.1.9xxx
 
 * Minor bugs in sliderInput's animation behavior have been fixed. (#852)
 
+* Updated to ion.rangeSlider to 2.0.12.
+
 * Added `shiny.minified` option, which controls whether the minified version
   of shiny.js is used. Setting it to FALSe can be useful for debugging. (#826,
   #850)

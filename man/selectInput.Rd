@@ -54,6 +54,10 @@ JavaScript library \pkg{selectize.js}
 (\url{https://github.com/brianreavis/selectize.js}) to instead of the basic
 select input element. To use the standard HTML select input element, use
 \code{selectInput()} with \code{selectize=FALSE}.
+
+In selectize mode, if the first element in \code{choices} has a value of
+\code{""}, its name will be treated as a placeholder prompt. For example:
+\code{selectInput("letter", "Letter", c("Choose one" = "", LETTERS))}
 }
 \note{
 The selectize input created from \code{selectizeInput()} allows

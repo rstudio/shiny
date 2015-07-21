@@ -62,7 +62,8 @@ $.extend(sliderInputBinding, textInputBinding, {
     $(el).off('.sliderInputBinding');
   },
   receiveMessage: function(el, data) {
-    var slider = $(el).data('ionRangeSlider');
+    var $el = $(el);
+    var slider = $el.data('ionRangeSlider');
     var msg = {};
 
     if (data.hasOwnProperty('value')) {
@@ -78,13 +79,13 @@ $.extend(sliderInputBinding, textInputBinding, {
     if (data.hasOwnProperty('step')) msg.step  = data.step;
 
     if (data.hasOwnProperty('label'))
-      $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
-    $(el).data('updating', true);
+    $el.data('updating', true);
     try {
       slider.update(msg);
     } finally {
-      $(el).data('updating', false);
+      $el.data('updating', false);
     }
   },
   getRatePolicy: function() {

@@ -9,6 +9,10 @@
 #' select input element. To use the standard HTML select input element, use
 #' \code{selectInput()} with \code{selectize=FALSE}.
 #'
+#' In selectize mode, if the first element in \code{choices} has a value of
+#' \code{""}, its name will be treated as a placeholder prompt. For example:
+#' \code{selectInput("letter", "Letter", c("Choose one" = "", LETTERS))}
+#'
 #' @inheritParams textInput
 #' @param choices List of values to select from. If elements of the list are
 #'   named then that name rather than the value is displayed to the user.

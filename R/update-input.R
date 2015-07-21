@@ -249,9 +249,9 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #'       sidebarLayout(
 #'         sidebarPanel(
 #'           p("The first slider controls the second"),
-#'           slider2Input("control", "Controller:", min=0, max=20, value=10,
+#'           sliderInput("control", "Controller:", min=0, max=20, value=10,
 #'                        step=1),
-#'           slider2Input("receive", "Receiver:", min=0, max=20, value=10,
+#'           sliderInput("receive", "Receiver:", min=0, max=20, value=10,
 #'                        step=1)
 #'         ),
 #'         mainPanel()

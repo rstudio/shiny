@@ -1,6 +1,9 @@
 shiny 0.12.1.9xxx
 --------------------------------------------------------------------------------
 
+* GitHub changed URLs for gists from .tar.gz to .zip, so `runGist` was updated
+  to work with the new URLs.
+
 * Callbacks from the session object are now guaranteed to execute in the order
   in which registration occurred.
 

@@ -207,6 +207,15 @@ function initShiny() {
   }
   exports.initializeInputs = initializeInputs;
 
+  function getIdFromEl(el) {
+    var $el = $(el);
+    var bindingAdapter = $el.data("shiny-output-binding");
+    if (!bindingAdapter)
+      return null;
+    else
+      return bindingAdapter.binding.getId();
+  }
+
 
   // Initialize all input objects in the document, before binding
   initializeInputs(document);
@@ -217,16 +226,18 @@ function initShiny() {
   // The server needs to know the size of each image and plot output element,
   // in case it is auto-sizing
   $('.shiny-image-output, .shiny-plot-output').each(function() {
+    var id = getIdFromEl(this);
     if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-      initialValues['.clientdata_output_' + this.id + '_width'] = this.offsetWidth;
-      initialValues['.clientdata_output_' + this.id + '_height'] = this.offsetHeight;
+      initialValues['.clientdata_output_' + id + '_width'] = this.offsetWidth;
+      initialValues['.clientdata_output_' + id + '_height'] = this.offsetHeight;
     }
   });
   function doSendImageSize() {
     $('.shiny-image-output, .shiny-plot-output').each(function() {
+      var id = getIdFromEl(this);
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-        inputs.setInput('.clientdata_output_' + this.id + '_width', this.offsetWidth);
-        inputs.setInput('.clientdata_output_' + this.id + '_height', this.offsetHeight);
+        inputs.setInput('.clientdata_output_' + id + '_width', this.offsetWidth);
+        inputs.setInput('.clientdata_output_' + id + '_height', this.offsetHeight);
       }
     });
     $('.shiny-bound-output').each(function() {
@@ -260,24 +271,26 @@ function initShiny() {
   var lastKnownVisibleOutputs = {};
   // Set initial state of outputs to hidden, if needed
   $('.shiny-bound-output').each(function() {
+    var id = getIdFromEl(this);
     if (isHidden(this)) {
-      initialValues['.clientdata_output_' + this.id + '_hidden'] = true;
+      initialValues['.clientdata_output_' + id + '_hidden'] = true;
     } else {
-      lastKnownVisibleOutputs[this.id] = true;
-      initialValues['.clientdata_output_' + this.id + '_hidden'] = false;
+      lastKnownVisibleOutputs[id] = true;
+      initialValues['.clientdata_output_' + id + '_hidden'] = false;
     }
   });
   // Send update when hidden state changes
   function doSendOutputHiddenState() {
     var visibleOutputs = {};
     $('.shiny-bound-output').each(function() {
-      delete lastKnownVisibleOutputs[this.id];
+      var id = getIdFromEl(this);
+      delete lastKnownVisibleOutputs[id];
       // Assume that the object is hidden when width and height are 0
       if (isHidden(this)) {
-        inputs.setInput('.clientdata_output_' + this.id + '_hidden', true);
+        inputs.setInput('.clientdata_output_' + id + '_hidden', true);
       } else {
-        visibleOutputs[this.id] = true;
-        inputs.setInput('.clientdata_output_' + this.id + '_hidden', false);
+        visibleOutputs[id] = true;
+        inputs.setInput('.clientdata_output_' + id + '_hidden', false);
       }
     });
     // Anything left in lastKnownVisibleOutputs is orphaned

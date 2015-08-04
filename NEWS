@@ -1,4 +1,4 @@
-shiny 0.12.1.9xxx
+shiny 0.12.2
 --------------------------------------------------------------------------------
 
 * GitHub changed URLs for gists from .tar.gz to .zip, so `runGist` was updated

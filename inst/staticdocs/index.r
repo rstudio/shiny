@@ -59,7 +59,6 @@ sd_section("UI Outputs",
   "Functions for creating user interface elements that, in conjunction with rendering functions, display different kinds of output from your application.",
   c(
     "htmlOutput",
-    "imageOutput",
     "plotOutput",
     "outputOptions",
     "tableOutput",

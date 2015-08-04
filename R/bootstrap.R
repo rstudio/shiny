@@ -763,6 +763,101 @@ verbatimTextOutput <- function(outputId) {
   textOutput(outputId, container = pre)
 }
 
+
+#' @rdname plotOutput
+#' @export
+imageOutput <- function(outputId, width = "100%", height="400px",
+                        click = NULL, dblclick = NULL,
+                        hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
+                        brush = NULL,
+                        clickId = NULL, hoverId = NULL,
+                        inline = FALSE) {
+
+  if (!is.null(clickId)) {
+    shinyDeprecated(
+      msg = paste("The 'clickId' argument is deprecated. ",
+                  "Please use 'click' instead. ",
+                  "See ?imageOutput or ?plotOutput for more information."),
+      version = "0.11.1"
+    )
+    click <- clickId
+  }
+
+  if (!is.null(hoverId)) {
+    shinyDeprecated(
+      msg = paste("The 'hoverId' argument is deprecated. ",
+                  "Please use 'hover' instead. ",
+                  "See ?imageOutput or ?plotOutput for more information."),
+      version = "0.11.1"
+    )
+    hover <- hoverId
+  }
+
+  if (!is.null(hoverDelay) || !is.null(hoverDelayType)) {
+    shinyDeprecated(
+      msg = paste("The 'hoverDelay'and 'hoverDelayType' arguments are deprecated. ",
+                  "Please use 'hoverOpts' instead. ",
+                  "See ?imageOutput or ?plotOutput for more information."),
+      version = "0.11.1"
+    )
+    hover <- hoverOpts(id = hover, delay = hoverDelay, delayType = hoverDelayType)
+  }
+
+  style <- if (!inline) {
+    paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
+  }
+
+
+  # Build up arguments for call to div() or span()
+  args <- list(
+    id = outputId,
+    class = "shiny-image-output",
+    style = style
+  )
+
+  # Given a named list with options, replace names like "delayType" with
+  # "data-hover-delay-type" (given a prefix "hover")
+  formatOptNames <- function(opts, prefix) {
+    newNames <- paste("data", prefix, names(opts), sep = "-")
+    # Replace capital letters with "-" and lowercase letter
+    newNames <- gsub("([A-Z])", "-\\L\\1", newNames, perl = TRUE)
+    names(opts) <- newNames
+    opts
+  }
+
+  if (!is.null(click)) {
+    # If click is a string, turn it into clickOpts object
+    if (is.character(click)) {
+      click <- clickOpts(id = click)
+    }
+    args <- c(args, formatOptNames(click, "click"))
+  }
+
+  if (!is.null(dblclick)) {
+    if (is.character(dblclick)) {
+      dblclick <- clickOpts(id = dblclick)
+    }
+    args <- c(args, formatOptNames(dblclick, "dblclick"))
+  }
+
+  if (!is.null(hover)) {
+    if (is.character(hover)) {
+      hover <- hoverOpts(id = hover)
+    }
+    args <- c(args, formatOptNames(hover, "hover"))
+  }
+
+  if (!is.null(brush)) {
+    if (is.character(brush)) {
+      brush <- brushOpts(id = brush)
+    }
+    args <- c(args, formatOptNames(brush, "brush"))
+  }
+
+  container <- if (inline) span else div
+  do.call(container, args)
+}
+
 #' Create an plot or image output element
 #'
 #' Render a \code{\link{renderPlot}} or \code{\link{renderImage}} within an
@@ -995,100 +1090,6 @@ verbatimTextOutput <- function(outputId) {
 #' )
 #'
 #' }
-#' @export
-imageOutput <- function(outputId, width = "100%", height="400px",
-                        click = NULL, dblclick = NULL,
-                        hover = NULL, hoverDelay = NULL, hoverDelayType = NULL,
-                        brush = NULL,
-                        clickId = NULL, hoverId = NULL,
-                        inline = FALSE) {
-
-  if (!is.null(clickId)) {
-    shinyDeprecated(
-      msg = paste("The 'clickId' argument is deprecated. ",
-                  "Please use 'click' instead. ",
-                  "See ?imageOutput or ?plotOutput for more information."),
-      version = "0.11.1"
-    )
-    click <- clickId
-  }
-
-  if (!is.null(hoverId)) {
-    shinyDeprecated(
-      msg = paste("The 'hoverId' argument is deprecated. ",
-                  "Please use 'hover' instead. ",
-                  "See ?imageOutput or ?plotOutput for more information."),
-      version = "0.11.1"
-    )
-    hover <- hoverId
-  }
-
-  if (!is.null(hoverDelay) || !is.null(hoverDelayType)) {
-    shinyDeprecated(
-      msg = paste("The 'hoverDelay'and 'hoverDelayType' arguments are deprecated. ",
-                  "Please use 'hoverOpts' instead. ",
-                  "See ?imageOutput or ?plotOutput for more information."),
-      version = "0.11.1"
-    )
-    hover <- hoverOpts(id = hover, delay = hoverDelay, delayType = hoverDelayType)
-  }
-
-  style <- if (!inline) {
-    paste("width:", validateCssUnit(width), ";", "height:", validateCssUnit(height))
-  }
-
-
-  # Build up arguments for call to div() or span()
-  args <- list(
-    id = outputId,
-    class = "shiny-image-output",
-    style = style
-  )
-
-  # Given a named list with options, replace names like "delayType" with
-  # "data-hover-delay-type" (given a prefix "hover")
-  formatOptNames <- function(opts, prefix) {
-    newNames <- paste("data", prefix, names(opts), sep = "-")
-    # Replace capital letters with "-" and lowercase letter
-    newNames <- gsub("([A-Z])", "-\\L\\1", newNames, perl = TRUE)
-    names(opts) <- newNames
-    opts
-  }
-
-  if (!is.null(click)) {
-    # If click is a string, turn it into clickOpts object
-    if (is.character(click)) {
-      click <- clickOpts(id = click)
-    }
-    args <- c(args, formatOptNames(click, "click"))
-  }
-
-  if (!is.null(dblclick)) {
-    if (is.character(dblclick)) {
-      dblclick <- clickOpts(id = dblclick)
-    }
-    args <- c(args, formatOptNames(dblclick, "dblclick"))
-  }
-
-  if (!is.null(hover)) {
-    if (is.character(hover)) {
-      hover <- hoverOpts(id = hover)
-    }
-    args <- c(args, formatOptNames(hover, "hover"))
-  }
-
-  if (!is.null(brush)) {
-    if (is.character(brush)) {
-      brush <- brushOpts(id = brush)
-    }
-    args <- c(args, formatOptNames(brush, "brush"))
-  }
-
-  container <- if (inline) span else div
-  do.call(container, args)
-}
-
-#' @rdname imageOutput
 #' @export
 plotOutput <- function(outputId, width = "100%", height="400px",
                        click = NULL, dblclick = NULL,

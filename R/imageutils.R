@@ -33,12 +33,12 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   # Otherwise, if the Cairo package is installed, use CairoPNG().
   # Finally, if neither quartz nor Cairo, use png().
   if (capabilities("aqua")) {
-    pngfun <- png
+    pngfun <- grDevices::png
   } else if ((getOption('shiny.usecairo') %OR% TRUE) &&
              nchar(system.file(package = "Cairo"))) {
     pngfun <- Cairo::CairoPNG
   } else {
-    pngfun <- png
+    pngfun <- grDevices::png
   }
 
   pngfun(filename=filename, width=width, height=height, res=res, ...)
@@ -49,10 +49,10 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   # by plot.new() with the default (large) margin. However, this does not
   # guarantee user's code in func() will not trigger the error -- they may have
   # to set par(mar = smaller_value) before they draw base graphics.
-  op <- par(mar = rep(0, 4))
-  tryCatch(plot.new(), finally = par(op))
-  dv <- dev.cur()
-  tryCatch(shinyCallingHandlers(func()), finally = dev.off(dv))
+  op <- graphics::par(mar = rep(0, 4))
+  tryCatch(graphics::plot.new(), finally = graphics::par(op))
+  dv <- grDevices::dev.cur()
+  tryCatch(shinyCallingHandlers(func()), finally = grDevices::dev.off(dv))
 
   filename
 }

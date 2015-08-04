@@ -547,7 +547,7 @@ runApp <- function(appDir=getwd(),
     # SHINY_SERVER_VERSION, those will return "" which is considered less than
     # any valid version.
     ver <- Sys.getenv('SHINY_SERVER_VERSION')
-    if (compareVersion(ver, .shinyServerMinVersion) < 0) {
+    if (utils::compareVersion(ver, .shinyServerMinVersion) < 0) {
       warning('Shiny Server v', .shinyServerMinVersion,
               ' or later is required; please upgrade!')
     }

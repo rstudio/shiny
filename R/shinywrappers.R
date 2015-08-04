@@ -185,7 +185,7 @@ renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) 
       return("")
 
     return(paste(
-      capture.output(
+      utils::capture.output(
         print(xtable(data, ...),
               type='html',
               html.table.attributes=paste('class="',
@@ -238,7 +238,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE, func = NULL,
   markRenderFunction(verbatimTextOutput, function() {
     op <- options(width = width)
     on.exit(options(op), add = TRUE)
-    paste(capture.output(func()), collapse = "\n")
+    paste(utils::capture.output(func()), collapse = "\n")
   })
 }
 
@@ -278,7 +278,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 
   markRenderFunction(textOutput, function() {
     value <- func()
-    return(paste(capture.output(cat(value)), collapse="\n"))
+    return(paste(utils::capture.output(cat(value)), collapse="\n"))
   })
 }
 
@@ -460,7 +460,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     colnames <- colnames(data)
     # if escape is column names, turn names to numeric indices
     if (is.character(escape)) {
-      escape <- setNames(seq_len(ncol(data)), colnames)[escape]
+      escape <- stats::setNames(seq_len(ncol(data)), colnames)[escape]
       if (any(is.na(escape)))
         stop("Some column names in the 'escape' argument not found in data")
     }
@@ -481,8 +481,10 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 # a data frame containing the DataTables 1.9 and 1.10 names
 DT10Names <- function() {
   rbind(
-    read.table(system.file('www/shared/datatables/upgrade1.10.txt', package = 'shiny'),
-               stringsAsFactors = FALSE),
+    utils::read.table(
+      system.file('www/shared/datatables/upgrade1.10.txt', package = 'shiny'),
+      stringsAsFactors = FALSE
+    ),
     c('aoColumns', 'Removed')  # looks like an omission on the upgrade guide
   )
 }
@@ -500,7 +502,7 @@ checkDT9 <- function(options) {
     'and DataTables 1.10.x uses different parameter names with 1.9.x. ',
     'Please follow the upgrade guide https://datatables.net/upgrade/1.10-convert',
     ' to change your DataTables parameter names:\n\n',
-    paste(formatUL(nms[i]), collapse = '\n'), '\n', sep = ''
+    paste(utils::formatUL(nms[i]), collapse = '\n'), '\n', sep = ''
   )
   j <- gsub('[.].*', '', DT10[, 1]) %in% nms
   # I cannot help you upgrade automatically in these cases, so I have to stop
@@ -509,7 +511,7 @@ checkDT9 <- function(options) {
   nms10 <- DT10[match(nms[i], DT10[, 1]), 2]
   if (any(nms10 == 'Removed')) stop(
     "These parameters have been removed in DataTables 1.10.x:\n\n",
-    paste(formatUL(nms[i][nms10 == 'Removed']), collapse = '\n'),
+    paste(utils::formatUL(nms[i][nms10 == 'Removed']), collapse = '\n'),
     "\n\n", msg
   )
   names(options)[i] <- nms10

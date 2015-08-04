@@ -93,9 +93,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
         # Special case for ggplot objects - need to capture coordmap
         if (inherits(result$value, "ggplot")) {
-          capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
+          utils::capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
         } else {
-          capture.output(print(result$value))
+          utils::capture.output(print(result$value))
         }
       }
 
@@ -237,12 +237,12 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 # Requires width and height of output image, in pixels.
 # Must be called before the graphics device is closed.
 getPrevPlotCoordmap <- function(width, height) {
-  usrCoords <- par('usr')
+  usrCoords <- graphics::par('usr')
   usrBounds <- usrCoords
-  if (par('xlog')) {
+  if (graphics::par('xlog')) {
     usrBounds[c(1,2)] <- 10 ^ usrBounds[c(1,2)]
   }
-  if (par('ylog')) {
+  if (graphics::par('ylog')) {
     usrBounds[c(3,4)] <- 10 ^ usrBounds[c(3,4)]
   }
 
@@ -257,14 +257,14 @@ getPrevPlotCoordmap <- function(width, height) {
     ),
     # The bounds of the plot area, in DOM pixels
     range = list(
-      left = grconvertX(usrBounds[1], 'user', 'nfc') * width,
-      right = grconvertX(usrBounds[2], 'user', 'nfc') * width,
-      bottom = (1-grconvertY(usrBounds[3], 'user', 'nfc')) * height - 1,
-      top = (1-grconvertY(usrBounds[4], 'user', 'nfc')) * height - 1
+      left = graphics::grconvertX(usrBounds[1], 'user', 'nfc') * width,
+      right = graphics::grconvertX(usrBounds[2], 'user', 'nfc') * width,
+      bottom = (1-graphics::grconvertY(usrBounds[3], 'user', 'nfc')) * height - 1,
+      top = (1-graphics::grconvertY(usrBounds[4], 'user', 'nfc')) * height - 1
     ),
     log = list(
-      x = if (par('xlog')) 10 else NULL,
-      y = if (par('ylog')) 10 else NULL
+      x = if (graphics::par('xlog')) 10 else NULL,
+      y = if (graphics::par('ylog')) 10 else NULL
     ),
     # We can't extract the original variable names from a base graphic.
     # `mapping` is an empty _named_ list, so that it is converted to an object
@@ -304,7 +304,7 @@ getGgplotCoordmap <- function(p, pixelratio) {
   which_method <- function(generic, x) {
     classes <- class(x)
     method_names <- paste(generic, classes, sep = ".")
-    idx <- which(method_names %in% methods(generic))
+    idx <- which(method_names %in% utils::methods(generic))
 
     if (length(idx) == 0)
       return(NULL)
@@ -539,7 +539,7 @@ getGgplotCoordmap <- function(p, pixelratio) {
     # the image has double size. In the latter case we don't have to scale the
     # numbers down.
     pix_ratio <- 1
-    if (!grepl("^quartz", names(dev.cur()))) {
+    if (!grepl("^quartz", names(grDevices::dev.cur()))) {
       pix_ratio <- pixelratio
     }
 

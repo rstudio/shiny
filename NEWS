@@ -24,6 +24,9 @@ shiny 0.12.1.9xxx
 * Added two alias functions of `updateTabsetPanel()` to update the selected tab:
   `updateNavbarPage()` and `updateNavlistPanel()`. (#881)
 
+* All non-base functions are now explicitly namespaced, to pass checks in
+  R-devel.
+
 shiny 0.12.1
 --------------------------------------------------------------------------------
 

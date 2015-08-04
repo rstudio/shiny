@@ -37,7 +37,7 @@ writeReactLog <- function(file=stdout()) {
 #'
 #' @export
 showReactLog <- function() {
-  browseURL(renderReactLog())
+  utils::browseURL(renderReactLog())
 }
 
 renderReactLog <- function() {
@@ -91,7 +91,7 @@ renderReactLog <- function() {
   .graphAppend(list(
     action = 'valueChange',
     id = label,
-    value = paste(capture.output(str(value)), collapse='\n')
+    value = paste(utils::capture.output(utils::str(value)), collapse='\n')
   ))
 }
 

@@ -307,10 +307,10 @@ reactiveValuesToList <- function(x, all.names=FALSE) {
 # x[['impl']].
 #' @export
 str.reactivevalues <- function(object, indent.str = " ", ...) {
-  str(unclass(object), indent.str = indent.str, ...)
+  utils::str(unclass(object), indent.str = indent.str, ...)
   # Need to manually print out the class field,
   cat(indent.str, '- attr(*, "class")=', sep = "")
-  str(class(object))
+  utils::str(class(object))
 }
 
 # Observable ----------------------------------------------------------------

@@ -4,7 +4,7 @@
 \alias{repeatable}
 \title{Make a random number generator repeatable}
 \usage{
-repeatable(rngfunc, seed = runif(1, 0, .Machine$integer.max))
+repeatable(rngfunc, seed = stats::runif(1, 0, .Machine$integer.max))
 }
 \arguments{
 \item{rngfunc}{The function that is affected by the R session's seed.}

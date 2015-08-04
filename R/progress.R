@@ -87,7 +87,7 @@ Progress <- R6Class(
         stop("'session' is not a ShinySession object.")
 
       private$session <- session
-      private$id <- paste(as.character(as.raw(runif(8, min=0, max=255))), collapse='')
+      private$id <- paste(as.character(as.raw(stats::runif(8, min=0, max=255))), collapse='')
       private$min <- min
       private$max <- max
       private$value <- NULL

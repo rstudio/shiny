@@ -499,7 +499,7 @@ ShinySession <- R6Class(
             private$invalidatedOutputErrors$set(
               name,
               list(message = cond$message,
-                   call = capture.output(print(cond$call)),
+                   call = utils::capture.output(print(cond$call)),
                    type = if (length(type)) type))
           }
           else

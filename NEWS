@@ -26,6 +26,7 @@ shiny 0.12.1.9xxx
 
 * All non-base functions are now explicitly namespaced, to pass checks in
   R-devel.
+* Shiny now correctly handles HTTP HEAD requests. (#876)
 
 shiny 0.12.1
 --------------------------------------------------------------------------------

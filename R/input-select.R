@@ -152,6 +152,13 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
     ))
   )
 
+  if ('drag_drop' %in% options$plugins) {
+    selectizeDep <- list(selectizeDep, htmlDependency(
+      'jqueryui', '1.10.4', c(href = 'shared/jqueryui/1.10.4'),
+      script = 'jquery-ui.min.js'
+    ))
+  }
+
   # Insert script on same level as <select> tag
   select$children[[2]] <- tagAppendChild(
     select$children[[2]],

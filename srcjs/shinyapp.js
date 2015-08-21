@@ -377,8 +377,13 @@ var ShinyApp = function() {
   this.dispatchMessage = function(msg) {
     var msgObj = JSON.parse(msg);
 
+    var evt = jQuery.Event('shiny:message');
+    evt.message = msgObj;
+    $(document).trigger(evt);
+    if (evt.isDefaultPrevented()) return;
+
     // Send msgObj.foo and msgObj.bar to appropriate handlers
-    this._sendMessagesToHandlers(msgObj, messageHandlers, messageHandlerOrder);
+    this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
 
     this.$updateConditionals();
   };

@@ -407,7 +407,6 @@ var ShinyApp = function() {
   // Message handlers =====================================================
 
   addMessageHandler('values', function(message) {
-    $(document.documentElement).removeClass('shiny-busy');
     for (var name in this.$bindings) {
       if (this.$bindings.hasOwnProperty(name))
         this.$bindings[name].showProgress(false);
@@ -494,12 +493,21 @@ var ShinyApp = function() {
   });
 
 
+  addCustomMessageHandler('busy', function(message) {
+    if (message === 'busy') {
+      $(document.documentElement).addClass('shiny-busy');
+      $(document).trigger('shiny:busy');
+    } else if (message === 'idle') {
+      $(document.documentElement).removeClass('shiny-busy');
+      $(document).trigger('shiny:idle');
+    }
+  });
+
   // Progress reporting ====================================================
 
   var progressHandlers = {
     // Progress for a particular object
     binding: function(message) {
-      $(document.documentElement).addClass('shiny-busy');
       var key = message.id;
       var binding = this.$bindings[key];
       if (binding && binding.showProgress) {

@@ -259,6 +259,7 @@ ShinySession <- R6Class(
     fileUploadContext = 'FileUploadContext',
     .input      = 'ANY', # Internal ReactiveValues object for normal input sent from client
     .clientData = 'ANY', # Internal ReactiveValues object for other data sent from the client
+    busyCount = 0L, # Number of observer callbacks that are pending. When 0, we are idle
     closedCallbacks = 'Callbacks',
     flushCallbacks = 'Callbacks',
     flushedCallbacks = 'Callbacks',
@@ -898,6 +899,18 @@ ShinySession <- R6Class(
       }
 
       invisible()
+    },
+    incrementBusyCount = function() {
+      if (private$busyCount == 0L) {
+        self$sendCustomMessage("busy", "busy")
+      }
+      private$busyCount <- private$busyCount + 1L
+    },
+    decrementBusyCount = function() {
+      private$busyCount <- private$busyCount - 1L
+      if (private$busyCount == 0L) {
+        self$sendCustomMessage("busy", "idle")
+      }
     }
   ),
   active = list(

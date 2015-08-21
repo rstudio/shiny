@@ -59,6 +59,8 @@ createMockDomain <- function() {
     }
     invisible()
   }
+  domain$incrementBusyCount <- function() NULL
+  domain$decrementBusyCount <- function() NULL
   return(domain)
 }
 

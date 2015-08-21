@@ -33,6 +33,11 @@ function initShiny() {
         shinyapp.bindOutput(id, bindingAdapter);
         $el.data('shiny-output-binding', bindingAdapter);
         $el.addClass('shiny-bound-output');
+        $el.trigger({
+          type: 'shiny:bound',
+          binding: binding,
+          bindingType: 'output'
+        });
       }
     }
 
@@ -55,6 +60,11 @@ function initShiny() {
       shinyapp.unbindOutput(id, bindingAdapter);
       $el.removeClass('shiny-bound-output');
       $el.removeData('shiny-output-binding');
+      $el.trigger({
+        type: 'shiny:unbound',
+        binding: bindingAdapter.binding,
+        bindingType: 'output'
+      });
     }
 
     setTimeout(sendOutputHiddenState, 0);
@@ -142,6 +152,12 @@ function initShiny() {
           node: el
         };
 
+        $(el).trigger({
+          type: 'shiny:bound',
+          binding: binding,
+          bindingType: 'input'
+        });
+
         if (shinyapp.isConnected()) {
           valueChangeCallback(binding, el, false);
         }
@@ -157,13 +173,19 @@ function initShiny() {
 
     var inputs = $(scope).find('.shiny-bound-input');
     for (var i = 0; i < inputs.length; i++) {
-      var binding = $(inputs[i]).data('shiny-input-binding');
+      var el = inputs[i];
+      var binding = $(el).data('shiny-input-binding');
       if (!binding)
         continue;
-      var id = binding.getId(inputs[i]);
-      $(inputs[i]).removeClass('shiny-bound-input');
+      var id = binding.getId(el);
+      $(el).removeClass('shiny-bound-input');
       delete boundInputs[id];
-      binding.unsubscribe(inputs[i]);
+      binding.unsubscribe(el);
+      $(el).trigger({
+        type: 'shiny:unbound',
+        binding: binding,
+        bindingType: 'input'
+      });
     }
   }
 

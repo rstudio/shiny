@@ -396,7 +396,7 @@ var ShinyApp = function() {
     for (var i = 0; i < handlerOrder.length; i++) {
       var msgType = handlerOrder[i];
 
-      if (msgObj[msgType]) {
+      if (msgObj.hasOwnProperty(msgType)) {
         // Execute each handler with 'this' referring to the present value of
         // 'this'
         handlers[msgType].call(this, msgObj[msgType]);

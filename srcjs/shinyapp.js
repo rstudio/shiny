@@ -227,8 +227,13 @@ var ShinyApp = function() {
     delete this.$values[name];
 
     var binding = this.$bindings[name];
-    if (binding && binding.onValueError) {
-      binding.onValueError(error);
+    var evt = jQuery.Event('shiny:error');
+    evt.name = name;
+    evt.error = error;
+    evt.binding = binding;
+    $(binding ? binding.el : document).trigger(evt);
+    if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
+      binding.onValueError(evt.error);
     }
   };
 
@@ -240,8 +245,13 @@ var ShinyApp = function() {
     delete this.$errors[name];
 
     var binding = this.$bindings[name];
-    if (binding) {
-      binding.onValueChange(value);
+    var evt = jQuery.Event('shiny:value');
+    evt.name = name;
+    evt.value = value;
+    evt.binding = binding;
+    $(binding ? binding.el : document).trigger(evt);
+    if (!evt.isDefaultPrevented() && binding) {
+      binding.onValueChange(evt.value);
     }
 
     return value;

@@ -72,8 +72,9 @@ function initShiny() {
 
   var inputBatchSender = new InputBatchSender(shinyapp);
   var inputsNoResend = new InputNoResendDecorator(inputBatchSender);
-  var inputsRate = new InputRateDecorator(inputsNoResend);
-  var inputsDefer = new InputDeferDecorator(inputsNoResend);
+  var inputsEvent = new InputEventDecorator(inputsNoResend);
+  var inputsRate = new InputRateDecorator(inputsEvent);
+  var inputsDefer = new InputDeferDecorator(inputsEvent);
 
   // By default, use rate decorator
   var inputs = inputsRate;

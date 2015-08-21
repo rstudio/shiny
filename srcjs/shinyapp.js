@@ -434,7 +434,13 @@ var ShinyApp = function() {
 
       // Dispatch the message to the appropriate input object
       if ($obj.length > 0) {
-        inputBinding.receiveMessage($obj[0], message[i].message);
+        var el = $obj[0];
+        var evt = jQuery.Event('shiny:updateinput');
+        evt.message = message[i].message;
+        evt.binding = inputBinding;
+        $(el).trigger(evt);
+        if (!evt.isDefaultPrevented())
+          inputBinding.receiveMessage(el, evt.message);
       }
     }
   });

@@ -536,6 +536,25 @@ var InputDeferDecorator = function(target) {
   };
 }).call(InputDeferDecorator.prototype);
 
+var InputEventDecorator = function(target) {
+  this.target = target;
+};
+(function() {
+  this.setInput = function(name, value, immediate) {
+    var evt = jQuery.Event("shiny:inputchanged");
+    var name2 = name.split(':');
+    evt.name = name2[0];
+    evt.inputType = name2.length > 1 ? name2[1] : '';
+    evt.value = value;
+    $(document).trigger(evt);
+    if (!evt.isDefaultPrevented()) {
+      name = evt.name;
+      if (evt.inputType !== '') name += ':' + evt.inputType;
+      this.target.setInput(name, evt.value, immediate);
+    }
+  };
+}).call(InputEventDecorator.prototype);
+
 var InputRateDecorator = function(target) {
   this.target = target;
   this.inputRatePolicies = {};
@@ -800,8 +819,13 @@ var ShinyApp = function() {
     delete this.$values[name];
 
     var binding = this.$bindings[name];
-    if (binding && binding.onValueError) {
-      binding.onValueError(error);
+    var evt = jQuery.Event('shiny:error');
+    evt.name = name;
+    evt.error = error;
+    evt.binding = binding;
+    $(binding ? binding.el : document).trigger(evt);
+    if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
+      binding.onValueError(evt.error);
     }
   };
 
@@ -813,8 +837,13 @@ var ShinyApp = function() {
     delete this.$errors[name];
 
     var binding = this.$bindings[name];
-    if (binding) {
-      binding.onValueChange(value);
+    var evt = jQuery.Event('shiny:value');
+    evt.name = name;
+    evt.value = value;
+    evt.binding = binding;
+    $(binding ? binding.el : document).trigger(evt);
+    if (!evt.isDefaultPrevented() && binding) {
+      binding.onValueChange(evt.value);
     }
 
     return value;
@@ -940,8 +969,13 @@ var ShinyApp = function() {
   this.dispatchMessage = function(msg) {
     var msgObj = JSON.parse(msg);
 
+    var evt = jQuery.Event('shiny:message');
+    evt.message = msgObj;
+    $(document).trigger(evt);
+    if (evt.isDefaultPrevented()) return;
+
     // Send msgObj.foo and msgObj.bar to appropriate handlers
-    this._sendMessagesToHandlers(msgObj, messageHandlers, messageHandlerOrder);
+    this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
 
     this.$updateConditionals();
   };
@@ -954,7 +988,7 @@ var ShinyApp = function() {
     for (var i = 0; i < handlerOrder.length; i++) {
       var msgType = handlerOrder[i];
 
-      if (msgObj[msgType]) {
+      if (msgObj.hasOwnProperty(msgType)) {
         // Execute each handler with 'this' referring to the present value of
         // 'this'
         handlers[msgType].call(this, msgObj[msgType]);
@@ -965,7 +999,6 @@ var ShinyApp = function() {
   // Message handlers =====================================================
 
   addMessageHandler('values', function(message) {
-    $(document.documentElement).removeClass('shiny-busy');
     for (var name in this.$bindings) {
       if (this.$bindings.hasOwnProperty(name))
         this.$bindings[name].showProgress(false);
@@ -992,7 +1025,13 @@ var ShinyApp = function() {
 
       // Dispatch the message to the appropriate input object
       if ($obj.length > 0) {
-        inputBinding.receiveMessage($obj[0], message[i].message);
+        var el = $obj[0];
+        var evt = jQuery.Event('shiny:updateinput');
+        evt.message = message[i].message;
+        evt.binding = inputBinding;
+        $(el).trigger(evt);
+        if (!evt.isDefaultPrevented())
+          inputBinding.receiveMessage(el, evt.message);
       }
     }
   });
@@ -1046,12 +1085,21 @@ var ShinyApp = function() {
   });
 
 
+  addCustomMessageHandler('busy', function(message) {
+    if (message === 'busy') {
+      $(document.documentElement).addClass('shiny-busy');
+      $(document).trigger('shiny:busy');
+    } else if (message === 'idle') {
+      $(document.documentElement).removeClass('shiny-busy');
+      $(document).trigger('shiny:idle');
+    }
+  });
+
   // Progress reporting ====================================================
 
   var progressHandlers = {
     // Progress for a particular object
     binding: function(message) {
-      $(document.documentElement).addClass('shiny-busy');
       var key = message.id;
       var binding = this.$bindings[key];
       if (binding && binding.showProgress) {
@@ -4373,6 +4421,11 @@ function initShiny() {
         shinyapp.bindOutput(id, bindingAdapter);
         $el.data('shiny-output-binding', bindingAdapter);
         $el.addClass('shiny-bound-output');
+        $el.trigger({
+          type: 'shiny:bound',
+          binding: binding,
+          bindingType: 'output'
+        });
       }
     }
 
@@ -4395,6 +4448,11 @@ function initShiny() {
       shinyapp.unbindOutput(id, bindingAdapter);
       $el.removeClass('shiny-bound-output');
       $el.removeData('shiny-output-binding');
+      $el.trigger({
+        type: 'shiny:unbound',
+        binding: bindingAdapter.binding,
+        bindingType: 'output'
+      });
     }
 
     setTimeout(sendOutputHiddenState, 0);
@@ -4402,8 +4460,9 @@ function initShiny() {
 
   var inputBatchSender = new InputBatchSender(shinyapp);
   var inputsNoResend = new InputNoResendDecorator(inputBatchSender);
-  var inputsRate = new InputRateDecorator(inputsNoResend);
-  var inputsDefer = new InputDeferDecorator(inputsNoResend);
+  var inputsEvent = new InputEventDecorator(inputsNoResend);
+  var inputsRate = new InputRateDecorator(inputsEvent);
+  var inputsDefer = new InputDeferDecorator(inputsEvent);
 
   // By default, use rate decorator
   var inputs = inputsRate;
@@ -4482,6 +4541,12 @@ function initShiny() {
           node: el
         };
 
+        $(el).trigger({
+          type: 'shiny:bound',
+          binding: binding,
+          bindingType: 'input'
+        });
+
         if (shinyapp.isConnected()) {
           valueChangeCallback(binding, el, false);
         }
@@ -4497,13 +4562,19 @@ function initShiny() {
 
     var inputs = $(scope).find('.shiny-bound-input');
     for (var i = 0; i < inputs.length; i++) {
-      var binding = $(inputs[i]).data('shiny-input-binding');
+      var el = inputs[i];
+      var binding = $(el).data('shiny-input-binding');
       if (!binding)
         continue;
-      var id = binding.getId(inputs[i]);
-      $(inputs[i]).removeClass('shiny-bound-input');
+      var id = binding.getId(el);
+      $(el).removeClass('shiny-bound-input');
       delete boundInputs[id];
-      binding.unsubscribe(inputs[i]);
+      binding.unsubscribe(el);
+      $(el).trigger({
+        type: 'shiny:unbound',
+        binding: binding,
+        bindingType: 'input'
+      });
     }
   }
 

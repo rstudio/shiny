@@ -251,6 +251,25 @@ var InputDeferDecorator = function(target) {
   };
 }).call(InputDeferDecorator.prototype);
 
+var InputEventDecorator = function(target) {
+  this.target = target;
+};
+(function() {
+  this.setInput = function(name, value, immediate) {
+    var evt = jQuery.Event("shiny:inputchanged");
+    var name2 = name.split(':');
+    evt.name = name2[0];
+    evt.inputType = name2.length > 1 ? name2[1] : '';
+    evt.value = value;
+    $(document).trigger(evt);
+    if (!evt.isDefaultPrevented()) {
+      name = evt.name;
+      if (evt.inputType !== '') name += ':' + evt.inputType;
+      this.target.setInput(name, evt.value, immediate);
+    }
+  };
+}).call(InputEventDecorator.prototype);
+
 var InputRateDecorator = function(target) {
   this.target = target;
   this.inputRatePolicies = {};

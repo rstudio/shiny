@@ -227,8 +227,13 @@ var ShinyApp = function() {
     delete this.$values[name];
 
     var binding = this.$bindings[name];
-    if (binding && binding.onValueError) {
-      binding.onValueError(error);
+    var evt = jQuery.Event('shiny:error');
+    evt.name = name;
+    evt.error = error;
+    evt.binding = binding;
+    $(binding ? binding.el : document).trigger(evt);
+    if (!evt.isDefaultPrevented() && binding && binding.onValueError) {
+      binding.onValueError(evt.error);
     }
   };
 
@@ -240,8 +245,13 @@ var ShinyApp = function() {
     delete this.$errors[name];
 
     var binding = this.$bindings[name];
-    if (binding) {
-      binding.onValueChange(value);
+    var evt = jQuery.Event('shiny:value');
+    evt.name = name;
+    evt.value = value;
+    evt.binding = binding;
+    $(binding ? binding.el : document).trigger(evt);
+    if (!evt.isDefaultPrevented() && binding) {
+      binding.onValueChange(evt.value);
     }
 
     return value;
@@ -367,8 +377,13 @@ var ShinyApp = function() {
   this.dispatchMessage = function(msg) {
     var msgObj = JSON.parse(msg);
 
+    var evt = jQuery.Event('shiny:message');
+    evt.message = msgObj;
+    $(document).trigger(evt);
+    if (evt.isDefaultPrevented()) return;
+
     // Send msgObj.foo and msgObj.bar to appropriate handlers
-    this._sendMessagesToHandlers(msgObj, messageHandlers, messageHandlerOrder);
+    this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
 
     this.$updateConditionals();
   };
@@ -381,7 +396,7 @@ var ShinyApp = function() {
     for (var i = 0; i < handlerOrder.length; i++) {
       var msgType = handlerOrder[i];
 
-      if (msgObj[msgType]) {
+      if (msgObj.hasOwnProperty(msgType)) {
         // Execute each handler with 'this' referring to the present value of
         // 'this'
         handlers[msgType].call(this, msgObj[msgType]);
@@ -392,7 +407,6 @@ var ShinyApp = function() {
   // Message handlers =====================================================
 
   addMessageHandler('values', function(message) {
-    $(document.documentElement).removeClass('shiny-busy');
     for (var name in this.$bindings) {
       if (this.$bindings.hasOwnProperty(name))
         this.$bindings[name].showProgress(false);
@@ -419,7 +433,13 @@ var ShinyApp = function() {
 
       // Dispatch the message to the appropriate input object
       if ($obj.length > 0) {
-        inputBinding.receiveMessage($obj[0], message[i].message);
+        var el = $obj[0];
+        var evt = jQuery.Event('shiny:updateinput');
+        evt.message = message[i].message;
+        evt.binding = inputBinding;
+        $(el).trigger(evt);
+        if (!evt.isDefaultPrevented())
+          inputBinding.receiveMessage(el, evt.message);
       }
     }
   });
@@ -473,12 +493,21 @@ var ShinyApp = function() {
   });
 
 
+  addCustomMessageHandler('busy', function(message) {
+    if (message === 'busy') {
+      $(document.documentElement).addClass('shiny-busy');
+      $(document).trigger('shiny:busy');
+    } else if (message === 'idle') {
+      $(document.documentElement).removeClass('shiny-busy');
+      $(document).trigger('shiny:idle');
+    }
+  });
+
   // Progress reporting ====================================================
 
   var progressHandlers = {
     // Progress for a particular object
     binding: function(message) {
-      $(document.documentElement).addClass('shiny-busy');
       var key = message.id;
       var binding = this.$bindings[key];
       if (binding && binding.showProgress) {

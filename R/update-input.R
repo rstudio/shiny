@@ -285,7 +285,7 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
     stop("Type mismatch for value, min, and max")
   }
 
-  if (type == "date" || type == "datetime") {
+  if ((length(type) == 1) && (type == "date" || type == "datetime")) {
     to_ms <- function(x) 1000 * as.numeric(as.POSIXct(x))
     if (!is.null(min))   min   <- to_ms(min)
     if (!is.null(max))   max   <- to_ms(max)

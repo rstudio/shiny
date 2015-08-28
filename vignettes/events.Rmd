@@ -86,3 +86,24 @@ $(document).on('shiny:value', function(event) {
 
 The `shiny:updateinput` event is triggered when an input is updated, e.g., when you call `updateTextInput()` in R to update the label or value of a text input. The event object has properties `message` (the update message sent from the server) and `binding` (the input binding).
 
+# Summary
+
+Here is a summary of the events. The ones that are cancelable can also be modified by users, e.g., you can change `event.value` in the `shiny:inputchanged` event, and the new `event.value` will be used as the input value (to be passed to R).
+
+```{r echo=FALSE}
+knitr::kable(matrix(c(
+  'shiny:connected', 'socket', 'No', 'document',
+  'shiny:disconnected', 'socket', 'No', 'document',
+  'shiny:busy', '', 'No', 'document',
+  'shiny:idle', '', 'No', 'document',
+  'shiny:inputchanged', 'name, value, inputType', 'Yes', 'document',
+  'shiny:message', 'message', 'Yes', 'document',
+  'shiny:bound', 'binding, bindingType', 'No', 'input/output element',
+  'shiny:unbound', 'binding, bindingType', 'No', 'input/output element',
+  'shiny:value', 'name, value, binding', 'Yes', 'output element',
+  'shiny:error', 'name, error, binding', 'Yes', 'output element',
+  'shiny:updateinput', 'message, binding', 'Yes', 'input element'
+), ncol = 4, byrow = TRUE,
+dimnames = list(NULL, c('Name', 'Event Properties', 'Cancelable', 'Target'))))
+```
+

@@ -11,7 +11,7 @@ For an introduction and examples, visit the [Shiny Dev Center](http://shiny.rstu
 * Build useful web applications with only a few lines of code&mdash;no JavaScript required.
 * Shiny applications are automatically "live" in the same way that spreadsheets are live. Outputs change instantly as users modify inputs, without requiring a reload of the browser.
 * Shiny user interfaces can be built entirely using R, or can be written directly in HTML, CSS, and JavaScript for more flexibility.
-* Works in any R environment (Console R, Rgui for Windows or Mac, ESS, StatET, RStudio, etc.)
+* Works in any R environment (Console R, Rgui for Windows or Mac, ESS, StatET, RStudio, etc.).
 * Attractive default UI theme based on [Bootstrap](http://getbootstrap.com/2.3.2/).
 * A highly customizable slider widget with built-in support for animation.
 * Pre-built output widgets for displaying plots, tables, and printed output of R objects.

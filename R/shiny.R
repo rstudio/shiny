@@ -471,7 +471,9 @@ ShinySession <- R6Class(
 
         obs <- observe({
 
-          self$sendCustomMessage('recalculating', list(name = name))
+          self$sendCustomMessage('recalculating', list(
+            name = name, status = 'recalculating'
+          ))
 
           value <- try(
             {
@@ -492,6 +494,10 @@ ShinySession <- R6Class(
             },
             silent=FALSE
           )
+
+          self$sendCustomMessage('recalculating', list(
+            name = name, status = 'recalculated'
+          ))
 
           private$invalidatedOutputErrors$remove(name)
           private$invalidatedOutputValues$remove(name)

@@ -508,10 +508,11 @@ var ShinyApp = function() {
   });
 
   addCustomMessageHandler('recalculating', function(message) {
-    if (message.hasOwnProperty('name')) return;
-    $('#' + message.name).trigger({
-      type: 'shiny:recalculating'
-    });
+    if (message.hasOwnProperty('name') && message.hasOwnProperty('status')) {
+      $('#' + message.name).trigger({
+        type: 'shiny:' + message.status
+      });
+    }
   });
 
 

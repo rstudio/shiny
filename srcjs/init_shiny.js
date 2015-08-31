@@ -256,6 +256,7 @@ function initShiny() {
       var $this = $(this), binding = $this.data('shiny-output-binding');
       $this.trigger({
         type: 'shiny:visualchange',
+        visible: !isHidden(this),
         binding: binding
       });
       binding.onResize();
@@ -301,12 +302,19 @@ function initShiny() {
     $('.shiny-bound-output').each(function() {
       delete lastKnownVisibleOutputs[this.id];
       // Assume that the object is hidden when width and height are 0
-      if (isHidden(this)) {
+      var hidden = isHidden(this), evt = {
+        type: 'shiny:visualchange',
+        visible: !hidden
+      };
+      if (hidden) {
         inputs.setInput('.clientdata_output_' + this.id + '_hidden', true);
       } else {
         visibleOutputs[this.id] = true;
         inputs.setInput('.clientdata_output_' + this.id + '_hidden', false);
       }
+      var $this = $(this);
+      evt.binding = $this.data('shiny-output-binding');
+      $this.trigger(evt);
     });
     // Anything left in lastKnownVisibleOutputs is orphaned
     for (var name in lastKnownVisibleOutputs) {

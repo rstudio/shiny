@@ -253,7 +253,12 @@ function initShiny() {
       }
     });
     $('.shiny-bound-output').each(function() {
-      $(this).data('shiny-output-binding').onResize();
+      var $this = $(this), binding = $this.data('shiny-output-binding');
+      $this.trigger({
+        type: 'shiny:visualchange',
+        binding: binding
+      });
+      binding.onResize();
     });
   }
   var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);

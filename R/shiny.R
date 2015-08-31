@@ -471,6 +471,8 @@ ShinySession <- R6Class(
 
         obs <- observe({
 
+          self$sendCustomMessage('recalculating', list(name = name))
+
           value <- try(
             {
               tryCatch(

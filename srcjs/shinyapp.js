@@ -310,6 +310,10 @@ var ShinyApp = function() {
       var show = condFunc(scope);
       var showing = el.css("display") !== "none";
       if (show !== showing) {
+        el.trigger({
+          type: 'shiny:conditional',
+          show: show
+        });
         if (show) {
           el.trigger('show');
           el.show();
@@ -502,6 +506,14 @@ var ShinyApp = function() {
       $(document).trigger('shiny:idle');
     }
   });
+
+  addCustomMessageHandler('recalculating', function(message) {
+    if (message.hasOwnProperty('name')) return;
+    $('#' + message.name).trigger({
+      type: 'shiny:recalculating'
+    });
+  });
+
 
   // Progress reporting ====================================================
 

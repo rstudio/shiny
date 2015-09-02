@@ -283,6 +283,10 @@ var ShinyApp = function() {
   };
 
   this.$updateConditionals = function() {
+    $(document).trigger({
+      type: 'shiny:conditional'
+    });
+
     var inputs = {};
 
     // Input keys use "name:type" format; we don't want the user to
@@ -310,10 +314,6 @@ var ShinyApp = function() {
       var show = condFunc(scope);
       var showing = el.css("display") !== "none";
       if (show !== showing) {
-        el.trigger({
-          type: 'shiny:conditional',
-          show: show
-        });
         if (show) {
           el.trigger('show');
           el.show();

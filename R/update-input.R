@@ -490,7 +490,7 @@ selectizeJSON <- function(data, req) {
   # all keywords in lower-case, for case-insensitive matching
   key <- unique(strsplit(tolower(query$query), '\\s+')[[1]])
   if (identical(key, '')) key <- character(0)
-  mop <- query$maxop
+  mop <- as.numeric(query$maxop)
 
   # convert a single vector to a data frame so it returns {label: , value: }
   # later in JSON; other objects return arbitrary JSON {x: , y: , foo: , ...}

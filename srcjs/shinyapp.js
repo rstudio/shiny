@@ -283,6 +283,10 @@ var ShinyApp = function() {
   };
 
   this.$updateConditionals = function() {
+    $(document).trigger({
+      type: 'shiny:conditional'
+    });
+
     var inputs = {};
 
     // Input keys use "name:type" format; we don't want the user to
@@ -502,6 +506,16 @@ var ShinyApp = function() {
       $(document).trigger('shiny:idle');
     }
   });
+
+  addCustomMessageHandler('recalculating', function(message) {
+    if (message.hasOwnProperty('name') && message.hasOwnProperty('status')) {
+      var binding = this.$bindings[name];
+      $(binding ? binding.el : null).trigger({
+        type: 'shiny:' + message.status
+      });
+    }
+  });
+
 
   // Progress reporting ====================================================
 

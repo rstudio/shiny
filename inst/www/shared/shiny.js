@@ -875,6 +875,10 @@ var ShinyApp = function() {
   };
 
   this.$updateConditionals = function() {
+    $(document).trigger({
+      type: 'shiny:conditional'
+    });
+
     var inputs = {};
 
     // Input keys use "name:type" format; we don't want the user to
@@ -1094,6 +1098,16 @@ var ShinyApp = function() {
       $(document).trigger('shiny:idle');
     }
   });
+
+  addCustomMessageHandler('recalculating', function(message) {
+    if (message.hasOwnProperty('name') && message.hasOwnProperty('status')) {
+      var binding = this.$bindings[name];
+      $(binding ? binding.el : null).trigger({
+        type: 'shiny:' + message.status
+      });
+    }
+  });
+
 
   // Progress reporting ====================================================
 
@@ -4641,7 +4655,13 @@ function initShiny() {
       }
     });
     $('.shiny-bound-output').each(function() {
-      $(this).data('shiny-output-binding').onResize();
+      var $this = $(this), binding = $this.data('shiny-output-binding');
+      $this.trigger({
+        type: 'shiny:visualchange',
+        visible: !isHidden(this),
+        binding: binding
+      });
+      binding.onResize();
     });
   }
   var sendImageSizeDebouncer = new Debouncer(null, doSendImageSize, 0);
@@ -4684,12 +4704,19 @@ function initShiny() {
     $('.shiny-bound-output').each(function() {
       delete lastKnownVisibleOutputs[this.id];
       // Assume that the object is hidden when width and height are 0
-      if (isHidden(this)) {
+      var hidden = isHidden(this), evt = {
+        type: 'shiny:visualchange',
+        visible: !hidden
+      };
+      if (hidden) {
         inputs.setInput('.clientdata_output_' + this.id + '_hidden', true);
       } else {
         visibleOutputs[this.id] = true;
         inputs.setInput('.clientdata_output_' + this.id + '_hidden', false);
       }
+      var $this = $(this);
+      evt.binding = $this.data('shiny-output-binding');
+      $this.trigger(evt);
     });
     // Anything left in lastKnownVisibleOutputs is orphaned
     for (var name in lastKnownVisibleOutputs) {

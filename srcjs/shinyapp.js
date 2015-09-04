@@ -509,7 +509,7 @@ var ShinyApp = function() {
 
   addCustomMessageHandler('recalculating', function(message) {
     if (message.hasOwnProperty('name') && message.hasOwnProperty('status')) {
-      var binding = this.$bindings[name];
+      var binding = this.$bindings[message.name];
       $(binding ? binding.el : null).trigger({
         type: 'shiny:' + message.status
       });

@@ -8,7 +8,7 @@ vignette: >
 output: knitr:::html_vignette
 ---
 
-A number of JavaScript events have been supported in Shiny since v0.13. These events can be used to keep track of the app progress, or even manipulate the values of inputs/outputs. All event names have the prefix `shiny:`, e.g., `shiny:connected`. We can listen to these events using `.on()` in jQuery, e.g.,
+A number of JavaScript events have been supported in Shiny after v0.12.2. These events can be used to keep track of the app progress, or even manipulate the values of inputs/outputs. All event names have the prefix `shiny:`, e.g., `shiny:connected`. We can listen to these events using `.on()` in jQuery, e.g.,
 
 ```javascript
 $(document).on('shiny:connected', function(event) {
@@ -53,6 +53,10 @@ $(document).on('shiny:inputchanged', function(event) {
 
 The `shiny:message` is triggered when any messages are received from the server. The event has a property `message`, which is the message object (a JavaScript object).
 
+# Conditional Panels
+
+When conditional panels (see `?shiny::conditionalPanel`) are updated, the event `shiny:conditional` is triggered on the document.
+
 # Binding/Unbinding Inputs/Outputs
 
 All the events above are triggered on the document. There are a few events triggered on specific HTML elements, including the events in the following sections on input and output elements.
@@ -64,6 +68,10 @@ When an input or output is bound to Shiny, the event `shiny:bound` is triggered.
 The `shiny:value` event is triggered when an output receives a value from the server. The event object has three properties: `name` (output id), `value` (output value), and `binding` (output binding).
 
 The `shiny:error` event is triggered when an error is propogated to an output. The event also has three properties like the `shiny:value` event: `name`, `error` (the error message), and `binding`.
+
+The `shiny:recalculating` and `shiny:recalculated` events are triggered before and after an output value is recalculated, respectively. Please note `shiny:recalculated` is triggered after the output value has been recalculated in R, but that does not imply the output value has been displayed on the page. Use `shiny:value` instead if you want to do something when the output value is rendered.
+
+The `shiny:visualchange` event is triggered when an output is resized, hidden, or shown. The event object has properties `visible` (`true` or `false`) and `binding` (the output binding).
 
 Since these events are triggered specifically on an output element, you may add the listener on the output element instead of the document, although the latter also works, e.g.
 
@@ -98,10 +106,14 @@ knitr::kable(matrix(c(
   'shiny:idle', '', 'No', 'document',
   'shiny:inputchanged', 'name, value, inputType', 'Yes', 'document',
   'shiny:message', 'message', 'Yes', 'document',
+  'shiny:conditional', '', 'No', 'document',
   'shiny:bound', 'binding, bindingType', 'No', 'input/output element',
   'shiny:unbound', 'binding, bindingType', 'No', 'input/output element',
   'shiny:value', 'name, value, binding', 'Yes', 'output element',
   'shiny:error', 'name, error, binding', 'Yes', 'output element',
+  'shiny:recalculating', '', 'No', 'output element',
+  'shiny:recalculated', '', 'No', 'output element',
+  'shiny:visualchange', 'visible, binding', 'No', 'output element',
   'shiny:updateinput', 'message, binding', 'Yes', 'input element'
 ), ncol = 4, byrow = TRUE,
 dimnames = list(NULL, c('Name', 'Event Properties', 'Cancelable', 'Target'))))

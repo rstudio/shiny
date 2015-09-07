@@ -55,7 +55,7 @@ $.extend(selectInputBinding, {
     if (data.hasOwnProperty('url')) {
       selectize = this._selectize(el);
       selectize.clearOptions();
-      var thiz = this;
+      var thiz = this, loaded = false;
       selectize.settings.load = function(query, callback) {
         var settings = selectize.settings;
         $.ajax({
@@ -72,8 +72,9 @@ $.extend(selectInputBinding, {
           },
           success: function(res) {
             callback(res);
-            if (data.hasOwnProperty('value'))
+            if (!loaded && data.hasOwnProperty('value'))
               thiz.setValue(el, data.value);
+            loaded = true;
           }
         });
       };

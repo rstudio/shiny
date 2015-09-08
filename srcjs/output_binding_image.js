@@ -11,6 +11,8 @@ $.extend(imageOutputBinding, {
     // * Bind those event handlers to events.
     // * Insert the new image.
 
+    var outputId = this.getId(el);
+
     var $el = $(el);
     // Load the image before emptying, to minimize flicker
     var img = null;
@@ -126,7 +128,7 @@ $.extend(imageOutputBinding, {
       $el.on('selectstart.image_output', function() { return false; });
 
       var brushHandler = imageutils.createBrushHandler(opts.brushId, $el, opts,
-        opts.coordmap);
+        opts.coordmap, outputId);
       $el.on('mousedown.image_output', brushHandler.mousedown);
       $el.on('mousemove.image_output', brushHandler.mousemove);
 
@@ -590,13 +592,32 @@ imageutils.createHoverHandler = function(inputId, delay, delayType, clip,
 
 // Returns a brush handler object. This has three public functions:
 // mousedown, mousemove, and onRemoveImg.
-imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
+imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId) {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
   var expandPixels = 20;
 
   // Represents the state of the brush
   var brush = imageutils.createBrush($el, opts, coordmap, expandPixels);
+
+  // Brush IDs can span multiple image/plot outputs. When an output is brushed,
+  // if a brush with the same ID is active on a different image/plot, it must
+  // be dismissed (but without sending any data to the server). We implement
+  // this by sending the shiny-internal:brushed event to all plots, and letting
+  // each plot decide for itself what to do.
+  //
+  // The decision to have the event sent to each plot (as opposed to a single
+  // event triggered on, say, the document) was made to make cleanup easier;
+  // listening on an event on the document would prevent garbage collection
+  // of plot outputs that are removed from the document.
+  $el.on("shiny-internal:brushed.image_output", function(e, coords) {
+    // If the new brush shares our ID but not our output element ID, we
+    // need to clear our brush (if any).
+    if (coords.brushId === inputId && coords.outputId !== outputId) {
+      $el.data("mostRecentBrush", false);
+      brush.reset();
+    }
+  });
 
   // Set cursor to one of 7 styles. We need to set the cursor on the whole
   // el instead of the brush div, because the brush div has
@@ -614,6 +635,10 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
     // We're in a new or reset state
     if (isNaN(coords.xmin)) {
       exports.onInputChange(inputId, null);
+      // Must tell other brushes to clear.
+      imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
+        brushId: inputId, outputId: null
+      });
       return;
     }
 
@@ -632,8 +657,14 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
 
     coords.direction = opts.brushDirection;
 
+    coords.brushId = inputId;
+    coords.outputId = outputId;
+
     // Send data to server
     exports.onInputChange(inputId, coords);
+
+    $el.data("mostRecentBrush", true);
+    imageOutputBinding.find(document).trigger("shiny-internal:brushed", coords);
   }
 
   var brushInfoSender;
@@ -800,17 +831,26 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap) {
 
   }
 
+  // Brush maintenance: When an image is re-rendered, the brush must either
+  // be removed (if brushResetOnNew) or imported (if !brushResetOnNew). The
+  // "mostRecentBrush" bit is to ensure that when multiple outputs share the
+  // same brush ID, inactive brushes don't send null values up to the server.
+
   // This should be called when the img (not the el) is removed
   function onRemoveImg() {
     if (opts.brushResetOnNew) {
-      brush.reset();
-      brushInfoSender.immediateCall();
+      if ($el.data("mostRecentBrush")) {
+        brush.reset();
+        brushInfoSender.immediateCall();
+      }
     }
   }
 
   if (!opts.brushResetOnNew) {
-    brush.importOldBrush();
-    brushInfoSender.immediateCall();
+    if ($el.data("mostRecentBrush")) {
+      brush.importOldBrush();
+      brushInfoSender.immediateCall();
+    }
   }
 
   return {

@@ -10,7 +10,10 @@ brushOpts(id = NULL, fill = "#9cf", stroke = "#036", opacity = 0.25,
 }
 \arguments{
 \item{id}{Input value name. For example, if the value is \code{"plot_brush"},
-then the coordinates will be available as \code{input$plot_brush}.}
+then the coordinates will be available as \code{input$plot_brush}. Multiple
+\code{imageOutput}/\code{plotOutput} calls may share the same \code{id}
+value; brushing one image or plot will cause any other brushes with the
+same \code{id} to disappear.}
 
 \item{fill}{Fill color of the brush.}
 

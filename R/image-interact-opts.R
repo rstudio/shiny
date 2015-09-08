@@ -91,7 +91,10 @@ hoverOpts <- function(id = NULL, delay = 300,
 #' \code{\link{plotOutput}}.
 #'
 #' @param id Input value name. For example, if the value is \code{"plot_brush"},
-#'   then the coordinates will be available as \code{input$plot_brush}.
+#'   then the coordinates will be available as \code{input$plot_brush}. Multiple
+#'   \code{imageOutput}/\code{plotOutput} calls may share the same \code{id}
+#'   value; brushing one image or plot will cause any other brushes with the
+#'   same \code{id} to disappear.
 #' @param fill Fill color of the brush.
 #' @param stroke Outline color of the brush.
 #' @param opacity Opacity of the brush

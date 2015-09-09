@@ -1,0 +1,121 @@
+---
+title: "JavaScript Events in Shiny"
+author: "Yihui Xie"
+date: "`r Sys.Date()`"
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{JavaScript Events in Shiny}
+output: knitr:::html_vignette
+---
+
+A number of JavaScript events have been supported in Shiny after v0.12.2. These events can be used to keep track of the app progress, or even manipulate the values of inputs/outputs. All event names have the prefix `shiny:`, e.g., `shiny:connected`. We can listen to these events using `.on()` in jQuery, e.g.,
+
+```javascript
+$(document).on('shiny:connected', function(event) {
+  alert('Connected to the server');
+});
+```
+
+When an event is triggered in Shiny, the `event` object may have some additional properties that can be used to query or modify the information in Shiny, as we will see later in this document. Some events can cancel the process in Shiny, e.g., stop the propogation of an input or output change to the server. Such events include `shiny:inputchanged`, `shiny:message`, `shiny:value`, `shiny:error`, `shiny:updateinput`. To cancel the Shiny process, you can use `event.preventDefault()`, e.g.,
+
+```javascript
+// no outputs will be updated since we canceled the output changes
+$(document).on('shiny:value', function(event) {
+  event.preventDefault();
+});
+```
+
+All events currently supported in Shiny are listed below. You can find a live example at https://gallery.shinyapps.io/107-events ([source](https://github.com/rstudio/shiny-examples/tree/master/107-events)).
+
+# Initial Connection and Disconnection
+
+The events `shiny:connected` and `shiny:disconnected` are triggered when an initial connection to server is established, and when a session is ended or the connection is lost for some reason, respectively.
+
+A property `socket` in the event object is used to store the web socket that is used to communicate between R and JavaScript. For example, you may query the state of the web socket via `event.socket.readyState`.
+
+# Server Status: Busy/Idle
+
+The event `shiny:busy` is triggered when something is happening on the server (e.g. an observer is running), and the event `shiny:idle` indicates when the server is idle. The event object does not carry any special properties related to Shiny.
+
+# Messages
+
+The event `shiny:inputchanged` is triggered when an input has a new value, e.g., when you click an action button, or type in a text input. The event object has properties `name` (the id of the input), `value` (the value of the input), and `inputType` (the type of the input, e.g. `shiny.action`). 
+
+For example, suppose you have a numeric input with id `foo`, you may double its value through this event:
+
+```javascript
+$(document).on('shiny:inputchanged', function(event) {
+  if (event.name === 'foo') {
+    event.value *= 2;
+  }
+});
+```
+
+The `shiny:message` is triggered when any messages are received from the server. The event has a property `message`, which is the message object (a JavaScript object).
+
+# Conditional Panels
+
+When conditional panels (see `?shiny::conditionalPanel`) are updated, the event `shiny:conditional` is triggered on the document.
+
+# Binding/Unbinding Inputs/Outputs
+
+All the events above are triggered on the document. There are a few events triggered on specific HTML elements, including the events in the following sections on input and output elements.
+
+When an input or output is bound to Shiny, the event `shiny:bound` is triggered. Similarly, there is a `shiny:unbound` event after an input/output is unbound. In these events, the event object has properties `binding` (the input/output binding object) and `bindingType` (may be `'input'` or `'output'` depending on the binding is for an input or output).
+
+# Output Events
+
+The `shiny:value` event is triggered when an output receives a value from the server. The event object has three properties: `name` (output id), `value` (output value), and `binding` (output binding).
+
+The `shiny:error` event is triggered when an error is propogated to an output. The event also has three properties like the `shiny:value` event: `name`, `error` (the error message), and `binding`.
+
+The `shiny:recalculating` and `shiny:recalculated` events are triggered before and after an output value is recalculated, respectively. Please note `shiny:recalculated` is triggered after the output value has been recalculated in R, but that does not imply the output value has been displayed on the page. Use `shiny:value` instead if you want to do something when the output value is rendered.
+
+The `shiny:visualchange` event is triggered when an output is resized, hidden, or shown. The event object has properties `visible` (`true` or `false`) and `binding` (the output binding).
+
+Since these events are triggered specifically on an output element, you may add the listener on the output element instead of the document, although the latter also works, e.g.
+
+```javascript
+$('#foo').on('shiny:value', function(event) {
+  // append a character string to the output value
+  event.value += ' Oh that is nice!';
+});
+
+// use event.target to obtain the output element
+$(document).on('shiny:value', function(event) {
+  // cancel the output of the element with id 'foo'
+  if (event.target.id === 'foo') {
+    event.preventDefault();
+  }
+});
+```
+
+# Input Events
+
+The `shiny:updateinput` event is triggered when an input is updated, e.g., when you call `updateTextInput()` in R to update the label or value of a text input. The event object has properties `message` (the update message sent from the server) and `binding` (the input binding).
+
+# Summary
+
+Here is a summary of the events. The ones that are cancelable can also be modified by users, e.g., you can change `event.value` in the `shiny:inputchanged` event, and the new `event.value` will be used as the input value (to be passed to R).
+
+```{r echo=FALSE}
+knitr::kable(matrix(c(
+  'shiny:connected', 'socket', 'No', 'document',
+  'shiny:disconnected', 'socket', 'No', 'document',
+  'shiny:busy', '', 'No', 'document',
+  'shiny:idle', '', 'No', 'document',
+  'shiny:inputchanged', 'name, value, inputType', 'Yes', 'document',
+  'shiny:message', 'message', 'Yes', 'document',
+  'shiny:conditional', '', 'No', 'document',
+  'shiny:bound', 'binding, bindingType', 'No', 'input/output element',
+  'shiny:unbound', 'binding, bindingType', 'No', 'input/output element',
+  'shiny:value', 'name, value, binding', 'Yes', 'output element',
+  'shiny:error', 'name, error, binding', 'Yes', 'output element',
+  'shiny:recalculating', '', 'No', 'output element',
+  'shiny:recalculated', '', 'No', 'output element',
+  'shiny:visualchange', 'visible, binding', 'No', 'output element',
+  'shiny:updateinput', 'message, binding', 'Yes', 'input element'
+), ncol = 4, byrow = TRUE,
+dimnames = list(NULL, c('Name', 'Event Properties', 'Cancelable', 'Target'))))
+```
+

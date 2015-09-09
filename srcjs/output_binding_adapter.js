@@ -11,6 +11,9 @@ var OutputBindingAdapter = function(el, binding) {
   }
 };
 (function() {
+  this.getId = function() {
+    return this.binding.getId(this.el);
+  };
   this.onValueChange = function(data) {
     this.binding.onValueChange(this.el, data);
   };

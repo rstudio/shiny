@@ -55,6 +55,7 @@ $.extend(selectInputBinding, {
     if (data.hasOwnProperty('url')) {
       selectize = this._selectize(el);
       selectize.clearOptions();
+      var thiz = this, loaded = false;
       selectize.settings.load = function(query, callback) {
         var settings = selectize.settings;
         $.ajax({
@@ -71,6 +72,9 @@ $.extend(selectInputBinding, {
           },
           success: function(res) {
             callback(res);
+            if (!loaded && data.hasOwnProperty('value'))
+              thiz.setValue(el, data.value);
+            loaded = true;
           }
         });
       };
@@ -78,12 +82,9 @@ $.extend(selectInputBinding, {
       selectize.load(function(callback) {
         selectize.settings.load.apply(selectize, ['', callback]);
       });
-      if (data.hasOwnProperty('selected'))
-        selectize.addOption(data.selected);
-    }
-
-    if (data.hasOwnProperty('value'))
+    } else if (data.hasOwnProperty('value')) {
       this.setValue(el, data.value);
+    }
 
     if (data.hasOwnProperty('label'))
       $(el).parent().parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);

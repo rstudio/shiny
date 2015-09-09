@@ -6,6 +6,16 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: pkgInfo(),
 
+    clean: {
+      options: { force: true },
+      src: [
+        instdir + "www/shared/shiny.js",
+        instdir + "www/shared/shiny.js.map",
+        instdir + "www/shared/shiny.min.js",
+        instdir + "www/shared/shiny.min.js.map"
+      ]
+    },
+
     concat: {
       options: {
         process: function(src, filepath) {
@@ -115,6 +125,7 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');

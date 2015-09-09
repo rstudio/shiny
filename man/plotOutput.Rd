@@ -63,7 +63,10 @@ accessible via \code{input$plot_brush}. Brushing means that the user will
 be able to draw a rectangle in the plotting area and drag it around. The
 value will be a named list with \code{xmin}, \code{xmax}, \code{ymin}, and
 \code{ymax} elements indicating the brush area. To control the brush
-behavior, use \code{\link{brushOpts}}.}
+behavior, use \code{\link{brushOpts}}. Multiple
+\code{imageOutput}/\code{plotOutput} calls may share the same \code{id}
+value; brushing one image or plot will cause any other brushes with the
+same \code{id} to disappear.}
 
 \item{clickId}{Deprecated; use \code{click} instead. Also see the
 \code{\link{clickOpts}} function.}

@@ -1,5 +1,11 @@
-writeReactLog <- function(file=stdout()) {
-  cat(toJSON(.graphStack$as_list(), pretty=TRUE), file=file)
+writeReactLog <- function(file=stdout(), sessionToken = NULL) {
+  log <- .graphStack$as_list()
+  if (!is.null(sessionToken)) {
+    log <- Filter(function(x) {
+      is.null(x$session) || identical(x$session, sessionToken)
+    }, log)
+  }
+  cat(toJSON(log, pretty=TRUE), file=file)
 }
 
 #' Reactive Log Visualizer
@@ -40,12 +46,12 @@ showReactLog <- function() {
   utils::browseURL(renderReactLog())
 }
 
-renderReactLog <- function() {
+renderReactLog <- function(sessionToken = NULL) {
   templateFile <- system.file('www/reactive-graph.html', package='shiny')
   html <- paste(readLines(templateFile, warn=FALSE), collapse='\r\n')
   tc <- textConnection(NULL, 'w')
   on.exit(close(tc))
-  writeReactLog(tc)
+  writeReactLog(tc, sessionToken)
   cat('\n', file=tc)
   flush(tc)
   html <- sub('__DATA__', paste(textConnectionValue(tc), collapse='\r\n'), html, fixed=TRUE)
@@ -55,8 +61,10 @@ renderReactLog <- function() {
 }
 
 .graphAppend <- function(logEntry, domain = getDefaultReactiveDomain()) {
-  if (isTRUE(getOption('shiny.reactlog')))
-    .graphStack$push(logEntry)
+  if (isTRUE(getOption('shiny.reactlog'))) {
+    sessionToken <- if (is.null(domain)) NULL else domain$token
+    .graphStack$push(c(logEntry, list(session = sessionToken)))
+  }
 
   if (!is.null(domain)) {
     domain$reactlog(logEntry)

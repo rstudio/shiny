@@ -9,9 +9,11 @@ reactLogHandler <- function(req) {
     return(NULL)
   }
 
+  sessionToken <- parseQueryString(req$QUERY_STRING)$s
+
   return(httpResponse(
     status=200,
-    content=list(file=renderReactLog(), owned=TRUE)
+    content=list(file=renderReactLog(sessionToken), owned=TRUE)
   ))
 }
 

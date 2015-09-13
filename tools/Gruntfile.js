@@ -55,6 +55,7 @@ module.exports = function(grunt) {
           js_srcdir + 'input_binding_tabinput.js',
           js_srcdir + 'input_binding_fileinput.js',
           js_srcdir + 'init_shiny.js',
+          js_srcdir + 'reactlog.js',
           js_srcdir + '_end.js'
         ],
         dest: instdir + 'www/shared/shiny.js',

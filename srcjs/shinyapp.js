@@ -27,7 +27,7 @@ var ShinyApp = function() {
 
     $.extend(initialInput, {
       // IE8 and IE9 have some limitations with data URIs
-      ".clientdata_allowDataUriScheme": typeof WebSocket !== 'undefined'
+      ".clientdata_allowDataUriScheme": typeof WebSocket !== 'undefined' && !/BlackBerry/.test(window.navigator.userAgent)
     });
 
     this.$socket = this.createSocket();

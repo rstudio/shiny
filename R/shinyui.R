@@ -53,7 +53,7 @@ renderPage <- function(ui, connection, showcase=0) {
   depHtml <- renderDependencies(deps, "href")
 
   # write preamble
-  writeLines(c('<!DOCTYPE html>',
+  writeUTF8(c('<!DOCTYPE html>',
                '<html>',
                '<head>',
                '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
@@ -66,15 +66,15 @@ renderPage <- function(ui, connection, showcase=0) {
                depHtml
               ),
               con = connection)
-  writeLines(c(result$head,
+  writeUTF8(c(result$head,
                '</head>',
                recursive=TRUE),
              con = connection)
 
-  writeLines(result$html, con = connection)
+  writeUTF8(result$html, con = connection)
 
   # write end document
-  writeLines('</html>',
+  writeUTF8('</html>',
              con = connection)
 }
 

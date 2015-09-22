@@ -1035,6 +1035,11 @@ sourceUTF8 <- function(file, ...) {
   source(file, ..., keep.source = TRUE, encoding = checkEncoding(file))
 }
 
+# write text as UTF-8
+writeUTF8 <- function(text, ...) {
+  text <- enc2utf8(text)
+  writeLines(text, ..., useBytes = TRUE)
+}
 
 URLdecode <- decodeURIComponent
 URLencode <- function(value, reserved = FALSE) {

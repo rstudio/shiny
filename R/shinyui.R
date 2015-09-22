@@ -106,7 +106,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
       return(NULL)
 
-    textConn <- textConnection(NULL, "w", encoding = 'UTF-8')
+    textConn <- file(open = "w+", encoding = 'UTF-8')
     on.exit(close(textConn))
 
     showcaseMode <- .globals$showcaseDefault
@@ -127,7 +127,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
       return(NULL)
 
     renderPage(uiValue, textConn, showcaseMode)
-    html <- paste(textConnectionValue(textConn), collapse='\n')
+    html <- paste(readLines(textConn, encoding = 'UTF-8'), collapse='\n')
     return(httpResponse(200, content=enc2utf8(html)))
   }
 }

@@ -1024,13 +1024,10 @@ checkEncoding <- function(file) {
 # failure, which defaults to native.enc, i.e. native encoding)
 readUTF8 <- function(file) {
   enc <- checkEncoding(file)
-  # readLines() does not support UTF-8-BOM directly; has to go through file()
-  if (enc == 'UTF-8-BOM') {
-    file <- base::file(file, encoding = enc)
-    on.exit(close(file), add = TRUE)
-  }
+  file <- base::file(file, encoding = enc)
+  on.exit(close(file), add = TRUE)
   x <- readLines(file, encoding = enc, warn = FALSE)
-  enc2native(x)
+  enc2utf8(x)
 }
 
 # similarly, try to source() a file with UTF-8

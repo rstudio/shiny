@@ -106,7 +106,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
       return(NULL)
 
-    textConn <- file(open = "w+", encoding = 'UTF-8')
+    textConn <- file(open = "w+")
     on.exit(close(textConn))
 
     showcaseMode <- .globals$showcaseDefault

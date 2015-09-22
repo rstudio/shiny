@@ -1005,8 +1005,6 @@ checkEncoding <- function(file) {
     warning('You should not include the Byte Order Mark (BOM) in ', file, '. ',
             'Please re-save it in UTF-8 without BOM. See ',
             'http://shiny.rstudio.com/articles/unicode.html for more info.')
-    if (getRversion() < '3.0.0')
-      stop('R does not support UTF-8-BOM before 3.0.0. Please upgrade R.')
     return('UTF-8-BOM')
   }
 

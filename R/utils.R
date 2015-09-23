@@ -979,8 +979,7 @@ setServerInfo <- function(...) {
   .globals$serverInfo <- infoOld
 }
 
-# see if the file can be read as UTF-8 on Windows, and converted from UTF-8 to
-# native encoding; if the conversion fails, it will produce NA's in the results
+# assume file is encoded in UTF-8, but warn against BOM
 checkEncoding <- function(file) {
   # skip *nix because its locale is normally UTF-8 based (e.g. en_US.UTF-8), and
   # *nix users have to make a conscious effort to save a file with an encoding
@@ -989,14 +988,10 @@ checkEncoding <- function(file) {
   # world of consistency (falling back to getOption('encoding') will not help
   # because native.enc is also normally UTF-8 based on *nix)
   if (!isWindows()) return('UTF-8')
-  # an empty file?
   size <- file.info(file)[, 'size']
-  if (size == 0) return('UTF-8')
-
-  x <- readLines(file, encoding = 'UTF-8', warn = FALSE)
-  # if conversion is successful and there are no embedded nul's, use UTF-8
-  if (!any(is.na(iconv(x, 'UTF-8'))) &&
-        !any(readBin(file, 'raw', size) == as.raw(0))) return('UTF-8')
+  if (is.na(size)) stop('Cannot access the file ', file)
+  # BOM is 3 bytes, so if the file contains BOM, it must be at least 3 bytes
+  if (size < 3L) return('UTF-8')
 
   # check if there is a BOM character: this is also skipped on *nix, because R
   # on *nix simply ignores this meaningless character if present, but it hurts
@@ -1007,17 +1002,7 @@ checkEncoding <- function(file) {
             'http://shiny.rstudio.com/articles/unicode.html for more info.')
     return('UTF-8-BOM')
   }
-
-  enc <- getOption('encoding')
-  msg <- c(sprintf('The file "%s" is not encoded in UTF-8. ', file),
-           'Please convert its encoding to UTF-8 ',
-           '(e.g. use the menu `File -> Save with Encoding` in RStudio). ',
-           'See http://shiny.rstudio.com/articles/unicode.html for more info.')
-  if (enc == 'UTF-8') stop(msg)
-  # if you publish the app to ShinyApps.io, you will be in trouble
-  warning(c(msg, ' Falling back to the encoding "', enc, '".'))
-
-  enc
+  'UTF-8'
 }
 
 # try to read a file using UTF-8 (fall back to getOption('encoding') in case of

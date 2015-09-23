@@ -1005,14 +1005,20 @@ checkEncoding <- function(file) {
   'UTF-8'
 }
 
-# try to read a file using UTF-8 (fall back to getOption('encoding') in case of
-# failure, which defaults to native.enc, i.e. native encoding)
+# read a file using UTF-8 and (on Windows) convert to native encoding if possible
 readUTF8 <- function(file) {
   enc <- checkEncoding(file)
   file <- base::file(file, encoding = enc)
   on.exit(close(file), add = TRUE)
-  x <- readLines(file, encoding = enc, warn = FALSE)
-  enc2utf8(x)
+  x <- enc2utf8(readLines(file, warn = FALSE))
+  tryNativeEncoding(x)
+}
+
+# if the UTF-8 string can be represented in the native encoding, use native encoding
+tryNativeEncoding <- function(string) {
+  if (!isWindows()) return(string)
+  string2 <- enc2native(string)
+  if (identical(enc2utf8(string2), string)) string2 else string
 }
 
 # similarly, try to source() a file with UTF-8

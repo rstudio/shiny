@@ -1022,8 +1022,27 @@ tryNativeEncoding <- function(string) {
 }
 
 # similarly, try to source() a file with UTF-8
-sourceUTF8 <- function(file, ...) {
-  source(file, ..., keep.source = TRUE, encoding = checkEncoding(file))
+sourceUTF8 <- function(file, envir = globalenv()) {
+  lines <- readUTF8(file)
+  enc <- if (any(Encoding(lines) == 'UTF-8')) 'UTF-8' else 'unknown'
+  src <- srcfilecopy(file, lines, isFile = TRUE)  # source reference info
+  # oddly, parse(file) does not work when file contains multibyte chars that
+  # **can** be encoded natively on Windows (might be a bug in base R); we fall
+  # back to parse(text) in this case
+  exprs <- tryCatch(
+    parse(file, keep.source = FALSE, srcfile = src, encoding = enc),
+    error = function(e) {
+      parse(text = lines, keep.source = FALSE, srcfile = src, encoding = enc)
+    }
+  )
+  eval(exprs, envir)
+}
+
+# a workaround for https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16264
+if (getRversion() <= '3.2.2') srcfilecopy <- function(filename, lines, ...) {
+  src <- base::srcfilecopy(filename, lines = '', ...)
+  src$lines <- lines
+  src
 }
 
 # write text as UTF-8

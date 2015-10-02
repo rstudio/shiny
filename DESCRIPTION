@@ -117,6 +117,7 @@ Collate:
     'jqueryui.R'
     'middleware-shiny.R'
     'middleware.R'
+    'modules.R'
     'priorityqueue.R'
     'progress.R'
     'react.R'

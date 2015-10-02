@@ -289,7 +289,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               # The client tells us what singletons were rendered into
               # the initial page
               if (!is.null(msg$data$.clientdata_singletons)) {
-                shinysession$singletons <<- strsplit(
+                shinysession$singletons <- strsplit(
                   msg$data$.clientdata_singletons, ',')[[1]]
               }
 

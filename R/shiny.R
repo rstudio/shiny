@@ -241,6 +241,40 @@ workerId <- local({
 #' @name session
 NULL
 
+#' @rdname NS
+#' @export
+ns.sep <- "-"
+
+#' Namespaced IDs for inputs/outputs
+#'
+#' Creates namespaced IDs out of bare IDs. (See Details.)
+#'
+#' Shiny applications use IDs to identify inputs and outputs. These IDs must be
+#' unique within an application, as accidentally using the same input/output ID
+#' more than once will result in unexpected behavior. The traditional solution
+#' for preventing name collisions is \emph{namespaces}; a namespace is to an ID
+#' as a directory is to a file. Use the \code{NS} function to turn a bare ID
+#' into a namespaced one, by combining them with \code{ns.sep} in between.
+#'
+#' @param namespace The character vector to use for the namespace. This can have
+#'   any length, though a single element is most common. Length 0 will cause the
+#'   \code{id} to be returned without a namespace, and length 2 will be
+#'   interpreted as multiple namespaces, in increasing order of specificity
+#'   (i.e. starting with the top-level namespace).
+#' @param id The id string to be namespaced (optional).
+#' @return If \code{id} is missing, returns a function that expects an id string
+#'   as its only argument and returns that id with the namespace prepended.
+#'
+#' @export
+NS <- function(namespace, id = NULL) {
+  if (missing(id)) {
+    function(id) {
+      paste(c(namespace, id), collapse = ns.sep)
+    }
+  } else {
+    paste(c(namespace, id), collapse = ns.sep)
+  }
+}
 
 #' @include utils.R
 ShinySession <- R6Class(
@@ -386,6 +420,13 @@ ShinySession <- R6Class(
         workerId = workerId(),
         sessionId = self$token
       ))))
+    },
+    makeScope = function(namespace) {
+      namespace <- paste0(namespace, ns.sep)
+      createSessionProxy(self,
+        input = .createReactiveValues(private$.input, readonly = TRUE, prefix = namespace),
+        output = .createOutputWriter(self, prefix = namespace)
+      )
     },
     onSessionEnded = function(callback) {
       "Registers the given callback to be invoked when the session is closed
@@ -933,12 +974,19 @@ ShinySession <- R6Class(
   )
 )
 
-.createOutputWriter <- function(shinysession) {
-  structure(list(impl=shinysession), class='shinyoutput')
+.createOutputWriter <- function(shinysession, prefix = "") {
+  structure(list(impl=shinysession, prefix=prefix), class='shinyoutput')
 }
 
 #' @export
 `$<-.shinyoutput` <- function(x, name, value) {
+  if (nzchar(prefix <- .subset2(x, 'prefix'))) {
+    name <- paste0(prefix, name)
+  } else {
+    # Just to make sure errors happen at the same time regardless of prefix
+    force(name)
+  }
+
   label <- deparse(substitute(value))
   if (length(substitute(value)) > 1) {
     # value is an object consisting of a call and its arguments. Here we want
@@ -1009,6 +1057,10 @@ ShinySession <- R6Class(
 outputOptions <- function(x, name, ...) {
   if (!inherits(x, "shinyoutput"))
     stop("x must be a shinyoutput object.")
+
+  if (nzchar(prefix <- .subset2(x, 'prefix'))) {
+    name <- paste0(prefix, name)
+  }
 
   .subset2(x, 'impl')$outputOptions(name, ...)
 }

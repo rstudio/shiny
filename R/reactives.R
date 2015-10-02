@@ -200,12 +200,27 @@ reactiveValues <- function(...) {
   values
 }
 
+checkName <- function(x) {
+  if (!is.character(x) || length(x) != 1) {
+    stop("Must use single string to index into reactivevalues")
+  }
+}
+
 # Create a reactivevalues object
 #
 # @param values A ReactiveValues object
 # @param readonly Should this object be read-only?
-.createReactiveValues <- function(values = NULL, readonly = FALSE) {
-  structure(list(impl=values), class='reactivevalues', readonly=readonly)
+.createReactiveValues <- function(values = NULL, readonly = FALSE,
+  prefix = "") {
+
+  structure(
+    list(
+      impl = values,
+      readonly = readonly,
+      prefix = prefix
+    ),
+    class='reactivevalues'
+  )
 }
 
 #' Checks whether an object is a reactivevalues object
@@ -219,7 +234,8 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 
 #' @export
 `$.reactivevalues` <- function(x, name) {
-  .subset2(x, 'impl')$get(name)
+  checkName(name)
+  .subset2(x, 'impl')$get(paste0(.subset2(x, 'prefix'), name))
 }
 
 #' @export
@@ -227,14 +243,12 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 
 #' @export
 `$<-.reactivevalues` <- function(x, name, value) {
-  if (attr(x, 'readonly')) {
+  if (.subset2(x, 'readonly')) {
     stop("Attempted to assign value to a read-only reactivevalues object")
-  } else if (length(name) != 1 || !is.character(name)) {
-    stop("Must use single string to index into reactivevalues")
-  } else {
-    .subset2(x, 'impl')$set(name, value)
-    x
   }
+  checkName(name)
+  .subset2(x, 'impl')$set(paste0(.subset2(x, 'prefix'), name), value)
+  x
 }
 
 #' @export
@@ -252,7 +266,13 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 
 #' @export
 names.reactivevalues <- function(x) {
-  .subset2(x, 'impl')$names()
+  prefix <- .subset2(x, 'prefix')
+  results <- .subset2(x, 'impl')$names()
+  if (nzchar(prefix)) {
+    results <- results[substring(results, 1, nchar(prefix)) == prefix]
+    results <- substring(results, nchar(prefix) + 1)
+  }
+  results
 }
 
 #' @export

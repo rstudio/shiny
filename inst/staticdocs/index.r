@@ -170,6 +170,12 @@ sd_section("Plot interaction",
     "nearPoints"
   )
 )
+sd_section("Modules",
+  "Functions for modularizing Shiny apps",
+  c(
+    "NS"
+  )
+)
 sd_section("Embedding",
   "Functions that are intended for third-party packages that embed Shiny applications.",
   c(

@@ -173,7 +173,9 @@ sd_section("Plot interaction",
 sd_section("Modules",
   "Functions for modularizing Shiny apps",
   c(
-    "NS"
+    "NS",
+    "moduleUI",
+    "callModule"
   )
 )
 sd_section("Embedding",

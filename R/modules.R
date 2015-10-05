@@ -26,6 +26,12 @@ createSessionProxy <- function(parentSession, ...) {
   x
 }
 
+#' Invoke a module's UI
+#'
+#' @param module A function or path
+#' @param id An ID string
+#' @param ... Additional parameters to pass to module function
+#' @return A tag, or a list of tags, or a \code{tagList} of tags
 #' @export
 moduleUI <- function(module, id, ...) {
   if (is.function(module)) {

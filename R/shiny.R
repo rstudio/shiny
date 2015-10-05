@@ -425,7 +425,10 @@ ShinySession <- R6Class(
       namespace <- paste0(namespace, ns.sep)
       createSessionProxy(self,
         input = .createReactiveValues(private$.input, readonly = TRUE, prefix = namespace),
-        output = .createOutputWriter(self, prefix = namespace)
+        output = .createOutputWriter(self, prefix = namespace),
+        sendInputMessage = function(inputId, message) {
+          .subset2(self, "sendInputMessage")(paste0(namespace, inputId), message)
+        }
       )
     },
     onSessionEnded = function(callback) {

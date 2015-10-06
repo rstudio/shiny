@@ -477,24 +477,26 @@ ShinySession <- R6Class(
             name = name, status = 'recalculating'
           ))
 
-          value <- try(
-            {
-              tryCatch(
-                shinyCallingHandlers(func()),
-                shiny.silent.error = function(cond) {
-                  # Don't let shiny.silent.error go through the normal stop
-                  # path of try, because we don't want it to print. But we
-                  # do want to try to return the same looking result so that
-                  # the code below can send the error to the browser.
-                  structure(
-                    NULL,
-                    class = "try-error",
-                    condition = cond
-                  )
-                }
+          value <- tryCatch(
+            shinyCallingHandlers(func()),
+            shiny.silent.error = function(cond) {
+              # Don't let shiny.silent.error go through the normal stop
+              # path of try, because we don't want it to print. But we
+              # do want to try to return the same looking result so that
+              # the code below can send the error to the browser.
+              structure(
+                NULL,
+                class = "try-error",
+                condition = cond
               )
             },
-            silent=FALSE
+            error = function(cond) {
+              msg <- paste0("Error in output$", name, ": ", conditionMessage(cond), "\n")
+              if (isTRUE(getOption("show.error.messages"))) {
+                cat(msg, file = stderr())
+              }
+              invisible(structure(msg, class = "try-error", condition = cond))
+            }
           )
 
           self$sendCustomMessage('recalculating', list(

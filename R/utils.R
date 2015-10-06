@@ -1046,3 +1046,23 @@ URLencode <- function(value, reserved = FALSE) {
   value <- enc2utf8(value)
   if (reserved) encodeURIComponent(value) else encodeURI(value)
 }
+
+
+# This function takes a name and function, and it wraps that function in a new
+# function which calls the original function using the specified name. This can
+# be helpful for profiling, because the specified name will show up on the stack
+# trace.
+wrapFunctionLabel <- function(func, name) {
+  if (name == "name" || name == "func" || name == "relabelWrapper") {
+    stop("Invalid name for wrapFunctionLabel: ", name)
+  }
+  assign(name, func, environment())
+
+  relabelWrapper <- function(...) {
+    # This `f` gets renamed to the value of `name`
+    f(...)
+  }
+
+  body(relabelWrapper)[[2]][[1]] <- as.name(name)
+  relabelWrapper
+}

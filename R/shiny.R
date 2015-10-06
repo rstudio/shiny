@@ -461,6 +461,8 @@ ShinySession <- R6Class(
           }
         }
 
+        func <- wrapFunctionLabel(func, paste0("output$", name))
+
         # Preserve source reference and file information when formatting the
         # label for display in the reactive graph
         srcref <- attr(label, "srcref")

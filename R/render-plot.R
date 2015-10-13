@@ -482,9 +482,20 @@ getGgplotCoordmap <- function(p, pixelratio) {
     # are "null" units. These units use the remaining available width/height --
     # that is, the space not occupied by elements that have an absolute size.
     is_null_unit <- function(x) {
-      vapply(x, FUN.VALUE = logical(1), function(u) {
-        isTRUE(attr(u, "unit", exact = TRUE) == "null")
-      })
+      # A vector of units can be either a list of individual units (a unit.list
+      # object), each with their own set of attributes, or an atomic vector with
+      # one set of attributes. ggplot2 switched from the former (in version
+      # 1.0.1) to the latter. We need to make sure that we get the correct
+      # result in both cases.
+      if (inherits(x, "unit.list")) {
+        # For ggplot2 <= 1.0.1
+        vapply(x, FUN.VALUE = logical(1), function(u) {
+          isTRUE(attr(u, "unit", exact = TRUE) == "null")
+        })
+      } else {
+        # For later versions of ggplot2
+        attr(x, "unit", exact = TRUE) == "null"
+      }
     }
 
     # Convert a unit (or vector of units) to a numeric vector of pixel sizes

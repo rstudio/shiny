@@ -1,6 +1,9 @@
 shiny 0.12.2.9000
 --------------------------------------------------------------------------------
 
+* Fixed #962: plot interactions did not work with the development version of
+  ggplot2 (after ggplot2 1.0.1).
+
 * Fixed #902: the `drag_drop` plugin of the selectize input did not work.
 
 * Fixed #933: `updateSliderInput()` does not work when only the label is

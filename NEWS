@@ -13,6 +13,8 @@ shiny 0.12.2.9000
   will ensure that performing a brush operation will clear any other brush with
   the same id.
 
+* Added `placeholder` option to `textInput`.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

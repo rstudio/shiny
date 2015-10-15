@@ -15,6 +15,8 @@ shiny 0.12.2.9000
 
 * Added `placeholder` option to `textInput`.
 
+* Improved support for Unicode characters on Windows (#968).
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

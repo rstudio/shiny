@@ -89,7 +89,7 @@ selectOptions <- function(choices, selected = NULL) {
       # If sub-list, create an optgroup and recurse into the sublist
       sprintf(
         '<optgroup label="%s">\n%s\n</optgroup>',
-        htmlEscape(label),
+        htmlEscape(label, TRUE),
         selectOptions(choice, selected)
       )
 
@@ -97,7 +97,7 @@ selectOptions <- function(choices, selected = NULL) {
       # If single item, just return option string
       sprintf(
         '<option value="%s"%s>%s</option>',
-        htmlEscape(choice),
+        htmlEscape(choice, TRUE),
         if (choice %in% selected) ' selected' else '',
         htmlEscape(label)
       )

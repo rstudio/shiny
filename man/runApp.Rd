@@ -10,13 +10,16 @@ runApp(appDir = getwd(), port = getOption("shiny.port"),
   quiet = FALSE, display.mode = c("auto", "normal", "showcase"))
 }
 \arguments{
-\item{appDir}{The directory of the application. Should contain
-\code{server.R}, plus, either \code{ui.R} or a \code{www} directory that
-contains the file \code{index.html}. Alternately, instead of
-\code{server.R} and \code{ui.R}, the directory may contain just
-\code{app.R}. Defaults to the working directory. Instead of a directory,
-this could be a list with \code{ui} and \code{server} components, or a
-Shiny app object created by \code{\link{shinyApp}}.}
+\item{appDir}{The application to run. Should be one of the following:
+\itemize{
+\item A directory containing \code{server.R}, plus, either \code{ui.R} or
+ a \code{www} directory that contains the file \code{index.html}.
+\item A directory containing \code{app.R}.
+\item An \code{.R} file containing a Shiny application, ending with an
+ expression that produces a Shiny app object.
+\item A list with \code{ui} and \code{server} components.
+\item A Shiny app object created by \code{\link{shinyApp}}.
+}}
 
 \item{port}{The TCP port that the application should listen on. If the
 \code{port} is not specified, and the \code{shiny.port} option is set (with

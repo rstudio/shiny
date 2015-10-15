@@ -102,10 +102,18 @@ shinyAppDir <- function(appDir, options=list()) {
   if (file.exists.ci(appDir, "server.R")) {
     shinyAppDir_serverR(appDir, options = options)
   } else if (file.exists.ci(appDir, "app.R")) {
-    shinyAppDir_appR(appDir, options = options)
+    shinyAppDir_appR("app.R", appDir, options = options)
   } else {
     stop("App dir must contain either app.R or server.R.")
   }
+}
+
+#' @rdname shinyApp
+#' @param appFile Path to a .R file containing a Shiny application
+#' @export
+shinyAppFile <- function(appFile, options=list()) {
+  appFile <- normalizePath(appFile, mustWork = TRUE)
+  shinyAppDir_appR(basename(appFile), dirname(appFile), options = options)
 }
 
 # This reads in an app dir in the case that there's a server.R (and ui.R/www)
@@ -192,15 +200,15 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   )
 }
 
-# This reads in an app dir in the case that there's a app.R present, and returns
-# a shiny.appobj.
-shinyAppDir_appR <- function(appDir, options=list()) {
-  fullpath <- file.path.ci(appDir, "app.R")
+# This reads in an app dir for a single-file application (e.g. app.R), and
+# returns a shiny.appobj.
+shinyAppDir_appR <- function(fileName, appDir, options=list()) {
+  fullpath <- file.path.ci(appDir, fileName)
 
   # This sources app.R and caches the content. When appObj() is called but
   # app.R hasn't changed, it won't re-source the file. But if called and
   # app.R has changed, it'll re-source the file and return the result.
-  appObj <- cachedFuncWithFile(appDir, "app.R", case.sensitive = FALSE,
+  appObj <- cachedFuncWithFile(appDir, fileName, case.sensitive = FALSE,
     function(appR) {
       result <- sourceUTF8(fullpath, envir = new.env(parent = globalenv()))
 
@@ -268,7 +276,10 @@ as.shiny.appobj.list <- function(x) {
 #' @rdname shinyApp
 #' @export
 as.shiny.appobj.character <- function(x) {
-  shinyAppDir(x)
+  if (identical(tolower(tools::file_ext(x)), "r"))
+    shinyAppFile(x)
+  else
+    shinyAppDir(x)
 }
 
 #' @rdname shinyApp

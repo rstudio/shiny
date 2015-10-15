@@ -124,7 +124,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
         # If not, then take the last expression that's returned from ui.R.
         .globals$ui <- NULL
         on.exit(.globals$ui <- NULL, add = FALSE)
-        ui <- sourceUTF8(uiR, local = new.env(parent = globalenv()))$value
+        ui <- sourceUTF8(uiR, envir = new.env(parent = globalenv()))
         if (!is.null(.globals$ui)) {
           ui <- .globals$ui[[1]]
         }
@@ -147,7 +147,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       # server.R.
       .globals$server <- NULL
       on.exit(.globals$server <- NULL, add = TRUE)
-      result <- sourceUTF8(serverR, local = new.env(parent = globalenv()))$value
+      result <- sourceUTF8(serverR, envir = new.env(parent = globalenv()))
       if (!is.null(.globals$server)) {
         result <- .globals$server[[1]]
       }
@@ -202,7 +202,7 @@ shinyAppDir_appR <- function(appDir, options=list()) {
   # app.R has changed, it'll re-source the file and return the result.
   appObj <- cachedFuncWithFile(appDir, "app.R", case.sensitive = FALSE,
     function(appR) {
-      result <- sourceUTF8(fullpath, local = new.env(parent = globalenv()))$value
+      result <- sourceUTF8(fullpath, envir = new.env(parent = globalenv()))
 
       if (!is.shiny.appobj(result))
         stop("app.R did not return a shiny.appobj object.")

@@ -979,8 +979,7 @@ setServerInfo <- function(...) {
   .globals$serverInfo <- infoOld
 }
 
-# see if the file can be read as UTF-8 on Windows, and converted from UTF-8 to
-# native encoding; if the conversion fails, it will produce NA's in the results
+# assume file is encoded in UTF-8, but warn against BOM
 checkEncoding <- function(file) {
   # skip *nix because its locale is normally UTF-8 based (e.g. en_US.UTF-8), and
   # *nix users have to make a conscious effort to save a file with an encoding
@@ -989,14 +988,10 @@ checkEncoding <- function(file) {
   # world of consistency (falling back to getOption('encoding') will not help
   # because native.enc is also normally UTF-8 based on *nix)
   if (!isWindows()) return('UTF-8')
-  # an empty file?
   size <- file.info(file)[, 'size']
-  if (size == 0) return('UTF-8')
-
-  x <- readLines(file, encoding = 'UTF-8', warn = FALSE)
-  # if conversion is successful and there are no embedded nul's, use UTF-8
-  if (!any(is.na(iconv(x, 'UTF-8'))) &&
-        !any(readBin(file, 'raw', size) == as.raw(0))) return('UTF-8')
+  if (is.na(size)) stop('Cannot access the file ', file)
+  # BOM is 3 bytes, so if the file contains BOM, it must be at least 3 bytes
+  if (size < 3L) return('UTF-8')
 
   # check if there is a BOM character: this is also skipped on *nix, because R
   # on *nix simply ignores this meaningless character if present, but it hurts
@@ -1005,41 +1000,56 @@ checkEncoding <- function(file) {
     warning('You should not include the Byte Order Mark (BOM) in ', file, '. ',
             'Please re-save it in UTF-8 without BOM. See ',
             'http://shiny.rstudio.com/articles/unicode.html for more info.')
-    if (getRversion() < '3.0.0')
-      stop('R does not support UTF-8-BOM before 3.0.0. Please upgrade R.')
     return('UTF-8-BOM')
   }
-
-  enc <- getOption('encoding')
-  msg <- c(sprintf('The file "%s" is not encoded in UTF-8. ', file),
-           'Please convert its encoding to UTF-8 ',
-           '(e.g. use the menu `File -> Save with Encoding` in RStudio). ',
-           'See http://shiny.rstudio.com/articles/unicode.html for more info.')
-  if (enc == 'UTF-8') stop(msg)
-  # if you publish the app to ShinyApps.io, you will be in trouble
-  warning(c(msg, ' Falling back to the encoding "', enc, '".'))
-
-  enc
+  'UTF-8'
 }
 
-# try to read a file using UTF-8 (fall back to getOption('encoding') in case of
-# failure, which defaults to native.enc, i.e. native encoding)
+# read a file using UTF-8 and (on Windows) convert to native encoding if possible
 readUTF8 <- function(file) {
   enc <- checkEncoding(file)
-  # readLines() does not support UTF-8-BOM directly; has to go through file()
-  if (enc == 'UTF-8-BOM') {
-    file <- base::file(file, encoding = enc)
-    on.exit(close(file), add = TRUE)
-  }
-  x <- readLines(file, encoding = enc, warn = FALSE)
-  enc2native(x)
+  file <- base::file(file, encoding = enc)
+  on.exit(close(file), add = TRUE)
+  x <- enc2utf8(readLines(file, warn = FALSE))
+  tryNativeEncoding(x)
+}
+
+# if the UTF-8 string can be represented in the native encoding, use native encoding
+tryNativeEncoding <- function(string) {
+  if (!isWindows()) return(string)
+  string2 <- enc2native(string)
+  if (identical(enc2utf8(string2), string)) string2 else string
 }
 
 # similarly, try to source() a file with UTF-8
-sourceUTF8 <- function(file, ...) {
-  source(file, ..., keep.source = TRUE, encoding = checkEncoding(file))
+sourceUTF8 <- function(file, envir = globalenv()) {
+  lines <- readUTF8(file)
+  enc <- if (any(Encoding(lines) == 'UTF-8')) 'UTF-8' else 'unknown'
+  src <- srcfilecopy(file, lines, isFile = TRUE)  # source reference info
+  # oddly, parse(file) does not work when file contains multibyte chars that
+  # **can** be encoded natively on Windows (might be a bug in base R); we fall
+  # back to parse(text) in this case
+  exprs <- tryCatch(
+    parse(file, keep.source = FALSE, srcfile = src, encoding = enc),
+    error = function(e) {
+      parse(text = lines, keep.source = FALSE, srcfile = src, encoding = enc)
+    }
+  )
+  eval(exprs, envir)
 }
 
+# a workaround for https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16264
+if (getRversion() <= '3.2.2') srcfilecopy <- function(filename, lines, ...) {
+  src <- base::srcfilecopy(filename, lines = '', ...)
+  src$lines <- lines
+  src
+}
+
+# write text as UTF-8
+writeUTF8 <- function(text, ...) {
+  text <- enc2utf8(text)
+  writeLines(text, ..., useBytes = TRUE)
+}
 
 URLdecode <- decodeURIComponent
 URLencode <- function(value, reserved = FALSE) {

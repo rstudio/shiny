@@ -53,7 +53,7 @@ renderPage <- function(ui, connection, showcase=0) {
   depHtml <- renderDependencies(deps, "href")
 
   # write preamble
-  writeLines(c('<!DOCTYPE html>',
+  writeUTF8(c('<!DOCTYPE html>',
                '<html>',
                '<head>',
                '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
@@ -66,15 +66,15 @@ renderPage <- function(ui, connection, showcase=0) {
                depHtml
               ),
               con = connection)
-  writeLines(c(result$head,
+  writeUTF8(c(result$head,
                '</head>',
                recursive=TRUE),
              con = connection)
 
-  writeLines(result$html, con = connection)
+  writeUTF8(result$html, con = connection)
 
   # write end document
-  writeLines('</html>',
+  writeUTF8('</html>',
              con = connection)
 }
 
@@ -106,7 +106,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (!isTRUE(grepl(uiPattern, req$PATH_INFO)))
       return(NULL)
 
-    textConn <- textConnection(NULL, "w")
+    textConn <- file(open = "w+")
     on.exit(close(textConn))
 
     showcaseMode <- .globals$showcaseDefault
@@ -127,7 +127,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
       return(NULL)
 
     renderPage(uiValue, textConn, showcaseMode)
-    html <- paste(textConnectionValue(textConn), collapse='\n')
+    html <- paste(readLines(textConn, encoding = 'UTF-8'), collapse='\n')
     return(httpResponse(200, content=enc2utf8(html)))
   }
 }

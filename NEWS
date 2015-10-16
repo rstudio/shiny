@@ -17,6 +17,15 @@ shiny 0.12.2.9000
 
 * Improved support for Unicode characters on Windows (#968).
 
+* Fixed bug in `selectInput` and `selectizeInput` where values with double
+  quotes were not properly escaped.
+
+* `runApp()` can now take a path to any .R file that yields a `shinyApp` object;
+  previously, the path had to be a directory that contained an app.R file (or
+  server.R if using separately defined server and UI). Similarly, introduced
+  `shinyAppFile()` function which creates a `shinyApp` object for an .R file
+  path, just as `shinyAppDir()` does for a directory path.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

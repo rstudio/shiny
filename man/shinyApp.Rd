@@ -10,12 +10,15 @@
 \alias{print.shiny.appobj}
 \alias{shinyApp}
 \alias{shinyAppDir}
+\alias{shinyAppFile}
 \title{Create a Shiny app object}
 \usage{
 shinyApp(ui = NULL, server = NULL, onStart = NULL, options = list(),
   uiPattern = "/")
 
 shinyAppDir(appDir, options = list())
+
+shinyAppFile(appFile, options = list())
 
 as.shiny.appobj(x)
 
@@ -52,6 +55,8 @@ expression in order for the match to be considered successful.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}
+
+\item{appFile}{Path to a .R file containing a Shiny application}
 
 \item{x}{Object to convert to a Shiny app.}
 

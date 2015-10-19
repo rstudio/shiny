@@ -200,9 +200,18 @@ Ronny Springer <springer.ronny@gmail.com>
 Marian Sollmann <marian.sollmann@cargomedia.ch>
 Corey Frang <gnarf37@gmail.com>
 Chris Antaki <ChrisAntaki@gmail.com>
-njhamann <njhamann@gmail.com>
-hongymagic <d.hong@me.com>
+Noah Hamann <njhamann@gmail.com>
+David Hong <d.hong@me.com>
 Jakob Stoeck <jakob@pokermania.de>
-cjqed <christopherjonesqed@gmail.com>
+Christopher Jones <christopherjonesqed@gmail.com>
 Forbes Lindesay <forbes@lindesay.co.uk>
 John Paul <john@johnkpaul.com>
+S. Andrew Sheppard <andrew@wq.io>
+Leonardo Balter <leonardo.balter@gmail.com>
+Roman Reiß <me@silverwind.io>
+Benjy Cui <benjytrys@gmail.com>
+Rodrigo Rosenfeld Rosas <rr.rosas@gmail.com>
+John Hoven <hovenj@gmail.com>
+Christian Kosmowski <ksmwsk@gmail.com>
+Liang Peng <poppinlp@gmail.com>
+TJ VanToll <tj.vantoll@gmail.com>

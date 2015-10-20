@@ -2,20 +2,31 @@
 % Please edit documentation in R/modules.R
 \name{callModule}
 \alias{callModule}
-\title{Invoke a module}
+\title{Invoke a Shiny module}
 \usage{
 callModule(module, id, ..., session = getDefaultReactiveDomain())
 }
 \arguments{
-\item{module}{A function or path}
+\item{module}{A Shiny module server function}
 
-\item{id}{An ID string}
+\item{id}{An ID string that corresponds with the ID used to call the module's
+UI function}
 
-\item{...}{Additional parameters to pass to module function}
+\item{...}{Additional parameters to pass to module server function}
 
-\item{session}{Session from which to make a child scope}
+\item{session}{Session from which to make a child scope (the default should
+  almost always be used)}
+}
+\value{
+The return value, if any, from executing the module server function
 }
 \description{
-Invoke a module
+Shiny's module feature lets you break complicated UI and server logic into
+smaller, self-contained pieces. Compared to large monolithic Shiny apps,
+modules are easier to reuse and easier to reason about. See the article at
+\url{http://shiny.rstudio.com/articles/modules.html} to learn more.
+}
+\seealso{
+\url{http://shiny.rstudio.com/articles/modules.html}
 }
 

@@ -247,7 +247,9 @@ ns.sep <- "-"
 
 #' Namespaced IDs for inputs/outputs
 #'
-#' Creates namespaced IDs out of bare IDs. (See Details.)
+#' The \code{NS} function creates namespaced IDs out of bare IDs, by joining
+#' them using \code{ns.sep} as the delimiter. It is intended for use in Shiny
+#' modules. See \url{http://shiny.rstudio.com/articles/modules.html}.
 #'
 #' Shiny applications use IDs to identify inputs and outputs. These IDs must be
 #' unique within an application, as accidentally using the same input/output ID
@@ -264,6 +266,7 @@ ns.sep <- "-"
 #' @param id The id string to be namespaced (optional).
 #' @return If \code{id} is missing, returns a function that expects an id string
 #'   as its only argument and returns that id with the namespace prepended.
+#' @seealso \url{http://shiny.rstudio.com/articles/modules.html}
 #'
 #' @export
 NS <- function(namespace, id = NULL) {

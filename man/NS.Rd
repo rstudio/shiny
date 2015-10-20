@@ -26,7 +26,9 @@ If \code{id} is missing, returns a function that expects an id string
   as its only argument and returns that id with the namespace prepended.
 }
 \description{
-Creates namespaced IDs out of bare IDs. (See Details.)
+The \code{NS} function creates namespaced IDs out of bare IDs, by joining
+them using \code{ns.sep} as the delimiter. It is intended for use in Shiny
+modules. See \url{http://shiny.rstudio.com/articles/modules.html}.
 }
 \details{
 Shiny applications use IDs to identify inputs and outputs. These IDs must be
@@ -35,6 +37,9 @@ more than once will result in unexpected behavior. The traditional solution
 for preventing name collisions is \emph{namespaces}; a namespace is to an ID
 as a directory is to a file. Use the \code{NS} function to turn a bare ID
 into a namespaced one, by combining them with \code{ns.sep} in between.
+}
+\seealso{
+\url{http://shiny.rstudio.com/articles/modules.html}
 }
 \keyword{datasets}
 

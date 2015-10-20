@@ -26,56 +26,30 @@ createSessionProxy <- function(parentSession, ...) {
   x
 }
 
-#' Invoke a module's UI
+#' Invoke a Shiny module
 #'
-#' @param module A function or path
-#' @param id An ID string
-#' @param ... Additional parameters to pass to module function
-#' @return A tag, or a list of tags, or a \code{tagList} of tags
-#' @export
-moduleUI <- function(module, id, ...) {
-  if (is.function(module)) {
-    # do nothing
-  } else if (is.character(module)) {
-    if (length(module) != 1) {
-      stop("module should be a function or single-element character vector")
-    }
-    retval <- source(module, local = TRUE)$value
-    if (!is.function(retval)) {
-      stop("File ", module, " does not evaluate to a function")
-    }
-    module <- retval
-  } else {
-    stop("module should be a function or single-element character vector")
-  }
-
-  module(id, ...)
-}
-
-#' Invoke a module
+#' Shiny's module feature lets you break complicated UI and server logic into
+#' smaller, self-contained pieces. Compared to large monolithic Shiny apps,
+#' modules are easier to reuse and easier to reason about. See the article at
+#' \url{http://shiny.rstudio.com/articles/modules.html} to learn more.
 #'
-#' @param module A function or path
-#' @param id An ID string
-#' @param ... Additional parameters to pass to module function
-#' @param session Session from which to make a child scope
+#' @param module A Shiny module server function
+#' @param id An ID string that corresponds with the ID used to call the module's
+#'   UI function
+#' @param ... Additional parameters to pass to module server function
+#' @param session Session from which to make a child scope (the default should
+#'   almost always be used)
+#'
+#' @return The return value, if any, from executing the module server function
+#' @seealso \url{http://shiny.rstudio.com/articles/modules.html}
+#'
 #' @export
 callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
   childScope <- session$makeScope(id)
 
   withReactiveDomain(childScope, {
-    if (is.function(module)) {
-      # do nothing
-    } else if (is.character(module)) {
-      if (length(module) != 1) {
-        stop("module should be a function or single-element character vector")
-      }
-      retval <- source(module, local = TRUE)$value
-      if (!is.function(retval)) {
-        stop("File ", module, " does not evaluate to a function")
-      }
-      module <- retval
-    } else {
-      stop("module should be a function or single-element character vector")
+    if (!is.function(module)) {
+      stop("module argument must be a function")
     }
 
     module(childScope$input, childScope$output, childScope, ...)

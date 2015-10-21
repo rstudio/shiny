@@ -174,7 +174,6 @@ sd_section("Modules",
   "Functions for modularizing Shiny apps",
   c(
     "NS",
-    "moduleUI",
     "callModule"
   )
 )

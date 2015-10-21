@@ -210,14 +210,15 @@ checkName <- function(x) {
 #
 # @param values A ReactiveValues object
 # @param readonly Should this object be read-only?
+# @param ns A namespace function (either `identity` or `NS(namespace)`)
 .createReactiveValues <- function(values = NULL, readonly = FALSE,
-  prefix = "") {
+  ns = identity) {
 
   structure(
     list(
       impl = values,
       readonly = readonly,
-      prefix = prefix
+      ns = ns
     ),
     class='reactivevalues'
   )
@@ -235,7 +236,7 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 #' @export
 `$.reactivevalues` <- function(x, name) {
   checkName(name)
-  .subset2(x, 'impl')$get(paste0(.subset2(x, 'prefix'), name))
+  .subset2(x, 'impl')$get(.subset2(x, 'ns')(name))
 }
 
 #' @export
@@ -247,7 +248,7 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
     stop("Attempted to assign value to a read-only reactivevalues object")
   }
   checkName(name)
-  .subset2(x, 'impl')$set(paste0(.subset2(x, 'prefix'), name), value)
+  .subset2(x, 'impl')$set(.subset2(x, 'ns')(name), value)
   x
 }
 
@@ -266,7 +267,7 @@ is.reactivevalues <- function(x) inherits(x, 'reactivevalues')
 
 #' @export
 names.reactivevalues <- function(x) {
-  prefix <- .subset2(x, 'prefix')
+  prefix <- .subset2(x, 'ns')("")
   results <- .subset2(x, 'impl')$names()
   if (nzchar(prefix)) {
     results <- results[substring(results, 1, nchar(prefix)) == prefix]

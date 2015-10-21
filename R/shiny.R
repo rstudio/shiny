@@ -237,6 +237,11 @@ workerId <- local({
 #'   from Shiny apps, but through friendlier wrapper functions like
 #'   \code{\link{updateTextInput}}.
 #' }
+#' \item{ns(id)}{
+#'   Server-side version of \code{ns <- \link{NS}(id)}. If bare IDs need to be
+#'   explicitly namespaced for the current module, \code{session$ns("name")}
+#'   will return the fully-qualified ID.
+#' }
 #'
 #' @name session
 NULL
@@ -425,14 +430,19 @@ ShinySession <- R6Class(
       ))))
     },
     makeScope = function(namespace) {
-      namespace <- paste0(namespace, ns.sep)
       createSessionProxy(self,
-        input = .createReactiveValues(private$.input, readonly = TRUE, prefix = namespace),
-        output = .createOutputWriter(self, prefix = namespace),
+        input = .createReactiveValues(private$.input, readonly = TRUE, ns = NS(namespace)),
+        output = .createOutputWriter(self, ns = NS(namespace)),
         sendInputMessage = function(inputId, message) {
-          .subset2(self, "sendInputMessage")(paste0(namespace, inputId), message)
+          .subset2(self, "sendInputMessage")(NS(namespace, inputId), message)
+        },
+        ns = function(id) {
+          NS(namespace, id)
         }
       )
+    },
+    ns = function(id) {
+      NS(NULL, id)
     },
     onSessionEnded = function(callback) {
       "Registers the given callback to be invoked when the session is closed
@@ -980,18 +990,13 @@ ShinySession <- R6Class(
   )
 )
 
-.createOutputWriter <- function(shinysession, prefix = "") {
-  structure(list(impl=shinysession, prefix=prefix), class='shinyoutput')
+.createOutputWriter <- function(shinysession, ns = identity) {
+  structure(list(impl=shinysession, ns=ns), class='shinyoutput')
 }
 
 #' @export
 `$<-.shinyoutput` <- function(x, name, value) {
-  if (nzchar(prefix <- .subset2(x, 'prefix'))) {
-    name <- paste0(prefix, name)
-  } else {
-    # Just to make sure errors happen at the same time regardless of prefix
-    force(name)
-  }
+  name <- .subset2(x, 'ns')(name)
 
   label <- deparse(substitute(value))
   if (length(substitute(value)) > 1) {
@@ -1064,9 +1069,7 @@ outputOptions <- function(x, name, ...) {
   if (!inherits(x, "shinyoutput"))
     stop("x must be a shinyoutput object.")
 
-  if (nzchar(prefix <- .subset2(x, 'prefix'))) {
-    name <- paste0(prefix, name)
-  }
+  name <- .subset2(x, 'ns')(name)
 
   .subset2(x, 'impl')$outputOptions(name, ...)
 }

@@ -4403,7 +4403,7 @@ function uploadFiles(evt) {
     uploader.abort();
 
   var files = evt.target.files;
-  var IE8 = (browser.isIE && browser.IEVersion === 8);
+  var IE8 = (browser.isIE && browser.IEVersion <= 9);
   var id = fileInputBinding.getId(evt.target);
 
   if (!IE8 && files.length === 0)

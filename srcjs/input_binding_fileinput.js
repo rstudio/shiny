@@ -168,7 +168,9 @@ function uploadFiles(evt) {
     uploader.abort();
 
   var files = evt.target.files;
-  var IE8 = (browser.isIE && browser.IEVersion === 8);
+  // IE8 here does not necessarily mean literally IE8; it indicates if the web
+  // browser supports the FileList object (IE8/9 do not support it)
+  var IE8 = typeof(files) === 'undefined';
   var id = fileInputBinding.getId(evt.target);
 
   if (!IE8 && files.length === 0)

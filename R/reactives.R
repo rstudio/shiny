@@ -487,15 +487,12 @@ Observer <- R6Class(
     .destroyed = logical(0),
     .prevId = character(0),
 
-    initialize = function(func, label, suspended = FALSE, priority = 0,
+    initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
                           autoDestroy = TRUE) {
-      if (length(formals(func)) > 0)
+      if (length(formals(observerFunc)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
-
-      # New name to assist debugging
-      observerFunc <- func
 
       .func <<- function() {
         tryCatch(

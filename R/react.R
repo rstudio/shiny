@@ -108,12 +108,10 @@ ReactiveEnvironment <- R6Class(
       }
       return(.currentContext)
     },
-    runWith = function(ctx, func) {
+    runWith = function(ctx, contextFunc) {
       old.ctx <- .currentContext
       .currentContext <<- ctx
       on.exit(.currentContext <<- old.ctx)
-      # Rename to assist debugging
-      contextFunc <- func
       shinyCallingHandlers(contextFunc())
     },
     addPendingFlush = function(ctx, priority) {

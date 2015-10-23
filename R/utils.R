@@ -1058,11 +1058,14 @@ wrapFunctionLabel <- function(func, name) {
   }
   assign(name, func, environment())
 
-  relabelWrapper <- function(...) {
-    # This `f` gets renamed to the value of `name`
-    f(...)
-  }
+  relabelWrapper <- eval(substitute(
+    function(...) {
+      # This `f` gets renamed to the value of `name`. Note that it may not
+      # print as the new name, because of source refs stored in the function.
+      f(...)
+    },
+    list(f = as.name(name))
+  ))
 
-  body(relabelWrapper)[[2]][[1]] <- as.name(name)
   relabelWrapper
 }

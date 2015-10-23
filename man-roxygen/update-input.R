@@ -1,4 +1,5 @@
 #' @details
+#'
 #' The input updater functions send a message to the client, telling it to
 #' change the settings of an input object. The messages are collected and sent
 #' after all the observers (including outputs) have finished running.
@@ -9,6 +10,10 @@
 #'
 #' Any arguments with NULL values will be ignored; they will not result in any
 #' changes to the input object on the client.
+#'
+#' For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
+#' \code{\link{selectInput}()}, the set of choices can be cleared by using
+#' \code{choices=character(0)}
 #'
 #' @param session The \code{session} object passed to function given to
 #'   \code{shinyServer}.

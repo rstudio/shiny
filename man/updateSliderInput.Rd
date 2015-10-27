@@ -37,6 +37,10 @@ inputs in the first place. For example, \code{\link{numericInput}()} and
 
 Any arguments with NULL values will be ignored; they will not result in any
 changes to the input object on the client.
+
+For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
+\code{\link{selectInput}()}, the set of choices can be cleared by using
+\code{choices=character(0)}
 }
 \examples{
 ## Only run this example in interactive R sessions

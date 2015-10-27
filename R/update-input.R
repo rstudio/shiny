@@ -306,15 +306,16 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
 updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
                                selected = NULL, inline = FALSE,
                                type = 'checkbox') {
-
-  choices <- choicesWithNames(choices)
+  if (!is.null(choices))
+    choices <- choicesWithNames(choices)
   if (!is.null(selected))
     selected <- validateSelected(selected, choices, inputId)
 
-  options <- if (length(choices))
+  options <- if (!is.null(choices)) {
     format(tagList(
       generateOptions(inputId, choices, selected, inline, type = type)
     ))
+  }
 
   message <- dropNulls(list(label = label, options = options, value = selected))
 

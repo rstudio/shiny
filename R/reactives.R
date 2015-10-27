@@ -487,16 +487,16 @@ Observer <- R6Class(
     .destroyed = logical(0),
     .prevId = character(0),
 
-    initialize = function(func, label, suspended = FALSE, priority = 0,
+    initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
                           autoDestroy = TRUE) {
-      if (length(formals(func)) > 0)
+      if (length(formals(observerFunc)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
 
       .func <<- function() {
         tryCatch(
-          func(),
+          observerFunc(),
           validation = function(e) {
             # It's OK for a validation error to cause an observer to stop
             # running
@@ -523,8 +523,8 @@ Observer <- R6Class(
       .prevId <<- ctx$id
 
       ctx$onInvalidate(function() {
-        lapply(.invalidateCallbacks, function(func) {
-          func()
+        lapply(.invalidateCallbacks, function(invalidateCallback) {
+          invalidateCallback()
           NULL
         })
 

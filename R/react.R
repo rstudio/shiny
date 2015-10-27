@@ -72,8 +72,8 @@ Context <- R6Class(
         }
       }, add = TRUE)
 
-      lapply(.flushCallbacks, function(func) {
-        func()
+      lapply(.flushCallbacks, function(flushCallback) {
+        flushCallback()
       })
     }
   )
@@ -108,11 +108,11 @@ ReactiveEnvironment <- R6Class(
       }
       return(.currentContext)
     },
-    runWith = function(ctx, func) {
+    runWith = function(ctx, contextFunc) {
       old.ctx <- .currentContext
       .currentContext <<- ctx
       on.exit(.currentContext <<- old.ctx)
-      shinyCallingHandlers(func())
+      shinyCallingHandlers(contextFunc())
     },
     addPendingFlush = function(ctx, priority) {
       .pendingFlush$enqueue(ctx, priority)

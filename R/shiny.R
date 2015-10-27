@@ -436,6 +436,9 @@ ShinySession <- R6Class(
         sendInputMessage = function(inputId, message) {
           .subset2(self, "sendInputMessage")(NS(namespace, inputId), message)
         },
+        registerDataObj = function(name, data, filterFunc) {
+          .subset2(self, "registerDataObj")(NS(namespace, name), data, filterFunc)
+        },
         ns = function(id) {
           NS(namespace, id)
         }

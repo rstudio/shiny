@@ -463,7 +463,7 @@ ShinySession <- R6Class(
         # label for display in the reactive graph
         srcref <- attr(label, "srcref")
         srcfile <- attr(label, "srcfile")
-        label <- sprintf('output$%s <- %s', name, paste(label, collapse='\n'))
+        label <- sprintf('output$%s', name)
         attr(label, "srcref") <- srcref
         attr(label, "srcfile") <- srcfile
 

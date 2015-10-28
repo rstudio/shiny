@@ -441,12 +441,45 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
   # Attach a label and a reference to the original user source for debugging
   if (is.null(label))
     label <- sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n'))
-  srcref <- attr(substitute(x), "srcref")
+  srcref <- attr(substitute(x), "srcref", exact = TRUE)
+  label <- srcrefToLabel(srcref[[1]], label)
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   o <- Observable$new(fun, label, domain)
   registerDebugHook(".func", o, "Reactive")
   structure(o$getValue, observable = o, class = "reactive")
+}
+
+# Given the srcref to a reactive expression, attempts to figure out what the
+# name of the reactive expression is. This isn't foolproof, as it literally
+# scans the line of code that started the reactive block and looks for something
+# that looks like assignment. If we fail, fall back to a default value (likely
+# the block of code in the body of the reactive).
+srcrefToLabel <- function(srcref, defaultLabel) {
+  if (is.null(srcref))
+    return(defaultLabel)
+
+  srcfile <- attr(srcref, "srcfile", exact = TRUE)
+  if (is.null(srcfile))
+    return(defaultLabel)
+
+  if (is.null(srcfile$lines))
+    return(defaultLabel)
+
+  firstLine <- substring(srcfile$lines[srcref[1]], 1, srcref[2] - 1)
+  m <- regexec("(.*)(<-|=)\\s*reactive\\s*\\($", firstLine)
+  if (m[[1]][1] == -1) {
+    return(defaultLabel)
+  }
+  sym <- regmatches(firstLine, m)[[1]][2]
+  res <- try(parse(text = sym), silent = TRUE)
+  if (inherits(res, "try-error"))
+    return(defaultLabel)
+
+  if (length(res) != 1 || !is.symbol(res[[1]]))
+    return(defaultLabel)
+
+  return(as.character(res[[1]]))
 }
 
 #' @export

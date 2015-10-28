@@ -101,6 +101,11 @@
   from Shiny apps, but through friendlier wrapper functions like
   \code{\link{updateTextInput}}.
 }
+\item{ns(id)}{
+  Server-side version of \code{ns <- \link{NS}(id)}. If bare IDs need to be
+  explicitly namespaced for the current module, \code{session$ns("name")}
+  will return the fully-qualified ID.
+}
 }
 \description{
 Shiny server functions can optionally include \code{session} as a parameter

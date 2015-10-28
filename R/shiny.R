@@ -237,10 +237,52 @@ workerId <- local({
 #'   from Shiny apps, but through friendlier wrapper functions like
 #'   \code{\link{updateTextInput}}.
 #' }
+#' \item{ns(id)}{
+#'   Server-side version of \code{ns <- \link{NS}(id)}. If bare IDs need to be
+#'   explicitly namespaced for the current module, \code{session$ns("name")}
+#'   will return the fully-qualified ID.
+#' }
 #'
 #' @name session
 NULL
 
+#' @rdname NS
+#' @export
+ns.sep <- "-"
+
+#' Namespaced IDs for inputs/outputs
+#'
+#' The \code{NS} function creates namespaced IDs out of bare IDs, by joining
+#' them using \code{ns.sep} as the delimiter. It is intended for use in Shiny
+#' modules. See \url{http://shiny.rstudio.com/articles/modules.html}.
+#'
+#' Shiny applications use IDs to identify inputs and outputs. These IDs must be
+#' unique within an application, as accidentally using the same input/output ID
+#' more than once will result in unexpected behavior. The traditional solution
+#' for preventing name collisions is \emph{namespaces}; a namespace is to an ID
+#' as a directory is to a file. Use the \code{NS} function to turn a bare ID
+#' into a namespaced one, by combining them with \code{ns.sep} in between.
+#'
+#' @param namespace The character vector to use for the namespace. This can have
+#'   any length, though a single element is most common. Length 0 will cause the
+#'   \code{id} to be returned without a namespace, and length 2 will be
+#'   interpreted as multiple namespaces, in increasing order of specificity
+#'   (i.e. starting with the top-level namespace).
+#' @param id The id string to be namespaced (optional).
+#' @return If \code{id} is missing, returns a function that expects an id string
+#'   as its only argument and returns that id with the namespace prepended.
+#' @seealso \url{http://shiny.rstudio.com/articles/modules.html}
+#'
+#' @export
+NS <- function(namespace, id = NULL) {
+  if (missing(id)) {
+    function(id) {
+      paste(c(namespace, id), collapse = ns.sep)
+    }
+  } else {
+    paste(c(namespace, id), collapse = ns.sep)
+  }
+}
 
 #' @include utils.R
 ShinySession <- R6Class(
@@ -382,6 +424,24 @@ ShinySession <- R6Class(
         workerId = workerId(),
         sessionId = self$token
       ))))
+    },
+    makeScope = function(namespace) {
+      createSessionProxy(self,
+        input = .createReactiveValues(private$.input, readonly = TRUE, ns = NS(namespace)),
+        output = .createOutputWriter(self, ns = NS(namespace)),
+        sendInputMessage = function(inputId, message) {
+          .subset2(self, "sendInputMessage")(NS(namespace, inputId), message)
+        },
+        registerDataObj = function(name, data, filterFunc) {
+          .subset2(self, "registerDataObj")(NS(namespace, name), data, filterFunc)
+        },
+        ns = function(id) {
+          NS(namespace, id)
+        }
+      )
+    },
+    ns = function(id) {
+      NS(NULL, id)
     },
     onSessionEnded = function(callback) {
       "Registers the given callback to be invoked when the session is closed
@@ -933,12 +993,14 @@ ShinySession <- R6Class(
   )
 )
 
-.createOutputWriter <- function(shinysession) {
-  structure(list(impl=shinysession), class='shinyoutput')
+.createOutputWriter <- function(shinysession, ns = identity) {
+  structure(list(impl=shinysession, ns=ns), class='shinyoutput')
 }
 
 #' @export
 `$<-.shinyoutput` <- function(x, name, value) {
+  name <- .subset2(x, 'ns')(name)
+
   label <- deparse(substitute(value))
   if (length(substitute(value)) > 1) {
     # value is an object consisting of a call and its arguments. Here we want
@@ -1009,6 +1071,8 @@ ShinySession <- R6Class(
 outputOptions <- function(x, name, ...) {
   if (!inherits(x, "shinyoutput"))
     stop("x must be a shinyoutput object.")
+
+  name <- .subset2(x, 'ns')(name)
 
   .subset2(x, 'impl')$outputOptions(name, ...)
 }

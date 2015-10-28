@@ -26,6 +26,10 @@ shiny 0.12.2.9000
   `shinyAppFile()` function which creates a `shinyApp` object for an .R file
   path, just as `shinyAppDir()` does for a directory path.
 
+* Introduced Shiny Modules, which are designed to 1) simplify the reuse of
+  Shiny UI/server logic and 2) make authoring and maintaining complex Shiny
+  apps much easier. See the article linked from `?callModule`.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

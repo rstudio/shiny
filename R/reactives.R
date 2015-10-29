@@ -439,10 +439,11 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
                      domain = getDefaultReactiveDomain()) {
   fun <- exprToFunction(x, env, quoted)
   # Attach a label and a reference to the original user source for debugging
-  if (is.null(label))
-    label <- sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n'))
   srcref <- attr(substitute(x), "srcref", exact = TRUE)
-  label <- srcrefToLabel(srcref[[1]], label)
+  if (is.null(label)) {
+    label <- srcrefToLabel(srcref[[1]],
+      sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n')))
+  }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   o <- Observable$new(fun, label, domain)
@@ -476,10 +477,10 @@ srcrefToLabel <- function(srcref, defaultLabel) {
   if (inherits(res, "try-error"))
     return(defaultLabel)
 
-  if (length(res) != 1 || !is.symbol(res[[1]]))
+  if (length(res) != 1)
     return(defaultLabel)
 
-  return(as.character(res[[1]]))
+  return(as.character(res))
 }
 
 #' @export

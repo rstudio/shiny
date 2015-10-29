@@ -63,7 +63,10 @@ renderReactLog <- function(sessionToken = NULL) {
 .graphAppend <- function(logEntry, domain = getDefaultReactiveDomain()) {
   if (isTRUE(getOption('shiny.reactlog'))) {
     sessionToken <- if (is.null(domain)) NULL else domain$token
-    .graphStack$push(c(logEntry, list(session = sessionToken)))
+    .graphStack$push(c(logEntry, list(
+      session = sessionToken,
+      time = as.numeric(Sys.time())
+    )))
   }
 
   if (!is.null(domain)) {

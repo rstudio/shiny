@@ -3,7 +3,7 @@
 # that value is returned instead. (See Decorator pattern.)
 createSessionProxy <- function(parentSession, ...) {
   e <- new.env(parent = emptyenv())
-  e$parent <= parentSession
+  e$parent <- parentSession
   e$overrides <- list(...)
 
   structure(

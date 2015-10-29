@@ -432,10 +432,10 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'
 #' \dontrun{
 #' # Example of usage within a Shiny app
-#' shinyServer(function(input, output, clientData) {
+#' shinyServer(function(input, output, session) {
 #'
 #'   output$queryText <- renderText({
-#'     query <- parseQueryString(clientData$url_search)
+#'     query <- parseQueryString(session$clientData$url_search)
 #'
 #'     # Ways of accessing the values
 #'     if (as.numeric(query$foo) == 1) {

@@ -24,10 +24,10 @@ parseQueryString("?foo=1&bar=b\%20a\%20r")
 
 \dontrun{
 # Example of usage within a Shiny app
-shinyServer(function(input, output, clientData) {
+shinyServer(function(input, output, session) {
 
   output$queryText <- renderText({
-    query <- parseQueryString(clientData$url_search)
+    query <- parseQueryString(session$clientData$url_search)
 
     # Ways of accessing the values
     if (as.numeric(query$foo) == 1) {

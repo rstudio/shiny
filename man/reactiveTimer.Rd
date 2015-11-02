@@ -4,7 +4,7 @@
 \alias{reactiveTimer}
 \title{Timer}
 \usage{
-reactiveTimer(intervalMs = 1000, session)
+reactiveTimer(intervalMs = 1000, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{intervalMs}{How often to fire, in milliseconds}
@@ -39,7 +39,7 @@ shinyServer(function(input, output, session) {
 
   # Anything that calls autoInvalidate will automatically invalidate
   # every 2 seconds.
-  autoInvalidate <- reactiveTimer(2000, session)
+  autoInvalidate <- reactiveTimer(2000)
 
   observe({
     # Invalidate and re-execute this reactive expression every time the

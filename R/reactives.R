@@ -894,7 +894,7 @@ setAutoflush <- local({
 #'
 #'   # Anything that calls autoInvalidate will automatically invalidate
 #'   # every 2 seconds.
-#'   autoInvalidate <- reactiveTimer(2000, session)
+#'   autoInvalidate <- reactiveTimer(2000)
 #'
 #'   observe({
 #'     # Invalidate and re-execute this reactive expression every time the
@@ -917,12 +917,7 @@ setAutoflush <- local({
 #' }
 #'
 #' @export
-reactiveTimer <- function(intervalMs=1000, session) {
-  if (missing(session)) {
-    warning("reactiveTimer should be passed a session object or NULL")
-    session <- NULL
-  }
-
+reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain()) {
   dependents <- Map$new()
   timerCallbacks$schedule(intervalMs, function() {
     # Quit if the session is closed
@@ -989,19 +984,14 @@ reactiveTimer <- function(intervalMs=1000, session) {
 #'   # input$n changes.
 #'   output$plot <- renderPlot({
 #'     # Re-execute this reactive expression after 2000 milliseconds
-#'     invalidateLater(2000, session)
+#'     invalidateLater(2000)
 #'     hist(isolate(input$n))
 #'   })
 #' })
 #' }
 #'
 #' @export
-invalidateLater <- function(millis, session) {
-  if (missing(session)) {
-    warning("invalidateLater should be passed a session object or NULL")
-    session <- NULL
-  }
-
+invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   ctx <- .getReactiveEnvironment()$currentContext()
   timerCallbacks$schedule(millis, function() {
     # Quit if the session is closed

@@ -4,7 +4,7 @@
 \alias{invalidateLater}
 \title{Scheduled Invalidation}
 \usage{
-invalidateLater(millis, session)
+invalidateLater(millis, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{millis}{Approximate milliseconds to wait before invalidating the
@@ -45,7 +45,7 @@ shinyServer(function(input, output, session) {
   # input$n changes.
   output$plot <- renderPlot({
     # Re-execute this reactive expression after 2000 milliseconds
-    invalidateLater(2000, session)
+    invalidateLater(2000)
     hist(isolate(input$n))
   })
 })

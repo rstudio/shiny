@@ -30,6 +30,9 @@ shiny 0.12.2.9000
   Shiny UI/server logic and 2) make authoring and maintaining complex Shiny
   apps much easier. See the article linked from `?callModule`.
 
+* `invalidateLater` and `reactiveTimer` no longer require an explicit `session`
+  argument; the default value uses the current session.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

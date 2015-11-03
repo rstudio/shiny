@@ -426,17 +426,20 @@ ShinySession <- R6Class(
       ))))
     },
     makeScope = function(namespace) {
+      ns <- NS(namespace)
+
       createSessionProxy(self,
-        input = .createReactiveValues(private$.input, readonly = TRUE, ns = NS(namespace)),
-        output = .createOutputWriter(self, ns = NS(namespace)),
+        input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
+        output = .createOutputWriter(self, ns = ns),
         sendInputMessage = function(inputId, message) {
-          .subset2(self, "sendInputMessage")(NS(namespace, inputId), message)
+          .subset2(self, "sendInputMessage")(ns(inputId), message)
         },
         registerDataObj = function(name, data, filterFunc) {
-          .subset2(self, "registerDataObj")(NS(namespace, name), data, filterFunc)
+          .subset2(self, "registerDataObj")(ns(name), data, filterFunc)
         },
-        ns = function(id) {
-          NS(namespace, id)
+        ns = ns,
+        makeScope = function(namespace) {
+          self$makeScope(ns(namespace))
         }
       )
     },

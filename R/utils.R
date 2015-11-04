@@ -1073,14 +1073,14 @@ sourceUTF8 <- function(file, envir = globalenv()) {
   enc <- if (any(Encoding(lines) == 'UTF-8')) 'UTF-8' else 'unknown'
   src <- srcfilecopy(file, lines, isFile = TRUE)  # source reference info
   # oddly, parse(file) does not work when file contains multibyte chars that
-  # **can** be encoded natively on Windows (might be a bug in base R); we fall
-  # back to parse(text) in this case
-  exprs <- tryCatch(
-    parse(file, keep.source = FALSE, srcfile = src, encoding = enc),
-    error = function(e) {
-      parse(text = lines, keep.source = FALSE, srcfile = src, encoding = enc)
-    }
-  )
+  # **can** be encoded natively on Windows (might be a bug in base R); we
+  # rewrite the source code in a natively encoded temp file and parse it in this
+  # case (the source reference is still pointed to the original file, though)
+  if (isWindows() && enc == 'unknown') {
+    file <- tempfile(); on.exit(unlink(file), add = TRUE)
+    writeLines(lines, file)
+  }
+  exprs <- parse(file, keep.source = FALSE, srcfile = src, encoding = enc)
 
   # Wrap the exprs in first `{`, then ..stacktraceon..(). It's only really the
   # ..stacktraceon..() that we care about, but the `{` is needed to make that

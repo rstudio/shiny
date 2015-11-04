@@ -33,6 +33,13 @@ shiny 0.12.2.9000
 * `invalidateLater` and `reactiveTimer` no longer require an explicit `session`
   argument; the default value uses the current session.
 
+* Added `session$reload()` method, the equivalent of hitting the browser's
+  Reload button.
+
+* Added `shiny.autoreload` option, which will automatically cause browsers to
+  reload whenever Shiny app files change on disk. This is intended to shorten
+  the feedback cycle when tweaking UI code.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

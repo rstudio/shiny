@@ -516,6 +516,10 @@ var ShinyApp = function() {
     }
   });
 
+  addCustomMessageHandler('reload', function(message) {
+    window.location.reload();
+  });
+
 
   // Progress reporting ====================================================
 

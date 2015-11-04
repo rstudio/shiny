@@ -42,6 +42,22 @@ NULL
 #'   \item{shiny.trace}{If \code{TRUE}, all of the messages sent between the R
 #'     server and the web browser client will be printed on the console. This
 #'     is useful for debugging.}
+#'   \item{shiny.autoreload}{If \code{TRUE} when a Shiny app is launched, the
+#'     app directory will be continually monitored for changes to files that
+#'     have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any
+#'     changes are detected, all connected Shiny sessions are reloaded. This
+#'     allows for fast feedback loops when tweaking Shiny UI.
+#'
+#'     Since monitoring for changes is expensive (we simply poll for last
+#'     modified times), this feature is intended only for development.
+#'
+#'     You can customize the file patterns Shiny will monitor by setting the
+#'     shiny.autoreload.pattern option. For example, to monitor only ui.R:
+#'     \code{option(shiny.autoreload.pattern = glob2rx("ui.R"))}
+#'
+#'     The default polling interval is 500 milliseconds. You can change this
+#'     by setting e.g. \code{option(shiny.autoreload.interval = 2000)} (every
+#'     two seconds).}
 #'   \item{shiny.reactlog}{If \code{TRUE}, enable logging of reactive events,
 #'     which can be viewed later with the \code{\link{showReactLog}} function.
 #'     This incurs a substantial performance penalty and should not be used in
@@ -211,6 +227,10 @@ workerId <- local({
 #'   called with these values whenever an HTTP request is made to the URL
 #'   endpoint. The return value of \code{filterFunc} should be a Rook-style
 #'   response.
+#' }
+#' \item{reload()}{
+#'   The equivalent of hitting the browser's Reload button. Only works if the
+#'   session is actually connected.
 #' }
 #' \item{request}{
 #'   An environment that implements the Rook specification for HTTP requests.
@@ -692,6 +712,9 @@ ShinySession <- R6Class(
     reactlog = function(logEntry) {
       if (private$showcase)
         self$sendCustomMessage("reactlog", logEntry)
+    },
+    reload = function() {
+      self$sendCustomMessage("reload", TRUE)
     },
 
     # Public RPC methods

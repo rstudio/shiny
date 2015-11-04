@@ -76,6 +76,10 @@
   endpoint. The return value of \code{filterFunc} should be a Rook-style
   response.
 }
+\item{reload()}{
+  The equivalent of hitting the browser's Reload button. Only works if the
+  session is actually connected.
+}
 \item{request}{
   An environment that implements the Rook specification for HTTP requests.
   This is the request that was used to initiate the websocket connection

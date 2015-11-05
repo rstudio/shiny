@@ -36,7 +36,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
   # required head tags for boostrap
   importBootstrap <- function() {
     list(
-      htmlDependency("bootstrap", "3.3.1",
+      htmlDependency("bootstrap", "3.3.5",
         c(
           href = "shared/bootstrap",
           file = system.file("www/shared/bootstrap", package = "shiny")

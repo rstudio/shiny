@@ -33,7 +33,7 @@ renderTable <- function(expr, ..., env=parent.frame(), quoted=FALSE, func=NULL) 
 
     # Separate the ... args to pass to xtable() vs print.xtable()
     dots <- list(...)
-    xtable_argnames <- c("caption", "label", "align", "digits", "display")
+    xtable_argnames <- setdiff(names(formals(xtable)), c("x", "..."))
     xtable_args <- dots[intersect(names(dots), xtable_argnames)]
     non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
 

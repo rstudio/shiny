@@ -248,23 +248,49 @@ download <- function(url, ...) {
   # First, check protocol. If http or https, check platform:
   if (grepl('^https?://', url)) {
 
-    # If Windows, call setInternet2, then use download.file with defaults.
-    if (isWindows()) {
-      # If we directly use setInternet2, R CMD CHECK gives a Note on Mac/Linux
-      mySI2 <- `::`(utils, 'setInternet2')
-      # Store initial settings
-      internet2_start <- mySI2(NA)
-      on.exit(mySI2(internet2_start))
+    # Check whether we are running R 3.2
+    isR32 <- getRversion() >= "3.2"
 
-      # Needed for https
-      mySI2(TRUE)
-      utils::download.file(url, ...)
+    # Windows
+    if (.Platform$OS.type == "windows") {
+
+      if (isR32) {
+        method <- "wininet"
+      } else {
+
+        # If we directly use setInternet2, R CMD CHECK gives a Note on Mac/Linux
+        seti2 <- `::`(utils, 'setInternet2')
+
+        # Check whether we are already using internet2 for internal
+        internet2_start <- seti2(NA)
+
+        # If not then temporarily set it
+        if (!internet2_start) {
+          # Store initial settings, and restore on exit
+          on.exit(suppressWarnings(seti2(internet2_start)))
+
+          # Needed for https. Will get warning if setInternet2(FALSE) already run
+          # and internet routines are used. But the warnings don't seem to matter.
+          suppressWarnings(seti2(TRUE))
+        }
+
+        method <- "internal"
+      }
+
+      # download.file will complain about file size with something like:
+      #       Warning message:
+      #         In download.file(url, ...) : downloaded length 19457 != reported length 200
+      # because apparently it compares the length with the status code returned (?)
+      # so we supress that
+      suppressWarnings(download.file(url, method = method, ...))
 
     } else {
-      # If non-Windows, check for curl/wget/lynx, then call download.file with
+      # If non-Windows, check for libcurl/curl/wget/lynx, then call download.file with
       # appropriate method.
 
-      if (nzchar(Sys.which("wget")[1])) {
+      if (isR32 && capabilities("libcurl")) {
+        method <- "libcurl"
+      } else if (nzchar(Sys.which("wget")[1])) {
         method <- "wget"
       } else if (nzchar(Sys.which("curl")[1])) {
         method <- "curl"

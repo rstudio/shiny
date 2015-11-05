@@ -179,14 +179,18 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   }
 
   oldwd <- NULL
+  monitorHandle <- NULL
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
+    monitorHandle <<- initAutoReloadMonitor(appDir)
     if (file.exists(file.path.ci(appDir, "global.R")))
       sourceUTF8(file.path.ci(appDir, "global.R"))
   }
   onEnd <- function() {
     setwd(oldwd)
+    monitorHandle()
+    monitorHandle <<- NULL
   }
 
   structure(
@@ -198,6 +202,52 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       options = options),
     class = "shiny.appobj"
   )
+}
+
+# Start a reactive observer that continually monitors dir for changes to files
+# that have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. Case is
+# ignored when checking extensions. If any changes are detected, all connected
+# Shiny sessions are reloaded.
+#
+# Use option(shiny.autoreload = TRUE) to enable this behavior. Since monitoring
+# for changes is expensive (we are polling for mtimes here, nothing fancy) this
+# feature is intended only for development.
+#
+# You can customize the file patterns Shiny will monitor by setting the
+# shiny.autoreload.pattern option. For example, to monitor only ui.R:
+# option(shiny.autoreload.pattern = glob2rx("ui.R"))
+#
+# The return value is a function that halts monitoring when called.
+initAutoReloadMonitor <- function(dir) {
+  if (!getOption("shiny.autoreload", FALSE)) {
+    return(function(){})
+  }
+
+  filePattern <- getOption("shiny.autoreload.pattern",
+    ".*\\.(r|html?|js|css|png|jpe?g|gif)$")
+
+  lastValue <- NULL
+  obs <- observe({
+    files <- sort(list.files(dir, pattern = filePattern, recursive = TRUE,
+      ignore.case = TRUE))
+    times <- file.info(files)$mtime
+    names(times) <- files
+
+    if (is.null(lastValue)) {
+      # First run
+      lastValue <<- times
+    } else if (!identical(lastValue, times)) {
+      # We've changed!
+      lastValue <<- times
+      for (session in appsByToken$values()) {
+        session$reload()
+      }
+    }
+
+    invalidateLater(getOption("shiny.autoreload.interval", 500))
+  })
+
+  obs$destroy
 }
 
 # This reads in an app dir for a single-file application (e.g. app.R), and
@@ -233,12 +283,16 @@ shinyAppDir_appR <- function(fileName, appDir, options=list()) {
   fallbackWWWDir <- system.file("www-dir", package = "shiny")
 
   oldwd <- NULL
+  monitorHandle <- NULL
   onStart <- function() {
     oldwd <<- getwd()
     setwd(appDir)
+    monitorHandle <<- initAutoReloadMonitor(appDir)
   }
   onEnd <- function() {
     setwd(oldwd)
+    monitorHandle()
+    monitorHandle <<- NULL
   }
 
   structure(

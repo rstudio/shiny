@@ -573,6 +573,8 @@ ShinySession <- R6Class(
               msg <- paste0("Error in output$", name, ": ", conditionMessage(cond), "\n")
               if (isTRUE(getOption("show.error.messages"))) {
                 cat(msg, file = stderr())
+                cat(file = stderr(), "Stack trace (innermost first):\n")
+                cat(file = stderr(), attr(cond, "stack.trace", exact = TRUE), "\n")
               }
               invisible(structure(msg, class = "try-error", condition = cond))
             }

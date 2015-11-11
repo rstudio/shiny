@@ -14,3 +14,4 @@
 ^srcjs$
 ^CONTRIBUTING.md$
 ^cran-comments.md$
+^.*\.o$

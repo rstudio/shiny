@@ -527,7 +527,13 @@ prettyStackTrace <- function(calls) {
   paste0(collapse = "\n",
     sapply(rev(calls), function(call) {
       srcref <- attr(call, "srcref", exact = TRUE)
-      pretty <- paste0("    ", capture.output(print(call[[1]])))
+      pretty <- if (is.function(call[[1]])) {
+        paste0("    <Anonymous>")
+      } else if (inherits(call[[1]], "call")) {
+        paste0("    ", format(call[[1]]))
+      } else {
+        paste0("    ", as.character(call[[1]]))
+      }
       if (!is.null(srcref)) {
         srcfile <- attr(srcref, "srcfile", exact = TRUE)
         if (!is.null(srcfile) && !is.null(srcfile$filename)) {
@@ -560,7 +566,7 @@ captureStackTraces <- function(expr, truncate = 0) {
           cst <- as.symbol("captureStackTraces")
           pos <- Position(function(x) {
             identical(x[[1]], cst)
-          }, calls, right = TRUE, nomatch = NA)
+          }, calls, right = FALSE, nomatch = NA)
           if (!is.na(pos)) {
             # The "+2" here is for captureStackTraces and withCallingHandlers
             calls <- calls[(pos + 2 + truncate):length(calls)]

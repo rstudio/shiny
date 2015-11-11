@@ -88,6 +88,7 @@ Collate:
     'bootstrap-layout.R'
     'map.R'
     'globals.R'
+    'conditions.R'
     'utils.R'
     'bootstrap.R'
     'cache.R'

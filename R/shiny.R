@@ -550,14 +550,14 @@ ShinySession <- R6Class(
         attr(label, "srcref") <- srcref
         attr(label, "srcfile") <- srcfile
 
-        obs <- observe({
+        obs <- observe({..stacktraceoff..({
 
           self$sendCustomMessage('recalculating', list(
             name = name, status = 'recalculating'
           ))
 
           value <- tryCatch(
-            shinyCallingHandlers(func()),
+            shinyCallingHandlers(..stacktraceon..(func())),
             shiny.silent.error = function(cond) {
               # Don't let shiny.silent.error go through the normal stop
               # path of try, because we don't want it to print. But we
@@ -573,8 +573,7 @@ ShinySession <- R6Class(
               msg <- paste0("Error in output$", name, ": ", conditionMessage(cond), "\n")
               if (isTRUE(getOption("show.error.messages"))) {
                 cat(msg, file = stderr())
-                cat(file = stderr(), "Stack trace (innermost first):\n")
-                cat(file = stderr(), attr(cond, "stack.trace", exact = TRUE), "\n")
+                printStackTrace(cond)
               }
               invisible(structure(msg, class = "try-error", condition = cond))
             }
@@ -598,7 +597,7 @@ ShinySession <- R6Class(
           }
           else
             private$invalidatedOutputValues$set(name, value)
-        }, suspended=private$shouldSuspend(name), label=label)
+        })}, suspended=private$shouldSuspend(name), label=label)
 
         obs$onInvalidate(function() {
           self$showProgress(name)

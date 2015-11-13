@@ -370,7 +370,9 @@ Observable <- R6Class(
       .dependents$register()
 
       if (.invalidated || .running) {
-        self$.updateValue()
+        ..stacktraceoff..(
+          self$.updateValue()
+        )
       }
 
       .graphDependsOnId(getCurrentContext()$id, .mostRecentCtxId)
@@ -400,7 +402,12 @@ Observable <- R6Class(
       on.exit(.running <<- wasRunning)
 
       ctx$run(function() {
-        result <- withVisible(try(shinyCallingHandlers(.func()), silent=TRUE))
+        result <- withCallingHandlers(withVisible(..stacktraceon..(.func())),
+          error = function(cond) {
+            .visible <<- FALSE
+            .value <<- try(stop(cond), silent = TRUE)
+          }
+        )
         .visible <<- result$visible
         .value <<- result$value
       })
@@ -551,7 +558,7 @@ Observer <- R6Class(
 
       .func <<- function() {
         tryCatch(
-          observerFunc(),
+          ..stacktraceon..(observerFunc()),
           validation = function(e) {
             # It's OK for a validation error to cause an observer to stop
             # running
@@ -596,7 +603,7 @@ Observer <- R6Class(
       ctx$onFlush(function() {
         tryCatch({
           if (!.destroyed)
-            run()
+            shinyCallingHandlers(run())
 
         }, error = function(e) {
           # A function to handle errors that occur during a flush
@@ -607,6 +614,7 @@ Observer <- R6Class(
             flushErrorHandler <- function(e, label, domain) {
               warning("Unhandled error in observer: ",
                 e$message, "\n", label, immediate. = TRUE, call. = FALSE)
+              printStackTrace(e)
               if (!is.null(domain)) {
                 domain$unhandledError(e)
               }

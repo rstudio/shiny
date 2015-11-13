@@ -80,47 +80,49 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     if (is.null(pixelratio))
       pixelratio <- 1
 
-    coordmap <- NULL
-    plotFunc <- function() {
-      # Actually perform the plotting
-      result <- withVisible(func())
+    ..stacktraceoff..({
+      coordmap <- NULL
+      plotFunc <- function() {
+        # Actually perform the plotting
+        result <- withVisible(..stacktraceon..(func()))
 
-      coordmap <<- NULL
+        coordmap <<- NULL
 
-      if (result$visible) {
-        # Use capture.output to squelch printing to the actual console; we
-        # are only interested in plot output
+        if (result$visible) {
+          # Use capture.output to squelch printing to the actual console; we
+          # are only interested in plot output
 
-        # Special case for ggplot objects - need to capture coordmap
-        if (inherits(result$value, "ggplot")) {
-          utils::capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
-        } else {
-          utils::capture.output(print(result$value))
+          # Special case for ggplot objects - need to capture coordmap
+          if (inherits(result$value, "ggplot")) {
+            utils::capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
+          } else {
+            utils::capture.output(..stacktraceon..(print(result$value)))
+          }
+        }
+
+        if (is.null(coordmap)) {
+          coordmap <<- getPrevPlotCoordmap(width, height)
         }
       }
 
-      if (is.null(coordmap)) {
-        coordmap <<- getPrevPlotCoordmap(width, height)
+      outfile <- do.call(plotPNG, c(plotFunc, width=width*pixelratio,
+                                    height=height*pixelratio, res=res*pixelratio, args))
+      on.exit(unlink(outfile))
+
+      # A list of attributes for the img
+      res <- list(
+        src=shinysession$fileUrl(name, outfile, contentType='image/png'),
+        width=width, height=height, coordmap=coordmap
+      )
+
+      # Get error message if present (from attribute on the coordmap)
+      error <- attr(coordmap, "error", exact = TRUE)
+      if (!is.null(error)) {
+        res$error <- error
       }
-    }
 
-    outfile <- do.call(plotPNG, c(plotFunc, width=width*pixelratio,
-                                  height=height*pixelratio, res=res*pixelratio, args))
-    on.exit(unlink(outfile))
-
-    # A list of attributes for the img
-    res <- list(
-      src=shinysession$fileUrl(name, outfile, contentType='image/png'),
-      width=width, height=height, coordmap=coordmap
-    )
-
-    # Get error message if present (from attribute on the coordmap)
-    error <- attr(coordmap, "error", exact = TRUE)
-    if (!is.null(error)) {
-      res$error <- error
-    }
-
-    res
+      res
+    })
   }))
 }
 

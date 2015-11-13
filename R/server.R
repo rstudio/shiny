@@ -662,10 +662,12 @@ runApp <- function(appDir=getwd(),
   .globals$retval <- NULL
   .globals$stopped <- FALSE
   shinyCallingHandlers(
-    while (!.globals$stopped) {
-      serviceApp()
-      Sys.sleep(0.001)
-    }
+    ..stacktraceoff..(
+      while (!.globals$stopped) {
+        serviceApp()
+        Sys.sleep(0.001)
+      }
+    )
   )
 
   return(.globals$retval)

@@ -21,10 +21,8 @@ Context <- R6Class(
       withReactiveDomain(.domain, {
         env <- .getReactiveEnvironment()
         .graphEnterContext(id)
-        tryCatch(
-          env$runWith(self, func),
-          finally = .graphExitContext(id)
-        )
+        on.exit(.graphExitContext(id), add = TRUE)
+        env$runWith(self, func)
       })
     },
     invalidate = function() {
@@ -112,7 +110,7 @@ ReactiveEnvironment <- R6Class(
       old.ctx <- .currentContext
       .currentContext <<- ctx
       on.exit(.currentContext <<- old.ctx)
-      shinyCallingHandlers(contextFunc())
+      contextFunc()
     },
     addPendingFlush = function(ctx, priority) {
       .pendingFlush$enqueue(ctx, priority)

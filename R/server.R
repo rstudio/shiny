@@ -661,8 +661,8 @@ runApp <- function(appDir=getwd(),
 
   .globals$retval <- NULL
   .globals$stopped <- FALSE
-  shinyCallingHandlers(
-    ..stacktraceoff..(
+  ..stacktraceoff..(
+    captureStackTraces(
       while (!.globals$stopped) {
         serviceApp()
         Sys.sleep(0.001)

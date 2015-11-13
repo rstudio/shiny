@@ -533,14 +533,14 @@ ShinySession <- R6Class(
       }
 
       if (is.function(func)) {
-        if (length(formals(func)) != 0) {
+        funcFormals <- formals(func)
+        func <- wrapFunctionLabel(func, paste0("output$", name), ..stacktraceon = TRUE)
+        if (length(funcFormals) != 0) {
           orig <- func
           func <- function() {
             orig(name=name, shinysession=self)
           }
         }
-
-        func <- wrapFunctionLabel(func, paste0("output$", name))
 
         # Preserve source reference and file information when formatting the
         # label for display in the reactive graph
@@ -550,14 +550,14 @@ ShinySession <- R6Class(
         attr(label, "srcref") <- srcref
         attr(label, "srcfile") <- srcfile
 
-        obs <- observe({..stacktraceoff..({
+        obs <- observe(..stacktraceon = FALSE, {
 
           self$sendCustomMessage('recalculating', list(
             name = name, status = 'recalculating'
           ))
 
           value <- tryCatch(
-            shinyCallingHandlers(..stacktraceon..(func())),
+            shinyCallingHandlers(func()),
             shiny.silent.error = function(cond) {
               # Don't let shiny.silent.error go through the normal stop
               # path of try, because we don't want it to print. But we
@@ -597,7 +597,7 @@ ShinySession <- R6Class(
           }
           else
             private$invalidatedOutputValues$set(name, value)
-        })}, suspended=private$shouldSuspend(name), label=label)
+        }, suspended=private$shouldSuspend(name), label=label)
 
         obs$onInvalidate(function() {
           self$showProgress(name)
@@ -849,13 +849,16 @@ ShinySession <- R6Class(
         if (nzchar(ext))
           ext <- paste(".", ext, sep = "")
         tmpdata <- tempfile(fileext = ext)
-        result <- try(Context$new(getDefaultReactiveDomain(), '[download]')$run(
-          function() { download$func(tmpdata) }
-        ))
+        result <- try(shinyCallingHandlers(Context$new(getDefaultReactiveDomain(), '[download]')$run(
+          function() { ..stacktraceon..(download$func(tmpdata)) }
+        )))
         if (inherits(result, 'try-error')) {
+          cond <- attr(result, 'condition', exact = TRUE)
+          cat(file = stderr(), paste0("Error in output$", dlname, ": ", conditionMessage(cond), "\n"))
+          printStackTrace(cond)
           unlink(tmpdata)
           return(httpResponse(500, 'text/plain; charset=UTF-8',
-                              enc2utf8(attr(result, 'condition')$message)))
+                              enc2utf8(conditionMessage(cond))))
         }
         return(httpResponse(
           200,

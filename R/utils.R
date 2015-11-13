@@ -1089,7 +1089,7 @@ URLencode <- function(value, reserved = FALSE) {
 # function which calls the original function using the specified name. This can
 # be helpful for profiling, because the specified name will show up on the stack
 # trace.
-wrapFunctionLabel <- function(func, name) {
+wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
   if (name == "name" || name == "func" || name == "relabelWrapper") {
     stop("Invalid name for wrapFunctionLabel: ", name)
   }
@@ -1099,7 +1099,10 @@ wrapFunctionLabel <- function(func, name) {
     function(...) {
       # This `f` gets renamed to the value of `name`. Note that it may not
       # print as the new name, because of source refs stored in the function.
-      f(...)
+      if (..stacktraceon)
+        ..stacktraceon..(f(...))
+      else
+        f(...)
     },
     list(f = as.name(name))
   ))

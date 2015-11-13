@@ -42,44 +42,54 @@ getLocs <- function(calls) {
   })
 }
 
-captureStackTraces <- function(expr, truncate = 0) {
+captureStackTraces <- function(expr,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
   withCallingHandlers(expr,
     error = function(e) {
       if (is.null(attr(e, "stack.trace", exact = TRUE))) {
         calls <- sys.calls()
 
-        # Offset calls vs. srcrefs by 1 to make them more intuitive.
-        # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
-        # the definition of foo().
-        srcrefs <- c(tail(getSrcRefs(calls), -1), list(NULL))
+        srcrefs <- getSrcRefs(calls)
+        if (offset) {
+          # Offset calls vs. srcrefs by 1 to make them more intuitive.
+          # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
+          # the definition of foo().
+          srcrefs <- c(tail(srcrefs, -1), list(NULL))
+        }
         calls <- setSrcRefs(calls, srcrefs)
 
+        # Remove stop(), .handleSimpleError(), and h() calls from the top of
+        # the stack--they don't add any helpful information
         calls <- head(calls, -3)
-        if (!is.null(truncate) && !identical(truncate, FALSE)) {
-          # truncate means we'll drop parts of the stack trace that
-          # originate from withCallingHandlers and anything outside
-          # of that
-          cst <- as.symbol("captureStackTraces")
-          pos <- Position(function(x) {
-            identical(x[[1]], cst)
-          }, calls, right = FALSE, nomatch = NA)
-          if (!is.na(pos)) {
-            # The "+2" here is for captureStackTraces and withCallingHandlers
-            calls <- calls[(pos + 2 + truncate):length(calls)]
-          }
-        }
 
         # Hide and show parts of the callstack based on ..stacktrace(on|off)..
         callnames <- getCallNames(calls)
-        score <- rep.int(0, length(callnames))
-        score[callnames == "..stacktraceoff.."] <- -1
-        score[callnames == "..stacktraceon.."] <- 1
-        toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff.."))
+        if (full) {
+          toShow <- rep.int(TRUE, length(calls))
+        } else {
+          # This uses a ref-counting scheme. It might make sense to switch this
+          # to a toggling scheme, so the most recent ..stacktrace(on|off)..
+          # directive wins, regardless of what came before it.
+          # Also explicitly remove ..stacktraceon.. because it can appear with
+          # score > 0 but still should never be shown.
+          score <- rep.int(0, length(callnames))
+          score[callnames == "..stacktraceoff.."] <- -1
+          score[callnames == "..stacktraceon.."] <- 1
+          toShow <- (1 + cumsum(score)) > 0 & callnames != "..stacktraceon.."
+        }
         calls <- calls[toShow]
 
         calls <- rev(calls) # Show in traceback() order
+        index <- rev(which(toShow))
+        width <- floor(log10(max(index))) + 1
         attr(e, "stack.trace") <- paste0(collapse = "\n",
-          "    ", rev(which(toShow)), ": ", getCallNames(calls), getLocs(calls)
+          "    ",
+          formatC(index, width = width),
+          ": ",
+          getCallNames(calls),
+          getLocs(calls)
         )
       }
       stop(e)

@@ -37,6 +37,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   } else {
     installExprFunction(expr, "func", env, quoted)
   }
+  func <- wrapFunctionLabel(func, "renderPlot", ..stacktraceon = TRUE)
 
   args <- list(...)
 
@@ -84,7 +85,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       coordmap <- NULL
       plotFunc <- function() {
         # Actually perform the plotting
-        result <- withVisible(..stacktraceon..(func()))
+        result <- withVisible(func())
 
         coordmap <<- NULL
 

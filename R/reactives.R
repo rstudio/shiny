@@ -357,7 +357,9 @@ Observable <- R6Class(
         stop("Can't make a reactive expression from a function that takes one ",
              "or more parameters; only functions without parameters can be ",
              "reactive.")
-      .func <<- func
+
+      .func <<- wrapFunctionLabel(func, paste("reactive", label),
+        ..stacktraceon = TRUE)
       .label <<- label
       .domain <<- domain
       .dependents <<- Dependents$new()
@@ -402,7 +404,7 @@ Observable <- R6Class(
       on.exit(.running <<- wasRunning)
 
       ctx$run(function() {
-        result <- withCallingHandlers(withVisible(..stacktraceon..(.func())),
+        result <- withCallingHandlers(withVisible(.func()),
           error = function(cond) {
             .visible <<- FALSE
             .value <<- try(stop(cond), silent = TRUE)
@@ -551,14 +553,17 @@ Observer <- R6Class(
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
-                          autoDestroy = TRUE) {
+                          autoDestroy = TRUE, ..stacktraceon = TRUE) {
       if (length(formals(observerFunc)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
 
       .func <<- function() {
         tryCatch(
-          ..stacktraceon..(observerFunc()),
+          if (..stacktraceon)
+            ..stacktraceon..(observerFunc())
+          else
+            observerFunc(),
           validation = function(e) {
             # It's OK for a validation error to cause an observer to stop
             # running
@@ -787,14 +792,16 @@ Observer <- R6Class(
 #' @export
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
                     suspended=FALSE, priority=0,
-                    domain=getDefaultReactiveDomain(), autoDestroy = TRUE) {
+                    domain=getDefaultReactiveDomain(), autoDestroy = TRUE,
+                    ..stacktraceon = TRUE) {
 
   fun <- exprToFunction(x, env, quoted)
   if (is.null(label))
     label <- sprintf('observe(%s)', paste(deparse(body(fun)), collapse='\n'))
 
   o <- Observer$new(fun, label=label, suspended=suspended, priority=priority,
-                    domain=domain, autoDestroy=autoDestroy)
+                    domain=domain, autoDestroy=autoDestroy,
+                    ..stacktraceon=..stacktraceon)
   registerDebugHook(".func", o, "Observer")
   invisible(o)
 }

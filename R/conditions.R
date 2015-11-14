@@ -114,6 +114,77 @@ captureStackTraces <- function(expr) {
   )
 }
 
+#' @details \code{withLogErrors} captures stack traces and logs errors that
+#'   occur in \code{expr}, but does allow errors to propagate beyond this point
+#'   (i.e. it doesn't catch the error). The same caveats that apply to
+#'   \code{captureStackTraces} with regard to \code{try}/\code{tryCatch} apply
+#'   to \code{withLogErrors}.
+#' @rdname stacktrace
+#' @export
+withLogErrors <- function(expr,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
+  withCallingHandlers(
+    captureStackTraces(expr),
+    error = function(cond) {
+      printError(cond, full = full, offset = offset)
+    }
+  )
+}
+
+#' @details \code{printError} prints the error and stack trace (if any) using
+#'   \code{warning(immediate.=TRUE)}. \code{printStackTrace} prints the stack
+#'   trace only.
+#'
+#' @param cond An condition object (generally, an error).
+#' @param full If \code{TRUE}, then every element of \code{sys.calls()} will be
+#'   included in the stack trace. By default (\code{FALSE}), calls that Shiny
+#'   deems uninteresting will be hidden.
+#' @param offset If \code{TRUE} (the default), srcrefs will be reassigned from
+#'   the calls they originated from, to the destinations of those calls. If
+#'   you're used to stack traces from other languages, this feels more
+#'   intuitive, as the definition of the function indicated in the call and the
+#'   location specified by the srcref match up. If \code{FALSE}, srcrefs will be
+#'   left alone (traditional R treatment where the srcref is of the callsite).
+#' @rdname stacktrace
+#' @export
+printError <- function(cond,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
+  warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s",
+    getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
+  printStackTrace(cond, full = full, offset = offset)
+  invisible()
+}
+
+#' @rdname stacktrace
+#' @export
+printStackTrace <- function(cond,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
+  stackTrace <- attr(cond, "stack.trace", exact = TRUE)
+  if (!is.null(stackTrace)) {
+    message(paste0(
+      "Stack trace (innermost first):\n",
+      paste0(collapse = "\n",
+        formatStackTrace(stackTrace, full = full, offset = offset,
+          indent = "    ")
+      )
+    ))
+  } else {
+    message("No stack trace available")
+  }
+  invisible()
+}
+
+#' @details \code{extractStackTrace} takes a list of calls (e.g. as returned
+#'   from \code{conditionStackTrace(cond)}) and returns a data frame with one
+#'   row for each stack frame and the columns \code{num} (stack frame number),
+#'   \code{call} (a function name or similar), and \code{loc} (source file path
+#'   and line number, if available).
 #' @rdname stacktrace
 #' @export
 extractStackTrace <- function(calls,
@@ -174,17 +245,23 @@ extractStackTrace <- function(calls,
   )
 }
 
+#' @details \code{formatStackTrace} is similar to \code{extractStackTrace}, but
+#'   it returns a preformatted character vector instead of a data frame.
+#' @param indent A string to prefix every line of the stack trace.
 #' @rdname stacktrace
 #' @export
-formatStackTrace <- function(calls,
+formatStackTrace <- function(calls, indent = "    ",
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   st <- extractStackTrace(calls, full = full, offset = offset)
+  if (nrow(st) == 0) {
+    return(character(0))
+  }
 
   width <- floor(log10(max(st$num))) + 1
   paste0(
-    "    ",
+    indent,
     formatC(st$num, width = width),
     ": ",
     st$call,
@@ -202,71 +279,6 @@ setSrcRefs <- function(calls, srcrefs) {
   mapply(function(call, srcref) {
     structure(call, srcref = srcref)
   }, calls, srcrefs)
-}
-
-#' @details \code{withLogErrors} captures stack traces and logs errors that
-#'   occur in \code{expr}, but does allow errors to propagate beyond this point
-#'   (i.e. it doesn't catch the error). The same caveats that apply to
-#'   \code{captureStackTraces} with regard to \code{try}/\code{tryCatch} apply
-#'   to \code{withLogErrors}.
-#' @rdname stacktrace
-#' @export
-withLogErrors <- function(expr,
-  full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE)) {
-
-  withCallingHandlers(
-    captureStackTraces(expr),
-    error = function(cond) {
-      printError(cond, full = full, offset = offset)
-    }
-  )
-}
-
-#' @details \code{printError} prints the error and stack trace (if any) using
-#'   \code{warning(immediate.=TRUE)}. \code{printStackTrace} prints the stack
-#'   trace only.
-#'
-#' @param cond An condition object (generally, an error).
-#' @param full If \code{TRUE}, then every element of \code{sys.calls()} will be
-#'   included in the stack trace. By default (\code{FALSE}), calls that Shiny
-#'   deems uninteresting will be hidden.
-#' @param offset If \code{TRUE} (the default), srcrefs will be reassigned from
-#'   the calls they originated from, to the destinations of those calls. If
-#'   you're used to stack traces from other languages, this feels more
-#'   intuitive, as the definition of the function indicated in the call and the
-#'   location specified by the srcref match up. If \code{FALSE}, srcrefs will be
-#'   left alone (traditional R treatment where the srcref is of the callsite).
-#' @rdname stacktrace
-#' @export
-printError <- function(cond,
-  full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE)) {
-
-  warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s",
-    getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
-  printStackTrace(cond, full = full, offset = offset)
-  invisible()
-}
-
-#' @rdname stacktrace
-#' @export
-printStackTrace <- function(cond,
-  full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE)) {
-
-  stackTrace <- attr(cond, "stack.trace", exact = TRUE)
-  if (!is.null(stackTrace)) {
-    message(paste0(
-      "Stack trace (innermost first):\n",
-      paste0(collapse = "\n",
-        formatStackTrace(stackTrace, full = full, offset = offset)
-      )
-    ))
-  } else {
-    message("No stack trace available")
-  }
-  invisible()
 }
 
 stripStackTrace <- function(cond) {

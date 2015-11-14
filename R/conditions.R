@@ -66,7 +66,7 @@ getCallNames <- function(calls) {
     if (is.function(call[[1]])) {
       "<Anonymous>"
     } else if (inherits(call[[1]], "call")) {
-      format(call[[1]])
+      paste0(format(call[[1]]), collapse = " ")
     } else {
       paste0(as.character(call[[1]]), collapse = " ")
     }
@@ -100,81 +100,95 @@ getLocs <- function(calls) {
 #'   condition handler installed by \code{captureStackTraces}.
 #'
 #' @param expr The expression to wrap.
-#' @param full If \code{TRUE}, then every element of \code{sys.calls()} will be
-#'   included in the stack trace. By default (\code{FALSE}), calls that Shiny
-#'   deems uninteresting will be hidden.
-#' @param offset If \code{TRUE} (the default), srcrefs will be reassigned from
-#'   the calls they originated from, to the destinations of those calls. If
-#'   you're used to stack traces from other languages, this feels more
-#'   intuitive, as the definition of the function indicated in the call and the
-#'   location specified by the srcref match up. If \code{FALSE}, srcrefs will be
-#'   left alone (traditional R treatment where the srcref is of the callsite).
 #' @rdname stacktrace
 #' @export
-captureStackTraces <- function(expr,
-  full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE)) {
-
+captureStackTraces <- function(expr) {
   withCallingHandlers(expr,
     error = function(e) {
       if (is.null(attr(e, "stack.trace", exact = TRUE))) {
         calls <- sys.calls()
-
-        srcrefs <- getSrcRefs(calls)
-        if (offset) {
-          # Offset calls vs. srcrefs by 1 to make them more intuitive.
-          # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
-          # the definition of foo().
-          srcrefs <- c(tail(srcrefs, -1), list(NULL))
-        }
-        calls <- setSrcRefs(calls, srcrefs)
-
-        callnames <- getCallNames(calls)
-
-        # Hide and show parts of the callstack based on ..stacktrace(on|off)..
-        if (full) {
-          toShow <- rep.int(TRUE, length(calls))
-        } else {
-          # Remove stop(), .handleSimpleError(), and h() calls from the end of
-          # the calls--they don't add any helpful information. But only remove
-          # the last *contiguous* block of them, and then, only if they are the
-          # last thing in the calls list.
-          hideable <- callnames %in% c("stop", ".handleSimpleError", "h")
-          # What's the last that *didn't* match stop/.handleSimpleError/h?
-          lastGoodCall <- max(which(!hideable))
-          toRemove <- length(calls) - lastGoodCall
-          # But don't remove more than 5 levels--that's an indication we might
-          # have gotten it wrong, I guess
-          if (toRemove > 0 && toRemove < 5) {
-            calls <- head(calls, -toRemove)
-            callnames <- head(callnames, -toRemove)
-          }
-
-          # This uses a ref-counting scheme. It might make sense to switch this
-          # to a toggling scheme, so the most recent ..stacktrace(on|off)..
-          # directive wins, regardless of what came before it.
-          # Also explicitly remove ..stacktraceon.. because it can appear with
-          # score > 0 but still should never be shown.
-          score <- rep.int(0, length(callnames))
-          score[callnames == "..stacktraceoff.."] <- -1
-          score[callnames == "..stacktraceon.."] <- 1
-          toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff.."))
-        }
-        calls <- calls[toShow]
-
-        calls <- rev(calls) # Show in traceback() order
-        index <- rev(which(toShow))
-        width <- floor(log10(max(index))) + 1
-        attr(e, "stack.trace") <- paste0(collapse = "\n",
-          "    ",
-          formatC(index, width = width),
-          ": ",
-          getCallNames(calls),
-          getLocs(calls)
-        )
+        attr(e, "stack.trace") <- calls
         stop(e)
       }
     }
+  )
+}
+
+#' @rdname stacktrace
+#' @export
+extractStackTrace <- function(calls,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
+  srcrefs <- getSrcRefs(calls)
+  if (offset) {
+    # Offset calls vs. srcrefs by 1 to make them more intuitive.
+    # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
+    # the definition of foo().
+    srcrefs <- c(tail(srcrefs, -1), list(NULL))
+  }
+  calls <- setSrcRefs(calls, srcrefs)
+
+  callnames <- getCallNames(calls)
+
+  # Hide and show parts of the callstack based on ..stacktrace(on|off)..
+  if (full) {
+    toShow <- rep.int(TRUE, length(calls))
+  } else {
+    # Remove stop(), .handleSimpleError(), and h() calls from the end of
+    # the calls--they don't add any helpful information. But only remove
+    # the last *contiguous* block of them, and then, only if they are the
+    # last thing in the calls list.
+    hideable <- callnames %in% c("stop", ".handleSimpleError", "h")
+    # What's the last that *didn't* match stop/.handleSimpleError/h?
+    lastGoodCall <- max(which(!hideable))
+    toRemove <- length(calls) - lastGoodCall
+    # But don't remove more than 5 levels--that's an indication we might
+    # have gotten it wrong, I guess
+    if (toRemove > 0 && toRemove < 5) {
+      calls <- head(calls, -toRemove)
+      callnames <- head(callnames, -toRemove)
+    }
+
+    # This uses a ref-counting scheme. It might make sense to switch this
+    # to a toggling scheme, so the most recent ..stacktrace(on|off)..
+    # directive wins, regardless of what came before it.
+    # Also explicitly remove ..stacktraceon.. because it can appear with
+    # score > 0 but still should never be shown.
+    score <- rep.int(0, length(callnames))
+    score[callnames == "..stacktraceoff.."] <- -1
+    score[callnames == "..stacktraceon.."] <- 1
+    toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff.."))
+  }
+  calls <- calls[toShow]
+
+  calls <- rev(calls) # Show in traceback() order
+  index <- rev(which(toShow))
+  width <- floor(log10(max(index))) + 1
+
+  data.frame(
+    num = index,
+    call = getCallNames(calls),
+    loc = getLocs(calls),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @rdname stacktrace
+#' @export
+formatStackTrace <- function(calls,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
+  st <- extractStackTrace(calls, full = full, offset = offset)
+
+  width <- floor(log10(max(st$num))) + 1
+  paste0(
+    "    ",
+    formatC(st$num, width = width),
+    ": ",
+    st$call,
+    st$loc
   )
 }
 
@@ -197,10 +211,15 @@ setSrcRefs <- function(calls, srcrefs) {
 #'   to \code{withLogErrors}.
 #' @rdname stacktrace
 #' @export
-withLogErrors <- function(expr) {
+withLogErrors <- function(expr,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
   withCallingHandlers(
     captureStackTraces(expr),
-    error = printError
+    error = function(cond) {
+      printError(cond, full = full, offset = offset)
+    }
   )
 }
 
@@ -209,37 +228,68 @@ withLogErrors <- function(expr) {
 #'   trace only.
 #'
 #' @param cond An condition object (generally, an error).
+#' @param full If \code{TRUE}, then every element of \code{sys.calls()} will be
+#'   included in the stack trace. By default (\code{FALSE}), calls that Shiny
+#'   deems uninteresting will be hidden.
+#' @param offset If \code{TRUE} (the default), srcrefs will be reassigned from
+#'   the calls they originated from, to the destinations of those calls. If
+#'   you're used to stack traces from other languages, this feels more
+#'   intuitive, as the definition of the function indicated in the call and the
+#'   location specified by the srcref match up. If \code{FALSE}, srcrefs will be
+#'   left alone (traditional R treatment where the srcref is of the callsite).
 #' @rdname stacktrace
 #' @export
-printError <- function(cond) {
+printError <- function(cond,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
   warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s",
     getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
-  printStackTrace(cond)
+  printStackTrace(cond, full = full, offset = offset)
   invisible()
 }
 
 #' @rdname stacktrace
 #' @export
-printStackTrace <- function(cond) {
+printStackTrace <- function(cond,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
   stackTrace <- attr(cond, "stack.trace", exact = TRUE)
   if (!is.null(stackTrace)) {
     message(paste0(
       "Stack trace (innermost first):\n",
-      stackTrace))
+      paste0(collapse = "\n",
+        formatStackTrace(stackTrace, full = full, offset = offset)
+      )
+    ))
   } else {
     message("No stack trace available")
   }
   invisible()
 }
 
-#' @details \code{stripStackTrace} removes stack trace info from a condition
-#'   that may have previously been annotated by \code{captureStackTraces} (or
-#'   \code{withLogErrors}).
+stripStackTrace <- function(cond) {
+  conditionStackTrace(cond) <- NULL
+}
+
+#' @details \code{conditionStackTrace} and \code{conditionStackTrace<-} are
+#'   accessor functions for getting/setting stack traces on conditions.
+#'
+#' @param cond A condition that may have previously been annotated by
+#'   \code{captureStackTraces} (or \code{withLogErrors}).
 #' @rdname stacktrace
 #' @export
-stripStackTrace <- function(cond) {
-  attr(cond, "stack.trace") <- NULL
-  cond
+conditionStackTrace <- function(cond) {
+  attr(cond, "stack.trace", exact = TRUE)
+}
+
+#' @param value The stack trace value to assign to the condition.
+#' @rdname stacktrace
+#' @export
+`conditionStackTrace<-` <- function(cond, value) {
+  attr(cond, "stack.trace") <- value
+  invisible(cond)
 }
 
 #' @details The two functions \code{..stacktraceon..} and

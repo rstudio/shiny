@@ -4,23 +4,36 @@
 \alias{..stacktraceoff..}
 \alias{..stacktraceon..}
 \alias{captureStackTraces}
+\alias{conditionStackTrace}
+\alias{conditionStackTrace<-}
+\alias{extractStackTrace}
+\alias{formatStackTrace}
 \alias{printError}
 \alias{printStackTrace}
 \alias{stacktrace}
-\alias{stripStackTrace}
 \alias{withLogErrors}
 \title{Stack trace manipulation functions}
 \usage{
-captureStackTraces(expr, full = getOption("shiny.fullstacktrace", FALSE),
+captureStackTraces(expr)
+
+extractStackTrace(calls, full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE))
 
-withLogErrors(expr)
+formatStackTrace(calls, full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE))
 
-printError(cond)
+withLogErrors(expr, full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE))
 
-printStackTrace(cond)
+printError(cond, full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE))
 
-stripStackTrace(cond)
+printStackTrace(cond, full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE))
+
+conditionStackTrace(cond)
+
+conditionStackTrace(cond) <- value
 
 ..stacktraceon..(expr)
 
@@ -41,6 +54,11 @@ location specified by the srcref match up. If \code{FALSE}, srcrefs will be
 left alone (traditional R treatment where the srcref is of the callsite).}
 
 \item{cond}{An condition object (generally, an error).}
+
+\item{value}{The stack trace value to assign to the condition.}
+
+\item{cond}{A condition that may have previously been annotated by
+\code{captureStackTraces} (or \code{withLogErrors}).}
 }
 \value{
 \code{printError} and \code{printStackTrace} return
@@ -74,9 +92,8 @@ manipulating stack traces.
   \code{warning(immediate.=TRUE)}. \code{printStackTrace} prints the stack
   trace only.
 
-\code{stripStackTrace} removes stack trace info from a condition
-  that may have previously been annotated by \code{captureStackTraces} (or
-  \code{withLogErrors}).
+\code{conditionStackTrace} and \code{conditionStackTrace<-} are
+  accessor functions for getting/setting stack traces on conditions.
 
 The two functions \code{..stacktraceon..} and
   \code{..stacktraceoff..} have no runtime behavior during normal execution;

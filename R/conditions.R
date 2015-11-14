@@ -89,7 +89,7 @@ captureStackTraces <- function(expr,
           score <- rep.int(0, length(callnames))
           score[callnames == "..stacktraceoff.."] <- -1
           score[callnames == "..stacktraceon.."] <- 1
-          toShow <- (1 + cumsum(score)) > 0 & callnames != "..stacktraceon.."
+          toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff.."))
         }
         calls <- calls[toShow]
 

@@ -435,8 +435,13 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 installExprFunction <- function(expr, name, eval.env = parent.frame(2),
                                 quoted = FALSE,
                                 assign.env = parent.frame(1),
-                                label = as.character(sys.call(-1)[[1]])) {
+                                label = as.character(sys.call(-1)[[1]]),
+                                wrappedWithLabel = TRUE,
+                                ..stacktraceon = FALSE) {
   func <- exprToFunction(expr, eval.env, quoted, 2)
+  if (wrappedWithLabel) {
+    func <- wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
+  }
   assign(name, func, envir = assign.env)
   registerDebugHook(name, assign.env, label)
 }

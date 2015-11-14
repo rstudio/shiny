@@ -32,14 +32,9 @@
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE, func=NULL) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg="renderPlot: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
-  func <- wrapFunctionLabel(func, "renderPlot", ..stacktraceon = TRUE)
+  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
 
   args <- list(...)
 

@@ -448,7 +448,6 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
                             env = parent.frame(), quoted = FALSE) {
   installExprFunction(expr, "func", env, quoted)
-  func <- wrapFunctionLabel(func, "renderDataTable")
 
   markRenderFunction(dataTableOutput, function(shinysession, name, ...) {
     if (is.function(options)) options <- options()

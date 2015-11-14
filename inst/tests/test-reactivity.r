@@ -859,32 +859,6 @@ test_that("Flush completes even when errors occur", {
   expect_true(all(c(n11, n12, n21, n22) == c(2,1,2,1)))
 })
 
-
-test_that("Alternate error handler function", {
-  vals <- reactiveValues(x = 0)
-
-  r <- reactive({
-    stop("error in reactive!")
-  })
-
-  observe({
-    r()
-  })
-  observe({
-    r()
-  })
-
-  # Alternate observer error handler - increment counter
-  ec <- 0
-  options(shiny.observer.error = function(e, label = NULL, domain = NULL) {
-    ec <<- ec + 1
-  })
-  on.exit(options(shiny.observer.error = NULL))
-
-  flushReact()
-  expect_identical(ec, 2)
-})
-
 test_that("event handling helpers take correct dependencies", {
   vals <- reactiveValues(action = NULL, x = 1)
 

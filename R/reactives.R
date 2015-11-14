@@ -634,20 +634,10 @@ Observer <- R6Class(
             shinyCallingHandlers(run())
 
         }, error = function(e) {
-          # A function to handle errors that occur during a flush
-          flushErrorHandler <- getOption('shiny.observer.error')
-
-          # Default handler function, if not available from global option
-          if (is.null(flushErrorHandler)) {
-            flushErrorHandler <- function(e, label, domain) {
-              printError(e)
-              if (!is.null(domain)) {
-                domain$unhandledError(e)
-              }
-            }
+          printError(e)
+          if (!is.null(.domain)) {
+            .domain$unhandledError(e)
           }
-
-          flushErrorHandler(e, .label, .domain)
         })
       })
 

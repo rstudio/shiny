@@ -48,7 +48,8 @@ left alone (traditional R treatment where the srcref is of the callsite).}
   \code{expr}.
 }
 \description{
-Functions for capturing, printing, and manipulating stack traces.
+Advanced (borderline internal) functions for capturing, printing, and
+manipulating stack traces.
 }
 \details{
 \code{captureStackTraces} runs the given \code{expr} and if any

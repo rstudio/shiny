@@ -202,6 +202,14 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
         return(TRUE)
       }
 
+      if (!is.null(getOption("shiny.observer.error", NULL))) {
+        warning(
+          call. = FALSE,
+          "options(shiny.observer.error) is no longer supported; please unset it!"
+        )
+        stopApp()
+      }
+
       shinysession <- ShinySession$new(ws)
       appsByToken$set(shinysession$token, shinysession)
       shinysession$setShowcase(.globals$showcaseDefault)
@@ -688,7 +696,7 @@ runApp <- function(appDir=getwd(),
 #'   \code{\link{runApp}}.
 #'
 #' @export
-stopApp <- function(returnValue = NULL) {
+stopApp <- function(returnValue = invisible()) {
   .globals$retval <- returnValue
   .globals$stopped <- TRUE
   httpuv::interrupt()

@@ -463,6 +463,8 @@ Observable <- R6Class(
 #'   variable; to do so, it must be quoted with \code{quote()}.
 #' @param label A label for the reactive expression, useful for debugging.
 #' @param domain See \link{domains}.
+#' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
+#'   \code{\link{stacktrace}}.
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
@@ -754,6 +756,8 @@ Observer <- R6Class(
 #' @param domain See \link{domains}.
 #' @param autoDestroy If \code{TRUE} (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.
+#' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
+#'   \code{\link{stacktrace}}.
 #' @return An observer reference class object. This object has the following
 #'   methods:
 #'   \describe{

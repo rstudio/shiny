@@ -92,6 +92,14 @@ NULL
 #'   \item{shiny.deprecation.messages}{This controls whether messages for
 #'     deprecated functions in Shiny will be printed. See
 #'     \code{\link{shinyDeprecated}} for more information.}
+#'   \item{shiny.fullstacktrace}{Controls whether "pretty" or full stack traces
+#'     are dumped to the console when errors occur during Shiny app execution.
+#'     The default is \code{FALSE} (pretty stack traces).}
+#'   \item{shiny.stacktraceoffset}{If \code{TRUE}, then Shiny's printed stack
+#'     traces will display srcrefs one line above their usual location. This is
+#'     an arguably more intuitive arrangement for casual R users, as the name
+#'     of a function appears next to the srcref where it is defined, rather than
+#'     where it is currently being called from.}
 #' }
 #' @name shiny-options
 NULL

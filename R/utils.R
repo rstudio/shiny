@@ -430,6 +430,8 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 #' @param assign.env The environment in which the function should be assigned.
 #' @param label A label for the object to be shown in the debugger. Defaults to
 #'   the name of the calling function.
+#' @param wrappedWithLabel,..stacktraceon Advanced use only. For stack manipulation purposes; see
+#'   \code{\link{stacktrace}}.
 #'
 #' @export
 installExprFunction <- function(expr, name, eval.env = parent.frame(2),

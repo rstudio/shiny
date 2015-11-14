@@ -40,6 +40,13 @@ shiny 0.12.2.9000
   reload whenever Shiny app files change on disk. This is intended to shorten
   the feedback cycle when tweaking UI code.
 
+* Errors are now printed with stack traces! This should make it tremendously
+  easier to track down the causes of errors in Shiny. Try it by calling
+  `stop("message")` from within an output, reactive, or observer. Shiny itself
+  adds a lot of noise to the call stack, so by default, it attempts to hide all
+  but the relevant levels of the call stack. You can turn off this behavior by
+  setting `options(shiny.fullstacktrace=TRUE)` before or during app startup.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

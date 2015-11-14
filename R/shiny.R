@@ -466,16 +466,16 @@ ShinySession <- R6Class(
     ns = function(id) {
       NS(NULL, id)
     },
-    onSessionEnded = function(callback) {
+    onSessionEnded = function(sessionEndedCallback) {
       "Registers the given callback to be invoked when the session is closed
       (i.e. the connection to the client has been severed). The return value
       is a function which unregisters the callback. If multiple callbacks are
       registered, the order in which they are invoked is not guaranteed."
-      return(private$closedCallbacks$register(callback))
+      return(private$closedCallbacks$register(sessionEndedCallback))
     },
-    onEnded = function(callback) {
+    onEnded = function(endedCallback) {
       "Synonym for onSessionEnded"
-      return(self$onSessionEnded(callback))
+      return(self$onSessionEnded(endedCallback))
     },
     onInputReceived = function(callback) {
       "Registers the given callback to be invoked when the session receives
@@ -495,13 +495,7 @@ ShinySession <- R6Class(
       for (output in private$.outputs) {
         output$suspend()
       }
-      private$closedCallbacks$invoke(onError=function(e) {
-        warning(simpleWarning(
-          paste("An error occurred in an onSessionEnded handler:",
-                e$message),
-          e$call
-        ))
-      })
+      private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
       flushReact()
       lapply(appsByToken$values(), function(shinysession) {
         shinysession$flushOutput()
@@ -572,8 +566,7 @@ ShinySession <- R6Class(
             error = function(cond) {
               msg <- paste0("Error in output$", name, ": ", conditionMessage(cond), "\n")
               if (isTRUE(getOption("show.error.messages"))) {
-                cat(msg, file = stderr())
-                printStackTrace(cond)
+                printError(cond)
               }
               invisible(structure(msg, class = "try-error", condition = cond))
             }
@@ -613,8 +606,8 @@ ShinySession <- R6Class(
     },
     flushOutput = function() {
 
-      private$flushCallbacks$invoke()
-      on.exit(private$flushedCallbacks$invoke())
+      private$flushCallbacks$invoke(..stacktraceon = TRUE)
+      on.exit(private$flushedCallbacks$invoke(..stacktraceon = TRUE))
 
       if (length(private$progressKeys) == 0
           && length(private$invalidatedOutputValues) == 0
@@ -691,24 +684,24 @@ ShinySession <- R6Class(
       # Add to input message queue
       private$inputMessageQueue[[length(private$inputMessageQueue) + 1]] <- data
     },
-    onFlush = function(func, once = TRUE) {
+    onFlush = function(flushCallback, once = TRUE) {
       if (!isTRUE(once)) {
-        return(private$flushCallbacks$register(func))
+        return(private$flushCallbacks$register(flushCallback))
       } else {
         dereg <- private$flushCallbacks$register(function() {
           dereg()
-          func()
+          flushCallback()
         })
         return(dereg)
       }
     },
-    onFlushed = function(func, once = TRUE) {
+    onFlushed = function(flushedCallback, once = TRUE) {
       if (!isTRUE(once)) {
-        return(private$flushedCallbacks$register(func))
+        return(private$flushedCallbacks$register(flushedCallback))
       } else {
         dereg <- private$flushedCallbacks$register(function() {
           dereg()
-          func()
+          flushedCallback()
         })
         return(dereg)
       }
@@ -854,8 +847,7 @@ ShinySession <- R6Class(
         )))
         if (inherits(result, 'try-error')) {
           cond <- attr(result, 'condition', exact = TRUE)
-          cat(file = stderr(), paste0("Error in output$", dlname, ": ", conditionMessage(cond), "\n"))
-          printStackTrace(cond)
+          printError(cond)
           unlink(tmpdata)
           return(httpResponse(500, 'text/plain; charset=UTF-8',
                               enc2utf8(conditionMessage(cond))))

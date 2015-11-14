@@ -379,8 +379,9 @@ Observable <- R6Class(
 
       .graphDependsOnId(getCurrentContext()$id, .mostRecentCtxId)
 
-      if (identical(class(.value), 'try-error'))
+      if (identical(class(.value), 'try-error')) {
         stop(attr(.value, 'condition'))
+      }
 
       if (.visible)
         .value
@@ -404,14 +405,32 @@ Observable <- R6Class(
       on.exit(.running <<- wasRunning)
 
       ctx$run(function() {
-        result <- withCallingHandlers(withVisible(.func()),
+        result <- withCallingHandlers(
+
+          withVisible(.func()),
+
           error = function(cond) {
+            # If an error occurs, we want to propagate the error, but we also
+            # want to save a copy of it, so future callers of this reactive will
+            # get the same error (i.e. the error is cached).
+
+            # We stripStackTrace in the next line, just in case someone
+            # downstream of us (i.e. deeper into the call stack) used
+            # captureStackTraces; otherwise the entire stack would always be the
+            # same (i.e. you'd always see the whole stack trace of the *first*
+            # time the code was run and the condition raised; there'd be no way
+            # to see the stack trace of the call site that caused the cached
+            # exception to be re-raised, and you need that information to figure
+            # out what's triggering the re-raise).
+            #
+            # We use try(stop()) as an easy way to generate a try-error object
+            # out of this condition.
+            .value <<- try(stop(stripStackTrace(cond)), silent = TRUE)
             .visible <<- FALSE
-            .value <<- try(stop(cond), silent = TRUE)
           }
         )
-        .visible <<- result$visible
         .value <<- result$value
+        .visible <<- result$visible
       })
     }
   )
@@ -617,9 +636,7 @@ Observer <- R6Class(
           # Default handler function, if not available from global option
           if (is.null(flushErrorHandler)) {
             flushErrorHandler <- function(e, label, domain) {
-              warning("Unhandled error in observer: ",
-                e$message, "\n", label, immediate. = TRUE, call. = FALSE)
-              printStackTrace(e)
+              printError(e)
               if (!is.null(domain)) {
                 domain$unhandledError(e)
               }
@@ -1254,9 +1271,9 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 isolate <- function(expr) {
   ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate')
   on.exit(ctx$invalidate())
-  ctx$run(function() {
-    expr
-  })
+  ..stacktraceoff..(ctx$run(function() {
+    ..stacktraceon..(expr)
+  }))
 }
 
 #' Evaluate an expression without a reactive context

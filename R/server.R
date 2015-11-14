@@ -206,7 +206,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       appsByToken$set(shinysession$token, shinysession)
       shinysession$setShowcase(.globals$showcaseDefault)
 
-      ws$onMessage(function(binary, msg) {
+      messageHandler <- function(binary, msg) {
         withReactiveDomain(shinysession, {
           # To ease transition from websockets-based code. Should remove once we're stable.
           if (is.character(msg))
@@ -344,6 +344,10 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
             NULL
           })
         })
+      }
+      ws$onMessage(function(binary, msg) {
+        # If unhandled errors occur, make sure they get properly logged
+        withLogErrors(messageHandler(binary, msg))
       })
 
       ws$onClose(function() {

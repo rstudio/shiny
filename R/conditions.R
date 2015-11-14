@@ -34,7 +34,7 @@ getLocs <- function(calls) {
     if (!is.null(srcref)) {
       srcfile <- attr(srcref, "srcfile", exact = TRUE)
       if (!is.null(srcfile) && !is.null(srcfile$filename)) {
-        loc <- paste0(srcfile$filename, ":", srcref[[1]])
+        loc <- paste0(srcfile$filename, "#", srcref[[1]])
         return(paste0(" [", loc, "]"))
       }
     }
@@ -60,15 +60,27 @@ captureStackTraces <- function(expr,
         }
         calls <- setSrcRefs(calls, srcrefs)
 
-        # Remove stop(), .handleSimpleError(), and h() calls from the top of
-        # the stack--they don't add any helpful information
-        calls <- head(calls, -3)
+        callnames <- getCallNames(calls)
 
         # Hide and show parts of the callstack based on ..stacktrace(on|off)..
-        callnames <- getCallNames(calls)
         if (full) {
           toShow <- rep.int(TRUE, length(calls))
         } else {
+          # Remove stop(), .handleSimpleError(), and h() calls from the end of
+          # the calls--they don't add any helpful information. But only remove
+          # the last *contiguous* block of them, and then, only if they are the
+          # last thing in the calls list.
+          hideable <- callnames %in% c("stop", ".handleSimpleError", "h")
+          # What's the last that *didn't* match stop/.handleSimpleError/h?
+          lastGoodCall <- max(which(!hideable))
+          toRemove <- length(calls) - lastGoodCall
+          # But don't remove more than 5 levels--that's an indication we might
+          # have gotten it wrong, I guess
+          if (toRemove > 0 && toRemove < 5) {
+            calls <- head(calls, -toRemove)
+            callnames <- head(callnames, -toRemove)
+          }
+
           # This uses a ref-counting scheme. It might make sense to switch this
           # to a toggling scheme, so the most recent ..stacktrace(on|off)..
           # directive wins, regardless of what came before it.
@@ -91,8 +103,8 @@ captureStackTraces <- function(expr,
           getCallNames(calls),
           getLocs(calls)
         )
+        stop(e)
       }
-      stop(e)
     }
   )
 }
@@ -109,6 +121,21 @@ setSrcRefs <- function(calls, srcrefs) {
   }, calls, srcrefs)
 }
 
+# Capture stack traces and log errors, but allow errors
+# to propagate beyond this point (i.e. doesn't catch).
+withLogErrors <- function(expr) {
+  withCallingHandlers(
+    captureStackTraces(expr),
+    error = printError
+  )
+}
+
+printError <- function(cond) {
+  cat(file = stderr(), sprintf("Error in %s: %s\n",
+    getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
+  printStackTrace(cond)
+}
+
 printStackTrace <- function(cond) {
   stackTrace <- attr(cond, "stack.trace", exact = TRUE)
   if (!is.null(stackTrace)) {
@@ -117,4 +144,9 @@ printStackTrace <- function(cond) {
   } else {
     cat(file = stderr(), "No stack trace available")
   }
+}
+
+stripStackTrace <- function(cond) {
+  attr(cond, "stack.trace") <- NULL
+  cond
 }

@@ -606,16 +606,28 @@ Callbacks <- R6Class(
         .callbacks$remove(id)
       })
     },
-    invoke = function(..., onError=NULL) {
+    invoke = function(..., onError=NULL, ..stacktraceon = FALSE) {
       # Ensure that calls are invoked in the order that they were registered
       keys <- as.character(sort(as.integer(.callbacks$keys()), decreasing = TRUE))
       callbacks <- .callbacks$mget(keys)
 
       for (callback in callbacks) {
         if (is.null(onError)) {
-          callback(...)
+          if (..stacktraceon) {
+            ..stacktraceon..(callback(...))
+          } else {
+            callback(...)
+          }
         } else {
-          tryCatch(callback(...), error = onError)
+          tryCatch(
+            captureStackTraces(
+              if (..stacktraceon)
+                ..stacktraceon..(callback(...))
+              else
+                callback(...)
+            ),
+            error = onError
+          )
         }
       }
     },

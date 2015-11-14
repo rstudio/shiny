@@ -37,6 +37,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   } else {
     installExprFunction(expr, "func", env, quoted)
   }
+  # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
+  # is called
   func <- wrapFunctionLabel(func, "renderPlot", ..stacktraceon = TRUE)
 
   args <- list(...)
@@ -81,49 +83,55 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     if (is.null(pixelratio))
       pixelratio <- 1
 
-    ..stacktraceoff..({
-      coordmap <- NULL
-      plotFunc <- function() {
-        # Actually perform the plotting
-        result <- withVisible(func())
+    coordmap <- NULL
+    plotFunc <- function() {
+      # Actually perform the plotting
+      result <- withVisible(func())
 
-        coordmap <<- NULL
+      coordmap <<- NULL
 
-        if (result$visible) {
-          # Use capture.output to squelch printing to the actual console; we
-          # are only interested in plot output
+      if (result$visible) {
+        # Use capture.output to squelch printing to the actual console; we
+        # are only interested in plot output
 
-          # Special case for ggplot objects - need to capture coordmap
-          if (inherits(result$value, "ggplot")) {
-            utils::capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
-          } else {
-            utils::capture.output(..stacktraceon..(print(result$value)))
-          }
-        }
-
-        if (is.null(coordmap)) {
-          coordmap <<- getPrevPlotCoordmap(width, height)
+        # Special case for ggplot objects - need to capture coordmap
+        if (inherits(result$value, "ggplot")) {
+          utils::capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
+        } else {
+          # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps the
+          # call to plotFunc
+          utils::capture.output(..stacktraceon..(print(result$value)))
         }
       }
 
-      outfile <- do.call(plotPNG, c(plotFunc, width=width*pixelratio,
-                                    height=height*pixelratio, res=res*pixelratio, args))
-      on.exit(unlink(outfile))
-
-      # A list of attributes for the img
-      res <- list(
-        src=shinysession$fileUrl(name, outfile, contentType='image/png'),
-        width=width, height=height, coordmap=coordmap
-      )
-
-      # Get error message if present (from attribute on the coordmap)
-      error <- attr(coordmap, "error", exact = TRUE)
-      if (!is.null(error)) {
-        res$error <- error
+      if (is.null(coordmap)) {
+        coordmap <<- getPrevPlotCoordmap(width, height)
       }
+    }
 
-      res
-    })
+    # This ..stacktraceoff.. is matched by the `func` function's
+    # wrapFunctionLabel(..stacktraceon=TRUE) call near the beginning of
+    # renderPlot, and by the ..stacktraceon.. in plotFunc where ggplot objects
+    # are printed
+    outfile <- ..stacktraceoff..(
+      do.call(plotPNG, c(plotFunc, width=width*pixelratio,
+        height=height*pixelratio, res=res*pixelratio, args))
+    )
+    on.exit(unlink(outfile))
+
+    # A list of attributes for the img
+    res <- list(
+      src=shinysession$fileUrl(name, outfile, contentType='image/png'),
+      width=width, height=height, coordmap=coordmap
+    )
+
+    # Get error message if present (from attribute on the coordmap)
+    error <- attr(coordmap, "error", exact = TRUE)
+    if (!is.null(error)) {
+      res$error <- error
+    }
+
+    res
   }))
 }
 

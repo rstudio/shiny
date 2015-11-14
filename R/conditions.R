@@ -13,8 +13,8 @@
 #     withVisible(..stacktraceon..(userFunc()))
 #   )
 # })
-..stacktraceon.. <- identity
-..stacktraceoff.. <- identity
+..stacktraceon.. <- function(x) x
+..stacktraceoff.. <- function(x) x
 
 getCallNames <- function(calls) {
   sapply(calls, function(call) {

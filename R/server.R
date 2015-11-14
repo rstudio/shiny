@@ -665,6 +665,8 @@ runApp <- function(appDir=getwd(),
 
   .globals$retval <- NULL
   .globals$stopped <- FALSE
+  # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
+  # reactive(), Callbacks$invoke(), and others
   ..stacktraceoff..(
     captureStackTraces(
       while (!.globals$stopped) {

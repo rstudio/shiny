@@ -495,6 +495,7 @@ ShinySession <- R6Class(
       for (output in private$.outputs) {
         output$suspend()
       }
+      # ..stacktraceon matches with the top-level ..stacktraceoff..
       private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
       flushReact()
       lapply(appsByToken$values(), function(shinysession) {
@@ -528,6 +529,8 @@ ShinySession <- R6Class(
 
       if (is.function(func)) {
         funcFormals <- formals(func)
+        # ..stacktraceon matches with the top-level ..stacktraceoff.., because
+        # the observer we set up below has ..stacktraceon=FALSE
         func <- wrapFunctionLabel(func, paste0("output$", name), ..stacktraceon = TRUE)
         if (length(funcFormals) != 0) {
           orig <- func
@@ -606,7 +609,9 @@ ShinySession <- R6Class(
     },
     flushOutput = function() {
 
+      # ..stacktraceon matches with the top-level ..stacktraceoff..
       private$flushCallbacks$invoke(..stacktraceon = TRUE)
+      # ..stacktraceon matches with the top-level ..stacktraceoff..
       on.exit(private$flushedCallbacks$invoke(..stacktraceon = TRUE))
 
       if (length(private$progressKeys) == 0
@@ -842,6 +847,7 @@ ShinySession <- R6Class(
         if (nzchar(ext))
           ext <- paste(".", ext, sep = "")
         tmpdata <- tempfile(fileext = ext)
+        # ..stacktraceon matches with the top-level ..stacktraceoff..
         result <- try(shinyCallingHandlers(Context$new(getDefaultReactiveDomain(), '[download]')$run(
           function() { ..stacktraceon..(download$func(tmpdata)) }
         )))

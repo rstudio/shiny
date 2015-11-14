@@ -352,14 +352,15 @@ Observable <- R6Class(
     .mostRecentCtxId = character(0),
 
     initialize = function(func, label = deparse(substitute(func)),
-                          domain = getDefaultReactiveDomain()) {
+                          domain = getDefaultReactiveDomain(),
+                          ..stacktraceon = TRUE) {
       if (length(formals(func)) > 0)
         stop("Can't make a reactive expression from a function that takes one ",
              "or more parameters; only functions without parameters can be ",
              "reactive.")
 
       .func <<- wrapFunctionLabel(func, paste("reactive", label),
-        ..stacktraceon = TRUE)
+        ..stacktraceon = ..stacktraceon)
       .label <<- label
       .domain <<- domain
       .dependents <<- Dependents$new()
@@ -485,7 +486,8 @@ Observable <- R6Class(
 #'
 #' @export
 reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
-                     domain = getDefaultReactiveDomain()) {
+                     domain = getDefaultReactiveDomain(),
+                     ..stacktraceon = TRUE) {
   fun <- exprToFunction(x, env, quoted)
   # Attach a label and a reference to the original user source for debugging
   srcref <- attr(substitute(x), "srcref", exact = TRUE)
@@ -495,7 +497,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
   }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
-  o <- Observable$new(fun, label, domain)
+  o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
   registerDebugHook(".func", o, "Reactive")
   structure(o$getValue, observable = o, class = "reactive")
 }
@@ -1271,6 +1273,7 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 isolate <- function(expr) {
   ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate')
   on.exit(ctx$invalidate())
+  # Matching ..stacktraceon../..stacktraceoff.. pair
   ..stacktraceoff..(ctx$run(function() {
     ..stacktraceon..(expr)
   }))

@@ -1422,8 +1422,10 @@ observeEvent <- function(eventExpr, handlerExpr,
   eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
   if (is.null(label))
     label <- sprintf('observeEvent(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
+  eventFunc <- wrapFunctionLabel(eventFunc, "observeEventExpr", ..stacktraceon = TRUE)
 
   handlerFunc <- exprToFunction(handlerExpr, handler.env, handler.quoted)
+  handlerFunc <- wrapFunctionLabel(handlerFunc, "observeEventHandler", ..stacktraceon = TRUE)
 
   invisible(observe({
     e <- eventFunc()
@@ -1434,7 +1436,7 @@ observeEvent <- function(eventExpr, handlerExpr,
 
     isolate(handlerFunc())
   }, label = label, suspended = suspended, priority = priority, domain = domain,
-    autoDestroy = TRUE))
+    autoDestroy = TRUE, ..stacktraceon = FALSE))
 }
 
 #' @rdname observeEvent
@@ -1448,8 +1450,10 @@ eventReactive <- function(eventExpr, valueExpr,
   eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
   if (is.null(label))
     label <- sprintf('eventReactive(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
+  eventFunc <- wrapFunctionLabel(eventFunc, "eventReactiveExpr", ..stacktraceon = TRUE)
 
   handlerFunc <- exprToFunction(valueExpr, value.env, value.quoted)
+  handlerFunc <- wrapFunctionLabel(handlerFunc, "eventReactiveHandler", ..stacktraceon = TRUE)
 
   invisible(reactive({
     e <- eventFunc()
@@ -1460,7 +1464,7 @@ eventReactive <- function(eventExpr, valueExpr,
     ))
 
     isolate(handlerFunc())
-  }, label = label, domain = domain))
+  }, label = label, domain = domain, ..stacktraceon = FALSE))
 }
 
 isNullEvent <- function(value) {

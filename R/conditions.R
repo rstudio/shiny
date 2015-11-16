@@ -166,17 +166,23 @@ printStackTrace <- function(cond,
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   stackTrace <- attr(cond, "stack.trace", exact = TRUE)
-  if (!is.null(stackTrace)) {
-    message(paste0(
-      "Stack trace (innermost first):\n",
-      paste0(collapse = "\n",
-        formatStackTrace(stackTrace, full = full, offset = offset,
-          indent = "    ")
-      )
-    ))
-  } else {
-    message("No stack trace available")
-  }
+  tryCatch(
+    if (!is.null(stackTrace)) {
+      message(paste0(
+        "Stack trace (innermost first):\n",
+        paste0(collapse = "\n",
+          formatStackTrace(stackTrace, full = full, offset = offset,
+            indent = "    ")
+        )
+      ))
+    } else {
+      message("No stack trace available")
+    },
+
+    error = function(cond) {
+      warning("Failed to write stack trace: ", cond)
+    }
+  )
   invisible()
 }
 

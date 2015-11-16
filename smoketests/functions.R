@@ -8,7 +8,7 @@ executeApp <- function(appPath) {
     stop("phantomjs must be installed and on the system path")
   }
 
-  system2("phantomjs", "visit.js", wait = FALSE)
+  system2("phantomjs", "visit.js", stdout = NULL, stderr = NULL, wait = FALSE)
   result <- system2(
   	"R",
 	c("--slave", "-e",
@@ -16,7 +16,9 @@ executeApp <- function(appPath) {
 	),
     stdout = TRUE, stderr = TRUE
   )
-  gsub(getwd(), "${PWD}", result)
+  result <- gsub(fixed = TRUE, getwd(), "${PWD}", result)
+  result <- gsub(fixed = TRUE, dirname(getwd()), "${SHINY}", result)
+  result
 }
 
 # Returns TRUE if the files indicated in artifactPaths exist, and

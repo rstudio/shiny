@@ -682,6 +682,9 @@ ShinySession <- R6Class(
         private$sendResponse(msg, value)
       }
     },
+    sendBinaryMessage = function(rawVect) {
+      private$write(rawVect)
+    },
     sendCustomMessage = function(type, message) {
       data <- list()
       data[[type]] <- message

@@ -343,6 +343,7 @@ var ShinyApp = function() {
   // in msgObj.custom.foo and msgObj.custom.bar.
   var customMessageHandlerOrder = [];
   var customMessageHandlers = {};
+  var customBinaryMessageHandlers = [];
 
   // Adds Shiny (internal) message handler
   function addMessageHandler(type, handler) {
@@ -355,13 +356,16 @@ var ShinyApp = function() {
     if (handler.length !== 1) {
       throw('handler must be a function that takes one argument.');
     }
-
     messageHandlerOrder.push(type);
     messageHandlers[type] = handler;
   }
 
   // Adds custom message handler - this one is exposed to the user
   function addCustomMessageHandler(type, handler) {
+ 	 if(type=='binary') {
+		 customBinaryMessageHandlers.push(handler);
+		 return;
+	 }
     if (customMessageHandlers[type]) {
       throw('handler for message of type "' + type + '" already added.');
     }
@@ -378,20 +382,34 @@ var ShinyApp = function() {
 
   exports.addCustomMessageHandler = addCustomMessageHandler;
 
-  this.dispatchMessage = function(msg) {
-    var msgObj = JSON.parse(msg);
+  this.dispatchMessage = function(data) {
+    var msgObj = {};
+    if(typeof data === "string") {
+      msgObj = JSON.parse(data);
+    } else {
+      msgObj = {buffer: data};
+    }
 
     var evt = jQuery.Event('shiny:message');
     evt.message = msgObj;
     $(document).trigger(evt);
     if (evt.isDefaultPrevented()) return;
 
-    // Send msgObj.foo and msgObj.bar to appropriate handlers
-    this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
-
+    if(typeof data === "string") {
+      // Send msgObj.foo and msgObj.bar to appropriate handlers
+      this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
+    } else {
+      this._sendMessagesToBinaryHandlers(evt.message, customBinaryMessageHandlers);
+    }
+    
     this.$updateConditionals();
   };
 
+  this._sendMessagesToBinaryHandlers = function(msgObj, handlers) {
+    for (var i = 0; i < handlers.length; i++)
+      if(handlers[i].call(this, msgObj.buffer))
+        break;
+  };
 
   // A function for sending messages to the appropriate handlers.
   // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar

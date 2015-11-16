@@ -1081,7 +1081,21 @@ sourceUTF8 <- function(file, envir = globalenv()) {
       parse(text = lines, keep.source = FALSE, srcfile = src, encoding = enc)
     }
   )
+
+  # Wrap the exprs in first `{`, then ..stacktraceon..(). It's only really the
+  # ..stacktraceon..() that we care about, but the `{` is needed to make that
+  # possible.
+  exprs <- makeCall(`{`, exprs)
+  # Need to wrap exprs in a list because we want it treated as a single argument
+  exprs <- makeCall(..stacktraceon.., list(exprs))
+
   eval(exprs, envir)
+}
+
+# @param func Name of function, in unquoted form
+# @param args An evaluated list of unevaluated argument expressions
+makeCall <- function(func, args) {
+  as.call(c(list(substitute(func)), args))
 }
 
 # a workaround for https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16264

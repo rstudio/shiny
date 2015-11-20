@@ -58,14 +58,18 @@ The default polling interval is 500 milliseconds. You can change this
   \item{shiny.error}{This can be a function which is called when an error
     occurs. For example, \code{options(shiny.error=recover)} will result a
     the debugger prompt when an error occurs.}
-  \item{shiny.observer.error}{This can be a function that is called by an
-    observer when an unhandled error occurs in it or an upstream reactive.
-    By default, these errors will result in a warning at the console, and
-    the websocket connection will close.}
   \item{shiny.table.class}{CSS class names to use for tables.}
   \item{shiny.deprecation.messages}{This controls whether messages for
     deprecated functions in Shiny will be printed. See
     \code{\link{shinyDeprecated}} for more information.}
+  \item{shiny.fullstacktrace}{Controls whether "pretty" or full stack traces
+    are dumped to the console when errors occur during Shiny app execution.
+    The default is \code{FALSE} (pretty stack traces).}
+  \item{shiny.stacktraceoffset}{If \code{TRUE}, then Shiny's printed stack
+    traces will display srcrefs one line above their usual location. This is
+    an arguably more intuitive arrangement for casual R users, as the name
+    of a function appears next to the srcref where it is defined, rather than
+    where it is currently being called from.}
 }
 }
 

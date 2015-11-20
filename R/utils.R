@@ -430,13 +430,20 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 #' @param assign.env The environment in which the function should be assigned.
 #' @param label A label for the object to be shown in the debugger. Defaults to
 #'   the name of the calling function.
+#' @param wrappedWithLabel,..stacktraceon Advanced use only. For stack manipulation purposes; see
+#'   \code{\link{stacktrace}}.
 #'
 #' @export
 installExprFunction <- function(expr, name, eval.env = parent.frame(2),
                                 quoted = FALSE,
                                 assign.env = parent.frame(1),
-                                label = as.character(sys.call(-1)[[1]])) {
+                                label = as.character(sys.call(-1)[[1]]),
+                                wrappedWithLabel = TRUE,
+                                ..stacktraceon = FALSE) {
   func <- exprToFunction(expr, eval.env, quoted, 2)
+  if (wrappedWithLabel) {
+    func <- wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
+  }
   assign(name, func, envir = assign.env)
   registerDebugHook(name, assign.env, label)
 }
@@ -524,8 +531,9 @@ assignNestedList <- function(x = list(), idx, value) {
 
 # decide what to do in case of errors; it is customizable using the shiny.error
 # option (e.g. we can set options(shiny.error = recover))
+#' @include conditions.R
 shinyCallingHandlers <- function(expr) {
-  withCallingHandlers(expr, error = function(e) {
+  withCallingHandlers(captureStackTraces(expr), error = function(e) {
     handle <- getOption('shiny.error')
     if (is.function(handle)) handle()
   })
@@ -605,16 +613,28 @@ Callbacks <- R6Class(
         .callbacks$remove(id)
       })
     },
-    invoke = function(..., onError=NULL) {
+    invoke = function(..., onError=NULL, ..stacktraceon = FALSE) {
       # Ensure that calls are invoked in the order that they were registered
       keys <- as.character(sort(as.integer(.callbacks$keys()), decreasing = TRUE))
       callbacks <- .callbacks$mget(keys)
 
       for (callback in callbacks) {
         if (is.null(onError)) {
-          callback(...)
+          if (..stacktraceon) {
+            ..stacktraceon..(callback(...))
+          } else {
+            callback(...)
+          }
         } else {
-          tryCatch(callback(...), error = onError)
+          tryCatch(
+            captureStackTraces(
+              if (..stacktraceon)
+                ..stacktraceon..(callback(...))
+              else
+                callback(...)
+            ),
+            error = onError
+          )
         }
       }
     },
@@ -1061,7 +1081,21 @@ sourceUTF8 <- function(file, envir = globalenv()) {
       parse(text = lines, keep.source = FALSE, srcfile = src, encoding = enc)
     }
   )
+
+  # Wrap the exprs in first `{`, then ..stacktraceon..(). It's only really the
+  # ..stacktraceon..() that we care about, but the `{` is needed to make that
+  # possible.
+  exprs <- makeCall(`{`, exprs)
+  # Need to wrap exprs in a list because we want it treated as a single argument
+  exprs <- makeCall(..stacktraceon.., list(exprs))
+
   eval(exprs, envir)
+}
+
+# @param func Name of function, in unquoted form
+# @param args An evaluated list of unevaluated argument expressions
+makeCall <- function(func, args) {
+  as.call(c(list(substitute(func)), args))
 }
 
 # a workaround for https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16264
@@ -1088,7 +1122,7 @@ URLencode <- function(value, reserved = FALSE) {
 # function which calls the original function using the specified name. This can
 # be helpful for profiling, because the specified name will show up on the stack
 # trace.
-wrapFunctionLabel <- function(func, name) {
+wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
   if (name == "name" || name == "func" || name == "relabelWrapper") {
     stop("Invalid name for wrapFunctionLabel: ", name)
   }
@@ -1098,7 +1132,10 @@ wrapFunctionLabel <- function(func, name) {
     function(...) {
       # This `f` gets renamed to the value of `name`. Note that it may not
       # print as the new name, because of source refs stored in the function.
-      f(...)
+      if (..stacktraceon)
+        ..stacktraceon..(f(...))
+      else
+        f(...)
     },
     list(f = as.name(name))
   ))

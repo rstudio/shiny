@@ -41,35 +41,3 @@ sessionHandler <- function(req) {
     shinysession$handleRequest(subreq)
   })
 }
-
-dynamicHandler <- function(filePath, dependencyFiles=filePath) {
-  lastKnownTimestamps <- NA
-  metaHandler <- function(req) NULL
-
-  if (!file.exists(filePath))
-    return(metaHandler)
-
-  cacheContext <- CacheContext$new()
-
-  return (function(req) {
-    # Check if we need to rebuild
-    if (cacheContext$isDirty()) {
-      cacheContext$reset()
-      for (dep in dependencyFiles)
-        cacheContext$addDependencyFile(dep)
-
-      clearClients()
-      if (file.exists(filePath)) {
-        local({
-          cacheContext$with(function() {
-            sys.source(filePath, envir=new.env(parent=globalenv()), keep.source=TRUE)
-          })
-        })
-      }
-      metaHandler <<- joinHandlers(.globals$clients)
-      clearClients()
-    }
-
-    return(metaHandler(req))
-  })
-}

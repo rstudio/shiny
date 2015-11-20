@@ -32,11 +32,9 @@
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE, func=NULL) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg="renderPlot: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
+  # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
+  # is called
+  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
 
   args <- list(...)
 
@@ -95,7 +93,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         if (inherits(result$value, "ggplot")) {
           utils::capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
         } else {
-          utils::capture.output(print(result$value))
+          # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps the
+          # call to plotFunc
+          utils::capture.output(..stacktraceon..(print(result$value)))
         }
       }
 
@@ -104,8 +104,14 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       }
     }
 
-    outfile <- do.call(plotPNG, c(plotFunc, width=width*pixelratio,
-                                  height=height*pixelratio, res=res*pixelratio, args))
+    # This ..stacktraceoff.. is matched by the `func` function's
+    # wrapFunctionLabel(..stacktraceon=TRUE) call near the beginning of
+    # renderPlot, and by the ..stacktraceon.. in plotFunc where ggplot objects
+    # are printed
+    outfile <- ..stacktraceoff..(
+      do.call(plotPNG, c(plotFunc, width=width*pixelratio,
+        height=height*pixelratio, res=res*pixelratio, args))
+    )
     on.exit(unlink(outfile))
 
     # A list of attributes for the img

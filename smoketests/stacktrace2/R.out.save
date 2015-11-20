@@ -1,0 +1,27 @@
+Loading required package: shiny
+Loading required package: methods
+
+Listening on http://127.0.0.1:8765
+Warning: Error in badfunc: boom
+Stack trace (innermost first):
+    106: badfunc [${PWD}/stacktrace2/app.R#4]
+    105: reactive A [${PWD}/stacktrace2/app.R#8]
+     94: A [${SHINY}/R/reactives.R#376]
+     93: reactive B [${PWD}/stacktrace2/app.R#12]
+     82: B [${SHINY}/R/reactives.R#376]
+     81: reactive C [${PWD}/stacktrace2/app.R#16]
+     70: C [${SHINY}/R/reactives.R#376]
+     69: renderText [${PWD}/stacktrace2/app.R#28]
+     68: func
+     67: output$foo [${SHINY}/R/shinywrappers.R#280]
+      1: shiny::runApp [${SHINY}/R/server.R#685]
+Warning: Error in doTryCatch: 
+Stack trace (innermost first):
+    73: <Anonymous>
+    72: stop
+    71: C [${SHINY}/R/reactives.R#384]
+    70: renderDataTable [${PWD}/stacktrace2/app.R#31]
+    69: func
+    68: output$bar [${SHINY}/R/shinywrappers.R#456]
+     1: shiny::runApp [${SHINY}/R/server.R#685]
+NULL

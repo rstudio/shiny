@@ -6,7 +6,7 @@
 \usage{
 observe(x, env = parent.frame(), quoted = FALSE, label = NULL,
   suspended = FALSE, priority = 0, domain = getDefaultReactiveDomain(),
-  autoDestroy = TRUE)
+  autoDestroy = TRUE, ..stacktraceon = TRUE)
 }
 \arguments{
 \item{x}{An expression (quoted or unquoted). Any return value will be
@@ -34,6 +34,9 @@ Positive, negative, and zero values are allowed.}
 
 \item{autoDestroy}{If \code{TRUE} (the default), the observer will be
 automatically destroyed when its domain (if any) ends.}
+
+\item{..stacktraceon}{Advanced use only. For stack manipulation purposes; see
+\code{\link{stacktrace}}.}
 }
 \value{
 An observer reference class object. This object has the following

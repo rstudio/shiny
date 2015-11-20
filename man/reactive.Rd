@@ -6,7 +6,7 @@
 \title{Create a reactive expression}
 \usage{
 reactive(x, env = parent.frame(), quoted = FALSE, label = NULL,
-  domain = getDefaultReactiveDomain())
+  domain = getDefaultReactiveDomain(), ..stacktraceon = TRUE)
 
 is.reactive(x)
 }
@@ -25,6 +25,9 @@ variable; to do so, it must be quoted with \code{quote()}.}
 \item{label}{A label for the reactive expression, useful for debugging.}
 
 \item{domain}{See \link{domains}.}
+
+\item{..stacktraceon}{Advanced use only. For stack manipulation purposes; see
+\code{\link{stacktrace}}.}
 }
 \value{
 a function, wrapped in a S3 class "reactive"

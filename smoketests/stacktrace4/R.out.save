@@ -1,0 +1,11 @@
+Loading required package: shiny
+Loading required package: methods
+
+Listening on http://127.0.0.1:8765
+Warning: Error in badfunc: boom
+Stack trace (innermost first):
+    37: badfunc [${PWD}/stacktrace4/app.R#4]
+    36: ui [${PWD}/stacktrace4/app.R#9]
+     1: shiny::runApp [${SHINY}/R/server.R#685]
+Error in badfunc() : boom
+NULL

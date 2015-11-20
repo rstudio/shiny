@@ -1,0 +1,17 @@
+Loading required package: shiny
+Loading required package: methods
+
+Listening on http://127.0.0.1:8765
+Warning: Error in badfunc: boom
+Stack trace (innermost first):
+    113: badfunc [${PWD}/stacktrace1/app.R#4]
+    112: reactive A [${PWD}/stacktrace1/app.R#8]
+    101: A [${SHINY}/R/reactives.R#376]
+    100: reactive B [${PWD}/stacktrace1/app.R#12]
+     89: B [${SHINY}/R/reactives.R#376]
+     88: reactive C [${PWD}/stacktrace1/app.R#16]
+     77: C [${SHINY}/R/reactives.R#376]
+     76: renderPlot [${PWD}/stacktrace1/app.R#27]
+     68: output$foo [${SHINY}/R/render-plot.R#111]
+      1: shiny::runApp [${SHINY}/R/server.R#685]
+NULL

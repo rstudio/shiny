@@ -202,11 +202,19 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
         return(TRUE)
       }
 
+      if (!is.null(getOption("shiny.observer.error", NULL))) {
+        warning(
+          call. = FALSE,
+          "options(shiny.observer.error) is no longer supported; please unset it!"
+        )
+        stopApp()
+      }
+
       shinysession <- ShinySession$new(ws)
       appsByToken$set(shinysession$token, shinysession)
       shinysession$setShowcase(.globals$showcaseDefault)
 
-      ws$onMessage(function(binary, msg) {
+      messageHandler <- function(binary, msg) {
         withReactiveDomain(shinysession, {
           # To ease transition from websockets-based code. Should remove once we're stable.
           if (is.character(msg))
@@ -307,7 +315,14 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                   args$session <- shinysession
 
                 withReactiveDomain(shinysession, {
-                  do.call(appvars$server, args)
+                  do.call(
+                    # No corresponding ..stacktraceoff; the server func is pure
+                    # user code
+                    wrapFunctionLabel(appvars$server, "server",
+                      ..stacktraceon = TRUE
+                    ),
+                    args
+                  )
                 })
               })
             },
@@ -344,6 +359,10 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
             NULL
           })
         })
+      }
+      ws$onMessage(function(binary, msg) {
+        # If unhandled errors occur, make sure they get properly logged
+        withLogErrors(messageHandler(binary, msg))
       })
 
       ws$onClose(function() {
@@ -661,11 +680,15 @@ runApp <- function(appDir=getwd(),
 
   .globals$retval <- NULL
   .globals$stopped <- FALSE
-  shinyCallingHandlers(
-    while (!.globals$stopped) {
-      serviceApp()
-      Sys.sleep(0.001)
-    }
+  # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
+  # reactive(), Callbacks$invoke(), and others
+  ..stacktraceoff..(
+    captureStackTraces(
+      while (!.globals$stopped) {
+        serviceApp()
+        Sys.sleep(0.001)
+      }
+    )
   )
 
   return(.globals$retval)
@@ -680,7 +703,7 @@ runApp <- function(appDir=getwd(),
 #'   \code{\link{runApp}}.
 #'
 #' @export
-stopApp <- function(returnValue = NULL) {
+stopApp <- function(returnValue = invisible()) {
   .globals$retval <- returnValue
   .globals$stopped <- TRUE
   httpuv::interrupt()

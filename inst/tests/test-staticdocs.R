@@ -6,7 +6,7 @@ test_that("All man pages have an entry in staticdocs/index.r", {
     return()
   }
   # Known not to be indexed
-  known_unindexed <- c("shiny-package", "knitr_methods", "knitr_methods_htmltools")
+  known_unindexed <- c("shiny-package", "stacktrace", "knitr_methods", "knitr_methods_htmltools")
 
   indexed_topics <- local({
     result <- character(0)

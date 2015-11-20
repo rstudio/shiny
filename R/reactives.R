@@ -352,12 +352,15 @@ Observable <- R6Class(
     .mostRecentCtxId = character(0),
 
     initialize = function(func, label = deparse(substitute(func)),
-                          domain = getDefaultReactiveDomain()) {
+                          domain = getDefaultReactiveDomain(),
+                          ..stacktraceon = TRUE) {
       if (length(formals(func)) > 0)
         stop("Can't make a reactive expression from a function that takes one ",
              "or more parameters; only functions without parameters can be ",
              "reactive.")
-      .func <<- func
+
+      .func <<- wrapFunctionLabel(func, paste("reactive", label),
+        ..stacktraceon = ..stacktraceon)
       .label <<- label
       .domain <<- domain
       .dependents <<- Dependents$new()
@@ -370,13 +373,16 @@ Observable <- R6Class(
       .dependents$register()
 
       if (.invalidated || .running) {
-        self$.updateValue()
+        ..stacktraceoff..(
+          self$.updateValue()
+        )
       }
 
       .graphDependsOnId(getCurrentContext()$id, .mostRecentCtxId)
 
-      if (identical(class(.value), 'try-error'))
+      if (identical(class(.value), 'try-error')) {
         stop(attr(.value, 'condition'))
+      }
 
       if (.visible)
         .value
@@ -400,9 +406,32 @@ Observable <- R6Class(
       on.exit(.running <<- wasRunning)
 
       ctx$run(function() {
-        result <- withVisible(try(shinyCallingHandlers(.func()), silent=TRUE))
-        .visible <<- result$visible
+        result <- withCallingHandlers(
+
+          withVisible(.func()),
+
+          error = function(cond) {
+            # If an error occurs, we want to propagate the error, but we also
+            # want to save a copy of it, so future callers of this reactive will
+            # get the same error (i.e. the error is cached).
+
+            # We stripStackTrace in the next line, just in case someone
+            # downstream of us (i.e. deeper into the call stack) used
+            # captureStackTraces; otherwise the entire stack would always be the
+            # same (i.e. you'd always see the whole stack trace of the *first*
+            # time the code was run and the condition raised; there'd be no way
+            # to see the stack trace of the call site that caused the cached
+            # exception to be re-raised, and you need that information to figure
+            # out what's triggering the re-raise).
+            #
+            # We use try(stop()) as an easy way to generate a try-error object
+            # out of this condition.
+            .value <<- try(stop(stripStackTrace(cond)), silent = TRUE)
+            .visible <<- FALSE
+          }
+        )
         .value <<- result$value
+        .visible <<- result$visible
       })
     }
   )
@@ -434,6 +463,8 @@ Observable <- R6Class(
 #'   variable; to do so, it must be quoted with \code{quote()}.
 #' @param label A label for the reactive expression, useful for debugging.
 #' @param domain See \link{domains}.
+#' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
+#'   \code{\link{stacktrace}}.
 #' @return a function, wrapped in a S3 class "reactive"
 #'
 #' @examples
@@ -457,7 +488,8 @@ Observable <- R6Class(
 #'
 #' @export
 reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
-                     domain = getDefaultReactiveDomain()) {
+                     domain = getDefaultReactiveDomain(),
+                     ..stacktraceon = TRUE) {
   fun <- exprToFunction(x, env, quoted)
   # Attach a label and a reference to the original user source for debugging
   srcref <- attr(substitute(x), "srcref", exact = TRUE)
@@ -467,7 +499,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
   }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
-  o <- Observable$new(fun, label, domain)
+  o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
   registerDebugHook(".func", o, "Reactive")
   structure(o$getValue, observable = o, class = "reactive")
 }
@@ -544,14 +576,17 @@ Observer <- R6Class(
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
-                          autoDestroy = TRUE) {
+                          autoDestroy = TRUE, ..stacktraceon = TRUE) {
       if (length(formals(observerFunc)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
 
       .func <<- function() {
         tryCatch(
-          observerFunc(),
+          if (..stacktraceon)
+            ..stacktraceon..(observerFunc())
+          else
+            observerFunc(),
           validation = function(e) {
             # It's OK for a validation error to cause an observer to stop
             # running
@@ -596,24 +631,13 @@ Observer <- R6Class(
       ctx$onFlush(function() {
         tryCatch({
           if (!.destroyed)
-            run()
+            shinyCallingHandlers(run())
 
         }, error = function(e) {
-          # A function to handle errors that occur during a flush
-          flushErrorHandler <- getOption('shiny.observer.error')
-
-          # Default handler function, if not available from global option
-          if (is.null(flushErrorHandler)) {
-            flushErrorHandler <- function(e, label, domain) {
-              warning("Unhandled error in observer: ",
-                e$message, "\n", label, immediate. = TRUE, call. = FALSE)
-              if (!is.null(domain)) {
-                domain$unhandledError(e)
-              }
-            }
+          printError(e)
+          if (!is.null(.domain)) {
+            .domain$unhandledError(e)
           }
-
-          flushErrorHandler(e, .label, .domain)
         })
       })
 
@@ -722,6 +746,8 @@ Observer <- R6Class(
 #' @param domain See \link{domains}.
 #' @param autoDestroy If \code{TRUE} (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.
+#' @param ..stacktraceon Advanced use only. For stack manipulation purposes; see
+#'   \code{\link{stacktrace}}.
 #' @return An observer reference class object. This object has the following
 #'   methods:
 #'   \describe{
@@ -779,14 +805,16 @@ Observer <- R6Class(
 #' @export
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
                     suspended=FALSE, priority=0,
-                    domain=getDefaultReactiveDomain(), autoDestroy = TRUE) {
+                    domain=getDefaultReactiveDomain(), autoDestroy = TRUE,
+                    ..stacktraceon = TRUE) {
 
   fun <- exprToFunction(x, env, quoted)
   if (is.null(label))
     label <- sprintf('observe(%s)', paste(deparse(body(fun)), collapse='\n'))
 
   o <- Observer$new(fun, label=label, suspended=suspended, priority=priority,
-                    domain=domain, autoDestroy=autoDestroy)
+                    domain=domain, autoDestroy=autoDestroy,
+                    ..stacktraceon=..stacktraceon)
   registerDebugHook(".func", o, "Observer")
   invisible(o)
 }
@@ -1239,9 +1267,10 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 isolate <- function(expr) {
   ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate')
   on.exit(ctx$invalidate())
-  ctx$run(function() {
-    expr
-  })
+  # Matching ..stacktraceon../..stacktraceoff.. pair
+  ..stacktraceoff..(ctx$run(function() {
+    ..stacktraceon..(expr)
+  }))
 }
 
 #' Evaluate an expression without a reactive context
@@ -1393,8 +1422,10 @@ observeEvent <- function(eventExpr, handlerExpr,
   eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
   if (is.null(label))
     label <- sprintf('observeEvent(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
+  eventFunc <- wrapFunctionLabel(eventFunc, "observeEventExpr", ..stacktraceon = TRUE)
 
   handlerFunc <- exprToFunction(handlerExpr, handler.env, handler.quoted)
+  handlerFunc <- wrapFunctionLabel(handlerFunc, "observeEventHandler", ..stacktraceon = TRUE)
 
   invisible(observe({
     e <- eventFunc()
@@ -1405,7 +1436,7 @@ observeEvent <- function(eventExpr, handlerExpr,
 
     isolate(handlerFunc())
   }, label = label, suspended = suspended, priority = priority, domain = domain,
-    autoDestroy = TRUE))
+    autoDestroy = TRUE, ..stacktraceon = FALSE))
 }
 
 #' @rdname observeEvent
@@ -1419,8 +1450,10 @@ eventReactive <- function(eventExpr, valueExpr,
   eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
   if (is.null(label))
     label <- sprintf('eventReactive(%s)', paste(deparse(body(eventFunc)), collapse='\n'))
+  eventFunc <- wrapFunctionLabel(eventFunc, "eventReactiveExpr", ..stacktraceon = TRUE)
 
   handlerFunc <- exprToFunction(valueExpr, value.env, value.quoted)
+  handlerFunc <- wrapFunctionLabel(handlerFunc, "eventReactiveHandler", ..stacktraceon = TRUE)
 
   invisible(reactive({
     e <- eventFunc()
@@ -1431,7 +1464,7 @@ eventReactive <- function(eventExpr, valueExpr,
     ))
 
     isolate(handlerFunc())
-  }, label = label, domain = domain))
+  }, label = label, domain = domain, ..stacktraceon = FALSE))
 }
 
 isNullEvent <- function(value) {

@@ -4,7 +4,7 @@
 \alias{stopApp}
 \title{Stop the currently running Shiny app}
 \usage{
-stopApp(returnValue = NULL)
+stopApp(returnValue = invisible())
 }
 \arguments{
 \item{returnValue}{The value that should be returned from

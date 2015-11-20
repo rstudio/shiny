@@ -5,7 +5,8 @@
 \title{Install an expression as a function}
 \usage{
 installExprFunction(expr, name, eval.env = parent.frame(2), quoted = FALSE,
-  assign.env = parent.frame(1), label = as.character(sys.call(-1)[[1]]))
+  assign.env = parent.frame(1), label = as.character(sys.call(-1)[[1]]),
+  wrappedWithLabel = TRUE, ..stacktraceon = FALSE)
 }
 \arguments{
 \item{expr}{A quoted or unquoted expression}
@@ -20,7 +21,10 @@ calling environment two steps back.}
 \item{assign.env}{The environment in which the function should be assigned.}
 
 \item{label}{A label for the object to be shown in the debugger. Defaults to
-  the name of the calling function.}
+the name of the calling function.}
+
+\item{wrappedWithLabel,..stacktraceon}{Advanced use only. For stack manipulation purposes; see
+  \code{\link{stacktrace}}.}
 }
 \description{
 Installs an expression in the given environment as a function, and registers

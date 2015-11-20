@@ -310,7 +310,7 @@ HandlerManager <- R6Class("HandlerManager",
         },
         call = .httpServer(
           function (req) {
-            return(handlers$invoke(req))
+            withLogErrors(handlers$invoke(req))
           },
           getOption('shiny.sharedSecret')
         ),

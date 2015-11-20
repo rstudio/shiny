@@ -1,0 +1,21 @@
+Loading required package: shiny
+Loading required package: methods
+
+Listening on http://127.0.0.1:8765
+Warning: Error in baduicall: ui boom
+Stack trace (innermost first):
+    51: baduicall [${PWD}/stacktrace6/ui.R#5]
+    50: tag
+    49: tags$div
+    48: div
+    47: wellPanel [${SHINY}/R/bootstrap.R#320]
+    46: tag
+    45: tags$div
+    44: div
+    43: tagList
+    42: attachDependencies
+    41: bootstrapPage [${SHINY}/R/bootstrap.R#56]
+    40: fluidPage [${SHINY}/R/bootstrap-layout.R#72]
+     1: shiny::runApp [${SHINY}/R/server.R#685]
+Error in baduicall() : ui boom
+NULL

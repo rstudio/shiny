@@ -84,14 +84,18 @@ NULL
 #'   \item{shiny.error}{This can be a function which is called when an error
 #'     occurs. For example, \code{options(shiny.error=recover)} will result a
 #'     the debugger prompt when an error occurs.}
-#'   \item{shiny.observer.error}{This can be a function that is called by an
-#'     observer when an unhandled error occurs in it or an upstream reactive.
-#'     By default, these errors will result in a warning at the console, and
-#'     the websocket connection will close.}
 #'   \item{shiny.table.class}{CSS class names to use for tables.}
 #'   \item{shiny.deprecation.messages}{This controls whether messages for
 #'     deprecated functions in Shiny will be printed. See
 #'     \code{\link{shinyDeprecated}} for more information.}
+#'   \item{shiny.fullstacktrace}{Controls whether "pretty" or full stack traces
+#'     are dumped to the console when errors occur during Shiny app execution.
+#'     The default is \code{FALSE} (pretty stack traces).}
+#'   \item{shiny.stacktraceoffset}{If \code{TRUE}, then Shiny's printed stack
+#'     traces will display srcrefs one line above their usual location. This is
+#'     an arguably more intuitive arrangement for casual R users, as the name
+#'     of a function appears next to the srcref where it is defined, rather than
+#'     where it is currently being called from.}
 #' }
 #' @name shiny-options
 NULL
@@ -466,16 +470,16 @@ ShinySession <- R6Class(
     ns = function(id) {
       NS(NULL, id)
     },
-    onSessionEnded = function(callback) {
+    onSessionEnded = function(sessionEndedCallback) {
       "Registers the given callback to be invoked when the session is closed
       (i.e. the connection to the client has been severed). The return value
       is a function which unregisters the callback. If multiple callbacks are
       registered, the order in which they are invoked is not guaranteed."
-      return(private$closedCallbacks$register(callback))
+      return(private$closedCallbacks$register(sessionEndedCallback))
     },
-    onEnded = function(callback) {
+    onEnded = function(endedCallback) {
       "Synonym for onSessionEnded"
-      return(self$onSessionEnded(callback))
+      return(self$onSessionEnded(endedCallback))
     },
     onInputReceived = function(callback) {
       "Registers the given callback to be invoked when the session receives
@@ -495,13 +499,8 @@ ShinySession <- R6Class(
       for (output in private$.outputs) {
         output$suspend()
       }
-      private$closedCallbacks$invoke(onError=function(e) {
-        warning(simpleWarning(
-          paste("An error occurred in an onSessionEnded handler:",
-                e$message),
-          e$call
-        ))
-      })
+      # ..stacktraceon matches with the top-level ..stacktraceoff..
+      private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
       flushReact()
       lapply(appsByToken$values(), function(shinysession) {
         shinysession$flushOutput()
@@ -533,14 +532,16 @@ ShinySession <- R6Class(
       }
 
       if (is.function(func)) {
-        if (length(formals(func)) != 0) {
+        funcFormals <- formals(func)
+        # ..stacktraceon matches with the top-level ..stacktraceoff.., because
+        # the observer we set up below has ..stacktraceon=FALSE
+        func <- wrapFunctionLabel(func, paste0("output$", name), ..stacktraceon = TRUE)
+        if (length(funcFormals) != 0) {
           orig <- func
           func <- function() {
             orig(name=name, shinysession=self)
           }
         }
-
-        func <- wrapFunctionLabel(func, paste0("output$", name))
 
         # Preserve source reference and file information when formatting the
         # label for display in the reactive graph
@@ -550,7 +551,7 @@ ShinySession <- R6Class(
         attr(label, "srcref") <- srcref
         attr(label, "srcfile") <- srcfile
 
-        obs <- observe({
+        obs <- observe(..stacktraceon = FALSE, {
 
           self$sendCustomMessage('recalculating', list(
             name = name, status = 'recalculating'
@@ -572,7 +573,7 @@ ShinySession <- R6Class(
             error = function(cond) {
               msg <- paste0("Error in output$", name, ": ", conditionMessage(cond), "\n")
               if (isTRUE(getOption("show.error.messages"))) {
-                cat(msg, file = stderr())
+                printError(cond)
               }
               invisible(structure(msg, class = "try-error", condition = cond))
             }
@@ -612,8 +613,10 @@ ShinySession <- R6Class(
     },
     flushOutput = function() {
 
-      private$flushCallbacks$invoke()
-      on.exit(private$flushedCallbacks$invoke())
+      # ..stacktraceon matches with the top-level ..stacktraceoff..
+      private$flushCallbacks$invoke(..stacktraceon = TRUE)
+      # ..stacktraceon matches with the top-level ..stacktraceoff..
+      on.exit(private$flushedCallbacks$invoke(..stacktraceon = TRUE))
 
       if (length(private$progressKeys) == 0
           && length(private$invalidatedOutputValues) == 0
@@ -690,24 +693,24 @@ ShinySession <- R6Class(
       # Add to input message queue
       private$inputMessageQueue[[length(private$inputMessageQueue) + 1]] <- data
     },
-    onFlush = function(func, once = TRUE) {
+    onFlush = function(flushCallback, once = TRUE) {
       if (!isTRUE(once)) {
-        return(private$flushCallbacks$register(func))
+        return(private$flushCallbacks$register(flushCallback))
       } else {
         dereg <- private$flushCallbacks$register(function() {
           dereg()
-          func()
+          flushCallback()
         })
         return(dereg)
       }
     },
-    onFlushed = function(func, once = TRUE) {
+    onFlushed = function(flushedCallback, once = TRUE) {
       if (!isTRUE(once)) {
-        return(private$flushedCallbacks$register(func))
+        return(private$flushedCallbacks$register(flushedCallback))
       } else {
         dereg <- private$flushedCallbacks$register(function() {
           dereg()
-          func()
+          flushedCallback()
         })
         return(dereg)
       }
@@ -848,13 +851,16 @@ ShinySession <- R6Class(
         if (nzchar(ext))
           ext <- paste(".", ext, sep = "")
         tmpdata <- tempfile(fileext = ext)
-        result <- try(Context$new(getDefaultReactiveDomain(), '[download]')$run(
-          function() { download$func(tmpdata) }
-        ))
+        # ..stacktraceon matches with the top-level ..stacktraceoff..
+        result <- try(shinyCallingHandlers(Context$new(getDefaultReactiveDomain(), '[download]')$run(
+          function() { ..stacktraceon..(download$func(tmpdata)) }
+        )))
         if (inherits(result, 'try-error')) {
+          cond <- attr(result, 'condition', exact = TRUE)
+          printError(cond)
           unlink(tmpdata)
           return(httpResponse(500, 'text/plain; charset=UTF-8',
-                              enc2utf8(attr(result, 'condition')$message)))
+                              enc2utf8(conditionMessage(cond))))
         }
         return(httpResponse(
           200,

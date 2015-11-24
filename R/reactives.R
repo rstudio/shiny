@@ -520,7 +520,18 @@ srcrefToLabel <- function(srcref, defaultLabel) {
   if (is.null(srcfile$lines))
     return(defaultLabel)
 
-  firstLine <- substring(srcfile$lines[srcref[1]], 1, srcref[2] - 1)
+  lines <- srcfile$lines
+  # When pasting at the Console, srcfile$lines is not split
+  if (length(lines) == 1) {
+    lines <- strsplit(lines, "\n")[[1]]
+  }
+
+  if (length(lines) < srcref[1]) {
+    return(defaultLabel)
+  }
+
+  firstLine <- substring(lines[srcref[1]], 1, srcref[2] - 1)
+
   m <- regexec("(.*)(<-|=)\\s*reactive\\s*\\($", firstLine)
   if (m[[1]][1] == -1) {
     return(defaultLabel)

@@ -67,6 +67,8 @@ getCallNames <- function(calls) {
       "<Anonymous>"
     } else if (inherits(call[[1]], "call")) {
       paste0(format(call[[1]]), collapse = " ")
+    } else if (typeof(call[[1]]) == "promise") {
+      "<Promise>"
     } else {
       paste0(as.character(call[[1]]), collapse = " ")
     }

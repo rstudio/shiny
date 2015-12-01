@@ -343,7 +343,6 @@ var ShinyApp = function() {
   // in msgObj.custom.foo and msgObj.custom.bar.
   var customMessageHandlerOrder = [];
   var customMessageHandlers = {};
-  var customBinaryMessageHandlers = [];
 
   // Adds Shiny (internal) message handler
   function addMessageHandler(type, handler) {
@@ -362,10 +361,6 @@ var ShinyApp = function() {
 
   // Adds custom message handler - this one is exposed to the user
   function addCustomMessageHandler(type, handler) {
- 	 if(type=='binary') {
-		 customBinaryMessageHandlers.push(handler);
-		 return;
-	 }
     if (customMessageHandlers[type]) {
       throw('handler for message of type "' + type + '" already added.');
     }
@@ -395,33 +390,50 @@ var ShinyApp = function() {
     $(document).trigger(evt);
     if (evt.isDefaultPrevented()) return;
 
-    if(typeof data === "string") {
-      // Send msgObj.foo and msgObj.bar to appropriate handlers
-      this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
-    } else {
-      this._sendMessagesToBinaryHandlers(evt.message, customBinaryMessageHandlers);
-    }
-    
+    // Send msgObj.foo and msgObj.bar to appropriate handlers
+    this._sendMessagesToHandlers(evt.message, messageHandlers, messageHandlerOrder);
+
     this.$updateConditionals();
   };
 
-  this._sendMessagesToBinaryHandlers = function(msgObj, handlers) {
-    for (var i = 0; i < handlers.length; i++)
-      if(handlers[i].call(this, msgObj.buffer))
-        break;
-  };
+  //this._sendMessagesToBinaryHandlers = function(msgObj, handlers) {
+  //  for (var i = 0; i < handlers.length; i++)
+  //    if(handlers[i].call(this, msgObj.buffer))
+  //      break;
+  //};
 
   // A function for sending messages to the appropriate handlers.
   // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
   this._sendMessagesToHandlers = function(msgObj, handlers, handlerOrder) {
+    var
+      tag = undefined
+      buffer;
+
+    if(typeof data !== "string") {
+      buffer = msgObj.buffer;
+      var len = new DataView(buffer,0,1).getUint8(0);
+      var tagdv = new DataView(buffer,1,len);
+      var tagbuf = [];
+      for(var i=0;i<len;i++){
+        tagbuf.push(String.fromCharCode(tagdv.getUint8(i)));
+      }
+      tag = tagbuf.join("");
+      buffer = buffer.slice(len+1);
+    }
+    
     // Dispatch messages to handlers, if handler is present
     for (var i = 0; i < handlerOrder.length; i++) {
       var msgType = handlerOrder[i];
-
-      if (msgObj.hasOwnProperty(msgType)) {
-        // Execute each handler with 'this' referring to the present value of
-        // 'this'
-        handlers[msgType].call(this, msgObj[msgType]);
+      if(tag) {
+        if(tag == msgType) {
+          handlers[msgType].call(this, buffer);
+        }
+      } else {
+        if (msgObj.hasOwnProperty(msgType)) {
+          // Execute each handler with 'this' referring to the present value of
+          // 'this'
+          handlers[msgType].call(this, msgObj[msgType]);
+        }        
       }
     }
   };

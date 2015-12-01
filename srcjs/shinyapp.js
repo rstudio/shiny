@@ -381,8 +381,16 @@ var ShinyApp = function() {
     var msgObj = {};
     if(typeof data === "string") {
       msgObj = JSON.parse(data);
-    } else {
-      msgObj = {buffer: data};
+    } else { // data is arraybuffer
+      var len = new DataView(data,0,1).getUint8(0);
+      var tagdv = new DataView(data,1,len);
+      var tagbuf = [];
+      for(var i=0; i<len; i++){
+        tagbuf.push(String.fromCharCode(tagdv.getUint8(i)));
+      }
+      var tag = tagbuf.join("");
+      data = data.slice(len+1);
+      msgObj[tag] = data;
     }
 
     var evt = jQuery.Event('shiny:message');
@@ -396,42 +404,18 @@ var ShinyApp = function() {
     this.$updateConditionals();
   };
 
-  //this._sendMessagesToBinaryHandlers = function(msgObj, handlers) {
-  //  for (var i = 0; i < handlers.length; i++)
-  //    if(handlers[i].call(this, msgObj.buffer))
-  //      break;
-  //};
-
   // A function for sending messages to the appropriate handlers.
   // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
   this._sendMessagesToHandlers = function(msgObj, handlers, handlerOrder) {
     var tag, buffer, i;
 
-    if(typeof data !== "string") {
-      buffer = msgObj.buffer;
-      var len = new DataView(buffer,0,1).getUint8(0);
-      var tagdv = new DataView(buffer,1,len);
-      var tagbuf = [];
-      for(i=0; i<len; i++){
-        tagbuf.push(String.fromCharCode(tagdv.getUint8(i)));
-      }
-      tag = tagbuf.join("");
-      buffer = buffer.slice(len+1);
-    }
-    
     // Dispatch messages to handlers, if handler is present
     for (i = 0; i < handlerOrder.length; i++) {
       var msgType = handlerOrder[i];
-      if(tag) {
-        if(tag == msgType) {
-          handlers[msgType].call(this, buffer);
-        }
-      } else {
-        if (msgObj.hasOwnProperty(msgType)) {
-          // Execute each handler with 'this' referring to the present value of
-          // 'this'
-          handlers[msgType].call(this, msgObj[msgType]);
-        }        
+      if (msgObj.hasOwnProperty(msgType)) {
+        // Execute each handler with 'this' referring to the present value of
+        // 'this'
+        handlers[msgType].call(this, msgObj[msgType]);
       }
     }
   };

@@ -50,8 +50,10 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   # guarantee user's code in func() will not trigger the error -- they may have
   # to set par(mar = smaller_value) before they draw base graphics.
   op <- graphics::par(mar = rep(0, 4))
-  on.exit(graphics::par(op), add = TRUE)
-  graphics::plot.new()
+  tryCatch(
+    graphics::plot.new(),
+    finally = graphics::par(op)
+  )
 
   dv <- grDevices::dev.cur()
   on.exit(grDevices::dev.off(dv), add = TRUE)

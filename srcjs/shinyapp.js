@@ -405,16 +405,14 @@ var ShinyApp = function() {
   // A function for sending messages to the appropriate handlers.
   // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
   this._sendMessagesToHandlers = function(msgObj, handlers, handlerOrder) {
-    var
-      tag = undefined
-      buffer;
+    var tag, buffer, i;
 
     if(typeof data !== "string") {
       buffer = msgObj.buffer;
       var len = new DataView(buffer,0,1).getUint8(0);
       var tagdv = new DataView(buffer,1,len);
       var tagbuf = [];
-      for(var i=0;i<len;i++){
+      for(i=0; i<len; i++){
         tagbuf.push(String.fromCharCode(tagdv.getUint8(i)));
       }
       tag = tagbuf.join("");
@@ -422,7 +420,7 @@ var ShinyApp = function() {
     }
     
     // Dispatch messages to handlers, if handler is present
-    for (var i = 0; i < handlerOrder.length; i++) {
+    for (i = 0; i < handlerOrder.length; i++) {
       var msgType = handlerOrder[i];
       if(tag) {
         if(tag == msgType) {

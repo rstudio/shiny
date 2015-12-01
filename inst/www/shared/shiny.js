@@ -982,7 +982,8 @@ var ShinyApp = function() {
       }
       var tag = tagbuf.join("");
       data = data.slice(len+1);
-      msgObj[tag] = data;
+      msgObj.custom = {};
+      msgObj.custom[tag] = data;
     }
 
     var evt = jQuery.Event('shiny:message');

@@ -86,9 +86,9 @@ VignetteBuilder: knitr
 Collate:
     'app.R'
     'bootstrap-layout.R'
+    'conditions.R'
     'map.R'
     'globals.R'
-    'conditions.R'
     'utils.R'
     'bootstrap.R'
     'cache.R'
@@ -136,3 +136,4 @@ Collate:
     'tar.R'
     'timer.R'
     'update-input.R'
+RoxygenNote: 5.0.1

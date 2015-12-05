@@ -3891,6 +3891,7 @@ $.extend(selectInputBinding, {
           data: {
             query: query,
             field: JSON.stringify([settings.searchField]),
+            value: settings.valueField,
             conju: settings.searchConjunction,
             maxop: settings.maxOptions
           },

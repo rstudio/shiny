@@ -475,6 +475,7 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
   value <- unname(selected)
+  attr(choices, 'selected_value') <- value
   message <- dropNulls(list(
     label = label,
     value = value,
@@ -492,6 +493,8 @@ selectizeJSON <- function(data, req) {
   key <- unique(strsplit(tolower(query$query), '\\s+')[[1]])
   if (identical(key, '')) key <- character(0)
   mop <- as.numeric(query$maxop)
+  vfd <- query$value  # the value field name
+  sel <- attr(data, 'selected_value', exact = TRUE)
 
   # convert a single vector to a data frame so it returns {label: , value: }
   # later in JSON; other objects return arbitrary JSON {x: , y: , foo: , ...}
@@ -515,6 +518,11 @@ selectizeJSON <- function(data, req) {
   }
   # only return the first n rows (n = maximum options in configuration)
   idx <- utils::head(if (length(key)) which(idx) else seq_along(idx), mop)
+  # make sure the selected value is in the data
+  if (length(sel)) {
+    i <- na.omit(match(sel, data[, vfd]))
+    if (length(i)) idx <- sort(utils::head(unique(c(i, idx)), mop))
+  }
   data <- data[idx, ]
 
   res <- toJSON(columnToRowData(data))

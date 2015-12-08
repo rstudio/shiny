@@ -3259,6 +3259,14 @@ inputBindings.register(checkboxInputBinding, 'shiny.checkboxInput');
 //---------------------------------------------------------------------
 // Source file: ../srcjs/input_binding_slider.js
 
+// Necessary to get hidden sliders to send their updated values
+function forceIonSliderUpdate(slider) {
+  if (slider.$cache && slider.$cache.input)
+    slider.$cache.input.trigger('change');
+  else
+    console.log("Couldn't force ion slider to update");
+}
+
 var sliderInputBinding = {};
 $.extend(sliderInputBinding, textInputBinding, {
   find: function(scope) {
@@ -3313,6 +3321,7 @@ $.extend(sliderInputBinding, textInputBinding, {
     } else {
       slider.update({ from: value });
     }
+    forceIonSliderUpdate(slider);
   },
   subscribe: function(el, callback) {
     $(el).on('change.sliderInputBinding', function(event) {
@@ -3345,6 +3354,7 @@ $.extend(sliderInputBinding, textInputBinding, {
     $el.data('updating', true);
     try {
       slider.update(msg);
+      forceIonSliderUpdate(slider);
     } finally {
       $el.data('updating', false);
     }
@@ -3456,6 +3466,7 @@ $(document).on('click', '.slider-animate-button', function(evt) {
           val.to = val.from + (slider.result.to - slider.result.from);
 
         slider.update(val);
+        forceIonSliderUpdate(slider);
       };
       var sliderStep = function() {
         // Don't overshoot the end
@@ -3466,6 +3477,7 @@ $(document).on('click', '.slider-animate-button', function(evt) {
           val.to = Math.min(slider.result.max, slider.result.to + slider.options.step);
 
         slider.update(val);
+        forceIonSliderUpdate(slider);
       };
 
       // If we're currently at the end, restart

@@ -30,7 +30,7 @@ htmlTemplate <- function(filename, ...) {
   if ("shinyHead" %in% names(vars)) {
     stop("Can't use reserved argument name 'shinyHead'.")
   }
-  vars$shinyHead <- HTML("<!-- SHINY_HEAD -->")
+  vars$shinyHead <- function() HTML("<!-- SHINY_HEAD -->")
   env <- list2env(vars, parent = parent.env(globalenv()))
 
   pieces[[1]] <- HTML(pieces[[1]])

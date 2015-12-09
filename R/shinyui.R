@@ -36,9 +36,9 @@ renderPage <- function(ui, connection, showcase=0) {
     if (!(inherits(ui, "shiny.tag") && ui$name == "body"))
       ui <- tags$body(ui)
 
-    # Put the body into the standard template
+    # Put the body into the default template
     ui <- htmlTemplate(
-      system.file("template", "index.html", package = "shiny"),
+      system.file("template", "default.html", package = "shiny"),
       body = ui
     )
   }

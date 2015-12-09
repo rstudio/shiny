@@ -2,9 +2,13 @@
 #'
 #' @param filename Path to an HTML template file.
 #' @param ... Variable values to use when processing the template.
+#' @param document_ Is this template a complete HTML document (\code{TRUE}), or
+#'   a fragment of HTML that is to be inserted into an HTML document
+#'   (\code{FALSE})? With \code{"auto"} (the default), auto-detect by searching
+#'   for the string \code{"<HTML>"} within the template.
 #'
 #' @export
-htmlTemplate <- function(filename, ...) {
+htmlTemplate <- function(filename, ..., document_ = "auto") {
   html <- readChar(filename, 1e7)
 
   pieces <- strsplit(html, "{{", fixed = TRUE)[[1]]
@@ -43,8 +47,15 @@ htmlTemplate <- function(filename, ...) {
   })
 
   result <- tagList(pieces)
-  # The html.document class indicates that it's a complete document, and not
-  # just a set of tags.
-  class(result) <- c("html.document", class(result))
+
+  if (document_ == "auto"  ) {
+    document_ = grepl("<HTML>", html, ignore.case = TRUE)
+  }
+  if (document_) {
+    # The html.document class indicates that it's a complete document, and not
+    # just a set of tags.
+    class(result) <- c("html.document", class(result))
+  }
+
   result
 }

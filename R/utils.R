@@ -1099,7 +1099,8 @@ makeCall <- function(func, args) {
 }
 
 # a workaround for https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16264
-if (getRversion() <= '3.2.2') srcfilecopy <- function(filename, lines, ...) {
+srcfilecopy <- function(filename, lines, ...) {
+  if (getRversion() > '3.2.2') return(base::srcfilecopy(filename, lines, ...))
   src <- base::srcfilecopy(filename, lines = '', ...)
   src$lines <- lines
   src

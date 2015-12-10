@@ -27,3 +27,26 @@ createWebDependency <- function(dependency) {
 
   return(dependency)
 }
+
+
+#' Suppress web dependencies
+#'
+#' This suppresses one or more web dependencies. It is meant to be used with
+#' Shiny applications where a dependency (like a JavaScript or CSS file) is
+#' declared in HTML, in an HTML template.
+#'
+#' @param ... Names of the dependencies to suppress. For example,
+#'   \code{"jquery"} or \code{"bootstrap"}.
+#'
+#' @seealso \code{\link{htmlTemplate}} for more information about using HTML
+#'   templates with Shiny.
+#' @seealso \code{\link[htmltools]{htmlDependency}}
+#' @export
+suppressDependencies <- function(...) {
+  lapply(list(...), function(name) {
+    attachDependencies(
+      character(0),
+      htmlDependency(name, "9999", c(href = ""))
+    )
+  })
+}

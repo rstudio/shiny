@@ -560,8 +560,10 @@ runApp <- function(appDir=getwd(),
     host <- '0.0.0.0'
 
   # Make warnings print immediately
-  ops <- options(warn = 1)
-  on.exit(options(ops), add = TRUE)
+  if (getOption("warn", 0) < 1) {
+    ops <- options(warn = 1)
+    on.exit(options(ops), add = TRUE)
+  }
 
   workerId(workerId)
 

@@ -70,7 +70,7 @@ Imports:
     jsonlite (>= 0.9.16),
     xtable,
     digest,
-    htmltools (>= 0.2.6),
+    htmltools (>= 0.2.10),
     R6 (>= 2.0)
 Suggests:
     datasets,

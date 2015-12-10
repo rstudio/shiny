@@ -14,9 +14,9 @@ html, body {
   padding: 0;
 }
 div {
-  -moz-user-select: none; 
-  -khtml-user-select: none; 
-  -webkit-user-select: none; 
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
   -o-user-select: none;
   cursor: default;
 }
@@ -190,25 +190,25 @@ var log = [
   { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:11] \"allowDataUriScheme\" \"output_caption_hidden\" \"output_summary_hidden\" ..." },
   { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 11\n $ allowDataUriScheme   : logi TRUE\n $ url_pathname         : chr \"/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ url_hash_initial     : chr \"\"\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"" },
   { "action" : "valueChange", "id" : "clientData$allowDataUriScheme", "value" : " logi TRUE" },
-  { "action" : "ctx", "id" : "1", "label" : "output$caption <- renderText({ \n    input$caption\n})", "type" : "observer", "prevId" : "" },
+  { "action" : "ctx", "id" : "1", "label" : "output$caption", "type" : "observer", "prevId" : "" },
   { "action" : "invalidate", "id" : "1" },
-  { "action" : "ctx", "id" : "2", "label" : "output$summary <- renderPrint({ \n    dataset <- datasetInput()\n    summary(dataset)\n})", "type" : "observer", "prevId" : "" },
+  { "action" : "ctx", "id" : "2", "label" : "output$summary", "type" : "observer", "prevId" : "" },
   { "action" : "invalidate", "id" : "2" },
-  { "action" : "ctx", "id" : "3", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "" },
+  { "action" : "ctx", "id" : "3", "label" : "output$view", "type" : "observer", "prevId" : "" },
   { "action" : "invalidate", "id" : "3" },
-  { "action" : "ctx", "id" : "4", "label" : "output$caption <- renderText({ \n    input$caption\n})", "type" : "observer", "prevId" : "1" },
+  { "action" : "ctx", "id" : "4", "label" : "output$caption", "type" : "observer", "prevId" : "1" },
   { "action" : "enter", "id" : "4" },
   { "action" : "dep", "id" : "4", "dependsOn" : "input$caption" },
   { "action" : "exit", "id" : "4" },
-  { "action" : "ctx", "id" : "5", "label" : "output$summary <- renderPrint({ \n    dataset <- datasetInput()\n    summary(dataset)\n})", "type" : "observer", "prevId" : "2" },
+  { "action" : "ctx", "id" : "5", "label" : "output$summary", "type" : "observer", "prevId" : "2" },
   { "action" : "enter", "id" : "5" },
-  { "action" : "ctx", "id" : "6", "label" : "reactive({ \n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n})", "type" : "observable", "prevId" : "" },
+  { "action" : "ctx", "id" : "6", "label" : "datasetInput", "type" : "observable", "prevId" : "" },
   { "action" : "enter", "id" : "6" },
   { "action" : "dep", "id" : "6", "dependsOn" : "input$dataset" },
   { "action" : "exit", "id" : "6" },
   { "action" : "depId", "id" : "5", "dependsOn" : "6" },
   { "action" : "exit", "id" : "5" },
-  { "action" : "ctx", "id" : "7", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "3" },
+  { "action" : "ctx", "id" : "7", "label" : "output$view", "type" : "observer", "prevId" : "3" },
   { "action" : "enter", "id" : "7" },
   { "action" : "depId", "id" : "7", "dependsOn" : "6" },
   { "action" : "dep", "id" : "7", "dependsOn" : "input$obs" },
@@ -217,7 +217,7 @@ var log = [
   { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Pressure Summary\"\n $ obs    : num 10\n $ dataset: chr \"rock\"" },
   { "action" : "valueChange", "id" : "input$caption", "value" : " chr \"Pressure Summary\"" },
   { "action" : "invalidate", "id" : "4" },
-  { "action" : "ctx", "id" : "8", "label" : "output$caption <- renderText({ \n    input$caption\n})", "type" : "observer", "prevId" : "4" },
+  { "action" : "ctx", "id" : "8", "label" : "output$caption", "type" : "observer", "prevId" : "4" },
   { "action" : "enter", "id" : "8" },
   { "action" : "dep", "id" : "8", "dependsOn" : "input$caption" },
   { "action" : "exit", "id" : "8" },
@@ -227,15 +227,15 @@ var log = [
   { "action" : "invalidate", "id" : "6" },
   { "action" : "invalidate", "id" : "5" },
   { "action" : "invalidate", "id" : "7" },
-  { "action" : "ctx", "id" : "9", "label" : "output$summary <- renderPrint({ \n    dataset <- datasetInput()\n    summary(dataset)\n})", "type" : "observer", "prevId" : "5" },
+  { "action" : "ctx", "id" : "9", "label" : "output$summary", "type" : "observer", "prevId" : "5" },
   { "action" : "enter", "id" : "9" },
-  { "action" : "ctx", "id" : "10", "label" : "reactive({ \n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n})", "type" : "observable", "prevId" : "6" },
+  { "action" : "ctx", "id" : "10", "label" : "datasetInput", "type" : "observable", "prevId" : "6" },
   { "action" : "enter", "id" : "10" },
   { "action" : "dep", "id" : "10", "dependsOn" : "input$dataset" },
   { "action" : "exit", "id" : "10" },
   { "action" : "depId", "id" : "9", "dependsOn" : "10" },
   { "action" : "exit", "id" : "9" },
-  { "action" : "ctx", "id" : "11", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "7" },
+  { "action" : "ctx", "id" : "11", "label" : "output$view", "type" : "observer", "prevId" : "7" },
   { "action" : "enter", "id" : "11" },
   { "action" : "depId", "id" : "11", "dependsOn" : "10" },
   { "action" : "dep", "id" : "11", "dependsOn" : "input$obs" },
@@ -244,7 +244,7 @@ var log = [
   { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Pressure Summary\"\n $ obs    : num 15\n $ dataset: chr \"pressure\"" },
   { "action" : "valueChange", "id" : "input$obs", "value" : " num 15" },
   { "action" : "invalidate", "id" : "11" },
-  { "action" : "ctx", "id" : "12", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "11" },
+  { "action" : "ctx", "id" : "12", "label" : "output$view", "type" : "observer", "prevId" : "11" },
   { "action" : "enter", "id" : "12" },
   { "action" : "depId", "id" : "12", "dependsOn" : "10" },
   { "action" : "dep", "id" : "12", "dependsOn" : "input$obs" },
@@ -415,6 +415,20 @@ function update() {
 }
 
 function onTick() {
+  $.each(nodeList, function(i, n) {
+    if (n.type === 'observer') {
+      if (n.x < 200)
+        n.x = 200;
+    } else if (n.type === 'value') {
+      if (n.x > 50)
+        n.x = 50;
+    } else {
+      if (n.x < 60)
+        n.x = 60;
+      if (n.x > 190)
+        n.x = 190;
+    }
+  });
   node
       .style('display', null)
       .attr('transform', function(n) {
@@ -431,7 +445,53 @@ function onTick() {
         return 'M' + source.x + ',' + source.y +
           ' L' + mid.x + ',' + mid.y +
           ' L' + target.x + ',' + target.y;
-      });
+      })
+      .attr('d', linkArc);
+}
+
+// http://bl.ocks.org/mbostock/1153292
+function linkArc(d) {
+  var source = getSourceCoords(d.source);
+  var target = getTargetCoords(d.target);
+  var dx = target.x - source.x,
+      dy = target.y - source.y,
+      dr = Math.sqrt(dx * dx + dy * dy) * 2;
+  return "M" + source.x + "," + source.y + //linkArcSegment(target, dr);
+      splitArc(source, target, dr);
+}
+
+function linkArcSegment(target, r) {
+  return "A" + r + "," + r + " 0 0,0 " + target.x + "," + target.y;
+}
+
+function splitArc(from, to, r) {
+  // Half the distance between the two points
+  var halfDist = distance(from, to) / 2;
+  // Min distance between the straight line between the two points, and the
+  // midpoint of the arc
+  var midpointDist = r - (Math.sqrt(Math.pow(r, 2) - Math.pow(halfDist, 2)));
+  var midpoint = {x: (from.x+to.x)/2, y: (from.y+to.y)/2};
+
+  var angle = Math.atan2(to.y - from.y, to.x - from.x) + Math.PI/2;
+  var arcMidpoint = {
+    x: midpoint.x + midpointDist * Math.cos(angle),
+    y: midpoint.y + midpointDist * Math.sin(angle)
+  };
+  return linkArcSegment(arcMidpoint, r) + " " +
+    linkArcSegment(to, r);
+}
+
+function midpoint(from, to) {
+  return {x: (from.x + to.x)/2, y: (from.y + to.y)/2};
+}
+
+function distance(from, to) {
+  return Math.sqrt(Math.pow(from.x-to.x, 2) + Math.pow(from.y-to.y, 2));
+}
+
+// http://bl.ocks.org/mbostock/1153292
+function transform(d) {
+  return "translate(" + d.x + "," + d.y + ")";
 }
 
 function createNodeWithUndo(data) {
@@ -601,7 +661,7 @@ var callbacks = {
     var existed = !!nodes[data.id];
     createNodeWithUndo({
       id: data.id,
-      label: data.id + ' = ' + data.value,
+      label: data.id + '\n' + data.value,
       type: 'value',
       prevId: nodes[data.id] ? data.id : null,
       hide: existed ? nodes[data.id].hide : true
@@ -777,9 +837,9 @@ $(function() {
   <svg>
     <defs>
       <marker id="triangle"
-              viewBox="0 0 10 10" 
+              viewBox="0 0 10 10"
               refX="5" refY="5"
-              markerWidth="6" 
+              markerWidth="6"
               markerHeight="6"
               orient="auto">
           <path d="M 10 0 L 0 5 L 10 10 z" />

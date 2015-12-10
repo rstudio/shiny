@@ -47,6 +47,9 @@ shiny 0.12.2.9000
   but the relevant levels of the call stack. You can turn off this behavior by
   setting `options(shiny.fullstacktrace=TRUE)` before or during app startup.
 
+* Fixed #1018: the selected value of a selectize input is guaranteed to be
+  selected in server-side mode.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

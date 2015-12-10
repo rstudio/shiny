@@ -443,3 +443,14 @@ knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
                                       shiny_rmd_warning())
   output
 }
+
+# Lets us drop reactive expressions directly into a knitr chunk and have the
+# value printed out! Nice for teaching if nothing else.
+#' @rdname knitr_methods
+#' @export
+knit_print.reactive <- function(x, ..., inline = FALSE) {
+  renderFunc <- if (inline) renderText else renderPrint
+  knitr:::knit_print(renderFunc({
+    x()
+  }), inline = inline)
+}

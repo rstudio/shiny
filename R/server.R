@@ -668,7 +668,10 @@ runApp <- function(appDir=getwd(),
     }
   )
 
-  return(.globals$retval)
+  if (inherits(.globals$retval, "try-error"))
+    stop(attr(.globals$retval, "condition", exact = TRUE))
+  else
+    return(.globals$retval)
 }
 
 #' Stop the currently running Shiny app
@@ -681,7 +684,7 @@ runApp <- function(appDir=getwd(),
 #'
 #' @export
 stopApp <- function(returnValue = NULL) {
-  .globals$retval <- returnValue
+  .globals$retval <- try(force(returnValue), silent = TRUE)
   .globals$stopped <- TRUE
   httpuv::interrupt()
 }

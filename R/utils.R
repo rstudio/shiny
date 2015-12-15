@@ -437,10 +437,15 @@ exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
 installExprFunction <- function(expr, name, eval.env = parent.frame(2),
                                 quoted = FALSE,
                                 assign.env = parent.frame(1),
-                                label = as.character(sys.call(-1)[[1]]),
+                                label = deparse(sys.call(-1)[[1]]),
                                 wrappedWithLabel = TRUE,
                                 ..stacktraceon = FALSE) {
   func <- exprToFunction(expr, eval.env, quoted, 2)
+  if (missing(label) && length(label) > 1) {
+    # Just in case the deparsed code is more complicated than we imagine. If we
+    # have a label with length > 1 it causes warnings in wrapFunctionLabel.
+    label <- paste0(label, collapse = "\n")
+  }
   if (wrappedWithLabel) {
     func <- wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
   }

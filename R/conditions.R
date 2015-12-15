@@ -130,6 +130,9 @@ withLogErrors <- function(expr,
   withCallingHandlers(
     captureStackTraces(expr),
     error = function(cond) {
+      # Don't print shiny.silent.error (i.e. validation errors)
+      if (inherits(cond, "shiny.silent.error"))
+        return()
       printError(cond, full = full, offset = offset)
     }
   )

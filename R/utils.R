@@ -538,10 +538,16 @@ assignNestedList <- function(x = list(), idx, value) {
 # option (e.g. we can set options(shiny.error = recover))
 #' @include conditions.R
 shinyCallingHandlers <- function(expr) {
-  withCallingHandlers(captureStackTraces(expr), error = function(e) {
-    handle <- getOption('shiny.error')
-    if (is.function(handle)) handle()
-  })
+  withCallingHandlers(captureStackTraces(expr),
+    error = function(e) {
+      # Don't intercept shiny.silent.error (i.e. validation errors)
+      if (inherits(e, "shiny.silent.error"))
+        return()
+
+      handle <- getOption('shiny.error')
+      if (is.function(handle)) handle()
+    }
+  )
 }
 
 #' Print message for deprecated functions in Shiny

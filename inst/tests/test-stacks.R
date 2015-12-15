@@ -75,3 +75,53 @@ test_that("integration tests", {
     FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
     FALSE, FALSE, FALSE))
 })
+
+test_that("shiny.error", {
+  caught <- NULL
+  op <- options(shiny.error = function() { caught <<- TRUE })
+  on.exit(options(op))
+
+  # Regular errors should be intercepted by shiny.error
+  try(shiny:::shinyCallingHandlers(stop("boom")), silent = TRUE)
+  expect_true(caught)
+
+  caught <- NULL
+
+  # Validation errors shouldn't be intercepted by shiny.error
+
+  try(shiny:::shinyCallingHandlers(validate(need(NULL, FALSE))), silent = TRUE)
+  expect_null(caught)
+
+  er <- eventReactive(NULL, { "Hello" })
+  try(shiny:::shinyCallingHandlers(isolate(er())), silent = TRUE)
+  expect_null(caught)
+  try(shiny:::shinyCallingHandlers(isolate(er())), silent = TRUE)
+  expect_null(caught)
+})
+
+test_that("validation error logging", {
+  caught <- NULL
+
+  # Given an error-throwing exception expr, execute it
+  # using withLogErrors, and superassign the warning that
+  # results (the error log is emitted using warning())
+  # into the parent variable `caught`
+  captureErrorLog <- function(expr) {
+    tryCatch(
+      tryCatch(
+        shiny::withLogErrors(expr),
+        warning = function(cond) {
+          caught <<- cond
+        }
+      ),
+      error = function(e) {
+      }
+    )
+  }
+
+  captureErrorLog(validate("boom"))
+  expect_null(caught)
+
+  captureErrorLog(stop("boom"))
+  expect_true(!is.null(caught))
+})

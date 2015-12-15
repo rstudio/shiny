@@ -347,6 +347,7 @@ Observable <- R6Class(
     .invalidated = logical(0),
     .running = logical(0),
     .value = NULL,
+    .error = FALSE,
     .visible = logical(0),
     .execCount = integer(0),
     .mostRecentCtxId = character(0),
@@ -380,8 +381,8 @@ Observable <- R6Class(
 
       .graphDependsOnId(getCurrentContext()$id, .mostRecentCtxId)
 
-      if (identical(class(.value), 'try-error')) {
-        stop(attr(.value, 'condition'))
+      if (.error) {
+        stop(.value)
       }
 
       if (.visible)
@@ -408,7 +409,10 @@ Observable <- R6Class(
       ctx$run(function() {
         result <- withCallingHandlers(
 
-          withVisible(.func()),
+          {
+            .error <<- FALSE
+            withVisible(.func())
+          },
 
           error = function(cond) {
             # If an error occurs, we want to propagate the error, but we also
@@ -426,7 +430,8 @@ Observable <- R6Class(
             #
             # We use try(stop()) as an easy way to generate a try-error object
             # out of this condition.
-            .value <<- try(stop(stripStackTrace(cond)), silent = TRUE)
+            .value <<- cond
+            .error <<- TRUE
             .visible <<- FALSE
           }
         )

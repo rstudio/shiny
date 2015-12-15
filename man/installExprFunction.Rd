@@ -5,7 +5,7 @@
 \title{Install an expression as a function}
 \usage{
 installExprFunction(expr, name, eval.env = parent.frame(2), quoted = FALSE,
-  assign.env = parent.frame(1), label = as.character(sys.call(-1)[[1]]),
+  assign.env = parent.frame(1), label = deparse(sys.call(-1)[[1]]),
   wrappedWithLabel = TRUE, ..stacktraceon = FALSE)
 }
 \arguments{

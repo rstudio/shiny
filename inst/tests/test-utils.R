@@ -89,6 +89,18 @@ test_that("need() works as expected", {
   expect_null(need(c(FALSE, FALSE, TRUE), FALSE))
 })
 
+test_that("req works", {
+  expect_error(req(TRUE, FALSE))
+  expect_error(req(TRUE, stop("boom")))
+  expect_equivalent(req(1, TRUE), 1)
+
+  # All req arguments are evaluated before any are tested for truthiness. This
+  # isn't necessary a good property, but let's at least document it with a test.
+  value <- 0
+  expect_error(req(NULL, value <- 1))
+  expect_equal(value, 1)
+})
+
 test_that("anyUnnamed works as expected", {
   expect_false(anyUnnamed(list()))
   expect_true(anyUnnamed(list(1,2,3)))

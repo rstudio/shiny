@@ -41,6 +41,15 @@ var ShinyApp = function() {
     return !!this.$socket;
   };
 
+  this.reconnect = function() {
+    if (this.isConnected())
+      throw "Attempted to reconnect, but already connected.";
+
+    this.$socket = this.createSocket();
+    this.$initialInput = $.extend({}, this.$inputValues);
+    this.$updateConditionals();
+  };
+
   this.createSocket = function () {
     var self = this;
 
@@ -69,11 +78,17 @@ var ShinyApp = function() {
     };
 
     var socket = createSocketFunc();
+    var hasOpened = false;
     socket.onopen = function() {
+      hasOpened = true;
+
       $(document).trigger({
         type: 'shiny:connected',
         socket: socket
       });
+
+      $(document.body).removeClass('disconnected');
+
       socket.send(JSON.stringify({
         method: 'init',
         data: self.$initialInput
@@ -87,13 +102,22 @@ var ShinyApp = function() {
     socket.onmessage = function(e) {
       self.dispatchMessage(e.data);
     };
+    // Called when a successfully-opened websocket is closed, or when an
+    // attempt to open a connection fails.
     socket.onclose = function() {
-      $(document).trigger({
-        type: 'shiny:disconnected',
-        socket: socket
-      });
-      $(document.body).addClass('disconnected');
-      self.$notifyDisconnected();
+      // These things are needed only if we've successfully opened the
+      // websocket.
+      if (hasOpened) {
+        $(document).trigger({
+          type: 'shiny:disconnected',
+          socket: socket
+        });
+        $(document.body).addClass('disconnected');
+        self.$notifyDisconnected();
+      }
+
+      self.$removeSocket();
+      self.$scheduleReconnect();
     };
     return socket;
   };
@@ -136,6 +160,16 @@ var ShinyApp = function() {
         parent.postMessage('disconnected', origin);
       }
     }
+  };
+
+  this.$removeSocket = function() {
+    this.$socket = null;
+  };
+
+  // Try to reconnect after one second
+  this.$scheduleReconnect = function() {
+    var self = this;
+    setTimeout(function() { self.reconnect(); }, 1000);
   };
 
   // NB: Including blobs will cause IE to break!

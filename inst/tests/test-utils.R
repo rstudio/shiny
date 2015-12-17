@@ -89,6 +89,34 @@ test_that("need() works as expected", {
   expect_null(need(c(FALSE, FALSE, TRUE), FALSE))
 })
 
+test_that("req works", {
+  expect_error(req(TRUE, FALSE))
+  expect_error(req(TRUE, stop("boom")))
+  expect_equivalent(req(1, TRUE), 1)
+
+  # req arguments short circuit when a falsy value is found
+  value <- 0
+  expect_error(req(NULL, value <- 1))
+  expect_equal(value, 0)
+
+  # first argument is evaluated exactly once
+  value <- 0
+  req(value <- value + 1)
+  expect_equal(value, 1)
+
+  # correct environment is used
+  req2 <- function(...) {
+    req(...)
+  }
+  value <- 0
+  req2(value <- value + 1)
+  expect_equal(value, 1)
+
+  # Lots of args are supported
+  expect_error(do.call(req, c(as.list(1:1000), list(NULL))))
+  expect_equal(1, do.call(req, as.list(1:1000)))
+})
+
 test_that("anyUnnamed works as expected", {
   expect_false(anyUnnamed(list()))
   expect_true(anyUnnamed(list(1,2,3)))

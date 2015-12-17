@@ -50,6 +50,11 @@ shiny 0.12.2.9000
 * Fixed #1018: the selected value of a selectize input is guaranteed to be
   selected in server-side mode.
 
+* Added `req` function, which provides a simple way to prevent a reactive,
+  observer, or output from executing until all required inputs and values are
+  available. (Similar functionality has been available for a while using
+  validate/need, but req provides a much simpler and more direct interface.)
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

@@ -1056,14 +1056,16 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' @export
 req <- function(...) {
-  dots <- eval(substitute(alist(...)))
+  first <- NULL
   dotloop(function(item) {
     if (!isTruthy(item))
       stopWithCondition("validation", "")
+    if (is.null(first))
+      first <<- list(item)
   }, ...)
 
-  if (!missing(..1))
-    ..1
+  if (!is.null(first))
+    first[[1]]
   else
     invisible()
 }
@@ -1073,10 +1075,10 @@ req <- function(...) {
 # is discarded, and only invisible() is returned from dotloop.
 #
 # Can be used to facilitate short-circuit eval on dots.
-dotloop <- function(fun_, ..., env_ = parent.frame(1)) {
+dotloop <- function(fun_, ...) {
   dots <- eval(substitute(alist(...)))
-  for (qexpr in dots) {
-    fun_(eval(qexpr, env_))
+  for (i in seq_along(dots)) {
+    fun_(eval(as.symbol(paste0("..", i)), environment()))
   }
   invisible()
 }

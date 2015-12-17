@@ -98,6 +98,19 @@ test_that("req works", {
   value <- 0
   expect_error(req(NULL, value <- 1))
   expect_equal(value, 0)
+
+  # first argument is evaluated exactly once
+  value <- 0
+  req(value <- value + 1)
+  expect_equal(value, 1)
+
+  # correct environment is used
+  req2 <- function(...) {
+    req(...)
+  }
+  value <- 0
+  req2(value <- value + 1)
+  expect_equal(value, 1)
 })
 
 test_that("anyUnnamed works as expected", {

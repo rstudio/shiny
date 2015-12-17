@@ -1056,16 +1056,13 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' @export
 req <- function(...) {
-  first <- NULL
   dotloop(function(item) {
     if (!isTruthy(item))
       stopWithCondition("validation", "")
-    if (is.null(first))
-      first <<- list(item)
   }, ...)
 
-  if (!is.null(first))
-    first[[1]]
+  if (!missing(..1))
+    ..1
   else
     invisible()
 }

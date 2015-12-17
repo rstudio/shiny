@@ -1056,14 +1056,29 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' @export
 req <- function(...) {
-  for (item in list(...)) {
+  dots <- eval(substitute(alist(...)))
+  dotloop(function(item) {
     if (!isTruthy(item))
       stopWithCondition("validation", "")
-  }
-  if (length(list(...)) > 0)
+  }, ...)
+
+  if (!missing(..1))
     ..1
   else
     invisible()
+}
+
+# Execute a function against each element of ..., but only evaluate each element
+# after the previous element has been passed to fun_. The return value of fun_
+# is discarded, and only invisible() is returned from dotloop.
+#
+# Can be used to facilitate short-circuit eval on dots.
+dotloop <- function(fun_, ..., env_ = parent.frame(1)) {
+  dots <- eval(substitute(alist(...)))
+  for (qexpr in dots) {
+    fun_(eval(qexpr, env_))
+  }
+  invisible()
 }
 
 isTruthy <- function(x) {

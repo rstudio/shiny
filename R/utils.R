@@ -1074,7 +1074,7 @@ req <- function(...) {
 # Can be used to facilitate short-circuit eval on dots.
 dotloop <- function(fun_, ...) {
   for (i in 1:(nargs()-1)) {
-    fun_(eval(as.symbol(paste0("..", i)), environment()))
+    fun_(eval(as.symbol(paste0("..", i))))
   }
   invisible()
 }

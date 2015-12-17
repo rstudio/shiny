@@ -111,6 +111,10 @@ test_that("req works", {
   value <- 0
   req2(value <- value + 1)
   expect_equal(value, 1)
+
+  # Lots of args are supported
+  expect_error(do.call(req, c(as.list(1:1000), list(NULL))))
+  expect_equal(1, do.call(req, as.list(1:1000)))
 })
 
 test_that("anyUnnamed works as expected", {

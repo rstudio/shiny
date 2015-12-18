@@ -61,6 +61,12 @@ shiny 0.12.2.9000
 
 * Upgrade to Font Awesome 4.5.0.
 
+* Added `fillPage` function, an alternative to `fluidPage`, `fixedPage`, etc.
+  that is designed for apps that fill the entire available page width/height.
+
+* Added `flexRow` and `flexCol` functions, for laying out proportional grids in
+  `fillPage`. For modern browsers only.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

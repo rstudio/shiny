@@ -417,3 +417,57 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
     }, SIMPLIFY = FALSE)
   ))
 }
+
+#' Flex Box-based row/column layouts
+#'
+#' Creates row and column layouts with proportionally-sized cells, using the
+#' Flex Box layout model of CSS3. These can be nested to create arbitrary
+#' proportional-grid layouts. \strong{Warning:} Flex Box is not well supported by
+#' Internet Explorer, so these functions should only be used where modern
+#' browsers can be assumed.
+#'
+#' @param ... UI objects to put in each row/column cell; each argument will
+#'   occupy a single cell. To put multiple items in a single cell, you can use
+#'   \code{\link{tagList}} or \code{\link{div}} to combine them.
+#' @param flex Determines how space should be distributed to the cells. Can be a
+#'   single value like \code{1} or \code{2} to evenly distribute the available
+#'   space; or use a vector of numbers to specify the proportions. For example,
+#'   \code{flex = c(2, 3)} would cause the space to be split 40\%/60\% between
+#'   two cells.
+#' @param width,height The total amount of width and height to use for the
+#'   entire row/column. For the default height of \code{"100\%"} to be
+#'   effective, the parent must be \code{fillPage}, another
+#'   \code{flexRow}/\code{flexCol}, or some other HTML element whose height is
+#'   not determined by the height of its contents.
+#'
+#' @export
+flexRow <- function(..., flex = 1, width = "100%", height = "100%") {
+  flexfill(..., direction = "row", flex = flex, width = width, height = height)
+}
+
+#' @rdname flexRow
+#' @export
+flexCol <- function(..., flex = 1, width = "100%", height = "100%") {
+  flexfill(..., direction = "column", flex = flex, width = width, height = height)
+}
+
+flexfill <- function(..., direction, flex, width = width, height = height) {
+  if (length(flex) > length(list(...))) {
+    flex <- flex[1:length(list(...))]
+  }
+
+  tags$div(
+    style = css(
+      display = "flex",
+      flex.direction = direction,
+      width = width,
+      height = height
+    ),
+    mapply(list(...), flex, FUN = function(el, flexValue) {
+      tags$div(
+        style = css(flex = flexValue, width = "100%", height = "100%"),
+        el
+      )
+    }, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+  )
+}

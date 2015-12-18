@@ -87,7 +87,7 @@ var ShinyApp = function() {
         socket: socket
       });
 
-      $(document.body).removeClass('disconnected');
+      exports.onSocketConnected();
 
       socket.send(JSON.stringify({
         method: 'init',
@@ -112,8 +112,9 @@ var ShinyApp = function() {
           type: 'shiny:disconnected',
           socket: socket
         });
-        $(document.body).addClass('disconnected');
+
         self.$notifyDisconnected();
+        exports.onSocketDisconnected();
       }
 
       self.$removeSocket();
@@ -170,6 +171,45 @@ var ShinyApp = function() {
   this.$scheduleReconnect = function() {
     var self = this;
     setTimeout(function() { self.reconnect(); }, 1000);
+  };
+
+  exports.onSocketDisconnected = function() {
+    var $dialog = $('<div class="shiny-reconnect-dialog-wrapper">' +
+      '<div class="shiny-reconnect-dialog">' +
+      '<span class="shiny-reconnect-text"></span>' +
+      '<span class="shiny-reconnect-dots"></span>' +
+      '</div></div>')
+        .appendTo('body');
+
+    $(".shiny-reconnect-text").text("Trying to reconnect to new session");
+
+    var ndots = 1;
+    var updateDots = function() {
+      // Select from $dialog, so that if a separate function call adds a div
+      // of the same class, we won't try to update that div's dots. This could
+      // happen when Shiny Server adds its own reconnection dialog.
+      var $dots = $dialog.find(".shiny-reconnect-dots");
+      // If the dots have been removed, exit and don't reschedule this function.
+      if ($dots.length === 0) return;
+
+      // Create the string for number of dots
+      ndots = (ndots-1) % 3 + 1;
+      var dotstr = "";
+      for (var i=0; i<ndots; i++) {
+        dotstr += ".";
+      }
+      ndots++;
+      $dots.text(dotstr);
+
+      // Reschedule this function after 1.5 seconds
+      setTimeout(updateDots, 1500);
+    };
+
+    updateDots();
+  };
+
+  exports.onSocketConnected = function() {
+    $(".shiny-reconnect-dialog-wrapper").remove();
   };
 
   // NB: Including blobs will cause IE to break!

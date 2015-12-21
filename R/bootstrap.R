@@ -764,6 +764,7 @@ verbatimTextOutput <- function(outputId) {
 }
 
 
+#' @name plotOutput
 #' @rdname plotOutput
 #' @export
 imageOutput <- function(outputId, width = "100%", height="400px",

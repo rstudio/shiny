@@ -442,13 +442,14 @@ function initShiny() {
 
 // Give any deferred iframes a chance to load.
 function initDeferredIframes() {
-  if (!window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {
+  if (!window.Shiny || !window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {
     // If somehow we accidentally call this before the server connection is
     // established, just ignore the call. At the time of this writing it
     // doesn't happen, but it's easy to imagine a later refactoring putting
     // us in this situation and it'd be hard to notice with either manual
     // testing or automated tests, because the only effect is on HTTP request
-    // timing.
+    // timing. (Update: Actually Aron saw this being called without even
+    // window.Shiny being defined, but it was hard to repro.)
     return;
   }
 

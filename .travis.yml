@@ -6,6 +6,9 @@ r_binary_packages:
   - cairo
   - knitr
 
+r_github_packages:
+  - rstudio/htmltools
+
 notifications:
   email:
     on_success: change

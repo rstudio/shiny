@@ -510,7 +510,7 @@ flexfill <- function(..., direction, flex, width = width, height = height) {
         # that sizes itself (along the main axis) to its contents
         tags$div(
           class = "flexfill-item",
-          style = css(position = "relative", flex = "initial"),
+          style = css(position = "relative", flex = "none"),
           style = paste0(main, ":auto;", cross, ":100%;"),
           el
         )

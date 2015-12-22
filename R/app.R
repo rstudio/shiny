@@ -367,7 +367,20 @@ as.tags.shiny.appobj <- function(x, ...) {
   height <- if (is.null(opts$height)) "400" else opts$height
 
   path <- addSubApp(x)
-  tags$iframe(src=path, width=width, height=height, class="shiny-frame")
+  deferredIFrame(path, width, height)
+}
+
+# Generate subapp iframes in such a way that they will not actually load right
+# away. Loading subapps immediately upon app load can result in a storm of
+# connections, all of which are contending for the few concurrent connections
+# that a browser will make to a specific origin. Instead, we load dummy iframes
+# and let the client load them when convenient. (See the initIframes function in
+# init_shiny.js.)
+deferredIFrame <- function(path, width, height) {
+  tags$iframe("data-deferred-src" = path,
+    width = width, height = height,
+    class = "shiny-frame shiny-frame-deferred"
+  )
 }
 
 #' Knitr S3 methods
@@ -418,8 +431,7 @@ knit_print.shiny.appobj <- function(x, ...) {
   }
   else {
     path <- addSubApp(x)
-    output <- tags$iframe(src=path, width=width, height=height,
-                          class="shiny-frame")
+    output <- deferredIFrame(path, width, height)
   }
 
   # If embedded Shiny apps ever have JS/CSS dependencies (like pym.js) we'll

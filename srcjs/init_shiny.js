@@ -206,6 +206,12 @@ function initShiny() {
     $.each(currentValues, function(name, value) {
       inputs.setInput(name, value);
     });
+
+    // Not sure if the iframe stuff is an intrinsic part of bindAll, but bindAll
+    // is a convenient place to hang it. bindAll will be called anytime new HTML
+    // appears that might contain inputs/outputs; it's reasonable to assume that
+    // any such HTML may contain iframes as well.
+    initDeferredIframes();
   };
   exports.unbindAll = unbindAll;
 
@@ -428,7 +434,32 @@ function initShiny() {
   // We've collected all the initial values--start the server process!
   inputsNoResend.reset(initialValues);
   shinyapp.connect(initialValues);
+  $(document).one("shiny:connected", function() {
+    initDeferredIframes();
+  });
 } // function initShiny()
+
+
+// Give any deferred iframes a chance to load.
+function initDeferredIframes() {
+  if (!window.Shiny || !window.Shiny.shinyapp || !window.Shiny.shinyapp.isConnected()) {
+    // If somehow we accidentally call this before the server connection is
+    // established, just ignore the call. At the time of this writing it
+    // doesn't happen, but it's easy to imagine a later refactoring putting
+    // us in this situation and it'd be hard to notice with either manual
+    // testing or automated tests, because the only effect is on HTTP request
+    // timing. (Update: Actually Aron saw this being called without even
+    // window.Shiny being defined, but it was hard to repro.)
+    return;
+  }
+
+  $(".shiny-frame-deferred").each(function (i, el) {
+    var $el = $(el);
+    $el.removeClass("shiny-frame-deferred");
+    $el.attr("src", $el.attr("data-deferred-src"));
+    $el.attr("data-deferred-src", null);
+  });
+}
 
 $(function() {
   // Init Shiny a little later than document ready, so user code can

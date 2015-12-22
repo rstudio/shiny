@@ -427,47 +427,118 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #' browsers can be assumed.
 #'
 #' @param ... UI objects to put in each row/column cell; each argument will
-#'   occupy a single cell. To put multiple items in a single cell, you can use
-#'   \code{\link{tagList}} or \code{\link{div}} to combine them.
+#'   occupy a single cell. (To put multiple items in a single cell, you can use
+#'   \code{\link{tagList}} or \code{\link{div}} to combine them.) Named
+#'   arguments will be used as attributes on the \code{div} element that
+#'   encapsulates the row/column.
 #' @param flex Determines how space should be distributed to the cells. Can be a
 #'   single value like \code{1} or \code{2} to evenly distribute the available
 #'   space; or use a vector of numbers to specify the proportions. For example,
 #'   \code{flex = c(2, 3)} would cause the space to be split 40\%/60\% between
-#'   two cells.
+#'   two cells. NA values will cause the corresponding cell to be sized
+#'   according to its contents (without growing or shrinking).
 #' @param width,height The total amount of width and height to use for the
 #'   entire row/column. For the default height of \code{"100\%"} to be
 #'   effective, the parent must be \code{fillPage}, another
-#'   \code{flexRow}/\code{flexCol}, or some other HTML element whose height is
+#'   \code{fillRow}/\code{fillCol}, or some other HTML element whose height is
 #'   not determined by the height of its contents.
 #'
+#' @examples
+#' \donttest{
+#' ui <- fillPage(fillRow(
+#'   plotOutput("plotLeft", height = "100%"),
+#'   fillCol(
+#'     plotOutput("plotTopRight", height = "100%"),
+#'     plotOutput("plotBottomRight", height = "100%")
+#'   )
+#' ))
+#'
+#' server <- function(input, output, session) {
+#'   output$plotLeft <- renderPlot(plot(cars))
+#'   output$plotTopRight <- renderPlot(plot(cars))
+#'   output$plotBottomLeft <- renderPlot(plot(cars))
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
 #' @export
-flexRow <- function(..., flex = 1, width = "100%", height = "100%") {
+fillRow <- function(..., flex = 1, width = "100%", height = "100%") {
   flexfill(..., direction = "row", flex = flex, width = width, height = height)
 }
 
-#' @rdname flexRow
+#' @rdname fillRow
 #' @export
-flexCol <- function(..., flex = 1, width = "100%", height = "100%") {
+fillCol <- function(..., flex = 1, width = "100%", height = "100%") {
   flexfill(..., direction = "column", flex = flex, width = width, height = height)
 }
 
 flexfill <- function(..., direction, flex, width = width, height = height) {
-  if (length(flex) > length(list(...))) {
-    flex <- flex[1:length(list(...))]
+  children <- list(...)
+  attrs <- list()
+
+  if (!is.null(names(children))) {
+    attrs <- children[names(children) != ""]
+    children <- children[names(children) == ""]
   }
 
-  tags$div(
+  if (length(flex) > length(children)) {
+    flex <- flex[1:length(children)]
+  }
+
+  # The dimension along the main axis
+  main <- switch(direction,
+    row = "width",
+    "row-reverse" = "width",
+    column = "height",
+    "column-reverse" = "height",
+    stop("Unexpected direction")
+  )
+  # The dimension along the cross axis
+  cross <- if (main == "width") "height" else "width"
+
+  divArgs <- list(
+    class = sprintf("flexfill-container flexfill-container-%s", direction),
     style = css(
       display = "flex",
       flex.direction = direction,
-      width = width,
-      height = height
+      width = validateCssUnit(width),
+      height = validateCssUnit(height)
     ),
-    mapply(list(...), flex, FUN = function(el, flexValue) {
-      tags$div(
-        style = css(flex = flexValue, width = "100%", height = "100%"),
-        el
-      )
+    mapply(children, flex, FUN = function(el, flexValue) {
+      if (is.na(flexValue)) {
+        # If the flex value is NA, then put the element in a simple flex item
+        # that sizes itself (along the main axis) to its contents
+        tags$div(
+          class = "flexfill-item",
+          style = css(position = "relative", flex = "initial"),
+          style = paste0(main, ":auto;", cross, ":100%;"),
+          el
+        )
+      } else if (is.numeric(flexValue)) {
+        # If the flex value is numeric, we need *two* wrapper divs. The outer is
+        # the flex item, and the inner is an absolute-fill div that is needed to
+        # make percentage-based sizing for el work correctly. I don't understand
+        # why this is needed but the truth is probably in this SO page:
+        # http://stackoverflow.com/questions/15381172/css-flexbox-child-height-100
+        tags$div(
+          class = "flexfill-item",
+          style = css(
+            position = "relative", flex = flexValue,
+            width = "100%", height = "100%"
+          ),
+          tags$div(
+            class = "flexfill-item-inner",
+            style = css(
+              position = "absolute",
+              top = 0, left = 0, right = 0, bottom = 0
+            ),
+            el
+          )
+        )
+      } else {
+        stop("Unexpected flex argument: ", flexValue)
+      }
     }, SIMPLIFY = FALSE, USE.NAMES = FALSE)
   )
+  do.call(tags$div, c(attrs, divArgs))
 }

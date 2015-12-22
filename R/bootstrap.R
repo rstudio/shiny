@@ -138,7 +138,7 @@ basicPage <- function(...) {
 #' )
 #'
 #' fillPage(
-#'   flexRow(
+#'   fillRow(
 #'     div(style = "background-color: red; width: 100%; height: 100%;"),
 #'     div(style = "background-color: blue; width: 100%; height: 100%;")
 #'   )

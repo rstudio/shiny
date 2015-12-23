@@ -422,9 +422,25 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'
 #' Creates row and column layouts with proportionally-sized cells, using the
 #' Flex Box layout model of CSS3. These can be nested to create arbitrary
-#' proportional-grid layouts. \strong{Warning:} Flex Box is not well supported by
-#' Internet Explorer, so these functions should only be used where modern
+#' proportional-grid layouts. \strong{Warning:} Flex Box is not well supported
+#' by Internet Explorer, so these functions should only be used where modern
 #' browsers can be assumed.
+#'
+#' @details If you try to use \code{fillRow} and \code{fillCol} inside of other
+#'   Shiny containers, such as \code{\link{sidebarLayout}},
+#'   \code{\link{navbarPage}}, or even \code{tags$div}, you will probably find
+#'   that they will not appear. This is due to \code{fillRow} and \code{fillCol}
+#'   defaulting to \code{height="100\%"}, which will only work inside of
+#'   containers that have determined their own size (rather than shrinking to
+#'   the size of their contents, as is usually the case in HTML).
+#'
+#'   To avoid this problem, you have two options:
+#'   \itemize{
+#'     \item only use \code{fillRow}/\code{fillCol} inside of \code{fillPage},
+#'       \code{fillRow}, or \code{fillCol}
+#'     \item provide an explicit \code{height} argument to
+#'       \code{fillRow}/\code{fillCol}
+#'   }
 #'
 #' @param ... UI objects to put in each row/column cell; each argument will
 #'   occupy a single cell. (To put multiple items in a single cell, you can use

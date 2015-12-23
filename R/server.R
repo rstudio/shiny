@@ -767,3 +767,110 @@ runExample <- function(example=NA,
            display.mode = display.mode)
   }
 }
+
+#' Run a gadget
+#'
+#' Similar to \code{runApp}, but if running in RStudio, defaults to viewing the
+#' app in the Viewer pane.
+#'
+#' @param app Either a Shiny app object as created by
+#'   \code{\link[=shiny]{shinyApp}} et al, or, a UI object.
+#' @param server Ignored if \code{app} is a Shiny app object; otherwise, passed
+#'   along to \code{shinyApp} (i.e. \code{shinyApp(ui = app, server = server)}).
+#' @param port See \code{\link[=shiny]{runApp}}.
+#' @param viewer Specify where the gadget should be displayed--viewer pane,
+#'   dialog window, or external browser--by passing in a call to one of the
+#'   \code{\link{viewer}} functions.
+#' @return The value returned by the gadget.
+#'
+#' @examples
+#' \dontrun{
+#' library(shiny)
+#'
+#' ui <- fillPage(...)
+#'
+#' server <- function(input, output, session) {
+#'   ...
+#' }
+#'
+#' # Either pass ui/server as separate arguments...
+#' runGadget(ui, server)
+#'
+#' # ...or as a single app object
+#' runGadget(shinyApp(ui, server))
+#' }
+#'
+#' @export
+runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
+  viewer = paneViewer()) {
+
+  if (!is.shiny.appobj(app)) {
+    app <- shinyApp(app, server)
+  }
+
+  if (is.null(viewer)) {
+    viewer <- browseURL
+  }
+
+  retVal <- withVisible(shiny::runApp(app, port = port, launch.browser = viewer))
+  if (retVal$visible)
+    retVal$value
+  else
+    invisible(retVal$value)
+}
+
+#' Viewer options
+#'
+#' Use these functions to control where the gadget is displayed in RStudio (or
+#' other R environments that emulate RStudio's viewer pane/dialog APIs). If
+#' viewer APIs are not available in the current R environment, then the gadget
+#' will be displayed in the system's default web browser (see
+#' \code{\link[utils]{browseURL}}).
+#'
+#' @return A function that takes a single \code{url} parameter, suitable for
+#'   passing as the \code{viewer} argument of \code{\link{runGadget}}.
+#'
+#' @rdname viewer
+#' @name viewer
+NULL
+
+#' @param minHeight The minimum height (in pixels) desired to show the gadget in
+#'   the viewer pane. If a positive number, resize the pane if necessary to show
+#'   at least that many pixels. If \code{NULL}, use the existing viewer pane
+#'   size. If \code{"maximize"}, use the maximum available vertical space.
+#' @rdname viewer
+#' @export
+paneViewer <- function(minHeight = NULL) {
+  viewer <- getOption("viewer")
+  if (is.null(viewer)) {
+    browseURL
+  } else {
+    function(url) {
+      viewer(url, minHeight)
+    }
+  }
+}
+
+#' @param dialogName The window title to display for the dialog.
+#' @param width,height The desired dialog width/height, in pixels.
+#' @rdname viewer
+#' @export
+dialogViewer <- function(dialogName, width = 600, height = 600) {
+  viewer <- getOption("shinygadgets.showdialog")
+  if (is.null(viewer)) {
+    browseURL
+  } else {
+    function(url) {
+      viewer(dialogName, url, width = width, height = height)
+    }
+  }
+}
+
+#' @param browser See \code{\link[utils]{browseURL}}.
+#' @rdname viewer
+#' @export
+browserViewer <- function(browser = getOption("browser")) {
+  function(url) {
+    browseURL(url, browser = browser)
+  }
+}

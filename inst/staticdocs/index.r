@@ -129,9 +129,12 @@ sd_section("Running",
   "Functions that are used to run or stop Shiny applications.",
   c(
     "runApp",
+    "runGadget",
     "runExample",
+    "runGadget",
     "runUrl",
-    "stopApp"
+    "stopApp",
+    "viewer"
   )
 )
 sd_section("Extending Shiny",

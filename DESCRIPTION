@@ -70,10 +70,8 @@ Imports:
     jsonlite (>= 0.9.16),
     xtable,
     digest,
-    htmltools (>= 0.2.11),
+    htmltools (>= 0.2.6),
     R6 (>= 2.0)
-Remotes:
-    rstudio/htmltools
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

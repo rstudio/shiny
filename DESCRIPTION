@@ -72,6 +72,8 @@ Imports:
     digest,
     htmltools (>= 0.2.11),
     R6 (>= 2.0)
+Remotes:
+    rstudio/htmltools
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

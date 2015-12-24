@@ -417,3 +417,178 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
     }, SIMPLIFY = FALSE)
   ))
 }
+
+#' Flex Box-based row/column layouts
+#'
+#' Creates row and column layouts with proportionally-sized cells, using the
+#' Flex Box layout model of CSS3. These can be nested to create arbitrary
+#' proportional-grid layouts. \strong{Warning:} Flex Box is not well supported
+#' by Internet Explorer, so these functions should only be used where modern
+#' browsers can be assumed.
+#'
+#' @details If you try to use \code{fillRow} and \code{fillCol} inside of other
+#'   Shiny containers, such as \code{\link{sidebarLayout}},
+#'   \code{\link{navbarPage}}, or even \code{tags$div}, you will probably find
+#'   that they will not appear. This is due to \code{fillRow} and \code{fillCol}
+#'   defaulting to \code{height="100\%"}, which will only work inside of
+#'   containers that have determined their own size (rather than shrinking to
+#'   the size of their contents, as is usually the case in HTML).
+#'
+#'   To avoid this problem, you have two options:
+#'   \itemize{
+#'     \item only use \code{fillRow}/\code{fillCol} inside of \code{fillPage},
+#'       \code{fillRow}, or \code{fillCol}
+#'     \item provide an explicit \code{height} argument to
+#'       \code{fillRow}/\code{fillCol}
+#'   }
+#'
+#' @param ... UI objects to put in each row/column cell; each argument will
+#'   occupy a single cell. (To put multiple items in a single cell, you can use
+#'   \code{\link{tagList}} or \code{\link{div}} to combine them.) Named
+#'   arguments will be used as attributes on the \code{div} element that
+#'   encapsulates the row/column.
+#' @param flex Determines how space should be distributed to the cells. Can be a
+#'   single value like \code{1} or \code{2} to evenly distribute the available
+#'   space; or use a vector of numbers to specify the proportions. For example,
+#'   \code{flex = c(2, 3)} would cause the space to be split 40\%/60\% between
+#'   two cells. NA values will cause the corresponding cell to be sized
+#'   according to its contents (without growing or shrinking).
+#' @param width,height The total amount of width and height to use for the
+#'   entire row/column. For the default height of \code{"100\%"} to be
+#'   effective, the parent must be \code{fillPage}, another
+#'   \code{fillRow}/\code{fillCol}, or some other HTML element whose height is
+#'   not determined by the height of its contents.
+#'
+#' @examples
+#' \donttest{
+#' ui <- fillPage(fillRow(
+#'   plotOutput("plotLeft", height = "100%"),
+#'   fillCol(
+#'     plotOutput("plotTopRight", height = "100%"),
+#'     plotOutput("plotBottomRight", height = "100%")
+#'   )
+#' ))
+#'
+#' server <- function(input, output, session) {
+#'   output$plotLeft <- renderPlot(plot(cars))
+#'   output$plotTopRight <- renderPlot(plot(cars))
+#'   output$plotBottomLeft <- renderPlot(plot(cars))
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#' @export
+fillRow <- function(..., flex = 1, width = "100%", height = "100%") {
+  flexfill(..., direction = "row", flex = flex, width = width, height = height)
+}
+
+#' @rdname fillRow
+#' @export
+fillCol <- function(..., flex = 1, width = "100%", height = "100%") {
+  flexfill(..., direction = "column", flex = flex, width = width, height = height)
+}
+
+flexfill <- function(..., direction, flex, width = width, height = height) {
+  children <- list(...)
+  attrs <- list()
+
+  if (!is.null(names(children))) {
+    attrs <- children[names(children) != ""]
+    children <- children[names(children) == ""]
+  }
+
+  if (length(flex) > length(children)) {
+    flex <- flex[1:length(children)]
+  }
+
+  # The dimension along the main axis
+  main <- switch(direction,
+    row = "width",
+    "row-reverse" = "width",
+    column = "height",
+    "column-reverse" = "height",
+    stop("Unexpected direction")
+  )
+  # The dimension along the cross axis
+  cross <- if (main == "width") "height" else "width"
+
+  divArgs <- list(
+    class = sprintf("flexfill-container flexfill-container-%s", direction),
+    style = css(
+      display = "flex",
+      flex.direction = direction,
+      width = validateCssUnit(width),
+      height = validateCssUnit(height)
+    ),
+    mapply(children, flex, FUN = function(el, flexValue) {
+      if (is.na(flexValue)) {
+        # If the flex value is NA, then put the element in a simple flex item
+        # that sizes itself (along the main axis) to its contents
+        tags$div(
+          class = "flexfill-item",
+          style = css(position = "relative", flex = "none"),
+          style = paste0(main, ":auto;", cross, ":100%;"),
+          el
+        )
+      } else if (is.numeric(flexValue)) {
+        # If the flex value is numeric, we need *two* wrapper divs. The outer is
+        # the flex item, and the inner is an absolute-fill div that is needed to
+        # make percentage-based sizing for el work correctly. I don't understand
+        # why this is needed but the truth is probably in this SO page:
+        # http://stackoverflow.com/questions/15381172/css-flexbox-child-height-100
+        tags$div(
+          class = "flexfill-item",
+          style = css(
+            position = "relative", flex = flexValue,
+            width = "100%", height = "100%"
+          ),
+          tags$div(
+            class = "flexfill-item-inner",
+            style = css(
+              position = "absolute",
+              top = 0, left = 0, right = 0, bottom = 0
+            ),
+            el
+          )
+        )
+      } else {
+        stop("Unexpected flex argument: ", flexValue)
+      }
+    }, SIMPLIFY = FALSE, USE.NAMES = FALSE)
+  )
+  do.call(tags$div, c(attrs, divArgs))
+}
+
+css <- function(..., collapse_ = "") {
+  props <- list(...)
+  if (length(props) == 0) {
+    return("")
+  }
+
+  if (is.null(names(props)) || any(names(props) == "")) {
+    stop("cssList expects all arguments to be named")
+  }
+
+  # Necessary to make factors show up as level names, not numbers
+  props[] <- lapply(props, paste, collapse = " ")
+
+  # Drop null args
+  props <- props[!sapply(props, empty)]
+  if (length(props) == 0) {
+    return("")
+  }
+
+  # Replace all '.' and '_' in property names to '-'
+  names(props) <- gsub("[._]", "-", tolower(gsub("([A-Z])", "-\\1", names(props))))
+
+  # Create "!important" suffix for each property whose name ends with !, then
+  # remove the ! from the property name
+  important <- ifelse(grepl("!$", names(props), perl = TRUE), " !important", "")
+  names(props) <- sub("!$", "", names(props), perl = TRUE)
+
+  paste0(names(props), ":", props, important, ";", collapse = collapse_)
+}
+
+empty <- function(x) {
+  length(x) == 0 || (is.character(x) && !any(nzchar(x)))
+}

@@ -67,6 +67,10 @@ shiny 0.12.2.9000
 * Added `fillRow` and `fillCol` functions, for laying out proportional grids in
   `fillPage`. For modern browsers only.
 
+* Added `runGadget`, `paneViewer`, `dialogViewer`, and `browserViewer`
+  functions to support Shiny Gadgets. More detailed docs about gadgets coming
+  soon.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

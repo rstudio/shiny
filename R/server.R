@@ -302,17 +302,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               }
 
               local({
-                args <- list(
-                  input=shinysession$input,
-                  output=.createOutputWriter(shinysession))
-
-                # The clientData and session arguments are optional; check if
-                # each exists
-                if ('clientData' %in% names(formals(serverFunc)))
-                  args$clientData <- shinysession$clientData
-
-                if ('session' %in% names(formals(serverFunc)))
-                  args$session <- shinysession
+                args <- argsForServerFunc(serverFunc, shinysession)
 
                 withReactiveDomain(shinysession, {
                   do.call(
@@ -374,6 +364,26 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
     }
   )
   return(appHandlers)
+}
+
+# Determine what arguments should be passed to this serverFunc. All server funcs
+# must take input and output, but clientData (obsolete) and session are
+# optional.
+argsForServerFunc <- function(serverFunc, session) {
+  args <- list(input = session$input, output = .createOutputWriter(session))
+
+  paramNames <- names(formals(serverFunc))
+
+  # The clientData and session arguments are optional; check if
+  # each exists
+
+  if ("clientData" %in% paramNames)
+    args$clientData <- session$clientData
+
+  if ("session" %in% paramNames)
+    args$session <- session
+
+  args
 }
 
 getEffectiveBody <- function(func) {
@@ -678,6 +688,7 @@ runApp <- function(appDir=getwd(),
     callAppHook("onAppStop", appUrl)
   }, add = TRUE)
 
+  .globals$reterror <- NULL
   .globals$retval <- NULL
   .globals$stopped <- FALSE
   # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
@@ -691,7 +702,13 @@ runApp <- function(appDir=getwd(),
     )
   )
 
-  return(.globals$retval)
+  if (isTRUE(.globals$reterror)) {
+    stop(.globals$retval)
+  }
+  else if (.globals$retval$visible)
+    .globals$retval
+  else
+    invisible(.globals$retval)
 }
 
 #' Stop the currently running Shiny app
@@ -704,7 +721,24 @@ runApp <- function(appDir=getwd(),
 #'
 #' @export
 stopApp <- function(returnValue = invisible()) {
-  .globals$retval <- returnValue
+  # reterror will indicate whether retval is an error (i.e. it should be passed
+  # to stop() when the serviceApp loop stops) or a regular value (in which case
+  # it should simply be returned with the appropriate visibility).
+  .globals$reterror <- FALSE
+  ..stacktraceoff..(
+    tryCatch(
+      {
+        captureStackTraces(
+          .globals$retval <- withVisible(..stacktraceon..(force(returnValue)))
+        )
+      },
+      error = function(e) {
+        .globals$retval <- e
+        .globals$reterror <- TRUE
+      }
+    )
+  )
+
   .globals$stopped <- TRUE
   httpuv::interrupt()
 }
@@ -770,8 +804,8 @@ runExample <- function(example=NA,
 
 #' Run a gadget
 #'
-#' Similar to \code{runApp}, but if running in RStudio, defaults to viewing the
-#' app in the Viewer pane.
+#' Similar to \code{runApp}, but handles \code{input$cancel} automatically, and
+#' if running in RStudio, defaults to viewing the app in the Viewer pane.
 #'
 #' @param app Either a Shiny app object as created by
 #'   \code{\link[=shiny]{shinyApp}} et al, or, a UI object.
@@ -781,6 +815,10 @@ runExample <- function(example=NA,
 #' @param viewer Specify where the gadget should be displayed--viewer pane,
 #'   dialog window, or external browser--by passing in a call to one of the
 #'   \code{\link{viewer}} functions.
+#' @param stopOnCancel If \code{TRUE} (the default), then an \code{observeEvent}
+#'   is automatically created that handles \code{input$cancel} by calling
+#'   \code{stopApp()} with an error. Pass \code{FALSE} if you want to handle
+#'   \code{input$cancel} yourself.
 #' @return The value returned by the gadget.
 #'
 #' @examples
@@ -802,21 +840,42 @@ runExample <- function(example=NA,
 #'
 #' @export
 runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
-  viewer = paneViewer()) {
+  viewer = paneViewer(), stopOnCancel = TRUE) {
 
   if (!is.shiny.appobj(app)) {
     app <- shinyApp(app, server)
+  }
+
+  if (isTRUE(stopOnCancel)) {
+    app <- decorateServerFunc(app, function(input, output, session) {
+      observeEvent(input$cancel, {
+        stopApp(stop("User cancel", call. = FALSE))
+      })
+    })
   }
 
   if (is.null(viewer)) {
     viewer <- browseURL
   }
 
-  retVal <- withVisible(shiny::runApp(app, port = port, launch.browser = viewer))
-  if (retVal$visible)
-    retVal$value
-  else
-    invisible(retVal$value)
+  shiny::runApp(app, port = port, launch.browser = viewer)
+}
+
+# Add custom functionality to a Shiny app object's server func
+decorateServerFunc <- function(appobj, serverFunc) {
+  origServerFuncSource <- appobj$serverFuncSource
+  appobj$serverFuncSource <- function() {
+    origServerFunc <- origServerFuncSource()
+    function(input, output, session) {
+      serverFunc(input, output, session)
+
+      # The clientData and session arguments are optional; check if
+      # each exists
+      args <- argsForServerFunc(origServerFunc, session)
+      do.call(origServerFunc, args)
+    }
+  }
+  appobj
 }
 
 #' Viewer options

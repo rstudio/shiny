@@ -5,7 +5,7 @@
 \title{Run a gadget}
 \usage{
 runGadget(app, server = NULL, port = getOption("shiny.port"),
-  viewer = paneViewer())
+  viewer = paneViewer(), stopOnCancel = TRUE)
 }
 \arguments{
 \item{app}{Either a Shiny app object as created by
@@ -19,13 +19,18 @@ along to \code{shinyApp} (i.e. \code{shinyApp(ui = app, server = server)}).}
 \item{viewer}{Specify where the gadget should be displayed--viewer pane,
 dialog window, or external browser--by passing in a call to one of the
 \code{\link{viewer}} functions.}
+
+\item{stopOnCancel}{If \code{TRUE} (the default), then an \code{observeEvent}
+is automatically created that handles \code{input$cancel} by calling
+\code{stopApp()} with an error. Pass \code{FALSE} if you want to handle
+\code{input$cancel} yourself.}
 }
 \value{
 The value returned by the gadget.
 }
 \description{
-Similar to \code{runApp}, but if running in RStudio, defaults to viewing the
-app in the Viewer pane.
+Similar to \code{runApp}, but handles \code{input$cancel} automatically, and
+if running in RStudio, defaults to viewing the app in the Viewer pane.
 }
 \examples{
 \dontrun{

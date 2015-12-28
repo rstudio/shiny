@@ -678,6 +678,7 @@ runApp <- function(appDir=getwd(),
     callAppHook("onAppStop", appUrl)
   }, add = TRUE)
 
+  .globals$reterror <- NULL
   .globals$retval <- NULL
   .globals$stopped <- FALSE
   # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
@@ -691,7 +692,13 @@ runApp <- function(appDir=getwd(),
     )
   )
 
-  return(.globals$retval)
+  if (isTRUE(.globals$reterror)) {
+    stop(.globals$retval)
+  }
+  else if (.globals$retval$visible)
+    .globals$retval
+  else
+    invisible(.globals$retval)
 }
 
 #' Stop the currently running Shiny app
@@ -704,7 +711,24 @@ runApp <- function(appDir=getwd(),
 #'
 #' @export
 stopApp <- function(returnValue = invisible()) {
-  .globals$retval <- returnValue
+  # reterror will indicate whether retval is an error (i.e. it should be passed
+  # to stop() when the serviceApp loop stops) or a regular value (in which case
+  # it should simply be returned with the appropriate visibility).
+  .globals$reterror <- FALSE
+  ..stacktraceoff..(
+    tryCatch(
+      {
+        captureStackTraces(
+          .globals$retval <- withVisible(..stacktraceon..(force(returnValue)))
+        )
+      },
+      error = function(e) {
+        .globals$retval <- e
+        .globals$reterror <- TRUE
+      }
+    )
+  )
+
   .globals$stopped <- TRUE
   httpuv::interrupt()
 }

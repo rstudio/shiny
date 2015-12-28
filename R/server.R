@@ -836,7 +836,7 @@ runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
     app <- shinyApp(app, server)
   }
 
-  if (isTRUE(handleCancel)) {
+  if (isTRUE(stopOnCancel)) {
     app <- decorateServerFunc(app, function(input, output, session) {
       observeEvent(input$cancel, {
         stopApp(stop("User cancel"))

@@ -858,7 +858,7 @@ decorateServerFunc <- function(appobj, serverFunc) {
     origServerFunc <- origServerFuncSource()
     function(input, output, session) {
       serverFunc(input, output, session)
-      if (length(formals(plot)) == 2)
+      if (length(formals(origServerFunc)) == 2)
         origServerFunc(input, output)
       else
         origServerFunc(input, output, session)

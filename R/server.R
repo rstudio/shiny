@@ -302,17 +302,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               }
 
               local({
-                args <- list(
-                  input=shinysession$input,
-                  output=.createOutputWriter(shinysession))
-
-                # The clientData and session arguments are optional; check if
-                # each exists
-                if ('clientData' %in% names(formals(serverFunc)))
-                  args$clientData <- shinysession$clientData
-
-                if ('session' %in% names(formals(serverFunc)))
-                  args$session <- shinysession
+                args <- argsForServerFunc(serverFunc, shinysession)
 
                 withReactiveDomain(shinysession, {
                   do.call(
@@ -374,6 +364,26 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
     }
   )
   return(appHandlers)
+}
+
+# Determine what arguments should be passed to this serverFunc. All server funcs
+# must take input and output, but clientData (obsolete) and session are
+# optional.
+argsForServerFunc <- function(serverFunc, session) {
+  args <- list(input = session$input, output = .createOutputWriter(session))
+
+  paramNames <- names(formals(serverFunc))
+
+  # The clientData and session arguments are optional; check if
+  # each exists
+
+  if ("clientData" %in% paramNames)
+    args$clientData <- session$clientData
+
+  if ("session" %in% paramNames)
+    args$session <- session
+
+  args
 }
 
 getEffectiveBody <- function(func) {
@@ -858,10 +868,11 @@ decorateServerFunc <- function(appobj, serverFunc) {
     origServerFunc <- origServerFuncSource()
     function(input, output, session) {
       serverFunc(input, output, session)
-      if (length(formals(origServerFunc)) == 2)
-        origServerFunc(input, output)
-      else
-        origServerFunc(input, output, session)
+
+      # The clientData and session arguments are optional; check if
+      # each exists
+      args <- argsForServerFunc(origServerFunc, session)
+      do.call(origServerFunc, args)
     }
   }
   appobj

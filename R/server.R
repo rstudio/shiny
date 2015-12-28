@@ -794,8 +794,8 @@ runExample <- function(example=NA,
 
 #' Run a gadget
 #'
-#' Similar to \code{runApp}, but if running in RStudio, defaults to viewing the
-#' app in the Viewer pane.
+#' Similar to \code{runApp}, but handles \code{input$cancel} automatically, and
+#' if running in RStudio, defaults to viewing the app in the Viewer pane.
 #'
 #' @param app Either a Shiny app object as created by
 #'   \code{\link[=shiny]{shinyApp}} et al, or, a UI object.
@@ -805,6 +805,10 @@ runExample <- function(example=NA,
 #' @param viewer Specify where the gadget should be displayed--viewer pane,
 #'   dialog window, or external browser--by passing in a call to one of the
 #'   \code{\link{viewer}} functions.
+#' @param stopOnCancel If \code{TRUE} (the default), then an \code{observeEvent}
+#'   is automatically created that handles \code{input$cancel} by calling
+#'   \code{stopApp()} with an error. Pass \code{FALSE} if you want to handle
+#'   \code{input$cancel} yourself.
 #' @return The value returned by the gadget.
 #'
 #' @examples
@@ -826,21 +830,41 @@ runExample <- function(example=NA,
 #'
 #' @export
 runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
-  viewer = paneViewer()) {
+  viewer = paneViewer(), stopOnCancel = TRUE) {
 
   if (!is.shiny.appobj(app)) {
     app <- shinyApp(app, server)
+  }
+
+  if (isTRUE(handleCancel)) {
+    app <- decorateServerFunc(app, function(input, output, session) {
+      observeEvent(input$cancel, {
+        stopApp(stop("User cancel"))
+      })
+    })
   }
 
   if (is.null(viewer)) {
     viewer <- browseURL
   }
 
-  retVal <- withVisible(shiny::runApp(app, port = port, launch.browser = viewer))
-  if (retVal$visible)
-    retVal$value
-  else
-    invisible(retVal$value)
+  shiny::runApp(app, port = port, launch.browser = viewer)
+}
+
+# Add custom functionality to a Shiny app object's server func
+decorateServerFunc <- function(appobj, serverFunc) {
+  origServerFuncSource <- appobj$serverFuncSource
+  appobj$serverFuncSource <- function() {
+    origServerFunc <- origServerFuncSource()
+    function(input, output, session) {
+      serverFunc(input, output, session)
+      if (length(formals(plot)) == 2)
+        origServerFunc(input, output)
+      else
+        origServerFunc(input, output, session)
+    }
+  }
+  appobj
 }
 
 #' Viewer options

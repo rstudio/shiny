@@ -706,9 +706,9 @@ runApp <- function(appDir=getwd(),
     stop(.globals$retval)
   }
   else if (.globals$retval$visible)
-    .globals$retval
+    .globals$retval$value
   else
-    invisible(.globals$retval)
+    invisible(.globals$retval$value)
 }
 
 #' Stop the currently running Shiny app

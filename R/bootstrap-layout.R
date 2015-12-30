@@ -515,6 +515,8 @@ flexfill <- function(..., direction, flex, width = width, height = height) {
   divArgs <- list(
     class = sprintf("flexfill-container flexfill-container-%s", direction),
     style = css(
+      display = "-webkit-flex",
+      display = "-ms-flexbox",
       display = "flex",
       flex.direction = direction,
       width = validateCssUnit(width),
@@ -526,7 +528,12 @@ flexfill <- function(..., direction, flex, width = width, height = height) {
         # that sizes itself (along the main axis) to its contents
         tags$div(
           class = "flexfill-item",
-          style = css(position = "relative", flex = "none"),
+          style = css(
+            position = "relative",
+            "-webkit-flex" = "none",
+            "-ms-flex" = "none",
+            flex = "none"
+          ),
           style = paste0(main, ":auto;", cross, ":100%;"),
           el
         )
@@ -539,7 +546,10 @@ flexfill <- function(..., direction, flex, width = width, height = height) {
         tags$div(
           class = "flexfill-item",
           style = css(
-            position = "relative", flex = flexValue,
+            position = "relative",
+            "-webkit-flex" = flexValue,
+            "-ms-flex" = flexValue,
+            flex = flexValue,
             width = "100%", height = "100%"
           ),
           tags$div(

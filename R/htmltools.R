@@ -4,4 +4,5 @@
 #' @export tag tagAppendAttributes tagAppendChild tagAppendChildren tagList tags tagSetChildren withTags
 #' @export validateCssUnit
 #' @export knit_print.html knit_print.shiny.tag knit_print.shiny.tag.list
+#' @export htmlTemplate suppressDependencies
 NULL

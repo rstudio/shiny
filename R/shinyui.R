@@ -25,57 +25,32 @@ withMathJax <- function(...) {
 }
 
 renderPage <- function(ui, connection, showcase=0) {
+  # If the ui is a NOT complete document (created by htmlTemplate()), then do some
+  # preprocessing and make sure it's a complete document.
+  if (!inherits(ui, "html_document")) {
+    if (showcase > 0)
+      ui <- showcaseUI(ui)
 
-  if (showcase > 0)
-    ui <- showcaseUI(ui)
+    # Wrap ui in body tag if it doesn't already have a single top-level body tag.
+    if (!(inherits(ui, "shiny.tag") && ui$name == "body"))
+      ui <- tags$body(ui)
 
-  # Wrap ui in body tag if it doesn't already have a single top-level body tag.
-  if (!(inherits(ui, "shiny.tag") && ui$name == "body"))
-    ui <- tags$body(ui)
+    # Put the body into the default template
+    ui <- htmlTemplate(
+      system.file("template", "default.html", package = "shiny"),
+      body = ui
+    )
+  }
 
-  result <- renderTags(ui)
-
-  deps <- c(
-    list(
-      htmlDependency("json2", "2014.02.04", c(href="shared"), script = "json2-min.js"),
-      htmlDependency("jquery", "1.11.3", c(href="shared"), script = "jquery.min.js"),
-      htmlDependency("shiny", utils::packageVersion("shiny"), c(href="shared"),
-        script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js",
-        stylesheet = "shiny.css")
-    ),
-    result$dependencies
+  shiny_deps <- list(
+    htmlDependency("json2", "2014.02.04", c(href="shared"), script = "json2-min.js"),
+    htmlDependency("jquery", "1.11.3", c(href="shared"), script = "jquery.min.js"),
+    htmlDependency("shiny", utils::packageVersion("shiny"), c(href="shared"),
+      script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js",
+      stylesheet = "shiny.css")
   )
-  deps <- resolveDependencies(deps)
-  deps <- lapply(deps, createWebDependency)
-  depStr <- paste(sapply(deps, function(dep) {
-    sprintf("%s[%s]", dep$name, dep$version)
-  }), collapse = ";")
-  depHtml <- renderDependencies(deps, "href")
-
-  # write preamble
-  writeUTF8(c('<!DOCTYPE html>',
-               '<html>',
-               '<head>',
-               '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
-               sprintf('  <script type="application/shiny-singletons">%s</script>',
-                       paste(result$singletons, collapse = ',')
-               ),
-               sprintf('  <script type="application/html-dependencies">%s</script>',
-                       depStr
-               ),
-               depHtml
-              ),
-              con = connection)
-  writeUTF8(c(result$head,
-               '</head>',
-               recursive=TRUE),
-             con = connection)
-
-  writeUTF8(result$html, con = connection)
-
-  # write end document
-  writeUTF8('</html>',
-             con = connection)
+  html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
+  writeUTF8(html, con = connection)
 }
 
 #' Create a Shiny UI handler

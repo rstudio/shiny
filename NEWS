@@ -71,6 +71,10 @@ shiny 0.12.2.9000
   functions to support Shiny Gadgets. More detailed docs about gadgets coming
   soon.
 
+* Added support for the new htmltools 0.3 feature `htmlTemplate`. It's now
+  possible to use regular HTML markup to design your UI, but still use R
+  expressions to define inputs, outputs, and HTML widgets.
+
 shiny 0.12.2
 --------------------------------------------------------------------------------
 

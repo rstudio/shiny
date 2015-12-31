@@ -80,7 +80,9 @@ sd_section("Interface builder functions",
     "singleton",
     "tag",
     "validateCssUnit",
-    "withTags"
+    "withTags",
+    "htmlTemplate",
+    "suppressDependencies"
   )
 )
 sd_section("Rendering functions",

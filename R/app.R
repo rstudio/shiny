@@ -462,7 +462,7 @@ knit_print.shiny.render.function <- function(x, ..., inline = FALSE) {
 #' @export
 knit_print.reactive <- function(x, ..., inline = FALSE) {
   renderFunc <- if (inline) renderText else renderPrint
-  knitr:::knit_print(renderFunc({
+  knitr::knit_print(renderFunc({
     x()
   }), inline = inline)
 }

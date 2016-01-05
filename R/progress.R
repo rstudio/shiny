@@ -83,7 +83,7 @@ Progress <- R6Class(
   public = list(
 
     initialize = function(session = getDefaultReactiveDomain(), min = 0, max = 1) {
-      if (!inherits(session, "ShinySession"))
+      if (is.null(session$progressStack))
         stop("'session' is not a ShinySession object.")
 
       private$session <- session
@@ -231,7 +231,7 @@ withProgress <- function(expr, min = 0, max = 1,
   if (!quoted)
     expr <- substitute(expr)
 
-  if (!inherits(session, "ShinySession"))
+  if (is.null(session$progressStack))
     stop("'session' is not a ShinySession object.")
 
   p <- Progress$new(session, min = min, max = max)
@@ -252,7 +252,7 @@ withProgress <- function(expr, min = 0, max = 1,
 setProgress <- function(value = NULL, message = NULL, detail = NULL,
                         session = getDefaultReactiveDomain()) {
 
-  if (!inherits(session, "ShinySession"))
+  if (is.null(session$progressStack))
     stop("'session' is not a ShinySession object.")
 
   if (session$progressStack$size() == 0) {
@@ -269,7 +269,7 @@ setProgress <- function(value = NULL, message = NULL, detail = NULL,
 incProgress <- function(amount = 0.1, message = NULL, detail = NULL,
                         session = getDefaultReactiveDomain()) {
 
-  if (!inherits(session, "ShinySession"))
+  if (is.null(session$progressStack))
     stop("'session' is not a ShinySession object.")
 
   if (session$progressStack$size() == 0) {

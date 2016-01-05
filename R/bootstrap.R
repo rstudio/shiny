@@ -33,26 +33,6 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
     shinyDeprecated("The 'responsive' argument is no longer used with Bootstrap 3.")
   }
 
-  # required head tags for boostrap
-  importBootstrap <- function() {
-    list(
-      htmlDependency("bootstrap", "3.3.5",
-        c(
-          href = "shared/bootstrap",
-          file = system.file("www/shared/bootstrap", package = "shiny")
-        ),
-        script = c(
-          "js/bootstrap.min.js",
-          # These shims are necessary for IE 8 compatibility
-          "shim/html5shiv.min.js",
-          "shim/respond.min.js"
-        ),
-        stylesheet = if (is.null(theme)) "css/bootstrap.min.css",
-        meta = list(viewport = "width=device-width, initial-scale=1")
-      )
-    )
-  }
-
   attachDependencies(
     tagList(
       if (!is.null(title)) tags$head(tags$title(title)),
@@ -63,7 +43,41 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
       # remainder of tags passed to the function
       list(...)
     ),
-    importBootstrap()
+    bootstrapDependency()
+  )
+}
+
+#' Bootstrap libraries
+#'
+#' This function returns a set of web dependencies necessary for using Bootstrap
+#' components in a web page.
+#'
+#' It isn't necessary to call this function if you use
+#' \code{\link{bootstrapPage}} or others which use \code{bootstrapPage}, such
+#' \code{\link{basicPage}}, \code{\link{fluidPage}}, \code{\link{fillPage}},
+#' \code{\link{pageWithSidebar}}, and \code{\link{navbarPage}}, because they
+#' already include the Bootstrap web dependencies.
+#'
+#' @inheritParams bootstrapPage
+#' @export
+bootstrapLib <- function(theme = NULL) {
+  attachDependencies(tagList(), bootstrapDependency(theme))
+}
+
+bootstrapDependency <- function(theme = NULL) {
+  htmlDependency("bootstrap", "3.3.5",
+    c(
+      href = "shared/bootstrap",
+      file = system.file("www/shared/bootstrap", package = "shiny")
+    ),
+    script = c(
+      "js/bootstrap.min.js",
+      # These shims are necessary for IE 8 compatibility
+      "shim/html5shiv.min.js",
+      "shim/respond.min.js"
+    ),
+    stylesheet = if (is.null(theme)) "css/bootstrap.min.css",
+    meta = list(viewport = "width=device-width, initial-scale=1")
   )
 }
 

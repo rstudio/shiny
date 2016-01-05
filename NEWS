@@ -63,6 +63,9 @@ shiny 0.12.2.9000
 
 * Upgraded to Bootstrap 3.3.5.
 
+* Switched to an almost-complete build of jQuery UI with the exception of the
+  datepicker extension, which conflicts with Shiny's date picker.
+
 * Added `fillPage` function, an alternative to `fluidPage`, `fixedPage`, etc.
   that is designed for apps that fill the entire available page width/height.
 

@@ -41,6 +41,16 @@ slot.
 The corresponding HTML output tag should be \code{div} or \code{img} and have
 the CSS class name \code{shiny-plot-output}.
 }
+\section{Interactive plots}{
+
+
+  With ggplot2 graphics, the code in \code{renderPlot} should return a ggplot
+  object; if instead the code prints the ggplot2 object with something like
+  \code{print(p)}, then the coordinates for interactive graphics will not be
+  properly scaled to the data space.
+
+  See \code{\link{plotOutput}} for more information about interactive plots.
+}
 \seealso{
 For the corresponding client-side output function, and example
   usage, see \code{\link{plotOutput}}. For more details on how the plots are

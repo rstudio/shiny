@@ -65,7 +65,7 @@ $.extend(imageOutputBinding, {
     // Copy items from data to img. This should include 'src'
     $.each(data, function(key, value) {
       if (value !== null)
-        img[key] = value;
+        img.setAttribute(key, value);
     });
 
     var $img = $(img);

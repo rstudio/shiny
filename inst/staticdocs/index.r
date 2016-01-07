@@ -82,6 +82,7 @@ sd_section("Interface builder functions",
     "validateCssUnit",
     "withTags",
     "htmlTemplate",
+    "bootstrapLib",
     "suppressDependencies"
   )
 )

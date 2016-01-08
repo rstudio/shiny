@@ -666,9 +666,7 @@ ShinySession <- R6Class(
     },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
-      # we must use $ instead of [[ here at the moment; see
-      # https://github.com/rstudio/shiny/issues/274
-      func <- try(do.call(`$`, list(self, method)), silent=TRUE)
+      func <- try(self[[method]], silent = TRUE)
       if (inherits(func, 'try-error')) {
         private$sendErrorResponse(msg, paste('Unknown method', msg$method))
       }

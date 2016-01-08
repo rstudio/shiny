@@ -241,6 +241,15 @@ workerId <- local({
 #'   This is the request that was used to initiate the websocket connection
 #'   (as opposed to the request that downloaded the web page for the app).
 #' }
+#' \item{allowReconnect(value)}{
+#'   If \code{value} is \code{TRUE}, this tells the browser that, if the
+#'   session ends due to the network connection closing, attempt to reconnect
+#'   to the server. If a reconnection is successful, the browser will send all
+#'   the current input values to the new session on the server, and the server
+#'   will recalculate any outputs and send them back to the client. If
+#'   \code{value} is \code{FALSE}, reconnections will be disabled (this is the
+#'   default state).
+#' }
 #' \item{sendCustomMessage(type, message)}{
 #'   Sends a custom message to the web page. \code{type} must be a
 #'   single-element character vector giving the type of message, while
@@ -530,6 +539,14 @@ ShinySession <- R6Class(
     setShowcase = function(value) {
       private$showcase <- !is.null(value) && as.logical(value)
     },
+
+    allowReconnect = function(value) {
+      if (!(identical(value, TRUE) || identical(value, FALSE))) {
+        stop("value must be TRUE or FALSE")
+      }
+      private$write(toJSON(list(allowReconnect = value)))
+    },
+
     defineOutput = function(name, func, label) {
       "Binds an output generating function to this name. The function can either
       take no parameters, or have named parameters for \\code{name} and

@@ -17,6 +17,8 @@ var ShinyApp = function() {
   this.$pendingMessages = [];
   this.$activeRequests = {};
   this.$nextRequestId = 0;
+
+  this.$allowReconnect = false;
 };
 
 (function() {
@@ -74,6 +76,13 @@ var ShinyApp = function() {
 
       var ws = new WebSocket(protocol + '//' + window.location.host + defaultPath);
       ws.binaryType = 'arraybuffer';
+
+      // This flag indicates that reconnections are permitted by the server.
+      // When Shiny is running with Shiny Server, this flag will be present
+      // only on versions of SS that support reconnects. When running Shiny
+      // locally, this is set to true, because the "server" always permits
+      // reconnection.
+      ws.allowReconnect = true;
       return ws;
     };
 
@@ -118,7 +127,12 @@ var ShinyApp = function() {
       }
 
       self.$removeSocket();
-      self.$scheduleReconnect();
+
+      // To try a reconnect, both the app (self.$allowReconnect) and the
+      // server (socket.allowReconnect) must allow reconnections.
+      if (self.$allowReconnect === true && socket.allowReconnect === true) {
+        self.$scheduleReconnect();
+      }
     };
     return socket;
   };
@@ -552,6 +566,13 @@ var ShinyApp = function() {
       else
         request.onError(message.error);
     }
+  });
+
+  addMessageHandler('allowReconnect', function(message) {
+    if (!(message === true || message === false)) {
+      throw "Invalid value for allowReconnect: " + message;
+    }
+    this.$allowReconnect = message;
   });
 
   addMessageHandler('custom', function(message) {

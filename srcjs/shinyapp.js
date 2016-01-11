@@ -97,6 +97,7 @@ var ShinyApp = function() {
       });
 
       exports.hideReconnectDialog();
+      reconnectDelay.reset();
 
       socket.send(JSON.stringify({
         method: 'init',
@@ -183,11 +184,42 @@ var ShinyApp = function() {
     this.$socket = null;
   };
 
-  // Try to reconnect after one second
   this.$scheduleReconnect = function() {
     var self = this;
-    setTimeout(function() { self.reconnect(); }, 1000);
+    var delay = reconnectDelay.next();
+    console.log("Waiting " + (delay/1000) + "s before trying to reconnect.");
+
+    setTimeout(function() { self.reconnect(); }, delay);
   };
+
+  // How long should we wait before trying the next reconnection?
+  // The delay will increase with subsequent attempts.
+  // .next: Return the time to wait for next connection, and increment counter.
+  // .reset: Reset the attempt counter.
+  var reconnectDelay = (function() {
+    var attempts = 0;
+    // Time to wait before each reconnection attempt. If we go through all of
+    // these values, use otherDelay.
+    var delays = [1000, 1000, 2000, 2000, 5000, 5000];
+    var otherDelay = 10000;
+
+    return {
+      next: function() {
+        var delay;
+        if (attempts >= delays.length) {
+          delay = otherDelay;
+        } else {
+          delay = delays[attempts];
+        }
+
+        attempts++;
+        return delay;
+      },
+      reset: function() {
+        attempts = 0;
+      }
+    };
+  })();
 
   exports.showReconnectDialog = function() {
     // If there's already a reconnect dialog, don't add another

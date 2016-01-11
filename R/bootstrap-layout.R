@@ -460,7 +460,7 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'   not determined by the height of its contents.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ui <- fillPage(fillRow(
 #'   plotOutput("plotLeft", height = "100%"),
 #'   fillCol(

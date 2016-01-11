@@ -54,7 +54,7 @@ If you try to use \code{fillRow} and \code{fillCol} inside of other
   }
 }
 \examples{
-\donttest{
+\dontrun{
 ui <- fillPage(fillRow(
   plotOutput("plotLeft", height = "100\%"),
   fillCol(

@@ -96,7 +96,7 @@ var ShinyApp = function() {
         socket: socket
       });
 
-      exports.onSocketConnected();
+      exports.hideReconnectDialog();
 
       socket.send(JSON.stringify({
         method: 'init',
@@ -123,7 +123,6 @@ var ShinyApp = function() {
         });
 
         self.$notifyDisconnected();
-        exports.onSocketDisconnected();
       }
 
       self.$removeSocket();
@@ -131,7 +130,10 @@ var ShinyApp = function() {
       // To try a reconnect, both the app (self.$allowReconnect) and the
       // server (socket.allowReconnect) must allow reconnections.
       if (self.$allowReconnect === true && socket.allowReconnect === true) {
+        exports.showReconnectDialog();
         self.$scheduleReconnect();
+      } else {
+        $(document.body).addClass('disconnected');
       }
     };
     return socket;
@@ -187,7 +189,11 @@ var ShinyApp = function() {
     setTimeout(function() { self.reconnect(); }, 1000);
   };
 
-  exports.onSocketDisconnected = function() {
+  exports.showReconnectDialog = function() {
+    // If there's already a reconnect dialog, don't add another
+    if ($('.shiny-reconnect-dialog-wrapper').length > 0)
+      return;
+
     var $dialog = $('<div class="shiny-reconnect-dialog-wrapper">' +
       '<div class="shiny-reconnect-dialog">' +
       '<span class="shiny-reconnect-text"></span>' +
@@ -222,7 +228,7 @@ var ShinyApp = function() {
     updateDots();
   };
 
-  exports.onSocketConnected = function() {
+  exports.hideReconnectDialog = function() {
     $(".shiny-reconnect-dialog-wrapper").remove();
   };
 

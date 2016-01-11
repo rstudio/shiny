@@ -609,6 +609,8 @@ var ShinyApp = function() {
   this.$pendingMessages = [];
   this.$activeRequests = {};
   this.$nextRequestId = 0;
+
+  this.$allowReconnect = false;
 };
 
 (function() {
@@ -631,6 +633,15 @@ var ShinyApp = function() {
 
   this.isConnected = function() {
     return !!this.$socket;
+  };
+
+  this.reconnect = function() {
+    if (this.isConnected())
+      throw "Attempted to reconnect, but already connected.";
+
+    this.$socket = this.createSocket();
+    this.$initialInput = $.extend({}, this.$inputValues);
+    this.$updateConditionals();
   };
 
   this.createSocket = function () {
@@ -657,15 +668,29 @@ var ShinyApp = function() {
 
       var ws = new WebSocket(protocol + '//' + window.location.host + defaultPath);
       ws.binaryType = 'arraybuffer';
+
+      // This flag indicates that reconnections are permitted by the server.
+      // When Shiny is running with Shiny Server, this flag will be present
+      // only on versions of SS that support reconnects. When running Shiny
+      // locally, this is set to true, because the "server" always permits
+      // reconnection.
+      ws.allowReconnect = true;
       return ws;
     };
 
     var socket = createSocketFunc();
+    var hasOpened = false;
     socket.onopen = function() {
+      hasOpened = true;
+
       $(document).trigger({
         type: 'shiny:connected',
         socket: socket
       });
+
+      exports.hideReconnectDialog();
+      reconnectDelay.reset();
+
       socket.send(JSON.stringify({
         method: 'init',
         data: self.$initialInput
@@ -679,13 +704,30 @@ var ShinyApp = function() {
     socket.onmessage = function(e) {
       self.dispatchMessage(e.data);
     };
+    // Called when a successfully-opened websocket is closed, or when an
+    // attempt to open a connection fails.
     socket.onclose = function() {
-      $(document).trigger({
-        type: 'shiny:disconnected',
-        socket: socket
-      });
-      $(document.body).addClass('disconnected');
-      self.$notifyDisconnected();
+      // These things are needed only if we've successfully opened the
+      // websocket.
+      if (hasOpened) {
+        $(document).trigger({
+          type: 'shiny:disconnected',
+          socket: socket
+        });
+
+        self.$notifyDisconnected();
+      }
+
+      self.$removeSocket();
+
+      // To try a reconnect, both the app (self.$allowReconnect) and the
+      // server (socket.allowReconnect) must allow reconnections.
+      if (self.$allowReconnect === true && socket.allowReconnect === true) {
+        exports.showReconnectDialog();
+        self.$scheduleReconnect();
+      } else {
+        $(document.body).addClass('disconnected');
+      }
     };
     return socket;
   };
@@ -728,6 +770,90 @@ var ShinyApp = function() {
         parent.postMessage('disconnected', origin);
       }
     }
+  };
+
+  this.$removeSocket = function() {
+    this.$socket = null;
+  };
+
+  this.$scheduleReconnect = function() {
+    var self = this;
+    var delay = reconnectDelay.next();
+    console.log("Waiting " + (delay/1000) + "s before trying to reconnect.");
+
+    setTimeout(function() { self.reconnect(); }, delay);
+  };
+
+  // How long should we wait before trying the next reconnection?
+  // The delay will increase with subsequent attempts.
+  // .next: Return the time to wait for next connection, and increment counter.
+  // .reset: Reset the attempt counter.
+  var reconnectDelay = (function() {
+    var attempts = 0;
+    // Time to wait before each reconnection attempt. If we go through all of
+    // these values, use otherDelay.
+    var delays = [1000, 1000, 2000, 2000, 5000, 5000];
+    var otherDelay = 10000;
+
+    return {
+      next: function() {
+        var delay;
+        if (attempts >= delays.length) {
+          delay = otherDelay;
+        } else {
+          delay = delays[attempts];
+        }
+
+        attempts++;
+        return delay;
+      },
+      reset: function() {
+        attempts = 0;
+      }
+    };
+  })();
+
+  exports.showReconnectDialog = exports.showReconnectDialog || function() {
+    // If there's already a reconnect dialog, don't add another
+    if ($('.shiny-reconnect-dialog-wrapper').length > 0)
+      return;
+
+    var $dialog = $('<div class="shiny-reconnect-dialog-wrapper">' +
+      '<div class="shiny-reconnect-dialog">' +
+      '<span class="shiny-reconnect-text"></span>' +
+      '<span class="shiny-reconnect-dots"></span>' +
+      '</div></div>')
+        .appendTo('body');
+
+    $(".shiny-reconnect-text").text("Trying to reconnect to new session");
+
+    var ndots = 1;
+    var updateDots = function() {
+      // Select from $dialog, so that if a separate function call adds a div
+      // of the same class, we won't try to update that div's dots. This could
+      // happen when Shiny Server adds its own reconnection dialog.
+      var $dots = $dialog.find(".shiny-reconnect-dots");
+      // If the dots have been removed, exit and don't reschedule this function.
+      if ($dots.length === 0) return;
+
+      // Create the string for number of dots
+      ndots = (ndots-1) % 3 + 1;
+      var dotstr = "";
+      for (var i=0; i<ndots; i++) {
+        dotstr += ".";
+      }
+      ndots++;
+      $dots.text(dotstr);
+
+      // Reschedule this function after 1.5 seconds
+      setTimeout(updateDots, 1500);
+    };
+
+    updateDots();
+  };
+
+  exports.hideReconnectDialog = exports.hideReconnectDialog || function() {
+    $(".shiny-reconnect-dialog-wrapper").remove();
   };
 
   // NB: Including blobs will cause IE to break!
@@ -1070,6 +1196,13 @@ var ShinyApp = function() {
       else
         request.onError(message.error);
     }
+  });
+
+  addMessageHandler('allowReconnect', function(message) {
+    if (!(message === true || message === false)) {
+      throw "Invalid value for allowReconnect: " + message;
+    }
+    this.$allowReconnect = message;
   });
 
   addMessageHandler('custom', function(message) {

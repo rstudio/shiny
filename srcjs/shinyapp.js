@@ -221,7 +221,7 @@ var ShinyApp = function() {
     };
   })();
 
-  exports.showReconnectDialog = function() {
+  exports.showReconnectDialog = exports.showReconnectDialog || function() {
     // If there's already a reconnect dialog, don't add another
     if ($('.shiny-reconnect-dialog-wrapper').length > 0)
       return;
@@ -260,7 +260,7 @@ var ShinyApp = function() {
     updateDots();
   };
 
-  exports.hideReconnectDialog = function() {
+  exports.hideReconnectDialog = exports.hideReconnectDialog || function() {
     $(".shiny-reconnect-dialog-wrapper").remove();
   };
 

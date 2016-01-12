@@ -207,7 +207,7 @@ extractStackTrace <- function(calls,
     # Offset calls vs. srcrefs by 1 to make them more intuitive.
     # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
     # the definition of foo().
-    srcrefs <- c(tail(srcrefs, -1), list(NULL))
+    srcrefs <- c(utils::tail(srcrefs, -1), list(NULL))
   }
   calls <- setSrcRefs(calls, srcrefs)
 
@@ -228,8 +228,8 @@ extractStackTrace <- function(calls,
     # But don't remove more than 5 levels--that's an indication we might
     # have gotten it wrong, I guess
     if (toRemove > 0 && toRemove < 5) {
-      calls <- head(calls, -toRemove)
-      callnames <- head(callnames, -toRemove)
+      calls <- utils::head(calls, -toRemove)
+      callnames <- utils::head(callnames, -toRemove)
     }
 
     # This uses a ref-counting scheme. It might make sense to switch this

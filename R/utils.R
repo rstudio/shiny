@@ -282,7 +282,7 @@ download <- function(url, ...) {
       #         In download.file(url, ...) : downloaded length 19457 != reported length 200
       # because apparently it compares the length with the status code returned (?)
       # so we supress that
-      suppressWarnings(download.file(url, method = method, ...))
+      suppressWarnings(utils::download.file(url, method = method, ...))
 
     } else {
       # If non-Windows, check for libcurl/curl/wget/lynx, then call download.file with

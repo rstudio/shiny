@@ -855,7 +855,7 @@ runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
   }
 
   if (is.null(viewer)) {
-    viewer <- browseURL
+    viewer <- utils::browseURL
   }
 
   shiny::runApp(app, port = port, launch.browser = viewer)
@@ -902,7 +902,7 @@ NULL
 paneViewer <- function(minHeight = NULL) {
   viewer <- getOption("viewer")
   if (is.null(viewer)) {
-    browseURL
+    utils::browseURL
   } else {
     function(url) {
       viewer(url, minHeight)
@@ -917,7 +917,7 @@ paneViewer <- function(minHeight = NULL) {
 dialogViewer <- function(dialogName, width = 600, height = 600) {
   viewer <- getOption("shinygadgets.showdialog")
   if (is.null(viewer)) {
-    browseURL
+    utils::browseURL
   } else {
     function(url) {
       viewer(dialogName, url, width = width, height = height)
@@ -930,6 +930,6 @@ dialogViewer <- function(dialogName, width = 600, height = 600) {
 #' @export
 browserViewer <- function(browser = getOption("browser")) {
   function(url) {
-    browseURL(url, browser = browser)
+    utils::browseURL(url, browser = browser)
   }
 }

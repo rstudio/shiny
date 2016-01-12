@@ -520,7 +520,7 @@ selectizeJSON <- function(data, req) {
   idx <- utils::head(if (length(key)) which(idx) else seq_along(idx), mop)
   # make sure the selected value is in the data
   if (length(sel)) {
-    i <- na.omit(match(sel, data[, vfd]))
+    i <- stats::na.omit(match(sel, data[, vfd]))
     if (length(i)) idx <- sort(utils::head(unique(c(i, idx)), mop))
   }
   data <- data[idx, ]

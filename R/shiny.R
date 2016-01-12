@@ -270,10 +270,6 @@ workerId <- local({
 #' @name session
 NULL
 
-#' @rdname NS
-#' @export
-ns.sep <- "-"
-
 #' Namespaced IDs for inputs/outputs
 #'
 #' The \code{NS} function creates namespaced IDs out of bare IDs, by joining
@@ -307,6 +303,10 @@ NS <- function(namespace, id = NULL) {
     paste(c(namespace, id), collapse = ns.sep)
   }
 }
+
+#' @rdname NS
+#' @export
+ns.sep <- "-"
 
 #' @include utils.R
 ShinySession <- R6Class(

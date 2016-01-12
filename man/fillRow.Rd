@@ -55,6 +55,11 @@ If you try to use \code{fillRow} and \code{fillCol} inside of other
 }
 \examples{
 \donttest{
+# Only run this example in interactive R sessions.
+# NOTE: This example should be run with example(fillRow, ask = FALSE) to
+# avoid being prompted to hit Enter during plot rendering.
+if (interactive()) {
+
 ui <- fillPage(fillRow(
   plotOutput("plotLeft", height = "100\%"),
   fillCol(
@@ -65,11 +70,13 @@ ui <- fillPage(fillRow(
 
 server <- function(input, output, session) {
   output$plotLeft <- renderPlot(plot(cars))
-  output$plotTopRight <- renderPlot(plot(cars))
-  output$plotBottomLeft <- renderPlot(plot(cars))
+  output$plotTopRight <- renderPlot(plot(pressure))
+  output$plotBottomRight <- renderPlot(plot(AirPassengers))
 }
 
 shinyApp(ui, server)
+
+}
 }
 }
 

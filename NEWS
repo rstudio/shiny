@@ -1,4 +1,4 @@
-shiny 0.12.2.9000
+shiny 0.13.0
 --------------------------------------------------------------------------------
 
 * Fixed #962: plot interactions did not work with the development version of

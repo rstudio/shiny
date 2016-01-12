@@ -460,7 +460,12 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'   not determined by the height of its contents.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' # Only run this example in interactive R sessions.
+#' # NOTE: This example should be run with example(fillRow, ask = FALSE) to
+#' # avoid being prompted to hit Enter during plot rendering.
+#' if (interactive()) {
+#'
 #' ui <- fillPage(fillRow(
 #'   plotOutput("plotLeft", height = "100%"),
 #'   fillCol(
@@ -471,11 +476,13 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'
 #' server <- function(input, output, session) {
 #'   output$plotLeft <- renderPlot(plot(cars))
-#'   output$plotTopRight <- renderPlot(plot(cars))
-#'   output$plotBottomLeft <- renderPlot(plot(cars))
+#'   output$plotTopRight <- renderPlot(plot(pressure))
+#'   output$plotBottomRight <- renderPlot(plot(AirPassengers))
 #' }
 #'
 #' shinyApp(ui, server)
+#'
+#' }
 #' }
 #' @export
 fillRow <- function(..., flex = 1, width = "100%", height = "100%") {

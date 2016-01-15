@@ -567,7 +567,7 @@ ShinySession <- R6Class(
 
         obs <- observe(..stacktraceon = FALSE, {
 
-          self$sendCustomMessage('recalculating', list(
+          private$sendMessage(recalculating = list(
             name = name, status = 'recalculating'
           ))
 
@@ -593,7 +593,7 @@ ShinySession <- R6Class(
             }
           )
 
-          self$sendCustomMessage('recalculating', list(
+          private$sendMessage(recalculating = list(
             name = name, status = 'recalculated'
           ))
 
@@ -730,10 +730,10 @@ ShinySession <- R6Class(
     },
     reactlog = function(logEntry) {
       if (private$showcase)
-        self$sendCustomMessage("reactlog", logEntry)
+        private$sendMessage(reactlog = logEntry)
     },
     reload = function() {
-      self$sendCustomMessage("reload", TRUE)
+      private$sendMessage(reload = TRUE)
     },
 
     # Public RPC methods
@@ -1015,14 +1015,14 @@ ShinySession <- R6Class(
     },
     incrementBusyCount = function() {
       if (private$busyCount == 0L) {
-        self$sendCustomMessage("busy", "busy")
+        private$sendMessage(busy = "busy")
       }
       private$busyCount <- private$busyCount + 1L
     },
     decrementBusyCount = function() {
       private$busyCount <- private$busyCount - 1L
       if (private$busyCount == 0L) {
-        self$sendCustomMessage("busy", "idle")
+        private$sendMessage(busy = "idle")
       }
     }
   ),

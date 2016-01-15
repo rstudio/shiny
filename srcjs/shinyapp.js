@@ -96,8 +96,7 @@ var ShinyApp = function() {
         socket: socket
       });
 
-      exports.hideReconnectDialog();
-      reconnectDelay.reset();
+      self.onConnected();
 
       socket.send(JSON.stringify({
         method: 'init',
@@ -126,16 +125,8 @@ var ShinyApp = function() {
         self.$notifyDisconnected();
       }
 
+      self.onDisconnected(); // Must be run before self.$removeSocket()
       self.$removeSocket();
-
-      // To try a reconnect, both the app (self.$allowReconnect) and the
-      // server (socket.allowReconnect) must allow reconnections.
-      if (self.$allowReconnect === true && socket.allowReconnect === true) {
-        exports.showReconnectDialog();
-        self.$scheduleReconnect();
-      } else {
-        $(document.body).addClass('disconnected');
-      }
     };
     return socket;
   };
@@ -184,9 +175,8 @@ var ShinyApp = function() {
     this.$socket = null;
   };
 
-  this.$scheduleReconnect = function() {
+  this.$scheduleReconnect = function(delay) {
     var self = this;
-    var delay = reconnectDelay.next();
     console.log("Waiting " + (delay/1000) + "s before trying to reconnect.");
 
     setTimeout(function() { self.reconnect(); }, delay);
@@ -221,7 +211,24 @@ var ShinyApp = function() {
     };
   })();
 
-  exports.showReconnectDialog = exports.showReconnectDialog || function() {
+  this.onDisconnected = function() {
+    // To try a reconnect, both the app (this.$allowReconnect) and the
+    // server (this.$socket.allowReconnect) must allow reconnections.
+    if (this.$allowReconnect === true && this.$socket.allowReconnect === true) {
+      showReconnectDialog();
+      var delay = reconnectDelay.next();
+      this.$scheduleReconnect(delay);
+    } else {
+      $(document.body).addClass('disconnected');
+    }
+  };
+
+  this.onConnected = function() {
+    hideReconnectDialog();
+    reconnectDelay.reset();
+  };
+
+  function showReconnectDialog() {
     // If there's already a reconnect dialog, don't add another
     if ($('.shiny-reconnect-dialog-wrapper').length > 0)
       return;
@@ -258,11 +265,11 @@ var ShinyApp = function() {
     };
 
     updateDots();
-  };
+  }
 
-  exports.hideReconnectDialog = exports.hideReconnectDialog || function() {
+  function hideReconnectDialog() {
     $(".shiny-reconnect-dialog-wrapper").remove();
-  };
+  }
 
   // NB: Including blobs will cause IE to break!
   // TODO: Make blobs work with Internet Explorer

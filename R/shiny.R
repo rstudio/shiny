@@ -336,12 +336,16 @@ ShinySession <- R6Class(
                 requestMsg$method)
         return()
       }
-      private$write(toJSON(list(response=list(tag=requestMsg$tag, value=value))))
+      private$sendMessage(
+        response = list(tag = requestMsg$tag, value = value)
+      )
     },
     sendErrorResponse = function(requestMsg, error) {
       if (is.null(requestMsg$tag))
         return()
-      private$write(toJSON(list(response=list(tag=requestMsg$tag, error=error))))
+      private$sendMessage(
+        response = list(tag = requestMsg$tag, error = error)
+      )
     },
     write = function(json) {
       if (self$closed){
@@ -351,6 +355,14 @@ ShinySession <- R6Class(
         message('SEND ',
            gsub('(?m)base64,[a-zA-Z0-9+/=]+','[base64 data]',json,perl=TRUE))
       private$websocket$send(json)
+    },
+    sendMessage = function(...) {
+      # This function is a wrapper for $write
+      msg <- list(...)
+      if (anyUnnamed(msg)) {
+        stop("All arguments to sendMessage must be named.")
+      }
+      private$write(toJSON(msg))
     },
     getOutputOption = function(outputName, propertyName, defaultValue) {
       opts <- private$.outputOptions[[outputName]]
@@ -444,10 +456,12 @@ ShinySession <- R6Class(
       # tries to access session$request
       delayedAssign('request', websocket$request, assign.env = self)
 
-      private$write(toJSON(list(config = list(
-        workerId = workerId(),
-        sessionId = self$token
-      ))))
+      private$sendMessage(
+        config = list(
+          workerId = workerId(),
+          sessionId = self$token
+        )
+      )
     },
     makeScope = function(namespace) {
       ns <- NS(namespace)
@@ -634,11 +648,11 @@ ShinySession <- R6Class(
       inputMessages <- private$inputMessageQueue
       private$inputMessageQueue <- list()
 
-      json <- toJSON(list(errors=as.list(errors),
-                          values=as.list(values),
-                          inputMessages=inputMessages))
-
-      private$write(json)
+      private$sendMessage(
+        errors = as.list(errors),
+        values = as.list(values),
+        inputMessages = inputMessages
+      )
     },
     showProgress = function(id) {
       'Send a message to the client that recalculation of the output identified
@@ -659,10 +673,9 @@ ShinySession <- R6Class(
       self$sendProgress('binding', list(id = id))
     },
     sendProgress = function(type, message) {
-      json <- toJSON(list(
+      private$sendMessage(
         progress = list(type = type, message = message)
-      ))
-      private$write(json)
+      )
     },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
@@ -685,7 +698,7 @@ ShinySession <- R6Class(
     sendCustomMessage = function(type, message) {
       data <- list()
       data[[type]] <- message
-      private$write(toJSON(list(custom=data)))
+      private$sendMessage(custom = data)
     },
     sendInputMessage = function(inputId, message) {
       data <- list(id = inputId, message = message)

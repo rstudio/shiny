@@ -1088,8 +1088,7 @@ var ShinyApp = function() {
     this.config = message;
   });
 
-
-  addCustomMessageHandler('busy', function(message) {
+  addMessageHandler('busy', function(message) {
     if (message === 'busy') {
       $(document.documentElement).addClass('shiny-busy');
       $(document).trigger('shiny:busy');
@@ -1099,7 +1098,7 @@ var ShinyApp = function() {
     }
   });
 
-  addCustomMessageHandler('recalculating', function(message) {
+  addMessageHandler('recalculating', function(message) {
     if (message.hasOwnProperty('name') && message.hasOwnProperty('status')) {
       var binding = this.$bindings[message.name];
       $(binding ? binding.el : null).trigger({
@@ -1108,7 +1107,7 @@ var ShinyApp = function() {
     }
   });
 
-  addCustomMessageHandler('reload', function(message) {
+  addMessageHandler('reload', function(message) {
     window.location.reload();
   });
 

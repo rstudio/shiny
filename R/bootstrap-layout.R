@@ -525,6 +525,8 @@ flexfill <- function(..., direction, flex, width = width, height = height) {
       display = "-webkit-flex",
       display = "-ms-flexbox",
       display = "flex",
+      .webkit.flex.direction = direction,
+      .ms.flex.direction = direction,
       flex.direction = direction,
       width = validateCssUnit(width),
       height = validateCssUnit(height)

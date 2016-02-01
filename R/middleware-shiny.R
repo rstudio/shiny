@@ -41,3 +41,139 @@ sessionHandler <- function(req) {
     shinysession$handleRequest(subreq)
   })
 }
+
+apiHandler <- function(serverFuncSource) {
+  function(req) {
+    path <- req$PATH_INFO
+    if (is.null(path))
+      return(NULL)
+
+    matches <- regmatches(path, regexec('^/api/(.*)$', path))
+    if (length(matches[[1]]) == 0)
+      return(NULL)
+
+    apiName <- matches[[1]][2]
+
+    sharedSecret <- getOption('shiny.sharedSecret')
+    if (!is.null(sharedSecret)
+      && !identical(sharedSecret, ws$request$HTTP_SHINY_SHARED_SECRET)) {
+      ws$close()
+      return(TRUE)
+    }
+
+    if (!is.null(getOption("shiny.observer.error", NULL))) {
+      warning(
+        call. = FALSE,
+        "options(shiny.observer.error) is no longer supported; please unset it!"
+      )
+      stopApp()
+    }
+
+    # need to give a fake websocket to the session
+    ws <- list(
+      request = req,
+      sendMessage = function(...) {
+        print(list(...))
+      }
+    )
+
+    inputVals <- parseQueryString(req$QUERY_STRING)
+
+    shinysession <- ShinySession$new(ws)
+    appsByToken$set(shinysession$token, shinysession)
+    shinysession$setShowcase(.globals$showcaseDefault)
+
+    serverFunc <- withReactiveDomain(NULL, serverFuncSource())
+
+    tryCatch({
+      withReactiveDomain(shinysession, {
+        shinysession$manageInputs(inputVals)
+        do.call(serverFunc, argsForServerFunc(serverFunc, shinysession))
+        result <- NULL
+        shinysession$enableApi(apiName, function(value) {
+          result <<- try(value, silent = TRUE)
+        })
+        flushReact()
+        if (inherits(result, "try-error")) {
+          return(httpResponse(
+            status=500,
+            content_type="text/plain",
+            content=conditionMessage(attr(result, "condition"))
+          ))
+        } else {
+          return(httpResponse(
+            status=200,
+            content_type="application/json",
+            content=toJSON(result)
+          ))
+        }
+      })
+    }, error = function(e) {
+      return(httpResponse(
+        status=500,
+        content=htmlEscape(conditionMessage(e))
+      ))
+    })
+  }
+}
+
+apiWsHandler <- function(serverFuncSource) {
+  function(ws) {
+    path <- ws$request$PATH_INFO
+    if (is.null(path))
+      return(NULL)
+
+    matches <- regmatches(path, regexec('^/api/(.*)$', path))
+    if (length(matches[[1]]) == 0)
+      return(NULL)
+
+    apiName <- matches[[1]][2]
+    str(matches)
+
+    sharedSecret <- getOption('shiny.sharedSecret')
+    if (!is.null(sharedSecret)
+      && !identical(sharedSecret, ws$request$HTTP_SHINY_SHARED_SECRET)) {
+      ws$close()
+      return(TRUE)
+    }
+
+    if (!is.null(getOption("shiny.observer.error", NULL))) {
+      warning(
+        call. = FALSE,
+        "options(shiny.observer.error) is no longer supported; please unset it!"
+      )
+      stopApp()
+    }
+
+    inputVals <- parseQueryString(ws$request$QUERY_STRING)
+
+    # Give a fake websocket to suppress messages from session
+    shinysession <- ShinySession$new(list(
+      request = ws$request,
+      sendMessage = function(...) {
+        #print(list(...))
+      }
+    ))
+    appsByToken$set(shinysession$token, shinysession)
+    shinysession$setShowcase(.globals$showcaseDefault)
+
+    serverFunc <- withReactiveDomain(NULL, serverFuncSource())
+
+    tryCatch({
+      withReactiveDomain(shinysession, {
+        shinysession$manageInputs(inputVals)
+        do.call(serverFunc, argsForServerFunc(serverFunc, shinysession))
+        result <- NULL
+        shinysession$enableApi(apiName, function(value) {
+          try(ws$send(toJSON(value)), silent=TRUE)
+        })
+        flushReact()
+      })
+    }, error = function(e) {
+      ws$close()
+    })
+
+    # TODO: Handle ws$onClose()
+    # TODO: What to do on ws$onMessage?
+  }
+}

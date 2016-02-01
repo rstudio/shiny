@@ -405,6 +405,7 @@ ShinySession <- R6Class(
     fileUploadContext = 'FileUploadContext',
     .input      = 'ANY', # Internal ReactiveValues object for normal input sent from client
     .clientData = 'ANY', # Internal ReactiveValues object for other data sent from the client
+    apiObservers = list(),
     busyCount = 0L, # Number of observer callbacks that are pending. When 0, we are idle
     closedCallbacks = 'Callbacks',
     flushCallbacks = 'Callbacks',
@@ -1631,6 +1632,19 @@ ShinySession <- R6Class(
                      URLencode(name, TRUE),
                      workerId(),
                      URLencode(createUniqueId(8), TRUE)))
+    },
+    registerApi = function(name, rexpr) {
+      private$apiObservers[[name]] <- rexpr
+    },
+    enableApi = function(name, callback) {
+      rexpr <- private$apiObservers[[name]]
+      if (is.null(rexpr)) {
+        stop("API not found")
+      }
+
+      observe({
+        callback(rexpr())
+      })
     },
     # This function suspends observers for hidden outputs and resumes observers
     # for un-hidden outputs.

@@ -189,6 +189,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
   appHandlers <- list(
     http = joinHandlers(c(
       sessionHandler,
+      apiHandler(serverFuncSource),
       httpHandlers,
       sys.www.root,
       resourcePathHandler,
@@ -197,6 +198,11 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       if (!is.null(sharedSecret)
           && !identical(sharedSecret, ws$request$HTTP_SHINY_SHARED_SECRET)) {
         ws$close()
+        return(TRUE)
+      }
+
+      if (grepl("^/api/", ws$request$PATH_INFO)) {
+        apiWsHandler(serverFuncSource)(ws)
         return(TRUE)
       }
 

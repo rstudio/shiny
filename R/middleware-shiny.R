@@ -100,10 +100,17 @@ apiHandler <- function(serverFuncSource) {
             content=conditionMessage(attr(result, "condition"))
           ))
         } else {
+          if (!is.null(attr(result, "content.type"))) {
+            return(httpResponse(
+              status=200L,
+              content_type=attr(result, "content.type"),
+              content=result
+            ))
+          }
           return(httpResponse(
             status=200,
             content_type="application/json",
-            content=toJSON(result)
+            content=toJSON(result, pretty=TRUE)
           ))
         }
       })
@@ -164,7 +171,7 @@ apiWsHandler <- function(serverFuncSource) {
         do.call(serverFunc, argsForServerFunc(serverFunc, shinysession))
         result <- NULL
         shinysession$enableApi(apiName, function(value) {
-          try(ws$send(toJSON(value)), silent=TRUE)
+          try(ws$send(toJSON(value, pretty=TRUE)), silent=TRUE)
         })
         flushReact()
       })

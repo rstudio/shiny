@@ -1633,8 +1633,34 @@ ShinySession <- R6Class(
                      workerId(),
                      URLencode(createUniqueId(8), TRUE)))
     },
-    registerApi = function(name, rexpr) {
-      private$apiObservers[[name]] <- rexpr
+    registerApi = function(name, rexpr, type = c("auto", "json", "plot")) {
+      type <- match.arg(type)
+      # This is not even close to good
+      if (type == "auto") {
+        private$apiObservers[[name]] <- rexpr
+      } else if (type == "json") {
+        private$apiObservers[[name]] <- function() {
+          structure(
+            toJSON(rexpr(), pretty = TRUE),
+            content.type = "application/json"
+          )
+        }
+      } else if (type == "plot") {
+        private$apiObservers[[name]] <- function() {
+          input <- getDefaultReactiveDomain()$input
+          w <- if (!is.null(input$`plot-width`)) input$`plot-width` else 600
+          h <- if (!is.null(input$`plot-height`)) input$`plot-height` else 400
+
+          pngfile <- plotPNG(function() {
+            rexpr()
+          }, width = w, height = h)
+
+          structure(
+            list(file = pngfile, owned = TRUE),
+            content.type = "image/png"
+          )
+        }
+      }
     },
     enableApi = function(name, callback) {
       rexpr <- private$apiObservers[[name]]

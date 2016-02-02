@@ -354,6 +354,60 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
   markRenderFunction(uiOutput, renderFunc, outputArgs = outputArgs)
 }
 
+#' @export
+serveJSON <- function(expr, env=parent.frame(), quoted=FALSE) {
+  installExprFunction(expr, "func", env, quoted)
+  function() {
+    structure(
+      toJSON(func(), pretty = TRUE),
+      content.type = "application/json"
+    )
+  }
+}
+
+#' @export
+servePlot <- function(expr, env=parent.frame(), quoted=FALSE) {
+  installExprFunction(expr, "func", env, quoted)
+  function() {
+    input <- getDefaultReactiveDomain()$input
+    w <- if (!is.null(input$`plot-width`)) as.numeric(input$`plot-width`) else 600
+    h <- if (!is.null(input$`plot-height`)) as.numeric(input$`plot-height`) else 400
+
+    pngfile <- plotPNG(function() {
+      func()
+    }, width = w, height = h)
+
+    structure(
+      list(file = pngfile, owned = TRUE),
+      content.type = "image/png"
+    )
+  }
+}
+
+#' @export
+serveCSV <- function(expr, env=parent.frame(), quoted=FALSE, row.names=FALSE) {
+  installExprFunction(expr, "func", env, quoted)
+  function() {
+    tmp <- tempfile(".csv")
+    write.csv(func(), tmp, row.names=row.names)
+    structure(
+      list(file = tmp, owned = TRUE),
+      content.type = "text/csv"
+    )
+  }
+}
+
+#' @export
+serveText <- function(expr, env=parent.frame(), quoted=FALSE, row.names=FALSE) {
+  installExprFunction(expr, "func", env, quoted)
+  function() {
+    structure(
+      paste(func(), collapse = "\n"),
+      content.type = "text/plain"
+    )
+  }
+}
+
 #' File Downloads
 #'
 #' Allows content from the Shiny application to be made available to the user as

@@ -690,6 +690,7 @@ ShinySession <- R6Class(
     progressStack = 'Stack', # Stack of progress objects
     input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
     output      = 'ANY',    # Externally-usable S3 wrapper object for .outputs
+    api         = 'ANY',    # Externally-usable S3 wrapper object for APIs
     clientData  = 'reactivevalues', # Externally-usable S3 wrapper object for .clientData
     token = 'character',  # Used to identify this instance in URLs
     files = 'Map',        # For keeping track of files sent to client
@@ -726,6 +727,7 @@ ShinySession <- R6Class(
       .setLabel(self$clientData, 'clientData')
 
       self$output <- .createOutputWriter(self)
+      self$api <- .createApiWriter(self)
 
       self$token <- createUniqueId(16)
       private$.outputs <- list()
@@ -1633,34 +1635,8 @@ ShinySession <- R6Class(
                      workerId(),
                      URLencode(createUniqueId(8), TRUE)))
     },
-    registerApi = function(name, rexpr, type = c("auto", "json", "plot")) {
-      type <- match.arg(type)
-      # This is not even close to good
-      if (type == "auto") {
-        private$apiObservers[[name]] <- rexpr
-      } else if (type == "json") {
-        private$apiObservers[[name]] <- function() {
-          structure(
-            toJSON(rexpr(), pretty = TRUE),
-            content.type = "application/json"
-          )
-        }
-      } else if (type == "plot") {
-        private$apiObservers[[name]] <- function() {
-          input <- getDefaultReactiveDomain()$input
-          w <- if (!is.null(input$`plot-width`)) input$`plot-width` else 600
-          h <- if (!is.null(input$`plot-height`)) input$`plot-height` else 400
-
-          pngfile <- plotPNG(function() {
-            rexpr()
-          }, width = w, height = h)
-
-          structure(
-            list(file = pngfile, owned = TRUE),
-            content.type = "image/png"
-          )
-        }
-      }
+    registerApi = function(name, func) {
+      private$apiObservers[[name]] <- func
     },
     enableApi = function(name, callback) {
       rexpr <- private$apiObservers[[name]]
@@ -1849,7 +1825,6 @@ outputOptions <- function(x, name, ...) {
   .subset2(x, 'impl')$outputOptions(name, ...)
 }
 
-
 #' Add callbacks for Shiny session events
 #'
 #' These functions are for registering callbacks on Shiny session events.
@@ -1904,4 +1879,48 @@ flushAllSessions <- function() {
     )
     NULL
   })
+}
+
+.createApiWriter <- function(shinysession, ns = identity) {
+  structure(list(impl=shinysession, ns=ns), class='shinyapi')
+}
+
+#' @export
+`$<-.shinyapi` <- function(x, name, value) {
+  name <- .subset2(x, 'ns')(name)
+
+  label <- deparse(substitute(value))
+  if (length(substitute(value)) > 1) {
+    # value is an object consisting of a call and its arguments. Here we want
+    # to find the source references for the first argument (if there are
+    # arguments), which generally corresponds to the reactive expression--
+    # e.g. in renderTable({ x }), { x } is the expression to trace.
+    attr(label, "srcref") <- srcrefFromShinyCall(substitute(value)[[2]])
+    srcref <- attr(substitute(value)[[2]], "srcref")
+    if (length(srcref) > 0)
+      attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
+  }
+  .subset2(x, 'impl')$registerApi(name, value)
+  return(invisible(x))
+}
+
+#' @export
+`[[<-.shinyapi` <- `$<-.shinyapi`
+
+#' @export
+`$.shinyapi` <- function(x, name) {
+  stop("Reading objects from shinyapi object not allowed.")
+}
+
+#' @export
+`[[.shinyapi` <- `$.shinyapi`
+
+#' @export
+`[.shinyapi` <- function(values, name) {
+  stop("Single-bracket indexing of shinyapi object is not allowed.")
+}
+
+#' @export
+`[<-.shinyapi` <- function(values, name, value) {
+  stop("Single-bracket indexing of shinyapi object is not allowed.")
 }

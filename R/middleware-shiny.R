@@ -72,7 +72,7 @@ apiHandler <- function(serverFuncSource) {
     ws <- list(
       request = req,
       sendMessage = function(...) {
-        print(list(...))
+        #print(list(...))
       }
     )
 
@@ -134,7 +134,6 @@ apiWsHandler <- function(serverFuncSource) {
       return(NULL)
 
     apiName <- matches[[1]][2]
-    str(matches)
 
     sharedSecret <- getOption('shiny.sharedSecret')
     if (!is.null(sharedSecret)

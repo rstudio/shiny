@@ -56,9 +56,8 @@ apiHandler <- function(serverFuncSource) {
 
     sharedSecret <- getOption('shiny.sharedSecret')
     if (!is.null(sharedSecret)
-      && !identical(sharedSecret, ws$request$HTTP_SHINY_SHARED_SECRET)) {
-      ws$close()
-      return(TRUE)
+      && !identical(sharedSecret, req$HTTP_SHINY_SHARED_SECRET)) {
+      stop("Incorrect shared secret")
     }
 
     if (!is.null(getOption("shiny.observer.error", NULL))) {

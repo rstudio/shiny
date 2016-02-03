@@ -93,26 +93,7 @@ apiHandler <- function(serverFuncSource) {
           result <<- try(value, silent = TRUE)
         })
         flushReact()
-        if (inherits(result, "try-error")) {
-          return(httpResponse(
-            status=500,
-            content_type="text/plain",
-            content=conditionMessage(attr(result, "condition"))
-          ))
-        } else {
-          if (!is.null(attr(result, "content.type"))) {
-            return(httpResponse(
-              status=200L,
-              content_type=attr(result, "content.type"),
-              content=result
-            ))
-          }
-          return(httpResponse(
-            status=200,
-            content_type="application/json",
-            content=toJSON(result, pretty=TRUE)
-          ))
-        }
+        resultToResponse(result)
       })
     }, error = function(e) {
       return(httpResponse(
@@ -168,9 +149,19 @@ apiWsHandler <- function(serverFuncSource) {
       withReactiveDomain(shinysession, {
         shinysession$manageInputs(inputVals)
         do.call(serverFunc, argsForServerFunc(serverFunc, shinysession))
-        result <- NULL
         shinysession$enableApi(apiName, function(value) {
-          try(ws$send(toJSON(value, pretty=TRUE)), silent=TRUE)
+          resp <- resultToResponse(value)
+          if (resp$status != 200L) {
+            warning("Error: ", responseToContent(resp))
+            ws$close()
+          } else {
+            content <- responseToContent(resp)
+            if (grepl("^image/", resp$content_type)) {
+              content <- paste0("data:", resp$content_type, ";base64,",
+                httpuv::rawToBase64(content))
+            }
+            try(ws$send(content), silent=TRUE)
+          }
         })
         flushReact()
       })
@@ -180,5 +171,53 @@ apiWsHandler <- function(serverFuncSource) {
 
     # TODO: Handle ws$onClose()
     # TODO: What to do on ws$onMessage?
+  }
+}
+
+resultToResponse <- function(result) {
+  if (inherits(result, "httpResponse")) {
+    return(result)
+  } else if (inherits(result, "try-error")) {
+    return(httpResponse(
+      status=500,
+      content_type="text/plain",
+      content=conditionMessage(attr(result, "condition"))
+    ))
+  } else if (!is.null(attr(result, "content.type"))) {
+    return(httpResponse(
+      status=200L,
+      content_type=attr(result, "content.type"),
+      content=result
+    ))
+  } else {
+    return(httpResponse(
+      status=200L,
+      content_type="application/json",
+      content=toJSON(result, pretty=TRUE)
+    ))
+  }
+}
+
+responseToContent <- function(result) {
+  ct <- result$content_type
+  textMode <- grepl("^text/", ct) || ct == "application/json" ||
+    grepl("^application/xml($|\\+)", ct)
+  
+  # TODO: Make sure text is UTF-8
+
+  if ("file" %in% names(result$content)) {
+    filename <- result$content$file
+    if ("owned" %in% names(result$content) && result$content$owned) {
+      on.exit(unlink(filename), add = TRUE)
+    }
+    if (textMode)
+      return(paste(readLines(filename), collapse = "\n"))
+    else
+      return(readBin(filename, raw(), file.info(filename)$size))
+  } else {
+    if (textMode)
+      return(paste(result$content, collapse = "\n"))
+    else
+      return(result$content)
   }
 }

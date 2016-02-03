@@ -3,6 +3,9 @@ shiny 0.13.0.9000
 
 * `flexCol` did not work on RStudio for Windows or Linux.
 
+* Fixed #561: DataTables might pop up a warning when the data is updated
+  extremely frequently.
+
 shiny 0.13.0
 --------------------------------------------------------------------------------
 

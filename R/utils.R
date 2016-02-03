@@ -663,6 +663,21 @@ dataTablesJSON <- function(data, req) {
   q <- parseQueryString(params, nested = TRUE)
   ci <- q$search[['caseInsensitive']] == 'true'
 
+  # data may have been replaced/updated in the new table while the Ajax request
+  # from the previous table is still on its way, so it is possible that the old
+  # request asks for more columns than the current data, in which case we should
+  # discard this request and return empty data; the next Ajax request from the
+  # new table will retrieve the correct number of columns of data
+  if (length(q$columns) != ncol(data)) {
+    res <- toJSON(list(
+      draw = as.integer(q$draw),
+      recordsTotal = n,
+      recordsFiltered = 0,
+      data = NULL
+    ))
+    return(httpResponse(200, 'application/json', enc2utf8(res)))
+  }
+
   # global searching
   i <- seq_len(n)
   if (length(q$search[['value']]) && q$search[['value']] != '') {

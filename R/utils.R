@@ -380,33 +380,13 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' # "text, text, text"
 #'
 #' @export
-exprToFunction <- function(expr, env=parent.frame(2), quoted=FALSE,
-                           caller_offset=1) {
-  # Get the quoted expr from two calls back
-  expr_sub <- eval(substitute(substitute(expr)), parent.frame(caller_offset))
-
-  # Check if expr is a function, making sure not to evaluate expr, in case it
-  # is actually an unquoted expression.
-  # If expr is a single token, then indexing with [[ will error; if it has multiple
-  # tokens, then [[ works. In the former case it will be a name object; in the
-  # latter, it will be a language object.
-  if (!is.null(expr_sub) && !is.name(expr_sub) && expr_sub[[1]] == as.name('function')) {
-    # Get name of function that called this function
-    called_fun <- sys.call(-1 * caller_offset)[[1]]
-
-    shinyDeprecated(msg = paste("Passing functions to '", called_fun,
-      "' is deprecated. Please use expressions instead. See ?", called_fun,
-      " for more information.", sep=""))
-    return(expr)
+exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
+  if (!quoted) {
+    expr <- eval(substitute(substitute(expr)), sys.parent(1))
   }
 
-  if (quoted) {
-    # expr is a quoted expression
-    makeFunction(body=expr, env=env)
-  } else {
-    # expr is an unquoted expression
-    makeFunction(body=expr_sub, env=env)
-  }
+  # expr is a quoted expression
+  makeFunction(body=expr, env=env)
 }
 
 #' Install an expression as a function
@@ -440,7 +420,13 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
                                 label = deparse(sys.call(-1)[[1]]),
                                 wrappedWithLabel = TRUE,
                                 ..stacktraceon = FALSE) {
-  func <- exprToFunction(expr, eval.env, quoted, 2)
+  if (!quoted) {
+    quoted <- TRUE
+    expr <- eval(substitute(substitute(expr)), sys.frame(-1))
+    print(expr)
+  }
+
+  func <- exprToFunction(expr, eval.env, quoted)
   if (length(label) > 1) {
     # Just in case the deparsed code is more complicated than we imagine. If we
     # have a label with length > 1 it causes warnings in wrapFunctionLabel.
@@ -448,9 +434,10 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
   }
   if (wrappedWithLabel) {
     func <- wrapFunctionLabel(func, label, ..stacktraceon = ..stacktraceon)
+  } else {
+    registerDebugHook(name, assign.env, label)
   }
   assign(name, func, envir = assign.env)
-  registerDebugHook(name, assign.env, label)
 }
 
 #' Parse a GET query string from a URL
@@ -1238,6 +1225,7 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
     stop("Invalid name for wrapFunctionLabel: ", name)
   }
   assign(name, func, environment())
+  registerDebugHook(name, environment(), name)
 
   relabelWrapper <- eval(substitute(
     function(...) {

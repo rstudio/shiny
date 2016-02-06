@@ -14,13 +14,28 @@ $.extend(imageOutputBinding, {
     var outputId = this.getId(el);
 
     var $el = $(el);
-    // Load the image before emptying, to minimize flicker
-    var img = null;
+    var canvas;
 
     // Remove event handlers that were added in previous renderValue()
     $el.off('.image_output');
-    // Trigger custom 'remove' event for any existing images in the div
-    $el.find('img').trigger('remove');
+
+    // Get existing canvas element if present.
+    var $canvas = $el.find('canvas');
+
+    if ($canvas.length === 0) {
+      // If a canvas element is not already present, that means this is either
+      // the first time renderValue() has been called, or this is after an
+      // error. If there was an error, we need to clear the contents, which
+      // would be the previous error message.
+      $el.empty();
+      canvas = document.createElement('canvas');
+      $el.append(canvas);
+      $canvas = $(canvas);
+    } else {
+      // Trigger custom 'reset' event for any existing images in the div
+      canvas = $canvas[0];
+      $canvas.trigger('reset');
+    }
 
     if (!data) {
       $el.empty();
@@ -61,14 +76,45 @@ $.extend(imageOutputBinding, {
       coordmap: data.coordmap
     };
 
-    img = document.createElement('img');
-    // Copy items from data to img. This should include 'src'
+    // Copy items from data to canvas. We'll save 'src' for last, because it
+    // must be changed _after_ setting width and height. Don't set width and
+    // height if they have the same value as current, because that makes the
+    // canvas reset. Also, don't use the coordmap as an attribute.
     $.each(data, function(key, value) {
-      if (value !== null)
-        img.setAttribute(key, value);
+      if (value === null || key === 'src' || key === 'coordmap') {
+        return;
+      }
+
+      if (key === "width") {
+        // Don't set width if it's unchanged; doing so will cause the canvas to
+        // reset.
+        if ($canvas.width() === value)
+          return;
+
+        // For canvas to look good on HiDPI displays, need to set the pixel
+        // width to a different value from the canvas pixel dimensions.
+        $canvas.width(value);
+        canvas.setAttribute(key, pixelRatio() * value);
+
+      } else if (key === "height") {
+        if ($canvas.height() === value)
+          return;
+        $canvas.height(value);
+        canvas.setAttribute(key, pixelRatio() * value);
+
+      } else {
+       canvas.setAttribute(key, value);
+      }
     });
 
-    var $img = $(img);
+    // Now set the image content, after possibly setting width and height.
+    if (data.src) {
+      var img = new Image();
+      img.addEventListener("load", function() {
+        canvas.getContext('2d').drawImage(img, 0, 0);
+      });
+      img.src = data.src;
+    }
 
     if (!opts.coordmap)
       opts.coordmap = [];
@@ -93,9 +139,9 @@ $.extend(imageOutputBinding, {
         opts.clickClip, opts.coordmap);
       $el.on('mousedown2.image_output', clickHandler.mousedown);
 
-      // When img is removed, do housekeeping: clear $el's mouse listener and
-      // call the handler's onRemoveImg callback.
-      $img.on('remove', clickHandler.onRemoveImg);
+      // When canvas is reset, do housekeeping: clear $el's mouse listener and
+      // call the handler's onResetCanvas callback.
+      $canvas.on('reset', clickHandler.onResetCanvas);
     }
 
     if (opts.dblclickId) {
@@ -105,7 +151,7 @@ $.extend(imageOutputBinding, {
         opts.clickClip, opts.coordmap);
       $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
-      $img.on('remove', dblclickHandler.onRemoveImg);
+      $canvas.on('reset', dblclickHandler.onResetCanvas);
     }
 
     if (opts.hoverId) {
@@ -115,14 +161,14 @@ $.extend(imageOutputBinding, {
       $el.on('mousemove.image_output', hoverHandler.mousemove);
       $el.on('mouseout.image_output', hoverHandler.mouseout);
 
-      $img.on('remove', hoverHandler.onRemoveImg);
+      $canvas.on('reset', hoverHandler.onResetCanvas);
     }
 
     if (opts.brushId) {
       // Make image non-draggable (Chrome, Safari)
-      $img.css('-webkit-user-drag', 'none');
+      $canvas.css('-webkit-user-drag', 'none');
       // Firefox, IE<=10
-      $img.on('dragstart', function() { return false; });
+      $canvas.on('dragstart', function() { return false; });
 
       // Disable selection of image and text when dragging in IE<=10
       $el.on('selectstart.image_output', function() { return false; });
@@ -132,22 +178,20 @@ $.extend(imageOutputBinding, {
       $el.on('mousedown.image_output', brushHandler.mousedown);
       $el.on('mousemove.image_output', brushHandler.mousemove);
 
-      $img.on('remove', brushHandler.onRemoveImg);
+      $canvas.on('reset', brushHandler.onResetCanvas);
     }
 
     if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
       $el.addClass('crosshair');
     }
 
-    // Remove all elements except brush, usually image plus error messages.
-    // These extra contortions are needed to select the bare text of error
-    // message.
+    // Remove all elements except canvas and the brush; this is usually just
+    // error messages. These extra contortions are needed to select the bare
+    // text of error message.
     $el.contents().filter(function() {
-      return this.id !== el.id + '_brush';
+      return this.tagName.toLowerCase() !== "canvas" &&
+             this.id !== el.id + '_brush';
     }).remove();
-
-    if (img)
-      $el.append(img);
 
     if (data.error)
       console.log('Error on server extracting coordmap: ' + data.error);
@@ -559,7 +603,7 @@ imageutils.createClickHandler = function(inputId, clip, coordmap) {
       if (e.which !== 1) return;
       clickInfoSender(e);
     },
-    onRemoveImg: function() { clickInfoSender(null); }
+    onResetCanvas: function() { clickInfoSender(null); }
   };
 };
 
@@ -585,13 +629,13 @@ imageutils.createHoverHandler = function(inputId, delay, delayType, clip,
   return {
     mousemove:   function(e) { hoverInfoSender.normalCall(e); },
     mouseout: mouseout,
-    onRemoveImg: function()  { hoverInfoSender.immediateCall(null); }
+    onResetCanvas: function()  { hoverInfoSender.immediateCall(null); }
   };
 };
 
 
 // Returns a brush handler object. This has three public functions:
-// mousedown, mousemove, and onRemoveImg.
+// mousedown, mousemove, and onResetCanvas.
 imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId) {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
@@ -836,8 +880,8 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
   // "mostRecentBrush" bit is to ensure that when multiple outputs share the
   // same brush ID, inactive brushes don't send null values up to the server.
 
-  // This should be called when the img (not the el) is removed
-  function onRemoveImg() {
+  // This should be called when the canvas (not the el) is reset
+  function onResetCanvas() {
     if (opts.brushResetOnNew) {
       if ($el.data("mostRecentBrush")) {
         brush.reset();
@@ -856,7 +900,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
   return {
     mousedown: mousedown,
     mousemove: mousemove,
-    onRemoveImg: onRemoveImg
+    onResetCanvas: onResetCanvas
   };
 };
 
@@ -1165,11 +1209,11 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   function updateDiv() {
     // Need parent offset relative to page to calculate mouse offset
     // relative to page.
-    var imgOffset = $el.offset();
+    var canvasOffset = $el.offset();
     var b = state.boundsPx;
     $div.offset({
-        top: imgOffset.top + b.ymin,
-        left: imgOffset.left + b.xmin
+        top: canvasOffset.top + b.ymin,
+        left: canvasOffset.left + b.xmin
       })
       .outerWidth(b.xmax - b.xmin + 1)
       .outerHeight(b.ymax - b.ymin + 1);

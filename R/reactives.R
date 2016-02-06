@@ -505,7 +505,6 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
-  registerDebugHook(".func", o, "Reactive")
   structure(o$getValue, observable = o, class = "reactive")
 }
 
@@ -596,7 +595,7 @@ Observer <- R6Class(
       if (length(formals(observerFunc)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
-
+registerDebugHook("observerFunc", environment(), label)
       .func <<- function() {
         tryCatch(
           if (..stacktraceon)
@@ -831,7 +830,6 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
   o <- Observer$new(fun, label=label, suspended=suspended, priority=priority,
                     domain=domain, autoDestroy=autoDestroy,
                     ..stacktraceon=..stacktraceon)
-  registerDebugHook(".func", o, "Observer")
   invisible(o)
 }
 

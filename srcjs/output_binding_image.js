@@ -111,7 +111,11 @@ $.extend(imageOutputBinding, {
     if (data.src) {
       var img = new Image();
       img.addEventListener("load", function() {
-        canvas.getContext('2d').drawImage(img, 0, 0);
+        var context = canvas.getContext('2d');
+        // Need to clear canvas in case we're drawing with a transparent bg
+        // over an existing plot.
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(img, 0, 0);
       });
       img.src = data.src;
     }

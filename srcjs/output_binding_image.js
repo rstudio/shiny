@@ -25,9 +25,7 @@ $.extend(imageOutputBinding, {
     if ($canvas.length === 0) {
       // If a canvas element is not already present, that means this is either
       // the first time renderValue() has been called, or this is after an
-      // error. If there was an error, we need to clear the contents, which
-      // would be the previous error message.
-      $el.empty();
+      // error.
       canvas = document.createElement('canvas');
       $el.append(canvas);
       $canvas = $(canvas);
@@ -189,16 +187,24 @@ $.extend(imageOutputBinding, {
       $el.addClass('crosshair');
     }
 
+    if (data.error)
+      console.log('Error on server extracting coordmap: ' + data.error);
+  },
+
+  renderError: function(el, err) {
+    $(el).find('canvas').trigger('reset');
+    OutputBinding.prototype.renderError.call(this, el, err);
+  },
+
+  clearError: function(el) {
     // Remove all elements except canvas and the brush; this is usually just
-    // error messages. These extra contortions are needed to select the bare
-    // text of error message.
-    $el.contents().filter(function() {
-      return this.tagName.toLowerCase() !== "canvas" &&
+    // error messages.
+    $(el).contents().filter(function() {
+      return this.tagName !== "CANVAS" &&
              this.id !== el.id + '_brush';
     }).remove();
 
-    if (data.error)
-      console.log('Error on server extracting coordmap: ' + data.error);
+    OutputBinding.prototype.clearError.call(this, el);
   }
 });
 outputBindings.register(imageOutputBinding, 'shiny.imageOutput');

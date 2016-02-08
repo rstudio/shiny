@@ -57,14 +57,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   else
     heightWrapper <- NULL
 
-  # If renderPlot isn't going to adapt to the height of the div, then the
-  # div needs to adapt to the height of renderPlot. By default, plotOutput
-  # sets the height to 400px, so to make it adapt we need to override it
-  # with NULL.
-  outputFunc <- plotOutput
-  if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
-  return(markRenderFunction(outputFunc, function(shinysession, name, ...) {
+  renderFunc <- function(shinysession, name, ...) {
     if (!is.null(widthWrapper))
       width <- widthWrapper()
     if (!is.null(heightWrapper))
@@ -136,7 +130,17 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     }
 
     res
-  }))
+  }
+
+
+  # If renderPlot isn't going to adapt to the height of the div, then the
+  # div needs to adapt to the height of renderPlot. By default, plotOutput
+  # sets the height to 400px, so to make it adapt we need to override it
+  # with NULL.
+  outputFunc <- plotOutput
+  if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
+
+  markRenderFunction(outputFunc, renderFunc)
 }
 
 # The coordmap extraction functions below return something like the examples

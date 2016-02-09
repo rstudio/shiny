@@ -380,7 +380,7 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' @export
 exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
   if (!quoted) {
-    expr <- eval(substitute(substitute(expr)), sys.parent(1))
+    expr <- eval(substitute(substitute(expr)), parent.frame())
   }
 
   # expr is a quoted expression
@@ -420,7 +420,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
                                 ..stacktraceon = FALSE) {
   if (!quoted) {
     quoted <- TRUE
-    expr <- eval(substitute(substitute(expr)), sys.frame(-1))
+    expr <- eval(substitute(substitute(expr)), parent.frame())
   }
 
   func <- exprToFunction(expr, eval.env, quoted)

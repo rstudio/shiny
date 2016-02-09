@@ -82,6 +82,17 @@ $.extend(imageOutputBinding, {
       img.setAttribute(key, value);
     });
 
+    // Unset any attributes in the current img that were not provided in the
+    // new data.
+    for (var i=0; i<img.attributes.length; i++) {
+      var attrib = img.attributes[i];
+      // Need to check attrib.specified on IE because img.attributes contains
+      // all possible attributes on IE.
+      if (attrib.specified && !data.hasOwnProperty(attrib.name)) {
+        img.removeAttribute(attrib.name);
+      }
+    }
+
     if (!opts.coordmap)
       opts.coordmap = [];
 

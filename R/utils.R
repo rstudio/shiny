@@ -423,7 +423,6 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
   if (!quoted) {
     quoted <- TRUE
     expr <- eval(substitute(substitute(expr)), sys.frame(-1))
-    print(expr)
   }
 
   func <- exprToFunction(expr, eval.env, quoted)

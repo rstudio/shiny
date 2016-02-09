@@ -343,8 +343,6 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #' @param env The desired environment for the function. Defaults to the
 #'   calling environment two steps back.
 #' @param quoted Is the expression quoted?
-#' @param caller_offset If specified, the offset in the callstack of the
-#'   functiont to be treated as the caller.
 #'
 #' @examples
 #' # Example of a new renderer, similar to renderText

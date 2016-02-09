@@ -39,11 +39,11 @@
 #'   instead).
 #'
 #' @export
-renderPlot <- function(plotExpr, width='auto', height='auto', res=72, ...,
+renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE, func=NULL) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
-  installExprFunction(plotExpr, "func", env, quoted, ..stacktraceon = TRUE)
+  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
 
   args <- list(...)
 

@@ -4,8 +4,7 @@
 \alias{exprToFunction}
 \title{Convert an expression to a function}
 \usage{
-exprToFunction(expr, env = parent.frame(2), quoted = FALSE,
-  caller_offset = 1)
+exprToFunction(expr, env = parent.frame(), quoted = FALSE)
 }
 \arguments{
 \item{expr}{A quoted or unquoted expression, or a function.}

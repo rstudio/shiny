@@ -13,9 +13,6 @@ exprToFunction(expr, env = parent.frame(), quoted = FALSE)
 calling environment two steps back.}
 
 \item{quoted}{Is the expression quoted?}
-
-\item{caller_offset}{If specified, the offset in the callstack of the
-functiont to be treated as the caller.}
 }
 \description{
 This is to be called from another function, because it will attempt to get

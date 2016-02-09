@@ -1413,13 +1413,26 @@ $.extend(imageOutputBinding, {
     var outputId = this.getId(el);
 
     var $el = $(el);
-    // Load the image before emptying, to minimize flicker
-    var img = null;
+    var img;
 
     // Remove event handlers that were added in previous renderValue()
     $el.off('.image_output');
-    // Trigger custom 'remove' event for any existing images in the div
-    $el.find('img').trigger('remove');
+
+    // Get existing img element if present.
+    var $img = $el.find('img');
+
+    if ($img.length === 0) {
+      // If a img element is not already present, that means this is either
+      // the first time renderValue() has been called, or this is after an
+      // error.
+      img = document.createElement('img');
+      $el.append(img);
+      $img = $(img);
+    } else {
+      // Trigger custom 'reset' event for any existing images in the div
+      img = $img[0];
+      $img.trigger('reset');
+    }
 
     if (!data) {
       $el.empty();
@@ -1460,14 +1473,24 @@ $.extend(imageOutputBinding, {
       coordmap: data.coordmap
     };
 
-    img = document.createElement('img');
-    // Copy items from data to img. This should include 'src'
+    // Copy items from data to img. Don't set the coordmap as an attribute.
     $.each(data, function(key, value) {
-      if (value !== null)
-        img.setAttribute(key, value);
+      if (value === null || key === 'coordmap') {
+        return;
+      }
+      img.setAttribute(key, value);
     });
 
-    var $img = $(img);
+    // Unset any attributes in the current img that were not provided in the
+    // new data.
+    for (var i=0; i<img.attributes.length; i++) {
+      var attrib = img.attributes[i];
+      // Need to check attrib.specified on IE because img.attributes contains
+      // all possible attributes on IE.
+      if (attrib.specified && !data.hasOwnProperty(attrib.name)) {
+        img.removeAttribute(attrib.name);
+      }
+    }
 
     if (!opts.coordmap)
       opts.coordmap = [];
@@ -1492,9 +1515,9 @@ $.extend(imageOutputBinding, {
         opts.clickClip, opts.coordmap);
       $el.on('mousedown2.image_output', clickHandler.mousedown);
 
-      // When img is removed, do housekeeping: clear $el's mouse listener and
-      // call the handler's onRemoveImg callback.
-      $img.on('remove', clickHandler.onRemoveImg);
+      // When img is reset, do housekeeping: clear $el's mouse listener and
+      // call the handler's onResetImg callback.
+      $img.on('reset', clickHandler.onResetImg);
     }
 
     if (opts.dblclickId) {
@@ -1504,7 +1527,7 @@ $.extend(imageOutputBinding, {
         opts.clickClip, opts.coordmap);
       $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
-      $img.on('remove', dblclickHandler.onRemoveImg);
+      $img.on('reset', dblclickHandler.onResetImg);
     }
 
     if (opts.hoverId) {
@@ -1514,7 +1537,7 @@ $.extend(imageOutputBinding, {
       $el.on('mousemove.image_output', hoverHandler.mousemove);
       $el.on('mouseout.image_output', hoverHandler.mouseout);
 
-      $img.on('remove', hoverHandler.onRemoveImg);
+      $img.on('reset', hoverHandler.onResetImg);
     }
 
     if (opts.brushId) {
@@ -1531,25 +1554,31 @@ $.extend(imageOutputBinding, {
       $el.on('mousedown.image_output', brushHandler.mousedown);
       $el.on('mousemove.image_output', brushHandler.mousemove);
 
-      $img.on('remove', brushHandler.onRemoveImg);
+      $img.on('reset', brushHandler.onResetImg);
     }
 
     if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
       $el.addClass('crosshair');
     }
 
-    // Remove all elements except brush, usually image plus error messages.
-    // These extra contortions are needed to select the bare text of error
-    // message.
-    $el.contents().filter(function() {
-      return this.id !== el.id + '_brush';
-    }).remove();
-
-    if (img)
-      $el.append(img);
-
     if (data.error)
       console.log('Error on server extracting coordmap: ' + data.error);
+  },
+
+  renderError: function(el, err) {
+    $(el).find('img').trigger('reset');
+    OutputBinding.prototype.renderError.call(this, el, err);
+  },
+
+  clearError: function(el) {
+    // Remove all elements except img and the brush; this is usually just
+    // error messages.
+    $(el).contents().filter(function() {
+      return this.tagName !== "IMG" &&
+             this.id !== el.id + '_brush';
+    }).remove();
+
+    OutputBinding.prototype.clearError.call(this, el);
   }
 });
 outputBindings.register(imageOutputBinding, 'shiny.imageOutput');
@@ -1958,7 +1987,7 @@ imageutils.createClickHandler = function(inputId, clip, coordmap) {
       if (e.which !== 1) return;
       clickInfoSender(e);
     },
-    onRemoveImg: function() { clickInfoSender(null); }
+    onResetImg: function() { clickInfoSender(null); }
   };
 };
 
@@ -1984,13 +2013,13 @@ imageutils.createHoverHandler = function(inputId, delay, delayType, clip,
   return {
     mousemove:   function(e) { hoverInfoSender.normalCall(e); },
     mouseout: mouseout,
-    onRemoveImg: function()  { hoverInfoSender.immediateCall(null); }
+    onResetImg: function()  { hoverInfoSender.immediateCall(null); }
   };
 };
 
 
 // Returns a brush handler object. This has three public functions:
-// mousedown, mousemove, and onRemoveImg.
+// mousedown, mousemove, and onResetImg.
 imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId) {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
@@ -2235,8 +2264,8 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
   // "mostRecentBrush" bit is to ensure that when multiple outputs share the
   // same brush ID, inactive brushes don't send null values up to the server.
 
-  // This should be called when the img (not the el) is removed
-  function onRemoveImg() {
+  // This should be called when the img (not the el) is reset
+  function onResetImg() {
     if (opts.brushResetOnNew) {
       if ($el.data("mostRecentBrush")) {
         brush.reset();
@@ -2255,7 +2284,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
   return {
     mousedown: mousedown,
     mousemove: mousemove,
-    onRemoveImg: onRemoveImg
+    onResetImg: onResetImg
   };
 };
 

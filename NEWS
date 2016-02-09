@@ -6,6 +6,8 @@ shiny 0.13.0.9000
 * Fixed #561: DataTables might pop up a warning when the data is updated
   extremely frequently.
 
+* Fixed #776: In some browsers, plots sometimes flickered when updated.
+
 shiny 0.13.0
 --------------------------------------------------------------------------------
 

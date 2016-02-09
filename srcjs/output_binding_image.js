@@ -14,25 +14,25 @@ $.extend(imageOutputBinding, {
     var outputId = this.getId(el);
 
     var $el = $(el);
-    var canvas;
+    var img;
 
     // Remove event handlers that were added in previous renderValue()
     $el.off('.image_output');
 
-    // Get existing canvas element if present.
-    var $canvas = $el.find('canvas');
+    // Get existing img element if present.
+    var $img = $el.find('img');
 
-    if ($canvas.length === 0) {
-      // If a canvas element is not already present, that means this is either
+    if ($img.length === 0) {
+      // If a img element is not already present, that means this is either
       // the first time renderValue() has been called, or this is after an
       // error.
-      canvas = document.createElement('canvas');
-      $el.append(canvas);
-      $canvas = $(canvas);
+      img = document.createElement('img');
+      $el.append(img);
+      $img = $(img);
     } else {
       // Trigger custom 'reset' event for any existing images in the div
-      canvas = $canvas[0];
-      $canvas.trigger('reset');
+      img = $img[0];
+      $img.trigger('reset');
     }
 
     if (!data) {
@@ -74,49 +74,15 @@ $.extend(imageOutputBinding, {
       coordmap: data.coordmap
     };
 
-    // Copy items from data to canvas. We'll save 'src' for last, because it
-    // must be changed _after_ setting width and height. Don't set width and
-    // height if they have the same value as current, because that makes the
-    // canvas reset. Also, don't use the coordmap as an attribute.
+    // Copy items from data to img. We'll save 'src' for last, because it must
+    // be changed _after_ setting width and height. Don't set the coordmap as
+    // an attribute.
     $.each(data, function(key, value) {
-      if (value === null || key === 'src' || key === 'coordmap') {
+      if (value === null || key === 'coordmap') {
         return;
       }
-
-      if (key === "width") {
-        // Don't set width if it's unchanged; doing so will cause the canvas to
-        // reset.
-        if ($canvas.width() === value)
-          return;
-
-        // For canvas to look good on HiDPI displays, need to set the pixel
-        // width to a different value from the canvas pixel dimensions.
-        $canvas.width(value);
-        canvas.setAttribute(key, pixelRatio() * value);
-
-      } else if (key === "height") {
-        if ($canvas.height() === value)
-          return;
-        $canvas.height(value);
-        canvas.setAttribute(key, pixelRatio() * value);
-
-      } else {
-       canvas.setAttribute(key, value);
-      }
+      img.setAttribute(key, value);
     });
-
-    // Now set the image content, after possibly setting width and height.
-    if (data.src) {
-      var img = new Image();
-      img.addEventListener("load", function() {
-        var context = canvas.getContext('2d');
-        // Need to clear canvas in case we're drawing with a transparent bg
-        // over an existing plot.
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(img, 0, 0);
-      });
-      img.src = data.src;
-    }
 
     if (!opts.coordmap)
       opts.coordmap = [];
@@ -141,9 +107,9 @@ $.extend(imageOutputBinding, {
         opts.clickClip, opts.coordmap);
       $el.on('mousedown2.image_output', clickHandler.mousedown);
 
-      // When canvas is reset, do housekeeping: clear $el's mouse listener and
-      // call the handler's onResetCanvas callback.
-      $canvas.on('reset', clickHandler.onResetCanvas);
+      // When img is reset, do housekeeping: clear $el's mouse listener and
+      // call the handler's onResetImg callback.
+      $img.on('reset', clickHandler.onResetImg);
     }
 
     if (opts.dblclickId) {
@@ -153,7 +119,7 @@ $.extend(imageOutputBinding, {
         opts.clickClip, opts.coordmap);
       $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
-      $canvas.on('reset', dblclickHandler.onResetCanvas);
+      $img.on('reset', dblclickHandler.onResetImg);
     }
 
     if (opts.hoverId) {
@@ -163,14 +129,14 @@ $.extend(imageOutputBinding, {
       $el.on('mousemove.image_output', hoverHandler.mousemove);
       $el.on('mouseout.image_output', hoverHandler.mouseout);
 
-      $canvas.on('reset', hoverHandler.onResetCanvas);
+      $img.on('reset', hoverHandler.onResetImg);
     }
 
     if (opts.brushId) {
       // Make image non-draggable (Chrome, Safari)
-      $canvas.css('-webkit-user-drag', 'none');
+      $img.css('-webkit-user-drag', 'none');
       // Firefox, IE<=10
-      $canvas.on('dragstart', function() { return false; });
+      $img.on('dragstart', function() { return false; });
 
       // Disable selection of image and text when dragging in IE<=10
       $el.on('selectstart.image_output', function() { return false; });
@@ -180,7 +146,7 @@ $.extend(imageOutputBinding, {
       $el.on('mousedown.image_output', brushHandler.mousedown);
       $el.on('mousemove.image_output', brushHandler.mousemove);
 
-      $canvas.on('reset', brushHandler.onResetCanvas);
+      $img.on('reset', brushHandler.onResetImg);
     }
 
     if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
@@ -192,15 +158,15 @@ $.extend(imageOutputBinding, {
   },
 
   renderError: function(el, err) {
-    $(el).find('canvas').trigger('reset');
+    $(el).find('img').trigger('reset');
     OutputBinding.prototype.renderError.call(this, el, err);
   },
 
   clearError: function(el) {
-    // Remove all elements except canvas and the brush; this is usually just
+    // Remove all elements except img and the brush; this is usually just
     // error messages.
     $(el).contents().filter(function() {
-      return this.tagName !== "CANVAS" &&
+      return this.tagName !== "IMG" &&
              this.id !== el.id + '_brush';
     }).remove();
 
@@ -613,7 +579,7 @@ imageutils.createClickHandler = function(inputId, clip, coordmap) {
       if (e.which !== 1) return;
       clickInfoSender(e);
     },
-    onResetCanvas: function() { clickInfoSender(null); }
+    onResetImg: function() { clickInfoSender(null); }
   };
 };
 
@@ -639,13 +605,13 @@ imageutils.createHoverHandler = function(inputId, delay, delayType, clip,
   return {
     mousemove:   function(e) { hoverInfoSender.normalCall(e); },
     mouseout: mouseout,
-    onResetCanvas: function()  { hoverInfoSender.immediateCall(null); }
+    onResetImg: function()  { hoverInfoSender.immediateCall(null); }
   };
 };
 
 
 // Returns a brush handler object. This has three public functions:
-// mousedown, mousemove, and onResetCanvas.
+// mousedown, mousemove, and onResetImg.
 imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId) {
   // Parameter: expand the area in which a brush can be started, by this
   // many pixels in all directions. (This should probably be a brush option)
@@ -890,8 +856,8 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
   // "mostRecentBrush" bit is to ensure that when multiple outputs share the
   // same brush ID, inactive brushes don't send null values up to the server.
 
-  // This should be called when the canvas (not the el) is reset
-  function onResetCanvas() {
+  // This should be called when the img (not the el) is reset
+  function onResetImg() {
     if (opts.brushResetOnNew) {
       if ($el.data("mostRecentBrush")) {
         brush.reset();
@@ -910,7 +876,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
   return {
     mousedown: mousedown,
     mousemove: mousemove,
-    onResetCanvas: onResetCanvas
+    onResetImg: onResetImg
   };
 };
 
@@ -1219,11 +1185,11 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   function updateDiv() {
     // Need parent offset relative to page to calculate mouse offset
     // relative to page.
-    var canvasOffset = $el.offset();
+    var imgOffset = $el.offset();
     var b = state.boundsPx;
     $div.offset({
-        top: canvasOffset.top + b.ymin,
-        left: canvasOffset.left + b.xmin
+        top: imgOffset.top + b.ymin,
+        left: imgOffset.left + b.xmin
       })
       .outerWidth(b.xmax - b.xmin + 1)
       .outerHeight(b.ymax - b.ymin + 1);

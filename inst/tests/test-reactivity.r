@@ -596,9 +596,9 @@ test_that("reactive() accepts quoted and unquoted expressions", {
   fun <- reactive(q_expr, quoted = TRUE)
   expect_equal(isolate(fun()), 2)
 
-  # If function is used, work, but print message
-  expect_message(fun <- reactive(function() { vals$A + 1 }))
-  expect_equal(isolate(fun()), 2)
+  # Functions being passed to reactives is no longer treated specially
+  fun <- reactive(function() { vals$A + 1 })
+  expect_true(is.function(isolate(fun())))
 
 
   # Check that environment is correct - parent environment should be this one
@@ -637,10 +637,10 @@ test_that("observe() accepts quoted and unquoted expressions", {
   flushReact()
   expect_equal(valB, 4)
 
-  # If function is used, work, but print message
-  expect_message(observe(function() { valB <<- vals$A + 5 }))
+  # Functions are no longer treated specially
+  observe(function() { valB <<- vals$A + 5 })
   flushReact()
-  expect_equal(valB, 5)
+  expect_equal(valB, 4)
 
 
   # Check that environment is correct - parent environment should be this one
@@ -662,6 +662,15 @@ test_that("Observer priorities are respected", {
   flushReact()
 
   expect_identical(results, c(30, 20, 21, 22, 10))
+})
+
+test_that("installExprFunction doesn't rely on name being `expr`", {
+  justExecute <- function(anExpression, envirToUse = parent.frame(), isQuoted = FALSE) {
+    shiny:::installExprFunction(anExpression, "myFunc", envirToUse, quoted = isQuoted)
+    myFunc()
+  }
+
+  expect_identical(-1, justExecute({-1}))
 })
 
 test_that("reactivePoll and reactiveFileReader", {

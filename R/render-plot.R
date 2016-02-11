@@ -50,19 +50,16 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   if (is.function(width))
     widthWrapper <- reactive({ width() })
   else
-    widthWrapper <- NULL
+    widthWrapper <- function() { width }
 
   if (is.function(height))
     heightWrapper <- reactive({ height() })
   else
-    heightWrapper <- NULL
-
+    heightWrapper <- function() { height }
 
   renderFunc <- function(shinysession, name, ...) {
-    if (!is.null(widthWrapper))
-      width <- widthWrapper()
-    if (!is.null(heightWrapper))
-      height <- heightWrapper()
+    width <- widthWrapper()
+    height <- heightWrapper()
 
     # Note that these are reactive calls. A change to the width and height
     # will inherently cause a reactive plot to redraw (unless width and
@@ -92,14 +89,20 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         # Use capture.output to squelch printing to the actual console; we
         # are only interested in plot output
 
-        # Special case for ggplot objects - need to capture coordmap
-        if (inherits(result$value, "ggplot")) {
-          utils::capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
-        } else {
-          # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps the
-          # call to plotFunc
-          utils::capture.output(..stacktraceon..(print(result$value)))
-        }
+        utils::capture.output({
+          # Special case for ggplot objects - need to capture coordmap
+          if (inherits(result$value, "ggplot")) {
+            coordmap <<- getGgplotCoordmap(result$value, pixelratio)
+          } else {
+            # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps
+            # the call to plotFunc. The value needs to be printed just in case
+            # it's an object that requires printing to generate plot output,
+            # similar to ggplot2. But for base graphics, it would already have
+            # been rendered when func was called above, and the print should
+            # have no effect.
+            ..stacktraceon..(print(result$value))
+          }
+        })
       }
 
       if (is.null(coordmap)) {

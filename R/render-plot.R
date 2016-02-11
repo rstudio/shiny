@@ -57,6 +57,27 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   else
     heightWrapper <- function() { height }
 
+  # A modified version of print.ggplot which returns the built ggplot object as
+  # well as the gtable grob. This overrides the ggplot::print.ggplot method, but
+  # only within the context of getGgplotCoordmap. The reason this needs to be an
+  # (pseudo) S3 method is so that, if an object has a class in addition to
+  # ggplot, and there's a print method for that class, that we won't override
+  # that method.
+  # https://github.com/rstudio/shiny/issues/841
+  print.ggplot <- function(x) {
+    grid::grid.newpage()
+
+    build <- ggplot2::ggplot_build(x)
+
+    gtable <- ggplot2::ggplot_gtable(build)
+    grid::grid.draw(gtable)
+
+    structure(list(
+      build = build,
+      gtable = gtable
+    ), class = "ggplot_build_gtable")
+  }
+
 
   # Vars to store session and output, so that they can be accessed from
   # render().
@@ -97,29 +118,24 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       # Actually perform the plotting
       result <- withVisible(func())
 
-      coordmap <<- NULL
-
       if (result$visible) {
         # Use capture.output to squelch printing to the actual console; we
         # are only interested in plot output
-
         utils::capture.output({
-          # Special case for ggplot objects - need to capture coordmap
-          if (inherits(result$value, "ggplot")) {
-            coordmap <<- getGgplotCoordmap(result$value, pixelratio)
-          } else {
-            # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps
-            # the call to plotFunc. The value needs to be printed just in case
-            # it's an object that requires printing to generate plot output,
-            # similar to ggplot2. But for base graphics, it would already have
-            # been rendered when func was called above, and the print should
-            # have no effect.
-            ..stacktraceon..(print(result$value))
-          }
+          # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps
+          # the call to plotFunc. The value needs to be printed just in case
+          # it's an object that requires printing to generate plot output,
+          # similar to ggplot2. But for base graphics, it would already have
+          # been rendered when func was called above, and the print should
+          # have no effect.
+          res <- ..stacktraceon..(print(result$value))
         })
       }
 
-      if (is.null(coordmap)) {
+      # Special case for ggplot objects - need to capture coordmap
+      if (inherits(res, "ggplot_build_gtable")) {
+        coordmap <<- getGgplotCoordmap(res, pixelratio)
+      } else {
         coordmap <<- getPrevPlotCoordmap(width, height)
       }
     }
@@ -309,46 +325,11 @@ getPrevPlotCoordmap <- function(width, height) {
   ))
 }
 
-# Print a ggplot object and return a coordmap for it.
+
+# Given a ggplot_build_gtable object, return a coordmap for it.
 getGgplotCoordmap <- function(p, pixelratio) {
-  if (!inherits(p, "ggplot"))
+  if (!inherits(p, "ggplot_build_gtable"))
     return(NULL)
-
-  # A modified version of print.ggplot which returns the built ggplot object as
-  # well as the gtable grob. This overrides the ggplot::print.ggplot method, but
-  # only within the context of getGgplotCoordmap. The reason this needs to be an
-  # (pseudo) S3 method is so that, if an object has a class in addition to
-  # ggplot, and there's a print method for that class, that we won't override
-  # that method.
-  # https://github.com/rstudio/shiny/issues/841
-  print.ggplot <- function(x) {
-    grid::grid.newpage()
-
-    build <- ggplot2::ggplot_build(x)
-
-    gtable <- ggplot2::ggplot_gtable(build)
-    grid::grid.draw(gtable)
-
-    list(
-      build = build,
-      gtable = gtable
-    )
-  }
-
-  # Given the name of a generic function and an object, return the class name
-  # for the method that would be used on the object.
-  which_method <- function(generic, x) {
-    classes <- class(x)
-    method_names <- paste(generic, classes, sep = ".")
-    idx <- which(method_names %in% utils::methods(generic))
-
-    if (length(idx) == 0)
-      return(NULL)
-
-    # Return name of first class with matching method
-    classes[idx[1]]
-  }
-
 
   # Given a built ggplot object, return x and y domains (data space coords) for
   # each panel.
@@ -603,36 +584,25 @@ getGgplotCoordmap <- function(p, pixelratio) {
     })
   }
 
-  # If print(p) gets dispatched to print.ggplot(p), attempt to extract coordmap.
-  # If dispatched to another method, just print the object and don't attempt to
-  # extract the coordmap. This can happen if there's another print method that
-  # takes precedence.
-  if (identical(which_method("print", p), "ggplot")) {
-    res <- print(p)
 
-    tryCatch({
-      # Get info from built ggplot object
-      info <- find_panel_info(res$build)
+  tryCatch({
+    # Get info from built ggplot object
+    info <- find_panel_info(p$build)
 
-      # Get ranges from gtable - it's possible for this to return more elements than
-      # info, because it calculates positions even for panels that aren't present.
-      # This can happen with facet_wrap.
-      ranges <- find_panel_ranges(res$gtable, pixelratio)
+    # Get ranges from gtable - it's possible for this to return more elements than
+    # info, because it calculates positions even for panels that aren't present.
+    # This can happen with facet_wrap.
+    ranges <- find_panel_ranges(p$gtable, pixelratio)
 
-      for (i in seq_along(info)) {
-        info[[i]]$range <- ranges[[i]]
-      }
+    for (i in seq_along(info)) {
+      info[[i]]$range <- ranges[[i]]
+    }
 
-      return(info)
+    return(info)
 
-    }, error = function(e) {
-      # If there was an error extracting info from the ggplot object, just return
-      # a list with the error message.
-      return(structure(list(), error = e$message))
-    })
-
-  } else {
-    print(p)
-    return(list())
-  }
+  }, error = function(e) {
+    # If there was an error extracting info from the ggplot object, just return
+    # a list with the error message.
+    return(structure(list(), error = e$message))
+  })
 }

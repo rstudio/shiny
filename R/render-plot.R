@@ -57,7 +57,21 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   else
     heightWrapper <- function() { height }
 
+
+  # Vars to store session and output, so that they can be accessed from
+  # render().
+  session <- NULL
+  outputName <- NULL
+
+  # This function gets wrapped in an observer
   renderFunc <- function(shinysession, name, ...) {
+    session <<- shinysession
+    outputName <<- name
+    render()
+  }
+
+
+  render <- reactive({
     width <- widthWrapper()
     height <- heightWrapper()
 
@@ -66,15 +80,15 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # height were explicitly specified).
     prefix <- 'output_'
     if (width == 'auto')
-      width <- shinysession$clientData[[paste(prefix, name, '_width', sep='')]];
+      width <- session$clientData[[paste0(prefix, outputName, '_width')]];
     if (height == 'auto')
-      height <- shinysession$clientData[[paste(prefix, name, '_height', sep='')]];
+      height <- session$clientData[[paste0(prefix, outputName, '_height')]];
 
     if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
       return(NULL)
 
     # Resolution multiplier
-    pixelratio <- shinysession$clientData$pixelratio
+    pixelratio <- session$clientData$pixelratio
     if (is.null(pixelratio))
       pixelratio <- 1
 
@@ -122,7 +136,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
     # A list of attributes for the img
     res <- list(
-      src=shinysession$fileUrl(name, outfile, contentType='image/png'),
+      src=session$fileUrl(name, outfile, contentType='image/png'),
       width=width, height=height, coordmap=coordmap
     )
 
@@ -133,7 +147,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     }
 
     res
-  }
+  })
 
 
   # If renderPlot isn't going to adapt to the height of the div, then the

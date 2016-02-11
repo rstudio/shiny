@@ -10,6 +10,7 @@ shiny 0.13.0.9000
 
 * BREAKING CHANGE: The long-deprecated ability to pass functions (rather than
   expressions) to reactive() and observe() has finally been removed.
+* Fixed #776: In some browsers, plots sometimes flickered when updated.
 
 shiny 0.13.0
 --------------------------------------------------------------------------------

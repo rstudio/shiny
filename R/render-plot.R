@@ -88,7 +88,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   renderFunc <- function(shinysession, name, ...) {
     session <<- shinysession
     outputName <<- name
-    render()
+    render()$img
   }
 
 
@@ -101,9 +101,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # height were explicitly specified).
     prefix <- 'output_'
     if (width == 'auto')
-      width <- session$clientData[[paste0(prefix, outputName, '_width')]];
+      width <- session$clientData[[paste0(prefix, outputName, '_width')]]
     if (height == 'auto')
-      height <- session$clientData[[paste0(prefix, outputName, '_height')]];
+      height <- session$clientData[[paste0(prefix, outputName, '_height')]]
 
     if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
       return(NULL)
@@ -113,7 +113,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     if (is.null(pixelratio))
       pixelratio <- 1
 
-    coordmap <- NULL
+    plotRes <- NULL
+    recordedPlot <- NULL
     plotFunc <- function() {
       # Actually perform the plotting
       result <- withVisible(func())
@@ -128,13 +129,15 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
           # similar to ggplot2. But for base graphics, it would already have
           # been rendered when func was called above, and the print should
           # have no effect.
-          res <- ..stacktraceon..(print(result$value))
+          plotRes <<- ..stacktraceon..(print(result$value))
         })
       }
 
+      recordedPlot <<- recordPlot()
+
       # Special case for ggplot objects - need to capture coordmap
-      if (inherits(res, "ggplot_build_gtable")) {
-        coordmap <<- getGgplotCoordmap(res, pixelratio)
+      if (inherits(plotRes, "ggplot_build_gtable")) {
+        coordmap <<- getGgplotCoordmap(plotRes, pixelratio)
       } else {
         coordmap <<- getPrevPlotCoordmap(width, height)
       }
@@ -151,7 +154,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     on.exit(unlink(outfile))
 
     # A list of attributes for the img
-    res <- list(
+    img <- list(
       src=session$fileUrl(name, outfile, contentType='image/png'),
       width=width, height=height, coordmap=coordmap
     )
@@ -159,10 +162,15 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # Get error message if present (from attribute on the coordmap)
     error <- attr(coordmap, "error", exact = TRUE)
     if (!is.null(error)) {
-      res$error <- error
+      img$error <- error
     }
 
-    res
+    list(
+      img = img,
+      plotRes = plotRes,
+      recordedPlot = recordedPlot,
+      coordmap = coordmap
+    )
   })
 
 

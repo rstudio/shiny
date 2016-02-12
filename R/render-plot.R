@@ -57,13 +57,12 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   else
     heightWrapper <- function() { height }
 
-  # A modified version of print.ggplot which returns the built ggplot object as
-  # well as the gtable grob. This overrides the ggplot::print.ggplot method, but
-  # only within the context of getGgplotCoordmap. The reason this needs to be an
-  # (pseudo) S3 method is so that, if an object has a class in addition to
-  # ggplot, and there's a print method for that class, that we won't override
-  # that method.
-  # https://github.com/rstudio/shiny/issues/841
+  # A modified version of print.ggplot which returns the built ggplot object
+  # as well as the gtable grob. This overrides the ggplot::print.ggplot
+  # method, but only within the context of renderPlot. The reason this needs
+  # to be a (pseudo) S3 method is so that, if an object has a class in
+  # addition to ggplot, and there's a print method for that class, that we
+  # won't override that method. https://github.com/rstudio/shiny/issues/841
   print.ggplot <- function(x) {
     grid::grid.newpage()
 
@@ -84,11 +83,15 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   session <- NULL
   outputName <- NULL
 
-  # This function gets wrapped in an observer
+  # This function is the one that's returned from renderPlot(), and gets
+  # wrapped in an observer when the output value is assigned. The expression
+  # passed to renderPlot() is actually run in render(); this function can only
+  # replay a plot if the width/height changes.
   renderFunc <- function(shinysession, name, ...) {
     session <<- shinysession
     outputName <<- name
 
+    # The reactive that runs the expr in renderPlot()
     plotData <- render()
 
     width <- widthWrapper()
@@ -101,18 +104,20 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     if (height == 'auto')
       height <- session$clientData[[paste0('output_', outputName, '_height')]]
 
+    if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
+      return(NULL)
 
-    # If only the width/height have changed, simply replay the plot
-    if (width != plotData$width || height != plotData$height) {
-      pixelratio <- session$clientData$pixelratio
-      if (is.null(pixelratio))
-        pixelratio <- 1
+    img <- plotData$img
+
+    # If only the width/height have changed, simply replay the plot and make a
+    # new img.
+    if (width != img$width || height != img$height) {
+      pixelratio <- session$clientData$pixelratio %OR% 1
 
       coordmap <- NULL
       plotFunc <- function() {
         replayPlot(plotData$recordedPlot)
 
-        # Special case for ggplot objects - need to capture coordmap
         if (inherits(plotData$plotResult, "ggplot_build_gtable")) {
           coordmap <<- getGgplotCoordmap(plotData$plotResult, pixelratio)
         } else {
@@ -125,18 +130,17 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       )
       on.exit(unlink(outfile))
 
-      plotData$imgSrc <- session$fileUrl(name, outfile, contentType='image/png')
-      plotData$width <- width
-      plotData$height <- height
-      plotData$coordmap <- coordmap
+      img <- dropNulls(list(
+        src = session$fileUrl(name, outfile, contentType='image/png'),
+        width = width,
+        height = height,
+        coordmap = coordmap,
+        # Get coordmap error message if present
+        error = attr(coordmap, "error", exact = TRUE)
+      ))
     }
 
-    list(
-      src = plotData$imgSrc,
-      width = plotData$width,
-      height = plotData$height,
-      coordmap = plotData$coordmap
-    )
+    img
   }
 
 
@@ -155,9 +159,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       return(NULL)
 
     # Resolution multiplier
-    pixelratio <- session$clientData$pixelratio
-    if (is.null(pixelratio))
-      pixelratio <- 1
+    pixelratio <- session$clientData$pixelratio %OR% 1
 
     plotResult <- NULL
     recordedPlot <- NULL
@@ -181,7 +183,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
       recordedPlot <<- recordPlot()
 
-      # Special case for ggplot objects - need to capture coordmap
       if (inherits(plotResult, "ggplot_build_gtable")) {
         coordmap <<- getGgplotCoordmap(plotResult, pixelratio)
       } else {
@@ -199,19 +200,21 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     )
     on.exit(unlink(outfile))
 
-    # A list of attributes for the img
-    # TODO: just save src, not width and height here.
-    imgSrc <- session$fileUrl(name, outfile, contentType='image/png')
-
     list(
-      imgSrc = imgSrc,
-      width = width,
-      height = height,
+      # img is the content that gets sent to the client.
+      img = dropNulls(list(
+        src = session$fileUrl(name, outfile, contentType='image/png'),
+        width = width,
+        height = height,
+        coordmap = coordmap,
+        # Get coordmap error message if present.
+        error = attr(coordmap, "error", exact = TRUE)
+      )),
+      # Returned value from expression in renderPlot() -- may be a printable
+      # object like ggplot2. Needed just in case we replayPlot and need to get
+      # a coordmap again.
       plotResult = plotResult,
-      recordedPlot = recordedPlot,
-      coordmap = coordmap,
-      # Get error message if present (from attribute on the coordmap)
-      error = attr(coordmap, "error", exact = TRUE)
+      recordedPlot = recordedPlot
     )
   })
 

@@ -80,7 +80,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
 
   # Vars to store session and output, so that they can be accessed from
-  # render().
+  # the render() reactive.
   session <- NULL
   outputName <- NULL
 
@@ -88,22 +88,68 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   renderFunc <- function(shinysession, name, ...) {
     session <<- shinysession
     outputName <<- name
-    render()$img
+
+    plotData <- render()
+
+    width <- widthWrapper()
+    height <- heightWrapper()
+    # Note that these are reactive calls. A change to the width and height
+    # will inherently cause a reactive plot to redraw (unless width and
+    # height were explicitly specified).
+    if (width == 'auto')
+      width <- session$clientData[[paste0('output_', outputName, '_width')]]
+    if (height == 'auto')
+      height <- session$clientData[[paste0('output_', outputName, '_height')]]
+
+
+    # If only the width/height have changed, simply replay the plot
+    if (width != plotData$width || height != plotData$height) {
+      pixelratio <- session$clientData$pixelratio
+      if (is.null(pixelratio))
+        pixelratio <- 1
+
+      coordmap <- NULL
+      plotFunc <- function() {
+        replayPlot(plotData$recordedPlot)
+
+        # Special case for ggplot objects - need to capture coordmap
+        if (inherits(plotData$plotResult, "ggplot_build_gtable")) {
+          coordmap <<- getGgplotCoordmap(plotData$plotResult, pixelratio)
+        } else {
+          coordmap <<- getPrevPlotCoordmap(width, height)
+        }
+      }
+      outfile <- ..stacktraceoff..(
+        plotPNG(plotFunc, width = width*pixelratio, height = height*pixelratio,
+                res = res*pixelratio)
+      )
+      on.exit(unlink(outfile))
+
+      plotData$imgSrc <- session$fileUrl(name, outfile, contentType='image/png')
+      plotData$width <- width
+      plotData$height <- height
+      plotData$coordmap <- coordmap
+    }
+
+    list(
+      src = plotData$imgSrc,
+      width = plotData$width,
+      height = plotData$height,
+      coordmap = plotData$coordmap
+    )
   }
 
 
   render <- reactive({
-    width <- widthWrapper()
-    height <- heightWrapper()
+    isolate({
+      width <- widthWrapper()
+      height <- heightWrapper()
 
-    # Note that these are reactive calls. A change to the width and height
-    # will inherently cause a reactive plot to redraw (unless width and
-    # height were explicitly specified).
-    prefix <- 'output_'
-    if (width == 'auto')
-      width <- session$clientData[[paste0(prefix, outputName, '_width')]]
-    if (height == 'auto')
-      height <- session$clientData[[paste0(prefix, outputName, '_height')]]
+      if (width == 'auto')
+        width <- session$clientData[[paste0('output_', outputName, '_width')]]
+      if (height == 'auto')
+        height <- session$clientData[[paste0('output_', outputName, '_height')]]
+    })
 
     if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
       return(NULL)
@@ -113,7 +159,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     if (is.null(pixelratio))
       pixelratio <- 1
 
-    plotRes <- NULL
+    plotResult <- NULL
     recordedPlot <- NULL
     plotFunc <- function() {
       # Actually perform the plotting
@@ -129,15 +175,15 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
           # similar to ggplot2. But for base graphics, it would already have
           # been rendered when func was called above, and the print should
           # have no effect.
-          plotRes <<- ..stacktraceon..(print(result$value))
+          plotResult <<- ..stacktraceon..(print(result$value))
         })
       }
 
       recordedPlot <<- recordPlot()
 
       # Special case for ggplot objects - need to capture coordmap
-      if (inherits(plotRes, "ggplot_build_gtable")) {
-        coordmap <<- getGgplotCoordmap(plotRes, pixelratio)
+      if (inherits(plotResult, "ggplot_build_gtable")) {
+        coordmap <<- getGgplotCoordmap(plotResult, pixelratio)
       } else {
         coordmap <<- getPrevPlotCoordmap(width, height)
       }
@@ -154,22 +200,18 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     on.exit(unlink(outfile))
 
     # A list of attributes for the img
-    img <- list(
-      src=session$fileUrl(name, outfile, contentType='image/png'),
-      width=width, height=height, coordmap=coordmap
-    )
-
-    # Get error message if present (from attribute on the coordmap)
-    error <- attr(coordmap, "error", exact = TRUE)
-    if (!is.null(error)) {
-      img$error <- error
-    }
+    # TODO: just save src, not width and height here.
+    imgSrc <- session$fileUrl(name, outfile, contentType='image/png')
 
     list(
-      img = img,
-      plotRes = plotRes,
+      imgSrc = imgSrc,
+      width = width,
+      height = height,
+      plotResult = plotResult,
       recordedPlot = recordedPlot,
-      coordmap = coordmap
+      coordmap = coordmap,
+      # Get error message if present (from attribute on the coordmap)
+      error = attr(coordmap, "error", exact = TRUE)
     )
   })
 

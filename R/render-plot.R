@@ -91,9 +91,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     session <<- shinysession
     outputName <<- name
 
-    # The reactive that runs the expr in renderPlot()
-    plotData <- render()
-
     width <- widthWrapper()
     height <- heightWrapper()
     # Note that these are reactive calls. A change to the width and height
@@ -107,6 +104,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
       return(NULL)
 
+    # The reactive that runs the expr in renderPlot()
+    plotData <- render()
+
     img <- plotData$img
 
     # If only the width/height have changed, simply replay the plot and make a
@@ -116,8 +116,10 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
       coordmap <- NULL
       plotFunc <- function() {
-        replayPlot(plotData$recordedPlot)
+        ..stacktraceon..(replayPlot(plotData$recordedPlot))
 
+        # Coordmap must be recalculated after replaying plot, because pixel
+        # dimensions will have changed.
         if (inherits(plotData$plotResult, "ggplot_build_gtable")) {
           coordmap <<- getGgplotCoordmap(plotData$plotResult, pixelratio)
         } else {

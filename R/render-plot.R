@@ -165,6 +165,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
     plotResult <- NULL
     recordedPlot <- NULL
+    coordmap <- NULL
     plotFunc <- function() {
       # Actually perform the plotting
       result <- withVisible(func())
@@ -205,7 +206,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     list(
       # img is the content that gets sent to the client.
       img = dropNulls(list(
-        src = session$fileUrl(name, outfile, contentType='image/png'),
+        src = session$fileUrl(outputName, outfile, contentType='image/png'),
         width = width,
         height = height,
         coordmap = coordmap,

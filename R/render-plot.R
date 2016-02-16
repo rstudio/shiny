@@ -78,6 +78,21 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   }
 
 
+  getDims <- function() {
+    width <- widthWrapper()
+    height <- heightWrapper()
+
+    # Note that these are reactive calls. A change to the width and height
+    # will inherently cause a reactive plot to redraw (unless width and
+    # height were explicitly specified).
+    if (width == 'auto')
+      width <- session$clientData[[paste0('output_', outputName, '_width')]]
+    if (height == 'auto')
+      height <- session$clientData[[paste0('output_', outputName, '_height')]]
+
+    list(width = width, height = height)
+  }
+
   # Vars to store session and output, so that they can be accessed from
   # the render() reactive.
   session <- NULL
@@ -91,18 +106,12 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     session <<- shinysession
     outputName <<- name
 
-    width <- widthWrapper()
-    height <- heightWrapper()
-    # Note that these are reactive calls. A change to the width and height
-    # will inherently cause a reactive plot to redraw (unless width and
-    # height were explicitly specified).
-    if (width == 'auto')
-      width <- session$clientData[[paste0('output_', outputName, '_width')]]
-    if (height == 'auto')
-      height <- session$clientData[[paste0('output_', outputName, '_height')]]
+    dims <- getDims()
 
-    if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
+    if (is.null(dims$width) || is.null(dims$height) ||
+        dims$width <= 0 || dims$height <= 0) {
       return(NULL)
+    }
 
     # The reactive that runs the expr in renderPlot()
     plotData <- render()
@@ -111,7 +120,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
     # If only the width/height have changed, simply replay the plot and make a
     # new img.
-    if (width != img$width || height != img$height) {
+    if (dims$width != img$width || dims$height != img$height) {
       pixelratio <- session$clientData$pixelratio %OR% 1
 
       coordmap <- NULL
@@ -123,19 +132,19 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         if (inherits(plotData$plotResult, "ggplot_build_gtable")) {
           coordmap <<- getGgplotCoordmap(plotData$plotResult, pixelratio)
         } else {
-          coordmap <<- getPrevPlotCoordmap(width, height)
+          coordmap <<- getPrevPlotCoordmap(dims$width, dims$height)
         }
       }
       outfile <- ..stacktraceoff..(
-        plotPNG(plotFunc, width = width*pixelratio, height = height*pixelratio,
+        plotPNG(plotFunc, width = dims$width*pixelratio, height = dims$height*pixelratio,
                 res = res*pixelratio)
       )
       on.exit(unlink(outfile))
 
       img <- dropNulls(list(
         src = session$fileUrl(name, outfile, contentType='image/png'),
-        width = width,
-        height = height,
+        width = dims$width,
+        height = dims$height,
         coordmap = coordmap,
         # Get coordmap error message if present
         error = attr(coordmap, "error", exact = TRUE)
@@ -147,18 +156,12 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
 
   render <- reactive({
-    isolate({
-      width <- widthWrapper()
-      height <- heightWrapper()
+    isolate({ dims <- getDims() })
 
-      if (width == 'auto')
-        width <- session$clientData[[paste0('output_', outputName, '_width')]]
-      if (height == 'auto')
-        height <- session$clientData[[paste0('output_', outputName, '_height')]]
-    })
-
-    if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
+    if (is.null(dims$width) || is.null(dims$height) ||
+        dims$width <= 0 || dims$height <= 0) {
       return(NULL)
+    }
 
     # Resolution multiplier
     pixelratio <- session$clientData$pixelratio %OR% 1
@@ -167,8 +170,24 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     recordedPlot <- NULL
     coordmap <- NULL
     plotFunc <- function() {
-      # Actually perform the plotting
-      result <- withVisible(func())
+      success <-FALSE
+      tryCatch(
+        {
+          # Actually perform the plotting
+          result <- withVisible(func())
+          success <- TRUE
+        },
+        finally = {
+          if (!success) {
+            # If there was an error in making the plot, there's a good chance
+            # it's "Error in plot.new: figure margins too large". We need to
+            # take a reactive dependency on the width and height, so that the
+            # user's plotting code will re-execute when the plot is resized,
+            # instead of just replaying the previous plot (which errored).
+            getDims()
+          }
+        }
+      )
 
       if (result$visible) {
         # Use capture.output to squelch printing to the actual console; we
@@ -189,7 +208,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       if (inherits(plotResult, "ggplot_build_gtable")) {
         coordmap <<- getGgplotCoordmap(plotResult, pixelratio)
       } else {
-        coordmap <<- getPrevPlotCoordmap(width, height)
+        coordmap <<- getPrevPlotCoordmap(dims$width, dims$height)
       }
     }
 
@@ -198,8 +217,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # renderPlot, and by the ..stacktraceon.. in plotFunc where ggplot objects
     # are printed
     outfile <- ..stacktraceoff..(
-      do.call(plotPNG, c(plotFunc, width=width*pixelratio,
-        height=height*pixelratio, res=res*pixelratio, args))
+      do.call(plotPNG, c(plotFunc, width=dims$width*pixelratio,
+        height=dims$height*pixelratio, res=res*pixelratio, args))
     )
     on.exit(unlink(outfile))
 
@@ -207,8 +226,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       # img is the content that gets sent to the client.
       img = dropNulls(list(
         src = session$fileUrl(outputName, outfile, contentType='image/png'),
-        width = width,
-        height = height,
+        width = dims$width,
+        height = dims$height,
         coordmap = coordmap,
         # Get coordmap error message if present.
         error = attr(coordmap, "error", exact = TRUE)

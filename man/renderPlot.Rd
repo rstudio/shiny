@@ -5,7 +5,7 @@
 \title{Plot Output}
 \usage{
 renderPlot(expr, width = "auto", height = "auto", res = 72, ...,
-  env = parent.frame(), quoted = FALSE, func = NULL)
+  env = parent.frame(), quoted = FALSE, func = NULL, replay = TRUE)
 }
 \arguments{
 \item{expr}{An expression that generates a plot.}
@@ -32,6 +32,13 @@ is useful if you want to save an expression in a variable.}
 
 \item{func}{A function that generates a plot (deprecated; use \code{expr}
 instead).}
+
+\item{replay}{If \code{TRUE} (the default), then when a plot is resized,
+Shiny will \emph{replay} the plot drawing commands with
+\code{\link[grDevices]{replayPlot}()} instead of re-executing \code{expr}.
+This can result in faster plot redrawing, but there may be rare cases where
+it is undesirable. If you encounter problems when resizing a plot, set this
+to \code{FALSE}.}
 }
 \description{
 Renders a reactive plot that is suitable for assigning to an \code{output}

@@ -37,10 +37,15 @@
 #'   is useful if you want to save an expression in a variable.
 #' @param func A function that generates a plot (deprecated; use \code{expr}
 #'   instead).
-#'
+#' @param replay If \code{TRUE} (the default), then when a plot is resized,
+#'   Shiny will \emph{replay} the plot drawing commands with
+#'   \code{\link[grDevices]{replayPlot}()} instead of re-executing \code{expr}.
+#'   This can result in faster plot redrawing, but there may be rare cases where
+#'   it is undesirable. If you encounter problems when resizing a plot, set this
+#'   to \code{FALSE}.
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
-                       env=parent.frame(), quoted=FALSE, func=NULL) {
+                       env=parent.frame(), quoted=FALSE, func=NULL, replay=TRUE) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
   installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
@@ -156,7 +161,11 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
 
   render <- reactive({
-    isolate({ dims <- getDims() })
+    if (replay) {
+      isolate({ dims <- getDims() })
+    } else {
+      dims <- getDims()
+    }
 
     if (is.null(dims$width) || is.null(dims$height) ||
         dims$width <= 0 || dims$height <= 0) {

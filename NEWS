@@ -1,4 +1,4 @@
-shiny 0.13.0.9000
+shiny 0.13.1
 --------------------------------------------------------------------------------
 
 * `flexCol` did not work on RStudio for Windows or Linux.

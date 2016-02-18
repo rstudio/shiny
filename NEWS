@@ -1,16 +1,20 @@
-shiny 0.13.0.9000
+shiny 0.13.1.9000
 --------------------------------------------------------------------------------
-
-* `flexCol` did not work on RStudio for Windows or Linux.
 
 * Fixed #561: DataTables might pop up a warning when the data is updated
   extremely frequently.
+
+* Fixed #776: In some browsers, plots sometimes flickered when updated.
+
+shiny 0.13.1
+--------------------------------------------------------------------------------
+
+* `flexCol` did not work on RStudio for Windows or Linux.
 
 * Fixed RStudio debugger integration.
 
 * BREAKING CHANGE: The long-deprecated ability to pass functions (rather than
   expressions) to reactive() and observe() has finally been removed.
-* Fixed #776: In some browsers, plots sometimes flickered when updated.
 
 shiny 0.13.0
 --------------------------------------------------------------------------------

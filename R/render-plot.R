@@ -99,13 +99,13 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   }
 
   # Vars to store session and output, so that they can be accessed from
-  # the render() reactive.
+  # the plotObj() reactive.
   session <- NULL
   outputName <- NULL
 
   # This function is the one that's returned from renderPlot(), and gets
   # wrapped in an observer when the output value is assigned. The expression
-  # passed to renderPlot() is actually run in render(); this function can only
+  # passed to renderPlot() is actually run in plotObj(); this function can only
   # replay a plot if the width/height changes.
   renderFunc <- function(shinysession, name, ...) {
     session <<- shinysession
@@ -119,7 +119,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     }
 
     # The reactive that runs the expr in renderPlot()
-    plotData <- render()
+    plotData <- plotObj()
 
     img <- plotData$img
 
@@ -160,7 +160,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   }
 
 
-  render <- reactive({
+  plotObj <- reactive({
     if (replay) {
       isolate({ dims <- getDims() })
     } else {

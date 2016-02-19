@@ -1157,6 +1157,10 @@ checkEncoding <- function(file) {
             'http://shiny.rstudio.com/articles/unicode.html for more info.')
     return('UTF-8-BOM')
   }
+  x <- readChar(file, size, useBytes = TRUE)
+  if (is.na(iconv(x, 'UTF-8', 'UTF-8'))) {
+    warning('The input file ', file, ' does not seem to be encoded in UTF8')
+  }
   'UTF-8'
 }
 

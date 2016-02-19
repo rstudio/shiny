@@ -37,10 +37,16 @@
 #'   is useful if you want to save an expression in a variable.
 #' @param func A function that generates a plot (deprecated; use \code{expr}
 #'   instead).
-#'
+#' @param execOnResize If \code{FALSE} (the default), then when a plot is
+#'   resized, Shiny will \emph{replay} the plot drawing commands with
+#'   \code{\link[grDevices]{replayPlot}()} instead of re-executing \code{expr}.
+#'   This can result in faster plot redrawing, but there may be rare cases where
+#'   it is undesirable. If you encounter problems when resizing a plot, you can
+#'   have Shiny re-execute the code on resize by setting this to \code{TRUE}.
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
-                       env=parent.frame(), quoted=FALSE, func=NULL) {
+                       env=parent.frame(), quoted=FALSE, func=NULL,
+                       execOnResize=FALSE) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
   installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
@@ -50,66 +56,169 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   if (is.function(width))
     widthWrapper <- reactive({ width() })
   else
-    widthWrapper <- NULL
+    widthWrapper <- function() { width }
 
   if (is.function(height))
     heightWrapper <- reactive({ height() })
   else
-    heightWrapper <- NULL
+    heightWrapper <- function() { height }
 
-  # If renderPlot isn't going to adapt to the height of the div, then the
-  # div needs to adapt to the height of renderPlot. By default, plotOutput
-  # sets the height to 400px, so to make it adapt we need to override it
-  # with NULL.
-  outputFunc <- plotOutput
-  if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
+  # A modified version of print.ggplot which returns the built ggplot object
+  # as well as the gtable grob. This overrides the ggplot::print.ggplot
+  # method, but only within the context of renderPlot. The reason this needs
+  # to be a (pseudo) S3 method is so that, if an object has a class in
+  # addition to ggplot, and there's a print method for that class, that we
+  # won't override that method. https://github.com/rstudio/shiny/issues/841
+  print.ggplot <- function(x) {
+    grid::grid.newpage()
 
-  return(markRenderFunction(outputFunc, function(shinysession, name, ...) {
-    if (!is.null(widthWrapper))
-      width <- widthWrapper()
-    if (!is.null(heightWrapper))
-      height <- heightWrapper()
+    build <- ggplot2::ggplot_build(x)
+
+    gtable <- ggplot2::ggplot_gtable(build)
+    grid::grid.draw(gtable)
+
+    structure(list(
+      build = build,
+      gtable = gtable
+    ), class = "ggplot_build_gtable")
+  }
+
+
+  getDims <- function() {
+    width <- widthWrapper()
+    height <- heightWrapper()
 
     # Note that these are reactive calls. A change to the width and height
     # will inherently cause a reactive plot to redraw (unless width and
     # height were explicitly specified).
-    prefix <- 'output_'
     if (width == 'auto')
-      width <- shinysession$clientData[[paste(prefix, name, '_width', sep='')]];
+      width <- session$clientData[[paste0('output_', outputName, '_width')]]
     if (height == 'auto')
-      height <- shinysession$clientData[[paste(prefix, name, '_height', sep='')]];
+      height <- session$clientData[[paste0('output_', outputName, '_height')]]
 
-    if (is.null(width) || is.null(height) || width <= 0 || height <= 0)
+    list(width = width, height = height)
+  }
+
+  # Vars to store session and output, so that they can be accessed from
+  # the plotObj() reactive.
+  session <- NULL
+  outputName <- NULL
+
+  # This function is the one that's returned from renderPlot(), and gets
+  # wrapped in an observer when the output value is assigned. The expression
+  # passed to renderPlot() is actually run in plotObj(); this function can only
+  # replay a plot if the width/height changes.
+  renderFunc <- function(shinysession, name, ...) {
+    session <<- shinysession
+    outputName <<- name
+
+    dims <- getDims()
+
+    if (is.null(dims$width) || is.null(dims$height) ||
+        dims$width <= 0 || dims$height <= 0) {
       return(NULL)
+    }
+
+    # The reactive that runs the expr in renderPlot()
+    plotData <- plotObj()
+
+    img <- plotData$img
+
+    # If only the width/height have changed, simply replay the plot and make a
+    # new img.
+    if (dims$width != img$width || dims$height != img$height) {
+      pixelratio <- session$clientData$pixelratio %OR% 1
+
+      coordmap <- NULL
+      plotFunc <- function() {
+        ..stacktraceon..(replayPlot(plotData$recordedPlot))
+
+        # Coordmap must be recalculated after replaying plot, because pixel
+        # dimensions will have changed.
+        if (inherits(plotData$plotResult, "ggplot_build_gtable")) {
+          coordmap <<- getGgplotCoordmap(plotData$plotResult, pixelratio)
+        } else {
+          coordmap <<- getPrevPlotCoordmap(dims$width, dims$height)
+        }
+      }
+      outfile <- ..stacktraceoff..(
+        plotPNG(plotFunc, width = dims$width*pixelratio, height = dims$height*pixelratio,
+                res = res*pixelratio)
+      )
+      on.exit(unlink(outfile))
+
+      img <- dropNulls(list(
+        src = session$fileUrl(name, outfile, contentType='image/png'),
+        width = dims$width,
+        height = dims$height,
+        coordmap = coordmap,
+        # Get coordmap error message if present
+        error = attr(coordmap, "error", exact = TRUE)
+      ))
+    }
+
+    img
+  }
+
+
+  plotObj <- reactive({
+    if (execOnResize) {
+      isolate({ dims <- getDims() })
+    } else {
+      dims <- getDims()
+    }
+
+    if (is.null(dims$width) || is.null(dims$height) ||
+        dims$width <= 0 || dims$height <= 0) {
+      return(NULL)
+    }
 
     # Resolution multiplier
-    pixelratio <- shinysession$clientData$pixelratio
-    if (is.null(pixelratio))
-      pixelratio <- 1
+    pixelratio <- session$clientData$pixelratio %OR% 1
 
+    plotResult <- NULL
+    recordedPlot <- NULL
     coordmap <- NULL
     plotFunc <- function() {
-      # Actually perform the plotting
-      result <- withVisible(func())
-
-      coordmap <<- NULL
+      success <-FALSE
+      tryCatch(
+        {
+          # Actually perform the plotting
+          result <- withVisible(func())
+          success <- TRUE
+        },
+        finally = {
+          if (!success) {
+            # If there was an error in making the plot, there's a good chance
+            # it's "Error in plot.new: figure margins too large". We need to
+            # take a reactive dependency on the width and height, so that the
+            # user's plotting code will re-execute when the plot is resized,
+            # instead of just replaying the previous plot (which errored).
+            getDims()
+          }
+        }
+      )
 
       if (result$visible) {
         # Use capture.output to squelch printing to the actual console; we
         # are only interested in plot output
-
-        # Special case for ggplot objects - need to capture coordmap
-        if (inherits(result$value, "ggplot")) {
-          utils::capture.output(coordmap <<- getGgplotCoordmap(result$value, pixelratio))
-        } else {
-          # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps the
-          # call to plotFunc
-          utils::capture.output(..stacktraceon..(print(result$value)))
-        }
+        utils::capture.output({
+          # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps
+          # the call to plotFunc. The value needs to be printed just in case
+          # it's an object that requires printing to generate plot output,
+          # similar to ggplot2. But for base graphics, it would already have
+          # been rendered when func was called above, and the print should
+          # have no effect.
+          plotResult <<- ..stacktraceon..(print(result$value))
+        })
       }
 
-      if (is.null(coordmap)) {
-        coordmap <<- getPrevPlotCoordmap(width, height)
+      recordedPlot <<- recordPlot()
+
+      if (inherits(plotResult, "ggplot_build_gtable")) {
+        coordmap <<- getGgplotCoordmap(plotResult, pixelratio)
+      } else {
+        coordmap <<- getPrevPlotCoordmap(dims$width, dims$height)
       }
     }
 
@@ -118,25 +227,38 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # renderPlot, and by the ..stacktraceon.. in plotFunc where ggplot objects
     # are printed
     outfile <- ..stacktraceoff..(
-      do.call(plotPNG, c(plotFunc, width=width*pixelratio,
-        height=height*pixelratio, res=res*pixelratio, args))
+      do.call(plotPNG, c(plotFunc, width=dims$width*pixelratio,
+        height=dims$height*pixelratio, res=res*pixelratio, args))
     )
     on.exit(unlink(outfile))
 
-    # A list of attributes for the img
-    res <- list(
-      src=shinysession$fileUrl(name, outfile, contentType='image/png'),
-      width=width, height=height, coordmap=coordmap
+    list(
+      # img is the content that gets sent to the client.
+      img = dropNulls(list(
+        src = session$fileUrl(outputName, outfile, contentType='image/png'),
+        width = dims$width,
+        height = dims$height,
+        coordmap = coordmap,
+        # Get coordmap error message if present.
+        error = attr(coordmap, "error", exact = TRUE)
+      )),
+      # Returned value from expression in renderPlot() -- may be a printable
+      # object like ggplot2. Needed just in case we replayPlot and need to get
+      # a coordmap again.
+      plotResult = plotResult,
+      recordedPlot = recordedPlot
     )
+  })
 
-    # Get error message if present (from attribute on the coordmap)
-    error <- attr(coordmap, "error", exact = TRUE)
-    if (!is.null(error)) {
-      res$error <- error
-    }
 
-    res
-  }))
+  # If renderPlot isn't going to adapt to the height of the div, then the
+  # div needs to adapt to the height of renderPlot. By default, plotOutput
+  # sets the height to 400px, so to make it adapt we need to override it
+  # with NULL.
+  outputFunc <- plotOutput
+  if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
+
+  markRenderFunction(outputFunc, renderFunc)
 }
 
 # The coordmap extraction functions below return something like the examples
@@ -288,46 +410,11 @@ getPrevPlotCoordmap <- function(width, height) {
   ))
 }
 
-# Print a ggplot object and return a coordmap for it.
+
+# Given a ggplot_build_gtable object, return a coordmap for it.
 getGgplotCoordmap <- function(p, pixelratio) {
-  if (!inherits(p, "ggplot"))
+  if (!inherits(p, "ggplot_build_gtable"))
     return(NULL)
-
-  # A modified version of print.ggplot which returns the built ggplot object as
-  # well as the gtable grob. This overrides the ggplot::print.ggplot method, but
-  # only within the context of getGgplotCoordmap. The reason this needs to be an
-  # (pseudo) S3 method is so that, if an object has a class in addition to
-  # ggplot, and there's a print method for that class, that we won't override
-  # that method.
-  # https://github.com/rstudio/shiny/issues/841
-  print.ggplot <- function(x) {
-    grid::grid.newpage()
-
-    build <- ggplot2::ggplot_build(x)
-
-    gtable <- ggplot2::ggplot_gtable(build)
-    grid::grid.draw(gtable)
-
-    list(
-      build = build,
-      gtable = gtable
-    )
-  }
-
-  # Given the name of a generic function and an object, return the class name
-  # for the method that would be used on the object.
-  which_method <- function(generic, x) {
-    classes <- class(x)
-    method_names <- paste(generic, classes, sep = ".")
-    idx <- which(method_names %in% utils::methods(generic))
-
-    if (length(idx) == 0)
-      return(NULL)
-
-    # Return name of first class with matching method
-    classes[idx[1]]
-  }
-
 
   # Given a built ggplot object, return x and y domains (data space coords) for
   # each panel.
@@ -582,36 +669,25 @@ getGgplotCoordmap <- function(p, pixelratio) {
     })
   }
 
-  # If print(p) gets dispatched to print.ggplot(p), attempt to extract coordmap.
-  # If dispatched to another method, just print the object and don't attempt to
-  # extract the coordmap. This can happen if there's another print method that
-  # takes precedence.
-  if (identical(which_method("print", p), "ggplot")) {
-    res <- print(p)
 
-    tryCatch({
-      # Get info from built ggplot object
-      info <- find_panel_info(res$build)
+  tryCatch({
+    # Get info from built ggplot object
+    info <- find_panel_info(p$build)
 
-      # Get ranges from gtable - it's possible for this to return more elements than
-      # info, because it calculates positions even for panels that aren't present.
-      # This can happen with facet_wrap.
-      ranges <- find_panel_ranges(res$gtable, pixelratio)
+    # Get ranges from gtable - it's possible for this to return more elements than
+    # info, because it calculates positions even for panels that aren't present.
+    # This can happen with facet_wrap.
+    ranges <- find_panel_ranges(p$gtable, pixelratio)
 
-      for (i in seq_along(info)) {
-        info[[i]]$range <- ranges[[i]]
-      }
+    for (i in seq_along(info)) {
+      info[[i]]$range <- ranges[[i]]
+    }
 
-      return(info)
+    return(info)
 
-    }, error = function(e) {
-      # If there was an error extracting info from the ggplot object, just return
-      # a list with the error message.
-      return(structure(list(), error = e$message))
-    })
-
-  } else {
-    print(p)
-    return(list())
-  }
+  }, error = function(e) {
+    # If there was an error extracting info from the ggplot object, just return
+    # a list with the error message.
+    return(structure(list(), error = e$message))
+  })
 }

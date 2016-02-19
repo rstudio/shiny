@@ -573,6 +573,9 @@ ShinySession <- R6Class(
 
           value <- tryCatch(
             shinyCallingHandlers(func()),
+            shiny.output.abort = function(cond) {
+              structure(NULL, class = "abort-output")
+            },
             shiny.silent.error = function(cond) {
               # Don't let shiny.silent.error go through the normal stop
               # path of try, because we don't want it to print. But we
@@ -590,12 +593,17 @@ ShinySession <- R6Class(
                 printError(cond)
               }
               invisible(structure(msg, class = "try-error", condition = cond))
+            },
+            finally = {
+              private$sendMessage(recalculating = list(
+                name = name, status = 'recalculated'
+              ))
             }
           )
 
-          private$sendMessage(recalculating = list(
-            name = name, status = 'recalculated'
-          ))
+          if (inherits(value, "abort-output")) {
+            return()
+          }
 
           private$invalidatedOutputErrors$remove(name)
           private$invalidatedOutputValues$remove(name)

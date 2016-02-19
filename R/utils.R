@@ -1066,6 +1066,22 @@ req <- function(...) {
     invisible()
 }
 
+#' Abort processing the current output
+#'
+#' Signals an error that Shiny treats specially if an output is currently being
+#' evaluated. Execution will stop, but rather than clearing the output (as
+#' \code{\link{req}} does) or showing an error message (as \code{\link{stop}}
+#' does), the output simply remains unchanged.
+#'
+#' If \code{abortOutput} is called in any non-output context (like in an
+#' \code{\link{observe}} or \code{\link{observeEvent}}), the effect is the same
+#' as \code{\link{req}(FALSE)}.
+#'
+#' @export
+abortOutput <- function() {
+  stopWithCondition("shiny.output.abort", "")
+}
+
 # Execute a function against each element of ..., but only evaluate each element
 # after the previous element has been passed to fun_. The return value of fun_
 # is discarded, and only invisible() is returned from dotloop.

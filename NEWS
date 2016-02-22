@@ -6,6 +6,9 @@ shiny 0.13.1.9000
 
 * Fixed #776: In some browsers, plots sometimes flickered when updated.
 
+* When resized, plots are drawn with `replayPlot()`, instead of re-executing
+  all plotting code. This results in faster plot rendering.
+
 * Added `cancelOutput` function, and a `cancelOutput` parameter to `req`. The
   function causes the currently executing output to cancel its execution, and
   leave its previous state alone (as opposed to clearing the output). The `req`
@@ -20,11 +23,6 @@ shiny 0.13.1
 
 * BREAKING CHANGE: The long-deprecated ability to pass functions (rather than
   expressions) to reactive() and observe() has finally been removed.
-
-* Fixed #776: In some browsers, plots sometimes flickered when updated.
-
-* When resized, plots are drawn with `replayPlot()`, instead of re-executing
-  all plotting code. This results in faster plot rendering.
 
 shiny 0.13.0
 --------------------------------------------------------------------------------

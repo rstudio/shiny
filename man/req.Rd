@@ -4,10 +4,14 @@
 \alias{req}
 \title{Check for required values}
 \usage{
-req(...)
+req(..., cancelOutput = FALSE)
 }
 \arguments{
 \item{...}{Values to check for truthiness.}
+
+\item{cancelOutput}{If \code{TRUE} and an output is being evaluated, stop
+processing as usual but instead of clearing the output, leave it in
+whatever state it happens to be in.}
 }
 \value{
 The first value that was passed in.

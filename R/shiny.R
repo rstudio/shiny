@@ -573,8 +573,8 @@ ShinySession <- R6Class(
 
           value <- tryCatch(
             shinyCallingHandlers(func()),
-            shiny.output.abort = function(cond) {
-              structure(NULL, class = "abort-output")
+            shiny.output.cancel = function(cond) {
+              structure(NULL, class = "cancel-output")
             },
             shiny.silent.error = function(cond) {
               # Don't let shiny.silent.error go through the normal stop
@@ -601,7 +601,7 @@ ShinySession <- R6Class(
             }
           )
 
-          if (inherits(value, "abort-output")) {
+          if (inherits(value, "cancel-output")) {
             return()
           }
 

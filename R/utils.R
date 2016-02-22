@@ -1051,13 +1051,21 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' \code{req(input$a != 0)}
 #'
 #' @param ... Values to check for truthiness.
+#' @param cancelOutput If \code{TRUE} and an output is being evaluated, stop
+#'   processing as usual but instead of clearing the output, leave it in
+#'   whatever state it happens to be in.
 #' @return The first value that was passed in.
 #'
 #' @export
-req <- function(...) {
+req <- function(..., cancelOutput = FALSE) {
   dotloop(function(item) {
-    if (!isTruthy(item))
-      stopWithCondition("validation", "")
+    if (!isTruthy(item)) {
+      if (isTRUE(cancelOutput)) {
+        cancelOutput()
+      } else {
+        stopWithCondition("validation", "")
+      }
+    }
   }, ...)
 
   if (!missing(..1))
@@ -1066,20 +1074,20 @@ req <- function(...) {
     invisible()
 }
 
-#' Abort processing the current output
+#' Cancel processing of the current output
 #'
 #' Signals an error that Shiny treats specially if an output is currently being
 #' evaluated. Execution will stop, but rather than clearing the output (as
 #' \code{\link{req}} does) or showing an error message (as \code{\link{stop}}
 #' does), the output simply remains unchanged.
 #'
-#' If \code{abortOutput} is called in any non-output context (like in an
+#' If \code{cancelOutput} is called in any non-output context (like in an
 #' \code{\link{observe}} or \code{\link{observeEvent}}), the effect is the same
 #' as \code{\link{req}(FALSE)}.
 #'
 #' @export
-abortOutput <- function() {
-  stopWithCondition("shiny.output.abort", "")
+cancelOutput <- function() {
+  stopWithCondition("shiny.output.cancel", "")
 }
 
 # Execute a function against each element of ..., but only evaluate each element

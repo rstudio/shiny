@@ -4,8 +4,8 @@
 \alias{renderBootstrapTable}
 \title{Table Output (Bootstrap)}
 \usage{
-renderBootstrapTable(expr, ..., css_class = NULL, env = parent.frame(),
-  quoted = FALSE, func = NULL)
+renderBootstrapTable(expr, ..., format = NULL, width = NULL,
+  env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used with
@@ -14,8 +14,11 @@ renderBootstrapTable(expr, ..., css_class = NULL, env = parent.frame(),
 \item{...}{Arguments to be passed through to \code{\link[xtable]{xtable}} and
 \code{\link[xtable]{print.xtable}}.}
 
-\item{css_class}{An optional string with the Botstrap CSS class to apply to the
-table (options: table-striped, table-bordered, table-hover, table-condensed).}
+\item{format}{An optional string with the Bootstrap table format to apply to the
+table (options: striped, bordered, hover, condensed).}
+
+\item{width}{An optional string with the width of the table, as a percentage of
+the total width of the page.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 

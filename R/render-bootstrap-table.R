@@ -10,8 +10,10 @@
 #'   \code{\link[xtable]{xtable}}.
 #' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}} and
 #'   \code{\link[xtable]{print.xtable}}.
-#' @param css_class An optional string with the Botstrap CSS class to apply to the
-#'   table (options: table-striped, table-bordered, table-hover, table-condensed).
+#' @param format An optional string with the Bootstrap table format to apply to the
+#'   table (options: striped, bordered, hover, condensed).
+#'@param  width An optional string with the width of the table, as a percentage of
+#'   the total width of the page.
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
@@ -19,7 +21,7 @@
 #'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #'
 #' @export
-renderBootstrapTable <- function(expr, ..., css_class=NULL, env=parent.frame(), quoted=FALSE, func=NULL) {
+renderBootstrapTable <- function(expr, ..., format=NULL, width=NULL, env=parent.frame(), quoted=FALSE, func=NULL) {
   if (!is.null(func)) {
     shinyDeprecated(msg="renderTable: argument 'func' is deprecated. Please use 'expr' instead.")
   } else {
@@ -28,7 +30,7 @@ renderBootstrapTable <- function(expr, ..., css_class=NULL, env=parent.frame(), 
 
   markRenderFunction(tableOutput, function() {
     classNames <- 'table'
-    if ( !is.null(css_class) ) classNames <- paste( classNames, css_class )
+    if ( !is.null(format) ) classNames <- paste0( classNames, " table-", format )
     data <- func()
 
     if (is.null(data) || identical(data, data.frame()))
@@ -49,9 +51,9 @@ renderBootstrapTable <- function(expr, ..., css_class=NULL, env=parent.frame(), 
     print_args <- list(
       xtable_res,
       type = 'html',
-      html.table.attributes = paste('class="', htmlEscape(classNames, TRUE),
-                                    '"', sep='')
-    )
+      html.table.attributes = paste0('class="', htmlEscape(classNames, TRUE), '" ',
+                                     'style="width:', noquote(validateCssUnit(width)),
+                                     ' !important"'))
 
     print_args <- c(print_args, non_xtable_args)
 

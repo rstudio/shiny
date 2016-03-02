@@ -41,9 +41,9 @@ renderBootstrapTable <- function(expr, ..., css_class=NULL, env=parent.frame(), 
     non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
 
     # Call xtable with its args
-    cols <- paste0( rep( "l", ncol( data )), collapse = "" )
-    xtable_res <- do.call(xtable, c(list(data), xtable_args,
-                                    align = paste0("l", cols)))
+    #cols <- paste0( rep( "r", ncol( data )), collapse = "" )    ## used to align all cells to the right, not yet decided if we should keep this or not
+    xtable_res <- do.call(xtable, c(list(data), xtable_args))
+                                   # align = paste0("l", cols)))
 
     # Set up print args
     print_args <- list(
@@ -52,7 +52,13 @@ renderBootstrapTable <- function(expr, ..., css_class=NULL, env=parent.frame(), 
       html.table.attributes = paste('class="', htmlEscape(classNames, TRUE),
                                     '"', sep='')
     )
+
     print_args <- c(print_args, non_xtable_args)
+
+    # By default, don't include row numbers
+    if( !"include.rownames" %in% names(list(... ))) {
+      print_args <- c(print_args, include.rownames = FALSE)
+    }
 
     return(paste(
       utils::capture.output(

@@ -11,6 +11,17 @@ table.data td[align=right] {
   text-align: right;
 }
 
+.table {
+  width: auto !important;
+  border-collapse: separate;
+}
+
+.table th {
+  text-align: center;
+  padding-left: 20px !important;
+  padding-right:20px !important;
+}
+
 .shiny-output-error {
   color: red;
   white-space: pre-wrap;

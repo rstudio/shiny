@@ -47,13 +47,19 @@ renderBootstrapTable <- function(expr, ..., format=NULL, width=NULL, env=parent.
     xtable_res <- do.call(xtable, c(list(data), xtable_args))
                                    # align = paste0("l", cols)))
 
+    # Check if user specified width, else set it to auto
+    if (!is.null(width)) {
+      width <- paste0('style="width:', noquote(validateCssUnit(width)),';"')
+    } else {
+      width <- paste0('style="width:auto;"')
+    }
+
     # Set up print args
     print_args <- list(
       xtable_res,
       type = 'html',
       html.table.attributes = paste0('class="', htmlEscape(classNames, TRUE), '" ',
-                                     'style="width:', noquote(validateCssUnit(width)),
-                                     ' !important"'))
+                                     width))
 
     print_args <- c(print_args, non_xtable_args)
 

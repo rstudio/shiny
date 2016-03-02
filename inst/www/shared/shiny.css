@@ -12,7 +12,6 @@ table.data td[align=right] {
 }
 
 .table {
-  width: auto !important;
   border-collapse: separate;
 }
 

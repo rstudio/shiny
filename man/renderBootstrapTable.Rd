@@ -4,7 +4,7 @@
 \alias{renderBootstrapTable}
 \title{Table Output (Bootstrap)}
 \usage{
-renderBootstrapTable(expr, ..., format = NULL, width = NULL,
+renderBootstrapTable(expr, ..., format = "basic", width = "auto",
   env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{

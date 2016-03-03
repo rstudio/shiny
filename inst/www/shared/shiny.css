@@ -17,8 +17,8 @@ table.data td[align=right] {
 
 .table th {
   text-align: center;
-  padding-left: 20px !important;
-  padding-right:20px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
 }
 
 .shiny-output-error {

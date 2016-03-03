@@ -21,16 +21,28 @@
 #'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #'
 #' @export
-renderBootstrapTable <- function(expr, ..., format=NULL, width=NULL, env=parent.frame(), quoted=FALSE, func=NULL) {
+renderBootstrapTable <- function(expr, ..., format="basic", width="auto", env=parent.frame(), quoted=FALSE, func=NULL) {
   if (!is.null(func)) {
     shinyDeprecated(msg="renderTable: argument 'func' is deprecated. Please use 'expr' instead.")
   } else {
     installExprFunction(expr, "func", env, quoted)
   }
 
+  if ( is.function(format) )
+    formatWrapper <- reactive({ format() })
+  else
+    formatWrapper <- function() { format }
+
+  if ( is.function(width) )
+    widthWrapper <- reactive({ width() })
+  else
+    widthWrapper <- function() { width }
+
   markRenderFunction(tableOutput, function() {
-    classNames <- 'table'
-    if ( !is.null(format) ) classNames <- paste0( classNames, " table-", format )
+    format <- formatWrapper()
+    width <- widthWrapper()
+    classNames <- "table anotherclass" ### CHANGE THIS CHAGE THIS CHANGE THIS
+    classNames <- paste0( classNames, " table-", format )
     data <- func()
 
     if (is.null(data) || identical(data, data.frame()))
@@ -47,19 +59,12 @@ renderBootstrapTable <- function(expr, ..., format=NULL, width=NULL, env=parent.
     xtable_res <- do.call(xtable, c(list(data), xtable_args))
                                    # align = paste0("l", cols)))
 
-    # Check if user specified width, else set it to auto
-    if (!is.null(width)) {
-      width <- paste0('style="width:', noquote(validateCssUnit(width)),';"')
-    } else {
-      width <- paste0('style="width:auto;"')
-    }
-
     # Set up print args
     print_args <- list(
       xtable_res,
       type = 'html',
-      html.table.attributes = paste0('class="', htmlEscape(classNames, TRUE), '" ',
-                                     width))
+      html.table.attributes = paste0('class="', htmlEscape(classNames, TRUE), '"
+                                     style="width:', noquote(validateCssUnit(width)),';"'))
 
     print_args <- c(print_args, non_xtable_args)
 

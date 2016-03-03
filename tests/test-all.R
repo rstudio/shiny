@@ -1,4 +1,4 @@
 library(testthat)
 library(shiny)
 
-test_package("shiny")
+test_check("shiny")

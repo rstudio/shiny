@@ -71,7 +71,8 @@ Imports:
     xtable,
     digest,
     htmltools (>= 0.3),
-    R6 (>= 2.0)
+    R6 (>= 2.0),
+    sourcetools
 Suggests:
     datasets,
     Cairo (>= 1.5-5),
@@ -92,6 +93,7 @@ Collate:
     'utils.R'
     'bootstrap.R'
     'cache.R'
+    'diagnose.R'
     'fileupload.R'
     'stack.R'
     'graph.R'

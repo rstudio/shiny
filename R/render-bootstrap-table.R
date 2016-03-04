@@ -21,9 +21,9 @@
 #'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #'
 #' @export
-renderBootstrapTable <- function(expr, ..., format="basic", width="auto",
+renderBootstrapTable <- function(expr, format="basic", width="auto",
                                  rownames=FALSE, colnames=TRUE, align=NULL,
-                                 digits=NULL, na="NA",
+                                 digits=NULL, na="NA", ...,
                                  env=parent.frame(), quoted=FALSE, func=NULL) {
   if (!is.null(func)) {
     shinyDeprecated(msg="renderTable: argument 'func' is deprecated. Please use 'expr' instead.")
@@ -31,44 +31,18 @@ renderBootstrapTable <- function(expr, ..., format="basic", width="auto",
     installExprFunction(expr, "func", env, quoted)
   }
 
-  if ( is.function(format) )
-    formatWrapper <- reactive({ format() })
-  else
-    formatWrapper <- function() { format }
+  # Create wrappers for most arguments so that functions can also be passed
+  # in, rather than only literals (useful for shiny apps)
+  formatWrapper <- createWrapper( format )
+  widthWrapper <- createWrapper( width )
+  rownamesWrapper <- createWrapper( rownames )
+  colnamesWrapper <- createWrapper( colnames )
+  alignWrapper <- createWrapper( align )
+  digitsWrapper <- createWrapper( digits )
+  naWrapper <- createWrapper( na )
 
-  if ( is.function(width) )
-    widthWrapper <- reactive({ width() })
-  else
-    widthWrapper <- function() { width }
-
-  if ( is.function(rownames) )
-    rownamesWrapper <- reactive({ rownames() })
-  else
-    rownamesWrapper <- function() { rownames }
-
-  if ( is.function(colnames) )
-    colnamesWrapper <- reactive({ colnames() })
-  else
-    colnamesWrapper <- function() { colnames }
-
-  if ( is.function(align) )
-    alignWrapper <- reactive({ align() })
-  else
-    alignWrapper <- function() { align }
-
-  if ( is.function(digits) )
-    digitsWrapper <- reactive({ digits() })
-  else
-    digitsWrapper <- function() { digits }
-
-  if ( is.function(na) )
-    naWrapper <- reactive({ na() })
-  else
-    naWrapper <- function() { na }
-
-
+  # Main render function
   markRenderFunction(tableOutput, function() {
-
     format <- formatWrapper()
     width <- widthWrapper()
     rownames <- rownamesWrapper()
@@ -77,10 +51,12 @@ renderBootstrapTable <- function(expr, ..., format="basic", width="auto",
     digits <- digitsWrapper()
     na <- naWrapper()
 
-    classNames <- "table anotherclass" ### CHANGE THIS CHAGE THIS CHANGE THIS
+    # For css styling
+    classNames <- "table shiny-table"
     classNames <- paste0( classNames, " table-", format )
     data <- func()
 
+    # Return empty string if no data is provided
     if (is.null(data) || identical(data, data.frame()))
       return("")
 
@@ -90,10 +66,28 @@ renderBootstrapTable <- function(expr, ..., format="basic", width="auto",
     xtable_args <- dots[intersect(names(dots), xtable_argnames)]
     non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
 
+    # Figure out column alignment
+    if ( is.null(align) ) xtable_args <- c( xtable_args, align = NULL )
+    else {
+      num_cols <- ifelse( rownames, nchar(align), nchar(align) + 1 )
+      valid <- !grepl( "[^lcr]", align )
+
+      if ( num_cols == ncol(data) + 1 && valid ){
+        if ( !rownames ) align <- paste0( "r", align )
+        xtable_args <- c( xtable_args, align = align )
+      }
+      else if ( nchar(align) == 1 && valid ){
+        cols <- paste0( rep( align, ncol(data) + 1 ), collapse = "" )
+        xtable_args <- c( xtable_args, align = cols )
+      }
+      else {
+        stop("`align` must contain only the characters `l`, `c` and/or `r` and have
+             length either equal to 1 or to the total number of columns")
+      }
+    }
+
     # Call xtable with its args
-    #cols <- paste0( rep( "r", ncol( data )), collapse = "" )    ## used to align all cells to the right, not yet decided if we should keep this or not
-    xtable_res <- do.call(xtable, c(list(data), xtable_args))
-                                   # align = paste0("l", cols)))
+    xtable_res <- do.call( xtable, c(list(data), xtable_args, digits = digits ))
 
     # Set up print args
     print_args <- list(
@@ -101,6 +95,7 @@ renderBootstrapTable <- function(expr, ..., format="basic", width="auto",
       type = 'html',
       include.rownames = rownames,
       include.colnames = colnames,
+      NA.string = na,
       html.table.attributes = paste0('class="', htmlEscape(classNames, TRUE), '"
                                      style="width:', noquote(validateCssUnit(width)),';"'))
 
@@ -113,4 +108,13 @@ renderBootstrapTable <- function(expr, ..., format="basic", width="auto",
       collapse="\n"
     ))
   })
+}
+
+
+
+# Create a wrapper for an argument passed to renderTable
+createWrapper <- function( arg ){
+  if ( is.function( arg )) wrapper <- reactive( {arg()} )
+  else wrapper <- function() { arg }
+  return( wrapper )
 }

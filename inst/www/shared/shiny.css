@@ -11,11 +11,11 @@ table.data td[align=right] {
   text-align: right;
 }
 
-.table {
+.shiny-table {
   border-collapse: separate;
 }
 
-.table th {
+.shiny-table th {
   text-align: center;
   padding-left: 10px !important;
   padding-right: 10px !important;

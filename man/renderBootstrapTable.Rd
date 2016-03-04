@@ -5,7 +5,8 @@
 \title{Table Output (Bootstrap)}
 \usage{
 renderBootstrapTable(expr, ..., format = "basic", width = "auto",
-  env = parent.frame(), quoted = FALSE, func = NULL)
+  rownames = FALSE, colnames = TRUE, align = NULL, digits = NULL,
+  na = "NA", env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used with
@@ -15,7 +16,7 @@ renderBootstrapTable(expr, ..., format = "basic", width = "auto",
 \code{\link[xtable]{print.xtable}}.}
 
 \item{format}{An optional string with the Bootstrap table format to apply to the
-table (options: striped, bordered, hover, condensed).}
+table (options: basic, striped, bordered, hover, condensed).}
 
 \item{width}{An optional string with the width of the table, as a percentage of
 the total width of the page.}

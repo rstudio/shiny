@@ -4,11 +4,19 @@
 \alias{renderTable}
 \title{Table Output}
 \usage{
-renderTable(expr, ..., env = parent.frame(), quoted = FALSE, func = NULL)
+renderTable(expr, format = "basic", width = "auto", rownames = FALSE,
+  colnames = TRUE, align = NULL, digits = NULL, na = "NA", ...,
+  env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used with
 \code{\link[xtable]{xtable}}.}
+
+\item{format}{An optional string with the Bootstrap table format to apply to the
+table (options: basic, striped, bordered, hover, condensed).}
+
+\item{width}{An optional string with the width of the table, as a percentage of
+the total width of the page.}
 
 \item{...}{Arguments to be passed through to \code{\link[xtable]{xtable}} and
 \code{\link[xtable]{print.xtable}}.}

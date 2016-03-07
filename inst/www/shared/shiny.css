@@ -3,14 +3,6 @@ body.disconnected {
   opacity: 0.5;
 }
 
-table.data {
-  width: auto;
-}
-table.data td[align=right] {
-  font-family: monospace;
-  text-align: right;
-}
-
 .shiny-table {
   border-collapse: separate;
 }

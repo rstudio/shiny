@@ -124,7 +124,6 @@ Collate:
     'react.R'
     'reactive-domains.R'
     'reactives.R'
-    'render-bootstrap-table.R'
     'render-plot.R'
     'render-table.R'
     'run-url.R'

@@ -71,7 +71,7 @@ renderTable <- function(expr, format="basic", width="auto",
     ## sure to left align them (xtable right aligns them by default, which
     ## looks weird when the rownames are strings).
     if ( is.null(align) ){
-      n <- rownames( data )
+      n <- row.names( data )
       if ( !( suppressWarnings( is.na( all( n == as.character( as.numeric(n) )))))){
         xtable_args <- c( xtable_args, align = NULL )
       }

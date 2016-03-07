@@ -67,7 +67,26 @@ renderBootstrapTable <- function(expr, format="basic", width="auto",
     non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
 
     # Figure out column alignment
-    if ( is.null(align) ) xtable_args <- c( xtable_args, align = NULL )
+    ## Case 1: if align=NULL, check if rownames are numbers. If not, make
+    ## sure to left align them (xtable right aligns them by default, which
+    ## looks weird when the rownames are strings).
+    if ( is.null(align) ){
+      n <- rownames( data )
+      if ( !( suppressWarnings( is.na( all( n == as.character( as.numeric(n) )))))){
+        xtable_args <- c( xtable_args, align = NULL )
+      }
+      else {
+        cols <- "l"
+        for ( i in 1:ncol(data) ){
+          cls <- class( data[,i] )
+          if ( cls=="numeric" || cls=="integer" ) cols <- paste0( cols, "r" )
+          else cols <- paste0( cols, "l" )
+        }
+        xtable_args <- c( xtable_args, align = cols )
+      }
+    }
+    ## Case 2: if align!=NULL, check if it is only one character or a vector
+    ## and process it accordingly.
     else {
       num_cols <- ifelse( rownames, nchar(align), nchar(align) + 1 )
       valid <- !grepl( "[^lcr]", align )

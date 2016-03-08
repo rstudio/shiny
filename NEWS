@@ -1,4 +1,4 @@
-shiny 0.13.1.9000
+shiny 0.13.1.9001
 --------------------------------------------------------------------------------
 
 * Fixed #561: DataTables might pop up a warning when the data is updated
@@ -13,6 +13,11 @@ shiny 0.13.1.9000
   function causes the currently executing output to cancel its execution, and
   leave its previous state alone (as opposed to clearing the output). The `req`
   parameter similarly modifies the behavior of `req`.
+
+* Added code diagnostics: if there is an error parsing ui.R, server.R, app.R,
+  or global.R, Shiny will search the code for missing commas, extra commas,
+  and unmatched braces, parens, and brackets, and will print out messages
+  pointing out those problems.
 
 shiny 0.13.1
 --------------------------------------------------------------------------------

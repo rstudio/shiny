@@ -86,16 +86,10 @@ diagnoseCode <- function(path = NULL, text = NULL) {
         if (!is.na(err)) {
           return(err)
         }
-        if (is.na(scope)) {
-          if      (type == "}") return("unmatched_brace")
-          else if (type == ")") return("unmatched_paren")
-          else if (type == "]") return("unmatched_bracket")
-
-        } else if (scope == "(") {
-
-          if ((prevType == "(" && type == ",") ||
-              (type == "," && nextType == ")") ||
-              (prevType == "," && type == ",")) {
+        if (scope == "(") {
+          if (type == "," &&
+              (prevType == "(" || prevType == "," || nextType == ")"))
+          {
             return("extra_comma")
           }
 
@@ -117,48 +111,47 @@ diagnoseCode <- function(path = NULL, text = NULL) {
   tokens <- find_scopes(tokens)
   tokens <- check_commas(tokens)
 
+  # No errors found
   if (all(is.na(tokens$err))) {
-    # No errors found
     return(TRUE)
-
-  } else {
-    # If any errors were found, print messages
-    if (!is.null(path)) {
-      lines <- readLines(path)
-    } else {
-      lines <- strsplit(text, "\n")[[1]]
-    }
-
-    # Print out the line of code with the error, and point to the column with
-    # the error.
-    show_code_error <- function(msg, lines, row, col) {
-      message(paste0(
-        msg, "\n",
-        row, ":", lines[row], "\n",
-        paste0(rep.int(" ", nchar(as.character(row)) + 1), collapse = ""),
-        gsub(perl = TRUE, "[^\\s]", " ", substr(lines[row], 1, col-1)), "^"
-      ))
-    }
-
-    err_idx <- which(!is.na(tokens$err))
-    msg <- ""
-    for (i in err_idx) {
-      row <- tokens$row[i]
-      col <- tokens$column[i]
-      err <- tokens$err[i]
-
-      if (err == "missing_comma") {
-        show_code_error("Possible missing comma at:", lines, row, col)
-      } else if (err == "extra_comma") {
-        show_code_error("Possible extra comma at:", lines, row, col)
-      } else if (err == "unmatched_brace") {
-        show_code_error("Possible unmatched '}' at:", lines, row, col)
-      } else if (err == "unmatched_paren") {
-        show_code_error("Possible unmatched ')' at:", lines, row, col)
-      } else if (err == "unmatched_bracket") {
-        show_code_error("Possible unmatched ']' at:", lines, row, col)
-      }
-    }
-    return(FALSE)
   }
+
+  # If we got here, errors were found; print messages.
+  if (!is.null(path)) {
+    lines <- readLines(path)
+  } else {
+    lines <- strsplit(text, "\n")[[1]]
+  }
+
+  # Print out the line of code with the error, and point to the column with
+  # the error.
+  show_code_error <- function(msg, lines, row, col) {
+    message(paste0(
+      msg, "\n",
+      row, ":", lines[row], "\n",
+      paste0(rep.int(" ", nchar(as.character(row)) + 1), collapse = ""),
+      gsub(perl = TRUE, "[^\\s]", " ", substr(lines[row], 1, col-1)), "^"
+    ))
+  }
+
+  err_idx <- which(!is.na(tokens$err))
+  msg <- ""
+  for (i in err_idx) {
+    row <- tokens$row[i]
+    col <- tokens$column[i]
+    err <- tokens$err[i]
+
+    if (err == "missing_comma") {
+      show_code_error("Possible missing comma at:", lines, row, col)
+    } else if (err == "extra_comma") {
+      show_code_error("Possible extra comma at:", lines, row, col)
+    } else if (err == "unmatched_brace") {
+      show_code_error("Possible unmatched '}' at:", lines, row, col)
+    } else if (err == "unmatched_paren") {
+      show_code_error("Possible unmatched ')' at:", lines, row, col)
+    } else if (err == "unmatched_bracket") {
+      show_code_error("Possible unmatched ']' at:", lines, row, col)
+    }
+  }
+  return(FALSE)
 }

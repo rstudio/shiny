@@ -136,7 +136,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         # Coordmap must be recalculated after replaying plot, because pixel
         # dimensions will have changed.
         if (inherits(plotData$plotResult, "ggplot_build_gtable")) {
-          coordmap <<- getGgplotCoordmap(plotData$plotResult, pixelratio)
+          coordmap <<- getGgplotCoordmap(plotData$plotResult, pixelratio, res)
         } else {
           coordmap <<- getPrevPlotCoordmap(dims$width, dims$height)
         }
@@ -216,7 +216,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       recordedPlot <<- recordPlot()
 
       if (inherits(plotResult, "ggplot_build_gtable")) {
-        coordmap <<- getGgplotCoordmap(plotResult, pixelratio)
+        coordmap <<- getGgplotCoordmap(plotResult, pixelratio, res)
       } else {
         coordmap <<- getPrevPlotCoordmap(dims$width, dims$height)
       }
@@ -412,7 +412,7 @@ getPrevPlotCoordmap <- function(width, height) {
 
 
 # Given a ggplot_build_gtable object, return a coordmap for it.
-getGgplotCoordmap <- function(p, pixelratio) {
+getGgplotCoordmap <- function(p, pixelratio, res) {
   if (!inherits(p, "ggplot_build_gtable"))
     return(NULL)
 
@@ -472,7 +472,7 @@ getGgplotCoordmap <- function(p, pixelratio) {
   # ggplot object, return the domain.
   find_panel_domain <- function(b, panel_num, scalex_num = 1, scaley_num = 1) {
     range <- b$panel$ranges[[panel_num]]
-    res <- list(
+    domain <- list(
       left   = range$x.range[1],
       right  = range$x.range[2],
       bottom = range$y.range[1],
@@ -484,15 +484,15 @@ getGgplotCoordmap <- function(p, pixelratio) {
     yscale <- b$panel$y_scales[[scaley_num]]
 
     if (!is.null(xscale$trans) && xscale$trans$name == "reverse") {
-      res$left  <- -res$left
-      res$right <- -res$right
+      domain$left  <- -domain$left
+      domain$right <- -domain$right
     }
     if (!is.null(yscale$trans) && yscale$trans$name == "reverse") {
-      res$top    <- -res$top
-      res$bottom <- -res$bottom
+      domain$top    <- -domain$top
+      domain$bottom <- -domain$bottom
     }
 
-    res
+    domain
   }
 
   # Given built ggplot object, return object with the log base for x and y if
@@ -600,9 +600,22 @@ getGgplotCoordmap <- function(p, pixelratio) {
       }
     }
 
+    # Workaround for a bug in the quartz device. If you have a 400x400 image and
+    # run `convertWidth(unit(1, "npc"), "native")`, the result will depend on
+    # res setting of the device. If res=72, then it returns 400 (as expected),
+    # but if, e.g., res=96, it will return 300, which is incorrect.
+    devScaleFactor <- 1
+    if (grepl("quartz", names(dev.cur()), fixed = TRUE)) {
+      devScaleFactor <- res / 72
+    }
+
     # Convert a unit (or vector of units) to a numeric vector of pixel sizes
-    h_px <- function(x) as.numeric(grid::convertHeight(x, "native"))
-    w_px <- function(x) as.numeric(grid::convertWidth(x, "native"))
+    h_px <- function(x) {
+      devScaleFactor * grid::convertHeight(x, "native", valueOnly = TRUE)
+    }
+    w_px <- function(x) {
+      devScaleFactor * grid::convertWidth(x, "native", valueOnly = TRUE)
+    }
 
     # Given a vector of relative sizes (in grid units), and a function for
     # converting grid units to numeric pixels, return a numeric vector of

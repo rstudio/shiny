@@ -12,7 +12,7 @@
 #'   \code{\link[xtable]{print.xtable}}.
 #' @param format An optional string with the Bootstrap table format to apply to the
 #'   table (options: basic, striped, bordered, hover, condensed).
-#'@param  width An optional string with the width of the table, as a percentage of
+#' @param  width An optional string with the width of the table, as a percentage of
 #'   the total width of the page.
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
@@ -31,15 +31,23 @@ renderTable <- function(expr, format="basic", width="auto",
     installExprFunction(expr, "func", env, quoted)
   }
 
+  # A small helper function to create a wrapper for an argument passed to
+  # renderTable()
+  createWrapper <- function(arg) {
+    if (is.function(arg)) wrapper <- reactive({ arg() })
+    else wrapper <- function() arg
+    return(wrapper)
+  }
+
   # Create wrappers for most arguments so that functions can also be passed
   # in, rather than only literals (useful for shiny apps)
-  formatWrapper <- createWrapper( format )
-  widthWrapper <- createWrapper( width )
-  rownamesWrapper <- createWrapper( rownames )
-  colnamesWrapper <- createWrapper( colnames )
-  alignWrapper <- createWrapper( align )
-  digitsWrapper <- createWrapper( digits )
-  naWrapper <- createWrapper( na )
+  formatWrapper <- createWrapper(format)
+  widthWrapper <- createWrapper(width)
+  rownamesWrapper <- createWrapper(rownames)
+  colnamesWrapper <- createWrapper(colnames)
+  alignWrapper <- createWrapper(align)
+  digitsWrapper <- createWrapper(digits)
+  naWrapper <- createWrapper(na)
 
   # Main render function
   markRenderFunction(tableOutput, function() {
@@ -52,13 +60,12 @@ renderTable <- function(expr, format="basic", width="auto",
     na <- naWrapper()
 
     # For css styling
-    classNames <- "table shiny-table"
-    classNames <- paste0( classNames, " table-", format )
+    classNames <- paste0("table shiny-table table-", format)
+
     data <- func()
 
     # Return empty string if no data is provided
-    if (is.null(data) || identical(data, data.frame()))
-      return("")
+    if (is.null(data) || identical(data, data.frame())) return("")
 
     # Separate the ... args to pass to xtable() vs print.xtable()
     dots <- list(...)
@@ -66,57 +73,57 @@ renderTable <- function(expr, format="basic", width="auto",
     xtable_args <- dots[intersect(names(dots), xtable_argnames)]
     non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
 
+    # A small helper function to determine if the row.names can be coerced to
+    # numeric or if they are legitimate strings
+    isNumber <- function(n) {
+      !(suppressWarnings(is.na(all(n == as.character(as.numeric(n))))))
+    }
+
     # Figure out column alignment
     ## Case 1: if align=NULL, check if rownames are numbers. If not, make
     ## sure to left align them (xtable right aligns them by default, which
     ## looks weird when the rownames are strings).
-    if ( is.null(align) ){
-      n <- row.names( data )
-      if ( !( suppressWarnings( is.na( all( n == as.character( as.numeric(n) )))))){
-        xtable_args <- c( xtable_args, align = NULL )
-      }
+    if (is.null(align)) {
+      n <- row.names(data)
+      if (isNumber(n)) xtable_args <- c(xtable_args, align=NULL)
       else {
         cols <- "l"
-        for ( i in 1:ncol(data) ){
-          cls <- class( data[,i] )
-          if ( cls=="numeric" || cls=="integer" ) cols <- paste0( cols, "r" )
-          else cols <- paste0( cols, "l" )
+        for (i in seq_len(ncol(data))) {
+          cls <- class(data[,i])
+          if (cls == "numeric" || cls == "integer") cols <- paste0(cols, "r")
+          else cols <- paste0(cols, "l")
         }
-        xtable_args <- c( xtable_args, align = cols )
+        xtable_args <- c(xtable_args, align=cols)
       }
-    }
-    ## Case 2: if align!=NULL, check if it is only one character or a vector
-    ## and process it accordingly.
-    else {
-      num_cols <- ifelse( rownames, nchar(align), nchar(align) + 1 )
-      valid <- !grepl( "[^lcr]", align )
-
-      if ( num_cols == ncol(data) + 1 && valid ){
-        if ( !rownames ) align <- paste0( "r", align )
-        xtable_args <- c( xtable_args, align = align )
-      }
-      else if ( nchar(align) == 1 && valid ){
-        cols <- paste0( rep( align, ncol(data) + 1 ), collapse = "" )
-        xtable_args <- c( xtable_args, align = cols )
-      }
-      else {
+    } else {
+      ## Case 2: if align!=NULL, check if it is only one character or a vector
+      ## and process it accordingly.
+      num_cols <- if (rownames) nchar(align) else nchar(align)+1
+      valid <- !grepl("[^lcr]", align)
+      if (num_cols == ncol(data)+1 && valid) {
+        if (!rownames) align <- paste0("r", align)
+        xtable_args <- c(xtable_args, align=align)
+      } else if (nchar(align) == 1 && valid) {
+        cols <- paste0(rep(align, ncol(data)+1), collapse="")
+        xtable_args <- c(xtable_args, align=cols)
+      } else {
         stop("`align` must contain only the characters `l`, `c` and/or `r` and have
              length either equal to 1 or to the total number of columns")
       }
-      }
+    }
 
     # Call xtable with its args
-    xtable_res <- do.call( xtable, c(list(data), xtable_args, digits = digits ))
+    xtable_res <- do.call(xtable, c(list(data), xtable_args, digits=digits))
 
     # Set up print args
     print_args <- list(
       xtable_res,
-      type = 'html',
-      include.rownames = rownames,
-      include.colnames = colnames,
-      NA.string = na,
-      html.table.attributes = paste0('class="', htmlEscape(classNames, TRUE), '"
-                                     style="width:', noquote(validateCssUnit(width)),';"'))
+      type='html',
+      include.rownames=rownames,
+      include.colnames=colnames,
+      NA.string=na,
+      html.table.attributes=paste0("class='", htmlEscape(classNames, TRUE), "'",
+                                   "style='width:", validateCssUnit(width),";'"))
 
     print_args <- c(print_args, non_xtable_args)
 
@@ -126,14 +133,5 @@ renderTable <- function(expr, format="basic", width="auto",
       ),
       collapse="\n"
     ))
-    })
-}
-
-
-
-# Create a wrapper for an argument passed to renderTable
-createWrapper <- function( arg ){
-  if ( is.function( arg )) wrapper <- reactive( {arg()} )
-  else wrapper <- function() { arg }
-  return( wrapper )
+  })
 }

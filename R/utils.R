@@ -1217,7 +1217,11 @@ sourceUTF8 <- function(file, envir = globalenv()) {
     file <- tempfile(); on.exit(unlink(file), add = TRUE)
     writeLines(lines, file)
   }
-  exprs <- parse(file, keep.source = FALSE, srcfile = src, encoding = enc)
+  exprs <- try(parse(file, keep.source = FALSE, srcfile = src, encoding = enc))
+  if (inherits(exprs, "try-error")) {
+    diagnoseCode(file)
+    stop("Error sourcing ", file)
+  }
 
   # Wrap the exprs in first `{`, then ..stacktraceon..(). It's only really the
   # ..stacktraceon..() that we care about, but the `{` is needed to make that

@@ -4,15 +4,25 @@
 \alias{renderTable}
 \title{Table Output}
 \usage{
-renderTable(expr, format = "basic", width = "auto", rownames = FALSE,
-  colnames = TRUE, align = NULL, digits = NULL, na = "NA", ...,
-  env = parent.frame(), quoted = FALSE, func = NULL)
+renderTable(expr, striped = FALSE, condensed = TRUE, hover = FALSE,
+  bordered = FALSE, width = "auto", align = NULL, rownames = FALSE,
+  colnames = TRUE, digits = NULL, na = "NA", ..., env = parent.frame(),
+  quoted = FALSE, func = NULL)
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used with
 \code{\link[xtable]{xtable}}.}
 
-\item{format}{An optional string with the Bootstrap table format to apply to the
+\item{striped}{An optional string with the Bootstrap table format to apply to the
+table (options: basic, striped, bordered, hover, condensed).}
+
+\item{condensed}{An optional string with the Bootstrap table format to apply to the
+table (options: basic, striped, bordered, hover, condensed).}
+
+\item{hover}{An optional string with the Bootstrap table format to apply to the
+table (options: basic, striped, bordered, hover, condensed).}
+
+\item{bordered}{An optional string with the Bootstrap table format to apply to the
 table (options: basic, striped, bordered, hover, condensed).}
 
 \item{width}{An optional string with the width of the table, as a percentage of

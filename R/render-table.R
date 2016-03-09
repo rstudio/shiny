@@ -10,7 +10,13 @@
 #'   \code{\link[xtable]{xtable}}.
 #' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}} and
 #'   \code{\link[xtable]{print.xtable}}.
-#' @param format An optional string with the Bootstrap table format to apply to the
+#' @param striped An optional string with the Bootstrap table format to apply to the
+#'   table (options: basic, striped, bordered, hover, condensed).
+#' @param hover An optional string with the Bootstrap table format to apply to the
+#'   table (options: basic, striped, bordered, hover, condensed).
+#' @param condensed An optional string with the Bootstrap table format to apply to the
+#'   table (options: basic, striped, bordered, hover, condensed).
+#' @param bordered An optional string with the Bootstrap table format to apply to the
 #'   table (options: basic, striped, bordered, hover, condensed).
 #' @param  width An optional string with the width of the table, as a percentage of
 #'   the total width of the page.
@@ -21,8 +27,10 @@
 #'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #'
 #' @export
-renderTable <- function(expr, format="basic", width="auto",
-                        rownames=FALSE, colnames=TRUE, align=NULL,
+renderTable <- function(expr, striped=FALSE, condensed=TRUE,
+                        hover=FALSE, bordered=FALSE,
+                        width="auto", align=NULL,
+                        rownames=FALSE, colnames=TRUE,
                         digits=NULL, na="NA", ...,
                         env=parent.frame(), quoted=FALSE, func=NULL) {
   if (!is.null(func)) {
@@ -41,26 +49,39 @@ renderTable <- function(expr, format="basic", width="auto",
 
   # Create wrappers for most arguments so that functions can also be passed
   # in, rather than only literals (useful for shiny apps)
-  formatWrapper <- createWrapper(format)
+  stripedWrapper <- createWrapper(striped)
+  condensedWrapper <- createWrapper(condensed)
+  hoverWrapper <- createWrapper(hover)
+  borderedWrapper <- createWrapper(bordered)
   widthWrapper <- createWrapper(width)
+  alignWrapper <- createWrapper(align)
   rownamesWrapper <- createWrapper(rownames)
   colnamesWrapper <- createWrapper(colnames)
-  alignWrapper <- createWrapper(align)
   digitsWrapper <- createWrapper(digits)
   naWrapper <- createWrapper(na)
 
   # Main render function
   markRenderFunction(tableOutput, function() {
-    format <- formatWrapper()
+    striped <- stripedWrapper()
+    condensed <- condensedWrapper()
+    hover <- hoverWrapper()
+    bordered <- borderedWrapper()
+    format <- c(striped=striped, condensed=condensed,
+                hover=hover, bordered=bordered)
     width <- widthWrapper()
+    align <- alignWrapper()
     rownames <- rownamesWrapper()
     colnames <- colnamesWrapper()
-    align <- alignWrapper()
     digits <- digitsWrapper()
     na <- naWrapper()
 
     # For css styling
-    classNames <- paste0("table shiny-table table-", format)
+    classNames <- paste0("table shiny-table")
+    for (i in seq_len(length(format))) {
+      if (format[i]) {
+        classNames <- paste0( classNames, " table-", names(format)[i])
+      }
+    }
 
     data <- func()
 
@@ -116,7 +137,7 @@ renderTable <- function(expr, format="basic", width="auto",
       include.rownames=rownames,
       include.colnames=colnames,
       NA.string=na,
-      html.table.attributes=paste0("class='", htmlEscape(classNames, TRUE), "'",
+      html.table.attributes=paste0("class='", htmlEscape(classNames, TRUE), "' ",
                                    "style='width:", validateCssUnit(width),";'"))
 
     print_args <- c(print_args, non_xtable_args)
@@ -139,10 +160,15 @@ renderTable <- function(expr, format="basic", width="auto",
     }
 
     for (i in seq_len(nchar(cols))) {
-      tab <- sub(" <th", paste0("<th style='text-align: ",
-                                header_alignments[i],";'"),
+      tab <- sub(" <th",
+                 paste0("<th style='text-align: ", header_alignments[i],";'"),
                  tab)
     }
+
+    tab <- sub("<tr>", "<thead> <tr>", tab)
+    tab <- sub("</tr>", "</tr> </thead> <tbody>", tab)
+    tab <- sub("</table>", "</tbody> </table>", tab)
+
     return(tab)
   })
 }

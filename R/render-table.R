@@ -84,16 +84,11 @@ renderTable <- function(expr, format="basic", width="auto",
     ## sure to left align them (xtable right aligns them by default, which
     ## looks weird when the rownames are strings).
     if (is.null(align)) {
-      n <- row.names(data)
-      if (isNumber(n)) xtable_args <- c(xtable_args, align=NULL)
-      else {
-        cols <- "l"
-        for (i in seq_len(ncol(data))) {
-          cls <- class(data[,i])
-          if (cls == "numeric" || cls == "integer") cols <- paste0(cols, "r")
-          else cols <- paste0(cols, "l")
-        }
-        xtable_args <- c(xtable_args, align=cols)
+      cols <- if (isNumber(row.names(data))) "r" else "l"
+      for (i in seq_len(ncol(data))) {
+        cls <- class(data[,i])
+        if (cls == "numeric" || cls == "integer") cols <- paste0(cols, "r")
+        else cols <- paste0(cols, "l")
       }
     } else {
       ## Case 2: if align!=NULL, check if it is only one character or a vector
@@ -101,19 +96,18 @@ renderTable <- function(expr, format="basic", width="auto",
       num_cols <- if (rownames) nchar(align) else nchar(align)+1
       valid <- !grepl("[^lcr]", align)
       if (num_cols == ncol(data)+1 && valid) {
-        if (!rownames) align <- paste0("r", align)
-        xtable_args <- c(xtable_args, align=align)
+        cols <- if (rownames) align else paste0("r", align)
       } else if (nchar(align) == 1 && valid) {
         cols <- paste0(rep(align, ncol(data)+1), collapse="")
-        xtable_args <- c(xtable_args, align=cols)
       } else {
         stop("`align` must contain only the characters `l`, `c` and/or `r` and have
              length either equal to 1 or to the total number of columns")
       }
     }
 
-    # Call xtable with its args
-    xtable_res <- do.call(xtable, c(list(data), xtable_args, digits=digits))
+    # Call xtable with its (updated) args
+    xtable_args <- c(xtable_args, align=cols, digits=digits)
+    xtable_res <- do.call(xtable, c(list(data), xtable_args))
 
     # Set up print args
     print_args <- list(
@@ -127,11 +121,28 @@ renderTable <- function(expr, format="basic", width="auto",
 
     print_args <- c(print_args, non_xtable_args)
 
-    return(paste(
+    tab <- paste(
       utils::capture.output(
         do.call(print, print_args)
       ),
       collapse="\n"
-    ))
+    )
+
+    cols <- if (rownames) cols else substr(cols,2,nchar(cols))
+    header_alignments <- c()
+    for (i in seq_len(nchar(cols))) {
+      header_alignments[i] <- {
+        if (substr(cols, i, i) == "l") "left"
+        else if (substr(cols, i, i) == "c") "center"
+        else "right"
+      }
+    }
+
+    for (i in seq_len(nchar(cols))) {
+      tab <- sub(" <th", paste0("<th style='text-align: ",
+                                header_alignments[i],";'"),
+                 tab)
+    }
+    return(tab)
   })
 }

@@ -212,18 +212,23 @@ var ShinyApp = function() {
   })();
 
   this.onDisconnected = function() {
+    // Add gray-out overlay, if not already present
+    var $overlay = $('#shiny-disconnected-overlay');
+    if ($overlay.length === 0) {
+      $(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+    }
+
     // To try a reconnect, both the app (this.$allowReconnect) and the
     // server (this.$socket.allowReconnect) must allow reconnections.
     if (this.$allowReconnect === true && this.$socket.allowReconnect === true) {
       exports.showReconnectDialog();
       var delay = reconnectDelay.next();
       this.$scheduleReconnect(delay);
-    } else {
-      $(document.body).addClass('disconnected');
     }
   };
 
   this.onConnected = function() {
+    $('#shiny-disconnected-overlay').remove();
     exports.hideReconnectDialog();
     reconnectDelay.reset();
   };

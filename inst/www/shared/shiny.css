@@ -1,6 +1,13 @@
-body.disconnected {
+#shiny-disconnected-overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background-color: #999;
   opacity: 0.5;
+  overflow: hidden;
+  z-index: 99998;
 }
 
 .table.shiny-table > thead > tr > th,
@@ -327,6 +334,7 @@ body.disconnected {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 99999;
   width: 100%;
   text-align: center;
 }

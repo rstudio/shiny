@@ -165,9 +165,11 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
                  tab)
     }
 
-    tab <- sub("<tr>", "<thead> <tr>", tab)
-    tab <- sub("</tr>", "</tr> </thead> <tbody>", tab)
-    tab <- sub("</table>", "</tbody> </table>", tab)
+    if (colnames) {
+      tab <- sub("<tr>", "<thead> <tr>", tab)
+      tab <- sub("</tr>", "</tr> </thead> <tbody>", tab)
+      tab <- sub("</table>", "</tbody> </table>", tab)
+    }
 
     return(tab)
   })

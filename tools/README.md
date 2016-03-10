@@ -30,6 +30,12 @@ To run all default grunt tasks (concatenation, minification, and jshint), simply
 grunt
 ```
 
+Sometimes grunt gets confused about whether the output files are up to date, and won't overwrite them even if the input files have changed. If this happens, run:
+
+```
+grunt clean
+```
+
 It's also useful to run `grunt` so that it monitors files for changes and run tasks as necessary. This is done with:
 
 ```

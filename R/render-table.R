@@ -10,9 +10,9 @@
 #'   \code{\link[xtable]{xtable}}.
 #' @param striped,condensed,hover,bordered Logicals: if \code{TRUE}, apply
 #'   the corresponding Bootstrap table format to the output table.
-#' @param width A string with the width of the table, expressed in any valid
-#'   CSS unit of length. (If only a number, or a string coercible to a number
-#'   is given, the implied unit is pixels, 'px'.)
+#' @param width Table width. Must be a valid CSS unit (like "100%", 400px",
+#'   "auto") or a number, which will be coerced to a string and
+#'    have "px" appended.
 #' @param align A string that specifies the column alignment. If equal to
 #'   \code{'l'}, \code{'c'} or \code{'r'}, then all columns will be,
 #'   respectively, left-, center- or right-aligned. Otherwise, \code{align}

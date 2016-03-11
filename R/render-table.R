@@ -99,8 +99,8 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
 
     data <- func()
 
-    # Return empty string if no data is provided
-    if (is.null(data) || identical(data, data.frame())) return("")
+    # Return NULL if no data is provided
+    if (is.null(data) || identical(data, data.frame())) return(NULL)
 
     # Separate the ... args to pass to xtable() vs print.xtable()
     dots <- list(...)

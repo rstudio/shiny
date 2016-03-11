@@ -90,7 +90,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     na <- naWrapper()
 
     # For css styling
-    classNames <- paste0("table shiny-table")
+    classNames <- "table shiny-table"
     for (i in seq_len(length(format))) {
       if (format[i]) {
         classNames <- paste0( classNames, " table-", names(format)[i])
@@ -111,7 +111,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     # A small helper function to determine if the row.names can be coerced
     # to numeric or if they are legitimate strings
     isNumber <- function(n) {
-      !(suppressWarnings(is.na(all(n == as.character(as.numeric(n))))))
+      grepl("^\\d$+", n)
     }
 
     # Figure out column alignment

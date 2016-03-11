@@ -13,28 +13,42 @@ renderTable(expr, striped = FALSE, condensed = TRUE, hover = FALSE,
 \item{expr}{An expression that returns an R object that can be used with
 \code{\link[xtable]{xtable}}.}
 
-\item{striped}{An optional string with the Bootstrap table format to apply to the
-table (options: basic, striped, bordered, hover, condensed).}
+\item{striped, condensed, hover, bordered}{Logicals: if \code{TRUE}, apply
+the corresponding Bootstrap table format to the output table.}
 
-\item{condensed}{An optional string with the Bootstrap table format to apply to the
-table (options: basic, striped, bordered, hover, condensed).}
+\item{width}{A string with the width of the table, expressed in any valid
+CSS unit of length.}
 
-\item{hover}{An optional string with the Bootstrap table format to apply to the
-table (options: basic, striped, bordered, hover, condensed).}
+\item{align}{A string that specifies the column alignment. If equal to
+\code{'l'}, \code{'c'} or \code{'r'}, then all columns will be,
+respectively, left-, center- or right-aligned. Otherwise, \code{align}
+must have the same number of characters as the resulting table (if
+\code{rownames = TRUE}, this will be equal to \code{ncol()+1}), with
+the \eqn{i^{\text{th}}} character specifying the alignment for the
+\eqn{i^{\text{th}}} column (again, only \code{'l'}, \code{'c'} or
+\code{'r'} are permitted). If \code{NULL}, then all numeric/integer
+columns (including the row names, if they are numbers) will be
+right-aligned and everything else will be left-aligned.}
 
-\item{bordered}{An optional string with the Bootstrap table format to apply to the
-table (options: basic, striped, bordered, hover, condensed).}
+\item{rownames, colnames}{Logicals: include rownames? include colnames
+(column headers)?}
 
-\item{width}{An optional string with the width of the table, as a percentage of
-the total width of the page.}
+\item{digits}{An integer specifying the number the decimal places for
+the numeric columns (this will not apply to columns with an integer
+class). If \code{digits} is set to a negative value, then the numeric
+columns will be displayed in scientific format with a precision of
+\code{abs(digits)} digits.}
 
-\item{...}{Arguments to be passed through to \code{\link[xtable]{xtable}} and
-\code{\link[xtable]{print.xtable}}.}
+\item{na}{The string to use in the table cells whose values are missing
+(i.e. they either evaluate to \code{NA} or \code{NaN}).}
+
+\item{...}{Arguments to be passed through to \code{\link[xtable]{xtable}}
+and \code{\link[xtable]{print.xtable}}.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
-is useful if you want to save an expression in a variable.}
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})?
+This is useful if you want to save an expression in a variable.}
 
 \item{func}{A function that returns an R object that can be used with
 \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).}
@@ -44,7 +58,7 @@ Creates a reactive table that is suitable for assigning to an \code{output}
 slot.
 }
 \details{
-The corresponding HTML output tag should be \code{div} and have the CSS class
-name \code{shiny-html-output}.
+The corresponding HTML output tag should be \code{div} and have the CSS
+class name \code{shiny-html-output}.
 }
 

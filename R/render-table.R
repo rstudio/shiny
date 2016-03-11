@@ -3,26 +3,39 @@
 #' Creates a reactive table that is suitable for assigning to an \code{output}
 #' slot.
 #'
-#' The corresponding HTML output tag should be \code{div} and have the CSS class
-#' name \code{shiny-html-output}.
+#' The corresponding HTML output tag should be \code{div} and have the CSS
+#' class name \code{shiny-html-output}.
 #'
 #' @param expr An expression that returns an R object that can be used with
 #'   \code{\link[xtable]{xtable}}.
-#' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}} and
-#'   \code{\link[xtable]{print.xtable}}.
-#' @param striped An optional string with the Bootstrap table format to apply to the
-#'   table (options: basic, striped, bordered, hover, condensed).
-#' @param hover An optional string with the Bootstrap table format to apply to the
-#'   table (options: basic, striped, bordered, hover, condensed).
-#' @param condensed An optional string with the Bootstrap table format to apply to the
-#'   table (options: basic, striped, bordered, hover, condensed).
-#' @param bordered An optional string with the Bootstrap table format to apply to the
-#'   table (options: basic, striped, bordered, hover, condensed).
-#' @param  width An optional string with the width of the table, as a percentage of
-#'   the total width of the page.
+#' @param striped,condensed,hover,bordered Logicals: if \code{TRUE}, apply
+#'   the corresponding Bootstrap table format to the output table.
+#' @param width A string with the width of the table, expressed in any valid
+#'   CSS unit of length.
+#' @param align A string that specifies the column alignment. If equal to
+#'   \code{'l'}, \code{'c'} or \code{'r'}, then all columns will be,
+#'   respectively, left-, center- or right-aligned. Otherwise, \code{align}
+#'   must have the same number of characters as the resulting table (if
+#'   \code{rownames = TRUE}, this will be equal to \code{ncol()+1}), with
+#'   the \eqn{i^{\text{th}}} character specifying the alignment for the
+#'   \eqn{i^{\text{th}}} column (again, only \code{'l'}, \code{'c'} or
+#'   \code{'r'} are permitted). If \code{NULL}, then all numeric/integer
+#'   columns (including the row names, if they are numbers) will be
+#'   right-aligned and everything else will be left-aligned.
+#' @param rownames,colnames Logicals: include rownames? include colnames
+#'   (column headers)?
+#' @param digits An integer specifying the number the decimal places for
+#'   the numeric columns (this will not apply to columns with an integer
+#'   class). If \code{digits} is set to a negative value, then the numeric
+#'   columns will be displayed in scientific format with a precision of
+#'   \code{abs(digits)} digits.
+#' @param na The string to use in the table cells whose values are missing
+#'   (i.e. they either evaluate to \code{NA} or \code{NaN}).
+#' @param ... Arguments to be passed through to \code{\link[xtable]{xtable}}
+#'   and \code{\link[xtable]{print.xtable}}.
 #' @param env The environment in which to evaluate \code{expr}.
-#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
-#'   is useful if you want to save an expression in a variable.
+#' @param quoted Is \code{expr} a quoted expression (with \code{quote()})?
+#'   This is useful if you want to save an expression in a variable.
 #' @param func A function that returns an R object that can be used with
 #'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #'
@@ -39,8 +52,8 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     installExprFunction(expr, "func", env, quoted)
   }
 
-  # A small helper function to create a wrapper for an argument passed to
-  # renderTable()
+  # A small helper function to create a wrapper for an argument that was
+  # passed to renderTable()
   createWrapper <- function(arg) {
     if (is.function(arg)) wrapper <- reactive({ arg() })
     else wrapper <- function() arg
@@ -94,16 +107,16 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     xtable_args <- dots[intersect(names(dots), xtable_argnames)]
     non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
 
-    # A small helper function to determine if the row.names can be coerced to
-    # numeric or if they are legitimate strings
+    # A small helper function to determine if the row.names can be coerced
+    # to numeric or if they are legitimate strings
     isNumber <- function(n) {
       !(suppressWarnings(is.na(all(n == as.character(as.numeric(n))))))
     }
 
     # Figure out column alignment
-    ## Case 1: if align=NULL, check if rownames are numbers. If not, make
-    ## sure to left align them (xtable right aligns them by default, which
-    ## looks weird when the rownames are strings).
+    ## Case 1: if align=NULL, check if row.names are numbers. If not, make
+    ## sure to left-align them (xtable right-aligns them by default, which
+    ## looks weird when the row.names are strings).
     if (is.null(align)) {
       cols <- if (isNumber(row.names(data))) "r" else "l"
       for (i in seq_len(ncol(data))) {
@@ -142,6 +155,8 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
 
     print_args <- c(print_args, non_xtable_args)
 
+    # Capture the raw html table returned by print.xtable(), and store it in
+    # a variable for further processing
     tab <- paste(
       utils::capture.output(
         do.call(print, print_args)
@@ -149,28 +164,39 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
       collapse="\n"
     )
 
-    cols <- if (rownames) cols else substr(cols,2,nchar(cols))
-    header_alignments <- c()
-    for (i in seq_len(nchar(cols))) {
-      header_alignments[i] <- {
-        if (substr(cols, i, i) == "l") "left"
-        else if (substr(cols, i, i) == "c") "center"
-        else "right"
-      }
-    }
-
-    for (i in seq_len(nchar(cols))) {
-      tab <- sub(" <th",
-                 paste0("<th style='text-align: ", header_alignments[i],";'"),
-                 tab)
-    }
-
+    # All further processing concerns the table headers, so we don't need to run
+    # any of this if colnames=FALSE
     if (colnames) {
+      # Make sure that the final html table has a proper header (not included
+      # in the print.xtable() default)
       tab <- sub("<tr>", "<thead> <tr>", tab)
       tab <- sub("</tr>", "</tr> </thead> <tbody>", tab)
       tab <- sub("</table>", "</tbody> </table>", tab)
-    }
 
+      # Update the `cols` string (which stores the alignment of each column) so
+      # that it only includes the alignment for the table variables (and not
+      # for the row.names)
+      cols <- if (rownames) cols else substr(cols,2,nchar(cols))
+
+      # Create a vector whose i-th entry corresponds to the i-th table variable
+      # alignment (substituting "l" by "left", "c" by "center" and "r" by "right")
+      header_alignments <- c()
+      for (i in seq_len(nchar(cols))) {
+        header_alignments[i] <- {
+          if (substr(cols, i, i) == "l") "left"
+          else if (substr(cols, i, i) == "c") "center"
+          else "right"
+        }
+      }
+
+      # Align each header accordingly (this guarantees that each header and its
+      # corresponding column have the same alignment)
+      for (i in seq_len(nchar(cols))) {
+        tab <- sub(" <th",
+                   paste0("<th style='text-align: ", header_alignments[i],";'"),
+                   tab)
+      }
+    }
     return(tab)
   })
 }

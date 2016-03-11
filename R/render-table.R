@@ -17,8 +17,8 @@
 #'   respectively, left-, center- or right-aligned. Otherwise, \code{align}
 #'   must have the same number of characters as the resulting table (if
 #'   \code{rownames = TRUE}, this will be equal to \code{ncol()+1}), with
-#'   the \eqn{i^{\text{th}}} character specifying the alignment for the
-#'   \eqn{i^{\text{th}}} column (again, only \code{'l'}, \code{'c'} or
+#'   the \emph{i}-th character specifying the alignment for the
+#'   \emph{i}-th column (again, only \code{'l'}, \code{'c'} or
 #'   \code{'r'} are permitted). If \code{NULL}, then all numeric/integer
 #'   columns (including the row names, if they are numbers) will be
 #'   right-aligned and everything else will be left-aligned.

@@ -90,12 +90,8 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     na <- naWrapper()
 
     # For css styling
-    classNames <- "table shiny-table"
-    for (i in seq_len(length(format))) {
-      if (format[i]) {
-        classNames <- paste0( classNames, " table-", names(format)[i])
-      }
-    }
+    classNames <- paste0("table shiny-table",
+                         paste0(" table-", names(format)[format], collapse='' ))
 
     data <- func()
 

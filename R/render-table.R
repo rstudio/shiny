@@ -25,7 +25,7 @@
 #'   right-aligned and everything else will be left-aligned.
 #' @param rownames,colnames Logicals: include rownames? include colnames
 #'   (column headers)?
-#' @param digits An integer specifying the number the decimal places for
+#' @param digits An integer specifying the number of decimal places for
 #'   the numeric columns (this will not apply to columns with an integer
 #'   class). If \code{digits} is set to a negative value, then the numeric
 #'   columns will be displayed in scientific format with a precision of

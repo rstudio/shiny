@@ -168,7 +168,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
       # in the print.xtable() default)
       tab <- sub("<tr>", "<thead> <tr>", tab)
       tab <- sub("</tr>", "</tr> </thead> <tbody>", tab)
-      tab <- sub("</table>", "</tbody> </table>", tab)
+      tab <- sub("</table>$", "</tbody> </table>", tab)
 
       # Update the `cols` string (which stores the alignment of each column) so
       # that it only includes the alignment for the table variables (and not

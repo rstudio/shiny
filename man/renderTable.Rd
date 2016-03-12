@@ -16,8 +16,9 @@ renderTable(expr, striped = FALSE, condensed = TRUE, hover = FALSE,
 \item{striped, condensed, hover, bordered}{Logicals: if \code{TRUE}, apply
 the corresponding Bootstrap table format to the output table.}
 
-\item{width}{A string with the width of the table, expressed in any valid
-CSS unit of length.}
+\item{width}{Table width. Must be a valid CSS unit (like "100%", 400px",
+"auto") or a number, which will be coerced to a string and
+ have "px" appended.}
 
 \item{align}{A string that specifies the column alignment. If equal to
 \code{'l'}, \code{'c'} or \code{'r'}, then all columns will be,
@@ -33,7 +34,7 @@ right-aligned and everything else will be left-aligned.}
 \item{rownames, colnames}{Logicals: include rownames? include colnames
 (column headers)?}
 
-\item{digits}{An integer specifying the number the decimal places for
+\item{digits}{An integer specifying the number of decimal places for
 the numeric columns (this will not apply to columns with an integer
 class). If \code{digits} is set to a negative value, then the numeric
 columns will be displayed in scientific format with a precision of

@@ -56,7 +56,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
   # A small helper function to create a wrapper for an argument that was
   # passed to renderTable()
   createWrapper <- function(arg) {
-    if (is.function(arg)) wrapper <- reactive({ arg() })
+    if (is.function(arg)) wrapper <- arg
     else wrapper <- function() arg
     return(wrapper)
   }
@@ -143,11 +143,11 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     # Set up print args
     print_args <- list(
       xtable_res,
-      type='html',
-      include.rownames=rownames,
-      include.colnames=colnames,
-      NA.string=na,
-      html.table.attributes=paste0("class='", htmlEscape(classNames, TRUE), "' ",
+      type = 'html',
+      include.rownames = rownames,
+      include.colnames = colnames,
+      NA.string = na,
+      html.table.attributes = paste0("class='", htmlEscape(classNames, TRUE), "' ",
                                    "style='width:", validateCssUnit(width),";'"))
 
     print_args <- c(print_args, non_xtable_args)

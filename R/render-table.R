@@ -91,7 +91,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
 
     # For css styling
     classNames <- paste0("table shiny-table",
-                         paste0(" table-", names(format)[format], collapse='' ))
+                         paste0(" table-", names(format)[format], collapse="" ))
 
     data <- func()
 
@@ -177,21 +177,15 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
 
       # Create a vector whose i-th entry corresponds to the i-th table variable
       # alignment (substituting "l" by "left", "c" by "center" and "r" by "right")
-      header_alignments <- character(0)
-      for (i in seq_len(nchar(cols))) {
-        header_alignments[i] <- {
-          if (substr(cols, i, i) == "l") "left"
-          else if (substr(cols, i, i) == "c") "center"
-          else "right"
-        }
-      }
+      cols <- strsplit(cols, "")[[1]]
+      cols[cols == "l"] <- "left"
+      cols[cols == "r"] <- "right"
+      cols[cols == "c"] <- "center"
 
       # Align each header accordingly (this guarantees that each header and its
       # corresponding column have the same alignment)
       for (i in seq_len(nchar(cols))) {
-        tab <- sub(" <th",
-                   paste0("<th style='text-align: ", header_alignments[i], ";'"),
-                   tab)
+        tab <- sub(" <th", paste0("<th style='text-align: ", cols[i], ";'"), tab)
       }
     }
     return(tab)

@@ -177,7 +177,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
 
       # Create a vector whose i-th entry corresponds to the i-th table variable
       # alignment (substituting "l" by "left", "c" by "center" and "r" by "right")
-      header_alignments <- c()
+      header_alignments <- character(0)
       for (i in seq_len(nchar(cols))) {
         header_alignments[i] <- {
           if (substr(cols, i, i) == "l") "left"

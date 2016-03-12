@@ -148,7 +148,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
       include.colnames = colnames,
       NA.string = na,
       html.table.attributes = paste0("class='", htmlEscape(classNames, TRUE), "' ",
-                                   "style='width:", validateCssUnit(width),";'"))
+                                     "style='width:", validateCssUnit(width), ";'"))
 
     print_args <- c(print_args, non_xtable_args)
 
@@ -173,7 +173,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
       # Update the `cols` string (which stores the alignment of each column) so
       # that it only includes the alignment for the table variables (and not
       # for the row.names)
-      cols <- if (rownames) cols else substr(cols,2,nchar(cols))
+      cols <- if (rownames) cols else substr(cols, 2, nchar(cols))
 
       # Create a vector whose i-th entry corresponds to the i-th table variable
       # alignment (substituting "l" by "left", "c" by "center" and "r" by "right")
@@ -190,7 +190,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
       # corresponding column have the same alignment)
       for (i in seq_len(nchar(cols))) {
         tab <- sub(" <th",
-                   paste0("<th style='text-align: ", header_alignments[i],";'"),
+                   paste0("<th style='text-align: ", header_alignments[i], ";'"),
                    tab)
       }
     }

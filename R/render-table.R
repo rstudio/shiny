@@ -93,7 +93,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     classNames <- paste0("table shiny-table",
                          paste0(" table-", names(format)[format], collapse="" ))
 
-    data <- func()
+    data <- as.data.frame(func())
 
     # Return NULL if no data is provided
     if (is.null(data) || identical(data, data.frame())) return(NULL)

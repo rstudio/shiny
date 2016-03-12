@@ -185,7 +185,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
       # Align each header accordingly (this guarantees that each header and its
       # corresponding column have the same alignment)
       for (i in seq_len(nchar(cols))) {
-        tab <- sub(" <th", paste0("<th style='text-align: ", cols[i], ";'"), tab)
+        tab <- sub("<th>", paste0("<th style='text-align: ", cols[i], ";'>"), tab)
       }
     }
     return(tab)

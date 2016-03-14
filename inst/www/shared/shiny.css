@@ -330,30 +330,41 @@
   color: #000;
 }
 
-.shiny-reconnect-dialog-wrapper {
+#shiny-reconnect-dialog {
+  padding: 1em;
   position: fixed;
-  top: 0;
-  left: 0;
+  bottom: 50px;
+  left: -30px;
+  padding-left: 45px;
+  padding-right: 18px;
+  width: 300px;
+  height: auto;
   z-index: 99999;
-  width: 100%;
-  text-align: center;
+  background-color: #222;
+  opacity: 0.8;
+  color: white;
+  border-radius: 3px;
+/*  font-size: 0.9em; */
+  box-shadow: rgba(0, 0, 0, 0.3) 3px 3px 10px;
 }
 
-.shiny-reconnect-dialog {
-  background-color: #fcf8e3;
-  display: inline-block;
-  padding: 3px 15px;
-  border-left: 1px solid #666;
-  border-right: 1px solid #666;
-  border-bottom: 1px solid #666;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-  box-shadow: 2px 2px 6px 0 rgba(0, 0, 0, 0.15);
+#shiny-reconnect-dialog label {
+  display: block;
+  font-weight: normal;
+  color: white;
+  margin: 0;
+  padding: 0;
 }
 
 /* Fixed with for dots, so we can animate them without changing width */
-.shiny-reconnect-dots {
+#shiny-reconnect-dialog .shiny-reconnect-dots {
   display: inline-block;
   width: 1ex;
   text-align: left;
+}
+
+#shiny-reconnect-now {
+  color: rgb(51, 122, 183);
+  text-decoration: underline;
+  font-weight: bold;
 }

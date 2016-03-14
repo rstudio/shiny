@@ -43,7 +43,12 @@ var ShinyApp = function() {
     return !!this.$socket;
   };
 
+  var scheduledReconnect = null;
   this.reconnect = function() {
+    // This function can be invoked directly even if there's a scheduled
+    // reconnect, so be sure to clear any such scheduled reconnects.
+    clearTimeout(scheduledReconnect);
+
     if (this.isConnected())
       throw "Attempted to reconnect, but already connected.";
 
@@ -179,7 +184,7 @@ var ShinyApp = function() {
     var self = this;
     console.log("Waiting " + (delay/1000) + "s before trying to reconnect.");
 
-    setTimeout(function() { self.reconnect(); }, delay);
+    scheduledReconnect = setTimeout(function() { self.reconnect(); }, delay);
   };
 
   // How long should we wait before trying the next reconnection?
@@ -221,8 +226,8 @@ var ShinyApp = function() {
     // To try a reconnect, both the app (this.$allowReconnect) and the
     // server (this.$socket.allowReconnect) must allow reconnections.
     if (this.$allowReconnect === true && this.$socket.allowReconnect === true) {
-      exports.showReconnectDialog();
       var delay = reconnectDelay.next();
+      exports.showReconnectDialog(delay);
       this.$scheduleReconnect(delay);
     }
   };
@@ -726,45 +731,46 @@ var ShinyApp = function() {
 
 // showReconnectDialog and hideReconnectDialog are conceptually related to the
 // socket code, but they belong in the Shiny/exports object.
-exports.showReconnectDialog = exports.showReconnectDialog || function() {
-  // If there's already a reconnect dialog, don't add another
-  if ($('.shiny-reconnect-dialog-wrapper').length > 0)
-    return;
+exports.showReconnectDialog = exports.showReconnectDialog || (function() {
+  var reconnectTime = null;
 
-  var $dialog = $('<div class="shiny-reconnect-dialog-wrapper">' +
-    '<div class="shiny-reconnect-dialog">' +
-    '<span class="shiny-reconnect-text"></span>' +
-    '<span class="shiny-reconnect-dots"></span>' +
-    '</div></div>')
-      .appendTo('body');
+  function updateTime() {
+    var $time = $("#shiny-reconnect-time");
+    // If the time has been removed, exit and don't reschedule this function.
+    if ($time.length === 0) return;
 
-  $(".shiny-reconnect-text").text("Trying to reconnect to new session");
-
-  var ndots = 1;
-  var updateDots = function() {
-    // Select from $dialog, so that if a separate function call adds a div
-    // of the same class, we won't try to update that div's dots. This could
-    // happen when Shiny Server adds its own reconnection dialog.
-    var $dots = $dialog.find(".shiny-reconnect-dots");
-    // If the dots have been removed, exit and don't reschedule this function.
-    if ($dots.length === 0) return;
-
-    // Create the string for number of dots
-    ndots = (ndots-1) % 3 + 1;
-    var dotstr = "";
-    for (var i=0; i<ndots; i++) {
-      dotstr += ".";
+    var seconds = Math.round((reconnectTime - new Date().getTime()) / 1000) + 1;
+    if (seconds > 0) {
+      $time.text(" in " + seconds + "s");
+    } else {
+      $time.text("...");
     }
-    ndots++;
-    $dots.text(dotstr);
 
-    // Reschedule this function after 1.5 seconds
-    setTimeout(updateDots, 1500);
+    // Reschedule this function after 1 second
+    setTimeout(updateTime, 1000);
+  }
+
+
+  return function(delay) {
+    reconnectTime = new Date().getTime() + delay;
+
+    // If there's already a reconnect dialog, don't add another
+    if ($('#shiny-reconnect-dialog').length > 0)
+      return;
+
+    var $dialog = $('<div id="shiny-reconnect-dialog">' +
+      '<span id="shiny-reconnect-text"></span>' +
+      '<span id="shiny-reconnect-time"></span><br>' +
+      '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>' +
+      '</div>')
+        .appendTo('body');
+
+    $("#shiny-reconnect-text").text("Connecting to new session");
+
+    updateTime();
   };
-
-  updateDots();
-};
+})();
 
 exports.hideReconnectDialog = exports.hideReconnectDialog || function() {
-  $(".shiny-reconnect-dialog-wrapper").remove();
+  $("#shiny-reconnect-dialog").remove();
 };

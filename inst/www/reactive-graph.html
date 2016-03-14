@@ -14,9 +14,9 @@ html, body {
   padding: 0;
 }
 div {
-  -moz-user-select: none; 
-  -khtml-user-select: none; 
-  -webkit-user-select: none; 
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
   -o-user-select: none;
   cursor: default;
 }
@@ -148,107 +148,844 @@ svg {
 </style>
 <script>
 var log = [
-  { "action" : "valueChange", "id" : "names(input)", "value" : " chr \"dataset\"" },
-  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 1\n $ dataset: chr \"rock\"" },
-  { "action" : "valueChange", "id" : "input$dataset", "value" : " chr \"rock\"" },
-  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:2] \"caption\" \"dataset\"" },
-  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 2\n $ caption: chr \"Data Summary\"\n $ dataset: chr \"rock\"" },
-  { "action" : "valueChange", "id" : "input$caption", "value" : " chr \"Data Summary\"" },
-  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:3] \"caption\" \"dataset\" \"obs\"" },
-  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Data Summary\"\n $ obs    : num 10\n $ dataset: chr \"rock\"" },
-  { "action" : "valueChange", "id" : "input$obs", "value" : " num 10" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr \"output_caption_hidden\"" },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 1\n $ output_caption_hidden: logi FALSE" },
-  { "action" : "valueChange", "id" : "clientData$output_caption_hidden", "value" : " logi FALSE" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:2] \"output_caption_hidden\" \"output_summary_hidden\"" },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 2\n $ output_caption_hidden: logi FALSE\n $ output_summary_hidden: logi FALSE" },
-  { "action" : "valueChange", "id" : "clientData$output_summary_hidden", "value" : " logi FALSE" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:3] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\"" },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 3\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ output_summary_hidden: logi FALSE" },
-  { "action" : "valueChange", "id" : "clientData$output_view_hidden", "value" : " logi FALSE" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:4] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 4\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ output_summary_hidden: logi FALSE" },
-  { "action" : "valueChange", "id" : "clientData$pixelratio", "value" : " num 2" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:5] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 5\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"" },
-  { "action" : "valueChange", "id" : "clientData$url_protocol", "value" : " chr \"http:\"" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:6] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 6\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"" },
-  { "action" : "valueChange", "id" : "clientData$url_hostname", "value" : " chr \"localhost\"" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:7] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 7\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"" },
-  { "action" : "valueChange", "id" : "clientData$url_port", "value" : " chr \"8100\"" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:8] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 8\n $ url_pathname         : chr \"/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"" },
-  { "action" : "valueChange", "id" : "clientData$url_pathname", "value" : " chr \"/\"" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:9] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 9\n $ url_pathname         : chr \"/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"" },
-  { "action" : "valueChange", "id" : "clientData$url_search", "value" : " chr \"\"" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:10] \"output_caption_hidden\" \"output_summary_hidden\" \"output_view_hidden\" ..." },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 10\n $ url_pathname         : chr \"/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ url_hash_initial     : chr \"\"\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"" },
-  { "action" : "valueChange", "id" : "clientData$url_hash_initial", "value" : " chr \"\"" },
-  { "action" : "valueChange", "id" : "names(clientData)", "value" : " chr [1:11] \"allowDataUriScheme\" \"output_caption_hidden\" \"output_summary_hidden\" ..." },
-  { "action" : "valueChange", "id" : "clientData (all)", "value" : "List of 11\n $ allowDataUriScheme   : logi TRUE\n $ url_pathname         : chr \"/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"8100\"\n $ output_caption_hidden: logi FALSE\n $ url_hash_initial     : chr \"\"\n $ pixelratio           : num 2\n $ url_hostname         : chr \"localhost\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"" },
-  { "action" : "valueChange", "id" : "clientData$allowDataUriScheme", "value" : " logi TRUE" },
-  { "action" : "ctx", "id" : "1", "label" : "output$caption <- renderText({ \n    input$caption\n})", "type" : "observer", "prevId" : "" },
-  { "action" : "invalidate", "id" : "1" },
-  { "action" : "ctx", "id" : "2", "label" : "output$summary <- renderPrint({ \n    dataset <- datasetInput()\n    summary(dataset)\n})", "type" : "observer", "prevId" : "" },
-  { "action" : "invalidate", "id" : "2" },
-  { "action" : "ctx", "id" : "3", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "" },
-  { "action" : "invalidate", "id" : "3" },
-  { "action" : "ctx", "id" : "4", "label" : "output$caption <- renderText({ \n    input$caption\n})", "type" : "observer", "prevId" : "1" },
-  { "action" : "enter", "id" : "4" },
-  { "action" : "dep", "id" : "4", "dependsOn" : "input$caption" },
-  { "action" : "exit", "id" : "4" },
-  { "action" : "ctx", "id" : "5", "label" : "output$summary <- renderPrint({ \n    dataset <- datasetInput()\n    summary(dataset)\n})", "type" : "observer", "prevId" : "2" },
-  { "action" : "enter", "id" : "5" },
-  { "action" : "ctx", "id" : "6", "label" : "reactive({ \n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n})", "type" : "observable", "prevId" : "" },
-  { "action" : "enter", "id" : "6" },
-  { "action" : "dep", "id" : "6", "dependsOn" : "input$dataset" },
-  { "action" : "exit", "id" : "6" },
-  { "action" : "depId", "id" : "5", "dependsOn" : "6" },
-  { "action" : "exit", "id" : "5" },
-  { "action" : "ctx", "id" : "7", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "3" },
-  { "action" : "enter", "id" : "7" },
-  { "action" : "depId", "id" : "7", "dependsOn" : "6" },
-  { "action" : "dep", "id" : "7", "dependsOn" : "input$obs" },
-  { "action" : "exit", "id" : "7" },
-  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:3] \"caption\" \"dataset\" \"obs\"" },
-  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Pressure Summary\"\n $ obs    : num 10\n $ dataset: chr \"rock\"" },
-  { "action" : "valueChange", "id" : "input$caption", "value" : " chr \"Pressure Summary\"" },
-  { "action" : "invalidate", "id" : "4" },
-  { "action" : "ctx", "id" : "8", "label" : "output$caption <- renderText({ \n    input$caption\n})", "type" : "observer", "prevId" : "4" },
-  { "action" : "enter", "id" : "8" },
-  { "action" : "dep", "id" : "8", "dependsOn" : "input$caption" },
-  { "action" : "exit", "id" : "8" },
-  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:3] \"caption\" \"dataset\" \"obs\"" },
-  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Pressure Summary\"\n $ obs    : num 10\n $ dataset: chr \"pressure\"" },
-  { "action" : "valueChange", "id" : "input$dataset", "value" : " chr \"pressure\"" },
-  { "action" : "invalidate", "id" : "6" },
-  { "action" : "invalidate", "id" : "5" },
-  { "action" : "invalidate", "id" : "7" },
-  { "action" : "ctx", "id" : "9", "label" : "output$summary <- renderPrint({ \n    dataset <- datasetInput()\n    summary(dataset)\n})", "type" : "observer", "prevId" : "5" },
-  { "action" : "enter", "id" : "9" },
-  { "action" : "ctx", "id" : "10", "label" : "reactive({ \n    switch(input$dataset, rock = rock, pressure = pressure, cars = cars)\n})", "type" : "observable", "prevId" : "6" },
-  { "action" : "enter", "id" : "10" },
-  { "action" : "dep", "id" : "10", "dependsOn" : "input$dataset" },
-  { "action" : "exit", "id" : "10" },
-  { "action" : "depId", "id" : "9", "dependsOn" : "10" },
-  { "action" : "exit", "id" : "9" },
-  { "action" : "ctx", "id" : "11", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "7" },
-  { "action" : "enter", "id" : "11" },
-  { "action" : "depId", "id" : "11", "dependsOn" : "10" },
-  { "action" : "dep", "id" : "11", "dependsOn" : "input$obs" },
-  { "action" : "exit", "id" : "11" },
-  { "action" : "valueChange", "id" : "names(input)", "value" : " chr [1:3] \"caption\" \"dataset\" \"obs\"" },
-  { "action" : "valueChange", "id" : "input (all)", "value" : "List of 3\n $ caption: chr \"Pressure Summary\"\n $ obs    : num 15\n $ dataset: chr \"pressure\"" },
-  { "action" : "valueChange", "id" : "input$obs", "value" : " num 15" },
-  { "action" : "invalidate", "id" : "11" },
-  { "action" : "ctx", "id" : "12", "label" : "output$view <- renderTable({ \n    head(datasetInput(), n = input$obs)\n})", "type" : "observer", "prevId" : "11" },
-  { "action" : "enter", "id" : "12" },
-  { "action" : "depId", "id" : "12", "dependsOn" : "10" },
-  { "action" : "dep", "id" : "12", "dependsOn" : "input$obs" },
-  { "action" : "exit", "id" : "12" }
+  {
+    "action": "valueChange",
+    "id": "names(input)",
+    "value": " chr \"dataset\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9168
+  },
+  {
+    "action": "valueChange",
+    "id": "input (all)",
+    "value": "List of 1\n $ dataset: chr \"rock\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.919
+  },
+  {
+    "action": "valueChange",
+    "id": "input$dataset",
+    "value": " chr \"rock\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9207
+  },
+  {
+    "action": "valueChange",
+    "id": "names(input)",
+    "value": " chr [1:2] \"caption\" \"dataset\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9222
+  },
+  {
+    "action": "valueChange",
+    "id": "input (all)",
+    "value": "List of 2\n $ caption: chr \"Data Summary\"\n $ dataset: chr \"rock\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9243
+  },
+  {
+    "action": "valueChange",
+    "id": "input$caption",
+    "value": " chr \"Data Summary\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9283
+  },
+  {
+    "action": "valueChange",
+    "id": "names(input)",
+    "value": " chr [1:3] \"caption\" \"dataset\" \"obs\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9298
+  },
+  {
+    "action": "valueChange",
+    "id": "input (all)",
+    "value": "List of 3\n $ caption: chr \"Data Summary\"\n $ obs    : int 10\n $ dataset: chr \"rock\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9323
+  },
+  {
+    "action": "valueChange",
+    "id": "input$obs",
+    "value": " int 10",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9339
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr \"output_caption_hidden\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9355
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 1\n $ output_caption_hidden: logi FALSE",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9373
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$output_caption_hidden",
+    "value": " logi FALSE",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9387
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:2] \"output_caption_hidden\" \"output_summary_hidden\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9401
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 2\n $ output_caption_hidden: logi FALSE\n $ output_summary_hidden: logi FALSE",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9424
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$output_summary_hidden",
+    "value": " logi FALSE",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.944
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:3] \"output_caption_hidden\" \"output_summary_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9455
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 3\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ output_summary_hidden: logi FALSE",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9481
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$output_view_hidden",
+    "value": " logi FALSE",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9494
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:4] \"output_caption_hidden\" \"output_summary_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9509
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 4\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : int 2\n $ output_summary_hidden: logi FALSE",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.954
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$pixelratio",
+    "value": " int 2",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9555
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:5] \"output_caption_hidden\" \"output_summary_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9569
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 5\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : int 2\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9605
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$url_protocol",
+    "value": " chr \"http:\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9619
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:6] \"output_caption_hidden\" \"output_summary_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9633
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 6\n $ output_view_hidden   : logi FALSE\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : int 2\n $ url_hostname         : chr \"127.0.0.1\"\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9671
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$url_hostname",
+    "value": " chr \"127.0.0.1\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9683
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:7] \"output_caption_hidden\" \"output_summary_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9697
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 7\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"5643\"\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : int 2\n $ url_hostname         : chr \"127.0.0.1\"\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9756
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$url_port",
+    "value": " chr \"5643\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9769
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:8] \"output_caption_hidden\" \"output_summary_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9784
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 8\n $ url_pathname         : chr \"\/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"5643\"\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : int 2\n $ url_hostname         : chr \"127.0.0.1\"\n $ output_summary_hidden: logi FALSE\n $ url_protocol         : chr \"http:\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9828
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$url_pathname",
+    "value": " chr \"\/\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9841
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:9] \"output_caption_hidden\" \"output_summary_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9856
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 9\n $ url_pathname         : chr \"\/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"5643\"\n $ output_caption_hidden: logi FALSE\n $ pixelratio           : int 2\n $ url_hostname         : chr \"127.0.0.1\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9904
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$url_search",
+    "value": " chr \"\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9918
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:10] \"output_caption_hidden\" \"output_summary_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9934
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 10\n $ url_pathname         : chr \"\/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"5643\"\n $ output_caption_hidden: logi FALSE\n $ url_hash_initial     : chr \"\"\n $ pixelratio           : int 2\n $ url_hostname         : chr \"127.0.0.1\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9985
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$url_hash_initial",
+    "value": " chr \"\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212774.9998
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:11] \"output_caption_hidden\" \"output_summary_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0015
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 11\n $ url_pathname         : chr \"\/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"5643\"\n $ output_caption_hidden: logi FALSE\n $ url_hash_initial     : chr \"\"\n $ pixelratio           : int 2\n $ singletons           : chr \"\"\n $ url_hostname         : chr \"127.0.0.1\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0077
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$singletons",
+    "value": " chr \"\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0094
+  },
+  {
+    "action": "valueChange",
+    "id": "names(clientData)",
+    "value": " chr [1:12] \"allowDataUriScheme\" \"output_caption_hidden\" ...",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0113
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData (all)",
+    "value": "List of 12\n $ allowDataUriScheme   : logi TRUE\n $ url_pathname         : chr \"\/\"\n $ output_view_hidden   : logi FALSE\n $ url_port             : chr \"5643\"\n $ output_caption_hidden: logi FALSE\n $ url_hash_initial     : chr \"\"\n $ pixelratio           : int 2\n $ singletons           : chr \"\"\n $ url_hostname         : chr \"127.0.0.1\"\n $ output_summary_hidden: logi FALSE\n $ url_search           : chr \"\"\n $ url_protocol         : chr \"http:\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.018
+  },
+  {
+    "action": "valueChange",
+    "id": "clientData$allowDataUriScheme",
+    "value": " logi TRUE",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0194
+  },
+  {
+    "action": "ctx",
+    "id": "1",
+    "label": "output$caption",
+    "srcref": [
+      34,
+      32,
+      35,
+      17,
+      32,
+      17
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0244
+  },
+  {
+    "action": "invalidate",
+    "id": "1",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0259
+  },
+  {
+    "action": "ctx",
+    "id": "2",
+    "label": "output$summary",
+    "srcref": [
+      42,
+      33,
+      44,
+      20,
+      33,
+      20
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0286
+  },
+  {
+    "action": "invalidate",
+    "id": "2",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0297
+  },
+  {
+    "action": "ctx",
+    "id": "3",
+    "label": "output$view",
+    "srcref": [
+      50,
+      30,
+      51,
+      39,
+      30,
+      39
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0319
+  },
+  {
+    "action": "invalidate",
+    "id": "3",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0331
+  },
+  {
+    "action": "ctx",
+    "id": "4",
+    "label": "output$caption",
+    "srcref": [
+      34,
+      32,
+      35,
+      17,
+      32,
+      17
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "1",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0345
+  },
+  {
+    "action": "enter",
+    "id": "4",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0357
+  },
+  {
+    "action": "dep",
+    "id": "4",
+    "dependsOn": "input$caption",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0373
+  },
+  {
+    "action": "exit",
+    "id": "4",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0395
+  },
+  {
+    "action": "ctx",
+    "id": "5",
+    "label": "output$summary",
+    "srcref": [
+      42,
+      33,
+      44,
+      20,
+      33,
+      20
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "2",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0405
+  },
+  {
+    "action": "enter",
+    "id": "5",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0416
+  },
+  {
+    "action": "ctx",
+    "id": "6",
+    "label": "datasetInput",
+    "srcref": [
+      16,
+      5,
+      19,
+      25,
+      5,
+      25,
+      16,
+      19
+    ],
+    "srcfile": "server.R",
+    "type": "observable",
+    "prevId": "",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0436
+  },
+  {
+    "action": "enter",
+    "id": "6",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0447
+  },
+  {
+    "action": "dep",
+    "id": "6",
+    "dependsOn": "input$dataset",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0455
+  },
+  {
+    "action": "exit",
+    "id": "6",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0478
+  },
+  {
+    "action": "depId",
+    "id": "5",
+    "dependsOn": "6",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0487
+  },
+  {
+    "action": "exit",
+    "id": "5",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0552
+  },
+  {
+    "action": "ctx",
+    "id": "7",
+    "label": "output$view",
+    "srcref": [
+      50,
+      30,
+      51,
+      39,
+      30,
+      39
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "3",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0562
+  },
+  {
+    "action": "enter",
+    "id": "7",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0574
+  },
+  {
+    "action": "depId",
+    "id": "7",
+    "dependsOn": "6",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0589
+  },
+  {
+    "action": "dep",
+    "id": "7",
+    "dependsOn": "input$obs",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.0598
+  },
+  {
+    "action": "exit",
+    "id": "7",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212775.069
+  },
+  {
+    "action": "valueChange",
+    "id": "names(input)",
+    "value": " chr [1:3] \"caption\" \"dataset\" \"obs\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212777.7149
+  },
+  {
+    "action": "valueChange",
+    "id": "input (all)",
+    "value": "List of 3\n $ caption: chr \"Data Summary 1\"\n $ obs    : int 10\n $ dataset: chr \"rock\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212777.7181
+  },
+  {
+    "action": "valueChange",
+    "id": "input$caption",
+    "value": " chr \"Data Summary 1\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212777.7198
+  },
+  {
+    "action": "invalidate",
+    "id": "4",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212777.7208
+  },
+  {
+    "action": "ctx",
+    "id": "8",
+    "label": "output$caption",
+    "srcref": [
+      34,
+      32,
+      35,
+      17,
+      32,
+      17
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "4",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212777.7236
+  },
+  {
+    "action": "enter",
+    "id": "8",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212777.7249
+  },
+  {
+    "action": "dep",
+    "id": "8",
+    "dependsOn": "input$caption",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212777.7266
+  },
+  {
+    "action": "exit",
+    "id": "8",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212777.7284
+  },
+  {
+    "action": "valueChange",
+    "id": "names(input)",
+    "value": " chr [1:3] \"caption\" \"dataset\" \"obs\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4006
+  },
+  {
+    "action": "valueChange",
+    "id": "input (all)",
+    "value": "List of 3\n $ caption: chr \"Data Summary 1\"\n $ obs    : int 10\n $ dataset: chr \"pressure\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4035
+  },
+  {
+    "action": "valueChange",
+    "id": "input$dataset",
+    "value": " chr \"pressure\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4049
+  },
+  {
+    "action": "invalidate",
+    "id": "6",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4058
+  },
+  {
+    "action": "invalidate",
+    "id": "5",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4065
+  },
+  {
+    "action": "invalidate",
+    "id": "7",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4089
+  },
+  {
+    "action": "ctx",
+    "id": "9",
+    "label": "output$summary",
+    "srcref": [
+      42,
+      33,
+      44,
+      20,
+      33,
+      20
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "5",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4109
+  },
+  {
+    "action": "enter",
+    "id": "9",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.412
+  },
+  {
+    "action": "ctx",
+    "id": "10",
+    "label": "datasetInput",
+    "srcref": [
+      16,
+      5,
+      19,
+      25,
+      5,
+      25,
+      16,
+      19
+    ],
+    "srcfile": "server.R",
+    "type": "observable",
+    "prevId": "6",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4142
+  },
+  {
+    "action": "enter",
+    "id": "10",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4153
+  },
+  {
+    "action": "dep",
+    "id": "10",
+    "dependsOn": "input$dataset",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4161
+  },
+  {
+    "action": "exit",
+    "id": "10",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4169
+  },
+  {
+    "action": "depId",
+    "id": "9",
+    "dependsOn": "10",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4177
+  },
+  {
+    "action": "exit",
+    "id": "9",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4777
+  },
+  {
+    "action": "ctx",
+    "id": "11",
+    "label": "output$view",
+    "srcref": [
+      50,
+      30,
+      51,
+      39,
+      30,
+      39
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "7",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4789
+  },
+  {
+    "action": "enter",
+    "id": "11",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.48
+  },
+  {
+    "action": "depId",
+    "id": "11",
+    "dependsOn": "10",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4818
+  },
+  {
+    "action": "dep",
+    "id": "11",
+    "dependsOn": "input$obs",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4827
+  },
+  {
+    "action": "exit",
+    "id": "11",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212779.4903
+  },
+  {
+    "action": "valueChange",
+    "id": "names(input)",
+    "value": " chr [1:3] \"caption\" \"dataset\" \"obs\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212781.0019
+  },
+  {
+    "action": "valueChange",
+    "id": "input (all)",
+    "value": "List of 3\n $ caption: chr \"Data Summary 1\"\n $ obs    : int 100\n $ dataset: chr \"pressure\"",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212781.0052
+  },
+  {
+    "action": "valueChange",
+    "id": "input$obs",
+    "value": " int 100",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212781.0069
+  },
+  {
+    "action": "invalidate",
+    "id": "11",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212781.008
+  },
+  {
+    "action": "ctx",
+    "id": "12",
+    "label": "output$view",
+    "srcref": [
+      50,
+      30,
+      51,
+      39,
+      30,
+      39
+    ],
+    "srcfile": "server.R",
+    "type": "observer",
+    "prevId": "11",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212781.0119
+  },
+  {
+    "action": "enter",
+    "id": "12",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212781.0132
+  },
+  {
+    "action": "depId",
+    "id": "12",
+    "dependsOn": "10",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212781.0155
+  },
+  {
+    "action": "dep",
+    "id": "12",
+    "dependsOn": "input$obs",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212781.0172
+  },
+  {
+    "action": "exit",
+    "id": "12",
+    "session": "36377b30e77d6f2f1f5fc5628b882ee5",
+    "time": 1449212781.0257
+  }
 ];
 try {
   log = __DATA__;
@@ -777,9 +1514,9 @@ $(function() {
   <svg>
     <defs>
       <marker id="triangle"
-              viewBox="0 0 10 10" 
+              viewBox="0 0 10 10"
               refX="5" refY="5"
-              markerWidth="6" 
+              markerWidth="6"
               markerHeight="6"
               orient="auto">
           <path d="M 10 0 L 0 5 L 10 10 z" />

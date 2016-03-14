@@ -109,10 +109,8 @@ renderTable <- function(expr, striped = FALSE, condensed = TRUE,
 
     # By default, numbers are right-aligned and everything else is left-aligned.
     defaultAlignment <- function(col) {
-      cls <- class(col)
-      if (cls == "numeric" || cls == "integer") align <- "r"
-      else align <- "l"
-      align
+      is_num <- inherits(col, "numeric") || inherits(col, "integer")
+      if (is_num) "r" else align <- "l"
     }
 
     # Figure out column alignment

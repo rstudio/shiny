@@ -13,8 +13,10 @@ renderTable(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
 \item{expr}{An expression that returns an R object that can be used with
 \code{\link[xtable]{xtable}}.}
 
-\item{striped, condensed, hover, bordered}{Logicals: if \code{TRUE}, apply
-the corresponding Bootstrap table format to the output table.}
+\item{striped, hover, bordered}{Logicals: if \code{TRUE}, apply the
+corresponding Bootstrap table format to the output table.}
+
+\item{spacing}{The spacing between the rows of the table.}
 
 \item{width}{Table width. Must be a valid CSS unit (like "100%", "400px",
 "auto") or a number, which will be coerced to a string and
@@ -26,10 +28,13 @@ respectively, left-, center- or right-aligned. Otherwise, \code{align}
 must have the same number of characters as the resulting table (if
 \code{rownames = TRUE}, this will be equal to \code{ncol()+1}), with
 the \emph{i}-th character specifying the alignment for the
-\emph{i}-th column (again, only \code{'l'}, \code{'c'} or
-\code{'r'} are permitted). If \code{NULL}, then all numeric/integer
-columns (including the row names, if they are numbers) will be
-right-aligned and everything else will be left-aligned.}
+\emph{i}-th column (besides \code{'l'}, \code{'c'} and
+\code{'r'}, \code{'?'} is also permitted - \code{?} is a placeholder
+for that particular column, indicating that it should keep its default
+alignment). If \code{NULL}, then all numeric/integer columns (including
+the row names, if they are numbers) will be right-aligned and
+everything else will be left-aligned (\code{align = '?'} produces the
+same result).}
 
 \item{rownames, colnames}{Logicals: include rownames? include colnames
 (column headers)?}

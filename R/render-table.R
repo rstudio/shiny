@@ -20,10 +20,13 @@
 #'   must have the same number of characters as the resulting table (if
 #'   \code{rownames = TRUE}, this will be equal to \code{ncol()+1}), with
 #'   the \emph{i}-th character specifying the alignment for the
-#'   \emph{i}-th column (again, only \code{'l'}, \code{'c'} or
-#'   \code{'r'} are permitted). If \code{NULL}, then all numeric/integer
-#'   columns (including the row names, if they are numbers) will be
-#'   right-aligned and everything else will be left-aligned.
+#'   \emph{i}-th column (besides \code{'l'}, \code{'c'} and
+#'   \code{'r'}, \code{'?'} is also permitted - \code{?} is a placeholder
+#'   for that particular column, indicating that it should keep its default
+#'   alignment). If \code{NULL}, then all numeric/integer columns (including
+#'   the row names, if they are numbers) will be right-aligned and
+#'   everything else will be left-aligned (\code{align = '?'} produces the
+#'   same result).
 #' @param rownames,colnames Logicals: include rownames? include colnames
 #'   (column headers)?
 #' @param digits An integer specifying the number of decimal places for

@@ -93,7 +93,8 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     classNames <- paste0("table shiny-table",
                          paste0(" table-", names(format)[format], collapse="" ))
 
-    data <- as.data.frame(func())
+    data <- func()
+    data <- as.data.frame(data)
 
     # Return NULL if no data is provided
     if (is.null(data) ||
@@ -106,30 +107,39 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     xtable_args <- dots[intersect(names(dots), xtable_argnames)]
     non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
 
-    # A small helper function to determine if the row.names can be coerced
-    # to numeric or if they are legitimate strings
-    isNumber <- function(n) {
-      grepl("^\\d$+", n)
+    defaultAlignment <- function(col, names=FALSE) {
+      if (names) {
+        # Determine if the row.names can be coerced to numeric or if they
+        # are legitimate strings
+        align  <- if (grepl("^\\d$+", col)) "r" else "l"
+      } else {
+        cls <- class(col)
+        if (cls == "numeric" || cls == "integer") align <- "r"
+        else align <- "l"
+      }
+      align
     }
 
     # Figure out column alignment
     ## Case 1: if align=NULL, check if row.names are numbers. If not, make
     ## sure to left-align them (xtable right-aligns them by default, which
     ## looks weird when the row.names are strings).
-    if (is.null(align)) {
-      cols <- if (isNumber(row.names(data))) "r" else "l"
-      for (i in seq_len(ncol(data))) {
-        cls <- class(data[,i])
-        if (cls == "numeric" || cls == "integer") cols <- paste0(cols, "r")
-        else cols <- paste0(cols, "l")
-      }
+    if (is.null(align) || align == "?") {
+      names <- defaultAlignment(row.names(data), names=TRUE)
+      cols <- paste(vapply(data, defaultAlignment, character(1)),
+                    collapse="")
+      cols <- paste0(names, cols)
     } else {
       ## Case 2: if align!=NULL, check if it is only one character or a vector
       ## and process it accordingly.
       num_cols <- if (rownames) nchar(align) else nchar(align)+1
-      valid <- !grepl("[^lcr]", align)
+      valid <- !grepl("[^lcr\\?]", align)
       if (num_cols == ncol(data)+1 && valid) {
         cols <- if (rownames) align else paste0("r", align)
+        defaults <- grep("\\?", strsplit(cols,"")[[1]])
+        if (length(defaults) != 0) {
+          vals <- vapply(data[,defaults], defaultAlignment, character(1))
+        }
       } else if (nchar(align) == 1 && valid) {
         cols <- paste0(rep(align, ncol(data)+1), collapse="")
       } else {

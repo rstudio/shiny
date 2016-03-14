@@ -41,14 +41,14 @@
 #'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #'
 #' @export
-renderTable <- function(expr, striped=FALSE, condensed=TRUE,
-                        hover=FALSE, bordered=FALSE,
-                        width="auto", align=NULL,
-                        rownames=FALSE, colnames=TRUE,
-                        digits=NULL, na="NA", ...,
-                        env=parent.frame(), quoted=FALSE, func=NULL) {
+renderTable <- function(expr, striped = FALSE, condensed = TRUE,
+                        hover = FALSE, bordered = FALSE,
+                        width = "auto", align = NULL,
+                        rownames = FALSE, colnames = TRUE,
+                        digits = NULL, na = "NA", ...,
+                        env = parent.frame(), quoted = FALSE, func = NULL) {
   if (!is.null(func)) {
-    shinyDeprecated(msg="renderTable: argument 'func' is deprecated. Please use 'expr' instead.")
+    shinyDeprecated(msg = "renderTable: argument 'func' is deprecated. Please use 'expr' instead.")
   } else {
     installExprFunction(expr, "func", env, quoted)
   }
@@ -80,8 +80,8 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     condensed <- condensedWrapper()
     hover <- hoverWrapper()
     bordered <- borderedWrapper()
-    format <- c(striped=striped, condensed=condensed,
-                hover=hover, bordered=bordered)
+    format <- c(striped = striped, condensed = condensed,
+                hover = hover, bordered = bordered)
     width <- widthWrapper()
     align <- alignWrapper()
     rownames <- rownamesWrapper()
@@ -91,7 +91,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
 
     # For css styling
     classNames <- paste0("table shiny-table",
-                         paste0(" table-", names(format)[format], collapse="" ))
+                         paste0(" table-", names(format)[format], collapse = "" ))
 
     data <- func()
     data <- as.data.frame(data)
@@ -107,31 +107,22 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     xtable_args <- dots[intersect(names(dots), xtable_argnames)]
     non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
 
-    defaultAlignment <- function(col, names=FALSE) {
-      if (names) {
-        # Determine if the row.names can be coerced to numeric or if they
-        # are legitimate strings
-        align  <- if (grepl("^\\d$+", col)) "r" else "l"
-      } else {
-        cls <- class(col)
-        if (cls == "numeric" || cls == "integer") align <- "r"
-        else align <- "l"
-      }
+    # By default, numbers are right-aligned and everything else is left-aligned.
+    defaultAlignment <- function(col) {
+      cls <- class(col)
+      if (cls == "numeric" || cls == "integer") align <- "r"
+      else align <- "l"
       align
     }
 
     # Figure out column alignment
-    ## Case 1: if align=NULL, check if row.names are numbers. If not, make
-    ## sure to left-align them (xtable right-aligns them by default, which
-    ## looks weird when the row.names are strings).
+    ## Case 1: default alignment
     if (is.null(align) || align == "?") {
-      names <- defaultAlignment(row.names(data), names=TRUE)
-      cols <- paste(vapply(data, defaultAlignment, character(1)),
-                    collapse="")
+      names <- defaultAlignment(attr(data, "row.names"))
+      cols <- paste(vapply(data, defaultAlignment, character(1)), collapse = "")
       cols <- paste0(names, cols)
     } else {
-      ## Case 2: if align!=NULL, check if it is only one character or a vector
-      ## and process it accordingly.
+    ## Case 2: user-specified alignment
       num_cols <- if (rownames) nchar(align) else nchar(align)+1
       valid <- !grepl("[^lcr\\?]", align)
       if (num_cols == ncol(data)+1 && valid) {
@@ -152,7 +143,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
     }
 
     # Call xtable with its (updated) args
-    xtable_args <- c(xtable_args, align=cols, digits=digits)
+    xtable_args <- c(xtable_args, align = cols, digits = digits)
     xtable_res <- do.call(xtable, c(list(data), xtable_args))
 
     # Set up print args
@@ -169,12 +160,7 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
 
     # Capture the raw html table returned by print.xtable(), and store it in
     # a variable for further processing
-    tab <- paste(
-      utils::capture.output(
-        do.call(print, print_args)
-      ),
-      collapse="\n"
-    )
+    tab <- paste(utils::capture.output(do.call(print, print_args)),collapse = "\n")
 
     # All further processing concerns the table headers, so we don't need to run
     # any of this if colnames=FALSE

@@ -138,13 +138,16 @@ renderTable <- function(expr, striped=FALSE, condensed=TRUE,
         cols <- if (rownames) align else paste0("r", align)
         defaults <- grep("\\?", strsplit(cols,"")[[1]])
         if (length(defaults) != 0) {
-          vals <- vapply(data[,defaults], defaultAlignment, character(1))
+          vals <- vapply(data[,defaults-1], defaultAlignment, character(1))
+          for (i in seq_len(length(defaults))) {
+            substr(cols, defaults[i], defaults[i]) <- vals[i]
+          }
         }
       } else if (nchar(align) == 1 && valid) {
         cols <- paste0(rep(align, ncol(data)+1), collapse="")
       } else {
-        stop("`align` must contain only the characters `l`, `c` and/or `r` and have
-             length either equal to 1 or to the total number of columns")
+        stop("`align` must contain only the characters `l`, `c`, `r` and/or `?` and
+              have length either equal to 1 or to the total number of columns")
       }
     }
 

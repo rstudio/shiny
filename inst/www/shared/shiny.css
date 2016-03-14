@@ -8,6 +8,46 @@ body.disconnected {
   padding-right: 12px !important;
 }
 
+.spacing-extrasmall > thead > tr > th,
+.spacing-extrasmall > tbody > tr > th,
+.spacing-extrasmall > tfoot > tr > th,
+.spacing-extrasmall > thead > tr > td,
+.spacing-extrasmall > tbody > tr > td,
+.spacing-extrasmall > tfoot > tr > td {
+  padding: 3px !important;
+}
+
+.spacing-small > thead > tr > th,
+.spacing-small > tbody > tr > th,
+.spacing-small > tfoot > tr > th,
+.spacing-small > thead > tr > td,
+.spacing-small > tbody > tr > td,
+.spacing-small > tfoot > tr > td {
+  padding: 5px !important;
+}
+
+.spacing-medium > thead > tr > th,
+.spacing-medium > tbody > tr > th,
+.spacing-medium > tfoot > tr > th,
+.spacing-medium > thead > tr > td,
+.spacing-medium > tbody > tr > td,
+.spacing-medium > tfoot > tr > td {
+  padding: 8px !important;
+}
+
+.spacing-large > thead > tr > th,
+.spacing-large > tbody > tr > th,
+.spacing-large > tfoot > tr > th,
+.spacing-large > thead > tr > td,
+.spacing-large > tbody > tr > td,
+.spacing-large > tfoot > tr > td {
+  padding: 10px !important;
+}
+
+.shiny-table .NA {
+  color: #909090;
+}
+
 .shiny-output-error {
   color: red;
   white-space: pre-wrap;

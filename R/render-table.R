@@ -8,9 +8,10 @@
 #'
 #' @param expr An expression that returns an R object that can be used with
 #'   \code{\link[xtable]{xtable}}.
-#' @param striped,condensed,hover,bordered Logicals: if \code{TRUE}, apply
-#'   the corresponding Bootstrap table format to the output table.
-#' @param width Table width. Must be a valid CSS unit (like "100%", 400px",
+#' @param striped,hover,bordered Logicals: if \code{TRUE}, apply the
+#'    corresponding Bootstrap table format to the output table.
+#' @param spacing The spacing between the rows of the table.
+#' @param width Table width. Must be a valid CSS unit (like "100%", "400px",
 #'   "auto") or a number, which will be coerced to a string and
 #'    have "px" appended.
 #' @param align A string that specifies the column alignment. If equal to
@@ -41,8 +42,8 @@
 #'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #'
 #' @export
-renderTable <- function(expr, striped = FALSE, condensed = TRUE,
-                        hover = FALSE, bordered = FALSE,
+renderTable <- function(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
+                        spacing = c("small", "extra small", "medium", "large"),
                         width = "auto", align = NULL,
                         rownames = FALSE, colnames = TRUE,
                         digits = NULL, na = "NA", ...,
@@ -52,6 +53,9 @@ renderTable <- function(expr, striped = FALSE, condensed = TRUE,
   } else {
     installExprFunction(expr, "func", env, quoted)
   }
+
+  spacing <- match.arg(spacing)
+  spacing <- gsub(" ", "", spacing)
 
   # A small helper function to create a wrapper for an argument that was
   # passed to renderTable()
@@ -64,9 +68,9 @@ renderTable <- function(expr, striped = FALSE, condensed = TRUE,
   # Create wrappers for most arguments so that functions can also be passed
   # in, rather than only literals (useful for shiny apps)
   stripedWrapper <- createWrapper(striped)
-  condensedWrapper <- createWrapper(condensed)
   hoverWrapper <- createWrapper(hover)
   borderedWrapper <- createWrapper(bordered)
+  spacingWrapper <- createWrapper(spacing)
   widthWrapper <- createWrapper(width)
   alignWrapper <- createWrapper(align)
   rownamesWrapper <- createWrapper(rownames)
@@ -77,11 +81,10 @@ renderTable <- function(expr, striped = FALSE, condensed = TRUE,
   # Main render function
   markRenderFunction(tableOutput, function() {
     striped <- stripedWrapper()
-    condensed <- condensedWrapper()
     hover <- hoverWrapper()
     bordered <- borderedWrapper()
-    format <- c(striped = striped, condensed = condensed,
-                hover = hover, bordered = bordered)
+    format <- c(striped = striped, hover = hover, bordered = bordered)
+    spacing <- spacingWrapper()
     width <- widthWrapper()
     align <- alignWrapper()
     rownames <- rownamesWrapper()
@@ -91,7 +94,8 @@ renderTable <- function(expr, striped = FALSE, condensed = TRUE,
 
     # For css styling
     classNames <- paste0("table shiny-table",
-                         paste0(" table-", names(format)[format], collapse = "" ))
+                         paste0(" table-", names(format)[format], collapse = "" ),
+                         paste0(" spacing-", spacing))
 
     data <- func()
     data <- as.data.frame(data)
@@ -110,7 +114,7 @@ renderTable <- function(expr, striped = FALSE, condensed = TRUE,
     # By default, numbers are right-aligned and everything else is left-aligned.
     defaultAlignment <- function(col) {
       is_num <- inherits(col, "numeric") || inherits(col, "integer")
-      if (is_num) "r" else align <- "l"
+      if (is_num) "r" else "l"
     }
 
     # Figure out column alignment
@@ -159,6 +163,9 @@ renderTable <- function(expr, striped = FALSE, condensed = TRUE,
     # Capture the raw html table returned by print.xtable(), and store it in
     # a variable for further processing
     tab <- paste(utils::capture.output(do.call(print, print_args)),collapse = "\n")
+
+    # Add extra class to cells with NA value, to be able to style them separately
+    tab <- gsub(paste(">", na, "<"), paste(" class='NA'>", na, "<"), tab)
 
     # All further processing concerns the table headers, so we don't need to run
     # any of this if colnames=FALSE

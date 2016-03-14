@@ -4,10 +4,10 @@
 \alias{renderTable}
 \title{Table Output}
 \usage{
-renderTable(expr, striped = FALSE, condensed = TRUE, hover = FALSE,
-  bordered = FALSE, width = "auto", align = NULL, rownames = FALSE,
-  colnames = TRUE, digits = NULL, na = "NA", ..., env = parent.frame(),
-  quoted = FALSE, func = NULL)
+renderTable(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
+  spacing = c("small", "extra small", "medium", "large"), width = "auto",
+  align = NULL, rownames = FALSE, colnames = TRUE, digits = NULL,
+  na = "NA", ..., env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used with
@@ -16,7 +16,7 @@ renderTable(expr, striped = FALSE, condensed = TRUE, hover = FALSE,
 \item{striped, condensed, hover, bordered}{Logicals: if \code{TRUE}, apply
 the corresponding Bootstrap table format to the output table.}
 
-\item{width}{Table width. Must be a valid CSS unit (like "100%", 400px",
+\item{width}{Table width. Must be a valid CSS unit (like "100%", "400px",
 "auto") or a number, which will be coerced to a string and
  have "px" appended.}
 

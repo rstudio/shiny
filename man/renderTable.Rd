@@ -5,9 +5,9 @@
 \title{Table Output}
 \usage{
 renderTable(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
-  spacing = c("small", "extra small", "medium", "large"), width = "auto",
-  align = NULL, rownames = FALSE, colnames = TRUE, digits = NULL,
-  na = "NA", ..., env = parent.frame(), quoted = FALSE, func = NULL)
+  spacing = c("s", "xs", "m", "l"), width = "auto", align = NULL,
+  rownames = FALSE, colnames = TRUE, digits = NULL, na = "NA", ...,
+  env = parent.frame(), quoted = FALSE, func = NULL)
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used with
@@ -16,11 +16,13 @@ renderTable(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
 \item{striped, hover, bordered}{Logicals: if \code{TRUE}, apply the
 corresponding Bootstrap table format to the output table.}
 
-\item{spacing}{The spacing between the rows of the table.}
+\item{spacing}{The spacing between the rows of the table (\code{xs}
+stands for "extra small", \code{s} for "small", \code{m} for "medium"
+and \code{l} for "large").}
 
 \item{width}{Table width. Must be a valid CSS unit (like "100%", "400px",
 "auto") or a number, which will be coerced to a string and
- have "px" appended.}
+have "px" appended.}
 
 \item{align}{A string that specifies the column alignment. If equal to
 \code{'l'}, \code{'c'} or \code{'r'}, then all columns will be,

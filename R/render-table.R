@@ -9,11 +9,13 @@
 #' @param expr An expression that returns an R object that can be used with
 #'   \code{\link[xtable]{xtable}}.
 #' @param striped,hover,bordered Logicals: if \code{TRUE}, apply the
-#'    corresponding Bootstrap table format to the output table.
-#' @param spacing The spacing between the rows of the table.
+#'   corresponding Bootstrap table format to the output table.
+#' @param spacing The spacing between the rows of the table (\code{xs}
+#'   stands for "extra small", \code{s} for "small", \code{m} for "medium"
+#'   and \code{l} for "large").
 #' @param width Table width. Must be a valid CSS unit (like "100%", "400px",
 #'   "auto") or a number, which will be coerced to a string and
-#'    have "px" appended.
+#'   have "px" appended.
 #' @param align A string that specifies the column alignment. If equal to
 #'   \code{'l'}, \code{'c'} or \code{'r'}, then all columns will be,
 #'   respectively, left-, center- or right-aligned. Otherwise, \code{align}
@@ -45,8 +47,8 @@
 #'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #'
 #' @export
-renderTable <- function(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
-                        spacing = c("small", "extra small", "medium", "large"),
+renderTable <- function(expr, striped = FALSE, hover = FALSE,
+                        bordered = FALSE, spacing = c("s", "xs", "m", "l"),
                         width = "auto", align = NULL,
                         rownames = FALSE, colnames = TRUE,
                         digits = NULL, na = "NA", ...,
@@ -94,12 +96,11 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
     digits <- digitsWrapper()
     na <- naWrapper()
 
-    spacing_choices <- c("small", "extra small", "medium", "large")
+    spacing_choices <- c("s", "xs", "m", "l")
     if (!(spacing %in% spacing_choices)) {
       stop(paste("`spacing` must be one of",
                  paste0("'", spacing_choices, "'", collapse=", ")))
     }
-    spacing <- gsub(" ", "", spacing)
 
     # For css styling
     classNames <- paste0("table shiny-table",
@@ -122,8 +123,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
 
     # By default, numbers are right-aligned and everything else is left-aligned.
     defaultAlignment <- function(col) {
-      is_num <- inherits(col, "numeric") || inherits(col, "integer")
-      if (is_num) "r" else "l"
+      if (is.numeric(col)) "r" else "l"
     }
 
     # Figure out column alignment

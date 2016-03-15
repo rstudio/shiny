@@ -13,42 +13,42 @@ body.disconnected {
   padding-right: 12px ;
 }
 
-.shiny-table.spacing-extrasmall > thead > tr > th,
-.shiny-table.spacing-extrasmall > tbody > tr > th,
-.shiny-table.spacing-extrasmall > tfoot > tr > th,
-.shiny-table.spacing-extrasmall > thead > tr > td,
-.shiny-table.spacing-extrasmall > tbody > tr > td,
-.shiny-table.spacing-extrasmall > tfoot > tr > td {
+.shiny-table.spacing-xs > thead > tr > th,
+.shiny-table.spacing-xs > tbody > tr > th,
+.shiny-table.spacing-xs > tfoot > tr > th,
+.shiny-table.spacing-xs > thead > tr > td,
+.shiny-table.spacing-xs > tbody > tr > td,
+.shiny-table.spacing-xs > tfoot > tr > td {
   padding-top: 3px;
   padding-bottom: 3px;
 }
 
-.shiny-table.spacing-small > thead > tr > th,
-.shiny-table.spacing-small > tbody > tr > th,
-.shiny-table.spacing-small > tfoot > tr > th,
-.shiny-table.spacing-small > thead > tr > td,
-.shiny-table.spacing-small > tbody > tr > td,
-.shiny-table.spacing-small > tfoot > tr > td {
+.shiny-table.spacing-s > thead > tr > th,
+.shiny-table.spacing-s > tbody > tr > th,
+.shiny-table.spacing-s > tfoot > tr > th,
+.shiny-table.spacing-s > thead > tr > td,
+.shiny-table.spacing-s > tbody > tr > td,
+.shiny-table.spacing-s > tfoot > tr > td {
   padding-top: 5px;
   padding-bottom: 5px;
 }
 
-.shiny-table.spacing-medium > thead > tr > th,
-.shiny-table.spacing-medium > tbody > tr > th,
-.shiny-table.spacing-medium > tfoot > tr > th,
-.shiny-table.spacing-medium > thead > tr > td,
-.shiny-table.spacing-medium > tbody > tr > td,
-.shiny-table.spacing-medium > tfoot > tr > td {
+.shiny-table.spacing-m > thead > tr > th,
+.shiny-table.spacing-m > tbody > tr > th,
+.shiny-table.spacing-m > tfoot > tr > th,
+.shiny-table.spacing-m > thead > tr > td,
+.shiny-table.spacing-m > tbody > tr > td,
+.shiny-table.spacing-m > tfoot > tr > td {
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.shiny-table.spacing-large > thead > tr > th,
-.shiny-table.spacing-large > tbody > tr > th,
-.shiny-table.spacing-large > tfoot > tr > th,
-.shiny-table.spacing-large > thead > tr > td,
-.shiny-table.spacing-large > tbody > tr > td,
-.shiny-table.spacing-large > tfoot > tr > td {
+.shiny-table.spacing-l > thead > tr > th,
+.shiny-table.spacing-l > tbody > tr > th,
+.shiny-table.spacing-l > tfoot > tr > th,
+.shiny-table.spacing-l > thead > tr > td,
+.shiny-table.spacing-l > tbody > tr > td,
+.shiny-table.spacing-l > tfoot > tr > td {
   padding-top: 10px;
   padding-bottom: 10px;
 }

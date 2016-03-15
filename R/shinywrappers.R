@@ -12,24 +12,37 @@ globalVariables('func')
 #'   an output ID.
 #' @param renderFunc A function that is suitable for assigning to a Shiny output
 #'   slot.
+#' @param outputArgs A list of arguments to pass to the \code{uiFunc}. Render
+#'   functions should include \code{outputArgs = list()} in their own parameter
+#'   list, and pass through the value to \code{markRenderFunction}, to allow
+#'   app authors to customize outputs.
 #' @return The \code{renderFunc} function, with annotations.
 #'
 #' @export
-markRenderFunction <- function(uiFunc, renderFunc) {
+markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
   structure(renderFunc,
             class      = c("shiny.render.function", "function"),
-            outputFunc = uiFunc)
+            outputFunc = uiFunc,
+            outputArgs = outputArgs)
 }
 
 useRenderFunction <- function(renderFunc, inline = FALSE) {
   outputFunction <- attr(renderFunc, "outputFunc")
+  outputArgs <- attr(renderFunc, "outputArgs")
+
   id <- createUniqueId(8, "out")
+  # Make the id the first positional argument
+  outputArgs <- c(list(id), outputArgs)
+
   o <- getDefaultReactiveDomain()$output
   if (!is.null(o))
     o[[id]] <- renderFunc
-  if (is.logical(formals(outputFunction)[["inline"]])) {
-    outputFunction(id, inline = inline)
-  } else outputFunction(id)
+
+  if (is.logical(formals(outputFunction)[["inline"]]) && !("inline" %in% names(outputArgs))) {
+    outputArgs[["inline"]] <- inline
+  }
+
+  do.call(outputFunction, outputArgs)
 }
 
 #' @export

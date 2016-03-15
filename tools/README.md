@@ -18,6 +18,10 @@ sudo npm install -g grunt-cli
 # Install grunt plus modules for this project
 npm install
 
+# Temporarily need to install estraverse-fb because of a bug in eslint:
+# https://github.com/eslint/eslint/issues/5476
+npm install estraverse-fb
+
 # To update modules in the future
 npm update
 ```

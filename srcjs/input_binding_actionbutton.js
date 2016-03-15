@@ -25,6 +25,25 @@ $.extend(actionButtonInputBinding, {
     return { value: this.getValue(el) };
   },
   receiveMessage: function(el, data) {
+    // retrieve current label and icon
+    var label = $(el).text();
+    var icon = '';
+    if ($(el).children().length===1) {
+      var icon_html = $(el).children()[0];
+      icon = $(icon_html).prop('outerHTML');
+    }
+
+    // update the requested properties
+    if (data.hasOwnProperty('label')) label = data.label;
+    if (data.hasOwnProperty('icon')) {
+      icon = data.icon;
+      // if the user entered icon=icon("") to remove it
+      if (icon==='<i class="fa fa-"></i>') icon = '';
+    }
+
+    // produce new html
+    $(el).html(icon + ' ' + label);
+    $(el).trigger('change');
   },
   unsubscribe: function(el) {
     $(el).off(".actionButtonInputBinding");

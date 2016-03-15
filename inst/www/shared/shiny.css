@@ -3,12 +3,58 @@ body.disconnected {
   opacity: 0.5;
 }
 
-table.data {
-  width: auto;
+.table.shiny-table > thead > tr > th,
+.table.shiny-table > tbody > tr > th,
+.table.shiny-table > tfoot > tr > th,
+.table.shiny-table > thead > tr > td,
+.table.shiny-table > tbody > tr > td,
+.table.shiny-table > tfoot > tr > td {
+  padding-left: 12px;
+  padding-right: 12px ;
 }
-table.data td[align=right] {
-  font-family: monospace;
-  text-align: right;
+
+.shiny-table.spacing-xs > thead > tr > th,
+.shiny-table.spacing-xs > tbody > tr > th,
+.shiny-table.spacing-xs > tfoot > tr > th,
+.shiny-table.spacing-xs > thead > tr > td,
+.shiny-table.spacing-xs > tbody > tr > td,
+.shiny-table.spacing-xs > tfoot > tr > td {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.shiny-table.spacing-s > thead > tr > th,
+.shiny-table.spacing-s > tbody > tr > th,
+.shiny-table.spacing-s > tfoot > tr > th,
+.shiny-table.spacing-s > thead > tr > td,
+.shiny-table.spacing-s > tbody > tr > td,
+.shiny-table.spacing-s > tfoot > tr > td {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.shiny-table.spacing-m > thead > tr > th,
+.shiny-table.spacing-m > tbody > tr > th,
+.shiny-table.spacing-m > tfoot > tr > th,
+.shiny-table.spacing-m > thead > tr > td,
+.shiny-table.spacing-m > tbody > tr > td,
+.shiny-table.spacing-m > tfoot > tr > td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.shiny-table.spacing-l > thead > tr > th,
+.shiny-table.spacing-l > tbody > tr > th,
+.shiny-table.spacing-l > tfoot > tr > th,
+.shiny-table.spacing-l > thead > tr > td,
+.shiny-table.spacing-l > tbody > tr > td,
+.shiny-table.spacing-l > tfoot > tr > td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.shiny-table .NA {
+  color: #909090;
 }
 
 .shiny-output-error {

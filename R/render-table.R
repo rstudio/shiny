@@ -102,7 +102,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
     spacing <- gsub(" ", "", spacing)
 
     # For css styling
-    classNames <- paste0("table",
+    classNames <- paste0("table shiny-table",
                          paste0(" table-", names(format)[format], collapse = "" ),
                          paste0(" spacing-", spacing))
 
@@ -165,7 +165,6 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
       include.colnames = colnames,
       NA.string = na,
       html.table.attributes = paste0("class = '", htmlEscape(classNames, TRUE), "' ",
-                                     "id = 'shiny-table'",
                                      "style = 'width:", validateCssUnit(width), ";'"))
 
     print_args <- c(print_args, non_xtable_args)

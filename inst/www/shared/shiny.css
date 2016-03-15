@@ -3,48 +3,57 @@ body.disconnected {
   opacity: 0.5;
 }
 
-#shiny-table td, th {
+.table.shiny-table > thead > tr > th,
+.table.shiny-table > tbody > tr > th,
+.table.shiny-table > tfoot > tr > th,
+.table.shiny-table > thead > tr > td,
+.table.shiny-table > tbody > tr > td,
+.table.shiny-table > tfoot > tr > td {
   padding-left: 12px;
   padding-right: 12px ;
 }
 
-#shiny-table.spacing-extrasmall > thead > tr > th,
-#shiny-table.spacing-extrasmall > tbody > tr > th,
-#shiny-table.spacing-extrasmall > tfoot > tr > th,
-#shiny-table.spacing-extrasmall > thead > tr > td,
-#shiny-table.spacing-extrasmall > tbody > tr > td,
-#shiny-table.spacing-extrasmall > tfoot > tr > td {
-  padding: 3px;
+.shiny-table.spacing-extrasmall > thead > tr > th,
+.shiny-table.spacing-extrasmall > tbody > tr > th,
+.shiny-table.spacing-extrasmall > tfoot > tr > th,
+.shiny-table.spacing-extrasmall > thead > tr > td,
+.shiny-table.spacing-extrasmall > tbody > tr > td,
+.shiny-table.spacing-extrasmall > tfoot > tr > td {
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
-#shiny-table.spacing-small > thead > tr > th,
-#shiny-table.spacing-small > tbody > tr > th,
-#shiny-table.spacing-small > tfoot > tr > th,
-#shiny-table.spacing-small > thead > tr > td,
-#shiny-table.spacing-small > tbody > tr > td,
-#shiny-table.spacing-small > tfoot > tr > td {
-  padding: 5px;
+.shiny-table.spacing-small > thead > tr > th,
+.shiny-table.spacing-small > tbody > tr > th,
+.shiny-table.spacing-small > tfoot > tr > th,
+.shiny-table.spacing-small > thead > tr > td,
+.shiny-table.spacing-small > tbody > tr > td,
+.shiny-table.spacing-small > tfoot > tr > td {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
-#shiny-table.spacing-medium > thead > tr > th,
-#shiny-table.spacing-medium > tbody > tr > th,
-#shiny-table.spacing-medium > tfoot > tr > th,
-#shiny-table.spacing-medium > thead > tr > td,
-#shiny-table.spacing-medium > tbody > tr > td,
-#shiny-table.spacing-medium > tfoot > tr > td {
-  padding: 8px;
+.shiny-table.spacing-medium > thead > tr > th,
+.shiny-table.spacing-medium > tbody > tr > th,
+.shiny-table.spacing-medium > tfoot > tr > th,
+.shiny-table.spacing-medium > thead > tr > td,
+.shiny-table.spacing-medium > tbody > tr > td,
+.shiny-table.spacing-medium > tfoot > tr > td {
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
-#shiny-table.spacing-large > thead > tr > th,
-#shiny-table.spacing-large > tbody > tr > th,
-#shiny-table.spacing-large > tfoot > tr > th,
-#shiny-table.spacing-large > thead > tr > td,
-#shiny-table.spacing-large > tbody > tr > td,
-#shiny-table.spacing-large > tfoot > tr > td {
-  padding: 10px;
+.shiny-table.spacing-large > thead > tr > th,
+.shiny-table.spacing-large > tbody > tr > th,
+.shiny-table.spacing-large > tfoot > tr > th,
+.shiny-table.spacing-large > thead > tr > td,
+.shiny-table.spacing-large > tbody > tr > td,
+.shiny-table.spacing-large > tfoot > tr > td {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
-#shiny-table .NA {
+.shiny-table .NA {
   color: #909090;
 }
 

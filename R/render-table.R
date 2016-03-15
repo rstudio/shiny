@@ -23,7 +23,7 @@
 #'   \code{rownames = TRUE}, this will be equal to \code{ncol()+1}), with
 #'   the \emph{i}-th character specifying the alignment for the
 #'   \emph{i}-th column (besides \code{'l'}, \code{'c'} and
-#'   \code{'r'}, \code{'?'} is also permitted - \code{?} is a placeholder
+#'   \code{'r'}, \code{'?'} is also permitted - \code{'?'} is a placeholder
 #'   for that particular column, indicating that it should keep its default
 #'   alignment). If \code{NULL}, then all numeric/integer columns (including
 #'   the row names, if they are numbers) will be right-aligned and

@@ -57,8 +57,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
     installExprFunction(expr, "func", env, quoted)
   }
 
-  spacing <- match.arg(spacing)
-  spacing <- gsub(" ", "", spacing)
+  if (!is.function(spacing)) spacing <- match.arg(spacing)
 
   # A small helper function to create a wrapper for an argument that was
   # passed to renderTable()
@@ -94,6 +93,13 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
     colnames <- colnamesWrapper()
     digits <- digitsWrapper()
     na <- naWrapper()
+
+    spacing_choices <- c("small", "extra small", "medium", "large")
+    if (!(spacing %in% spacing_choices)) {
+      stop(paste("`spacing` must be one of",
+                 paste0("'", spacing_choices, "'", collapse=", ")))
+    }
+    spacing <- gsub(" ", "", spacing)
 
     # For css styling
     classNames <- paste0("table shiny-table",

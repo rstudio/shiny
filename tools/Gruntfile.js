@@ -81,6 +81,23 @@ module.exports = function(grunt) {
       }
     },
 
+    eslint: {
+      options: {
+        parser: 'babel-eslint',
+        format: require('eslint-stylish-mapped'),
+        extends: 'eslint:recommended',
+        rules: {
+          "consistent-return": 2,
+          "dot-location": [2, "property"],
+          "no-shadow": 2,
+          "no-unused-vars": [2, {"args": "none"}],
+          "no-use-before-define": [2, {"functions": false}],
+          "semi": [2, "always"]
+        }
+      },
+      shiny: ['./temp_concat/shiny.js']
+    },
+
     uglify: {
       shiny: {
         options: {
@@ -108,15 +125,6 @@ module.exports = function(grunt) {
       }
     },
 
-    jshint: {
-      options: {
-        force: true  // Don't abort if there are JSHint warnings
-      },
-      shiny: {
-        src: instdir + 'www/shared/shiny.js'
-      }
-    },
-
     watch: {
       shiny: {
         files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
@@ -124,7 +132,7 @@ module.exports = function(grunt) {
           'newer:concat',
           'configureBabel',
           'newer:babel',
-          'newer:jshint',
+          'newer:eslint',
           'newer:uglify'
         ]
       },
@@ -153,8 +161,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-babel');
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-newer');
 
@@ -171,7 +179,7 @@ module.exports = function(grunt) {
     'newer:concat',
     'configureBabel',
     'newer:babel',
-    'newer:jshint',
+    'newer:eslint',
     'newer:uglify:shiny'
   ]);
 

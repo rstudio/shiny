@@ -90,10 +90,13 @@ module.exports = function(grunt) {
           "consistent-return": 2,
           "dot-location": [2, "property"],
           "no-shadow": 2,
+          "no-undef": 2,
           "no-unused-vars": [2, {"args": "none"}],
           "no-use-before-define": [2, {"functions": false}],
           "semi": [2, "always"]
-        }
+        },
+        envs: ["browser", "jquery"],
+        globals: ["strftime"]
       },
       shiny: ['./temp_concat/shiny.js']
     },
@@ -130,9 +133,9 @@ module.exports = function(grunt) {
         files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
         tasks: [
           'newer:concat',
+          'newer:eslint',
           'configureBabel',
           'newer:babel',
-          'newer:eslint',
           'newer:uglify'
         ]
       },
@@ -177,9 +180,9 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', [
     'newer:concat',
+    'newer:eslint',
     'configureBabel',
     'newer:babel',
-    'newer:eslint',
     'newer:uglify:shiny'
   ]);
 

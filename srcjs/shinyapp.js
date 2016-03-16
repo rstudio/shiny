@@ -239,7 +239,7 @@ var ShinyApp = function() {
 
   this.receiveOutput = function(name, value) {
     if (this.$values[name] === value)
-      return;
+      return undefined;
 
     this.$values[name] = value;
     delete this.$errors[name];

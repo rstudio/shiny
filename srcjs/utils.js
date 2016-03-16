@@ -7,10 +7,6 @@ function escapeHTML(str) {
             .replace(/\//g,"&#x2F;");
 }
 
-function randomId() {
-  return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
-}
-
 function strToBool(str) {
   if (!str || !str.toLowerCase)
     return undefined;
@@ -128,16 +124,6 @@ function makeBlob(parts) {
     });
     return blobBuilder.getBlob();
   }
-}
-
-function slice(blob, start, end) {
-  if (blob.slice)
-    return blob.slice(start, end);
-  if (blob.mozSlice)
-    return blob.mozSlice(start, end);
-  if (blob.webkitSlice)
-    return blob.webkitSlice(start, end);
-  throw "Blob doesn't support slice";
 }
 
 function pixelRatio() {

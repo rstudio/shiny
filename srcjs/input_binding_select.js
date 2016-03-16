@@ -104,10 +104,10 @@ $.extend(selectInputBinding, {
     this._selectize(el);
   },
   _selectize: function(el, update) {
-    if (!$.fn.selectize) return;
+    if (!$.fn.selectize) return undefined;
     var $el = $(el);
     var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
-    if (config.length === 0) return;
+    if (config.length === 0) return undefined;
     var options = $.extend({
       labelField: 'label',
       valueField: 'value',

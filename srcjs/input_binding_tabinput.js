@@ -16,8 +16,9 @@ $.extend(bootstrapTabInputBinding, {
     anchors.each(function() {
       if (self._getTabName($(this)) === value) {
         $(this).tab('show');
-        return false;
+        return false; // Break out of each()
       }
+      return true;
     });
   },
   getState: function(el) {

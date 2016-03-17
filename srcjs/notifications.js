@@ -1,54 +1,65 @@
 exports.Notifications = (function() {
 
-  function add(note, duration = 250) {
+  // Milliseconds to fade in or out
+  const fadeDuration = 250;
+
+  function add({ html="", duration=null } = {}) {
     const id = randomId();
 
     // Create panel if necessary
     _createPanel();
 
     // Create DOM element
-    _create(id).html(note.html);
+    _create(id).html(html);
+    show(id);
 
-    show(id, duration);
+    if (duration) {
+      _addRemovalCallback(id, duration);
+    }
+
     return id;
   }
 
-  function update(id, note) {
-    get(id).html(note.html);
+  function update(id, { html="", duration=null } = {}) {
+    if (duration)
+      _addRemovalCallback(id, duration);
+
+    if (html)
+      get(id).html(html);
   }
 
-  function remove(id, duration = 250) {
-    get(id).fadeOut(duration, function() { this.remove(); } );
+  function remove(id) {
+    get(id).fadeOut(fadeDuration, function() { this.remove(); } );
   }
 
-  function show(id, duration = 250) {
-    showPanel(duration);
-    get(id).fadeIn(duration);
+  function show(id) {
+    showPanel(fadeDuration);
+    get(id).fadeIn(fadeDuration);
   }
 
-  function hide(id, duration = 250) {
-    get(id).fadeOut(duration);
+  function hide(id) {
+    get(id).fadeOut(fadeDuration);
   }
 
-  function removeAll(duration = 250) {
+  function removeAll() {
     _getPanel().find('.shiny-notification')
-      .fadeOut(duration, function() { this.remove(); } );
+      .fadeOut(fadeDuration, function() { this.remove(); } );
   }
 
-  function hideAll(duration = 250) {
-    _getPanel().find('.shiny-notification').fadeOut(duration);
+  function hideAll() {
+    _getPanel().find('.shiny-notification').fadeOut(fadeDuration);
   }
 
-  function showAll(duration = 250) {
-    _getPanel().find('.shiny-notification').fadeIn(duration);
+  function showAll() {
+    _getPanel().find('.shiny-notification').fadeIn(fadeDuration);
   }
 
-  function hidePanel(duration = 250) {
-    _getPanel().fadeOut(duration);
+  function hidePanel() {
+    _getPanel().fadeOut(fadeDuration);
   }
 
-  function showPanel(duration = 250) {
-    _getPanel().fadeIn(duration);
+  function showPanel() {
+    _getPanel().fadeIn(fadeDuration);
   }
 
   // Returns an individual notification DOM object (wrapped in jQuery).
@@ -96,6 +107,26 @@ exports.Notifications = (function() {
     }
 
     return $notification;
+  }
+
+  // Add a callback to remove a notification after a delay in ms.
+  function _addRemovalCallback(id, delay) {
+    // If there's an existing removalCallback, clear it before adding the new
+    // one.
+    _clearRemovalCallback(id);
+
+    // Attach new removal callback
+    const removalCallback = setTimeout(function() { remove(id); }, delay);
+    get(id).data('removalCallback', removalCallback);
+  }
+
+  // Clear a removal callback from a notification, if present.
+  function _clearRemovalCallback(id) {
+    const $notification = get(id);
+    const oldRemovalCallback = $notification.data('removalCallback');
+    if (oldRemovalCallback) {
+      clearTimeout(oldRemovalCallback);
+    }
   }
 
   return {

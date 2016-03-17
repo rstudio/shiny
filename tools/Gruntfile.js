@@ -132,6 +132,13 @@ module.exports = function(grunt) {
       }
     },
 
+    copy: {
+      babelPolyfill: {
+        src: "node_modules/babel-polyfill/dist/polyfill.min.js",
+        dest: "../inst/www/shared/babel-polyfill.min.js"
+      }
+    },
+
     watch: {
       shiny: {
         files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
@@ -142,6 +149,10 @@ module.exports = function(grunt) {
           'newer:babel',
           'newer:uglify'
         ]
+      },
+      babelPolyfill: {
+        files: '<%= copy.babelPolyfill.src %>',
+        tasks: ['newer:copy:babelPolyfill']
       },
       datepicker: {
         files: '<%= uglify.datepicker.src %>',
@@ -171,6 +182,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-newer');
 
   // Need this here so that babel reads in the source map file after it's
@@ -187,7 +199,8 @@ module.exports = function(grunt) {
     'newer:eslint',
     'configureBabel',
     'newer:babel',
-    'newer:uglify:shiny'
+    'newer:uglify',
+    'newer:copy'
   ]);
 
 

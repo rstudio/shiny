@@ -14,8 +14,7 @@ updateActionButton(session, inputId, label = NULL, icon = NULL)
 
 \item{label}{The label to set for the input object.}
 
-\item{icon}{The icon to set for the input object. To
-remove an existing icon, use \code{icon=icon("")}.}
+\item{icon}{The icon to set for the input object.}
 }
 \description{
 Change the label or icon of an action button on the client
@@ -34,16 +33,29 @@ changes to the input object on the client.
 
 For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{\link{selectInput}()}, the set of choices can be cleared by using
-\code{choices=character(0)}
+\code{choices=character(0)}. Similarly, to get rid of an icon on an
+\code{\link{actionButton}()} (or an \code{\link{actionLink}()}), use
+\code{icon=character(0)}.
 }
 \examples{
 \dontrun{
 shinyServer(function(input, output, session) {
 
   observe({
+    # Updates goButton's label and icon
     updateActionButton(session, "goButton",
       label = "New label",
       icon = icon("calendar"))
+
+    # Leaves goButton2's label unchaged and
+    # removes its icon
+    updateActionButton(session, "goButton2",
+      icon = character(0))
+
+    # Leaves goButton3's icon, if it exists,
+    # unchaged and changes its label
+    updateActionButton(session, "goButton3",
+      label = "New label")
   })
 })
 }

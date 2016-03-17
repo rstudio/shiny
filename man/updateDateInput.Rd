@@ -41,7 +41,9 @@ changes to the input object on the client.
 
 For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{\link{selectInput}()}, the set of choices can be cleared by using
-\code{choices=character(0)}
+\code{choices=character(0)}. Similarly, to get rid of an icon on an
+\code{\link{actionButton}()} (or an \code{\link{actionLink}()}), use
+\code{icon=character(0)}.
 }
 \examples{
 \dontrun{

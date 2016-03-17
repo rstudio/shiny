@@ -4222,8 +4222,8 @@ $.extend(actionButtonInputBinding, {
     // retrieve current label and icon
     var label = $el.text();
     var icon = '';
-    if ($el.find('i.fa, i.glyphicon').length > 0) {
-      var icon_html = $el.find('i.fa, i.glyphicon')[0];
+    if ($el.find('i[class]').length > 0) {
+      var icon_html = $el.find('i[class]]')[0];
       icon = $(icon_html).prop('outerHTML');
     }
 

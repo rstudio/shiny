@@ -4226,7 +4226,7 @@ $.extend(actionButtonInputBinding, {
     // to check (and store) the previous icon, we look for a $el child
     // object that has an i tag, and some (any) class (this prevents
     // italicized text - which has an i tag but, usually, no class -
-    // from being mistankenly selected)
+    // from being mistakenly selected)
     if ($el.find('i[class]').length > 0) {
       var icon_html = $el.find('i[class]')[0];
       icon = $(icon_html).prop('outerHTML');

@@ -1,5 +1,9 @@
 shiny 0.13.1.9001
 --------------------------------------------------------------------------------
+* Added `updateActionButton()` function, so the user can change an Action Button's
+  (or Link's) label and/or icon. Also check that the icon argument (for both
+  creation and updating of a button) is valid and throw a warning otherwise.
+
 * Fixes #1056: Upgrades Bootstrap to 3.3.6
 
 * Fixed #561: DataTables might pop up a warning when the data is updated

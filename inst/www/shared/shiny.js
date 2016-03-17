@@ -4217,11 +4217,13 @@ $.extend(actionButtonInputBinding, {
     return { value: this.getValue(el) };
   },
   receiveMessage: function(el, data) {
+    var $el = $(el);
+
     // retrieve current label and icon
-    var label = $(el).text();
+    var label = $el.text();
     var icon = '';
-    if ($(el).children().length===1) {
-      var icon_html = $(el).children()[0];
+    if ($el.find('i.fa, i.glyphicon').length > 0) {
+      var icon_html = $el.find('i.fa, i.glyphicon')[0];
       icon = $(icon_html).prop('outerHTML');
     }
 
@@ -4234,8 +4236,7 @@ $.extend(actionButtonInputBinding, {
     }
 
     // produce new html
-    $(el).html(icon + ' ' + label);
-    $(el).trigger('change');
+    $el.html(icon + ' ' + label);
   },
   unsubscribe: function(el) {
     $(el).off(".actionButtonInputBinding");

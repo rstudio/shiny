@@ -30,8 +30,8 @@
 #'
 #' @export
 actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
-  if (!is.null(icon) && !isIcon(icon)) {
-    stop("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
+  if (!is.null(icon) && icon$name != "i") {
+    warning("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
   }
   tags$button(id=inputId,
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
@@ -45,8 +45,8 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
 #' @rdname actionButton
 #' @export
 actionLink <- function(inputId, label, icon = NULL, ...) {
-  if (!is.null(icon) && !isIcon(icon)) {
-    stop("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
+  if (!is.null(icon) && icon$name != "i") {
+    warning("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
   }
   tags$a(id=inputId,
     href="#",
@@ -54,15 +54,4 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
     list(icon, label),
     ...
   )
-}
-
-# Check that icon has the right format (this does not check whether it is
-# a *valid* icon - currently that would require a massive cross reference
-# with the "font-awesome" and the "glyphicon" libraries)
-isIcon <- function(icon) {
-  if (inherits(icon, "shiny.tag")) {
-    icon_char <- as.character(icon)
-    if (grepl("^<i class=\"(.*)\"></i>$", icon_char)) return(TRUE)
-  }
-  return(FALSE)
 }

@@ -76,8 +76,8 @@ updateCheckboxInput <- updateTextInput
 #' @export
 updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
   if (!is.null(icon)) {
-    if (isIcon(icon)) icon <- as.character(icon)
-    else stop("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
+    if (icon$name == "i") icon <- as.character(icon)
+    else warning("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
   }
   message <- dropNulls(list(label=label, icon=icon))
   session$sendInputMessage(inputId, message)

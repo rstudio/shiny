@@ -268,3 +268,23 @@ body.disconnected {
 .shiny-input-container > div > select:not(.selectized) {
   width: 100%;
 }
+
+
+#shiny-notifications-panel {
+  position: fixed;
+  bottom: -10px;
+  right: 10px;
+  background-color: #444;
+  opacity: 0.85;
+  padding: 2px 2px 10px 2px;
+  border-radius: 4px;
+  width: 250px;
+}
+
+.shiny-notification {
+  color: #fff;
+  background-color: #222;
+  padding: 5px;
+  border-radius: 3px;
+  margin: 2px;
+}

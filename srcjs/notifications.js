@@ -1,4 +1,4 @@
-exports.Notifications = (function() {
+exports.notifications = (function() {
 
   // Milliseconds to fade in or out
   const fadeDuration = 250;

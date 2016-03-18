@@ -1,5 +1,8 @@
 shiny 0.13.1.9001
 --------------------------------------------------------------------------------
+* Improved `renderTable()` function to make the tables look prettier and also
+  provide the user with a lot more parameters to customize their tables with.
+
 * Added `updateActionButton()` function, so the user can change an Action Button's
   (or Link's) label and/or icon. Also check that the icon argument (for both
   creation and updating of a button) is valid and throw a warning otherwise.

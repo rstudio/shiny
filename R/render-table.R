@@ -148,8 +148,8 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
       } else if (nchar(align) == 1 && valid) {
         cols <- paste0(rep(align, ncol(data)+1), collapse="")
       } else {
-        stop("`align` must contain only the characters `l`, `c`, `r` and/or `?` and
-              have length either equal to 1 or to the total number of columns")
+        stop("`align` must contain only the characters `l`, `c`, `r` and/or `?` and",
+             "have length either equal to 1 or to the total number of columns")
       }
     }
 

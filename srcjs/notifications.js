@@ -3,55 +3,51 @@ exports.notifications = (function() {
   // Milliseconds to fade in or out
   const fadeDuration = 250;
 
-  function add({ html="", duration=null } = {}) {
-    const id = randomId();
+  function show({ html=null, duration=null, id=null } = {}) {
+    if (!id)
+      id = randomId();
 
     // Create panel if necessary
     _createPanel();
+    showPanel(fadeDuration);
 
-    // Create DOM element
-    _create(id).html(html);
-    show(id);
+    // Get existing DOM element for this ID, or create if needed.
+    let $notification = get(id);
+    if ($notification.length === 0)
+      $notification = _create(id);
 
-    if (duration) {
-      _addRemovalCallback(id, duration);
+    // Set HTML content
+    if (html) {
+      $notification
+        .html(html)
+        .fadeIn(fadeDuration);
     }
+
+    // If duration was provided, schedule removal. If not, clear existing
+    // removal callback (this happens if a message was first added with
+    // a duration, and then updated with no duration).
+    if (duration)
+      _addRemovalCallback(id, duration);
+    else
+      _clearRemovalCallback(id)
 
     return id;
   }
 
-  function update(id, { html="", duration=null } = {}) {
-    if (duration)
-      _addRemovalCallback(id, duration);
-
-    if (html)
-      get(id).html(html);
-  }
-
   function remove(id) {
-    get(id).fadeOut(fadeDuration, function() { this.remove(); } );
-  }
+    get(id).fadeOut(fadeDuration, function() {
 
-  function show(id) {
-    showPanel(fadeDuration);
-    get(id).fadeIn(fadeDuration);
-  }
+      this.remove();
 
-  function hide(id) {
-    get(id).fadeOut(fadeDuration);
+      // If no more notifications, remove the panel from the DOM.
+      if (ids().length === 0) {
+        _getPanel().remove();
+      }
+    });
   }
 
   function removeAll() {
-    _getPanel().find('.shiny-notification')
-      .fadeOut(fadeDuration, function() { this.remove(); } );
-  }
-
-  function hideAll() {
-    _getPanel().find('.shiny-notification').fadeOut(fadeDuration);
-  }
-
-  function showAll() {
-    _getPanel().find('.shiny-notification').fadeIn(fadeDuration);
+    ids().forEach(id => remove(id));
   }
 
   function hidePanel() {
@@ -83,7 +79,7 @@ exports.notifications = (function() {
   // Create notifications panel and return the jQuery object. If the DOM
   // element already exists, just return it.
   function _createPanel() {
-    let $panel = $('#shiny-notifications-panel');
+    let $panel = _getPanel();
 
     if ($panel.length === 0) {
       $panel = $('<div id="shiny-notifications-panel">');
@@ -130,14 +126,9 @@ exports.notifications = (function() {
   }
 
   return {
-    add,
-    update,
-    remove,
     show,
-    hide,
+    remove,
     removeAll,
-    hideAll,
-    showAll,
     hidePanel,
     showPanel,
     get,

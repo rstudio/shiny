@@ -87,13 +87,13 @@ module.exports = function(grunt) {
         format: require('eslint-stylish-mapped'),
         extends: 'eslint:recommended',
         rules: {
-          "consistent-return": 2,
-          "dot-location": [2, "property"],
-          // "no-shadow": 2,
-          "no-undef": 2,
-          "no-unused-vars": [2, {"args": "none"}],
-          // "no-use-before-define": [2, {"functions": false}],
-          "semi": [2, "always"]
+          "consistent-return": 1,
+          "dot-location": [1, "property"],
+          // "no-shadow": 1,
+          "no-undef": 1,
+          "no-unused-vars": [1, {"args": "none"}],
+          // "no-use-before-define": [1, {"functions": false}],
+          "semi": [1, "always"]
         },
         envs: [
           "es6",

@@ -44,7 +44,7 @@ changes to the input object on the client.
 
 For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{\link{selectInput}()}, the set of choices can be cleared by using
-\code{choices=character(0)}
+\code{choices=character(0)}.
 }
 \examples{
 \dontrun{

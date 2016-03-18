@@ -54,6 +54,44 @@ updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
 updateCheckboxInput <- updateTextInput
 
 
+#' Change the label or icon of an action button on the client
+#'
+#' @template update-input
+#' @param icon The icon to set for the input object. To remove the
+#' current icon, use \code{icon=character(0)}.
+#'
+#' @seealso \code{\link{actionButton}}
+#'
+#' @examples
+#' \dontrun{
+#' shinyServer(function(input, output, session) {
+#'
+#'   observe({
+#'     # Updates goButton's label and icon
+#'     updateActionButton(session, "goButton",
+#'       label = "New label",
+#'       icon = icon("calendar"))
+#'
+#'     # Leaves goButton2's label unchaged and
+#'     # removes its icon
+#'     updateActionButton(session, "goButton2",
+#'       icon = character(0))
+#'
+#'     # Leaves goButton3's icon, if it exists,
+#'     # unchaged and changes its label
+#'     updateActionButton(session, "goButton3",
+#'       label = "New label")
+#'   })
+#' })
+#' }
+#' @export
+updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
+  if (!is.null(icon)) icon <- as.character(validateIcon(icon))
+  message <- dropNulls(list(label=label, icon=icon))
+  session$sendInputMessage(inputId, message)
+}
+
+
 #' Change the value of a date input on the client
 #'
 #' @template update-input

@@ -4217,6 +4217,33 @@ $.extend(actionButtonInputBinding, {
     return { value: this.getValue(el) };
   },
   receiveMessage: function(el, data) {
+    var $el = $(el);
+
+    // retrieve current label and icon
+    var label = $el.text();
+    var icon = '';
+
+    // to check (and store) the previous icon, we look for a $el child
+    // object that has an i tag, and some (any) class (this prevents
+    // italicized text - which has an i tag but, usually, no class -
+    // from being mistakenly selected)
+    if ($el.find('i[class]').length > 0) {
+      var icon_html = $el.find('i[class]')[0];
+      if (icon_html == $el.children()[0]) {     // another check for robustness
+        icon = $(icon_html).prop('outerHTML');
+      }
+    }
+
+    // update the requested properties
+    if (data.hasOwnProperty('label')) label = data.label;
+    if (data.hasOwnProperty('icon')) {
+      icon = data.icon;
+      // if the user entered icon=character(0), remove the icon
+      if (icon.length === 0) icon = '';
+    }
+
+    // produce new html
+    $el.html(icon + ' ' + label);
   },
   unsubscribe: function(el) {
     $(el).off(".actionButtonInputBinding");

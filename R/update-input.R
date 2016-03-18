@@ -57,7 +57,8 @@ updateCheckboxInput <- updateTextInput
 #' Change the label or icon of an action button on the client
 #'
 #' @template update-input
-#' @param icon The icon to set for the input object.
+#' @param icon The icon to set for the input object. To remove the
+#' current icon, use \code{icon=character(0)}.
 #'
 #' @seealso \code{\link{actionButton}}
 #'
@@ -85,7 +86,7 @@ updateCheckboxInput <- updateTextInput
 #' }
 #' @export
 updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
-  if (!is.null(icon) && validIcon(icon)) icon <- as.character(icon)
+  if (!is.null(icon)) icon <- as.character(validateIcon(icon))
   message <- dropNulls(list(label=label, icon=icon))
   session$sendInputMessage(inputId, message)
 }

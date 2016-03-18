@@ -22,6 +22,9 @@ npm install
 npm update
 ```
 
+Note: The `package.json` file contains a reference to `estraverse-fb`. This is needed only because the current version of ESLint has a [bug](https://github.com/eslint/eslint/issues/5476). At some point in the future, it can be removed.
+
+
 ### Using Grunt
 
 To run all default grunt tasks (concatenation, minification, and jshint), simply go into the `tools` directory and run:
@@ -45,3 +48,17 @@ grunt watch
 One of the tasks concatenates all the .js files in `/srcjs` together into `/inst/www/shared/shiny.js`. Another task minifies `shiny.js` to generate `shiny.min.js`. The minified file is supplied to the browser, along with a source map file, `shiny.min.js.map`, which allows a user to view the original Javascript source when using the debugging console in the browser.
 
 During development of Shiny's Javascript code, it's best to use `grunt watch` so that the minified file will get updated whenever you make changes the Javascript sources.
+
+
+
+Updating web libraries
+======================
+
+## babel-polyfill
+
+To update the version of babel-polyfill:
+
+* Check if there is a newer version available by running `npm outdated babel-polyfill`. (If there's no output, then you have the latest version.)
+* Run `npm install babel-polyfill --save-dev --save-exact`.
+* Edit R/shinyui.R. The `renderPage` function has an `htmlDependency` for
+  `babel-polyfill`. Update this to the new version number.

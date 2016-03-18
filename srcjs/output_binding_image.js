@@ -480,7 +480,6 @@ imageutils.initCoordmap = function($el, coordmap) {
 // trigger custom mousedown2 and dblclick2 events with this mousedown
 // listener.
 imageutils.createClickInfo = function($el, dblclickId, dblclickDelay) {
-  var clickCount = 0;
   var clickTimer = null;
   var pending_e = null;    // A pending mousedown2 event
 
@@ -1078,7 +1077,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   // will fit the box bounds into the panel, so we don't brush outside of it.
   // This knows whether we're brushing in the x, y, or xy directions, and sets
   // bounds accordingly.
-  // If no box is passed in, return current bounds.
+  // If no box is passed in, just return current bounds.
   function boundsPx(box) {
     if (box === undefined)
       return state.boundsPx;
@@ -1126,6 +1125,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     // brush. This should be fast because it doesn't actually modify the DOM.
     $div.data('bounds-data', state.boundsData);
     $div.data('panel', state.panel);
+    return undefined;
   }
 
   // Get or set the bounds of the brush using coordinates in the data space.
@@ -1148,6 +1148,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
       ymin: Math.min(minPx.y, maxPx.y),
       ymax: Math.max(minPx.y, maxPx.y)
     });
+    return undefined;
   }
 
   function getPanel() {
@@ -1209,6 +1210,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
       return state.down;
 
     state.down = offset;
+    return undefined;
   }
 
   function up(offset) {
@@ -1216,6 +1218,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
       return state.up;
 
     state.up = offset;
+    return undefined;
   }
 
   function isBrushing() {

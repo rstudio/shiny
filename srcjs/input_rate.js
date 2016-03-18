@@ -144,6 +144,7 @@ function debounce(threshold, func) {
 // threshold of 1000ms, then calling it 17 times at
 // 900ms intervals will result in something like 15
 // or 16 executions of the underlying function.
+// eslint-disable-next-line no-unused-vars
 function throttle(threshold, func) {
   var executionPending = false;
   var timerId = null;

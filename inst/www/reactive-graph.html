@@ -55,7 +55,7 @@ svg {
 .node.changed text {
   fill: red;
 }
-.node text tspan {
+.node html {
   white-space: pre;
 }
 .node path {
@@ -1039,28 +1039,29 @@ function getTargetCoords(node) {
   }
 }
 
-function multilineTextNode(node) {
-  var MAX_LINES = 6;
-  var fade = false;
-  var el = d3.select(this);
-  var lines = el.text().split('\n');
-  if (lines.length > MAX_LINES) {
-    lines.splice(MAX_LINES);
-    fade = true;
-  }
-  el.text('');
-  var tspan = el.selectAll('tspan').data(lines);
-  tspan.enter().append('tspan');
-  tspan
-      .attr('x', 8)
-      .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
-      .attr('opacity', function(line, i) {
-        if (!fade)
-          return 1;
-        return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
-      })
-      .text(function(line) { return line; });
-}
+// this is not actually being called anywhere...
+// function multilineTextNode(node) {
+//   var MAX_LINES = 6;
+//   var fade = false;
+//   var el = d3.select(this);
+//   var lines = el.text().split('\n');
+//   if (lines.length > MAX_LINES) {
+//     lines.splice(MAX_LINES);
+//     fade = true;
+//   }
+//   el.text('');
+//   var tspan = el.selectAll('tspan').data(lines);
+//   tspan.enter().append('tspan');
+//   tspan
+//       .attr('x', 8)
+//       .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
+//       .attr('opacity', function(line, i) {
+//         if (!fade)
+//           return 1;
+//         return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
+//       })
+//       .html(function(line) { return line; });
+// }
 
 function update() {
   force.size([document.documentElement.clientWidth / 4,
@@ -1079,10 +1080,10 @@ function update() {
         d3.event.stopPropagation();
       })
       .on('mouseover', function(n) {
-        $('#description').text(n.label);
+        $('#description').html(n.label);
       })
       .on('mouseout', function(d, i) {
-        $('#description').html('');
+        $('#description').html('heelo');
       })
       .call(force.drag);
   newG.append('path')
@@ -1091,7 +1092,7 @@ function update() {
       .attr('stroke-width', 4)
       .attr('fill', 'white')
       .attr('d', pathDataForNode);
-  newG.append('text')
+  newG.append('html')
       .attr('x', 3)
       .attr('y', 0)
       .attr('font-size', 3.25)
@@ -1112,13 +1113,13 @@ function update() {
         else
           return null;
       });
-  var tspan = node.selectAll('text').filter(function(n) {
+  var html_span = node.selectAll('html').filter(function(n) {
     // This filter is used to disregard all nodes whose labels have
     // not changed since the last time we updated them.
     var changed = n.label !== this.label;
     this.label = n.label;
     return changed;
-  }).selectAll('tspan')
+  }).selectAll('html_span')
     .data(function(n) {
       var lines = n.label.replace(/ /g, '\xA0').split('\n');
       if (lines.length > MAX_LINES) {
@@ -1126,15 +1127,15 @@ function update() {
       }
       return lines;
     });
-  tspan.enter().append('tspan');
-  tspan.exit().remove();
-  tspan
+  html_span.enter().append('html_span');
+  html_span.exit().remove();
+  html_span
       .attr('x', 8)
       .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
       .attr('opacity', function(line, i) {
         return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
       })
-      .text(function(line) { return line; });
+      .html(function(line) { return '<p>line</p>'; });
 
   link = d3.select('#links').selectAll('.link').data(links);
   layoutDirty = layoutDirty || !link.enter().empty() || !link.exit().empty();
@@ -1177,7 +1178,8 @@ function createNodeWithUndo(data) {
     node = {
       label: data.label,
       type: data.type,
-      hide: data.hide
+      hide: data.hide,
+      timeLabel: 'hello'
     };
     nodes[data.id] = node;
     pushUndo(function() {
@@ -1370,11 +1372,10 @@ var callbacks = {
     node.running = false;
     var oldLabel = node.label;
     var timeElapsed = (parseFloat(data.time) - parseFloat(node.start)) * 1000
-    node.label = oldLabel + '\ntime elapsed: ' +
-                 (Math.round(timeElapsed * 1000) / 1000) + ' ms';
+    node.timeLabel = 'time elapsed: ' + (Math.round(timeElapsed * 1000) / 1000) + ' ms';
     pushUndo(function() {
       node.running = true;
-      node.label = oldLabel;
+      node.timeLabel = ''
     });
   }
 };

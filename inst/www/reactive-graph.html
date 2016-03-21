@@ -1046,29 +1046,30 @@ function getTargetCoords(node) {
   }
 }
 
-function multilineTextNode(node) {
-  var MAX_LINES = 6;
-  var fade = false;
-  var el = d3.select(this);
-  var lines = el.text().split('\n');
-  if (lines.length > MAX_LINES) {
-    lines.splice(MAX_LINES);
-    fade = true;
-  }
-  el.text('');
-  var tspan = el.selectAll('.tspanLabel').data(lines);
-  tspan.enter().append('tspan');
-  tspan
-      .attr('x', 8)
-      .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
-      .attr('opacity', function(line, i) {
-        if (!fade)
-          return 1;
-        return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
-      })
-      .classed('tspanLabel', true)
-      .text(function(line) { return line; });
-}
+// this is not actually being called anywhere...
+// function multilineTextNode(node) {
+//   var MAX_LINES = 6;
+//   var fade = false;
+//   var el = d3.select(this);
+//   var lines = el.text().split('\n');
+//   if (lines.length > MAX_LINES) {
+//     lines.splice(MAX_LINES);
+//     fade = true;
+//   }
+//   el.text('');
+//   var tspan = el.selectAll('.tspanLabel').data(lines);
+//   tspan.enter().append('tspan');
+//   tspan
+//       .attr('x', 8)
+//       .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
+//       .attr('opacity', function(line, i) {
+//         if (!fade)
+//           return 1;
+//         return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
+//       })
+//       .classed('tspanLabel', true)
+//       .text(function(line) { return line; });
+// }
 
 function update() {
   force.size([document.documentElement.clientWidth / 4,
@@ -1101,7 +1102,7 @@ function update() {
       .attr('d', pathDataForNode);
   newG.append('text')
       .attr('x', 3)
-      .attr('y', 0)
+      .attr('y', 1.5)
       .attr('font-size', 3.25)
       .attr('transform', function(n) {
         if (n.type !== 'observer')
@@ -1138,7 +1139,6 @@ function update() {
   tspanLabel.exit().remove();
   tspanLabel
       .attr('x', 8)
-      .attr('y', 1.5)
       .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
       .attr('opacity', function(line, i) {
         return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);

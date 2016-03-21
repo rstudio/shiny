@@ -994,8 +994,10 @@ var log = [
     "time": 1449212781.0257
   }
 ];
+var time = true;
 try {
   log = __DATA__;
+  time = String(__TIME__).toLowerCase() === 'true';
 } catch (e) {}
 
 var nodes = {};
@@ -1045,31 +1047,6 @@ function getTargetCoords(node) {
       return {x: node.x, y: node.y};
   }
 }
-
-// this is not actually being called anywhere...
-// function multilineTextNode(node) {
-//   var MAX_LINES = 6;
-//   var fade = false;
-//   var el = d3.select(this);
-//   var lines = el.text().split('\n');
-//   if (lines.length > MAX_LINES) {
-//     lines.splice(MAX_LINES);
-//     fade = true;
-//   }
-//   el.text('');
-//   var tspan = el.selectAll('.tspanLabel').data(lines);
-//   tspan.enter().append('tspan');
-//   tspan
-//       .attr('x', 8)
-//       .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
-//       .attr('opacity', function(line, i) {
-//         if (!fade)
-//           return 1;
-//         return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
-//       })
-//       .classed('tspanLabel', true)
-//       .text(function(line) { return line; });
-// }
 
 function update() {
   force.size([document.documentElement.clientWidth / 4,
@@ -1207,7 +1184,7 @@ function createNodeWithUndo(data) {
       label: data.label,
       type: data.type,
       hide: data.hide,
-      timeLabel: data.timeLabel //////////////////// !!!!!!!!!!!! ////////////
+      timeLabel: data.timeLabel
     };
     nodes[data.id] = node;
     pushUndo(function() {
@@ -1318,7 +1295,12 @@ var callbacks = {
   dep: function(data) {
     var dependsOn = nodes[data.dependsOn];
     if (!dependsOn) {
-      createNodeWithUndo({id: data.dependsOn, label: data.dependsOn, type: 'value', timeLabel: ''});
+      createNodeWithUndo({
+        id: data.dependsOn,
+        label: data.dependsOn,
+        type: 'value',
+        timeLabel: ''
+      });
       dependsOn = nodes[data.dependsOn];
     }
     if (dependsOn.hide) {
@@ -1400,7 +1382,8 @@ var callbacks = {
     var node = nodes[data.id];
     node.running = false;
     var timeElapsed = (parseFloat(data.time) - parseFloat(node.start)) * 1000
-    node.timeLabel = 'time elapsed: ' + (Math.round(timeElapsed * 1000) / 1000) + ' ms';
+    var timeLabel = 'time elapsed: ' + (Math.round(timeElapsed * 1000) / 1000) + ' ms';
+    node.timeLabel = time ? timeLabel : '';
     pushUndo(function() {
       node.running = true;
       node.timeLabel = ''

@@ -1046,29 +1046,29 @@ function getTargetCoords(node) {
   }
 }
 
-// this is not actually being called anywhere...
-// function multilineTextNode(node) {
-//   var MAX_LINES = 6;
-//   var fade = false;
-//   var el = d3.select(this);
-//   var lines = el.text().split('\n');
-//   if (lines.length > MAX_LINES) {
-//     lines.splice(MAX_LINES);
-//     fade = true;
-//   }
-//   el.text('');
-//   var tspan = el.selectAll('tspan').data(lines);
-//   tspan.enter().append('tspan');
-//   tspan
-//       .attr('x', 8)
-//       .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
-//       .attr('opacity', function(line, i) {
-//         if (!fade)
-//           return 1;
-//         return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
-//       })
-//       .html(function(line) { return line; });
-// }
+function multilineTextNode(node) {
+  var MAX_LINES = 6;
+  var fade = false;
+  var el = d3.select(this);
+  var lines = el.text().split('\n');
+  if (lines.length > MAX_LINES) {
+    lines.splice(MAX_LINES);
+    fade = true;
+  }
+  el.text('');
+  var tspan = el.selectAll('.tspanLabel').data(lines);
+  tspan.enter().append('tspan');
+  tspan
+      .attr('x', 8)
+      .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
+      .attr('opacity', function(line, i) {
+        if (!fade)
+          return 1;
+        return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
+      })
+      .classed('tspanLabel', true)
+      .text(function(line) { return line; });
+}
 
 function update() {
   force.size([document.documentElement.clientWidth / 4,
@@ -1090,7 +1090,7 @@ function update() {
         $('#description').text(n.label);
       })
       .on('mouseout', function(d, i) {
-        $('#description').html('');
+        $('#description').text('');
       })
       .call(force.drag);
   newG.append('path')

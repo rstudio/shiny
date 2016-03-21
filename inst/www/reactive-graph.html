@@ -41,7 +41,14 @@ svg {
 .node {
   cursor: pointer;
 }
-.node text {
+.node .tspanTime{
+  font-weight: bold;
+  font-size: 87%;
+  fill: #a7d9b7;
+  user-select: none;
+  transition: fill 0.75s ease;
+}
+.node .tspanLabel{
   font-family: 'Source Code Pro', monospace;
   font-weight: normal;
   text-anchor: start;
@@ -49,13 +56,13 @@ svg {
   user-select: none;
   transition: fill 0.75s ease;
 }
-.node.running text {
+.node.running .tspanLabel {
   fill: black;
 }
-.node.changed text {
+.node.changed .tspanLabel {
   fill: red;
 }
-.node html {
+.node .tspanLabel {
   white-space: pre;
 }
 .node path {
@@ -1080,10 +1087,10 @@ function update() {
         d3.event.stopPropagation();
       })
       .on('mouseover', function(n) {
-        $('#description').html(n.label);
+        $('#description').text(n.label);
       })
       .on('mouseout', function(d, i) {
-        $('#description').html('heelo');
+        $('#description').html('');
       })
       .call(force.drag);
   newG.append('path')
@@ -1092,7 +1099,7 @@ function update() {
       .attr('stroke-width', 4)
       .attr('fill', 'white')
       .attr('d', pathDataForNode);
-  newG.append('html')
+  newG.append('text')
       .attr('x', 3)
       .attr('y', 0)
       .attr('font-size', 3.25)
@@ -1113,13 +1120,13 @@ function update() {
         else
           return null;
       });
-  var html_span = node.selectAll('html').filter(function(n) {
+  var tspanLabel = node.selectAll('text').filter(function(n) {
     // This filter is used to disregard all nodes whose labels have
     // not changed since the last time we updated them.
     var changed = n.label !== this.label;
     this.label = n.label;
     return changed;
-  }).selectAll('html_span')
+  }).selectAll('.tspanLabel')
     .data(function(n) {
       var lines = n.label.replace(/ /g, '\xA0').split('\n');
       if (lines.length > MAX_LINES) {
@@ -1127,15 +1134,36 @@ function update() {
       }
       return lines;
     });
-  html_span.enter().append('html_span');
-  html_span.exit().remove();
-  html_span
+  tspanLabel.enter().append('tspan');
+  tspanLabel.exit().remove();
+  tspanLabel
       .attr('x', 8)
+      .attr('y', 1.5)
       .attr('dy', function(line, i) { return i > 0 ? '1em' : 0})
       .attr('opacity', function(line, i) {
         return Math.min(1, (MAX_LINES - i) * 0.25 - 0.15);
       })
-      .html(function(line) { return '<p>line</p>'; });
+      .classed('tspanLabel', true)
+      .text(function(line) { return line; });
+
+  var tspanTime = node.selectAll('text').filter(function(n) {
+    // This filter is used to disregard all nodes whose labels have
+    // not changed since the last time we updated them.
+    var changed = n.timeLabel !== this.timeLabel;
+    this.timeLabel = n.timeLabel;
+    return changed;
+  }).selectAll('.tspanTime')
+    .data(function(n) {
+      var lines = n.timeLabel.replace(/ /g, '\xA0').split('\n');
+      return lines;
+    });
+  tspanTime.enter().append('tspan');
+  tspanTime.exit().remove();
+  tspanTime
+      .attr('x', 8)
+      .attr('y', -2)
+      .classed('tspanTime', true)
+      .text(function(line) { return line; });
 
   link = d3.select('#links').selectAll('.link').data(links);
   layoutDirty = layoutDirty || !link.enter().empty() || !link.exit().empty();
@@ -1179,7 +1207,7 @@ function createNodeWithUndo(data) {
       label: data.label,
       type: data.type,
       hide: data.hide,
-      timeLabel: 'hello'
+      timeLabel: data.timeLabel //////////////////// !!!!!!!!!!!! ////////////
     };
     nodes[data.id] = node;
     pushUndo(function() {
@@ -1290,7 +1318,7 @@ var callbacks = {
   dep: function(data) {
     var dependsOn = nodes[data.dependsOn];
     if (!dependsOn) {
-      createNodeWithUndo({id: data.dependsOn, label: data.dependsOn, type: 'value'});
+      createNodeWithUndo({id: data.dependsOn, label: data.dependsOn, type: 'value', timeLabel: ''});
       dependsOn = nodes[data.dependsOn];
     }
     if (dependsOn.hide) {
@@ -1342,6 +1370,7 @@ var callbacks = {
       id: data.id,
       label: data.id + ' = ' + data.value,
       type: 'value',
+      timeLabel: '',
       prevId: nodes[data.id] ? data.id : null,
       hide: existed ? nodes[data.id].hide : true
     });
@@ -1370,7 +1399,6 @@ var callbacks = {
   exit: function(data) {
     var node = nodes[data.id];
     node.running = false;
-    var oldLabel = node.label;
     var timeElapsed = (parseFloat(data.time) - parseFloat(node.start)) * 1000
     node.timeLabel = 'time elapsed: ' + (Math.round(timeElapsed * 1000) / 1000) + ' ms';
     pushUndo(function() {

@@ -1124,15 +1124,12 @@ function update() {
       .text(function(line) { return line; });
 
   var tspanTime = node.selectAll('text').filter(function(n) {
-    // This filter is used to disregard all nodes whose labels have
-    // not changed since the last time we updated them.
-    var changed = n.timeLabel !== this.timeLabel;
-    this.timeLabel = n.timeLabel;
+    var changed = n.timeElapsed !== this.timeElapsed;
+    this.timeElapsed = n.timeElapsed;
     return changed;
   }).selectAll('.tspanTime')
     .data(function(n) {
-      var lines = n.timeLabel.replace(/ /g, '\xA0').split('\n');
-      return lines;
+      return [n.timeElapsed];
     });
   tspanTime.enter().append('tspan');
   tspanTime.exit().remove();
@@ -1140,7 +1137,10 @@ function update() {
       .attr('x', 8)
       .attr('y', -2)
       .classed('tspanTime', true)
-      .text(function(line) { return line; });
+      .text(function(time) {
+        if (time === null) return '';
+        else return 'time elapsed: ' + (Math.round(time * 1000) / 1000) + ' ms';
+      });
 
   link = d3.select('#links').selectAll('.link').data(links);
   layoutDirty = layoutDirty || !link.enter().empty() || !link.exit().empty();
@@ -1183,8 +1183,7 @@ function createNodeWithUndo(data) {
     node = {
       label: data.label,
       type: data.type,
-      hide: data.hide,
-      timeLabel: data.timeLabel
+      hide: data.hide
     };
     nodes[data.id] = node;
     pushUndo(function() {
@@ -1298,8 +1297,7 @@ var callbacks = {
       createNodeWithUndo({
         id: data.dependsOn,
         label: data.dependsOn,
-        type: 'value',
-        timeLabel: ''
+        type: 'value'
       });
       dependsOn = nodes[data.dependsOn];
     }
@@ -1352,7 +1350,6 @@ var callbacks = {
       id: data.id,
       label: data.id + ' = ' + data.value,
       type: 'value',
-      timeLabel: '',
       prevId: nodes[data.id] ? data.id : null,
       hide: existed ? nodes[data.id].hide : true
     });
@@ -1373,20 +1370,22 @@ var callbacks = {
     var node = nodes[data.id];
     node.running = true;
     node.start = data.time;
+    var oldTimeElapsed = node.timeElapsed;
+    node.timeElapsed = null;
     pushUndo(function() {
       node.running = false;
       node.start = null;
+      node.timeElapsed = oldTimeElapsed;
     });
   },
   exit: function(data) {
     var node = nodes[data.id];
     node.running = false;
-    var timeElapsed = (parseFloat(data.time) - parseFloat(node.start)) * 1000
-    var timeLabel = 'time elapsed: ' + (Math.round(timeElapsed * 1000) / 1000) + ' ms';
-    node.timeLabel = time ? timeLabel : '';
+    var oldTimeElapsed = node.timeElapsed;
+    node.timeElapsed = time ? (parseFloat(data.time) - parseFloat(node.start)) * 1000 : null;
     pushUndo(function() {
       node.running = true;
-      node.timeLabel = ''
+      node.timeElapsed = oldTimeElapsed;
     });
   }
 };

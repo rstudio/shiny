@@ -1359,15 +1359,22 @@ var callbacks = {
   enter: function(data) {
     var node = nodes[data.id];
     node.running = true;
+    node.start = data.time;
     pushUndo(function() {
       node.running = false;
+      node.start = null;
     });
   },
   exit: function(data) {
     var node = nodes[data.id];
     node.running = false;
+    var oldLabel = node.label;
+    var timeElapsed = (parseFloat(data.time) - parseFloat(node.start)) * 1000
+    node.label = oldLabel + '\ntime elapsed: ' +
+                 (Math.round(timeElapsed * 1000) / 1000) + ' ms';
     pushUndo(function() {
       node.running = true;
+      node.label = oldLabel;
     });
   }
 };

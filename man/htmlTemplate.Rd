@@ -2,12 +2,16 @@
 \alias{htmlTemplate}
 \title{Process an HTML template}
 \usage{
-htmlTemplate(filename, ..., document_ = "auto")
+htmlTemplate(filename = NULL, ..., text_ = NULL, document_ = "auto")
 }
 \arguments{
-\item{filename}{Path to an HTML template file.}
+\item{filename}{Path to an HTML template file. Incompatible with
+\code{text_}.}
 
 \item{...}{Variable values to use when processing the template.}
+
+\item{text_}{A string to use as the template, instead of a file. Incompatible
+with \code{filename}.}
 
 \item{document_}{Is this template a complete HTML document (\code{TRUE}), or
 a fragment of HTML that is to be inserted into an HTML document

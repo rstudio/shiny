@@ -685,6 +685,11 @@ ShinySession <- R6Class(
         progress = list(type = type, message = message)
       )
     },
+    sendNotification = function(type, message) {
+      private$sendMessage(
+        notification = list(type = type, message = message)
+      )
+    },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
       func <- try(self[[method]], silent = TRUE)

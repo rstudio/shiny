@@ -468,6 +468,15 @@ var ShinyApp = function() {
     }
   });
 
+  addMessageHandler('notification', function(message) {
+    if (message.type === 'show')
+      exports.notifications.show(message.message);
+    else if (message.type === 'remove')
+      exports.notifications.remove(message.message);
+    else
+      throw('Unkown notification type: ' + message.type);
+  });
+
   addMessageHandler('response', function(message) {
     var requestId = message.tag;
     var request = this.$activeRequests[requestId];

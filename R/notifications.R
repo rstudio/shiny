@@ -13,6 +13,8 @@
 #'   \code{removeNotification}. If not provided, one will be generated
 #'   automatically. If an ID is provided and there does not currently exist a
 #'   notification with that ID, a new notification will be created with that ID.
+#' @param style A string which controls the color of the notification. One of
+#'   "default" (gray), "message" (blue), "warning" (yellow), or "error" (red).
 #' @param session Session object to send notification to.
 #'
 #' @return An ID for the notification.
@@ -60,7 +62,9 @@
 #' }
 #' @export
 showNotification <- function(ui, duration = 5, closeButton = TRUE,
-  id = NULL, session = getDefaultReactiveDomain()) {
+  id = NULL, style = c("default", "message", "warning", "error"),
+  session = getDefaultReactiveDomain())
+{
 
   if (is.null(id))
     id <- randomID()
@@ -70,7 +74,8 @@ showNotification <- function(ui, duration = 5, closeButton = TRUE,
       html = as.character(htmltools::as.tags(ui)),
       duration = if (!is.null(duration)) duration * 1000,
       closeButton = closeButton,
-      id = id
+      id = id,
+      style = match.arg(style)
     )
   )
 

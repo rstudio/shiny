@@ -277,18 +277,35 @@ body.disconnected {
   background-color: rgba(0,0,0,0);
   padding: 2px;
   width: 250px;
+  z-index: 9999;
 }
 
 .shiny-notification {
-  background-color: #222;
+  background-color: #e8e8e8;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 3px;
   opacity: 0.85;
   padding: 10px 8px 10px 10px;
-  border-radius: 3px;
   margin: 2px;
 }
 
-.shiny-notification-content {
-  color: #fff;
+.shiny-notification-message {
+  color: #31708f;
+  background-color: #d9edf7;
+  border: 1px solid #bce8f1;
+}
+
+.shiny-notification-warning {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border: 1px solid #faebcc;
+}
+
+.shiny-notification-error {
+  color: #a94442;
+  background-color: #f2dede;
+  border: 1px solid #ebccd1;
 }
 
 .shiny-notification-close {
@@ -298,10 +315,10 @@ body.disconnected {
   bottom: 9px;
   position: relative;
   padding-left: 4px;
-  color: #888;
+  color: #444;
   cursor: default;
 }
 
 .shiny-notification-close:hover {
-  color: #aaa;
+  color: #000;
 }

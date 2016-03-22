@@ -3,7 +3,9 @@ exports.notifications = (function() {
   // Milliseconds to fade in or out
   const fadeDuration = 250;
 
-  function show({ html=null, duration=5000, id=null, closeButton=true } = {}) {
+  function show({ html=null, duration=5000, id=null, closeButton=true,
+                  style = null } = {})
+  {
     if (!id)
       id = randomId();
 
@@ -22,6 +24,19 @@ exports.notifications = (function() {
         .html(html)
         .fadeIn(fadeDuration);
     }
+
+    // Remove any existing classes of the form 'shiny-notification-xxxx'.
+    // The xxxx would be strings like 'warning'.
+    const classes = $notification.attr('class')
+      .split(/\s+/)
+      .filter(cls => cls.match(/^shiny-notification-/))
+      .join(' ');
+    $notification.removeClass(classes);
+
+    // Add class. 'default' means no additional CSS class.
+    if (style && style !== 'default')
+      $notification.addClass('shiny-notification-' + style);
+
 
     // Make sure that the presence/absence of close button matches with value
     // of `closeButton`.

@@ -23,7 +23,8 @@ notification disappear when clicked. If \code{FALSE} do not display.}
 \item{id}{An ID string. This can be used to change the contents of an
 existing message with \code{showNotification}, or to remove it with
 \code{removeNotification}. If not provided, one will be generated
-automatically.}
+automatically. If an ID is provided and there does not currently exist a
+notification with that ID, a new notification will be created with that ID.}
 
 \item{session}{Session object to send notification to.}
 }

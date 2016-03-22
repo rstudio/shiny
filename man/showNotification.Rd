@@ -5,13 +5,13 @@
 \alias{showNotification}
 \title{Show or remove a notification}
 \usage{
-showNotification(html, duration = 5, closeButton = TRUE, id = NULL,
+showNotification(ui, duration = 5, closeButton = TRUE, id = NULL,
   session = getDefaultReactiveDomain())
 
 removeNotification(id = NULL, session = getDefaultReactiveDomain())
 }
 \arguments{
-\item{html}{HTML content of message.}
+\item{ui}{Content of message.}
 
 \item{duration}{Number of seconds to display the message before it
 disappears. Use \code{NULL} to make the message not automatically

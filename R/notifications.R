@@ -2,7 +2,7 @@
 #'
 #' These functions show and remove notifications in a Shiny application.
 #'
-#' @param html HTML content of message.
+#' @param ui Content of message.
 #' @param duration Number of seconds to display the message before it
 #'   disappears. Use \code{NULL} to make the message not automatically
 #'   disappear.
@@ -59,7 +59,7 @@
 #' )
 #' }
 #' @export
-showNotification <- function(html, duration = 5, closeButton = TRUE,
+showNotification <- function(ui, duration = 5, closeButton = TRUE,
   id = NULL, session = getDefaultReactiveDomain()) {
 
   if (is.null(id))
@@ -67,7 +67,7 @@ showNotification <- function(html, duration = 5, closeButton = TRUE,
 
   session$sendNotification("show",
     list(
-      html = as.character(htmltools::as.tags(html)),
+      html = as.character(htmltools::as.tags(ui)),
       duration = if (!is.null(duration)) duration * 1000,
       closeButton = closeButton,
       id = id

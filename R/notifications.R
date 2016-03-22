@@ -66,7 +66,7 @@ showNotification <- function(html, duration = 5, closeButton = TRUE,
 
   session$sendNotification("show",
     list(
-      html = as.character(html),
+      html = as.character(htmltools::as.tags(html)),
       duration = if (!is.null(duration)) duration * 1000,
       closeButton = closeButton,
       id = id

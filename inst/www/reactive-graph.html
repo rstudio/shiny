@@ -2,6 +2,7 @@
 <html>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="https://rawgit.com/mbostock/d3/master/lib/colorbrewer/colorbrewer.js"></script>
 <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,600' rel='stylesheet' type='text/css'>
 <style type="text/css">
 html, body {
@@ -44,7 +45,6 @@ svg {
 .node .tspanTime{
   font-weight: bold;
   font-size: 87%;
-  fill: #444444;
   user-select: none;
   transition: fill 0.75s ease;
 }
@@ -1048,6 +1048,30 @@ function getTargetCoords(node) {
   }
 }
 
+function compare(a, b) {
+  if (a.id < b.id)
+    return -1;
+  else if (a.id > b.id)
+    return 1;
+  else
+    return 0;
+}
+
+var timeDifferences = function() {
+  var enters = log.filter(function(obj) { return obj.action === 'enter' });
+  enters.sort(compare);
+  var exits = log.filter(function(obj) { return obj.action === 'exit' });
+  exits.sort(compare);
+  var diff = [];
+  for (var i = 0; i < exits.length; i++)
+    diff.push(exits[i].time - enters[i].time);
+  return diff.map(function(x) { return x * 1000; });
+}();
+
+var colorScale = d3.scale.quantize()
+                         .domain([d3.min(timeDifferences), d3.max(timeDifferences)])
+                         .range(colorbrewer.Reds[9].slice(2, 8));
+
 function update() {
   force.size([document.documentElement.clientWidth / 4,
               document.documentElement.clientHeight / 4]);
@@ -1136,6 +1160,7 @@ function update() {
   tspanTime
       .attr('x', 8)
       .attr('y', -2)
+      .attr('fill', function(time) { return colorScale(time); })
       .classed('tspanTime', true)
       .text(function(time) {
         if (time === null) return '';
@@ -1391,7 +1416,6 @@ var callbacks = {
 };
 
 function processMessage(data, suppressUpdate) {
-  console.log(JSON.stringify(data));
   if (!callbacks.hasOwnProperty(data.action))
     throw new Error('Unknown action ' + data.action);
   var result = callbacks[data.action].call(callbacks, data);

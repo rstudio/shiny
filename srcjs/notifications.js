@@ -4,7 +4,7 @@ exports.notifications = (function() {
   const fadeDuration = 250;
 
   function show({ html=null, duration=5000, id=null, closeButton=true,
-                  style = null } = {})
+                  type=null } = {})
   {
     if (!id)
       id = randomId();
@@ -34,8 +34,8 @@ exports.notifications = (function() {
     $notification.removeClass(classes);
 
     // Add class. 'default' means no additional CSS class.
-    if (style && style !== 'default')
-      $notification.addClass('shiny-notification-' + style);
+    if (type && type !== 'default')
+      $notification.addClass('shiny-notification-' + type);
 
 
     // Make sure that the presence/absence of close button matches with value

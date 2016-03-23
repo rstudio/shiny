@@ -69,9 +69,12 @@ showNotification <- function(ui, duration = 5, closeButton = TRUE,
   if (is.null(id))
     id <- randomID()
 
+  res <- processDeps(ui, session)
+
   session$sendNotification("show",
     list(
-      html = as.character(htmltools::as.tags(ui)),
+      html = res$html,
+      deps = res$deps,
       duration = if (!is.null(duration)) duration * 1000,
       closeButton = closeButton,
       id = id,

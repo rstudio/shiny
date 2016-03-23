@@ -3,8 +3,8 @@ exports.notifications = (function() {
   // Milliseconds to fade in or out
   const fadeDuration = 250;
 
-  function show({ html=null, duration=5000, id=null, closeButton=true,
-                  type=null } = {})
+  function show({ html=null, deps=[], duration=5000, id=null,
+                  closeButton=true, type=null } = {})
   {
     if (!id)
       id = randomId();
@@ -17,13 +17,9 @@ exports.notifications = (function() {
     if ($notification.length === 0)
       $notification = _create(id);
 
-    // Set HTML content
-    if (html) {
-      $notification
-        .find('.shiny-notification-content')
-        .html(html)
-        .fadeIn(fadeDuration);
-    }
+    // Render html and dependencies
+    const $content = $notification.find('.shiny-notification-content');
+    exports.renderContent($content, { html, deps });
 
     // Remove any existing classes of the form 'shiny-notification-xxxx'.
     // The xxxx would be strings like 'warning'.
@@ -61,6 +57,7 @@ exports.notifications = (function() {
   function remove(id) {
     get(id).fadeOut(fadeDuration, function() {
 
+      exports.unbindAll(this);
       this.remove();
 
       // If no more notifications, remove the panel from the DOM.
@@ -81,8 +78,8 @@ exports.notifications = (function() {
 
   // Return array of all notification IDs
   function ids() {
-    const $notifications = _getPanel().find('.shiny-notification');
-    return $notifications
+    return _getPanel()
+      .find('.shiny-notification')
       .map(function() { return this.id.replace(/shiny-notification-/, ''); })
       .get();
   }

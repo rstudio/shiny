@@ -7,6 +7,10 @@ function escapeHTML(str) {
             .replace(/\//g,"&#x2F;");
 }
 
+function randomId() {
+  return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
+}
+
 function strToBool(str) {
   if (!str || !str.toLowerCase)
     return undefined;

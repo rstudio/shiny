@@ -8,22 +8,7 @@ $.extend(htmlOutputBinding, {
     this.renderError(el, err);
   },
   renderValue: function(el, data) {
-    exports.unbindAll(el);
-
-    var html;
-    var dependencies = [];
-    if (data === null) {
-      html = '';
-    } else if (typeof(data) === 'string') {
-      html = data;
-    } else if (typeof(data) === 'object') {
-      html = data.html;
-      dependencies = data.deps;
-    }
-
-    exports.renderHtml(html, el, dependencies);
-    exports.initializeInputs(el);
-    exports.bindAll(el);
+    exports.renderContent(el, data);
   }
 });
 outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');
@@ -34,6 +19,28 @@ var renderDependencies = exports.renderDependencies = function(dependencies) {
       renderDependency(dep);
     });
   }
+};
+
+// Render HTML in a DOM element, add dependencies, and bind Shiny
+// inputs/outputs. `content` can be null, a string, or an object with
+// properties 'html' and 'deps'.
+exports.renderContent = function(el, content) {
+  exports.unbindAll(el);
+
+  var html;
+  var dependencies = [];
+  if (content === null) {
+    html = '';
+  } else if (typeof(content) === 'string') {
+    html = content;
+  } else if (typeof(content) === 'object') {
+    html = content.html;
+    dependencies = content.deps || [];
+  }
+
+  exports.renderHtml(html, el, dependencies);
+  exports.initializeInputs(el);
+  exports.bindAll(el);
 };
 
 // Render HTML in a DOM element, inserting singletons into head as needed

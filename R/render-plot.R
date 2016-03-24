@@ -49,6 +49,16 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
                        env=parent.frame(), quoted=FALSE,
                        execOnResize=FALSE, outputArgs=list()
 ) {
+  ## This will only work under "normal" circumstances...
+  if (identical(parent.env(env), globalenv())) {
+    if (length(outputArgs) != 0){
+      warning("Unused argument: outputArgs. The argument outputArgs is only ",
+              "meant to be used when embedding snippets of Shiny code in an ",
+              "R Markdown code chunk (using runtime: shiny). When running a ",
+              "full Shiny app, please set the output arguments directly in ",
+              "the plotOutput() function in your UI code.")
+    }
+  }
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
   installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)

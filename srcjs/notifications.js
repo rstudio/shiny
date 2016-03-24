@@ -13,7 +13,7 @@ exports.notifications = (function() {
     _createPanel();
 
     // Get existing DOM element for this ID, or create if needed.
-    let $notification = get(id);
+    let $notification = _get(id);
     if ($notification.length === 0)
       $notification = _create(id);
 
@@ -55,29 +55,25 @@ exports.notifications = (function() {
   }
 
   function remove(id) {
-    get(id).fadeOut(fadeDuration, function() {
+    _get(id).fadeOut(fadeDuration, function() {
 
       exports.unbindAll(this);
       this.remove();
 
       // If no more notifications, remove the panel from the DOM.
-      if (ids().length === 0) {
+      if (_ids().length === 0) {
         _getPanel().remove();
       }
     });
   }
 
-  function removeAll() {
-    ids().forEach(id => remove(id));
-  }
-
   // Returns an individual notification DOM object (wrapped in jQuery).
-  function get(id) {
+  function _get(id) {
     return _getPanel().find('#shiny-notification-' + $escape(id));
   }
 
   // Return array of all notification IDs
-  function ids() {
+  function _ids() {
     return _getPanel()
       .find('.shiny-notification')
       .map(function() { return this.id.replace(/shiny-notification-/, ''); })
@@ -105,7 +101,7 @@ exports.notifications = (function() {
   // Create a notification DOM element and return the jQuery object. If the
   // DOM element already exists for the ID, just return it without creating.
   function _create(id) {
-    let $notification = get(id);
+    let $notification = _get(id);
 
     if ($notification.length === 0) {
       $notification = $(
@@ -135,12 +131,12 @@ exports.notifications = (function() {
 
     // Attach new removal callback
     const removalCallback = setTimeout(function() { remove(id); }, delay);
-    get(id).data('removalCallback', removalCallback);
+    _get(id).data('removalCallback', removalCallback);
   }
 
   // Clear a removal callback from a notification, if present.
   function _clearRemovalCallback(id) {
-    const $notification = get(id);
+    const $notification = _get(id);
     const oldRemovalCallback = $notification.data('removalCallback');
     if (oldRemovalCallback) {
       clearTimeout(oldRemovalCallback);
@@ -149,9 +145,6 @@ exports.notifications = (function() {
 
   return {
     show,
-    remove,
-    removeAll,
-    get,
-    ids
+    remove
   };
 })();

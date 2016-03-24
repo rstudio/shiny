@@ -6,7 +6,7 @@
 \title{Show or remove a notification}
 \usage{
 showNotification(ui, duration = 5, closeButton = TRUE, id = NULL,
-  style = c("default", "message", "warning", "error"),
+  type = c("default", "message", "warning", "error"),
   session = getDefaultReactiveDomain())
 
 removeNotification(id = NULL, session = getDefaultReactiveDomain())
@@ -27,7 +27,7 @@ existing message with \code{showNotification}, or to remove it with
 automatically. If an ID is provided and there does not currently exist a
 notification with that ID, a new notification will be created with that ID.}
 
-\item{style}{A string which controls the color of the notification. One of
+\item{type}{A string which controls the color of the notification. One of
 "default" (gray), "message" (blue), "warning" (yellow), or "error" (red).}
 
 \item{session}{Session object to send notification to.}

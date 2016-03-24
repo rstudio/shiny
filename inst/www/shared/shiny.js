@@ -21,6 +21,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\//g, "&#x2F;");
   }
 
+  function randomId() {
+    return Math.floor(0x100000000 + Math.random() * 0xF00000000).toString(16);
+  }
+
   function strToBool(str) {
     if (!str || !str.toLowerCase) return undefined;
 
@@ -973,6 +977,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
     });
 
+    addMessageHandler('notification', function (message) {
+      if (message.type === 'show') exports.notifications.show(message.message);else if (message.type === 'remove') exports.notifications.remove(message.message);else throw 'Unkown notification type: ' + message.type;
+    });
+
     addMessageHandler('response', function (message) {
       var requestId = message.tag;
       var request = this.$activeRequests[requestId];
@@ -1099,6 +1107,160 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     exports.progressHandlers = progressHandlers;
   }).call(ShinyApp.prototype);
+
+  //---------------------------------------------------------------------
+  // Source file: ../srcjs/notifications.js
+
+  exports.notifications = function () {
+
+    // Milliseconds to fade in or out
+    var fadeDuration = 250;
+
+    function show() {
+      var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      var _ref$html = _ref.html;
+      var html = _ref$html === undefined ? null : _ref$html;
+      var _ref$deps = _ref.deps;
+      var deps = _ref$deps === undefined ? [] : _ref$deps;
+      var _ref$duration = _ref.duration;
+      var duration = _ref$duration === undefined ? 5000 : _ref$duration;
+      var _ref$id = _ref.id;
+      var id = _ref$id === undefined ? null : _ref$id;
+      var _ref$closeButton = _ref.closeButton;
+      var closeButton = _ref$closeButton === undefined ? true : _ref$closeButton;
+      var _ref$type = _ref.type;
+      var type = _ref$type === undefined ? null : _ref$type;
+
+      if (!id) id = randomId();
+
+      // Create panel if necessary
+      _createPanel();
+
+      // Get existing DOM element for this ID, or create if needed.
+      var $notification = _get(id);
+      if ($notification.length === 0) $notification = _create(id);
+
+      // Render html and dependencies
+      var $content = $notification.find('.shiny-notification-content');
+      exports.renderContent($content, { html: html, deps: deps });
+
+      // Remove any existing classes of the form 'shiny-notification-xxxx'.
+      // The xxxx would be strings like 'warning'.
+      var classes = $notification.attr('class').split(/\s+/).filter(function (cls) {
+        return cls.match(/^shiny-notification-/);
+      }).join(' ');
+      $notification.removeClass(classes);
+
+      // Add class. 'default' means no additional CSS class.
+      if (type && type !== 'default') $notification.addClass('shiny-notification-' + type);
+
+      // Make sure that the presence/absence of close button matches with value
+      // of `closeButton`.
+      var $close = $notification.find('.shiny-notification-close');
+      if (closeButton && $close.length === 0) {
+        $notification.append('<div class="shiny-notification-close">&times;</div>');
+      } else if (!closeButton && $close.length !== 0) {
+        $close.remove();
+      }
+
+      // If duration was provided, schedule removal. If not, clear existing
+      // removal callback (this happens if a message was first added with
+      // a duration, and then updated with no duration).
+      if (duration) _addRemovalCallback(id, duration);else _clearRemovalCallback(id);
+
+      return id;
+    }
+
+    function remove(id) {
+      _get(id).fadeOut(fadeDuration, function () {
+
+        exports.unbindAll(this);
+        this.remove();
+
+        // If no more notifications, remove the panel from the DOM.
+        if (_ids().length === 0) {
+          _getPanel().remove();
+        }
+      });
+    }
+
+    // Returns an individual notification DOM object (wrapped in jQuery).
+    function _get(id) {
+      return _getPanel().find('#shiny-notification-' + $escape(id));
+    }
+
+    // Return array of all notification IDs
+    function _ids() {
+      return _getPanel().find('.shiny-notification').map(function () {
+        return this.id.replace(/shiny-notification-/, '');
+      }).get();
+    }
+
+    // Returns the notification panel DOM object (wrapped in jQuery).
+    function _getPanel() {
+      return $('#shiny-notification-panel');
+    }
+
+    // Create notifications panel and return the jQuery object. If the DOM
+    // element already exists, just return it.
+    function _createPanel() {
+      var $panel = _getPanel();
+
+      if ($panel.length > 0) return $panel;
+
+      $('body').append('<div id="shiny-notification-panel">');
+
+      return $panel;
+    }
+
+    // Create a notification DOM element and return the jQuery object. If the
+    // DOM element already exists for the ID, just return it without creating.
+    function _create(id) {
+      var $notification = _get(id);
+
+      if ($notification.length === 0) {
+        $notification = $('<div id="shiny-notification-' + id + '" class="shiny-notification">' + '<div class="shiny-notification-close">&times;</div>' + '<div class="shiny-notification-content"></div>' + '</div>');
+
+        $notification.find('.shiny-notification-close').on('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          remove(id);
+        });
+
+        _getPanel().append($notification);
+      }
+
+      return $notification;
+    }
+
+    // Add a callback to remove a notification after a delay in ms.
+    function _addRemovalCallback(id, delay) {
+      // If there's an existing removalCallback, clear it before adding the new
+      // one.
+      _clearRemovalCallback(id);
+
+      // Attach new removal callback
+      var removalCallback = setTimeout(function () {
+        remove(id);
+      }, delay);
+      _get(id).data('removalCallback', removalCallback);
+    }
+
+    // Clear a removal callback from a notification, if present.
+    function _clearRemovalCallback(id) {
+      var $notification = _get(id);
+      var oldRemovalCallback = $notification.data('removalCallback');
+      if (oldRemovalCallback) {
+        clearTimeout(oldRemovalCallback);
+      }
+    }
+
+    return {
+      show: show,
+      remove: remove
+    };
+  }();
 
   //---------------------------------------------------------------------
   // Source file: ../srcjs/file_processor.js
@@ -2584,22 +2746,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       this.renderError(el, err);
     },
     renderValue: function renderValue(el, data) {
-      exports.unbindAll(el);
-
-      var html;
-      var dependencies = [];
-      if (data === null) {
-        html = '';
-      } else if (typeof data === 'string') {
-        html = data;
-      } else if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
-        html = data.html;
-        dependencies = data.deps;
-      }
-
-      exports.renderHtml(html, el, dependencies);
-      exports.initializeInputs(el);
-      exports.bindAll(el);
+      exports.renderContent(el, data);
     }
   });
   outputBindings.register(htmlOutputBinding, 'shiny.htmlOutput');
@@ -2610,6 +2757,28 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         renderDependency(dep);
       });
     }
+  };
+
+  // Render HTML in a DOM element, add dependencies, and bind Shiny
+  // inputs/outputs. `content` can be null, a string, or an object with
+  // properties 'html' and 'deps'.
+  exports.renderContent = function (el, content) {
+    exports.unbindAll(el);
+
+    var html;
+    var dependencies = [];
+    if (content === null) {
+      html = '';
+    } else if (typeof content === 'string') {
+      html = content;
+    } else if ((typeof content === 'undefined' ? 'undefined' : _typeof(content)) === 'object') {
+      html = content.html;
+      dependencies = content.deps || [];
+    }
+
+    exports.renderHtml(html, el, dependencies);
+    exports.initializeInputs(el);
+    exports.bindAll(el);
   };
 
   // Render HTML in a DOM element, inserting singletons into head as needed

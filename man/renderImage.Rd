@@ -4,7 +4,8 @@
 \alias{renderImage}
 \title{Image file output}
 \usage{
-renderImage(expr, env = parent.frame(), quoted = FALSE, deleteFile = TRUE)
+renderImage(expr, env = parent.frame(), quoted = FALSE, deleteFile = TRUE,
+  outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that returns a list.}
@@ -18,6 +19,10 @@ is useful if you want to save an expression in a variable.}
 it is sent to the client browser? Generally speaking, if the image is a
 temp file generated within \code{func}, then this should be \code{TRUE};
 if the image is not a temp file, this should be \code{FALSE}.}
+
+\item{outputArgs}{A list of arguments to be passed through to the implicit
+call to \code{\link{imageOutput}} when \code{renderImage} is used in an
+interactive R Markdown document.}
 }
 \description{
 Renders a reactive image that is suitable for assigning to an \code{output}

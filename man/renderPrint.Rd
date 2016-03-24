@@ -5,7 +5,7 @@
 \title{Printable Output}
 \usage{
 renderPrint(expr, env = parent.frame(), quoted = FALSE, func = NULL,
-  width = getOption("width"))
+  width = getOption("width"), outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that may print output and/or return a printable R
@@ -19,6 +19,10 @@ object.}
 object (deprecated; use \code{expr} instead).}
 
 \item{width}{The value for \code{\link{options}('width')}.}
+
+\item{outputArgs}{A list of arguments to be passed through to the implicit
+call to \code{\link{verbatimTextOutput}} when \code{renderPrint} is used
+in an interactive R Markdown document.}
 }
 \description{
 Makes a reactive version of the given function that captures any printed

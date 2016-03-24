@@ -6,7 +6,7 @@
 \usage{
 renderDataTable(expr, options = NULL, searchDelay = 500,
   callback = "function(oTable) {}", escape = TRUE, env = parent.frame(),
-  quoted = FALSE)
+  quoted = FALSE, outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that returns a data frame or a matrix.}
@@ -32,6 +32,10 @@ third), or \code{c('Species', 'Sepal.Length')}.}
 
 \item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
 is useful if you want to save an expression in a variable.}
+
+\item{outputArgs}{A list of arguments to be passed through to the implicit
+call to \code{\link{dataTableOutput}} when \code{renderDataTable} is used
+in an interactive R Markdown document.}
 }
 \description{
 Makes a reactive version of the given function that returns a data frame (or

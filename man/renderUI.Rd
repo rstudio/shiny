@@ -4,7 +4,8 @@
 \alias{renderUI}
 \title{UI Output}
 \usage{
-renderUI(expr, env = parent.frame(), quoted = FALSE, func = NULL)
+renderUI(expr, env = parent.frame(), quoted = FALSE, func = NULL,
+  outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that returns a Shiny tag object, \code{\link{HTML}},
@@ -17,6 +18,10 @@ is useful if you want to save an expression in a variable.}
 
 \item{func}{A function that returns a Shiny tag object, \code{\link{HTML}},
 or a list of such objects (deprecated; use \code{expr} instead).}
+
+\item{outputArgs}{A list of arguments to be passed through to the implicit
+call to \code{\link{uiOutput}} when \code{renderUI} is used in an
+interactive R Markdown document.}
 }
 \description{
 \bold{Experimental feature.} Makes a reactive version of a function that

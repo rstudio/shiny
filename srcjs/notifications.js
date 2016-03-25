@@ -69,6 +69,8 @@ exports.notifications = (function() {
 
   // Returns an individual notification DOM object (wrapped in jQuery).
   function _get(id) {
+    if (!id)
+      return null;
     return _getPanel().find('#shiny-notification-' + $escape(id));
   }
 

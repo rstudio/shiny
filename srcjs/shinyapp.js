@@ -731,46 +731,57 @@ var ShinyApp = function() {
 
 // showReconnectDialog and hideReconnectDialog are conceptually related to the
 // socket code, but they belong in the Shiny/exports object.
-exports.showReconnectDialog = exports.showReconnectDialog || (function() {
-  var reconnectTime = null;
+{
+  let notificationID = null;
 
-  function updateTime() {
-    var $time = $("#shiny-reconnect-time");
-    // If the time has been removed, exit and don't reschedule this function.
-    if ($time.length === 0) return;
+  exports.showReconnectDialog = exports.showReconnectDialog || (function() {
+    var reconnectTime = null;
 
-    var seconds = Math.round((reconnectTime - new Date().getTime()) / 1000) + 1;
-    if (seconds > 0) {
-      $time.text(" in " + seconds + "s");
-    } else {
-      $time.text("...");
+    function updateTime() {
+      var $time = $("#shiny-reconnect-time");
+      // If the time has been removed, exit and don't reschedule this function.
+      if ($time.length === 0) return;
+
+      var seconds = Math.round((reconnectTime - new Date().getTime()) / 1000) + 1;
+      if (seconds > 0) {
+        $time.text(" in " + seconds + "s");
+      } else {
+        $time.text("...");
+      }
+
+      // Reschedule this function after 1 second
+      setTimeout(updateTime, 1000);
     }
 
-    // Reschedule this function after 1 second
-    setTimeout(updateTime, 1000);
-  }
 
+    return function(delay) {
+      reconnectTime = new Date().getTime() + delay;
 
-  return function(delay) {
-    reconnectTime = new Date().getTime() + delay;
+      // If there's already a reconnect dialog, don't add another
+      if ($('#shiny-reconnect-dialog').length > 0)
+        return;
 
-    // If there's already a reconnect dialog, don't add another
-    if ($('#shiny-reconnect-dialog').length > 0)
-      return;
+      var html = '<div id="shiny-reconnect-dialog">' +
+        '<span id="shiny-reconnect-text">Connecting to new session</span>' +
+        '<span id="shiny-reconnect-time"></span><br>' +
+        '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>' +
+        '</div>';
 
-    var $dialog = $('<div id="shiny-reconnect-dialog">' +
-      '<span id="shiny-reconnect-text"></span>' +
-      '<span id="shiny-reconnect-time"></span><br>' +
-      '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>' +
-      '</div>')
-        .appendTo('body');
+      notificationID = exports.notifications.show({
+        html: html,
+        duration: null,
+        closeButton: false,
+        type: 'error'
+      });
 
-    $("#shiny-reconnect-text").text("Connecting to new session");
+      updateTime();
+    };
+  })();
 
-    updateTime();
+  exports.hideReconnectDialog = exports.hideReconnectDialog || function() {
+    if (notificationID) {
+      exports.notifications.remove(notificationID);
+      notificationID = null;
+    }
   };
-})();
-
-exports.hideReconnectDialog = exports.hideReconnectDialog || function() {
-  $("#shiny-reconnect-dialog").remove();
-};
+}

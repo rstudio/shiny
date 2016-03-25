@@ -284,7 +284,7 @@
   background-color: rgba(0,0,0,0);
   padding: 2px;
   width: 250px;
-  z-index: 9999;
+  z-index: 99999;
 }
 
 .shiny-notification {
@@ -330,38 +330,6 @@
   color: #000;
 }
 
-#shiny-reconnect-dialog {
-  padding: 1em;
-  position: fixed;
-  bottom: 50px;
-  left: -30px;
-  padding-left: 45px;
-  padding-right: 18px;
-  width: 300px;
-  height: auto;
-  z-index: 99999;
-  background-color: #222;
-  opacity: 0.8;
-  color: white;
-  border-radius: 3px;
-/*  font-size: 0.9em; */
-  box-shadow: rgba(0, 0, 0, 0.3) 3px 3px 10px;
-}
-
-#shiny-reconnect-dialog label {
-  display: block;
-  font-weight: normal;
-  color: white;
-  margin: 0;
-  padding: 0;
-}
-
-/* Fixed with for dots, so we can animate them without changing width */
-#shiny-reconnect-dialog .shiny-reconnect-dots {
-  display: inline-block;
-  width: 1ex;
-  text-align: left;
-}
 
 #shiny-reconnect-now {
   color: rgb(51, 122, 183);

@@ -246,9 +246,10 @@ pageWithSidebar <- function(headerPanel,
 #' toggle a set of \code{\link{tabPanel}} elements.
 #'
 #' @param title The title to display in the navbar
-#' @param ... \code{\link{tabPanel}} elements to include in the page. If a
-#'   string of dashes like \code{"----"} is used in a \code{navbarMenu}, it
-#'   will display a horizontal separator in the menu.
+#' @param ... \code{\link{tabPanel}} elements to include in the page. The
+#'   \code{navbarMenu} function also accepts strings, which will be used as menu
+#'   section headers. If the string is a set of dashes like \code{"----"} a
+#'   horizontal separator will be displayed in the menu.
 #' @param id If provided, you can use \code{input$}\emph{\code{id}} in your
 #'   server logic to determine which of the current tabs is active. The value
 #'   will correspond to the \code{value} argument that is passed to
@@ -302,6 +303,7 @@ pageWithSidebar <- function(headerPanel,
 #'   navbarMenu("More",
 #'     tabPanel("Summary"),
 #'     "----",
+#'     "Section header",
 #'     tabPanel("Table")
 #'   )
 #' ))
@@ -789,6 +791,8 @@ buildTabset <- function(tabs,
       textFilter <- function(text) {
         if (grepl("^\\-+$", text))
           tags$li(class="divider")
+        else
+          tags$li(class="dropdown-header", text)
       }
 
       # build the child tabset

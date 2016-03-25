@@ -15,9 +15,10 @@ navbarMenu(title, ..., icon = NULL)
 \arguments{
 \item{title}{The title to display in the navbar}
 
-\item{...}{\code{\link{tabPanel}} elements to include in the page. If a
-string of dashes like \code{"----"} is used in a \code{navbarMenu}, it
-will display a horizontal separator in the menu.}
+\item{...}{\code{\link{tabPanel}} elements to include in the page. The
+\code{navbarMenu} function also accepts strings, which will be used as menu
+section headers. If the string is a set of dashes like \code{"----"} a
+horizontal separator will be displayed in the menu.}
 
 \item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
@@ -86,6 +87,7 @@ shinyUI(navbarPage("App Title",
   navbarMenu("More",
     tabPanel("Summary"),
     "----",
+    "Section header",
     tabPanel("Table")
   )
 ))

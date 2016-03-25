@@ -246,18 +246,20 @@ pageWithSidebar <- function(headerPanel,
 #' toggle a set of \code{\link{tabPanel}} elements.
 #'
 #' @param title The title to display in the navbar
-#' @param ... \code{\link{tabPanel}} elements to include in the page
+#' @param ... \code{\link{tabPanel}} elements to include in the page. If a
+#'   string of dashes like \code{"----"} is used in a \code{navbarMenu}, it
+#'   will display a horizontal separator in the menu.
 #' @param id If provided, you can use \code{input$}\emph{\code{id}} in your
 #'   server logic to determine which of the current tabs is active. The value
 #'   will correspond to the \code{value} argument that is passed to
 #'   \code{\link{tabPanel}}.
 #' @param position Determines whether the navbar should be displayed at the top
-#'   of the page with normal scrolling behavior (\code{"static-top"}), pinned
-#'   at the top (\code{"fixed-top"}), or pinned at the bottom
+#'   of the page with normal scrolling behavior (\code{"static-top"}), pinned at
+#'   the top (\code{"fixed-top"}), or pinned at the bottom
 #'   (\code{"fixed-bottom"}). Note that using \code{"fixed-top"} or
 #'   \code{"fixed-bottom"} will cause the navbar to overlay your body content,
-#'   unless you add padding, e.g.:
-#'   \code{tags$style(type="text/css", "body {padding-top: 70px;}")}
+#'   unless you add padding, e.g.: \code{tags$style(type="text/css", "body
+#'   {padding-top: 70px;}")}
 #' @param header Tag or list of tags to display as a common header above all
 #'   tabPanels.
 #' @param footer Tag or list of tags to display as a common footer below all
@@ -299,6 +301,7 @@ pageWithSidebar <- function(headerPanel,
 #'   tabPanel("Plot"),
 #'   navbarMenu("More",
 #'     tabPanel("Summary"),
+#'     "----",
 #'     tabPanel("Table")
 #'   )
 #' ))
@@ -782,8 +785,14 @@ buildTabset <- function(tabs,
       # build the dropdown list element
       liTag <- tags$li(class = "dropdown", aTag)
 
+      # text filter for separators
+      textFilter <- function(text) {
+        if (grepl("^\\-+$", text))
+          tags$li(class="divider")
+      }
+
       # build the child tabset
-      tabset <- buildTabset(divTag$tabs, "dropdown-menu")
+      tabset <- buildTabset(divTag$tabs, "dropdown-menu", textFilter)
       liTag <- tagAppendChild(liTag, tabset$navList)
 
       # don't add a standard tab content div, rather add the list of tab

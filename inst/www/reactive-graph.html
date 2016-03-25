@@ -2,7 +2,6 @@
 <html>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script src="https://rawgit.com/mbostock/d3/master/lib/colorbrewer/colorbrewer.js"></script>
 <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,600' rel='stylesheet' type='text/css'>
 <style type="text/css">
 html, body {
@@ -1068,9 +1067,10 @@ var timeDifferences = function() {
   return diff.map(function(x) { return x * 1000; });
 }();
 
+// colors taken from colorbrewer's 9-class Reds: http://colorbrewer2.org/?type=sequential&scheme=Reds&n=9
 var colorScale = d3.scale.quantize()
                          .domain([d3.min(timeDifferences), d3.max(timeDifferences)])
-                         .range(colorbrewer.Reds[9].slice(2, 8));
+                         .range(['#fcbba1','#fc9272','#fb6a4a','#ef3b2c','#cb181d','#a50f15']);
 
 function update() {
   force.size([document.documentElement.clientWidth / 4,

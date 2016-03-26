@@ -9,6 +9,8 @@ shiny 0.13.1.9001
 
 * Fixes #1056: Upgrades Bootstrap to 3.3.6
 
+* Upgrades ion.rangeSlider to 2.1.2
+
 * Fixed #561: DataTables might pop up a warning when the data is updated
   extremely frequently.
 

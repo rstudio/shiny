@@ -52,8 +52,6 @@ var FileProcessor = function(files) {
   // It relies on the state of the object's fields to know what to do next.
   this.$run = function() {
 
-    var self = this;
-
     if (this.aborted || this.completed)
       return;
 

@@ -239,7 +239,7 @@ var ShinyApp = function() {
 
   this.receiveOutput = function(name, value) {
     if (this.$values[name] === value)
-      return;
+      return undefined;
 
     this.$values[name] = value;
     delete this.$errors[name];
@@ -466,6 +466,15 @@ var ShinyApp = function() {
       if (handler)
         handler.call(this, message.message);
     }
+  });
+
+  addMessageHandler('notification', function(message) {
+    if (message.type === 'show')
+      exports.notifications.show(message.message);
+    else if (message.type === 'remove')
+      exports.notifications.remove(message.message);
+    else
+      throw('Unkown notification type: ' + message.type);
   });
 
   addMessageHandler('response', function(message) {

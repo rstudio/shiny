@@ -130,16 +130,6 @@ function makeBlob(parts) {
   }
 }
 
-function slice(blob, start, end) {
-  if (blob.slice)
-    return blob.slice(start, end);
-  if (blob.mozSlice)
-    return blob.mozSlice(start, end);
-  if (blob.webkitSlice)
-    return blob.webkitSlice(start, end);
-  throw "Blob doesn't support slice";
-}
-
 function pixelRatio() {
   if (window.devicePixelRatio) {
     return window.devicePixelRatio;

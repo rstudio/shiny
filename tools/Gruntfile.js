@@ -3,7 +3,7 @@ module.exports = function(grunt) {
   var instdir = '../inst/';
   var js_srcdir = '../srcjs/'
 
-  grunt.initConfig({
+  gruntConfig = {
     pkg: pkgInfo(),
 
     clean: {
@@ -12,7 +12,9 @@ module.exports = function(grunt) {
         instdir + "www/shared/shiny.js",
         instdir + "www/shared/shiny.js.map",
         instdir + "www/shared/shiny.min.js",
-        instdir + "www/shared/shiny.min.js.map"
+        instdir + "www/shared/shiny.min.js.map",
+        "./temp_concat/shiny.js",
+        "./temp_concat/shiny.js.map"
       ]
     },
 
@@ -31,6 +33,7 @@ module.exports = function(grunt) {
           js_srcdir + 'browser.js',
           js_srcdir + 'input_rate.js',
           js_srcdir + 'shinyapp.js',
+          js_srcdir + 'notifications.js',
           js_srcdir + 'file_processor.js',
           js_srcdir + 'binding_registry.js',
           js_srcdir + 'output_binding.js',
@@ -58,9 +61,49 @@ module.exports = function(grunt) {
           js_srcdir + 'reactlog.js',
           js_srcdir + '_end.js'
         ],
-        dest: instdir + 'www/shared/shiny.js',
+        // The temp_concat/ directory would have gone under /srcjs/, but the
+        // Babel Grunt plugin has trouble finding presets if it operates on a
+        // file that's not under the current directory. So we'll put it under
+        // ./
+        dest: './temp_concat/shiny.js',
         nonull: true
       },
+    },
+
+    babel: {
+      options: {
+        sourceMap: true,
+        compact: false,
+        presets: ['es2015']
+      },
+      shiny: {
+        src: './temp_concat/shiny.js',
+        dest: instdir + '/www/shared/shiny.js'
+      }
+    },
+
+    eslint: {
+      options: {
+        parser: 'babel-eslint',
+        format: require('eslint-stylish-mapped'),
+        extends: 'eslint:recommended',
+        rules: {
+          "consistent-return": 1,
+          "dot-location": [1, "property"],
+          // "no-shadow": 1,
+          "no-undef": 1,
+          "no-unused-vars": [1, {"args": "none"}],
+          // "no-use-before-define": [1, {"functions": false}],
+          "semi": [1, "always"]
+        },
+        envs: [
+          "es6",
+          "browser",
+          "jquery"
+        ],
+        globals: ["strftime"]
+      },
+      shiny: ['./temp_concat/shiny.js']
     },
 
     uglify: {
@@ -90,19 +133,27 @@ module.exports = function(grunt) {
       }
     },
 
-    jshint: {
-      options: {
-        force: true  // Don't abort if there are JSHint warnings
-      },
-      shiny: {
-        src: instdir + 'www/shared/shiny.js'
+    copy: {
+      babelPolyfill: {
+        src: "node_modules/babel-polyfill/dist/polyfill.min.js",
+        dest: "../inst/www/shared/babel-polyfill.min.js"
       }
     },
 
     watch: {
       shiny: {
         files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
-        tasks: ['newer:concat', 'newer:jshint:shiny', 'newer:uglify:shiny']
+        tasks: [
+          'newer:concat',
+          'newer:eslint',
+          'configureBabel',
+          'newer:babel',
+          'newer:uglify'
+        ]
+      },
+      babelPolyfill: {
+        files: '<%= copy.babelPolyfill.src %>',
+        tasks: ['newer:copy:babelPolyfill']
       },
       datepicker: {
         files: '<%= uglify.datepicker.src %>',
@@ -124,17 +175,34 @@ module.exports = function(grunt) {
         }
       }
     }
-  });
+  };
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-babel');
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-newer');
 
+  // Need this here so that babel reads in the source map file after it's
+  // generated. Without this task, it would read in the source map when Grunt
+  // runs, which is wrong, if the source map doesn't exist, or is change later.
+  grunt.task.registerTask("configureBabel", "configures babel options", function() {
+    gruntConfig.babel.options.inputSourceMap = grunt.file.readJSON('./temp_concat/shiny.js.map');
+  });
 
-  grunt.registerTask('default', ['newer:concat', 'newer:jshint', 'newer:uglify']);
+  grunt.initConfig(gruntConfig);
+
+  grunt.registerTask('default', [
+    'newer:concat',
+    'newer:eslint',
+    'configureBabel',
+    'newer:babel',
+    'newer:uglify',
+    'newer:copy'
+  ]);
 
 
   // ---------------------------------------------------------------------------

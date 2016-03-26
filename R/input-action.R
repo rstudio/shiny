@@ -34,7 +34,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     type="button",
     class="btn btn-default action-button",
-    list(icon, label),
+    list(validateIcon(icon), label),
     ...
   )
 }
@@ -45,7 +45,26 @@ actionLink <- function(inputId, label, icon = NULL, ...) {
   tags$a(id=inputId,
     href="#",
     class="action-button",
-    list(icon, label),
+    list(validateIcon(icon), label),
     ...
   )
+}
+
+
+# Check that the icon parameter is valid:
+# 1) Check  if the user wants to actually add an icon:
+#    -- if icon=NULL, it means leave the icon unchanged
+#    -- if icon=character(0), it means don't add an icon or, more usefully,
+#       remove the previous icon
+# 2) If so, check that the icon has the right format (this does not check whether
+# it is a *real* icon - currently that would require a massive cross reference
+# with the "font-awesome" and the "glyphicon" libraries)
+validateIcon <- function(icon) {
+  if (is.null(icon) || identical(icon, character(0))) {
+    return(icon)
+  } else if (inherits(icon, "shiny.tag") && icon$name == "i") {
+    return(icon)
+  } else {
+    stop("Invalid icon. Use Shiny's 'icon()' function to generate a valid icon")
+  }
 }

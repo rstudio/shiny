@@ -27,7 +27,7 @@ test_that("ggplot coordmap", {
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0))
   png(tmpfile)
-  m <- getGgplotCoordmap(print(p), 1)
+  m <- getGgplotCoordmap(print(p), 1, 72)
   dev.off()
 
   # Check mapping vars
@@ -42,7 +42,7 @@ test_that("ggplot coordmap", {
   # Scatterplot where aes() is declared in geom
   p <- ggplot(dat, aes(xvar)) + geom_point(aes(y=yvar))
   png(tmpfile)
-  m <- getGgplotCoordmap(print(p), 1)
+  m <- getGgplotCoordmap(print(p), 1, 72)
   dev.off()
 
   # Check mapping vars
@@ -52,7 +52,7 @@ test_that("ggplot coordmap", {
   # Plot with computed variable (histogram)
   p <- ggplot(dat, aes(xvar)) + geom_histogram(binwidth=1)
   png(tmpfile)
-  m <- getGgplotCoordmap(print(p), 1)
+  m <- getGgplotCoordmap(print(p), 1, 72)
   dev.off()
 
   # Check mapping vars - no value for y
@@ -73,7 +73,7 @@ test_that("ggplot coordmap with facet_wrap", {
     scale_y_continuous(expand = c(0, 0)) +
     facet_wrap(~ g, ncol = 2)
   png(tmpfile)
-  m <- getGgplotCoordmap(print(p), 1)
+  m <- getGgplotCoordmap(print(p), 1, 72)
   dev.off()
 
   # Should have 3 panels
@@ -122,7 +122,7 @@ test_that("ggplot coordmap with facet_grid", {
   # facet_grid horizontal
   p1 <- p + facet_grid(. ~ g)
   png(tmpfile)
-  m <- getGgplotCoordmap(print(p1), 1)
+  m <- getGgplotCoordmap(print(p1), 1, 72)
   dev.off()
 
   # Should have 3 panels
@@ -159,7 +159,7 @@ test_that("ggplot coordmap with facet_grid", {
   # facet_grid vertical
   p1 <- p + facet_grid(g ~ .)
   png(tmpfile)
-  m <- getGgplotCoordmap(print(p1), 1)
+  m <- getGgplotCoordmap(print(p1), 1, 72)
   dev.off()
 
   # Should have 3 panels
@@ -207,7 +207,7 @@ test_that("ggplot coordmap with 2D facet_grid", {
 
   p1 <- p + facet_grid(g ~ h)
   png(tmpfile)
-  m <- getGgplotCoordmap(print(p1), 1)
+  m <- getGgplotCoordmap(print(p1), 1, 72)
   dev.off()
 
   # Should have 4 panels

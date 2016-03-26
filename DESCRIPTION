@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 0.13.1.9001
+Version: 0.13.1.9002
 Date: 2016-02-17
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
@@ -70,7 +70,7 @@ Imports:
     jsonlite (>= 0.9.16),
     xtable,
     digest,
-    htmltools (>= 0.3),
+    htmltools (>= 0.3.5),
     R6 (>= 2.0),
     sourcetools
 Suggests:
@@ -121,6 +121,7 @@ Collate:
     'middleware-shiny.R'
     'middleware.R'
     'modules.R'
+    'notifications.R'
     'priorityqueue.R'
     'progress.R'
     'react.R'

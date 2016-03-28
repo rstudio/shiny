@@ -539,7 +539,13 @@ shinyCallingHandlers <- function(expr) {
         return()
 
       handle <- getOption('shiny.error')
-      if (is.function(handle)) handle()
+      if (is.function(handle)) {
+        if ("condition" %in% names(formals(handle))) {
+          handle(condition = e)
+        } else {
+          handle()
+        }
+      }
     }
   )
 }

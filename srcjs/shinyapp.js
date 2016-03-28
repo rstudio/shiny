@@ -194,9 +194,10 @@ var ShinyApp = function() {
   var reconnectDelay = (function() {
     var attempts = 0;
     // Time to wait before each reconnection attempt. If we go through all of
-    // these values, use otherDelay.
-    var delays = [1000, 1000, 2000, 2000, 5000, 5000];
-    var otherDelay = 10000;
+    // these values, use otherDelay. Add 500ms to each one so that in the last
+    // 0.5s, it shows "..."
+    var delays = [1500, 1500, 2500, 2500, 5500, 5500];
+    var otherDelay = 10500;
 
     return {
       next: function() {
@@ -734,7 +735,7 @@ var ShinyApp = function() {
 {
   let notificationID = null;
 
-  exports.showReconnectDialog = exports.showReconnectDialog || (function() {
+  exports.showReconnectDialog = (function() {
     var reconnectTime = null;
 
     function updateTime() {
@@ -742,7 +743,7 @@ var ShinyApp = function() {
       // If the time has been removed, exit and don't reschedule this function.
       if ($time.length === 0) return;
 
-      var seconds = Math.round((reconnectTime - new Date().getTime()) / 1000) + 1;
+      var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1000);
       if (seconds > 0) {
         $time.text(" in " + seconds + "s");
       } else {
@@ -762,7 +763,7 @@ var ShinyApp = function() {
         return;
 
       var html = '<div id="shiny-reconnect-dialog">' +
-        '<span id="shiny-reconnect-text">Connecting to new session</span>' +
+        '<span id="shiny-reconnect-text">Attempting to reconnect</span>' +
         '<span id="shiny-reconnect-time"></span><br>' +
         '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>' +
         '</div>';
@@ -771,14 +772,14 @@ var ShinyApp = function() {
         html: html,
         duration: null,
         closeButton: false,
-        type: 'error'
+        type: 'warning'
       });
 
       updateTime();
     };
   })();
 
-  exports.hideReconnectDialog = exports.hideReconnectDialog || function() {
+  exports.hideReconnectDialog = function() {
     if (notificationID) {
       exports.notifications.remove(notificationID);
       notificationID = null;

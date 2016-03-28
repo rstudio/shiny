@@ -87,9 +87,6 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
   naWrapper <- createWrapper(na)
 
   renderFunc <- function(shinysession, name, ...) {
-    session <<- shinysession
-    outputName <<- name
-
     striped <- stripedWrapper()
     hover <- hoverWrapper()
     bordered <- borderedWrapper()

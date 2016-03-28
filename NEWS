@@ -7,7 +7,9 @@ shiny 0.13.1.9001
   (or Link's) label and/or icon. Also check that the icon argument (for both
   creation and updating of a button) is valid and throw a warning otherwise.
 
-* Fixes #1056: Upgrades Bootstrap to 3.3.6
+* Fixed #1056: Upgraded Bootstrap to 3.3.6.
+
+* Updated ion.RangeSlider to 2.1.2.
 
 * Fixed #561: DataTables might pop up a warning when the data is updated
   extremely frequently.

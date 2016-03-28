@@ -15,20 +15,42 @@ globalVariables('func')
 #' @param outputArgs A list of arguments to pass to the \code{uiFunc}. Render
 #'   functions should include \code{outputArgs = list()} in their own parameter
 #'   list, and pass through the value to \code{markRenderFunction}, to allow
-#'   app authors to customize outputs.
+#'   app authors to customize outputs. (Currently, this is only supported for
+#'   dynamically generated UIs, such as those created by Shiny code snippets
+#'   embedded in R Markdown documents).
 #' @return The \code{renderFunc} function, with annotations.
 #'
 #' @export
 markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
+  tracker <- new.env()
+  tracker$executed <- FALSE
+
+  origRenderFunc <- renderFunc
+  renderFunc <- function(...) {
+    # Was tracker executed?
+    if (length(outputArgs) != 0 && !tracker$executed) {
+      warning("Unused argument: outputArgs. The argument outputArgs is only ",
+              "meant to be used when embedding snippets of Shiny code in an ",
+              "R Markdown code chunk (using runtime: shiny). When running a ",
+              "full Shiny app, please set the output arguments directly in ",
+              "the corresponding plot function of your UI code.")
+      tracker$executed <- TRUE # Stop warning from happening again
+    }
+    origRenderFunc(...)
+  }
+
   structure(renderFunc,
             class      = c("shiny.render.function", "function"),
             outputFunc = uiFunc,
-            outputArgs = outputArgs)
+            outputArgs = outputArgs,
+            tracker    = tracker)
 }
 
 useRenderFunction <- function(renderFunc, inline = FALSE) {
   outputFunction <- attr(renderFunc, "outputFunc")
   outputArgs <- attr(renderFunc, "outputArgs")
+  tracker <- attr(renderFunc, "tracker")
+  tracker$executed <- TRUE
 
   for (arg in names(outputArgs)) {
     if (!arg %in% names(formals(outputFunction))) {

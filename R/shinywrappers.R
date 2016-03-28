@@ -177,6 +177,9 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
   installExprFunction(expr, "func", env, quoted)
 
   renderFunc <- function(shinysession, name, ...) {
+    session <<- shinysession
+    outputName <<- name
+
     imageinfo <- func()
     # Should the file be deleted after being sent? If .deleteFile not set or if
     # TRUE, then delete; otherwise don't delete.
@@ -241,7 +244,10 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE, func = NULL,
     installExprFunction(expr, "func", env, quoted)
   }
 
-  renderFunc <- function() {
+  renderFunc <- function(shinysession, name, ...) {
+    session <<- shinysession
+    outputName <<- name
+
     op <- options(width = width)
     on.exit(options(op), add = TRUE)
     paste(utils::capture.output(func()), collapse = "\n")
@@ -288,7 +294,9 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
     installExprFunction(expr, "func", env, quoted)
   }
 
-  renderFunc <- function() {
+  renderFunc <- function(shinysession, name, ...) {
+    session <<- shinysession
+    outputName <<- name
     value <- func()
     return(paste(utils::capture.output(cat(value)), collapse="\n"))
   }
@@ -335,6 +343,9 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
   }
 
   renderFunc <- function(shinysession, name, ...) {
+    session <<- shinysession
+    outputName <<- name
+
     result <- func()
     if (is.null(result) || length(result) == 0)
       return(NULL)
@@ -402,7 +413,9 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 #'
 #' @export
 downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()) {
-  renderFunc <-function(shinysession, name, ...) {
+  renderFunc <- function(shinysession, name, ...) {
+    session <<- shinysession
+    outputName <<- name
     shinysession$registerDownload(name, filename, contentType, content)
   }
   markRenderFunction(downloadButton, renderFunc, outputArgs = outputArgs)
@@ -479,6 +492,9 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
   installExprFunction(expr, "func", env, quoted)
 
   renderFunc <- function(shinysession, name, ...) {
+    session <<- shinysession
+    outputName <<- name
+
     if (is.function(options)) options <- options()
     options <- checkDT9(options)
     res <- checkAsIs(options)

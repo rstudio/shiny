@@ -86,8 +86,10 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
   digitsWrapper <- createWrapper(digits)
   naWrapper <- createWrapper(na)
 
-  # Main render function
-  markRenderFunction(tableOutput, function() {
+  renderFunc <- function(shinysession, name, ...) {
+    session <<- shinysession
+    outputName <<- name
+
     striped <- stripedWrapper()
     hover <- hoverWrapper()
     bordered <- borderedWrapper()
@@ -137,7 +139,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
       cols <- paste(vapply(data, defaultAlignment, character(1)), collapse = "")
       cols <- paste0(names, cols)
     } else {
-    ## Case 2: user-specified alignment
+      ## Case 2: user-specified alignment
       num_cols <- if (rownames) nchar(align) else nchar(align)+1
       valid <- !grepl("[^lcr\\?]", align)
       if (num_cols == ncol(data)+1 && valid) {
@@ -208,5 +210,8 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
       }
     }
     return(tab)
-  }, outputArgs = outputArgs)
+  }
+
+  # Main render function
+  markRenderFunction(tableOutput, renderFunc, outputArgs = outputArgs)
 }

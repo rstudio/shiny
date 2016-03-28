@@ -314,7 +314,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   })
 #' }
 renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
-                     func=NULL, outputArgs=list()) {
+                     outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
   renderFunc <- function(shinysession, name, ...) {

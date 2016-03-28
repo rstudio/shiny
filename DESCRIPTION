@@ -131,6 +131,7 @@ Collate:
     'reactives.R'
     'render-plot.R'
     'render-table.R'
+    'restore.R'
     'run-url.R'
     'server-input-handlers.R'
     'server.R'

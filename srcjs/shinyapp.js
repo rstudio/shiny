@@ -670,6 +670,9 @@ var ShinyApp = function() {
   addMessageHandler("resetBrush", function(message) {
     exports.resetBrush(message.brushId);
   });
+  addMessageHandler('historyReplaceState', function(message) {
+    window.history.replaceState(null, null, message.url);
+  });
 
   // Progress reporting ====================================================
 

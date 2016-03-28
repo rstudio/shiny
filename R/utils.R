@@ -539,7 +539,13 @@ shinyCallingHandlers <- function(expr) {
         return()
 
       handle <- getOption('shiny.error')
-      if (is.function(handle)) handle()
+      if (is.function(handle)) {
+        if ("condition" %in% names(formals(handle))) {
+          handle(condition = e)
+        } else {
+          handle()
+        }
+      }
     }
   )
 }
@@ -1295,3 +1301,17 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
 
   relabelWrapper
 }
+
+MutableValue <- R6Class("MutableValue",
+  public = list(
+    get = function() {
+      private$value
+    },
+    set = function(value) {
+      private$value <- value
+    }
+  ),
+  private = list(
+    value = NULL
+  )
+)

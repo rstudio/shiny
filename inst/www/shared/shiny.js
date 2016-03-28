@@ -1130,6 +1130,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       window.location.reload();
     });
 
+    addMessageHandler('historyReplaceState', function (message) {
+      window.history.replaceState(null, null, message.url);
+    });
+
     // Progress reporting ====================================================
 
     var progressHandlers = {

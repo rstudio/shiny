@@ -737,6 +737,13 @@ buildTabset <- function(tabs,
   if (!is.null(id))
     ulClass <- paste(ulClass, "shiny-tab-input")
 
+  if (anyNamed(tabs)) {
+    nms <- names(tabs)
+    nms <- nms[nzchar(nms)]
+    stop("Tabs should all be unnamed arguments, but some are named: ",
+         paste(nms, collapse = ", "))
+  }
+
   tabNavList <- tags$ul(class = ulClass, id = id)
   tabContent <- tags$div(class = "tab-content")
   firstTab <- TRUE

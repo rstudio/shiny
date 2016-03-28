@@ -330,8 +330,7 @@
   color: #000;
 }
 
-
-#shiny-reconnect-now {
+.shiny-notification-content-action a {
   color: rgb(51, 122, 183);
   text-decoration: underline;
   font-weight: bold;

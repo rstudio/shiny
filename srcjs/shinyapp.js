@@ -759,17 +759,16 @@ var ShinyApp = function() {
       reconnectTime = new Date().getTime() + delay;
 
       // If there's already a reconnect dialog, don't add another
-      if ($('#shiny-reconnect-dialog').length > 0)
+      if ($('#shiny-reconnect-text').length > 0)
         return;
 
-      var html = '<div id="shiny-reconnect-dialog">' +
-        '<span id="shiny-reconnect-text">Attempting to reconnect</span>' +
-        '<span id="shiny-reconnect-time"></span><br>' +
-        '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>' +
-        '</div>';
+      var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span>' +
+                 '<span id="shiny-reconnect-time"></span>';
+      var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
 
       notificationID = exports.notifications.show({
         html: html,
+        action: action,
         duration: null,
         closeButton: false,
         type: 'warning'

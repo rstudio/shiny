@@ -33,7 +33,7 @@ markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
               "meant to be used when embedding snippets of Shiny code in an ",
               "R Markdown code chunk (using runtime: shiny). When running a ",
               "full Shiny app, please set the output arguments directly in ",
-              "the corresponding plot function of your UI code.")
+              "the corresponding output function of your UI code.")
       tracker$executed <- TRUE # Stop warning from happening again
     }
     origRenderFunc(...)
@@ -221,8 +221,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   object.
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
-#' @param func A function that may print output and/or return a printable R
-#'   object (deprecated; use \code{expr} instead).
+#'   is useful if you want to save an expression in a variable.
 #' @param width The value for \code{\link{options}('width')}.
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to \code{\link{verbatimTextOutput}} when \code{renderPrint} is used
@@ -233,13 +232,9 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 #' @example res/text-example.R
 #'
 #' @export
-renderPrint <- function(expr, env = parent.frame(), quoted = FALSE, func = NULL,
+renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list()) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg="renderPrint: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
+  installExprFunction(expr, "func", env, quoted)
 
   renderFunc <- function(shinysession, name, ...) {
     op <- options(width = width)
@@ -268,8 +263,6 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE, func = NULL,
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
-#' @param func A function that returns an R object that can be used as an
-#'   argument to \code{cat}.(deprecated; use \code{expr} instead).
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to \code{\link{textOutput}} when \code{renderText} is used in an
 #'   interactive R Markdown document.
@@ -281,12 +274,8 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE, func = NULL,
 #'
 #' @export
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
-                       func=NULL, outputArgs=list()) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg="renderText: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
+                       outputArgs=list()) {
+  installExprFunction(expr, "func", env, quoted)
 
   renderFunc <- function(shinysession, name, ...) {
     value <- func()
@@ -309,8 +298,6 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
-#' @param func A function that returns a Shiny tag object, \code{\link{HTML}},
-#'   or a list of such objects (deprecated; use \code{expr} instead).
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to \code{\link{uiOutput}} when \code{renderUI} is used in an
 #'   interactive R Markdown document.
@@ -328,30 +315,14 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #' }
 renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
                      func=NULL, outputArgs=list()) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg="renderUI: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
+  installExprFunction(expr, "func", env, quoted)
 
   renderFunc <- function(shinysession, name, ...) {
     result <- func()
     if (is.null(result) || length(result) == 0)
       return(NULL)
 
-    result <- takeSingletons(result, shinysession$singletons, desingleton=FALSE)$ui
-    result <- surroundSingletons(result)
-    dependencies <- lapply(resolveDependencies(findDependencies(result)),
-                           createWebDependency)
-    names(dependencies) <- NULL
-
-    # renderTags returns a list with head, singletons, and html
-    output <- list(
-      html = doRenderTags(result),
-      deps = dependencies
-    )
-
-    return(output)
+    processDeps(result, shinysession)
   }
 
   markRenderFunction(uiOutput, renderFunc, outputArgs = outputArgs)

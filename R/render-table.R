@@ -43,8 +43,6 @@
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})?
 #'   This is useful if you want to save an expression in a variable.
-#' @param func A function that returns an R object that can be used with
-#'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
 #' @param outputArgs A list of arguments to be passed through to the
 #'   implicit call to \code{\link{tableOutput}} when \code{renderTable} is
 #'   used in an interactive R Markdown document.
@@ -56,12 +54,8 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         rownames = FALSE, colnames = TRUE,
                         digits = NULL, na = "NA", ...,
                         env = parent.frame(), quoted = FALSE,
-                        func = NULL, outputArgs=list()) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg = "renderTable: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
+                        outputArgs=list()) {
+  installExprFunction(expr, "func", env, quoted)
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)
 

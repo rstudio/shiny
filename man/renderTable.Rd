@@ -7,8 +7,7 @@
 renderTable(expr, striped = FALSE, hover = FALSE, bordered = FALSE,
   spacing = c("s", "xs", "m", "l"), width = "auto", align = NULL,
   rownames = FALSE, colnames = TRUE, digits = NULL, na = "NA", ...,
-  env = parent.frame(), quoted = FALSE, func = NULL,
-  outputArgs = list())
+  env = parent.frame(), quoted = FALSE, outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used with
@@ -58,9 +57,6 @@ and \code{\link[xtable]{print.xtable}}.}
 
 \item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})?
 This is useful if you want to save an expression in a variable.}
-
-\item{func}{A function that returns an R object that can be used with
-\code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).}
 
 \item{outputArgs}{A list of arguments to be passed through to the
 implicit call to \code{\link{tableOutput}} when \code{renderTable} is

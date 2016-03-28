@@ -4,7 +4,7 @@
 \alias{renderPrint}
 \title{Printable Output}
 \usage{
-renderPrint(expr, env = parent.frame(), quoted = FALSE, func = NULL,
+renderPrint(expr, env = parent.frame(), quoted = FALSE,
   width = getOption("width"), outputArgs = list())
 }
 \arguments{
@@ -13,10 +13,8 @@ object.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This}
-
-\item{func}{A function that may print output and/or return a printable R
-object (deprecated; use \code{expr} instead).}
+\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
+is useful if you want to save an expression in a variable.}
 
 \item{width}{The value for \code{\link{options}('width')}.}
 

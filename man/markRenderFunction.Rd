@@ -16,7 +16,9 @@ slot.}
 \item{outputArgs}{A list of arguments to pass to the \code{uiFunc}. Render
 functions should include \code{outputArgs = list()} in their own parameter
 list, and pass through the value to \code{markRenderFunction}, to allow
-app authors to customize outputs.}
+app authors to customize outputs. (Currently, this is only supported for
+dynamically generated UIs, such as those created by Shiny code snippets
+embedded in R Markdown documents).}
 }
 \value{
 The \code{renderFunc} function, with annotations.

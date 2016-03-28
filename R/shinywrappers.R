@@ -54,9 +54,9 @@ useRenderFunction <- function(renderFunc, inline = FALSE) {
 
   for (arg in names(outputArgs)) {
     if (!arg %in% names(formals(outputFunction))) {
-      warning(paste0("Unused argument: in 'outputArgs', '",
-                     arg, "' is not an valid argument for ",
-                     "the output function"))
+      stop(paste0("Unused argument: in 'outputArgs', '",
+                  arg, "' is not an valid argument for ",
+                  "the output function"))
       outputArgs[[arg]] <- NULL
     }
   }

@@ -669,6 +669,10 @@ var ShinyApp = function() {
     });
   });
 
+  addMessageHandler('historyReplaceState', function(message) {
+    window.history.replaceState(null, null, message.url);
+  });
+
   // Progress reporting ====================================================
 
   var progressHandlers = {

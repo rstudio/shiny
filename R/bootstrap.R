@@ -43,7 +43,7 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
       # remainder of tags passed to the function
       list(...)
     ),
-    bootstrapDependency()
+    bootstrapLib()
   )
 }
 
@@ -61,10 +61,6 @@ bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 #' @inheritParams bootstrapPage
 #' @export
 bootstrapLib <- function(theme = NULL) {
-  attachDependencies(tagList(), bootstrapDependency(theme))
-}
-
-bootstrapDependency <- function(theme = NULL) {
   htmlDependency("bootstrap", "3.3.6",
     c(
       href = "shared/bootstrap",

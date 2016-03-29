@@ -86,13 +86,16 @@
   (as opposed to the request that downloaded the web page for the app).
 }
 \item{allowReconnect(value)}{
-  If \code{value} is \code{TRUE}, this tells the browser that, if the
-  session ends due to the network connection closing, attempt to reconnect
-  to the server. If a reconnection is successful, the browser will send all
-  the current input values to the new session on the server, and the server
-  will recalculate any outputs and send them back to the client. If
-  \code{value} is \code{FALSE}, reconnections will be disabled (this is the
-  default state).
+  If \code{value} is \code{TRUE} and run in a hosting environment (Shiny
+  Server or Connect) with reconnections enabled,  then when the session ends
+  due to the network connection closing, the client will attempt to
+  reconnect to the server. If a reconnection is successful, the browser will
+  send all the current input values to the new session on the server, and
+  the server will recalculate any outputs and send them back to the client.
+  If \code{value} is \code{FALSE}, reconnections will be disabled (this is
+  the default state). If \code{"force"}, then the client browser will always
+  attempt to reconnect. The only reason to use \code{"force"} is for testing
+  on a local connection (without Shiny Server or Connect).
 }
 \item{sendCustomMessage(type, message)}{
   Sends a custom message to the web page. \code{type} must be a

@@ -4,7 +4,11 @@
 \alias{showReactLog}
 \title{Reactive Log Visualizer}
 \usage{
-showReactLog()
+showReactLog(time = TRUE)
+}
+\arguments{
+\item{time}{A boolean that specifies whether or not to display the
+time that each reactive.}
 }
 \description{
 Provides an interactive browser-based tool for visualizing reactive

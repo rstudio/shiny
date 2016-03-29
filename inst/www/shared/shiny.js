@@ -701,8 +701,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     this.$scheduleReconnect = function (delay) {
       var self = this;
-      console.log("Waiting " + delay / 1000 + "s before trying to reconnect.");
-
       scheduledReconnect = setTimeout(function () {
         self.reconnect();
       }, delay);
@@ -715,22 +713,20 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var reconnectDelay = function () {
       var attempts = 0;
       // Time to wait before each reconnection attempt. If we go through all of
-      // these values, use otherDelay. Add 500ms to each one so that in the last
-      // 0.5s, it shows "..."
-      var delays = [1500, 1500, 2500, 2500, 5500, 5500];
-      var otherDelay = 10500;
+      // these values, repeated use the last one. Add 500ms to each one so that
+      // in the last 0.5s, it shows "..."
+      var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
 
       return {
         next: function next() {
-          var delay;
-          if (attempts >= delays.length) {
-            delay = otherDelay;
-          } else {
-            delay = delays[attempts];
+          var i = attempts;
+          // Instead of going off the end, use the last one
+          if (i >= delays.length) {
+            i = delays.length - 1;
           }
 
           attempts++;
-          return delay;
+          return delays[i];
         },
         reset: function reset() {
           attempts = 0;
@@ -1214,60 +1210,50 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     exports.progressHandlers = progressHandlers;
   }).call(ShinyApp.prototype);
 
-  // showReconnectDialog and hideReconnectDialog are conceptually related to the
-  // socket code, but they belong in the Shiny/exports object.
-  {
-    (function () {
-      var notificationID = null;
+  exports.showReconnectDialog = function () {
+    var reconnectTime = null;
 
-      exports.showReconnectDialog = function () {
-        var reconnectTime = null;
+    function updateTime() {
+      var $time = $("#shiny-reconnect-time");
+      // If the time has been removed, exit and don't reschedule this function.
+      if ($time.length === 0) return;
 
-        function updateTime() {
-          var $time = $("#shiny-reconnect-time");
-          // If the time has been removed, exit and don't reschedule this function.
-          if ($time.length === 0) return;
+      var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1000);
+      if (seconds > 0) {
+        $time.text(" in " + seconds + "s");
+      } else {
+        $time.text("...");
+      }
 
-          var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1000);
-          if (seconds > 0) {
-            $time.text(" in " + seconds + "s");
-          } else {
-            $time.text("...");
-          }
+      // Reschedule this function after 1 second
+      setTimeout(updateTime, 1000);
+    }
 
-          // Reschedule this function after 1 second
-          setTimeout(updateTime, 1000);
-        }
+    return function (delay) {
+      reconnectTime = new Date().getTime() + delay;
 
-        return function (delay) {
-          reconnectTime = new Date().getTime() + delay;
+      // If there's already a reconnect dialog, don't add another
+      if ($('#shiny-reconnect-text').length > 0) return;
 
-          // If there's already a reconnect dialog, don't add another
-          if ($('#shiny-reconnect-text').length > 0) return;
+      var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span>' + '<span id="shiny-reconnect-time"></span>';
+      var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
 
-          var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span>' + '<span id="shiny-reconnect-time"></span>';
-          var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
+      exports.notifications.show({
+        id: "reconnect",
+        html: html,
+        action: action,
+        duration: null,
+        closeButton: false,
+        type: 'warning'
+      });
 
-          notificationID = exports.notifications.show({
-            html: html,
-            action: action,
-            duration: null,
-            closeButton: false,
-            type: 'warning'
-          });
+      updateTime();
+    };
+  }();
 
-          updateTime();
-        };
-      }();
-
-      exports.hideReconnectDialog = function () {
-        if (notificationID) {
-          exports.notifications.remove(notificationID);
-          notificationID = null;
-        }
-      };
-    })();
-  }
+  exports.hideReconnectDialog = function () {
+    exports.notifications.remove("reconnect");
+  };
 
   //---------------------------------------------------------------------
   // Source file: ../srcjs/notifications.js

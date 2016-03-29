@@ -1,5 +1,10 @@
 shiny 0.13.1.9001
 --------------------------------------------------------------------------------
+
+* Added the ability for the client browser to reconnect to a new session on
+  the server, by setting `session$allowReconnect(TRUE)`. This requires a
+  version of Shiny Server that supports reconnections. (#1074)
+
 * Improved `renderTable()` function to make the tables look prettier and also
   provide the user with a lot more parameters to customize their tables with.
 

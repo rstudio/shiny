@@ -5,14 +5,19 @@
 \alias{showNotification}
 \title{Show or remove a notification}
 \usage{
-showNotification(ui, duration = 5, closeButton = TRUE, id = NULL,
-  type = c("default", "message", "warning", "error"),
+showNotification(ui, action = NULL, duration = 5, closeButton = TRUE,
+  id = NULL, type = c("default", "message", "warning", "error"),
   session = getDefaultReactiveDomain())
 
 removeNotification(id = NULL, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{ui}{Content of message.}
+
+\item{action}{Message content that represents an action. For example, this
+could be a link that the user can click on. This is separate from \code{ui}
+so customized layouts can handle the main notification content separately
+from action content.}
 
 \item{duration}{Number of seconds to display the message before it
 disappears. Use \code{NULL} to make the message not automatically
@@ -47,7 +52,9 @@ shinyApp(
   ),
   server = function(input, output) {
     observeEvent(input$show, {
-      showNotification("Message text")
+      showNotification("Message text",
+        action = a(href = "javascript:location.reload();", "Reload page")
+      )
     })
   }
 )

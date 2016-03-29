@@ -3,6 +3,10 @@
 #' These functions show and remove notifications in a Shiny application.
 #'
 #' @param ui Content of message.
+#' @param action Message content that represents an action. For example, this
+#'   could be a link that the user can click on. This is separate from \code{ui}
+#'   so customized layouts can handle the main notification content separately
+#'   from action content.
 #' @param duration Number of seconds to display the message before it
 #'   disappears. Use \code{NULL} to make the message not automatically
 #'   disappear.
@@ -28,7 +32,9 @@
 #'   ),
 #'   server = function(input, output) {
 #'     observeEvent(input$show, {
-#'       showNotification("Message text")
+#'       showNotification("Message text",
+#'         action = a(href = "javascript:location.reload();", "Reload page")
+#'       )
 #'     })
 #'   }
 #' )
@@ -61,8 +67,9 @@
 #' )
 #' }
 #' @export
-showNotification <- function(ui, duration = 5, closeButton = TRUE,
-  id = NULL, type = c("default", "message", "warning", "error"),
+showNotification <- function(ui, action = NULL, duration = 5,
+  closeButton = TRUE, id = NULL,
+  type = c("default", "message", "warning", "error"),
   session = getDefaultReactiveDomain())
 {
 
@@ -70,11 +77,13 @@ showNotification <- function(ui, duration = 5, closeButton = TRUE,
     id <- randomID()
 
   res <- processDeps(ui, session)
+  actionRes <- processDeps(action, session)
 
   session$sendNotification("show",
     list(
       html = res$html,
-      deps = res$deps,
+      action = actionRes$html,
+      deps = c(res$deps, actionRes$deps),
       duration = if (!is.null(duration)) duration * 1000,
       closeButton = closeButton,
       id = id,

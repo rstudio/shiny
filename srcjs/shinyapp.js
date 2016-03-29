@@ -17,8 +17,6 @@ var ShinyApp = function() {
   this.$pendingMessages = [];
   this.$activeRequests = {};
   this.$nextRequestId = 0;
-
-  this.$allowReconnect = false;
 };
 
 (function() {
@@ -41,20 +39,6 @@ var ShinyApp = function() {
 
   this.isConnected = function() {
     return !!this.$socket;
-  };
-
-  var scheduledReconnect = null;
-  this.reconnect = function() {
-    // This function can be invoked directly even if there's a scheduled
-    // reconnect, so be sure to clear any such scheduled reconnects.
-    clearTimeout(scheduledReconnect);
-
-    if (this.isConnected())
-      throw "Attempted to reconnect, but already connected.";
-
-    this.$socket = this.createSocket();
-    this.$initialInput = $.extend({}, this.$inputValues);
-    this.$updateConditionals();
   };
 
   this.createSocket = function () {
@@ -81,22 +65,15 @@ var ShinyApp = function() {
 
       var ws = new WebSocket(protocol + '//' + window.location.host + defaultPath);
       ws.binaryType = 'arraybuffer';
-
       return ws;
     };
 
     var socket = createSocketFunc();
-    var hasOpened = false;
     socket.onopen = function() {
-      hasOpened = true;
-
       $(document).trigger({
         type: 'shiny:connected',
         socket: socket
       });
-
-      self.onConnected();
-
       socket.send(JSON.stringify({
         method: 'init',
         data: self.$initialInput
@@ -110,22 +87,13 @@ var ShinyApp = function() {
     socket.onmessage = function(e) {
       self.dispatchMessage(e.data);
     };
-    // Called when a successfully-opened websocket is closed, or when an
-    // attempt to open a connection fails.
     socket.onclose = function() {
-      // These things are needed only if we've successfully opened the
-      // websocket.
-      if (hasOpened) {
-        $(document).trigger({
-          type: 'shiny:disconnected',
-          socket: socket
-        });
-
-        self.$notifyDisconnected();
-      }
-
-      self.onDisconnected(); // Must be run before self.$removeSocket()
-      self.$removeSocket();
+      $(document).trigger({
+        type: 'shiny:disconnected',
+        socket: socket
+      });
+      $(document.body).addClass('disconnected');
+      self.$notifyDisconnected();
     };
     return socket;
   };
@@ -168,73 +136,6 @@ var ShinyApp = function() {
         parent.postMessage('disconnected', origin);
       }
     }
-  };
-
-  this.$removeSocket = function() {
-    this.$socket = null;
-  };
-
-  this.$scheduleReconnect = function(delay) {
-    var self = this;
-    console.log("Waiting " + (delay/1000) + "s before trying to reconnect.");
-
-    scheduledReconnect = setTimeout(function() { self.reconnect(); }, delay);
-  };
-
-  // How long should we wait before trying the next reconnection?
-  // The delay will increase with subsequent attempts.
-  // .next: Return the time to wait for next connection, and increment counter.
-  // .reset: Reset the attempt counter.
-  var reconnectDelay = (function() {
-    var attempts = 0;
-    // Time to wait before each reconnection attempt. If we go through all of
-    // these values, use otherDelay. Add 500ms to each one so that in the last
-    // 0.5s, it shows "..."
-    var delays = [1500, 1500, 2500, 2500, 5500, 5500];
-    var otherDelay = 10500;
-
-    return {
-      next: function() {
-        var delay;
-        if (attempts >= delays.length) {
-          delay = otherDelay;
-        } else {
-          delay = delays[attempts];
-        }
-
-        attempts++;
-        return delay;
-      },
-      reset: function() {
-        attempts = 0;
-      }
-    };
-  })();
-
-  this.onDisconnected = function() {
-    // Add gray-out overlay, if not already present
-    var $overlay = $('#shiny-disconnected-overlay');
-    if ($overlay.length === 0) {
-      $(document.body).append('<div id="shiny-disconnected-overlay"></div>');
-    }
-
-    // To try a reconnect, both the app (this.$allowReconnect) and the
-    // server (this.$socket.allowReconnect) must allow reconnections, or
-    // session$allowReconnect("force") was called. The "force" option should
-    // only be used for testing.
-    if ((this.$allowReconnect === true && this.$socket.allowReconnect === true) ||
-        this.$allowReconnect === "force")
-    {
-      var delay = reconnectDelay.next();
-      exports.showReconnectDialog(delay);
-      this.$scheduleReconnect(delay);
-    }
-  };
-
-  this.onConnected = function() {
-    $('#shiny-disconnected-overlay').remove();
-    exports.hideReconnectDialog();
-    reconnectDelay.reset();
   };
 
   // NB: Including blobs will cause IE to break!
@@ -588,14 +489,6 @@ var ShinyApp = function() {
     }
   });
 
-  addMessageHandler('allowReconnect', function(message) {
-    if (message === true || message === false || message === "force") {
-      this.$allowReconnect = message;
-    } else {
-      throw "Invalid value for allowReconnect: " + message;
-    }
-  });
-
   addMessageHandler('custom', function(message) {
     // For old-style custom messages - should deprecate and migrate to new
     // method
@@ -726,61 +619,3 @@ var ShinyApp = function() {
 
 
 }).call(ShinyApp.prototype);
-
-
-
-// showReconnectDialog and hideReconnectDialog are conceptually related to the
-// socket code, but they belong in the Shiny/exports object.
-{
-  let notificationID = null;
-
-  exports.showReconnectDialog = (function() {
-    var reconnectTime = null;
-
-    function updateTime() {
-      var $time = $("#shiny-reconnect-time");
-      // If the time has been removed, exit and don't reschedule this function.
-      if ($time.length === 0) return;
-
-      var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1000);
-      if (seconds > 0) {
-        $time.text(" in " + seconds + "s");
-      } else {
-        $time.text("...");
-      }
-
-      // Reschedule this function after 1 second
-      setTimeout(updateTime, 1000);
-    }
-
-
-    return function(delay) {
-      reconnectTime = new Date().getTime() + delay;
-
-      // If there's already a reconnect dialog, don't add another
-      if ($('#shiny-reconnect-text').length > 0)
-        return;
-
-      var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span>' +
-                 '<span id="shiny-reconnect-time"></span>';
-      var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
-
-      notificationID = exports.notifications.show({
-        html: html,
-        action: action,
-        duration: null,
-        closeButton: false,
-        type: 'warning'
-      });
-
-      updateTime();
-    };
-  })();
-
-  exports.hideReconnectDialog = function() {
-    if (notificationID) {
-      exports.notifications.remove(notificationID);
-      notificationID = null;
-    }
-  };
-}

@@ -1,9 +1,13 @@
-shiny 0.13.1.9001
+shiny 0.13.2.9001
 --------------------------------------------------------------------------------
 
 * Added the ability for the client browser to reconnect to a new session on
   the server, by setting `session$allowReconnect(TRUE)`. This requires a
   version of Shiny Server that supports reconnections. (#1074)
+
+* Added a new notification API. From R, there are new functions
+  `showNotification` and `hideNotification`. From JavaScript, there is a new
+  `Shiny.notification` object that controls notifications. (#1141)
 
 * Improved `renderTable()` function to make the tables look prettier and also
   provide the user with a lot more parameters to customize their tables with.
@@ -35,6 +39,18 @@ shiny 0.13.1.9001
   pointing out those problems.
 
 * Added support for horizontal dividers in `navbarMenu`. (#888)
+
+* Fixed #543, #855: When navbarPage had a navbarMenu as the first item, it
+  not automatically select an item.
+
+* navbarPage previously did not have an option to set the selected tab. (#970)
+
+* navbarMenu now has dividers and dropdown headers (#888)
+
+shiny 0.13.2
+--------------------------------------------------------------------------------
+
+* Updated documentation for `htmlTemplate`.
 
 shiny 0.13.1
 --------------------------------------------------------------------------------

@@ -34,6 +34,8 @@ shiny 0.13.1.9001
   and unmatched braces, parens, and brackets, and will print out messages
   pointing out those problems.
 
+* Added support for horizontal dividers in `navbarMenu`. (#888)
+
 shiny 0.13.1
 --------------------------------------------------------------------------------
 

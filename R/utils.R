@@ -165,6 +165,20 @@ dropNullsOrEmpty <- function(x) {
   x[!vapply(x, nullOrEmpty, FUN.VALUE=logical(1))]
 }
 
+# Given a vector/list, return TRUE if any elements are named, FALSE otherwise.
+anyNamed <- function(x) {
+  # Zero-length vector
+  if (length(x) == 0) return(FALSE)
+
+  nms <- names(x)
+
+  # List with no name attribute
+  if (is.null(nms)) return(FALSE)
+
+  # List with name attribute; check for any ""
+  any(nzchar(nms))
+}
+
 # Given a vector/list, return TRUE if any elements are unnamed, FALSE otherwise.
 anyUnnamed <- function(x) {
   # Zero-length vector

@@ -15,7 +15,10 @@ navbarMenu(title, ..., icon = NULL)
 \arguments{
 \item{title}{The title to display in the navbar}
 
-\item{...}{\code{\link{tabPanel}} elements to include in the page}
+\item{...}{\code{\link{tabPanel}} elements to include in the page. The
+\code{navbarMenu} function also accepts strings, which will be used as menu
+section headers. If the string is a set of dashes like \code{"----"} a
+horizontal separator will be displayed in the menu.}
 
 \item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
@@ -23,12 +26,12 @@ will correspond to the \code{value} argument that is passed to
 \code{\link{tabPanel}}.}
 
 \item{position}{Determines whether the navbar should be displayed at the top
-of the page with normal scrolling behavior (\code{"static-top"}), pinned
-at the top (\code{"fixed-top"}), or pinned at the bottom
+of the page with normal scrolling behavior (\code{"static-top"}), pinned at
+the top (\code{"fixed-top"}), or pinned at the bottom
 (\code{"fixed-bottom"}). Note that using \code{"fixed-top"} or
 \code{"fixed-bottom"} will cause the navbar to overlay your body content,
-unless you add padding, e.g.:
-\code{tags$style(type="text/css", "body {padding-top: 70px;}")}}
+unless you add padding, e.g.: \code{tags$style(type="text/css", "body
+{padding-top: 70px;}")}}
 
 \item{header}{Tag or list of tags to display as a common header above all
 tabPanels.}
@@ -83,6 +86,8 @@ shinyUI(navbarPage("App Title",
   tabPanel("Plot"),
   navbarMenu("More",
     tabPanel("Summary"),
+    "----",
+    "Section header",
     tabPanel("Table")
   )
 ))

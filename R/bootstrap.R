@@ -250,6 +250,9 @@ pageWithSidebar <- function(headerPanel,
 #'   server logic to determine which of the current tabs is active. The value
 #'   will correspond to the \code{value} argument that is passed to
 #'   \code{\link{tabPanel}}.
+#' @param selected The \code{value} (or, if none was supplied, the \code{title})
+#'   of the tab that should be selected by default. If \code{NULL}, the first
+#'   tab will be selected.
 #' @param position Determines whether the navbar should be displayed at the top
 #'   of the page with normal scrolling behavior (\code{"static-top"}), pinned at
 #'   the top (\code{"fixed-top"}), or pinned at the bottom
@@ -307,6 +310,7 @@ pageWithSidebar <- function(headerPanel,
 navbarPage <- function(title,
                        ...,
                        id = NULL,
+                       selected = NULL,
                        position = c("static-top", "fixed-top", "fixed-bottom"),
                        header = NULL,
                        footer = NULL,
@@ -336,7 +340,7 @@ navbarPage <- function(title,
 
   # build the tabset
   tabs <- list(...)
-  tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id)
+  tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id, selected)
 
   # built the container div dynamically to support optional collapsibility
   if (collapsible) {
@@ -721,132 +725,188 @@ navlistPanel <- function(...,
 }
 
 
-buildTabset <- function(tabs,
-                        ulClass,
-                        textFilter = NULL,
-                        id = NULL,
-                        selected = NULL) {
+buildTabset <- function(tabs, ulClass, textFilter = NULL,
+                        id = NULL, selected = NULL) {
 
-  # build tab nav list and tab content div
+  # This function proceeds in two phases. First, it scans over all the items
+  # to find and mark which tab should start selected. Then it actually builds
+  # the tab nav and tab content lists.
 
-  # add tab input sentinel class if we have an id
-  if (!is.null(id))
-    ulClass <- paste(ulClass, "shiny-tab-input")
-
-  if (anyNamed(tabs)) {
-    nms <- names(tabs)
-    nms <- nms[nzchar(nms)]
-    stop("Tabs should all be unnamed arguments, but some are named: ",
-         paste(nms, collapse = ", "))
+  # Mark an item as selected
+  markSelected <- function(x) {
+    attr(x, "selected") <- TRUE
+    x
   }
 
-  tabNavList <- tags$ul(class = ulClass, id = id)
-  tabContent <- tags$div(class = "tab-content")
-  firstTab <- TRUE
-  tabsetId <- p_randomInt(1000, 10000)
-  tabId <- 1
-  for (divTag in tabs) {
-
-    # check for text; pass it to the textFilter or skip it if there is none
-    if (is.character(divTag)) {
-      if (!is.null(textFilter))
-        tabNavList <- tagAppendChild(tabNavList, textFilter(divTag))
-      next
-    }
-
-    # compute id and assign it to the div
-    thisId <- paste("tab", tabsetId, tabId, sep="-")
-    divTag$attribs$id <- thisId
-    tabId <- tabId + 1
-
-    tabValue <- divTag$attribs$`data-value`
-
-    # function to append an optional icon to an aTag
-    appendIcon <- function(aTag, iconClass) {
-      if (!is.null(iconClass)) {
-        # for font-awesome we specify fixed-width
-        if (grepl("fa-", iconClass, fixed = TRUE))
-          iconClass <- paste(iconClass, "fa-fw")
-        aTag <- tagAppendChild(aTag, icon(name = NULL, class = iconClass))
-      }
-      aTag
-    }
-
-    # check for a navbarMenu and handle appropriately
-    if (inherits(divTag, "shiny.navbarmenu")) {
-
-      # create the a tag
-      aTag <- tags$a(href="#",
-                     class="dropdown-toggle",
-                     `data-toggle`="dropdown")
-
-      # add optional icon
-      aTag <- appendIcon(aTag, divTag$iconClass)
-
-      # add the title and caret
-      aTag <- tagAppendChild(aTag, divTag$title)
-      aTag <- tagAppendChild(aTag, tags$b(class="caret"))
-
-      # build the dropdown list element
-      liTag <- tags$li(class = "dropdown", aTag)
-
-      # text filter for separators
-      textFilter <- function(text) {
-        if (grepl("^\\-+$", text))
-          tags$li(class="divider")
-        else
-          tags$li(class="dropdown-header", text)
-      }
-
-      # build the child tabset
-      tabset <- buildTabset(divTag$tabs, "dropdown-menu", textFilter)
-      liTag <- tagAppendChild(liTag, tabset$navList)
-
-      # don't add a standard tab content div, rather add the list of tab
-      # content divs that are contained within the tabset
-      divTag <- NULL
-      tabContent <- tagAppendChildren(tabContent,
-                                      list = tabset$content$children)
-    }
-    # else it's a standard navbar item
-    else {
-      # create the a tag
-      aTag <- tags$a(href=paste("#", thisId, sep=""),
-                     `data-toggle` = "tab",
-                     `data-value` = tabValue)
-
-      # append optional icon
-      aTag <- appendIcon(aTag, divTag$attribs$`data-icon-class`)
-
-      # add the title
-      aTag <- tagAppendChild(aTag, divTag$attribs$title)
-
-      # create the li tag
-      liTag <- tags$li(aTag)
-    }
-
-    if (is.null(tabValue)) {
-      tabValue <- divTag$attribs$title
-    }
-
-    # If appropriate, make this the selected tab (don't ever do initial
-    # selection of tabs that are within a navbarMenu)
-    if ((ulClass != "dropdown-menu") &&
-       ((firstTab && is.null(selected)) ||
-        (!is.null(selected) && identical(selected, tabValue)))) {
-      liTag$attribs$class <- "active"
-      divTag$attribs$class <- "tab-pane active"
-      firstTab = FALSE
-    }
-
-    divTag$attribs$title <- NULL
-
-    # append the elements to our lists
-    tabNavList <- tagAppendChild(tabNavList, liTag)
-    tabContent <- tagAppendChild(tabContent, divTag)
+  # Returns TRUE if an item is selected
+  isSelected <- function(x) {
+    isTRUE(attr(x, "selected", exact = TRUE))
   }
 
-  list(navList = tabNavList, content = tabContent)
+  # Returns TRUE if a list of tab items contains a selected tab, FALSE
+  # otherwise.
+  containsSelected <- function(tabs) {
+    any(vapply(tabs, isSelected, logical(1)))
+  }
+
+  # Take a pass over all tabs, and mark the selected tab.
+  foundSelectedItem <- FALSE
+  findAndMarkSelected <- function(tabs, selected) {
+    lapply(tabs, function(divTag) {
+      if (foundSelectedItem) {
+        # If we already found the selected tab, no need to keep looking
+
+      } else if (is.character(divTag)) {
+        # Strings don't represent selectable items
+
+      } else if (inherits(divTag, "shiny.navbarmenu")) {
+        # Navbar menu
+        divTag$tabs <- findAndMarkSelected(divTag$tabs, selected)
+
+      } else {
+        # Regular tab item
+        if (is.null(selected)) {
+          # If selected tab isn't specified, mark first available item
+          # as selected.
+          foundSelectedItem <<- TRUE
+          divTag <- markSelected(divTag)
+
+        } else {
+          # If selected tab is specified, check for a match
+          tabValue <- divTag$attribs$`data-value` %OR% divTag$attribs$title
+          if (identical(selected, tabValue)) {
+            foundSelectedItem <<- TRUE
+            divTag <- markSelected(divTag)
+          }
+        }
+      }
+
+      return(divTag)
+    })
+  }
+
+
+  # Append an optional icon to an aTag
+  appendIcon <- function(aTag, iconClass) {
+    if (!is.null(iconClass)) {
+      # for font-awesome we specify fixed-width
+      if (grepl("fa-", iconClass, fixed = TRUE))
+        iconClass <- paste(iconClass, "fa-fw")
+      aTag <- tagAppendChild(aTag, icon(name = NULL, class = iconClass))
+    }
+    aTag
+  }
+
+  # Build the tabset
+  build <- function(tabs, ulClass, textFilter = NULL, id = NULL) {
+    # add tab input sentinel class if we have an id
+    if (!is.null(id))
+      ulClass <- paste(ulClass, "shiny-tab-input")
+
+    if (anyNamed(tabs)) {
+      nms <- names(tabs)
+      nms <- nms[nzchar(nms)]
+      stop("Tabs should all be unnamed arguments, but some are named: ",
+           paste(nms, collapse = ", "))
+    }
+
+    tabNavList <- tags$ul(class = ulClass, id = id)
+    tabContent <- tags$div(class = "tab-content")
+    tabsetId <- p_randomInt(1000, 10000)
+    tabId <- 1
+
+    buildItem <- function(divTag) {
+      # check for text; pass it to the textFilter or skip it if there is none
+      if (is.character(divTag)) {
+        if (!is.null(textFilter)) {
+          tabNavList <<- tagAppendChild(tabNavList, textFilter(divTag))
+        }
+
+      } else if (inherits(divTag, "shiny.navbarmenu")) {
+
+        # create the a tag
+        aTag <- tags$a(href="#",
+                       class="dropdown-toggle",
+                       `data-toggle`="dropdown")
+
+        # add optional icon
+        aTag <- appendIcon(aTag, divTag$iconClass)
+
+        # add the title and caret
+        aTag <- tagAppendChild(aTag, divTag$title)
+        aTag <- tagAppendChild(aTag, tags$b(class="caret"))
+
+        # build the dropdown list element
+        liTag <- tags$li(class = "dropdown", aTag)
+
+        # text filter for separators
+        textFilter <- function(text) {
+          if (grepl("^\\-+$", text))
+            tags$li(class="divider")
+          else
+            tags$li(class="dropdown-header", text)
+        }
+
+        # build the child tabset
+        tabset <- build(divTag$tabs, "dropdown-menu", textFilter)
+        liTag <- tagAppendChild(liTag, tabset$navList)
+
+        # If this navbar menu contains a selected item, mark it as active
+        if (containsSelected(divTag$tabs)) {
+          liTag$attribs$class <- paste(liTag$attribs$class, "active")
+        }
+
+        tabNavList <<- tagAppendChild(tabNavList, liTag)
+        # don't add a standard tab content div, rather add the list of tab
+        # content divs that are contained within the tabset
+        tabContent <<- tagAppendChildren(tabContent,
+                                        list = tabset$content$children)
+
+      } else {
+        # Standard navbar item
+        # compute id and assign it to the div
+        thisId <- paste("tab", tabsetId, tabId, sep="-")
+        divTag$attribs$id <- thisId
+        tabId <<- tabId + 1
+
+        tabValue <- divTag$attribs$`data-value`
+
+        # create the a tag
+        aTag <- tags$a(href=paste("#", thisId, sep=""),
+                       `data-toggle` = "tab",
+                       `data-value` = tabValue)
+
+        # append optional icon
+        aTag <- appendIcon(aTag, divTag$attribs$`data-icon-class`)
+
+        # add the title
+        aTag <- tagAppendChild(aTag, divTag$attribs$title)
+
+        # create the li tag
+        liTag <- tags$li(aTag)
+
+        # If selected, set appropriate classes on li tag and div tag.
+        if (isSelected(divTag)) {
+          liTag$attribs$class <- "active"
+          divTag$attribs$class <- "tab-pane active"
+        }
+
+        divTag$attribs$title <- NULL
+
+        # append the elements to our lists
+        tabNavList <<- tagAppendChild(tabNavList, liTag)
+        tabContent <<- tagAppendChild(tabContent, divTag)
+      }
+    }
+
+    lapply(tabs, buildItem)
+    list(navList = tabNavList, content = tabContent)
+  }
+
+
+  # Finally, actually invoke the functions to do the processing.
+  tabs <- findAndMarkSelected(tabs, selected)
+  build(tabs, ulClass, textFilter, id)
 }
 
 

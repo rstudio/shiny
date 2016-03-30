@@ -5,10 +5,10 @@
 \alias{navbarPage}
 \title{Create a page with a top level navigation bar}
 \usage{
-navbarPage(title, ..., id = NULL, position = c("static-top", "fixed-top",
-  "fixed-bottom"), header = NULL, footer = NULL, inverse = FALSE,
-  collapsible = FALSE, collapsable, fluid = TRUE, responsive = NULL,
-  theme = NULL, windowTitle = title)
+navbarPage(title, ..., id = NULL, selected = NULL,
+  position = c("static-top", "fixed-top", "fixed-bottom"), header = NULL,
+  footer = NULL, inverse = FALSE, collapsible = FALSE, collapsable,
+  fluid = TRUE, responsive = NULL, theme = NULL, windowTitle = title)
 
 navbarMenu(title, ..., icon = NULL)
 }
@@ -24,6 +24,10 @@ horizontal separator will be displayed in the menu.}
 server logic to determine which of the current tabs is active. The value
 will correspond to the \code{value} argument that is passed to
 \code{\link{tabPanel}}.}
+
+\item{selected}{The \code{value} (or, if none was supplied, the \code{title})
+of the tab that should be selected by default. If \code{NULL}, the first
+tab will be selected.}
 
 \item{position}{Determines whether the navbar should be displayed at the top
 of the page with normal scrolling behavior (\code{"static-top"}), pinned at

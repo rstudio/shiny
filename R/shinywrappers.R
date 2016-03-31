@@ -22,35 +22,42 @@ globalVariables('func')
 #'
 #' @export
 markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
-  tracker <- new.env()
-  tracker$executed <- FALSE
+  # a mutable object that keeps track of whether `useRenderFunction` has been
+  # executed (this usually only happens when rendering Shiny code snippets in
+  # an interactive R Markdown document); its initial value is FALSE
+  executed_useRenderFunction <- MutableObj$new()
+  executed_useRenderFunction$set(FALSE)
 
   origRenderFunc <- renderFunc
   renderFunc <- function(...) {
-    # Was tracker executed?
-    if (length(outputArgs) != 0 && !tracker$executed) {
+    # if the user provided something through `outputArgs` BUT the
+    # `useRenderFunction` was not executed, then outputArgs will be ignored,
+    # so throw a warning to let user know the correct usage
+    if (length(outputArgs) != 0 && !executed_useRenderFunction$get()) {
       warning("Unused argument: outputArgs. The argument outputArgs is only ",
               "meant to be used when embedding snippets of Shiny code in an ",
               "R Markdown code chunk (using runtime: shiny). When running a ",
               "full Shiny app, please set the output arguments directly in ",
               "the corresponding output function of your UI code.")
-      tracker$executed <- TRUE # Stop warning from happening again
+      # stop warning from happening again for the same object
+      executed_useRenderFunction$set(TRUE)
     }
-    origRenderFunc(...)
+    if (is.null(formals(origRenderFunc))) origRenderFunc()
+    else origRenderFunc(...)
   }
 
   structure(renderFunc,
             class      = c("shiny.render.function", "function"),
             outputFunc = uiFunc,
             outputArgs = outputArgs,
-            tracker    = tracker)
+            executed_useRenderFunction = executed_useRenderFunction)
 }
 
 useRenderFunction <- function(renderFunc, inline = FALSE) {
   outputFunction <- attr(renderFunc, "outputFunc")
   outputArgs <- attr(renderFunc, "outputArgs")
-  tracker <- attr(renderFunc, "tracker")
-  tracker$executed <- TRUE
+  executed <- attr(renderFunc, "executed_useRenderFunction")
+  executed$set(TRUE)
 
   for (arg in names(outputArgs)) {
     if (!arg %in% names(formals(outputFunction))) {
@@ -236,7 +243,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
-  renderFunc <- function(shinysession, name, ...) {
+  renderFunc <- function() {
     op <- options(width = width)
     on.exit(options(op), add = TRUE)
     paste(utils::capture.output(func()), collapse = "\n")
@@ -277,7 +284,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
-  renderFunc <- function(shinysession, name, ...) {
+  renderFunc <- function() {
     value <- func()
     return(paste(utils::capture.output(cat(value)), collapse="\n"))
   }

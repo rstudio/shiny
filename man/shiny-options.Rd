@@ -75,7 +75,7 @@ The default polling interval is 500 milliseconds. You can change this
     simple generic error message is printed instead (the error and strack trace
     printed to the console remain unchanged). If you want this behavior in
     general, but you DO want a particular error message to get displayed to the
-    user, please use \code{stopWithCondition} instead.}
+    user, please use \code{customStop} instead.}
 }
 }
 

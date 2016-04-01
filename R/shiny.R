@@ -579,6 +579,10 @@ ShinySession <- R6Class(
 
           value <- tryCatch(
             shinyCallingHandlers(func()),
+            shiny.custom.error = function(cond) {
+              if (isTRUE(getOption("show.error.messages"))) printError(cond)
+              structure(NULL, class = "try-error", condition = cond)
+            },
             shiny.output.cancel = function(cond) {
               structure(NULL, class = "cancel-output")
             },
@@ -587,25 +591,16 @@ ShinySession <- R6Class(
               # path of try, because we don't want it to print. But we
               # do want to try to return the same looking result so that
               # the code below can send the error to the browser.
-              structure(
-                NULL,
-                class = "try-error",
-                condition = cond
-              )
+              structure(NULL, class = "try-error", condition = cond)
             },
             error = function(cond) {
-              msg <- paste0("Error in output$", name, ": ", conditionMessage(cond), "\n")
-              if (isTRUE(getOption("show.error.messages"))) {
-                printError(cond)
-              }
+              if (isTRUE(getOption("show.error.messages"))) printError(cond)
               if (getOption("shiny.sanitize.errors", TRUE)) {
-                cond$message <- paste("An error has occurred. Check your logs or contact",
-                                      "the app author for clarification.")
-              } else {
-                cond$message <- paste0("Error in output$", name, ": ",
-                                       conditionMessage(cond), "\n")
+                cond <- simpleError(paste("An error has occurred. Check your",
+                                          "logs or contact the app author for",
+                                          "clarification."))
               }
-              invisible(structure(msg, class = "try-error", condition = cond))
+              invisible(structure(NULL, class = "try-error", condition = cond))
             },
             finally = {
               private$sendMessage(recalculating = list(

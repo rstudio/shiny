@@ -310,8 +310,71 @@ HandlerManager <- R6Class("HandlerManager",
         },
         call = .httpServer(
           function (req) {
-            withLogErrors(handlers$invoke(req))
+            # expr <- handlers$invoke(req)
+            print("hello")
+            #withLogErrors(expr)
+            # return(list(status = 400L,
+            #             headers = list(
+            #               'Content-Type' = 'text/plain'
+            #             ),
+            #             body = paste("An error has occurred. Check",
+            #                          "your logs or contact the app",
+            #                          "author for clarification.")))
+            withCallingHandlers(handlers$invoke(req),
+              error = function(cond) {
+                print("error")
+                return("error")
+              },
+              warning = function(cond) {
+                print("warning")
+                return("warning")
+                # if (inherits(cond, 'shiny.custom.error')) {
+                #   return(list(status = 400L,
+                #               headers = list(
+                #                 'Content-Type' = 'text/plain'
+                #               ),
+                #               body = cond$message))
+                # }
+                # if (getOption('shiny.sanitize.errors', TRUE)) {
+                  # return(list(status = 400L,
+                  #             headers = list(
+                  #               'Content-Type' = 'text/plain'
+                  #             ),
+                  #             body = paste("An error has occurred. Check",
+                  #                          "your logs or contact the app",
+                  #                          "author for clarification.")))
+                # } else {
+                #   return(list(status = 400L,
+                #               headers = list(
+                #                 'Content-Type' = 'text/plain'
+                #               ),
+                #               body = cond$message))
+                # }
+              }
+            )
+            # if (getOption('shiny.sanitize.errors', TRUE)) {
+            #   return(list(status = 400L,
+            #               headers = list(
+            #                 'Content-Type' = 'text/plain'
+            #               ),
+            #               body = paste("An error has occurred. Check",
+            #                            "your logs or contact the app",
+            #                            "author for clarification.")))
+            # }
           },
+          # if (getOption("shiny.sanitize.errors", TRUE)) {
+          #   cond <- simpleError(paste("An error has occurred. Check your",
+          #                             "logs or contact the app author for",
+          #                             "clarification."))
+          # }
+
+          # if (reqSize > maxSize) {
+          #   return(list(status = 413L,
+          #               headers = list(
+          #                 'Content-Type' = 'text/plain'
+          #               ),
+          #               body = 'Maximum upload size exceeded'))
+          # }
           getOption('shiny.sharedSecret')
         ),
         onWSOpen = function(ws) {
@@ -333,7 +396,7 @@ HandlerManager <- R6Class("HandlerManager",
         }
 
         # Catch HEAD requests. For the purposes of handler functions, they
-        # should be treated like GET. The difference is that  they shouldn't
+        # should be treated like GET. The difference is that they shouldn't
         # return a body in the http response.
         head_request <- FALSE
         if (identical(req$REQUEST_METHOD, "HEAD")) {

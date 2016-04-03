@@ -4,7 +4,8 @@
 \alias{passwordInput}
 \title{Create a password input control}
 \usage{
-passwordInput(inputId, label, value = "", width = NULL)
+passwordInput(inputId, label, value = "", width = NULL,
+  placeholder = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -15,6 +16,10 @@ passwordInput(inputId, label, value = "", width = NULL)
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
+
+\item{placeholder}{A character string giving the user a hint as to what can
+be entered into the control. Internet Explorer 8 and 9 do not support this
+option.}
 }
 \value{
 A text input control that can be added to a UI definition.

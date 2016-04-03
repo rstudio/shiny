@@ -47,6 +47,8 @@ shiny 0.13.2.9001
 
 * navbarMenu now has dividers and dropdown headers (#888)
 
+* Added `placeholder` option to `passwordInput`.
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

@@ -43,8 +43,9 @@
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})?
 #'   This is useful if you want to save an expression in a variable.
-#' @param func A function that returns an R object that can be used with
-#'   \code{\link[xtable]{xtable}} (deprecated; use \code{expr} instead).
+#' @param outputArgs A list of arguments to be passed through to the
+#'   implicit call to \code{\link{tableOutput}} when \code{renderTable} is
+#'   used in an interactive R Markdown document.
 #'
 #' @export
 renderTable <- function(expr, striped = FALSE, hover = FALSE,
@@ -52,12 +53,9 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         width = "auto", align = NULL,
                         rownames = FALSE, colnames = TRUE,
                         digits = NULL, na = "NA", ...,
-                        env = parent.frame(), quoted = FALSE, func = NULL) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg = "renderTable: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
+                        env = parent.frame(), quoted = FALSE,
+                        outputArgs=list()) {
+  installExprFunction(expr, "func", env, quoted)
 
   if (!is.function(spacing)) spacing <- match.arg(spacing)
 
@@ -82,8 +80,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
   digitsWrapper <- createWrapper(digits)
   naWrapper <- createWrapper(na)
 
-  # Main render function
-  markRenderFunction(tableOutput, function() {
+  renderFunc <- function(shinysession, name, ...) {
     striped <- stripedWrapper()
     hover <- hoverWrapper()
     bordered <- borderedWrapper()
@@ -133,7 +130,7 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
       cols <- paste(vapply(data, defaultAlignment, character(1)), collapse = "")
       cols <- paste0(names, cols)
     } else {
-    ## Case 2: user-specified alignment
+      ## Case 2: user-specified alignment
       num_cols <- if (rownames) nchar(align) else nchar(align)+1
       valid <- !grepl("[^lcr\\?]", align)
       if (num_cols == ncol(data)+1 && valid) {
@@ -204,5 +201,8 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
       }
     }
     return(tab)
-  })
+  }
+
+  # Main render function
+  markRenderFunction(tableOutput, renderFunc, outputArgs = outputArgs)
 }

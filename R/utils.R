@@ -1309,3 +1309,17 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
 
   relabelWrapper
 }
+
+
+# This is a very simple mutable object which only stores one value
+# (which we can set and get). Using this class is sometimes useful
+# when communicating persistent changes across functions.
+Mutable <- R6Class("Mutable",
+  private = list(
+    value = NULL
+  ),
+  public = list(
+    set = function(value) { private$value <- value },
+    get = function() { private$value }
+  )
+)

@@ -37,7 +37,7 @@ For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 }
 \examples{
 \dontrun{
-shinyServer(function(input, output, session) {
+function(input, output, session) {
 
   observe({
     # TRUE if input$controller is even, FALSE otherwise.
@@ -45,7 +45,7 @@ shinyServer(function(input, output, session) {
 
     updateCheckboxInput(session, "inCheckbox", value = x_even)
   })
-})
+}
 }
 }
 \seealso{

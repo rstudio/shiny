@@ -46,7 +46,7 @@ See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
   pages.
 }
 \examples{
-shinyUI(fixedPage(
+fixedPage(
   title = "Hello, Shiny!",
   fixedRow(
     column(width = 4,
@@ -56,7 +56,7 @@ shinyUI(fixedPage(
       "3 offset 2"
     )
   )
-))
+)
 
 }
 \seealso{

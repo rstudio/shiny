@@ -1,7 +1,7 @@
 library(shiny)
 
 # Define UI for slider demo application
-shinyUI(fluidPage(
+fluidPage(
 
   #  Application title
   titlePanel("Sliders"),
@@ -40,4 +40,4 @@ shinyUI(fluidPage(
       tableOutput("values")
     )
   )
-))
+)

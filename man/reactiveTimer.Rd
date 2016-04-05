@@ -35,7 +35,7 @@ See \code{\link{invalidateLater}} as a safer and simpler alternative.
 }
 \examples{
 \dontrun{
-shinyServer(function(input, output, session) {
+function(input, output, session) {
 
   # Anything that calls autoInvalidate will automatically invalidate
   # every 2 seconds.
@@ -58,7 +58,7 @@ shinyServer(function(input, output, session) {
     autoInvalidate()
     hist(isolate(input$n))
   })
-})
+}
 }
 
 }

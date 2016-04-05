@@ -31,7 +31,7 @@
 #' @seealso \code{\link{column}}, \code{\link{sidebarLayout}}
 #'
 #' @examples
-#' shinyUI(fluidPage(
+#' fluidPage(
 #'
 #'   # Application title
 #'   titlePanel("Hello Shiny!"),
@@ -52,9 +52,9 @@
 #'       plotOutput("distPlot")
 #'     )
 #'   )
-#' ))
+#' )
 #'
-#' shinyUI(fluidPage(
+#' fluidPage(
 #'   title = "Hello Shiny!",
 #'   fluidRow(
 #'     column(width = 4,
@@ -64,7 +64,7 @@
 #'       "3 offset 2"
 #'     )
 #'   )
-#' ))
+#' )
 #'
 #' @rdname fluidPage
 #' @export
@@ -115,7 +115,7 @@ fluidRow <- function(...) {
 #' @seealso \code{\link{column}}
 #'
 #' @examples
-#' shinyUI(fixedPage(
+#' fixedPage(
 #'   title = "Hello, Shiny!",
 #'   fixedRow(
 #'     column(width = 4,
@@ -125,7 +125,7 @@ fluidRow <- function(...) {
 #'       "3 offset 2"
 #'     )
 #'   )
-#' ))
+#' )
 #'
 #' @rdname fixedPage
 #' @export
@@ -227,7 +227,7 @@ titlePanel <- function(title, windowTitle=title) {
 #'
 #' @examples
 #' # Define UI
-#' shinyUI(fluidPage(
+#' fluidPage(
 #'
 #'   # Application title
 #'   titlePanel("Hello Shiny!"),
@@ -248,7 +248,7 @@ titlePanel <- function(title, windowTitle=title) {
 #'       plotOutput("distPlot")
 #'     )
 #'   )
-#' ))
+#' )
 #'
 #' @export
 sidebarLayout <- function(sidebarPanel,
@@ -286,13 +286,13 @@ sidebarLayout <- function(sidebarPanel,
 #' @seealso \code{\link{fluidPage}}, \code{\link{flowLayout}}
 #'
 #' @examples
-#' shinyUI(fluidPage(
+#' fluidPage(
 #'   verticalLayout(
 #'     a(href="http://example.com/link1", "Link One"),
 #'     a(href="http://example.com/link2", "Link Two"),
 #'     a(href="http://example.com/link3", "Link Three")
 #'   )
-#' ))
+#' )
 #' @export
 verticalLayout <- function(..., fluid = TRUE) {
   lapply(list(...), function(row) {

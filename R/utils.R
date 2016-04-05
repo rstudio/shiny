@@ -478,7 +478,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'
 #' \dontrun{
 #' # Example of usage within a Shiny app
-#' shinyServer(function(input, output, session) {
+#' function(input, output, session) {
 #'
 #'   output$queryText <- renderText({
 #'     query <- parseQueryString(session$clientData$url_search)
@@ -494,7 +494,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'     # Return a string with key-value pairs
 #'     paste(names(query), query, sep = "=", collapse=", ")
 #'   })
-#' })
+#' }
 #' }
 #'
 parseQueryString <- function(str, nested = FALSE) {

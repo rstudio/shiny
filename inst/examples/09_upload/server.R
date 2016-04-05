@@ -1,6 +1,6 @@
 library(shiny)
 
-shinyServer(function(input, output) {
+function(input, output) {
   output$contents <- renderTable({
     
     # input$file1 will be NULL initially. After the user selects
@@ -17,4 +17,4 @@ shinyServer(function(input, output) {
     read.csv(inFile$datapath, header=input$header, sep=input$sep, 
 				 quote=input$quote)
   })
-})
+}

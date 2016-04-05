@@ -71,7 +71,7 @@ to be removed.
 \examples{
 \dontrun{
 # server.R
-shinyServer(function(input, output, session) {
+function(input, output, session) {
   output$plot <- renderPlot({
     progress <- shiny::Progress$new(session, min=1, max=15)
     on.exit(progress$close())
@@ -85,7 +85,7 @@ shinyServer(function(input, output, session) {
     }
     plot(cars)
   })
-})
+}
 }
 }
 \seealso{

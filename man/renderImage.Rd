@@ -47,7 +47,7 @@ the CSS class name \code{shiny-image-output}.
 \examples{
 \dontrun{
 
-shinyServer(function(input, output, clientData) {
+function(input, output, clientData) {
 
   # A plot of fixed size
   output$plot1 <- renderImage({
@@ -95,7 +95,7 @@ shinyServer(function(input, output, clientData) {
     # Return a list containing the filename
     list(src = filename)
   }, deleteFile = FALSE)
-})
+}
 
 }
 }

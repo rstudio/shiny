@@ -57,7 +57,7 @@
 #' @examples
 #' \dontrun{
 #' # server.R
-#' shinyServer(function(input, output, session) {
+#' function(input, output, session) {
 #'   output$plot <- renderPlot({
 #'     progress <- shiny::Progress$new(session, min=1, max=15)
 #'     on.exit(progress$close())
@@ -71,7 +71,7 @@
 #'     }
 #'     plot(cars)
 #'   })
-#' })
+#' }
 #' }
 #' @seealso \code{\link{withProgress}}
 #' @format NULL
@@ -206,7 +206,7 @@ Progress <- R6Class(
 #' @examples
 #' \dontrun{
 #' # server.R
-#' shinyServer(function(input, output) {
+#' function(input, output) {
 #'   output$plot <- renderPlot({
 #'     withProgress(message = 'Calculation in progress',
 #'                  detail = 'This may take a while...', value = 0, {
@@ -217,7 +217,7 @@ Progress <- R6Class(
 #'     })
 #'     plot(cars)
 #'   })
-#' })
+#' }
 #' }
 #' @seealso \code{\link{Progress}}
 #' @rdname withProgress

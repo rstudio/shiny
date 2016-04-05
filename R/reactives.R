@@ -932,7 +932,7 @@ setAutoflush <- local({
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, session) {
+#' function(input, output, session) {
 #'
 #'   # Anything that calls autoInvalidate will automatically invalidate
 #'   # every 2 seconds.
@@ -955,7 +955,7 @@ setAutoflush <- local({
 #'     autoInvalidate()
 #'     hist(isolate(input$n))
 #'   })
-#' })
+#' }
 #' }
 #'
 #' @export
@@ -1010,7 +1010,7 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #'
 #' @examples
 #' \dontrun{
-#' shinyServer(function(input, output, session) {
+#' function(input, output, session) {
 #'
 #'   observe({
 #'     # Re-execute this reactive expression after 1000 milliseconds
@@ -1029,7 +1029,7 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #'     invalidateLater(2000)
 #'     hist(isolate(input$n))
 #'   })
-#' })
+#' }
 #' }
 #'
 #' @export
@@ -1103,12 +1103,12 @@ coerceToFunc <- function(x) {
 #' @examples
 #' \dontrun{
 #' # Assume the existence of readTimestamp and readValue functions
-#' shinyServer(function(input, output, session) {
+#' function(input, output, session) {
 #'   data <- reactivePoll(1000, session, readTimestamp, readValue)
 #'   output$dataTable <- renderTable({
 #'     data()
 #'   })
-#' })
+#' }
 #' }
 #'
 #' @export
@@ -1170,7 +1170,7 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #' @examples
 #' \dontrun{
 #' # Per-session reactive file reader
-#' shinyServer(function(input, output, session)) {
+#' function(input, output, session) {
 #'   fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
 #'
 #'   output$data <- renderTable({
@@ -1182,7 +1182,7 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #' # the same reader, so read.csv only gets executed once no matter how many
 #' # user sessions are connected.
 #' fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
-#' shinyServer(function(input, output, session)) {
+#' function(input, output, session) {
 #'   output$data <- renderTable({
 #'     fileData()
 #'   })

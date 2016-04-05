@@ -76,7 +76,7 @@ case, you can use the \code{Progress} reference class.
 \examples{
 \dontrun{
 # server.R
-shinyServer(function(input, output) {
+function(input, output) {
   output$plot <- renderPlot({
     withProgress(message = 'Calculation in progress',
                  detail = 'This may take a while...', value = 0, {
@@ -87,7 +87,7 @@ shinyServer(function(input, output) {
     })
     plot(cars)
   })
-})
+}
 }
 }
 \seealso{

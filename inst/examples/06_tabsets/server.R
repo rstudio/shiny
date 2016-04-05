@@ -1,7 +1,7 @@
 library(shiny)
 
 # Define server logic for random distribution application
-shinyServer(function(input, output) {
+function(input, output) {
   
   # Reactive expression to generate the requested distribution.
   # This is called whenever the inputs change. The output
@@ -41,4 +41,4 @@ shinyServer(function(input, output) {
     data.frame(x=data())
   })
   
-})
+}

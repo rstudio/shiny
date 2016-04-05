@@ -48,7 +48,7 @@ For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 }
 \examples{
 \dontrun{
-shinyServer(function(input, output, session) {
+function(input, output, session) {
 
   observe({
     # We'll use the input$controller variable multiple times, so save it as x
@@ -60,7 +60,7 @@ shinyServer(function(input, output, session) {
       start = paste("2013-01-", x, sep=""))
       end = paste("2013-12-", x, sep=""))
   })
-})
+}
 }
 }
 \seealso{

@@ -1,7 +1,7 @@
 library(shiny)
 
 # Define UI for dataset viewer application
-shinyUI(fluidPage(
+fluidPage(
   
   # Application title
   titlePanel("Shiny Text"),
@@ -24,4 +24,4 @@ shinyUI(fluidPage(
       tableOutput("view")
     )
   )
-))
+)

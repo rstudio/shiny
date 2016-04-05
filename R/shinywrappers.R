@@ -133,7 +133,7 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #' @examples
 #' \dontrun{
 #'
-#' shinyServer(function(input, output, clientData) {
+#' function(input, output, clientData) {
 #'
 #'   # A plot of fixed size
 #'   output$plot1 <- renderImage({
@@ -181,7 +181,7 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'     # Return a list containing the filename
 #'     list(src = filename)
 #'   }, deleteFile = FALSE)
-#' })
+#' }
 #'
 #' }
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,

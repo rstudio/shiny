@@ -38,7 +38,7 @@ For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 }
 \examples{
 \dontrun{
-shinyServer(function(input, output, session) {
+function(input, output, session) {
 
   observe({
     # Updates goButton's label and icon
@@ -56,7 +56,7 @@ shinyServer(function(input, output, session) {
     updateActionButton(session, "goButton3",
       label = "New label")
   })
-})
+}
 }
 }
 \seealso{

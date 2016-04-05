@@ -59,12 +59,12 @@ values and reactive expressions.
 \examples{
 \dontrun{
 # Assume the existence of readTimestamp and readValue functions
-shinyServer(function(input, output, session) {
+function(input, output, session) {
   data <- reactivePoll(1000, session, readTimestamp, readValue)
   output$dataTable <- renderTable({
     data()
   })
-})
+}
 }
 
 }

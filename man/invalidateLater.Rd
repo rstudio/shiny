@@ -29,7 +29,7 @@ possible to stop this cycle by adding conditional logic that prevents the
 }
 \examples{
 \dontrun{
-shinyServer(function(input, output, session) {
+function(input, output, session) {
 
   observe({
     # Re-execute this reactive expression after 1000 milliseconds
@@ -48,7 +48,7 @@ shinyServer(function(input, output, session) {
     invalidateLater(2000)
     hist(isolate(input$n))
   })
-})
+}
 }
 
 }

@@ -25,7 +25,7 @@ area occupies 2/3 of the horizontal width and typically contains outputs.
 }
 \examples{
 # Define UI
-shinyUI(fluidPage(
+fluidPage(
 
   # Application title
   titlePanel("Hello Shiny!"),
@@ -46,7 +46,7 @@ shinyUI(fluidPage(
       plotOutput("distPlot")
     )
   )
-))
+)
 
 }
 

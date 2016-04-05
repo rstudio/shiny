@@ -26,7 +26,7 @@ Change the selected tab on the client
 }
 \examples{
 \dontrun{
-shinyServer(function(input, output, session) {
+function(input, output, session) {
 
   observe({
     # TRUE if input$controller is even, FALSE otherwise.
@@ -40,7 +40,7 @@ shinyServer(function(input, output, session) {
       updateTabsetPanel(session, "inTabset", selected = "panel1")
     }
   })
-})
+}
 }
 }
 \seealso{

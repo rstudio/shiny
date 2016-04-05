@@ -45,7 +45,7 @@ See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
   pages.
 }
 \examples{
-shinyUI(fluidPage(
+fluidPage(
 
   # Application title
   titlePanel("Hello Shiny!"),
@@ -66,9 +66,9 @@ shinyUI(fluidPage(
       plotOutput("distPlot")
     )
   )
-))
+)
 
-shinyUI(fluidPage(
+fluidPage(
   title = "Hello Shiny!",
   fluidRow(
     column(width = 4,
@@ -78,7 +78,7 @@ shinyUI(fluidPage(
       "3 offset 2"
     )
   )
-))
+)
 
 }
 \seealso{

@@ -3,7 +3,7 @@
 \name{showModal}
 \alias{removeModal}
 \alias{showModal}
-\title{Show a modal dialog}
+\title{Show or remove a modal dialog}
 \usage{
 showModal(ui, session = getDefaultReactiveDomain())
 
@@ -16,7 +16,8 @@ removeModal(session = getDefaultReactiveDomain())
 \code{shinyServer}.}
 }
 \description{
-Show a modal dialog
+This causes a modal dialog to be displayed in the client browser, and is
+typically used with \code{\link{modalDialog}}.
 }
 \seealso{
 \code{\link{modalDialog}} for examples.

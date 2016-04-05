@@ -12,7 +12,7 @@ modalDialog(..., title = NULL, footer = modalButton("Dismiss"),
 
 \item{title}{An optional title for the dialog.}
 
-\item{footer}{UI for footer. Use \coode{NULL} for no footer.}
+\item{footer}{UI for footer. Use \code{NULL} for no footer.}
 
 \item{dismissable}{If \code{TRUE}, the modal dialog can be dismissed by
 clicking outside the dialog box, or be pressing the Escape key. If
@@ -21,6 +21,114 @@ ways; instead it must be dismissed by clicking on the dismiss button, or
 from a call to \code{\link{removeModal}} on the server.}
 }
 \description{
-Create a modal dialog UI
+This creates the UI for a modal dialog, using Bootstrap's modal class. Modals
+are typically used for showing important messages, or for presenting UI that
+requires input from the user, such as a username and password input.
+}
+\examples{
+if (interactive()) {
+# Display an important message that can be dismissed only by clicking the
+# dismiss button.
+shinyApp(
+  ui = basicPage(
+    actionButton("show", "Show modal dialog")
+  ),
+  server = function(input, output) {
+    observeEvent(input$show, {
+      showModal(modalDialog(
+        title = "Important message",
+        "This is an important message!"
+      ))
+    })
+  }
+)
+
+
+# Display a message that can be dismissed by clicking outside the modal dialog,
+# or by pressing Esc.
+shinyApp(
+  ui = basicPage(
+    actionButton("show", "Show modal dialog")
+  ),
+  server = function(input, output) {
+    observeEvent(input$show, {
+      showModal(modalDialog(
+        title = "Somewhat important message",
+        "This is a somewhat important message.",
+        dismissable = TRUE,
+        footer = NULL
+      ))
+    })
+  }
+)
+
+
+# Display a modal that requires valid username and password input.
+shinyApp(
+  ui = basicPage(
+    actionButton("show", "Show modal dialog"),
+    verbatimTextOutput("loginInfo")
+  ),
+  server = function(input, output) {
+    # A string with the current login status. This is in a reactiveValues
+    # object so that it can trigger reactivity.
+    vals <- reactiveValues(loginStatus = "Not logged in.")
+
+    # Attempt logging in with a username and password, returning TRUE if
+    # successful and FALSE if not.
+    login <- function(username, password) {
+      # In a real-world use case, this would check against some sort of user
+      # database instead of just checking that the values are identical to
+      # hard-coded values.
+      if (identical(username, "user1") && identical(password, "pass1")) {
+        vals$loginStatus <- paste0('Logged in as "', username, '"')
+        return(TRUE)
+
+      } else {
+        vals$loginStatus <- "Not logged in."
+        return(FALSE)
+      }
+    }
+
+    # Return the UI for a modal dialog with username/password inputs.
+    # If 'failed' is TRUE, then display a message that the previous username
+    # and password were invalid.
+    loginModal <- function(failed = FALSE) {
+      modalDialog(
+        textInput("username", "Username"),
+        passwordInput("password", "Password"),
+        span('(Try logging in with "user1" and "pass1")'),
+        if (failed)
+          div(tags$b("Invalid username/password", style = "color: red;")),
+
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton("login", "Log in")
+        )
+      )
+    }
+
+    observeEvent(input$show, {
+      showModal(loginModal())
+    })
+
+    # When login button is pressed, attempt to log in. If successful, remove the
+    # modal. If not show another modal, but this time with a failure message.
+    observeEvent(input$login, {
+      if (login(input$username, input$password)) {
+        removeModal()
+      } else {
+        showModal(loginModal(failed = TRUE))
+      }
+    })
+
+    # Display current login status
+    output$loginInfo <- renderText({
+      vals$loginStatus
+    })
+  }
+)
+
+}
 }
 

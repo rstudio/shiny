@@ -1075,6 +1075,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if (message.type === 'show') exports.notifications.show(message.message);else if (message.type === 'remove') exports.notifications.remove(message.message);else throw 'Unkown notification type: ' + message.type;
     });
 
+    addMessageHandler('modal', function (message) {
+      if (message.type === 'show') exports.modal.show(message.message);else if (message.type === 'remove') exports.modal.remove(); // For 'remove', message content isn't used
+      else throw 'Unkown modal type: ' + message.type;
+    });
+
     addMessageHandler('response', function (message) {
       var requestId = message.tag;
       var request = this.$activeRequests[requestId];
@@ -1412,6 +1417,63 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       remove: remove
     };
   }();
+
+  //---------------------------------------------------------------------
+  // Source file: ../srcjs/modal.js
+
+  exports.modal = {
+
+    // Show a modal dialog. This is meant to handle two types of cases: one is
+    // that the content is a Bootstrap modal dialog, and the other is that the
+    // content is non-Bootstrap. Bootstrap modals require some special handling,
+    // which is coded in here.
+    show: function show() {
+      var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      var _ref2$html = _ref2.html;
+      var html = _ref2$html === undefined ? '' : _ref2$html;
+      var _ref2$deps = _ref2.deps;
+      var deps = _ref2$deps === undefined ? [] : _ref2$deps;
+
+
+      // If there was an existing Bootstrap modal, then there will be a modal-
+      // backdrop div that was added outside of the modal wrapper, and it must be
+      // removed; otherwise there can be multiple of these divs.
+      $('.modal-backdrop').remove();
+
+      // Get existing wrapper DOM element, or create if needed.
+      var $modal = $('#shiny-modal-wrapper');
+      if ($modal.length === 0) {
+        $modal = $('<div id="shiny-modal-wrapper"></div>');
+        $('body').append($modal);
+
+        // If the wrapper's content is a Bootstrap modal, then when the inner
+        // modal is hidden, remove the entire thing, including wrapper.
+        $modal.on('hidden.bs.modal', function () {
+          exports.unbindAll($modal);
+          $modal.remove();
+        });
+      }
+
+      // Set/replace contents of wrapper with html.
+      exports.renderContent($modal, { html: html, deps: deps });
+    },
+
+    remove: function remove() {
+      var $modal = $('#shiny-modal-wrapper');
+
+      // Look for a Bootstrap modal and if present, trigger hide event. This will
+      // trigger the hidden.bs.modal callback that we set in show(), which unbinds
+      // and removes the element.
+      if ($modal.find('.modal').length > 0) {
+        $modal.find('.modal').modal('hide');
+      } else {
+        // If not a Bootstrap modal dialog, simply unbind and remove it.
+        exports.unbindAll($modal);
+        $modal.remove();
+      }
+    }
+  };
 
   //---------------------------------------------------------------------
   // Source file: ../srcjs/file_processor.js

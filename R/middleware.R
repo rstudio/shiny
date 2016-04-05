@@ -299,9 +299,7 @@ HandlerManager <- R6Class("HandlerManager",
 
           if (reqSize > maxSize) {
             return(list(status = 413L,
-              headers = list(
-                'Content-Type' = 'text/plain'
-              ),
+              headers = list('Content-Type' = 'text/plain'),
               body = 'Maximum upload size exceeded'))
           }
           else {
@@ -309,72 +307,30 @@ HandlerManager <- R6Class("HandlerManager",
           }
         },
         call = .httpServer(
-          function (req) {
-            # expr <- handlers$invoke(req)
-            print("hello")
-            #withLogErrors(expr)
-            # return(list(status = 400L,
-            #             headers = list(
-            #               'Content-Type' = 'text/plain'
-            #             ),
-            #             body = paste("An error has occurred. Check",
-            #                          "your logs or contact the app",
-            #                          "author for clarification.")))
-            withCallingHandlers(handlers$invoke(req),
-              error = function(cond) {
-                print("error")
-                return("error")
-              },
-              warning = function(cond) {
-                print("warning")
-                return("warning")
-                # if (inherits(cond, 'shiny.custom.error')) {
-                #   return(list(status = 400L,
-                #               headers = list(
-                #                 'Content-Type' = 'text/plain'
-                #               ),
-                #               body = cond$message))
-                # }
-                # if (getOption('shiny.sanitize.errors', TRUE)) {
-                  # return(list(status = 400L,
-                  #             headers = list(
-                  #               'Content-Type' = 'text/plain'
-                  #             ),
-                  #             body = paste("An error has occurred. Check",
-                  #                          "your logs or contact the app",
-                  #                          "author for clarification.")))
-                # } else {
-                #   return(list(status = 400L,
-                #               headers = list(
-                #                 'Content-Type' = 'text/plain'
-                #               ),
-                #               body = cond$message))
-                # }
-              }
-            )
-            # if (getOption('shiny.sanitize.errors', TRUE)) {
-            #   return(list(status = 400L,
-            #               headers = list(
-            #                 'Content-Type' = 'text/plain'
-            #               ),
-            #               body = paste("An error has occurred. Check",
-            #                            "your logs or contact the app",
-            #                            "author for clarification.")))
-            # }
-          },
-          # if (getOption("shiny.sanitize.errors", TRUE)) {
-          #   cond <- simpleError(paste("An error has occurred. Check your",
-          #                             "logs or contact the app author for",
-          #                             "clarification."))
-          # }
+          function(req,
+                   full = getOption("shiny.fullstacktrace", FALSE),
+                   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
-          # if (reqSize > maxSize) {
-          #   return(list(status = 413L,
-          #               headers = list(
-          #                 'Content-Type' = 'text/plain'
-          #               ),
-          #               body = 'Maximum upload size exceeded'))
-          # }
+             withCallingHandlers(captureStackTraces(handlers$invoke(req)),
+               error = function(cond) {
+                 # Don't print shiny.silent.error (i.e. validation errors)
+                 if (inherits(cond, "shiny.silent.error")) return()
+                 if (isTRUE(getOption("show.error.messages"))) {
+                   printError(cond, full = full, offset = offset)
+                   sanitizeErrors = getOption('shiny.sanitize.errors', TRUE)
+
+                   if (inherits(cond, 'shiny.custom.error') || !sanitizeErrors) {
+                     stop(cond$message, call. = FALSE)
+                   }
+                   else {
+                     stop(paste("An error has occurred. Check your logs or",
+                                "contact the app author for clarification."),
+                          call. = FALSE)
+                   }
+                 }
+               }
+             )
+          },
           getOption('shiny.sharedSecret')
         ),
         onWSOpen = function(ws) {

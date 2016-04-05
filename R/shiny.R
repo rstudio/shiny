@@ -886,13 +886,11 @@ ShinySession <- R6Class(
         # ..stacktraceon matches with the top-level ..stacktraceoff..
         result <- try(shinyCallingHandlers(Context$new(getDefaultReactiveDomain(), '[download]')$run(
           function() { ..stacktraceon..(download$func(tmpdata)) }
-        )))
+        )), silent = TRUE)
         if (inherits(result, 'try-error')) {
           cond <- attr(result, 'condition', exact = TRUE)
-          printError(cond)
           unlink(tmpdata)
-          return(httpResponse(500, 'text/plain; charset=UTF-8',
-                              enc2utf8(conditionMessage(cond))))
+          stop(result)
         }
         return(httpResponse(
           200,

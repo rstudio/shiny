@@ -710,6 +710,11 @@ ShinySession <- R6Class(
         notification = list(type = type, message = message)
       )
     },
+    sendModal = function(type, message) {
+      private$sendMessage(
+        modal = list(type = type, message = message)
+      )
+    },
     dispatch = function(msg) {
       method <- paste('@', msg$method, sep='')
       func <- try(self[[method]], silent = TRUE)

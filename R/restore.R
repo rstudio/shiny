@@ -64,7 +64,7 @@ restoreInput <- function(id, defaultValue) {
 restoreValue <- function(id, defaultValue) {
   ctx <- getCurrentRestoreContext()
   if (id %in% names(ctx$values)) {
-    ctx$input[[id]]
+    ctx$values[[id]]
   } else {
     defaultValue
   }

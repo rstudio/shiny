@@ -553,13 +553,7 @@ shinyCallingHandlers <- function(expr) {
         return()
 
       handle <- getOption('shiny.error')
-      if (is.function(handle)) {
-        if ("condition" %in% names(formals(handle))) {
-          handle(condition = e)
-        } else {
-          handle()
-        }
-      }
+      if (is.function(handle)) handle()
     }
   )
 }
@@ -1397,6 +1391,7 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
   relabelWrapper
 }
 
+
 # This is a very simple mutable object which only stores one value
 # (which we can set and get). Using this class is sometimes useful
 # when communicating persistent changes across functions.
@@ -1407,19 +1402,5 @@ Mutable <- R6Class("Mutable",
   public = list(
     set = function(value) { private$value <- value },
     get = function() { private$value }
-  )
-)
-
-MutableValue <- R6Class("MutableValue",
-  public = list(
-    get = function() {
-      private$value
-    },
-    set = function(value) {
-      private$value <- value
-    }
-  ),
-  private = list(
-    value = NULL
   )
 )

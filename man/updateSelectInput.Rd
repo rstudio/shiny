@@ -56,32 +56,35 @@ For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{choices=character(0)}.
 }
 \examples{
-\dontrun{
-function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
 
+ui <- fluidPage(
+  p("The checkbox group controls the select input"),
+  checkboxGroupInput("inCheckboxGroup", "Input checkbox",
+    c("Item A", "Item B", "Item C")),
+  selectInput("inSelect", "Select input",
+    c("Item A", "Item B", "Item C"))
+)
+
+server <- function(input, output, session) {
   observe({
-    # We'll use the input$controller variable multiple times, so save it as x
-    # for convenience.
-    x <- input$controller
+    x <- input$inCheckboxGroup
 
-    # Create a list of new options, where the name of the items is something
-    # like 'option label x 1', and the values are 'option-x-1'.
-    s_options <- list()
-    s_options[[sprintf("option label \%d 1", x)]] <- sprintf("option-\%d-1", x)
-    s_options[[sprintf("option label \%d 2", x)]] <- sprintf("option-\%d-2", x)
+    # Can use character(0) to remove all choices
+    if (is.null(x))
+      x <- character(0)
 
-    # Change values for input$inSelect
-    updateSelectInput(session, "inSelect", choices = s_options)
-
-    # Can also set the label and select an item (or more than one if it's a
-    # multi-select)
-    updateSelectInput(session, "inSelect2",
-      label = paste("Select label", x),
-      choices = s_options,
-      selected = sprintf("option-\%d-2", x)
+    # Can also set the label and select items
+    updateSelectInput(session, "inSelect",
+      label = paste("Select input label", length(x)),
+      choices = x,
+      selected = tail(x, 1)
     )
   })
 }
+
+shinyApp(ui, server)
 }
 }
 \seealso{

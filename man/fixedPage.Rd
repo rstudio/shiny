@@ -46,7 +46,10 @@ See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
   pages.
 }
 \examples{
-fixedPage(
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fixedPage(
   title = "Hello, Shiny!",
   fixedRow(
     column(width = 4,
@@ -57,6 +60,9 @@ fixedPage(
     )
   )
 )
+
+shinyApp(ui, server = function(input, output) { })
+}
 
 }
 \seealso{

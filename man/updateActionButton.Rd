@@ -37,10 +37,23 @@ For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{choices=character(0)}.
 }
 \examples{
-\dontrun{
-function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
 
+ui <- fluidPage(
+  actionButton("update", "Update other buttons"),
+  br(),
+  actionButton("goButton", "Go"),
+  br(),
+  actionButton("goButton2", "Go 2", icon = icon("area-chart")),
+  br(),
+  actionButton("goButton3", "Go 3")
+)
+
+server <- function(input, output, session) {
   observe({
+    req(input$update)
+
     # Updates goButton's label and icon
     updateActionButton(session, "goButton",
       label = "New label",
@@ -54,9 +67,11 @@ function(input, output, session) {
     # Leaves goButton3's icon, if it exists,
     # unchaged and changes its label
     updateActionButton(session, "goButton3",
-      label = "New label")
+      label = "New label 3")
   })
 }
+
+shinyApp(ui, server)
 }
 }
 \seealso{

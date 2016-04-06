@@ -22,7 +22,7 @@
 #' @export
 #' @examples
 #' ## Only run this example in interactive R sessions
-#'   if (interactive()) {
+#' if (interactive()) {
 #'   runUrl('https://github.com/rstudio/shiny_example/archive/master.tar.gz')
 #'
 #'   # Can run an app from a subdirectory in the archive

@@ -6,9 +6,16 @@
 #' @seealso \code{\link{textInput}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   sliderInput("controller", "Controller", 0, 20, 10),
+#'   textInput("inText", "Input text"),
+#'   textInput("inText2", "Input text 2")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
 #'     # for convenience.
@@ -23,6 +30,8 @@
 #'       value = paste("New text", x))
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
@@ -39,16 +48,24 @@ updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
 #' @seealso \code{\link{checkboxInput}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   sliderInput("controller", "Controller", 0, 1, 0, step = 1),
+#'   checkboxInput("inCheckbox", "Input checkbox")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'   observe({
-#'     # TRUE if input$controller is even, FALSE otherwise.
-#'     x_even <- input$controller %% 2 == 0
+#'     # TRUE if input$controller is odd, FALSE if even.
+#'     x_even <- input$controller %% 2 == 1
 #'
 #'     updateCheckboxInput(session, "inCheckbox", value = x_even)
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateCheckboxInput <- updateTextInput
@@ -63,10 +80,23 @@ updateCheckboxInput <- updateTextInput
 #' @seealso \code{\link{actionButton}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   actionButton("update", "Update other buttons"),
+#'   br(),
+#'   actionButton("goButton", "Go"),
+#'   br(),
+#'   actionButton("goButton2", "Go 2", icon = icon("area-chart")),
+#'   br(),
+#'   actionButton("goButton3", "Go 3")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'   observe({
+#'     req(input$update)
+#'
 #'     # Updates goButton's label and icon
 #'     updateActionButton(session, "goButton",
 #'       label = "New label",
@@ -80,9 +110,11 @@ updateCheckboxInput <- updateTextInput
 #'     # Leaves goButton3's icon, if it exists,
 #'     # unchaged and changes its label
 #'     updateActionButton(session, "goButton3",
-#'       label = "New label")
+#'       label = "New label 3")
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
@@ -105,9 +137,15 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 #' @seealso \code{\link{dateInput}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   sliderInput("controller", "Controller", 1, 30, 10),
+#'   dateInput("inDate", "Input date")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
 #'     # for convenience.
@@ -121,6 +159,8 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 #'     )
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateDateInput <- function(session, inputId, label = NULL, value = NULL,
@@ -152,9 +192,15 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #' @seealso \code{\link{dateRangeInput}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   sliderInput("controller", "Controller", 1, 30, 10),
+#'   dateRangeInput("inDateRange", "Input date range")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'   observe({
 #'     # We'll use the input$controller variable multiple times, so save it as x
 #'     # for convenience.
@@ -162,10 +208,13 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #'
 #'     updateDateRangeInput(session, "inDateRange",
 #'       label = paste("Date range label", x),
-#'       start = paste("2013-01-", x, sep=""))
-#'       end = paste("2013-12-", x, sep=""))
+#'       start = paste("2013-01-", x, sep=""),
+#'       end = paste("2013-12-", x, sep="")
+#'     )
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateDateRangeInput <- function(session, inputId, label = NULL,
@@ -200,22 +249,31 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
 #' \code{\link{navbarPage}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
-#'   observe({
-#'     # TRUE if input$controller is even, FALSE otherwise.
-#'     x_even <- input$controller %% 2 == 0
+#' ui <- fluidPage(sidebarLayout(
+#'   sidebarPanel(
+#'     sliderInput("controller", "Controller", 1, 3, 1)
+#'   ),
+#'   mainPanel(
+#'     tabsetPanel(id = "inTabset",
+#'       tabPanel(title = "Panel 1", value = "panel1", "Panel 1 content"),
+#'       tabPanel(title = "Panel 2", value = "panel2", "Panel 2 content"),
+#'       tabPanel(title = "Panel 3", value = "panel3", "Panel 3 content")
+#'     )
+#'   )
+#' ))
 #'
-#'     # Change the selected tab.
-#'     # Note that the tabset container must have been created with an 'id' argument
-#'     if (x_even) {
-#'       updateTabsetPanel(session, "inTabset", selected = "panel2")
-#'     } else {
-#'       updateTabsetPanel(session, "inTabset", selected = "panel1")
-#'     }
+#' server <- function(input, output, session) {
+#'   observeEvent(input$controller, {
+#'     updateTabsetPanel(session, "inTabset",
+#'       selected = paste0("panel", input$controller)
+#'     )
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateTabsetPanel <- function(session, inputId, selected = NULL) {
@@ -242,10 +300,18 @@ updateNavlistPanel <- updateTabsetPanel
 #' @seealso \code{\link{numericInput}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
-#'   observe({
+#' ui <- fluidPage(
+#'   sliderInput("controller", "Controller", 0, 20, 10),
+#'   numericInput("inNumber", "Input number", 0),
+#'   numericInput("inNumber2", "Input number 2", 0)
+#' )
+#'
+#' server <- function(input, output, session) {
+#'
+#'   observeEvent(input$controller, {
 #'     # We'll use the input$controller variable multiple times, so save it as x
 #'     # for convenience.
 #'     x <- input$controller
@@ -257,6 +323,8 @@ updateNavlistPanel <- updateTabsetPanel
 #'       value = x, min = x-10, max = x+10, step = 5)
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
@@ -368,31 +436,35 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
 #' @seealso \code{\link{checkboxGroupInput}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   p("The first checkbox group controls the second"),
+#'   checkboxGroupInput("inCheckboxGroup", "Input checkbox",
+#'     c("Item A", "Item B", "Item C")),
+#'   checkboxGroupInput("inCheckboxGroup2", "Input checkbox 2",
+#'     c("Item A", "Item B", "Item C"))
+#' )
+#'
+#' server <- function(input, output, session) {
 #'   observe({
-#'     # We'll use the input$controller variable multiple times, so save it as x
-#'     # for convenience.
-#'     x <- input$controller
+#'     x <- input$inCheckboxGroup
 #'
-#'     # Create a list of new options, where the name of the items is something
-#'     # like 'option label x 1', and the values are 'option-x-1'.
-#'     cb_options <- list()
-#'     cb_options[[sprintf("option label %d 1", x)]] <- sprintf("option-%d-1", x)
-#'     cb_options[[sprintf("option label %d 2", x)]] <- sprintf("option-%d-2", x)
-#'
-#'     # Change values for input$inCheckboxGroup
-#'     updateCheckboxGroupInput(session, "inCheckboxGroup", choices = cb_options)
+#'     # Can use character(0) to remove all choices
+#'     if (is.null(x))
+#'       x <- character(0)
 #'
 #'     # Can also set the label and select items
 #'     updateCheckboxGroupInput(session, "inCheckboxGroup2",
-#'       label = paste("checkboxgroup label", x),
-#'       choices = cb_options,
-#'       selected = sprintf("option-%d-2", x)
+#'       label = paste("Checkboxgroup label", length(x)),
+#'       choices = x,
+#'       selected = x
 #'     )
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateCheckboxGroupInput <- function(session, inputId, label = NULL,
@@ -410,29 +482,31 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #' @seealso \code{\link{radioButtons}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   p("The first radio button group controls the second"),
+#'   radioButtons("inRadioButtons", "Input radio buttons",
+#'     c("Item A", "Item B", "Item C")),
+#'   radioButtons("inRadioButtons2", "Input radio buttons 2",
+#'     c("Item A", "Item B", "Item C"))
+#' )
+#'
+#' server <- function(input, output, session) {
 #'   observe({
-#'     # We'll use the input$controller variable multiple times, so save it as x
-#'     # for convenience.
-#'     x <- input$controller
+#'     x <- input$inRadioButtons
 #'
-#'     r_options <- list()
-#'     r_options[[sprintf("option label %d 1", x)]] <- sprintf("option-%d-1", x)
-#'     r_options[[sprintf("option label %d 2", x)]] <- sprintf("option-%d-2", x)
-#'
-#'     # Change values for input$inRadio
-#'     updateRadioButtons(session, "inRadio", choices = r_options)
-#'
-#'     # Can also set the label and select an item
-#'     updateRadioButtons(session, "inRadio2",
-#'       label = paste("Radio label", x),
-#'       choices = r_options,
-#'       selected = sprintf("option-%d-2", x)
+#'     # Can also set the label and select items
+#'     updateRadioButtons(session, "inRadioButtons2",
+#'       label = paste("radioButtons label", x),
+#'       choices = x,
+#'       selected = x
 #'     )
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
@@ -451,32 +525,35 @@ updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
 #' @seealso \code{\link{selectInput}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   p("The checkbox group controls the select input"),
+#'   checkboxGroupInput("inCheckboxGroup", "Input checkbox",
+#'     c("Item A", "Item B", "Item C")),
+#'   selectInput("inSelect", "Select input",
+#'     c("Item A", "Item B", "Item C"))
+#' )
+#'
+#' server <- function(input, output, session) {
 #'   observe({
-#'     # We'll use the input$controller variable multiple times, so save it as x
-#'     # for convenience.
-#'     x <- input$controller
+#'     x <- input$inCheckboxGroup
 #'
-#'     # Create a list of new options, where the name of the items is something
-#'     # like 'option label x 1', and the values are 'option-x-1'.
-#'     s_options <- list()
-#'     s_options[[sprintf("option label %d 1", x)]] <- sprintf("option-%d-1", x)
-#'     s_options[[sprintf("option label %d 2", x)]] <- sprintf("option-%d-2", x)
+#'     # Can use character(0) to remove all choices
+#'     if (is.null(x))
+#'       x <- character(0)
 #'
-#'     # Change values for input$inSelect
-#'     updateSelectInput(session, "inSelect", choices = s_options)
-#'
-#'     # Can also set the label and select an item (or more than one if it's a
-#'     # multi-select)
-#'     updateSelectInput(session, "inSelect2",
-#'       label = paste("Select label", x),
-#'       choices = s_options,
-#'       selected = sprintf("option-%d-2", x)
+#'     # Can also set the label and select items
+#'     updateSelectInput(session, "inSelect",
+#'       label = paste("Select input label", length(x)),
+#'       choices = x,
+#'       selected = tail(x, 1)
 #'     )
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,

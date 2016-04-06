@@ -57,14 +57,12 @@ will be executed in a reactive context; therefore, they may read reactive
 values and reactive expressions.
 }
 \examples{
-\dontrun{
 # Assume the existence of readTimestamp and readValue functions
 function(input, output, session) {
   data <- reactivePoll(1000, session, readTimestamp, readValue)
   output$dataTable <- renderTable({
     data()
   })
-}
 }
 
 }

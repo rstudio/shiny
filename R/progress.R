@@ -55,11 +55,16 @@
 #'   progress bar.
 #'
 #' @examples
-#' \dontrun{
-#' # server.R
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   plotOutput("plot")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'   output$plot <- renderPlot({
-#'     progress <- shiny::Progress$new(session, min=1, max=15)
+#'     progress <- Progress$new(session, min=1, max=15)
 #'     on.exit(progress$close())
 #'
 #'     progress$set(message = 'Calculation in progress',
@@ -72,6 +77,8 @@
 #'     plot(cars)
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @seealso \code{\link{withProgress}}
 #' @format NULL
@@ -204,9 +211,14 @@ Progress <- R6Class(
 #'   progress bar, if it is currently visible.
 #'
 #' @examples
-#' \dontrun{
-#' # server.R
-#' function(input, output) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   plotOutput("plot")
+#' )
+#'
+#' server <- function(input, output) {
 #'   output$plot <- renderPlot({
 #'     withProgress(message = 'Calculation in progress',
 #'                  detail = 'This may take a while...', value = 0, {
@@ -218,6 +230,8 @@ Progress <- R6Class(
 #'     plot(cars)
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @seealso \code{\link{Progress}}
 #' @rdname withProgress

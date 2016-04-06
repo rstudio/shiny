@@ -45,9 +45,17 @@ The corresponding HTML output tag should be \code{div} or \code{img} and have
 the CSS class name \code{shiny-image-output}.
 }
 \examples{
-\dontrun{
+## Only run examples in interactive R sessions
+if (interactive()) {
 
-function(input, output, clientData) {
+ui <- fluidPage(
+  sliderInput("n", "Number of observations", 2, 1000, 500),
+  plotOutput("plot1"),
+  plotOutput("plot2"),
+  plotOutput("plot3")
+)
+
+server <- function(input, output, session) {
 
   # A plot of fixed size
   output$plot1 <- renderImage({
@@ -69,14 +77,14 @@ function(input, output, clientData) {
   output$plot2 <- renderImage({
     # Read plot2's width and height. These are reactive values, so this
     # expression will re-run whenever these values change.
-    width  <- clientData$output_plot2_width
-    height <- clientData$output_plot2_height
+    width  <- session$clientData$output_plot2_width
+    height <- session$clientData$output_plot2_height
 
     # A temp file to save the output.
     outfile <- tempfile(fileext='.png')
 
     png(outfile, width=width, height=height)
-    hist(rnorm(input$obs))
+    hist(rnorm(input$n))
     dev.off()
 
     # Return a list containing the filename
@@ -87,6 +95,8 @@ function(input, output, clientData) {
   }, deleteFile = TRUE)
 
   # Send a pre-rendered image, and don't delete the image after sending it
+  # NOTE: For this example to work, it would require files in a subdirectory
+  # named images/
   output$plot3 <- renderImage({
     # When input$n is 1, filename is ./images/image1.jpeg
     filename <- normalizePath(file.path('./images',
@@ -97,6 +107,7 @@ function(input, output, clientData) {
   }, deleteFile = FALSE)
 }
 
+shinyApp(ui, server)
 }
 }
 \seealso{

@@ -48,6 +48,27 @@
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
 #'
+#' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   sliderInput("obs", "Number of observations:",
+#'     min = 0, max = 1000, value = 500
+#'   ),
+#'   plotOutput("distPlot")
+#' )
+#'
+#' # Server logic
+#' server <- function(input, output) {
+#'   output$distPlot <- renderPlot({
+#'     hist(rnorm(input$obs))
+#'   })
+#' }
+#'
+#' # Complete app with UI and server components
+#' shinyApp(ui, server)
+#' }
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,

@@ -23,24 +23,43 @@ Create a column for use within a  \code{\link{fluidRow}} or
 \code{\link{fixedRow}}
 }
 \examples{
-fluidRow(
-  column(4,
-    sliderInput("obs", "Number of observations:",
-                min = 1, max = 1000, value = 500)
-  ),
-  column(8,
-    plotOutput("distPlot")
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
+  fluidRow(
+    column(4,
+      sliderInput("obs", "Number of observations:",
+                  min = 1, max = 1000, value = 500)
+    ),
+    column(8,
+      plotOutput("distPlot")
+    )
   )
 )
 
-fluidRow(
-  column(width = 4,
-    "4"
-  ),
-  column(width = 3, offset = 2,
-    "3 offset 2"
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    hist(rnorm(input$obs))
+  })
+}
+
+shinyApp(ui, server)
+
+
+
+ui <- fluidPage(
+  fluidRow(
+    column(width = 4,
+      "4"
+    ),
+    column(width = 3, offset = 2,
+      "3 offset 2"
+    )
   )
 )
+shinyApp(ui, server = function(input, output) { })
+}
 }
 \seealso{
 \code{\link{fluidRow}}, \code{\link{fixedRow}}.

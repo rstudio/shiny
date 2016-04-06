@@ -13,8 +13,18 @@
 #' @seealso \code{\link{updateNumericInput}}
 #'
 #' @examples
-#' numericInput("obs", "Observations:", 10,
-#'              min = 1, max = 100)
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   numericInput("obs", "Observations:", 10, min = 1, max = 100),
+#'   verbatimTextOutput("value")
+#' )
+#' server <- function(input, output) {
+#'   output$value <- renderText({ input$obs })
+#' }
+#' shinyApp(ui, server)
+#' }
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
   width = NULL) {

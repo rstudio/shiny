@@ -44,6 +44,7 @@ An ID for the notification.
 These functions show and remove notifications in a Shiny application.
 }
 \examples{
+## Only run examples in interactive R sessions
 if (interactive()) {
 # Show a message when button is clicked
 shinyApp(

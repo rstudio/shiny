@@ -45,7 +45,11 @@ See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
   pages.
 }
 \examples{
-fluidPage(
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+# Example of UI with fluidPage
+ui <- fluidPage(
 
   # Application title
   titlePanel("Hello Shiny!"),
@@ -68,7 +72,19 @@ fluidPage(
   )
 )
 
-fluidPage(
+# Server logic
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    hist(rnorm(input$obs))
+  })
+}
+
+# Complete app with UI and server components
+shinyApp(ui, server)
+
+
+# UI demonstrating column layouts
+ui <- fluidPage(
   title = "Hello Shiny!",
   fluidRow(
     column(width = 4,
@@ -80,6 +96,8 @@ fluidPage(
   )
 )
 
+shinyApp(ui, server = function(input, output) { })
+}
 }
 \seealso{
 \code{\link{column}}, \code{\link{sidebarLayout}}

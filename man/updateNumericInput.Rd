@@ -43,10 +43,18 @@ For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{choices=character(0)}.
 }
 \examples{
-\dontrun{
-function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
 
-  observe({
+ui <- fluidPage(
+  sliderInput("controller", "Controller", 0, 20, 10),
+  numericInput("inNumber", "Input number", 0),
+  numericInput("inNumber2", "Input number 2", 0)
+)
+
+server <- function(input, output, session) {
+
+  observeEvent(input$controller, {
     # We'll use the input$controller variable multiple times, so save it as x
     # for convenience.
     x <- input$controller
@@ -58,6 +66,8 @@ function(input, output, session) {
       value = x, min = x-10, max = x+10, step = 5)
   })
 }
+
+shinyApp(ui, server)
 }
 }
 \seealso{

@@ -24,8 +24,11 @@ distinct background color and typically contains input controls. The main
 area occupies 2/3 of the horizontal width and typically contains outputs.
 }
 \examples{
+## Only run examples in interactive R sessions
+if (interactive()) {
+
 # Define UI
-fluidPage(
+ui <- fluidPage(
 
   # Application title
   titlePanel("Hello Shiny!"),
@@ -48,5 +51,15 @@ fluidPage(
   )
 )
 
+# Server logic
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    hist(rnorm(input$obs))
+  })
+}
+
+# Complete app with UI and server components
+shinyApp(ui, server)
+}
 }
 

@@ -74,9 +74,14 @@ is not common) or otherwise cannot be encapsulated by a single scope. In that
 case, you can use the \code{Progress} reference class.
 }
 \examples{
-\dontrun{
-# server.R
-function(input, output) {
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
+  plotOutput("plot")
+)
+
+server <- function(input, output) {
   output$plot <- renderPlot({
     withProgress(message = 'Calculation in progress',
                  detail = 'This may take a while...', value = 0, {
@@ -88,6 +93,8 @@ function(input, output) {
     plot(cars)
   })
 }
+
+shinyApp(ui, server)
 }
 }
 \seealso{

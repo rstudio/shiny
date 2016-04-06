@@ -931,8 +931,15 @@ setAutoflush <- local({
 #' @seealso \code{\link{invalidateLater}}
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   sliderInput("n", "Number of observations", 2, 1000, 500),
+#'   plotOutput("plot")
+#' )
+#'
+#' server <- function(input, output) {
 #'
 #'   # Anything that calls autoInvalidate will automatically invalidate
 #'   # every 2 seconds.
@@ -953,9 +960,11 @@ setAutoflush <- local({
 #'   # input$n changes.
 #'   output$plot <- renderPlot({
 #'     autoInvalidate()
-#'     hist(isolate(input$n))
+#'     hist(rnorm(isolate(input$n)))
 #'   })
 #' }
+#'
+#' shinyApp(ui, server)
 #' }
 #'
 #' @export
@@ -1009,8 +1018,15 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #' @seealso \code{\link{reactiveTimer}} is a slightly less safe alternative.
 #'
 #' @examples
-#' \dontrun{
-#' function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   sliderInput("n", "Number of observations", 2, 1000, 500),
+#'   plotOutput("plot")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'
 #'   observe({
 #'     # Re-execute this reactive expression after 1000 milliseconds
@@ -1027,11 +1043,12 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #'   output$plot <- renderPlot({
 #'     # Re-execute this reactive expression after 2000 milliseconds
 #'     invalidateLater(2000)
-#'     hist(isolate(input$n))
+#'     hist(rnorm(isolate(input$n)))
 #'   })
 #' }
-#' }
 #'
+#' shinyApp(ui, server)
+#' }
 #' @export
 invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   ctx <- .getReactiveEnvironment()$currentContext()
@@ -1101,14 +1118,12 @@ coerceToFunc <- function(x) {
 #' @seealso \code{\link{reactiveFileReader}}
 #'
 #' @examples
-#' \dontrun{
 #' # Assume the existence of readTimestamp and readValue functions
 #' function(input, output, session) {
 #'   data <- reactivePoll(1000, session, readTimestamp, readValue)
 #'   output$dataTable <- renderTable({
 #'     data()
 #'   })
-#' }
 #' }
 #'
 #' @export

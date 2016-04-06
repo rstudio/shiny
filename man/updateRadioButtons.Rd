@@ -43,29 +43,31 @@ For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{choices=character(0)}.
 }
 \examples{
-\dontrun{
-function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
 
+ui <- fluidPage(
+  p("The first radio button group controls the second"),
+  radioButtons("inRadioButtons", "Input radio buttons",
+    c("Item A", "Item B", "Item C")),
+  radioButtons("inRadioButtons2", "Input radio buttons 2",
+    c("Item A", "Item B", "Item C"))
+)
+
+server <- function(input, output, session) {
   observe({
-    # We'll use the input$controller variable multiple times, so save it as x
-    # for convenience.
-    x <- input$controller
+    x <- input$inRadioButtons
 
-    r_options <- list()
-    r_options[[sprintf("option label \%d 1", x)]] <- sprintf("option-\%d-1", x)
-    r_options[[sprintf("option label \%d 2", x)]] <- sprintf("option-\%d-2", x)
-
-    # Change values for input$inRadio
-    updateRadioButtons(session, "inRadio", choices = r_options)
-
-    # Can also set the label and select an item
-    updateRadioButtons(session, "inRadio2",
-      label = paste("Radio label", x),
-      choices = r_options,
-      selected = sprintf("option-\%d-2", x)
+    # Can also set the label and select items
+    updateRadioButtons(session, "inRadioButtons2",
+      label = paste("radioButtons label", x),
+      choices = x,
+      selected = x
     )
   })
 }
+
+shinyApp(ui, server)
 }
 }
 \seealso{

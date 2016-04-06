@@ -28,13 +28,24 @@ The corresponding HTML output tag should be \code{div} and have the CSS class
 name \code{shiny-html-output} (or use \code{\link{uiOutput}}).
 }
 \examples{
-\dontrun{
-  output$moreControls <- renderUI({
-    list(
+## Only run examples in interactive R sessions
+if (interactive()) {
 
+ui <- fluidPage(
+  uiOutput("moreControls")
+)
+
+server <- function(input, output) {
+  output$moreControls <- renderUI({
+    tagList(
+      sliderInput("n", "N", 1, 1000, 500),
+      textInput("label", "Label")
     )
   })
 }
+shinyApp(ui, server)
+}
+
 }
 \seealso{
 conditionalPanel

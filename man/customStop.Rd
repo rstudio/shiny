@@ -32,27 +32,30 @@ your users' lives much easier by giving them a hint as to where the
 error occurred.
 }
 \examples{
+## Only run examples in interactive R sessions
+if (interactive()) {
+
 # uncomment the desired line to experiment with shiny.sanitize.errors
 # options(shiny.sanitize.errors = TRUE)
 # options(shiny.sanitize.errors = FALSE)
 
-# ui
-ui <- shinyUI(fluidPage(
+# Define UI
+ui <- fluidPage(
   textInput('number', 'Enter your favorite number from 1 to 10', '5'),
   textOutput('errorStop'),
   textOutput('errorCustomStop')
-))
+)
 
-# server
-server <- shinyServer(function(input, output) {
+# Server logic
+server <- function(input, output) {
   output$errorStop <- renderText({
     number <- input$number
     if (number \%in\% 1:10) {
       return(paste('You chose', number, '!'))
     } else {
-      return(stop(
+      stop(
         paste(number, 'is not a number between 1 and 10')
-      ))
+      )
     }
   })
   output$errorCustomStop <- renderText({
@@ -60,15 +63,16 @@ server <- shinyServer(function(input, output) {
     if (number \%in\% 1:10) {
       return(paste('You chose', number, '!'))
     } else {
-      return(customStop(
+      customStop(
         paste(number, 'is not a number between 1 and 10')
-      ))
+      )
     }
   })
-})
+}
 
-# run
-if (interactive()) shinyApp(ui = ui, server = server)
+# Complete app with UI and server components
+shinyApp(ui, server)
+}
 }
 \seealso{
 \code{\link{shiny-options}}

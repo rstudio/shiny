@@ -43,7 +43,7 @@ getCurrentRestoreContext <- function() {
   ctx
 }
 
-extractRestoreContext <- function(url) {
+decodeRestoreContext <- function(url) {
   list(
     input = readBookmarkDataURL(url),
     values = list()
@@ -51,21 +51,21 @@ extractRestoreContext <- function(url) {
 }
 
 #' @export
-restoreInput <- function(id, defaultValue) {
+restoreInput <- function(id, default) {
   ctx <- getCurrentRestoreContext()
   if (id %in% names(ctx$input)) {
     ctx$input[[id]]
   } else {
-    defaultValue
+    default
   }
 }
 
 #' @export
-restoreValue <- function(id, defaultValue) {
+restoreValue <- function(id, default) {
   ctx <- getCurrentRestoreContext()
   if (id %in% names(ctx$values)) {
     ctx$values[[id]]
   } else {
-    defaultValue
+    default
   }
 }

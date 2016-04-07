@@ -3,7 +3,10 @@ shiny 0.13.2.9001
 * Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`.
   To err on the side of security, the default is `TRUE` (i.e. sanitized errors,
   with most error messages being generic). This changes the look of an app
-  when erros are printed (but the console remains the same).
+  when errors are printed (but the console remains the same).
+
+* Closed #1161: Deprecated the `position` argument to `tabsetPanel()` since
+  Bootstrap 3 stopped supporting this feature.
 
 * BREAKING CHANGE: The long-deprecated ability to pass a `func` argument to
   many of the `render` functions has been removed.

@@ -1,6 +1,6 @@
 readBookmarkDataURL <- function(url) {
   values <- parseQueryString(url, nested = TRUE)
-  mapply(names(values), values,
+  mapply(names(values), values, SIMPLIFY = FALSE,
     FUN = function(name, value) {
       tryCatch(
         jsonlite::fromJSON(value),

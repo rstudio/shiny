@@ -39,6 +39,7 @@ module.exports = function(grunt) {
           js_srcdir + 'binding_registry.js',
           js_srcdir + 'output_binding.js',
           js_srcdir + 'output_binding_text.js',
+          js_srcdir + 'output_binding_bookmark.js',
           js_srcdir + 'output_binding_image.js',
           js_srcdir + 'output_binding_html.js',
           js_srcdir + 'output_binding_downloadlink.js',
@@ -102,7 +103,7 @@ module.exports = function(grunt) {
           "browser",
           "jquery"
         ],
-        globals: ["strftime"]
+        globals: ["strftime", "Clipboard"]
       },
       shiny: ['./temp_concat/shiny.js']
     },

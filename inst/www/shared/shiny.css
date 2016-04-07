@@ -124,6 +124,11 @@
   max-width: 100%;
 }
 
+.shiny-bookmark-output {
+  width: 300px;
+  max-width: 100%;
+}
+
 .shiny-progress-container {
   position: fixed;
   top: 0px;

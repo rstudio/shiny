@@ -1,5 +1,18 @@
 shiny 0.13.2.9001
 --------------------------------------------------------------------------------
+* Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`.
+  To err on the side of security, the default is `TRUE` (i.e. sanitized errors,
+  with most error messages being generic). This changes the look of an app
+  when erros are printed (but the console remains the same).
+
+* BREAKING CHANGE: The long-deprecated ability to pass a `func` argument to
+  many of the `render` functions has been removed.
+
+* Added the option of passing arguments to an `xxxOutput()` function through
+  the corresponding `renderXXX()` function via an `outputArgs` parameter to the
+  latter. This is only valid for snippets of Shiny code in an interactive
+  `runtime: shiny` Rmd document (never for full apps, even if embedded in an
+  Rmd).
 
 * Added the ability for the client browser to reconnect to a new session on
   the server, by setting `session$allowReconnect(TRUE)`. This requires a

@@ -69,3 +69,30 @@ restoreValue <- function(id, default) {
     default
   }
 }
+
+#' @export
+bookmarkOutput <- function(id, label = NULL) {
+  textId <- paste0("shiny-bookmark-", id)
+
+  tagList(
+    if (!is.null(label)) tags$label(label, `for` = textId),
+
+    div(class="input-group shiny-bookmark-output", id = id,
+      tags$input(type = "text", id = textId,
+        readonly = "readonly",
+        class = "form-control",
+        placeholder = "Click button"
+      ),
+      span(class = "input-group-btn",
+        tags$button(class = "btn btn-default",
+          `data-clipboard-target` = paste0("#", textId),
+          icon("copy", lib = "glyphicon")
+        )
+      )
+    ),
+    htmlDependency(
+      "clipboardjs", "1.5.10", c(href = "shared/clipboardjs"),
+      script = "clipboard.min.js"
+    )
+  )
+}

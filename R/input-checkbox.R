@@ -24,6 +24,9 @@
 #' }
 #' @export
 checkboxInput <- function(inputId, label, value = FALSE, width = NULL) {
+
+  value <- restoreInput(id = inputId, default = value)
+
   inputTag <- tags$input(id = inputId, type="checkbox")
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"

@@ -81,6 +81,8 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
 
+  value <- restoreInput(id = inputId, default = value)
+
   attachDependencies(
     tags$div(id = inputId,
       class = "shiny-date-input form-group shiny-input-container",

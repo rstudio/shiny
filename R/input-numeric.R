@@ -1,4 +1,3 @@
-
 #' Create a numeric input control
 #'
 #' Create an input control for entry of numeric values
@@ -28,6 +27,8 @@
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
   width = NULL) {
+
+  value <- restoreInput(id = inputId, default = value)
 
   # build input tag
   inputTag <- tags$input(id = inputId, type = "number", class="form-control",

@@ -888,7 +888,6 @@ ShinySession <- R6Class(
           function() { ..stacktraceon..(download$func(tmpdata)) }
         )), silent = TRUE)
         if (inherits(result, 'try-error')) {
-          cond <- attr(result, 'condition', exact = TRUE)
           unlink(tmpdata)
           stop(result)
         }

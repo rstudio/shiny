@@ -55,6 +55,8 @@ radioButtons <- function(inputId, label, choices, selected = NULL,
   # resolve names
   choices <- choicesWithNames(choices)
 
+  selected <- restoreInput(id = inputId, default = selected)
+
   # default value if it's not specified
   selected <- if (is.null(selected)) choices[[1]] else {
     validateSelected(selected, choices, inputId)

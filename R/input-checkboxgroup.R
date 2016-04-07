@@ -38,6 +38,8 @@
 checkboxGroupInput <- function(inputId, label, choices, selected = NULL,
   inline = FALSE, width = NULL) {
 
+  selected <- restoreInput(id = inputId, default = selected)
+
   # resolve names
   choices <- choicesWithNames(choices)
   if (!is.null(selected))

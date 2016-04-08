@@ -1,4 +1,5 @@
-readBookmarkDataURL <- function(url) {
+#' @export
+decodeBookmarkDataURL <- function(url) {
   values <- parseQueryString(url, nested = TRUE)
   mapply(names(values), values, SIMPLIFY = FALSE,
     FUN = function(name, value) {
@@ -12,7 +13,8 @@ readBookmarkDataURL <- function(url) {
   )
 }
 
-saveBookmarkDataURL <- function(input, values, files) {
+#' @export
+encodeBookmarkDataURL <- function(input, values, files) {
   vals <- vapply(reactiveValuesToList(input), function(x) {
     toJSON(x, strict_atomic = FALSE)
   }, character(1), USE.NAMES = TRUE)
@@ -45,7 +47,7 @@ getCurrentRestoreContext <- function() {
 
 decodeRestoreContext <- function(url) {
   list(
-    input = readBookmarkDataURL(url),
+    input = decodeBookmarkDataURL(url),
     values = list()
   )
 }
@@ -95,4 +97,9 @@ bookmarkOutput <- function(id, label = NULL) {
       script = "clipboard.min.js"
     )
   )
+}
+
+#' @export
+updateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
+  session$updateQueryString(queryString)
 }

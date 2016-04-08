@@ -669,9 +669,10 @@ var ShinyApp = function() {
     });
   });
 
-  addMessageHandler('historyReplaceState', function(message) {
-    window.history.replaceState(null, null, message.url);
+  addMessageHandler('updateQueryString', function(message) {
+    window.history.replaceState(null, null, location.pathname + '?' + message.url);
   });
+
 
   // Progress reporting ====================================================
 

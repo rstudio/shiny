@@ -805,8 +805,8 @@ ShinySession <- R6Class(
         )
       )
     },
-    updateUrl = function(url) {
-      private$sendMessage(historyReplaceState = list(url = url))
+    updateQueryString = function(url) {
+      private$sendMessage(updateQueryString = list(url = url))
     },
 
     # Public RPC methods

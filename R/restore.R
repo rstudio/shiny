@@ -26,12 +26,79 @@ encodeBookmarkDataURL <- function(input, values, files) {
   )
 }
 
+# Restore context. This is basically a key-value store, except for one important
+# difference: When the user `get()`s a value, the value is marked as pending;
+# when `flushPending()` is called, those pending values are marked as used. When
+# a value is marked as used, `get()` will not return it, unless called with
+# `force=TRUE`. This is to make sure that a particular value can be restored
+# only within a single call to `withRestoreContext()`.
+RestoreContext <- R6Class("RestoreContext",
+  private = list(
+    values = NULL,
+    pending = character(0),
+    used = character(0)     # Names of values which have been used
+  ),
+
+  public = list(
+    initialize = function(queryString = NULL) {
+      private$values <- new.env(parent = emptyenv())
+
+      if (!is.null(queryString)) {
+        vals <- decodeBookmarkDataURL(queryString)
+        list2env(vals, private$values)
+      }
+    },
+
+    exists = function(name) {
+      exists(name, envir = private$values)
+    },
+
+    # Return TRUE if the value exists and has not been marked as used.
+    available = function(name) {
+      self$exists(name) && !self$isUsed(name)
+    },
+
+    isPending = function(name) {
+      name %in% private$pending
+    },
+
+    isUsed = function(name) {
+      name %in% private$used
+    },
+
+    # Get a value. If `force` is TRUE, get the value without checking whether
+    # has been used, and without marking it as pending.
+    get = function(name, force = FALSE) {
+      if (force)
+        return(private$values[[name]])
+
+      if (!self$available(name))
+        return(NULL)
+
+      # Mark this name as pending. Use unique so that it's not added twice.
+      private$pending <- unique(c(private$pending, name))
+      private$values[[name]]
+    },
+
+    # Take pending names and mark them as used, then clear pending list.
+    flushPending = function() {
+      private$used <- unique(c(private$used, private$pending))
+      private$pending <- character(0)
+    }
+  )
+)
+
 
 restoreCtxStack <- Stack$new()
 
 withRestoreContext <- function(ctx, expr) {
   restoreCtxStack$push(ctx)
-  on.exit(restoreCtxStack$pop(), add = TRUE)
+
+  on.exit({
+    # Mark pending names as used
+    ctx$flushPending()
+    restoreCtxStack$pop()
+  }, add = TRUE)
 
   force(expr)
 }
@@ -45,18 +112,11 @@ getCurrentRestoreContext <- function() {
   ctx
 }
 
-decodeRestoreContext <- function(url) {
-  list(
-    input = decodeBookmarkDataURL(url),
-    values = list()
-  )
-}
-
 #' @export
 restoreInput <- function(id, default) {
   ctx <- getCurrentRestoreContext()
-  if (id %in% names(ctx$input)) {
-    ctx$input[[id]]
+  if (ctx$available(id)) {
+    ctx$get(id)
   } else {
     default
   }

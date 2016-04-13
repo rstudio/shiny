@@ -92,7 +92,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
         showcaseMode <- mode
     }
     uiValue <- if (is.function(ui)) {
-      withRestoreContext(decodeRestoreContext(req$QUERY_STRING), {
+      withRestoreContext(RestoreContext$new(req$QUERY_STRING), {
         if (length(formals(ui)) > 0) {
           # No corresponding ..stacktraceoff.., this is pure user code
           ..stacktraceon..(ui(req))

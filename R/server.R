@@ -292,6 +292,9 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                   shinysession$setShowcase(mode)
               }
 
+              # If there's bookmarked state, save it on the session object
+              shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
+
               shinysession$manageInputs(msg$data)
 
               # The client tells us what singletons were rendered into
@@ -304,15 +307,17 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               local({
                 args <- argsForServerFunc(serverFunc, shinysession)
 
-                withReactiveDomain(shinysession, {
-                  do.call(
-                    # No corresponding ..stacktraceoff; the server func is pure
-                    # user code
-                    wrapFunctionLabel(appvars$server, "server",
-                      ..stacktraceon = TRUE
-                    ),
-                    args
-                  )
+                withRestoreContext(shinysession$restoreContext, {
+                  withReactiveDomain(shinysession, {
+                    do.call(
+                      # No corresponding ..stacktraceoff; the server func is pure
+                      # user code
+                      wrapFunctionLabel(appvars$server, "server",
+                        ..stacktraceon = TRUE
+                      ),
+                      args
+                    )
+                  })
                 })
               })
             },
@@ -334,7 +339,9 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               sep=""), con=shiny_stdout)
             flush(shiny_stdout)
 
-            flushReact()
+            withRestoreContext(shinysession$restoreContext, {
+              flushReact()
+            })
 
             # eXit a flushReact
             writeLines(paste("_x_flushReact ", get("HTTP_GUID", ws$request),
@@ -342,7 +349,9 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               sep=""), con=shiny_stdout)
             flush(shiny_stdout)
           } else {
-            flushReact()
+            withRestoreContext(shinysession$restoreContext, {
+              flushReact()
+            })
           }
           lapply(appsByToken$values(), function(shinysession) {
             shinysession$flushOutput()

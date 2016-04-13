@@ -148,7 +148,7 @@ bookmarkOutput <- function(id, label = NULL) {
     if (!is.null(label)) tags$label(label, `for` = textId),
 
     div(class="input-group shiny-bookmark-output", id = id,
-      tags$input(type = "text", id = textId,
+      tags$input(id = textId,
         readonly = "readonly",
         class = "form-control",
         placeholder = "Click button"

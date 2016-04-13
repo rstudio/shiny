@@ -103,6 +103,11 @@ withRestoreContext <- function(ctx, expr) {
   force(expr)
 }
 
+# Is there a current restore context?
+hasCurrentRestoreContext <- function() {
+  restoreCtxStack$size() > 0
+}
+
 # Call to access the current restore context
 getCurrentRestoreContext <- function() {
   ctx <- restoreCtxStack$peek()
@@ -114,6 +119,9 @@ getCurrentRestoreContext <- function() {
 
 #' @export
 restoreInput <- function(id, default) {
+  if (!hasCurrentRestoreContext())
+    return(default)
+
   ctx <- getCurrentRestoreContext()
   if (ctx$available(id)) {
     ctx$get(id)

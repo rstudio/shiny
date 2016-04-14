@@ -631,7 +631,8 @@ tabsetPanel <- function(...,
                         position = NULL) {
   if (!is.null(position)) {
     shinyDeprecated(msg = paste("tabsetPanel: argument 'position' is deprecated;",
-                                "it has been discontinued in Bootstrap 3."))
+                                "it has been discontinued in Bootstrap 3."),
+                    version = "0.10.2.2")
   }
 
   # build the tabset

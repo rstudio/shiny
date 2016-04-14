@@ -950,20 +950,14 @@ columnToRowData <- function(data) {
 #' }
 #' @export
 safeError <- function(error, errorClass = character(0)) {
-  if (inherits(error, "error")) {
-    cond <- structure(
-      list(message = error$message),
-      class = c("shiny.custom.error", errorClass, class(error))
-    )
-  } else if (inherits(error, "character")) {
-    cond <- structure(
-      list(message = error),
-      class = c("shiny.custom.error", errorClass, "error", "condition")
-    )
-  } else {
+  if (inherits(error, "character")) {
+    error <- simpleError(error)
+  }
+  if (!inherits(error, "error")) {
     stop("The class of the `error` parameter must be either 'error' or 'character'")
   }
-  return(cond)
+  class(error) <- c("shiny.custom.error", errorClass, class(error))
+  error
 }
 
 #' Validate input values and other conditions

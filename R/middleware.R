@@ -307,29 +307,19 @@ HandlerManager <- R6Class("HandlerManager",
           }
         },
         call = .httpServer(
-          function(req,
-                   full = getOption("shiny.fullstacktrace", FALSE),
-                   offset = getOption("shiny.stacktraceoffset", TRUE)) {
-
-             withCallingHandlers(captureStackTraces(handlers$invoke(req)),
-               error = function(cond) {
-                 # Don't print shiny.silent.error (i.e. validation errors)
-                 if (inherits(cond, "shiny.silent.error")) return()
-                 if (isTRUE(getOption("show.error.messages"))) {
-                   printError(cond, full = full, offset = offset)
-                   sanitizeErrors = getOption('shiny.sanitize.errors', TRUE)
-
-                   if (inherits(cond, 'shiny.custom.error') || !sanitizeErrors) {
-                     stop(cond$message, call. = FALSE)
-                   }
-                   else {
-                     stop(paste("An error has occurred. Check your logs or",
-                                "contact the app author for clarification."),
-                          call. = FALSE)
-                   }
-                 }
-               }
-             )
+          function (req) {
+            withCallingHandlers(withLogErrors(handlers$invoke(req)),
+              error = function(cond) {
+                sanitizeErrors <- getOption('shiny.sanitize.errors', TRUE)
+                if (inherits(cond, 'shiny.custom.error') || !sanitizeErrors) {
+                  stop(cond$message, call. = FALSE)
+                } else {
+                  stop(paste("An error has occurred. Check your logs or",
+                             "contact the app author for clarification."),
+                       call. = FALSE)
+                }
+              }
+            )
           },
           getOption('shiny.sharedSecret')
         ),

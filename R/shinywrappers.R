@@ -42,13 +42,8 @@ markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
       # stop warning from happening again for the same object
       hasExecuted$set(TRUE)
     }
-    if (is.null(formals(origRenderFunc))) {
-      warning("The render function should take at least two arguments (`name` ",
-              "and `shinysession`.")
-      origRenderFunc()
-    } else {
-      origRenderFunc(...)
-    }
+    if (is.null(formals(origRenderFunc))) origRenderFunc()
+    else origRenderFunc(...)
   }
 
   structure(renderFunc,

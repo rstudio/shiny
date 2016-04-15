@@ -607,10 +607,8 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #'   tab will be selected.
 #' @param type Use "tabs" for the standard look; Use "pills" for a more plain
 #'   look where tabs are selected using a background fill color.
-#' @param position The position of the tabs relative to the content. Valid
-#'   values are "above", "below", "left", and "right" (defaults to "above").
-#'   Note that the \code{position} argument is not valid when \code{type} is
-#'   "pill".
+#' @param position This argument is deprecated; it has been discontinued in
+#'   Bootstrap 3.
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'
 #' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
@@ -630,25 +628,24 @@ tabsetPanel <- function(...,
                         id = NULL,
                         selected = NULL,
                         type = c("tabs", "pills"),
-                        position = c("above", "below", "left", "right")) {
+                        position = NULL) {
+  if (!is.null(position)) {
+    shinyDeprecated(msg = paste("tabsetPanel: argument 'position' is deprecated;",
+                                "it has been discontinued in Bootstrap 3."),
+                    version = "0.10.2.2")
+  }
 
   # build the tabset
   tabs <- list(...)
   type <- match.arg(type)
   tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
 
-  # position the nav list and content appropriately
-  position <- match.arg(position)
-  if (position %in% c("above", "left", "right")) {
-    first <- tabset$navList
-    second <- tabset$content
-  } else if (position %in% c("below")) {
-    first <- tabset$content
-    second <- tabset$navList
-  }
+  # create the content
+  first <- tabset$navList
+  second <- tabset$content
 
   # create the tab div
-  tags$div(class = paste("tabbable tabs-", position, sep=""), first, second)
+  tags$div(class = "tabbable", first, second)
 }
 
 #' Create a navigation list panel

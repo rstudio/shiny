@@ -10,8 +10,6 @@ safeError(error, errorClass = character(0))
 \item{error}{Either an "error" object or a "character" object (string).
 In the latter case, the string will become the message of the error
 returned by \code{safeError}.}
-
-\item{errorClass}{An optional class to add to the error.}
 }
 \value{
 An "error" object

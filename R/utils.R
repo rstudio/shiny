@@ -889,7 +889,6 @@ columnToRowData <- function(data) {
 #' @param error Either an "error" object or a "character" object (string).
 #' In the latter case, the string will become the message of the error
 #' returned by \code{safeError}.
-#' @param errorClass An optional class to add to the error.
 #'
 #' @return An "error" object
 #'
@@ -956,7 +955,7 @@ safeError <- function(error, errorClass = character(0)) {
   if (!inherits(error, "error")) {
     stop("The class of the `error` parameter must be either 'error' or 'character'")
   }
-  class(error) <- c("shiny.custom.error", errorClass, class(error))
+  class(error) <- c("shiny.custom.error", class(error))
   error
 }
 

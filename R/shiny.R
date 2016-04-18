@@ -595,7 +595,7 @@ ShinySession <- R6Class(
             },
             error = function(cond) {
               if (isTRUE(getOption("show.error.messages"))) printError(cond)
-              if (getOption("shiny.sanitize.errors", TRUE)) {
+              if (getOption("shiny.sanitize.errors", FALSE)) {
                 cond <- simpleError(paste("An error has occurred. Check your",
                                           "logs or contact the app author for",
                                           "clarification."))

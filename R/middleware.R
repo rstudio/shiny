@@ -310,7 +310,7 @@ HandlerManager <- R6Class("HandlerManager",
           function (req) {
             withCallingHandlers(withLogErrors(handlers$invoke(req)),
               error = function(cond) {
-                sanitizeErrors <- getOption('shiny.sanitize.errors', TRUE)
+                sanitizeErrors <- getOption('shiny.sanitize.errors', FALSE)
                 if (inherits(cond, 'shiny.custom.error') || !sanitizeErrors) {
                   stop(cond$message, call. = FALSE)
                 } else {

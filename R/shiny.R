@@ -96,6 +96,12 @@ NULL
 #'     an arguably more intuitive arrangement for casual R users, as the name
 #'     of a function appears next to the srcref where it is defined, rather than
 #'     where it is currently being called from.}
+#'   \item{shiny.sanitize.errors}{If \code{TRUE} (the default), then normal
+#'     errors (i.e. errors not wrapped in \code{safeError}) won't show up in the app;
+#'     a simple generic error message is printed instead (the error and strack trace
+#'     printed to the console remain unchanged). If you want this behavior in
+#'     general, but you DO want a particular error \code{e} to get displayed to the
+#'     user, please use \code{stop(safeError(e))} instead.}
 #' }
 #' @name shiny-options
 NULL
@@ -593,6 +599,10 @@ ShinySession <- R6Class(
 
           value <- tryCatch(
             shinyCallingHandlers(func()),
+            shiny.custom.error = function(cond) {
+              if (isTRUE(getOption("show.error.messages"))) printError(cond)
+              structure(NULL, class = "try-error", condition = cond)
+            },
             shiny.output.cancel = function(cond) {
               structure(NULL, class = "cancel-output")
             },
@@ -601,18 +611,16 @@ ShinySession <- R6Class(
               # path of try, because we don't want it to print. But we
               # do want to try to return the same looking result so that
               # the code below can send the error to the browser.
-              structure(
-                NULL,
-                class = "try-error",
-                condition = cond
-              )
+              structure(NULL, class = "try-error", condition = cond)
             },
             error = function(cond) {
-              msg <- paste0("Error in output$", name, ": ", conditionMessage(cond), "\n")
-              if (isTRUE(getOption("show.error.messages"))) {
-                printError(cond)
+              if (isTRUE(getOption("show.error.messages"))) printError(cond)
+              if (getOption("shiny.sanitize.errors", FALSE)) {
+                cond <- simpleError(paste("An error has occurred. Check your",
+                                          "logs or contact the app author for",
+                                          "clarification."))
               }
-              invisible(structure(msg, class = "try-error", condition = cond))
+              invisible(structure(NULL, class = "try-error", condition = cond))
             },
             finally = {
               private$sendMessage(recalculating = list(
@@ -898,13 +906,10 @@ ShinySession <- R6Class(
         # ..stacktraceon matches with the top-level ..stacktraceoff..
         result <- try(shinyCallingHandlers(Context$new(getDefaultReactiveDomain(), '[download]')$run(
           function() { ..stacktraceon..(download$func(tmpdata)) }
-        )))
+        )), silent = TRUE)
         if (inherits(result, 'try-error')) {
-          cond <- attr(result, 'condition', exact = TRUE)
-          printError(cond)
           unlink(tmpdata)
-          return(httpResponse(500, 'text/plain; charset=UTF-8',
-                              enc2utf8(conditionMessage(cond))))
+          stop(attr(result, "condition", exact = TRUE))
         }
         return(httpResponse(
           200,

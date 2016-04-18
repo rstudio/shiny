@@ -299,9 +299,7 @@ HandlerManager <- R6Class("HandlerManager",
 
           if (reqSize > maxSize) {
             return(list(status = 413L,
-              headers = list(
-                'Content-Type' = 'text/plain'
-              ),
+              headers = list('Content-Type' = 'text/plain'),
               body = 'Maximum upload size exceeded'))
           }
           else {
@@ -310,7 +308,18 @@ HandlerManager <- R6Class("HandlerManager",
         },
         call = .httpServer(
           function (req) {
-            withLogErrors(handlers$invoke(req))
+            withCallingHandlers(withLogErrors(handlers$invoke(req)),
+              error = function(cond) {
+                sanitizeErrors <- getOption('shiny.sanitize.errors', FALSE)
+                if (inherits(cond, 'shiny.custom.error') || !sanitizeErrors) {
+                  stop(cond$message, call. = FALSE)
+                } else {
+                  stop(paste("An error has occurred. Check your logs or",
+                             "contact the app author for clarification."),
+                       call. = FALSE)
+                }
+              }
+            )
           },
           getOption('shiny.sharedSecret')
         ),
@@ -333,7 +342,7 @@ HandlerManager <- R6Class("HandlerManager",
         }
 
         # Catch HEAD requests. For the purposes of handler functions, they
-        # should be treated like GET. The difference is that  they shouldn't
+        # should be treated like GET. The difference is that they shouldn't
         # return a body in the http response.
         head_request <- FALSE
         if (identical(req$REQUEST_METHOD, "HEAD")) {

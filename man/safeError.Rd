@@ -4,7 +4,7 @@
 \alias{safeError}
 \title{Declare an error safe for the user to see}
 \usage{
-safeError(error, errorClass = character(0))
+safeError(error)
 }
 \arguments{
 \item{error}{Either an "error" object or a "character" object (string).

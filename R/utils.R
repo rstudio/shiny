@@ -948,7 +948,7 @@ columnToRowData <- function(data) {
 #' shinyApp(ui, server)
 #' }
 #' @export
-safeError <- function(error, errorClass = character(0)) {
+safeError <- function(error) {
   if (inherits(error, "character")) {
     error <- simpleError(error)
   }

@@ -5,7 +5,7 @@
 \title{Create a modal dialog UI}
 \usage{
 modalDialog(..., title = NULL, footer = modalButton("Dismiss"),
-  dismissable = FALSE)
+  easyClose = FALSE)
 }
 \arguments{
 \item{...}{UI elements for the body of the modal dialog box.}
@@ -14,7 +14,7 @@ modalDialog(..., title = NULL, footer = modalButton("Dismiss"),
 
 \item{footer}{UI for footer. Use \code{NULL} for no footer.}
 
-\item{dismissable}{If \code{TRUE}, the modal dialog can be dismissed by
+\item{easyClose}{If \code{TRUE}, the modal dialog can be dismissed by
 clicking outside the dialog box, or be pressing the Escape key. If
 \code{FALSE} (the default), the modal dialog can't be dismissed in those
 ways; instead it must be dismissed by clicking on the dismiss button, or
@@ -55,7 +55,7 @@ shinyApp(
       showModal(modalDialog(
         title = "Somewhat important message",
         "This is a somewhat important message.",
-        dismissable = TRUE,
+        easyClose = TRUE,
         footer = NULL
       ))
     })

@@ -36,7 +36,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' @param ... UI elements for the body of the modal dialog box.
 #' @param title An optional title for the dialog.
 #' @param footer UI for footer. Use \code{NULL} for no footer.
-#' @param dismissable If \code{TRUE}, the modal dialog can be dismissed by
+#' @param easyClose If \code{TRUE}, the modal dialog can be dismissed by
 #'   clicking outside the dialog box, or be pressing the Escape key. If
 #'   \code{FALSE} (the default), the modal dialog can't be dismissed in those
 #'   ways; instead it must be dismissed by clicking on the dismiss button, or
@@ -72,7 +72,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #'       showModal(modalDialog(
 #'         title = "Somewhat important message",
 #'         "This is a somewhat important message.",
-#'         dismissable = TRUE,
+#'         easyClose = TRUE,
 #'         footer = NULL
 #'       ))
 #'     })
@@ -149,11 +149,11 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' }
 #' @export
 modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
-                        dismissable = FALSE) {
+                        easyClose = FALSE) {
 
   div(id = "shiny-modal", class = "modal fade", tabindex = "-1",
-    `data-backdrop` = if (!dismissable) "static",
-    `data-keyboard` = if (!dismissable) "false",
+    `data-backdrop` = if (!easyClose) "static",
+    `data-keyboard` = if (!easyClose) "false",
 
     div(class = "modal-dialog",
       div(class = "modal-content",

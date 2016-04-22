@@ -1,7 +1,7 @@
 library(shiny)
 
 # Define UI for random distribution application 
-shinyUI(fluidPage(
+fluidPage(
     
   # Application title
   titlePanel("Tabsets"),
@@ -35,4 +35,4 @@ shinyUI(fluidPage(
       )
     )
   )
-))
+)

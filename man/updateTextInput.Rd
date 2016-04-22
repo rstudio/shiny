@@ -36,9 +36,16 @@ For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{choices=character(0)}.
 }
 \examples{
-\dontrun{
-shinyServer(function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
 
+ui <- fluidPage(
+  sliderInput("controller", "Controller", 0, 20, 10),
+  textInput("inText", "Input text"),
+  textInput("inText2", "Input text 2")
+)
+
+server <- function(input, output, session) {
   observe({
     # We'll use the input$controller variable multiple times, so save it as x
     # for convenience.
@@ -52,7 +59,9 @@ shinyServer(function(input, output, session) {
       label = paste("New label", x),
       value = paste("New text", x))
   })
-})
+}
+
+shinyApp(ui, server)
 }
 }
 \seealso{

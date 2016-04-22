@@ -37,20 +37,28 @@ the user initiates the download. Assign the return value to a slot on
 download available.
 }
 \examples{
-\dontrun{
-# In server.R:
-output$downloadData <- downloadHandler(
-  filename = function() {
-    paste('data-', Sys.Date(), '.csv', sep='')
-  },
-  content = function(file) {
-    write.csv(data, file)
-  }
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
+  downloadLink("downloadData", "Download")
 )
 
-# In ui.R:
-downloadLink('downloadData', 'Download')
+server <- function(input, output) {
+  # Our dataset
+  data <- mtcars
+
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("data-", Sys.Date(), ".csv", sep="")
+    },
+    content = function(file) {
+      write.csv(data, file)
+    }
+  )
 }
 
+shinyApp(ui, server)
+}
 }
 

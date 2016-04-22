@@ -9,7 +9,22 @@
 #' @seealso \code{\link{updateTextInput}}
 #'
 #' @examples
-#' passwordInput("password", "Password:")
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   passwordInput("password", "Password:"),
+#'   actionButton("go", "Go"),
+#'   verbatimTextOutput("value")
+#' )
+#' server <- function(input, output) {
+#'   output$value <- renderText({
+#'     req(input$go)
+#'     isolate(input$password)
+#'   })
+#' }
+#' shinyApp(ui, server)
+#' }
 #' @export
 passwordInput <- function(inputId, label, value = "", width = NULL,
                           placeholder = NULL) {

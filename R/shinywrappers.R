@@ -126,9 +126,17 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
-#' shinyServer(function(input, output, clientData) {
+#' ui <- fluidPage(
+#'   sliderInput("n", "Number of observations", 2, 1000, 500),
+#'   plotOutput("plot1"),
+#'   plotOutput("plot2"),
+#'   plotOutput("plot3")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'
 #'   # A plot of fixed size
 #'   output$plot1 <- renderImage({
@@ -150,14 +158,14 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'   output$plot2 <- renderImage({
 #'     # Read plot2's width and height. These are reactive values, so this
 #'     # expression will re-run whenever these values change.
-#'     width  <- clientData$output_plot2_width
-#'     height <- clientData$output_plot2_height
+#'     width  <- session$clientData$output_plot2_width
+#'     height <- session$clientData$output_plot2_height
 #'
 #'     # A temp file to save the output.
 #'     outfile <- tempfile(fileext='.png')
 #'
 #'     png(outfile, width=width, height=height)
-#'     hist(rnorm(input$obs))
+#'     hist(rnorm(input$n))
 #'     dev.off()
 #'
 #'     # Return a list containing the filename
@@ -168,6 +176,8 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'   }, deleteFile = TRUE)
 #'
 #'   # Send a pre-rendered image, and don't delete the image after sending it
+#'   # NOTE: For this example to work, it would require files in a subdirectory
+#'   # named images/
 #'   output$plot3 <- renderImage({
 #'     # When input$n is 1, filename is ./images/image1.jpeg
 #'     filename <- normalizePath(file.path('./images',
@@ -176,8 +186,9 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'     # Return a list containing the filename
 #'     list(src = filename)
 #'   }, deleteFile = FALSE)
-#' })
+#' }
 #'
+#' shinyApp(ui, server)
 #' }
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
                         deleteFile=TRUE, outputArgs=list()) {
@@ -313,13 +324,24 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #'
 #' @export
 #' @examples
-#' \dontrun{
-#'   output$moreControls <- renderUI({
-#'     list(
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   uiOutput("moreControls")
+#' )
+#'
+#' server <- function(input, output) {
+#'   output$moreControls <- renderUI({
+#'     tagList(
+#'       sliderInput("n", "N", 1, 1000, 500),
+#'       textInput("label", "Label")
 #'     )
 #'   })
 #' }
+#' shinyApp(ui, server)
+#' }
+#'
 renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
                      outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
@@ -363,21 +385,29 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   in an interactive R Markdown document.
 #'
 #' @examples
-#' \dontrun{
-#' # In server.R:
-#' output$downloadData <- downloadHandler(
-#'   filename = function() {
-#'     paste('data-', Sys.Date(), '.csv', sep='')
-#'   },
-#'   content = function(file) {
-#'     write.csv(data, file)
-#'   }
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   downloadLink("downloadData", "Download")
 #' )
 #'
-#' # In ui.R:
-#' downloadLink('downloadData', 'Download')
+#' server <- function(input, output) {
+#'   # Our dataset
+#'   data <- mtcars
+#'
+#'   output$downloadData <- downloadHandler(
+#'     filename = function() {
+#'       paste("data-", Sys.Date(), ".csv", sep="")
+#'     },
+#'     content = function(file) {
+#'       write.csv(data, file)
+#'     }
+#'   )
 #' }
 #'
+#' shinyApp(ui, server)
+#' }
 #' @export
 downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()) {
   renderFunc <- function(shinysession, name, ...) {

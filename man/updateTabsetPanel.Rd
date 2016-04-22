@@ -25,22 +25,31 @@ or \code{navbarPage} object.}
 Change the selected tab on the client
 }
 \examples{
-\dontrun{
-shinyServer(function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
 
-  observe({
-    # TRUE if input$controller is even, FALSE otherwise.
-    x_even <- input$controller \%\% 2 == 0
+ui <- fluidPage(sidebarLayout(
+  sidebarPanel(
+    sliderInput("controller", "Controller", 1, 3, 1)
+  ),
+  mainPanel(
+    tabsetPanel(id = "inTabset",
+      tabPanel(title = "Panel 1", value = "panel1", "Panel 1 content"),
+      tabPanel(title = "Panel 2", value = "panel2", "Panel 2 content"),
+      tabPanel(title = "Panel 3", value = "panel3", "Panel 3 content")
+    )
+  )
+))
 
-    # Change the selected tab.
-    # Note that the tabset container must have been created with an 'id' argument
-    if (x_even) {
-      updateTabsetPanel(session, "inTabset", selected = "panel2")
-    } else {
-      updateTabsetPanel(session, "inTabset", selected = "panel1")
-    }
+server <- function(input, output, session) {
+  observeEvent(input$controller, {
+    updateTabsetPanel(session, "inTabset",
+      selected = paste0("panel", input$controller)
+    )
   })
-})
+}
+
+shinyApp(ui, server)
 }
 }
 \seealso{

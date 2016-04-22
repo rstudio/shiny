@@ -24,6 +24,7 @@
 #' @return An ID for the notification.
 #'
 #' @examples
+#' ## Only run examples in interactive R sessions
 #' if (interactive()) {
 #' # Show a message when button is clicked
 #' shinyApp(

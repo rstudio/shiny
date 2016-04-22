@@ -28,7 +28,22 @@ A text input control that can be added to a UI definition.
 Create an password control for entry of passwords.
 }
 \examples{
-passwordInput("password", "Password:")
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
+  passwordInput("password", "Password:"),
+  actionButton("go", "Go"),
+  verbatimTextOutput("value")
+)
+server <- function(input, output) {
+  output$value <- renderText({
+    req(input$go)
+    isolate(input$password)
+  })
+}
+shinyApp(ui, server)
+}
 }
 \seealso{
 \code{\link{updateTextInput}}

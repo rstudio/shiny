@@ -20,7 +20,13 @@ Calling this function has the side effect of including a
   explicitly using the `title` parameter of the top-level page function.
 }
 \examples{
-titlePanel("Hello Shiny!")
+## Only run examples in interactive R sessions
+if (interactive()) {
 
+ui <- fluidPage(
+  titlePanel("Hello Shiny!")
+)
+shinyApp(ui, server = function(input, output) { })
+}
 }
 

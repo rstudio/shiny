@@ -65,6 +65,9 @@ shiny 0.13.2.9001
 
 * Added `placeholder` option to `passwordInput`.
 
+* Almost all code examples now have a runnable example with `shinyApp()`, so
+  that users can run the examples and see them in action. (#1137, #1158)
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

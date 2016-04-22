@@ -11,7 +11,7 @@ mpgData$am <- factor(mpgData$am, labels = c("Automatic", "Manual"))
 
 # Define server logic required to plot various variables against
 # mpg
-shinyServer(function(input, output) {
+function(input, output) {
 
   # Compute the formula text in a reactive expression since it is
   # shared by the output$caption and output$mpgPlot functions
@@ -31,4 +31,4 @@ shinyServer(function(input, output) {
             data = mpgData,
             outline = input$outliers)
   })
-})
+}

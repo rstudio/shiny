@@ -1,6 +1,6 @@
 library(shiny)
 
-shinyUI(fluidPage(
+fluidPage(
   titlePanel("Uploading Files"),
   sidebarLayout(
     sidebarPanel(
@@ -25,4 +25,4 @@ shinyUI(fluidPage(
       tableOutput('contents')
     )
   )
-))
+)

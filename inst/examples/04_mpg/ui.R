@@ -1,7 +1,7 @@
 library(shiny)
 
 # Define UI for miles per gallon application
-shinyUI(fluidPage(
+fluidPage(
   
   # Application title
   titlePanel("Miles Per Gallon"),
@@ -26,4 +26,4 @@ shinyUI(fluidPage(
       plotOutput("mpgPlot")
     )
   )
-))
+)

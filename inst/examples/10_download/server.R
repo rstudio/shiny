@@ -1,4 +1,4 @@
-shinyServer(function(input, output) {
+function(input, output) {
   datasetInput <- reactive({
     switch(input$dataset,
            "rock" = rock,
@@ -18,4 +18,4 @@ shinyServer(function(input, output) {
       write.csv(datasetInput(), file)
     }
   )
-})
+}

@@ -196,7 +196,7 @@ collapseSizes <- function(padding) {
 #'
 #' @examples
 #' # Define UI
-#' shinyUI(pageWithSidebar(
+#' pageWithSidebar(
 #'
 #'   # Application title
 #'   headerPanel("Hello Shiny!"),
@@ -214,7 +214,7 @@ collapseSizes <- function(padding) {
 #'   mainPanel(
 #'     plotOutput("distPlot")
 #'   )
-#' ))
+#' )
 #'
 #' @export
 pageWithSidebar <- function(headerPanel,
@@ -291,13 +291,13 @@ pageWithSidebar <- function(headerPanel,
 #'   \code{\link{updateNavbarPage}}
 #'
 #' @examples
-#' shinyUI(navbarPage("App Title",
+#' navbarPage("App Title",
 #'   tabPanel("Plot"),
 #'   tabPanel("Summary"),
 #'   tabPanel("Table")
-#' ))
+#' )
 #'
-#' shinyUI(navbarPage("App Title",
+#' navbarPage("App Title",
 #'   tabPanel("Plot"),
 #'   navbarMenu("More",
 #'     tabPanel("Summary"),
@@ -305,7 +305,7 @@ pageWithSidebar <- function(headerPanel,
 #'     "Section header",
 #'     tabPanel("Table")
 #'   )
-#' ))
+#' )
 #' @export
 navbarPage <- function(title,
                        ...,
@@ -676,7 +676,7 @@ tabsetPanel <- function(...,
 #'
 #' @seealso \code{\link{tabPanel}}, \code{\link{updateNavlistPanel}}
 #' @examples
-#' shinyUI(fluidPage(
+#' fluidPage(
 #'
 #'   titlePanel("Application Title"),
 #'
@@ -686,7 +686,7 @@ tabsetPanel <- function(...,
 #'     tabPanel("Second"),
 #'     tabPanel("Third")
 #'   )
-#' ))
+#' )
 #' @export
 navlistPanel <- function(...,
                          id = NULL,
@@ -1490,11 +1490,11 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
 #' # add an icon to a submit button
 #' submitButton("Update View", icon = icon("refresh"))
 #'
-#' shinyUI(navbarPage("App Title",
+#' navbarPage("App Title",
 #'   tabPanel("Plot", icon = icon("bar-chart-o")),
 #'   tabPanel("Summary", icon = icon("list-alt")),
 #'   tabPanel("Table", icon = icon("table"))
-#' ))
+#' )
 #'
 #' @export
 icon <- function(name, class = NULL, lib = "font-awesome") {

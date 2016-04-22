@@ -80,13 +80,13 @@ The \code{navbarMenu} function can be used to create an embedded
   example below).
 }
 \examples{
-shinyUI(navbarPage("App Title",
+navbarPage("App Title",
   tabPanel("Plot"),
   tabPanel("Summary"),
   tabPanel("Table")
-))
+)
 
-shinyUI(navbarPage("App Title",
+navbarPage("App Title",
   tabPanel("Plot"),
   navbarMenu("More",
     tabPanel("Summary"),
@@ -94,7 +94,7 @@ shinyUI(navbarPage("App Title",
     "Section header",
     tabPanel("Table")
   )
-))
+)
 }
 \seealso{
 \code{\link{tabPanel}}, \code{\link{tabsetPanel}},

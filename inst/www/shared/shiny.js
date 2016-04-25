@@ -5006,22 +5006,40 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     e.preventDefault();
   });
 
-  exports.addCustomMessageHandler("shiny-insert-ui", function (message) {
-    var targets = $(message.selector);
-    if (targets.length === 0) {
-      // render the HTML and deps to a null target, so
-      // the side-effect of rendering the deps, singletons,
-      // and <head> still occur
-      exports.renderHtml($([]), message.content.html, message.content.deps);
-    } else {
-      targets.each(function (i, target) {
-        var container = document.createElement("div");
-        target.insertAdjacentElement(message.where, container);
-        exports.renderContent(container, message.content);
-        $(container).trigger("shown");
+  exports.addCustomMessageHandler("shiny-insert-ui",
+    function(message) {
+      let targets = $(message.selector);
+      if (targets.length === 0) {
+        // render the HTML and deps to a null target, so
+        // the side-effect of rendering the deps, singletons,
+        // and <head> still occur
+        exports.renderHtml(
+          $([]),
+          message.content.html,
+          message.content.deps
+        );
+      } else {
+        targets.each((i, target) => {
+          let container = document.createElement(message.container);
+          target.insertAdjacentElement(message.where, container);
+          exports.renderContent(container, message.content);
+          $(container).trigger("shown");
+          return message.multiple;
+        });
+      }
+    }
+  );
+
+  exports.addCustomMessageHandler("shiny-remove-ui",
+    function(message) {
+      let els = $(message.selector);
+      els.each((i, el) => {
+        $(el).remove();
+        return message.multiple;
       });
     }
-  });
+  );
+
 
   //---------------------------------------------------------------------
   // Source file: ../srcjs/_end.js

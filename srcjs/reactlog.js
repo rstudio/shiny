@@ -21,11 +21,23 @@ exports.addCustomMessageHandler("shiny-insert-ui",
       );
     } else {
       targets.each((i, target) => {
-        let container = document.createElement("div");
+        let container = document.createElement(message.container);
         target.insertAdjacentElement(message.where, container);
         exports.renderContent(container, message.content);
         $(container).trigger("shown");
+        return message.multiple;
       });
     }
   }
 );
+
+exports.addCustomMessageHandler("shiny-remove-ui",
+  function(message) {
+    let els = $(message.selector);
+    els.each((i, el) => {
+      $(el).remove();
+      return message.multiple;
+    });
+  }
+);
+

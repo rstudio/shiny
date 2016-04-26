@@ -7,7 +7,7 @@
 
   function renderValue(el, data) {
     const $el = $(el);
-    const $button = $el.find('button');
+    const $button = $el.find('button[data-clipboard-target]');
 
     // Initialize clipboardjs for this element, one time only
     if (!$button.data('clipboard-initialized')) {

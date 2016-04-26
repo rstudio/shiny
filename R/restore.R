@@ -148,8 +148,14 @@ restoreValue <- function(id, default) {
   }
 }
 
+#' @param id ID for the output.
+#' @param label Text label, displayed above the bookmark output.
+#' @param updateId An optional input ID. If non-NULL, a special actionButton
+#'   with this ID will be added to the input group. The purpose of this button
+#'   is that, when clicked, the \code{bookmarkOutput}'s value will be updated.
+#'   See examples below.
 #' @export
-bookmarkOutput <- function(id, label = NULL) {
+bookmarkOutput <- function(id, label = NULL, updateId = NULL) {
   textId <- paste0("shiny-bookmark-", id)
 
   tagList(
@@ -159,9 +165,13 @@ bookmarkOutput <- function(id, label = NULL) {
       tags$input(id = textId,
         readonly = "readonly",
         class = "form-control",
-        placeholder = "Click button"
+        placeholder = "Bookmark URL"
       ),
       span(class = "input-group-btn",
+        if (!is.null(updateId)) tags$button(id = updateId,
+          class = "btn btn-default action-button",
+          icon("repeat", lib = "glyphicon")
+        ),
         tags$button(class = "btn btn-default",
           `data-clipboard-target` = paste0("#", textId),
           icon("copy", lib = "glyphicon")

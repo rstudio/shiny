@@ -13,11 +13,19 @@ decodeBookmarkDataURL <- function(url) {
   )
 }
 
+
+#' @param input The session's input object.
+#' @param exclude A character vector of input names that should not be
+#'   bookmarked.
 #' @export
-encodeBookmarkDataURL <- function(input, values, files) {
-  vals <- vapply(reactiveValuesToList(input), function(x) {
+encodeBookmarkDataURL <- function(input, exclude = NULL) {
+  vals <- reactiveValuesToList(input)
+  vals <- vals[setdiff(names(vals), exclude)]
+
+  vals <- vapply(vals, function(x) {
     toJSON(x, strict_atomic = FALSE)
   }, character(1), USE.NAMES = TRUE)
+
   paste0(
     encodeURIComponent(names(vals)),
     "=",

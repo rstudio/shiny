@@ -120,6 +120,7 @@ Collate:
     'jqueryui.R'
     'middleware-shiny.R'
     'middleware.R'
+    'modal.R'
     'modules.R'
     'notifications.R'
     'priorityqueue.R'

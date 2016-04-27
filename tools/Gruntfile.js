@@ -34,6 +34,7 @@ module.exports = function(grunt) {
           js_srcdir + 'input_rate.js',
           js_srcdir + 'shinyapp.js',
           js_srcdir + 'notifications.js',
+          js_srcdir + 'modal.js',
           js_srcdir + 'file_processor.js',
           js_srcdir + 'binding_registry.js',
           js_srcdir + 'output_binding.js',

@@ -572,6 +572,15 @@ var ShinyApp = function() {
       throw('Unkown notification type: ' + message.type);
   });
 
+  addMessageHandler('modal', function(message) {
+    if (message.type === 'show')
+      exports.modal.show(message.message);
+    else if (message.type === 'remove')
+      exports.modal.remove(); // For 'remove', message content isn't used
+    else
+      throw('Unkown modal type: ' + message.type);
+  });
+
   addMessageHandler('response', function(message) {
     var requestId = message.tag;
     var request = this.$activeRequests[requestId];

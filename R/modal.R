@@ -80,72 +80,62 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' )
 #'
 #'
-#' # Display a modal that requires valid username and password input.
+# Display a modal that requires valid input before continuing.
 #' shinyApp(
 #'   ui = basicPage(
 #'     actionButton("show", "Show modal dialog"),
-#'     verbatimTextOutput("loginInfo")
+#'     verbatimTextOutput("dataInfo")
 #'   ),
+#'
 #'   server = function(input, output) {
-#'     # A string with the current login status. This is in a reactiveValues
-#'     # object so that it can trigger reactivity.
-#'     vals <- reactiveValues(loginStatus = "Not logged in.")
+#'     # reactiveValues object for storing current data set.
+#'     vals <- reactiveValues(data = NULL)
 #'
-#'     # Attempt logging in with a username and password, returning TRUE if
-#'     # successful and FALSE if not.
-#'     login <- function(username, password) {
-#'       # In a real-world use case, this would check against some sort of user
-#'       # database instead of just checking that the values are identical to
-#'       # hard-coded values.
-#'       if (identical(username, "user1") && identical(password, "pass1")) {
-#'         vals$loginStatus <- paste0('Logged in as "', username, '"')
-#'         return(TRUE)
-#'
-#'       } else {
-#'         vals$loginStatus <- "Not logged in."
-#'         return(FALSE)
-#'       }
-#'     }
-#'
-#'     # Return the UI for a modal dialog with username/password inputs.
-#'     # If 'failed' is TRUE, then display a message that the previous username
-#'     # and password were invalid.
-#'     loginModal <- function(failed = FALSE) {
+#'     # Return the UI for a modal dialog with data selection input. If 'failed' is
+#'     # TRUE, then display a message that the previous value was invalid.
+#'     dataModal <- function(failed = FALSE) {
 #'       modalDialog(
-#'         textInput("username", "Username"),
-#'         passwordInput("password", "Password"),
-#'         span('(Try logging in with "user1" and "pass1")'),
+#'         textInput("dataset", "Choose data set",
+#'           placeholder = 'Try "mtcars" or "abc"'
+#'         ),
+#'         span('(Try the name of a valid data object like "mtcars", then a name of a non-existent object like "abc")'),
 #'         if (failed)
-#'           div(tags$b("Invalid username/password", style = "color: red;")),
+#'           div(tags$b("Invalid name of data object", style = "color: red;")),
 #'
 #'         footer = tagList(
 #'           modalButton("Cancel"),
-#'           actionButton("login", "Log in")
+#'           actionButton("ok", "OK")
 #'         )
 #'       )
 #'     }
 #'
+#'     # Show modal when button is clicked.
 #'     observeEvent(input$show, {
-#'       showModal(loginModal())
+#'       showModal(dataModal())
 #'     })
 #'
-#'     # When login button is pressed, attempt to log in. If successful, remove the
-#'     # modal. If not show another modal, but this time with a failure message.
-#'     observeEvent(input$login, {
-#'       if (login(input$username, input$password)) {
+#'     # When OK button is pressed, attempt to load the data set. If successful,
+#'     # remove the modal. If not show another modal, but this time with a failure
+#'     # message.
+#'     observeEvent(input$ok, {
+#'       # Check that data object exists and is data frame.
+#'       if (exists(input$dataset) && is.data.frame(get(input$dataset))) {
+#'         vals$data <- get(input$dataset)
 #'         removeModal()
 #'       } else {
-#'         showModal(loginModal(failed = TRUE))
+#'         showModal(dataModal(failed = TRUE))
 #'       }
 #'     })
 #'
-#'     # Display current login status
-#'     output$loginInfo <- renderText({
-#'       vals$loginStatus
+#'     # Display information about selected data
+#'     output$dataInfo <- renderPrint({
+#'       if (is.null(vals$data))
+#'         "No data selected"
+#'       else
+#'         summary(vals$data)
 #'     })
 #'   }
 #' )
-#'
 #' }
 #' @export
 modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),

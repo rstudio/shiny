@@ -43,8 +43,8 @@
 #' you usually put inside your apps's  \code{ui} function.
 #'
 #' @param immediate Whether the UI object should be immediately inserted into
-#' the app when you call \code{insertUI}, or whether Shiny should wait for the
-#' next time your app is updated for some other reason (default).
+#' the app when you call \code{insertUI}, or whether Shiny should wait until
+#' all outputs have been updated and all observers have been run (default).
 #'
 #' @param container A function to generate an HTML element to contain the UI
 #' object.
@@ -92,6 +92,8 @@ insertUI <- function(selector,
   force(selector)
   force(ui)
   force(session)
+  force(multiple)
+  force(container)
   if (missing(where)) where <- "afterEnd"
   where <- match.arg(where)
 
@@ -139,8 +141,8 @@ insertUI <- function(selector,
 #' elements or just the first matched element (default).
 #'
 #' @param immediate Whether the element(s) should be immediately removed from
-#' the app when you call \code{removeUI}, or whether Shiny should wait for the
-#' next time your app is updated for some other reason (default).
+#' the app when you call \code{removeUI}, or whether Shiny should wait until
+#' all outputs have been updated and all observers have been run (default).
 #'
 #' @param session The shiny session within which to call \code{removeUI}.
 #'

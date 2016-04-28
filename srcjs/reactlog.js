@@ -7,6 +7,31 @@ $(document).on('keydown', function(e) {
   e.preventDefault();
 });
 
+// Turns out that Firefox does not support insertAdjacentElement().
+// So we have to implement our own version for insertUI.
+// Code adapted from here: http://forums.mozillazine.org/viewtopic.php?t=445587
+HTMLElement.prototype.insertAdjacentElement = function(where, parsedNode) {
+  switch (where) {
+    case 'beforeBegin':
+      this.parentNode.insertBefore(parsedNode, this);
+      break;
+    case 'afterBegin':
+      this.insertBefore(parsedNode, this.firstChild);
+      break;
+    case 'beforeEnd':
+      this.appendChild(parsedNode);
+      break;
+    case 'afterEnd':
+      if (this.nextSibling) {
+        this.parentNode.insertBefore(parsedNode, this.nextSibling);
+      }
+      else {
+        this.parentNode.appendChild(parsedNode);
+      }
+      break;
+  }
+};
+
 exports.addCustomMessageHandler("shiny-insert-ui",
   function(message) {
     let targets = $(message.selector);

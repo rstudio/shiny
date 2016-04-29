@@ -1176,7 +1176,26 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     addMessageHandler('shiny-remove-ui', function (message) {
       var els = $(message.selector);
       els.each(function (i, el) {
-        $(el).remove();
+        var temp = document.createElement('div');
+        $(el).appendTo(temp);
+        exports.unbindAll(temp);
+        $(temp).remove();
+
+        // The size of each image may change either because the browser window was
+        // resized, or because a tab was shown/hidden (hidden elements report size
+        // of 0x0). It's OK to over-report sizes because the input pipeline will
+        // filter out values that haven't changed.
+        // Need to register callbacks for each Bootstrap 3 class.
+        var bs3classes = ['modal', 'dropdown', 'tab', 'tooltip', 'popover', 'collapse'];
+        $.each(bs3classes, function (idx, classname) {
+          $('body').on('shown.bs.' + classname + '.sendImageSize', '*', filterEventsByNamespace('bs', sendImageSize));
+          $('body').on('shown.bs.' + classname + '.sendOutputHiddenState ' + 'hidden.bs.' + classname + '.sendOutputHiddenState', '*', filterEventsByNamespace('bs', sendOutputHiddenState));
+        });
+        // This is needed for Bootstrap 2 compatibility and for non-Bootstrap
+        // related shown/hidden events (like conditionalPanel)
+        $('body').on('shown.sendImageSize', '*', sendImageSize);
+        $('body').on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*', sendOutputHiddenState);
+
         // If `multiple` is false, returning false terminates the function
         // and no other elements are removed; if `multiple` is true,
         // returning true continues removing all remaining elements.

@@ -35,8 +35,8 @@ Adapted from
 you usually put inside your apps's  \code{ui} function.}
 
 \item{immediate}{Whether the UI object should be immediately inserted into
-the app when you call \code{insertUI}, or whether Shiny should wait for the
-next time your app is updated for some other reason (default).}
+the app when you call \code{insertUI}, or whether Shiny should wait until
+all outputs have been updated and all observers have been run (default).}
 
 \item{container}{A function to generate an HTML element to contain the UI
 object.}

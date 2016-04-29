@@ -19,8 +19,8 @@ so you may need to use a somewhat complex selector (see the Examples below).}
 elements or just the first matched element (default).}
 
 \item{immediate}{Whether the element(s) should be immediately removed from
-the app when you call \code{removeUI}, or whether Shiny should wait for the
-next time your app is updated for some other reason (default).}
+the app when you call \code{removeUI}, or whether Shiny should wait until
+all outputs have been updated and all observers have been run (default).}
 
 \item{session}{The shiny session within which to call \code{removeUI}.}
 }

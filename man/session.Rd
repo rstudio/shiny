@@ -41,17 +41,19 @@
 \item{onEnded(callback)}{
   Synonym for \code{onSessionEnded}.
 }
-\item{onFlush(func, once=TRUE)}{
+\item{onFlush(func, once=TRUE, ...)}{
   Registers a function to be called before the next time (if \code{once=TRUE})
   or every time (if \code{once=FALSE}) Shiny flushes the reactive system.
-  Returns a function that can be called with no arguments to cancel the
-  registration.
+  The \code{...} argument allows you to pass arguments that should be applied
+  to \code{func} when it is called. Returns a function that can be called
+  with no arguments to cancel the registration.
 }
-\item{onFlushed(func, once=TRUE)}{
+\item{onFlushed(func, once=TRUE, ...)}{
   Registers a function to be called after the next time (if \code{once=TRUE})
   or every time (if \code{once=FALSE}) Shiny flushes the reactive system.
-  Returns a function that can be called with no arguments to cancel the
-  registration.
+  The \code{...} argument allows you to pass arguments that should be applied
+  to \code{func} when it is called. Returns a function that can be called
+  with no arguments to cancel the registration.
 }
 \item{onSessionEnded(callback)}{
   Registers a function to be called after the client has disconnected.

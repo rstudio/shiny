@@ -766,6 +766,18 @@ ShinySession <- R6Class(
     reload = function() {
       private$sendMessage(reload = TRUE)
     },
+    sendInsertUI = function(selector, multiple, where,
+                            content, container) {
+      private$sendMessage(
+        `shiny-insert-ui` = list(
+          selector = selector,
+          multiple = multiple,
+          where = where,
+          content = content,
+          container = container
+        )
+      )
+    },
 
     # Public RPC methods
     `@uploadieFinish` = function() {

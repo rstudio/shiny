@@ -97,23 +97,36 @@ insertUI <- function(selector,
   if (missing(where)) where <- "afterEnd"
   where <- match.arg(where)
 
-  sendInsertUI <- function() {
-    session$sendCustomMessage("shiny-insert-ui",
-      list(
-        selector = selector,
-        multiple = multiple,
-        where = where,
-        content = processDeps(ui, session),
-        container = container
-      )
-    )
-  }
+  # sendInsertUI <- function() {
+  #   private$sendMessage(
+  #     `shiny-insert-ui` = list(
+  #       selector = selector,
+  #       multiple = multiple,
+  #       where = where,
+  #       content = processDeps(ui, session),
+  #       container = container
+  #     )
+  #   )
+  # }
+  #
+  # sendInsertUI <- function(selector, multiple, where,
+  #                          content, container) {
+  #   private$sendMessage(
+  #     `shiny-insert-ui` = list(
+  #       selector = selector,
+  #       multiple = multiple,
+  #       where = where,
+  #       content = processDeps(ui, session),
+  #       container = container
+  #     )
+  #   )
+  # }
 
-  if (!immediate) {
-    session$onFlushed(sendInsertUI, once = TRUE)
-  } else {
-    sendInsertUI()
-  }
+  # if (!immediate) {
+  #   session$onFlushed(sendInsertUI, once = TRUE)
+  # } else {
+    session$sendInsertUI(selector, multiple, where, processDeps(ui, session), container)
+  # }
 }
 
 
@@ -180,7 +193,7 @@ removeUI <- function(selector,
   force(session)
 
   sendRemoveUI <- function() {
-    session$sendCustomMessage("shiny-remove-ui",
+    session$sendMessage("shiny-remove-ui",
       list(
         selector = selector,
         multiple = multiple

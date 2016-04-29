@@ -748,13 +748,14 @@ ShinySession <- R6Class(
         return(dereg)
       }
     },
-    onFlushed = function(flushedCallback, once = TRUE) {
+    onFlushed = function(flushedCallback, once = TRUE, ...) {
       if (!isTRUE(once)) {
         return(private$flushedCallbacks$register(flushedCallback))
       } else {
         dereg <- private$flushedCallbacks$register(function() {
           dereg()
-          flushedCallback()
+          if (is.null(formals(flushedCallback))) flushedCallback()
+          else flushedCallback(...)
         })
         return(dereg)
       }
@@ -775,6 +776,14 @@ ShinySession <- R6Class(
           where = where,
           content = content,
           container = container
+        )
+      )
+    },
+    sendRemoveUI = function(selector, multiple) {
+      private$sendMessage(
+        `shiny-remove-ui` = list(
+          selector = selector,
+          multiple = multiple
         )
       )
     },

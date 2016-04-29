@@ -97,36 +97,20 @@ insertUI <- function(selector,
   if (missing(where)) where <- "afterEnd"
   where <- match.arg(where)
 
-  # sendInsertUI <- function() {
-  #   private$sendMessage(
-  #     `shiny-insert-ui` = list(
-  #       selector = selector,
-  #       multiple = multiple,
-  #       where = where,
-  #       content = processDeps(ui, session),
-  #       container = container
-  #     )
-  #   )
-  # }
-  #
-  # sendInsertUI <- function(selector, multiple, where,
-  #                          content, container) {
-  #   private$sendMessage(
-  #     `shiny-insert-ui` = list(
-  #       selector = selector,
-  #       multiple = multiple,
-  #       where = where,
-  #       content = processDeps(ui, session),
-  #       container = container
-  #     )
-  #   )
-  # }
-
-  # if (!immediate) {
-  #   session$onFlushed(sendInsertUI, once = TRUE)
-  # } else {
-    session$sendInsertUI(selector, multiple, where, processDeps(ui, session), container)
-  # }
+  if (!immediate) {
+    session$onFlushed(session$sendInsertUI, once = TRUE,
+                      selector = selector,
+                      multiple = multiple,
+                      where = where,
+                      content = processDeps(ui, session),
+                      container = container)
+  } else {
+    session$sendInsertUI(selector = selector,
+                         multiple = multiple,
+                         where = where,
+                         content = processDeps(ui, session),
+                         container = container)
+  }
 }
 
 
@@ -190,20 +174,15 @@ removeUI <- function(selector,
   session = getDefaultReactiveDomain()) {
 
   force(selector)
+  force(multiple)
   force(session)
 
-  sendRemoveUI <- function() {
-    session$sendMessage("shiny-remove-ui",
-      list(
-        selector = selector,
-        multiple = multiple
-      )
-    )
-  }
-
   if (!immediate) {
-    session$onFlushed(sendRemoveUI, once = TRUE)
+    session$onFlushed(session$sendRemoveUI, once = TRUE,
+                      selector = selector,
+                      multiple = multiple)
   } else {
-    sendRemoveUI()
+    session$sendRemoveUI(selector = selector,
+                         multiple = multiple)
   }
 }

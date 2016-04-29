@@ -68,24 +68,24 @@ ReactiveValues <- R6Class(
     get = function(key) {
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!exists(dep.key, where=.dependents, inherits=FALSE)) {
+      if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
         .graphDependsOn(ctx$id, sprintf('%s$%s', .label, key))
-        assign(dep.key, ctx, pos=.dependents, inherits=FALSE)
+        .dependents[[dep.key]] <- ctx
         ctx$onInvalidate(function() {
-          rm(list=dep.key, pos=.dependents, inherits=FALSE)
+          rm(list=dep.key, envir=.dependents, inherits=FALSE)
         })
       }
 
-      if (!exists(key, where=.values, inherits=FALSE))
+      if (!exists(key, envir=.values, inherits=FALSE))
         NULL
       else
-        base::get(key, pos=.values, inherits=FALSE)
+        .values[[key]]
     },
     set = function(key, value) {
       hidden <- substr(key, 1, 1) == "."
 
-      if (exists(key, where=.values, inherits=FALSE)) {
-        if (identical(base::get(key, pos=.values, inherits=FALSE), value)) {
+      if (exists(key, envir=.values, inherits=FALSE)) {
+        if (identical(.values[[key]], value)) {
           return(invisible())
         }
       }
@@ -98,14 +98,14 @@ ReactiveValues <- R6Class(
       else
         .valuesDeps$invalidate()
 
-      assign(key, value, pos=.values, inherits=FALSE)
+      .values[[key]] <- value
 
       .graphValueChange(sprintf('names(%s)', .label), ls(.values, all.names=TRUE))
       .graphValueChange(sprintf('%s (all)', .label), as.list(.values))
       .graphValueChange(sprintf('%s$%s', .label, key), value)
 
       dep.keys <- objects(
-        pos=.dependents,
+        envir=.dependents,
         pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
         all.names=TRUE
       )
@@ -562,7 +562,7 @@ srcrefToLabel <- function(srcref, defaultLabel) {
 
 #' @export
 print.reactive <- function(x, ...) {
-  label <- attr(x, "observable")$.label
+  label <- attr(x, "observable", exact = TRUE)$.label
   cat(label, "\n")
 }
 
@@ -573,7 +573,7 @@ is.reactive <- function(x) inherits(x, "reactive")
 # Return the number of times that a reactive expression or observer has been run
 execCount <- function(x) {
   if (is.reactive(x))
-    return(attr(x, "observable")$.execCount)
+    return(attr(x, "observable", exact = TRUE)$.execCount)
   else if (inherits(x, 'Observer'))
     return(x$.execCount)
   else
@@ -865,9 +865,9 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' }
 #' @export
 makeReactiveBinding <- function(symbol, env = parent.frame()) {
-  if (exists(symbol, where = env, inherits = FALSE)) {
-    initialValue <- get(symbol, pos = env, inherits = FALSE)
-    rm(list = symbol, pos = env, inherits = FALSE)
+  if (exists(symbol, envir = env, inherits = FALSE)) {
+    initialValue <- env[[symbol]]
+    rm(list = symbol, envir = env, inherits = FALSE)
   }
   else
     initialValue <- NULL

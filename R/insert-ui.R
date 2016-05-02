@@ -5,17 +5,18 @@
 #' This function allows you to dynamically add an arbitrarily large UI
 #' object into your app, whenever you want, as many times as you want.
 #' Unlike \code{renderUI}, the UI generated with \code{insertUI} is
-#' not updatable as a whole, once it's created, it stays there. Each
+#' not updatable as a whole: once it's created, it stays there. Each
 #' new call to \code{insertUI} creates more UI objects, in addition to
-#' the ones already there. To update a part of the UI (ex: an input
-#' object), you must use the appropriate \code{render} function or a
-#' customized \code{reactive} function.
+#' the ones already there (all independent from one another). To
+#' update a part of the UI (ex: an input object), you must use the
+#' appropriate \code{render} function or a customized \code{reactive}
+#' function.
 #'
 #' Note that whatever UI object you pass through \code{ui}, it is always
-#' wrapped in an extra div before making its way into the DOM. This
-#' does not affect what you mean to do, and it makes it easier to remove
-#' the whole UI object using \code{\link{removeUI}} (if you wish to do
-#' so, of course).
+#' wrapped in an extra \code{div} (or if \code{inline = TRUE}, a
+#' \code{span}) before making its way into the DOM. This does not affect
+#' what you mean to do, and it makes it easier to remove the whole UI
+#' object using \code{\link{removeUI}} (if you wish to do so, of course).
 #'
 #' @param selector A string that is accepted by jQuery's selector (i.e. the
 #' string \code{s} to be placed in a \code{$(s)} jQuery call). This selector
@@ -33,8 +34,8 @@
 #'   \item{\code{afterBegin}}{Just inside the selector element, before its
 #'   first child.}
 #'   \item{\code{beforeEnd}}{Just inside the selector element, after its
-#'   last child}
-#'   \item{\code{afterEnd}}{After the selector element itself (default)}
+#'   last child (default)}
+#'   \item{\code{afterEnd}}{After the selector element itself}
 #' }
 #' Adapted from
 #' \href{https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML}{here}.
@@ -94,23 +95,19 @@ insertUI <- function(selector,
   force(session)
   force(multiple)
   force(container)
-  if (missing(where)) where <- "afterEnd"
+  if (missing(where)) where <- "beforeEnd"
   where <- match.arg(where)
 
-  if (!immediate) {
-    session$onFlushed(session$sendInsertUI, once = TRUE,
-                      selector = selector,
-                      multiple = multiple,
-                      where = where,
-                      content = processDeps(ui, session),
-                      container = container)
-  } else {
+  callback <- function() {
     session$sendInsertUI(selector = selector,
                          multiple = multiple,
                          where = where,
                          content = processDeps(ui, session),
                          container = container)
   }
+
+  if (!immediate) session$onFlushed(callback, once = TRUE)
+  else callback()
 }
 
 
@@ -177,12 +174,11 @@ removeUI <- function(selector,
   force(multiple)
   force(session)
 
-  if (!immediate) {
-    session$onFlushed(session$sendRemoveUI, once = TRUE,
-                      selector = selector,
-                      multiple = multiple)
-  } else {
+  callback <- function() {
     session$sendRemoveUI(selector = selector,
                          multiple = multiple)
   }
+
+  if (!immediate) session$onFlushed(callback, once = TRUE)
+  else callback()
 }

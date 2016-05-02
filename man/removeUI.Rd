@@ -28,8 +28,8 @@ all outputs have been updated and all observers have been run (default).}
 Remove a UI object from the app.
 }
 \details{
-This function allows you to remove any part of your UI. Once you call
-\code{removeUI} on some element, it is gone forever.
+This function allows you to remove any part of your UI. Once \code{removeUI}
+is executed on some element, it is gone forever.
 
 While it may be a particularly useful pattern to pair this with
 \code{\link{insertUI}} (to remove some UI you had previously inserted),

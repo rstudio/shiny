@@ -2,11 +2,7 @@ function initShiny() {
 
   var shinyapp = exports.shinyapp = new ShinyApp();
 
-  function bindOutputs(scope) {
-
-    if (scope === undefined)
-      scope = document;
-
+  function bindOutputs(scope = document) {
     scope = $(scope);
 
     var bindings = outputBindings.getBindings();
@@ -46,10 +42,7 @@ function initShiny() {
     setTimeout(sendOutputHiddenState, 0);
   }
 
-  function unbindOutputs(scope, includeSelf = false) {
-    if (scope === undefined)
-      scope = document;
-
+  function unbindOutputs(scope = document, includeSelf = false) {
     var outputs = $(scope).find('.shiny-bound-output');
 
     if (includeSelf && $(scope).hasClass('shiny-bound-output')) {
@@ -109,11 +102,7 @@ function initShiny() {
     }
   }
 
-  function bindInputs(scope) {
-
-    if (scope === undefined)
-      scope = document;
-
+  function bindInputs(scope = document) {
     var bindings = inputBindings.getBindings();
 
     var currentValues = {};
@@ -173,10 +162,7 @@ function initShiny() {
     return currentValues;
   }
 
-  function unbindInputs(scope, includeSelf = false) {
-    if (scope === undefined)
-      scope = document;
-
+  function unbindInputs(scope = document, includeSelf = false) {
     var inputs = $(scope).find('.shiny-bound-input');
 
     if (includeSelf && $(scope).hasClass('shiny-bound-input')) {
@@ -227,10 +213,7 @@ function initShiny() {
 
   // Calls .initialize() for all of the input objects in all input bindings,
   // in the given scope.
-  function initializeInputs(scope) {
-    if (scope === undefined)
-      scope = document;
-
+  function initializeInputs(scope = document) {
     var bindings = inputBindings.getBindings();
 
     // Iterate over all bindings

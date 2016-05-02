@@ -1166,7 +1166,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           var container = document.createElement(message.container);
           insertAdjacentElement(message.where, target, container);
           exports.renderContent(container, message.content);
-          $(container).trigger('shown');
           return message.multiple;
         });
       }
@@ -1176,9 +1175,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var els = $(message.selector);
       els.each(function (i, el) {
         exports.unbindAll(el, true);
-        $(el).trigger('hide');
-        $(el).hide();
-        $(el).trigger('hidden');
         $(el).remove();
         // If `multiple` is false, returning false terminates the function
         // and no other elements are removed; if `multiple` is true,
@@ -4614,9 +4610,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     var shinyapp = exports.shinyapp = new ShinyApp();
 
-    function bindOutputs(scope) {
-
-      if (scope === undefined) scope = document;
+    function bindOutputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       scope = $(scope);
 
@@ -4656,10 +4651,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       setTimeout(sendOutputHiddenState, 0);
     }
 
-    function unbindOutputs(scope) {
+    function unbindOutputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
       var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-
-      if (scope === undefined) scope = document;
 
       var outputs = $(scope).find('.shiny-bound-output');
 
@@ -4718,9 +4712,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
     }
 
-    function bindInputs(scope) {
-
-      if (scope === undefined) scope = document;
+    function bindInputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       var bindings = inputBindings.getBindings();
 
@@ -4777,10 +4770,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return currentValues;
     }
 
-    function unbindInputs(scope) {
+    function unbindInputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
       var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
-
-      if (scope === undefined) scope = document;
 
       var inputs = $(scope).find('.shiny-bound-input');
 
@@ -4833,8 +4825,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     // Calls .initialize() for all of the input objects in all input bindings,
     // in the given scope.
-    function initializeInputs(scope) {
-      if (scope === undefined) scope = document;
+    function initializeInputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       var bindings = inputBindings.getBindings();
 

@@ -643,7 +643,6 @@ var ShinyApp = function() {
           var container = document.createElement(message.container);
           insertAdjacentElement(message.where, target, container);
           exports.renderContent(container, message.content);
-          $(container).trigger('shown');
           return message.multiple;
         });
       }
@@ -653,9 +652,6 @@ var ShinyApp = function() {
     var els = $(message.selector);
     els.each(function (i, el) {
       exports.unbindAll(el, true);
-      $(el).trigger('hide');
-      $(el).hide();
-      $(el).trigger('hidden');
       $(el).remove();
       // If `multiple` is false, returning false terminates the function
       // and no other elements are removed; if `multiple` is true,

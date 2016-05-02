@@ -743,12 +743,12 @@ ShinySession <- R6Class(
       } else {
         dereg <- private$flushCallbacks$register(function() {
           dereg()
-          flushedCallback()
+          flushCallback()
         })
         return(dereg)
       }
     },
-    onFlushed = function(flushedCallback, once = TRUE, ...) {
+    onFlushed = function(flushedCallback, once = TRUE) {
       if (!isTRUE(once)) {
         return(private$flushedCallbacks$register(flushedCallback))
       } else {

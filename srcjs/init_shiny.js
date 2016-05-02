@@ -65,6 +65,8 @@ function initShiny() {
       });
     }
 
+    // Send later in case DOM layout isn't final yet.
+    setTimeout(sendImageSize, 0);
     setTimeout(sendOutputHiddenState, 0);
   }
 

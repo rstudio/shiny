@@ -631,71 +631,38 @@ var ShinyApp = function() {
     window.location.reload();
   });
 
-  // Helper function for addMessageHandler('shiny-insert-ui').
-  // Turns out that Firefox does not support insertAdjacentElement().
-  // So we have to implement our own version for insertUI.
-  // Code adapted from here: http://forums.mozillazine.org/viewtopic.php?t=445587
-  HTMLElement.prototype.insertAdjacentElement = function(where, parsedNode) {
-    switch (where) {
-      case 'beforeBegin':
-        this.parentNode.insertBefore(parsedNode, this);
-        break;
-      case 'afterBegin':
-        this.insertBefore(parsedNode, this.firstChild);
-        break;
-      case 'beforeEnd':
-        this.appendChild(parsedNode);
-        break;
-      case 'afterEnd':
-        if (this.nextSibling) {
-          this.parentNode.insertBefore(parsedNode, this.nextSibling);
-        }
-        else {
-          this.parentNode.appendChild(parsedNode);
-        }
-        break;
-    }
-  };
+  addMessageHandler('shiny-insert-ui', function (message) {
+      var targets = $(message.selector);
+      if (targets.length === 0) {
+        // render the HTML and deps to a null target, so
+        // the side-effect of rendering the deps, singletons,
+        // and <head> still occur
+        exports.renderHtml($([]), message.content.html, message.content.deps);
+      } else {
+        targets.each(function (i, target) {
+          var container = document.createElement(message.container);
+          insertAdjacentElement(message.where, target, container);
+          exports.renderContent(container, message.content);
+          $(container).trigger('shown');
+          return message.multiple;
+        });
+      }
+    });
 
-  addMessageHandler('shiny-insert-ui', function(message) {
-    let targets = $(message.selector);
-    if (targets.length === 0) {
-      // render the HTML and deps to a null target, so
-      // the side-effect of rendering the deps, singletons,
-      // and <head> still occur
-      exports.renderHtml(
-        $([]),
-        message.content.html,
-        message.content.deps
-      );
-    } else {
-      targets.each((i, target) => {
-        let container = document.createElement(message.container);
-        target.insertAdjacentElement(message.where, container);
-        exports.renderContent(container, message.content);
-        $(container).trigger('shown');
-        return message.multiple;
-      });
-    }
+  addMessageHandler('shiny-remove-ui', function (message) {
+    var els = $(message.selector);
+    els.each(function (i, el) {
+      exports.unbindAll(el, true);
+      $(el).trigger('hide');
+      $(el).hide();
+      $(el).trigger('hidden');
+      $(el).remove();
+      // If `multiple` is false, returning false terminates the function
+      // and no other elements are removed; if `multiple` is true,
+      // returning true continues removing all remaining elements.
+      return message.multiple;
+    });
   });
-
-  addMessageHandler('shiny-remove-ui',
-    function(message) {
-      let els = $(message.selector);
-      els.each((i, el) => {
-        exports.unbindAll(el, includeSelf = true);
-        $(el).trigger('hide');
-        $(el).hide();
-        $(el).trigger('hidden');
-        $(el).remove();
-        // If `multiple` is false, returning false terminates the function
-        // and no other elements are removed; if `multiple` is true,
-        // returning true continues removing all remaining elements.
-        return message.multiple;
-      });
-    }
-  );
-
 
   // Progress reporting ====================================================
 

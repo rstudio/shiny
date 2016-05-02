@@ -200,6 +200,30 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
   };
 
+  // Helper function for addMessageHandler('shiny-insert-ui').
+  // Turns out that Firefox does not support insertAdjacentElement().
+  // So we have to implement our own version for insertUI.
+  function insertAdjacentElement(where, element, content) {
+    switch (where) {
+      case 'beforeBegin':
+        element.parentNode.insertBefore(content, element);
+        break;
+      case 'afterBegin':
+        element.insertBefore(content, element.firstChild);
+        break;
+      case 'beforeEnd':
+        element.appendChild(content);
+        break;
+      case 'afterEnd':
+        if (element.nextSibling) {
+          element.parentNode.insertBefore(content, element.nextSibling);
+        } else {
+          element.parentNode.appendChild(content);
+        }
+        break;
+    }
+  }
+
   //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -1151,7 +1175,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     addMessageHandler('shiny-remove-ui', function (message) {
       var els = $(message.selector);
       els.each(function (i, el) {
-        exports.unbindAll(el, includeSelf = true);
+        exports.unbindAll(el, true);
         $(el).trigger('hide');
         $(el).hide();
         $(el).trigger('hidden');
@@ -4785,8 +4809,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return bindInputs(scope);
     }
     function unbindAll(scope) {
-      unbindInputs(scope);
-      unbindOutputs(scope);
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+      unbindInputs(scope, includeSelf);
+      unbindOutputs(scope, includeSelf);
     }
     exports.bindAll = function (scope) {
       // _bindAll alone returns initial values, it doesn't send them to the

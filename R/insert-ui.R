@@ -4,13 +4,13 @@
 #'
 #' This function allows you to dynamically add an arbitrarily large UI
 #' object into your app, whenever you want, as many times as you want.
-#' Unlike \code{renderUI}, the UI generated with \code{insertUI} is
-#' not updatable as a whole: once it's created, it stays there. Each
+#' Unlike \code{\link{renderUI}}, the UI generated with \code{insertUI}
+#' is not updatable as a whole: once it's created, it stays there. Each
 #' new call to \code{insertUI} creates more UI objects, in addition to
 #' the ones already there (all independent from one another). To
 #' update a part of the UI (ex: an input object), you must use the
 #' appropriate \code{render} function or a customized \code{reactive}
-#' function.
+#' function. To remove any part of your UI, use \code{\link{removeUI}}.
 #'
 #' Note that whatever UI object you pass through \code{ui}, it is always
 #' wrapped in an extra \code{div} (or if \code{inline = TRUE}, a
@@ -32,7 +32,7 @@
 #' \describe{
 #'   \item{\code{beforeBegin}}{Before the selector element itself}
 #'   \item{\code{afterBegin}}{Just inside the selector element, before its
-#'   first child.}
+#'   first child}
 #'   \item{\code{beforeEnd}}{Just inside the selector element, after its
 #'   last child (default)}
 #'   \item{\code{afterEnd}}{After the selector element itself}
@@ -41,7 +41,7 @@
 #' \href{https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML}{here}.
 #'
 #' @param ui The UI object you want to insert. This can be anything that
-#' you usually put inside your apps's  \code{ui} function.
+#' you usually put inside your apps's \code{ui} function.
 #'
 #' @param immediate Whether the UI object should be immediately inserted into
 #' the app when you call \code{insertUI}, or whether Shiny should wait until
@@ -70,6 +70,7 @@
 #'   observeEvent(input$add, {
 #'     insertUI(
 #'       selector = "#add",
+#'       where = "afterEnd",
 #'       ui = textInput(paste0("txt", input$add),
 #'                      "Insert some text")
 #'     )

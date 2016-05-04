@@ -116,6 +116,7 @@ Collate:
     'input-slider.R'
     'input-submit.R'
     'input-text.R'
+    'input-textarea.R'
     'input-utils.R'
     'jqueryui.R'
     'middleware-shiny.R'

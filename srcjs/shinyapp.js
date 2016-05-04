@@ -640,6 +640,34 @@ var ShinyApp = function() {
     window.location.reload();
   });
 
+  addMessageHandler('shiny-insert-ui', function (message) {
+      var targets = $(message.selector);
+      if (targets.length === 0) {
+        // render the HTML and deps to a null target, so
+        // the side-effect of rendering the deps, singletons,
+        // and <head> still occur
+        exports.renderHtml($([]), message.content.html, message.content.deps);
+      } else {
+        targets.each(function (i, target) {
+          var container = document.createElement(message.container);
+          insertAdjacentElement(message.where, target, container);
+          exports.renderContent(container, message.content);
+          return message.multiple;
+        });
+      }
+    });
+
+  addMessageHandler('shiny-remove-ui', function (message) {
+    var els = $(message.selector);
+    els.each(function (i, el) {
+      exports.unbindAll(el, true);
+      $(el).remove();
+      // If `multiple` is false, returning false terminates the function
+      // and no other elements are removed; if `multiple` is true,
+      // returning true continues removing all remaining elements.
+      return message.multiple;
+    });
+  });
 
   // Progress reporting ====================================================
 

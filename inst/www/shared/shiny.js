@@ -200,6 +200,30 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
   };
 
+  // Helper function for addMessageHandler('shiny-insert-ui').
+  // Turns out that Firefox does not support insertAdjacentElement().
+  // So we have to implement our own version for insertUI.
+  function insertAdjacentElement(where, element, content) {
+    switch (where) {
+      case 'beforeBegin':
+        element.parentNode.insertBefore(content, element);
+        break;
+      case 'afterBegin':
+        element.insertBefore(content, element.firstChild);
+        break;
+      case 'beforeEnd':
+        element.appendChild(content);
+        break;
+      case 'afterEnd':
+        if (element.nextSibling) {
+          element.parentNode.insertBefore(content, element.nextSibling);
+        } else {
+          element.parentNode.appendChild(content);
+        }
+        break;
+    }
+  }
+
   //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -1133,6 +1157,35 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     addMessageHandler('reload', function (message) {
       window.location.reload();
+    });
+
+    addMessageHandler('shiny-insert-ui', function (message) {
+      var targets = $(message.selector);
+      if (targets.length === 0) {
+        // render the HTML and deps to a null target, so
+        // the side-effect of rendering the deps, singletons,
+        // and <head> still occur
+        exports.renderHtml($([]), message.content.html, message.content.deps);
+      } else {
+        targets.each(function (i, target) {
+          var container = document.createElement(message.container);
+          insertAdjacentElement(message.where, target, container);
+          exports.renderContent(container, message.content);
+          return message.multiple;
+        });
+      }
+    });
+
+    addMessageHandler('shiny-remove-ui', function (message) {
+      var els = $(message.selector);
+      els.each(function (i, el) {
+        exports.unbindAll(el, true);
+        $(el).remove();
+        // If `multiple` is false, returning false terminates the function
+        // and no other elements are removed; if `multiple` is true,
+        // returning true continues removing all remaining elements.
+        return message.multiple;
+      });
     });
 
     // Progress reporting ====================================================
@@ -4619,9 +4672,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     var shinyapp = exports.shinyapp = new ShinyApp();
 
-    function bindOutputs(scope) {
-
-      if (scope === undefined) scope = document;
+    function bindOutputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       scope = $(scope);
 
@@ -4661,10 +4713,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       setTimeout(sendOutputHiddenState, 0);
     }
 
-    function unbindOutputs(scope) {
-      if (scope === undefined) scope = document;
+    function unbindOutputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
       var outputs = $(scope).find('.shiny-bound-output');
+
+      if (includeSelf && $(scope).hasClass('shiny-bound-output')) {
+        outputs.push(scope);
+      }
+
       for (var i = 0; i < outputs.length; i++) {
         var $el = $(outputs[i]);
         var bindingAdapter = $el.data('shiny-output-binding');
@@ -4680,6 +4738,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         });
       }
 
+      // Send later in case DOM layout isn't final yet.
+      setTimeout(sendImageSize, 0);
       setTimeout(sendOutputHiddenState, 0);
     }
 
@@ -4716,9 +4776,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
     }
 
-    function bindInputs(scope) {
-
-      if (scope === undefined) scope = document;
+    function bindInputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       var bindings = inputBindings.getBindings();
 
@@ -4775,10 +4834,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return currentValues;
     }
 
-    function unbindInputs(scope) {
-      if (scope === undefined) scope = document;
+    function unbindInputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
       var inputs = $(scope).find('.shiny-bound-input');
+
+      if (includeSelf && $(scope).hasClass('shiny-bound-input')) {
+        inputs.push(scope);
+      }
+
       for (var i = 0; i < inputs.length; i++) {
         var el = inputs[i];
         var binding = $(el).data('shiny-input-binding');
@@ -4800,8 +4865,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return bindInputs(scope);
     }
     function unbindAll(scope) {
-      unbindInputs(scope);
-      unbindOutputs(scope);
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+      unbindInputs(scope, includeSelf);
+      unbindOutputs(scope, includeSelf);
     }
     exports.bindAll = function (scope) {
       // _bindAll alone returns initial values, it doesn't send them to the
@@ -4822,8 +4889,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     // Calls .initialize() for all of the input objects in all input bindings,
     // in the given scope.
-    function initializeInputs(scope) {
-      if (scope === undefined) scope = document;
+    function initializeInputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       var bindings = inputBindings.getBindings();
 

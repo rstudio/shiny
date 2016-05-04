@@ -202,3 +202,27 @@ var $escape = exports.$escape = function(val) {
   return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
 };
 
+
+// Helper function for addMessageHandler('shiny-insert-ui').
+// Turns out that Firefox does not support insertAdjacentElement().
+// So we have to implement our own version for insertUI.
+function insertAdjacentElement(where, element, content) {
+  switch (where) {
+    case 'beforeBegin':
+      element.parentNode.insertBefore(content, element);
+      break;
+    case 'afterBegin':
+      element.insertBefore(content, element.firstChild);
+      break;
+    case 'beforeEnd':
+      element.appendChild(content);
+      break;
+    case 'afterEnd':
+      if (element.nextSibling) {
+        element.parentNode.insertBefore(content, element.nextSibling);
+      } else {
+        element.parentNode.appendChild(content);
+      }
+      break;
+  }
+}

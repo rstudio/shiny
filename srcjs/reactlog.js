@@ -6,3 +6,4 @@ $(document).on('keydown', function(e) {
   window.open(url);
   e.preventDefault();
 });
+

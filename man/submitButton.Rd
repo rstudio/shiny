@@ -33,6 +33,7 @@ Other input.elements: \code{\link{actionButton}},
   \code{\link{dateRangeInput}}, \code{\link{fileInput}},
   \code{\link{numericInput}}, \code{\link{passwordInput}},
   \code{\link{radioButtons}}, \code{\link{selectInput}},
-  \code{\link{sliderInput}}, \code{\link{textInput}}
+  \code{\link{sliderInput}}, \code{\link{textAreaInput}},
+  \code{\link{textInput}}
 }
 

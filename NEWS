@@ -1,5 +1,8 @@
 shiny 0.13.2.9001
 --------------------------------------------------------------------------------
+* Added insertUI and removeUI functions to be able to add and remove chunks
+  of UI, standalone, and all independent of one another.
+
 * Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`.
   By default, this option is `FALSE`. When `TRUE`, normal errors will be
   sanitized, displaying only a generic error message. This changes the look

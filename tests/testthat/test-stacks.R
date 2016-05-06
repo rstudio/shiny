@@ -45,7 +45,7 @@ test_that("integration tests", {
 
   expect_equal(df$num, c(32L, 31L, 30L, 19L, 18L, 17L, 16L, 15L,
     8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L))
-  expect_equal(df$call, c("A", "B", "reactive C", "C", "renderTable",
+  expect_equal(df$call, c("A", "B", "<reactive:C>", "C", "renderTable",
     "func", "origRenderFunc","renderTable({     C() }, server = FALSE)",
     "isolate", "withCallingHandlers", "captureStackTraces", "doTryCatch",
     "tryCatchOne", "tryCatchList", "tryCatch", "try"))
@@ -61,7 +61,7 @@ test_that("integration tests", {
     15L, 14L, 13L, 12L, 11L, 10L, 9L, 8L, 7L, 6L, 5L, 4L, 3L,
     2L, 1L))
   expect_equal(df$call, c("h", ".handleSimpleError", "stop",
-    "A", "B", "reactive C", "..stacktraceon..", ".func", "withVisible",
+    "A", "B", "<reactive:C>", "..stacktraceon..", ".func", "withVisible",
     "withCallingHandlers", "contextFunc", "env$runWith", "withReactiveDomain",
     "ctx$run", "self$.updateValue", "..stacktraceoff..", "C",
     "renderTable", "func", "origRenderFunc",

@@ -163,7 +163,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   }
 
 
-  plotObj <- reactive({
+  plotObj <- reactive(label = "plotObj", {
     if (execOnResize) {
       isolate({ dims <- getDims() })
     } else {

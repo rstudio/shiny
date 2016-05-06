@@ -360,7 +360,16 @@ Observable <- R6Class(
              "or more parameters; only functions without parameters can be ",
              "reactive.")
 
-      .func <<- wrapFunctionLabel(func, paste("reactive", label),
+      # This is to make sure that the function labels that show in the profiler
+      # and in stack traces doesn't contain whitespace. See
+      # https://github.com/rstudio/profvis/issues/58
+      if (grepl("\\s", label, perl = TRUE)) {
+        funcLabel <- "<reactive>"
+      } else {
+        funcLabel <- paste0("<reactive:", label, ">")
+      }
+
+      .func <<- wrapFunctionLabel(func, funcLabel,
         ..stacktraceon = ..stacktraceon)
       .label <<- label
       .domain <<- domain

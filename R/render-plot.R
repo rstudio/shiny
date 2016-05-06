@@ -133,7 +133,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
       coordmap <- NULL
       plotFunc <- function() {
-        ..stacktraceon..(replayPlot(plotData$recordedPlot))
+        ..stacktraceon..(grDevices::replayPlot(plotData$recordedPlot))
 
         # Coordmap must be recalculated after replaying plot, because pixel
         # dimensions will have changed.
@@ -215,7 +215,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         })
       }
 
-      recordedPlot <<- recordPlot()
+      recordedPlot <<- grDevices::recordPlot()
 
       if (inherits(plotResult, "ggplot_build_gtable")) {
         coordmap <<- getGgplotCoordmap(plotResult, pixelratio, res)
@@ -607,7 +607,7 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
     # res setting of the device. If res=72, then it returns 400 (as expected),
     # but if, e.g., res=96, it will return 300, which is incorrect.
     devScaleFactor <- 1
-    if (grepl("quartz", names(dev.cur()), fixed = TRUE)) {
+    if (grepl("quartz", names(grDevices::dev.cur()), fixed = TRUE)) {
       devScaleFactor <- res / 72
     }
 

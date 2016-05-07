@@ -612,11 +612,19 @@ runApp <- function(appDir=getwd(),
           setShowcaseDefault(1)
         }
       }
+      if ("wwwFiles" %in% colnames(settings)) {
+        .globals$wwwFiles <- as.logical(settings[1,"wwwFiles"])
+      } else {
+        .globals$wwwFiles <- TRUE
+      }
     }
   }
 
   # If display mode is specified as an argument, apply it (overriding the
   # value specified in DESCRIPTION, if any).
+  if (is.null(.globals$wwwFiles) || is.na(.globals$wwwFiles)) {
+    .globals$wwwFiles <- TRUE
+  }
   display.mode <- match.arg(display.mode)
   if (display.mode == "normal")
     setShowcaseDefault(0)

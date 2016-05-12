@@ -89,6 +89,12 @@ registerInputHandler("shiny.number", function(val, ...){
   ifelse(is.null(val), NA, val)
 })
 
+registerInputHandler("shiny.password", function(val, shinysession, name) {
+  # Mark passwords as not serializable
+  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializable", FALSE)
+  val
+})
+
 registerInputHandler("shiny.date", function(val, ...){
   # First replace NULLs with NA, then convert to Date vector
   datelist <- ifelse(lapply(val, is.null), NA, val)
@@ -104,7 +110,10 @@ registerInputHandler("shiny.datetime", function(val, ...){
   as.POSIXct(unlist(times), origin = "1970-01-01", tz = "UTC")
 })
 
-registerInputHandler("shiny.action", function(val, ...) {
+registerInputHandler("shiny.action", function(val, shinysession, name) {
+  # Mark as not serializable
+  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializable", FALSE)
+
   # mark up the action button value with a special class so we can recognize it later
   class(val) <- c(class(val), "shinyActionButtonValue")
   val

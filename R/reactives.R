@@ -151,9 +151,6 @@ ReactiveValues <- R6Class(
 
     # Set a metadata value. Does not trigger reactivity.
     setMeta = function(key, metaKey, value) {
-      if (!exists(key, envir = .values, inherits = FALSE)) {
-        stop("Attempted to set metadata on non-existent value.")
-      }
       # Make sure to use named (not numeric) indexing into list.
       metaKey <- as.character(metaKey)
 

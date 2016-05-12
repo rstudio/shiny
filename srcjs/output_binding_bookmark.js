@@ -20,6 +20,14 @@
       location.pathname + '?' + data;
   }
 
+  function renderError(el, err) {
+    return;
+  }
+
+  function clearError(el) {
+    return;
+  }
+
   function _initTooltip(clipboard, $el) {
     // When clipboard action occurs, show tooltip
     clipboard.on('success', function(e) {
@@ -69,7 +77,9 @@
 
   $.extend(bookmarkOutputBinding, {
     find,
-    renderValue
+    renderValue,
+    renderError,
+    clearError
   });
   outputBindings.register(bookmarkOutputBinding, 'shiny.bookmarkOutput');
 })();

@@ -87,6 +87,20 @@ navTabsHelper <- function(files, prefix = "") {
   })
 }
 
+navTabsDropdown <- function(files) {
+  if (length(files) > 0) {
+    with(tags,
+      li(role="presentation", class="dropdown",
+        a(class="dropdown-toggle", `data-toggle`="dropdown", href="#",
+          role="button", `aria-haspopup`="true", `aria-expanded`="false",
+          "www", span(class="caret")
+        ),
+        ul(class="dropdown-menu", navTabsHelper(files))
+      )
+    )
+  }
+}
+
 tabContentHelper <- function(files, path, language) {
   lapply(files, function(file) {
     with(tags,
@@ -111,9 +125,8 @@ tabContentHelper <- function(files, path, language) {
 showcaseCodeTabs <- function(codeLicense) {
   rFiles <- list.files(pattern = "\\.[rR]$")
   wwwFiles <- list()
-  if (isTRUE(.globals$wwwFiles)) {
-    path = paste0(getwd(),"/www")
-    wwwFiles <- list("jsFiles", "cssFiles", "htmlFiles")
+  if (isTRUE(.globals$IncludeWWW)) {
+    path = paste0(getwd(), "/www")
     wwwFiles$jsFiles <- list.files(path, pattern = "\\.js$")
     wwwFiles$cssFiles <- list.files(path, pattern = "\\.css$")
     wwwFiles$htmlFiles <- list.files(path, pattern = "\\.html$")
@@ -126,15 +139,7 @@ showcaseCodeTabs <- function(codeLicense) {
       "show with app"),
     ul(class="nav nav-tabs",
        navTabsHelper(rFiles),
-       if (length(wwwFiles$jsFiles) != 0) {
-         navTabsHelper(wwwFiles$jsFiles, prefix = "www/")
-       },
-       if (length(wwwFiles$cssFiles) != 0) {
-         navTabsHelper(wwwFiles$cssFiles, prefix = "www/")
-       },
-       if (length(wwwFiles$htmlFiles) != 0) {
-         navTabsHelper(wwwFiles$htmlFiles, prefix = "www/")
-       }
+       navTabsDropdown(unlist(wwwFiles))
     ),
     div(class="tab-content", id="showcase-code-content",
         tabContentHelper(rFiles, path = getwd(), language = "r"),

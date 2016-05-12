@@ -513,6 +513,17 @@ ShinySession <- R6Class(
     ns = function(id) {
       NS(NULL, id)
     },
+
+    # Invalidate a value until the flush cycle completes
+    invalidateValue = function(x, name) {
+      if (!is.reactivevalues(x))
+        stop("x must be a reactivevalues object")
+
+      impl <- .subset2(x, 'impl')
+      impl$invalidate(name)
+      self$onFlushed(function() impl$unInvalidate(name))
+    },
+
     onSessionEnded = function(sessionEndedCallback) {
       "Registers the given callback to be invoked when the session is closed
       (i.e. the connection to the client has been severed). The return value

@@ -47,6 +47,7 @@ ReactiveValues <- R6Class(
     # For debug purposes
     .label = character(0),
     .values = 'environment',
+    .metadata = 'environment',
     .dependents = 'environment',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
@@ -60,12 +61,16 @@ ReactiveValues <- R6Class(
                        p_randomInt(1000, 10000),
                        sep="")
       .values <<- new.env(parent=emptyenv())
+      .metadata <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
       .namesDeps <<- Dependents$new()
       .allValuesDeps <<- Dependents$new()
       .valuesDeps <<- Dependents$new()
     },
+
     get = function(key) {
+      # Register the "downstream" reactive which is accessing this value, so
+      # that we know to invalidate them when this value changes.
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
       if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
@@ -76,11 +81,15 @@ ReactiveValues <- R6Class(
         })
       }
 
+      if (isInvalid(key))
+        stopWithCondition(c("validation", "shiny.silent.error"), "")
+
       if (!exists(key, envir=.values, inherits=FALSE))
         NULL
       else
         .values[[key]]
     },
+
     set = function(key, value) {
       hidden <- substr(key, 1, 1) == "."
 
@@ -118,18 +127,57 @@ ReactiveValues <- R6Class(
       )
       invisible()
     },
+
     mset = function(lst) {
       lapply(base::names(lst),
              function(name) {
                self$set(name, lst[[name]])
              })
     },
+
     names = function() {
       .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
                       sprintf('names(%s)', .label))
       .namesDeps$register()
       return(ls(.values, all.names=TRUE))
     },
+
+    # Get a metadata value. Does not trigger reactivity.
+    getMeta = function(key, metaKey) {
+      # Make sure to use named (not numeric) indexing into list.
+      metaKey <- as.character(metaKey)
+      .metadata[[key]][[metaKey]]
+    },
+
+    # Set a metadata value. Does not trigger reactivity.
+    setMeta = function(key, metaKey, value) {
+      if (!exists(key, envir = .values, inherits = FALSE)) {
+        stop("Attempted to set metadata on non-existent value.")
+      }
+      # Make sure to use named (not numeric) indexing into list.
+      metaKey <- as.character(metaKey)
+
+      if (!exists(key, envir = .metadata, inherits = FALSE)) {
+        .metadata[[key]] <<- list()
+      }
+
+      .metadata[[key]][[metaKey]] <<- value
+    },
+
+    # Mark a value as invalid. If accessed while invalid, a shiny.silent.error
+    # will be thrown.
+    invalidate = function(key) {
+      setMeta(key, "invalid", TRUE)
+    },
+
+    unInvalidate = function(key) {
+      setMeta(key, "invalid", NULL)
+    },
+
+    isInvalid = function(key) {
+      isTRUE(getMeta(key, "invalid"))
+    },
+
     toList = function(all.names=FALSE) {
       .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
                       sprintf('%s (all)', .label))
@@ -140,6 +188,7 @@ ReactiveValues <- R6Class(
 
       return(as.list(.values, all.names=all.names))
     },
+
     .setLabel = function(label) {
       .label <<- label
     }
@@ -333,6 +382,7 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
   cat(indent.str, '- attr(*, "class")=', sep = "")
   utils::str(class(object))
 }
+
 
 # Observable ----------------------------------------------------------------
 

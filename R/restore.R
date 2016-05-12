@@ -13,7 +13,6 @@ decodeBookmarkDataURL <- function(url) {
   )
 }
 
-
 #' @param input The session's input object.
 #' @param exclude A character vector of input names that should not be
 #'   bookmarked.
@@ -21,6 +20,13 @@ decodeBookmarkDataURL <- function(url) {
 encodeBookmarkDataURL <- function(input, exclude = NULL) {
   vals <- reactiveValuesToList(input)
   vals <- vals[setdiff(names(vals), exclude)]
+
+  # Remove items that are marked as unserializable
+  impl <- .subset2(input, "impl")
+  unserializable_idx <- vapply(names(vals), function(x) {
+    identical(impl$getMeta(x, "shiny.serializable"), FALSE)
+  }, FUN.VALUE = logical(1))
+  vals <- vals[!unserializable_idx]
 
   vals <- vapply(vals, function(x) {
     toJSON(x, strict_atomic = FALSE)

@@ -247,11 +247,14 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                   stop("No handler registered for for type ", name)
                 }
 
-                msg$data[[ splitName[[1]] ]] <-
-                  inputHandlers$get(splitName[[2]])(
-                    val,
-                    shinysession,
-                    splitName[[1]] )
+                inputName <- splitName[[1]]
+
+                # Get the function for processing this type of input
+                inputHandler <- inputHandlers$get(splitName[[2]])
+
+                msg$data[[inputName]] <- inputHandler(val, shinysession,
+                                                      inputName)
+
               }
               else if (is.list(val) && is.null(names(val))) {
                 val_flat <- unlist(val, recursive = TRUE)

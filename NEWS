@@ -1,5 +1,9 @@
 shiny 0.13.2.9001
 --------------------------------------------------------------------------------
+* `Display: Showcase` now displays the .js, .html and .css files in the `www`
+  directory by default. In order to use showcase mode and not display these,
+  include a new line in your Description file: `IncludeWWW: False`.
+
 * Added insertUI and removeUI functions to be able to add and remove chunks
   of UI, standalone, and all independent of one another.
 

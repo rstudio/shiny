@@ -137,6 +137,7 @@ Collate:
     'run-url.R'
     'server-input-handlers.R'
     'server.R'
+    'shiny-options.R'
     'shiny.R'
     'shinyui.R'
     'shinywrappers.R'

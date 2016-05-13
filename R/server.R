@@ -577,6 +577,11 @@ runApp <- function(appDir=getwd(),
     handlerManager$clear()
   }, add = TRUE)
 
+  # Enable per-app Shiny options
+  oldOptionSet <- .globals$options
+  on.exit({
+    .globals$options <- oldOptionSet
+  },add = TRUE)
 
   if (is.null(host) || is.na(host))
     host <- '0.0.0.0'

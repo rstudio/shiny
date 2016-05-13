@@ -193,6 +193,21 @@ anyUnnamed <- function(x) {
   any(!nzchar(nms))
 }
 
+# Given two named vectors, join them together, and keep only the last element
+# with a given name in the resulting vector. If b has any elements with the same
+# name as elements in a, the element in a is dropped. Also, if there are any
+# duplicated names in a or b, only the last one with that name is kept.
+mergeVectors <- function(a, b) {
+  if (anyUnnamed(a) || anyUnnamed(b)) {
+    stop("Vectors must be either NULL or have names for all elements")
+  }
+
+  x <- c(a, b)
+  drop_idx <- duplicated(names(x), fromLast = TRUE)
+  x[!drop_idx]
+}
+
+
 # Combine dir and (file)name into a file path. If a file already exists with a
 # name differing only by case, then use it instead.
 file.path.ci <- function(...) {

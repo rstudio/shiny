@@ -565,6 +565,9 @@ runApp <- function(appDir=getwd(),
     handlerManager$clear()
   }, add = TRUE)
 
+  # Enable per-app Shiny options
+  oldOptionFrame <- pushNewOptionFrame()
+  on.exit(restoreOptionFrame(oldOptionFrame))
 
   if (is.null(host) || is.na(host))
     host <- '0.0.0.0'

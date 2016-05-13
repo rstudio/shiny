@@ -126,7 +126,7 @@ showcaseCodeTabs <- function(codeLicense) {
   rFiles <- list.files(pattern = "\\.[rR]$")
   wwwFiles <- list()
   if (isTRUE(.globals$IncludeWWW)) {
-    path = paste0(getwd(), "/www")
+    path <- file.path(getwd(), "www")
     wwwFiles$jsFiles <- list.files(path, pattern = "\\.js$")
     wwwFiles$cssFiles <- list.files(path, pattern = "\\.css$")
     wwwFiles$htmlFiles <- list.files(path, pattern = "\\.html$")

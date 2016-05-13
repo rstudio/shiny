@@ -12,12 +12,6 @@
 #' appropriate \code{render} function or a customized \code{reactive}
 #' function. To remove any part of your UI, use \code{\link{removeUI}}.
 #'
-#' Note that whatever UI object you pass through \code{ui}, it is always
-#' wrapped in an extra \code{div} (or if \code{inline = TRUE}, a
-#' \code{span}) before making its way into the DOM. This does not affect
-#' what you mean to do, and it makes it easier to remove the whole UI
-#' object using \code{\link{removeUI}} (if you wish to do so, of course).
-#'
 #' @param selector A string that is accepted by jQuery's selector (i.e. the
 #' string \code{s} to be placed in a \code{$(s)} jQuery call). This selector
 #' will determine the element(s) relative to which you want to insert your
@@ -46,12 +40,6 @@
 #' @param immediate Whether the UI object should be immediately inserted into
 #' the app when you call \code{insertUI}, or whether Shiny should wait until
 #' all outputs have been updated and all observers have been run (default).
-#'
-#' @param container A function to generate an HTML element to contain the UI
-#' object.
-#'
-#' @param inline Use an inline (\code{span()}) or block container (\code{div()},
-#' default) for the output.
 #'
 #' @param session The shiny session within which to call \code{insertUI}.
 #'
@@ -87,15 +75,12 @@ insertUI <- function(selector,
   where = c("beforeBegin", "afterBegin", "beforeEnd", "afterEnd"),
   ui,
   immediate = FALSE,
-  container = if (inline) "span" else "div",
-  inline = FALSE,
   session = getDefaultReactiveDomain()) {
 
   force(selector)
   force(ui)
   force(session)
   force(multiple)
-  force(container)
   if (missing(where)) where <- "beforeEnd"
   where <- match.arg(where)
 
@@ -103,8 +88,7 @@ insertUI <- function(selector,
     session$sendInsertUI(selector = selector,
                          multiple = multiple,
                          where = where,
-                         content = processDeps(ui, session),
-                         container = container)
+                         content = processDeps(ui, session))
   }
 
   if (!immediate) session$onFlushed(callback, once = TRUE)

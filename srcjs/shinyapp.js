@@ -640,9 +640,10 @@ var ShinyApp = function() {
         exports.renderHtml($([]), message.content.html, message.content.deps);
       } else {
         targets.each(function (i, target) {
-          var container = document.createElement(message.container);
-          insertAdjacentElement(message.where, target, container);
-          exports.renderContent(container, message.content);
+          exports.renderContent(message.where, target, message.content);
+          // var container = document.createElement(message.container);
+          // insertAdjacentElement(message.where, target, container);
+          // exports.renderContent(container, message.content);
           return message.multiple;
         });
       }

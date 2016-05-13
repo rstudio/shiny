@@ -1163,9 +1163,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         exports.renderHtml($([]), message.content.html, message.content.deps);
       } else {
         targets.each(function (i, target) {
-          var container = document.createElement(message.container);
-          insertAdjacentElement(message.where, target, container);
-          exports.renderContent(container, message.content);
+          exports.renderContent(message.where, target, message.content);
+          // var container = document.createElement(message.container);
+          // insertAdjacentElement(message.where, target, container);
+          // exports.renderContent(container, message.content);
           return message.multiple;
         });
       }
@@ -2966,7 +2967,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // Render HTML in a DOM element, add dependencies, and bind Shiny
   // inputs/outputs. `content` can be null, a string, or an object with
   // properties 'html' and 'deps'.
-  exports.renderContent = function (el, content) {
+  exports.renderContent = function () {
+    var where = arguments.length <= 0 || arguments[0] === undefined ? "replace" : arguments[0];
+    var el = arguments[1];
+    var content = arguments[2];
+
     exports.unbindAll(el);
 
     var html;
@@ -2980,15 +2985,29 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       dependencies = content.deps || [];
     }
 
-    exports.renderHtml(html, el, dependencies);
+    exports.renderHtml(where, html, el, dependencies);
     exports.initializeInputs(el);
-    exports.bindAll(el);
+
+    var scope = el;
+    if (where === "replace") {
+      exports.bindAll(el);
+    } else {
+      parent = $(el).parent();
+      if (parent.length > 0) {
+        scope = parent;
+        if (where === "beforeBegin" || where === "afterEnd") {
+          grandparent = $(parent).parent();
+          if (grandparent.length > 0) scope = grandparent;
+        }
+      }
+      exports.bindAll(scope);
+    }
   };
 
   // Render HTML in a DOM element, inserting singletons into head as needed
-  exports.renderHtml = function (html, el, dependencies) {
+  exports.renderHtml = function (where, html, el, dependencies) {
     renderDependencies(dependencies);
-    return singletons.renderHtml(html, el);
+    return singletons.renderHtml(where, html, el);
   };
 
   var htmlDependencies = {};
@@ -3057,11 +3076,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   var singletons = {
     knownSingletons: {},
-    renderHtml: function renderHtml(html, el) {
+    renderHtml: function renderHtml(where, html, el) {
       var processed = this._processHtml(html);
       this._addToHead(processed.head);
       this.register(processed.singletons);
-      $(el).html(processed.html);
+      if (where === "replace") {
+        $(el).html(processed.html);
+      } else {
+        el.insertAdjacentHTML(where, processed.html);
+      }
       return processed;
     },
     // Take an object where keys are names of singletons, and merges it into

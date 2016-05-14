@@ -133,7 +133,7 @@ getCurrentRestoreContext <- function() {
 
 #' @export
 restoreInput <- function(id, default) {
-  if (!hasCurrentRestoreContext())
+  if (!isTRUE(getShinyOption("restorable")) || !hasCurrentRestoreContext())
     return(default)
 
   ctx <- getCurrentRestoreContext()

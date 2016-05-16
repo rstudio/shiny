@@ -54,13 +54,13 @@
           }
         }
       }
-      // If this is not a text node, descend recursively to see how many 
+      // If this is not a text node, descend recursively to see how many
       // lines it contains.
       else if (child.nodeType === 1) { // ELEMENT_NODE
         var ret = findTextPoint(child, line - newlines, col);
         if (ret.element !== null)
-          return ret; 
-        else 
+          return ret;
+        else
           newlines += ret.offset;
       }
     }
@@ -85,7 +85,7 @@
       var code = document.getElementById(srcfile.replace(/\./g, "_") + "_code");
       var start = findTextPoint(code, ref[0], ref[4]);
       var end = findTextPoint(code, ref[2], ref[5]);
-      
+
       // If the insertion point can't be found, bail out now
       if (start.element === null || end.element === null)
          return;
@@ -129,10 +129,10 @@
     var animateCodeMs = animate ? animateMs : 1;
 
     // set the source and targets for the tab move
-    var newHostElement = above ? 
+    var newHostElement = above ?
       document.getElementById("showcase-sxs-code") :
       document.getElementById("showcase-code-inline");
-    var currentHostElement = above ? 
+    var currentHostElement = above ?
       document.getElementById("showcase-code-inline") :
       document.getElementById("showcase-sxs-code");
 
@@ -162,7 +162,7 @@
 
       $(newHostElement).fadeIn();
       if (!above) {
-        // remove the applied width and zoom on the app container, and 
+        // remove the applied width and zoom on the app container, and
         // scroll smoothly down to the code's new home
         document.getElementById("showcase-app-container").removeAttribute("style");
         if (animate)
@@ -234,9 +234,9 @@
   };
 
   // make the code scrollable to about the height of the browser, less space
-  // for the tabs 
+  // for the tabs
   var setCodeHeightFromDocHeight = function() {
-    document.getElementById("showcase-code-content").style.height = 
+    document.getElementById("showcase-code-content").style.height =
       $(window).height() + "px";
   };
 
@@ -247,7 +247,7 @@
       // IE8 puts the content of <script> tags into innerHTML but
       // not innerText
       var content = mdContent.innerText || mdContent.innerHTML;
-      document.getElementById("readme-md").innerHTML = 
+      document.getElementById("readme-md").innerHTML =
         (new Showdown.converter()).makeHtml(content)
     }
   }

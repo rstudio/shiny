@@ -607,21 +607,38 @@ runApp <- function(appDir=getwd(),
       on.exit(close(con), add = TRUE)
       settings <- read.dcf(con)
       if ("DisplayMode" %in% colnames(settings)) {
-        mode <- settings[1,"DisplayMode"]
+        mode <- settings[1, "DisplayMode"]
         if (mode == "Showcase") {
           setShowcaseDefault(1)
+          if ("IncludeWWW" %in% colnames(settings)) {
+            .globals$IncludeWWW <- as.logical(settings[1, "IncludeWWW"])
+            if (is.na(.globals$IncludeWWW)) {
+              stop("In your Description file, `IncludeWWW` ",
+                   "must be set to `True` (default) or `False`")
+            }
+          } else {
+            .globals$IncludeWWW <- TRUE
+          }
         }
       }
     }
   }
 
+  ## default is to show the .js, .css and .html files in the www directory
+  ## (if not in showcase mode, this variable will simply be ignored)
+  if (is.null(.globals$IncludeWWW) || is.na(.globals$IncludeWWW)) {
+    .globals$IncludeWWW <- TRUE
+  }
+
   # If display mode is specified as an argument, apply it (overriding the
   # value specified in DESCRIPTION, if any).
   display.mode <- match.arg(display.mode)
-  if (display.mode == "normal")
+  if (display.mode == "normal") {
     setShowcaseDefault(0)
-  else if (display.mode == "showcase")
+  }
+  else if (display.mode == "showcase") {
     setShowcaseDefault(1)
+  }
 
   require(shiny)
 

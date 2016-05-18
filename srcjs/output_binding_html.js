@@ -24,7 +24,7 @@ var renderDependencies = exports.renderDependencies = function(dependencies) {
 // Render HTML in a DOM element, add dependencies, and bind Shiny
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
-exports.renderContent = function(where="replace", el, content) {
+exports.renderContent = function(el, content, where="replace") {
   exports.unbindAll(el);
 
   var html;
@@ -38,19 +38,19 @@ exports.renderContent = function(where="replace", el, content) {
     dependencies = content.deps || [];
   }
 
-  exports.renderHtml(where, html, el, dependencies);
+  exports.renderHtml(html, el, dependencies, where);
   exports.initializeInputs(el);
 
   var scope = el;
   if (where === "replace") {
     exports.bindAll(el);
   } else {
-    parent = $(el).parent();
-    if (parent.length > 0) {
-      scope = parent;
+    var $parent = $(el).parent();
+    if ($parent.length > 0) {
+      scope = $parent;
       if (where === "beforeBegin" || where === "afterEnd") {
-        grandparent = $(parent).parent();
-         if (grandparent.length > 0) scope = grandparent;
+        var $grandparent = $parent.parent();
+        if ($grandparent.length > 0) scope = $grandparent;
       }
     }
     exports.bindAll(scope);
@@ -58,9 +58,9 @@ exports.renderContent = function(where="replace", el, content) {
 };
 
 // Render HTML in a DOM element, inserting singletons into head as needed
-exports.renderHtml = function(where, html, el, dependencies) {
+exports.renderHtml = function(html, el, dependencies, where) {
   renderDependencies(dependencies);
-  return singletons.renderHtml(where, html, el);
+  return singletons.renderHtml(html, el, where);
 };
 
 var htmlDependencies = {};
@@ -134,7 +134,7 @@ function renderDependency(dep) {
 
 var singletons = {
   knownSingletons: {},
-  renderHtml: function(where, html, el) {
+  renderHtml: function(html, el, where) {
     var processed = this._processHtml(html);
     this._addToHead(processed.head);
     this.register(processed.singletons);

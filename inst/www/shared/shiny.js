@@ -200,30 +200,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
   };
 
-  // Helper function for addMessageHandler('shiny-insert-ui').
-  // Turns out that Firefox does not support insertAdjacentElement().
-  // So we have to implement our own version for insertUI.
-  function insertAdjacentElement(where, element, content) {
-    switch (where) {
-      case 'beforeBegin':
-        element.parentNode.insertBefore(content, element);
-        break;
-      case 'afterBegin':
-        element.insertBefore(content, element.firstChild);
-        break;
-      case 'beforeEnd':
-        element.appendChild(content);
-        break;
-      case 'afterEnd':
-        if (element.nextSibling) {
-          element.parentNode.insertBefore(content, element.nextSibling);
-        } else {
-          element.parentNode.appendChild(content);
-        }
-        break;
-    }
-  }
-
   //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -1163,10 +1139,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         exports.renderHtml($([]), message.content.html, message.content.deps);
       } else {
         targets.each(function (i, target) {
-          exports.renderContent(message.where, target, message.content);
-          // var container = document.createElement(message.container);
-          // insertAdjacentElement(message.where, target, container);
-          // exports.renderContent(container, message.content);
+          exports.renderContent(target, message.content, message.where);
           return message.multiple;
         });
       }
@@ -2967,10 +2940,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // Render HTML in a DOM element, add dependencies, and bind Shiny
   // inputs/outputs. `content` can be null, a string, or an object with
   // properties 'html' and 'deps'.
-  exports.renderContent = function () {
-    var where = arguments.length <= 0 || arguments[0] === undefined ? "replace" : arguments[0];
-    var el = arguments[1];
-    var content = arguments[2];
+  exports.renderContent = function (el, content) {
+    var where = arguments.length <= 2 || arguments[2] === undefined ? "replace" : arguments[2];
 
     exports.unbindAll(el);
 
@@ -2985,19 +2956,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       dependencies = content.deps || [];
     }
 
-    exports.renderHtml(where, html, el, dependencies);
+    exports.renderHtml(html, el, dependencies, where);
     exports.initializeInputs(el);
 
     var scope = el;
     if (where === "replace") {
       exports.bindAll(el);
     } else {
-      parent = $(el).parent();
-      if (parent.length > 0) {
-        scope = parent;
+      var $parent = $(el).parent();
+      if ($parent.length > 0) {
+        scope = $parent;
         if (where === "beforeBegin" || where === "afterEnd") {
-          grandparent = $(parent).parent();
-          if (grandparent.length > 0) scope = grandparent;
+          var $grandparent = $parent.parent();
+          if ($grandparent.length > 0) scope = $grandparent;
         }
       }
       exports.bindAll(scope);
@@ -3005,9 +2976,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   };
 
   // Render HTML in a DOM element, inserting singletons into head as needed
-  exports.renderHtml = function (where, html, el, dependencies) {
+  exports.renderHtml = function (html, el, dependencies, where) {
     renderDependencies(dependencies);
-    return singletons.renderHtml(where, html, el);
+    return singletons.renderHtml(html, el, where);
   };
 
   var htmlDependencies = {};
@@ -3076,7 +3047,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   var singletons = {
     knownSingletons: {},
-    renderHtml: function renderHtml(where, html, el) {
+    renderHtml: function renderHtml(html, el, where) {
       var processed = this._processHtml(html);
       this._addToHead(processed.head);
       this.register(processed.singletons);

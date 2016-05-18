@@ -32,7 +32,12 @@ Adapted from
 \href{https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML}{here}.}
 
 \item{ui}{The UI object you want to insert. This can be anything that
-you usually put inside your apps's \code{ui} function.}
+you usually put inside your apps's \code{ui} function. If you're inserting
+multiple elements in one call, make sure to wrap them in either a
+\code{tagList()} or a \code{tags$div()} (the latter option has the
+advantage that you can give it an \code{id} to make it easier to
+reference or remove it later on). If you want to insert raw html, use
+\code{ui = HTML()}.}
 
 \item{immediate}{Whether the UI object should be immediately inserted into
 the app when you call \code{insertUI}, or whether Shiny should wait until

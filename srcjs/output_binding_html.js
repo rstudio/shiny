@@ -24,7 +24,7 @@ var renderDependencies = exports.renderDependencies = function(dependencies) {
 // Render HTML in a DOM element, add dependencies, and bind Shiny
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
-exports.renderContent = function(el, content) {
+exports.renderContent = function(el, content, where="replace") {
   exports.unbindAll(el);
 
   var html;
@@ -38,15 +38,29 @@ exports.renderContent = function(el, content) {
     dependencies = content.deps || [];
   }
 
-  exports.renderHtml(html, el, dependencies);
+  exports.renderHtml(html, el, dependencies, where);
   exports.initializeInputs(el);
-  exports.bindAll(el);
+
+  var scope = el;
+  if (where === "replace") {
+    exports.bindAll(el);
+  } else {
+    var $parent = $(el).parent();
+    if ($parent.length > 0) {
+      scope = $parent;
+      if (where === "beforeBegin" || where === "afterEnd") {
+        var $grandparent = $parent.parent();
+        if ($grandparent.length > 0) scope = $grandparent;
+      }
+    }
+    exports.bindAll(scope);
+  }
 };
 
 // Render HTML in a DOM element, inserting singletons into head as needed
-exports.renderHtml = function(html, el, dependencies) {
+exports.renderHtml = function(html, el, dependencies, where) {
   renderDependencies(dependencies);
-  return singletons.renderHtml(html, el);
+  return singletons.renderHtml(html, el, where);
 };
 
 var htmlDependencies = {};
@@ -120,11 +134,15 @@ function renderDependency(dep) {
 
 var singletons = {
   knownSingletons: {},
-  renderHtml: function(html, el) {
+  renderHtml: function(html, el, where) {
     var processed = this._processHtml(html);
     this._addToHead(processed.head);
     this.register(processed.singletons);
-    $(el).html(processed.html);
+    if (where === "replace") {
+      $(el).html(processed.html);
+    } else {
+      el.insertAdjacentHTML(where, processed.html);
+    }
     return processed;
   },
   // Take an object where keys are names of singletons, and merges it into

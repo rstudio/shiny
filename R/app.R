@@ -99,6 +99,10 @@ shinyAppDir <- function(appDir, options=list()) {
   # affected by future changes to the path)
   appDir <- normalizePath(appDir, mustWork = TRUE)
 
+  # Store appDir in options so that we can find out where we are from within the
+  # app.
+  shinyOptions(appDir = appDir)
+
   if (file.exists.ci(appDir, "server.R")) {
     shinyAppDir_serverR(appDir, options = options)
   } else if (file.exists.ci(appDir, "app.R")) {
@@ -113,7 +117,12 @@ shinyAppDir <- function(appDir, options=list()) {
 #' @export
 shinyAppFile <- function(appFile, options=list()) {
   appFile <- normalizePath(appFile, mustWork = TRUE)
-  shinyAppDir_appR(basename(appFile), dirname(appFile), options = options)
+  appDir <- dirname(appFile)
+
+  # Store appDir in options so that we can find out where we are
+  shinyOptions(appDir = appDir)
+
+  shinyAppDir_appR(basename(appFile), appDir, options = options)
 }
 
 # This reads in an app dir in the case that there's a server.R (and ui.R/www)

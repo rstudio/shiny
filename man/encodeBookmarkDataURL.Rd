@@ -3,7 +3,7 @@
 \name{encodeBookmarkDataURL}
 \alias{encodeBookmarkDataURL}
 \usage{
-encodeBookmarkDataURL(input, exclude = NULL)
+encodeBookmarkDataURL(input, exclude = NULL, persist = FALSE)
 }
 \arguments{
 \item{input}{The session's input object.}

@@ -126,6 +126,7 @@ Collate:
     'modal.R'
     'modules.R'
     'notifications.R'
+    'persist.R'
     'priorityqueue.R'
     'progress.R'
     'react.R'

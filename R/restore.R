@@ -1,23 +1,31 @@
 #' @export
 decodeBookmarkDataURL <- function(url) {
   values <- parseQueryString(url, nested = TRUE)
-  mapply(names(values), values, SIMPLIFY = FALSE,
-    FUN = function(name, value) {
-      tryCatch(
-        jsonlite::fromJSON(value),
-        error = function(e) {
-          stop("Failed to parse URL parameter \"", name, "\"")
-        }
-      )
-    }
-  )
+
+  # If we have a "_state_id" key, restore from persisted state and ignore other
+  # key/value pairs. If not, restore from key/value pairs in the query string.
+  if (!is.null(values[["_state_id"]]) && nzchar(values[["_state_id"]])) {
+    restoreValues(values[["_state_id"]])
+
+  } else {
+    mapply(names(values), values, SIMPLIFY = FALSE,
+      FUN = function(name, value) {
+        tryCatch(
+          jsonlite::fromJSON(value),
+          error = function(e) {
+            stop("Failed to parse URL parameter \"", name, "\"")
+          }
+        )
+      }
+    )
+  }
 }
 
 #' @param input The session's input object.
 #' @param exclude A character vector of input names that should not be
 #'   bookmarked.
 #' @export
-encodeBookmarkDataURL <- function(input, exclude = NULL) {
+encodeBookmarkDataURL <- function(input, exclude = NULL, persist = FALSE) {
   vals <- reactiveValuesToList(input)
   vals <- vals[setdiff(names(vals), exclude)]
 
@@ -26,19 +34,27 @@ encodeBookmarkDataURL <- function(input, exclude = NULL) {
   unserializable_idx <- vapply(names(vals), function(x) {
     identical(impl$getMeta(x, "shiny.serializable"), FALSE)
   }, FUN.VALUE = logical(1))
+
   vals <- vals[!unserializable_idx]
 
-  vals <- vapply(vals, function(x) {
-    toJSON(x, strict_atomic = FALSE)
-  }, character(1), USE.NAMES = TRUE)
+  if (persist) {
+    id <- persistValues(vals)
+    paste0("_state_id=", encodeURIComponent(id))
 
-  paste0(
-    encodeURIComponent(names(vals)),
-    "=",
-    encodeURIComponent(vals),
-    collapse = "&"
-  )
+  } else {
+    vals <- vapply(vals, function(x) {
+      toJSON(x, strict_atomic = FALSE)
+    }, character(1), USE.NAMES = TRUE)
+
+    paste0(
+      encodeURIComponent(names(vals)),
+      "=",
+      encodeURIComponent(vals),
+      collapse = "&"
+    )
+  }
 }
+
 
 # Restore context. This is basically a key-value store, except for one important
 # difference: When the user `get()`s a value, the value is marked as pending;

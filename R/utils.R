@@ -250,6 +250,12 @@ find.file.ci <- function(...) {
   return(matches[1])
 }
 
+# The function base::dir.exists was added in R 3.2.0, but for backward
+# compatibility we need to add this function
+dirExists <- function(paths) {
+  file.exists(paths) & file.info(paths)$isdir
+}
+
 # Attempt to join a path and relative path, and turn the result into a
 # (normalized) absolute path. The result will only be returned if it is an
 # existing file/directory and is a descendant of dir.

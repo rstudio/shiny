@@ -2,7 +2,6 @@
 #'
 #' @param values A named list of values to persist.
 #'
-#' @return A unique ID of the persisted values.
 #' @export
 persistValues <- function(values, id, exclude = NULL) {
   # Serialize values, either to directory, or to a database.
@@ -11,9 +10,12 @@ persistValues <- function(values, id, exclude = NULL) {
   if (anyUnnamed(values))
     stop("All values must be named.")
 
-  persistFile <- file.path(persistentDir(), paste0(id, ".rds"))
-  saveRDS(values, persistFile)
-  id
+  tryCatch({
+    persistFile <- file.path(persistentDir(), paste0(id, ".rds"))
+    saveRDS(values, persistFile)
+  }, error = function(e) {
+    stop(safeError(paste0("Unable to save state ", id)))
+  })
 }
 
 
@@ -27,9 +29,9 @@ restoreValues <- function(id) {
   if (is.null(id))
     stop("restoreValues requires an ID to restore.")
 
-  persistFile <- file.path(persistentDir(), paste0(id, ".rds"))
 
   tryCatch({
+    persistFile <- file.path(persistentDir(), paste0(id, ".rds"))
     readRDS(persistFile)
   }, error = function(e) {
     stop(safeError(paste0("Unable to restore saved state ", id)))

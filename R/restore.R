@@ -24,8 +24,13 @@ decodeBookmarkDataURL <- function(url) {
 #' @param input The session's input object.
 #' @param exclude A character vector of input names that should not be
 #'   bookmarked.
+#' @param persist If \code{FALSE} (the default), the URL will contain the
+#'   values. If \code{TRUE}, the URL will contain just a \code{_state_id} and
+#'   the state will be saved to disk.
 #' @export
-encodeBookmarkDataURL <- function(input, exclude = NULL, persist = FALSE) {
+encodeBookmarkDataURL <- function(input, exclude = NULL, persist = FALSE,
+  session = getDefaultReactiveDomain())
+{
   vals <- reactiveValuesToList(input)
   vals <- vals[setdiff(names(vals), exclude)]
 
@@ -38,8 +43,8 @@ encodeBookmarkDataURL <- function(input, exclude = NULL, persist = FALSE) {
   vals <- vals[!unserializable_idx]
 
   if (persist) {
-    id <- persistValues(vals)
-    paste0("_state_id=", encodeURIComponent(id))
+    persistValues(vals, session$stateID)
+    paste0("_state_id=", encodeURIComponent(session$stateID))
 
   } else {
     vals <- vapply(vals, function(x) {

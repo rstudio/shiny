@@ -429,6 +429,7 @@ ShinySession <- R6Class(
     output      = 'ANY',    # Externally-usable S3 wrapper object for .outputs
     clientData  = 'reactivevalues', # Externally-usable S3 wrapper object for .clientData
     token = 'character',  # Used to identify this instance in URLs
+    stateID = character(0),  # A unique ID, used for saving state
     files = 'Map',        # For keeping track of files sent to client
     downloads = 'Map',
     closed = logical(0),
@@ -463,6 +464,7 @@ ShinySession <- R6Class(
       self$output <- .createOutputWriter(self)
 
       self$token <- createUniqueId(16)
+      self$stateID <- createUniqueId(8)
       private$.outputs <- list()
       private$.outputOptions <- list()
 

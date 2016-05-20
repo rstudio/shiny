@@ -120,16 +120,6 @@ p_randomInt <- function(...) {
   withPrivateSeed(randomInt(...))
 }
 
-# Return a random hexadecimal string with `length` digits.
-randomID <- function(length = 16) {
-  paste(sample(
-    c("0", "1", "2", "3", "4", "5", "6", "7", "8","9",
-      "a", "b", "c", "d", "e", "f"),
-    length,
-    replace = TRUE
-  ), collapse = '')
-}
-
 isWholeNum <- function(x, tol = .Machine$double.eps^0.5) {
   abs(x - round(x)) < tol
 }

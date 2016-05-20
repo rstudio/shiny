@@ -94,7 +94,7 @@ Progress <- R6Class(
         stop("'session' is not a ShinySession object.")
 
       private$session <- session
-      private$id <- randomID()
+      private$id <- createUniqueId(8)
       private$min <- min
       private$max <- max
       private$value <- NULL

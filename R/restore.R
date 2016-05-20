@@ -43,7 +43,7 @@ encodeBookmarkDataURL <- function(input, exclude = NULL, persist = FALSE,
   vals <- vals[!unserializable_idx]
 
   if (persist) {
-    persistValues(vals, session$stateID)
+    id <- persistValues(vals, session$stateID)
     paste0("_state_id=", encodeURIComponent(session$stateID))
 
   } else {

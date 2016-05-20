@@ -3,7 +3,7 @@
 #' @param values A named list of values to persist.
 #'
 #' @export
-persistValues <- function(values, id, exclude = NULL) {
+persistValues <- function(values, id) {
   # Serialize values, either to directory, or to a database.
   if (!is.list(values))
     stop("`values` must be a list.")
@@ -11,8 +11,12 @@ persistValues <- function(values, id, exclude = NULL) {
     stop("All values must be named.")
 
   tryCatch({
-    persistFile <- file.path(persistentDir(), paste0(id, ".rds"))
-    saveRDS(values, persistFile)
+    stateDir <- file.path(persistentDir(), id)
+    if (!dirExists(stateDir))
+      dir.create(stateDir)
+
+    stateFile <- file.path(stateDir, "state.rds")
+    saveRDS(values, stateFile)
   }, error = function(e) {
     stop(safeError(paste0("Unable to save state ", id)))
   })
@@ -31,8 +35,9 @@ restoreValues <- function(id) {
 
 
   tryCatch({
-    persistFile <- file.path(persistentDir(), paste0(id, ".rds"))
-    readRDS(persistFile)
+    stateDir <- file.path(persistentDir(), id)
+    stateFile <- file.path(stateDir, "state.rds")
+    readRDS(stateFile)
   }, error = function(e) {
     stop(safeError(paste0("Unable to restore saved state ", id)))
   })

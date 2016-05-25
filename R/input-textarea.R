@@ -36,6 +36,6 @@ textAreaInput <- function(inputId, label, value = "", width = NULL,
       style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
       label %AND% tags$label(label, `for` = inputId),
       tags$textarea(id = inputId, class = "form-control", placeholder = placeholder,
-                    paste(value, collapse = "\n")
+                    paste(value, collapse = "\n"))
   )
 }

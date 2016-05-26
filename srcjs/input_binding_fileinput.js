@@ -162,8 +162,8 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
 
 function uploadFiles(evt) {
   // If previously selected files are uploading, abort that.
-  var el = $(evt.target);
-  var uploader = el.data('currentUploader');
+  var $el = $(evt.target);
+  var uploader = $el.data('currentUploader');
   if (uploader)
     uploader.abort();
 
@@ -176,12 +176,23 @@ function uploadFiles(evt) {
   if (!IE8 && files.length === 0)
     return;
 
+  // Clear data-restore attribute if present.
+  $el.removeAttr('data-restore');
+
+  // Set the label in the text box
+  var $fileText = $el.closest('div.input-group').find('input[type=text]');
+  if (files.length === 1) {
+    $fileText.val(files[0].name);
+  } else {
+    $fileText.val(files.length + " files");
+  }
+
   // Start the new upload and put the uploader in 'currentUploader'.
   if (IE8) {
     /*jshint nonew:false */
     new IE8FileUploader(exports.shinyapp, id, evt.target);
   } else {
-    el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+    $el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
   }
 }
 
@@ -194,10 +205,41 @@ $.extend(fileInputBinding, {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   },
   getValue: function(el) {
-    return null;
+    // This returns a non-undefined value only when there's a 'data-restore'
+    // attribute, which is set only when restoring Shiny state. If a file is
+    // uploaded through the browser, 'data-restore' gets cleared.
+    var data = $(el).attr('data-restore');
+    if (data) {
+      data = JSON.parse(unescapeHTML(data));
+
+      // Set the label in the text box
+      var $fileText = $(el).closest('div.input-group').find('input[type=text]');
+      if (data.name.length === 1) {
+        $fileText.val(data.name[0]);
+      } else {
+        $fileText.val(data.name.length + " files");
+      }
+
+      // Manually set up progress bar. A bit inelegant because it duplicates
+      // code from FileUploader, but duplication is less bad than alternatives.
+      var $progress = $(el).closest('div.form-group').find('.progress');
+      var $bar = $progress.find('.progress-bar');
+      $progress.removeClass('active');
+      $bar.width('100%');
+      $bar.css('visibility', 'visible');
+
+      return data;
+
+    } else {
+      return null;
+    }
   },
   setValue: function(el, value) {
     // Not implemented
+  },
+  getType: function(el) {
+    // This will be used only when restoring a file from a saved state.
+    return 'shiny.file';
   },
   subscribe: function(el, callback) {
     $(el).on('change.fileInputBinding', uploadFiles);

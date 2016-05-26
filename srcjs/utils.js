@@ -7,6 +7,15 @@ function escapeHTML(str) {
             .replace(/\//g,"&#x2F;");
 }
 
+function unescapeHTML(str) {
+  return str.replace(/&amp;/g, "&")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'")
+            .replace(/&#x2F;/g, "\/");
+}
+
 function randomId() {
   return Math.floor(0x100000000 + (Math.random() * 0xF00000000)).toString(16);
 }

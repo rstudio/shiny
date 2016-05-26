@@ -7,6 +7,12 @@
 #' @param value Initial value.
 #' @param width The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 #'   see \code{\link{validateCssUnit}}.
+#' @param height The height of the input, e.g. \code{'400px'}, or \code{'100\%'};
+#'   see \code{\link{validateCssUnit}}.
+#' @param cols Value of the visible character columns of the input, e.g.
+#'   \code{'80'}.
+#' @param rows The value of the visible character rows of the input, e.g.
+#'   \code{'6'}.
 #' @param placeholder A character string giving the user a hint as to what can
 #'   be entered into the control. Internet Explorer 8 and 9 do not support this
 #'   option.
@@ -29,13 +35,16 @@
 #' shinyApp(ui, server)
 #' }
 #' @export
-textAreaInput <- function(inputId, label, value = "", width = NULL,
-                      placeholder = NULL) {
+textAreaInput <- function(inputId, label, value = "", width = NULL, height = NULL,
+                          cols = NULL, rows = NULL, placeholder = NULL) {
 
   div(class = "form-group shiny-input-container",
       style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
       label %AND% tags$label(label, `for` = inputId),
-      tags$textarea(id = inputId, class = "form-control", placeholder = placeholder,
-                    paste(value, collapse = "\n"))
+      tags$textarea(
+        id = inputId, class = "form-control", placeholder = placeholder,
+        style = if (!is.null(height)) paste0("height: ", validateCssUnit(height), ";"),
+        rows = rows, cols = cols, paste(value, collapse = "\n")
+      )
   )
 }

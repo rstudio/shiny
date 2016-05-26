@@ -4,8 +4,8 @@
 \alias{textAreaInput}
 \title{Create a textarea input control}
 \usage{
-textAreaInput(inputId, label, value = "", width = NULL,
-  placeholder = NULL)
+textAreaInput(inputId, label, value = "", width = NULL, height = NULL,
+  cols = NULL, rows = NULL, placeholder = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -16,6 +16,15 @@ textAreaInput(inputId, label, value = "", width = NULL,
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
+
+\item{height}{The height of the input, e.g. \code{'400px'}, or \code{'100\%'};
+see \code{\link{validateCssUnit}}.}
+
+\item{cols}{Value of the visible character columns of the input, e.g.
+\code{'80'}.}
+
+\item{rows}{The value of the visible character rows of the input, e.g.
+\code{'6'}.}
 
 \item{placeholder}{A character string giving the user a hint as to what can
 be entered into the control. Internet Explorer 8 and 9 do not support this

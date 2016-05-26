@@ -118,3 +118,19 @@ registerInputHandler("shiny.action", function(val, shinysession, name) {
   class(val) <- c(class(val), "shinyActionButtonValue")
   val
 })
+
+registerInputHandler("shiny.file", function(val, shinysession, name) {
+  # This function is only used when restoring a Shiny fileInput. When a file is
+  # uploaded the usual way, it takes a different code path and won't hit this
+  # function.
+  if (is.null(val))
+    return(NULL)
+
+  # The data will be a named list of lists; convert to a data frame.
+  val <- as.data.frame(lapply(val, unlist))
+
+  # Prepend the persistent dir
+  val$datapath <- file.path(persistentDir(), val$datapath)
+
+  val
+})

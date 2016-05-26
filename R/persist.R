@@ -36,7 +36,6 @@ restoreValues <- function(id) {
   if (is.null(id))
     stop("restoreValues requires an ID to restore.")
 
-
   tryCatch({
     stateDir <- file.path(persistentDir(), id)
     stateFile <- file.path(stateDir, "state.rds")

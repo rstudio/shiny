@@ -4,6 +4,22 @@ serializerDefault <- function(value, stateDir) {
 }
 
 
+serializerFileInput <- function(value, stateDir = NULL) {
+  # File inputs can be serialized only if there's a stateDir
+  if (is.null(stateDir)) {
+    return(serializerUnserializable())
+  }
+
+  # value is a data frame. When persisting files, we need to copy the file to
+  # the persistent dir and change the datapath to point to the new location.
+  newpaths <- file.path(stateDir, basename(value$datapath))
+  file.copy(value$datapath, newpaths, overwrite = TRUE)
+  value$datapath <- newpaths
+
+  value
+}
+
+
 # Return a sentinel value that represents "unserializable". This is applied to
 # for example, passwords and actionButtons.
 serializerUnserializable <- function(value, stateDir) {
@@ -47,7 +63,7 @@ serializeReactiveValues <- function(values, exclude, stateDir = NULL) {
       serializer <- serializerDefault
 
     # Apply serializer function.
-    serializer(val, stateDir = NULL)
+    serializer(val, stateDir)
   })
 
   # Filter out any values that were marked as unserializable.

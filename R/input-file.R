@@ -72,16 +72,55 @@
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
   width = NULL) {
 
-  inputTag <- tags$input(id = inputId, name = inputId, type = "file")
+  restoredValue <- restoreInput(id = inputId, default = NULL)
+
+  # Catch potential edge case - ensure that it's either NULL or a data frame.
+  if (!is.null(restoredValue) && !is.data.frame(restoredValue)) {
+    warning("Restored value for ", inputId, " has incorrect format.")
+    restoredValue <- NULL
+  }
+
+  # If restoring a value, keep only the hash ID
+  if (!is.null(restoredValue)) {
+    restoredValue$datapath <- file.path(
+      basename(dirname(restoredValue$datapath)),
+      basename(restoredValue$datapath)
+    )
+
+    restoredValue <- htmlEscape(toJSON(restoredValue, strict_atomic = FALSE),
+                                attribute = TRUE)
+  }
+
+  inputTag <- tags$input(
+    id = inputId,
+    name = inputId,
+    type = "file",
+    style = "display: none;",
+    `data-restore` = if (!is.null(restoredValue)) restoredValue
+  )
+
   if (multiple)
     inputTag$attribs$multiple <- "multiple"
   if (length(accept) > 0)
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
+
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     label %AND% tags$label(label),
-    inputTag,
+
+    div(class = "input-group",
+      tags$label(class = "input-group-btn",
+        span(class = "btn btn-default btn-file",
+          "Browse...",
+          inputTag
+        )
+      ),
+      tags$input(type = "text", class = "form-control",
+        placeholder = "No file selected", readonly = "readonly"
+      )
+    ),
+
     tags$div(
       id=paste(inputId, "_progress", sep=""),
       class="progress progress-striped active shiny-file-input-progress",

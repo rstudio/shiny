@@ -848,6 +848,9 @@ ShinySession <- R6Class(
     `@uploadEnd` = function(jobId, inputId) {
       fileData <- private$fileUploadContext$getUploadOperation(jobId)$finish()
       private$.input$set(inputId, fileData)
+
+      private$.input$setMeta(inputId, "shiny.serializer", serializerFileInput)
+
       invisible()
     },
     # Provides a mechanism for handling direct HTTP requests that are posted

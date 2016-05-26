@@ -91,7 +91,7 @@ registerInputHandler("shiny.number", function(val, ...){
 
 registerInputHandler("shiny.password", function(val, shinysession, name) {
   # Mark passwords as not serializable
-  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializable", FALSE)
+  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializer", NULL)
   val
 })
 
@@ -112,7 +112,7 @@ registerInputHandler("shiny.datetime", function(val, ...){
 
 registerInputHandler("shiny.action", function(val, shinysession, name) {
   # Mark as not serializable
-  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializable", FALSE)
+  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializer", NULL)
 
   # mark up the action button value with a special class so we can recognize it later
   class(val) <- c(class(val), "shinyActionButtonValue")

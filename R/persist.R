@@ -3,23 +3,26 @@
 #' @param values A named list of values to persist.
 #'
 #' @export
-persistValues <- function(values, id) {
-  # Serialize values, either to directory, or to a database.
-  if (!is.list(values))
-    stop("`values` must be a list.")
-  if (anyUnnamed(values))
-    stop("All values must be named.")
+persistValues <- function(input, exclude = NULL, persist = FALSE,
+  session = getDefaultReactiveDomain())
+{
+  id <- session$stateID
 
   tryCatch({
     stateDir <- file.path(persistentDir(), id)
     if (!dirExists(stateDir))
       dir.create(stateDir)
 
+    # Serialize values, possibly saving some extra data to stateDir
+    values <- serializeReactiveValues(input, exclude, stateDir)
+
     stateFile <- file.path(stateDir, "state.rds")
     saveRDS(values, stateFile)
   }, error = function(e) {
     stop(safeError(paste0("Unable to save state ", id)))
   })
+
+  id
 }
 
 

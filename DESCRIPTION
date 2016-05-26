@@ -136,6 +136,7 @@ Collate:
     'render-table.R'
     'restore.R'
     'run-url.R'
+    'serializers.R'
     'server-input-handlers.R'
     'server.R'
     'shiny-options.R'

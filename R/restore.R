@@ -31,22 +31,13 @@ decodeBookmarkDataURL <- function(url) {
 encodeBookmarkDataURL <- function(input, exclude = NULL, persist = FALSE,
   session = getDefaultReactiveDomain())
 {
-  vals <- reactiveValuesToList(input)
-  vals <- vals[setdiff(names(vals), exclude)]
-
-  # Remove items that are marked as unserializable
-  impl <- .subset2(input, "impl")
-  unserializable_idx <- vapply(names(vals), function(x) {
-    identical(impl$getMeta(x, "shiny.serializable"), FALSE)
-  }, FUN.VALUE = logical(1))
-
-  vals <- vals[!unserializable_idx]
-
   if (persist) {
-    id <- persistValues(vals, session$stateID)
-    paste0("_state_id=", encodeURIComponent(session$stateID))
+    id <- persistValues(input, exclude, persist, session)
+    paste0("_state_id=", encodeURIComponent(id))
 
   } else {
+    vals <- serializeReactiveValues(input, exclude, stateDir = NULL)
+
     vals <- vapply(vals, function(x) {
       toJSON(x, strict_atomic = FALSE)
     }, character(1), USE.NAMES = TRUE)

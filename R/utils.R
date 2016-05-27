@@ -597,7 +597,10 @@ Callbacks <- R6Class(
     .callbacks = 'Map',
 
     initialize = function() {
-      .nextId <<- as.integer(.Machine$integer.max)
+      # NOTE: we avoid using '.Machine$integer.max' directly
+      # as R 3.3.0's 'radixsort' could segfault when sorting
+      # an integer vector containing this value
+      .nextId <<- as.integer(.Machine$integer.max - 1L)
       .callbacks <<- Map$new()
     },
     register = function(callback) {

@@ -3,8 +3,7 @@
 \name{createBookmark}
 \alias{createBookmark}
 \usage{
-createBookmark(input, exclude = NULL, persist = FALSE,
-  session = getDefaultReactiveDomain())
+createBookmark(input, exclude = NULL, persist = FALSE)
 }
 \arguments{
 \item{input}{The session's input object.}

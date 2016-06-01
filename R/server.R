@@ -232,17 +232,21 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
           msg <- decodeMessage(msg)
 
-          # Do our own list simplifying here. sapply/simplify2array give names to
-          # character vectors, which is rarely what we want.
-          if (!is.null(msg$data)) {
-            for (name in names(msg$data)) {
-              val <- msg$data[[name]]
+          # Set up a restore context from .clientdata_url_search before
+          # handling all the input values, because the restore context may be
+          # used by an input handler (like the one for "shiny.file"). This
+          # should only happen once, when the app starts.
+          if (is.null(shinysession$restoreContext)) {
+            # If there's bookmarked state, save it on the session object
+            shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
+          }
 
+          withRestoreContext(shinysession$restoreContext, {
+
+            unpackInput <- function(name, val) {
               splitName <- strsplit(name, ':')[[1]]
               if (length(splitName) > 1) {
-                msg$data[[name]] <- NULL
-
-                if (!inputHandlers$containsKey(splitName[[2]])){
+                if (!inputHandlers$containsKey(splitName[[2]])) {
                   # No input handler registered for this type
                   stop("No handler registered for for type ", name)
                 }
@@ -252,65 +256,64 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                 # Get the function for processing this type of input
                 inputHandler <- inputHandlers$get(splitName[[2]])
 
-                msg$data[[inputName]] <- inputHandler(val, shinysession,
-                                                      inputName)
+                return(inputHandler(val, shinysession, inputName))
 
-              }
-              else if (is.list(val) && is.null(names(val))) {
-                val_flat <- unlist(val, recursive = TRUE)
-
-                if (is.null(val_flat)) {
-                  # This is to assign NULL instead of deleting the item
-                  msg$data[name] <- list(NULL)
-                } else {
-                  msg$data[[name]] <- val_flat
-                }
+              } else if (is.list(val) && is.null(names(val))) {
+                return(unlist(val, recursive = TRUE))
+              } else {
+                return(val)
               }
             }
-          }
 
-          switch(
-            msg$method,
-            init = {
+            msg$data <- mapply(unpackInput, names(msg$data), msg$data,
+                               SIMPLIFY = FALSE)
 
-              serverFunc <- withReactiveDomain(NULL, serverFuncSource())
-              if (!identicalFunctionBodies(serverFunc, appvars$server)) {
-                appvars$server <- serverFunc
-                if (!is.null(appvars$server))
-                {
-                  # Tag this function as the Shiny server function. A debugger may use this
-                  # tag to give this function special treatment.
-                  # It's very important that it's appvars$server itself and NOT a copy that
-                  # is invoked, otherwise new breakpoints won't be picked up.
-                  attr(appvars$server, "shinyServerFunction") <- TRUE
-                  registerDebugHook("server", appvars, "Server Function")
+            # Convert names like "button1:shiny.action" to "button1"
+            names(msg$data) <- vapply(
+              names(msg$data),
+              function(name) { strsplit(name, ":")[[1]][1] },
+              FUN.VALUE = character(1)
+            )
+
+
+            switch(
+              msg$method,
+              init = {
+
+                serverFunc <- withReactiveDomain(NULL, serverFuncSource())
+                if (!identicalFunctionBodies(serverFunc, appvars$server)) {
+                  appvars$server <- serverFunc
+                  if (!is.null(appvars$server))
+                  {
+                    # Tag this function as the Shiny server function. A debugger may use this
+                    # tag to give this function special treatment.
+                    # It's very important that it's appvars$server itself and NOT a copy that
+                    # is invoked, otherwise new breakpoints won't be picked up.
+                    attr(appvars$server, "shinyServerFunction") <- TRUE
+                    registerDebugHook("server", appvars, "Server Function")
+                  }
                 }
-              }
 
-              # Check for switching into/out of showcase mode
-              if (.globals$showcaseOverride &&
-                  exists(".clientdata_url_search", where = msg$data)) {
-                mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
-                if (!is.null(mode))
-                  shinysession$setShowcase(mode)
-              }
+                # Check for switching into/out of showcase mode
+                if (.globals$showcaseOverride &&
+                    exists(".clientdata_url_search", where = msg$data)) {
+                  mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
+                  if (!is.null(mode))
+                    shinysession$setShowcase(mode)
+                }
 
-              # If there's bookmarked state, save it on the session object
-              shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
+                shinysession$manageInputs(msg$data)
 
-              shinysession$manageInputs(msg$data)
+                # The client tells us what singletons were rendered into
+                # the initial page
+                if (!is.null(msg$data$.clientdata_singletons)) {
+                  shinysession$singletons <- strsplit(
+                    msg$data$.clientdata_singletons, ',')[[1]]
+                }
 
-              # The client tells us what singletons were rendered into
-              # the initial page
-              if (!is.null(msg$data$.clientdata_singletons)) {
-                shinysession$singletons <- strsplit(
-                  msg$data$.clientdata_singletons, ',')[[1]]
-              }
+                local({
+                  args <- argsForServerFunc(serverFunc, shinysession)
 
-              local({
-                args <- argsForServerFunc(serverFunc, shinysession)
-
-                withRestoreContext(shinysession$restoreContext, {
                   withReactiveDomain(shinysession, {
                     do.call(
                       # No corresponding ..stacktraceoff; the server func is pure
@@ -322,43 +325,39 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                     )
                   })
                 })
-              })
-            },
-            update = {
-              shinysession$manageInputs(msg$data)
-            },
-            shinysession$dispatch(msg)
-          )
-          shinysession$manageHiddenOutputs()
+              },
+              update = {
+                shinysession$manageInputs(msg$data)
+              },
+              shinysession$dispatch(msg)
+            )
+            shinysession$manageHiddenOutputs()
 
-          if (exists(".shiny__stdout", globalenv()) &&
-              exists("HTTP_GUID", ws$request)) {
-            # safe to assume we're in shiny-server
-            shiny_stdout <- get(".shiny__stdout", globalenv())
+            if (exists(".shiny__stdout", globalenv()) &&
+                exists("HTTP_GUID", ws$request)) {
+              # safe to assume we're in shiny-server
+              shiny_stdout <- get(".shiny__stdout", globalenv())
 
-            # eNter a flushReact
-            writeLines(paste("_n_flushReact ", get("HTTP_GUID", ws$request),
-              " @ ", sprintf("%.3f", as.numeric(Sys.time())),
-              sep=""), con=shiny_stdout)
-            flush(shiny_stdout)
+              # eNter a flushReact
+              writeLines(paste("_n_flushReact ", get("HTTP_GUID", ws$request),
+                " @ ", sprintf("%.3f", as.numeric(Sys.time())),
+                sep=""), con=shiny_stdout)
+              flush(shiny_stdout)
 
-            withRestoreContext(shinysession$restoreContext, {
               flushReact()
-            })
 
-            # eXit a flushReact
-            writeLines(paste("_x_flushReact ", get("HTTP_GUID", ws$request),
-              " @ ", sprintf("%.3f", as.numeric(Sys.time())),
-              sep=""), con=shiny_stdout)
-            flush(shiny_stdout)
-          } else {
-            withRestoreContext(shinysession$restoreContext, {
+              # eXit a flushReact
+              writeLines(paste("_x_flushReact ", get("HTTP_GUID", ws$request),
+                " @ ", sprintf("%.3f", as.numeric(Sys.time())),
+                sep=""), con=shiny_stdout)
+              flush(shiny_stdout)
+            } else {
               flushReact()
+            }
+            lapply(appsByToken$values(), function(shinysession) {
+              shinysession$flushOutput()
+              NULL
             })
-          }
-          lapply(appsByToken$values(), function(shinysession) {
-            shinysession$flushOutput()
-            NULL
           })
         })
       }

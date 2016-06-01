@@ -127,10 +127,10 @@ registerInputHandler("shiny.file", function(val, shinysession, name) {
     return(NULL)
 
   # The data will be a named list of lists; convert to a data frame.
-  val <- as.data.frame(lapply(val, unlist))
+  val <- as.data.frame(lapply(val, unlist), stringsAsFactors = FALSE)
 
   # Prepend the persistent dir
-  val$datapath <- file.path(persistentDir(), val$datapath)
+  val$datapath <- file.path(getCurrentRestoreContext()$getDir(), val$datapath)
 
   val
 })

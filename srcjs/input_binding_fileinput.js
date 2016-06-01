@@ -210,7 +210,7 @@ $.extend(fileInputBinding, {
     // uploaded through the browser, 'data-restore' gets cleared.
     var data = $(el).attr('data-restore');
     if (data) {
-      data = JSON.parse(unescapeHTML(data));
+      data = JSON.parse(data);
 
       // Set the label in the text box
       var $fileText = $(el).closest('div.input-group').find('input[type=text]');

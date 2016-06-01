@@ -5,7 +5,11 @@ decodeBookmarkDataURL <- function(url) {
   # If we have a "_state_id" key, restore from persisted state and ignore other
   # key/value pairs. If not, restore from key/value pairs in the query string.
   if (!is.null(values[["_state_id"]]) && nzchar(values[["_state_id"]])) {
-    restoreValues(values[["_state_id"]])
+
+    restoreStateLocal(values[["_state_id"]], function(stateDir) {
+      stateFile <- file.path(stateDir, "state.rds")
+      readRDS(stateFile)
+    })
 
   } else {
     mapply(names(values), values, SIMPLIFY = FALSE,
@@ -28,12 +32,20 @@ decodeBookmarkDataURL <- function(url) {
 #'   values. If \code{TRUE}, the URL will contain just a \code{_state_id} and
 #'   the state will be saved to disk.
 #' @export
-encodeBookmarkDataURL <- function(input, exclude = NULL, persist = FALSE,
+createBookmark <- function(input, exclude = NULL, persist = FALSE,
   session = getDefaultReactiveDomain())
 {
   if (persist) {
-    id <- persistValues(input, exclude, persist, session)
-    paste0("_state_id=", encodeURIComponent(id))
+    saveState <- getShinyOption("saveState", default = saveStateLocal)
+    saveState(session$stateID, function(stateDir) {
+      # Serialize values, possibly saving some extra data to stateDir
+      values <- serializeReactiveValues(stateDir, input, exclude)
+
+      stateFile <- file.path(stateDir, "state.rds")
+      saveRDS(values, stateFile)
+    })
+
+    paste0("_state_id=", encodeURIComponent(session$stateID))
 
   } else {
     vals <- serializeReactiveValues(input, exclude, stateDir = NULL)
@@ -61,6 +73,7 @@ encodeBookmarkDataURL <- function(input, exclude = NULL, persist = FALSE,
 RestoreContext <- R6Class("RestoreContext",
   private = list(
     values = NULL,
+    dir = NULL,  # Directory for extra files, if restoring from saved state
     pending = character(0),
     used = character(0)     # Names of values which have been used
   ),
@@ -70,8 +83,28 @@ RestoreContext <- R6Class("RestoreContext",
       private$values <- new.env(parent = emptyenv())
 
       if (!is.null(queryString)) {
-        vals <- decodeBookmarkDataURL(queryString)
-        list2env(vals, private$values)
+        values <- parseQueryString(queryString, nested = TRUE)
+
+        # If we have a "_state_id" key, restore from persisted state and ignore
+        # other key/value pairs. If not, restore from key/value pairs in the
+        # query string.
+        if (!is.null(values[["_state_id"]]) && nzchar(values[["_state_id"]])) {
+          id <- values[["_state_id"]]
+          # TODO: get the directory here, load values here
+          restoreState <- getShinyOption("restoreState", default = restoreStateLocal)
+
+          values <- restoreState(id, function(stateDir) {
+            private$dir <- stateDir
+
+            stateFile <- file.path(stateDir, "state.rds")
+            readRDS(stateFile)
+          })
+
+        } else {
+          # This URL contains the saved keys and values
+          values <- decodeBookmarkDataURL(queryString)
+        }
+        list2env(values, private$values)
       }
     },
 
@@ -110,6 +143,10 @@ RestoreContext <- R6Class("RestoreContext",
     flushPending = function() {
       private$used <- unique(c(private$used, private$pending))
       private$pending <- character(0)
+    },
+
+    getDir = function() {
+      private$dir
     }
   )
 )
@@ -117,12 +154,13 @@ RestoreContext <- R6Class("RestoreContext",
 
 restoreCtxStack <- Stack$new()
 
+# Equivalent to
 withRestoreContext <- function(ctx, expr) {
   restoreCtxStack$push(ctx)
 
   on.exit({
     # Mark pending names as used
-    ctx$flushPending()
+    restoreCtxStack$peek()$flushPending()
     restoreCtxStack$pop()
   }, add = TRUE)
 

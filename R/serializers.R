@@ -11,10 +11,10 @@ serializerFileInput <- function(value, stateDir = NULL) {
   }
 
   # value is a data frame. When persisting files, we need to copy the file to
-  # the persistent dir and change the datapath to point to the new location.
+  # the persistent dir and then strip the original path before saving.
   newpaths <- file.path(stateDir, basename(value$datapath))
   file.copy(value$datapath, newpaths, overwrite = TRUE)
-  value$datapath <- newpaths
+  value$datapath <- basename(newpaths)
 
   value
 }
@@ -43,7 +43,7 @@ isUnserializable <- function(x) {
 # values. This function passes stateDir to the serializer functions, so if
 # stateDir is non-NULL, it can have a side effect of writing values to disk (in
 # stateDir).
-serializeReactiveValues <- function(values, exclude, stateDir = NULL) {
+serializeReactiveValues <- function(stateDir = NULL, values, exclude) {
   impl <- .subset2(values, "impl")
 
   # Get named list where keys and values are the names of inputs; we'll retrieve

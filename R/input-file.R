@@ -80,15 +80,8 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     restoredValue <- NULL
   }
 
-  # If restoring a value, keep only the hash ID
   if (!is.null(restoredValue)) {
-    restoredValue$datapath <- file.path(
-      basename(dirname(restoredValue$datapath)),
-      basename(restoredValue$datapath)
-    )
-
-    restoredValue <- htmlEscape(toJSON(restoredValue, strict_atomic = FALSE),
-                                attribute = TRUE)
+    restoredValue <- toJSON(restoredValue, strict_atomic = FALSE)
   }
 
   inputTag <- tags$input(
@@ -96,7 +89,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     name = inputId,
     type = "file",
     style = "display: none;",
-    `data-restore` = if (!is.null(restoredValue)) restoredValue
+    `data-restore` = restoredValue
   )
 
   if (multiple)

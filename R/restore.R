@@ -32,12 +32,13 @@ decodeBookmarkDataURL <- function(url) {
 #'   values. If \code{TRUE}, the URL will contain just a \code{_state_id} and
 #'   the state will be saved to disk.
 #' @export
-createBookmark <- function(input, exclude = NULL, persist = FALSE,
-  session = getDefaultReactiveDomain())
-{
+createBookmark <- function(input, exclude = NULL, persist = FALSE) {
   if (persist) {
+    id <- createUniqueId(8)
+
     saveState <- getShinyOption("saveState", default = saveStateLocal)
-    saveState(session$stateID, function(stateDir) {
+
+    saveState(id, function(stateDir) {
       # Serialize values, possibly saving some extra data to stateDir
       values <- serializeReactiveValues(stateDir, input, exclude)
 
@@ -45,7 +46,7 @@ createBookmark <- function(input, exclude = NULL, persist = FALSE,
       saveRDS(values, stateFile)
     })
 
-    paste0("_state_id=", encodeURIComponent(session$stateID))
+    paste0("_state_id=", encodeURIComponent(id))
 
   } else {
     vals <- serializeReactiveValues(input, exclude, stateDir = NULL)

@@ -1,5 +1,79 @@
+#' @param input The session's input object.
+#' @param exclude A character vector of input names that should not be
+#'   bookmarked.
+#' @param persist If \code{FALSE} (the default), the URL will contain the
+#'   values. If \code{TRUE}, the URL will contain just a \code{_state_id} and
+#'   the state will be saved to disk.
 #' @export
-decodeBookmarkDataURL <- function(url) {
+createBookmark <- function(input, exclude = NULL, persist = FALSE) {
+  if (persist) {
+    saveStateURL(input, exclude)
+  } else {
+    encodeStateURL(input, exclude)
+  }
+}
+
+
+#' @export
+saveStateURL <- function(input, exclude) {
+  id <- createUniqueId(8)
+
+  saveInterface <- getShinyOption("save.interface", default = saveInterfaceLocal)
+
+  saveInterface(id, function(stateDir) {
+    # Serialize values, possibly saving some extra data to stateDir
+    values <- serializeReactiveValues(stateDir, input, exclude)
+
+    stateFile <- file.path(stateDir, "state.rds")
+    saveRDS(values, stateFile)
+  })
+
+  paste0("_state_id=", encodeURIComponent(id))
+}
+
+
+restoreStateURL <- function(queryString) {
+  values <- parseQueryString(queryString, nested = TRUE)
+  id <- values[["_state_id"]]
+
+  restoreInterface <- getShinyOption("restore.interface", default = restoreInterfaceLocal)
+
+  res <- NULL
+
+  restoreInterface(id, function(stateDir) {
+    stateFile <- file.path(stateDir, "state.rds")
+
+    res <<- list(
+      values = readRDS(stateFile),
+      dir = stateDir
+    )
+  })
+
+  res
+}
+
+
+#' @export
+encodeStateURL <- function(input, exclude) {
+  vals <- serializeReactiveValues(input, exclude, stateDir = NULL)
+
+  vals <- vapply(vals,
+    function(x) toJSON(x, strict_atomic = FALSE),
+    character(1),
+    USE.NAMES = TRUE
+  )
+
+  paste0(
+    encodeURIComponent(names(vals)),
+    "=",
+    encodeURIComponent(vals),
+    collapse = "&"
+  )
+}
+
+
+#' @export
+decodeStateURL <- function(url) {
   values <- parseQueryString(url, nested = TRUE)
 
   mapply(names(values), values, SIMPLIFY = FALSE,
@@ -13,46 +87,6 @@ decodeBookmarkDataURL <- function(url) {
     }
   )
 }
-
-#' @param input The session's input object.
-#' @param exclude A character vector of input names that should not be
-#'   bookmarked.
-#' @param persist If \code{FALSE} (the default), the URL will contain the
-#'   values. If \code{TRUE}, the URL will contain just a \code{_state_id} and
-#'   the state will be saved to disk.
-#' @export
-createBookmark <- function(input, exclude = NULL, persist = FALSE) {
-  if (persist) {
-    id <- createUniqueId(8)
-
-    saveState <- getShinyOption("saveState", default = saveStateLocal)
-
-    saveState(id, function(stateDir) {
-      # Serialize values, possibly saving some extra data to stateDir
-      values <- serializeReactiveValues(stateDir, input, exclude)
-
-      stateFile <- file.path(stateDir, "state.rds")
-      saveRDS(values, stateFile)
-    })
-
-    paste0("_state_id=", encodeURIComponent(id))
-
-  } else {
-    vals <- serializeReactiveValues(input, exclude, stateDir = NULL)
-
-    vals <- vapply(vals, function(x) {
-      toJSON(x, strict_atomic = FALSE)
-    }, character(1), USE.NAMES = TRUE)
-
-    paste0(
-      encodeURIComponent(names(vals)),
-      "=",
-      encodeURIComponent(vals),
-      collapse = "&"
-    )
-  }
-}
-
 
 # Restore context. This is basically a key-value store, except for one important
 # difference: When the user `get()`s a value, the value is marked as pending;
@@ -79,21 +113,17 @@ RestoreContext <- R6Class("RestoreContext",
         # other key/value pairs. If not, restore from key/value pairs in the
         # query string.
         if (!is.null(values[["_state_id"]]) && nzchar(values[["_state_id"]])) {
-          id <- values[["_state_id"]]
 
-          restoreState <- getShinyOption("restoreState", default = restoreStateLocal)
+          res <- restoreStateURL(queryString)
 
-          values <- restoreState(id, function(stateDir) {
-            private$dir <- stateDir
-
-            stateFile <- file.path(stateDir, "state.rds")
-            readRDS(stateFile)
-          })
+          values <- res$values
+          private$dir <- res$dir
 
         } else {
           # The query string contains the saved keys and values
-          values <- decodeBookmarkDataURL(queryString)
+          values <- decodeStateURL(queryString)
         }
+
         list2env(values, private$values)
       }
     },

@@ -43,7 +43,7 @@ isUnserializable <- function(x) {
 # values. This function passes stateDir to the serializer functions, so if
 # stateDir is non-NULL, it can have a side effect of writing values to disk (in
 # stateDir).
-serializeReactiveValues <- function(stateDir = NULL, values, exclude) {
+serializeReactiveValues <- function(values, exclude, stateDir = NULL) {
   impl <- .subset2(values, "impl")
 
   # Get named list where keys and values are the names of inputs; we'll retrieve

@@ -9,14 +9,14 @@
 #' @param exclude A character vector of input names that should not be
 #'   bookmarked.
 #' @export
-saveStateURL <- function(input, exclude) {
+saveStateURL <- function(input, exclude = NULL) {
   id <- createUniqueId(8)
 
   saveInterface <- getShinyOption("save.interface", default = saveInterfaceLocal)
 
   saveInterface(id, function(stateDir) {
     # Serialize values, possibly saving some extra data to stateDir
-    values <- serializeReactiveValues(stateDir, input, exclude)
+    values <- serializeReactiveValues(input, exclude, stateDir)
 
     stateFile <- file.path(stateDir, "state.rds")
     saveRDS(values, stateFile)
@@ -48,7 +48,7 @@ restoreStateURL <- function(queryString) {
 
 #' @rdname saveStateURL
 #' @export
-encodeStateURL <- function(input, exclude) {
+encodeStateURL <- function(input, exclude = NULL) {
   vals <- serializeReactiveValues(input, exclude, stateDir = NULL)
 
   vals <- vapply(vals,

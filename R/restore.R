@@ -2,27 +2,16 @@
 decodeBookmarkDataURL <- function(url) {
   values <- parseQueryString(url, nested = TRUE)
 
-  # If we have a "_state_id" key, restore from persisted state and ignore other
-  # key/value pairs. If not, restore from key/value pairs in the query string.
-  if (!is.null(values[["_state_id"]]) && nzchar(values[["_state_id"]])) {
-
-    restoreStateLocal(values[["_state_id"]], function(stateDir) {
-      stateFile <- file.path(stateDir, "state.rds")
-      readRDS(stateFile)
-    })
-
-  } else {
-    mapply(names(values), values, SIMPLIFY = FALSE,
-      FUN = function(name, value) {
-        tryCatch(
-          jsonlite::fromJSON(value),
-          error = function(e) {
-            stop("Failed to parse URL parameter \"", name, "\"")
-          }
-        )
-      }
-    )
-  }
+  mapply(names(values), values, SIMPLIFY = FALSE,
+    FUN = function(name, value) {
+      tryCatch(
+        jsonlite::fromJSON(value),
+        error = function(e) {
+          stop("Failed to parse URL parameter \"", name, "\"")
+        }
+      )
+    }
+  )
 }
 
 #' @param input The session's input object.
@@ -91,7 +80,7 @@ RestoreContext <- R6Class("RestoreContext",
         # query string.
         if (!is.null(values[["_state_id"]]) && nzchar(values[["_state_id"]])) {
           id <- values[["_state_id"]]
-          # TODO: get the directory here, load values here
+
           restoreState <- getShinyOption("restoreState", default = restoreStateLocal)
 
           values <- restoreState(id, function(stateDir) {
@@ -102,7 +91,7 @@ RestoreContext <- R6Class("RestoreContext",
           })
 
         } else {
-          # This URL contains the saved keys and values
+          # The query string contains the saved keys and values
           values <- decodeBookmarkDataURL(queryString)
         }
         list2env(values, private$values)

@@ -1,19 +1,13 @@
+#' Save or encode state of Shiny session
+#'
+#' Shiny applications can have their state \emph{encoded} in a URL or
+#' \emph{saved}. If the state is encoded, all of the input values are stored in
+#' the URL. If the state is saved, the input values and any uploaded files are
+#' stored on disk.
+#'
 #' @param input The session's input object.
 #' @param exclude A character vector of input names that should not be
 #'   bookmarked.
-#' @param persist If \code{FALSE} (the default), the URL will contain the
-#'   values. If \code{TRUE}, the URL will contain just a \code{_state_id} and
-#'   the state will be saved to disk.
-#' @export
-createBookmark <- function(input, exclude = NULL, persist = FALSE) {
-  if (persist) {
-    saveStateURL(input, exclude)
-  } else {
-    encodeStateURL(input, exclude)
-  }
-}
-
-
 #' @export
 saveStateURL <- function(input, exclude) {
   id <- createUniqueId(8)
@@ -52,7 +46,7 @@ restoreStateURL <- function(queryString) {
   res
 }
 
-
+#' @rdname saveStateURL
 #' @export
 encodeStateURL <- function(input, exclude) {
   vals <- serializeReactiveValues(input, exclude, stateDir = NULL)

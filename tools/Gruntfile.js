@@ -104,7 +104,7 @@ module.exports = function(grunt) {
           "browser",
           "jquery"
         ],
-        globals: ["strftime", "Clipboard"]
+        globals: ["strftime"]
       },
       shiny: ['./temp_concat/shiny.js']
     },

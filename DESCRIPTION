@@ -44,8 +44,6 @@ Authors@R: c(
     comment = "ion.rangeSlider library"),
     person("Sami", "Samhuri", role = c("ctb", "cph"),
     comment = "Javascript strftime library"),
-    person("Zeno", "Rocha", role = c("ctb", "cph"),
-    comment = "clipboard.js library"),
     person(family = "SpryMedia Limited", role = c("ctb", "cph"),
     comment = "DataTables library"),
     person("John", "Fraser", role = c("ctb", "cph"),

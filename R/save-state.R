@@ -218,44 +218,68 @@ restoreValue <- function(id, default) {
   }
 }
 
-#' @param id ID for the output.
-#' @param label Text label, displayed above the bookmark output.
-#' @param updateId An optional input ID. If non-NULL, a special actionButton
-#'   with this ID will be added to the input group. The purpose of this button
-#'   is that, when clicked, the \code{bookmarkOutput}'s value will be updated.
-#'   See examples below.
-#' @export
-bookmarkOutput <- function(id, label = NULL, updateId = NULL) {
-  textId <- paste0("shiny-bookmark-", id)
-
-  tagList(
-    if (!is.null(label)) tags$label(label, `for` = textId),
-
-    div(class="input-group shiny-bookmark-output", id = id,
-      tags$input(id = textId,
-        readonly = "readonly",
-        class = "form-control",
-        placeholder = "Bookmark URL"
-      ),
-      span(class = "input-group-btn",
-        if (!is.null(updateId)) tags$button(id = updateId,
-          class = "btn btn-default action-button",
-          icon("repeat", lib = "glyphicon")
-        ),
-        tags$button(class = "btn btn-default",
-          `data-clipboard-target` = paste0("#", textId),
-          icon("copy", lib = "glyphicon")
-        )
-      )
-    ),
-    htmlDependency(
-      "clipboardjs", "1.5.10", c(href = "shared/clipboardjs"),
-      script = "clipboard.min.js"
-    )
-  )
-}
 
 #' @export
 updateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
   session$updateQueryString(queryString)
+}
+
+
+#' @export
+saveStateModal <- function(input, exclude = NULL,
+  session = getDefaultReactiveDomain())
+{
+  clientData <- session$clientData
+
+  modalDialog(
+    title = "Share link",
+    easyClose = TRUE,
+    footer = NULL,
+    tags$input(type = "text", class = "form-control",
+      value = paste0(
+        clientData$url_protocol, "//",
+        clientData$url_hostname,
+        if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
+        clientData$url_pathname,
+        "?", saveStateURL(input, exclude)
+      )
+    ),
+    br(),
+    span(class = "text-muted",
+      "The state of this application has been saved."
+    ),
+    tags$script(
+      "$('#shiny-modal').one('shown.bs.modal', function() {
+        $('#shiny-modal input[type=text]').select().focus();
+      })"
+    )
+  )
+}
+
+
+#' @export
+encodeStateModal <- function(input, exclude = NULL,
+  session = getDefaultReactiveDomain()) 
+{
+  clientData <- session$clientData
+
+  modalDialog(
+    title = "Share link",
+    easyClose = TRUE,
+    footer = NULL,
+    tags$textarea(class = "form-control", rows = "5", style = "resize: none;",
+      paste0(
+        clientData$url_protocol, "//",
+        clientData$url_hostname,
+        if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
+        clientData$url_pathname,
+        "?", encodeStateURL(input, exclude)
+      )
+    ),
+    tags$script(
+      "$('#shiny-modal').one('shown.bs.modal', function() {
+        $('#shiny-modal textarea').select().focus();
+      })"
+    )
+  )
 }

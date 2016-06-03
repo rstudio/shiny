@@ -641,19 +641,19 @@ var ShinyApp = function() {
   });
 
   addMessageHandler('shiny-insert-ui', function (message) {
-      var targets = $(message.selector);
-      if (targets.length === 0) {
-        // render the HTML and deps to a null target, so
-        // the side-effect of rendering the deps, singletons,
-        // and <head> still occur
-        exports.renderHtml($([]), message.content.html, message.content.deps);
-      } else {
-        targets.each(function (i, target) {
-          exports.renderContent(target, message.content, message.where);
-          return message.multiple;
-        });
-      }
-    });
+    var targets = $(message.selector);
+    if (targets.length === 0) {
+      // render the HTML and deps to a null target, so
+      // the side-effect of rendering the deps, singletons,
+      // and <head> still occur
+      exports.renderHtml($([]), message.content.html, message.content.deps);
+    } else {
+      targets.each(function (i, target) {
+        exports.renderContent(target, message.content, message.where);
+        return message.multiple;
+      });
+    }
+  });
 
   addMessageHandler('shiny-remove-ui', function (message) {
     var els = $(message.selector);
@@ -665,6 +665,10 @@ var ShinyApp = function() {
       // returning true continues removing all remaining elements.
       return message.multiple;
     });
+  });
+
+  addMessageHandler("resetBrush", function(message) {
+    exports.resetBrush(message.brushId);
   });
 
   // Progress reporting ====================================================

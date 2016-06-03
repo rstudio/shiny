@@ -1368,3 +1368,10 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     stopResizing: stopResizing
   };
 };
+
+exports.resetBrush = function(brushId) {
+  exports.onInputChange(brushId, null);
+  imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
+    brushId: brushId, outputId: null
+  });
+};

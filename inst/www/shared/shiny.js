@@ -1162,6 +1162,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       });
     });
 
+    addMessageHandler("resetBrush", function (message) {
+      exports.resetBrush(message.brushId);
+    });
+
     // Progress reporting ====================================================
 
     var progressHandlers = {
@@ -2971,6 +2975,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       resizeTo: resizeTo,
       stopResizing: stopResizing
     };
+  };
+
+  exports.resetBrush = function (brushId) {
+    exports.onInputChange(brushId, null);
+    imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
+      brushId: brushId, outputId: null
+    });
   };
 
   //---------------------------------------------------------------------

@@ -75,6 +75,9 @@ shiny 0.13.2.9001
 * Almost all code examples now have a runnable example with `shinyApp()`, so
   that users can run the examples and see them in action. (#1137, #1158)
 
+* Added `session$resetBrush(brushId)` (R) and `Shiny.resetBrush(brushId)` (JS)
+  to programatically clear brushes from `imageOutput`/`plotOutput`.
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

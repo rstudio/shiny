@@ -9,7 +9,7 @@
 #' @param exclude A character vector of input names that should not be
 #'   bookmarked.
 #' @export
-saveStateURL <- function(input, exclude = NULL) {
+saveStateQueryString <- function(input, exclude = NULL) {
   id <- createUniqueId(8)
 
   saveInterface <- getShinyOption("save.interface", default = saveInterfaceLocal)
@@ -46,9 +46,9 @@ restoreStateURL <- function(queryString) {
   res
 }
 
-#' @rdname saveStateURL
+#' @rdname saveStateQueryString
 #' @export
-encodeStateURL <- function(input, exclude = NULL) {
+encodeStateQueryString <- function(input, exclude = NULL) {
   vals <- serializeReactiveValues(input, exclude, stateDir = NULL)
 
   vals <- vapply(vals,
@@ -168,7 +168,6 @@ RestoreContext <- R6Class("RestoreContext",
 
 restoreCtxStack <- Stack$new()
 
-# Equivalent to
 withRestoreContext <- function(ctx, expr) {
   restoreCtxStack$push(ctx)
 
@@ -208,16 +207,6 @@ restoreInput <- function(id, default) {
   }
 }
 
-#' @export
-restoreValue <- function(id, default) {
-  ctx <- getCurrentRestoreContext()
-  if (id %in% names(ctx$values)) {
-    ctx$values[[id]]
-  } else {
-    default
-  }
-}
-
 
 #' @export
 updateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
@@ -226,60 +215,118 @@ updateQueryString <- function(queryString, session = getDefaultReactiveDomain())
 
 
 #' @export
-saveStateModal <- function(input, exclude = NULL,
-  session = getDefaultReactiveDomain())
-{
-  clientData <- session$clientData
+urlModal <- function(url, title = "Share link", subtitle = NULL) {
+
+  subtitleTag <- NULL
+  if (!is.null(subtitle)) {
+    subtitleTag <- tagList(
+      br(),
+      span(class = "text-muted", subtitle)
+    )
+  }
 
   modalDialog(
-    title = "Share link",
+    title = title,
     easyClose = TRUE,
     footer = NULL,
-    tags$input(type = "text", class = "form-control",
-      value = paste0(
-        clientData$url_protocol, "//",
-        clientData$url_hostname,
-        if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
-        clientData$url_pathname,
-        "?", saveStateURL(input, exclude)
-      )
+    tags$textarea(class = "form-control", rows = "1", style = "resize: none;",
+      readonly = "readonly",
+      url
     ),
-    br(),
-    span(class = "text-muted",
-      "The state of this application has been saved."
-    ),
+    subtitleTag,
+    # Need separate show and shown listeners. The show listener sizes the
+    # textarea just as the modal starts to fade in. The 200ms delay is needed
+    # because if we try to resize earlier, it can't calculate the text height
+    # (scrollHeight will be reported as zero). The shown listener selects the
+    # text; it's needed because because selection has to be done after the fade-
+    # in is completed.
     tags$script(
-      "$('#shiny-modal').one('shown.bs.modal', function() {
-        $('#shiny-modal input[type=text]').select().focus();
-      })"
+      "$('#shiny-modal').
+        one('show.bs.modal', function() {
+          setTimeout(function() {
+            var $textarea = $('#shiny-modal textarea');
+            $textarea.innerHeight($textarea[0].scrollHeight);
+          }, 200);
+        });
+      $('#shiny-modal')
+        .one('shown.bs.modal', function() {
+          $('#shiny-modal textarea').select().focus();
+        });"
     )
   )
 }
 
 
+#' Configure bookmarking for the current session
+#'
+#' There are two types of bookmarking: saving state, and encoding state.
+#'
+#' @param eventExpr An expression to listen for, similar to
+#'   \code{\link{observeEvent}}.
+#' @param enable If \code{TRUE} (the default), enable bookmarking for this app.
+#' @param type Either \code{"save"}, which saves to disk, or \code{"encode"},
+#'   which encodes all of the relevant values in a URL.
+#' @param exclude Input values to exclude from bookmarking.
+#' @param onBookmarked A callback function to invoke after the bookmarking has
+#'   been done.
+#' @param session A Shiny session object.
 #' @export
-encodeStateModal <- function(input, exclude = NULL,
-  session = getDefaultReactiveDomain()) 
+configureBookmarking <- function(eventExpr, enable = TRUE,
+  type = c("save", "encode"), exclude = NULL,
+  onBookmarked = NULL, session = getDefaultReactiveDomain())
 {
-  clientData <- session$clientData
 
-  modalDialog(
-    title = "Share link",
-    easyClose = TRUE,
-    footer = NULL,
-    tags$textarea(class = "form-control", rows = "5", style = "resize: none;",
-      paste0(
-        clientData$url_protocol, "//",
-        clientData$url_hostname,
-        if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
-        clientData$url_pathname,
-        "?", encodeStateURL(input, exclude)
-      )
-    ),
-    tags$script(
-      "$('#shiny-modal').one('shown.bs.modal', function() {
-        $('#shiny-modal textarea').select().focus();
-      })"
+  eventExpr <- substitute(eventExpr)
+  type <- match.arg(type)
+
+  # If no onBookmarked function is provided, use one of these defaults.
+  if (is.null(onBookmarked)) {
+    if (!is.function(onBookmarked))
+      stop("onBookmarked must be a function")
+
+    if (type == "save") {
+      onBookmarked <- function(url) {
+        showModal(urlModal(url, subtitle = "The state of this application has been saved."))
+      }
+    } else {
+      onBookmarked <- function(url) {
+        showModal(urlModal(url))
+      }
+    }
+  }
+
+  # If there's an existing onBookmarked observer, destroy it before creating a
+  # new one.
+  if (!is.null(session$onBookmarkedObserver)) {
+    session$onBookmarkedObserver$destroy()
+    session$onBookmarkedObserver <- NULL
+  }
+
+  if (enable) {
+    session$onBookmarkedObserver <- observeEvent(
+      eventExpr,
+      event.env = parent.frame(),
+      event.quoted = TRUE,
+      {
+        if (type == "save") {
+          url <- saveStateQueryString(session$input, exclude)
+        } else {
+          url <- encodeStateQueryString(session$input, exclude)
+        }
+
+        clientData <- session$clientData
+        url <- paste0(
+          clientData$url_protocol, "//",
+          clientData$url_hostname,
+          if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
+          clientData$url_pathname,
+          "?", url
+        )
+
+        onBookmarked(url)
+      }
     )
-  )
+  }
+
+  invisible()
 }

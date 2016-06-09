@@ -136,7 +136,7 @@ registerInputHandler("shiny.file", function(val, shinysession, name) {
   }
 
   # Prepend the persistent dir
-  val$datapath <- file.path(getCurrentRestoreContext()$getDir(), val$datapath)
+  val$datapath <- file.path(getCurrentRestoreContext()$dir, val$datapath)
 
   val
 })

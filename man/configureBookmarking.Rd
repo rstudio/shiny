@@ -5,7 +5,7 @@
 \title{Configure bookmarking for the current session}
 \usage{
 configureBookmarking(eventExpr, enable = TRUE, type = c("save", "encode"),
-  exclude = NULL, onBookmarked = NULL,
+  exclude = NULL, onSave = NULL, onRestore = NULL, onBookmarked = NULL,
   session = getDefaultReactiveDomain())
 }
 \arguments{

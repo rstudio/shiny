@@ -5,9 +5,9 @@
 \alias{saveStateQueryString}
 \title{Save or encode state of Shiny session}
 \usage{
-saveStateQueryString(input, exclude = NULL)
+saveStateQueryString(input, exclude = NULL, values = NULL)
 
-encodeStateQueryString(input, exclude = NULL)
+encodeStateQueryString(input, exclude = NULL, values = NULL)
 }
 \arguments{
 \item{input}{The session's input object.}

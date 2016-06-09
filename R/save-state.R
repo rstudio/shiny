@@ -9,17 +9,21 @@
 #' @param exclude A character vector of input names that should not be
 #'   bookmarked.
 #' @export
-saveStateQueryString <- function(input, exclude = NULL) {
+saveStateQueryString <- function(input, exclude = NULL, values = NULL) {
   id <- createUniqueId(8)
 
   saveInterface <- getShinyOption("save.interface", default = saveInterfaceLocal)
 
   saveInterface(id, function(stateDir) {
     # Serialize values, possibly saving some extra data to stateDir
-    values <- serializeReactiveValues(input, exclude, stateDir)
+    inputValues <- serializeReactiveValues(input, exclude, stateDir)
 
-    stateFile <- file.path(stateDir, "state.rds")
-    saveRDS(values, stateFile)
+    saveRDS(inputValues, file.path(stateDir, "input.rds"))
+
+    # If there values passed in, save them also
+    if (!is.null(values))
+      saveRDS(values, file.path(stateDir, "values.rds"))
+
   })
 
   paste0("_state_id=", encodeURIComponent(id))
@@ -35,10 +39,8 @@ restoreStateURL <- function(queryString) {
   res <- NULL
 
   restoreInterface(id, function(stateDir) {
-    stateFile <- file.path(stateDir, "state.rds")
-
     res <<- list(
-      values = readRDS(stateFile),
+      inputValues = readRDS(file.path(stateDir, "input.rds")),
       dir = stateDir
     )
   })
@@ -48,7 +50,7 @@ restoreStateURL <- function(queryString) {
 
 #' @rdname saveStateQueryString
 #' @export
-encodeStateQueryString <- function(input, exclude = NULL) {
+encodeStateQueryString <- function(input, exclude = NULL, values = NULL) {
   vals <- serializeReactiveValues(input, exclude, stateDir = NULL)
 
   vals <- vapply(vals,
@@ -82,44 +84,71 @@ decodeStateURL <- function(url) {
   )
 }
 
-# Restore context. This is basically a key-value store, except for one important
-# difference: When the user `get()`s a value, the value is marked as pending;
-# when `flushPending()` is called, those pending values are marked as used. When
-# a value is marked as used, `get()` will not return it, unless called with
-# `force=TRUE`. This is to make sure that a particular value can be restored
-# only within a single call to `withRestoreContext()`.
+
 RestoreContext <- R6Class("RestoreContext",
+  public = list(
+    # This is a RestoreInputSet for input values. This is a key-value store with
+    # some special handling. 
+    input = NULL,
+
+    # Directory for extra files, if restoring from saved state
+    dir = NULL,
+
+    # For values other than input values. These values don't need the special
+    # phandling that's needed for input values, because they're only accessed
+    # from the onRestore function.
+    values = list(),
+
+    initialize = function(queryString = NULL) {
+      if (!is.null(queryString)) {
+        qsValues <- parseQueryString(queryString, nested = TRUE)
+
+        # If we have a "_state_id" key, restore from persisted state and ignore
+        # other key/value pairs. If not, restore from key/value pairs in the
+        # query string.
+        if (!is.null(qsValues[["_state_id"]]) && nzchar(qsValues[["_state_id"]])) {
+
+          res <- restoreStateURL(queryString)
+
+          inputValues <- res$inputValues
+          self$dir <- res$dir
+
+        } else {
+          # The query string contains the saved keys and values
+          inputValues <- decodeStateURL(queryString)
+        }
+
+        self$input <- RestoreInputSet$new(inputValues)
+      }
+    },
+
+    # This should be called before a restore context is popped off the stack.
+    flushPending = function() {
+      self$input$flushPending()
+    }
+  )
+)
+
+
+# Restore input set. This is basically a key-value store, except for one
+# important difference: When the user `get()`s a value, the value is marked as
+# pending; when `flushPending()` is called, those pending values are marked as
+# used. When a value is marked as used, `get()` will not return it, unless
+# called with `force=TRUE`. This is to make sure that a particular value can be
+# restored only within a single call to `withRestoreContext()`. Without this, if
+# a value is restored in a dynamic UI, it could completely prevent any other
+# (non- restored) kvalue from being used.
+RestoreInputSet <- R6Class("RestoreInputSet",
   private = list(
     values = NULL,
-    dir = NULL,  # Directory for extra files, if restoring from saved state
     pending = character(0),
     used = character(0)     # Names of values which have been used
   ),
 
   public = list(
-    initialize = function(queryString = NULL) {
+    initialize = function(values) {
       private$values <- new.env(parent = emptyenv())
-
-      if (!is.null(queryString)) {
-        values <- parseQueryString(queryString, nested = TRUE)
-
-        # If we have a "_state_id" key, restore from persisted state and ignore
-        # other key/value pairs. If not, restore from key/value pairs in the
-        # query string.
-        if (!is.null(values[["_state_id"]]) && nzchar(values[["_state_id"]])) {
-
-          res <- restoreStateURL(queryString)
-
-          values <- res$values
-          private$dir <- res$dir
-
-        } else {
-          # The query string contains the saved keys and values
-          values <- decodeStateURL(queryString)
-        }
-
-        list2env(values, private$values)
-      }
+      list2env(values, private$values)
     },
 
     exists = function(name) {
@@ -157,10 +186,6 @@ RestoreContext <- R6Class("RestoreContext",
     flushPending = function() {
       private$used <- unique(c(private$used, private$pending))
       private$pending <- character(0)
-    },
-
-    getDir = function() {
-      private$dir
     }
   )
 )
@@ -199,9 +224,9 @@ restoreInput <- function(id, default) {
   if (!isTRUE(getShinyOption("restorable")) || !hasCurrentRestoreContext())
     return(default)
 
-  ctx <- getCurrentRestoreContext()
-  if (ctx$available(id)) {
-    ctx$get(id)
+  oldInputs <- getCurrentRestoreContext()$input
+  if (oldInputs$available(id)) {
+    oldInputs$get(id)
   } else {
     default
   }
@@ -273,7 +298,8 @@ urlModal <- function(url, title = "Share link", subtitle = NULL) {
 #' @export
 configureBookmarking <- function(eventExpr, enable = TRUE,
   type = c("save", "encode"), exclude = NULL,
-  onBookmarked = NULL, session = getDefaultReactiveDomain())
+  onSave = NULL, onRestore = NULL, onBookmarked = NULL,
+  session = getDefaultReactiveDomain())
 {
 
   eventExpr <- substitute(eventExpr)
@@ -281,8 +307,6 @@ configureBookmarking <- function(eventExpr, enable = TRUE,
 
   # If no onBookmarked function is provided, use one of these defaults.
   if (is.null(onBookmarked)) {
-    if (!is.function(onBookmarked))
-      stop("onBookmarked must be a function")
 
     if (type == "save") {
       onBookmarked <- function(url) {
@@ -293,25 +317,35 @@ configureBookmarking <- function(eventExpr, enable = TRUE,
         showModal(urlModal(url))
       }
     }
+  } else if (!is.function(onBookmarked)) {
+    stop("onBookmarked must be a function.")
   }
 
   # If there's an existing onBookmarked observer, destroy it before creating a
   # new one.
-  if (!is.null(session$onBookmarkedObserver)) {
-    session$onBookmarkedObserver$destroy()
-    session$onBookmarkedObserver <- NULL
+  if (!is.null(session$bookmarkConfig$onBookmarkedObserver)) {
+    session$bookmarkConfig$onBookmarkedObserver$destroy()
+    session$bookmarkConfig$onBookmarkedObserver <- NULL
   }
 
   if (enable) {
-    session$onBookmarkedObserver <- observeEvent(
+    session$bookmarkConfig$onBookmarkedObserver <- observeEvent(
       eventExpr,
       event.env = parent.frame(),
       event.quoted = TRUE,
       {
+        onSave <- session$bookmarkConfig$onSave
+
+        values <- NULL
+        if (!is.null(onSave))
+          values <- onSave()
+        if (!is.null(values) && !is.list(values))
+          stop("The value returned by onSave() must be NULL or a list.")
+
         if (type == "save") {
-          url <- saveStateQueryString(session$input, exclude)
+          url <- saveStateQueryString(session$input, exclude, values)
         } else {
-          url <- encodeStateQueryString(session$input, exclude)
+          url <- encodeStateQueryString(session$input, exclude, values)
         }
 
         clientData <- session$clientData

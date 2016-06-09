@@ -342,38 +342,22 @@ urlModal <- function(url, title = "Share link", subtitle = NULL) {
 #'
 #' @param eventExpr An expression to listen for, similar to
 #'   \code{\link{observeEvent}}.
-#' @param enable If \code{TRUE} (the default), enable bookmarking for this app.
-#' @param type Either \code{"save"}, which saves to disk, or \code{"encode"},
-#'   which encodes all of the relevant values in a URL.
+#' @param type Either \code{"save"}, which saves to disk, \code{"encode"}, which
+#'   encodes all of the relevant values in a URL, or \code{"disable"}, which
+#'   disables any previously-enabled bookmarking.
 #' @param exclude Input values to exclude from bookmarking.
 #' @param onBookmarked A callback function to invoke after the bookmarking has
 #'   been done.
 #' @param session A Shiny session object.
 #' @export
-configureBookmarking <- function(eventExpr, enable = TRUE,
-  type = c("save", "encode"), exclude = NULL,
+configureBookmarking <- function(eventExpr,
+  type = c("save", "encode", "disable"), exclude = NULL,
   onSave = NULL, onRestore = NULL, onBookmarked = NULL,
   session = getDefaultReactiveDomain())
 {
 
   eventExpr <- substitute(eventExpr)
   type <- match.arg(type)
-
-  # If no onBookmarked function is provided, use one of these defaults.
-  if (is.null(onBookmarked)) {
-
-    if (type == "save") {
-      onBookmarked <- function(url) {
-        showModal(urlModal(url, subtitle = "The state of this application has been saved."))
-      }
-    } else {
-      onBookmarked <- function(url) {
-        showModal(urlModal(url))
-      }
-    }
-  } else if (!is.function(onBookmarked)) {
-    stop("onBookmarked must be a function.")
-  }
 
   # If there's an existing onBookmarked observer, destroy it before creating a
   # new one.
@@ -382,40 +366,57 @@ configureBookmarking <- function(eventExpr, enable = TRUE,
     session$bookmarkConfig$onBookmarkedObserver <- NULL
   }
 
-  if (enable) {
-    session$bookmarkConfig$onBookmarkedObserver <- observeEvent(
-      eventExpr,
-      event.env = parent.frame(),
-      event.quoted = TRUE,
-      {
-        values <- NULL
-        if (!is.null(onSave))
-          values <- onSave()
-        if (!is.null(values) && !is.list(values))
-          stop("The value returned by onSave() must be NULL or a list.")
-
-        if (type == "save") {
-          url <- saveStateQueryString(session$input, exclude, values)
-        } else {
-          url <- encodeStateQueryString(session$input, exclude, values)
-        }
-
-        clientData <- session$clientData
-        url <- paste0(
-          clientData$url_protocol, "//",
-          clientData$url_hostname,
-          if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
-          clientData$url_pathname,
-          "?", url
-        )
-
-        onBookmarked(url)
-      }
-    )
-
-    # Run the onRestore function immediately
-    onRestore(getCurrentRestoreContext())
+  if (type == "disable") {
+    return(invisible())
   }
+
+  # If no onBookmarked function is provided, use one of these defaults.
+  if (is.null(onBookmarked)) {
+    if (type == "save") {
+      onBookmarked <- function(url) {
+        showModal(urlModal(url, subtitle = "The state of this application has been saved."))
+      }
+    } else if (type == "encode") {
+      onBookmarked <- function(url) {
+        showModal(urlModal(url))
+      }
+    }
+  } else if (!is.function(onBookmarked)) {
+    stop("onBookmarked must be a function.")
+  }
+
+  session$bookmarkConfig$onBookmarkedObserver <- observeEvent(
+    eventExpr,
+    event.env = parent.frame(),
+    event.quoted = TRUE,
+    {
+      values <- NULL
+      if (!is.null(onSave))
+        values <- onSave()
+      if (!is.null(values) && !is.list(values))
+        stop("The value returned by onSave() must be NULL or a list.")
+
+      if (type == "save") {
+        url <- saveStateQueryString(session$input, exclude, values)
+      } else {
+        url <- encodeStateQueryString(session$input, exclude, values)
+      }
+
+      clientData <- session$clientData
+      url <- paste0(
+        clientData$url_protocol, "//",
+        clientData$url_hostname,
+        if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
+        clientData$url_pathname,
+        "?", url
+      )
+
+      onBookmarked(url)
+    }
+  )
+
+  # Run the onRestore function immediately
+  onRestore(getCurrentRestoreContext())
 
   invisible()
 }

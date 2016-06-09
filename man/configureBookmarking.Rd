@@ -4,7 +4,7 @@
 \alias{configureBookmarking}
 \title{Configure bookmarking for the current session}
 \usage{
-configureBookmarking(eventExpr, enable = TRUE, type = c("save", "encode"),
+configureBookmarking(eventExpr, type = c("save", "encode", "disable"),
   exclude = NULL, onSave = NULL, onRestore = NULL, onBookmarked = NULL,
   session = getDefaultReactiveDomain())
 }
@@ -12,10 +12,9 @@ configureBookmarking(eventExpr, enable = TRUE, type = c("save", "encode"),
 \item{eventExpr}{An expression to listen for, similar to
 \code{\link{observeEvent}}.}
 
-\item{enable}{If \code{TRUE} (the default), enable bookmarking for this app.}
-
-\item{type}{Either \code{"save"}, which saves to disk, or \code{"encode"},
-which encodes all of the relevant values in a URL.}
+\item{type}{Either \code{"save"}, which saves to disk, \code{"encode"}, which
+encodes all of the relevant values in a URL, or \code{"disable"}, which
+disables any previously-enabled bookmarking.}
 
 \item{exclude}{Input values to exclude from bookmarking.}
 

@@ -30,7 +30,7 @@ saveStateQueryString <- function(input, exclude = NULL, values = NULL) {
 }
 
 
-restoreStateURL <- function(queryString) {
+loadStateQueryString <- function(queryString) {
   values <- parseQueryString(queryString, nested = TRUE)
   id <- values[["_state_id"]]
 
@@ -40,9 +40,16 @@ restoreStateURL <- function(queryString) {
 
   restoreInterface(id, function(stateDir) {
     res <<- list(
-      inputValues = readRDS(file.path(stateDir, "input.rds")),
+      input = readRDS(file.path(stateDir, "input.rds")),
       dir = stateDir
     )
+
+    valuesFile <- file.path(stateDir, "values.rds")
+    if (file.exists(valuesFile)) {
+      res$values <<- readRDS(valuesFile)
+    } else {
+      res$values <<- list()
+    }
   })
 
   res
@@ -51,28 +58,63 @@ restoreStateURL <- function(queryString) {
 #' @rdname saveStateQueryString
 #' @export
 encodeStateQueryString <- function(input, exclude = NULL, values = NULL) {
-  vals <- serializeReactiveValues(input, exclude, stateDir = NULL)
+  if (!is.list(values)) {
+    stop("'values' must be a list.")
+  }
 
-  vals <- vapply(vals,
+  inputVals <- serializeReactiveValues(input, exclude, stateDir = NULL)
+
+  inputVals <- vapply(inputVals,
     function(x) toJSON(x, strict_atomic = FALSE),
     character(1),
     USE.NAMES = TRUE
   )
 
-  paste0(
-    encodeURIComponent(names(vals)),
+  res <- paste0(
+    encodeURIComponent(names(inputVals)),
     "=",
-    encodeURIComponent(vals),
+    encodeURIComponent(inputVals),
     collapse = "&"
   )
+
+  # If 'values' is present, add them as well.
+  if (length(values) != 0) {
+    values <- vapply(values,
+      function(x) toJSON(x, strict_atomic = FALSE),
+      character(1),
+      USE.NAMES = TRUE
+    )
+
+    res <- paste0(res, "&_values_&",
+      paste0(
+        encodeURIComponent(names(values)),
+        "=",
+        encodeURIComponent(values),
+        collapse = "&"
+      )
+    )
+  }
+
+  res
 }
 
 
 #' @export
-decodeStateURL <- function(url) {
-  values <- parseQueryString(url, nested = TRUE)
+decodeStateQueryString <- function(queryString) {
+  if (grepl("_values_", queryString)) {
+    splitStr <- strsplit(queryString, "_values_", fixed = TRUE)[[1]]
+    inputValueStr <- splitStr[1]
+    valueStr <- splitStr[2]
 
-  mapply(names(values), values, SIMPLIFY = FALSE,
+  } else {
+    inputValueStr <- queryString
+    valueStr <- ""
+  }
+
+  inputValues <- parseQueryString(inputValueStr, nested = TRUE)
+  values <- parseQueryString(valueStr, nested = TRUE)
+
+  inputValues <- mapply(names(inputValues), inputValues, SIMPLIFY = FALSE,
     FUN = function(name, value) {
       tryCatch(
         jsonlite::fromJSON(value),
@@ -82,13 +124,26 @@ decodeStateURL <- function(url) {
       )
     }
   )
+
+  values <- mapply(names(values), values, SIMPLIFY = FALSE,
+    FUN = function(name, value) {
+      tryCatch(
+        jsonlite::fromJSON(value),
+        error = function(e) {
+          stop("Failed to parse URL parameter \"", name, "\"")
+        }
+      )
+    }
+  )
+
+  list(input = inputValues, values = values)
 }
 
 
 RestoreContext <- R6Class("RestoreContext",
   public = list(
     # This is a RestoreInputSet for input values. This is a key-value store with
-    # some special handling. 
+    # some special handling.
     input = NULL,
 
     # Directory for extra files, if restoring from saved state
@@ -108,17 +163,16 @@ RestoreContext <- R6Class("RestoreContext",
         # query string.
         if (!is.null(qsValues[["_state_id"]]) && nzchar(qsValues[["_state_id"]])) {
 
-          res <- restoreStateURL(queryString)
-
-          inputValues <- res$inputValues
-          self$dir <- res$dir
+          allValues <- loadStateQueryString(queryString)
+          self$dir <- allValues$dir
 
         } else {
           # The query string contains the saved keys and values
-          inputValues <- decodeStateURL(queryString)
+          allValues <- decodeStateQueryString(queryString)
         }
 
-        self$input <- RestoreInputSet$new(inputValues)
+        self$input <- RestoreInputSet$new(allValues$input)
+        self$values <- allValues$values
       }
     },
 
@@ -334,8 +388,6 @@ configureBookmarking <- function(eventExpr, enable = TRUE,
       event.env = parent.frame(),
       event.quoted = TRUE,
       {
-        onSave <- session$bookmarkConfig$onSave
-
         values <- NULL
         if (!is.null(onSave))
           values <- onSave()
@@ -360,6 +412,9 @@ configureBookmarking <- function(eventExpr, enable = TRUE,
         onBookmarked(url)
       }
     )
+
+    # Run the onRestore function immediately
+    onRestore(getCurrentRestoreContext())
   }
 
   invisible()

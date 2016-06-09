@@ -424,7 +424,7 @@ ShinySession <- R6Class(
   ),
   public = list(
     restoreContext = NULL,
-    onBookmarkedObserver = NULL, # Observer that's fired when bookmark event happens
+    bookmarkConfig = list(),
     progressStack = 'Stack', # Stack of progress objects
     input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
     output      = 'ANY',    # Externally-usable S3 wrapper object for .outputs

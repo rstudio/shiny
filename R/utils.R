@@ -517,6 +517,8 @@ parseQueryString <- function(str, nested = FALSE) {
     str <- substr(str, 2, nchar(str))
 
   pairs <- strsplit(str, '&', fixed = TRUE)[[1]]
+  # Drop any empty items (if there's leading/trailing/consecutive '&' chars)
+  pairs <- pairs[pairs != ""]
   pairs <- strsplit(pairs, '=', fixed = TRUE)
 
   keys   <- vapply(pairs, function(x) x[1], FUN.VALUE = character(1))

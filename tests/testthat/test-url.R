@@ -18,6 +18,8 @@ test_that("Query string parsing", {
   # Should be the same with or without leading question mark
   expect_identical(parseQueryString("?foo=1&bar=b"), parseQueryString("foo=1&bar=b"))
 
+  # Leading/trailing/consecutive ampersands are ignored
+  expect_identical(parseQueryString("?&a=1&&b=2&"), parseQueryString("?a=1&b=2"))
 
   # Nested and non-nested query strings
   expect_identical(

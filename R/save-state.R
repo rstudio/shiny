@@ -446,7 +446,8 @@ configureBookmarking <- function(eventExpr,
   )
 
   # Run the onRestore function immediately
-  onRestore(getCurrentRestoreContext())
+  if (!is.null(onRestore))
+    onRestore(getCurrentRestoreContext())
 
   invisible()
 }

@@ -14,6 +14,9 @@ encodeStateQueryString(input, exclude = NULL, values = NULL)
 
 \item{exclude}{A character vector of input names that should not be
 bookmarked.}
+
+\item{values}{Any additional values that should be saved or encoded. This
+must be either NULL or a list.}
 }
 \description{
 Shiny applications can have their state \emph{encoded} in a URL or

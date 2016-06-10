@@ -18,6 +18,12 @@ disables any previously-enabled bookmarking.}
 
 \item{exclude}{Input values to exclude from bookmarking.}
 
+\item{onSave}{A function to call before saving state. This function should
+return a list, which will be saved as \code{values}.}
+
+\item{onRestore}{A function to call when a session is restored. It will be
+passed one argument, a restoreContext object.}
+
 \item{onBookmarked}{A callback function to invoke after the bookmarking has
 been done.}
 

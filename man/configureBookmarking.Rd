@@ -4,22 +4,22 @@
 \alias{configureBookmarking}
 \title{Configure bookmarking for the current session}
 \usage{
-configureBookmarking(eventExpr, type = c("save", "encode", "disable"),
-  exclude = NULL, onSave = NULL, onRestore = NULL, onBookmarked = NULL,
-  session = getDefaultReactiveDomain())
+configureBookmarking(eventExpr, type = c("encode", "save", "disable"),
+  exclude = NULL, onBookmark = NULL, onRestore = NULL,
+  onBookmarked = NULL, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{eventExpr}{An expression to listen for, similar to
 \code{\link{observeEvent}}.}
 
-\item{type}{Either \code{"save"}, which saves to disk, \code{"encode"}, which
-encodes all of the relevant values in a URL, or \code{"disable"}, which
+\item{type}{Either \code{"encode"}, which encodes all of the relevant values
+in a URL, \code{"save"}, which saves to disk, or \code{"disable"}, which
 disables any previously-enabled bookmarking.}
 
 \item{exclude}{Input values to exclude from bookmarking.}
 
-\item{onSave}{A function to call before saving state. This function should
-return a list, which will be saved as \code{values}.}
+\item{onBookmark}{A function to call before saving state. This function
+should return a list, which will be saved as \code{values}.}
 
 \item{onRestore}{A function to call when a session is restored. It will be
 passed one argument, a restoreContext object.}

@@ -313,6 +313,20 @@ updateQueryString <- function(queryString, session = getDefaultReactiveDomain())
   session$updateQueryString(queryString)
 }
 
+#' Create a button for bookmarking/sharing
+#'
+#' A \code{bookmarkButton} is a \code{\link{actionButton}} with a default label
+#' that consists of a link icon and the text "Share...". It is meant to be used
+#' for bookmarking state.
+#'
+#' @seealso configureBookmarking
+#' @inheritParams actionButton
+#' @export
+bookmarkButton <- function(inputId,
+  label = tagList(icon("link", lib = "glyphicon"), "Share..."), ...)
+{
+  actionButton(inputId, label, ...)
+}
 
 #' Generate a modal dialog that displays a URL
 #'
@@ -373,12 +387,12 @@ urlModal <- function(url, title = "Share link", subtitle = NULL) {
 #'
 #' @param eventExpr An expression to listen for, similar to
 #'   \code{\link{observeEvent}}.
-#' @param type Either \code{"save"}, which saves to disk, \code{"encode"}, which
-#'   encodes all of the relevant values in a URL, or \code{"disable"}, which
+#' @param type Either \code{"encode"}, which encodes all of the relevant values
+#'   in a URL, \code{"save"}, which saves to disk, or \code{"disable"}, which
 #'   disables any previously-enabled bookmarking.
 #' @param exclude Input values to exclude from bookmarking.
-#' @param onBookmark A function to call before saving state. This function should
-#'   return a list, which will be saved as \code{values}.
+#' @param onBookmark A function to call before saving state. This function
+#'   should return a list, which will be saved as \code{values}.
 #' @param onRestore A function to call when a session is restored. It will be
 #'   passed one argument, a restoreContext object.
 #' @param onBookmarked A callback function to invoke after the bookmarking has
@@ -386,7 +400,7 @@ urlModal <- function(url, title = "Share link", subtitle = NULL) {
 #' @param session A Shiny session object.
 #' @export
 configureBookmarking <- function(eventExpr,
-  type = c("save", "encode", "disable"), exclude = NULL,
+  type = c("encode", "save", "disable"), exclude = NULL,
   onBookmark = NULL, onRestore = NULL, onBookmarked = NULL,
   session = getDefaultReactiveDomain())
 {

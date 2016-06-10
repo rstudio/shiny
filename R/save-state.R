@@ -288,6 +288,11 @@ getCurrentRestoreContext <- function() {
 #'
 #' @export
 restoreInput <- function(id, default) {
+  # Need to evaluate `default` in case it contains reactives like input$x. If we
+  # don't, then the calling code won't take a reactive dependency on input$x
+  # when restoring a value.
+  force(default)
+
   if (!isTRUE(getShinyOption("restorable")) || !hasCurrentRestoreContext())
     return(default)
 

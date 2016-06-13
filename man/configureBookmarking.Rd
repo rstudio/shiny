@@ -4,7 +4,7 @@
 \alias{configureBookmarking}
 \title{Configure bookmarking for the current session}
 \usage{
-configureBookmarking(eventExpr, type = c("encode", "save", "disable"),
+configureBookmarking(eventExpr, type = c("encode", "persist", "disable"),
   exclude = NULL, onBookmark = NULL, onRestore = NULL,
   onBookmarked = NULL, session = getDefaultReactiveDomain())
 }
@@ -13,7 +13,7 @@ configureBookmarking(eventExpr, type = c("encode", "save", "disable"),
 \code{\link{observeEvent}}.}
 
 \item{type}{Either \code{"encode"}, which encodes all of the relevant values
-in a URL, \code{"save"}, which saves to disk, or \code{"disable"}, which
+in a URL, \code{"persist"}, which saves to disk, or \code{"disable"}, which
 disables any previously-enabled bookmarking.}
 
 \item{exclude}{Input values to exclude from bookmarking.}

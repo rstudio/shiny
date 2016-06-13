@@ -1,26 +1,26 @@
-#' Save or encode state of Shiny session
+#' Persist (save) or encode state of Shiny session
 #'
 #' Shiny applications can have their state \emph{encoded} in a URL or
-#' \emph{saved}. If the state is encoded, all of the input values are stored in
-#' the URL. If the state is saved, the input values and any uploaded files are
+#' \emph{persisted}. If the state is encoded, all of the input values are stored in
+#' the URL. If the state is persisted, the input values and any uploaded files are
 #' stored on disk.
 #'
 #' @param input The session's input object.
 #' @param exclude A character vector of input names that should not be
 #'   bookmarked.
-#' @param values Any additional values that should be saved or encoded. This
+#' @param values Any additional values that should be persisted or encoded. This
 #'   must be either NULL or a list.
 #' @export
-saveStateQueryString <- function(input, exclude = NULL, values = NULL) {
+persistStateQueryString <- function(input, exclude = NULL, values = NULL) {
   if (!is.null(values) && !is.list(values)) {
     stop("'values' must be either NULL or a list.")
   }
 
   id <- createUniqueId(8)
 
-  saveInterface <- getShinyOption("save.interface", default = saveInterfaceLocal)
+  persistInterface <- getShinyOption("persist.interface", default = persistInterfaceLocal)
 
-  saveInterface(id, function(stateDir) {
+  persistInterface(id, function(stateDir) {
     # Serialize values, possibly saving some extra data to stateDir
     inputValues <- serializeReactiveValues(input, exclude, stateDir)
 
@@ -35,7 +35,7 @@ saveStateQueryString <- function(input, exclude = NULL, values = NULL) {
   paste0("_state_id=", encodeURIComponent(id))
 }
 
-# Counterpart to saveStateQueryString
+# Counterpart to persistStateQueryString
 loadStateQueryString <- function(queryString) {
   values <- parseQueryString(queryString, nested = TRUE)
   id <- values[["_state_id"]]
@@ -62,7 +62,7 @@ loadStateQueryString <- function(queryString) {
 }
 
 
-#' @rdname saveStateQueryString
+#' @rdname persistStateQueryString
 #' @export
 encodeStateQueryString <- function(input, exclude = NULL, values = NULL) {
   if (!is.null(values) && !is.list(values)) {
@@ -152,7 +152,7 @@ RestoreContext <- R6Class("RestoreContext",
     # some special handling.
     input = NULL,
 
-    # Directory for extra files, if restoring from saved state
+    # Directory for extra files, if restoring from persisted state
     dir = NULL,
 
     # For values other than input values. These values don't need the special
@@ -388,7 +388,7 @@ urlModal <- function(url, title = "Share link", subtitle = NULL) {
 #' @param eventExpr An expression to listen for, similar to
 #'   \code{\link{observeEvent}}.
 #' @param type Either \code{"encode"}, which encodes all of the relevant values
-#'   in a URL, \code{"save"}, which saves to disk, or \code{"disable"}, which
+#'   in a URL, \code{"persist"}, which saves to disk, or \code{"disable"}, which
 #'   disables any previously-enabled bookmarking.
 #' @param exclude Input values to exclude from bookmarking.
 #' @param onBookmark A function to call before saving state. This function
@@ -400,7 +400,7 @@ urlModal <- function(url, title = "Share link", subtitle = NULL) {
 #' @param session A Shiny session object.
 #' @export
 configureBookmarking <- function(eventExpr,
-  type = c("encode", "save", "disable"), exclude = NULL,
+  type = c("encode", "persist", "disable"), exclude = NULL,
   onBookmark = NULL, onRestore = NULL, onBookmarked = NULL,
   session = getDefaultReactiveDomain())
 {
@@ -421,9 +421,9 @@ configureBookmarking <- function(eventExpr,
 
   # If no onBookmarked function is provided, use one of these defaults.
   if (is.null(onBookmarked)) {
-    if (type == "save") {
+    if (type == "persist") {
       onBookmarked <- function(url) {
-        showModal(urlModal(url, subtitle = "The state of this application has been saved."))
+        showModal(urlModal(url, subtitle = "The state of this application has been persisted."))
       }
     } else if (type == "encode") {
       onBookmarked <- function(url) {
@@ -445,8 +445,8 @@ configureBookmarking <- function(eventExpr,
       if (!is.null(values) && !is.list(values))
         stop("The value returned by onBookmark() must be NULL or a list.")
 
-      if (type == "save") {
-        url <- saveStateQueryString(session$input, exclude, values)
+      if (type == "persist") {
+        url <- persistStateQueryString(session$input, exclude, values)
       } else {
         url <- encodeStateQueryString(session$input, exclude, values)
       }

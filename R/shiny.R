@@ -827,8 +827,8 @@ ShinySession <- R6Class(
         )
       )
     },
-    updateQueryString = function(url) {
-      private$sendMessage(updateQueryString = list(url = url))
+    updateLocationBar = function(url) {
+      private$sendMessage(updateLocationBar = list(url = url))
     },
 
     # Public RPC methods

@@ -293,7 +293,7 @@ restoreInput <- function(id, default) {
   # when restoring a value.
   force(default)
 
-  if (!isTRUE(getShinyOption("restorable")) || !hasCurrentRestoreContext())
+  if (identical(getShinyOption("restorable"), FALSE) || !hasCurrentRestoreContext())
     return(default)
 
   oldInputs <- getCurrentRestoreContext()$input

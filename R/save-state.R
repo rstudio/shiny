@@ -304,13 +304,13 @@ restoreInput <- function(id, default) {
   }
 }
 
-#' Update URL query string in browser's location bar
+#' Update URL in browser's location bar
 #'
 #' @param queryString The new query string to show in the location bar.
 #' @param session A Shiny session object.
 #' @export
-updateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
-  session$updateQueryString(queryString)
+updateLocationBar <- function(queryString, session = getDefaultReactiveDomain()) {
+  session$updateLocationBar(queryString)
 }
 
 #' Create a button for bookmarking/sharing

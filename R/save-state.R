@@ -107,10 +107,16 @@ encodeStateQueryString <- function(input, exclude = NULL, values = NULL) {
 
 # Counterpart to encodeStateQueryString
 decodeStateQueryString <- function(queryString) {
-  if (grepl("_values_", queryString)) {
-    splitStr <- strsplit(queryString, "_values_", fixed = TRUE)[[1]]
+  # Remove leading '?'
+  if (substr(queryString, 1, 1) == '?')
+    queryString <- substr(queryString, 2, nchar(queryString))
+
+  if (grepl("(^|&)_values_(&|$)", queryString)) {
+    splitStr <- strsplit(queryString, "(^|&)_values_(&|$)")[[1]]
     inputValueStr <- splitStr[1]
     valueStr <- splitStr[2]
+    if (is.na(valueStr))
+      valueStr <- ""
 
   } else {
     inputValueStr <- queryString

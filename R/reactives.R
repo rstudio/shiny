@@ -381,6 +381,31 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 }
 
 
+#' Invalidate a reactive value
+#'
+#' This invalidates a reactive value. If the value is accessed while invalid, a
+#' "silent" exception is raised and the operation is stopped. This is the same
+#' thing that happens if \code{req(FALSE)} is called. The value is
+#' un-invalidated (accessing it will no longer raise an exception) when the
+#' current reactive domain is flushed; in a Shiny application, this occurs after
+#' all of the observers are executed.
+#'
+#' @param x A \code{\link{reactiveValues}} object (like \code{input}).
+#' @param name The name of a value in the \code{\link{reactiveValues}} object.
+#'
+#' @seealso \code{\link{req}}
+#' @export
+invalidateReactiveValue <- function(x, name) {
+  domain <- getDefaultReactiveDomain()
+  if (is.null(getDefaultReactiveDomain)) {
+    stop("invalidateReactiveValue() must be called when a default reactive domain is active.")
+  }
+
+  domain$invalidateValue(x, name)
+  invisible()
+}
+
+
 # Observable ----------------------------------------------------------------
 
 Observable <- R6Class(

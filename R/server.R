@@ -570,7 +570,8 @@ runApp <- function(appDir=getwd(),
     host <- '0.0.0.0'
 
   # Make warnings print immediately
-  ops <- options(warn = 1)
+  # Set pool.scheduler to support pool package
+  ops <- options(warn = 1, pool.scheduler = scheduleTask)
   on.exit(options(ops), add = TRUE)
 
   workerId(workerId)

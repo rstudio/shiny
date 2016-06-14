@@ -4,7 +4,7 @@
 \alias{urlModal}
 \title{Generate a modal dialog that displays a URL}
 \usage{
-urlModal(url, title = "Share link", subtitle = NULL)
+urlModal(url, title = "Saved application link", subtitle = NULL)
 }
 \arguments{
 \item{url}{A URL to display in the dialog box.}

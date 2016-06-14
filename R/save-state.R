@@ -328,11 +328,14 @@ updateLocationBar <- function(queryString, session = getDefaultReactiveDomain())
 #' @seealso configureBookmarking
 #' @inheritParams actionButton
 #' @export
-bookmarkButton <- function(inputId,
-  label = tagList(icon("link", lib = "glyphicon"), "Share..."), ...)
+saveStateButton <- function(inputId, label = "Save and share...",
+  icon = shiny::icon("link", lib = "glyphicon"),
+  title = "Save this application's current state and get a URL for sharing.",
+  ...)
 {
-  actionButton(inputId, label, ...)
+  actionButton(inputId, label, icon, title = title, ...)
 }
+
 
 #' Generate a modal dialog that displays a URL
 #'
@@ -345,7 +348,7 @@ bookmarkButton <- function(inputId,
 #' @param title A title for the dialog box.
 #' @param subtitle Text to display underneath URL.
 #' @export
-urlModal <- function(url, title = "Share link", subtitle = NULL) {
+urlModal <- function(url, title = "Saved application link", subtitle = NULL) {
 
   subtitleTag <- NULL
   if (!is.null(subtitle)) {
@@ -429,11 +432,17 @@ configureBookmarking <- function(eventExpr,
   if (is.null(onBookmarked)) {
     if (type == "persist") {
       onBookmarked <- function(url) {
-        showModal(urlModal(url, subtitle = "The state of this application has been persisted."))
+        showModal(urlModal(
+          url,
+          subtitle = "The current state of this application has been persisted."
+        ))
       }
     } else if (type == "encode") {
       onBookmarked <- function(url) {
-        showModal(urlModal(url))
+        showModal(urlModal(
+          url,
+          subtitle = "This link encodes the current state of this application."
+        ))
       }
     }
   } else if (!is.function(onBookmarked)) {

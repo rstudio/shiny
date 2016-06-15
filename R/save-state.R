@@ -71,14 +71,14 @@ decodeStateQueryString <- function(queryString) {
 }
 
 
-ShinyState <- R6Class("ShinyState",
+ShinySaveState <- R6Class("ShinySaveState",
   public = list(
     input = NULL,
     exclude = NULL,
     onSave = NULL, # A callback to invoke during the saving process.
 
     # These are set not in initialize(), but by external functions that modify
-    # the ShinyState object.
+    # the ShinySaveState object.
     dir = NULL,
     values = NULL,
 
@@ -163,6 +163,14 @@ ShinyState <- R6Class("ShinyState",
 )
 
 
+ShinyRestoreState <- R6Class("ShinyRestoreState",
+  public = list(
+    input = NULL,
+    dir = NULL,
+    values = NULL
+  )
+)
+
 RestoreContext <- R6Class("RestoreContext",
   public = list(
     # This is a RestoreInputSet for input values. This is a key-value store with
@@ -175,7 +183,7 @@ RestoreContext <- R6Class("RestoreContext",
     # For values other than input values. These values don't need the special
     # phandling that's needed for input values, because they're only accessed
     # from the onRestore function.
-    values = list(),
+    values = NULL,
 
     initialize = function(queryString = NULL) {
       if (!is.null(queryString)) {
@@ -202,6 +210,20 @@ RestoreContext <- R6Class("RestoreContext",
     # This should be called before a restore context is popped off the stack.
     flushPending = function() {
       self$input$flushPending()
+    },
+
+    # Returns a ShinyRestoreState object. This is passed to the app author's
+    # onRestore function. The main difference between the RestoreContext object
+    # and the ShinyRestoreState object is that the former's `input` field is a
+    # RestoreInputSet object, while the latter's `input` field is just a list.
+    asShinyRestoreState = function() {
+      state <- ShinyRestoreState$new()
+
+      state$input <- self$input$asList()
+      state$dir <- self$dir
+      state$values <- self$values
+
+      state
     }
   )
 )
@@ -263,6 +285,10 @@ RestoreInputSet <- R6Class("RestoreInputSet",
     flushPending = function() {
       private$used <- unique(c(private$used, private$pending))
       private$pending <- character(0)
+    },
+
+    asList = function() {
+      as.list.environment(private$values)
     }
   )
 )
@@ -465,12 +491,12 @@ configureBookmarking <- function(eventExpr,
     event.env = parent.frame(),
     event.quoted = TRUE,
     {
-      state <- ShinyState$new(session$input, exclude, onBookmark)
+      saveState <- ShinySaveState$new(session$input, exclude, onBookmark)
 
       if (type == "persist") {
-        url <- state$persist()
+        url <- saveState$persist()
       } else {
-        url <- state$encode()
+        url <- saveState$encode()
       }
 
       clientData <- session$clientData
@@ -487,8 +513,10 @@ configureBookmarking <- function(eventExpr,
   )
 
   # Run the onRestore function immediately
-  if (!is.null(onRestore))
-    onRestore(getCurrentRestoreContext())
+  if (!is.null(onRestore)) {
+    restoreState <- getCurrentRestoreContext()$asShinyRestoreState()
+    onRestore(restoreState)
+  }
 
   invisible()
 }

@@ -430,9 +430,9 @@ configureBookmarking <- function(eventExpr,
 
   # If there's an existing onBookmarked observer, destroy it before creating a
   # new one.
-  if (!is.null(session$bookmarkConfig$onBookmarkedObserver)) {
-    session$bookmarkConfig$onBookmarkedObserver$destroy()
-    session$bookmarkConfig$onBookmarkedObserver <- NULL
+  if (!is.null(session$bookmarkObserver)) {
+    session$bookmarkObserver$destroy()
+    session$bookmarkObserver <- NULL
   }
 
   if (type == "disable") {
@@ -460,7 +460,7 @@ configureBookmarking <- function(eventExpr,
     stop("onBookmarked must be a function.")
   }
 
-  session$bookmarkConfig$onBookmarkedObserver <- observeEvent(
+  session$bookmarkObserver <- observeEvent(
     eventExpr,
     event.env = parent.frame(),
     event.quoted = TRUE,

@@ -1,40 +1,3 @@
-#' Persist (save) or encode state of Shiny session
-#'
-#' Shiny applications can have their state \emph{encoded} in a URL or
-#' \emph{persisted}. If the state is encoded, all of the input values are stored in
-#' the URL. If the state is persisted, the input values and any uploaded files are
-#' stored on disk.
-#'
-#' @param input The session's input object.
-#' @param exclude A character vector of input names that should not be
-#'   bookmarked.
-#' @param values Any additional values that should be persisted or encoded. This
-#'   must be either NULL or a list.
-#' @export
-persistStateQueryString <- function(input, exclude = NULL, values = NULL) {
-  if (!is.null(values) && !is.list(values)) {
-    stop("'values' must be either NULL or a list.")
-  }
-
-  id <- createUniqueId(8)
-
-  persistInterface <- getShinyOption("persist.interface", default = persistInterfaceLocal)
-
-  persistInterface(id, function(stateDir) {
-    # Serialize values, possibly saving some extra data to stateDir
-    inputValues <- serializeReactiveValues(input, exclude, stateDir)
-
-    saveRDS(inputValues, file.path(stateDir, "input.rds"))
-
-    # If there values passed in, save them also
-    if (!is.null(values))
-      saveRDS(values, file.path(stateDir, "values.rds"))
-
-  })
-
-  paste0("_state_id=", encodeURIComponent(id))
-}
-
 # Counterpart to persistStateQueryString
 loadStateQueryString <- function(queryString) {
   values <- parseQueryString(queryString, nested = TRUE)
@@ -57,50 +20,6 @@ loadStateQueryString <- function(queryString) {
       res$values <<- list()
     }
   })
-
-  res
-}
-
-
-#' @rdname persistStateQueryString
-#' @export
-encodeStateQueryString <- function(input, exclude = NULL, values = NULL) {
-  if (!is.null(values) && !is.list(values)) {
-    stop("'values' must be either NULL or a list.")
-  }
-
-  inputVals <- serializeReactiveValues(input, exclude, stateDir = NULL)
-
-  inputVals <- vapply(inputVals,
-    function(x) toJSON(x, strict_atomic = FALSE),
-    character(1),
-    USE.NAMES = TRUE
-  )
-
-  res <- paste0(
-    encodeURIComponent(names(inputVals)),
-    "=",
-    encodeURIComponent(inputVals),
-    collapse = "&"
-  )
-
-  # If 'values' is present, add them as well.
-  if (length(values) != 0) {
-    values <- vapply(values,
-      function(x) toJSON(x, strict_atomic = FALSE),
-      character(1),
-      USE.NAMES = TRUE
-    )
-
-    res <- paste0(res, "&_values_&",
-      paste0(
-        encodeURIComponent(names(values)),
-        "=",
-        encodeURIComponent(values),
-        collapse = "&"
-      )
-    )
-  }
 
   res
 }
@@ -150,6 +69,98 @@ decodeStateQueryString <- function(queryString) {
 
   list(input = inputValues, values = values)
 }
+
+
+ShinyState <- R6Class("ShinyState",
+  public = list(
+    input = NULL,
+    exclude = NULL,
+    onSave = NULL, # A callback to invoke during the saving process.
+
+    # These are set not in initialize(), but by external functions that modify
+    # the ShinyState object.
+    dir = NULL,
+    values = NULL,
+
+    initialize = function(input = NULL, exclude = NULL, onSave = NULL)
+    {
+      self$input   <- input
+      self$exclude <- exclude
+      self$onSave  <- onSave
+    },
+
+    # Persist this state object to disk. Returns a query string which can be
+    # used to restore the session.
+    persist = function() {
+      id <- createUniqueId(8)
+
+      persistInterface <- getShinyOption("persist.interface",
+                                         default = persistInterfaceLocal)
+
+      persistInterface(id, function(stateDir) {
+        # Directory is provided by the persistInterface function.
+        self$dir <- stateDir
+
+        # Allow user-supplied onSave function to do things like add self$values, or
+        # save data to state dir.
+        if (!is.null(self$onSave))
+          isolate(self$onSave(self))
+
+        # Serialize values, possibly saving some extra data to stateDir
+        inputValues <- serializeReactiveValues(self$input, self$exclude, self$dir)
+        saveRDS(inputValues, file.path(stateDir, "input.rds"))
+
+        # If there values passed in, save them also
+        if (!is.null(self$values))
+          saveRDS(self$values, file.path(stateDir, "values.rds"))
+      })
+
+      paste0("_state_id=", encodeURIComponent(id))
+    },
+
+    # Encode the state to a URL. This does not save to disk.
+    encode = function() {
+      inputVals <- serializeReactiveValues(self$input, self$exclude, stateDir = NULL)
+
+      # Allow user-supplied onSave function to do things like add self$values.
+      if (!is.null(self$onSave))
+        self$onSave(self)
+
+      inputVals <- vapply(inputVals,
+        function(x) toJSON(x, strict_atomic = FALSE),
+        character(1),
+        USE.NAMES = TRUE
+      )
+
+      res <- paste0(
+        encodeURIComponent(names(inputVals)),
+        "=",
+        encodeURIComponent(inputVals),
+        collapse = "&"
+      )
+
+      # If 'values' is present, add them as well.
+      if (length(self$values) != 0) {
+        values <- vapply(self$values,
+          function(x) toJSON(x, strict_atomic = FALSE),
+          character(1),
+          USE.NAMES = TRUE
+        )
+
+        res <- paste0(res, "&_values_&",
+          paste0(
+            encodeURIComponent(names(values)),
+            "=",
+            encodeURIComponent(values),
+            collapse = "&"
+          )
+        )
+      }
+
+      res
+    }
+  )
+)
 
 
 RestoreContext <- R6Class("RestoreContext",
@@ -454,16 +465,12 @@ configureBookmarking <- function(eventExpr,
     event.env = parent.frame(),
     event.quoted = TRUE,
     {
-      values <- NULL
-      if (!is.null(onBookmark))
-        values <- onBookmark()
-      if (!is.null(values) && !is.list(values))
-        stop("The value returned by onBookmark() must be NULL or a list.")
+      state <- ShinyState$new(session$input, exclude, onBookmark)
 
       if (type == "persist") {
-        url <- persistStateQueryString(session$input, exclude, values)
+        url <- state$persist()
       } else {
-        url <- encodeStateQueryString(session$input, exclude, values)
+        url <- state$encode()
       }
 
       clientData <- session$clientData

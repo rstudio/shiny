@@ -1,76 +1,3 @@
-# Counterpart to persistStateQueryString
-loadStateQueryString <- function(queryString) {
-  values <- parseQueryString(queryString, nested = TRUE)
-  id <- values[["_state_id"]]
-
-  restoreInterface <- getShinyOption("restore.interface", default = restoreInterfaceLocal)
-
-  res <- NULL
-
-  restoreInterface(id, function(stateDir) {
-    res <<- list(
-      input = readRDS(file.path(stateDir, "input.rds")),
-      dir = stateDir
-    )
-
-    valuesFile <- file.path(stateDir, "values.rds")
-    if (file.exists(valuesFile)) {
-      res$values <<- readRDS(valuesFile)
-    } else {
-      res$values <<- list()
-    }
-  })
-
-  res
-}
-
-# Counterpart to encodeStateQueryString
-decodeStateQueryString <- function(queryString) {
-  # Remove leading '?'
-  if (substr(queryString, 1, 1) == '?')
-    queryString <- substr(queryString, 2, nchar(queryString))
-
-  if (grepl("(^|&)_values_(&|$)", queryString)) {
-    splitStr <- strsplit(queryString, "(^|&)_values_(&|$)")[[1]]
-    inputValueStr <- splitStr[1]
-    valueStr <- splitStr[2]
-    if (is.na(valueStr))
-      valueStr <- ""
-
-  } else {
-    inputValueStr <- queryString
-    valueStr <- ""
-  }
-
-  inputValues <- parseQueryString(inputValueStr, nested = TRUE)
-  values <- parseQueryString(valueStr, nested = TRUE)
-
-  inputValues <- mapply(names(inputValues), inputValues, SIMPLIFY = FALSE,
-    FUN = function(name, value) {
-      tryCatch(
-        jsonlite::fromJSON(value),
-        error = function(e) {
-          stop("Failed to parse URL parameter \"", name, "\"")
-        }
-      )
-    }
-  )
-
-  values <- mapply(names(values), values, SIMPLIFY = FALSE,
-    FUN = function(name, value) {
-      tryCatch(
-        jsonlite::fromJSON(value),
-        error = function(e) {
-          stop("Failed to parse URL parameter \"", name, "\"")
-        }
-      )
-    }
-  )
-
-  list(input = inputValues, values = values)
-}
-
-
 ShinySaveState <- R6Class("ShinySaveState",
   public = list(
     input = NULL,
@@ -162,7 +89,9 @@ ShinySaveState <- R6Class("ShinySaveState",
   )
 )
 
-
+# This is similar to the ShinySaveState class. These objects are passed to the
+# onRestore function. However, a ShinyRestoreState object is essentially a
+# simplified, user-friendlier version of RestoreContext object.
 ShinyRestoreState <- R6Class("ShinyRestoreState",
   public = list(
     input = NULL,
@@ -193,17 +122,12 @@ RestoreContext <- R6Class("RestoreContext",
         # other key/value pairs. If not, restore from key/value pairs in the
         # query string.
         if (!is.null(qsValues[["_state_id"]]) && nzchar(qsValues[["_state_id"]])) {
-
-          allValues <- loadStateQueryString(queryString)
-          self$dir <- allValues$dir
+          private$loadStateQueryString(queryString)
 
         } else {
           # The query string contains the saved keys and values
-          allValues <- decodeStateQueryString(queryString)
+          private$decodeStateQueryString(queryString)
         }
-
-        self$input <- RestoreInputSet$new(allValues$input)
-        self$values <- allValues$values
       }
     },
 
@@ -211,6 +135,7 @@ RestoreContext <- R6Class("RestoreContext",
     flushPending = function() {
       self$input$flushPending()
     },
+
 
     # Returns a ShinyRestoreState object. This is passed to the app author's
     # onRestore function. The main difference between the RestoreContext object
@@ -224,6 +149,81 @@ RestoreContext <- R6Class("RestoreContext",
       state$values <- self$values
 
       state
+    }
+  ),
+
+  private = list(
+    # Given a query string with a _state_id, load persisted state with that ID.
+    loadStateQueryString = function(queryString) {
+      values <- parseQueryString(queryString, nested = TRUE)
+      id <- values[["_state_id"]]
+
+      # This function is passed to the loadInterface function; given a
+      # directory, it will load state from that directory
+      loadFun <- function(stateDir) {
+        self$dir <- stateDir
+        
+        inputValues <- readRDS(file.path(stateDir, "input.rds"))
+        self$input <- RestoreInputSet$new(inputValues)
+
+        valuesFile <- file.path(stateDir, "values.rds")
+        if (file.exists(valuesFile)) {
+          self$values <- readRDS(valuesFile)
+        } else {
+          self$values <- list()
+        }
+      }
+
+      loadInterface <- getShinyOption("load.interface", default = loadInterfaceLocal)
+      loadInterface(id, loadFun)
+
+      invisible()
+    },
+
+    # Given a query string with values encoded in it, restore persisted state
+    # from those values.
+    decodeStateQueryString = function(queryString) {
+      # Remove leading '?'
+      if (substr(queryString, 1, 1) == '?')
+        queryString <- substr(queryString, 2, nchar(queryString))
+
+      if (grepl("(^|&)_values_(&|$)", queryString)) {
+        splitStr <- strsplit(queryString, "(^|&)_values_(&|$)")[[1]]
+        inputValueStr <- splitStr[1]
+        valueStr <- splitStr[2]
+        if (is.na(valueStr))
+          valueStr <- ""
+
+      } else {
+        inputValueStr <- queryString
+        valueStr <- ""
+      }
+
+      inputValues <- parseQueryString(inputValueStr, nested = TRUE)
+      values <- parseQueryString(valueStr, nested = TRUE)
+
+      inputValues <- mapply(names(inputValues), inputValues, SIMPLIFY = FALSE,
+        FUN = function(name, value) {
+          tryCatch(
+            jsonlite::fromJSON(value),
+            error = function(e) {
+              stop("Failed to parse URL parameter \"", name, "\"")
+            }
+          )
+        }
+      )
+      self$input <- RestoreInputSet$new(inputValues)
+
+      self$values <- mapply(names(values), values, SIMPLIFY = FALSE,
+        FUN = function(name, value) {
+          tryCatch(
+            jsonlite::fromJSON(value),
+            error = function(e) {
+              stop("Failed to parse URL parameter \"", name, "\"")
+            }
+          )
+        }
+      )
     }
   )
 )

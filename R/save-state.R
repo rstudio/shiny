@@ -89,16 +89,6 @@ ShinySaveState <- R6Class("ShinySaveState",
   )
 )
 
-# This is similar to the ShinySaveState class. These objects are passed to the
-# onRestore function. However, a ShinyRestoreState object is essentially a
-# simplified, user-friendlier version of RestoreContext object.
-ShinyRestoreState <- R6Class("ShinyRestoreState",
-  public = list(
-    input = NULL,
-    dir = NULL,
-    values = NULL
-  )
-)
 
 RestoreContext <- R6Class("RestoreContext",
   public = list(
@@ -137,18 +127,17 @@ RestoreContext <- R6Class("RestoreContext",
     },
 
 
-    # Returns a ShinyRestoreState object. This is passed to the app author's
-    # onRestore function. The main difference between the RestoreContext object
-    # and the ShinyRestoreState object is that the former's `input` field is a
-    # RestoreInputSet object, while the latter's `input` field is just a list.
-    asShinyRestoreState = function() {
-      state <- ShinyRestoreState$new()
-
-      state$input <- self$input$asList()
-      state$dir <- self$dir
-      state$values <- self$values
-
-      state
+    # Returns a list representation of the RestoreContext object. This is passed
+    # to the app author's onRestore function. An important difference between
+    # the RestoreContext object and the list is that the former's `input` field
+    # is a RestoreInputSet object, while the latter's `input` field is just a
+    # list.
+    asList = function() {
+      list(
+        input = self$input$asList(),
+        dir = self$dir,
+        values = self$values
+      )
     }
   ),
 
@@ -514,7 +503,7 @@ configureBookmarking <- function(eventExpr,
 
   # Run the onRestore function immediately
   if (!is.null(onRestore)) {
-    restoreState <- getCurrentRestoreContext()$asShinyRestoreState()
+    restoreState <- getCurrentRestoreContext()$asList()
     onRestore(restoreState)
   }
 

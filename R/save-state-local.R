@@ -19,7 +19,7 @@ persistInterfaceLocal <- function(id, callback) {
   callback(stateDir)
 }
 
-restoreInterfaceLocal <- function(id, callback) {
+loadInterfaceLocal <- function(id, callback) {
   # Try to save in app directory, or, if that's not available, in the current
   # directory.
   appDir <- getShinyOption("appDir", default = getwd())

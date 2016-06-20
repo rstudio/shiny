@@ -42,7 +42,7 @@ ShinySaveState <- R6Class("ShinySaveState",
           saveRDS(self$values, file.path(stateDir, "values.rds"))
       })
 
-      paste0("_state_id=", encodeURIComponent(id))
+      paste0("__state_id__=", encodeURIComponent(id))
     },
 
     # Encode the state to a URL. This does not save to disk.
@@ -110,10 +110,10 @@ RestoreContext <- R6Class("RestoreContext",
           {
             qsValues <- parseQueryString(queryString, nested = TRUE)
 
-            # If we have a "_state_id" key, restore from persisted state and ignore
+            # If we have a "__state_id__" key, restore from persisted state and ignore
             # other key/value pairs. If not, restore from key/value pairs in the
             # query string.
-            if (!is.null(qsValues[["_state_id"]]) && nzchar(qsValues[["_state_id"]])) {
+            if (!is.null(qsValues[["__state_id__"]]) && nzchar(qsValues[["__state_id__"]])) {
               private$loadStateQueryString(queryString)
 
             } else {
@@ -157,10 +157,10 @@ RestoreContext <- R6Class("RestoreContext",
   ),
 
   private = list(
-    # Given a query string with a _state_id, load persisted state with that ID.
+    # Given a query string with a __state_id__, load persisted state with that ID.
     loadStateQueryString = function(queryString) {
       values <- parseQueryString(queryString, nested = TRUE)
-      id <- values[["_state_id"]]
+      id <- values[["__state_id__"]]
 
       # This function is passed to the loadInterface function; given a
       # directory, it will load state from that directory

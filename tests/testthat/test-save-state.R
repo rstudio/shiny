@@ -27,4 +27,11 @@ test_that("decoding state query string", {
   expect_identical(rc$input$asList(), list())
   expect_identical(rc$values, list())
   expect_identical(rc$dir, NULL)
+
+  # Ignore query string if it's a subapp
+  rc <- RestoreContext$new("?w=&__subapp__=1")
+  expect_identical(rc$input$asList(), list())
+  expect_identical(rc$values, list())
+  expect_identical(rc$dir, NULL)
+
 })

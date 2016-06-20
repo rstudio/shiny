@@ -20,4 +20,11 @@ test_that("decoding state query string", {
   rc <- RestoreContext$new("?_values_")
   expect_identical(rc$input$asList(), list())
   expect_identical(rc$values, list())
+
+  # If there's an error in the conversion from query string, should have
+  # blank values.
+  expect_warning(rc <- RestoreContext$new("?a=[x&b=1"))
+  expect_identical(rc$input$asList(), list())
+  expect_identical(rc$values, list())
+  expect_identical(rc$dir, NULL)
 })

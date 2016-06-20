@@ -106,19 +106,34 @@ RestoreContext <- R6Class("RestoreContext",
 
     initialize = function(queryString = NULL) {
       if (!is.null(queryString)) {
-        qsValues <- parseQueryString(queryString, nested = TRUE)
+        tryCatch(
+          {
+            qsValues <- parseQueryString(queryString, nested = TRUE)
 
-        # If we have a "_state_id" key, restore from persisted state and ignore
-        # other key/value pairs. If not, restore from key/value pairs in the
-        # query string.
-        if (!is.null(qsValues[["_state_id"]]) && nzchar(qsValues[["_state_id"]])) {
-          private$loadStateQueryString(queryString)
+            # If we have a "_state_id" key, restore from persisted state and ignore
+            # other key/value pairs. If not, restore from key/value pairs in the
+            # query string.
+            if (!is.null(qsValues[["_state_id"]]) && nzchar(qsValues[["_state_id"]])) {
+              private$loadStateQueryString(queryString)
 
-        } else {
-          # The query string contains the saved keys and values
-          private$decodeStateQueryString(queryString)
-        }
+            } else {
+              # The query string contains the saved keys and values
+              private$decodeStateQueryString(queryString)
+            }
+          },
+          error = function(e) {
+            # If there's an error in restoring problem, just reset these values
+            self$reset()
+            warning(e$message)
+          }
+        )
       }
+    },
+
+    reset = function() {
+      self$input <- RestoreInputSet$new(list())
+      self$values <- list()
+      self$dir <- NULL
     },
 
     # This should be called before a restore context is popped off the stack.
@@ -151,7 +166,7 @@ RestoreContext <- R6Class("RestoreContext",
       # directory, it will load state from that directory
       loadFun <- function(stateDir) {
         self$dir <- stateDir
-        
+
         inputValues <- readRDS(file.path(stateDir, "input.rds"))
         self$input <- RestoreInputSet$new(inputValues)
 
@@ -191,28 +206,23 @@ RestoreContext <- R6Class("RestoreContext",
       inputValues <- parseQueryString(inputValueStr, nested = TRUE)
       values <- parseQueryString(valueStr, nested = TRUE)
 
-      inputValues <- mapply(names(inputValues), inputValues, SIMPLIFY = FALSE,
-        FUN = function(name, value) {
-          tryCatch(
-            jsonlite::fromJSON(value),
-            error = function(e) {
-              stop("Failed to parse URL parameter \"", name, "\"")
-            }
-          )
-        }
-      )
+      valuesFromJSON <- function(vals) {
+        mapply(names(vals), vals, SIMPLIFY = FALSE,
+          FUN = function(name, value) {
+            tryCatch(
+              jsonlite::fromJSON(value),
+              error = function(e) {
+                stop("Failed to parse URL parameter \"", name, "\"")
+              }
+            )
+          }
+        )
+      }
+
+      inputValues <- valuesFromJSON(inputValues)
       self$input <- RestoreInputSet$new(inputValues)
 
-      self$values <- mapply(names(values), values, SIMPLIFY = FALSE,
-        FUN = function(name, value) {
-          tryCatch(
-            jsonlite::fromJSON(value),
-            error = function(e) {
-              stop("Failed to parse URL parameter \"", name, "\"")
-            }
-          )
-        }
-      )
+      self$values <- valuesFromJSON(values)
     }
   )
 )

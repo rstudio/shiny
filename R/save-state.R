@@ -110,10 +110,14 @@ RestoreContext <- R6Class("RestoreContext",
           {
             qsValues <- parseQueryString(queryString, nested = TRUE)
 
-            # If we have a "__state_id__" key, restore from persisted state and ignore
-            # other key/value pairs. If not, restore from key/value pairs in the
-            # query string.
-            if (!is.null(qsValues[["__state_id__"]]) && nzchar(qsValues[["__state_id__"]])) {
+            if (!is.null(qsValues[["__subapp__"]]) && qsValues[["__subapp__"]] == 1) {
+              # Ignore subapps in shiny docs
+              self$reset()
+
+            } else if (!is.null(qsValues[["__state_id__"]]) && nzchar(qsValues[["__state_id__"]])) {
+              # If we have a "__state_id__" key, restore from persisted state and ignore
+              # other key/value pairs. If not, restore from key/value pairs in the
+              # query string.
               private$loadStateQueryString(queryString)
 
             } else {

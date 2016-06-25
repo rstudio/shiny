@@ -14,7 +14,7 @@ persistInterfaceLocal <- function(id, callback) {
 
   stateDir <- file.path(appDir, "shiny_persist", id)
   if (!dirExists(stateDir))
-    dir.create(stateDir)
+    dir.create(stateDir, recursive = TRUE)
 
   callback(stateDir)
 }

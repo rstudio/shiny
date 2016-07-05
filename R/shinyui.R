@@ -91,19 +91,25 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
       if (!is.null(mode))
         showcaseMode <- mode
     }
-    uiValue <- if (is.function(ui)) {
-      withRestoreContext(RestoreContext$new(req$QUERY_STRING), {
+
+    withRestoreContext(RestoreContext$new(req$QUERY_STRING), {
+      uiValue <- NULL
+
+      if (is.function(ui)) {
         if (length(formals(ui)) > 0) {
           # No corresponding ..stacktraceoff.., this is pure user code
-          ..stacktraceon..(ui(req))
+          uiValue <- ..stacktraceon..(ui(req))
         } else {
           # No corresponding ..stacktraceoff.., this is pure user code
-          ..stacktraceon..(ui())
+          uiValue <- ..stacktraceon..(ui())
         }
-      })
-    } else {
-      ui
-    }
+      } else {
+        if (getCurrentRestoreContext()$active) {
+          warning("Trying to restore saved app state, but UI code must be a function for this to work! See ?configureBookmarking")
+        }
+        uiValue <- ui
+      }
+    })
     if (is.null(uiValue))
       return(NULL)
 

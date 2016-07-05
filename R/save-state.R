@@ -92,6 +92,9 @@ ShinySaveState <- R6Class("ShinySaveState",
 
 RestoreContext <- R6Class("RestoreContext",
   public = list(
+    # This will be set to TRUE if there's actually a state to restore
+    active = FALSE,
+
     # This is a RestoreInputSet for input values. This is a key-value store with
     # some special handling.
     input = NULL,
@@ -105,7 +108,9 @@ RestoreContext <- R6Class("RestoreContext",
     values = NULL,
 
     initialize = function(queryString = NULL) {
-      if (!is.null(queryString)) {
+      self$reset() # Need this to initialize self$input
+
+      if (!is.null(queryString) && nzchar(queryString)) {
         tryCatch(
           {
             qsValues <- parseQueryString(queryString, nested = TRUE)
@@ -118,10 +123,12 @@ RestoreContext <- R6Class("RestoreContext",
               # If we have a "__state_id__" key, restore from persisted state and ignore
               # other key/value pairs. If not, restore from key/value pairs in the
               # query string.
+              self$active <- TRUE
               private$loadStateQueryString(queryString)
 
             } else {
               # The query string contains the saved keys and values
+              self$active <- TRUE
               private$decodeStateQueryString(queryString)
             }
           },
@@ -135,6 +142,7 @@ RestoreContext <- R6Class("RestoreContext",
     },
 
     reset = function() {
+      self$active <- FALSE
       self$input <- RestoreInputSet$new(list())
       self$values <- list()
       self$dir <- NULL

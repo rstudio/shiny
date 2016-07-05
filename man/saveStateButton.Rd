@@ -17,6 +17,9 @@ you could also use any other HTML, like an image.}
 
 \item{icon}{An optional \code{\link{icon}} to appear on the button.}
 
+\item{title}{A tooltip that is shown when the mouse cursor hovers over the
+button.}
+
 \item{...}{Named attributes to be applied to the button or link.}
 }
 \description{

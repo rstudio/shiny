@@ -327,7 +327,8 @@ getCurrentRestoreContext <- function() {
 
 #' Restore an input value
 #'
-#' This restores an input value from the current restore context..
+#' This restores an input value from the current restore context. It should be
+#' called early on inside of input functions (like \code{\link{textInput}}).
 #'
 #' @param id Name of the input value to restore.
 #' @param default A default value to use, if there's no value to restore.
@@ -352,6 +353,9 @@ restoreInput <- function(id, default) {
 
 #' Update URL in browser's location bar
 #'
+#' This function updates the URL in the client browser's location bar. It
+#' typically is called from an observer.
+#'
 #' @param queryString The new query string to show in the location bar.
 #' @param session A Shiny session object.
 #' @export
@@ -364,6 +368,9 @@ updateLocationBar <- function(queryString, session = getDefaultReactiveDomain())
 #' A \code{bookmarkButton} is a \code{\link{actionButton}} with a default label
 #' that consists of a link icon and the text "Share...". It is meant to be used
 #' for bookmarking state.
+#'
+#' @param title A tooltip that is shown when the mouse cursor hovers over the
+#'   button.
 #'
 #' @seealso configureBookmarking
 #' @inheritParams actionButton
@@ -432,7 +439,40 @@ urlModal <- function(url, title = "Saved application link", subtitle = NULL) {
 
 #' Configure bookmarking for the current session
 #'
-#' There are two types of bookmarking: saving state, and encoding state.
+#' There are two types of bookmarking: persisting state, and encoding state. For
+#' persisting state, the state of the application will be saved on disk, and can
+#' be restored with the corresponding state ID. For encoding state, the state of
+#' the application will be encoded in a URL.
+#'
+#' For restoring state to work properly, the UI must be a function that takes
+#' one argument, \code{req}. In most Shiny applications, the UI is not a
+#' function; it might have the form \code{fluidPage(....)}. Converting it to a
+#' function is as simple as wrapping it in a function, as in \code{function(req)
+#' \{ fluidPage(....) \}}.
+#'
+#' By default, all input values will be saved, except for the values of
+#' actionButtons and passwordInputs. If the state is persisted, fileInputs will
+#' be saved, but if the state is encoded, fileInputs will not be saved.
+#'
+#' When persisting state, arbitrary values can be saved to disk, by passing a
+#' function as Extra values can be stored, by passing a function as the
+#' \code{onBookmark} argument. That function will be passed a
+#' \code{\link{ShinySaveState}} object. The \code{values} field of the object
+#' can be manipulated to save extra information. Additionally, if the state is
+#' being persisted, and the \code{dir} field of that object can be used to save
+#' extra information to files in that directory.
+#'
+#' For persisted state, this is how the persisted state directory is chosen:
+#' \itemize{
+#'   \item If running in a hosting environment such as Shiny Server or Connect,
+#'     the hosting environment will choose the directory.
+#'   \item If running an app in a directory with \code{\link{runApp}()}, the
+#'     persisted states will be saved in a subdirectory of the app called
+#'     shiny_persist.
+#'   \item If running a Shiny app object that is generated from code (not run
+#'     from a directory), the persisted states will be saved in a subdirectory
+#'     of the current working directory called shiny_persist.
+#' }
 #'
 #' @param eventExpr An expression to listen for, similar to
 #'   \code{\link{observeEvent}}.
@@ -440,13 +480,147 @@ urlModal <- function(url, title = "Saved application link", subtitle = NULL) {
 #'   in a URL, \code{"persist"}, which saves to disk, or \code{"disable"}, which
 #'   disables any previously-enabled bookmarking.
 #' @param exclude Input values to exclude from bookmarking.
-#' @param onBookmark A function to call before saving state. This function
-#'   should return a list, which will be saved as \code{values}.
+#' @param onBookmark A function to call just before saving state. It will be
+#'   passed a \code{\link{ShinySaveState}} object. The \code{values} field of
+#'   the object can be manipulated to save extra information, and if the state
+#'   is being persisted, the \code{dir} field can be used to save extra
+#'   information to files in that directory.
 #' @param onRestore A function to call when a session is restored. It will be
-#'   passed one argument, a restoreContext object.
+#'   passed a list with three items: \code{input}, a named list with input
+#'   values; \code{dir}, the path to a directory with other persisted content
+#'   (only if the state was persisted and not encoded); and \code{values}, extra
+#'   values that were saved with the \code{onBookmark} function.
 #' @param onBookmarked A callback function to invoke after the bookmarking has
-#'   been done.
+#'   been done. The default behavior is to show a modal dialog in the client
+#'   browser, with the bookmark URL.
 #' @param session A Shiny session object.
+#'
+#' @examples
+#' ## Only run these examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' # Basic example with encoded state
+#' ui <- function(req) {
+#'   fluidPage(
+#'     textInput("txt", "Text"),
+#'     checkboxInput("chk", "Checkbox"),
+#'     saveStateButton("save")
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   configureBookmarking(input$save, type = "encode")
+#' }
+#' shinyApp(ui, server)
+#'
+#'
+#' # Basic example with persisted state
+#' ui <- function(req) {
+#'   fluidPage(
+#'     textInput("txt", "Text"),
+#'     checkboxInput("chk", "Checkbox"),
+#'     saveStateButton("save")
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   configureBookmarking(input$save, type = "persist")
+#' }
+#' shinyApp(ui, server)
+#'
+#'
+#' # Update browser's location bar automatically when inputs change
+#' ui <- function(req) {
+#'   fluidPage(
+#'     textInput("txt", "Text"),
+#'     checkboxInput("chk", "Checkbox")
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   configureBookmarking(reactiveValuesToList(input),
+#'     type = "encode",
+#'     onBookmarked = function(url) {
+#'       updateLocationBar(url)
+#'     }
+#'   )
+#' }
+#' shinyApp(ui, server)
+#'
+#'
+#' # Usable with dynamic UI
+#' ui <- function(req) {
+#'   fluidPage(
+#'     sliderInput("slider", "Slider", 1, 100, 50),
+#'     uiOutput("ui"),
+#'     saveStateButton("save")
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   output$ui <- renderUI({
+#'     textInput("txt", "Text", input$slider)
+#'   })
+#'   configureBookmarking(input$save, type = "encode")
+#' }
+#' shinyApp(ui, server)
+#'
+#'
+#' # Exclude specific inputs
+#' # The only input that will be saved in this example is chk
+#' ui <- function(req) {
+#'   fluidPage(
+#'     passwordInput("pw", "Password"),   # Passwords are never saved
+#'     sliderInput("slider", "Slider", 1, 100, 50),
+#'     checkboxInput("chk", "Checkbox"),
+#'     saveStateButton("save")
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   configureBookmarking(input$save,
+#'     exclude = "slider",
+#'     type = "encode"
+#'   )
+#' }
+#' shinyApp(ui, server)
+#'
+#'
+#' # Save/restore uploaded files
+#' ui <- function(req){
+#'   fluidPage(
+#'     sidebarLayout(
+#'       sidebarPanel(
+#'         fileInput("file1", "Choose CSV File", multiple = TRUE,
+#'           accept = c(
+#'             "text/csv",
+#'             "text/comma-separated-values,text/plain",
+#'             ".csv"
+#'           )
+#'         ),
+#'         tags$hr(),
+#'         checkboxInput("header", "Header", TRUE),
+#'         saveStateButton("save")
+#'       ),
+#'       mainPanel(
+#'         tableOutput("contents")
+#'       )
+#'     )
+#'   )
+#' }
+#' server <- function(input, output) {
+#'   output$contents <- renderTable({
+#'     inFile <- input$file1
+#'     if (is.null(inFile))
+#'       return(NULL)
+#'
+#'     if (nrow(inFile) == 1) {
+#'       read.csv(inFile$datapath, header = input$header)
+#'     } else {
+#'       data.frame(x = "multiple files")
+#'     }
+#'   })
+#'
+#'   configureBookmarking(input$save, type = "persist")
+#' }
+#' shinyApp(ui, server)
+#'
+#' }
 #' @export
 configureBookmarking <- function(eventExpr,
   type = c("encode", "persist", "disable"), exclude = NULL,

@@ -12,6 +12,7 @@ restoreInput(id, default)
 \item{default}{A default value to use, if there's no value to restore.}
 }
 \description{
-This restores an input value from the current restore context..
+This restores an input value from the current restore context. It should be
+called early on inside of input functions (like \code{\link{textInput}}).
 }
 

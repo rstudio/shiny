@@ -12,6 +12,7 @@ updateLocationBar(queryString, session = getDefaultReactiveDomain())
 \item{session}{A Shiny session object.}
 }
 \description{
-Update URL in browser's location bar
+This function updates the URL in the client browser's location bar. It
+typically is called from an observer.
 }
 

@@ -553,6 +553,43 @@ urlModal <- function(url, title = "Saved application link", subtitle = NULL) {
 #' shinyApp(ui, server)
 #'
 #'
+#' # Save/restore arbitrary values
+#' ui <- function(req) {
+#'   fluidPage(
+#'     textInput("txt", "Text"),
+#'     checkboxInput("chk", "Checkbox"),
+#'     saveStateButton("save"),
+#'     br(),
+#'     textOutput("lastSaved")
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   vals <- reactiveValues(savedTime = NULL)
+#'   output$lastSaved <- renderText({
+#'     if (!is.null(vals$savedTime))
+#'       paste("Last saved at", vals$savedTime)
+#'     else
+#'       ""
+#'   })
+#'
+#'   configureBookmarking(input$save,
+#'     type = "encode",
+#'     onBookmark = function(state) {
+#'       vals$savedTime <- as.character(Sys.time())
+#'       # state is a mutable reference object, and we can add arbitrary values
+#'       # to it.
+#'       state$values <- list(
+#'         time = vals$savedTime
+#'       )
+#'     },
+#'     onRestore = function(state) {
+#'       vals$savedTime <- state$values$time
+#'     }
+#'   )
+#' }
+#' shinyApp(ui, server)
+#'
+#'
 #' # Usable with dynamic UI
 #' ui <- function(req) {
 #'   fluidPage(

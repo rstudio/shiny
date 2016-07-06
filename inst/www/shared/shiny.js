@@ -3030,10 +3030,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     exports.renderHtml(html, el, dependencies, where);
-    exports.initializeInputs(el);
 
     var scope = el;
     if (where === "replace") {
+      exports.initializeInputs(el);
       exports.bindAll(el);
     } else {
       var $parent = $(el).parent();
@@ -3044,6 +3044,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           if ($grandparent.length > 0) scope = $grandparent;
         }
       }
+      exports.initializeInputs(scope);
       exports.bindAll(scope);
     }
   };
@@ -4906,7 +4907,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
         // Iterate over all input objects for this binding
         for (var j = 0; j < inputObjects.length; j++) {
-          binding.initialize(inputObjects[j]);
+          if (!inputObjects[j]._shiny_initialized) {
+            inputObjects[j]._shiny_initialized = true;
+            binding.initialize(inputObjects[j]);
+          }
         }
       }
     }

@@ -225,7 +225,10 @@ function initShiny() {
 
       // Iterate over all input objects for this binding
       for (var j = 0; j < inputObjects.length; j++) {
-        binding.initialize(inputObjects[j]);
+        if (!inputObjects[j]._shiny_initialized) {
+          inputObjects[j]._shiny_initialized = true;
+          binding.initialize(inputObjects[j]);
+        }
       }
     }
   }

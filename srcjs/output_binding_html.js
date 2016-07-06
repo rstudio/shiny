@@ -39,10 +39,10 @@ exports.renderContent = function(el, content, where="replace") {
   }
 
   exports.renderHtml(html, el, dependencies, where);
-  exports.initializeInputs(el);
 
   var scope = el;
   if (where === "replace") {
+    exports.initializeInputs(el);
     exports.bindAll(el);
   } else {
     var $parent = $(el).parent();
@@ -53,6 +53,7 @@ exports.renderContent = function(el, content, where="replace") {
         if ($grandparent.length > 0) scope = $grandparent;
       }
     }
+    exports.initializeInputs(scope);
     exports.bindAll(scope);
   }
 };

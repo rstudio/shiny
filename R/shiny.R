@@ -1186,10 +1186,15 @@ ShinySession <- R6Class(
 #' @param ... Options to set for the output observer.
 #' @export
 outputOptions <- function(x, name, ...) {
-  if (!inherits(x, "shinyoutput"))
+  if (!inherits(x, "shinyoutput")) {
     stop("x must be a shinyoutput object.")
+  }
 
-  name <- .subset2(x, 'ns')(name)
+  if (!missing(name)) {
+    name <- .subset2(x, 'ns')(name)
+  } else {
+    name <- NULL
+  }
 
   .subset2(x, 'impl')$outputOptions(name, ...)
 }

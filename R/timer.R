@@ -71,3 +71,15 @@ TimerCallbacks <- R6Class(
 )
 
 timerCallbacks <- TimerCallbacks$new()
+
+scheduleTask <- function(millis, callback) {
+  cancelled <- FALSE
+  timerCallbacks$schedule(millis, function() {
+    if (!cancelled)
+      callback()
+  })
+
+  function() {
+    cancelled <<- TRUE
+  }
+}

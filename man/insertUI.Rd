@@ -4,8 +4,8 @@
 \alias{insertUI}
 \title{Insert UI objects}
 \usage{
-insertUI(selector, multiple = FALSE, where = c("beforeBegin", "afterBegin",
-  "beforeEnd", "afterEnd"), ui, immediate = FALSE,
+insertUI(selector, where = c("beforeBegin", "afterBegin", "beforeEnd",
+  "afterEnd"), ui, multiple = FALSE, immediate = FALSE,
   session = getDefaultReactiveDomain())
 }
 \arguments{
@@ -13,11 +13,6 @@ insertUI(selector, multiple = FALSE, where = c("beforeBegin", "afterBegin",
 string \code{s} to be placed in a \code{$(s)} jQuery call). This selector
 will determine the element(s) relative to which you want to insert your
 UI object.}
-
-\item{multiple}{In case your selector matches more than one element,
-\code{multiple} determines whether Shiny should insert the UI object
-relative to all matched elements or just relative to the first
-matched element (default).}
 
 \item{where}{Where your UI object should go relative to the selector:
 \describe{
@@ -38,6 +33,11 @@ multiple elements in one call, make sure to wrap them in either a
 advantage that you can give it an \code{id} to make it easier to
 reference or remove it later on). If you want to insert raw html, use
 \code{ui = HTML()}.}
+
+\item{multiple}{In case your selector matches more than one element,
+\code{multiple} determines whether Shiny should insert the UI object
+relative to all matched elements or just relative to the first
+matched element (default).}
 
 \item{immediate}{Whether the UI object should be immediately inserted into
 the app when you call \code{insertUI}, or whether Shiny should wait until

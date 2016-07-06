@@ -17,11 +17,6 @@
 #' will determine the element(s) relative to which you want to insert your
 #' UI object.
 #'
-#' @param multiple In case your selector matches more than one element,
-#' \code{multiple} determines whether Shiny should insert the UI object
-#' relative to all matched elements or just relative to the first
-#' matched element (default).
-#'
 #' @param where Where your UI object should go relative to the selector:
 #' \describe{
 #'   \item{\code{beforeBegin}}{Before the selector element itself}
@@ -41,6 +36,11 @@
 #' advantage that you can give it an \code{id} to make it easier to
 #' reference or remove it later on). If you want to insert raw html, use
 #' \code{ui = HTML()}.
+#'
+#' @param multiple In case your selector matches more than one element,
+#' \code{multiple} determines whether Shiny should insert the UI object
+#' relative to all matched elements or just relative to the first
+#' matched element (default).
 #'
 #' @param immediate Whether the UI object should be immediately inserted into
 #' the app when you call \code{insertUI}, or whether Shiny should wait until
@@ -76,9 +76,9 @@
 #'
 #' @export
 insertUI <- function(selector,
-  multiple = FALSE,
   where = c("beforeBegin", "afterBegin", "beforeEnd", "afterEnd"),
   ui,
+  multiple = FALSE,
   immediate = FALSE,
   session = getDefaultReactiveDomain()) {
 

@@ -81,5 +81,6 @@ scheduleTask <- function(millis, callback) {
 
   function() {
     cancelled <<- TRUE
+    callback <<- NULL # to allow for callback to be gc'ed
   }
 }

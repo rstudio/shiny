@@ -1,3 +1,6 @@
+#' @include stack.R
+NULL
+
 ShinySaveState <- R6Class("ShinySaveState",
   public = list(
     input = NULL,
@@ -494,10 +497,19 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'   is being persisted, the \code{dir} field can be used to save extra
 #'   information to files in that directory.
 #' @param onRestore A function to call when a session is restored. It will be
-#'   passed a list with three items: \code{input}, a named list with input
-#'   values; \code{dir}, the path to a directory with other persisted content
-#'   (only if the state was persisted and not encoded); and \code{values}, extra
-#'   values that were saved with the \code{onBookmark} function.
+#'   called after the server function executes, but before all other reactives,
+#'   observers and render functions are run. This function will be passed a list
+#'   with three items: \code{input}, a named list with input values; \code{dir},
+#'   the path to a directory with other persisted content (only if the state was
+#'   persisted and not encoded); and \code{values}, extra values that were saved
+#'   with the \code{onBookmark} function.
+#' @param onRestored A function to call after a session is restored. This is
+#'   similar to \code{onRestore}, but it will be called after all reactives,
+#'   observers, and render functions run, and after results are sent to the
+#'   client browser. This makes it appropriate for setup code that must be run
+#'   only after the client receives its first update -- for example, sending an
+#'   update an input that was dynamically generated. This function will be
+#'   passed the same object as \code{onRestore}.
 #' @param onBookmarked A callback function to invoke after the bookmarking has
 #'   been done. The default behavior is to show a modal dialog in the client
 #'   browser, with the bookmark URL.
@@ -669,7 +681,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #' @export
 configureBookmarking <- function(eventExpr,
   type = c("encode", "persist", "disable"), exclude = NULL,
-  onBookmark = NULL, onRestore = NULL, onBookmarked = NULL,
+  onBookmark = NULL, onBookmarked = NULL, onRestore = NULL, onRestored = NULL,
   session = getDefaultReactiveDomain())
 {
 
@@ -734,10 +746,22 @@ configureBookmarking <- function(eventExpr,
     }
   )
 
-  # Run the onRestore function immediately
+  # Run the onRestore function at the beginning of the flush cycle, but after
+  # the server function has been executed.
   if (!is.null(onRestore)) {
-    restoreState <- getCurrentRestoreContext()$asList()
-    onRestore(restoreState)
+    observe(isolate({
+      restoreState <- getCurrentRestoreContext()$asList()
+      onRestore(restoreState)
+    }), priority = -1000000)
+  }
+
+  # Run the onRestored function after the flush cycle completes and information
+  # is sent to the client.
+  if (!is.null(onRestored)) {
+    session$onFlushed(function() {
+      restoreState <- getCurrentRestoreContext()$asList()
+      isolate(onRestored(restoreState))
+    })
   }
 
   invisible()

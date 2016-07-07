@@ -49,9 +49,9 @@ function; it might have the form \code{fluidPage(....)}. Converting it to a
 function is as simple as wrapping it in a function, as in \code{function(req)
 \{ fluidPage(....) \}}.
 
-By default, all input values will be saved, except for the values of
-actionButtons and passwordInputs. If the state is persisted, fileInputs will
-be saved, but if the state is encoded, fileInputs will not be saved.
+By default, all input values will be bookmarked, except for the values of
+actionButtons and passwordInputs. FileInputs will be saved if the state is
+persisted, but not if if the state is encoded.
 
 When persisting state, arbitrary values can be saved to disk, by passing a
 function as Extra values can be stored, by passing a function as the
@@ -82,11 +82,11 @@ ui <- function(req) {
   fluidPage(
     textInput("txt", "Text"),
     checkboxInput("chk", "Checkbox"),
-    saveStateButton("save")
+    bookmarkButton("bookmark")
   )
 }
 server <- function(input, output, session) {
-  configureBookmarking(input$save, type = "encode")
+  configureBookmarking(input$bookmark, type = "encode")
 }
 shinyApp(ui, server)
 
@@ -96,11 +96,11 @@ ui <- function(req) {
   fluidPage(
     textInput("txt", "Text"),
     checkboxInput("chk", "Checkbox"),
-    saveStateButton("save")
+    bookmarkButton("bookmark")
   )
 }
 server <- function(input, output, session) {
-  configureBookmarking(input$save, type = "persist")
+  configureBookmarking(input$bookmark, type = "persist")
 }
 shinyApp(ui, server)
 
@@ -128,7 +128,7 @@ ui <- function(req) {
   fluidPage(
     textInput("txt", "Text"),
     checkboxInput("chk", "Checkbox"),
-    saveStateButton("save"),
+    bookmarkButton("bookmark"),
     br(),
     textOutput("lastSaved")
   )
@@ -142,7 +142,7 @@ server <- function(input, output, session) {
       ""
   })
 
-  configureBookmarking(input$save,
+  configureBookmarking(input$bookmark,
     type = "encode",
     onBookmark = function(state) {
       vals$savedTime <- as.character(Sys.time())
@@ -165,14 +165,14 @@ ui <- function(req) {
   fluidPage(
     sliderInput("slider", "Slider", 1, 100, 50),
     uiOutput("ui"),
-    saveStateButton("save")
+    bookmarkButton("bookmark")
   )
 }
 server <- function(input, output, session) {
   output$ui <- renderUI({
     textInput("txt", "Text", input$slider)
   })
-  configureBookmarking(input$save, type = "encode")
+  configureBookmarking(input$bookmark, type = "encode")
 }
 shinyApp(ui, server)
 
@@ -184,11 +184,11 @@ ui <- function(req) {
     passwordInput("pw", "Password"),   # Passwords are never saved
     sliderInput("slider", "Slider", 1, 100, 50),
     checkboxInput("chk", "Checkbox"),
-    saveStateButton("save")
+    bookmarkButton("bookmark")
   )
 }
 server <- function(input, output, session) {
-  configureBookmarking(input$save,
+  configureBookmarking(input$bookmark,
     exclude = "slider",
     type = "encode"
   )
@@ -210,7 +210,7 @@ ui <- function(req){
         ),
         tags$hr(),
         checkboxInput("header", "Header", TRUE),
-        saveStateButton("save")
+        bookmarkButton("bookmark")
       ),
       mainPanel(
         tableOutput("contents")
@@ -231,7 +231,7 @@ server <- function(input, output) {
     }
   })
 
-  configureBookmarking(input$save, type = "persist")
+  configureBookmarking(input$bookmark, type = "persist")
 }
 shinyApp(ui, server)
 

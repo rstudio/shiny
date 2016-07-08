@@ -115,7 +115,7 @@ RestoreContext <- R6Class("RestoreContext",
 
       if (!is.null(queryString) && nzchar(queryString)) {
         tryCatch(
-          {
+          withLogErrors({
             qsValues <- parseQueryString(queryString, nested = TRUE)
 
             if (!is.null(qsValues[["__subapp__"]]) && qsValues[["__subapp__"]] == 1) {
@@ -134,7 +134,7 @@ RestoreContext <- R6Class("RestoreContext",
               self$active <- TRUE
               private$decodeStateQueryString(queryString)
             }
-          },
+          }),
           error = function(e) {
             # If there's an error in restoring problem, just reset these values
             self$reset()
@@ -725,42 +725,78 @@ configureBookmarking <- function(eventExpr,
     event.env = parent.frame(),
     event.quoted = TRUE,
     {
-      saveState <- ShinySaveState$new(session$input, exclude, onBookmark)
+      tryCatch(
+        withLogErrors({
+          saveState <- ShinySaveState$new(session$input, exclude, onBookmark)
 
-      if (type == "persist") {
-        url <- saveState$persist()
-      } else {
-        url <- saveState$encode()
-      }
+          if (type == "persist") {
+            url <- saveState$persist()
+          } else {
+            url <- saveState$encode()
+          }
 
-      clientData <- session$clientData
-      url <- paste0(
-        clientData$url_protocol, "//",
-        clientData$url_hostname,
-        if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
-        clientData$url_pathname,
-        "?", url
+          clientData <- session$clientData
+          url <- paste0(
+            clientData$url_protocol, "//",
+            clientData$url_hostname,
+            if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
+            clientData$url_pathname,
+            "?", url
+          )
+
+          onBookmarked(url)
+        }),
+        error = function(e) {
+          msg <- paste0("Error bookmarking state: ", e$message)
+          showNotification(msg, duration = NULL, type = "error")
+        }
       )
-
-      onBookmarked(url)
     }
   )
 
   # Run the onRestore function at the beginning of the flush cycle, but after
   # the server function has been executed.
   if (!is.null(onRestore)) {
-    observe(isolate({
-      restoreState <- getCurrentRestoreContext()$asList()
-      onRestore(restoreState)
-    }), priority = -1000000)
+    observe({
+      tryCatch(
+        withLogErrors(
+          isolate({
+            rc <- getCurrentRestoreContext()
+            if (rc$active) {
+              restoreState <- getCurrentRestoreContext()$asList()
+              onRestore(restoreState)
+            }
+          })
+        ),
+        error = function(e) {
+          showNotification(
+            paste0("Error calling onRestore(): ", e$message),
+            duration = NULL, type = "error"
+          )
+        }
+      )
+    }, priority = -1000000)
   }
 
   # Run the onRestored function after the flush cycle completes and information
   # is sent to the client.
   if (!is.null(onRestored)) {
     session$onFlushed(function() {
-      restoreState <- getCurrentRestoreContext()$asList()
-      isolate(onRestored(restoreState))
+      tryCatch(
+        withLogErrors(
+          isolate({
+            rc <- getCurrentRestoreContext()
+            if (rc$active) {
+              restoreState <- getCurrentRestoreContext()$asList()
+              onRestored(restoreState)
+            }
+          })
+        ),
+        error = function(e) {
+          msg <- paste0("Error calling onRestored(): ", e$message)
+          showNotification(msg, duration = NULL, type = "error")
+        }
+      )
     })
   }
 

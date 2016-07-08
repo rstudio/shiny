@@ -78,10 +78,10 @@ For persisted state, this is how the persisted state directory is chosen:
     the hosting environment will choose the directory.
   \item If running an app in a directory with \code{\link{runApp}()}, the
     persisted states will be saved in a subdirectory of the app called
-    shiny_persist.
+    shiny_bookmarks.
   \item If running a Shiny app object that is generated from code (not run
     from a directory), the persisted states will be saved in a subdirectory
-    of the current working directory called shiny_persist.
+    of the current working directory called shiny_bookmarks.
 }
 }
 \examples{

@@ -12,7 +12,7 @@ persistInterfaceLocal <- function(id, callback) {
   # directory.
   appDir <- getShinyOption("appDir", default = getwd())
 
-  stateDir <- file.path(appDir, "shiny_persist", id)
+  stateDir <- file.path(appDir, "shiny_bookmarks", id)
   if (!dirExists(stateDir))
     dir.create(stateDir, recursive = TRUE)
 
@@ -24,6 +24,6 @@ loadInterfaceLocal <- function(id, callback) {
   # directory.
   appDir <- getShinyOption("appDir", default = getwd())
 
-  stateDir <- file.path(appDir, "shiny_persist", id)
+  stateDir <- file.path(appDir, "shiny_bookmarks", id)
   callback(stateDir)
 }

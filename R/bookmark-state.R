@@ -98,6 +98,11 @@ RestoreContext <- R6Class("RestoreContext",
     # This will be set to TRUE if there's actually a state to restore
     active = FALSE,
 
+    # This is set to an error message string in case there was an initialization
+    # error. Later, after the app has started on the client, the server can send
+    # this message as a notification on the client.
+    initErrorMessage = NULL,
+
     # This is a RestoreInputSet for input values. This is a key-value store with
     # some special handling.
     input = NULL,
@@ -138,6 +143,7 @@ RestoreContext <- R6Class("RestoreContext",
           error = function(e) {
             # If there's an error in restoring problem, just reset these values
             self$reset()
+            self$initErrorMessage <- e$message
             warning(e$message)
           }
         )
@@ -146,6 +152,7 @@ RestoreContext <- R6Class("RestoreContext",
 
     reset = function() {
       self$active <- FALSE
+      self$initErrorMessage <- NULL
       self$input <- RestoreInputSet$new(list())
       self$values <- list()
       self$dir <- NULL
@@ -753,6 +760,18 @@ configureBookmarking <- function(eventExpr,
       )
     }
   )
+
+  # If there was an error initializing the current restore context, show
+  # notification in the client.
+  observe({
+    rc <- getCurrentRestoreContext()
+    if (!is.null(rc$initErrorMessage)) {
+      showNotification(
+        paste("Error in RestoreContext initialization:", rc$initErrorMessage),
+        duration = NULL, type = "error"
+      )
+    }
+  })
 
   # Run the onRestore function at the beginning of the flush cycle, but after
   # the server function has been executed.

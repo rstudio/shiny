@@ -419,7 +419,8 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
   if (!is.null(subtitle)) {
     subtitleTag <- tagList(
       br(),
-      span(class = "text-muted", subtitle)
+      span(class = "text-muted", subtitle),
+      span(id = "shiny-bookmark-copy-text", class = "text-muted")
     )
   }
 
@@ -449,7 +450,16 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
       $('#shiny-modal')
         .one('shown.bs.modal', function() {
           $('#shiny-modal textarea').select().focus();
-        });"
+        });
+      $('#shiny-bookmark-copy-text')
+        .text(function() {
+          if (/Mac/i.test(navigator.userAgent)) {
+            return 'Press ⌘-C to copy.';
+          } else {
+            return 'Press Ctrl-C to copy.';
+          }
+        });
+      "
     )
   )
 }

@@ -475,8 +475,8 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #' For restoring state to work properly, the UI must be a function that takes
 #' one argument, \code{req}. In most Shiny applications, the UI is not a
 #' function; it might have the form \code{fluidPage(....)}. Converting it to a
-#' function is as simple as wrapping it in a function, as in \code{function(req)
-#' \{ fluidPage(....) \}}.
+#' function is as simple as wrapping it in a function, as in
+#' \code{function(request) \{ fluidPage(....) \}}.
 #'
 #' By default, all input values will be bookmarked, except for the values of
 #' actionButtons and passwordInputs. FileInputs will be saved if the state is
@@ -537,7 +537,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #' if (interactive()) {
 #'
 #' # Basic example with encoded state
-#' ui <- function(req) {
+#' ui <- function(request) {
 #'   fluidPage(
 #'     textInput("txt", "Text"),
 #'     checkboxInput("chk", "Checkbox"),
@@ -551,7 +551,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'
 #'
 #' # Basic example with persisted state
-#' ui <- function(req) {
+#' ui <- function(request) {
 #'   fluidPage(
 #'     textInput("txt", "Text"),
 #'     checkboxInput("chk", "Checkbox"),
@@ -565,7 +565,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'
 #'
 #' # Update browser's location bar automatically when inputs change
-#' ui <- function(req) {
+#' ui <- function(request) {
 #'   fluidPage(
 #'     textInput("txt", "Text"),
 #'     checkboxInput("chk", "Checkbox")
@@ -583,7 +583,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'
 #'
 #' # Save/restore arbitrary values
-#' ui <- function(req) {
+#' ui <- function(request) {
 #'   fluidPage(
 #'     textInput("txt", "Text"),
 #'     checkboxInput("chk", "Checkbox"),
@@ -620,7 +620,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'
 #'
 #' # Usable with dynamic UI
-#' ui <- function(req) {
+#' ui <- function(request) {
 #'   fluidPage(
 #'     sliderInput("slider", "Slider", 1, 100, 50),
 #'     uiOutput("ui"),
@@ -638,7 +638,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'
 #' # Exclude specific inputs
 #' # The only input that will be saved in this example is chk
-#' ui <- function(req) {
+#' ui <- function(request) {
 #'   fluidPage(
 #'     passwordInput("pw", "Password"),   # Passwords are never saved
 #'     sliderInput("slider", "Slider", 1, 100, 50),
@@ -656,7 +656,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'
 #'
 #' # Save/restore uploaded files
-#' ui <- function(req){
+#' ui <- function(request) {
 #'   fluidPage(
 #'     sidebarLayout(
 #'       sidebarPanel(

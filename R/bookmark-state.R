@@ -19,16 +19,16 @@ ShinySaveState <- R6Class("ShinySaveState",
       self$onSave  <- onSave
     },
 
-    # Persist this state object to disk. Returns a query string which can be
-    # used to restore the session.
-    persist = function() {
+    # Save this state object to disk. Returns a query string which can be used
+    # to restore the session.
+    save = function() {
       id <- createUniqueId(8)
 
-      persistInterface <- getShinyOption("persist.interface",
-                                         default = persistInterfaceLocal)
+      saveInterface <- getShinyOption("save.interface",
+                                       default = saveInterfaceLocal)
 
-      persistInterface(id, function(stateDir) {
-        # Directory is provided by the persistInterface function.
+      saveInterface(id, function(stateDir) {
+        # Directory is provided by the saveInterface function.
         self$dir <- stateDir
 
         # Allow user-supplied onSave function to do things like add self$values, or
@@ -45,7 +45,7 @@ ShinySaveState <- R6Class("ShinySaveState",
           saveRDS(self$values, file.path(stateDir, "values.rds"))
       })
 
-      paste0("__state_id__=", encodeURIComponent(id))
+      paste0("_state_id_=", encodeURIComponent(id))
     },
 
     # Encode the state to a URL. This does not save to disk.
@@ -107,7 +107,7 @@ RestoreContext <- R6Class("RestoreContext",
     # some special handling.
     input = NULL,
 
-    # Directory for extra files, if restoring from persisted state
+    # Directory for extra files, if restoring from state that was saved to disk.
     dir = NULL,
 
     # For values other than input values. These values don't need the special
@@ -127,10 +127,10 @@ RestoreContext <- R6Class("RestoreContext",
               # Ignore subapps in shiny docs
               self$reset()
 
-            } else if (!is.null(qsValues[["__state_id__"]]) && nzchar(qsValues[["__state_id__"]])) {
-              # If we have a "__state_id__" key, restore from persisted state and ignore
-              # other key/value pairs. If not, restore from key/value pairs in the
-              # query string.
+            } else if (!is.null(qsValues[["_state_id_"]]) && nzchar(qsValues[["_state_id_"]])) {
+              # If we have a "_state_id_" key, restore from saved state and
+              # ignore other key/value pairs. If not, restore from key/value
+              # pairs in the query string.
               self$active <- TRUE
               private$loadStateQueryString(queryString)
 
@@ -179,10 +179,10 @@ RestoreContext <- R6Class("RestoreContext",
   ),
 
   private = list(
-    # Given a query string with a __state_id__, load persisted state with that ID.
+    # Given a query string with a _state_id_, load saved state with that ID.
     loadStateQueryString = function(queryString) {
       values <- parseQueryString(queryString, nested = TRUE)
-      id <- values[["__state_id__"]]
+      id <- values[["_state_id_"]]
 
       # This function is passed to the loadInterface function; given a
       # directory, it will load state from that directory
@@ -206,7 +206,7 @@ RestoreContext <- R6Class("RestoreContext",
       invisible()
     },
 
-    # Given a query string with values encoded in it, restore persisted state
+    # Given a query string with values encoded in it, restore saved state
     # from those values.
     decodeStateQueryString = function(queryString) {
       # Remove leading '?'
@@ -467,59 +467,60 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 
 #' Configure bookmarking for the current session
 #'
-#' There are two types of bookmarking: persisting state, and encoding state. For
-#' persisting state, the state of the application will be saved on disk, and can
-#' be restored with the corresponding state ID. For encoding state, the state of
-#' the application will be encoded in a URL.
+#' There are two types of bookmarking: saving an application's state to disk on
+#' the server, and encoding the application's state in a URL. For state that has
+#' been saved to disk, the state can be restored with the corresponding state
+#' ID. For URL-encoded state, the state of the application is encoded in the
+#' URL, and no server-side storage is needed.
 #'
 #' For restoring state to work properly, the UI must be a function that takes
-#' one argument, \code{req}. In most Shiny applications, the UI is not a
+#' one argument, \code{request}. In most Shiny applications, the UI is not a
 #' function; it might have the form \code{fluidPage(....)}. Converting it to a
 #' function is as simple as wrapping it in a function, as in
 #' \code{function(request) \{ fluidPage(....) \}}.
 #'
 #' By default, all input values will be bookmarked, except for the values of
 #' actionButtons and passwordInputs. FileInputs will be saved if the state is
-#' persisted, but not if if the state is encoded.
+#' saved on a server, but not if if the state is encoded in a URL.
 #'
-#' When persisting state, arbitrary values can be saved to disk, by passing a
-#' function as Extra values can be stored, by passing a function as the
-#' \code{onBookmark} argument. That function will be passed a
-#' \code{\link{ShinySaveState}} object. The \code{values} field of the object
-#' can be manipulated to save extra information. Additionally, if the state is
-#' being persisted, and the \code{dir} field of that object can be used to save
-#' extra information to files in that directory.
+#' When bookmarking state, arbitrary values can be stored, by passing a function
+#' as the \code{onBookmark} argument. That function will be passed a
+#' \code{\link{ShinySaveState}} object. The \code{values} field of the object is
+#' a list which can be manipulated to save extra information. Additionally, if
+#' the state is being saved on the server, and the \code{dir} field of that
+#' object can be used to save extra information to files in that directory.
 #'
-#' For persisted state, this is how the persisted state directory is chosen:
+#' For saved-to-server state, this is how the state directory is chosen:
 #' \itemize{
 #'   \item If running in a hosting environment such as Shiny Server or Connect,
 #'     the hosting environment will choose the directory.
 #'   \item If running an app in a directory with \code{\link{runApp}()}, the
-#'     persisted states will be saved in a subdirectory of the app called
+#'     saved states will be saved in a subdirectory of the app called
 #'     shiny_bookmarks.
 #'   \item If running a Shiny app object that is generated from code (not run
-#'     from a directory), the persisted states will be saved in a subdirectory
+#'     from a directory), the saved states will be saved in a subdirectory
 #'     of the current working directory called shiny_bookmarks.
 #' }
 #'
 #' @param eventExpr An expression to listen for, similar to
 #'   \code{\link{observeEvent}}.
-#' @param type Either \code{"encode"}, which encodes all of the relevant values
-#'   in a URL, \code{"persist"}, which saves to disk, or \code{"disable"}, which
-#'   disables any previously-enabled bookmarking.
-#' @param exclude Input values to exclude from bookmarking.
+#' @param store Either \code{"url"}, which encodes all of the relevant values in
+#'   a URL, \code{"server"}, which saves to disk on the server, or
+#'   \code{"disable"}, which disables any previously-enabled bookmarking.
+#' @param exclude A character vector of names of input values to exclude from
+#'   bookmarking.
 #' @param onBookmark A function to call just before saving state. It will be
 #'   passed a \code{\link{ShinySaveState}} object. The \code{values} field of
 #'   the object can be manipulated to save extra information, and if the state
-#'   is being persisted, the \code{dir} field can be used to save extra
+#'   is being saved to disk, the \code{dir} field can be used to save extra
 #'   information to files in that directory.
 #' @param onRestore A function to call when a session is restored. It will be
 #'   called after the server function executes, but before all other reactives,
 #'   observers and render functions are run. This function will be passed a list
 #'   with three items: \code{input}, a named list with input values; \code{dir},
-#'   the path to a directory with other persisted content (only if the state was
-#'   persisted and not encoded); and \code{values}, extra values that were saved
-#'   with the \code{onBookmark} function.
+#'   the path to a directory which can be used for other saved content (only if
+#'   the state was saved to disk); and \code{values}, extra values that were
+#'   saved with the \code{onBookmark} function.
 #' @param onRestored A function to call after a session is restored. This is
 #'   similar to \code{onRestore}, but it will be called after all reactives,
 #'   observers, and render functions run, and after results are sent to the
@@ -536,7 +537,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #' ## Only run these examples in interactive R sessions
 #' if (interactive()) {
 #'
-#' # Basic example with encoded state
+#' # Basic example with state encoded in URL
 #' ui <- function(request) {
 #'   fluidPage(
 #'     textInput("txt", "Text"),
@@ -545,12 +546,12 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'   )
 #' }
 #' server <- function(input, output, session) {
-#'   configureBookmarking(input$bookmark, type = "encode")
+#'   configureBookmarking(input$bookmark, store = "url")
 #' }
 #' shinyApp(ui, server)
 #'
 #'
-#' # Basic example with persisted state
+#' # Basic example with state saved to disk
 #' ui <- function(request) {
 #'   fluidPage(
 #'     textInput("txt", "Text"),
@@ -559,7 +560,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'   )
 #' }
 #' server <- function(input, output, session) {
-#'   configureBookmarking(input$bookmark, type = "persist")
+#'   configureBookmarking(input$bookmark, store = "server")
 #' }
 #' shinyApp(ui, server)
 #'
@@ -573,7 +574,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #' }
 #' server <- function(input, output, session) {
 #'   configureBookmarking(reactiveValuesToList(input),
-#'     type = "encode",
+#'     store = "url",
 #'     onBookmarked = function(url) {
 #'       updateLocationBar(url)
 #'     }
@@ -602,7 +603,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'   })
 #'
 #'   configureBookmarking(input$bookmark,
-#'     type = "encode",
+#'     store = "url",
 #'     onBookmark = function(state) {
 #'       vals$savedTime <- as.character(Sys.time())
 #'       # state is a mutable reference object, and we can add arbitrary values
@@ -619,7 +620,8 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #' shinyApp(ui, server)
 #'
 #'
-#' # Usable with dynamic UI
+#' # Usable with dynamic UI (set the slider, then change the text input,
+#' # click the bookmark button)
 #' ui <- function(request) {
 #'   fluidPage(
 #'     sliderInput("slider", "Slider", 1, 100, 50),
@@ -631,13 +633,13 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'   output$ui <- renderUI({
 #'     textInput("txt", "Text", input$slider)
 #'   })
-#'   configureBookmarking(input$bookmark, type = "encode")
+#'   configureBookmarking(input$bookmark, store = "url")
 #' }
 #' shinyApp(ui, server)
 #'
 #'
-#' # Exclude specific inputs
-#' # The only input that will be saved in this example is chk
+#' # Exclude specific inputs (The only input that will be saved in this
+#' # example is chk)
 #' ui <- function(request) {
 #'   fluidPage(
 #'     passwordInput("pw", "Password"),   # Passwords are never saved
@@ -649,7 +651,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #' server <- function(input, output, session) {
 #'   configureBookmarking(input$bookmark,
 #'     exclude = "slider",
-#'     type = "encode"
+#'     store = "url"
 #'   )
 #' }
 #' shinyApp(ui, server)
@@ -690,20 +692,20 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'     }
 #'   })
 #'
-#'   configureBookmarking(input$bookmark, type = "persist")
+#'   configureBookmarking(input$bookmark, store = "server")
 #' }
 #' shinyApp(ui, server)
 #'
 #' }
 #' @export
 configureBookmarking <- function(eventExpr,
-  type = c("encode", "persist", "disable"), exclude = NULL,
+  store = c("url", "server", "disable"), exclude = NULL,
   onBookmark = NULL, onBookmarked = NULL, onRestore = NULL, onRestored = NULL,
   session = getDefaultReactiveDomain())
 {
 
   eventExpr <- substitute(eventExpr)
-  type <- match.arg(type)
+  store <- match.arg(store)
 
   # If there's an existing onBookmarked observer, destroy it before creating a
   # new one.
@@ -712,24 +714,24 @@ configureBookmarking <- function(eventExpr,
     session$bookmarkObserver <- NULL
   }
 
-  if (type == "disable") {
+  if (store == "disable") {
     return(invisible())
   }
 
   # If no onBookmarked function is provided, use one of these defaults.
   if (is.null(onBookmarked)) {
-    if (type == "persist") {
+    if (store == "server") {
       onBookmarked <- function(url) {
         showModal(urlModal(
           url,
-          subtitle = "The current state of this application has been persisted."
+          subtitle = "The current state of this application has been stored on the server."
         ))
       }
-    } else if (type == "encode") {
+    } else if (store == "url") {
       onBookmarked <- function(url) {
         showModal(urlModal(
           url,
-          subtitle = "This link encodes the current state of this application."
+          subtitle = "This link stores the current state of this application."
         ))
       }
     }
@@ -746,8 +748,8 @@ configureBookmarking <- function(eventExpr,
         withLogErrors({
           saveState <- ShinySaveState$new(session$input, exclude, onBookmark)
 
-          if (type == "persist") {
-            url <- saveState$persist()
+          if (store == "server") {
+            url <- saveState$save()
           } else {
             url <- saveState$encode()
           }

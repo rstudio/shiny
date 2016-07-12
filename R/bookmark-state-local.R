@@ -1,4 +1,5 @@
-# Function wrappers for persisting or restoring state when running Shiny locally
+# Function wrappers for saving and restoring state to/from disk when running
+# Shiny locally.
 #
 # These functions provide a directory to the callback function.
 #
@@ -7,7 +8,7 @@
 #   a directory. It must take one argument, \code{stateDir}, which is a
 #   directory to which it writes/reads.
 
-persistInterfaceLocal <- function(id, callback) {
+saveInterfaceLocal <- function(id, callback) {
   # Try to save in app directory, or, if that's not available, in the current
   # directory.
   appDir <- getShinyOption("appDir", default = getwd())

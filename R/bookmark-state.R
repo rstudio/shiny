@@ -62,11 +62,14 @@ ShinySaveState <- R6Class("ShinySaveState",
         USE.NAMES = TRUE
       )
 
-      res <- paste0(
-        encodeURIComponent(names(inputVals)),
-        "=",
-        encodeURIComponent(inputVals),
-        collapse = "&"
+      res <-
+      res <- paste0("_inputs_&",
+        paste0(
+          encodeURIComponent(names(inputVals)),
+          "=",
+          encodeURIComponent(inputVals),
+          collapse = "&"
+        )
       )
 
       # If 'values' is present, add them as well.
@@ -213,19 +216,41 @@ RestoreContext <- R6Class("RestoreContext",
       if (substr(queryString, 1, 1) == '?')
         queryString <- substr(queryString, 2, nchar(queryString))
 
-      if (grepl("(^|&)_values_(&|$)", queryString)) {
-        splitStr <- strsplit(queryString, "(^|&)_values_(&|$)")[[1]]
-        inputValueStr <- splitStr[1]
-        valueStr <- splitStr[2]
-        if (is.na(valueStr))
-          valueStr <- ""
+
+      # Error if multiple '_inputs_' or '_values_'. This is needed because
+      # strsplit won't add an entry if the search pattern is at the end of a
+      # string.
+      if (length(gregexpr("(^|&)_inputs_(&|$)", queryString)[[1]]) > 1)
+        stop("Invalid state string: more than one '_inputs_' found")
+      if (length(gregexpr("(^|&)_values_(&|$)", queryString)[[1]]) > 1)
+        stop("Invalid state string: more than one '_values_' found")
+
+      # Look for _inputs_ and store following content in inputStr
+      splitStr <- strsplit(queryString, "(^|&)_inputs_(&|$)")[[1]]
+      if (length(splitStr) == 2) {
+        inputStr <- splitStr[2]
+        # Remove any _values_ (and content after _values_) that may come after
+        # _inputs_
+        inputStr <- strsplit(inputStr, "(^|&)_values_(&|$)")[[1]][1]
 
       } else {
-        inputValueStr <- queryString
+        inputStr <- ""
+      }
+
+      # Look for _values_ and store following content in valueStr
+      splitStr <- strsplit(queryString, "(^|&)_values_(&|$)")[[1]]
+      if (length(splitStr) == 2) {
+        valueStr <- splitStr[2]
+        # Remove any _inputs_ (and content after _inputs_) that may come after
+        # _values_
+        valueStr <- strsplit(valueStr, "(^|&)_inputs_(&|$)")[[1]][1]
+
+      } else {
         valueStr <- ""
       }
 
-      inputValues <- parseQueryString(inputValueStr, nested = TRUE)
+
+      inputs <- parseQueryString(inputStr, nested = TRUE)
       values <- parseQueryString(valueStr, nested = TRUE)
 
       valuesFromJSON <- function(vals) {
@@ -241,8 +266,8 @@ RestoreContext <- R6Class("RestoreContext",
         )
       }
 
-      inputValues <- valuesFromJSON(inputValues)
-      self$input <- RestoreInputSet$new(inputValues)
+      inputs <- valuesFromJSON(inputs)
+      self$input <- RestoreInputSet$new(inputs)
 
       self$values <- valuesFromJSON(values)
     }

@@ -244,7 +244,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
                 if (!inputHandlers$containsKey(splitName[[2]])){
                   # No input handler registered for this type
-                  stop("No handler registered for for type ", name)
+                  stop("No handler registered for type ", name)
                 }
 
                 msg$data[[ splitName[[1]] ]] <-

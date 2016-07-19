@@ -345,7 +345,7 @@ ShinySession <- R6Class(
     .outputs = list(),          # Keeps track of all the output observer objects
     .outputOptions = list(),     # Options for each of the output observer objects
     progressKeys = 'character',
-    showcase   = 'ANY',
+    showcase   = FALSE,
     fileUploadContext = 'FileUploadContext',
     .input      = 'ANY', # Internal ReactiveValues object for normal input sent from client
     .clientData = 'ANY', # Internal ReactiveValues object for other data sent from the client
@@ -420,11 +420,164 @@ ShinySession <- R6Class(
 
       # Clear file upload directories, if present
       self$onSessionEnded(private$fileUploadContext$rmUploadDirs)
+    },
+
+    createBookmarkObservers = function() {
+      # This is to be called from the initialization. It registers observers
+      # for bookmarking to work.
+
+      # These observers are set up in the initialization, before
+      # private$showcase is properly set, and when we call observe() and
+      # observeEvent(), it will check the current value of private$showcase,
+      # resulting in errors. So we'll just disable showcase mode while we set
+      # up these observers.
+      origShowcase <- private$showcase
+      self$setShowcase(FALSE)
+      on.exit(self$setShowcase(origShowcase))
+
+
+      withReactiveDomain(self, {
+        # To make code a little clearer
+        session <- self
+
+        # TODO: Make sure not to do anything if bookmarking is disabled
+        # This observer fires when the bookmark button is clicked.
+        observeEvent(
+          label = "bookmark",
+          session$input[["__bookmark__"]],
+          {
+            tryCatch(
+              withLogErrors({
+                store   <- getShinyOption("bookmarkStore", default = "disable")
+                exclude <- getShinyOption("bookmarkExclude", default = NULL)
+
+                if (store == "disable")
+                  return()
+
+                saveState <- ShinySaveState$new(
+                  input = session$input,
+                  exclude = exclude,
+                  onSave = function(state) {
+                    # Need to check for onBookmark at run time, because when
+                    # this callback is defined, it probably won't exist yet.
+                    if (!is.null(session$bookmarkCallbacks$onBookmark)) {
+                      session$bookmarkCallbacks$onBookmark(state)
+                    }
+                  }
+                )
+
+                if (store == "server") {
+                  url <- saveState$save()
+                } else if (store == "url") {
+                  url <- saveState$encode()
+                } else {
+                  stop("Unknown store type: ", store)
+                }
+
+                clientData <- session$clientData
+                url <- paste0(
+                  clientData$url_protocol, "//",
+                  clientData$url_hostname,
+                  if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
+                  clientData$url_pathname,
+                  "?", url
+                )
+
+
+                # If no onBookmarked function is provided, use one of these defaults.
+                if (is.null(session$bookmarkCallbacks$onBookmarked)) {
+                  if (store == "server") {
+                    onBookmarked(function(url) {
+                      showModal(urlModal(
+                        url,
+                        subtitle = "The current state of this application has been stored on the server."
+                      ))
+                    })
+                  } else if (store == "url") {
+                    onBookmarked(function(url) {
+                      showModal(urlModal(
+                        url,
+                        subtitle = "This link stores the current state of this application."
+                      ))
+                    })
+                  }
+                }
+
+                session$bookmarkCallbacks$onBookmarked(url)
+              }),
+              error = function(e) {
+                msg <- paste0("Error bookmarking state: ", e$message)
+                showNotification(msg, duration = NULL, type = "error")
+              }
+            )
+          }
+        )
+
+        # If there was an error initializing the current restore context, show
+        # notification in the client.
+        observe({
+          rc <- getCurrentRestoreContext()
+          if (!is.null(rc$initErrorMessage)) {
+            showNotification(
+              paste("Error in RestoreContext initialization:", rc$initErrorMessage),
+              duration = NULL, type = "error"
+            )
+          }
+        })
+
+        # Run the onRestore function at the beginning of the flush cycle, but after
+        # the server function has been executed.
+        observe({
+          if (!is.null(session$bookmarkCallbacks$onRestore)) {
+            tryCatch(
+              withLogErrors(
+                isolate({
+                  rc <- getCurrentRestoreContext()
+                  if (rc$active) {
+                    restoreState <- getCurrentRestoreContext()$asList()
+                    session$bookmarkCallbacks$onRestore(restoreState)
+                  }
+                })
+              ),
+              error = function(e) {
+                showNotification(
+                  paste0("Error calling onRestore(): ", e$message),
+                  duration = NULL, type = "error"
+                )
+              }
+            )
+          }
+        }, priority = -1000000)
+
+        # Run the onRestored function after the flush cycle completes and information
+        # is sent to the client.
+        session$onFlushed(function() {
+          if (!is.null(session$bookmarkCallbacks$onRestored)) {
+
+            tryCatch(
+              withLogErrors(
+                isolate({
+                  rc <- getCurrentRestoreContext()
+                  if (rc$active) {
+                    restoreState <- getCurrentRestoreContext()$asList()
+                    session$bookmarkCallbacks$onRestored(restoreState)
+                  }
+                })
+              ),
+              error = function(e) {
+                msg <- paste0("Error calling onRestored(): ", e$message)
+                showNotification(msg, duration = NULL, type = "error")
+              }
+            )
+          }
+        })
+
+      }) # withReactiveDomain
     }
   ),
   public = list(
     restoreContext = NULL,
-    bookmarkObserver = NULL,
+    bookmarkCallbacks = NULL,   # Bookmark configuration info
     progressStack = 'Stack', # Stack of progress objects
     input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
     output      = 'ANY',    # Externally-usable S3 wrapper object for .outputs
@@ -466,6 +619,14 @@ ShinySession <- R6Class(
       self$token <- createUniqueId(16)
       private$.outputs <- list()
       private$.outputOptions <- list()
+
+      self$bookmarkCallbacks <- list(
+        onBookmark = NULL,
+        onBookmarked = NULL,
+        onRestore = NULL,
+        onRestored = NULL
+      )
+      private$createBookmarkObservers()
 
       private$registerSessionEndCallbacks()
 

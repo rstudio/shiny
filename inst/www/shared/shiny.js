@@ -3122,6 +3122,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   var singletons = {
     knownSingletons: {},
     renderHtml: function renderHtml(html, el, where) {
+      where = where || "replace";
       var processed = this._processHtml(html);
       this._addToHead(processed.head);
       this.register(processed.singletons);

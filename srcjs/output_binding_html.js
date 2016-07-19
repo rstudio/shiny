@@ -136,6 +136,7 @@ function renderDependency(dep) {
 var singletons = {
   knownSingletons: {},
   renderHtml: function(html, el, where) {
+    where = where || "replace";
     var processed = this._processHtml(html);
     this._addToHead(processed.head);
     this.register(processed.singletons);

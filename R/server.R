@@ -660,7 +660,14 @@ runApp <- function(appDir=getwd(),
       }
       else {
         # Try up to 20 random ports
-        port <- p_randomInt(3000, 8000)
+        while (TRUE) {
+          port <- p_randomInt(3000, 8000)
+          # Reject ports in this range that are considered unsafe by Chrome
+          # http://superuser.com/questions/188058/which-ports-are-considered-unsafe-on-chrome
+          if (!port %in% c(3659, 4045, 6000, 6665:6669)) {
+            break
+          }
+        }
       }
 
       # Test port to see if we can use it

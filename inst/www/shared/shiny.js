@@ -3050,7 +3050,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   };
 
   // Render HTML in a DOM element, inserting singletons into head as needed
-  exports.renderHtml = function (html, el, dependencies, where) {
+  exports.renderHtml = function (html, el, dependencies) {
+    var where = arguments.length <= 3 || arguments[3] === undefined ? 'replace' : arguments[3];
+
     renderDependencies(dependencies);
     return singletons.renderHtml(html, el, where);
   };

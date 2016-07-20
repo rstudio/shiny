@@ -59,7 +59,7 @@ exports.renderContent = function(el, content, where="replace") {
 };
 
 // Render HTML in a DOM element, inserting singletons into head as needed
-exports.renderHtml = function(html, el, dependencies, where) {
+exports.renderHtml = function(html, el, dependencies, where = 'replace') {
   renderDependencies(dependencies);
   return singletons.renderHtml(html, el, where);
 };

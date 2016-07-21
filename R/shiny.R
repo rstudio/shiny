@@ -1359,3 +1359,40 @@ outputOptions <- function(x, name, ...) {
 
   .subset2(x, 'impl')$outputOptions(name, ...)
 }
+
+
+#' Add callbacks for Shiny session events
+#'
+#' These functions are for registering callbacks on Shiny session events.
+#' \code{onFlush} registers a function that will be called before Shiny flushes
+#' the reactive system. \code{onFlushed} registers a function that will be
+#' called after Shiny flushes the reactive system. \code{onSessionEnded}
+#' registers a function to be called after the client has disconnected.
+#'
+#' These functions should be called within the application's server function.
+#'
+#' All of these functions return a function which can be called with no
+#' arguments to cancel the registration.
+#'
+#' @param fun A callback function.
+#' @param once Should the function be run once, and then cleared, or should it
+#'   re-run each time the event occurs. (Only for \code{onFlush} and
+#'   \code{onFlushed}.)
+#' @param session A shiny session object.
+#'
+#' @export
+onFlush <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
+  session$onFlush(fun)
+}
+
+#' @rdname onFlush
+#' @export
+onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
+  session$onFlushed(fun)
+}
+
+#' @rdname onFlush
+#' @export
+onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
+  session$onSessionEnded(fun)
+}

@@ -237,8 +237,14 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
           # used by an input handler (like the one for "shiny.file"). This
           # should only happen once, when the app starts.
           if (is.null(shinysession$restoreContext)) {
-            # If there's bookmarked state, save it on the session object
-            shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
+            bookmarkStore <- getShinyOption("appConfig")$bookmarkStore %OR% "disable"
+            if (bookmarkStore == "disable") {
+              # If bookmarking is disabled, use empty context
+              shinysession$restoreContext <- RestoreContext$new()
+            } else {
+              # If there's bookmarked state, save it on the session object
+              shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
+            }
           }
 
           withRestoreContext(shinysession$restoreContext, {

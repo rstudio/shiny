@@ -92,7 +92,16 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
         showcaseMode <- mode
     }
 
-    withRestoreContext(RestoreContext$new(req$QUERY_STRING), {
+    # Create a restore context using query string
+    bookmarkStore <- getShinyOption("appConfig")$bookmarkStore %OR% "disable"
+    if (bookmarkStore == "disable") {
+      # If bookmarking is disabled, use empty context
+      restoreContext <- RestoreContext$new()
+    } else {
+      restoreContext <- RestoreContext$new(req$QUERY_STRING)
+    }
+
+    withRestoreContext(restoreContext, {
       uiValue <- NULL
 
       if (is.function(ui)) {

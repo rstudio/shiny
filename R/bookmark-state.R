@@ -383,8 +383,7 @@ restoreInput <- function(id, default) {
   # when restoring a value.
   force(default)
 
-  if (getShinyOption("bookmarkStore", default = "disable") == "disable" ||
-      !hasCurrentRestoreContext()) {
+  if (!hasCurrentRestoreContext()) {
     return(default)
   }
 

@@ -80,6 +80,9 @@ shiny 0.13.2.9001
 * Added `session$resetBrush(brushId)` (R) and `Shiny.resetBrush(brushId)` (JS)
   to programatically clear brushes from `imageOutput`/`plotOutput`.
 
+* Fixed #1253: Memory could leak when an observer was destroyed without first
+  being invalidated.
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

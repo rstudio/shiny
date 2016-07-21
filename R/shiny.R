@@ -354,6 +354,11 @@ ShinySession <- R6Class(
     flushCallbacks = 'Callbacks',
     flushedCallbacks = 'Callbacks',
     inputReceivedCallbacks = 'Callbacks',
+    bookmarkCallbacks = 'Callbacks',
+    bookmarkedCallbacks = 'Callbacks',
+    restoreCallbacks = 'Callbacks',
+    restoredCallbacks = 'Callbacks',
+
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
         warning("Tried to send response for untagged message; method: ",
@@ -449,11 +454,7 @@ ShinySession <- R6Class(
                   input = session$input,
                   exclude = exclude,
                   onSave = function(state) {
-                    # Need to check for onBookmark at run time, because when
-                    # this callback is defined, it probably won't exist yet.
-                    if (!is.null(session$bookmarkCallbacks$onBookmark)) {
-                      session$bookmarkCallbacks$onBookmark(state)
-                    }
+                    private$bookmarkCallbacks$invoke(state)
                   }
                 )
 
@@ -475,8 +476,8 @@ ShinySession <- R6Class(
                 )
 
 
-                # If no onBookmarked function is provided, use one of these defaults.
-                if (is.null(session$bookmarkCallbacks$onBookmarked)) {
+                # If no onBookmarked function was provided, use one of these defaults.
+                if (private$bookmarkedCallbacks$count() == 0) {
                   if (store == "server") {
                     onBookmarked(function(url) {
                       showModal(urlModal(
@@ -494,7 +495,7 @@ ShinySession <- R6Class(
                   }
                 }
 
-                session$bookmarkCallbacks$onBookmarked(url)
+                private$bookmarkedCallbacks$invoke(url)
               }),
               error = function(e) {
                 msg <- paste0("Error bookmarking state: ", e$message)
@@ -519,20 +520,20 @@ ShinySession <- R6Class(
         # Run the onRestore function at the beginning of the flush cycle, but after
         # the server function has been executed.
         observe({
-          if (!is.null(session$bookmarkCallbacks$onRestore)) {
+          if (private$restoreCallbacks$count() > 0) {
             tryCatch(
               withLogErrors(
                 isolate({
                   rc <- getCurrentRestoreContext()
                   if (rc$active) {
                     restoreState <- getCurrentRestoreContext()$asList()
-                    session$bookmarkCallbacks$onRestore(restoreState)
+                    private$restoreCallbacks$invoke(restoreState)
                   }
                 })
               ),
               error = function(e) {
                 showNotification(
-                  paste0("Error calling onRestore(): ", e$message),
+                  paste0("Error calling onRestore callback: ", e$message),
                   duration = NULL, type = "error"
                 )
               }
@@ -543,7 +544,7 @@ ShinySession <- R6Class(
         # Run the onRestored function after the flush cycle completes and information
         # is sent to the client.
         session$onFlushed(function() {
-          if (!is.null(session$bookmarkCallbacks$onRestored)) {
+          if (private$restoredCallbacks$count() > 0) {
 
             tryCatch(
               withLogErrors(
@@ -551,12 +552,12 @@ ShinySession <- R6Class(
                   rc <- getCurrentRestoreContext()
                   if (rc$active) {
                     restoreState <- getCurrentRestoreContext()$asList()
-                    session$bookmarkCallbacks$onRestored(restoreState)
+                    private$restoredCallbacks$invoke(restoreState)
                   }
                 })
               ),
               error = function(e) {
-                msg <- paste0("Error calling onRestored(): ", e$message)
+                msg <- paste0("Error calling onRestored callback: ", e$message)
                 showNotification(msg, duration = NULL, type = "error")
               }
             )
@@ -568,7 +569,6 @@ ShinySession <- R6Class(
   ),
   public = list(
     restoreContext = NULL,
-    bookmarkCallbacks = NULL,   # Bookmark configuration info
     progressStack = 'Stack', # Stack of progress objects
     input       = 'reactivevalues', # Externally-usable S3 wrapper object for .input
     output      = 'ANY',    # Externally-usable S3 wrapper object for .outputs
@@ -611,12 +611,10 @@ ShinySession <- R6Class(
       private$.outputs <- list()
       private$.outputOptions <- list()
 
-      self$bookmarkCallbacks <- list(
-        onBookmark = NULL,
-        onBookmarked = NULL,
-        onRestore = NULL,
-        onRestored = NULL
-      )
+      private$bookmarkCallbacks <- Callbacks$new()
+      private$bookmarkedCallbacks <- Callbacks$new()
+      private$restoreCallbacks <- Callbacks$new()
+      private$restoredCallbacks <- Callbacks$new()
       private$createBookmarkObservers()
 
       private$registerSessionEndCallbacks()
@@ -943,6 +941,32 @@ ShinySession <- R6Class(
         return(dereg)
       }
     },
+
+    onBookmark = function(fun) {
+      if (!is.function(fun) || length(fun) != 1) {
+        stop("`fun` must be a function that takes one argument")
+      }
+      private$bookmarkCallbacks$register(fun)
+    },
+    onBookmarked = function(fun) {
+      if (!is.function(fun) || length(fun) != 1) {
+        stop("`fun` must be a function that takes one argument")
+      }
+      private$bookmarkedCallbacks$register(fun)
+    },
+    onRestore = function(fun) {
+      if (!is.function(fun) || length(fun) != 1) {
+        stop("`fun` must be a function that takes one argument")
+      }
+      private$restoreCallbacks$register(fun)
+    },
+    onRestored = function(fun) {
+      if (!is.function(fun) || length(fun) != 1) {
+        stop("`fun` must be a function that takes one argument")
+      }
+      private$restoredCallbacks$register(fun)
+    },
+
     reactlog = function(logEntry) {
       if (private$showcase)
         private$sendMessage(reactlog = logEntry)

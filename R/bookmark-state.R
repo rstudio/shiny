@@ -506,36 +506,43 @@ configureBookmarking <- function(store = c("url", "server", "disable"),
 }
 
 
+#' Add callbacks for Shiny session bookmarkingevents
+#'
+#' These functions are for registering callbacks on Shiny session events.
+#' \code{onBookmark} registers a function that will be called before Shiny flushes
+#' the reactive system. \code{onFlushed} registers a function that will be
+#' called after Shiny flushes the reactive system. \code{onSessionEnded}
+#' registers a function to be called after the client has disconnected.
+#'
+#' These functions should be called within the application's server function.
+#'
+#' All of these functions return a function which can be called with no
+#' arguments to cancel the registration.
+#'
+#' @param fun A callback function.
+#' @param once Should the function be run once, and then cleared, or should it
+#'   re-run each time the event occurs. (Only for \code{onFlush} and
+#'   \code{onFlushed}.)
+#' @param session A shiny session object.
+#'
 #' @export
 onBookmark <- function(fun, session = getDefaultReactiveDomain()) {
-  if (!is.function(fun) || length(fun) != 1) {
-    stop("`fun` must be a function that takes one argument")
-  }
-  session$bookmarkCallbacks$onBookmark <- fun
+  session$onBookmark(fun)
 }
 
 #' @export
 onBookmarked <- function(fun, session = getDefaultReactiveDomain()) {
-  if (!is.function(fun) || length(fun) != 1) {
-    stop("`fun` must be a function that takes one argument")
-  }
-  session$bookmarkCallbacks$onBookmarked <- fun
+  session$onBookmarked(fun)
 }
 
 #' @export
 onRestore <- function(fun, session = getDefaultReactiveDomain()) {
-  if (!is.function(fun) || length(fun) != 1) {
-    stop("`fun` must be a function that takes one argument")
-  }
-  session$bookmarkCallbacks$onRestore <- fun
+  session$onRestore(fun)
 }
 
 #' @export
 onRestored <- function(fun, session = getDefaultReactiveDomain()) {
-  if (!is.function(fun) || length(fun) != 1) {
-    stop("`fun` must be a function that takes one argument")
-  }
-  session$bookmarkCallbacks$onRestored <- fun
+  session$onRestored(fun)
 }
 
 

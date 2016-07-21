@@ -81,7 +81,10 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
       httpHandler = httpHandler,
       serverFuncSource = serverFuncSource,
       onStart = onStart,
-      options = options),
+      options = options,
+      # Add options from configureBookmarking
+      appConfig = consumeBookmarkOptions()
+    ),
     class = "shiny.appobj"
   )
 }
@@ -99,14 +102,14 @@ shinyAppDir <- function(appDir, options=list()) {
   # affected by future changes to the path)
   appDir <- normalizePath(appDir, mustWork = TRUE)
 
-  # Store appDir in options so that we can find out where we are from within the
-  # app.
-  shinyOptions(appDir = appDir)
+  # Add options from configureBookmarking and store appDir so that we can find
+  # out where we are from within the app.
+  appConfig <- c(consumeBookmarkOptions(), appDir = appDir)
 
   if (file.exists.ci(appDir, "server.R")) {
-    shinyAppDir_serverR(appDir, options = options)
+    shinyAppDir_serverR(appDir, options = options, appConfig = appConfig)
   } else if (file.exists.ci(appDir, "app.R")) {
-    shinyAppDir_appR("app.R", appDir, options = options)
+    shinyAppDir_appR("app.R", appDir, options = options, appConfig = appConfig)
   } else {
     stop("App dir must contain either app.R or server.R.")
   }
@@ -119,15 +122,17 @@ shinyAppFile <- function(appFile, options=list()) {
   appFile <- normalizePath(appFile, mustWork = TRUE)
   appDir <- dirname(appFile)
 
-  # Store appDir in options so that we can find out where we are
-  shinyOptions(appDir = appDir)
+  # Add options from configureBookmarking and store appDir so that we can find
+  # out where we are from within the app.
+  appConfig <- c(consumeBookmarkOptions(), appDir = appDir)
 
-  shinyAppDir_appR(basename(appFile), appDir, options = options)
+  shinyAppDir_appR(basename(appFile), appDir, options = options,
+                   appConfig = appConfig)
 }
 
 # This reads in an app dir in the case that there's a server.R (and ui.R/www)
 # present, and returns a shiny.appobj.
-shinyAppDir_serverR <- function(appDir, options=list()) {
+shinyAppDir_serverR <- function(appDir, options=list(), appConfig = list()) {
   # Most of the complexity here comes from needing to hot-reload if the .R files
   # change on disk, or are created, or are removed.
 
@@ -208,7 +213,9 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       serverFuncSource = serverFuncSource,
       onStart = onStart,
       onEnd = onEnd,
-      options = options),
+      options = options,
+      appConfig = appConfig
+    ),
     class = "shiny.appobj"
   )
 }
@@ -261,7 +268,9 @@ initAutoReloadMonitor <- function(dir) {
 
 # This reads in an app dir for a single-file application (e.g. app.R), and
 # returns a shiny.appobj.
-shinyAppDir_appR <- function(fileName, appDir, options=list()) {
+shinyAppDir_appR <- function(fileName, appDir, options=list(),
+  appConfig = list())
+{
   fullpath <- file.path.ci(appDir, fileName)
 
   # This sources app.R and caches the content. When appObj() is called but
@@ -310,7 +319,8 @@ shinyAppDir_appR <- function(fileName, appDir, options=list()) {
       serverFuncSource = dynServerFuncSource,
       onStart = onStart,
       onEnd = onEnd,
-      options = options
+      options = options,
+      appConfig = appConfig
     ),
     class = "shiny.appobj"
   )

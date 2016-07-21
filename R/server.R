@@ -672,6 +672,12 @@ runApp <- function(appDir=getwd(),
   }
 
   appParts <- as.shiny.appobj(appDir)
+
+  # Extract appConfig (which is a list) and store it as a shinyOption. (This is
+  # the only place we have to store settings that are accessible both the UI and
+  # server portion of the app.)
+  shinyOptions(appConfig = appParts$appConfig)
+
   # Set up the onEnd before we call onStart, so that it gets called even if an
   # error happens in onStart.
   if (!is.null(appParts$onEnd))

@@ -491,6 +491,21 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
   )
 }
 
+#' Configure bookmarking for a Shiny application
+#'
+#' @param store Either \code{"url"}, which encodes all of the relevant values in
+#'   a URL, \code{"server"}, which saves to disk on the server, or
+#'   \code{"disable"}, which disables any previously-enabled bookmarking.
+#' @param exclude A character vector of names of input values to exclude from
+#'   bookmarking.
+#' @export
+configureBookmarking <- function(store = c("url", "server", "disable"),
+  exclude = NULL)
+{
+  store <- match.arg(store)
+  shinyOptions(bookmarkStore = store, bookmarkExclude = exclude)
+}
+
 
 #' @export
 onBookmark <- function(fun, session = getDefaultReactiveDomain()) {
@@ -522,4 +537,23 @@ onRestored <- function(fun, session = getDefaultReactiveDomain()) {
     stop("`fun` must be a function that takes one argument")
   }
   session$bookmarkCallbacks$onRestored <- fun
+}
+
+
+# Get shiny options related to bookmarking and put them in a list, reset those
+# shiny options, and then return the options list. This should be during the
+# creation of a shiny app object, which happens before another option frame is
+# added to the options stack (the new option frame is added when the app is
+# run). This function "consumes" the options when the shinyApp object is
+# created, so the options won't affect another app that is created later.
+consumeBookmarkOptions <- function() {
+  # Get options from configureBookmarking
+  options <- list(
+    bookmarkStore = getShinyOption("bookmarkStore"),
+    bookmarkExclude = getShinyOption("bookmarkExclude")
+  )
+
+  shinyOptions(bookmarkStore = NULL, bookmarkExclude = NULL)
+
+  options
 }

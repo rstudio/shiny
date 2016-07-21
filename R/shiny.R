@@ -426,21 +426,18 @@ ShinySession <- R6Class(
       # This is to be called from the initialization. It registers observers
       # for bookmarking to work.
 
-      # These observers are set up in the initialization, before
-      # private$showcase is properly set, and when we call observe() and
-      # observeEvent(), it will check the current value of private$showcase,
-      # resulting in errors. So we'll just disable showcase mode while we set
-      # up these observers.
-      origShowcase <- private$showcase
-      self$setShowcase(FALSE)
-      on.exit(self$setShowcase(origShowcase))
+      # Get bookmarking config
+      appConfig <- getShinyOption("appConfig")
+      store   <- appConfig$bookmarkStore %OR% "disable"
+      exclude <- appConfig$bookmarkExclude
 
+      if (store == "disable")
+        return()
 
       withReactiveDomain(self, {
         # To make code a little clearer
         session <- self
 
-        # TODO: Make sure not to do anything if bookmarking is disabled
         # This observer fires when the bookmark button is clicked.
         observeEvent(
           label = "bookmark",
@@ -448,12 +445,6 @@ ShinySession <- R6Class(
           {
             tryCatch(
               withLogErrors({
-                store   <- getShinyOption("bookmarkStore", default = "disable")
-                exclude <- getShinyOption("bookmarkExclude", default = NULL)
-
-                if (store == "disable")
-                  return()
-
                 saveState <- ShinySaveState$new(
                   input = session$input,
                   exclude = exclude,

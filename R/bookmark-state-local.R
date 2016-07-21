@@ -11,7 +11,7 @@
 saveInterfaceLocal <- function(id, callback) {
   # Try to save in app directory, or, if that's not available, in the current
   # directory.
-  appDir <- getShinyOption("appDir", default = getwd())
+  appDir <- getShinyOption("appConfig")$appDir %OR% getwd()
 
   stateDir <- file.path(appDir, "shiny_bookmarks", id)
   if (!dirExists(stateDir))
@@ -23,7 +23,7 @@ saveInterfaceLocal <- function(id, callback) {
 loadInterfaceLocal <- function(id, callback) {
   # Try to save in app directory, or, if that's not available, in the current
   # directory.
-  appDir <- getShinyOption("appDir", default = getwd())
+  appDir <- getShinyOption("appConfig")$appDir %OR% getwd()
 
   stateDir <- file.path(appDir, "shiny_bookmarks", id)
   callback(stateDir)

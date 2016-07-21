@@ -597,6 +597,7 @@ Observer <- R6Class(
     .suspended = logical(0),
     .destroyed = logical(0),
     .prevId = character(0),
+    .ctx = NULL,
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
@@ -636,7 +637,23 @@ registerDebugHook("observerFunc", environment(), label)
       ctx <- Context$new(.domain, .label, type='observer', prevId=.prevId)
       .prevId <<- ctx$id
 
+      if (!is.null(.ctx)) {
+        # If this happens, something went wrong.
+        warning("Created a new context without invalidating previous context.")
+      }
+      # Store the context explicitly in the Observer object. This is necessary
+      # to make sure that when the observer is destroyed, it also gets
+      # invalidated. Otherwise the upstream reactive (on which the observer
+      # depends) will hold a (indirect) reference to this context until the
+      # reactive is invalidated, which may not happen immediately or at all.
+      # This can lead to a memory leak (#1253).
+      .ctx <<- ctx
+
       ctx$onInvalidate(function() {
+        # Context is invalidated, so we don't need to store a reference to it
+        # anymore.
+        .ctx <<- NULL
+
         lapply(.invalidateCallbacks, function(invalidateCallback) {
           invalidateCallback()
           NULL
@@ -719,8 +736,16 @@ registerDebugHook("observerFunc", environment(), label)
       "Prevents this observer from ever executing again (even if a flush has
       already been scheduled)."
 
+      # Make sure to not try to destory twice.
+      if (.destroyed)
+        return()
+
       suspend()
       .destroyed <<- TRUE
+
+      if (!is.null(.ctx)) {
+        .ctx$invalidate()
+      }
     },
     .onDomainEnded = function() {
       if (isTRUE(.autoDestroy)) {

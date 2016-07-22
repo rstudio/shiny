@@ -721,12 +721,12 @@ registerDebugHook("observerFunc", environment(), label)
           if (.domain$isEnded()) {
             destroy()
           } else {
-            .autoDestroyHandle <<- onReactiveDomainEnded(.domain, self$.onDomainEnded)
+            .autoDestroyHandle <<- onReactiveDomainEnded(.domain, .onDomainEnded)
           }
         }
       } else {
         if (!is.null(.autoDestroyHandle))
-          self$.autoDestroyHandle()
+          .autoDestroyHandle()
         .autoDestroyHandle <<- NULL
       }
 
@@ -763,7 +763,7 @@ registerDebugHook("observerFunc", environment(), label)
       .destroyed <<- TRUE
 
       if (!is.null(.autoDestroyHandle)) {
-        self$.autoDestroyHandle()
+        .autoDestroyHandle()
       }
       .autoDestroyHandle <<- NULL
 
@@ -773,7 +773,7 @@ registerDebugHook("observerFunc", environment(), label)
     },
     .onDomainEnded = function() {
       if (isTRUE(.autoDestroy)) {
-        self$destroy()
+        destroy()
       }
     }
   )

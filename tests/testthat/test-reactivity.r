@@ -976,3 +976,28 @@ test_that("event handling helpers take correct dependencies", {
   expect_equal(execCount(o1), 2)
   expect_equal(execCount(o2), 2)
 })
+
+test_that("reactlog is correct", {
+  op <- options(shiny.reactlog = TRUE)
+  on.exit(options(op))
+
+  # Observer outside of the reactive domain shouldn't affect
+  # the actions below (that will be filtered on domain token)
+  observe({})
+
+  domain <- createMockDomain()
+  withReactiveDomain(domain, {
+    observe({}, label = "my observer")
+  })
+
+  flushReact()
+  log <- .graphStack$as_list()
+  log <- Filter(function(x) {
+    identical(x$session, domain$token)
+  }, log)
+  actions <- Map(function(x) x$action, log)
+
+  # Just make sure that the reactlog hits all of the actions
+  # we expect. An earlier bug caused "exit" not to show up.
+  expect_equal(actions, list("ctx", "invalidate", "ctx", "enter", "exit"))
+})

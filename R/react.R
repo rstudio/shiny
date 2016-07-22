@@ -21,8 +21,10 @@ Context <- R6Class(
       withReactiveDomain(.domain, {
         env <- .getReactiveEnvironment()
         .graphEnterContext(id)
-        on.exit(.graphExitContext(id), add = TRUE)
-        env$runWith(self, func)
+        tryCatch(
+          env$runWith(self, func),
+          finally = .graphExitContext(id)
+        )
       })
     },
     invalidate = function() {

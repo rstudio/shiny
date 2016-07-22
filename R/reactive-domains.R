@@ -41,10 +41,11 @@ NULL
 # `reactlog(logEntry)`.
 #
 ## ------------------------------------------------------------------------
-createMockDomain <- function() {
+createMockDomain <- function(token = createUniqueId(4)) {
   callbacks <- Callbacks$new()
   ended <- FALSE
   domain <- new.env(parent = emptyenv())
+  domain$token <- token
   domain$onEnded <- function(callback) {
     return(callbacks$register(callback))
   }

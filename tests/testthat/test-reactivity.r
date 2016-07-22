@@ -819,6 +819,66 @@ test_that("observers autodestroy (or not)", {
   })
 })
 
+test_that("observers are garbage collected when destroyed", {
+  domain <- createMockDomain()
+  rv <- reactiveValues(x = 1)
+
+  # Auto-destroy. GC on domain end.
+  a <- observe(rv$x, domain = domain)
+  # No auto-destroy. GC with rv.
+  b <- observe(rv$x, domain = domain, autoDestroy = FALSE)
+  # No auto-destroy and no reactive dependencies. GC immediately.
+  c <- observe({}, domain = domain)
+  c$setAutoDestroy(FALSE)
+  # Similar to b, but we'll set it to autoDestroy later.
+  d <- observe(rv$x, domain = domain, autoDestroy = FALSE)
+  # Like a, but we'll destroy it immediately.
+  e <- observe(rx$x, domain = domain)
+  e$destroy()
+
+  collected <- new.env(parent = emptyenv())
+
+  reg.finalizer(a, function(o) collected$a <- TRUE)
+  reg.finalizer(b, function(o) collected$b <- TRUE)
+  reg.finalizer(c, function(o) collected$c <- TRUE)
+  reg.finalizer(d, function(o) collected$d <- TRUE)
+  reg.finalizer(e, function(o) collected$e <- TRUE)
+
+  rm(list = c("a", "b", "c", "e")) # Not "d"
+
+  gc()
+  # Nothing can be GC'd yet, because all of the observers are
+  # pending execution (i.e. waiting for flushReact).
+  expect_equal(ls(collected), character())
+
+  flushReact()
+  # Now "c" can be garbage collected, because it ran and took
+  # no dependencies (and isn't tied to the session in any way).
+  # And "e" can also be garbage collected, it's been destroyed.
+  gc()
+  expect_equal(ls(collected), c("c", "e"))
+
+  domain$end()
+  # We can GC "a" as well; even though it references rv, it is
+  # destroyed when the session ends.
+  gc()
+  expect_equal(sort(ls(collected)), c("a", "c", "e"))
+
+  # It's OK to turn on auto-destroy even after the session was
+  # destroyed.
+  d$setAutoDestroy(TRUE)
+  # This should no-op.
+  d$setAutoDestroy(FALSE)
+  rm(d)
+  gc()
+  expect_equal(sort(ls(collected)), c("a", "c", "d", "e"))
+
+  rm(rv)
+  # Both rv and "b" can now be collected.
+  gc()
+  expect_equal(sort(ls(collected)), c("a", "b", "c", "d", "e"))
+})
+
 test_that("maskReactiveContext blocks use of reactives", {
   vals <- reactiveValues(x = 123)
 

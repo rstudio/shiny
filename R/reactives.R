@@ -591,6 +591,7 @@ Observer <- R6Class(
     .domain = 'ANY',
     .priority = numeric(0),
     .autoDestroy = logical(0),
+    .autoDestroyHandle = 'ANY',
     .invalidateCallbacks = list(),
     .execCount = integer(0),
     .onResume = 'function',
@@ -620,7 +621,6 @@ registerDebugHook("observerFunc", environment(), label)
       }
       .label <<- label
       .domain <<- domain
-      .autoDestroy <<- autoDestroy
       .priority <<- normalizePriority(priority)
       .execCount <<- 0L
       .suspended <<- suspended
@@ -628,7 +628,9 @@ registerDebugHook("observerFunc", environment(), label)
       .destroyed <<- FALSE
       .prevId <<- ''
 
-      onReactiveDomainEnded(.domain, self$.onDomainEnded)
+      .autoDestroy <<- FALSE
+      .autoDestroyHandle <<- NULL
+      setAutoDestroy(autoDestroy)
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
@@ -706,11 +708,28 @@ registerDebugHook("observerFunc", environment(), label)
       "Sets whether this observer should be automatically destroyed when its
       domain (if any) ends. If autoDestroy is TRUE and the domain already
       ended, then destroy() is called immediately."
+
+      if (.autoDestroy == autoDestroy) {
+        return(.autoDestroy)
+      }
+
       oldValue <- .autoDestroy
       .autoDestroy <<- autoDestroy
-      if (!is.null(.domain) && .domain$isEnded()) {
-        destroy()
+
+      if (autoDestroy) {
+        if (!.destroyed && !is.null(.domain)) { # Make sure to not try to destroy twice.
+          if (.domain$isEnded()) {
+            destroy()
+          } else {
+            .autoDestroyHandle <<- onReactiveDomainEnded(.domain, self$.onDomainEnded)
+          }
+        }
+      } else {
+        if (!is.null(.autoDestroyHandle))
+          self$.autoDestroyHandle()
+        .autoDestroyHandle <<- NULL
       }
+
       invisible(oldValue)
     },
     suspend = function() {
@@ -743,13 +762,18 @@ registerDebugHook("observerFunc", environment(), label)
       suspend()
       .destroyed <<- TRUE
 
+      if (!is.null(.autoDestroyHandle)) {
+        self$.autoDestroyHandle()
+      }
+      .autoDestroyHandle <<- NULL
+
       if (!is.null(.ctx)) {
         .ctx$invalidate()
       }
     },
     .onDomainEnded = function() {
       if (isTRUE(.autoDestroy)) {
-        destroy()
+        self$destroy()
       }
     }
   )

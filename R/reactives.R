@@ -366,7 +366,23 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 #'
 #' @export
 reactiveValuesToList <- function(x, all.names=FALSE) {
-  .subset2(x, 'impl')$toList(all.names)
+  prefix <- .subset2(x, 'ns')("")
+
+  if (nzchar(prefix)) {
+    # Special handling for namespaces
+    items <- .subset2(x, 'impl')$names()
+
+    items <- items[substring(items, 1, nchar(prefix)) == prefix]
+    items <- substring(items, nchar(prefix) + 1)
+    names(items) <- items
+    lapply(items, function(name) {
+      x[[name]]
+    })
+
+  } else {
+    # Default case
+    .subset2(x, 'impl')$toList(all.names)
+  }
 }
 
 # This function is needed because str() on a reactivevalues object will call

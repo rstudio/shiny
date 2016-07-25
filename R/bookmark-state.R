@@ -24,69 +24,6 @@ ShinySaveState <- R6Class("ShinySaveState",
       self$exclude <- exclude
       self$onSave  <- onSave
       self$values  <- new.env(parent = emptyenv())
-    },
-
-    # Save this state object to disk, given a directory to save to.
-    save = function(stateDir) {
-      self$dir <- stateDir
-
-      # Allow user-supplied onSave function to do things like add self$values, or
-      # save data to state dir.
-      if (!is.null(self$onSave))
-        isolate(self$onSave(self))
-
-      # Serialize values, possibly saving some extra data to stateDir
-      inputValues <- serializeReactiveValues(self$input, self$exclude, self$dir)
-      saveRDS(inputValues, file.path(stateDir, "input.rds"))
-
-      # If values were added, save them also.
-      values <- as.list.environment(self$values)
-      if (length(values) != 0)
-        saveRDS(values, file.path(stateDir, "values.rds"))
-    },
-
-    # Encode the state to a URL. This does not save to disk.
-    encode = function() {
-      inputVals <- serializeReactiveValues(self$input, self$exclude, stateDir = NULL)
-
-      # Allow user-supplied onSave function to do things like add self$values.
-      if (!is.null(self$onSave))
-        isolate(self$onSave(self))
-
-      inputVals <- vapply(inputVals,
-        function(x) toJSON(x, strict_atomic = FALSE),
-        character(1),
-        USE.NAMES = TRUE
-      )
-
-      res <- paste0("_inputs_&",
-        paste0(
-          encodeURIComponent(names(inputVals)),
-          "=",
-          encodeURIComponent(inputVals),
-          collapse = "&"
-        )
-      )
-
-      # If 'values' is present, add them as well.
-      if (length(self$values) != 0) {
-        values <- vapply(self$values,
-          function(x) toJSON(x, strict_atomic = FALSE),
-          character(1),
-          USE.NAMES = TRUE
-        )
-
-        res <- paste0(res, "&_values_&",
-          paste0(
-            encodeURIComponent(names(values)),
-            "=",
-            encodeURIComponent(values),
-            collapse = "&"
-          )
-        )
-      }
-
-      res
     }
   )
 )
@@ -97,15 +34,76 @@ ShinySaveState <- R6Class("ShinySaveState",
 saveShinySaveState <- function(state) {
   id <- createUniqueId(8)
 
+  # A function for saving the state object to disk, given a directory to save
+  # to.
+  saveState <- function(stateDir) {
+    state$dir <- stateDir
+
+    # Allow user-supplied onSave function to do things like add state$values, or
+    # save data to state dir.
+    if (!is.null(state$onSave))
+      isolate(state$onSave(state))
+
+    # Serialize values, possibly saving some extra data to stateDir
+    inputValues <- serializeReactiveValues(state$input, state$exclude, state$dir)
+    saveRDS(inputValues, file.path(stateDir, "input.rds"))
+
+    # If values were added, save them also.
+    values <- as.list.environment(state$values)
+    if (length(values) != 0)
+      saveRDS(values, file.path(stateDir, "values.rds"))
+  }
+
+  # Pass the saveState function to the save interface function, which will
+  # invoke saveState after preparing the directory.
   saveInterface <- getShinyOption("save.interface", default = saveInterfaceLocal)
-  saveInterface(id, state$save)
+  saveInterface(id, saveState)
 
   paste0("_state_id_=", encodeURIComponent(id))
 }
 
 # Encode the state to a URL. This does not save to disk.
 encodeShinySaveState <- function(state) {
-  state$encode()
+  inputVals <- serializeReactiveValues(state$input, state$exclude, stateDir = NULL)
+
+  # Allow user-supplied onSave function to do things like add state$values.
+  if (!is.null(state$onSave))
+    isolate(state$onSave(state))
+
+  inputVals <- vapply(inputVals,
+    function(x) toJSON(x, strict_atomic = FALSE),
+    character(1),
+    USE.NAMES = TRUE
+  )
+
+  res <- paste0("_inputs_&",
+    paste0(
+      encodeURIComponent(names(inputVals)),
+      "=",
+      encodeURIComponent(inputVals),
+      collapse = "&"
+    )
+  )
+
+  # If 'values' is present, add them as well.
+  if (length(state$values) != 0) {
+    values <- vapply(state$values,
+      function(x) toJSON(x, strict_atomic = FALSE),
+      character(1),
+      USE.NAMES = TRUE
+    )
+
+    res <- paste0(res, "&_values_&",
+      paste0(
+        encodeURIComponent(names(values)),
+        "=",
+        encodeURIComponent(values),
+        collapse = "&"
+      )
+    )
+  }
+
+  res
 }
 
 RestoreContext <- R6Class("RestoreContext",

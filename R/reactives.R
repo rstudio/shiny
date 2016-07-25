@@ -369,7 +369,10 @@ reactiveValuesToList <- function(x, all.names=FALSE) {
   prefix <- .subset2(x, 'ns')("")
 
   if (nzchar(prefix)) {
-    # Special handling for namespaces
+    # Special handling for namespaces. One way this differs from the regular un-
+    # namespaced case is when a new item is added to the reactiveValues object.
+    # In the regular case, that would invalidate dependents; in the namespaced
+    # case, it would not.
     items <- .subset2(x, 'impl')$names()
 
     items <- items[substring(items, 1, nchar(prefix)) == prefix]

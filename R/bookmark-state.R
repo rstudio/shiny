@@ -11,7 +11,13 @@ ShinySaveState <- R6Class("ShinySaveState",
     # the ShinySaveState object.
     dir = NULL,
 
-    values = NULL, # An environment for storing arbitrary values
+    # An environment for storing arbitrary values. This is an environment
+    # (instead of, say, a list) because if the onSave function represents
+    # multiple callback functions (when onBookmark is called multiple times),
+    # each callback can change `values`, and if we used a list, one of the
+    # callbacks could easily obliterate values set by another. This can happen
+    # when using modules that have an onBookmark function.
+    values = NULL,
 
     initialize = function(input = NULL, exclude = NULL, onSave = NULL) {
       self$input   <- input

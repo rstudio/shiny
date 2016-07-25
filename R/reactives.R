@@ -366,26 +366,23 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 #'
 #' @export
 reactiveValuesToList <- function(x, all.names=FALSE) {
+  # Default case
+  res <- .subset2(x, 'impl')$toList(all.names)
+
   prefix <- .subset2(x, 'ns')("")
-
+  # Special handling for namespaces
   if (nzchar(prefix)) {
-    # Special handling for namespaces. One way this differs from the regular un-
-    # namespaced case is when a new item is added to the reactiveValues object.
-    # In the regular case, that would invalidate dependents; in the namespaced
-    # case, it would not.
-    items <- .subset2(x, 'impl')$names()
+    fullNames <- names(res)
 
-    items <- items[substring(items, 1, nchar(prefix)) == prefix]
-    items <- substring(items, nchar(prefix) + 1)
-    names(items) <- items
-    lapply(items, function(name) {
-      x[[name]]
-    })
+    # Filter out items that match namespace
+    fullNames <- fullNames[substring(fullNames, 1, nchar(prefix)) == prefix]
+    res <- res[fullNames]
 
-  } else {
-    # Default case
-    .subset2(x, 'impl')$toList(all.names)
+    # Remove namespace prefix
+    names(res) <- substring(fullNames, nchar(prefix) + 1)
   }
+
+  res
 }
 
 # This function is needed because str() on a reactivevalues object will call

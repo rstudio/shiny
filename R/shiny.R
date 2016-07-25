@@ -332,24 +332,6 @@ NS <- function(namespace, id = NULL) {
 #' @export
 ns.sep <- "-"
 
-# Given a char vector, return a logical vector indicating which of those strings
-# are names of things in that namespace.
-filterNamespace <- function(namespace, x) {
-  nsString <- paste0(namespace, ns.sep)
-  substr(x, 1, nchar(nsString)) == nsString
-}
-
-# Given a char vector of namespaced names, return a char vector of corresponding
-# names with namespace prefix removed.
-unNamespace <- function(namespace, x) {
-  if (!all(filterNamespace(namespace, x))) {
-    stop("x contains strings(s) that do not have namespace prefix ", namespace)
-  }
-
-  nsString <- paste0(namespace, ns.sep)
-  substr(x, nchar(nsString) + 1, 99999)
-}
-
 
 #' @include utils.R
 ShinySession <- R6Class(
@@ -724,6 +706,24 @@ ShinySession <- R6Class(
         }
       )
 
+      # Given a char vector, return a logical vector indicating which of those
+      # strings are names of things in the namespace.
+      filterNamespace <- function(x) {
+        nsString <- paste0(namespace, ns.sep)
+        substr(x, 1, nchar(nsString)) == nsString
+      }
+
+      # Given a char vector of namespaced names, return a char vector of corresponding
+      # names with namespace prefix removed.
+      unNamespace <- function(x) {
+        if (!all(filterNamespace(x))) {
+          stop("x contains strings(s) that do not have namespace prefix ", namespace)
+        }
+
+        nsString <- paste0(namespace, ns.sep)
+        substring(x, nchar(nsString) + 1)
+      }
+
       # Given a restore state object (a list), return a modified version that's
       # scoped to this namespace.
       scopeRestoreState <- function(state) {
@@ -732,12 +732,12 @@ ShinySession <- R6Class(
         scopeState <- state
 
         # Keep only inputs that are in the scope, and rename them
-        scopeState$input <- scopeState$input[filterNamespace(namespace, names(scopeState$input))]
-        names(scopeState$input) <- unNamespace(namespace, names(scopeState$input))
+        scopeState$input <- scopeState$input[filterNamespace(names(scopeState$input))]
+        names(scopeState$input) <- unNamespace(names(scopeState$input))
 
         # Same for values
-        scopeState$values <- scopeState$values[filterNamespace(namespace, names(scopeState$values))]
-        names(scopeState$values) <- unNamespace(namespace, names(scopeState$values))
+        scopeState$values <- scopeState$values[filterNamespace(names(scopeState$values))]
+        names(scopeState$values) <- unNamespace(names(scopeState$values))
 
         if (!is.null(state$dir)) {
           scopeState$dir <- file.path(state$dir, namespace)

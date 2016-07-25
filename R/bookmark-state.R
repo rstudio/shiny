@@ -10,42 +10,33 @@ ShinySaveState <- R6Class("ShinySaveState",
     # These are set not in initialize(), but by external functions that modify
     # the ShinySaveState object.
     dir = NULL,
-    values = NULL,
 
-    initialize = function(input = NULL, exclude = NULL, onSave = NULL)
-    {
+    values = NULL, # An environment for storing arbitrary values
+
+    initialize = function(input = NULL, exclude = NULL, onSave = NULL) {
       self$input   <- input
       self$exclude <- exclude
       self$onSave  <- onSave
+      self$values  <- new.env(parent = emptyenv())
     },
 
-    # Save this state object to disk. Returns a query string which can be used
-    # to restore the session.
-    save = function() {
-      id <- createUniqueId(8)
+    # Save this state object to disk, given a directory to save to.
+    save = function(stateDir) {
+      self$dir <- stateDir
 
-      saveInterface <- getShinyOption("save.interface",
-                                       default = saveInterfaceLocal)
+      # Allow user-supplied onSave function to do things like add self$values, or
+      # save data to state dir.
+      if (!is.null(self$onSave))
+        isolate(self$onSave(self))
 
-      saveInterface(id, function(stateDir) {
-        # Directory is provided by the saveInterface function.
-        self$dir <- stateDir
+      # Serialize values, possibly saving some extra data to stateDir
+      inputValues <- serializeReactiveValues(self$input, self$exclude, self$dir)
+      saveRDS(inputValues, file.path(stateDir, "input.rds"))
 
-        # Allow user-supplied onSave function to do things like add self$values, or
-        # save data to state dir.
-        if (!is.null(self$onSave))
-          isolate(self$onSave(self))
-
-        # Serialize values, possibly saving some extra data to stateDir
-        inputValues <- serializeReactiveValues(self$input, self$exclude, self$dir)
-        saveRDS(inputValues, file.path(stateDir, "input.rds"))
-
-        # If there values passed in, save them also
-        if (!is.null(self$values))
-          saveRDS(self$values, file.path(stateDir, "values.rds"))
-      })
-
-      paste0("_state_id_=", encodeURIComponent(id))
+      # If values were added, save them also.
+      values <- as.list.environment(self$values)
+      if (length(values) != 0)
+        saveRDS(values, file.path(stateDir, "values.rds"))
     },
 
     # Encode the state to a URL. This does not save to disk.
@@ -54,7 +45,7 @@ ShinySaveState <- R6Class("ShinySaveState",
 
       # Allow user-supplied onSave function to do things like add self$values.
       if (!is.null(self$onSave))
-        self$onSave(self)
+        isolate(self$onSave(self))
 
       inputVals <- vapply(inputVals,
         function(x) toJSON(x, strict_atomic = FALSE),
@@ -62,7 +53,6 @@ ShinySaveState <- R6Class("ShinySaveState",
         USE.NAMES = TRUE
       )
 
-      res <-
       res <- paste0("_inputs_&",
         paste0(
           encodeURIComponent(names(inputVals)),
@@ -95,6 +85,22 @@ ShinySaveState <- R6Class("ShinySaveState",
   )
 )
 
+
+# Save a state to disk. Returns a query string which can be used to restore the
+# session.
+saveShinySaveState <- function(state) {
+  id <- createUniqueId(8)
+
+  saveInterface <- getShinyOption("save.interface", default = saveInterfaceLocal)
+  saveInterface(id, state$save)
+
+  paste0("_state_id_=", encodeURIComponent(id))
+}
+
+# Encode the state to a URL. This does not save to disk.
+encodeShinySaveState <- function(state) {
+  state$encode()
+}
 
 RestoreContext <- R6Class("RestoreContext",
   public = list(

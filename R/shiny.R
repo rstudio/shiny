@@ -332,6 +332,25 @@ NS <- function(namespace, id = NULL) {
 #' @export
 ns.sep <- "-"
 
+# Given a char vector, return a logical vector indicating which of those strings
+# are names of things in that namespace.
+filterNamespace <- function(namespace, x) {
+  nsString <- paste0(namespace, ns.sep)
+  substr(x, 1, nchar(nsString)) == nsString
+}
+
+# Given a char vector of namespaced names, return a char vector of corresponding
+# names with namespace prefix removed.
+unNamespace <- function(namespace, x) {
+  if (!all(filterNamespace(namespace, x))) {
+    stop("x contains strings(s) that do not have namespace prefix ", namespace)
+  }
+
+  nsString <- paste0(namespace, ns.sep)
+  substr(x, nchar(nsString) + 1, 99999)
+}
+
+
 #' @include utils.R
 ShinySession <- R6Class(
   'ShinySession',
@@ -459,9 +478,9 @@ ShinySession <- R6Class(
                 )
 
                 if (store == "server") {
-                  url <- saveState$save()
+                  url <- saveShinySaveState(saveState)
                 } else if (store == "url") {
-                  url <- saveState$encode()
+                  url <- encodeShinySaveState(saveState)
                 } else {
                   stop("Unknown store type: ", store)
                 }
@@ -642,7 +661,7 @@ ShinySession <- R6Class(
     makeScope = function(namespace) {
       ns <- NS(namespace)
 
-      createSessionProxy(self,
+      scope <- createSessionProxy(self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
         output = .createOutputWriter(self, ns = ns),
         sendInputMessage = function(inputId, message) {
@@ -654,8 +673,80 @@ ShinySession <- R6Class(
         ns = ns,
         makeScope = function(namespace) {
           self$makeScope(ns(namespace))
+        },
+
+        onBookmark = function(fun) {
+          self$onBookmark(function(state) {
+            # TODO: Update `exclude` to have per-session values.
+            scopeState <- ShinySaveState$new(scope$input)
+
+            # Create subdir for this scope
+            if (!is.null(state$dir)) {
+              scopeState$dir <- file.path(state$dir, namespace)
+              res <- dir.create(scopeState$dir)
+              if (res == FALSE) {
+                stop("Error creating subdirectory for scope ", namespace)
+              }
+            }
+
+            # Invoke the callback on the scopeState object
+            fun(scopeState)
+
+            # Copy `values` from scopeState to state, adding namespace
+            if (length(scopeState$values) != 0) {
+              if (anyUnnamed(scopeState$values)) {
+                stop("All scope values in must be named.")
+              }
+
+              lapply(names(scopeState$values), function(origName) {
+                scopedName <- ns(origName)
+                state$values[[scopedName]] <- scopeState$values[[origName]]
+              })
+            }
+          })
+        },
+        onBookmarked = function(fun) {
+          stop("onBookmarked() can't be used in a module.")
+        },
+        onRestore = function(fun) {
+          self$onRestore(function(state) {
+            scopeState <- scopeRestoreState(state)
+            # Invoke user callback
+            fun(scopeState)
+          })
+        },
+        onRestored = function(fun) {
+          self$onRestored(function(state) {
+            scopeState <- scopeRestoreState(state)
+            # Invoke user callback
+            fun(scopeState)
+          })
         }
       )
+
+      # Given a restore state object (a list), return a modified version that's
+      # scoped to this namespace.
+      scopeRestoreState <- function(state) {
+        # State is a list. We need to copy and transform some things for the
+        # scope.
+        scopeState <- state
+
+        # Keep only inputs that are in the scope, and rename them
+        scopeState$input <- scopeState$input[filterNamespace(namespace, names(scopeState$input))]
+        names(scopeState$input) <- unNamespace(namespace, names(scopeState$input))
+
+        # Same for values
+        scopeState$values <- scopeState$values[filterNamespace(namespace, names(scopeState$values))]
+        names(scopeState$values) <- unNamespace(namespace, names(scopeState$values))
+
+        if (!is.null(state$dir)) {
+          scopeState$dir <- file.path(state$dir, namespace)
+        }
+
+        scopeState
+      }
+
+      scope
     },
     ns = function(id) {
       NS(NULL, id)

@@ -591,6 +591,10 @@ Observer <- R6Class(
     .domain = 'ANY',
     .priority = numeric(0),
     .autoDestroy = logical(0),
+    # A function that, when invoked, unsubscribes the autoDestroy
+    # listener (or NULL if autodestroy is disabled for this observer).
+    # We must unsubscribe when this observer is destroyed, or else
+    # the observer cannot be garbage collected until the session ends.
     .autoDestroyHandle = 'ANY',
     .invalidateCallbacks = list(),
     .execCount = integer(0),

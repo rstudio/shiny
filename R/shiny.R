@@ -359,6 +359,7 @@ ShinySession <- R6Class(
     bookmarkedCallbacks = 'Callbacks',
     restoreCallbacks = 'Callbacks',
     restoredCallbacks = 'Callbacks',
+    bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
 
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
@@ -435,7 +436,6 @@ ShinySession <- R6Class(
       # Get bookmarking config
       appConfig <- getShinyOption("appConfig")
       store   <- appConfig$bookmarkStore %OR% "disable"
-      exclude <- appConfig$bookmarkExclude
 
       if (store == "disable")
         return()
@@ -453,7 +453,7 @@ ShinySession <- R6Class(
               withLogErrors({
                 saveState <- ShinySaveState$new(
                   input = session$input,
-                  exclude = exclude,
+                  exclude = session$getBookmarkExclude(),
                   onSave = function(state) {
                     private$bookmarkCallbacks$invoke(state)
                   }
@@ -643,6 +643,11 @@ ShinySession <- R6Class(
     makeScope = function(namespace) {
       ns <- NS(namespace)
 
+      # Names of inputs to exclude from bookmarking. Can't be part of the scope
+      # object because `$<-.session_proxy` doesn't allow assignment on overidden
+      # names.
+      bookmarkExclude = character(0)
+
       scope <- createSessionProxy(self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
         output = .createOutputWriter(self, ns = ns),
@@ -657,10 +662,15 @@ ShinySession <- R6Class(
           self$makeScope(ns(namespace))
         },
 
+        setBookmarkExclude = function(names) {
+          bookmarkExclude <<- names
+        },
+        getBookmarkExclude = function() {
+          bookmarkExclude
+        },
         onBookmark = function(fun) {
           self$onBookmark(function(state) {
-            # TODO: Update `exclude` to have per-session values.
-            scopeState <- ShinySaveState$new(scope$input)
+            scopeState <- ShinySaveState$new(scope$input, scope$getBookmarkExclude())
 
             # Create subdir for this scope
             if (!is.null(state$dir)) {
@@ -1033,6 +1043,12 @@ ShinySession <- R6Class(
       }
     },
 
+    setBookmarkExclude = function(names) {
+      private$bookmarkExclude <- names
+    },
+    getBookmarkExclude = function() {
+      private$bookmarkExclude
+    },
     onBookmark = function(fun) {
       if (!is.function(fun) || length(fun) != 1) {
         stop("`fun` must be a function that takes one argument")

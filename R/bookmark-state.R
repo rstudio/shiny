@@ -500,19 +500,25 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
   )
 }
 
-#' Configure bookmarking for a Shiny application
+#' Enable bookmarking for a Shiny application
 #'
 #' @param store Either \code{"url"}, which encodes all of the relevant values in
 #'   a URL, \code{"server"}, which saves to disk on the server, or
 #'   \code{"disable"}, which disables any previously-enabled bookmarking.
-#' @param exclude A character vector of names of input values to exclude from
+#' @export
+enableBookmarking <- function(store = c("url", "server", "disable")) {
+  store <- match.arg(store)
+  shinyOptions(bookmarkStore = store)
+}
+
+
+#' Exclude inputs from bookmarking
+#'
+#' @param names A character vector containing names of inputs to exclude from
 #'   bookmarking.
 #' @export
-configureBookmarking <- function(store = c("url", "server", "disable"),
-  exclude = NULL)
-{
-  store <- match.arg(store)
-  shinyOptions(bookmarkStore = store, bookmarkExclude = exclude)
+setBookmarkExclude <- function(names = character(0), session = getDefaultReactiveDomain()) {
+  session$setBookmarkExclude(names)
 }
 
 
@@ -565,11 +571,10 @@ onRestored <- function(fun, session = getDefaultReactiveDomain()) {
 consumeBookmarkOptions <- function() {
   # Get options from configureBookmarking
   options <- list(
-    bookmarkStore = getShinyOption("bookmarkStore"),
-    bookmarkExclude = getShinyOption("bookmarkExclude")
+    bookmarkStore = getShinyOption("bookmarkStore")
   )
 
-  shinyOptions(bookmarkStore = NULL, bookmarkExclude = NULL)
+  shinyOptions(bookmarkStore = NULL)
 
   options
 }

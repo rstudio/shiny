@@ -734,7 +734,9 @@ ShinySession <- R6Class(
         })
 
         if (!is.null(state$dir)) {
-          scopeState$dir <- file.path(state$dir, namespace)
+          dir <- file.path(state$dir, namespace)
+          if (dirExists(dir))
+            scopeState$dir <- dir
         }
 
         scopeState

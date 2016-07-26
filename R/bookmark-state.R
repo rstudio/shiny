@@ -490,7 +490,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
       $('#shiny-bookmark-copy-text')
         .text(function() {
           if (/Mac/i.test(navigator.userAgent)) {
-            return 'Press ⌘-C to copy.';
+            return 'Press \u2318-C to copy.';
           } else {
             return 'Press Ctrl-C to copy.';
           }
@@ -516,6 +516,7 @@ enableBookmarking <- function(store = c("url", "server", "disable")) {
 #'
 #' @param names A character vector containing names of inputs to exclude from
 #'   bookmarking.
+#' @param session A shiny session object.
 #' @export
 setBookmarkExclude <- function(names = character(0), session = getDefaultReactiveDomain()) {
   session$setBookmarkExclude(names)
@@ -536,9 +537,6 @@ setBookmarkExclude <- function(names = character(0), session = getDefaultReactiv
 #' arguments to cancel the registration.
 #'
 #' @param fun A callback function.
-#' @param once Should the function be run once, and then cleared, or should it
-#'   re-run each time the event occurs. (Only for \code{onFlush} and
-#'   \code{onFlushed}.)
 #' @param session A shiny session object.
 #'
 #' @export
@@ -546,16 +544,19 @@ onBookmark <- function(fun, session = getDefaultReactiveDomain()) {
   session$onBookmark(fun)
 }
 
+#' @rdname onBookmark
 #' @export
 onBookmarked <- function(fun, session = getDefaultReactiveDomain()) {
   session$onBookmarked(fun)
 }
 
+#' @rdname onBookmark
 #' @export
 onRestore <- function(fun, session = getDefaultReactiveDomain()) {
   session$onRestore(fun)
 }
 
+#' @rdname onBookmark
 #' @export
 onRestored <- function(fun, session = getDefaultReactiveDomain()) {
   session$onRestored(fun)

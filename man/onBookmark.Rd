@@ -2,18 +2,23 @@
 % Please edit documentation in R/bookmark-state.R
 \name{onBookmark}
 \alias{onBookmark}
+\alias{onBookmarked}
+\alias{onRestore}
+\alias{onRestored}
 \title{Add callbacks for Shiny session bookmarkingevents}
 \usage{
 onBookmark(fun, session = getDefaultReactiveDomain())
+
+onBookmarked(fun, session = getDefaultReactiveDomain())
+
+onRestore(fun, session = getDefaultReactiveDomain())
+
+onRestored(fun, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{fun}{A callback function.}
 
 \item{session}{A shiny session object.}
-
-\item{once}{Should the function be run once, and then cleared, or should it
-re-run each time the event occurs. (Only for \code{onFlush} and
-\code{onFlushed}.)}
 }
 \description{
 These functions are for registering callbacks on Shiny session events.

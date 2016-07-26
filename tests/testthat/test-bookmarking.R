@@ -38,4 +38,17 @@ test_that("Inputs and values in query string", {
   expect_warning(suppressMessages(RestoreContext$new("?_inputs_&a=1&_values_&b=2&_inputs_&")))
   expect_warning(suppressMessages(RestoreContext$new("?_values_&a=1&_values_")))
   expect_warning(suppressMessages(RestoreContext$new("?_inputs_&a=1&_values_&_values&b=2")))
+
+  # If there's an error in the conversion from query string, should have
+  # blank values.
+  expect_warning(suppressMessages(rc <- RestoreContext$new("?_inputs_&a=[x&b=1")))
+  expect_identical(rc$input$asList(), list())
+  expect_identical(rc$values, list())
+  expect_identical(rc$dir, NULL)
+
+  # Ignore query string if it's a subapp
+  rc <- RestoreContext$new("?w=&__subapp__=1")
+  expect_identical(rc$input$asList(), list())
+  expect_identical(rc$values, list())
+  expect_identical(rc$dir, NULL)
 })

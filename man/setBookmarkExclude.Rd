@@ -10,6 +10,8 @@ setBookmarkExclude(names = character(0),
 \arguments{
 \item{names}{A character vector containing names of inputs to exclude from
 bookmarking.}
+
+\item{session}{A shiny session object.}
 }
 \description{
 Exclude inputs from bookmarking

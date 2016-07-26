@@ -34,6 +34,8 @@ shiny 0.13.2.9001
   `showNotification` and `hideNotification`. From JavaScript, there is a new
   `Shiny.notification` object that controls notifications. (#1141)
 
+* Progress indicators now use the notification API.
+
 * Improved `renderTable()` function to make the tables look prettier and also
   provide the user with a lot more parameters to customize their tables with.
 

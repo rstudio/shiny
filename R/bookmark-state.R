@@ -11,20 +11,40 @@ ShinySaveState <- R6Class("ShinySaveState",
     # the ShinySaveState object.
     dir = NULL,
 
-    # An environment for storing arbitrary values. This is an environment
-    # (instead of, say, a list) because if the onSave function represents
-    # multiple callback functions (when onBookmark is called multiple times),
-    # each callback can change `values`, and if we used a list, one of the
-    # callbacks could easily obliterate values set by another. This can happen
-    # when using modules that have an onBookmark function.
-    values = NULL,
 
     initialize = function(input = NULL, exclude = NULL, onSave = NULL) {
       self$input   <- input
       self$exclude <- exclude
       self$onSave  <- onSave
-      self$values  <- new.env(parent = emptyenv())
+      private$values_  <- new.env(parent = emptyenv())
     }
+  ),
+
+  active = list(
+    # `values` looks to the outside world like an environment for storing
+    # arbitrary values. Two things to note: (1) This is an environment (instead
+    # of, say, a list) because if the onSave function represents multiple
+    # callback functions (when onBookmark is called multiple times), each
+    # callback can change `values`, and if we used a list, one of the callbacks
+    # could easily obliterate values set by another. This can happen when using
+    # modules that have an onBookmark function. (2) The purpose of the active
+    # binding is to prevent replacing state$values with another arbitrary
+    # object. (Simply locking the binding would prevent all changes to
+    # state$values.)
+    values = function(value) {
+      if (missing(value))
+        return(private$values_)
+
+      if (identical(value, private$values_)) {
+        return(value)
+      } else {
+        stop("Items in `values` can be changed, but `values` itself cannot be replaced.")
+      }
+    }
+  ),
+
+  private = list(
+    values_ = NULL
   )
 )
 

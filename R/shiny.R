@@ -643,10 +643,12 @@ ShinySession <- R6Class(
     makeScope = function(namespace) {
       ns <- NS(namespace)
 
-      # Names of inputs to exclude from bookmarking. Can't be part of the scope
-      # object because `$<-.session_proxy` doesn't allow assignment on overidden
-      # names.
-      bookmarkExclude = character(0)
+      # Private items for this scope. Can't be part of the scope object because
+      # `$<-.session_proxy` doesn't allow assignment on overidden names.
+      bookmarkCallbacks <- Callbacks$new()
+      restoreCallbacks  <- Callbacks$new()
+      restoredCallbacks <- Callbacks$new()
+      bookmarkExclude   <- character(0)
 
       scope <- createSessionProxy(self,
         input = .createReactiveValues(private$.input, readonly = TRUE, ns = ns),
@@ -669,50 +671,25 @@ ShinySession <- R6Class(
           bookmarkExclude
         },
         onBookmark = function(fun) {
-          self$onBookmark(function(state) {
-            scopeState <- ShinySaveState$new(scope$input, scope$getBookmarkExclude())
-
-            # Create subdir for this scope
-            if (!is.null(state$dir)) {
-              scopeState$dir <- file.path(state$dir, namespace)
-              res <- dir.create(scopeState$dir)
-              if (res == FALSE) {
-                stop("Error creating subdirectory for scope ", namespace)
-              }
-            }
-
-            # Invoke the callback on the scopeState object
-            fun(scopeState)
-
-            # Copy `values` from scopeState to state, adding namespace
-            if (length(scopeState$values) != 0) {
-              if (anyUnnamed(scopeState$values)) {
-                stop("All scope values in must be named.")
-              }
-
-              lapply(names(scopeState$values), function(origName) {
-                scopedName <- ns(origName)
-                state$values[[scopedName]] <- scopeState$values[[origName]]
-              })
-            }
-          })
+          if (!is.function(fun) || length(fun) != 1) {
+            stop("`fun` must be a function that takes one argument")
+          }
+          bookmarkCallbacks$register(fun)
         },
         onBookmarked = function(fun) {
           stop("onBookmarked() can't be used in a module.")
         },
         onRestore = function(fun) {
-          self$onRestore(function(state) {
-            scopeState <- scopeRestoreState(state)
-            # Invoke user callback
-            fun(scopeState)
-          })
+          if (!is.function(fun) || length(fun) != 1) {
+            stop("`fun` must be a function that takes one argument")
+          }
+          restoreCallbacks$register(fun)
         },
         onRestored = function(fun) {
-          self$onRestored(function(state) {
-            scopeState <- scopeRestoreState(state)
-            # Invoke user callback
-            fun(scopeState)
-          })
+          if (!is.function(fun) || length(fun) != 1) {
+            stop("`fun` must be a function that takes one argument")
+          }
+          restoredCallbacks$register(fun)
         }
       )
 
@@ -755,6 +732,61 @@ ShinySession <- R6Class(
 
         scopeState
       }
+
+      # When scope is created, register these bookmarking callbacks on the main
+      # session object. They will invoke the scope's own callbacks, if any are
+      # present.
+      self$onBookmark(function(state) {
+        # Exit if no user-defined callbacks.
+        if (bookmarkCallbacks$count() == 0)
+          return()
+
+        scopeState <- ShinySaveState$new(scope$input, scope$getBookmarkExclude())
+
+        # Create subdir for this scope
+        if (!is.null(state$dir)) {
+          scopeState$dir <- file.path(state$dir, namespace)
+          res <- dir.create(scopeState$dir)
+          if (res == FALSE) {
+            stop("Error creating subdirectory for scope ", namespace)
+          }
+        }
+
+        # Invoke the callback on the scopeState object
+        bookmarkCallbacks$invoke(scopeState)
+
+        # Copy `values` from scopeState to state, adding namespace
+        if (length(scopeState$values) != 0) {
+          if (anyUnnamed(scopeState$values)) {
+            stop("All scope values in must be named.")
+          }
+
+          lapply(names(scopeState$values), function(origName) {
+            scopedName <- ns(origName)
+            state$values[[scopedName]] <- scopeState$values[[origName]]
+          })
+        }
+      })
+
+      self$onRestore(function(state) {
+        # Exit if no user-defined callbacks.
+        if (restoreCallbacks$count() == 0)
+          return()
+
+        scopeState <- scopeRestoreState(state)
+        # Invoke user callbacks
+        restoreCallbacks$invoke(scopeState)
+      })
+
+      self$onRestored(function(state) {
+        # Exit if no user-defined callbacks.
+        if (restoredCallbacks$count() == 0)
+          return()
+
+        scopeState <- scopeRestoreState(state)
+        # Invoke user callbacks
+        restoredCallbacks$invoke(scopeState)
+      })
 
       scope
     },

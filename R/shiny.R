@@ -717,14 +717,21 @@ ShinySession <- R6Class(
         # State is a list. We need to copy and transform some things for the
         # scope.
         scopeState <- state
+        # `values` is an environment and we don't want to modify the original.
+        scopeState$values <- new.env(parent = emptyenv())
 
         # Keep only inputs that are in the scope, and rename them
         scopeState$input <- scopeState$input[filterNamespace(names(scopeState$input))]
         names(scopeState$input) <- unNamespace(names(scopeState$input))
 
-        # Same for values
-        scopeState$values <- scopeState$values[filterNamespace(names(scopeState$values))]
-        names(scopeState$values) <- unNamespace(names(scopeState$values))
+        # Same for values. This is an environment so we have to handle a little
+        # differently.
+        origNames <- names(state$values)
+        origNames <- origNames[filterNamespace(origNames)]
+        lapply(origNames, function(origName) {
+          scopedName <- unNamespace(origName)
+          scopeState$values[[scopedName]] <- state$values[[origName]]
+        })
 
         if (!is.null(state$dir)) {
           scopeState$dir <- file.path(state$dir, namespace)

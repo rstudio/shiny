@@ -49,9 +49,8 @@ saveShinySaveState <- function(state) {
     saveRDS(inputValues, file.path(stateDir, "input.rds"))
 
     # If values were added, save them also.
-    values <- as.list.environment(state$values)
-    if (length(values) != 0)
-      saveRDS(values, file.path(stateDir, "values.rds"))
+    if (length(state$values) != 0)
+      saveRDS(state$values, file.path(stateDir, "values.rds"))
   }
 
   # Pass the saveState function to the save interface function, which will
@@ -167,7 +166,7 @@ RestoreContext <- R6Class("RestoreContext",
       self$active <- FALSE
       self$initErrorMessage <- NULL
       self$input <- RestoreInputSet$new(list())
-      self$values <- list()
+      self$values <- new.env(parent = emptyenv())
       self$dir <- NULL
     },
 
@@ -208,8 +207,6 @@ RestoreContext <- R6Class("RestoreContext",
         valuesFile <- file.path(stateDir, "values.rds")
         if (file.exists(valuesFile)) {
           self$values <- readRDS(valuesFile)
-        } else {
-          self$values <- list()
         }
       }
 
@@ -279,7 +276,8 @@ RestoreContext <- R6Class("RestoreContext",
       inputs <- valuesFromJSON(inputs)
       self$input <- RestoreInputSet$new(inputs)
 
-      self$values <- valuesFromJSON(values)
+      values <- valuesFromJSON(values)
+      self$values <- list2env(values, self$values)
     }
   )
 )

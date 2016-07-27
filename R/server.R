@@ -447,6 +447,9 @@ startApp <- function(appObj, port, host, quiet) {
       message('\n', 'Listening on domain socket ', port)
     }
     mask <- attr(port, 'mask')
+    if (is.null(mask)) {
+      stop("`port` is not a valid domain socket (missing `mask` attribute)")
+    }
     return(startPipeServer(port, mask, handlerManager$createHttpuvApp()))
   }
 }

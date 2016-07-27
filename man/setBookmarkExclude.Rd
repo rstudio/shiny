@@ -14,6 +14,16 @@ bookmarking.}
 \item{session}{A shiny session object.}
 }
 \description{
-Exclude inputs from bookmarking
+This function tells Shiny which inputs should be excluded from bookmarking.
+It should be called from inside the application's server function.
+}
+\details{
+This function can also be called from a module's server function, in which
+case it will exclude inputs with the specified names, from that module. It
+will not affect inputs from other modules or from the top level of the Shiny
+application.
+}
+\seealso{
+\code{\link{enableBookmarking}} for examples.
 }
 

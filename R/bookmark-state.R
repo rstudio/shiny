@@ -520,10 +520,187 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 
 #' Enable bookmarking for a Shiny application
 #'
+#' There are two types of bookmarking: saving an application's state to disk on
+#' the server, and encoding the application's state in a URL. For state that has
+#' been saved to disk, the state can be restored with the corresponding state
+#' ID. For URL-encoded state, the state of the application is encoded in the
+#' URL, and no server-side storage is needed.
+#'
+#' For restoring state to work properly, the UI must be a function that takes
+#' one argument, \code{request}. In most Shiny applications, the UI is not a
+#' function; it might have the form \code{fluidPage(....)}. Converting it to a
+#' function is as simple as wrapping it in a function, as in
+#' \code{function(request) \{ fluidPage(....) \}}.
+#'
+#' By default, all input values will be bookmarked, except for the values of
+#' actionButtons and passwordInputs. FileInputs will be saved if the state is
+#' saved on a server, but not if if the state is encoded in a URL.
+#'
+#' When bookmarking state, arbitrary values can be stored, by passing a function
+#' as the \code{onBookmark} argument. That function will be passed a
+#' \code{\link{ShinySaveState}} object. The \code{values} field of the object is
+#' a list which can be manipulated to save extra information. Additionally, if
+#' the state is being saved on the server, and the \code{dir} field of that
+#' object can be used to save extra information to files in that directory.
+#'
+#' For saved-to-server state, this is how the state directory is chosen:
+#' \itemize{ \item If running in a hosting environment such as Shiny Server or
+#' Connect, the hosting environment will choose the directory. \item If running
+#' an app in a directory with \code{\link{runApp}()}, the saved states will be
+#' saved in a subdirectory of the app called shiny_bookmarks. \item If running a
+#' Shiny app object that is generated from code (not run from a directory), the
+#' saved states will be saved in a subdirectory of the current working directory
+#' called shiny_bookmarks. }
+#'
 #' @param store Either \code{"url"}, which encodes all of the relevant values in
 #'   a URL, \code{"server"}, which saves to disk on the server, or
 #'   \code{"disable"}, which disables any previously-enabled bookmarking.
+#' @param exclude A character vector of names of input values to exclude from
+#'   bookmarking.
+#' @param session A Shiny session object.
+#'
+#' @seealso \code{\link{onBookmark}}, \code{\link{onRestore}}, and
+#'   \code{\link{onRestored}} for registering callback functions that are
+#'   invoked when the state is bookmarked or restored.
+#'
 #' @export
+#' @examples
+#' ## Only run these examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' # Basic example with state encoded in URL
+#' ui <- function(request) {
+#'   fluidPage(
+#'     textInput("txt", "Text"),
+#'     checkboxInput("chk", "Checkbox"),
+#'     bookmarkButton("bookmark")
+#'   )
+#' }
+#' server <- function(input, output, session) { }
+#' enableBookmarking("url")
+#' shinyApp(ui, server)
+#'
+#'
+#' # Basic example with state saved to disk
+#' ui <- function(request) {
+#'   fluidPage(
+#'     textInput("txt", "Text"),
+#'     checkboxInput("chk", "Checkbox"),
+#'     bookmarkButton("bookmark")
+#'   )
+#' }
+#' server <- function(input, output, session) { }
+#' enableBookmarking("server")
+#' shinyApp(ui, server)
+#'
+#'
+#' # Save/restore arbitrary values
+#' ui <- function(req) {
+#'   fluidPage(
+#'     textInput("txt", "Text"),
+#'     checkboxInput("chk", "Checkbox"),
+#'     bookmarkButton(),
+#'     br(),
+#'     textOutput("lastSaved")
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   vals <- reactiveValues(savedTime = NULL)
+#'   output$lastSaved <- renderText({
+#'     if (!is.null(vals$savedTime))
+#'       paste("Last saved at", vals$savedTime)
+#'     else
+#'       ""
+#'   })
+#'
+#'   onBookmark(function(state) {
+#'     vals$savedTime <- Sys.time()
+#'     # state is a mutable reference object, and we can add arbitrary values
+#'     # to it.
+#'     state$values$time <- vals$savedTime
+#'   })
+#'   onRestore(function(state) {
+#'     vals$savedTime <- state$values$time
+#'   })
+#' }
+#' enableBookmarking(store = "url")
+#' shinyApp(ui, server)
+#'
+#'
+#' # Usable with dynamic UI (set the slider, then change the text input,
+#' # click the bookmark button)
+#' ui <- function(request) {
+#'   fluidPage(
+#'     sliderInput("slider", "Slider", 1, 100, 50),
+#'     uiOutput("ui"),
+#'     bookmarkButton("bookmark")
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   output$ui <- renderUI({
+#'     textInput("txt", "Text", input$slider)
+#'   })
+#' }
+#' enableBookmarking("url")
+#' shinyApp(ui, server)
+#'
+#'
+#' # Exclude specific inputs (The only input that will be saved in this
+#' # example is chk)
+#' ui <- function(request) {
+#'   fluidPage(
+#'     passwordInput("pw", "Password"), # Passwords are never saved
+#'     sliderInput("slider", "Slider", 1, 100, 50), # Manually excluded below
+#'     checkboxInput("chk", "Checkbox"),
+#'     bookmarkButton("bookmark")
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   setBookmarkExclude("slider")
+#' }
+#' enableBookmarking("url")
+#' shinyApp(ui, server)
+#'
+#'
+#' # Save/restore uploaded files
+#' ui <- function(request) {
+#'   fluidPage(
+#'     sidebarLayout(
+#'       sidebarPanel(
+#'         fileInput("file1", "Choose CSV File", multiple = TRUE,
+#'           accept = c(
+#'             "text/csv",
+#'             "text/comma-separated-values,text/plain",
+#'             ".csv"
+#'           )
+#'         ),
+#'         tags$hr(),
+#'         checkboxInput("header", "Header", TRUE),
+#'         bookmarkButton("bookmark")
+#'       ),
+#'       mainPanel(
+#'         tableOutput("contents")
+#'       )
+#'     )
+#'   )
+#' }
+#' server <- function(input, output) {
+#'   output$contents <- renderTable({
+#'     inFile <- input$file1
+#'     if (is.null(inFile))
+#'       return(NULL)
+#'
+#'     if (nrow(inFile) == 1) {
+#'       read.csv(inFile$datapath, header = input$header)
+#'     } else {
+#'       data.frame(x = "multiple files")
+#'     }
+#'   })
+#' }
+#' enableBookmarking("server")
+#' shinyApp(ui, server)
+#'
+#' }
 enableBookmarking <- function(store = c("url", "server", "disable")) {
   store <- match.arg(store)
   shinyOptions(bookmarkStore = store)
@@ -532,31 +709,215 @@ enableBookmarking <- function(store = c("url", "server", "disable")) {
 
 #' Exclude inputs from bookmarking
 #'
+#' This function tells Shiny which inputs should be excluded from bookmarking.
+#' It should be called from inside the application's server function.
+#'
+#' This function can also be called from a module's server function, in which
+#' case it will exclude inputs with the specified names, from that module. It
+#' will not affect inputs from other modules or from the top level of the Shiny
+#' application.
+#'
 #' @param names A character vector containing names of inputs to exclude from
 #'   bookmarking.
 #' @param session A shiny session object.
+#' @seealso \code{\link{enableBookmarking}} for examples.
 #' @export
 setBookmarkExclude <- function(names = character(0), session = getDefaultReactiveDomain()) {
   session$setBookmarkExclude(names)
 }
 
 
-#' Add callbacks for Shiny session bookmarkingevents
+#' Add callbacks for Shiny session bookmarking events
 #'
-#' These functions are for registering callbacks on Shiny session events.
-#' \code{onBookmark} registers a function that will be called before Shiny flushes
-#' the reactive system. \code{onFlushed} registers a function that will be
-#' called after Shiny flushes the reactive system. \code{onSessionEnded}
-#' registers a function to be called after the client has disconnected.
+#' @description
 #'
-#' These functions should be called within the application's server function.
+#' These functions are for registering callbacks on Shiny session events. They
+#' should be called within an application's server function.
+#'
+#' \itemize{
+#'   \item \code{onBookmark} registers a function that will be called just
+#'     before Shiny bookmarks state.
+#'   \item \code{onRestore} registers a function that will be called when a
+#'     session is restored, after the server function executes, but before all
+#'     other reactives, observers and render functions are run.
+#'   \item \code{onRestored} registers a function that will be called after a
+#'     session is restored. This is similar to \code{onRestore}, but it will be
+#'     called after all reactives, observers, and render functions run, and
+#'     after results are sent to the client browser. \code{onRestored}
+#'     callbacks can be useful for sending update messages to the client
+#'     browser.
+#' }
+#'
+#' @details
 #'
 #' All of these functions return a function which can be called with no
 #' arguments to cancel the registration.
 #'
-#' @param fun A callback function.
-#' @param session A shiny session object.
+#' The callback function that is passed to these functions should take one
+#' argument, typically named "state" (for \code{onBookmark}, \code{onRestore},
+#' and \code{onRestored}) or "url" (for \code{onBookmarked}).
 #'
+#' For \code{onBookmark}, the state object has three relevant fields. The
+#' \code{values} field is an environment which can be used to save arbitrary
+#' values (see examples). If the state is being saved to disk (as opposed to
+#' being encoded in a URL), the \code{dir} field contains the name of a
+#' directory which can be used to store extra files. Finally, the state object
+#' has an \code{input} field, which is simply the application's \code{input}
+#' object. It can be read, but not modified.
+#'
+#' For \code{onRestore} and \code{onRestored}, the state object is a list. This
+#' list contains \code{input}, which is a named list of input values to restore,
+#' \code{values}, which is an environment containing arbitrary values that were
+#' saved in \code{onBookmark}, and \code{dir}, the name of the directory that
+#' the state is being restored from, and which could have been used to save
+#' extra files.
+#'
+#' For \code{onBookmarked}, the callback function receives a string with the
+#' bookmark URL. This callback function should be used to display UI in the
+#' client browser with the bookmark URL. If no callback function is registered,
+#' then Shiny will by default display a modal dialog with the bookmark URL.
+#'
+#' @section Modules:
+#'
+#'   These callbacks may also be used in Shiny modules. When used this way, the
+#'   inputs and values will automatically be namespaced for the module, and the
+#'   callback functions registered for the module will only be able to see the
+#'   module's inputs and values.
+#'
+#' @param fun A callback function which takes one argument.
+#' @param session A shiny session object.
+#' @seealso enableBookmarking for general information on bookmarking.
+#'
+#' @examples
+#' ## Only run these examples in interactive sessions
+#' if (interactive()) {
+#'
+#' # Basic use of onBookmark and onRestore: This app saves the time in its
+#' # arbitrary values, and restores that time when the app is restored.
+#' ui <- function(req) {
+#'   fluidPage(
+#'     textInput("txt", "Input text"),
+#'     bookmarkButton()
+#'   )
+#' }
+#' server <- function(input, output) {
+#'   onBookmark(function(state) {
+#'     savedTime <- as.character(Sys.time())
+#'     cat("Last saved at", savedTime, "\n")
+#'     # state is a mutable reference object, and we can add arbitrary values to
+#'     # it.
+#'     state$values$time <- savedTime
+#'   })
+#'
+#'   onRestore(function(state) {
+#'     cat("Restoring from state bookmarked at", state$values$time, "\n")
+#'   })
+#' }
+#' enableBookmarking("url")
+#' shinyApp(ui, server)
+#'
+#'
+#'
+# This app illustrates two things: saving values in a file using state$dir, and
+# using an onRestored callback to call an input updater function. (In real use
+# cases, it probably makes sense to save content to a file only if it's much
+# larger.)
+#' ui <- function(req) {
+#'   fluidPage(
+#'     textInput("txt", "Input text"),
+#'     bookmarkButton()
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   lastUpdateTime <- NULL
+#'
+#'   observeEvent(input$txt, {
+#'     updateTextInput(session, "txt",
+#'       label = paste0("Input text (Changed ", as.character(Sys.time()), ")")
+#'     )
+#'   })
+#'
+#'   onBookmark(function(state) {
+#'     # Save content to a file
+#'     messageFile <- file.path(state$dir, "message.txt")
+#'     cat(as.character(Sys.time()), file = messageFile)
+#'   })
+#'
+#'   onRestored(function(state) {
+#'     # Read the file
+#'     messageFile <- file.path(state$dir, "message.txt")
+#'     timeText <- readChar(messageFile, 1000)
+#'
+#'     # updateTextInput must be called in onRestored, as opposed to onRestore,
+#'     # because onRestored happens after the client browser is ready.
+#'     updateTextInput(session, "txt",
+#'       label = paste0("Input text (Changed ", timeText, ")")
+#'     )
+#'   })
+#' }
+#' # "server" bookmarking is needed for writing to disk.
+#' enableBookmarking("server")
+#' shinyApp(ui, server)
+#'
+#'
+#' # This app has a module, and both the module and the main app code have
+#' # onBookmark and onRestore functions which write and read state$values$hash. The
+#' # module's version of state$values$hash does not conflict with the app's version
+#' # of state$values$hash.
+#' #
+#' # A basic module that captializes text.
+#' capitalizerUI <- function(id) {
+#'   ns <- NS(id)
+#'   wellPanel(
+#'     h4("Text captializer module"),
+#'     textInput(ns("text"), "Enter text:"),
+#'     verbatimTextOutput(ns("out"))
+#'   )
+#' }
+#' capitalizerServer <- function(input, output, session) {
+#'   output$out <- renderText({
+#'     toupper(input$text)
+#'   })
+#'   onBookmark(function(state) {
+#'     state$values$hash <- digest::digest(input$text, "md5")
+#'   })
+#'   onRestore(function(state) {
+#'     if (identical(digest::digest(input$text, "md5"), state$values$hash)) {
+#'       message("Module's input text matches hash ", state$values$hash)
+#'     } else {
+#'       message("Module's input text does not match hash ", state$values$hash)
+#'     }
+#'   })
+#' }
+#' # Main app code
+#' ui <- function(request) {
+#'   fluidPage(
+#'     sidebarLayout(
+#'       sidebarPanel(
+#'         capitalizerUI("tc"),
+#'         textInput("text", "Enter text (not in module):"),
+#'         bookmarkButton()
+#'       ),
+#'       mainPanel()
+#'     )
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   callModule(capitalizerServer, "tc")
+#'   onBookmark(function(state) {
+#'     state$values$hash <- digest::digest(input$text, "md5")
+#'   })
+#'   onRestore(function(state) {
+#'     if (identical(digest::digest(input$text, "md5"), state$values$hash)) {
+#'       message("App's input text matches hash ", state$values$hash)
+#'     } else {
+#'       message("App's input text does not match hash ", state$values$hash)
+#'     }
+#'   })
+#' }
+#' enableBookmarking(store = "url")
+#' shinyApp(ui, server)
+#' #' }
 #' @export
 onBookmark <- function(fun, session = getDefaultReactiveDomain()) {
   session$onBookmark(fun)

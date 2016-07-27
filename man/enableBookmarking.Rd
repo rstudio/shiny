@@ -10,8 +10,187 @@ enableBookmarking(store = c("url", "server", "disable"))
 \item{store}{Either \code{"url"}, which encodes all of the relevant values in
 a URL, \code{"server"}, which saves to disk on the server, or
 \code{"disable"}, which disables any previously-enabled bookmarking.}
+
+\item{exclude}{A character vector of names of input values to exclude from
+bookmarking.}
+
+\item{session}{A Shiny session object.}
 }
 \description{
-Enable bookmarking for a Shiny application
+There are two types of bookmarking: saving an application's state to disk on
+the server, and encoding the application's state in a URL. For state that has
+been saved to disk, the state can be restored with the corresponding state
+ID. For URL-encoded state, the state of the application is encoded in the
+URL, and no server-side storage is needed.
+}
+\details{
+For restoring state to work properly, the UI must be a function that takes
+one argument, \code{request}. In most Shiny applications, the UI is not a
+function; it might have the form \code{fluidPage(....)}. Converting it to a
+function is as simple as wrapping it in a function, as in
+\code{function(request) \{ fluidPage(....) \}}.
+
+By default, all input values will be bookmarked, except for the values of
+actionButtons and passwordInputs. FileInputs will be saved if the state is
+saved on a server, but not if if the state is encoded in a URL.
+
+When bookmarking state, arbitrary values can be stored, by passing a function
+as the \code{onBookmark} argument. That function will be passed a
+\code{\link{ShinySaveState}} object. The \code{values} field of the object is
+a list which can be manipulated to save extra information. Additionally, if
+the state is being saved on the server, and the \code{dir} field of that
+object can be used to save extra information to files in that directory.
+
+For saved-to-server state, this is how the state directory is chosen:
+\itemize{ \item If running in a hosting environment such as Shiny Server or
+Connect, the hosting environment will choose the directory. \item If running
+an app in a directory with \code{\link{runApp}()}, the saved states will be
+saved in a subdirectory of the app called shiny_bookmarks. \item If running a
+Shiny app object that is generated from code (not run from a directory), the
+saved states will be saved in a subdirectory of the current working directory
+called shiny_bookmarks. }
+}
+\examples{
+## Only run these examples in interactive R sessions
+if (interactive()) {
+
+# Basic example with state encoded in URL
+ui <- function(request) {
+  fluidPage(
+    textInput("txt", "Text"),
+    checkboxInput("chk", "Checkbox"),
+    bookmarkButton("bookmark")
+  )
+}
+server <- function(input, output, session) { }
+enableBookmarking("url")
+shinyApp(ui, server)
+
+
+# Basic example with state saved to disk
+ui <- function(request) {
+  fluidPage(
+    textInput("txt", "Text"),
+    checkboxInput("chk", "Checkbox"),
+    bookmarkButton("bookmark")
+  )
+}
+server <- function(input, output, session) { }
+enableBookmarking("server")
+shinyApp(ui, server)
+
+
+# Save/restore arbitrary values
+ui <- function(req) {
+  fluidPage(
+    textInput("txt", "Text"),
+    checkboxInput("chk", "Checkbox"),
+    bookmarkButton(),
+    br(),
+    textOutput("lastSaved")
+  )
+}
+server <- function(input, output, session) {
+  vals <- reactiveValues(savedTime = NULL)
+  output$lastSaved <- renderText({
+    if (!is.null(vals$savedTime))
+      paste("Last saved at", vals$savedTime)
+    else
+      ""
+  })
+
+  onBookmark(function(state) {
+    vals$savedTime <- Sys.time()
+    # state is a mutable reference object, and we can add arbitrary values
+    # to it.
+    state$values$time <- vals$savedTime
+  })
+  onRestore(function(state) {
+    vals$savedTime <- state$values$time
+  })
+}
+enableBookmarking(store = "url")
+shinyApp(ui, server)
+
+
+# Usable with dynamic UI (set the slider, then change the text input,
+# click the bookmark button)
+ui <- function(request) {
+  fluidPage(
+    sliderInput("slider", "Slider", 1, 100, 50),
+    uiOutput("ui"),
+    bookmarkButton("bookmark")
+  )
+}
+server <- function(input, output, session) {
+  output$ui <- renderUI({
+    textInput("txt", "Text", input$slider)
+  })
+}
+enableBookmarking("url")
+shinyApp(ui, server)
+
+
+# Exclude specific inputs (The only input that will be saved in this
+# example is chk)
+ui <- function(request) {
+  fluidPage(
+    passwordInput("pw", "Password"), # Passwords are never saved
+    sliderInput("slider", "Slider", 1, 100, 50), # Manually excluded below
+    checkboxInput("chk", "Checkbox"),
+    bookmarkButton("bookmark")
+  )
+}
+server <- function(input, output, session) {
+  setBookmarkExclude("slider")
+}
+enableBookmarking("url")
+shinyApp(ui, server)
+
+
+# Save/restore uploaded files
+ui <- function(request) {
+  fluidPage(
+    sidebarLayout(
+      sidebarPanel(
+        fileInput("file1", "Choose CSV File", multiple = TRUE,
+          accept = c(
+            "text/csv",
+            "text/comma-separated-values,text/plain",
+            ".csv"
+          )
+        ),
+        tags$hr(),
+        checkboxInput("header", "Header", TRUE),
+        bookmarkButton("bookmark")
+      ),
+      mainPanel(
+        tableOutput("contents")
+      )
+    )
+  )
+}
+server <- function(input, output) {
+  output$contents <- renderTable({
+    inFile <- input$file1
+    if (is.null(inFile))
+      return(NULL)
+
+    if (nrow(inFile) == 1) {
+      read.csv(inFile$datapath, header = input$header)
+    } else {
+      data.frame(x = "multiple files")
+    }
+  })
+}
+enableBookmarking("server")
+shinyApp(ui, server)
+
+}
+}
+\seealso{
+\code{\link{onBookmark}}, \code{\link{onRestore}}, and
+  \code{\link{onRestored}} for registering callback functions that are
+  invoked when the state is bookmarked or restored.
 }
 

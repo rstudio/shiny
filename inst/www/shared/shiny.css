@@ -124,46 +124,17 @@
   max-width: 100%;
 }
 
-.shiny-progress-container {
-  position: fixed;
-  top: 0px;
-  width: 100%;
-  /* Make sure it draws above all Bootstrap components */
-  z-index: 2000;
-}
-
 .shiny-progress .progress {
-  position: absolute;
-  width: 100%;
-  top: 0px;
-  height: 3px;
-  margin: 0px;
-}
-
-.shiny-progress .bar {
-  opacity: 0.6;
-  transition-duration: 250ms;
-}
-
-.shiny-progress .progress-text {
-  position: absolute;
-  right: 10px;
-  height: 24px;
-  width: 240px;
-  background-color: #eef8ff;
-  margin: 0px;
-  padding: 2px 3px;
-  opacity: 0.85;
+  margin-bottom: 5px;
+  height: 10px;
 }
 
 .shiny-progress .progress-text .progress-message {
-  padding: 0px 3px;
   font-weight: bold;
   font-size: 90%;
 }
 
 .shiny-progress .progress-text .progress-detail {
-  padding: 0px 3px;
   font-size: 80%;
 }
 

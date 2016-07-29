@@ -200,30 +200,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
   };
 
-  // Helper function for addMessageHandler('shiny-insert-ui').
-  // Turns out that Firefox does not support insertAdjacentElement().
-  // So we have to implement our own version for insertUI.
-  function insertAdjacentElement(where, element, content) {
-    switch (where) {
-      case 'beforeBegin':
-        element.parentNode.insertBefore(content, element);
-        break;
-      case 'afterBegin':
-        element.insertBefore(content, element.firstChild);
-        break;
-      case 'beforeEnd':
-        element.appendChild(content);
-        break;
-      case 'afterEnd':
-        if (element.nextSibling) {
-          element.parentNode.insertBefore(content, element.nextSibling);
-        } else {
-          element.parentNode.appendChild(content);
-        }
-        break;
-    }
-  }
-
   //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -1168,9 +1144,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         exports.renderHtml($([]), message.content.html, message.content.deps);
       } else {
         targets.each(function (i, target) {
-          var container = document.createElement(message.container);
-          insertAdjacentElement(message.where, target, container);
-          exports.renderContent(container, message.content);
+          exports.renderContent(target, message.content, message.where);
           return message.multiple;
         });
       }
@@ -1192,6 +1166,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       window.history.replaceState(null, null, message.url);
     });
 
+    addMessageHandler("resetBrush", function (message) {
+      exports.resetBrush(message.brushId);
+    });
+
     // Progress reporting ====================================================
 
     var progressHandlers = {
@@ -1203,35 +1181,24 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           binding.showProgress(true);
         }
       },
+
       // Open a page-level progress bar
       open: function open(message) {
-        // Add progress container (for all progress items) if not already present
-        var $container = $('.shiny-progress-container');
-        if ($container.length === 0) {
-          $container = $('<div class="shiny-progress-container"></div>');
-          $('body').append($container);
-        }
-
-        // Add div for just this progress ID
-        var depth = $('.shiny-progress.open').length;
-        var $progress = $(progressHandlers.progressHTML);
-        $progress.attr('id', message.id);
-        $container.append($progress);
-
-        // Stack bars
-        var $progressBar = $progress.find('.progress');
-        $progressBar.css('top', depth * $progressBar.height() + 'px');
-
-        // Stack text objects
-        var $progressText = $progress.find('.progress-text');
-        $progressText.css('top', 3 * $progressBar.height() + depth * $progressText.outerHeight() + 'px');
-
-        $progress.hide();
+        // Progress bar starts hidden; will be made visible if a value is provided
+        // during updates.
+        exports.notifications.show({
+          html: '<div id="shiny-progress-' + message.id + '" class="shiny-progress">' + '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span> ' + '<span class="progress-detail"></span>' + '</div>' + '</div>',
+          id: message.id,
+          duration: null
+        });
       },
 
       // Update page-level progress bar
       update: function update(message) {
-        var $progress = $('#' + message.id + '.shiny-progress');
+        var $progress = $('#shiny-progress-' + message.id);
+
+        if ($progress.length === 0) return;
+
         if (typeof message.message !== 'undefined') {
           $progress.find('.progress-message').text(message.message);
         }
@@ -1241,32 +1208,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         if (typeof message.value !== 'undefined') {
           if (message.value !== null) {
             $progress.find('.progress').show();
-            $progress.find('.bar').width(message.value * 100 + '%');
+            $progress.find('.progress-bar').width(message.value * 100 + '%');
           } else {
             $progress.find('.progress').hide();
           }
         }
-
-        $progress.fadeIn();
       },
 
       // Close page-level progress bar
       close: function close(message) {
-        var $progress = $('#' + message.id + '.shiny-progress');
-        $progress.removeClass('open');
-
-        $progress.fadeOut({
-          complete: function complete() {
-            $progress.remove();
-
-            // If this was the last shiny-progress, remove container
-            if ($('.shiny-progress').length === 0) $('.shiny-progress-container').remove();
-          }
-        });
-      },
-
-      // The 'bar' class is needed for backward compatibility with Bootstrap 2.
-      progressHTML: '<div class="shiny-progress open">' + '<div class="progress progress-striped active"><div class="progress-bar bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span>' + '<span class="progress-detail"></span>' + '</div>' + '</div>'
+        exports.notifications.remove(message.id);
+      }
     };
 
     exports.progressHandlers = progressHandlers;
@@ -3003,6 +2955,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     };
   };
 
+  exports.resetBrush = function (brushId) {
+    exports.onInputChange(brushId, null);
+    imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
+      brushId: brushId, outputId: null
+    });
+  };
+
   //---------------------------------------------------------------------
   // Source file: ../srcjs/output_binding_html.js
 
@@ -3033,6 +2992,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // inputs/outputs. `content` can be null, a string, or an object with
   // properties 'html' and 'deps'.
   exports.renderContent = function (el, content) {
+    var where = arguments.length <= 2 || arguments[2] === undefined ? "replace" : arguments[2];
+
     exports.unbindAll(el);
 
     var html;
@@ -3046,15 +3007,32 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       dependencies = content.deps || [];
     }
 
-    exports.renderHtml(html, el, dependencies);
-    exports.initializeInputs(el);
-    exports.bindAll(el);
+    exports.renderHtml(html, el, dependencies, where);
+
+    var scope = el;
+    if (where === "replace") {
+      exports.initializeInputs(el);
+      exports.bindAll(el);
+    } else {
+      var $parent = $(el).parent();
+      if ($parent.length > 0) {
+        scope = $parent;
+        if (where === "beforeBegin" || where === "afterEnd") {
+          var $grandparent = $parent.parent();
+          if ($grandparent.length > 0) scope = $grandparent;
+        }
+      }
+      exports.initializeInputs(scope);
+      exports.bindAll(scope);
+    }
   };
 
   // Render HTML in a DOM element, inserting singletons into head as needed
   exports.renderHtml = function (html, el, dependencies) {
+    var where = arguments.length <= 3 || arguments[3] === undefined ? 'replace' : arguments[3];
+
     renderDependencies(dependencies);
-    return singletons.renderHtml(html, el);
+    return singletons.renderHtml(html, el, where);
   };
 
   var htmlDependencies = {};
@@ -3123,11 +3101,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   var singletons = {
     knownSingletons: {},
-    renderHtml: function renderHtml(html, el) {
+    renderHtml: function renderHtml(html, el, where) {
       var processed = this._processHtml(html);
       this._addToHead(processed.head);
       this.register(processed.singletons);
-      $(el).html(processed.html);
+      if (where === "replace") {
+        $(el).html(processed.html);
+      } else {
+        el.insertAdjacentHTML(where, processed.html);
+      }
       return processed;
     },
     // Take an object where keys are names of singletons, and merges it into
@@ -4960,7 +4942,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
         // Iterate over all input objects for this binding
         for (var j = 0; j < inputObjects.length; j++) {
-          binding.initialize(inputObjects[j]);
+          if (!inputObjects[j]._shiny_initialized) {
+            inputObjects[j]._shiny_initialized = true;
+            binding.initialize(inputObjects[j]);
+          }
         }
       }
     }

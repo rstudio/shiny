@@ -254,7 +254,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               if (length(splitName) > 1) {
                 if (!inputHandlers$containsKey(splitName[[2]])) {
                   # No input handler registered for this type
-                  stop("No handler registered for for type ", name)
+                  stop("No handler registered for type ", name)
                 }
 
                 inputName <- splitName[[1]]
@@ -592,7 +592,8 @@ runApp <- function(appDir=getwd(),
     host <- '0.0.0.0'
 
   # Make warnings print immediately
-  ops <- options(warn = 1)
+  # Set pool.scheduler to support pool package
+  ops <- options(warn = 1, pool.scheduler = scheduleTask)
   on.exit(options(ops), add = TRUE)
 
   workerId(workerId)
@@ -629,21 +630,38 @@ runApp <- function(appDir=getwd(),
       on.exit(close(con), add = TRUE)
       settings <- read.dcf(con)
       if ("DisplayMode" %in% colnames(settings)) {
-        mode <- settings[1,"DisplayMode"]
+        mode <- settings[1, "DisplayMode"]
         if (mode == "Showcase") {
           setShowcaseDefault(1)
+          if ("IncludeWWW" %in% colnames(settings)) {
+            .globals$IncludeWWW <- as.logical(settings[1, "IncludeWWW"])
+            if (is.na(.globals$IncludeWWW)) {
+              stop("In your Description file, `IncludeWWW` ",
+                   "must be set to `True` (default) or `False`")
+            }
+          } else {
+            .globals$IncludeWWW <- TRUE
+          }
         }
       }
     }
   }
 
+  ## default is to show the .js, .css and .html files in the www directory
+  ## (if not in showcase mode, this variable will simply be ignored)
+  if (is.null(.globals$IncludeWWW) || is.na(.globals$IncludeWWW)) {
+    .globals$IncludeWWW <- TRUE
+  }
+
   # If display mode is specified as an argument, apply it (overriding the
   # value specified in DESCRIPTION, if any).
   display.mode <- match.arg(display.mode)
-  if (display.mode == "normal")
+  if (display.mode == "normal") {
     setShowcaseDefault(0)
-  else if (display.mode == "showcase")
+  }
+  else if (display.mode == "showcase") {
     setShowcaseDefault(1)
+  }
 
   require(shiny)
 
@@ -664,7 +682,14 @@ runApp <- function(appDir=getwd(),
       }
       else {
         # Try up to 20 random ports
-        port <- p_randomInt(3000, 8000)
+        while (TRUE) {
+          port <- p_randomInt(3000, 8000)
+          # Reject ports in this range that are considered unsafe by Chrome
+          # http://superuser.com/questions/188058/which-ports-are-considered-unsafe-on-chrome
+          if (!port %in% c(3659, 4045, 6000, 6665:6669)) {
+            break
+          }
+        }
       }
 
       # Test port to see if we can use it

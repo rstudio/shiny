@@ -714,12 +714,18 @@ Observer <- R6Class(
     .domain = 'ANY',
     .priority = numeric(0),
     .autoDestroy = logical(0),
+    # A function that, when invoked, unsubscribes the autoDestroy
+    # listener (or NULL if autodestroy is disabled for this observer).
+    # We must unsubscribe when this observer is destroyed, or else
+    # the observer cannot be garbage collected until the session ends.
+    .autoDestroyHandle = 'ANY',
     .invalidateCallbacks = list(),
     .execCount = integer(0),
     .onResume = 'function',
     .suspended = logical(0),
     .destroyed = logical(0),
     .prevId = character(0),
+    .ctx = NULL,
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
@@ -742,7 +748,6 @@ registerDebugHook("observerFunc", environment(), label)
       }
       .label <<- label
       .domain <<- domain
-      .autoDestroy <<- autoDestroy
       .priority <<- normalizePriority(priority)
       .execCount <<- 0L
       .suspended <<- suspended
@@ -750,7 +755,9 @@ registerDebugHook("observerFunc", environment(), label)
       .destroyed <<- FALSE
       .prevId <<- ''
 
-      onReactiveDomainEnded(.domain, self$.onDomainEnded)
+      .autoDestroy <<- FALSE
+      .autoDestroyHandle <<- NULL
+      setAutoDestroy(autoDestroy)
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
@@ -759,7 +766,23 @@ registerDebugHook("observerFunc", environment(), label)
       ctx <- Context$new(.domain, .label, type='observer', prevId=.prevId)
       .prevId <<- ctx$id
 
+      if (!is.null(.ctx)) {
+        # If this happens, something went wrong.
+        warning("Created a new context without invalidating previous context.")
+      }
+      # Store the context explicitly in the Observer object. This is necessary
+      # to make sure that when the observer is destroyed, it also gets
+      # invalidated. Otherwise the upstream reactive (on which the observer
+      # depends) will hold a (indirect) reference to this context until the
+      # reactive is invalidated, which may not happen immediately or at all.
+      # This can lead to a memory leak (#1253).
+      .ctx <<- ctx
+
       ctx$onInvalidate(function() {
+        # Context is invalidated, so we don't need to store a reference to it
+        # anymore.
+        .ctx <<- NULL
+
         lapply(.invalidateCallbacks, function(invalidateCallback) {
           invalidateCallback()
           NULL
@@ -812,11 +835,28 @@ registerDebugHook("observerFunc", environment(), label)
       "Sets whether this observer should be automatically destroyed when its
       domain (if any) ends. If autoDestroy is TRUE and the domain already
       ended, then destroy() is called immediately."
+
+      if (.autoDestroy == autoDestroy) {
+        return(.autoDestroy)
+      }
+
       oldValue <- .autoDestroy
       .autoDestroy <<- autoDestroy
-      if (!is.null(.domain) && .domain$isEnded()) {
-        destroy()
+
+      if (autoDestroy) {
+        if (!.destroyed && !is.null(.domain)) { # Make sure to not try to destroy twice.
+          if (.domain$isEnded()) {
+            destroy()
+          } else {
+            .autoDestroyHandle <<- onReactiveDomainEnded(.domain, .onDomainEnded)
+          }
+        }
+      } else {
+        if (!is.null(.autoDestroyHandle))
+          .autoDestroyHandle()
+        .autoDestroyHandle <<- NULL
       }
+
       invisible(oldValue)
     },
     suspend = function() {
@@ -842,8 +882,21 @@ registerDebugHook("observerFunc", environment(), label)
       "Prevents this observer from ever executing again (even if a flush has
       already been scheduled)."
 
+      # Make sure to not try to destory twice.
+      if (.destroyed)
+        return()
+
       suspend()
       .destroyed <<- TRUE
+
+      if (!is.null(.autoDestroyHandle)) {
+        .autoDestroyHandle()
+      }
+      .autoDestroyHandle <<- NULL
+
+      if (!is.null(.ctx)) {
+        .ctx$invalidate()
+      }
     },
     .onDomainEnded = function() {
       if (isTRUE(.autoDestroy)) {

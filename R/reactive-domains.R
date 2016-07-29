@@ -42,11 +42,11 @@ NULL
 #
 ## ------------------------------------------------------------------------
 createMockDomain <- function() {
-  callbacks <- list()
+  callbacks <- Callbacks$new()
   ended <- FALSE
   domain <- new.env(parent = emptyenv())
   domain$onEnded <- function(callback) {
-    callbacks <<- c(callbacks, callback)
+    return(callbacks$register(callback))
   }
   domain$isEnded <- function() {
     ended
@@ -55,7 +55,7 @@ createMockDomain <- function() {
   domain$end <- function() {
     if (!ended) {
       ended <<- TRUE
-      lapply(callbacks, do.call, list())
+      callbacks$invoke()
     }
     invisible()
   }

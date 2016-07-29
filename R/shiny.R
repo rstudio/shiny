@@ -172,6 +172,18 @@ workerId <- local({
 #' example, \code{session$clientData$url_search}).
 #'
 #' @return
+#' \item{allowReconnect(value)}{
+#'   If \code{value} is \code{TRUE} and run in a hosting environment (Shiny
+#'   Server or Connect) with reconnections enabled,  then when the session ends
+#'   due to the network connection closing, the client will attempt to
+#'   reconnect to the server. If a reconnection is successful, the browser will
+#'   send all the current input values to the new session on the server, and
+#'   the server will recalculate any outputs and send them back to the client.
+#'   If \code{value} is \code{FALSE}, reconnections will be disabled (this is
+#'   the default state). If \code{"force"}, then the client browser will always
+#'   attempt to reconnect. The only reason to use \code{"force"} is for testing
+#'   on a local connection (without Shiny Server or Connect).
+#' }
 #' \item{clientData}{
 #'   A \code{\link{reactiveValues}} object that contains information about the client.
 #'   \itemize{
@@ -205,6 +217,11 @@ workerId <- local({
 #' }
 #' \item{isClosed()}{A function that returns \code{TRUE} if the client has
 #'   disconnected.
+#' }
+#' \item{ns(id)}{
+#'   Server-side version of \code{ns <- \link{NS}(id)}. If bare IDs need to be
+#'   explicitly namespaced for the current module, \code{session$ns("name")}
+#'   will return the fully-qualified ID.
 #' }
 #' \item{onEnded(callback)}{
 #'   Synonym for \code{onSessionEnded}.
@@ -253,17 +270,9 @@ workerId <- local({
 #'   This is the request that was used to initiate the websocket connection
 #'   (as opposed to the request that downloaded the web page for the app).
 #' }
-#' \item{allowReconnect(value)}{
-#'   If \code{value} is \code{TRUE} and run in a hosting environment (Shiny
-#'   Server or Connect) with reconnections enabled,  then when the session ends
-#'   due to the network connection closing, the client will attempt to
-#'   reconnect to the server. If a reconnection is successful, the browser will
-#'   send all the current input values to the new session on the server, and
-#'   the server will recalculate any outputs and send them back to the client.
-#'   If \code{value} is \code{FALSE}, reconnections will be disabled (this is
-#'   the default state). If \code{"force"}, then the client browser will always
-#'   attempt to reconnect. The only reason to use \code{"force"} is for testing
-#'   on a local connection (without Shiny Server or Connect).
+#' \item{resetBrush(brushId)}{
+#'   Resets/clears the brush with the given \code{brushId}, if it exists on
+#'   any \code{imageOutput} or \code{plotOutput} in the app.
 #' }
 #' \item{sendCustomMessage(type, message)}{
 #'   Sends a custom message to the web page. \code{type} must be a
@@ -284,11 +293,6 @@ workerId <- local({
 #'   be called. \code{sendInputMessage} should generally not be called directly
 #'   from Shiny apps, but through friendlier wrapper functions like
 #'   \code{\link{updateTextInput}}.
-#' }
-#' \item{ns(id)}{
-#'   Server-side version of \code{ns <- \link{NS}(id)}. If bare IDs need to be
-#'   explicitly namespaced for the current module, \code{session$ns("name")}
-#'   will return the fully-qualified ID.
 #' }
 #'
 #' @name session
@@ -1122,15 +1126,13 @@ ShinySession <- R6Class(
     reload = function() {
       private$sendMessage(reload = TRUE)
     },
-    sendInsertUI = function(selector, multiple, where,
-                            content, container) {
+    sendInsertUI = function(selector, multiple, where, content) {
       private$sendMessage(
         `shiny-insert-ui` = list(
           selector = selector,
           multiple = multiple,
           where = where,
-          content = content,
-          container = container
+          content = content
         )
       )
     },
@@ -1144,6 +1146,13 @@ ShinySession <- R6Class(
     },
     updateLocationBar = function(url) {
       private$sendMessage(updateLocationBar = list(url = url))
+    },
+    resetBrush = function(brushId) {
+      private$sendMessage(
+        resetBrush = list(
+          brushId = brushId
+        )
+      )
     },
 
     # Public RPC methods
@@ -1524,10 +1533,15 @@ ShinySession <- R6Class(
 #' @param ... Options to set for the output observer.
 #' @export
 outputOptions <- function(x, name, ...) {
-  if (!inherits(x, "shinyoutput"))
+  if (!inherits(x, "shinyoutput")) {
     stop("x must be a shinyoutput object.")
+  }
 
-  name <- .subset2(x, 'ns')(name)
+  if (!missing(name)) {
+    name <- .subset2(x, 'ns')(name)
+  } else {
+    name <- NULL
+  }
 
   .subset2(x, 'impl')$outputOptions(name, ...)
 }

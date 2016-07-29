@@ -538,26 +538,26 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #'
 #' When bookmarking state, arbitrary values can be stored, by passing a function
 #' as the \code{onBookmark} argument. That function will be passed a
-#' \code{\link{ShinySaveState}} object. The \code{values} field of the object is
-#' a list which can be manipulated to save extra information. Additionally, if
-#' the state is being saved on the server, and the \code{dir} field of that
-#' object can be used to save extra information to files in that directory.
+#' \code{ShinySaveState} object. The \code{values} field of the object is a list
+#' which can be manipulated to save extra information. Additionally, if the
+#' state is being saved on the server, and the \code{dir} field of that object
+#' can be used to save extra information to files in that directory.
 #'
 #' For saved-to-server state, this is how the state directory is chosen:
-#' \itemize{ \item If running in a hosting environment such as Shiny Server or
-#' Connect, the hosting environment will choose the directory. \item If running
-#' an app in a directory with \code{\link{runApp}()}, the saved states will be
-#' saved in a subdirectory of the app called shiny_bookmarks. \item If running a
-#' Shiny app object that is generated from code (not run from a directory), the
-#' saved states will be saved in a subdirectory of the current working directory
-#' called shiny_bookmarks. }
+#' \itemize{
+#'   \item If running in a hosting environment such as Shiny Server or
+#'     Connect, the hosting environment will choose the directory.
+#'   \item If running an app in a directory with \code{\link{runApp}()}, the
+#'     saved states will be saved in a subdirectory of the app called
+#'    shiny_bookmarks.
+#'   \item If running a Shiny app object that is generated from code (not run
+#'     from a directory), the saved states will be saved in a subdirectory of
+#'     the current working directory called shiny_bookmarks.
+#' }
 #'
 #' @param store Either \code{"url"}, which encodes all of the relevant values in
 #'   a URL, \code{"server"}, which saves to disk on the server, or
 #'   \code{"disable"}, which disables any previously-enabled bookmarking.
-#' @param exclude A character vector of names of input values to exclude from
-#'   bookmarking.
-#' @param session A Shiny session object.
 #'
 #' @seealso \code{\link{onBookmark}}, \code{\link{onRestore}}, and
 #'   \code{\link{onRestored}} for registering callback functions that are
@@ -917,7 +917,7 @@ setBookmarkExclude <- function(names = character(0), session = getDefaultReactiv
 #' }
 #' enableBookmarking(store = "url")
 #' shinyApp(ui, server)
-#' #' }
+#' }
 #' @export
 onBookmark <- function(fun, session = getDefaultReactiveDomain()) {
   session$onBookmark(fun)

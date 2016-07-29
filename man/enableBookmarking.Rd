@@ -10,11 +10,6 @@ enableBookmarking(store = c("url", "server", "disable"))
 \item{store}{Either \code{"url"}, which encodes all of the relevant values in
 a URL, \code{"server"}, which saves to disk on the server, or
 \code{"disable"}, which disables any previously-enabled bookmarking.}
-
-\item{exclude}{A character vector of names of input values to exclude from
-bookmarking.}
-
-\item{session}{A Shiny session object.}
 }
 \description{
 There are two types of bookmarking: saving an application's state to disk on
@@ -36,19 +31,22 @@ saved on a server, but not if if the state is encoded in a URL.
 
 When bookmarking state, arbitrary values can be stored, by passing a function
 as the \code{onBookmark} argument. That function will be passed a
-\code{\link{ShinySaveState}} object. The \code{values} field of the object is
-a list which can be manipulated to save extra information. Additionally, if
-the state is being saved on the server, and the \code{dir} field of that
-object can be used to save extra information to files in that directory.
+\code{ShinySaveState} object. The \code{values} field of the object is a list
+which can be manipulated to save extra information. Additionally, if the
+state is being saved on the server, and the \code{dir} field of that object
+can be used to save extra information to files in that directory.
 
 For saved-to-server state, this is how the state directory is chosen:
-\itemize{ \item If running in a hosting environment such as Shiny Server or
-Connect, the hosting environment will choose the directory. \item If running
-an app in a directory with \code{\link{runApp}()}, the saved states will be
-saved in a subdirectory of the app called shiny_bookmarks. \item If running a
-Shiny app object that is generated from code (not run from a directory), the
-saved states will be saved in a subdirectory of the current working directory
-called shiny_bookmarks. }
+\itemize{
+  \item If running in a hosting environment such as Shiny Server or
+    Connect, the hosting environment will choose the directory.
+  \item If running an app in a directory with \code{\link{runApp}()}, the
+    saved states will be saved in a subdirectory of the app called
+   shiny_bookmarks.
+  \item If running a Shiny app object that is generated from code (not run
+    from a directory), the saved states will be saved in a subdirectory of
+    the current working directory called shiny_bookmarks.
+}
 }
 \examples{
 ## Only run these examples in interactive R sessions

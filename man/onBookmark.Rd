@@ -199,7 +199,7 @@ server <- function(input, output, session) {
 }
 enableBookmarking(store = "url")
 shinyApp(ui, server)
-#' }
+}
 }
 \seealso{
 enableBookmarking for general information on bookmarking.

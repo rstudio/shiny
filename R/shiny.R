@@ -1144,8 +1144,8 @@ ShinySession <- R6Class(
         )
       )
     },
-    updateLocationBar = function(url) {
-      private$sendMessage(updateLocationBar = list(url = url))
+    updateQueryString = function(queryString) {
+      private$sendMessage(updateQueryString = list(queryString = queryString))
     },
     resetBrush = function(brushId) {
       private$sendMessage(

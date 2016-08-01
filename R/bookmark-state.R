@@ -429,14 +429,14 @@ restoreInput <- function(id, default) {
 
 #' Update URL in browser's location bar
 #'
-#' This function updates the URL in the client browser's location bar. It
-#' typically is called from an observer.
+#' This function updates the client browser's query string in the location bar.
+#' It typically is called from an observer.
 #'
 #' @param queryString The new query string to show in the location bar.
 #' @param session A Shiny session object.
 #' @export
-updateLocationBar <- function(queryString, session = getDefaultReactiveDomain()) {
-  session$updateLocationBar(queryString)
+updateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
+  session$updateQueryString(queryString)
 }
 
 #' Create a button for bookmarking/sharing

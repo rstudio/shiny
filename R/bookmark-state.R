@@ -456,7 +456,7 @@ bookmarkButton <- function(label = "Bookmark...",
   title = "Bookmark this application's state and get a URL for sharing.",
   ...)
 {
-  actionButton("__bookmark__", label, icon, title = title, ...)
+  actionButton("._bookmark_", label, icon, title = title, ...)
 }
 
 

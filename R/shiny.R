@@ -451,7 +451,7 @@ ShinySession <- R6Class(
         # This observer fires when the bookmark button is clicked.
         observeEvent(
           label = "bookmark",
-          session$input[["__bookmark__"]],
+          session$input[["._bookmark_"]],
           {
             tryCatch(
               withLogErrors({

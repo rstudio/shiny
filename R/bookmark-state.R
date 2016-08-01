@@ -325,8 +325,7 @@ RestoreInputSet <- R6Class("RestoreInputSet",
 
   public = list(
     initialize = function(values) {
-      private$values <- new.env(parent = emptyenv())
-      list2env(values, private$values)
+      private$values <- list2env(values, parent = emptyenv())
     },
 
     exists = function(name) {

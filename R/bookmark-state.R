@@ -216,6 +216,11 @@ RestoreContext <- R6Class("RestoreContext",
       values <- parseQueryString(queryString, nested = TRUE)
       id <- values[["_state_id_"]]
 
+      # Check that id has only alphanumeric chars
+      if (grepl("[^a-zA-Z0-9]", id)) {
+        stop("Invalid state id: ", id)
+      }
+
       # This function is passed to the loadInterface function; given a
       # directory, it will load state from that directory
       loadFun <- function(stateDir) {

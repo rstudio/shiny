@@ -76,14 +76,17 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
     server
   }
 
+  # Add options from configureBookmarking and store appDir so that we can find
+  # out where we are from within the app.
+  appConfig <- c(consumeBookmarkOptions(), appDir = getwd())
+
   structure(
     list(
       httpHandler = httpHandler,
       serverFuncSource = serverFuncSource,
       onStart = onStart,
       options = options,
-      # Add options from configureBookmarking
-      appConfig = consumeBookmarkOptions()
+      appConfig = appConfig
     ),
     class = "shiny.appobj"
   )

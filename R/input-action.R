@@ -37,7 +37,6 @@
 #' }
 #'
 #' @seealso \code{\link{observeEvent}} and \code{\link{eventReactive}}
-#'
 #' @export
 actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
   tags$button(id=inputId,

@@ -23,7 +23,6 @@ NULL
 #' rnormA(3)  # [1]  1.8285879 -0.7468041 -0.4639111
 #' rnormA(5)  # [1]  1.8285879 -0.7468041 -0.4639111 -1.6510126 -1.4686924
 #' rnormB(5)  # [1] -0.7946034  0.2568374 -0.6567597  1.2451387 -0.8375699
-#'
 #' @export
 repeatable <- function(rngfunc, seed = stats::runif(1, 0, .Machine$integer.max)) {
   force(seed)
@@ -400,7 +399,6 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #'
 #' isolate(tripleA())
 #' # "text, text, text"
-#'
 #' @export
 exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
   if (!quoted) {
@@ -434,7 +432,6 @@ exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
 #'   the name of the calling function.
 #' @param wrappedWithLabel,..stacktraceon Advanced use only. For stack manipulation purposes; see
 #'   \code{\link{stacktrace}}.
-#'
 #' @export
 installExprFunction <- function(expr, name, eval.env = parent.frame(2),
                                 quoted = FALSE,
@@ -1169,7 +1166,6 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'   processing as usual but instead of clearing the output, leave it in
 #'   whatever state it happens to be in.
 #' @return The first value that was passed in.
-#'
 #' @export
 req <- function(..., cancelOutput = FALSE) {
   dotloop(function(item) {
@@ -1198,7 +1194,6 @@ req <- function(..., cancelOutput = FALSE) {
 #' If \code{cancelOutput} is called in any non-output context (like in an
 #' \code{\link{observe}} or \code{\link{observeEvent}}), the effect is the same
 #' as \code{\link{req}(FALSE)}.
-#'
 #' @export
 cancelOutput <- function() {
   stopWithCondition(c("shiny.output.cancel", "shiny.silent.error"), "")

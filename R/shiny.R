@@ -316,7 +316,6 @@ NULL
 #' @return If \code{id} is missing, returns a function that expects an id string
 #'   as its only argument and returns that id with the namespace prepended.
 #' @seealso \url{http://shiny.rstudio.com/articles/modules.html}
-#'
 #' @export
 NS <- function(namespace, id = NULL) {
   if (missing(id)) {

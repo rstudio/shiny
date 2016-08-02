@@ -49,7 +49,6 @@ registerClient <- function(client) {
 #'
 #' @examples
 #' addResourcePath('datasets', system.file('data', package='datasets'))
-#'
 #' @export
 addResourcePath <- function(prefix, directoryPath) {
   prefix <- prefix[1]
@@ -141,7 +140,6 @@ resourcePathHandler <- function(req) {
 #'   })
 #' }
 #' }
-#'
 #' @export
 shinyServer <- function(func) {
   .globals$server <- list(func)
@@ -743,7 +741,6 @@ runApp <- function(appDir=getwd(),
 #'
 #' @param returnValue The value that should be returned from
 #'   \code{\link{runApp}}.
-#'
 #' @export
 stopApp <- function(returnValue = invisible()) {
   # reterror will indicate whether retval is an error (i.e. it should be passed
@@ -862,7 +859,6 @@ runExample <- function(example=NA,
 #' # ...or as a single app object
 #' runGadget(shinyApp(ui, server))
 #' }
-#'
 #' @export
 runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
   viewer = paneViewer(), stopOnCancel = TRUE) {

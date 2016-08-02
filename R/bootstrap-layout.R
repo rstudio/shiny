@@ -418,7 +418,6 @@ flowLayout <- function(..., cellArgs = list()) {
 #' suitable for wrapping inputs.
 #'
 #' @param ... Input controls or other HTML elements.
-#'
 #' @export
 inputPanel <- function(...) {
   div(class = "shiny-input-panel",

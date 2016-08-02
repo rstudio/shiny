@@ -73,7 +73,6 @@
 #' # Complete app with UI and server components
 #' shinyApp(ui, server)
 #' }
-#'
 #' @export
 insertUI <- function(selector,
   where = c("beforeBegin", "afterBegin", "beforeEnd", "afterEnd"),
@@ -155,7 +154,6 @@ insertUI <- function(selector,
 #' # Complete app with UI and server components
 #' shinyApp(ui, server)
 #' }
-#'
 #' @export
 removeUI <- function(selector,
   multiple = FALSE,

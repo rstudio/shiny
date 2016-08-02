@@ -53,7 +53,6 @@
 #'   over text). The default is \code{"auto"}, which is equivalent to
 #'   \code{ifelse(draggable, "move", "inherit")}.
 #' @return An HTML element or list of elements.
-#'
 #' @export
 absolutePanel <- function(...,
                           top = NULL, left = NULL, right = NULL, bottom = NULL,

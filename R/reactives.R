@@ -186,7 +186,6 @@ ReactiveValues <- R6Class(
 #'   these objects must be named.
 #'
 #' @seealso \code{\link{isolate}} and \code{\link{is.reactivevalues}}.
-#'
 #' @export
 reactiveValues <- function(...) {
   args <- list(...)
@@ -317,7 +316,6 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 #' # isolate() can also be used when calling from outside a reactive context (e.g.
 #' # at the console)
 #' isolate(reactiveValuesToList(values))
-#'
 #' @export
 reactiveValuesToList <- function(x, all.names=FALSE) {
   .subset2(x, 'impl')$toList(all.names)
@@ -499,7 +497,6 @@ Observable <- R6Class(
 #' isolate(reactiveB())
 #' isolate(reactiveC())
 #' isolate(reactiveD())
-#'
 #' @export
 reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
                      domain = getDefaultReactiveDomain(),
@@ -878,7 +875,6 @@ registerDebugHook("observerFunc", environment(), label)
 #' # In a normal Shiny app, the web client will trigger flush events. If you
 #' # are at the console, you can force a flush with flushReact()
 #' shiny:::flushReact()
-#'
 #' @export
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
                     suspended=FALSE, priority=0,
@@ -1028,7 +1024,6 @@ setAutoflush <- local({
 #'
 #' shinyApp(ui, server)
 #' }
-#'
 #' @export
 reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain()) {
   dependents <- Map$new()
@@ -1187,7 +1182,6 @@ coerceToFunc <- function(x) {
 #'     data()
 #'   })
 #' }
-#'
 #' @export
 reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
   intervalMillis <- coerceToFunc(intervalMillis)
@@ -1265,7 +1259,6 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #'   })
 #' }
 #' }
-#'
 #' @export
 reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...) {
   filePath <- coerceToFunc(filePath)
@@ -1353,7 +1346,6 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #'
 #' # isolate also works if the reactive expression accesses values from the
 #' # input object, like input$x
-#'
 #' @export
 isolate <- function(expr) {
   ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate')
@@ -1375,7 +1367,6 @@ isolate <- function(expr) {
 #' @return The value of \code{expr}.
 #'
 #' @seealso \code{\link{isolate}}
-#'
 #' @export
 maskReactiveContext <- function(expr) {
   .getReactiveEnvironment()$runWith(NULL, function() {
@@ -1502,7 +1493,6 @@ maskReactiveContext <- function(expr) {
 #'   }
 #'   shinyApp(ui=ui, server=server)
 #' }
-#'
 #' @export
 observeEvent <- function(eventExpr, handlerExpr,
   event.env = parent.frame(), event.quoted = FALSE,

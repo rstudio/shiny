@@ -43,7 +43,6 @@ writeReactLog <- function(file=stdout(), sessionToken = NULL) {
 #'
 #' @param time A boolean that specifies whether or not to display the
 #' time that each reactive.
-#'
 #' @export
 showReactLog <- function(time = TRUE) {
   utils::browseURL(renderReactLog(time = as.logical(time)))

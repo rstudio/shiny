@@ -46,7 +46,6 @@
 #' @param outputArgs A list of arguments to be passed through to the
 #'   implicit call to \code{\link{tableOutput}} when \code{renderTable} is
 #'   used in an interactive R Markdown document.
-#'
 #' @export
 renderTable <- function(expr, striped = FALSE, hover = FALSE,
                         bordered = FALSE, spacing = c("s", "xs", "m", "l"),

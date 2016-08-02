@@ -25,7 +25,6 @@ NULL
 #'   \code{\link{fluidPage}} function instead.
 #'
 #' @seealso \code{\link{fluidPage}}, \code{\link{fixedPage}}
-#'
 #' @export
 bootstrapPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
 
@@ -153,7 +152,6 @@ basicPage <- function(...) {
 #'     div(style = "background-color: blue; width: 100%; height: 100%;")
 #'   )
 #' )
-#'
 #' @export
 fillPage <- function(..., padding = 0, title = NULL, bootstrap = TRUE,
   theme = NULL) {
@@ -215,7 +213,6 @@ collapseSizes <- function(padding) {
 #'     plotOutput("distPlot")
 #'   )
 #' )
-#'
 #' @export
 pageWithSidebar <- function(headerPanel,
                             sidebarPanel,
@@ -430,7 +427,6 @@ headerPanel <- function(title, windowTitle=title) {
 #'
 #' @param ... UI elements to include inside the panel.
 #' @return The newly created panel.
-#'
 #' @export
 wellPanel <- function(...) {
   div(class="well", ...)
@@ -534,7 +530,6 @@ mainPanel <- function(..., width = 8) {
 #'       )
 #'    )
 #' )
-#'
 #' @export
 conditionalPanel <- function(condition, ...) {
   div('data-display-if'=condition, ...)
@@ -1495,7 +1490,6 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
 #'   tabPanel("Summary", icon = icon("list-alt")),
 #'   tabPanel("Table", icon = icon("table"))
 #' )
-#'
 #' @export
 icon <- function(name, class = NULL, lib = "font-awesome") {
   prefixes <- list(

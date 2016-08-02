@@ -59,7 +59,6 @@
 #'
 #'   runApp(app)
 #' }
-#'
 #' @export
 shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
                      uiPattern="/") {

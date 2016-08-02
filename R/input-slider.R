@@ -242,7 +242,6 @@ hasDecimals <- function(value) {
 #'   or list of tags (using \code{\link{tag}} and friends), or raw HTML (using
 #'   \code{\link{HTML}}).
 #' @param pauseButton Similar to \code{playButton}, but for the pause button.
-#'
 #' @export
 animationOptions <- function(interval=1000,
                              loop=FALSE,

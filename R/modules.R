@@ -48,7 +48,6 @@ createSessionProxy <- function(parentSession, ...) {
 #'
 #' @return The return value, if any, from executing the module server function
 #' @seealso \url{http://shiny.rstudio.com/articles/modules.html}
-#'
 #' @export
 callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
   childScope <- session$makeScope(id)

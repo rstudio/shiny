@@ -19,7 +19,6 @@ globalVariables('func')
 #'   dynamically generated UIs, such as those created by Shiny code snippets
 #'   embedded in R Markdown documents).
 #' @return The \code{renderFunc} function, with annotations.
-#'
 #' @export
 markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
   # a mutable object that keeps track of whether `useRenderFunction` has been
@@ -248,7 +247,6 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   function, instead of the printed output.
 #'
 #' @example res/text-example.R
-#'
 #' @export
 renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list()) {
@@ -289,7 +287,6 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
 #'   function, rather than the returned text value.
 #'
 #' @example res/text-example.R
-#'
 #' @export
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list()) {
@@ -321,7 +318,6 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   interactive R Markdown document.
 #'
 #' @seealso conditionalPanel
-#'
 #' @export
 #' @examples
 #' ## Only run examples in interactive R sessions

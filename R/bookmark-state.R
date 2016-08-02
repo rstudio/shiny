@@ -473,14 +473,11 @@ bookmarkButton <- function(label = "Bookmark...",
 #' @export
 urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL) {
 
-  subtitleTag <- NULL
-  if (!is.null(subtitle)) {
-    subtitleTag <- tagList(
-      br(),
-      span(class = "text-muted", subtitle),
-      span(id = "shiny-bookmark-copy-text", class = "text-muted")
-    )
-  }
+  subtitleTag <- tagList(
+    br(),
+    span(class = "text-muted", subtitle),
+    span(id = "shiny-bookmark-copy-text", class = "text-muted")
+  )
 
   modalDialog(
     title = title,

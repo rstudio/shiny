@@ -41,7 +41,6 @@ navbarPage("App Title",
   tabPanel("Summary", icon = icon("list-alt")),
   tabPanel("Table", icon = icon("table"))
 )
-
 }
 \seealso{
 For lists of available icons, see

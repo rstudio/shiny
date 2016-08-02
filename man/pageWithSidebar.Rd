@@ -45,6 +45,5 @@ pageWithSidebar(
     plotOutput("distPlot")
   )
 )
-
 }
 

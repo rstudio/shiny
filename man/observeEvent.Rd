@@ -149,7 +149,6 @@ if (interactive()) {
   }
   shinyApp(ui=ui, server=server)
 }
-
 }
 \seealso{
 \code{\link{actionButton}}

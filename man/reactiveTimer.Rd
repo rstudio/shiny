@@ -69,7 +69,6 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 }
-
 }
 \seealso{
 \code{\link{invalidateLater}}

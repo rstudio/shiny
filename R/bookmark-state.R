@@ -226,12 +226,28 @@ RestoreContext <- R6Class("RestoreContext",
       loadFun <- function(stateDir) {
         self$dir <- stateDir
 
-        inputValues <- readRDS(file.path(stateDir, "input.rds"))
-        self$input <- RestoreInputSet$new(inputValues)
+        if (!dirExists(stateDir)) {
+          stop("Bookmarked state directory does not exist.")
+        }
+
+        tryCatch({
+            inputValues <- readRDS(file.path(stateDir, "input.rds"))
+            self$input <- RestoreInputSet$new(inputValues)
+          },
+          error = function(e) {
+            stop("Error reading input values file.")
+          }
+        )
 
         valuesFile <- file.path(stateDir, "values.rds")
         if (file.exists(valuesFile)) {
-          self$values <- readRDS(valuesFile)
+          tryCatch({
+              self$values <- readRDS(valuesFile)
+            },
+            error = function(e) {
+              stop("Error reading values file.")
+            }
+          )
         }
       }
 

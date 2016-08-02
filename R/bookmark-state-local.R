@@ -20,7 +20,7 @@ saveInterfaceLocal <- function(id, callback) {
 }
 
 loadInterfaceLocal <- function(id, callback) {
-  # Try to save in app directory
+  # Try to load from app directory
   appDir <- getShinyOption("appConfig")$appDir
 
   stateDir <- file.path(appDir, "shiny_bookmarks", id)

@@ -1162,8 +1162,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       });
     });
 
-    addMessageHandler('updateLocationBar', function (message) {
-      window.history.replaceState(null, null, message.url);
+    addMessageHandler('updateQueryString', function (message) {
+      window.history.replaceState(null, null, message.queryString);
     });
 
     addMessageHandler("resetBrush", function (message) {

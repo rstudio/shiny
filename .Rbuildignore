@@ -16,3 +16,4 @@
 ^CONTRIBUTING.md$
 ^cran-comments.md$
 ^.*\.o$
+^appveyor\.yml$

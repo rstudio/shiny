@@ -1,6 +1,8 @@
 # Shiny
 
-[![Build Status](https://travis-ci.org/rstudio/shiny.svg?branch=master)](https://travis-ci.org/rstudio/shiny)
+*Travis:* [![Travis Build Status](https://travis-ci.org/rstudio/shiny.svg?branch=master)](https://travis-ci.org/rstudio/shiny)
+
+*AppVeyor:* [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/rstudio/shiny?branch=master&svg=true)](https://ci.appveyor.com/project/rstudio/shiny)
 
 Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
 

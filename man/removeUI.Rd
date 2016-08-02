@@ -60,7 +60,6 @@ server <- function(input, output, session) {
 # Complete app with UI and server components
 shinyApp(ui, server)
 }
-
 }
 \seealso{
 \code{\link{insertUI}}

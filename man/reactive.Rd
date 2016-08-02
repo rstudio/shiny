@@ -66,6 +66,5 @@ reactiveD <- reactive(expr_q, quoted = TRUE)
 isolate(reactiveB())
 isolate(reactiveC())
 isolate(reactiveD())
-
 }
 

@@ -28,7 +28,6 @@ You can call \code{addResourcePath} multiple times for a given
 }
 \examples{
 addResourcePath('datasets', system.file('data', package='datasets'))
-
 }
 \seealso{
 \code{\link{singleton}}

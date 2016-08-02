@@ -64,7 +64,6 @@ function(input, output, session) {
     data()
   })
 }
-
 }
 \seealso{
 \code{\link{reactiveFileReader}}

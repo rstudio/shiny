@@ -1,7 +1,8 @@
 # Shiny
 
-Travis: [![Travis Build Status](https://travis-ci.org/rstudio/shiny.svg?branch=master)](https://travis-ci.org/rstudio/shiny)
-AppVeyor: [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/rstudio/shiny?branch=master&svg=true)](https://ci.appveyor.com/project/rstudio/shiny)
+*Travis:* [![Travis Build Status](https://travis-ci.org/rstudio/shiny.svg?branch=master)](https://travis-ci.org/rstudio/shiny)
+
+*AppVeyor:* [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/rstudio/shiny?branch=master&svg=true)](https://ci.appveyor.com/project/rstudio/shiny)
 
 Shiny is a new package from RStudio that makes it incredibly easy to build interactive web applications with R.
 
@@ -64,13 +65,3 @@ The shiny package is licensed under the GPLv3. See these files in the inst direc
 
 - COPYING - shiny package license (GPLv3)
 - NOTICE  - Copyright notices for additional included software
-
-=========
-### Issue and PR tracking (via [waffle.io](https://waffle.io/))
-
-[![Stories in Backlog](https://badge.waffle.io/rstudio/shiny.svg?label=Backlog&title=Backlog)](http://waffle.io/rstudio/shiny)
-[![Stories in Ready](https://badge.waffle.io/rstudio/shiny.svg?label=ready&title=Ready)](http://waffle.io/rstudio/shiny)
-[![Stories in In Progress](https://badge.waffle.io/rstudio/shiny.svg?label=In%20Progress&title=In%20Progress)](http://waffle.io/rstudio/shiny)
-[![Stories in Done](https://badge.waffle.io/rstudio/shiny.svg?label=Done&title=Done)](http://waffle.io/rstudio/shiny)
-
-[![Throughput Graph](https://graphs.waffle.io/rstudio/shiny/throughput.svg)](https://waffle.io/rstudio/shiny/metrics/throughput)

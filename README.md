@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/rstudio/shiny.png?label=ready&title=Ready)](https://waffle.io/rstudio/shiny)
 # Shiny
 
 *Travis:* [![Travis Build Status](https://travis-ci.org/rstudio/shiny.svg?branch=master)](https://travis-ci.org/rstudio/shiny)

@@ -3,17 +3,17 @@ context("bookmarking")
 test_that("Inputs and values in query string", {
   # Normal format
   vals <- RestoreContext$new("?_inputs_&a=1&b=2&_values_&x=3")$asList()
-  expect_identical(vals$input, list(a=1L, b=2L))
+  expect_true(contents_identical(vals$input, list(a=1L, b=2L)))
   expect_identical(as.list(vals$values), list(x=3L))
 
   # No leading '?', trailing '&', and values before inputs
   vals <- RestoreContext$new("_values_&x=3&_inputs_&a=1&b=2&")$asList()
-  expect_identical(vals$input, list(a=1L, b=2L))
+  expect_true(contents_identical(vals$input, list(a=1L, b=2L)))
   expect_identical(as.list(vals$values), list(x=3L))
 
   # Just inputs, no values, and leading '&'
   vals <- RestoreContext$new("&_inputs_&a=1&b=2")$asList()
-  expect_identical(vals$input, list(a=1L, b=2L))
+  expect_true(contents_identical(vals$input, list(a=1L, b=2L)))
   expect_identical(as.list(vals$values), list())
 
   # No inputs, just values

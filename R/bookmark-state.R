@@ -521,11 +521,23 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 
 #' Enable bookmarking for a Shiny application
 #'
+#' @description
+#'
 #' There are two types of bookmarking: saving an application's state to disk on
 #' the server, and encoding the application's state in a URL. For state that has
 #' been saved to disk, the state can be restored with the corresponding state
 #' ID. For URL-encoded state, the state of the application is encoded in the
 #' URL, and no server-side storage is needed.
+#'
+#' URL-encoded bookmarking is appropriate for applications where there not many
+#' input values that need to be recorded. Some browsers have a length limit for
+#' URLs of about 2000 characters, and if there are many inputs, the length of
+#' the URL can exceed that limit.
+#'
+#' Saved-on-server bookmarking is appropriate when there are many inputs, or
+#' when the bookmarked state requires storing files.
+#'
+#' @details
 #'
 #' For restoring state to work properly, the UI must be a function that takes
 #' one argument, \code{request}. In most Shiny applications, the UI is not a
@@ -534,8 +546,8 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #' \code{function(request) \{ fluidPage(....) \}}.
 #'
 #' By default, all input values will be bookmarked, except for the values of
-#' actionButtons and passwordInputs. FileInputs will be saved if the state is
-#' saved on a server, but not if if the state is encoded in a URL.
+#' actionButtons and passwordInputs. fileInputs will be saved if the state is
+#' saved on a server, but not if the state is encoded in a URL.
 #'
 #' When bookmarking state, arbitrary values can be stored, by passing a function
 #' as the \code{onBookmark} argument. That function will be passed a

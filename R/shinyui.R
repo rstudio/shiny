@@ -114,7 +114,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
         }
       } else {
         if (getCurrentRestoreContext()$active) {
-          warning("Trying to restore saved app state, but UI code must be a function for this to work! See ?configureBookmarking")
+          warning("Trying to restore saved app state, but UI code must be a function for this to work! See ?enableBookmarking")
         }
         uiValue <- ui
       }

@@ -76,8 +76,8 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
     server
   }
 
-  # Add options from configureBookmarking and store appDir so that we can find
-  # out where we are from within the app.
+  # Add options from enableBookmarking and store appDir so that we can find out
+  # where we are from within the app.
   appConfig <- c(consumeBookmarkOptions(), appDir = getwd())
 
   structure(
@@ -105,8 +105,8 @@ shinyAppDir <- function(appDir, options=list()) {
   # affected by future changes to the path)
   appDir <- normalizePath(appDir, mustWork = TRUE)
 
-  # Add options from configureBookmarking and store appDir so that we can find
-  # out where we are from within the app.
+  # Add options from enableBookmarking and store appDir so that we can find out
+  # where we are from within the app.
   appConfig <- c(consumeBookmarkOptions(), appDir = appDir)
 
   if (file.exists.ci(appDir, "server.R")) {
@@ -125,8 +125,8 @@ shinyAppFile <- function(appFile, options=list()) {
   appFile <- normalizePath(appFile, mustWork = TRUE)
   appDir <- dirname(appFile)
 
-  # Add options from configureBookmarking and store appDir so that we can find
-  # out where we are from within the app.
+  # Add options from enableBookmarking and store appDir so that we can find out
+  # where we are from within the app.
   appConfig <- c(consumeBookmarkOptions(), appDir = appDir)
 
   shinyAppDir_appR(basename(appFile), appDir, options = options,

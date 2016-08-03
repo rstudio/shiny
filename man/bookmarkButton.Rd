@@ -25,6 +25,6 @@ that consists of a link icon and the text "Share...". It is meant to be used
 for bookmarking state.
 }
 \seealso{
-configureBookmarking
+enableBookmarking
 }
 

@@ -464,7 +464,7 @@ updateQueryString <- function(queryString, session = getDefaultReactiveDomain())
 #' @param title A tooltip that is shown when the mouse cursor hovers over the
 #'   button.
 #'
-#' @seealso configureBookmarking
+#' @seealso enableBookmarking
 #' @inheritParams actionButton
 #' @export
 bookmarkButton <- function(label = "Bookmark...",
@@ -978,7 +978,7 @@ onRestored <- function(fun, session = getDefaultReactiveDomain()) {
 # run). This function "consumes" the options when the shinyApp object is
 # created, so the options won't affect another app that is created later.
 consumeBookmarkOptions <- function() {
-  # Get options from configureBookmarking
+  # Get options from enableBookmarking
   options <- list(
     bookmarkStore = getShinyOption("bookmarkStore")
   )

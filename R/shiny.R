@@ -481,26 +481,13 @@ ShinySession <- R6Class(
                 )
 
 
-                # If no onBookmarked function was provided, use one of these defaults.
-                if (private$bookmarkedCallbacks$count() == 0) {
-                  if (store == "server") {
-                    onBookmarked(function(url) {
-                      showModal(urlModal(
-                        url,
-                        subtitle = "The current state of this application has been stored on the server."
-                      ))
-                    })
-                  } else if (store == "url") {
-                    onBookmarked(function(url) {
-                      showModal(urlModal(
-                        url,
-                        subtitle = "This link stores the current state of this application."
-                      ))
-                    })
-                  }
+                # If onBookmarked callback was provided, invoke it; if not call
+                # the default.
+                if (private$bookmarkedCallbacks$count() > 0) {
+                  private$bookmarkedCallbacks$invoke(url)
+                } else {
+                  showBookmarkUrlModal(url)
                 }
-
-                private$bookmarkedCallbacks$invoke(url)
               }),
               error = function(e) {
                 msg <- paste0("Error bookmarking state: ", e$message)

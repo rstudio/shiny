@@ -535,6 +535,30 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
   )
 }
 
+
+#' Display a modal dialog for bookmarking
+#'
+#' This is a wrapper function for \code{\link{urlModal}} that is automatically
+#' called if an application is bookmarked but no other \code{\link{onBookmark}}
+#' callback was set. It displays a modal dialog with the bookmark URL, along
+#' with a subtitle that is appropriate for the type of bookmarking used ("url"
+#' or "server").
+#'
+#' @param url A URL to show in the modal dialog.
+#' @export
+showBookmarkUrlModal <- function(url) {
+  store <- getShinyOption("appConfig")$bookmarkStore
+  if (store == "url") {
+    subtitle <- "This link stores the current state of this application."
+  } else if (store == "server") {
+    subtitle <- "The current state of this application has been stored on the server."
+  } else {
+    subtitle <- NULL
+  }
+
+  showModal(urlModal(url, subtitle = subtitle))
+}
+
 #' Enable bookmarking for a Shiny application
 #'
 #' @description

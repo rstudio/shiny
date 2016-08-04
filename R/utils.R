@@ -990,10 +990,6 @@ safeError <- function(error) {
 #'
 #' @param message An optional error message.
 #' @param class An optional class to add to the error.
-#' @param type The type of reactive error that should be used depending
-#' on whether we want to be able to see the error message (use "validation")
-#' or whether we want to keep the output in the last valid state (use
-#' "shiny.output.cancel").
 #' @export
 #' @examples
 #' ## Note: the breaking of the reactive chain that happens in the app
@@ -1026,10 +1022,8 @@ safeError <- function(error) {
 #' shinyApp(ui, server)
 #' }
 #' @export
-reactiveStop <- function(message = "", class = NULL,
-                         type = c("validation", "shiny.output.cancel")) {
-  type <- match.arg(type)
-  stopWithCondition(c(type, "shiny.silent.error", class), message)
+reactiveStop <- function(message = "", class = NULL) {
+  stopWithCondition(c("shiny.silent.error", class), message)
 }
 
 #' Validate input values and other conditions
@@ -1125,7 +1119,7 @@ validate <- function(..., errorClass = character(0)) {
   # There may be empty strings remaining; these are message-less failures that
   # started as FALSE
   results <- results[nzchar(results)]
-  reactiveStop(message = paste(results, collapse="\n"), class = errorClass)
+  reactiveStop(paste(results, collapse="\n"), errorClass)
 }
 
 #' @param expr An expression to test. The condition will pass if the expression
@@ -1231,7 +1225,7 @@ req <- function(..., cancelOutput = FALSE) {
       if (isTRUE(cancelOutput)) {
         cancelOutput()
       } else {
-        reactiveStop()
+        reactiveStop(class = "validation")
       }
     }
   }, ...)
@@ -1277,7 +1271,7 @@ req <- function(..., cancelOutput = FALSE) {
 #' shinyApp(ui, server)
 #' }
 cancelOutput <- function() {
-  reactiveStop(type = "shiny.output.cancel")
+  reactiveStop(class = "shiny.output.cancel")
 }
 
 # Execute a function against each element of ..., but only evaluate each element

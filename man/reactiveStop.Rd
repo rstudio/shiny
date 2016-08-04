@@ -4,18 +4,12 @@
 \alias{reactiveStop}
 \title{Propagate an error through Shiny, but catch it before it throws}
 \usage{
-reactiveStop(message = "", class = NULL, type = c("validation",
-  "shiny.output.cancel"))
+reactiveStop(message = "", class = NULL)
 }
 \arguments{
 \item{message}{An optional error message.}
 
 \item{class}{An optional class to add to the error.}
-
-\item{type}{The type of reactive error that should be used depending
-on whether we want to be able to see the error message (use "validation")
-or whether we want to keep the output in the last valid state (use
-"shiny.output.cancel").}
 }
 \description{
 Throws a type of exception that is caught by observers. When such an

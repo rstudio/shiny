@@ -17,4 +17,28 @@ If \code{cancelOutput} is called in any non-output context (like in an
 \code{\link{observe}} or \code{\link{observeEvent}}), the effect is the same
 as \code{\link{req}(FALSE)}.
 }
+\examples{
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+# uncomment the desired line to experiment with cancelOutput() vs. req()
+
+ui <- fluidPage(
+  textInput('txt', 'Enter text'),
+  textOutput('check')
+)
+
+server <- function(input, output) {
+  output$check <- renderText({
+    # req(input$txt)
+    if (input$txt == 'hi') return('hi')
+    else if (input$txt == 'bye') return('bye')
+    # else cancelOutput()
+  })
+}
+
+# Complete app with UI and server components
+shinyApp(ui, server)
+}
+}
 

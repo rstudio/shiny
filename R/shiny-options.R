@@ -55,3 +55,29 @@ withLocalOptions <- function(expr) {
 
   expr
 }
+
+
+# Get specific shiny options and put them in a list, reset those shiny options,
+# and then return the options list. This should be during the creation of a
+# shiny app object, which happens before another option frame is added to the
+# options stack (the new option frame is added when the app is run). This
+# function "consumes" the options when the shinyApp object is created, so the
+# options won't affect another app that is created later.
+consumeAppOptions <- function() {
+  options <- list(
+    appDir = getwd(),
+    bookmarkStore = getShinyOption("bookmarkStore")
+  )
+
+  shinyOptions(appDir = NULL, bookmarkStore = NULL)
+
+  options
+}
+
+# Do the inverse of consumeAppOptions. This should be called once the app is
+# started.
+unconsumeAppOptions <- function(options) {
+  if (!is.null(options)) {
+    do.call(shinyOptions, options)
+  }
+}

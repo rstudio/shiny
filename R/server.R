@@ -237,7 +237,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
           # used by an input handler (like the one for "shiny.file"). This
           # should only happen once, when the app starts.
           if (is.null(shinysession$restoreContext)) {
-            bookmarkStore <- getShinyOption("appConfig")$bookmarkStore %OR% "disable"
+            bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
             if (bookmarkStore == "disable") {
               # If bookmarking is disabled, use empty context
               shinysession$restoreContext <- RestoreContext$new()
@@ -704,10 +704,10 @@ runApp <- function(appDir=getwd(),
 
   appParts <- as.shiny.appobj(appDir)
 
-  # Extract appConfig (which is a list) and store it as a shinyOption. (This is
-  # the only place we have to store settings that are accessible both the UI and
-  # server portion of the app.)
-  shinyOptions(appConfig = appParts$appConfig)
+  # Extract appOptions (which is a list) and store them as shinyOptions, for
+  # this app. (This is the only place we have to store settings that are
+  # accessible both the UI and server portion of the app.)
+  unconsumeAppOptions(appParts$appOptions)
 
   # Set up the onEnd before we call onStart, so that it gets called even if an
   # error happens in onStart.

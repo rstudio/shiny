@@ -547,7 +547,7 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
 #' @param url A URL to show in the modal dialog.
 #' @export
 showBookmarkUrlModal <- function(url) {
-  store <- getShinyOption("appConfig")$bookmarkStore
+  store <- getShinyOption("bookmarkStore", default = "")
   if (store == "url") {
     subtitle <- "This link stores the current state of this application."
   } else if (store == "server") {
@@ -992,22 +992,4 @@ onRestore <- function(fun, session = getDefaultReactiveDomain()) {
 #' @export
 onRestored <- function(fun, session = getDefaultReactiveDomain()) {
   session$onRestored(fun)
-}
-
-
-# Get shiny options related to bookmarking and put them in a list, reset those
-# shiny options, and then return the options list. This should be during the
-# creation of a shiny app object, which happens before another option frame is
-# added to the options stack (the new option frame is added when the app is
-# run). This function "consumes" the options when the shinyApp object is
-# created, so the options won't affect another app that is created later.
-consumeBookmarkOptions <- function() {
-  # Get options from enableBookmarking
-  options <- list(
-    bookmarkStore = getShinyOption("bookmarkStore")
-  )
-
-  shinyOptions(bookmarkStore = NULL)
-
-  options
 }

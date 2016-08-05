@@ -93,7 +93,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     }
 
     # Create a restore context using query string
-    bookmarkStore <- getShinyOption("appConfig")$bookmarkStore %OR% "disable"
+    bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
     if (bookmarkStore == "disable") {
       # If bookmarking is disabled, use empty context
       restoreContext <- RestoreContext$new()

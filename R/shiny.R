@@ -438,9 +438,7 @@ ShinySession <- R6Class(
       # for bookmarking to work.
 
       # Get bookmarking config
-      appConfig <- getShinyOption("appConfig")
-      store   <- appConfig$bookmarkStore %OR% "disable"
-
+      store <- getShinyOption("bookmarkStore", default = "disable")
       if (store == "disable")
         return()
 

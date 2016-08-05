@@ -119,16 +119,6 @@ p_randomInt <- function(...) {
   withPrivateSeed(randomInt(...))
 }
 
-# Return a random hexadecimal string with `length` digits.
-randomID <- function(length = 16) {
-  paste(sample(
-    c("0", "1", "2", "3", "4", "5", "6", "7", "8","9",
-      "a", "b", "c", "d", "e", "f"),
-    length,
-    replace = TRUE
-  ), collapse = '')
-}
-
 isWholeNum <- function(x, tol = .Machine$double.eps^0.5) {
   abs(x - round(x)) < tol
 }
@@ -192,6 +182,21 @@ anyUnnamed <- function(x) {
   any(!nzchar(nms))
 }
 
+# Given two named vectors, join them together, and keep only the last element
+# with a given name in the resulting vector. If b has any elements with the same
+# name as elements in a, the element in a is dropped. Also, if there are any
+# duplicated names in a or b, only the last one with that name is kept.
+mergeVectors <- function(a, b) {
+  if (anyUnnamed(a) || anyUnnamed(b)) {
+    stop("Vectors must be either NULL or have names for all elements")
+  }
+
+  x <- c(a, b)
+  drop_idx <- duplicated(names(x), fromLast = TRUE)
+  x[!drop_idx]
+}
+
+
 # Combine dir and (file)name into a file path. If a file already exists with a
 # name differing only by case, then use it instead.
 file.path.ci <- function(...) {
@@ -232,6 +237,12 @@ find.file.ci <- function(...) {
     return(NULL)
 
   return(matches[1])
+}
+
+# The function base::dir.exists was added in R 3.2.0, but for backward
+# compatibility we need to add this function
+dirExists <- function(paths) {
+  file.exists(paths) & file.info(paths)$isdir
 }
 
 # Attempt to join a path and relative path, and turn the result into a
@@ -503,6 +514,8 @@ parseQueryString <- function(str, nested = FALSE) {
     str <- substr(str, 2, nchar(str))
 
   pairs <- strsplit(str, '&', fixed = TRUE)[[1]]
+  # Drop any empty items (if there's leading/trailing/consecutive '&' chars)
+  pairs <- pairs[pairs != ""]
   pairs <- strsplit(pairs, '=', fixed = TRUE)
 
   keys   <- vapply(pairs, function(x) x[1], FUN.VALUE = character(1))
@@ -550,13 +563,7 @@ shinyCallingHandlers <- function(expr) {
         return()
 
       handle <- getOption('shiny.error')
-      if (is.function(handle)) {
-        if ("condition" %in% names(formals(handle))) {
-          handle(condition = e)
-        } else {
-          handle()
-        }
-      }
+      if (is.function(handle)) handle()
     }
   )
 }

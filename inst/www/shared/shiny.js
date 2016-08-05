@@ -1162,6 +1162,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       });
     });
 
+    addMessageHandler('updateQueryString', function (message) {
+      window.history.replaceState(null, null, message.queryString);
+    });
+
     addMessageHandler("resetBrush", function (message) {
       exports.resetBrush(message.brushId);
     });
@@ -1177,35 +1181,24 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           binding.showProgress(true);
         }
       },
+
       // Open a page-level progress bar
       open: function open(message) {
-        // Add progress container (for all progress items) if not already present
-        var $container = $('.shiny-progress-container');
-        if ($container.length === 0) {
-          $container = $('<div class="shiny-progress-container"></div>');
-          $('body').append($container);
-        }
-
-        // Add div for just this progress ID
-        var depth = $('.shiny-progress.open').length;
-        var $progress = $(progressHandlers.progressHTML);
-        $progress.attr('id', message.id);
-        $container.append($progress);
-
-        // Stack bars
-        var $progressBar = $progress.find('.progress');
-        $progressBar.css('top', depth * $progressBar.height() + 'px');
-
-        // Stack text objects
-        var $progressText = $progress.find('.progress-text');
-        $progressText.css('top', 3 * $progressBar.height() + depth * $progressText.outerHeight() + 'px');
-
-        $progress.hide();
+        // Progress bar starts hidden; will be made visible if a value is provided
+        // during updates.
+        exports.notifications.show({
+          html: '<div id="shiny-progress-' + message.id + '" class="shiny-progress">' + '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span> ' + '<span class="progress-detail"></span>' + '</div>' + '</div>',
+          id: message.id,
+          duration: null
+        });
       },
 
       // Update page-level progress bar
       update: function update(message) {
-        var $progress = $('#' + message.id + '.shiny-progress');
+        var $progress = $('#shiny-progress-' + message.id);
+
+        if ($progress.length === 0) return;
+
         if (typeof message.message !== 'undefined') {
           $progress.find('.progress-message').text(message.message);
         }
@@ -1215,32 +1208,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         if (typeof message.value !== 'undefined') {
           if (message.value !== null) {
             $progress.find('.progress').show();
-            $progress.find('.bar').width(message.value * 100 + '%');
+            $progress.find('.progress-bar').width(message.value * 100 + '%');
           } else {
             $progress.find('.progress').hide();
           }
         }
-
-        $progress.fadeIn();
       },
 
       // Close page-level progress bar
       close: function close(message) {
-        var $progress = $('#' + message.id + '.shiny-progress');
-        $progress.removeClass('open');
-
-        $progress.fadeOut({
-          complete: function complete() {
-            $progress.remove();
-
-            // If this was the last shiny-progress, remove container
-            if ($('.shiny-progress').length === 0) $('.shiny-progress-container').remove();
-          }
-        });
-      },
-
-      // The 'bar' class is needed for backward compatibility with Bootstrap 2.
-      progressHTML: '<div class="shiny-progress open">' + '<div class="progress progress-striped active"><div class="progress-bar bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span>' + '<span class="progress-detail"></span>' + '</div>' + '</div>'
+        exports.notifications.remove(message.id);
+      }
     };
 
     exports.progressHandlers = progressHandlers;
@@ -3389,7 +3367,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   var textInputBinding = new InputBinding();
   $.extend(textInputBinding, {
     find: function find(scope) {
-      return $(scope).find('input[type="text"], input[type="password"], input[type="search"], input[type="url"], input[type="email"]');
+      return $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
     },
     getId: function getId(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -3443,6 +3421,20 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
   });
   inputBindings.register(textareaInputBinding, 'shiny.textareaInput');
+
+  //---------------------------------------------------------------------
+  // Source file: ../srcjs/input_binding_password.js
+
+  var passwordInputBinding = {};
+  $.extend(passwordInputBinding, textInputBinding, {
+    find: function find(scope) {
+      return $(scope).find('input[type="password"]');
+    },
+    getType: function getType(el) {
+      return "shiny.password";
+    }
+  });
+  inputBindings.register(passwordInputBinding, 'shiny.passwordInput');
 
   //---------------------------------------------------------------------
   // Source file: ../srcjs/input_binding_number.js
@@ -4629,8 +4621,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   function uploadFiles(evt) {
     // If previously selected files are uploading, abort that.
-    var el = $(evt.target);
-    var uploader = el.data('currentUploader');
+    var $el = $(evt.target);
+    var uploader = $el.data('currentUploader');
     if (uploader) uploader.abort();
 
     var files = evt.target.files;
@@ -4641,12 +4633,23 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     if (!IE8 && files.length === 0) return;
 
+    // Clear data-restore attribute if present.
+    $el.removeAttr('data-restore');
+
+    // Set the label in the text box
+    var $fileText = $el.closest('div.input-group').find('input[type=text]');
+    if (files.length === 1) {
+      $fileText.val(files[0].name);
+    } else {
+      $fileText.val(files.length + " files");
+    }
+
     // Start the new upload and put the uploader in 'currentUploader'.
     if (IE8) {
       /*jshint nonew:false */
       new IE8FileUploader(exports.shinyapp, id, evt.target);
     } else {
-      el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+      $el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
     }
   }
 
@@ -4659,10 +4662,40 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return InputBinding.prototype.getId.call(this, el) || el.name;
     },
     getValue: function getValue(el) {
-      return null;
+      // This returns a non-undefined value only when there's a 'data-restore'
+      // attribute, which is set only when restoring Shiny state. If a file is
+      // uploaded through the browser, 'data-restore' gets cleared.
+      var data = $(el).attr('data-restore');
+      if (data) {
+        data = JSON.parse(data);
+
+        // Set the label in the text box
+        var $fileText = $(el).closest('div.input-group').find('input[type=text]');
+        if (data.name.length === 1) {
+          $fileText.val(data.name[0]);
+        } else {
+          $fileText.val(data.name.length + " files");
+        }
+
+        // Manually set up progress bar. A bit inelegant because it duplicates
+        // code from FileUploader, but duplication is less bad than alternatives.
+        var $progress = $(el).closest('div.form-group').find('.progress');
+        var $bar = $progress.find('.progress-bar');
+        $progress.removeClass('active');
+        $bar.width('100%');
+        $bar.css('visibility', 'visible');
+
+        return data;
+      } else {
+        return null;
+      }
     },
     setValue: function setValue(el, value) {
       // Not implemented
+    },
+    getType: function getType(el) {
+      // This will be used only when restoring a file from a saved state.
+      return 'shiny.file';
     },
     subscribe: function subscribe(el, callback) {
       $(el).on('change.fileInputBinding', uploadFiles);

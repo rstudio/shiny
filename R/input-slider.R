@@ -85,6 +85,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
+  value <- restoreInput(id = inputId, default = value)
+
   # If step is NULL, use heuristic to set the step size.
   findStepSize <- function(min, max, step) {
     if (!is.null(step)) return(step)

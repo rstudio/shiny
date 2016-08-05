@@ -54,6 +54,9 @@
 selectInput <- function(inputId, label, choices, selected = NULL,
                         multiple = FALSE, selectize = TRUE, width = NULL,
                         size = NULL) {
+
+  selected <- restoreInput(id = inputId, default = selected)
+
   # resolve names
   choices <- choicesWithNames(choices)
 

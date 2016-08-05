@@ -47,6 +47,7 @@ ReactiveValues <- R6Class(
     # For debug purposes
     .label = character(0),
     .values = 'environment',
+    .metadata = 'environment',
     .dependents = 'environment',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
@@ -60,32 +61,40 @@ ReactiveValues <- R6Class(
                        p_randomInt(1000, 10000),
                        sep="")
       .values <<- new.env(parent=emptyenv())
+      .metadata <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
       .namesDeps <<- Dependents$new()
       .allValuesDeps <<- Dependents$new()
       .valuesDeps <<- Dependents$new()
     },
+
     get = function(key) {
+      # Register the "downstream" reactive which is accessing this value, so
+      # that we know to invalidate them when this value changes.
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!exists(dep.key, where=.dependents, inherits=FALSE)) {
+      if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
         .graphDependsOn(ctx$id, sprintf('%s$%s', .label, key))
-        assign(dep.key, ctx, pos=.dependents, inherits=FALSE)
+        .dependents[[dep.key]] <- ctx
         ctx$onInvalidate(function() {
-          rm(list=dep.key, pos=.dependents, inherits=FALSE)
+          rm(list=dep.key, envir=.dependents, inherits=FALSE)
         })
       }
 
-      if (!exists(key, where=.values, inherits=FALSE))
+      if (isInvalid(key))
+        stopWithCondition(c("validation", "shiny.silent.error"), "")
+
+      if (!exists(key, envir=.values, inherits=FALSE))
         NULL
       else
-        base::get(key, pos=.values, inherits=FALSE)
+        .values[[key]]
     },
+
     set = function(key, value) {
       hidden <- substr(key, 1, 1) == "."
 
-      if (exists(key, where=.values, inherits=FALSE)) {
-        if (identical(base::get(key, pos=.values, inherits=FALSE), value)) {
+      if (exists(key, envir=.values, inherits=FALSE)) {
+        if (identical(.values[[key]], value)) {
           return(invisible())
         }
       }
@@ -98,14 +107,14 @@ ReactiveValues <- R6Class(
       else
         .valuesDeps$invalidate()
 
-      assign(key, value, pos=.values, inherits=FALSE)
+      .values[[key]] <- value
 
       .graphValueChange(sprintf('names(%s)', .label), ls(.values, all.names=TRUE))
       .graphValueChange(sprintf('%s (all)', .label), as.list(.values))
       .graphValueChange(sprintf('%s$%s', .label, key), value)
 
       dep.keys <- objects(
-        pos=.dependents,
+        envir=.dependents,
         pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
         all.names=TRUE
       )
@@ -118,18 +127,54 @@ ReactiveValues <- R6Class(
       )
       invisible()
     },
+
     mset = function(lst) {
       lapply(base::names(lst),
              function(name) {
                self$set(name, lst[[name]])
              })
     },
+
     names = function() {
       .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
                       sprintf('names(%s)', .label))
       .namesDeps$register()
       return(ls(.values, all.names=TRUE))
     },
+
+    # Get a metadata value. Does not trigger reactivity.
+    getMeta = function(key, metaKey) {
+      # Make sure to use named (not numeric) indexing into list.
+      metaKey <- as.character(metaKey)
+      .metadata[[key]][[metaKey]]
+    },
+
+    # Set a metadata value. Does not trigger reactivity.
+    setMeta = function(key, metaKey, value) {
+      # Make sure to use named (not numeric) indexing into list.
+      metaKey <- as.character(metaKey)
+
+      if (!exists(key, envir = .metadata, inherits = FALSE)) {
+        .metadata[[key]] <<- list()
+      }
+
+      .metadata[[key]][[metaKey]] <<- value
+    },
+
+    # Mark a value as invalid. If accessed while invalid, a shiny.silent.error
+    # will be thrown.
+    invalidate = function(key) {
+      setMeta(key, "invalid", TRUE)
+    },
+
+    unInvalidate = function(key) {
+      setMeta(key, "invalid", NULL)
+    },
+
+    isInvalid = function(key) {
+      isTRUE(getMeta(key, "invalid"))
+    },
+
     toList = function(all.names=FALSE) {
       .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
                       sprintf('%s (all)', .label))
@@ -140,6 +185,7 @@ ReactiveValues <- R6Class(
 
       return(as.list(.values, all.names=all.names))
     },
+
     .setLabel = function(label) {
       .label <<- label
     }
@@ -318,7 +364,23 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 #' isolate(reactiveValuesToList(values))
 #' @export
 reactiveValuesToList <- function(x, all.names=FALSE) {
-  .subset2(x, 'impl')$toList(all.names)
+  # Default case
+  res <- .subset2(x, 'impl')$toList(all.names)
+
+  prefix <- .subset2(x, 'ns')("")
+  # Special handling for namespaces
+  if (nzchar(prefix)) {
+    fullNames <- names(res)
+
+    # Filter out items that match namespace
+    fullNames <- fullNames[substring(fullNames, 1, nchar(prefix)) == prefix]
+    res <- res[fullNames]
+
+    # Remove namespace prefix
+    names(res) <- substring(fullNames, nchar(prefix) + 1)
+  }
+
+  res
 }
 
 # This function is needed because str() on a reactivevalues object will call
@@ -331,6 +393,67 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
   cat(indent.str, '- attr(*, "class")=', sep = "")
   utils::str(class(object))
 }
+
+
+#' Invalidate a reactive value
+#'
+#' This invalidates a reactive value. If the value is accessed while invalid, a
+#' "silent" exception is raised and the operation is stopped. This is the same
+#' thing that happens if \code{req(FALSE)} is called. The value is
+#' un-invalidated (accessing it will no longer raise an exception) when the
+#' current reactive domain is flushed; in a Shiny application, this occurs after
+#' all of the observers are executed.
+#'
+#' @param x A \code{\link{reactiveValues}} object (like \code{input}).
+#' @param name The name of a value in the \code{\link{reactiveValues}} object.
+#'
+#' @seealso \code{\link{req}}
+#' @examples
+#' ## Only run this examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   selectInput("data", "Data Set", c("mtcars", "pressure")),
+#'   checkboxGroupInput("cols", "Columns (select 2)", character(0)),
+#'   plotOutput("plot")
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   observe({
+#'     data <- get(input$data)
+#'     # Sets a flag on input$cols to essentially do req(FALSE) if input$cols
+#'     # is accessed. Without this, an error will momentarily show whenever a
+#'     # new data set is selected.
+#'     invalidateReactiveValue(input, "cols")
+#'     updateCheckboxGroupInput(session, "cols", choices = names(data))
+#'   })
+#'
+#'   output$plot <- renderPlot({
+#'     # When a new data set is selected, input$cols will have been invalidated
+#'     # above, and this will essentially do the same as req(FALSE), causing
+#'     # this observer to stop and raise a silent exception.
+#'     cols <- input$cols
+#'     data <- get(input$data)
+#'
+#'     if (length(cols) == 2) {
+#'       plot(data[[ cols[1] ]], data[[ cols[2] ]])
+#'     }
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#' @export
+invalidateReactiveValue <- function(x, name) {
+  domain <- getDefaultReactiveDomain()
+  if (is.null(getDefaultReactiveDomain)) {
+    stop("invalidateReactiveValue() must be called when a default reactive domain is active.")
+  }
+
+  domain$invalidateValue(x, name)
+  invisible()
+}
+
 
 # Observable ----------------------------------------------------------------
 
@@ -559,7 +682,7 @@ srcrefToLabel <- function(srcref, defaultLabel) {
 
 #' @export
 print.reactive <- function(x, ...) {
-  label <- attr(x, "observable")$.label
+  label <- attr(x, "observable", exact = TRUE)$.label
   cat(label, "\n")
 }
 
@@ -570,7 +693,7 @@ is.reactive <- function(x) inherits(x, "reactive")
 # Return the number of times that a reactive expression or observer has been run
 execCount <- function(x) {
   if (is.reactive(x))
-    return(attr(x, "observable")$.execCount)
+    return(attr(x, "observable", exact = TRUE)$.execCount)
   else if (inherits(x, 'Observer'))
     return(x$.execCount)
   else
@@ -914,9 +1037,9 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' }
 #' @export
 makeReactiveBinding <- function(symbol, env = parent.frame()) {
-  if (exists(symbol, where = env, inherits = FALSE)) {
-    initialValue <- get(symbol, pos = env, inherits = FALSE)
-    rm(list = symbol, pos = env, inherits = FALSE)
+  if (exists(symbol, envir = env, inherits = FALSE)) {
+    initialValue <- env[[symbol]]
+    rm(list = symbol, envir = env, inherits = FALSE)
   }
   else
     initialValue <- NULL

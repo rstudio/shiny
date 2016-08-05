@@ -75,7 +75,7 @@ showNotification <- function(ui, action = NULL, duration = 5,
 {
 
   if (is.null(id))
-    id <- randomID()
+    id <- createUniqueId(8)
 
   res <- processDeps(ui, session)
   actionRes <- processDeps(action, session)

@@ -90,17 +90,34 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
       if (!is.null(mode))
         showcaseMode <- mode
     }
-    uiValue <- if (is.function(ui)) {
-      if (length(formals(ui)) > 0) {
-        # No corresponding ..stacktraceoff.., this is pure user code
-        ..stacktraceon..(ui(req))
-      } else {
-        # No corresponding ..stacktraceoff.., this is pure user code
-        ..stacktraceon..(ui())
-      }
+
+    # Create a restore context using query string
+    bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
+    if (bookmarkStore == "disable") {
+      # If bookmarking is disabled, use empty context
+      restoreContext <- RestoreContext$new()
     } else {
-      ui
+      restoreContext <- RestoreContext$new(req$QUERY_STRING)
     }
+
+    withRestoreContext(restoreContext, {
+      uiValue <- NULL
+
+      if (is.function(ui)) {
+        if (length(formals(ui)) > 0) {
+          # No corresponding ..stacktraceoff.., this is pure user code
+          uiValue <- ..stacktraceon..(ui(req))
+        } else {
+          # No corresponding ..stacktraceoff.., this is pure user code
+          uiValue <- ..stacktraceon..(ui())
+        }
+      } else {
+        if (getCurrentRestoreContext()$active) {
+          warning("Trying to restore saved app state, but UI code must be a function for this to work! See ?enableBookmarking")
+        }
+        uiValue <- ui
+      }
+    })
     if (is.null(uiValue))
       return(NULL)
 

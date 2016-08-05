@@ -47,6 +47,7 @@ module.exports = function(grunt) {
           js_srcdir + 'input_binding.js',
           js_srcdir + 'input_binding_text.js',
           js_srcdir + 'input_binding_textarea.js',
+          js_srcdir + 'input_binding_password.js',
           js_srcdir + 'input_binding_number.js',
           js_srcdir + 'input_binding_checkbox.js',
           js_srcdir + 'input_binding_slider.js',

@@ -667,6 +667,10 @@ var ShinyApp = function() {
     });
   });
 
+  addMessageHandler('updateQueryString', function(message) {
+    window.history.replaceState(null, null, message.queryString);
+  });
+
   addMessageHandler("resetBrush", function(message) {
     exports.resetBrush(message.brushId);
   });

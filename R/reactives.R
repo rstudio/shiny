@@ -81,7 +81,7 @@ ReactiveValues <- R6Class(
         })
       }
 
-      if (isInvalid(key))
+      if (isFrozen(key))
         stopWithCondition(c("validation", "shiny.silent.error"), "")
 
       if (!exists(key, envir=.values, inherits=FALSE))
@@ -161,18 +161,18 @@ ReactiveValues <- R6Class(
       .metadata[[key]][[metaKey]] <<- value
     },
 
-    # Mark a value as invalid. If accessed while invalid, a shiny.silent.error
-    # will be thrown.
-    invalidate = function(key) {
-      setMeta(key, "invalid", TRUE)
+    # Mark a value as frozen If accessed while frozen, a shiny.silent.error will
+    # be thrown.
+    freeze = function(key) {
+      setMeta(key, "frozen", TRUE)
     },
 
-    unInvalidate = function(key) {
-      setMeta(key, "invalid", NULL)
+    thaw = function(key) {
+      setMeta(key, "frozen", NULL)
     },
 
-    isInvalid = function(key) {
-      isTRUE(getMeta(key, "invalid"))
+    isFrozen = function(key) {
+      isTRUE(getMeta(key, "frozen"))
     },
 
     toList = function(all.names=FALSE) {
@@ -395,14 +395,14 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 }
 
 
-#' Invalidate a reactive value
+#' Freeze a reactive value
 #'
-#' This invalidates a reactive value. If the value is accessed while invalid, a
+#' This freezes a reactive value. If the value is accessed while frozen, a
 #' "silent" exception is raised and the operation is stopped. This is the same
-#' thing that happens if \code{req(FALSE)} is called. The value is
-#' un-invalidated (accessing it will no longer raise an exception) when the
-#' current reactive domain is flushed; in a Shiny application, this occurs after
-#' all of the observers are executed.
+#' thing that happens if \code{req(FALSE)} is called. The value is thawed
+#' (un-frozen; accessing it will no longer raise an exception) when the current
+#' reactive domain is flushed. In a Shiny application, this occurs after all of
+#' the observers are executed.
 #'
 #' @param x A \code{\link{reactiveValues}} object (like \code{input}).
 #' @param name The name of a value in the \code{\link{reactiveValues}} object.
@@ -424,7 +424,7 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 #'     # Sets a flag on input$cols to essentially do req(FALSE) if input$cols
 #'     # is accessed. Without this, an error will momentarily show whenever a
 #'     # new data set is selected.
-#'     invalidateReactiveValue(input, "cols")
+#'     freezeReactiveValue(input, "cols")
 #'     updateCheckboxGroupInput(session, "cols", choices = names(data))
 #'   })
 #'
@@ -444,13 +444,13 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 #' shinyApp(ui, server)
 #' }
 #' @export
-invalidateReactiveValue <- function(x, name) {
+freezeReactiveValue <- function(x, name) {
   domain <- getDefaultReactiveDomain()
   if (is.null(getDefaultReactiveDomain)) {
-    stop("invalidateReactiveValue() must be called when a default reactive domain is active.")
+    stop("freezeReactiveValue() must be called when a default reactive domain is active.")
   }
 
-  domain$invalidateValue(x, name)
+  domain$freezeValue(x, name)
   invisible()
 }
 

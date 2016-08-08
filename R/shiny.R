@@ -791,14 +791,14 @@ ShinySession <- R6Class(
       NS(NULL, id)
     },
 
-    # Invalidate a value until the flush cycle completes
-    invalidateValue = function(x, name) {
+    # Freeze a value until the flush cycle completes
+    freezeValue = function(x, name) {
       if (!is.reactivevalues(x))
         stop("x must be a reactivevalues object")
 
       impl <- .subset2(x, 'impl')
-      impl$invalidate(name)
-      self$onFlushed(function() impl$unInvalidate(name))
+      impl$freeze(name)
+      self$onFlushed(function() impl$thaw(name))
     },
 
     onSessionEnded = function(sessionEndedCallback) {

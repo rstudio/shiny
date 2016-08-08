@@ -23,21 +23,33 @@ Lays out elements horizontally, dividing the available horizontal space into
 equal parts (by default).
 }
 \examples{
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+# Server code used for all examples
+server <- function(input, output) {
+  output$plot1 <- renderPlot(plot(cars))
+  output$plot2 <- renderPlot(plot(pressure))
+  output$plot3 <- renderPlot(plot(AirPassengers))
+}
+
 # Equal sizing
-splitLayout(
+ui <- splitLayout(
   plotOutput("plot1"),
   plotOutput("plot2")
 )
+shinyApp(ui, server)
 
 # Custom widths
-splitLayout(cellWidths = c("25\%", "75\%"),
+ui <- splitLayout(cellWidths = c("25\%", "75\%"),
   plotOutput("plot1"),
   plotOutput("plot2")
 )
+shinyApp(ui, server)
 
 # All cells at 300 pixels wide, with cell padding
 # and a border around everything
-splitLayout(
+ui <- splitLayout(
   style = "border: 1px solid silver;",
   cellWidths = 300,
   cellArgs = list(style = "padding: 6px"),
@@ -45,5 +57,7 @@ splitLayout(
   plotOutput("plot2"),
   plotOutput("plot3")
 )
+shinyApp(ui, server)
+}
 }
 

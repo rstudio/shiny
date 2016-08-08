@@ -92,6 +92,28 @@ or list of tags (using \code{\link{tag}} and friends), or raw HTML (using
 \description{
 Constructs a slider widget to select a numeric value from a range.
 }
+\examples{
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
+  sliderInput("obs", "Number of observations:",
+    min = 0, max = 1000, value = 500
+  ),
+  plotOutput("distPlot")
+)
+
+# Server logic
+server <- function(input, output) {
+  output$distPlot <- renderPlot({
+    hist(rnorm(input$obs))
+  })
+}
+
+# Complete app with UI and server components
+shinyApp(ui, server)
+}
+}
 \seealso{
 \code{\link{updateSliderInput}}
 

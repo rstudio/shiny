@@ -48,6 +48,27 @@
 #' @family input elements
 #' @seealso \code{\link{updateSliderInput}}
 #'
+#' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   sliderInput("obs", "Number of observations:",
+#'     min = 0, max = 1000, value = 500
+#'   ),
+#'   plotOutput("distPlot")
+#' )
+#'
+#' # Server logic
+#' server <- function(input, output) {
+#'   output$distPlot <- renderPlot({
+#'     hist(rnorm(input$obs))
+#'   })
+#' }
+#'
+#' # Complete app with UI and server components
+#' shinyApp(ui, server)
+#' }
 #' @export
 sliderInput <- function(inputId, label, min, max, value, step = NULL,
                         round = FALSE, format = NULL, locale = NULL,
@@ -63,6 +84,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     shinyDeprecated(msg = "The `locale` argument to sliderInput is deprecated. Use `sep`, `pre`, and `post` instead.",
                     version = "0.10.2.2")
   }
+
+  value <- restoreInput(id = inputId, default = value)
 
   # If step is NULL, use heuristic to set the step size.
   findStepSize <- function(min, max, step) {
@@ -191,7 +214,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   }
 
   dep <- list(
-    htmlDependency("ionrangeslider", "2.0.12", c(href="shared/ionrangeslider"),
+    htmlDependency("ionrangeslider", "2.1.2", c(href="shared/ionrangeslider"),
       script = "js/ion.rangeSlider.min.js",
       # ion.rangeSlider also needs normalize.css, which is already included in
       # Bootstrap.
@@ -221,7 +244,6 @@ hasDecimals <- function(value) {
 #'   or list of tags (using \code{\link{tag}} and friends), or raw HTML (using
 #'   \code{\link{HTML}}).
 #' @param pauseButton Similar to \code{playButton}, but for the pause button.
-#'
 #' @export
 animationOptions <- function(interval=1000,
                              loop=FALSE,

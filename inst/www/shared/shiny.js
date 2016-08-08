@@ -550,6 +550,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     this.$pendingMessages = [];
     this.$activeRequests = {};
     this.$nextRequestId = 0;
+
+    this.$allowReconnect = false;
   };
 
   (function () {
@@ -571,6 +573,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     this.isConnected = function () {
       return !!this.$socket;
+    };
+
+    var scheduledReconnect = null;
+    this.reconnect = function () {
+      // This function can be invoked directly even if there's a scheduled
+      // reconnect, so be sure to clear any such scheduled reconnects.
+      clearTimeout(scheduledReconnect);
+
+      if (this.isConnected()) throw "Attempted to reconnect, but already connected.";
+
+      this.$socket = this.createSocket();
+      this.$initialInput = $.extend({}, this.$inputValues);
+      this.$updateConditionals();
     };
 
     this.createSocket = function () {
@@ -595,15 +610,22 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
         var ws = new WebSocket(protocol + '//' + window.location.host + defaultPath);
         ws.binaryType = 'arraybuffer';
+
         return ws;
       };
 
       var socket = createSocketFunc();
+      var hasOpened = false;
       socket.onopen = function () {
+        hasOpened = true;
+
         $(document).trigger({
           type: 'shiny:connected',
           socket: socket
         });
+
+        self.onConnected();
+
         socket.send(JSON.stringify({
           method: 'init',
           data: self.$initialInput
@@ -617,13 +639,22 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       socket.onmessage = function (e) {
         self.dispatchMessage(e.data);
       };
+      // Called when a successfully-opened websocket is closed, or when an
+      // attempt to open a connection fails.
       socket.onclose = function () {
-        $(document).trigger({
-          type: 'shiny:disconnected',
-          socket: socket
-        });
-        $(document.body).addClass('disconnected');
-        self.$notifyDisconnected();
+        // These things are needed only if we've successfully opened the
+        // websocket.
+        if (hasOpened) {
+          $(document).trigger({
+            type: 'shiny:disconnected',
+            socket: socket
+          });
+
+          self.$notifyDisconnected();
+        }
+
+        self.onDisconnected(); // Must be run before self.$removeSocket()
+        self.$removeSocket();
       };
       return socket;
     };
@@ -662,6 +693,69 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           parent.postMessage('disconnected', origin);
         }
       }
+    };
+
+    this.$removeSocket = function () {
+      this.$socket = null;
+    };
+
+    this.$scheduleReconnect = function (delay) {
+      var self = this;
+      scheduledReconnect = setTimeout(function () {
+        self.reconnect();
+      }, delay);
+    };
+
+    // How long should we wait before trying the next reconnection?
+    // The delay will increase with subsequent attempts.
+    // .next: Return the time to wait for next connection, and increment counter.
+    // .reset: Reset the attempt counter.
+    var reconnectDelay = function () {
+      var attempts = 0;
+      // Time to wait before each reconnection attempt. If we go through all of
+      // these values, repeated use the last one. Add 500ms to each one so that
+      // in the last 0.5s, it shows "..."
+      var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
+
+      return {
+        next: function next() {
+          var i = attempts;
+          // Instead of going off the end, use the last one
+          if (i >= delays.length) {
+            i = delays.length - 1;
+          }
+
+          attempts++;
+          return delays[i];
+        },
+        reset: function reset() {
+          attempts = 0;
+        }
+      };
+    }();
+
+    this.onDisconnected = function () {
+      // Add gray-out overlay, if not already present
+      var $overlay = $('#shiny-disconnected-overlay');
+      if ($overlay.length === 0) {
+        $(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+      }
+
+      // To try a reconnect, both the app (this.$allowReconnect) and the
+      // server (this.$socket.allowReconnect) must allow reconnections, or
+      // session$allowReconnect("force") was called. The "force" option should
+      // only be used for testing.
+      if (this.$allowReconnect === true && this.$socket.allowReconnect === true || this.$allowReconnect === "force") {
+        var delay = reconnectDelay.next();
+        exports.showReconnectDialog(delay);
+        this.$scheduleReconnect(delay);
+      }
+    };
+
+    this.onConnected = function () {
+      $('#shiny-disconnected-overlay').remove();
+      exports.hideReconnectDialog();
+      reconnectDelay.reset();
     };
 
     // NB: Including blobs will cause IE to break!
@@ -981,12 +1075,25 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if (message.type === 'show') exports.notifications.show(message.message);else if (message.type === 'remove') exports.notifications.remove(message.message);else throw 'Unkown notification type: ' + message.type;
     });
 
+    addMessageHandler('modal', function (message) {
+      if (message.type === 'show') exports.modal.show(message.message);else if (message.type === 'remove') exports.modal.remove(); // For 'remove', message content isn't used
+      else throw 'Unkown modal type: ' + message.type;
+    });
+
     addMessageHandler('response', function (message) {
       var requestId = message.tag;
       var request = this.$activeRequests[requestId];
       if (request) {
         delete this.$activeRequests[requestId];
         if ('value' in message) request.onSuccess(message.value);else request.onError(message.error);
+      }
+    });
+
+    addMessageHandler('allowReconnect', function (message) {
+      if (message === true || message === false || message === "force") {
+        this.$allowReconnect = message;
+      } else {
+        throw "Invalid value for allowReconnect: " + message;
       }
     });
 
@@ -1028,6 +1135,41 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       window.location.reload();
     });
 
+    addMessageHandler('shiny-insert-ui', function (message) {
+      var targets = $(message.selector);
+      if (targets.length === 0) {
+        // render the HTML and deps to a null target, so
+        // the side-effect of rendering the deps, singletons,
+        // and <head> still occur
+        exports.renderHtml($([]), message.content.html, message.content.deps);
+      } else {
+        targets.each(function (i, target) {
+          exports.renderContent(target, message.content, message.where);
+          return message.multiple;
+        });
+      }
+    });
+
+    addMessageHandler('shiny-remove-ui', function (message) {
+      var els = $(message.selector);
+      els.each(function (i, el) {
+        exports.unbindAll(el, true);
+        $(el).remove();
+        // If `multiple` is false, returning false terminates the function
+        // and no other elements are removed; if `multiple` is true,
+        // returning true continues removing all remaining elements.
+        return message.multiple;
+      });
+    });
+
+    addMessageHandler('updateQueryString', function (message) {
+      window.history.replaceState(null, null, message.queryString);
+    });
+
+    addMessageHandler("resetBrush", function (message) {
+      exports.resetBrush(message.brushId);
+    });
+
     // Progress reporting ====================================================
 
     var progressHandlers = {
@@ -1039,35 +1181,24 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           binding.showProgress(true);
         }
       },
+
       // Open a page-level progress bar
       open: function open(message) {
-        // Add progress container (for all progress items) if not already present
-        var $container = $('.shiny-progress-container');
-        if ($container.length === 0) {
-          $container = $('<div class="shiny-progress-container"></div>');
-          $('body').append($container);
-        }
-
-        // Add div for just this progress ID
-        var depth = $('.shiny-progress.open').length;
-        var $progress = $(progressHandlers.progressHTML);
-        $progress.attr('id', message.id);
-        $container.append($progress);
-
-        // Stack bars
-        var $progressBar = $progress.find('.progress');
-        $progressBar.css('top', depth * $progressBar.height() + 'px');
-
-        // Stack text objects
-        var $progressText = $progress.find('.progress-text');
-        $progressText.css('top', 3 * $progressBar.height() + depth * $progressText.outerHeight() + 'px');
-
-        $progress.hide();
+        // Progress bar starts hidden; will be made visible if a value is provided
+        // during updates.
+        exports.notifications.show({
+          html: '<div id="shiny-progress-' + message.id + '" class="shiny-progress">' + '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span> ' + '<span class="progress-detail"></span>' + '</div>' + '</div>',
+          id: message.id,
+          duration: null
+        });
       },
 
       // Update page-level progress bar
       update: function update(message) {
-        var $progress = $('#' + message.id + '.shiny-progress');
+        var $progress = $('#shiny-progress-' + message.id);
+
+        if ($progress.length === 0) return;
+
         if (typeof message.message !== 'undefined') {
           $progress.find('.progress-message').text(message.message);
         }
@@ -1077,36 +1208,66 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         if (typeof message.value !== 'undefined') {
           if (message.value !== null) {
             $progress.find('.progress').show();
-            $progress.find('.bar').width(message.value * 100 + '%');
+            $progress.find('.progress-bar').width(message.value * 100 + '%');
           } else {
             $progress.find('.progress').hide();
           }
         }
-
-        $progress.fadeIn();
       },
 
       // Close page-level progress bar
       close: function close(message) {
-        var $progress = $('#' + message.id + '.shiny-progress');
-        $progress.removeClass('open');
-
-        $progress.fadeOut({
-          complete: function complete() {
-            $progress.remove();
-
-            // If this was the last shiny-progress, remove container
-            if ($('.shiny-progress').length === 0) $('.shiny-progress-container').remove();
-          }
-        });
-      },
-
-      // The 'bar' class is needed for backward compatibility with Bootstrap 2.
-      progressHTML: '<div class="shiny-progress open">' + '<div class="progress progress-striped active"><div class="progress-bar bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span>' + '<span class="progress-detail"></span>' + '</div>' + '</div>'
+        exports.notifications.remove(message.id);
+      }
     };
 
     exports.progressHandlers = progressHandlers;
   }).call(ShinyApp.prototype);
+
+  exports.showReconnectDialog = function () {
+    var reconnectTime = null;
+
+    function updateTime() {
+      var $time = $("#shiny-reconnect-time");
+      // If the time has been removed, exit and don't reschedule this function.
+      if ($time.length === 0) return;
+
+      var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1000);
+      if (seconds > 0) {
+        $time.text(" in " + seconds + "s");
+      } else {
+        $time.text("...");
+      }
+
+      // Reschedule this function after 1 second
+      setTimeout(updateTime, 1000);
+    }
+
+    return function (delay) {
+      reconnectTime = new Date().getTime() + delay;
+
+      // If there's already a reconnect dialog, don't add another
+      if ($('#shiny-reconnect-text').length > 0) return;
+
+      var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span>' + '<span id="shiny-reconnect-time"></span>';
+      var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
+
+      exports.notifications.show({
+        id: "reconnect",
+        html: html,
+        action: action,
+        duration: null,
+        closeButton: false,
+        type: 'warning'
+      });
+
+      updateTime();
+    };
+  }();
+
+  exports.hideReconnectDialog = function () {
+    exports.notifications.remove("reconnect");
+  };
 
   //---------------------------------------------------------------------
   // Source file: ../srcjs/notifications.js
@@ -1120,7 +1281,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
       var _ref$html = _ref.html;
-      var html = _ref$html === undefined ? null : _ref$html;
+      var html = _ref$html === undefined ? '' : _ref$html;
+      var _ref$action = _ref.action;
+      var action = _ref$action === undefined ? '' : _ref$action;
       var _ref$deps = _ref.deps;
       var deps = _ref$deps === undefined ? [] : _ref$deps;
       var _ref$duration = _ref.duration;
@@ -1142,8 +1305,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if ($notification.length === 0) $notification = _create(id);
 
       // Render html and dependencies
+      var newHtml = '<div class="shiny-notification-content-text">' + html + '</div>' + ('<div class="shiny-notification-content-action">' + action + '</div>');
       var $content = $notification.find('.shiny-notification-content');
-      exports.renderContent($content, { html: html, deps: deps });
+      exports.renderContent($content, { html: newHtml, deps: deps });
 
       // Remove any existing classes of the form 'shiny-notification-xxxx'.
       // The xxxx would be strings like 'warning'.
@@ -1187,6 +1351,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     // Returns an individual notification DOM object (wrapped in jQuery).
     function _get(id) {
+      if (!id) return null;
       return _getPanel().find('#shiny-notification-' + $escape(id));
     }
 
@@ -1261,6 +1426,63 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       remove: remove
     };
   }();
+
+  //---------------------------------------------------------------------
+  // Source file: ../srcjs/modal.js
+
+  exports.modal = {
+
+    // Show a modal dialog. This is meant to handle two types of cases: one is
+    // that the content is a Bootstrap modal dialog, and the other is that the
+    // content is non-Bootstrap. Bootstrap modals require some special handling,
+    // which is coded in here.
+    show: function show() {
+      var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      var _ref2$html = _ref2.html;
+      var html = _ref2$html === undefined ? '' : _ref2$html;
+      var _ref2$deps = _ref2.deps;
+      var deps = _ref2$deps === undefined ? [] : _ref2$deps;
+
+
+      // If there was an existing Bootstrap modal, then there will be a modal-
+      // backdrop div that was added outside of the modal wrapper, and it must be
+      // removed; otherwise there can be multiple of these divs.
+      $('.modal-backdrop').remove();
+
+      // Get existing wrapper DOM element, or create if needed.
+      var $modal = $('#shiny-modal-wrapper');
+      if ($modal.length === 0) {
+        $modal = $('<div id="shiny-modal-wrapper"></div>');
+        $('body').append($modal);
+
+        // If the wrapper's content is a Bootstrap modal, then when the inner
+        // modal is hidden, remove the entire thing, including wrapper.
+        $modal.on('hidden.bs.modal', function () {
+          exports.unbindAll($modal);
+          $modal.remove();
+        });
+      }
+
+      // Set/replace contents of wrapper with html.
+      exports.renderContent($modal, { html: html, deps: deps });
+    },
+
+    remove: function remove() {
+      var $modal = $('#shiny-modal-wrapper');
+
+      // Look for a Bootstrap modal and if present, trigger hide event. This will
+      // trigger the hidden.bs.modal callback that we set in show(), which unbinds
+      // and removes the element.
+      if ($modal.find('.modal').length > 0) {
+        $modal.find('.modal').modal('hide');
+      } else {
+        // If not a Bootstrap modal dialog, simply unbind and remove it.
+        exports.unbindAll($modal);
+        $modal.remove();
+      }
+    }
+  };
 
   //---------------------------------------------------------------------
   // Source file: ../srcjs/file_processor.js
@@ -2733,6 +2955,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     };
   };
 
+  exports.resetBrush = function (brushId) {
+    exports.onInputChange(brushId, null);
+    imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
+      brushId: brushId, outputId: null
+    });
+  };
+
   //---------------------------------------------------------------------
   // Source file: ../srcjs/output_binding_html.js
 
@@ -2763,6 +2992,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // inputs/outputs. `content` can be null, a string, or an object with
   // properties 'html' and 'deps'.
   exports.renderContent = function (el, content) {
+    var where = arguments.length <= 2 || arguments[2] === undefined ? "replace" : arguments[2];
+
     exports.unbindAll(el);
 
     var html;
@@ -2776,15 +3007,32 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       dependencies = content.deps || [];
     }
 
-    exports.renderHtml(html, el, dependencies);
-    exports.initializeInputs(el);
-    exports.bindAll(el);
+    exports.renderHtml(html, el, dependencies, where);
+
+    var scope = el;
+    if (where === "replace") {
+      exports.initializeInputs(el);
+      exports.bindAll(el);
+    } else {
+      var $parent = $(el).parent();
+      if ($parent.length > 0) {
+        scope = $parent;
+        if (where === "beforeBegin" || where === "afterEnd") {
+          var $grandparent = $parent.parent();
+          if ($grandparent.length > 0) scope = $grandparent;
+        }
+      }
+      exports.initializeInputs(scope);
+      exports.bindAll(scope);
+    }
   };
 
   // Render HTML in a DOM element, inserting singletons into head as needed
   exports.renderHtml = function (html, el, dependencies) {
+    var where = arguments.length <= 3 || arguments[3] === undefined ? 'replace' : arguments[3];
+
     renderDependencies(dependencies);
-    return singletons.renderHtml(html, el);
+    return singletons.renderHtml(html, el, where);
   };
 
   var htmlDependencies = {};
@@ -2853,11 +3101,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   var singletons = {
     knownSingletons: {},
-    renderHtml: function renderHtml(html, el) {
+    renderHtml: function renderHtml(html, el, where) {
       var processed = this._processHtml(html);
       this._addToHead(processed.head);
       this.register(processed.singletons);
-      $(el).html(processed.html);
+      if (where === "replace") {
+        $(el).html(processed.html);
+      } else {
+        el.insertAdjacentHTML(where, processed.html);
+      }
       return processed;
     },
     // Take an object where keys are names of singletons, and merges it into
@@ -3115,7 +3367,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   var textInputBinding = new InputBinding();
   $.extend(textInputBinding, {
     find: function find(scope) {
-      return $(scope).find('input[type="text"], input[type="password"], input[type="search"], input[type="url"], input[type="email"]');
+      return $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
     },
     getId: function getId(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;
@@ -3169,6 +3421,20 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
   });
   inputBindings.register(textareaInputBinding, 'shiny.textareaInput');
+
+  //---------------------------------------------------------------------
+  // Source file: ../srcjs/input_binding_password.js
+
+  var passwordInputBinding = {};
+  $.extend(passwordInputBinding, textInputBinding, {
+    find: function find(scope) {
+      return $(scope).find('input[type="password"]');
+    },
+    getType: function getType(el) {
+      return "shiny.password";
+    }
+  });
+  inputBindings.register(passwordInputBinding, 'shiny.passwordInput');
 
   //---------------------------------------------------------------------
   // Source file: ../srcjs/input_binding_number.js
@@ -4355,8 +4621,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   function uploadFiles(evt) {
     // If previously selected files are uploading, abort that.
-    var el = $(evt.target);
-    var uploader = el.data('currentUploader');
+    var $el = $(evt.target);
+    var uploader = $el.data('currentUploader');
     if (uploader) uploader.abort();
 
     var files = evt.target.files;
@@ -4367,12 +4633,23 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     if (!IE8 && files.length === 0) return;
 
+    // Clear data-restore attribute if present.
+    $el.removeAttr('data-restore');
+
+    // Set the label in the text box
+    var $fileText = $el.closest('div.input-group').find('input[type=text]');
+    if (files.length === 1) {
+      $fileText.val(files[0].name);
+    } else {
+      $fileText.val(files.length + " files");
+    }
+
     // Start the new upload and put the uploader in 'currentUploader'.
     if (IE8) {
       /*jshint nonew:false */
       new IE8FileUploader(exports.shinyapp, id, evt.target);
     } else {
-      el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+      $el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
     }
   }
 
@@ -4385,10 +4662,40 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return InputBinding.prototype.getId.call(this, el) || el.name;
     },
     getValue: function getValue(el) {
-      return null;
+      // This returns a non-undefined value only when there's a 'data-restore'
+      // attribute, which is set only when restoring Shiny state. If a file is
+      // uploaded through the browser, 'data-restore' gets cleared.
+      var data = $(el).attr('data-restore');
+      if (data) {
+        data = JSON.parse(data);
+
+        // Set the label in the text box
+        var $fileText = $(el).closest('div.input-group').find('input[type=text]');
+        if (data.name.length === 1) {
+          $fileText.val(data.name[0]);
+        } else {
+          $fileText.val(data.name.length + " files");
+        }
+
+        // Manually set up progress bar. A bit inelegant because it duplicates
+        // code from FileUploader, but duplication is less bad than alternatives.
+        var $progress = $(el).closest('div.form-group').find('.progress');
+        var $bar = $progress.find('.progress-bar');
+        $progress.removeClass('active');
+        $bar.width('100%');
+        $bar.css('visibility', 'visible');
+
+        return data;
+      } else {
+        return null;
+      }
     },
     setValue: function setValue(el, value) {
       // Not implemented
+    },
+    getType: function getType(el) {
+      // This will be used only when restoring a file from a saved state.
+      return 'shiny.file';
     },
     subscribe: function subscribe(el, callback) {
       $(el).on('change.fileInputBinding', uploadFiles);
@@ -4406,9 +4713,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     var shinyapp = exports.shinyapp = new ShinyApp();
 
-    function bindOutputs(scope) {
-
-      if (scope === undefined) scope = document;
+    function bindOutputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       scope = $(scope);
 
@@ -4448,10 +4754,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       setTimeout(sendOutputHiddenState, 0);
     }
 
-    function unbindOutputs(scope) {
-      if (scope === undefined) scope = document;
+    function unbindOutputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
       var outputs = $(scope).find('.shiny-bound-output');
+
+      if (includeSelf && $(scope).hasClass('shiny-bound-output')) {
+        outputs.push(scope);
+      }
+
       for (var i = 0; i < outputs.length; i++) {
         var $el = $(outputs[i]);
         var bindingAdapter = $el.data('shiny-output-binding');
@@ -4467,6 +4779,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         });
       }
 
+      // Send later in case DOM layout isn't final yet.
+      setTimeout(sendImageSize, 0);
       setTimeout(sendOutputHiddenState, 0);
     }
 
@@ -4503,9 +4817,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
     }
 
-    function bindInputs(scope) {
-
-      if (scope === undefined) scope = document;
+    function bindInputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       var bindings = inputBindings.getBindings();
 
@@ -4562,10 +4875,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return currentValues;
     }
 
-    function unbindInputs(scope) {
-      if (scope === undefined) scope = document;
+    function unbindInputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
       var inputs = $(scope).find('.shiny-bound-input');
+
+      if (includeSelf && $(scope).hasClass('shiny-bound-input')) {
+        inputs.push(scope);
+      }
+
       for (var i = 0; i < inputs.length; i++) {
         var el = inputs[i];
         var binding = $(el).data('shiny-input-binding');
@@ -4587,8 +4906,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return bindInputs(scope);
     }
     function unbindAll(scope) {
-      unbindInputs(scope);
-      unbindOutputs(scope);
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+      unbindInputs(scope, includeSelf);
+      unbindOutputs(scope, includeSelf);
     }
     exports.bindAll = function (scope) {
       // _bindAll alone returns initial values, it doesn't send them to the
@@ -4609,8 +4930,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     // Calls .initialize() for all of the input objects in all input bindings,
     // in the given scope.
-    function initializeInputs(scope) {
-      if (scope === undefined) scope = document;
+    function initializeInputs() {
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       var bindings = inputBindings.getBindings();
 
@@ -4621,7 +4942,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
         // Iterate over all input objects for this binding
         for (var j = 0; j < inputObjects.length; j++) {
-          binding.initialize(inputObjects[j]);
+          if (!inputObjects[j]._shiny_initialized) {
+            inputObjects[j]._shiny_initialized = true;
+            binding.initialize(inputObjects[j]);
+          }
         }
       }
     }

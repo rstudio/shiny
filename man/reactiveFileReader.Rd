@@ -47,7 +47,7 @@ reactive values and reactive expressions.
 \examples{
 \dontrun{
 # Per-session reactive file reader
-shinyServer(function(input, output, session)) {
+function(input, output, session) {
   fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
 
   output$data <- renderTable({
@@ -59,13 +59,12 @@ shinyServer(function(input, output, session)) {
 # the same reader, so read.csv only gets executed once no matter how many
 # user sessions are connected.
 fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
-shinyServer(function(input, output, session)) {
+function(input, output, session) {
   output$data <- renderTable({
     fileData()
   })
 }
 }
-
 }
 \seealso{
 \code{\link{reactivePoll}}

@@ -28,20 +28,92 @@
 #' @param accept A character vector of MIME types; gives the browser a hint of
 #'   what kind of files the server is expecting.
 #'
+#' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(
+#'       fileInput("file1", "Choose CSV File",
+#'         accept = c(
+#'           "text/csv",
+#'           "text/comma-separated-values,text/plain",
+#'           ".csv")
+#'         ),
+#'       tags$hr(),
+#'       checkboxInput("header", "Header", TRUE)
+#'     ),
+#'     mainPanel(
+#'       tableOutput("contents")
+#'     )
+#'   )
+#' )
+#'
+#' server <- function(input, output) {
+#'   output$contents <- renderTable({
+#'     # input$file1 will be NULL initially. After the user selects
+#'     # and uploads a file, it will be a data frame with 'name',
+#'     # 'size', 'type', and 'datapath' columns. The 'datapath'
+#'     # column will contain the local filenames where the data can
+#'     # be found.
+#'     inFile <- input$file1
+#'
+#'     if (is.null(inFile))
+#'       return(NULL)
+#'
+#'     read.csv(inFile$datapath, header = input$header)
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
   width = NULL) {
 
-  inputTag <- tags$input(id = inputId, name = inputId, type = "file")
+  restoredValue <- restoreInput(id = inputId, default = NULL)
+
+  # Catch potential edge case - ensure that it's either NULL or a data frame.
+  if (!is.null(restoredValue) && !is.data.frame(restoredValue)) {
+    warning("Restored value for ", inputId, " has incorrect format.")
+    restoredValue <- NULL
+  }
+
+  if (!is.null(restoredValue)) {
+    restoredValue <- toJSON(restoredValue, strict_atomic = FALSE)
+  }
+
+  inputTag <- tags$input(
+    id = inputId,
+    name = inputId,
+    type = "file",
+    style = "display: none;",
+    `data-restore` = restoredValue
+  )
+
   if (multiple)
     inputTag$attribs$multiple <- "multiple"
   if (length(accept) > 0)
     inputTag$attribs$accept <- paste(accept, collapse=',')
 
+
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     label %AND% tags$label(label),
-    inputTag,
+
+    div(class = "input-group",
+      tags$label(class = "input-group-btn",
+        span(class = "btn btn-default btn-file",
+          "Browse...",
+          inputTag
+        )
+      ),
+      tags$input(type = "text", class = "form-control",
+        placeholder = "No file selected", readonly = "readonly"
+      )
+    ),
+
     tags$div(
       id=paste(inputId, "_progress", sep=""),
       class="progress progress-striped active shiny-file-input-progress",

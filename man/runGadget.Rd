@@ -48,6 +48,5 @@ runGadget(ui, server)
 # ...or as a single app object
 runGadget(shinyApp(ui, server))
 }
-
 }
 

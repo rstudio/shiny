@@ -44,9 +44,15 @@ For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 \code{choices=character(0)}.
 }
 \examples{
-\dontrun{
-shinyServer(function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
 
+ui <- fluidPage(
+  sliderInput("controller", "Controller", 1, 30, 10),
+  dateInput("inDate", "Input date")
+)
+
+server <- function(input, output, session) {
   observe({
     # We'll use the input$controller variable multiple times, so save it as x
     # for convenience.
@@ -59,7 +65,9 @@ shinyServer(function(input, output, session) {
       max   = paste("2013-04-", x+1, sep="")
     )
   })
-})
+}
+
+shinyApp(ui, server)
 }
 }
 \seealso{

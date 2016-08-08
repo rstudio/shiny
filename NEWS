@@ -1,5 +1,43 @@
-shiny 0.13.1.9001
+shiny 0.13.2.9005
 --------------------------------------------------------------------------------
+* Added support for bookmarkable state.
+
+* Added support for the `pool` package (use Shiny's timer/scheduler)
+
+* `Display: Showcase` now displays the .js, .html and .css files in the `www`
+  directory by default. In order to use showcase mode and not display these,
+  include a new line in your Description file: `IncludeWWW: False`.
+
+* Added insertUI and removeUI functions to be able to add and remove chunks
+  of UI, standalone, and all independent of one another.
+
+* Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`.
+  By default, this option is `FALSE`. When `TRUE`, normal errors will be
+  sanitized, displaying only a generic error message. This changes the look
+  of an app when errors are printed (but the console log remains the same).
+
+* Closed #1161: Deprecated the `position` argument to `tabsetPanel()` since
+  Bootstrap 3 stopped supporting this feature.
+
+* BREAKING CHANGE: The long-deprecated ability to pass a `func` argument to
+  many of the `render` functions has been removed.
+
+* Added the option of passing arguments to an `xxxOutput()` function through
+  the corresponding `renderXXX()` function via an `outputArgs` parameter to the
+  latter. This is only valid for snippets of Shiny code in an interactive
+  `runtime: shiny` Rmd document (never for full apps, even if embedded in an
+  Rmd).
+
+* Added the ability for the client browser to reconnect to a new session on
+  the server, by setting `session$allowReconnect(TRUE)`. This requires a
+  version of Shiny Server that supports reconnections. (#1074)
+
+* Added a new notification API. From R, there are new functions
+  `showNotification` and `hideNotification`. From JavaScript, there is a new
+  `Shiny.notification` object that controls notifications. (#1141)
+
+* Progress indicators now use the notification API.
+
 * Improved `renderTable()` function to make the tables look prettier and also
   provide the user with a lot more parameters to customize their tables with.
 
@@ -7,7 +45,9 @@ shiny 0.13.1.9001
   (or Link's) label and/or icon. Also check that the icon argument (for both
   creation and updating of a button) is valid and throw a warning otherwise.
 
-* Fixes #1056: Upgrades Bootstrap to 3.3.6
+* Fixed #1056: Upgraded Bootstrap to 3.3.6.
+
+* Updated ion.RangeSlider to 2.1.2.
 
 * Fixed #561: DataTables might pop up a warning when the data is updated
   extremely frequently.
@@ -26,6 +66,31 @@ shiny 0.13.1.9001
   or global.R, Shiny will search the code for missing commas, extra commas,
   and unmatched braces, parens, and brackets, and will print out messages
   pointing out those problems.
+
+* Added support for horizontal dividers in `navbarMenu`. (#888)
+
+* Fixed #543, #855: When navbarPage had a navbarMenu as the first item, it
+  not automatically select an item.
+
+* navbarPage previously did not have an option to set the selected tab. (#970)
+
+* navbarMenu now has dividers and dropdown headers (#888)
+
+* Added `placeholder` option to `passwordInput`.
+
+* Almost all code examples now have a runnable example with `shinyApp()`, so
+  that users can run the examples and see them in action. (#1137, #1158)
+
+* Added `session$resetBrush(brushId)` (R) and `Shiny.resetBrush(brushId)` (JS)
+  to programatically clear brushes from `imageOutput`/`plotOutput`.
+
+* Fixed #1253: Memory could leak when an observer was destroyed without first
+  being invalidated.
+
+shiny 0.13.2
+--------------------------------------------------------------------------------
+
+* Updated documentation for `htmlTemplate`.
 
 shiny 0.13.1
 --------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-# Creates an object whose $ and $<- pass through to the parent
+# Creates an object whose $ and [[ pass through to the parent
 # session, unless the name is matched in ..., in which case
 # that value is returned instead. (See Decorator pattern.)
 createSessionProxy <- function(parentSession, ...) {
@@ -14,17 +14,23 @@ createSessionProxy <- function(parentSession, ...) {
 
 #' @export
 `$.session_proxy` <- function(x, name) {
-  if (name %in% names(x[["overrides"]]))
-    x[["overrides"]][[name]]
+  if (name %in% names(.subset2(x, "overrides")))
+    .subset2(x, "overrides")[[name]]
   else
-    x[["parent"]][[name]]
+    .subset2(x, "parent")[[name]]
 }
 
 #' @export
+`[[.session_proxy` <- `$.session_proxy`
+
+
+#' @export
 `$<-.session_proxy` <- function(x, name, value) {
-  x[["parent"]][[name]] <- value
-  x
+  stop("Attempted to assign value on session proxy.")
 }
+
+`[[<-.session_proxy` <- `$<-.session_proxy`
+
 
 #' Invoke a Shiny module
 #'
@@ -42,7 +48,6 @@ createSessionProxy <- function(parentSession, ...) {
 #'
 #' @return The return value, if any, from executing the module server function
 #' @seealso \url{http://shiny.rstudio.com/articles/modules.html}
-#'
 #' @export
 callModule <- function(module, id, ..., session = getDefaultReactiveDomain()) {
   childScope <- session$makeScope(id)

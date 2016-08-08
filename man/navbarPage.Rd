@@ -5,30 +5,37 @@
 \alias{navbarPage}
 \title{Create a page with a top level navigation bar}
 \usage{
-navbarPage(title, ..., id = NULL, position = c("static-top", "fixed-top",
-  "fixed-bottom"), header = NULL, footer = NULL, inverse = FALSE,
-  collapsible = FALSE, collapsable, fluid = TRUE, responsive = NULL,
-  theme = NULL, windowTitle = title)
+navbarPage(title, ..., id = NULL, selected = NULL,
+  position = c("static-top", "fixed-top", "fixed-bottom"), header = NULL,
+  footer = NULL, inverse = FALSE, collapsible = FALSE, collapsable,
+  fluid = TRUE, responsive = NULL, theme = NULL, windowTitle = title)
 
 navbarMenu(title, ..., icon = NULL)
 }
 \arguments{
 \item{title}{The title to display in the navbar}
 
-\item{...}{\code{\link{tabPanel}} elements to include in the page}
+\item{...}{\code{\link{tabPanel}} elements to include in the page. The
+\code{navbarMenu} function also accepts strings, which will be used as menu
+section headers. If the string is a set of dashes like \code{"----"} a
+horizontal separator will be displayed in the menu.}
 
 \item{id}{If provided, you can use \code{input$}\emph{\code{id}} in your
 server logic to determine which of the current tabs is active. The value
 will correspond to the \code{value} argument that is passed to
 \code{\link{tabPanel}}.}
 
+\item{selected}{The \code{value} (or, if none was supplied, the \code{title})
+of the tab that should be selected by default. If \code{NULL}, the first
+tab will be selected.}
+
 \item{position}{Determines whether the navbar should be displayed at the top
-of the page with normal scrolling behavior (\code{"static-top"}), pinned
-at the top (\code{"fixed-top"}), or pinned at the bottom
+of the page with normal scrolling behavior (\code{"static-top"}), pinned at
+the top (\code{"fixed-top"}), or pinned at the bottom
 (\code{"fixed-bottom"}). Note that using \code{"fixed-top"} or
 \code{"fixed-bottom"} will cause the navbar to overlay your body content,
-unless you add padding, e.g.:
-\code{tags$style(type="text/css", "body {padding-top: 70px;}")}}
+unless you add padding, e.g.: \code{tags$style(type="text/css", "body
+{padding-top: 70px;}")}}
 
 \item{header}{Tag or list of tags to display as a common header above all
 tabPanels.}
@@ -73,19 +80,21 @@ The \code{navbarMenu} function can be used to create an embedded
   example below).
 }
 \examples{
-shinyUI(navbarPage("App Title",
+navbarPage("App Title",
   tabPanel("Plot"),
   tabPanel("Summary"),
   tabPanel("Table")
-))
+)
 
-shinyUI(navbarPage("App Title",
+navbarPage("App Title",
   tabPanel("Plot"),
   navbarMenu("More",
     tabPanel("Summary"),
+    "----",
+    "Section header",
     tabPanel("Table")
   )
-))
+)
 }
 \seealso{
 \code{\link{tabPanel}}, \code{\link{tabsetPanel}},

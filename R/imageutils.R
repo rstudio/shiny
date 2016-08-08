@@ -25,7 +25,6 @@
 #'   R; it won't change the actual ppi of the browser.
 #' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}.
 #'   These can be used to set the width, height, background color, etc.
-#'
 #' @export
 plotPNG <- function(func, filename=tempfile(fileext='.png'),
                     width=400, height=400, res=72, ...) {

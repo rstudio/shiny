@@ -41,12 +41,14 @@ writeReactLog <- function(file=stdout(), sessionToken = NULL) {
 #' enabled, it's possible for any user of your app to see at least some
 #' of the source code of your reactive expressions and observers.
 #'
+#' @param time A boolean that specifies whether or not to display the
+#' time that each reactive.
 #' @export
-showReactLog <- function() {
-  utils::browseURL(renderReactLog())
+showReactLog <- function(time = TRUE) {
+  utils::browseURL(renderReactLog(time = as.logical(time)))
 }
 
-renderReactLog <- function(sessionToken = NULL) {
+renderReactLog <- function(sessionToken = NULL, time = TRUE) {
   templateFile <- system.file('www/reactive-graph.html', package='shiny')
   html <- paste(readLines(templateFile, warn=FALSE), collapse='\r\n')
   tc <- textConnection(NULL, 'w')
@@ -55,6 +57,7 @@ renderReactLog <- function(sessionToken = NULL) {
   cat('\n', file=tc)
   flush(tc)
   html <- sub('__DATA__', paste(textConnectionValue(tc), collapse='\r\n'), html, fixed=TRUE)
+  html <- sub('__TIME__', paste0('"', time, '"'), html, fixed=TRUE)
   file <- tempfile(fileext = '.html')
   writeLines(html, file)
   return(file)

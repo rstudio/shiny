@@ -1,7 +1,7 @@
 library(shiny)
 
 # Define server logic for slider examples
-shinyServer(function(input, output) {
+function(input, output) {
   
   # Reactive expression to compose a data frame containing all of
   # the values
@@ -26,4 +26,4 @@ shinyServer(function(input, output) {
   output$values <- renderTable({
     sliderValues()
   })
-})
+}

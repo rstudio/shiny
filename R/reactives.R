@@ -47,6 +47,7 @@ ReactiveValues <- R6Class(
     # For debug purposes
     .label = character(0),
     .values = 'environment',
+    .metadata = 'environment',
     .dependents = 'environment',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
@@ -60,32 +61,40 @@ ReactiveValues <- R6Class(
                        p_randomInt(1000, 10000),
                        sep="")
       .values <<- new.env(parent=emptyenv())
+      .metadata <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
       .namesDeps <<- Dependents$new()
       .allValuesDeps <<- Dependents$new()
       .valuesDeps <<- Dependents$new()
     },
+
     get = function(key) {
+      # Register the "downstream" reactive which is accessing this value, so
+      # that we know to invalidate them when this value changes.
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!exists(dep.key, where=.dependents, inherits=FALSE)) {
+      if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
         .graphDependsOn(ctx$id, sprintf('%s$%s', .label, key))
-        assign(dep.key, ctx, pos=.dependents, inherits=FALSE)
+        .dependents[[dep.key]] <- ctx
         ctx$onInvalidate(function() {
-          rm(list=dep.key, pos=.dependents, inherits=FALSE)
+          rm(list=dep.key, envir=.dependents, inherits=FALSE)
         })
       }
 
-      if (!exists(key, where=.values, inherits=FALSE))
+      if (isInvalid(key))
+        stopWithCondition(c("validation", "shiny.silent.error"), "")
+
+      if (!exists(key, envir=.values, inherits=FALSE))
         NULL
       else
-        base::get(key, pos=.values, inherits=FALSE)
+        .values[[key]]
     },
+
     set = function(key, value) {
       hidden <- substr(key, 1, 1) == "."
 
-      if (exists(key, where=.values, inherits=FALSE)) {
-        if (identical(base::get(key, pos=.values, inherits=FALSE), value)) {
+      if (exists(key, envir=.values, inherits=FALSE)) {
+        if (identical(.values[[key]], value)) {
           return(invisible())
         }
       }
@@ -98,14 +107,14 @@ ReactiveValues <- R6Class(
       else
         .valuesDeps$invalidate()
 
-      assign(key, value, pos=.values, inherits=FALSE)
+      .values[[key]] <- value
 
       .graphValueChange(sprintf('names(%s)', .label), ls(.values, all.names=TRUE))
       .graphValueChange(sprintf('%s (all)', .label), as.list(.values))
       .graphValueChange(sprintf('%s$%s', .label, key), value)
 
       dep.keys <- objects(
-        pos=.dependents,
+        envir=.dependents,
         pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
         all.names=TRUE
       )
@@ -118,18 +127,54 @@ ReactiveValues <- R6Class(
       )
       invisible()
     },
+
     mset = function(lst) {
       lapply(base::names(lst),
              function(name) {
                self$set(name, lst[[name]])
              })
     },
+
     names = function() {
       .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
                       sprintf('names(%s)', .label))
       .namesDeps$register()
       return(ls(.values, all.names=TRUE))
     },
+
+    # Get a metadata value. Does not trigger reactivity.
+    getMeta = function(key, metaKey) {
+      # Make sure to use named (not numeric) indexing into list.
+      metaKey <- as.character(metaKey)
+      .metadata[[key]][[metaKey]]
+    },
+
+    # Set a metadata value. Does not trigger reactivity.
+    setMeta = function(key, metaKey, value) {
+      # Make sure to use named (not numeric) indexing into list.
+      metaKey <- as.character(metaKey)
+
+      if (!exists(key, envir = .metadata, inherits = FALSE)) {
+        .metadata[[key]] <<- list()
+      }
+
+      .metadata[[key]][[metaKey]] <<- value
+    },
+
+    # Mark a value as invalid. If accessed while invalid, a shiny.silent.error
+    # will be thrown.
+    invalidate = function(key) {
+      setMeta(key, "invalid", TRUE)
+    },
+
+    unInvalidate = function(key) {
+      setMeta(key, "invalid", NULL)
+    },
+
+    isInvalid = function(key) {
+      isTRUE(getMeta(key, "invalid"))
+    },
+
     toList = function(all.names=FALSE) {
       .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
                       sprintf('%s (all)', .label))
@@ -140,6 +185,7 @@ ReactiveValues <- R6Class(
 
       return(as.list(.values, all.names=all.names))
     },
+
     .setLabel = function(label) {
       .label <<- label
     }
@@ -186,7 +232,6 @@ ReactiveValues <- R6Class(
 #'   these objects must be named.
 #'
 #' @seealso \code{\link{isolate}} and \code{\link{is.reactivevalues}}.
-#'
 #' @export
 reactiveValues <- function(...) {
   args <- list(...)
@@ -317,10 +362,25 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 #' # isolate() can also be used when calling from outside a reactive context (e.g.
 #' # at the console)
 #' isolate(reactiveValuesToList(values))
-#'
 #' @export
 reactiveValuesToList <- function(x, all.names=FALSE) {
-  .subset2(x, 'impl')$toList(all.names)
+  # Default case
+  res <- .subset2(x, 'impl')$toList(all.names)
+
+  prefix <- .subset2(x, 'ns')("")
+  # Special handling for namespaces
+  if (nzchar(prefix)) {
+    fullNames <- names(res)
+
+    # Filter out items that match namespace
+    fullNames <- fullNames[substring(fullNames, 1, nchar(prefix)) == prefix]
+    res <- res[fullNames]
+
+    # Remove namespace prefix
+    names(res) <- substring(fullNames, nchar(prefix) + 1)
+  }
+
+  res
 }
 
 # This function is needed because str() on a reactivevalues object will call
@@ -333,6 +393,67 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
   cat(indent.str, '- attr(*, "class")=', sep = "")
   utils::str(class(object))
 }
+
+
+#' Invalidate a reactive value
+#'
+#' This invalidates a reactive value. If the value is accessed while invalid, a
+#' "silent" exception is raised and the operation is stopped. This is the same
+#' thing that happens if \code{req(FALSE)} is called. The value is
+#' un-invalidated (accessing it will no longer raise an exception) when the
+#' current reactive domain is flushed; in a Shiny application, this occurs after
+#' all of the observers are executed.
+#'
+#' @param x A \code{\link{reactiveValues}} object (like \code{input}).
+#' @param name The name of a value in the \code{\link{reactiveValues}} object.
+#'
+#' @seealso \code{\link{req}}
+#' @examples
+#' ## Only run this examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   selectInput("data", "Data Set", c("mtcars", "pressure")),
+#'   checkboxGroupInput("cols", "Columns (select 2)", character(0)),
+#'   plotOutput("plot")
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   observe({
+#'     data <- get(input$data)
+#'     # Sets a flag on input$cols to essentially do req(FALSE) if input$cols
+#'     # is accessed. Without this, an error will momentarily show whenever a
+#'     # new data set is selected.
+#'     invalidateReactiveValue(input, "cols")
+#'     updateCheckboxGroupInput(session, "cols", choices = names(data))
+#'   })
+#'
+#'   output$plot <- renderPlot({
+#'     # When a new data set is selected, input$cols will have been invalidated
+#'     # above, and this will essentially do the same as req(FALSE), causing
+#'     # this observer to stop and raise a silent exception.
+#'     cols <- input$cols
+#'     data <- get(input$data)
+#'
+#'     if (length(cols) == 2) {
+#'       plot(data[[ cols[1] ]], data[[ cols[2] ]])
+#'     }
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#' @export
+invalidateReactiveValue <- function(x, name) {
+  domain <- getDefaultReactiveDomain()
+  if (is.null(getDefaultReactiveDomain)) {
+    stop("invalidateReactiveValue() must be called when a default reactive domain is active.")
+  }
+
+  domain$invalidateValue(x, name)
+  invisible()
+}
+
 
 # Observable ----------------------------------------------------------------
 
@@ -360,7 +481,16 @@ Observable <- R6Class(
              "or more parameters; only functions without parameters can be ",
              "reactive.")
 
-      .func <<- wrapFunctionLabel(func, paste("reactive", label),
+      # This is to make sure that the function labels that show in the profiler
+      # and in stack traces doesn't contain whitespace. See
+      # https://github.com/rstudio/profvis/issues/58
+      if (grepl("\\s", label, perl = TRUE)) {
+        funcLabel <- "<reactive>"
+      } else {
+        funcLabel <- paste0("<reactive:", label, ">")
+      }
+
+      .func <<- wrapFunctionLabel(func, funcLabel,
         ..stacktraceon = ..stacktraceon)
       .label <<- label
       .domain <<- domain
@@ -490,7 +620,6 @@ Observable <- R6Class(
 #' isolate(reactiveB())
 #' isolate(reactiveC())
 #' isolate(reactiveD())
-#'
 #' @export
 reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
                      domain = getDefaultReactiveDomain(),
@@ -553,7 +682,7 @@ srcrefToLabel <- function(srcref, defaultLabel) {
 
 #' @export
 print.reactive <- function(x, ...) {
-  label <- attr(x, "observable")$.label
+  label <- attr(x, "observable", exact = TRUE)$.label
   cat(label, "\n")
 }
 
@@ -564,7 +693,7 @@ is.reactive <- function(x) inherits(x, "reactive")
 # Return the number of times that a reactive expression or observer has been run
 execCount <- function(x) {
   if (is.reactive(x))
-    return(attr(x, "observable")$.execCount)
+    return(attr(x, "observable", exact = TRUE)$.execCount)
   else if (inherits(x, 'Observer'))
     return(x$.execCount)
   else
@@ -582,12 +711,18 @@ Observer <- R6Class(
     .domain = 'ANY',
     .priority = numeric(0),
     .autoDestroy = logical(0),
+    # A function that, when invoked, unsubscribes the autoDestroy
+    # listener (or NULL if autodestroy is disabled for this observer).
+    # We must unsubscribe when this observer is destroyed, or else
+    # the observer cannot be garbage collected until the session ends.
+    .autoDestroyHandle = 'ANY',
     .invalidateCallbacks = list(),
     .execCount = integer(0),
     .onResume = 'function',
     .suspended = logical(0),
     .destroyed = logical(0),
     .prevId = character(0),
+    .ctx = NULL,
 
     initialize = function(observerFunc, label, suspended = FALSE, priority = 0,
                           domain = getDefaultReactiveDomain(),
@@ -610,7 +745,6 @@ registerDebugHook("observerFunc", environment(), label)
       }
       .label <<- label
       .domain <<- domain
-      .autoDestroy <<- autoDestroy
       .priority <<- normalizePriority(priority)
       .execCount <<- 0L
       .suspended <<- suspended
@@ -618,7 +752,9 @@ registerDebugHook("observerFunc", environment(), label)
       .destroyed <<- FALSE
       .prevId <<- ''
 
-      onReactiveDomainEnded(.domain, self$.onDomainEnded)
+      .autoDestroy <<- FALSE
+      .autoDestroyHandle <<- NULL
+      setAutoDestroy(autoDestroy)
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
@@ -627,7 +763,23 @@ registerDebugHook("observerFunc", environment(), label)
       ctx <- Context$new(.domain, .label, type='observer', prevId=.prevId)
       .prevId <<- ctx$id
 
+      if (!is.null(.ctx)) {
+        # If this happens, something went wrong.
+        warning("Created a new context without invalidating previous context.")
+      }
+      # Store the context explicitly in the Observer object. This is necessary
+      # to make sure that when the observer is destroyed, it also gets
+      # invalidated. Otherwise the upstream reactive (on which the observer
+      # depends) will hold a (indirect) reference to this context until the
+      # reactive is invalidated, which may not happen immediately or at all.
+      # This can lead to a memory leak (#1253).
+      .ctx <<- ctx
+
       ctx$onInvalidate(function() {
+        # Context is invalidated, so we don't need to store a reference to it
+        # anymore.
+        .ctx <<- NULL
+
         lapply(.invalidateCallbacks, function(invalidateCallback) {
           invalidateCallback()
           NULL
@@ -680,11 +832,28 @@ registerDebugHook("observerFunc", environment(), label)
       "Sets whether this observer should be automatically destroyed when its
       domain (if any) ends. If autoDestroy is TRUE and the domain already
       ended, then destroy() is called immediately."
+
+      if (.autoDestroy == autoDestroy) {
+        return(.autoDestroy)
+      }
+
       oldValue <- .autoDestroy
       .autoDestroy <<- autoDestroy
-      if (!is.null(.domain) && .domain$isEnded()) {
-        destroy()
+
+      if (autoDestroy) {
+        if (!.destroyed && !is.null(.domain)) { # Make sure to not try to destroy twice.
+          if (.domain$isEnded()) {
+            destroy()
+          } else {
+            .autoDestroyHandle <<- onReactiveDomainEnded(.domain, .onDomainEnded)
+          }
+        }
+      } else {
+        if (!is.null(.autoDestroyHandle))
+          .autoDestroyHandle()
+        .autoDestroyHandle <<- NULL
       }
+
       invisible(oldValue)
     },
     suspend = function() {
@@ -710,8 +879,21 @@ registerDebugHook("observerFunc", environment(), label)
       "Prevents this observer from ever executing again (even if a flush has
       already been scheduled)."
 
+      # Make sure to not try to destory twice.
+      if (.destroyed)
+        return()
+
       suspend()
       .destroyed <<- TRUE
+
+      if (!is.null(.autoDestroyHandle)) {
+        .autoDestroyHandle()
+      }
+      .autoDestroyHandle <<- NULL
+
+      if (!is.null(.ctx)) {
+        .ctx$invalidate()
+      }
     },
     .onDomainEnded = function() {
       if (isTRUE(.autoDestroy)) {
@@ -816,7 +998,6 @@ registerDebugHook("observerFunc", environment(), label)
 #' # In a normal Shiny app, the web client will trigger flush events. If you
 #' # are at the console, you can force a flush with flushReact()
 #' shiny:::flushReact()
-#'
 #' @export
 observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
                     suspended=FALSE, priority=0,
@@ -856,9 +1037,9 @@ observe <- function(x, env=parent.frame(), quoted=FALSE, label=NULL,
 #' }
 #' @export
 makeReactiveBinding <- function(symbol, env = parent.frame()) {
-  if (exists(symbol, where = env, inherits = FALSE)) {
-    initialValue <- get(symbol, pos = env, inherits = FALSE)
-    rm(list = symbol, pos = env, inherits = FALSE)
+  if (exists(symbol, envir = env, inherits = FALSE)) {
+    initialValue <- env[[symbol]]
+    rm(list = symbol, envir = env, inherits = FALSE)
   }
   else
     initialValue <- NULL
@@ -931,8 +1112,15 @@ setAutoflush <- local({
 #' @seealso \code{\link{invalidateLater}}
 #'
 #' @examples
-#' \dontrun{
-#' shinyServer(function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   sliderInput("n", "Number of observations", 2, 1000, 500),
+#'   plotOutput("plot")
+#' )
+#'
+#' server <- function(input, output) {
 #'
 #'   # Anything that calls autoInvalidate will automatically invalidate
 #'   # every 2 seconds.
@@ -953,11 +1141,12 @@ setAutoflush <- local({
 #'   # input$n changes.
 #'   output$plot <- renderPlot({
 #'     autoInvalidate()
-#'     hist(isolate(input$n))
+#'     hist(rnorm(isolate(input$n)))
 #'   })
-#' })
 #' }
 #'
+#' shinyApp(ui, server)
+#' }
 #' @export
 reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain()) {
   dependents <- Map$new()
@@ -1009,8 +1198,15 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #' @seealso \code{\link{reactiveTimer}} is a slightly less safe alternative.
 #'
 #' @examples
-#' \dontrun{
-#' shinyServer(function(input, output, session) {
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   sliderInput("n", "Number of observations", 2, 1000, 500),
+#'   plotOutput("plot")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'
 #'   observe({
 #'     # Re-execute this reactive expression after 1000 milliseconds
@@ -1027,11 +1223,12 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #'   output$plot <- renderPlot({
 #'     # Re-execute this reactive expression after 2000 milliseconds
 #'     invalidateLater(2000)
-#'     hist(isolate(input$n))
+#'     hist(rnorm(isolate(input$n)))
 #'   })
-#' })
 #' }
 #'
+#' shinyApp(ui, server)
+#' }
 #' @export
 invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   ctx <- .getReactiveEnvironment()$currentContext()
@@ -1101,16 +1298,13 @@ coerceToFunc <- function(x) {
 #' @seealso \code{\link{reactiveFileReader}}
 #'
 #' @examples
-#' \dontrun{
 #' # Assume the existence of readTimestamp and readValue functions
-#' shinyServer(function(input, output, session) {
+#' function(input, output, session) {
 #'   data <- reactivePoll(1000, session, readTimestamp, readValue)
 #'   output$dataTable <- renderTable({
 #'     data()
 #'   })
-#' })
 #' }
-#'
 #' @export
 reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
   intervalMillis <- coerceToFunc(intervalMillis)
@@ -1170,7 +1364,7 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #' @examples
 #' \dontrun{
 #' # Per-session reactive file reader
-#' shinyServer(function(input, output, session)) {
+#' function(input, output, session) {
 #'   fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
 #'
 #'   output$data <- renderTable({
@@ -1182,13 +1376,12 @@ reactivePoll <- function(intervalMillis, session, checkFunc, valueFunc) {
 #' # the same reader, so read.csv only gets executed once no matter how many
 #' # user sessions are connected.
 #' fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
-#' shinyServer(function(input, output, session)) {
+#' function(input, output, session) {
 #'   output$data <- renderTable({
 #'     fileData()
 #'   })
 #' }
 #' }
-#'
 #' @export
 reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...) {
   filePath <- coerceToFunc(filePath)
@@ -1276,7 +1469,6 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #'
 #' # isolate also works if the reactive expression accesses values from the
 #' # input object, like input$x
-#'
 #' @export
 isolate <- function(expr) {
   ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate')
@@ -1298,7 +1490,6 @@ isolate <- function(expr) {
 #' @return The value of \code{expr}.
 #'
 #' @seealso \code{\link{isolate}}
-#'
 #' @export
 maskReactiveContext <- function(expr) {
   .getReactiveEnvironment()$runWith(NULL, function() {
@@ -1425,7 +1616,6 @@ maskReactiveContext <- function(expr) {
 #'   }
 #'   shinyApp(ui=ui, server=server)
 #' }
-#'
 #' @export
 observeEvent <- function(eventExpr, handlerExpr,
   event.env = parent.frame(), event.quoted = FALSE,

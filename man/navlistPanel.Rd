@@ -40,7 +40,7 @@ You can include headers within the \code{navlistPanel} by including
   doesn't support separators.
 }
 \examples{
-shinyUI(fluidPage(
+fluidPage(
 
   titlePanel("Application Title"),
 
@@ -50,7 +50,7 @@ shinyUI(fluidPage(
     tabPanel("Second"),
     tabPanel("Third")
   )
-))
+)
 }
 \seealso{
 \code{\link{tabPanel}}, \code{\link{updateNavlistPanel}}

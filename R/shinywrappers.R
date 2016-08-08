@@ -12,24 +12,74 @@ globalVariables('func')
 #'   an output ID.
 #' @param renderFunc A function that is suitable for assigning to a Shiny output
 #'   slot.
+#' @param outputArgs A list of arguments to pass to the \code{uiFunc}. Render
+#'   functions should include \code{outputArgs = list()} in their own parameter
+#'   list, and pass through the value to \code{markRenderFunction}, to allow
+#'   app authors to customize outputs. (Currently, this is only supported for
+#'   dynamically generated UIs, such as those created by Shiny code snippets
+#'   embedded in R Markdown documents).
 #' @return The \code{renderFunc} function, with annotations.
-#'
 #' @export
-markRenderFunction <- function(uiFunc, renderFunc) {
+markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
+  # a mutable object that keeps track of whether `useRenderFunction` has been
+  # executed (this usually only happens when rendering Shiny code snippets in
+  # an interactive R Markdown document); its initial value is FALSE
+  hasExecuted <- Mutable$new()
+  hasExecuted$set(FALSE)
+
+  origRenderFunc <- renderFunc
+  renderFunc <- function(...) {
+    # if the user provided something through `outputArgs` BUT the
+    # `useRenderFunction` was not executed, then outputArgs will be ignored,
+    # so throw a warning to let user know the correct usage
+    if (length(outputArgs) != 0 && !hasExecuted$get()) {
+      warning("Unused argument: outputArgs. The argument outputArgs is only ",
+              "meant to be used when embedding snippets of Shiny code in an ",
+              "R Markdown code chunk (using runtime: shiny). When running a ",
+              "full Shiny app, please set the output arguments directly in ",
+              "the corresponding output function of your UI code.")
+      # stop warning from happening again for the same object
+      hasExecuted$set(TRUE)
+    }
+    if (is.null(formals(origRenderFunc))) origRenderFunc()
+    else origRenderFunc(...)
+  }
+
   structure(renderFunc,
-            class      = c("shiny.render.function", "function"),
-            outputFunc = uiFunc)
+            class       = c("shiny.render.function", "function"),
+            outputFunc  = uiFunc,
+            outputArgs  = outputArgs,
+            hasExecuted = hasExecuted)
 }
 
 useRenderFunction <- function(renderFunc, inline = FALSE) {
   outputFunction <- attr(renderFunc, "outputFunc")
+  outputArgs <- attr(renderFunc, "outputArgs")
+  hasExecuted <- attr(renderFunc, "hasExecuted")
+  hasExecuted$set(TRUE)
+
+  for (arg in names(outputArgs)) {
+    if (!arg %in% names(formals(outputFunction))) {
+      stop(paste0("Unused argument: in 'outputArgs', '",
+                  arg, "' is not an valid argument for ",
+                  "the output function"))
+      outputArgs[[arg]] <- NULL
+    }
+  }
+
   id <- createUniqueId(8, "out")
+  # Make the id the first positional argument
+  outputArgs <- c(list(id), outputArgs)
+
   o <- getDefaultReactiveDomain()$output
   if (!is.null(o))
     o[[id]] <- renderFunc
-  if (is.logical(formals(outputFunction)[["inline"]])) {
-    outputFunction(id, inline = inline)
-  } else outputFunction(id)
+
+  if (is.logical(formals(outputFunction)[["inline"]]) && !("inline" %in% names(outputArgs))) {
+    outputArgs[["inline"]] <- inline
+  }
+
+  do.call(outputFunction, outputArgs)
 }
 
 #' @export
@@ -69,13 +119,23 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'   it is sent to the client browser? Generally speaking, if the image is a
 #'   temp file generated within \code{func}, then this should be \code{TRUE};
 #'   if the image is not a temp file, this should be \code{FALSE}.
-#'
+#' @param outputArgs A list of arguments to be passed through to the implicit
+#'   call to \code{\link{imageOutput}} when \code{renderImage} is used in an
+#'   interactive R Markdown document.
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
-#' shinyServer(function(input, output, clientData) {
+#' ui <- fluidPage(
+#'   sliderInput("n", "Number of observations", 2, 1000, 500),
+#'   plotOutput("plot1"),
+#'   plotOutput("plot2"),
+#'   plotOutput("plot3")
+#' )
+#'
+#' server <- function(input, output, session) {
 #'
 #'   # A plot of fixed size
 #'   output$plot1 <- renderImage({
@@ -97,14 +157,14 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'   output$plot2 <- renderImage({
 #'     # Read plot2's width and height. These are reactive values, so this
 #'     # expression will re-run whenever these values change.
-#'     width  <- clientData$output_plot2_width
-#'     height <- clientData$output_plot2_height
+#'     width  <- session$clientData$output_plot2_width
+#'     height <- session$clientData$output_plot2_height
 #'
 #'     # A temp file to save the output.
 #'     outfile <- tempfile(fileext='.png')
 #'
 #'     png(outfile, width=width, height=height)
-#'     hist(rnorm(input$obs))
+#'     hist(rnorm(input$n))
 #'     dev.off()
 #'
 #'     # Return a list containing the filename
@@ -115,6 +175,8 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'   }, deleteFile = TRUE)
 #'
 #'   # Send a pre-rendered image, and don't delete the image after sending it
+#'   # NOTE: For this example to work, it would require files in a subdirectory
+#'   # named images/
 #'   output$plot3 <- renderImage({
 #'     # When input$n is 1, filename is ./images/image1.jpeg
 #'     filename <- normalizePath(file.path('./images',
@@ -123,14 +185,15 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'     # Return a list containing the filename
 #'     list(src = filename)
 #'   }, deleteFile = FALSE)
-#' })
+#' }
 #'
+#' shinyApp(ui, server)
 #' }
 renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
-                        deleteFile=TRUE) {
+                        deleteFile=TRUE, outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
-  return(markRenderFunction(imageOutput, function(shinysession, name, ...) {
+  renderFunc <- function(shinysession, name, ...) {
     imageinfo <- func()
     # Should the file be deleted after being sent? If .deleteFile not set or if
     # TRUE, then delete; otherwise don't delete.
@@ -147,7 +210,9 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
     # Return a list with src, and other img attributes
     c(src = shinysession$fileUrl(name, file=imageinfo$src, contentType=contentType),
       extra_attr)
-  }))
+  }
+
+  markRenderFunction(imageOutput, renderFunc, outputArgs = outputArgs)
 }
 
 
@@ -173,28 +238,27 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   object.
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
-#' @param func A function that may print output and/or return a printable R
-#'   object (deprecated; use \code{expr} instead).
+#'   is useful if you want to save an expression in a variable.
 #' @param width The value for \code{\link{options}('width')}.
+#' @param outputArgs A list of arguments to be passed through to the implicit
+#'   call to \code{\link{verbatimTextOutput}} when \code{renderPrint} is used
+#'   in an interactive R Markdown document.
 #' @seealso \code{\link{renderText}} for displaying the value returned from a
 #'   function, instead of the printed output.
 #'
 #' @example res/text-example.R
-#'
 #' @export
-renderPrint <- function(expr, env = parent.frame(), quoted = FALSE, func = NULL,
-                        width = getOption('width')) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg="renderPrint: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
+renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
+                        width = getOption('width'), outputArgs=list()) {
+  installExprFunction(expr, "func", env, quoted)
 
-  markRenderFunction(verbatimTextOutput, function() {
+  renderFunc <- function(shinysession, name, ...) {
     op <- options(width = width)
     on.exit(options(op), add = TRUE)
     paste(utils::capture.output(func()), collapse = "\n")
-  })
+  }
+
+  markRenderFunction(verbatimTextOutput, renderFunc, outputArgs = outputArgs)
 }
 
 #' Text Output
@@ -215,26 +279,25 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE, func = NULL,
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
-#' @param func A function that returns an R object that can be used as an
-#'   argument to \code{cat}.(deprecated; use \code{expr} instead).
+#' @param outputArgs A list of arguments to be passed through to the implicit
+#'   call to \code{\link{textOutput}} when \code{renderText} is used in an
+#'   interactive R Markdown document.
 #'
 #' @seealso \code{\link{renderPrint}} for capturing the print output of a
 #'   function, rather than the returned text value.
 #'
 #' @example res/text-example.R
-#'
 #' @export
-renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg="renderText: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
+renderText <- function(expr, env=parent.frame(), quoted=FALSE,
+                       outputArgs=list()) {
+  installExprFunction(expr, "func", env, quoted)
 
-  markRenderFunction(textOutput, function() {
+  renderFunc <- function(shinysession, name, ...) {
     value <- func()
     return(paste(utils::capture.output(cat(value)), collapse="\n"))
-  })
+  }
+
+  markRenderFunction(textOutput, renderFunc, outputArgs = outputArgs)
 }
 
 #' UI Output
@@ -250,34 +313,44 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
-#' @param func A function that returns a Shiny tag object, \code{\link{HTML}},
-#'   or a list of such objects (deprecated; use \code{expr} instead).
+#' @param outputArgs A list of arguments to be passed through to the implicit
+#'   call to \code{\link{uiOutput}} when \code{renderUI} is used in an
+#'   interactive R Markdown document.
 #'
 #' @seealso conditionalPanel
-#'
 #' @export
 #' @examples
-#' \dontrun{
-#'   output$moreControls <- renderUI({
-#'     list(
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   uiOutput("moreControls")
+#' )
+#'
+#' server <- function(input, output) {
+#'   output$moreControls <- renderUI({
+#'     tagList(
+#'       sliderInput("n", "N", 1, 1000, 500),
+#'       textInput("label", "Label")
 #'     )
 #'   })
 #' }
-renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
-  if (!is.null(func)) {
-    shinyDeprecated(msg="renderUI: argument 'func' is deprecated. Please use 'expr' instead.")
-  } else {
-    installExprFunction(expr, "func", env, quoted)
-  }
+#' shinyApp(ui, server)
+#' }
+#'
+renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
+                     outputArgs=list()) {
+  installExprFunction(expr, "func", env, quoted)
 
-  markRenderFunction(uiOutput, function(shinysession, name, ...) {
+  renderFunc <- function(shinysession, name, ...) {
     result <- func()
     if (is.null(result) || length(result) == 0)
       return(NULL)
 
     processDeps(result, shinysession)
-  })
+  }
+
+  markRenderFunction(uiOutput, renderFunc, outputArgs = outputArgs)
 }
 
 #' File Downloads
@@ -303,28 +376,40 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE, func=NULL) {
 #'   example \code{"text/csv"} or \code{"image/png"}. If \code{NULL} or
 #'   \code{NA}, the content type will be guessed based on the filename
 #'   extension, or \code{application/octet-stream} if the extension is unknown.
+#' @param outputArgs A list of arguments to be passed through to the implicit
+#'   call to \code{\link{downloadButton}} when \code{downloadHandler} is used
+#'   in an interactive R Markdown document.
 #'
 #' @examples
-#' \dontrun{
-#' # In server.R:
-#' output$downloadData <- downloadHandler(
-#'   filename = function() {
-#'     paste('data-', Sys.Date(), '.csv', sep='')
-#'   },
-#'   content = function(file) {
-#'     write.csv(data, file)
-#'   }
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   downloadLink("downloadData", "Download")
 #' )
 #'
-#' # In ui.R:
-#' downloadLink('downloadData', 'Download')
+#' server <- function(input, output) {
+#'   # Our dataset
+#'   data <- mtcars
+#'
+#'   output$downloadData <- downloadHandler(
+#'     filename = function() {
+#'       paste("data-", Sys.Date(), ".csv", sep="")
+#'     },
+#'     content = function(file) {
+#'       write.csv(data, file)
+#'     }
+#'   )
 #' }
 #'
+#' shinyApp(ui, server)
+#' }
 #' @export
-downloadHandler <- function(filename, content, contentType=NA) {
-  return(markRenderFunction(downloadButton, function(shinysession, name, ...) {
+downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()) {
+  renderFunc <- function(shinysession, name, ...) {
     shinysession$registerDownload(name, filename, contentType, content)
-  }))
+  }
+  markRenderFunction(downloadButton, renderFunc, outputArgs = outputArgs)
 }
 
 #' Table output with the JavaScript library DataTables
@@ -355,6 +440,10 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #'   indicate which columns to escape, e.g. \code{1:5} (the first 5 columns),
 #'   \code{c(1, 3, 4)}, or \code{c(-1, -3)} (all columns except the first and
 #'   third), or \code{c('Species', 'Sepal.Length')}.
+#' @param outputArgs A list of arguments to be passed through to the implicit
+#'   call to \code{\link{dataTableOutput}} when \code{renderDataTable} is used
+#'   in an interactive R Markdown document.
+#'
 #' @references \url{http://datatables.net}
 #' @note This function only provides the server-side version of DataTables
 #'   (using R to process the data object on the server side). There is a
@@ -389,10 +478,11 @@ downloadHandler <- function(filename, content, contentType=NA) {
 #' }
 renderDataTable <- function(expr, options = NULL, searchDelay = 500,
                             callback = 'function(oTable) {}', escape = TRUE,
-                            env = parent.frame(), quoted = FALSE) {
+                            env = parent.frame(), quoted = FALSE,
+                            outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
-  markRenderFunction(dataTableOutput, function(shinysession, name, ...) {
+  renderFunc <- function(shinysession, name, ...) {
     if (is.function(options)) options <- options()
     options <- checkDT9(options)
     res <- checkAsIs(options)
@@ -418,7 +508,9 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
       evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,
       callback = paste(callback, collapse = '\n'), escape = escape
     )
-  })
+  }
+
+  markRenderFunction(dataTableOutput, renderFunc, outputArgs = outputArgs)
 }
 
 # a data frame containing the DataTables 1.9 and 1.10 names

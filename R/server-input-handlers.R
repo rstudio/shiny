@@ -89,6 +89,12 @@ registerInputHandler("shiny.number", function(val, ...){
   ifelse(is.null(val), NA, val)
 })
 
+registerInputHandler("shiny.password", function(val, shinysession, name) {
+  # Mark passwords as not serializable
+  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializer", serializerUnserializable)
+  val
+})
+
 registerInputHandler("shiny.date", function(val, ...){
   # First replace NULLs with NA, then convert to Date vector
   datelist <- ifelse(lapply(val, is.null), NA, val)
@@ -104,8 +110,33 @@ registerInputHandler("shiny.datetime", function(val, ...){
   as.POSIXct(unlist(times), origin = "1970-01-01", tz = "UTC")
 })
 
-registerInputHandler("shiny.action", function(val, ...) {
+registerInputHandler("shiny.action", function(val, shinysession, name) {
+  # Mark as not serializable
+  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializer", serializerUnserializable)
+
   # mark up the action button value with a special class so we can recognize it later
   class(val) <- c(class(val), "shinyActionButtonValue")
+  val
+})
+
+registerInputHandler("shiny.file", function(val, shinysession, name) {
+  # This function is only used when restoring a Shiny fileInput. When a file is
+  # uploaded the usual way, it takes a different code path and won't hit this
+  # function.
+  if (is.null(val))
+    return(NULL)
+
+  # The data will be a named list of lists; convert to a data frame.
+  val <- as.data.frame(lapply(val, unlist), stringsAsFactors = FALSE)
+
+  # Make sure that the paths don't go up the directory tree, for security
+  # reasons.
+  if (any(grepl("..", val$datapath, fixed = TRUE))) {
+    stop("Invalid '..' found in file input path.")
+  }
+
+  # Prepend the persistent dir
+  val$datapath <- file.path(getCurrentRestoreContext()$dir, val$datapath)
+
   val
 })

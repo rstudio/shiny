@@ -35,18 +35,20 @@
 #' @param env The environment in which to evaluate \code{expr}.
 #' @param quoted Is \code{expr} a quoted expression (with \code{quote()})? This
 #'   is useful if you want to save an expression in a variable.
-#' @param func A function that generates a plot (deprecated; use \code{expr}
-#'   instead).
 #' @param execOnResize If \code{FALSE} (the default), then when a plot is
 #'   resized, Shiny will \emph{replay} the plot drawing commands with
 #'   \code{\link[grDevices]{replayPlot}()} instead of re-executing \code{expr}.
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to \code{TRUE}.
+#' @param outputArgs A list of arguments to be passed through to the implicit
+#'   call to \code{\link{plotOutput}} when \code{renderPlot} is used in an
+#'   interactive R Markdown document.
 #' @export
 renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
-                       env=parent.frame(), quoted=FALSE, func=NULL,
-                       execOnResize=FALSE) {
+                       env=parent.frame(), quoted=FALSE,
+                       execOnResize=FALSE, outputArgs=list()
+) {
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
   installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
@@ -131,7 +133,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
       coordmap <- NULL
       plotFunc <- function() {
-        ..stacktraceon..(replayPlot(plotData$recordedPlot))
+        ..stacktraceon..(grDevices::replayPlot(plotData$recordedPlot))
 
         # Coordmap must be recalculated after replaying plot, because pixel
         # dimensions will have changed.
@@ -161,7 +163,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   }
 
 
-  plotObj <- reactive({
+  plotObj <- reactive(label = "plotObj", {
     if (execOnResize) {
       isolate({ dims <- getDims() })
     } else {
@@ -213,7 +215,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         })
       }
 
-      recordedPlot <<- recordPlot()
+      recordedPlot <<- grDevices::recordPlot()
 
       if (inherits(plotResult, "ggplot_build_gtable")) {
         coordmap <<- getGgplotCoordmap(plotResult, pixelratio, res)
@@ -258,7 +260,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   outputFunc <- plotOutput
   if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
-  markRenderFunction(outputFunc, renderFunc)
+  markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
 # The coordmap extraction functions below return something like the examples
@@ -605,7 +607,7 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
     # res setting of the device. If res=72, then it returns 400 (as expected),
     # but if, e.g., res=96, it will return 300, which is incorrect.
     devScaleFactor <- 1
-    if (grepl("quartz", names(dev.cur()), fixed = TRUE)) {
+    if (grepl("quartz", names(grDevices::dev.cur()), fixed = TRUE)) {
       devScaleFactor <- res / 72
     }
 

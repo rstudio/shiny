@@ -16,10 +16,23 @@
 #' @seealso \code{\link{updateTextInput}}
 #'
 #' @examples
-#' textInput("caption", "Caption:", "Data Summary")
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   textInput("caption", "Caption", "Data Summary"),
+#'   verbatimTextOutput("value")
+#' )
+#' server <- function(input, output) {
+#'   output$value <- renderText({ input$caption })
+#' }
+#' shinyApp(ui, server)
+#' }
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
   placeholder = NULL) {
+
+  value <- restoreInput(id = inputId, default = value)
 
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),

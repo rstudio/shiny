@@ -20,11 +20,16 @@ well with elements that have a percentage-based width (e.g.
 \code{\link{plotOutput}} at its default setting of \code{width = "100\%"}).
 }
 \examples{
-flowLayout(
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- flowLayout(
   numericInput("rows", "How many rows?", 5),
   selectInput("letter", "Which letter?", LETTERS),
   sliderInput("value", "What value?", 0, 100, 50)
 )
+shinyApp(ui, server = function(input, output) { })
+}
 }
 \seealso{
 \code{\link{verticalLayout}}

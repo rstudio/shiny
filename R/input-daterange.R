@@ -32,37 +32,44 @@
 #' @seealso \code{\link{dateInput}}, \code{\link{updateDateRangeInput}}
 #'
 #' @examples
-#' dateRangeInput("daterange", "Date range:",
-#'                start = "2001-01-01",
-#'                end   = "2010-12-31")
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
-#' # Default start and end is the current date in the client's time zone
-#' dateRangeInput("daterange", "Date range:")
+#' ui <- fluidPage(
+#'   dateRangeInput("daterange1", "Date range:",
+#'                  start = "2001-01-01",
+#'                  end   = "2010-12-31"),
 #'
-#' # start and end are always specified in yyyy-mm-dd, even if the display
-#' # format is different
-#' dateRangeInput("daterange", "Date range:",
-#'                start  = "2001-01-01",
-#'                end    = "2010-12-31",
-#'                min    = "2001-01-01",
-#'                max    = "2012-12-21",
-#'                format = "mm/dd/yy",
-#'                separator = " - ")
+#'   # Default start and end is the current date in the client's time zone
+#'   dateRangeInput("daterange2", "Date range:"),
 #'
-#' # Pass in Date objects
-#' dateRangeInput("daterange", "Date range:",
-#'                start = Sys.Date()-10,
-#'                end = Sys.Date()+10)
+#'   # start and end are always specified in yyyy-mm-dd, even if the display
+#'   # format is different
+#'   dateRangeInput("daterange3", "Date range:",
+#'                  start  = "2001-01-01",
+#'                  end    = "2010-12-31",
+#'                  min    = "2001-01-01",
+#'                  max    = "2012-12-21",
+#'                  format = "mm/dd/yy",
+#'                  separator = " - "),
 #'
-#' # Use different language and different first day of week
-#' dateRangeInput("daterange", "Date range:",
-#'                language = "de",
-#'                weekstart = 1)
+#'   # Pass in Date objects
+#'   dateRangeInput("daterange4", "Date range:",
+#'                  start = Sys.Date()-10,
+#'                  end = Sys.Date()+10),
 #'
-#' # Start with decade view instead of default month view
-#' dateRangeInput("daterange", "Date range:",
-#'                startview = "decade")
+#'   # Use different language and different first day of week
+#'   dateRangeInput("daterange5", "Date range:",
+#'                  language = "de",
+#'                  weekstart = 1),
 #'
+#'   # Start with decade view instead of default month view
+#'   dateRangeInput("daterange6", "Date range:",
+#'                  startview = "decade")
+#' )
+#'
+#' shinyApp(ui, server = function(input, output) { })
+#' }
 #' @export
 dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     min = NULL, max = NULL, format = "yyyy-mm-dd", startview = "month",
@@ -74,6 +81,10 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
   if (inherits(end,   "Date"))  end   <- format(end,   "%Y-%m-%d")
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
+
+  restored <- restoreInput(id = inputId, default = list(start, end))
+  start <- restored[[1]]
+  end <- restored[[2]]
 
   attachDependencies(
     div(id = inputId,

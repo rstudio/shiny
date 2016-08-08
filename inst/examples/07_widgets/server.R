@@ -3,7 +3,7 @@ library(datasets)
 
 # Define server logic required to summarize and view the 
 # selected dataset
-shinyServer(function(input, output) {
+function(input, output) {
   
   # Return the requested dataset
   datasetInput <- reactive({
@@ -23,4 +23,4 @@ shinyServer(function(input, output) {
   output$view <- renderTable({
     head(datasetInput(), n = input$obs)
   })
-})
+}

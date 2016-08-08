@@ -17,13 +17,18 @@ Create a container that includes one or more rows of content (each element
 passed to the container will appear on it's own line in the UI)
 }
 \examples{
-shinyUI(fluidPage(
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
   verticalLayout(
     a(href="http://example.com/link1", "Link One"),
     a(href="http://example.com/link2", "Link Two"),
     a(href="http://example.com/link3", "Link Three")
   )
-))
+)
+shinyApp(ui, server = function(input, output) { })
+}
 }
 \seealso{
 \code{\link{fluidPage}}, \code{\link{flowLayout}}

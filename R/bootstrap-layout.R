@@ -31,7 +31,11 @@
 #' @seealso \code{\link{column}}, \code{\link{sidebarLayout}}
 #'
 #' @examples
-#' shinyUI(fluidPage(
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' # Example of UI with fluidPage
+#' ui <- fluidPage(
 #'
 #'   # Application title
 #'   titlePanel("Hello Shiny!"),
@@ -52,9 +56,21 @@
 #'       plotOutput("distPlot")
 #'     )
 #'   )
-#' ))
+#' )
 #'
-#' shinyUI(fluidPage(
+#' # Server logic
+#' server <- function(input, output) {
+#'   output$distPlot <- renderPlot({
+#'     hist(rnorm(input$obs))
+#'   })
+#' }
+#'
+#' # Complete app with UI and server components
+#' shinyApp(ui, server)
+#'
+#'
+#' # UI demonstrating column layouts
+#' ui <- fluidPage(
 #'   title = "Hello Shiny!",
 #'   fluidRow(
 #'     column(width = 4,
@@ -64,8 +80,10 @@
 #'       "3 offset 2"
 #'     )
 #'   )
-#' ))
+#' )
 #'
+#' shinyApp(ui, server = function(input, output) { })
+#' }
 #' @rdname fluidPage
 #' @export
 fluidPage <- function(..., title = NULL, responsive = NULL, theme = NULL) {
@@ -115,7 +133,10 @@ fluidRow <- function(...) {
 #' @seealso \code{\link{column}}
 #'
 #' @examples
-#' shinyUI(fixedPage(
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fixedPage(
 #'   title = "Hello, Shiny!",
 #'   fixedRow(
 #'     column(width = 4,
@@ -125,7 +146,10 @@ fluidRow <- function(...) {
 #'       "3 offset 2"
 #'     )
 #'   )
-#' ))
+#' )
+#'
+#' shinyApp(ui, server = function(input, output) { })
+#' }
 #'
 #' @rdname fixedPage
 #' @export
@@ -160,24 +184,43 @@ fixedRow <- function(...) {
 #' @seealso \code{\link{fluidRow}}, \code{\link{fixedRow}}.
 #'
 #' @examples
-#' fluidRow(
-#'   column(4,
-#'     sliderInput("obs", "Number of observations:",
-#'                 min = 1, max = 1000, value = 500)
-#'   ),
-#'   column(8,
-#'     plotOutput("distPlot")
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   fluidRow(
+#'     column(4,
+#'       sliderInput("obs", "Number of observations:",
+#'                   min = 1, max = 1000, value = 500)
+#'     ),
+#'     column(8,
+#'       plotOutput("distPlot")
+#'     )
 #'   )
 #' )
 #'
-#' fluidRow(
-#'   column(width = 4,
-#'     "4"
-#'   ),
-#'   column(width = 3, offset = 2,
-#'     "3 offset 2"
+#' server <- function(input, output) {
+#'   output$distPlot <- renderPlot({
+#'     hist(rnorm(input$obs))
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#'
+#'
+#'
+#' ui <- fluidPage(
+#'   fluidRow(
+#'     column(width = 4,
+#'       "4"
+#'     ),
+#'     column(width = 3, offset = 2,
+#'       "3 offset 2"
+#'     )
 #'   )
 #' )
+#' shinyApp(ui, server = function(input, output) { })
+#' }
 #' @export
 column <- function(width, ..., offset = 0) {
 
@@ -202,8 +245,14 @@ column <- function(width, ..., offset = 0) {
 #'
 #'
 #' @examples
-#' titlePanel("Hello Shiny!")
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
+#' ui <- fluidPage(
+#'   titlePanel("Hello Shiny!")
+#' )
+#' shinyApp(ui, server = function(input, output) { })
+#' }
 #' @export
 titlePanel <- function(title, windowTitle=title) {
   tagList(
@@ -226,8 +275,11 @@ titlePanel <- function(title, windowTitle=title) {
 #'   layout.
 #'
 #' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
 #' # Define UI
-#' shinyUI(fluidPage(
+#' ui <- fluidPage(
 #'
 #'   # Application title
 #'   titlePanel("Hello Shiny!"),
@@ -248,8 +300,18 @@ titlePanel <- function(title, windowTitle=title) {
 #'       plotOutput("distPlot")
 #'     )
 #'   )
-#' ))
+#' )
 #'
+#' # Server logic
+#' server <- function(input, output) {
+#'   output$distPlot <- renderPlot({
+#'     hist(rnorm(input$obs))
+#'   })
+#' }
+#'
+#' # Complete app with UI and server components
+#' shinyApp(ui, server)
+#' }
 #' @export
 sidebarLayout <- function(sidebarPanel,
                           mainPanel,
@@ -286,13 +348,18 @@ sidebarLayout <- function(sidebarPanel,
 #' @seealso \code{\link{fluidPage}}, \code{\link{flowLayout}}
 #'
 #' @examples
-#' shinyUI(fluidPage(
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
 #'   verticalLayout(
 #'     a(href="http://example.com/link1", "Link One"),
 #'     a(href="http://example.com/link2", "Link Two"),
 #'     a(href="http://example.com/link3", "Link Three")
 #'   )
-#' ))
+#' )
+#' shinyApp(ui, server = function(input, output) { })
+#' }
 #' @export
 verticalLayout <- function(..., fluid = TRUE) {
   lapply(list(...), function(row) {
@@ -319,11 +386,16 @@ verticalLayout <- function(..., fluid = TRUE) {
 #' @seealso \code{\link{verticalLayout}}
 #'
 #' @examples
-#' flowLayout(
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- flowLayout(
 #'   numericInput("rows", "How many rows?", 5),
 #'   selectInput("letter", "Which letter?", LETTERS),
 #'   sliderInput("value", "What value?", 0, 100, 50)
 #' )
+#' shinyApp(ui, server = function(input, output) { })
+#' }
 #' @export
 flowLayout <- function(..., cellArgs = list()) {
 
@@ -346,7 +418,6 @@ flowLayout <- function(..., cellArgs = list()) {
 #' suitable for wrapping inputs.
 #'
 #' @param ... Input controls or other HTML elements.
-#'
 #' @export
 inputPanel <- function(...) {
   div(class = "shiny-input-panel",
@@ -369,21 +440,33 @@ inputPanel <- function(...) {
 #'   of the layout.
 #'
 #' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' # Server code used for all examples
+#' server <- function(input, output) {
+#'   output$plot1 <- renderPlot(plot(cars))
+#'   output$plot2 <- renderPlot(plot(pressure))
+#'   output$plot3 <- renderPlot(plot(AirPassengers))
+#' }
+#'
 #' # Equal sizing
-#' splitLayout(
+#' ui <- splitLayout(
 #'   plotOutput("plot1"),
 #'   plotOutput("plot2")
 #' )
+#' shinyApp(ui, server)
 #'
 #' # Custom widths
-#' splitLayout(cellWidths = c("25%", "75%"),
+#' ui <- splitLayout(cellWidths = c("25%", "75%"),
 #'   plotOutput("plot1"),
 #'   plotOutput("plot2")
 #' )
+#' shinyApp(ui, server)
 #'
 #' # All cells at 300 pixels wide, with cell padding
 #' # and a border around everything
-#' splitLayout(
+#' ui <- splitLayout(
 #'   style = "border: 1px solid silver;",
 #'   cellWidths = 300,
 #'   cellArgs = list(style = "padding: 6px"),
@@ -391,6 +474,8 @@ inputPanel <- function(...) {
 #'   plotOutput("plot2"),
 #'   plotOutput("plot3")
 #' )
+#' shinyApp(ui, server)
+#' }
 #' @export
 splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 
@@ -460,10 +545,7 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'   not determined by the height of its contents.
 #'
 #' @examples
-#' \donttest{
 #' # Only run this example in interactive R sessions.
-#' # NOTE: This example should be run with example(fillRow, ask = FALSE) to
-#' # avoid being prompted to hit Enter during plot rendering.
 #' if (interactive()) {
 #'
 #' ui <- fillPage(fillRow(
@@ -482,7 +564,6 @@ splitLayout <- function(..., cellWidths = NULL, cellArgs = list()) {
 #'
 #' shinyApp(ui, server)
 #'
-#' }
 #' }
 #' @export
 fillRow <- function(..., flex = 1, width = "100%", height = "100%") {

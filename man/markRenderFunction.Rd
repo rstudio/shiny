@@ -4,7 +4,7 @@
 \alias{markRenderFunction}
 \title{Mark a function as a render function}
 \usage{
-markRenderFunction(uiFunc, renderFunc)
+markRenderFunction(uiFunc, renderFunc, outputArgs = list())
 }
 \arguments{
 \item{uiFunc}{A function that renders Shiny UI. Must take a single argument:
@@ -12,6 +12,13 @@ an output ID.}
 
 \item{renderFunc}{A function that is suitable for assigning to a Shiny output
 slot.}
+
+\item{outputArgs}{A list of arguments to pass to the \code{uiFunc}. Render
+functions should include \code{outputArgs = list()} in their own parameter
+list, and pass through the value to \code{markRenderFunction}, to allow
+app authors to customize outputs. (Currently, this is only supported for
+dynamically generated UIs, such as those created by Shiny code snippets
+embedded in R Markdown documents).}
 }
 \value{
 The \code{renderFunc} function, with annotations.

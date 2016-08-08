@@ -34,8 +34,15 @@ needed.
 See \code{\link{invalidateLater}} as a safer and simpler alternative.
 }
 \examples{
-\dontrun{
-shinyServer(function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
+  sliderInput("n", "Number of observations", 2, 1000, 500),
+  plotOutput("plot")
+)
+
+server <- function(input, output) {
 
   # Anything that calls autoInvalidate will automatically invalidate
   # every 2 seconds.
@@ -56,11 +63,12 @@ shinyServer(function(input, output, session) {
   # input$n changes.
   output$plot <- renderPlot({
     autoInvalidate()
-    hist(isolate(input$n))
+    hist(rnorm(isolate(input$n)))
   })
-})
 }
 
+shinyApp(ui, server)
+}
 }
 \seealso{
 \code{\link{invalidateLater}}

@@ -31,11 +31,25 @@ independently. The server will receive the input as a character vector of the
 selected values.
 }
 \examples{
-checkboxGroupInput("variable", "Variable:",
-                   c("Cylinders" = "cyl",
-                     "Transmission" = "am",
-                     "Gears" = "gear"))
+## Only run examples in interactive R sessions
+if (interactive()) {
 
+ui <- fluidPage(
+  checkboxGroupInput("variable", "Variables to show:",
+                     c("Cylinders" = "cyl",
+                       "Transmission" = "am",
+                       "Gears" = "gear")),
+  tableOutput("data")
+)
+
+server <- function(input, output) {
+  output$data <- renderTable({
+    mtcars[, c("mpg", input$variable), drop = FALSE]
+  }, rownames = TRUE)
+}
+
+shinyApp(ui, server)
+}
 }
 \seealso{
 \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}

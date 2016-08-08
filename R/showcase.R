@@ -77,10 +77,60 @@ appMetadata <- function(desc) {
   else ""
 }
 
+navTabsHelper <- function(files, prefix = "") {
+  lapply(files, function(file) {
+    with(tags,
+      li(class=if (tolower(file) %in% c("app.r", "server.r")) "active" else "",
+         a(href=paste("#", gsub(".", "_", file, fixed=TRUE), "_code", sep=""),
+           "data-toggle"="tab", paste0(prefix, file)))
+    )
+  })
+}
+
+navTabsDropdown <- function(files) {
+  if (length(files) > 0) {
+    with(tags,
+      li(role="presentation", class="dropdown",
+        a(class="dropdown-toggle", `data-toggle`="dropdown", href="#",
+          role="button", `aria-haspopup`="true", `aria-expanded`="false",
+          "www", span(class="caret")
+        ),
+        ul(class="dropdown-menu", navTabsHelper(files))
+      )
+    )
+  }
+}
+
+tabContentHelper <- function(files, path, language) {
+  lapply(files, function(file) {
+    with(tags,
+      div(class=paste("tab-pane",
+                      if (tolower(file) %in% c("app.r", "server.r")) " active"
+                      else "",
+                      sep=""),
+          id=paste(gsub(".", "_", file, fixed=TRUE),
+                   "_code", sep=""),
+          pre(class="shiny-code",
+              # we need to prevent the indentation of <code> ... </code>
+              HTML(format(tags$code(
+                class=paste0("language-", language),
+                paste(readUTF8(file.path.ci(path, file)), collapse="\n")
+              ), indent = FALSE))))
+    )
+  })
+}
+
 # Returns tags containing the application's code in Bootstrap-style tabs in
 # showcase mode.
 showcaseCodeTabs <- function(codeLicense) {
   rFiles <- list.files(pattern = "\\.[rR]$")
+  wwwFiles <- list()
+  if (isTRUE(.globals$IncludeWWW)) {
+    path <- file.path(getwd(), "www")
+    wwwFiles$jsFiles <- list.files(path, pattern = "\\.js$")
+    wwwFiles$cssFiles <- list.files(path, pattern = "\\.css$")
+    wwwFiles$htmlFiles <- list.files(path, pattern = "\\.html$")
+  }
   with(tags, div(id="showcase-code-tabs",
     a(id="showcase-code-position-toggle",
       class="btn btn-default btn-sm",
@@ -88,27 +138,21 @@ showcaseCodeTabs <- function(codeLicense) {
       icon("level-up"),
       "show with app"),
     ul(class="nav nav-tabs",
-       lapply(rFiles, function(rFile) {
-         li(class=if (tolower(rFile) %in% c("app.r", "server.r")) "active" else "",
-            a(href=paste("#", gsub(".", "_", rFile, fixed=TRUE),
-                         "_code", sep=""),
-              "data-toggle"="tab", rFile))
-       })),
+       navTabsHelper(rFiles),
+       navTabsDropdown(unlist(wwwFiles))
+    ),
     div(class="tab-content", id="showcase-code-content",
-        lapply(rFiles, function(rFile) {
-          div(class=paste("tab-pane",
-                          if (tolower(rFile) %in% c("app.r", "server.r")) " active"
-                          else "",
-                          sep=""),
-              id=paste(gsub(".", "_", rFile, fixed=TRUE),
-                       "_code", sep=""),
-              pre(class="shiny-code",
-                  # we need to prevent the indentation of <code> ... </code>
-                  HTML(format(tags$code(
-                    class="language-r",
-                    paste(readUTF8(file.path.ci(getwd(), rFile)), collapse="\n")
-                  ), indent = FALSE))))
-        })),
+        tabContentHelper(rFiles, path = getwd(), language = "r"),
+        tabContentHelper(wwwFiles$jsFiles,
+                         path = paste0(getwd(), "/www"),
+                         language = "javascript"),
+        tabContentHelper(wwwFiles$cssFiles,
+                         path = paste0(getwd(), "/www"),
+                         language = "css"),
+        tabContentHelper(wwwFiles$htmlFiles,
+                         path = paste0(getwd(), "/www"),
+                         language = "xml")
+    ),
     codeLicense))
 }
 
@@ -177,3 +221,4 @@ showcaseUI <- function(ui) {
     showcaseBody(ui)
   )
 }
+

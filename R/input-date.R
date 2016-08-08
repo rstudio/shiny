@@ -43,26 +43,33 @@
 #' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
 #'
 #' @examples
-#' dateInput("date", "Date:", value = "2012-02-29")
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
 #'
-#' # Default value is the date in client's time zone
-#' dateInput("date", "Date:")
+#' ui <- fluidPage(
+#'   dateInput("date1", "Date:", value = "2012-02-29"),
 #'
-#' # value is always yyyy-mm-dd, even if the display format is different
-#' dateInput("date", "Date:", value = "2012-02-29", format = "mm/dd/yy")
+#'   # Default value is the date in client's time zone
+#'   dateInput("date2", "Date:"),
 #'
-#' # Pass in a Date object
-#' dateInput("date", "Date:", value = Sys.Date()-10)
+#'   # value is always yyyy-mm-dd, even if the display format is different
+#'   dateInput("date3", "Date:", value = "2012-02-29", format = "mm/dd/yy"),
 #'
-#' # Use different language and different first day of week
-#' dateInput("date", "Date:",
+#'   # Pass in a Date object
+#'   dateInput("date4", "Date:", value = Sys.Date()-10),
+#'
+#'   # Use different language and different first day of week
+#'   dateInput("date5", "Date:",
 #'           language = "de",
-#'           weekstart = 1)
+#'           weekstart = 1),
 #'
-#' # Start with decade view instead of default month view
-#' dateInput("date", "Date:",
-#'           startview = "decade")
+#'   # Start with decade view instead of default month view
+#'   dateInput("date6", "Date:",
+#'             startview = "decade")
+#' )
 #'
+#' shinyApp(ui, server = function(input, output) { })
+#' }
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en",
@@ -73,6 +80,8 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
+
+  value <- restoreInput(id = inputId, default = value)
 
   attachDependencies(
     tags$div(id = inputId,

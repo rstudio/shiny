@@ -21,17 +21,41 @@
 #' @seealso \code{\link{updateRadioButtons}}
 #'
 #' @examples
-#' radioButtons("dist", "Distribution type:",
-#'              c("Normal" = "norm",
-#'                "Uniform" = "unif",
-#'                "Log-normal" = "lnorm",
-#'                "Exponential" = "exp"))
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   radioButtons("dist", "Distribution type:",
+#'                c("Normal" = "norm",
+#'                  "Uniform" = "unif",
+#'                  "Log-normal" = "lnorm",
+#'                  "Exponential" = "exp")),
+#'   plotOutput("distPlot")
+#' )
+#'
+#' server <- function(input, output) {
+#'   output$distPlot <- renderPlot({
+#'     dist <- switch(input$dist,
+#'                    norm = rnorm,
+#'                    unif = runif,
+#'                    lnorm = rlnorm,
+#'                    exp = rexp,
+#'                    rnorm)
+#'
+#'     hist(dist(500))
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
 #' @export
 radioButtons <- function(inputId, label, choices, selected = NULL,
   inline = FALSE, width = NULL) {
 
   # resolve names
   choices <- choicesWithNames(choices)
+
+  selected <- restoreInput(id = inputId, default = selected)
 
   # default value if it's not specified
   selected <- if (is.null(selected)) choices[[1]] else {

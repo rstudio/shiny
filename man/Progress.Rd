@@ -69,11 +69,16 @@ to be removed.
   }
 }
 \examples{
-\dontrun{
-# server.R
-shinyServer(function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
+  plotOutput("plot")
+)
+
+server <- function(input, output, session) {
   output$plot <- renderPlot({
-    progress <- shiny::Progress$new(session, min=1, max=15)
+    progress <- Progress$new(session, min=1, max=15)
     on.exit(progress$close())
 
     progress$set(message = 'Calculation in progress',
@@ -85,7 +90,9 @@ shinyServer(function(input, output, session) {
     }
     plot(cars)
   })
-})
+}
+
+shinyApp(ui, server)
 }
 }
 \seealso{

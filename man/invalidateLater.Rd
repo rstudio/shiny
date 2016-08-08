@@ -28,8 +28,15 @@ possible to stop this cycle by adding conditional logic that prevents the
 \code{invalidateLater} from being run.
 }
 \examples{
-\dontrun{
-shinyServer(function(input, output, session) {
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
+  sliderInput("n", "Number of observations", 2, 1000, 500),
+  plotOutput("plot")
+)
+
+server <- function(input, output, session) {
 
   observe({
     # Re-execute this reactive expression after 1000 milliseconds
@@ -46,11 +53,12 @@ shinyServer(function(input, output, session) {
   output$plot <- renderPlot({
     # Re-execute this reactive expression after 2000 milliseconds
     invalidateLater(2000)
-    hist(isolate(input$n))
+    hist(rnorm(isolate(input$n)))
   })
-})
 }
 
+shinyApp(ui, server)
+}
 }
 \seealso{
 \code{\link{reactiveTimer}} is a slightly less safe alternative.

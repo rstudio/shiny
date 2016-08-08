@@ -1,7 +1,7 @@
 library(shiny)
 
 # Define UI for application that draws a histogram
-shinyUI(fluidPage(
+fluidPage(
 
   # Application title
   titlePanel("Hello Shiny!"),
@@ -21,4 +21,4 @@ shinyUI(fluidPage(
       plotOutput("distPlot")
     )
   )
-))
+)

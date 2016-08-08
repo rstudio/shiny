@@ -10,9 +10,23 @@
 #' @seealso \code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
 #'
 #' @examples
-#' checkboxInput("outliers", "Show outliers", FALSE)
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   checkboxInput("somevalue", "Some value", FALSE),
+#'   verbatimTextOutput("value")
+#' )
+#' server <- function(input, output) {
+#'   output$value <- renderText({ input$somevalue })
+#' }
+#' shinyApp(ui, server)
+#' }
 #' @export
 checkboxInput <- function(inputId, label, value = FALSE, width = NULL) {
+
+  value <- restoreInput(id = inputId, default = value)
+
   inputTag <- tags$input(id = inputId, type="checkbox")
   if (!is.null(value) && value)
     inputTag$attribs$checked <- "checked"

@@ -57,6 +57,5 @@ tripleA <- renderTriple({
 
 isolate(tripleA())
 # "text, text, text"
-
 }
 

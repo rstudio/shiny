@@ -31,14 +31,32 @@
 #' @seealso \code{\link{updateSelectInput}}
 #'
 #' @examples
-#' selectInput("variable", "Variable:",
-#'             c("Cylinders" = "cyl",
-#'               "Transmission" = "am",
-#'               "Gears" = "gear"))
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   selectInput("variable", "Variable:",
+#'               c("Cylinders" = "cyl",
+#'                 "Transmission" = "am",
+#'                 "Gears" = "gear")),
+#'   tableOutput("data")
+#' )
+#'
+#' server <- function(input, output) {
+#'   output$data <- renderTable({
+#'     mtcars[, c("mpg", input$variable), drop = FALSE]
+#'   }, rownames = TRUE)
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
 #' @export
 selectInput <- function(inputId, label, choices, selected = NULL,
                         multiple = FALSE, selectize = TRUE, width = NULL,
                         size = NULL) {
+
+  selected <- restoreInput(id = inputId, default = selected)
+
   # resolve names
   choices <- choicesWithNames(choices)
 

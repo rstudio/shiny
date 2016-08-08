@@ -23,7 +23,6 @@ NULL
 #' rnormA(3)  # [1]  1.8285879 -0.7468041 -0.4639111
 #' rnormA(5)  # [1]  1.8285879 -0.7468041 -0.4639111 -1.6510126 -1.4686924
 #' rnormB(5)  # [1] -0.7946034  0.2568374 -0.6567597  1.2451387 -0.8375699
-#'
 #' @export
 repeatable <- function(rngfunc, seed = stats::runif(1, 0, .Machine$integer.max)) {
   force(seed)
@@ -120,16 +119,6 @@ p_randomInt <- function(...) {
   withPrivateSeed(randomInt(...))
 }
 
-# Return a random hexadecimal string with `length` digits.
-randomID <- function(length = 16) {
-  paste(sample(
-    c("0", "1", "2", "3", "4", "5", "6", "7", "8","9",
-      "a", "b", "c", "d", "e", "f"),
-    length,
-    replace = TRUE
-  ), collapse = '')
-}
-
 isWholeNum <- function(x, tol = .Machine$double.eps^0.5) {
   abs(x - round(x)) < tol
 }
@@ -165,6 +154,20 @@ dropNullsOrEmpty <- function(x) {
   x[!vapply(x, nullOrEmpty, FUN.VALUE=logical(1))]
 }
 
+# Given a vector/list, return TRUE if any elements are named, FALSE otherwise.
+anyNamed <- function(x) {
+  # Zero-length vector
+  if (length(x) == 0) return(FALSE)
+
+  nms <- names(x)
+
+  # List with no name attribute
+  if (is.null(nms)) return(FALSE)
+
+  # List with name attribute; check for any ""
+  any(nzchar(nms))
+}
+
 # Given a vector/list, return TRUE if any elements are unnamed, FALSE otherwise.
 anyUnnamed <- function(x) {
   # Zero-length vector
@@ -178,6 +181,21 @@ anyUnnamed <- function(x) {
   # List with name attribute; check for any ""
   any(!nzchar(nms))
 }
+
+# Given two named vectors, join them together, and keep only the last element
+# with a given name in the resulting vector. If b has any elements with the same
+# name as elements in a, the element in a is dropped. Also, if there are any
+# duplicated names in a or b, only the last one with that name is kept.
+mergeVectors <- function(a, b) {
+  if (anyUnnamed(a) || anyUnnamed(b)) {
+    stop("Vectors must be either NULL or have names for all elements")
+  }
+
+  x <- c(a, b)
+  drop_idx <- duplicated(names(x), fromLast = TRUE)
+  x[!drop_idx]
+}
+
 
 # Combine dir and (file)name into a file path. If a file already exists with a
 # name differing only by case, then use it instead.
@@ -219,6 +237,12 @@ find.file.ci <- function(...) {
     return(NULL)
 
   return(matches[1])
+}
+
+# The function base::dir.exists was added in R 3.2.0, but for backward
+# compatibility we need to add this function
+dirExists <- function(paths) {
+  file.exists(paths) & file.info(paths)$isdir
 }
 
 # Attempt to join a path and relative path, and turn the result into a
@@ -386,7 +410,6 @@ makeFunction <- function(args = pairlist(), body, env = parent.frame()) {
 #'
 #' isolate(tripleA())
 #' # "text, text, text"
-#'
 #' @export
 exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
   if (!quoted) {
@@ -420,7 +443,6 @@ exprToFunction <- function(expr, env=parent.frame(), quoted=FALSE) {
 #'   the name of the calling function.
 #' @param wrappedWithLabel,..stacktraceon Advanced use only. For stack manipulation purposes; see
 #'   \code{\link{stacktrace}}.
-#'
 #' @export
 installExprFunction <- function(expr, name, eval.env = parent.frame(2),
                                 quoted = FALSE,
@@ -464,7 +486,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'
 #' \dontrun{
 #' # Example of usage within a Shiny app
-#' shinyServer(function(input, output, session) {
+#' function(input, output, session) {
 #'
 #'   output$queryText <- renderText({
 #'     query <- parseQueryString(session$clientData$url_search)
@@ -480,7 +502,7 @@ installExprFunction <- function(expr, name, eval.env = parent.frame(2),
 #'     # Return a string with key-value pairs
 #'     paste(names(query), query, sep = "=", collapse=", ")
 #'   })
-#' })
+#' }
 #' }
 #'
 parseQueryString <- function(str, nested = FALSE) {
@@ -492,6 +514,8 @@ parseQueryString <- function(str, nested = FALSE) {
     str <- substr(str, 2, nchar(str))
 
   pairs <- strsplit(str, '&', fixed = TRUE)[[1]]
+  # Drop any empty items (if there's leading/trailing/consecutive '&' chars)
+  pairs <- pairs[pairs != ""]
   pairs <- strsplit(pairs, '=', fixed = TRUE)
 
   keys   <- vapply(pairs, function(x) x[1], FUN.VALUE = character(1))
@@ -607,7 +631,10 @@ Callbacks <- R6Class(
     .callbacks = 'Map',
 
     initialize = function() {
-      .nextId <<- as.integer(.Machine$integer.max)
+      # NOTE: we avoid using '.Machine$integer.max' directly
+      # as R 3.3.0's 'radixsort' could segfault when sorting
+      # an integer vector containing this value
+      .nextId <<- as.integer(.Machine$integer.max - 1L)
       .callbacks <<- Map$new()
     },
     register = function(callback) {
@@ -872,6 +899,87 @@ columnToRowData <- function(data) {
   )
 }
 
+#' Declare an error safe for the user to see
+#'
+#' This should be used when you want to let the user see an error
+#' message even if the default is to sanitize all errors. If you have an
+#' error \code{e} and call \code{stop(safeError(e))}, then Shiny will
+#' ignore the value of \code{getOption("shiny.sanitize.errors")} and always
+#' display the error in the app itself.
+#'
+#' @param error Either an "error" object or a "character" object (string).
+#' In the latter case, the string will become the message of the error
+#' returned by \code{safeError}.
+#'
+#' @return An "error" object
+#'
+#' @details An error generated by \code{safeError} has priority over all
+#' other Shiny errors. This can be dangerous. For example, if you have set
+#' \code{options(shiny.sanitize.errors = TRUE)}, then by default all error
+#' messages are omitted in the app, and replaced by a generic error message.
+#' However, this does not apply to \code{safeError}: whatever you pass
+#' through \code{error} will be displayed to the user. So, this should only
+#' be used when you are sure that your error message does not contain any
+#' sensitive information. In those situations, \code{safeError} can make
+#' your users' lives much easier by giving them a hint as to where the
+#' error occurred.
+#'
+#' @seealso \code{\link{shiny-options}}
+#'
+#' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' # uncomment the desired line to experiment with shiny.sanitize.errors
+#' # options(shiny.sanitize.errors = TRUE)
+#' # options(shiny.sanitize.errors = FALSE)
+#'
+#' # Define UI
+#' ui <- fluidPage(
+#'   textInput('number', 'Enter your favorite number from 1 to 10', '5'),
+#'   textOutput('normalError'),
+#'   textOutput('safeError')
+#' )
+#'
+#' # Server logic
+#' server <- function(input, output) {
+#'   output$normalError <- renderText({
+#'     number <- input$number
+#'     if (number %in% 1:10) {
+#'       return(paste('You chose', number, '!'))
+#'     } else {
+#'       stop(
+#'         paste(number, 'is not a number between 1 and 10')
+#'       )
+#'     }
+#'   })
+#'   output$safeError <- renderText({
+#'     number <- input$number
+#'     if (number %in% 1:10) {
+#'       return(paste('You chose', number, '!'))
+#'     } else {
+#'       stop(safeError(
+#'         paste(number, 'is not a number between 1 and 10')
+#'       ))
+#'     }
+#'   })
+#' }
+#'
+#' # Complete app with UI and server components
+#' shinyApp(ui, server)
+#' }
+#' @export
+safeError <- function(error) {
+  if (inherits(error, "character")) {
+    error <- simpleError(error)
+  }
+  if (!inherits(error, "error")) {
+    stop("The class of the `error` parameter must be either 'error' or 'character'")
+  }
+  class(error) <- c("shiny.custom.error", class(error))
+  error
+}
+
 #' Validate input values and other conditions
 #'
 #' For an output rendering function (e.g. \code{\link{renderPlot}()}), you may
@@ -965,8 +1073,8 @@ validate <- function(..., errorClass = character(0)) {
   # There may be empty strings remaining; these are message-less failures that
   # started as FALSE
   results <- results[nzchar(results)]
-
-  stopWithCondition(c("validation", errorClass), paste(results, collapse="\n"))
+  stopWithCondition(c("validation", "shiny.silent.error", errorClass),
+                    paste(results, collapse="\n"))
 }
 
 #' @param expr An expression to test. The condition will pass if the expression
@@ -1065,7 +1173,6 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'   processing as usual but instead of clearing the output, leave it in
 #'   whatever state it happens to be in.
 #' @return The first value that was passed in.
-#'
 #' @export
 req <- function(..., cancelOutput = FALSE) {
   dotloop(function(item) {
@@ -1073,7 +1180,7 @@ req <- function(..., cancelOutput = FALSE) {
       if (isTRUE(cancelOutput)) {
         cancelOutput()
       } else {
-        stopWithCondition("validation", "")
+        stopWithCondition(c("validation", "shiny.silent.error"), "")
       }
     }
   }, ...)
@@ -1094,10 +1201,9 @@ req <- function(..., cancelOutput = FALSE) {
 #' If \code{cancelOutput} is called in any non-output context (like in an
 #' \code{\link{observe}} or \code{\link{observeEvent}}), the effect is the same
 #' as \code{\link{req}(FALSE)}.
-#'
 #' @export
 cancelOutput <- function() {
-  stopWithCondition("shiny.output.cancel", "")
+  stopWithCondition(c("shiny.output.cancel", "shiny.silent.error"), "")
 }
 
 # Execute a function against each element of ..., but only evaluate each element
@@ -1140,7 +1246,7 @@ isTruthy <- function(x) {
 stopWithCondition <- function(class, message) {
   cond <- structure(
     list(message = message),
-    class = c(class, 'shiny.silent.error', 'error', 'condition')
+    class = c(class, 'error', 'condition')
   )
   stop(cond)
 }
@@ -1295,3 +1401,17 @@ wrapFunctionLabel <- function(func, name, ..stacktraceon = FALSE) {
 
   relabelWrapper
 }
+
+
+# This is a very simple mutable object which only stores one value
+# (which we can set and get). Using this class is sometimes useful
+# when communicating persistent changes across functions.
+Mutable <- R6Class("Mutable",
+  private = list(
+    value = NULL
+  ),
+  public = list(
+    set = function(value) { private$value <- value },
+    get = function() { private$value }
+  )
+)

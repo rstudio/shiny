@@ -201,4 +201,3 @@ function mergeSort(list, sortfunc) {
 var $escape = exports.$escape = function(val) {
   return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
 };
-

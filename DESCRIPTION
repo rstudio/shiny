@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 0.13.1.9002
+Version: 0.13.2.9005
 Date: 2016-02-17
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
@@ -86,6 +86,9 @@ BugReports: https://github.com/rstudio/shiny/issues
 VignetteBuilder: knitr
 Collate:
     'app.R'
+    'bookmark-state-local.R'
+    'stack.R'
+    'bookmark-state.R'
     'bootstrap-layout.R'
     'conditions.R'
     'map.R'
@@ -95,7 +98,6 @@ Collate:
     'cache.R'
     'diagnose.R'
     'fileupload.R'
-    'stack.R'
     'graph.R'
     'hooks.R'
     'html-deps.R'
@@ -117,9 +119,11 @@ Collate:
     'input-submit.R'
     'input-text.R'
     'input-utils.R'
+    'insert-ui.R'
     'jqueryui.R'
     'middleware-shiny.R'
     'middleware.R'
+    'modal.R'
     'modules.R'
     'notifications.R'
     'priorityqueue.R'
@@ -130,8 +134,10 @@ Collate:
     'render-plot.R'
     'render-table.R'
     'run-url.R'
+    'serializers.R'
     'server-input-handlers.R'
     'server.R'
+    'shiny-options.R'
     'shiny.R'
     'shinyui.R'
     'shinywrappers.R'

@@ -26,7 +26,7 @@ along with \code{\link{sidebarLayout}} to implement a page with a sidebar.
 }
 \examples{
 # Define UI
-shinyUI(pageWithSidebar(
+pageWithSidebar(
 
   # Application title
   headerPanel("Hello Shiny!"),
@@ -44,7 +44,6 @@ shinyUI(pageWithSidebar(
   mainPanel(
     plotOutput("distPlot")
   )
-))
-
+)
 }
 

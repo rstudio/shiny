@@ -70,6 +70,14 @@ The default polling interval is 500 milliseconds. You can change this
     an arguably more intuitive arrangement for casual R users, as the name
     of a function appears next to the srcref where it is defined, rather than
     where it is currently being called from.}
+  \item{shiny.sanitize.errors}{If \code{TRUE}, then normal errors (i.e.
+    errors not wrapped in \code{safeError}) won't show up in the app; a simple
+    generic error message is printed instead (the error and strack trace printed
+    to the console remain unchanged). The default is \code{FALSE} (unsanitized
+    errors).If you want to sanitize errors in general, but you DO want a
+    particular error \code{e} to get displayed to the user, then set this option
+    to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the
+    user to see.}
 }
 }
 

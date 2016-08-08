@@ -24,7 +24,7 @@ parseQueryString("?foo=1&bar=b\%20a\%20r")
 
 \dontrun{
 # Example of usage within a Shiny app
-shinyServer(function(input, output, session) {
+function(input, output, session) {
 
   output$queryText <- renderText({
     query <- parseQueryString(session$clientData$url_search)
@@ -40,7 +40,7 @@ shinyServer(function(input, output, session) {
     # Return a string with key-value pairs
     paste(names(query), query, sep = "=", collapse=", ")
   })
-})
+}
 }
 
 }

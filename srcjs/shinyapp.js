@@ -17,6 +17,8 @@ var ShinyApp = function() {
   this.$pendingMessages = [];
   this.$activeRequests = {};
   this.$nextRequestId = 0;
+
+  this.$allowReconnect = false;
 };
 
 (function() {
@@ -39,6 +41,20 @@ var ShinyApp = function() {
 
   this.isConnected = function() {
     return !!this.$socket;
+  };
+
+  var scheduledReconnect = null;
+  this.reconnect = function() {
+    // This function can be invoked directly even if there's a scheduled
+    // reconnect, so be sure to clear any such scheduled reconnects.
+    clearTimeout(scheduledReconnect);
+
+    if (this.isConnected())
+      throw "Attempted to reconnect, but already connected.";
+
+    this.$socket = this.createSocket();
+    this.$initialInput = $.extend({}, this.$inputValues);
+    this.$updateConditionals();
   };
 
   this.createSocket = function () {
@@ -65,15 +81,22 @@ var ShinyApp = function() {
 
       var ws = new WebSocket(protocol + '//' + window.location.host + defaultPath);
       ws.binaryType = 'arraybuffer';
+
       return ws;
     };
 
     var socket = createSocketFunc();
+    var hasOpened = false;
     socket.onopen = function() {
+      hasOpened = true;
+
       $(document).trigger({
         type: 'shiny:connected',
         socket: socket
       });
+
+      self.onConnected();
+
       socket.send(JSON.stringify({
         method: 'init',
         data: self.$initialInput
@@ -87,13 +110,22 @@ var ShinyApp = function() {
     socket.onmessage = function(e) {
       self.dispatchMessage(e.data);
     };
+    // Called when a successfully-opened websocket is closed, or when an
+    // attempt to open a connection fails.
     socket.onclose = function() {
-      $(document).trigger({
-        type: 'shiny:disconnected',
-        socket: socket
-      });
-      $(document.body).addClass('disconnected');
-      self.$notifyDisconnected();
+      // These things are needed only if we've successfully opened the
+      // websocket.
+      if (hasOpened) {
+        $(document).trigger({
+          type: 'shiny:disconnected',
+          socket: socket
+        });
+
+        self.$notifyDisconnected();
+      }
+
+      self.onDisconnected(); // Must be run before self.$removeSocket()
+      self.$removeSocket();
     };
     return socket;
   };
@@ -136,6 +168,69 @@ var ShinyApp = function() {
         parent.postMessage('disconnected', origin);
       }
     }
+  };
+
+  this.$removeSocket = function() {
+    this.$socket = null;
+  };
+
+  this.$scheduleReconnect = function(delay) {
+    var self = this;
+    scheduledReconnect = setTimeout(function() { self.reconnect(); }, delay);
+  };
+
+  // How long should we wait before trying the next reconnection?
+  // The delay will increase with subsequent attempts.
+  // .next: Return the time to wait for next connection, and increment counter.
+  // .reset: Reset the attempt counter.
+  var reconnectDelay = (function() {
+    var attempts = 0;
+    // Time to wait before each reconnection attempt. If we go through all of
+    // these values, repeated use the last one. Add 500ms to each one so that
+    // in the last 0.5s, it shows "..."
+    var delays = [1500, 1500, 2500, 2500, 5500, 5500, 10500];
+
+    return {
+      next: function() {
+        var i = attempts;
+        // Instead of going off the end, use the last one
+        if (i >= delays.length) {
+          i = delays.length - 1;
+        }
+
+        attempts++;
+        return delays[i];
+      },
+      reset: function() {
+        attempts = 0;
+      }
+    };
+  })();
+
+  this.onDisconnected = function() {
+    // Add gray-out overlay, if not already present
+    var $overlay = $('#shiny-disconnected-overlay');
+    if ($overlay.length === 0) {
+      $(document.body).append('<div id="shiny-disconnected-overlay"></div>');
+    }
+
+    // To try a reconnect, both the app (this.$allowReconnect) and the
+    // server (this.$socket.allowReconnect) must allow reconnections, or
+    // session$allowReconnect("force") was called. The "force" option should
+    // only be used for testing.
+    if ((this.$allowReconnect === true && this.$socket.allowReconnect === true) ||
+        this.$allowReconnect === "force")
+    {
+      var delay = reconnectDelay.next();
+      exports.showReconnectDialog(delay);
+      this.$scheduleReconnect(delay);
+    }
+  };
+
+  this.onConnected = function() {
+    $('#shiny-disconnected-overlay').remove();
+    exports.hideReconnectDialog();
+    reconnectDelay.reset();
   };
 
   // NB: Including blobs will cause IE to break!
@@ -477,6 +572,15 @@ var ShinyApp = function() {
       throw('Unkown notification type: ' + message.type);
   });
 
+  addMessageHandler('modal', function(message) {
+    if (message.type === 'show')
+      exports.modal.show(message.message);
+    else if (message.type === 'remove')
+      exports.modal.remove(); // For 'remove', message content isn't used
+    else
+      throw('Unkown modal type: ' + message.type);
+  });
+
   addMessageHandler('response', function(message) {
     var requestId = message.tag;
     var request = this.$activeRequests[requestId];
@@ -486,6 +590,14 @@ var ShinyApp = function() {
         request.onSuccess(message.value);
       else
         request.onError(message.error);
+    }
+  });
+
+  addMessageHandler('allowReconnect', function(message) {
+    if (message === true || message === false || message === "force") {
+      this.$allowReconnect = message;
+    } else {
+      throw "Invalid value for allowReconnect: " + message;
     }
   });
 
@@ -528,6 +640,40 @@ var ShinyApp = function() {
     window.location.reload();
   });
 
+  addMessageHandler('shiny-insert-ui', function (message) {
+    var targets = $(message.selector);
+    if (targets.length === 0) {
+      // render the HTML and deps to a null target, so
+      // the side-effect of rendering the deps, singletons,
+      // and <head> still occur
+      exports.renderHtml($([]), message.content.html, message.content.deps);
+    } else {
+      targets.each(function (i, target) {
+        exports.renderContent(target, message.content, message.where);
+        return message.multiple;
+      });
+    }
+  });
+
+  addMessageHandler('shiny-remove-ui', function (message) {
+    var els = $(message.selector);
+    els.each(function (i, el) {
+      exports.unbindAll(el, true);
+      $(el).remove();
+      // If `multiple` is false, returning false terminates the function
+      // and no other elements are removed; if `multiple` is true,
+      // returning true continues removing all remaining elements.
+      return message.multiple;
+    });
+  });
+
+  addMessageHandler('updateQueryString', function(message) {
+    window.history.replaceState(null, null, message.queryString);
+  });
+
+  addMessageHandler("resetBrush", function(message) {
+    exports.resetBrush(message.brushId);
+  });
 
   // Progress reporting ====================================================
 
@@ -540,36 +686,32 @@ var ShinyApp = function() {
         binding.showProgress(true);
       }
     },
+
     // Open a page-level progress bar
     open: function(message) {
-      // Add progress container (for all progress items) if not already present
-      var $container = $('.shiny-progress-container');
-      if ($container.length === 0) {
-        $container = $('<div class="shiny-progress-container"></div>');
-        $('body').append($container);
-      }
-
-      // Add div for just this progress ID
-      var depth = $('.shiny-progress.open').length;
-      var $progress = $(progressHandlers.progressHTML);
-      $progress.attr('id', message.id);
-      $container.append($progress);
-
-      // Stack bars
-      var $progressBar = $progress.find('.progress');
-      $progressBar.css('top', depth * $progressBar.height() + 'px');
-
-      // Stack text objects
-      var $progressText = $progress.find('.progress-text');
-      $progressText.css('top', 3 * $progressBar.height() +
-        depth * $progressText.outerHeight() + 'px');
-
-      $progress.hide();
+      // Progress bar starts hidden; will be made visible if a value is provided
+      // during updates.
+      exports.notifications.show({
+        html:
+          `<div id="shiny-progress-${message.id}" class="shiny-progress">` +
+            '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' +
+            '<div class="progress-text">' +
+              '<span class="progress-message">message</span> ' +
+              '<span class="progress-detail"></span>' +
+            '</div>' +
+          '</div>',
+        id: message.id,
+        duration: null
+      });
     },
 
     // Update page-level progress bar
     update: function(message) {
-      var $progress = $('#' + message.id + '.shiny-progress');
+      var $progress = $('#shiny-progress-' + message.id);
+
+      if ($progress.length === 0)
+        return;
+
       if (typeof(message.message) !== 'undefined') {
         $progress.find('.progress-message').text(message.message);
       }
@@ -579,43 +721,71 @@ var ShinyApp = function() {
       if (typeof(message.value) !== 'undefined') {
         if (message.value !== null) {
           $progress.find('.progress').show();
-          $progress.find('.bar').width((message.value*100) + '%');
-        }
-        else {
+          $progress.find('.progress-bar').width((message.value*100) + '%');
+
+        } else {
           $progress.find('.progress').hide();
         }
       }
-
-      $progress.fadeIn();
     },
 
     // Close page-level progress bar
     close: function(message) {
-      var $progress = $('#' + message.id + '.shiny-progress');
-      $progress.removeClass('open');
-
-      $progress.fadeOut({
-        complete: function() {
-          $progress.remove();
-
-          // If this was the last shiny-progress, remove container
-          if ($('.shiny-progress').length === 0)
-            $('.shiny-progress-container').remove();
-        }
-      });
-    },
-
-    // The 'bar' class is needed for backward compatibility with Bootstrap 2.
-    progressHTML: '<div class="shiny-progress open">' +
-      '<div class="progress progress-striped active"><div class="progress-bar bar"></div></div>' +
-      '<div class="progress-text">' +
-        '<span class="progress-message">message</span>' +
-        '<span class="progress-detail"></span>' +
-      '</div>' +
-    '</div>'
+      exports.notifications.remove(message.id);
+    }
   };
 
   exports.progressHandlers = progressHandlers;
 
 
 }).call(ShinyApp.prototype);
+
+
+
+exports.showReconnectDialog = (function() {
+  var reconnectTime = null;
+
+  function updateTime() {
+    var $time = $("#shiny-reconnect-time");
+    // If the time has been removed, exit and don't reschedule this function.
+    if ($time.length === 0) return;
+
+    var seconds = Math.floor((reconnectTime - new Date().getTime()) / 1000);
+    if (seconds > 0) {
+      $time.text(" in " + seconds + "s");
+    } else {
+      $time.text("...");
+    }
+
+    // Reschedule this function after 1 second
+    setTimeout(updateTime, 1000);
+  }
+
+
+  return function(delay) {
+    reconnectTime = new Date().getTime() + delay;
+
+    // If there's already a reconnect dialog, don't add another
+    if ($('#shiny-reconnect-text').length > 0)
+      return;
+
+    var html = '<span id="shiny-reconnect-text">Attempting to reconnect</span>' +
+               '<span id="shiny-reconnect-time"></span>';
+    var action = '<a id="shiny-reconnect-now" href="#" onclick="Shiny.shinyapp.reconnect();">Try now</a>';
+
+    exports.notifications.show({
+      id: "reconnect",
+      html: html,
+      action: action,
+      duration: null,
+      closeButton: false,
+      type: 'warning'
+    });
+
+    updateTime();
+  };
+})();
+
+exports.hideReconnectDialog = function() {
+  exports.notifications.remove("reconnect");
+};

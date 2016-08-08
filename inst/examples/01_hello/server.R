@@ -1,7 +1,7 @@
 library(shiny)
 
 # Define server logic required to draw a histogram
-shinyServer(function(input, output) {
+function(input, output) {
 
   # Expression that generates a histogram. The expression is
   # wrapped in a call to renderPlot to indicate that:
@@ -18,4 +18,4 @@ shinyServer(function(input, output) {
     hist(x, breaks = bins, col = 'darkgray', border = 'white')
   })
 
-})
+}

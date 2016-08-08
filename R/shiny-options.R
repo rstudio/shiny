@@ -40,7 +40,7 @@ shinyOptions <- function(...) {
   newOpts <- list(...)
 
   if (length(newOpts) > 0) {
-    .globals$options <- mergeVectors(.globals$options, newOpts)
+    .globals$options <- dropNulls(mergeVectors(.globals$options, newOpts))
     invisible(.globals$options)
   } else {
     .globals$options

@@ -59,7 +59,7 @@ $.extend(selectInputBinding, {
       selectize.settings.load = function(query, callback) {
         var settings = selectize.settings;
         $.ajax({
-          cache: false,
+          //cache: false,
           url: data.url,
           data: {
             query: query,

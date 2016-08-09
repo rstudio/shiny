@@ -1348,7 +1348,7 @@ ShinySession <- R6Class(
     registerDataObj = function(name, data, filterFunc) {
       # abusing downloads at the moment
       self$downloads$set(name, list(data = data, filter = filterFunc))
-      return(sprintf('session/%s/dataobj/%s?w=%s&id=%s',
+      return(sprintf('session/%s/dataobj/%s?w=%s&nonce=%s',
                      URLencode(self$token, TRUE),
                      URLencode(name, TRUE),
                      workerId(),

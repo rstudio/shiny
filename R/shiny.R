@@ -962,19 +962,36 @@ ShinySession <- R6Class(
     },
     flushOutput = function() {
 
-      # ..stacktraceon matches with the top-level ..stacktraceoff..
-      private$flushCallbacks$invoke(..stacktraceon = TRUE)
-      # ..stacktraceon matches with the top-level ..stacktraceoff..
-      on.exit(private$flushedCallbacks$invoke(..stacktraceon = TRUE))
-
-      if (length(private$progressKeys) == 0
-          && length(private$invalidatedOutputValues) == 0
-          && length(private$invalidatedOutputErrors) == 0
-          && length(private$inputMessageQueue) == 0) {
-        return(invisible())
+      # Return TRUE if there's any stuff to send to the client.
+      hasPendingUpdates <- function() {
+        return(
+          length(private$invalidatedOutputValues) != 0 ||
+          length(private$invalidatedOutputErrors) != 0 ||
+          length(private$inputMessageQueue) != 0
+        )
       }
 
+      # ..stacktraceon matches with the top-level ..stacktraceoff..
+      private$flushCallbacks$invoke(..stacktraceon = TRUE)
+
+      # Schedule execution of onFlushed callbacks
+      on.exit({
+        # ..stacktraceon matches with the top-level ..stacktraceoff..
+        private$flushedCallbacks$invoke(..stacktraceon = TRUE)
+
+        # If one of the flushedCallbacks added anything to send to the client,
+        # or invalidated any observers, set up another flush cycle.
+        if (hasPendingUpdates() || .getReactiveEnvironment()$hasPendingFlush()) {
+          scheduleFlush()
+        }
+      })
+
+      # Clear any progress keys
       private$progressKeys <- character(0)
+
+      if (!hasPendingUpdates()) {
+        return(invisible())
+      }
 
       values <- private$invalidatedOutputValues
       private$invalidatedOutputValues <- Map$new()
@@ -1565,4 +1582,9 @@ onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
 #' @export
 onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
   session$onSessionEnded(fun)
+}
+
+
+scheduleFlush <- function() {
+  timerCallbacks$schedule(0, function() {})
 }

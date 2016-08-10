@@ -115,13 +115,16 @@ ReactiveEnvironment <- R6Class(
     addPendingFlush = function(ctx, priority) {
       .pendingFlush$enqueue(ctx, priority)
     },
+    hasPendingFlush = function() {
+      return(!.pendingFlush$isEmpty())
+    },
     flush = function() {
       # If already in a flush, don't start another one
       if (.inFlush) return()
       .inFlush <<- TRUE
       on.exit(.inFlush <<- FALSE)
 
-      while (!.pendingFlush$isEmpty()) {
+      while (hasPendingFlush()) {
         ctx <- .pendingFlush$dequeue()
         ctx$executeFlushCallbacks()
       }

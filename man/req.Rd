@@ -128,8 +128,7 @@ if (interactive()) {
       req(exists(input$data, "package:datasets", inherits = FALSE),
           cancelOutput = TRUE)
 
-      head(get(input$data, "package:datasets",
-               inherits = FALSE))
+      head(get(input$data, "package:datasets", inherits = FALSE))
     })
   }
 

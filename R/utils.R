@@ -1263,8 +1263,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'       req(exists(input$data, "package:datasets", inherits = FALSE),
 #'           cancelOutput = TRUE)
 #'
-#'       head(get(input$data, "package:datasets",
-#'                inherits = FALSE))
+#'       head(get(input$data, "package:datasets", inherits = FALSE))
 #'     })
 #'   }
 #'

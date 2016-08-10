@@ -45,7 +45,7 @@ shiny 0.13.2.9005
   (or Link's) label and/or icon. Also check that the icon argument (for both
   creation and updating of a button) is valid and throw a warning otherwise.
 
-* Fixed #1056: Upgraded Bootstrap to 3.3.6.
+* Fixed #1056: Upgraded Bootstrap to 3.3.7.
 
 * Updated ion.RangeSlider to 2.1.2.
 

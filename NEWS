@@ -167,6 +167,8 @@ shiny 0.13.0
 
 * Upgraded to Bootstrap 3.3.5.
 
+* Upgraded to jQuery 1.12.4
+
 * Switched to an almost-complete build of jQuery UI with the exception of the
   datepicker extension, which conflicts with Shiny's date picker.
 

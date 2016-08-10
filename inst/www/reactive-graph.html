@@ -66,7 +66,7 @@ svg {
 }
 .node path {
   fill: white;
-  stroke: #777;
+  stroke: #999;
   stroke-width: 7.5px;
   transition: fill 0.75s ease;
 }
@@ -82,6 +82,9 @@ svg {
 }
 .node.running path {
   fill: #61B97E;
+}
+.node.fixed path {
+  stroke: #000;
 }
 #legend {
   font-size: 22px;
@@ -1094,7 +1097,13 @@ function update() {
       .on('mouseout', function(d, i) {
         $('#description').text('');
       })
-      .call(force.drag);
+      .on('dblclick', function(d) {
+        d3.event.stopPropagation();
+        d3.select(this).classed('fixed', d.fixed = false);
+      })
+      .call(force.drag().on('dragstart', function(d) {
+        d3.select(this).classed('fixed', d.fixed = true);
+      }));
   newG.append('path')
       .attr('transform', 'scale(0.08)')
       .attr('stroke', 'black')

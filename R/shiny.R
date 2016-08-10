@@ -1552,13 +1552,13 @@ outputOptions <- function(x, name, ...) {
 #'
 #' @export
 onFlush <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
-  session$onFlush(fun)
+  session$onFlush(fun, once = once)
 }
 
 #' @rdname onFlush
 #' @export
 onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
-  session$onFlushed(fun)
+  session$onFlushed(fun, once = once)
 }
 
 #' @rdname onFlush

@@ -1,5 +1,7 @@
 shiny 0.13.2.9005
 --------------------------------------------------------------------------------
+* Updated Font Awesome to 4.6.3
+
 * Added support for bookmarkable state.
 
 * Added support for the `pool` package (use Shiny's timer/scheduler)

@@ -87,6 +87,9 @@ shiny 0.13.2.9005
 * Fixed #1253: Memory could leak when an observer was destroyed without first
   being invalidated.
 
+* Fixed #1144: updateRadioButton and updateCheckboxGroupInput break controls
+  when used in modules (thanks, @sipemu!).
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

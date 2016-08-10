@@ -833,10 +833,7 @@ ShinySession <- R6Class(
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
       flushReact()
-      lapply(appsByToken$values(), function(shinysession) {
-        shinysession$flushOutput()
-        NULL
-      })
+      flushAllSessions()
     },
     isClosed = function() {
       return(self$closed)
@@ -961,6 +958,8 @@ ShinySession <- R6Class(
       }
     },
     flushOutput = function() {
+      if (self$isClosed())
+        return()
 
       # Return TRUE if there's any stuff to send to the client.
       hasPendingUpdates <- function() {
@@ -1587,4 +1586,19 @@ onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
 
 scheduleFlush <- function() {
   timerCallbacks$schedule(0, function() {})
+}
+
+flushAllSessions <- function() {
+  lapply(appsByToken$values(), function(shinysession) {
+    tryCatch(
+      shinysession$flushOutput(),
+
+      stop = function(e) {
+        # If there are any uncaught errors that bubbled up to here, close the
+        # session.
+        shinysession$close()
+      }
+    )
+    NULL
+  })
 }

@@ -1181,21 +1181,6 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' \code{input$plotType} is truthy, and if so, returns it. This is a convenient
 #' way to check for a value "inline" with its first use.
 #'
-#' \strong{Using \code{cancelOutput = TRUE}}
-#'
-#' When \code{req(..., cancelOutput = TRUE)} is used, the "silent" exception is
-#' also raised, but it is treated slightly differently if one or more outputs are
-#' currently being evaluated. In those cases, the reactive chain does not proceed
-#' or update, but the output(s) are left is whatever state they happen to be in
-#' (whatever was their last valid state).
-#'
-#' Note that this is always going to be the case if
-#' this is used inside an output context (e.g. \code{output$txt <- ...}). It may
-#' or may not be the case if it is used inside a non-output context (e.g.
-#' \code{\link{reactive}}, \code{\link{observe}} or \code{\link{observeEvent}})
-#' -- depending on whether or not there is an \code{output$...} that is triggered
-#' as a result of those calls. See the examples below for concrete scenarios.
-#'
 #' \strong{Truthy and falsy values}
 #'
 #' The terms "truthy" and "falsy" generally indicate whether a value, when
@@ -1239,10 +1224,26 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' if you have a complicated condition to check for (or perhaps if you'd like to
 #' divide your condition into nested \code{if} statements).
 #'
+#' \strong{Using \code{cancelOutput = TRUE}}
+#'
+#' When \code{req(..., cancelOutput = TRUE)} is used, the "silent" exception is
+#' also raised, but it is treated slightly differently if one or more outputs are
+#' currently being evaluated. In those cases, the reactive chain does not proceed
+#' or update, but the output(s) are left is whatever state they happen to be in
+#' (whatever was their last valid state).
+#'
+#' Note that this is always going to be the case if
+#' this is used inside an output context (e.g. \code{output$txt <- ...}). It may
+#' or may not be the case if it is used inside a non-output context (e.g.
+#' \code{\link{reactive}}, \code{\link{observe}} or \code{\link{observeEvent}})
+#' -- depending on whether or not there is an \code{output$...} that is triggered
+#' as a result of those calls. See the examples below for concrete scenarios.
+#'
 #' @param ... Values to check for truthiness.
 #' @param cancelOutput If \code{TRUE} and an output is being evaluated, stop
 #'   processing as usual but instead of clearing the output, leave it in
 #'   whatever state it happens to be in.
+#' @param x An expression whose truthiness value we want to determine
 #' @return The first value that was passed in.
 #' @export
 #' @examples
@@ -1338,6 +1339,8 @@ dotloop <- function(fun_, ...) {
   invisible()
 }
 
+#' @export
+#' @rdname req
 isTruthy <- function(x) {
   if (inherits(x, 'try-error'))
     return(FALSE)

@@ -87,6 +87,9 @@ shiny 0.13.2.9005
 * Fixed #1253: Memory could leak when an observer was destroyed without first
   being invalidated.
 
+* Fixed #1284: Reactive system was being flushed too often (usually this just
+  means a more-expensive no-op than necessary).
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

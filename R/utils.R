@@ -1185,12 +1185,16 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' When \code{req(..., cancelOutput = TRUE)} is used, the "silent" exception is
 #' also raised, but it is treated slightly differently if one or more outputs are
-#' currently being evaluated. Note that this is always going to be the case if
+#' currently being evaluated. In those cases, the reactive chain does not proceed
+#' or update, but the output(s) are left is whatever state they happen to be in
+#' (whatever was their last valid state).
+#'
+#' Note that this is always going to be the case if
 #' this is used inside an output context (e.g. \code{output$txt <- ...}). It may
 #' or may not be the case if it is used inside a non-output context (e.g.
 #' \code{\link{reactive}}, \code{\link{observe}} or \code{\link{observeEvent}})
 #' -- depending on whether or not there is an \code{output$...} that is triggered
-#' as a result of those calls. See the examples below for concrete scnarios.
+#' as a result of those calls. See the examples below for concrete scenarios.
 #'
 #' \strong{Truthy and falsy values}
 #'
@@ -1231,8 +1235,8 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #'
 #' You can use \code{req(FALSE)} (i.e. no condition) if you've already performed
 #' all the checks you needed to by that point and just want to stop the reactive
-#' chain now. There is no advantange this, except perhaps ease of readibility
-#' if you have a complicated condition to check (or perhaps if you'd like to
+#' chain now. There is no advantange to this, except perhaps ease of readibility
+#' if you have a complicated condition to check for (or perhaps if you'd like to
 #' divide your condition into nested \code{if} statements).
 #'
 #' @param ... Values to check for truthiness.
@@ -1244,32 +1248,27 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
+#'   ui <- fluidPage(
+#'     textInput('data', 'Enter a dataset from the "datasets" package', 'cars'),
+#'     p('(E.g. "cars", "mtcars", "pressure", "faithful")'), hr(),
+#'     tableOutput('tbl')
+#'   )
 #'
-#' # uncomment the desired lines to experiment with the
-#' # different variations of req()
+#'   server <- function(input, output) {
+#'     output$tbl <- renderTable({
 #'
-#' ui <- fluidPage(
-#'   numericInput('num', 'Enter a number'),
-#'   textOutput('ndigits')
-#' )
+#'       ## to require that the user types something, use: `req(input$data)`
+#'       ## but better: require that input$data is valid and leave the last
+#'       ## valid table up
+#'       req(exists(input$data, "package:datasets", inherits = FALSE),
+#'           cancelOutput = TRUE)
 #'
-#' server <- function(input, output) {
-#'   output$ndigits <- renderText({
-#'     req(input$txt)
-#'     if (input$txt == 'hi') return('hi')
-#'     else if (input$txt == 'bye') return('bye')
-#'     # else cancelOutput()
-#'   })
+#'       head(get(input$data, "package:datasets",
+#'                inherits = FALSE))
+#'     })
+#'   }
 #'
-#'   output$check <- renderText({
-#'     # req(input$txt)
-#'     if (input$txt == 'hi') return('hi')
-#'     else if (input$txt == 'bye') return('bye')
-#'     # else cancelOutput()
-#'   })
-#' }
-#'
-#' shinyApp(ui, server)
+#'   shinyApp(ui, server)
 #' }
 req <- function(..., cancelOutput = FALSE) {
   dotloop(function(item) {

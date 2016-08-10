@@ -737,10 +737,10 @@ registerDebugHook("observerFunc", environment(), label)
             ..stacktraceon..(observerFunc())
           else
             observerFunc(),
-          validation = function(e) {
-            # It's OK for a validation error to cause an observer to stop
-            # running
-          }
+          # It's OK for shiny.silent.error errors to cause an observer to stop running
+          shiny.silent.error = function(e) NULL
+          # validation = function(e) NULL,
+          # shiny.output.cancel = function(e) NULL
         )
       }
       .label <<- label

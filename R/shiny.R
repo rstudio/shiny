@@ -791,14 +791,14 @@ ShinySession <- R6Class(
       NS(NULL, id)
     },
 
-    # Invalidate a value until the flush cycle completes
-    invalidateValue = function(x, name) {
+    # Freeze a value until the flush cycle completes
+    freezeValue = function(x, name) {
       if (!is.reactivevalues(x))
         stop("x must be a reactivevalues object")
 
       impl <- .subset2(x, 'impl')
-      impl$invalidate(name)
-      self$onFlushed(function() impl$unInvalidate(name))
+      impl$freeze(name)
+      self$onFlushed(function() impl$thaw(name))
     },
 
     onSessionEnded = function(sessionEndedCallback) {
@@ -833,10 +833,7 @@ ShinySession <- R6Class(
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
       flushReact()
-      lapply(appsByToken$values(), function(shinysession) {
-        shinysession$flushOutput()
-        NULL
-      })
+      flushAllSessions()
     },
     isClosed = function() {
       return(self$closed)
@@ -961,21 +958,43 @@ ShinySession <- R6Class(
       }
     },
     flushOutput = function() {
+      if (self$isClosed())
+        return()
+
+      # Return TRUE if there's any stuff to send to the client.
+      hasPendingUpdates <- function() {
+        # Even though progressKeys isn't sent to the client, we use it in this
+        # check. This is because if it is non-empty, sending `values` to the
+        # client tells it that the flushReact loop is finished, and the client
+        # then knows to stop showing progress.
+        return(
+          length(private$progressKeys) != 0 ||
+          length(private$invalidatedOutputValues) != 0 ||
+          length(private$invalidatedOutputErrors) != 0 ||
+          length(private$inputMessageQueue) != 0
+        )
+      }
 
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       private$flushCallbacks$invoke(..stacktraceon = TRUE)
-      # ..stacktraceon matches with the top-level ..stacktraceoff..
-      on.exit(private$flushedCallbacks$invoke(..stacktraceon = TRUE))
 
-      if (length(private$progressKeys) == 0
-          && length(private$invalidatedOutputValues) == 0
-          && length(private$invalidatedOutputErrors) == 0
-          && length(private$inputMessageQueue) == 0) {
+      # Schedule execution of onFlushed callbacks
+      on.exit({
+        # ..stacktraceon matches with the top-level ..stacktraceoff..
+        private$flushedCallbacks$invoke(..stacktraceon = TRUE)
+
+        # If one of the flushedCallbacks added anything to send to the client,
+        # or invalidated any observers, set up another flush cycle.
+        if (hasPendingUpdates() || .getReactiveEnvironment()$hasPendingFlush()) {
+          scheduleFlush()
+        }
+      })
+
+      if (!hasPendingUpdates()) {
         return(invisible())
       }
 
       private$progressKeys <- character(0)
-
       values <- private$invalidatedOutputValues
       private$invalidatedOutputValues <- Map$new()
       errors <- private$invalidatedOutputErrors
@@ -1553,17 +1572,37 @@ outputOptions <- function(x, name, ...) {
 #'
 #' @export
 onFlush <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
-  session$onFlush(fun)
+  session$onFlush(fun, once = once)
 }
 
 #' @rdname onFlush
 #' @export
 onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
-  session$onFlushed(fun)
+  session$onFlushed(fun, once = once)
 }
 
 #' @rdname onFlush
 #' @export
 onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
   session$onSessionEnded(fun)
+}
+
+
+scheduleFlush <- function() {
+  timerCallbacks$schedule(0, function() {})
+}
+
+flushAllSessions <- function() {
+  lapply(appsByToken$values(), function(shinysession) {
+    tryCatch(
+      shinysession$flushOutput(),
+
+      stop = function(e) {
+        # If there are any uncaught errors that bubbled up to here, close the
+        # session.
+        shinysession$close()
+      }
+    )
+    NULL
+  })
 }

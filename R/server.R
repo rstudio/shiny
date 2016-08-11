@@ -358,10 +358,8 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
             } else {
               flushReact()
             }
-            lapply(appsByToken$values(), function(shinysession) {
-              shinysession$flushOutput()
-              NULL
-            })
+
+            flushAllSessions()
           })
         })
       }
@@ -481,10 +479,7 @@ serviceApp <- function() {
     }
 
     flushReact()
-
-    for (shinysession in appsByToken$values()) {
-      shinysession$flushOutput()
-    }
+    flushAllSessions()
   }
 
   # If this R session is interactive, then call service() with a short timeout

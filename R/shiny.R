@@ -1269,7 +1269,9 @@ ShinySession <- R6Class(
         ext <- tools::file_ext(filename)
         if (nzchar(ext))
           ext <- paste(".", ext, sep = "")
-        tmpdata <- tempfile(fileext = ext)
+        tmpdata <- tempfile( tmpdir = tempdir(), fileext = ext)
+        snapshot <- utils::fileSnapshot(tempdir())
+
         # ..stacktraceon matches with the top-level ..stacktraceoff..
         result <- try(shinyCallingHandlers(Context$new(getDefaultReactiveDomain(), '[download]')$run(
           function() { ..stacktraceon..(download$func(tmpdata)) }
@@ -1277,6 +1279,11 @@ ShinySession <- R6Class(
         if (inherits(result, 'try-error')) {
           unlink(tmpdata)
           stop(attr(result, "condition", exact = TRUE))
+        }
+
+        # if nothing was added, return an "no content" error
+        if (identical(utils::changedFiles(snapshot)$added, character(0))) {
+           return(httpResponse(400, content="<h1>No content</h1>"))
         }
         return(httpResponse(
           200,

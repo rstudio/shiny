@@ -79,6 +79,8 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
   digitsWrapper <- createWrapper(digits)
   naWrapper <- createWrapper(na)
 
+  dots <- list(...)  ## used later (but defined here because of scoping)
+
   renderFunc <- function(shinysession, name, ...) {
     striped <- stripedWrapper()
     hover <- hoverWrapper()
@@ -112,7 +114,6 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
       return(NULL)
 
     # Separate the ... args to pass to xtable() vs print.xtable()
-    dots <- list(...)
     xtable_argnames <- setdiff(names(formals(xtable)), c("x", "..."))
     xtable_args <- dots[intersect(names(dots), xtable_argnames)]
     non_xtable_args <- dots[setdiff(names(dots), xtable_argnames)]
@@ -155,15 +156,30 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
 
     # Set up print args
     print_args <- list(
-      xtable_res,
+      x = xtable_res,
       type = 'html',
-      include.rownames = rownames,
-      include.colnames = colnames,
-      NA.string = na,
-      html.table.attributes = paste0("class = '", htmlEscape(classNames, TRUE), "' ",
-                                     "style = 'width:", validateCssUnit(width), ";'"))
+      include.rownames = {
+        if ("include.rownames" %in% names(dots)) dots$include.rownames
+        else rownames
+      },
+      include.colnames = {
+        if ("include.colnames" %in% names(dots)) dots$include.colnames
+        else colnames
+      },
+      NA.string = {
+        if ("NA.string" %in% names(dots)) dots$NA.string
+        else na
+      },
+      html.table.attributes =
+        paste0({
+          if ("html.table.attributes" %in% names(dots)) dots$html.table.attributes
+          else ""
+        }, " ",
+        "class = '", htmlEscape(classNames, TRUE), "' ",
+        "style = 'width:", validateCssUnit(width), ";'"))
 
     print_args <- c(print_args, non_xtable_args)
+    print_args <- print_args[unique(names(print_args))]
 
     # Capture the raw html table returned by print.xtable(), and store it in
     # a variable for further processing

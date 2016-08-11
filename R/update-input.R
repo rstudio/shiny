@@ -415,11 +415,11 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
   if (!is.null(choices))
     choices <- choicesWithNames(choices)
   if (!is.null(selected))
-    selected <- validateSelected(selected, choices, inputId)
+    selected <- validateSelected(selected, choices, session$ns(inputId))
 
   options <- if (!is.null(choices)) {
     format(tagList(
-      generateOptions(inputId, choices, selected, inline, type = type)
+      generateOptions(session$ns(inputId), choices, selected, inline, type = type)
     ))
   }
 

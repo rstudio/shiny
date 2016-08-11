@@ -87,6 +87,17 @@ $.extend(selectInputBinding, {
       this.setValue(el, data.value);
     }
 
+    if (data.hasOwnProperty('multiple')) {
+      if (data.multiple) {
+        $(el).attr('multiple', 'multiple');
+        $(el).next().attr('class', 'selectize-control multi');
+      }
+      else {
+        $(el).attr('multiple', '');
+        $(el).next().attr('class', 'selectize-control single');
+      }
+    }
+
     if (data.hasOwnProperty('label'))
       $(el).parent().parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 

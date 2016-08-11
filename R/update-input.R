@@ -557,12 +557,13 @@ updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
 #' }
 #' @export
 updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
-                              selected = NULL) {
+                              selected = NULL, multiple = NULL) {
   choices <- if (!is.null(choices)) choicesWithNames(choices)
   if (!is.null(selected))
     selected <- validateSelected(selected, choices, inputId)
   options <- if (!is.null(choices)) selectOptions(choices, selected)
-  message <- dropNulls(list(label = label, options = options, value = selected))
+  message <- dropNulls(list(label = label, options = options,
+                            value = selected, multiple = multiple))
   session$sendInputMessage(inputId, message)
 }
 
@@ -574,8 +575,8 @@ updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
 #'   version of \pkg{selectize.js})
 #' @export
 updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
-                                 selected = NULL, options = list(),
-                                 server = FALSE) {
+                                 selected = NULL, multiple = NULL,
+                                 options = list(), server = FALSE) {
   if (length(options)) {
     res <- checkAsIs(options)
     cfg <- tags$script(
@@ -587,7 +588,7 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     session$sendInputMessage(inputId, list(config = as.character(cfg)))
   }
   if (!server) {
-    return(updateSelectInput(session, inputId, label, choices, selected))
+    return(updateSelectInput(session, inputId, label, choices, selected, multiple))
   }
   value <- unname(selected)
   attr(choices, 'selected_value') <- value

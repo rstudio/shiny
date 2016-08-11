@@ -963,7 +963,12 @@ ShinySession <- R6Class(
 
       # Return TRUE if there's any stuff to send to the client.
       hasPendingUpdates <- function() {
+        # Even though progressKeys isn't sent to the client, we use it in this
+        # check. This is because if it is non-empty, sending `values` to the
+        # client tells it that the flushReact loop is finished, and the client
+        # then knows to stop showing progress.
         return(
+          length(private$progressKeys) != 0 ||
           length(private$invalidatedOutputValues) != 0 ||
           length(private$invalidatedOutputErrors) != 0 ||
           length(private$inputMessageQueue) != 0
@@ -985,13 +990,11 @@ ShinySession <- R6Class(
         }
       })
 
-      # Clear any progress keys
-      private$progressKeys <- character(0)
-
       if (!hasPendingUpdates()) {
         return(invisible())
       }
 
+      private$progressKeys <- character(0)
       values <- private$invalidatedOutputValues
       private$invalidatedOutputValues <- Map$new()
       errors <- private$invalidatedOutputErrors

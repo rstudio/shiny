@@ -1,21 +1,20 @@
 #' Create a textarea input control
 #'
-#' Create a resizable input control for entry of unstructured text values
+#' Create a textarea input control for entry of unstructured text values.
 #'
-#' @param inputId The \code{input} slot that will be used to access the value.
-#' @param label Display label for the control, or \code{NULL} for no label.
-#' @param value Initial value.
-#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
-#'   see \code{\link{validateCssUnit}}.
-#' @param height The height of the input, e.g. \code{'400px'}, or \code{'100\%'};
-#'   see \code{\link{validateCssUnit}}.
+#' @inheritParams textInput
+#' @param height The height of the input, e.g. \code{'400px'}, or
+#'   \code{'100\%'}; see \code{\link{validateCssUnit}}.
 #' @param cols Value of the visible character columns of the input, e.g.
-#'   \code{'80'}.
+#'   \code{80}. If used with \code{width}, \code{width} will take precedence in
+#'   the browser's rendering.
 #' @param rows The value of the visible character rows of the input, e.g.
-#'   \code{'6'}.
-#' @param placeholder A character string giving the user a hint as to what can
-#'   be entered into the control. Internet Explorer 8 and 9 do not support this
-#'   option.
+#'   \code{6}. If used with \code{height}, \code{height} will take precedence in
+#'   the browser's rendering.
+#' @param resize Which directions the textarea box can be resized. Can be one of
+#'   \code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}.
+#'   The default, \code{NULL}, will use the client browser's default setting for
+#'   resizing textareas.
 #' @return A textarea input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -33,18 +32,38 @@
 #'   output$value <- renderText({ input$caption })
 #' }
 #' shinyApp(ui, server)
+#'
 #' }
 #' @export
 textAreaInput <- function(inputId, label, value = "", width = NULL, height = NULL,
-                          cols = NULL, rows = NULL, placeholder = NULL) {
+  cols = NULL, rows = NULL, placeholder = NULL, resize = NULL) {
+
+  value <- restoreInput(id = inputId, default = value)
+
+  if (!is.null(resize)) {
+    resize <- match.arg(resize, c("both", "none", "vertical", "horizontal"))
+  }
+
+  style <- paste(
+    if (!is.null(width))  paste0("width: ",  validateCssUnit(width),  ";"),
+    if (!is.null(height)) paste0("height: ", validateCssUnit(height), ";"),
+    if (!is.null(resize)) paste0("resize: ", resize, ";")
+  )
+
+  # Workaround for tag attribute=character(0) bug:
+  #   https://github.com/rstudio/htmltools/issues/65
+  if (length(style) == 0) style <- NULL
 
   div(class = "form-group shiny-input-container",
-      style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
-      label %AND% tags$label(label, `for` = inputId),
-      tags$textarea(
-        id = inputId, class = "form-control", placeholder = placeholder,
-        style = if (!is.null(height)) paste0("height: ", validateCssUnit(height), ";"),
-        rows = rows, cols = cols, paste(value, collapse = "\n")
-      )
+    label %AND% tags$label(label, `for` = inputId),
+    tags$textarea(
+      id = inputId,
+      class = "form-control",
+      placeholder = placeholder,
+      style = style,
+      rows = rows,
+      cols = cols,
+      value
+    )
   )
 }

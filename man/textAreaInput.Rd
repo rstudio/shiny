@@ -5,7 +5,7 @@
 \title{Create a textarea input control}
 \usage{
 textAreaInput(inputId, label, value = "", width = NULL, height = NULL,
-  cols = NULL, rows = NULL, placeholder = NULL)
+  cols = NULL, rows = NULL, placeholder = NULL, resize = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -17,24 +17,31 @@ textAreaInput(inputId, label, value = "", width = NULL, height = NULL,
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
 
-\item{height}{The height of the input, e.g. \code{'400px'}, or \code{'100\%'};
-see \code{\link{validateCssUnit}}.}
+\item{height}{The height of the input, e.g. \code{'400px'}, or
+\code{'100\%'}; see \code{\link{validateCssUnit}}.}
 
 \item{cols}{Value of the visible character columns of the input, e.g.
-\code{'80'}.}
+\code{80}. If used with \code{width}, \code{width} will take precedence in
+the browser's rendering.}
 
 \item{rows}{The value of the visible character rows of the input, e.g.
-\code{'6'}.}
+\code{6}. If used with \code{height}, \code{height} will take precedence in
+the browser's rendering.}
 
 \item{placeholder}{A character string giving the user a hint as to what can
 be entered into the control. Internet Explorer 8 and 9 do not support this
 option.}
+
+\item{resize}{Which directions the textarea box can be resized. Can be one of
+\code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}.
+The default, \code{NULL}, will use the client browser's default setting for
+resizing textareas.}
 }
 \value{
 A textarea input control that can be added to a UI definition.
 }
 \description{
-Create a resizable input control for entry of unstructured text values
+Create a textarea input control for entry of unstructured text values.
 }
 \examples{
 ## Only run examples in interactive R sessions
@@ -48,6 +55,7 @@ server <- function(input, output) {
   output$value <- renderText({ input$caption })
 }
 shinyApp(ui, server)
+
 }
 }
 \seealso{

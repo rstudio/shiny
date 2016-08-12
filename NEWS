@@ -90,6 +90,8 @@ shiny 0.13.2.9005
 * Fixed #1144: updateRadioButton and updateCheckboxGroupInput break controls
   when used in modules (thanks, @sipemu!).
 
+* Fixed #1179: updateDateInput sometimes didn't work with malformed dates.
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

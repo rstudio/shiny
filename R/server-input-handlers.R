@@ -98,7 +98,20 @@ registerInputHandler("shiny.password", function(val, shinysession, name) {
 registerInputHandler("shiny.date", function(val, ...){
   # First replace NULLs with NA, then convert to Date vector
   datelist <- ifelse(lapply(val, is.null), NA, val)
-  as.Date(unlist(datelist))
+
+  res <- NULL
+  tryCatch({
+      res <- as.Date(unlist(datelist))
+    },
+    error = function(e) {
+      # It's possible for client to send a string like "99999-01-01", which
+      # as.Date can't handle.
+      warning(e$message)
+      res <<- as.Date(rep(NA, length(datelist)))
+    }
+  )
+
+  res
 })
 
 registerInputHandler("shiny.datetime", function(val, ...){

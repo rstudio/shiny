@@ -90,6 +90,9 @@ shiny 0.13.2.9005
 * Fixed #1144: updateRadioButton and updateCheckboxGroupInput break controls
   when used in modules (thanks, @sipemu!).
 
+* Fixed #1284: Reactive system was being flushed too often (usually this just
+  means a more-expensive no-op than necessary).
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

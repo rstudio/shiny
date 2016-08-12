@@ -13,7 +13,8 @@
 #'
 #' For \code{\link{radioButtons}()}, \code{\link{checkboxGroupInput}()} and
 #' \code{\link{selectInput}()}, the set of choices can be cleared by using
-#' \code{choices=character(0)}.
+#' \code{choices=character(0)}. Similarly, for these inputs, the selected item
+#' can be cleared by using \code{selected=character(0)}.
 #'
 #' @param session The \code{session} object passed to function given to
 #'   \code{shinyServer}.

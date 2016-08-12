@@ -337,6 +337,7 @@ navbarPage <- function(title,
 
   # build the tabset
   tabs <- list(...)
+  selected <- restoreInput(id = id, default = selected)
   tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id, selected)
 
   # built the container div dynamically to support optional collapsibility
@@ -633,6 +634,7 @@ tabsetPanel <- function(...,
   # build the tabset
   tabs <- list(...)
   type <- match.arg(type)
+  selected <- restoreInput(id = id, default = selected)
   tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
 
   # create the content
@@ -697,6 +699,7 @@ navlistPanel <- function(...,
 
   # build the tabset
   tabs <- list(...)
+  selected <- restoreInput(id = id, default = selected)
   tabset <- buildTabset(tabs,
                         "nav nav-pills nav-stacked",
                         textFilter,

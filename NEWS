@@ -94,6 +94,7 @@ shiny 0.13.2.9005
   means a more-expensive no-op than necessary).
 
 * Fixed #1179: updateDateInput sometimes didn't work with malformed dates.
+* Added inputTextArea. (Thanks to @nuno-agostinho)
 
 shiny 0.13.2
 --------------------------------------------------------------------------------

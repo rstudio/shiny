@@ -60,6 +60,6 @@ Other input.elements: \code{\link{actionButton}},
   \code{\link{numericInput}}, \code{\link{passwordInput}},
   \code{\link{radioButtons}}, \code{\link{selectInput}},
   \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textInput}}
+  \code{\link{textAreaInput}}, \code{\link{textInput}}
 }
 

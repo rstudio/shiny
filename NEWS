@@ -93,6 +93,8 @@ shiny 0.13.2.9005
 * Fixed #1284: Reactive system was being flushed too often (usually this just
   means a more-expensive no-op than necessary).
 
+* Fixed #1179: updateDateInput sometimes didn't work with malformed dates.
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

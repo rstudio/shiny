@@ -34,8 +34,8 @@ function is as simple as wrapping it in a function, as in
 \code{function(request) \{ fluidPage(....) \}}.
 
 By default, all input values will be bookmarked, except for the values of
-actionButtons and passwordInputs. fileInputs will be saved if the state is
-saved on a server, but not if the state is encoded in a URL.
+passwordInputs. fileInputs will be saved if the state is saved on a server,
+but not if the state is encoded in a URL.
 
 When bookmarking state, arbitrary values can be stored, by passing a function
 as the \code{onBookmark} argument. That function will be passed a

@@ -458,8 +458,8 @@ updateQueryString <- function(queryString, session = getDefaultReactiveDomain())
 #' Create a button for bookmarking/sharing
 #'
 #' A \code{bookmarkButton} is a \code{\link{actionButton}} with a default label
-#' that consists of a link icon and the text "Share...". It is meant to be used
-#' for bookmarking state.
+#' that consists of a link icon and the text "Bookmark...". It is meant to be
+#' used for bookmarking state.
 #'
 #' @param title A tooltip that is shown when the mouse cursor hovers over the
 #'   button.

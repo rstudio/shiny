@@ -21,8 +21,8 @@ button.}
 }
 \description{
 A \code{bookmarkButton} is a \code{\link{actionButton}} with a default label
-that consists of a link icon and the text "Share...". It is meant to be used
-for bookmarking state.
+that consists of a link icon and the text "Bookmark...". It is meant to be
+used for bookmarking state.
 }
 \seealso{
 enableBookmarking

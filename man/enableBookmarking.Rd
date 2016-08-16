@@ -55,6 +55,10 @@ For saved-to-server state, this is how the state directory is chosen:
     from a directory), the saved states will be saved in a subdirectory of
     the current working directory called shiny_bookmarks.
 }
+
+When used with \code{\link{shinyApp}()}, this function must be called before
+\code{shinyApp()}, or in the \code{shinyApp()}'s \code{onStart} function.
+See examples below.
 }
 \examples{
 ## Only run these examples in interactive R sessions
@@ -65,7 +69,7 @@ ui <- function(request) {
   fluidPage(
     textInput("txt", "Text"),
     checkboxInput("chk", "Checkbox"),
-    bookmarkButton("bookmark")
+    bookmarkButton()
   )
 }
 server <- function(input, output, session) { }
@@ -73,15 +77,13 @@ enableBookmarking("url")
 shinyApp(ui, server)
 
 
-# Basic example with state saved to disk
-ui <- function(request) {
-  fluidPage(
-    textInput("txt", "Text"),
-    checkboxInput("chk", "Checkbox"),
-    bookmarkButton("bookmark")
-  )
-}
-server <- function(input, output, session) { }
+# An alternative: call from shinyApp's onStart function
+shinyApp(ui, server,
+  onStart = function() { enableBookmarking("url") }
+)
+
+
+# Same basic example with state saved to disk
 enableBookmarking("server")
 shinyApp(ui, server)
 
@@ -125,7 +127,7 @@ ui <- function(request) {
   fluidPage(
     sliderInput("slider", "Slider", 1, 100, 50),
     uiOutput("ui"),
-    bookmarkButton("bookmark")
+    bookmarkButton()
   )
 }
 server <- function(input, output, session) {
@@ -144,7 +146,7 @@ ui <- function(request) {
     passwordInput("pw", "Password"), # Passwords are never saved
     sliderInput("slider", "Slider", 1, 100, 50), # Manually excluded below
     checkboxInput("chk", "Checkbox"),
-    bookmarkButton("bookmark")
+    bookmarkButton()
   )
 }
 server <- function(input, output, session) {
@@ -168,7 +170,7 @@ ui <- function(request) {
         ),
         tags$hr(),
         checkboxInput("header", "Header", TRUE),
-        bookmarkButton("bookmark")
+        bookmarkButton()
       ),
       mainPanel(
         tableOutput("contents")

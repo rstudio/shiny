@@ -608,6 +608,10 @@ showBookmarkUrlModal <- function(url) {
 #'     the current working directory called shiny_bookmarks.
 #' }
 #'
+#' When used with \code{\link{shinyApp}()}, this function must be called before
+#' \code{shinyApp()}, or in the \code{shinyApp()}'s \code{onStart} function.
+#' See examples below.
+#'
 #' @param store Either \code{"url"}, which encodes all of the relevant values in
 #'   a URL, \code{"server"}, which saves to disk on the server, or
 #'   \code{"disable"}, which disables any previously-enabled bookmarking.
@@ -626,7 +630,7 @@ showBookmarkUrlModal <- function(url) {
 #'   fluidPage(
 #'     textInput("txt", "Text"),
 #'     checkboxInput("chk", "Checkbox"),
-#'     bookmarkButton("bookmark")
+#'     bookmarkButton()
 #'   )
 #' }
 #' server <- function(input, output, session) { }
@@ -634,15 +638,13 @@ showBookmarkUrlModal <- function(url) {
 #' shinyApp(ui, server)
 #'
 #'
-#' # Basic example with state saved to disk
-#' ui <- function(request) {
-#'   fluidPage(
-#'     textInput("txt", "Text"),
-#'     checkboxInput("chk", "Checkbox"),
-#'     bookmarkButton("bookmark")
-#'   )
-#' }
-#' server <- function(input, output, session) { }
+#' # An alternative: call from shinyApp's onStart function
+#' shinyApp(ui, server,
+#'   onStart = function() { enableBookmarking("url") }
+#' )
+#'
+#'
+#' # Same basic example with state saved to disk
 #' enableBookmarking("server")
 #' shinyApp(ui, server)
 #'
@@ -686,7 +688,7 @@ showBookmarkUrlModal <- function(url) {
 #'   fluidPage(
 #'     sliderInput("slider", "Slider", 1, 100, 50),
 #'     uiOutput("ui"),
-#'     bookmarkButton("bookmark")
+#'     bookmarkButton()
 #'   )
 #' }
 #' server <- function(input, output, session) {
@@ -705,7 +707,7 @@ showBookmarkUrlModal <- function(url) {
 #'     passwordInput("pw", "Password"), # Passwords are never saved
 #'     sliderInput("slider", "Slider", 1, 100, 50), # Manually excluded below
 #'     checkboxInput("chk", "Checkbox"),
-#'     bookmarkButton("bookmark")
+#'     bookmarkButton()
 #'   )
 #' }
 #' server <- function(input, output, session) {
@@ -729,7 +731,7 @@ showBookmarkUrlModal <- function(url) {
 #'         ),
 #'         tags$hr(),
 #'         checkboxInput("header", "Header", TRUE),
-#'         bookmarkButton("bookmark")
+#'         bookmarkButton()
 #'       ),
 #'       mainPanel(
 #'         tableOutput("contents")

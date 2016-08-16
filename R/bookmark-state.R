@@ -498,7 +498,6 @@ urlModal <- function(url, title = "Bookmarked application link", subtitle = NULL
   modalDialog(
     title = title,
     easyClose = TRUE,
-    footer = NULL,
     tags$textarea(class = "form-control", rows = "1", style = "resize: none;",
       readonly = "readonly",
       url

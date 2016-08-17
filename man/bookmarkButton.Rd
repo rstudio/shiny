@@ -6,7 +6,8 @@
 \usage{
 bookmarkButton(label = "Bookmark...", icon = shiny::icon("link", lib =
   "glyphicon"),
-  title = "Bookmark this application's state and get a URL for sharing.", ...)
+  title = "Bookmark this application's state and get a URL for sharing.", ...,
+  id = "._bookmark_")
 }
 \arguments{
 \item{label}{The contents of the button or link--usually a text label, but
@@ -18,6 +19,11 @@ you could also use any other HTML, like an image.}
 button.}
 
 \item{...}{Named attributes to be applied to the button or link.}
+
+\item{id}{An ID for the bookmark button. The only time it is necessary to set
+the ID unless you have more than one bookmark button in your application.
+If you specify an input ID, it should be excluded from bookmarking with
+\code{\link{setBookmarkExclude}}.}
 }
 \description{
 A \code{bookmarkButton} is a \code{\link{actionButton}} with a default label

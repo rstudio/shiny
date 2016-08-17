@@ -463,6 +463,10 @@ updateQueryString <- function(queryString, session = getDefaultReactiveDomain())
 #'
 #' @param title A tooltip that is shown when the mouse cursor hovers over the
 #'   button.
+#' @param id An ID for the bookmark button. The only time it is necessary to set
+#'   the ID unless you have more than one bookmark button in your application.
+#'   If you specify an input ID, it should be excluded from bookmarking with
+#'   \code{\link{setBookmarkExclude}}.
 #'
 #' @seealso enableBookmarking
 #' @inheritParams actionButton
@@ -470,9 +474,10 @@ updateQueryString <- function(queryString, session = getDefaultReactiveDomain())
 bookmarkButton <- function(label = "Bookmark...",
   icon = shiny::icon("link", lib = "glyphicon"),
   title = "Bookmark this application's state and get a URL for sharing.",
-  ...)
+  ...,
+  id = "._bookmark_")
 {
-  actionButton("._bookmark_", label, icon, title = title, ...)
+  actionButton(id, label, icon, title = title, ...)
 }
 
 
@@ -780,6 +785,17 @@ setBookmarkExclude <- function(names = character(0), session = getDefaultReactiv
   session$setBookmarkExclude(names)
 }
 
+
+#' Set the event that triggers bookmarking
+#' @export
+setBookmarkEvent <- function(expr, env = parent.frame(), quoted = FALSE,
+  session = getDefaultReactiveDomain())
+{
+  if (!quoted) {
+    expr <- substitute(expr)
+  }
+  session$setBookmarkEvent(expr, env, quoted = TRUE)
+}
 
 #' Add callbacks for Shiny session bookmarking events
 #'

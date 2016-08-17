@@ -363,6 +363,7 @@ ShinySession <- R6Class(
     restoreCallbacks = 'Callbacks',
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
+    bookmarkEvent = list(),          # Event that triggers bookmarking
 
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
@@ -445,54 +446,66 @@ ShinySession <- R6Class(
         # To make code a little clearer
         session <- self
 
-        # This observer fires when the bookmark button is clicked.
-        observeEvent(
-          label = "bookmark",
-          session$input[["._bookmark_"]],
-          {
-            tryCatch(
-              withLogErrors({
-                saveState <- ShinySaveState$new(
-                  input = session$input,
-                  exclude = session$getBookmarkExclude(),
-                  onSave = function(state) {
-                    private$bookmarkCallbacks$invoke(state)
+        # This outer observer schedules the observeEvent that gets triggered
+        # when the bookmarking event happens, then it destroys itself. This is
+        # scheduled with a low priority so that if another observer in the app
+        # calls setBookmarkEvent(), this will get called after that, and  will
+        # respect that setting.
+        bookmarkObserverScheduler <- observe({
+          # This observer fires when the bookmark button is clicked.
+          observeEvent(
+            eventExpr = private$bookmarkEvent$expr,
+            event.env = private$bookmarkEvent$env,
+            event.quoted = TRUE,
+            label = "bookmark",
+            {
+              tryCatch(
+                withLogErrors({
+                  saveState <- ShinySaveState$new(
+                    input = session$input,
+                    exclude = session$getBookmarkExclude(),
+                    onSave = function(state) {
+                      private$bookmarkCallbacks$invoke(state)
+                    }
+                  )
+
+                  if (store == "server") {
+                    url <- saveShinySaveState(saveState)
+                  } else if (store == "url") {
+                    url <- encodeShinySaveState(saveState)
+                  } else {
+                    stop("Unknown store type: ", store)
                   }
-                )
 
-                if (store == "server") {
-                  url <- saveShinySaveState(saveState)
-                } else if (store == "url") {
-                  url <- encodeShinySaveState(saveState)
-                } else {
-                  stop("Unknown store type: ", store)
+                  clientData <- session$clientData
+                  url <- paste0(
+                    clientData$url_protocol, "//",
+                    clientData$url_hostname,
+                    if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
+                    clientData$url_pathname,
+                    "?", url
+                  )
+
+
+                  # If onBookmarked callback was provided, invoke it; if not call
+                  # the default.
+                  if (private$bookmarkedCallbacks$count() > 0) {
+                    private$bookmarkedCallbacks$invoke(url)
+                  } else {
+                    showBookmarkUrlModal(url)
+                  }
+                }),
+                error = function(e) {
+                  msg <- paste0("Error bookmarking state: ", e$message)
+                  showNotification(msg, duration = NULL, type = "error")
                 }
+              )
+            }
+          )
 
-                clientData <- session$clientData
-                url <- paste0(
-                  clientData$url_protocol, "//",
-                  clientData$url_hostname,
-                  if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
-                  clientData$url_pathname,
-                  "?", url
-                )
-
-
-                # If onBookmarked callback was provided, invoke it; if not call
-                # the default.
-                if (private$bookmarkedCallbacks$count() > 0) {
-                  private$bookmarkedCallbacks$invoke(url)
-                } else {
-                  showBookmarkUrlModal(url)
-                }
-              }),
-              error = function(e) {
-                msg <- paste0("Error bookmarking state: ", e$message)
-                showNotification(msg, duration = NULL, type = "error")
-              }
-            )
-          }
-        )
+          # Only want to schedule the observer once
+          bookmarkObserverScheduler$destroy()
+        }, priority = 1000000)
 
         # If there was an error initializing the current restore context, show
         # notification in the client.
@@ -604,6 +617,9 @@ ShinySession <- R6Class(
       private$bookmarkedCallbacks <- Callbacks$new()
       private$restoreCallbacks <- Callbacks$new()
       private$restoredCallbacks <- Callbacks$new()
+
+      # Set the default event that triggers bookmarking.
+      self$setBookmarkEvent(self$input[["._bookmark_"]])
       private$createBookmarkObservers()
 
       private$registerSessionEndCallbacks()
@@ -1091,6 +1107,12 @@ ShinySession <- R6Class(
       }
     },
 
+    setBookmarkEvent = function(expr, env = parent.frame(), quoted = FALSE) {
+      if (!quoted) {
+        expr <- substitute(expr)
+      }
+      private$bookmarkEvent <- list(expr = expr, env = env)
+    },
     setBookmarkExclude = function(names) {
       private$bookmarkExclude <- names
     },

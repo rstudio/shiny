@@ -335,9 +335,11 @@ navbarPage <- function(title,
   if (inverse)
     navbarClass <- paste(navbarClass, "navbar-inverse")
 
+  if (!is.null(id))
+    selected <- restoreInput(id = id, default = selected)
+
   # build the tabset
   tabs <- list(...)
-  selected <- restoreInput(id = id, default = selected)
   tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id, selected)
 
   # built the container div dynamically to support optional collapsibility
@@ -631,10 +633,13 @@ tabsetPanel <- function(...,
                     version = "0.10.2.2")
   }
 
+  if (!is.null(id))
+    selected <- restoreInput(id = id, default = selected)
+
   # build the tabset
   tabs <- list(...)
   type <- match.arg(type)
-  selected <- restoreInput(id = id, default = selected)
+
   tabset <- buildTabset(tabs, paste0("nav nav-", type), NULL, id, selected)
 
   # create the content
@@ -697,9 +702,11 @@ navlistPanel <- function(...,
       tags$li(class="navbar-brand", text)
   }
 
+  if (!is.null(id))
+    selected <- restoreInput(id = id, default = selected)
+
   # build the tabset
   tabs <- list(...)
-  selected <- restoreInput(id = id, default = selected)
   tabset <- buildTabset(tabs,
                         "nav nav-pills nav-stacked",
                         textFilter,

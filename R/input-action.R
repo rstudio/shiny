@@ -39,10 +39,14 @@
 #' @seealso \code{\link{observeEvent}} and \code{\link{eventReactive}}
 #' @export
 actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
+
+  value <- restoreInput(id = inputId, default = NULL)
+
   tags$button(id=inputId,
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     type="button",
     class="btn btn-default action-button",
+    `data-val` = value,
     list(validateIcon(icon), label),
     ...
   )
@@ -51,9 +55,12 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
 #' @rdname actionButton
 #' @export
 actionLink <- function(inputId, label, icon = NULL, ...) {
+  value <- restoreInput(id = inputId, default = NULL)
+
   tags$a(id=inputId,
     href="#",
     class="action-button",
+    `data-val` = value,
     list(validateIcon(icon), label),
     ...
   )

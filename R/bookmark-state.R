@@ -65,7 +65,8 @@ saveShinySaveState <- function(state) {
       isolate(state$onSave(state))
 
     # Serialize values, possibly saving some extra data to stateDir
-    inputValues <- serializeReactiveValues(state$input, state$exclude, state$dir)
+    exclude <- c(state$exclude, "._bookmark_")
+    inputValues <- serializeReactiveValues(state$input, exclude, state$dir)
     saveRDS(inputValues, file.path(stateDir, "input.rds"))
 
     # If values were added, save them also.
@@ -83,7 +84,8 @@ saveShinySaveState <- function(state) {
 
 # Encode the state to a URL. This does not save to disk.
 encodeShinySaveState <- function(state) {
-  inputVals <- serializeReactiveValues(state$input, state$exclude, stateDir = NULL)
+  exclude <- c(state$exclude, "._bookmark_")
+  inputVals <- serializeReactiveValues(state$input, exclude, stateDir = NULL)
 
   # Allow user-supplied onSave function to do things like add state$values.
   if (!is.null(state$onSave))
@@ -592,8 +594,8 @@ showBookmarkUrlModal <- function(url) {
 #' \code{function(request) \{ fluidPage(....) \}}.
 #'
 #' By default, all input values will be bookmarked, except for the values of
-#' actionButtons and passwordInputs. fileInputs will be saved if the state is
-#' saved on a server, but not if the state is encoded in a URL.
+#' passwordInputs. fileInputs will be saved if the state is saved on a server,
+#' but not if the state is encoded in a URL.
 #'
 #' When bookmarking state, arbitrary values can be stored, by passing a function
 #' as the \code{onBookmark} argument. That function will be passed a

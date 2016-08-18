@@ -36,6 +36,8 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' @param ... UI elements for the body of the modal dialog box.
 #' @param title An optional title for the dialog.
 #' @param footer UI for footer. Use \code{NULL} for no footer.
+#' @param size One of \code{"s"} for small, \code{"m"} (the default) for medium,
+#'   or \code{"l"} for large.
 #' @param easyClose If \code{TRUE}, the modal dialog can be dismissed by
 #'   clicking outside the dialog box, or be pressing the Escape key. If
 #'   \code{FALSE} (the default), the modal dialog can't be dismissed in those
@@ -80,7 +82,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' )
 #'
 #'
-# Display a modal that requires valid input before continuing.
+#' # Display a modal that requires valid input before continuing.
 #' shinyApp(
 #'   ui = basicPage(
 #'     actionButton("show", "Show modal dialog"),
@@ -140,13 +142,17 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' }
 #' @export
 modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
-                        easyClose = FALSE) {
+  size = c("m", "s", "l"), easyClose = FALSE) {
+
+  size <- match.arg(size)
 
   div(id = "shiny-modal", class = "modal fade", tabindex = "-1",
     `data-backdrop` = if (!easyClose) "static",
     `data-keyboard` = if (!easyClose) "false",
 
-    div(class = "modal-dialog",
+    div(
+      class = "modal-dialog",
+      class = switch(size, s = "modal-sm", m = NULL, l = "modal-lg"),
       div(class = "modal-content",
         if (!is.null(title)) div(class = "modal-header",
           tags$h4(class = "modal-title", title)

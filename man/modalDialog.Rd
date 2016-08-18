@@ -5,7 +5,7 @@
 \title{Create a modal dialog UI}
 \usage{
 modalDialog(..., title = NULL, footer = modalButton("Dismiss"),
-  easyClose = FALSE)
+  size = c("m", "s", "l"), easyClose = FALSE)
 }
 \arguments{
 \item{...}{UI elements for the body of the modal dialog box.}
@@ -13,6 +13,9 @@ modalDialog(..., title = NULL, footer = modalButton("Dismiss"),
 \item{title}{An optional title for the dialog.}
 
 \item{footer}{UI for footer. Use \code{NULL} for no footer.}
+
+\item{size}{One of \code{"s"} for small, \code{"m"} (the default) for medium,
+or \code{"l"} for large.}
 
 \item{easyClose}{If \code{TRUE}, the modal dialog can be dismissed by
 clicking outside the dialog box, or be pressing the Escape key. If
@@ -63,6 +66,7 @@ shinyApp(
 )
 
 
+# Display a modal that requires valid input before continuing.
 shinyApp(
   ui = basicPage(
     actionButton("show", "Show modal dialog"),

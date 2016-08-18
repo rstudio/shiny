@@ -82,7 +82,7 @@ ReactiveValues <- R6Class(
       }
 
       if (isFrozen(key))
-        stopWithCondition(c("validation", "shiny.silent.error"), "")
+        reactiveStop()
 
       if (!exists(key, envir=.values, inherits=FALSE))
         NULL

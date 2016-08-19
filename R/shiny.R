@@ -549,7 +549,7 @@ ShinySession <- R6Class(
               }
             )
           }
-        }, priority = -1000000)
+        }, priority = 1000000)
 
         # Run the onRestored function after the flush cycle completes and information
         # is sent to the client.

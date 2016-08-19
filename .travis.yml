@@ -10,3 +10,8 @@ notifications:
   email:
     on_success: change
     on_failure: change
+
+# Set CXX1X for R-devel, as R-devel does not detect CXX1X support for gcc 4.6.3.
+# This was causing dependency sourcetools to fail.
+before_install:
+  - if [[ "$TRAVIS_R_VERSION_STRING" = 'devel' ]]; then mkdir ~/.R && echo 'CXX1X=g++ -std=c++0x -g -O2 -fPIC' > ~/.R/Makevars; fi

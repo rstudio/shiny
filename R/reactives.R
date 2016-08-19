@@ -922,8 +922,8 @@ registerDebugHook("observerFunc", environment(), label)
 #' soon as their dependencies change, they schedule themselves to re-execute.
 #'
 #' Starting with Shiny 0.10.0, observers are automatically destroyed by default
-#' when the \link[=domains]{domain} that owns them ends (e.g. when a Shiny session
-#' ends).
+#' when the \link[=domains]{domain} that owns them ends (e.g. when a Shiny
+#' session ends).
 #'
 #' @param x An expression (quoted or unquoted). Any return value will be
 #'   ignored.
@@ -934,12 +934,13 @@ registerDebugHook("observerFunc", environment(), label)
 #'   This is useful when you want to use an expression that is stored in a
 #'   variable; to do so, it must be quoted with \code{quote()}.
 #' @param label A label for the observer, useful for debugging.
-#' @param suspended If \code{TRUE}, start the observer in a suspended state.
-#'   If \code{FALSE} (the default), start in a non-suspended state.
+#' @param suspended If \code{TRUE}, start the observer in a suspended state. If
+#'   \code{FALSE} (the default), start in a non-suspended state.
 #' @param priority An integer or numeric that controls the priority with which
-#'   this observer should be executed. An observer with a given priority level
-#'   will always execute sooner than all observers with a lower priority level.
-#'   Positive, negative, and zero values are allowed.
+#'   this observer should be executed. A higher value means higher priority: an
+#'   observer with a higher priority value will execute before all observers
+#'   with lower priority values. Positive, negative, and zero values are
+#'   allowed.
 #' @param domain See \link{domains}.
 #' @param autoDestroy If \code{TRUE} (the default), the observer will be
 #'   automatically destroyed when its domain (if any) ends.

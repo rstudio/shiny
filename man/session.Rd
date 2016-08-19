@@ -146,6 +146,9 @@
   Registers a function that will be called when a session is restored, after
   all other reactives, observers, and render functions are run.
 }
+\item{doBookmark()}{
+  Do bookmarking and invoke the onBookmark and onBookmarked callback functions.
+}
 }
 \description{
 Shiny server functions can optionally include \code{session} as a parameter

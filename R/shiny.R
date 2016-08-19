@@ -314,7 +314,9 @@ workerId <- local({
 #'   Registers a function that will be called when a session is restored, after
 #'   all other reactives, observers, and render functions are run.
 #' }
-#'
+#' \item{doBookmark()}{
+#'   Do bookmarking and invoke the onBookmark and onBookmarked callback functions.
+#' }
 #'
 #' @name session
 NULL
@@ -463,57 +465,10 @@ ShinySession <- R6Class(
         return()
 
       withReactiveDomain(self, {
-        # To make code a little clearer
-        session <- self
-
         # This observer fires when the bookmark button is clicked.
-        observeEvent(
-          label = "bookmark",
-          session$input[["._bookmark_"]],
-          {
-            tryCatch(
-              withLogErrors({
-                saveState <- ShinySaveState$new(
-                  input = session$input,
-                  exclude = session$getBookmarkExclude(),
-                  onSave = function(state) {
-                    private$bookmarkCallbacks$invoke(state)
-                  }
-                )
-
-                if (store == "server") {
-                  url <- saveShinySaveState(saveState)
-                } else if (store == "url") {
-                  url <- encodeShinySaveState(saveState)
-                } else {
-                  stop("Unknown store type: ", store)
-                }
-
-                clientData <- session$clientData
-                url <- paste0(
-                  clientData$url_protocol, "//",
-                  clientData$url_hostname,
-                  if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
-                  clientData$url_pathname,
-                  "?", url
-                )
-
-
-                # If onBookmarked callback was provided, invoke it; if not call
-                # the default.
-                if (private$bookmarkedCallbacks$count() > 0) {
-                  private$bookmarkedCallbacks$invoke(url)
-                } else {
-                  showBookmarkUrlModal(url)
-                }
-              }),
-              error = function(e) {
-                msg <- paste0("Error bookmarking state: ", e$message)
-                showNotification(msg, duration = NULL, type = "error")
-              }
-            )
-          }
-        )
+        observeEvent(self$input[["._bookmark_"]], {
+          self$doBookmark()
+        })
 
         # If there was an error initializing the current restore context, show
         # notification in the client.
@@ -553,7 +508,7 @@ ShinySession <- R6Class(
 
         # Run the onRestored function after the flush cycle completes and information
         # is sent to the client.
-        session$onFlushed(function() {
+        self$onFlushed(function() {
           if (private$restoredCallbacks$count() > 0) {
 
             tryCatch(
@@ -1142,6 +1097,55 @@ ShinySession <- R6Class(
       }
       private$restoredCallbacks$register(fun)
     },
+    doBookmark = function() {
+      # Get bookmarking store config
+      store <- getShinyOption("bookmarkStore", default = "disable")
+      if (store == "disable")
+        return()
+
+      tryCatch(
+        withLogErrors({
+          saveState <- ShinySaveState$new(
+            input = self$input,
+            exclude = self$getBookmarkExclude(),
+            onSave = function(state) {
+              private$bookmarkCallbacks$invoke(state)
+            }
+          )
+
+          if (store == "server") {
+            url <- saveShinySaveState(saveState)
+          } else if (store == "url") {
+            url <- encodeShinySaveState(saveState)
+          } else {
+            stop("Unknown store type: ", store)
+          }
+
+          clientData <- self$clientData
+          url <- paste0(
+            clientData$url_protocol, "//",
+            clientData$url_hostname,
+            if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
+            clientData$url_pathname,
+            "?", url
+          )
+
+
+          # If onBookmarked callback was provided, invoke it; if not call
+          # the default.
+          if (private$bookmarkedCallbacks$count() > 0) {
+            private$bookmarkedCallbacks$invoke(url)
+          } else {
+            showBookmarkUrlModal(url)
+          }
+        }),
+        error = function(e) {
+          msg <- paste0("Error bookmarking state: ", e$message)
+          showNotification(msg, duration = NULL, type = "error")
+        }
+      )
+    },
+
 
     reactlog = function(logEntry) {
       if (private$showcase)

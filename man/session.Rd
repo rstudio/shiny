@@ -126,6 +126,26 @@
   from Shiny apps, but through friendlier wrapper functions like
   \code{\link{updateTextInput}}.
 }
+\item{setBookmarkExclude(names)}{
+  Set input names to be excluded from bookmarking.
+}
+\item{getBookmarkExclude()}{
+  Returns the set of input names to be excluded from bookmarking.
+}
+\item{onBookmark(fun)}{
+  Registers a function that will be called just before bookmarking state.
+}
+\item{onBookmarked(fun)}{
+  Registers a function that will be called just after bookmarking state.
+}
+\item{onRestore(fun)}{
+  Registers a function that will be called when a session is restored, before
+  all other reactives, observers, and render functions are run.
+}
+\item{onRestored(fun)}{
+  Registers a function that will be called when a session is restored, after
+  all other reactives, observers, and render functions are run.
+}
 }
 \description{
 Shiny server functions can optionally include \code{session} as a parameter

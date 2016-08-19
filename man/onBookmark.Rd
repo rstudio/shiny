@@ -27,6 +27,8 @@ should be called within an application's server function.
 \itemize{
   \item \code{onBookmark} registers a function that will be called just
     before Shiny bookmarks state.
+  \item \code{onBookmarked} registers a function that will be called just
+    after Shiny bookmarks state.
   \item \code{onRestore} registers a function that will be called when a
     session is restored, after the server function executes, but before all
     other reactives, observers and render functions are run.

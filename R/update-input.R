@@ -204,15 +204,18 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 updateDateInput <- function(session, inputId, label = NULL, value = NULL,
                             min = NULL, max = NULL) {
 
-  # Make sure values are Date objects. This is so we can ensure that they will
-  # be formatted correctly.
-  value <- as.Date(value)
-  min   <- as.Date(min)
-  max   <- as.Date(max)
-
-  value <- format(value, "%Y-%m-%d")
-  min   <- format(min,   "%Y-%m-%d")
-  max   <- format(max,   "%Y-%m-%d")
+  # Make sure values are NULL or Date objects. This is so we can ensure that
+  # they will be formatted correctly. For example, the string "2016-08-9" is not
+  # correctly formatted, but the conversion to Date and back to string will fix
+  # it.
+  formatDate <- function(x) {
+    if (is.null(x))
+      return(NULL)
+    format(as.Date(x), "%Y-%m-%d")
+  }
+  value <- formatDate(value)
+  min   <- formatDate(min)
+  max   <- formatDate(max)
 
   message <- dropNulls(list(label=label, value=value, min=min, max=max))
   session$sendInputMessage(inputId, message)

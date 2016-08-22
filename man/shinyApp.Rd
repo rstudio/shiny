@@ -14,7 +14,7 @@
 \title{Create a Shiny app object}
 \usage{
 shinyApp(ui = NULL, server = NULL, onStart = NULL, options = list(),
-  uiPattern = "/")
+  uiPattern = "/", enableBookmarking = NULL)
 
 shinyAppDir(appDir, options = list())
 
@@ -52,6 +52,12 @@ hint to the embedding environment about the ideal height/width for the app.}
 request to determine whether the \code{ui} should be used to handle the
 request. Note that the entire request path must match the regular
 expression in order for the match to be considered successful.}
+
+\item{enableBookmarking}{Can be one of \code{"url"}, \code{"server"}, or
+\code{"disable"}. This is equivalent to calling the
+\code{\link{enableBookmarking}()} function just before calling
+\code{shinyApp()}. See \code{\link{enableBookmarking}} for more
+information.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

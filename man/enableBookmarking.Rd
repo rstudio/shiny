@@ -162,7 +162,7 @@ shinyApp(ui, server)
 ui <- function(req) {
   fluidPage(
     textInput("txt", "Text"),
-    checkboxInput("chk", "Checkbox"),
+    checkboxInput("chk", "Checkbox")
   )
 }
 server <- function(input, output, session) {

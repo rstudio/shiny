@@ -1033,10 +1033,12 @@ ShinySession <- R6Class(
         private$sendResponse(msg, value)
       }
     },
-    sendBinaryMessage = function(tag, rawVect) {
-      taglen <- nchar(tag)
-      if(taglen > 255) { stop("tag supposed to be < 256 chars long") }
-      private$write(c(as.raw(taglen), charToRaw(tag), rawVect))
+    sendBinaryMessage = function(type, message) {
+      tagBytes <- charToRaw(type)
+      if (length(tagBytes) > 255) {
+        stop("Tag too long")
+      }
+      private$write(c(as.raw(length(tagBytes)), tagBytes, message))
     },
     sendCustomMessage = function(type, message) {
       data <- list()

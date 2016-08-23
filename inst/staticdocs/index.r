@@ -44,7 +44,9 @@ sd_section("UI Inputs",
     "sliderInput",
     "submitButton",
     "textInput",
+    "textAreaInput",
     "passwordInput",
+    "modalButton",
     "updateActionButton",
     "updateCheckboxGroupInput",
     "updateCheckboxInput",
@@ -55,7 +57,9 @@ sd_section("UI Inputs",
     "updateSelectInput",
     "updateSliderInput",
     "updateTabsetPanel",
-    "updateTextInput"
+    "updateTextInput",
+    "updateTextAreaInput",
+    "updateQueryString"
   )
 )
 sd_section("UI Outputs",
@@ -69,7 +73,11 @@ sd_section("UI Outputs",
     "verbatimTextOutput",
     "downloadButton",
     "Progress",
-    "withProgress"
+    "withProgress",
+    "modalDialog",
+    "urlModal",
+    "showModal",
+    "showNotification"
   )
 )
 sd_section("Interface builder functions",
@@ -84,7 +92,9 @@ sd_section("Interface builder functions",
     "withTags",
     "htmlTemplate",
     "bootstrapLib",
-    "suppressDependencies"
+    "suppressDependencies",
+    "insertUI",
+    "removeUI"
   )
 )
 sd_section("Rendering functions",
@@ -120,6 +130,7 @@ sd_section("Reactive constructs",
     "reactiveTimer",
     "reactiveValues",
     "reactiveValuesToList",
+    "freezeReactiveValue",
     "domains",
     "showReactLog"
   )
@@ -143,6 +154,16 @@ sd_section("Running",
     "viewer"
   )
 )
+sd_section("Bookmarking state",
+  "Functions that are used for bookmarking and restoring state.",
+  c(
+    "bookmarkButton",
+    "enableBookmarking",
+    "setBookmarkExclude",
+    "showBookmarkUrlModal",
+    "onBookmark"
+  )
+)
 sd_section("Extending Shiny",
   "Functions that are intended to be called by third-party packages that extend Shiny.",
   c(
@@ -157,9 +178,12 @@ sd_section("Utility functions",
   "Miscellaneous utilities that may be useful to advanced users or when extending Shiny.",
   c(
     "req",
-    "cancelOutput",
     "validate",
     "session",
+    "shinyOptions",
+    "safeError",
+    "onFlush",
+    "restoreInput",
     "exprToFunction",
     "installExprFunction",
     "parseQueryString",

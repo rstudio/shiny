@@ -965,7 +965,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if (handler.length !== 1) {
         throw 'handler must be a function that takes one argument.';
       }
-
       messageHandlerOrder.push(type);
       messageHandlers[type] = handler;
     }
@@ -988,8 +987,23 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     exports.addCustomMessageHandler = addCustomMessageHandler;
 
-    this.dispatchMessage = function (msg) {
-      var msgObj = JSON.parse(msg);
+    this.dispatchMessage = function (data) {
+      var msgObj = {};
+      if (typeof data === "string") {
+        msgObj = JSON.parse(data);
+      } else {
+        // data is arraybuffer
+        var len = new DataView(data, 0, 1).getUint8(0);
+        var tagdv = new DataView(data, 1, len);
+        var tagbuf = [];
+        for (var i = 0; i < len; i++) {
+          tagbuf.push(String.fromCharCode(tagdv.getUint8(i)));
+        }
+        var tag = tagbuf.join("");
+        data = data.slice(len + 1);
+        msgObj.custom = {};
+        msgObj.custom[tag] = data;
+      }
 
       var evt = jQuery.Event('shiny:message');
       evt.message = msgObj;
@@ -1005,10 +1019,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // A function for sending messages to the appropriate handlers.
     // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
     this._sendMessagesToHandlers = function (msgObj, handlers, handlerOrder) {
-      // Dispatch messages to handlers, if handler is present
-      for (var i = 0; i < handlerOrder.length; i++) {
-        var msgType = handlerOrder[i];
+      var tag, buffer, i;
 
+      // Dispatch messages to handlers, if handler is present
+      for (i = 0; i < handlerOrder.length; i++) {
+        var msgType = handlerOrder[i];
         if (msgObj.hasOwnProperty(msgType)) {
           // Execute each handler with 'this' referring to the present value of
           // 'this'

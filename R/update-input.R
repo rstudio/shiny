@@ -166,7 +166,7 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 #'
 #' @template update-input
 #' @param value The desired date value. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   \code{yyyy-mm-dd} format. Supply \code{NA} to clear the date.
 #' @param min The minimum allowed date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
 #' @param max The maximum allowed date. Either a Date object, or a string in
@@ -226,9 +226,9 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #'
 #' @template update-input
 #' @param start The start date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   \code{yyyy-mm-dd} format. Supplying \code{NA} clears the start date.
 #' @param end The end date. Either a Date object, or a string in
-#'   \code{yyyy-mm-dd} format.
+#'   \code{yyyy-mm-dd} format. Supplying \code{NA} clears the end date.
 #' @param min The minimum allowed date. Either a Date object, or a string in
 #'   \code{yyyy-mm-dd} format.
 #' @param max The maximum allowed date. Either a Date object, or a string in

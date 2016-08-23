@@ -16,7 +16,7 @@ updateDateInput(session, inputId, label = NULL, value = NULL, min = NULL,
 \item{label}{The label to set for the input object.}
 
 \item{value}{The desired date value. Either a Date object, or a string in
-\code{yyyy-mm-dd} format.}
+\code{yyyy-mm-dd} format. Supply \code{NA} to clear the date.}
 
 \item{min}{The minimum allowed date. Either a Date object, or a string in
 \code{yyyy-mm-dd} format.}

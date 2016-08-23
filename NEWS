@@ -2,6 +2,9 @@ shiny 0.13.2.9005
 --------------------------------------------------------------------------------
 * Added support for bookmarkable state.
 
+* `updateDateInput()` and `updateDateRangeInput()` can now clear the date
+  input fields. (#1299, #896)
+
 * Added support for the `pool` package (use Shiny's timer/scheduler)
 
 * `Display: Showcase` now displays the .js, .html and .css files in the `www`

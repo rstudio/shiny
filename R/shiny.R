@@ -1322,6 +1322,10 @@ ShinySession <- R6Class(
           unlink(tmpdata)
           stop(attr(result, "condition", exact = TRUE))
         }
+        if (!file.exists(tmpdata)) {
+          # If no file was created, return a 404
+          return(httpResponse(404, content = "404 Not found"))
+        }
         return(httpResponse(
           200,
           download$contentType %OR% getContentType(filename),

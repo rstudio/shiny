@@ -459,6 +459,7 @@ restoreInput <- function(id, default) {
 #'
 #' @param queryString The new query string to show in the location bar.
 #' @param session A Shiny session object.
+#' @seealso \code{\link{enableBookmarking}} for examples.
 #' @export
 updateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
   session$updateQueryString(queryString)
@@ -666,9 +667,12 @@ showBookmarkUrlModal <- function(url) {
 #'   a URL, \code{"server"}, which saves to disk on the server, or
 #'   \code{"disable"}, which disables any previously-enabled bookmarking.
 #'
-#' @seealso \code{\link{onBookmark}}, \code{\link{onRestore}}, and
-#'   \code{\link{onRestored}} for registering callback functions that are
-#'   invoked when the state is bookmarked or restored.
+#' @seealso \code{\link{onBookmark}}, \code{\link{onBookmarked}},
+#'   \code{\link{onRestore}}, and \code{\link{onRestored}} for registering
+#'   callback functions that are invoked when the state is bookmarked or
+#'   restored.
+#'
+#'   Also see \code{\link{updateQueryString}}.
 #'
 #' @export
 #' @examples
@@ -762,6 +766,29 @@ showBookmarkUrlModal <- function(url) {
 #' }
 #' server <- function(input, output, session) {
 #'   setBookmarkExclude("slider")
+#' }
+#' enableBookmarking("url")
+#' shinyApp(ui, server)
+#'
+#'
+#' # Update the browser's location bar every time an input changes. This should
+#' # not be used with enableBookmarking("server"), because that would create a
+#' # new saved state on disk every time the user changes an input.
+#' ui <- function(req) {
+#'   fluidPage(
+#'     textInput("txt", "Text"),
+#'     checkboxInput("chk", "Checkbox"),
+#'   )
+#' }
+#' server <- function(input, output, session) {
+#'   observe({
+#'     # Trigger this observer every time an input changes
+#'     reactiveValuesToList(input)
+#'     session$doBookmark()
+#'   })
+#'   onBookmarked(function(url) {
+#'     updateQueryString(url)
+#'   })
 #' }
 #' enableBookmarking("url")
 #' shinyApp(ui, server)

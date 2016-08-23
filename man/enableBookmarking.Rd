@@ -156,6 +156,29 @@ enableBookmarking("url")
 shinyApp(ui, server)
 
 
+# Update the browser's location bar every time an input changes. This should
+# not be used with enableBookmarking("server"), because that would create a
+# new saved state on disk every time the user changes an input.
+ui <- function(req) {
+  fluidPage(
+    textInput("txt", "Text"),
+    checkboxInput("chk", "Checkbox"),
+  )
+}
+server <- function(input, output, session) {
+  observe({
+    # Trigger this observer every time an input changes
+    reactiveValuesToList(input)
+    session$doBookmark()
+  })
+  onBookmarked(function(url) {
+    updateQueryString(url)
+  })
+}
+enableBookmarking("url")
+shinyApp(ui, server)
+
+
 # Save/restore uploaded files
 ui <- function(request) {
   fluidPage(
@@ -197,8 +220,11 @@ shinyApp(ui, server)
 }
 }
 \seealso{
-\code{\link{onBookmark}}, \code{\link{onRestore}}, and
-  \code{\link{onRestored}} for registering callback functions that are
-  invoked when the state is bookmarked or restored.
+\code{\link{onBookmark}}, \code{\link{onBookmarked}},
+  \code{\link{onRestore}}, and \code{\link{onRestored}} for registering
+  callback functions that are invoked when the state is bookmarked or
+  restored.
+
+  Also see \code{\link{updateQueryString}}.
 }
 

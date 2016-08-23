@@ -3921,7 +3921,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // value must be an array of unambiguous strings like '2001-01-01', or
     // Date objects.
     setValue: function setValue(el, value) {
-      if (!(value instanceof Array)) {
+      if (!(value instanceof Object)) {
         return;
       }
 
@@ -3930,19 +3930,19 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       // If value is undefined, don't try to set
       // null will remove the current value
-      if (value[0] !== undefined) {
-        if (value[0] === null) {
+      if (value.start !== undefined) {
+        if (value.start === null) {
           $inputs.eq(0).val('').datepicker('update');
         } else {
-          var start = this._newDate(value[0]);
+          var start = this._newDate(value.start);
           $inputs.eq(0).datepicker('update', start);
         }
       }
-      if (value[1] !== undefined) {
-        if (value[1] === null) {
+      if (value.end !== undefined) {
+        if (value.end === null) {
           $inputs.eq(1).val('').datepicker('update');
         } else {
-          var end = this._newDate(value[1]);
+          var end = this._newDate(value.end);
           $inputs.eq(1).datepicker('update', end);
         }
       }
@@ -4014,7 +4014,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       if (end === undefined || end === null) end = this._dateAsUTC(new Date());
 
-      this.setValue(el, [start, end]);
+      this.setValue(el, { "start": start, "end": end });
 
       // // Set the start and end dates, from min-date and max-date. These always
       // // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in

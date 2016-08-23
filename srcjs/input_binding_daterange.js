@@ -23,13 +23,22 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     var $inputs = $(el).find('input');
 
     // If value is undefined, don't try to set
+    // null will remove the current value
     if (value[0] !== undefined) {
-      var start = this._newDate(value[0]);
-      $inputs.eq(0).datepicker('update', start);
+      if (value[0] === null) {
+        $inputs.eq(0).val('').datepicker('update');
+      } else {
+        var start = this._newDate(value[0]);
+        $inputs.eq(0).datepicker('update', start);
+      }
     }
     if (value[1] !== undefined) {
-      var end = this._newDate(value[1]);
-      $inputs.eq(1).datepicker('update', end);
+      if (value[1] === null) {
+        $inputs.eq(1).val('').datepicker('update');
+      } else {
+        var end = this._newDate(value[1]);
+        $inputs.eq(1).datepicker('update', end);
+      }
     }
   },
   getState: function(el) {

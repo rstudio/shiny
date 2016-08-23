@@ -1446,7 +1446,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
       // If there was an existing Bootstrap modal, then there will be a modal-
-      // backdrop div that was added outside of the modal wrapper, and it must be
+      // backdrop div that was added outside of the modal wrapper, and it must be 
       // removed; otherwise there can be multiple of these divs.
       $('.modal-backdrop').remove();
 
@@ -2691,13 +2691,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         // No change
 
       } else if (opts.brushDirection === 'x') {
-          // Extend top and bottom of plotting area
-          min.y = panelBounds.top;
-          max.y = panelBounds.bottom;
-        } else if (opts.brushDirection === 'y') {
-          min.x = panelBounds.left;
-          max.x = panelBounds.right;
-        }
+        // Extend top and bottom of plotting area
+        min.y = panelBounds.top;
+        max.y = panelBounds.bottom;
+      } else if (opts.brushDirection === 'y') {
+        min.x = panelBounds.left;
+        max.x = panelBounds.right;
+      }
 
       state.boundsPx = {
         xmin: min.x,
@@ -3753,6 +3753,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     },
     // value must be an unambiguous string like '2001-01-01', or a Date object.
     setValue: function setValue(el, value) {
+      // R's NA, which is null here will remove current value
+      if (value === null) {
+        $(el).find('input').val('').datepicker('update');
+        return;
+      }
+
       var date = this._newDate(value);
       // If date is invalid, do nothing
       if (isNaN(date)) return;
@@ -3923,13 +3929,22 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var $inputs = $(el).find('input');
 
       // If value is undefined, don't try to set
+      // null will remove the current value
       if (value[0] !== undefined) {
-        var start = this._newDate(value[0]);
-        $inputs.eq(0).datepicker('update', start);
+        if (value[0] === null) {
+          $inputs.eq(0).val('').datepicker('update');
+        } else {
+          var start = this._newDate(value[0]);
+          $inputs.eq(0).datepicker('update', start);
+        }
       }
       if (value[1] !== undefined) {
-        var end = this._newDate(value[1]);
-        $inputs.eq(1).datepicker('update', end);
+        if (value[1] === null) {
+          $inputs.eq(1).val('').datepicker('update');
+        } else {
+          var end = this._newDate(value[1]);
+          $inputs.eq(1).datepicker('update', end);
+        }
       }
     },
     getState: function getState(el) {
@@ -4282,8 +4297,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         }
         // Else assume it's a single value
       } else {
-          $('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop('checked', true);
-        }
+        $('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop('checked', true);
+      }
     },
     getState: function getState(el) {
       var $objs = $('input:checkbox[name="' + $escape(el.id) + '"]');
@@ -5141,6 +5156,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       initDeferredIframes();
     });
   } // function initShiny()
+
 
   // Give any deferred iframes a chance to load.
   function initDeferredIframes() {

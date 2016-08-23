@@ -14,6 +14,12 @@ $.extend(dateInputBinding, {
   },
   // value must be an unambiguous string like '2001-01-01', or a Date object.
   setValue: function(el, value) {
+    // R's NA, which is null here will remove current value
+    if (value === null) {
+      $(el).find('input').val('').datepicker('update');
+      return;
+    }
+
     var date = this._newDate(value);
     // If date is invalid, do nothing
     if (isNaN(date))

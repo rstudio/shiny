@@ -16,10 +16,10 @@ updateDateRangeInput(session, inputId, label = NULL, start = NULL,
 \item{label}{The label to set for the input object.}
 
 \item{start}{The start date. Either a Date object, or a string in
-\code{yyyy-mm-dd} format.}
+\code{yyyy-mm-dd} format. Supplying \code{NA} clears the start date.}
 
 \item{end}{The end date. Either a Date object, or a string in
-\code{yyyy-mm-dd} format.}
+\code{yyyy-mm-dd} format. Supplying \code{NA} clears the end date.}
 
 \item{min}{The minimum allowed date. Either a Date object, or a string in
 \code{yyyy-mm-dd} format.}

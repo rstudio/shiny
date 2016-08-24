@@ -56,8 +56,9 @@ expression in order for the match to be considered successful.}
 \item{enableBookmarking}{Can be one of \code{"url"}, \code{"server"}, or
 \code{"disable"}. This is equivalent to calling the
 \code{\link{enableBookmarking}()} function just before calling
-\code{shinyApp()}. See \code{\link{enableBookmarking}} for more
-information.}
+\code{shinyApp()}. With the default value (\code{NULL}), the app will
+respect the setting from any previous calls to \code{enableBookmarking()}.
+See \code{\link{enableBookmarking}} for more information.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

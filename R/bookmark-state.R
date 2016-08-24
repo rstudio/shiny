@@ -660,8 +660,10 @@ showBookmarkUrlModal <- function(url) {
 #' }
 #'
 #' When used with \code{\link{shinyApp}()}, this function must be called before
-#' \code{shinyApp()}, or in the \code{shinyApp()}'s \code{onStart} function.
-#' See examples below.
+#' \code{shinyApp()}, or in the \code{shinyApp()}'s \code{onStart} function. An
+#' alternative to calling the \code{enableBookmarking()} function is to use the
+#' \code{enableBookmarking} \emph{argument} for \code{shinyApp()}. See examples
+#' below.
 #'
 #' @param store Either \code{"url"}, which encodes all of the relevant values in
 #'   a URL, \code{"server"}, which saves to disk on the server, or
@@ -692,10 +694,9 @@ showBookmarkUrlModal <- function(url) {
 #' shinyApp(ui, server)
 #'
 #'
-#' # An alternative: call from shinyApp's onStart function
-#' shinyApp(ui, server,
-#'   onStart = function() { enableBookmarking("url") }
-#' )
+#' # An alternative to calling enableBookmarking(): use shinyApp's
+#' # enableBookmarking argument
+#' shinyApp(ui, server, enableBookmarking = "url")
 #'
 #'
 #' # Same basic example with state saved to disk

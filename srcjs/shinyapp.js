@@ -478,15 +478,15 @@ var ShinyApp = function() {
       msgObj = JSON.parse(data);
     } else { // data is arraybuffer
       var len = new DataView(data,0,1).getUint8(0);
-      var tagdv = new DataView(data,1,len);
-      var tagbuf = [];
+      var typedv = new DataView(data,1,len);
+      var typebuf = [];
       for(var i=0; i<len; i++){
-        tagbuf.push(String.fromCharCode(tagdv.getUint8(i)));
+        typebuf.push(String.fromCharCode(typedv.getUint8(i)));
       }
-      var tag = tagbuf.join("");
+      var type = typebuf.join("");
       data = data.slice(len+1);
       msgObj.custom = {};
-      msgObj.custom[tag] = data;
+      msgObj.custom[type] = data;
     }
 
     var evt = jQuery.Event('shiny:message');
@@ -503,10 +503,8 @@ var ShinyApp = function() {
   // A function for sending messages to the appropriate handlers.
   // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
   this._sendMessagesToHandlers = function(msgObj, handlers, handlerOrder) {
-    var tag, buffer, i;
-
     // Dispatch messages to handlers, if handler is present
-    for (i = 0; i < handlerOrder.length; i++) {
+    for (let i = 0; i < handlerOrder.length; i++) {
       var msgType = handlerOrder[i];
       if (msgObj.hasOwnProperty(msgType)) {
         // Execute each handler with 'this' referring to the present value of

@@ -286,6 +286,12 @@ workerId <- local({
 #'   \code{addCustomMessageHandler} will be invoked each time
 #'   \code{sendCustomMessage} is called on the server.
 #' }
+#' \item{sendBinaryMessage(type, message)}{
+#'   Similar to \code{sendCustomMessage}, but the message must be a raw vector
+#'   and the registration method on the client is
+#'   \code{Shiny.addBinaryMessageHandler(type, function(message){...})}. The
+#'   message argument on the client will be a \href{https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView}{DataView}.
+#' }
 #' \item{sendInputMessage(inputId, message)}{
 #'   Sends a message to an input on the session's client web page; if the input
 #'   is present and bound on the page at the time the message is received, then

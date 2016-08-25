@@ -105,6 +105,9 @@ shiny 0.13.2.9005
 
 * Fixed #803: Malformed date input values crashed app.
 
+* Added `session$sendBinaryMessage(type, message)` method for sending custom
+  binary data to the client. See `?session`. (Thanks, @daef!)
+
 shiny 0.13.2
 --------------------------------------------------------------------------------
 

@@ -450,7 +450,6 @@ var ShinyApp = function() {
     if (handler.length !== 1) {
       throw('handler must be a function that takes one argument.');
     }
-
     messageHandlerOrder.push(type);
     messageHandlers[type] = handler;
   }
@@ -473,8 +472,22 @@ var ShinyApp = function() {
 
   exports.addCustomMessageHandler = addCustomMessageHandler;
 
-  this.dispatchMessage = function(msg) {
-    var msgObj = JSON.parse(msg);
+  this.dispatchMessage = function(data) {
+    var msgObj = {};
+    if(typeof data === "string") {
+      msgObj = JSON.parse(data);
+    } else { // data is arraybuffer
+      var len = new DataView(data,0,1).getUint8(0);
+      var typedv = new DataView(data,1,len);
+      var typebuf = [];
+      for(var i=0; i<len; i++){
+        typebuf.push(String.fromCharCode(typedv.getUint8(i)));
+      }
+      var type = typebuf.join("");
+      data = data.slice(len+1);
+      msgObj.custom = {};
+      msgObj.custom[type] = data;
+    }
 
     var evt = jQuery.Event('shiny:message');
     evt.message = msgObj;
@@ -487,14 +500,12 @@ var ShinyApp = function() {
     this.$updateConditionals();
   };
 
-
   // A function for sending messages to the appropriate handlers.
   // - msgObj: the object containing messages, with format {msgObj.foo, msObj.bar
   this._sendMessagesToHandlers = function(msgObj, handlers, handlerOrder) {
     // Dispatch messages to handlers, if handler is present
-    for (var i = 0; i < handlerOrder.length; i++) {
+    for (let i = 0; i < handlerOrder.length; i++) {
       var msgType = handlerOrder[i];
-
       if (msgObj.hasOwnProperty(msgType)) {
         // Execute each handler with 'this' referring to the present value of
         // 'this'

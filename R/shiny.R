@@ -1033,6 +1033,13 @@ ShinySession <- R6Class(
         private$sendResponse(msg, value)
       }
     },
+    sendBinaryMessage = function(type, message) {
+      typeBytes <- charToRaw(type)
+      if (length(typeBytes) > 255) {
+        stop("'type' argument is too long")
+      }
+      private$write(c(as.raw(length(typeBytes)), typeBytes, message))
+    },
     sendCustomMessage = function(type, message) {
       data <- list()
       data[[type]] <- message

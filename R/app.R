@@ -27,6 +27,12 @@
 #'   request to determine whether the \code{ui} should be used to handle the
 #'   request. Note that the entire request path must match the regular
 #'   expression in order for the match to be considered successful.
+#' @param enableBookmarking Can be one of \code{"url"}, \code{"server"}, or
+#'   \code{"disable"}. This is equivalent to calling the
+#'   \code{\link{enableBookmarking}()} function just before calling
+#'   \code{shinyApp()}. With the default value (\code{NULL}), the app will
+#'   respect the setting from any previous calls to \code{enableBookmarking()}.
+#'   See \code{\link{enableBookmarking}} for more information.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to \code{\link{runApp}} will run the app.
 #'
@@ -61,7 +67,7 @@
 #' }
 #' @export
 shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
-                     uiPattern="/") {
+                     uiPattern="/", enableBookmarking = NULL) {
   if (is.null(server)) {
     stop("`server` missing from shinyApp")
   }
@@ -73,6 +79,11 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
 
   serverFuncSource <- function() {
     server
+  }
+
+  if (!is.null(enableBookmarking)) {
+    bookmarkStore <- match.arg(enableBookmarking, c("url", "server", "disable"))
+    enableBookmarking(bookmarkStore)
   }
 
   # Store the appDir and bookmarking-related options, so that we can read them

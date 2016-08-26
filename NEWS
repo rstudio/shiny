@@ -43,7 +43,7 @@ shiny 0.13.2.9005
   `showNotification` and `hideNotification`. From JavaScript, there is a new
   `Shiny.notification` object that controls notifications. (#1141)
 
-* Progress indicators now use the notification API.
+* Progress indicators now use the notification API. (#1160)
 
 * Improved `renderTable()` function to make the tables look prettier and also
   provide the user with a lot more parameters to customize their tables with.
@@ -87,7 +87,7 @@ shiny 0.13.2.9005
 
 * navbarMenu now has dividers and dropdown headers (#888)
 
-* Added `placeholder` option to `passwordInput`.
+* Added `placeholder` option to `passwordInput`. (##1152)
 
 * Almost all code examples now have a runnable example with `shinyApp()`, so
   that users can run the examples and see them in action. (#1137, #1158)
@@ -96,19 +96,19 @@ shiny 0.13.2.9005
   to programatically clear brushes from `imageOutput`/`plotOutput`.
 
 * Fixed #1253: Memory could leak when an observer was destroyed without first
-  being invalidated.
+  being invalidated. (#1254)
 
 * Fixed #1144: updateRadioButton and updateCheckboxGroupInput break controls
-  when used in modules (thanks, @sipemu!).
+  when used in modules (thanks, @sipemu!). (#1285)
 
 * Fixed #1284: Reactive system was being flushed too often (usually this just
   means a more-expensive no-op than necessary).
 
 * Fixed #1179: updateDateInput sometimes didn't work with malformed dates.
 
-* Added textAreaInput. (Thanks to @nuno-agostinho)
+* Added textAreaInput. (Thanks to @nuno-agostinho. #1183, #1300)
 
-* Fixed #803: Malformed date input values crashed app.
+* Fixed #803: Malformed date input values crashed app. (#1298)
 
 * Added `session$sendBinaryMessage(type, message)` method for sending custom
   binary data to the client. See `?session`. (Thanks, @daef!)

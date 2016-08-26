@@ -1,43 +1,17 @@
 shiny 0.13.2.9005
 =================
 
-* Added support for bookmarkable state.
-
-* `updateDateInput()` and `updateDateRangeInput()` can now clear the date
-  input fields. (#1299, #896)
-
-* Fix `updateDateRangeInput()` when only one of `start` and `end` are
-  updated. (#1315)
-
-* Added support for the `pool` package (use Shiny's timer/scheduler)
-
-* `Display: Showcase` now displays the .js, .html and .css files in the `www`
-  directory by default. In order to use showcase mode and not display these,
-  include a new line in your Description file: `IncludeWWW: False`.
-
-* Added insertUI and removeUI functions to be able to add and remove chunks
-  of UI, standalone, and all independent of one another.
-
-* Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`.
-  By default, this option is `FALSE`. When `TRUE`, normal errors will be
-  sanitized, displaying only a generic error message. This changes the look
-  of an app when errors are printed (but the console log remains the same).
+## Breaking changes
 
 * Closed #1161: Deprecated the `position` argument to `tabsetPanel()` since
   Bootstrap 3 stopped supporting this feature.
 
-* BREAKING CHANGE: The long-deprecated ability to pass a `func` argument to
-  many of the `render` functions has been removed.
+* The long-deprecated ability to pass a `func` argument to many of the
+  `render` functions has been removed.
 
-* Added the option of passing arguments to an `xxxOutput()` function through
-  the corresponding `renderXXX()` function via an `outputArgs` parameter to the
-  latter. This is only valid for snippets of Shiny code in an interactive
-  `runtime: shiny` Rmd document (never for full apps, even if embedded in an
-  Rmd).
+## New features
 
-* Added the ability for the client browser to reconnect to a new session on
-  the server, by setting `session$allowReconnect(TRUE)`. This requires a
-  version of Shiny Server that supports reconnections. (#1074)
+* Added the ability to bookmark and restore application state.
 
 * Added a new notification API. From R, there are new functions
   `showNotification` and `hideNotification`. From JavaScript, there is a new
@@ -45,73 +19,134 @@ shiny 0.13.2.9005
 
 * Progress indicators now use the notification API. (#1160)
 
+* Added the ability for the client browser to reconnect to a new session on
+  the server, by setting `session$allowReconnect(TRUE)`. This requires a
+  version of Shiny Server that supports reconnections. (#1074)
+
+* Added modal dialogs. (#1157)
+
+* Added insertUI and removeUI functions to be able to add and remove chunks
+  of UI, standalone, and all independent of one another.
+
 * Improved `renderTable()` function to make the tables look prettier and also
   provide the user with a lot more parameters to customize their tables with.
 
-* Added `updateActionButton()` function, so the user can change an Action Button's
-  (or Link's) label and/or icon. Also check that the icon argument (for both
-  creation and updating of a button) is valid and throw a warning otherwise.
+* Added support for the `pool` package (use Shiny's timer/scheduler)
 
-* Updated ion.RangeSlider to 2.1.2.
+## Minor new features and improvements
+
+* Added `cancelOutput` argument to `req()`. This causes the currently
+  executing reactive to cancel its execution, and leave its previous state
+  alone (as opposed to clearing the output).
+
+* `Display: Showcase` now displays the .js, .html and .css files in the `www`
+  directory by default. In order to use showcase mode and not display these,
+  include a new line in your Description file: `IncludeWWW: False`. (#1185)
+
+* Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`.
+  By default, this option is `FALSE`. When `TRUE`, normal errors will be
+  sanitized, displaying only a generic error message. This changes the look
+  of an app when errors are printed (but the console log remains the same).
+  (#1123, #1156)
+
+* Added the option of passing arguments to an `xxxOutput()` function through
+  the corresponding `renderXXX()` function via an `outputArgs` parameter to the
+  latter. This is only valid for snippets of Shiny code in an interactive
+  `runtime: shiny` Rmd document (never for full apps, even if embedded in an
+  Rmd).
+
+* Added `updateActionButton()` function, so the user can change an
+  `actionButton`'s (or `actionLink`'s) label and/or icon. It also checks that
+  the icon argument (for both creation and updating of a button) is valid and
+  throws a warning otherwise. (#1134)
+
+* Added code diagnostics: if there is an error parsing ui.R, server.R, app.R,
+  or global.R, Shiny will search the code for missing commas, extra commas,
+  and unmatched braces, parens, and brackets, and will print out messages
+  pointing out those problems. (#1126)
+
+* Added support for horizontal dividers in `navbarMenu`. (#888)
+
+* navbarMenu now has dividers and dropdown headers (#888)
+
+* Added `placeholder` option to `passwordInput`. (#1152)
+
+* Added `session$resetBrush(brushId)` (R) and `Shiny.resetBrush(brushId)` (JS)
+  to programatically clear brushes from `imageOutput`/`plotOutput`. (#1197)
+
+* Added textAreaInput. (Thanks to @nuno-agostinho. #1183, #1300)
+
+* Added `session$sendBinaryMessage(type, message)` method for sending custom
+  binary data to the client. See `?session`. (Thanks, @daef! #1316, #1320)
+
+* Almost all code examples now have a runnable example with `shinyApp()`, so
+  that users can run the examples and see them in action. (#1137, #1158)
+
+* When resized, plots are drawn with `replayPlot()`, instead of re-executing
+  all plotting code. This results in faster plot rendering. (#1112)
+
+* Exported the `isTruthy()` function.
+
+* Reactive log now shows elapsed time for reactives and observers.
+
+* Nodes in the reactlog visualization are now sticky if the user drags them.
+
+## Bug fixes
+
+* `updateDateInput()` and `updateDateRangeInput()` can now clear the date
+  input fields. (#1299, #896, #1315)
+
+* Fixed #561: DataTables previously might pop up a warning when the data was
+  updated extremely frequently.
+
+* Fixed #776: In some browsers, plots sometimes flickered when updated.
+
+* Fixed #543, #855: When `navbarPage()` had a `navbarMenu()` as the first
+  item, it did not automatically select an item.
+
+* Fixed #970: `navbarPage()` previously did not have an option to set the
+  selected tab.
+
+* Fixed #1253: Memory could leak when an observer was destroyed without first
+  being invalidated. (#1254)
+
+* Fixed #931: Nested observers could leak memory. (#1256)
+
+* Fixed #1144: `updateRadioButton()` and `updateCheckboxGroupInput()` broke
+  controls when used in modules (thanks, @sipemu!). (#1285)
+
+* Fixed #1093: `updateRadioButtons()` and `updateCheckboxGroupInput()` didn't
+  work if `choices` was numeric vector.
+
+* Fixed #1122: `downloadHandler()` popped up empty browser window if the file
+  wasn't present. It now gives a 404 error code.
+
+* Fixed #1284: Reactive system was being flushed too often (usually this just
+  means a more-expensive no-op than necessary).
+
+* Fixed #1179: `updateDateInput()` sometimes didn't work with malformed dates.
+
+* Fixed #1257: `updateSelectInput()` didn't work correctly in IE 11 and Edge.
+  (#1277)
+
+* Fixed #803: Malformed date input values crashed app. (#1298)
+
+* Fixed #971: `runApp()` would give confusing error if `port` was not numeric.
+
+* Shiny now avoids using ports that Chrome deems unsafe. (#1222)
+
+* Added workaround for quartz graphics device resolution bug, where resolution
+  is hard-coded to 72 ppi.
+
+## Library updates
+
+* Updated to ion.RangeSlider 2.1.2.
 
 * Updated to Font Awesome 4.6.3.
 
 * Updated to Bootstrap 3.3.7.
 
 * Updated to jQuery 1.12.4.
-
-* Fixed #561: DataTables might pop up a warning when the data is updated
-  extremely frequently.
-
-* Fixed #776: In some browsers, plots sometimes flickered when updated.
-
-* When resized, plots are drawn with `replayPlot()`, instead of re-executing
-  all plotting code. This results in faster plot rendering.
-
-* Added `cancelOutput` function, and a `cancelOutput` parameter to `req`. The
-  function causes the currently executing output to cancel its execution, and
-  leave its previous state alone (as opposed to clearing the output). The `req`
-  parameter similarly modifies the behavior of `req`.
-
-* Added code diagnostics: if there is an error parsing ui.R, server.R, app.R,
-  or global.R, Shiny will search the code for missing commas, extra commas,
-  and unmatched braces, parens, and brackets, and will print out messages
-  pointing out those problems.
-
-* Added support for horizontal dividers in `navbarMenu`. (#888)
-
-* Fixed #543, #855: When navbarPage had a navbarMenu as the first item, it
-  not automatically select an item.
-
-* navbarPage previously did not have an option to set the selected tab. (#970)
-
-* navbarMenu now has dividers and dropdown headers (#888)
-
-* Added `placeholder` option to `passwordInput`. (##1152)
-
-* Almost all code examples now have a runnable example with `shinyApp()`, so
-  that users can run the examples and see them in action. (#1137, #1158)
-
-* Added `session$resetBrush(brushId)` (R) and `Shiny.resetBrush(brushId)` (JS)
-  to programatically clear brushes from `imageOutput`/`plotOutput`.
-
-* Fixed #1253: Memory could leak when an observer was destroyed without first
-  being invalidated. (#1254)
-
-* Fixed #1144: updateRadioButton and updateCheckboxGroupInput break controls
-  when used in modules (thanks, @sipemu!). (#1285)
-
-* Fixed #1284: Reactive system was being flushed too often (usually this just
-  means a more-expensive no-op than necessary).
-
-* Fixed #1179: updateDateInput sometimes didn't work with malformed dates.
-
-* Added textAreaInput. (Thanks to @nuno-agostinho. #1183, #1300)
-
-* Fixed #803: Malformed date input values crashed app. (#1298)
-
-* Added `session$sendBinaryMessage(type, message)` method for sending custom
-  binary data to the client. See `?session`. (Thanks, @daef!)
 
 
 shiny 0.13.2

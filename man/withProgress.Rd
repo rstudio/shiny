@@ -7,8 +7,9 @@
 \title{Reporting progress (functional API)}
 \usage{
 withProgress(expr, min = 0, max = 1, value = min + (max - min) * 0.1,
-  message = NULL, detail = NULL, session = getDefaultReactiveDomain(),
-  env = parent.frame(), quoted = FALSE)
+  message = NULL, detail = NULL, style = c("notification", "old"),
+  session = getDefaultReactiveDomain(), env = parent.frame(),
+  quoted = FALSE)
 
 setProgress(value = NULL, message = NULL, detail = NULL,
   session = getDefaultReactiveDomain())
@@ -37,6 +38,11 @@ to the user, or \code{NULL} to hide the current message (if any).}
 displayed to the user, or \code{NULL} to hide the current detail message
 (if any). The detail message will be shown with a de-emphasized appearance
 relative to \code{message}.}
+
+\item{style}{Progress display style. If \code{"notification"} (the default),
+the progress indicator will show using Shiny's notification API. If
+\code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
+(this is for backward-compatibility).}
 
 \item{session}{The Shiny session object, as provided by \code{shinyServer} to
 the server function. The default is to automatically find the session by

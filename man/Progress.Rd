@@ -27,6 +27,11 @@ de-emphasized appearance relative to \code{message}.}
 the progress bar, relative to \code{min} and \code{max}.
 \code{NULL} hides the progress bar, if it is currently visible.}
 
+\item{style}{Progress display style. If \code{"notification"} (the default),
+the progress indicator will show using Shiny's notification API. If
+\code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
+(this is for backward-compatibility).}
+
 \item{amount}{Single-element numeric vector; the value at which to set
 the progress bar, relative to \code{min} and \code{max}.
 \code{NULL} hides the progress bar, if it is currently visible.}

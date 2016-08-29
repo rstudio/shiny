@@ -48,6 +48,10 @@
 #' @param value A numeric value at which to set
 #'   the progress bar, relative to \code{min} and \code{max}.
 #'   \code{NULL} hides the progress bar, if it is currently visible.
+#' @param style Progress display style. If \code{"notification"} (the default),
+#'   the progress indicator will show using Shiny's notification API. If
+#'   \code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
+#'   (this is for backward-compatibility).
 #' @param amount Single-element numeric vector; the value at which to set
 #'   the progress bar, relative to \code{min} and \code{max}.
 #'   \code{NULL} hides the progress bar, if it is currently visible.
@@ -89,7 +93,9 @@ Progress <- R6Class(
   portable = TRUE,
   public = list(
 
-    initialize = function(session = getDefaultReactiveDomain(), min = 0, max = 1) {
+    initialize = function(session = getDefaultReactiveDomain(), min = 0, max = 1,
+      style = c("notification", "old"))
+    {
       if (is.null(session$progressStack))
         stop("'session' is not a ShinySession object.")
 
@@ -97,10 +103,11 @@ Progress <- R6Class(
       private$id <- createUniqueId(8)
       private$min <- min
       private$max <- max
+      private$style <- match.arg(style)
       private$value <- NULL
       private$closed <- FALSE
 
-      session$sendProgress('open', list(id = private$id))
+      session$sendProgress('open', list(id = private$id, style = private$style))
     },
 
     set = function(value = NULL, message = NULL, detail = NULL) {
@@ -122,7 +129,8 @@ Progress <- R6Class(
         id = private$id,
         message = message,
         detail = detail,
-        value = value
+        value = value,
+        style = private$style
       ))
 
        private$session$sendProgress('update', data)
@@ -148,7 +156,9 @@ Progress <- R6Class(
         return()
       }
 
-      private$session$sendProgress('close', list(id = private$id))
+      private$session$sendProgress('close',
+        list(id = private$id, style = private$style)
+      )
       private$closed <- TRUE
     }
   ),
@@ -158,6 +168,7 @@ Progress <- R6Class(
     id = character(0),
     min = numeric(0),
     max = numeric(0),
+    style = character(0),
     value = NULL,
     closed = logical(0)
   )
@@ -206,6 +217,10 @@ Progress <- R6Class(
 #'   displayed to the user, or \code{NULL} to hide the current detail message
 #'   (if any). The detail message will be shown with a de-emphasized appearance
 #'   relative to \code{message}.
+#' @param style Progress display style. If \code{"notification"} (the default),
+#'   the progress indicator will show using Shiny's notification API. If
+#'   \code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
+#'   (this is for backward-compatibility).
 #' @param value Single-element numeric vector; the value at which to set the
 #'   progress bar, relative to \code{min} and \code{max}. \code{NULL} hides the
 #'   progress bar, if it is currently visible.
@@ -239,6 +254,7 @@ Progress <- R6Class(
 withProgress <- function(expr, min = 0, max = 1,
                          value = min + (max - min) * 0.1,
                          message = NULL, detail = NULL,
+                         style = c("notification", "old"),
                          session = getDefaultReactiveDomain(),
                          env = parent.frame(), quoted = FALSE) {
 
@@ -248,7 +264,7 @@ withProgress <- function(expr, min = 0, max = 1,
   if (is.null(session$progressStack))
     stop("'session' is not a ShinySession object.")
 
-  p <- Progress$new(session, min = min, max = max)
+  p <- Progress$new(session, min = min, max = max, style = match.arg(style))
 
   session$progressStack$push(p)
   on.exit({

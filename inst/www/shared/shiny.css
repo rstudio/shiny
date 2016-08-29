@@ -124,17 +124,18 @@
   max-width: 100%;
 }
 
-.shiny-progress .progress {
+/* New-style progress (uses notifications API) */
+.shiny-progress-notification .progress {
   margin-bottom: 5px;
   height: 10px;
 }
 
-.shiny-progress .progress-text .progress-message {
+.shiny-progress-notification .progress-text .progress-message {
   font-weight: bold;
   font-size: 90%;
 }
 
-.shiny-progress .progress-text .progress-detail {
+.shiny-progress-notification .progress-text .progress-detail {
   font-size: 80%;
 }
 

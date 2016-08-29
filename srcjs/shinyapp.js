@@ -704,7 +704,7 @@ var ShinyApp = function() {
       // during updates.
       exports.notifications.show({
         html:
-          `<div id="shiny-progress-${message.id}" class="shiny-progress">` +
+          `<div id="shiny-progress-${message.id}" class="shiny-progress-notification">` +
             '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' +
             '<div class="progress-text">' +
               '<span class="progress-message">message</span> ' +

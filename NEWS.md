@@ -1,13 +1,83 @@
-shiny 0.13.2.9005
+<base href="http://www.w3schools.com/images/" target="_blank">
+
+shiny 0.14
 =================
 
-## Breaking changes
+A new Shiny release is upon us! There's quite a few new exciting features, as well as a lot of minor ones, a bunch of bug fixes and some library updates. You can browse through the full changelog below for the details, as we'll just highlight the most important changes here. In all likelihood, this will be the last release before shiny 1.0, so get out your party hats!
+
+The breaking changes in this release are very minor and should not affect 99% of you at all. If you encounter a new bug or your app breaks in a way that you don't understand (or that is not detailed here), please let us know! (Do pay attention at the "Progress indicators" section below as you may need to add as extra argument to `withProgress()` if you were using custom CSS.)
+
+## Bookmarkable state
+
+
+## Notifications
+
+## Progress indicators
+
+## Reconnection
+
+## Modal windows
+
+## `insertUI` and `removeUI`
+
+## Documentation for connecting to an external database
+* pool package
+
+## Others
+* error sanitization
+* code diagnostics
+* reactlog vis (elapsed time + sticky nodes)
+
+Performance Improvements
+Performance of the selector engine has improved thanks to a shortcut path that immediately uses precompiled Sizzle selectors when the selector cannot be processed by the native querySelectorAll or matchesSelector methods. This results in a significant speedup in some real-world cases.
+
+New Features
+We’ve added some minor, non-breaking features that we thought might be useful in these releases. Here are some of the highlights.
+
+SVG Class Manipulation
+
+While jQuery is a HTML library, we agreed that class support for SVG elements could be useful. Users will now be able to call the .addClass(), .removeClass(), .toggleClass(), and .hasClass() methods on SVG. jQuery now changes the class attribute rather than the className property. This also makes the class methods usable in general XML documents. Keep in mind that many other things will not work with SVG, and we still recommend using a library dedicated to SVG if you need anything beyond class manipulation.
+
+jQuery.post(options) and jQuery.get(options)
+
+These ajax shortcuts have a new signature that takes a single object containing options.
+
+jQuery.post({
+  url: “/example”
+});
+Symbol/iterator support
+
+We’ve added support for the Symbol type and iterators via Symbol.iterator added in ES6/ES2015. “Symbol” will be detectable with jQuery.type, and jQuery objects can be iterated with for-of where supported.
+
+for (element of $elements) {
+  console.log(element);
+}
+jQuery.htmlPrefilter()
+
+A new hook has been added for filtering HTML that is passed to jQuery DOM manipulation methods like .html(), .append(), and .replaceWith(). The default prefilter translates single tags to XHTML-compatible tags. This method will allow users to bypass certain edge cases, remove scripts, and sanitize input.
+
+jQuery.uniqueSort alias
+
+To make it clear that jQuery.unique() also sorts, we’ve update the name. jQuery.unique will still exist, but jQuery.uniqueSort will become the documented method. This method is still only intended to sort DOM elements in document order; it is not a general sorting method.
+
+
+
+
+
+
+
+
+
+
+## Full changelog
+
+### Breaking changes
 
 * Closed [#1161](https://github.com/rstudio/shiny/issues/1161): Deprecated the `position` argument to `tabsetPanel()` since Bootstrap 3 stopped supporting this feature.
 
 * The long-deprecated ability to pass a `func` argument to many of the `render` functions has been removed.
 
-## New features
+### New features
 
 * Added the ability to bookmark and restore application state. (main PR: [#1209](https://github.com/rstudio/shiny/pull/1209))
 
@@ -25,7 +95,7 @@ shiny 0.13.2.9005
 
 * Added support for the `pool` package (use Shiny's timer/scheduler). ([#1226](https://github.com/rstudio/shiny/pull/1226))
 
-## Minor new features and improvements
+### Minor new features and improvements
 
 * Added `cancelOutput` argument to `req()`. This causes the currently executing reactive to cancel its execution, and leave its previous state alone (as opposed to clearing the output). ([#1272](https://github.com/rstudio/shiny/pull/1272))
 
@@ -59,7 +129,7 @@ shiny 0.13.2.9005
 
 * Nodes in the reactlog visualization are now sticky if the user drags them. ([#1283](https://github.com/rstudio/shiny/pull/1283))
 
-## Bug fixes
+### Bug fixes
 
 * `updateDateInput()` and `updateDateRangeInput()` can now clear the date input fields. (thanks, [@gaborcsardi](https://github.com/gaborcsardi)! [#1299](https://github.com/rstudio/shiny/pull/1299), [#1315](https://github.com/rstudio/shiny/pull/1315) and  [#1317](https://github.com/rstudio/shiny/pull/1317))
 
@@ -93,7 +163,7 @@ shiny 0.13.2.9005
 
 * Added workaround for quartz graphics device resolution bug, where resolution is hard-coded to 72 ppi.
 
-## Library updates
+### Library updates
 
 * Updated to ion.RangeSlider 2.1.2.
 

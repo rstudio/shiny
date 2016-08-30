@@ -122,7 +122,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #'     # message.
 #'     observeEvent(input$ok, {
 #'       # Check that data object exists and is data frame.
-#'       if (exists(input$dataset) && is.data.frame(get(input$dataset))) {
+#'       if (tryCatch(exists(input$dataset), error = function(e) FALSE) && is.data.frame(get(input$dataset))) {
 #'         vals$data <- get(input$dataset)
 #'         removeModal()
 #'       } else {

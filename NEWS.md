@@ -17,7 +17,9 @@ shiny 0.13.2.9005
   `showNotification` and `hideNotification`. From JavaScript, there is a new
   `Shiny.notification` object that controls notifications. (#1141)
 
-* Progress indicators now use the notification API. (#1160)
+* Progress indicators can now either use the new notification API, using
+  `style="notification"`, or be displayed with the previous styling, using'
+  `style="old"`. (#1160, #1327, #1329)
 
 * Added the ability for the client browser to reconnect to a new session on
   the server, by setting `session$allowReconnect(TRUE)`. This requires a

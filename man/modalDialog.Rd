@@ -106,7 +106,8 @@ shinyApp(
     # message.
     observeEvent(input$ok, {
       # Check that data object exists and is data frame.
-      if (exists(input$dataset) && is.data.frame(get(input$dataset))) {
+      if (!is.null(input$dataset) && nzchar(input$dataset) &&
+          exists(input$dataset) && is.data.frame(get(input$dataset))) {
         vals$data <- get(input$dataset)
         removeModal()
       } else {

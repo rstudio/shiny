@@ -41,6 +41,8 @@
 #'   This can result in faster plot redrawing, but there may be rare cases where
 #'   it is undesirable. If you encounter problems when resizing a plot, you can
 #'   have Shiny re-execute the code on resize by setting this to \code{TRUE}.
+#'   (This parameter is currently ignored, due to unexpected behavior from
+#'   \code{replayPlot}/\code{recordPlot} in recent versions of R.)
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to \code{\link{plotOutput}} when \code{renderPlot} is used in an
 #'   interactive R Markdown document.
@@ -52,6 +54,11 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
   installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
+
+  # There appears to be a bug in R 3.3.1 where recordPlot/replayPlot don't
+  # work when used with the png device. Disable this optimization until we
+  # figure out how to get this working.
+  execOnResize <- TRUE
 
   args <- list(...)
 

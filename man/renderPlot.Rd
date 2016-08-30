@@ -36,7 +36,9 @@ resized, Shiny will \emph{replay} the plot drawing commands with
 \code{\link[grDevices]{replayPlot}()} instead of re-executing \code{expr}.
 This can result in faster plot redrawing, but there may be rare cases where
 it is undesirable. If you encounter problems when resizing a plot, you can
-have Shiny re-execute the code on resize by setting this to \code{TRUE}.}
+have Shiny re-execute the code on resize by setting this to \code{TRUE}.
+(This parameter is currently ignored, due to unexpected behavior from
+\code{replayPlot}/\code{recordPlot} in recent versions of R.)}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link{plotOutput}} when \code{renderPlot} is used in an

@@ -7,9 +7,9 @@
 \title{Reporting progress (functional API)}
 \usage{
 withProgress(expr, min = 0, max = 1, value = min + (max - min) * 0.1,
-  message = NULL, detail = NULL, style = c("notification", "old"),
-  session = getDefaultReactiveDomain(), env = parent.frame(),
-  quoted = FALSE)
+  message = NULL, detail = NULL, style = getShinyOption("progress.style",
+  default = "notification"), session = getDefaultReactiveDomain(),
+  env = parent.frame(), quoted = FALSE)
 
 setProgress(value = NULL, message = NULL, detail = NULL,
   session = getDefaultReactiveDomain())
@@ -78,6 +78,14 @@ Generally, \code{withProgress}/\code{incProgress}/\code{setProgress} should
 be sufficient; the exception is if the work to be done is asynchronous (this
 is not common) or otherwise cannot be encapsulated by a single scope. In that
 case, you can use the \code{Progress} reference class.
+
+As of version 0.14, the progress indicators use Shiny's new notification API.
+If you want to use the old styling (for example, you may have used customized
+CSS), you can use \code{style="old"} each time you call
+\code{withProgress()}. If you don't want to set the style each time
+\code{withProgress} is called, you can instead call
+\code{\link{shinyOptions}(progress.style="old")} just once, inside the server
+function.
 }
 \examples{
 ## Only run examples in interactive R sessions

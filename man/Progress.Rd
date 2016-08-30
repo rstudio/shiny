@@ -53,6 +53,14 @@ created, and it will be displayed the first time the \code{set}
 method is called. Calling \code{close} will cause the progress panel
 to be removed.
 
+As of version 0.14, the progress indicators use Shiny's new notification API.
+If you want to use the old styling (for example, you may have used customized
+CSS), you can use \code{style="old"} each time you call
+\code{Progress$new()}. If you don't want to set the style each time
+\code{Progress$new} is called, you can instead call
+\code{\link{shinyOptions}(progress.style="old")} just once, inside the server
+function.
+
 \strong{Methods}
   \describe{
     \item{\code{initialize(session, min = 0, max = 1)}}{

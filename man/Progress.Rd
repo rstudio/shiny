@@ -27,6 +27,11 @@ de-emphasized appearance relative to \code{message}.}
 the progress bar, relative to \code{min} and \code{max}.
 \code{NULL} hides the progress bar, if it is currently visible.}
 
+\item{style}{Progress display style. If \code{"notification"} (the default),
+the progress indicator will show using Shiny's notification API. If
+\code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
+(this is for backward-compatibility).}
+
 \item{amount}{Single-element numeric vector; the value at which to set
 the progress bar, relative to \code{min} and \code{max}.
 \code{NULL} hides the progress bar, if it is currently visible.}
@@ -47,6 +52,14 @@ Instantiating a \code{Progress} object causes a progress panel to be
 created, and it will be displayed the first time the \code{set}
 method is called. Calling \code{close} will cause the progress panel
 to be removed.
+
+As of version 0.14, the progress indicators use Shiny's new notification API.
+If you want to use the old styling (for example, you may have used customized
+CSS), you can use \code{style="old"} each time you call
+\code{Progress$new()}. If you don't want to set the style each time
+\code{Progress$new} is called, you can instead call
+\code{\link{shinyOptions}(progress.style="old")} just once, inside the server
+function.
 
 \strong{Methods}
   \describe{

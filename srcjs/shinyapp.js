@@ -700,49 +700,133 @@ var ShinyApp = function() {
 
     // Open a page-level progress bar
     open: function(message) {
-      // Progress bar starts hidden; will be made visible if a value is provided
-      // during updates.
-      exports.notifications.show({
-        html:
-          `<div id="shiny-progress-${message.id}" class="shiny-progress">` +
-            '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' +
-            '<div class="progress-text">' +
-              '<span class="progress-message">message</span> ' +
-              '<span class="progress-detail"></span>' +
-            '</div>' +
-          '</div>',
-        id: message.id,
-        duration: null
-      });
+      if (message.style === "notification") {
+        // For new-style (starting in Shiny 0.14) progress indicators that use
+        // the notification API.
+
+        // Progress bar starts hidden; will be made visible if a value is provided
+        // during updates.
+        exports.notifications.show({
+          html:
+            `<div id="shiny-progress-${message.id}" class="shiny-progress-notification">` +
+              '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' +
+              '<div class="progress-text">' +
+                '<span class="progress-message">message</span> ' +
+                '<span class="progress-detail"></span>' +
+              '</div>' +
+            '</div>',
+          id: message.id,
+          duration: null
+        });
+
+      } else if (message.style === "old") {
+        // For old-style (Shiny <=0.13.2) progress indicators.
+
+        // Add progress container (for all progress items) if not already present
+        var $container = $('.shiny-progress-container');
+        if ($container.length === 0) {
+          $container = $('<div class="shiny-progress-container"></div>');
+          $('body').append($container);
+        }
+
+        // Add div for just this progress ID
+        var depth = $('.shiny-progress.open').length;
+        // The 'bar' class is needed for backward compatibility with Bootstrap 2.
+        var $progress = $('<div class="shiny-progress open">' +
+          '<div class="progress progress-striped active"><div class="progress-bar bar"></div></div>' +
+          '<div class="progress-text">' +
+            '<span class="progress-message">message</span>' +
+            '<span class="progress-detail"></span>' +
+          '</div>' +
+          '</div>'
+        );
+
+        $progress.attr('id', message.id);
+        $container.append($progress);
+
+        // Stack bars
+        var $progressBar = $progress.find('.progress');
+        $progressBar.css('top', depth * $progressBar.height() + 'px');
+
+        // Stack text objects
+        var $progressText = $progress.find('.progress-text');
+        $progressText.css('top', 3 * $progressBar.height() +
+          depth * $progressText.outerHeight() + 'px');
+
+        $progress.hide();
+      }
+
     },
 
     // Update page-level progress bar
     update: function(message) {
-      var $progress = $('#shiny-progress-' + message.id);
+      if (message.style === "notification") {
+        // For new-style (starting in Shiny 0.14) progress indicators that use
+        // the notification API.
+        var $progress = $('#shiny-progress-' + message.id);
 
-      if ($progress.length === 0)
-        return;
+        if ($progress.length === 0)
+          return;
 
-      if (typeof(message.message) !== 'undefined') {
-        $progress.find('.progress-message').text(message.message);
-      }
-      if (typeof(message.detail) !== 'undefined') {
-        $progress.find('.progress-detail').text(message.detail);
-      }
-      if (typeof(message.value) !== 'undefined') {
-        if (message.value !== null) {
-          $progress.find('.progress').show();
-          $progress.find('.progress-bar').width((message.value*100) + '%');
-
-        } else {
-          $progress.find('.progress').hide();
+        if (typeof(message.message) !== 'undefined') {
+          $progress.find('.progress-message').text(message.message);
         }
+        if (typeof(message.detail) !== 'undefined') {
+          $progress.find('.progress-detail').text(message.detail);
+        }
+        if (typeof(message.value) !== 'undefined') {
+          if (message.value !== null) {
+            $progress.find('.progress').show();
+            $progress.find('.progress-bar').width((message.value*100) + '%');
+
+          } else {
+            $progress.find('.progress').hide();
+          }
+        }
+
+      } else if (message.style === "old") {
+        // For old-style (Shiny <=0.13.2) progress indicators.
+
+        var $progress = $('#' + message.id + '.shiny-progress');
+        if (typeof(message.message) !== 'undefined') {
+          $progress.find('.progress-message').text(message.message);
+        }
+        if (typeof(message.detail) !== 'undefined') {
+          $progress.find('.progress-detail').text(message.detail);
+        }
+        if (typeof(message.value) !== 'undefined') {
+          if (message.value !== null) {
+            $progress.find('.progress').show();
+            $progress.find('.bar').width((message.value*100) + '%');
+          } else {
+            $progress.find('.progress').hide();
+          }
+        }
+
+        $progress.fadeIn();
       }
+
     },
 
     // Close page-level progress bar
     close: function(message) {
-      exports.notifications.remove(message.id);
+      if (message.style === "notification") {
+        exports.notifications.remove(message.id);
+
+      } else if (message.style === "old") {
+        var $progress = $('#' + message.id + '.shiny-progress');
+        $progress.removeClass('open');
+
+        $progress.fadeOut({
+          complete: function() {
+            $progress.remove();
+
+            // If this was the last shiny-progress, remove container
+            if ($('.shiny-progress').length === 0)
+              $('.shiny-progress-container').remove();
+          }
+        });
+      }
     }
   };
 

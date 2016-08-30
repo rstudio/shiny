@@ -1,12 +1,13 @@
+[bookmarking-state.html]: http://shiny.rstudio-staging.com/articles/bookmarking-state.html
+
 shiny 0.14
 =================
-<head><base href="http://shiny.rstudio-staging.com/articles/" target="_blank"></head>
 A new Shiny release is upon us! There's quite a few new exciting features, as well as a lot of minor ones, a bunch of bug fixes and some library updates. You can browse through the full changelog below for the details, as we'll just highlight the most important changes here. In all likelihood, this will be the last release before shiny 1.0, so get out your party hats!
 
 The breaking changes in this release are very minor and should not affect 99% of you at all. If you encounter a new bug or your app breaks in a way that you don't understand (or that is not detailed here), please let us know! (Do pay attention at the "Progress indicators" section below as you may need to add as extra argument to `withProgress()` if you were using custom CSS.)
 
 ## Bookmarkable state
-See [this article](bookmarking-state.html)
+See [this article][bookmarking-state.html]
 
 ## Notifications
 

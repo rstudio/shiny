@@ -1,6 +1,8 @@
 [bookmarking-state.html]: http://shiny.rstudio-staging.com/articles/bookmarking-state.html
 [advanced-bookmarking.html]: http://shiny.rstudio-staging.com/articles/advanced-bookmarking.html
 [bookmarking-modules.html]: http://shiny.rstudio-staging.com/articles/bookmarking-modules.html
+[notification.png]: http://shiny.rstudio-staging.com/images/notification.png
+
 shiny 0.14
 =================
 A new Shiny release is upon us! There's quite a few new exciting features, as well as a lot of minor ones, a bunch of bug fixes and some library updates. You can browse through the full changelog below for the details, as we'll just highlight the most important changes here. In all likelihood, this will be the last release before shiny 1.0, so get out your party hats!
@@ -13,6 +15,9 @@ Shiny now supports bookmarkable state: users can save the state of an applicatio
 See [this article][bookmarking-state.html] to get started with bookmarkable state. There is also an [advanced-level article][advanced-bookmarking.html] (for apps that have a complex state), and [a modules article][bookmarking-modules.html] that details how to use bookmarking in conjunction with modules.
 
 ## Notifications
+Shiny can now display notifications on the client browser by using the `showNotification()` function. Use this demo app to play around with the notification API. Here's a screenshot of a very simple notification (shown when the button is clicked): ![notification][notification.png]
+
+
 
 ## Progress indicators
 

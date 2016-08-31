@@ -1423,7 +1423,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       _get(id).fadeOut(fadeDuration, function () {
 
         exports.unbindAll(this);
-        this.remove();
+        $(this).remove();
 
         // If no more notifications, remove the panel from the DOM.
         if (_ids().length === 0) {

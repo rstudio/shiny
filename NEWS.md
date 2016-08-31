@@ -86,9 +86,6 @@ shiny 0.13.2.9005
 * Almost all code examples now have a runnable example with `shinyApp()`, so
   that users can run the examples and see them in action. (#1137, #1158)
 
-* When resized, plots are drawn with `replayPlot()`, instead of re-executing
-  all plotting code. This results in faster plot rendering. (#1112)
-
 * Exported the `isTruthy()` function.
 
 * Reactive log now shows elapsed time for reactives and observers.

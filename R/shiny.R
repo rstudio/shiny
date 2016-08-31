@@ -610,6 +610,9 @@ ShinySession <- R6Class(
         )
       )
     },
+    rootScope = function() {
+      self
+    },
     makeScope = function(namespace) {
       ns <- NS(namespace)
 

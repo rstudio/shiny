@@ -13,7 +13,8 @@ updateQueryString(queryString, session = getDefaultReactiveDomain())
 }
 \description{
 This function updates the client browser's query string in the location bar.
-It typically is called from an observer.
+It typically is called from an observer. Note that this will not work in
+Internet Explorer 9 and below.
 }
 \seealso{
 \code{\link{enableBookmarking}} for examples.

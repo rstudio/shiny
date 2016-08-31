@@ -97,6 +97,9 @@ shiny 0.13.2.9005
 
 ## Bug fixes
 
+* Fixed #1331: `renderPlot()` now correctly records and replays plots when
+  `execOnResize=FALSE`. (#1337)
+
 * `updateDateInput()` and `updateDateRangeInput()` can now clear the date
   input fields. (#1299, #896, #1315)
 

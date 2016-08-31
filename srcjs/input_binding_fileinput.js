@@ -181,7 +181,10 @@ function uploadFiles(evt) {
 
   // Set the label in the text box
   var $fileText = $el.closest('div.input-group').find('input[type=text]');
-  if (files.length === 1) {
+  if (IE8) {
+    // If we're using IE8/9, just use this placeholder
+    $fileText.val("[Uploaded file]");
+  } else if (files.length === 1) {
     $fileText.val(files[0].name);
   } else {
     $fileText.val(files.length + " files");

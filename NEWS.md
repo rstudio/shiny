@@ -2,13 +2,13 @@
 [advanced-bookmarking.html]: http://shiny.rstudio-staging.com/articles/advanced-bookmarking.html
 [bookmarking-modules.html]: http://shiny.rstudio-staging.com/articles/bookmarking-modules.html
 [enableBookmarking.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/enableBookmarking.html
-[notification.png]: http://shiny.rstudio-staging.com/images/notification.png
+<!-- [notification.png]: http://shiny.rstudio-staging.com/images/notification.png -->
 [notifications.html]: http://shiny.rstudio-staging.com/articles/notifications.html
 [showNotification.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/showNotification.html
 [progress.html]: http://shiny.rstudio-staging.com/articles/progress.html
 [withProgress.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/withProgress.html
 [Progress.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/Progress.html
-[modal-dialog.png]: http://shiny.rstudio-staging.com/images/modal-dialog.png
+<!-- [modal-dialog.png]: http://shiny.rstudio-staging.com/images/modal-dialog.png -->
 [modal-dialogs.html]: http://shiny.rstudio-staging.com/articles/modal-dialogs.html
 [modalDialog.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/modalDialog.html
 [dynamic-ui.html]: http://shiny.rstudio-staging.com/articles/dynamic-ui.html
@@ -34,7 +34,14 @@ See [this article][bookmarking-state.html] to get started with bookmarkable stat
 ## Notifications
 Shiny can now display notifications on the client browser by using the `showNotification()` function. Use [this demo app](https://gallery.shinyapps.io/116-notifications/) to play around with the notification API. Here's a screenshot of a very simple notification (shown when the button is clicked):
 
-![notification][notification.png]
+<!-- ![notification][notification.png] -->
+<img src="http://shiny.rstudio-staging.com/images/notification.png"
+     alt="notification" 
+     style="width: 50%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto"
+/>
 
 [Here][notifications.html]'s our article about it, and the [reference documentation][showNotification.html].
 
@@ -51,8 +58,14 @@ Shiny can now automatically reconnect your Shiny session if you lose network acc
 ## Modal windows
 Shiny now has built-in support for displaying modal dialogs like the one below ([live app here](https://gallery.shinyapps.io/114-modal-dialog/)):
 
-<img src="modal-dialog.png" alt="modal-dialog" style="width: 50%;"/>
-![modal-dialog][modal-dialog.png]
+<!-- ![modal-dialog][modal-dialog.png] -->
+<img src="http://shiny.rstudio-staging.com/images/modal-dialog.png"
+     alt="modal-dialog"
+     style="width: 50%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto"
+/>
 
 To learn more about this, read [our article][modal-dialogs.html] and the [reference documentation][modalDialog.html].
 

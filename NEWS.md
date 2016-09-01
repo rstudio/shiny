@@ -1,34 +1,73 @@
 [bookmarking-state.html]: http://shiny.rstudio-staging.com/articles/bookmarking-state.html
 [advanced-bookmarking.html]: http://shiny.rstudio-staging.com/articles/advanced-bookmarking.html
 [bookmarking-modules.html]: http://shiny.rstudio-staging.com/articles/bookmarking-modules.html
+[enableBookmarking.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/enableBookmarking.html
 [notification.png]: http://shiny.rstudio-staging.com/images/notification.png
+[notifications.html]: http://shiny.rstudio-staging.com/articles/notifications.html
+[showNotification.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/showNotification.html
+[progress.html]: http://shiny.rstudio-staging.com/articles/progress.html
+[withProgress.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/withProgress.html
+[Progress.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/Progress.html
+[modal-dialog.png]: http://shiny.rstudio-staging.com/images/modal-dialog.png
+[modal-dialog.html]: http://shiny.rstudio-staging.com/articles/modal-dialogs.html
+[modalDialog.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/modalDialog.html
+[dynamic-ui.html]: [http://shiny.rstudio-staging.com/articles/dynamic-ui.html]
+[insertUI.html]: [http://shiny.rstudio-staging.com/reference/shiny/latest/insertUI.html]
+[removeUI.html]: [http://shiny.rstudio-staging.com/reference/shiny/latest/removeUI.html]
+[overview.html][http://shiny.rstudio-staging.com/articles/overview.html]
+[sql-injections.html]: [http://shiny.rstudio-staging.com/articles/sql-injections.html]
+[pool-basics.html]: [http://shiny.rstudio-staging.com/articles/pool-basics.html]
+[pool-advanced.html]: [http://shiny.rstudio-staging.com/articles/pool-advanced.html]
+[pool-dplyr.html]: [http://shiny.rstudio-staging.com/articles/pool-dplyr.html]
 
 shiny 0.14
 =================
 A new Shiny release is upon us! There's quite a few new exciting features, as well as a lot of minor ones, a bunch of bug fixes and some library updates. You can browse through the full changelog below for the details, as we'll just highlight the most important changes here. In all likelihood, this will be the last release before shiny 1.0, so get out your party hats!
 
-The breaking changes in this release are very minor and should not affect 99% of you at all. If you encounter a new bug or your app breaks in a way that you don't understand (or that is not detailed here), please let us know! (Do pay attention at the "Progress indicators" section below as you may need to add as extra argument to `withProgress()` if you were using custom CSS.)
+The breaking changes in this release are relatively minor and should not affect much. If you encounter a new bug or your app breaks in a way that you don't understand (or that is not detailed here), please let us know! (Do pay attention at the "Progress indicators" section below as you may need to add an extra argument to `withProgress()` if you were using custom CSS.)
 
 ## Bookmarkable state
 Shiny now supports bookmarkable state: users can save the state of an application and get a URL which will restore the application with that state. There are two types of bookmarking: encoding the state in a URL, and saving the state to the server. With an encoded state, the entire state of the application is contained in the URL’s query string. You can see this in action with this app: https://gallery.shinyapps.io/113-bookmarking-url/. An example of a bookmark URL for this app is https://gallery.shinyapps.io/113-bookmarking-url/?_inputs_&n=200. When the state is saved to the server, the URL might look like: `https://gallery.shinyapps.io/bookmark-saved/?_state_id_=d80625dc681e913a`.
 
-See [this article][bookmarking-state.html] to get started with bookmarkable state. There is also an [advanced-level article][advanced-bookmarking.html] (for apps that have a complex state), and [a modules article][bookmarking-modules.html] that details how to use bookmarking in conjunction with modules.
+See [this article][bookmarking-state.html] to get started with bookmarkable state. There is also an [advanced-level article][advanced-bookmarking.html] (for apps that have a complex state), and [a modules article][bookmarking-modules.html] that details how to use bookmarking in conjunction with modules. Here is the [reference documentation][enableBookmarking.html].
 
 ## Notifications
-Shiny can now display notifications on the client browser by using the `showNotification()` function. Use this demo app to play around with the notification API. Here's a screenshot of a very simple notification (shown when the button is clicked): ![notification][notification.png]
+Shiny can now display notifications on the client browser by using the `showNotification()` function. Use [this demo app](https://gallery.shinyapps.io/116-notifications/) to play around with the notification API. Here's a screenshot of a very simple notification (shown when the button is clicked):
 
+![notification][notification.png]
 
+[Here][notifications.html]'s our article about it, and the [reference documentation][showNotification.html].
 
 ## Progress indicators
+If your Shiny app contains computations that take a long time to complete, a progress bar can improve the user experience by communicating how far along the computation is, and how much is left. Progress bars were added in Shiny 0.10.2. In Shiny 0.14, they were changed to use the notifications system (which gives them a pretty different look by default, but keeps the same API).
+
+**Important note: If you were already using progress bars before and had customized them with your own CSS, you must add a new argument to the `withProgress()` function (or to `Progress$new()`), specifying `style = "old"` if you want to keep the same look in the UI. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling.** In any case, do feel free to try out the default notification-style look!
+
+To see progress bars in action, see [this app](https://gallery.shinyapps.io/085-progress/) in the gallery. You can also learn more about this in [our article][progress.html] and in the reference documentation (either for the easier [`withProgress` functional API][withProgress.html] or the more complicated, but more powerful, [`Progress` object-oriented API][Progress.html].
 
 ## Reconnection
+Shiny can now automatically reconnect your Shiny session if you lose network access temporarily. Here is our article about this (FORTHCOMING).
 
 ## Modal windows
+Shiny now has built-in support for displaying modal dialogs like the one below ([live app here][https://gallery.shinyapps.io/114-modal-dialog/]):
+
+![modal-dialog][modal-dialog.png]
+
+To learn more about this, read [our article][modal-dialogs.html] and the [reference documentation][modalDialog.html].
 
 ## `insertUI` and `removeUI`
+Sometimes in a Shiny app, arbitrary UI may need to be created on-the-fly in response to user input. The existing `uiOutput` and `renderUI` functions let you continue using reactive logic to generate calls to UI functions and make the results appear in a predetermined place in the UI. The `insertUI` and `removeUI` functions, which are used in server.R, allow you to switch to more imperative logic add and remove arbitrary chunks of UI code (all independent from one another), as many times as you want, whenever you want, wherever you want. This option may be more convenient when you want, for example, to add a new model to your app each time the user selects a different option (and leave previous models unchanged, rather than substitute the previous one for the latest one).
+
+See [this simple demo app](https://gallery.shinyapps.io/111-insert-ui/) of how one could use `insertUI` and `removeUI` to insert and remove text elements using a queue logic. You might also want to check out [this other app](https://gallery.shinyapps.io/insertUI/) that demos how to insert and remove a few common shiny input objects. Finally, [this app](https://gallery.shinyapps.io/insertUI-modules/) shows how to dynamically insert modules using insertUI.
+
+For more, read [our article][dynamic-ui.html] about dynamic UI generation and the reference documentation about [`insertUI`][insertUI.html] and [`removeUI`][removeUI.html].
 
 ## Documentation for connecting to an external database
-* pool package
+As Shiny apps grow and become more complex, a recurring issue has been that of integrating an external database into an app. While this is already possible, so far it’s been mostly up to the app authors to figure out the appropriate database driver for R and how to manage the database connections within the app itself. In order to demystify this process, we wrote up a series of articles ([first one here][overview.html]) that covers the basics of hooking up to an external database, as well as some security precautions to keep in mind (e.g. [how to avoid SQL injection attacks][sql-injections.html]).
+
+There's a few packages that you should definitely check out if you're using a relational database in a Shiny app: the `dplyr` and `DBI` packages (both featured in the article linked above) and the brand new `pool` package, which provides a further layer of abstraction to make it even easier and safer to use wither `DBI` or `dplyr`. In particular, `pool` will take care of managing connections, preventing leaks and ensuring the best performance. Check out this [`pool` basics article][pool-basics.html] and the [more advanced-level article][pool-advanced.html] if you're feeling adventurous (both of which contain Shiny app examples that use `DBI` to connect to an external MySQL database)! If you are more comfortable with `dplyr` rather than `DBI`, don't miss the article about the [integration of `pool` and `dplyr`][pool-dplyr.html].
+
+If you're new to databases in the Shiny world, we recommend you always use `dplyr` and `pool` if possible. If you need greater control than `dplyr` offers (for example, if you need to modify data in the external database or use transactions), then use `DBI` and `pool`. The `pool` packages was introduced to make your life easier, but in no way constrain you, so we don't envision any situation in which you'd be better off *not* using it. The only caveat to this at the present moment is that `pool` is not yet on CRAN, so you may prefer to wait for that.
 
 ## Others
 * error sanitization
@@ -36,12 +75,11 @@ Shiny can now display notifications on the client browser by using the `showNoti
 * reactlog vis (elapsed time + sticky nodes)
 
 
-
-
-
 ## Full changelog
 
 ### Breaking changes
+
+* Progress indicators can now either use the new notification API, using `style = "notification"` (default), or be displayed with the previous styling, using `style = "old"`. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. Note that if you had customized your progress indicators with additional CSS, you'll *need* to use `style = "old"` if you want your UI to look the same ([#1160](https://github.com/rstudio/shiny/pull/1160) and [#1329](https://github.com/rstudio/shiny/pull/1329)).
 
 * Closed [#1161](https://github.com/rstudio/shiny/issues/1161): Deprecated the `position` argument to `tabsetPanel()` since Bootstrap 3 stopped supporting this feature.
 

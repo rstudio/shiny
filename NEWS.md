@@ -103,8 +103,7 @@ While there's a lot more minor features, small improvements and bug fixes than w
 
       Now you can also drag any of the nodes to a specific position and leave them there (you'll see the border around the node turn black -- that means it is in a fixed position). If you want to release the node back, just double click on it (you'll see the border around it go back to gray).
 
-*
-      **Nicer-looking tables**: we've made tables generated with `renderTable()` look more Bootstrap-y and generally nicer-looking. While this won't break any older code (even though there's a bunch of new possible arguments, all the old ones are still accepted), the finished look of your table will be quite a bit different, as the following image shows:
+*    **Nicer-looking tables**: we've made tables generated with `renderTable()` look more Bootstrap-y and generally nicer-looking. While this won't break any older code (even though there's a bunch of new possible arguments, all the old ones are still accepted), the finished look of your table will be quite a bit different, as the following image shows:
 
       <p align="center">
       <img src="http://shiny.rstudio-staging.com/images/render-table.png" alt="render-table" width="75%"/>

@@ -6,7 +6,7 @@
 #' URL.
 #'
 #' @param dependency A single HTML dependency object, created using
-#'   \code{\link{htmlDependency}}. If the \code{src} value is named, then
+#'   \code{\link[htmltools]{htmlDependency}}. If the \code{src} value is named, then
 #'   \code{href} and/or \code{file} names must be present.
 #'
 #' @return A single HTML dependency object that has an \code{href}-named element

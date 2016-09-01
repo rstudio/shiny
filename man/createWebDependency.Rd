@@ -8,7 +8,7 @@ createWebDependency(dependency)
 }
 \arguments{
 \item{dependency}{A single HTML dependency object, created using
-\code{\link{htmlDependency}}. If the \code{src} value is named, then
+\code{\link[htmltools]{htmlDependency}}. If the \code{src} value is named, then
 \code{href} and/or \code{file} names must be present.}
 }
 \value{

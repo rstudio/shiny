@@ -11,16 +11,15 @@
 [modal-dialog.png]: http://shiny.rstudio-staging.com/images/modal-dialog.png
 [modal-dialogs.html]: http://shiny.rstudio-staging.com/articles/modal-dialogs.html
 [modalDialog.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/modalDialog.html
-[dynamic-ui.html]: [http://shiny.rstudio-staging.com/articles/dynamic-ui.html]
-[insertUI.html]: [http://shiny.rstudio-staging.com/reference/shiny/latest/insertUI.html]
-[removeUI.html]: [http://shiny.rstudio-staging.com/reference/shiny/latest/removeUI.html]
-[overview.html]: [http://shiny.rstudio-staging.com/articles/overview.html]
-[sql-injections.html]: [http://shiny.rstudio-staging.com/articles/sql-injections.html]
-[pool-basics.html]: [http://shiny.rstudio-staging.com/articles/pool-basics.html]
-[pool-advanced.html]: [http://shiny.rstudio-staging.com/articles/pool-advanced.html]
-[pool-dplyr.html]: [http://shiny.rstudio-staging.com/articles/pool-dplyr.html]
+[dynamic-ui.html]: http://shiny.rstudio-staging.com/articles/dynamic-ui.html
+[insertUI.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/insertUI.html
+[removeUI.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/removeUI.html
+[overview.html]: http://shiny.rstudio-staging.com/articles/overview.html
+[sql-injections.html]: http://shiny.rstudio-staging.com/articles/sql-injections.html
+[pool-basics.html]: http://shiny.rstudio-staging.com/articles/pool-basics.html
+[pool-advanced.html]: http://shiny.rstudio-staging.com/articles/pool-advanced.html
+[pool-dplyr.html]: http://shiny.rstudio-staging.com/articles/pool-dplyr.html
 
-<head>
 <style>
 img {
   width: 50%;
@@ -29,7 +28,6 @@ img {
   margin-right: auto
 }
 </style>
-</head>
 
 shiny 0.14
 =================

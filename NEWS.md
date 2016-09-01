@@ -33,6 +33,9 @@ The breaking changes in this release are relatively minor and should not affect 
 ## Bookmarkable state
 Shiny now supports bookmarkable state: users can save the state of an application and get a URL which will restore the application with that state. There are two types of bookmarking: encoding the state in a URL, and saving the state to the server. With an encoded state, the entire state of the application is contained in the URL’s query string. You can see this in action with this app: https://gallery.shinyapps.io/113-bookmarking-url/. An example of a bookmark URL for this app is https://gallery.shinyapps.io/113-bookmarking-url/?_inputs_&n=200. When the state is saved to the server, the URL might look like: `https://gallery.shinyapps.io/bookmark-saved/?_state_id_=d80625dc681e913a`.
 
+**_Important note_:**
+> The "save to server" option for bookmarkable state is still a very experimental feature and is not currently supported on Shiny Server Pro, RStudio Connect, or shinyapps.io.
+ 
 See [this article][bookmarking-state.html] to get started with bookmarkable state. There is also an [advanced-level article][advanced-bookmarking.html] (for apps that have a complex state), and [a modules article][bookmarking-modules.html] that details how to use bookmarking in conjunction with modules. Here is the [reference documentation][enableBookmarking.html].
 
 ## Notifications
@@ -83,11 +86,12 @@ If you're new to databases in the Shiny world, we recommend you always use `dply
 ## Others
 While there's a lot more minor features, small improvements and bug fixes than we can cover here, we'll just finish by mentioning a few of the more noteworthy ones (the full changelog, with links to all the relevant issues and PRs, is right below this section):
 
-* **Error Sanitization**: you now have the option to sanitize error messages. This can be important if there is information in the original error message that you don’t want the user to see (usually because it may be sensitive information). To sanitize errors everywhere in your app, just add `options(shiny.sanitize.errors = TRUE)` somewhere in your app. Read [this article][sanitize-errors.html] for more, or play with the [demo app](https://gallery.shinyapps.io/110-error-sanitization/).
+<ul>
+  <li markdown="1" style="padding-bottom: 10px;">**Error Sanitization**: you now have the option to sanitize error messages. This can be important if there is information in the original error message that you don’t want the user to see (usually because it may be sensitive information). To sanitize errors everywhere in your app, just add `options(shiny.sanitize.errors = TRUE)` somewhere in your app. Read [this article][sanitize-errors.html] for more, or play with the [demo app](https://gallery.shinyapps.io/110-error-sanitization/).
 
-* **Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
+ <li markdown="1" style="padding-bottom: 10px;">**Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
 
-* **Reactlog visualization**: by default, the [`showReactLog()` function][showReactLog.html] (which shows the reactive graph) also displays the time that each reactive and observer were active for:
+<li markdown="1" style="padding-bottom: 10px;">**Reactlog visualization**: by default, the [`showReactLog()` function][showReactLog.html] (which shows the reactive graph) also displays the time that each reactive and observer were active for:
 
 <p align="center">
 <img src="http://shiny.rstudio-staging.com/images/reactlog.png" alt="modal-dialog" width="75%"/>
@@ -96,6 +100,7 @@ While there's a lot more minor features, small improvements and bug fixes than w
 This new feature can be turned off by specifying `showReactLog(time = FALSE)` (this may be convenient if you have a large graph and don't want to not have this new information cluttering it up the graph). The elapsed time info shows up above each relevant node's label, and it's encoded in a 6-step monochromatic red scale ranging from a very pale red/beige to a dark wine red (from [colorbrewer](http://colorbrewer2.org/?type=sequential&scheme=Reds&n=9)). The colors are normalized so that the slowest reactive in your app will always be dark red and the fastest will always be light red.
 
 Now you can also drag any of the nodes to a specific position and leave them there (you'll see the border around the node turn black -- that means it is in a fixed position). If you want to release the node back, just double click on it (you'll see the border around it go back to gray).
+{::nomarkdown}</ul>{:/nomarkdown}
 
 * **Nicer-looking tables**: we've made tables generated with `renderTable()` look more Bootstrap-y and generally nicer-looking. While this won't break any older code (even though there's a bunch of new possible arguments, all the old ones are still accepted), the finished look of your table will be quite a bit different, as the following image shows:
 
@@ -103,7 +108,7 @@ Now you can also drag any of the nodes to a specific position and leave them the
 <img src="http://shiny.rstudio-staging.com/images/render-table.png" alt="render-table" width="75%"/>
 </p>
 
-For more, read our [short article][render-table.html] about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/) or check out the [reference documentation][renderTable.html].
+ For more, read our [short article][render-table.html] about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/) or check out the [reference documentation][renderTable.html].
 
 ## Full changelog
 

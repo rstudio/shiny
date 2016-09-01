@@ -20,8 +20,6 @@
 [pool-advanced.html]: http://shiny.rstudio-staging.com/articles/pool-advanced.html
 [pool-dplyr.html]: http://shiny.rstudio-staging.com/articles/pool-dplyr.html
 
-<p>Do not forget to buy <mark>soy milk</mark> today.</p>
-
 shiny 0.14
 =================
 A new Shiny release is upon us! There's quite a few new exciting features, as well as a lot of minor ones, a bunch of bug fixes and some library updates. You can browse through the full changelog below for the details, as we'll just highlight the most important changes here. In all likelihood, this will be the last release before shiny 1.0, so get out your party hats!
@@ -46,10 +44,8 @@ Shiny can now display notifications on the client browser by using the `showNoti
 ## Progress indicators
 If your Shiny app contains computations that take a long time to complete, a progress bar can improve the user experience by communicating how far along the computation is, and how much is left. Progress bars were added in Shiny 0.10.2. In Shiny 0.14, they were changed to use the notifications system (which gives them a pretty different look by default, but keeps the same API).
 
-**Important note:**
-```
-If you were already using progress bars before and had customized them with your own CSS, you must add a new argument to the `withProgress()` function (or to `Progress$new()`), specifying `style = "old"` if you want to keep the same look in the UI. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. In any case, do feel free to try out the default notification-style look!
-```
+**_Important note_:**
+> If you were already using progress bars before and had customized them with your own CSS, you must add a new argument to the `withProgress()` function (or to `Progress$new()`), specifying `style = "old"` if you want to keep the same look in the UI. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. In any case, do feel free to try out the default notification-style look!
 
 To see progress bars in action, see [this app](https://gallery.shinyapps.io/085-progress/) in the gallery. You can also learn more about this in [our article][progress.html] and in the reference documentation (either for the easier [`withProgress` functional API][withProgress.html] or the more complicated, but more powerful, [`Progress` object-oriented API][Progress.html].
 

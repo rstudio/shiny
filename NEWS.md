@@ -14,7 +14,7 @@
 [dynamic-ui.html]: [http://shiny.rstudio-staging.com/articles/dynamic-ui.html]
 [insertUI.html]: [http://shiny.rstudio-staging.com/reference/shiny/latest/insertUI.html]
 [removeUI.html]: [http://shiny.rstudio-staging.com/reference/shiny/latest/removeUI.html]
-[overview.html][http://shiny.rstudio-staging.com/articles/overview.html]
+[overview.html]: [http://shiny.rstudio-staging.com/articles/overview.html]
 [sql-injections.html]: [http://shiny.rstudio-staging.com/articles/sql-injections.html]
 [pool-basics.html]: [http://shiny.rstudio-staging.com/articles/pool-basics.html]
 [pool-advanced.html]: [http://shiny.rstudio-staging.com/articles/pool-advanced.html]
@@ -49,9 +49,9 @@ To see progress bars in action, see [this app](https://gallery.shinyapps.io/085-
 Shiny can now automatically reconnect your Shiny session if you lose network access temporarily. Here is our article about this (FORTHCOMING).
 
 ## Modal windows
-Shiny now has built-in support for displaying modal dialogs like the one below ([live app here][https://gallery.shinyapps.io/114-modal-dialog/]):
+Shiny now has built-in support for displaying modal dialogs like the one below ([live app here](https://gallery.shinyapps.io/114-modal-dialog/)):
 
-![modal-dialog][modal-dialog.png]
+![modal-dialog][modal-dialog.png =100x20]
 
 To learn more about this, read [our article][modal-dialogs.html] and the [reference documentation][modalDialog.html].
 

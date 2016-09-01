@@ -9,7 +9,7 @@
 [withProgress.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/withProgress.html
 [Progress.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/Progress.html
 [modal-dialog.png]: http://shiny.rstudio-staging.com/images/modal-dialog.png
-[modal-dialog.html]: http://shiny.rstudio-staging.com/articles/modal-dialogs.html
+[modal-dialogs.html]: http://shiny.rstudio-staging.com/articles/modal-dialogs.html
 [modalDialog.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/modalDialog.html
 [dynamic-ui.html]: [http://shiny.rstudio-staging.com/articles/dynamic-ui.html]
 [insertUI.html]: [http://shiny.rstudio-staging.com/reference/shiny/latest/insertUI.html]
@@ -20,6 +20,7 @@
 [pool-advanced.html]: [http://shiny.rstudio-staging.com/articles/pool-advanced.html]
 [pool-dplyr.html]: [http://shiny.rstudio-staging.com/articles/pool-dplyr.html]
 
+<head>
 <style>
 img {
   width: 50%;
@@ -28,6 +29,7 @@ img {
   margin-right: auto
 }
 </style>
+</head>
 
 shiny 0.14
 =================

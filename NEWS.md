@@ -19,6 +19,10 @@
 [pool-basics.html]: http://shiny.rstudio-staging.com/articles/pool-basics.html
 [pool-advanced.html]: http://shiny.rstudio-staging.com/articles/pool-advanced.html
 [pool-dplyr.html]: http://shiny.rstudio-staging.com/articles/pool-dplyr.html
+[sanitize-errors.html]: http://shiny.rstudio-staging.com/articles/sanitize-errors.html
+[showReactLog.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/showReactLog.html
+[render-table.html]: http://shiny.rstudio-staging.com/articles/render-table.html
+[renderTable.html]: http://shiny.rstudio-staging.com/reference/shiny/latest/renderTable.html
 
 shiny 0.14
 =================
@@ -36,7 +40,7 @@ Shiny can now display notifications on the client browser by using the `showNoti
 
 <!-- ![notification][notification.png] -->
 <p align="center">
-<img src="http://shiny.rstudio-staging.com/images/notification.png" alt="notification" width="50%" align="center"/>
+<img src="http://shiny.rstudio-staging.com/images/notification.png" alt="notification" width="50%"/>
 </p>
 
 [Here][notifications.html]'s our article about it, and the [reference documentation][showNotification.html].
@@ -57,7 +61,7 @@ Shiny now has built-in support for displaying modal dialogs like the one below (
 
 <!-- ![modal-dialog][modal-dialog.png] -->
 <p align="center">
-<img src="http://shiny.rstudio-staging.com/images/modal-dialog.png" alt="modal-dialog" width="50%" align="center"/>
+<img src="http://shiny.rstudio-staging.com/images/modal-dialog.png" alt="modal-dialog" width="50%"/>
 </p>
 
 To learn more about this, read [our article][modal-dialogs.html] and the [reference documentation][modalDialog.html].
@@ -65,7 +69,7 @@ To learn more about this, read [our article][modal-dialogs.html] and the [refere
 ## `insertUI` and `removeUI`
 Sometimes in a Shiny app, arbitrary UI may need to be created on-the-fly in response to user input. The existing `uiOutput` and `renderUI` functions let you continue using reactive logic to generate calls to UI functions and make the results appear in a predetermined place in the UI. The `insertUI` and `removeUI` functions, which are used in server.R, allow you to switch to more imperative logic add and remove arbitrary chunks of UI code (all independent from one another), as many times as you want, whenever you want, wherever you want. This option may be more convenient when you want, for example, to add a new model to your app each time the user selects a different option (and leave previous models unchanged, rather than substitute the previous one for the latest one).
 
-See [this simple demo app](https://gallery.shinyapps.io/111-insert-ui/) of how one could use `insertUI` and `removeUI` to insert and remove text elements using a queue logic. You might also want to check out [this other app](https://gallery.shinyapps.io/insertUI/) that demos how to insert and remove a few common shiny input objects. Finally, [this app](https://gallery.shinyapps.io/insertUI-modules/) shows how to dynamically insert modules using insertUI.
+See [this simple demo app](https://gallery.shinyapps.io/111-insert-ui/) of how one could use `insertUI` and `removeUI` to insert and remove text elements using a queue logic. You might also want to check out [this other app](https://gallery.shinyapps.io/insertUI/) that demos how to insert and remove a few common shiny input objects. Finally, [this app](https://gallery.shinyapps.io/insertUI-modules/) shows how to dynamically insert modules using `insertUI`.
 
 For more, read [our article][dynamic-ui.html] about dynamic UI generation and the reference documentation about [`insertUI`][insertUI.html] and [`removeUI`][removeUI.html].
 
@@ -77,10 +81,29 @@ There's a few packages that you should definitely check out if you're using a re
 If you're new to databases in the Shiny world, we recommend you always use `dplyr` and `pool` if possible. If you need greater control than `dplyr` offers (for example, if you need to modify data in the external database or use transactions), then use `DBI` and `pool`. The `pool` packages was introduced to make your life easier, but in no way constrain you, so we don't envision any situation in which you'd be better off *not* using it. The only caveat to this at the present moment is that `pool` is not yet on CRAN, so you may prefer to wait for that.
 
 ## Others
-* error sanitization
-* code diagnostics
-* reactlog vis (elapsed time + sticky nodes)
+While there's a lot more minor features, small improvements and bug fixes than we can cover here, we'll just finish by mentioning a few of the more noteworthy ones (the full changelog, with links to all the relevant issues and PRs, is right below this section):
 
+* **Error Sanitization**: you now have the option to sanitize error messages. This can be important if there is information in the original error message that you don’t want the user to see (usually because it may be sensitive information). To sanitize errors everywhere in your app, just add `options(shiny.sanitize.errors = TRUE)` somewhere in your app. Read [this article][sanitize-errors.html] for more, or play with the [demo app](https://gallery.shinyapps.io/110-error-sanitization/).
+
+* **Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
+
+* **Reactlog visualization**: by default, the [`showReactLog()` function][showReactLog.html] (which shows the reactive graph) also displays the time that each reactive and observer were active for:
+
+<p align="center">
+<img src="http://shiny.rstudio-staging.com/images/reactlog.png" alt="modal-dialog" width="50%"/>
+</p>
+
+This new feature can be turned off by specifying `showReactLog(time = FALSE)` (this may be convenient if you have a large graph and don't want to not have this new information cluttering it up the graph). The elapsed time info shows up above each relevant node's label, and it's encoded in a 6-step monochromatic red scale ranging from a very pale red/beige to a dark wine red (from [colorbrewer](http://colorbrewer2.org/?type=sequential&scheme=Reds&n=9)). The colors are normalized so that the slowest reactive in your app will always be dark red and the fastest will always be light red.
+
+Now you can also drag any of the nodes to a specific position and leave them there (you'll see the border around the node turn black -- that means it is in a fixed position). If you want to release the node back, just double click on it (you'll see the border around it go back to gray).
+
+* **Nicer-looking tables**: we've made tables generated with `renderTable()` look more Bootstrap-y and generally nicer-looking. While this won't break any older code (even though there's a bunch of new possible arguments, all the old ones are still accepted), the finished look of your table will be quite a bit different, as the following image shows:
+
+<p align="center">
+<img src="http://shiny.rstudio-staging.com/images/render-table.png" alt="render-table" width="50%"/>
+</p>
+
+For more, read our [short article][render-table.html] about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/) or check out the [reference documentation][renderTable.html].
 
 ## Full changelog
 

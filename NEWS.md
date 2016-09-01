@@ -97,6 +97,8 @@ shiny 0.13.2.9005
 
 ## Bug fixes
 
+* Fixed #1350: Highlighting of reactives didn't work in showcase mode. (#1351)
+
 * Fixed #1331: `renderPlot()` now correctly records and replays plots when
   `execOnResize=FALSE`. (#1337)
 

@@ -1164,8 +1164,10 @@ ShinySession <- R6Class(
 
 
     reactlog = function(logEntry) {
+      # Use sendCustomMessage instead of sendMessage, because the handler in
+      # shiny-showcase.js only has access to public API of the Shiny object.
       if (private$showcase)
-        private$sendMessage(reactlog = logEntry)
+        self$sendCustomMessage("reactlog", logEntry)
     },
     reload = function() {
       private$sendMessage(reload = TRUE)

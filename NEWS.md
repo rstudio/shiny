@@ -86,30 +86,31 @@ If you're new to databases in the Shiny world, we recommend you always use `dply
 ## Others
 While there's a lot more minor features, small improvements and bug fixes than we can cover here, we'll just finish by mentioning a few of the more noteworthy ones (the full changelog, with links to all the relevant issues and PRs, is right below this section):
 
-<ul>
-  <li markdown="1" style="padding-bottom: 10px;">**Error Sanitization**: you now have the option to sanitize error messages. This can be important if there is information in the original error message that you don’t want the user to see (usually because it may be sensitive information). To sanitize errors everywhere in your app, just add `options(shiny.sanitize.errors = TRUE)` somewhere in your app. Read [this article][sanitize-errors.html] for more, or play with the [demo app](https://gallery.shinyapps.io/110-error-sanitization/).
+*     **Error Sanitization**: you now have the option to sanitize error messages. This can be important if there is
+      information in the original error message that you don’t want the user to see (usually because it may be sensitive information). To sanitize errors everywhere in your app, just add `options(shiny.sanitize.errors = TRUE)` somewhere in your app. Read [this article][sanitize-errors.html] for more, or play with the [demo app](https://gallery.shinyapps.io/110-error-sanitization/).
 
- <li markdown="1" style="padding-bottom: 10px;">**Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
+*     **Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will
+      search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
 
- <li markdown="1" style="padding-bottom: 10px;">**Reactlog visualization**: by default, the [`showReactLog()` function][showReactLog.html] (which shows the reactive graph) also displays the time that each reactive and observer were active for:
+*     **Reactlog visualization**: by default, the [`showReactLog()` function][showReactLog.html] (which shows the
+      reactive graph) also displays the time that each reactive and observer were active for:
 
-<p align="center">
-<img src="http://shiny.rstudio-staging.com/images/reactlog.png" alt="modal-dialog" width="75%"/>
-</p>
+      <p align="center">
+      <img src="http://shiny.rstudio-staging.com/images/reactlog.png" alt="modal-dialog" width="75%"/>
+      </p>
 
-This new feature can be turned off by specifying `showReactLog(time = FALSE)` (this may be convenient if you have a large graph and don't want to not have this new information cluttering it up the graph). The elapsed time info shows up above each relevant node's label, and it's encoded in a 6-step monochromatic red scale ranging from a very pale red/beige to a dark wine red (from [colorbrewer](http://colorbrewer2.org/?type=sequential&scheme=Reds&n=9)). The colors are normalized so that the slowest reactive in your app will always be dark red and the fastest will always be light red.
+      This new feature can be turned off by specifying `showReactLog(time = FALSE)` (this may be convenient if you have a large graph and don't want to not have this new information cluttering it up the graph). The elapsed time info shows up above each relevant node's label, and it's encoded in a 6-step monochromatic red scale ranging from a very pale red/beige to a dark wine red (from [colorbrewer](http://colorbrewer2.org/?type=sequential&scheme=Reds&n=9)). The colors are normalized so that the slowest reactive in your app will always be dark red and the fastest will always be light red.
 
-Now you can also drag any of the nodes to a specific position and leave them there (you'll see the border around the node turn black -- that means it is in a fixed position). If you want to release the node back, just double click on it (you'll see the border around it go back to gray).
+      Now you can also drag any of the nodes to a specific position and leave them there (you'll see the border around the node turn black -- that means it is in a fixed position). If you want to release the node back, just double click on it (you'll see the border around it go back to gray).
 
- <li markdown="1" style="padding-bottom: 10px;">* **Nicer-looking tables**: we've made tables generated with `renderTable()` look more Bootstrap-y and generally nicer-looking. While this won't break any older code (even though there's a bunch of new possible arguments, all the old ones are still accepted), the finished look of your table will be quite a bit different, as the following image shows:
+*     **Nicer-looking tables**: we've made tables generated with `renderTable()` look more Bootstrap-y and generally
+      nicer-looking. While this won't break any older code (even though there's a bunch of new possible arguments, all the old ones are still accepted), the finished look of your table will be quite a bit different, as the following image shows:
 
-<p align="center">
-<img src="http://shiny.rstudio-staging.com/images/render-table.png" alt="render-table" width="75%"/>
-</p>
+      <p align="center">
+      <img src="http://shiny.rstudio-staging.com/images/render-table.png" alt="render-table" width="75%"/>
+      </p>
 
- For more, read our [short article][render-table.html] about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/) or check out the [reference documentation][renderTable.html].
-
-</ul>
+      For more, read our [short article][render-table.html] about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/) or check out the [reference documentation][renderTable.html].
 
 ## Full changelog
 

@@ -20,15 +20,6 @@
 [pool-advanced.html]: http://shiny.rstudio-staging.com/articles/pool-advanced.html
 [pool-dplyr.html]: http://shiny.rstudio-staging.com/articles/pool-dplyr.html
 
-<style>
-img {
-  width: 50%;
-  display: block;
-  margin-left: auto;
-  margin-right: auto
-}
-</style>
-
 shiny 0.14
 =================
 A new Shiny release is upon us! There's quite a few new exciting features, as well as a lot of minor ones, a bunch of bug fixes and some library updates. You can browse through the full changelog below for the details, as we'll just highlight the most important changes here. In all likelihood, this will be the last release before shiny 1.0, so get out your party hats!
@@ -60,6 +51,7 @@ Shiny can now automatically reconnect your Shiny session if you lose network acc
 ## Modal windows
 Shiny now has built-in support for displaying modal dialogs like the one below ([live app here](https://gallery.shinyapps.io/114-modal-dialog/)):
 
+<img src="modal-dialog.png" alt="modal-dialog" style="width: 50%;"/>
 ![modal-dialog][modal-dialog.png]
 
 To learn more about this, read [our article][modal-dialogs.html] and the [reference documentation][modalDialog.html].

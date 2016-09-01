@@ -78,15 +78,16 @@ not necessary for the outputs to validate \code{input$x} explicitly, as long
 as \code{a} does validate it.
 }
 \examples{
-# in ui.R
-fluidPage(
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+ui <- fluidPage(
   checkboxGroupInput('in1', 'Check some letters', choices = head(LETTERS)),
   selectizeInput('in2', 'Select a state', choices = state.name),
   plotOutput('plot')
 )
 
-# in server.R
-function(input, output) {
+server <- function(input, output) {
   output$plot <- renderPlot({
     validate(
       need(input$in1, 'Check at least one letter!'),
@@ -94,6 +95,10 @@ function(input, output) {
     )
     plot(1:10, main = paste(c(input$in1, input$in2), collapse = ', '))
   })
+}
+
+shinyApp(ui, server)
+
 }
 }
 

@@ -90,7 +90,7 @@ While there's a lot more minor features, small improvements and bug fixes than w
 * **Reactlog visualization**: by default, the [`showReactLog()` function][showReactLog.html] (which shows the reactive graph) also displays the time that each reactive and observer were active for:
 
 <p align="center">
-<img src="http://shiny.rstudio-staging.com/images/reactlog.png" alt="modal-dialog" width="50%"/>
+<img src="http://shiny.rstudio-staging.com/images/reactlog.png" alt="modal-dialog" width="75%"/>
 </p>
 
 This new feature can be turned off by specifying `showReactLog(time = FALSE)` (this may be convenient if you have a large graph and don't want to not have this new information cluttering it up the graph). The elapsed time info shows up above each relevant node's label, and it's encoded in a 6-step monochromatic red scale ranging from a very pale red/beige to a dark wine red (from [colorbrewer](http://colorbrewer2.org/?type=sequential&scheme=Reds&n=9)). The colors are normalized so that the slowest reactive in your app will always be dark red and the fastest will always be light red.
@@ -100,7 +100,7 @@ Now you can also drag any of the nodes to a specific position and leave them the
 * **Nicer-looking tables**: we've made tables generated with `renderTable()` look more Bootstrap-y and generally nicer-looking. While this won't break any older code (even though there's a bunch of new possible arguments, all the old ones are still accepted), the finished look of your table will be quite a bit different, as the following image shows:
 
 <p align="center">
-<img src="http://shiny.rstudio-staging.com/images/render-table.png" alt="render-table" width="50%"/>
+<img src="http://shiny.rstudio-staging.com/images/render-table.png" alt="render-table" width="75%"/>
 </p>
 
 For more, read our [short article][render-table.html] about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/) or check out the [reference documentation][renderTable.html].

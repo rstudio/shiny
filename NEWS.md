@@ -35,7 +35,13 @@ See [this article][bookmarking-state.html] to get started with bookmarkable stat
 Shiny can now display notifications on the client browser by using the `showNotification()` function. Use [this demo app](https://gallery.shinyapps.io/116-notifications/) to play around with the notification API. Here's a screenshot of a very simple notification (shown when the button is clicked):
 
 <!-- ![notification][notification.png] -->
-<img style="width: 50%;" src="http://shiny.rstudio-staging.com/images/notification.png" alt="notification"/>
+<img src="http://shiny.rstudio-staging.com/images/notification.png"
+     alt="notification"
+     style="width: 100px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto"
+/>
 
 [Here][notifications.html]'s our article about it, and the [reference documentation][showNotification.html].
 

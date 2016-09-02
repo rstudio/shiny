@@ -597,7 +597,7 @@ runApp <- function(appDir=getwd(),
 
   workerId(workerId)
 
-  if (nzchar(Sys.getenv('SHINY_PORT'))) {
+  if (inShinyServer()) {
     # If SHINY_PORT is set, we're running under Shiny Server. Check the version
     # to make sure it is compatible. Older versions of Shiny Server don't set
     # SHINY_SERVER_VERSION, those will return "" which is considered less than
@@ -982,4 +982,10 @@ browserViewer <- function(browser = getOption("browser")) {
   function(url) {
     utils::browseURL(url, browser = browser)
   }
+}
+
+# Returns TRUE if we're running in Shiny Server or other hosting environment,
+# otherwise returns FALSE.
+inShinyServer <- function() {
+  nzchar(Sys.getenv('SHINY_PORT'))
 }

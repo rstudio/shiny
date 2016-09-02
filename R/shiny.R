@@ -470,6 +470,18 @@ ShinySession <- R6Class(
       if (store == "disable")
         return()
 
+      # Warn if trying to enable save-to-server bookmarking on a version of SS,
+      # SSP, or Connect that doesn't support it.
+      if (store == "server" && inShinyServer() &&
+          is.null(getShinyOption("save.interface")))
+      {
+        showNotification(
+          "This app tried to enable saved-to-server bookmarking, but it is not supported by the hosting environment.",
+          duration = NULL, type = "warning", session = self
+        )
+        return()
+      }
+
       withReactiveDomain(self, {
         # This observer fires when the bookmark button is clicked.
         observeEvent(self$input[["._bookmark_"]], {

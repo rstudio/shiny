@@ -1,153 +1,186 @@
 shiny 0.13.2.9005
 =================
+A new Shiny release is upon us! There's quite a few new exciting features, as well as a lot of minor ones, a bunch of bug fixes and some library updates. You can browse through the full changelog below for the details, as we'll just highlight the most important changes here. In all likelihood, this will be the last release before shiny 1.0, so get out your party hats!
 
-## Breaking changes
+The breaking changes in this release are relatively minor and should not affect much. If you encounter a new bug or your app breaks in a way that you don't understand (or that is not detailed here), please let us know! (Do pay attention at the "Progress indicators" section below as you may need to add an extra argument to `withProgress()` if you were using custom CSS.)
 
-* Progress indicators can now either use the new notification API, using
-  `style="notification"`, or be displayed with the previous styling, using
-  `style="old"`. You can also call `shinyOptions(progress.style="old")`
-  in the server function to make all progress indicators use the old styling.
-  (#1160, #1327, #1329)
+## Bookmarkable state
+Shiny now supports bookmarkable state: users can save the state of an application and get a URL which will restore the application with that state. There are two types of bookmarking: encoding the state in a URL, and saving the state to the server. With an encoded state, the entire state of the application is contained in the URL’s query string. You can see this in action with this app: https://gallery.shinyapps.io/113-bookmarking-url/. An example of a bookmark URL for this app is https://gallery.shinyapps.io/113-bookmarking-url/?_inputs_&n=200. When the state is saved to the server, the URL might look like: `https://gallery.shinyapps.io/bookmark-saved/?_state_id_=d80625dc681e913a`.
 
-* Closed #1161: Deprecated the `position` argument to `tabsetPanel()` since
-  Bootstrap 3 stopped supporting this feature.
+**_Important note_:**
+> The "save to server" option for bookmarkable state is still a very experimental feature and is not currently supported on Shiny Server Pro, RStudio Connect, or shinyapps.io.
 
-* The long-deprecated ability to pass a `func` argument to many of the
-  `render` functions has been removed.
+See [this article](http://shiny.rstudio-staging.com/articles/bookmarking-state.html) to get started with bookmarkable state. There is also an [advanced-level article](http://shiny.rstudio-staging.com/articles/advanced-bookmarking.html) (for apps that have a complex state), and [a modules article](http://shiny.rstudio-staging.com/articles/bookmarking-modules.html) that details how to use bookmarking in conjunction with modules. Here is the [reference documentation](http://shiny.rstudio-staging.com/reference/shiny/latest/enableBookmarking.html).
 
-## New features
+## Notifications
+Shiny can now display notifications on the client browser by using the `showNotification()` function. Use [this demo app](https://gallery.shinyapps.io/116-notifications/) to play around with the notification API. Here's a screenshot of a very simple notification (shown when the button is clicked):
 
-* Added the ability to bookmark and restore application state.
+<p align="center">
+<img src="http://shiny.rstudio-staging.com/images/notification.png" alt="notification" width="50%"/>
+</p>
 
-* Added a new notification API. From R, there are new functions
-  `showNotification` and `hideNotification`. From JavaScript, there is a new
-  `Shiny.notification` object that controls notifications. (#1141)
+[Here](http://shiny.rstudio-staging.com/articles/notifications.html)'s our article about it, and the [reference documentation](http://shiny.rstudio-staging.com/reference/shiny/latest/showNotification.html).
 
-* Added the ability for the client browser to reconnect to a new session on
-  the server, by setting `session$allowReconnect(TRUE)`. This requires a
-  version of Shiny Server that supports reconnections. (#1074)
+## Progress indicators
+If your Shiny app contains computations that take a long time to complete, a progress bar can improve the user experience by communicating how far along the computation is, and how much is left. Progress bars were added in Shiny 0.10.2. In Shiny 0.14, they were changed to use the notifications system (which gives them a pretty different look by default, but keeps the same API).
 
-* Added modal dialogs. (#1157)
+**_Important note_:**
+> If you were already using progress bars before and had customized them with your own CSS, you must add a new argument to the `withProgress()` function (or to `Progress$new()`), specifying `style = "old"` if you want to keep the same look in the UI. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. In any case, do feel free to try out the default notification-style look!
 
-* Added insertUI and removeUI functions to be able to add and remove chunks
-  of UI, standalone, and all independent of one another.
+To see progress bars in action, see [this app](https://gallery.shinyapps.io/085-progress/) in the gallery. You can also learn more about this in [our article](http://shiny.rstudio-staging.com/articles/progress.html) and in the reference documentation (either for the easier [`withProgress` functional API](http://shiny.rstudio-staging.com/reference/shiny/latest/withProgress.html) or the more complicated, but more powerful, [`Progress` object-oriented API](http://shiny.rstudio-staging.com/reference/shiny/latest/Progress.html).
 
-* Improved `renderTable()` function to make the tables look prettier and also
-  provide the user with a lot more parameters to customize their tables with.
+## Reconnection
+Shiny can now automatically reconnect your Shiny session if you lose network access temporarily. Here is our article about this (FORTHCOMING).
 
-* Added support for the `pool` package (use Shiny's timer/scheduler)
+## Modal windows
+Shiny has now built-in support for displaying modal dialogs like the one below ([live app here](https://gallery.shinyapps.io/114-modal-dialog/)):
 
-## Minor new features and improvements
+<p align="center">
+<img src="http://shiny.rstudio-staging.com/images/modal-dialog.png" alt="modal-dialog" width="50%"/>
+</p>
 
-* Added `cancelOutput` argument to `req()`. This causes the currently
-  executing reactive to cancel its execution, and leave its previous state
-  alone (as opposed to clearing the output).
+To learn more about this, read [our article](http://shiny.rstudio-staging.com/articles/modal-dialogs.html) and the [reference documentation](http://shiny.rstudio-staging.com/reference/shiny/latest/modalDialog.html).
 
-* `Display: Showcase` now displays the .js, .html and .css files in the `www`
-  directory by default. In order to use showcase mode and not display these,
-  include a new line in your Description file: `IncludeWWW: False`. (#1185)
+## `insertUI` and `removeUI`
+Sometimes in a Shiny app, arbitrary UI may need to be created on-the-fly in response to user input. The existing `uiOutput` and `renderUI` functions let you continue using reactive logic to generate calls to UI functions and make the results appear in a predetermined place in the UI. The `insertUI` and `removeUI` functions, which are used in `server.R`, allow you to switch over to imperative logic to add and remove arbitrary chunks of UI code (all independent from one another), as many times as you want, whenever you want, wherever you want. This option may be more convenient when you want to, for example, add a new model to your app each time the user selects a different option (and leave previous models unchanged, rather than substitute the previous one for the latest one).
 
-* Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`.
-  By default, this option is `FALSE`. When `TRUE`, normal errors will be
-  sanitized, displaying only a generic error message. This changes the look
-  of an app when errors are printed (but the console log remains the same).
-  (#1123, #1156)
+See [this simple demo app](https://gallery.shinyapps.io/111-insert-ui/) of how one could use `insertUI` and `removeUI` to insert and remove text elements using a queue logic. You might also want to check out [this other app](https://gallery.shinyapps.io/insertUI/) that demos how to insert and remove a few common shiny input objects. Finally, [this app](https://gallery.shinyapps.io/insertUI-modules/) shows how to dynamically insert modules using `insertUI`.
 
-* Added the option of passing arguments to an `xxxOutput()` function through
-  the corresponding `renderXXX()` function via an `outputArgs` parameter to the
-  latter. This is only valid for snippets of Shiny code in an interactive
-  `runtime: shiny` Rmd document (never for full apps, even if embedded in an
-  Rmd).
+For more, read [our article](http://shiny.rstudio-staging.com/articles/dynamic-ui.html) about dynamic UI generation and the reference documentation about [`insertUI`](http://shiny.rstudio-staging.com/reference/shiny/latest/insertUI.html) and [`removeUI`](http://shiny.rstudio-staging.com/reference/shiny/latest/removeUI.html).
 
-* Added `updateActionButton()` function, so the user can change an
-  `actionButton`'s (or `actionLink`'s) label and/or icon. It also checks that
-  the icon argument (for both creation and updating of a button) is valid and
-  throws a warning otherwise. (#1134)
+## Documentation for connecting to an external database
+As Shiny apps grow and become more complex, a recurring issue has been that of integrating an external database into an app. While this is already possible, so far it’s been mostly up to the app authors to figure out the appropriate database driver for R and how to manage the database connections within the app itself. In order to demystify this process, we wrote up a series of articles ([first one here](http://shiny.rstudio-staging.com/articles/overview.html)) that covers the basics of hooking up to an external database, as well as some security precautions to keep in mind (e.g. [how to avoid SQL injection attacks](http://shiny.rstudio-staging.com/articles/sql-injections.html)).
 
-* Added code diagnostics: if there is an error parsing ui.R, server.R, app.R,
-  or global.R, Shiny will search the code for missing commas, extra commas,
-  and unmatched braces, parens, and brackets, and will print out messages
-  pointing out those problems. (#1126)
+There's a few packages that you should definitely check out if you're using a relational database in a Shiny app: the `dplyr` and `DBI` packages (both featured in the article linked above) and the brand new `pool` package, which provides a further layer of abstraction to make it easier (and safer) to use either `DBI` or `dplyr`. In particular, `pool` will take care of managing connections, preventing leaks and ensuring the best performance. Check out this [`pool` basics article](http://shiny.rstudio-staging.com/articles/pool-basics.html) and the [more advanced-level article](http://shiny.rstudio-staging.com/articles/pool-advanced.html) if you're feeling adventurous (both of which contain Shiny app examples that use `DBI` to connect to an external MySQL database)! If you are more comfortable with `dplyr` than `DBI`, don't miss the article about the [integration of `pool` and `dplyr`](http://shiny.rstudio-staging.com/articles/pool-dplyr.html).
 
-* Added support for horizontal dividers in `navbarMenu`. (#888)
+If you're new to databases in the Shiny world, we recommend you always use `dplyr` and `pool` if possible. If you need greater control than `dplyr` offers (for example, if you need to modify data in the external database or use transactions), then use `DBI` and `pool`. The `pool` package was introduced to make your life easier, but in no way constrain you, so we don't envision any situation in which you'd be better off *not* using it. The only caveat to this at the present moment is that `pool` is not yet on CRAN, so you may prefer to wait for that.
 
-* navbarMenu now has dividers and dropdown headers (#888)
+## Others
+While there's a lot more minor features, small improvements and bug fixes than we can cover here, we'll just finish by mentioning a few of the more noteworthy ones (the full changelog, with links to all the relevant issues and PRs, is right below this section):
 
-* Added `placeholder` option to `passwordInput`. (#1152)
+*    **Error Sanitization**: you now have the option to sanitize error messages. This can be important if there is information in the original error message that you don’t want the user to see (usually because it may be sensitive information). To sanitize errors everywhere in your app, just add `options(shiny.sanitize.errors = TRUE)` somewhere in your app. Read [this article](http://shiny.rstudio-staging.com/articles/sanitize-errors.html) for more, or play with the [demo app](https://gallery.shinyapps.io/110-error-sanitization/).
 
-* Added `session$resetBrush(brushId)` (R) and `Shiny.resetBrush(brushId)` (JS)
-  to programatically clear brushes from `imageOutput`/`plotOutput`. (#1197)
+*    **Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
 
-* Added textAreaInput. (Thanks to @nuno-agostinho. #1183, #1300)
+*    **Reactlog visualization**: by default, the [`showReactLog()` function](http://shiny.rstudio-staging.com/reference/shiny/latest/showReactLog.html) (which brings up the reactive graph) also displays the time that each reactive and observer were active for:
 
-* Added `session$sendBinaryMessage(type, message)` method for sending custom
-  binary data to the client. See `?session`. (Thanks, @daef! #1316, #1320)
+      <p align="center">
+      <img src="http://shiny.rstudio-staging.com/images/reactlog.png" alt="modal-dialog" width="75%"/>
+      </p>
 
-* Almost all code examples now have a runnable example with `shinyApp()`, so
-  that users can run the examples and see them in action. (#1137, #1158)
+      This new feature can be turned off by specifying `showReactLog(time = FALSE)` (this may be convenient if you have a large graph and don't want to have this new information cluttering it up). The elapsed time info shows up above each relevant node's label, and it's encoded in a 6-step monochromatic red scale ranging from a very pale red/beige to a dark wine red (from [colorbrewer](http://colorbrewer2.org/?type=sequential&scheme=Reds&n=9)). The colors are normalized so that the slowest reactive in your app will always be dark red and the fastest will always be light red.
 
-* When resized, plots are drawn with `replayPlot()`, instead of re-executing
-  all plotting code. This results in faster plot rendering. (#1112)
+      Another improvement to the reactive graph is that you can now also drag any of the nodes to a specific position and leave them there (you'll see the border around the node turn black -- that means it is in a fixed position). If you want to release the node back, just double click on it (you'll see the border around it go back to gray).
 
-* Exported the `isTruthy()` function.
+*    **Nicer-looking tables**: we've made tables generated with `renderTable()` look more Bootstrap-y and generally nicer-looking. While this won't break any older code (even though there's a bunch of new possible arguments, all the old ones are still accepted), the finished look of your table will be quite a bit different, as the following image shows:
 
-* Reactive log now shows elapsed time for reactives and observers.
+      <p align="center">
+      <img src="http://shiny.rstudio-staging.com/images/render-table.png" alt="render-table" width="75%"/>
+      </p>
 
-* Nodes in the reactlog visualization are now sticky if the user drags them.
+      For more, read our [short article](http://shiny.rstudio-staging.com/articles/render-table.html) about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/) or check out the [reference documentation](http://shiny.rstudio-staging.com/reference/shiny/latest/renderTable.html).
 
-## Bug fixes
+## Full changelog
 
-* Fixed #1350: Highlighting of reactives didn't work in showcase mode. (#1351)
+### Breaking changes
 
-* Fixed #1331: `renderPlot()` now correctly records and replays plots when
-  `execOnResize=FALSE`. (#1337)
+* Progress indicators can now either use the new notification API, using `style = "notification"` (default), or be displayed with the previous styling, using `style = "old"`. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. Note that if you had customized your progress indicators with additional CSS, you'll *need* to use `style = "old"` if you want your UI to look the same ([#1160](https://github.com/rstudio/shiny/pull/1160) and [#1329](https://github.com/rstudio/shiny/pull/1329)).
 
-* `updateDateInput()` and `updateDateRangeInput()` can now clear the date
-  input fields. (#1299, #896, #1315)
+* Closed [#1161](https://github.com/rstudio/shiny/issues/1161): Deprecated the `position` argument to `tabsetPanel()` since Bootstrap 3 stopped supporting this feature.
 
-* Fixed #561: DataTables previously might pop up a warning when the data was
-  updated extremely frequently.
+* The long-deprecated ability to pass a `func` argument to many of the `render` functions has been removed.
 
-* Fixed #776: In some browsers, plots sometimes flickered when updated.
+### New features
 
-* Fixed #543, #855: When `navbarPage()` had a `navbarMenu()` as the first
-  item, it did not automatically select an item.
+* Added the ability to bookmark and restore application state. (main PR: [#1209](https://github.com/rstudio/shiny/pull/1209))
 
-* Fixed #970: `navbarPage()` previously did not have an option to set the
-  selected tab.
+* Added a new notification API. From R, there are new functions `showNotification` and `hideNotification`. From JavaScript, there is a new `Shiny.notification` object that controls notifications. ([#1141](https://github.com/rstudio/shiny/pull/1141))
 
-* Fixed #1253: Memory could leak when an observer was destroyed without first
-  being invalidated. (#1254)
+* Progress indicators now use the notification API. ([#1160](https://github.com/rstudio/shiny/pull/1160))
 
-* Fixed #931: Nested observers could leak memory. (#1256)
+* Added the ability for the client browser to reconnect to a new session on the server, by setting `session$allowReconnect(TRUE)`. This requires a version of Shiny Server that supports reconnections. ([#1074](https://github.com/rstudio/shiny/pull/1074))
 
-* Fixed #1144: `updateRadioButton()` and `updateCheckboxGroupInput()` broke
-  controls when used in modules (thanks, @sipemu!). (#1285)
+* Added modal dialogs. ([#1157](https://github.com/rstudio/shiny/pull/1157))
 
-* Fixed #1093: `updateRadioButtons()` and `updateCheckboxGroupInput()` didn't
-  work if `choices` was numeric vector.
+* Added insertUI and removeUI functions to be able to add and remove chunks of UI, standalone, and all independent of one another. ([#1174](https://github.com/rstudio/shiny/pull/1174) and [#1189](https://github.com/rstudio/shiny/pull/1189))
 
-* Fixed #1122: `downloadHandler()` popped up empty browser window if the file
-  wasn't present. It now gives a 404 error code.
+* Improved `renderTable()` function to make the tables look prettier and also provide the user with a lot more parameters to customize their tables with. ([#1129](https://github.com/rstudio/shiny/pull/1129))
 
-* Fixed #1284: Reactive system was being flushed too often (usually this just
-  means a more-expensive no-op than necessary).
+* Added support for the `pool` package (use Shiny's timer/scheduler). ([#1226](https://github.com/rstudio/shiny/pull/1226))
 
-* Fixed #1179: `updateDateInput()` sometimes didn't work with malformed dates.
+### Minor new features and improvements
 
-* Fixed #1257: `updateSelectInput()` didn't work correctly in IE 11 and Edge.
-  (#1277)
+* Added `cancelOutput` argument to `req()`. This causes the currently executing reactive to cancel its execution, and leave its previous state alone (as opposed to clearing the output). ([#1272](https://github.com/rstudio/shiny/pull/1272))
 
-* Fixed #803: Malformed date input values crashed app. (#1298)
+* `Display: Showcase` now displays the .js, .html and .css files in the `www` directory by default. In order to use showcase mode and not display these, include a new line in your Description file: `IncludeWWW: False`. ([#1185](https://github.com/rstudio/shiny/pull/1185))
 
-* Fixed #971: `runApp()` would give confusing error if `port` was not numeric.
+* Added an error sanitization option: `options(shiny.sanitize.errors = TRUE)`. By default, this option is `FALSE`. When `TRUE`, normal errors will be sanitized, displaying only a generic error message. This changes the look of an app when errors are printed (but the console log remains the same). ([#1156](https://github.com/rstudio/shiny/pull/1156))
 
-* Shiny now avoids using ports that Chrome deems unsafe. (#1222)
+* Added the option of passing arguments to an `xxxOutput()` function through the corresponding `renderXXX()` function via an `outputArgs` parameter to the latter. This is only valid for snippets of Shiny code in an interactive `runtime: shiny` Rmd document (never for full apps, even if embedded in an Rmd). ([#1443](https://github.com/rstudio/shiny/pull/1143))
 
-* Added workaround for quartz graphics device resolution bug, where resolution
-  is hard-coded to 72 ppi.
+* Added `updateActionButton()` function, so the user can change an `actionButton`'s (or `actionLink`'s) label and/or icon. It also checks that the icon argument (for both creation and updating of a button) is valid and throws a warning otherwise. ([#1134](https://github.com/rstudio/shiny/pull/1134))
 
-## Library updates
+* Added code diagnostics: if there is an error parsing ui.R, server.R, app.R, or global.R, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
+
+* Added support for horizontal dividers in `navbarMenu`. ([#1147](https://github.com/rstudio/shiny/pull/1147))
+
+* Added `placeholder` option to `passwordInput`. ([#1152](https://github.com/rstudio/shiny/pull/1152))
+
+* Added `session$resetBrush(brushId)` (R) and `Shiny.resetBrush(brushId)` (JS) to programatically clear brushes from `imageOutput`/`plotOutput`. ([#1197](https://github.com/rstudio/shiny/pull/1197))
+
+* Added textAreaInput. (thanks, [@nuno-agostinho](https://github.com/nuno-agostinho)! [#1300](https://github.com/rstudio/shiny/pull/1300))
+
+* Added `session$sendBinaryMessage(type, message)` method for sending custom binary data to the client. See `?session`. (thanks, [@daef](https://github.com/daef)! [#1316](https://github.com/rstudio/shiny/pull/1316) and [#1320](https://github.com/rstudio/shiny/pull/1320))
+
+* Almost all code examples now have a runnable example with `shinyApp()`, so that users can run the examples and see them in action. ([#1158](https://github.com/rstudio/shiny/pull/1158))
+
+* When resized, plots are drawn with `replayPlot()`, instead of re-executing all plotting code. This results in faster plot rendering. ([#1112](https://github.com/rstudio/shiny/pull/1112))
+
+* Exported the `isTruthy()` function. (part of PR [#1272](https://github.com/rstudio/shiny/pull/1272))
+
+* Reactive log now shows elapsed time for reactives and observers. ([#1132](https://github.com/rstudio/shiny/pull/1132))
+
+* Nodes in the reactlog visualization are now sticky if the user drags them. ([#1283](https://github.com/rstudio/shiny/pull/1283))
+
+### Bug fixes
+
+* Fixed [#1350](https://github.com/rstudio/shiny/issues/1350): Highlighting of reactives didn't work in showcase mode.
+
+* Fixed [#1331](https://github.com/rstudio/shiny/issues/1331): `renderPlot()` now correctly records and replays plots when `execOnResize = FALSE`.
+
+* `updateDateInput()` and `updateDateRangeInput()` can now clear the date input fields. (thanks, [@gaborcsardi](https://github.com/gaborcsardi)! [#1299](https://github.com/rstudio/shiny/pull/1299), [#1315](https://github.com/rstudio/shiny/pull/1315) and  [#1317](https://github.com/rstudio/shiny/pull/1317))
+
+* Fixed [#561](https://github.com/rstudio/shiny/issues/561): DataTables previously might pop up a warning when the data was updated extremely frequently.
+
+* Fixed [#776](https://github.com/rstudio/shiny/issues/776): In some browsers, plots sometimes flickered when updated.
+
+* Fixed [#543](https://github.com/rstudio/shiny/issues/543) and [#855](https://github.com/rstudio/shiny/issues/855): When `navbarPage()` had a `navbarMenu()` as the first item, it did not automatically select an item.
+
+* Fixed [#970](https://github.com/rstudio/shiny/issues/970): `navbarPage()` previously did not have an option to set the selected tab.
+
+* Fixed [#1253](https://github.com/rstudio/shiny/issues/1253): Memory could leak when an observer was destroyed without first being invalidated.
+
+* Fixed [#931](https://github.com/rstudio/shiny/issues/931): Nested observers could leak memory.
+
+* Fixed [#1144](https://github.com/rstudio/shiny/issues/1144): `updateRadioButton()` and `updateCheckboxGroupInput()` broke controls when used in modules (thanks, [@sipemu](https://github.com/sipemu)!).
+
+* Fixed [#1093](https://github.com/rstudio/shiny/issues/1093): `updateRadioButtons()` and `updateCheckboxGroupInput()` didn't work if `choices` was numeric vector.
+
+* Fixed [#1122](https://github.com/rstudio/shiny/issues/1122): `downloadHandler()` popped up empty browser window if the file wasn't present. It now gives a 404 error code.
+
+* Fixed [#1278](https://github.com/rstudio/shiny/issues/1278): Reactive system was being flushed too often (usually this just means a more-expensive no-op than necessary).
+
+* Fixed [#803](https://github.com/rstudio/shiny/issues/803) and [#1179](https://github.com/rstudio/shiny/issues/1179): handling malformed dates in `dateInput` and `updateDateInput()`.
+
+* Fixed [#1257](https://github.com/rstudio/shiny/issues/1257): `updateSelectInput()` didn't work correctly in IE 11 and Edge.
+
+* Fixed [#971](https://github.com/rstudio/shiny/issues/971): `runApp()` would give confusing error if `port` was not numeric.
+
+* Shiny now avoids using ports that Chrome deems unsafe. ([#1222](https://github.com/rstudio/shiny/pull/1222))
+
+* Added workaround for quartz graphics device resolution bug, where resolution is hard-coded to 72 ppi.
+
+### Library updates
 
 * Updated to ion.RangeSlider 2.1.2.
 

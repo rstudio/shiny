@@ -76,7 +76,25 @@ saveShinySaveState <- function(state) {
 
   # Pass the saveState function to the save interface function, which will
   # invoke saveState after preparing the directory.
-  saveInterface <- getShinyOption("save.interface", default = saveInterfaceLocal)
+
+  # Look for a save.interface function. This will be defined by the hosting
+  # environment if it supports bookmarking.
+  saveInterface <- getShinyOption("save.interface")
+
+  if (is.null(saveInterface)) {
+    if (inShinyServer()) {
+      # We're in a version of Shiny Server/Connect that doesn't have
+      # bookmarking support.
+      saveInterface <- function(id, callback) {
+        stop("The hosting environment does not support saved-to-server bookmarking.")
+      }
+
+    } else {
+      # We're running Shiny locally.
+      saveInterface <- saveInterfaceLocal
+    }
+  }
+
   saveInterface(id, saveState)
 
   paste0("_state_id_=", encodeURIComponent(id))
@@ -260,7 +278,24 @@ RestoreContext <- R6Class("RestoreContext",
         }
       }
 
-      loadInterface <- getShinyOption("load.interface", default = loadInterfaceLocal)
+      # Look for a load.interface function. This will be defined by the hosting
+      # environment if it supports bookmarking.
+      loadInterface <- getShinyOption("load.interface")
+
+      if (is.null(loadInterface)) {
+        if (inShinyServer()) {
+          # We're in a version of Shiny Server/Connect that doesn't have
+          # bookmarking support.
+          loadInterface <- function(id, callback) {
+            stop("The hosting environment does not support saved-to-server bookmarking.")
+          }
+
+        } else {
+          # We're running Shiny locally.
+          loadInterface <- loadInterfaceLocal
+        }
+      }
+
       loadInterface(id, loadFun)
 
       invisible()

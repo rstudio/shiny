@@ -172,6 +172,10 @@ While there's a lot more minor features, small improvements and bug fixes than w
 
 ### Bug fixes
 
+* Fixed [#1350](https://github.com/rstudio/shiny/issues/1350): Highlighting of reactives didn't work in showcase mode.
+
+* Fixed [#1331](https://github.com/rstudio/shiny/issues/1331): `renderPlot()` now correctly records and replays plots when `execOnResize = FALSE`.
+
 * `updateDateInput()` and `updateDateRangeInput()` can now clear the date input fields. (thanks, [@gaborcsardi](https://github.com/gaborcsardi)! [#1299](https://github.com/rstudio/shiny/pull/1299), [#1315](https://github.com/rstudio/shiny/pull/1315) and  [#1317](https://github.com/rstudio/shiny/pull/1317))
 
 * Fixed [#561](https://github.com/rstudio/shiny/issues/561): DataTables previously might pop up a warning when the data was updated extremely frequently.

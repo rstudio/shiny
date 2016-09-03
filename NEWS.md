@@ -1,18 +1,19 @@
 shiny 0.13.2.9005
 =================
-A new Shiny release is upon us! There's quite a few new exciting features, as well as a lot of minor ones, a bunch of bug fixes and some library updates. You can browse through the full changelog below for the details, as we'll just highlight the most important changes here. In all likelihood, this will be the last release before shiny 1.0, so get out your party hats!
 
-The breaking changes in this release are relatively minor and should not affect much. If you encounter a new bug or your app breaks in a way that you don't understand (or that is not detailed here), please let us know! (Do pay attention at the "Progress indicators" section below as you may need to add an extra argument to `withProgress()` if you were using custom CSS.)
+A new Shiny release is upon us! There are many new exciting features, bug fixes, and library updates. We'll just highlight the most important changes here, but you can browse through the full changelog below for details. This will likely be the last release before shiny 1.0, so get out your party hats!
 
 ## Bookmarkable state
-Shiny now supports bookmarkable state: users can save the state of an application and get a URL which will restore the application with that state. There are two types of bookmarking: encoding the state in a URL, and saving the state to the server. With an encoded state, the entire state of the application is contained in the URL’s query string. You can see this in action with this app: https://gallery.shinyapps.io/113-bookmarking-url/. An example of a bookmark URL for this app is https://gallery.shinyapps.io/113-bookmarking-url/?_inputs_&n=200. When the state is saved to the server, the URL might look like: `https://gallery.shinyapps.io/bookmark-saved/?_state_id_=d80625dc681e913a`.
+
+Shiny now supports bookmarkable state: users can save the state of an application and get a URL which will restore the application with that state. There are two types of bookmarking: encoding the state in a URL, and saving the state to the server. With an encoded state, the entire state of the application is contained in the URL’s query string. You can see this in action with this app: https://gallery.shinyapps.io/113-bookmarking-url/. An example of a bookmark URL for this app is https://gallery.shinyapps.io/113-bookmarking-url/?_inputs_&n=200. When the state is saved to the server, the URL might look something like: https://gallery.shinyapps.io/bookmark-saved/?_state_id_=d80625dc681e913a (note that this URL is not for an active app).
 
 **_Important note_:**
-> The "save to server" option for bookmarkable state is still a very experimental feature and is not currently supported on Shiny Server Pro, RStudio Connect, or shinyapps.io.
+> Saved-to-server bookmarking currently works with Shiny Server Open Source. Support on Shiny Server Pro, RStudio Connect, and shinyapps.io is under development and testing. However, URL-encoded bookmarking works on all hosting platforms.
 
-See [this article](http://shiny.rstudio-staging.com/articles/bookmarking-state.html) to get started with bookmarkable state. There is also an [advanced-level article](http://shiny.rstudio-staging.com/articles/advanced-bookmarking.html) (for apps that have a complex state), and [a modules article](http://shiny.rstudio-staging.com/articles/bookmarking-modules.html) that details how to use bookmarking in conjunction with modules. Here is the [reference documentation](http://shiny.rstudio-staging.com/reference/shiny/latest/enableBookmarking.html).
+See [this article](http://shiny.rstudio-staging.com/articles/bookmarking-state.html) to get started with bookmarkable state. There is also an [advanced-level article](http://shiny.rstudio-staging.com/articles/advanced-bookmarking.html) (for apps that have a complex state), and [a modules article](http://shiny.rstudio-staging.com/articles/bookmarking-modules.html) that details how to use bookmarking in conjunction with modules.
 
 ## Notifications
+
 Shiny can now display notifications on the client browser by using the `showNotification()` function. Use [this demo app](https://gallery.shinyapps.io/116-notifications/) to play around with the notification API. Here's a screenshot of a very simple notification (shown when the button is clicked):
 
 <p align="center">
@@ -22,17 +23,20 @@ Shiny can now display notifications on the client browser by using the `showNoti
 [Here](http://shiny.rstudio-staging.com/articles/notifications.html)'s our article about it, and the [reference documentation](http://shiny.rstudio-staging.com/reference/shiny/latest/showNotification.html).
 
 ## Progress indicators
-If your Shiny app contains computations that take a long time to complete, a progress bar can improve the user experience by communicating how far along the computation is, and how much is left. Progress bars were added in Shiny 0.10.2. In Shiny 0.14, they were changed to use the notifications system (which gives them a pretty different look by default, but keeps the same API).
+
+If your Shiny app contains computations that take a long time to complete, a progress bar can improve the user experience by communicating how far along the computation is, and how much is left. Progress bars were added in Shiny 0.10.2. In Shiny 0.14, they were changed to use the notifications system, which gives them a different look.
 
 **_Important note_:**
-> If you were already using progress bars before and had customized them with your own CSS, you must add a new argument to the `withProgress()` function (or to `Progress$new()`), specifying `style = "old"` if you want to keep the same look in the UI. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. In any case, do feel free to try out the default notification-style look!
+> If you were already using progress bars and had customized them with your own CSS, you can add the `style = "old"` argument to your `withProgress()` call (or `Progress$new()`). This will result in the same appearance as before. You can also call `shinyOptions(progress.style = "old")` in your app's server function to make all progress indicators use the old styling.
 
-To see progress bars in action, see [this app](https://gallery.shinyapps.io/085-progress/) in the gallery. You can also learn more about this in [our article](http://shiny.rstudio-staging.com/articles/progress.html) and in the reference documentation (either for the easier [`withProgress` functional API](http://shiny.rstudio-staging.com/reference/shiny/latest/withProgress.html) or the more complicated, but more powerful, [`Progress` object-oriented API](http://shiny.rstudio-staging.com/reference/shiny/latest/Progress.html).
+To see new progress bars in action, see [this app](https://gallery.shinyapps.io/085-progress/) in the gallery. You can also learn more about this in [our article](http://shiny.rstudio-staging.com/articles/progress.html) and in the reference documentation (either for the easier [`withProgress` functional API](http://shiny.rstudio-staging.com/reference/shiny/latest/withProgress.html) or the more complicated, but more powerful, [`Progress` object-oriented API](http://shiny.rstudio-staging.com/reference/shiny/latest/Progress.html).
 
 ## Reconnection
-Shiny can now automatically reconnect your Shiny session if you lose network access temporarily. Here is our article about this (FORTHCOMING).
+
+Shiny can now automatically reconnect to your Shiny session if you temporarily lose network access.
 
 ## Modal windows
+
 Shiny has now built-in support for displaying modal dialogs like the one below ([live app here](https://gallery.shinyapps.io/114-modal-dialog/)):
 
 <p align="center">
@@ -42,23 +46,26 @@ Shiny has now built-in support for displaying modal dialogs like the one below (
 To learn more about this, read [our article](http://shiny.rstudio-staging.com/articles/modal-dialogs.html) and the [reference documentation](http://shiny.rstudio-staging.com/reference/shiny/latest/modalDialog.html).
 
 ## `insertUI` and `removeUI`
-Sometimes in a Shiny app, arbitrary UI may need to be created on-the-fly in response to user input. The existing `uiOutput` and `renderUI` functions let you continue using reactive logic to generate calls to UI functions and make the results appear in a predetermined place in the UI. The `insertUI` and `removeUI` functions, which are used in `server.R`, allow you to switch over to imperative logic to add and remove arbitrary chunks of UI code (all independent from one another), as many times as you want, whenever you want, wherever you want. This option may be more convenient when you want to, for example, add a new model to your app each time the user selects a different option (and leave previous models unchanged, rather than substitute the previous one for the latest one).
 
-See [this simple demo app](https://gallery.shinyapps.io/111-insert-ui/) of how one could use `insertUI` and `removeUI` to insert and remove text elements using a queue logic. You might also want to check out [this other app](https://gallery.shinyapps.io/insertUI/) that demos how to insert and remove a few common shiny input objects. Finally, [this app](https://gallery.shinyapps.io/insertUI-modules/) shows how to dynamically insert modules using `insertUI`.
+Sometimes in a Shiny app, arbitrary HTML UI may need to be created on-the-fly in response to user input. The existing `uiOutput` and `renderUI` functions let you continue using reactive logic to call UI functions and make the results appear in a predetermined place in the UI. The `insertUI` and `removeUI` functions, which are used in the server code, allow you to use imperative logic to add and remove arbitrary chunks of HTML (all independent from one another), as many times as you want, whenever you want, wherever you want. This option may be more convenient when you want to, for example, add a new model to your app each time the user selects a different option (and leave previous models unchanged, rather than substitute the previous one for the latest one).
+
+See [this simple demo app](https://gallery.shinyapps.io/111-insert-ui/) of how one could use `insertUI` and `removeUI` to insert and remove text elements using a queue. Also see [this other app](https://gallery.shinyapps.io/insertUI/) that demonstrates how to insert and remove a few common Shiny input objects. Finally, [this app](https://gallery.shinyapps.io/insertUI-modules/) shows how to dynamically insert modules using `insertUI`.
 
 For more, read [our article](http://shiny.rstudio-staging.com/articles/dynamic-ui.html) about dynamic UI generation and the reference documentation about [`insertUI`](http://shiny.rstudio-staging.com/reference/shiny/latest/insertUI.html) and [`removeUI`](http://shiny.rstudio-staging.com/reference/shiny/latest/removeUI.html).
 
 ## Documentation for connecting to an external database
-As Shiny apps grow and become more complex, a recurring issue has been that of integrating an external database into an app. While this is already possible, so far it’s been mostly up to the app authors to figure out the appropriate database driver for R and how to manage the database connections within the app itself. In order to demystify this process, we wrote up a series of articles ([first one here](http://shiny.rstudio-staging.com/articles/overview.html)) that covers the basics of hooking up to an external database, as well as some security precautions to keep in mind (e.g. [how to avoid SQL injection attacks](http://shiny.rstudio-staging.com/articles/sql-injections.html)).
 
-There's a few packages that you should definitely check out if you're using a relational database in a Shiny app: the `dplyr` and `DBI` packages (both featured in the article linked above) and the brand new `pool` package, which provides a further layer of abstraction to make it easier (and safer) to use either `DBI` or `dplyr`. In particular, `pool` will take care of managing connections, preventing leaks and ensuring the best performance. Check out this [`pool` basics article](http://shiny.rstudio-staging.com/articles/pool-basics.html) and the [more advanced-level article](http://shiny.rstudio-staging.com/articles/pool-advanced.html) if you're feeling adventurous (both of which contain Shiny app examples that use `DBI` to connect to an external MySQL database)! If you are more comfortable with `dplyr` than `DBI`, don't miss the article about the [integration of `pool` and `dplyr`](http://shiny.rstudio-staging.com/articles/pool-dplyr.html).
+Many Shiny users have asked about best practices for accessing external databases from their Shiny applications. Although database access has long been possible using various database connector packages in R, it can be challenging to use them robustly in the dynamic environment that Shiny provides. So far, it has been mostly up to application authors to find the appropriate database drivers and to discover how to manage the database connections within an application. In order to demystify this process, we wrote a series of articles ([first one here](http://shiny.rstudio-staging.com/articles/overview.html)) that covers the basics of connecting to an external database, as well as some security precautions to keep in mind (e.g. [how to avoid SQL injection attacks](http://shiny.rstudio-staging.com/articles/sql-injections.html)).
 
-If you're new to databases in the Shiny world, we recommend you always use `dplyr` and `pool` if possible. If you need greater control than `dplyr` offers (for example, if you need to modify data in the external database or use transactions), then use `DBI` and `pool`. The `pool` package was introduced to make your life easier, but in no way constrain you, so we don't envision any situation in which you'd be better off *not* using it. The only caveat to this at the present moment is that `pool` is not yet on CRAN, so you may prefer to wait for that.
+There are a few packages that you should look at if you're using a relational database in a Shiny app: the `dplyr` and `DBI` packages (both featured in the article linked to above), and the brand new `pool` package, which provides a further layer of abstraction to make it easier and safer to use either `DBI` or `dplyr`. `pool` is not yet on CRAN. In particular, `pool` will take care of managing connections, preventing memory leaks, and ensuring the best performance. See this [`pool` basics article](http://shiny.rstudio-staging.com/articles/pool-basics.html) and the [more advanced-level article](http://shiny.rstudio-staging.com/articles/pool-advanced.html) if you're feeling adventurous! (Both of these articles contain Shiny app examples that use `DBI` to connect to an external MySQL database.) If you are more comfortable with `dplyr` than `DBI`, don't miss the article about the [integration of `pool` and `dplyr`](http://shiny.rstudio-staging.com/articles/pool-dplyr.html).
+
+If you're new to databases in the Shiny world, we recommend using `dplyr` and `pool` if possible. If you need greater control than `dplyr` offers (for example, if you need to modify data in the database or use transactions), then use `DBI` and `pool`. The `pool` package was introduced to make your life easier, but in no way constrains you, so we don't envision any situation in which you'd be better off *not* using it. The only caveat is that `pool` is not yet on CRAN, so you may prefer to wait for that.
 
 ## Others
-While there's a lot more minor features, small improvements and bug fixes than we can cover here, we'll just finish by mentioning a few of the more noteworthy ones (the full changelog, with links to all the relevant issues and PRs, is right below this section):
 
-*    **Error Sanitization**: you now have the option to sanitize error messages. This can be important if there is information in the original error message that you don’t want the user to see (usually because it may be sensitive information). To sanitize errors everywhere in your app, just add `options(shiny.sanitize.errors = TRUE)` somewhere in your app. Read [this article](http://shiny.rstudio-staging.com/articles/sanitize-errors.html) for more, or play with the [demo app](https://gallery.shinyapps.io/110-error-sanitization/).
+There are many more minor features, small improvements, and bug fixes than we can cover here, so we'll just mention a few of the more noteworthy ones (the full changelog, with links to all the relevant issues and pull requests, is right below this section):
+
+*    **Error Sanitization**: you now have the option to sanitize error messages; in other words, the content of the original error message can be suppressed so that it doesn't leak any sensitive information. To sanitize errors everywhere in your app, just add `options(shiny.sanitize.errors = TRUE)` somewhere in your app. Read [this article](http://shiny.rstudio-staging.com/articles/sanitize-errors.html) for more, or play with the [demo app](https://gallery.shinyapps.io/110-error-sanitization/).
 
 *    **Code Diagnostics**: if there is an error parsing `ui.R`, `server.R`, `app.R`, or `global.R`, Shiny will search the code for missing commas, extra commas, and unmatched braces, parens, and brackets, and will print out messages pointing out those problems. ([#1126](https://github.com/rstudio/shiny/pull/1126))
 
@@ -68,23 +75,23 @@ While there's a lot more minor features, small improvements and bug fixes than w
       <img src="http://shiny.rstudio-staging.com/images/reactlog.png" alt="modal-dialog" width="75%"/>
       </p>
 
-      This new feature can be turned off by specifying `showReactLog(time = FALSE)` (this may be convenient if you have a large graph and don't want to have this new information cluttering it up). The elapsed time info shows up above each relevant node's label, and it's encoded in a 6-step monochromatic red scale ranging from a very pale red/beige to a dark wine red (from [colorbrewer](http://colorbrewer2.org/?type=sequential&scheme=Reds&n=9)). The colors are normalized so that the slowest reactive in your app will always be dark red and the fastest will always be light red.
+      This new feature can be turned off with `showReactLog(time = FALSE)`. This may be convenient if you have a large graph and don't want to have this new information cluttering it up. The elapsed time info shows up above each relevant node's label, and the time is also coded by color: the slowest reactive will be dark red and the fastest will be light red.
 
-      Another improvement to the reactive graph is that you can now also drag any of the nodes to a specific position and leave them there (you'll see the border around the node turn black -- that means it is in a fixed position). If you want to release the node back, just double click on it (you'll see the border around it go back to gray).
+      Additionally, to organize the graph, you can now drag any of the nodes to a specific position and leave it there.
 
-*    **Nicer-looking tables**: we've made tables generated with `renderTable()` look more Bootstrap-y and generally nicer-looking. While this won't break any older code (even though there's a bunch of new possible arguments, all the old ones are still accepted), the finished look of your table will be quite a bit different, as the following image shows:
+*    **Nicer-looking tables**: we've made tables generated with `renderTable()` look cleaner and more modern. While this won't break any older code, the finished look of your table will be quite a bit different, as the following image shows:
 
       <p align="center">
       <img src="http://shiny.rstudio-staging.com/images/render-table.png" alt="render-table" width="75%"/>
       </p>
 
-      For more, read our [short article](http://shiny.rstudio-staging.com/articles/render-table.html) about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/) or check out the [reference documentation](http://shiny.rstudio-staging.com/reference/shiny/latest/renderTable.html).
+      For more, read our [short article](http://shiny.rstudio-staging.com/articles/render-table.html) about this update, experiment with all the new features in this [demo app](https://gallery.shinyapps.io/109-render-table/), or check out the [reference documentation](http://shiny.rstudio-staging.com/reference/shiny/latest/renderTable.html).
 
 ## Full changelog
 
 ### Breaking changes
 
-* Progress indicators can now either use the new notification API, using `style = "notification"` (default), or be displayed with the previous styling, using `style = "old"`. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. Note that if you had customized your progress indicators with additional CSS, you'll *need* to use `style = "old"` if you want your UI to look the same ([#1160](https://github.com/rstudio/shiny/pull/1160) and [#1329](https://github.com/rstudio/shiny/pull/1329)).
+* Progress indicators can now either use the new notification API, using `style = "notification"` (default), or be displayed with the previous styling, using `style = "old"`. You can also call `shinyOptions(progress.style = "old")` in the server function to make all progress indicators use the old styling. Note that if you had customized your progress indicators with additional CSS, you'll need to use the old style if you want your UI to look the same ([#1160](https://github.com/rstudio/shiny/pull/1160) and [#1329](https://github.com/rstudio/shiny/pull/1329)).
 
 * Closed [#1161](https://github.com/rstudio/shiny/issues/1161): Deprecated the `position` argument to `tabsetPanel()` since Bootstrap 3 stopped supporting this feature.
 

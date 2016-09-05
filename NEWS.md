@@ -301,6 +301,21 @@ shiny 0.12.1
 shiny 0.12.0
 ============
 
+In addition to the changes listed below (in the *Full Changelog* section), there is an infrastructure change that could affect existing Shiny apps. 
+
+### JSON serialization
+
+In Shiny 0.12.0, we've switched from RJSONIO to jsonlite. For the vast majority of users, this will result in no noticeable changes; however, if you use any packages in your Shiny apps which rely on the [htmlwidgets](http://www.htmlwidgets.org/), you will also need to update htmlwidgets to 0.4.0. Both of these packages will issue a message when loaded, if the other package needs to be upgraded.
+
+POSIXt objects are now serialized to JSON in UTC8601 format (like
+"2015-03-20T20:00:00Z"), instead of as seconds from the epoch. If you have a Shiny app which uses `sendCustomMessage()` to send datetime (POSIXt) objects, then you may need to modify your Javascript code to receive time data in this format.
+
+### A note about Data Tables
+
+Shiny 0.12.0 deprecated Shiny's dataTableOutput and renderDataTable functions and instructed you to migrate to the nascent [DT](https://rstudio.github.io/DT/) package instead. (We'll talk more about DT in a future blog post.) User feedback has indicated this transition was too sudden and abrupt, so we've undeprecated these functions in 0.12.1. We'll continue to support these functions until DT has had more time to mature.
+
+## Full Changelog
+
 * Switched from RJSONIO to jsonlite. This improves consistency and speed when converting between R data structures and JSON. One notable change is that POSIXt objects are now serialized to JSON in UTC8601 format (like "2015-03-20T20:00:00Z"), instead of as seconds from the epoch).
 
 * In addition to the existing support for clicking and hovering on plots created by base graphics, added support for double-clicking and brushing. (#769)
@@ -374,7 +389,7 @@ shiny 0.11
 Shiny 0.11 switches away from the Bootstrap 2 web framework to the next version, Bootstrap 3. This is in part because Bootstrap 2 is no longer being developed, and in part because it allows us to tap into the ecosystem of Bootstrap 3 themes.
 
 
-## Known issues for migration
+### Known issues for migration
 
 *    In Bootstrap 3, images in `<img>` tags are no longer automatically scaled to the width of their container. If you use `img()` in your UI code, or `<img>` tags in your raw HTML source, it's possible that they will be too large in the new version of Shiny. To address this you can add the `img-responsive` class:
     
@@ -402,11 +417,11 @@ Shiny 0.11 switches away from the Bootstrap 2 web framework to the next version,
 
 If you encounter other migration issues, please let us know on the [shiny-discuss](https://groups.google.com/forum/#!forum/shiny-discuss) mailing list, or on the Shiny [issue tracker](https://github.com/rstudio/shiny/issues).
 
-## Using shinybootstrap2
+### Using shinybootstrap2
 
 If you would like to use Shiny 0.11 with Bootstrap 2, you can use the **shinybootstrap2** package. Installation and usage instructions are on available on the [project page](https://github.com/rstudio/shinybootstrap2). We recommend that you do this only as a temporary solution because  future development on Shiny will use Bootstrap 3.
 
-## Installing an older version of Shiny
+### Installing an older version of Shiny
 
 If you want to install a specific version of Shiny other than the latest CRAN release, you can use the `install_version()` function from devtools:
 
@@ -418,7 +433,7 @@ install.package("devtools")
 devtools::install_version("shiny", "0.10.2.2")
 ```
 
-## Themes
+### Themes
 
 Along with the release of Shiny 0.11, we've packaged up some Bootstrap 3 themes in the [shinythemes](http://rstudio.github.io/shinythemes/) package. This package makes it easy to use Bootstrap themes with Shiny.
 

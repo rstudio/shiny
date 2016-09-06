@@ -17,3 +17,4 @@
 ^cran-comments.md$
 ^.*\.o$
 ^appveyor\.yml$
+^revdep$

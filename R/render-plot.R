@@ -186,7 +186,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       tryCatch(
         {
           # This is necessary to enable displaylist recording
-          dev.control(displaylist = "enable")
+          grDevices::dev.control(displaylist = "enable")
 
           # Actually perform the plotting
           result <- withVisible(func())

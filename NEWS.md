@@ -1,4 +1,4 @@
-shiny 0.13.2.9005
+shiny 0.14
 =================
 
 A new Shiny release is upon us! There are many new exciting features, bug fixes, and library updates. We'll just highlight the most important changes here, but you can browse through the full changelog below for details. This will likely be the last release before shiny 1.0, so get out your party hats!

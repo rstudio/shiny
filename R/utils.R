@@ -1134,7 +1134,7 @@ validate <- function(..., errorClass = character(0)) {
   # There may be empty strings remaining; these are message-less failures that
   # started as FALSE
   results <- results[nzchar(results)]
-  reactiveStop(paste(results, collapse="\n"), errorClass)
+  reactiveStop(paste(results, collapse="\n"), c(errorClass, "validation"))
 }
 
 #' @param expr An expression to test. The condition will pass if the expression

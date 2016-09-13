@@ -145,7 +145,14 @@ registerInputHandler("shiny.file", function(val, shinysession, name) {
   }
 
   # Prepend the persistent dir
-  val$datapath <- file.path(getCurrentRestoreContext()$dir, val$datapath)
+  oldfile <- file.path(getCurrentRestoreContext()$dir, val$datapath)
+
+  # Copy the original file to a new temp dir, so that a restored session can't
+  # modify the original.
+  newdir <- file.path(tempdir(), createUniqueId(12))
+  dir.create(newdir)
+  val$datapath <- file.path(newdir, val$datapath)
+  file.copy(oldfile, val$datapath)
 
   # Need to mark this input value with the correct serializer. When a file is
   # uploaded the usual way (instead of being restored), this occurs in

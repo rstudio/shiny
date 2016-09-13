@@ -139,14 +139,25 @@ registerInputHandler("shiny.file", function(val, shinysession, name) {
   # The data will be a named list of lists; convert to a data frame.
   val <- as.data.frame(lapply(val, unlist), stringsAsFactors = FALSE)
 
-  # Make sure that the paths don't go up the directory tree, for security
-  # reasons.
-  if (any(grepl("..", val$datapath, fixed = TRUE))) {
-    stop("Invalid '..' found in file input path.")
+  # `val$datapath` should be a filename without a path, for security reasons.
+  if (basename(val$datapath) != val$datapath) {
+    stop("Invalid '/' found in file input path.")
   }
 
   # Prepend the persistent dir
-  val$datapath <- file.path(getCurrentRestoreContext()$dir, val$datapath)
+  oldfile <- file.path(getCurrentRestoreContext()$dir, val$datapath)
+
+  # Copy the original file to a new temp dir, so that a restored session can't
+  # modify the original.
+  newdir <- file.path(tempdir(), createUniqueId(12))
+  dir.create(newdir)
+  val$datapath <- file.path(newdir, val$datapath)
+  file.copy(oldfile, val$datapath)
+
+  # Need to mark this input value with the correct serializer. When a file is
+  # uploaded the usual way (instead of being restored), this occurs in
+  # session$`@uploadEnd`.
+  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializer", serializerFileInput)
 
   val
 })

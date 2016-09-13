@@ -94,7 +94,7 @@ FileUploadContext <- R6Class(
     },
     createUploadOperation = function(fileInfos) {
       while (TRUE) {
-        id <- paste(as.raw(p_runif(12, min=0, max=0xFF)), collapse='')
+        id <- createUniqueId(12)
         private$ids <- c(private$ids, id)
         dir <- file.path(private$basedir, id)
         if (!dir.create(dir))

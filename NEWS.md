@@ -1,6 +1,13 @@
 shiny 0.14.0.9000
 =================
 
+## Minor new features and improvements
+
+* Restored file inputs are now copied on restore, so that the restored application can't modify the bookmarked file. ([#1370](https://github.com/rstudio/shiny/issues/1370))
+
+## Bug fixes
+
+* Fixed [#1368](https://github.com/rstudio/shiny/issues/1368): If an app with a file input was bookmarked and restored, and then the restored app was bookmarked and restored (without uploading a new file), then it would fail to restore the file the second time. ([#1370](https://github.com/rstudio/shiny/issues/1370))
 
 shiny 0.14
 ==========

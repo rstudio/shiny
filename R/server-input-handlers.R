@@ -148,5 +148,10 @@ registerInputHandler("shiny.file", function(val, shinysession, name) {
   # Prepend the persistent dir
   val$datapath <- file.path(getCurrentRestoreContext()$dir, val$datapath)
 
+  # Need to mark this input value with the correct serializer. When a file is
+  # uploaded the usual way (instead of being restored), this occurs in
+  # session$`@uploadEnd`.
+  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializer", serializerFileInput)
+
   val
 })

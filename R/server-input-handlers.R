@@ -139,10 +139,9 @@ registerInputHandler("shiny.file", function(val, shinysession, name) {
   # The data will be a named list of lists; convert to a data frame.
   val <- as.data.frame(lapply(val, unlist), stringsAsFactors = FALSE)
 
-  # Make sure that the paths don't go up the directory tree, for security
-  # reasons.
-  if (any(grepl("..", val$datapath, fixed = TRUE))) {
-    stop("Invalid '..' found in file input path.")
+  # `val$datapath` should be a filename without a path, for security reasons.
+  if (basename(val$datapath) != val$datapath) {
+    stop("Invalid '/' found in file input path.")
   }
 
   # Prepend the persistent dir

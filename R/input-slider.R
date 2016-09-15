@@ -163,7 +163,6 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-grid` = ticks,
     `data-grid-num` = n_ticks,
     `data-grid-snap` = FALSE,
-    `data-prettify-separator` = sep,
     `data-prefix` = pre,
     `data-postfix` = post,
     `data-keyboard` = TRUE,
@@ -174,6 +173,12 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-time-format` = timeFormat,
     `data-timezone` = timezone
   ))
+
+  if (sep == "") {
+    sliderProps$`data-prettify-enabled` <- "0"
+  } else {
+    sliderProps$`data-prettify-separator` <- sep
+  }
 
   # Replace any TRUE and FALSE with "true" and "false"
   sliderProps <- lapply(sliderProps, function(x) {

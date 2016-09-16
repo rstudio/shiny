@@ -16,7 +16,7 @@ $.extend(dateInputBinding, {
   setValue: function(el, value) {
     // R's NA, which is null here will remove current value
     if (value === null) {
-      $(el).find('input').val('').datepicker('update');
+      $(el).find('input').val('').bootstrapDP('update');
       return;
     }
 
@@ -25,7 +25,7 @@ $.extend(dateInputBinding, {
     if (isNaN(date))
       return;
 
-    $(el).find('input').datepicker('update', date);
+    $(el).find('input').bootstrapDP('update', date);
   },
   getState: function(el) {
     var $el = $(el);
@@ -127,24 +127,24 @@ $.extend(dateInputBinding, {
   // null will unset.
   _setMin: function(el, date) {
     if (date === null) {
-      $(el).datepicker('setStartDate', null);
+      $(el).bootstrapDP('setStartDate', null);
 
     } else {
       date = this._newDate(date);
       if (!isNaN(date))
-        $(el).datepicker('setStartDate', date);
+        $(el).bootstrapDP('setStartDate', date);
     }
   },
   // Given an unambiguous date string or a Date object, set the max (end) date
   // null will unset.
   _setMax: function(el, date) {
     if (date === null) {
-      $(el).datepicker('setEndDate', null);
+      $(el).bootstrapDP('setEndDate', null);
 
     } else {
       date = this._newDate(date);
       if (!isNaN(date))
-        $(el).datepicker('setEndDate', date);
+        $(el).bootstrapDP('setEndDate', date);
     }
   },
   // Given a date string of format yyyy-mm-dd, return a Date object with

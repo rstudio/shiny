@@ -26,18 +26,18 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     // null will remove the current value
     if (value.start !== undefined) {
       if (value.start === null) {
-        $inputs.eq(0).val('').datepicker('update');
+        $inputs.eq(0).val('').bootstrapDP('update');
       } else {
         var start = this._newDate(value.start);
-        $inputs.eq(0).datepicker('update', start);
+        $inputs.eq(0).bootstrapDP('update', start);
       }
     }
     if (value.end !== undefined) {
       if (value.end === null) {
-        $inputs.eq(1).val('').datepicker('update');
+        $inputs.eq(1).val('').bootstrapDP('update');
       } else {
         var end = this._newDate(value.end);
-        $inputs.eq(1).datepicker('update', end);
+        $inputs.eq(1).bootstrapDP('update', end);
       }
     }
   },

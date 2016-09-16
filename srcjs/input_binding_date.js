@@ -9,7 +9,7 @@ $.extend(dateInputBinding, {
   // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
   // format like mm/dd/yyyy)
   getValue: function(el) {
-    var date = $(el).find('input').data('datepicker').getUTCDate();
+    var date = $(el).find('input').bootstrapDP('getUTCDate');
     return formatDateUTC(date);
   },
   // value must be an unambiguous string like '2001-01-01', or a Date object.
@@ -25,7 +25,7 @@ $.extend(dateInputBinding, {
     if (isNaN(date))
       return;
 
-    $(el).find('input').bootstrapDP('update', date);
+    $(el).find('input').bootstrapDP('setUTCDate', date);
   },
   getState: function(el) {
     var $el = $(el);

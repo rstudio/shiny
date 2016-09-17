@@ -79,8 +79,6 @@ absolutePanel <- function(...,
   if (isTRUE(draggable)) {
     divTag <- tagAppendAttributes(divTag, class='draggable')
     return(tagList(
-      # IMPORTANT NOTE: If you update jqueryui, make sure you DON'T include the datepicker,
-      # as it collides with our bootstrap datepicker!
       singleton(tags$head(tags$script(src='shared/jqueryui/jquery-ui.min.js'))),
       divTag,
       tags$script('$(".draggable").draggable();')

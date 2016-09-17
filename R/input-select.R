@@ -172,7 +172,7 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 
   if ('drag_drop' %in% options$plugins) {
     selectizeDep <- list(selectizeDep, htmlDependency(
-      'jqueryui', '1.11.4', c(href = 'shared/jqueryui'),
+      'jqueryui', '1.12.1', c(href = 'shared/jqueryui'),
       script = 'jquery-ui.min.js'
     ))
   }

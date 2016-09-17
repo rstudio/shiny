@@ -137,6 +137,7 @@ $.extend(dateInputBinding, {
 
     } else {
       date = this._newDate(date);
+      date = this._UTCDateAsLocal(date);
       if (!isNaN(date)) {
         // Workaround for https://github.com/eternicode/bootstrap-datepicker/issues/2010
         // If the start date when there's a two-digit year format, it will set
@@ -158,6 +159,7 @@ $.extend(dateInputBinding, {
 
     } else {
       date = this._newDate(date);
+      date = this._UTCDateAsLocal(date);
       if (!isNaN(date)) {
         // Workaround for same issue as in _setMin.
         var curValue = $(el).bootstrapDP('getUTCDate');
@@ -191,6 +193,12 @@ $.extend(dateInputBinding, {
   // print this in local time, as "Sat Feb 02 2013 05:00:00 GMT-0600 (CST)".
   _dateAsUTC: function(date) {
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  },
+  // The inverse of _dateAsUTC. This is needed to adjust time zones because
+  // some bootstrap-datepicker methods only take local dates as input, and not
+  // UTC.
+    _UTCDateAsLocal: function(date) {
+    return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
   }
 });
 inputBindings.register(dateInputBinding, 'shiny.dateInput');

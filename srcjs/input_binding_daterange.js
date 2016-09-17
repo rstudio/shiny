@@ -7,8 +7,8 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
   // format like mm/dd/yyyy)
   getValue: function(el) {
     var $inputs = $(el).find('input');
-    var start = $inputs.eq(0).data('datepicker').getUTCDate();
-    var end   = $inputs.eq(1).data('datepicker').getUTCDate();
+    var start = $inputs.eq(0).bootstrapDP('getUTCDate');
+    var end   = $inputs.eq(1).bootstrapDP('getUTCDate');
 
     return [formatDateUTC(start), formatDateUTC(end)];
   },
@@ -29,7 +29,7 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
         $inputs.eq(0).val('').bootstrapDP('update');
       } else {
         var start = this._newDate(value.start);
-        $inputs.eq(0).bootstrapDP('update', start);
+        $inputs.eq(0).bootstrapDP('setUTCDate', start);
       }
     }
     if (value.end !== undefined) {
@@ -37,7 +37,7 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
         $inputs.eq(1).val('').bootstrapDP('update');
       } else {
         var end = this._newDate(value.end);
-        $inputs.eq(1).bootstrapDP('update', end);
+        $inputs.eq(1).bootstrapDP('setUTCDate', end);
       }
     }
   },
@@ -48,8 +48,8 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     var $endinput   = $inputs.eq(1);
 
     // For many of the properties, assume start and end have the same values
-    var min = $startinput.data('datepicker').startDate;
-    var max = $startinput.data('datepicker').endDate;
+    var min = $startinput.bootstrapDP('getStartDate');
+    var max = $startinput.bootstrapDP('getEndDate');
 
     // Stringify min and max. If min and max aren't set, they will be
     // -Infinity and Infinity; replace these with null.
@@ -57,7 +57,7 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     max = (max ===  Infinity) ? null : formatDateUTC(max);
 
     // startViewMode is stored as a number; convert to string
-    var startview = $startinput.data('datepicker').startViewMode;
+    var startview = $startinput.data('datepicker').startView;
     if      (startview === 2)  startview = 'decade';
     else if (startview === 1)  startview = 'year';
     else if (startview === 0)  startview = 'month';

@@ -19,6 +19,8 @@ shiny 0.14.0.9000
 
 * Updated to bootstrap-datepicker 1.6.4. ([#1218](https://github.com/rstudio/shiny/issues/1218), [#1374](https://github.com/rstudio/shiny/pull/1374))
 
+* Updated to jQuery UI 1.12.1. Previously, Shiny included a build of 1.11.4 which was missing the datepicker component due to a conflict with the bootstrap-datepicker used by Shiny's `dateInput()` and `dateRangeInput()`. ([#1374](https://github.com/rstudio/shiny/pull/1374))
+
 
 shiny 0.14
 ==========

@@ -1,15 +1,24 @@
 shiny 0.14.0.9000
 =================
 
-## Minor new features and improvements
+## Full changelog
+
+### Minor new features and improvements
 
 * Restored file inputs are now copied on restore, so that the restored application can't modify the bookmarked file. ([#1370](https://github.com/rstudio/shiny/issues/1370))
 
-## Bug fixes
+### Bug fixes
 
 * Fixed [#1368](https://github.com/rstudio/shiny/issues/1368): If an app with a file input was bookmarked and restored, and then the restored app was bookmarked and restored (without uploading a new file), then it would fail to restore the file the second time. ([#1370](https://github.com/rstudio/shiny/issues/1370))
 
 * Fixed [#1369](https://github.com/rstudio/shiny/issues/1369): `sliderInput()` did not allow showing numbers without a thousands separator.
+
+* Fixed [#1346](https://github.com/rstudio/shiny/issues/1346) and [#1107](https://github.com/rstudio/shiny/issues/1107) : jQuery UI's datepicker conflicted with the bootstrap-datepicker used by Shiny's `dateInput()` and `dateRangeInput()`. ([#1374](https://github.com/rstudio/shiny/pull/1374))
+
+### Library updates
+
+* Updated to bootstrap-datepicker 1.6.4. ([#1218](https://github.com/rstudio/shiny/issues/1218), [#1374](https://github.com/rstudio/shiny/pull/1374))
+
 
 shiny 0.14
 ==========

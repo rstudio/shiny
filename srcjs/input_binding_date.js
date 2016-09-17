@@ -137,8 +137,15 @@ $.extend(dateInputBinding, {
 
     } else {
       date = this._newDate(date);
-      if (!isNaN(date))
+      if (!isNaN(date)) {
+        // Workaround for https://github.com/eternicode/bootstrap-datepicker/issues/2010
+        // If the start date when there's a two-digit year format, it will set
+        // the date value to null. So we'll save the value, set the start
+        // date, and the restore the value.
+        var curValue = $(el).bootstrapDP('getUTCDate');
         $(el).bootstrapDP('setStartDate', date);
+        $(el).bootstrapDP('setUTCDate', curValue);
+      }
     }
   },
   // Given an unambiguous date string or a Date object, set the max (end) date
@@ -151,8 +158,12 @@ $.extend(dateInputBinding, {
 
     } else {
       date = this._newDate(date);
-      if (!isNaN(date))
+      if (!isNaN(date)) {
+        // Workaround for same issue as in _setMin.
+        var curValue = $(el).bootstrapDP('getUTCDate');
         $(el).bootstrapDP('setEndDate', date);
+        $(el).bootstrapDP('setUTCDate', curValue);
+      }
     }
   },
   // Given a date string of format yyyy-mm-dd, return a Date object with

@@ -14,7 +14,9 @@ module.exports = function(grunt) {
         instdir + "www/shared/shiny.min.js",
         instdir + "www/shared/shiny.min.js.map",
         "./temp_concat/shiny.js",
-        "./temp_concat/shiny.js.map"
+        "./temp_concat/shiny.js.map",
+        instdir + 'www/shared/datepicker/js/bootstrap-datepicker.min.js',
+        instdir + 'www/shared/ionrangeslider/js/ion.rangeSlider.min.js'
       ]
     },
 

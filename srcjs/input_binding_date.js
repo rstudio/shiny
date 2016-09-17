@@ -109,8 +109,12 @@ $.extend(dateInputBinding, {
     // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
     // support for date-startdate and data-enddate, which use the current
     // date format.
-    this._setMin($input[0], $input.data('min-date'));
-    this._setMax($input[0], $input.data('max-date'));
+    if ($input.data('min-date') !== undefined) {
+      this._setMin($input[0], $input.data('min-date'));
+    }
+    if ($input.data('max-date') !== undefined) {
+      this._setMax($input[0], $input.data('max-date'));
+    }
   },
   // Given a format object from a date picker, return a string
   _formatToString: function(format) {
@@ -124,8 +128,10 @@ $.extend(dateInputBinding, {
     return str;
   },
   // Given an unambiguous date string or a Date object, set the min (start) date.
-  // null will unset.
+  // null will unset. undefined will result in no change,
   _setMin: function(el, date) {
+    if (date === undefined)
+      return;
     if (date === null) {
       $(el).bootstrapDP('setStartDate', null);
 
@@ -138,6 +144,8 @@ $.extend(dateInputBinding, {
   // Given an unambiguous date string or a Date object, set the max (end) date
   // null will unset.
   _setMax: function(el, date) {
+    if (date === undefined)
+      return;
     if (date === null) {
       $(el).bootstrapDP('setEndDate', null);
 

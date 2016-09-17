@@ -7,8 +7,8 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
   // format like mm/dd/yyyy)
   getValue: function(el) {
     var $inputs = $(el).find('input');
-    var start = $inputs.eq(0).bootstrapDP('getUTCDate');
-    var end   = $inputs.eq(1).bootstrapDP('getUTCDate');
+    var start = $inputs.eq(0).bsDatepicker('getUTCDate');
+    var end   = $inputs.eq(1).bsDatepicker('getUTCDate');
 
     return [formatDateUTC(start), formatDateUTC(end)];
   },
@@ -26,18 +26,18 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     // null will remove the current value
     if (value.start !== undefined) {
       if (value.start === null) {
-        $inputs.eq(0).val('').bootstrapDP('update');
+        $inputs.eq(0).val('').bsDatepicker('update');
       } else {
         var start = this._newDate(value.start);
-        $inputs.eq(0).bootstrapDP('setUTCDate', start);
+        $inputs.eq(0).bsDatepicker('setUTCDate', start);
       }
     }
     if (value.end !== undefined) {
       if (value.end === null) {
-        $inputs.eq(1).val('').bootstrapDP('update');
+        $inputs.eq(1).val('').bsDatepicker('update');
       } else {
         var end = this._newDate(value.end);
-        $inputs.eq(1).bootstrapDP('setUTCDate', end);
+        $inputs.eq(1).bsDatepicker('setUTCDate', end);
       }
     }
   },
@@ -48,8 +48,8 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     var $endinput   = $inputs.eq(1);
 
     // For many of the properties, assume start and end have the same values
-    var min = $startinput.bootstrapDP('getStartDate');
-    var max = $startinput.bootstrapDP('getEndDate');
+    var min = $startinput.bsDatepicker('getStartDate');
+    var max = $startinput.bsDatepicker('getEndDate');
 
     // Stringify min and max. If min and max aren't set, they will be
     // -Infinity and Infinity; replace these with null.

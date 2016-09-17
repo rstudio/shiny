@@ -9,14 +9,14 @@ $.extend(dateInputBinding, {
   // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
   // format like mm/dd/yyyy)
   getValue: function(el) {
-    var date = $(el).find('input').bootstrapDP('getUTCDate');
+    var date = $(el).find('input').bsDatepicker('getUTCDate');
     return formatDateUTC(date);
   },
   // value must be an unambiguous string like '2001-01-01', or a Date object.
   setValue: function(el, value) {
     // R's NA, which is null here will remove current value
     if (value === null) {
-      $(el).find('input').val('').bootstrapDP('update');
+      $(el).find('input').val('').bsDatepicker('update');
       return;
     }
 
@@ -25,7 +25,7 @@ $.extend(dateInputBinding, {
     if (isNaN(date))
       return;
 
-    $(el).find('input').bootstrapDP('setUTCDate', date);
+    $(el).find('input').bsDatepicker('setUTCDate', date);
   },
   getState: function(el) {
     var $el = $(el);
@@ -133,7 +133,7 @@ $.extend(dateInputBinding, {
     if (date === undefined)
       return;
     if (date === null) {
-      $(el).bootstrapDP('setStartDate', null);
+      $(el).bsDatepicker('setStartDate', null);
 
     } else {
       date = this._newDate(date);
@@ -143,9 +143,9 @@ $.extend(dateInputBinding, {
         // If the start date when there's a two-digit year format, it will set
         // the date value to null. So we'll save the value, set the start
         // date, and the restore the value.
-        var curValue = $(el).bootstrapDP('getUTCDate');
-        $(el).bootstrapDP('setStartDate', date);
-        $(el).bootstrapDP('setUTCDate', curValue);
+        var curValue = $(el).bsDatepicker('getUTCDate');
+        $(el).bsDatepicker('setStartDate', date);
+        $(el).bsDatepicker('setUTCDate', curValue);
       }
     }
   },
@@ -155,16 +155,16 @@ $.extend(dateInputBinding, {
     if (date === undefined)
       return;
     if (date === null) {
-      $(el).bootstrapDP('setEndDate', null);
+      $(el).bsDatepicker('setEndDate', null);
 
     } else {
       date = this._newDate(date);
       date = this._UTCDateAsLocal(date);
       if (!isNaN(date)) {
         // Workaround for same issue as in _setMin.
-        var curValue = $(el).bootstrapDP('getUTCDate');
-        $(el).bootstrapDP('setEndDate', date);
-        $(el).bootstrapDP('setUTCDate', curValue);
+        var curValue = $(el).bsDatepicker('getUTCDate');
+        $(el).bsDatepicker('setEndDate', date);
+        $(el).bsDatepicker('setUTCDate', curValue);
       }
     }
   },

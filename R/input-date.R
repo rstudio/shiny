@@ -114,7 +114,7 @@ datePickerDependency <- htmlDependency(
   head = "<script>
 (function() {
   var datepicker = $.fn.datepicker.noConflict();
-  $.fn.bootstrapDP = datepicker;
+  $.fn.bsDatepicker = datepicker;
 })();
 </script>"
 )

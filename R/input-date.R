@@ -92,8 +92,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 
     controlLabel(inputId, label),
     tags$input(type = "text",
-               # datepicker class necessary for dropdown to display correctly
-               class = "form-control datepicker",
+               class = "form-control",
                `data-date-language` = language,
                `data-date-week-start` = weekstart,
                `data-date-format` = format,

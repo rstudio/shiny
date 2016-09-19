@@ -60,9 +60,6 @@ $.extend(dateInputBinding, {
   receiveMessage: function(el, data) {
     var $input = $(el).find('input');
 
-    if (data.hasOwnProperty('value'))
-      this.setValue(el, data.value);
-
     if (data.hasOwnProperty('label'))
       $(el).find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
@@ -71,6 +68,12 @@ $.extend(dateInputBinding, {
 
     if (data.hasOwnProperty('max'))
       this._setMax($input[0], data.max);
+
+    // Must set value only after min and max have been set. If new value is
+    // outside the bounds of the previous min/max, then the result will be a
+    // blank input.
+    if (data.hasOwnProperty('value'))
+      this.setValue(el, data.value);
 
     $(el).trigger('change');
   },

@@ -3831,14 +3831,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // Return the date in an unambiguous format, yyyy-mm-dd (as opposed to a
     // format like mm/dd/yyyy)
     getValue: function getValue(el) {
-      var date = $(el).find('input').data('datepicker').getUTCDate();
+      var date = $(el).find('input').bsDatepicker('getUTCDate');
       return formatDateUTC(date);
     },
     // value must be an unambiguous string like '2001-01-01', or a Date object.
     setValue: function setValue(el, value) {
       // R's NA, which is null here will remove current value
       if (value === null) {
-        $(el).find('input').val('').datepicker('update');
+        $(el).find('input').val('').bsDatepicker('update');
         return;
       }
 
@@ -3846,7 +3846,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       // If date is invalid, do nothing
       if (isNaN(date)) return;
 
-      $(el).find('input').datepicker('update', date);
+      $(el).find('input').bsDatepicker('setUTCDate', date);
     },
     getState: function getState(el) {
       var $el = $(el);
@@ -3879,13 +3879,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     receiveMessage: function receiveMessage(el, data) {
       var $input = $(el).find('input');
 
-      if (data.hasOwnProperty('value')) this.setValue(el, data.value);
-
       if (data.hasOwnProperty('label')) $(el).find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       if (data.hasOwnProperty('min')) this._setMin($input[0], data.min);
 
       if (data.hasOwnProperty('max')) this._setMax($input[0], data.max);
+
+      // Must set value only after min and max have been set. If new value is
+      // outside the bounds of the previous min/max, then the result will be a
+      // blank input.
+      if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
       $(el).trigger('change');
     },
@@ -3924,8 +3927,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       // use yyyy-mm-dd format, instead of bootstrap-datepicker's built-in
       // support for date-startdate and data-enddate, which use the current
       // date format.
-      this._setMin($input[0], $input.data('min-date'));
-      this._setMax($input[0], $input.data('max-date'));
+      if ($input.data('min-date') !== undefined) {
+        this._setMin($input[0], $input.data('min-date'));
+      }
+      if ($input.data('max-date') !== undefined) {
+        this._setMax($input[0], $input.data('max-date'));
+      }
     },
     // Given a format object from a date picker, return a string
     _formatToString: function _formatToString(format) {
@@ -3939,23 +3946,40 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return str;
     },
     // Given an unambiguous date string or a Date object, set the min (start) date.
-    // null will unset.
+    // null will unset. undefined will result in no change,
     _setMin: function _setMin(el, date) {
+      if (date === undefined) return;
       if (date === null) {
-        $(el).datepicker('setStartDate', null);
+        $(el).bsDatepicker('setStartDate', null);
       } else {
         date = this._newDate(date);
-        if (!isNaN(date)) $(el).datepicker('setStartDate', date);
+        date = this._UTCDateAsLocal(date);
+        if (!isNaN(date)) {
+          // Workaround for https://github.com/eternicode/bootstrap-datepicker/issues/2010
+          // If the start date when there's a two-digit year format, it will set
+          // the date value to null. So we'll save the value, set the start
+          // date, and the restore the value.
+          var curValue = $(el).bsDatepicker('getUTCDate');
+          $(el).bsDatepicker('setStartDate', date);
+          $(el).bsDatepicker('setUTCDate', curValue);
+        }
       }
     },
     // Given an unambiguous date string or a Date object, set the max (end) date
     // null will unset.
     _setMax: function _setMax(el, date) {
+      if (date === undefined) return;
       if (date === null) {
-        $(el).datepicker('setEndDate', null);
+        $(el).bsDatepicker('setEndDate', null);
       } else {
         date = this._newDate(date);
-        if (!isNaN(date)) $(el).datepicker('setEndDate', date);
+        date = this._UTCDateAsLocal(date);
+        if (!isNaN(date)) {
+          // Workaround for same issue as in _setMin.
+          var curValue = $(el).bsDatepicker('getUTCDate');
+          $(el).bsDatepicker('setEndDate', date);
+          $(el).bsDatepicker('setUTCDate', curValue);
+        }
       }
     },
     // Given a date string of format yyyy-mm-dd, return a Date object with
@@ -3980,6 +4004,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // print this in local time, as "Sat Feb 02 2013 05:00:00 GMT-0600 (CST)".
     _dateAsUTC: function _dateAsUTC(date) {
       return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    },
+    // The inverse of _dateAsUTC. This is needed to adjust time zones because
+    // some bootstrap-datepicker methods only take local dates as input, and not
+    // UTC.
+    _UTCDateAsLocal: function _UTCDateAsLocal(date) {
+      return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
     }
   });
   inputBindings.register(dateInputBinding, 'shiny.dateInput');
@@ -3996,8 +4026,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // format like mm/dd/yyyy)
     getValue: function getValue(el) {
       var $inputs = $(el).find('input');
-      var start = $inputs.eq(0).data('datepicker').getUTCDate();
-      var end = $inputs.eq(1).data('datepicker').getUTCDate();
+      var start = $inputs.eq(0).bsDatepicker('getUTCDate');
+      var end = $inputs.eq(1).bsDatepicker('getUTCDate');
 
       return [formatDateUTC(start), formatDateUTC(end)];
     },
@@ -4015,18 +4045,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       // null will remove the current value
       if (value.start !== undefined) {
         if (value.start === null) {
-          $inputs.eq(0).val('').datepicker('update');
+          $inputs.eq(0).val('').bsDatepicker('update');
         } else {
           var start = this._newDate(value.start);
-          $inputs.eq(0).datepicker('update', start);
+          $inputs.eq(0).bsDatepicker('setUTCDate', start);
         }
       }
       if (value.end !== undefined) {
         if (value.end === null) {
-          $inputs.eq(1).val('').datepicker('update');
+          $inputs.eq(1).val('').bsDatepicker('update');
         } else {
           var end = this._newDate(value.end);
-          $inputs.eq(1).datepicker('update', end);
+          $inputs.eq(1).bsDatepicker('setUTCDate', end);
         }
       }
     },
@@ -4037,8 +4067,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var $endinput = $inputs.eq(1);
 
       // For many of the properties, assume start and end have the same values
-      var min = $startinput.data('datepicker').startDate;
-      var max = $startinput.data('datepicker').endDate;
+      var min = $startinput.bsDatepicker('getStartDate');
+      var max = $startinput.bsDatepicker('getEndDate');
 
       // Stringify min and max. If min and max aren't set, they will be
       // -Infinity and Infinity; replace these with null.
@@ -4046,7 +4076,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       max = max === Infinity ? null : formatDateUTC(max);
 
       // startViewMode is stored as a number; convert to string
-      var startview = $startinput.data('datepicker').startViewMode;
+      var startview = $startinput.data('datepicker').startView;
       if (startview === 2) startview = 'decade';else if (startview === 1) startview = 'year';else if (startview === 0) startview = 'month';
 
       return {
@@ -4067,8 +4097,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var $startinput = $inputs.eq(0);
       var $endinput = $inputs.eq(1);
 
-      if (data.hasOwnProperty('value')) this.setValue(el, data.value);
-
       if (data.hasOwnProperty('label')) $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
       if (data.hasOwnProperty('min')) {
@@ -4080,6 +4108,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         this._setMax($startinput[0], data.max);
         this._setMax($endinput[0], data.max);
       }
+
+      // Must set value only after min and max have been set. If new value is
+      // outside the bounds of the previous min/max, then the result will be a
+      // blank input.
+      if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
       $el.trigger('change');
     },

@@ -7,8 +7,8 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
   // format like mm/dd/yyyy)
   getValue: function(el) {
     var $inputs = $(el).find('input');
-    var start = $inputs.eq(0).data('datepicker').getUTCDate();
-    var end   = $inputs.eq(1).data('datepicker').getUTCDate();
+    var start = $inputs.eq(0).bsDatepicker('getUTCDate');
+    var end   = $inputs.eq(1).bsDatepicker('getUTCDate');
 
     return [formatDateUTC(start), formatDateUTC(end)];
   },
@@ -26,18 +26,18 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     // null will remove the current value
     if (value.start !== undefined) {
       if (value.start === null) {
-        $inputs.eq(0).val('').datepicker('update');
+        $inputs.eq(0).val('').bsDatepicker('update');
       } else {
         var start = this._newDate(value.start);
-        $inputs.eq(0).datepicker('update', start);
+        $inputs.eq(0).bsDatepicker('setUTCDate', start);
       }
     }
     if (value.end !== undefined) {
       if (value.end === null) {
-        $inputs.eq(1).val('').datepicker('update');
+        $inputs.eq(1).val('').bsDatepicker('update');
       } else {
         var end = this._newDate(value.end);
-        $inputs.eq(1).datepicker('update', end);
+        $inputs.eq(1).bsDatepicker('setUTCDate', end);
       }
     }
   },
@@ -48,8 +48,8 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     var $endinput   = $inputs.eq(1);
 
     // For many of the properties, assume start and end have the same values
-    var min = $startinput.data('datepicker').startDate;
-    var max = $startinput.data('datepicker').endDate;
+    var min = $startinput.bsDatepicker('getStartDate');
+    var max = $startinput.bsDatepicker('getEndDate');
 
     // Stringify min and max. If min and max aren't set, they will be
     // -Infinity and Infinity; replace these with null.
@@ -57,7 +57,7 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     max = (max ===  Infinity) ? null : formatDateUTC(max);
 
     // startViewMode is stored as a number; convert to string
-    var startview = $startinput.data('datepicker').startViewMode;
+    var startview = $startinput.data('datepicker').startView;
     if      (startview === 2)  startview = 'decade';
     else if (startview === 1)  startview = 'year';
     else if (startview === 0)  startview = 'month';
@@ -80,9 +80,6 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     var $startinput = $inputs.eq(0);
     var $endinput   = $inputs.eq(1);
 
-    if (data.hasOwnProperty('value'))
-      this.setValue(el, data.value);
-
     if (data.hasOwnProperty('label'))
       $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
@@ -95,6 +92,12 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
       this._setMax($startinput[0], data.max);
       this._setMax($endinput[0],   data.max);
     }
+
+    // Must set value only after min and max have been set. If new value is
+    // outside the bounds of the previous min/max, then the result will be a
+    // blank input.
+    if (data.hasOwnProperty('value'))
+      this.setValue(el, data.value);
 
     $el.trigger('change');
   },

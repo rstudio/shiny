@@ -52,20 +52,20 @@ can be cleared by using \code{selected=character(0)}.
 if (interactive()) {
 
 ui <- fluidPage(
-  sliderInput("controller", "Controller", 1, 30, 10),
+  sliderInput("n", "Day of month", 1, 30, 10),
   dateRangeInput("inDateRange", "Input date range")
 )
 
 server <- function(input, output, session) {
   observe({
-    # We'll use the input$controller variable multiple times, so save it as x
-    # for convenience.
-    x <- input$controller
+    date <- as.Date(paste0("2013-04-", input$n))
 
     updateDateRangeInput(session, "inDateRange",
-      label = paste("Date range label", x),
-      start = paste("2013-01-", x, sep=""),
-      end = paste("2013-12-", x, sep="")
+      label = paste("Date range label", input$n),
+      start = date - 1,
+      end = date + 1,
+      min = date - 5,
+      max = date + 5
     )
   })
 }

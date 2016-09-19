@@ -14,7 +14,7 @@ Authors@R: c(
     person(family = "jQuery contributors", role = c("ctb", "cph"),
     comment = "jQuery library; authors listed in inst/www/shared/jquery-AUTHORS.txt"),
     person(family = "jQuery UI contributors", role = c("ctb", "cph"),
-    comment = "jQuery UI library; authors listed in inst/www/shared/jqueryui/1.10.4/AUTHORS.txt"),
+    comment = "jQuery UI library; authors listed in inst/www/shared/jqueryui/AUTHORS.txt"),
     person("Mark", "Otto", role = "ctb",
     comment = "Bootstrap library"),
     person("Jacob", "Thornton", role = "ctb",

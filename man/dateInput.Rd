@@ -14,8 +14,8 @@ dateInput(inputId, label, value = NULL, min = NULL, max = NULL,
 \item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{value}{The starting date. Either a Date object, or a string in
-\code{yyyy-mm-dd} format. If NULL (the default), will use the current
-date in the client's time zone.}
+\code{yyyy-mm-dd} format. If NULL (the default), will use the current date
+in the client's time zone.}
 
 \item{min}{The minimum allowed date. Either a Date object, or a string in
 \code{yyyy-mm-dd} format.}
@@ -26,17 +26,20 @@ date in the client's time zone.}
 \item{format}{The format of the date to display in the browser. Defaults to
 \code{"yyyy-mm-dd"}.}
 
-\item{startview}{The date range shown when the input object is first
-clicked. Can be "month" (the default), "year", or "decade".}
+\item{startview}{The date range shown when the input object is first clicked.
+Can be "month" (the default), "year", or "decade".}
 
 \item{weekstart}{Which day is the start of the week. Should be an integer
 from 0 (Sunday) to 6 (Saturday).}
 
 \item{language}{The language used for month and day names. Default is "en".
-Other valid values include "bg", "ca", "cs", "da", "de", "el", "es", "fi",
-"fr", "he", "hr", "hu", "id", "is", "it", "ja", "kr", "lt", "lv", "ms",
-"nb", "nl", "pl", "pt", "pt-BR", "ro", "rs", "rs-latin", "ru", "sk", "sl",
-"sv", "sw", "th", "tr", "uk", "zh-CN", and "zh-TW".}
+Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
+"de", "el", "en-AU", "en-GB", "eo", "es", "et", "eu", "fa", "fi", "fo",
+"fr-CH", "fr", "gl", "he", "hr", "hu", "hy", "id", "is", "it-CH", "it",
+"ja", "ka", "kh", "kk", "ko", "kr", "lt", "lv", "me", "mk", "mn", "ms",
+"nb", "nl-BE", "nl", "no", "pl", "pt-BR", "pt", "ro", "rs-latin", "rs",
+"ru", "sk", "sl", "sq", "sr-latin", "sr", "sv", "sw", "th", "tr", "uk",
+"vi", "zh-CN", and "zh-TW".}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
@@ -80,7 +83,7 @@ ui <- fluidPage(
 
   # Use different language and different first day of week
   dateInput("date5", "Date:",
-          language = "de",
+          language = "ru",
           weekstart = 1),
 
   # Start with decade view instead of default month view

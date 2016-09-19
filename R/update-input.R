@@ -179,21 +179,18 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 #' if (interactive()) {
 #'
 #' ui <- fluidPage(
-#'   sliderInput("controller", "Controller", 1, 30, 10),
+#'   sliderInput("n", "Day of month", 1, 30, 10),
 #'   dateInput("inDate", "Input date")
 #' )
 #'
 #' server <- function(input, output, session) {
 #'   observe({
-#'     # We'll use the input$controller variable multiple times, so save it as x
-#'     # for convenience.
-#'     x <- input$controller
-#'
+#'     date <- as.Date(paste0("2013-04-", input$n))
 #'     updateDateInput(session, "inDate",
-#'       label = paste("Date label", x),
-#'       value = paste("2013-04-", x, sep=""),
-#'       min   = paste("2013-04-", x-1, sep=""),
-#'       max   = paste("2013-04-", x+1, sep="")
+#'       label = paste("Date label", input$n),
+#'       value = date,
+#'       min   = date - 3,
+#'       max   = date + 3
 #'     )
 #'   })
 #' }
@@ -241,20 +238,20 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 #' if (interactive()) {
 #'
 #' ui <- fluidPage(
-#'   sliderInput("controller", "Controller", 1, 30, 10),
+#'   sliderInput("n", "Day of month", 1, 30, 10),
 #'   dateRangeInput("inDateRange", "Input date range")
 #' )
 #'
 #' server <- function(input, output, session) {
 #'   observe({
-#'     # We'll use the input$controller variable multiple times, so save it as x
-#'     # for convenience.
-#'     x <- input$controller
+#'     date <- as.Date(paste0("2013-04-", input$n))
 #'
 #'     updateDateRangeInput(session, "inDateRange",
-#'       label = paste("Date range label", x),
-#'       start = paste("2013-01-", x, sep=""),
-#'       end = paste("2013-12-", x, sep="")
+#'       label = paste("Date range label", input$n),
+#'       start = date - 1,
+#'       end = date + 1,
+#'       min = date - 5,
+#'       max = date + 5
 #'     )
 #'   })
 #' }

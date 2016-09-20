@@ -86,6 +86,19 @@ module.exports = function(grunt) {
       }
     },
 
+    flow: {
+      options: {
+          style: 'color'
+      },
+      watch: {
+        src: './temp_concat/shiny.js',
+        options: {
+          server: true
+        }
+      },
+      files: {}  // Flow doesn't use this, but it is needed for Grunt to run properly
+    },
+
     eslint: {
       options: {
         parser: 'babel-eslint',
@@ -150,6 +163,7 @@ module.exports = function(grunt) {
         tasks: [
           'newer:concat',
           'newer:eslint',
+          'newer:flow',
           'configureBabel',
           'newer:babel',
           'newer:uglify'
@@ -189,6 +203,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-newer');
+  grunt.loadNpmTasks('grunt-flow');
 
   // Need this here so that babel reads in the source map file after it's
   // generated. Without this task, it would read in the source map when Grunt
@@ -202,6 +217,7 @@ module.exports = function(grunt) {
   grunt.registerTask('default', [
     'newer:concat',
     'newer:eslint',
+    'newer:flow',
     'configureBabel',
     'newer:babel',
     'newer:uglify',

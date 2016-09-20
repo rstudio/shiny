@@ -1,3 +1,5 @@
+// @flow
+
 (function() {
   var $ = jQuery;
 

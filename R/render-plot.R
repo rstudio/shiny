@@ -611,6 +611,11 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
       )
     }
 
+    # Look for CoordFlip
+    if (inherits(b$plot$coordinates, "CoordFlip")) {
+      mappings[c("x", "y")] <- mappings[c("y", "x")]
+    }
+
     mappings_cache <<- mappings
     mappings
   }

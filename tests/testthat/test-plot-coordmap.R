@@ -26,7 +26,7 @@ test_that("ggplot coordmap", {
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0))
-  png(tmpfile)
+  png(tmpfile, width = 500, height = 500)
   m <- getGgplotCoordmap(print(p), 1, 72)
   dev.off()
 
@@ -37,6 +37,20 @@ test_that("ggplot coordmap", {
     sortList(m[[1]]$domain),
     sortList(list(left=0, right=5, bottom=10, top=20))
   )
+  # Check for no log bases
+  expect_equal(
+    sortList(m[[1]]$log),
+    sortList(list(x=NULL, y=NULL))
+  )
+  # panel_vars should be an empty named list
+  expect_identical(m[[1]]$panel_vars, list(a=1)[0])
+  # Sanity check for ranges. Checking exact range values isn't feasible due to
+  # variations in graphics devices, and possible changes to positioning in
+  # ggplot2.
+  expect_true(m[[1]]$range$left    >  20 && m[[1]]$range$left   <  70)
+  expect_true(m[[1]]$range$right   > 480 && m[[1]]$range$right  < 499)
+  expect_true(m[[1]]$range$bottom  > 450 && m[[1]]$range$bottom < 490)
+  expect_true(m[[1]]$range$top     > 1   && m[[1]]$range$top    <  20)
 
 
   # Scatterplot where aes() is declared in geom
@@ -244,4 +258,106 @@ test_that("ggplot coordmap with 2D facet_grid", {
   expect_equal(m[[2]]$panel_vars, list(panelvar1 = dat$h[2], panelvar2 = dat$g[1]))
   expect_equal(m[[3]]$panel_vars, list(panelvar1 = dat$h[1], panelvar2 = dat$g[2]))
   expect_equal(m[[4]]$panel_vars, list(panelvar1 = dat$h[2], panelvar2 = dat$g[2]))
+})
+
+
+test_that("ggplot coordmap with various data types", {
+  tmpfile <- tempfile("test-shiny", fileext = ".png")
+  on.exit(rm(tmpfile))
+
+  # Factors
+  dat <- expand.grid(xvar = letters[1:3], yvar = LETTERS[1:4])
+  p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
+    scale_x_discrete(expand = c(0 ,0)) +
+    scale_y_discrete(expand = c(0, 0))
+  png(tmpfile)
+  m <- getGgplotCoordmap(print(p), 1, 72)
+  dev.off()
+
+  # Check domain
+  expect_equal(
+    sortList(m[[1]]$domain),
+    sortList(list(left=1, right=3, bottom=1, top=4))
+  )
+
+  # Dates and date-times
+  dat <- data.frame(
+    xvar = as.Date("2016-09-27") + c(0, 10),
+    yvar = as.POSIXct("2016-09-27 09:00:00", origin = "1960-01-01", tz = "GMT") + c(3600, 0)
+  )
+  p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
+    scale_x_date(expand = c(0 ,0)) +
+    scale_y_datetime(expand = c(0, 0))
+  png(tmpfile)
+  m <- getGgplotCoordmap(print(p), 1, 72)
+  dev.off()
+
+  # Check domain
+  expect_equal(
+    sortList(m[[1]]$domain),
+    sortList(list(
+      left   = as.numeric(dat$xvar[1]),
+      right  = as.numeric(dat$xvar[2]),
+      bottom = as.numeric(dat$yvar[2]),
+      top    = as.numeric(dat$yvar[1])
+    ))
+  )
+})
+
+test_that("ggplot coordmap with various scales and coords", {
+  tmpfile <- tempfile("test-shiny", fileext = ".png")
+  on.exit(rm(tmpfile))
+
+  # Reversed scales
+  dat <- data.frame(xvar = c(0, 5), yvar = c(10, 20))
+  p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
+    scale_x_continuous(expand = c(0 ,0)) +
+    scale_y_reverse(expand = c(0, 0))
+  png(tmpfile)
+  m <- getGgplotCoordmap(print(p), 1, 72)
+  dev.off()
+
+  # Check domain (y reversed)
+  expect_equal(
+    sortList(m[[1]]$domain),
+    sortList(list(left=0, right=5, bottom=20, top=10))
+  )
+
+  # coord_flip
+  p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
+    scale_x_continuous(expand = c(0 ,0)) +
+    scale_y_continuous(expand = c(0 ,0)) +
+    coord_flip()
+  png(tmpfile)
+  m <- getGgplotCoordmap(print(p), 1, 72)
+  dev.off()
+
+  # Check mapping vars
+  expect_equal(m[[1]]$mapping, list(x = "yvar", y = "xvar"))
+  # Check domain (y reversed)
+  expect_equal(
+    sortList(m[[1]]$domain),
+    sortList(list(left=10, right=20, bottom=0, top=5))
+  )
+
+  # Log scales and log coord transformations
+  dat <- data.frame(xvar = c(10^-1, 10^3), yvar = c(2^-2, 2^4))
+  p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
+    scale_x_log10(expand = c(0 ,0)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    coord_trans(y = "log2")
+  png(tmpfile)
+  m <- getGgplotCoordmap(print(p), 1, 72)
+  dev.off()
+
+  # Check log bases
+  expect_equal(
+    sortList(m[[1]]$log),
+    sortList(list(x=10, y=2))
+  )
+  # Check domains
+  expect_equal(
+    sortList(m[[1]]$domain),
+    sortList(list(left=-1, right=3, bottom=-2, top=4))
+  )
 })

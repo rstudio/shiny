@@ -7,7 +7,7 @@ controlLabel <- function(controlName, label) {
 # refers to values. Below is a function for backward compatibility.
 validateSelected <- function(selected, choices, inputId) {
   # drop names, otherwise toJSON() keeps them too
-  selected <- unname(selected)
+  selected <- as.character(unname(selected))
   # if you are using optgroups, you're using shiny > 0.10.0, and you should
   # already know that `selected` must be a value instead of a label
   if (needOptgroup(choices)) return(selected)
@@ -79,7 +79,7 @@ choicesWithNames <- function(choices) {
       if (is.list(val))
         listify(val)
       else if (length(val) == 1 && is.null(names(val)))
-        val
+        as.character(val)
       else
         makeNamed(as.list(val))
     })

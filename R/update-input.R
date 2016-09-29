@@ -553,8 +553,8 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #' @export
 updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
                                selected = NULL, inline = FALSE) {
-  if (!is.null(choices)) choices <- sapply(choices, as.character)
-  if (!is.null(selected)) selected <- sapply(selected, as.character)
+  # if (!is.null(choices)) choices <- setNames(as.character(choices), names(choices))
+  # if (!is.null(selected)) selected <- vapply(selected, as.character)
 
   # you must select at least one radio button
   if (is.null(selected) && !is.null(choices)) selected <- choices[[1]]

@@ -56,7 +56,7 @@ test_that("Choices are correctly assigned names", {
   # Unnamed list
   expect_identical(
     choicesWithNames(list("a","b",3)),
-    list(a="a", b="b", "3"=3)
+    list(a="a", b="b", "3"="3")
   )
   # Vector, with some named, some not
   expect_identical(
@@ -66,7 +66,7 @@ test_that("Choices are correctly assigned names", {
   # List, with some named, some not
   expect_identical(
     choicesWithNames(list(A="a", "b", C=3, 4)),
-    list(A="a", "b"="b", C=3, "4"=4)
+    list(A="a", "b"="b", C="3", "4"="4")
   )
   # List, named, with a sub-vector
   expect_identical(

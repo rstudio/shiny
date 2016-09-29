@@ -9,6 +9,8 @@ shiny 0.14.0.9000
 
 ### Bug fixes
 
+* Fixed [#1093](https://github.com/rstudio/shiny/issues/1093) better: `updateRadioButtons()` and `updateCheckboxGroupInput()` were not working correctly if the choices were given as a numeric vector. This had been solved in [#1291](https://github.com/rstudio/shiny/pull/1291), but that introduced a different bug [#1396](https://github.com/rstudio/shiny/issues/1396) that this better fix avoids.
+
 * Fixed [#1368](https://github.com/rstudio/shiny/issues/1368): If an app with a file input was bookmarked and restored, and then the restored app was bookmarked and restored (without uploading a new file), then it would fail to restore the file the second time. ([#1370](https://github.com/rstudio/shiny/issues/1370))
 
 * Fixed [#1369](https://github.com/rstudio/shiny/issues/1369): `sliderInput()` did not allow showing numbers without a thousands separator.

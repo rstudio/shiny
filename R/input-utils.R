@@ -4,10 +4,13 @@ controlLabel <- function(controlName, label) {
 
 
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
-# refers to values. Below is a function for backward compatibility.
+# refers to values. Below is a function for backward compatibility. It also
+# coerces the value to `character`.
 validateSelected <- function(selected, choices, inputId) {
-  # drop names, otherwise toJSON() keeps them too
-  selected <- unname(selected)
+  # this line accomplishes two tings:
+  #   - coerces selected to character
+  #   - drops name, otherwise toJSON() keeps it too
+  selected <- as.character(selected)
   # if you are using optgroups, you're using shiny > 0.10.0, and you should
   # already know that `selected` must be a value instead of a label
   if (needOptgroup(choices)) return(selected)
@@ -63,7 +66,7 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
 
 
 # Takes a vector or list, and adds names (same as the value) to any entries
-# without names.
+# without names. Coerces all leaf nodes to `character`.
 choicesWithNames <- function(choices) {
   # Take a vector or list, and convert to list. Also, if any children are
   # vectors with length > 1, convert those to list. If the list is unnamed,
@@ -79,7 +82,7 @@ choicesWithNames <- function(choices) {
       if (is.list(val))
         listify(val)
       else if (length(val) == 1 && is.null(names(val)))
-        val
+        as.character(val)
       else
         makeNamed(as.list(val))
     })

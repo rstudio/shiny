@@ -7,6 +7,9 @@ shiny 0.14.0.9000
 
 * Restored file inputs are now copied on restore, so that the restored application can't modify the bookmarked file. ([#1370](https://github.com/rstudio/shiny/issues/1370))
 
+* Added support for plot interaction in the development version of ggplot2, 2.1.0.9000. Also added support for ggplot2 plots with `coord_flip()`. ([hadley/ggplot2#1781](https://github.com/hadley/ggplot2/issues/1781), [#1392](https://github.com/rstudio/shiny/pull/1392))
+
+
 ### Bug fixes
 
 * Fixed [#1093](https://github.com/rstudio/shiny/issues/1093) better: `updateRadioButtons()` and `updateCheckboxGroupInput()` were not working correctly if the choices were given as a numeric vector. This had been solved in [#1291](https://github.com/rstudio/shiny/pull/1291), but that introduced a different bug [#1396](https://github.com/rstudio/shiny/issues/1396) that this better fix avoids. ([#1370](https://github.com/rstudio/shiny/pull/1397))

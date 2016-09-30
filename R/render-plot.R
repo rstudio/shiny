@@ -418,23 +418,39 @@ getPrevPlotCoordmap <- function(width, height) {
 
 # Given a ggplot_build_gtable object, return a coordmap for it.
 getGgplotCoordmap <- function(p, pixelratio, res) {
+  # Structure of ggplot objects changed after 2.1.0
+  new_ggplot <- (utils::packageVersion("ggplot2") > "2.1.0")
+
   if (!inherits(p, "ggplot_build_gtable"))
     return(NULL)
 
   # Given a built ggplot object, return x and y domains (data space coords) for
   # each panel.
   find_panel_info <- function(b) {
-    layout <- b$panel$layout
+    if (new_ggplot) {
+      layout <- b$layout$panel_layout
+    } else {
+      layout <- b$panel$layout
+    }
     # Convert factor to numbers
     layout$PANEL <- as.integer(as.character(layout$PANEL))
 
     # Names of facets
-    facet <- b$plot$facet
     facet_vars <- NULL
-    if (inherits(facet, "grid")) {
-      facet_vars <- vapply(c(facet$cols, facet$rows), as.character, character(1))
-    } else if (inherits(facet, "wrap")) {
-      facet_vars <- vapply(facet$facets, as.character, character(1))
+    if (new_ggplot) {
+      facet <- b$layout$facet
+      if (inherits(facet, "FacetGrid")) {
+        facet_vars <- vapply(c(facet$params$cols, facet$params$rows), as.character, character(1))
+      } else if (inherits(facet, "FacetWrap")) {
+        facet_vars <- vapply(facet$params$facets, as.character, character(1))
+      }
+    } else {
+      facet <- b$plot$facet
+      if (inherits(facet, "grid")) {
+        facet_vars <- vapply(c(facet$cols, facet$rows), as.character, character(1))
+      } else if (inherits(facet, "wrap")) {
+        facet_vars <- vapply(facet$facets, as.character, character(1))
+      }
     }
 
     # Iterate over each row in the layout data frame
@@ -476,7 +492,11 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
   # Given a single range object (representing the data domain) from a built
   # ggplot object, return the domain.
   find_panel_domain <- function(b, panel_num, scalex_num = 1, scaley_num = 1) {
-    range <- b$panel$ranges[[panel_num]]
+    if (new_ggplot) {
+      range <- b$layout$panel_ranges[[panel_num]]
+    } else {
+      range <- b$panel$ranges[[panel_num]]
+    }
     domain <- list(
       left   = range$x.range[1],
       right  = range$x.range[2],
@@ -485,9 +505,13 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
     )
 
     # Check for reversed scales
-    xscale <- b$panel$x_scales[[scalex_num]]
-    yscale <- b$panel$y_scales[[scaley_num]]
-
+    if (new_ggplot) {
+      xscale <- b$layout$panel_scales$x[[scalex_num]]
+      yscale <- b$layout$panel_scales$y[[scaley_num]]
+    } else {
+      xscale <- b$panel$x_scales[[scalex_num]]
+      yscale <- b$panel$y_scales[[scaley_num]]
+    }
     if (!is.null(xscale$trans) && xscale$trans$name == "reverse") {
       domain$left  <- -domain$left
       domain$right <- -domain$right
@@ -522,10 +546,18 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
     y_names <- character(0)
 
     # Continuous scales have a trans; discrete ones don't
-    if (!is.null(b$panel$x_scales[[scalex_num]]$trans))
-      x_names <- b$panel$x_scales[[scalex_num]]$trans$name
-    if (!is.null(b$panel$y_scales[[scaley_num]]$trans))
-      y_names <- b$panel$y_scales[[scaley_num]]$trans$name
+    if (new_ggplot) {
+      if (!is.null(b$layout$panel_scales$x[[scalex_num]]$trans))
+        x_names <- b$layout$panel_scales$x[[scalex_num]]$trans$name
+      if (!is.null(b$layout$panel_scales$y[[scaley_num]]$trans))
+        y_names <- b$layout$panel_scales$y[[scaley_num]]$trans$name
+
+    } else {
+      if (!is.null(b$panel$x_scales[[scalex_num]]$trans))
+        x_names <- b$panel$x_scales[[scalex_num]]$trans$name
+      if (!is.null(b$panel$y_scales[[scaley_num]]$trans))
+        y_names <- b$panel$y_scales[[scaley_num]]$trans$name
+    }
 
     coords <- b$plot$coordinates
     if (!is.null(coords$trans)) {
@@ -577,6 +609,11 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
           init
         }
       )
+    }
+
+    # Look for CoordFlip
+    if (inherits(b$plot$coordinates, "CoordFlip")) {
+      mappings[c("x", "y")] <- mappings[c("y", "x")]
     }
 
     mappings_cache <<- mappings

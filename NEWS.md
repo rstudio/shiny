@@ -1,6 +1,8 @@
 shiny 0.14.1
 ============
 
+This is a maintenance release of Shiny, with some bug fixes and minor new features.
+
 ## Full changelog
 
 ### Minor new features and improvements

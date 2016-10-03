@@ -13,7 +13,15 @@ causeError <- function(full) {
     B()
   })
 
-  res <- try(captureStackTraces(isolate(renderTable({C()}, server = FALSE)())),
+  res <- try({
+      captureStackTraces({
+        isolate({
+          renderTable({
+            C()
+          }, server = FALSE)()
+        })
+      })
+    },
     silent = TRUE)
   cond <- attr(res, "condition", exact = TRUE)
 
@@ -50,7 +58,7 @@ test_that("integration tests", {
     "isolate", "withCallingHandlers", "captureStackTraces", "doTryCatch",
     "tryCatchOne", "tryCatchList", "tryCatch", "try"))
   expect_equal(nzchar(df$loc), c(TRUE, TRUE, TRUE, FALSE, TRUE,
-    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+    FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE,
     FALSE, FALSE))
 
   df <- causeError(full = TRUE)
@@ -72,8 +80,8 @@ test_that("integration tests", {
     "tryCatch", "try"))
   expect_equal(nzchar(df$loc), c(FALSE, FALSE, FALSE, TRUE,
     TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-    FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE,
-    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+    FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE,
+    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE,
     FALSE, FALSE, FALSE, FALSE))
 })
 

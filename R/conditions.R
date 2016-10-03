@@ -76,7 +76,7 @@ getCallNames <- function(calls) {
 }
 
 getLocs <- function(calls) {
-  sapply(calls, function(call) {
+  vapply(calls, function(call) {
     srcref <- attr(call, "srcref", exact = TRUE)
     if (!is.null(srcref)) {
       srcfile <- attr(srcref, "srcfile", exact = TRUE)
@@ -86,7 +86,7 @@ getLocs <- function(calls) {
       }
     }
     return("")
-  })
+  }, character(1))
 }
 
 #' @details \code{captureStackTraces} runs the given \code{expr} and if any

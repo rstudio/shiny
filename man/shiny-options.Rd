@@ -27,10 +27,10 @@ Since monitoring for changes is expensive (we simply poll for last
 
 You can customize the file patterns Shiny will monitor by setting the
     shiny.autoreload.pattern option. For example, to monitor only ui.R:
-    \code{option(shiny.autoreload.pattern = glob2rx("ui.R"))}
+    \code{options(shiny.autoreload.pattern = glob2rx("ui.R"))}
 
 The default polling interval is 500 milliseconds. You can change this
-    by setting e.g. \code{option(shiny.autoreload.interval = 2000)} (every
+    by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
     two seconds).}
   \item{shiny.reactlog}{If \code{TRUE}, enable logging of reactive events,
     which can be viewed later with the \code{\link{showReactLog}} function.

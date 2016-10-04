@@ -231,13 +231,13 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
 # ignored when checking extensions. If any changes are detected, all connected
 # Shiny sessions are reloaded.
 #
-# Use option(shiny.autoreload = TRUE) to enable this behavior. Since monitoring
+# Use options(shiny.autoreload = TRUE) to enable this behavior. Since monitoring
 # for changes is expensive (we are polling for mtimes here, nothing fancy) this
 # feature is intended only for development.
 #
 # You can customize the file patterns Shiny will monitor by setting the
 # shiny.autoreload.pattern option. For example, to monitor only ui.R:
-# option(shiny.autoreload.pattern = glob2rx("ui.R"))
+# options(shiny.autoreload.pattern = glob2rx("ui.R"))
 #
 # The return value is a function that halts monitoring when called.
 initAutoReloadMonitor <- function(dir) {

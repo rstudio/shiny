@@ -1,3 +1,13 @@
+shiny 0.14.1.9000
+============
+
+## Full changelog
+
+### Bug fixes
+
+* Fixed [#1404](https://github.com/rstudio/shiny/issues/1404): stack trace tests were not compatible with the byte-code compiler in R-devel, which now tracks source references.
+
+
 shiny 0.14.1
 ============
 

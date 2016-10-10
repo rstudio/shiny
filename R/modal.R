@@ -43,6 +43,8 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #'   \code{FALSE} (the default), the modal dialog can't be dismissed in those
 #'   ways; instead it must be dismissed by clicking on the dismiss button, or
 #'   from a call to \code{\link{removeModal}} on the server.
+#' @param fade If \code{FALSE}, the modal dialog will have no fade-in animation
+#'   (it will simply appear rather than fade in to view).
 #'
 #' @examples
 #' if (interactive()) {
@@ -143,11 +145,12 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' }
 #' @export
 modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
-  size = c("m", "s", "l"), easyClose = FALSE) {
+  size = c("m", "s", "l"), easyClose = FALSE, fade = TRUE) {
 
   size <- match.arg(size)
 
-  div(id = "shiny-modal", class = "modal fade", tabindex = "-1",
+  cls <- if (fade) "modal fade" else "modal"
+  div(id = "shiny-modal", class = cls, tabindex = "-1",
     `data-backdrop` = if (!easyClose) "static",
     `data-keyboard` = if (!easyClose) "false",
 

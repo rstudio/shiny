@@ -143,11 +143,12 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #' }
 #' @export
 modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
-  size = c("m", "s", "l"), easyClose = FALSE) {
+  size = c("m", "s", "l"), easyClose = FALSE, fade = TRUE) {
 
   size <- match.arg(size)
 
-  div(id = "shiny-modal", class = "modal fade", tabindex = "-1",
+  cls <- if (fade) "modal fade" else "modal"
+  div(id = "shiny-modal", class = cls, tabindex = "-1",
     `data-backdrop` = if (!easyClose) "static",
     `data-keyboard` = if (!easyClose) "false",
 

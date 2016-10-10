@@ -44,7 +44,7 @@ removeModal <- function(session = getDefaultReactiveDomain()) {
 #'   ways; instead it must be dismissed by clicking on the dismiss button, or
 #'   from a call to \code{\link{removeModal}} on the server.
 #' @param fade If \code{FALSE}, the modal dialog will have no fade-in animation
-#' (it will simply appear rather than fade in to view).
+#'   (it will simply appear rather than fade in to view).
 #'
 #' @examples
 #' if (interactive()) {

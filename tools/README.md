@@ -1,27 +1,48 @@
 This directory contains build tools for Shiny.
 
 
-## Grunt
+## JavaScript build tools
 
-Grunt is a build tool that runs on node.js. In Shiny, it is used for concatenating, minifying, and linting Javascript code.
 
-### Installing Grunt
+### First-time setup
 
-Grunt requires Node.js and npm (the Node.js package manager). Installation of these programs differs across platforms and is generally pretty easy, so I won't include instructions here.
+Shiny's JavaScript build tools use Node.js, along with [yarn](https://yarnpkg.com/) to manage the JavaScript packages.
 
-Once node and npm are installed, install grunt:
+Installation of Node.js differs across platforms and is generally pretty easy, so I won't include instructions here.
+
+There are a number of ways to [install yarn](https://yarnpkg.com/en/docs/install), but if you already have npm installed, you can simply run:
+
+```
+sudo npm install --global yarn
+```
+
+Then, in this directory (tools/), run the following to install the packages:
+
+```
+yarn
+```
+
+If in the future you want to upgrade or add a package, run:
+
+```
+yarn add --dev [packagename]
+```
+
+If someone else updates the package.json and/or yarn.lock files, simply run `yarn` to update your packages.
+
+For information about upgrading or installing new packages, see the [yarn workflow documentation](https://yarnpkg.com/en/docs/yarn-workflow).
+
+
+### Grunt
+
+Grunt is a build tool that runs on node.js and will be installed. In Shiny, it is used for concatenating, minifying, and linting Javascript code.
+
+#### Installing Grunt
 
 ```
 # Install grunt command line tool globally
-sudo npm install -g grunt-cli
-
-# Install grunt plus modules for this project
-npm install
-
-# To update modules in the future
-npm update
+sudo yarn global add grunt-cli
 ```
-
 
 ### Using Grunt
 
@@ -56,7 +77,7 @@ Updating web libraries
 
 To update the version of babel-polyfill:
 
-* Check if there is a newer version available by running `npm outdated babel-polyfill`. (If there's no output, then you have the latest version.)
-* Run `npm install babel-polyfill --save-dev --save-exact`.
+* Check if there is a newer version available by running `yarn outdated babel-polyfill`. (If there's no output, then you have the latest version.)
+* Run `yarn add --dev babel-polyfill --exact`.
 * Edit R/shinyui.R. The `renderPage` function has an `htmlDependency` for
   `babel-polyfill`. Update this to the new version number.

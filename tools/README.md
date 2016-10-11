@@ -22,8 +22,6 @@ npm install
 npm update
 ```
 
-Note: The `package.json` file contains a reference to `estraverse-fb`. This is needed only because the current version of ESLint has a [bug](https://github.com/eslint/eslint/issues/5476). At some point in the future, it can be removed.
-
 
 ### Using Grunt
 

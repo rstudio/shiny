@@ -1,4 +1,4 @@
-shiny 0.14.1.9000
+shiny 0.14.1.9001
 ============
 
 ## Full changelog
@@ -6,6 +6,8 @@ shiny 0.14.1.9000
 ### Minor new features and improvements
 
 * Added a `fade` argument to `modalDialog()` -- setting it to `FALSE` will remove the usual fade-in animation for that modal window. ([#1414](https://github.com/rstudio/shiny/pull/1414))
+
+* Exported function to apply input handlers to input values. This can be used for testing Shiny applications. ([#1421](https://github.com/rstudio/shiny/pull/1421))
 
 ### Bug fixes
 

@@ -247,38 +247,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
 
           withRestoreContext(shinysession$restoreContext, {
 
-            unpackInput <- function(name, val) {
-              splitName <- strsplit(name, ':')[[1]]
-              if (length(splitName) > 1) {
-                if (!inputHandlers$containsKey(splitName[[2]])) {
-                  # No input handler registered for this type
-                  stop("No handler registered for type ", name)
-                }
-
-                inputName <- splitName[[1]]
-
-                # Get the function for processing this type of input
-                inputHandler <- inputHandlers$get(splitName[[2]])
-
-                return(inputHandler(val, shinysession, inputName))
-
-              } else if (is.list(val) && is.null(names(val))) {
-                return(unlist(val, recursive = TRUE))
-              } else {
-                return(val)
-              }
-            }
-
-            msg$data <- mapply(unpackInput, names(msg$data), msg$data,
-                               SIMPLIFY = FALSE)
-
-            # Convert names like "button1:shiny.action" to "button1"
-            names(msg$data) <- vapply(
-              names(msg$data),
-              function(name) { strsplit(name, ":")[[1]][1] },
-              FUN.VALUE = character(1)
-            )
-
+            msg$data <- applyInputHandlers(msg$data)
 
             switch(
               msg$method,

@@ -71,6 +71,72 @@ removeInputHandler <- function(type){
   inputHandlers$remove(type)
 }
 
+
+# Apply input handler to a single input value
+applyInputHandler <- function(name, val) {
+  splitName <- strsplit(name, ':')[[1]]
+  if (length(splitName) > 1) {
+    if (!inputHandlers$containsKey(splitName[[2]])) {
+      # No input handler registered for this type
+      stop("No handler registered for type ", name)
+    }
+
+    inputName <- splitName[[1]]
+
+    # Get the function for processing this type of input
+    inputHandler <- inputHandlers$get(splitName[[2]])
+
+    return(inputHandler(val, shinysession, inputName))
+
+  } else if (is.list(val) && is.null(names(val))) {
+    return(unlist(val, recursive = TRUE))
+  } else {
+    return(val)
+  }
+}
+
+#' Apply input handlers to raw input values
+#'
+#' The purpose of this function is to make it possible for external packages to
+#' test Shiny inputs. It takes a named list of raw input values, applies input
+#' handlers to those values, and then returns a named list of the processed
+#' values.
+#'
+#' The raw input values should be in a named list. Some values may have names
+#' like \code{"x:shiny.date"}. This function would apply the \code{"shiny.date"}
+#' input handler to the value, and then rename the result to \code{"x"}, in the
+#' output.
+#'
+#' @param inputs A named list of input values.
+#'
+#' @seealso registerInputHandler
+#'
+#' @examples
+#' applyInputHandlers(list(
+#'   "m1" = list(list(1, 2), list(3, 4)),
+#'   "m2:shiny.matrix" = list(list(1, 2), list(3, 4)),
+#'
+#'   "d1" = "2016-01-01",
+#'   "d2:shiny.date" = "2016-01-01",  # Date object
+#'
+#'   "n1" = NULL,
+#'   "n2:shiny.number" = NULL  # Converts to NA
+#' ))
+#' @export
+applyInputHandlers <- function(inputs) {
+  inputs <- mapply(applyInputHandler, names(inputs), inputs, SIMPLIFY = FALSE)
+
+  # Convert names like "button1:shiny.action" to "button1"
+  names(inputs) <- vapply(
+    names(inputs),
+    function(name) { strsplit(name, ":")[[1]][1] },
+    FUN.VALUE = character(1)
+  )
+
+  inputs
+}
+
+
 # Takes a list-of-lists and returns a matrix. The lists
 # must all be the same length. NULL is replaced by NA.
 registerInputHandler("shiny.matrix", function(data, ...) {

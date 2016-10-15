@@ -39,9 +39,12 @@ NULL
 #'     when an app is run. See \code{\link{runApp}} for more information.}
 #'   \item{shiny.port}{A port number that Shiny will listen on. See
 #'     \code{\link{runApp}} for more information.}
-#'   \item{shiny.trace}{If \code{TRUE}, all of the messages sent between the R
-#'     server and the web browser client will be printed on the console. This
-#'     is useful for debugging.}
+#'   \item{shiny.trace}{Print messages sent between the R server and the web
+#'     browser client to the R console. This is useful for debugging. Possible
+#'     values are \code{"send"} (only print messages sent to the client),
+#'     \code{"recv"} (only print messages received by the server), \code{TRUE}
+#'     (print all messages), or \code{FALSE} (default; don't print any of these
+#'     messages).}
 #'   \item{shiny.autoreload}{If \code{TRUE} when a Shiny app is launched, the
 #'     app directory will be continually monitored for changes to files that
 #'     have the extensions: r, htm, html, js, css, png, jpg, jpeg, gif. If any
@@ -414,7 +417,8 @@ ShinySession <- R6Class(
       if (self$closed){
         return()
       }
-      if (isTRUE(getOption('shiny.trace')))
+      traceOption <- getOption('shiny.trace', FALSE)
+      if (isTRUE(traceOption) || traceOption == "send")
         message('SEND ',
            gsub('(?m)base64,[a-zA-Z0-9+/=]+','[base64 data]',json,perl=TRUE))
       private$websocket$send(json)

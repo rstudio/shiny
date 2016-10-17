@@ -12,8 +12,8 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
 
     return [formatDateUTC(start), formatDateUTC(end)];
   },
-  // value must be an array of unambiguous strings like '2001-01-01', or
-  // Date objects.
+  // value must be an object, with optional fields `start` and `end`. These
+  // should be unambiguous strings like '2001-01-01', or Date objects.
   setValue: function(el, value) {
     if (!(value instanceof Object)) {
       return;

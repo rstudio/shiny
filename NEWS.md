@@ -11,6 +11,7 @@ shiny 0.14.1.9000
 
 * Fixed [#1404](https://github.com/rstudio/shiny/issues/1404): stack trace tests were not compatible with the byte-code compiler in R-devel, which now tracks source references.
 
+* `sliderInputBinding.setValue()` now sends a slider's value immediately, instead of waiting for the usual 250ms debounce delay. ([#1429](https://github.com/rstudio/shiny/pull/1429))
 
 shiny 0.14.1
 ============

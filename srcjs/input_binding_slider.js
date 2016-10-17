@@ -53,14 +53,21 @@ $.extend(sliderInputBinding, textInputBinding, {
 
   },
   setValue: function(el, value) {
-    var slider = $(el).data('ionRangeSlider');
+    var $el = $(el);
+    var slider = $el.data('ionRangeSlider');
 
-    if (this._numValues(el) == 2 && value instanceof Array) {
-      slider.update({ from: value[0], to: value[1] });
-    } else {
-      slider.update({ from: value });
+    $el.data('immediate', true);
+    try {
+      if (this._numValues(el) == 2 && value instanceof Array) {
+        slider.update({ from: value[0], to: value[1] });
+      } else {
+        slider.update({ from: value });
+      }
+
+      forceIonSliderUpdate(slider);
+    } finally {
+      $el.data('immediate', false);
     }
-    forceIonSliderUpdate(slider);
   },
   subscribe: function(el, callback) {
     $(el).on('change.sliderInputBinding', function(event) {

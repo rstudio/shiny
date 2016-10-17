@@ -1,6 +1,6 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 //---------------------------------------------------------------------
 // Source file: ../srcjs/_start.js
@@ -1361,7 +1361,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var fadeDuration = 250;
 
     function show() {
-      var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       var _ref$html = _ref.html;
       var html = _ref$html === undefined ? '' : _ref$html;
@@ -1520,7 +1520,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       var _ref2$html = _ref2.html;
       var html = _ref2$html === undefined ? '' : _ref2$html;
@@ -3075,7 +3075,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // inputs/outputs. `content` can be null, a string, or an object with
   // properties 'html' and 'deps'.
   exports.renderContent = function (el, content) {
-    var where = arguments.length <= 2 || arguments[2] === undefined ? "replace" : arguments[2];
+    var where = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "replace";
 
     exports.unbindAll(el);
 
@@ -3112,7 +3112,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   // Render HTML in a DOM element, inserting singletons into head as needed
   exports.renderHtml = function (html, el, dependencies) {
-    var where = arguments.length <= 3 || arguments[3] === undefined ? 'replace' : arguments[3];
+    var where = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'replace';
 
     renderDependencies(dependencies);
     return singletons.renderHtml(html, el, where);
@@ -3414,6 +3414,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     this.getValue = function (el) {
       throw "Not implemented";
     };
+
+    // The callback method takes one argument, whose value is boolean. If true,
+    // allow deferred (debounce or throttle) sending depending on the value of
+    // getRatePolicy. If false, send value immediately.
     this.subscribe = function (el, callback) {};
     this.unsubscribe = function (el) {};
 
@@ -3646,18 +3650,25 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
     },
     setValue: function setValue(el, value) {
-      var slider = $(el).data('ionRangeSlider');
+      var $el = $(el);
+      var slider = $el.data('ionRangeSlider');
 
-      if (this._numValues(el) == 2 && value instanceof Array) {
-        slider.update({ from: value[0], to: value[1] });
-      } else {
-        slider.update({ from: value });
+      $el.data('immediate', true);
+      try {
+        if (this._numValues(el) == 2 && value instanceof Array) {
+          slider.update({ from: value[0], to: value[1] });
+        } else {
+          slider.update({ from: value });
+        }
+
+        forceIonSliderUpdate(slider);
+      } finally {
+        $el.data('immediate', false);
       }
-      forceIonSliderUpdate(slider);
     },
     subscribe: function subscribe(el, callback) {
       $(el).on('change.sliderInputBinding', function (event) {
-        callback(!$(el).data('updating') && !$(el).data('animating'));
+        callback(!$(el).data('immediate') && !$(el).data('animating'));
       });
     },
     unsubscribe: function unsubscribe(el) {
@@ -3682,12 +3693,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       if (data.hasOwnProperty('label')) $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
-      $el.data('updating', true);
+      $el.data('immediate', true);
       try {
         slider.update(msg);
         forceIonSliderUpdate(slider);
       } finally {
-        $el.data('updating', false);
+        $el.data('immediate', false);
       }
     },
     getRatePolicy: function getRatePolicy() {
@@ -4848,7 +4859,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var shinyapp = exports.shinyapp = new ShinyApp();
 
     function bindOutputs() {
-      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
 
       scope = $(scope);
 
@@ -4889,8 +4900,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function unbindOutputs() {
-      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
-      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+      var includeSelf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
       var outputs = $(scope).find('.shiny-bound-output');
 
@@ -4952,7 +4963,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function bindInputs() {
-      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
 
       var bindings = inputBindings.getBindings();
 
@@ -5010,8 +5021,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function unbindInputs() {
-      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
-      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+      var includeSelf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
       var inputs = $(scope).find('.shiny-bound-input');
 
@@ -5040,7 +5051,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return bindInputs(scope);
     }
     function unbindAll(scope) {
-      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+      var includeSelf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
       unbindInputs(scope, includeSelf);
       unbindOutputs(scope, includeSelf);
@@ -5065,7 +5076,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // Calls .initialize() for all of the input objects in all input bindings,
     // in the given scope.
     function initializeInputs() {
-      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
 
       var bindings = inputBindings.getBindings();
 

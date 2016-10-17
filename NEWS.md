@@ -7,6 +7,8 @@ shiny 0.14.1.9000
 
 * Added a `fade` argument to `modalDialog()` -- setting it to `FALSE` will remove the usual fade-in animation for that modal window. ([#1414](https://github.com/rstudio/shiny/pull/1414))
 
+* Fixed [#1422](https://github.com/rstudio/shiny/issues/1422): When using the `shiny.trace` option, allow specifying to only log SEND or RECV messages, or both
+
 ### Bug fixes
 
 * Fixed [#1404](https://github.com/rstudio/shiny/issues/1404): stack trace tests were not compatible with the byte-code compiler in R-devel, which now tracks source references.

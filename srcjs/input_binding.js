@@ -14,6 +14,10 @@ this.getId = function(el) {
 // to deserialize the JSON correctly
 this.getType = function() { return false; };
 this.getValue = function(el) { throw "Not implemented"; };
+
+// The callback method takes one argument, whose value is boolean. If true,
+// allow deferred (debounce or throttle) sending depending on the value of
+// getRatePolicy. If false, send value immediately.
 this.subscribe = function(el, callback) { };
 this.unsubscribe = function(el) { };
 

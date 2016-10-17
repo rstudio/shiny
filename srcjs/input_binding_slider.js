@@ -64,7 +64,7 @@ $.extend(sliderInputBinding, textInputBinding, {
   },
   subscribe: function(el, callback) {
     $(el).on('change.sliderInputBinding', function(event) {
-      callback(!$(el).data('updating') && !$(el).data('animating'));
+      callback(!$(el).data('immediate') && !$(el).data('animating'));
     });
   },
   unsubscribe: function(el) {
@@ -90,12 +90,12 @@ $.extend(sliderInputBinding, textInputBinding, {
     if (data.hasOwnProperty('label'))
       $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
-    $el.data('updating', true);
+    $el.data('immediate', true);
     try {
       slider.update(msg);
       forceIonSliderUpdate(slider);
     } finally {
-      $el.data('updating', false);
+      $el.data('immediate', false);
     }
   },
   getRatePolicy: function() {

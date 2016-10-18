@@ -9,6 +9,8 @@ shiny 0.14.1.9001
 
 * Exported function to apply input handlers to input values. This can be used for testing Shiny applications. ([#1421](https://github.com/rstudio/shiny/pull/1421))
 
+* Fixed a "duplicate binding" error that occurred in some edge cases involving `insertUI` and nested `uiOutput`. ([#1402](https://github.com/rstudio/shiny/pull/1402))
+
 ### Bug fixes
 
 * Fixed [#1427](https://github.com/rstudio/shiny/issues/1427): make sure that modals do not close incorrectly when an element inside them is triggered as hidden. ([#1430](https://github.com/rstudio/shiny/pull/1430))

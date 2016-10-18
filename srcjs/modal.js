@@ -19,9 +19,11 @@ exports.modal = {
 
       // If the wrapper's content is a Bootstrap modal, then when the inner
       // modal is hidden, remove the entire thing, including wrapper.
-      $modal.on('hidden.bs.modal', ".shiny-modal-wrapper", function() {
-        exports.unbindAll($modal);
-        $modal.remove();
+      $modal.on('hidden.bs.modal', function(e) {
+        if (this === e.target) {
+          exports.unbindAll($modal);
+          $modal.remove();
+        }
       });
     }
 

@@ -7,7 +7,7 @@ exports.modal = {
   show: function({ html='', deps=[] } = {}) {
 
     // If there was an existing Bootstrap modal, then there will be a modal-
-    // backdrop div that was added outside of the modal wrapper, and it must be 
+    // backdrop div that was added outside of the modal wrapper, and it must be
     // removed; otherwise there can be multiple of these divs.
     $('.modal-backdrop').remove();
 
@@ -19,9 +19,11 @@ exports.modal = {
 
       // If the wrapper's content is a Bootstrap modal, then when the inner
       // modal is hidden, remove the entire thing, including wrapper.
-      $modal.on('hidden.bs.modal', function() {
-        exports.unbindAll($modal);
-        $modal.remove();
+      $modal.on('hidden.bs.modal', function(e) {
+        if (e.target === $("#shiny-modal")[0]) {
+          exports.unbindAll($modal);
+          $modal.remove();
+        }
       });
     }
 

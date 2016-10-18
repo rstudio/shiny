@@ -1542,7 +1542,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         // If the wrapper's content is a Bootstrap modal, then when the inner
         // modal is hidden, remove the entire thing, including wrapper.
         $modal.on('hidden.bs.modal', function (e) {
-          if (this === e.target) {
+          if (e.target === $("#shiny-modal")[0]) {
             exports.unbindAll($modal);
             $modal.remove();
           }

@@ -1,6 +1,6 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 //---------------------------------------------------------------------
 // Source file: ../srcjs/_start.js
@@ -1361,7 +1361,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var fadeDuration = 250;
 
     function show() {
-      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
       var _ref$html = _ref.html;
       var html = _ref$html === undefined ? '' : _ref$html;
@@ -1520,7 +1520,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
       var _ref2$html = _ref2.html;
       var html = _ref2$html === undefined ? '' : _ref2$html;
@@ -1529,7 +1529,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
       // If there was an existing Bootstrap modal, then there will be a modal-
-      // backdrop div that was added outside of the modal wrapper, and it must be 
+      // backdrop div that was added outside of the modal wrapper, and it must be
       // removed; otherwise there can be multiple of these divs.
       $('.modal-backdrop').remove();
 
@@ -1541,7 +1541,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
         // If the wrapper's content is a Bootstrap modal, then when the inner
         // modal is hidden, remove the entire thing, including wrapper.
-        $modal.on('hidden.bs.modal', function () {
+        $modal.on('hidden.bs.modal', ".shiny-modal-wrapper", function () {
           exports.unbindAll($modal);
           $modal.remove();
         });
@@ -2774,13 +2774,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         // No change
 
       } else if (opts.brushDirection === 'x') {
-        // Extend top and bottom of plotting area
-        min.y = panelBounds.top;
-        max.y = panelBounds.bottom;
-      } else if (opts.brushDirection === 'y') {
-        min.x = panelBounds.left;
-        max.x = panelBounds.right;
-      }
+          // Extend top and bottom of plotting area
+          min.y = panelBounds.top;
+          max.y = panelBounds.bottom;
+        } else if (opts.brushDirection === 'y') {
+          min.x = panelBounds.left;
+          max.x = panelBounds.right;
+        }
 
       state.boundsPx = {
         xmin: min.x,
@@ -3075,7 +3075,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // inputs/outputs. `content` can be null, a string, or an object with
   // properties 'html' and 'deps'.
   exports.renderContent = function (el, content) {
-    var where = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "replace";
+    var where = arguments.length <= 2 || arguments[2] === undefined ? "replace" : arguments[2];
 
     exports.unbindAll(el);
 
@@ -3112,7 +3112,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   // Render HTML in a DOM element, inserting singletons into head as needed
   exports.renderHtml = function (html, el, dependencies) {
-    var where = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'replace';
+    var where = arguments.length <= 3 || arguments[3] === undefined ? 'replace' : arguments[3];
 
     renderDependencies(dependencies);
     return singletons.renderHtml(html, el, where);
@@ -4042,8 +4042,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       return [formatDateUTC(start), formatDateUTC(end)];
     },
-    // value must be an array of unambiguous strings like '2001-01-01', or
-    // Date objects.
+    // value must be an object, with optional fields `start` and `end`. These
+    // should be unambiguous strings like '2001-01-01', or Date objects.
     setValue: function setValue(el, value) {
       if (!(value instanceof Object)) {
         return;
@@ -4424,8 +4424,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         }
         // Else assume it's a single value
       } else {
-        $('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop('checked', true);
-      }
+          $('input:checkbox[name="' + $escape(el.id) + '"][value="' + $escape(value) + '"]').prop('checked', true);
+        }
     },
     getState: function getState(el) {
       var $objs = $('input:checkbox[name="' + $escape(el.id) + '"]');
@@ -4859,7 +4859,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var shinyapp = exports.shinyapp = new ShinyApp();
 
     function bindOutputs() {
-      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       scope = $(scope);
 
@@ -4900,8 +4900,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function unbindOutputs() {
-      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
-      var includeSelf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
       var outputs = $(scope).find('.shiny-bound-output');
 
@@ -4963,7 +4963,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function bindInputs() {
-      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       var bindings = inputBindings.getBindings();
 
@@ -5021,8 +5021,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
 
     function unbindInputs() {
-      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
-      var includeSelf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
       var inputs = $(scope).find('.shiny-bound-input');
 
@@ -5051,7 +5051,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return bindInputs(scope);
     }
     function unbindAll(scope) {
-      var includeSelf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var includeSelf = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
       unbindInputs(scope, includeSelf);
       unbindOutputs(scope, includeSelf);
@@ -5076,7 +5076,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // Calls .initialize() for all of the input objects in all input bindings,
     // in the given scope.
     function initializeInputs() {
-      var scope = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+      var scope = arguments.length <= 0 || arguments[0] === undefined ? document : arguments[0];
 
       var bindings = inputBindings.getBindings();
 
@@ -5286,7 +5286,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       initDeferredIframes();
     });
   } // function initShiny()
-
 
   // Give any deferred iframes a chance to load.
   function initDeferredIframes() {

@@ -1182,6 +1182,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       });
     });
 
+    addMessageHandler('pushState', function (message) {
+      console.log(message);
+      console.log(message.url);
+      window.history.pushState(message.state, message.title, message.url);
+    });
+
     addMessageHandler('updateQueryString', function (message) {
       window.history.replaceState(null, null, message.queryString);
     });
@@ -5352,6 +5358,26 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     shinyapp.connect(initialValues);
     $(document).one("shiny:connected", function () {
       initDeferredIframes();
+    });
+
+    function loadPage(selector, href) {
+      $(selector).load(href);
+    };
+
+    $(window).on("popstate", function (e) {
+      if (e.originalEvent.state !== null) {
+        $("#main").load(location.href);
+      }
+    });
+
+    $(document).on("click", "a, area", function () {
+      var href = $(this).attr("href");
+
+      if (href.indexOf(document.domain) > -1 || href.indexOf(':') === -1) {
+        history.pushState({}, '', href);
+        $("#main").load(href);
+        return false;
+      }
     });
   } // function initShiny()
 

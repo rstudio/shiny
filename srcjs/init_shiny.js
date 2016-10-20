@@ -441,6 +441,27 @@ function initShiny() {
   $(document).one("shiny:connected", function() {
     initDeferredIframes();
   });
+
+  function loadPage(selector, href) {
+    $( selector ).load( href );
+  };
+
+  $(window).on("popstate", function(e) {
+    if (e.originalEvent.state !== null) {
+      $( "#main" ).load(location.href);
+    }
+  });
+
+  $(document).on("click", "a, area", function() {
+    var href = $(this).attr("href");
+
+    if (href.indexOf(document.domain) > -1
+      || href.indexOf(':') === -1) {
+      history.pushState({}, '', href);
+      $( "#main" ).load( href );
+      return false;
+    }
+  });
 } // function initShiny()
 
 

@@ -686,6 +686,12 @@ var ShinyApp = function() {
     });
   });
 
+  addMessageHandler('pushState', function(message) {
+    console.log(message);
+    console.log(message.url);
+    window.history.pushState(message.state, message.title, message.url);
+  });
+
   addMessageHandler('updateQueryString', function(message) {
     window.history.replaceState(null, null, message.queryString);
   });

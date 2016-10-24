@@ -7,10 +7,17 @@
 onTestSnapshot(..., quoted_ = FALSE, envir_ = parent.frame(),
   session = getDefaultReactiveDomain())
 }
+\arguments{
+\item{...}{Named arguments that are quoted or unquoted expressions that will
+be captured and evaluated when API endpoint is visited.}
+
+\item{quoted_}{Are the expression quoted? Default is \code{FALSE}.}
+
+\item{envir_}{The environment in which the expression should be evaluated.}
+}
 \description{
 This function registers expressions that will be called when a test snapshot
-occurs. These test snapshots are available at a URL unique to this
-application.
+occurs. These test snapshots are available at an API endpoint URL.
 }
 \details{
 The format of the response can be specified in a POST request to the data

@@ -107,6 +107,9 @@ NULL
 #'     particular error \code{e} to get displayed to the user, then set this option
 #'     to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the
 #'     user to see.}
+#'   \item{shiny.testing}{If \code{TRUE}, then enable features for testing Shiny
+#'     applications. If \code{FALSE} (the default), do not enable those features.
+#'   }
 #' }
 #' @name shiny-options
 NULL

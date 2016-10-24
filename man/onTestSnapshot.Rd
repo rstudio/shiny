@@ -20,5 +20,8 @@ encoded as JSON. If the body is \code{\{"format": "rds"\}}, then the values
 will be encoded as RDS. In practice, RDS should be used for programmatic
 work; JSON can be used for human-readable output for debugging (and is the
 default).
+
+This function only has an effect if the global option \code{shiny.testing} is
+set to \code{TRUE}.
 }
 

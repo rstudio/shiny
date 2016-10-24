@@ -12,10 +12,17 @@
 #' work; JSON can be used for human-readable output for debugging (and is the
 #' default).
 #'
+#' This function only has an effect if the global option \code{shiny.testing} is
+#' set to \code{TRUE}.
+#'
 #' @export
 onTestSnapshot <- function(..., quoted_ = FALSE, envir_ = parent.frame(),
   session = getDefaultReactiveDomain())
 {
+  # Only do this if in testing mode.
+  if (!isTRUE(getOption("shiny.testing", default = FALSE)))
+    return()
+
   # Get a named list of unevaluated expressions.
   if (quoted_) {
     dots <- list(...)

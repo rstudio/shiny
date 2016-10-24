@@ -142,6 +142,7 @@ Collate:
     'shinywrappers.R'
     'showcase.R'
     'tar.R'
+    'test-snapshot.R'
     'timer.R'
     'update-input.R'
 RoxygenNote: 5.0.1

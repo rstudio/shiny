@@ -398,6 +398,7 @@ ShinySession <- R6Class(
     restoreCallbacks = 'Callbacks',
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
+    testSnapshotItems = list(),
 
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
@@ -555,6 +556,51 @@ ShinySession <- R6Class(
         })
 
       }) # withReactiveDomain
+    },
+
+    enableTestEndpoint = function() {
+      self$registerDataObj("shinytest", NULL, function(data, req) {
+        params <- parseQueryString(req$QUERY_STRING)
+        # The format of the response that will be sent back. Default to "rds"
+        # unless requested otherwise. The only other valid value is "json".
+        format <- params$format %OR% "rds"
+
+        # The type of the request. Can either be "inputs" or "snapshot".
+        type <- params$type %OR% "inputs"
+
+        if (type == "inputs") {
+          values <- isolate(reactiveValuesToList(self$input, all.names = TRUE))
+
+        } else if (type == "snapshot") {
+          values <- isolate(
+            lapply(private$testSnapshotItems, function(item) {
+              eval(item$expr, envir = item$env)
+            })
+          )
+
+        } else {
+          return(httpResponse(400, "text/plain",
+                              paste("Invalid type requested:", type))
+          )
+        }
+
+        if (identical(format, "json")) {
+          content <- toJSON(values)
+          httpResponse(200, "application/json", content)
+
+        } else if (identical(format, "rds")) {
+          tmpfile <- tempfile("shinytest", fileext = ".rds")
+          saveRDS(values, tmpfile)
+          on.exit(unlink(tmpfile))
+
+          content <- readBin(tmpfile, "raw", n = file.info(tmpfile)$size)
+          httpResponse(200, "application/octet-stream", content)
+
+        } else {
+          httpResponse(400, "text/plain", paste("Invalid format requested:", format))
+        }
+      })
+
     }
   ),
   public = list(
@@ -606,6 +652,10 @@ ShinySession <- R6Class(
       private$restoreCallbacks <- Callbacks$new()
       private$restoredCallbacks <- Callbacks$new()
       private$createBookmarkObservers()
+
+      if (isTRUE(getOption("shiny.testing", default = FALSE))) {
+        private$enableTestEndpoint()
+      }
 
       private$registerSessionEndCallbacks()
 
@@ -1181,6 +1231,25 @@ ShinySession <- R6Class(
       )
     },
 
+    onTestSnapshot = function(..., quoted_ = FALSE, env_ = parent.frame()) {
+      # Get a named list of unevaluated expressions.
+      if (quoted_) {
+        dots <- list(...)
+      } else {
+        dots <- eval(substitute(alist(...)))
+      }
+
+      if (anyUnnamed(dots))
+        stop("onTestSnapshot: all arguments must be named.")
+
+      # Create a named list where each item is a list with an expression and
+      # environment in which to eval the expression.
+      items <- lapply(dots, function(expr) {
+        list(expr = expr, env = env_)
+      })
+
+      private$testSnapshotItems <- mergeVectors(private$testSnapshotItems, items)
+    },
 
     reactlog = function(logEntry) {
       # Use sendCustomMessage instead of sendMessage, because the handler in

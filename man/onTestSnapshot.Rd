@@ -4,14 +4,16 @@
 \alias{onTestSnapshot}
 \title{Register expressions that will be evaluated when a test snapshot occurs}
 \usage{
-onTestSnapshot(..., quoted_ = FALSE, envir_ = parent.frame(),
-  session = getDefaultReactiveDomain())
+onTestSnapshot(..., quoted_ = FALSE, env_ = parent.frame(),
+  session_ = getDefaultReactiveDomain())
 }
 \arguments{
 \item{...}{Named arguments that are quoted or unquoted expressions that will
 be captured and evaluated when API endpoint is visited.}
 
 \item{quoted_}{Are the expression quoted? Default is \code{FALSE}.}
+
+\item{session_}{A Shiny session object.}
 
 \item{envir_}{The environment in which the expression should be evaluated.}
 }
@@ -20,14 +22,6 @@ This function registers expressions that will be called when a test snapshot
 occurs. These test snapshots are available at an API endpoint URL.
 }
 \details{
-The format of the response can be specified in a POST request to the data
-URL. The POST body can be a JSON object that specifies the format. For
-example if the body is \code{\{"format": "json"\}}, then the values will be
-encoded as JSON. If the body is \code{\{"format": "rds"\}}, then the values
-will be encoded as RDS. In practice, RDS should be used for programmatic
-work; JSON can be used for human-readable output for debugging (and is the
-default).
-
 This function only has an effect if the global option \code{shiny.testing} is
 set to \code{TRUE}.
 }

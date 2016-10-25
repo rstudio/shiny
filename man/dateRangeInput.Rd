@@ -109,7 +109,7 @@ ui <- fluidPage(
 
   # Start with decade view instead of default month view
   dateRangeInput("daterange6", "Date range:",
-                 startview = "decade")
+                 startview = "decade"),
                  
   # Allow the user to select a month instead of a day
   dateRangeInput("daterange7", "Date range:",

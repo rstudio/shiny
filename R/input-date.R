@@ -70,7 +70,7 @@
 #'
 #'   # Start with decade view instead of default month view
 #'   dateInput("date6", "Date:",
-#'             startview = "decade")
+#'             startview = "decade"),
 #'                         
 #'   # Allow the user to select a month instead of a day
 #'   dateInput("date7", "Date:",

@@ -73,7 +73,7 @@ removeInputHandler <- function(type){
 
 
 # Apply input handler to a single input value
-applyInputHandler <- function(name, val) {
+applyInputHandler <- function(name, val, shinysession) {
   splitName <- strsplit(name, ':')[[1]]
   if (length(splitName) > 1) {
     if (!inputHandlers$containsKey(splitName[[2]])) {
@@ -108,6 +108,7 @@ applyInputHandler <- function(name, val) {
 #' output.
 #'
 #' @param inputs A named list of input values.
+#' @param shinysession A Shiny session object.
 #'
 #' @seealso registerInputHandler
 #'
@@ -123,8 +124,10 @@ applyInputHandler <- function(name, val) {
 #'   "n2:shiny.number" = NULL  # Converts to NA
 #' ))
 #' @export
-applyInputHandlers <- function(inputs) {
-  inputs <- mapply(applyInputHandler, names(inputs), inputs, SIMPLIFY = FALSE)
+applyInputHandlers <- function(inputs, shinysession = getDefaultReactiveDomain()) {
+  inputs <- mapply(applyInputHandler, names(inputs), inputs,
+                   MoreArgs = list(shinysession = shinysession),
+                   SIMPLIFY = FALSE)
 
   # Convert names like "button1:shiny.action" to "button1"
   names(inputs) <- vapply(

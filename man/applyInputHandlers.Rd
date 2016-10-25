@@ -4,10 +4,12 @@
 \alias{applyInputHandlers}
 \title{Apply input handlers to raw input values}
 \usage{
-applyInputHandlers(inputs)
+applyInputHandlers(inputs, shinysession = getDefaultReactiveDomain())
 }
 \arguments{
 \item{inputs}{A named list of input values.}
+
+\item{shinysession}{A Shiny session object.}
 }
 \description{
 The purpose of this function is to make it possible for external packages to

@@ -442,23 +442,19 @@ function initShiny() {
     initDeferredIframes();
   });
 
-  function loadPage(selector, href) {
-    $( selector ).load( href );
-  };
-
   $(window).on("popstate", function(e) {
-    if (e.originalEvent.state !== null) {
-      $( "#main" ).load(location.href);
-    }
+    //if (e.originalEvent.state !== null) {
+      $( "#main" ).load(location.href + " #main");
+    //}
   });
 
-  $(document).on("click", "a, area", function() {
+  $(document).on("click", ".navigate", function() {
     var href = $(this).attr("href");
 
     if (href.indexOf(document.domain) > -1
       || href.indexOf(':') === -1) {
       history.pushState({}, '', href);
-      $( "#main" ).load( href );
+      $( "#main" ).load( href + " #main");
       return false;
     }
   });

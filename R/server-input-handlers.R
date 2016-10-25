@@ -123,7 +123,8 @@ applyInputHandler <- function(name, val, shinysession) {
 #'   "n1" = NULL,
 #'   "n2:shiny.number" = NULL  # Converts to NA
 #' ))
-#' @export
+#'
+#' @keywords internal
 applyInputHandlers <- function(inputs, shinysession = getDefaultReactiveDomain()) {
   inputs <- mapply(applyInputHandler, names(inputs), inputs,
                    MoreArgs = list(shinysession = shinysession),

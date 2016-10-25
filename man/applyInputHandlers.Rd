@@ -34,8 +34,10 @@ applyInputHandlers(list(
   "n1" = NULL,
   "n2:shiny.number" = NULL  # Converts to NA
 ))
+
 }
 \seealso{
 registerInputHandler
 }
+\keyword{internal}
 

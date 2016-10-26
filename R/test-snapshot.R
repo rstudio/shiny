@@ -3,7 +3,7 @@
 #' This function registers expressions that will be called when a test snapshot
 #' occurs. These test snapshots are available at an API endpoint URL.
 #'
-#' This function only has an effect if the global option \code{shiny.testing} is
+#' This function only has an effect if the global option \code{shiny.testmode} is
 #' set to \code{TRUE}.
 #'
 #' @param quoted_ Are the expression quoted? Default is \code{FALSE}.

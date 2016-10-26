@@ -22,7 +22,7 @@ This function registers expressions that will be called when a test snapshot
 occurs. These test snapshots are available at an API endpoint URL.
 }
 \details{
-This function only has an effect if the global option \code{shiny.testing} is
+This function only has an effect if the global option \code{shiny.testmode} is
 set to \code{TRUE}.
 }
 

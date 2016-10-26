@@ -107,7 +107,7 @@ NULL
 #'     particular error \code{e} to get displayed to the user, then set this option
 #'     to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the
 #'     user to see.}
-#'   \item{shiny.testing}{If \code{TRUE}, then enable features for testing Shiny
+#'   \item{shiny.testmode}{If \code{TRUE}, then enable features for testing Shiny
 #'     applications. If \code{FALSE} (the default), do not enable those features.
 #'   }
 #' }
@@ -685,7 +685,7 @@ ShinySession <- R6Class(
       private$restoredCallbacks <- Callbacks$new()
       private$createBookmarkObservers()
 
-      if (isTRUE(getOption("shiny.testing", default = FALSE))) {
+      if (isTRUE(getOption("shiny.testmode", default = FALSE))) {
         private$enableTestEndpoint()
       }
 
@@ -1088,7 +1088,7 @@ ShinySession <- R6Class(
       inputMessages <- private$inputMessageQueue
       private$inputMessageQueue <- list()
 
-      if (isTRUE(getOption("shiny.testing", default = FALSE))) {
+      if (isTRUE(getOption("shiny.testmode", default = FALSE))) {
         private$storeOutputValues(mergeVectors(values, errors))
       }
 

@@ -81,7 +81,7 @@ The default polling interval is 500 milliseconds. You can change this
     particular error \code{e} to get displayed to the user, then set this option
     to \code{TRUE} and use \code{stop(safeError(e))} for errors you want the
     user to see.}
-  \item{shiny.testing}{If \code{TRUE}, then enable features for testing Shiny
+  \item{shiny.testmode}{If \code{TRUE}, then enable features for testing Shiny
     applications. If \code{FALSE} (the default), do not enable those features.
   }
 }

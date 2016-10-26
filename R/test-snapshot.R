@@ -7,7 +7,7 @@
 #' set to \code{TRUE}.
 #'
 #' @param quoted_ Are the expression quoted? Default is \code{FALSE}.
-#' @param envir_ The environment in which the expression should be evaluated.
+#' @param env_ The environment in which the expression should be evaluated.
 #' @param session_ A Shiny session object.
 #' @param ... Named arguments that are quoted or unquoted expressions that will
 #'   be captured and evaluated when API endpoint is visited.

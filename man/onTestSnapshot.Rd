@@ -13,9 +13,9 @@ be captured and evaluated when API endpoint is visited.}
 
 \item{quoted_}{Are the expression quoted? Default is \code{FALSE}.}
 
-\item{session_}{A Shiny session object.}
+\item{env_}{The environment in which the expression should be evaluated.}
 
-\item{envir_}{The environment in which the expression should be evaluated.}
+\item{session_}{A Shiny session object.}
 }
 \description{
 This function registers expressions that will be called when a test snapshot

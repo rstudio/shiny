@@ -23,19 +23,6 @@ like \code{"x:shiny.date"}. This function would apply the \code{"shiny.date"}
 input handler to the value, and then rename the result to \code{"x"}, in the
 output.
 }
-\examples{
-applyInputHandlers(list(
-  "m1" = list(list(1, 2), list(3, 4)),
-  "m2:shiny.matrix" = list(list(1, 2), list(3, 4)),
-
-  "d1" = "2016-01-01",
-  "d2:shiny.date" = "2016-01-01",  # Date object
-
-  "n1" = NULL,
-  "n2:shiny.number" = NULL  # Converts to NA
-))
-
-}
 \seealso{
 registerInputHandler
 }

@@ -971,9 +971,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     // Adds custom message handler - this one is exposed to the user
     function addCustomMessageHandler(type, handler) {
-      if (customMessageHandlers[type]) {
-        throw 'handler for message of type "' + type + '" already added.';
-      }
       if (typeof handler !== 'function') {
         throw 'handler must be a function.';
       }

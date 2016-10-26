@@ -971,6 +971,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     // Adds custom message handler - this one is exposed to the user
     function addCustomMessageHandler(type, handler) {
+      // Remove any previously defined handlers so that only the most recent one
+      // will be called
+      if (customMessageHandlers[type]) {
+        var typeIdx = customMessageHandlerOrder.indexOf(type);
+        if (typeIdx != -1) {
+          customMessageHandlerOrder.splice(typeIdx, 1);
+        }
+      }
       if (typeof handler !== 'function') {
         throw 'handler must be a function.';
       }

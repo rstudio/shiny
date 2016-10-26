@@ -329,6 +329,14 @@ workerId <- local({
 #' \item{doBookmark()}{
 #'   Do bookmarking and invoke the onBookmark and onBookmarked callback functions.
 #' }
+#' \item{exportTestValues()}{
+#'   Registers expressions for export in test mode, available at the test
+#'   endpoint URL.
+#' }
+#' \item{getTestEndpointUrl()}{
+#'   Returns a URL for the test endpoint. Only useful when the
+#'   \code{shiny.testmode} option is set to TRUE.
+#' }
 #'
 #' @name session
 NULL
@@ -398,8 +406,10 @@ ShinySession <- R6Class(
     restoreCallbacks = 'Callbacks',
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
+
     testValueExprs = list(),
     outputValues = list(),           # Saved output values (for testing mode)
+    testEndpointUrl = character(0),
 
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
@@ -565,74 +575,79 @@ ShinySession <- R6Class(
     },
 
     enableTestEndpoint = function() {
-      self$registerDataObj("shinytest", NULL, function(data, req) {
-        params <- parseQueryString(req$QUERY_STRING)
-        # The format of the response that will be sent back. Default to "rds"
-        # unless requested otherwise. The only other valid value is "json".
-        format <- params$format %OR% "rds"
+      private$testEndpointUrl <- self$registerDataObj("shinytest", NULL,
+        function(data, req) {
+          if (!isTRUE(getOption("shiny.testmode"))) {
+            return()
+          }
 
-        values <- list()
+          params <- parseQueryString(req$QUERY_STRING)
+          # The format of the response that will be sent back. Default to "rds"
+          # unless requested otherwise. The only other valid value is "json".
+          format <- params$format %OR% "rds"
 
-        if (!is.null(params$inputs)) {
-          if (params$inputs == 1) {
-            values$inputs <- isolate(
-              reactiveValuesToList(self$input, all.names = TRUE)
-            )
-          } else {
+          values <- list()
+
+          if (!is.null(params$inputs)) {
+            if (params$inputs == 1) {
+              values$inputs <- isolate(
+                reactiveValuesToList(self$input, all.names = TRUE)
+              )
+            } else {
+              return(httpResponse(400, "text/plain",
+                paste("Unknown value for inputs:", params$inputs)
+              ))
+            }
+          }
+
+          if (!is.null(params$outputs)) {
+            if (params$outputs == 1) {
+              values$outputs <- private$outputValues
+            } else {
+              return(httpResponse(400, "text/plain",
+                paste("Unknown value for outputs:", params$outputs)
+              ))
+            }
+          }
+
+          if (!is.null(params$exports)) {
+            if (params$exports == 1) {
+              values$exports <- isolate(
+                lapply(private$testValueExprs, function(item) {
+                  eval(item$expr, envir = item$env)
+                })
+              )
+            } else {
+              return(httpResponse(400, "text/plain",
+                paste("Unknown value for exports:", params$exports)
+              ))
+
+            }
+          }
+
+          if (length(values) == 0) {
             return(httpResponse(400, "text/plain",
-              paste("Unknown value for inputs:", params$inputs)
+              "No exports, inputs, or outputs requested."
             ))
           }
-        }
 
-        if (!is.null(params$outputs)) {
-          if (params$outputs == 1) {
-            values$outputs <- private$outputValues
+          if (identical(format, "json")) {
+            content <- toJSON(values, pretty = TRUE)
+            httpResponse(200, "application/json", content)
+
+          } else if (identical(format, "rds")) {
+            tmpfile <- tempfile("shinytest", fileext = ".rds")
+            saveRDS(values, tmpfile)
+            on.exit(unlink(tmpfile))
+
+            content <- readBin(tmpfile, "raw", n = file.info(tmpfile)$size)
+            httpResponse(200, "application/octet-stream", content)
+
           } else {
-            return(httpResponse(400, "text/plain",
-              paste("Unknown value for outputs:", params$outputs)
-            ))
+            httpResponse(400, "text/plain", paste("Invalid format requested:", format))
           }
         }
-
-        if (!is.null(params$exports)) {
-          if (params$exports == 1) {
-            values$exports <- isolate(
-              lapply(private$testValueExprs, function(item) {
-                eval(item$expr, envir = item$env)
-              })
-            )
-          } else {
-            return(httpResponse(400, "text/plain",
-              paste("Unknown value for exports:", params$exports)
-            ))
-
-          }
-        }
-
-        if (length(values) == 0) {
-          return(httpResponse(400, "text/plain",
-            "No exports, inputs, or outputs requested."
-          ))
-        }
-
-        if (identical(format, "json")) {
-          content <- toJSON(values, pretty = TRUE)
-          httpResponse(200, "application/json", content)
-
-        } else if (identical(format, "rds")) {
-          tmpfile <- tempfile("shinytest", fileext = ".rds")
-          saveRDS(values, tmpfile)
-          on.exit(unlink(tmpfile))
-
-          content <- readBin(tmpfile, "raw", n = file.info(tmpfile)$size)
-          httpResponse(200, "application/octet-stream", content)
-
-        } else {
-          httpResponse(400, "text/plain", paste("Invalid format requested:", format))
-        }
-      })
-
+      )
     }
   ),
   public = list(
@@ -685,9 +700,7 @@ ShinySession <- R6Class(
       private$restoredCallbacks <- Callbacks$new()
       private$createBookmarkObservers()
 
-      if (isTRUE(getOption("shiny.testmode", default = FALSE))) {
-        private$enableTestEndpoint()
-      }
+      private$enableTestEndpoint()
 
       private$registerSessionEndCallbacks()
 
@@ -1088,7 +1101,7 @@ ShinySession <- R6Class(
       inputMessages <- private$inputMessageQueue
       private$inputMessageQueue <- list()
 
-      if (isTRUE(getOption("shiny.testmode", default = FALSE))) {
+      if (isTRUE(getOption("shiny.testmode"))) {
         private$storeOutputValues(mergeVectors(values, errors))
       }
 
@@ -1285,6 +1298,10 @@ ShinySession <- R6Class(
       })
 
       private$testValueExprs <- mergeVectors(private$testValueExprs, items)
+    },
+
+    getTestEndpointUrl = function() {
+      private$testEndpointUrl
     },
 
     reactlog = function(logEntry) {

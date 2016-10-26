@@ -155,6 +155,14 @@
 \item{doBookmark()}{
   Do bookmarking and invoke the onBookmark and onBookmarked callback functions.
 }
+\item{exportTestValues()}{
+  Registers expressions for export in test mode, available at the test
+  endpoint URL.
+}
+\item{getTestEndpointUrl()}{
+  Returns a URL for the test endpoint. Only useful when the
+  \code{shiny.testmode} option is set to TRUE.
+}
 }
 \description{
 Shiny server functions can optionally include \code{session} as a parameter

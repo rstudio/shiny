@@ -21,20 +21,11 @@
 #' # fetch the input, output, and exported values in JSON format.
 #' shinyApp(
 #'   ui = basicPage(
-#'     h4("Test values URL: "),
-#'     p(a(id = "url")),
+#'     h4("Snapshot URL: "),
+#'     uiOutput("url"),
 #'     h4("Current values:"),
 #'     verbatimTextOutput("values"),
-#'     actionButton("inc", "Increment x"),
-#'     tags$script(HTML(
-#'       # This script uses a bit of a hack to set the URL after the page
-#'       # is ready.
-#'       "$(document).one('shiny:idle', function() {
-#'         var url = Shiny.shinyapp.getTestEndpointUrl() +
-#'           '&inputs=1&outputs=1&exports=1&format=json';
-#'         $('#url').attr('href', url).html(url);
-#'       })"
-#'     ))
+#'     actionButton("inc", "Increment x")
 #'   ),
 #'
 #'   server = function(input, output, session) {
@@ -49,6 +40,14 @@
 #'       x = vals$x,
 #'       y = y()
 #'     )
+#'
+#'     output$url <- renderUI({
+#'       # Build the URL for the test endpoint
+#'       url <- paste0(session$getTestEndpointUrl(),
+#'         "&inputs=1&outputs=1&exports=1&format=json")
+#'
+#'       a(href = url, url)
+#'     })
 #'
 #'     output$values <- renderText({
 #'       paste0("vals$x: ", vals$x, "\ny: ", y())

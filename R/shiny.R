@@ -399,6 +399,7 @@ ShinySession <- R6Class(
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
     testSnapshotItems = list(),
+    outputValues = list(),           # Saved output values (for testing mode)
 
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
@@ -558,6 +559,11 @@ ShinySession <- R6Class(
       }) # withReactiveDomain
     },
 
+    # Save output values and errors. This is only used for testing mode.
+    storeOutputValues = function(values = NULL) {
+      private$outputValues <- mergeVectors(private$outputValues, values)
+    },
+
     enableTestEndpoint = function() {
       self$registerDataObj("shinytest", NULL, function(data, req) {
         params <- parseQueryString(req$QUERY_STRING)
@@ -565,27 +571,53 @@ ShinySession <- R6Class(
         # unless requested otherwise. The only other valid value is "json".
         format <- params$format %OR% "rds"
 
-        # The type of the request. Can either be "inputs" or "snapshot".
-        type <- params$type %OR% "inputs"
+        values <- list()
 
-        if (type == "inputs") {
-          values <- isolate(reactiveValuesToList(self$input, all.names = TRUE))
+        if (!is.null(params$inputs)) {
+          if (params$inputs == 1) {
+            values$inputs <- isolate(
+              reactiveValuesToList(self$input, all.names = TRUE)
+            )
+          } else {
+            return(httpResponse(400, "text/plain",
+              paste("Unknown value for inputs:", params$inputs)
+            ))
+          }
+        }
 
-        } else if (type == "snapshot") {
-          values <- isolate(
-            lapply(private$testSnapshotItems, function(item) {
-              eval(item$expr, envir = item$env)
-            })
-          )
+        if (!is.null(params$outputs)) {
+          if (params$outputs == 1) {
+            values$outputs <- private$outputValues
+          } else {
+            return(httpResponse(400, "text/plain",
+              paste("Unknown value for outputs:", params$outputs)
+            ))
+          }
+        }
 
-        } else {
+        if (!is.null(params$snapshot)) {
+          if (params$snapshot == 1) {
+            values$snapshot <- isolate(
+              lapply(private$testSnapshotItems, function(item) {
+                eval(item$expr, envir = item$env)
+              })
+            )
+          } else {
+            return(httpResponse(400, "text/plain",
+              paste("Unknown value for snapshot:", params$snapshot)
+            ))
+
+          }
+        }
+
+        if (length(values) == 0) {
           return(httpResponse(400, "text/plain",
-                              paste("Invalid type requested:", type))
-          )
+            "No snapshot, inputs, or outputs requested."
+          ))
         }
 
         if (identical(format, "json")) {
-          content <- toJSON(values)
+          content <- toJSON(values, pretty = TRUE)
           httpResponse(200, "application/json", content)
 
         } else if (identical(format, "rds")) {
@@ -1049,16 +1081,20 @@ ShinySession <- R6Class(
       }
 
       private$progressKeys <- character(0)
-      values <- private$invalidatedOutputValues
+      values <- as.list(private$invalidatedOutputValues)
       private$invalidatedOutputValues <- Map$new()
-      errors <- private$invalidatedOutputErrors
+      errors <- as.list(private$invalidatedOutputErrors)
       private$invalidatedOutputErrors <- Map$new()
       inputMessages <- private$inputMessageQueue
       private$inputMessageQueue <- list()
 
+      if (isTRUE(getOption("shiny.testing", default = FALSE))) {
+        private$storeOutputValues(mergeVectors(values, errors))
+      }
+
       private$sendMessage(
-        errors = as.list(errors),
-        values = as.list(values),
+        errors = errors,
+        values = values,
         inputMessages = inputMessages
       )
     },

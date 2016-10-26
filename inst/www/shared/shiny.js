@@ -1307,10 +1307,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     exports.progressHandlers = progressHandlers;
 
     // Returns a URL which can be queried to get values from inside the server
-    // function. This is enabled by calling `shiny::onTestSnapshot()` in the
-    // app's server function.
+    // function. This is enabled with `options(shiny.testmode=TRUE)`.
     this.getTestEndpointUrl = function () {
-      return window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + window.location.pathname + "session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId);
+      return "session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + randomId();
     };
   }).call(ShinyApp.prototype);
 

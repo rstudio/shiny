@@ -218,7 +218,8 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
           if (is.character(msg))
             msg <- charToRaw(msg)
 
-          if (isTRUE(getOption('shiny.trace'))) {
+          traceOption <- getOption('shiny.trace', FALSE)
+          if (isTRUE(traceOption) || traceOption == "recv") {
             if (binary)
               message("RECV ", '$$binary data$$')
             else

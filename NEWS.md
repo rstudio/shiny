@@ -11,6 +11,8 @@ shiny 0.14.1.9001
 
 * Fixed a "duplicate binding" error that occurred in some edge cases involving `insertUI` and nested `uiOutput`. ([#1402](https://github.com/rstudio/shiny/pull/1402))
 
+* Fixed [#1422](https://github.com/rstudio/shiny/issues/1422): When using the `shiny.trace` option, allow specifying to only log SEND or RECV messages, or both (PR [#1428](https://github.com/rstudio/shiny/pull/1428))
+
 ### Bug fixes
 
 * Fixed [#1427](https://github.com/rstudio/shiny/issues/1427): make sure that modals do not close incorrectly when an element inside them is triggered as hidden. ([#1430](https://github.com/rstudio/shiny/pull/1430))

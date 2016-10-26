@@ -398,7 +398,7 @@ ShinySession <- R6Class(
     restoreCallbacks = 'Callbacks',
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
-    testSnapshotItems = list(),
+    testValueExprs = list(),
     outputValues = list(),           # Saved output values (for testing mode)
 
     sendResponse = function(requestMsg, value) {
@@ -595,16 +595,16 @@ ShinySession <- R6Class(
           }
         }
 
-        if (!is.null(params$snapshot)) {
-          if (params$snapshot == 1) {
-            values$snapshot <- isolate(
-              lapply(private$testSnapshotItems, function(item) {
+        if (!is.null(params$exports)) {
+          if (params$exports == 1) {
+            values$exports <- isolate(
+              lapply(private$testValueExprs, function(item) {
                 eval(item$expr, envir = item$env)
               })
             )
           } else {
             return(httpResponse(400, "text/plain",
-              paste("Unknown value for snapshot:", params$snapshot)
+              paste("Unknown value for exports:", params$exports)
             ))
 
           }
@@ -612,7 +612,7 @@ ShinySession <- R6Class(
 
         if (length(values) == 0) {
           return(httpResponse(400, "text/plain",
-            "No snapshot, inputs, or outputs requested."
+            "No exports, inputs, or outputs requested."
           ))
         }
 
@@ -1267,7 +1267,7 @@ ShinySession <- R6Class(
       )
     },
 
-    onTestSnapshot = function(..., quoted_ = FALSE, env_ = parent.frame()) {
+    exportTestValues = function(..., quoted_ = FALSE, env_ = parent.frame()) {
       # Get a named list of unevaluated expressions.
       if (quoted_) {
         dots <- list(...)
@@ -1276,7 +1276,7 @@ ShinySession <- R6Class(
       }
 
       if (anyUnnamed(dots))
-        stop("onTestSnapshot: all arguments must be named.")
+        stop("exportTestValues: all arguments must be named.")
 
       # Create a named list where each item is a list with an expression and
       # environment in which to eval the expression.
@@ -1284,7 +1284,7 @@ ShinySession <- R6Class(
         list(expr = expr, env = env_)
       })
 
-      private$testSnapshotItems <- mergeVectors(private$testSnapshotItems, items)
+      private$testValueExprs <- mergeVectors(private$testValueExprs, items)
     },
 
     reactlog = function(logEntry) {

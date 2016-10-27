@@ -56,10 +56,7 @@ shinyApp(
     )
 
     output$url <- renderUI({
-      # Build the URL for the test endpoint
-      url <- paste0(session$getTestEndpointUrl(),
-        "&inputs=1&outputs=1&exports=1&format=json")
-
+      url <- session$getTestEndpointUrl(format="json")
       a(href = url, url)
     })
 

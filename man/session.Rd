@@ -159,9 +159,14 @@
   Registers expressions for export in test mode, available at the test
   endpoint URL.
 }
-\item{getTestEndpointUrl()}{
-  Returns a URL for the test endpoint. Only useful when the
-  \code{shiny.testmode} option is set to TRUE.
+\item{getTestEndpointUrl(inputs=TRUE, outputs=TRUE, exports=TRUE,
+  format="rds")}{
+  Returns a URL for the test endpoint. Only has an effect when the
+  \code{shiny.testmode} option is set to TRUE. For the inputs, outputs, and
+  exports arguments, TRUE means to return all of these values. It is also
+  possible to specify by name which values to return by providing a
+  character vector, as in \code{inputs=c("x", "y")}. The format can be
+  "rds" or "json".
 }
 }
 \description{

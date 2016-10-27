@@ -777,6 +777,24 @@ ShinySession <- R6Class(
             stop("`fun` must be a function that takes one argument")
           }
           restoredCallbacks$register(fun)
+        },
+        exportTestValues = function(..., quoted_ = FALSE, env_ = parent.frame()) {
+          if (quoted_) {
+            dots <- list(...)
+          } else {
+            dots <- eval(substitute(alist(...)))
+          }
+
+          if (anyUnnamed(dots))
+            stop("exportTestValues: all arguments must be named.")
+
+          names(dots) <- vapply(names(dots), ns, character(1))
+
+          do.call(
+            .subset2(self, "exportTestValues"),
+            c(dots, quoted_ = TRUE, env_ = env_),
+            quote = TRUE
+          )
         }
       )
 

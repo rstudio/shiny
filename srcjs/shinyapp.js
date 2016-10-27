@@ -456,8 +456,14 @@ var ShinyApp = function() {
 
   // Adds custom message handler - this one is exposed to the user
   function addCustomMessageHandler(type, handler) {
+    // Remove any previously defined handlers so that only the most recent one
+    // will be called
     if (customMessageHandlers[type]) {
-      throw('handler for message of type "' + type + '" already added.');
+      var typeIdx = customMessageHandlerOrder.indexOf(type);
+      if (typeIdx !== -1) {
+        customMessageHandlerOrder.splice(typeIdx, 1);
+        delete customMessageHandlers[type];
+      }
     }
     if (typeof(handler) !== 'function') {
       throw('handler must be a function.');

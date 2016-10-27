@@ -94,6 +94,7 @@ module.exports = function(grunt) {
         rules: {
           "consistent-return": 1,
           "dot-location": [1, "property"],
+          "eqeqeq": 1,
           // "no-shadow": 1,
           "no-undef": 1,
           "no-unused-vars": [1, {"args": "none"}],

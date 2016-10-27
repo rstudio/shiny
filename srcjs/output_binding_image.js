@@ -983,7 +983,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
       var aProps = Object.getOwnPropertyNames(a);
       var bProps = Object.getOwnPropertyNames(b);
 
-      if (aProps.length != bProps.length)
+      if (aProps.length !== bProps.length)
         return false;
 
       for (var i=0; i<aProps.length; i++) {

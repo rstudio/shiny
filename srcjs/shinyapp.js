@@ -146,7 +146,7 @@ var ShinyApp = function() {
 
     // function to normalize hostnames
     var normalize = function(hostname) {
-      if (hostname == "127.0.0.1")
+      if (hostname === "127.0.0.1")
         return "localhost";
       else
         return hostname;
@@ -160,7 +160,7 @@ var ShinyApp = function() {
       a.href = parentUrl;
 
       // post the disconnected message if the hostnames are the same
-      if (normalize(a.hostname) == normalize(window.location.hostname)) {
+      if (normalize(a.hostname) === normalize(window.location.hostname)) {
         var protocol = a.protocol.replace(':',''); // browser compatability
         var origin = protocol + '://' + a.hostname;
         if (a.port)

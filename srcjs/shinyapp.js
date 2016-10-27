@@ -460,8 +460,9 @@ var ShinyApp = function() {
     // will be called
     if (customMessageHandlers[type]) {
       var typeIdx = customMessageHandlerOrder.indexOf(type);
-      if (typeIdx != -1) {
+      if (typeIdx !== -1) {
         customMessageHandlerOrder.splice(typeIdx, 1);
+        delete customMessageHandlers[type];
       }
     }
     if (typeof(handler) !== 'function') {

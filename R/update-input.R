@@ -622,7 +622,7 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     res <- checkAsIs(options)
     cfg <- tags$script(
       type = 'application/json',
-      `data-for` = inputId,
+      `data-for` = session$ns(inputId),
       `data-eval` = if (length(res$eval)) HTML(toJSON(res$eval)),
       HTML(toJSON(res$options))
     )

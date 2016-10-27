@@ -589,39 +589,50 @@ ShinySession <- R6Class(
           values <- list()
 
           if (!is.null(params$inputs)) {
-            if (params$inputs == 1) {
-              values$inputs <- isolate(
-                reactiveValuesToList(self$input, all.names = TRUE)
-              )
+
+            allInputs <- isolate(
+              reactiveValuesToList(self$input, all.names = TRUE)
+            )
+
+            # If params$inputs is "1", return all; otherwise return just the
+            # inputs that are named in params$inputs, like "x,y,z".
+            if (params$inputs == "1") {
+              values$inputs <- allInputs
             } else {
-              return(httpResponse(400, "text/plain",
-                paste("Unknown value for inputs:", params$inputs)
-              ))
+              items <- strsplit(params$inputs, ",")[[1]]
+              items <- intersect(items, names(allInputs))
+              values$inputs <- allInputs[items]
             }
           }
 
           if (!is.null(params$outputs)) {
-            if (params$outputs == 1) {
+
+            if (params$outputs == "1") {
               values$outputs <- private$outputValues
             } else {
-              return(httpResponse(400, "text/plain",
-                paste("Unknown value for outputs:", params$outputs)
-              ))
+              items <- strsplit(params$outputs, ",")[[1]]
+              items <- intersect(items, names(private$outputValues))
+              values$outputs <- private$outputValues[items]
             }
           }
 
           if (!is.null(params$exports)) {
-            if (params$exports == 1) {
+
+            testValueExprs <- private$testValueExprs
+            if (params$exports == "1") {
               values$exports <- isolate(
                 lapply(private$testValueExprs, function(item) {
                   eval(item$expr, envir = item$env)
                 })
               )
             } else {
-              return(httpResponse(400, "text/plain",
-                paste("Unknown value for exports:", params$exports)
-              ))
-
+              items <- strsplit(params$exports, ",")[[1]]
+              items <- intersect(items, names(private$testValueExprs))
+              values$exports <- isolate(
+                lapply(private$testValueExprs[items], function(item) {
+                  eval(item$expr, envir = item$env)
+                })
+              )
             }
           }
 

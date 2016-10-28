@@ -1183,9 +1183,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     });
 
     addMessageHandler('pushState', function (message) {
-      console.log(message);
-      console.log(message.url);
       window.history.pushState(message.state, message.title, message.url);
+      // just to trigger a onpopstate event...
+      window.history.pushState(message.state, message.title, message.url);
+      window.history.back();
     });
 
     addMessageHandler('updateQueryString', function (message) {
@@ -5333,7 +5334,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     initialValues['.clientdata_url_hostname'] = window.location.hostname;
     initialValues['.clientdata_url_port'] = window.location.port;
     initialValues['.clientdata_url_pathname'] = window.location.pathname;
+
+    // Send initial URL search (query string) and update it if it changes
     initialValues['.clientdata_url_search'] = window.location.search;
+
+    // on popstate
+    window.onpopstate = history.onpushstate = function (e) {
+      inputs.setInput('.clientdata_url_search', window.location.search);
+    };
+
     // This is only the initial value of the hash. The hash can change, but
     // a reactive version of this isn't sent because w atching for changes can
     // require polling on some browsers. The JQuery hashchange plugin can be
@@ -5360,21 +5369,40 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       initDeferredIframes();
     });
 
-    $(window).on("popstate", function (e) {
-      //if (e.originalEvent.state !== null) {
-      $("#main").load(location.href + " #main");
-      //}
-    });
-
-    $(document).on("click", ".navigate", function () {
-      var href = $(this).attr("href");
-
-      if (href.indexOf(document.domain) > -1 || href.indexOf(':') === -1) {
-        history.pushState({}, '', href);
-        $("#main").load(href + " #main");
-        return false;
-      }
-    });
+    /*********************************************
+     *
+     *
+      $(window).on("popstate", function(e) {
+        //if (e.originalEvent.state !== null) {
+          $( "#main" ).load(location.href + " #main");
+        //}
+      });
+    
+      $(document).on("click", ".navigate", function() {
+        var $href = $(this).attr("href");
+    
+        if ($href.indexOf(document.domain) > -1
+          || $href.indexOf(':') === -1) {
+          // history.pushState({}, '', $href);
+          // $( "#main" ).load( $href + " #main");
+          window.location.hash = $href;
+          $(window).trigger('hashchange');
+          return false;
+        }
+      });
+    
+      $(window).on('hashchange', function() {
+        var href = (window.location.hash).substring(1); // remove leading hash
+        $( "#main" ).load( href + " #main");
+      });
+    
+      // for the ajax loading to take into effect if the user opens an app
+      // with an hash already
+      $(window).trigger('hashchange');
+     *
+     *
+    *********************************************/
+    //window.history.pushState({}, "", "");
   } // function initShiny()
 
 

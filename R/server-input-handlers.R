@@ -111,19 +111,7 @@ applyInputHandler <- function(name, val, shinysession) {
 #' @param shinysession A Shiny session object.
 #'
 #' @seealso registerInputHandler
-#'
-#' @examples
-#' applyInputHandlers(list(
-#'   "m1" = list(list(1, 2), list(3, 4)),
-#'   "m2:shiny.matrix" = list(list(1, 2), list(3, 4)),
-#'
-#'   "d1" = "2016-01-01",
-#'   "d2:shiny.date" = "2016-01-01",  # Date object
-#'
-#'   "n1" = NULL,
-#'   "n2:shiny.number" = NULL  # Converts to NA
-#' ))
-#' @export
+#' @keywords internal
 applyInputHandlers <- function(inputs, shinysession = getDefaultReactiveDomain()) {
   inputs <- mapply(applyInputHandler, names(inputs), inputs,
                    MoreArgs = list(shinysession = shinysession),

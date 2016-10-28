@@ -838,6 +838,15 @@ var ShinyApp = function() {
 
   exports.progressHandlers = progressHandlers;
 
+  // Returns a URL which can be queried to get values from inside the server
+  // function. This is enabled with `options(shiny.testmode=TRUE)`.
+  this.getTestEndpointUrl = function() {
+    return "session/" +
+      encodeURIComponent(this.config.sessionId) +
+      "/dataobj/shinytest?w=" +
+      encodeURIComponent(this.config.workerId) +
+      "&nonce=" + randomId();
+  };
 
 }).call(ShinyApp.prototype);
 

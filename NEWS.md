@@ -1,4 +1,4 @@
-shiny 0.14.1.9001
+shiny 0.14.1.9002
 ============
 
 ## Full changelog
@@ -14,6 +14,8 @@ shiny 0.14.1.9001
 * Fixed [#1422](https://github.com/rstudio/shiny/issues/1422): When using the `shiny.trace` option, allow specifying to only log SEND or RECV messages, or both. (PR [#1428](https://github.com/rstudio/shiny/pull/1428))
 
 * Fixed [#1419](https://github.com/rstudio/shiny/issues/1419): Allow overriding a JS custom message handler. (PR [#1445](https://github.com/rstudio/shiny/pull/1445))
+
+* Added `exportTestValues()` function, which allows a test driver to query the session for values internal to an application's server function. This only has an effect if the `shiny.testmode` option is set to `TRUE`. ([#1436](https://github.com/rstudio/shiny/pull/1436))
 
 ### Bug fixes
 

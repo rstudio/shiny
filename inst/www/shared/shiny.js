@@ -675,7 +675,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       // function to normalize hostnames
       var normalize = function normalize(hostname) {
-        if (hostname == "127.0.0.1") return "localhost";else return hostname;
+        if (hostname === "127.0.0.1") return "localhost";else return hostname;
       };
 
       // Send a 'disconnected' message to parent if we are on the same domin
@@ -686,7 +686,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         a.href = parentUrl;
 
         // post the disconnected message if the hostnames are the same
-        if (normalize(a.hostname) == normalize(window.location.hostname)) {
+        if (normalize(a.hostname) === normalize(window.location.hostname)) {
           var protocol = a.protocol.replace(':', ''); // browser compatability
           var origin = protocol + '://' + a.hostname;
           if (a.port) origin = origin + ':' + a.port;
@@ -1311,6 +1311,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     };
 
     exports.progressHandlers = progressHandlers;
+
+    // Returns a URL which can be queried to get values from inside the server
+    // function. This is enabled with `options(shiny.testmode=TRUE)`.
+    this.getTestEndpointUrl = function () {
+      return "session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + randomId();
+    };
   }).call(ShinyApp.prototype);
 
   exports.showReconnectDialog = function () {
@@ -2683,7 +2689,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         var aProps = Object.getOwnPropertyNames(a);
         var bProps = Object.getOwnPropertyNames(b);
 
-        if (aProps.length != bProps.length) return false;
+        if (aProps.length !== bProps.length) return false;
 
         for (var i = 0; i < aProps.length; i++) {
           var propName = aProps[i];
@@ -3651,7 +3657,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         };
       }
 
-      if (this._numValues(el) == 2) {
+      if (this._numValues(el) === 2) {
         return [convert(result.from), convert(result.to)];
       } else {
         return convert(result.from);
@@ -3663,7 +3669,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       $el.data('immediate', true);
       try {
-        if (this._numValues(el) == 2 && value instanceof Array) {
+        if (this._numValues(el) === 2 && value instanceof Array) {
           slider.update({ from: value[0], to: value[1] });
         } else {
           slider.update({ from: value });
@@ -3688,7 +3694,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var msg = {};
 
       if (data.hasOwnProperty('value')) {
-        if (this._numValues(el) == 2 && data.value instanceof Array) {
+        if (this._numValues(el) === 2 && data.value instanceof Array) {
           msg.from = data.value[0];
           msg.to = data.value[1];
         } else {
@@ -4542,7 +4548,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       // from being mistakenly selected)
       if ($el.find('i[class]').length > 0) {
         var icon_html = $el.find('i[class]')[0];
-        if (icon_html == $el.children()[0]) {
+        if (icon_html === $el.children()[0]) {
           // another check for robustness
           icon = $(icon_html).prop('outerHTML');
         }

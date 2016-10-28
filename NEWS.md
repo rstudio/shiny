@@ -25,6 +25,8 @@ shiny 0.14.1.9002
 
 * `sliderInputBinding.setValue()` now sends a slider's value immediately, instead of waiting for the usual 250ms debounce delay. ([#1429](https://github.com/rstudio/shiny/pull/1429))
 
+* Fixed a bug where, in versions of R before 3.2, Shiny applications could crash due to a bug in R's implementation of `list2env()`. ([#1446](https://github.com/rstudio/shiny/pull/1446))
+
 shiny 0.14.1
 ============
 

@@ -196,6 +196,16 @@ mergeVectors <- function(a, b) {
   x[!drop_idx]
 }
 
+# Wrapper around list2env with a NULL check. In R <3.2.0, if an empty unnamed
+# list is passed to list2env(), it errors. But an empty named list is OK. For
+# R >=3.2.0, this wrapper is not necessary.
+list2env2 <- function(x, ...) {
+  # Ensure that zero-length lists have a name attribute
+   if (length(x) == 0)
+    attr(x, "names") <- character(0)
+
+  list2env(x, ...)
+}
 
 # Combine dir and (file)name into a file path. If a file already exists with a
 # name differing only by case, then use it instead.

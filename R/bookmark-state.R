@@ -362,7 +362,7 @@ RestoreContext <- R6Class("RestoreContext",
       self$input <- RestoreInputSet$new(inputs)
 
       values <- valuesFromJSON(values)
-      self$values <- list2env(values, self$values)
+      self$values <- list2env2(values, self$values)
     }
   )
 )
@@ -385,7 +385,7 @@ RestoreInputSet <- R6Class("RestoreInputSet",
 
   public = list(
     initialize = function(values) {
-      private$values <- list2env(values, parent = emptyenv())
+      private$values <- list2env2(values, parent = emptyenv())
     },
 
     exists = function(name) {

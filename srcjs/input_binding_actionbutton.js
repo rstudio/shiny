@@ -37,7 +37,7 @@ $.extend(actionButtonInputBinding, {
     // from being mistakenly selected)
     if ($el.find('i[class]').length > 0) {
       var icon_html = $el.find('i[class]')[0];
-      if (icon_html == $el.children()[0]) {     // another check for robustness
+      if (icon_html === $el.children()[0]) {     // another check for robustness
         icon = $(icon_html).prop('outerHTML');
       }
     }

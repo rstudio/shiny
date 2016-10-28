@@ -44,7 +44,7 @@ $.extend(sliderInputBinding, textInputBinding, {
       convert = function(val) { return +val; };
     }
 
-    if (this._numValues(el) == 2) {
+    if (this._numValues(el) === 2) {
       return [convert(result.from), convert(result.to)];
     }
     else {
@@ -58,7 +58,7 @@ $.extend(sliderInputBinding, textInputBinding, {
 
     $el.data('immediate', true);
     try {
-      if (this._numValues(el) == 2 && value instanceof Array) {
+      if (this._numValues(el) === 2 && value instanceof Array) {
         slider.update({ from: value[0], to: value[1] });
       } else {
         slider.update({ from: value });
@@ -83,7 +83,7 @@ $.extend(sliderInputBinding, textInputBinding, {
     var msg = {};
 
     if (data.hasOwnProperty('value')) {
-      if (this._numValues(el) == 2 && data.value instanceof Array) {
+      if (this._numValues(el) === 2 && data.value instanceof Array) {
         msg.from = data.value[0];
         msg.to = data.value[1];
       } else {

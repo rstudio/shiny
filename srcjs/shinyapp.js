@@ -146,7 +146,7 @@ var ShinyApp = function() {
 
     // function to normalize hostnames
     var normalize = function(hostname) {
-      if (hostname == "127.0.0.1")
+      if (hostname === "127.0.0.1")
         return "localhost";
       else
         return hostname;
@@ -160,7 +160,7 @@ var ShinyApp = function() {
       a.href = parentUrl;
 
       // post the disconnected message if the hostnames are the same
-      if (normalize(a.hostname) == normalize(window.location.hostname)) {
+      if (normalize(a.hostname) === normalize(window.location.hostname)) {
         var protocol = a.protocol.replace(':',''); // browser compatability
         var origin = protocol + '://' + a.hostname;
         if (a.port)
@@ -456,8 +456,14 @@ var ShinyApp = function() {
 
   // Adds custom message handler - this one is exposed to the user
   function addCustomMessageHandler(type, handler) {
+    // Remove any previously defined handlers so that only the most recent one
+    // will be called
     if (customMessageHandlers[type]) {
-      throw('handler for message of type "' + type + '" already added.');
+      var typeIdx = customMessageHandlerOrder.indexOf(type);
+      if (typeIdx !== -1) {
+        customMessageHandlerOrder.splice(typeIdx, 1);
+        delete customMessageHandlers[type];
+      }
     }
     if (typeof(handler) !== 'function') {
       throw('handler must be a function.');

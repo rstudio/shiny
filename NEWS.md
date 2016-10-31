@@ -1,5 +1,7 @@
-shiny 0.14.1.9002
+shiny 0.14.2
 ============
+
+This is a maintenance release of Shiny, with some bug fixes and minor new features.
 
 ## Full changelog
 

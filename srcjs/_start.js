@@ -3,6 +3,7 @@
 
   var exports = window.Shiny = window.Shiny || {};
 
+/*
   (function(history){
     var pushState = history.pushState;
     history.pushState = function(state) {
@@ -14,6 +15,7 @@
         return pushState.apply(history, arguments);
     };
   })(window.history);
+*/
 
   $(document).on('submit', 'form:not([action])', function(e) {
     e.preventDefault();

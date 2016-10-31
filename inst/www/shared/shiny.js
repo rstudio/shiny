@@ -10,20 +10,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   var exports = window.Shiny = window.Shiny || {};
 
-  /*
-    (function(history){
-      var pushState = history.pushState;
-      history.pushState = function(state) {
-          if (typeof history.onpushstate == "function") {
-              history.onpushstate({state: state});
-          }
-          // whatever else you want to do
-          // maybe call onhashchange e.handler
-          return pushState.apply(history, arguments);
-      };
-    })(window.history);
-  */
-
   $(document).on('submit', 'form:not([action])', function (e) {
     e.preventDefault();
   });
@@ -1198,6 +1184,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     addMessageHandler('pushState', function (message) {
       window.history.pushState(message.state, message.title, message.url);
+      // just to trigger a onpopstate event...
+      window.history.pushState(message.state, message.title, message.url);
+      window.history.back();
     });
 
     addMessageHandler('updateQueryString', function (message) {
@@ -5349,20 +5338,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // Send initial URL search (query string) and update it if it changes
     initialValues['.clientdata_url_search'] = window.location.search;
 
-    // on popstate
-    window.onpopstate = history.onpushstate = function (e) {
+    $(window).bind("popstate", function () {
       inputs.setInput('.clientdata_url_search', window.location.search);
-    };
-
-    /*
-      $(window).bind("popstate", function() {
-        inputs.setInput('.clientdata_url_search', window.location.search);
-      });
-    
-      $(window).bind("pushstate", function() {
-        inputs.setInput('.clientdata_url_search', window.location.search);
-      });
-    */
+    });
 
     // This is only the initial value of the hash. The hash can change, but
     // a reactive version of this isn't sent because w atching for changes can
@@ -5388,21 +5366,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     shinyapp.connect(initialValues);
     $(document).one("shiny:connected", function () {
       initDeferredIframes();
-
-      window.history.pushState({}, "", "#");
-      window.history.back();
-
-      (function (history) {
-        var pushState = history.pushState;
-        history.pushState = function (state) {
-          if (typeof history.onpushstate == "function") {
-            history.onpushstate({ state: state });
-          }
-          // whatever else you want to do
-          // maybe call onhashchange e.handler
-          return pushState.apply(history, arguments);
-        };
-      })(window.history);
     });
   } // function initShiny()
 

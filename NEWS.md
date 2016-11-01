@@ -1,3 +1,13 @@
+shiny 0.14.2.9000
+============
+
+## Full changelog
+
+### Minor new features and improvements
+
+### Bug fixes
+
+
 shiny 0.14.2
 ============
 

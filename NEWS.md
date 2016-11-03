@@ -7,6 +7,7 @@ shiny 0.14.2.9000
 
 ### Bug fixes
 
+Fixed[#1455](https://github.com/rstudio/shiny/issues/1455): The `shiny.inputchanged` event fired sometimes even when the input had not changed. ([#1457](https://github.com/rstudio/shiny/pull/1457))
 
 shiny 0.14.2
 ============

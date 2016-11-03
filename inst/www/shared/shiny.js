@@ -487,12 +487,35 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     this.target = target;
   };
   (function () {
+    // Cache previous input values, from before they are possibly changed by a
+    // shiny:inputchanged handler. These are the values from the input bindings'
+    // getValue() method. This allows us to check if the input value has
+    // changed. Values are store as JSON strings because that lets us easily
+    // test if the value has changed for non-primitive objects like arrays.
+    var previousValues = {};
+
+    this.registerInitialValues = function (values) {
+      for (var name in values) {
+        var inputName = name.split(':')[0];
+        var value = values[name];
+        previousValues[inputName] = JSON.stringify(value);
+      }
+    };
+
     this.setInput = function (name, value, immediate) {
-      var evt = jQuery.Event("shiny:inputchanged");
       var name2 = name.split(':');
-      evt.name = name2[0];
+      var inputName = name2[0];
+
+      var valueJSON = JSON.stringify(value);
+      if (previousValues[inputName] === valueJSON) return;
+
+      previousValues[inputName] = valueJSON;
+
+      var evt = jQuery.Event("shiny:inputchanged");
+      evt.name = inputName;
       evt.inputType = name2.length > 1 ? name2[1] : '';
       evt.value = value;
+
       $(document).trigger(evt);
       if (!evt.isDefaultPrevented()) {
         name = evt.name;
@@ -5035,6 +5058,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           }
         }
       }
+
+      inputsEvent.registerInitialValues(currentValues);
 
       return currentValues;
     }

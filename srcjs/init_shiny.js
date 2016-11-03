@@ -167,6 +167,8 @@ function initShiny() {
       }
     }
 
+    inputsEvent.registerInitialValues(currentValues);
+
     return currentValues;
   }
 

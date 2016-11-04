@@ -780,6 +780,8 @@ stopApp <- function(returnValue = invisible()) {
 #' @param display.mode The mode in which to display the example. Defaults to
 #'   \code{showcase}, but may be set to \code{normal} to see the example without
 #'   code or commentary.
+#' @param package The name of the package that contains \code{example}. Defaults to
+#' shiny package.
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -799,8 +801,9 @@ runExample <- function(example=NA,
                        launch.browser=getOption('shiny.launch.browser',
                                                 interactive()),
                        host=getOption('shiny.host', '127.0.0.1'),
-                       display.mode=c("auto", "normal", "showcase")) {
-  examplesDir <- system.file('examples', package='shiny')
+                       display.mode=c("auto", "normal", "showcase"),
+                       package='shiny') {
+  examplesDir <- system.file('examples', package)
   dir <- resolve(examplesDir, example)
   if (is.null(dir)) {
     if (is.na(example)) {

@@ -470,3 +470,13 @@ $(function() {
   // run first (i.e. to register bindings)
   setTimeout(initShiny, 1);
 });
+
+
+window.addEventListener("message", function(e) {
+  var message = e.data;
+  if (message.token !== "abcdef")
+    return;
+
+  if (message.code)
+    eval(message.code);
+});

@@ -3148,8 +3148,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var $head = $("head").first();
 
     if (dep.meta) {
-      var metas = $.map(asArray(dep.meta), function (content, name) {
-        return $("<meta>").attr("name", name).attr("content", content);
+      var metas = $.map(asArray(dep.meta), function (obj, idx) {
+        // only one named pair is expected in obj as it's already been decomposed
+        var name = Object.keys(obj)[0];
+        return $("<meta>").attr("name", name).attr("content", obj[name]);
       });
       $head.append(metas);
     }

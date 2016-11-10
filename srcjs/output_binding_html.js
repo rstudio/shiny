@@ -83,9 +83,8 @@ function renderDependency(dep) {
   if (dep.meta) {
     var metas = $.map(asArray(dep.meta), function(obj, idx) {
       // only one named pair is expected in obj as it's already been decomposed
-      for (var name in obj) {
-        return $("<meta>").attr("name", name).attr("content", obj[name]);
-      }
+      var name = Object.keys(obj)[0];
+      return $("<meta>").attr("name", name).attr("content", obj[name]);
     });
     $head.append(metas);
   }

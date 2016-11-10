@@ -182,6 +182,16 @@ anyUnnamed <- function(x) {
   any(!nzchar(nms))
 }
 
+
+# Given a vector/list, returns a named vector (the labels will be blank).
+asNamedVector <- function(x) {
+  if (!is.null(names(x)))
+    return(x)
+
+  names(x) <- rep.int("", length(x))
+  x
+}
+
 # Given two named vectors, join them together, and keep only the last element
 # with a given name in the resulting vector. If b has any elements with the same
 # name as elements in a, the element in a is dropped. Also, if there are any

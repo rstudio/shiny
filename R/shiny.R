@@ -640,6 +640,13 @@ ShinySession <- R6Class(
             }
           }
 
+          # Make sure inputs, outputs, exports are all named lists (at this
+          # point, they could be unnamed if they are empty lists). This is so
+          # that the resulting object is represented as an object in JSON
+          # instead of an array, and so that the RDS data structure is of a
+          # consistent type.
+          values <- lapply(values, asNamedVector)
+
           if (length(values) == 0) {
             return(httpResponse(400, "text/plain",
               "No exports, inputs, or outputs requested."

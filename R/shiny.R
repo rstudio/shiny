@@ -412,7 +412,7 @@ ShinySession <- R6Class(
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
 
-    testValueExprs = list(),
+    testExportExprs = list(),
     outputValues = list(),           # Saved output values (for testing mode)
     testEndpointUrl = character(0),
 
@@ -623,18 +623,17 @@ ShinySession <- R6Class(
 
           if (!is.null(params$exports)) {
 
-            testValueExprs <- private$testValueExprs
             if (params$exports == "1") {
               values$exports <- isolate(
-                lapply(private$testValueExprs, function(item) {
+                lapply(private$testExportExprs, function(item) {
                   eval(item$expr, envir = item$env)
                 })
               )
             } else {
               items <- strsplit(params$exports, ",")[[1]]
-              items <- intersect(items, names(private$testValueExprs))
+              items <- intersect(items, names(private$testExportExprs))
               values$exports <- isolate(
-                lapply(private$testValueExprs[items], function(item) {
+                lapply(private$testExportExprs[items], function(item) {
                   eval(item$expr, envir = item$env)
                 })
               )
@@ -1331,7 +1330,7 @@ ShinySession <- R6Class(
         list(expr = expr, env = env_)
       })
 
-      private$testValueExprs <- mergeVectors(private$testValueExprs, items)
+      private$testExportExprs <- mergeVectors(private$testExportExprs, items)
     },
 
     getTestEndpointUrl = function(inputs = TRUE, outputs = TRUE, exports = TRUE,

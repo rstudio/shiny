@@ -7,7 +7,7 @@ shiny 0.14.2.9000
 
 ### Bug fixes
 
-* Fixed bug causing `<meta>` tags associated with HTML dependencies of Shiny R Markdown files to be rendered incorrectly
+* Fixed bug causing `<meta>` tags associated with HTML dependencies of Shiny R Markdown files to be rendered incorrectly. ([#1463](https://github.com/rstudio/shiny/pull/1463))
 
 
 shiny 0.14.2

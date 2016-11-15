@@ -5,6 +5,8 @@ shiny 0.14.2.9000
 
 ### Minor new features and improvements
 
+* Added support for injecting JavaScript code when the `shiny.testmode` option is set to `TRUE`. This makes it possible to record test events interactively. ([#1464]https://github.com/rstudio/shiny/pull/1464))
+
 ### Bug fixes
 
 * Fixed bug causing `<meta>` tags associated with HTML dependencies of Shiny R Markdown files to be rendered incorrectly. ([#1463](https://github.com/rstudio/shiny/pull/1463))

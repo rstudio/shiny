@@ -2,8 +2,6 @@
 // shiny.testmode option is TRUE.
 window.addEventListener("message", function(e) {
   var message = e.data;
-  if (message.token !== "abcdef")
-    return;
 
   if (message.code)
     eval(message.code);

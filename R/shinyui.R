@@ -50,6 +50,14 @@ renderPage <- function(ui, connection, showcase=0) {
       script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js",
       stylesheet = "shiny.css")
   )
+
+  if (isTRUE(getOption("shiny.testmode"))) {
+    # Add code injection listener if in test mode
+    shiny_deps[[length(shiny_deps) + 1]] <-
+      htmlDependency("shiny-testmode", utils::packageVersion("shiny"),
+        c(href="shared"), script = "shiny-testmode.js")
+  }
+
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
   writeUTF8(html, con = connection)
 }

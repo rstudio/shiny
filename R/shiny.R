@@ -333,13 +333,13 @@ workerId <- local({
 #'   Registers expressions for export in test mode, available at the test
 #'   endpoint URL.
 #' }
-#' \item{getTestEndpointUrl(inputs=TRUE, outputs=TRUE, exports=TRUE,
+#' \item{getTestEndpointUrl(input=TRUE, output=TRUE, export=TRUE,
 #'   format="rds")}{
 #'   Returns a URL for the test endpoint. Only has an effect when the
-#'   \code{shiny.testmode} option is set to TRUE. For the inputs, outputs, and
-#'   exports arguments, TRUE means to return all of these values. It is also
+#'   \code{shiny.testmode} option is set to TRUE. For the input, output, and
+#'   export arguments, TRUE means to return all of these values. It is also
 #'   possible to specify by name which values to return by providing a
-#'   character vector, as in \code{inputs=c("x", "y")}. The format can be
+#'   character vector, as in \code{input=c("x", "y")}. The format can be
 #'   "rds" or "json".
 #' }
 #'
@@ -593,46 +593,46 @@ ShinySession <- R6Class(
 
           values <- list()
 
-          if (!is.null(params$inputs)) {
+          if (!is.null(params$input)) {
 
             allInputs <- isolate(
               reactiveValuesToList(self$input, all.names = TRUE)
             )
 
-            # If params$inputs is "1", return all; otherwise return just the
-            # inputs that are named in params$inputs, like "x,y,z".
-            if (params$inputs == "1") {
-              values$inputs <- allInputs
+            # If params$input is "1", return all; otherwise return just the
+            # inputs that are named in params$input, like "x,y,z".
+            if (params$input == "1") {
+              values$input <- allInputs
             } else {
-              items <- strsplit(params$inputs, ",")[[1]]
+              items <- strsplit(params$input, ",")[[1]]
               items <- intersect(items, names(allInputs))
-              values$inputs <- allInputs[items]
+              values$input <- allInputs[items]
             }
           }
 
-          if (!is.null(params$outputs)) {
+          if (!is.null(params$output)) {
 
-            if (params$outputs == "1") {
-              values$outputs <- private$outputValues
+            if (params$output == "1") {
+              values$output <- private$outputValues
             } else {
-              items <- strsplit(params$outputs, ",")[[1]]
+              items <- strsplit(params$output, ",")[[1]]
               items <- intersect(items, names(private$outputValues))
-              values$outputs <- private$outputValues[items]
+              values$output <- private$outputValues[items]
             }
           }
 
-          if (!is.null(params$exports)) {
+          if (!is.null(params$export)) {
 
-            if (params$exports == "1") {
-              values$exports <- isolate(
+            if (params$export == "1") {
+              values$export <- isolate(
                 lapply(private$testExportExprs, function(item) {
                   eval(item$expr, envir = item$env)
                 })
               )
             } else {
-              items <- strsplit(params$exports, ",")[[1]]
+              items <- strsplit(params$export, ",")[[1]]
               items <- intersect(items, names(private$testExportExprs))
-              values$exports <- isolate(
+              values$export <- isolate(
                 lapply(private$testExportExprs[items], function(item) {
                   eval(item$expr, envir = item$env)
                 })
@@ -640,7 +640,7 @@ ShinySession <- R6Class(
             }
           }
 
-          # Make sure inputs, outputs, exports are all named lists (at this
+          # Make sure input, output, and export are all named lists (at this
           # point, they could be unnamed if they are empty lists). This is so
           # that the resulting object is represented as an object in JSON
           # instead of an array, and so that the RDS data structure is of a
@@ -649,7 +649,7 @@ ShinySession <- R6Class(
 
           if (length(values) == 0) {
             return(httpResponse(400, "text/plain",
-              "No exports, inputs, or outputs requested."
+              "None of export, input, or output requested."
             ))
           }
 
@@ -1340,7 +1340,7 @@ ShinySession <- R6Class(
       private$testExportExprs <- mergeVectors(private$testExportExprs, items)
     },
 
-    getTestEndpointUrl = function(inputs = TRUE, outputs = TRUE, exports = TRUE,
+    getTestEndpointUrl = function(input = TRUE, output = TRUE, export = TRUE,
                                   format = "rds") {
       reqString <- function(group, value) {
         if (isTRUE(value))
@@ -1352,9 +1352,9 @@ ShinySession <- R6Class(
       }
       paste(
         private$testEndpointUrl,
-        reqString("inputs", inputs),
-        reqString("outputs", outputs),
-        reqString("exports", exports),
+        reqString("input", input),
+        reqString("output", output),
+        reqString("export", export),
         paste0("format=", format),
         sep = "&"
       )

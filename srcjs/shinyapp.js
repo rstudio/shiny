@@ -855,9 +855,9 @@ var ShinyApp = function() {
       "/dataobj/shinytest?w=" +
       encodeURIComponent(this.config.workerId) +
       "&nonce=" + randomId() +
-      (inputs ? "&inputs=1" : "") +
-      (outputs ? "&outputs=1" : "") +
-      (exports ? "&exports=1" : "") +
+      (inputs ? "&input=1" : "") +
+      (outputs ? "&output=1" : "") +
+      (exports ? "&export=1" : "") +
       "&format=" + format;
 
     return url;

@@ -59,6 +59,10 @@ devtools::install_version("shiny", version = "0.10.2.2")
 
 The Javascript code in Shiny is minified using tools that run on Node.js. See the tools/ directory for more information.
 
+## Guidelines for contributing
+
+We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for detailed guidelines of how to contribute.
+
 ## License
 
 The shiny package is licensed under the GPLv3. See these files in the inst directory for additional details:

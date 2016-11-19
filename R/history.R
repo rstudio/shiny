@@ -4,13 +4,12 @@
 #' It typically is called from an observer. Note that this will not work in
 #' Internet Explorer 9 and below.
 #'
-#' @param state State to save on the history stack.
-#' @param title Not currently in use.
-#' @param url New url to display on the window.
+#' @param queryString	The new query string to show in the location bar.
 #' @param session A Shiny session object.
 #' @seealso \code{\link{enableBookmarking}} for examples.
 #' @export
-pushState <- function(state, title, url,
-                              session = getDefaultReactiveDomain()) {
+navigateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
   session$pushState(state, title, url)
 }
+
+

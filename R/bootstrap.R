@@ -1448,6 +1448,7 @@ downloadButton <- function(outputId,
                  class=paste('btn btn-default shiny-download-link', class),
                  href='',
                  target='_blank',
+                 download=NA,
                  icon("download"),
                  label)
 }
@@ -1459,6 +1460,7 @@ downloadLink <- function(outputId, label="Download", class=NULL) {
          class=paste(c('shiny-download-link', class), collapse=" "),
          href='',
          target='_blank',
+         download=NA,
          label)
 }
 

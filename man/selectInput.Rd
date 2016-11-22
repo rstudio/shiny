@@ -16,7 +16,12 @@ selectizeInput(inputId, ..., options = NULL, width = NULL)
 \item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{choices}{List of values to select from. If elements of the list are
-named then that name rather than the value is displayed to the user.}
+named, then that name rather than the value is displayed to the user.
+This can also be a named list whose elements are (either named or
+unnamed) lists or vectors. If this is the case, the outermost names
+will be used as the "optgroup" label for the elements in the respective
+sublist. This allows you to group and label similar choices. See the
+example section for a small demo of this feature.}
 
 \item{selected}{The initially selected value (or multiple values if
 \code{multiple = TRUE}). If not specified then defaults to the first value
@@ -73,21 +78,38 @@ The selectize input created from \code{selectizeInput()} allows
 ## Only run examples in interactive R sessions
 if (interactive()) {
 
-ui <- fluidPage(
-  selectInput("variable", "Variable:",
-              c("Cylinders" = "cyl",
-                "Transmission" = "am",
-                "Gears" = "gear")),
-  tableOutput("data")
+# basic example
+shinyApp(
+  ui = fluidPage(
+    selectInput("variable", "Variable:",
+                c("Cylinders" = "cyl",
+                  "Transmission" = "am",
+                  "Gears" = "gear")),
+    tableOutput("data")
+  ),
+  server = function(input, output) {
+    output$data <- renderTable({
+      mtcars[, c("mpg", input$variable), drop = FALSE]
+    }, rownames = TRUE)
+  }
 )
 
-server <- function(input, output) {
-  output$data <- renderTable({
-    mtcars[, c("mpg", input$variable), drop = FALSE]
-  }, rownames = TRUE)
-}
-
-shinyApp(ui, server)
+# demoing optgroup support in the `choices` arg
+shinyApp(
+  ui = fluidPage(
+    selectInput("state", "Choose a state:",
+      list(`East Coast` = c("NY", "NJ", "CT"),
+           `West Coast` = c("WA", "OR", "CA"),
+           `Midwest` = c("MN", "WI", "IA"))
+    ),
+    textOutput("result")
+  ),
+  server = function(input, output) {
+    output$result <- renderText({
+      paste("You chose", input$state)
+    })
+  }
+)
 }
 }
 \seealso{

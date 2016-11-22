@@ -1,3 +1,17 @@
+/* This is necessary so that an empty verbatimTextOutput slot
+is the same height as a non-empty one (only important when
+* placeholder = TRUE) */
+pre.shiny-text-output:empty::before {
+  content: " ";
+}
+
+pre.shiny-text-output.noplaceholder:empty {
+  margin: 0;
+  padding: 0;
+  border-width: 0;
+  height: 0;
+}
+
 #shiny-disconnected-overlay {
   position: fixed;
   top: 0;

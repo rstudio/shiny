@@ -935,21 +935,34 @@ textOutput <- function(outputId, container = if (inline) span else div, inline =
 #' Render a reactive output variable as verbatim text within an
 #' application page. The text will be included within an HTML \code{pre} tag.
 #' @param outputId output variable to read the value from
+#' @param placeholder if the output is empty or \code{NULL}, should an empty
+#'   rectangle be displayed to serve as a placeholder? (does not affect
+#'   behavior when the the output in nonempty)
 #' @return A verbatim text output element that can be included in a panel
 #' @details Text is HTML-escaped prior to rendering. This element is often used
-#' with the \link{renderPrint} function to preserve fixed-width formatting
-#' of printed objects.
+#'   with the \link{renderPrint} function to preserve fixed-width formatting
+#'   of printed objects.
 #' @examples
-#' mainPanel(
-#'   h4("Summary"),
-#'   verbatimTextOutput("summary"),
-#'
-#'   h4("Observations"),
-#'   tableOutput("view")
-#' )
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   shinyApp(
+#'     ui = basicPage(
+#'       textInput("txt", "Enter the text to display below:"),
+#'       verbatimTextOutput("default"),
+#'       verbatimTextOutput("placeholder", placeholder = TRUE)
+#'     ),
+#'     server = function(input, output) {
+#'       output$default <- renderText({ input$txt })
+#'       output$placeholder <- renderText({ input$txt })
+#'     }
+#'   )
+#' }
 #' @export
-verbatimTextOutput <- function(outputId) {
-  textOutput(outputId, container = pre)
+verbatimTextOutput <- function(outputId, placeholder = FALSE) {
+  pre(id = outputId,
+      class = paste(c("shiny-text-output", if (!placeholder) "noplaceholder"),
+                    collapse = " ")
+      )
 }
 
 

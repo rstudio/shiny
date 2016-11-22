@@ -26,7 +26,7 @@
 #' if you find your app getting increasingly complicated, opt for using
 #' an action button (or more since there is no problem with multiple
 #' action buttons in the same app). The link above shows an example of
-#' a delayed reaction using an action button. For another exmaple, the
+#' a delayed reaction using an action button. For another example, the
 #' code below converts the example in this page (at the bottom) to an
 #' equivalent app using an action button (using the same pattern
 #' described in the link above):

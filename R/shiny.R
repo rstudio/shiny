@@ -412,6 +412,7 @@ ShinySession <- R6Class(
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
 
+    testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
     outputValues = list(),           # Saved output values (for testing mode)
     testEndpointUrl = character(0),
@@ -582,7 +583,7 @@ ShinySession <- R6Class(
     enableTestEndpoint = function() {
       private$testEndpointUrl <- self$registerDataObj("shinytest", NULL,
         function(data, req) {
-          if (!isTRUE(getOption("shiny.testmode"))) {
+          if (!isTRUE(private$testMode)) {
             return()
           }
 
@@ -722,6 +723,7 @@ ShinySession <- R6Class(
       private$restoredCallbacks <- Callbacks$new()
       private$createBookmarkObservers()
 
+      private$testMode <- .globals$testMode
       private$enableTestEndpoint()
 
       private$registerSessionEndCallbacks()
@@ -1141,7 +1143,7 @@ ShinySession <- R6Class(
       inputMessages <- private$inputMessageQueue
       private$inputMessageQueue <- list()
 
-      if (isTRUE(getOption("shiny.testmode"))) {
+      if (isTRUE(private$testMode)) {
         private$storeOutputValues(mergeVectors(values, errors))
       }
 

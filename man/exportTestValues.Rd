@@ -22,8 +22,9 @@ This function registers expressions that will be evaluated when a test export
 event occurs. These events are triggered by accessing an API endpoint URL.
 }
 \details{
-This function only has an effect if the global option \code{shiny.testmode}
-is set to \code{TRUE}.
+This function only has an effect if the app is launched in test mode. This is
+done by calling \code{runApp()} with \code{test.mode=TRUE}, or by setting the
+global option \code{shiny.testmode} to \code{TRUE}.
 }
 \examples{
 ## Only run this example in interactive R sessions

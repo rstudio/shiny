@@ -838,31 +838,6 @@ var ShinyApp = function() {
 
   exports.progressHandlers = progressHandlers;
 
-  // Returns a URL which can be queried to get values from inside the server
-  // function. This is enabled with `options(shiny.testmode=TRUE)`.
-  this.getTestEndpointUrl = function({ fullUrl = true, input = true,
-    output = true, export = true, format = "json" } = {})
-  {
-    const loc = window.location;
-    let url = "";
-
-    if (fullUrl) {
-      // Strip off everything after last slash in path, like dirname() in R
-      url = loc.origin + loc.pathname.replace(/\/[^/]*$/, "");
-    }
-    url += "/session/" +
-      encodeURIComponent(this.config.sessionId) +
-      "/dataobj/shinytest?w=" +
-      encodeURIComponent(this.config.workerId) +
-      "&nonce=" + randomId() +
-      (input ? "&input=1" : "") +
-      (output ? "&output=1" : "") +
-      (export ? "&export=1" : "") +
-      "&format=" + format;
-
-    return url;
-  };
-
 }).call(ShinyApp.prototype);
 
 

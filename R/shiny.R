@@ -331,11 +331,11 @@ workerId <- local({
 #' }
 #' \item{exportTestValues()}{
 #'   Registers expressions for export in test mode, available at the test
-#'   endpoint URL.
+#'   snapshot URL.
 #' }
-#' \item{getTestEndpointUrl(input=TRUE, output=TRUE, export=TRUE,
+#' \item{getTestSnapshotUrl(input=TRUE, output=TRUE, export=TRUE,
 #'   format="json")}{
-#'   Returns a URL for the test endpoint. Only has an effect when the
+#'   Returns a URL for the test snapshots. Only has an effect when the
 #'   \code{shiny.testmode} option is set to TRUE. For the input, output, and
 #'   export arguments, TRUE means to return all of these values. It is also
 #'   possible to specify by name which values to return by providing a
@@ -415,7 +415,7 @@ ShinySession <- R6Class(
     testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
     outputValues = list(),           # Saved output values (for testing mode)
-    testEndpointUrl = character(0),
+    testSnapshotUrl = character(0),
 
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
@@ -580,8 +580,8 @@ ShinySession <- R6Class(
       private$outputValues <- mergeVectors(private$outputValues, values)
     },
 
-    enableTestEndpoint = function() {
-      private$testEndpointUrl <- self$registerDataObj("shinytest", NULL,
+    enableTestSnapshot = function() {
+      private$testSnapshotUrl <- self$registerDataObj("shinytest", NULL,
         function(data, req) {
           if (!isTRUE(private$testMode)) {
             return()
@@ -725,7 +725,7 @@ ShinySession <- R6Class(
       private$createBookmarkObservers()
 
       private$testMode <- .globals$testMode
-      private$enableTestEndpoint()
+      private$enableTestSnapshot()
 
       private$registerSessionEndCallbacks()
 
@@ -1343,8 +1343,8 @@ ShinySession <- R6Class(
       private$testExportExprs <- mergeVectors(private$testExportExprs, items)
     },
 
-    getTestEndpointUrl = function(input = TRUE, output = TRUE, export = TRUE,
-                                  format = "rds") {
+    getTestSnapshotUrl = function(input = TRUE, output = TRUE, export = TRUE,
+                                  format = "json") {
       reqString <- function(group, value) {
         if (isTRUE(value))
           paste0(group, "=1")
@@ -1354,7 +1354,7 @@ ShinySession <- R6Class(
           ""
       }
       paste(
-        private$testEndpointUrl,
+        private$testSnapshotUrl,
         reqString("input", input),
         reqString("output", output),
         reqString("export", export),

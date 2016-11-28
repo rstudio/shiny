@@ -9,7 +9,7 @@ exportTestValues(..., quoted_ = FALSE, env_ = parent.frame(),
 }
 \arguments{
 \item{...}{Named arguments that are quoted or unquoted expressions that will
-be captured and evaluated when API endpoint is visited.}
+be captured and evaluated when snapshot URL is visited.}
 
 \item{quoted_}{Are the expression quoted? Default is \code{FALSE}.}
 
@@ -19,7 +19,7 @@ be captured and evaluated when API endpoint is visited.}
 }
 \description{
 This function registers expressions that will be evaluated when a test export
-event occurs. These events are triggered by accessing an API endpoint URL.
+event occurs. These events are triggered by accessing a snapshot URL.
 }
 \details{
 This function only has an effect if the app is launched in test mode. This is
@@ -32,7 +32,7 @@ if (interactive()) {
 
 options(shiny.testmode = TRUE)
 
-# This application shows the test endpoint URL; clicking on it will
+# This application shows the test snapshot URL; clicking on it will
 # fetch the input, output, and exported values in JSON format.
 shinyApp(
   ui = basicPage(
@@ -57,7 +57,7 @@ shinyApp(
     )
 
     output$url <- renderUI({
-      url <- session$getTestEndpointUrl(format="json")
+      url <- session$getTestSnapshotUrl(format="json")
       a(href = url, url)
     })
 

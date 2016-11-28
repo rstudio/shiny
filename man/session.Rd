@@ -157,11 +157,11 @@
 }
 \item{exportTestValues()}{
   Registers expressions for export in test mode, available at the test
-  endpoint URL.
+  snapshot URL.
 }
-\item{getTestEndpointUrl(input=TRUE, output=TRUE, export=TRUE,
+\item{getTestSnapshotUrl(input=TRUE, output=TRUE, export=TRUE,
   format="json")}{
-  Returns a URL for the test endpoint. Only has an effect when the
+  Returns a URL for the test snapshots. Only has an effect when the
   \code{shiny.testmode} option is set to TRUE. For the input, output, and
   export arguments, TRUE means to return all of these values. It is also
   possible to specify by name which values to return by providing a

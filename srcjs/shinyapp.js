@@ -840,8 +840,8 @@ var ShinyApp = function() {
 
   // Returns a URL which can be queried to get values from inside the server
   // function. This is enabled with `options(shiny.testmode=TRUE)`.
-  this.getTestEndpointUrl = function({ fullUrl = true, inputs = true,
-    outputs = true, exports = true, format = "rds" } = {})
+  this.getTestEndpointUrl = function({ fullUrl = true, input = true,
+    output = true, export = true, format = "json" } = {})
   {
     const loc = window.location;
     let url = "";
@@ -855,9 +855,9 @@ var ShinyApp = function() {
       "/dataobj/shinytest?w=" +
       encodeURIComponent(this.config.workerId) +
       "&nonce=" + randomId() +
-      (inputs ? "&input=1" : "") +
-      (outputs ? "&output=1" : "") +
-      (exports ? "&export=1" : "") +
+      (input ? "&input=1" : "") +
+      (output ? "&output=1" : "") +
+      (export ? "&export=1" : "") +
       "&format=" + format;
 
     return url;

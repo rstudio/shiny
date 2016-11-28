@@ -589,6 +589,9 @@ runApp <- function(appDir=getwd(),
   setShowcaseDefault(0)
 
   .globals$testMode <- test.mode
+  if (test.mode) {
+    message("Running application in test mode.")
+  }
 
   # If appDir specifies a path, and display mode is specified in the
   # DESCRIPTION file at that path, apply it here.

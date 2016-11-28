@@ -334,7 +334,7 @@ workerId <- local({
 #'   endpoint URL.
 #' }
 #' \item{getTestEndpointUrl(input=TRUE, output=TRUE, export=TRUE,
-#'   format="rds")}{
+#'   format="json")}{
 #'   Returns a URL for the test endpoint. Only has an effect when the
 #'   \code{shiny.testmode} option is set to TRUE. For the input, output, and
 #'   export arguments, TRUE means to return all of these values. It is also
@@ -588,9 +588,10 @@ ShinySession <- R6Class(
           }
 
           params <- parseQueryString(req$QUERY_STRING)
-          # The format of the response that will be sent back. Default to "rds"
-          # unless requested otherwise. The only other valid value is "json".
-          format <- params$format %OR% "rds"
+          # The format of the response that will be sent back. Defaults to
+          # "json" unless requested otherwise. The only other valid value is
+          # "rds".
+          format <- params$format %OR% "json"
 
           values <- list()
 

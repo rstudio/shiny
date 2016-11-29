@@ -610,6 +610,8 @@ ShinySession <- R6Class(
               items <- intersect(items, names(allInputs))
               values$input <- allInputs[items]
             }
+
+            values$input <- sortByName(values$input)
           }
 
           if (!is.null(params$output)) {
@@ -621,6 +623,8 @@ ShinySession <- R6Class(
               items <- intersect(items, names(private$outputValues))
               values$output <- private$outputValues[items]
             }
+
+            values$output <- sortByName(values$output)
           }
 
           if (!is.null(params$export)) {
@@ -640,6 +644,8 @@ ShinySession <- R6Class(
                 })
               )
             }
+
+            values$export <- sortByName(values$export)
           }
 
           # Make sure input, output, and export are all named lists (at this

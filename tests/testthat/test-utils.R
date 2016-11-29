@@ -129,6 +129,31 @@ test_that("anyUnnamed works as expected", {
   expect_true(anyUnnamed(x))
 })
 
+test_that("sortByName works as expected", {
+  # Error if any unnamed elements
+  expect_error(sortByName(c("a", "b")))
+  expect_error(sortByName(list(a=1, 2)))
+
+  expect_identical(sortByName(NULL), NULL)
+  expect_identical(sortByName(numeric(0)), numeric(0))
+  expect_identical(sortByName(character(0)), character(0))
+  # Empty unnamed list
+  expect_identical(sortByName(list()), list())
+  # Empty named list
+  expect_identical(sortByName(list(a=1)[0]), list(a=1)[0])
+
+  expect_identical(sortByName(list(b=1, a=2)), list(a=2, b=1))
+  expect_identical(sortByName(list(b=1)), list(b=1))
+
+  # Ties are resolved by using original order
+  expect_identical(sortByName(list(b=1, a=2, b=3)), list(a=2, b=1, b=3))
+  expect_identical(sortByName(list(b=3, a=2, b=1)), list(a=2, b=3, b=1))
+
+  # Make sure atomic vectors work
+  expect_identical(sortByName(c(b=1, a=2)), c(a=2, b=1))
+  expect_identical(sortByName(c(b=1, a=2, b=3)), c(a=2, b=1, b=3))
+})
+
 test_that("Callbacks fire in predictable order", {
   cb <- Callbacks$new()
 

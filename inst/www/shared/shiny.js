@@ -1314,8 +1314,22 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
-    this.getTestEndpointUrl = function () {
-      return "session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + randomId();
+    this.getTestSnapshotBaseUrl = function () {
+      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      var _ref$fullUrl = _ref.fullUrl;
+      var fullUrl = _ref$fullUrl === undefined ? true : _ref$fullUrl;
+
+      var loc = window.location;
+      var url = "";
+
+      if (fullUrl) {
+        // Strip off everything after last slash in path, like dirname() in R
+        url = loc.origin + loc.pathname.replace(/\/[^/]*$/, "");
+      }
+      url += "/session/" + encodeURIComponent(this.config.sessionId) + "/dataobj/shinytest?w=" + encodeURIComponent(this.config.workerId) + "&nonce=" + randomId();
+
+      return url;
     };
   }).call(ShinyApp.prototype);
 
@@ -1373,22 +1387,22 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var fadeDuration = 250;
 
     function show() {
-      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref$html = _ref.html;
-      var html = _ref$html === undefined ? '' : _ref$html;
-      var _ref$action = _ref.action;
-      var action = _ref$action === undefined ? '' : _ref$action;
-      var _ref$deps = _ref.deps;
-      var deps = _ref$deps === undefined ? [] : _ref$deps;
-      var _ref$duration = _ref.duration;
-      var duration = _ref$duration === undefined ? 5000 : _ref$duration;
-      var _ref$id = _ref.id;
-      var id = _ref$id === undefined ? null : _ref$id;
-      var _ref$closeButton = _ref.closeButton;
-      var closeButton = _ref$closeButton === undefined ? true : _ref$closeButton;
-      var _ref$type = _ref.type;
-      var type = _ref$type === undefined ? null : _ref$type;
+      var _ref2$html = _ref2.html;
+      var html = _ref2$html === undefined ? '' : _ref2$html;
+      var _ref2$action = _ref2.action;
+      var action = _ref2$action === undefined ? '' : _ref2$action;
+      var _ref2$deps = _ref2.deps;
+      var deps = _ref2$deps === undefined ? [] : _ref2$deps;
+      var _ref2$duration = _ref2.duration;
+      var duration = _ref2$duration === undefined ? 5000 : _ref2$duration;
+      var _ref2$id = _ref2.id;
+      var id = _ref2$id === undefined ? null : _ref2$id;
+      var _ref2$closeButton = _ref2.closeButton;
+      var closeButton = _ref2$closeButton === undefined ? true : _ref2$closeButton;
+      var _ref2$type = _ref2.type;
+      var type = _ref2$type === undefined ? null : _ref2$type;
 
       if (!id) id = randomId();
 
@@ -1532,12 +1546,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref2$html = _ref2.html;
-      var html = _ref2$html === undefined ? '' : _ref2$html;
-      var _ref2$deps = _ref2.deps;
-      var deps = _ref2$deps === undefined ? [] : _ref2$deps;
+      var _ref3$html = _ref3.html;
+      var html = _ref3$html === undefined ? '' : _ref3$html;
+      var _ref3$deps = _ref3.deps;
+      var deps = _ref3$deps === undefined ? [] : _ref3$deps;
 
 
       // If there was an existing Bootstrap modal, then there will be a modal-
@@ -4744,6 +4758,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         self.onError(error);
       });
       this.$bar().text('Finishing upload');
+
+      // Trigger event when all files are finished uploading.
+      var evt = jQuery.Event("shiny:fileuploaded");
+      evt.name = this.id;
+      evt.files = $.map(this.files, function (file, i) {
+        return {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        };
+      });
+      $(document).trigger(evt);
     };
     this.onError = function (message) {
       this.$setError(message || '');

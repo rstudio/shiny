@@ -24,7 +24,7 @@ withMathJax <- function(...) {
   )
 }
 
-renderPage <- function(ui, connection, showcase=0) {
+renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
   # If the ui is a NOT complete document (created by htmlTemplate()), then do some
   # preprocessing and make sure it's a complete document.
   if (!inherits(ui, "html_document")) {
@@ -50,6 +50,14 @@ renderPage <- function(ui, connection, showcase=0) {
       script = if (getOption("shiny.minified", TRUE)) "shiny.min.js" else "shiny.js",
       stylesheet = "shiny.css")
   )
+
+  if (testMode) {
+    # Add code injection listener if in test mode
+    shiny_deps[[length(shiny_deps) + 1]] <-
+      htmlDependency("shiny-testmode", utils::packageVersion("shiny"),
+        c(href="shared"), script = "shiny-testmode.js")
+  }
+
   html <- renderDocument(ui, shiny_deps, processDep = createWebDependency)
   writeUTF8(html, con = connection)
 }
@@ -91,6 +99,8 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
         showcaseMode <- mode
     }
 
+    testMode <- .globals$testMode %OR% FALSE
+
     # Create a restore context using query string
     bookmarkStore <- getShinyOption("bookmarkStore", default = "disable")
     if (bookmarkStore == "disable") {
@@ -121,7 +131,7 @@ uiHttpHandler <- function(ui, uiPattern = "^/$") {
     if (is.null(uiValue))
       return(NULL)
 
-    renderPage(uiValue, textConn, showcaseMode)
+    renderPage(uiValue, textConn, showcaseMode, testMode)
     html <- paste(readLines(textConn, encoding = 'UTF-8'), collapse='\n')
     return(httpResponse(200, content=enc2utf8(html)))
   }

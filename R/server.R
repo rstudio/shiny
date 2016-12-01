@@ -503,6 +503,9 @@ serviceApp <- function() {
 #'   application. If set to \code{"normal"}, displays the application normally.
 #'   Defaults to \code{"auto"}, which displays the application in the mode given
 #'   in its \code{DESCRIPTION} file, if any.
+#' @param test.mode Should the application be launched in test mode? This is
+#'   only used for recording or running automated tests. Defaults to the
+#'   \code{shiny.testmode} option, or FALSE if the option is not set.
 #'
 #' @examples
 #' \dontrun{
@@ -546,7 +549,8 @@ runApp <- function(appDir=getwd(),
                                             interactive()),
                    host=getOption('shiny.host', '127.0.0.1'),
                    workerId="", quiet=FALSE,
-                   display.mode=c("auto", "normal", "showcase")) {
+                   display.mode=c("auto", "normal", "showcase"),
+                   test.mode=getOption('shiny.testmode', FALSE)) {
   on.exit({
     handlerManager$clear()
   }, add = TRUE)
@@ -583,6 +587,11 @@ runApp <- function(appDir=getwd(),
   # either the DESCRIPTION file for directory-based apps, or via
   # the display.mode parameter. The latter takes precedence.
   setShowcaseDefault(0)
+
+  .globals$testMode <- test.mode
+  if (test.mode) {
+    message("Running application in test mode.")
+  }
 
   # If appDir specifies a path, and display mode is specified in the
   # DESCRIPTION file at that path, apply it here.

@@ -7,7 +7,8 @@
 runApp(appDir = getwd(), port = getOption("shiny.port"),
   launch.browser = getOption("shiny.launch.browser", interactive()),
   host = getOption("shiny.host", "127.0.0.1"), workerId = "",
-  quiet = FALSE, display.mode = c("auto", "normal", "showcase"))
+  quiet = FALSE, display.mode = c("auto", "normal", "showcase"),
+  test.mode = getOption("shiny.testmode", FALSE))
 }
 \arguments{
 \item{appDir}{The application to run. Should be one of the following:
@@ -46,6 +47,10 @@ the value \code{"showcase"}, shows application code and metadata from a
 application. If set to \code{"normal"}, displays the application normally.
 Defaults to \code{"auto"}, which displays the application in the mode given
 in its \code{DESCRIPTION} file, if any.}
+
+\item{test.mode}{Should the application be launched in test mode? This is
+only used for recording or running automated tests. Defaults to the
+\code{shiny.testmode} option, or FALSE if the option is not set.}
 }
 \description{
 Runs a Shiny application. This function normally does not return; interrupt R

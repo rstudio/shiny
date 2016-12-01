@@ -126,6 +126,18 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
         self.onError(error);
       });
     this.$bar().text('Finishing upload');
+
+    // Trigger event when all files are finished uploading.
+    var evt = jQuery.Event("shiny:fileuploaded");
+    evt.name = this.id;
+    evt.files = $.map(this.files, function(file, i) {
+      return {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      };
+    });
+    $(document).trigger(evt);
   };
   this.onError = function(message) {
     this.$setError(message || '');

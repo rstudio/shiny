@@ -1,23 +1,24 @@
 #' Register expressions for export in test mode
 #'
 #' This function registers expressions that will be evaluated when a test export
-#' event occurs. These events are triggered by accessing an API endpoint URL.
+#' event occurs. These events are triggered by accessing a snapshot URL.
 #'
-#' This function only has an effect if the global option \code{shiny.testmode}
-#' is set to \code{TRUE}.
+#' This function only has an effect if the app is launched in test mode. This is
+#' done by calling \code{runApp()} with \code{test.mode=TRUE}, or by setting the
+#' global option \code{shiny.testmode} to \code{TRUE}.
 #'
 #' @param quoted_ Are the expression quoted? Default is \code{FALSE}.
 #' @param env_ The environment in which the expression should be evaluated.
 #' @param session_ A Shiny session object.
 #' @param ... Named arguments that are quoted or unquoted expressions that will
-#'   be captured and evaluated when API endpoint is visited.
+#'   be captured and evaluated when snapshot URL is visited.
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
 #'
 #' options(shiny.testmode = TRUE)
 #'
-#' # This application shows the test endpoint URL; clicking on it will
+#' # This application shows the test snapshot URL; clicking on it will
 #' # fetch the input, output, and exported values in JSON format.
 #' shinyApp(
 #'   ui = basicPage(
@@ -42,7 +43,7 @@
 #'     )
 #'
 #'     output$url <- renderUI({
-#'       url <- session$getTestEndpointUrl(format="json")
+#'       url <- session$getTestSnapshotUrl(format="json")
 #'       a(href = url, url)
 #'     })
 #'

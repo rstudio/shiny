@@ -331,15 +331,15 @@ workerId <- local({
 #' }
 #' \item{exportTestValues()}{
 #'   Registers expressions for export in test mode, available at the test
-#'   endpoint URL.
+#'   snapshot URL.
 #' }
-#' \item{getTestEndpointUrl(inputs=TRUE, outputs=TRUE, exports=TRUE,
-#'   format="rds")}{
-#'   Returns a URL for the test endpoint. Only has an effect when the
-#'   \code{shiny.testmode} option is set to TRUE. For the inputs, outputs, and
-#'   exports arguments, TRUE means to return all of these values. It is also
+#' \item{getTestSnapshotUrl(input=TRUE, output=TRUE, export=TRUE,
+#'   format="json")}{
+#'   Returns a URL for the test snapshots. Only has an effect when the
+#'   \code{shiny.testmode} option is set to TRUE. For the input, output, and
+#'   export arguments, TRUE means to return all of these values. It is also
 #'   possible to specify by name which values to return by providing a
-#'   character vector, as in \code{inputs=c("x", "y")}. The format can be
+#'   character vector, as in \code{input=c("x", "y")}. The format can be
 #'   "rds" or "json".
 #' }
 #'
@@ -412,9 +412,10 @@ ShinySession <- R6Class(
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
 
-    testValueExprs = list(),
+    testMode = FALSE,                # Are we running in test mode?
+    testExportExprs = list(),
     outputValues = list(),           # Saved output values (for testing mode)
-    testEndpointUrl = character(0),
+    testSnapshotUrl = character(0),
 
     sendResponse = function(requestMsg, value) {
       if (is.null(requestMsg$tag)) {
@@ -579,71 +580,84 @@ ShinySession <- R6Class(
       private$outputValues <- mergeVectors(private$outputValues, values)
     },
 
-    enableTestEndpoint = function() {
-      private$testEndpointUrl <- self$registerDataObj("shinytest", NULL,
+    enableTestSnapshot = function() {
+      private$testSnapshotUrl <- self$registerDataObj("shinytest", NULL,
         function(data, req) {
-          if (!isTRUE(getOption("shiny.testmode"))) {
+          if (!isTRUE(private$testMode)) {
             return()
           }
 
           params <- parseQueryString(req$QUERY_STRING)
-          # The format of the response that will be sent back. Default to "rds"
-          # unless requested otherwise. The only other valid value is "json".
-          format <- params$format %OR% "rds"
+          # The format of the response that will be sent back. Defaults to
+          # "json" unless requested otherwise. The only other valid value is
+          # "rds".
+          format <- params$format %OR% "json"
 
           values <- list()
 
-          if (!is.null(params$inputs)) {
+          if (!is.null(params$input)) {
 
             allInputs <- isolate(
               reactiveValuesToList(self$input, all.names = TRUE)
             )
 
-            # If params$inputs is "1", return all; otherwise return just the
-            # inputs that are named in params$inputs, like "x,y,z".
-            if (params$inputs == "1") {
-              values$inputs <- allInputs
+            # If params$input is "1", return all; otherwise return just the
+            # inputs that are named in params$input, like "x,y,z".
+            if (params$input == "1") {
+              values$input <- allInputs
             } else {
-              items <- strsplit(params$inputs, ",")[[1]]
+              items <- strsplit(params$input, ",")[[1]]
               items <- intersect(items, names(allInputs))
-              values$inputs <- allInputs[items]
+              values$input <- allInputs[items]
             }
+
+            values$input <- sortByName(values$input)
           }
 
-          if (!is.null(params$outputs)) {
+          if (!is.null(params$output)) {
 
-            if (params$outputs == "1") {
-              values$outputs <- private$outputValues
+            if (params$output == "1") {
+              values$output <- private$outputValues
             } else {
-              items <- strsplit(params$outputs, ",")[[1]]
+              items <- strsplit(params$output, ",")[[1]]
               items <- intersect(items, names(private$outputValues))
-              values$outputs <- private$outputValues[items]
+              values$output <- private$outputValues[items]
             }
+
+            values$output <- sortByName(values$output)
           }
 
-          if (!is.null(params$exports)) {
+          if (!is.null(params$export)) {
 
-            testValueExprs <- private$testValueExprs
-            if (params$exports == "1") {
-              values$exports <- isolate(
-                lapply(private$testValueExprs, function(item) {
+            if (params$export == "1") {
+              values$export <- isolate(
+                lapply(private$testExportExprs, function(item) {
                   eval(item$expr, envir = item$env)
                 })
               )
             } else {
-              items <- strsplit(params$exports, ",")[[1]]
-              items <- intersect(items, names(private$testValueExprs))
-              values$exports <- isolate(
-                lapply(private$testValueExprs[items], function(item) {
+              items <- strsplit(params$export, ",")[[1]]
+              items <- intersect(items, names(private$testExportExprs))
+              values$export <- isolate(
+                lapply(private$testExportExprs[items], function(item) {
                   eval(item$expr, envir = item$env)
                 })
               )
             }
+
+            values$export <- sortByName(values$export)
           }
+
+          # Make sure input, output, and export are all named lists (at this
+          # point, they could be unnamed if they are empty lists). This is so
+          # that the resulting object is represented as an object in JSON
+          # instead of an array, and so that the RDS data structure is of a
+          # consistent type.
+          values <- lapply(values, asNamedVector)
 
           if (length(values) == 0) {
             return(httpResponse(400, "text/plain",
-              "No exports, inputs, or outputs requested."
+              "None of export, input, or output requested."
             ))
           }
 
@@ -716,7 +730,8 @@ ShinySession <- R6Class(
       private$restoredCallbacks <- Callbacks$new()
       private$createBookmarkObservers()
 
-      private$enableTestEndpoint()
+      private$testMode <- .globals$testMode
+      private$enableTestSnapshot()
 
       private$registerSessionEndCallbacks()
 
@@ -1135,7 +1150,7 @@ ShinySession <- R6Class(
       inputMessages <- private$inputMessageQueue
       private$inputMessageQueue <- list()
 
-      if (isTRUE(getOption("shiny.testmode"))) {
+      if (isTRUE(private$testMode)) {
         private$storeOutputValues(mergeVectors(values, errors))
       }
 
@@ -1331,11 +1346,11 @@ ShinySession <- R6Class(
         list(expr = expr, env = env_)
       })
 
-      private$testValueExprs <- mergeVectors(private$testValueExprs, items)
+      private$testExportExprs <- mergeVectors(private$testExportExprs, items)
     },
 
-    getTestEndpointUrl = function(inputs = TRUE, outputs = TRUE, exports = TRUE,
-                                  format = "rds") {
+    getTestSnapshotUrl = function(input = TRUE, output = TRUE, export = TRUE,
+                                  format = "json") {
       reqString <- function(group, value) {
         if (isTRUE(value))
           paste0(group, "=1")
@@ -1345,10 +1360,10 @@ ShinySession <- R6Class(
           ""
       }
       paste(
-        private$testEndpointUrl,
-        reqString("inputs", inputs),
-        reqString("outputs", outputs),
-        reqString("exports", exports),
+        private$testSnapshotUrl,
+        reqString("input", input),
+        reqString("output", output),
+        reqString("export", export),
         paste0("format=", format),
         sep = "&"
       )

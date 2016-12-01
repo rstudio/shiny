@@ -1421,6 +1421,7 @@ uiOutput <- htmlOutput
 #'   is assigned to.
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any.
+#' @param ... Other arguments to pass to the container tag function.
 #'
 #' @examples
 #' \dontrun{
@@ -1443,25 +1444,25 @@ uiOutput <- htmlOutput
 #' @export
 downloadButton <- function(outputId,
                            label="Download",
-                           class=NULL) {
+                           class=NULL, ...) {
   aTag <- tags$a(id=outputId,
                  class=paste('btn btn-default shiny-download-link', class),
                  href='',
                  target='_blank',
                  download=NA,
                  icon("download"),
-                 label)
+                 label, ...)
 }
 
 #' @rdname downloadButton
 #' @export
-downloadLink <- function(outputId, label="Download", class=NULL) {
+downloadLink <- function(outputId, label="Download", class=NULL, ...) {
   tags$a(id=outputId,
          class=paste(c('shiny-download-link', class), collapse=" "),
          href='',
          target='_blank',
          download=NA,
-         label)
+         label, ...)
 }
 
 

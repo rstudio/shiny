@@ -7,6 +7,8 @@ shiny 0.14.2.9000
 
 * Added support for injecting JavaScript code when the `shiny.testmode` option is set to `TRUE`. This makes it possible to record test events interactively. ([#1464]https://github.com/rstudio/shiny/pull/1464))
 
+* Added ability through arguments to the `a` tag function called inside `downloadButton()` and `downloadLink()`. Closes [#986](https://github.com/rstudio/shiny/issues/986). ([#1492](https://github.com/rstudio/shiny/pulls/1492))
+
 ### Bug fixes
 
 * Fix [#1438](https://github.com/rstudio/shiny/issue/1438): `unbindAll()` should not be called when inserting content with `insertUI()` ([#1449](https://github.com/rstudio/shiny/pull/1449))

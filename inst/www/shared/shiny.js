@@ -3105,6 +3105,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   exports.renderContent = function (el, content) {
     var where = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "replace";
 
+    if (where === "replace") {
+      exports.unbindAll(el);
+    }
+
     exports.unbindAll(el);
 
     var html;

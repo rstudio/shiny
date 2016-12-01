@@ -25,6 +25,10 @@ var renderDependencies = exports.renderDependencies = function(dependencies) {
 // inputs/outputs. `content` can be null, a string, or an object with
 // properties 'html' and 'deps'.
 exports.renderContent = function(el, content, where="replace") {
+  if (where === "replace") {
+    exports.unbindAll(el);
+  }
+
   exports.unbindAll(el);
 
   var html;

@@ -5,6 +5,8 @@ shiny 0.14.2.9000
 
 ### Minor new features and improvements
 
+* Added a more descriptive JS warning for `insertUI()` when the selector argument does not match anything in DOM. ([#1488](https://github.com/rstudio/shiny/pull/1488))
+
 * Added support for injecting JavaScript code when the `shiny.testmode` option is set to `TRUE`. This makes it possible to record test events interactively. ([#1464]https://github.com/rstudio/shiny/pull/1464))
 
 * Added ability through arguments to the `a` tag function called inside `downloadButton()` and `downloadLink()`. Closes [#986](https://github.com/rstudio/shiny/issues/986). ([#1492](https://github.com/rstudio/shiny/pulls/1492))

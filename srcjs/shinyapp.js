@@ -663,7 +663,9 @@ var ShinyApp = function() {
       // render the HTML and deps to a null target, so
       // the side-effect of rendering the deps, singletons,
       // and <head> still occur
-      exports.renderHtml($([]), message.content.html, message.content.deps);
+      console.warn('The selector you chose ("' + message.selector +
+                   '") could not be found in the DOM.');
+      exports.renderHtml(message.content.html, $([]), message.content.deps);
     } else {
       targets.each(function (i, target) {
         exports.renderContent(target, message.content, message.where);

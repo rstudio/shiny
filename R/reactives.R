@@ -1584,6 +1584,16 @@ maskReactiveContext <- function(expr) {
 #' @param ignoreNULL Whether the action should be triggered (or value
 #'   calculated, in the case of \code{eventReactive}) when the input is
 #'   \code{NULL}. See Details.
+#' @param skipFirst Whether the action should be run the first time the
+#'   input is invalidated. By default, \code{observeEvent} will run the first
+#'   time (and all subsequent others). But when responding to a click of an
+#'   action button, it may often be useful to set \code{skipFirst} to
+#'   \code{TRUE} (for example, if you're setting up an \code{observeEvent}
+#'   for a dynamically created button, \code{skipFirst = TRUE} will guarantee
+#'   that the action will only be triggered when the button is actually clicked,
+#'   instead of also being triggered when it is created -- since this causes
+#'   the value of the button to change -- from \code{NULL} to \code{0}).
+#'
 #' @return \code{observeEvent} returns an observer reference class object (see
 #'   \code{\link{observe}}). \code{eventReactive} returns a reactive expression
 #'   object (see \code{\link{reactive}}).
@@ -1622,8 +1632,9 @@ maskReactiveContext <- function(expr) {
 observeEvent <- function(eventExpr, handlerExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   handler.env = parent.frame(), handler.quoted = FALSE,
-  label=NULL, suspended=FALSE, priority=0, domain=getDefaultReactiveDomain(),
-  autoDestroy = TRUE, ignoreNULL = TRUE) {
+  label = NULL, suspended = FALSE, priority = 0,
+  domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
+  ignoreNULL = TRUE, skipFirst = FALSE) {
 
   eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
   if (is.null(label))
@@ -1633,8 +1644,16 @@ observeEvent <- function(eventExpr, handlerExpr,
   handlerFunc <- exprToFunction(handlerExpr, handler.env, handler.quoted)
   handlerFunc <- wrapFunctionLabel(handlerFunc, "observeEventHandler", ..stacktraceon = TRUE)
 
+  initialized <- FALSE
+
   invisible(observe({
     e <- eventFunc()
+
+    if (skipFirst && !initialized) {
+      initialized <<- TRUE
+      e
+      req(FALSE)
+    }
 
     if (ignoreNULL && isNullEvent(e)) {
       return()
@@ -1650,8 +1669,8 @@ observeEvent <- function(eventExpr, handlerExpr,
 eventReactive <- function(eventExpr, valueExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   value.env = parent.frame(), value.quoted = FALSE,
-  label=NULL, domain=getDefaultReactiveDomain(),
-  ignoreNULL = TRUE) {
+  label = NULL, domain = getDefaultReactiveDomain(),
+  ignoreNULL = TRUE, skipFirst = FALSE) {
 
   eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
   if (is.null(label))
@@ -1661,8 +1680,16 @@ eventReactive <- function(eventExpr, valueExpr,
   handlerFunc <- exprToFunction(valueExpr, value.env, value.quoted)
   handlerFunc <- wrapFunctionLabel(handlerFunc, "eventReactiveHandler", ..stacktraceon = TRUE)
 
+  initialized <- FALSE
+
   invisible(reactive({
     e <- eventFunc()
+
+    if (skipFirst && !initialized) {
+      initialized <<- TRUE
+      e
+      req(FALSE)
+    }
 
     validate(need(
       !ignoreNULL || !isNullEvent(e),

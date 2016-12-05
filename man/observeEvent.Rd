@@ -9,11 +9,12 @@ observeEvent(eventExpr, handlerExpr, event.env = parent.frame(),
   event.quoted = FALSE, handler.env = parent.frame(),
   handler.quoted = FALSE, label = NULL, suspended = FALSE, priority = 0,
   domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
-  ignoreNULL = TRUE)
+  ignoreNULL = TRUE, skipFirst = FALSE)
 
 eventReactive(eventExpr, valueExpr, event.env = parent.frame(),
   event.quoted = FALSE, value.env = parent.frame(), value.quoted = FALSE,
-  label = NULL, domain = getDefaultReactiveDomain(), ignoreNULL = TRUE)
+  label = NULL, domain = getDefaultReactiveDomain(), ignoreNULL = TRUE,
+  skipFirst = FALSE)
 }
 \arguments{
 \item{eventExpr}{A (quoted or unquoted) expression that represents the event;
@@ -60,6 +61,16 @@ automatically destroyed when its domain (if any) ends.}
 \item{ignoreNULL}{Whether the action should be triggered (or value
 calculated, in the case of \code{eventReactive}) when the input is
 \code{NULL}. See Details.}
+
+\item{skipFirst}{Whether the action should be run the first time the
+input is invalidated. By default, \code{observeEvent} will run the first
+time (and all subsequent others). But when responding to a click of an
+action button, it may often be useful to set \code{skipFirst} to
+\code{TRUE} (for example, if you're setting up an \code{observeEvent}
+for a dynamically created button, \code{skipFirst = TRUE} will guarantee
+that the action will only be triggered when the button is actually clicked,
+instead of also being triggered when it is created -- since this causes
+the value of the button to change -- from \code{NULL} to \code{0}).}
 
 \item{valueExpr}{The expression that produces the return value of the
 \code{eventReactive}. It will be executed within an \code{\link{isolate}}

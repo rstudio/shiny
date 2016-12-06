@@ -587,23 +587,23 @@ runApp <- function(appDir=getwd(),
   #
   # I tried to make this as compact and intuitive as possible,
   # given that there are four distinct possibilities to check
-  runOpts <- appParts$options
-  assignVal <- function(arg, default) {
-    if (arg %in% names(runOpts)) runOpts[[arg]] else default
+  appOps <- appParts$options
+  findVal <- function(arg, default) {
+    if (arg %in% names(appOps)) appOps[[arg]] else default
   }
 
   if (missing(port))
-    port <- assignVal("port", port)
+    port <- findVal("port", port)
   if (missing(launch.browser))
-    launch.browser <- assignVal("launch.browser", launch.browser)
+    launch.browser <- findVal("launch.browser", launch.browser)
   if (missing(host))
-    host <- assignVal("host", host)
+    host <- findVal("host", host)
   if (missing(quiet))
-    quiet <- assignVal("quiet", quiet)
+    quiet <- findVal("quiet", quiet)
   if (missing(display.mode))
-    display.mode <- assignVal("display.mode", display.mode)
+    display.mode <- findVal("display.mode", display.mode)
   if (missing(test.mode))
-    test.mode <- assignVal("test.mode", test.mode)
+    test.mode <- findVal("test.mode", test.mode)
 
   if (is.null(host) || is.na(host)) host <- '0.0.0.0'
 

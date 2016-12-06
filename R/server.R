@@ -561,13 +561,51 @@ runApp <- function(appDir=getwd(),
     .globals$options <- oldOptionSet
   },add = TRUE)
 
-  if (is.null(host) || is.na(host))
-    host <- '0.0.0.0'
-
   # Make warnings print immediately
   # Set pool.scheduler to support pool package
   ops <- options(warn = 1, pool.scheduler = scheduleTask)
   on.exit(options(ops), add = TRUE)
+
+  appParts <- as.shiny.appobj(appDir)
+
+  # The lines below set some of the app's running options, which
+  # can be:
+  #   - left unspeficied (in which case the arguments' default
+  #     values from `runApp` kick in);
+  #   - passed through `shinyApp`
+  #   - passed through `runApp` (this function)
+  #   - passed through both `shinyApp` and `runApp` (the latter
+  #     takes precedence)
+  #
+  # Matrix of possibilities:
+  # | IN shinyApp | IN runApp | result       | check                                                                                                                                  |
+  # |-------------|-----------|--------------|----------------------------------------------------------------------------------------------------------------------------------------|
+  # | no          | no        | use defaults | exhaust all possibilities: if it's missing (runApp does not specify); THEN if it's not in shinyApp appParts$options; THEN use defaults |
+  # | yes         | no        | use shinyApp | if it's missing (runApp does not specify); THEN if it's in shinyApp appParts$options; THEN use shinyApp                                |
+  # | no          | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
+  # | yes         | yes       | use runApp   | if it's not missing (runApp specifies), use those                                                                                      |
+  #
+  # I tried to make this as compact and intuitive as possible,
+  # given that there are four distinct possibilities to check
+  appOps <- appParts$options
+  findVal <- function(arg, default) {
+    if (arg %in% names(appOps)) appOps[[arg]] else default
+  }
+
+  if (missing(port))
+    port <- findVal("port", port)
+  if (missing(launch.browser))
+    launch.browser <- findVal("launch.browser", launch.browser)
+  if (missing(host))
+    host <- findVal("host", host)
+  if (missing(quiet))
+    quiet <- findVal("quiet", quiet)
+  if (missing(display.mode))
+    display.mode <- findVal("display.mode", display.mode)
+  if (missing(test.mode))
+    test.mode <- findVal("test.mode", test.mode)
+
+  if (is.null(host) || is.na(host)) host <- '0.0.0.0'
 
   workerId(workerId)
 
@@ -679,8 +717,6 @@ runApp <- function(appDir=getwd(),
       }
     }
   }
-
-  appParts <- as.shiny.appobj(appDir)
 
   # Extract appOptions (which is a list) and store them as shinyOptions, for
   # this app. (This is the only place we have to store settings that are

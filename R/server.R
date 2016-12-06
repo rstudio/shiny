@@ -588,30 +588,22 @@ runApp <- function(appDir=getwd(),
   # I tried to make this as compact and intuitive as possible,
   # given that there are four distinct possibilities to check
   runOpts <- appParts$options
-  passedArgs <- as.list(match.call())[-1]
-  thisEnv <- environment()
-
-  # Figure out which value to use for an option
-  priorityAssign <- function(arg) {
-    # if it was passed directly to `runApp`, use that value
-    if (arg %in% names(passedArgs)) val <- passedArgs[[arg]]
-
-    # else if it was passed directly to `shinyApp`, use that value
-    else if (arg %in% names(runOpts)) val <- runOpts[[arg]]
-
-    # else, just use the default value specified in `runApp`
-    else val <- thisEnv[[arg]]
-
-    # make sure that Ts and Fs are kept as logicals
-    if (is.name(val) && val == "T") val <- TRUE
-    if (is.name(val) && val == "F") val <- FALSE
-
-    assign(arg, val, envir = thisEnv)
+  assignVal <- function(arg, default) {
+    if (arg %in% names(runOpts)) runOpts[[arg]] else default
   }
 
-  lapply(list("port", "launch.browser", "host",
-              "quiet", "display.mode", "test.mode"),
-         priorityAssign)
+  if (missing(port))
+    port <- assignVal("port", port)
+  if (missing(launch.browser))
+    launch.browser <- assignVal("launch.browser", launch.browser)
+  if (missing(host))
+    host <- assignVal("host", host)
+  if (missing(quiet))
+    quiet <- assignVal("quiet", quiet)
+  if (missing(display.mode))
+    display.mode <- assignVal("display.mode", display.mode)
+  if (missing(test.mode))
+    test.mode <- assignVal("test.mode", test.mode)
 
   if (is.null(host) || is.na(host)) host <- '0.0.0.0'
 

@@ -11,13 +11,13 @@ shiny 0.14.2.9000
 
 ### Bug fixes
 
-* Fix [#969](ttps://github.com/rstudio/shiny/issue/969): allow navbarPage's `fluid` param to control both containers. ([#1481](https://github.com/rstudio/shiny/pull/1481))
+* Fixed [#969](ttps://github.com/rstudio/shiny/issue/969): allow navbarPage's `fluid` param to control both containers. ([#1481](https://github.com/rstudio/shiny/pull/1481))
 
-* Fix [#1438](https://github.com/rstudio/shiny/issue/1438): `unbindAll()` should not be called when inserting content with `insertUI()` ([#1449](https://github.com/rstudio/shiny/pull/1449))
+* Fixed [#1438](https://github.com/rstudio/shiny/issue/1438): `unbindAll()` should not be called when inserting content with `insertUI()` ([#1449](https://github.com/rstudio/shiny/pull/1449))
 
 * Fixed bug causing `<meta>` tags associated with HTML dependencies of Shiny R Markdown files to be rendered incorrectly. ([#1463](https://github.com/rstudio/shiny/pull/1463))
 
-* Fix [#1359](https://github.com/rstudio/shiny/issue/1359): `shinyApp()` options argument ignored when passed to `runApp()`. ([#1483](https://github.com/rstudio/shiny/pull/1483))
+* Fixed [#1359](https://github.com/rstudio/shiny/issue/1359): `shinyApp()` options argument ignored when passed to `runApp()`. ([#1483](https://github.com/rstudio/shiny/pull/1483))
 
 shiny 0.14.2
 ============

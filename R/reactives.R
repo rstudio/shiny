@@ -703,6 +703,10 @@ execCount <- function(x) {
 
 # Observer ------------------------------------------------------------------
 
+# The initial value of "current observer" is NULL (and will always be NULL,
+# except when within the scope of the observe or observeEvent)
+.globals$currentObserver <- NULL
+
 Observer <- R6Class(
   'Observer',
   portable = FALSE,
@@ -812,6 +816,10 @@ registerDebugHook("observerFunc", environment(), label)
       return(ctx)
     },
     run = function() {
+      # Store the current observer in the global scope so that it can be easily accessed
+      .globals$currentObserver <- self
+      on.exit(.globals$currentObserver <- NULL) # On exit, set it back to NULL
+
       ctx <- .createContext()
       .execCount <<- .execCount + 1L
       ctx$run(.func)
@@ -903,6 +911,13 @@ registerDebugHook("observerFunc", environment(), label)
     }
   )
 )
+
+#' @name domains
+#' @rdname domains
+#' @export
+getCurrentObserver <- function() {
+  .globals$currentObserver
+}
 
 #' Create a reactive observer
 #'

@@ -342,10 +342,18 @@ navbarPage <- function(title,
   tabs <- list(...)
   tabset <- buildTabset(tabs, "nav navbar-nav", NULL, id, selected)
 
+  # function to return plain or fluid class name
+  className <- function(name) {
+    if (fluid)
+      paste(name, "-fluid", sep="")
+    else
+      name
+  }
+
   # built the container div dynamically to support optional collapsibility
   if (collapsible) {
     navId <- paste("navbar-collapse-", p_randomInt(1000, 10000), sep="")
-    containerDiv <- div(class="container",
+    containerDiv <- div(class=className("container"),
       div(class="navbar-header",
         tags$button(type="button", class="navbar-toggle collapsed",
           `data-toggle`="collapse", `data-target`=paste0("#", navId),
@@ -359,20 +367,12 @@ navbarPage <- function(title,
       div(class="navbar-collapse collapse", id=navId, tabset$navList)
     )
   } else {
-    containerDiv <- div(class="container",
+    containerDiv <- div(class=className("container"),
       div(class="navbar-header",
         span(class="navbar-brand", pageTitle)
       ),
       tabset$navList
     )
-  }
-
-  # function to return plain or fluid class name
-  className <- function(name) {
-    if (fluid)
-      paste(name, "-fluid", sep="")
-    else
-      name
   }
 
   # build the main tab content div

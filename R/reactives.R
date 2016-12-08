@@ -1666,8 +1666,7 @@ observeEvent <- function(eventExpr, handlerExpr,
 
     if (skipFirst && !initialized) {
       initialized <<- TRUE
-      e
-      req(FALSE)
+      return()
     }
 
     if (ignoreNULL && isNullEvent(e)) {
@@ -1702,14 +1701,13 @@ eventReactive <- function(eventExpr, valueExpr,
 
     if (skipFirst && !initialized) {
       initialized <<- TRUE
-      e
       req(FALSE)
     }
 
-    validate(need(
+    req(
       !ignoreNULL || !isNullEvent(e),
       message = FALSE
-    ))
+    )
 
     isolate(handlerFunc())
   }, label = label, domain = domain, ..stacktraceon = FALSE))

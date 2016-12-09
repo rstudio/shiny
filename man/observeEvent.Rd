@@ -9,7 +9,7 @@ observeEvent(eventExpr, handlerExpr, event.env = parent.frame(),
   event.quoted = FALSE, handler.env = parent.frame(),
   handler.quoted = FALSE, label = NULL, suspended = FALSE, priority = 0,
   domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
-  ignoreNULL = TRUE, skipFirst = FALSE)
+  ignoreNULL = TRUE, skipFirst = FALSE, once = FALSE)
 
 eventReactive(eventExpr, valueExpr, event.env = parent.frame(),
   event.quoted = FALSE, value.env = parent.frame(), value.quoted = FALSE,
@@ -71,6 +71,11 @@ for a dynamically created button, \code{skipFirst = TRUE} will guarantee
 that the action will only be triggered when the button is actually clicked,
 instead of also being triggered when it is created -- since this causes
 the value of the button to change -- from \code{NULL} to \code{0}).}
+
+\item{once}{Whether this \code{observeEvent} should be immediately destroyed
+after the first time that the code in \code{handlerExpr} is run. This
+pattern is useful when you want to subscribe to a event that only happens
+once.}
 
 \item{valueExpr}{The expression that produces the return value of the
 \code{eventReactive}. It will be executed within an \code{\link{isolate}}

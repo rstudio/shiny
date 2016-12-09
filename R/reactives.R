@@ -816,12 +816,10 @@ registerDebugHook("observerFunc", environment(), label)
       return(ctx)
     },
     run = function() {
-      # Store the current observer in the global scope so that it can be easily accessed
-      .globals$currentObserver <- self
-      on.exit(.globals$currentObserver <- NULL) # On exit, set it back to NULL
-
       ctx <- .createContext()
       .execCount <<- .execCount + 1L
+      .globals$currentObserver <- self
+      on.exit(.globals$currentObserver <- NULL) # On exit, set it back to NULL
       ctx$run(.func)
     },
     onInvalidate = function(callback) {
@@ -1025,7 +1023,10 @@ registerDebugHook("observerFunc", environment(), label)
 #' }
 #' @export
 getCurrentObserver <- function(dig = FALSE) {
-  .globals$currentObserver
+  o <- .globals$currentObserver
+  ctx <- getCurrentContext()
+  if (!dig && !is.null(o) && ctx$id != o$.ctx$id) o <- NULL
+  o
 }
 
 #' Create a reactive observer

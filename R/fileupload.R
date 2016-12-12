@@ -52,8 +52,14 @@ FileUploadOperation <- R6Class(
       .currentFileInfo <<- file
       .pendingFileInfos <<- tail(.pendingFileInfos, -1)
 
+      if (tools::file_ext(file$name)=="") {
+        extn <- ""
+      } else {
+        extn <- paste0(".",tools::file_ext(file$name))
+      }
+
       filename <- file.path(.dir, paste0(as.character(length(.files$name)),
-                                         ".", tools::file_ext(file$name)))
+                                         extn))
       row <- data.frame(name=file$name, size=file$size, type=file$type,
                         datapath=filename, stringsAsFactors=FALSE)
 

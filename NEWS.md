@@ -25,6 +25,8 @@ shiny 0.14.2.9000
 
 * Fixed [#1359](https://github.com/rstudio/shiny/issue/1359): `shinyApp()` options argument ignored when passed to `runApp()`. ([#1483](https://github.com/rstudio/shiny/pull/1483))
 
+* Fixed [#117](https://github.com/rstudio/shiny/issue/117): Reactive expressions now release references to cached values as soon as they are invalidated, potentially making those cached values eligible for garbage collection sooner. Previously, this would not occur until the next cached value was calculated and stored.
+
 shiny 0.14.2
 ============
 

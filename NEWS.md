@@ -25,6 +25,8 @@ shiny 0.14.2.9000
 
 * Fixed [#1359](https://github.com/rstudio/shiny/issue/1359): `shinyApp()` options argument ignored when passed to `runApp()`. ([#1483](https://github.com/rstudio/shiny/pull/1483))
 
+* Fixed [#1013](https://github.com/rstudio/shiny/issues/1013): `flushReact` should be called after app loads. Observers set up outside of server functions were not running until after the first user connects.
+
 shiny 0.14.2
 ============
 

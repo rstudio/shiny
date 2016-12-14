@@ -92,6 +92,8 @@ object to \code{print()} or \code{\link{runApp}()}.
 \examples{
 ## Only run this example in interactive R sessions
 if (interactive()) {
+  options(device.ask.default = FALSE)
+
   shinyApp(
     ui = fluidPage(
       numericInput("n", "n", 1),

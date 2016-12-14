@@ -127,6 +127,7 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
+#' options(device.ask.default = FALSE)
 #'
 #' ui <- fluidPage(
 #'   sliderInput("n", "Number of observations", 2, 1000, 500),

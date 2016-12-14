@@ -80,6 +80,7 @@ as \code{a} does validate it.
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
+options(device.ask.default = FALSE)
 
 ui <- fluidPage(
   checkboxGroupInput('in1', 'Check some letters', choices = head(LETTERS)),

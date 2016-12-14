@@ -1,6 +1,10 @@
 shiny 0.14.2.9000
 ============
 
+## Debounce/throttle reactives
+
+Now there's an official way to slow down reactive values and expressions that invalidate too quickly. Pass a reactive expression to the new `debounce` or `throttle` function, and get back a modified reactive expression that doesn't invalidate as often.
+
 ## Full changelog
 
 ### Breaking changes

@@ -1686,12 +1686,23 @@ isNullEvent <- function(value) {
 #' \code{debounce} and \code{throttle} use different algorithms for slowing down
 #' invalidation signals; see Details.
 #'
-#' Because R is single threaded, we can't come close to guaranteeing that the
-#' timing of debounce/throttle (or any other timing-related functions in Shiny)
-#' will be consistent or accurate; at the time we want to emit an invalidation
-#' signal, R may be performing a different task and we have no way to interrupt
-#' it (nor would we necessarily want to if we could). Therefore, it's best to
-#' think of the time windows you pass to these functions as minimums.
+#' @section Limitations:
+#'
+#'   Because R is single threaded, we can't come close to guaranteeing that the
+#'   timing of debounce/throttle (or any other timing-related functions in
+#'   Shiny) will be consistent or accurate; at the time we want to emit an
+#'   invalidation signal, R may be performing a different task and we have no
+#'   way to interrupt it (nor would we necessarily want to if we could).
+#'   Therefore, it's best to think of the time windows you pass to these
+#'   functions as minimums.
+#'
+#'   You may also see undesirable behavior if the amount of time spent doing
+#'   downstream processing for each change approaches or exceeds the time
+#'   window: in this case, debounce/throttle may not have any effect, as the
+#'   time each subsequent event is considered is already after the time window
+#'   has expired.
+#'
+#' @details
 #'
 #' This is not a true debounce/throttle in that it will not prevent \code{r}
 #' from being called many times (in fact it may be called more times than
@@ -1766,7 +1777,6 @@ isNullEvent <- function(value) {
 #'
 #' shinyApp(ui, server)
 #' }
-
 #'
 #' @export
 debounce <- function(r, millis, domain = shiny::getDefaultReactiveDomain()) {

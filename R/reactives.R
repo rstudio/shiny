@@ -1779,7 +1779,7 @@ isNullEvent <- function(value) {
 #' }
 #'
 #' @export
-debounce <- function(r, millis, domain = shiny::getDefaultReactiveDomain()) {
+debounce <- function(r, millis, domain = getDefaultReactiveDomain()) {
 
   # TODO: make a nice label for the observer(s)
 

@@ -5,7 +5,7 @@
 \alias{throttle}
 \title{Slow down a reactive expression with debounce/throttle}
 \usage{
-debounce(r, millis, domain = shiny::getDefaultReactiveDomain())
+debounce(r, millis, domain = getDefaultReactiveDomain())
 
 throttle(r, millis, domain = getDefaultReactiveDomain())
 }

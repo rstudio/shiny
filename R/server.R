@@ -462,6 +462,9 @@ serviceApp <- function() {
 
 .shinyServerMinVersion <- '0.3.4'
 
+# Global flag that's TRUE whenever we're inside of the scope of a call to runApp
+.globals$running <- FALSE
+
 #' Run Shiny Application
 #'
 #' Runs a Shiny application. This function normally does not return; interrupt R
@@ -553,6 +556,15 @@ runApp <- function(appDir=getwd(),
                    test.mode=getOption('shiny.testmode', FALSE)) {
   on.exit({
     handlerManager$clear()
+  }, add = TRUE)
+
+  if (.globals$running) {
+    stop("Can't call `runApp()` from within `runApp()`. If your ,",
+         "application code contains `runApp()`, please remove it.")
+  }
+  .globals$running <- TRUE
+  on.exit({
+    .globals$running <- FALSE
   }, add = TRUE)
 
   # Enable per-app Shiny options

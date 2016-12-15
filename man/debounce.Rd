@@ -7,7 +7,7 @@
 \usage{
 debounce(r, millis, domain = shiny::getDefaultReactiveDomain())
 
-throttle(r, millis, domain = shiny::getDefaultReactiveDomain())
+throttle(r, millis, domain = getDefaultReactiveDomain())
 }
 \arguments{
 \item{r}{A reactive expression (that invalidates too often).}

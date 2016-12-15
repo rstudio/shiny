@@ -1820,6 +1820,7 @@ debounce <- function(r, millis, domain = shiny::getDefaultReactiveDomain()) {
 
     now <- Sys.time()
     if (now >= v$when) {
+      # Mod by 999999999 to get predictable overflow behavior
       v$trigger <- isolate(v$trigger %OR% 0) %% 999999999 + 1
       v$when <- NULL
     } else {
@@ -1836,7 +1837,7 @@ debounce <- function(r, millis, domain = shiny::getDefaultReactiveDomain()) {
 
 #' @rdname debounce
 #' @export
-throttle <- function(r, millis, domain = shiny::getDefaultReactiveDomain()) {
+throttle <- function(r, millis, domain = getDefaultReactiveDomain()) {
 
   # TODO: make a nice label for the observer(s)
 
@@ -1864,6 +1865,7 @@ throttle <- function(r, millis, domain = shiny::getDefaultReactiveDomain()) {
 
   trigger <- function() {
     v$lastTriggeredAt <- Sys.time()
+    # Mod by 999999999 to get predictable overflow behavior
     v$trigger <- isolate(v$trigger) %% 999999999 + 1
     v$pending <- FALSE
   }

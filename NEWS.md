@@ -15,15 +15,17 @@ shiny 0.14.2.9000
 
 * Added ability through arguments to the `a` tag function called inside `downloadButton()` and `downloadLink()`. Closes [#986](https://github.com/rstudio/shiny/issues/986). ([#1492](https://github.com/rstudio/shiny/pulls/1492))
 
+* Implemented [#1512](https://github.com/rstudio/shiny/issues/1512): added a `userData` environment to `session`, for storing arbitrary session-related variables. Generally, session-scoped variables are created just by declaring normal variables that are local to the Shiny server function, but `session$userData` may be more convenient for some advanced scenarios. ([#1513](https://github.com/rstudio/shiny/pull/1513))
+
 ### Bug fixes
 
-* Fixed [#969](ttps://github.com/rstudio/shiny/issue/969): allow navbarPage's `fluid` param to control both containers. ([#1481](https://github.com/rstudio/shiny/pull/1481))
+* Fixed [#969](https://github.com/rstudio/shiny/issues/969): allow navbarPage's `fluid` param to control both containers. ([#1481](https://github.com/rstudio/shiny/pull/1481))
 
-* Fixed [#1438](https://github.com/rstudio/shiny/issue/1438): `unbindAll()` should not be called when inserting content with `insertUI()` ([#1449](https://github.com/rstudio/shiny/pull/1449))
+* Fixed [#1438](https://github.com/rstudio/shiny/issues/1438): `unbindAll()` should not be called when inserting content with `insertUI()` ([#1449](https://github.com/rstudio/shiny/pull/1449))
 
 * Fixed bug causing `<meta>` tags associated with HTML dependencies of Shiny R Markdown files to be rendered incorrectly. ([#1463](https://github.com/rstudio/shiny/pull/1463))
 
-* Fixed [#1359](https://github.com/rstudio/shiny/issue/1359): `shinyApp()` options argument ignored when passed to `runApp()`. ([#1483](https://github.com/rstudio/shiny/pull/1483))
+* Fixed [#1359](https://github.com/rstudio/shiny/issues/1359): `shinyApp()` options argument ignored when passed to `runApp()`. ([#1483](https://github.com/rstudio/shiny/pull/1483))
 
 shiny 0.14.2
 ============

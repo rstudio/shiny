@@ -102,6 +102,10 @@
   This is the request that was used to initiate the websocket connection
   (as opposed to the request that downloaded the web page for the app).
 }
+\item{userData}{
+  An environment for app authors and module/package authors to store whatever
+  session-specific data they want.
+}
 \item{resetBrush(brushId)}{
   Resets/clears the brush with the given \code{brushId}, if it exists on
   any \code{imageOutput} or \code{plotOutput} in the app.

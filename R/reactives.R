@@ -1736,6 +1736,10 @@ isNullEvent <- function(value) {
 #' @param millis The debounce/throttle time window. You may optionally pass a
 #'   no-arg function or reactive expression instead, e.g. to let the end-user
 #'   control the time window.
+#' @param priority Debounce/throttle is implemented under the hood using
+#'   \link[=observe]{observers}. Use this parameter to set the priority of
+#'   these observers. Generally, this should be higher than the priorities of
+#'   downstream observers and outputs (which default to zero).
 #' @param domain See \link{domains}.
 #'
 #' @examples
@@ -1779,7 +1783,7 @@ isNullEvent <- function(value) {
 #' }
 #'
 #' @export
-debounce <- function(r, millis, domain = getDefaultReactiveDomain()) {
+debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain()) {
 
   # TODO: make a nice label for the observer(s)
 
@@ -1810,7 +1814,7 @@ debounce <- function(r, millis, domain = getDefaultReactiveDomain()) {
 
     # The value (or possibly millis) changed. Start or reset the timer.
     v$when <- Sys.time() + millis()/1000
-  }, label = "debounce tracker", domain = domain)
+  }, label = "debounce tracker", domain = domain, priority = priority)
 
   # This observer is the timer. It rests until v$when elapses, then touches
   # v$trigger.
@@ -1826,18 +1830,28 @@ debounce <- function(r, millis, domain = getDefaultReactiveDomain()) {
     } else {
       invalidateLater((v$when - now) * 1000)
     }
-  }, label = "debounce timer", domain = domain)
+  }, label = "debounce timer", domain = domain, priority = priority)
 
   # This is the actual reactive that is returned to the user. It returns the
   # value of r(), but only invalidates/updates when v$trigger is touched.
-  eventReactive(v$trigger, {
+  er <- eventReactive(v$trigger, {
     r()
   }, label = "debounce result", ignoreNULL = FALSE, domain = domain)
+
+  # Force the value of er to be immediately cached upon creation. It's very hard
+  # to explain why this observer is needed, but if you want to understand, try
+  # commenting it out and studying the unit test failure that results.
+  primer <- observe({
+    primer$destroy()
+    er()
+  }, label = "debounce primer", domain = domain, priority = priority)
+
+  er
 }
 
 #' @rdname debounce
 #' @export
-throttle <- function(r, millis, domain = getDefaultReactiveDomain()) {
+throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain()) {
 
   # TODO: make a nice label for the observer(s)
 
@@ -1883,7 +1897,7 @@ throttle <- function(r, millis, domain = getDefaultReactiveDomain()) {
       # period.
       trigger()
     }
-  }, label = "throttle tracker", ignoreNULL = FALSE, domain = domain)
+  }, label = "throttle tracker", ignoreNULL = FALSE, priority = priority, domain = domain)
 
   observe({
     if (!v$pending) {
@@ -1896,7 +1910,7 @@ throttle <- function(r, millis, domain = getDefaultReactiveDomain()) {
     } else {
       trigger()
     }
-  }, domain = domain)
+  }, priority = priority, domain = domain)
 
   # This is the actual reactive that is returned to the user. It returns the
   # value of r(), but only invalidates/updates when v$trigger is touched.

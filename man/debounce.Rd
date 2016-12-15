@@ -5,9 +5,9 @@
 \alias{throttle}
 \title{Slow down a reactive expression with debounce/throttle}
 \usage{
-debounce(r, millis, domain = getDefaultReactiveDomain())
+debounce(r, millis, priority = 100, domain = getDefaultReactiveDomain())
 
-throttle(r, millis, domain = getDefaultReactiveDomain())
+throttle(r, millis, priority = 100, domain = getDefaultReactiveDomain())
 }
 \arguments{
 \item{r}{A reactive expression (that invalidates too often).}
@@ -15,6 +15,11 @@ throttle(r, millis, domain = getDefaultReactiveDomain())
 \item{millis}{The debounce/throttle time window. You may optionally pass a
 no-arg function or reactive expression instead, e.g. to let the end-user
 control the time window.}
+
+\item{priority}{Debounce/throttle is implemented under the hood using
+\link[=observe]{observers}. Use this parameter to set the priority of
+these observers. Generally, this should be higher than the priorities of
+downstream observers and outputs (which default to zero).}
 
 \item{domain}{See \link{domains}.}
 }

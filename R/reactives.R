@@ -1024,9 +1024,11 @@ registerDebugHook("observerFunc", environment(), label)
 #' @export
 getCurrentObserver <- function(dig = FALSE) {
   o <- .globals$currentObserver
+  # browser()
   ctx <- getCurrentContext()
-  if (!dig && !is.null(o) && ctx$id != o$.ctx$id) o <- NULL
-  o
+  if (!dig && !is.null(o) && ctx$id != o$.ctx$id) o <- NULL  # return()
+  # if (is.null(o)) reactiveStop()
+  return(o)
 }
 
 #' Create a reactive observer

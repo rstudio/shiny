@@ -18,7 +18,7 @@ occur.}
 A no-parameter function that can be called from a reactive context,
   in order to cause that context to be invalidated the next time the timer
   interval elapses. Calling the returned function also happens to yield the
-  current time (as in \code{\link{Sys.time}}).
+  current time (as in \code{\link[base]{Sys.time}}).
 }
 \description{
 Creates a reactive timer with the given interval. A reactive timer is like a

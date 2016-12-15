@@ -75,7 +75,7 @@ Dedicated functions are available for the most common HTML tags that do not
 conflict with common R functions.
 
 The result from these functions is a tag object, which can be converted using
-\code{\link{as.character}()}.
+\code{\link[base]{as.character}()}.
 }
 \examples{
 doc <- tags$html(

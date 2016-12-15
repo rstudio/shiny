@@ -344,7 +344,7 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 
 #' Convert a reactivevalues object to a list
 #'
-#' This function does something similar to what you might \code{\link{as.list}}
+#' This function does something similar to what you might \code{\link[base]{as.list}}
 #' to do. The difference is that the calling context will take dependencies on
 #' every object in the reactivevalues object. To avoid taking dependencies on
 #' all the objects, you can wrap the call with \code{\link{isolate}()}.
@@ -1109,7 +1109,7 @@ setAutoflush <- local({
 #' @return A no-parameter function that can be called from a reactive context,
 #'   in order to cause that context to be invalidated the next time the timer
 #'   interval elapses. Calling the returned function also happens to yield the
-#'   current time (as in \code{\link{Sys.time}}).
+#'   current time (as in \code{\link[base]{Sys.time}}).
 #' @seealso \code{\link{invalidateLater}}
 #'
 #' @examples
@@ -1417,7 +1417,7 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #' The expression given to \code{isolate()} is evaluated in the calling
 #' environment. This means that if you assign a variable inside the
 #' \code{isolate()}, its value will be visible outside of the \code{isolate()}.
-#' If you want to avoid this, you can use \code{\link{local}()} inside the
+#' If you want to avoid this, you can use \code{\link[base]{local}()} inside the
 #' \code{isolate()}.
 #'
 #' This function can also be useful for calling reactive expression at the

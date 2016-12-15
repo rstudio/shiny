@@ -1230,7 +1230,7 @@ need <- function(expr, message = paste(label, "must be provided"), label) {
 #' \strong{Truthy and falsy values}
 #'
 #' The terms "truthy" and "falsy" generally indicate whether a value, when
-#' coerced to a \code{\link{logical}}, is \code{TRUE} or \code{FALSE}. We use
+#' coerced to a \code{\link[base]{logical}}, is \code{TRUE} or \code{FALSE}. We use
 #' the term a little loosely here; our usage tries to match the intuitive
 #' notions of "Is this value missing or available?", or "Has the user provided
 #' an answer?", or in the case of action buttons, "Has the button been

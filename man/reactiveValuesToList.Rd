@@ -13,7 +13,7 @@ reactiveValuesToList(x, all.names = FALSE)
 \code{FALSE} (the default) don't include those objects.}
 }
 \description{
-This function does something similar to what you might \code{\link{as.list}}
+This function does something similar to what you might \code{\link[base]{as.list}}
 to do. The difference is that the calling context will take dependencies on
 every object in the reactivevalues object. To avoid taking dependencies on
 all the objects, you can wrap the call with \code{\link{isolate}()}.

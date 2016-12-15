@@ -39,7 +39,7 @@ contain tags, text nodes, and HTML.}
 }
 \value{
 An HTML tag object that can be rendered as HTML using
-  \code{\link{as.character}()}.
+  \code{\link[base]{as.character}()}.
 }
 \description{
 \code{tag()} creates an HTML tag definition. Note that all of the valid HTML5

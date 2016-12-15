@@ -28,7 +28,7 @@
 #'   inline plot, you must provide numeric values (in pixels) to both
 #'   \code{width} and \code{height}.
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
-#'   passed to \code{\link{png}}. Note that this affects the resolution of PNG
+#'   passed to \code{\link[grDevices]{png}}. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
 #' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}.
 #'   These can be used to set the width, height, background color, etc.

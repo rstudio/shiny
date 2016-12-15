@@ -1136,7 +1136,7 @@ imageOutput <- function(outputId, width = "100%", height="400px",
 #'   same \code{id} to disappear.
 #' @inheritParams textOutput
 #' @note The arguments \code{clickId} and \code{hoverId} only work for R base
-#'   graphics (see the \pkg{\link{graphics}} package). They do not work for
+#'   graphics (see the \pkg{\link[graphics:graphics-package]{graphics}} package). They do not work for
 #'   \pkg{\link[grid:grid-package]{grid}}-based graphics, such as \pkg{ggplot2},
 #'   \pkg{lattice}, and so on.
 #'

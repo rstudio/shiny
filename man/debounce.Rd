@@ -16,7 +16,7 @@ throttle(r, millis, domain = shiny::getDefaultReactiveDomain())
 no-arg function or reactive expression instead, e.g. to let the end-user
 control the time window.}
 
-\item{domain}{See \link[shiny]{domains}.}
+\item{domain}{See \link{domains}.}
 }
 \description{
 Transforms a reactive expression by preventing its invalidation signals from

@@ -1736,7 +1736,7 @@ isNullEvent <- function(value) {
 #' @param millis The debounce/throttle time window. You may optionally pass a
 #'   no-arg function or reactive expression instead, e.g. to let the end-user
 #'   control the time window.
-#' @param domain See \link[shiny]{domains}.
+#' @param domain See \link{domains}.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

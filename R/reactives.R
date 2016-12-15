@@ -526,6 +526,7 @@ Observable <- R6Class(
       .mostRecentCtxId <<- ctx$id
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
+        .value <<- NULL # Value can be GC'd, it won't be read once invalidated
         .dependents$invalidate()
       })
       .execCount <<- .execCount + 1L

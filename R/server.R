@@ -761,12 +761,16 @@ runApp <- function(appDir=getwd(),
   # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
   # reactive(), Callbacks$invoke(), and others
   ..stacktraceoff..(
-    captureStackTraces(
+    captureStackTraces({
+      # If any observers were created before runApp was called, this will make
+      # sure they run once the app starts. (Issue #1013)
+      scheduleFlush()
+
       while (!.globals$stopped) {
         serviceApp()
         Sys.sleep(0.001)
       }
-    )
+    })
   )
 
   if (isTRUE(.globals$reterror)) {

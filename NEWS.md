@@ -29,6 +29,8 @@ shiny 0.14.2.9000
 
 * Fixed [#117](https://github.com/rstudio/shiny/issues/117): Reactive expressions now release references to cached values as soon as they are invalidated, potentially making those cached values eligible for garbage collection sooner. Previously, this would not occur until the next cached value was calculated and stored. ([#1504](https://github.com/rstudio/shiny/pull/1504/files))
 
+* Fixed [#1013](https://github.com/rstudio/shiny/issues/1013): `flushReact` should be called after app loads. Observers set up outside of server functions were not running until after the first user connects. ([#1503](https://github.com/rstudio/shiny/pull/1503))
+
 shiny 0.14.2
 ============
 

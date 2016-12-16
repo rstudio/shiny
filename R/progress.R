@@ -245,6 +245,7 @@ Progress <- R6Class(
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
+#' options(device.ask.default = FALSE)
 #'
 #' ui <- fluidPage(
 #'   plotOutput("plot")

@@ -1676,3 +1676,246 @@ eventReactive <- function(eventExpr, valueExpr,
 isNullEvent <- function(value) {
   is.null(value) || (inherits(value, 'shinyActionButtonValue') && value == 0)
 }
+
+#' Slow down a reactive expression with debounce/throttle
+#'
+#' Transforms a reactive expression by preventing its invalidation signals from
+#' being sent unnecessarily often. This lets you ignore a very "chatty" reactive
+#' expression until it becomes idle, which is useful when the intermediate
+#' values don't matter as much as the final value, and the downstream
+#' calculations that depend on the reactive expression take a long time.
+#' \code{debounce} and \code{throttle} use different algorithms for slowing down
+#' invalidation signals; see Details.
+#'
+#' @section Limitations:
+#'
+#'   Because R is single threaded, we can't come close to guaranteeing that the
+#'   timing of debounce/throttle (or any other timing-related functions in
+#'   Shiny) will be consistent or accurate; at the time we want to emit an
+#'   invalidation signal, R may be performing a different task and we have no
+#'   way to interrupt it (nor would we necessarily want to if we could).
+#'   Therefore, it's best to think of the time windows you pass to these
+#'   functions as minimums.
+#'
+#'   You may also see undesirable behavior if the amount of time spent doing
+#'   downstream processing for each change approaches or exceeds the time
+#'   window: in this case, debounce/throttle may not have any effect, as the
+#'   time each subsequent event is considered is already after the time window
+#'   has expired.
+#'
+#' @details
+#'
+#' This is not a true debounce/throttle in that it will not prevent \code{r}
+#' from being called many times (in fact it may be called more times than
+#' usual), but rather, the reactive invalidation signal that is produced by
+#' \code{r} is debounced/throttled instead. Therefore, these functions should be
+#' used when \code{r} is cheap but the things it will trigger (downstream
+#' outputs and reactives) are expensive.
+#'
+#' Debouncing means that every invalidation from \code{r} will be held for the
+#' specified time window. If \code{r} invalidates again within that time window,
+#' then the timer starts over again. This means that as long as invalidations
+#' continually arrive from \code{r} within the time window, the debounced
+#' reactive will not invalidate at all. Only after the invalidations stop (or
+#' slow down sufficiently) will the downstream invalidation be sent.
+#'
+#' \code{ooo-oo-oo---- => -----------o-}
+#'
+#' (In this graphical depiction, each character represents a unit of time, and
+#' the time window is 3 characters.)
+#'
+#' Throttling, on the other hand, delays invalidation if the \emph{throttled}
+#' reactive recently (within the time window) invalidated. New \code{r}
+#' invalidations do not reset the time window. This means that if invalidations
+#' continually come from \code{r} within the time window, the throttled reactive
+#' will invalidate regularly, at a rate equal to or slower than than the time
+#' window.
+#'
+#' \code{ooo-oo-oo---- => o--o--o--o---}
+#'
+#' @param r A reactive expression (that invalidates too often).
+#' @param millis The debounce/throttle time window. You may optionally pass a
+#'   no-arg function or reactive expression instead, e.g. to let the end-user
+#'   control the time window.
+#' @param priority Debounce/throttle is implemented under the hood using
+#'   \link[=observe]{observers}. Use this parameter to set the priority of
+#'   these observers. Generally, this should be higher than the priorities of
+#'   downstream observers and outputs (which default to zero).
+#' @param domain See \link{domains}.
+#'
+#' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#' options(device.ask.default = FALSE)
+#'
+#' library(shiny)
+#' library(magrittr)
+#'
+#' ui <- fluidPage(
+#'   plotOutput("plot", click = clickOpts("hover")),
+#'   helpText("Quickly click on the plot above, while watching the result table below:"),
+#'   tableOutput("result")
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   hover <- reactive({
+#'     if (is.null(input$hover))
+#'       list(x = NA, y = NA)
+#'     else
+#'       input$hover
+#'   })
+#'   hover_d <- hover %>% debounce(1000)
+#'   hover_t <- hover %>% throttle(1000)
+#'
+#'   output$plot <- renderPlot({
+#'     plot(cars)
+#'   })
+#'
+#'   output$result <- renderTable({
+#'     data.frame(
+#'       mode = c("raw", "throttle", "debounce"),
+#'       x = c(hover()$x, hover_t()$x, hover_d()$x),
+#'       y = c(hover()$y, hover_t()$y, hover_d()$y)
+#'     )
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#'
+#' @export
+debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain()) {
+
+  # TODO: make a nice label for the observer(s)
+
+  force(r)
+  force(millis)
+
+  if (!is.function(millis)) {
+    origMillis <- millis
+    millis <- function() origMillis
+  }
+
+  v <- reactiveValues(
+    trigger = NULL,
+    when = NULL # the deadline for the timer to fire; NULL if not scheduled
+  )
+
+  # Responsible for tracking when f() changes.
+  firstRun <- TRUE
+  observe({
+    r()
+
+    if (firstRun) {
+      # During the first run we don't want to set v$when, as this will kick off
+      # the timer. We only want to do that when we see r() change.
+      firstRun <<- FALSE
+      return()
+    }
+
+    # The value (or possibly millis) changed. Start or reset the timer.
+    v$when <- Sys.time() + millis()/1000
+  }, label = "debounce tracker", domain = domain, priority = priority)
+
+  # This observer is the timer. It rests until v$when elapses, then touches
+  # v$trigger.
+  observe({
+    if (is.null(v$when))
+      return()
+
+    now <- Sys.time()
+    if (now >= v$when) {
+      # Mod by 999999999 to get predictable overflow behavior
+      v$trigger <- isolate(v$trigger %OR% 0) %% 999999999 + 1
+      v$when <- NULL
+    } else {
+      invalidateLater((v$when - now) * 1000)
+    }
+  }, label = "debounce timer", domain = domain, priority = priority)
+
+  # This is the actual reactive that is returned to the user. It returns the
+  # value of r(), but only invalidates/updates when v$trigger is touched.
+  er <- eventReactive(v$trigger, {
+    r()
+  }, label = "debounce result", ignoreNULL = FALSE, domain = domain)
+
+  # Force the value of er to be immediately cached upon creation. It's very hard
+  # to explain why this observer is needed, but if you want to understand, try
+  # commenting it out and studying the unit test failure that results.
+  primer <- observe({
+    primer$destroy()
+    er()
+  }, label = "debounce primer", domain = domain, priority = priority)
+
+  er
+}
+
+#' @rdname debounce
+#' @export
+throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain()) {
+
+  # TODO: make a nice label for the observer(s)
+
+  force(r)
+  force(millis)
+
+  if (!is.function(millis)) {
+    origMillis <- millis
+    millis <- function() origMillis
+  }
+
+  v <- reactiveValues(
+    trigger = 0,
+    lastTriggeredAt = NULL, # Last time we fired; NULL if never
+    pending = FALSE # If TRUE, trigger again when timer elapses
+  )
+
+  blackoutMillisLeft <- function() {
+    if (is.null(v$lastTriggeredAt)) {
+      0
+    } else {
+      max(0, (v$lastTriggeredAt + millis()/1000) - Sys.time()) * 1000
+    }
+  }
+
+  trigger <- function() {
+    v$lastTriggeredAt <- Sys.time()
+    # Mod by 999999999 to get predictable overflow behavior
+    v$trigger <- isolate(v$trigger) %% 999999999 + 1
+    v$pending <- FALSE
+  }
+
+  # Responsible for tracking when f() changes.
+  observeEvent(r(), {
+    if (v$pending) {
+      # In a blackout period and someone already scheduled; do nothing
+    } else if (blackoutMillisLeft() > 0) {
+      # In a blackout period but this is the first change in that period; set
+      # v$pending so that a trigger will be scheduled at the end of the period
+      v$pending <- TRUE
+    } else {
+      # Not in a blackout period. Trigger, which will start a new blackout
+      # period.
+      trigger()
+    }
+  }, label = "throttle tracker", ignoreNULL = FALSE, priority = priority, domain = domain)
+
+  observe({
+    if (!v$pending) {
+      return()
+    }
+
+    timeout <- blackoutMillisLeft()
+    if (timeout > 0) {
+      invalidateLater(timeout)
+    } else {
+      trigger()
+    }
+  }, priority = priority, domain = domain)
+
+  # This is the actual reactive that is returned to the user. It returns the
+  # value of r(), but only invalidates/updates when v$trigger is touched.
+  eventReactive(v$trigger, {
+    r()
+  }, label = "throttle result", ignoreNULL = FALSE, domain = domain)
+}

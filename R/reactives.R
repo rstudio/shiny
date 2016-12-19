@@ -1531,6 +1531,8 @@ maskReactiveContext <- function(expr) {
 #' invalidations that come from its reactive dependencies; it only invalidates
 #' in response to the given event.
 #'
+#' @section \code{ignoreNULL} and \code{ignoreInit}:
+#'
 #' Both \code{observeEvent} and \code{eventReactive} take an \code{ignoreNULL}
 #' parameter that affects behavior when the \code{eventExpr} evaluates to
 #' \code{NULL} (or in the special case of an \code{\link{actionButton}},
@@ -1542,6 +1544,44 @@ maskReactiveContext <- function(expr) {
 #' whereas \code{ignoreNULL=FALSE} is desirable if you want to initially perform
 #' the action/calculation and just let the user re-initiate it (like a
 #' "Recalculate" button).
+#'
+#' Unlike what happens for \code{ignoreNULL}, only \code{observeEvent} takes in an
+#' \code{ignoreInit} argument. By default, \code{observeEvent} will run right when
+#' it is created (except if, at that moment, \code{eventExpr} evaluates to \code{NULL}
+#' and \code{ignoreNULL} is \code{TRUE}). But when responding to a click of an action
+#' button, it may often be useful to set \code{ignoreInit} to \code{TRUE}. For
+#' example, if you're setting up an \code{observeEvent} for a dynamically created
+#' button, then \code{ignoreInit = TRUE} will guarantee that the action (in
+#' \code{handlerExpr}) will only be triggered when the button is actually clicked,
+#' instead of also being triggered when it is created/initialized.
+#'
+#' Even though \code{ignoreNULL} and \code{ignoreInit} can be used for similar
+#' purposes they are independent from one another. Here's the result of combining
+#' these:
+#'
+#' \describe{
+#'   \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = FALSE}}{
+#'      This is the default. This combination means that \code{handlerExpr} will
+#'      run every time that \code{eventExpr} is not \code{NULL}. If, at the time
+#'      of the \code{observeEvent}'s creation, \code{handleExpr} happens to
+#'      \emph{not} be \code{NULL}, then the code runs.
+#'   }
+#'   \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = FALSE}}{
+#'      This combination means that \code{handlerExpr} will run every time no
+#'      matter what.
+#'   }
+#'   \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = TRUE}}{
+#'      This combination means that \code{handlerExpr} will \emph{not} run when
+#'      the \code{observeEvent} is created (because \code{ignoreInit = TRUE}),
+#'      but it will run every other time.
+#'   }
+#'   \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = TRUE}}{
+#'      This combination means that \code{handlerExpr} will \emph{not} run when
+#'      the \code{observeEvent} is created (because \code{ignoreInit = TRUE}).
+#'      After that, \code{handlerExpr} will run every time that \code{eventExpr}
+#'      is not \code{NULL}.
+#'   }
+#' }
 #'
 #' @param eventExpr A (quoted or unquoted) expression that represents the event;
 #'   this can be a simple reactive value like \code{input$click}, a call to a
@@ -1584,6 +1624,15 @@ maskReactiveContext <- function(expr) {
 #' @param ignoreNULL Whether the action should be triggered (or value
 #'   calculated, in the case of \code{eventReactive}) when the input is
 #'   \code{NULL}. See Details.
+#' @param ignoreInit If \code{TRUE}, then, when this \code{observeEvent} is
+#'   first created/initialized, ignore the \code{handlerExpr} (the second
+#'   argument), whether it is otherwise supposed to run or not. The default is
+#'   \code{FALSE}. See Details.
+#' @param once Whether this \code{observeEvent} should be immediately destroyed
+#'   after the first time that the code in \code{handlerExpr} is run. This
+#'   pattern is useful when you want to subscribe to a event that should only
+#'   happen once.
+#'
 #' @return \code{observeEvent} returns an observer reference class object (see
 #'   \code{\link{observe}}). \code{eventReactive} returns a reactive expression
 #'   object (see \code{\link{reactive}}).
@@ -1593,37 +1642,71 @@ maskReactiveContext <- function(expr) {
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
-#'   ui <- fluidPage(
-#'     column(4,
-#'       numericInput("x", "Value", 5),
-#'       br(),
-#'       actionButton("button", "Show")
+#'
+#'   ## App 1: Sample usage
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       column(4,
+#'         numericInput("x", "Value", 5),
+#'         br(),
+#'         actionButton("button", "Show")
+#'       ),
+#'       column(8, tableOutput("table"))
 #'     ),
-#'     column(8, tableOutput("table"))
+#'     server = function(input, output) {
+#'       # Take an action every time button is pressed;
+#'       # here, we just print a message to the console
+#'       observeEvent(input$button, {
+#'         cat("Showing", input$x, "rows\n")
+#'       })
+#'       # Take a reactive dependency on input$button, but
+#'       # not on any of the stuff inside the function
+#'       df <- eventReactive(input$button, {
+#'         head(cars, input$x)
+#'       })
+#'       output$table <- renderTable({
+#'         df()
+#'       })
+#'     }
 #'   )
-#'   server <- function(input, output) {
-#'     # Take an action every time button is pressed;
-#'     # here, we just print a message to the console
-#'     observeEvent(input$button, {
-#'       cat("Showing", input$x, "rows\n")
-#'     })
-#'     # Take a reactive dependency on input$button, but
-#'     # not on any of the stuff inside the function
-#'     df <- eventReactive(input$button, {
-#'       head(cars, input$x)
-#'     })
-#'     output$table <- renderTable({
-#'       df()
-#'     })
-#'   }
-#'   shinyApp(ui=ui, server=server)
+#'
+#'   ## App 2: Using `once`
+#'   shinyApp(
+#'     ui = basicPage( actionButton("go", "Go")),
+#'     server = function(input, output, session) {
+#'       observeEvent(input$go, {
+#'         print(paste("This will only be printed once; all",
+#'               "subsequent button clicks won't do anything"))
+#'       }, once = TRUE)
+#'     }
+#'   )
+#'
+#'   ## App 3: Using `ignoreInit` and `once`
+#'   shinyApp(
+#'     ui = basicPage(actionButton("go", "Go")),
+#'     server = function(input, output, session) {
+#'       observeEvent(input$go, {
+#'         insertUI("#go", "afterEnd",
+#'                  actionButton("dynamic", "click to remove"))
+#'
+#'         # set up an observer that depends on the dynamic
+#'         # input, so that it doesn't run when the input is
+#'         # created, and only runs once after that (since
+#'         # the side effect is remove the input from the DOM)
+#'         observeEvent(input$dynamic, {
+#'           removeUI("#dynamic")
+#'         }, ignoreInit = TRUE, once = TRUE)
+#'       })
+#'     }
+#'   )
 #' }
 #' @export
 observeEvent <- function(eventExpr, handlerExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   handler.env = parent.frame(), handler.quoted = FALSE,
-  label=NULL, suspended=FALSE, priority=0, domain=getDefaultReactiveDomain(),
-  autoDestroy = TRUE, ignoreNULL = TRUE) {
+  label = NULL, suspended = FALSE, priority = 0,
+  domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
+  ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE) {
 
   eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
   if (is.null(label))
@@ -1633,16 +1716,29 @@ observeEvent <- function(eventExpr, handlerExpr,
   handlerFunc <- exprToFunction(handlerExpr, handler.env, handler.quoted)
   handlerFunc <- wrapFunctionLabel(handlerFunc, "observeEventHandler", ..stacktraceon = TRUE)
 
-  invisible(observe({
+  initialized <- FALSE
+
+  o <- observe({
     e <- eventFunc()
+
+    if (ignoreInit && !initialized) {
+      initialized <<- TRUE
+      return()
+    }
 
     if (ignoreNULL && isNullEvent(e)) {
       return()
     }
 
+    if (once) {
+      on.exit(o$destroy())
+    }
+
     isolate(handlerFunc())
   }, label = label, suspended = suspended, priority = priority, domain = domain,
-    autoDestroy = TRUE, ..stacktraceon = FALSE))
+  autoDestroy = TRUE, ..stacktraceon = FALSE)
+
+  invisible(o)
 }
 
 #' @rdname observeEvent
@@ -1650,8 +1746,8 @@ observeEvent <- function(eventExpr, handlerExpr,
 eventReactive <- function(eventExpr, valueExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   value.env = parent.frame(), value.quoted = FALSE,
-  label=NULL, domain=getDefaultReactiveDomain(),
-  ignoreNULL = TRUE) {
+  label = NULL, domain = getDefaultReactiveDomain(),
+  ignoreNULL = TRUE, ignoreInit = FALSE) {
 
   eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
   if (is.null(label))
@@ -1661,13 +1757,17 @@ eventReactive <- function(eventExpr, valueExpr,
   handlerFunc <- exprToFunction(valueExpr, value.env, value.quoted)
   handlerFunc <- wrapFunctionLabel(handlerFunc, "eventReactiveHandler", ..stacktraceon = TRUE)
 
+  initialized <- FALSE
+
   invisible(reactive({
     e <- eventFunc()
 
-    validate(need(
-      !ignoreNULL || !isNullEvent(e),
-      message = FALSE
-    ))
+    if (ignoreInit && !initialized) {
+      initialized <<- TRUE
+      req(FALSE)
+    }
+
+    req(!ignoreNULL || !isNullEvent(e))
 
     isolate(handlerFunc())
   }, label = label, domain = domain, ..stacktraceon = FALSE))

@@ -1747,7 +1747,7 @@ eventReactive <- function(eventExpr, valueExpr,
   event.env = parent.frame(), event.quoted = FALSE,
   value.env = parent.frame(), value.quoted = FALSE,
   label = NULL, domain = getDefaultReactiveDomain(),
-  ignoreNULL = TRUE, skipFirst = FALSE) {
+  ignoreNULL = TRUE, ignoreInit = FALSE) {
 
   eventFunc <- exprToFunction(eventExpr, event.env, event.quoted)
   if (is.null(label))
@@ -1762,7 +1762,7 @@ eventReactive <- function(eventExpr, valueExpr,
   invisible(reactive({
     e <- eventFunc()
 
-    if (skipFirst && !initialized) {
+    if (ignoreInit && !initialized) {
       initialized <<- TRUE
       req(FALSE)
     }

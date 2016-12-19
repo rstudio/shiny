@@ -703,10 +703,6 @@ execCount <- function(x) {
 
 # Observer ------------------------------------------------------------------
 
-# The initial value of "current observer" is NULL (and will always be NULL,
-# except when within the scope of the observe or observeEvent)
-.globals$currentObserver <- NULL
-
 Observer <- R6Class(
   'Observer',
   portable = FALSE,
@@ -818,8 +814,6 @@ registerDebugHook("observerFunc", environment(), label)
     run = function() {
       ctx <- .createContext()
       .execCount <<- .execCount + 1L
-      .globals$currentObserver <- self
-      on.exit(.globals$currentObserver <- NULL) # On exit, set it back to NULL
       ctx$run(.func)
     },
     onInvalidate = function(callback) {

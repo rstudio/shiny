@@ -14,7 +14,7 @@ observeEvent(eventExpr, handlerExpr, event.env = parent.frame(),
 eventReactive(eventExpr, valueExpr, event.env = parent.frame(),
   event.quoted = FALSE, value.env = parent.frame(), value.quoted = FALSE,
   label = NULL, domain = getDefaultReactiveDomain(), ignoreNULL = TRUE,
-  skipFirst = FALSE)
+  ignoreInit = FALSE)
 }
 \arguments{
 \item{eventExpr}{A (quoted or unquoted) expression that represents the event;

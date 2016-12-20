@@ -1,0 +1,118 @@
+
+#' @include reactive-domains.R
+NULL
+
+#' @include reactives.R
+NULL
+
+#' Get the parsed query string from the URL
+#'
+#' A user friendly wrapper for getting and parsing the query
+#' string from the app's URL.
+#'
+#' This can be particularly useful if:
+#' \enumerate{
+#'   \item You want to do "live" bookmarking; or
+#'   \item You want to display different content depending on the
+#'     values in the query string (e.g. instead of basing the
+#'     conditional on an input or a calculated reactive, you can
+#'     base it on the query string)
+#'
+#' Under the hood, this function is accession the \code{session}
+#' object, so make sure that your server function includes all
+#' three params (i.e.
+#' \code{server = function(input, output, session) {...} }).
+#'
+#' Finally, beware that, if you're changing the query string
+#' programatically from within the server code, you must use
+#' \code{updateQueryString(_yourNewQueryString_, mode = "push")}.
+#' The default \code{mode} for \code{updateQueryString} is
+#' "replace", which doesn't raise any events, so any observers
+#' or reactives that depend on it will \emph{not} get triggered.
+#' However, if you're changing the query string directly by
+#' typing directly in the browser, you don't have to worry
+#' about this.
+#'
+#' @param session The current Shiny session.
+#'
+#' @return A named list such \code{?param1=value1&param2=value2}
+#'   becomes \code{list(param1 = value1, param2 = value2)}
+#'
+#' @seealso \code{\link{updateQueryString}},
+#'   \code{\link{getUrlHash}}
+#'
+#' @examples
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'
+#'   ## App 1: Doing "live" bookmarking
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       textInput("txt", "Enter new query string"),
+#'       helpText("Format: ?param1=val1&param2=val2"),
+#'       actionButton("go", "Update"),
+#'       hr(),
+#'       verbatimTextOutput("query")
+#'     ),
+#'     server = function(input, output, session) {
+#'       observeEvent(input$go, {
+#'         updateQueryString(input$txt, mode = "push")
+#'       })
+#'       output$query <- renderText({
+#'         query <- getQueryString(session)
+#'         queryText <- paste(names(query), query,
+#'                        sep = "=", collapse=", ")
+#'         paste("Your query string is:\n", queryText)
+#'       })
+#'     }
+#'   )
+#'
+#'   ## App 2: Using the query string to decide which
+#'   ## content to display (could also be implemented
+#'   ## using conditionalPanel)
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       textInput("txt", "Enter new query string"),
+#'       helpText("Format: ?param1=val1&param2=val2"),
+#'       actionButton("go", "Update"),
+#'       hr(),
+#'       verbatimTextOutput("query")
+#'     ),
+#'     server = function(input, output, session) {
+#'       observeEvent(input$go, {
+#'         updateQueryString(input$txt, mode = "push")
+#'       })
+#'       output$query <- renderText({
+#'         query <- getQueryString(session)
+#'         queryText <- paste(names(query), query,
+#'                        sep = "=", collapse=", ")
+#'         paste("Your query string is:\n", queryText)
+#'       })
+#'     }
+#'   )
+#' }
+#' @export
+getQueryString <- function(session) {
+  parseQueryString(session$clientData$url_search)
+}
+
+# getQueryString <- reactive({
+#   session <- getDefaultReactiveDomain()
+#   parseQueryString(session$clientData$url_search)
+# })
+
+# getQueryString <- function(session) {
+#   #session <- getDefaultReactiveDomain()
+#   reactive(parseQueryString(session$clientData$url_search))
+# }
+
+#' Get the hash from the URL
+#'
+#' Something something
+#'
+#' @return the value
+#' @examples
+#' @export
+getUrlHash <- function() {
+
+}

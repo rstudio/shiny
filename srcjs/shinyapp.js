@@ -686,13 +686,12 @@ var ShinyApp = function() {
     });
   });
 
-  addMessageHandler('pushState', function(message) {
-    window.history.pushState(message.state, message.title, message.url);
-
-  });
-
   addMessageHandler('updateQueryString', function(message) {
-    window.history.replaceState(null, null, message.queryString);
+    if (message.mode === "replace"){
+      window.history.replaceState(null, null, message.queryString);
+    } else if (message.mode === "push"){
+      window.history.pushState(null, null, message.queryString);
+    }
   });
 
   addMessageHandler("resetBrush", function(message) {

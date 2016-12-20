@@ -4,10 +4,16 @@
 \alias{updateQueryString}
 \title{Update URL in browser's location bar}
 \usage{
-updateQueryString(queryString, session = getDefaultReactiveDomain())
+updateQueryString(queryString, mode = c("replace", "push"),
+  session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{queryString}{The new query string to show in the location bar.}
+
+\item{mode}{When the query string is updated, should the the current history
+entry be replaced (default), or should a new history entry be pushed onto
+the history stack? The latter is useful if you want to navigate between
+states using the browser's back and forward buttons.}
 
 \item{session}{A Shiny session object.}
 }
@@ -15,6 +21,13 @@ updateQueryString(queryString, session = getDefaultReactiveDomain())
 This function updates the client browser's query string in the location bar.
 It typically is called from an observer. Note that this will not work in
 Internet Explorer 9 and below.
+}
+\details{
+Under the hood, this function is calling the HTML5 history API. When
+\code{mode = "replace"}, the function called is
+\code{window.history.replaceState(null, null, message.queryString)}.
+When \code{mode = "push"}, the function called is
+\code{window.history.pushState(null, null, message.queryString)}.
 }
 \seealso{
 \code{\link{enableBookmarking}} for examples.

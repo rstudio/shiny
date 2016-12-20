@@ -493,12 +493,23 @@ restoreInput <- function(id, default) {
 #' It typically is called from an observer. Note that this will not work in
 #' Internet Explorer 9 and below.
 #'
+#' Under the hood, this function is calling the HTML5 history API. When
+#' \code{mode = "replace"}, the function called is
+#' \code{window.history.replaceState(null, null, message.queryString)}.
+#' When \code{mode = "push"}, the function called is
+#' \code{window.history.pushState(null, null, message.queryString)}.
+#'
 #' @param queryString The new query string to show in the location bar.
+#' @param mode When the query string is updated, should the the current history
+#'   entry be replaced (default), or should a new history entry be pushed onto
+#'   the history stack? The latter is useful if you want to navigate between
+#'   states using the browser's back and forward buttons.
 #' @param session A Shiny session object.
 #' @seealso \code{\link{enableBookmarking}} for examples.
 #' @export
-updateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
-  session$updateQueryString(queryString)
+updateQueryString <- function(queryString, mode = c("replace", "push"),
+                              session = getDefaultReactiveDomain()) {
+  session$updateQueryString(queryString, mode)
 }
 
 #' Create a button for bookmarking/sharing

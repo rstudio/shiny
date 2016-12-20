@@ -1402,12 +1402,9 @@ ShinySession <- R6Class(
         )
       )
     },
-    pushState = function(state, title, url) {
-      private$sendMessage(pushState = list(
-        state = state, title = title, url = url))
-    },
-    updateQueryString = function(queryString) {
-      private$sendMessage(updateQueryString = list(queryString = queryString))
+    updateQueryString = function(queryString, mode) {
+      private$sendMessage(updateQueryString = list(
+        queryString = queryString, mode = mode))
     },
     resetBrush = function(brushId) {
       private$sendMessage(

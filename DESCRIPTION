@@ -98,7 +98,6 @@ Collate:
     'diagnose.R'
     'fileupload.R'
     'graph.R'
-    'history.R'
     'hooks.R'
     'html-deps.R'
     'htmltools.R'

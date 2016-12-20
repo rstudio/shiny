@@ -418,19 +418,35 @@ function initShiny() {
   // Send initial URL search (query string) and update it if it changes
   initialValues['.clientdata_url_search']   = window.location.search;
 
-  $(window).on("pushstate", function(e) {
+  $(window).on('pushstate', function(e) {
     inputs.setInput('.clientdata_url_search', window.location.search);
   });
 
-  $(window).on("popstate", function(e) {
+  $(window).on('popstate', function(e) {
     inputs.setInput('.clientdata_url_search', window.location.search);
   });
 
   // This is only the initial value of the hash. The hash can change, but
-  // a reactive version of this isn't sent because w atching for changes can
+  // a reactive version of this isn't sent because watching for changes can
   // require polling on some browsers. The JQuery hashchange plugin can be
   // used if this capability is important.
   initialValues['.clientdata_url_hash_initial'] = window.location.hash;
+
+  initialValues['.clientdata_url_hash'] = window.location.hash;
+
+/*
+  $(window).on('hashchange', function(e) {
+    console.log("got here");
+    inputs.setInput('.clientdata_url_hash', location.hash);
+  });
+*/
+
+  window.addEventListener('hashchange', function() {
+    console.log("got here");
+    inputs.setInput('.clientdata_url_hash', location.hash);
+}, false);
+
+  // $(window).hashchange();
 
   // The server needs to know what singletons were rendered as part of
   // the page loading

@@ -37,6 +37,8 @@ Now there's an official way to slow down reactive values and expressions that in
 
 ### Breaking changes
 
+* 
+
 * Added a new `placeholder` argument to `verbatimTextOutput()`. The default is `FALSE`, which means that, if there is no content for this output, no representation of this slot will be made in the UI. Previsouly, even if there was no content, you'd see an empty rectangle in the UI that served as a placeholder. You can set `placeholder = TRUE` to revert back to that look. ([#1480](https://github.com/rstudio/shiny/pull/1480))
 
 ### New features

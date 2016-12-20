@@ -509,6 +509,7 @@ restoreInput <- function(id, default) {
 #' @export
 updateQueryString <- function(queryString, mode = c("replace", "push"),
                               session = getDefaultReactiveDomain()) {
+  mode <- match.arg(mode)
   session$updateQueryString(queryString, mode)
 }
 

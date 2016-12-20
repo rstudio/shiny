@@ -621,7 +621,7 @@ runApp <- function(appDir=getwd(),
 
   if (is.null(host) || is.na(host)) host <- '0.0.0.0'
 
-  workerId(workerId)
+  #workerId(workerId)
 
   if (inShinyServer()) {
     # If SHINY_PORT is set, we're running under Shiny Server. Check the version

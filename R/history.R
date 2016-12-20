@@ -9,7 +9,6 @@
 #' @seealso \code{\link{enableBookmarking}} for examples.
 #' @export
 navigateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
-  session$pushState(state, title, url)
+  session$pushState(state = NULL, title = NULL, url = queryString)
 }
-
 

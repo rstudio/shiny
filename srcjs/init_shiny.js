@@ -418,7 +418,11 @@ function initShiny() {
   // Send initial URL search (query string) and update it if it changes
   initialValues['.clientdata_url_search']   = window.location.search;
 
-  $(window).bind("popstate", function() {
+  $(window).on("pushstate", function(e) {
+    inputs.setInput('.clientdata_url_search', window.location.search);
+  });
+
+  $(window).on("popstate", function(e) {
     inputs.setInput('.clientdata_url_search', window.location.search);
   });
 

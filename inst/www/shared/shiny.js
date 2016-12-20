@@ -10,6 +10,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   var exports = window.Shiny = window.Shiny || {};
 
+  var origPushState = window.history.pushState;
+  window.history.pushState = function () {
+    var result = origPushState.apply(this, arguments);
+    $(document).trigger("pushstate");
+    return result;
+  };
+
   $(document).on('submit', 'form:not([action])', function (e) {
     e.preventDefault();
   });
@@ -1184,9 +1191,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     addMessageHandler('pushState', function (message) {
       window.history.pushState(message.state, message.title, message.url);
-      // just to trigger a onpopstate event...
-      window.history.pushState(message.state, message.title, message.url);
-      window.history.back();
     });
 
     addMessageHandler('updateQueryString', function (message) {
@@ -5338,7 +5342,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // Send initial URL search (query string) and update it if it changes
     initialValues['.clientdata_url_search'] = window.location.search;
 
-    $(window).bind("popstate", function () {
+    $(window).on("pushstate", function (e) {
+      inputs.setInput('.clientdata_url_search', window.location.search);
+    });
+
+    $(window).on("popstate", function (e) {
       inputs.setInput('.clientdata_url_search', window.location.search);
     });
 

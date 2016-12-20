@@ -692,6 +692,9 @@ var ShinyApp = function() {
     } else if (message.mode === "push"){
       window.history.pushState(null, null, message.queryString);
     }
+    if (message.queryString.charAt(0) === "#") {
+      $(document).trigger("hashchange");
+    }
   });
 
   addMessageHandler("resetBrush", function(message) {

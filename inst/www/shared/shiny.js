@@ -1195,6 +1195,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       } else if (message.mode === "push") {
         window.history.pushState(null, null, message.queryString);
       }
+      if (message.queryString.charAt(0) === "#") {
+        $(document).trigger("hashchange");
+      }
     });
 
     addMessageHandler("resetBrush", function (message) {
@@ -5355,22 +5358,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // require polling on some browsers. The JQuery hashchange plugin can be
     // used if this capability is important.
     initialValues['.clientdata_url_hash_initial'] = window.location.hash;
-
     initialValues['.clientdata_url_hash'] = window.location.hash;
 
-    /*
-      $(window).on('hashchange', function(e) {
-        console.log("got here");
-        inputs.setInput('.clientdata_url_hash', location.hash);
-      });
-    */
-
-    window.addEventListener('hashchange', function () {
-      console.log("got here");
+    $(window).on('hashchange', function (e) {
       inputs.setInput('.clientdata_url_hash', location.hash);
-    }, false);
-
-    // $(window).hashchange();
+    });
 
     // The server needs to know what singletons were rendered as part of
     // the page loading

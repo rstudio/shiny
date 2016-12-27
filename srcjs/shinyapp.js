@@ -687,14 +687,25 @@ var ShinyApp = function() {
   });
 
   addMessageHandler('updateQueryString', function(message) {
+    var what = null;
+    if (message.queryString.charAt(0) === "#") what = "hash";
+    else if (message.queryString.charAt(0) === "?") what = "query";
+    else throw "The 'query' string must start with either '?' " +
+               "(to update the query string) or with '#' (to " +
+               "update the hash).";
+
+    // for the case when message.queryString has both a query string
+    // and a hash (`what = "hash"` allows us to trigger the
+    // hashchange event)
+    if (message.queryString.indexOf("#") !== -1)  what = "hash";
+
+    var newRelURL = window.location.pathname + message.queryString
     if (message.mode === "replace"){
-      window.history.replaceState(null, null, message.queryString);
+      window.history.replaceState(null, null, newRelURL);
     } else if (message.mode === "push"){
-      window.history.pushState(null, null, message.queryString);
+      window.history.pushState(null, null, newRelURL);
     }
-    if (message.queryString.charAt(0) === "#") {
-      $(document).trigger("hashchange");
-    }
+    if (what === "hash") $(document).trigger("hashchange");
   });
 
   addMessageHandler("resetBrush", function(message) {

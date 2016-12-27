@@ -697,9 +697,9 @@ var ShinyApp = function() {
     // for the case when message.queryString has both a query string
     // and a hash (`what = "hash"` allows us to trigger the
     // hashchange event)
-    if (message.queryString.indexOf("#") !== -1)  what = "hash";
+    if (message.queryString.indexOf("#") !== -1) what = "hash";
 
-    var newRelURL = window.location.pathname + message.queryString
+    var newRelURL = window.location.pathname + message.queryString;
     if (message.mode === "replace"){
       window.history.replaceState(null, null, newRelURL);
     } else if (message.mode === "push"){

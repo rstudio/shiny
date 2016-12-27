@@ -6,9 +6,6 @@
 \usage{
 getQueryString()
 }
-\arguments{
-\item{session}{The current Shiny session.}
-}
 \value{
 A named list such \code{?param1=value1&param2=value2}
   becomes \code{list(param1 = value1, param2 = value2)}

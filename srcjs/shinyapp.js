@@ -694,17 +694,38 @@ var ShinyApp = function() {
                "(to update the query string) or with '#' (to " +
                "update the hash).";
 
+    var path = window.location.pathname;
+    var oldHash = window.location.hash;
+
+    /* Barbara -- December 2016
+    Note: we could check if the new QS and/or hash are different
+    from the old one(s) and, if not, we could choose not to push
+    a new state (whether or not we would replace it is moot/
+    inconsequential). However, I think that it is better to
+    interpret each call to `updateQueryString` as representing
+    new state (even if the message.queryString is the same), so
+    that check isn't even performed as of right now.
+    */
+
+    var relURL = "";
+    if (what === "query") relURL = path + message.queryString;
+    else relURL = message.queryString; // leave old QS if it exists
+
+    if (message.mode === "replace") {
+      window.history.replaceState(null, null, relURL);
+    } else if (message.mode === "push") {
+      window.history.pushState(null, null, relURL);
+    }
+
     // for the case when message.queryString has both a query string
     // and a hash (`what = "hash"` allows us to trigger the
     // hashchange event)
     if (message.queryString.indexOf("#") !== -1) what = "hash";
 
-    var newRelURL = window.location.pathname + message.queryString;
-    if (message.mode === "replace"){
-      window.history.replaceState(null, null, newRelURL);
-    } else if (message.mode === "push"){
-      window.history.pushState(null, null, newRelURL);
-    }
+    // for the case when there was a hash before, but there isn't
+    // any hash now (e.g. for when only the query string is updated)
+    if (window.location.hash !== oldHash) what = "hash";
+
     if (what === "hash") $(document).trigger("hashchange");
   });
 

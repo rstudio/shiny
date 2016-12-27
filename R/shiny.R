@@ -1051,17 +1051,17 @@ ShinySession <- R6Class(
             shinyCallingHandlers(func()),
             shiny.custom.error = function(cond) {
               if (isTRUE(getOption("show.error.messages"))) printError(cond)
-              structure(NULL, class = "try-error", condition = cond)
+              structure(list(), class = "try-error", condition = cond)
             },
             shiny.output.cancel = function(cond) {
-              structure(NULL, class = "cancel-output")
+              structure(list(), class = "cancel-output")
             },
             shiny.silent.error = function(cond) {
               # Don't let shiny.silent.error go through the normal stop
               # path of try, because we don't want it to print. But we
               # do want to try to return the same looking result so that
               # the code below can send the error to the browser.
-              structure(NULL, class = "try-error", condition = cond)
+              structure(list(), class = "try-error", condition = cond)
             },
             error = function(cond) {
               if (isTRUE(getOption("show.error.messages"))) printError(cond)
@@ -1070,7 +1070,7 @@ ShinySession <- R6Class(
                                           "logs or contact the app author for",
                                           "clarification."))
               }
-              invisible(structure(NULL, class = "try-error", condition = cond))
+              invisible(structure(list(), class = "try-error", condition = cond))
             },
             finally = {
               private$sendMessage(recalculating = list(

@@ -695,6 +695,7 @@ var ShinyApp = function() {
                "update the hash).";
 
     var path = window.location.pathname;
+    var oldQS = window.location.search;
     var oldHash = window.location.hash;
 
     /* Barbara -- December 2016
@@ -707,9 +708,9 @@ var ShinyApp = function() {
     that check isn't even performed as of right now.
     */
 
-    var relURL = "";
-    if (what === "query") relURL = path + message.queryString;
-    else relURL = message.queryString; // leave old QS if it exists
+    var relURL = path;
+    if (what === "query") relURL += message.queryString;
+    else relURL += oldQS + message.queryString; // leave old QS if it exists
 
     if (message.mode === "replace") {
       window.history.replaceState(null, null, relURL);

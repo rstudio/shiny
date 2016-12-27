@@ -1194,6 +1194,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if (message.queryString.charAt(0) === "#") what = "hash";else if (message.queryString.charAt(0) === "?") what = "query";else throw "The 'query' string must start with either '?' " + "(to update the query string) or with '#' (to " + "update the hash).";
 
       var path = window.location.pathname;
+      var oldQS = window.location.search;
       var oldHash = window.location.hash;
 
       /* Barbara -- December 2016
@@ -1206,8 +1207,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       that check isn't even performed as of right now.
       */
 
-      var relURL = "";
-      if (what === "query") relURL = path + message.queryString;else relURL = message.queryString; // leave old QS if it exists
+      var relURL = path;
+      if (what === "query") relURL += message.queryString;else relURL += oldQS + message.queryString; // leave old QS if it exists
 
       if (message.mode === "replace") {
         window.history.replaceState(null, null, relURL);

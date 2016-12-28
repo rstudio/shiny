@@ -9,6 +9,9 @@ shiny 1.0.0.9000
 
 ### Minor new features and improvements
 
+* Added support for HTML5's `pushState` which allows for pseudo-navigation
+in shiny apps. For more info, see the documentation (`?updateQueryString` and `?getQueryString`). [#1447](https://github.com/rstudio/shiny/pull/1447)
+
 * Fixed ([#1121](https://github.com/rstudio/shiny/issues/1121)): plot interactions with ggplot2 now support `coord_fixed()`. ([#1525](https://github.com/rstudio/shiny/pull/1525))
 
 ### Bug fixes
@@ -36,8 +39,6 @@ Now there's an official way to slow down reactive values and expressions that in
 ## Full changelog
 
 ### Breaking changes
-
-* 
 
 * Added a new `placeholder` argument to `verbatimTextOutput()`. The default is `FALSE`, which means that, if there is no content for this output, no representation of this slot will be made in the UI. Previsouly, even if there was no content, you'd see an empty rectangle in the UI that served as a placeholder. You can set `placeholder = TRUE` to revert back to that look. ([#1480](https://github.com/rstudio/shiny/pull/1480))
 

@@ -687,6 +687,13 @@ var ShinyApp = function() {
   });
 
   addMessageHandler('updateQueryString', function(message) {
+
+    // leave the bookmarking code intact
+    if (message.mode === "replace") {
+      window.history.replaceState(null, null, message.queryString);
+      return;
+    }
+
     var what = null;
     if (message.queryString.charAt(0) === "#") what = "hash";
     else if (message.queryString.charAt(0) === "?") what = "query";
@@ -711,12 +718,7 @@ var ShinyApp = function() {
     var relURL = path;
     if (what === "query") relURL += message.queryString;
     else relURL += oldQS + message.queryString; // leave old QS if it exists
-
-    if (message.mode === "replace") {
-      window.history.replaceState(null, null, relURL);
-    } else if (message.mode === "push") {
-      window.history.pushState(null, null, relURL);
-    }
+    window.history.pushState(null, null, relURL);
 
     // for the case when message.queryString has both a query string
     // and a hash (`what = "hash"` allows us to trigger the

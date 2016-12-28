@@ -5,44 +5,43 @@ NULL
 #' @include reactives.R
 NULL
 
-#' Get the parsed query string from the URL
+#' Get the query string / hash component from the URL
 #'
-#' A user friendly wrapper for getting and parsing the query
-#' string from the app's URL.
+#' Two user friendly wrappers for getting the query string
+#' and the hash component from the app's URL.
 #'
-#' This can be particularly useful if you want to display
+#' These can be particularly useful if you want to display
 #' different content depending on the values in the query
-#' string (e.g. instead of basing the conditional on an input
-#' or a calculated reactive, you can base it on the query string)
-#'
-#' Under the hood, this function is accession the \code{session}
-#' object, so make sure that your server function includes all
-#' three params (i.e.
-#' \code{server = function(input, output, session) {...} }).
-#'
-#' Finally, beware that, if you're changing the query string
+#' string / hash (e.g. instead of basing the conditional on an input
+#' or a calculated reactive, you can base it on the query string).
+#' However, note that, if you're changing the query string / hash
 #' programatically from within the server code, you must use
 #' \code{updateQueryString(_yourNewQueryString_, mode = "push")}.
 #' The default \code{mode} for \code{updateQueryString} is
-#' "replace", which doesn't raise any events, so any observers
+#' \code{"replace"}, which doesn't raise any events, so any observers
 #' or reactives that depend on it will \emph{not} get triggered.
-#' However, if you're changing the query string directly by
-#' typing directly in the browser, you don't have to worry
-#' about this.
+#' However, if you're changing the query string / hash directly by
+#' typing directly in the browser and hitting enter, you don't
+#' have to worry about this.
 #'
-#' @return A named list such \code{?param1=value1&param2=value2}
-#'   becomes \code{list(param1 = value1, param2 = value2)}
+#' @param session	A Shiny session object.
 #'
-#' @seealso \code{\link{updateQueryString}},
-#'   \code{\link{getUrlHash}}
+#' @return For \code{getQueryString}, a named list.
+#'   For example, the query string \code{?param1=value1&param2=value2}
+#'   becomes \code{list(param1 = value1, param2 = value2)}.
+#'   For \code{getUrlHash}, a character vector with the hash
+#'   (including the leading \code{#} symbol).
+#'
+#' @seealso \code{\link{updateQueryString}}
 #'
 #' @examples
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
 #'
-#'   ## Using the query string to decide which content
-#'   ## to display (could also be implemented using
-#'   ## conditionalPanel)
+#'   ## App 1: getQueryString
+#'   ## Printing the value of the query string
+#'   ## (Use the back and forward buttons to see how the browser
+#'   ## keeps a record of each state)
 #'   shinyApp(
 #'     ui = fluidPage(
 #'       textInput("txt", "Enter new query string"),
@@ -56,27 +55,44 @@ NULL
 #'         updateQueryString(input$txt, mode = "push")
 #'       })
 #'       output$query <- renderText({
-#'         query <- getQueryString(session)
+#'         query <- getQueryString()
 #'         queryText <- paste(names(query), query,
 #'                        sep = "=", collapse=", ")
 #'         paste("Your query string is:\n", queryText)
 #'       })
 #'     }
 #'   )
+#'
+#'   ## App 2: getUrlHash
+#'   ## Printing the value of the URL hash
+#'   ## (Use the back and forward buttons to see how the browser
+#'   ## keeps a record of each state)
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       textInput("txt", "Enter new hash"),
+#'       helpText("Format: #hash"),
+#'       actionButton("go", "Update"),
+#'       hr(),
+#'       verbatimTextOutput("hash")
+#'     ),
+#'     server = function(input, output, session) {
+#'       observeEvent(input$go, {
+#'         updateQueryString(input$txt, mode = "push")
+#'       })
+#'       output$hash <- renderText({
+#'         hash <- getUrlHash()
+#'         paste("Your hash is:\n", hash)
+#'       })
+#'     }
+#'   )
 #' }
 #' @export
-getQueryString <- function() {
-  session <- getDefaultReactiveDomain()
+getQueryString <- function(session = getDefaultReactiveDomain()) {
   parseQueryString(session$clientData$url_search)
 }
 
-#' Get the hash from the URL
-#'
-#' Something something
-#'
-#' @return the value
-#' @examples
+#' @rdname getQueryString
 #' @export
-getUrlHash <- function() {
-
+getUrlHash <- function(session = getDefaultReactiveDomain()) {
+  session$clientData$url_hash
 }

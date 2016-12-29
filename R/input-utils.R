@@ -35,12 +35,49 @@ validateSelected <- function(selected, choices, inputId) {
 }
 
 
+validateSelected2 <- function(selected, choicesValues, choicesNames, inputId) {
+  selected <- as.character(selected)
+  if (needOptgroup(choicesValues)) return(selected)
+
+  if (is.list(choicesValues)) choicesValues <- unlist(choicesValues)
+  if (is.list(choicesNames)) choicesNames <- unlist(choicesNames)
+
+  # labels and values are identical, no need to validate
+  if (identical(choicesNames, choicesValues)) return(selected)
+  # when selected labels instead of values
+  i <- (selected %in% choicesNames) & !(selected %in% choicesValues)
+  if (any(i)) {
+    warnFun <- if (all(i)) {
+      # replace names with values
+      selected <- choicesValues[[which(choicesNames == selected)]]
+      warning
+    } else stop  # stop when it is ambiguous (some labels == values)
+    warnFun("'selected' must be the values instead of names of 'choices' ",
+            "for the input '", inputId, "'")
+  }
+  selected
+}
+
+
 # generate options for radio buttons and checkbox groups (type = 'checkbox' or
 # 'radio')
-generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox') {
+generateOptions <- function(inputId, choices = NULL, selected, inline,
+                            type = 'checkbox', choicesNames = NULL,
+                            choicesValues = NULL) {
+
+  session <- getDefaultReactiveDomain()
+
+  if (is.null(choices)) {
+    nms <- choicesNames
+    vals <- choicesValues
+  } else {
+    nms <- names(choices)
+    vals <- choices
+  }
+
   # generate a list of <input type=? [checked] />
   options <- mapply(
-    choices, names(choices),
+    vals, nms,
     FUN = function(value, name) {
       inputTag <- tags$input(
         type = type, name = inputId, value = value
@@ -50,12 +87,12 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
 
       # If inline, there's no wrapper div, and the label needs a class like
       # checkbox-inline.
+      nm <- processDeps(name, session)$html
+
       if (inline) {
-        tags$label(class = paste0(type, "-inline"), inputTag, tags$span(name))
+        tags$label(class = paste0(type, "-inline"), inputTag, tags$span(nm))
       } else {
-        tags$div(class = type,
-          tags$label(inputTag, tags$span(name))
-        )
+        tags$div(class = type, tags$label(inputTag, tags$span(nm)))
       }
     },
     SIMPLIFY = FALSE, USE.NAMES = FALSE

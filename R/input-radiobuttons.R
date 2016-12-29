@@ -11,11 +11,15 @@
 #'
 #' @inheritParams textInput
 #' @param choices List of values to select from (if elements of the list are
-#' named then that name rather than the value is displayed to the user)
+#'   named then that name rather than the value is displayed to the user). If
+#'   this argument is provided, then \code{choiceNames} and \code{choiceValues}
+#'   must not be provided, and vice-versa.
 #' @param selected The initially selected value (if not specified then
-#' defaults to the first value)
+#'   defaults to the first value)
 #' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
 #' @return A set of radio buttons that can be added to a UI definition.
+#' @param choicesValues
+#' @param choicesNames List
 #'
 #' @family input elements
 #' @seealso \code{\link{updateRadioButtons}}
@@ -49,25 +53,59 @@
 #' shinyApp(ui, server)
 #' }
 #' @export
-radioButtons <- function(inputId, label, choices, selected = NULL,
-  inline = FALSE, width = NULL) {
+radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
+  inline = FALSE, width = NULL, choicesValues = NULL, choicesNames = NULL) {
 
-  # resolve names
-  choices <- choicesWithNames(choices)
+  lenNames <- length(choicesNames)
+  lenVals <- length(choicesValues)
+  useChoices <- FALSE
+
+  if (is.null(choices)) {
+    if (lenNames == 0 || lenVals == 0) {
+      stop("Please specify a non-empty vector for `choices` (or,
+           alternatively, for both `choicesNames` and `choicesValues`).")
+    }
+    if (lenNames != lenVals) {
+      stop("`choicesNames` and `choicesValues` must have the same length.")
+    }
+    if (!is.null(names(choicesNames)) || !is.null(names(choicesValues))) {
+      stop("`choicesNames` and `choicesValues` must not be named.")
+    }
+  } else {
+    if (lenNames != 0 || lenVals != 0) {
+      warning("Using `choices` argument; ignoring `choicesNames` and
+              `choicesValues`.")
+    }
+    # resolve names
+    useChoices <- TRUE
+    choices <- choicesWithNames(choices)
+  }
 
   selected <- restoreInput(id = inputId, default = selected)
 
   # default value if it's not specified
-  selected <- if (is.null(selected)) choices[[1]] else {
-    validateSelected(selected, choices, inputId)
+  selected <- if (is.null(selected)) {
+    if (useChoices) choices[[1]] else choicesValues[[1]]
+  } else {
+    if (useChoices) validateSelected(selected, choices, inputId)
+    else validateSelected2(selected, choicesNames, choicesValues, inputId)
   }
+
   if (length(selected) > 1) stop("The 'selected' argument must be of length 1")
 
-  options <- generateOptions(inputId, choices, selected, inline, type = 'radio')
+  #print(choicesNames)
+  #print(choicesValues)
+
+  options <- if (useChoices)
+    generateOptions(inputId, choices, selected, inline, type = 'radio')
+  else
+    generateOptions(inputId, NULL, selected, inline, type = 'radio',
+                    choicesNames, choicesValues)
+
+  #print(options)
 
   divClass <- "form-group shiny-input-radiogroup shiny-input-container"
-  if (inline)
-    divClass <- paste(divClass, "shiny-input-container-inline")
+  if (inline) divClass <- paste(divClass, "shiny-input-container-inline")
 
   tags$div(id = inputId,
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),

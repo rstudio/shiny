@@ -85,14 +85,16 @@ generateOptions <- function(inputId, choices = NULL, selected, inline,
       if (value %in% selected)
         inputTag$attribs$checked <- "checked"
 
+      pd <- processDeps(name, session)
+
       # If inline, there's no wrapper div, and the label needs a class like
       # checkbox-inline.
-      nm <- processDeps(name, session)$html
-
       if (inline) {
-        tags$label(class = paste0(type, "-inline"), inputTag, tags$span(nm))
+        tags$label(class = paste0(type, "-inline"), inputTag,
+                   tagList(tags$span(pd$html), pd$dep))
       } else {
-        tags$div(class = type, tags$label(inputTag, tags$span(nm)))
+        tags$div(class = type, tags$label(inputTag,
+                 tagList(tags$span(pd$html), pd$dep)))
       }
     },
     SIMPLIFY = FALSE, USE.NAMES = FALSE

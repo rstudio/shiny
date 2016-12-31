@@ -3,9 +3,9 @@ controlLabel <- function(controlName, label) {
 }
 
 
-# # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
-# # refers to values. Below is a function for backward compatibility. It also
-# # coerces the value to `character`.
+# Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
+# refers to values. Below is a function for backward compatibility. It also
+# coerces the value to `character`.
 validateSelected <- function(selected, choices, inputId, choicesNames, choicesValues) {
   # this line accomplishes two tings:
   #   - coerces selected to character

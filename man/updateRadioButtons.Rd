@@ -16,7 +16,9 @@ updateRadioButtons(session, inputId, label = NULL, choices = NULL,
 \item{label}{The label to set for the input object.}
 
 \item{choices}{List of values to select from (if elements of the list are
-named then that name rather than the value is displayed to the user)}
+named then that name rather than the value is displayed to the user). If
+this argument is provided, then \code{choiceNames} and \code{choiceValues}
+must not be provided, and vice-versa.}
 
 \item{selected}{The initially selected value (if not specified then
 defaults to the first value)}

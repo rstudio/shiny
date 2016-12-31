@@ -18,8 +18,15 @@
 #'   defaults to the first value)
 #' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
 #' @return A set of radio buttons that can be added to a UI definition.
-#' @param choicesValues
-#' @param choicesNames List
+#' @param choicesNames,choicesValues List of names and values, respectively,
+#'   that are displayed to the user in the app and correspond to the each
+#'   choice (for this reason, \code{choicesNames} and \code{choicesValues}
+#'   must have the same length). If either of these arguments is
+#'   provided, then the other \emph{must} be provided and \code{choices}
+#'   \emph{must not} be provided. The advantage of using both of these over
+#'   a named list for \code{choices} is that \code{choicesNames} allows any
+#'   type of UI object to be passed through (tag objects, icons, HTML code,
+#'   ...), instead of just simple text. See Examples.
 #'
 #' @family input elements
 #' @seealso \code{\link{updateRadioButtons}}
@@ -51,14 +58,34 @@
 #' }
 #'
 #' shinyApp(ui, server)
+#'
+#' ui <- fluidPage(
+#'   radioButtons("rb", "Choose one:",
+#'                choicesNames = list(
+#'                  icon("calendar"),
+#'                  HTML("<p style='color:red;'>Red Text</p>"),
+#'                  "Normal text"
+#'                ),
+#'                choicesValues = list(
+#'                  "icon", "html", "text"
+#'                )),
+#'   textOutput("txt")
+#' )
+#'
+#' server <- function(input, output) {
+#'   output$txt <- renderText({
+#'     paste("You chose", input$rb)
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
 radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
-  inline = FALSE, width = NULL, choicesValues = NULL, choicesNames = NULL) {
+  inline = FALSE, width = NULL, choicesNames = NULL, choicesValues = NULL) {
 
   lenNames <- length(choicesNames)
   lenVals <- length(choicesValues)
-  useChoices <- FALSE
 
   if (is.null(choices)) {
     if (lenNames == 0 || lenVals == 0) {
@@ -77,7 +104,6 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
               `choicesValues`.")
     }
     # resolve names if not specified
-    useChoices <- TRUE
     choices <- choicesWithNames(choices)
   }
 

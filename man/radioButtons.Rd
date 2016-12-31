@@ -4,8 +4,9 @@
 \alias{radioButtons}
 \title{Create radio buttons}
 \usage{
-radioButtons(inputId, label, choices, selected = NULL, inline = FALSE,
-  width = NULL)
+radioButtons(inputId, label, choices = NULL, selected = NULL,
+  inline = FALSE, width = NULL, choicesNames = NULL,
+  choicesValues = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -13,7 +14,9 @@ radioButtons(inputId, label, choices, selected = NULL, inline = FALSE,
 \item{label}{Display label for the control, or \code{NULL} for no label.}
 
 \item{choices}{List of values to select from (if elements of the list are
-named then that name rather than the value is displayed to the user)}
+named then that name rather than the value is displayed to the user). If
+this argument is provided, then \code{choiceNames} and \code{choiceValues}
+must not be provided, and vice-versa.}
 
 \item{selected}{The initially selected value (if not specified then
 defaults to the first value)}
@@ -22,6 +25,16 @@ defaults to the first value)}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
+
+\item{choicesNames, choicesValues}{List of names and values, respectively,
+that are displayed to the user in the app and correspond to the each
+choice (for this reason, \code{choicesNames} and \code{choicesValues}
+must have the same length). If either of these arguments is
+provided, then the other \emph{must} be provided and \code{choices}
+\emph{must not} be provided. The advantage of using both of these over
+a named list for \code{choices} is that \code{choicesNames} allows any
+type of UI object to be passed through (tag objects, icons, HTML code,
+...), instead of just simple text. See Examples.}
 }
 \value{
 A set of radio buttons that can be added to a UI definition.
@@ -60,6 +73,27 @@ server <- function(input, output) {
                    rnorm)
 
     hist(dist(500))
+  })
+}
+
+shinyApp(ui, server)
+
+ui <- fluidPage(
+  radioButtons("rb", "Choose one:",
+               choicesNames = list(
+                 icon("calendar"),
+                 HTML("<p style='color:red;'>Red Text</p>"),
+                 "Normal text"
+               ),
+               choicesValues = list(
+                 "icon", "html", "text"
+               )),
+  textOutput("txt")
+)
+
+server <- function(input, output) {
+  output$txt <- renderText({
+    paste("You chose", input$rb)
   })
 }
 

@@ -6,59 +6,6 @@ controlLabel <- function(controlName, label) {
 # # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
 # # refers to values. Below is a function for backward compatibility. It also
 # # coerces the value to `character`.
-# validateSelected <- function(selected, choices, inputId) {
-#   # this line accomplishes two tings:
-#   #   - coerces selected to character
-#   #   - drops name, otherwise toJSON() keeps it too
-#   selected <- as.character(selected)
-#   # if you are using optgroups, you're using shiny > 0.10.0, and you should
-#   # already know that `selected` must be a value instead of a label
-#   if (needOptgroup(choices)) return(selected)
-#
-#   if (is.list(choices)) choices <- unlist(choices)
-#
-#   nms <- names(choices)
-#   # labels and values are identical, no need to validate
-#   if (identical(nms, unname(choices))) return(selected)
-#   # when selected labels instead of values
-#   i <- (selected %in% nms) & !(selected %in% choices)
-#   if (any(i)) {
-#     warnFun <- if (all(i)) {
-#       # replace names with values
-#       selected <- unname(choices[selected])
-#       warning
-#     } else stop  # stop when it is ambiguous (some labels == values)
-#     warnFun("'selected' must be the values instead of names of 'choices' ",
-#             "for the input '", inputId, "'")
-#   }
-#   selected
-# }
-#
-#
-# validateSelected2 <- function(selected, choicesValues, choicesNames, inputId) {
-#   selected <- as.character(selected)
-#   if (needOptgroup(choicesValues)) return(selected)
-#
-#   if (is.list(choicesValues)) choicesValues <- unlist(choicesValues)
-#   if (is.list(choicesNames)) choicesNames <- unlist(choicesNames)
-#
-#   # labels and values are identical, no need to validate
-#   if (identical(choicesNames, choicesValues)) return(selected)
-#   # when selected labels instead of values
-#   i <- (selected %in% choicesNames) & !(selected %in% choicesValues)
-#   if (any(i)) {
-#     warnFun <- if (all(i)) {
-#       # replace names with values
-#       selected <- choicesValues[[which(choicesNames == selected)]]
-#       warning
-#     } else stop  # stop when it is ambiguous (some labels == values)
-#     warnFun("'selected' must be the values instead of names of 'choices' ",
-#             "for the input '", inputId, "'")
-#   }
-#   selected
-# }
-
-
 validateSelected <- function(selected, choices, inputId, choicesNames, choicesValues) {
   # this line accomplishes two tings:
   #   - coerces selected to character
@@ -70,8 +17,8 @@ validateSelected <- function(selected, choices, inputId, choicesNames, choicesVa
   if (needOptgroup(choices %OR% choicesValues)) return(selected)
 
   if (is.list(choices)) choices <- unlist(choices)
-  if (is.list(choicesValues)) choicesValues <- unlist(choicesValues)
   if (is.list(choicesNames)) choicesNames <- unlist(choicesNames)
+  if (is.list(choicesValues)) choicesValues <- unlist(choicesValues)
 
   nms <- names(choices) %OR% choicesNames
 

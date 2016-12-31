@@ -3,53 +3,86 @@ controlLabel <- function(controlName, label) {
 }
 
 
-# Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
-# refers to values. Below is a function for backward compatibility. It also
-# coerces the value to `character`.
-validateSelected <- function(selected, choices, inputId) {
+# # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
+# # refers to values. Below is a function for backward compatibility. It also
+# # coerces the value to `character`.
+# validateSelected <- function(selected, choices, inputId) {
+#   # this line accomplishes two tings:
+#   #   - coerces selected to character
+#   #   - drops name, otherwise toJSON() keeps it too
+#   selected <- as.character(selected)
+#   # if you are using optgroups, you're using shiny > 0.10.0, and you should
+#   # already know that `selected` must be a value instead of a label
+#   if (needOptgroup(choices)) return(selected)
+#
+#   if (is.list(choices)) choices <- unlist(choices)
+#
+#   nms <- names(choices)
+#   # labels and values are identical, no need to validate
+#   if (identical(nms, unname(choices))) return(selected)
+#   # when selected labels instead of values
+#   i <- (selected %in% nms) & !(selected %in% choices)
+#   if (any(i)) {
+#     warnFun <- if (all(i)) {
+#       # replace names with values
+#       selected <- unname(choices[selected])
+#       warning
+#     } else stop  # stop when it is ambiguous (some labels == values)
+#     warnFun("'selected' must be the values instead of names of 'choices' ",
+#             "for the input '", inputId, "'")
+#   }
+#   selected
+# }
+#
+#
+# validateSelected2 <- function(selected, choicesValues, choicesNames, inputId) {
+#   selected <- as.character(selected)
+#   if (needOptgroup(choicesValues)) return(selected)
+#
+#   if (is.list(choicesValues)) choicesValues <- unlist(choicesValues)
+#   if (is.list(choicesNames)) choicesNames <- unlist(choicesNames)
+#
+#   # labels and values are identical, no need to validate
+#   if (identical(choicesNames, choicesValues)) return(selected)
+#   # when selected labels instead of values
+#   i <- (selected %in% choicesNames) & !(selected %in% choicesValues)
+#   if (any(i)) {
+#     warnFun <- if (all(i)) {
+#       # replace names with values
+#       selected <- choicesValues[[which(choicesNames == selected)]]
+#       warning
+#     } else stop  # stop when it is ambiguous (some labels == values)
+#     warnFun("'selected' must be the values instead of names of 'choices' ",
+#             "for the input '", inputId, "'")
+#   }
+#   selected
+# }
+
+
+validateSelected <- function(selected, choices, inputId, choicesNames, choicesValues) {
   # this line accomplishes two tings:
   #   - coerces selected to character
   #   - drops name, otherwise toJSON() keeps it too
   selected <- as.character(selected)
+
   # if you are using optgroups, you're using shiny > 0.10.0, and you should
   # already know that `selected` must be a value instead of a label
-  if (needOptgroup(choices)) return(selected)
+  if (needOptgroup(choices %OR% choicesValues)) return(selected)
 
   if (is.list(choices)) choices <- unlist(choices)
-
-  nms <- names(choices)
-  # labels and values are identical, no need to validate
-  if (identical(nms, unname(choices))) return(selected)
-  # when selected labels instead of values
-  i <- (selected %in% nms) & !(selected %in% choices)
-  if (any(i)) {
-    warnFun <- if (all(i)) {
-      # replace names with values
-      selected <- unname(choices[selected])
-      warning
-    } else stop  # stop when it is ambiguous (some labels == values)
-    warnFun("'selected' must be the values instead of names of 'choices' ",
-            "for the input '", inputId, "'")
-  }
-  selected
-}
-
-
-validateSelected2 <- function(selected, choicesValues, choicesNames, inputId) {
-  selected <- as.character(selected)
-  if (needOptgroup(choicesValues)) return(selected)
-
   if (is.list(choicesValues)) choicesValues <- unlist(choicesValues)
   if (is.list(choicesNames)) choicesNames <- unlist(choicesNames)
 
+  nms <- names(choices) %OR% choicesNames
+
   # labels and values are identical, no need to validate
-  if (identical(choicesNames, choicesValues)) return(selected)
+  if (identical(nms, unname(choices) %OR% choicesValues)) return(selected)
   # when selected labels instead of values
-  i <- (selected %in% choicesNames) & !(selected %in% choicesValues)
+  i <- (selected %in% nms) & !(selected %in% (choices %OR% choicesValues))
   if (any(i)) {
     warnFun <- if (all(i)) {
       # replace names with values
-      selected <- choicesValues[[which(choicesNames == selected)]]
+      selected <- unname(choices[selected]) %OR% choicesValues[[which(choicesNames == selected)]]
       warning
     } else stop  # stop when it is ambiguous (some labels == values)
     warnFun("'selected' must be the values instead of names of 'choices' ",
@@ -57,23 +90,16 @@ validateSelected2 <- function(selected, choicesValues, choicesNames, inputId) {
   }
   selected
 }
-
 
 # generate options for radio buttons and checkbox groups (type = 'checkbox' or
 # 'radio')
 generateOptions <- function(inputId, choices = NULL, selected, inline,
                             type = 'checkbox', choicesNames = NULL,
-                            choicesValues = NULL) {
+                            choicesValues = NULL,
+                            session = getDefaultReactiveDomain()) {
 
-  session <- getDefaultReactiveDomain()
-
-  if (is.null(choices)) {
-    nms <- choicesNames
-    vals <- choicesValues
-  } else {
-    nms <- names(choices)
-    vals <- choices
-  }
+  nms <- names(choices) %OR% choicesNames
+  vals <- choices %OR% choicesValues
 
   # generate a list of <input type=? [checked] />
   options <- mapply(
@@ -85,6 +111,8 @@ generateOptions <- function(inputId, choices = NULL, selected, inline,
       if (value %in% selected)
         inputTag$attribs$checked <- "checked"
 
+      # in case, the options include UI code other than text
+      # (arbitrary HTML using the tags() function or equivalent)
       pd <- processDeps(name, session)
 
       # If inline, there's no wrapper div, and the label needs a class like

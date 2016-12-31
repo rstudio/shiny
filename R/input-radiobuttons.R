@@ -76,7 +76,7 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
       warning("Using `choices` argument; ignoring `choicesNames` and
               `choicesValues`.")
     }
-    # resolve names
+    # resolve names if not specified
     useChoices <- TRUE
     choices <- choicesWithNames(choices)
   }
@@ -84,25 +84,14 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
   selected <- restoreInput(id = inputId, default = selected)
 
   # default value if it's not specified
-  selected <- if (is.null(selected)) {
-    if (useChoices) choices[[1]] else choicesValues[[1]]
-  } else {
-    if (useChoices) validateSelected(selected, choices, inputId)
-    else validateSelected2(selected, choicesNames, choicesValues, inputId)
+  selected <- if (is.null(selected)) choices[[1]] %OR% choicesValues[[1]] else {
+    validateSelected(selected, choices, inputId, choicesNames, choicesValues)
   }
 
   if (length(selected) > 1) stop("The 'selected' argument must be of length 1")
 
-  #print(choicesNames)
-  #print(choicesValues)
-
-  options <- if (useChoices)
-    generateOptions(inputId, choices, selected, inline, type = 'radio')
-  else
-    generateOptions(inputId, NULL, selected, inline, type = 'radio',
-                    choicesNames, choicesValues)
-
-  #print(options)
+  options <- generateOptions(inputId, choices, selected, inline, type = 'radio',
+                             choicesNames, choicesValues)
 
   divClass <- "form-group shiny-input-radiogroup shiny-input-container"
   if (inline) divClass <- paste(divClass, "shiny-input-container-inline")

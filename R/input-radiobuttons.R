@@ -102,6 +102,8 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
     if (lenNames != 0 || lenVals != 0) {
       warning("Using `choices` argument; ignoring `choicesNames` and
               `choicesValues`.")
+      choicesNames = NULL
+      choicesValues = NULL
     }
     # resolve names if not specified
     choices <- choicesWithNames(choices)

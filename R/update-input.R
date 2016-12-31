@@ -452,16 +452,37 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
 
 
 updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
-                               selected = NULL, inline = FALSE,
-                               type = 'checkbox') {
-  if (!is.null(choices))
-    choices <- choicesWithNames(choices)
-  if (!is.null(selected))
-    selected <- validateSelected(selected, choices, session$ns(inputId))
+                               selected = NULL, inline = FALSE, type = 'checkbox', 
+                               choicesNames = NULL, choicesValues = NULL) {
+  lenNames <- length(choicesNames)
+  lenVals <- length(choicesValues)
 
-  options <- if (!is.null(choices)) {
+  if (lenNames != 0 || lenVals != 0) {
+    if (lenNames != lenVals) {
+      stop("`choicesNames` and `choicesValues` must have the same length.")
+    }
+    if (!is.null(names(choicesNames)) || !is.null(names(choicesValues))) {
+      stop("`choicesNames` and `choicesValues` must not be named.")
+    }
+  } 
+  if (!is.null(choices)) {
+    if (lenNames != 0 || lenVals != 0) {
+      warning("Using `choices` argument; ignoring `choicesNames` and
+              `choicesValues`.")
+      choicesNames = NULL
+      choicesValues = NULL
+    }
+    choices <- choicesWithNames(choices)
+  }
+
+  if (!is.null(selected))
+    selected <- validateSelected(selected, choices, session$ns(inputId),
+                                 choicesNames, choicesValues)
+
+  options <- if (!is.null(choices) || !is.null(choicesValues)) {
     format(tagList(
-      generateOptions(session$ns(inputId), choices, selected, inline, type = type)
+      generateOptions(session$ns(inputId), choices, selected, inline, type = type,
+                      choicesNames, choicesValues)
     ))
   }
 

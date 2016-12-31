@@ -66,10 +66,10 @@ generateOptions <- function(inputId, choices = NULL, selected, inline,
       # checkbox-inline.
       if (inline) {
         tags$label(class = paste0(type, "-inline"), inputTag,
-                   tagList(tags$span(pd$html), pd$dep))
+                   tags$span(pd$html, pd$dep))
       } else {
         tags$div(class = type, tags$label(inputTag,
-                 tagList(tags$span(pd$html), pd$dep)))
+                 tags$span(pd$html, pd$dep)))
       }
     },
     SIMPLIFY = FALSE, USE.NAMES = FALSE

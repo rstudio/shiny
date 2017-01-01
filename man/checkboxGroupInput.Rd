@@ -20,19 +20,20 @@ must not be provided, and vice-versa.}
 
 \item{selected}{The values that should be initially selected, if any.}
 
-\item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)
-@param choicesNames,choicesValues List of names and values, respectively,
- that are displayed to the user in the app and correspond to the each
- choice (for this reason, \code{choicesNames} and \code{choicesValues}
- must have the same length). If either of these arguments is
- provided, then the other \emph{must} be provided and \code{choices}
- \emph{must not} be provided. The advantage of using both of these over
- a named list for \code{choices} is that \code{choicesNames} allows any
- type of UI object to be passed through (tag objects, icons, HTML code,
- ...), instead of just simple text. See Examples.}
+\item{inline}{If \code{TRUE}, render the choices inline (i.e. horizontally)}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
+
+\item{choicesNames, choicesValues}{List of names and values, respectively,
+that are displayed to the user in the app and correspond to the each
+choice (for this reason, \code{choicesNames} and \code{choicesValues}
+must have the same length). If either of these arguments is
+provided, then the other \emph{must} be provided and \code{choices}
+\emph{must not} be provided. The advantage of using both of these over
+a named list for \code{choices} is that \code{choicesNames} allows any
+type of UI object to be passed through (tag objects, icons, HTML code,
+...), instead of just simple text. See Examples.}
 }
 \value{
 A list of HTML elements that can be added to a UI definition.

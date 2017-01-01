@@ -11,7 +11,7 @@
 #'   must not be provided, and vice-versa.
 #' @param selected The values that should be initially selected, if any.
 #' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
-#'  @param choicesNames,choicesValues List of names and values, respectively,
+#' @param choicesNames,choicesValues List of names and values, respectively,
 #'   that are displayed to the user in the app and correspond to the each
 #'   choice (for this reason, \code{choicesNames} and \code{choicesValues}
 #'   must have the same length). If either of these arguments is

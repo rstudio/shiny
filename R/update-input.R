@@ -454,26 +454,10 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
 updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
                                selected = NULL, inline = FALSE, type = NULL,
                                choicesNames = NULL, choicesValues = NULL) {
-  lenNames <- length(choicesNames)
-  lenVals <- length(choicesValues)
-
-  if (lenNames != 0 || lenVals != 0) {
-    if (lenNames != lenVals) {
-      stop("`choicesNames` and `choicesValues` must have the same length.")
-    }
-    if (!is.null(names(choicesNames)) || !is.null(names(choicesValues))) {
-      stop("`choicesNames` and `choicesValues` must not be named.")
-    }
-  }
-  if (!is.null(choices)) {
-    if (lenNames != 0 || lenVals != 0) {
-      warning("Using `choices` argument; ignoring `choicesNames` and
-              `choicesValues`.")
-      choicesNames = NULL
-      choicesValues = NULL
-    }
-    choices <- choicesWithNames(choices)
-  }
+  args <- checkChoicesArgs(choices, choicesNames, choicesValues)
+  choices <- args$choices
+  choicesNames <- args$choicesNames
+  choicesValues <- args$choicesValues
 
   if (!is.null(selected))
     selected <- validateSelected(selected, choices, session$ns(inputId),

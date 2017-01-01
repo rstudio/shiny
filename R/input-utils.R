@@ -2,6 +2,35 @@ controlLabel <- function(controlName, label) {
   label %AND% tags$label(class = "control-label", `for` = controlName, label)
 }
 
+checkChoicesArgs <- function(choices, choicesNames, choicesValues) {
+
+  lenNames <- length(choicesNames)
+  lenVals <- length(choicesValues)
+
+  if (is.null(choices)) {
+    if (lenNames == 0 || lenVals == 0) {
+      stop("Please specify a non-empty vector for `choices` (or,
+           alternatively, for both `choicesNames` and `choicesValues`).")
+    }
+    if (lenNames != lenVals) {
+      stop("`choicesNames` and `choicesValues` must have the same length.")
+    }
+    if (!is.null(names(choicesNames)) || !is.null(names(choicesValues))) {
+      stop("`choicesNames` and `choicesValues` must not be named.")
+    }
+  } else {
+    if (lenNames != 0 || lenVals != 0) {
+      warning("Using `choices` argument; ignoring `choicesNames` and
+                `choicesValues`.")
+      choicesNames = NULL
+      choicesValues = NULL
+    }
+    # resolve names if not specified
+    choices <- choicesWithNames(choices)
+  }
+
+  return(list(choices, choicesNames, choicesValues))
+}
 
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
 # refers to values. Below is a function for backward compatibility. It also

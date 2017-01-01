@@ -118,8 +118,8 @@ radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
 
   if (length(selected) > 1) stop("The 'selected' argument must be of length 1")
 
-  options <- generateOptions(inputId, choices, selected, inline, type = 'radio',
-                             choicesNames, choicesValues)
+  options <- generateOptions(inputId, choices, selected, inline,
+                             'radio', choicesNames, choicesValues)
 
   divClass <- "form-group shiny-input-radiogroup shiny-input-container"
   if (inline) divClass <- paste(divClass, "shiny-input-container-inline")

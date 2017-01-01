@@ -452,7 +452,7 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
 
 
 updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
-                               selected = NULL, inline = FALSE, type = 'checkbox', 
+                               selected = NULL, inline = FALSE, type = NULL,
                                choicesNames = NULL, choicesValues = NULL) {
   lenNames <- length(choicesNames)
   lenVals <- length(choicesValues)
@@ -464,7 +464,7 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
     if (!is.null(names(choicesNames)) || !is.null(names(choicesValues))) {
       stop("`choicesNames` and `choicesValues` must not be named.")
     }
-  } 
+  }
   if (!is.null(choices)) {
     if (lenNames != 0 || lenVals != 0) {
       warning("Using `choices` argument; ignoring `choicesNames` and
@@ -481,8 +481,8 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
 
   options <- if (!is.null(choices) || !is.null(choicesValues)) {
     format(tagList(
-      generateOptions(session$ns(inputId), choices, selected, inline, type = type,
-                      choicesNames, choicesValues)
+      generateOptions(session$ns(inputId), choices, selected, inline,
+                      type, choicesNames, choicesValues)
     ))
   }
 
@@ -531,9 +531,10 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
 #' }
 #' @export
 updateCheckboxGroupInput <- function(session, inputId, label = NULL,
-                                     choices = NULL, selected = NULL,
-                                     inline = FALSE) {
-  updateInputOptions(session, inputId, label, choices, selected, inline)
+  choices = NULL, selected = NULL, inline = FALSE,
+  choicesNames = NULL, choicesValues = NULL) {
+  updateInputOptions(session, inputId, label, choices, selected,
+                     inline, "checkbox", choicesNames, choicesValues)
 }
 
 
@@ -573,10 +574,12 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #' }
 #' @export
 updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
-                               selected = NULL, inline = FALSE) {
+                               selected = NULL, inline = FALSE,
+                               choicesNames = NULL, choicesValues = NULL) {
   # you must select at least one radio button
   if (is.null(selected) && !is.null(choices)) selected <- choices[[1]]
-  updateInputOptions(session, inputId, label, choices, selected, inline, type = 'radio')
+  updateInputOptions(session, inputId, label, choices, selected,
+    inline, 'radio', choicesNames, choicesValues)
 }
 
 

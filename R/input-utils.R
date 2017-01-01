@@ -29,7 +29,9 @@ checkChoicesArgs <- function(choices, choicesNames, choicesValues) {
     choices <- choicesWithNames(choices)
   }
 
-  return(list(choices, choicesNames, choicesValues))
+  return(list(choices = choices,
+              choicesNames = choicesNames,
+              choicesValues = choicesValues))
 }
 
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it

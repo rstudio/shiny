@@ -384,6 +384,7 @@ servePlot <- function(expr, env=parent.frame(), quoted=FALSE) {
   }
 }
 
+#' @importFrom utils write.csv
 #' @export
 serveCSV <- function(expr, env=parent.frame(), quoted=FALSE, row.names=FALSE) {
   installExprFunction(expr, "func", env, quoted)

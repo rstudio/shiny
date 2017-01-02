@@ -366,12 +366,19 @@ serveJSON <- function(expr, env=parent.frame(), quoted=FALSE) {
 }
 
 #' @export
-servePlot <- function(expr, env=parent.frame(), quoted=FALSE) {
+servePlot <- function(expr, env=parent.frame(), quoted=FALSE,
+  defaultWidth = 600, defaultHeight = 400) {
+
+  if (!is.function(defaultWidth))
+    defaultWidth <- valueToFunc(defaultWidth)
+  if (!is.function(defaultHeight))
+    defaultHeight <- valueToFunc(defaultHeight)
+
   installExprFunction(expr, "func", env, quoted)
   function() {
     input <- getDefaultReactiveDomain()$input
-    w <- if (!is.null(input$`plot-width`)) as.numeric(input$`plot-width`) else 600
-    h <- if (!is.null(input$`plot-height`)) as.numeric(input$`plot-height`) else 400
+    w <- if (!is.null(input$`plot-width`)) as.numeric(input$`plot-width`) else defaultWidth()
+    h <- if (!is.null(input$`plot-height`)) as.numeric(input$`plot-height`) else defaultHeight()
 
     pngfile <- plotPNG(function() {
       func()
@@ -399,12 +406,31 @@ serveCSV <- function(expr, env=parent.frame(), quoted=FALSE, row.names=FALSE) {
 }
 
 #' @export
-serveText <- function(expr, env=parent.frame(), quoted=FALSE, row.names=FALSE) {
+serveText <- function(expr, env=parent.frame(), quoted=FALSE) {
   installExprFunction(expr, "func", env, quoted)
   function() {
     structure(
       paste(func(), collapse = "\n"),
       content.type = "text/plain"
+    )
+  }
+}
+
+#' @export
+serveRaw <- function(expr, env=parent.frame(), quoted=FALSE, contentType) {
+
+  if (!is.function(contentType))
+    contentType <- valueToFunc(contentType)
+
+  installExprFunction(expr, "func", env, quoted)
+  function() {
+    bytes <- func()
+    if (!is.raw(bytes)) {
+      stop("serveRaw expects raw vector data")
+    }
+    structure(
+      bytes,
+      content.type = contentType()
     )
   }
 }

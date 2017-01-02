@@ -76,7 +76,7 @@ apiHandler <- function(serverFuncSource) {
       }
     )
 
-    inputVals <- parseQueryString(req$QUERY_STRING)
+    inputVals <- parseQueryStringJSON(req$QUERY_STRING)
 
     shinysession <- ShinySession$new(ws)
     appsByToken$set(shinysession$token, shinysession)
@@ -131,7 +131,7 @@ apiWsHandler <- function(serverFuncSource) {
       stopApp()
     }
 
-    inputVals <- parseQueryString(ws$request$QUERY_STRING)
+    inputVals <- parseQueryStringJSON(ws$request$QUERY_STRING)
 
     # Give a fake websocket to suppress messages from session
     shinysession <- ShinySession$new(list(
@@ -202,7 +202,7 @@ responseToContent <- function(result) {
   ct <- result$content_type
   textMode <- grepl("^text/", ct) || ct == "application/json" ||
     grepl("^application/xml($|\\+)", ct)
-  
+
   # TODO: Make sure text is UTF-8
 
   if ("file" %in% names(result$content)) {

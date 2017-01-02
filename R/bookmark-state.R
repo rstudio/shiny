@@ -342,26 +342,10 @@ RestoreContext <- R6Class("RestoreContext",
       }
 
 
-      inputs <- parseQueryString(inputStr, nested = TRUE)
-      values <- parseQueryString(valueStr, nested = TRUE)
+      inputs <- parseQueryStringJSON(inputStr, nested = TRUE)
+      values <- parseQueryStringJSON(valueStr, nested = TRUE)
 
-      valuesFromJSON <- function(vals) {
-        mapply(names(vals), vals, SIMPLIFY = FALSE,
-          FUN = function(name, value) {
-            tryCatch(
-              jsonlite::fromJSON(value),
-              error = function(e) {
-                stop("Failed to parse URL parameter \"", name, "\"")
-              }
-            )
-          }
-        )
-      }
-
-      inputs <- valuesFromJSON(inputs)
       self$input <- RestoreInputSet$new(inputs)
-
-      values <- valuesFromJSON(values)
       self$values <- list2env2(values, self$values)
     }
   )

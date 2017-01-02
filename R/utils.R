@@ -576,6 +576,20 @@ parseQueryString <- function(str, nested = FALSE) {
   res
 }
 
+parseQueryStringJSON <- function(str, nested = FALSE) {
+  vals <- parseQueryString(str, nested)
+  mapply(names(vals), vals, SIMPLIFY = FALSE,
+    FUN = function(name, value) {
+      tryCatch(
+        jsonlite::fromJSON(value),
+        error = function(e) {
+          stop("Failed to parse URL parameter \"", name, "\"")
+        }
+      )
+    }
+  )
+}
+
 # Assign value to the bottom element of the list x using recursive indices idx
 assignNestedList <- function(x = list(), idx, value) {
   for (i in seq_along(idx)) {
@@ -1585,3 +1599,9 @@ Mutable <- R6Class("Mutable",
     get = function() { private$value }
   )
 )
+
+# Turn a value into a no-arg function that returns that value
+valueToFunc <- function(val) {
+  force(val)
+  function() val
+}

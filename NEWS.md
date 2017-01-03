@@ -41,6 +41,11 @@ Now there's an official way to slow down reactive values and expressions that in
 
 * Fixed [#1013](https://github.com/rstudio/shiny/issues/1013): `flushReact` should be called after app loads. Observers set up outside of server functions were not running until after the first user connects. ([#1503](https://github.com/rstudio/shiny/pull/1503))
 
+### Library updates
+
+* Updated to Font Awesome 4.7.0.
+
+
 shiny 0.14.2
 ============
 

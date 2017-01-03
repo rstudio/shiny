@@ -76,7 +76,11 @@ apiHandler <- function(serverFuncSource) {
       }
     )
 
-    inputVals <- parseQueryStringJSON(req$QUERY_STRING)
+    # Accept JSON query string and/or JSON body as input values
+    inputVals <- c(
+      parseQueryStringJSON(req$QUERY_STRING),
+      parseJSONBody(req)
+    )
 
     shinysession <- ShinySession$new(ws)
     appsByToken$set(shinysession$token, shinysession)
@@ -171,6 +175,34 @@ apiWsHandler <- function(serverFuncSource) {
 
     # TODO: Handle ws$onClose()
     # TODO: What to do on ws$onMessage?
+  }
+}
+
+parseJSONBody <- function(req) {
+  if (identical(req[["REQUEST_METHOD"]], "POST")) {
+    if (isTRUE(grepl(perl=TRUE, "^(text|application)/json(;\\s*charset\\s*=\\s*utf-8)?$", req[["HTTP_CONTENT_TYPE"]]))) {
+      tmp <- file("", "w+b")
+      on.exit(close(tmp))
+
+      input_file <- req[["rook.input"]]
+      while (TRUE) {
+        chunk <- input_file$read(8192L)
+        if (length(chunk) == 0)
+          break
+        writeBin(chunk, tmp)
+      }
+
+      return(jsonlite::fromJSON(tmp))
+    }
+
+    if (is.null(req[["HTTP_CONTENT_TYPE"]])) {
+      if (!is.null(req[["rook.input"]]) && length(req[["rook.input"]]$read(1L)) > 0) {
+        stop("Invalid POST request (body provided without content type)")
+      }
+      return()
+    }
+
+    stop("Invalid POST request (content type not supported)")
   }
 }
 

@@ -51,6 +51,8 @@ Now there's an official way to slow down reactive values and expressions that in
 
 * Fixed [#1013](https://github.com/rstudio/shiny/issues/1013): `flushReact` should be called after app loads. Observers set up outside of server functions were not running until after the first user connects. ([#1503](https://github.com/rstudio/shiny/pull/1503))
 
+* Fixed [#1453](https://github.com/rstudio/shiny/issues/1453): When using a modal dialog with `easyClose=TRUE` in a Shiny gadget, pressing Esc would close both the modal and the gadget. Now pressing Esc only closes the modal. ([#1523](https://github.com/rstudio/shiny/pull/1523))
+
 ### Library updates
 
 * Updated to Font Awesome 4.7.0.

@@ -1,6 +1,10 @@
 shiny 0.14.2.9000
 ============
 
+## Support for testing Shiny applications
+
+Shiny now supports automated testing of applications, with the [shinytest](https://github.com/MangoTheCat/shinytest) package. Shinytest has not yet been released on CRAN, but will be soon. ([#18](https://github.com/rstudio/shiny/issues/18), [#1464](https://github.com/rstudio/shiny/pull/1464))
+
 ## Debounce/throttle reactives
 
 Now there's an official way to slow down reactive values and expressions that invalidate too quickly. Pass a reactive expression to the new `debounce` or `throttle` function, and get back a modified reactive expression that doesn't invalidate as often. ([#1510](https://github.com/rstudio/shiny/pull/1510))
@@ -13,7 +17,7 @@ Now there's an official way to slow down reactive values and expressions that in
 
 ### New features
 
-* Added support for testing Shiny applications with the shinytest package. ([#1464](https://github.com/rstudio/shiny/pull/1464))
+* Added support for testing Shiny applications with the shinytest package. ([#18](https://github.com/rstudio/shiny/issues/18), [#1464](https://github.com/rstudio/shiny/pull/1464))
 
 * Added `debounce` and `throttle` functions, to control the rate at which reactive values and expressions invalidate. ([#1510](https://github.com/rstudio/shiny/pull/1510))
 

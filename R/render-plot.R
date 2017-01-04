@@ -660,32 +660,83 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
     }
 
     # Given a vector of relative sizes (in grid units), and a function for
-    # converting grid units to numeric pixels, return a numeric vector of
-    # pixel sizes.
-    find_px_sizes <- function(rel_sizes, unit_to_px) {
+    # converting grid units to numeric pixels, return a list with: known pixel
+    # dimensions, scalable dimensions, and the overall space for the scalable
+    # objects.
+    find_size_info <- function(rel_sizes, unit_to_px) {
       # Total pixels (in height or width)
       total_px <- unit_to_px(grid::unit(1, "npc"))
       # Calculate size of all panel(s) together. Panels (and only panels) have
       # null size.
       null_idx <- is_null_unit(rel_sizes)
+
       # All the absolute heights. At this point, null heights are 0. We need to
       # calculate them separately and add them in later.
       px_sizes <- unit_to_px(rel_sizes)
-      # Total size for panels is image size minus absolute (non-panel) elements
-      panel_px_total <- total_px - sum(px_sizes)
-      # Divide up the total panel size up into the panels (scaled by size)
-      panel_sizes_rel <- as.numeric(rel_sizes[null_idx])
-      panel_sizes_rel <- panel_sizes_rel / sum(panel_sizes_rel)
-      px_sizes[null_idx] <- panel_px_total * panel_sizes_rel
-      abs(px_sizes)
+      # Mark the null heights as NA.
+      px_sizes[null_idx] <- NA_real_
+
+      # The plotting panels all are 'null' units.
+      null_sizes <- rep(NA_real_, length(rel_sizes))
+      null_sizes[null_idx] <- as.numeric(rel_sizes[null_idx])
+
+      # Total size allocated for panels is the total image size minus absolute
+      # (non-panel) elements.
+      panel_px_total <- total_px - sum(px_sizes, na.rm = TRUE)
+
+      # Size of a 1null unit
+      null_px <- abs(panel_px_total / sum(null_sizes, na.rm = TRUE))
+
+      # This returned list contains:
+      # * px_sizes: A vector of known pixel dimensions. The values that were
+      #   null units will be assigned NA. The null units are ones that scale
+      #   when the plotting area is resized.
+      # * null_sizes: A vector of the null units. All others will be assigned
+      #   NA. The null units often are 1, but they may be any value, especially
+      #   when using coord_fixed.
+      # * null_px: The size (in pixels) of a 1null unit.
+      # * null_px_scaled: The size (in pixels) of a 1null unit when scaled to
+      #   fit a smaller dimension (used for plots with coord_fixed).
+      list(
+        px_sizes       = abs(px_sizes),
+        null_sizes     = null_sizes,
+        null_px        = null_px,
+        null_px_scaled = null_px
+      )
     }
 
-    px_heights <- find_px_sizes(g$heights, h_px)
-    px_widths <- find_px_sizes(g$widths, w_px)
+    # Given a size_info, return absolute pixel positions
+    size_info_to_px <- function(info) {
+      px_sizes <- info$px_sizes
+
+      null_idx <- !is.na(info$null_sizes)
+      px_sizes[null_idx] <- info$null_sizes[null_idx] * info$null_px_scaled
+
+      # If this direction is scaled down because of coord_fixed, we need to add an
+      # offset so that the pixel locations are centered.
+      offset <- (info$null_px - info$null_px_scaled) *
+                sum(info$null_sizes, na.rm = TRUE) / 2
+
+      # Get absolute pixel positions
+      cumsum(px_sizes) + offset
+    }
+
+    heights_info <- find_size_info(g$heights, h_px)
+    widths_info  <- find_size_info(g$widths,  w_px)
+
+    if (g$respect) {
+      # This is a plot with coord_fixed. The grid 'respect' option means to use
+      # the same pixel value for 1null, for width and height. We want the
+      # smaller of the two values -- that's what makes the plot fit in the
+      # viewport.
+      null_px_min <- min(heights_info$null_px, widths_info$null_px)
+      heights_info$null_px_scaled <- null_px_min
+      widths_info$null_px_scaled  <- null_px_min
+    }
 
     # Convert to absolute pixel positions
-    x_pos <- cumsum(px_widths)
-    y_pos <- cumsum(px_heights)
+    y_pos <- size_info_to_px(heights_info)
+    x_pos <- size_info_to_px(widths_info)
 
     # Match up the pixel dimensions to panels
     layout <- g$layout

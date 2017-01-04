@@ -381,7 +381,18 @@ servePlot <- function(expr, env=parent.frame(), quoted=FALSE,
     h <- if (!is.null(input$`plot-height`)) as.numeric(input$`plot-height`) else defaultHeight()
 
     pngfile <- plotPNG(function() {
-      func()
+      result <- withVisible(func())
+      if (result$visible) {
+        # Use capture.output to squelch printing to the actual console; we
+        # are only interested in plot output
+        utils::capture.output({
+          # The value needs to be printed just in case it's an object that
+          # requires printing to generate plot output, similar to ggplot2. But
+          # for base graphics, it would already have been rendered when func was
+          # called above, and the print should have no effect.
+          print(result$value)
+        })
+      }
     }, width = w, height = h)
 
     structure(

@@ -1645,8 +1645,8 @@ ShinySession <- R6Class(
       }
 
       observe({
-        callback(rexpr())
-      })
+        callback(..stacktraceon..(rexpr()))
+      }, ..stacktraceon = FALSE)
     },
     # This function suspends observers for hidden outputs and resumes observers
     # for un-hidden outputs.

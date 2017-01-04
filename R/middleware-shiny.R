@@ -94,7 +94,7 @@ apiHandler <- function(serverFuncSource) {
         do.call(serverFunc, argsForServerFunc(serverFunc, shinysession))
         result <- NULL
         shinysession$enableApi(apiName, function(value) {
-          result <<- try(value, silent = TRUE)
+          result <<- try(withLogErrors(value), silent = TRUE)
         })
         flushReact()
         resultToResponse(result)

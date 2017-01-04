@@ -1,5 +1,5 @@
-shiny 0.14.2.9000
-============
+shiny 1.0.0
+===========
 
 ## Support for testing Shiny applications
 

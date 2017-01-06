@@ -1,6 +1,10 @@
 shiny 1.0.0
 ===========
 
+Shiny has reached a milestone: version 1.0.0! In the last year, we've added two major features that we considered essential for a 1.0.0 release: bookmarking, and support for testing Shiny applications. As usual, this version of Shiny also includes many minor features and bug fixes.
+
+Here are some highlights from this release. For more details, see the full changelog below.
+
 ## Support for testing Shiny applications
 
 Shiny now supports automated testing of applications, with the [shinytest](https://github.com/MangoTheCat/shinytest) package. Shinytest has not yet been released on CRAN, but will be soon. ([#18](https://github.com/rstudio/shiny/issues/18), [#1464](https://github.com/rstudio/shiny/pull/1464))
@@ -31,7 +35,7 @@ Now there's an official way to slow down reactive values and expressions that in
 
 * Added a more descriptive JS warning for `insertUI()` when the selector argument does not match anything in DOM. ([#1488](https://github.com/rstudio/shiny/pull/1488))
 
-* Added support for injecting JavaScript code when the `shiny.testmode` option is set to `TRUE`. This makes it possible to record test events interactively. ([#1464]https://github.com/rstudio/shiny/pull/1464))
+* Added support for injecting JavaScript code when the `shiny.testmode` option is set to `TRUE`. This makes it possible to record test events interactively. ([#1464](https://github.com/rstudio/shiny/pull/1464))
 
 * Added ability through arguments to the `a` tag function called inside `downloadButton()` and `downloadLink()`. Closes [#986](https://github.com/rstudio/shiny/issues/986). ([#1492](https://github.com/rstudio/shiny/pulls/1492))
 

@@ -83,6 +83,14 @@ apiHandler <- function(serverFuncSource) {
     )
 
     shinysession <- ShinySession$new(ws)
+    on.exit({
+      try({
+        # Clean up the session. Very important, so that observers
+        # and such don't hang around, and to let memory get gc'd.
+        shinysession$wsClosed()
+        appsByToken$remove(shinysession$token)
+      })
+    }, add = TRUE)
     appsByToken$set(shinysession$token, shinysession)
     shinysession$setShowcase(.globals$showcaseDefault)
 
@@ -173,7 +181,13 @@ apiWsHandler <- function(serverFuncSource) {
       ws$close()
     })
 
-    # TODO: Handle ws$onClose()
+    ws$onClose(function() {
+      # Clean up the session. Very important, so that observers
+      # and such don't hang around, and to let memory get gc'd.
+      shinysession$wsClosed()
+      appsByToken$remove(shinysession$token)
+    })
+
     # TODO: What to do on ws$onMessage?
   }
 }

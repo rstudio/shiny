@@ -37,7 +37,7 @@ Now there's an official way to slow down reactive values and expressions that in
 
 * Implemented [#1512](https://github.com/rstudio/shiny/issues/1512): added a `userData` environment to `session`, for storing arbitrary session-related variables. Generally, session-scoped variables are created just by declaring normal variables that are local to the Shiny server function, but `session$userData` may be more convenient for some advanced scenarios. ([#1513](https://github.com/rstudio/shiny/pull/1513))
 
-* Relaxed naming requirements for `addResourcePath()` (the first character no longer needs to be a letter)
+* Relaxed naming requirements for `addResourcePath()` (the first character no longer needs to be a letter). ([#1529](https://github.com/rstudio/shiny/pull/1529))
 
 ### Bug fixes
 

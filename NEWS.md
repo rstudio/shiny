@@ -7,7 +7,7 @@ Here are some highlights from this release. For more details, see the full chang
 
 ## Support for testing Shiny applications
 
-Shiny now supports automated testing of applications, with the [shinytest](https://github.com/MangoTheCat/shinytest) package. Shinytest has not yet been released on CRAN, but will be soon. ([#18](https://github.com/rstudio/shiny/issues/18), [#1464](https://github.com/rstudio/shiny/pull/1464))
+Shiny now supports automated testing of applications, with the [shinytest](https://github.com/rstudio/shinytest) package. Shinytest has not yet been released on CRAN, but will be soon. ([#18](https://github.com/rstudio/shiny/issues/18), [#1464](https://github.com/rstudio/shiny/pull/1464))
 
 ## Debounce/throttle reactives
 

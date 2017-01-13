@@ -1,5 +1,9 @@
-shiny 0.14.2.9000
-============
+shiny 1.0.0
+===========
+
+Shiny has reached a milestone: version 1.0.0! In the last year, we've added two major features that we considered essential for a 1.0.0 release: bookmarking, and support for testing Shiny applications. As usual, this version of Shiny also includes many minor features and bug fixes.
+
+Here are some highlights from this release. For more details, see the full changelog below.
 
 ## Support for testing Shiny applications
 
@@ -23,7 +27,7 @@ Now there's an official way to slow down reactive values and expressions that in
 
 ### Minor new features and improvements
 
-* Addressed [#1486](https://github.com/rstudio/shiny/issue/1486) by adding a new argument to `observeEvent` and `eventReactive`, called `ignoreInit` (defaults to `FALSE` for backwards compatibility). When set to `TRUE`, the action (i.e. the second argument: `handlerExpr` and `valueExpr`, respectively) will not be triggered when the observer/reactive is first created/initialized. In other words, `ignoreInit = TRUE` ensures that the `observeEvent` (or `eventReactive`) is *never* run right away. For more info, see the documentation (`?observeEvent`). ([#1494](https://github.com/rstudio/shiny/pull/1494))
+* Addressed [#1486](https://github.com/rstudio/shiny/issues/1486) by adding a new argument to `observeEvent` and `eventReactive`, called `ignoreInit` (defaults to `FALSE` for backwards compatibility). When set to `TRUE`, the action (i.e. the second argument: `handlerExpr` and `valueExpr`, respectively) will not be triggered when the observer/reactive is first created/initialized. In other words, `ignoreInit = TRUE` ensures that the `observeEvent` (or `eventReactive`) is *never* run right away. For more info, see the documentation (`?observeEvent`). ([#1494](https://github.com/rstudio/shiny/pull/1494))
     
 * Added a new argument to `observeEvent` called `once`. When set to `TRUE`, it results in the observer being destroyed (stop observing) after the first time that `handlerExpr` is run (i.e. `once = TRUE` guarantees that the observer only runs, at most, once). For more info, see the documentation (`?observeEvent`). ([#1494](https://github.com/rstudio/shiny/pull/1494))
 
@@ -31,7 +35,7 @@ Now there's an official way to slow down reactive values and expressions that in
 
 * Added a more descriptive JS warning for `insertUI()` when the selector argument does not match anything in DOM. ([#1488](https://github.com/rstudio/shiny/pull/1488))
 
-* Added support for injecting JavaScript code when the `shiny.testmode` option is set to `TRUE`. This makes it possible to record test events interactively. ([#1464]https://github.com/rstudio/shiny/pull/1464))
+* Added support for injecting JavaScript code when the `shiny.testmode` option is set to `TRUE`. This makes it possible to record test events interactively. ([#1464](https://github.com/rstudio/shiny/pull/1464))
 
 * Added ability through arguments to the `a` tag function called inside `downloadButton()` and `downloadLink()`. Closes [#986](https://github.com/rstudio/shiny/issues/986). ([#1492](https://github.com/rstudio/shiny/pulls/1492))
 

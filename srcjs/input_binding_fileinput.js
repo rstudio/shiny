@@ -81,6 +81,15 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
       function(error) {
         self.onError(error);
       });
+
+    // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,
+    // it's not possible to modify the information before the values get
+    // sent to the server.
+    var evt = jQuery.Event("shiny:inputchanged");
+    evt.name = this.id;
+    evt.value = fileInfo;
+    evt.inputType = '';
+    $(document).trigger(evt);
   };
   this.onFile = function(file, cont) {
     var self = this;

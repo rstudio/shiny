@@ -15,7 +15,7 @@ shiny 1.0.0.9000
 
 ### Library updates
 
-* Closed ([#1500](https://github.com/rstudio/shiny/issues/1500)): Updated ion.rangeSlider to 2.1.6([#1540](https://github.com/rstudio/shiny/pull/1540)).
+* Closed ([#1500](https://github.com/rstudio/shiny/issues/1500)): Updated ion.rangeSlider to 2.1.6. ([#1540](https://github.com/rstudio/shiny/pull/1540))
 
 
 shiny 1.0.0

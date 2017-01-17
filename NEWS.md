@@ -15,6 +15,8 @@ shiny 1.0.0.9000
 
 ### Library updates
 
+* Updated ion.rangeSlider to 2.1.6.
+
 
 shiny 1.0.0
 ===========

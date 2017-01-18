@@ -28,8 +28,7 @@ Must be less tham \code{max}. Default is 0.}
 greater than \code{min}. Default is 1.}
 
 \item{value}{Single-element numeric vector; the value at which to set the
-progress bar, relative to \code{min} and \code{max}. \code{NULL} hides the
-progress bar, if it is currently visible.}
+progress bar, relative to \code{min} and \code{max}.}
 
 \item{message}{A single-element character vector; the message to be displayed
 to the user, or \code{NULL} to hide the current message (if any).}

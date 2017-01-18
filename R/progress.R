@@ -55,7 +55,6 @@
 #'   de-emphasized appearance relative to \code{message}.
 #' @param value A numeric value at which to set
 #'   the progress bar, relative to \code{min} and \code{max}.
-#'   \code{NULL} hides the progress bar, if it is currently visible.
 #' @param style Progress display style. If \code{"notification"} (the default),
 #'   the progress indicator will show using Shiny's notification API. If
 #'   \code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
@@ -98,7 +97,6 @@
 #' @export
 Progress <- R6Class(
   'Progress',
-  portable = TRUE,
   public = list(
 
     initialize = function(session = getDefaultReactiveDomain(),
@@ -113,7 +111,7 @@ Progress <- R6Class(
       private$min <- min
       private$max <- max
       private$style <- match.arg(style, choices = c("notification", "old"))
-      private$value <- NULL
+      private$value <- 0
       private$closed <- FALSE
 
       session$sendProgress('open', list(id = private$id, style = private$style))
@@ -132,7 +130,8 @@ Progress <- R6Class(
         value <- min(1, max(0, (value - private$min) / (private$max - private$min)))
       }
 
-      private$value <- value
+      if (!is.null(value))
+        private$value <- value
 
       data <- dropNulls(list(
         id = private$id,
@@ -142,7 +141,7 @@ Progress <- R6Class(
         style = private$style
       ))
 
-       private$session$sendProgress('update', data)
+      private$session$sendProgress('update', data)
     },
 
     inc = function(amount = 0.1, message = NULL, detail = NULL) {
@@ -239,8 +238,7 @@ Progress <- R6Class(
 #'   \code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
 #'   (this is for backward-compatibility).
 #' @param value Single-element numeric vector; the value at which to set the
-#'   progress bar, relative to \code{min} and \code{max}. \code{NULL} hides the
-#'   progress bar, if it is currently visible.
+#'   progress bar, relative to \code{min} and \code{max}.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

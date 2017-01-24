@@ -27,12 +27,29 @@ exports.modal = {
       });
     }
 
+    $modal.on('keydown.shinymodal', function(e) {
+      // If we're listening for Esc, don't let the event propagate. See
+      // https://github.com/rstudio/shiny/issues/1453. The value of
+      // data("keyboard") needs to be checked inside the handler, because at
+      // the time that $modal.on() is called, the $("#shiny-modal") div doesn't
+      // yet exist.
+      if ($("#shiny-modal").data("keyboard") === false)
+        return;
+
+      if (e.keyCode === 27) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    });
+
     // Set/replace contents of wrapper with html.
     exports.renderContent($modal, { html: html, deps: deps });
   },
 
   remove: function() {
     const $modal = $('#shiny-modal-wrapper');
+
+    $modal.off('keydown.shinymodal');
 
     // Look for a Bootstrap modal and if present, trigger hide event. This will
     // trigger the hidden.bs.modal callback that we set in show(), which unbinds

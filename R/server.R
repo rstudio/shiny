@@ -34,7 +34,7 @@ registerClient <- function(client) {
 #' JavaScript/CSS files available to their components.
 #'
 #' @param prefix The URL prefix (without slashes). Valid characters are a-z,
-#'   A-Z, 0-9, hyphen, period, and underscore; and must begin with a-z or A-Z.
+#'   A-Z, 0-9, hyphen, period, and underscore.
 #'   For example, a value of 'foo' means that any request paths that begin with
 #'   '/foo' will be mapped to the given directory.
 #' @param directoryPath The directory that contains the static resources to be
@@ -52,7 +52,7 @@ registerClient <- function(client) {
 #' @export
 addResourcePath <- function(prefix, directoryPath) {
   prefix <- prefix[1]
-  if (!grepl('^[a-z][a-z0-9\\-_.]*$', prefix, ignore.case=TRUE, perl=TRUE)) {
+  if (!grepl('^[a-z0-9\\-_][a-z0-9\\-_.]*$', prefix, ignore.case=TRUE, perl=TRUE)) {
     stop("addResourcePath called with invalid prefix; please see documentation")
   }
 
@@ -462,6 +462,9 @@ serviceApp <- function() {
 
 .shinyServerMinVersion <- '0.3.4'
 
+# Global flag that's TRUE whenever we're inside of the scope of a call to runApp
+.globals$running <- FALSE
+
 #' Run Shiny Application
 #'
 #' Runs a Shiny application. This function normally does not return; interrupt R
@@ -518,6 +521,8 @@ serviceApp <- function() {
 #'
 #' ## Only run this example in interactive R sessions
 #' if (interactive()) {
+#'   options(device.ask.default = FALSE)
+#'
 #'   # Apps can be run without a server.r and ui.r file
 #'   runApp(list(
 #'     ui = bootstrapPage(
@@ -553,6 +558,15 @@ runApp <- function(appDir=getwd(),
                    test.mode=getOption('shiny.testmode', FALSE)) {
   on.exit({
     handlerManager$clear()
+  }, add = TRUE)
+
+  if (.globals$running) {
+    stop("Can't call `runApp()` from within `runApp()`. If your ,",
+         "application code contains `runApp()`, please remove it.")
+  }
+  .globals$running <- TRUE
+  on.exit({
+    .globals$running <- FALSE
   }, add = TRUE)
 
   # Enable per-app Shiny options
@@ -761,12 +775,16 @@ runApp <- function(appDir=getwd(),
   # Top-level ..stacktraceoff..; matches with ..stacktraceon in observe(),
   # reactive(), Callbacks$invoke(), and others
   ..stacktraceoff..(
-    captureStackTraces(
+    captureStackTraces({
+      # If any observers were created before runApp was called, this will make
+      # sure they run once the app starts. (Issue #1013)
+      scheduleFlush()
+
       while (!.globals$stopped) {
         serviceApp()
         Sys.sleep(0.001)
       }
-    )
+    })
   )
 
   if (isTRUE(.globals$reterror)) {

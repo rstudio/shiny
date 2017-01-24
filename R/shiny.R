@@ -276,6 +276,10 @@ workerId <- local({
 #'   This is the request that was used to initiate the websocket connection
 #'   (as opposed to the request that downloaded the web page for the app).
 #' }
+#' \item{userData}{
+#'   An environment for app authors and module/package authors to store whatever
+#'   session-specific data they want.
+#' }
 #' \item{resetBrush(brushId)}{
 #'   Resets/clears the brush with the given \code{brushId}, if it exists on
 #'   any \code{imageOutput} or \code{plotOutput} in the app.
@@ -692,6 +696,7 @@ ShinySession <- R6Class(
     closed = logical(0),
     request = 'ANY',      # Websocket request object
     singletons = character(0),  # Tracks singleton HTML fragments sent to the page
+    userData = 'environment',
     user = NULL,
     groups = NULL,
 
@@ -712,6 +717,7 @@ ShinySession <- R6Class(
       self$progressStack <- Stack$new()
       self$files <- Map$new()
       self$downloads <- Map$new()
+      self$userData <- new.env(parent = emptyenv())
 
       self$input <- .createReactiveValues(private$.input, readonly=TRUE)
       .setLabel(self$input, 'input')
@@ -1045,17 +1051,17 @@ ShinySession <- R6Class(
             shinyCallingHandlers(func()),
             shiny.custom.error = function(cond) {
               if (isTRUE(getOption("show.error.messages"))) printError(cond)
-              structure(NULL, class = "try-error", condition = cond)
+              structure(list(), class = "try-error", condition = cond)
             },
             shiny.output.cancel = function(cond) {
-              structure(NULL, class = "cancel-output")
+              structure(list(), class = "cancel-output")
             },
             shiny.silent.error = function(cond) {
               # Don't let shiny.silent.error go through the normal stop
               # path of try, because we don't want it to print. But we
               # do want to try to return the same looking result so that
               # the code below can send the error to the browser.
-              structure(NULL, class = "try-error", condition = cond)
+              structure(list(), class = "try-error", condition = cond)
             },
             error = function(cond) {
               if (isTRUE(getOption("show.error.messages"))) printError(cond)
@@ -1064,7 +1070,7 @@ ShinySession <- R6Class(
                                           "logs or contact the app author for",
                                           "clarification."))
               }
-              invisible(structure(NULL, class = "try-error", condition = cond))
+              invisible(structure(list(), class = "try-error", condition = cond))
             },
             finally = {
               private$sendMessage(recalculating = list(

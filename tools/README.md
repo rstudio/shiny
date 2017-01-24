@@ -10,11 +10,7 @@ Shiny's JavaScript build tools use Node.js, along with [yarn](https://yarnpkg.co
 
 Installation of Node.js differs across platforms and is generally pretty easy, so I won't include instructions here.
 
-There are a number of ways to [install yarn](https://yarnpkg.com/en/docs/install), but if you already have npm installed, you can simply run:
-
-```
-sudo npm install --global yarn
-```
+Install yarn using the [official instructions](https://yarnpkg.com/en/docs/install).
 
 Then, in this directory (tools/), run the following to install the packages:
 

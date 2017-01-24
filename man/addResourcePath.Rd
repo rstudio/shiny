@@ -8,7 +8,7 @@ addResourcePath(prefix, directoryPath)
 }
 \arguments{
 \item{prefix}{The URL prefix (without slashes). Valid characters are a-z,
-A-Z, 0-9, hyphen, period, and underscore; and must begin with a-z or A-Z.
+A-Z, 0-9, hyphen, period, and underscore.
 For example, a value of 'foo' means that any request paths that begin with
 '/foo' will be mapped to the given directory.}
 

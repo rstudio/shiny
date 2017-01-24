@@ -141,6 +141,7 @@
     line-height: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
+    overflow: hidden;
     outline: none !important;
     z-index: -9999 !important;
     background: none !important;

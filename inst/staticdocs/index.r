@@ -115,24 +115,25 @@ sd_section("Rendering functions",
     "reactiveUI"
   )
 )
-sd_section("Reactive constructs",
+sd_section("Reactive programming",
   "A sub-library that provides reactive programming facilities for R.",
   c(
-    "invalidateLater",
-    "is.reactivevalues",
-    "isolate",
-    "makeReactiveBinding",
+    "reactive",
     "observe",
     "observeEvent",
-    "reactive",
+    "reactiveValues",
+    "reactiveValuesToList",
+    "is.reactivevalues",
+    "isolate",
+    "invalidateLater",
+    "debounce",
+    "showReactLog",
+    "makeReactiveBinding",
     "reactiveFileReader",
     "reactivePoll",
     "reactiveTimer",
-    "reactiveValues",
-    "reactiveValuesToList",
-    "freezeReactiveValue",
     "domains",
-    "showReactLog"
+    "freezeReactiveValue"
   )
 )
 sd_section("Boilerplate",

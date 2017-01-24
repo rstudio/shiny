@@ -16,7 +16,7 @@ object.}
 \item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
 is useful if you want to save an expression in a variable.}
 
-\item{width}{The value for \code{\link{options}('width')}.}
+\item{width}{The value for \code{\link[base]{options}('width')}.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link{verbatimTextOutput}} when \code{renderPrint} is used
@@ -25,7 +25,7 @@ in an interactive R Markdown document.}
 \description{
 Makes a reactive version of the given function that captures any printed
 output, and also captures its printable result (unless
-\code{\link{invisible}}), into a string. The resulting function is suitable
+\code{\link[base]{invisible}}), into a string. The resulting function is suitable
 for assigning to an  \code{output} slot.
 }
 \details{
@@ -38,7 +38,7 @@ The result of executing \code{func} will be printed inside a
 
 Note that unlike most other Shiny output functions, if the given function
 returns \code{NULL} then \code{NULL} will actually be visible in the output.
-To display nothing, make your function return \code{\link{invisible}()}.
+To display nothing, make your function return \code{\link[base]{invisible}()}.
 }
 \examples{
 isolate({

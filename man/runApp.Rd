@@ -74,6 +74,8 @@ runApp("myapp")
 
 ## Only run this example in interactive R sessions
 if (interactive()) {
+  options(device.ask.default = FALSE)
+
   # Apps can be run without a server.r and ui.r file
   runApp(list(
     ui = bootstrapPage(

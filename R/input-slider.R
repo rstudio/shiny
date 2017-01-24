@@ -36,7 +36,7 @@
 #'   format string, to be passed to the Javascript strftime library. See
 #'   \url{https://github.com/samsonjs/strftime} for more details. The allowed
 #'   format specifications are very similar, but not identical, to those for R's
-#'   \code{\link{strftime}} function. For Dates, the default is \code{"\%F"}
+#'   \code{\link[base]{strftime}} function. For Dates, the default is \code{"\%F"}
 #'   (like \code{"2015-07-01"}), and for POSIXt, the default is \code{"\%F \%T"}
 #'   (like \code{"2015-07-01 15:32:10"}).
 #' @param timezone Only used if the values are POSIXt objects. A string
@@ -51,6 +51,7 @@
 #' @examples
 #' ## Only run examples in interactive R sessions
 #' if (interactive()) {
+#' options(device.ask.default = FALSE)
 #'
 #' ui <- fluidPage(
 #'   sliderInput("obs", "Number of observations:",
@@ -163,6 +164,8 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-grid` = ticks,
     `data-grid-num` = n_ticks,
     `data-grid-snap` = FALSE,
+    `data-prettify-separator` = sep,
+    `data-prettify-enabled` = (sep != ""),
     `data-prefix` = pre,
     `data-postfix` = post,
     `data-keyboard` = TRUE,
@@ -173,12 +176,6 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-time-format` = timeFormat,
     `data-timezone` = timezone
   ))
-
-  if (sep == "") {
-    sliderProps$`data-prettify-enabled` <- "0"
-  } else {
-    sliderProps$`data-prettify-separator` <- sep
-  }
 
   # Replace any TRUE and FALSE with "true" and "false"
   sliderProps <- lapply(sliderProps, function(x) {
@@ -219,7 +216,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   }
 
   dep <- list(
-    htmlDependency("ionrangeslider", "2.1.2", c(href="shared/ionrangeslider"),
+    htmlDependency("ionrangeslider", "2.1.6", c(href="shared/ionrangeslider"),
       script = "js/ion.rangeSlider.min.js",
       # ion.rangeSlider also needs normalize.css, which is already included in
       # Bootstrap.

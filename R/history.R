@@ -7,30 +7,27 @@ NULL
 
 #' Get the query string / hash component from the URL
 #'
-#' Two user friendly wrappers for getting the query string
-#' and the hash component from the app's URL.
+#' Two user friendly wrappers for getting the query string and the hash
+#' component from the app's URL.
 #'
-#' These can be particularly useful if you want to display
-#' different content depending on the values in the query
-#' string / hash (e.g. instead of basing the conditional on an input
-#' or a calculated reactive, you can base it on the query string).
-#' However, note that, if you're changing the query string / hash
+#' These can be particularly useful if you want to display different content
+#' depending on the values in the query string / hash (e.g. instead of basing
+#' the conditional on an input or a calculated reactive, you can base it on the
+#' query string). However, note that, if you're changing the query string / hash
 #' programatically from within the server code, you must use
-#' \code{updateQueryString(_yourNewQueryString_, mode = "push")}.
-#' The default \code{mode} for \code{updateQueryString} is
-#' \code{"replace"}, which doesn't raise any events, so any observers
-#' or reactives that depend on it will \emph{not} get triggered.
-#' However, if you're changing the query string / hash directly by
-#' typing directly in the browser and hitting enter, you don't
-#' have to worry about this.
+#' \code{updateQueryString(_yourNewQueryString_, mode = "push")}. The default
+#' \code{mode} for \code{updateQueryString} is \code{"replace"}, which doesn't
+#' raise any events, so any observers or reactives that depend on it will
+#' \emph{not} get triggered. However, if you're changing the query string / hash
+#' directly by typing directly in the browser and hitting enter, you don't have
+#' to worry about this.
 #'
 #' @param session	A Shiny session object.
 #'
-#' @return For \code{getQueryString}, a named list.
-#'   For example, the query string \code{?param1=value1&param2=value2}
-#'   becomes \code{list(param1 = value1, param2 = value2)}.
-#'   For \code{getUrlHash}, a character vector with the hash
-#'   (including the leading \code{#} symbol).
+#' @return For \code{getQueryString}, a named list. For example, the query
+#'   string \code{?param1=value1&param2=value2} becomes \code{list(param1 =
+#'   value1, param2 = value2)}. For \code{getUrlHash}, a character vector with
+#'   the hash (including the leading \code{#} symbol).
 #'
 #' @seealso \code{\link{updateQueryString}}
 #'

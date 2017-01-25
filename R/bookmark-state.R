@@ -493,12 +493,90 @@ restoreInput <- function(id, default) {
 #' It typically is called from an observer. Note that this will not work in
 #' Internet Explorer 9 and below.
 #'
+#' For \code{mode = "push"}, only three updates are currently allowed:
+#' \enumerate{
+#'   \item the query string (format: \code{?param1=val1&param2=val2})
+#'   \item the hash (format: \code{#hash})
+#'   \item both the query string and the hash
+#'     (format: \code{?param1=val1&param2=val2#hash})
+#' }
+#'
+#' In other words, if \code{mode = "push"}, the \code{queryString} must start
+#' with either \code{?} or with \code{#}.
+#'
+#' A technical curiosity: under the hood, this function is calling the HTML5
+#' history API (which is where the names for the \code{mode} argument come from).
+#' When \code{mode = "replace"}, the function called is
+#' \code{window.history.replaceState(null, null, queryString)}.
+#' When \code{mode = "push"}, the function called is
+#' \code{window.history.pushState(null, null, queryString)}.
+#'
 #' @param queryString The new query string to show in the location bar.
+#' @param mode When the query string is updated, should the the current history
+#'   entry be replaced (default), or should a new history entry be pushed onto
+#'   the history stack? The former should only be used in a live bookmarking
+#'   context. The latter is useful if you want to navigate between states using
+#'   the browser's back and forward buttons. See Examples.
 #' @param session A Shiny session object.
-#' @seealso \code{\link{enableBookmarking}} for examples.
+#' @seealso \code{\link{enableBookmarking}}, \code{\link{getQueryString}}
+#' @examples
+#' ## Only run these examples in interactive sessions
+#' if (interactive()) {
+#'
+#'   ## App 1: Doing "live" bookmarking
+#'   ## Update the browser's location bar every time an input changes.
+#'   ## This should not be used with enableBookmarking("server"),
+#'   ## because that would create a new saved state on disk every time
+#'   ## the user changes an input.
+#'   enableBookmarking("url")
+#'   shinyApp(
+#'     ui = function(req) {
+#'       fluidPage(
+#'         textInput("txt", "Text"),
+#'         checkboxInput("chk", "Checkbox")
+#'       )
+#'     },
+#'     server = function(input, output, session) {
+#'       observe({
+#'         # Trigger this observer every time an input changes
+#'         reactiveValuesToList(input)
+#'         session$doBookmark()
+#'       })
+#'       onBookmarked(function(url) {
+#'         updateQueryString(url)
+#'       })
+#'     }
+#'   )
+#'
+#'   ## App 2: Printing the value of the query string
+#'   ## (Use the back and forward buttons to see how the browser
+#'   ## keeps a record of each state)
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       textInput("txt", "Enter new query string"),
+#'       helpText("Format: ?param1=val1&param2=val2"),
+#'       actionButton("go", "Update"),
+#'       hr(),
+#'       verbatimTextOutput("query")
+#'     ),
+#'     server = function(input, output, session) {
+#'       observeEvent(input$go, {
+#'         updateQueryString(input$txt, mode = "push")
+#'       })
+#'       output$query <- renderText({
+#'         query <- getQueryString()
+#'         queryText <- paste(names(query), query,
+#'                        sep = "=", collapse=", ")
+#'         paste("Your query string is:\n", queryText)
+#'       })
+#'     }
+#'   )
+#' }
 #' @export
-updateQueryString <- function(queryString, session = getDefaultReactiveDomain()) {
-  session$updateQueryString(queryString)
+updateQueryString <- function(queryString, mode = c("replace", "push"),
+                              session = getDefaultReactiveDomain()) {
+  mode <- match.arg(mode)
+  session$updateQueryString(queryString, mode)
 }
 
 #' Create a button for bookmarking/sharing

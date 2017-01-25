@@ -59,7 +59,8 @@ sd_section("UI Inputs",
     "updateTabsetPanel",
     "updateTextInput",
     "updateTextAreaInput",
-    "updateQueryString"
+    "updateQueryString",
+    "getQueryString"
   )
 )
 sd_section("UI Outputs",

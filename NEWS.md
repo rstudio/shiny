@@ -9,6 +9,9 @@ shiny 1.0.0.9000
 
 ### Minor new features and improvements
 
+* Added support for HTML5's `pushState` which allows for pseudo-navigation
+in shiny apps. For more info, see the documentation (`?updateQueryString` and `?getQueryString`). [#1447](https://github.com/rstudio/shiny/pull/1447)
+
 * Fixed ([#1121](https://github.com/rstudio/shiny/issues/1121)): plot interactions with ggplot2 now support `coord_fixed()`. ([#1525](https://github.com/rstudio/shiny/pull/1525))
 
 ### Bug fixes

@@ -10,6 +10,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   var exports = window.Shiny = window.Shiny || {};
 
+  var origPushState = window.history.pushState;
+  window.history.pushState = function () {
+    var result = origPushState.apply(this, arguments);
+    $(document).trigger("pushstate");
+    return result;
+  };
+
   $(document).on('submit', 'form:not([action])', function (e) {
     e.preventDefault();
   });
@@ -1183,7 +1190,46 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     });
 
     addMessageHandler('updateQueryString', function (message) {
-      window.history.replaceState(null, null, message.queryString);
+
+      // leave the bookmarking code intact
+      if (message.mode === "replace") {
+        window.history.replaceState(null, null, message.queryString);
+        return;
+      }
+
+      var what = null;
+      if (message.queryString.charAt(0) === "#") what = "hash";else if (message.queryString.charAt(0) === "?") what = "query";else throw "The 'query' string must start with either '?' " + "(to update the query string) or with '#' (to " + "update the hash).";
+
+      var path = window.location.pathname;
+      var oldQS = window.location.search;
+      var oldHash = window.location.hash;
+
+      /* Barbara -- December 2016
+      Note: we could check if the new QS and/or hash are different
+      from the old one(s) and, if not, we could choose not to push
+      a new state (whether or not we would replace it is moot/
+      inconsequential). However, I think that it is better to
+      interpret each call to `updateQueryString` as representing
+      new state (even if the message.queryString is the same), so
+      that check isn't even performed as of right now.
+      */
+
+      var relURL = path;
+      if (what === "query") relURL += message.queryString;else relURL += oldQS + message.queryString; // leave old QS if it exists
+      window.history.pushState(null, null, relURL);
+
+      // for the case when message.queryString has both a query string
+      // and a hash (`what = "hash"` allows us to trigger the
+      // hashchange event)
+      if (message.queryString.indexOf("#") !== -1) what = "hash";
+
+      // for the case when there was a hash before, but there isn't
+      // any hash now (e.g. for when only the query string is updated)
+      if (window.location.hash !== oldHash) what = "hash";
+
+      // This event needs to be triggered manually because pushState() never
+      // causes a hashchange event to be fired,
+      if (what === "hash") $(document).trigger("hashchange");
     });
 
     addMessageHandler("resetBrush", function (message) {
@@ -5327,12 +5373,28 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     initialValues['.clientdata_url_hostname'] = window.location.hostname;
     initialValues['.clientdata_url_port'] = window.location.port;
     initialValues['.clientdata_url_pathname'] = window.location.pathname;
+
+    // Send initial URL search (query string) and update it if it changes
     initialValues['.clientdata_url_search'] = window.location.search;
+
+    $(window).on('pushstate', function (e) {
+      inputs.setInput('.clientdata_url_search', window.location.search);
+    });
+
+    $(window).on('popstate', function (e) {
+      inputs.setInput('.clientdata_url_search', window.location.search);
+    });
+
     // This is only the initial value of the hash. The hash can change, but
-    // a reactive version of this isn't sent because w atching for changes can
+    // a reactive version of this isn't sent because watching for changes can
     // require polling on some browsers. The JQuery hashchange plugin can be
     // used if this capability is important.
     initialValues['.clientdata_url_hash_initial'] = window.location.hash;
+    initialValues['.clientdata_url_hash'] = window.location.hash;
+
+    $(window).on('hashchange', function (e) {
+      inputs.setInput('.clientdata_url_hash', location.hash);
+    });
 
     // The server needs to know what singletons were rendered as part of
     // the page loading

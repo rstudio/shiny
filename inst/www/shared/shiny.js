@@ -1227,6 +1227,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       // any hash now (e.g. for when only the query string is updated)
       if (window.location.hash !== oldHash) what = "hash";
 
+      // This event needs to be triggered manually because pushState() never
+      // causes a hashchange event to be fired,
       if (what === "hash") $(document).trigger("hashchange");
     });
 

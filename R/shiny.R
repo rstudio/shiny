@@ -202,11 +202,11 @@ workerId <- local({
 #'     \item{\code{singletons} - for internal use}
 #'     \item{\code{url_protocol}, \code{url_hostname}, \code{url_port},
 #'       \code{url_pathname}, \code{url_search}, \code{url_hash_initial}
-#'       and \code{url_hash} can be used to get the components of the URL 
-#'       that was requested by the browser to load the Shiny app page. 
-#'       These values are from the browser's perspective, so neither HTTP 
-#'       proxies nor Shiny Server will affect these values. The 
-#'       \code{url_search} value may be used with \code{\link{parseQueryString}} 
+#'       and \code{url_hash} can be used to get the components of the URL
+#'       that was requested by the browser to load the Shiny app page.
+#'       These values are from the browser's perspective, so neither HTTP
+#'       proxies nor Shiny Server will affect these values. The
+#'       \code{url_search} value may be used with \code{\link{parseQueryString}}
 #'       to access query string parameters.
 #'     }
 #'   }
@@ -761,6 +761,7 @@ ShinySession <- R6Class(
           sessionId = self$token
         )
       )
+      if (!is.null(self$user)) self$sendUserInfo(user = self$user)
     },
     rootScope = function() {
       self

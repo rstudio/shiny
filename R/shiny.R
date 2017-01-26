@@ -764,7 +764,7 @@ ShinySession <- R6Class(
           sessionId = self$token
         )
       )
-      if (!is.null(self$user)) self$sendUserInfo(user = self$user)
+      if (!is.null(self$user)) self$sendUserInfo(userId = self$user)
     },
     rootScope = function() {
       self

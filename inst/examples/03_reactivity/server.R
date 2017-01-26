@@ -10,7 +10,7 @@ function(input, output) {
   #
   #  1) It is only called when the inputs it depends on changes
   #  2) The computation and result are shared by all the callers 
-  #	  (it only executes a single time)
+  #     (it only executes a single time)
   #
   datasetInput <- reactive({
     switch(input$dataset,

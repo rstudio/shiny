@@ -17,7 +17,7 @@ fluidPage(
     ),
     
     # Show a summary of the dataset and an HTML table with the 
-	 # requested number of observations
+    # requested number of observations
     mainPanel(
       verbatimTextOutput("summary"),
       

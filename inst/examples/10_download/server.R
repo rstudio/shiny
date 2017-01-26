@@ -12,8 +12,8 @@ function(input, output) {
   
   output$downloadData <- downloadHandler(
     filename = function() { 
-		 paste(input$dataset, '.csv', sep='') 
-	 },
+      paste(input$dataset, '.csv', sep='')
+    },
     content = function(file) {
       write.csv(datasetInput(), file)
     }

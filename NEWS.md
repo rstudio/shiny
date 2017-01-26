@@ -16,6 +16,10 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * Fixed ([#1121](https://github.com/rstudio/shiny/issues/1121)): plot interactions with ggplot2 now support `coord_fixed()`. ([#1525](https://github.com/rstudio/shiny/pull/1525))
 
+* Added `snapshotExclude` function, which marks an output so that it is not recorded in a test snapshot. ([#1559](https://github.com/rstudio/shiny/pull/1559))
+
+* Added `shiny:filedownload` JavaScript event, which is triggered when a `downloadButton` or `downloadLink` is clicked. Also, the values of `downloadHandler`s are not recorded in test snapshots, because the values change every time the application is run. ([#1559](https://github.com/rstudio/shiny/pull/1559))
+
 ### Bug fixes
 
 * Fixed ([#1511](https://github.com/rstudio/shiny/issues/1511)): `fileInput`s did not trigger the `shiny:inputchanged` event on the client. ([#1541](https://github.com/rstudio/shiny/pull/1541))

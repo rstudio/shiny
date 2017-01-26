@@ -750,6 +750,9 @@ ShinySession <- R6Class(
         }, silent=FALSE)
       }
 
+      #*************** REMOVE THIS *************#
+      self$user <- self$user %OR% "testuser"
+
       # session$request should throw an error if httpuv doesn't have
       # websocket$request, but don't throw it until a caller actually
       # tries to access session$request

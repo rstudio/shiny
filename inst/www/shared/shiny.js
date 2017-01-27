@@ -1237,9 +1237,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       exports.resetBrush(message.brushId);
     });
 
-    addMessageHandler('user', function (message) {
-      exports.user = message.userId;
-    });
     // Progress reporting ====================================================
 
     var progressHandlers = {

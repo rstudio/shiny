@@ -739,9 +739,6 @@ var ShinyApp = function() {
     exports.resetBrush(message.brushId);
   });
 
-  addMessageHandler('user', function(message) {
-    exports.user = message.userId;
-  });
   // Progress reporting ====================================================
 
   var progressHandlers = {

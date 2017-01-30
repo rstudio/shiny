@@ -9,6 +9,8 @@ shiny 1.0.0.9000
 
 ### Minor new features and improvements
 
+* Exported `session$user` (if it exists) to the client-side; it's accessible in the Shiny object: `Shiny.user`. ([#1563](https://github.com/rstudio/shiny/pull/1563))
+
 * Added support for HTML5's `pushState` which allows for pseudo-navigation
 in shiny apps. For more info, see the documentation (`?updateQueryString` and `?getQueryString`). [#1447](https://github.com/rstudio/shiny/pull/1447)
 

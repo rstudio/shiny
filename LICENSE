@@ -12,7 +12,7 @@ these components are included below):
 - Respond.js, https://github.com/scottjehl/Respond
 - bootstrap-datepicker, https://github.com/eternicode/bootstrap-datepicker
 - Font Awesome, https://github.com/FortAwesome/Font-Awesome
-- selectize.js, https://github.com/brianreavis/selectize.js
+- selectize.js, https://github.com/selectize/selectize.js
 - es5-shim, https://github.com/es-shims/es5-shim
 - ion.rangeSlider, https://github.com/IonDen/ion.rangeSlider
 - strftime for Javascript, https://github.com/samsonjs/strftime

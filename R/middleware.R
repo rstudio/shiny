@@ -191,7 +191,7 @@ staticHandler <- function(root) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
 
-    path <- req$PATH_INFO
+    path <- URLdecode(req$PATH_INFO)
 
     if (is.null(path))
       return(httpResponse(400, content="<h1>Bad Request</h1>"))

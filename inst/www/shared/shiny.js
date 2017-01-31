@@ -4818,6 +4818,24 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     };
     this.onComplete = function () {
       var self = this;
+
+      var fileInfo = $.map(this.files, function (file, i) {
+        return {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        };
+      });
+
+      // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,
+      // it's not possible to modify the information before the values get
+      // sent to the server.
+      var evt = jQuery.Event("shiny:inputchanged");
+      evt.name = this.id;
+      evt.value = fileInfo;
+      evt.inputType = 'fileupload';
+      $(document).trigger(evt);
+
       this.makeRequest('uploadEnd', [this.jobId, this.id], function (response) {
         self.$setActive(false);
         self.onProgress(null, 1);
@@ -4830,13 +4848,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       // Trigger event when all files are finished uploading.
       var evt = jQuery.Event("shiny:fileuploaded");
       evt.name = this.id;
-      evt.files = $.map(this.files, function (file, i) {
-        return {
-          name: file.name,
-          size: file.size,
-          type: file.type
-        };
-      });
+      evt.files = fileInfo;
       $(document).trigger(evt);
     };
     this.onError = function (message) {

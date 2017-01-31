@@ -115,6 +115,24 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
   };
   this.onComplete = function() {
     var self = this;
+
+    var fileInfo = $.map(this.files, function(file, i) {
+      return {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      };
+    });
+
+    // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,
+    // it's not possible to modify the information before the values get
+    // sent to the server.
+    var evt = jQuery.Event("shiny:inputchanged");
+    evt.name = this.id;
+    evt.value = fileInfo;
+    evt.inputType = 'fileupload';
+    $(document).trigger(evt);
+
     this.makeRequest(
       'uploadEnd', [this.jobId, this.id],
       function(response) {
@@ -130,13 +148,7 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
     // Trigger event when all files are finished uploading.
     var evt = jQuery.Event("shiny:fileuploaded");
     evt.name = this.id;
-    evt.files = $.map(this.files, function(file, i) {
-      return {
-        name: file.name,
-        size: file.size,
-        type: file.type
-      };
-    });
+    evt.files = fileInfo;
     $(document).trigger(evt);
   };
   this.onError = function(message) {

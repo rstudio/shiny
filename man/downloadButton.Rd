@@ -43,6 +43,6 @@ downloadLink('downloadData', 'Download')
 
 }
 \seealso{
-downloadHandler
+\code{\link{downloadHandler}}
 }
 

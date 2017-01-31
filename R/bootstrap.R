@@ -1453,7 +1453,7 @@ uiOutput <- htmlOutput
 #' }
 #'
 #' @aliases downloadLink
-#' @seealso downloadHandler
+#' @seealso \code{\link{downloadHandler}}
 #' @export
 downloadButton <- function(outputId,
                            label="Download",

@@ -629,6 +629,12 @@ ShinySession <- R6Class(
               values$output <- private$outputValues[items]
             }
 
+            # Filter out those outputs that have the snapshotExclude attribute.
+            exclude_idx <- vapply(names(values$output), function(name) {
+              isTRUE(attr(private$.outputs[[name]], "snapshotExclude", TRUE))
+            }, logical(1))
+            values$output <- values$output[!exclude_idx]
+
             values$output <- sortByName(values$output)
           }
 
@@ -1024,6 +1030,10 @@ ShinySession <- R6Class(
       }
 
       if (is.function(func)) {
+        # Extract any output attributes attached to the render function. These
+        # will be attached to the observer after it's created.
+        outputAttrs <- attr(func, "outputAttrs", TRUE)
+
         funcFormals <- formals(func)
         # ..stacktraceon matches with the top-level ..stacktraceoff.., because
         # the observer we set up below has ..stacktraceon=FALSE
@@ -1100,6 +1110,12 @@ ShinySession <- R6Class(
           else
             private$invalidatedOutputValues$set(name, value)
         }, suspended=private$shouldSuspend(name), label=label)
+
+        # If any output attributes were added to the render function attach
+        # them to observer.
+        lapply(names(outputAttrs), function(name) {
+          attr(obs, name) <- outputAttrs[[name]]
+        })
 
         obs$onInvalidate(function() {
           self$showProgress(name)
@@ -1810,6 +1826,16 @@ outputOptions <- function(x, name, ...) {
   }
 
   .subset2(x, 'impl')$outputOptions(name, ...)
+}
+
+
+#' Mark an output to be excluded from test snapshots
+#'
+#' @param x A reactive which will be assigned to an output.
+#'
+#' @export
+snapshotExclude <- function(x) {
+  markOutputAttrs(x, snapshotExclude = TRUE)
 }
 
 

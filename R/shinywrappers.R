@@ -88,6 +88,26 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
   useRenderFunction(x, inline = inline)
 }
 
+
+#' Mark a render function with attributes that will be used by the output
+#'
+#' @inheritParams markRenderFunction
+#' @param snapshotExclude If TRUE, exclude the output from test snapshots.
+#'
+#' @keywords internal
+markOutputAttrs <- function(renderFunc, snapshotExclude = NULL) {
+  # Add the outputAttrs attribute if necessary
+  if (is.null(attr(renderFunc, "outputAttrs", TRUE))) {
+    attr(renderFunc, "outputAttrs") <- list()
+  }
+
+  if (!is.null(snapshotExclude)) {
+    attr(renderFunc, "outputAttrs")$snapshotExclude <- snapshotExclude
+  }
+
+  renderFunc
+}
+
 #' Image file output
 #'
 #' Renders a reactive image that is suitable for assigning to an \code{output}
@@ -410,7 +430,9 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
   renderFunc <- function(shinysession, name, ...) {
     shinysession$registerDownload(name, filename, contentType, content)
   }
-  markRenderFunction(downloadButton, renderFunc, outputArgs = outputArgs)
+  snapshotExclude(
+    markRenderFunction(downloadButton, renderFunc, outputArgs = outputArgs)
+  )
 }
 
 #' Table output with the JavaScript library DataTables

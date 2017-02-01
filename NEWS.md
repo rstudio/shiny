@@ -9,14 +9,14 @@ shiny 1.0.0.9000
 
 ### Minor new features and improvements
 
-* Fixed [#1565](https://github.com/rstudio/shiny/issues/1565), which meant that resources with spaces in their names return HTTP 404 .[#1566](https://github.com/rstudio/shiny/pull/1566)
+* Fixed [#1565](https://github.com/rstudio/shiny/issues/1565), which meant that resources with spaces in their names return HTTP 404. ([#1566](https://github.com/rstudio/shiny/pull/1566))
 
 * Exported `session$user` (if it exists) to the client-side; it's accessible in the Shiny object: `Shiny.user`. ([#1563](https://github.com/rstudio/shiny/pull/1563))
 
 * Added support for HTML5's `pushState` which allows for pseudo-navigation
-in shiny apps. For more info, see the documentation (`?updateQueryString` and `?getQueryString`). [#1447](https://github.com/rstudio/shiny/pull/1447)
+in shiny apps. For more info, see the documentation (`?updateQueryString` and `?getQueryString`). ([#1447](https://github.com/rstudio/shiny/pull/1447))
 
-* Fixed ([#1121](https://github.com/rstudio/shiny/issues/1121)): plot interactions with ggplot2 now support `coord_fixed()`. ([#1525](https://github.com/rstudio/shiny/pull/1525))
+* Fixed [#1121](https://github.com/rstudio/shiny/issues/1121): plot interactions with ggplot2 now support `coord_fixed()`. ([#1525](https://github.com/rstudio/shiny/pull/1525))
 
 * Added `snapshotExclude` function, which marks an output so that it is not recorded in a test snapshot. ([#1559](https://github.com/rstudio/shiny/pull/1559))
 
@@ -24,13 +24,13 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 ### Bug fixes
 
-* Fixed ([#1511](https://github.com/rstudio/shiny/issues/1511)): `fileInput`s did not trigger the `shiny:inputchanged` event on the client. Also removed `shiny:fileuploaded` JavaScript event, because it is no longer needed after this fix. ([#1541](https://github.com/rstudio/shiny/pull/1541), [#1570](https://github.com/rstudio/shiny/pull/1570))
+* Fixed [#1511](https://github.com/rstudio/shiny/issues/1511): `fileInput`s did not trigger the `shiny:inputchanged` event on the client. Also removed `shiny:fileuploaded` JavaScript event, because it is no longer needed after this fix. ([#1541](https://github.com/rstudio/shiny/pull/1541), [#1570](https://github.com/rstudio/shiny/pull/1570))
 
-* Fixed ([#1472](https://github.com/rstudio/shiny/issues/1472)): With a Progress object, calling `set(value=NULL)` made the progress bar go to 100%. Now it does not change the value of the progress bar. The documentation also incorrectly said that setting the `value` to `NULL` would hide the progress bar. ([#1547](https://github.com/rstudio/shiny/pull/1547))
+* Fixed [#1472](https://github.com/rstudio/shiny/issues/1472): With a Progress object, calling `set(value=NULL)` made the progress bar go to 100%. Now it does not change the value of the progress bar. The documentation also incorrectly said that setting the `value` to `NULL` would hide the progress bar. ([#1547](https://github.com/rstudio/shiny/pull/1547))
 
 ### Library updates
 
-* Closed ([#1500](https://github.com/rstudio/shiny/issues/1500)): Updated ion.rangeSlider to 2.1.6. ([#1540](https://github.com/rstudio/shiny/pull/1540))
+* Closed [#1500](https://github.com/rstudio/shiny/issues/1500): Updated ion.rangeSlider to 2.1.6. ([#1540](https://github.com/rstudio/shiny/pull/1540))
 
 
 shiny 1.0.0

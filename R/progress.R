@@ -110,7 +110,7 @@ Progress <- R6Class(
       private$id <- createUniqueId(8)
       private$min <- min
       private$max <- max
-      private$value <- min
+      private$value <- NULL
       private$style <- match.arg(style, choices = c("notification", "old"))
       private$closed <- FALSE
 
@@ -144,6 +144,9 @@ Progress <- R6Class(
     },
 
     inc = function(amount = 0.1, message = NULL, detail = NULL) {
+      if (is.null(private$value))
+        private$value <- private$min
+
       value <- min(private$value + amount, private$max)
       self$set(value, message, detail)
     },

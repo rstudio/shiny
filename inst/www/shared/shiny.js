@@ -1307,13 +1307,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           if (typeof message.detail !== 'undefined') {
             $progress.find('.progress-detail').text(message.detail);
           }
-          if (typeof message.value !== 'undefined') {
-            if (message.value !== null) {
-              $progress.find('.progress').show();
-              $progress.find('.progress-bar').width(message.value * 100 + '%');
-            } else {
-              $progress.find('.progress').hide();
-            }
+          if (typeof message.value !== 'undefined' && message.value !== null) {
+            $progress.find('.progress').show();
+            $progress.find('.progress-bar').width(message.value * 100 + '%');
           }
         } else if (message.style === "old") {
           // For old-style (Shiny <=0.13.2) progress indicators.
@@ -1325,13 +1321,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           if (typeof message.detail !== 'undefined') {
             $progress.find('.progress-detail').text(message.detail);
           }
-          if (typeof message.value !== 'undefined') {
-            if (message.value !== null) {
-              $progress.find('.progress').show();
-              $progress.find('.bar').width(message.value * 100 + '%');
-            } else {
-              $progress.find('.progress').hide();
-            }
+          if (typeof message.value !== 'undefined' && message.value !== null) {
+            $progress.find('.progress').show();
+            $progress.find('.bar').width(message.value * 100 + '%');
           }
 
           $progress.fadeIn();

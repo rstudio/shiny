@@ -55,7 +55,6 @@
 #'   de-emphasized appearance relative to \code{message}.
 #' @param value A numeric value at which to set
 #'   the progress bar, relative to \code{min} and \code{max}.
-#'   \code{NULL} hides the progress bar, if it is currently visible.
 #' @param style Progress display style. If \code{"notification"} (the default),
 #'   the progress indicator will show using Shiny's notification API. If
 #'   \code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
@@ -98,7 +97,6 @@
 #' @export
 Progress <- R6Class(
   'Progress',
-  portable = TRUE,
   public = list(
 
     initialize = function(session = getDefaultReactiveDomain(),
@@ -112,8 +110,8 @@ Progress <- R6Class(
       private$id <- createUniqueId(8)
       private$min <- min
       private$max <- max
-      private$style <- match.arg(style, choices = c("notification", "old"))
       private$value <- NULL
+      private$style <- match.arg(style, choices = c("notification", "old"))
       private$closed <- FALSE
 
       session$sendProgress('open', list(id = private$id, style = private$style))
@@ -125,14 +123,14 @@ Progress <- R6Class(
         return()
       }
 
-      if (is.null(value) || is.na(value)) {
+      if (is.null(value) || is.na(value))
         value <- NULL
-      } else {
+
+      if (!is.null(value)) {
+        private$value <- value
         # Normalize value to number between 0 and 1
         value <- min(1, max(0, (value - private$min) / (private$max - private$min)))
       }
-
-      private$value <- value
 
       data <- dropNulls(list(
         id = private$id,
@@ -142,11 +140,14 @@ Progress <- R6Class(
         style = private$style
       ))
 
-       private$session$sendProgress('update', data)
+      private$session$sendProgress('update', data)
     },
 
     inc = function(amount = 0.1, message = NULL, detail = NULL) {
-      value <- min(self$getValue() + amount, private$max)
+      if (is.null(private$value))
+        private$value <- private$min
+
+      value <- min(private$value + amount, private$max)
       self$set(value, message, detail)
     },
 
@@ -154,10 +155,7 @@ Progress <- R6Class(
 
     getMax = function() private$max,
 
-    # Return value (not the normalized 0-1 value, but in the original range)
-    getValue = function() {
-      private$value * (private$max - private$min) + private$min
-    },
+    getValue = function() private$value,
 
     close = function() {
       if (private$closed) {
@@ -173,12 +171,12 @@ Progress <- R6Class(
   ),
 
   private = list(
-    session = 'environment',
+    session = 'ShinySession',
     id = character(0),
     min = numeric(0),
     max = numeric(0),
     style = character(0),
-    value = NULL,
+    value = numeric(0),
     closed = logical(0)
   )
 )
@@ -239,8 +237,7 @@ Progress <- R6Class(
 #'   \code{"old"}, use the same HTML and CSS used in Shiny 0.13.2 and below
 #'   (this is for backward-compatibility).
 #' @param value Single-element numeric vector; the value at which to set the
-#'   progress bar, relative to \code{min} and \code{max}. \code{NULL} hides the
-#'   progress bar, if it is currently visible.
+#'   progress bar, relative to \code{min} and \code{max}.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions

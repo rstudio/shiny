@@ -24,8 +24,7 @@ detail message (if any). The detail message will be shown with a
 de-emphasized appearance relative to \code{message}.}
 
 \item{value}{A numeric value at which to set
-the progress bar, relative to \code{min} and \code{max}.
-\code{NULL} hides the progress bar, if it is currently visible.}
+the progress bar, relative to \code{min} and \code{max}.}
 
 \item{style}{Progress display style. If \code{"notification"} (the default),
 the progress indicator will show using Shiny's notification API. If

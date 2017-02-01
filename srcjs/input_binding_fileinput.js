@@ -130,7 +130,7 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
     var evt = jQuery.Event("shiny:inputchanged");
     evt.name = this.id;
     evt.value = fileInfo;
-    evt.inputType = 'fileupload';
+    evt.inputType = 'shiny.fileupload';
     $(document).trigger(evt);
 
     this.makeRequest(
@@ -144,12 +144,6 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
         self.onError(error);
       });
     this.$bar().text('Finishing upload');
-
-    // Trigger event when all files are finished uploading.
-    var evt = jQuery.Event("shiny:fileuploaded");
-    evt.name = this.id;
-    evt.files = fileInfo;
-    $(document).trigger(evt);
   };
   this.onError = function(message) {
     this.$setError(message || '');

@@ -94,7 +94,7 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #' @inheritParams markRenderFunction
 #' @param snapshotExclude If TRUE, exclude the output from test snapshots.
 #'
-#' @export
+#' @keywords internal
 markOutputAttrs <- function(renderFunc, snapshotExclude = NULL) {
   # Add the outputAttrs attribute if necessary
   if (is.null(attr(renderFunc, "outputAttrs", TRUE))) {
@@ -430,9 +430,8 @@ downloadHandler <- function(filename, content, contentType=NA, outputArgs=list()
   renderFunc <- function(shinysession, name, ...) {
     shinysession$registerDownload(name, filename, contentType, content)
   }
-  markOutputAttrs(
-    markRenderFunction(downloadButton, renderFunc, outputArgs = outputArgs),
-    snapshotExclude = TRUE
+  snapshotExclude(
+    markRenderFunction(downloadButton, renderFunc, outputArgs = outputArgs)
   )
 }
 

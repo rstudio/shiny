@@ -1829,6 +1829,16 @@ outputOptions <- function(x, name, ...) {
 }
 
 
+#' Mark an output to be excluded from test snapshots
+#'
+#' @param x A reactive which will be assigned to an output.
+#'
+#' @export
+snapshotExclude <- function(x) {
+  markOutputAttrs(x, snapshotExclude = TRUE)
+}
+
+
 #' Add callbacks for Shiny session events
 #'
 #' These functions are for registering callbacks on Shiny session events.

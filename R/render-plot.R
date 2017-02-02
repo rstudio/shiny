@@ -418,8 +418,16 @@ getPrevPlotCoordmap <- function(width, height) {
 
 # Given a ggplot_build_gtable object, return a coordmap for it.
 getGgplotCoordmap <- function(p, pixelratio, res) {
-  # Structure of ggplot objects changed after 2.1.0
-  new_ggplot <- (utils::packageVersion("ggplot2") > "2.1.0")
+  # Structure of ggplot objects changed after 2.1.0. After 2.2.1, there was a
+  # an API for extracting the necessary information.
+  ggplot_ver <- utils::packageVersion("ggplot2")
+  if (ggplot_ver > "2.2.1") {
+    ggplot_format <- "api"
+  } else if (ggplot_ver > "2.1.0") {
+    ggplot_format <- "new"
+  } else {
+    ggplot_format <- "old"
+  }
 
   if (!inherits(p, "ggplot_build_gtable"))
     return(NULL)
@@ -427,7 +435,7 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
   # Given a built ggplot object, return x and y domains (data space coords) for
   # each panel.
   find_panel_info <- function(b) {
-    if (new_ggplot) {
+    if (ggplot_format == "new") {
       layout <- b$layout$panel_layout
     } else {
       layout <- b$panel$layout
@@ -437,7 +445,7 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
 
     # Names of facets
     facet_vars <- NULL
-    if (new_ggplot) {
+    if (ggplot_format == "new") {
       facet <- b$layout$facet
       if (inherits(facet, "FacetGrid")) {
         facet_vars <- vapply(c(facet$params$cols, facet$params$rows), as.character, character(1))
@@ -492,7 +500,7 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
   # Given a single range object (representing the data domain) from a built
   # ggplot object, return the domain.
   find_panel_domain <- function(b, panel_num, scalex_num = 1, scaley_num = 1) {
-    if (new_ggplot) {
+    if (ggplot_format == "new") {
       range <- b$layout$panel_ranges[[panel_num]]
     } else {
       range <- b$panel$ranges[[panel_num]]
@@ -505,7 +513,7 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
     )
 
     # Check for reversed scales
-    if (new_ggplot) {
+    if (ggplot_format == "new") {
       xscale <- b$layout$panel_scales$x[[scalex_num]]
       yscale <- b$layout$panel_scales$y[[scaley_num]]
     } else {
@@ -546,7 +554,7 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
     y_names <- character(0)
 
     # Continuous scales have a trans; discrete ones don't
-    if (new_ggplot) {
+    if (ggplot_format == "new") {
       if (!is.null(b$layout$panel_scales$x[[scalex_num]]$trans))
         x_names <- b$layout$panel_scales$x[[scalex_num]]$trans$name
       if (!is.null(b$layout$panel_scales$y[[scaley_num]]$trans))

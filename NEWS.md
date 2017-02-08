@@ -9,6 +9,8 @@ shiny 1.0.0.9000
 
 ### Minor new features and improvements
 
+* Added automatic ids to radiobutton and checkbox choices. Id format: `inputId_choice`
+
 * Fixed [#1565](https://github.com/rstudio/shiny/issues/1565), which meant that resources with spaces in their names return HTTP 404. ([#1566](https://github.com/rstudio/shiny/pull/1566))
 
 * Exported `session$user` (if it exists) to the client-side; it's accessible in the Shiny object: `Shiny.user`. ([#1563](https://github.com/rstudio/shiny/pull/1563))

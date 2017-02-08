@@ -43,7 +43,7 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
     choices, names(choices),
     FUN = function(value, name) {
       inputTag <- tags$input(
-        type = type, name = inputId, value = value
+        type = type, id = paste0(inputId, "_", value), name = inputId, value = value
       )
       if (value %in% selected)
         inputTag$attribs$checked <- "checked"

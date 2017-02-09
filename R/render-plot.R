@@ -287,17 +287,30 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 #   .. ..$ y: NULL
 #   ..$ mapping: Named list()
 #
-# For ggplot2, it might be something like:
-# p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
-# str(getGgplotCoordmap(p, 1))
+# For ggplot2, first you need to define the print.ggplot function from inside
+# renderPlot, then use it to print the plot:
+# print.ggplot <- function(x) {
+#   grid::grid.newpage()
+#
+#   build <- ggplot2::ggplot_build(x)
+#
+#   gtable <- ggplot2::ggplot_gtable(build)
+#   grid::grid.draw(gtable)
+#
+#   structure(list(
+#     build = build,
+#     gtable = gtable
+#   ), class = "ggplot_build_gtable")
+# }
+#
+# p <- print(ggplot(mtcars, aes(wt, mpg)) + geom_point())
+# str(getGgplotCoordmap(p, 1, 72))
 # List of 1
 #  $ :List of 10
 #   ..$ panel     : int 1
 #   ..$ row       : int 1
 #   ..$ col       : int 1
 #   ..$ panel_vars: Named list()
-#   ..$ scale_x   : int 1
-#   ..$ scale_y   : int 1
 #   ..$ log       :List of 2
 #   .. ..$ x: NULL
 #   .. ..$ y: NULL
@@ -320,8 +333,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 # can be up to two of them.
 # mtc <- mtcars
 # mtc$am <- factor(mtc$am)
-# p <- ggplot(mtcars, aes(wt, mpg)) + geom_point() + facet_wrap(~ am)
-# str(getGgplotCoordmap(p, 1))
+# p <- print(ggplot(mtc, aes(wt, mpg)) + geom_point() + facet_wrap(~ am))
+# str(getGgplotCoordmap(p, 1, 72))
 # List of 2
 #  $ :List of 10
 #   ..$ panel     : int 1
@@ -329,8 +342,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 #   ..$ col       : int 1
 #   ..$ panel_vars:List of 1
 #   .. ..$ panelvar1: Factor w/ 2 levels "0","1": 1
-#   ..$ scale_x   : int 1
-#   ..$ scale_y   : int 1
 #   ..$ log       :List of 2
 #   .. ..$ x: NULL
 #   .. ..$ y: NULL
@@ -354,8 +365,6 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 #   ..$ col       : int 2
 #   ..$ panel_vars:List of 1
 #   .. ..$ panelvar1: Factor w/ 2 levels "0","1": 2
-#   ..$ scale_x   : int 1
-#   ..$ scale_y   : int 1
 #   ..$ log       :List of 2
 #   .. ..$ x: NULL
 #   .. ..$ y: NULL
@@ -435,66 +444,197 @@ getGgplotCoordmap <- function(p, pixelratio, res) {
   # Given a built ggplot object, return x and y domains (data space coords) for
   # each panel.
   find_panel_info <- function(b) {
-    if (ggplot_format == "new") {
-      layout <- b$layout$panel_layout
+
+    if (ggplot_format == "api") {
+      layout <- ggplot2::summarise_layout(b)
+      coord  <- ggplot2::summarise_coord(b)
+      layers <- ggplot2::summarise_layers(b)
+
+      # Given x and y scale objects and a coord object, return a list that has
+      # the bases of log transformations for x and y, or NULL if it's not a
+      # log transform.
+      get_log_bases <- function(xscale, yscale, coord) {
+        # Given a transform object, find the log base; if the transform object is
+        # NULL, or if it's not a log transform, return NA.
+        get_log_base <- function(trans) {
+          if (!is.null(trans) && grepl("^log-", trans$name)) {
+            environment(trans$transform)$base
+          } else {
+            NA_real_
+          }
+        }
+
+        # First look for log base in scale, then coord; otherwise NULL.
+        list(
+          x = get_log_base(xscale$trans) %OR% coord$xlog %OR% NULL,
+          y = get_log_base(yscale$trans) %OR% coord$ylog %OR% NULL
+        )
+      }
+
+      # Given x/y min/max, and the x/y scale objects, create a list that
+      # represents the domain. Note that the x/y min/max should be taken from
+      # the layout summary table, not the scale objects.
+      get_domain <- function(xmin, xmax, ymin, ymax, xscale, yscale) {
+        is_reverse <- function(scale) {
+          identical(scale$trans$name, "reverse")
+        }
+
+        domain <- list(
+          left   = xmin,
+          right  = xmax,
+          bottom = ymin,
+          top    = ymax
+        )
+
+        if (is_reverse(xscale)) {
+          domain$left  <- -domain$left
+          domain$right <- -domain$right
+        }
+        if (is_reverse(yscale)) {
+          domain$top    <- -domain$top
+          domain$bottom <- -domain$bottom
+        }
+
+        domain
+      }
+
+      # Rename the items in vars to have names like panelvar1, panelvar2.
+      rename_panel_vars <- function(vars) {
+        for (i in seq_along(vars)) {
+          names(vars)[i] <- paste0("panelvar", i)
+        }
+        vars
+      }
+
+      get_mappings <- function(layers, layout, coord) {
+        # For simplicity, we'll just use the mapping from the first layer of the
+        # ggplot object. The original uses quoted expressions; convert to
+        # character.
+        mapping <- layers$mapping[[1]]
+        # lapply'ing as.character results in unexpected behavior for expressions
+        # like `wt/2`; deparse handles it correctly.
+        mapping <- lapply(mapping, deparse)
+
+        # If either x or y is not present, give it a NULL entry.
+        mapping <- mergeVectors(list(x = NULL, y = NULL), mapping)
+
+        # The names (not values) of panel vars are the same across all panels,
+        # so just look at the first one. Also, the order of panel vars needs
+        # to be reversed.
+        vars <- rev(layout$vars[[1]])
+        for (i in seq_along(vars)) {
+          mapping[[paste0("panelvar", i)]] <- names(vars)[i]
+        }
+
+        if (isTRUE(coord$flip)) {
+          mapping[c("x", "y")] <- mapping[c("y", "x")]
+        }
+
+        mapping
+      }
+
+      # Mapping is constant across all panels, so get it here and reuse later.
+      mapping <- get_mappings(layers, layout, coord)
+
+      # If coord_flip is used, these need to be swapped
+      flip_xy <- function(layout) {
+        l <- layout
+        l$xscale <- layout$yscale
+        l$yscale <- layout$xscale
+        l$xmin <- layout$ymin
+        l$xmax <- layout$ymax
+        l$ymin <- layout$xmin
+        l$ymax <- layout$xmax
+        l
+      }
+      if (coord$flip) {
+        layout <- flip_xy(layout)
+      }
+
+      # Iterate over each row in the layout data frame
+      lapply(seq_len(nrow(layout)), function(i) {
+        # Slice out one row, use it as a list. The (former) list-cols are still
+        # in lists, so we need to unwrap them.
+        l <- as.list(layout[i, ])
+        l$vars   <- l$vars[[1]]
+        l$xscale <- l$xscale[[1]]
+        l$yscale <- l$yscale[[1]]
+
+        list(
+          panel   = as.numeric(l$panel),
+          row     = l$row,
+          col     = l$col,
+          # Rename panel vars. They must also be in reversed order.
+          panel_vars = rename_panel_vars(rev(l$vars)),
+          log     = get_log_bases(l$xscale, l$yscale, coord),
+          domain  = get_domain(l$xmin, l$xmax, l$ymin, l$ymax, l$xscale, l$yscale),
+          mapping = mapping
+        )
+      })
+
     } else {
-      layout <- b$panel$layout
+
+      if (ggplot_format == "new") {
+        layout <- b$layout$panel_layout
+      } else {
+        layout <- b$panel$layout
+      }
+      # Convert factor to numbers
+      layout$PANEL <- as.integer(as.character(layout$PANEL))
+
+      # Names of facets
+      facet_vars <- NULL
+      if (ggplot_format == "new") {
+        facet <- b$layout$facet
+        if (inherits(facet, "FacetGrid")) {
+          facet_vars <- vapply(c(facet$params$cols, facet$params$rows), as.character, character(1))
+        } else if (inherits(facet, "FacetWrap")) {
+          facet_vars <- vapply(facet$params$facets, as.character, character(1))
+        }
+      } else {
+        facet <- b$plot$facet
+        if (inherits(facet, "grid")) {
+          facet_vars <- vapply(c(facet$cols, facet$rows), as.character, character(1))
+        } else if (inherits(facet, "wrap")) {
+          facet_vars <- vapply(facet$facets, as.character, character(1))
+        }
+      }
+
+      # Iterate over each row in the layout data frame
+      lapply(seq_len(nrow(layout)), function(i) {
+        # Slice out one row
+        l <- layout[i, ]
+
+        scale_x <- l$SCALE_X
+        scale_y <- l$SCALE_Y
+
+        mapping <- find_plot_mappings(b)
+
+        # For each of the faceting variables, get the value of that variable in
+        # the current panel. Default to empty _named_ list so that it's sent as a
+        # JSON object, not array.
+        panel_vars <- list(a = NULL)[0]
+        for (i in seq_along(facet_vars)) {
+          var_name <- facet_vars[[i]]
+          vname <- paste0("panelvar", i)
+
+          mapping[[vname]] <- var_name
+          panel_vars[[vname]] <- l[[var_name]]
+        }
+
+        list(
+          panel   = l$PANEL,
+          row     = l$ROW,
+          col     = l$COL,
+          panel_vars = panel_vars,
+          scale_x = scale_x,
+          scale_y = scale_x,
+          log     = check_log_scales(b, scale_x, scale_y),
+          domain  = find_panel_domain(b, l$PANEL, scale_x, scale_y),
+          mapping = mapping
+        )
+      })
     }
-    # Convert factor to numbers
-    layout$PANEL <- as.integer(as.character(layout$PANEL))
-
-    # Names of facets
-    facet_vars <- NULL
-    if (ggplot_format == "new") {
-      facet <- b$layout$facet
-      if (inherits(facet, "FacetGrid")) {
-        facet_vars <- vapply(c(facet$params$cols, facet$params$rows), as.character, character(1))
-      } else if (inherits(facet, "FacetWrap")) {
-        facet_vars <- vapply(facet$params$facets, as.character, character(1))
-      }
-    } else {
-      facet <- b$plot$facet
-      if (inherits(facet, "grid")) {
-        facet_vars <- vapply(c(facet$cols, facet$rows), as.character, character(1))
-      } else if (inherits(facet, "wrap")) {
-        facet_vars <- vapply(facet$facets, as.character, character(1))
-      }
-    }
-
-    # Iterate over each row in the layout data frame
-    lapply(seq_len(nrow(layout)), function(i) {
-      # Slice out one row
-      l <- layout[i, ]
-
-      scale_x <- l$SCALE_X
-      scale_y <- l$SCALE_Y
-
-      mapping <- find_plot_mappings(b)
-
-      # For each of the faceting variables, get the value of that variable in
-      # the current panel. Default to empty _named_ list so that it's sent as a
-      # JSON object, not array.
-      panel_vars <- list(a = NULL)[0]
-      for (i in seq_along(facet_vars)) {
-        var_name <- facet_vars[[i]]
-        vname <- paste0("panelvar", i)
-
-        mapping[[vname]] <- var_name
-        panel_vars[[vname]] <- l[[var_name]]
-      }
-
-      list(
-        panel   = l$PANEL,
-        row     = l$ROW,
-        col     = l$COL,
-        panel_vars = panel_vars,
-        scale_x = scale_x,
-        scale_y = scale_x,
-        log     = check_log_scales(b, scale_x, scale_y),
-        domain  = find_panel_domain(b, l$PANEL, scale_x, scale_y),
-        mapping = mapping
-      )
-    })
   }
 
   # Given a single range object (representing the data domain) from a built

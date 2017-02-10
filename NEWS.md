@@ -24,6 +24,8 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * Added support for plot interactions with ggplot2 > 2.2.1. ([#1578](https://github.com/rstudio/shiny/pull/1578))
 
+* Improved escapeHTML (util.js) in terms of the order dependency of replacing, XSS risk attack and performance. ([#1579](https://github.com/rstudio/shiny/pull/1579))
+
 ### Bug fixes
 
 * Fixed [#1511](https://github.com/rstudio/shiny/issues/1511): `fileInput`s did not trigger the `shiny:inputchanged` event on the client. Also removed `shiny:fileuploaded` JavaScript event, because it is no longer needed after this fix. ([#1541](https://github.com/rstudio/shiny/pull/1541), [#1570](https://github.com/rstudio/shiny/pull/1570))

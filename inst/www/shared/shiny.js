@@ -25,7 +25,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // Source file: ../srcjs/utils.js
 
   function escapeHTML(str) {
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\//g, "&#x2F;");
+    var escaped = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+      "/": "&#x2F;"
+    };
+
+    return str.replace(/[&<>'"\/]/g, function (m) {
+      return escaped[m];
+    });
   }
 
   function randomId() {

@@ -22,6 +22,8 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * Added `shiny:filedownload` JavaScript event, which is triggered when a `downloadButton` or `downloadLink` is clicked. Also, the values of `downloadHandler`s are not recorded in test snapshots, because the values change every time the application is run. ([#1559](https://github.com/rstudio/shiny/pull/1559))
 
+* Added support for plot interactions with ggplot2 > 2.2.1. ([#1578](https://github.com/rstudio/shiny/pull/1578))
+
 ### Bug fixes
 
 * Fixed [#1511](https://github.com/rstudio/shiny/issues/1511): `fileInput`s did not trigger the `shiny:inputchanged` event on the client. Also removed `shiny:fileuploaded` JavaScript event, because it is no longer needed after this fix. ([#1541](https://github.com/rstudio/shiny/pull/1541), [#1570](https://github.com/rstudio/shiny/pull/1570))

@@ -60,17 +60,17 @@ test_that("ggplot coordmap", {
   dev.off()
 
   # Check mapping vars
-  expect_equal(m[[1]]$mapping, list(x = "xvar", y = "yvar"))
+  expect_equal(sortList(m[[1]]$mapping), list(x = "xvar", y = "yvar"))
 
 
-  # Plot with computed variable (histogram)
-  p <- ggplot(dat, aes(xvar)) + geom_histogram(binwidth=1)
+  # Plot with an expression in aes, and a computed variable (histogram)
+  p <- ggplot(dat, aes(xvar/2)) + geom_histogram(binwidth=1)
   png(tmpfile)
   m <- getGgplotCoordmap(print(p), 1, 72)
   dev.off()
 
   # Check mapping vars - no value for y
-  expect_equal(m[[1]]$mapping, list(x = "xvar", y = NULL))
+  expect_equal(sortList(m[[1]]$mapping), list(x = "xvar/2", y = NULL))
 })
 
 

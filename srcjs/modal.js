@@ -6,11 +6,6 @@ exports.modal = {
   // which is coded in here.
   show: function({ html='', deps=[] } = {}) {
 
-    // If there was an existing Bootstrap modal, then there will be a modal-
-    // backdrop div that was added outside of the modal wrapper, and it must be
-    // removed; otherwise there can be multiple of these divs.
-    $('.modal-backdrop').remove();
-
     // Get existing wrapper DOM element, or create if needed.
     let $modal = $('#shiny-modal-wrapper');
     if ($modal.length === 0) {
@@ -42,6 +37,17 @@ exports.modal = {
       }
     });
 
+    if (!$modal.is(":visible")) { 
+      $('.modal-backdrop').show();
+      $modal.show(); 
+      return;
+    }
+
+    // If there was an existing Bootstrap modal, then there will be a modal-
+    // backdrop div that was added outside of the modal wrapper, and it must be
+    // removed; otherwise there can be multiple of these divs.
+    $('.modal-backdrop').remove();
+
     // Set/replace contents of wrapper with html.
     exports.renderContent($modal, { html: html, deps: deps });
   },
@@ -62,5 +68,12 @@ exports.modal = {
       exports.unbindAll($modal);
       $modal.remove();
     }
+  },
+
+  hide: function() {
+    const $modal = $('#shiny-modal-wrapper');
+    $modal.off('keydown.shinymodal');
+    $('.modal-backdrop').hide();
+    $modal.hide();
   }
 };

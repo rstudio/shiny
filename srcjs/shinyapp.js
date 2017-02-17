@@ -594,6 +594,8 @@ var ShinyApp = function() {
       exports.modal.show(message.message);
     else if (message.type === 'remove')
       exports.modal.remove(); // For 'remove', message content isn't used
+    else if (message.type === 'hide')
+      exports.modal.hide(); // For 'hide', message content isn't used
     else
       throw('Unkown modal type: ' + message.type);
   });

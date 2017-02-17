@@ -1114,7 +1114,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     addMessageHandler('modal', function (message) {
       if (message.type === 'show') exports.modal.show(message.message);else if (message.type === 'remove') exports.modal.remove(); // For 'remove', message content isn't used
-      else throw 'Unkown modal type: ' + message.type;
+      else if (message.type === 'hide') exports.modal.hide(); // For 'hide', message content isn't used
+        else throw 'Unkown modal type: ' + message.type;
     });
 
     addMessageHandler('response', function (message) {
@@ -1605,11 +1606,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var deps = _ref3$deps === undefined ? [] : _ref3$deps;
 
 
-      // If there was an existing Bootstrap modal, then there will be a modal-
-      // backdrop div that was added outside of the modal wrapper, and it must be
-      // removed; otherwise there can be multiple of these divs.
-      $('.modal-backdrop').remove();
-
       // Get existing wrapper DOM element, or create if needed.
       var $modal = $('#shiny-modal-wrapper');
       if ($modal.length === 0) {
@@ -1640,6 +1636,17 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         }
       });
 
+      if (!$modal.is(":visible")) {
+        $('.modal-backdrop').show();
+        $modal.show();
+        return;
+      }
+
+      // If there was an existing Bootstrap modal, then there will be a modal-
+      // backdrop div that was added outside of the modal wrapper, and it must be
+      // removed; otherwise there can be multiple of these divs.
+      $('.modal-backdrop').remove();
+
       // Set/replace contents of wrapper with html.
       exports.renderContent($modal, { html: html, deps: deps });
     },
@@ -1659,6 +1666,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         exports.unbindAll($modal);
         $modal.remove();
       }
+    },
+
+    hide: function hide() {
+      var $modal = $('#shiny-modal-wrapper');
+      $modal.off('keydown.shinymodal');
+      $('.modal-backdrop').hide();
+      $modal.hide();
     }
   };
 

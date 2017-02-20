@@ -31,6 +31,8 @@
 #'   \code{"yyyy-mm-dd"}.
 #' @param startview The date range shown when the input object is first clicked.
 #'   Can be "month" (the default), "year", or "decade".
+#' @param minviewmode The granularity of the dates the user will choose from. 
+#'   Can be "days" (the default), "months", or "years".
 #' @param weekstart Which day is the start of the week. Should be an integer
 #'   from 0 (Sunday) to 6 (Saturday).
 #' @param language The language used for month and day names. Default is "en".
@@ -69,14 +71,18 @@
 #'   # Start with decade view instead of default month view
 #'   dateInput("date6", "Date:",
 #'             startview = "decade")
+#'                         
+#'   # Allow the user to select a month instead of a day
+#'   dateInput("date7", "Date:",
+#'             minviewmode = "months")
 #' )
 #'
 #' shinyApp(ui, server = function(input, output) { })
 #' }
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
-  format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en",
-  width = NULL) {
+  format = "yyyy-mm-dd", startview = "month", minviewmode = "days", 
+  weekstart = 0, language = "en", width = NULL) {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
@@ -95,6 +101,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                class = "form-control",
                `data-date-language` = language,
                `data-date-week-start` = weekstart,
+               `data-date-min-view-mode` = minviewmode,
                `data-date-format` = format,
                `data-date-start-view` = startview,
                `data-min-date` = min,

@@ -5,8 +5,9 @@
 \title{Create date range input}
 \usage{
 dateRangeInput(inputId, label, start = NULL, end = NULL, min = NULL,
-  max = NULL, format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-  language = "en", separator = " to ", width = NULL)
+  max = NULL, format = "yyyy-mm-dd", startview = "month",
+  minviewmode = "days", weekstart = 0, language = "en",
+  separator = " to ", width = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -32,6 +33,9 @@ date in the client's time zone.}
 
 \item{startview}{The date range shown when the input object is first clicked.
 Can be "month" (the default), "year", or "decade".}
+
+\item{minviewmode}{The granularity of the dates the user will choose from. 
+Can be "days" (the default), "months", or "years".}
 
 \item{weekstart}{Which day is the start of the week. Should be an integer
 from 0 (Sunday) to 6 (Saturday).}
@@ -105,7 +109,11 @@ ui <- fluidPage(
 
   # Start with decade view instead of default month view
   dateRangeInput("daterange6", "Date range:",
-                 startview = "decade")
+                 startview = "decade"),
+                 
+  # Allow the user to select a month instead of a day
+  dateRangeInput("daterange7", "Date range:",
+                 minviewmode = "months")
 )
 
 shinyApp(ui, server = function(input, output) { })

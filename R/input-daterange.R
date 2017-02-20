@@ -66,6 +66,10 @@
 #'   # Start with decade view instead of default month view
 #'   dateRangeInput("daterange6", "Date range:",
 #'                  startview = "decade")
+#'                  
+#'   # Allow the user to select a month instead of a day
+#'   dateRangeInput("daterange7", "Date range:",
+#'                  minviewmode = "months")
 #' )
 #'
 #' shinyApp(ui, server = function(input, output) { })
@@ -73,7 +77,8 @@
 #' @export
 dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     min = NULL, max = NULL, format = "yyyy-mm-dd", startview = "month",
-    weekstart = 0, language = "en", separator = " to ", width = NULL) {
+    minviewmode = "days", weekstart = 0, language = "en", 
+    separator = " to ", width = NULL) {
 
   # If start and end are date objects, convert to a string with yyyy-mm-dd format
   # Same for min and max
@@ -99,6 +104,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
           type = "text",
           `data-date-language` = language,
           `data-date-weekstart` = weekstart,
+          `data-date-min-view-mode` = minviewmode,
           `data-date-format` = format,
           `data-date-start-view` = startview,
           `data-min-date` = min,
@@ -111,6 +117,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
           type = "text",
           `data-date-language` = language,
           `data-date-weekstart` = weekstart,
+          `data-date-min-view-mode` = minviewmode,
           `data-date-format` = format,
           `data-date-start-view` = startview,
           `data-min-date` = min,

@@ -262,7 +262,7 @@ var InputEventDecorator = function(target) {
   this.target = target;
 };
 (function() {
-  this.setInput = function(name, value, immediate) {
+  this.setInput = function(name, value) {
     var evt = jQuery.Event("shiny:inputchanged");
 
     const input = splitInputNameType(name);
@@ -273,7 +273,7 @@ var InputEventDecorator = function(target) {
     if (!evt.isDefaultPrevented()) {
       name = evt.name;
       if (evt.inputType !== '') name += ':' + evt.inputType;
-      this.target.setInput(name, evt.value, immediate);
+      this.target.setInput(name, evt.value);
     }
   };
 }).call(InputEventDecorator.prototype);
@@ -286,9 +286,9 @@ var InputRateDecorator = function(target) {
   this.setInput = function(name, value, immediate) {
     this.$ensureInit(name);
     if (immediate)
-      this.inputRatePolicies[name].immediateCall(name, value, immediate);
+      this.inputRatePolicies[name].immediateCall(name, value);
     else
-      this.inputRatePolicies[name].normalCall(name, value, immediate);
+      this.inputRatePolicies[name].normalCall(name, value);
   };
   this.setRatePolicy = function(name, mode, millis) {
     if (mode === 'direct') {

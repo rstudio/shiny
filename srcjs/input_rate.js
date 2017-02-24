@@ -217,10 +217,16 @@ var InputNoResendDecorator = function(target, initialValues) {
 };
 (function() {
   this.setInput = function(name, value) {
-    var jsonValue = JSON.stringify(value);
-    if (this.lastSentValues[name] === jsonValue)
+    const { name: inputName, inputType: inputType } = splitInputNameType(name);
+    const jsonValue = JSON.stringify(value);
+
+    // Resend if either json value or the input type has changed.
+    if (this.lastSentValues[inputName] &&
+        this.lastSentValues[inputName].jsonValue === jsonValue &&
+        this.lastSentValues[inputName].inputType === inputType) {
       return;
-    this.lastSentValues[name] = jsonValue;
+    }
+    this.lastSentValues[inputName] = { jsonValue, inputType };
     this.target.setInput(name, value);
   };
   this.reset = function(values) {
@@ -258,9 +264,10 @@ var InputEventDecorator = function(target) {
 (function() {
   this.setInput = function(name, value, immediate) {
     var evt = jQuery.Event("shiny:inputchanged");
-    var name2 = name.split(':');
-    evt.name = name2[0];
-    evt.inputType = name2.length > 1 ? name2[1] : '';
+
+    const input = splitInputNameType(name);
+    evt.name = input.name;
+    evt.inputType = input.inputType;
     evt.value = value;
     $(document).trigger(evt);
     if (!evt.isDefaultPrevented()) {
@@ -302,3 +309,12 @@ var InputRateDecorator = function(target) {
     this.target.setInput(name, value);
   };
 }).call(InputRateDecorator.prototype);
+
+
+  function splitInputNameType(name) {
+    const name2 = name.split(':');
+    return {
+      name:      name2[0],
+      inputType: name2.length > 1 ? name2[1] : ''
+    };
+  }

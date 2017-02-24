@@ -178,6 +178,7 @@ function throttle(threshold, func) {
   return throttled;
 }
 
+
 // Schedules data to be sent to shinyapp at the next setTimeout(0).
 // Batches multiple input calls into one websocket message.
 var InputBatchSender = function(shinyapp) {
@@ -188,7 +189,7 @@ var InputBatchSender = function(shinyapp) {
   this.lastChanceCallback = [];
 };
 (function() {
-  this.setInput = function(name, value) {
+  this.setInput = function(name, value, opts) {
     var self = this;
 
     this.pendingData[name] = value;
@@ -211,23 +212,25 @@ var InputBatchSender = function(shinyapp) {
   };
 }).call(InputBatchSender.prototype);
 
+
 var InputNoResendDecorator = function(target, initialValues) {
   this.target = target;
   this.lastSentValues = initialValues || {};
 };
 (function() {
-  this.setInput = function(name, value) {
+  this.setInput = function(name, value, opts) {
     const { name: inputName, inputType: inputType } = splitInputNameType(name);
     const jsonValue = JSON.stringify(value);
 
-    // Resend if either json value or the input type has changed.
+    // Resend if either json value or the input type has changed. Note that if
+    // `opts` changes, it will not the value to be resent.
     if (this.lastSentValues[inputName] &&
         this.lastSentValues[inputName].jsonValue === jsonValue &&
         this.lastSentValues[inputName].inputType === inputType) {
       return;
     }
     this.lastSentValues[inputName] = { jsonValue, inputType };
-    this.target.setInput(name, value);
+    this.target.setInput(name, value, opts);
   };
   this.reset = function(values) {
     values = values || {};
@@ -239,56 +242,82 @@ var InputNoResendDecorator = function(target, initialValues) {
   };
 }).call(InputNoResendDecorator.prototype);
 
+
 var InputDeferDecorator = function(target) {
   this.target = target;
   this.pendingInput = {};
 };
 (function() {
-  this.setInput = function(name, value) {
+  this.setInput = function(name, value, opts) {
+    opts = Object.assign({
+      binding: null,
+      el: null
+    }, opts);
+
     if (/^\./.test(name))
-      this.target.setInput(name, value);
+      this.target.setInput(name, value, opts);
     else
-      this.pendingInput[name] = value;
+      this.pendingInput[name] = { value, opts };
   };
   this.submit = function() {
     for (var name in this.pendingInput) {
-      if (this.pendingInput.hasOwnProperty(name))
-        this.target.setInput(name, this.pendingInput[name]);
+      if (this.pendingInput.hasOwnProperty(name)) {
+        let input = this.pendingInput[name];
+        this.target.setInput(name, input.value, input.opts);
+      }
     }
   };
 }).call(InputDeferDecorator.prototype);
+
 
 var InputEventDecorator = function(target) {
   this.target = target;
 };
 (function() {
-  this.setInput = function(name, value) {
+  this.setInput = function(name, value, opts) {
+    opts = Object.assign({
+      binding: null,
+      el: null
+    }, opts);
+
     var evt = jQuery.Event("shiny:inputchanged");
 
     const input = splitInputNameType(name);
     evt.name = input.name;
     evt.inputType = input.inputType;
     evt.value = value;
+    evt.binding   = opts.binding;
+    evt.el        = opts.el;
+
     $(document).trigger(evt);
+
     if (!evt.isDefaultPrevented()) {
       name = evt.name;
       if (evt.inputType !== '') name += ':' + evt.inputType;
-      this.target.setInput(name, evt.value);
+      this.target.setInput(name, evt.value, opts);
     }
   };
 }).call(InputEventDecorator.prototype);
+
 
 var InputRateDecorator = function(target) {
   this.target = target;
   this.inputRatePolicies = {};
 };
 (function() {
-  this.setInput = function(name, value, immediate) {
+  this.setInput = function(name, value, opts) {
+    opts = Object.assign({
+      immediate: false,
+      binding: null,
+      el: null
+    }, opts);
+
     this.$ensureInit(name);
-    if (immediate)
-      this.inputRatePolicies[name].immediateCall(name, value);
+
+    if (opts.immediate)
+      this.inputRatePolicies[name].immediateCall(name, value, opts);
     else
-      this.inputRatePolicies[name].normalCall(name, value);
+      this.inputRatePolicies[name].normalCall(name, value, opts);
   };
   this.setRatePolicy = function(name, mode, millis) {
     if (mode === 'direct') {
@@ -305,8 +334,8 @@ var InputRateDecorator = function(target) {
     if (!(name in this.inputRatePolicies))
       this.setRatePolicy(name, 'direct');
   };
-  this.$doSetInput = function(name, value) {
-    this.target.setInput(name, value);
+  this.$doSetInput = function(name, value, opts) {
+    this.target.setInput(name, value, opts);
   };
 }).call(InputRateDecorator.prototype);
 

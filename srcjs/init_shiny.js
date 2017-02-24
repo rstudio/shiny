@@ -93,8 +93,14 @@ function initShiny() {
     });
   });
 
-  exports.onInputChange = function(name, value) {
-    inputs.setInput(name, value);
+  exports.onInputChange = function(name, value, opts) {
+    opts = Object.assign({
+      immediate: false,
+      binding: null,
+      el: null
+    }, opts);
+
+    inputs.setInput(name, value, opts);
   };
 
   var boundInputs = {};
@@ -106,7 +112,9 @@ function initShiny() {
       var type = binding.getType(el);
       if (type)
         id = id + ":" + type;
-      inputs.setInput(id, value, !allowDeferred);
+
+      let opts = { immediate: !allowDeferred, binding: binding, el: el };
+      inputs.setInput(id, value, opts);
     }
   }
 

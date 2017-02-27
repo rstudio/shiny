@@ -264,15 +264,20 @@ function initShiny() {
   initializeInputs(document);
 
   var initialValues = _bindAll(document);
-
+  // Each entry in initialValues has the structure { value: 123, opts: {} },
+  // where opts is an empty object, to be consistent with the (non-initial)
+  // input values.
+  function addInitialValue(name, value) {
+    initialValues[name] = { value, opts: {} };
+  }
 
   // The server needs to know the size of each image and plot output element,
   // in case it is auto-sizing
   $('.shiny-image-output, .shiny-plot-output').each(function() {
     var id = getIdFromEl(this);
     if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
-      initialValues['.clientdata_output_' + id + '_width'] = this.offsetWidth;
-      initialValues['.clientdata_output_' + id + '_height'] = this.offsetHeight;
+      addInitialValue('.clientdata_output_' + id + '_width', this.offsetWidth);
+      addInitialValue('.clientdata_output_' + id + '_height', this.offsetHeight);
     }
   });
   function doSendImageSize() {
@@ -322,10 +327,10 @@ function initShiny() {
   $('.shiny-bound-output').each(function() {
     var id = getIdFromEl(this);
     if (isHidden(this)) {
-      initialValues['.clientdata_output_' + id + '_hidden'] = true;
+      addInitialValue('.clientdata_output_' + id + '_hidden', true);
     } else {
       lastKnownVisibleOutputs[id] = true;
-      initialValues['.clientdata_output_' + id + '_hidden'] = false;
+      addInitialValue('.clientdata_output_' + id + '_hidden', false);
     }
   });
   // Send update when hidden state changes
@@ -414,19 +419,19 @@ function initShiny() {
                sendOutputHiddenState);
 
   // Send initial pixel ratio, and update it if it changes
-  initialValues['.clientdata_pixelratio'] = pixelRatio();
+  addInitialValue('.clientdata_pixelratio', pixelRatio());
   $(window).resize(function() {
     inputs.setInput('.clientdata_pixelratio', pixelRatio());
   });
 
   // Send initial URL
-  initialValues['.clientdata_url_protocol'] = window.location.protocol;
-  initialValues['.clientdata_url_hostname'] = window.location.hostname;
-  initialValues['.clientdata_url_port']     = window.location.port;
-  initialValues['.clientdata_url_pathname'] = window.location.pathname;
+  addInitialValue('.clientdata_url_protocol', window.location.protocol);
+  addInitialValue('.clientdata_url_hostname', window.location.hostname);
+  addInitialValue('.clientdata_url_port',     window.location.port);
+  addInitialValue('.clientdata_url_pathname', window.location.pathname);
 
   // Send initial URL search (query string) and update it if it changes
-  initialValues['.clientdata_url_search']   = window.location.search;
+  addInitialValue('.clientdata_url_search',   window.location.search);
 
   $(window).on('pushstate', function(e) {
     inputs.setInput('.clientdata_url_search', window.location.search);
@@ -440,8 +445,8 @@ function initShiny() {
   // a reactive version of this isn't sent because watching for changes can
   // require polling on some browsers. The JQuery hashchange plugin can be
   // used if this capability is important.
-  initialValues['.clientdata_url_hash_initial'] = window.location.hash;
-  initialValues['.clientdata_url_hash'] = window.location.hash;
+  addInitialValue('.clientdata_url_hash_initial', window.location.hash);
+  addInitialValue('.clientdata_url_hash', window.location.hash);
 
   $(window).on('hashchange', function(e) {
     inputs.setInput('.clientdata_url_hash', location.hash);
@@ -449,8 +454,8 @@ function initShiny() {
 
   // The server needs to know what singletons were rendered as part of
   // the page loading
-  var singletonText = initialValues['.clientdata_singletons'] =
-      $('script[type="application/shiny-singletons"]').text();
+  var singletonText = $('script[type="application/shiny-singletons"]').text();
+  addInitialValue('.clientdata_singletons', singletonText);
   singletons.registerNames(singletonText.split(/,/));
 
   var dependencyText = $('script[type="application/html-dependencies"]').text();

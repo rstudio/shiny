@@ -192,7 +192,8 @@ var InputBatchSender = function(shinyapp) {
   this.setInput = function(name, value, opts) {
     var self = this;
 
-    this.pendingData[name] = value;
+    this.pendingData[name] = { value, opts };
+
     if (!this.timerId && !this.reentrant) {
       this.timerId = setTimeout(function() {
         self.reentrant = true;
@@ -234,10 +235,7 @@ var InputNoResendDecorator = function(target, initialValues) {
   };
   this.reset = function(values) {
     values = values || {};
-    var strValues = {};
-    $.each(values, function(key, value) {
-      strValues[key] = JSON.stringify(value);
-    });
+    var strValues = mapValues(values, x => JSON.stringify(x.value));
     this.lastSentValues = strValues;
   };
 }).call(InputNoResendDecorator.prototype);

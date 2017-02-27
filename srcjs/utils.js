@@ -207,3 +207,14 @@ function mergeSort(list, sortfunc) {
 var $escape = exports.$escape = function(val) {
   return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
 };
+
+// Maps a function over an object, preserving keys. Like the mapValues
+// function from lodash.
+function mapValues(obj, f) {
+  const newObj = {};
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key))
+      newObj[key] = f(obj[key]);
+  }
+  return newObj;
+}

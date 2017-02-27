@@ -121,7 +121,7 @@ function initShiny() {
   function bindInputs(scope = document) {
     var bindings = inputBindings.getBindings();
 
-    var currentValues = {};
+    var inputItems = {};
 
     for (var i = 0; i < bindings.length; i++) {
       var binding = bindings[i].binding;
@@ -136,7 +136,13 @@ function initShiny() {
 
         var type = binding.getType(el);
         var effectiveId = type ? id + ":" + type : id;
-        currentValues[effectiveId] = binding.getValue(el);
+        inputItems[effectiveId] = {
+          value: binding.getValue(el),
+          opts: {
+            binding: binding,
+            el: el
+          }
+        };
 
         /*jshint loopfunc:true*/
         var thisCallback = (function() {
@@ -171,7 +177,7 @@ function initShiny() {
       }
     }
 
-    return currentValues;
+    return inputItems;
   }
 
   function unbindInputs(scope = document, includeSelf = false) {

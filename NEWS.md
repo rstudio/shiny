@@ -32,6 +32,8 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * Fixed [#1472](https://github.com/rstudio/shiny/issues/1472): With a Progress object, calling `set(value=NULL)` made the progress bar go to 100%. Now it does not change the value of the progress bar. The documentation also incorrectly said that setting the `value` to `NULL` would hide the progress bar. ([#1547](https://github.com/rstudio/shiny/pull/1547))
 
+* Fixed [#162](https://github.com/rstudio/shiny/issues/162): When a dynamically-generated input changed to a different `inputType`, it might be incorrectly deduplicated.  ([#1594](https://github.com/rstudio/shiny/pull/1594))
+
 ### Library updates
 
 * Closed [#1500](https://github.com/rstudio/shiny/issues/1500): Updated ion.rangeSlider to 2.1.6. ([#1540](https://github.com/rstudio/shiny/pull/1540))

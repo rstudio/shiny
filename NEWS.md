@@ -34,6 +34,8 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * Fixed [#162](https://github.com/rstudio/shiny/issues/162): When a dynamically-generated input changed to a different `inputType`, it might be incorrectly deduplicated.  ([#1594](https://github.com/rstudio/shiny/pull/1594))
 
+* Removed redundant call to `inputs.setInput`. ([#1595](https://github.com/rstudio/shiny/pull/1595))
+
 ### Library updates
 
 * Closed [#1500](https://github.com/rstudio/shiny/issues/1500): Updated ion.rangeSlider to 2.1.6. ([#1540](https://github.com/rstudio/shiny/pull/1540))

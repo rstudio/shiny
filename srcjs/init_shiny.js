@@ -160,10 +160,6 @@ function initShiny() {
           binding: binding,
           bindingType: 'input'
         });
-
-        if (shinyapp.isConnected()) {
-          valueChangeCallback(binding, el, false);
-        }
       }
     }
 

@@ -38,9 +38,10 @@ var IE8FileUploader = function(shinyapp, id, fileEl) {
   };
 }).call(IE8FileUploader.prototype);
 
-var FileUploader = function(shinyapp, id, files) {
+var FileUploader = function(shinyapp, id, files, el) {
   this.shinyapp = shinyapp;
   this.id = id;
+  this.el = el;
   FileProcessor.call(this, files);
 };
 $.extend(FileUploader.prototype, FileProcessor.prototype);
@@ -130,6 +131,8 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
     var evt = jQuery.Event("shiny:inputchanged");
     evt.name = this.id;
     evt.value = fileInfo;
+    evt.binding = fileInputBinding;
+    evt.el = this.el;
     evt.inputType = 'shiny.fileupload';
     $(document).trigger(evt);
 
@@ -213,7 +216,8 @@ function uploadFiles(evt) {
     /*jshint nonew:false */
     new IE8FileUploader(exports.shinyapp, id, evt.target);
   } else {
-    $el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+    $el.data('currentUploader',
+      new FileUploader(exports.shinyapp, id, files, evt.target));
   }
 }
 

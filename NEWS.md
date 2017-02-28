@@ -36,6 +36,8 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * Removed redundant call to `inputs.setInput`. ([#1595](https://github.com/rstudio/shiny/pull/1595))
 
+* Fixed bug where `dateRangeInput` did not respect `weekstart` argument. ([#1592](https://github.com/rstudio/shiny/pull/1592))
+
 ### Library updates
 
 * Closed [#1500](https://github.com/rstudio/shiny/issues/1500): Updated ion.rangeSlider to 2.1.6. ([#1540](https://github.com/rstudio/shiny/pull/1540))

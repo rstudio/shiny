@@ -102,12 +102,7 @@ function initShiny() {
   var inputs = inputsValidate;
 
   exports.onInputChange = function(name, value, opts) {
-    opts = Object.assign({
-      immediate: false,
-      binding: null,
-      el: null
-    }, opts);
-
+    opts = addDefaultInputOpts(opts);
     inputs.setInput(name, value, opts);
   };
 

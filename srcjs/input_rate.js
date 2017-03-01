@@ -335,16 +335,21 @@ const InputValidateDecorator = function(target) {
     if (!name)
       throw "Can't set input with empty name.";
 
-    // Merge with default options
-    opts = Object.assign({
-      immediate: false,
-      binding: null,
-      el: null
-    }, opts);
+    opts = addDefaultInputOpts(opts);
 
     this.target.setInput(name, value, opts);
   };
 }).call(InputValidateDecorator.prototype);
+
+
+// Merge opts with defaults, and return a new object.
+function addDefaultInputOpts(opts) {
+  return Object.assign({
+    immediate: false,
+    binding: null,
+    el: null
+  }, opts);
+}
 
 
 function splitInputNameType(name) {

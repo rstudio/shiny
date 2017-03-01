@@ -139,6 +139,7 @@ function initShiny() {
         inputItems[effectiveId] = {
           value: binding.getValue(el),
           opts: {
+            immediate: true,
             binding: binding,
             el: el
           }

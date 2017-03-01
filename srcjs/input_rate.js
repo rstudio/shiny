@@ -224,7 +224,6 @@ var InputNoResendDecorator = function(target, initialValues) {
     // decorator stack. If in the future this setInput keeps track of opts, it
     // would be best not to store the `el`, because that could prevent it from
     // being GC'd.
-
     const { name: inputName, inputType: inputType } = splitInputNameType(name);
     const jsonValue = JSON.stringify(value);
 
@@ -249,11 +248,6 @@ var InputEventDecorator = function(target) {
 };
 (function() {
   this.setInput = function(name, value, opts) {
-    opts = Object.assign({
-      binding: null,
-      el: null
-    }, opts);
-
     var evt = jQuery.Event("shiny:inputchanged");
 
     const input = splitInputNameType(name);
@@ -283,12 +277,6 @@ var InputRateDecorator = function(target) {
 };
 (function() {
   this.setInput = function(name, value, opts) {
-    opts = Object.assign({
-      immediate: false,
-      binding: null,
-      el: null
-    }, opts);
-
     this.$ensureInit(name);
 
     if (opts.immediate)
@@ -323,11 +311,6 @@ var InputDeferDecorator = function(target) {
 };
 (function() {
   this.setInput = function(name, value, opts) {
-    opts = Object.assign({
-      binding: null,
-      el: null
-    }, opts);
-
     if (/^\./.test(name))
       this.target.setInput(name, value, opts);
     else
@@ -342,6 +325,26 @@ var InputDeferDecorator = function(target) {
     }
   };
 }).call(InputDeferDecorator.prototype);
+
+
+const InputValidateDecorator = function(target) {
+  this.target = target;
+};
+(function() {
+  this.setInput = function(name, value, opts) {
+    if (!name)
+      throw "Can't set input with empty name.";
+
+    // Merge with default options
+    opts = Object.assign({
+      immediate: false,
+      binding: null,
+      el: null
+    }, opts);
+
+    this.target.setInput(name, value, opts);
+  };
+}).call(InputValidateDecorator.prototype);
 
 
 function splitInputNameType(name) {

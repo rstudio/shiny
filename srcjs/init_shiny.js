@@ -82,16 +82,24 @@ function initShiny() {
   var inputsRate = new InputRateDecorator(inputsEvent);
   var inputsDefer = new InputDeferDecorator(inputsEvent);
 
-  // By default, use rate decorator
-  var inputs = inputsRate;
-  $('input[type="submit"], button[type="submit"]').each(function() {
+  var inputsValidate;
+  if ($('input[type="submit"], button[type="submit"]').length > 0) {
     // If there is a submit button on the page, use defer decorator
-    inputs = inputsDefer;
-    $(this).click(function(event) {
-      event.preventDefault();
-      inputsDefer.submit();
+    inputsValidate = new InputValidateDecorator(inputsDefer);
+
+    $('input[type="submit"], button[type="submit"]').each(function() {
+      $(this).click(function(event) {
+        event.preventDefault();
+        inputsDefer.submit();
+      });
     });
-  });
+
+  } else {
+    // By default, use rate decorator
+    inputsValidate = new InputValidateDecorator(inputsRate);
+  }
+
+  var inputs = inputsValidate;
 
   exports.onInputChange = function(name, value, opts) {
     opts = Object.assign({

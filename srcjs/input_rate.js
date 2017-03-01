@@ -257,9 +257,9 @@ var InputEventDecorator = function(target) {
     var evt = jQuery.Event("shiny:inputchanged");
 
     const input = splitInputNameType(name);
-    evt.name = input.name;
+    evt.name      = input.name;
     evt.inputType = input.inputType;
-    evt.value = value;
+    evt.value     = value;
     evt.binding   = opts.binding;
     evt.el        = opts.el;
 

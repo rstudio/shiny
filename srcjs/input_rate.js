@@ -338,10 +338,10 @@ var InputDeferDecorator = function(target) {
 }).call(InputDeferDecorator.prototype);
 
 
-  function splitInputNameType(name) {
-    const name2 = name.split(':');
-    return {
-      name:      name2[0],
-      inputType: name2.length > 1 ? name2[1] : ''
-    };
-  }
+function splitInputNameType(name) {
+  const name2 = name.split(':');
+  return {
+    name:      name2[0],
+    inputType: name2.length > 1 ? name2[1] : ''
+  };
+}

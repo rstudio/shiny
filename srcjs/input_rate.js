@@ -241,33 +241,6 @@ var InputNoResendDecorator = function(target, initialValues) {
 }).call(InputNoResendDecorator.prototype);
 
 
-var InputDeferDecorator = function(target) {
-  this.target = target;
-  this.pendingInput = {};
-};
-(function() {
-  this.setInput = function(name, value, opts) {
-    opts = Object.assign({
-      binding: null,
-      el: null
-    }, opts);
-
-    if (/^\./.test(name))
-      this.target.setInput(name, value, opts);
-    else
-      this.pendingInput[name] = { value, opts };
-  };
-  this.submit = function() {
-    for (var name in this.pendingInput) {
-      if (this.pendingInput.hasOwnProperty(name)) {
-        let input = this.pendingInput[name];
-        this.target.setInput(name, input.value, input.opts);
-      }
-    }
-  };
-}).call(InputDeferDecorator.prototype);
-
-
 var InputEventDecorator = function(target) {
   this.target = target;
 };
@@ -336,6 +309,33 @@ var InputRateDecorator = function(target) {
     this.target.setInput(name, value, opts);
   };
 }).call(InputRateDecorator.prototype);
+
+
+var InputDeferDecorator = function(target) {
+  this.target = target;
+  this.pendingInput = {};
+};
+(function() {
+  this.setInput = function(name, value, opts) {
+    opts = Object.assign({
+      binding: null,
+      el: null
+    }, opts);
+
+    if (/^\./.test(name))
+      this.target.setInput(name, value, opts);
+    else
+      this.pendingInput[name] = { value, opts };
+  };
+  this.submit = function() {
+    for (var name in this.pendingInput) {
+      if (this.pendingInput.hasOwnProperty(name)) {
+        let input = this.pendingInput[name];
+        this.target.setInput(name, input.value, input.opts);
+      }
+    }
+  };
+}).call(InputDeferDecorator.prototype);
 
 
   function splitInputNameType(name) {

@@ -189,10 +189,10 @@ var InputBatchSender = function(shinyapp) {
   this.lastChanceCallback = [];
 };
 (function() {
-  this.setInput = function(name, value, opts) {
+  this.setInput = function(name, value) {
     var self = this;
 
-    this.pendingData[name] = { value, opts };
+    this.pendingData[name] = value;
 
     if (!this.timerId && !this.reentrant) {
       this.timerId = setTimeout(function() {
@@ -219,19 +219,22 @@ var InputNoResendDecorator = function(target, initialValues) {
   this.lastSentValues = initialValues || {};
 };
 (function() {
-  this.setInput = function(name, value, opts) {
+  this.setInput = function(name, value) {
+    // Note that opts is not passed to setInput at this stage of the input
+    // decorator stack. If in the future this setInput keeps track of opts, it
+    // would be best not to store the `el`, because that could prevent it from
+    // being GC'd.
+
     const { name: inputName, inputType: inputType } = splitInputNameType(name);
     const jsonValue = JSON.stringify(value);
 
-    // Resend if either json value or the input type has changed. Note that if
-    // `opts` changes, it will not the value to be resent.
     if (this.lastSentValues[inputName] &&
         this.lastSentValues[inputName].jsonValue === jsonValue &&
         this.lastSentValues[inputName].inputType === inputType) {
       return;
     }
     this.lastSentValues[inputName] = { jsonValue, inputType };
-    this.target.setInput(name, value, opts);
+    this.target.setInput(name, value);
   };
   this.reset = function(values) {
     values = values || {};
@@ -265,7 +268,10 @@ var InputEventDecorator = function(target) {
     if (!evt.isDefaultPrevented()) {
       name = evt.name;
       if (evt.inputType !== '') name += ':' + evt.inputType;
-      this.target.setInput(name, evt.value, opts);
+
+      // opts aren't passed along to lower levels in the input decorator
+      // stack.
+      this.target.setInput(name, evt.value);
     }
   };
 }).call(InputEventDecorator.prototype);

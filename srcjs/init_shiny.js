@@ -214,12 +214,11 @@ function initShiny() {
     unbindOutputs(scope, includeSelf);
   }
   exports.bindAll = function(scope) {
-    // _bindAll alone returns initial values, it doesn't send them to the
-    // server. export.bindAll needs to send the values to the server, so we
-    // wrap _bindAll in a closure that does that.
+    // _bindAll returns input values; it doesn't send them to the server.
+    // export.bindAll needs to send the values to the server.
     var currentValues = _bindAll(scope);
-    $.each(currentValues, function(name, value) {
-      inputs.setInput(name, value);
+    $.each(currentValues, function(name, val) {
+      inputs.setInput(name, val.value, val.opts);
     });
 
     // Not sure if the iframe stuff is an intrinsic part of bindAll, but bindAll
@@ -264,8 +263,14 @@ function initShiny() {
   // Initialize all input objects in the document, before binding
   initializeInputs(document);
 
-  var initialValues = _bindAll(document);
-
+  // The input values returned by _bindAll() each have a structure like this:
+  //   { value: 123, opts: { ... } }
+  // We want to only keep the value. This is because when the initialValues is
+  // passed to ShinyApp.connect(), the ShinyApp object stores the
+  // initialValues object for the duration of the session, and the opts may
+  // have a reference to the DOM element, which would prevent it from being
+  // GC'd.
+  var initialValues = mapValues(_bindAll(document), x => x.value);
 
   // The server needs to know the size of each image and plot output element,
   // in case it is auto-sizing

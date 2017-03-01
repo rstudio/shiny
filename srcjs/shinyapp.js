@@ -100,23 +100,9 @@ var ShinyApp = function() {
 
       self.onConnected();
 
-      // self.$initialInput has a structure like this:
-      //   { x: { value: 1, opts: { binding: null, el: null } },
-      //     y: { value: 2, opts: { binding: null, el: null } } }
-      // We need to extract just the `value` so that we send just this data:
-      //   { x: 1, y: 2 }
-      const initialInputValues = mapValues(self.$initialInput, x => {
-        // TODO: Remove need for this test, by setting initial values with
-        // {values: 1} wrapper. We need to use hasOwnProperty because sometimes
-        // value is null.
-        if (x.hasOwnProperty("value"))
-          return x.value;
-        return x;
-      });
-
       socket.send(JSON.stringify({
         method: 'init',
-        data: initialInputValues
+        data: self.$initialInput
       }));
 
       while (self.$pendingMessages.length) {
@@ -148,16 +134,9 @@ var ShinyApp = function() {
   };
 
   this.sendInput = function(values) {
-    // `values` will have a format like this:
-    //   { x: { value: 1, opts: { binding: null, el: null } },
-    //     y: { value: 2, opts: { binding: null, el: null } } }
-    // We need to extract just the `value` so that we send just this data:
-    //   { x: 1, y: 2 }
-    const dataValues = mapValues(values, x => x.value);
-
-    const msg = JSON.stringify({
+    var msg = JSON.stringify({
       method: 'update',
-      data: dataValues
+      data: values
     });
 
     this.$sendMsg(msg);
@@ -413,7 +392,7 @@ var ShinyApp = function() {
     for (var name in this.$inputValues) {
       if (this.$inputValues.hasOwnProperty(name)) {
         var shortName = name.replace(/:.*/, '');
-        inputs[shortName] = this.$inputValues[name].value;
+        inputs[shortName] = this.$inputValues[name];
       }
     }
 

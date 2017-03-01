@@ -32,10 +32,7 @@ var ShinyApp = function() {
 
     $.extend(initialInput, {
       // IE8 and IE9 have some limitations with data URIs
-      ".clientdata_allowDataUriScheme": {
-        value: typeof WebSocket !== 'undefined',
-        opts: {}
-      }
+      ".clientdata_allowDataUriScheme": typeof WebSocket !== 'undefined'
     });
 
     this.$socket = this.createSocket();
@@ -108,7 +105,14 @@ var ShinyApp = function() {
       //     y: { value: 2, opts: { binding: null, el: null } } }
       // We need to extract just the `value` so that we send just this data:
       //   { x: 1, y: 2 }
-      const initialInputValues = mapValues(self.$initialInput, x => x.value);
+      const initialInputValues = mapValues(self.$initialInput, x => {
+        // TODO: Remove need for this test, by setting initial values with
+        // {values: 1} wrapper. We need to use hasOwnProperty because sometimes
+        // value is null.
+        if (x.hasOwnProperty("value"))
+          return x.value;
+        return x;
+      });
 
       socket.send(JSON.stringify({
         method: 'init',

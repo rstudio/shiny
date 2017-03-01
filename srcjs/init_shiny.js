@@ -224,9 +224,9 @@ function initShiny() {
   exports.bindAll = function(scope) {
     // _bindAll returns input values; it doesn't send them to the server.
     // export.bindAll needs to send the values to the server.
-    var currentValues = _bindAll(scope);
-    $.each(currentValues, function(name, val) {
-      inputs.setInput(name, val.value, val.opts);
+    var currentInputItems = _bindAll(scope);
+    $.each(currentInputItems, function(name, item) {
+      inputs.setInput(name, item.value, item.opts);
     });
 
     // Not sure if the iframe stuff is an intrinsic part of bindAll, but bindAll

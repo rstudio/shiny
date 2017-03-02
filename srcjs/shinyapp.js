@@ -632,7 +632,7 @@ var ShinyApp = function() {
 
   addMessageHandler('config', function(message) {
     this.config = {workerId: message.workerId, sessionId: message.sessionId};
-    if (message.user != null) exports.user = message.user;
+    if (message.user) exports.user = message.user;
   });
 
   addMessageHandler('busy', function(message) {

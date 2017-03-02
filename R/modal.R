@@ -22,8 +22,9 @@ showModal <- function(ui, session = getDefaultReactiveDomain()) {
 
 #' @rdname showModal
 #' @export
-removeModal <- function(session = getDefaultReactiveDomain()) {
-  session$sendModal("remove", NULL)
+removeModal <- function(session = getDefaultReactiveDomain(), hideOnly = FALSE) {
+  if (!hideOnly) session$sendModal("remove", NULL)
+  else session$sendModal("hide", NULL)
 }
 
 
@@ -176,8 +177,12 @@ modalDialog <- function(..., title = NULL, footer = modalButton("Dismiss"),
 #' @inheritParams actionButton
 #' @seealso \code{\link{modalDialog}} for examples.
 #' @export
-modalButton <- function(label, icon = NULL) {
-  tags$button(type = "button", class = "btn btn-default",
-    `data-dismiss` = "modal", validateIcon(icon), label
-  )
+modalButton <- function(label, icon = NULL, hideOnly = FALSE) {
+  if (!hideOnly) {
+    tags$button(type = "button", class = "btn btn-default",
+      `data-dismiss` = "modal", validateIcon(icon), label)
+  } else {
+    tags$button(type = "button", class = "btn btn-default",
+      validateIcon(icon), label, onclick = 'Shiny.modal.hide()')
+  }
 }

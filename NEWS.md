@@ -26,6 +26,8 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * Fixed [#1577](https://github.com/rstudio/shiny/issues/1577): Improved `escapeHTML` (util.js) in terms of the order dependency of replacing, XSS risk attack and performance. ([#1579](https://github.com/rstudio/shiny/pull/1579))
 
+* The `shiny:inputchanged` JavaScript event now includes two new fields, `binding` and `el`, which contain the input binding and DOM element, respectively. Additionally, `Shiny.onInputChange()` now accepts an optional argument, `opts`, which can contain the same fields. ([#1596](https://github.com/rstudio/shiny/pull/1596))
+
 ### Bug fixes
 
 * Fixed [#1511](https://github.com/rstudio/shiny/issues/1511): `fileInput`s did not trigger the `shiny:inputchanged` event on the client. Also removed `shiny:fileuploaded` JavaScript event, because it is no longer needed after this fix. ([#1541](https://github.com/rstudio/shiny/pull/1541), [#1570](https://github.com/rstudio/shiny/pull/1570))

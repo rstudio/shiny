@@ -98,6 +98,7 @@ module.exports = function(grunt) {
           // "no-shadow": 1,
           "no-undef": 1,
           "no-unused-vars": [1, {"args": "none"}],
+          "guard-for-in": 1,
           // "no-use-before-define": [1, {"functions": false}],
           "semi": [1, "always"]
         },

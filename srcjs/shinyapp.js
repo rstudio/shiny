@@ -4,6 +4,9 @@ var ShinyApp = function() {
   // Cached input values
   this.$inputValues = {};
 
+  // Input values at initialization (and reconnect)
+  this.$initialInput = {};
+
   // Output bindings
   this.$bindings = {};
 
@@ -26,11 +29,6 @@ var ShinyApp = function() {
   this.connect = function(initialInput) {
     if (this.$socket)
       throw "Connect was already called on this application object";
-
-    $.extend(initialInput, {
-      // IE8 and IE9 have some limitations with data URIs
-      ".clientdata_allowDataUriScheme": typeof WebSocket !== 'undefined'
-    });
 
     this.$socket = this.createSocket();
     this.$initialInput = initialInput;

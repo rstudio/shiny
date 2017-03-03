@@ -471,9 +471,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   };
   (function () {
     this.setInput = function (name, value) {
+      var _splitInputNameType = splitInputNameType(name);
+
+      var inputName = _splitInputNameType.name;
+      var inputType = _splitInputNameType.inputType;
+
       var jsonValue = JSON.stringify(value);
-      if (this.lastSentValues[name] === jsonValue) return;
-      this.lastSentValues[name] = jsonValue;
+
+      // Resend if either json value or the input type has changed.
+      if (this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
+        return;
+      }
+      this.lastSentValues[inputName] = { jsonValue: jsonValue, inputType: inputType };
       this.target.setInput(name, value);
     };
     this.reset = function (values) {
@@ -507,9 +516,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   (function () {
     this.setInput = function (name, value, immediate) {
       var evt = jQuery.Event("shiny:inputchanged");
-      var name2 = name.split(':');
-      evt.name = name2[0];
-      evt.inputType = name2.length > 1 ? name2[1] : '';
+
+      var input = splitInputNameType(name);
+      evt.name = input.name;
+      evt.inputType = input.inputType;
       evt.value = value;
       $(document).trigger(evt);
       if (!evt.isDefaultPrevented()) {
@@ -545,6 +555,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       this.target.setInput(name, value);
     };
   }).call(InputRateDecorator.prototype);
+
+  function splitInputNameType(name) {
+    var name2 = name.split(':');
+    return {
+      name: name2[0],
+      inputType: name2.length > 1 ? name2[1] : ''
+    };
+  }
 
   //---------------------------------------------------------------------
   // Source file: ../srcjs/shinyapp.js
@@ -1147,7 +1165,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     addMessageHandler('config', function (message) {
       this.config = { workerId: message.workerId, sessionId: message.sessionId };
-      if (message.user != null) exports.user = message.user;
+      if (message.user) exports.user = message.user;
     });
 
     addMessageHandler('busy', function (message) {
@@ -5142,10 +5160,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
             binding: binding,
             bindingType: 'input'
           });
-
-          if (shinyapp.isConnected()) {
-            valueChangeCallback(binding, el, false);
-          }
         }
       }
 

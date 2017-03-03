@@ -82,10 +82,10 @@ function initShiny() {
   var inputsRate = new InputRateDecorator(inputsEvent);
   var inputsDefer = new InputDeferDecorator(inputsEvent);
 
-  var inputsValidate;
+  var inputs;
   if ($('input[type="submit"], button[type="submit"]').length > 0) {
     // If there is a submit button on the page, use defer decorator
-    inputsValidate = new InputValidateDecorator(inputsDefer);
+    inputs = inputsDefer;
 
     $('input[type="submit"], button[type="submit"]').each(function() {
       $(this).click(function(event) {
@@ -96,10 +96,10 @@ function initShiny() {
 
   } else {
     // By default, use rate decorator
-    inputsValidate = new InputValidateDecorator(inputsRate);
+    inputs = inputsRate;
   }
 
-  var inputs = inputsValidate;
+  inputs = new InputValidateDecorator(inputs);
 
   exports.onInputChange = function(name, value, opts) {
     opts = addDefaultInputOpts(opts);

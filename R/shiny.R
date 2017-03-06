@@ -416,6 +416,7 @@ ShinySession <- R6Class(
     restoreCallbacks = 'Callbacks',
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
+    getBookmarkExcludeFuns = list(),
 
     testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
@@ -578,6 +579,16 @@ ShinySession <- R6Class(
         })
 
       }) # withReactiveDomain
+    },
+
+    # Modules (scopes) call this to register a function that returns a vector
+    # of names to exclude from bookmarking. The function should return
+    # something like c("scope1-x", "scope1-y"). This doesn't use a Callback
+    # object because the return values of the functions are needed, but
+    # Callback$invoke() discards return values.
+    registerBookmarkExclude = function(fun) {
+      len <- length(private$getBookmarkExcludeFuns) + 1
+      private$getBookmarkExcludeFuns[[len]] <- fun
     },
 
     # Save output values and errors. This is only used for testing mode.
@@ -947,6 +958,12 @@ ShinySession <- R6Class(
         restoredCallbacks$invoke(scopeState)
       })
 
+      # Returns the excluded names with the scope's ns prefix on them.
+      private$registerBookmarkExclude(function() {
+        excluded <- scope$getBookmarkExclude()
+        vapply(excluded, ns, character(1), USE.NAMES = FALSE)
+      })
+
       scope
     },
     ns = function(id) {
@@ -1278,8 +1295,12 @@ ShinySession <- R6Class(
       private$bookmarkExclude <- names
     },
     getBookmarkExclude = function() {
-      private$bookmarkExclude
+      scopedExcludes <- lapply(private$getBookmarkExcludeFuns, function(f) f())
+      scopedExcludes <- unlist(scopedExcludes)
+
+      c(private$bookmarkExclude, scopedExcludes)
     },
+
     onBookmark = function(fun) {
       if (!is.function(fun) || length(fun) != 1) {
         stop("`fun` must be a function that takes one argument")

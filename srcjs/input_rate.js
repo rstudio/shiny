@@ -237,7 +237,7 @@ var InputNoResendDecorator = function(target, initialValues) {
   };
   this.reset = function(values) {
     values = values || {};
-    var strValues = mapValues(values, x => JSON.stringify(x.value));
+    var strValues = values;
     this.lastSentValues = strValues;
   };
 }).call(InputNoResendDecorator.prototype);

@@ -478,7 +478,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   var InputNoResendDecorator = function InputNoResendDecorator(target, initialValues) {
     this.target = target;
-    this.lastSentValues = initialValues || {};
+    this.lastSentValues = this.reset(initialValues);
   };
   (function () {
     this.setInput = function (name, value) {
@@ -499,10 +499,31 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       this.lastSentValues[inputName] = { jsonValue: jsonValue, inputType: inputType };
       this.target.setInput(name, value);
     };
-    this.reset = function (values) {
-      values = values || {};
-      var strValues = values;
-      this.lastSentValues = strValues;
+    this.reset = function () {
+      var values = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      // Given an object with flat name-value format:
+      //   { x: "abc", "y.shiny.number": 123 }
+      // Create an object in cache format and save it:
+      //   { x: { jsonValue: '"abc"', inputType: "" },
+      //     y: { jsonValue: "123", inputType: "shiny.number" } }
+      var cacheValues = {};
+
+      for (var inputName in values) {
+        if (values.hasOwnProperty(inputName)) {
+          var _splitInputNameType2 = splitInputNameType(inputName);
+
+          var name = _splitInputNameType2.name;
+          var inputType = _splitInputNameType2.inputType;
+
+          cacheValues[name] = {
+            jsonValue: JSON.stringify(values[inputName]),
+            inputType: inputType
+          };
+        }
+      }
+
+      this.lastSentValues = cacheValues;
     };
   }).call(InputNoResendDecorator.prototype);
 

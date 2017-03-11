@@ -23,7 +23,7 @@ shinyShortcut <- function(shinyDirectory = getwd(), OS = .Platform$OS.type) {
   unlink(".shiny_run", recursive = TRUE, force = TRUE)
   unlink("shiny_run.desktop", recursive = FALSE, force = TRUE)
   unlink("shinyShortcut.vbs", recursive = FALSE, force = TRUE)
-  unlink("shinyShortuct.cmd", recursive = FALSE, force = TRUE)
+  unlink("shinyShortcut.cmd", recursive = FALSE, force = TRUE)
 
   dir.create(paste(shinyDirectory, ".shiny_run", sep = "/"))
 
@@ -44,7 +44,7 @@ shinyShortcut <- function(shinyDirectory = getwd(), OS = .Platform$OS.type) {
 
     batchReference <- paste0(shinyDirectory,
                              "/.shiny_run",
-                             "/shinyShortuct.cmd")
+                             "/shinyShortcut.cmd")
 
     write(batchCode, batchReference)
 

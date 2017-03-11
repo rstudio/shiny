@@ -70,4 +70,3 @@ shinyApp(ui, server)
 \seealso{
 \code{\link{enableBookmarking}} for more examples.
 }
-

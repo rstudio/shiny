@@ -12,4 +12,3 @@ reactivePrint(func)
 \description{
 See \code{\link{renderPrint}}.
 }
-

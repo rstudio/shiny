@@ -87,4 +87,3 @@ nearPoints(mtcars, input$plot_click, threshold = 10, maxpoints = 1)
 \seealso{
 \code{\link{plotOutput}} for more examples.
 }
-

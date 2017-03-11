@@ -18,4 +18,3 @@ reactivePlot(func, width = "auto", height = "auto", ...)
 \description{
 See \code{\link{renderPlot}}.
 }
-

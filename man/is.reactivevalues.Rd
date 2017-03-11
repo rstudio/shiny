@@ -15,4 +15,3 @@ Checks whether its argument is a reactivevalues object.
 \seealso{
 \code{\link{reactiveValues}}.
 }
-

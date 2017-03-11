@@ -40,4 +40,3 @@ outputOptions(output, "myplot")
 }
 
 }
-

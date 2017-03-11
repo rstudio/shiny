@@ -21,4 +21,3 @@ withMathJax(helpText("Some math here $$\\\\alpha+\\\\beta$$"))
 # now we can just write "static" content without withMathJax()
 div("more math here $$\\\\sqrt{2}$$")
 }
-

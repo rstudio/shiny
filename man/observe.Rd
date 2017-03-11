@@ -116,4 +116,3 @@ obsD <- observe(expr_q, quoted = TRUE)
 # are at the console, you can force a flush with flushReact()
 shiny:::flushReact()
 }
-

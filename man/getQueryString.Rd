@@ -91,4 +91,3 @@ if (interactive()) {
 \seealso{
 \code{\link{updateQueryString}}
 }
-

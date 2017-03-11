@@ -20,4 +20,3 @@ for data of this type, the default jsonlite serialization will be used.
 \seealso{
 \code{\link{registerInputHandler}}
 }
-

@@ -21,4 +21,3 @@ Create a header panel containing an application title.
 \examples{
 headerPanel("Hello Shiny!")
 }
-

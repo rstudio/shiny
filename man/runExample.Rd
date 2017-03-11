@@ -43,4 +43,3 @@ if (interactive()) {
   system.file("examples", package="shiny")
 }
 }
-

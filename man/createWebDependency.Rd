@@ -21,4 +21,3 @@ served over Shiny's HTTP server. This function works by using
 \code{\link{addResourcePath}} to map the HTML dependency's directory to a
 URL.
 }
-

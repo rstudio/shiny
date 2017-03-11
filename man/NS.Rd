@@ -41,4 +41,3 @@ into a namespaced one, by combining them with \code{ns.sep} in between.
 \url{http://shiny.rstudio.com/articles/modules.html}
 }
 \keyword{datasets}
-

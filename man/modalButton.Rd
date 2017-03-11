@@ -18,4 +18,3 @@ When clicked, a \code{modalButton} will dismiss the modal dialog.
 \seealso{
 \code{\link{modalDialog}} for examples.
 }
-

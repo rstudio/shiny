@@ -30,4 +30,3 @@ sidebarPanel(
   numericInput("obs", "Observations:", 10)
 )
 }
-

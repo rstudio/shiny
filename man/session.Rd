@@ -182,4 +182,3 @@ relating to the session. The following list describes the items available
 in the environment; they can be accessed using the \code{$} operator (for
 example, \code{session$clientData$url_search}).
 }
-

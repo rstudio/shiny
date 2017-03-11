@@ -32,4 +32,3 @@ addResourcePath('datasets', system.file('data', package='datasets'))
 \seealso{
 \code{\link{singleton}}
 }
-

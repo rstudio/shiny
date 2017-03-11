@@ -86,4 +86,3 @@ The default polling interval is 500 milliseconds. You can change this
   }
 }
 }
-

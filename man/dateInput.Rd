@@ -97,7 +97,7 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
 
-Other input.elements: \code{\link{actionButton}},
+Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},
   \code{\link{checkboxInput}},
   \code{\link{dateRangeInput}}, \code{\link{fileInput}},
@@ -106,4 +106,3 @@ Other input.elements: \code{\link{actionButton}},
   \code{\link{sliderInput}}, \code{\link{submitButton}},
   \code{\link{textAreaInput}}, \code{\link{textInput}}
 }
-

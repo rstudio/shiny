@@ -21,4 +21,3 @@ It isn't necessary to call this function if you use
 \code{\link{pageWithSidebar}}, and \code{\link{navbarPage}}, because they
 already include the Bootstrap web dependencies.
 }
-

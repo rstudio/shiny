@@ -74,4 +74,3 @@ if (interactive()) {
 \seealso{
 \code{\link{sliderInput}}
 }
-

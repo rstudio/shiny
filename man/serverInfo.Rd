@@ -19,4 +19,3 @@ just returns \code{list(shinyServer = FALSE)}.
 This function will only return meaningful data when using Shiny Server
 version 1.2.2 or later.
 }
-

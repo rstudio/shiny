@@ -16,4 +16,3 @@ slot.}
 Mark a render function with attributes that will be used by the output
 }
 \keyword{internal}
-

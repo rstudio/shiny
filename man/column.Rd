@@ -64,4 +64,3 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link{fluidRow}}, \code{\link{fixedRow}}.
 }
-

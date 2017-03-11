@@ -20,4 +20,3 @@ shinyDeprecated(new = NULL, msg = NULL,
 To disable these messages, use \code{options(shiny.deprecation.messages=FALSE)}.
 }
 \keyword{internal}
-

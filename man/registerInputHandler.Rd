@@ -62,4 +62,3 @@ getType: function(el) {
 \seealso{
 \code{\link{removeInputHandler}}
 }
-

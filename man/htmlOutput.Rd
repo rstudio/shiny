@@ -42,4 +42,3 @@ tags$ul(
   htmlOutput("summary", container = tags$li, class = "custom-li-output")
 )
 }
-

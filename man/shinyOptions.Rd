@@ -36,4 +36,3 @@ shinyOptions(myOption = 10)
 getShinyOption("myOption")
 }
 }
-

@@ -80,4 +80,3 @@ specify \code{0} for \code{top}, \code{left}, \code{right}, and \code{bottom}
 rather than the more obvious \code{width = "100\%"} and \code{height =
 "100\%"}.
 }
-

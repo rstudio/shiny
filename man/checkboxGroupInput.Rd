@@ -54,7 +54,7 @@ shinyApp(ui, server)
 \seealso{
 \code{\link{checkboxInput}}, \code{\link{updateCheckboxGroupInput}}
 
-Other input.elements: \code{\link{actionButton}},
+Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxInput}}, \code{\link{dateInput}},
   \code{\link{dateRangeInput}}, \code{\link{fileInput}},
   \code{\link{numericInput}}, \code{\link{passwordInput}},
@@ -62,4 +62,3 @@ Other input.elements: \code{\link{actionButton}},
   \code{\link{sliderInput}}, \code{\link{submitButton}},
   \code{\link{textAreaInput}}, \code{\link{textInput}}
 }
-

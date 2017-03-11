@@ -19,4 +19,3 @@ textarea input, and the URL text will be selected so that it can be easily
 copied. The result from \code{urlModal} should be passed to the
 \code{\link{showModal}} function to display it in the browser.
 }
-

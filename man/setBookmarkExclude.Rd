@@ -26,4 +26,3 @@ application.
 \seealso{
 \code{\link{enableBookmarking}} for examples.
 }
-

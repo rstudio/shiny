@@ -111,4 +111,3 @@ shinyApp(ui, server)
 \code{\link{withProgress}}
 }
 \keyword{datasets}
-

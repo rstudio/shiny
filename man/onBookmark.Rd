@@ -76,6 +76,7 @@ then Shiny will by default display a modal dialog with the bookmark URL.
   callback functions registered for the module will only be able to see the
   module's inputs and values.
 }
+
 \examples{
 ## Only run these examples in interactive sessions
 if (interactive()) {
@@ -206,4 +207,3 @@ shinyApp(ui, server)
 \seealso{
 enableBookmarking for general information on bookmarking.
 }
-

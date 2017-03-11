@@ -12,4 +12,3 @@ reactiveText(func)
 \description{
 See \code{\link{renderText}}.
 }
-

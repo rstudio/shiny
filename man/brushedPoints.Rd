@@ -69,4 +69,3 @@ using just the x or y variable, whichever is appropriate.
 \seealso{
 \code{\link{plotOutput}} for example usage.
 }
-

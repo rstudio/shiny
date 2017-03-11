@@ -102,4 +102,3 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link{column}}, \code{\link{sidebarLayout}}
 }
-

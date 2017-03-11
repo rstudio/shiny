@@ -188,7 +188,7 @@ test_that("ShinyShorcut returns the correct files", {
                                OS = "windows"),
                  paste0("Set objShell = WScript.CreateObject",
                         "(\"WScript.Shell\")\nobjShell.Run",
-                        "(\"C:\\shiny_dir\\.shiny_run\\shinyShortuct.cmd\")",
+                        "(\"C:\\shiny_dir\\.shiny_run\\shinyShortcut.cmd\")",
                         ", 0, True")),
 
     expect_error(shinyShortcut(shinyDirectory = "C:/shiny_dir",

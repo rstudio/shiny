@@ -310,7 +310,8 @@ workerId <- local({
 #'   Similar to \code{sendCustomMessage}, but the message must be a raw vector
 #'   and the registration method on the client is
 #'   \code{Shiny.addBinaryMessageHandler(type, function(message){...})}. The
-#'   message argument on the client will be a \href{https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView}{DataView}.
+#'   message argument on the client will be a
+#'   \href{https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView}{DataView}.
 #' }
 #' \item{sendInputMessage(inputId, message)}{
 #'   Sends a message to an input on the session's client web page; if the input
@@ -410,6 +411,7 @@ NS <- function(namespace, id = NULL) {
 ns.sep <- "-"
 
 
+#' @import monads
 #' @include utils.R
 ShinySession <- R6Class(
   'ShinySession',
@@ -1129,56 +1131,63 @@ ShinySession <- R6Class(
             name = name, status = 'recalculating'
           ))
 
-          value <- tryCatch(
-            shinyCallingHandlers(func()),
-            shiny.custom.error = function(cond) {
-              if (isTRUE(getOption("show.error.messages"))) printError(cond)
-              structure(list(), class = "try-error", condition = cond)
-            },
-            shiny.output.cancel = function(cond) {
-              structure(list(), class = "cancel-output")
-            },
-            shiny.silent.error = function(cond) {
-              # Don't let shiny.silent.error go through the normal stop
-              # path of try, because we don't want it to print. But we
-              # do want to try to return the same looking result so that
-              # the code below can send the error to the browser.
-              structure(list(), class = "try-error", condition = cond)
-            },
+          p <- system2.5::Promise$new()
+          tryCatch(
+            # This shinyCallingHandlers should maybe be at a higher level,
+            # to include the $then/$catch calls below?
+            p$resolve(shinyCallingHandlers(func())),
             error = function(cond) {
-              if (isTRUE(getOption("show.error.messages"))) printError(cond)
-              if (getOption("shiny.sanitize.errors", FALSE)) {
-                cond <- simpleError(paste("An error has occurred. Check your",
-                                          "logs or contact the app author for",
-                                          "clarification."))
-              }
-              invisible(structure(list(), class = "try-error", condition = cond))
-            },
-            finally = {
-              private$sendMessage(recalculating = list(
-                name = name, status = 'recalculated'
-              ))
+              p$reject(cond)
             }
           )
 
-          if (inherits(value, "cancel-output")) {
-            return()
-          }
+          p$catch(
+            function(cond) {
+              if (inherits(cond, "shiny.custom.error")) {
+                if (isTRUE(getOption("show.error.messages"))) printError(cond)
+                structure(list(), class = "try-error", condition = cond)
+              } else if (inherits(cond, "shiny.output.cancel")) {
+                structure(list(), class = "cancel-output")
+              } else if (inherits(cond, "shiny.silent.error")) {
+                # Don't let shiny.silent.error go through the normal stop
+                # path of try, because we don't want it to print. But we
+                # do want to try to return the same looking result so that
+                # the code below can send the error to the browser.
+                structure(list(), class = "try-error", condition = cond)
+              } else {
+                if (isTRUE(getOption("show.error.messages"))) printError(cond)
+                if (getOption("shiny.sanitize.errors", FALSE)) {
+                  cond <- simpleError(paste("An error has occurred. Check your",
+                    "logs or contact the app author for",
+                    "clarification."))
+                }
+                invisible(structure(list(), class = "try-error", condition = cond))
+              }
+            }
+          ) %>>% function(value) {
+            private$sendMessage(recalculating = list(
+              name = name, status = 'recalculated'
+            ))
 
-          private$invalidatedOutputErrors$remove(name)
-          private$invalidatedOutputValues$remove(name)
+            if (inherits(value, "cancel-output")) {
+              return()
+            }
 
-          if (inherits(value, 'try-error')) {
-            cond <- attr(value, 'condition')
-            type <- setdiff(class(cond), c('simpleError', 'error', 'condition'))
-            private$invalidatedOutputErrors$set(
-              name,
-              list(message = cond$message,
-                   call = utils::capture.output(print(cond$call)),
-                   type = if (length(type)) type))
+            private$invalidatedOutputErrors$remove(name)
+            private$invalidatedOutputValues$remove(name)
+
+            if (inherits(value, 'try-error')) {
+              cond <- attr(value, 'condition')
+              type <- setdiff(class(cond), c('simpleError', 'error', 'condition'))
+              private$invalidatedOutputErrors$set(
+                name,
+                list(message = cond$message,
+                  call = utils::capture.output(print(cond$call)),
+                  type = if (length(type)) type))
+            }
+            else
+              private$invalidatedOutputValues$set(name, value)
           }
-          else
-            private$invalidatedOutputValues$set(name, value)
         }, suspended=private$shouldSuspend(name), label=label)
 
         # If any output attributes were added to the render function attach

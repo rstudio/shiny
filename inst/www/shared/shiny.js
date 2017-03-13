@@ -1075,12 +1075,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // Message handlers =====================================================
 
     addMessageHandler('values', function (message) {
-      for (var name in this.$bindings) {
-        if (this.$bindings.hasOwnProperty(name)) this.$bindings[name].showProgress(false);
-      }
-
       for (var key in message) {
-        if (message.hasOwnProperty(key)) this.receiveOutput(key, message[key]);
+        if (message.hasOwnProperty(key)) {
+          if (this.$bindings.hasOwnProperty(key)) {
+            this.$bindings[key].showProgress(false);
+          }
+          this.receiveOutput(key, message[key]);
+        }
       }
     });
 

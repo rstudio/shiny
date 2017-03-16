@@ -170,7 +170,9 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
     `data-postfix` = post,
     `data-keyboard` = TRUE,
     `data-keyboard-step` = step / (max - min) * 100,
-    `data-drag-interval` = dragRange,
+    # This value is only relevant for range sliders; for non-range sliders it
+    # causes problems since ion.RangeSlider 2.1.2 (issue #1605).
+    `data-drag-interval` = if (length(value) > 1) dragRange,
     # The following are ignored by the ion.rangeSlider, but are used by Shiny.
     `data-data-type` = dataType,
     `data-time-format` = timeFormat,

@@ -38,6 +38,123 @@ Dependents <- R6Class(
 )
 
 
+# ReactiveValue -------------------------------------------------------------
+
+ReactiveVal <- R6Class(
+  'ReactiveVal',
+  portable = FALSE,
+  private = list(
+    value = NULL,
+    label = NULL,
+    dependents = Dependents$new()
+  ),
+  public = list(
+    initialize = function(value, label = NULL) {
+      private$value <- value
+      private$label <- label
+    },
+    get = function() {
+      private$dependents$register(depLabel = private$label)
+      private$value
+    },
+    set = function(value) {
+      if (identical(private$value, value)) {
+        return(invisible(FALSE))
+      }
+      private$value <- value
+      .graphValueChange(private$label, value)
+      private$dependents$invalidate()
+      invisible(TRUE)
+    }
+  )
+)
+
+#' Create a (single) reactive value
+#'
+#' A \code{reactiveVal} is an object used for reading and writing a value, like
+#' a variable, but with special capabilities for reactive programming. When you
+#' read the value out of a \code{reactiveVal}, the calling reactive expression
+#' takes a dependency, and when you change the value, it notifies any reactives
+#' that previously depended on that value.
+#'
+#' \code{reactiveVal} is very similar to \code{\link{reactiveValues}}, except
+#' that the former is for a single reactive value (like a variable), whereas the
+#' latter lets you conveniently use multiple reactive values by name (like a
+#' named list of variables). For a one-off reactive value, it's more natural to
+#' use \code{reactiveVal}.
+#'
+#' @param value An optional initial value.
+#' @param label An optional label, for debugging purposes (see
+#'   \code{\link{showReactLog}}). If missing, a label will be automatically
+#'   created.
+#'
+#' @return A function. Call the function with no arguments to (reactively) read
+#'   the value; call the function with a single argument to set the value.
+#'
+#' @examples
+#'
+#' \dontrun{
+#'
+#' # Create the object by calling reactiveVal
+#' r <- reactiveVal()
+#'
+#' # Set the value by calling with an argument
+#' r(10)
+#'
+#' # Read the value by calling without arguments
+#' r()
+#'
+#' }
+#'
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   actionButton("minus", "-1"),
+#'   actionButton("plus", "+1"),
+#'   br(),
+#'   textOutput("value")
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   value <- reactiveVal(0)
+#'
+#'   observeEvent(input$minus, {
+#'     newValue <- value() - 1
+#'     value(newValue)
+#'   })
+#'
+#'   observeEvent(input$plus, {
+#'     newValue <- value() + 1
+#'     value(newValue)
+#'   })
+#'
+#'   output$value <- renderText({
+#'     value()
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#'
+#' }
+#'
+#' @export
+reactiveVal <- function(value = NULL, label = NULL) {
+  rv <- ReactiveVal$new(value, label)
+  structure(
+    function(x) {
+      if (missing(x)) {
+        rv$get()
+      } else {
+        force(x)
+        rv$set(x)
+      }
+    },
+    class = "reactiveVal"
+  )
+}
+
+
 # ReactiveValues ------------------------------------------------------------
 
 ReactiveValues <- R6Class(
@@ -689,7 +806,9 @@ print.reactive <- function(x, ...) {
 
 #' @export
 #' @rdname reactive
-is.reactive <- function(x) inherits(x, "reactive")
+is.reactive <- function(x) {
+  inherits(x, c("reactive", "reactiveVal"), which = FALSE)
+}
 
 # Return the number of times that a reactive expression or observer has been run
 execCount <- function(x) {

@@ -375,12 +375,24 @@ NULL
 #' @seealso \url{http://shiny.rstudio.com/articles/modules.html}
 #' @export
 NS <- function(namespace, id = NULL) {
+  if (length(namespace) == 0)
+    ns_prefix <- character(0)
+  else
+    ns_prefix <- paste(namespace, collapse = ns.sep)
+
+  f <- function(id) {
+    if (length(id) == 0)
+      return(ns_prefix)
+    if (length(ns_prefix) == 0)
+      return(id)
+
+    paste(ns_prefix, id, sep = "-")
+  }
+
   if (missing(id)) {
-    function(id) {
-      paste(c(namespace, id), collapse = ns.sep)
-    }
+    f
   } else {
-    paste(c(namespace, id), collapse = ns.sep)
+    f(id)
   }
 }
 

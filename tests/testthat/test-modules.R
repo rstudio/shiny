@@ -1,11 +1,30 @@
 context("modules")
 
 test_that("Namespace qualifying", {
+  expect_equivalent(NS(NULL, "one"), "one")
+  expect_equivalent(NS(NULL)("one"), "one")
+
+  expect_equivalent(NS("one", NULL), "one")
+  expect_equivalent(NS("one")(NULL), "one")
+
   expect_equivalent(NS("one", "two"), "one-two")
+  expect_equivalent(NS("one")("two"), "one-two")
+
   expect_equivalent(NS(c("one", "two"))(NULL), "one-two")
-  expect_equivalent(NS(NULL)(c("one", "two")), "one-two")
-  expect_equivalent(NS(c("one", "two"), c("three", "four")), "one-two-three-four")
-  expect_equivalent(NS(c("one", "two"))(c("three", "four")), "one-two-three-four")
+  expect_equivalent(NS(c("one", "two"), NULL), "one-two")
+
+  expect_equivalent(NS(NULL)(c("one", "two")), c("one", "two"))
+  expect_equivalent(NS(NULL, c("one", "two")), c("one", "two"))
+
+  expect_equivalent(NS("one", c("two", "three")), c("one-two", "one-three"))
+  expect_equivalent(NS("one")(c("two", "three")), c("one-two", "one-three"))
+
+  expect_equivalent(NS(c("one", "two"), "three"), "one-two-three")
+  expect_equivalent(NS(c("one", "two"))("three"), "one-two-three")
+
+  expect_equivalent(NS(c("one", "two"), c("three", "four")), c("one-two-three", "one-two-four"))
+  expect_equivalent(NS(c("one", "two"))(c("three", "four")), c("one-two-three", "one-two-four"))
+
   expect_equivalent(NS(c("one", "two"))("three four"), "one-two-three four")
   expect_equivalent(NS(c("one", "two"))("three-four"), "one-two-three-four")
 })

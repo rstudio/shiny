@@ -218,6 +218,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     return val.replace(/([!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~])/g, '\\$1');
   };
 
+  // Maps a function over an object, preserving keys. Like the mapValues
+  // function from lodash.
+  function mapValues(obj, f) {
+    var newObj = {};
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) newObj[key] = f(obj[key]);
+    }
+    return newObj;
+  }
+
   //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -446,6 +456,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var self = this;
 
       this.pendingData[name] = value;
+
       if (!this.timerId && !this.reentrant) {
         this.timerId = setTimeout(function () {
           self.reentrant = true;
@@ -467,10 +478,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   var InputNoResendDecorator = function InputNoResendDecorator(target, initialValues) {
     this.target = target;
-    this.lastSentValues = initialValues || {};
+    this.lastSentValues = this.reset(initialValues);
   };
   (function () {
     this.setInput = function (name, value) {
+      // Note that opts is not passed to setInput at this stage of the input
+      // decorator stack. If in the future this setInput keeps track of opts, it
+      // would be best not to store the `el`, because that could prevent it from
+      // being GC'd.
       var _splitInputNameType = splitInputNameType(name);
 
       var inputName = _splitInputNameType.name;
@@ -478,54 +493,63 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       var jsonValue = JSON.stringify(value);
 
-      // Resend if either json value or the input type has changed.
       if (this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
         return;
       }
       this.lastSentValues[inputName] = { jsonValue: jsonValue, inputType: inputType };
       this.target.setInput(name, value);
     };
-    this.reset = function (values) {
-      values = values || {};
-      var strValues = {};
-      $.each(values, function (key, value) {
-        strValues[key] = JSON.stringify(value);
-      });
-      this.lastSentValues = strValues;
+    this.reset = function () {
+      var values = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      // Given an object with flat name-value format:
+      //   { x: "abc", "y.shiny.number": 123 }
+      // Create an object in cache format and save it:
+      //   { x: { jsonValue: '"abc"', inputType: "" },
+      //     y: { jsonValue: "123", inputType: "shiny.number" } }
+      var cacheValues = {};
+
+      for (var inputName in values) {
+        if (values.hasOwnProperty(inputName)) {
+          var _splitInputNameType2 = splitInputNameType(inputName);
+
+          var name = _splitInputNameType2.name;
+          var inputType = _splitInputNameType2.inputType;
+
+          cacheValues[name] = {
+            jsonValue: JSON.stringify(values[inputName]),
+            inputType: inputType
+          };
+        }
+      }
+
+      this.lastSentValues = cacheValues;
     };
   }).call(InputNoResendDecorator.prototype);
-
-  var InputDeferDecorator = function InputDeferDecorator(target) {
-    this.target = target;
-    this.pendingInput = {};
-  };
-  (function () {
-    this.setInput = function (name, value) {
-      if (/^\./.test(name)) this.target.setInput(name, value);else this.pendingInput[name] = value;
-    };
-    this.submit = function () {
-      for (var name in this.pendingInput) {
-        if (this.pendingInput.hasOwnProperty(name)) this.target.setInput(name, this.pendingInput[name]);
-      }
-    };
-  }).call(InputDeferDecorator.prototype);
 
   var InputEventDecorator = function InputEventDecorator(target) {
     this.target = target;
   };
   (function () {
-    this.setInput = function (name, value, immediate) {
+    this.setInput = function (name, value, opts) {
       var evt = jQuery.Event("shiny:inputchanged");
 
       var input = splitInputNameType(name);
       evt.name = input.name;
       evt.inputType = input.inputType;
       evt.value = value;
+      evt.binding = opts.binding;
+      evt.el = opts.el;
+
       $(document).trigger(evt);
+
       if (!evt.isDefaultPrevented()) {
         name = evt.name;
         if (evt.inputType !== '') name += ':' + evt.inputType;
-        this.target.setInput(name, evt.value, immediate);
+
+        // opts aren't passed along to lower levels in the input decorator
+        // stack.
+        this.target.setInput(name, evt.value);
       }
     };
   }).call(InputEventDecorator.prototype);
@@ -535,9 +559,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     this.inputRatePolicies = {};
   };
   (function () {
-    this.setInput = function (name, value, immediate) {
+    this.setInput = function (name, value, opts) {
       this.$ensureInit(name);
-      if (immediate) this.inputRatePolicies[name].immediateCall(name, value, immediate);else this.inputRatePolicies[name].normalCall(name, value, immediate);
+
+      if (opts.immediate) this.inputRatePolicies[name].immediateCall(name, value, opts);else this.inputRatePolicies[name].normalCall(name, value, opts);
     };
     this.setRatePolicy = function (name, mode, millis) {
       if (mode === 'direct') {
@@ -551,10 +576,50 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     this.$ensureInit = function (name) {
       if (!(name in this.inputRatePolicies)) this.setRatePolicy(name, 'direct');
     };
-    this.$doSetInput = function (name, value) {
-      this.target.setInput(name, value);
+    this.$doSetInput = function (name, value, opts) {
+      this.target.setInput(name, value, opts);
     };
   }).call(InputRateDecorator.prototype);
+
+  var InputDeferDecorator = function InputDeferDecorator(target) {
+    this.target = target;
+    this.pendingInput = {};
+  };
+  (function () {
+    this.setInput = function (name, value, opts) {
+      if (/^\./.test(name)) this.target.setInput(name, value, opts);else this.pendingInput[name] = { value: value, opts: opts };
+    };
+    this.submit = function () {
+      for (var name in this.pendingInput) {
+        if (this.pendingInput.hasOwnProperty(name)) {
+          var input = this.pendingInput[name];
+          this.target.setInput(name, input.value, input.opts);
+        }
+      }
+    };
+  }).call(InputDeferDecorator.prototype);
+
+  var InputValidateDecorator = function InputValidateDecorator(target) {
+    this.target = target;
+  };
+  (function () {
+    this.setInput = function (name, value, opts) {
+      if (!name) throw "Can't set input with empty name.";
+
+      opts = addDefaultInputOpts(opts);
+
+      this.target.setInput(name, value, opts);
+    };
+  }).call(InputValidateDecorator.prototype);
+
+  // Merge opts with defaults, and return a new object.
+  function addDefaultInputOpts(opts) {
+    return Object.assign({
+      immediate: false,
+      binding: null,
+      el: null
+    }, opts);
+  }
 
   function splitInputNameType(name) {
     var name2 = name.split(':');
@@ -572,6 +637,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     // Cached input values
     this.$inputValues = {};
+
+    // Input values at initialization (and reconnect)
+    this.$initialInput = {};
 
     // Output bindings
     this.$bindings = {};
@@ -594,11 +662,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     this.connect = function (initialInput) {
       if (this.$socket) throw "Connect was already called on this application object";
-
-      $.extend(initialInput, {
-        // IE8 and IE9 have some limitations with data URIs
-        ".clientdata_allowDataUriScheme": typeof WebSocket !== 'undefined'
-      });
 
       this.$socket = this.createSocket();
       this.$initialInput = initialInput;
@@ -4775,9 +4838,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     };
   }).call(IE8FileUploader.prototype);
 
-  var FileUploader = function FileUploader(shinyapp, id, files) {
+  var FileUploader = function FileUploader(shinyapp, id, files, el) {
     this.shinyapp = shinyapp;
     this.id = id;
+    this.el = el;
     FileProcessor.call(this, files);
   };
   $.extend(FileUploader.prototype, FileProcessor.prototype);
@@ -4862,6 +4926,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       var evt = jQuery.Event("shiny:inputchanged");
       evt.name = this.id;
       evt.value = fileInfo;
+      evt.binding = fileInputBinding;
+      evt.el = this.el;
       evt.inputType = 'shiny.fileupload';
       $(document).trigger(evt);
 
@@ -4939,7 +5005,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       /*jshint nonew:false */
       new IE8FileUploader(exports.shinyapp, id, evt.target);
     } else {
-      $el.data('currentUploader', new FileUploader(exports.shinyapp, id, files));
+      $el.data('currentUploader', new FileUploader(exports.shinyapp, id, files, evt.target));
     }
   }
 
@@ -5085,19 +5151,27 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var inputsRate = new InputRateDecorator(inputsEvent);
     var inputsDefer = new InputDeferDecorator(inputsEvent);
 
-    // By default, use rate decorator
-    var inputs = inputsRate;
-    $('input[type="submit"], button[type="submit"]').each(function () {
+    var inputs;
+    if ($('input[type="submit"], button[type="submit"]').length > 0) {
       // If there is a submit button on the page, use defer decorator
       inputs = inputsDefer;
-      $(this).click(function (event) {
-        event.preventDefault();
-        inputsDefer.submit();
-      });
-    });
 
-    exports.onInputChange = function (name, value) {
-      inputs.setInput(name, value);
+      $('input[type="submit"], button[type="submit"]').each(function () {
+        $(this).click(function (event) {
+          event.preventDefault();
+          inputsDefer.submit();
+        });
+      });
+    } else {
+      // By default, use rate decorator
+      inputs = inputsRate;
+    }
+
+    inputs = new InputValidateDecorator(inputs);
+
+    exports.onInputChange = function (name, value, opts) {
+      opts = addDefaultInputOpts(opts);
+      inputs.setInput(name, value, opts);
     };
 
     var boundInputs = {};
@@ -5108,7 +5182,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         var value = binding.getValue(el);
         var type = binding.getType(el);
         if (type) id = id + ":" + type;
-        inputs.setInput(id, value, !allowDeferred);
+
+        var opts = { immediate: !allowDeferred, binding: binding, el: el };
+        inputs.setInput(id, value, opts);
       }
     }
 
@@ -5117,7 +5193,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       var bindings = inputBindings.getBindings();
 
-      var currentValues = {};
+      var inputItems = {};
 
       for (var i = 0; i < bindings.length; i++) {
         var binding = bindings[i].binding;
@@ -5131,7 +5207,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
           var type = binding.getType(el);
           var effectiveId = type ? id + ":" + type : id;
-          currentValues[effectiveId] = binding.getValue(el);
+          inputItems[effectiveId] = {
+            value: binding.getValue(el),
+            opts: {
+              immediate: true,
+              binding: binding,
+              el: el
+            }
+          };
 
           /*jshint loopfunc:true*/
           var thisCallback = function () {
@@ -5163,7 +5246,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         }
       }
 
-      return currentValues;
+      return inputItems;
     }
 
     function unbindInputs() {
@@ -5203,12 +5286,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       unbindOutputs(scope, includeSelf);
     }
     exports.bindAll = function (scope) {
-      // _bindAll alone returns initial values, it doesn't send them to the
-      // server. export.bindAll needs to send the values to the server, so we
-      // wrap _bindAll in a closure that does that.
-      var currentValues = _bindAll(scope);
-      $.each(currentValues, function (name, value) {
-        inputs.setInput(name, value);
+      // _bindAll returns input values; it doesn't send them to the server.
+      // export.bindAll needs to send the values to the server.
+      var currentInputItems = _bindAll(scope);
+      $.each(currentInputItems, function (name, item) {
+        inputs.setInput(name, item.value, item.opts);
       });
 
       // Not sure if the iframe stuff is an intrinsic part of bindAll, but bindAll
@@ -5251,7 +5333,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // Initialize all input objects in the document, before binding
     initializeInputs(document);
 
-    var initialValues = _bindAll(document);
+    // The input values returned by _bindAll() each have a structure like this:
+    //   { value: 123, opts: { ... } }
+    // We want to only keep the value. This is because when the initialValues is
+    // passed to ShinyApp.connect(), the ShinyApp object stores the
+    // initialValues object for the duration of the session, and the opts may
+    // have a reference to the DOM element, which would prevent it from being
+    // GC'd.
+    var initialValues = mapValues(_bindAll(document), function (x) {
+      return x.value;
+    });
 
     // The server needs to know the size of each image and plot output element,
     // in case it is auto-sizing
@@ -5440,6 +5531,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         registerDependency(match[1], match[2]);
       }
     });
+
+    // IE8 and IE9 have some limitations with data URIs
+    initialValues['.clientdata_allowDataUriScheme'] = typeof WebSocket !== 'undefined';
 
     // We've collected all the initial values--start the server process!
     inputsNoResend.reset(initialValues);

@@ -3,35 +3,30 @@ controlLabel <- function(controlName, label) {
 }
 
 checkChoicesArgs <- function(choices, choicesNames, choicesValues) {
-
-  lenNames <- length(choicesNames)
-  lenVals <- length(choicesValues)
-
+  # if-else to check that either choices OR (choicesNames + choicesValues)
+  # were correctly provided
   if (is.null(choices)) {
-    if (lenNames == 0 || lenVals == 0) {
+    if (length(choicesNames) == 0 || length(choicesValues) == 0) {
       stop("Please specify a non-empty vector for `choices` (or,
            alternatively, for both `choicesNames` and `choicesValues`).")
     }
-    if (lenNames != lenVals) {
+    if (length(choicesNames) != length(choicesValues)) {
       stop("`choicesNames` and `choicesValues` must have the same length.")
     }
-    if (!is.null(names(choicesNames)) || !is.null(names(choicesValues))) {
+    if (anyNamed(choicesNames) || anyNamed(choicesValues)) {
       stop("`choicesNames` and `choicesValues` must not be named.")
     }
   } else {
-    if (lenNames != 0 || lenVals != 0) {
+    if (!is.null(choicesNames) || !is.null(choicesValues)) {
       warning("Using `choices` argument; ignoring `choicesNames` and
-                `choicesValues`.")
-      choicesNames = NULL
-      choicesValues = NULL
+               `choicesValues`.")
     }
-    # resolve names if not specified
-    choices <- choicesWithNames(choices)
+    choices <- choicesWithNames(choices) # resolve names if not specified
+    choicesNames <- names(choices)
+    choicesValues <- unname(choices)
   }
 
-  return(list(choices = choices,
-              choicesNames = choicesNames,
-              choicesValues = choicesValues))
+  return(list(choicesNames = choicesNames, choicesValues = choicesValues))
 }
 
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it

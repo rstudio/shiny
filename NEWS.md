@@ -40,6 +40,8 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * Fixed bug where `dateRangeInput` did not respect `weekstart` argument. ([#1592](https://github.com/rstudio/shiny/pull/1592))
 
+* Fixed [#1598](https://github.com/rstudio/shiny/issues/1598): `setBookmarkExclude()` did not work properly inside of modules. ([#1599](https://github.com/rstudio/shiny/pull/1599))
+
 * Fixed [#1605](https://github.com/rstudio/shiny/issues/1605): sliders did not move when clicked on the bar area. ([#1610](https://github.com/rstudio/shiny/pull/1610))
 
 ### Library updates

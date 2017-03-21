@@ -386,7 +386,7 @@ NS <- function(namespace, id = NULL) {
     if (length(ns_prefix) == 0)
       return(id)
 
-    paste(ns_prefix, id, sep = "-")
+    paste(ns_prefix, id, sep = ns.sep)
   }
 
   if (missing(id)) {

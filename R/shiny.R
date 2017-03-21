@@ -856,7 +856,7 @@ ShinySession <- R6Class(
           if (anyUnnamed(dots))
             stop("exportTestValues: all arguments must be named.")
 
-          names(dots) <- vapply(names(dots), ns, character(1))
+          names(dots) <- ns(names(dots))
 
           do.call(
             .subset2(self, "exportTestValues"),
@@ -973,7 +973,7 @@ ShinySession <- R6Class(
       # Returns the excluded names with the scope's ns prefix on them.
       private$registerBookmarkExclude(function() {
         excluded <- scope$getBookmarkExclude()
-        vapply(excluded, ns, character(1), USE.NAMES = FALSE)
+        ns(excluded)
       })
 
       scope

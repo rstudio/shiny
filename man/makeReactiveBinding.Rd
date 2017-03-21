@@ -30,4 +30,3 @@ observe(print(b()))
 a <- 20
 }
 }
-

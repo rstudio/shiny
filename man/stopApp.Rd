@@ -14,4 +14,3 @@ stopApp(returnValue = invisible())
 Stops the currently running Shiny app, returning control to the caller of
 \code{\link{runApp}}.
 }
-

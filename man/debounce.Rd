@@ -78,6 +78,7 @@ window.
   time each subsequent event is considered is already after the time window
   has expired.
 }
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {
@@ -119,4 +120,3 @@ shinyApp(ui, server)
 }
 
 }
-

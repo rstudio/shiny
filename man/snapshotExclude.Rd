@@ -12,4 +12,3 @@ snapshotExclude(x)
 \description{
 Mark an output to be excluded from test snapshots
 }
-

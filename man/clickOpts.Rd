@@ -19,4 +19,3 @@ This generates an object representing click options, to be passed as the
 \code{click} argument of \code{\link{imageOutput}} or
 \code{\link{plotOutput}}.
 }
-

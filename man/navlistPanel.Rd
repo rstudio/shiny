@@ -55,4 +55,3 @@ fluidPage(
 \seealso{
 \code{\link{tabPanel}}, \code{\link{updateNavlistPanel}}
 }
-

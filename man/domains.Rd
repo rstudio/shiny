@@ -3,8 +3,9 @@
 \name{domains}
 \alias{domains}
 \alias{getDefaultReactiveDomain}
-\alias{onReactiveDomainEnded}
 \alias{withReactiveDomain}
+\alias{onReactiveDomainEnded}
+\alias{domains}
 \title{Reactive domains}
 \usage{
 getDefaultReactiveDomain()
@@ -51,4 +52,3 @@ as a convenience function for registering callbacks. If the reactive domain
 is \code{NULL} and \code{failIfNull} is \code{FALSE}, then the callback will
 never be invoked.
 }
-

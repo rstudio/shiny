@@ -2,8 +2,8 @@
 % Please edit documentation in R/shiny.R
 \docType{package}
 \name{shiny-package}
-\alias{shiny}
 \alias{shiny-package}
+\alias{shiny}
 \title{Web Application Framework for R}
 \description{
 Shiny makes it incredibly easy to build interactive web applications with R.
@@ -19,4 +19,3 @@ includes extensive annotated examples.
 \seealso{
 \link{shiny-options} for documentation about global options.
 }
-

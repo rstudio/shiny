@@ -14,4 +14,3 @@ reactiveTable(func, ...)
 \description{
 See \code{\link{renderTable}}.
 }
-

@@ -33,4 +33,3 @@ shinyApp(ui, server = function(input, output) { })
 \seealso{
 \code{\link{fluidPage}}, \code{\link{flowLayout}}
 }
-

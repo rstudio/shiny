@@ -34,4 +34,3 @@ These functions should be called within the application's server function.
 All of these functions return a function which can be called with no
 arguments to cancel the registration.
 }
-

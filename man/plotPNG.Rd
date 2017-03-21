@@ -41,4 +41,3 @@ In some cases, \code{Cairo()} provides output that looks worse than
 \code{png()}. To disable Cairo output for an app, use
 \code{options(shiny.usecairo=FALSE)}.
 }
-

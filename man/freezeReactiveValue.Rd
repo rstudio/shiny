@@ -58,4 +58,3 @@ shinyApp(ui, server)
 \seealso{
 \code{\link{req}}
 }
-

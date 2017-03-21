@@ -60,9 +60,9 @@ the CSS class name \code{shiny-plot-output}.
 
   See \code{\link{plotOutput}} for more information about interactive plots.
 }
+
 \seealso{
 For the corresponding client-side output function, and example
   usage, see \code{\link{plotOutput}}. For more details on how the plots are
   generated, and how to control the output, see \code{\link{plotPNG}}.
 }
-

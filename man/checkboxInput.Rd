@@ -39,7 +39,7 @@ shinyApp(ui, server)
 \seealso{
 \code{\link{checkboxGroupInput}}, \code{\link{updateCheckboxInput}}
 
-Other input.elements: \code{\link{actionButton}},
+Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},
   \code{\link{dateInput}}, \code{\link{dateRangeInput}},
   \code{\link{fileInput}}, \code{\link{numericInput}},
@@ -48,4 +48,3 @@ Other input.elements: \code{\link{actionButton}},
   \code{\link{submitButton}}, \code{\link{textAreaInput}},
   \code{\link{textInput}}
 }
-

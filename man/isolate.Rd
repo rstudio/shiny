@@ -77,4 +77,3 @@ isolate(fun())
 # isolate also works if the reactive expression accesses values from the
 # input object, like input$x
 }
-

@@ -16,4 +16,3 @@ callback was set. It displays a modal dialog with the bookmark URL, along
 with a subtitle that is appropriate for the type of bookmarking used ("url"
 or "server").
 }
-

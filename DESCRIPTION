@@ -147,4 +147,4 @@ Collate:
     'test-export.R'
     'timer.R'
     'update-input.R'
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

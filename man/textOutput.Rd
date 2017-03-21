@@ -28,4 +28,3 @@ Text is HTML-escaped prior to rendering. This element is often used
 \examples{
 h3(textOutput("caption"))
 }
-

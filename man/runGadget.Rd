@@ -49,4 +49,3 @@ runGadget(ui, server)
 runGadget(shinyApp(ui, server))
 }
 }
-

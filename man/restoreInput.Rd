@@ -15,4 +15,3 @@ restoreInput(id, default)
 This restores an input value from the current restore context. It should be
 called early on inside of input functions (like \code{\link{textInput}}).
 }
-

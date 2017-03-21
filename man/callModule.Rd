@@ -29,4 +29,3 @@ modules are easier to reuse and easier to reason about. See the article at
 \seealso{
 \url{http://shiny.rstudio.com/articles/modules.html}
 }
-

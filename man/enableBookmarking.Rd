@@ -228,4 +228,3 @@ shinyApp(ui, server)
 
   Also see \code{\link{updateQueryString}}.
 }
-

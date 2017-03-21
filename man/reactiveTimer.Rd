@@ -73,4 +73,3 @@ shinyApp(ui, server)
 \seealso{
 \code{\link{invalidateLater}}
 }
-

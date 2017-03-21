@@ -16,4 +16,3 @@ The newly created panel.
 Creates a panel with a slightly inset border and grey background. Equivalent
 to Bootstrap's \code{well} CSS class.
 }
-

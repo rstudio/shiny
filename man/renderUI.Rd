@@ -50,4 +50,3 @@ shinyApp(ui, server)
 \seealso{
 conditionalPanel
 }
-

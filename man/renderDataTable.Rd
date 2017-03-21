@@ -87,4 +87,3 @@ if (interactive()) {
 \references{
 \url{http://datatables.net}
 }
-

@@ -33,4 +33,3 @@ This generates an object representing hovering options, to be passed as the
 \code{hover} argument of \code{\link{imageOutput}} or
 \code{\link{plotOutput}}.
 }
-

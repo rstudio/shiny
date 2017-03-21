@@ -21,4 +21,3 @@ default, an error).
 \seealso{
 \code{\link{isolate}}
 }
-

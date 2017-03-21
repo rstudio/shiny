@@ -23,4 +23,3 @@ This generates an object representing dobule-click options, to be passed as
 the \code{dblclick} argument of \code{\link{imageOutput}} or
 \code{\link{plotOutput}}.
 }
-

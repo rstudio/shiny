@@ -29,4 +29,3 @@ reactiveValuesToList(values)
 # at the console)
 isolate(reactiveValuesToList(values))
 }
-

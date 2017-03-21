@@ -29,4 +29,3 @@ ui <- fluidPage(
 shinyApp(ui, server = function(input, output) { })
 }
 }
-

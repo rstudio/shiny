@@ -13,4 +13,3 @@ inputPanel(...)
 A \code{\link{flowLayout}} with a grey border and light grey background,
 suitable for wrapping inputs.
 }
-

@@ -45,4 +45,3 @@ isolate(values$a)
 \seealso{
 \code{\link{isolate}} and \code{\link{is.reactivevalues}}.
 }
-

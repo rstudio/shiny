@@ -61,4 +61,3 @@ ui <- splitLayout(
 shinyApp(ui, server)
 }
 }
-

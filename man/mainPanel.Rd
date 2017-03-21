@@ -27,4 +27,3 @@ mainPanel(
    plotOutput("mpgPlot")
 )
 }
-

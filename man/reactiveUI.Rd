@@ -12,4 +12,3 @@ reactiveUI(func)
 \description{
 See \code{\link{renderUI}}.
 }
-

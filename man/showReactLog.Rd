@@ -43,4 +43,3 @@ For security and performance reasons, do not enable
 enabled, it's possible for any user of your app to see at least some
 of the source code of your reactive expressions and observers.
 }
-

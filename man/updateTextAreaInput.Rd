@@ -68,4 +68,3 @@ shinyApp(ui, server)
 \seealso{
 \code{\link{textAreaInput}}
 }
-

@@ -30,4 +30,3 @@ Shiny regarding what UI function is most commonly used with this type of
 render function. This can be used in R Markdown documents to create complete
 output widgets out of just the render function.
 }
-

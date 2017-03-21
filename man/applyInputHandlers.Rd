@@ -27,4 +27,3 @@ output.
 registerInputHandler
 }
 \keyword{internal}
-

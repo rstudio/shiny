@@ -99,4 +99,3 @@ if (interactive()) {
 \seealso{
 \code{\link{enableBookmarking}}, \code{\link{getQueryString}}
 }
-

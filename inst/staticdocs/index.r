@@ -152,6 +152,7 @@ sd_section("Running",
     "runExample",
     "runGadget",
     "runUrl",
+    "shinyShortcut",
     "stopApp",
     "viewer"
   )

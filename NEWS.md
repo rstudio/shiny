@@ -9,6 +9,8 @@ shiny 1.0.0.9001
 
 ### Minor new features and improvements
 
+* Added `shinyShortcut` function, which saves an exectuable file into the shiny app directory that when ran will launch the app directly in the user's default browser (inspired by this [blog post](http://www.mango-solutions.com/wp/2017/03/shiny-based-tablet-or-desktop-app/)). For more info, see the documentation (`?shinyShortcut`).
+
 * Fixed [#1565](https://github.com/rstudio/shiny/issues/1565), which meant that resources with spaces in their names return HTTP 404. ([#1566](https://github.com/rstudio/shiny/pull/1566))
 
 * Exported `session$user` (if it exists) to the client-side; it's accessible in the Shiny object: `Shiny.user`. ([#1563](https://github.com/rstudio/shiny/pull/1563))

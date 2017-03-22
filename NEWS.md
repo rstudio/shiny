@@ -7,6 +7,8 @@ shiny 1.0.0.9001
 
 ### New features
 
+* Added `reactiveVal` function, for storing a single value which can be (reactively) read and written. Similar to `reactiveValues`, except that `reactiveVal` just lets you store a single value instead of storing multiple values by name.
+
 ### Minor new features and improvements
 
 * Fixed [#1565](https://github.com/rstudio/shiny/issues/1565), which meant that resources with spaces in their names return HTTP 404. ([#1566](https://github.com/rstudio/shiny/pull/1566))

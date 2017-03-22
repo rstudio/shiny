@@ -3,6 +3,7 @@ context("reactivity")
 
 test_that("ReactiveVal", {
   val <- reactiveVal()
+
   isolate({
     expect_true(is.null(val()))
 
@@ -38,6 +39,14 @@ test_that("ReactiveVal", {
   expect_equal(execCount(o), 2)  #
 
   o$destroy()
+})
+
+test_that("ReactiveVal labels", {
+  val <- reactiveVal()
+  expect_equal(attr(val, "label", exact = TRUE), "val")
+
+  name.with.dots = reactiveVal()
+  expect_equal(attr(name.with.dots, "label", exact = TRUE), "name.with.dots")
 })
 
 # Test for correct behavior of ReactiveValues

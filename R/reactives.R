@@ -52,6 +52,7 @@ ReactiveVal <- R6Class(
     initialize = function(value, label = NULL) {
       private$value <- value
       private$label <- label
+      .graphValueChange(private$label, value)
     },
     get = function() {
       private$dependents$register(depLabel = private$label)
@@ -140,6 +141,11 @@ ReactiveVal <- R6Class(
 #'
 #' @export
 reactiveVal <- function(value = NULL, label = NULL) {
+  if (missing(label)) {
+    call <- sys.call()
+    label <- rvalSrcrefToLabel(attr(call, "srcref", exact = TRUE))
+  }
+
   rv <- ReactiveVal$new(value, label)
   structure(
     function(x) {
@@ -150,8 +156,54 @@ reactiveVal <- function(value = NULL, label = NULL) {
         rv$set(x)
       }
     },
-    class = "reactiveVal"
+    class = "reactiveVal",
+    label = label
   )
+}
+
+# Attempts to extract the variable name that the reactiveVal object is being
+# assigned to (e.g. for `a <- reactiveVal()`, the result should be "a"). This
+# is a fragile, error-prone operation, so we default to a random label if
+# necessary.
+rvalSrcrefToLabel <- function(srcref,
+  defaultLabel = paste0("reactiveVal", createUniqueId(4))) {
+
+  if (is.null(srcref))
+    return(defaultLabel)
+
+  srcfile <- attr(srcref, "srcfile", exact = TRUE)
+  if (is.null(srcfile))
+    return(defaultLabel)
+
+  if (is.null(srcfile$lines))
+    return(defaultLabel)
+
+  lines <- srcfile$lines
+  # When pasting at the Console, srcfile$lines is not split
+  if (length(lines) == 1) {
+    lines <- strsplit(lines, "\n")[[1]]
+  }
+
+  if (length(lines) < srcref[1]) {
+    return(defaultLabel)
+  }
+
+  firstLine <- substring(lines[srcref[1]], srcref[2] - 1)
+
+  m <- regexec("\\s*([^\\s]+)\\s*(<-|=)\\s*reactiveVal\\b", firstLine, perl = TRUE)
+  if (m[[1]][1] == -1) {
+    return(defaultLabel)
+  }
+
+  sym <- regmatches(firstLine, m)[[1]][2]
+  res <- try(parse(text = sym), silent = TRUE)
+  if (inherits(res, "try-error"))
+    return(defaultLabel)
+
+  if (length(res) != 1)
+    return(defaultLabel)
+
+  return(as.character(res))
 }
 
 
@@ -746,7 +798,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
   # Attach a label and a reference to the original user source for debugging
   srcref <- attr(substitute(x), "srcref", exact = TRUE)
   if (is.null(label)) {
-    label <- srcrefToLabel(srcref[[1]],
+    label <- rexprSrcrefToLabel(srcref[[1]],
       sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n')))
   }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
@@ -760,7 +812,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
 # scans the line of code that started the reactive block and looks for something
 # that looks like assignment. If we fail, fall back to a default value (likely
 # the block of code in the body of the reactive).
-srcrefToLabel <- function(srcref, defaultLabel) {
+rexprSrcrefToLabel <- function(srcref, defaultLabel) {
   if (is.null(srcref))
     return(defaultLabel)
 

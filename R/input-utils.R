@@ -18,8 +18,7 @@ normalizeChoicesArgs <- function(choices, choiceNames, choiceValues) {
     }
   } else {
     if (!is.null(choiceNames) || !is.null(choiceValues)) {
-      warning("Using `choices` argument; ignoring `choiceNames` and
-               `choiceValues`.")
+      warning("Using `choices` argument; ignoring `choiceNames` and `choiceValues`.")
     }
     choices <- choicesWithNames(choices) # resolve names if not specified
     choiceNames <- names(choices)
@@ -42,7 +41,7 @@ normalizeSelected <- function(selected, inputId, choiceNames, choiceValues) {
   # already know that `selected` must be a value instead of a label
   if (needOptgroup(choiceValues)) return(selected)
 
-  if (is.list(choiceNames)) choiceNames <- unlist(choiceNames)
+  if (is.list(choiceNames)) choiceNames <- unlist(as.character(choiceNames))
   if (is.list(choiceValues)) choiceValues <- unlist(choiceValues)
 
   # when selected labels instead of values

@@ -28,8 +28,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
      format(x)
   ))
 
-
-  # Radio buttons
+  # Radio buttons using choices
   x <- radioButtons('id','label', choices = c(a='x1', a='x2', b='x3'))
   choices <- x$children
 
@@ -43,6 +42,28 @@ test_that("Repeated names for selectInput and radioButtons choices", {
 
   expect_equal(choices[[2]]$children[[1]][[3]]$children[[1]]$children[[2]]$children[[1]], HTML('b'))
   expect_equal(choices[[2]]$children[[1]][[3]]$children[[1]]$children[[1]]$attribs$value, 'x3')
+  expect_equal(choices[[2]]$children[[1]][[3]]$children[[1]]$children[[1]]$attribs$checked, NULL)
+
+  # Radio buttons using choiceNames and choiceValues
+  x <- radioButtons('id','label',
+    choiceNames = list(icon('calendar'), HTML('<p style="color:red;">Red</p>'), 'Normal'),
+    choiceValues = list('icon', 'html', 'text')
+  )
+  choices <- x$children
+
+  expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[2]]$children[[1]],
+    HTML('<i class="fa fa-calendar"></i>'))
+  expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$value, 'icon')
+  expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$checked, 'checked')
+
+  expect_equal(choices[[2]]$children[[1]][[2]]$children[[1]]$children[[2]]$children[[1]],
+    HTML('<p style="color:red;">Red</p>'))
+  expect_equal(choices[[2]]$children[[1]][[2]]$children[[1]]$children[[1]]$attribs$value, 'html')
+  expect_equal(choices[[2]]$children[[1]][[2]]$children[[1]]$children[[1]]$attribs$checked, NULL)
+
+  expect_equal(choices[[2]]$children[[1]][[3]]$children[[1]]$children[[2]]$children[[1]],
+    HTML('Normal'))
+  expect_equal(choices[[2]]$children[[1]][[3]]$children[[1]]$children[[1]]$attribs$value, 'text')
   expect_equal(choices[[2]]$children[[1]][[3]]$children[[1]]$children[[1]]$attribs$checked, NULL)
 })
 
@@ -166,4 +187,37 @@ test_that("selectInput selects items by default", {
     '<option value="a">',
     selectInput('x', 'x', list("a", "b"), multiple = TRUE)
   ))
+})
+
+test_that("normalizeChoicesArgs does its job", {
+
+  # Unnamed vectors and lists
+  expected <- list(choiceNames = c("a", "b"), choiceValues = list("a", "b"))
+  expect_equal(normalizeChoicesArgs(c("a", "b"), NULL, NULL), expected)
+  expect_equal(normalizeChoicesArgs(list("a", "b"), NULL, NULL), expected)
+
+  # Named list
+  expected <- list(choiceNames = c("one", "two"), choiceValues = list("a", "b"))
+  x <- list(one = "a", two = "b")
+  expect_equal(normalizeChoicesArgs(x, NULL, NULL), expected)
+  expect_equal(normalizeChoicesArgs(NULL, names(x), unname(x)), expected)
+
+  # Using unnamed `choiceNames` and `choiceValues` vectors/lists directly
+  expected <- list(choiceNames = c("one", "two"), choiceValues = c("a", "b"))
+  expect_equal(normalizeChoicesArgs(NULL, c("one", "two"),  c("a", "b")), expected)
+
+  expected <- list(choiceNames = list("one", "two"), choiceValues = list("a", "b"))
+  expect_equal(normalizeChoicesArgs(NULL, list("one", "two"),  list("a", "b")), expected)
+
+  # Using choiceNames with HTML and choiceValues
+  nms <- list(icon("calendar"), HTML("<p style='color:red;'>Red Text</p>"))
+  vals <- list("a", "b")
+  expected <- list(choiceNames = nms, choiceValues = vals)
+  expect_equal(normalizeChoicesArgs(NULL, nms, vals), expected)
+
+  # Attempt to use choices, AND choiceNames + choiceValues
+  x <- list("a", "b")
+  expect_warning(res <- normalizeChoicesArgs(x, nms, vals),
+    "Using `choices` argument; ignoring `choiceNames` and `choiceValues`.")
+  expect_equal(res, list(choiceNames = c("a", "b"), choiceValues = list("a", "b")))
 })

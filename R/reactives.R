@@ -190,7 +190,7 @@ rvalSrcrefToLabel <- function(srcref,
 
   firstLine <- substring(lines[srcref[1]], srcref[2] - 1)
 
-  m <- regexec("\\s*([^\\s]+)\\s*(<-|=)\\s*reactiveVal\\b", firstLine, perl = TRUE)
+  m <- regexec("\\s*([^[:space:]]+)\\s*(<-|=)\\s*reactiveVal\\b", firstLine)
   if (m[[1]][1] == -1) {
     return(defaultLabel)
   }

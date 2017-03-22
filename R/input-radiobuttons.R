@@ -18,13 +18,13 @@
 #'   defaults to the first value)
 #' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
 #' @return A set of radio buttons that can be added to a UI definition.
-#' @param choicesNames,choicesValues List of names and values, respectively,
+#' @param choiceNames,choiceValues List of names and values, respectively,
 #'   that are displayed to the user in the app and correspond to the each
-#'   choice (for this reason, \code{choicesNames} and \code{choicesValues}
+#'   choice (for this reason, \code{choiceNames} and \code{choiceValues}
 #'   must have the same length). If either of these arguments is
 #'   provided, then the other \emph{must} be provided and \code{choices}
 #'   \emph{must not} be provided. The advantage of using both of these over
-#'   a named list for \code{choices} is that \code{choicesNames} allows any
+#'   a named list for \code{choices} is that \code{choiceNames} allows any
 #'   type of UI object to be passed through (tag objects, icons, HTML code,
 #'   ...), instead of just simple text. See Examples.
 #'
@@ -61,12 +61,12 @@
 #'
 #' ui <- fluidPage(
 #'   radioButtons("rb", "Choose one:",
-#'                choicesNames = list(
+#'                choiceNames = list(
 #'                  icon("calendar"),
 #'                  HTML("<p style='color:red;'>Red Text</p>"),
 #'                  "Normal text"
 #'                ),
-#'                choicesValues = list(
+#'                choiceValues = list(
 #'                  "icon", "html", "text"
 #'                )),
 #'   textOutput("txt")
@@ -82,21 +82,21 @@
 #' }
 #' @export
 radioButtons <- function(inputId, label, choices = NULL, selected = NULL,
-  inline = FALSE, width = NULL, choicesNames = NULL, choicesValues = NULL) {
+  inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL) {
 
-  args <- normalizeChoicesArgs(choices, choicesNames, choicesValues)
+  args <- normalizeChoicesArgs(choices, choiceNames, choiceValues)
 
   selected <- restoreInput(id = inputId, default = selected)
 
   # default value if it's not specified
-  selected <- if (is.null(selected)) args$choicesValues[[1]] else {
-    normalizeSelected(selected, inputId, args$choicesNames, args$choicesValues)
+  selected <- if (is.null(selected)) args$choiceValues[[1]] else {
+    normalizeSelected(selected, inputId, args$choiceNames, args$choiceValues)
   }
 
   if (length(selected) > 1) stop("The 'selected' argument must be of length 1")
 
   options <- generateOptions(inputId, selected, inline, 'radio',
-                             args$choicesNames, args$choicesValues)
+                             args$choiceNames, args$choiceValues)
 
   divClass <- "form-group shiny-input-radiogroup shiny-input-container"
   if (inline) divClass <- paste(divClass, "shiny-input-container-inline")

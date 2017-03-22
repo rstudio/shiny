@@ -5,8 +5,7 @@
 \title{Create radio buttons}
 \usage{
 radioButtons(inputId, label, choices = NULL, selected = NULL,
-  inline = FALSE, width = NULL, choicesNames = NULL,
-  choicesValues = NULL)
+  inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -26,13 +25,13 @@ defaults to the first value)}
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
 
-\item{choicesNames, choicesValues}{List of names and values, respectively,
+\item{choiceNames, choiceValues}{List of names and values, respectively,
 that are displayed to the user in the app and correspond to the each
-choice (for this reason, \code{choicesNames} and \code{choicesValues}
+choice (for this reason, \code{choiceNames} and \code{choiceValues}
 must have the same length). If either of these arguments is
 provided, then the other \emph{must} be provided and \code{choices}
 \emph{must not} be provided. The advantage of using both of these over
-a named list for \code{choices} is that \code{choicesNames} allows any
+a named list for \code{choices} is that \code{choiceNames} allows any
 type of UI object to be passed through (tag objects, icons, HTML code,
 ...), instead of just simple text. See Examples.}
 }
@@ -80,12 +79,12 @@ shinyApp(ui, server)
 
 ui <- fluidPage(
   radioButtons("rb", "Choose one:",
-               choicesNames = list(
+               choiceNames = list(
                  icon("calendar"),
                  HTML("<p style='color:red;'>Red Text</p>"),
                  "Normal text"
                ),
-               choicesValues = list(
+               choiceValues = list(
                  "icon", "html", "text"
                )),
   textOutput("txt")

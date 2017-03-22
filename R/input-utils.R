@@ -2,37 +2,37 @@ controlLabel <- function(controlName, label) {
   label %AND% tags$label(class = "control-label", `for` = controlName, label)
 }
 
-normalizeChoicesArgs <- function(choices, choicesNames, choicesValues) {
-  # if-else to check that either choices OR (choicesNames + choicesValues)
+normalizeChoicesArgs <- function(choices, choiceNames, choiceValues) {
+  # if-else to check that either choices OR (choiceNames + choiceValues)
   # were correctly provided
   if (is.null(choices)) {
-    if (length(choicesNames) == 0 || length(choicesValues) == 0) {
+    if (length(choiceNames) == 0 || length(choiceValues) == 0) {
       stop("Please specify a non-empty vector for `choices` (or,
-           alternatively, for both `choicesNames` and `choicesValues`).")
+           alternatively, for both `choiceNames` and `choiceValues`).")
     }
-    if (length(choicesNames) != length(choicesValues)) {
-      stop("`choicesNames` and `choicesValues` must have the same length.")
+    if (length(choiceNames) != length(choiceValues)) {
+      stop("`choiceNames` and `choiceValues` must have the same length.")
     }
-    if (anyNamed(choicesNames) || anyNamed(choicesValues)) {
-      stop("`choicesNames` and `choicesValues` must not be named.")
+    if (anyNamed(choiceNames) || anyNamed(choiceValues)) {
+      stop("`choiceNames` and `choiceValues` must not be named.")
     }
   } else {
-    if (!is.null(choicesNames) || !is.null(choicesValues)) {
-      warning("Using `choices` argument; ignoring `choicesNames` and
-               `choicesValues`.")
+    if (!is.null(choiceNames) || !is.null(choiceValues)) {
+      warning("Using `choices` argument; ignoring `choiceNames` and
+               `choiceValues`.")
     }
     choices <- choicesWithNames(choices) # resolve names if not specified
-    choicesNames <- names(choices)
-    choicesValues <- unname(choices)
+    choiceNames <- names(choices)
+    choiceValues <- unname(choices)
   }
 
-  return(list(choicesNames = choicesNames, choicesValues = choicesValues))
+  return(list(choiceNames = choiceNames, choiceValues = choiceValues))
 }
 
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
 # refers to values. Below is a function for backward compatibility. It also
 # coerces the value to `character`.
-normalizeSelected <- function(selected, inputId, choicesNames, choicesValues) {
+normalizeSelected <- function(selected, inputId, choiceNames, choiceValues) {
   # this line accomplishes two tings:
   #   - coerces selected to character
   #   - drops name, otherwise toJSON() keeps it too
@@ -40,17 +40,17 @@ normalizeSelected <- function(selected, inputId, choicesNames, choicesValues) {
 
   # if you are using optgroups, you're using shiny > 0.10.0, and you should
   # already know that `selected` must be a value instead of a label
-  if (needOptgroup(choicesValues)) return(selected)
+  if (needOptgroup(choiceValues)) return(selected)
 
-  if (is.list(choicesNames)) choicesNames <- unlist(choicesNames)
-  if (is.list(choicesValues)) choicesValues <- unlist(choicesValues)
+  if (is.list(choiceNames)) choiceNames <- unlist(choiceNames)
+  if (is.list(choiceValues)) choiceValues <- unlist(choiceValues)
 
   # when selected labels instead of values
-  i <- (selected %in% choicesNames) & !(selected %in% choicesValues)
+  i <- (selected %in% choiceNames) & !(selected %in% choiceValues)
   if (any(i)) {
     warnFun <- if (all(i)) {
       # replace names with values
-      selected <- choicesValues[[which(choicesNames == selected)]]
+      selected <- choiceValues[[which(choiceNames == selected)]]
       warning
     } else stop  # stop when it is ambiguous (some labels == values)
     warnFun("'selected' must be the values instead of names of 'choices' ",
@@ -62,11 +62,11 @@ normalizeSelected <- function(selected, inputId, choicesNames, choicesValues) {
 # generate options for radio buttons and checkbox groups (type = 'checkbox' or
 # 'radio')
 generateOptions <- function(inputId, selected, inline, type = 'checkbox',
-                            choicesNames, choicesValues,
+                            choiceNames, choiceValues,
                             session = getDefaultReactiveDomain()) {
   # generate a list of <input type=? [checked] />
   options <- mapply(
-    choicesValues, choicesNames,
+    choiceValues, choiceNames,
     FUN = function(value, name) {
       inputTag <- tags$input(
         type = type, name = inputId, value = value

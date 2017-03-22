@@ -453,17 +453,17 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
 
 updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
                                selected = NULL, inline = FALSE, type = NULL,
-                               choicesNames = NULL, choicesValues = NULL) {
-  args <- normalizeChoicesArgs(choices, choicesNames, choicesValues)
+                               choiceNames = NULL, choiceValues = NULL) {
+  args <- normalizeChoicesArgs(choices, choiceNames, choiceValues)
 
   if (!is.null(selected))
     selected <- normalizeSelected(selected, session$ns(inputId),
-      args$choicesNames, args$choicesValues)
+      args$choiceNames, args$choiceValues)
 
-  options <- if (!is.null(args$choicesValues)) {
+  options <- if (!is.null(args$choiceValues)) {
     format(tagList(
       generateOptions(session$ns(inputId), selected, inline, type,
-        args$choicesNames, args$choicesValues)
+        args$choiceNames, args$choiceValues)
     ))
   }
 
@@ -513,9 +513,9 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
 #' @export
 updateCheckboxGroupInput <- function(session, inputId, label = NULL,
   choices = NULL, selected = NULL, inline = FALSE,
-  choicesNames = NULL, choicesValues = NULL) {
+  choiceNames = NULL, choiceValues = NULL) {
   updateInputOptions(session, inputId, label, choices, selected,
-                     inline, "checkbox", choicesNames, choicesValues)
+                     inline, "checkbox", choiceNames, choiceValues)
 }
 
 
@@ -556,11 +556,11 @@ updateCheckboxGroupInput <- function(session, inputId, label = NULL,
 #' @export
 updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
                                selected = NULL, inline = FALSE,
-                               choicesNames = NULL, choicesValues = NULL) {
+                               choiceNames = NULL, choiceValues = NULL) {
   # you must select at least one radio button
   if (is.null(selected) && !is.null(choices)) selected <- choices[[1]]
   updateInputOptions(session, inputId, label, choices, selected,
-    inline, 'radio', choicesNames, choicesValues)
+    inline, 'radio', choiceNames, choiceValues)
 }
 
 

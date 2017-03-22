@@ -454,19 +454,16 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
 updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
                                selected = NULL, inline = FALSE, type = NULL,
                                choicesNames = NULL, choicesValues = NULL) {
-  args <- checkChoicesArgs(choices, choicesNames, choicesValues)
-  choices <- args$choices
-  choicesNames <- args$choicesNames
-  choicesValues <- args$choicesValues
+  args <- normalizeChoicesArgs(choices, choicesNames, choicesValues)
 
   if (!is.null(selected))
-    selected <- validateSelected(selected, choices, session$ns(inputId),
-                                 choicesNames, choicesValues)
+    selected <- normalizeSelected(selected, session$ns(inputId),
+      args$choicesNames, args$choicesValues)
 
-  options <- if (!is.null(choices) || !is.null(choicesValues)) {
+  options <- if (!is.null(args$choicesValues)) {
     format(tagList(
-      generateOptions(session$ns(inputId), choices, selected, inline,
-                      type, choicesNames, choicesValues)
+      generateOptions(session$ns(inputId), selected, inline, type,
+        args$choicesNames, args$choicesValues)
     ))
   }
 
@@ -610,7 +607,7 @@ updateSelectInput <- function(session, inputId, label = NULL, choices = NULL,
                               selected = NULL) {
   choices <- if (!is.null(choices)) choicesWithNames(choices)
   if (!is.null(selected))
-    selected <- validateSelected(selected, choices, inputId)
+    selected <- normalizeSelected(selected, inputId, names(choices), unname(choices))
   options <- if (!is.null(choices)) selectOptions(choices, selected)
   message <- dropNulls(list(label = label, options = options, value = selected))
   session$sendInputMessage(inputId, message)

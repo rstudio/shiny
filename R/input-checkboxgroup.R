@@ -70,23 +70,17 @@
 checkboxGroupInput <- function(inputId, label, choices = NULL, selected = NULL,
   inline = FALSE, width = NULL, choicesNames = NULL, choicesValues = NULL) {
 
-  args <- checkChoicesArgs(choices, choicesNames, choicesValues)
-  choices <- args$choices
-  choicesNames <- args$choicesNames
-  choicesValues <- args$choicesValues
+  args <- normalizeChoicesArgs(choices, choicesNames, choicesValues)
 
   selected <- restoreInput(id = inputId, default = selected)
 
   # default value if it's not specified
   if (!is.null(selected))
-    selected <- validateSelected(selected, choices, inputId,
-                                 choicesNames, choicesValues)
+    selected <- normalizeSelected(selected, inputId,
+      args$choicesNames, args$choicesValues)
 
-  if (!is.null(selected))
-    selected <- validateSelected(selected, choices, inputId)
-
-  options <- generateOptions(inputId, choices, selected, inline,
-                             'checkbox', choicesNames, choicesValues)
+  options <- generateOptions(inputId, selected, inline,
+    'checkbox', args$choicesNames, args$choicesValues)
 
   divClass <- "form-group shiny-input-checkboxgroup shiny-input-container"
   if (inline)

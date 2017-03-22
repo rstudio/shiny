@@ -85,7 +85,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
   # default value if it's not specified
   if (is.null(selected)) {
     if (!multiple) selected <- firstChoice(choices)
-  } else selected <- validateSelected(selected, choices, inputId)
+  } else selected <- normalizeSelected(selected, inputId, names(choices), unname(choices))
 
   if (!is.null(size) && selectize) {
     stop("'size' argument is incompatible with 'selectize=TRUE'.")

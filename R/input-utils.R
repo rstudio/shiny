@@ -2,7 +2,7 @@ controlLabel <- function(controlName, label) {
   label %AND% tags$label(class = "control-label", `for` = controlName, label)
 }
 
-checkChoicesArgs <- function(choices, choicesNames, choicesValues) {
+normalizeChoicesArgs <- function(choices, choicesNames, choicesValues) {
   # if-else to check that either choices OR (choicesNames + choicesValues)
   # were correctly provided
   if (is.null(choices)) {
@@ -32,7 +32,7 @@ checkChoicesArgs <- function(choices, choicesNames, choicesValues) {
 # Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
 # refers to values. Below is a function for backward compatibility. It also
 # coerces the value to `character`.
-validateSelected <- function(selected, choices, inputId, choicesNames, choicesValues) {
+normalizeSelected <- function(selected, inputId, choicesNames, choicesValues) {
   # this line accomplishes two tings:
   #   - coerces selected to character
   #   - drops name, otherwise toJSON() keeps it too
@@ -40,22 +40,17 @@ validateSelected <- function(selected, choices, inputId, choicesNames, choicesVa
 
   # if you are using optgroups, you're using shiny > 0.10.0, and you should
   # already know that `selected` must be a value instead of a label
-  if (needOptgroup(choices %OR% choicesValues)) return(selected)
+  if (needOptgroup(choicesValues)) return(selected)
 
-  if (is.list(choices)) choices <- unlist(choices)
   if (is.list(choicesNames)) choicesNames <- unlist(choicesNames)
   if (is.list(choicesValues)) choicesValues <- unlist(choicesValues)
 
-  nms <- names(choices) %OR% choicesNames
-
-  # labels and values are identical, no need to validate
-  if (identical(nms, unname(choices) %OR% choicesValues)) return(selected)
   # when selected labels instead of values
-  i <- (selected %in% nms) & !(selected %in% (choices %OR% choicesValues))
+  i <- (selected %in% choicesNames) & !(selected %in% choicesValues)
   if (any(i)) {
     warnFun <- if (all(i)) {
       # replace names with values
-      selected <- unname(choices[selected]) %OR% choicesValues[[which(choicesNames == selected)]]
+      selected <- choicesValues[[which(choicesNames == selected)]]
       warning
     } else stop  # stop when it is ambiguous (some labels == values)
     warnFun("'selected' must be the values instead of names of 'choices' ",
@@ -66,17 +61,12 @@ validateSelected <- function(selected, choices, inputId, choicesNames, choicesVa
 
 # generate options for radio buttons and checkbox groups (type = 'checkbox' or
 # 'radio')
-generateOptions <- function(inputId, choices = NULL, selected, inline,
-                            type = 'checkbox', choicesNames = NULL,
-                            choicesValues = NULL,
+generateOptions <- function(inputId, selected, inline, type = 'checkbox',
+                            choicesNames, choicesValues,
                             session = getDefaultReactiveDomain()) {
-
-  nms <- names(choices) %OR% choicesNames
-  vals <- choices %OR% choicesValues
-
   # generate a list of <input type=? [checked] />
   options <- mapply(
-    vals, nms,
+    choicesValues, choicesNames,
     FUN = function(value, name) {
       inputTag <- tags$input(
         type = type, name = inputId, value = value

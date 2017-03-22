@@ -2,6 +2,14 @@ controlLabel <- function(controlName, label) {
   label %AND% tags$label(class = "control-label", `for` = controlName, label)
 }
 
+# This function takes in either a list or vector for `choices` (and
+# `choiceNames` and `choiceValues` are passed in as NULL) OR it takes
+# in a list or vector for both `choiceNames` and `choiceValues` (and
+# `choices` is passed as NULL) and returns a list of two elements:
+#    - `choiceNames` is a vector or list that holds the options names
+#      (each element can be arbitrary UI, or simple text)
+#    - `choiceValues` is a vector or list that holds the options values
+#       (each element must be simple text)
 normalizeChoicesArgs <- function(choices, choiceNames, choiceValues) {
   # if-else to check that either choices OR (choiceNames + choiceValues)
   # were correctly provided

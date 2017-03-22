@@ -9,6 +9,8 @@ shiny 1.0.0.9001
 
 ### Minor new features and improvements
 
+* Addressed [#1348](https://github.com/rstudio/shiny/issues/1348) and [#1437](https://github.com/rstudio/shiny/issues/1437) by adding two new arguments to `radioButtons()` and `checkboxGroupInput()`: `choiceNames` (list or vector) and `choiceValues` (list or vector). These can be passed in as an alternative to `choices`, with the added benefit that the elements in `choiceNames` can be arbitrary UI (i.e. anything created by `HTML()` and the `tags()` functions, like icons and images). While the underlying values for each choice (passed in through `choiceValues`) must still be simple text, their visual representation on the app (what the user actually clicks to select a different option) can be any valid HTML element. See `?radioButtons` for a small example. ([#1521](https://github.com/rstudio/shiny/pull/1521))
+
 * Updated `tools/README.md` with more detailed instructions. ([##1616](https://github.com/rstudio/shiny/pull/1616))
 
 * Fixed [#1565](https://github.com/rstudio/shiny/issues/1565), which meant that resources with spaces in their names return HTTP 404. ([#1566](https://github.com/rstudio/shiny/pull/1566))

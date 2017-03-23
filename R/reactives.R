@@ -747,6 +747,10 @@ Observable <- R6Class(
       else
         invisible(.value)
     },
+    format = function() {
+      label <- sprintf('reactive(%s)', paste(deparse(body(.origFunc)), collapse='\n'))
+      strsplit(label, "\n")[[1]]
+    },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
                          prevId = .mostRecentCtxId)
@@ -910,9 +914,7 @@ rexprSrcrefToLabel <- function(srcref, defaultLabel) {
 
 #' @export
 format.reactiveExpr <- function(x, ...) {
-  fun <- attr(x, "observable", exact = TRUE)$.origFunc
-  label <- sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n'))
-  strsplit(label, "\n")[[1]]
+  attr(x, "observable", exact = TRUE)$format()
 }
 
 #' @export

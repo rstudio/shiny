@@ -18,9 +18,10 @@ A function. Call the function with no arguments to (reactively) read
   the value; call the function with a single argument to set the value.
 }
 \description{
-A \code{reactiveVal} is an object used for reading and writing a value, like
-a variable, but with special capabilities for reactive programming. When you
-read the value out of a \code{reactiveVal}, the calling reactive expression
+The \code{reactiveVal} function is used to construct a "reactive value"
+object. This is an object used for reading and writing a value, like a
+variable, but with special capabilities for reactive programming. When you
+read the value out of a reactiveVal object, the calling reactive expression
 takes a dependency, and when you change the value, it notifies any reactives
 that previously depended on that value.
 }
@@ -29,7 +30,7 @@ that previously depended on that value.
 that the former is for a single reactive value (like a variable), whereas the
 latter lets you conveniently use multiple reactive values by name (like a
 named list of variables). For a one-off reactive value, it's more natural to
-use \code{reactiveVal}.
+use \code{reactiveVal}. See the Examples section for an illustration.
 }
 \examples{
 
@@ -56,21 +57,22 @@ ui <- fluidPage(
   textOutput("value")
 )
 
+# The comments below show the equivalent logic using reactiveValues()
 server <- function(input, output, session) {
-  value <- reactiveVal(0)
+  value <- reactiveVal(0)       # rv <- reactiveValues(value = 0)
 
   observeEvent(input$minus, {
-    newValue <- value() - 1
-    value(newValue)
+    newValue <- value() - 1     # newValue <- rv$value - 1
+    value(newValue)             # rv$value <- newValue
   })
 
   observeEvent(input$plus, {
-    newValue <- value() + 1
-    value(newValue)
+    newValue <- value() + 1     # newValue <- rv$value + 1
+    value(newValue)             # rv$value <- newValue
   })
 
   output$value <- renderText({
-    value()
+    value()                     # rv$value
   })
 }
 

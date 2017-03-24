@@ -5,8 +5,9 @@
 \alias{selectizeInput}
 \title{Create a select list input control}
 \usage{
-selectInput(inputId, label, choices, selected = NULL, multiple = FALSE,
-  selectize = TRUE, width = NULL, size = NULL)
+selectInput(inputId, label, choices = NULL, selected = NULL,
+  multiple = FALSE, selectize = TRUE, width = NULL, size = NULL,
+  choiceNames = NULL, choiceValues = NULL)
 
 selectizeInput(inputId, ..., options = NULL, width = NULL)
 }
@@ -38,6 +39,18 @@ see \code{\link{validateCssUnit}}.}
 will result in a taller box. Not compatible with \code{selectize=TRUE}.
 Normally, when \code{multiple=FALSE}, a select input will be a drop-down
 list, but when \code{size} is set, it will be a box instead.}
+
+\item{choiceNames, choiceValues}{List of names and values, respectively,
+that are displayed to the user in the app and correspond to the each
+choice (for this reason, \code{choiceNames} and \code{choiceValues}
+must have the same length). If either of these arguments is
+provided, then the other \emph{must} be provided and \code{choices}
+\emph{must not} be provided. For \code{selectInput} and \code{selectizeInput},
+there isn't any particular advantage to using both of these over
+a named list for \code{choices} and it is simply a matter of preference
+(this is not always the case; for example, \code{\link{radioButtons}} and
+\code{\link{checkboxGroupInput}} can use \code{choiceNames} to pass HTML
+code, instead of simple text).}
 
 \item{...}{Arguments passed to \code{selectInput()}.}
 

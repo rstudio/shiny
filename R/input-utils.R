@@ -10,14 +10,21 @@ controlLabel <- function(controlName, label) {
 #      (each element can be arbitrary UI, or simple text)
 #    - `choiceValues` is a vector or list that holds the options values
 #       (each element must be simple text)
-normalizeChoicesArgs <- function(choices, choiceNames, choiceValues) {
+normalizeChoicesArgs <- function(choices, choiceNames, choiceValues,
+  mustExist = TRUE) {
   # if-else to check that either choices OR (choiceNames + choiceValues)
   # were correctly provided
   if (is.null(choices)) {
     if (is.null(choiceNames) || is.null(choiceValues)) {
-      return(list(choiceNames = NULL, choiceValues = NULL))
-      # stop("Please specify a non-empty vector for `choices` (or,
-      #      alternatively, for both `choiceNames` and `choiceValues`).")
+      if (mustExist) {
+        stop("Please specify a non-empty vector for `choices` (or,",
+             "alternatively, for both `choiceNames` and `choiceValues`).")
+      } else {
+        # this is useful when we call this function from `updateInputOptions()`
+        # in which case, all three `choices`, `choiceNames` and `choiceValues`
+        # may legitimately be NULL
+        return(list(choiceNames = NULL, choiceValues = NULL))
+      }
     }
     if (length(choiceNames) != length(choiceValues)) {
       stop("`choiceNames` and `choiceValues` must have the same length.")

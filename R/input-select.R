@@ -30,6 +30,17 @@
 #'   will result in a taller box. Not compatible with \code{selectize=TRUE}.
 #'   Normally, when \code{multiple=FALSE}, a select input will be a drop-down
 #'   list, but when \code{size} is set, it will be a box instead.
+#' @param choiceNames,choiceValues List of names and values, respectively,
+#'   that are displayed to the user in the app and correspond to the each
+#'   choice (for this reason, \code{choiceNames} and \code{choiceValues}
+#'   must have the same length). If either of these arguments is
+#'   provided, then the other \emph{must} be provided and \code{choices}
+#'   \emph{must not} be provided. For \code{selectInput} and \code{selectizeInput},
+#'   there isn't any particular advantage to using both of these over
+#'   a named list for \code{choices} and it is simply a matter of preference
+#'   (this is not always the case; for example, \code{\link{radioButtons}} and
+#'   \code{\link{checkboxGroupInput}} can use \code{choiceNames} to pass HTML
+#'   code, instead of simple text).
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -73,18 +84,18 @@
 #' )
 #' }
 #' @export
-selectInput <- function(inputId, label, choices, selected = NULL,
-                        multiple = FALSE, selectize = TRUE, width = NULL,
-                        size = NULL) {
+selectInput <- function(inputId, label, choices = NULL, selected = NULL,
+  multiple = FALSE, selectize = TRUE, width = NULL, size = NULL,
+  choiceNames = NULL, choiceValues = NULL) {
 
   selected <- restoreInput(id = inputId, default = selected)
 
-  # resolve names
-  choices <- choicesWithNames(choices)
+  # resolve choices
+  args <- normalizeChoicesArgs(choices, choiceNames, choiceValues)
 
   # default value if it's not specified
   if (is.null(selected)) {
-    if (!multiple) selected <- firstChoice(choices)
+    if (!multiple) selected <- firstChoice(args$choiceValues)
   } else selected <- as.character(selected)
 
   if (!is.null(size) && selectize) {
@@ -96,7 +107,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
     id = inputId,
     class = if (!selectize) "form-control",
     size = size,
-    selectOptions(choices, selected)
+    selectOptions(args$choiceNames, args$choiceValues, selected)
   )
   if (multiple)
     selectTag$attribs$multiple <- "multiple"
@@ -111,7 +122,7 @@ selectInput <- function(inputId, label, choices, selected = NULL,
 
   if (!selectize) return(res)
 
-  selectizeIt(inputId, res, NULL, nonempty = !multiple && !("" %in% choices))
+  selectizeIt(inputId, res, NULL, nonempty = !multiple && !("" %in% args$choiceValues))
 }
 
 firstChoice <- function(choices) {
@@ -123,8 +134,8 @@ firstChoice <- function(choices) {
 # Create tags for each of the options; use <optgroup> if necessary.
 # This returns a HTML string instead of tags, because of the 'selected'
 # attribute.
-selectOptions <- function(choices, selected = NULL) {
-  html <- mapply(choices, names(choices), FUN = function(choice, label) {
+selectOptions <- function(choiceNames, choiceValues, selected = NULL) {
+  html <- mapply(choiceValues, choiceNames, FUN = function(choice, label) {
     if (is.list(choice)) {
       # If sub-list, create an optgroup and recurse into the sublist
       sprintf(
@@ -145,11 +156,6 @@ selectOptions <- function(choices, selected = NULL) {
   })
 
   HTML(paste(html, collapse = '\n'))
-}
-
-# need <optgroup> when choices contains sub-lists
-needOptgroup <- function(choices) {
-  any(vapply(choices, is.list, logical(1)))
 }
 
 #' @rdname selectInput

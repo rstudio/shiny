@@ -1,6 +1,54 @@
 context("reactivity")
 
 
+test_that("ReactiveVal", {
+  val <- reactiveVal()
+
+  isolate({
+    expect_true(is.null(val()))
+
+    # Set to a simple value
+    val(1)
+    expect_equal(val(), 1)
+
+    # Set to a complex value
+    val(cars)
+    expect_equal(val(), cars)
+
+    # Check that passing in an initial value works
+    expect_equal(reactiveVal(10)(), 10)
+  })
+
+  o <- observe({
+    val()
+  })
+  flushReact()
+  expect_equal(execCount(o), 1)
+  # Just making sure o is stable
+  flushReact()
+  expect_equal(execCount(o), 1)
+
+  # Changing value causes o to invalidate
+  val(10)
+  flushReact()
+  expect_equal(execCount(o), 2)
+
+  # Setting new value that's same as current value is a no-op
+  val(10)
+  flushReact()
+  expect_equal(execCount(o), 2)  #
+
+  o$destroy()
+})
+
+test_that("ReactiveVal labels", {
+  val <- reactiveVal()
+  expect_equal(attr(val, "label", exact = TRUE), "val")
+
+  name.with.dots = reactiveVal()
+  expect_equal(attr(name.with.dots, "label", exact = TRUE), "name.with.dots")
+})
+
 # Test for correct behavior of ReactiveValues
 test_that("ReactiveValues", {
   # Creation and indexing into ReactiveValues -------------------------------

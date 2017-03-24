@@ -38,6 +38,228 @@ Dependents <- R6Class(
 )
 
 
+# ReactiveVal ---------------------------------------------------------------
+
+ReactiveVal <- R6Class(
+  'ReactiveVal',
+  portable = FALSE,
+  private = list(
+    value = NULL,
+    label = NULL,
+    frozen = FALSE,
+    dependents = Dependents$new()
+  ),
+  public = list(
+    initialize = function(value, label = NULL) {
+      private$value <- value
+      private$label <- label
+      .graphValueChange(private$label, value)
+    },
+    get = function() {
+      private$dependents$register(depLabel = private$label)
+
+      if (private$frozen)
+        reactiveStop()
+
+      private$value
+    },
+    set = function(value) {
+      if (identical(private$value, value)) {
+        return(invisible(FALSE))
+      }
+      private$value <- value
+      .graphValueChange(private$label, value)
+      private$dependents$invalidate()
+      invisible(TRUE)
+    },
+    freeze = function(session = getDefaultReactiveDomain()) {
+      if (is.null(session)) {
+        stop("Can't freeze a reactiveVal without a reactive domain")
+      }
+      session$onFlushed(function() {
+        self$thaw()
+      })
+      private$frozen <- TRUE
+    },
+    thaw = function() {
+      private$frozen <- FALSE
+    },
+    isFrozen = function() {
+      private$frozen
+    },
+    format = function(...) {
+      # capture.output(print()) is necessary because format() doesn't
+      # necessarily return a character vector, e.g. data.frame.
+      label <- capture.output(print(base::format(private$value, ...)))
+      if (length(label) == 1) {
+        paste0("reactiveVal: ", label)
+      } else {
+        c("reactiveVal:", label)
+      }
+    }
+  )
+)
+
+#' Create a (single) reactive value
+#'
+#' The \code{reactiveVal} function is used to construct a "reactive value"
+#' object. This is an object used for reading and writing a value, like a
+#' variable, but with special capabilities for reactive programming. When you
+#' read the value out of a reactiveVal object, the calling reactive expression
+#' takes a dependency, and when you change the value, it notifies any reactives
+#' that previously depended on that value.
+#'
+#' \code{reactiveVal} is very similar to \code{\link{reactiveValues}}, except
+#' that the former is for a single reactive value (like a variable), whereas the
+#' latter lets you conveniently use multiple reactive values by name (like a
+#' named list of variables). For a one-off reactive value, it's more natural to
+#' use \code{reactiveVal}. See the Examples section for an illustration.
+#'
+#' @param value An optional initial value.
+#' @param label An optional label, for debugging purposes (see
+#'   \code{\link{showReactLog}}). If missing, a label will be automatically
+#'   created.
+#'
+#' @return A function. Call the function with no arguments to (reactively) read
+#'   the value; call the function with a single argument to set the value.
+#'
+#' @examples
+#'
+#' \dontrun{
+#'
+#' # Create the object by calling reactiveVal
+#' r <- reactiveVal()
+#'
+#' # Set the value by calling with an argument
+#' r(10)
+#'
+#' # Read the value by calling without arguments
+#' r()
+#'
+#' }
+#'
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' ui <- fluidPage(
+#'   actionButton("minus", "-1"),
+#'   actionButton("plus", "+1"),
+#'   br(),
+#'   textOutput("value")
+#' )
+#'
+#' # The comments below show the equivalent logic using reactiveValues()
+#' server <- function(input, output, session) {
+#'   value <- reactiveVal(0)       # rv <- reactiveValues(value = 0)
+#'
+#'   observeEvent(input$minus, {
+#'     newValue <- value() - 1     # newValue <- rv$value - 1
+#'     value(newValue)             # rv$value <- newValue
+#'   })
+#'
+#'   observeEvent(input$plus, {
+#'     newValue <- value() + 1     # newValue <- rv$value + 1
+#'     value(newValue)             # rv$value <- newValue
+#'   })
+#'
+#'   output$value <- renderText({
+#'     value()                     # rv$value
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#'
+#' }
+#'
+#' @export
+reactiveVal <- function(value = NULL, label = NULL) {
+  if (missing(label)) {
+    call <- sys.call()
+    label <- rvalSrcrefToLabel(attr(call, "srcref", exact = TRUE))
+  }
+
+  rv <- ReactiveVal$new(value, label)
+  structure(
+    function(x) {
+      if (missing(x)) {
+        rv$get()
+      } else {
+        force(x)
+        rv$set(x)
+      }
+    },
+    class = c("reactiveVal", "reactive"),
+    label = label,
+    .impl = rv
+  )
+}
+
+#' @rdname freezeReactiveValue
+#' @export
+freezeReactiveVal <- function(x) {
+  domain <- getDefaultReactiveDomain()
+  if (is.null(domain)) {
+    stop("freezeReactiveVal() must be called when a default reactive domain is active.")
+  }
+  if (!inherits(x, "reactiveVal")) {
+    stop("x must be a reactiveVal object")
+  }
+
+  attr(x, ".impl", exact = TRUE)$freeze(domain)
+  invisible()
+}
+
+#' @export
+format.reactiveVal <- function(x, ...) {
+  attr(x, ".impl", exact = TRUE)$format(...)
+}
+
+# Attempts to extract the variable name that the reactiveVal object is being
+# assigned to (e.g. for `a <- reactiveVal()`, the result should be "a"). This
+# is a fragile, error-prone operation, so we default to a random label if
+# necessary.
+rvalSrcrefToLabel <- function(srcref,
+  defaultLabel = paste0("reactiveVal", createUniqueId(4))) {
+
+  if (is.null(srcref))
+    return(defaultLabel)
+
+  srcfile <- attr(srcref, "srcfile", exact = TRUE)
+  if (is.null(srcfile))
+    return(defaultLabel)
+
+  if (is.null(srcfile$lines))
+    return(defaultLabel)
+
+  lines <- srcfile$lines
+  # When pasting at the Console, srcfile$lines is not split
+  if (length(lines) == 1) {
+    lines <- strsplit(lines, "\n")[[1]]
+  }
+
+  if (length(lines) < srcref[1]) {
+    return(defaultLabel)
+  }
+
+  firstLine <- substring(lines[srcref[1]], srcref[2] - 1)
+
+  m <- regexec("\\s*([^[:space:]]+)\\s*(<-|=)\\s*reactiveVal\\b", firstLine)
+  if (m[[1]][1] == -1) {
+    return(defaultLabel)
+  }
+
+  sym <- regmatches(firstLine, m)[[1]][2]
+  res <- try(parse(text = sym), silent = TRUE)
+  if (inherits(res, "try-error"))
+    return(defaultLabel)
+
+  if (length(res) != 1)
+    return(defaultLabel)
+
+  return(as.character(res))
+}
+
+
 # ReactiveValues ------------------------------------------------------------
 
 ReactiveValues <- R6Class(
@@ -397,14 +619,17 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 
 #' Freeze a reactive value
 #'
-#' This freezes a reactive value. If the value is accessed while frozen, a
+#' These functions freeze a \code{\link{reactiveVal}}, or an element of a
+#' \code{\link{reactiveValues}}. If the value is accessed while frozen, a
 #' "silent" exception is raised and the operation is stopped. This is the same
 #' thing that happens if \code{req(FALSE)} is called. The value is thawed
 #' (un-frozen; accessing it will no longer raise an exception) when the current
 #' reactive domain is flushed. In a Shiny application, this occurs after all of
 #' the observers are executed.
 #'
-#' @param x A \code{\link{reactiveValues}} object (like \code{input}).
+#' @param x For \code{freezeReactiveValue}, a \code{\link{reactiveValues}}
+#'   object (like \code{input}); for \code{freezeReactiveVal}, a
+#'   \code{\link{reactiveVal}} object.
 #' @param name The name of a value in the \code{\link{reactiveValues}} object.
 #'
 #' @seealso \code{\link{req}}
@@ -446,7 +671,7 @@ str.reactivevalues <- function(object, indent.str = " ", ...) {
 #' @export
 freezeReactiveValue <- function(x, name) {
   domain <- getDefaultReactiveDomain()
-  if (is.null(getDefaultReactiveDomain)) {
+  if (is.null(domain)) {
     stop("freezeReactiveValue() must be called when a default reactive domain is active.")
   }
 
@@ -461,6 +686,7 @@ Observable <- R6Class(
   'Observable',
   portable = FALSE,
   public = list(
+    .origFunc = 'function',
     .func = 'function',
     .label = character(0),
     .domain = NULL,
@@ -490,6 +716,7 @@ Observable <- R6Class(
         funcLabel <- paste0("<reactive:", label, ">")
       }
 
+      .origFunc <<- func
       .func <<- wrapFunctionLabel(func, funcLabel,
         ..stacktraceon = ..stacktraceon)
       .label <<- label
@@ -519,6 +746,10 @@ Observable <- R6Class(
         .value
       else
         invisible(.value)
+    },
+    format = function() {
+      label <- sprintf('reactive(%s)', paste(deparse(body(.origFunc)), collapse='\n'))
+      strsplit(label, "\n")[[1]]
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
@@ -629,13 +860,13 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
   # Attach a label and a reference to the original user source for debugging
   srcref <- attr(substitute(x), "srcref", exact = TRUE)
   if (is.null(label)) {
-    label <- srcrefToLabel(srcref[[1]],
+    label <- rexprSrcrefToLabel(srcref[[1]],
       sprintf('reactive(%s)', paste(deparse(body(fun)), collapse='\n')))
   }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
   o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
-  structure(o$getValue, observable = o, class = "reactive")
+  structure(o$getValue, observable = o, class = c("reactiveExpr", "reactive"))
 }
 
 # Given the srcref to a reactive expression, attempts to figure out what the
@@ -643,7 +874,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
 # scans the line of code that started the reactive block and looks for something
 # that looks like assignment. If we fail, fall back to a default value (likely
 # the block of code in the body of the reactive).
-srcrefToLabel <- function(srcref, defaultLabel) {
+rexprSrcrefToLabel <- function(srcref, defaultLabel) {
   if (is.null(srcref))
     return(defaultLabel)
 
@@ -682,18 +913,24 @@ srcrefToLabel <- function(srcref, defaultLabel) {
 }
 
 #' @export
+format.reactiveExpr <- function(x, ...) {
+  attr(x, "observable", exact = TRUE)$format()
+}
+
+#' @export
 print.reactive <- function(x, ...) {
-  label <- attr(x, "observable", exact = TRUE)$.label
-  cat(label, "\n")
+  cat(paste(format(x), collapse = "\n"), "\n")
 }
 
 #' @export
 #' @rdname reactive
-is.reactive <- function(x) inherits(x, "reactive")
+is.reactive <- function(x) {
+  inherits(x, "reactive")
+}
 
 # Return the number of times that a reactive expression or observer has been run
 execCount <- function(x) {
-  if (is.reactive(x))
+  if (inherits(x, "reactiveExpr"))
     return(attr(x, "observable", exact = TRUE)$.execCount)
   else if (inherits(x, 'Observer'))
     return(x$.execCount)

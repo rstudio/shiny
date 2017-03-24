@@ -7,6 +7,8 @@ shiny 1.0.0.9001
 
 ### New features
 
+* Added `reactiveVal` function, for storing a single value which can be (reactively) read and written. Similar to `reactiveValues`, except that `reactiveVal` just lets you store a single value instead of storing multiple values by name. ([#1614](https://github.com/rstudio/shiny/pull/1614))
+
 ### Minor new features and improvements
 
 * Updated `tools/README.md` with more detailed instructions. ([##1616](https://github.com/rstudio/shiny/pull/1616))

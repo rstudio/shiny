@@ -456,7 +456,7 @@ updateInputOptions <- function(session, inputId, label = NULL, choices = NULL,
                                choiceNames = NULL, choiceValues = NULL) {
   if (is.null(type)) stop("Please specify the type ('checkbox' or 'radio')")
 
-  args <- normalizeChoicesArgs(choices, choiceNames, choiceValues)
+  args <- normalizeChoicesArgs(choices, choiceNames, choiceValues, mustExist = FALSE)
 
   if (!is.null(selected)) selected <- as.character(selected)
 

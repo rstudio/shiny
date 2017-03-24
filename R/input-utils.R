@@ -17,7 +17,7 @@ normalizeChoicesArgs <- function(choices, choiceNames, choiceValues,
   if (is.null(choices)) {
     if (is.null(choiceNames) || is.null(choiceValues)) {
       if (mustExist) {
-        stop("Please specify a non-empty vector for `choices` (or,",
+        stop("Please specify a non-empty vector for `choices` (or, ",
              "alternatively, for both `choiceNames` and `choiceValues`).")
       } else {
         # this is useful when we call this function from `updateInputOptions()`

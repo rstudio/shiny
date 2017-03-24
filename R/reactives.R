@@ -1151,6 +1151,10 @@ setAutoflush <- local({
 #' }
 #' @export
 reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain()) {
+  # Need to make sure that session is resolved at creation, not when the
+  # callback below is fired (see #1621).
+  force(session)
+
   dependents <- Map$new()
   timerCallbacks$schedule(intervalMs, function() {
     # Quit if the session is closed

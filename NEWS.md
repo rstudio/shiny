@@ -32,6 +32,8 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * The `NS()` function now returns a vectorized function. ([#1613](https://github.com/rstudio/shiny/pull/1613))
 
+* Fixed [#1617](https://github.com/rstudio/shiny/issues/1617): `fileInput` can have customized text for the button and the placeholder. ([#1619](https://github.com/rstudio/shiny/pull/1619))
+
 ### Bug fixes
 
 * Fixed [#1511](https://github.com/rstudio/shiny/issues/1511): `fileInput`s did not trigger the `shiny:inputchanged` event on the client. Also removed `shiny:fileuploaded` JavaScript event, because it is no longer needed after this fix. ([#1541](https://github.com/rstudio/shiny/pull/1541), [#1570](https://github.com/rstudio/shiny/pull/1570))

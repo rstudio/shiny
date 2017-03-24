@@ -4,7 +4,8 @@
 \alias{fileInput}
 \title{File Upload Control}
 \usage{
-fileInput(inputId, label, multiple = FALSE, accept = NULL, width = NULL)
+fileInput(inputId, label, multiple = FALSE, accept = NULL, width = NULL,
+  buttonLabel = "Browse...", placeholder = "No file selected")
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -20,6 +21,11 @@ what kind of files the server is expecting.}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
+
+\item{buttonLabel}{The label used on the button. Can be text or an HTML tag
+object.}
+
+\item{placeholder}{The text to show before a file has been uploaded.}
 }
 \description{
 Create a file upload control that can be used to upload one or more files.

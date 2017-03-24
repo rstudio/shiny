@@ -27,6 +27,9 @@
 #'   Internet Explorer 9 and earlier.}
 #' @param accept A character vector of MIME types; gives the browser a hint of
 #'   what kind of files the server is expecting.
+#' @param buttonLabel The label used on the button. Can be text or an HTML tag
+#'   object.
+#' @param placeholder The text to show before a file has been uploaded.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -70,7 +73,7 @@
 #' }
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
-  width = NULL) {
+  width = NULL, buttonLabel = "Browse...", placeholder = "No file selected") {
 
   restoredValue <- restoreInput(id = inputId, default = NULL)
 
@@ -105,12 +108,12 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     div(class = "input-group",
       tags$label(class = "input-group-btn",
         span(class = "btn btn-default btn-file",
-          "Browse...",
+          buttonLabel,
           inputTag
         )
       ),
       tags$input(type = "text", class = "form-control",
-        placeholder = "No file selected", readonly = "readonly"
+        placeholder = placeholder, readonly = "readonly"
       )
     ),
 

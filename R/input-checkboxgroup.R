@@ -75,9 +75,7 @@ checkboxGroupInput <- function(inputId, label, choices = NULL, selected = NULL,
   selected <- restoreInput(id = inputId, default = selected)
 
   # default value if it's not specified
-  if (!is.null(selected))
-    selected <- normalizeSelected(selected, inputId,
-      args$choiceNames, args$choiceValues)
+  if (!is.null(selected)) selected <- as.character(selected)
 
   options <- generateOptions(inputId, selected, inline,
     'checkbox', args$choiceNames, args$choiceValues)

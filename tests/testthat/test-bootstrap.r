@@ -192,21 +192,18 @@ test_that("selectInput selects items by default", {
 test_that("normalizeChoicesArgs does its job", {
 
   # Unnamed vectors and lists
-  expected <- list(choiceNames = c("a", "b"), choiceValues = list("a", "b"))
+  expected <- list(choiceNames = list("a", "b"), choiceValues = list("a", "b"))
   expect_equal(normalizeChoicesArgs(c("a", "b"), NULL, NULL), expected)
   expect_equal(normalizeChoicesArgs(list("a", "b"), NULL, NULL), expected)
 
   # Named list
-  expected <- list(choiceNames = c("one", "two"), choiceValues = list("a", "b"))
+  expected <- list(choiceNames = list("one", "two"), choiceValues = list("a", "b"))
   x <- list(one = "a", two = "b")
   expect_equal(normalizeChoicesArgs(x, NULL, NULL), expected)
   expect_equal(normalizeChoicesArgs(NULL, names(x), unname(x)), expected)
 
   # Using unnamed `choiceNames` and `choiceValues` vectors/lists directly
-  expected <- list(choiceNames = c("one", "two"), choiceValues = c("a", "b"))
   expect_equal(normalizeChoicesArgs(NULL, c("one", "two"),  c("a", "b")), expected)
-
-  expected <- list(choiceNames = list("one", "two"), choiceValues = list("a", "b"))
   expect_equal(normalizeChoicesArgs(NULL, list("one", "two"),  list("a", "b")), expected)
 
   # Using choiceNames with HTML and choiceValues
@@ -219,5 +216,21 @@ test_that("normalizeChoicesArgs does its job", {
   x <- list("a", "b")
   expect_warning(res <- normalizeChoicesArgs(x, nms, vals),
     "Using `choices` argument; ignoring `choiceNames` and `choiceValues`.")
-  expect_equal(res, list(choiceNames = c("a", "b"), choiceValues = list("a", "b")))
+  expect_equal(res, list(choiceNames = list("a", "b"), choiceValues = list("a", "b")))
+
+  # Set possibilities to character(0)
+  expected <- list(choiceNames = list(), choiceValues = list())
+  expect_equal(normalizeChoicesArgs(character(0), NULL, NULL), expected)
+  expect_equal(normalizeChoicesArgs(NULL, character(0), character(0)), expected)
+  expect_warning(res <- normalizeChoicesArgs(character(0), character(0), character(0)),
+    "Using `choices` argument; ignoring `choiceNames` and `choiceValues`.")
+  expect_equal(res, expected)
+
+  # Set possibilities to character(0) in an inconsistent way
+  expected <- list(choiceNames = NULL, choiceValues = NULL)
+  expect_equal(normalizeChoicesArgs(NULL, character(0), NULL), expected)
+  expect_equal(normalizeChoicesArgs(NULL, NULL, character(0)), expected)
+
+  # Set all possibilities to NULL
+  expect_equal(normalizeChoicesArgs(NULL, NULL, NULL), expected)
 })

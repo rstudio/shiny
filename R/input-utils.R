@@ -14,9 +14,10 @@ normalizeChoicesArgs <- function(choices, choiceNames, choiceValues) {
   # if-else to check that either choices OR (choiceNames + choiceValues)
   # were correctly provided
   if (is.null(choices)) {
-    if (length(choiceNames) == 0 || length(choiceValues) == 0) {
-      stop("Please specify a non-empty vector for `choices` (or,
-           alternatively, for both `choiceNames` and `choiceValues`).")
+    if (is.null(choiceNames) || is.null(choiceValues)) {
+      return(list(choiceNames = NULL, choiceValues = NULL))
+      # stop("Please specify a non-empty vector for `choices` (or,
+      #      alternatively, for both `choiceNames` and `choiceValues`).")
     }
     if (length(choiceNames) != length(choiceValues)) {
       stop("`choiceNames` and `choiceValues` must have the same length.")
@@ -33,37 +34,8 @@ normalizeChoicesArgs <- function(choices, choiceNames, choiceValues) {
     choiceValues <- unname(choices)
   }
 
-  return(list(choiceNames = choiceNames, choiceValues = choiceValues))
-}
-
-# Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
-# refers to values. Below is a function for backward compatibility. It also
-# coerces the value to `character`.
-normalizeSelected <- function(selected, inputId, choiceNames, choiceValues) {
-  # this line accomplishes two tings:
-  #   - coerces selected to character
-  #   - drops name, otherwise toJSON() keeps it too
-  selected <- as.character(selected)
-
-  # if you are using optgroups, you're using shiny > 0.10.0, and you should
-  # already know that `selected` must be a value instead of a label
-  if (needOptgroup(choiceValues)) return(selected)
-
-  if (is.list(choiceNames)) choiceNames <- unlist(as.character(choiceNames))
-  if (is.list(choiceValues)) choiceValues <- unlist(choiceValues)
-
-  # when selected labels instead of values
-  i <- (selected %in% choiceNames) & !(selected %in% choiceValues)
-  if (any(i)) {
-    warnFun <- if (all(i)) {
-      # replace names with values
-      selected <- choiceValues[[which(choiceNames == selected)]]
-      warning
-    } else stop  # stop when it is ambiguous (some labels == values)
-    warnFun("'selected' must be the values instead of names of 'choices' ",
-            "for the input '", inputId, "'")
-  }
-  selected
+  return(list(choiceNames = as.list(choiceNames),
+              choiceValues = as.list(choiceValues)))
 }
 
 # generate options for radio buttons and checkbox groups (type = 'checkbox' or

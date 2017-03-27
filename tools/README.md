@@ -34,7 +34,7 @@ Periodically, it's good to upgrade the packages to a recent version. There's two
   
   - `^` is for upgrades that keep the major version the same (more or less -- more specifically, it allow changes that do not modify the first non-zero digit in the version, either the 3 in 3.1.4 or the 4 in 0.4.2.). This is the default operator added to the package.json when you run `yarn add [package-name]`.
 
-2. Use `yarn upgrapde [package]` to upgrade a single named package to the version specified by the latest tag (potentially upgrading the package across major versions).
+2. Use `yarn upgrade [package]` to upgrade a single named package to the version specified by the latest tag (potentially upgrading the package across major versions).
 
 For more information about upgrading or installing new packages, see the [yarn workflow documentation](https://yarnpkg.com/en/docs/yarn-workflow).
 

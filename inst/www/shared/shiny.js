@@ -614,7 +614,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
   // Merge opts with defaults, and return a new object.
   function addDefaultInputOpts(opts) {
-    return Object.assign({
+    return $.extend({
       immediate: false,
       binding: null,
       el: null

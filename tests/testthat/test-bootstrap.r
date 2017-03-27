@@ -204,7 +204,14 @@ test_that("normalizeChoicesArgs does its job", {
 
   # Using unnamed `choiceNames` and `choiceValues` vectors/lists directly
   expect_equal(normalizeChoicesArgs(NULL, c("one", "two"),  c("a", "b")), expected)
-  expect_equal(normalizeChoicesArgs(NULL, list("one", "two"),  list("a", "b")), expected)
+  expect_equal(normalizeChoicesArgs(NULL, list("one", "two"), list("a", "b")), expected)
+
+  # Numbers
+  expected <- list(choiceNames = list("a", "b"), choiceValues = list("1", "2"))
+  expect_equal(normalizeChoicesArgs(c("a" = 1, "b" = 2), NULL, NULL), expected)
+  expect_equal(normalizeChoicesArgs(list("a" = 1, "b" = 2), NULL, NULL), expected)
+  expect_equal(normalizeChoicesArgs(NULL, c("a", "b"), c(1, 2)), expected)
+  expect_equal(normalizeChoicesArgs(NULL, list("a", "b"), list("1", "2")), expected)
 
   # Using choiceNames with HTML and choiceValues
   nms <- list(icon("calendar"), HTML("<p style='color:red;'>Red Text</p>"))
@@ -226,11 +233,17 @@ test_that("normalizeChoicesArgs does its job", {
     "Using `choices` argument; ignoring `choiceNames` and `choiceValues`.")
   expect_equal(res, expected)
 
-  # Set possibilities to character(0) in an inconsistent way
-  expected <- list(choiceNames = NULL, choiceValues = NULL)
-  expect_equal(normalizeChoicesArgs(NULL, character(0), NULL), expected)
-  expect_equal(normalizeChoicesArgs(NULL, NULL, character(0)), expected)
+  # Set possibilities to NULL in an inconsistent way
+  expected <- paste("One of `choiceNames` or `choiceValues` was set to NULL,",
+                    "but either both or none should be NULL.")
+  expect_error(normalizeChoicesArgs(NULL, character(0), NULL, FALSE), expected, fixed = TRUE)
+  expect_error(normalizeChoicesArgs(NULL, NULL, character(0), FALSE), expected, fixed = TRUE)
+  expected <- paste("Please specify a non-empty vector for `choices` (or,",
+                    "alternatively, for both `choiceNames` AND `choiceValues`).")
+  expect_error(normalizeChoicesArgs(NULL, character(0), NULL), expected, fixed = TRUE)
+  expect_error(normalizeChoicesArgs(NULL, NULL, character(0)), expected, fixed = TRUE)
 
-  # Set all possibilities to NULL
-  expect_equal(normalizeChoicesArgs(NULL, NULL, NULL), expected)
+  # Set all possibilities to NULL (and mustExist = FALSE)
+  expected <- list(choiceNames = NULL, choiceValues = NULL)
+  expect_equal(normalizeChoicesArgs(NULL, NULL, NULL, FALSE), expected)
 })

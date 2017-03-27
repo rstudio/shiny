@@ -18,12 +18,17 @@ normalizeChoicesArgs <- function(choices, choiceNames, choiceValues,
     if (is.null(choiceNames) || is.null(choiceValues)) {
       if (mustExist) {
         stop("Please specify a non-empty vector for `choices` (or, ",
-             "alternatively, for both `choiceNames` and `choiceValues`).")
+             "alternatively, for both `choiceNames` AND `choiceValues`).")
       } else {
-        # this is useful when we call this function from `updateInputOptions()`
-        # in which case, all three `choices`, `choiceNames` and `choiceValues`
-        # may legitimately be NULL
-        return(list(choiceNames = NULL, choiceValues = NULL))
+        if (is.null(choiceNames) && is.null(choiceValues)) {
+          # this is useful when we call this function from `updateInputOptions()`
+          # in which case, all three `choices`, `choiceNames` and `choiceValues`
+          # may legitimately be NULL
+          return(list(choiceNames = NULL, choiceValues = NULL))
+        } else {
+          stop("One of `choiceNames` or `choiceValues` was set to ",
+               "NULL, but either both or none should be NULL.")
+        }
       }
     }
     if (length(choiceNames) != length(choiceValues)) {
@@ -42,7 +47,7 @@ normalizeChoicesArgs <- function(choices, choiceNames, choiceValues,
   }
 
   return(list(choiceNames = as.list(choiceNames),
-              choiceValues = as.list(choiceValues)))
+              choiceValues = as.list(as.character(choiceValues))))
 }
 
 # generate options for radio buttons and checkbox groups (type = 'checkbox' or

@@ -561,7 +561,7 @@ runApp <- function(appDir=getwd(),
   }, add = TRUE)
 
   if (.globals$running) {
-    stop("Can't call `runApp()` from within `runApp()`. If your ,",
+    stop("Can't call `runApp()` from within `runApp()`. If your ",
          "application code contains `runApp()`, please remove it.")
   }
   .globals$running <- TRUE

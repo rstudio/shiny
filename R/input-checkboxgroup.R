@@ -6,9 +6,21 @@
 #'
 #' @inheritParams textInput
 #' @param choices List of values to show checkboxes for. If elements of the list
-#'   are named then that name rather than the value is displayed to the user.
+#'   are named then that name rather than the value is displayed to the user. If
+#'   this argument is provided, then \code{choiceNames} and \code{choiceValues}
+#'   must not be provided, and vice-versa.
 #' @param selected The values that should be initially selected, if any.
 #' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
+#' @param choiceNames,choiceValues List of names and values, respectively,
+#'   that are displayed to the user in the app and correspond to the each
+#'   choice (for this reason, \code{choiceNames} and \code{choiceValues}
+#'   must have the same length). If either of these arguments is
+#'   provided, then the other \emph{must} be provided and \code{choices}
+#'   \emph{must not} be provided. The advantage of using both of these over
+#'   a named list for \code{choices} is that \code{choiceNames} allows any
+#'   type of UI object to be passed through (tag objects, icons, HTML code,
+#'   ...), instead of just simple text. See Examples.
+#'
 #' @return A list of HTML elements that can be added to a UI definition.
 #'
 #' @family input elements
@@ -26,26 +38,47 @@
 #'   tableOutput("data")
 #' )
 #'
-#' server <- function(input, output) {
+#' server <- function(input, output, session) {
 #'   output$data <- renderTable({
 #'     mtcars[, c("mpg", input$variable), drop = FALSE]
 #'   }, rownames = TRUE)
 #' }
 #'
 #' shinyApp(ui, server)
+#'
+#' ui <- fluidPage(
+#'   checkboxGroupInput("icons", "Choose icons:",
+#'     choiceNames =
+#'       list(icon("calendar"), icon("bed"),
+#'            icon("cog"), icon("bug")),
+#'     choiceValues =
+#'       list("calendar", "bed", "cog", "bug")
+#'   ),
+#'   textOutput("txt")
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   output$txt <- renderText({
+#'     icons <- paste(input$icons, collapse = ", ")
+#'     paste("You chose", icons)
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
 #' }
 #' @export
-checkboxGroupInput <- function(inputId, label, choices, selected = NULL,
-  inline = FALSE, width = NULL) {
+checkboxGroupInput <- function(inputId, label, choices = NULL, selected = NULL,
+  inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL) {
+
+  args <- normalizeChoicesArgs(choices, choiceNames, choiceValues)
 
   selected <- restoreInput(id = inputId, default = selected)
 
-  # resolve names
-  choices <- choicesWithNames(choices)
-  if (!is.null(selected))
-    selected <- validateSelected(selected, choices, inputId)
+  # default value if it's not specified
+  if (!is.null(selected)) selected <- as.character(selected)
 
-  options <- generateOptions(inputId, choices, selected, inline)
+  options <- generateOptions(inputId, selected, inline,
+    'checkbox', args$choiceNames, args$choiceValues)
 
   divClass <- "form-group shiny-input-checkboxgroup shiny-input-container"
   if (inline)

@@ -2,45 +2,62 @@ controlLabel <- function(controlName, label) {
   label %AND% tags$label(class = "control-label", `for` = controlName, label)
 }
 
-
-# Before shiny 0.9, `selected` refers to names/labels of `choices`; now it
-# refers to values. Below is a function for backward compatibility. It also
-# coerces the value to `character`.
-validateSelected <- function(selected, choices, inputId) {
-  # this line accomplishes two tings:
-  #   - coerces selected to character
-  #   - drops name, otherwise toJSON() keeps it too
-  selected <- as.character(selected)
-  # if you are using optgroups, you're using shiny > 0.10.0, and you should
-  # already know that `selected` must be a value instead of a label
-  if (needOptgroup(choices)) return(selected)
-
-  if (is.list(choices)) choices <- unlist(choices)
-
-  nms <- names(choices)
-  # labels and values are identical, no need to validate
-  if (identical(nms, unname(choices))) return(selected)
-  # when selected labels instead of values
-  i <- (selected %in% nms) & !(selected %in% choices)
-  if (any(i)) {
-    warnFun <- if (all(i)) {
-      # replace names with values
-      selected <- unname(choices[selected])
-      warning
-    } else stop  # stop when it is ambiguous (some labels == values)
-    warnFun("'selected' must be the values instead of names of 'choices' ",
-            "for the input '", inputId, "'")
+# This function takes in either a list or vector for `choices` (and
+# `choiceNames` and `choiceValues` are passed in as NULL) OR it takes
+# in a list or vector for both `choiceNames` and `choiceValues` (and
+# `choices` is passed as NULL) and returns a list of two elements:
+#    - `choiceNames` is a vector or list that holds the options names
+#      (each element can be arbitrary UI, or simple text)
+#    - `choiceValues` is a vector or list that holds the options values
+#       (each element must be simple text)
+normalizeChoicesArgs <- function(choices, choiceNames, choiceValues,
+  mustExist = TRUE) {
+  # if-else to check that either choices OR (choiceNames + choiceValues)
+  # were correctly provided
+  if (is.null(choices)) {
+    if (is.null(choiceNames) || is.null(choiceValues)) {
+      if (mustExist) {
+        stop("Please specify a non-empty vector for `choices` (or, ",
+             "alternatively, for both `choiceNames` AND `choiceValues`).")
+      } else {
+        if (is.null(choiceNames) && is.null(choiceValues)) {
+          # this is useful when we call this function from `updateInputOptions()`
+          # in which case, all three `choices`, `choiceNames` and `choiceValues`
+          # may legitimately be NULL
+          return(list(choiceNames = NULL, choiceValues = NULL))
+        } else {
+          stop("One of `choiceNames` or `choiceValues` was set to ",
+               "NULL, but either both or none should be NULL.")
+        }
+      }
+    }
+    if (length(choiceNames) != length(choiceValues)) {
+      stop("`choiceNames` and `choiceValues` must have the same length.")
+    }
+    if (anyNamed(choiceNames) || anyNamed(choiceValues)) {
+      stop("`choiceNames` and `choiceValues` must not be named.")
+    }
+  } else {
+    if (!is.null(choiceNames) || !is.null(choiceValues)) {
+      warning("Using `choices` argument; ignoring `choiceNames` and `choiceValues`.")
+    }
+    choices <- choicesWithNames(choices) # resolve names if not specified
+    choiceNames <- names(choices)
+    choiceValues <- unname(choices)
   }
-  selected
-}
 
+  return(list(choiceNames = as.list(choiceNames),
+              choiceValues = as.list(as.character(choiceValues))))
+}
 
 # generate options for radio buttons and checkbox groups (type = 'checkbox' or
 # 'radio')
-generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox') {
+generateOptions <- function(inputId, selected, inline, type = 'checkbox',
+                            choiceNames, choiceValues,
+                            session = getDefaultReactiveDomain()) {
   # generate a list of <input type=? [checked] />
   options <- mapply(
-    choices, names(choices),
+    choiceValues, choiceNames,
     FUN = function(value, name) {
       inputTag <- tags$input(
         type = type, name = inputId, value = value
@@ -48,14 +65,18 @@ generateOptions <- function(inputId, choices, selected, inline, type = 'checkbox
       if (value %in% selected)
         inputTag$attribs$checked <- "checked"
 
+      # in case, the options include UI code other than text
+      # (arbitrary HTML using the tags() function or equivalent)
+      pd <- processDeps(name, session)
+
       # If inline, there's no wrapper div, and the label needs a class like
       # checkbox-inline.
       if (inline) {
-        tags$label(class = paste0(type, "-inline"), inputTag, tags$span(name))
+        tags$label(class = paste0(type, "-inline"), inputTag,
+                   tags$span(pd$html, pd$dep))
       } else {
-        tags$div(class = type,
-          tags$label(inputTag, tags$span(name))
-        )
+        tags$div(class = type, tags$label(inputTag,
+                 tags$span(pd$html, pd$dep)))
       }
     },
     SIMPLIFY = FALSE, USE.NAMES = FALSE

@@ -5,6 +5,8 @@ shiny 1.0.0.9001
 
 ### Breaking changes
 
+* The functions `radioButtons()`, `checkboxGroupInput()` and `selectInput()` (and the corresponding `updateXXX()` functions) no longer accept a `selected` argument whose value is the name of a choice, instead of the value of the choice. This feature had been soft-deprecated since Shiny 0.10 (printing a warning message, but still trying to match the name to the right choice) and it's now been completely deprecated.
+
 ### New features
 
 ### Minor new features and improvements

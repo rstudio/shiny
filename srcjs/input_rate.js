@@ -359,7 +359,7 @@ const InputValidateDecorator = function(target) {
 
 // Merge opts with defaults, and return a new object.
 function addDefaultInputOpts(opts) {
-  return Object.assign({
+  return $.extend({
     immediate: false,
     binding: null,
     el: null

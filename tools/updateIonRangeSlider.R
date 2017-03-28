@@ -1,8 +1,14 @@
 #!/usr/bin/env Rscript
 
 # This script copies resources from ion.RangeSlider to shiny's inst
-# directory. The ion.RangeSlider/ project directory should be on the same level
+# directory. The ion.rangeSlider/ project directory should be on the same level
 # as the shiny/ project directory.
+
+# The version of ion.rangeSlider that we use is modified from the base version
+# in two ways:
+# * In our version, mouse events on the slider are not propagated to lower
+#   layers (#711, #1630).
+# * We include a custom skin for Shiny.
 
 # This script can be sourced from RStudio, or run with Rscript.
 

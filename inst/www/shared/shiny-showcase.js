@@ -217,7 +217,7 @@
     var app = document.getElementById("showcase-app-container");
     $(app).animate({
         width: appWidth + "px",
-        zoom: zoom
+        zoom: (zoom*100) + "%"
       }, animate ? animateMs : 0);
   };
 

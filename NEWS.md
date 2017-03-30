@@ -62,6 +62,8 @@ in shiny apps. For more info, see the documentation (`?updateQueryString` and `?
 
 * Fixed [#1621](https://github.com/rstudio/shiny/issues/1621): if a `reactiveTimer`'s session was closed before the first time that the `reactiveTimer` fired, then the `reactiveTimer` would not get cleared and would keep firing indefinitely. ([#1623](https://github.com/rstudio/shiny/pull/1623))
 
+* Fixed [#1634](https://github.com/rstudio/shiny/issues/1634): If brushing on a plot causes the plot to redraw, then the redraw could in turn trigger the plot to redraw again and again. This was due to spurious changes in values of floating point numbers. ([#1641](https://github.com/rstudio/shiny/pull/1641))
+
 ### Library updates
 
 * Closed [#1500](https://github.com/rstudio/shiny/issues/1500): Updated ion.rangeSlider to 2.1.6. ([#1540](https://github.com/rstudio/shiny/pull/1540))

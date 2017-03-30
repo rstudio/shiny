@@ -15,6 +15,8 @@ This is a maintenance release of Shiny, mostly aimed at fixing bugs and introduc
 
 ### Minor new features and improvements
 
+* Fixed [#1637](https://github.com/rstudio/shiny/issues/1637): Outputs stay faded on MS Edge. ([#1640](https://github.com/rstudio/shiny/pull/1640))
+
 * Addressed [#1348](https://github.com/rstudio/shiny/issues/1348) and [#1437](https://github.com/rstudio/shiny/issues/1437) by adding two new arguments to `radioButtons()` and `checkboxGroupInput()`: `choiceNames` (list or vector) and `choiceValues` (list or vector). These can be passed in as an alternative to `choices`, with the added benefit that the elements in `choiceNames` can be arbitrary UI (i.e. anything created by `HTML()` and the `tags()` functions, like icons and images). While the underlying values for each choice (passed in through `choiceValues`) must still be simple text, their visual representation on the app (what the user actually clicks to select a different option) can be any valid HTML element. See `?radioButtons` for a small example. ([#1521](https://github.com/rstudio/shiny/pull/1521))
 
 * Updated `tools/README.md` with more detailed instructions. ([##1616](https://github.com/rstudio/shiny/pull/1616))

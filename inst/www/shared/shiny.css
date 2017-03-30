@@ -95,6 +95,13 @@ pre.shiny-text-output.noplaceholder:empty {
   font-weight: inherit;
 }
 
+/* Work around MS Edge transition bug (issue #1637) */
+@supports (-ms-ime-align:auto) {
+  .shiny-bound-output {
+    transition: 0;
+  }
+}
+
 .recalculating {
   opacity: 0.3;
   transition: opacity 250ms ease 500ms;

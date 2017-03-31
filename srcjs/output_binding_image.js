@@ -1119,6 +1119,9 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     // For reversed scales, the min and max can be reversed, so use findBox
     // to ensure correct order.
     state.boundsData = coordmap.findBox(minData, maxData);
+    // Round to 14 significant digits to avoid spurious changes in FP values
+    // (#1634).
+    state.boundsData = mapValues(state.boundsData, val => roundSignif(val, 14));
 
     // We also need to attach the data bounds and panel as data attributes, so
     // that if the image is re-sent, we can grab the data bounds to create a new

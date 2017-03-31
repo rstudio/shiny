@@ -78,6 +78,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }return str;
   }
 
+  // Round to a specified number of significant digits.
+  function roundSignif(x) {
+    var digits = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
+    if (digits < 1) throw "Significant digits must be at least 1.";
+
+    // This converts to a string and back to a number, which is inelegant, but
+    // is less prone to FP rounding error than an alternate method which used
+    // Math.round().
+    return parseFloat(x.toPrecision(digits));
+  }
+
   // Take a string with format "YYYY-MM-DD" and return a Date object.
   // IE8 and QTWebKit don't support YYYY-MM-DD, but they support YYYY/MM/DD
   function parseDate(dateString) {
@@ -2971,6 +2983,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       // For reversed scales, the min and max can be reversed, so use findBox
       // to ensure correct order.
       state.boundsData = coordmap.findBox(minData, maxData);
+      // Round to 14 significant digits to avoid spurious changes in FP values
+      // (#1634).
+      state.boundsData = mapValues(state.boundsData, function (val) {
+        return roundSignif(val, 14);
+      });
 
       // We also need to attach the data bounds and panel as data attributes, so
       // that if the image is re-sent, we can grab the data bounds to create a new

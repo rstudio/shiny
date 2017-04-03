@@ -18,7 +18,8 @@ licenseLink <- function(licenseName) {
     "Artistic-2.0" = "http://www.r-project.org/Licenses/Artistic-2.0",
     "BSD_2_clause" = "http://www.r-project.org/Licenses/BSD_2_clause",
     "BSD_3_clause" = "http://www.r-project.org/Licenses/BSD_3_clause",
-    "MIT" = "http://www.r-project.org/Licenses/MIT")
+    "MIT" = "http://www.r-project.org/Licenses/MIT",
+    "CC-BY-SA-4.0" = "https://www.r-project.org/Licenses/CC-BY-SA-4.0")
   if (exists(licenseName, where = licenses)) {
     tags$a(href=licenses[[licenseName]], licenseName)
   } else {

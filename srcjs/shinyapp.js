@@ -631,7 +631,7 @@ var ShinyApp = function() {
   addMessageHandler('config', function(message) {
     this.config = {workerId: message.workerId, sessionId: message.sessionId};
     if (message.user) exports.user = message.user;
-    $(document).trigger('shiny:shiny:sessioninitialized');
+    $(document).trigger('shiny:sessioninitialized');
   });
 
   addMessageHandler('busy', function(message) {

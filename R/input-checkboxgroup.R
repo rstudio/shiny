@@ -70,6 +70,11 @@
 checkboxGroupInput <- function(inputId, label, choices = NULL, selected = NULL,
   inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL) {
 
+  # keep backward compatibility with Shiny < 1.0.1 (see #1649)
+  if (is.null(choices) && is.null(choiceNames) && is.null(choiceValues)) {
+    choices <- character(0)
+  }
+
   args <- normalizeChoicesArgs(choices, choiceNames, choiceValues)
 
   selected <- restoreInput(id = inputId, default = selected)

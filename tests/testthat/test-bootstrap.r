@@ -247,3 +247,21 @@ test_that("normalizeChoicesArgs does its job", {
   expected <- list(choiceNames = NULL, choiceValues = NULL)
   expect_equal(normalizeChoicesArgs(NULL, NULL, NULL, FALSE), expected)
 })
+
+test_that("Choices need not be provided, can be NULL or c()", {
+
+  expected <- "<div id=\"cb\" class=\"form-group shiny-input-checkboxgroup shiny-input-container\">\n  <label class=\"control-label\" for=\"cb\">Choose:</label>\n  <div class=\"shiny-options-group\"></div>\n</div>"
+  noChoices <- checkboxGroupInput("cb", "Choose:")
+  choicesNull <- checkboxGroupInput("cb", "Choose:", choices = NULL)
+  choicesCharacter <- checkboxGroupInput("cb", "Choose:", choices = c())
+  choicesCharacter0 <- checkboxGroupInput("cb", "Choose:", choices = character(0))
+  allChoicesNull <- checkboxGroupInput("cb", "Choose:", choices = NULL,
+    choiceNames = NULL, choiceValues = NULL)
+
+  expect_identical(noChoices, choicesNull)
+  expect_identical(noChoices, choicesCharacter)
+  expect_identical(noChoices, choicesCharacter0)
+  expect_identical(noChoices, allChoicesNull)
+
+  expect_true(grepl(fixed = TRUE, expected, format(noChoices)))
+})

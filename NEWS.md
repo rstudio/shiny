@@ -1,3 +1,18 @@
+shiny 1.0.1.9000
+================
+
+## Full changelog
+
+### Breaking changes
+### New features
+### Minor new features and improvements
+
+* Fixed [#1649](https://github.com/rstudio/shiny/issues/1649): allow the `choices` argument in `checkboxGroupInput()` to be `NULL` (or `c()`) to keep backward compatibility with Shiny < 1.0.1. This will result in the same thing as providing `choices = character(0)`. ([#1652](https://github.com/rstudio/shiny/pull/1652))
+
+### Bug fixes
+### Library updates
+
+
 shiny 1.0.1
 ================
 

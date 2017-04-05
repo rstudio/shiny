@@ -7,6 +7,8 @@ shiny 1.0.1.9000
 ### New features
 ### Minor new features and improvements
 
+* Added a `shiny:sessioninitialized` Javascript event, which is fired at the end of the initialize method of the Session object. This allows us to listen for this event when we want to get the value of things like `Shiny.user`. ([#1568](https://github.com/rstudio/shiny/pull/1568))
+
 * Fixed [#1649](https://github.com/rstudio/shiny/issues/1649): allow the `choices` argument in `checkboxGroupInput()` to be `NULL` (or `c()`) to keep backward compatibility with Shiny < 1.0.1. This will result in the same thing as providing `choices = character(0)`. ([#1652](https://github.com/rstudio/shiny/pull/1652))
 
 ### Bug fixes

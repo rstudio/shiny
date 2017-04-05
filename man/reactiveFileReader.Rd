@@ -58,7 +58,7 @@ function(input, output, session) {
 # Cross-session reactive file reader. In this example, all sessions share
 # the same reader, so read.csv only gets executed once no matter how many
 # user sessions are connected.
-fileData <- reactiveFileReader(1000, session, 'data.csv', read.csv)
+fileData <- reactiveFileReader(1000, NULL, 'data.csv', read.csv)
 function(input, output, session) {
   output$data <- renderTable({
     fileData()

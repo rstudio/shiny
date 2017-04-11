@@ -165,7 +165,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
-  p1 <- with_promise_domain(domain, {
+  p1 <- promise::with_promise_domain(domain, {
     p2 <- promise::resolved(func())
     p2 <- promise::then(p2, function(value, visible) {
       if (visible) {

@@ -332,21 +332,19 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
 
   renderFunc <- function(shinysession, name, ...) {
     domain <- createRenderPrintPromiseDomain(width)
-    system2.5::with_promise_domain(domain, {
-      p <- system2.5::Promise$new()$resolve(NULL)
-      p2 <- p$then(
-        function(value) func()
+    p1 <- promise::with_promise_domain(domain, {
+      p2 <- promise::resolved(func())
+      p2 <- promise::then(p2, function(value) {
+        res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
+        res
+      })
+      # TODO jcheng 2017-04-11: Is this correct, or just leftover debugging?
+      p2 <- promise::catch(p2,
+        function(err) { cat(file=stderr(), "ERROR", err$message) }
       )
-    })$then(function(value) {
-      res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
-      res
-    })$catch(
-      function(err) { cat(file=stderr(), "ERROR", err$message) }
-    )$finally(
-      function() {
-        close(domain$conn)
-      }
-    )
+    })
+    p1 <- finally(p1, ~close(domain$conn))
+    p1
   }
 
   markRenderFunction(verbatimTextOutput, renderFunc, outputArgs = outputArgs)

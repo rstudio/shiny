@@ -65,27 +65,6 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   filename
 }
 
-plotPNGAsync <- function(func, filename=tempfile(fileext='.png'),
-  width=400, height=400, res=72, ...) {
-
-  dv <- startPNG(filename, width, height, res, ...)
-  domain <- createGraphicsDevicePromiseDomain(dv)
-  p1 <- promise::with_promise_domain(domain, {
-    p2 <- promise::resolved(NULL)
-    p2 <- promise::then(p2, function(value) {
-      func()
-    })
-    p2 <- promise::then(p2, function(value) {
-      filename
-    })
-    p2
-  })
-  p1 <- promise::finally(p1, function() {
-    grDevices::dev.off(dv)
-  })
-  p1
-}
-
 createGraphicsDevicePromiseDomain <- function(which = dev.cur()) {
   force(which)
 

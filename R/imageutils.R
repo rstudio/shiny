@@ -92,22 +92,22 @@ createGraphicsDevicePromiseDomain <- function(which = dev.cur()) {
   promise::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
-      function(value) {
+      function(...) {
         old <- dev.cur()
         dev.set(which)
         on.exit(dev.set(old))
 
-        onFulfilled(value)
+        onFulfilled(...)
       }
     },
     wrapOnRejected = function(onRejected) {
       force(onRejected)
-      function(reason) {
+      function(...) {
         old <- dev.cur()
         dev.set(which)
         on.exit(dev.set(old))
 
-        onRejected(reason)
+        onRejected(...)
       }
     }
   )

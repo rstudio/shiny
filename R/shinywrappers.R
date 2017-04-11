@@ -358,11 +358,11 @@ createRenderPrintPromiseDomain <- function(width) {
   new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
-      function(value) {
+      function(...) {
         op <- options(width = width)
         on.exit(options(op), add = TRUE)
 
-        capture.output(onFulfilled(value), file = f, append = TRUE, split = TRUE)
+        capture.output(onFulfilled(...), file = f, append = TRUE, split = TRUE)
       }
     },
     conn = f

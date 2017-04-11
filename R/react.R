@@ -172,10 +172,9 @@ wrapForContext <- function(func, ctx) {
   force(ctx)
 
   function(...) {
-    args <- list(...)
     ctx$run(function() {
       captureStackTraces(
-        do.call(func, args)
+        func(...)
       )
     })
   }

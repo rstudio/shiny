@@ -122,44 +122,47 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     }
 
     # The reactive that runs the expr in renderPlot()
-    plotData <- plotObj()
+    p1 <- plotObj()
+    p1 <- promise::then(p1, function(plotData) {
 
-    img <- plotData$img
+      img <- plotData$img
 
-    # If only the width/height have changed, simply replay the plot and make a
-    # new img.
-    if (dims$width != img$width || dims$height != img$height) {
-      pixelratio <- session$clientData$pixelratio %OR% 1
+      # If only the width/height have changed, simply replay the plot and make a
+      # new img.
+      if (dims$width != img$width || dims$height != img$height) {
+        pixelratio <- session$clientData$pixelratio %OR% 1
 
-      coordmap <- NULL
-      plotFunc <- function() {
-        ..stacktraceon..(grDevices::replayPlot(plotData$recordedPlot))
+        coordmap <- NULL
+        plotFunc <- function() {
+          ..stacktraceon..(grDevices::replayPlot(plotData$recordedPlot))
 
-        # Coordmap must be recalculated after replaying plot, because pixel
-        # dimensions will have changed.
-        if (inherits(plotData$plotResult, "ggplot_build_gtable")) {
-          coordmap <<- getGgplotCoordmap(plotData$plotResult, pixelratio, res)
-        } else {
-          coordmap <<- getPrevPlotCoordmap(dims$width, dims$height)
+          # Coordmap must be recalculated after replaying plot, because pixel
+          # dimensions will have changed.
+          if (inherits(plotData$plotResult, "ggplot_build_gtable")) {
+            coordmap <<- getGgplotCoordmap(plotData$plotResult, pixelratio, res)
+          } else {
+            coordmap <<- getPrevPlotCoordmap(dims$width, dims$height)
+          }
         }
+        outfile <- ..stacktraceoff..(
+          plotPNG(plotFunc, width = dims$width*pixelratio, height = dims$height*pixelratio,
+                  res = res*pixelratio)
+        )
+        on.exit(unlink(outfile))
+
+        img <- dropNulls(list(
+          src = session$fileUrl(name, outfile, contentType='image/png'),
+          width = dims$width,
+          height = dims$height,
+          coordmap = coordmap,
+          # Get coordmap error message if present
+          error = attr(coordmap, "error", exact = TRUE)
+        ))
       }
-      outfile <- ..stacktraceoff..(
-        plotPNG(plotFunc, width = dims$width*pixelratio, height = dims$height*pixelratio,
-                res = res*pixelratio)
-      )
-      on.exit(unlink(outfile))
 
-      img <- dropNulls(list(
-        src = session$fileUrl(name, outfile, contentType='image/png'),
-        width = dims$width,
-        height = dims$height,
-        coordmap = coordmap,
-        # Get coordmap error message if present
-        error = attr(coordmap, "error", exact = TRUE)
-      ))
-    }
-
-    img
+      img
+    })
+    p1
   }
 
 
@@ -182,6 +185,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     recordedPlot <- NULL
     coordmap <- NULL
     plotFunc <- function() {
+
       success <-FALSE
       tryCatch(
         {
@@ -231,28 +235,31 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # wrapFunctionLabel(..stacktraceon=TRUE) call near the beginning of
     # renderPlot, and by the ..stacktraceon.. in plotFunc where ggplot objects
     # are printed
-    outfile <- ..stacktraceoff..(
-      do.call("plotPNG", c(quote(plotFunc), width=dims$width*pixelratio,
+    p1 <- ..stacktraceoff..({
+      do.call("plotPNGAsync", c(quote(plotFunc), width=dims$width*pixelratio,
         height=dims$height*pixelratio, res=res*pixelratio, args))
-    )
-    on.exit(unlink(outfile))
+    })
+    p1 <- promise::then(p1, function(outfile) {
+      on.exit(unlink(outfile))
 
-    list(
-      # img is the content that gets sent to the client.
-      img = dropNulls(list(
-        src = session$fileUrl(outputName, outfile, contentType='image/png'),
-        width = dims$width,
-        height = dims$height,
-        coordmap = coordmap,
-        # Get coordmap error message if present.
-        error = attr(coordmap, "error", exact = TRUE)
-      )),
-      # Returned value from expression in renderPlot() -- may be a printable
-      # object like ggplot2. Needed just in case we replayPlot and need to get
-      # a coordmap again.
-      plotResult = plotResult,
-      recordedPlot = recordedPlot
-    )
+      list(
+        # img is the content that gets sent to the client.
+        img = dropNulls(list(
+          src = session$fileUrl(outputName, outfile, contentType='image/png'),
+          width = dims$width,
+          height = dims$height,
+          coordmap = coordmap,
+          # Get coordmap error message if present.
+          error = attr(coordmap, "error", exact = TRUE)
+        )),
+        # Returned value from expression in renderPlot() -- may be a printable
+        # object like ggplot2. Needed just in case we replayPlot and need to get
+        # a coordmap again.
+        plotResult = plotResult,
+        recordedPlot = recordedPlot
+      )
+    })
+    p1
   })
 
 

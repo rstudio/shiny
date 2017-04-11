@@ -19,7 +19,7 @@ Context <- R6Class(
     run = function(func) {
       "Run the provided function under this context."
 
-      system2.5::withPromiseDomain(reactivePromiseDomain, {
+      promise::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
           env <- .getReactiveEnvironment()
           .graphEnterContext(id)
@@ -181,24 +181,17 @@ wrapForContext <- function(func, ctx) {
   }
 }
 
-reactivePromiseDomain <- list(
-  onThen = function(onFulfilled, onRejected) {
-    ctx <- getCurrentContext()
-
-    changed <- FALSE
-    if (is.function(onFulfilled)) {
-      changed <- TRUE
-      onFulfilled <- wrapForContext(onFulfilled, ctx)
+reactivePromiseDomain <- function() {
+  promise::new_promise_domain(
+    wrapOnFulfilled = function(onFulfilled) {
+      force(onFulfilled)
+      ctx <- getCurrentContext()
+      wrapForContext(onFulfilled, ctx)
+    },
+    wrapOnRejected = function(onRejected) {
+      force(onRejected)
+      ctx <- getCurrentContext()
+      wrapForContext(onRejected, ctx)
     }
-    if (is.function(onRejected)) {
-      changed <- TRUE
-      onRejected <- wrapForContext(onRejected, ctx)
-    }
-
-    if (changed) {
-      list(onFulfilled = onFulfilled, onRejected = onRejected)
-    } else {
-      NULL
-    }
-  }
-)
+  )
+}

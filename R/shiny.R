@@ -411,7 +411,6 @@ NS <- function(namespace, id = NULL) {
 ns.sep <- "-"
 
 
-#' @import monads
 #' @include utils.R
 ShinySession <- R6Class(
   'ShinySession',
@@ -1131,17 +1130,11 @@ ShinySession <- R6Class(
             name = name, status = 'recalculating'
           ))
 
-          p <- system2.5::Promise$new()
-          tryCatch(
-            # This shinyCallingHandlers should maybe be at a higher level,
-            # to include the $then/$catch calls below?
-            p$resolve(shinyCallingHandlers(func())),
-            error = function(cond) {
-              p$reject(cond)
-            }
-          )
+          # This shinyCallingHandlers should maybe be at a higher level,
+          # to include the $then/$catch calls below?
+          p <- promise::resolved(shinyCallingHandlers(func()))
 
-          p$catch(
+          p <- promise::catch(p,
             function(cond) {
               if (inherits(cond, "shiny.custom.error")) {
                 if (isTRUE(getOption("show.error.messages"))) printError(cond)
@@ -1164,7 +1157,9 @@ ShinySession <- R6Class(
                 invisible(structure(list(), class = "try-error", condition = cond))
               }
             }
-          ) %>>% function(value) {
+          )
+
+          p <- promise::then(p, function(value) {
             private$sendMessage(recalculating = list(
               name = name, status = 'recalculated'
             ))
@@ -1187,7 +1182,7 @@ ShinySession <- R6Class(
             }
             else
               private$invalidatedOutputValues$set(name, value)
-          }
+          })
         }, suspended=private$shouldSuspend(name), label=label)
 
         # If any output attributes were added to the render function attach

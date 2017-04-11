@@ -82,11 +82,12 @@ createRenderFunction <- function(
 
   renderFunc <- function(shinysession, name, ...) {
     res <- func()
-    if (inherits(res, "Promise")) {
-      res %>>%
-        transform(shinysession, name, ...)
+    if (promise::is.promise(res)) {
+      return(promise::then(res, function(value) {
+        transform(value, shinysession, name, ...)
+      }))
     } else {
-      transform(res, shinysession, name, ...)
+      return(transform(res, shinysession, name, ...))
     }
   }
 
@@ -324,22 +325,28 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
-  # TODO: Set a promise domain that sets the console width
+  # Set a promise domain that sets the console width
   #   and captures output
   # op <- options(width = width)
   # on.exit(options(op), add = TRUE)
 
   renderFunc <- function(shinysession, name, ...) {
     domain <- createRenderPrintPromiseDomain(width)
-    system2.5::withPromiseDomain(domain, {
-      p <- system2.5::Promise$new()
-      p2 <- p$then(function(value) func())$then(function(value) {
-        res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
-        res
-      })
-      p$resolve(NULL)
-      p2$catch(function(err) { cat(file=stderr(), "ERROR", err$message) })
-    })
+    system2.5::with_promise_domain(domain, {
+      p <- system2.5::Promise$new()$resolve(NULL)
+      p2 <- p$then(
+        function(value) func()
+      )
+    })$then(function(value) {
+      res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
+      res
+    })$catch(
+      function(err) { cat(file=stderr(), "ERROR", err$message) }
+    )$finally(
+      function() {
+        close(domain$conn)
+      }
+    )
   }
 
   markRenderFunction(verbatimTextOutput, renderFunc, outputArgs = outputArgs)
@@ -348,31 +355,17 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
 createRenderPrintPromiseDomain <- function(width) {
   f <- file()
 
-  list(
-    conn = f,
-    onThen = function(onFulfilled, onRejected) {
-      res <- list(onFulfilled = onFulfilled, onRejected = onRejected)
+  new_promise_domain(
+    wrapOnFulfilled = function(onFulfilled) {
+      force(onFulfilled)
+      function(value) {
+        op <- options(width = width)
+        on.exit(options(op), add = TRUE)
 
-      if (is.function(onFulfilled)) {
-        res$onFulfilled = function(result) {
-          op <- options(width = width)
-          on.exit(options(op), add = TRUE)
-
-          capture.output(onFulfilled(result), file = f, append = TRUE, split = TRUE)
-        }
+        capture.output(onFulfilled(value), file = f, append = TRUE, split = TRUE)
       }
-
-      if (is.function(onRejected)) {
-        res$onRejected = function(reason) {
-          op <- options(width = width)
-          on.exit(options(op), add = TRUE)
-
-          capture.output(onRejected(reason), file = f, append = TRUE)
-        }
-      }
-
-      res
-    }
+    },
+    conn = f
   )
 }
 
@@ -458,15 +451,16 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
                      outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
-  renderFunc <- function(shinysession, name, ...) {
-    result <- func()
-    if (is.null(result) || length(result) == 0)
-      return(NULL)
+  createRenderFunction(
+    func,
+    function(result, shinysession, name, ...) {
+      if (is.null(result) || length(result) == 0)
+        return(NULL)
 
-    processDeps(result, shinysession)
-  }
-
-  markRenderFunction(uiOutput, renderFunc, outputArgs = outputArgs)
+      processDeps(result, shinysession)
+    },
+    uiOutput, outputArgs
+  )
 }
 
 #' File Downloads

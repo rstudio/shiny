@@ -318,7 +318,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                 sep=""), con=shiny_stdout)
               flush(shiny_stdout)
 
-              flushReact()
+              runloop()
 
               # eXit a flushReact
               writeLines(paste("_x_flushReact ", get("HTTP_GUID", ws$request),
@@ -326,7 +326,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                 sep=""), con=shiny_stdout)
               flush(shiny_stdout)
             } else {
-              flushReact()
+              runloop()
             }
 
             flushAllSessions()
@@ -440,6 +440,14 @@ startApp <- function(appObj, port, host, quiet) {
   }
 }
 
+runloop <- function() {
+  while (TRUE) {
+    flushReact()
+    if (!later::run_now())
+      break
+  }
+}
+
 # Run an application that was created by \code{\link{startApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
 serviceApp <- function() {
@@ -448,7 +456,7 @@ serviceApp <- function() {
       shinysession$manageHiddenOutputs()
     }
 
-    flushReact()
+    runloop()
     flushAllSessions()
   }
 

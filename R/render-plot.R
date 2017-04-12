@@ -110,7 +110,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     pixelratio <- session$clientData$pixelratio %OR% 1
 
     p1 <- drawReactive()
-    p1 <- promise::then(p1, ~resizeSavedPlot(name, shinysession, ., dims$width, dims$height, pixelratio, res))
+    p1 <- promise::then(p1, function(result) {
+      resizeSavedPlot(name, shinysession, result, dims$width, dims$height, pixelratio, res)
+    })
     p1
   }
 
@@ -188,8 +190,8 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
           # have no effect.
           result <- ..stacktraceon..(print(value))
           # TODO jcheng 2017-04-11: Verify above ..stacktraceon..
-          result
         })
+        result
       } else {
         # Not necessary, but I wanted to make it explicit
         NULL

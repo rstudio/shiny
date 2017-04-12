@@ -14,7 +14,7 @@ NULL
 #' # now we can just write "static" content without withMathJax()
 #' div("more math here $$\\sqrt{2}$$")
 withMathJax <- function(...) {
-  path <- 'https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
+  path <- 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
   tagList(
     tags$head(
       singleton(tags$script(src = path, type = 'text/javascript'))

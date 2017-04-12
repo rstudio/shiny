@@ -55,12 +55,16 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
   args <- list(...)
 
-  if (is.function(width))
+  if (is.reactive(width))
+    widthWrapper <- width
+  else if (is.function(width))
     widthWrapper <- reactive({ width() })
   else
     widthWrapper <- function() { width }
 
-  if (is.function(height))
+  if (is.reactive(height))
+    heightWrapper <- height
+  else if (is.function(height))
     heightWrapper <- reactive({ height() })
   else
     heightWrapper <- function() { height }
@@ -82,10 +86,15 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 
   # Vars to store session and output, so that they can be accessed from
   # the plotObj() reactive.
-  session <- getDefaultReactiveDomain()
+  session <- NULL
   outputName <- NULL
 
+  # Calls drawPlot, invoking the user-provided `func` (which may or may not
+  # return a promise). The idea is that the (cached) return value from this
+  # reactive can be used for varying width/heights, as it includes the
+  # displaylist, which is resolution independent.
   drawReactive <- reactive({
+    # Don't invalidate when width/height changes.
     dims <- isolate(getDims())
     pixelratio <- session$clientData$pixelratio %OR% 1
     p1 <- drawPlot(name, session, func, dims$width, dims$height, pixelratio, res)
@@ -94,23 +103,22 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       # the dimensions are too small. By taking a dependency on width/height,
       # we can try again if the plot output element changes size.
       getDims()
+
+      # Propagate the error
       stop(reason)
     })
   })
 
   # This function is the one that's returned from renderPlot(), and gets
-  # wrapped in an observer when the output value is assigned. The expression
-  # passed to renderPlot() is actually run in plotObj(); this function can only
-  # replay a plot if the width/height changes.
+  # wrapped in an observer when the output value is assigned.
   renderFunc <- function(shinysession, name, ...) {
     outputName <<- name
     session <<- shinysession
-    outputName <<- name
-    dims <- getDims()
-    pixelratio <- session$clientData$pixelratio %OR% 1
 
     p1 <- drawReactive()
     p1 <- promise::then(p1, function(result) {
+      dims <- getDims()
+      pixelratio <- session$clientData$pixelratio %OR% 1
       resizeSavedPlot(name, shinysession, result, dims$width, dims$height, pixelratio, res)
     })
     p1

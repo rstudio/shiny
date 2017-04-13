@@ -1,10 +1,10 @@
-shiny 1.0.1.9000
+shiny 1.0.2
 ================
+
+This is a hotfix release of Shiny. The primary reason for this release is because the web host for MathJax JavaScript library is scheduled to be shut down in the next few weeks. After it is shut down, Shiny applications that use MathJax will no longer be able to load the MathJax library if they are run with Shiny 1.0.1 and below. (If you don't know whether your application uses MathJax, it probably does not.) For more information about why the MathJax CDN is shutting down, see https://www.mathjax.org/cdn-shutting-down/.
 
 ## Full changelog
 
-### Breaking changes
-### New features
 ### Minor new features and improvements
 
 * Added a `shiny:sessioninitialized` Javascript event, which is fired at the end of the initialize method of the Session object. This allows us to listen for this event when we want to get the value of things like `Shiny.user`. ([#1568](https://github.com/rstudio/shiny/pull/1568))
@@ -16,8 +16,6 @@ shiny 1.0.1.9000
 ### Bug fixes
 
 * Fixed [#1653](https://github.com/rstudio/shiny/issues/1653): wrong code example in documentation. ([#1658](https://github.com/rstudio/shiny/pull/1658))
-
-### Library updates
 
 
 shiny 1.0.1

@@ -5,3 +5,4 @@
 - [x] Brushing not working; the mapping is null for ggplot.
 - [ ] ..stacktraceon../..stacktraceoff.. and stack traces in general
 - [ ] Non-async render functions should have their code all execute on the current tick. Otherwise order of execution will be surprising if they have side effects and explicit priorities.
+- [x] Respect execOnResize

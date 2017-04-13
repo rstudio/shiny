@@ -95,7 +95,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   # displaylist, which is resolution independent.
   drawReactive <- reactive({
     # Don't invalidate when width/height changes.
-    dims <- isolate(getDims())
+    dims <- if (execOnResize) getDims() else isolate(getDims())
     pixelratio <- session$clientData$pixelratio %OR% 1
     p1 <- drawPlot(name, session, func, dims$width, dims$height, pixelratio, res)
     p1 <- promise::catch(p1, function(reason) {

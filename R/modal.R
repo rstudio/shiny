@@ -181,3 +181,50 @@ modalButton <- function(label, icon = NULL) {
     `data-dismiss` = "modal", validateIcon(icon), label
   )
 }
+
+#' Create a non-dismissible Modal Dialog whilst performing a long-running computation.
+#' @param expr The work to be done. Usually some long-running computation whilst the UI should not be available (e.g. database data load),
+#' in contrast to \code{\link{withProgress}}. Also useful for cases when "progress" cannot be well defined (i.e. not running a loop).
+#' @param ... UI elements for the body of the modal dialog box.
+#' @param title An optional title for the dialog.
+#' @param size One of "s" for small, "m" (the default) for medium, or "l" for large.
+#' @param fade If FALSE, the modal dialog will have no fade-in animation (it will simply appear rather than fade in to view).
+#' @param env The environment in which expr should be evaluated.
+#' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' # Show a modal message whilst a simulated long running calculation is performed
+#' shinyApp(
+#'   ui = basicPage(
+#'     tags$b("Result of calculation"),
+#'     textOutput("random_number")
+#'   ),
+#'   server = function(input, output) {
+#'     output$random_number <- renderText({
+#'       withModalDialog({
+#'         Sys.sleep(15)
+#'         runif(1)
+#'       },
+#'       tags$b("Simulating a long running calculation, please wait..."),
+#'       title = "Generating random number")
+#'     })
+#'   }
+#' )
+#' }
+#' @export
+withModalDialog <- function(expr, ..., title = NULL, size=c("m", "s", "l"), fade = TRUE, env=parent.frame()) {
+  on.exit(removeModal())
+  showModal(
+    modalDialog(
+      ...,
+      title=title,
+      footer=NULL,
+      size=size,
+      easyClose = FALSE,
+      fade=fade
+    )
+  )
+  eval(expr,envir = env)
+}
+

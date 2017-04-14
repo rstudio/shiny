@@ -1,3 +1,5 @@
+* Add `withModalDialog()` to show a non-dismissible modal dialog whilst performing a long-running computation. Useful as an alternative of `withProgress()` when the UI should not be available during the calculation and 'progress' is not well defined (e.g. loading from database).
+
 shiny 1.0.1.9000
 ================
 

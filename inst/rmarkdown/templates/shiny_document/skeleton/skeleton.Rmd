@@ -1,0 +1,56 @@
+---
+title: "Shiny Document"
+author: "Your Name"
+output: html_document
+runtime: shiny
+---
+
+This is a Shiny R Markdown document. Shiny documents are R Markdown documents that can contain interactive Shiny elements and applications. 
+
+## Inputs and outputs
+
+Your document can contain user input elements: 
+
+```{r}
+div(
+  numericInput("rows", "How many cars?", 5)
+)
+```
+
+And output elements:
+
+```{r}
+output$table <- renderTable({
+  head(cars, input$rows)
+})
+tableOutput("table")
+```
+
+## Reactives
+
+Shiny documents can also contain reactive expressions. As in Shiny applications, these values respond to changes in their inputs.
+
+```{r}
+numrows <- reactive({ input$rows })
+output$numrows <- renderText({ 
+  paste("You're looking at", numrows(), "cars.") })
+textOutput("numrows")
+```
+
+## Embedded applications
+
+You can even embed entire Shiny applications in the document. In addition to their own state, these applications can use values defined in the document. This application uses the reactive `numrows` declared above.
+
+```{r}
+shinyApp(
+  ui = fluidPage(selectInput("region", "Region:", 
+                             choices = colnames(WorldPhones)),
+                 plotOutput("phonePlot")),
+  server = function(input, output) {
+    output$phonePlot <- renderPlot({
+      barplot(head(WorldPhones[,input$region]*1000, numrows()), 
+              ylab = "Number of Telephones", xlab = "Year")})
+  },
+  options = list(height = 500)
+)
+```

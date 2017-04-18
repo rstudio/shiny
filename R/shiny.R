@@ -5,7 +5,7 @@ NULL
 #'
 #' Shiny makes it incredibly easy to build interactive web applications with R.
 #' Automatic "reactive" binding between inputs and outputs and extensive
-#' pre-built widgets make it possible to build beautiful, responsive, and
+#' prebuilt widgets make it possible to build beautiful, responsive, and
 #' powerful applications with minimal effort.
 #'
 #' The Shiny tutorial at \url{http://shiny.rstudio.com/tutorial/} explains

@@ -56,7 +56,7 @@ Authors@R: c(
     )
 Description: Makes it incredibly easy to build interactive web
     applications with R. Automatic "reactive" binding between inputs and
-    outputs and extensive pre-built widgets make it possible to build
+    outputs and extensive prebuilt widgets make it possible to build
     beautiful, responsive, and powerful applications with minimal effort.
 License: GPL-3 | file LICENSE
 Depends:

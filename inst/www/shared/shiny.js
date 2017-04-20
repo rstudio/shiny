@@ -4979,7 +4979,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       this.$container().css('visibility', visible ? 'visible' : 'hidden');
     };
     this.$setError = function (error) {
-      this.$bar().toggleClass('bar-danger', error !== null);
+      this.$bar().toggleClass('progress-bar-danger', error !== null);
       if (error !== null) {
         this.onProgress(null, 1);
         this.$bar().text(error);

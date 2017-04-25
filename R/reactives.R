@@ -1541,9 +1541,22 @@ coerceToFunc <- function(x) {
 #' @seealso \code{\link{reactiveFileReader}}
 #'
 #' @examples
-#' # Assume the existence of readTimestamp and readValue functions
 #' function(input, output, session) {
-#'   data <- reactivePoll(1000, session, readTimestamp, readValue)
+#'
+#'   data <- reactivePoll(1000, session,
+#'     # This function returns the time that log_file was last modified
+#'     checkFunc = function() {
+#'       if (file.exists(log_file))
+#'         file.info(log_file)$mtime[1]
+#'       else
+#'         ""
+#'     },
+#'     # This function returns the content of log_file
+#'     valueFunc = function() {
+#'       read.csv(log_file)
+#'     }
+#'   )
+#'
 #'   output$dataTable <- renderTable({
 #'     data()
 #'   })

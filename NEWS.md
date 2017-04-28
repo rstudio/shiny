@@ -9,6 +9,8 @@ shiny 1.0.3.9000
 
 ### Minor new features and improvements
 
+* Converted examples to single file apps, and made updates and enhancements to comments in the example app scripts.
+
 ### Bug fixes
 
 ### Library updates

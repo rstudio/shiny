@@ -28,7 +28,7 @@ server <- function(input, output) {
 
     hist(d(),
          main = paste("r", dist, "(", n, ")", sep = ""),
-         col = "#6399D2", border = "white")
+         col = "#75AADB", border = "white")
   })
 
   # Generate a summary of the data ----

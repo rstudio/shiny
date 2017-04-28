@@ -66,7 +66,7 @@ server <- function(input, output) {
     boxplot(as.formula(formulaText()),
             data = mpgData,
             outline = input$outliers,
-            col = "#6399D2", pch = 19)
+            col = "#75AADB", pch = 19)
   })
 
 }

@@ -11,6 +11,8 @@ shiny 1.0.3.9000
 
 ### Bug fixes
 
+Fixed [#1701](https://github.com/rstudio/shiny/issues/1701): There was a partial argument match in the `generateOptions` function. ([#1702](https://github.com/rstudio/shiny/pull/1702))
+
 ### Library updates
 
 

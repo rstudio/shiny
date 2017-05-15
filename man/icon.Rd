@@ -4,7 +4,7 @@
 \alias{icon}
 \title{Create an icon}
 \usage{
-icon(name, class = NULL, lib = "font-awesome")
+icon(name, class = NULL, lib = "font-awesome", ...)
 }
 \arguments{
 \item{name}{Name of icon. Icons are drawn from the
@@ -19,6 +19,9 @@ in icon names (i.e. the "fa-calendar" icon should be referred to as
 supported styles).}
 
 \item{lib}{Icon library to use ("font-awesome" or "glyphicon")}
+
+\item{...}{Other arguments to pass to the icon tag function. This is
+useful for providing additional classes for the tag.}
 }
 \value{
 An icon element

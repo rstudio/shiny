@@ -1495,6 +1495,8 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   \href{http://fontawesome.io/examples/}{usage examples} for details on
 #'   supported styles).
 #' @param lib Icon library to use ("font-awesome" or "glyphicon")
+#' @param ... Other arguments to pass to the icon tag function. This is
+#'   useful for providing additional classes for the tag.
 #'
 #' @return An icon element
 #'
@@ -1517,7 +1519,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   tabPanel("Table", icon = icon("table"))
 #' )
 #' @export
-icon <- function(name, class = NULL, lib = "font-awesome") {
+icon <- function(name, class = NULL, lib = "font-awesome", ...) {
   prefixes <- list(
     "font-awesome" = "fa",
     "glyphicon" = "glyphicon"
@@ -1538,7 +1540,7 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
 
-  iconTag <- tags$i(class = iconClass)
+  iconTag <- tags$i(class = iconClass, ...)
 
   # font-awesome needs an additional dependency (glyphicon is in bootstrap)
   if (lib == "font-awesome") {

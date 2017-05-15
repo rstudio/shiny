@@ -20,6 +20,32 @@
 # form upload, i.e. traditional HTTP POST-based file upload) doesn't work with
 # the websockets package's HTTP server at the moment.
 
+#' @details \code{sanitizeFileName} is an effort to safely retain something
+#'   close to an uploaded file's original name in order to support libraries
+#'   like readxl that are sensitive to the names of files. A good overview of
+#'   the risks associated with uploaded files is
+#'   \url{https://www.owasp.org/index.php/Unrestricted_File_Upload}
+#' @param name A string, the name of a file to sanitize.
+#' @param defaultName The string to return if \code{name} cannot be sanitized.
+#' @param maxSize The maximum allowable size of \code{name} after sanitization.
+#'   (Default is 255 characters.)
+#' @return If \code{name} is an empty string, returns \code{defaultName}.
+#'   Otherwise, \code{name} is \emph{sanitized}. If the sanitized string is no
+#'   greater than \code{maxSize} characters long and is not empty, it is
+#'   returned. Otherwise, \code{defaultName} is returned. The sanitization
+#'   process replaces sequences of two or more '.' characters with a single '.'
+#'   and removes any non-alphanumeric characters.
+sanitizeFileName <- function(name, defaultName, maxSize = 255) {
+  if (missing(defaultName)) stop("defaultName is a required argument to sanitizeFileName")
+  if (nchar(name) == 0) return(defaultName)
+  newName <- gsub("\\.+", "\\.", name)
+  newName <- gsub("[^a-zA-Z0-9\\.]", "", newName)
+  if ((nchar(newName) > maxSize) || (nchar(newName) == 0))
+    defaultName
+  else
+    newName
+}
+
 FileUploadOperation <- R6Class(
   'FileUploadOperation',
   portable = FALSE,
@@ -52,7 +78,8 @@ FileUploadOperation <- R6Class(
       .currentFileInfo <<- file
       .pendingFileInfos <<- tail(.pendingFileInfos, -1)
 
-      filename <- file.path(.dir, as.character(length(.files$name)))
+      basename <- .currentFileInfo$name
+      filename <- file.path(.dir, sanitizeFileName(basename, as.character(length(.files$name))))
       row <- data.frame(name=file$name, size=file$size, type=file$type,
                         datapath=filename, stringsAsFactors=FALSE)
 

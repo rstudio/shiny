@@ -1,3 +1,5 @@
+library(tools)
+
 # For HTML5-capable browsers, file uploads happen through a series of requests.
 #
 # 1. Client tells server that one or more files are about to be uploaded; the
@@ -20,6 +22,56 @@
 # form upload, i.e. traditional HTTP POST-based file upload) doesn't work with
 # the websockets package's HTTP server at the moment.
 
+# The following file names are illegal on Windows. It's also bad to follow them
+# with an extension, such as NUL.txt
+# https://msdn.microsoft.com/en-us/library/aa365247.aspx
+# https://blogs.msdn.microsoft.com/oldnewthing/20031022-00/?p=42073
+illegalWindowsNames <-
+  c("AUX",
+    paste("COM", 1:9, sep=""),
+    "CON",
+    paste("LPT", 1:9, sep=""),
+    "NUL",
+    "PRN")
+
+# Helper function: removes the first illegal string found from the beginning of
+# str if one is present. Otherwise, returns str.
+removeIllegalStart1 <- function(str, illegals) {
+  for(illegal in illegals) {
+    if(substr(str, 1, nchar(illegal)) == illegal)
+      return(substr(str, nchar(illegal)+1, nchar(str)))
+  }
+  return(str)
+}
+
+# Helper function: iteratively removes any illegal string from the beginning of
+# str as long as one is present. Otherwise, returns str.
+removeIllegalStart <- function(str, illegals) {
+  orig <- str
+  repeat {
+    nxt <- removeIllegalStart1(orig, illegals)
+    if(orig == nxt) return(nxt) else orig <- nxt
+  }
+  return(str)
+}
+
+# @details Helper function for abbreviating dots and removing unwanted
+#   characters and strings from a filename.
+# @param str A character vector which is presumably the name of a file.
+# @param whitelist The regular expression fragment indicating the characters to
+#   keep.
+# @param windows A logical indicating whether or not to strip names that are
+#   illegal on Windows.
+# @return str with dots abbreviated, non-whitelisted characters removed, and
+#   optionally illegal Windows names removed.
+sanitize <- function(str, whitelist = "a-zA-Z0-9\\.", windows = FALSE) {
+  sanitized <- gsub(sprintf("[^%s]", whitelist), "", gsub("\\.+", "\\.", str))
+  if(windows)
+    removeIllegalStart(sanitized, illegalWindowsNames)
+  else
+    sanitized
+}
+
 # @details \code{sanitizeFileName} is an effort to safely retain something close
 #   to an uploaded file's original name in order to support libraries like
 #   readxl that are sensitive to the names of files. A good overview of the
@@ -39,15 +91,31 @@ sanitizeFileName <- function(name, default, maxSize = 255) {
   if (missing(default))
     stop("default is a required argument")
 
+  if (any(nchar(default) > maxSize))
+    stop("default can't be longer than maxSize")
+
   if (length(name) != length(default))
     stop("name and default must be the same length")
 
-  newName <- gsub("\\.+", "\\.", name)
-  newName <- gsub("[^a-zA-Z0-9\\.]", "", newName)
+  sanitized     <- sanitize(name, windows = (.Platform$OS.type == "windows"))
+  fileName      <- file_path_sans_ext(sanitized)
+  fileExt       <- file_ext(sanitized)
+  fileNameEqExt <- ifelse(fileName == sprintf(".%s", fileExt), TRUE, FALSE)
 
-  ifelse(((nchar(newName) > maxSize) | (nchar(newName) == 0)),
+  # If the filename is empty, return the default.
+  ifelse(nchar(sanitized) == 0,
          default,
-         newName)
+         # If the extension was preserved but the name was not, concatenate the
+         # default and the extension.
+         ifelse((nchar(fileExt) > 0) &
+                fileNameEqExt &
+                ((nchar(default) + 1 + nchar(fileExt)) <= maxSize),
+                paste(default, fileExt, sep = "."),
+                # If the sanitized filename is small enough, use it.
+                ifelse((nchar(sanitized) <= maxSize) &
+                       !fileNameEqExt,
+                  sanitized,
+                  default)))
 }
 
 FileUploadOperation <- R6Class(

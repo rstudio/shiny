@@ -24,7 +24,29 @@ test_that("If the file name is empty after being sanitized, the default is retur
 
 test_that("sanitizeFileName is vectorized", {
   names <- c("foo.txt", "", "bar.txt")
-  defaults <- sapply(0:(length(names)-1), as.character)
-  expected <- c("foo.txt", "1", "bar.txt")
+  defaults <- as.character(seq_along(names))
+  expected <- c("foo.txt", "2", "bar.txt")
   expect_equal(sanitizeFileName(names, defaults), expected)
+})
+
+test_that("extension is preserved even when the name is not", {
+  expect_equal(sanitizeFileName("你好.xlsx", "0"), "0.xlsx")
+})
+
+test_that("If the extension is preserved but combined with the default it's too long, use the default", {
+  expect_equal(sanitizeFileName("你好.xlsx", "0", maxSize = 5), "0")
+})
+
+test_that("Illegal file names are removed by the sanitize function when windows = TRUE", {
+  expect_equal(sanitize("COM1", windows = TRUE), "")
+  expect_equal(sanitize("NUL.txt", windows = TRUE), ".txt")
+  expect_equal(sanitize("COM1LPT1NUL.jpg", windows = TRUE), ".jpg")
+})
+
+test_that("On Windows, illegal file names are removed", {
+  skip_on_os("mac")
+  skip_on_os("linux")
+  skip_on_os("solaris")
+  expect_equal(sanitizeFileName("COM1", "0"), "0")
+  expect_equal(sanitizeFileName("NUL.txt", "0"), "0.txt")
 })

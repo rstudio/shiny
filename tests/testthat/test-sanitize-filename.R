@@ -21,3 +21,10 @@ test_that("Sanitized file names contain only alphanumeric characters and dots", 
 test_that("If the file name is empty after being sanitized, the default is returned", {
   expect_equal(sanitizeFileName("ℍℍℍℍ ", "default"), "default")
 })
+
+test_that("sanitizeFileName is vectorized", {
+  names <- c("foo.txt", "", "bar.txt")
+  defaults <- sapply(0:(length(names)-1), as.character)
+  expected <- c("foo.txt", "1", "bar.txt")
+  expect_equal(sanitizeFileName(names, defaults), expected)
+})

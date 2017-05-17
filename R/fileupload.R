@@ -20,30 +20,34 @@
 # form upload, i.e. traditional HTTP POST-based file upload) doesn't work with
 # the websockets package's HTTP server at the moment.
 
-# @details \code{sanitizeFileName} is an effort to safely retain something
-#   close to an uploaded file's original name in order to support libraries
-#   like readxl that are sensitive to the names of files. A good overview of
-#   the risks associated with uploaded files is
+# @details \code{sanitizeFileName} is an effort to safely retain something close
+#   to an uploaded file's original name in order to support libraries like
+#   readxl that are sensitive to the names of files. A good overview of the
+#   risks associated with uploaded files is
 #   \url{https://www.owasp.org/index.php/Unrestricted_File_Upload}
-# @param name A string, the name of a file to sanitize.
-# @param defaultName The string to return if \code{name} cannot be sanitized.
+# @param name A character vector, the name of a file to sanitize.
+# @param default Character vector to return if \code{name} cannot be sanitized.
 # @param maxSize The maximum allowable size of \code{name} after sanitization.
 #   (Default is 255 characters.)
-# @return If \code{name} is an empty string, returns \code{defaultName}.
-#   Otherwise, \code{name} is \emph{sanitized}. If the sanitized string is no
-#   greater than \code{maxSize} characters long and is not empty, it is
-#   returned. Otherwise, \code{defaultName} is returned. The sanitization
-#   process replaces sequences of two or more '.' characters with a single '.'
-#   and removes any non-alphanumeric characters.
-sanitizeFileName <- function(name, defaultName, maxSize = 255) {
-  if (missing(defaultName)) stop("defaultName is a required argument to sanitizeFileName")
-  if (nchar(name) == 0) return(defaultName)
+# @return If \code{name} is empty, returns \code{default}. Otherwise,
+#   \code{name} is \emph{sanitized}. If the sanitized string is no greater than
+#   \code{maxSize} characters long and is not empty, it is returned. Otherwise,
+#   \code{default} is returned. The sanitization process replaces sequences
+#   of two or more '.' characters with a single '.' and removes any
+#   non-alphanumeric characters.
+sanitizeFileName <- function(name, default, maxSize = 255) {
+  if (missing(default))
+    stop("default is a required argument")
+
+  if (length(name) != length(default))
+    stop("name and default must be the same length")
+
   newName <- gsub("\\.+", "\\.", name)
   newName <- gsub("[^a-zA-Z0-9\\.]", "", newName)
-  if ((nchar(newName) > maxSize) || (nchar(newName) == 0))
-    defaultName
-  else
-    newName
+
+  ifelse(((nchar(newName) > maxSize) | (nchar(newName) == 0)),
+         default,
+         newName)
 }
 
 FileUploadOperation <- R6Class(

@@ -38,10 +38,12 @@ test_that("If the extension is preserved but combined with the default it's too 
   expect_equal(sanitizeFileName("你好.xlsx", "0", maxSize = 5), "0")
 })
 
-test_that("Illegal file names are removed by the sanitize function when windows = TRUE", {
+test_that("Illegal Windows file names are removed by the sanitize function when windows = TRUE", {
   expect_equal(sanitize("COM1", windows = TRUE), "")
   expect_equal(sanitize("NUL.txt", windows = TRUE), ".txt")
-  expect_equal(sanitize("COM1LPT1NUL.jpg", windows = TRUE), ".jpg")
+  expect_equal(sanitize("NUL.COM1", windows = TRUE), ".COM1")
+  expect_equal(sanitize(".NUL", windows = TRUE), ".NUL")
+  expect_equal(sanitize("COM1LPT1NUL.jpg", windows = TRUE), "COM1LPT1NUL.jpg")
 })
 
 test_that("On Windows, illegal file names are removed", {

@@ -34,27 +34,16 @@ illegalWindowsNames <-
     "NUL",
     "PRN")
 
-# Helper function: removes the first illegal string found from the beginning of
-# str if one is present. Otherwise, returns str.
-removeIllegalStart1 <- function(str, illegals) {
-  for(illegal in illegals) {
-    if(substr(str, 1, nchar(illegal)) == illegal)
-      return(substr(str, nchar(illegal)+1, nchar(str)))
-  }
-  return(str)
-}
-
-# Helper function: iteratively removes any illegal string from the beginning of
-# str as long as one is present. Otherwise, returns str. This is a more involved
-# but also more permissive approach than simply deleting illegal strings from
-# anywhere in the name.
-removeIllegalStart <- function(str, illegals) {
-  orig <- str
-  repeat {
-    nxt <- removeIllegalStart1(orig, illegals)
-    if(orig == nxt) return(nxt) else orig <- nxt
-  }
-  return(str)
+# @details Removes strings in file names that could cause problems on Windows.
+# @param str A character vector to remove illegal strings from.
+# @param illegal The vector of words, by themselves or with an extension, to
+#   remove from \code{str}
+# @return \code{str} with any illegal words removed.
+removeIllegalWindowsFilenames <- function(str, illegal) {
+  ret <- str
+  ret[ret %in% illegal] <- ""
+  ret[file_path_sans_ext(ret) %in% illegal] <- paste(".", file_ext(ret), sep = "")
+  ret
 }
 
 # @details Helper function for abbreviating dots and removing unwanted
@@ -69,7 +58,7 @@ removeIllegalStart <- function(str, illegals) {
 sanitize <- function(str, whitelist = "a-zA-Z0-9\\.", windows = FALSE) {
   sanitized <- gsub("\\.+", "\\.", gsub(sprintf("[^%s]", whitelist), "", str))
   if(windows)
-    removeIllegalStart(sanitized, illegalWindowsNames)
+    removeIllegalWindowsFilenames(sanitized, illegalWindowsNames)
   else
     sanitized
 }

@@ -28,9 +28,9 @@ library(tools)
 # https://blogs.msdn.microsoft.com/oldnewthing/20031022-00/?p=42073
 illegalWindowsNames <-
   c("AUX",
-    paste("COM", 1:9, sep=""),
+    paste0("COM", 1:9),
     "CON",
-    paste("LPT", 1:9, sep=""),
+    paste0("LPT", 1:9),
     "NUL",
     "PRN")
 
@@ -42,7 +42,7 @@ illegalWindowsNames <-
 removeIllegalWindowsFilenames <- function(str, illegal) {
   ret <- str
   ret[ret %in% illegal] <- ""
-  ret[file_path_sans_ext(ret) %in% illegal] <- paste(".", file_ext(ret), sep = "")
+  ret[file_path_sans_ext(ret) %in% illegal] <- paste0(".", file_ext(ret))
   ret
 }
 
@@ -92,6 +92,7 @@ sanitizeFileName <- function(name, default, maxSize = 255) {
   fileName      <- file_path_sans_ext(sanitized)
   fileExt       <- file_ext(sanitized)
   fileNameEqExt <- ifelse(fileName == sprintf(".%s", fileExt), TRUE, FALSE)
+
 
   # If the filename is empty, return the default.
   ifelse(nchar(sanitized) == 0,

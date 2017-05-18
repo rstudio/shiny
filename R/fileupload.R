@@ -45,7 +45,9 @@ removeIllegalStart1 <- function(str, illegals) {
 }
 
 # Helper function: iteratively removes any illegal string from the beginning of
-# str as long as one is present. Otherwise, returns str.
+# str as long as one is present. Otherwise, returns str. This is a more involved
+# but also more permissive approach than simply deleting illegal strings from
+# anywhere in the name.
 removeIllegalStart <- function(str, illegals) {
   orig <- str
   repeat {
@@ -65,7 +67,7 @@ removeIllegalStart <- function(str, illegals) {
 # @return str with dots abbreviated, non-whitelisted characters removed, and
 #   optionally illegal Windows names removed.
 sanitize <- function(str, whitelist = "a-zA-Z0-9\\.", windows = FALSE) {
-  sanitized <- gsub(sprintf("[^%s]", whitelist), "", gsub("\\.+", "\\.", str))
+  sanitized <- gsub("\\.+", "\\.", gsub(sprintf("[^%s]", whitelist), "", str))
   if(windows)
     removeIllegalStart(sanitized, illegalWindowsNames)
   else

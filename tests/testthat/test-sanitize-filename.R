@@ -2,6 +2,7 @@ context("sanitize-filename")
 
 test_that("File names can't have multiple dots", {
   expect_equal(sanitizeFileName("../baz.jpg", "default"), ".baz.jpg")
+  expect_equal(sanitizeFileName("./.baz.jpg", "default"), ".baz.jpg")
 })
 
 test_that("If the file name is longer than 255 characters, the default name is returned", {

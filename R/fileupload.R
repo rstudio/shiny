@@ -70,14 +70,13 @@ sanitize <- function(str, whitelist = "a-zA-Z0-9\\.", windows = FALSE) {
 #   \url{https://www.owasp.org/index.php/Unrestricted_File_Upload}
 # @param name A character vector, the name of a file to sanitize.
 # @param default Character vector to return if \code{name} cannot be sanitized.
-# @param maxSize The maximum allowable size of \code{name} after sanitization.
-#   (Default is 255 characters.)
-# @return If \code{name} is empty, returns \code{default}. Otherwise,
-#   \code{name} is \emph{sanitized}. If the sanitized string is no greater than
-#   \code{maxSize} characters long and is not empty, it is returned. Otherwise,
-#   \code{default} is returned. The sanitization process replaces sequences
-#   of two or more '.' characters with a single '.' and removes any
-#   non-alphanumeric characters.
+#   If a file's extension can be preserved, and the total length of
+#   \code{default} and the extension is not more than \code{maxSize}, then
+#   \code{default} is combined with the extension and returned.
+# @param maxSize The maximum allowable size of the name returned by this
+#   function. (Default is 255 characters.)
+# @return The sanitized \code{name}, or the \code{default} combined with the
+#   original extension, if possible. Otherwise, \code{default}.
 sanitizeFileName <- function(name, default, maxSize = 255) {
   if (missing(default))
     stop("default is a required argument")
@@ -88,26 +87,29 @@ sanitizeFileName <- function(name, default, maxSize = 255) {
   if (length(name) != length(default))
     stop("name and default must be the same length")
 
-  sanitized     <- sanitize(name, windows = (.Platform$OS.type == "windows"))
-  fileName      <- file_path_sans_ext(sanitized)
-  fileExt       <- file_ext(sanitized)
-  fileNameEqExt <- ifelse(fileName == sprintf(".%s", fileExt), TRUE, FALSE)
+  sanitizedNames <- sanitize(name, windows = (.Platform$OS.type == "windows"))
 
-
-  # If the filename is empty, return the default.
-  ifelse(nchar(sanitized) == 0,
-         default,
-         # If the extension was preserved but the name was not, concatenate the
-         # default and the extension.
-         ifelse((nchar(fileExt) > 0) &
-                fileNameEqExt &
-                ((nchar(default) + 1 + nchar(fileExt)) <= maxSize),
-                paste(default, fileExt, sep = "."),
-                # If the sanitized filename is small enough, use it.
-                ifelse((nchar(sanitized) <= maxSize) &
-                       !fileNameEqExt,
-                  sanitized,
-                  default)))
+  mapply(function(sanitizedName, defaultName) {
+    fileName <- file_path_sans_ext(sanitizedName)
+    fileExt  <- file_ext(sanitizedName)
+    onlyExt  <- substring(sanitizedName, 1, 1) == "."
+    # If the filename is empty, return the default.
+    if (nchar(sanitizedName) == 0) {
+      defaultName
+    # If sanitizedName consists of just an extension -- meaning the name was
+    # removed but the extension was preserved -- and if defaultName combined
+    # with the preserved extension is an allowable size, return that.
+    } else if (onlyExt && (nchar(defaultName) + 1 + nchar(fileExt) <= maxSize)) {
+      paste(defaultName, fileExt, sep = ".")
+    # If sanitizedName is an allowable size and if it doesn't consist of just an
+    # extension, return it.
+    } else if ((nchar(sanitizedName) <= maxSize) && !onlyExt) {
+      sanitizedName
+    # In all other cases, return defaultName.
+    } else {
+      defaultName
+    }
+  }, sanitizedNames, default)
 }
 
 FileUploadOperation <- R6Class(

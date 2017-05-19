@@ -40,9 +40,11 @@ illegalWindowsNames <-
 #   remove from \code{str}
 # @return \code{str} with any illegal words removed.
 removeIllegalWindowsFilenames <- function(str, illegal) {
-  str %>%
-    ifelse(file_path_sans_ext(str) %in% illegal, paste0(".", file_ext(str)), .) %>%
-    ifelse(str %in% illegal, "", .)
+  ret <- str
+  ret[ret %in% illegal] <- ""
+  illegalNames <- file_path_sans_ext(ret) %in% illegal
+  ret[illegalNames] <- paste0(".", file_ext(ret[illegalNames]))
+  ret
 }
 
 # @details Helper function for abbreviating dots and removing unwanted

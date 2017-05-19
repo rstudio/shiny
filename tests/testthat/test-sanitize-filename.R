@@ -44,6 +44,7 @@ test_that("Illegal Windows file names are removed by the sanitize function when 
   expect_equal(sanitize("NUL.COM1", windows = TRUE), ".COM1")
   expect_equal(sanitize(".NUL", windows = TRUE), ".NUL")
   expect_equal(sanitize("COM1LPT1NUL.jpg", windows = TRUE), "COM1LPT1NUL.jpg")
+  expect_equal(sanitize(c("NUL.COM1", "foo.txt"), windows = TRUE), c(".COM1", "foo.txt"))
 })
 
 test_that("On Windows, illegal file names are removed", {

@@ -56,7 +56,10 @@ removeIllegalWindowsFilenames <- function(str, illegal) {
 # @return str with dots abbreviated, non-whitelisted characters removed, and
 #   optionally illegal Windows names removed.
 sanitize <- function(str, whitelist = "a-zA-Z0-9\\.", windows = FALSE) {
-  sanitized <- gsub("\\.+", "\\.", gsub(sprintf("[^%s]", whitelist), "", str))
+  sanitized <- str %>%
+    gsub(sprintf("[^%s]", whitelist), "", .) %>%
+    gsub("\\.+", "\\.", .)
+
   if(windows)
     removeIllegalWindowsFilenames(sanitized, illegalWindowsNames)
   else
@@ -92,7 +95,8 @@ sanitizeFileName <- function(name, default, maxSize = 255) {
   mapply(function(sanitizedName, defaultName) {
     fileName <- file_path_sans_ext(sanitizedName)
     fileExt  <- file_ext(sanitizedName)
-    onlyExt  <- substring(sanitizedName, 1, 1) == "."
+    onlyExt  <- fileName == paste0(".", fileExt)
+
     # If the filename is empty, return the default.
     if (nchar(sanitizedName) == 0) {
       defaultName
@@ -109,7 +113,10 @@ sanitizeFileName <- function(name, default, maxSize = 255) {
     } else {
       defaultName
     }
-  }, sanitizedNames, default)
+  },
+  sanitizedNames,
+  default,
+  USE.NAMES = FALSE)
 }
 
 FileUploadOperation <- R6Class(

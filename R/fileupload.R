@@ -89,7 +89,7 @@ sanitizeFileName <- function(name, default, maxSize = 255) {
   if (length(name) != length(default))
     stop("name and default must be the same length")
 
-  sanitizedNames <- sanitize(name, windows = (.Platform$OS.type == "windows"))
+  sanitizedNames <- sanitize(name, windows = isWindows())
 
   mapply(function(sanitizedName, defaultName) {
     fileName <- tools::file_path_sans_ext(sanitizedName)

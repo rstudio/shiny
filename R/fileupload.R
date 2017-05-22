@@ -1,5 +1,3 @@
-library(tools)
-
 # For HTML5-capable browsers, file uploads happen through a series of requests.
 #
 # 1. Client tells server that one or more files are about to be uploaded; the

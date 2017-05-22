@@ -42,8 +42,8 @@ illegalWindowsNames <-
 removeIllegalWindowsFilenames <- function(str, illegal) {
   ret <- str
   ret[ret %in% illegal] <- ""
-  illegalNames <- file_path_sans_ext(ret) %in% illegal
-  ret[illegalNames] <- paste0(".", file_ext(ret[illegalNames]))
+  illegalNames <- tools::file_path_sans_ext(ret) %in% illegal
+  ret[illegalNames] <- paste0(".", tools::file_ext(ret[illegalNames]))
   ret
 }
 
@@ -94,8 +94,8 @@ sanitizeFileName <- function(name, default, maxSize = 255) {
   sanitizedNames <- sanitize(name, windows = (.Platform$OS.type == "windows"))
 
   mapply(function(sanitizedName, defaultName) {
-    fileName <- file_path_sans_ext(sanitizedName)
-    fileExt  <- file_ext(sanitizedName)
+    fileName <- tools::file_path_sans_ext(sanitizedName)
+    fileExt  <- tools::file_ext(sanitizedName)
     onlyExt  <- fileName == paste0(".", fileExt)
 
     # If the filename is empty, return the default.

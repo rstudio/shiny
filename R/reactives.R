@@ -47,12 +47,13 @@ ReactiveVal <- R6Class(
     value = NULL,
     label = NULL,
     frozen = FALSE,
-    dependents = Dependents$new()
+    dependents = NULL
   ),
   public = list(
     initialize = function(value, label = NULL) {
       private$value <- value
       private$label <- label
+      private$dependents <- Dependents$new()
       .graphValueChange(private$label, value)
     },
     get = function() {

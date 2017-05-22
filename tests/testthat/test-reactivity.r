@@ -41,6 +41,29 @@ test_that("ReactiveVal", {
   o$destroy()
 })
 
+test_that("ReactiveVals have independent dependencies", {
+  # Issue 1710
+  x <- reactiveVal(0)
+  y <- reactiveVal(0)
+
+  o <- observe({
+    y()
+  })
+
+  # The observer always fires the first time
+  x(1)
+  flushReact()
+  expect_equal(execCount(o), 1)
+
+  # Changing x again shouldn't invalidate the observer
+  x(2)
+  flushReact()
+  expect_equal(execCount(o), 1)
+
+  o$destroy()
+})
+
+
 test_that("ReactiveVal labels", {
   val <- reactiveVal()
   expect_equal(attr(val, "label", exact = TRUE), "val")

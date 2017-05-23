@@ -38,13 +38,27 @@ test_that("If the extension is preserved but combined with the default it's too 
   expect_equal(sanitizeFileName("你好.xlsx", "0", maxSize = 5), "0")
 })
 
+illegalNamesAndResults <- list(
+  "COM1", "",
+  "NUL.txt", ".txt",
+  "NUL.COM1", ".COM1",
+  ".NUL", ".NUL",
+  "COM1LPT1NUL.jpg", "COM1LPT1NUL.jpg",
+  c("NUL.COM1", "foo.txt"), c(".COM1", "foo.txt")
+)
+
 test_that("Illegal Windows file names are removed by the sanitize function when windows = TRUE", {
-  expect_equal(sanitize("COM1", windows = TRUE), "")
-  expect_equal(sanitize("NUL.txt", windows = TRUE), ".txt")
-  expect_equal(sanitize("NUL.COM1", windows = TRUE), ".COM1")
-  expect_equal(sanitize(".NUL", windows = TRUE), ".NUL")
-  expect_equal(sanitize("COM1LPT1NUL.jpg", windows = TRUE), "COM1LPT1NUL.jpg")
-  expect_equal(sanitize(c("NUL.COM1", "foo.txt"), windows = TRUE), c(".COM1", "foo.txt"))
+  for (idx in seq(1, length(illegalNamesAndResults), by = 2)) {
+    expect_equal(sanitize(illegalNamesAndResults[[idx]], windows = TRUE), illegalNamesAndResults[[idx + 1]])
+  }
+})
+
+test_that("Lower-case illegal Windows file names are removed by the sanitize function when windows = TRUE", {
+  for (idx in seq(1, length(illegalNamesAndResults), by = 2)) {
+    upName <- tolower(illegalNamesAndResults[[idx]])
+    toResult <- tolower(illegalNamesAndResults[[idx + 1]])
+    expect_equal(sanitize(upName, windows = TRUE), toResult)
+  }
 })
 
 test_that("On Windows, illegal file names are removed", {

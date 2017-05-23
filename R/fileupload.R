@@ -33,14 +33,15 @@ illegalWindowsNames <-
     "PRN")
 
 # @details Removes strings in file names that could cause problems on Windows.
-# @param str A character vector to remove illegal strings from.
+# @param str A character vector to remove illegal strings from. Comparison is
+#   case-insensitive.
 # @param illegal The vector of words, by themselves or with an extension, to
 #   remove from \code{str}
 # @return \code{str} with any illegal words removed.
 removeIllegalWindowsFilenames <- function(str, illegal) {
   ret <- str
-  ret[ret %in% illegal] <- ""
-  illegalNames <- tools::file_path_sans_ext(ret) %in% illegal
+  ret[toupper(ret) %in% illegal] <- ""
+  illegalNames <- (tools::file_path_sans_ext(toupper(ret)) %in% illegal)
   ret[illegalNames] <- paste0(".", tools::file_ext(ret[illegalNames]))
   ret
 }

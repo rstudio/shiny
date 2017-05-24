@@ -56,9 +56,7 @@ removeIllegalWindowsFilenames <- function(str, illegal) {
 # @return str with dots abbreviated, non-whitelisted characters removed, and
 #   optionally illegal Windows names removed.
 sanitize <- function(str, whitelist = "a-zA-Z0-9\\.", windows = FALSE) {
-  sanitized <- str %>%
-    gsub(sprintf("[^%s]", whitelist), "", .) %>%
-    gsub("\\.+", "\\.", .)
+  sanitized <- gsub("\\.+", "\\.", gsub(sprintf("[^%s]", whitelist), "", str))
 
   if(windows)
     removeIllegalWindowsFilenames(sanitized, illegalWindowsNames)

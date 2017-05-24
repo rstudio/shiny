@@ -54,7 +54,7 @@ actionButton <- function(inputId, label, icon = NULL, width = NULL, ...) {
 
 #' @rdname actionButton
 #' @export
-actionLink <- function(inputId, label, icon = NULL, ...) {
+actionLink <- function(inputId, label, ..., icon = NULL) {
   value <- restoreInput(id = inputId, default = NULL)
 
   tags$a(id=inputId,

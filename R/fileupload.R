@@ -20,101 +20,15 @@
 # form upload, i.e. traditional HTTP POST-based file upload) doesn't work with
 # the websockets package's HTTP server at the moment.
 
-# The following file names are illegal on Windows. It's also bad to follow them
-# with an extension, such as NUL.txt
-# https://msdn.microsoft.com/en-us/library/aa365247.aspx
-# https://blogs.msdn.microsoft.com/oldnewthing/20031022-00/?p=42073
-illegalWindowsNames <-
-  c("AUX",
-    paste0("COM", 1:9),
-    "CON",
-    paste0("LPT", 1:9),
-    "NUL",
-    "PRN")
-
-# @details Removes strings in file names that could cause problems on Windows.
-# @param str A character vector to remove illegal strings from. Comparison is
-#   case-insensitive.
-# @param illegal The vector of words, by themselves or with an extension, to
-#   remove from \code{str}
-# @return \code{str} with any illegal words removed.
-removeIllegalWindowsFilenames <- function(str, illegal) {
-  ret <- str
-  ret[toupper(ret) %in% illegal] <- ""
-  illegalNames <- (tools::file_path_sans_ext(toupper(ret)) %in% illegal)
-  ret[illegalNames] <- paste0(".", tools::file_ext(ret[illegalNames]))
-  ret
-}
-
-# @details Helper function for abbreviating dots and removing unwanted
-#   characters and strings from a filename.
-# @param str A character vector which is presumably the name of a file.
-# @param whitelist The regular expression fragment indicating the characters to
-#   keep.
-# @param windows A logical indicating whether or not to strip names that are
-#   illegal on Windows.
-# @return str with dots abbreviated, non-whitelisted characters removed, and
-#   optionally illegal Windows names removed.
-sanitize <- function(str, whitelist = "a-zA-Z0-9\\.", windows = FALSE) {
-  sanitized <- gsub("\\.+", "\\.", gsub(sprintf("[^%s]", whitelist), "", str))
-
-  if(windows)
-    removeIllegalWindowsFilenames(sanitized, illegalWindowsNames)
-  else
-    sanitized
-}
-
-# @details \code{sanitizeFileName} is an effort to safely retain something close
-#   to an uploaded file's original name in order to support libraries like
-#   readxl that are sensitive to the names of files. A good overview of the
-#   risks associated with uploaded files is
-#   \url{https://www.owasp.org/index.php/Unrestricted_File_Upload}
-# @param name A character vector, the name of a file to sanitize.
-# @param default Character vector to return if \code{name} cannot be sanitized.
-#   If a file's extension can be preserved, and the total length of
-#   \code{default} and the extension is not more than \code{maxSize}, then
-#   \code{default} is combined with the extension and returned.
-# @param maxSize The maximum allowable size of the name returned by this
-#   function. (Default is 255 characters.)
-# @return The sanitized \code{name}, or the \code{default} combined with the
-#   original extension, if possible. Otherwise, \code{default}.
-sanitizeFileName <- function(name, default, maxSize = 255) {
-  if (missing(default))
-    stop("default is a required argument")
-
-  if (any(nchar(default) > maxSize))
-    stop("default can't be longer than maxSize")
-
-  if (length(name) != length(default))
-    stop("name and default must be the same length")
-
-  sanitizedNames <- sanitize(name, windows = isWindows())
-
-  mapply(function(sanitizedName, defaultName) {
-    fileName <- tools::file_path_sans_ext(sanitizedName)
-    fileExt  <- tools::file_ext(sanitizedName)
-    onlyExt  <- fileName == paste0(".", fileExt)
-
-    # If the filename is empty, return the default.
-    if (nchar(sanitizedName) == 0) {
-      defaultName
-    # If sanitizedName consists of just an extension -- meaning the name was
-    # removed but the extension was preserved -- and if defaultName combined
-    # with the preserved extension is an allowable size, return that.
-    } else if (onlyExt && (nchar(defaultName) + 1 + nchar(fileExt) <= maxSize)) {
-      paste(defaultName, fileExt, sep = ".")
-    # If sanitizedName is an allowable size and if it doesn't consist of just an
-    # extension, return it.
-    } else if ((nchar(sanitizedName) <= maxSize) && !onlyExt) {
-      sanitizedName
-    # In all other cases, return defaultName.
-    } else {
-      defaultName
-    }
-  },
-  sanitizedNames,
-  default,
-  USE.NAMES = FALSE)
+#' @description Returns a file's extension, with a leading dot, if one can be
+#'   found.
+#' @param x character vector giving file paths.
+#' @return The extension of \code{x}, with a leading dot, if one was found.
+#'   Otherwise, an empty character vector.
+maybeGetExtension <- function(x) {
+  ext <- tools::file_ext(x)
+  ext[ext != ""] <- paste0(".", ext[ext != ""])
+  ext
 }
 
 FileUploadOperation <- R6Class(
@@ -149,9 +63,9 @@ FileUploadOperation <- R6Class(
       .currentFileInfo <<- file
       .pendingFileInfos <<- tail(.pendingFileInfos, -1)
 
-      basename <- .currentFileInfo$name
-      filename <- file.path(.dir, sanitizeFileName(basename, as.character(length(.files$name))))
-      row <- data.frame(name=file$name, size=file$size, type=file$type,
+      fileBasename <- basename(.currentFileInfo$name)
+      filename <- file.path(.dir, paste0(as.character(length(.files$name)), maybeGetExtension(fileBasename)))
+      row <- data.frame(name=fileBasename, size=file$size, type=file$type,
                         datapath=filename, stringsAsFactors=FALSE)
 
       if (length(.files$name) == 0)

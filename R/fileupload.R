@@ -21,14 +21,16 @@
 # the websockets package's HTTP server at the moment.
 
 #' @description Returns a file's extension, with a leading dot, if one can be
-#'   found.
+#'   found. A valid extension contains only alphanumeric characters. If there is
+#'   no extension, or if it contains non-alphanumeric characters, an empty
+#'   string is returned.
 #' @param x character vector giving file paths.
 #' @return The extension of \code{x}, with a leading dot, if one was found.
 #'   Otherwise, an empty character vector.
+#' @note
 maybeGetExtension <- function(x) {
   ext <- tools::file_ext(x)
-  ext[ext != ""] <- paste0(".", ext[ext != ""])
-  ext
+  ifelse(ext == "", ext, paste0(".", ext))
 }
 
 FileUploadOperation <- R6Class(

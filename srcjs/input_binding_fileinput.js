@@ -19,6 +19,9 @@ var IE8FileUploader = function(shinyapp, id, fileEl) {
       // invalidated reactives, but observers don't actually execute.
       self.shinyapp.makeRequest('uploadieFinish', [], function(){}, function(){});
       $(self.iframe).remove();
+      // Reset the file input's value to "". This allows the same file to be
+      // uploaded again. https://stackoverflow.com/a/22521275
+      $(self.fileEl).val("");
     };
     if (this.iframe.attachEvent) {
       this.iframe.attachEvent('onload', iframeDestroy);
@@ -142,6 +145,9 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
         self.$setActive(false);
         self.onProgress(null, 1);
         self.$bar().text('Upload complete');
+        // Reset the file input's value to "". This allows the same file to be
+        // uploaded again. https://stackoverflow.com/a/22521275
+        $(evt.el).val("");
       },
       function(error) {
         self.onError(error);

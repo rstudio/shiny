@@ -9,7 +9,7 @@ shiny 1.0.3.9000
 
 ### Minor new features and improvements
 
-The `fileInput` control now retains uploaded file extensions on the server. This fixes [readxl](https://github.com/tidyverse/readxl)'s `readxl::read_excel` and other functions that must recognize a file's extension in order to work. ([#1706](https://github.com/rstudio/shiny/pull/1706), [#1501](https://github.com/rstudio/shiny/issues/1501), [#1502](https://github.com/rstudio/shiny/pull/1502))
+Addressed [#1501](https://github.com/rstudio/shiny/issues/1501): The `fileInput` control now retains uploaded file extensions on the server. This fixes [readxl](https://github.com/tidyverse/readxl)'s `readxl::read_excel` and other functions that must recognize a file's extension in order to work. ([#1706](https://github.com/rstudio/shiny/pull/1706))
 
 ### Bug fixes
 

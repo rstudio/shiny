@@ -84,7 +84,16 @@ One of the tasks concatenates all the .js files in `/srcjs` together into `/inst
 
 During development of Shiny's Javascript code, it's best to use `grunt watch` so that the minified file will get updated whenever you make changes the Javascript sources.
 
+#### Auto build and browser refresh
 
+An alternative to `grunt watch` is to use `entr` to trigger `grunt` when sources
+change. `entr` can be installed with `brew install entr`. Using this technique,
+it's possible to both automatically rebuild sources and reload the browser at
+the same time:
+
+```
+find ../srcjs/ | entr bash -c './node_modules/grunt/bin/grunt && say done && osascript -e "tell application \"Google Chrome\" to reload active tab of window 1"'
+```
 
 Updating web libraries
 ======================

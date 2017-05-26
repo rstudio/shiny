@@ -20,14 +20,13 @@
 # form upload, i.e. traditional HTTP POST-based file upload) doesn't work with
 # the websockets package's HTTP server at the moment.
 
-#' @description Returns a file's extension, with a leading dot, if one can be
-#'   found. A valid extension contains only alphanumeric characters. If there is
-#'   no extension, or if it contains non-alphanumeric characters, an empty
-#'   string is returned.
-#' @param x character vector giving file paths.
-#' @return The extension of \code{x}, with a leading dot, if one was found.
-#'   Otherwise, an empty character vector.
-#' @note
+# @description Returns a file's extension, with a leading dot, if one can be
+#   found. A valid extension contains only alphanumeric characters. If there is
+#   no extension, or if it contains non-alphanumeric characters, an empty
+#   string is returned.
+# @param x character vector giving file paths.
+# @return The extension of \code{x}, with a leading dot, if one was found.
+#   Otherwise, an empty character vector.
 maybeGetExtension <- function(x) {
   ext <- tools::file_ext(x)
   ifelse(ext == "", ext, paste0(".", ext))

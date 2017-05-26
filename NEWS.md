@@ -9,6 +9,8 @@ shiny 1.0.3.9000
 
 ### Minor new features and improvements
 
+Addressed [#1508](https://github.com/rstudio/shiny/issues/1508): `fileInput` now permits the same file to be uploaded multiple times. ([#1719](https://github.com/rstudio/shiny/pull/1719))
+
 ### Bug fixes
 
 Fixed [#1701](https://github.com/rstudio/shiny/issues/1701): There was a partial argument match in the `generateOptions` function. ([#1702](https://github.com/rstudio/shiny/pull/1702))

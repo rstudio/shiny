@@ -1542,12 +1542,12 @@ ShinySession <- R6Class(
       # @return A named list with datapath updated to point to the new location
       #   of the file, if an extension was added.
       maybeMoveIEUpload <- function(multipart) {
-        if(is.null(multipart)) return(NULL)
+        if (is.null(multipart)) return(NULL)
 
         lapply(multipart, function(input) {
           oldPath <- input$datapath
           newPath <- paste0(oldPath, maybeGetExtension(input$name))
-          if(oldPath != newPath) {
+          if (oldPath != newPath) {
             file.rename(oldPath, newPath)
             input$datapath <- newPath
           }

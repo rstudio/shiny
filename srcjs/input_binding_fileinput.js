@@ -221,6 +221,69 @@ function uploadFiles(evt) {
   }
 }
 
+// https://stackoverflow.com/questions/22308882/drag-drop-files-on-the-page-lack-of-a-consistent-solution
+$.fn.draghover = function(options) {
+  return this.each(function() {
+
+    var self = $(this),
+        collection = $();
+
+    self.on('dragenter', function(e) {
+      if (collection.size() === 0) {
+        self.trigger('draghoverstart', e.originalEvent);
+      }
+      collection = collection.add(e.target);
+    });
+
+    self.on('dragleave drop', function(e) {
+      // timeout is needed because Firefox 3.6 fires the dragleave event on
+      // the previous element before firing dragenter on the next one
+      setTimeout( function() {
+        collection = collection.not(e.target);
+        if (collection.size() === 0) {
+          self.trigger('draghoverend', e.originalEvent);
+        }
+      }, 1);
+    });
+
+    self.on('draghoverfinished', function(e, $element) {
+      collection = collection.not($element);
+    });
+
+  });
+};
+
+var $dropzones = $();
+
+function showDropzones() {
+  // TODO Should this be a class, and so parameterizable by the user?
+  $dropzones.closest("div.input-group").css("box-shadow", "0 0 6px 3px #5cb85c");
+}
+
+function hideDropzones() {
+  $dropzones.closest("div.input-group").css("box-shadow", "none");
+}
+
+function handleGlobalDragEnter(e) {
+  e.preventDefault();
+  showDropzones();
+}
+
+function handleGlobalDragHoverEnd(e) {
+  e.preventDefault();
+  hideDropzones();
+}
+
+function handleGlobalDragOver(e) {
+  e.preventDefault();
+}
+
+function handleGlobalDrop(e) {
+  e.preventDefault();
+  console.log("global drop");
+  hideDropzones();
+}
+
 var fileInputBinding = new InputBinding();
 $.extend(fileInputBinding, {
   find: function(scope) {
@@ -268,9 +331,22 @@ $.extend(fileInputBinding, {
   },
   subscribe: function(el, callback) {
     $(el).on('change.fileInputBinding', uploadFiles);
+
+    if ($dropzones.length === 0) {
+      $(document).draghover().on('dragenter', handleGlobalDragEnter);
+      $(document).on('draghoverend', handleGlobalDragHoverEnd);
+      $(document).on('dragover', handleGlobalDragOver);
+      $(document).on('drop', handleGlobalDrop);
+    }
+
+    $dropzones = $dropzones.add(el);
   },
   unsubscribe: function(el) {
     $(el).off('.fileInputBinding');
+    $dropzones = $dropzones.not(el);
+    if ($dropzones.length === 0) {
+      // TODO Clean up global event handlers.
+    }
   }
 });
 inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');

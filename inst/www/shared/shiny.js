@@ -175,7 +175,14 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   // "with" on the argument value, and return the result.
   function scopeExprToFunc(expr) {
     /*jshint evil: true */
-    var func = new Function("with (this) {return (" + expr + ");}");
+    var expr_escaped = expr.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+    try {
+      var func = new Function('with (this) {\n        try {\n          return (' + expr + ');\n        } catch (e) {\n          console.error(\'Error evaluating expression: ' + expr_escaped + '\');\n          throw e;\n        }\n      }');
+    } catch (e) {
+      console.error("Error parsing expression: " + expr);
+      throw e;
+    }
+
     return function (scope) {
       return func.call(scope);
     };

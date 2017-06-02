@@ -11,6 +11,8 @@ shiny 1.0.3.9000
 
 Addressed [#1501](https://github.com/rstudio/shiny/issues/1501): The `fileInput` control now retains uploaded file extensions on the server. This fixes [readxl](https://github.com/tidyverse/readxl)'s `readxl::read_excel` and other functions that must recognize a file's extension in order to work. ([#1706](https://github.com/rstudio/shiny/pull/1706))
 
+For `conditionalPanel`s, Shiny now gives more informative messages if there are errors evaluating or parsing the JavaScript conditional expression. ([#1727](https://github.com/rstudio/shiny/pull/1727))
+
 ### Bug fixes
 
 Fixed [#1701](https://github.com/rstudio/shiny/issues/1701): There was a partial argument match in the `generateOptions` function. ([#1702](https://github.com/rstudio/shiny/pull/1702))

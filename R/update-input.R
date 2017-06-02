@@ -696,30 +696,33 @@ selectizeJSON <- function(data, req) {
 #' @export
 updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
   if (!is.null(value)) {
+    rows <- lapply(value, function(file) {
 
-    # Error checking that the given path is valid
-    file <- value
-    file <- normalizePath(file, mustWork = FALSE)
-    if (!file.exists(file)) {
-      stop("The file provided to updateFileInput() could not be read.")
-    }
-    fileInfo <- file.info(file)
-    if (is.na(fileInfo$isdir)) {
-      stop("The file provided to updateFileInput() could not be read.")
-    }
-    if (fileInfo$isdir) {
-      stop("updateFileInput() expects a file, but a directory was provided instead")
-    }
+      # Error checking that the given path is valid
+      file <- normalizePath(file, mustWork = FALSE)
+      if (!file.exists(file)) {
+        stop("The file provided to updateFileInput() could not be read.")
+      }
+      fileInfo <- file.info(file)
+      if (is.na(fileInfo$isdir)) {
+        stop("The file provided to updateFileInput() could not be read.")
+      }
+      if (fileInfo$isdir) {
+        stop("updateFileInput() expects a file, but a directory was provided instead")
+      }
 
-    # Extract the necessary information from the file and build the dataframe
-    fileBasename <- basename(file)
-    size <- fileInfo$size
-    type <- mime::guess_type(file)
-    datapath <- file
-    row <- data.frame(name = fileBasename, size = size, type = type,
-                      datapath = datapath, stringsAsFactors = FALSE)
+      # Extract the necessary information from the file and build the dataframe
+      fileBasename <- basename(file)
+      size <- fileInfo$size
+      type <- mime::guess_type(file)
+      datapath <- file
+      row <- data.frame(name = fileBasename, size = size, type = type,
+                        datapath = datapath, stringsAsFactors = FALSE)
+      row
+    })
 
-    files <- row
+    # Combine all the files info into one dataframe and set the input to it
+    files <- do.call(rbind, rows)
     .subset2(session$input, "impl")$set(inputId, files)
   }
 }

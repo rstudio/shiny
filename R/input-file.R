@@ -20,6 +20,7 @@
 #' }
 #'
 #' @family input elements
+#' @seealso \code{\link{updateFileInput}}
 #'
 #' @inheritParams textInput
 #' @param multiple Whether the user should be allowed to select and upload

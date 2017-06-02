@@ -693,6 +693,41 @@ selectizeJSON <- function(data, req) {
   httpResponse(200, 'application/json', enc2utf8(res))
 }
 
+#' Change the value of a file input
+#'
+#' @template update-input
+#' @param value The file (or files) to set as the value of the file input.
+#'
+#' @seealso \code{\link{fileInput}}
+#'
+#' @examples
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       fileInput("file", "File", multiple = TRUE),
+#'       actionButton("btn_1", "Select the shiny DESCRIPTION"),
+#'       actionButton("btn_2", "Select the shiny DESCRIPTION and NAMESPACE"),
+#'       tableOutput("table")
+#'     ),
+#'     server = function(input, output, session) {
+#'       observeEvent(input$btn_1, {
+#'         updateFileInput(session, "file",
+#'                         value = system.file("DESCRIPTION", package = "shiny"))
+#'       })
+#'
+#'       observeEvent(input$btn_2, {
+#'         updateFileInput(session, "file",
+#'                         value = c(system.file("DESCRIPTION", package = "shiny"),
+#'                                   system.file("NAMESPACE", package = "shiny")))
+#'       })
+#'
+#'       output$table <- renderTable({
+#'         input$file
+#'       })
+#'     }
+#'   )
+#' }
 #' @export
 updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
   if (!is.null(value)) {

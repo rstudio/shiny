@@ -90,6 +90,8 @@ shinyApp(ui, server)
 }
 }
 \seealso{
+\code{\link{updateFileInput}}
+
 Other input elements: \code{\link{actionButton}},
   \code{\link{checkboxGroupInput}},
   \code{\link{checkboxInput}}, \code{\link{dateInput}},

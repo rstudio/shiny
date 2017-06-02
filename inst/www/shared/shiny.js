@@ -5076,6 +5076,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     },
     unsubscribe: function unsubscribe(el) {
       $(el).off('.fileInputBinding');
+    },
+    receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('label'))
+        $(el).closest(".form-group").find('label[for="' + $escape(el.id) + '"]').text(data.label);
+
+      $(el).trigger('change');
     }
   });
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');

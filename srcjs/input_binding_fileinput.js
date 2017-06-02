@@ -271,6 +271,12 @@ $.extend(fileInputBinding, {
   },
   unsubscribe: function(el) {
     $(el).off('.fileInputBinding');
+  },
+  receiveMessage: function(el, data) {
+    if (data.hasOwnProperty('label'))
+      $(el).closest(".form-group").find('label[for="' + $escape(el.id) + '"]').text(data.label);
+
+    $(el).trigger('change');
   }
 });
 inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');

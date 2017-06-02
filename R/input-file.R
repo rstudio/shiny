@@ -103,7 +103,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
 
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
-    label %AND% tags$label(label),
+    label %AND% tags$label(label, `for` = inputId),
 
     div(class = "input-group",
       tags$label(class = "input-group-btn",

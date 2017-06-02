@@ -725,4 +725,7 @@ updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
     files <- do.call(rbind, rows)
     .subset2(session$input, "impl")$set(inputId, files)
   }
+
+  message <- dropNulls(list(label=label, value=value))
+  session$sendInputMessage(inputId, message)
 }

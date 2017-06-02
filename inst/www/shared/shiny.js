@@ -5078,6 +5078,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       $(el).off('.fileInputBinding');
     },
     receiveMessage: function(el, data) {
+      if (data.hasOwnProperty('value')) {
+        $(el).val('');
+      }
+
       if (data.hasOwnProperty('label'))
         $(el).closest(".form-group").find('label[for="' + $escape(el.id) + '"]').text(data.label);
 

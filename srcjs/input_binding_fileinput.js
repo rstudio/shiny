@@ -273,6 +273,10 @@ $.extend(fileInputBinding, {
     $(el).off('.fileInputBinding');
   },
   receiveMessage: function(el, data) {
+    if (data.hasOwnProperty('value')) {
+      $(el).val('');
+    }
+
     if (data.hasOwnProperty('label'))
       $(el).closest(".form-group").find('label[for="' + $escape(el.id) + '"]').text(data.label);
 

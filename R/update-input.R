@@ -692,3 +692,85 @@ selectizeJSON <- function(data, req) {
   res <- toJSON(columnToRowData(data))
   httpResponse(200, 'application/json', enc2utf8(res))
 }
+
+#' Change the value of a file input
+#'
+#' @template update-input
+#' @param value The file (or files) to set as the value of the file input.
+#'
+#' @seealso \code{\link{fileInput}}
+#'
+#' @examples
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   shinyApp(
+#'     ui = fluidPage(
+#'       fileInput("file", "File", multiple = TRUE),
+#'       actionButton("btn_1", "Select the shiny DESCRIPTION"),
+#'       actionButton("btn_2", "Select the shiny DESCRIPTION and NAMESPACE"),
+#'       tableOutput("table")
+#'     ),
+#'     server = function(input, output, session) {
+#'       observeEvent(input$btn_1, {
+#'         updateFileInput(session, "file",
+#'                         value = system.file("DESCRIPTION", package = "shiny"))
+#'       })
+#'
+#'       observeEvent(input$btn_2, {
+#'         updateFileInput(session, "file",
+#'                         value = c(system.file("DESCRIPTION", package = "shiny"),
+#'                                   system.file("NAMESPACE", package = "shiny")))
+#'       })
+#'
+#'       output$table <- renderTable({
+#'         input$file
+#'       })
+#'     }
+#'   )
+#' }
+#' @export
+updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
+  if (!is.null(value)) {
+    rows <- lapply(value, function(file) {
+
+      # Error checking that the given path is valid
+      file <- normalizePath(file, mustWork = FALSE)
+      if (!file.exists(file)) {
+        stop("The file provided to updateFileInput() could not be read.")
+      }
+      fileInfo <- file.info(file)
+      if (is.na(fileInfo$isdir)) {
+        stop("The file provided to updateFileInput() could not be read.")
+      }
+      if (fileInfo$isdir) {
+        stop("updateFileInput() expects a file, but a directory was provided instead")
+      }
+
+      # Extract the necessary information from the file and build the dataframe
+      fileBasename <- basename(file)
+      size <- fileInfo$size
+      type <- mime::guess_type(file)
+      datapath <- file
+      row <- data.frame(name = fileBasename, size = size, type = type,
+                        datapath = datapath, stringsAsFactors = FALSE)
+      row
+    })
+
+    # Combine all the files info into one dataframe and set the input to it
+    files <- do.call(rbind, rows)
+    .subset2(session$input, "impl")$set(inputId, files)
+
+    # Update the client about the update as well
+    if (nrow(files) == 0) {
+      # I can't think of a case of this happening, but just in case
+      stop("An error occurred in updateFileInput().")
+    } else if (nrow(files) == 1) {
+      value <- files[1, 'name']
+    } else {
+      value <- paste(nrow(files), "files")
+    }
+  }
+
+  message <- dropNulls(list(label=label, value=value))
+  session$sendInputMessage(inputId, message)
+}

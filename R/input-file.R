@@ -20,6 +20,7 @@
 #' }
 #'
 #' @family input elements
+#' @seealso \code{\link{updateFileInput}}
 #'
 #' @inheritParams textInput
 #' @param multiple Whether the user should be allowed to select and upload
@@ -103,7 +104,7 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
 
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
-    label %AND% tags$label(label),
+    label %AND% tags$label(label, `for` = inputId),
 
     div(class = "input-group",
       tags$label(class = "input-group-btn",

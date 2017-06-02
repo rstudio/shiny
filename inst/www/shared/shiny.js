@@ -5076,6 +5076,20 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     },
     unsubscribe: function unsubscribe(el) {
       $(el).off('.fileInputBinding');
+    },
+    receiveMessage: function receiveMessage(el, data) {
+      if (data.hasOwnProperty('value')) {
+        // Clear the file input's value so that if the user selects the same
+        // file as previously selected, the browser will recognize that it's
+        // not the same file as currently
+        $(el).val('');
+        // To not confuse the user, update the text that shows what file is chosen
+        $(el).closest(".form-group").find("input").eq(1).val(data.value);
+      }
+
+      if (data.hasOwnProperty('label')) $(el).closest(".form-group").find('label[for="' + $escape(el.id) + '"]').text(data.label);
+
+      $(el).trigger('change');
     }
   });
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');

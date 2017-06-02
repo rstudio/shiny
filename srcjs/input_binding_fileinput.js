@@ -253,15 +253,18 @@ $.fn.draghover = function(options) {
   });
 };
 
-var $dropzones = $();
+var $inputs = $();
+
+function $zone($el) {
+  return $el.closest("div.input-group");
+}
 
 function showDropzones() {
-  // TODO Should this be a class, and so parameterizable by the user?
-  $dropzones.closest("div.input-group").css("box-shadow", "0 0 6px 3px #5cb85c");
+  $zone($inputs).css("box-shadow", "0 0 6px 3px #5cb85c");
 }
 
 function hideDropzones() {
-  $dropzones.closest("div.input-group").css("box-shadow", "none");
+  $zone($inputs).css("box-shadow", "none");
 }
 
 function handleGlobalDragEnter(e) {
@@ -280,8 +283,18 @@ function handleGlobalDragOver(e) {
 
 function handleGlobalDrop(e) {
   e.preventDefault();
-  console.log("global drop");
   hideDropzones();
+}
+
+function handleDragover(e) {
+  $zone($(e.target)).css("box-shadow", "0 0 6px 3px #00f");
+  e.preventDefault();
+};
+
+// TODO Handle dragging the same file multiple times.
+function handleDrop(inputEl, e) {
+  inputEl.files = e.originalEvent.dataTransfer.files;
+  e.preventDefault();
 }
 
 var fileInputBinding = new InputBinding();
@@ -330,21 +343,27 @@ $.extend(fileInputBinding, {
     return 'shiny.file';
   },
   subscribe: function(el, callback) {
-    $(el).on('change.fileInputBinding', uploadFiles);
+    var $el = $(el);
+    $el.on('change.fileInputBinding', uploadFiles);
 
-    if ($dropzones.length === 0) {
+    if ($inputs.length === 0) {
       $(document).draghover().on('dragenter', handleGlobalDragEnter);
       $(document).on('draghoverend', handleGlobalDragHoverEnd);
       $(document).on('dragover', handleGlobalDragOver);
       $(document).on('drop', handleGlobalDrop);
     }
 
-    $dropzones = $dropzones.add(el);
+    $zone($el).on("drop", handleDrop.bind(null, el));
+    $zone($el).on("dragover", handleDragover);
+
+    $inputs = $inputs.add(el);
   },
   unsubscribe: function(el) {
-    $(el).off('.fileInputBinding');
-    $dropzones = $dropzones.not(el);
-    if ($dropzones.length === 0) {
+    var $el = $(el);
+    $el.off('.fileInputBinding');
+    $inputs = $inputs.not(el);
+    // TODO Clean up local event handlers.
+    if ($inputs.length === 0) {
       // TODO Clean up global event handlers.
     }
   }

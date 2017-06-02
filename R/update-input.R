@@ -724,6 +724,16 @@ updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
     # Combine all the files info into one dataframe and set the input to it
     files <- do.call(rbind, rows)
     .subset2(session$input, "impl")$set(inputId, files)
+
+    # Update the client about the update as well
+    if (nrow(files) == 0) {
+      # I can't think of a case of this happening, but just in case
+      stop("An error occurred in updateFileInput().")
+    } else if (nrow(files) == 1) {
+      value <- files[1, 'name']
+    } else {
+      value <- paste(nrow(files), "files")
+    }
   }
 
   message <- dropNulls(list(label=label, value=value))

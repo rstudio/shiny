@@ -759,6 +759,7 @@ updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
     # Combine all the files info into one dataframe and set the input to it
     files <- do.call(rbind, rows)
     .subset2(session$input, "impl")$set(inputId, files)
+    .subset2(session$input, "impl")$setMeta(inputId, "shiny.serializer", serializerFileInput)
 
     # Update the client about the update as well
     if (nrow(files) == 0) {

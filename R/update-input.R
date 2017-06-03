@@ -731,7 +731,11 @@ selectizeJSON <- function(data, req) {
 #' @export
 updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
   if (!is.null(value)) {
-    rows <- lapply(value, function(file) {
+    newdir <- createUniqueId(12)
+    newpath <- file.path(tempdir(), newdir)
+
+    rows <- lapply(seq_along(value), function(idx) {
+      file <- value[[idx]]
 
       # Error checking that the given path is valid
       file <- normalizePath(file, mustWork = FALSE)
@@ -746,11 +750,16 @@ updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
         stop("updateFileInput() expects a file, but a directory was provided instead")
       }
 
+      # Copy the file to a temp dir so that the path to original file isn't used
+      dir.create(newpath, showWarnings = FALSE)
+      filename <- paste0(idx-1, maybeGetExtension(file))
+      datapath <- file.path(newpath, filename)
+      file.copy(file, datapath)
+
       # Extract the necessary information from the file and build the dataframe
       fileBasename <- basename(file)
       size <- fileInfo$size
-      type <- mime::guess_type(file)
-      datapath <- file
+      type <- mime::guess_type(datapath)
       row <- data.frame(name = fileBasename, size = size, type = type,
                         datapath = datapath, stringsAsFactors = FALSE)
       row
@@ -759,6 +768,8 @@ updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
     # Combine all the files info into one dataframe and set the input to it
     files <- do.call(rbind, rows)
     .subset2(session$input, "impl")$set(inputId, files)
+
+    # Take care of other bits that happen when a file is uploaded manually
     .subset2(session$input, "impl")$setMeta(inputId, "shiny.serializer", serializerFileInput)
 
     # Update the client about the update as well

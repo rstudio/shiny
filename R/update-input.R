@@ -772,15 +772,11 @@ updateFileInput <- function(session, inputId, label = NULL, value = NULL) {
     # Take care of other bits that happen when a file is uploaded manually
     .subset2(session$input, "impl")$setMeta(inputId, "shiny.serializer", serializerFileInput)
 
-    # Update the client about the update as well
-    if (nrow(files) == 0) {
-      # I can't think of a case of this happening, but just in case
-      stop("An error occurred in updateFileInput().")
-    } else if (nrow(files) == 1) {
-      value <- files[1, 'name']
-    } else {
-      value <- paste(nrow(files), "files")
-    }
+    # Remove the datapath info before sending this to the client
+    value <- lapply(rows, function(row) {
+      row$datapath = NULL
+      as.list(row)
+    })
   }
 
   message <- dropNulls(list(label=label, value=value))

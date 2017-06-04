@@ -4930,24 +4930,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     this.onComplete = function () {
       var self = this;
 
-      var fileInfo = $.map(this.files, function (file, i) {
-        return {
-          name: file.name,
-          size: file.size,
-          type: file.type
-        };
-      });
-
-      // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,
-      // it's not possible to modify the information before the values get
-      // sent to the server.
-      var evt = jQuery.Event("shiny:inputchanged");
-      evt.name = this.id;
-      evt.value = fileInfo;
-      evt.binding = fileInputBinding;
-      evt.el = this.el;
-      evt.inputType = 'shiny.fileupload';
-      $(document).trigger(evt);
+      fileUploadTriggerChange(this.el, this.files);
 
       this.makeRequest('uploadEnd', [this.jobId, this.id], function (response) {
         self.$setActive(false);
@@ -5027,6 +5010,38 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
   }
 
+  // Trigger shiny:inputchanged. Unlike a normal shiny:inputchanged event,
+  // it's not possible to modify the information before the values get
+  // sent to the server.
+  function fileUploadTriggerChange(el, files) {
+    var fileInfo = $.map(files, function (file, i) {
+      return {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      };
+    });
+
+    var evt = jQuery.Event("shiny:inputchanged");
+    evt.name = el.id;
+    evt.value = fileInfo;
+    evt.binding = fileInputBinding;
+    evt.el = el;
+    evt.inputType = 'shiny.fileupload';
+    $(document).trigger(evt);
+  }
+
+  // Manually set up progress bar. A bit inelegant because it duplicates
+  // code from FileUploader, but duplication is less bad than alternatives.
+  function fileUploadEndMock(el) {
+    var $progress = $(el).closest('div.form-group').find('.progress');
+    var $bar = $progress.find('.progress-bar');
+    $progress.removeClass('active');
+    $bar.width('100%');
+    $bar.css('visibility', 'visible');
+    $bar.text('Upload complete');
+  }
+
   var fileInputBinding = new InputBinding();
   $.extend(fileInputBinding, {
     find: function find(scope) {
@@ -5051,13 +5066,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           $fileText.val(data.name.length + " files");
         }
 
-        // Manually set up progress bar. A bit inelegant because it duplicates
-        // code from FileUploader, but duplication is less bad than alternatives.
-        var $progress = $(el).closest('div.form-group').find('.progress');
-        var $bar = $progress.find('.progress-bar');
-        $progress.removeClass('active');
-        $bar.width('100%');
-        $bar.css('visibility', 'visible');
+        fileUploadEndMock(el);
 
         return data;
       } else {
@@ -5083,8 +5092,15 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
         // file as previously selected, the browser will recognize that it's
         // not the same file as currently
         $(el).val('');
-        // To not confuse the user, update the text that shows what file is chosen
-        $(el).closest(".form-group").find("input").eq(1).val(data.value);
+
+        fileUploadTriggerChange(el, data.value);
+        var $fileText = $(el).closest('div.input-group').find('input[type=text]');
+        if (data.value.length === 1) {
+          $fileText.val(data.value[0].name);
+        } else {
+          $fileText.val(data.value.length + " files");
+        }
+        fileUploadEndMock(el);
       }
 
       if (data.hasOwnProperty('label')) $(el).closest(".form-group").find('label[for="' + $escape(el.id) + '"]').text(data.label);

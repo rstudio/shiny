@@ -177,8 +177,8 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
 
   p1 <- promise::with_promise_domain(domain, {
     p2 <- promise::resolved(func())
-    p2 <- promise::then(p2, function(value, visible) {
-      if (visible) {
+    p2 <- promise::then(p2, function(value, .visible) {
+      if (.visible) {
         # A modified version of print.ggplot which returns the built ggplot object
         # as well as the gtable grob. This overrides the ggplot::print.ggplot
         # method, but only within the context of renderPlot. The reason this needs

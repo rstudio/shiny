@@ -451,7 +451,7 @@ runloop <- function() {
 # Run an application that was created by \code{\link{startApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
 serviceApp <- function() {
-  if (timerCallbacks$executeElapsed()) {
+  if (later::run_now() || timerCallbacks$executeElapsed()) {
     for (shinysession in appsByToken$values()) {
       shinysession$manageHiddenOutputs()
     }

@@ -26,6 +26,7 @@ createSessionProxy <- function(parentSession, ...) {
 
 #' @export
 `$<-.session_proxy` <- function(x, name, value) {
+  if (identical(x[[name]], value)) return(x)
   stop("Attempted to assign value on session proxy.")
 }
 

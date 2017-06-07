@@ -87,6 +87,7 @@ URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate: 
     'app.R'
+    'async.R'
     'bookmark-state-local.R'
     'stack.R'
     'bookmark-state.R'

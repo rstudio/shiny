@@ -29,8 +29,6 @@ exports.renderContent = function(el, content, where="replace") {
     exports.unbindAll(el);
   }
 
-  exports.unbindAll(el);
-
   var html;
   var dependencies = [];
   if (content === null) {

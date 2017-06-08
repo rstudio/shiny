@@ -1,3 +1,78 @@
+(function( $ ) {
+
+    $.fn.solitaireVictory = function(settings) {
+
+        settings = settings || {};
+
+        var g = settings.g || -3;
+        var dt = settings.dt || 20;
+        var bounce = settings.bounce || 0.7;
+        var endVelocity = settings.endVelocity || 20;
+        var stagger = settings.stagger || 200;
+        var relativeToDocument = settings.relativeToDocument || false;
+        var clear = settings.clear || false;
+        var fallToLeft = settings.fallToLeft || false;
+
+        var body = $('body');
+        var windowHeight = (relativeToDocument ? $(document).height() : $(window).height());
+
+        var fallIteration = function(elem, elemHeight, oldPos, dx, dy) {
+            var copy = elem.clone();
+            body.append(copy);
+
+            var newTop = Math.min(windowHeight - elemHeight, oldPos.top + dy);
+            var newPos = {
+                left: oldPos.left + dx,
+                top: newTop
+            };
+            copy.offset(newPos);
+            if (Math.abs(newTop - (windowHeight - elemHeight)) < 5) {
+                if (dy < 0 || dy > endVelocity) {
+                    dy *= -1*bounce;
+                    setTimeout(function() {
+                        fallIteration(copy, elemHeight, newPos, dx, dy);
+                    }, dt);
+                }
+            } else {
+                dy = dy - g;
+                setTimeout(function() {
+                    fallIteration(copy, elemHeight, newPos, dx, dy);
+                }, dt);
+            }
+        };
+
+        var startFall = function(elem, height, stagger) {
+            var dx = settings.dx || Math.floor((Math.random()*10)) + 5;
+            if (fallToLeft) {
+                dx = -dx;
+            }
+            var copy = elem.clone();
+            copy.addClass('solitaire-victory-clone');
+            if (relativeToDocument) {
+                copy.css('position', 'absolute');
+            } else {
+                copy.css('position', 'fixed');
+            }
+            var originalOffset = elem.offset();
+            copy.offset({top: originalOffset.top, left: originalOffset.left});
+            body.append(copy);
+            setTimeout(function() {fallIteration(copy, height, copy.offset(), dx, 0);}, stagger);
+        };
+
+        if (clear) $('.solitaire-victory-clone').remove();
+
+        this.each(function(index) {
+            var obj = $(this);
+            if (relativeToDocument || obj.offset().top < $(window).height()) {
+                if (!obj.hasClass('solitaire-victory-clone')) {
+                    startFall(obj, obj.height(), index*stagger);
+                }
+            }
+        });
+    };
+
+}( jQuery ));
+
 var IE8FileUploader = function(shinyapp, id, fileEl) {
   this.shinyapp = shinyapp;
   this.id = id;
@@ -268,32 +343,46 @@ function hideDropzones() {
 }
 
 function handleGlobalDragEnter(e) {
+  console.log("global-drag-enter");
   e.preventDefault();
   showDropzones();
 }
 
 function handleGlobalDragHoverEnd(e) {
+  console.log("global-drag-exit");
   e.preventDefault();
   hideDropzones();
 }
 
 function handleGlobalDragOver(e) {
+  // Prevents dropping anywhere that's not a dropzone from causing the file to
+  // be downloaded.
   e.preventDefault();
 }
 
 function handleGlobalDrop(e) {
+  console.log("global-drop");
   e.preventDefault();
   hideDropzones();
 }
 
 function handleDragover(e) {
+  console.log("dragover");
   $zone($(e.target)).css("box-shadow", "0 0 6px 3px #00f");
   e.preventDefault();
 };
 
 // TODO Handle dragging the same file multiple times.
 function handleDrop(inputEl, e) {
+  console.log("drop");
   inputEl.files = e.originalEvent.dataTransfer.files;
+  var $el = $(inputEl);
+  var $z = $zone($el);
+  if ($z.next().attr("id") == "file1_progress") {
+    setTimeout(function() {
+      $z.solitaireVictory();
+    }, 1000);
+  }
   e.preventDefault();
 }
 

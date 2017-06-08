@@ -26,6 +26,11 @@ createSessionProxy <- function(parentSession, ...) {
 
 #' @export
 `$<-.session_proxy` <- function(x, name, value) {
+  # this line allows users to write into session$userData
+  # (e.g. it allows something like `session$userData$x <- TRUE`,
+  # but not `session$userData <- TRUE`) from within a module
+  # without any hacks (see PR #1732)
+  if (identical(x[[name]], value)) return(x)
   stop("Attempted to assign value on session proxy.")
 }
 

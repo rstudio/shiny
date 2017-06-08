@@ -9,15 +9,17 @@ shiny 1.0.3.9000
 
 ### Minor new features and improvements
 
-Addressed [#1501](https://github.com/rstudio/shiny/issues/1501): The `fileInput` control now retains uploaded file extensions on the server. This fixes [readxl](https://github.com/tidyverse/readxl)'s `readxl::read_excel` and other functions that must recognize a file's extension in order to work. ([#1706](https://github.com/rstudio/shiny/pull/1706))
+* Addressed [#1501](https://github.com/rstudio/shiny/issues/1501): The `fileInput` control now retains uploaded file extensions on the server. This fixes [readxl](https://github.com/tidyverse/readxl)'s `readxl::read_excel` and other functions that must recognize a file's extension in order to work. ([#1706](https://github.com/rstudio/shiny/pull/1706))
 
-For `conditionalPanel`s, Shiny now gives more informative messages if there are errors evaluating or parsing the JavaScript conditional expression. ([#1727](https://github.com/rstudio/shiny/pull/1727))
+* For `conditionalPanel`s, Shiny now gives more informative messages if there are errors evaluating or parsing the JavaScript conditional expression. ([#1727](https://github.com/rstudio/shiny/pull/1727))
 
 ### Bug fixes
 
-Fixed [#1701](https://github.com/rstudio/shiny/issues/1701): There was a partial argument match in the `generateOptions` function. ([#1702](https://github.com/rstudio/shiny/pull/1702))
+* Fixed [#1546](https://github.com/rstudio/shiny/issues/1546): make it possible (without any hacks) to write arbitrary data into a module's `session$userData` (which is exactly the same environment as the parent's `session$userData`). To be clear, it allows something like `session$userData$x <- TRUE`, but not something like `session$userData <- TRUE` (that is not allowed in any context, whether you're in the main app, or in a module) ([#1732](https://github.com/rstudio/shiny/pull/1732)).
 
-Fixed [#1710](https://github.com/rstudio/shiny/issues/1710): `ReactiveVal` objects did not have separate dependents. ([#1712](https://github.com/rstudio/shiny/pull/1712))
+* Fixed [#1701](https://github.com/rstudio/shiny/issues/1701): There was a partial argument match in the `generateOptions` function. ([#1702](https://github.com/rstudio/shiny/pull/1702))
+
+* Fixed [#1710](https://github.com/rstudio/shiny/issues/1710): `ReactiveVal` objects did not have separate dependents. ([#1712](https://github.com/rstudio/shiny/pull/1712))
 
 ### Library updates
 

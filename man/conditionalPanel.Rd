@@ -4,13 +4,16 @@
 \alias{conditionalPanel}
 \title{Conditional Panel}
 \usage{
-conditionalPanel(condition, ...)
+conditionalPanel(condition, ..., ns = NS(NULL))
 }
 \arguments{
 \item{condition}{A JavaScript expression that will be evaluated repeatedly to
 determine whether the panel should be displayed.}
 
 \item{...}{Elements to include in the panel.}
+
+\item{ns}{The \code{\link[=NS]{namespace}} object of the current module, if
+any.}
 }
 \description{
 Creates a panel that is visible or not, depending on the value of a

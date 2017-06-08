@@ -502,6 +502,8 @@ mainPanel <- function(..., width = 8) {
 #'
 #' @param condition A JavaScript expression that will be evaluated repeatedly to
 #'   determine whether the panel should be displayed.
+#' @param ns The \code{\link[=NS]{namespace}} object of the current module, if
+#'   any.
 #' @param ... Elements to include in the panel.
 #'
 #' @note You are not recommended to use special JavaScript characters such as a
@@ -534,8 +536,8 @@ mainPanel <- function(..., width = 8) {
 #'    )
 #' )
 #' @export
-conditionalPanel <- function(condition, ...) {
-  div('data-display-if'=condition, ...)
+conditionalPanel <- function(condition, ..., ns = NS(NULL)) {
+  div('data-display-if'=condition, 'data-ns-prefix'=ns(""), ...)
 }
 
 #' Create a help text element

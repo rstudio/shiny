@@ -375,6 +375,18 @@ var ShinyApp = function() {
     }
   };
 
+
+  // Narrows a scopeComponent -- an input or output object -- to one constrained
+  // by nsPrefix. Returns a new object with keys removed and renamed as
+  // necessary.
+  function narrowScope(scopeComponent, nsPrefix) {
+    return mapKeys(pickBy(scopeComponent, function(val, key) {
+      return key.startsWith(nsPrefix);
+    }), function(key) {
+      return key.substring(nsPrefix.length);
+    });
+  }
+
   this.$updateConditionals = function() {
     $(document).trigger({
       type: 'shiny:conditional'
@@ -404,7 +416,15 @@ var ShinyApp = function() {
         el.data('data-display-if-func', condFunc);
       }
 
-      var show = condFunc(scope);
+      // The data-ns-prefix attribute is always present, but might be empty. If
+      // it's empty, no keys are removed or renamed by narrowScope.
+      var nsPrefix = el.attr('data-ns-prefix');
+      var nsScope = {
+        input: narrowScope(scope.input, nsPrefix),
+        output: narrowScope(scope.output, nsPrefix)
+      };
+
+      var show = condFunc(nsScope);
       var showing = el.css("display") !== "none";
       if (show !== showing) {
         if (show) {

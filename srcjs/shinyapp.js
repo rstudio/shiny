@@ -382,7 +382,7 @@ var ShinyApp = function() {
   function narrowScope(scopeComponent, nsPrefix) {
     return mapKeys(pickBy(scopeComponent, function(val, key) {
       return key.startsWith(nsPrefix);
-    }), function(key) {
+    }), function(val, key, obj) {
       return key.substring(nsPrefix.length);
     });
   }

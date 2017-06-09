@@ -3282,8 +3282,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       exports.unbindAll(el);
     }
 
-    exports.unbindAll(el);
-
     var html;
     var dependencies = [];
     if (content === null) {

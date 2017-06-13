@@ -415,13 +415,11 @@ var ShinyApp = function() {
         el.data('data-display-if-func', condFunc);
       }
 
-      // The data-ns-prefix attribute is always present, but might be empty. If
-      // it's empty, no keys are removed or renamed by narrowScope.
       var nsPrefix = el.attr('data-ns-prefix');
-      var nsScope = {
+      var nsScope = nsPrefix ? {
         input: narrowScope(scope.input, nsPrefix),
         output: narrowScope(scope.output, nsPrefix)
-      };
+      } : scope;
 
       var show = condFunc(nsScope);
       var showing = el.css("display") !== "none";

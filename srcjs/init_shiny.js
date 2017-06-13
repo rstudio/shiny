@@ -273,7 +273,7 @@ function initShiny() {
   // initialValues object for the duration of the session, and the opts may
   // have a reference to the DOM element, which would prevent it from being
   // GC'd.
-  var initialValues = mapValues(_bindAll(document), x => x.value);
+  var initialValues = _.mapValues(_bindAll(document), x => x.value);
 
   // The server needs to know the size of each image and plot output element,
   // in case it is auto-sizing

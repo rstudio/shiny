@@ -380,11 +380,10 @@ var ShinyApp = function() {
   // by nsPrefix. Returns a new object with keys removed and renamed as
   // necessary.
   function narrowScope(scopeComponent, nsPrefix) {
-    return mapKeys(pickBy(scopeComponent, function(val, key) {
-      return key.startsWith(nsPrefix);
-    }), function(val, key, obj) {
-      return key.substring(nsPrefix.length);
-    });
+    return _(scopeComponent)
+      .pickBy(({}, k) => k.startsWith(nsPrefix))
+      .mapKeys(({}, k, {}) => k.substring(nsPrefix.length))
+      .value();
   }
 
   this.$updateConditionals = function() {

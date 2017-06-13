@@ -2,6 +2,7 @@
 #'
 #' @template update-input
 #' @param value The value to set for the input object.
+#' @param placeholder The placeholder to set for the input object.
 #'
 #' @seealso \code{\link{textInput}}
 #'
@@ -34,8 +35,8 @@
 #' shinyApp(ui, server)
 #' }
 #' @export
-updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
-  message <- dropNulls(list(label=label, value=value))
+updateTextInput <- function(session, inputId, label = NULL, value = NULL, placeholder = NULL) {
+  message <- dropNulls(list(label=label, value=value, placeholder=placeholder))
   session$sendInputMessage(inputId, message)
 }
 
@@ -43,6 +44,7 @@ updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
 #'
 #' @template update-input
 #' @param value The value to set for the input object.
+#' @param placeholder The placeholder to set for the input object.
 #'
 #' @seealso \code{\link{textAreaInput}}
 #'

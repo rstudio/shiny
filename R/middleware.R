@@ -357,6 +357,10 @@ HandlerManager <- R6Class("HandlerManager",
         if (inherits(response, "httpResponse")) {
           headers <- as.list(response$headers)
           headers$'Content-Type' <- response$content_type
+          if(Sys.getenv("ALLOW_ORIGIN") != "") {
+            origin <- Sys.getenv("ALLOW_ORIGIN")
+            headers$'Access-Control-Allow-Origin' <- origin
+          }
 
           response <- filter(req, response)
           if (head_request) {

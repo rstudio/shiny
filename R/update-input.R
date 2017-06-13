@@ -43,8 +43,7 @@ updateTextInput <- function(session, inputId, label = NULL, value = NULL, placeh
 #' Change the value of a textarea input on the client
 #'
 #' @template update-input
-#' @param value The value to set for the input object.
-#' @param placeholder The placeholder to set for the input object.
+#' @inheritParams updateTextInput
 #'
 #' @seealso \code{\link{textAreaInput}}
 #'

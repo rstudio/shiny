@@ -71,7 +71,8 @@ Imports:
     digest,
     htmltools (>= 0.3.5),
     R6 (>= 2.0),
-    sourcetools
+    sourcetools,
+    tools
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

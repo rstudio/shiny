@@ -21,6 +21,8 @@ shiny 1.0.3.9000
 
 * Fixed [#1710](https://github.com/rstudio/shiny/issues/1710): `ReactiveVal` objects did not have separate dependents. ([#1712](https://github.com/rstudio/shiny/pull/1712))
 
+* Fixed [#1438](https://github.com/rstudio/shiny/issues/1438): `unbindAll()` should not be called when inserting content with `insertUI()`. A previous fix ([#1449](https://github.com/rstudio/shiny/pull/1449)) did not work correctly. ([#1736](https://github.com/rstudio/shiny/pull/1736))
+
 ### Library updates
 
 

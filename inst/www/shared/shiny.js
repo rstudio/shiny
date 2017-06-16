@@ -3696,15 +3696,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
       if (data.hasOwnProperty('label')) $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
-      if (data.hasOwnProperty('placeholder')) el.placeholder = data.placeholder;
-
       $(el).trigger('change');
     },
     getState: function getState(el) {
       return {
         label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
-        value: el.value,
-        placeholder: el.placeholder
+        value: el.value
       };
     },
     getRatePolicy: function getRatePolicy() {

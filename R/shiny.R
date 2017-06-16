@@ -1192,6 +1192,13 @@ ShinySession <- R6Class(
       })
 
       if (!hasPendingUpdates()) {
+        # Normally, if there are no updates, simply return without sending
+        # anything to the client. But if we are in test mode, we still want to
+        # send a message with blank `values`, so that the client knows that
+        # any changed inputs have been received by the server and processed.
+        if (isTRUE(private$testMode)) {
+          private$sendMessage( values = list() )
+        }
         return(invisible())
       }
 

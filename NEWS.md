@@ -15,6 +15,8 @@ shiny 1.0.3.9000
 
 * For `conditionalPanel`s, Shiny now gives more informative messages if there are errors evaluating or parsing the JavaScript conditional expression. ([#1727](https://github.com/rstudio/shiny/pull/1727))
 
+* With `options(shiny.testmode=TRUE)`, the Shiny process will send a message to the client in response to a changed input, even if no outputs have changed. This helps to streamline testing using the shinytest package. ([#1747](https://github.com/rstudio/shiny/pull/1747)
+
 ### Bug fixes
 
 * Fixed [#1546](https://github.com/rstudio/shiny/issues/1546): make it possible (without any hacks) to write arbitrary data into a module's `session$userData` (which is exactly the same environment as the parent's `session$userData`). To be clear, it allows something like `session$userData$x <- TRUE`, but not something like `session$userData <- TRUE` (that is not allowed in any context, whether you're in the main app, or in a module) ([#1732](https://github.com/rstudio/shiny/pull/1732)).

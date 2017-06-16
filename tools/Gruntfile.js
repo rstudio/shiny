@@ -1,55 +1,7 @@
 module.exports = function(grunt) {
 
   var instdir = '../inst/';
-  var js_srcdir = '../srcjs/';
-  var bundled_dir = '../bundled/';
-
-  var sources = [
-    'utils.js',
-    'browser.js',
-    'input_rate.js',
-    'shinyapp.js',
-    'notifications.js',
-    'modal.js',
-    'file_processor.js',
-    'binding_registry.js',
-    'output_binding.js',
-    'output_binding_text.js',
-    'output_binding_image.js',
-    'output_binding_html.js',
-    'output_binding_downloadlink.js',
-    'output_binding_datatable.js',
-    'output_binding_adapter.js',
-    'input_binding.js',
-    'input_binding_text.js',
-    'input_binding_textarea.js',
-    'input_binding_password.js',
-    'input_binding_number.js',
-    'input_binding_checkbox.js',
-    'input_binding_slider.js',
-    'input_binding_date.js',
-    'input_binding_daterange.js',
-    'input_binding_select.js',
-    'input_binding_radio.js',
-    'input_binding_checkboxgroup.js',
-    'input_binding_actionbutton.js',
-    'input_binding_tabinput.js',
-    'input_binding_fileinput.js',
-    'init_shiny.js',
-    'reactlog.js'
-  ].map(src => js_srcdir + src);
-
-  var preamble = [js_srcdir + '_start.js'];
-  var epilogue = [js_srcdir + '_end.js'];
-
-  var lodash = [
-    // Disables ESLint
-    bundled_dir + 'lodash_preamble.js',
-    bundled_dir + 'lodash.custom.js',
-    // Re-enables ESLint and ensures Lodash is loaded only within the Shiny
-    // closure.
-    bundled_dir + 'lodash_epilogue.js'
-  ];
+  var js_srcdir = '../srcjs/'
 
   gruntConfig = {
     pkg: pkgInfo(),
@@ -77,14 +29,49 @@ module.exports = function(grunt) {
         sourceMap: true
       },
       shiny: {
-        src: preamble.concat(lodash, sources, epilogue),
+        src: [
+          js_srcdir + '_start.js',
+          js_srcdir + 'utils.js',
+          js_srcdir + 'browser.js',
+          js_srcdir + 'input_rate.js',
+          js_srcdir + 'shinyapp.js',
+          js_srcdir + 'notifications.js',
+          js_srcdir + 'modal.js',
+          js_srcdir + 'file_processor.js',
+          js_srcdir + 'binding_registry.js',
+          js_srcdir + 'output_binding.js',
+          js_srcdir + 'output_binding_text.js',
+          js_srcdir + 'output_binding_image.js',
+          js_srcdir + 'output_binding_html.js',
+          js_srcdir + 'output_binding_downloadlink.js',
+          js_srcdir + 'output_binding_datatable.js',
+          js_srcdir + 'output_binding_adapter.js',
+          js_srcdir + 'input_binding.js',
+          js_srcdir + 'input_binding_text.js',
+          js_srcdir + 'input_binding_textarea.js',
+          js_srcdir + 'input_binding_password.js',
+          js_srcdir + 'input_binding_number.js',
+          js_srcdir + 'input_binding_checkbox.js',
+          js_srcdir + 'input_binding_slider.js',
+          js_srcdir + 'input_binding_date.js',
+          js_srcdir + 'input_binding_daterange.js',
+          js_srcdir + 'input_binding_select.js',
+          js_srcdir + 'input_binding_radio.js',
+          js_srcdir + 'input_binding_checkboxgroup.js',
+          js_srcdir + 'input_binding_actionbutton.js',
+          js_srcdir + 'input_binding_tabinput.js',
+          js_srcdir + 'input_binding_fileinput.js',
+          js_srcdir + 'init_shiny.js',
+          js_srcdir + 'reactlog.js',
+          js_srcdir + '_end.js'
+        ],
         // The temp_concat/ directory would have gone under /srcjs/, but the
         // Babel Grunt plugin has trouble finding presets if it operates on a
         // file that's not under the current directory. So we'll put it under
         // ./
         dest: './temp_concat/shiny.js',
         nonull: true
-      }
+      },
     },
 
     babel: {

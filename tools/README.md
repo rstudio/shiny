@@ -96,12 +96,3 @@ To update the version of babel-polyfill:
 * Run `yarn add --dev babel-polyfill --exact`.
 * Edit R/shinyui.R. The `renderPage` function has an `htmlDependency` for
   `babel-polyfill`. Update this to the new version number.
-
-## lodash
-Currently we use a custom build of the [Lodash](https://lodash.com/) utility
-library accessible within the "Shiny closure". Our Lodash build includes only
-certain functions that we have specified in order to save space. This custom
-build is stored in `bundled/lodash.custom.js`. New custom builds can be created
-by installing `lodash-cli` via `npm install lodash-cli` and then running a
-command similar to the one in the comment at the top of
-`bundled/lodash.custom.js`.

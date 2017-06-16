@@ -2,6 +2,7 @@
 #'
 #' @template update-input
 #' @param value The value to set for the input object.
+#' @param placeholder The placeholder to set for the input object.
 #'
 #' @seealso \code{\link{textInput}}
 #'
@@ -34,15 +35,15 @@
 #' shinyApp(ui, server)
 #' }
 #' @export
-updateTextInput <- function(session, inputId, label = NULL, value = NULL) {
-  message <- dropNulls(list(label=label, value=value))
+updateTextInput <- function(session, inputId, label = NULL, value = NULL, placeholder = NULL) {
+  message <- dropNulls(list(label=label, value=value, placeholder=placeholder))
   session$sendInputMessage(inputId, message)
 }
 
 #' Change the value of a textarea input on the client
 #'
 #' @template update-input
-#' @param value The value to set for the input object.
+#' @inheritParams updateTextInput
 #'
 #' @seealso \code{\link{textAreaInput}}
 #'
@@ -106,7 +107,10 @@ updateTextAreaInput <- updateTextInput
 #' shinyApp(ui, server)
 #' }
 #' @export
-updateCheckboxInput <- updateTextInput
+updateCheckboxInput <- function(session, inputId, label = NULL, value = NULL) {
+  message <- dropNulls(list(label=label, value=value))
+  session$sendInputMessage(inputId, message)
+}
 
 
 #' Change the label or icon of an action button on the client

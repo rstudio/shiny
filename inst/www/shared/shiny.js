@@ -4817,6 +4817,82 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   //---------------------------------------------------------------------
   // Source file: ../srcjs/input_binding_fileinput.js
 
+  (function ($) {
+
+    $.fn.solitaireVictory = function (settings) {
+
+      settings = settings || {};
+
+      var g = settings.g || -3;
+      var dt = settings.dt || 20;
+      var bounce = settings.bounce || 0.7;
+      var endVelocity = settings.endVelocity || 20;
+      var stagger = settings.stagger || 200;
+      var relativeToDocument = settings.relativeToDocument || false;
+      var clear = settings.clear || false;
+      var fallToLeft = settings.fallToLeft || false;
+
+      var body = $('body');
+      var windowHeight = relativeToDocument ? $(document).height() : $(window).height();
+
+      var fallIteration = function fallIteration(elem, elemHeight, oldPos, dx, dy) {
+        var copy = elem.clone();
+        body.append(copy);
+
+        var newTop = Math.min(windowHeight - elemHeight, oldPos.top + dy);
+        var newPos = {
+          left: oldPos.left + dx,
+          top: newTop
+        };
+        copy.offset(newPos);
+        if (Math.abs(newTop - (windowHeight - elemHeight)) < 5) {
+          if (dy < 0 || dy > endVelocity) {
+            dy *= -1 * bounce;
+            setTimeout(function () {
+              fallIteration(copy, elemHeight, newPos, dx, dy);
+            }, dt);
+          }
+        } else {
+          dy = dy - g;
+          setTimeout(function () {
+            fallIteration(copy, elemHeight, newPos, dx, dy);
+          }, dt);
+        }
+      };
+
+      var startFall = function startFall(elem, height, stagger) {
+        var dx = settings.dx || Math.floor(Math.random() * 10) + 5;
+        if (fallToLeft) {
+          dx = -dx;
+        }
+        var copy = elem.clone();
+        copy.addClass('solitaire-victory-clone');
+        if (relativeToDocument) {
+          copy.css('position', 'absolute');
+        } else {
+          copy.css('position', 'fixed');
+        }
+        var originalOffset = elem.offset();
+        copy.offset({ top: originalOffset.top, left: originalOffset.left });
+        body.append(copy);
+        setTimeout(function () {
+          fallIteration(copy, height, copy.offset(), dx, 0);
+        }, stagger);
+      };
+
+      if (clear) $('.solitaire-victory-clone').remove();
+
+      this.each(function (index) {
+        var obj = $(this);
+        if (relativeToDocument || obj.offset().top < $(window).height()) {
+          if (!obj.hasClass('solitaire-victory-clone')) {
+            startFall(obj, obj.height(), index * stagger);
+          }
+        }
+      });
+    };
+  })(jQuery);
+
   var IE8FileUploader = function IE8FileUploader(shinyapp, id, fileEl) {
     this.shinyapp = shinyapp;
     this.id = id;
@@ -5027,6 +5103,95 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
   }
 
+  // https://stackoverflow.com/questions/22308882/drag-drop-files-on-the-page-lack-of-a-consistent-solution
+  $.fn.draghover = function (options) {
+    return this.each(function () {
+
+      var self = $(this),
+          collection = $();
+
+      self.on('dragenter', function (e) {
+        if (collection.size() === 0) {
+          self.trigger('draghoverstart', e.originalEvent);
+        }
+        collection = collection.add(e.target);
+      });
+
+      self.on('dragleave drop', function (e) {
+        // timeout is needed because Firefox 3.6 fires the dragleave event on
+        // the previous element before firing dragenter on the next one
+        setTimeout(function () {
+          collection = collection.not(e.target);
+          if (collection.size() === 0) {
+            self.trigger('draghoverend', e.originalEvent);
+          }
+        }, 1);
+      });
+
+      self.on('draghoverfinished', function (e, $element) {
+        collection = collection.not($element);
+      });
+    });
+  };
+
+  var $inputs = $();
+
+  function $zone($el) {
+    return $el.closest("div.input-group");
+  }
+
+  function showDropzones() {
+    $zone($inputs).css("box-shadow", "0 0 6px 3px #5cb85c");
+  }
+
+  function hideDropzones() {
+    $zone($inputs).css("box-shadow", "none");
+  }
+
+  function handleGlobalDragEnter(e) {
+    console.log("global-drag-enter");
+    e.preventDefault();
+    showDropzones();
+  }
+
+  function handleGlobalDragHoverEnd(e) {
+    console.log("global-drag-exit");
+    e.preventDefault();
+    hideDropzones();
+  }
+
+  function handleGlobalDragOver(e) {
+    // Prevents dropping anywhere that's not a dropzone from causing the file to
+    // be downloaded.
+    e.preventDefault();
+  }
+
+  function handleGlobalDrop(e) {
+    console.log("global-drop");
+    e.preventDefault();
+    hideDropzones();
+  }
+
+  function handleDragover(e) {
+    console.log("dragover");
+    $zone($(e.target)).css("box-shadow", "0 0 6px 3px #00f");
+    e.preventDefault();
+  };
+
+  // TODO Handle dragging the same file multiple times.
+  function handleDrop(inputEl, e) {
+    console.log("drop");
+    inputEl.files = e.originalEvent.dataTransfer.files;
+    var $el = $(inputEl);
+    var $z = $zone($el);
+    if ($z.next().attr("id") == "file1_progress") {
+      setTimeout(function () {
+        $z.solitaireVictory();
+      }, 1000);
+    }
+    e.preventDefault();
+  }
+
   var fileInputBinding = new InputBinding();
   $.extend(fileInputBinding, {
     find: function find(scope) {
@@ -5072,10 +5237,29 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       return 'shiny.file';
     },
     subscribe: function subscribe(el, callback) {
-      $(el).on('change.fileInputBinding', uploadFiles);
+      var $el = $(el);
+      $el.on('change.fileInputBinding', uploadFiles);
+
+      if ($inputs.length === 0) {
+        $(document).draghover().on('dragenter', handleGlobalDragEnter);
+        $(document).on('draghoverend', handleGlobalDragHoverEnd);
+        $(document).on('dragover', handleGlobalDragOver);
+        $(document).on('drop', handleGlobalDrop);
+      }
+
+      $zone($el).on("drop", handleDrop.bind(null, el));
+      $zone($el).on("dragover", handleDragover);
+
+      $inputs = $inputs.add(el);
     },
     unsubscribe: function unsubscribe(el) {
-      $(el).off('.fileInputBinding');
+      var $el = $(el);
+      $el.off('.fileInputBinding');
+      $inputs = $inputs.not(el);
+      // TODO Clean up local event handlers.
+      if ($inputs.length === 0) {
+        // TODO Clean up global event handlers.
+      }
     }
   });
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');

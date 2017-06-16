@@ -253,8 +253,3 @@ function toPairs(obj) {
   return Object.keys(obj).reduce((arr, k) => arr.concat([[k, obj[k]]]), []);
 }
 
-// Assigns keyValuePair to obj and returns the mutated obj.
-function assignPair(obj, keyValuePair) {
-  let [k, v] = keyValuePair;
-  return Object.assign(obj, {[k]: v});
-}

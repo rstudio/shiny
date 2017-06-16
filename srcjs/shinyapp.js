@@ -382,8 +382,8 @@ var ShinyApp = function() {
   function narrowScope(scopeComponent, nsPrefix) {
     return toPairs(scopeComponent)
       .filter(([k, {}]) => k.startsWith(nsPrefix))
-      .map(([k, v]) => [k.substring(nsPrefix.length), v])
-      .reduce(assignPair, {});
+      .map(([k, v]) => ({[k.substring(nsPrefix.length)]: v}))
+      .reduce((obj, pair) => Object.assign(obj, pair), {});
   }
 
   this.$updateConditionals = function() {

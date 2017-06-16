@@ -4,9 +4,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("Cannot destructure undefined"); }
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("Cannot destructure undefined"); }
 
 //---------------------------------------------------------------------
 // Source file: ../srcjs/_start.js
@@ -259,16 +259,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     return Object.keys(obj).reduce(function (arr, k) {
       return arr.concat([[k, obj[k]]]);
     }, []);
-  }
-
-  // Assigns keyValuePair to obj and returns the mutated obj.
-  function assignPair(obj, keyValuePair) {
-    var _keyValuePair = _slicedToArray(keyValuePair, 2);
-
-    var k = _keyValuePair[0];
-    var v = _keyValuePair[1];
-
-    return Object.assign(obj, _defineProperty({}, k, v));
   }
 
   //---------------------------------------------------------------------
@@ -1052,8 +1042,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         var k = _ref4[0];
         var v = _ref4[1];
-        return [k.substring(nsPrefix.length), v];
-      }).reduce(assignPair, {});
+        return _defineProperty({}, k.substring(nsPrefix.length), v);
+      }).reduce(function (obj, pair) {
+        return Object.assign(obj, pair);
+      }, {});
     }
 
     this.$updateConditionals = function () {
@@ -1518,10 +1510,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
     this.getTestSnapshotBaseUrl = function () {
-      var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref5$fullUrl = _ref5.fullUrl;
-      var fullUrl = _ref5$fullUrl === undefined ? true : _ref5$fullUrl;
+      var _ref6$fullUrl = _ref6.fullUrl;
+      var fullUrl = _ref6$fullUrl === undefined ? true : _ref6$fullUrl;
 
       var loc = window.location;
       var url = "";
@@ -1590,22 +1582,22 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     var fadeDuration = 250;
 
     function show() {
-      var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref6$html = _ref6.html;
-      var html = _ref6$html === undefined ? '' : _ref6$html;
-      var _ref6$action = _ref6.action;
-      var action = _ref6$action === undefined ? '' : _ref6$action;
-      var _ref6$deps = _ref6.deps;
-      var deps = _ref6$deps === undefined ? [] : _ref6$deps;
-      var _ref6$duration = _ref6.duration;
-      var duration = _ref6$duration === undefined ? 5000 : _ref6$duration;
-      var _ref6$id = _ref6.id;
-      var id = _ref6$id === undefined ? null : _ref6$id;
-      var _ref6$closeButton = _ref6.closeButton;
-      var closeButton = _ref6$closeButton === undefined ? true : _ref6$closeButton;
-      var _ref6$type = _ref6.type;
-      var type = _ref6$type === undefined ? null : _ref6$type;
+      var _ref7$html = _ref7.html;
+      var html = _ref7$html === undefined ? '' : _ref7$html;
+      var _ref7$action = _ref7.action;
+      var action = _ref7$action === undefined ? '' : _ref7$action;
+      var _ref7$deps = _ref7.deps;
+      var deps = _ref7$deps === undefined ? [] : _ref7$deps;
+      var _ref7$duration = _ref7.duration;
+      var duration = _ref7$duration === undefined ? 5000 : _ref7$duration;
+      var _ref7$id = _ref7.id;
+      var id = _ref7$id === undefined ? null : _ref7$id;
+      var _ref7$closeButton = _ref7.closeButton;
+      var closeButton = _ref7$closeButton === undefined ? true : _ref7$closeButton;
+      var _ref7$type = _ref7.type;
+      var type = _ref7$type === undefined ? null : _ref7$type;
 
       if (!id) id = randomId();
 
@@ -1749,12 +1741,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref7$html = _ref7.html;
-      var html = _ref7$html === undefined ? '' : _ref7$html;
-      var _ref7$deps = _ref7.deps;
-      var deps = _ref7$deps === undefined ? [] : _ref7$deps;
+      var _ref8$html = _ref8.html;
+      var html = _ref8$html === undefined ? '' : _ref8$html;
+      var _ref8$deps = _ref8.deps;
+      var deps = _ref8$deps === undefined ? [] : _ref8$deps;
 
 
       // If there was an existing Bootstrap modal, then there will be a modal-

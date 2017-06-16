@@ -2,11 +2,7 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("Cannot destructure undefined"); }
 
 //---------------------------------------------------------------------
 // Source file: ../srcjs/_start.js
@@ -251,14 +247,6 @@ function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("
       if (obj.hasOwnProperty(key)) newObj[key] = f(obj[key]);
     }
     return newObj;
-  }
-
-  // Creates an array of the entries in obj. Like the toPairs function from
-  // lodash.
-  function toPairs(obj) {
-    return Object.keys(obj).reduce(function (arr, k) {
-      return arr.concat([[k, obj[k]]]);
-    }, []);
   }
 
   //---------------------------------------------------------------------
@@ -1029,20 +1017,10 @@ function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("
     // by nsPrefix. Returns a new object with keys removed and renamed as
     // necessary.
     function narrowScope(scopeComponent, nsPrefix) {
-      return toPairs(scopeComponent).filter(function (_ref) {
-        var _ref2 = _slicedToArray(_ref, 2);
-
-        var k = _ref2[0];
-
-        _objectDestructuringEmpty(_ref2[1]);
-
+      return Object.keys(scopeComponent).filter(function (k) {
         return k.startsWith(nsPrefix);
-      }).map(function (_ref3) {
-        var _ref4 = _slicedToArray(_ref3, 2);
-
-        var k = _ref4[0];
-        var v = _ref4[1];
-        return _defineProperty({}, k.substring(nsPrefix.length), v);
+      }).map(function (k) {
+        return _defineProperty({}, k.substring(nsPrefix.length), scopeComponent[k]);
       }).reduce(function (obj, pair) {
         return Object.assign(obj, pair);
       }, {});
@@ -1510,10 +1488,10 @@ function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
     this.getTestSnapshotBaseUrl = function () {
-      var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref6$fullUrl = _ref6.fullUrl;
-      var fullUrl = _ref6$fullUrl === undefined ? true : _ref6$fullUrl;
+      var _ref2$fullUrl = _ref2.fullUrl;
+      var fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
 
       var loc = window.location;
       var url = "";
@@ -1582,22 +1560,22 @@ function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("
     var fadeDuration = 250;
 
     function show() {
-      var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref7$html = _ref7.html;
-      var html = _ref7$html === undefined ? '' : _ref7$html;
-      var _ref7$action = _ref7.action;
-      var action = _ref7$action === undefined ? '' : _ref7$action;
-      var _ref7$deps = _ref7.deps;
-      var deps = _ref7$deps === undefined ? [] : _ref7$deps;
-      var _ref7$duration = _ref7.duration;
-      var duration = _ref7$duration === undefined ? 5000 : _ref7$duration;
-      var _ref7$id = _ref7.id;
-      var id = _ref7$id === undefined ? null : _ref7$id;
-      var _ref7$closeButton = _ref7.closeButton;
-      var closeButton = _ref7$closeButton === undefined ? true : _ref7$closeButton;
-      var _ref7$type = _ref7.type;
-      var type = _ref7$type === undefined ? null : _ref7$type;
+      var _ref3$html = _ref3.html;
+      var html = _ref3$html === undefined ? '' : _ref3$html;
+      var _ref3$action = _ref3.action;
+      var action = _ref3$action === undefined ? '' : _ref3$action;
+      var _ref3$deps = _ref3.deps;
+      var deps = _ref3$deps === undefined ? [] : _ref3$deps;
+      var _ref3$duration = _ref3.duration;
+      var duration = _ref3$duration === undefined ? 5000 : _ref3$duration;
+      var _ref3$id = _ref3.id;
+      var id = _ref3$id === undefined ? null : _ref3$id;
+      var _ref3$closeButton = _ref3.closeButton;
+      var closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton;
+      var _ref3$type = _ref3.type;
+      var type = _ref3$type === undefined ? null : _ref3$type;
 
       if (!id) id = randomId();
 
@@ -1741,12 +1719,12 @@ function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref8$html = _ref8.html;
-      var html = _ref8$html === undefined ? '' : _ref8$html;
-      var _ref8$deps = _ref8.deps;
-      var deps = _ref8$deps === undefined ? [] : _ref8$deps;
+      var _ref4$html = _ref4.html;
+      var html = _ref4$html === undefined ? '' : _ref4$html;
+      var _ref4$deps = _ref4.deps;
+      var deps = _ref4$deps === undefined ? [] : _ref4$deps;
 
 
       // If there was an existing Bootstrap modal, then there will be a modal-

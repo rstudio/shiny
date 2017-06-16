@@ -2,6 +2,12 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("Cannot destructure undefined"); }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 //---------------------------------------------------------------------
 // Source file: ../srcjs/_start.js
 
@@ -245,6 +251,24 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if (obj.hasOwnProperty(key)) newObj[key] = f(obj[key]);
     }
     return newObj;
+  }
+
+  // Creates an array of the entries in obj. Like the toPairs function from
+  // lodash.
+  function toPairs(obj) {
+    return Object.keys(obj).reduce(function (arr, k) {
+      return arr.concat([[k, obj[k]]]);
+    }, []);
+  }
+
+  // Assigns keyValuePair to obj and returns the mutated obj.
+  function assignPair(obj, keyValuePair) {
+    var _keyValuePair = _slicedToArray(keyValuePair, 2);
+
+    var k = _keyValuePair[0];
+    var v = _keyValuePair[1];
+
+    return Object.assign(obj, _defineProperty({}, k, v));
   }
 
   //---------------------------------------------------------------------
@@ -1011,6 +1035,27 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
     };
 
+    // Narrows a scopeComponent -- an input or output object -- to one constrained
+    // by nsPrefix. Returns a new object with keys removed and renamed as
+    // necessary.
+    function narrowScope(scopeComponent, nsPrefix) {
+      return toPairs(scopeComponent).filter(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2);
+
+        var k = _ref2[0];
+
+        _objectDestructuringEmpty(_ref2[1]);
+
+        return k.startsWith(nsPrefix);
+      }).map(function (_ref3) {
+        var _ref4 = _slicedToArray(_ref3, 2);
+
+        var k = _ref4[0];
+        var v = _ref4[1];
+        return [k.substring(nsPrefix.length), v];
+      }).reduce(assignPair, {});
+    }
+
     this.$updateConditionals = function () {
       $(document).trigger({
         type: 'shiny:conditional'
@@ -1040,7 +1085,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
           el.data('data-display-if-func', condFunc);
         }
 
-        var show = condFunc(scope);
+        var nsPrefix = el.attr('data-ns-prefix');
+        var nsScope = nsPrefix ? {
+          input: narrowScope(scope.input, nsPrefix),
+          output: narrowScope(scope.output, nsPrefix)
+        } : scope;
+
+        var show = condFunc(nsScope);
         var showing = el.css("display") !== "none";
         if (show !== showing) {
           if (show) {
@@ -1467,10 +1518,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
     this.getTestSnapshotBaseUrl = function () {
-      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref5 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref$fullUrl = _ref.fullUrl;
-      var fullUrl = _ref$fullUrl === undefined ? true : _ref$fullUrl;
+      var _ref5$fullUrl = _ref5.fullUrl;
+      var fullUrl = _ref5$fullUrl === undefined ? true : _ref5$fullUrl;
 
       var loc = window.location;
       var url = "";
@@ -1539,22 +1590,22 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     var fadeDuration = 250;
 
     function show() {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref6 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref2$html = _ref2.html;
-      var html = _ref2$html === undefined ? '' : _ref2$html;
-      var _ref2$action = _ref2.action;
-      var action = _ref2$action === undefined ? '' : _ref2$action;
-      var _ref2$deps = _ref2.deps;
-      var deps = _ref2$deps === undefined ? [] : _ref2$deps;
-      var _ref2$duration = _ref2.duration;
-      var duration = _ref2$duration === undefined ? 5000 : _ref2$duration;
-      var _ref2$id = _ref2.id;
-      var id = _ref2$id === undefined ? null : _ref2$id;
-      var _ref2$closeButton = _ref2.closeButton;
-      var closeButton = _ref2$closeButton === undefined ? true : _ref2$closeButton;
-      var _ref2$type = _ref2.type;
-      var type = _ref2$type === undefined ? null : _ref2$type;
+      var _ref6$html = _ref6.html;
+      var html = _ref6$html === undefined ? '' : _ref6$html;
+      var _ref6$action = _ref6.action;
+      var action = _ref6$action === undefined ? '' : _ref6$action;
+      var _ref6$deps = _ref6.deps;
+      var deps = _ref6$deps === undefined ? [] : _ref6$deps;
+      var _ref6$duration = _ref6.duration;
+      var duration = _ref6$duration === undefined ? 5000 : _ref6$duration;
+      var _ref6$id = _ref6.id;
+      var id = _ref6$id === undefined ? null : _ref6$id;
+      var _ref6$closeButton = _ref6.closeButton;
+      var closeButton = _ref6$closeButton === undefined ? true : _ref6$closeButton;
+      var _ref6$type = _ref6.type;
+      var type = _ref6$type === undefined ? null : _ref6$type;
 
       if (!id) id = randomId();
 
@@ -1698,12 +1749,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref3$html = _ref3.html;
-      var html = _ref3$html === undefined ? '' : _ref3$html;
-      var _ref3$deps = _ref3.deps;
-      var deps = _ref3$deps === undefined ? [] : _ref3$deps;
+      var _ref7$html = _ref7.html;
+      var html = _ref7$html === undefined ? '' : _ref7$html;
+      var _ref7$deps = _ref7.deps;
+      var deps = _ref7$deps === undefined ? [] : _ref7$deps;
 
 
       // If there was an existing Bootstrap modal, then there will be a modal-

@@ -380,11 +380,10 @@ var ShinyApp = function() {
   // by nsPrefix. Returns a new object with keys removed and renamed as
   // necessary.
   function narrowScope(scopeComponent, nsPrefix) {
-    return mapKeys(pickBy(scopeComponent, function(val, key) {
-      return key.startsWith(nsPrefix);
-    }), function(val, key, obj) {
-      return key.substring(nsPrefix.length);
-    });
+    return toPairs(scopeComponent)
+      .filter(([k, {}]) => k.startsWith(nsPrefix))
+      .map(([k, v]) => [k.substring(nsPrefix.length), v])
+      .reduce(assignPair, {});
   }
 
   this.$updateConditionals = function() {
@@ -416,13 +415,11 @@ var ShinyApp = function() {
         el.data('data-display-if-func', condFunc);
       }
 
-      // The data-ns-prefix attribute is always present, but might be empty. If
-      // it's empty, no keys are removed or renamed by narrowScope.
       var nsPrefix = el.attr('data-ns-prefix');
-      var nsScope = {
+      var nsScope = nsPrefix ? {
         input: narrowScope(scope.input, nsPrefix),
         output: narrowScope(scope.output, nsPrefix)
-      };
+      } : scope;
 
       var show = condFunc(nsScope);
       var showing = el.css("display") !== "none";

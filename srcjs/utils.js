@@ -247,26 +247,14 @@ function mapValues(obj, f) {
   return newObj;
 }
 
-// Creates an object composed of the object properties predicate returns truthy
-// for. The predicate is invoked with two arguments: (value, key). Like the
-// pickBy function from lodash.
-function pickBy(obj, predicate) {
-  const newObj = {};
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key) && predicate(obj[key], key))
-      newObj[key] = obj[key];
-  }
-  return newObj;
+// Creates an array of the entries in obj. Like the toPairs function from
+// lodash.
+function toPairs(obj) {
+  return Object.keys(obj).reduce((arr, k) => arr.concat([[k, obj[k]]]), []);
 }
 
-// Maps a function over an object and its entries, and returns a new object with
-// entries keyed by the return value of the function. f takes three arguments:
-// (value, key, object). Like the mapKeys function from lodash.
-function mapKeys(obj, f) {
-  const newObj = {};
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key))
-      newObj[f(obj[key], key, obj)] = obj[key];
-  }
-  return newObj;
+// Assigns keyValuePair to obj and returns the mutated obj.
+function assignPair(obj, keyValuePair) {
+  let [k, v] = keyValuePair;
+  return Object.assign(obj, {[k]: v});
 }

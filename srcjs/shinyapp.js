@@ -380,9 +380,9 @@ var ShinyApp = function() {
   // by nsPrefix. Returns a new object with keys removed and renamed as
   // necessary.
   function narrowScope(scopeComponent, nsPrefix) {
-    return toPairs(scopeComponent)
-      .filter(([k, {}]) => k.startsWith(nsPrefix))
-      .map(([k, v]) => ({[k.substring(nsPrefix.length)]: v}))
+    return Object.keys(scopeComponent)
+      .filter(k => k.startsWith(nsPrefix))
+      .map(k => ({[k.substring(nsPrefix.length)]: scopeComponent[k]}))
       .reduce((obj, pair) => Object.assign(obj, pair), {});
   }
 

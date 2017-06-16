@@ -247,9 +247,3 @@ function mapValues(obj, f) {
   return newObj;
 }
 
-// Creates an array of the entries in obj. Like the toPairs function from
-// lodash.
-function toPairs(obj) {
-  return Object.keys(obj).reduce((arr, k) => arr.concat([[k, obj[k]]]), []);
-}
-

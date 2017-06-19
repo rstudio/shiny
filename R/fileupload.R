@@ -20,6 +20,18 @@
 # form upload, i.e. traditional HTTP POST-based file upload) doesn't work with
 # the websockets package's HTTP server at the moment.
 
+# @description Returns a file's extension, with a leading dot, if one can be
+#   found. A valid extension contains only alphanumeric characters. If there is
+#   no extension, or if it contains non-alphanumeric characters, an empty
+#   string is returned.
+# @param x character vector giving file paths.
+# @return The extension of \code{x}, with a leading dot, if one was found.
+#   Otherwise, an empty character vector.
+maybeGetExtension <- function(x) {
+  ext <- tools::file_ext(x)
+  ifelse(ext == "", ext, paste0(".", ext))
+}
+
 FileUploadOperation <- R6Class(
   'FileUploadOperation',
   portable = FALSE,
@@ -52,8 +64,9 @@ FileUploadOperation <- R6Class(
       .currentFileInfo <<- file
       .pendingFileInfos <<- tail(.pendingFileInfos, -1)
 
-      filename <- file.path(.dir, as.character(length(.files$name)))
-      row <- data.frame(name=file$name, size=file$size, type=file$type,
+      fileBasename <- basename(.currentFileInfo$name)
+      filename <- file.path(.dir, paste0(as.character(length(.files$name)), maybeGetExtension(fileBasename)))
+      row <- data.frame(name=fileBasename, size=file$size, type=file$type,
                         datapath=filename, stringsAsFactors=FALSE)
 
       if (length(.files$name) == 0)

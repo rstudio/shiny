@@ -1016,14 +1016,28 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // Narrows a scopeComponent -- an input or output object -- to one constrained
     // by nsPrefix. Returns a new object with keys removed and renamed as
     // necessary.
-    function narrowScope(scopeComponent, nsPrefix) {
+    function narrowScopeComponent(scopeComponent, nsPrefix) {
       return Object.keys(scopeComponent).filter(function (k) {
         return k.startsWith(nsPrefix);
       }).map(function (k) {
         return _defineProperty({}, k.substring(nsPrefix.length), scopeComponent[k]);
       }).reduce(function (obj, pair) {
-        return Object.assign(obj, pair);
+        return $.extend(obj, pair);
       }, {});
+    }
+
+    // Narrows a scope -- an object with input and output "subComponents" -- to
+    // one constrained by the nsPrefix string.
+    //
+    // If nsPrefix is null or empty, returns scope without modification.
+    //
+    // Otherwise, returns a new object with keys in subComponents removed and
+    // renamed as necessary.
+    function narrowScope(scope, nsPrefix) {
+      return nsPrefix ? {
+        input: narrowScopeComponent(scope.input, nsPrefix),
+        output: narrowScopeComponent(scope.output, nsPrefix)
+      } : scope;
     }
 
     this.$updateConditionals = function () {
@@ -1056,11 +1070,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
 
         var nsPrefix = el.attr('data-ns-prefix');
-        var nsScope = nsPrefix ? {
-          input: narrowScope(scope.input, nsPrefix),
-          output: narrowScope(scope.output, nsPrefix)
-        } : scope;
-
+        var nsScope = narrowScope(scope, nsPrefix);
         var show = condFunc(nsScope);
         var showing = el.css("display") !== "none";
         if (show !== showing) {

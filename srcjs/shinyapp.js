@@ -383,7 +383,8 @@ var ShinyApp = function() {
     return Object.keys(scopeComponent)
       .filter(k => k.startsWith(nsPrefix))
       .map(k => ({[k.substring(nsPrefix.length)]: scopeComponent[k]}))
-      .reduce((obj, pair) => Object.assign(obj, pair), {});
+      .reduce((obj, pair) => $.extend(obj, pair),
+              {});
   }
 
   this.$updateConditionals = function() {

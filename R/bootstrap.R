@@ -537,7 +537,7 @@ mainPanel <- function(..., width = 8) {
 #' )
 #' @export
 conditionalPanel <- function(condition, ..., ns = NS(NULL)) {
-  div('data-display-if'=condition, 'data-ns-prefix'=ns(""), ...)
+  div(`data-display-if`=condition, `data-ns-prefix`=ns(""), ...)
 }
 
 #' Create a help text element

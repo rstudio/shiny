@@ -4,7 +4,8 @@
 \alias{updateTextInput}
 \title{Change the value of a text input on the client}
 \usage{
-updateTextInput(session, inputId, label = NULL, value = NULL)
+updateTextInput(session, inputId, label = NULL, value = NULL,
+  placeholder = NULL)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -15,6 +16,8 @@ updateTextInput(session, inputId, label = NULL, value = NULL)
 \item{label}{The label to set for the input object.}
 
 \item{value}{The value to set for the input object.}
+
+\item{placeholder}{The placeholder to set for the input object.}
 }
 \description{
 Change the value of a text input on the client

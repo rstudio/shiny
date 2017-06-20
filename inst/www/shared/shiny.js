@@ -1018,7 +1018,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // necessary.
     function narrowScopeComponent(scopeComponent, nsPrefix) {
       return Object.keys(scopeComponent).filter(function (k) {
-        return k.startsWith(nsPrefix);
+        return k.indexOf(nsPrefix) === 0;
       }).map(function (k) {
         return _defineProperty({}, k.substring(nsPrefix.length), scopeComponent[k]);
       }).reduce(function (obj, pair) {

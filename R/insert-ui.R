@@ -172,3 +172,281 @@ removeUI <- function(selector,
   if (!immediate) session$onFlushed(callback, once = TRUE)
   else callback()
 }
+
+
+#' Dynamically add a tabPanel
+#'
+#' Dynamically add a \code{tabPanel()} into an existing \code{tabsetPanel}.
+#'
+#' @param tabsetPanelId The \code{id} of the \code{tabsetPanel()} into which
+#'   \code{tab} will be inserted.
+#'
+#' @param tab The tab element to be added (must be created with
+#'   \code{tabPanel}).
+#'
+#' @param target The \code{value} of an existing \code{tabPanel()}, next to
+#'   which \code{tab} will be added. If \code{NULL},the \code{tab} will be
+#'   placed either as the first tab or the last tab, depending on the
+#'   \code{position} argument.
+#'
+#' @param position Should \code{tab} be added to the right ot to the left
+#'   of \code{target}?
+#'
+#' @param immediate Whether \code{tab} should be immediately inserted into
+#'   the app when you call \code{insertTab}, or whether Shiny should wait until
+#'   all outputs have been updated and all observers have been run (default).
+#'
+#' @param session The shiny session within which to call \code{insertTab}.
+#'
+#' @seealso \code{\link{removeTab}}, \code{\link{showTab}},
+#'   \code{\link{hideTab}}
+#'
+#' @examples
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(actionButton("add", "Add tab")),
+#'     mainPanel(
+#'       tabsetPanel(id = "tabs",
+#'         tabPanel("Hello", "This is the hello tab"),
+#'         tabPanel("Foo", "This is the foo tab"),
+#'         tabPanel("Bar", "This is the bar tab")
+#'       )
+#'     )
+#'   )
+#' )
+#' server <- function(input, output, session) {
+#'   observeEvent(input$add, {
+#'     insertTab(tabsetPanelId = "tabs",
+#'       tabPanel("Dynamic", "This a dynamically-added tab"),
+#'       target = "Bar"
+#'     )
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#' @export
+insertTab <- function(tabsetPanelId, tab, target = NULL,
+  position = c("right", "left"), immediate = FALSE,
+  session = getDefaultReactiveDomain()) {
+
+  force(tabsetPanelId)
+  force(tab)
+  force(target)
+  position <- match.arg(position)
+  force(session)
+
+  # tabContent <- tags$div(class = "tab-content")
+  # buildItem(tabsetId, divTag)
+
+  iconClass <- tab$attribs$`data-icon-class`
+  icon <- if (!is.null(iconClass)) {
+    # for font-awesome we specify fixed-width
+    if (grepl("fa-", iconClass, fixed = TRUE))
+      iconClass <- paste(iconClass, "fa-fw")
+    icon(name = NULL, class = iconClass)
+  } else NULL
+
+  callback <- function() {
+    session$sendInsertTab(
+      tabsetPanelId = tabsetPanelId,
+      tab = processDeps(tab, session),
+      icon = processDeps(icon, session),
+      target = target,
+      position = position)
+  }
+
+  if (!immediate) session$onFlushed(callback, once = TRUE)
+  else callback()
+}
+
+
+#' Dynamically remove a tabPanel
+#'
+#' Dynamically remove a \code{tabPanel()} from an existing \code{tabsetPanel}.
+#'
+#' @param tabsetPanelId The \code{id} of the \code{tabsetPanel()} from which
+#'   \code{target} will be removed.
+#'
+#' @param target The \code{value} of the \code{tabPanel()} to be removed.
+#'
+#' @param immediate Whether \code{tab} should be immediately removed from
+#'   the app when you call \code{removeTab}, or whether Shiny should wait until
+#'   all outputs have been updated and all observers have been run (default).
+#'
+#' @param session The shiny session within which to call \code{removeTab}.
+#'
+#' @seealso \code{\link{insertTab}}, \code{\link{showTab}},
+#'   \code{\link{hideTab}}
+#'
+#' @examples
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(actionButton("remove", "Remove tab")),
+#'     mainPanel(
+#'       tabsetPanel(id = "tabs",
+#'         tabPanel("Hello", "This is the hello tab"),
+#'         tabPanel("Foo", "This is the foo tab"),
+#'         tabPanel("Bar", "This is the bar tab")
+#'       )
+#'     )
+#'   )
+#' )
+#' server <- function(input, output, session) {
+#'   observeEvent(input$remove, {
+#'     removeTab(tabsetPanelId = "tabs",
+#'       target = "Bar"
+#'     )
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#' @export
+removeTab <- function(tabsetPanelId, target, immediate = FALSE,
+  session = getDefaultReactiveDomain()) {
+
+  force(tabsetPanelId)
+  force(target)
+  force(session)
+
+  callback <- function() {
+    session$sendRemoveTab(
+      tabsetPanelId = tabsetPanelId,
+      target = target)
+  }
+
+  if (!immediate) session$onFlushed(callback, once = TRUE)
+  else callback()
+}
+
+
+#' Dynamically show a tabPanel
+#'
+#' Dynamically show (expose) a hidden \code{tabPanel()} from an existing
+#' \code{tabsetPanel}.
+#'
+#' @param tabsetPanelId The \code{id} of the \code{tabsetPanel()} that
+#'   \code{target} belongs to.
+#'
+#' @param target The \code{value} of the \code{tabPanel()} to be shown.
+#'
+#' @param immediate Whether \code{tab} should be immediately shown from when
+#'   you call \code{removeTab}, or whether Shiny should wait until all
+#'   outputs have been updated and all observers have been run (default).
+#'
+#' @param session The shiny session within which to call \code{showTab}.
+#'
+#' @seealso \code{\link{insertTab}}, \code{\link{removeTab}},
+#'   \code{\link{hideTab}}
+#'
+#' @examples
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(actionButton("remove", "Remove tab")),
+#'     mainPanel(
+#'       tabsetPanel(id = "tabs",
+#'         tabPanel("Hello", "This is the hello tab"),
+#'         tabPanel("Foo", "This is the foo tab"),
+#'         tabPanel("Bar", "This is the bar tab")
+#'       )
+#'     )
+#'   )
+#' )
+#' server <- function(input, output, session) {
+#'   observeEvent(input$remove, {
+#'     showTab(tabsetPanelId = "tabs",
+#'       target = "Bar"
+#'     )
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#' @export
+showTab <- function(tabsetPanelId, target, immediate = FALSE,
+  session = getDefaultReactiveDomain()) {
+
+  force(tabsetPanelId)
+  force(target)
+  force(session)
+
+  callback <- function() {
+    session$sendShowTab(
+      tabsetPanelId = tabsetPanelId,
+      target = target)
+  }
+
+  if (!immediate) session$onFlushed(callback, once = TRUE)
+  else callback()
+}
+
+
+#' Dynamically hide a tabPanel
+#'
+#' Dynamically hide \code{tabPanel()} from an existing
+#' \code{tabsetPanel}.
+#'
+#' @param tabsetPanelId The \code{id} of the \code{tabsetPanel()} that
+#'   \code{target} belongs to.
+#'
+#' @param target The \code{value} of the \code{tabPanel()} to be hidden.
+#'
+#' @param immediate Whether \code{tab} should be immediately shown from when
+#'   you call \code{removeTab}, or whether Shiny should wait until all
+#'   outputs have been updated and all observers have been run (default).
+#'
+#' @param session The shiny session within which to call \code{hideTab}.
+#'
+#' @seealso \code{\link{insertTab}}, \code{\link{removeTab}},
+#'   \code{\link{showTab}}
+#'
+#' @examples
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(actionButton("remove", "Remove tab")),
+#'     mainPanel(
+#'       tabsetPanel(id = "tabs",
+#'         tabPanel("Hello", "This is the hello tab"),
+#'         tabPanel("Foo", "This is the foo tab"),
+#'         tabPanel("Bar", "This is the bar tab")
+#'       )
+#'     )
+#'   )
+#' )
+#' server <- function(input, output, session) {
+#'   observeEvent(input$remove, {
+#'     hideTab(tabsetPanelId = "tabs",
+#'       target = "Bar"
+#'     )
+#'   })
+#' }
+#'
+#' shinyApp(ui, server)
+#' }
+#' @export
+hideTab <- function(tabsetPanelId, target, immediate = FALSE,
+  session = getDefaultReactiveDomain()) {
+
+  force(tabsetPanelId)
+  force(target)
+  force(session)
+
+  callback <- function() {
+    session$sendHideTab(
+      tabsetPanelId = tabsetPanelId,
+      target = target)
+  }
+
+  if (!immediate) session$onFlushed(callback, once = TRUE)
+  else callback()
+}
+

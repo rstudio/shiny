@@ -1492,6 +1492,41 @@ ShinySession <- R6Class(
         )
       )
     },
+    sendInsertTab = function(tabsetPanelId, tab, icon, target, position) {
+      private$sendMessage(
+        `shiny-insert-tab` = list(
+          tabsetPanelId = tabsetPanelId,
+          tab = tab,
+          icon = icon,
+          target = target,
+          position = position
+        )
+      )
+    },
+    sendRemoveTab = function(tabsetPanelId, target) {
+      private$sendMessage(
+        `shiny-remove-tab` = list(
+          tabsetPanelId = tabsetPanelId,
+          target = target
+        )
+      )
+    },
+    sendShowTab = function(tabsetPanelId, target) {
+      private$sendMessage(
+        `shiny-show-tab` = list(
+          tabsetPanelId = tabsetPanelId,
+          target = target
+        )
+      )
+    },
+    sendHideTab = function(tabsetPanelId, target) {
+      private$sendMessage(
+        `shiny-hide-tab` = list(
+          tabsetPanelId = tabsetPanelId,
+          target = target
+        )
+      )
+    },
     updateQueryString = function(queryString, mode) {
       private$sendMessage(updateQueryString = list(
         queryString = queryString, mode = mode))

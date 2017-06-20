@@ -1960,7 +1960,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     };
     this.showProgress = function (el, show) {
       var RECALC_CLASS = 'recalculating';
-      if (show) $(el).addClass(RECALC_CLASS);else $(el).removeClass(RECALC_CLASS);
+      if (show) {
+        $(el).addClass(RECALC_CLASS);
+      } else {
+        $(el).removeClass(RECALC_CLASS);
+      }
     };
   }).call(OutputBinding.prototype);
 

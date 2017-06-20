@@ -381,7 +381,7 @@ var ShinyApp = function() {
   // necessary.
   function narrowScopeComponent(scopeComponent, nsPrefix) {
     return Object.keys(scopeComponent)
-      .filter(k => k.startsWith(nsPrefix))
+      .filter(k => k.indexOf(nsPrefix) === 0)
       .map(k => ({[k.substring(nsPrefix.length)]: scopeComponent[k]}))
       .reduce((obj, pair) => $.extend(obj, pair),
               {});

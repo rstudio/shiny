@@ -745,8 +745,11 @@ var ShinyApp = function() {
     binding: function(message) {
       var key = message.id;
       var binding = this.$bindings[key];
-      if (binding && binding.showProgress) {
-        binding.showProgress(true);
+      if (binding) {
+        $(binding.el).trigger({
+          type: 'shiny:invalidated'
+        });
+        if (binding.showProgress) binding.showProgress(true);
       }
     },
 

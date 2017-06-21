@@ -25,6 +25,9 @@ createWebDependency <- function(dependency) {
     dependency$src$href <- prefix
   }
 
+  # Don't leak local file path to client
+  dependency$src$file <- NULL
+
   return(dependency)
 }
 

@@ -1356,8 +1356,13 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       binding: function binding(message) {
         var key = message.id;
         var binding = this.$bindings[key];
-        if (binding && binding.showProgress) {
-          binding.showProgress(true);
+        if (binding) {
+          $(binding.el).trigger({
+            type: 'shiny:outputinvalidated',
+            binding: binding,
+            name: key
+          });
+          if (binding.showProgress) binding.showProgress(true);
         }
       },
 

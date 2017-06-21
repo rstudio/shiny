@@ -623,6 +623,22 @@ ShinySession <- R6Class(
 
           values <- list()
 
+          # Given a list, run prettify() on any items that are json.
+          prettifyJSON <- function(x, indent = 2, indent_level = 0) {
+            lapply(x, function(item) {
+              if (inherits(item, "json")) {
+                start_indent <- paste(rep(" ", indent * indent_level), collapse = "")
+
+                item <- jsonlite::prettify(item, indent = indent)
+                item <- sub("\n$", "", item)
+                item <- gsub("\n", paste0("\n", start_indent), item)
+                item
+              } else {
+                item
+              }
+            })
+          }
+
           if (!is.null(params$input)) {
 
             allInputs <- isolate(
@@ -657,6 +673,9 @@ ShinySession <- R6Class(
               isTRUE(attr(private$.outputs[[name]], "snapshotExclude", TRUE))
             }, logical(1))
             values$output <- values$output[!exclude_idx]
+
+            # Need to prettify any output items that are already JSON. (#1752)
+            values$output <- prettifyJSON(values$output, indent_level = 2)
 
             values$output <- sortByName(values$output)
           }

@@ -747,7 +747,9 @@ var ShinyApp = function() {
       var binding = this.$bindings[key];
       if (binding) {
         $(binding.el).trigger({
-          type: 'shiny:outputinvalidated'
+          type: 'shiny:outputinvalidated',
+          binding: binding,
+          name: key
         });
         if (binding.showProgress) binding.showProgress(true);
       }

@@ -84,7 +84,7 @@ Suggests:
     magrittr
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
-Collate:
+Collate: 
     'app.R'
     'bookmark-state-local.R'
     'stack.R'
@@ -144,6 +144,7 @@ Collate:
     'shinyui.R'
     'shinywrappers.R'
     'showcase.R'
+    'snapshot.R'
     'tar.R'
     'test-export.R'
     'timer.R'

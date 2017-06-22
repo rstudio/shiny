@@ -666,7 +666,7 @@ ShinySession <- R6Class(
                 if (is.function(preprocess)) {
                   preprocess(values$output[[name]])
                 } else {
-                   values$output[[name]]
+                  values$output[[name]]
                 }
               }
             )

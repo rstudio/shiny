@@ -33,6 +33,8 @@ shiny 1.0.3.9001
 
 * Fixed [#1438](https://github.com/rstudio/shiny/issues/1438): `unbindAll()` should not be called when inserting content with `insertUI()`. A previous fix ([#1449](https://github.com/rstudio/shiny/pull/1449)) did not work correctly. ([#1736](https://github.com/rstudio/shiny/pull/1736))
 
+* Fixed [#1755](https://github.com/rstudio/shiny/issues/1755): dynamic htmlwidgets sent the path of the package on the server to the client. ([#1756](https://github.com/rstudio/shiny/pull/1756))
+
 ### Library updates
 
 

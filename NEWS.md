@@ -1,4 +1,4 @@
-shiny 1.0.3.9000
+shiny 1.0.3.9001
 ================
 
 ## Full changelog
@@ -20,6 +20,8 @@ shiny 1.0.3.9000
 * With `options(shiny.testmode=TRUE)`, the Shiny process will send a message to the client in response to a changed input, even if no outputs have changed. This helps to streamline testing using the shinytest package. ([#1747](https://github.com/rstudio/shiny/pull/1747))
 
 * Addressed [#1738](https://github.com/rstudio/shiny/issues/1738): The `updateTextInput` and `updateTextAreaInput` functions can now update the placeholder. ([#1742](https://github.com/rstudio/shiny/pull/1742))
+
+* Added new `snapshotPreprocess()` function, which is used for preprocessing output values before taking a test snapshot. ([#1760](https://github.com/rstudio/shiny/pull/1760))
 
 ### Bug fixes
 

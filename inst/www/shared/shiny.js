@@ -1387,8 +1387,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       binding: function binding(message) {
         var key = message.id;
         var binding = this.$bindings[key];
-        if (binding && binding.showProgress) {
-          binding.showProgress(true);
+        if (binding) {
+          $(binding.el).trigger({
+            type: 'shiny:outputinvalidated',
+            binding: binding,
+            name: key
+          });
+          if (binding.showProgress) binding.showProgress(true);
         }
       },
 

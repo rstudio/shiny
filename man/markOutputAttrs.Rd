@@ -4,13 +4,17 @@
 \alias{markOutputAttrs}
 \title{Mark a render function with attributes that will be used by the output}
 \usage{
-markOutputAttrs(renderFunc, snapshotExclude = NULL)
+markOutputAttrs(renderFunc, snapshotExclude = NULL,
+  snapshotPreprocess = NULL)
 }
 \arguments{
 \item{renderFunc}{A function that is suitable for assigning to a Shiny output
 slot.}
 
 \item{snapshotExclude}{If TRUE, exclude the output from test snapshots.}
+
+\item{snapshotPreprocess}{A function for preprocessing the value before
+taking a test snapshot.}
 }
 \description{
 Mark a render function with attributes that will be used by the output

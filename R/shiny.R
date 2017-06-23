@@ -658,6 +658,19 @@ ShinySession <- R6Class(
             }, logical(1))
             values$output <- values$output[!exclude_idx]
 
+            # Apply snapshotPreprocess functions for outputs that have them.
+            values$output <- lapply(
+              setNames(names(values$output), names(values$output)),
+              function(name) {
+                preprocess <- attr(private$.outputs[[name]], "snapshotPreprocess", TRUE)
+                if (is.function(preprocess)) {
+                  preprocess(values$output[[name]])
+                } else {
+                  values$output[[name]]
+                }
+              }
+            )
+
             values$output <- sortByName(values$output)
           }
 
@@ -1888,17 +1901,6 @@ outputOptions <- function(x, name, ...) {
 
   .subset2(x, 'impl')$outputOptions(name, ...)
 }
-
-
-#' Mark an output to be excluded from test snapshots
-#'
-#' @param x A reactive which will be assigned to an output.
-#'
-#' @export
-snapshotExclude <- function(x) {
-  markOutputAttrs(x, snapshotExclude = TRUE)
-}
-
 
 #' Add callbacks for Shiny session events
 #'

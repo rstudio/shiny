@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.0.3.9000
+Version: 1.0.3.9001
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -60,7 +60,7 @@ Description: Makes it incredibly easy to build interactive web
     beautiful, responsive, and powerful applications with minimal effort.
 License: GPL-3 | file LICENSE
 Depends:
-    R (>= 3.0.0),
+    R (>= 3.0.2),
     methods
 Imports:
     utils,
@@ -84,7 +84,7 @@ Suggests:
     magrittr
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
-Collate:
+Collate: 
     'app.R'
     'bookmark-state-local.R'
     'stack.R'
@@ -144,6 +144,7 @@ Collate:
     'shinyui.R'
     'shinywrappers.R'
     'showcase.R'
+    'snapshot.R'
     'tar.R'
     'test-export.R'
     'timer.R'

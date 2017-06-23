@@ -17,6 +17,8 @@ shiny 1.0.3.9001
 
 * For `conditionalPanel`s, Shiny now gives more informative messages if there are errors evaluating or parsing the JavaScript conditional expression. ([#1727](https://github.com/rstudio/shiny/pull/1727))
 
+* Addressed [#1586](https://github.com/rstudio/shiny/issues/1586): The `conditionalPanel` function now accepts an `ns` argument. The `ns` argument can be used in a [module](https://shiny.rstudio.com/articles/modules.html) UI function to scope the `condition` expression to the module's own input and output IDs. ([#1735](https://github.com/rstudio/shiny/pull/1735))
+
 * With `options(shiny.testmode=TRUE)`, the Shiny process will send a message to the client in response to a changed input, even if no outputs have changed. This helps to streamline testing using the shinytest package. ([#1747](https://github.com/rstudio/shiny/pull/1747))
 
 * Addressed [#1738](https://github.com/rstudio/shiny/issues/1738): The `updateTextInput` and `updateTextAreaInput` functions can now update the placeholder. ([#1742](https://github.com/rstudio/shiny/pull/1742))

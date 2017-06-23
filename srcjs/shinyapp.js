@@ -375,6 +375,32 @@ var ShinyApp = function() {
     }
   };
 
+
+  // Narrows a scopeComponent -- an input or output object -- to one constrained
+  // by nsPrefix. Returns a new object with keys removed and renamed as
+  // necessary.
+  function narrowScopeComponent(scopeComponent, nsPrefix) {
+    return Object.keys(scopeComponent)
+      .filter(k => k.indexOf(nsPrefix) === 0)
+      .map(k => ({[k.substring(nsPrefix.length)]: scopeComponent[k]}))
+      .reduce((obj, pair) => $.extend(obj, pair),
+              {});
+  }
+
+  // Narrows a scope -- an object with input and output "subComponents" -- to
+  // one constrained by the nsPrefix string.
+  //
+  // If nsPrefix is null or empty, returns scope without modification.
+  //
+  // Otherwise, returns a new object with keys in subComponents removed and
+  // renamed as necessary.
+  function narrowScope(scope, nsPrefix) {
+    return nsPrefix ? {
+      input: narrowScopeComponent(scope.input, nsPrefix),
+      output: narrowScopeComponent(scope.output, nsPrefix)
+    } : scope;
+  }
+
   this.$updateConditionals = function() {
     $(document).trigger({
       type: 'shiny:conditional'
@@ -404,7 +430,9 @@ var ShinyApp = function() {
         el.data('data-display-if-func', condFunc);
       }
 
-      var show = condFunc(scope);
+      var nsPrefix = el.attr('data-ns-prefix');
+      var nsScope = narrowScope(scope, nsPrefix);
+      var show = condFunc(nsScope);
       var showing = el.css("display") !== "none";
       if (show !== showing) {
         if (show) {

@@ -35,27 +35,50 @@ You are not recommended to use special JavaScript characters such as a
   value.
 }
 \examples{
-sidebarPanel(
-   selectInput(
-      "plotType", "Plot Type",
-      c(Scatter = "scatter",
-        Histogram = "hist")),
-
-   # Only show this panel if the plot type is a histogram
-   conditionalPanel(
-      condition = "input.plotType == 'hist'",
-      selectInput(
-         "breaks", "Breaks",
-         c("Sturges",
-           "Scott",
-           "Freedman-Diaconis",
-           "[Custom]" = "custom")),
-
-      # Only show this panel if Custom is selected
+## Only run this example in interactive R sessions
+if (interactive()) {
+  ui <- fluidPage(
+    sidebarPanel(
+      selectInput("plotType", "Plot Type",
+        c(Scatter = "scatter", Histogram = "hist")
+      ),
+      # Only show this panel if the plot type is a histogram
       conditionalPanel(
-         condition = "input.breaks == 'custom'",
-         sliderInput("breakCount", "Break Count", min=1, max=1000, value=10)
+        condition = "input.plotType == 'hist'",
+        selectInput(
+          "breaks", "Breaks",
+          c("Sturges", "Scott", "Freedman-Diaconis", "[Custom]" = "custom")
+        ),
+        # Only show this panel if Custom is selected
+        conditionalPanel(
+          condition = "input.breaks == 'custom'",
+          sliderInput("breakCount", "Break Count", min = 1, max = 50, value = 10)
+        )
       )
-   )
-)
+    ),
+    mainPanel(
+      plotOutput("plot")
+    )
+  )
+
+  server <- function(input, output) {
+    x <- rnorm(100)
+    y <- rnorm(100)
+
+    output$plot <- renderPlot({
+      if (input$plotType == "scatter") {
+        plot(x, y)
+      } else {
+        breaks <- input$breaks
+        if (breaks == "custom") {
+          breaks <- input$breakCount
+        }
+
+        hist(x, breaks = breaks)
+      }
+    })
+  }
+
+  shinyApp(ui, server)
+}
 }

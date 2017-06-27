@@ -325,6 +325,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     oldwd <<- getwd()
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
+    if (!is.null(appObj()$onStart)) appObj()$onStart()
   }
   onStop <- function() {
     if (!is.null(appObj()$onStop)) appObj()$onStop()

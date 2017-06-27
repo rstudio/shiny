@@ -83,7 +83,7 @@ Suggests:
     ggplot2,
     magrittr
 Remotes:
-    rstudio/httpuv@wch-getrngstate
+    rstudio/httpuv
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate: 

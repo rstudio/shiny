@@ -43,44 +43,40 @@ repeatable <- function(rngfunc, seed = stats::runif(1, 0, .Machine$integer.max))
   }
 }
 
-# Temporarily set x in env to value, evaluate expr, and
-# then restore x to its original state
-withTemporary <- function(env, x, value, expr, unset = FALSE) {
-
-  if (exists(x, envir = env, inherits = FALSE)) {
-    oldValue <- get(x, envir = env, inherits = FALSE)
-    on.exit(
-      assign(x, oldValue, envir = env, inherits = FALSE),
-      add = TRUE)
-  } else {
-    on.exit(
-      rm(list = x, envir = env, inherits = FALSE),
-      add = TRUE
-    )
-  }
-
-  if (!missing(value) && !isTRUE(unset))
-    assign(x, value, envir = env, inherits = FALSE)
-  else {
-    if (exists(x, envir = env, inherits = FALSE))
-      rm(list = x, envir = env, inherits = FALSE)
-  }
-  force(expr)
-}
-
 .globals$ownSeed <- NULL
 # Evaluate an expression using Shiny's own private stream of
 # randomness (not affected by set.seed).
 withPrivateSeed <- function(expr) {
-  withTemporary(.GlobalEnv, ".Random.seed",
-    .globals$ownSeed, unset=is.null(.globals$ownSeed), {
-      tryCatch({
-        expr
-      }, finally = {
-        .globals$ownSeed <- getExists('.Random.seed', 'numeric', globalenv())
-      })
+  # Save the old seed if present.
+  if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+    hasOrigSeed <- TRUE
+    origSeed <- .GlobalEnv$.Random.seed
+  } else {
+    hasOrigSeed <- FALSE
+  }
+
+  # Swap in the private seed.
+  if (is.null(.globals$ownSeed)) {
+    if (hasOrigSeed) {
+      # Move old seed out of the way if present.
+      rm(.Random.seed, envir = .GlobalEnv, inherits = FALSE)
     }
-  )
+  } else {
+    .GlobalEnv$.Random.seed <- .globals$ownSeed
+  }
+
+  # On exit, save the modified private seed, and put the old seed back.
+  on.exit({
+    .globals$ownSeed <- .GlobalEnv$.Random.seed
+
+    if (hasOrigSeed) {
+      .GlobalEnv$.Random.seed <- origSeed
+    } else {
+      rm(.Random.seed, envir = .GlobalEnv, inherits = FALSE)
+    }
+  })
+
+  expr
 }
 
 # a homemade version of set.seed(NULL) for backward compatibility with R 2.15.x

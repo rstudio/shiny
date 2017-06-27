@@ -176,7 +176,12 @@ renderTable <- function(expr, striped = FALSE, hover = FALSE,
           else ""
         }, " ",
         "class = '", htmlEscape(classNames, TRUE), "' ",
-        "style = 'width:", validateCssUnit(width), ";'"))
+        "style = 'width:", validateCssUnit(width), ";'"),
+      comment = {
+        if ("comment" %in% names(dots)) dots$comment
+        else FALSE
+      }
+    )
 
     print_args <- c(print_args, non_xtable_args)
     print_args <- print_args[unique(names(print_args))]

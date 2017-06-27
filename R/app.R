@@ -35,8 +35,8 @@
 #'   \code{shinyApp()}. With the default value (\code{NULL}), the app will
 #'   respect the setting from any previous calls to \code{enableBookmarking()}.
 #'   See \code{\link{enableBookmarking}} for more information.
-#' @param onStop A function that will be called after the app is run and all
-#'   sessions have been disconnected.
+#' @param onStop A function that will be called after the app has finished
+#'   running (all sessions have been disconnected).
 #' @return An object that represents the app. Printing the object or passing it
 #'   to \code{\link{runApp}} will run the app.
 #'

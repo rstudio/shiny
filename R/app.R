@@ -216,6 +216,9 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       sourceUTF8(file.path.ci(appDir, "global.R"))
   }
   onStop <- function() {
+    onStopFunc <- getShinyOption("onStop", default = function() {})
+    if (!is(onStopFunc, "function")) stop("`onStop` must be a function")
+    else onStopFunc()
     setwd(oldwd)
     monitorHandle()
     monitorHandle <<- NULL
@@ -499,4 +502,14 @@ knit_print.reactive <- function(x, ..., inline = FALSE) {
   knitr::knit_print(renderFunc({
     x()
   }), inline = inline)
+}
+
+#' Run code after app is run
+#'
+#' This function allows you to register a callback function that is invoked
+#' after your app is run and all sessions have been disconnected.
+#' @param fun A function that will be called after the app is run.
+#' @export
+onStop <- function(fun) {
+  shinyOptions(onStop = fun)
 }

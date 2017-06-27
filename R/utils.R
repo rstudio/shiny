@@ -82,15 +82,6 @@ withPrivateSeed <- function(expr) {
   expr
 }
 
-# a homemade version of set.seed(NULL) for backward compatibility with R 2.15.x
-reinitializeSeed <- if (getRversion() >= '3.0.0') {
-  function() set.seed(NULL)
-} else function() {
-  if (exists('.Random.seed', globalenv()))
-    rm(list = '.Random.seed', pos = globalenv())
-  stats::runif(1)  # generate any random numbers so R can reinitialize the seed
-}
-
 # Version of runif that runs with private seed
 p_runif <- function(...) {
   withPrivateSeed(stats::runif(...))

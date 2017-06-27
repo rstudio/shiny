@@ -201,7 +201,8 @@ sd_section("Utility functions",
     "repeatable",
     "shinyDeprecated",
     "serverInfo",
-    "shiny-options"
+    "shiny-options",
+    "onStop"
   )
 )
 sd_section("Plot interaction",

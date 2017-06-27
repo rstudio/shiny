@@ -507,11 +507,15 @@ knit_print.reactive <- function(x, ..., inline = FALSE) {
   }), inline = inline)
 }
 
-#' Run code after app is run
+#' Run code after app has finished
 #'
 #' This function allows you to register a callback function that is invoked
-#' after your app is run and all sessions have been disconnected.
-#' @param fun A function that will be called after the app is run.
+#' after your app has finished running (all sessions have been disconnected).
+#'
+#' @param fun A function that will be called after the app has finished running.
+#'
+#' @examples
+#' onStop(function() { print("goodbye") })
 #' @export
 onStop <- function(fun) {
   shinyOptions(onStop = fun)

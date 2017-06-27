@@ -2,14 +2,17 @@
 % Please edit documentation in R/app.R
 \name{onStop}
 \alias{onStop}
-\title{Run code after app is run}
+\title{Run code after app has finished}
 \usage{
 onStop(fun)
 }
 \arguments{
-\item{fun}{A function that will be called after the app is run.}
+\item{fun}{A function that will be called after the app has finished running.}
 }
 \description{
 This function allows you to register a callback function that is invoked
-after your app is run and all sessions have been disconnected.
+after your app has finished running (all sessions have been disconnected).
+}
+\examples{
+onStop(function() { print("goodbye") })
 }

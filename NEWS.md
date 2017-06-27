@@ -6,6 +6,7 @@ shiny 1.0.3.9001
 ### Breaking changes
 
 ### New features
+* Added an onAppExit callback to be run after all app sessions have been closed. This is useful if you have finalization/cleaning up code that should be run after the app is closed. If you are creating an app interactively at the R console, this would be the equivalent of code that comes after the `shinyApp()` call. Fixes [rstudio/pool#38](https://github.com/rstudio/pool/issues/38). 
 
 ### Minor new features and improvements
 

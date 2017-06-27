@@ -35,6 +35,8 @@
 #'   \code{shinyApp()}. With the default value (\code{NULL}), the app will
 #'   respect the setting from any previous calls to \code{enableBookmarking()}.
 #'   See \code{\link{enableBookmarking}} for more information.
+#' @param onStop A function that will be called after the app is run and all
+#'   sessions have been disconnected.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to \code{\link{runApp}} will run the app.
 #'
@@ -71,7 +73,7 @@
 #' }
 #' @export
 shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
-                     uiPattern="/", enableBookmarking = NULL) {
+                     uiPattern="/", enableBookmarking=NULL, onStop=NULL) {
   if (is.null(server)) {
     stop("`server` missing from shinyApp")
   }
@@ -100,6 +102,7 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
       httpHandler = httpHandler,
       serverFuncSource = serverFuncSource,
       onStart = onStart,
+      onStop = onStop,
       options = options,
       appOptions = appOptions
     ),
@@ -212,7 +215,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     if (file.exists(file.path.ci(appDir, "global.R")))
       sourceUTF8(file.path.ci(appDir, "global.R"))
   }
-  onEnd <- function() {
+  onStop <- function() {
     setwd(oldwd)
     monitorHandle()
     monitorHandle <<- NULL
@@ -223,7 +226,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       httpHandler = joinHandlers(c(uiHandler, wwwDir, fallbackWWWDir)),
       serverFuncSource = serverFuncSource,
       onStart = onStart,
-      onEnd = onEnd,
+      onStop = onStop,
       options = options
     ),
     class = "shiny.appobj"
@@ -318,7 +321,8 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
   }
-  onEnd <- function() {
+  onStop <- function() {
+    appObj()$onStop()
     setwd(oldwd)
     monitorHandle()
     monitorHandle <<- NULL
@@ -329,7 +333,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
       httpHandler = joinHandlers(c(dynHttpHandler, wwwDir, fallbackWWWDir)),
       serverFuncSource = dynServerFuncSource,
       onStart = onStart,
-      onEnd = onEnd,
+      onStop = onStop,
       options = options
     ),
     class = "shiny.appobj"

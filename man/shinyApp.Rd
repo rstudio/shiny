@@ -14,7 +14,7 @@
 \title{Create a Shiny app object}
 \usage{
 shinyApp(ui = NULL, server = NULL, onStart = NULL, options = list(),
-  uiPattern = "/", enableBookmarking = NULL)
+  uiPattern = "/", enableBookmarking = NULL, onStop = NULL)
 
 shinyAppDir(appDir, options = list())
 
@@ -61,6 +61,9 @@ expression in order for the match to be considered successful.}
 \code{shinyApp()}. With the default value (\code{NULL}), the app will
 respect the setting from any previous calls to \code{enableBookmarking()}.
 See \code{\link{enableBookmarking}} for more information.}
+
+\item{onStop}{A function that will be called after the app is run and all
+sessions have been disconnected.}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

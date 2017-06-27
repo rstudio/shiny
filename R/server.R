@@ -741,10 +741,10 @@ runApp <- function(appDir=getwd(),
   # accessible both the UI and server portion of the app.)
   unconsumeAppOptions(appParts$appOptions)
 
-  # Set up the onEnd before we call onStart, so that it gets called even if an
+  # Set up the onStop before we call onStart, so that it gets called even if an
   # error happens in onStart.
-  if (!is.null(appParts$onEnd))
-    on.exit(appParts$onEnd(), add = TRUE)
+  if (!is.null(appParts$onStop))
+    on.exit(appParts$onStop(), add = TRUE)
   if (!is.null(appParts$onStart))
     appParts$onStart()
 

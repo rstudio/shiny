@@ -74,6 +74,9 @@ withPrivateSeed <- function(expr) {
     } else {
       rm(.Random.seed, envir = .GlobalEnv, inherits = FALSE)
     }
+    # Need to call this to make sure that the value of .Random.seed gets put
+    # into R's internal RNG state. (Issue #1763)
+    httpuv::getRNGState()
   })
 
   expr

@@ -37,6 +37,8 @@ shiny 1.0.3.9001
 
 * Fixed [#1755](https://github.com/rstudio/shiny/issues/1755): dynamic htmlwidgets sent the path of the package on the server to the client. ([#1756](https://github.com/rstudio/shiny/pull/1756))
 
+* Fixed [#1763](https://github.com/rstudio/shiny/issues/1763): Shiny's private random stream leaked out into the main random stream. ([#1768](https://github.com/rstudio/shiny/pull/1768))
+
 ### Library updates
 
 

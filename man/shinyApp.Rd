@@ -62,8 +62,8 @@ expression in order for the match to be considered successful.}
 respect the setting from any previous calls to \code{enableBookmarking()}.
 See \code{\link{enableBookmarking}} for more information.}
 
-\item{onStop}{A function that will be called after the app is run and all
-sessions have been disconnected.}
+\item{onStop}{A function that will be called after the app has finished
+running (all sessions have been disconnected).}
 
 \item{appDir}{Path to directory that contains a Shiny app (i.e. a server.R
 file and either ui.R or www/index.html)}

@@ -6,9 +6,11 @@ shiny 1.0.3.9001
 ### Breaking changes
 
 ### New features
-* Added an onAppExit callback to be run after all app sessions have been closed. This is useful if you have finalization/cleaning up code that should be run after the app is closed. If you are creating an app interactively at the R console, this would be the equivalent of code that comes after the `shinyApp()` call. Fixes [rstudio/pool#38](https://github.com/rstudio/pool/issues/38). 
+* Added an `onStop` argument to `shinyApp()`, which can be used to register a function callback to be run after the app has finished (all sessions have been disconnected). This is useful if you have finalization/cleaning up code that should be run after the app is closed. If you are creating an app interactively at the R console, this would be the equivalent of code that comes after the `shinyApp()` call. We've also added an `onStop()` function (whose only argument must be the callback function), which has the same effect. This is only necessary for apps that use the two-file format (ui.R and server.R), but it has the same effect regardless of your app structure. In case that you supply both an `onStop()` function _and_ an `onStop` argument to `shinyApp()`, the latter will be the one respected. ([#1770](https://github.com/rstudio/shiny/pull/1770)
 
 ### Minor new features and improvements
+
+* Fixed [#1772](https://github.com/rstudio/shiny/issues/1772): ensure that `runApp()` respects the `shinyApp(onStart = function())` argument. ([#1770](https://github.com/rstudio/shiny/pull/1770)
 
 * Addressed [#1688](https://github.com/rstudio/shiny/issues/1688): trigger a new `shiny:outputinvalidated` event when an output gets invalidated, at the same time that the `recalculating` CSS class is added. ([#1758](https://github.com/rstudio/shiny/pull/1758), thanks [@andrewsali](https://github.com/andrewsali)!)
 

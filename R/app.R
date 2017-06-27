@@ -92,6 +92,8 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
     enableBookmarking(bookmarkStore)
   }
 
+  onStop <- if (!is.null(onStop)) onStop else getShinyOption("onStop")
+
   # Store the appDir and bookmarking-related options, so that we can read them
   # from within the app.
   shinyOptions(appDir = getwd())
@@ -217,7 +219,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   }
   onStop <- function() {
     onStopFunc <- getShinyOption("onStop", default = function() {})
-    if (!is(onStopFunc, "function")) stop("`onStop` must be a function")
+    if (!is(onStopFunc, "function")) warning("`onStop` must be a function")
     else onStopFunc()
     setwd(oldwd)
     monitorHandle()
@@ -325,7 +327,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     monitorHandle <<- initAutoReloadMonitor(appDir)
   }
   onStop <- function() {
-    appObj()$onStop()
+    if (!is.null(appObj()$onStop)) appObj()$onStop()
     setwd(oldwd)
     monitorHandle()
     monitorHandle <<- NULL

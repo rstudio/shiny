@@ -220,7 +220,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   onStop <- function() {
     onStopFunc <- getShinyOption("onStop", default = function() {})
     if (!is(onStopFunc, "function")) warning("`onStop` must be a function")
-    else onStopFunc()
+    else try(onStopFunc())
     setwd(oldwd)
     monitorHandle()
     monitorHandle <<- NULL
@@ -328,7 +328,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     if (!is.null(appObj()$onStart)) appObj()$onStart()
   }
   onStop <- function() {
-    if (!is.null(appObj()$onStop)) appObj()$onStop()
+    if (!is.null(appObj()$onStop)) try(appObj()$onStop())
     setwd(oldwd)
     monitorHandle()
     monitorHandle <<- NULL

@@ -36,7 +36,7 @@
 #'   respect the setting from any previous calls to \code{enableBookmarking()}.
 #'   See \code{\link{enableBookmarking}} for more information.
 #' @param onStop A function that will be called after the app has finished
-#'   running (all sessions have been disconnected).
+#'   running.
 #' @return An object that represents the app. Printing the object or passing it
 #'   to \code{\link{runApp}} will run the app.
 #'
@@ -510,7 +510,7 @@ knit_print.reactive <- function(x, ..., inline = FALSE) {
 #' Run code after app has finished
 #'
 #' This function allows you to register a callback function that is invoked
-#' after your app has finished running (all sessions have been disconnected).
+#' after your app has finished running.
 #'
 #' @param fun A function that will be called after the app has finished running.
 #'

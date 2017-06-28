@@ -1,78 +1,3 @@
-(function( $ ) {
-
-    $.fn.solitaireVictory = function(settings) {
-
-        settings = settings || {};
-
-        var g = settings.g || -3;
-        var dt = settings.dt || 20;
-        var bounce = settings.bounce || 0.7;
-        var endVelocity = settings.endVelocity || 20;
-        var stagger = settings.stagger || 200;
-        var relativeToDocument = settings.relativeToDocument || false;
-        var clear = settings.clear || false;
-        var fallToLeft = settings.fallToLeft || false;
-
-        var body = $('body');
-        var windowHeight = (relativeToDocument ? $(document).height() : $(window).height());
-
-        var fallIteration = function(elem, elemHeight, oldPos, dx, dy) {
-            var copy = elem.clone();
-            body.append(copy);
-
-            var newTop = Math.min(windowHeight - elemHeight, oldPos.top + dy);
-            var newPos = {
-                left: oldPos.left + dx,
-                top: newTop
-            };
-            copy.offset(newPos);
-            if (Math.abs(newTop - (windowHeight - elemHeight)) < 5) {
-                if (dy < 0 || dy > endVelocity) {
-                    dy *= -1*bounce;
-                    setTimeout(function() {
-                        fallIteration(copy, elemHeight, newPos, dx, dy);
-                    }, dt);
-                }
-            } else {
-                dy = dy - g;
-                setTimeout(function() {
-                    fallIteration(copy, elemHeight, newPos, dx, dy);
-                }, dt);
-            }
-        };
-
-        var startFall = function(elem, height, stagger) {
-            var dx = settings.dx || Math.floor((Math.random()*10)) + 5;
-            if (fallToLeft) {
-                dx = -dx;
-            }
-            var copy = elem.clone();
-            copy.addClass('solitaire-victory-clone');
-            if (relativeToDocument) {
-                copy.css('position', 'absolute');
-            } else {
-                copy.css('position', 'fixed');
-            }
-            var originalOffset = elem.offset();
-            copy.offset({top: originalOffset.top, left: originalOffset.left});
-            body.append(copy);
-            setTimeout(function() {fallIteration(copy, height, copy.offset(), dx, 0);}, stagger);
-        };
-
-        if (clear) $('.solitaire-victory-clone').remove();
-
-        this.each(function(index) {
-            var obj = $(this);
-            if (relativeToDocument || obj.offset().top < $(window).height()) {
-                if (!obj.hasClass('solitaire-victory-clone')) {
-                    startFall(obj, obj.height(), index*stagger);
-                }
-            }
-        });
-    };
-
-}( jQuery ));
-
 var IE8FileUploader = function(shinyapp, id, fileEl) {
   this.shinyapp = shinyapp;
   this.id = id;
@@ -318,7 +243,7 @@ $.fn.draghover = function(options) {
         if (collection.size() === 0) {
           self.trigger('draghoverend', e.originalEvent);
         }
-      }, 1);
+      }, 0);
     });
 
     self.on('draghoverfinished', function(e, $element) {
@@ -343,7 +268,7 @@ function hideDropzones() {
 }
 
 function handleGlobalDragEnter(e) {
-  console.log("global-drag-enter");
+  // console.log("global-drag-enter");
   e.preventDefault();
   showDropzones();
 }
@@ -376,14 +301,33 @@ function handleDragover(e) {
 function handleDrop(inputEl, e) {
   console.log("drop");
   inputEl.files = e.originalEvent.dataTransfer.files;
-  var $el = $(inputEl);
-  var $z = $zone($el);
-  if ($z.next().attr("id") == "file1_progress") {
-    setTimeout(function() {
-      $z.solitaireVictory();
-    }, 1000);
-  }
   e.preventDefault();
+}
+
+function makeStateMachine(transitions, initialState) {
+  const machine = {
+    state: initialState,
+    transition: (el, e, stateEventTable) => {
+      let currentState = machine.getState();
+      if (!stateEventTable.hasOwnProperty(currentState))
+        throw new Error(`stateEventTable has no entry for current currentState: ${currentState}`);
+      const eventName = stateEventTable[currentState];
+      if (!transitions[currentState].hasOwnProperty(eventName))
+        throw new Error(`transitions table has no entry for event: ${eventName}`);
+      const transitionFun = transitions[currentState][eventName];
+      machine.setState(transitionFun(el, e));
+    },
+    getState: () => {
+      return machine.state;
+    },
+    setState: (newState) => {
+      machine.state = newState;
+    },
+    shutdown: () => {
+      // turn off event handlers
+    }
+  };
+  return machine;
 }
 
 var fileInputBinding = new InputBinding();
@@ -435,25 +379,73 @@ $.extend(fileInputBinding, {
     var $el = $(el);
     $el.on('change.fileInputBinding', uploadFiles);
 
+    const transitions = {
+      "unsubscribed": {
+        "subscribe":   (el, e) => "subscribed"
+      },
+      "subscribed": {
+        "enterPage":   (el, e) => "highlighted",
+        "unsubscribe": (el, e) => {},
+        "enterInput":  (el, e) => {
+          console.log("entered input");
+          return "hovering";
+        }
+      },
+      "highlighted": {
+        "enterInput": (el, e) => {
+          $el.addClass("file-drag-over");
+          return "hovering";
+        },
+        exitInput: (el, e) => {},
+        unsubscribe: (el, e) => {
+          return "subscribed";
+        }
+      },
+      "hovering": {"droppedHere": "subscribed"}
+    };
+
+    const machine = makeStateMachine(transitions, "subscribed");
+    $el.data('machine', machine);
+
     if ($inputs.length === 0) {
       $(document).draghover().on('dragenter', handleGlobalDragEnter);
-      $(document).on('draghoverend', handleGlobalDragHoverEnd);
-      $(document).on('dragover', handleGlobalDragOver);
-      $(document).on('drop', handleGlobalDrop);
+      $(document).on('draghoverend.fileInputBinding', handleGlobalDragHoverEnd);
+      $(document).on('dragover.fileInputBinding', handleGlobalDragOver);
+      $(document).on('drop.fileInputBinding', handleGlobalDrop);
     }
 
-    $zone($el).on("drop", handleDrop.bind(null, el));
-    $zone($el).on("dragover", handleDragover);
+    // $zone($el).on("drop.fileInputBinding", handleDrop.bind(null, el));
+    // $zone($el).on("dragover.fileInputBinding", handleDragover);
+
+    // Connect jQuery events to our state transitions
+
+    $zone($el).on("dragover.fileDrag", (e) => {
+      machine.transition(this, e, {"subscribed": "enterInput"});
+    });
+    $el.on("drop.fileDrag", (e) => {
+      machine.transition($el, e, {
+        "hovering": "droppedHere",
+        "highlighted": "droppedHere"
+      });
+    });
+    // $el.on("disable.fileDrag", (e) => {
+    //   transition("unsubscribe");
+    //   $el.off(".fileDrag");
+    // });
 
     $inputs = $inputs.add(el);
   },
   unsubscribe: function(el) {
     var $el = $(el);
+    $el.data('machine').shutdown()
+    $el.removeData('machine')
     $el.off('.fileInputBinding');
+    // Clean up local event handlers.
+    $zone($el).off('.fileInputBinding');
     $inputs = $inputs.not(el);
-    // TODO Clean up local event handlers.
     if ($inputs.length === 0) {
-      // TODO Clean up global event handlers.
+      // Clean up global event handlers.
+      $(document).off('.fileInputBinding');
     }
   }
 });

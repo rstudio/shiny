@@ -356,13 +356,15 @@ $.extend(fileInputBinding, {
     $el.data("state", "subscribed");
 
     let transition = multimethod()
-          .dispatch((from, via) => [from, via])
-          .test(([a,b], [c,d]) => a === c && b === d)
-          .when(["subscribed", "enterInput"], ({}, {}, e) => {
-            console.log("entered input");
-            $el.data("state", "hovering");
-          })
-        .default((from, via) => console.log("noop", from, via));
+        .dispatch(({}, from, via) => [from, via])
+        .test(([a,b], [c,d]) => a === c && b === d)
+        .when(["subscribed", "enterInput"], (e) => {
+          console.log("entered input");
+          $el.data("state", "hovering");
+        })
+        .default(({}, from, via) => {
+          console.log(`unhandled: ["${from}", "${via}"]`);
+        });
 
     if ($inputs.length === 0) {
       $(document).draghover().on('dragenter', handleGlobalDragEnter);
@@ -377,7 +379,7 @@ $.extend(fileInputBinding, {
     // Connect jQuery events to our state transitions
 
     $zone($el).on("dragover.fileDrag", (e) => {
-      transition($el.data("state"), "enterInput", e);
+      transition(e, $el.data("state"), "enterInput");
     });
     // $el.on("drop.fileDrag", (e) => {
     //   machine.transition($el, e, {

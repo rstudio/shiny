@@ -231,7 +231,7 @@ function mapValues(obj, f) {
 }
 
 function multimethod(dispatch = (x) => x,
-                     test = (x,y) => x == y,
+                     test = (x,y) => x === y,
                      defaultMethod = null,
                      methods = []) {
   let invoke = (...args) => {

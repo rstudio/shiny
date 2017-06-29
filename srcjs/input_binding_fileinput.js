@@ -221,37 +221,28 @@ function uploadFiles(evt) {
   }
 }
 
-// https://stackoverflow.com/questions/22308882/drag-drop-files-on-the-page-lack-of-a-consistent-solution
-$.fn.draghover = function(options) {
-  return this.each(function() {
+function enableDraghover($el) {
+  collection = $();
 
-    var self = $(this),
-        collection = $();
-
-    self.on('dragenter', function(e) {
-      if (collection.size() === 0) {
-        self.trigger('draghoverstart', e.originalEvent);
-      }
-      collection = collection.add(e.target);
-    });
-
-    self.on('dragleave drop', function(e) {
-      // timeout is needed because Firefox 3.6 fires the dragleave event on
-      // the previous element before firing dragenter on the next one
-      setTimeout( function() {
-        collection = collection.not(e.target);
-        if (collection.size() === 0) {
-          self.trigger('draghoverend', e.originalEvent);
-        }
-      }, 0);
-    });
-
-    self.on('draghoverfinished', function(e, $element) {
-      collection = collection.not($element);
-    });
-
+  $el.on('dragenter.dragHover', function(e) {
+    if (collection.size() === 0) {
+      $el.trigger('draghoverstart', e.originalEvent);
+    }
+    collection = collection.add(e.target);
   });
-};
+
+  $el.on('dragleave.dragHover drop.dragHover', function(e) {
+    setTimeout(() => {
+      collection = collection.not(e.target);
+      if (collection.size() === 0)
+        $el.trigger('draghoverend', e.originalEvent);
+    }, 0);
+  });
+}
+
+function disableDraghover($el) {
+  $el.off(".dragHover");
+}
 
 var $inputs = $();
 
@@ -391,20 +382,19 @@ $.extend(fileInputBinding, {
     //   transition("unsubscribe");
     //   $el.off(".fileDrag");
     // });
-
-    $inputs = $inputs.add(el);
+    $inputs = $inputs.add(el)
   },
+
   unsubscribe: function(el) {
     var $el = $(el);
-    $el.data('machine').shutdown()
-    $el.removeData('machine')
+    $el.removeData('state');
     $el.off('.fileInputBinding');
     // Clean up local event handlers.
-    $zone($el).off('.fileInputBinding');
+    $zone($el).off('.fileDrag');
     $inputs = $inputs.not(el);
     if ($inputs.length === 0) {
       // Clean up global event handlers.
-      $(document).off('.fileInputBinding');
+      $(document).off('.fileDrag');
     }
   }
 });

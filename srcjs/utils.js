@@ -229,3 +229,37 @@ function mapValues(obj, f) {
   }
   return newObj;
 }
+
+function multimethod(dispatch = (x) => x,
+                     test = (x,y) => x == y,
+                     defaultMethod = null,
+                     methods = []) {
+  let invoke = (...args) => {
+    var dispatchVal = dispatch.apply(null, args);
+    for (let [methodVal, methodFn] of methods) {
+      if (test(dispatchVal, methodVal))
+        return methodFn.apply(null, args);
+    }
+    if (defaultMethod) {
+      defaultMethod.apply(null, args);
+    } else {
+      throw new Error(`No method for dispatch value ${dispatchVal}`);
+    }
+  };
+  invoke.dispatch = (dispatch) => {
+    return multimethod(dispatch, test, defaultMethod, methods);
+  };
+  invoke.test = (test) => {
+    return multimethod(dispatch, test, defaultMethod, methods);
+  };
+  invoke.when = (methodVal, methodFn) => {
+    return multimethod(dispatch,
+                       test,
+                       defaultMethod,
+                       methods.concat([[methodVal, methodFn]]));
+  };
+  invoke.default = (newDefaultMethod) => {
+    return multimethod(dispatch, test, newDefaultMethod, methods);
+  };
+  return invoke;
+}

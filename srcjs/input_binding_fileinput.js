@@ -304,32 +304,6 @@ function handleDrop(inputEl, e) {
   e.preventDefault();
 }
 
-function makeStateMachine(transitions, initialState) {
-  const machine = {
-    state: initialState,
-    transition: (el, e, stateEventTable) => {
-      let currentState = machine.getState();
-      if (!stateEventTable.hasOwnProperty(currentState))
-        throw new Error(`stateEventTable has no entry for current currentState: ${currentState}`);
-      const eventName = stateEventTable[currentState];
-      if (!transitions[currentState].hasOwnProperty(eventName))
-        throw new Error(`transitions table has no entry for event: ${eventName}`);
-      const transitionFun = transitions[currentState][eventName];
-      machine.setState(transitionFun(el, e));
-    },
-    getState: () => {
-      return machine.state;
-    },
-    setState: (newState) => {
-      machine.state = newState;
-    },
-    shutdown: () => {
-      // turn off event handlers
-    }
-  };
-  return machine;
-}
-
 var fileInputBinding = new InputBinding();
 $.extend(fileInputBinding, {
   find: function(scope) {
@@ -379,33 +353,16 @@ $.extend(fileInputBinding, {
     var $el = $(el);
     $el.on('change.fileInputBinding', uploadFiles);
 
-    const transitions = {
-      "unsubscribed": {
-        "subscribe":   (el, e) => "subscribed"
-      },
-      "subscribed": {
-        "enterPage":   (el, e) => "highlighted",
-        "unsubscribe": (el, e) => {},
-        "enterInput":  (el, e) => {
-          console.log("entered input");
-          return "hovering";
-        }
-      },
-      "highlighted": {
-        "enterInput": (el, e) => {
-          $el.addClass("file-drag-over");
-          return "hovering";
-        },
-        exitInput: (el, e) => {},
-        unsubscribe: (el, e) => {
-          return "subscribed";
-        }
-      },
-      "hovering": {"droppedHere": "subscribed"}
-    };
+    $el.data("state", "subscribed");
 
-    const machine = makeStateMachine(transitions, "subscribed");
-    $el.data('machine', machine);
+    let transition = multimethod()
+          .dispatch((from, via) => [from, via])
+          .test(([a,b], [c,d]) => a === c && b === d)
+          .when(["subscribed", "enterInput"], ({}, {}, e) => {
+            console.log("entered input");
+            $el.data("state", "hovering");
+          })
+        .default((from, via) => console.log("noop", from, via));
 
     if ($inputs.length === 0) {
       $(document).draghover().on('dragenter', handleGlobalDragEnter);
@@ -420,14 +377,14 @@ $.extend(fileInputBinding, {
     // Connect jQuery events to our state transitions
 
     $zone($el).on("dragover.fileDrag", (e) => {
-      machine.transition(this, e, {"subscribed": "enterInput"});
+      transition($el.data("state"), "enterInput", e);
     });
-    $el.on("drop.fileDrag", (e) => {
-      machine.transition($el, e, {
-        "hovering": "droppedHere",
-        "highlighted": "droppedHere"
-      });
-    });
+    // $el.on("drop.fileDrag", (e) => {
+    //   machine.transition($el, e, {
+    //     "hovering": "droppedHere",
+    //     "highlighted": "droppedHere"
+    //   });
+    // });
     // $el.on("disable.fileDrag", (e) => {
     //   transition("unsubscribe");
     //   $el.off(".fileDrag");

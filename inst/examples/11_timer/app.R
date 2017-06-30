@@ -17,5 +17,5 @@ server <- function(input, output, session) {
 
 }
 
-# Run the app ----
+# Create Shiny app ----
 shinyApp(ui, server)

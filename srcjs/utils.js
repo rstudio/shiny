@@ -241,7 +241,7 @@ function multimethod(dispatch = (x) => x,
         return methodFn.apply(null, args);
     }
     if (defaultMethod) {
-      defaultMethod.apply(null, args);
+      return defaultMethod.apply(null, args);
     } else {
       throw new Error(`No method for dispatch value ${dispatchVal}`);
     }
@@ -258,7 +258,7 @@ function multimethod(dispatch = (x) => x,
                        defaultMethod,
                        methods.concat([[methodVal, methodFn]]));
   };
-  invoke.default = (newDefaultMethod) => {
+  invoke.else = (newDefaultMethod) => {
     return multimethod(dispatch, test, newDefaultMethod, methods);
   };
   return invoke;

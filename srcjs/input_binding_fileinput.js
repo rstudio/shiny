@@ -319,65 +319,60 @@ $.extend(fileInputBinding, {
     "activated": {"box-shadow": "0 0 6px 3px #5cb85c"},
     "over":      {"box-shadow": "0 0 6px 3px #00f"}
   },
+  zoneEvents: [
+    "showZone.fileDrag",
+    "hideZone.fileDrag",
+    "dragenter",
+    "dragleave",
+    "drop"
+  ].join(" "),
   subscribe: function(el, callback) {
     let $el        = $(el),
         $zone      = this.getZone(el),
         getState   = () => $el.data("state"),
         setState   = (newState) => $el.data("state", newState),
-        stateErr   = (e) => {
-          throw new Error(`Invalid state/event: ${getState()}/${e.type}`);
-        };
+        transition = multimethod()
+          .dispatch(e => [getState(), e.type])
+          .test(([s1, e1], [s2, e2]) => s1 === s2 && e1 === e2)
+          .when(["plain", "showZone"], e => {
+            $zone.css(this.zoneStyles["activated"]);
+            setState("activated");
+          })
+          .when(["activated", "hideZone"], e => {
+            $zone.css(this.zoneStyles["plain"]);
+            setState("plain");
+          })
+          .when(["over", "hideZone"], e => {
+            $zone.css(this.zoneStyles["plain"]);
+            setState("plain");
+          })
+          .when(["activated", "dragenter"], e => {
+            $zone.css(this.zoneStyles["over"]);
+            setState("over");
+          })
+          .when(["over", "drop"], e => {
+            // Set the input value to the empty string so that files with
+            // identical names may be uploaded in succession.
+            $el.val("");
+            el.files = e.originalEvent.dataTransfer.files;
+            e.preventDefault();
+            // Allowing propagation here lets the event bubble to the top-level
+            // document drop handler, which triggers a "hideZone" event on all
+            // inputs.
+          })
+          .when(["over", "dragleave"], e => {
+            $zone.css(this.zoneStyles["activated"]);
+            setState("activated");
+          });
 
     if ($fileInputs.length === 0) this.enableDocumentEvents();
 
+    // Initialize this input's state and style.
     setState("plain");
     $zone.css(this.zoneStyles["plain"]);
 
-    $el.on('change.fileInputBinding', uploadFiles);
-
-    $zone.on("showZone.fileDrag", e => {
-      if (getState() === "plain") {
-        $zone.css(this.zoneStyles["activated"]);
-        setState("activated");
-      } else {
-        stateErr(e);
-      }
-    });
-
-    $zone.on("hideZone.fileDrag", e => {
-      switch (getState()) {
-        case "activated":
-        case "over":
-          $zone.css(this.zoneStyles["plain"]);
-          setState("plain");
-          break;
-        default: stateErr(e);
-      }
-    });
-
-    $zone.on("dragenter.fileDrag", e => {
-      if (getState() === "activated") {
-        $zone.css(this.zoneStyles["over"]);
-        setState("over");
-      } else {
-        stateErr(e);
-      }
-    });
-
-    $zone.on("dragleave.fileDrag", e => {
-      if (getState() === "over") {
-        $zone.css(this.zoneStyles["activated"]);
-        setState("activated");
-      } else {
-        stateErr(e);
-      }
-    });
-
-    $zone.on("drop.fileDrag", e => {
-      $el.val("");
-      el.files = e.originalEvent.dataTransfer.files;
-      e.preventDefault();
-    });
+    $el.on("change.fileInputBinding", uploadFiles);
+    $zone.on(this.zoneEvents, transition);
 
     $fileInputs = $fileInputs.add(el);
   },
@@ -390,7 +385,7 @@ $.extend(fileInputBinding, {
 
     // Clean up local event handlers.
     $el.off(".fileInputBinding");
-    $zone.off(".fileDrag");
+    $zone.off(this.zoneEvents);
 
     // Remove el from list of inputs and (maybe) clean up global event handlers.
     $fileInputs = $fileInputs.not(el);

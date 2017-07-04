@@ -338,12 +338,13 @@ $.extend(fileInputBinding, {
         transition = multimethod()
           .dispatch(e => [getState(), e.type])
           .test(([s1, e1], [s2, e2]) => s1 === s2 && e1 === e2)
-
-          .when(["plain", "showZone"], e => {
+          .whenAny([
+            ["plain", "showZone"],
+            ["over", "dragleave"]
+          ], e => {
             $zone.css(this.zoneStyles["activated"]);
             setState("activated");
           })
-
           .whenAny([
             ["activated", "hideZone"],
             ["over", "hideZone"]
@@ -351,12 +352,10 @@ $.extend(fileInputBinding, {
             $zone.css(this.zoneStyles["plain"]);
             setState("plain");
           })
-
           .when(["activated", "dragenter"], e => {
             $zone.css(this.zoneStyles["over"]);
             setState("over");
           })
-
           .when(["over", "drop"], e => {
             // Set the input value to the empty string so that files with
             // identical names may be uploaded in succession.
@@ -366,11 +365,6 @@ $.extend(fileInputBinding, {
             // Allowing propagation here lets the event bubble to the top-level
             // document drop handler, which triggers a "hideZone" event on all
             // file inputs.
-          })
-
-          .when(["over", "dragleave"], e => {
-            $zone.css(this.zoneStyles["activated"]);
-            setState("activated");
           });
 
     if ($fileInputs.length === 0) this.enableDocumentEvents();

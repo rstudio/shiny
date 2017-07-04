@@ -243,11 +243,11 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   }
 
   function multimethod() {
-    var dispatch = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (x) {
-      return x;
+    var dispatch = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (firstArg) {
+      return firstArg;
     };
-    var test = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function (x, y) {
-      return x === y;
+    var test = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function (dispatchVal, methodVal) {
+      return dispatchVal === methodVal;
     };
     var defaultMethod = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
     var methods = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
@@ -300,6 +300,11 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     };
     invoke.when = function (methodVal, methodFn) {
       return multimethod(dispatch, test, defaultMethod, methods.concat([[methodVal, methodFn]]));
+    };
+    invoke.whenAny = function (methodVals, methodFn) {
+      return multimethod(dispatch, test, defaultMethod, methods.concat(methodVals.map(function (v) {
+        return [v, methodFn];
+      })));
     };
     invoke.else = function (newDefaultMethod) {
       return multimethod(dispatch, test, newDefaultMethod, methods);
@@ -5221,13 +5226,10 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         var s2 = _ref6[0];
         var e2 = _ref6[1];
         return s1 === s2 && e1 === e2;
-      }).when(["plain", "showZone"], function (e) {
+      }).whenAny([["plain", "showZone"], ["over", "dragleave"]], function (e) {
         $zone.css(_this.zoneStyles["activated"]);
         setState("activated");
-      }).when(["activated", "hideZone"], function (e) {
-        $zone.css(_this.zoneStyles["plain"]);
-        setState("plain");
-      }).when(["over", "hideZone"], function (e) {
+      }).whenAny([["activated", "hideZone"], ["over", "hideZone"]], function (e) {
         $zone.css(_this.zoneStyles["plain"]);
         setState("plain");
       }).when(["activated", "dragenter"], function (e) {
@@ -5242,9 +5244,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         // Allowing propagation here lets the event bubble to the top-level
         // document drop handler, which triggers a "hideZone" event on all
         // file inputs.
-      }).when(["over", "dragleave"], function (e) {
-        $zone.css(_this.zoneStyles["activated"]);
-        setState("activated");
       });
 
       if ($fileInputs.length === 0) this.enableDocumentEvents();

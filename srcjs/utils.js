@@ -263,3 +263,30 @@ function multimethod(dispatch = (x) => x,
   };
   return invoke;
 }
+
+// TODO: discuss if really worth it
+var equal = multimethod()
+    .dispatch((x, y) => [x, y].map(jQuery.type))
+    .test(([a, b], [c, d]) => a === c && b === d);
+
+var equal = equal.when(
+  ["object", "object"],
+  (x, y) => {
+    if (Object.keys(x).length !== Object.keys(y).length) return false;
+    for (let k in x) {
+      if (!y.hasOwnProperty(k) || !equal(x[k], y[k])) return false;
+    }
+    return true;
+  });
+
+var equal = equal.when(
+  ["array", "array"],
+  (x, y) => {
+    if (x.length !== y.length) return false;
+    for (let k in x) {
+      if (!equal(x[k], y[k])) return false;
+    }
+    return true;
+  });
+
+var equal = equal.else((x, y) => x === y);

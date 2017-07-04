@@ -222,7 +222,7 @@ function uploadFiles(evt) {
 }
 
 function enableDraghover($el) {
-  collection = $();
+  let collection = $();
 
   $el.on('dragenter.dragHover', function(e) {
     if (collection.size() === 0) {
@@ -244,56 +244,7 @@ function disableDraghover($el) {
   $el.off(".dragHover");
 }
 
-var $inputs = $();
-
-function $zone($el) {
-  return $el.closest("div.input-group");
-}
-
-function showDropzones() {
-  $zone($inputs).css("box-shadow", "0 0 6px 3px #5cb85c");
-}
-
-function hideDropzones() {
-  $zone($inputs).css("box-shadow", "none");
-}
-
-function handleGlobalDragEnter(e) {
-  // console.log("global-drag-enter");
-  e.preventDefault();
-  showDropzones();
-}
-
-function handleGlobalDragHoverEnd(e) {
-  console.log("global-drag-exit");
-  e.preventDefault();
-  hideDropzones();
-}
-
-function handleGlobalDragOver(e) {
-  // Prevents dropping anywhere that's not a dropzone from causing the file to
-  // be downloaded.
-  e.preventDefault();
-}
-
-function handleGlobalDrop(e) {
-  console.log("global-drop");
-  e.preventDefault();
-  hideDropzones();
-}
-
-function handleDragover(e) {
-  console.log("dragover");
-  $zone($(e.target)).css("box-shadow", "0 0 6px 3px #00f");
-  e.preventDefault();
-};
-
-// TODO Handle dragging the same file multiple times.
-function handleDrop(inputEl, e) {
-  console.log("drop");
-  inputEl.files = e.originalEvent.dataTransfer.files;
-  e.preventDefault();
-}
+var $fileInputs = $();
 
 var fileInputBinding = new InputBinding();
 $.extend(fileInputBinding, {
@@ -340,62 +291,103 @@ $.extend(fileInputBinding, {
     // This will be used only when restoring a file from a saved state.
     return 'shiny.file';
   },
+  getZone: function(el) {
+    return $(el).closest("div.input-group");
+  },
+  enableDocumentEvents: function() {
+    let $doc = $(document);
+
+    enableDraghover($doc);
+    $doc.on("draghoverstart.fileDrag", e => {
+      $fileInputs.trigger("showZone.fileDrag");
+    });
+    $doc.on("draghoverend.fileDrag", e => {
+      $fileInputs.trigger("hideZone.fileDrag");
+    });
+    // Enable the drop event and prevent download if the file is dropped outside
+    // of a drop zone.
+    $doc.on("dragover.fileDrag drop.fileDrag", e => e.preventDefault());
+  },
+  disableDocumentEvents: function() {
+    let $doc = $(document);
+
+    $doc.off(".fileDrag");
+    disableDraghover($doc);
+  },
+  zoneStyles: {
+    "plain":     {"box-shadow": "none"},
+    "activated": {"box-shadow": "0 0 6px 3px #5cb85c"},
+    "over":      {"box-shadow": "0 0 6px 3px #00f"}
+  },
+  transition: multimethod()
+    .dispatch((zone, styles, fromState, viaEvent) => [fromState, viaEvent])
+    .test(equal)
+    .when(["plain", "activate"], ($zone, styles) => {
+      $zone.css(styles["activated"]);
+      return "activated";
+    })
+    .when(["activated", "deactivate"], ($zone, styles) => {
+      $zone.css(styles["plain"]);
+      return "plain";
+    })
+    .when(["over", "deactivate"], ($zone, styles) => {
+      $zone.css(styles["plain"]);
+      return "plain";
+    })
+    .when(["activated", "enter"], ($zone, styles) => {
+      $zone.css(styles["over"]);
+      return "over";
+    })
+    .when(["over", "exit"], ($zone, styles) => {
+      $zone.css(styles["activated"]);
+      return "activated";
+    }),
   subscribe: function(el, callback) {
-    var $el = $(el);
+    let $el        = $(el),
+        $zone      = this.getZone(el),
+        handle     = (via) => {
+          let state = $el.data("state");
+          $el.data("state", this.transition($zone, this.zoneStyles, state, via));
+        };
+
+    if ($fileInputs.length === 0) this.enableDocumentEvents();
+
+    $el.data("state", "plain");
+    $zone.css(this.zoneStyles["plain"]);
+
     $el.on('change.fileInputBinding', uploadFiles);
 
-    $el.data("state", "subscribed");
+    $zone.on("showZone.fileDrag", e => handle("activate"));
 
-    let transition = multimethod()
-        .dispatch(({}, from, via) => [from, via])
-        .test(([a,b], [c,d]) => a === c && b === d)
-        .when(["subscribed", "enterInput"], (e) => {
-          console.log("entered input");
-          $el.data("state", "hovering");
-        })
-        .default(({}, from, via) => {
-          console.log(`unhandled: ["${from}", "${via}"]`);
-        });
+    $zone.on("hideZone.fileDrag", e => handle("deactivate"));
 
-    if ($inputs.length === 0) {
-      $(document).draghover().on('dragenter', handleGlobalDragEnter);
-      $(document).on('draghoverend.fileInputBinding', handleGlobalDragHoverEnd);
-      $(document).on('dragover.fileInputBinding', handleGlobalDragOver);
-      $(document).on('drop.fileInputBinding', handleGlobalDrop);
-    }
+    $zone.on("dragenter.fileDrag", e => handle("enter"));
 
-    // $zone($el).on("drop.fileInputBinding", handleDrop.bind(null, el));
-    // $zone($el).on("dragover.fileInputBinding", handleDragover);
+    $zone.on("dragleave.fileDrag", e => handle("exit"));
 
-    // Connect jQuery events to our state transitions
-
-    $zone($el).on("dragover.fileDrag", (e) => {
-      transition(e, $el.data("state"), "enterInput");
+    $zone.on("drop.fileDrag", e => {
+      $el.val("");
+      el.files = e.originalEvent.dataTransfer.files;
+      e.preventDefault();
     });
-    // $el.on("drop.fileDrag", (e) => {
-    //   machine.transition($el, e, {
-    //     "hovering": "droppedHere",
-    //     "highlighted": "droppedHere"
-    //   });
-    // });
-    // $el.on("disable.fileDrag", (e) => {
-    //   transition("unsubscribe");
-    //   $el.off(".fileDrag");
-    // });
-    $inputs = $inputs.add(el)
+
+    $fileInputs = $fileInputs.add(el);
   },
 
   unsubscribe: function(el) {
-    var $el = $(el);
-    $el.removeData('state');
-    $el.off('.fileInputBinding');
+    let $el   = $(el),
+        $zone = this.getZone(el),
+        $doc  = $(document);
+
+    $el.removeData("state");
+
     // Clean up local event handlers.
-    $zone($el).off('.fileDrag');
-    $inputs = $inputs.not(el);
-    if ($inputs.length === 0) {
-      // Clean up global event handlers.
-      $(document).off('.fileDrag');
-    }
+    $el.off(".fileInputBinding");
+    $zone.off(".fileDrag");
+
+    // Remove el from list of inputs and (maybe) clean up global event handlers.
+    $fileInputs = $fileInputs.not(el);
+    if ($fileInputs.length === 0) this.disableDocumentEvents();
   }
 });
 inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');

@@ -2,6 +2,8 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 //---------------------------------------------------------------------
 // Source file: ../srcjs/_start.js
 
@@ -238,6 +240,71 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       if (obj.hasOwnProperty(key)) newObj[key] = f(obj[key]);
     }
     return newObj;
+  }
+
+  function multimethod() {
+    var dispatch = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (x) {
+      return x;
+    };
+    var test = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function (x, y) {
+      return x === y;
+    };
+    var defaultMethod = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    var methods = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+
+    var invoke = function invoke() {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      var dispatchVal = dispatch.apply(null, args);
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = methods[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var _step$value = _slicedToArray(_step.value, 2);
+
+          var methodVal = _step$value[0];
+          var methodFn = _step$value[1];
+
+          if (test(dispatchVal, methodVal)) return methodFn.apply(null, args);
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      if (defaultMethod) {
+        return defaultMethod.apply(null, args);
+      } else {
+        throw new Error('No method for dispatch value ' + dispatchVal);
+      }
+    };
+    invoke.dispatch = function (dispatch) {
+      return multimethod(dispatch, test, defaultMethod, methods);
+    };
+    invoke.test = function (test) {
+      return multimethod(dispatch, test, defaultMethod, methods);
+    };
+    invoke.when = function (methodVal, methodFn) {
+      return multimethod(dispatch, test, defaultMethod, methods.concat([[methodVal, methodFn]]));
+    };
+    invoke.else = function (newDefaultMethod) {
+      return multimethod(dispatch, test, newDefaultMethod, methods);
+    };
+    return invoke;
   }
 
   //---------------------------------------------------------------------
@@ -4817,82 +4884,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
   //---------------------------------------------------------------------
   // Source file: ../srcjs/input_binding_fileinput.js
 
-  (function ($) {
-
-    $.fn.solitaireVictory = function (settings) {
-
-      settings = settings || {};
-
-      var g = settings.g || -3;
-      var dt = settings.dt || 20;
-      var bounce = settings.bounce || 0.7;
-      var endVelocity = settings.endVelocity || 20;
-      var stagger = settings.stagger || 200;
-      var relativeToDocument = settings.relativeToDocument || false;
-      var clear = settings.clear || false;
-      var fallToLeft = settings.fallToLeft || false;
-
-      var body = $('body');
-      var windowHeight = relativeToDocument ? $(document).height() : $(window).height();
-
-      var fallIteration = function fallIteration(elem, elemHeight, oldPos, dx, dy) {
-        var copy = elem.clone();
-        body.append(copy);
-
-        var newTop = Math.min(windowHeight - elemHeight, oldPos.top + dy);
-        var newPos = {
-          left: oldPos.left + dx,
-          top: newTop
-        };
-        copy.offset(newPos);
-        if (Math.abs(newTop - (windowHeight - elemHeight)) < 5) {
-          if (dy < 0 || dy > endVelocity) {
-            dy *= -1 * bounce;
-            setTimeout(function () {
-              fallIteration(copy, elemHeight, newPos, dx, dy);
-            }, dt);
-          }
-        } else {
-          dy = dy - g;
-          setTimeout(function () {
-            fallIteration(copy, elemHeight, newPos, dx, dy);
-          }, dt);
-        }
-      };
-
-      var startFall = function startFall(elem, height, stagger) {
-        var dx = settings.dx || Math.floor(Math.random() * 10) + 5;
-        if (fallToLeft) {
-          dx = -dx;
-        }
-        var copy = elem.clone();
-        copy.addClass('solitaire-victory-clone');
-        if (relativeToDocument) {
-          copy.css('position', 'absolute');
-        } else {
-          copy.css('position', 'fixed');
-        }
-        var originalOffset = elem.offset();
-        copy.offset({ top: originalOffset.top, left: originalOffset.left });
-        body.append(copy);
-        setTimeout(function () {
-          fallIteration(copy, height, copy.offset(), dx, 0);
-        }, stagger);
-      };
-
-      if (clear) $('.solitaire-victory-clone').remove();
-
-      this.each(function (index) {
-        var obj = $(this);
-        if (relativeToDocument || obj.offset().top < $(window).height()) {
-          if (!obj.hasClass('solitaire-victory-clone')) {
-            startFall(obj, obj.height(), index * stagger);
-          }
-        }
-      });
-    };
-  })(jQuery);
-
   var IE8FileUploader = function IE8FileUploader(shinyapp, id, fileEl) {
     this.shinyapp = shinyapp;
     this.id = id;
@@ -5103,94 +5094,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
     }
   }
 
-  // https://stackoverflow.com/questions/22308882/drag-drop-files-on-the-page-lack-of-a-consistent-solution
-  $.fn.draghover = function (options) {
-    return this.each(function () {
-
-      var self = $(this),
-          collection = $();
-
-      self.on('dragenter', function (e) {
-        if (collection.size() === 0) {
-          self.trigger('draghoverstart', e.originalEvent);
-        }
-        collection = collection.add(e.target);
-      });
-
-      self.on('dragleave drop', function (e) {
-        // timeout is needed because Firefox 3.6 fires the dragleave event on
-        // the previous element before firing dragenter on the next one
-        setTimeout(function () {
-          collection = collection.not(e.target);
-          if (collection.size() === 0) {
-            self.trigger('draghoverend', e.originalEvent);
-          }
-        }, 1);
-      });
-
-      self.on('draghoverfinished', function (e, $element) {
-        collection = collection.not($element);
-      });
-    });
-  };
-
-  var $inputs = $();
-
-  function $zone($el) {
-    return $el.closest("div.input-group");
-  }
-
-  function showDropzones() {
-    $zone($inputs).css("box-shadow", "0 0 6px 3px #5cb85c");
-  }
-
-  function hideDropzones() {
-    $zone($inputs).css("box-shadow", "none");
-  }
-
-  function handleGlobalDragEnter(e) {
-    console.log("global-drag-enter");
-    e.preventDefault();
-    showDropzones();
-  }
-
-  function handleGlobalDragHoverEnd(e) {
-    console.log("global-drag-exit");
-    e.preventDefault();
-    hideDropzones();
-  }
-
-  function handleGlobalDragOver(e) {
-    // Prevents dropping anywhere that's not a dropzone from causing the file to
-    // be downloaded.
-    e.preventDefault();
-  }
-
-  function handleGlobalDrop(e) {
-    console.log("global-drop");
-    e.preventDefault();
-    hideDropzones();
-  }
-
-  function handleDragover(e) {
-    console.log("dragover");
-    $zone($(e.target)).css("box-shadow", "0 0 6px 3px #00f");
-    e.preventDefault();
-  };
-
-  // TODO Handle dragging the same file multiple times.
-  function handleDrop(inputEl, e) {
-    console.log("drop");
-    inputEl.files = e.originalEvent.dataTransfer.files;
-    var $el = $(inputEl);
-    var $z = $zone($el);
-    if ($z.next().attr("id") == "file1_progress") {
-      setTimeout(function () {
-        $z.solitaireVictory();
-      }, 1000);
-    }
-    e.preventDefault();
-  }
+  var $fileInputs = $();
 
   var fileInputBinding = new InputBinding();
   $.extend(fileInputBinding, {
@@ -5236,30 +5140,137 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       // This will be used only when restoring a file from a saved state.
       return 'shiny.file';
     },
-    subscribe: function subscribe(el, callback) {
-      var $el = $(el);
-      $el.on('change.fileInputBinding', uploadFiles);
-
-      if ($inputs.length === 0) {
-        $(document).draghover().on('dragenter', handleGlobalDragEnter);
-        $(document).on('draghoverend', handleGlobalDragHoverEnd);
-        $(document).on('dragover', handleGlobalDragOver);
-        $(document).on('drop', handleGlobalDrop);
-      }
-
-      $zone($el).on("drop", handleDrop.bind(null, el));
-      $zone($el).on("dragover", handleDragover);
-
-      $inputs = $inputs.add(el);
+    getZone: function getZone(el) {
+      return $(el).closest("div.input-group");
     },
-    unsubscribe: function unsubscribe(el) {
-      var $el = $(el);
-      $el.off('.fileInputBinding');
-      $inputs = $inputs.not(el);
-      // TODO Clean up local event handlers.
-      if ($inputs.length === 0) {
-        // TODO Clean up global event handlers.
+    enableDraghover: function enableDraghover($el) {
+      var collection = $();
+
+      $el.on('dragenter.dragHover', function (e) {
+        if (collection.size() === 0) {
+          $el.trigger('draghoverstart', e.originalEvent);
+        }
+        collection = collection.add(e.target);
+      });
+
+      $el.on('dragleave.dragHover drop.dragHover', function (e) {
+        setTimeout(function () {
+          collection = collection.not(e.target);
+          if (collection.size() === 0) $el.trigger('draghoverend', e.originalEvent);
+        }, 0);
+      });
+    },
+    disableDraghover: function disableDraghover($el) {
+      $el.off(".dragHover");
+    },
+    enableDocumentEvents: function enableDocumentEvents() {
+      var $doc = $(document);
+
+      this.enableDraghover($doc);
+      $doc.on("draghoverstart.fileDrag", function (e) {
+        $fileInputs.trigger("showZone.fileDrag");
+      });
+      $doc.on("draghoverend.fileDrag", function (e) {
+        $fileInputs.trigger("hideZone.fileDrag");
+      });
+      // Enable the drop event and prevent download if the file is dropped outside
+      // of a drop zone.
+      $doc.on("dragover.fileDrag drop.fileDrag", function (e) {
+        return e.preventDefault();
+      });
+    },
+    disableDocumentEvents: function disableDocumentEvents() {
+      var $doc = $(document);
+
+      $doc.off(".fileDrag");
+      this.disableDraghover($doc);
+    },
+    zoneStyles: {
+      "plain": {
+        "box-shadow": "none"
+      },
+      "activated": {
+        "box-shadow": "inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6)"
+      },
+      "over": {
+        "box-shadow": "inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(76, 174, 76, .6)"
       }
+    },
+    zoneEvents: ["showZone.fileDrag", "hideZone.fileDrag", "dragenter", "dragleave", "drop"].join(" "),
+    subscribe: function subscribe(el, callback) {
+      var _this = this;
+
+      var $el = $(el),
+          $zone = this.getZone(el),
+          getState = function getState() {
+        return $el.data("state");
+      },
+          setState = function setState(newState) {
+        return $el.data("state", newState);
+      },
+          transition = multimethod().dispatch(function (e) {
+        return [getState(), e.type];
+      }).test(function (_ref4, _ref5) {
+        var _ref7 = _slicedToArray(_ref4, 2);
+
+        var s1 = _ref7[0];
+        var e1 = _ref7[1];
+
+        var _ref6 = _slicedToArray(_ref5, 2);
+
+        var s2 = _ref6[0];
+        var e2 = _ref6[1];
+        return s1 === s2 && e1 === e2;
+      }).when(["plain", "showZone"], function (e) {
+        $zone.css(_this.zoneStyles["activated"]);
+        setState("activated");
+      }).when(["activated", "hideZone"], function (e) {
+        $zone.css(_this.zoneStyles["plain"]);
+        setState("plain");
+      }).when(["over", "hideZone"], function (e) {
+        $zone.css(_this.zoneStyles["plain"]);
+        setState("plain");
+      }).when(["activated", "dragenter"], function (e) {
+        $zone.css(_this.zoneStyles["over"]);
+        setState("over");
+      }).when(["over", "drop"], function (e) {
+        // Set the input value to the empty string so that files with
+        // identical names may be uploaded in succession.
+        $el.val("");
+        el.files = e.originalEvent.dataTransfer.files;
+        e.preventDefault();
+        // Allowing propagation here lets the event bubble to the top-level
+        // document drop handler, which triggers a "hideZone" event on all
+        // file inputs.
+      }).when(["over", "dragleave"], function (e) {
+        $zone.css(_this.zoneStyles["activated"]);
+        setState("activated");
+      });
+
+      if ($fileInputs.length === 0) this.enableDocumentEvents();
+
+      setState("plain");
+      $zone.css(this.zoneStyles["plain"]);
+
+      $el.on("change.fileInputBinding", uploadFiles);
+      $zone.on(this.zoneEvents, transition);
+
+      $fileInputs = $fileInputs.add(el);
+    },
+
+    unsubscribe: function unsubscribe(el) {
+      var $el = $(el),
+          $zone = this.getZone(el);
+
+      $el.removeData("state");
+
+      // Clean up local event handlers.
+      $el.off(".fileInputBinding");
+      $zone.off(this.zoneEvents);
+
+      // Remove el from list of inputs and (maybe) clean up global event handlers.
+      $fileInputs = $fileInputs.not(el);
+      if ($fileInputs.length === 0) this.disableDocumentEvents();
     }
   });
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');

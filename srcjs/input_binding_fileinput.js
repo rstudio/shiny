@@ -319,51 +319,59 @@ $.extend(fileInputBinding, {
     "activated": {"box-shadow": "0 0 6px 3px #5cb85c"},
     "over":      {"box-shadow": "0 0 6px 3px #00f"}
   },
-  transition: multimethod()
-    .dispatch((zone, styles, fromState, viaEvent) => [fromState, viaEvent])
-    .test(equal)
-    .when(["plain", "activate"], ($zone, styles) => {
-      $zone.css(styles["activated"]);
-      return "activated";
-    })
-    .when(["activated", "deactivate"], ($zone, styles) => {
-      $zone.css(styles["plain"]);
-      return "plain";
-    })
-    .when(["over", "deactivate"], ($zone, styles) => {
-      $zone.css(styles["plain"]);
-      return "plain";
-    })
-    .when(["activated", "enter"], ($zone, styles) => {
-      $zone.css(styles["over"]);
-      return "over";
-    })
-    .when(["over", "exit"], ($zone, styles) => {
-      $zone.css(styles["activated"]);
-      return "activated";
-    }),
   subscribe: function(el, callback) {
     let $el        = $(el),
         $zone      = this.getZone(el),
-        handle     = (via) => {
-          let state = $el.data("state");
-          $el.data("state", this.transition($zone, this.zoneStyles, state, via));
+        getState   = () => $el.data("state"),
+        setState   = (newState) => $el.data("state", newState),
+        stateErr   = (e) => {
+          throw new Error(`Invalid state/event: ${getState()}/${e.type}`);
         };
 
     if ($fileInputs.length === 0) this.enableDocumentEvents();
 
-    $el.data("state", "plain");
+    setState("plain");
     $zone.css(this.zoneStyles["plain"]);
 
     $el.on('change.fileInputBinding', uploadFiles);
 
-    $zone.on("showZone.fileDrag", e => handle("activate"));
+    $zone.on("showZone.fileDrag", e => {
+      if (getState() === "plain") {
+        $zone.css(this.zoneStyles["activated"]);
+        setState("activated");
+      } else {
+        stateErr(e);
+      }
+    });
 
-    $zone.on("hideZone.fileDrag", e => handle("deactivate"));
+    $zone.on("hideZone.fileDrag", e => {
+      switch (getState()) {
+        case "activated":
+        case "over":
+          $zone.css(this.zoneStyles["plain"]);
+          setState("plain");
+          break;
+        default: stateErr(e);
+      }
+    });
 
-    $zone.on("dragenter.fileDrag", e => handle("enter"));
+    $zone.on("dragenter.fileDrag", e => {
+      if (getState() === "activated") {
+        $zone.css(this.zoneStyles["over"]);
+        setState("over");
+      } else {
+        stateErr(e);
+      }
+    });
 
-    $zone.on("dragleave.fileDrag", e => handle("exit"));
+    $zone.on("dragleave.fileDrag", e => {
+      if (getState() === "over") {
+        $zone.css(this.zoneStyles["activated"]);
+        setState("activated");
+      } else {
+        stateErr(e);
+      }
+    });
 
     $zone.on("drop.fileDrag", e => {
       $el.val("");
@@ -376,8 +384,7 @@ $.extend(fileInputBinding, {
 
   unsubscribe: function(el) {
     let $el   = $(el),
-        $zone = this.getZone(el),
-        $doc  = $(document);
+        $zone = this.getZone(el);
 
     $el.removeData("state");
 

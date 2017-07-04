@@ -258,34 +258,14 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       }
 
       var dispatchVal = dispatch.apply(null, args);
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+      for (var i = 0; i < methods.length; i++) {
+        var _methods$i = _slicedToArray(methods[i], 2);
 
-      try {
-        for (var _iterator = methods[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var _step$value = _slicedToArray(_step.value, 2);
+        var methodVal = _methods$i[0];
+        var methodFn = _methods$i[1];
 
-          var methodVal = _step$value[0];
-          var methodFn = _step$value[1];
-
-          if (test(dispatchVal, methodVal)) return methodFn.apply(null, args);
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
+        if (test(dispatchVal, methodVal)) return methodFn.apply(null, args);
       }
-
       if (defaultMethod) {
         return defaultMethod.apply(null, args);
       } else {

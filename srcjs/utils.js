@@ -230,8 +230,10 @@ function mapValues(obj, f) {
   return newObj;
 }
 
-function multimethod(dispatch = (x) => x,
-                     test = (x,y) => x === y,
+function multimethod(dispatch = (firstArg) => firstArg,
+                     test = (dispatchVal, methodVal) => {
+                       return dispatchVal === methodVal;
+                     },
                      defaultMethod = null,
                      methods = []) {
   let invoke = (...args) => {
@@ -257,6 +259,12 @@ function multimethod(dispatch = (x) => x,
                        test,
                        defaultMethod,
                        methods.concat([[methodVal, methodFn]]));
+  };
+  invoke.whenAny = (methodVals, methodFn) => {
+    return multimethod(dispatch,
+                       test,
+                       defaultMethod,
+                       methods.concat(methodVals.map(v => [v, methodFn])));
   };
   invoke.else = (newDefaultMethod) => {
     return multimethod(dispatch, test, newDefaultMethod, methods);

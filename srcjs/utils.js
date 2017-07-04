@@ -238,7 +238,8 @@ function multimethod(dispatch = (firstArg) => firstArg,
                      methods = []) {
   let invoke = (...args) => {
     var dispatchVal = dispatch.apply(null, args);
-    for (let [methodVal, methodFn] of methods) {
+    for (let i = 0; i < methods.length; i++) {
+      let [methodVal, methodFn] = methods[i];
       if (test(dispatchVal, methodVal))
         return methodFn.apply(null, args);
     }

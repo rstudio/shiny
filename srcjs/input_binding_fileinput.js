@@ -313,9 +313,15 @@ $.extend(fileInputBinding, {
     this.disableDraghover($doc);
   },
   zoneStyles: {
-    "plain":     {"box-shadow": "none"},
-    "activated": {"box-shadow": "0 0 6px 3px #5cb85c"},
-    "over":      {"box-shadow": "0 0 6px 3px #00f"}
+    "plain": {
+      "box-shadow": "none"
+    },
+    "activated": {
+      "box-shadow": "inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6)"
+    },
+    "over": {
+      "box-shadow": "inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(76, 174, 76, .6)"
+    }
   },
   zoneEvents: [
     "showZone.fileDrag",

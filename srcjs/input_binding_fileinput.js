@@ -221,29 +221,6 @@ function uploadFiles(evt) {
   }
 }
 
-function enableDraghover($el) {
-  let collection = $();
-
-  $el.on('dragenter.dragHover', function(e) {
-    if (collection.size() === 0) {
-      $el.trigger('draghoverstart', e.originalEvent);
-    }
-    collection = collection.add(e.target);
-  });
-
-  $el.on('dragleave.dragHover drop.dragHover', function(e) {
-    setTimeout(() => {
-      collection = collection.not(e.target);
-      if (collection.size() === 0)
-        $el.trigger('draghoverend', e.originalEvent);
-    }, 0);
-  });
-}
-
-function disableDraghover($el) {
-  $el.off(".dragHover");
-}
-
 var $fileInputs = $();
 
 var fileInputBinding = new InputBinding();
@@ -294,10 +271,31 @@ $.extend(fileInputBinding, {
   getZone: function(el) {
     return $(el).closest("div.input-group");
   },
+  enableDraghover: function($el) {
+    let collection = $();
+
+    $el.on('dragenter.dragHover', function(e) {
+      if (collection.size() === 0) {
+        $el.trigger('draghoverstart', e.originalEvent);
+      }
+      collection = collection.add(e.target);
+    });
+
+    $el.on('dragleave.dragHover drop.dragHover', function(e) {
+      setTimeout(() => {
+        collection = collection.not(e.target);
+        if (collection.size() === 0)
+          $el.trigger('draghoverend', e.originalEvent);
+      }, 0);
+    });
+  },
+  disableDraghover: function($el) {
+    $el.off(".dragHover");
+  },
   enableDocumentEvents: function() {
     let $doc = $(document);
 
-    enableDraghover($doc);
+    this.enableDraghover($doc);
     $doc.on("draghoverstart.fileDrag", e => {
       $fileInputs.trigger("showZone.fileDrag");
     });
@@ -312,7 +310,7 @@ $.extend(fileInputBinding, {
     let $doc = $(document);
 
     $doc.off(".fileDrag");
-    disableDraghover($doc);
+    this.disableDraghover($doc);
   },
   zoneStyles: {
     "plain":     {"box-shadow": "none"},
@@ -358,7 +356,7 @@ $.extend(fileInputBinding, {
             e.preventDefault();
             // Allowing propagation here lets the event bubble to the top-level
             // document drop handler, which triggers a "hideZone" event on all
-            // inputs.
+            // file inputs.
           })
           .when(["over", "dragleave"], e => {
             $zone.css(this.zoneStyles["activated"]);
@@ -367,7 +365,6 @@ $.extend(fileInputBinding, {
 
     if ($fileInputs.length === 0) this.enableDocumentEvents();
 
-    // Initialize this input's state and style.
     setState("plain");
     $zone.css(this.zoneStyles["plain"]);
 

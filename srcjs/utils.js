@@ -349,7 +349,7 @@ function equal(...args) {
 //     .when([3, 5], x => "FizzBuzz")
 //     .when([3], x => "Fizz")
 //     .when([5], x => "Buzz")
-//     .else(x => x.toString());
+//     .else(x => x);
 //
 // for(let i = 0; i <= 100; i++) console.log(fizzBuzz(i));
 function multimethod(dispatch = (firstArg) => firstArg,

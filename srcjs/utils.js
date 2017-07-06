@@ -247,9 +247,35 @@ function mapValues(obj, f) {
   return newObj;
 }
 
-// Forward declaration. Exists so that multimethod's test option can default to
-// _equal even though _equal is implemented as a multimethod.
-var _equal;
+// Binary equality function used by the equal function.
+function _equal(x, y) {
+  if ($.type(x) === "object" && $.type(y) === "object") {
+    if (Object.keys(x).length !== Object.keys(y).length) return false;
+    for (let prop in x)
+      if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop]))
+        return false;
+  } else if ($.type(x) === "array" && $.type(y) === "array") {
+    if (x.length !== y.length) return false;
+    for (let i = 0; i < x.length; i++)
+      if (!_equal(x[i], y[i])) return false;
+  } else {
+    return (x === y);
+  }
+}
+
+// Structural or "deep" equality predicate. Tests two or more arguments for
+// equality, traversing arrays and objects (as determined by $.type) as
+// necessary.
+//
+// Objects other than objects and arrays are tested for equality using ===.
+function equal(...args) {
+  if (args.length < 2) throw new Error("equal requires at least two arguments.");
+  for (let i = 0; i < args.length-1; i++) {
+    if (!_equal(args[i], args[i+1]))
+      return false;
+  }
+  return true;
+};
 
 // Creates functions -- multimethods -- that are polymorphic on one or more of
 // their arguments.
@@ -275,21 +301,27 @@ var _equal;
 // The function returned by multimethod() exposes functions as properties. These
 // functions generally return the multimethod, and so can be chained.
 //
-// - dispatch([function]): Takes a function that should take the same number of
-//   arguments as the multimethod and return a value. Defaults to
-//   single-argument identity.
+// - dispatch([function newDispatch]): Takes an (optional) function that should
+//   take the same number of arguments as the multimethod and return a value.
+//   Defaults to single-argument identity. If an argument is not provided, sets
+//   the dispatch function to the default
 //
-// - test([function]): Takes a binary function that will be passed the dispatch
-//   value and a value associated with a possibly-applicable method. If the test
-//   function returns true, the method is invoked.
+// - test([function newTest]): Takes a (optional) binary function that will be
+//   passed the dispatch value and a value associated with a possibly-applicable
+//   method. If the test function returns true, the method is invoked. Defaults
+//   to deep equality. If an argument is not provided, sets the test function to
+//   the default.
 //
-// - when(dispatchVal, function): Installs a method for dispatchVal.
+// - when(object dispatchVal, function method): Installs a method for
+//   dispatchVal.
 //
-// - whenAny(dispatchVals, function): Like when, but associates the method with
-//   the dispatch values contained in the dispatchVals array.
+// - whenAny(array<object> dispatchVals, function method): Like when, but
+//   associates the method with the dispatch values contained in the
+//   dispatchVals array.
 //
-// - else(function): Installs a function to invoke when no methods apply. If not
-//   defined, an exception is thrown when no methods apply.
+// - else(function newDefaultMethod): Installs a function to invoke when no
+//   methods apply. If not defined, an exception is thrown when no methods
+//   apply.
 //
 // - clone(): Returns a new, functionally-equivalent multimethod. This is a way
 //   to extend an existing multimethod in a local context -- such as inside a
@@ -366,41 +398,3 @@ function multimethod(dispatch = (firstArg) => firstArg,
   };
   return invoke;
 }
-
-// Low-level, binary multimethod used by equal, takes two or more
-// arguments. Can be extended to support deep equality for other kinds of
-// objects reported by $.type.
-var _equal = multimethod()
-    .dispatch((x, y) => [x, y].map($.type))
-    .test(([a, b], [c, d]) => a === c && b === d)
-    .when(["object", "object"], (x, y) => {
-      if (Object.keys(x).length !== Object.keys(y).length) return false;
-      for (let prop in x)
-        if (!y.hasOwnProperty(prop) || !multimethod.self(x[prop], y[prop]))
-          return false;
-      return true;
-    })
-    .when(["array", "array"], (x, y) => {
-      if (x.length !== y.length) return false;
-      for (let i = 0; i < x.length; i++)
-        if (!multimethod.self(x[i], y[i])) return false;
-      return true;
-    })
-    .else((x, y) => x === y);
-
-// Structural or "deep" equality predicate. Tests two or more arguments for
-// equality, traversing arrays and objects as necessary.
-//
-// Object type is determined via $.type, and equality methods for "array" and
-// "object" are implemented. All other object types are compared using ===.
-//
-// Equality semantics for other object types can be added by adding methods to
-// the _equal multimethod.
-var equal = (...args) => {
-  if (args.length < 2) throw new Error("equal requires at least two arguments.");
-  for (let i = 0; i < args.length-1; i++) {
-    if (!_equal(args[i], args[i+1]))
-      return false;
-  }
-  return true;
-};

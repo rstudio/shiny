@@ -247,18 +247,93 @@ function mapValues(obj, f) {
   return newObj;
 }
 
+// Forward declaration. Exists so that multimethod's test option can default to
+// _equal even though _equal is implemented as a multimethod.
+var _equal;
+
+// Creates functions -- multimethods -- that are polymorphic on one or more of
+// their arguments.
+//
+// Multimethods can take any number of arguments. Arguments are passed to an
+// applicable function or "method", returning its result. By default, if no
+// method was applicable, an exception is thrown.
+//
+// Methods are searched in the order that they were installed, and the first
+// applicable method is the one used.
+//
+// A method is applicable when the "dispatch value" associated with it
+// corresponds to the value returned by the dispatch function. The dispatch
+// function defaults to the value of the first argument passed to the
+// multimethod.
+//
+// The correspondence between the value returned by the dispatch function and
+// any method's dispatch value is established by the test function, which is
+// user-definable and defaults to "equals" or deep equality.
+//
+// # Chainable Functions
+//
+// The function returned by multimethod() exposes functions as properties. These
+// functions generally return the multimethod, and so can be chained.
+//
+// - dispatch([function]): Takes a function that should take the same number of
+//   arguments as the multimethod and return a value. Defaults to
+//   single-argument identity.
+//
+// - test([function]): Takes a binary function that will be passed the dispatch
+//   value and a value associated with a possibly-applicable method. If the test
+//   function returns true, the method is invoked.
+//
+// - when(dispatchVal, function): Installs a method for dispatchVal.
+//
+// - whenAny(dispatchVals, function): Like when, but associates the method with
+//   the dispatch values contained in the dispatchVals array.
+//
+// - else(function): Installs a function to invoke when no methods apply. If not
+//   defined, an exception is thrown when no methods apply.
+//
+// - clone(): Returns a new, functionally-equivalent multimethod. This is a way
+//   to extend an existing multimethod in a local context -- such as inside a
+//   function -- without modifying the original.
+//
+// # Example
+//
+// var handleEvent = multimethod()
+//  .dispatch(e => [e.target.tagName.toLowerCase(), e.type])
+//  .when(["h1", "click"], e => "you clicked on an h1")
+//  .when(["p", "mouseover"], e => "you moused over a p"})
+//  .else(e => {
+//    let tag = e.target.tagName.toLowerCase();
+//    return `you did ${e.type} to an ${tag}`;
+//  });
+//
+// $(document).on("click mouseover mouseup mousedown", e => console.log(handle(e)))
+//
+// # Weird Example
+//
+// The test function can be something other than equality, to strange effect.
+//
+// var fizzBuzz = multimethod()
+//     .test((x, divs) => divs.map(d => x % d === 0).every(Boolean))
+//     .when([3, 5], x => "FizzBuzz")
+//     .when([3], x => "Fizz")
+//     .when([5], x => "Buzz")
+//     .else(x => x.toString());
+//
+// for(let i = 0; i <= 100; i++) console.log(fizzBuzz(i));
 function multimethod(dispatch = (firstArg) => firstArg,
-                     test = (dispatchVal, methodVal) => {
-                       return dispatchVal === methodVal;
-                     },
+                     test = _equal,
                      defaultMethod = null,
                      methods = []) {
   let invoke = (...args) => {
     var dispatchVal = dispatch.apply(null, args);
     for (let i = 0; i < methods.length; i++) {
       let [methodVal, methodFn] = methods[i];
-      if (test(dispatchVal, methodVal))
-        return methodFn.apply(null, args);
+      if (test(dispatchVal, methodVal)) {
+        multimethod.self = invoke;
+        let ret = methodFn.apply(invoke, args);
+        multimethod.self = null;
+        return ret;
+      }
     }
     if (defaultMethod) {
       return defaultMethod.apply(null, args);
@@ -266,26 +341,66 @@ function multimethod(dispatch = (firstArg) => firstArg,
       throw new Error(`No method for dispatch value ${dispatchVal}`);
     }
   };
-  invoke.dispatch = (dispatch) => {
-    return multimethod(dispatch, test, defaultMethod, methods);
+  invoke.dispatch = (newDispatch = (firstArg) => firstArg) => {
+    dispatch = newDispatch;
+    return invoke;
   };
-  invoke.test = (test) => {
-    return multimethod(dispatch, test, defaultMethod, methods);
+  invoke.test = (newTest = _equal) => {
+    test = newTest;
+    return invoke;
   };
-  invoke.when = (methodVal, methodFn) => {
-    return multimethod(dispatch,
-                       test,
-                       defaultMethod,
-                       methods.concat([[methodVal, methodFn]]));
+  invoke.when = (dispatchVal, methodFn) => {
+    methods = methods.concat([[dispatchVal, methodFn]]);
+    return invoke;
   };
-  invoke.whenAny = (methodVals, methodFn) => {
-    return multimethod(dispatch,
-                       test,
-                       defaultMethod,
-                       methods.concat(methodVals.map(v => [v, methodFn])));
+  invoke.whenAny = (dispatchVals, methodFn) => {
+    methods = methods.concat((dispatchVals).map(v => [v, methodFn]));
+    return invoke;
   };
-  invoke.else = (newDefaultMethod) => {
-    return multimethod(dispatch, test, newDefaultMethod, methods);
+  invoke.else = (newDefaultMethod = null) => {
+    defaultMethod = newDefaultMethod;
+    return invoke;
+  };
+  invoke.clone = () => {
+    return multimethod(dispatch, test, defaultMethod, methods.slice());
   };
   return invoke;
 }
+
+// Low-level, binary multimethod used by equal, takes two or more
+// arguments. Can be extended to support deep equality for other kinds of
+// objects reported by $.type.
+var _equal = multimethod()
+    .dispatch((x, y) => [x, y].map($.type))
+    .test(([a, b], [c, d]) => a === c && b === d)
+    .when(["object", "object"], (x, y) => {
+      if (Object.keys(x).length !== Object.keys(y).length) return false;
+      for (let prop in x)
+        if (!y.hasOwnProperty(prop) || !multimethod.self(x[prop], y[prop]))
+          return false;
+      return true;
+    })
+    .when(["array", "array"], (x, y) => {
+      if (x.length !== y.length) return false;
+      for (let i = 0; i < x.length; i++)
+        if (!multimethod.self(x[i], y[i])) return false;
+      return true;
+    })
+    .else((x, y) => x === y);
+
+// Structural or "deep" equality predicate. Tests two or more arguments for
+// equality, traversing arrays and objects as necessary.
+//
+// Object type is determined via $.type, and equality methods for "array" and
+// "object" are implemented. All other object types are compared using ===.
+//
+// Equality semantics for other object types can be added by adding methods to
+// the _equal multimethod.
+var equal = (...args) => {
+  if (args.length < 2) throw new Error("equal requires at least two arguments.");
+  for (let i = 0; i < args.length-1; i++) {
+    if (!_equal(args[i], args[i+1]))
+      return false;
+  }
+  return true;
+};

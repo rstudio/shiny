@@ -277,7 +277,7 @@ function equal(...args) {
   return true;
 };
 
-// Creates functions -- multimethods -- that are polymorphic on one or more of
+// Creates functions -- "multimethods" -- that are polymorphic on one or more of
 // their arguments.
 //
 // Multimethods can take any number of arguments. Arguments are passed to an
@@ -301,74 +301,114 @@ function equal(...args) {
 // The function returned by multimethod() exposes functions as properties. These
 // functions generally return the multimethod, and so can be chained.
 //
-// - dispatch([function newDispatch]): Takes an (optional) function that should
-//   take the same number of arguments as the multimethod and return a value.
-//   Defaults to single-argument identity. If an argument is not provided, sets
-//   the dispatch function to the default
+// - dispatch([function newDispatch]): Sets the dispatch function. The dispatch
+//   function can take any number of arguments, but must return a dispatch
+//   value. The default dispatch function returns the first argument passed to
+//   the multimethod.
 //
-// - test([function newTest]): Takes a (optional) binary function that will be
-//   passed the dispatch value and a value associated with a possibly-applicable
-//   method. If the test function returns true, the method is invoked. Defaults
-//   to deep equality. If an argument is not provided, sets the test function to
-//   the default.
+// - test([function newTest]): Sets the test function. The test function takes
+//   two arguments: the dispatch value produced by the dispath function, and the
+//   dispatch value associated with some method. It must return a boolean
+//   indicating whether or not to select the method. The default test function
+//   is deep equal.
 //
-// - when(object dispatchVal, function method): Installs a method for
-//   dispatchVal.
+// - when(object dispatchVal, function method): Adds a new dispatch value/method
+//   combination.
 //
 // - whenAny(array<object> dispatchVals, function method): Like when, but
-//   associates the method with the dispatch values contained in the
+//   associates the method with every dispatch values contained in the
 //   dispatchVals array.
 //
-// - else(function newDefaultMethod): Installs a function to invoke when no
-//   methods apply. If not defined, an exception is thrown when no methods
-//   apply.
+// - else(function newDefaultMethod): Sets the default function. This function
+//   is invoked when no methods apply. If not set, an exception is thrown.
 //
 // - clone(): Returns a new, functionally-equivalent multimethod. This is a way
 //   to extend an existing multimethod in a local context -- such as inside a
-//   function -- without modifying the original.
+//   function -- without modifying the original. NOTE: The array of methods is
+//   copied, but the dispatch values themselves are not. It's not a good idea to
+//   mutate dispatch values.
 //
-// # Example
+// # Self-calls
 //
-// var handleEvent = multimethod()
-//  .dispatch(e => [e.target.tagName.toLowerCase(), e.type])
-//  .when(["h1", "click"], e => "you clicked on an h1")
-//  .when(["p", "mouseover"], e => "you moused over a p"})
-//  .else(e => {
-//    let tag = e.target.tagName.toLowerCase();
-//    return `you did ${e.type} to an ${tag}`;
-//  });
+// The multimethod function can obtained inside its constituent method bodies,
+// without referring to it by name.
 //
-// $(document).on("click mouseover mouseup mousedown", e => console.log(handle(e)))
+// This makes it possible for one method to call another, or to pass the
+// multimethod to other functions as a callback, within methods.
 //
-// # Weird Example
+// The mechanism is: the multimethod itself is bound as "this" to methods when
+// they are called. Since arrow functions cannot be bound to objects, **self-calls
+// are only possible within methods created using the "function" keyword**.
 //
-// The test function can be something other than equality, to strange effect.
+// # Examples
 //
-// var fizzBuzz = multimethod()
-//     .test((x, divs) => divs.map(d => x % d === 0).every(Boolean))
-//     .when([3, 5], x => "FizzBuzz")
-//     .when([3], x => "Fizz")
-//     .when([5], x => "Buzz")
-//     .else(x => x);
+// Handling events:
 //
-// for(let i = 0; i <= 100; i++) console.log(fizzBuzz(i));
+//   var handleEvent = multimethod()
+//    .dispatch(e => [e.target.tagName.toLowerCase(), e.type])
+//    .when(["h1", "click"], e => "you clicked on an h1")
+//    .when(["p", "mouseover"], e => "you moused over a p"})
+//    .else(e => {
+//      let tag = e.target.tagName.toLowerCase();
+//      return `you did ${e.type} to an ${tag}`;
+//    });
+//
+//   $(document).on("click mouseover mouseup mousedown", e => console.log(handle(e)))
+//
+// Self-calls:
+//
+//   var demoSelfCall = multimethod()
+//    .when(0, function(n) {
+//      this(1);
+//    })
+//    .when(1, function(n) {
+//      doSomething(this);
+//    })
+//    .when(2, _ => console.log("tada"));
+//
+// Using (abusing?) the test function:
+//
+//   var fizzBuzz = multimethod()
+//    .test((x, divs) => divs.map(d => x % d === 0).every(Boolean))
+//    .when([3, 5], x => "FizzBuzz")
+//    .when([3], x => "Fizz")
+//    .when([5], x => "Buzz")
+//    .else(x => x);
+//
+//   for(let i = 0; i <= 100; i++) console.log(fizzBuzz(i));
+//
+// Getting carried away:
+//
+//   var factorial = multimethod()
+//    .when(0, () => 1)
+//    .when(1, (_, prod = 1) => prod)
+//    .else((n, prod = 1) => {
+//       return this(n-1, n*prod);
+//     });
 function multimethod(dispatch = (firstArg) => firstArg,
                      test = _equal,
                      defaultMethod = null,
                      methods = []) {
+
+  function RecurArgs (args) { this.args = args; }
+  function recur(...args) { return new RecurArgs(args); }
+
   let invoke = (...args) => {
-    var dispatchVal = dispatch.apply(null, args);
+    var dispatchVal = dispatch.apply(null, args), ret;
     for (let i = 0; i < methods.length; i++) {
       let [methodVal, methodFn] = methods[i];
       if (test(dispatchVal, methodVal)) {
-        multimethod.self = invoke;
-        let ret = methodFn.apply(invoke, args);
-        multimethod.self = null;
+        ret = methodFn.apply(recur, args);
+        while (ret instanceof RecurArgs)
+          ret = invoke.apply(recur, ret.args);
         return ret;
       }
     }
     if (defaultMethod) {
-      return defaultMethod.apply(null, args);
+      ret = defaultMethod.apply(recur, args);
+      while (ret instanceof RecurArgs)
+        ret = invoke.apply(recur, ret.args);
+      return ret;
     } else {
       throw new Error(`No method for dispatch value ${dispatchVal}`);
     }
@@ -398,3 +438,4 @@ function multimethod(dispatch = (firstArg) => firstArg,
   };
   return invoke;
 }
+

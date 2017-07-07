@@ -382,9 +382,9 @@ function equal(...args) {
 //   var factorial = multimethod()
 //    .when(0, () => 1)
 //    .when(1, (_, prod = 1) => prod)
-//    .else((n, prod = 1) => {
+//    .else(function(n, prod = 1) {
 //       return this(n-1, n*prod);
-//     });
+//    });
 function multimethod(dispatch = (firstArg) => firstArg,
                      test = _equal,
                      defaultMethod = null,

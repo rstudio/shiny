@@ -154,7 +154,8 @@ sd_section("Running",
     "runGadget",
     "runUrl",
     "stopApp",
-    "viewer"
+    "viewer",
+    "isRunning"
   )
 )
 sd_section("Bookmarking state",

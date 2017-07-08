@@ -181,6 +181,31 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
 }).call(FileUploader.prototype);
 
 
+function uploadDroppedFilesIE10Plus(el, files) {
+  // If previously selected files are uploading, abort that.
+  var $el = $(el);
+  var uploader = $el.data('currentUploader');
+  if (uploader)
+    uploader.abort();
+
+  // Clear data-restore attribute if present.
+  $el.removeAttr('data-restore');
+
+  // Set the label in the text box
+  var $fileText = $el.closest('div.input-group').find('input[type=text]');
+  if (files.length === 1) {
+    $fileText.val(files[0].name);
+  } else {
+    $fileText.val(files.length + " files");
+  }
+
+  var id = fileInputBinding.getId(el);
+
+  // Start the new upload and put the uploader in 'currentUploader'.
+  $el.data('currentUploader',
+           new FileUploader(exports.shinyapp, id, files, el));
+}
+
 function uploadFiles(evt) {
   // If previously selected files are uploading, abort that.
   var $el = $(evt.target);
@@ -330,6 +355,40 @@ $.extend(fileInputBinding, {
     "dragleave",
     "drop"
   ].join(" "),
+  canSetFiles: (fileList) => {
+    var testEl = document.createElement("input");
+    testEl.type = "file";
+    try {
+      testEl.files = fileList;
+    } catch (e) {
+      return false;
+    }
+    return true;
+  },
+  handleDrop: (e, el) => {
+    const files = e.originalEvent.dataTransfer.files,
+          $el   = $(el);
+    if (files === undefined || files === null) {
+      // 1. The FileList object isn't supported by this browser, and
+      // there's nothing else we can try. (< IE 10)
+      setTimeout(() => {
+        $el.trigger("hideZone.fileDrag");
+        console.log("Dropping files is not supported on this browser. (no FileList)");
+      }, 0);
+    } else if (!this.canSetFiles(files)) {
+      // 2. The browser doesn't support assigning a type=file input's .files
+      // property, but we do have a FileList to work with. (IE10+)
+      setTimeout(() => {
+        $el.trigger("hideZone.fileDrag");
+        uploadDroppedFilesIE10Plus(el, e.target, files);
+      }, 0);
+    } else {
+      // 3. The browser supports FileList and input.files assignment.
+      // (Chrome, Safari)
+      $el.val("");
+      el.files = e.originalEvent.dataTransfer.files;
+    }
+  },
   subscribe: function(el, callback) {
     let $el        = $(el),
         $zone      = this.getZone(el),
@@ -356,15 +415,15 @@ $.extend(fileInputBinding, {
             $zone.css(this.zoneStyles["over"]);
             setState("over");
           })
-          .when(["over", "drop"], e => {
-            // Set the input value to the empty string so that files with
-            // identical names may be uploaded in succession.
-            $el.val("");
-            el.files = e.originalEvent.dataTransfer.files;
-            e.preventDefault();
+          .when(["over", "drop"], (e) => {
+            // In order to have reached this code, the browser must support Drag
+            // and Drop ("DnD"), because a "drop" event has been triggered. That
+            // means it's probably Chrome, Safari, or IE9+
+            this.handleDrop(e, el);
             // Allowing propagation here lets the event bubble to the top-level
             // document drop handler, which triggers a "hideZone" event on all
             // file inputs.
+            e.preventDefault();
           });
 
     if ($fileInputs.length === 0) this.enableDocumentEvents();

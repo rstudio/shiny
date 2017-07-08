@@ -380,7 +380,7 @@ $.extend(fileInputBinding, {
       // property, but we do have a FileList to work with. (IE10+)
       setTimeout(() => {
         $el.trigger("hideZone.fileDrag");
-        uploadDroppedFilesIE10Plus(el, e.target, files);
+        uploadDroppedFilesIE10Plus(el, files);
       }, 0);
     } else {
       // 3. The browser supports FileList and input.files assignment.

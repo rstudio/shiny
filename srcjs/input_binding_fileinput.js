@@ -355,7 +355,7 @@ $.extend(fileInputBinding, {
     "dragleave",
     "drop"
   ].join(" "),
-  canSetFiles: (fileList) => {
+  canSetFiles: function(fileList) {
     var testEl = document.createElement("input");
     testEl.type = "file";
     try {
@@ -365,7 +365,7 @@ $.extend(fileInputBinding, {
     }
     return true;
   },
-  handleDrop: (e, el) => {
+  handleDrop: function(e, el) {
     const files = e.originalEvent.dataTransfer.files,
           $el   = $(el);
     if (files === undefined || files === null) {

@@ -5437,17 +5437,12 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       if (files === undefined || files === null) {
         // 1. The FileList object isn't supported by this browser, and
         // there's nothing else we can try. (< IE 10)
-        setTimeout(function () {
-          $el.trigger("hideZone.fileDrag");
-          console.log("Dropping files is not supported on this browser. (no FileList)");
-        }, 0);
+        console.log("Dropping files is not supported on this browser. (no FileList)");
       } else if (!this.canSetFiles(files)) {
         // 2. The browser doesn't support assigning a type=file input's .files
         // property, but we do have a FileList to work with. (IE10+)
-        setTimeout(function () {
-          $el.trigger("hideZone.fileDrag");
-          uploadDroppedFilesIE10Plus(el, files);
-        }, 0);
+        $el.val("");
+        uploadDroppedFilesIE10Plus(el, files);
       } else {
         // 3. The browser supports FileList and input.files assignment.
         // (Chrome, Safari)

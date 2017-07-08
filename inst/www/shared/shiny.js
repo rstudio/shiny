@@ -8,6 +8,8 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 // Source file: ../srcjs/_start.js
 
 (function () {
+  var _this = this;
+
   var $ = jQuery;
 
   var exports = window.Shiny = window.Shiny || {};
@@ -177,7 +179,14 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
   // "with" on the argument value, and return the result.
   function scopeExprToFunc(expr) {
     /*jshint evil: true */
-    var func = new Function("with (this) {return (" + expr + ");}");
+    var expr_escaped = expr.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+    try {
+      var func = new Function('with (this) {\n        try {\n          return (' + expr + ');\n        } catch (e) {\n          console.error(\'Error evaluating expression: ' + expr_escaped + '\');\n          throw e;\n        }\n      }');
+    } catch (e) {
+      console.error("Error parsing expression: " + expr);
+      throw e;
+    }
+
     return function (scope) {
       return func.call(scope);
     };
@@ -242,19 +251,197 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     return newObj;
   }
 
+  // Binary equality function used by the equal function.
+  function _equal(x, y) {
+    if ($.type(x) === "object" && $.type(y) === "object") {
+      if (Object.keys(x).length !== Object.keys(y).length) return false;
+      for (var prop in x) {
+        if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop])) return false;
+      }return true;
+    } else if ($.type(x) === "array" && $.type(y) === "array") {
+      if (x.length !== y.length) return false;
+      for (var i = 0; i < x.length; i++) {
+        if (!_equal(x[i], y[i])) return false;
+      }return true;
+    } else {
+      return x === y;
+    }
+  }
+
+  // Structural or "deep" equality predicate. Tests two or more arguments for
+  // equality, traversing arrays and objects (as determined by $.type) as
+  // necessary.
+  //
+  // Objects other than objects and arrays are tested for equality using ===.
+  function equal() {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    if (args.length < 2) throw new Error("equal requires at least two arguments.");
+    for (var i = 0; i < args.length - 1; i++) {
+      if (!_equal(args[i], args[i + 1])) return false;
+    }
+    return true;
+  };
+
+  // multimethod: Creates functions — "multimethods" — that are polymorphic on one
+  // or more of their arguments.
+  //
+  // Multimethods can take any number of arguments. Arguments are passed to an
+  // applicable function or "method", returning its result. By default, if no
+  // method was applicable, an exception is thrown.
+  //
+  // Methods are searched in the order that they were added, and the first
+  // applicable method found is the one used.
+  //
+  // A method is applicable when the "dispatch value" associated with it
+  // corresponds to the value returned by the dispatch function. The dispatch
+  // function defaults to the value of the first argument passed to the
+  // multimethod.
+  //
+  // The correspondence between the value returned by the dispatch function and
+  // any method's dispatch value is determined by the test function, which is
+  // user-definable and defaults to `equal` or deep equality.
+  //
+  // # Chainable Functions
+  //
+  // The function returned by `multimethod()` exposes functions as properties.
+  // These functions generally return the multimethod, and so can be chained.
+  //
+  // - dispatch([function newDispatch]): Sets the dispatch function. The dispatch
+  //   function can take any number of arguments, but must return a dispatch
+  //   value. The default dispatch function returns the first argument passed to
+  //   the multimethod.
+  //
+  // - test([function newTest]): Sets the test function. The test function takes
+  //   two arguments: the dispatch value produced by the dispatch function, and
+  //   the dispatch value associated with some method. It must return a boolean
+  //   indicating whether or not to select the method. The default test function
+  //   is `equal`.
+  //
+  // - when(object dispatchVal, function method): Adds a new dispatch value/method
+  //   combination.
+  //
+  // - whenAny(array<object> dispatchVals, function method): Like `when`, but
+  //   associates the method with every dispatch value in the `dispatchVals`
+  //   array.
+  //
+  // - else(function newDefaultMethod): Sets the default function. This function
+  //   is invoked when no methods apply. If left unset, the multimethod will throw
+  //   an exception when no methods are applicable.
+  //
+  // - clone(): Returns a new, functionally-equivalent multimethod. This is a way
+  //   to extend an existing multimethod in a local context — such as inside a
+  //   function — without modifying the original. NOTE: The array of methods is
+  //   copied, but the dispatch values themselves are not.
+  //
+  // # Self-reference
+  //
+  // The multimethod function can be obtained inside its method bodies without
+  // referring to it by name.
+  //
+  // This makes it possible for one method to call another, or to pass the
+  // multimethod to other functions as a callback from within methods.
+  //
+  // The mechanism is: the multimethod itself is bound as `this` to methods when
+  // they are called. Since arrow functions cannot be bound to objects, **self-reference
+  // is only possible within methods created using the `function` keyword**.
+  //
+  // # Tail recursion
+  //
+  // A method can call itself in a way that will not overflow the stack by using
+  // `this.recur`.
+  //
+  // `this.recur` is a function available in methods created using `function`.
+  // When the return value of a call to `this.recur` is returned by a method, the
+  // arguments that were supplied to `this.recur` are used to call the
+  // multimethod.
+  //
+  // # Examples
+  //
+  // Handling events:
+  //
+  //    var handleEvent = multimethod()
+  //     .dispatch(e => [e.target.tagName.toLowerCase(), e.type])
+  //     .when(["h1", "click"], e => "you clicked on an h1")
+  //     .when(["p", "mouseover"], e => "you moused over a p"})
+  //     .else(e => {
+  //       let tag = e.target.tagName.toLowerCase();
+  //       return `you did ${e.type} to an ${tag}`;
+  //     });
+  //
+  //    $(document).on("click mouseover mouseup mousedown", e => console.log(handle(e)))
+  //
+  // Self-calls:
+  //
+  //    var demoSelfCall = multimethod()
+  //     .when(0, function(n) {
+  //       this(1);
+  //     })
+  //     .when(1, function(n) {
+  //       doSomething(this);
+  //     })
+  //     .when(2, _ => console.log("tada"));
+  //
+  // Using (abusing?) the test function:
+  //
+  //    var fizzBuzz = multimethod()
+  //     .test((x, divs) => divs.map(d => x % d === 0).every(Boolean))
+  //     .when([3, 5], x => "FizzBuzz")
+  //     .when([3], x => "Fizz")
+  //     .when([5], x => "Buzz")
+  //     .else(x => x);
+  //
+  //    for(let i = 0; i <= 100; i++) console.log(fizzBuzz(i));
+  //
+  // Getting carried away with tail recursion:
+  //
+  //    var factorial = multimethod()
+  //     .when(0, () => 1)
+  //     .when(1, (_, prod = 1) => prod)
+  //     .else(function(n, prod = 1) {
+  //       return this.recur(n-1, n*prod);
+  //     });
+  //
+  //    var fibonacci = multimethod()
+  //     .when(0, (_, a = 0) => a)
+  //     .else(function(n, a = 0, b = 1) {
+  //       return this.recur(n-1, b, a+b);
+  //     });
   function multimethod() {
     var dispatch = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (firstArg) {
       return firstArg;
     };
-    var test = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function (dispatchVal, methodVal) {
-      return dispatchVal === methodVal;
-    };
+    var test = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : equal;
     var defaultMethod = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
     var methods = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
 
-    var invoke = function invoke() {
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
+
+    var trampolining = false;
+
+    function Sentinel(args) {
+      this.args = args;
+    }
+
+    function trampoline(f) {
+      return function () {
+        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          args[_key2] = arguments[_key2];
+        }
+
+        trampolining = true;
+        var ret = f.apply(invoke, args);
+        while (ret instanceof Sentinel) {
+          ret = f.apply(invoke, ret.args);
+        }trampolining = false;
+        return ret;
+      };
+    }
+
+    var invoke = trampoline(function () {
+      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
       }
 
       var dispatchVal = dispatch.apply(null, args);
@@ -264,31 +451,64 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         var methodVal = _methods$i[0];
         var methodFn = _methods$i[1];
 
-        if (test(dispatchVal, methodVal)) return methodFn.apply(null, args);
+        if (test(dispatchVal, methodVal)) {
+          return methodFn.apply(invoke, args);
+        }
       }
       if (defaultMethod) {
-        return defaultMethod.apply(null, args);
+        return defaultMethod.apply(invoke, args);
       } else {
         throw new Error('No method for dispatch value ' + dispatchVal);
       }
+    });
+
+    invoke.recur = function () {
+      for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
+      }
+
+      if (!trampolining) throw new Error("recur can only be called inside a method");
+      return new Sentinel(args);
     };
-    invoke.dispatch = function (dispatch) {
-      return multimethod(dispatch, test, defaultMethod, methods);
+
+    invoke.dispatch = function () {
+      var newDispatch = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (firstArg) {
+        return firstArg;
+      };
+
+      dispatch = newDispatch;
+      return invoke;
     };
-    invoke.test = function (test) {
-      return multimethod(dispatch, test, defaultMethod, methods);
+
+    invoke.test = function () {
+      var newTest = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _equal;
+
+      test = newTest;
+      return invoke;
     };
-    invoke.when = function (methodVal, methodFn) {
-      return multimethod(dispatch, test, defaultMethod, methods.concat([[methodVal, methodFn]]));
+
+    invoke.when = function (dispatchVal, methodFn) {
+      methods = methods.concat([[dispatchVal, methodFn]]);
+      return invoke;
     };
-    invoke.whenAny = function (methodVals, methodFn) {
-      return multimethod(dispatch, test, defaultMethod, methods.concat(methodVals.map(function (v) {
-        return [v, methodFn];
-      })));
+
+    invoke.whenAny = function (dispatchVals, methodFn) {
+      return dispatchVals.reduce(function (self, val) {
+        return invoke.when(val, methodFn);
+      }, invoke);
     };
-    invoke.else = function (newDefaultMethod) {
-      return multimethod(dispatch, test, newDefaultMethod, methods);
+
+    invoke.else = function () {
+      var newDefaultMethod = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+
+      defaultMethod = newDefaultMethod;
+      return invoke;
     };
+
+    invoke.clone = function () {
+      return multimethod(dispatch, test, defaultMethod, methods.slice());
+    };
+
     return invoke;
   }
 
@@ -3327,8 +3547,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       exports.unbindAll(el);
     }
 
-    exports.unbindAll(el);
-
     var html;
     var dependencies = [];
     if (content === null) {
@@ -5042,6 +5260,29 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     };
   }).call(FileUploader.prototype);
 
+  function uploadDroppedFilesIE10Plus(el, files) {
+    // If previously selected files are uploading, abort that.
+    var $el = $(el);
+    var uploader = $el.data('currentUploader');
+    if (uploader) uploader.abort();
+
+    // Clear data-restore attribute if present.
+    $el.removeAttr('data-restore');
+
+    // Set the label in the text box
+    var $fileText = $el.closest('div.input-group').find('input[type=text]');
+    if (files.length === 1) {
+      $fileText.val(files[0].name);
+    } else {
+      $fileText.val(files.length + " files");
+    }
+
+    var id = fileInputBinding.getId(el);
+
+    // Start the new upload and put the uploader in 'currentUploader'.
+    $el.data('currentUploader', new FileUploader(exports.shinyapp, id, files, el));
+  }
+
   function uploadFiles(evt) {
     // If previously selected files are uploading, abort that.
     var $el = $(evt.target);
@@ -5182,8 +5423,42 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       }
     },
     zoneEvents: ["showZone.fileDrag", "hideZone.fileDrag", "dragenter", "dragleave", "drop"].join(" "),
+    canSetFiles: function canSetFiles(fileList) {
+      var testEl = document.createElement("input");
+      testEl.type = "file";
+      try {
+        testEl.files = fileList;
+      } catch (e) {
+        return false;
+      }
+      return true;
+    },
+    handleDrop: function handleDrop(e, el) {
+      var files = e.originalEvent.dataTransfer.files,
+          $el = $(el);
+      if (files === undefined || files === null) {
+        // 1. The FileList object isn't supported by this browser, and
+        // there's nothing else we can try. (< IE 10)
+        setTimeout(function () {
+          $el.trigger("hideZone.fileDrag");
+          console.log("Dropping files is not supported on this browser. (no FileList)");
+        }, 0);
+      } else if (!_this.canSetFiles(files)) {
+        // 2. The browser doesn't support assigning a type=file input's .files
+        // property, but we do have a FileList to work with. (IE10+)
+        setTimeout(function () {
+          $el.trigger("hideZone.fileDrag");
+          uploadDroppedFilesIE10Plus(el, e.target, files);
+        }, 0);
+      } else {
+        // 3. The browser supports FileList and input.files assignment.
+        // (Chrome, Safari)
+        $el.val("");
+        el.files = e.originalEvent.dataTransfer.files;
+      }
+    },
     subscribe: function subscribe(el, callback) {
-      var _this = this;
+      var _this2 = this;
 
       var $el = $(el),
           $zone = this.getZone(el),
@@ -5207,23 +5482,23 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         var e2 = _ref6[1];
         return s1 === s2 && e1 === e2;
       }).whenAny([["plain", "showZone"], ["over", "dragleave"]], function (e) {
-        $zone.css(_this.zoneStyles["activated"]);
+        $zone.css(_this2.zoneStyles["activated"]);
         setState("activated");
       }).whenAny([["activated", "hideZone"], ["over", "hideZone"]], function (e) {
-        $zone.css(_this.zoneStyles["plain"]);
+        $zone.css(_this2.zoneStyles["plain"]);
         setState("plain");
       }).when(["activated", "dragenter"], function (e) {
-        $zone.css(_this.zoneStyles["over"]);
+        $zone.css(_this2.zoneStyles["over"]);
         setState("over");
       }).when(["over", "drop"], function (e) {
-        // Set the input value to the empty string so that files with
-        // identical names may be uploaded in succession.
-        $el.val("");
-        el.files = e.originalEvent.dataTransfer.files;
-        e.preventDefault();
+        // In order to have reached this code, the browser must support Drag
+        // and Drop ("DnD"), because a "drop" event has been triggered. That
+        // means it's probably Chrome, Safari, or IE9+
+        _this2.handleDrop(e, el);
         // Allowing propagation here lets the event bubble to the top-level
         // document drop handler, which triggers a "hideZone" event on all
         // file inputs.
+        e.preventDefault();
       });
 
       if ($fileInputs.length === 0) this.enableDocumentEvents();

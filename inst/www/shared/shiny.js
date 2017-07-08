@@ -8,8 +8,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 // Source file: ../srcjs/_start.js
 
 (function () {
-  var _this = this;
-
   var $ = jQuery;
 
   var exports = window.Shiny = window.Shiny || {};
@@ -5443,7 +5441,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
           $el.trigger("hideZone.fileDrag");
           console.log("Dropping files is not supported on this browser. (no FileList)");
         }, 0);
-      } else if (!_this.canSetFiles(files)) {
+      } else if (!this.canSetFiles(files)) {
         // 2. The browser doesn't support assigning a type=file input's .files
         // property, but we do have a FileList to work with. (IE10+)
         setTimeout(function () {
@@ -5458,7 +5456,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       }
     },
     subscribe: function subscribe(el, callback) {
-      var _this2 = this;
+      var _this = this;
 
       var $el = $(el),
           $zone = this.getZone(el),
@@ -5482,19 +5480,19 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         var e2 = _ref6[1];
         return s1 === s2 && e1 === e2;
       }).whenAny([["plain", "showZone"], ["over", "dragleave"]], function (e) {
-        $zone.css(_this2.zoneStyles["activated"]);
+        $zone.css(_this.zoneStyles["activated"]);
         setState("activated");
       }).whenAny([["activated", "hideZone"], ["over", "hideZone"]], function (e) {
-        $zone.css(_this2.zoneStyles["plain"]);
+        $zone.css(_this.zoneStyles["plain"]);
         setState("plain");
       }).when(["activated", "dragenter"], function (e) {
-        $zone.css(_this2.zoneStyles["over"]);
+        $zone.css(_this.zoneStyles["over"]);
         setState("over");
       }).when(["over", "drop"], function (e) {
         // In order to have reached this code, the browser must support Drag
         // and Drop ("DnD"), because a "drop" event has been triggered. That
         // means it's probably Chrome, Safari, or IE9+
-        _this2.handleDrop(e, el);
+        _this.handleDrop(e, el);
         // Allowing propagation here lets the event bubble to the top-level
         // document drop handler, which triggers a "hideZone" event on all
         // file inputs.

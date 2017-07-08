@@ -5443,6 +5443,11 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         // property, but we do have a FileList to work with. (IE10+)
         $el.val("");
         uploadDroppedFilesIE10Plus(el, files);
+        // Triggering this event manually because the drop event doesn't seem to
+        // bubble to the document handler on IE.
+        setTimeout(function () {
+          return $fileInputs.trigger("hideZone.fileDrag");
+        }, 0);
       } else {
         // 3. The browser supports FileList and input.files assignment.
         // (Chrome, Safari)

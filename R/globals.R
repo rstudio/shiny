@@ -1,6 +1,17 @@
 # A scope where we can put mutable global state
 .globals <- new.env(parent = emptyenv())
 
+#' Check whether the Shiny app is running
+#'
+#' This function tests whether it is being called from within a running Shiny
+#' app.
+#' @return \code{TRUE} if the function is called from within a running Shiny
+#'   app. Otherwise, \code{FALSE}.
+#' @export
+isRunning <- function () {
+  .globals$running
+}
+
 .onLoad <- function(libname, pkgname) {
   # R's lazy-loading package scheme causes the private seed to be cached in the
   # package itself, making our PRNG completely deterministic. This line resets

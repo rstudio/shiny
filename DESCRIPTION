@@ -82,8 +82,6 @@ Suggests:
     rmarkdown,
     ggplot2,
     magrittr
-Remotes:
-    rstudio/httpuv
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate: 

@@ -5,7 +5,7 @@
   # R's lazy-loading package scheme causes the private seed to be cached in the
   # package itself, making our PRNG completely deterministic. This line resets
   # the private seed during load.
-  withPrivateSeed(reinitializeSeed())
+  withPrivateSeed(set.seed(NULL))
 }
 
 .onAttach <- function(libname, pkgname) {

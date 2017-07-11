@@ -282,7 +282,7 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
       extra_attr <- imageinfo[!names(imageinfo) %in% c('src', 'contentType')]
 
       # Return a list with src, and other img attributes
-      c(src = shinysession$fileUrl(name, file=imageinfo$src, contentType=contentType),
+      c(src = session$fileUrl(name, file=imageinfo$src, contentType=contentType),
         extra_attr)
     },
     imageOutput, outputArgs)
@@ -333,8 +333,14 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
   renderFunc <- function(shinysession, name, ...) {
     domain <- createRenderPrintPromiseDomain(width)
     p1 <- promise::with_promise_domain(domain, {
-      p2 <- promise::resolved(func())
+      p2 <- promise::resolved(TRUE)
       p2 <- promise::then(p2, function(value) {
+        func()
+      })
+      p2 <- promise::then(p2, function(value, .visible) {
+        if (.visible) {
+          cat(file = domain$conn, paste(capture.output(value, append = TRUE), collapse = "\n"))
+        }
         res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
         res
       })
@@ -342,6 +348,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
       p2 <- promise::catch(p2,
         function(err) { cat(file=stderr(), "ERROR", err$message) }
       )
+      p2
     })
     p1 <- promise::finally(p1, ~close(domain$conn))
     p1
@@ -360,7 +367,22 @@ createRenderPrintPromiseDomain <- function(width) {
         op <- options(width = width)
         on.exit(options(op), add = TRUE)
 
-        capture.output(onFulfilled(...), file = f, append = TRUE, split = TRUE)
+        sink(f, append = TRUE)
+        on.exit(sink(NULL), add = TRUE)
+
+        onFulfilled(...)
+      }
+    },
+    wrapOnRejected = function(onRejected) {
+      force(onRejected)
+      function(...) {
+        op <- options(width = width)
+        on.exit(options(op), add = TRUE)
+
+        sink(f, append = TRUE)
+        on.exit(sink(NULL), add = TRUE)
+
+        onRejected(...)
       }
     },
     conn = f

@@ -9,6 +9,8 @@ shiny 1.0.3.9001
 
 ### Minor new features and improvements
 
+* Exposed options for `dateInput` and `dateRangeInput` from the Bootstrap Datepicker. ([#1373](https://github.com/rstudio/shiny/issues/1373)
+
 * Addressed [#1688](https://github.com/rstudio/shiny/issues/1688): trigger a new `shiny:outputinvalidated` event when an output gets invalidated, at the same time that the `recalculating` CSS class is added. ([#1758](https://github.com/rstudio/shiny/pull/1758), thanks [@andrewsali](https://github.com/andrewsali)!)
 
 * Addressed [#1508](https://github.com/rstudio/shiny/issues/1508): `fileInput` now permits the same file to be uploaded multiple times. ([#1719](https://github.com/rstudio/shiny/pull/1719))

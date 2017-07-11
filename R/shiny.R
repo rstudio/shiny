@@ -639,6 +639,19 @@ ShinySession <- R6Class(
               values$input <- allInputs[items]
             }
 
+            # Apply shiny.snapshot.preprocess functions for inputs that have them.
+            values$input <- lapply(
+              setNames(names(values$input), names(values$input)),
+              function(name) {
+                preprocess <- private$.input$getMeta(name, "shiny.snapshot.preprocess")
+                if (is.function(preprocess)) {
+                  preprocess(values$input[[name]])
+                } else {
+                  values$input[[name]]
+                }
+              }
+            )
+
             values$input <- sortByName(values$input)
           }
 
@@ -1512,6 +1525,7 @@ ShinySession <- R6Class(
       private$.input$set(inputId, fileData)
 
       private$.input$setMeta(inputId, "shiny.serializer", serializerFileInput)
+      private$.input$setMeta(inputId, "shiny.snapshot.preprocess", snapshotPreprocessorFileInput)
 
       invisible()
     },

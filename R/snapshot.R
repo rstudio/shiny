@@ -18,3 +18,11 @@ snapshotPreprocess <- function(x, fun) {
   markOutputAttrs(x, snapshotPreprocess = fun)
 }
 
+
+# fileInputs need preprocessing before being snapshotted. This gets added as a
+# meta attribute to the input value. (Note that this is an input, not an
+# output, so it's not set via the snapshotPreprocess() function.)
+snapshotPreprocessorFileInput <- function(value) {
+  value$datapath <- basename(value$datapath)
+  value
+}

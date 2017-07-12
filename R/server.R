@@ -577,7 +577,11 @@ runApp <- function(appDir=getwd(),
 
   # Make warnings print immediately
   # Set pool.scheduler to support pool package
-  ops <- options(warn = 1, pool.scheduler = scheduleTask)
+  ops <- options(
+    # Raise warn level to 1, but don't lower it
+    warn = max(1, getOption("warn", default = 1)),
+    pool.scheduler = scheduleTask
+  )
   on.exit(options(ops), add = TRUE)
 
   appParts <- as.shiny.appobj(appDir)

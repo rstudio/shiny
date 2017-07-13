@@ -19,9 +19,25 @@ snapshotPreprocessOutput <- function(x, fun) {
 }
 
 
-# fileInputs need preprocessing before being snapshotted. This gets added as a
-# meta attribute to the input value. (Note that this is an input, not an
-# output, so it's not set via the snapshotPreprocess() function.)
+#' Add a function for preprocessing an input before taking a test snapshot
+#'
+#' @param inputId Name of the input value.
+#' @param fun A function that takes the input value and returns a modified
+#'   value. The returned value will be used for the test snapshot.
+#' @param session A Shiny session object.
+#'
+#' @export
+snapshotPreprocessInput <- function(inputId, fun, session = getDefaultReactiveDomain()) {
+  if (is.null(session)) {
+    stop("snapshotPreprocessInput() needs a session object.")
+  }
+
+  input_impl <- .subset2(session$input, "impl")
+  input_impl$setMeta(inputId, "shiny.snapshot.preprocess", fun)
+}
+
+
+# Strip out file path from fileInput value
 snapshotPreprocessorFileInput <- function(value) {
   value$datapath <- basename(value$datapath)
   value

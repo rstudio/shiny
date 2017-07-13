@@ -1525,7 +1525,7 @@ ShinySession <- R6Class(
       private$.input$set(inputId, fileData)
 
       private$.input$setMeta(inputId, "shiny.serializer", serializerFileInput)
-      private$.input$setMeta(inputId, "shiny.snapshot.preprocess", snapshotPreprocessorFileInput)
+      snapshotPreprocessInput(inputId, snapshotPreprocessorFileInput)
 
       invisible()
     },

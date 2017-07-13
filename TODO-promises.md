@@ -8,3 +8,4 @@
 - [x] Respect execOnResize
 - [ ] Accidentally did then(cars) instead of then(~cars), which caused an *unhandled* promise exception
 - [ ] promise::resolved(logic()) should use the current reactive domain to wrap the call to logic()
+- [ ] invisible() doesn't seem to be working correctly with renderPrint

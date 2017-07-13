@@ -1,7 +1,7 @@
 ^\.Rproj\.user$
 ^\.git$
 ^examples$
-^shiny\.Rproj$
+^.*\.Rproj$
 ^shiny\.sh$
 ^shiny\.cmd$
 ^run\.R$
@@ -18,3 +18,4 @@
 ^.*\.o$
 ^appveyor\.yml$
 ^revdep$
+^tests/testthat/apps/\.git$

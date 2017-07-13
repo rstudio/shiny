@@ -6,6 +6,14 @@ r:
 sudo: false
 cache: packages
 
+# Need to replace the git: URL with https: so that Travis can check out the
+# submodule.
+git:
+  submodules: false
+before_install:
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+
 notifications:
   email:
     on_success: change

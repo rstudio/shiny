@@ -216,5 +216,7 @@ registerInputHandler("shiny.file", function(val, shinysession, name) {
   # session$`@uploadEnd`.
   .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializer", serializerFileInput)
 
+  snapshotPreprocessInput(name, snapshotPreprocessorFileInput)
+
   val
 })

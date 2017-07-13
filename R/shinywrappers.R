@@ -543,7 +543,7 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
 
   renderFunc <- markRenderFunction(dataTableOutput, renderFunc, outputArgs = outputArgs)
 
-  renderFunc <- snapshotPreprocess(renderFunc, function(value) {
+  renderFunc <- snapshotPreprocessOutput(renderFunc, function(value) {
     # Remove the action field so that it's not saved in test snapshots. It
     # contains a value that changes every time an app is run, and shouldn't be
     # stored for test snapshots. It will be something like:

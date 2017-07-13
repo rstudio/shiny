@@ -14,7 +14,7 @@ snapshotExclude <- function(x) {
 #'   modified value. The returned value will be used for the test snapshot.
 #'
 #' @export
-snapshotPreprocess <- function(x, fun) {
+snapshotPreprocessOutput <- function(x, fun) {
   markOutputAttrs(x, snapshotPreprocess = fun)
 }
 

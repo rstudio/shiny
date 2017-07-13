@@ -5,7 +5,7 @@ if (dir.exists("apps")) {
   if (length(app_dirs) > 0) {
     for (app_dir in app_dirs) {
       test_that(basename(app_dir), {
-        shinytest::expect_pass(shinytest::testApp(app_dir))
+        shinytest::expect_pass(shinytest::testApp(app_dir, compareScreenshot = FALSE))
       })
     }
   }

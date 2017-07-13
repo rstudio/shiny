@@ -643,7 +643,7 @@ ShinySession <- R6Class(
             values$input <- lapply(
               setNames(names(values$input), names(values$input)),
               function(name) {
-                preprocess <- getSnapshotPreprocessInput(name, self)
+                preprocess <- private$getSnapshotPreprocessInput(name)
                 preprocess(values$input[[name]])
               }
             )
@@ -671,12 +671,8 @@ ShinySession <- R6Class(
             values$output <- lapply(
               setNames(names(values$output), names(values$output)),
               function(name) {
-                preprocess <- attr(private$.outputs[[name]], "snapshotPreprocess", TRUE)
-                if (is.function(preprocess)) {
-                  preprocess(values$output[[name]])
-                } else {
-                  values$output[[name]]
-                }
+                preprocess <- private$getSnapshotPreprocessOutput(name)
+                preprocess(values$output[[name]])
               }
             )
 
@@ -734,6 +730,20 @@ ShinySession <- R6Class(
           }
         }
       )
+    },
+
+    # Get the snapshotPreprocessOutput function for an output name. If no preprocess
+    # function has been set, return the identity function.
+    getSnapshotPreprocessOutput = function(name) {
+      fun <- attr(private$.outputs[[name]], "snapshotPreprocess", exact = TRUE)
+      fun %OR% identity
+    },
+
+    # Get the snapshotPreprocessInput function for an input name. If no preprocess
+    # function has been set, return the identity function.
+    getSnapshotPreprocessInput = function(name) {
+      fun <- private$.input$getMeta(name, "shiny.snapshot.preprocess")
+      fun %OR% identity
     }
   ),
   public = list(

@@ -639,16 +639,12 @@ ShinySession <- R6Class(
               values$input <- allInputs[items]
             }
 
-            # Apply shiny.snapshot.preprocess functions for inputs that have them.
+            # Apply preprocessor functions for inputs that have them.
             values$input <- lapply(
               setNames(names(values$input), names(values$input)),
               function(name) {
-                preprocess <- private$.input$getMeta(name, "shiny.snapshot.preprocess")
-                if (is.function(preprocess)) {
-                  preprocess(values$input[[name]])
-                } else {
-                  values$input[[name]]
-                }
+                preprocess <- getSnapshotPreprocessInput(name, self)
+                preprocess(values$input[[name]])
               }
             )
 

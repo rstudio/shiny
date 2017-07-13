@@ -36,6 +36,22 @@ snapshotPreprocessInput <- function(inputId, fun, session = getDefaultReactiveDo
   input_impl$setMeta(inputId, "shiny.snapshot.preprocess", fun)
 }
 
+# Get the snapshotPreprocessInput function for an input name. If no preprocess
+# function has been set, return the identity function.
+getSnapshotPreprocessInput <- function(inputId, session = getDefaultReactiveDomain()) {
+  if (is.null(session)) {
+    stop("getSnapshotPreprocessInput() needs a session object.")
+  }
+
+  input_impl <- .subset2(session$input, "impl")
+  fun <- input_impl$getMeta(inputId, "shiny.snapshot.preprocess")
+
+  if (!is.null(fun))
+    fun
+  else
+    identity
+}
+
 
 # Strip out file path from fileInput value
 snapshotPreprocessorFileInput <- function(value) {

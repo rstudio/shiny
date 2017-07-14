@@ -717,8 +717,7 @@ var ShinyApp = function() {
   addMessageHandler('shiny-insert-tab', function (message) {
     var $tabsetPanel = $("#" + message.tabsetPanelId);
     if ($tabsetPanel.length === 0) {
-      console.warn('There is no tabsetPanel with id ' + message.tabsetPanelId);
-      return;
+      throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
     };
 
     // This is the JS equivalent of the builtItem() R function that is used
@@ -784,6 +783,28 @@ var ShinyApp = function() {
 
     exports.renderDependencies(message.tab.deps);
     exports.renderContent($tabContent[0], $tabContent.html());
+  });
+
+  addMessageHandler('shiny-remove-tab', function (message) {
+    var $tabsetPanel = $("#" + message.tabsetPanelId);
+    if ($tabsetPanel.length === 0) {
+      throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
+    };
+    var $tabContent = $tabsetPanel.find("+ .tab-content");
+    var dataValue = "[data-value='" + message.target + "']";
+
+    var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
+    var $targetTabContent = $tabContent.find("div" + dataValue);
+
+    if ($targetTabsetPanel.length === 0) {
+      throw 'There is no tabPanel with value ' + message.target;
+    }
+
+    var els = [$targetTabsetPanel, $targetTabContent];
+    $(els).each(function (i, el) {
+      exports.unbindAll(el, true);
+      $(el).remove();
+    });
   });
 
   addMessageHandler('updateQueryString', function(message) {

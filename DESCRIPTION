@@ -84,7 +84,7 @@ Suggests:
     magrittr,
     shinytest
 Remotes:
-    rstudio/shinytest@exclude-screenshot
+    rstudio/shinytest
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate: 

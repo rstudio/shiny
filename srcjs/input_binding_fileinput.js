@@ -329,7 +329,9 @@ $.extend(fileInputBinding, {
     });
     // Enable the drop event and prevent download if the file is dropped outside
     // of a drop zone.
-    $doc.on("dragover.fileDrag drop.fileDrag", e => e.preventDefault());
+    $doc.on("dragover.fileDrag drop.fileDrag", e => {
+      e.preventDefault();
+    });
   },
   disableDocumentEvents: function() {
     let $doc = $(document);
@@ -377,9 +379,15 @@ $.extend(fileInputBinding, {
       // property, but we do have a FileList to work with. (IE10+)
       $el.val("");
       uploadDroppedFilesIE10Plus(el, files);
-      // Triggering this event manually because the drop event doesn't seem to
-      // bubble to the document handler on IE.
-      setTimeout(() => $fileInputs.trigger("hideZone.fileDrag"), 0);
+      window.setTimeout(() => {
+        // We manually trigger the hideZone event because for some reason the
+        // document-level handler is disabled by the drop event.
+        $fileInputs.trigger("hideZone.fileDrag");
+        // Because the document handlers are removed inexplicably on IE10, we
+        // re-add them here.
+        this.disableDocumentEvents();
+        this.enableDocumentEvents();
+      }, 0);
     } else {
       // 3. The browser supports FileList and input.files assignment.
       // (Chrome, Safari)

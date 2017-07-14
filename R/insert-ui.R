@@ -238,9 +238,6 @@ insertTab <- function(tabsetPanelId, tab, target = NULL,
   position <- match.arg(position)
   force(session)
 
-  # tabContent <- tags$div(class = "tab-content")
-  # buildItem(tabsetId, divTag)
-
   iconClass <- tab$attribs$`data-icon-class`
   icon <- if (!is.null(iconClass)) {
     # for font-awesome we specify fixed-width

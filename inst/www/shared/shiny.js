@@ -1333,6 +1333,75 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     });
 
+    addMessageHandler('shiny-insert-tab', function (message) {
+      var $tabsetPanel = $("#" + message.tabsetPanelId);
+      if ($tabsetPanel.length === 0) {
+        console.warn('There is no tabsetPanel with id ' + message.tabsetPanelId);
+        return;
+      };
+
+      // This is the JS equivalent of the builtItem() R function that is used
+      // to build a tabPanel when initializing a tabsetPanel
+      var $tab = $(message.tab.html);
+      var leadingHref = "#tab-" + $tabsetPanel.attr("data-tabsetid") + "-";
+
+      var prevTabIds = [];
+      $tabsetPanel.find("> li").each(function () {
+        prevTabIds.push($(this).find('> a').attr('href').replace(leadingHref, ''));
+      });
+      prevTabIds = prevTabIds.map(Number);
+      var tabId = Math.max.apply(Math, prevTabIds) + 1;
+      var thisId = "tab-" + $tabsetPanel.attr("data-tabsetid") + "-" + tabId;
+
+      var icon = message.icon.html;
+
+      // if there is an icon, render the possible deps
+      if (icon !== "") exports.renderDependencies(message.icon.deps);
+
+      var $aTag = $("<a>", {
+        href: "#" + thisId,
+        "data-toggle": "tab",
+        "data-value": $tab.attr("data-value")
+      }).append(icon).append($tab.attr("title"));
+
+      var $liTag = $("<li>").append($aTag);
+      var $divTag = $tab.attr("id", thisId);
+      $divTag.removeAttr("title");
+
+      var $tabContent = $tabsetPanel.find("+ .tab-content");
+
+      if (message.target === null) {
+        if (message.position === "left") {
+          $tabsetPanel.prepend($liTag);
+          $tabContent.prepend($divTag);
+        } else if (message.position === "right") {
+          $tabsetPanel.append($liTag);
+          $tabContent.append($divTag);
+        }
+      } else {
+        var dataValue = "[data-value='" + message.target + "']";
+        var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
+        var $targetTabContent = $tabContent.find("div" + dataValue);
+
+        if ($targetTabsetPanel.length === 0) {
+          console.warn('There is no tabPanel with value ' + message.target + 'Appending tab to the end...');
+          $tabsetPanel.append($liTag);
+          $tabContent.append($divTag);
+        } else {
+          if (message.position === "left") {
+            $targetTabsetPanel.before($liTag);
+            $targetTabContent.before($divTag);
+          } else if (message.position === "right") {
+            $targetTabsetPanel.after($liTag);
+            $targetTabContent.after($divTag);
+          }
+        }
+      }
+
+      exports.renderDependencies(message.tab.deps);
+      exports.renderContent($tabContent[0], $tabContent.html());
+    });
+
     addMessageHandler('updateQueryString', function (message) {
 
       // leave the bookmarking code intact

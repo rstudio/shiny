@@ -30,7 +30,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(actionButton("remove", "Remove tab")),
     mainPanel(
-      tabsetPanel(id = "tabs"
+      tabsetPanel(id = "tabs",
         tabPanel("Hello", "This is the hello tab"),
         tabPanel("Foo", "This is the foo tab"),
         tabPanel("Bar", "This is the bar tab")

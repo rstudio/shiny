@@ -4,7 +4,7 @@
 \alias{insertTab}
 \title{Dynamically add a tabPanel}
 \usage{
-insertTab(tabsetPanelId, tab, target, position = c("right", "left"),
+insertTab(tabsetPanelId, tab, target = NULL, position = c("right", "left"),
   immediate = FALSE, session = getDefaultReactiveDomain())
 }
 \arguments{
@@ -15,7 +15,9 @@ insertTab(tabsetPanelId, tab, target, position = c("right", "left"),
 \code{tabPanel}).}
 
 \item{target}{The \code{value} of an existing \code{tabPanel()}, next to
-which \code{tab} will be added.}
+which \code{tab} will be added. If \code{NULL},the \code{tab} will be
+placed either as the first tab or the last tab, depending on the
+\code{position} argument.}
 
 \item{position}{Should \code{tab} be added to the right ot to the left
 of \code{target}?}
@@ -36,7 +38,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(actionButton("add", "Add tab")),
     mainPanel(
-      tabsetPanel(id = "tabs"
+      tabsetPanel(id = "tabs",
         tabPanel("Hello", "This is the hello tab"),
         tabPanel("Foo", "This is the foo tab"),
         tabPanel("Bar", "This is the bar tab")

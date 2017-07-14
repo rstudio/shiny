@@ -28,7 +28,7 @@ Dynamically show (expose) a hidden \code{tabPanel()} from an existing
 if (interactive()) {
 ui <- fluidPage(
   sidebarLayout(
-    sidebarPanel(actionButton("remove", "Remove tab")),
+    sidebarPanel(actionButton("show", "Show tab")),
     mainPanel(
       tabsetPanel(id = "tabs",
         tabPanel("Hello", "This is the hello tab"),
@@ -39,10 +39,11 @@ ui <- fluidPage(
   )
 )
 server <- function(input, output, session) {
-  observeEvent(input$remove, {
-    showTab(tabsetPanelId = "tabs",
-      target = "Bar"
-    )
+  # Hide tab as soon as app starts up
+  hideTab(tabsetPanelId = "tabs", target = "Foo")
+
+  observeEvent(input$show, {
+    showTab(tabsetPanelId = "tabs", target = "Foo")
   })
 }
 

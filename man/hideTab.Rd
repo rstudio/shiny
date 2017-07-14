@@ -28,7 +28,7 @@ Dynamically hide \code{tabPanel()} from an existing
 if (interactive()) {
 ui <- fluidPage(
   sidebarLayout(
-    sidebarPanel(actionButton("remove", "Remove tab")),
+    sidebarPanel(actionButton("hide", "Hide tab")),
     mainPanel(
       tabsetPanel(id = "tabs",
         tabPanel("Hello", "This is the hello tab"),
@@ -39,10 +39,8 @@ ui <- fluidPage(
   )
 )
 server <- function(input, output, session) {
-  observeEvent(input$remove, {
-    hideTab(tabsetPanelId = "tabs",
-      target = "Bar"
-    )
+  observeEvent(input$hide, {
+    hideTab(tabsetPanelId = "tabs", target = "Foo")
   })
 }
 

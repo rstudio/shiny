@@ -295,9 +295,7 @@ insertTab <- function(tabsetPanelId, tab, target = NULL,
 #' )
 #' server <- function(input, output, session) {
 #'   observeEvent(input$remove, {
-#'     removeTab(tabsetPanelId = "tabs",
-#'       target = "Bar"
-#'     )
+#'     removeTab(tabsetPanelId = "tabs", target = "Foo")
 #'   })
 #' }
 #'
@@ -346,7 +344,7 @@ removeTab <- function(tabsetPanelId, target, immediate = FALSE,
 #' if (interactive()) {
 #' ui <- fluidPage(
 #'   sidebarLayout(
-#'     sidebarPanel(actionButton("remove", "Remove tab")),
+#'     sidebarPanel(actionButton("show", "Show tab")),
 #'     mainPanel(
 #'       tabsetPanel(id = "tabs",
 #'         tabPanel("Hello", "This is the hello tab"),
@@ -357,10 +355,11 @@ removeTab <- function(tabsetPanelId, target, immediate = FALSE,
 #'   )
 #' )
 #' server <- function(input, output, session) {
-#'   observeEvent(input$remove, {
-#'     showTab(tabsetPanelId = "tabs",
-#'       target = "Bar"
-#'     )
+#'   # Hide tab as soon as app starts up
+#'   hideTab(tabsetPanelId = "tabs", target = "Foo")
+#'
+#'   observeEvent(input$show, {
+#'     showTab(tabsetPanelId = "tabs", target = "Foo")
 #'   })
 #' }
 #'
@@ -409,7 +408,7 @@ showTab <- function(tabsetPanelId, target, immediate = FALSE,
 #' if (interactive()) {
 #' ui <- fluidPage(
 #'   sidebarLayout(
-#'     sidebarPanel(actionButton("remove", "Remove tab")),
+#'     sidebarPanel(actionButton("hide", "Hide tab")),
 #'     mainPanel(
 #'       tabsetPanel(id = "tabs",
 #'         tabPanel("Hello", "This is the hello tab"),
@@ -420,10 +419,8 @@ showTab <- function(tabsetPanelId, target, immediate = FALSE,
 #'   )
 #' )
 #' server <- function(input, output, session) {
-#'   observeEvent(input$remove, {
-#'     hideTab(tabsetPanelId = "tabs",
-#'       target = "Bar"
-#'     )
+#'   observeEvent(input$hide, {
+#'     hideTab(tabsetPanelId = "tabs", target = "Foo")
 #'   })
 #' }
 #'

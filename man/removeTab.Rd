@@ -39,9 +39,7 @@ ui <- fluidPage(
 )
 server <- function(input, output, session) {
   observeEvent(input$remove, {
-    removeTab(tabsetPanelId = "tabs",
-      target = "Bar"
-    )
+    removeTab(tabsetPanelId = "tabs", target = "Foo")
   })
 }
 

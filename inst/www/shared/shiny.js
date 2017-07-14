@@ -1423,6 +1423,38 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     });
 
+    addMessageHandler('shiny-show-tab', function (message) {
+      var $tabsetPanel = $("#" + message.tabsetPanelId);
+      if ($tabsetPanel.length === 0) {
+        throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
+      };
+
+      var dataValue = "[data-value='" + message.target + "']";
+      var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
+
+      if ($targetTabsetPanel.length === 0) {
+        throw 'There is no tabPanel with value ' + message.target;
+      }
+
+      $targetTabsetPanel.show();
+    });
+
+    addMessageHandler('shiny-hide-tab', function (message) {
+      var $tabsetPanel = $("#" + message.tabsetPanelId);
+      if ($tabsetPanel.length === 0) {
+        throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
+      };
+
+      var dataValue = "[data-value='" + message.target + "']";
+      var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
+
+      if ($targetTabsetPanel.length === 0) {
+        throw 'There is no tabPanel with value ' + message.target;
+      }
+
+      $targetTabsetPanel.hide();
+    });
+
     addMessageHandler('updateQueryString', function (message) {
 
       // leave the bookmarking code intact

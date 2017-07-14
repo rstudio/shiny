@@ -685,7 +685,7 @@ var ShinyApp = function() {
     window.location.reload();
   });
 
-  addMessageHandler('shiny-insert-ui', function (message) {
+  addMessageHandler('shiny-insert-ui', function(message) {
     var targets = $(message.selector);
     if (targets.length === 0) {
       // render the HTML and deps to a null target, so
@@ -702,7 +702,7 @@ var ShinyApp = function() {
     }
   });
 
-  addMessageHandler('shiny-remove-ui', function (message) {
+  addMessageHandler('shiny-remove-ui', function(message) {
     var els = $(message.selector);
     els.each(function (i, el) {
       exports.unbindAll(el, true);
@@ -714,7 +714,7 @@ var ShinyApp = function() {
     });
   });
 
-  addMessageHandler('shiny-insert-tab', function (message) {
+  addMessageHandler('shiny-insert-tab', function(message) {
     var $tabsetPanel = $("#" + message.tabsetPanelId);
     if ($tabsetPanel.length === 0) {
       throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
@@ -785,7 +785,7 @@ var ShinyApp = function() {
     exports.renderContent($tabContent[0], $tabContent.html());
   });
 
-  addMessageHandler('shiny-remove-tab', function (message) {
+  addMessageHandler('shiny-remove-tab', function(message) {
     var $tabsetPanel = $("#" + message.tabsetPanelId);
     if ($tabsetPanel.length === 0) {
       throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
@@ -805,6 +805,38 @@ var ShinyApp = function() {
       exports.unbindAll(el, true);
       $(el).remove();
     });
+  });
+
+  addMessageHandler('shiny-show-tab', function(message) {
+    var $tabsetPanel = $("#" + message.tabsetPanelId);
+    if ($tabsetPanel.length === 0) {
+      throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
+    };
+
+    var dataValue = "[data-value='" + message.target + "']";
+    var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
+
+    if ($targetTabsetPanel.length === 0) {
+      throw 'There is no tabPanel with value ' + message.target;
+    }
+
+    $targetTabsetPanel.show();
+  });
+
+  addMessageHandler('shiny-hide-tab', function(message) {
+        var $tabsetPanel = $("#" + message.tabsetPanelId);
+    if ($tabsetPanel.length === 0) {
+      throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
+    };
+
+    var dataValue = "[data-value='" + message.target + "']";
+    var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
+
+    if ($targetTabsetPanel.length === 0) {
+      throw 'There is no tabPanel with value ' + message.target;
+    }
+
+    $targetTabsetPanel.hide();
   });
 
   addMessageHandler('updateQueryString', function(message) {

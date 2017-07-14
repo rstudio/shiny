@@ -7,6 +7,8 @@ shiny 1.0.3.9001
 
 ### New features
 
+* Dynamic tabs: added four functions (`insertTab`, `removeTab`, `showTab` and `hideTab`) that allow you to do those actions for an existing tabsetPanel. ([#1794](https://github.com/rstudio/shiny/pull/1794))
+
 * Added a new function, `onStop()`, which can be used to register callback functions that are invoked when an application exits, or when a user session ends. (Multiple sessions can be connected to a single running Shiny application.) This is useful if you have finalization/clean-up code that should be run after the application exits. ([#1770](https://github.com/rstudio/shiny/pull/1770)
 
 ### Minor new features and improvements

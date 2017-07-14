@@ -1383,7 +1383,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var $targetTabContent = $tabContent.find("div" + dataValue);
 
         if ($targetTabsetPanel.length === 0) {
-          console.warn('There is no tabPanel with value ' + message.target + 'Appending tab to the end...');
+          console.warn('There is no tabPanel with value ' + message.target + '. ' + 'Appending tab to the end...');
           $tabsetPanel.append($liTag);
           $tabContent.append($divTag);
         } else {

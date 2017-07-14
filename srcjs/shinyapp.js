@@ -766,7 +766,7 @@ var ShinyApp = function() {
       var $targetTabContent = $tabContent.find("div" + dataValue);
 
       if ($targetTabsetPanel.length === 0) {
-        console.warn('There is no tabPanel with value ' + message.target +
+        console.warn('There is no tabPanel with value ' + message.target + '. ' +
                      'Appending tab to the end...');
         $tabsetPanel.append($liTag);
         $tabContent.append($divTag);

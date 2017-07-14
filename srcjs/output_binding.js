@@ -38,10 +38,9 @@ var OutputBinding = exports.OutputBinding = function() {};
   };
   this.showProgress = function(el, show) {
     var RECALC_CLASS = 'recalculating';
-    if (show) {
+    if (show)
       $(el).addClass(RECALC_CLASS);
-    } else {
+    else
       $(el).removeClass(RECALC_CLASS);
-    }
   };
 }).call(OutputBinding.prototype);

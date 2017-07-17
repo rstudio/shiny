@@ -296,10 +296,10 @@ $.extend(fileInputBinding, {
     // This will be used only when restoring a file from a saved state.
     return 'shiny.file';
   },
-  getZone: function(el) {
+  _getZone: function(el) {
     return $(el).closest("div.input-group");
   },
-  enableDraghover: function($el) {
+  _enableDraghover: function($el) {
     // Create an empty jQuery collection. This is a set-like data structure that
     // jQuery normally uses to contain the results of a selection.
     let collection = $();
@@ -331,13 +331,13 @@ $.extend(fileInputBinding, {
       }, 0);
     });
   },
-  disableDraghover: function($el) {
+  _disableDraghover: function($el) {
     $el.off(".dragHover");
   },
-  enableDocumentEvents: function() {
+  _enableDocumentEvents: function() {
     let $doc = $("html");
 
-    this.enableDraghover($doc);
+    this._enableDraghover($doc);
     $doc.on("draghoverstart.fileDrag", e => {
       $fileInputs.trigger("showZone.fileDrag");
     });
@@ -349,22 +349,21 @@ $.extend(fileInputBinding, {
     $doc.on("dragover.fileDrag drop.fileDrag", e => {
       e.preventDefault();
     });
-
   },
-  disableDocumentEvents: function() {
+  _disableDocumentEvents: function() {
     let $doc = $("html");
 
     $doc.off(".fileDrag");
-    this.disableDraghover($doc);
+    this._disableDraghover($doc);
   },
-  zoneEvents: [
+  _zoneEvents: [
     "showZone.fileDrag",
     "hideZone.fileDrag",
     "dragenter",
     "dragleave",
     "drop"
   ].join(" "),
-  canSetFiles: function(fileList) {
+  _canSetFiles: function(fileList) {
     var testEl = document.createElement("input");
     testEl.type = "file";
     try {
@@ -374,16 +373,16 @@ $.extend(fileInputBinding, {
     }
     return true;
   },
-  handleDrop: function(e, el) {
+  _handleDrop: function(e, el) {
     const files = e.originalEvent.dataTransfer.files,
           $el   = $(el);
     if (files === undefined || files === null) {
       // 1. The FileList object isn't supported by this browser, and
       // there's nothing else we can try. (< IE 10)
       console.log("Dropping files is not supported on this browser. (no FileList)");
-    } else if (!this.canSetFiles(files)) {
+    } else if (!this._canSetFiles(files)) {
       // 2. The browser doesn't support assigning a type=file input's .files
-      // property, but we do have a FileList to work with. (IE10+)
+      // property, but we do have a FileList to work with. (IE10+/Edge)
       $el.val("");
       uploadDroppedFilesIE10Plus(el, files);
     } else {
@@ -397,73 +396,97 @@ $.extend(fileInputBinding, {
     $fileInputs.trigger("hideZone.fileDrag");
     // Because the document handlers are removed inexplicably, we re-add them
     // here.
-    this.disableDocumentEvents();
-    this.enableDocumentEvents();
+    this._disableDocumentEvents();
+    this._enableDocumentEvents();
+  },
+  _activeClass: "shiny-file-input-active",
+  _overClass: "shiny-file-input-over",
+  _isIE9: function() {
+    try {
+      return (window.navigator.userAgent.match(/MSIE 9\./) && true) || false;
+    } catch (e) {
+      return false;
+    }
   },
   subscribe: function(el, callback) {
-    let $el         = $(el),
-        $zone       = this.getZone(el),
-        activeClass = "shiny-file-input-active",
-        overClass   = "shiny-file-input-over",
-        getState    = () => $el.data("state"),
-        setState    = (newState) => $el.data("state", newState),
-        transition  = multimethod()
+    let $el = $(el);
+    // Here we try to set up the necessary events for Drag and Drop ("DnD") on
+    // every browser except IE9. We specifically exclude IE9 because it's one
+    // browser that supports just enough of the functionality we need to be
+    // confusing. In particular, it supports drag events, so drop zones will
+    // highlight when a file is dragged into the browser window. It doesn't
+    // support the FileList object though, so the user's expectation that DnD is
+    // supported based on this highlighting would be incorrect.
+    if (!this._isIE9()) {
+      let $zone       = this._getZone(el),
+          getState    = () => $el.data("state"),
+          setState    = (newState) => $el.data("state", newState),
+          transition  = multimethod()
           .dispatch(e => [getState(), e.type])
           .whenAny([
             ["plain", "showZone"],
             ["over", "dragleave"],
           ], e => {
-            $zone.removeClass(overClass);
-            $zone.addClass(activeClass);
+            $zone.removeClass(this._overClass);
+            $zone.addClass(this._activeClass);
             setState("activated");
           })
           .whenAny([
             ["activated", "hideZone"],
-            ["over", "hideZone"]
+            ["over", "hideZone"],
+            ["plain", "hideZone"]
           ], e => {
-            $zone.removeClass(overClass);
-            $zone.removeClass(activeClass);
+            $zone.removeClass(this._overClass);
+            $zone.removeClass(this._activeClass);
             setState("plain");
           })
           .whenAny([
             ["activated", "dragenter"],
             ["over", "dragenter"]
           ], e => {
-            $zone.addClass(overClass);
+            $zone.addClass(this._overClass);
             setState("over");
           })
           .when(["over", "drop"], (e) => {
             // In order to have reached this code, the browser must support Drag
             // and Drop ("DnD"), because a "drop" event has been triggered. That
             // means it's probably Chrome, Safari, or IE9+
-            this.handleDrop(e, el);
+            this._handleDrop(e, el);
             e.preventDefault();
             e.stopPropagation();
+          })
+          .else((e) => {
+            // This is harmless and can be observed happening in IE10+. It might
+            // be related to running in a VM.
+            console.log("fileInput DnD unhandled transition: " + getState() + "," + e.type);
+            $fileInputs.trigger("hideZone.fileDrag");
           });
 
-    if ($fileInputs.length === 0) this.enableDocumentEvents();
-
-    setState("plain");
+      if ($fileInputs.length === 0) this._enableDocumentEvents();
+      setState("plain");
+      $zone.on(this._zoneEvents, transition);
+      $fileInputs = $fileInputs.add(el);
+    }
 
     $el.on("change.fileInputBinding", uploadFiles);
-    $zone.on(this.zoneEvents, transition);
-
-    $fileInputs = $fileInputs.add(el);
   },
 
   unsubscribe: function(el) {
     let $el   = $(el),
-        $zone = this.getZone(el);
+        $zone = this._getZone(el);
 
     $el.removeData("state");
 
+    $zone.removeClass(this._overClass);
+    $zone.removeClass(this._activeClass);
+
     // Clean up local event handlers.
     $el.off(".fileInputBinding");
-    $zone.off(this.zoneEvents);
+    $zone.off(this._zoneEvents);
 
     // Remove el from list of inputs and (maybe) clean up global event handlers.
     $fileInputs = $fileInputs.not(el);
-    if ($fileInputs.length === 0) this.disableDocumentEvents();
+    if ($fileInputs.length === 0) this._disableDocumentEvents();
   }
 });
 inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');

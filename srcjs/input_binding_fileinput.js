@@ -181,37 +181,41 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
 }).call(FileUploader.prototype);
 
 
-function uploadDroppedFilesIE10Plus(el, files) {
-  // If previously selected files are uploading, abort that.
-  var $el = $(el);
-  var uploader = $el.data('currentUploader');
-  if (uploader)
-    uploader.abort();
-
-  // Clear data-restore attribute if present.
-  $el.removeAttr('data-restore');
-
-  // Set the label in the text box
+function setFileText($el, files) {
   var $fileText = $el.closest('div.input-group').find('input[type=text]');
   if (files.length === 1) {
     $fileText.val(files[0].name);
   } else {
     $fileText.val(files.length + " files");
   }
+}
 
-  var id = fileInputBinding.getId(el);
+// If previously selected files are uploading, abort that.
+function abortCurrentUpload($el) {
+  var uploader = $el.data('currentUploader');
+  if (uploader) uploader.abort();
+  // Clear data-restore attribute if present.
+  $el.removeAttr('data-restore');
+}
+
+function uploadDroppedFilesIE10Plus(el, files) {
+  var $el = $(el);
+  abortCurrentUpload($el);
+
+  // Set the label in the text box
+  setFileText($el, files);
 
   // Start the new upload and put the uploader in 'currentUploader'.
   $el.data('currentUploader',
-           new FileUploader(exports.shinyapp, id, files, el));
+           new FileUploader(exports.shinyapp,
+                            fileInputBinding.getId(el),
+                            files,
+                            el));
 }
 
 function uploadFiles(evt) {
-  // If previously selected files are uploading, abort that.
   var $el = $(evt.target);
-  var uploader = $el.data('currentUploader');
-  if (uploader)
-    uploader.abort();
+  abortCurrentUpload($el);
 
   var files = evt.target.files;
   // IE8 here does not necessarily mean literally IE8; it indicates if the web
@@ -222,18 +226,13 @@ function uploadFiles(evt) {
   if (!IE8 && files.length === 0)
     return;
 
-  // Clear data-restore attribute if present.
-  $el.removeAttr('data-restore');
-
   // Set the label in the text box
   var $fileText = $el.closest('div.input-group').find('input[type=text]');
   if (IE8) {
     // If we're using IE8/9, just use this placeholder
     $fileText.val("[Uploaded file]");
-  } else if (files.length === 1) {
-    $fileText.val(files[0].name);
   } else {
-    $fileText.val(files.length + " files");
+    setFileText($el, files);
   }
 
   // Start the new upload and put the uploader in 'currentUploader'.
@@ -246,6 +245,10 @@ function uploadFiles(evt) {
   }
 }
 
+// Here we maintain a list of all the current file inputs. This is necessary
+// because we need to trigger events on them in order to respond to file drag
+// events. For example, they should all light up when a file is dragged on to
+// the page.
 var $fileInputs = $();
 
 var fileInputBinding = new InputBinding();
@@ -339,17 +342,6 @@ $.extend(fileInputBinding, {
     $doc.off(".fileDrag");
     this.disableDraghover($doc);
   },
-  zoneStyles: {
-    "plain": {
-      "box-shadow": "none"
-    },
-    "activated": {
-      "box-shadow": "inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6)"
-    },
-    "over": {
-      "box-shadow": "inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(76, 174, 76, .6)"
-    }
-  },
   zoneEvents: [
     "showZone.fileDrag",
     "hideZone.fileDrag",
@@ -396,29 +388,32 @@ $.extend(fileInputBinding, {
     }
   },
   subscribe: function(el, callback) {
-    let $el        = $(el),
-        $zone      = this.getZone(el),
-        getState   = () => $el.data("state"),
-        setState   = (newState) => $el.data("state", newState),
-        transition = multimethod()
+    let $el         = $(el),
+        $zone       = this.getZone(el),
+        activeClass = $zone.attr("data-active-class"),
+        overClass   = $zone.attr("data-over-class"),
+        getState    = () => $el.data("state"),
+        setState    = (newState) => $el.data("state", newState),
+        transition  = multimethod()
           .dispatch(e => [getState(), e.type])
-          .test(([s1, e1], [s2, e2]) => s1 === s2 && e1 === e2)
           .whenAny([
             ["plain", "showZone"],
             ["over", "dragleave"]
           ], e => {
-            $zone.css(this.zoneStyles["activated"]);
+            $zone.removeClass(overClass);
+            $zone.addClass(activeClass);
             setState("activated");
           })
           .whenAny([
             ["activated", "hideZone"],
             ["over", "hideZone"]
           ], e => {
-            $zone.css(this.zoneStyles["plain"]);
+            $zone.removeClass(overClass);
+            $zone.removeClass(activeClass);
             setState("plain");
           })
           .when(["activated", "dragenter"], e => {
-            $zone.css(this.zoneStyles["over"]);
+            $zone.addClass(overClass);
             setState("over");
           })
           .when(["over", "drop"], (e) => {
@@ -435,7 +430,6 @@ $.extend(fileInputBinding, {
     if ($fileInputs.length === 0) this.enableDocumentEvents();
 
     setState("plain");
-    $zone.css(this.zoneStyles["plain"]);
 
     $el.on("change.fileInputBinding", uploadFiles);
     $zone.on(this.zoneEvents, transition);

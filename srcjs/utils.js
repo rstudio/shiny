@@ -356,7 +356,7 @@ function equal(...args) {
 //
 // Handling events:
 //
-//    var handleEvent = multimethod()
+//    var handle = multimethod()
 //     .dispatch(e => [e.target.tagName.toLowerCase(), e.type])
 //     .when(["h1", "click"], e => "you clicked on an h1")
 //     .when(["p", "mouseover"], e => "you moused over a p"})
@@ -443,12 +443,12 @@ function multimethod(dispatch = (firstArg) => firstArg,
     return new Sentinel(args);
   };
 
-  invoke.dispatch = (newDispatch = (firstArg) => firstArg) => {
+  invoke.dispatch = (newDispatch) => {
     dispatch = newDispatch;
     return invoke;
   };
 
-  invoke.test = (newTest = _equal) => {
+  invoke.test = (newTest) => {
     test = newTest;
     return invoke;
   };

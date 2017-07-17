@@ -730,7 +730,7 @@ var ShinyApp = function() {
       prevTabIds.push($(this).find('> a').attr('href').replace(leadingHref,''));
     });
     prevTabIds = prevTabIds.map(Number);
-    var tabId = Math.max.apply(Math, prevTabIds) + 1;
+    var tabId = Math.max.apply(null, prevTabIds) + 1;
     var thisId = "tab-" + $tabsetPanel.attr("data-tabsetid") + "-" + tabId;
 
     var icon = message.icon.html;

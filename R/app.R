@@ -514,6 +514,9 @@ knit_print.reactive <- function(x, ..., inline = FALSE) {
 #'
 #' @param fun A function that will be called after the app has finished running.
 #'
+#' @seealso \code{\link{onSessionEnded}()} for the same functionality but at the
+#'   session level, instead of at the global level.
+#'
 #' @examples
 #' onStop(function() { print("goodbye") })
 #' @export

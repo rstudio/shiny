@@ -30,8 +30,6 @@
 #' @param buttonLabel The label used on the button. Can be text or an HTML tag
 #'   object.
 #' @param placeholder The text to show before a file has been uploaded.
-#' @param activeClass The name of a CSS class to add to the element when a file is dragged over the page.
-#' @param overClass The name of a CSS class to add to the element when a file is dragged over the element.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -75,8 +73,7 @@
 #' }
 #' @export
 fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
-  width = NULL, buttonLabel = "Browse...", placeholder = "No file selected",
-  activeClass = "shiny-file-input-active", overClass = "shiny-file-input-over") {
+  width = NULL, buttonLabel = "Browse...", placeholder = "No file selected") {
 
   restoredValue <- restoreInput(id = inputId, default = NULL)
 
@@ -109,8 +106,6 @@ fileInput <- function(inputId, label, multiple = FALSE, accept = NULL,
     label %AND% tags$label(label),
 
     div(class = "input-group",
-        `data-active-class` = activeClass,
-        `data-over-class` = overClass,
       tags$label(class = "input-group-btn",
         span(class = "btn btn-default btn-file",
           buttonLabel,

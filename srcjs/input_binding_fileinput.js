@@ -403,8 +403,8 @@ $.extend(fileInputBinding, {
   subscribe: function(el, callback) {
     let $el         = $(el),
         $zone       = this.getZone(el),
-        activeClass = $zone.attr("data-active-class"),
-        overClass   = $zone.attr("data-over-class"),
+        activeClass = "shiny-file-input-active",
+        overClass   = "shiny-file-input-over",
         getState    = () => $el.data("state"),
         setState    = (newState) => $el.data("state", newState),
         transition  = multimethod()
@@ -437,9 +437,6 @@ $.extend(fileInputBinding, {
             // and Drop ("DnD"), because a "drop" event has been triggered. That
             // means it's probably Chrome, Safari, or IE9+
             this.handleDrop(e, el);
-            // Allowing propagation here lets the event bubble to the top-level
-            // document drop handler, which triggers a "hideZone" event on all
-            // file inputs.
             e.preventDefault();
             e.stopPropagation();
           });

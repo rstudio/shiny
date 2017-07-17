@@ -11,8 +11,12 @@ onStop(fun)
 }
 \description{
 This function allows you to register a callback function that is invoked
-after your app has finished running (all sessions have been disconnected).
+after your app has finished running.
 }
 \examples{
 onStop(function() { print("goodbye") })
+}
+\seealso{
+\code{\link{onSessionEnded}()} for the same functionality but at the
+  session level, instead of at the global level.
 }

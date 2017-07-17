@@ -300,20 +300,34 @@ $.extend(fileInputBinding, {
     return $(el).closest("div.input-group");
   },
   enableDraghover: function($el) {
+    // Create an empty jQuery collection. This is a set-like data structure that
+    // jQuery normally uses to contain the results of a selection.
     let collection = $();
 
+    // Attach a dragenter handler to $el and all of its children. When the first
+    // child is entered, trigger a draghoverstart event.
     $el.on('dragenter.dragHover', function(e) {
       if (collection.size() === 0) {
         $el.trigger('draghoverstart', e.originalEvent);
       }
-      collection = collection.add(e.target);
+      // Every child that has fired dragenter is added to the collection.
+      // Addition is idempotent, which accounts for elements producing dragenter
+      // multiple times.
+      collection = collection.add(e.originalEvent.target);
     });
 
+    // Attach dragleave and drop handlers to $el and its children. Whenever a
+    // child fires either of these events, remove it from the collection.
     $el.on('dragleave.dragHover drop.dragHover', function(e) {
+      // Timeout might be required by some browsers (Firefox) that fire
+      // dragleave before firing dragenter.
       setTimeout(() => {
-        collection = collection.not(e.target);
-        if (collection.size() === 0)
+        collection = collection.not(e.originalEvent.target);
+        // When the collection has no elements, all of the children have been
+        // removed, and produce draghoverend event.
+        if (collection.size() === 0) {
           $el.trigger('draghoverend', e.originalEvent);
+        }
       }, 0);
     });
   },
@@ -321,7 +335,7 @@ $.extend(fileInputBinding, {
     $el.off(".dragHover");
   },
   enableDocumentEvents: function() {
-    let $doc = $(document);
+    let $doc = $("html");
 
     this.enableDraghover($doc);
     $doc.on("draghoverstart.fileDrag", e => {
@@ -335,9 +349,10 @@ $.extend(fileInputBinding, {
     $doc.on("dragover.fileDrag drop.fileDrag", e => {
       e.preventDefault();
     });
+
   },
   disableDocumentEvents: function() {
-    let $doc = $(document);
+    let $doc = $("html");
 
     $doc.off(".fileDrag");
     this.disableDraghover($doc);
@@ -371,21 +386,19 @@ $.extend(fileInputBinding, {
       // property, but we do have a FileList to work with. (IE10+)
       $el.val("");
       uploadDroppedFilesIE10Plus(el, files);
-      window.setTimeout(() => {
-        // We manually trigger the hideZone event because for some reason the
-        // document-level handler is disabled by the drop event.
-        $fileInputs.trigger("hideZone.fileDrag");
-        // Because the document handlers are removed inexplicably on IE10, we
-        // re-add them here.
-        this.disableDocumentEvents();
-        this.enableDocumentEvents();
-      }, 0);
     } else {
       // 3. The browser supports FileList and input.files assignment.
       // (Chrome, Safari)
       $el.val("");
       el.files = e.originalEvent.dataTransfer.files;
     }
+    // We manually trigger the hideZone event because for some reason the
+    // document-level handler is disabled by the drop event.
+    $fileInputs.trigger("hideZone.fileDrag");
+    // Because the document handlers are removed inexplicably, we re-add them
+    // here.
+    this.disableDocumentEvents();
+    this.enableDocumentEvents();
   },
   subscribe: function(el, callback) {
     let $el         = $(el),
@@ -398,7 +411,7 @@ $.extend(fileInputBinding, {
           .dispatch(e => [getState(), e.type])
           .whenAny([
             ["plain", "showZone"],
-            ["over", "dragleave"]
+            ["over", "dragleave"],
           ], e => {
             $zone.removeClass(overClass);
             $zone.addClass(activeClass);
@@ -412,7 +425,10 @@ $.extend(fileInputBinding, {
             $zone.removeClass(activeClass);
             setState("plain");
           })
-          .when(["activated", "dragenter"], e => {
+          .whenAny([
+            ["activated", "dragenter"],
+            ["over", "dragenter"]
+          ], e => {
             $zone.addClass(overClass);
             setState("over");
           })
@@ -425,6 +441,7 @@ $.extend(fileInputBinding, {
             // document drop handler, which triggers a "hideZone" event on all
             // file inputs.
             e.preventDefault();
+            e.stopPropagation();
           });
 
     if ($fileInputs.length === 0) this.enableDocumentEvents();

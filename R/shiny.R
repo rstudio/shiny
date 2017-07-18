@@ -1983,3 +1983,21 @@ flushAllSessions <- function() {
     NULL
   })
 }
+
+#' Run code after app has finished
+#'
+#' This function allows you to register callback functions that are invoked
+#' after your app has finished running.
+#'
+#' @param fun A function that will be called after the app has finished running.
+#'
+#' @seealso \code{\link{onSessionEnded}()} for the same functionality but at the
+#'   session level, instead of at the global level.
+#'
+#' @examples
+#' onStop(function() { print("goodbye") })
+#' @export
+onStop <- function(fun) {
+  shinyOptions(onStop = fun)
+}
+

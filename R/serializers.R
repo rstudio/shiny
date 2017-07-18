@@ -5,10 +5,11 @@
 #'   value. The returned value will be used for the test snapshot.
 #' @param session A Shiny session object.
 #'
+#' @keywords internal
 #' @export
-serializer <- function(inputId, fun, session = getDefaultReactiveDomain()) {
+setSerializer <- function(inputId, fun, session = getDefaultReactiveDomain()) {
   if (is.null(session)) {
-    stop("serializer() needs a session object.")
+    stop("setSerializer() needs a session object.")
   }
 
   input_impl <- .subset2(session$input, "impl")

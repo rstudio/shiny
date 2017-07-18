@@ -1530,7 +1530,7 @@ ShinySession <- R6Class(
       fileData <- private$fileUploadContext$getUploadOperation(jobId)$finish()
       private$.input$set(inputId, fileData)
 
-      serializer(inputId, serializerFileInput)
+      setSerializer(inputId, serializerFileInput)
       snapshotPreprocessInput(inputId, snapshotPreprocessorFileInput)
 
       invisible()

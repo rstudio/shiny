@@ -838,8 +838,8 @@ buildTabset <- function(tabs, ulClass, textFilter = NULL,
     }
 
     tabsetId <- p_randomInt(1000, 10000)
-    tabNavList <- tags$ul(class = ulClass, id = id, `data-tabsetId` = tabsetId)
-    tabContent <- tags$div(class = "tab-content")
+    tabNavList <- tags$ul(class = ulClass, id = id, `data-tabsetid` = tabsetId)
+    tabContent <- tags$div(class = "tab-content", `data-tabsetid` = tabsetId)
 
     tabId <- 1
 

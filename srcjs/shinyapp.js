@@ -727,12 +727,13 @@ var ShinyApp = function() {
 
     var prevTabIds = [];
     $tabsetPanel.find("> li").each(function(){
-      prevTabIds.push($(this).find('> a').attr('href').replace(leadingHref,''));
+      var $prevTabs = $(this).find('> a[data-toggle="tab"]');
+      if ($prevTabs.length > 0)
+        prevTabIds.push($prevTabs.attr('href').replace(leadingHref,''));
     });
     prevTabIds = prevTabIds.map(Number);
     var tabId = Math.max.apply(null, prevTabIds) + 1;
     var thisId = "tab-" + $tabsetPanel.attr("data-tabsetid") + "-" + tabId;
-
     var icon = message.icon.html;
 
     // if there is an icon, render the possible deps
@@ -748,8 +749,7 @@ var ShinyApp = function() {
     var $divTag = $tab.attr("id", thisId);
     $divTag.removeAttr("title");
 
-
-    var $tabContent = $tabsetPanel.find("+ .tab-content");
+    var $tabContent = $("div.tab-content[data-tabsetid='" + $tabsetPanel.attr("data-tabsetid") + "']");
 
     if (message.target === null) {
       if (message.position === "left") {

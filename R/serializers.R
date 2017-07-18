@@ -1,3 +1,22 @@
+#' Add a function for serializing an input before bookmarking application state
+#'
+#' @param inputId Name of the input value.
+#' @param fun A function that takes the input value and returns a modified
+#'   value. The returned value will be used for the test snapshot.
+#' @param session A Shiny session object.
+#'
+#' @keywords internal
+#' @export
+setSerializer <- function(inputId, fun, session = getDefaultReactiveDomain()) {
+  if (is.null(session)) {
+    stop("setSerializer() needs a session object.")
+  }
+
+  input_impl <- .subset2(session$input, "impl")
+  input_impl$setMeta(inputId, "shiny.serializer", fun)
+}
+
+
 # For most types of values, simply return the value unchanged.
 serializerDefault <- function(value, stateDir) {
   value
@@ -58,12 +77,12 @@ serializeReactiveValues <- function(values, exclude, stateDir = NULL) {
 
     # Get the serializer function for this input value. If none specified, use
     # the default.
-    serializer <- impl$getMeta(name, "shiny.serializer")
-    if (is.null(serializer))
-      serializer <- serializerDefault
+    serializer_fun <- impl$getMeta(name, "shiny.serializer")
+    if (is.null(serializer_fun))
+      serializer_fun <- serializerDefault
 
     # Apply serializer function.
-    serializer(val, stateDir)
+    serializer_fun(val, stateDir)
   })
 
   # Filter out any values that were marked as unserializable.

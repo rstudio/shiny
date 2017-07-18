@@ -31,6 +31,8 @@ shiny 1.0.3.9001
 
 * Added a function `isRunning` to test whether a Shiny app is currently running. ([#1785](https://github.com/rstudio/shiny/pull/1785))
 
+* Added a function `setSerializer`, which allows authors to specify a function for serializing the value of a custom input. ([#1791](https://github.com/rstudio/shiny/pull/1791))
+
 ### Bug fixes
 
 * Fixed [#1546](https://github.com/rstudio/shiny/issues/1546): make it possible (without any hacks) to write arbitrary data into a module's `session$userData` (which is exactly the same environment as the parent's `session$userData`). To be clear, it allows something like `session$userData$x <- TRUE`, but not something like `session$userData <- TRUE` (that is not allowed in any context, whether you're in the main app, or in a module) ([#1732](https://github.com/rstudio/shiny/pull/1732)).

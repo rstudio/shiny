@@ -1371,31 +1371,29 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       var $tabContent = $("div.tab-content[data-tabsetid='" + tabsetNumericId + "']");
 
-      if (message.prepend) {
-        $tabsetPanel.prepend($liTag);
-        $tabContent.prepend($divTag);
-        return;
-      }
-
-      if (message.append) {
-        $tabsetPanel.append($liTag);
-        $tabContent.append($divTag);
-        return;
-      }
-
-      var dataValue = "[data-value='" + message.target + "']";
-      var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
-      var $targetTabContent = $tabContent.find("div" + dataValue);
-
-      if ($targetTabsetPanel.length === 0) {
-        throw 'There is no tabPanel with value ' + message.target + '. ' + 'Appending tab to the end...';
+      if (message.prepend || message.append) {
+        if (message.prepend) {
+          $tabsetPanel.prepend($liTag);
+          $tabContent.prepend($divTag);
+        } else if (message.append) {
+          $tabsetPanel.append($liTag);
+          $tabContent.append($divTag);
+        }
       } else {
-        if (message.position === "before") {
-          $targetTabsetPanel.before($liTag);
-          $targetTabContent.before($divTag);
-        } else if (message.position === "after") {
-          $targetTabsetPanel.after($liTag);
-          $targetTabContent.after($divTag);
+        var dataValue = "[data-value='" + message.target + "']";
+        var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
+        var $targetTabContent = $tabContent.find("div" + dataValue);
+
+        if ($targetTabsetPanel.length === 0) {
+          throw "There is no tabPanel with value " + message.target;
+        } else {
+          if (message.position === "before") {
+            $targetTabsetPanel.before($liTag);
+            $targetTabContent.before($divTag);
+          } else if (message.position === "after") {
+            $targetTabsetPanel.after($liTag);
+            $targetTabContent.after($divTag);
+          }
         }
       }
 

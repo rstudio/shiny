@@ -16,8 +16,7 @@ prependTab(inputId, tab, menuName = NULL,
 appendTab(inputId, tab, menuName = NULL,
   session = getDefaultReactiveDomain())
 
-removeTab(inputId, target, immediate = FALSE,
-  session = getDefaultReactiveDomain())
+removeTab(inputId, target, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{inputId}{The \code{id} of the \code{tabsetPanel} (or 
@@ -28,14 +27,24 @@ be inserted/removed.}
 \code{tabPanel}).}
 
 \item{target}{The \code{value} of an existing \code{tabPanel}, next to
-which \code{tab} will be added. If \code{NULL},the \code{tab} will be
-placed either as the first tab or the last tab, depending on the
-\code{position} argument.}
+which \code{tab} will be added.}
 
 \item{position}{Should \code{tab} be added before or after the 
 \code{target} tab?}
 
 \item{session}{The shiny session within which to call \code{insertTab}.}
+
+\item{menuName}{This argument should only be used when you want to
+prepend (or append) \code{tab} to the beginning (or end) of an 
+existing \code{\link{navbarMenu}} (which must itself be part of
+an existing \code{\link{navbarPage}}). In this case, this argument 
+should be the \code{menuName} that you gave your \code{navbarMenu} 
+when you first created it (by default, this is equal to the value 
+of the \code{title} argument). Note that you still need to set the
+\code{inputId} argument to whatever the \code{id} of the parent
+\code{navbarPage} is. If \code{menuName} is left as \code{NULL},
+\code{tab} will be prepended (or appended) to whatever 
+\code{inputId} is.}
 }
 \description{
 Dynamically insert or remove a \code{\link{tabPanel}} from an existing

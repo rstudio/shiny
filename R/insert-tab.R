@@ -36,12 +36,10 @@ getIcon <- function(tab) {
 #'   \code{tabPanel}).
 #'
 #' @param target The \code{value} of an existing \code{tabPanel}, next to
-#'   which \code{tab} will be added. If \code{NULL},the \code{tab} will be
-#'   placed either as the first tab or the last tab, depending on the
-#'   \code{position} argument.
+#'   which \code{tab} will be added.
 #'
 #' @param position Should \code{tab} be added before or after the 
-#' \code{target} tab?
+#'   \code{target} tab?
 #'
 #' @param session The shiny session within which to call \code{insertTab}.
 #'
@@ -104,6 +102,18 @@ insertTab <- function(inputId, tab, target,
   session$onFlushed(callback, once = TRUE)
 }
 
+#' @param menuName This argument should only be used when you want to
+#'   prepend (or append) \code{tab} to the beginning (or end) of an 
+#'   existing \code{\link{navbarMenu}} (which must itself be part of
+#'   an existing \code{\link{navbarPage}}). In this case, this argument 
+#'   should be the \code{menuName} that you gave your \code{navbarMenu} 
+#'   when you first created it (by default, this is equal to the value 
+#'   of the \code{title} argument). Note that you still need to set the
+#'   \code{inputId} argument to whatever the \code{id} of the parent
+#'   \code{navbarPage} is. If \code{menuName} is left as \code{NULL},
+#'   \code{tab} will be prepended (or appended) to whatever 
+#'   \code{inputId} is.
+#'   
 #' @rdname insertTab
 #' @export
 prependTab <- function(inputId, tab, menuName = NULL,
@@ -154,7 +164,7 @@ appendTab <- function(inputId, tab, menuName = NULL,
 
 #' @rdname insertTab
 #' @export
-removeTab <- function(inputId, target, immediate = FALSE,
+removeTab <- function(inputId, target,
   session = getDefaultReactiveDomain()) {
 
   force(inputId)
@@ -167,8 +177,7 @@ removeTab <- function(inputId, target, immediate = FALSE,
       target = target)
   }
 
-  if (!immediate) session$onFlushed(callback, once = TRUE)
-  else callback()
+  session$onFlushed(callback, once = TRUE)
 }
 
 

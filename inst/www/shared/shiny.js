@@ -1334,9 +1334,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     });
 
     addMessageHandler('shiny-insert-tab', function (message) {
-      var $tabsetPanel = $("#" + message.tabsetPanelId);
+      var $tabsetPanel = $("#" + message.inputId);
       if ($tabsetPanel.length === 0) {
-        throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
+        throw 'There is no tabsetPanel with id ' + message.inputId;
       };
 
       // This is the JS equivalent of the builtItem() R function that is used
@@ -1351,7 +1351,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
       prevTabIds = prevTabIds.map(Number);
       var tabId = Math.max.apply(null, prevTabIds) + 1;
-      var thisId = "tab-" + $tabsetPanel.attr("data-tabsetid") + "-" + tabId;
+
+      var tabsetNumericId = $tabsetPanel.attr("data-tabsetid");
+      var thisId = "tab-" + tabsetNumericId + "-" + tabId;
       var icon = message.icon.html;
 
       // if there is an icon, render the possible deps
@@ -1367,33 +1369,33 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var $divTag = $tab.attr("id", thisId);
       $divTag.removeAttr("title");
 
-      var $tabContent = $("div.tab-content[data-tabsetid='" + $tabsetPanel.attr("data-tabsetid") + "']");
+      var $tabContent = $("div.tab-content[data-tabsetid='" + tabsetNumericId + "']");
 
-      if (message.target === null) {
-        if (message.position === "left") {
-          $tabsetPanel.prepend($liTag);
-          $tabContent.prepend($divTag);
-        } else if (message.position === "right") {
-          $tabsetPanel.append($liTag);
-          $tabContent.append($divTag);
-        }
+      if (message.prepend) {
+        $tabsetPanel.prepend($liTag);
+        $tabContent.prepend($divTag);
+        return;
+      }
+
+      if (message.append) {
+        $tabsetPanel.append($liTag);
+        $tabContent.append($divTag);
+        return;
+      }
+
+      var dataValue = "[data-value='" + message.target + "']";
+      var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
+      var $targetTabContent = $tabContent.find("div" + dataValue);
+
+      if ($targetTabsetPanel.length === 0) {
+        throw 'There is no tabPanel with value ' + message.target + '. ' + 'Appending tab to the end...';
       } else {
-        var dataValue = "[data-value='" + message.target + "']";
-        var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
-        var $targetTabContent = $tabContent.find("div" + dataValue);
-
-        if ($targetTabsetPanel.length === 0) {
-          console.warn('There is no tabPanel with value ' + message.target + '. ' + 'Appending tab to the end...');
-          $tabsetPanel.append($liTag);
-          $tabContent.append($divTag);
-        } else {
-          if (message.position === "left") {
-            $targetTabsetPanel.before($liTag);
-            $targetTabContent.before($divTag);
-          } else if (message.position === "right") {
-            $targetTabsetPanel.after($liTag);
-            $targetTabContent.after($divTag);
-          }
+        if (message.position === "before") {
+          $targetTabsetPanel.before($liTag);
+          $targetTabContent.before($divTag);
+        } else if (message.position === "after") {
+          $targetTabsetPanel.after($liTag);
+          $targetTabContent.after($divTag);
         }
       }
 
@@ -1402,9 +1404,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     });
 
     addMessageHandler('shiny-remove-tab', function (message) {
-      var $tabsetPanel = $("#" + message.tabsetPanelId);
+      var $tabsetPanel = $("#" + message.inputId);
       if ($tabsetPanel.length === 0) {
-        throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
+        throw 'There is no tabsetPanel with id ' + message.inputId;
       };
       var $tabContent = $tabsetPanel.find("+ .tab-content");
       var dataValue = "[data-value='" + message.target + "']";
@@ -1423,10 +1425,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     });
 
-    addMessageHandler('shiny-show-tab', function (message) {
-      var $tabsetPanel = $("#" + message.tabsetPanelId);
+    addMessageHandler('shiny-change-tab-visibility', function (message) {
+      var $tabsetPanel = $("#" + message.inputId);
       if ($tabsetPanel.length === 0) {
-        throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
+        throw 'There is no tabsetPanel with id ' + message.inputId;
       };
 
       var dataValue = "[data-value='" + message.target + "']";
@@ -1436,23 +1438,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         throw 'There is no tabPanel with value ' + message.target;
       }
 
-      $targetTabsetPanel.show();
-    });
-
-    addMessageHandler('shiny-hide-tab', function (message) {
-      var $tabsetPanel = $("#" + message.tabsetPanelId);
-      if ($tabsetPanel.length === 0) {
-        throw 'There is no tabsetPanel with id ' + message.tabsetPanelId;
-      };
-
-      var dataValue = "[data-value='" + message.target + "']";
-      var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
-
-      if ($targetTabsetPanel.length === 0) {
-        throw 'There is no tabPanel with value ' + message.target;
-      }
-
-      $targetTabsetPanel.hide();
+      if (message.type === "show") $targetTabsetPanel.show();else if (message.type === "hide") $targetTabsetPanel.hide();
     });
 
     addMessageHandler('updateQueryString', function (message) {

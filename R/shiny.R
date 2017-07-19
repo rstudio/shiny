@@ -1492,38 +1492,42 @@ ShinySession <- R6Class(
         )
       )
     },
-    sendInsertTab = function(tabsetPanelId, tab, icon, target, position) {
-      private$sendMessage(
-        `shiny-insert-tab` = list(
-          tabsetPanelId = tabsetPanelId,
-          tab = tab,
-          icon = icon,
-          target = target,
-          position = position
+    sendInsertTab = function(inputId, tab, icon, target,
+      prepend, append, position) {
+
+        if (is.null(target)) {
+          if (prepend == append) {
+            stop("If target is NULL, either `prepend` or `append` must be TRUE.",
+              "Both cannot be TRUE, however.")
+          }
+        }
+
+        private$sendMessage(
+          `shiny-insert-tab` = list(
+            inputId = inputId,
+            tab = tab,
+            icon = icon,
+            target = target,
+            prepend = prepend,
+            append = append,
+            position = position
+          )
         )
-      )
     },
-    sendRemoveTab = function(tabsetPanelId, target) {
+    sendRemoveTab = function(inputId, target) {
       private$sendMessage(
         `shiny-remove-tab` = list(
-          tabsetPanelId = tabsetPanelId,
+          inputId = inputId,
           target = target
         )
       )
     },
-    sendShowTab = function(tabsetPanelId, target) {
+    sendChangeTabVisibility = function(inputId, target, type) {
       private$sendMessage(
-        `shiny-show-tab` = list(
-          tabsetPanelId = tabsetPanelId,
-          target = target
-        )
-      )
-    },
-    sendHideTab = function(tabsetPanelId, target) {
-      private$sendMessage(
-        `shiny-hide-tab` = list(
-          tabsetPanelId = tabsetPanelId,
-          target = target
+        `shiny-change-tab-visibility` = list(
+          inputId = inputId,
+          target = target,
+          type = type
         )
       )
     },

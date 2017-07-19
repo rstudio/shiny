@@ -172,4 +172,3 @@ removeUI <- function(selector,
   if (!immediate) session$onFlushed(callback, once = TRUE)
   else callback()
 }
-

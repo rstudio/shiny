@@ -53,5 +53,6 @@ fluidPage(
 )
 }
 \seealso{
-\code{\link{tabPanel}}, \code{\link{updateNavlistPanel}}
+\code{\link{tabPanel}}, \code{\link{updateNavlistPanel}},
+   \code{\link{insertTab}}, \code{\link{showTab}}
 }

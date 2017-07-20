@@ -285,7 +285,8 @@ pageWithSidebar <- function(headerPanel,
 #'   example below).
 #'
 #' @seealso \code{\link{tabPanel}}, \code{\link{tabsetPanel}},
-#'   \code{\link{updateNavbarPage}}
+#'   \code{\link{updateNavbarPage}}, \code{\link{insertTab}},
+#'   \code{\link{showTab}}
 #'
 #' @examples
 #' navbarPage("App Title",
@@ -393,9 +394,13 @@ navbarPage <- function(title,
   )
 }
 
+#' @param menuName A name that identifies this \code{navbarMenu}. This
+#'   is needed if you want to insert/remove or show/hide an entire
+#'   \code{navbarMenu}.
+#'
 #' @rdname navbarPage
 #' @export
-navbarMenu <- function(title, ..., icon = NULL) {
+navbarMenu <- function(title, ..., menuName = title, icon = NULL) {
   structure(list(title = title,
                  tabs = list(...),
                  iconClass = iconClass(icon)),
@@ -634,7 +639,8 @@ tabPanel <- function(title, ..., value = title, icon = NULL) {
 #'   Bootstrap 3.
 #' @return A tabset that can be passed to \code{\link{mainPanel}}
 #'
-#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}}
+#' @seealso \code{\link{tabPanel}}, \code{\link{updateTabsetPanel}},
+#'   \code{\link{insertTab}}, \code{\link{showTab}}
 #'
 #' @examples
 #' # Show a tabset that includes a plot, summary, and
@@ -701,7 +707,9 @@ tabsetPanel <- function(...,
 #'   supported. This is because version 0.11 switched to Bootstrap 3, which
 #'   doesn't support separators.
 #'
-#' @seealso \code{\link{tabPanel}}, \code{\link{updateNavlistPanel}}
+#' @seealso \code{\link{tabPanel}}, \code{\link{updateNavlistPanel}},
+#'    \code{\link{insertTab}}, \code{\link{showTab}}
+#'
 #' @examples
 #' fluidPage(
 #'

@@ -1338,38 +1338,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if ($tabsetPanel.length === 0) {
         throw 'There is no tabsetPanel with id ' + message.inputId;
       };
-
-      // This is the JS equivalent of the builtItem() R function that is used
-      // to build a tabPanel when initializing a tabsetPanel
-      var $tab = $(message.tab.html);
-      var leadingHref = "#tab-" + $tabsetPanel.attr("data-tabsetid") + "-";
-
-      var prevTabIds = [];
-      $tabsetPanel.find("> li").each(function () {
-        var $prevTabs = $(this).find('> a[data-toggle="tab"]');
-        if ($prevTabs.length > 0) prevTabIds.push($prevTabs.attr('href').replace(leadingHref, ''));
-      });
-      prevTabIds = prevTabIds.map(Number);
-      var tabId = Math.max.apply(null, prevTabIds) + 1;
-
       var tabsetNumericId = $tabsetPanel.attr("data-tabsetid");
-      var thisId = "tab-" + tabsetNumericId + "-" + tabId;
-      var icon = message.icon.html;
-
-      // if there is an icon, render the possible deps
-      if (icon !== "") exports.renderDependencies(message.icon.deps);
-
-      var $aTag = $("<a>", {
-        href: "#" + thisId,
-        "data-toggle": "tab",
-        "data-value": $tab.attr("data-value")
-      }).append(icon).append($tab.attr("title"));
-
-      var $liTag = $("<li>").append($aTag);
-      var $divTag = $tab.attr("id", thisId);
-      $divTag.removeAttr("title");
-
       var $tabContent = $("div.tab-content[data-tabsetid='" + tabsetNumericId + "']");
+
+      var $divTag = $(message.divTag.html);
+      var $liTag = $(message.liTag.html);
+      var $liChild = $liTag.find("> a");
+
+      if ($liChild.attr("data-toggle") === "tab") {
+        // for regular tab, construct the correct tabId for both the li and the div tags
+        var tabId = "tab-" + tabsetNumericId + "-" + getTabIndex();
+        $liTag.find('> a[data-toggle="tab"]').attr("href", "#" + tabId);
+        $divTag.attr("id", tabId);
+      }
 
       if (message.prepend || message.append) {
         if (message.prepend) {
@@ -1396,9 +1377,29 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           }
         }
       }
-
-      exports.renderDependencies(message.tab.deps);
+      exports.renderContent($tabsetPanel[0], $tabsetPanel.html());
       exports.renderContent($tabContent[0], $tabContent.html());
+
+      /* Barbara -- August 2017
+      Note: until now, the number of tabs in a tabsetPanel (or navbarPage
+      or navlistPanel) was always fixed. So, an easy way to give an id to
+      a tab was simply incrementing a counter. (Just like it was easy to
+      give a random 4-digit number to identify the tabsetPanel). Now that
+      we're introducing dynamic tabs, we have to retrive these numbers and
+      fix the dummy id given to the tab in the R side -- there, we always
+      set the tab id (counter dummy) to "id" and the tabset id to "tsid") */
+      function getTabIndex() {
+        var prevTabIds = [];
+        var leadingHref = "#tab-" + tabsetNumericId + "-";
+        // loop through all existing tabs, find the one with highest id (since
+        // this is based on a numeric counter) and add 1 to get the new tab's id
+        $tabsetPanel.find("> li").each(function () {
+          var $prevTabs = $(this).find('> a[data-toggle="tab"]');
+          if ($prevTabs.length > 0) prevTabIds.push($prevTabs.attr('href').replace(leadingHref, ''));
+        });
+        prevTabIds = prevTabIds.map(Number); // convert strings to numbers
+        return Math.max.apply(null, prevTabIds) + 1;
+      }
     });
 
     addMessageHandler('shiny-remove-tab', function (message) {

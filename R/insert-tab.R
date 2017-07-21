@@ -1,35 +1,24 @@
-
-getIcon <- function(tab) {
-  iconClass <- tab$attribs$`data-icon-class`
-  if (!is.null(iconClass)) {
-    # for font-awesome we specify fixed-width
-    if (grepl("fa-", iconClass, fixed = TRUE))
-      iconClass <- paste(iconClass, "fa-fw")
-    icon(name = NULL, class = iconClass)
-  } else NULL
-}
-
 #' Dynamically insert/remove a tabPanel
 #'
 #' Dynamically insert or remove a \code{\link{tabPanel}} from an existing
-#' \code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or 
+#' \code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or
 #' \code{\link{navbarPage}}.
-#' 
-#' When you want to insert a new tab before of after an existing tab, you 
+#'
+#' When you want to insert a new tab before of after an existing tab, you
 #' should use \code{insertTab}. When you want to prepend a tab (i.e. add a
 #' tab to the beginning of the \code{tabsetPanel}), use \code{prependTab}.
-#' When you want to append a tab (i.e. add a tab to the end of the 
+#' When you want to append a tab (i.e. add a tab to the end of the
 #' \code{tabsetPanel}), use \code{appendTab}.
-#' 
-#' For \code{navbarPage}, you can insert/remove conventional 
+#'
+#' For \code{navbarPage}, you can insert/remove conventional
 #' \code{tabPanel}s (whether at the top level or nested inside a
-#' \code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}. 
-#' For the latter case, \code{target} should be the \code{menuName} that 
-#' you gave your \code{navbarMenu} when you first created it (by default, 
+#' \code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}.
+#' For the latter case, \code{target} should be the \code{menuName} that
+#' you gave your \code{navbarMenu} when you first created it (by default,
 #' this is equal to the value of the \code{title} argument).
 #'
-#' @param inputId The \code{id} of the \code{tabsetPanel} (or 
-#'   \code{navlistPanel} or \code{navbarPage})into which \code{tab} will 
+#' @param inputId The \code{id} of the \code{tabsetPanel} (or
+#'   \code{navlistPanel} or \code{navbarPage})into which \code{tab} will
 #'   be inserted/removed.
 #'
 #' @param tab The tab element to be added (must be created with
@@ -38,7 +27,7 @@ getIcon <- function(tab) {
 #' @param target The \code{value} of an existing \code{tabPanel}, next to
 #'   which \code{tab} will be added.
 #'
-#' @param position Should \code{tab} be added before or after the 
+#' @param position Should \code{tab} be added before or after the
 #'   \code{target} tab?
 #'
 #' @param session The shiny session within which to call \code{insertTab}.
@@ -81,18 +70,27 @@ getIcon <- function(tab) {
 insertTab <- function(inputId, tab, target,
   position = c("before", "after"),
   session = getDefaultReactiveDomain()) {
-  
+
   force(inputId)
-  force(tab)
   force(target)
   position <- match.arg(position)
   force(session)
 
+  # Barbara -- August 2017
+  # Note: until now, the number of tabs in a tabsetPanel (or navbarPage
+  # or navlistPanel) was always fixed. So, an easy way to give an id to
+  # a tab was simply incrementing a counter. (Just like it was easy to
+  # give a random 4-digit number to identify the tabsetPanel). Now that
+  # we're introducing dynamic tabs, we have to retrive these numbers.
+
+  item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
+    textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
+
   callback <- function() {
     session$sendInsertTab(
       inputId = inputId,
-      tab = processDeps(tab, session),
-      icon = processDeps(getIcon(tab), session),
+      liTag = processDeps(item$liTag, session),
+      divTag = processDeps(item$divTag, session),
       target = target,
       prepend = FALSE,
       append = FALSE,
@@ -103,17 +101,17 @@ insertTab <- function(inputId, tab, target,
 }
 
 #' @param menuName This argument should only be used when you want to
-#'   prepend (or append) \code{tab} to the beginning (or end) of an 
+#'   prepend (or append) \code{tab} to the beginning (or end) of an
 #'   existing \code{\link{navbarMenu}} (which must itself be part of
-#'   an existing \code{\link{navbarPage}}). In this case, this argument 
-#'   should be the \code{menuName} that you gave your \code{navbarMenu} 
-#'   when you first created it (by default, this is equal to the value 
+#'   an existing \code{\link{navbarPage}}). In this case, this argument
+#'   should be the \code{menuName} that you gave your \code{navbarMenu}
+#'   when you first created it (by default, this is equal to the value
 #'   of the \code{title} argument). Note that you still need to set the
 #'   \code{inputId} argument to whatever the \code{id} of the parent
 #'   \code{navbarPage} is. If \code{menuName} is left as \code{NULL},
-#'   \code{tab} will be prepended (or appended) to whatever 
+#'   \code{tab} will be prepended (or appended) to whatever
 #'   \code{inputId} is.
-#'   
+#'
 #' @rdname insertTab
 #' @export
 prependTab <- function(inputId, tab, menuName = NULL,
@@ -123,17 +121,20 @@ prependTab <- function(inputId, tab, menuName = NULL,
   force(tab)
   force(menuName)
   force(session)
-  
+
+  item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
+    textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
+
   callback <- function() {
-      session$sendInsertTab(
-        inputId = inputId,
-        tab = processDeps(tab, session),
-        icon = processDeps(getIcon(tab), session),
-        target = NULL,
-        prepend = TRUE,
-        append = FALSE,
-        position = NULL)
-    }
+    session$sendInsertTab(
+      inputId = inputId,
+      liTag = processDeps(item$liTag, session),
+      divTag = processDeps(item$divTag, session),
+      target = NULL,
+      prepend = TRUE,
+      append = FALSE,
+      position = NULL)
+  }
 
   session$onFlushed(callback, once = TRUE)
 }
@@ -147,17 +148,20 @@ appendTab <- function(inputId, tab, menuName = NULL,
   force(tab)
   force(menuName)
   force(session)
-  
+
+  item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
+    textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
+
   callback <- function() {
-      session$sendInsertTab(
-        inputId = inputId,
-        tab = processDeps(tab, session),
-        icon = processDeps(getIcon(tab), session),
-        target = NULL,
-        prepend = FALSE,
-        append = TRUE,
-        position = NULL)
-    }
+    session$sendInsertTab(
+      inputId = inputId,
+      liTag = processDeps(item$liTag, session),
+      divTag = processDeps(item$divTag, session),
+      target = NULL,
+      prepend = FALSE,
+      append = TRUE,
+      position = NULL)
+  }
 
   session$onFlushed(callback, once = TRUE)
 }
@@ -184,25 +188,25 @@ removeTab <- function(inputId, target,
 #' Dynamically hide/show a tabPanel
 #'
 #' Dynamically hide or show a \code{\link{tabPanel}} from an existing
-#' \code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or 
+#' \code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or
 #' \code{\link{navbarPage}}.
-#' 
-#' For \code{navbarPage}, you can hide/show conventional 
+#'
+#' For \code{navbarPage}, you can hide/show conventional
 #' \code{tabPanel}s (whether at the top level or nested inside a
-#' \code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}. 
-#' For the latter case, \code{target} should be the \code{menuName} that 
-#' you gave your \code{navbarMenu} when you first created it (by default, 
+#' \code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}.
+#' For the latter case, \code{target} should be the \code{menuName} that
+#' you gave your \code{navbarMenu} when you first created it (by default,
 #' this is equal to the value of the \code{title} argument).
 #'
-#' @param inputId The \code{id} of the \code{tabsetPanel} (or 
-#'   \code{navlistPanel} or \code{navbarPage})into which \code{tab} will 
+#' @param inputId The \code{id} of the \code{tabsetPanel} (or
+#'   \code{navlistPanel} or \code{navbarPage})into which \code{tab} will
 #'   be inserted/removed.
 #'
 #' @param target The \code{value} of the \code{tabPanel} to be
 #'   hidden/shown. See Details if you want to hide/show an entire
 #'   \code{navbarMenu} instead.
-#'   
-#' @param session The shiny session within which to call this 
+#'
+#' @param session The shiny session within which to call this
 #'   function.
 #'
 #' @seealso \code{\link{insertTab}}
@@ -233,9 +237,9 @@ removeTab <- function(inputId, target,
 #'
 #' shinyApp(ui, server)
 #' }
-#' 
+#'
 #' # TODO: add example usage for `navbarMenu`
-#' 
+#'
 #' @export
 showTab <- function(inputId, target,
   session = getDefaultReactiveDomain()) {

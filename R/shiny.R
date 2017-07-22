@@ -1492,16 +1492,18 @@ ShinySession <- R6Class(
         )
       )
     },
-    sendInsertTab = function(inputId, liTag, divTag, target, prepend, append, position) {
+    sendInsertTab = function(inputId, liTag, divTag, menuName,
+                             target, prepend, append, position) {
       if (is.null(target) && prepend == append) {
-        stop("If target is NULL, either `prepend` or `append` must be TRUE.",
-          "Both cannot be TRUE, however.")
+        stop("If target is NULL, either `prepend` or `append` ",
+          "must be TRUE. Both cannot be TRUE, however.")
       }
       private$sendMessage(
         `shiny-insert-tab` = list(
           inputId = inputId,
           liTag = liTag,
           divTag = divTag,
+          menuName = menuName,
           target = target,
           prepend = prepend,
           append = append,

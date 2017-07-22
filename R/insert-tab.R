@@ -66,11 +66,13 @@
 #'
 #' shinyApp(ui, server)
 #' }
+#'
+#' # TODO: add example usage for inserting `navbarMenu`
+#'
 #' @export
 insertTab <- function(inputId, tab, target,
-  position = c("before", "after"),
-  session = getDefaultReactiveDomain()) {
-
+                      position = c("before", "after"),
+                      session = getDefaultReactiveDomain()) {
   force(inputId)
   force(target)
   position <- match.arg(position)
@@ -80,9 +82,9 @@ insertTab <- function(inputId, tab, target,
   # Note: until now, the number of tabs in a tabsetPanel (or navbarPage
   # or navlistPanel) was always fixed. So, an easy way to give an id to
   # a tab was simply incrementing a counter. (Just like it was easy to
-  # give a random 4-digit number to identify the tabsetPanel). Now that
-  # we're introducing dynamic tabs, we have to retrive these numbers.
-
+  # give a random 4-digit number to identify the tabsetPanel). Since we
+  # can only know this in the client side, we'll just pass `id` and
+  # `tsid` (TabSetID) as dummy values that will be fixed in the JS code.
   item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
     textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
 
@@ -91,12 +93,12 @@ insertTab <- function(inputId, tab, target,
       inputId = inputId,
       liTag = processDeps(item$liTag, session),
       divTag = processDeps(item$divTag, session),
+      menuName = NULL,
       target = target,
       prepend = FALSE,
       append = FALSE,
       position = position)
   }
-
   session$onFlushed(callback, once = TRUE)
 }
 
@@ -115,8 +117,7 @@ insertTab <- function(inputId, tab, target,
 #' @rdname insertTab
 #' @export
 prependTab <- function(inputId, tab, menuName = NULL,
-  session = getDefaultReactiveDomain()) {
-
+                       session = getDefaultReactiveDomain()) {
   force(inputId)
   force(tab)
   force(menuName)
@@ -130,20 +131,19 @@ prependTab <- function(inputId, tab, menuName = NULL,
       inputId = inputId,
       liTag = processDeps(item$liTag, session),
       divTag = processDeps(item$divTag, session),
+      menuName = menuName,
       target = NULL,
       prepend = TRUE,
       append = FALSE,
       position = NULL)
   }
-
   session$onFlushed(callback, once = TRUE)
 }
 
 #' @rdname insertTab
 #' @export
 appendTab <- function(inputId, tab, menuName = NULL,
-  session = getDefaultReactiveDomain()) {
-
+                      session = getDefaultReactiveDomain()) {
   force(inputId)
   force(tab)
   force(menuName)
@@ -157,20 +157,19 @@ appendTab <- function(inputId, tab, menuName = NULL,
       inputId = inputId,
       liTag = processDeps(item$liTag, session),
       divTag = processDeps(item$divTag, session),
+      menuName = menuName,
       target = NULL,
       prepend = FALSE,
       append = TRUE,
       position = NULL)
   }
-
   session$onFlushed(callback, once = TRUE)
 }
 
 #' @rdname insertTab
 #' @export
 removeTab <- function(inputId, target,
-  session = getDefaultReactiveDomain()) {
-
+                      session = getDefaultReactiveDomain()) {
   force(inputId)
   force(target)
   force(session)
@@ -180,7 +179,6 @@ removeTab <- function(inputId, target,
       inputId = inputId,
       target = target)
   }
-
   session$onFlushed(callback, once = TRUE)
 }
 
@@ -242,8 +240,7 @@ removeTab <- function(inputId, target,
 #'
 #' @export
 showTab <- function(inputId, target,
-  session = getDefaultReactiveDomain()) {
-
+                    session = getDefaultReactiveDomain()) {
   force(inputId)
   force(target)
   force(session)
@@ -255,15 +252,13 @@ showTab <- function(inputId, target,
       type = "show"
     )
   }
-
   session$onFlushed(callback, once = TRUE)
 }
 
 #' @rdname showTab
 #' @export
 hideTab <- function(inputId, target,
-  session = getDefaultReactiveDomain()) {
-
+                    session = getDefaultReactiveDomain()) {
   force(inputId)
   force(target)
   force(session)
@@ -275,6 +270,5 @@ hideTab <- function(inputId, target,
       type = "hide"
     )
   }
-
   session$onFlushed(callback, once = TRUE)
 }

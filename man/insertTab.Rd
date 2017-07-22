@@ -19,8 +19,8 @@ appendTab(inputId, tab, menuName = NULL,
 removeTab(inputId, target, session = getDefaultReactiveDomain())
 }
 \arguments{
-\item{inputId}{The \code{id} of the \code{tabsetPanel} (or 
-\code{navlistPanel} or \code{navbarPage})into which \code{tab} will 
+\item{inputId}{The \code{id} of the \code{tabsetPanel} (or
+\code{navlistPanel} or \code{navbarPage})into which \code{tab} will
 be inserted/removed.}
 
 \item{tab}{The tab element to be added (must be created with
@@ -29,40 +29,40 @@ be inserted/removed.}
 \item{target}{The \code{value} of an existing \code{tabPanel}, next to
 which \code{tab} will be added.}
 
-\item{position}{Should \code{tab} be added before or after the 
+\item{position}{Should \code{tab} be added before or after the
 \code{target} tab?}
 
 \item{session}{The shiny session within which to call \code{insertTab}.}
 
 \item{menuName}{This argument should only be used when you want to
-prepend (or append) \code{tab} to the beginning (or end) of an 
+prepend (or append) \code{tab} to the beginning (or end) of an
 existing \code{\link{navbarMenu}} (which must itself be part of
-an existing \code{\link{navbarPage}}). In this case, this argument 
-should be the \code{menuName} that you gave your \code{navbarMenu} 
-when you first created it (by default, this is equal to the value 
+an existing \code{\link{navbarPage}}). In this case, this argument
+should be the \code{menuName} that you gave your \code{navbarMenu}
+when you first created it (by default, this is equal to the value
 of the \code{title} argument). Note that you still need to set the
 \code{inputId} argument to whatever the \code{id} of the parent
 \code{navbarPage} is. If \code{menuName} is left as \code{NULL},
-\code{tab} will be prepended (or appended) to whatever 
+\code{tab} will be prepended (or appended) to whatever
 \code{inputId} is.}
 }
 \description{
 Dynamically insert or remove a \code{\link{tabPanel}} from an existing
-\code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or 
+\code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or
 \code{\link{navbarPage}}.
 }
 \details{
-When you want to insert a new tab before of after an existing tab, you 
+When you want to insert a new tab before of after an existing tab, you
 should use \code{insertTab}. When you want to prepend a tab (i.e. add a
 tab to the beginning of the \code{tabsetPanel}), use \code{prependTab}.
-When you want to append a tab (i.e. add a tab to the end of the 
+When you want to append a tab (i.e. add a tab to the end of the
 \code{tabsetPanel}), use \code{appendTab}.
 
-For \code{navbarPage}, you can insert/remove conventional 
+For \code{navbarPage}, you can insert/remove conventional
 \code{tabPanel}s (whether at the top level or nested inside a
-\code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}. 
-For the latter case, \code{target} should be the \code{menuName} that 
-you gave your \code{navbarMenu} when you first created it (by default, 
+\code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}.
+For the latter case, \code{target} should be the \code{menuName} that
+you gave your \code{navbarMenu} when you first created it (by default,
 this is equal to the value of the \code{title} argument).
 }
 \examples{
@@ -97,6 +97,9 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 }
+
+# TODO: add example usage for inserting `navbarMenu`
+
 }
 \seealso{
 \code{\link{showTab}}

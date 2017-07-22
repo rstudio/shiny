@@ -10,28 +10,28 @@ showTab(inputId, target, session = getDefaultReactiveDomain())
 hideTab(inputId, target, session = getDefaultReactiveDomain())
 }
 \arguments{
-\item{inputId}{The \code{id} of the \code{tabsetPanel} (or 
-\code{navlistPanel} or \code{navbarPage})into which \code{tab} will 
+\item{inputId}{The \code{id} of the \code{tabsetPanel} (or
+\code{navlistPanel} or \code{navbarPage})into which \code{tab} will
 be inserted/removed.}
 
 \item{target}{The \code{value} of the \code{tabPanel} to be
 hidden/shown. See Details if you want to hide/show an entire
 \code{navbarMenu} instead.}
 
-\item{session}{The shiny session within which to call this 
+\item{session}{The shiny session within which to call this
 function.}
 }
 \description{
 Dynamically hide or show a \code{\link{tabPanel}} from an existing
-\code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or 
+\code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or
 \code{\link{navbarPage}}.
 }
 \details{
-For \code{navbarPage}, you can hide/show conventional 
+For \code{navbarPage}, you can hide/show conventional
 \code{tabPanel}s (whether at the top level or nested inside a
-\code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}. 
-For the latter case, \code{target} should be the \code{menuName} that 
-you gave your \code{navbarMenu} when you first created it (by default, 
+\code{navbarMenu}), as well as an entire \code{\link{navbarMenu}}.
+For the latter case, \code{target} should be the \code{menuName} that
+you gave your \code{navbarMenu} when you first created it (by default,
 this is equal to the value of the \code{title} argument).
 }
 \examples{

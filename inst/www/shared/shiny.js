@@ -1333,51 +1333,56 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     });
 
-    addMessageHandler('shiny-insert-tab', function (message) {
-      var $tabsetPanel = $("#" + message.inputId);
-      if ($tabsetPanel.length === 0) {
-        throw 'There is no tabsetPanel with id ' + message.inputId;
-      };
-      var tabsetNumericId = $tabsetPanel.attr("data-tabsetid");
-      var $tabContent = $("div.tab-content[data-tabsetid='" + tabsetNumericId + "']");
+    addMessageHandler("shiny-insert-tab", function (message) {
+      var $parentTabset = $("#" + message.inputId);
+      if ($parentTabset.length === 0) throw "There is no tabsetPanel (or navbarPage or " + "navlistPanel) with id " + message.inputId;
+
+      var $tabset = $parentTabset;
+      var tabsetId = $parentTabset.attr("data-tabsetid");
+      var $tabContent = $("div.tab-content[data-tabsetid='" + tabsetId + "']");
 
       var $divTag = $(message.divTag.html);
       var $liTag = $(message.liTag.html);
-      var $liChild = $liTag.find("> a");
+      var $aTag = $liTag.find("> a");
 
-      if ($liChild.attr("data-toggle") === "tab") {
-        // for regular tab, construct the correct tabId for both the li and the div tags
-        var tabId = "tab-" + tabsetNumericId + "-" + getTabIndex();
-        $liTag.find('> a[data-toggle="tab"]').attr("href", "#" + tabId);
+      // Unless the item is being prepended/appended, the target tab
+      // must be provided
+      if (message.target !== null) {
+        var selector = "a" + "[data-value='" + message.target + "']";
+        var $targetLiTag = $parentTabset.find(selector).parent();
+        if ($targetLiTag.length === 0) {
+          throw "There is no tabPanel (or navbarMenu) with value" + " (or menuName) equal to '" + message.target + "'";
+        }
+      }
+
+      // If the item is to be placed inside a navbarMenu (dropdown),
+      // change the value of $tabset from the parent's ul tag to the
+      // dropdown's ul tag
+      var dropdown = getDropdown();
+      if (dropdown !== null) {
+        if ($aTag.attr("data-toggle") === "dropdown") throw "Cannot insert a navbarMenu inside another one";
+        $tabset = dropdown.$tabset;
+        tabsetId = dropdown.id;
+      }
+
+      // For regular tab items, fix the href (of the li > a tag)
+      // and the id (of the div tag). This does not apply to plain
+      // text items (which function as dividers and headers inside
+      // navbarMenus) and whole navbarMenus (since those get
+      // constructed from scratch on the R side and therefore
+      // there are no ids that need matching)
+      if ($aTag.attr("data-toggle") === "tab") {
+        var index = getTabIndex($tabset, tabsetId);
+        var tabId = "tab-" + tabsetId + "-" + index;
+        $liTag.find("> a").attr("href", "#" + tabId);
         $divTag.attr("id", tabId);
       }
 
-      if (message.prepend || message.append) {
-        if (message.prepend) {
-          $tabsetPanel.prepend($liTag);
-          $tabContent.prepend($divTag);
-        } else if (message.append) {
-          $tabsetPanel.append($liTag);
-          $tabContent.append($divTag);
-        }
-      } else {
-        var dataValue = "[data-value='" + message.target + "']";
-        var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
-        var $targetTabContent = $tabContent.find("div" + dataValue);
+      // actually insert the item into the right place
+      if (message.prepend) $tabset.prepend($liTag);else if (message.append) $tabset.append($liTag);else if (message.position === "before") $targetLiTag.before($liTag);else if (message.position === "after") $targetLiTag.after($liTag);
+      $tabContent.append($divTag);
 
-        if ($targetTabsetPanel.length === 0) {
-          throw "There is no tabPanel with value " + message.target;
-        } else {
-          if (message.position === "before") {
-            $targetTabsetPanel.before($liTag);
-            $targetTabContent.before($divTag);
-          } else if (message.position === "after") {
-            $targetTabsetPanel.after($liTag);
-            $targetTabContent.after($divTag);
-          }
-        }
-      }
-      exports.renderContent($tabsetPanel[0], $tabsetPanel.html());
+      exports.renderContent($parentTabset[0], $parentTabset.html());
       exports.renderContent($tabContent[0], $tabContent.html());
 
       /* Barbara -- August 2017
@@ -1385,59 +1390,88 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       or navlistPanel) was always fixed. So, an easy way to give an id to
       a tab was simply incrementing a counter. (Just like it was easy to
       give a random 4-digit number to identify the tabsetPanel). Now that
-      we're introducing dynamic tabs, we have to retrive these numbers and
+      we're introducing dynamic tabs, we must retrieve these numbers and
       fix the dummy id given to the tab in the R side -- there, we always
-      set the tab id (counter dummy) to "id" and the tabset id to "tsid") */
-      function getTabIndex() {
-        var prevTabIds = [];
-        var leadingHref = "#tab-" + tabsetNumericId + "-";
-        // loop through all existing tabs, find the one with highest id (since
-        // this is based on a numeric counter) and add 1 to get the new tab's id
-        $tabsetPanel.find("> li").each(function () {
-          var $prevTabs = $(this).find('> a[data-toggle="tab"]');
-          if ($prevTabs.length > 0) prevTabIds.push($prevTabs.attr('href').replace(leadingHref, ''));
+      set the tab id (counter dummy) to "id" and the tabset id to "tsid")
+      */
+      function getTabIndex($tabset, tabsetId) {
+        var existingTabIds = [];
+        var leadingHref = "#tab-" + tabsetId + "-";
+        // loop through all existing tabs, find the one with highest id
+        // (since this is based on a numeric counter), and increment
+        $tabset.find("> li").each(function () {
+          var $tab = $(this).find("> a[data-toggle='tab']");
+          if ($tab.length > 0) {
+            var index = $tab.attr("href").replace(leadingHref, "");
+            existingTabIds.push(Number(index));
+          }
         });
-        prevTabIds = prevTabIds.map(Number); // convert strings to numbers
-        return Math.max.apply(null, prevTabIds) + 1;
+        return Math.max.apply(null, existingTabIds) + 1;
+      }
+
+      // Finds out if the item will be placed inside a navbarMenu
+      // (dropdown). If so, returns the dropdown tabset (ul tag)
+      // and the dropdown tabsetid (to be used to fix the tab ID)
+      function getDropdown() {
+        if (message.menuName !== null) {
+          // menuName is only provided if the user wants to prepend
+          // or append an item inside a navbarMenu (dropdown)
+          var $dropdownATag = $("a.dropdown-toggle[data-value='" + message.menuName + "']");
+          if ($dropdownATag.length === 0) {
+            throw "There is no navbarMenu with menuName equal to '" + message.menuName + "'";
+          }
+          var $dropdownTabset = $dropdownATag.find("+ ul.dropdown-menu");
+          var dropdownId = $dropdownTabset.attr("data-tabsetid");
+          return { $tabset: $dropdownTabset, id: dropdownId };
+        } else if (message.target !== null) {
+          // if our item is to be placed next to a tab that is inside
+          // a navbarMenu, our item will also be inside
+          var $uncleTabset = $targetLiTag.parent("ul");
+          if ($uncleTabset.hasClass("dropdown-menu")) {
+            var uncleId = $uncleTabset.attr("data-tabsetid");
+            return { $tabset: $uncleTabset, id: uncleId };
+          }
+        }
+        return null;
       }
     });
 
-    addMessageHandler('shiny-remove-tab', function (message) {
-      var $tabsetPanel = $("#" + message.inputId);
-      if ($tabsetPanel.length === 0) {
-        throw 'There is no tabsetPanel with id ' + message.inputId;
+    addMessageHandler("shiny-remove-tab", function (message) {
+      var $parentTabset = $("#" + message.inputId);
+      if ($parentTabset.length === 0) {
+        throw "There is no tabsetPanel with id " + message.inputId;
       };
-      var $tabContent = $tabsetPanel.find("+ .tab-content");
+      var $tabContent = $parentTabset.find("+ .tab-content");
       var dataValue = "[data-value='" + message.target + "']";
 
-      var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
-      var $targetTabContent = $tabContent.find("div" + dataValue);
+      var $targetLiTag = $parentTabset.find("a" + dataValue).parent();
+      var $targetDivTag = $tabContent.find("div" + dataValue);
 
-      if ($targetTabsetPanel.length === 0) {
-        throw 'There is no tabPanel with value ' + message.target;
+      if ($targetLiTag.length === 0) {
+        throw "There is no tabPanel with value " + message.target;
       }
 
-      var els = [$targetTabsetPanel, $targetTabContent];
+      var els = [$targetLiTag, $targetDivTag];
       $(els).each(function (i, el) {
         exports.unbindAll(el, true);
         $(el).remove();
       });
     });
 
-    addMessageHandler('shiny-change-tab-visibility', function (message) {
-      var $tabsetPanel = $("#" + message.inputId);
-      if ($tabsetPanel.length === 0) {
-        throw 'There is no tabsetPanel with id ' + message.inputId;
+    addMessageHandler("shiny-change-tab-visibility", function (message) {
+      var $parentTabset = $("#" + message.inputId);
+      if ($parentTabset.length === 0) {
+        throw "There is no tabsetPanel with id " + message.inputId;
       };
 
       var dataValue = "[data-value='" + message.target + "']";
-      var $targetTabsetPanel = $tabsetPanel.find("a" + dataValue).parent();
+      var $targetLiTag = $parentTabset.find("a" + dataValue).parent();
 
-      if ($targetTabsetPanel.length === 0) {
-        throw 'There is no tabPanel with value ' + message.target;
+      if ($targetLiTag.length === 0) {
+        throw "There is no tabPanel with value " + message.target;
       }
 
-      if (message.type === "show") $targetTabsetPanel.show();else if (message.type === "hide") $targetTabsetPanel.hide();
+      if (message.type === "show") $targetLiTag.show();else if (message.type === "hide") $targetLiTag.hide();
     });
 
     addMessageHandler('updateQueryString', function (message) {

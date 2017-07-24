@@ -1345,14 +1345,28 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return $tabContent;
     }
 
-    function getTargetTab($tabset, $tabContent, target) {
+    function getTargetTabs($tabset, $tabContent, target) {
       var dataValue = "[data-value='" + target + "']";
-      var $liTag = $tabset.find("a" + dataValue).parent();
+      var $aTag = $tabset.find("a" + dataValue);
+      var $liTag = $aTag.parent();
       if ($liTag.length === 0) {
         throw "There is no tabPanel (or navbarMenu) with value" + " (or menuName) equal to '" + target + "'";
       }
-      var $divTag = $tabContent.find("div" + dataValue);
-      return { $liTag: $liTag, $divTag: $divTag };
+      var $divTags = [];
+      if ($aTag.attr("data-toggle") === "dropdown") {
+        // dropdown
+        var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
+        var dropdownId = $dropdownTabset.attr("data-tabsetid");
+        var selector = "div.tab-pane[id^='tab-" + dropdownId + "']";
+        var $dropdownDivs = $tabContent.find(selector);
+        $dropdownDivs.each(function (i, el) {
+          $divTags.push(el);
+        });
+      } else {
+        // regular tab
+        $divTags.push($tabContent.find("div" + dataValue));
+      }
+      return { $liTag: $liTag, $divTags: $divTags };
     }
 
     addMessageHandler("shiny-insert-tab", function (message) {
@@ -1368,7 +1382,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // Unless the item is being prepended/appended, the target tab
       // must be provided
       if (message.target !== null) {
-        var target = getTargetTab($tabset, $tabContent, message.target);
+        var target = getTargetTabs($tabset, $tabContent, message.target);
         var $targetLiTag = target.$liTag;
       }
 
@@ -1453,27 +1467,81 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
     });
 
+    function getNearestTabSibling($liTag) {
+      var siblingTabValue = null;
+
+      // possibilities, in order of desirability
+      var $tabRight = $liTag.nextAll("li:visible").children("a" + "[data-toggle='tab']").first();
+
+      var $tabLeft = $liTag.prevAll("li:visible").children("a" + "[data-toggle='tab']").first();
+
+      var $tabDropRight = $liTag.nextAll("li:visible").children("a" + "[data-toggle='dropdown']").next("ul" + ".dropdown-menu").next("li").next("a[data-toggle='tab']").first();
+
+      var $tabDropLeft = $liTag.prevAll("li:visible").children("a" + "[data-toggle='dropdown']").next("ul" + ".dropdown-menu").next("li").next("a[data-toggle='tab']").first();
+
+      var possibilities = [$tabRight, $tabLeft, $tabDropRight, $tabDropLeft];
+
+      $.each(possibilities, function (i, $tab) {
+        siblingTabValue = getValueIfExistsAndVisible($tab);
+        if (siblingTabValue !== null) return false; // break out of each()
+        else return true;
+      });
+
+      return siblingTabValue;
+
+      function getValueIfExistsAndVisible($el) {
+        if ($el.length === 1) {
+          return $el.attr("data-value");
+        } else return null;
+      }
+    }
+
+    function tabApplyFunction(target, func) {
+      $.each(target, function (key, el) {
+        if (key === "$liTag") func(el); // $liTag is always just one jQuery element
+        else if (key === "$divTags") // $divTags is always an array (even if length = 1)
+            $.each(el, function (i, div) {
+              func(div);
+            });
+      });
+    }
+
+    function navigateToNearestTab($tabset, nextTabValue) {
+      var inputBinding = $tabset.data('shiny-input-binding');
+      var evt = jQuery.Event('shiny:updateinput');
+      evt.binding = inputBinding;
+      $tabset.trigger(evt);
+      inputBinding.setValue($tabset[0], nextTabValue);
+    }
+
     addMessageHandler("shiny-remove-tab", function (message) {
       var $tabset = getTabset(message.inputId);
       var $tabContent = getTabContent($tabset);
+      var target = getTargetTabs($tabset, $tabContent, message.target);
+      var nextTabValue = getNearestTabSibling(target.$liTag);
 
-      var target = getTargetTab($tabset, $tabContent, message.target);
-      for (var $el in target) {
-        if (target.hasOwnProperty($el)) {
-          exports.unbindAll(target[$el], true);
-          target[$el].remove();
-        }
+      tabApplyFunction(target, removeEl);
+      navigateToNearestTab($tabset, nextTabValue);
+
+      function removeEl($el) {
+        exports.unbindAll($el, true);
+        $el.remove();
       }
     });
 
     addMessageHandler("shiny-change-tab-visibility", function (message) {
       var $tabset = getTabset(message.inputId);
       var $tabContent = getTabContent($tabset);
+      var target = getTargetTabs($tabset, $tabContent, message.target);
+      var nextTabValue = getNearestTabSibling(target.$liTag);
 
-      var target = getTargetTab($tabset, $tabContent, message.target);
-      for (var $el in target) {
-        if (target.hasOwnProperty($el)) {
-          if (message.type === "show") target[$el].css("display", "");else if (message.type === "hide") target[$el].hide();
+      tabApplyFunction(target, changeVisibility);
+      navigateToNearestTab($tabset, nextTabValue);
+
+      function changeVisibility($el) {
+        if (message.type === "show") $el.css("display", "");else if (message.type === "hide") {
+          $el.hide();
+          $el.removeClass("active");
         }
       }
     });

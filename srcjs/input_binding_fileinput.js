@@ -338,16 +338,28 @@ $.extend(fileInputBinding, {
     let $doc = $("html");
 
     this._enableDraghover($doc);
-    $doc.on("draghoverstart.fileDrag", e => {
-      $fileInputs.trigger("showZone.fileDrag");
-    });
-    $doc.on("draghoverend.fileDrag", e => {
-      $fileInputs.trigger("hideZone.fileDrag");
-    });
-    // Enable the drop event and prevent download if the file is dropped outside
-    // of a drop zone.
-    $doc.on("dragover.fileDrag drop.fileDrag", e => {
-      e.preventDefault();
+    $doc.on({
+      "draghoverstart.fileDrag": e => {
+        $fileInputs.trigger("showZone.fileDrag");
+      },
+      "draghoverend.fileDrag": e => {
+        $fileInputs.trigger("hideZone.fileDrag");
+      },
+      // IE10/11 workaround (Edge is OK): Mouse movements and drag events can't
+      // happen together. This handler makes mousing into the page a way to
+      // "un-stick" the drag system that highlights drop-able inputs. This
+      // behavior is harmless on other browsers and doing it in all of them
+      // saves us from the nasty business of browser sniffing.
+      "mouseenter": e => {
+        this._disableDraghover($doc);
+        $fileInputs.trigger("hideZone.fileDrag");
+        this._enableDraghover($doc);
+      },
+      // Enable the drop event and prevent download if the file is dropped outside
+      // of a drop zone.
+      "dragover.fileDrag drop.fileDrag": e => {
+        e.preventDefault();
+      }
     });
   },
   _disableDocumentEvents: function() {

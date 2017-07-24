@@ -20,19 +20,22 @@ removeTab(inputId, target, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{inputId}{The \code{id} of the \code{tabsetPanel} (or
-\code{navlistPanel} or \code{navbarPage})into which \code{tab} will
+\code{navlistPanel} or \code{navbarPage}) into which \code{tab} will
 be inserted/removed.}
 
-\item{tab}{The tab element to be added (must be created with
-\code{tabPanel}).}
+\item{tab}{The item to be added (must be created with \code{tabPanel},
+or with \code{navbarMenu}).}
 
-\item{target}{The \code{value} of an existing \code{tabPanel}, next to
-which \code{tab} will be added.}
+\item{target}{If inserting: the \code{value} of an existing
+\code{tabPanel}, next to which \code{tab} will be added.
+If removing: the \code{value} of the \code{tabPanel} that
+you want to remove. See Details if you want to insert next to/remove
+an entire \code{navbarMenu} instead.}
 
 \item{position}{Should \code{tab} be added before or after the
 \code{target} tab?}
 
-\item{session}{The shiny session within which to call \code{insertTab}.}
+\item{session}{The shiny session within which to call this function.}
 
 \item{menuName}{This argument should only be used when you want to
 prepend (or append) \code{tab} to the beginning (or end) of an
@@ -47,12 +50,12 @@ of the \code{title} argument). Note that you still need to set the
 \code{inputId} is.}
 }
 \description{
-Dynamically insert or remove a \code{\link{tabPanel}} from an existing
-\code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or
-\code{\link{navbarPage}}.
+Dynamically insert or remove a \code{\link{tabPanel}} (or a
+\code{\link{navbarMenu}}) from an existing \code{\link{tabsetPanel}},
+\code{\link{navlistPanel}} or \code{\link{navbarPage}}.
 }
 \details{
-When you want to insert a new tab before of after an existing tab, you
+When you want to insert a new tab before or after an existing tab, you
 should use \code{insertTab}. When you want to prepend a tab (i.e. add a
 tab to the beginning of the \code{tabsetPanel}), use \code{prependTab}.
 When you want to append a tab (i.e. add a tab to the end of the
@@ -68,6 +71,8 @@ this is equal to the value of the \code{title} argument).
 \examples{
 ## Only run this example in interactive R sessions
 if (interactive()) {
+
+# example app for inserting/removing a tab
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
@@ -96,10 +101,45 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+
+
+# example app for prepending/appending a navbarMenu
+ui <- navbarPage("Navbar page", id = "tabs",
+  tabPanel("Home",
+    actionButton("prepend", "Prepend a navbarMenu"),
+    actionButton("append", "Append a navbarMenu")
+  )
+)
+server <- function(input, output, session) {
+  observeEvent(input$prepend, {
+    id <- paste0("Dropdown", input$prepend, "p")
+    prependTab(inputId = "tabs",
+      navbarMenu(id,
+        tabPanel("Drop1", paste("Drop1 page from", id)),
+        tabPanel("Drop2", paste("Drop2 page from", id)),
+        "------",
+        "Header",
+        tabPanel("Drop3", paste("Drop3 page from", id))
+      )
+    )
+  })
+  observeEvent(input$append, {
+    id <- paste0("Dropdown", input$append, "a")
+    appendTab(inputId = "tabs",
+      navbarMenu(id,
+        tabPanel("Drop1", paste("Drop1 page from", id)),
+        tabPanel("Drop2", paste("Drop2 page from", id)),
+        "------",
+        "Header",
+        tabPanel("Drop3", paste("Drop3 page from", id))
+      )
+    )
+  })
 }
 
-# TODO: add example usage for inserting `navbarMenu`
+shinyApp(ui, server)
 
+}
 }
 \seealso{
 \code{\link{showTab}}

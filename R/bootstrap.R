@@ -760,7 +760,7 @@ navlistPanel <- function(...,
     fixedRow(columns)
 }
 
-# -- Helpers to build tabsetPanels (& Co.) and their elements
+# Helpers to build tabsetPanels (& Co.) and their elements
 markTabAsSelected <- function(x) {
   attr(x, "selected") <- TRUE
   x

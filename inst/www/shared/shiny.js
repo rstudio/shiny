@@ -1333,13 +1333,33 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     });
 
-    addMessageHandler("shiny-insert-tab", function (message) {
-      var $parentTabset = $("#" + message.inputId);
-      if ($parentTabset.length === 0) throw "There is no tabsetPanel (or navbarPage or " + "navlistPanel) with id " + message.inputId;
+    function getTabset(id) {
+      var $tabset = $("#" + id);
+      if ($tabset.length === 0) throw "There is no tabsetPanel (or navbarPage or navlistPanel) " + "with id equal to '" + id + "'";
+      return $tabset;
+    }
 
-      var $tabset = $parentTabset;
-      var tabsetId = $parentTabset.attr("data-tabsetid");
+    function getTabContent($tabset) {
+      var tabsetId = $tabset.attr("data-tabsetid");
       var $tabContent = $("div.tab-content[data-tabsetid='" + tabsetId + "']");
+      return $tabContent;
+    }
+
+    function getTargetTab($tabset, $tabContent, target) {
+      var dataValue = "[data-value='" + target + "']";
+      var $liTag = $tabset.find("a" + dataValue).parent();
+      if ($liTag.length === 0) {
+        throw "There is no tabPanel (or navbarMenu) with value" + " (or menuName) equal to '" + target + "'";
+      }
+      var $divTag = $tabContent.find("div" + dataValue);
+      return { $liTag: $liTag, $divTag: $divTag };
+    }
+
+    addMessageHandler("shiny-insert-tab", function (message) {
+      var $parentTabset = getTabset(message.inputId);
+      var $tabset = $parentTabset;
+      var $tabContent = getTabContent($tabset);
+      var tabsetId = $parentTabset.attr("data-tabsetid");
 
       var $divTag = $(message.divTag.html);
       var $liTag = $(message.liTag.html);
@@ -1348,11 +1368,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // Unless the item is being prepended/appended, the target tab
       // must be provided
       if (message.target !== null) {
-        var selector = "a" + "[data-value='" + message.target + "']";
-        var $targetLiTag = $parentTabset.find(selector).parent();
-        if ($targetLiTag.length === 0) {
-          throw "There is no tabPanel (or navbarMenu) with value" + " (or menuName) equal to '" + message.target + "'";
-        }
+        var target = getTargetTab($tabset, $tabContent, message.target);
+        var $targetLiTag = target.$liTag;
       }
 
       // If the item is to be placed inside a navbarMenu (dropdown),
@@ -1382,8 +1399,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (message.prepend) $tabset.prepend($liTag);else if (message.append) $tabset.append($liTag);else if (message.position === "before") $targetLiTag.before($liTag);else if (message.position === "after") $targetLiTag.after($liTag);
       $tabContent.append($divTag);
 
-      exports.renderContent($parentTabset[0], $parentTabset.html());
-      exports.renderContent($tabContent[0], $tabContent.html());
+      exports.renderContent($liTag[0], $liTag.html());
+      exports.renderContent($divTag[0], $divTag.html());
 
       /* Barbara -- August 2017
       Note: until now, the number of tabs in a tabsetPanel (or navbarPage
@@ -1437,41 +1454,28 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     });
 
     addMessageHandler("shiny-remove-tab", function (message) {
-      var $parentTabset = $("#" + message.inputId);
-      if ($parentTabset.length === 0) {
-        throw "There is no tabsetPanel with id " + message.inputId;
-      };
-      var $tabContent = $parentTabset.find("+ .tab-content");
-      var dataValue = "[data-value='" + message.target + "']";
+      var $tabset = getTabset(message.inputId);
+      var $tabContent = getTabContent($tabset);
 
-      var $targetLiTag = $parentTabset.find("a" + dataValue).parent();
-      var $targetDivTag = $tabContent.find("div" + dataValue);
-
-      if ($targetLiTag.length === 0) {
-        throw "There is no tabPanel with value " + message.target;
+      var target = getTargetTab($tabset, $tabContent, message.target);
+      for (var $el in target) {
+        if (target.hasOwnProperty($el)) {
+          exports.unbindAll(target[$el], true);
+          target[$el].remove();
+        }
       }
-
-      var els = [$targetLiTag, $targetDivTag];
-      $(els).each(function (i, el) {
-        exports.unbindAll(el, true);
-        $(el).remove();
-      });
     });
 
     addMessageHandler("shiny-change-tab-visibility", function (message) {
-      var $parentTabset = $("#" + message.inputId);
-      if ($parentTabset.length === 0) {
-        throw "There is no tabsetPanel with id " + message.inputId;
-      };
+      var $tabset = getTabset(message.inputId);
+      var $tabContent = getTabContent($tabset);
 
-      var dataValue = "[data-value='" + message.target + "']";
-      var $targetLiTag = $parentTabset.find("a" + dataValue).parent();
-
-      if ($targetLiTag.length === 0) {
-        throw "There is no tabPanel with value " + message.target;
+      var target = getTargetTab($tabset, $tabContent, message.target);
+      for (var $el in target) {
+        if (target.hasOwnProperty($el)) {
+          if (message.type === "show") target[$el].css("display", "");else if (message.type === "hide") target[$el].hide();
+        }
       }
-
-      if (message.type === "show") $targetLiTag.show();else if (message.type === "hide") $targetLiTag.hide();
     });
 
     addMessageHandler('updateQueryString', function (message) {

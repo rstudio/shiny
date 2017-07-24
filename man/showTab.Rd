@@ -11,20 +11,19 @@ hideTab(inputId, target, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{inputId}{The \code{id} of the \code{tabsetPanel} (or
-\code{navlistPanel} or \code{navbarPage})into which \code{tab} will
-be inserted/removed.}
+\code{navlistPanel} or \code{navbarPage}) in which to find
+\code{target}.}
 
 \item{target}{The \code{value} of the \code{tabPanel} to be
 hidden/shown. See Details if you want to hide/show an entire
 \code{navbarMenu} instead.}
 
-\item{session}{The shiny session within which to call this
-function.}
+\item{session}{The shiny session within which to call this function.}
 }
 \description{
-Dynamically hide or show a \code{\link{tabPanel}} from an existing
-\code{\link{tabsetPanel}}, \code{\link{navlistPanel}} or
-\code{\link{navbarPage}}.
+Dynamically hide or show a \code{\link{tabPanel}} (or a
+\code{\link{navbarMenu}})from an existing \code{\link{tabsetPanel}},
+\code{\link{navlistPanel}} or \code{\link{navbarPage}}.
 }
 \details{
 For \code{navbarPage}, you can hide/show conventional
@@ -37,31 +36,45 @@ this is equal to the value of the \code{title} argument).
 \examples{
 ## Only run this example in interactive R sessions
 if (interactive()) {
-ui <- fluidPage(
-  sidebarLayout(
-    sidebarPanel(actionButton("show", "Show tab")),
-    mainPanel(
-      tabsetPanel(id = "tabs",
-        tabPanel("Hello", "This is the hello tab"),
-        tabPanel("Foo", "This is the foo tab"),
-        tabPanel("Bar", "This is the bar tab")
-      )
-    )
+
+ui <- navbarPage("Navbar page", id = "tabs",
+  tabPanel("Home",
+    actionButton("hideTab", "Hide 'Foo' tab"),
+    actionButton("showTab", "Show 'Foo' tab"),
+    actionButton("hideMenu", "Hide 'More' navbarMenu"),
+    actionButton("showMenu", "Show 'More' navbarMenu")
+  ),
+  tabPanel("Foo", "This is the foo tab"),
+  tabPanel("Bar", "This is the bar tab"),
+  navbarMenu("More",
+    tabPanel("Table", "Table page"),
+    tabPanel("About", "About page"),
+    "------",
+    "Even more!",
+    tabPanel("Email", "Email page")
   )
 )
-server <- function(input, output, session) {
-  # Hide tab as soon as app starts up
-  hideTab(inputId = "tabs", target = "Foo")
 
-  observeEvent(input$show, {
+server <- function(input, output, session) {
+  observeEvent(input$hideTab, {
+    hideTab(inputId = "tabs", target = "Foo")
+  })
+
+  observeEvent(input$showTab, {
     showTab(inputId = "tabs", target = "Foo")
+  })
+
+  observeEvent(input$hideMenu, {
+    hideTab(inputId = "tabs", target = "More")
+  })
+
+  observeEvent(input$showMenu, {
+    showTab(inputId = "tabs", target = "More")
   })
 }
 
 shinyApp(ui, server)
 }
-
-# TODO: add example usage for `navbarMenu`
 
 }
 \seealso{

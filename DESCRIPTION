@@ -82,9 +82,11 @@ Suggests:
     rmarkdown,
     ggplot2,
     magrittr,
+    DT,
     shinytest
 Remotes:
-    rstudio/shinytest
+    rstudio/shinytest,
+    rstudio/DT
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate: 

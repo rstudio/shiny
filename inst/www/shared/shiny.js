@@ -1334,19 +1334,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     });
 
     function getTabset(id) {
-      var $tabset = $("#" + id);
+      var $tabset = $("#" + $escape(id));
       if ($tabset.length === 0) throw "There is no tabsetPanel (or navbarPage or navlistPanel) " + "with id equal to '" + id + "'";
       return $tabset;
     }
 
     function getTabContent($tabset) {
       var tabsetId = $tabset.attr("data-tabsetid");
-      var $tabContent = $("div.tab-content[data-tabsetid='" + tabsetId + "']");
+      var $tabContent = $("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
       return $tabContent;
     }
 
     function getTargetTabs($tabset, $tabContent, target) {
-      var dataValue = "[data-value='" + target + "']";
+      var dataValue = "[data-value='" + $escape(target) + "']";
       var $aTag = $tabset.find("a" + dataValue);
       var $liTag = $aTag.parent();
       if ($liTag.length === 0) {
@@ -1357,7 +1357,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // dropdown
         var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
         var dropdownId = $dropdownTabset.attr("data-tabsetid");
-        var selector = "div.tab-pane[id^='tab-" + dropdownId + "']";
+        var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
         var $dropdownDivs = $tabContent.find(selector);
         $dropdownDivs.each(function (i, el) {
           $divTags.push(el);
@@ -1447,7 +1447,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         if (message.menuName !== null) {
           // menuName is only provided if the user wants to prepend
           // or append an item inside a navbarMenu (dropdown)
-          var $dropdownATag = $("a.dropdown-toggle[data-value='" + message.menuName + "']");
+          var $dropdownATag = $("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
           if ($dropdownATag.length === 0) {
             throw "There is no navbarMenu with menuName equal to '" + message.menuName + "'";
           }

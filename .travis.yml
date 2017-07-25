@@ -1,16 +1,37 @@
+dist: trusty
 language: r
 r:
   - oldrel
   - release
   - devel
 sudo: false
-cache: packages
+
+cache:
+  packages:
+  # Use newer version of PhantomJS than is installed by default on basic R image.
+  # Code referenced from:
+  #   https://github.com/travis-ci/travis-ci/issues/3225#issuecomment-255500144
+  directories:
+    - "travis_phantomjs"
 
 # Need to replace the git: URL with https: so that Travis can check out the
 # submodule.
 git:
   submodules: false
+
 before_install:
+  # For updated version of PhantomJS
+  - "export PHANTOMJS_VERSION=2.1.1"
+  - "phantomjs --version"
+  - "export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH"
+  - "hash -r"
+  - "phantomjs --version"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then rm -rf $PWD/travis_phantomjs; mkdir -p $PWD/travis_phantomjs; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -O $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then tar -xvf $PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs; fi"
+  - "if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then hash -r; fi"
+  - "phantomjs --version"
+  # For git submodule
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
   - git submodule update --init --recursive
 

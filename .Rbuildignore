@@ -19,3 +19,4 @@
 ^appveyor\.yml$
 ^revdep$
 ^tests/testthat/apps/\.git$
+^travis_phantomjs$

@@ -662,6 +662,9 @@ Callbacks <- R6Class(
       .callbacks <<- Map$new()
     },
     register = function(callback) {
+      if (!is.function(callback)) {
+        stop("callback must be a function")
+      }
       id <- as.character(.nextId)
       .nextId <<- .nextId - 1L
       .callbacks$set(id, callback)

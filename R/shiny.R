@@ -1954,11 +1954,8 @@ onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
 
 #' @rdname onFlush
 #'
-#' @seealso \code{\link{onStop}()} for registering a callback on the end of the
-#'   app, to be called immediately after the app stops. This means that for an
-#'   instance of a runnning app, this will only be called once, whereas the
-#'   functions on this page are be called an arbitrary number of times (depending
-#'   on how many reactives flushes and clients there are).
+#' @seealso \code{\link{onStop}()} for registering callbacks that will be
+#'   invoked when the application exits, or when a session ends.
 #' @export
 onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
   session$onSessionEnded(fun)
@@ -1984,20 +1981,92 @@ flushAllSessions <- function() {
   })
 }
 
-#' Run code after app has finished
+.globals$onStopCallbacks <- Callbacks$new()
+
+#' Run code after an application or session ends
 #'
-#' This function allows you to register callback functions that are invoked
-#' after your app has finished running.
+#' This function registers callback functions that are invoked when the
+#' application exits (when \code{\link{runApp}} exits), or after each user
+#' session ends (when a client disconnects).
 #'
 #' @param fun A function that will be called after the app has finished running.
+#' @param scope When the callback will run. If "global", the callback will be
+#'   invoked when the application exits. If "session", the callback will be
+#'   invoked when a session ends. If "auto" (the default), then if this function
+#'   was called outside a server function, it will be like using "global", and
+#'   if this function was called inside a server function, it will be like using
+#'   "session".
 #'
-#' @seealso \code{\link{onSessionEnded}()} for the same functionality but at the
-#'   session level, instead of at the global level.
+#' @seealso \code{\link{onSessionEnded}()} for the same functionality, but at
+#'   the session level only.
 #'
+#' @return A function which, if invoked, will cancel the callback.
 #' @examples
-#' onStop(function() { print("goodbye") })
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   # Open this application in multiple browsers, then close the browsers.
+#'   shinyApp(
+#'     ui = basicPage("onStop demo"),
+#'
+#'     server = function(input, output, session) {
+#'       onStop(function() cat("Session stopped\n"))
+#'     },
+#'
+#'     onStart = function() {
+#'       cat("Doing application setup\n")
+#'
+#'       onStop(function() {
+#'         cat("Doing application cleanup\n")
+#'       })
+#'     }
+#'   )
+#' }
+#' # In the example above, onStop() is called inside of onStart(). This is
+#' # the pattern that should be used when creating a shinyApp() object from
+#' # a function, or at the console. If instead you are writing an app.R which
+#' # will be invoked with runApp(), you can do it that way, or put the onStop()
+#' # before the shinyApp() call, as shown below.
+#'
+#' \dontrun{
+#' # ==== app.R ====
+#' cat("Doing application setup\n")
+#' onStop(function() {
+#'   cat("Doing application cleanup\n")
+#' })
+#'
+#' shinyApp(
+#'   ui = basicPage("onStop demo"),
+#'
+#'   server = function(input, output, session) {
+#'     onStop(function() cat("Session stopped\n"))
+#'   }
+#' )
+#' # ==== end app.R ====
+#'
+#'
+#' # Similarly, if you have a global.R, you can call onStop() from there.
+#' # ==== global.R ====
+#' cat("Doing application setup\n")
+#' onStop(function() {
+#'   cat("Doing application cleanup\n")
+#' })
+#' # ==== end global.R ====
+#' }
 #' @export
-onStop <- function(fun) {
-  shinyOptions(onStop = fun)
-}
+onStop <- function(fun, scope = c("auto", "global", "session")) {
+  scope <- match.arg(scope)
+  if (scope == "auto") {
+    if (is.null(getDefaultReactiveDomain()))
+      scope <- "global"
+    else
+      scope <- "session"
+  }
 
+  if (scope == "global") {
+    return(.globals$onStopCallbacks$register(fun))
+
+  } else {
+    session <- getDefaultReactiveDomain()
+    return(session$onSessionEnded(fun))
+  }
+}

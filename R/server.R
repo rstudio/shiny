@@ -736,6 +736,13 @@ runApp <- function(appDir=getwd(),
     }
   }
 
+  # Invoke user-defined onStop callbacks, before the application's internal
+  # onStop callbacks.
+  on.exit({
+    .globals$onStopCallbacks$invoke()
+    .globals$onStopCallbacks <- Callbacks$new()
+  }, add = TRUE)
+
   # Extract appOptions (which is a list) and store them as shinyOptions, for
   # this app. (This is the only place we have to store settings that are
   # accessible both the UI and server portion of the app.)

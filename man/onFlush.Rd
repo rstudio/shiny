@@ -35,9 +35,6 @@ All of these functions return a function which can be called with no
 arguments to cancel the registration.
 }
 \seealso{
-\code{\link{onStop}()} for registering a callback on the end of the
-  app, to be called immediately after the app stops. This means that for an
-  instance of a runnning app, this will only be called once, whereas the
-  functions on this page are be called an arbitrary number of times (depending
-  on how many reactives flushes and clients there are).
+\code{\link{onStop}()} for registering callbacks that will be
+  invoked when the application exits, or when a session ends.
 }

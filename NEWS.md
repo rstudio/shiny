@@ -49,6 +49,8 @@ shiny 1.0.3.9001
 
 * Fixed [#1680](https://github.com/rstudio/shiny/issues/1680): `options(warn=2)` was not respected when running an app. ([#1790](https://github.com/rstudio/shiny/pull/1790))
 
+* Fixed [#1474](https://github.com/rstudio/shiny/issues/1474): A `browser()` call in an observer could cause an error in the RStudio IDE on Windows. ([#1802](https://github.com/rstudio/shiny/pull/1802))
+
 ### Library updates
 
 

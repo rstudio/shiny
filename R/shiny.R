@@ -1953,6 +1953,9 @@ onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
 }
 
 #' @rdname onFlush
+#'
+#' @seealso \code{\link{onStop}()} for registering callbacks that will be
+#'   invoked when the application exits, or when a session ends.
 #' @export
 onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
   session$onSessionEnded(fun)
@@ -1976,4 +1979,87 @@ flushAllSessions <- function() {
     )
     NULL
   })
+}
+
+.globals$onStopCallbacks <- Callbacks$new()
+
+#' Run code after an application or session ends
+#'
+#' This function registers callback functions that are invoked when the
+#' application exits (when \code{\link{runApp}} exits), or after each user
+#' session ends (when a client disconnects).
+#'
+#' @param fun A function that will be called after the app has finished running.
+#' @param session A scope for when the callback will run. If \code{onStop} is
+#'   called from within the server function, this will default to the current
+#'   session, and the callback will be invoked when the current session ends. If
+#'   \code{onStop} is called outside a server function, then the callback will
+#'   be invoked with the application exits.
+#'
+#'
+#' @seealso \code{\link{onSessionEnded}()} for the same functionality, but at
+#'   the session level only.
+#'
+#' @return A function which, if invoked, will cancel the callback.
+#' @examples
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   # Open this application in multiple browsers, then close the browsers.
+#'   shinyApp(
+#'     ui = basicPage("onStop demo"),
+#'
+#'     server = function(input, output, session) {
+#'       onStop(function() cat("Session stopped\n"))
+#'     },
+#'
+#'     onStart = function() {
+#'       cat("Doing application setup\n")
+#'
+#'       onStop(function() {
+#'         cat("Doing application cleanup\n")
+#'       })
+#'     }
+#'   )
+#' }
+#' # In the example above, onStop() is called inside of onStart(). This is
+#' # the pattern that should be used when creating a shinyApp() object from
+#' # a function, or at the console. If instead you are writing an app.R which
+#' # will be invoked with runApp(), you can do it that way, or put the onStop()
+#' # before the shinyApp() call, as shown below.
+#'
+#' \dontrun{
+#' # ==== app.R ====
+#' cat("Doing application setup\n")
+#' onStop(function() {
+#'   cat("Doing application cleanup\n")
+#' })
+#'
+#' shinyApp(
+#'   ui = basicPage("onStop demo"),
+#'
+#'   server = function(input, output, session) {
+#'     onStop(function() cat("Session stopped\n"))
+#'   }
+#' )
+#' # ==== end app.R ====
+#'
+#'
+#' # Similarly, if you have a global.R, you can call onStop() from there.
+#' # ==== global.R ====
+#' cat("Doing application setup\n")
+#' onStop(function() {
+#'   cat("Doing application cleanup\n")
+#' })
+#' # ==== end global.R ====
+#' }
+#' @export
+onStop <- function(fun, session = getDefaultReactiveDomain()) {
+  if (is.null(getDefaultReactiveDomain())) {
+    return(.globals$onStopCallbacks$register(fun))
+  } else {
+    # Note: In the future if we allow scoping the onStop() callback to modules
+    # and allow modules to be stopped, then session_proxy objects will need
+    # its own implementation of $onSessionEnded.
+    return(session$onSessionEnded(fun))
+  }
 }

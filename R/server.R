@@ -226,7 +226,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               message("RECV ", rawToChar(msg))
           }
 
-          if (identical(charToRaw("\003\xe9"), msg))
+          if (isEmptyMessage(msg))
             return()
 
           msg <- decodeMessage(msg)
@@ -1025,4 +1025,10 @@ browserViewer <- function(browser = getOption("browser")) {
 # otherwise returns FALSE.
 inShinyServer <- function() {
   nzchar(Sys.getenv('SHINY_PORT'))
+}
+
+# This check was moved out of the main function body because of an issue with
+# the RStudio debugger. (#1474)
+isEmptyMessage <- function(msg) {
+  identical(charToRaw("\003\xe9"), msg)
 }

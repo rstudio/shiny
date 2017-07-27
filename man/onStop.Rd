@@ -4,17 +4,16 @@
 \alias{onStop}
 \title{Run code after an application or session ends}
 \usage{
-onStop(fun, scope = c("auto", "global", "session"))
+onStop(fun, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{fun}{A function that will be called after the app has finished running.}
 
-\item{scope}{When the callback will run. If "global", the callback will be
-invoked when the application exits. If "session", the callback will be
-invoked when a session ends. If "auto" (the default), then if this function
-was called outside a server function, it will be like using "global", and
-if this function was called inside a server function, it will be like using
-"session".}
+\item{session}{A scope for when the callback will run. If \code{onStop} is
+called from within the server function, this will default to the current
+session, and the callback will be invoked when the current session ends. If
+\code{onStop} is called outside a server function, then the callback will
+be invoked with the application exits.}
 }
 \value{
 A function which, if invoked, will cancel the callback.

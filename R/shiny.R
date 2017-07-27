@@ -1990,12 +1990,12 @@ flushAllSessions <- function() {
 #' session ends (when a client disconnects).
 #'
 #' @param fun A function that will be called after the app has finished running.
-#' @param scope When the callback will run. If "global", the callback will be
-#'   invoked when the application exits. If "session", the callback will be
-#'   invoked when a session ends. If "auto" (the default), then if this function
-#'   was called outside a server function, it will be like using "global", and
-#'   if this function was called inside a server function, it will be like using
-#'   "session".
+#' @param session A scope for when the callback will run. If \code{onStop} is
+#'   called from within the server function, this will default to the current
+#'   session, and the callback will be invoked when the current session ends. If
+#'   \code{onStop} is called outside a server function, then the callback will
+#'   be invoked with the application exits.
+#'
 #'
 #' @seealso \code{\link{onSessionEnded}()} for the same functionality, but at
 #'   the session level only.
@@ -2053,20 +2053,13 @@ flushAllSessions <- function() {
 #' # ==== end global.R ====
 #' }
 #' @export
-onStop <- function(fun, scope = c("auto", "global", "session")) {
-  scope <- match.arg(scope)
-  if (scope == "auto") {
-    if (is.null(getDefaultReactiveDomain()))
-      scope <- "global"
-    else
-      scope <- "session"
-  }
-
-  if (scope == "global") {
+onStop <- function(fun, session = getDefaultReactiveDomain()) {
+  if (is.null(getDefaultReactiveDomain())) {
     return(.globals$onStopCallbacks$register(fun))
-
   } else {
-    session <- getDefaultReactiveDomain()
+    # Note: In the future if we allow scoping the onStop() callback to modules
+    # and allow modules to be stopped, then session_proxy objects will need
+    # its own implementation of $onSessionEnded.
     return(session$onSessionEnded(fun))
   }
 }

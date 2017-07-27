@@ -465,6 +465,17 @@ serviceApp <- function() {
 # Global flag that's TRUE whenever we're inside of the scope of a call to runApp
 .globals$running <- FALSE
 
+#' Check whether a Shiny application is running
+#'
+#' This function tests whether a Shiny application is currently running.
+#'
+#' @return \code{TRUE} if a Shiny application is currently running. Otherwise,
+#'   \code{FALSE}.
+#' @export
+isRunning <- function() {
+  .globals$running
+}
+
 #' Run Shiny Application
 #'
 #' Runs a Shiny application. This function normally does not return; interrupt R

@@ -1425,10 +1425,51 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           $tabset.prepend($liTag);
         }
       }
-      $tabContent.append($divTag);
 
-      exports.renderContent($liTag[0], $liTag.html());
-      exports.renderContent($divTag[0], $divTag.html());
+      exports.renderContent($liTag[0], { html: $liTag.html(), deps: message.liTag.deps });
+      // jcheng 2017-07-28: This next part might look a little insane versus the
+      // more obvious `$tabContent.append($divTag);`, but there's a method to the
+      // madness.
+      //
+      // 1) We need to load the dependencies, and this needs to happen before
+      //    any scripts in $divTag get a chance to run.
+      // 2) The scripts in $divTag need to run only once.
+      // 3) The contents of $divTag need to be sent through renderContent so that
+      //    singletons may be registered and/or obeyed, and so that inputs/outputs
+      //    may be bound.
+      //
+      // Add to these constraints these facts:
+      //
+      // A) The (non-jQuery) DOM manipulation functions don't cause scripts to
+      //    run, but the jQuery functions all do.
+      // B) renderContent must be called on an element that's attached to the
+      //    document.
+      // C) $divTag may be of length > 1 (e.g. navbarMenu). I also noticed text
+      //    elements consisting of just "\n" being included in the nodeset of
+      //    $divTag.
+      // D) renderContent has a bug where only position "replace" (the default)
+      //    uses the jQuery functions, so other positions like "beforeend" will
+      //    prevent child script tags from running.
+      //
+      // In theory the same problem exists for $liTag but since that content is
+      // much less likely to include arbitrary scripts, we're skipping it.
+      //
+      // This code could be nicer if we didn't use renderContent, but rather the
+      // lower-level functions that renderContent uses. Like if we pre-process
+      // the value of message.divTag.html for singletons, we could do that, then
+      // render dependencies, then do $tabContent.append($divTag).
+      exports.renderContent($tabContent[0], { html: "", deps: message.divTag.deps }, "beforeend");
+      $divTag.get().forEach(function (el) {
+        // Must not use jQuery for appending el to the doc, we don't want any
+        // scripts to run (since they will run when renderContent takes a crack).
+        $tabContent[0].appendChild(el);
+        // If `el` itself is a script tag, this approach won't work (the script
+        // won't be run), since we're only sending innerHTML through renderContent
+        // and not the whole tag. That's fine in this case because we control the
+        // R code that generates this HTML, and we know that the element is not
+        // a script tag.
+        exports.renderContent(el, el.innerHTML || el.textContent);
+      });
 
       if (message.select) {
         $liTag.find("a").tab("show");

@@ -8,12 +8,12 @@
 \title{Dynamically insert/remove a tabPanel}
 \usage{
 insertTab(inputId, tab, target, position = c("before", "after"),
+  select = FALSE, session = getDefaultReactiveDomain())
+
+prependTab(inputId, tab, select = FALSE, menuName = NULL,
   session = getDefaultReactiveDomain())
 
-prependTab(inputId, tab, menuName = NULL,
-  session = getDefaultReactiveDomain())
-
-appendTab(inputId, tab, menuName = NULL,
+appendTab(inputId, tab, select = FALSE, menuName = NULL,
   session = getDefaultReactiveDomain())
 
 removeTab(inputId, target, session = getDefaultReactiveDomain())
@@ -34,6 +34,8 @@ an entire \code{navbarMenu} instead.}
 
 \item{position}{Should \code{tab} be added before or after the
 \code{target} tab?}
+
+\item{select}{Should \code{tab} be selected upon being inserted?}
 
 \item{session}{The shiny session within which to call this function.}
 

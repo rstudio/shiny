@@ -33,6 +33,8 @@
 #' @param position Should \code{tab} be added before or after the
 #'   \code{target} tab?
 #'
+#' @param select Should \code{tab} be selected upon being inserted?
+#'
 #' @param session The shiny session within which to call this function.
 #'
 #' @seealso \code{\link{showTab}}
@@ -111,11 +113,12 @@
 #' }
 #' @export
 insertTab <- function(inputId, tab, target,
-                      position = c("before", "after"),
+                      position = c("before", "after"), select = FALSE,
                       session = getDefaultReactiveDomain()) {
   force(inputId)
   force(target)
   position <- match.arg(position)
+  force(select)
   force(session)
 
   # Barbara -- August 2017
@@ -135,7 +138,8 @@ insertTab <- function(inputId, tab, target,
       divTag = processDeps(item$divTag, session),
       menuName = NULL,
       target = target,
-      position = position)
+      position = position,
+      select = select)
   }
   session$onFlushed(callback, once = TRUE)
 }
@@ -154,10 +158,11 @@ insertTab <- function(inputId, tab, target,
 #'
 #' @rdname insertTab
 #' @export
-prependTab <- function(inputId, tab, menuName = NULL,
+prependTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                        session = getDefaultReactiveDomain()) {
   force(inputId)
   force(tab)
+  force(select)
   force(menuName)
   force(session)
 
@@ -171,17 +176,19 @@ prependTab <- function(inputId, tab, menuName = NULL,
       divTag = processDeps(item$divTag, session),
       menuName = menuName,
       target = NULL,
-      position = "after")
+      position = "after",
+      select = select)
   }
   session$onFlushed(callback, once = TRUE)
 }
 
 #' @rdname insertTab
 #' @export
-appendTab <- function(inputId, tab, menuName = NULL,
+appendTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                       session = getDefaultReactiveDomain()) {
   force(inputId)
   force(tab)
+  force(select)
   force(menuName)
   force(session)
 
@@ -195,7 +202,8 @@ appendTab <- function(inputId, tab, menuName = NULL,
       divTag = processDeps(item$divTag, session),
       menuName = menuName,
       target = NULL,
-      position = "before")
+      position = "before",
+      select = select)
   }
   session$onFlushed(callback, once = TRUE)
 }

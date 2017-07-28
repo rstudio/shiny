@@ -817,6 +817,10 @@ var ShinyApp = function() {
     exports.renderContent($liTag[0], $liTag.html());
     exports.renderContent($divTag[0], $divTag.html());
 
+    if (message.select) {
+      $liTag.find("a").tab("show");
+    }
+
     /* Barbara -- August 2017
     Note: until now, the number of tabs in a tabsetPanel (or navbarPage
     or navlistPanel) was always fixed. So, an easy way to give an id to

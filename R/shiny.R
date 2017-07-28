@@ -1493,7 +1493,7 @@ ShinySession <- R6Class(
       )
     },
     sendInsertTab = function(inputId, liTag, divTag, menuName,
-                             target, position) {
+                             target, position, select) {
       private$sendMessage(
         `shiny-insert-tab` = list(
           inputId = inputId,
@@ -1501,7 +1501,8 @@ ShinySession <- R6Class(
           divTag = divTag,
           menuName = menuName,
           target = target,
-          position = position
+          position = position,
+          select = select
         )
       )
     },

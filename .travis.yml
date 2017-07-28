@@ -7,7 +7,7 @@ r:
 sudo: false
 
 cache:
-  packages:
+  packages: true
   # Use newer version of PhantomJS than is installed by default on basic R image.
   # Code referenced from:
   #   https://github.com/travis-ci/travis-ci/issues/3225#issuecomment-255500144

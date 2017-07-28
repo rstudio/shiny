@@ -135,8 +135,6 @@ insertTab <- function(inputId, tab, target,
       divTag = processDeps(item$divTag, session),
       menuName = NULL,
       target = target,
-      prepend = FALSE,
-      append = FALSE,
       position = position)
   }
   session$onFlushed(callback, once = TRUE)
@@ -173,9 +171,7 @@ prependTab <- function(inputId, tab, menuName = NULL,
       divTag = processDeps(item$divTag, session),
       menuName = menuName,
       target = NULL,
-      prepend = TRUE,
-      append = FALSE,
-      position = NULL)
+      position = "after")
   }
   session$onFlushed(callback, once = TRUE)
 }
@@ -199,9 +195,7 @@ appendTab <- function(inputId, tab, menuName = NULL,
       divTag = processDeps(item$divTag, session),
       menuName = menuName,
       target = NULL,
-      prepend = FALSE,
-      append = TRUE,
-      position = NULL)
+      position = "before")
   }
   session$onFlushed(callback, once = TRUE)
 }

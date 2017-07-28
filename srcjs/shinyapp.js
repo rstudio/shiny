@@ -767,9 +767,11 @@ var ShinyApp = function() {
 
     // Unless the item is being prepended/appended, the target tab
     // must be provided
+    var target = null;
+    var $targetLiTag = null;
     if (message.target !== null) {
-      var target = getTargetTabs($tabset, $tabContent, message.target);
-      var $targetLiTag = target.$liTag;
+      target = getTargetTabs($tabset, $tabContent, message.target);
+      $targetLiTag = target.$liTag;
     }
 
     // If the item is to be placed inside a navbarMenu (dropdown),
@@ -797,10 +799,19 @@ var ShinyApp = function() {
     }
 
     // actually insert the item into the right place
-    if (message.prepend) $tabset.prepend($liTag);
-    else if (message.append) $tabset.append($liTag);
-    else if (message.position === "before") $targetLiTag.before($liTag);
-    else if (message.position === "after") $targetLiTag.after($liTag);
+    if (message.position === "before") {
+      if ($targetLiTag) {
+        $targetLiTag.before($liTag);
+      } else {
+        $tabset.append($liTag);
+      }
+    } else if (message.position === "after") {
+      if ($targetLiTag) {
+        $targetLiTag.after($liTag);
+      } else {
+        $tabset.prepend($liTag);
+      }
+    }
     $tabContent.append($divTag);
 
     exports.renderContent($liTag[0], $liTag.html());

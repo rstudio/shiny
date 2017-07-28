@@ -5101,14 +5101,23 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     setValue: function setValue(el, value) {
       var self = this;
-      var anchors = $(el).find('li:not(.dropdown)').children('a');
-      anchors.each(function () {
-        if (self._getTabName($(this)) === value) {
-          $(this).tab('show');
-          return false; // Break out of each()
-        }
-        return true;
-      });
+      var success = false;
+      if (value) {
+        var anchors = $(el).find('li:not(.dropdown)').children('a');
+        anchors.each(function () {
+          if (self._getTabName($(this)) === value) {
+            $(this).tab('show');
+            success = true;
+            return false; // Break out of each()
+          }
+          return true;
+        });
+      }
+      if (!success) {
+        // This is to handle the case where nothing is selected, e.g. the last tab
+        // was removed using removeTab.
+        $(el).trigger("change");
+      }
     },
     getState: function getState(el) {
       return { value: this.getValue(el) };
@@ -5117,7 +5126,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
     },
     subscribe: function subscribe(el, callback) {
-      $(el).on('shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function (event) {
+      $(el).on('change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function (event) {
         callback();
       });
     },

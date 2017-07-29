@@ -1526,33 +1526,26 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
     });
 
-    function getNearestTabSibling($liTag) {
-      var siblingTabValue = null;
-
-      // possibilities, in order of desirability
-      var $tabRight = $liTag.nextAll("li:visible").children("a" + "[data-toggle='tab']").first();
-
-      var $tabLeft = $liTag.prevAll("li:visible").children("a" + "[data-toggle='tab']").first();
-
-      var $tabDropRight = $liTag.nextAll("li:visible").children("a" + "[data-toggle='dropdown']").next("ul" + ".dropdown-menu").next("li").next("a[data-toggle='tab']").first();
-
-      var $tabDropLeft = $liTag.prevAll("li:visible").children("a" + "[data-toggle='dropdown']").next("ul" + ".dropdown-menu").next("li").next("a[data-toggle='tab']").first();
-
-      var possibilities = [$tabRight, $tabLeft, $tabDropRight, $tabDropLeft];
-
-      $.each(possibilities, function (i, $tab) {
-        siblingTabValue = getValueIfExistsAndVisible($tab);
-        if (siblingTabValue !== null) return false; // break out of each()
-        else return true;
-      });
-
-      return siblingTabValue;
-
-      function getValueIfExistsAndVisible($el) {
-        if ($el.length === 1) {
-          return $el.attr("data-value");
-        } else return null;
+    // If the given tabset has no active tabs, s
+    function ensureTabsetHasVisibleTab($tabset) {
+      if ($tabset.find("li.active").length === 0) {
+        // Note: destTabValue may be null. We still want to proceed
+        // through the below logic and setValue so that the input
+        // value for the tabset gets updated (i.e. input$tabsetId
+        // should be null if there are no tabs).
+        var destTabValue = getFirstTab($tabset);
+        var inputBinding = $tabset.data('shiny-input-binding');
+        var evt = jQuery.Event('shiny:updateinput');
+        evt.binding = inputBinding;
+        $tabset.trigger(evt);
+        inputBinding.setValue($tabset[0], destTabValue);
       }
+    }
+
+    // Given a tabset ul jquery object, return the value of the first tab
+    // (in document order) that's visible and able to be selected.
+    function getFirstTab($ul) {
+      return $ul.find("li:visible a[data-toggle='tab']").first().attr("data-value") || null;
     }
 
     function tabApplyFunction(target, func) {
@@ -1565,22 +1558,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     }
 
-    function navigateToNearestTab($tabset, nextTabValue) {
-      var inputBinding = $tabset.data('shiny-input-binding');
-      var evt = jQuery.Event('shiny:updateinput');
-      evt.binding = inputBinding;
-      $tabset.trigger(evt);
-      inputBinding.setValue($tabset[0], nextTabValue);
-    }
-
     addMessageHandler("shiny-remove-tab", function (message) {
       var $tabset = getTabset(message.inputId);
       var $tabContent = getTabContent($tabset);
       var target = getTargetTabs($tabset, $tabContent, message.target);
-      var nextTabValue = getNearestTabSibling(target.$liTag);
 
       tabApplyFunction(target, removeEl);
-      navigateToNearestTab($tabset, nextTabValue);
+
+      ensureTabsetHasVisibleTab($tabset);
 
       function removeEl($el) {
         exports.unbindAll($el, true);
@@ -1592,10 +1577,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var $tabset = getTabset(message.inputId);
       var $tabContent = getTabContent($tabset);
       var target = getTargetTabs($tabset, $tabContent, message.target);
-      var nextTabValue = getNearestTabSibling(target.$liTag);
 
       tabApplyFunction(target, changeVisibility);
-      navigateToNearestTab($tabset, nextTabValue);
+
+      ensureTabsetHasVisibleTab($tabset);
 
       function changeVisibility($el) {
         if (message.type === "show") $el.css("display", "");else if (message.type === "hide") {

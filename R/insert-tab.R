@@ -141,7 +141,7 @@ insertTab <- function(inputId, tab, target,
       position = position,
       select = select)
   }
-  session$onFlushed(callback, once = TRUE)
+  session$onFlush(callback, once = TRUE)
 }
 
 #' @param menuName This argument should only be used when you want to
@@ -179,7 +179,7 @@ prependTab <- function(inputId, tab, select = FALSE, menuName = NULL,
       position = "after",
       select = select)
   }
-  session$onFlushed(callback, once = TRUE)
+  session$onFlush(callback, once = TRUE)
 }
 
 #' @rdname insertTab
@@ -205,7 +205,7 @@ appendTab <- function(inputId, tab, select = FALSE, menuName = NULL,
       position = "before",
       select = select)
   }
-  session$onFlushed(callback, once = TRUE)
+  session$onFlush(callback, once = TRUE)
 }
 
 #' @rdname insertTab
@@ -221,7 +221,7 @@ removeTab <- function(inputId, target,
       inputId = inputId,
       target = target)
   }
-  session$onFlushed(callback, once = TRUE)
+  session$onFlush(callback, once = TRUE)
 }
 
 
@@ -307,7 +307,7 @@ showTab <- function(inputId, target,
       type = "show"
     )
   }
-  session$onFlushed(callback, once = TRUE)
+  session$onFlush(callback, once = TRUE)
 }
 
 #' @rdname showTab
@@ -325,5 +325,5 @@ hideTab <- function(inputId, target,
       type = "hide"
     )
   }
-  session$onFlushed(callback, once = TRUE)
+  session$onFlush(callback, once = TRUE)
 }

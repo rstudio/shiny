@@ -98,7 +98,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     dims <- if (execOnResize) getDims() else isolate(getDims())
     pixelratio <- session$clientData$pixelratio %OR% 1
     p1 <- drawPlot(name, session, func, dims$width, dims$height, pixelratio, res)
-    p1 <- promise::catch(p1, function(reason) {
+    p1 <- promises::catch(p1, function(reason) {
       # Non-isolating read. A common reason for errors in plotting is because
       # the dimensions are too small. By taking a dependency on width/height,
       # we can try again if the plot output element changes size.
@@ -116,7 +116,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     session <<- shinysession
 
     p1 <- drawReactive()
-    p1 <- promise::then(p1, function(result) {
+    p1 <- promises::then(p1, function(result) {
       dims <- getDims()
       pixelratio <- session$clientData$pixelratio %OR% 1
       resizeSavedPlot(name, shinysession, result, dims$width, dims$height, pixelratio, res)
@@ -175,9 +175,9 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
-  p1 <- promise::with_promise_domain(domain, {
-    p2 <- promise::resolved(func())
-    p2 <- promise::then(p2, function(value, .visible) {
+  p1 <- promises::with_promise_domain(domain, {
+    p2 <- promises::promise(~resolve(func()))
+    p2 <- promises::then(p2, function(value, .visible) {
       if (.visible) {
         # A modified version of print.ggplot which returns the built ggplot object
         # as well as the gtable grob. This overrides the ggplot::print.ggplot
@@ -205,7 +205,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
         NULL
       }
     })
-    p2 <- promise::then(p2, function(value) {
+    p2 <- promises::then(p2, function(value) {
       list(
         plotResult = value,
         recordedPlot = grDevices::recordPlot(),
@@ -216,10 +216,10 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
     })
     p2
   })
-  p1 <- promise::finally(p1, function() {
+  p1 <- promises::finally(p1, function() {
     grDevices::dev.off(device)
   })
-  p1 <- promise::then(p1, function(result) {
+  p1 <- promises::then(p1, function(result) {
     result$img <- dropNulls(list(
       src = session$fileUrl(name, outfile, contentType='image/png'),
       width = width,
@@ -230,7 +230,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
     ))
     result
   })
-  p1 <- promise::finally(p1, function() {
+  p1 <- promises::finally(p1, function() {
     unlink(outfile)
   })
 }

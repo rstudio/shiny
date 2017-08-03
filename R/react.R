@@ -19,7 +19,7 @@ Context <- R6Class(
     run = function(func) {
       "Run the provided function under this context."
 
-      promise::with_promise_domain(reactivePromiseDomain(), {
+      promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
           env <- .getReactiveEnvironment()
           .graphEnterContext(id)
@@ -181,7 +181,7 @@ wrapForContext <- function(func, ctx) {
 }
 
 reactivePromiseDomain <- function() {
-  promise::new_promise_domain(
+  promises::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
       ctx <- getCurrentContext()

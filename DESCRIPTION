@@ -72,7 +72,7 @@ Imports:
     htmltools (>= 0.3.5),
     R6 (>= 2.0),
     sourcetools,
-    promise,
+    promises,
     tools
 Suggests:
     datasets,

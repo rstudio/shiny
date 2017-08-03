@@ -1132,9 +1132,9 @@ ShinySession <- R6Class(
 
           # This shinyCallingHandlers should maybe be at a higher level,
           # to include the $then/$catch calls below?
-          p <- promise::resolved(shinyCallingHandlers(func()))
+          p <- promises::promise(~resolve(shinyCallingHandlers(func())))
 
-          p <- promise::catch(p,
+          p <- promises::catch(p,
             function(cond) {
               if (inherits(cond, "shiny.custom.error")) {
                 if (isTRUE(getOption("show.error.messages"))) printError(cond)
@@ -1159,7 +1159,7 @@ ShinySession <- R6Class(
             }
           )
 
-          p <- promise::then(p, function(value) {
+          p <- promises::then(p, function(value) {
             private$sendMessage(recalculating = list(
               name = name, status = 'recalculated'
             ))

@@ -36,4 +36,3 @@ An annotated render function, ready to be assigned to an
 \description{
 Implement render functions
 }
-

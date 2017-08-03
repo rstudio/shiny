@@ -7,5 +7,5 @@
 - [ ] Non-async render functions should have their code all execute on the current tick. Otherwise order of execution will be surprising if they have side effects and explicit priorities.
 - [x] Respect execOnResize
 - [ ] Accidentally did then(cars) instead of then(~cars), which caused an *unhandled* promise exception
-- [ ] promise::resolved(logic()) should use the current reactive domain to wrap the call to logic()
+- [ ] promises::resolved(logic()) should use the current reactive domain to wrap the call to logic()
 - [ ] invisible() doesn't seem to be working correctly with renderPrint

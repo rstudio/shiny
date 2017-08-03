@@ -82,8 +82,8 @@ createRenderFunction <- function(
 
   renderFunc <- function(shinysession, name, ...) {
     res <- func()
-    if (promise::is.promise(res)) {
-      return(promise::then(res, function(value) {
+    if (promises::is.promise(res)) {
+      return(promises::then(res, function(value) {
         transform(value, shinysession, name, ...)
       }))
     } else {
@@ -332,12 +332,12 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
 
   renderFunc <- function(shinysession, name, ...) {
     domain <- createRenderPrintPromiseDomain(width)
-    p1 <- promise::with_promise_domain(domain, {
-      p2 <- promise::resolved(TRUE)
-      p2 <- promise::then(p2, function(value) {
+    p1 <- promises::with_promise_domain(domain, {
+      p2 <- promises::promise(~resolve(TRUE))
+      p2 <- promises::then(p2, function(value) {
         func()
       })
-      p2 <- promise::then(p2, function(value, .visible) {
+      p2 <- promises::then(p2, function(value, .visible) {
         if (.visible) {
           cat(file = domain$conn, paste(capture.output(value, append = TRUE), collapse = "\n"))
         }
@@ -345,12 +345,12 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
         res
       })
       # TODO jcheng 2017-04-11: Is this correct, or just leftover debugging?
-      p2 <- promise::catch(p2,
+      p2 <- promises::catch(p2,
         function(err) { cat(file=stderr(), "ERROR", err$message) }
       )
       p2
     })
-    p1 <- promise::finally(p1, ~close(domain$conn))
+    p1 <- promises::finally(p1, ~close(domain$conn))
     p1
   }
 
@@ -360,7 +360,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
 createRenderPrintPromiseDomain <- function(width) {
   f <- file()
 
-  promise::new_promise_domain(
+  promises::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
       function(...) {

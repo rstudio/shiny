@@ -5,7 +5,8 @@
 \alias{hideTab}
 \title{Dynamically hide/show a tabPanel}
 \usage{
-showTab(inputId, target, session = getDefaultReactiveDomain())
+showTab(inputId, target, select = FALSE,
+  session = getDefaultReactiveDomain())
 
 hideTab(inputId, target, session = getDefaultReactiveDomain())
 }
@@ -17,6 +18,8 @@ hideTab(inputId, target, session = getDefaultReactiveDomain())
 \item{target}{The \code{value} of the \code{tabPanel} to be
 hidden/shown. See Details if you want to hide/show an entire
 \code{navbarMenu} instead.}
+
+\item{select}{Should \code{target} be selected upon being shown?}
 
 \item{session}{The shiny session within which to call this function.}
 }

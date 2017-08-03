@@ -246,6 +246,8 @@ removeTab <- function(inputId, target,
 #'   hidden/shown. See Details if you want to hide/show an entire
 #'   \code{navbarMenu} instead.
 #'
+#' @param select Should \code{target} be selected upon being shown?
+#'
 #' @param session The shiny session within which to call this function.
 #'
 #' @seealso \code{\link{insertTab}}
@@ -294,11 +296,13 @@ removeTab <- function(inputId, target,
 #' }
 #'
 #' @export
-showTab <- function(inputId, target,
+showTab <- function(inputId, target, select = FALSE,
                     session = getDefaultReactiveDomain()) {
   force(inputId)
   force(target)
   force(session)
+
+  if (select) updateTabsetPanel(session, inputId, selected = target)
 
   callback <- function() {
     session$sendChangeTabVisibility(

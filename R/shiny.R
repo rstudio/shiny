@@ -846,6 +846,17 @@ ShinySession <- R6Class(
         registerDataObj = function(name, data, filterFunc) {
           .subset2(self, "registerDataObj")(ns(name), data, filterFunc)
         },
+        sendInsertTab = function(inputId, liTag, divTag, menuName,
+                                 target, position, select) {
+          .subset2(self, "sendInsertTab")(ns(inputId), liTag, divTag, 
+            menuName, target, position, select)
+        },
+        sendRemoveTab = function(inputId, target) {
+          .subset2(self, "sendRemoveTab")(ns(inputId), target)
+        },
+        sendChangeTabVisibility = function(inputId, target, type) {
+          .subset2(self, "sendChangeTabVisibility")(ns(inputId), target, type)
+        },
         ns = ns,
         makeScope = function(namespace) {
           self$makeScope(ns(namespace))

@@ -685,7 +685,7 @@ var ShinyApp = function() {
     window.location.reload();
   });
 
-  addMessageHandler('shiny-insert-ui', function (message) {
+  addMessageHandler('shiny-insert-ui', function(message) {
     var targets = $(message.selector);
     if (targets.length === 0) {
       // render the HTML and deps to a null target, so
@@ -702,7 +702,7 @@ var ShinyApp = function() {
     }
   });
 
-  addMessageHandler('shiny-remove-ui', function (message) {
+  addMessageHandler('shiny-remove-ui', function(message) {
     var els = $(message.selector);
     els.each(function (i, el) {
       exports.unbindAll(el, true);
@@ -712,6 +712,290 @@ var ShinyApp = function() {
       // returning true continues removing all remaining elements.
       return message.multiple;
     });
+  });
+
+  function getTabset(id) {
+    var $tabset = $("#" + $escape(id));
+    if ($tabset.length === 0)
+      throw "There is no tabsetPanel (or navbarPage or navlistPanel) " +
+            "with id equal to '" + id + "'";
+    return $tabset;
+  }
+
+  function getTabContent($tabset) {
+    var tabsetId = $tabset.attr("data-tabsetid");
+    var $tabContent = $("div.tab-content[data-tabsetid='" +
+                        $escape(tabsetId) + "']");
+    return $tabContent;
+  }
+
+  function getTargetTabs($tabset, $tabContent, target) {
+    var dataValue = "[data-value='" + $escape(target) + "']";
+    var $aTag = $tabset.find("a" + dataValue);
+    var $liTag = $aTag.parent();
+    if ($liTag.length === 0) {
+      throw "There is no tabPanel (or navbarMenu) with value" +
+            " (or menuName) equal to '" + target + "'";
+    }
+    var $liTags = [];
+    var $divTags = [];
+
+    if ($aTag.attr("data-toggle") === "dropdown") {
+      // dropdown
+      var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
+      var dropdownId = $dropdownTabset.attr("data-tabsetid");
+
+      var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
+      $dropdownLiTags.each(function (i, el) {
+        $liTags.push($(el));
+      });
+      var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
+      var $dropdownDivs = $tabContent.find(selector);
+      $dropdownDivs.each(function (i, el) {
+        $divTags.push($(el));
+      });
+
+    }
+    else {
+      // regular tab
+      $divTags.push($tabContent.find("div" + dataValue));
+    }
+    return { $liTag: $liTag, $liTags: $liTags, $divTags: $divTags };
+  }
+
+  addMessageHandler("shiny-insert-tab", function(message) {
+    var $parentTabset = getTabset(message.inputId);
+    var $tabset = $parentTabset;
+    var $tabContent = getTabContent($tabset);
+    var tabsetId = $parentTabset.attr("data-tabsetid");
+
+    var $divTag = $(message.divTag.html);
+    var $liTag = $(message.liTag.html);
+    var $aTag = $liTag.find("> a");
+
+    // Unless the item is being prepended/appended, the target tab
+    // must be provided
+    var target = null;
+    var $targetLiTag = null;
+    if (message.target !== null) {
+      target = getTargetTabs($tabset, $tabContent, message.target);
+      $targetLiTag = target.$liTag;
+    }
+
+    // If the item is to be placed inside a navbarMenu (dropdown),
+    // change the value of $tabset from the parent's ul tag to the
+    // dropdown's ul tag
+    var dropdown = getDropdown();
+    if (dropdown !== null) {
+      if ($aTag.attr("data-toggle") === "dropdown")
+        throw "Cannot insert a navbarMenu inside another one";
+      $tabset = dropdown.$tabset;
+      tabsetId = dropdown.id;
+    }
+
+    // For regular tab items, fix the href (of the li > a tag)
+    // and the id (of the div tag). This does not apply to plain
+    // text items (which function as dividers and headers inside
+    // navbarMenus) and whole navbarMenus (since those get
+    // constructed from scratch on the R side and therefore
+    // there are no ids that need matching)
+    if ($aTag.attr("data-toggle") === "tab") {
+      var index = getTabIndex($tabset, tabsetId);
+      var tabId = "tab-" + tabsetId + "-" + index;
+      $liTag.find("> a").attr("href", "#" + tabId);
+      $divTag.attr("id", tabId);
+    }
+
+    // actually insert the item into the right place
+    if (message.position === "before") {
+      if ($targetLiTag) {
+        $targetLiTag.before($liTag);
+      } else {
+        $tabset.append($liTag);
+      }
+    } else if (message.position === "after") {
+      if ($targetLiTag) {
+        $targetLiTag.after($liTag);
+      } else {
+        $tabset.prepend($liTag);
+      }
+    }
+
+    exports.renderContent($liTag[0], {html: $liTag.html(), deps: message.liTag.deps});
+    // jcheng 2017-07-28: This next part might look a little insane versus the
+    // more obvious `$tabContent.append($divTag);`, but there's a method to the
+    // madness.
+    //
+    // 1) We need to load the dependencies, and this needs to happen before
+    //    any scripts in $divTag get a chance to run.
+    // 2) The scripts in $divTag need to run only once.
+    // 3) The contents of $divTag need to be sent through renderContent so that
+    //    singletons may be registered and/or obeyed, and so that inputs/outputs
+    //    may be bound.
+    //
+    // Add to these constraints these facts:
+    //
+    // A) The (non-jQuery) DOM manipulation functions don't cause scripts to
+    //    run, but the jQuery functions all do.
+    // B) renderContent must be called on an element that's attached to the
+    //    document.
+    // C) $divTag may be of length > 1 (e.g. navbarMenu). I also noticed text
+    //    elements consisting of just "\n" being included in the nodeset of
+    //    $divTag.
+    // D) renderContent has a bug where only position "replace" (the default)
+    //    uses the jQuery functions, so other positions like "beforeend" will
+    //    prevent child script tags from running.
+    //
+    // In theory the same problem exists for $liTag but since that content is
+    // much less likely to include arbitrary scripts, we're skipping it.
+    //
+    // This code could be nicer if we didn't use renderContent, but rather the
+    // lower-level functions that renderContent uses. Like if we pre-process
+    // the value of message.divTag.html for singletons, we could do that, then
+    // render dependencies, then do $tabContent.append($divTag).
+    exports.renderContent($tabContent[0], {html: "", deps: message.divTag.deps}, "beforeend");
+    $divTag.get().forEach(el => {
+      // Must not use jQuery for appending el to the doc, we don't want any
+      // scripts to run (since they will run when renderContent takes a crack).
+      $tabContent[0].appendChild(el);
+      // If `el` itself is a script tag, this approach won't work (the script
+      // won't be run), since we're only sending innerHTML through renderContent
+      // and not the whole tag. That's fine in this case because we control the
+      // R code that generates this HTML, and we know that the element is not
+      // a script tag.
+      exports.renderContent(el, el.innerHTML || el.textContent);
+    });
+
+    if (message.select) {
+      $liTag.find("a").tab("show");
+    }
+
+    /* Barbara -- August 2017
+    Note: until now, the number of tabs in a tabsetPanel (or navbarPage
+    or navlistPanel) was always fixed. So, an easy way to give an id to
+    a tab was simply incrementing a counter. (Just like it was easy to
+    give a random 4-digit number to identify the tabsetPanel). Now that
+    we're introducing dynamic tabs, we must retrieve these numbers and
+    fix the dummy id given to the tab in the R side -- there, we always
+    set the tab id (counter dummy) to "id" and the tabset id to "tsid")
+    */
+    function getTabIndex($tabset, tabsetId) {
+      var existingTabIds = [];
+      var leadingHref = "#tab-" + tabsetId + "-";
+      // loop through all existing tabs, find the one with highest id
+      // (since this is based on a numeric counter), and increment
+      $tabset.find("> li").each(function() {
+        var $tab = $(this).find("> a[data-toggle='tab']");
+        if ($tab.length > 0) {
+          var index = $tab.attr("href").replace(leadingHref, "");
+          existingTabIds.push(Number(index));
+        }
+      });
+      return (Math.max.apply(null, existingTabIds) + 1);
+    }
+
+    // Finds out if the item will be placed inside a navbarMenu
+    // (dropdown). If so, returns the dropdown tabset (ul tag)
+    // and the dropdown tabsetid (to be used to fix the tab ID)
+    function getDropdown() {
+      if (message.menuName !== null) {
+        // menuName is only provided if the user wants to prepend
+        // or append an item inside a navbarMenu (dropdown)
+        var $dropdownATag = $("a.dropdown-toggle[data-value='" +
+                              $escape(message.menuName) + "']");
+        if ($dropdownATag.length === 0) {
+          throw "There is no navbarMenu with menuName equal to '" +
+                message.menuName + "'";
+        }
+        var $dropdownTabset = $dropdownATag.find("+ ul.dropdown-menu");
+        var dropdownId = $dropdownTabset.attr("data-tabsetid");
+        return { $tabset: $dropdownTabset, id: dropdownId };
+
+      } else if (message.target !== null) {
+        // if our item is to be placed next to a tab that is inside
+        // a navbarMenu, our item will also be inside
+        var $uncleTabset = $targetLiTag.parent("ul");
+        if ($uncleTabset.hasClass("dropdown-menu")) {
+          var uncleId = $uncleTabset.attr("data-tabsetid");
+          return { $tabset: $uncleTabset, id: uncleId };
+        }
+      }
+      return null;
+    }
+  });
+
+  // If the given tabset has no active tabs, select the first one
+  function ensureTabsetHasVisibleTab($tabset) {
+    if ($tabset.find("li.active").not(".dropdown").length === 0) {
+      // Note: destTabValue may be null. We still want to proceed
+      // through the below logic and setValue so that the input
+      // value for the tabset gets updated (i.e. input$tabsetId
+      // should be null if there are no tabs).
+      let destTabValue = getFirstTab($tabset);
+      let inputBinding = $tabset.data('shiny-input-binding');
+      let evt = jQuery.Event('shiny:updateinput');
+      evt.binding = inputBinding;
+      $tabset.trigger(evt);
+      inputBinding.setValue($tabset[0], destTabValue);
+    }
+  }
+
+  // Given a tabset ul jquery object, return the value of the first tab
+  // (in document order) that's visible and able to be selected.
+  function getFirstTab($ul) {
+    return $ul.find("li:visible a[data-toggle='tab']")
+      .first()
+      .attr("data-value") || null;
+  }
+
+  function tabApplyFunction(target, func, liTags = false) {
+    $.each(target, function(key, el) {
+      if (key === "$liTag") {
+        // $liTag is always just one jQuery element
+        func(el);
+      }
+      else if (key === "$divTags") {
+        // $divTags is always an array (even if length = 1)
+        $.each(el, function(i, div) { func(div); });
+
+      } else if (liTags && key === "$liTags") {
+        // $liTags is always an array (even if length = 0)
+        $.each(el, function(i, div) { func(div); });
+      }
+    });
+  }
+
+  addMessageHandler("shiny-remove-tab", function(message) {
+    var $tabset = getTabset(message.inputId);
+    var $tabContent = getTabContent($tabset);
+    var target = getTargetTabs($tabset, $tabContent, message.target);
+
+    tabApplyFunction(target, removeEl);
+
+    ensureTabsetHasVisibleTab($tabset);
+
+    function removeEl($el) {
+      exports.unbindAll($el, true);
+      $el.remove();
+    }
+  });
+
+  addMessageHandler("shiny-change-tab-visibility", function(message) {
+    var $tabset = getTabset(message.inputId);
+    var $tabContent = getTabContent($tabset);
+    var target = getTargetTabs($tabset, $tabContent, message.target);
+
+    tabApplyFunction(target, changeVisibility, true);
+
+    ensureTabsetHasVisibleTab($tabset);
+
+    function changeVisibility($el) {
+      if (message.type === "show") $el.css("display", "");
+      else if (message.type === "hide") {
+        $el.hide();
+        $el.removeClass("active");
+      }
+    }
   });
 
   addMessageHandler('updateQueryString', function(message) {

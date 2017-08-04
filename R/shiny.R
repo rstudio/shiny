@@ -1492,6 +1492,37 @@ ShinySession <- R6Class(
         )
       )
     },
+    sendInsertTab = function(inputId, liTag, divTag, menuName,
+                             target, position, select) {
+      private$sendMessage(
+        `shiny-insert-tab` = list(
+          inputId = inputId,
+          liTag = liTag,
+          divTag = divTag,
+          menuName = menuName,
+          target = target,
+          position = position,
+          select = select
+        )
+      )
+    },
+    sendRemoveTab = function(inputId, target) {
+      private$sendMessage(
+        `shiny-remove-tab` = list(
+          inputId = inputId,
+          target = target
+        )
+      )
+    },
+    sendChangeTabVisibility = function(inputId, target, type) {
+      private$sendMessage(
+        `shiny-change-tab-visibility` = list(
+          inputId = inputId,
+          target = target,
+          type = type
+        )
+      )
+    },
     updateQueryString = function(queryString, mode) {
       private$sendMessage(updateQueryString = list(
         queryString = queryString, mode = mode))

@@ -215,7 +215,7 @@ sortByName <- function(x) {
 # R >=3.2.0, this wrapper is not necessary.
 list2env2 <- function(x, ...) {
   # Ensure that zero-length lists have a name attribute
-   if (length(x) == 0)
+  if (length(x) == 0)
     attr(x, "names") <- character(0)
 
   list2env(x, ...)

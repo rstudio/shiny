@@ -1496,7 +1496,7 @@ ShinySession <- R6Class(
                              target, position, select) {
       private$sendMessage(
         `shiny-insert-tab` = list(
-          inputId = self$ns(inputId),
+          inputId = inputId,
           liTag = liTag,
           divTag = divTag,
           menuName = menuName,
@@ -1509,7 +1509,7 @@ ShinySession <- R6Class(
     sendRemoveTab = function(inputId, target) {
       private$sendMessage(
         `shiny-remove-tab` = list(
-          inputId = self$ns(inputId),
+          inputId = inputId,
           target = target
         )
       )
@@ -1517,7 +1517,7 @@ ShinySession <- R6Class(
     sendChangeTabVisibility = function(inputId, target, type) {
       private$sendMessage(
         `shiny-change-tab-visibility` = list(
-          inputId = self$ns(inputId),
+          inputId = inputId,
           target = target,
           type = type
         )

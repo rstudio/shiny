@@ -115,11 +115,10 @@
 insertTab <- function(inputId, tab, target,
                       position = c("before", "after"), select = FALSE,
                       session = getDefaultReactiveDomain()) {
-  force(inputId)
   force(target)
-  position <- match.arg(position)
   force(select)
-  force(session)
+  position <- match.arg(position)
+  inputId <- session$ns(inputId)
 
   # Barbara -- August 2017
   # Note: until now, the number of tabs in a tabsetPanel (or navbarPage
@@ -160,11 +159,9 @@ insertTab <- function(inputId, tab, target,
 #' @export
 prependTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                        session = getDefaultReactiveDomain()) {
-  force(inputId)
-  force(tab)
   force(select)
   force(menuName)
-  force(session)
+  inputId <- session$ns(inputId)
 
   item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
     textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
@@ -186,11 +183,9 @@ prependTab <- function(inputId, tab, select = FALSE, menuName = NULL,
 #' @export
 appendTab <- function(inputId, tab, select = FALSE, menuName = NULL,
                       session = getDefaultReactiveDomain()) {
-  force(inputId)
-  force(tab)
   force(select)
   force(menuName)
-  force(session)
+  inputId <- session$ns(inputId)
 
   item <- buildTabItem("id", "tsid", TRUE, divTag = tab,
     textFilter = if (is.character(tab)) navbarMenuTextFilter else NULL)
@@ -212,9 +207,8 @@ appendTab <- function(inputId, tab, select = FALSE, menuName = NULL,
 #' @export
 removeTab <- function(inputId, target,
                       session = getDefaultReactiveDomain()) {
-  force(inputId)
   force(target)
-  force(session)
+  inputId <- session$ns(inputId)
 
   callback <- function() {
     session$sendRemoveTab(
@@ -298,11 +292,10 @@ removeTab <- function(inputId, target,
 #' @export
 showTab <- function(inputId, target, select = FALSE,
                     session = getDefaultReactiveDomain()) {
-  force(inputId)
   force(target)
-  force(session)
 
   if (select) updateTabsetPanel(session, inputId, selected = target)
+  inputId <- session$ns(inputId)
 
   callback <- function() {
     session$sendChangeTabVisibility(
@@ -318,9 +311,8 @@ showTab <- function(inputId, target, select = FALSE,
 #' @export
 hideTab <- function(inputId, target,
                     session = getDefaultReactiveDomain()) {
-  force(inputId)
   force(target)
-  force(session)
+  inputId <- session$ns(inputId)
 
   callback <- function() {
     session$sendChangeTabVisibility(

@@ -846,17 +846,6 @@ ShinySession <- R6Class(
         registerDataObj = function(name, data, filterFunc) {
           .subset2(self, "registerDataObj")(ns(name), data, filterFunc)
         },
-        sendInsertTab = function(inputId, liTag, divTag, menuName,
-                                 target, position, select) {
-          .subset2(self, "sendInsertTab")(ns(inputId), liTag, divTag, 
-            menuName, target, position, select)
-        },
-        sendRemoveTab = function(inputId, target) {
-          .subset2(self, "sendRemoveTab")(ns(inputId), target)
-        },
-        sendChangeTabVisibility = function(inputId, target, type) {
-          .subset2(self, "sendChangeTabVisibility")(ns(inputId), target, type)
-        },
         ns = ns,
         makeScope = function(namespace) {
           self$makeScope(ns(namespace))
@@ -1507,7 +1496,7 @@ ShinySession <- R6Class(
                              target, position, select) {
       private$sendMessage(
         `shiny-insert-tab` = list(
-          inputId = inputId,
+          inputId = self$ns(inputId),
           liTag = liTag,
           divTag = divTag,
           menuName = menuName,
@@ -1520,7 +1509,7 @@ ShinySession <- R6Class(
     sendRemoveTab = function(inputId, target) {
       private$sendMessage(
         `shiny-remove-tab` = list(
-          inputId = inputId,
+          inputId = self$ns(inputId),
           target = target
         )
       )
@@ -1528,7 +1517,7 @@ ShinySession <- R6Class(
     sendChangeTabVisibility = function(inputId, target, type) {
       private$sendMessage(
         `shiny-change-tab-visibility` = list(
-          inputId = inputId,
+          inputId = self$ns(inputId),
           target = target,
           type = type
         )

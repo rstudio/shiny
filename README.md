@@ -59,6 +59,14 @@ devtools::install_version("shiny", version = "0.10.2.2")
 
 The Javascript code in Shiny is minified using tools that run on Node.js. See the tools/ directory for more information.
 
+A set of application-level tests reside in the [shiny-test-apps](https://github.com/rstudio/shiny-test-apps) repository, which is set up as a git submodule of this repository. To use the full-application tests, simply update the submodule:
+
+```
+git submodule update --init
+```
+
+This will clone the shiny-test-apps repository into the directory tests/testthat/apps. When you run tests for shiny, it will also test the applications.
+
 ## Guidelines for contributing
 
 We welcome contributions to the **shiny** package. Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for detailed guidelines of how to contribute.

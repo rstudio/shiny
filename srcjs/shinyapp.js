@@ -737,22 +737,30 @@ var ShinyApp = function() {
       throw "There is no tabPanel (or navbarMenu) with value" +
             " (or menuName) equal to '" + target + "'";
     }
+    var $liTags = [];
     var $divTags = [];
+
     if ($aTag.attr("data-toggle") === "dropdown") {
       // dropdown
       var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
       var dropdownId = $dropdownTabset.attr("data-tabsetid");
+
+      var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
+      $dropdownLiTags.each(function (i, el) {
+        $liTags.push($(el));
+      });
       var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
       var $dropdownDivs = $tabContent.find(selector);
       $dropdownDivs.each(function (i, el) {
-        $divTags.push(el);
+        $divTags.push($(el));
       });
+
     }
     else {
       // regular tab
       $divTags.push($tabContent.find("div" + dataValue));
     }
-    return { $liTag: $liTag, $divTags: $divTags };
+    return { $liTag: $liTag, $liTags: $liTags, $divTags: $divTags };
   }
 
   addMessageHandler("shiny-insert-tab", function(message) {
@@ -916,9 +924,9 @@ var ShinyApp = function() {
     }
   });
 
-  // If the given tabset has no active tabs, s
+  // If the given tabset has no active tabs, select the first one
   function ensureTabsetHasVisibleTab($tabset) {
-    if ($tabset.find("li.active").length === 0) {
+    if ($tabset.find("li.active").not(".dropdown").length === 0) {
       // Note: destTabValue may be null. We still want to proceed
       // through the below logic and setValue so that the input
       // value for the tabset gets updated (i.e. input$tabsetId
@@ -940,11 +948,20 @@ var ShinyApp = function() {
       .attr("data-value") || null;
   }
 
-  function tabApplyFunction(target, func) {
+  function tabApplyFunction(target, func, liTags = false) {
     $.each(target, function(key, el) {
-    if (key === "$liTag") func(el); // $liTag is always just one jQuery element
-    else if (key === "$divTags")    // $divTags is always an array (even if length = 1)
-      $.each(el, function(i, div) { func(div); });
+      if (key === "$liTag") {
+        // $liTag is always just one jQuery element
+        func(el);
+      }
+      else if (key === "$divTags") {
+        // $divTags is always an array (even if length = 1)
+        $.each(el, function(i, div) { func(div); });
+
+      } else if (liTags && key === "$liTags") {
+        // $liTags is always an array (even if length = 0)
+        $.each(el, function(i, div) { func(div); });
+      }
     });
   }
 
@@ -968,7 +985,7 @@ var ShinyApp = function() {
     var $tabContent = getTabContent($tabset);
     var target = getTargetTabs($tabset, $tabContent, message.target);
 
-    tabApplyFunction(target, changeVisibility);
+    tabApplyFunction(target, changeVisibility, true);
 
     ensureTabsetHasVisibleTab($tabset);
 

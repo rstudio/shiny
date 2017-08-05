@@ -438,6 +438,7 @@ $.extend(fileInputBinding, {
           .whenAny([
             ["plain", "showZone"],
             ["over", "dragleave"],
+            ["plain", "dragleave"]
           ], e => {
             $zone.removeClass(this._overClass);
             $zone.addClass(this._activeClass);
@@ -458,6 +459,20 @@ $.extend(fileInputBinding, {
           ], e => {
             $zone.addClass(this._overClass);
             setState("over");
+          })
+          // This happens when the window (like Finder) that a file is being
+          // dragged from occludes the browser window, and the dragged item
+          // first enters the page over a drop zone instead of entering through
+          // a none-zone element. To deal with it, we stopPropagation and then
+          // trigger a showZone on all elements, which "prepares" them by
+          // putting them in the activated state, the same as they would be if
+          // the file entered the page normally. Then, we fire the suspended
+          // dragenter event.
+          .when(["plain", "dragenter"], (e) => {
+            e.stopPropagation();
+            $fileInputs.trigger("showZone.fileDrag");
+            transition(e);
+            console.log(getState());
           })
           .when(["over", "drop"], (e) => {
             // In order to have reached this code, the browser must support Drag

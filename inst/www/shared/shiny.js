@@ -2,7 +2,7 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 //---------------------------------------------------------------------
 // Source file: ../srcjs/_start.js
@@ -247,261 +247,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       if (obj.hasOwnProperty(key)) newObj[key] = f(obj[key]);
     }
     return newObj;
-  }
-
-  // Binary equality function used by the equal function.
-  function _equal(x, y) {
-    if ($.type(x) === "object" && $.type(y) === "object") {
-      if (Object.keys(x).length !== Object.keys(y).length) return false;
-      for (var prop in x) {
-        if (!y.hasOwnProperty(prop) || !_equal(x[prop], y[prop])) return false;
-      }return true;
-    } else if ($.type(x) === "array" && $.type(y) === "array") {
-      if (x.length !== y.length) return false;
-      for (var i = 0; i < x.length; i++) {
-        if (!_equal(x[i], y[i])) return false;
-      }return true;
-    } else {
-      return x === y;
-    }
-  }
-
-  // Structural or "deep" equality predicate. Tests two or more arguments for
-  // equality, traversing arrays and objects (as determined by $.type) as
-  // necessary.
-  //
-  // Objects other than objects and arrays are tested for equality using ===.
-  function equal() {
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    if (args.length < 2) throw new Error("equal requires at least two arguments.");
-    for (var i = 0; i < args.length - 1; i++) {
-      if (!_equal(args[i], args[i + 1])) return false;
-    }
-    return true;
-  };
-
-  // multimethod: Creates functions — "multimethods" — that are polymorphic on one
-  // or more of their arguments.
-  //
-  // Multimethods can take any number of arguments. Arguments are passed to an
-  // applicable function or "method", returning its result. By default, if no
-  // method was applicable, an exception is thrown.
-  //
-  // Methods are searched in the order that they were added, and the first
-  // applicable method found is the one used.
-  //
-  // A method is applicable when the "dispatch value" associated with it
-  // corresponds to the value returned by the dispatch function. The dispatch
-  // function defaults to the value of the first argument passed to the
-  // multimethod.
-  //
-  // The correspondence between the value returned by the dispatch function and
-  // any method's dispatch value is determined by the test function, which is
-  // user-definable and defaults to `equal` or deep equality.
-  //
-  // # Chainable Functions
-  //
-  // The function returned by `multimethod()` exposes functions as properties.
-  // These functions generally return the multimethod, and so can be chained.
-  //
-  // - dispatch([function newDispatch]): Sets the dispatch function. The dispatch
-  //   function can take any number of arguments, but must return a dispatch
-  //   value. The default dispatch function returns the first argument passed to
-  //   the multimethod.
-  //
-  // - test([function newTest]): Sets the test function. The test function takes
-  //   two arguments: the dispatch value produced by the dispatch function, and
-  //   the dispatch value associated with some method. It must return a boolean
-  //   indicating whether or not to select the method. The default test function
-  //   is `equal`.
-  //
-  // - when(object dispatchVal, function method): Adds a new dispatch value/method
-  //   combination.
-  //
-  // - whenAny(array<object> dispatchVals, function method): Like `when`, but
-  //   associates the method with every dispatch value in the `dispatchVals`
-  //   array.
-  //
-  // - else(function newDefaultMethod): Sets the default function. This function
-  //   is invoked when no methods apply. If left unset, the multimethod will throw
-  //   an exception when no methods are applicable.
-  //
-  // - clone(): Returns a new, functionally-equivalent multimethod. This is a way
-  //   to extend an existing multimethod in a local context — such as inside a
-  //   function — without modifying the original. NOTE: The array of methods is
-  //   copied, but the dispatch values themselves are not.
-  //
-  // # Self-reference
-  //
-  // The multimethod function can be obtained inside its method bodies without
-  // referring to it by name.
-  //
-  // This makes it possible for one method to call another, or to pass the
-  // multimethod to other functions as a callback from within methods.
-  //
-  // The mechanism is: the multimethod itself is bound as `this` to methods when
-  // they are called. Since arrow functions cannot be bound to objects, **self-reference
-  // is only possible within methods created using the `function` keyword**.
-  //
-  // # Tail recursion
-  //
-  // A method can call itself in a way that will not overflow the stack by using
-  // `this.recur`.
-  //
-  // `this.recur` is a function available in methods created using `function`.
-  // When the return value of a call to `this.recur` is returned by a method, the
-  // arguments that were supplied to `this.recur` are used to call the
-  // multimethod.
-  //
-  // # Examples
-  //
-  // Handling events:
-  //
-  //    var handle = multimethod()
-  //     .dispatch(e => [e.target.tagName.toLowerCase(), e.type])
-  //     .when(["h1", "click"], e => "you clicked on an h1")
-  //     .when(["p", "mouseover"], e => "you moused over a p"})
-  //     .else(e => {
-  //       let tag = e.target.tagName.toLowerCase();
-  //       return `you did ${e.type} to an ${tag}`;
-  //     });
-  //
-  //    $(document).on("click mouseover mouseup mousedown", e => console.log(handle(e)))
-  //
-  // Self-calls:
-  //
-  //    var demoSelfCall = multimethod()
-  //     .when(0, function(n) {
-  //       this(1);
-  //     })
-  //     .when(1, function(n) {
-  //       doSomething(this);
-  //     })
-  //     .when(2, _ => console.log("tada"));
-  //
-  // Using (abusing?) the test function:
-  //
-  //    var fizzBuzz = multimethod()
-  //     .test((x, divs) => divs.map(d => x % d === 0).every(Boolean))
-  //     .when([3, 5], x => "FizzBuzz")
-  //     .when([3], x => "Fizz")
-  //     .when([5], x => "Buzz")
-  //     .else(x => x);
-  //
-  //    for(let i = 0; i <= 100; i++) console.log(fizzBuzz(i));
-  //
-  // Getting carried away with tail recursion:
-  //
-  //    var factorial = multimethod()
-  //     .when(0, () => 1)
-  //     .when(1, (_, prod = 1) => prod)
-  //     .else(function(n, prod = 1) {
-  //       return this.recur(n-1, n*prod);
-  //     });
-  //
-  //    var fibonacci = multimethod()
-  //     .when(0, (_, a = 0) => a)
-  //     .else(function(n, a = 0, b = 1) {
-  //       return this.recur(n-1, b, a+b);
-  //     });
-  function multimethod() {
-    var dispatch = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (firstArg) {
-      return firstArg;
-    };
-    var test = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : equal;
-    var defaultMethod = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    var methods = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-
-
-    var trampolining = false;
-
-    function Sentinel(args) {
-      this.args = args;
-    }
-
-    function trampoline(f) {
-      return function () {
-        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          args[_key2] = arguments[_key2];
-        }
-
-        trampolining = true;
-        var ret = f.apply(invoke, args);
-        while (ret instanceof Sentinel) {
-          ret = f.apply(invoke, ret.args);
-        }trampolining = false;
-        return ret;
-      };
-    }
-
-    var invoke = trampoline(function () {
-      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-
-      var dispatchVal = dispatch.apply(null, args);
-      for (var i = 0; i < methods.length; i++) {
-        var _methods$i = _slicedToArray(methods[i], 2);
-
-        var methodVal = _methods$i[0];
-        var methodFn = _methods$i[1];
-
-        if (test(dispatchVal, methodVal)) {
-          return methodFn.apply(invoke, args);
-        }
-      }
-      if (defaultMethod) {
-        return defaultMethod.apply(invoke, args);
-      } else {
-        throw new Error('No method for dispatch value ' + dispatchVal);
-      }
-    });
-
-    invoke.recur = function () {
-      for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-        args[_key4] = arguments[_key4];
-      }
-
-      if (!trampolining) throw new Error("recur can only be called inside a method");
-      return new Sentinel(args);
-    };
-
-    invoke.dispatch = function (newDispatch) {
-      dispatch = newDispatch;
-      return invoke;
-    };
-
-    invoke.test = function (newTest) {
-      test = newTest;
-      return invoke;
-    };
-
-    invoke.when = function (dispatchVal, methodFn) {
-      methods = methods.concat([[dispatchVal, methodFn]]);
-      return invoke;
-    };
-
-    invoke.whenAny = function (dispatchVals, methodFn) {
-      return dispatchVals.reduce(function (self, val) {
-        return invoke.when(val, methodFn);
-      }, invoke);
-    };
-
-    invoke.else = function () {
-      var newDefaultMethod = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-      defaultMethod = newDefaultMethod;
-      return invoke;
-    };
-
-    invoke.clone = function () {
-      return multimethod(dispatch, test, defaultMethod, methods.slice());
-    };
-
-    return invoke;
   }
 
   //---------------------------------------------------------------------
@@ -1268,6 +1013,33 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       }
     };
 
+    // Narrows a scopeComponent -- an input or output object -- to one constrained
+    // by nsPrefix. Returns a new object with keys removed and renamed as
+    // necessary.
+    function narrowScopeComponent(scopeComponent, nsPrefix) {
+      return Object.keys(scopeComponent).filter(function (k) {
+        return k.indexOf(nsPrefix) === 0;
+      }).map(function (k) {
+        return _defineProperty({}, k.substring(nsPrefix.length), scopeComponent[k]);
+      }).reduce(function (obj, pair) {
+        return $.extend(obj, pair);
+      }, {});
+    }
+
+    // Narrows a scope -- an object with input and output "subComponents" -- to
+    // one constrained by the nsPrefix string.
+    //
+    // If nsPrefix is null or empty, returns scope without modification.
+    //
+    // Otherwise, returns a new object with keys in subComponents removed and
+    // renamed as necessary.
+    function narrowScope(scope, nsPrefix) {
+      return nsPrefix ? {
+        input: narrowScopeComponent(scope.input, nsPrefix),
+        output: narrowScopeComponent(scope.output, nsPrefix)
+      } : scope;
+    }
+
     this.$updateConditionals = function () {
       $(document).trigger({
         type: 'shiny:conditional'
@@ -1297,7 +1069,9 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
           el.data('data-display-if-func', condFunc);
         }
 
-        var show = condFunc(scope);
+        var nsPrefix = el.attr('data-ns-prefix');
+        var nsScope = narrowScope(scope, nsPrefix);
+        var show = condFunc(nsScope);
         var showing = el.css("display") !== "none";
         if (show !== showing) {
           if (show) {
@@ -1559,6 +1333,281 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       });
     });
 
+    function getTabset(id) {
+      var $tabset = $("#" + $escape(id));
+      if ($tabset.length === 0) throw "There is no tabsetPanel (or navbarPage or navlistPanel) " + "with id equal to '" + id + "'";
+      return $tabset;
+    }
+
+    function getTabContent($tabset) {
+      var tabsetId = $tabset.attr("data-tabsetid");
+      var $tabContent = $("div.tab-content[data-tabsetid='" + $escape(tabsetId) + "']");
+      return $tabContent;
+    }
+
+    function getTargetTabs($tabset, $tabContent, target) {
+      var dataValue = "[data-value='" + $escape(target) + "']";
+      var $aTag = $tabset.find("a" + dataValue);
+      var $liTag = $aTag.parent();
+      if ($liTag.length === 0) {
+        throw "There is no tabPanel (or navbarMenu) with value" + " (or menuName) equal to '" + target + "'";
+      }
+      var $liTags = [];
+      var $divTags = [];
+
+      if ($aTag.attr("data-toggle") === "dropdown") {
+        // dropdown
+        var $dropdownTabset = $aTag.find("+ ul.dropdown-menu");
+        var dropdownId = $dropdownTabset.attr("data-tabsetid");
+
+        var $dropdownLiTags = $dropdownTabset.find("a[data-toggle='tab']").parent("li");
+        $dropdownLiTags.each(function (i, el) {
+          $liTags.push($(el));
+        });
+        var selector = "div.tab-pane[id^='tab-" + $escape(dropdownId) + "']";
+        var $dropdownDivs = $tabContent.find(selector);
+        $dropdownDivs.each(function (i, el) {
+          $divTags.push($(el));
+        });
+      } else {
+        // regular tab
+        $divTags.push($tabContent.find("div" + dataValue));
+      }
+      return { $liTag: $liTag, $liTags: $liTags, $divTags: $divTags };
+    }
+
+    addMessageHandler("shiny-insert-tab", function (message) {
+      var $parentTabset = getTabset(message.inputId);
+      var $tabset = $parentTabset;
+      var $tabContent = getTabContent($tabset);
+      var tabsetId = $parentTabset.attr("data-tabsetid");
+
+      var $divTag = $(message.divTag.html);
+      var $liTag = $(message.liTag.html);
+      var $aTag = $liTag.find("> a");
+
+      // Unless the item is being prepended/appended, the target tab
+      // must be provided
+      var target = null;
+      var $targetLiTag = null;
+      if (message.target !== null) {
+        target = getTargetTabs($tabset, $tabContent, message.target);
+        $targetLiTag = target.$liTag;
+      }
+
+      // If the item is to be placed inside a navbarMenu (dropdown),
+      // change the value of $tabset from the parent's ul tag to the
+      // dropdown's ul tag
+      var dropdown = getDropdown();
+      if (dropdown !== null) {
+        if ($aTag.attr("data-toggle") === "dropdown") throw "Cannot insert a navbarMenu inside another one";
+        $tabset = dropdown.$tabset;
+        tabsetId = dropdown.id;
+      }
+
+      // For regular tab items, fix the href (of the li > a tag)
+      // and the id (of the div tag). This does not apply to plain
+      // text items (which function as dividers and headers inside
+      // navbarMenus) and whole navbarMenus (since those get
+      // constructed from scratch on the R side and therefore
+      // there are no ids that need matching)
+      if ($aTag.attr("data-toggle") === "tab") {
+        var index = getTabIndex($tabset, tabsetId);
+        var tabId = "tab-" + tabsetId + "-" + index;
+        $liTag.find("> a").attr("href", "#" + tabId);
+        $divTag.attr("id", tabId);
+      }
+
+      // actually insert the item into the right place
+      if (message.position === "before") {
+        if ($targetLiTag) {
+          $targetLiTag.before($liTag);
+        } else {
+          $tabset.append($liTag);
+        }
+      } else if (message.position === "after") {
+        if ($targetLiTag) {
+          $targetLiTag.after($liTag);
+        } else {
+          $tabset.prepend($liTag);
+        }
+      }
+
+      exports.renderContent($liTag[0], { html: $liTag.html(), deps: message.liTag.deps });
+      // jcheng 2017-07-28: This next part might look a little insane versus the
+      // more obvious `$tabContent.append($divTag);`, but there's a method to the
+      // madness.
+      //
+      // 1) We need to load the dependencies, and this needs to happen before
+      //    any scripts in $divTag get a chance to run.
+      // 2) The scripts in $divTag need to run only once.
+      // 3) The contents of $divTag need to be sent through renderContent so that
+      //    singletons may be registered and/or obeyed, and so that inputs/outputs
+      //    may be bound.
+      //
+      // Add to these constraints these facts:
+      //
+      // A) The (non-jQuery) DOM manipulation functions don't cause scripts to
+      //    run, but the jQuery functions all do.
+      // B) renderContent must be called on an element that's attached to the
+      //    document.
+      // C) $divTag may be of length > 1 (e.g. navbarMenu). I also noticed text
+      //    elements consisting of just "\n" being included in the nodeset of
+      //    $divTag.
+      // D) renderContent has a bug where only position "replace" (the default)
+      //    uses the jQuery functions, so other positions like "beforeend" will
+      //    prevent child script tags from running.
+      //
+      // In theory the same problem exists for $liTag but since that content is
+      // much less likely to include arbitrary scripts, we're skipping it.
+      //
+      // This code could be nicer if we didn't use renderContent, but rather the
+      // lower-level functions that renderContent uses. Like if we pre-process
+      // the value of message.divTag.html for singletons, we could do that, then
+      // render dependencies, then do $tabContent.append($divTag).
+      exports.renderContent($tabContent[0], { html: "", deps: message.divTag.deps }, "beforeend");
+      $divTag.get().forEach(function (el) {
+        // Must not use jQuery for appending el to the doc, we don't want any
+        // scripts to run (since they will run when renderContent takes a crack).
+        $tabContent[0].appendChild(el);
+        // If `el` itself is a script tag, this approach won't work (the script
+        // won't be run), since we're only sending innerHTML through renderContent
+        // and not the whole tag. That's fine in this case because we control the
+        // R code that generates this HTML, and we know that the element is not
+        // a script tag.
+        exports.renderContent(el, el.innerHTML || el.textContent);
+      });
+
+      if (message.select) {
+        $liTag.find("a").tab("show");
+      }
+
+      /* Barbara -- August 2017
+      Note: until now, the number of tabs in a tabsetPanel (or navbarPage
+      or navlistPanel) was always fixed. So, an easy way to give an id to
+      a tab was simply incrementing a counter. (Just like it was easy to
+      give a random 4-digit number to identify the tabsetPanel). Now that
+      we're introducing dynamic tabs, we must retrieve these numbers and
+      fix the dummy id given to the tab in the R side -- there, we always
+      set the tab id (counter dummy) to "id" and the tabset id to "tsid")
+      */
+      function getTabIndex($tabset, tabsetId) {
+        var existingTabIds = [];
+        var leadingHref = "#tab-" + tabsetId + "-";
+        // loop through all existing tabs, find the one with highest id
+        // (since this is based on a numeric counter), and increment
+        $tabset.find("> li").each(function () {
+          var $tab = $(this).find("> a[data-toggle='tab']");
+          if ($tab.length > 0) {
+            var index = $tab.attr("href").replace(leadingHref, "");
+            existingTabIds.push(Number(index));
+          }
+        });
+        return Math.max.apply(null, existingTabIds) + 1;
+      }
+
+      // Finds out if the item will be placed inside a navbarMenu
+      // (dropdown). If so, returns the dropdown tabset (ul tag)
+      // and the dropdown tabsetid (to be used to fix the tab ID)
+      function getDropdown() {
+        if (message.menuName !== null) {
+          // menuName is only provided if the user wants to prepend
+          // or append an item inside a navbarMenu (dropdown)
+          var $dropdownATag = $("a.dropdown-toggle[data-value='" + $escape(message.menuName) + "']");
+          if ($dropdownATag.length === 0) {
+            throw "There is no navbarMenu with menuName equal to '" + message.menuName + "'";
+          }
+          var $dropdownTabset = $dropdownATag.find("+ ul.dropdown-menu");
+          var dropdownId = $dropdownTabset.attr("data-tabsetid");
+          return { $tabset: $dropdownTabset, id: dropdownId };
+        } else if (message.target !== null) {
+          // if our item is to be placed next to a tab that is inside
+          // a navbarMenu, our item will also be inside
+          var $uncleTabset = $targetLiTag.parent("ul");
+          if ($uncleTabset.hasClass("dropdown-menu")) {
+            var uncleId = $uncleTabset.attr("data-tabsetid");
+            return { $tabset: $uncleTabset, id: uncleId };
+          }
+        }
+        return null;
+      }
+    });
+
+    // If the given tabset has no active tabs, select the first one
+    function ensureTabsetHasVisibleTab($tabset) {
+      if ($tabset.find("li.active").not(".dropdown").length === 0) {
+        // Note: destTabValue may be null. We still want to proceed
+        // through the below logic and setValue so that the input
+        // value for the tabset gets updated (i.e. input$tabsetId
+        // should be null if there are no tabs).
+        var destTabValue = getFirstTab($tabset);
+        var inputBinding = $tabset.data('shiny-input-binding');
+        var evt = jQuery.Event('shiny:updateinput');
+        evt.binding = inputBinding;
+        $tabset.trigger(evt);
+        inputBinding.setValue($tabset[0], destTabValue);
+      }
+    }
+
+    // Given a tabset ul jquery object, return the value of the first tab
+    // (in document order) that's visible and able to be selected.
+    function getFirstTab($ul) {
+      return $ul.find("li:visible a[data-toggle='tab']").first().attr("data-value") || null;
+    }
+
+    function tabApplyFunction(target, func) {
+      var liTags = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      $.each(target, function (key, el) {
+        if (key === "$liTag") {
+          // $liTag is always just one jQuery element
+          func(el);
+        } else if (key === "$divTags") {
+          // $divTags is always an array (even if length = 1)
+          $.each(el, function (i, div) {
+            func(div);
+          });
+        } else if (liTags && key === "$liTags") {
+          // $liTags is always an array (even if length = 0)
+          $.each(el, function (i, div) {
+            func(div);
+          });
+        }
+      });
+    }
+
+    addMessageHandler("shiny-remove-tab", function (message) {
+      var $tabset = getTabset(message.inputId);
+      var $tabContent = getTabContent($tabset);
+      var target = getTargetTabs($tabset, $tabContent, message.target);
+
+      tabApplyFunction(target, removeEl);
+
+      ensureTabsetHasVisibleTab($tabset);
+
+      function removeEl($el) {
+        exports.unbindAll($el, true);
+        $el.remove();
+      }
+    });
+
+    addMessageHandler("shiny-change-tab-visibility", function (message) {
+      var $tabset = getTabset(message.inputId);
+      var $tabContent = getTabContent($tabset);
+      var target = getTargetTabs($tabset, $tabContent, message.target);
+
+      tabApplyFunction(target, changeVisibility, true);
+
+      ensureTabsetHasVisibleTab($tabset);
+
+      function changeVisibility($el) {
+        if (message.type === "show") $el.css("display", "");else if (message.type === "hide") {
+          $el.hide();
+          $el.removeClass("active");
+        }
+      }
+    });
+
     addMessageHandler('updateQueryString', function (message) {
 
       // leave the bookmarking code intact
@@ -1613,8 +1662,13 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       binding: function binding(message) {
         var key = message.id;
         var binding = this.$bindings[key];
-        if (binding && binding.showProgress) {
-          binding.showProgress(true);
+        if (binding) {
+          $(binding.el).trigger({
+            type: 'shiny:outputinvalidated',
+            binding: binding,
+            name: key
+          });
+          if (binding.showProgress) binding.showProgress(true);
         }
       },
 
@@ -1724,10 +1778,10 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
     this.getTestSnapshotBaseUrl = function () {
-      var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref$fullUrl = _ref.fullUrl;
-      var fullUrl = _ref$fullUrl === undefined ? true : _ref$fullUrl;
+      var _ref2$fullUrl = _ref2.fullUrl;
+      var fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
 
       var loc = window.location;
       var url = "";
@@ -1796,22 +1850,22 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     var fadeDuration = 250;
 
     function show() {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref2$html = _ref2.html;
-      var html = _ref2$html === undefined ? '' : _ref2$html;
-      var _ref2$action = _ref2.action;
-      var action = _ref2$action === undefined ? '' : _ref2$action;
-      var _ref2$deps = _ref2.deps;
-      var deps = _ref2$deps === undefined ? [] : _ref2$deps;
-      var _ref2$duration = _ref2.duration;
-      var duration = _ref2$duration === undefined ? 5000 : _ref2$duration;
-      var _ref2$id = _ref2.id;
-      var id = _ref2$id === undefined ? null : _ref2$id;
-      var _ref2$closeButton = _ref2.closeButton;
-      var closeButton = _ref2$closeButton === undefined ? true : _ref2$closeButton;
-      var _ref2$type = _ref2.type;
-      var type = _ref2$type === undefined ? null : _ref2$type;
+      var _ref3$html = _ref3.html;
+      var html = _ref3$html === undefined ? '' : _ref3$html;
+      var _ref3$action = _ref3.action;
+      var action = _ref3$action === undefined ? '' : _ref3$action;
+      var _ref3$deps = _ref3.deps;
+      var deps = _ref3$deps === undefined ? [] : _ref3$deps;
+      var _ref3$duration = _ref3.duration;
+      var duration = _ref3$duration === undefined ? 5000 : _ref3$duration;
+      var _ref3$id = _ref3.id;
+      var id = _ref3$id === undefined ? null : _ref3$id;
+      var _ref3$closeButton = _ref3.closeButton;
+      var closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton;
+      var _ref3$type = _ref3.type;
+      var type = _ref3$type === undefined ? null : _ref3$type;
 
       if (!id) id = randomId();
 
@@ -1955,12 +2009,12 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-      var _ref3$html = _ref3.html;
-      var html = _ref3$html === undefined ? '' : _ref3$html;
-      var _ref3$deps = _ref3.deps;
-      var deps = _ref3$deps === undefined ? [] : _ref3$deps;
+      var _ref4$html = _ref4.html;
+      var html = _ref4$html === undefined ? '' : _ref4$html;
+      var _ref4$deps = _ref4.deps;
+      var deps = _ref4$deps === undefined ? [] : _ref4$deps;
 
 
       // If there was an existing Bootstrap modal, then there will be a modal-
@@ -3951,12 +4005,15 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
       if (data.hasOwnProperty('label')) $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
+      if (data.hasOwnProperty('placeholder')) el.placeholder = data.placeholder;
+
       $(el).trigger('change');
     },
     getState: function getState(el) {
       return {
         label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
-        value: el.value
+        value: el.value,
+        placeholder: el.placeholder
       };
     },
     getRatePolicy: function getRatePolicy() {
@@ -5047,14 +5104,23 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     },
     setValue: function setValue(el, value) {
       var self = this;
-      var anchors = $(el).find('li:not(.dropdown)').children('a');
-      anchors.each(function () {
-        if (self._getTabName($(this)) === value) {
-          $(this).tab('show');
-          return false; // Break out of each()
-        }
-        return true;
-      });
+      var success = false;
+      if (value) {
+        var anchors = $(el).find('li:not(.dropdown)').children('a');
+        anchors.each(function () {
+          if (self._getTabName($(this)) === value) {
+            $(this).tab('show');
+            success = true;
+            return false; // Break out of each()
+          }
+          return true;
+        });
+      }
+      if (!success) {
+        // This is to handle the case where nothing is selected, e.g. the last tab
+        // was removed using removeTab.
+        $(el).trigger("change");
+      }
     },
     getState: function getState(el) {
       return { value: this.getValue(el) };
@@ -5063,7 +5129,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
     },
     subscribe: function subscribe(el, callback) {
-      $(el).on('shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function (event) {
+      $(el).on('change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function (event) {
         callback();
       });
     },
@@ -5100,6 +5166,9 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         // invalidated reactives, but observers don't actually execute.
         self.shinyapp.makeRequest('uploadieFinish', [], function () {}, function () {});
         $(self.iframe).remove();
+        // Reset the file input's value to "". This allows the same file to be
+        // uploaded again. https://stackoverflow.com/a/22521275
+        $(self.fileEl).val("");
       };
       if (this.iframe.attachEvent) {
         this.iframe.attachEvent('onload', iframeDestroy);
@@ -5179,6 +5248,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
           return xhrVal;
         },
         data: file,
+        contentType: 'application/octet-stream',
         processData: false,
         success: function success() {
           self.progressBytes += file.size;
@@ -5215,6 +5285,9 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
         self.$setActive(false);
         self.onProgress(null, 1);
         self.$bar().text('Upload complete');
+        // Reset the file input's value to "". This allows the same file to be
+        // uploaded again. https://stackoverflow.com/a/22521275
+        $(evt.el).val("");
       }, function (error) {
         self.onError(error);
       });
@@ -5252,37 +5325,11 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
     };
   }).call(FileUploader.prototype);
 
-  function setFileText($el, files) {
-    var $fileText = $el.closest('div.input-group').find('input[type=text]');
-    if (files.length === 1) {
-      $fileText.val(files[0].name);
-    } else {
-      $fileText.val(files.length + " files");
-    }
-  }
-
-  // If previously selected files are uploading, abort that.
-  function abortCurrentUpload($el) {
+  function uploadFiles(evt) {
+    // If previously selected files are uploading, abort that.
+    var $el = $(evt.target);
     var uploader = $el.data('currentUploader');
     if (uploader) uploader.abort();
-    // Clear data-restore attribute if present.
-    $el.removeAttr('data-restore');
-  }
-
-  function uploadDroppedFilesIE10Plus(el, files) {
-    var $el = $(el);
-    abortCurrentUpload($el);
-
-    // Set the label in the text box
-    setFileText($el, files);
-
-    // Start the new upload and put the uploader in 'currentUploader'.
-    $el.data('currentUploader', new FileUploader(exports.shinyapp, fileInputBinding.getId(el), files, el));
-  }
-
-  function uploadFiles(evt) {
-    var $el = $(evt.target);
-    abortCurrentUpload($el);
 
     var files = evt.target.files;
     // IE8 here does not necessarily mean literally IE8; it indicates if the web
@@ -5292,13 +5339,18 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
     if (!IE8 && files.length === 0) return;
 
+    // Clear data-restore attribute if present.
+    $el.removeAttr('data-restore');
+
     // Set the label in the text box
     var $fileText = $el.closest('div.input-group').find('input[type=text]');
     if (IE8) {
       // If we're using IE8/9, just use this placeholder
       $fileText.val("[Uploaded file]");
+    } else if (files.length === 1) {
+      $fileText.val(files[0].name);
     } else {
-      setFileText($el, files);
+      $fileText.val(files.length + " files");
     }
 
     // Start the new upload and put the uploader in 'currentUploader'.
@@ -5309,12 +5361,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       $el.data('currentUploader', new FileUploader(exports.shinyapp, id, files, evt.target));
     }
   }
-
-  // Here we maintain a list of all the current file inputs. This is necessary
-  // because we need to trigger events on them in order to respond to file drag
-  // events. For example, they should all light up when a file is dragged on to
-  // the page.
-  var $fileInputs = $();
 
   var fileInputBinding = new InputBinding();
   $.extend(fileInputBinding, {
@@ -5360,199 +5406,11 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
       // This will be used only when restoring a file from a saved state.
       return 'shiny.file';
     },
-    _getZone: function _getZone(el) {
-      return $(el).closest("div.input-group");
-    },
-    _enableDraghover: function _enableDraghover($el) {
-      // Create an empty jQuery collection. This is a set-like data structure that
-      // jQuery normally uses to contain the results of a selection.
-      var collection = $();
-
-      // Attach a dragenter handler to $el and all of its children. When the first
-      // child is entered, trigger a draghoverstart event.
-      $el.on('dragenter.dragHover', function (e) {
-        if (collection.size() === 0) {
-          $el.trigger('draghoverstart', e.originalEvent);
-        }
-        // Every child that has fired dragenter is added to the collection.
-        // Addition is idempotent, which accounts for elements producing dragenter
-        // multiple times.
-        collection = collection.add(e.originalEvent.target);
-      });
-
-      // Attach dragleave and drop handlers to $el and its children. Whenever a
-      // child fires either of these events, remove it from the collection.
-      $el.on('dragleave.dragHover drop.dragHover', function (e) {
-        // Timeout might be required by some browsers (Firefox) that fire
-        // dragleave before firing dragenter.
-        setTimeout(function () {
-          collection = collection.not(e.originalEvent.target);
-          // When the collection has no elements, all of the children have been
-          // removed, and produce draghoverend event.
-          if (collection.size() === 0) {
-            $el.trigger('draghoverend', e.originalEvent);
-          }
-        }, 0);
-      });
-    },
-    _disableDraghover: function _disableDraghover($el) {
-      $el.off(".dragHover");
-    },
-    _enableDocumentEvents: function _enableDocumentEvents() {
-      var _this = this;
-
-      var $doc = $("html");
-
-      this._enableDraghover($doc);
-      $doc.on({
-        "draghoverstart.fileDrag": function draghoverstartFileDrag(e) {
-          $fileInputs.trigger("showZone.fileDrag");
-        },
-        "draghoverend.fileDrag": function draghoverendFileDrag(e) {
-          $fileInputs.trigger("hideZone.fileDrag");
-        },
-        // IE10/11 workaround (Edge is OK): Mouse movements and drag events can't
-        // happen together. This handler makes mousing into the page a way to
-        // "un-stick" the drag system that highlights drop-able inputs. This
-        // behavior is harmless on other browsers and doing it in all of them
-        // saves us from the nasty business of browser sniffing.
-        "mouseenter": function mouseenter(e) {
-          _this._disableDraghover($doc);
-          $fileInputs.trigger("hideZone.fileDrag");
-          _this._enableDraghover($doc);
-        },
-        // Enable the drop event and prevent download if the file is dropped outside
-        // of a drop zone.
-        "dragover.fileDrag drop.fileDrag": function dragoverFileDragDropFileDrag(e) {
-          e.preventDefault();
-        }
-      });
-    },
-    _disableDocumentEvents: function _disableDocumentEvents() {
-      var $doc = $("html");
-
-      $doc.off(".fileDrag");
-      this._disableDraghover($doc);
-    },
-    _zoneEvents: ["showZone.fileDrag", "hideZone.fileDrag", "dragenter", "dragleave", "drop"].join(" "),
-    _canSetFiles: function _canSetFiles(fileList) {
-      var testEl = document.createElement("input");
-      testEl.type = "file";
-      try {
-        testEl.files = fileList;
-      } catch (e) {
-        return false;
-      }
-      return true;
-    },
-    _handleDrop: function _handleDrop(e, el) {
-      var files = e.originalEvent.dataTransfer.files,
-          $el = $(el);
-      if (files === undefined || files === null) {
-        // 1. The FileList object isn't supported by this browser, and
-        // there's nothing else we can try. (< IE 10)
-        console.log("Dropping files is not supported on this browser. (no FileList)");
-      } else if (!this._canSetFiles(files)) {
-        // 2. The browser doesn't support assigning a type=file input's .files
-        // property, but we do have a FileList to work with. (IE10+/Edge)
-        $el.val("");
-        uploadDroppedFilesIE10Plus(el, files);
-      } else {
-        // 3. The browser supports FileList and input.files assignment.
-        // (Chrome, Safari)
-        $el.val("");
-        el.files = e.originalEvent.dataTransfer.files;
-      }
-      // We manually trigger the hideZone event because for some reason the
-      // document-level handler is disabled by the drop event.
-      $fileInputs.trigger("hideZone.fileDrag");
-      // Because the document handlers are removed inexplicably, we re-add them
-      // here.
-      this._disableDocumentEvents();
-      this._enableDocumentEvents();
-    },
-    _activeClass: "shiny-file-input-active",
-    _overClass: "shiny-file-input-over",
-    _isIE9: function _isIE9() {
-      try {
-        return window.navigator.userAgent.match(/MSIE 9\./) && true || false;
-      } catch (e) {
-        return false;
-      }
-    },
     subscribe: function subscribe(el, callback) {
-      var _this2 = this;
-
-      var $el = $(el);
-      // Here we try to set up the necessary events for Drag and Drop ("DnD") on
-      // every browser except IE9. We specifically exclude IE9 because it's one
-      // browser that supports just enough of the functionality we need to be
-      // confusing. In particular, it supports drag events, so drop zones will
-      // highlight when a file is dragged into the browser window. It doesn't
-      // support the FileList object though, so the user's expectation that DnD is
-      // supported based on this highlighting would be incorrect.
-      if (!this._isIE9()) {
-        (function () {
-          var $zone = _this2._getZone(el),
-              getState = function getState() {
-            return $el.data("state");
-          },
-              setState = function setState(newState) {
-            return $el.data("state", newState);
-          },
-              transition = multimethod().dispatch(function (e) {
-            return [getState(), e.type];
-          }).whenAny([["plain", "showZone"], ["over", "dragleave"]], function (e) {
-            $zone.removeClass(_this2._overClass);
-            $zone.addClass(_this2._activeClass);
-            setState("activated");
-          }).whenAny([["activated", "hideZone"], ["over", "hideZone"], ["plain", "hideZone"]], function (e) {
-            $zone.removeClass(_this2._overClass);
-            $zone.removeClass(_this2._activeClass);
-            setState("plain");
-          }).whenAny([["activated", "dragenter"], ["over", "dragenter"]], function (e) {
-            $zone.addClass(_this2._overClass);
-            setState("over");
-          }).when(["over", "drop"], function (e) {
-            // In order to have reached this code, the browser must support Drag
-            // and Drop ("DnD"), because a "drop" event has been triggered. That
-            // means it's probably Chrome, Safari, or IE9+
-            _this2._handleDrop(e, el);
-            e.preventDefault();
-            e.stopPropagation();
-          }).else(function (e) {
-            // This is harmless and can be observed happening in IE10+. It might
-            // be related to running in a VM.
-            console.log("fileInput DnD unhandled transition: " + getState() + "," + e.type);
-            $fileInputs.trigger("hideZone.fileDrag");
-          });
-
-          if ($fileInputs.length === 0) _this2._enableDocumentEvents();
-          setState("plain");
-          $zone.on(_this2._zoneEvents, transition);
-          $fileInputs = $fileInputs.add(el);
-        })();
-      }
-
-      $el.on("change.fileInputBinding", uploadFiles);
+      $(el).on('change.fileInputBinding', uploadFiles);
     },
-
     unsubscribe: function unsubscribe(el) {
-      var $el = $(el),
-          $zone = this._getZone(el);
-
-      $el.removeData("state");
-
-      $zone.removeClass(this._overClass);
-      $zone.removeClass(this._activeClass);
-
-      // Clean up local event handlers.
-      $el.off(".fileInputBinding");
-      $zone.off(this._zoneEvents);
-
-      // Remove el from list of inputs and (maybe) clean up global event handlers.
-      $fileInputs = $fileInputs.not(el);
-      if ($fileInputs.length === 0) this._disableDocumentEvents();
+      $(el).off('.fileInputBinding');
     }
   });
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');

@@ -57,6 +57,8 @@ sd_section("UI Inputs",
     "updateSelectInput",
     "updateSliderInput",
     "updateTabsetPanel",
+    "insertTab",
+    "showTab",
     "updateTextInput",
     "updateTextAreaInput",
     "updateQueryString",
@@ -154,7 +156,8 @@ sd_section("Running",
     "runGadget",
     "runUrl",
     "stopApp",
-    "viewer"
+    "viewer",
+    "isRunning"
   )
 )
 sd_section("Bookmarking state",
@@ -193,12 +196,16 @@ sd_section("Utility functions",
     "parseQueryString",
     "plotPNG",
     "exportTestValues",
+    "setSerializer",
     "snapshotExclude",
+    "snapshotPreprocessInput",
+    "snapshotPreprocessOutput",
     "markOutputAttrs",
     "repeatable",
     "shinyDeprecated",
     "serverInfo",
-    "shiny-options"
+    "shiny-options",
+    "onStop"
   )
 )
 sd_section("Plot interaction",

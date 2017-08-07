@@ -71,7 +71,7 @@
 #' }
 #' @export
 shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
-                     uiPattern="/", enableBookmarking = NULL) {
+                     uiPattern="/", enableBookmarking=NULL) {
   if (is.null(server)) {
     stop("`server` missing from shinyApp")
   }
@@ -212,7 +212,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     if (file.exists(file.path.ci(appDir, "global.R")))
       sourceUTF8(file.path.ci(appDir, "global.R"))
   }
-  onEnd <- function() {
+  onStop <- function() {
     setwd(oldwd)
     monitorHandle()
     monitorHandle <<- NULL
@@ -223,7 +223,7 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
       httpHandler = joinHandlers(c(uiHandler, wwwDir, fallbackWWWDir)),
       serverFuncSource = serverFuncSource,
       onStart = onStart,
-      onEnd = onEnd,
+      onStop = onStop,
       options = options
     ),
     class = "shiny.appobj"
@@ -317,8 +317,9 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     oldwd <<- getwd()
     setwd(appDir)
     monitorHandle <<- initAutoReloadMonitor(appDir)
+    if (!is.null(appObj()$onStart)) appObj()$onStart()
   }
-  onEnd <- function() {
+  onStop <- function() {
     setwd(oldwd)
     monitorHandle()
     monitorHandle <<- NULL
@@ -329,7 +330,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
       httpHandler = joinHandlers(c(dynHttpHandler, wwwDir, fallbackWWWDir)),
       serverFuncSource = dynServerFuncSource,
       onStart = onStart,
-      onEnd = onEnd,
+      onStop = onStop,
       options = options
     ),
     class = "shiny.appobj"

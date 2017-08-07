@@ -43,53 +43,43 @@ repeatable <- function(rngfunc, seed = stats::runif(1, 0, .Machine$integer.max))
   }
 }
 
-# Temporarily set x in env to value, evaluate expr, and
-# then restore x to its original state
-withTemporary <- function(env, x, value, expr, unset = FALSE) {
-
-  if (exists(x, envir = env, inherits = FALSE)) {
-    oldValue <- get(x, envir = env, inherits = FALSE)
-    on.exit(
-      assign(x, oldValue, envir = env, inherits = FALSE),
-      add = TRUE)
-  } else {
-    on.exit(
-      rm(list = x, envir = env, inherits = FALSE),
-      add = TRUE
-    )
-  }
-
-  if (!missing(value) && !isTRUE(unset))
-    assign(x, value, envir = env, inherits = FALSE)
-  else {
-    if (exists(x, envir = env, inherits = FALSE))
-      rm(list = x, envir = env, inherits = FALSE)
-  }
-  force(expr)
-}
-
 .globals$ownSeed <- NULL
 # Evaluate an expression using Shiny's own private stream of
 # randomness (not affected by set.seed).
 withPrivateSeed <- function(expr) {
-  withTemporary(.GlobalEnv, ".Random.seed",
-    .globals$ownSeed, unset=is.null(.globals$ownSeed), {
-      tryCatch({
-        expr
-      }, finally = {
-        .globals$ownSeed <- getExists('.Random.seed', 'numeric', globalenv())
-      })
-    }
-  )
-}
+  # Save the old seed if present.
+  if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+    hasOrigSeed <- TRUE
+    origSeed <- .GlobalEnv$.Random.seed
+  } else {
+    hasOrigSeed <- FALSE
+  }
 
-# a homemade version of set.seed(NULL) for backward compatibility with R 2.15.x
-reinitializeSeed <- if (getRversion() >= '3.0.0') {
-  function() set.seed(NULL)
-} else function() {
-  if (exists('.Random.seed', globalenv()))
-    rm(list = '.Random.seed', pos = globalenv())
-  stats::runif(1)  # generate any random numbers so R can reinitialize the seed
+  # Swap in the private seed.
+  if (is.null(.globals$ownSeed)) {
+    if (hasOrigSeed) {
+      # Move old seed out of the way if present.
+      rm(.Random.seed, envir = .GlobalEnv, inherits = FALSE)
+    }
+  } else {
+    .GlobalEnv$.Random.seed <- .globals$ownSeed
+  }
+
+  # On exit, save the modified private seed, and put the old seed back.
+  on.exit({
+    .globals$ownSeed <- .GlobalEnv$.Random.seed
+
+    if (hasOrigSeed) {
+      .GlobalEnv$.Random.seed <- origSeed
+    } else {
+      rm(.Random.seed, envir = .GlobalEnv, inherits = FALSE)
+    }
+    # Need to call this to make sure that the value of .Random.seed gets put
+    # into R's internal RNG state. (Issue #1763)
+    httpuv::getRNGState()
+  })
+
+  expr
 }
 
 # Version of runif that runs with private seed
@@ -225,7 +215,7 @@ sortByName <- function(x) {
 # R >=3.2.0, this wrapper is not necessary.
 list2env2 <- function(x, ...) {
   # Ensure that zero-length lists have a name attribute
-   if (length(x) == 0)
+  if (length(x) == 0)
     attr(x, "names") <- character(0)
 
   list2env(x, ...)
@@ -672,6 +662,9 @@ Callbacks <- R6Class(
       .callbacks <<- Map$new()
     },
     register = function(callback) {
+      if (!is.function(callback)) {
+        stop("callback must be a function")
+      }
       id <- as.character(.nextId)
       .nextId <<- .nextId - 1L
       .callbacks$set(id, callback)

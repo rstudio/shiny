@@ -93,9 +93,13 @@ as.tags.shiny.render.function <- function(x, ..., inline = FALSE) {
 #'
 #' @inheritParams markRenderFunction
 #' @param snapshotExclude If TRUE, exclude the output from test snapshots.
+#' @param snapshotPreprocess A function for preprocessing the value before
+#'   taking a test snapshot.
 #'
 #' @keywords internal
-markOutputAttrs <- function(renderFunc, snapshotExclude = NULL) {
+markOutputAttrs <- function(renderFunc, snapshotExclude = NULL,
+  snapshotPreprocess = NULL)
+{
   # Add the outputAttrs attribute if necessary
   if (is.null(attr(renderFunc, "outputAttrs", TRUE))) {
     attr(renderFunc, "outputAttrs") <- list()
@@ -103,6 +107,10 @@ markOutputAttrs <- function(renderFunc, snapshotExclude = NULL) {
 
   if (!is.null(snapshotExclude)) {
     attr(renderFunc, "outputAttrs")$snapshotExclude <- snapshotExclude
+  }
+
+  if (!is.null(snapshotPreprocess)) {
+    attr(renderFunc, "outputAttrs")$snapshotPreprocess <- snapshotPreprocess
   }
 
   renderFunc
@@ -533,7 +541,18 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     )
   }
 
-  markRenderFunction(dataTableOutput, renderFunc, outputArgs = outputArgs)
+  renderFunc <- markRenderFunction(dataTableOutput, renderFunc, outputArgs = outputArgs)
+
+  renderFunc <- snapshotPreprocessOutput(renderFunc, function(value) {
+    # Remove the action field so that it's not saved in test snapshots. It
+    # contains a value that changes every time an app is run, and shouldn't be
+    # stored for test snapshots. It will be something like:
+    # "session/e0d14d3fe97f672f9655a127f2a1e079/dataobj/table?w=&nonce=7f5d6d54e22450a3"
+    value$action <- NULL
+    value
+  })
+
+  renderFunc
 }
 
 # a data frame containing the DataTables 1.9 and 1.10 names

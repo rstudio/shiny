@@ -52,6 +52,27 @@ test_that("Setting the private seed explicitly results in identical values", {
   expect_identical(id7, id8)
 })
 
+test_that("Private and 'public' random streams are independent and work the same", {
+  set.seed(0)
+  public <- c(runif(1), runif(1), runif(1))
+  withPrivateSeed(set.seed(0))
+  private <- c(withPrivateSeed(runif(1)), withPrivateSeed(runif(1)), withPrivateSeed(runif(1)))
+  expect_identical(public, private)
+
+  # Interleaved calls to runif() with private and public streams
+  set.seed(0)
+  withPrivateSeed(set.seed(0))
+  public  <- numeric()
+  private <- numeric()
+  public[1]  <- runif(1)
+  private[1] <- withPrivateSeed(runif(1))
+  private[2] <- withPrivateSeed(runif(1))
+  public[2]  <- runif(1)
+  public[3]  <- runif(1)
+  private[3] <- withPrivateSeed(runif(1))
+  expect_identical(public, private)
+})
+
 test_that("need() works as expected", {
 
   # These are all falsy

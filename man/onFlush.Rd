@@ -34,3 +34,7 @@ These functions should be called within the application's server function.
 All of these functions return a function which can be called with no
 arguments to cancel the registration.
 }
+\seealso{
+\code{\link{onStop}()} for registering callbacks that will be
+  invoked when the application exits, or when a session ends.
+}

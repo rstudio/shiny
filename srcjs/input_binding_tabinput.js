@@ -11,15 +11,24 @@ $.extend(bootstrapTabInputBinding, {
     return null;
   },
   setValue: function(el, value) {
-    var self = this;
-    var anchors = $(el).find('li:not(.dropdown)').children('a');
-    anchors.each(function() {
-      if (self._getTabName($(this)) === value) {
-        $(this).tab('show');
-        return false; // Break out of each()
-      }
-      return true;
-    });
+    let self = this;
+    let success = false;
+    if (value) {
+      let anchors = $(el).find('li:not(.dropdown)').children('a');
+      anchors.each(function() {
+        if (self._getTabName($(this)) === value) {
+          $(this).tab('show');
+          success = true;
+          return false; // Break out of each()
+        }
+        return true;
+      });
+    }
+    if (!success) {
+      // This is to handle the case where nothing is selected, e.g. the last tab
+      // was removed using removeTab.
+      $(el).trigger("change");
+    }
   },
   getState: function(el) {
     return { value: this.getValue(el) };
@@ -29,7 +38,7 @@ $.extend(bootstrapTabInputBinding, {
       this.setValue(el, data.value);
   },
   subscribe: function(el, callback) {
-    $(el).on('shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function(event) {
+    $(el).on('change shown.bootstrapTabInputBinding shown.bs.tab.bootstrapTabInputBinding', function(event) {
       callback();
     });
   },

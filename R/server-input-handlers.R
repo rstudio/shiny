@@ -148,7 +148,7 @@ registerInputHandler("shiny.number", function(val, ...){
 
 registerInputHandler("shiny.password", function(val, shinysession, name) {
   # Mark passwords as not serializable
-  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializer", serializerUnserializable)
+  setSerializer(name, serializerUnserializable)
   val
 })
 
@@ -214,7 +214,9 @@ registerInputHandler("shiny.file", function(val, shinysession, name) {
   # Need to mark this input value with the correct serializer. When a file is
   # uploaded the usual way (instead of being restored), this occurs in
   # session$`@uploadEnd`.
-  .subset2(shinysession$input, "impl")$setMeta(name, "shiny.serializer", serializerFileInput)
+  setSerializer(name, serializerFileInput)
+
+  snapshotPreprocessInput(name, snapshotPreprocessorFileInput)
 
   val
 })

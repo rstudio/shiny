@@ -639,6 +639,15 @@ ShinySession <- R6Class(
               values$input <- allInputs[items]
             }
 
+            # Apply preprocessor functions for inputs that have them.
+            values$input <- lapply(
+              setNames(names(values$input), names(values$input)),
+              function(name) {
+                preprocess <- private$getSnapshotPreprocessInput(name)
+                preprocess(values$input[[name]])
+              }
+            )
+
             values$input <- sortByName(values$input)
           }
 
@@ -657,6 +666,15 @@ ShinySession <- R6Class(
               isTRUE(attr(private$.outputs[[name]], "snapshotExclude", TRUE))
             }, logical(1))
             values$output <- values$output[!exclude_idx]
+
+            # Apply snapshotPreprocess functions for outputs that have them.
+            values$output <- lapply(
+              setNames(names(values$output), names(values$output)),
+              function(name) {
+                preprocess <- private$getSnapshotPreprocessOutput(name)
+                preprocess(values$output[[name]])
+              }
+            )
 
             values$output <- sortByName(values$output)
           }
@@ -712,6 +730,20 @@ ShinySession <- R6Class(
           }
         }
       )
+    },
+
+    # Get the snapshotPreprocessOutput function for an output name. If no preprocess
+    # function has been set, return the identity function.
+    getSnapshotPreprocessOutput = function(name) {
+      fun <- attr(private$.outputs[[name]], "snapshotPreprocess", exact = TRUE)
+      fun %OR% identity
+    },
+
+    # Get the snapshotPreprocessInput function for an input name. If no preprocess
+    # function has been set, return the identity function.
+    getSnapshotPreprocessInput = function(name) {
+      fun <- private$.input$getMeta(name, "shiny.snapshot.preprocess")
+      fun %OR% identity
     }
   ),
   public = list(
@@ -1192,6 +1224,13 @@ ShinySession <- R6Class(
       })
 
       if (!hasPendingUpdates()) {
+        # Normally, if there are no updates, simply return without sending
+        # anything to the client. But if we are in test mode, we still want to
+        # send a message with blank `values`, so that the client knows that
+        # any changed inputs have been received by the server and processed.
+        if (isTRUE(private$testMode)) {
+          private$sendMessage( values = list() )
+        }
         return(invisible())
       }
 
@@ -1453,6 +1492,37 @@ ShinySession <- R6Class(
         )
       )
     },
+    sendInsertTab = function(inputId, liTag, divTag, menuName,
+                             target, position, select) {
+      private$sendMessage(
+        `shiny-insert-tab` = list(
+          inputId = inputId,
+          liTag = liTag,
+          divTag = divTag,
+          menuName = menuName,
+          target = target,
+          position = position,
+          select = select
+        )
+      )
+    },
+    sendRemoveTab = function(inputId, target) {
+      private$sendMessage(
+        `shiny-remove-tab` = list(
+          inputId = inputId,
+          target = target
+        )
+      )
+    },
+    sendChangeTabVisibility = function(inputId, target, type) {
+      private$sendMessage(
+        `shiny-change-tab-visibility` = list(
+          inputId = inputId,
+          target = target,
+          type = type
+        )
+      )
+    },
     updateQueryString = function(queryString, mode) {
       private$sendMessage(updateQueryString = list(
         queryString = queryString, mode = mode))
@@ -1491,7 +1561,8 @@ ShinySession <- R6Class(
       fileData <- private$fileUploadContext$getUploadOperation(jobId)$finish()
       private$.input$set(inputId, fileData)
 
-      private$.input$setMeta(inputId, "shiny.serializer", serializerFileInput)
+      setSerializer(inputId, serializerFileInput)
+      snapshotPreprocessInput(inputId, snapshotPreprocessorFileInput)
 
       invisible()
     },
@@ -1882,17 +1953,6 @@ outputOptions <- function(x, name, ...) {
   .subset2(x, 'impl')$outputOptions(name, ...)
 }
 
-
-#' Mark an output to be excluded from test snapshots
-#'
-#' @param x A reactive which will be assigned to an output.
-#'
-#' @export
-snapshotExclude <- function(x) {
-  markOutputAttrs(x, snapshotExclude = TRUE)
-}
-
-
 #' Add callbacks for Shiny session events
 #'
 #' These functions are for registering callbacks on Shiny session events.
@@ -1924,6 +1984,9 @@ onFlushed <- function(fun, once = TRUE, session = getDefaultReactiveDomain()) {
 }
 
 #' @rdname onFlush
+#'
+#' @seealso \code{\link{onStop}()} for registering callbacks that will be
+#'   invoked when the application exits, or when a session ends.
 #' @export
 onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
   session$onSessionEnded(fun)
@@ -1947,4 +2010,87 @@ flushAllSessions <- function() {
     )
     NULL
   })
+}
+
+.globals$onStopCallbacks <- Callbacks$new()
+
+#' Run code after an application or session ends
+#'
+#' This function registers callback functions that are invoked when the
+#' application exits (when \code{\link{runApp}} exits), or after each user
+#' session ends (when a client disconnects).
+#'
+#' @param fun A function that will be called after the app has finished running.
+#' @param session A scope for when the callback will run. If \code{onStop} is
+#'   called from within the server function, this will default to the current
+#'   session, and the callback will be invoked when the current session ends. If
+#'   \code{onStop} is called outside a server function, then the callback will
+#'   be invoked with the application exits.
+#'
+#'
+#' @seealso \code{\link{onSessionEnded}()} for the same functionality, but at
+#'   the session level only.
+#'
+#' @return A function which, if invoked, will cancel the callback.
+#' @examples
+#' ## Only run this example in interactive R sessions
+#' if (interactive()) {
+#'   # Open this application in multiple browsers, then close the browsers.
+#'   shinyApp(
+#'     ui = basicPage("onStop demo"),
+#'
+#'     server = function(input, output, session) {
+#'       onStop(function() cat("Session stopped\n"))
+#'     },
+#'
+#'     onStart = function() {
+#'       cat("Doing application setup\n")
+#'
+#'       onStop(function() {
+#'         cat("Doing application cleanup\n")
+#'       })
+#'     }
+#'   )
+#' }
+#' # In the example above, onStop() is called inside of onStart(). This is
+#' # the pattern that should be used when creating a shinyApp() object from
+#' # a function, or at the console. If instead you are writing an app.R which
+#' # will be invoked with runApp(), you can do it that way, or put the onStop()
+#' # before the shinyApp() call, as shown below.
+#'
+#' \dontrun{
+#' # ==== app.R ====
+#' cat("Doing application setup\n")
+#' onStop(function() {
+#'   cat("Doing application cleanup\n")
+#' })
+#'
+#' shinyApp(
+#'   ui = basicPage("onStop demo"),
+#'
+#'   server = function(input, output, session) {
+#'     onStop(function() cat("Session stopped\n"))
+#'   }
+#' )
+#' # ==== end app.R ====
+#'
+#'
+#' # Similarly, if you have a global.R, you can call onStop() from there.
+#' # ==== global.R ====
+#' cat("Doing application setup\n")
+#' onStop(function() {
+#'   cat("Doing application cleanup\n")
+#' })
+#' # ==== end global.R ====
+#' }
+#' @export
+onStop <- function(fun, session = getDefaultReactiveDomain()) {
+  if (is.null(getDefaultReactiveDomain())) {
+    return(.globals$onStopCallbacks$register(fun))
+  } else {
+    # Note: In the future if we allow scoping the onStop() callback to modules
+    # and allow modules to be stopped, then session_proxy objects will need
+    # its own implementation of $onSessionEnded.
+    return(session$onSessionEnded(fun))
+  }
 }

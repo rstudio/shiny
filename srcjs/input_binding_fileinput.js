@@ -181,14 +181,18 @@ $.extend(FileUploader.prototype, FileProcessor.prototype);
 }).call(FileUploader.prototype);
 
 
+// NOTE On Safari, at least version 10.1.2, *if the developer console is open*,
+// setting the input's value will behave strangely because of a Safari bug. The
+// uploaded file's name will appear over the placeholder value, instead of
+// replacing it. The workaround is to restart Safari. When I (Alan Dipert) ran
+// into this bug Winston Chang helped me diagnose the exact problem, and Winston
+// then submitted a bug report to Apple.
 function setFileText($el, files) {
   var $fileText = $el.closest('div.input-group').find('input[type=text]');
   if (files.length === 1) {
     $fileText.val(files[0].name);
-    // $fileText.attr("placeholder", files[0].name);
   } else {
     $fileText.val(files.length + " files");
-    // $fileText.attr("placeholder", files.length + " files");
   }
 }
 
@@ -233,7 +237,6 @@ function uploadFiles(evt) {
   if (IE8) {
     // If we're using IE8/9, just use this placeholder
     $fileText.val("[Uploaded file]");
-    // $fileText.attr("placeholder", "[Uploaded file]");
   } else {
     setFileText($el, files);
   }
@@ -302,6 +305,9 @@ $.extend(fileInputBinding, {
   _getZone: function(el) {
     return $(el).closest("div.input-group");
   },
+  // This implements draghoverstart/draghoverend events that occur once per
+  // selector, instead of once for every child the way native
+  // dragenter/dragleave do. Inspired by https://gist.github.com/meleyal/3794126
   _enableDraghover: function($el, ns = "") {
     // Create an empty jQuery collection. This is a set-like data structure that
     // jQuery normally uses to contain the results of a selection.
@@ -309,9 +315,9 @@ $.extend(fileInputBinding, {
 
     // Attach a dragenter handler to $el and all of its children. When the first
     // child is entered, trigger a draghoverstart event.
-    $el.on('dragenter.dragHover', function(e) {
+    $el.on("dragenter.dragHover", e => {
       if (collection.size() === 0) {
-        $el.trigger('draghoverstart' + ns, e.originalEvent);
+        $el.trigger("draghoverstart" + ns, e.originalEvent);
       }
       // Every child that has fired dragenter is added to the collection.
       // Addition is idempotent, which accounts for elements producing dragenter
@@ -321,17 +327,13 @@ $.extend(fileInputBinding, {
 
     // Attach dragleave and drop handlers to $el and its children. Whenever a
     // child fires either of these events, remove it from the collection.
-    $el.on('dragleave.dragHover drop.dragHover', function(e) {
-      // Timeout might be required by some browsers (Firefox) that fire
-      // dragleave before firing dragenter.
-      setTimeout(() => {
-        collection = collection.not(e.originalEvent.target);
-        // When the collection has no elements, all of the children have been
-        // removed, and produce draghoverend event.
-        if (collection.size() === 0) {
-          $el.trigger('draghoverend' + ns, e.originalEvent);
-        }
-      }, 0);
+    $el.on("dragleave.dragHover drop.dragHover", e => {
+      collection = collection.not(e.originalEvent.target);
+      // When the collection has no elements, all of the children have been
+      // removed, and produce draghoverend event.
+      if (collection.size() === 0) {
+        $el.trigger("draghoverend" + ns, e.originalEvent);
+      }
     });
   },
   _disableDraghover: function($el) {
@@ -348,19 +350,6 @@ $.extend(fileInputBinding, {
       "draghoverend.fileDrag": e => {
         $fileInputs.trigger("hideZone.fileDrag");
       },
-      // IE10/11 workaround (Edge is OK): Mouse movements and drag events can't
-      // happen together. This handler makes mousing into the page a way to
-      // "un-stick" the drag system that highlights drop-able inputs. This
-      // behavior is harmless on other browsers and doing it in all of them
-      // saves us from the nasty business of browser sniffing.
-      "mouseenter": e => {
-        // TODO re-evaluate
-        // this._disableDraghover($doc);
-        // $fileInputs.trigger("hideZone.fileDrag");
-        // this._enableDraghover($doc);
-      },
-      // Enable the drop event and prevent download if the file is dropped outside
-      // of a drop zone.
       "dragover.fileDrag drop.fileDrag": e => {
         e.preventDefault();
       }
@@ -487,10 +476,7 @@ $.extend(fileInputBinding, {
 
       if ($fileInputs.length === 0) this._enableDocumentEvents();
       setState("plain");
-      $zone.on(this._zoneEvents, e => {
-        // console.log(getState(), e.type);
-        transition(e);
-      });
+      $zone.on(this._zoneEvents, transition);
       $fileInputs = $fileInputs.add(el);
       this._enableDraghover($zone, ".zone");
     }

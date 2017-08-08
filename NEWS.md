@@ -7,11 +7,11 @@ shiny 1.0.3.9001
 
 ### New features
 
-* Dynamic tabs: added four functions (`insertTab`, `removeTab`, `showTab` and `hideTab`) that allow you to do those actions for an existing tabsetPanel. ([#1794](https://github.com/rstudio/shiny/pull/1794))
+* Implemented [#1668](https://github.com/rstudio/shiny/issues/1668): dynamic tabs: added four functions (`insertTab`, `removeTab`, `showTab` and `hideTab`) that allow you to do those actions for an existing tabsetPanel. ([#1794](https://github.com/rstudio/shiny/pull/1794))
 
-* Added a new function, `onStop()`, which can be used to register callback functions that are invoked when an application exits, or when a user session ends. (Multiple sessions can be connected to a single running Shiny application.) This is useful if you have finalization/clean-up code that should be run after the application exits. ([#1770](https://github.com/rstudio/shiny/pull/1770)
+* Implemented [#1213](https://github.com/rstudio/shiny/issues/1213): Added a new function, `onStop()`, which can be used to register callback functions that are invoked when an application exits, or when a user session ends. (Multiple sessions can be connected to a single running Shiny application.) This is useful if you have finalization/clean-up code that should be run after the application exits. ([#1770](https://github.com/rstudio/shiny/pull/1770)
 
-* Files can now be drag-and-dropped on `fileInput` controls. The appearance of `fileInput` controls while files are being dragged can be modified by overriding the `shiny-file-input-active` and `shiny-file-input-over` classes. ([#1782](https://github.com/rstudio/shiny/pull/1782))
+* Implemented [#1155](https://github.com/rstudio/shiny/issues/1155): Files can now be drag-and-dropped on `fileInput` controls. The appearance of `fileInput` controls while files are being dragged can be modified by overriding the `shiny-file-input-active` and `shiny-file-input-over` classes. ([#1782](https://github.com/rstudio/shiny/pull/1782))
 
 ### Minor new features and improvements
 

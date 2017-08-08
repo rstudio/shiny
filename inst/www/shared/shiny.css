@@ -373,3 +373,11 @@ pre.shiny-text-output.noplaceholder:empty {
   text-decoration: underline;
   font-weight: bold;
 }
+
+.shiny-file-input-active {
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+}
+
+.shiny-file-input-over {
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(76, 174, 76, .6);
+}

@@ -11,6 +11,8 @@ shiny 1.0.3.9001
 
 * Added a new function, `onStop()`, which can be used to register callback functions that are invoked when an application exits, or when a user session ends. (Multiple sessions can be connected to a single running Shiny application.) This is useful if you have finalization/clean-up code that should be run after the application exits. ([#1770](https://github.com/rstudio/shiny/pull/1770)
 
+* Files can now be drag-and-dropped on `fileInput` controls. The appearance of `fileInput` controls while files are being dragged can be modified by overriding the `shiny-file-input-active` and `shiny-file-input-over` classes. ([#1782](https://github.com/rstudio/shiny/pull/1782))
+
 ### Minor new features and improvements
 
 * Addressed [#1688](https://github.com/rstudio/shiny/issues/1688): trigger a new `shiny:outputinvalidated` event when an output gets invalidated, at the same time that the `recalculating` CSS class is added. ([#1758](https://github.com/rstudio/shiny/pull/1758), thanks [@andrewsali](https://github.com/andrewsali)!)

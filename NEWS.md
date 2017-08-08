@@ -3,8 +3,6 @@ shiny 1.0.4
 
 ## Full changelog
 
-### Breaking changes
-
 ### New features
 
 * Implemented [#1668](https://github.com/rstudio/shiny/issues/1668): dynamic tabs: added four functions (`insertTab`, `removeTab`, `showTab` and `hideTab`) that allow you to do those actions for an existing tabsetPanel. ([#1794](https://github.com/rstudio/shiny/pull/1794))
@@ -58,8 +56,6 @@ shiny 1.0.4
 * Fixed [#1772](https://github.com/rstudio/shiny/issues/1772): ensure that `runApp()` respects the `shinyApp(onStart = function())` argument. ([#1770](https://github.com/rstudio/shiny/pull/1770))
 
 * Fixed [#1474](https://github.com/rstudio/shiny/issues/1474): A `browser()` call in an observer could cause an error in the RStudio IDE on Windows. ([#1802](https://github.com/rstudio/shiny/pull/1802))
-
-### Library updates
 
 
 shiny 1.0.3

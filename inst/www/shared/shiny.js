@@ -1761,7 +1761,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             existingTabIds.push(Number(index));
           }
         });
-        return Math.max.apply(Math, existingTabIds) + 1;
+        return Math.max.apply(null, existingTabIds) + 1;
       }
 
       // Finds out if the item will be placed inside a navbarMenu

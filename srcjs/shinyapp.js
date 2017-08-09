@@ -892,7 +892,7 @@ var ShinyApp = function() {
           existingTabIds.push(Number(index));
         }
       });
-      return Math.max(...existingTabIds) + 1;
+      return Math.max.apply(null, existingTabIds) + 1;
     }
 
     // Finds out if the item will be placed inside a navbarMenu

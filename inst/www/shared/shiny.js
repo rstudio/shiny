@@ -1749,7 +1749,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       set the tab id (counter dummy) to "id" and the tabset id to "tsid")
       */
       function getTabIndex($tabset, tabsetId) {
-        var existingTabIds = [];
+        // The 0 is to ensure this works for empty tabsetPanels as well
+        var existingTabIds = [0];
         var leadingHref = "#tab-" + tabsetId + "-";
         // loop through all existing tabs, find the one with highest id
         // (since this is based on a numeric counter), and increment

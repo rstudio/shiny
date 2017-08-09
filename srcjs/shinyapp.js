@@ -880,7 +880,8 @@ var ShinyApp = function() {
     set the tab id (counter dummy) to "id" and the tabset id to "tsid")
     */
     function getTabIndex($tabset, tabsetId) {
-      var existingTabIds = [];
+      // The 0 is to ensure this works for empty tabsetPanels as well
+      var existingTabIds = [0];
       var leadingHref = "#tab-" + tabsetId + "-";
       // loop through all existing tabs, find the one with highest id
       // (since this is based on a numeric counter), and increment
@@ -891,7 +892,7 @@ var ShinyApp = function() {
           existingTabIds.push(Number(index));
         }
       });
-      return (Math.max.apply(null, existingTabIds) + 1);
+      return Math.max(...existingTabIds) + 1;
     }
 
     // Finds out if the item will be placed inside a navbarMenu

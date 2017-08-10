@@ -1,6 +1,8 @@
 shiny 1.0.4
 ===========
 
+There are three headlining features in this release of Shiny. It is now possible to add and remove tabs from a `tabPanel`; there is a new function, `onStop()`, which registers callbacks that execute when an application exits; and `fileInput`s now can have files dragged and dropped on them. In addition to these features, this release has a number of minor features and bug fixes. See the full changelog below for more details.
+
 ## Full changelog
 
 ### New features

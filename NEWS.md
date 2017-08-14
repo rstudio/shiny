@@ -1,13 +1,13 @@
-shiny 1.0.3.9001
-================
+shiny 1.0.4
+===========
+
+There are three headlining features in this release of Shiny. It is now possible to add and remove tabs from a `tabPanel`; there is a new function, `onStop()`, which registers callbacks that execute when an application exits; and `fileInput`s now can have files dragged and dropped on them. In addition to these features, this release has a number of minor features and bug fixes. See the full changelog below for more details.
 
 ## Full changelog
 
-### Breaking changes
-
 ### New features
 
-* Implemented [#1668](https://github.com/rstudio/shiny/issues/1668): dynamic tabs: added four functions (`insertTab`, `removeTab`, `showTab` and `hideTab`) that allow you to do those actions for an existing tabsetPanel. ([#1794](https://github.com/rstudio/shiny/pull/1794))
+* Implemented [#1668](https://github.com/rstudio/shiny/issues/1668): dynamic tabs: added functions (`insertTab`, `appendTab`, `prependTab`, `removeTab`, `showTab` and `hideTab`) that allow you to do those actions for an existing `tabsetPanel`. ([#1794](https://github.com/rstudio/shiny/pull/1794))
 
 * Implemented [#1213](https://github.com/rstudio/shiny/issues/1213): Added a new function, `onStop()`, which can be used to register callback functions that are invoked when an application exits, or when a user session ends. (Multiple sessions can be connected to a single running Shiny application.) This is useful if you have finalization/clean-up code that should be run after the application exits. ([#1770](https://github.com/rstudio/shiny/pull/1770)
 
@@ -58,8 +58,6 @@ shiny 1.0.3.9001
 * Fixed [#1772](https://github.com/rstudio/shiny/issues/1772): ensure that `runApp()` respects the `shinyApp(onStart = function())` argument. ([#1770](https://github.com/rstudio/shiny/pull/1770))
 
 * Fixed [#1474](https://github.com/rstudio/shiny/issues/1474): A `browser()` call in an observer could cause an error in the RStudio IDE on Windows. ([#1802](https://github.com/rstudio/shiny/pull/1802))
-
-### Library updates
 
 
 shiny 1.0.3

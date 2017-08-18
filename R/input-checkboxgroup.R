@@ -8,7 +8,8 @@
 #' @param choices List of values to show checkboxes for. If elements of the list
 #'   are named then that name rather than the value is displayed to the user. If
 #'   this argument is provided, then \code{choiceNames} and \code{choiceValues}
-#'   must not be provided, and vice-versa.
+#'   must not be provided, and vice-versa. The values should be strings; other
+#'   types (such as logicals and numbers) will be coerced to strings.
 #' @param selected The values that should be initially selected, if any.
 #' @param inline If \code{TRUE}, render the choices inline (i.e. horizontally)
 #' @param choiceNames,choiceValues List of names and values, respectively,

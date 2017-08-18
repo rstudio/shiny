@@ -161,7 +161,11 @@ function pixelRatio() {
 // "with" on the argument value, and return the result.
 function scopeExprToFunc(expr) {
   /*jshint evil: true */
-  var expr_escaped = expr.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+  var expr_escaped = expr
+    .replace(/[\\"']/g, '\\$&')
+    .replace(/\u0000/g, '\\0')
+    .replace(/\n/g, '\\n');
+
   try {
     var func = new Function(
       `with (this) {

@@ -11,6 +11,8 @@ shiny 1.0.4.9000
 
 ### Bug fixes
 
+* Fixed [#1818](https://github.com/rstudio/shiny/issues/1818): `conditionalPanel()` expressions that have a newline character in them caused the application to not work. ([#1820](https://github.com/rstudio/shiny/pull/1820))
+
 ### Library updates
 
 

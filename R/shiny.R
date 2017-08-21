@@ -142,6 +142,15 @@ toJSON <- function(x, ...,  dataframe = "columns", null = "null", na = "null",
    keep_vec_names = keep_vec_names, json_verbatim = TRUE, ...)
 }
 
+# If the input to jsonlite::fromJSON is not valid JSON, it will try to fetch a
+# URL or read a file from disk. We don't want to allow that.
+safeFromJSON <- function(txt, ...) {
+  if (!jsonlite::validate(txt)) {
+    stop("Argument 'txt' is not a valid JSON string.")
+  }
+  jsonlite::fromJSON(txt, ...)
+}
+
 # Call the workerId func with no args to get the worker id, and with an arg to
 # set it.
 #
@@ -805,7 +814,7 @@ ShinySession <- R6Class(
 
       if (!is.null(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)) {
         try({
-          creds <- jsonlite::fromJSON(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)
+          creds <- safeFromJSON(websocket$request$HTTP_SHINY_SERVER_CREDENTIALS)
           self$user <- creds$user
           self$groups <- creds$groups
         }, silent=FALSE)

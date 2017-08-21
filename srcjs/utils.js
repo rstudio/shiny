@@ -164,7 +164,10 @@ function scopeExprToFunc(expr) {
   var expr_escaped = expr
     .replace(/[\\"']/g, '\\$&')
     .replace(/\u0000/g, '\\0')
-    .replace(/\n/g, '\\n');
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    // \b has a special meaning; need [\b] to match backspace char.
+    .replace(/[\b]/g, '\\b');
 
   try {
     var func = new Function(

@@ -179,7 +179,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   // "with" on the argument value, and return the result.
   function scopeExprToFunc(expr) {
     /*jshint evil: true */
-    var expr_escaped = expr.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0').replace(/\n/g, '\\n');
+    var expr_escaped = expr.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0').replace(/\n/g, '\\n').replace(/\r/g, '\\r')
+    // \b has a special meaning; need [\b] to match backspace char.
+    .replace(/[\b]/g, '\\b');
 
     try {
       var func = new Function('with (this) {\n        try {\n          return (' + expr + ');\n        } catch (e) {\n          console.error(\'Error evaluating expression: ' + expr_escaped + '\');\n          throw e;\n        }\n      }');

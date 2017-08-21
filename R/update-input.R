@@ -655,7 +655,7 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
 selectizeJSON <- function(data, req) {
   query <- parseQueryString(req$QUERY_STRING)
   # extract the query variables, conjunction (and/or), search string, maximum options
-  var <- c(jsonlite::fromJSON(query$field))
+  var <- c(safeFromJSON(query$field))
   cjn <- if (query$conju == 'and') all else any
   # all keywords in lower-case, for case-insensitive matching
   key <- unique(strsplit(tolower(query$query), '\\s+')[[1]])

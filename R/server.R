@@ -155,7 +155,7 @@ decodeMessage <- function(data) {
     # Treat message as UTF-8
     charData <- rawToChar(data)
     Encoding(charData) <- 'UTF-8'
-    return(jsonlite::fromJSON(charData, simplifyVector=FALSE))
+    return(safeFromJSON(charData, simplifyVector=FALSE))
   }
 
   i <- 5

@@ -349,7 +349,7 @@ RestoreContext <- R6Class("RestoreContext",
         mapply(names(vals), vals, SIMPLIFY = FALSE,
           FUN = function(name, value) {
             tryCatch(
-              jsonlite::fromJSON(value),
+              safeFromJSON(value),
               error = function(e) {
                 stop("Failed to parse URL parameter \"", name, "\"")
               }

@@ -15,6 +15,8 @@ shiny 1.0.4.9000
 
 * Added a safe wrapper function for internal calls to `jsonlite::fromJSON()`. ([#1822](https://github.com/rstudio/shiny/pull/1822))
 
+* Fixed [#1824](https://github.com/rstudio/shiny/issues/1824): HTTP HEAD requests on static files caused the application to stop. ([#1825](https://github.com/rstudio/shiny/pull/1825))
+
 ### Library updates
 
 

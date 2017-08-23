@@ -9,6 +9,8 @@ shiny 1.0.5.9000
 
 ### Minor new features and improvements
 
+* The version of Shiny is now accessible from Javascript, with `Shiny.version`. ([#1826](https://github.com/rstudio/shiny/pull/1826))
+
 ### Bug fixes
 
 ### Library updates

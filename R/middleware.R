@@ -360,7 +360,9 @@ HandlerManager <- R6Class("HandlerManager",
 
           response <- filter(req, response)
           if (head_request) {
-            headers$`Content-Length` <- nchar(response$content, type = "bytes")
+
+            headers$`Content-Length` <- getResponseContentLength(response, deleteOwnedContent = TRUE)
+
             return(list(
               status = response$status,
               body = "",
@@ -382,6 +384,35 @@ HandlerManager <- R6Class("HandlerManager",
     }
   )
 )
+
+# Safely get the Content-Length of a Rook response, or NULL if the length cannot
+# be determined for whatever reason (probably malformed response$content).
+# If deleteOwnedContent is TRUE, then the function should delete response
+# content that is of the form list(file=..., owned=TRUE).
+getResponseContentLength <- function(response, deleteOwnedContent) {
+  force(deleteOwnedContent)
+
+  result <- if (is.character(response$content) && length(response$content) == 1) {
+    nchar(response$content, type = "bytes")
+  } else if (is.raw(response$content)) {
+    length(response$content)
+  } else if (is.list(response$content) && !is.null(response$content$file)) {
+    if (deleteOwnedContent && isTRUE(response$content$owned)) {
+      on.exit(unlink(response$content$file, recursive = FALSE, force = FALSE), add = TRUE)
+    }
+    file.info(response$content$file)$size
+  } else {
+    warning("HEAD request for unexpected content class ", class(response$content)[[1]])
+    NULL
+  }
+
+  if (is.na(result)) {
+    # Mostly for missing file case
+    return(NULL)
+  } else {
+    return(result)
+  }
+}
 
 #
 # ## Next steps

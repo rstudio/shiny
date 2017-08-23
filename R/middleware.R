@@ -385,10 +385,14 @@ HandlerManager <- R6Class("HandlerManager",
   )
 )
 
+# Safely get the Content-Length of a Rook response, or NULL if the length cannot
+# be determined for whatever reason (probably malformed response$content).
+# If deleteOwnedContent is TRUE, then the function should delete response
+# content that is of the form list(file=..., owned=TRUE).
 getResponseContentLength <- function(response, deleteOwnedContent) {
   force(deleteOwnedContent)
 
-  result <- if (is.character(response$content)) {
+  result <- if (is.character(response$content) && length(response$content) == 1) {
     nchar(response$content, type = "bytes")
   } else if (is.raw(response$content)) {
     length(response$content)
@@ -403,6 +407,7 @@ getResponseContentLength <- function(response, deleteOwnedContent) {
   }
 
   if (is.na(result)) {
+    # Mostly for missing file case
     return(NULL)
   } else {
     return(result)

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -13,6 +13,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var $ = jQuery;
 
   var exports = window.Shiny = window.Shiny || {};
+
+  exports.version = "1.0.5.9000"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -184,7 +186,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     .replace(/[\b]/g, '\\b');
 
     try {
-      var func = new Function('with (this) {\n        try {\n          return (' + expr + ');\n        } catch (e) {\n          console.error(\'Error evaluating expression: ' + expr_escaped + '\');\n          throw e;\n        }\n      }');
+      var func = new Function("with (this) {\n        try {\n          return (" + expr + ");\n        } catch (e) {\n          console.error('Error evaluating expression: " + expr_escaped + "');\n          throw e;\n        }\n      }");
     } catch (e) {
       console.error("Error parsing expression: " + expr);
       throw e;
@@ -461,7 +463,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (defaultMethod) {
         return defaultMethod.apply(invoke, args);
       } else {
-        throw new Error('No method for dispatch value ' + dispatchVal);
+        throw new Error("No method for dispatch value " + dispatchVal);
       }
     });
 
@@ -1942,7 +1944,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           // Progress bar starts hidden; will be made visible if a value is provided
           // during updates.
           exports.notifications.show({
-            html: '<div id="shiny-progress-' + message.id + '" class="shiny-progress-notification">' + '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span> ' + '<span class="progress-detail"></span>' + '</div>' + '</div>',
+            html: "<div id=\"shiny-progress-" + message.id + "\" class=\"shiny-progress-notification\">" + '<div class="progress progress-striped active" style="display: none;"><div class="progress-bar"></div></div>' + '<div class="progress-text">' + '<span class="progress-message">message</span> ' + '<span class="progress-detail"></span>' + '</div>' + '</div>',
             id: message.id,
             duration: null
           });
@@ -2138,7 +2140,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if ($notification.length === 0) $notification = _create(id);
 
       // Render html and dependencies
-      var newHtml = '<div class="shiny-notification-content-text">' + html + '</div>' + ('<div class="shiny-notification-content-action">' + action + '</div>');
+      var newHtml = "<div class=\"shiny-notification-content-text\">" + html + "</div>" + ("<div class=\"shiny-notification-content-action\">" + action + "</div>");
       var $content = $notification.find('.shiny-notification-content');
       exports.renderContent($content, { html: newHtml, deps: deps });
 
@@ -2218,7 +2220,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var $notification = _get(id);
 
       if ($notification.length === 0) {
-        $notification = $('<div id="shiny-notification-' + id + '" class="shiny-notification">' + '<div class="shiny-notification-close">&times;</div>' + '<div class="shiny-notification-content"></div>' + '</div>');
+        $notification = $("<div id=\"shiny-notification-" + id + "\" class=\"shiny-notification\">" + '<div class="shiny-notification-close">&times;</div>' + '<div class="shiny-notification-content"></div>' + '</div>');
 
         $notification.find('.shiny-notification-close').on('click', function (e) {
           e.preventDefault();
@@ -3860,7 +3862,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       html = '';
     } else if (typeof content === 'string') {
       html = content;
-    } else if ((typeof content === 'undefined' ? 'undefined' : _typeof(content)) === 'object') {
+    } else if ((typeof content === "undefined" ? "undefined" : _typeof(content)) === 'object') {
       html = content.html;
       dependencies = content.deps || [];
     }

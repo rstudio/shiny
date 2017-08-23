@@ -74,6 +74,20 @@ module.exports = function(grunt) {
       },
     },
 
+    "string-replace": {
+      version: {
+        files: {
+          'temp_concat/': './temp_concat/shiny.js'
+        },
+        options: {
+          replacements: [{
+            pattern: /{{ VERSION }}/g,
+            replacement: pkgInfo().version
+          }]
+        }
+      }
+    },
+
     babel: {
       options: {
         sourceMap: true,
@@ -174,6 +188,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-string-replace');
   grunt.loadNpmTasks('grunt-babel');
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -191,6 +206,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', [
     'newer:concat',
+    'newer:string-replace',
     'newer:eslint',
     'configureBabel',
     'newer:babel',

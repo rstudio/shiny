@@ -3,6 +3,8 @@
 
   var exports = window.Shiny = window.Shiny || {};
 
+  exports.version = "{{ VERSION }}";  // Version number inserted by Grunt
+
   var origPushState = window.history.pushState;
   window.history.pushState = function() {
     var result = origPushState.apply(this, arguments);

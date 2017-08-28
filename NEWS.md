@@ -11,6 +11,8 @@ shiny 1.0.5.9000
 
 * The version of Shiny is now accessible from Javascript, with `Shiny.version`. ([#1826](https://github.com/rstudio/shiny/pull/1826))
 
+* Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome.
+
 ### Bug fixes
 
 ### Library updates

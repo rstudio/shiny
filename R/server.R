@@ -731,7 +731,8 @@ runApp <- function(appDir=getwd(),
           port <- p_randomInt(3000, 8000)
           # Reject ports in this range that are considered unsafe by Chrome
           # http://superuser.com/questions/188058/which-ports-are-considered-unsafe-on-chrome
-          if (!port %in% c(3659, 4045, 6000, 6665:6669)) {
+          # https://github.com/rstudio/shiny/issues/1784
+          if (!port %in% c(3659, 4045, 6000, 6665:6669, 6697)) {
             break
           }
         }

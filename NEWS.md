@@ -1,3 +1,9 @@
+## My Changes
+
+### Minor new features and improvements
+
+* Addressed [#1834](https://github.com/rstudio/shiny/issues/1834): `session$doBookmark()` now include arguments that allow you to customize the bookmark link.
+
 shiny 1.0.5.9000
 ================
 

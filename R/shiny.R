@@ -1385,7 +1385,7 @@ ShinySession <- R6Class(
       }
       private$restoredCallbacks$register(fun)
     },
-    doBookmark = function() {
+    doBookmark = function(url_hostname=NULL,url_protocol=NULL,url_pathname=NULL,url_port=NULL) {
       # Get bookmarking store config
       store <- getShinyOption("bookmarkStore", default = "disable")
       if (store == "disable")
@@ -1410,11 +1410,34 @@ ShinySession <- R6Class(
           }
 
           clientData <- self$clientData
+
+          if(is.null(url_protocol)){
+            url_protocol <- paste0(clientData$url_protocol,"//")
+          } else {
+            url_protocol <- paste0(url_protocol,"//")
+          }
+
+          if(is.null(url_hostname)){
+            url_hostname <- clientData$url_hostname
+          }
+
+          if(is.null(url_port)){
+            if (nzchar(clientData$url_port)){
+              url_port <- paste0(":", clientData$url_port)
+            }
+          } else {
+            url_port <- paste0(":", url_port)
+          }
+
+          if(is.null(url_pathname)){
+            url_pathname <- clientData$url_pathname
+          }
+
           url <- paste0(
-            clientData$url_protocol, "//",
-            clientData$url_hostname,
-            if (nzchar(clientData$url_port)) paste0(":", clientData$url_port),
-            clientData$url_pathname,
+            url_protocol,
+            url_hostname,
+            url_port,
+            url_pathname,
             "?", url
           )
 

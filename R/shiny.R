@@ -1413,7 +1413,7 @@ ShinySession <- R6Class(
 
           if(is.null(url_protocol)){
             url_protocol <- paste0(clientData$url_protocol,"//")
-          } else if (!url_protocol){
+          } else if (url_protocol == F){
             url_protocol <- ''
           } else {
             url_protocol <- paste0(url_protocol,"//")
@@ -1421,7 +1421,7 @@ ShinySession <- R6Class(
 
           if(is.null(url_hostname)){
             url_hostname <- clientData$url_hostname
-          } else if (!url_hostname){
+          } else if (url_hostname == F){
             url_hostname <- ''
           }
 
@@ -1429,7 +1429,7 @@ ShinySession <- R6Class(
             if (nzchar(clientData$url_port)){
               url_port <- paste0(":", clientData$url_port)
             }
-          } else if (!url_port){
+          } else if (url_port == F){
             url_port <- ''
           } else {
             url_port <- paste0(":", url_port)
@@ -1437,7 +1437,7 @@ ShinySession <- R6Class(
 
           if(is.null(url_pathname)){
             url_pathname <- clientData$url_pathname
-          } else if (!url_pathname){
+          } else if (url_pathname == F){
             url_pathname <- ''
           }
 

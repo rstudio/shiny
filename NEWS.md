@@ -15,6 +15,8 @@ shiny 1.0.5.9000
 
 ### Bug fixes
 
+* Changed script links for reactlog to use protocol relative URLs in order to avoid mixed content blocking by modern browsers.
+
 ### Library updates
 
 

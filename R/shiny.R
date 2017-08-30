@@ -1413,24 +1413,32 @@ ShinySession <- R6Class(
 
           if(is.null(url_protocol)){
             url_protocol <- paste0(clientData$url_protocol,"//")
+          } else if (!url_protocol){
+            url_protocol <- ''
           } else {
             url_protocol <- paste0(url_protocol,"//")
           }
 
           if(is.null(url_hostname)){
             url_hostname <- clientData$url_hostname
+          } else if (!url_hostname){
+            url_hostname <- ''
           }
 
           if(is.null(url_port)){
             if (nzchar(clientData$url_port)){
               url_port <- paste0(":", clientData$url_port)
             }
+          } else if (!url_port){
+            url_port <- ''
           } else {
             url_port <- paste0(":", url_port)
           }
 
           if(is.null(url_pathname)){
             url_pathname <- clientData$url_pathname
+          } else if (!url_pathname){
+            url_pathname <- ''
           }
 
           url <- paste0(

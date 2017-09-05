@@ -9,7 +9,7 @@ shiny 1.0.5.9000
 
 ### Minor new features and improvements
 
-* The version of Shiny is now accessible from Javascript, with `Shiny.version`. ([#1826](https://github.com/rstudio/shiny/pull/1826))
+* The version of Shiny is now accessible from Javascript, with `Shiny.version`. There is also a new function for comparing version strings, `Shiny.compareVersion()`. ([#1826](https://github.com/rstudio/shiny/pull/1826), [#1830](https://github.com/rstudio/shiny/pull/1830))
 
 * Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome.
 

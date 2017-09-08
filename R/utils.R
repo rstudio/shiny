@@ -1532,7 +1532,10 @@ writeUTF8 <- function(text, ...) {
   writeLines(text, ..., useBytes = TRUE)
 }
 
-URLdecode <- decodeURIComponent
+URLdecode <- function(value) {
+  decodeURIComponent(value)
+}
+
 URLencode <- function(value, reserved = FALSE) {
   value <- enc2utf8(value)
   if (reserved) encodeURIComponent(value) else encodeURI(value)

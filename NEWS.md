@@ -17,6 +17,8 @@ shiny 1.0.5.9000
 
 ### Bug fixes
 
+* The internal `URLdecode()` function previously was a copy of `httpuv::decodeURIComponent()`, assigned at build time; now it invokes the httpuv function at run time.
+
 ### Library updates
 
 

@@ -344,10 +344,6 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
         res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
         res
       })
-      # TODO jcheng 2017-04-11: Is this correct, or just leftover debugging?
-      p2 <- promises::catch(p2,
-        function(err) { cat(file=stderr(), "ERROR", err$message) }
-      )
       p2
     })
     p1 <- promises::finally(p1, ~close(domain$conn))

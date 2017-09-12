@@ -43,21 +43,18 @@ To learn more we highly recommend you check out the [Shiny Tutorial](http://shin
 
 We hope you enjoy using Shiny. If you have general questions about using Shiny, please use the Shiny [mailing list](https://groups.google.com/forum/#!forum/shiny-discuss). For bug reports, please use the [issue tracker](https://github.com/rstudio/shiny/issues).
 
-## Bootstrap 3 migration
-
-Shiny versions 0.10.2.2 and below used the Bootstrap 2 web framework. After 0.10.2.2, Shiny switched to Bootstrap 3. For most users, the upgrade should be seamless. However, if you have have customized your HTML-generating code to use features specific to Bootstrap 2, you may need to update your code to work with Bootstrap 3.
-
-If you do not wish to update your code at this time, you can use the [shinybootstrap2](https://github.com/rstudio/shinybootstrap2) package for backward compatibility.
-
-If you prefer to install an older version of Shiny, you can do it using the devtools package:
-
-```R
-devtools::install_version("shiny", version = "0.10.2.2")
-```
 
 ## Development notes
 
 The Javascript code in Shiny is minified using tools that run on Node.js. See the tools/ directory for more information.
+
+A set of application-level tests reside in the [shiny-test-apps](https://github.com/rstudio/shiny-test-apps) repository, which is set up as a git submodule of this repository. To use the full-application tests, simply update the submodule:
+
+```
+git submodule update --init
+```
+
+This will clone the shiny-test-apps repository into the directory tests/testthat/apps. When you run tests for shiny, it will also test the applications.
 
 ## Guidelines for contributing
 

@@ -1,0 +1,3 @@
+[submodule "tests/testthat/apps"]
+	path = tests/testthat/apps
+	url = git@github.com:rstudio/shiny-test-apps.git

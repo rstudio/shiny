@@ -883,8 +883,8 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
       tags$a(href = "#",
         class = "dropdown-toggle", `data-toggle` = "dropdown",
         `data-value` = divTag$menuName,
-        divTag$title, tags$b(class = "caret"),
-        getIcon(iconClass = divTag$iconClass)
+        getIcon(iconClass = divTag$iconClass),
+        divTag$title, tags$b(class = "caret")
       ),
       tabset$navList   # inner tabPanels items
     )
@@ -899,8 +899,8 @@ buildTabItem <- function(index, tabsetId, foundSelected, tabs = NULL,
                  href = paste("#", tabId, sep = ""),
                  `data-toggle` = "tab",
                  `data-value` = divTag$attribs$`data-value`,
-                 divTag$attribs$title,
-                 getIcon(iconClass = divTag$attribs$`data-icon-class`)
+                 getIcon(iconClass = divTag$attribs$`data-icon-class`),
+                 divTag$attribs$title
                )
     )
     # if this tabPanel is selected item, mark it active

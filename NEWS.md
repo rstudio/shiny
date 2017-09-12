@@ -19,6 +19,8 @@ shiny 1.0.5.9000
 
 * The internal `URLdecode()` function previously was a copy of `httpuv::decodeURIComponent()`, assigned at build time; now it invokes the httpuv function at run time.
 
+* Fixed [#1840](https://github.com/rstudio/shiny/issues/1840): with the release of Shiny 1.0.5, we accidently changed the relative positioning of the icon and the title text in `navbarMenu`s and `tabPanel`s. This fix reverts this behavior back (i.e. the icon should be to the left of the text and/or the downward arrow in case of `navbarMenu`s). ([#1848](https://github.com/rstudio/shiny/pull/1848))
+
 ### Library updates
 
 

@@ -15,6 +15,8 @@ shiny 1.0.5.9000
 
 * Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome.
 
+* Addressed [#1851](https://github.com/rstudio/shiny/issues/1851): Stack traces are now smaller in some places `do.call()` is used. ([#1856](https://github.com/rstudio/shiny/pull/1856))
+
 ### Bug fixes
 
 * The internal `URLdecode()` function previously was a copy of `httpuv::decodeURIComponent()`, assigned at build time; now it invokes the httpuv function at run time.

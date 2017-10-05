@@ -300,14 +300,15 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                     )
                   })
                 })
-                shinysession$requestFlush()
               },
               update = {
                 shinysession$manageInputs(msg$data)
-                shinysession$requestFlush()
               },
               shinysession$dispatch(msg)
             )
+            # The HTTP_GUID, if it exists, is for Shiny Server reporting purposes
+            shinysession$startTiming(ws$request$HTTP_GUID)
+            shinysession$requestFlush()
           })
         })
       }

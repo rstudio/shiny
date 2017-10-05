@@ -439,6 +439,7 @@ ShinySession <- R6Class(
     restoredCallbacks = 'Callbacks',
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
     getBookmarkExcludeFuns = list(),
+    timingRecorder = 'ShinyServerTimingRecorder',
 
     testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
@@ -786,6 +787,7 @@ ShinySession <- R6Class(
       private$inputReceivedCallbacks <- Callbacks$new()
       private$.input      <- ReactiveValues$new()
       private$.clientData <- ReactiveValues$new()
+      private$timingRecorder <- ShinyServerTimingRecorder$new()
       self$progressStack <- Stack$new()
       self$files <- Map$new()
       self$downloads <- Map$new()
@@ -833,6 +835,12 @@ ShinySession <- R6Class(
           user = self$user
         )
       )
+    },
+    startTiming = function(guid) {
+      if (!is.null(guid)) {
+        private$timingRecorder$start(guid)
+        self$onFlush(private$timingRecorder$stop)
+      }
     },
     requestFlush = function() {
       appsNeedingFlush$set(self$token, self)
@@ -2113,3 +2121,43 @@ onStop <- function(fun, session = getDefaultReactiveDomain()) {
     return(session$onSessionEnded(fun))
   }
 }
+
+# Helper class for emitting log messages to stdout that will be interpreted by
+# a Shiny Server parent process. The duration it's trying to record is the time
+# between a websocket message being received, and the next flush to the client.
+ShinyServerTimingRecorder <- R6Class("ShinyServerTimingRecorder",
+  cloneable = FALSE,
+  public = list(
+    initialize = function() {
+      private$shiny_stdout <- get(".shiny__stdout", globalenv())
+      private$guid <- NULL
+    },
+    start = function(guid) {
+      if (is.null(private$shiny_stdout)) return()
+
+      private$guid <- guid
+      if (!is.null(guid)) {
+        private$write("n")
+      }
+    },
+    stop = function() {
+      if (is.null(private$shiny_stdout)) return()
+
+      if (!is.null(private$guid)) {
+        private$write("x")
+        private$guid <- NULL
+      }
+    }
+  ),
+  private = list(
+    shiny_stdout = NULL,
+    guid = character(),
+    write = function(code) {
+      # eNter or eXit a flushReact
+      writeLines(paste("_", code, "_flushReact ", private$guid,
+        " @ ", sprintf("%.3f", as.numeric(Sys.time())),
+        sep=""), con=private$shiny_stdout)
+      flush(private$shiny_stdout)
+    }
+  )
+)

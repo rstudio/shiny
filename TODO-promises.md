@@ -1,16 +1,16 @@
 # Promises TODO
 
-- [x] How to handle invisible/withVisible? This is needed for dealing with ggplot2 in renderPlot.
-- [x] renderPlot is broken. plotFunc is synchronous but calls func() which is potentially asynchronous.
-- [x] Brushing not working; the mapping is null for ggplot.
+## Error handling/debugging
 - [ ] ..stacktraceon../..stacktraceoff.. and stack traces in general
 - [ ] long stack traces
+
+## Render functions
 - [ ] Non-async render functions should have their code all execute on the current tick. Otherwise order of execution will be surprising if they have side effects and explicit priorities.
-- [x] Respect execOnResize
-- [x] Accidentally did then(cars) instead of then(~cars), which caused an *unhandled* promise exception
 - [ ] promises::resolved(logic()) should use the current reactive domain to wrap the call to logic()
-- [ ] invisible() doesn't seem to be working correctly with renderPrint. .visible doesn't survive promise chaining, e.g. promise(~resolve(promise(~resolve(invisible("Hi"))))) %>% then(function(x, .visible) { cat(.visible) }) will print TRUE, not FALSE.
-- [ ] Do we allow the Shiny session to proceed as normal while an async operation is running, or do we hold off on any further processing of inputs until all operations are complete? (Possible exception for cancelling) In either case I don't know if we can stop invalidateLater? Well, maybe we can.
-- [ ] What does the client see after flushReact finishes but there's still an async operation running? Hold all outputs/errors?
 - [ ] Promise domains should maybe have an onExecute, for the "sync" part that kicks off async operations to also have wrapping behavior (like capturing output). Right now, I have to start off renderPrint with promise(~resolve(TRUE)) and then execute the user code in a then(), just to get the promise behavior. Same will be true when we tackle error handling (stack trace capture).
-- [x] Writing flushReact timing info for Shiny Server Pro (this got dropped during the refactor)
+- [ ] invisible() doesn't seem to be working correctly with renderPrint. .visible doesn't survive promise chaining, e.g. promise(~resolve(promise(~resolve(invisible("Hi"))))) %>% then(function(x, .visible) { cat(.visible) }) will print TRUE, not FALSE.
+
+## Flush lifecycle
+- [ ] While async operations are running in a session, hold off on any further processing of inputs and scheduled task items until all operations are complete.
+- [ ] Hold all outputs/errors until async operations are complete.
+- [ ] Allow both sync and async outputs to be displayed before all outputs are done. (opt-in)

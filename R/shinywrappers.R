@@ -339,7 +339,7 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
       })
       p2 <- promises::then(p2, function(value, .visible) {
         if (.visible) {
-          cat(file = domain$conn, paste(capture.output(value, append = TRUE), collapse = "\n"))
+          cat(file = domain$conn, paste(utils::capture.output(value, append = TRUE), collapse = "\n"))
         }
         res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
         res

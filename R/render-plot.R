@@ -97,7 +97,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # Don't invalidate when width/height changes.
     dims <- if (execOnResize) getDims() else isolate(getDims())
     pixelratio <- session$clientData$pixelratio %OR% 1
-    p1 <- drawPlot(name, session, func, dims$width, dims$height, pixelratio, res)
+    p1 <- drawPlot(outputName, session, func, dims$width, dims$height, pixelratio, res)
     p1 <- promises::catch(p1, function(reason) {
       # Non-isolating read. A common reason for errors in plotting is because
       # the dimensions are too small. By taking a dependency on width/height,

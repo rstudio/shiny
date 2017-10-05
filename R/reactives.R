@@ -91,7 +91,7 @@ ReactiveVal <- R6Class(
     format = function(...) {
       # capture.output(print()) is necessary because format() doesn't
       # necessarily return a character vector, e.g. data.frame.
-      label <- capture.output(print(base::format(private$value, ...)))
+      label <- utils::capture.output(print(base::format(private$value, ...)))
       if (length(label) == 1) {
         paste0("reactiveVal: ", label)
       } else {

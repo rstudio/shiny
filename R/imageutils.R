@@ -65,6 +65,7 @@ plotPNG <- function(func, filename=tempfile(fileext='.png'),
   filename
 }
 
+#' @importFrom grDevices dev.set dev.cur
 createGraphicsDevicePromiseDomain <- function(which = dev.cur()) {
   force(which)
 

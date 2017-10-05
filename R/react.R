@@ -121,9 +121,12 @@ ReactiveEnvironment <- R6Class(
     hasPendingFlush = function() {
       return(!.pendingFlush$isEmpty())
     },
+    # Returns TRUE if anything was actually called
     flush = function() {
+      # If nothing to flush, exit early
+      if (!hasPendingFlush()) return(invisible(FALSE))
       # If already in a flush, don't start another one
-      if (.inFlush) return()
+      if (.inFlush) return(invisible(FALSE))
       .inFlush <<- TRUE
       on.exit(.inFlush <<- FALSE)
 
@@ -131,6 +134,8 @@ ReactiveEnvironment <- R6Class(
         ctx <- .pendingFlush$dequeue()
         ctx$executeFlushCallbacks()
       }
+
+      invisible(TRUE)
     }
   )
 )
@@ -144,9 +149,10 @@ ReactiveEnvironment <- R6Class(
   }
 })
 
-# Causes any pending invalidations to run.
+# Causes any pending invalidations to run. Returns TRUE if any invalidations
+# were pending (i.e. if work was actually done).
 flushReact <- function() {
-  .getReactiveEnvironment()$flush()
+  return(.getReactiveEnvironment()$flush())
 }
 
 # Retrieves the current reactive context, or errors if there is no reactive

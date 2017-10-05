@@ -13,3 +13,4 @@
 - [ ] Do we allow the Shiny session to proceed as normal while an async operation is running, or do we hold off on any further processing of inputs until all operations are complete? (Possible exception for cancelling) In either case I don't know if we can stop invalidateLater? Well, maybe we can.
 - [ ] What does the client see after flushReact finishes but there's still an async operation running? Hold all outputs/errors?
 - [ ] Promise domains should maybe have an onExecute, for the "sync" part that kicks off async operations to also have wrapping behavior (like capturing output). Right now, I have to start off renderPrint with promise(~resolve(TRUE)) and then execute the user code in a then(), just to get the promise behavior. Same will be true when we tackle error handling (stack trace capture).
+- [ ] Writing flushReact timing info for Shiny Server Pro (this got dropped during the refactor)

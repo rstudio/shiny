@@ -834,6 +834,9 @@ ShinySession <- R6Class(
         )
       )
     },
+    requestFlush = function() {
+      appsNeedingFlush$set(self$token, self)
+    },
     rootScope = function() {
       self
     },
@@ -1065,8 +1068,6 @@ ShinySession <- R6Class(
       }
       # ..stacktraceon matches with the top-level ..stacktraceoff..
       private$closedCallbacks$invoke(onError = printError, ..stacktraceon = TRUE)
-      flushReact()
-      flushAllSessions()
     },
     isClosed = function() {
       return(self$closed)
@@ -1160,6 +1161,11 @@ ShinySession <- R6Class(
           )
 
           p <- promises::then(p, function(value) {
+            # Needed so that Shiny knows to flush the outputs. Even if no
+            # outputs/errors are queued, it's necessary to flush so that the
+            # client knows that progress is over.
+            self$requestFlush()
+
             private$sendMessage(recalculating = list(
               name = name, status = 'recalculated'
             ))
@@ -1204,6 +1210,8 @@ ShinySession <- R6Class(
       }
     },
     flushOutput = function() {
+      appsNeedingFlush$remove(self$token)
+
       if (self$isClosed())
         return()
 
@@ -1228,12 +1236,6 @@ ShinySession <- R6Class(
       on.exit({
         # ..stacktraceon matches with the top-level ..stacktraceoff..
         private$flushedCallbacks$invoke(..stacktraceon = TRUE)
-
-        # If one of the flushedCallbacks added anything to send to the client,
-        # or invalidated any observers, set up another flush cycle.
-        if (hasPendingUpdates() || .getReactiveEnvironment()$hasPendingFlush()) {
-          scheduleFlush()
-        }
       })
 
       if (!hasPendingUpdates()) {
@@ -1331,6 +1333,8 @@ ShinySession <- R6Class(
 
       # Add to input message queue
       private$inputMessageQueue[[length(private$inputMessageQueue) + 1]] <- data
+      # Needed so that Shiny knows to actually flush the input message queue
+      self$requestFlush()
     },
     onFlush = function(flushCallback, once = TRUE) {
       if (!isTRUE(once)) {
@@ -1791,9 +1795,13 @@ ShinySession <- R6Class(
     },
     # This function suspends observers for hidden outputs and resumes observers
     # for un-hidden outputs.
-    manageHiddenOutputs = function() {
+    manageHiddenOutputs = function(outputsToCheck = NULL) {
+      if (is.null(outputsToCheck)) {
+        outputsToCheck <- names(private$.outputs)
+      }
+
       # Find hidden state for each output, and suspend/resume accordingly
-      for (outputName in names(private$.outputs)) {
+      for (outputName in outputsToCheck) {
         if (private$shouldSuspend(outputName)) {
           private$.outputs[[outputName]]$suspend()
         } else {
@@ -1819,6 +1827,8 @@ ShinySession <- R6Class(
       names(input_clientdata) <- sub("^.clientdata_", "",
                                      names(input_clientdata))
       private$.clientData$mset(input_clientdata)
+
+      self$manageHiddenOutputs()
     },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs
@@ -1843,7 +1853,7 @@ ShinySession <- R6Class(
 
       # If any changes to suspendWhenHidden, need to re-run manageHiddenOutputs
       if ("suspendWhenHidden" %in% names(opts)) {
-        self$manageHiddenOutputs()
+        self$manageHiddenOutputs(name)
       }
 
       if ("priority" %in% names(opts)) {
@@ -2006,12 +2016,8 @@ onSessionEnded <- function(fun, session = getDefaultReactiveDomain()) {
 }
 
 
-scheduleFlush <- function() {
-  timerCallbacks$schedule(0, function() {})
-}
-
-flushAllSessions <- function() {
-  lapply(appsByToken$values(), function(shinysession) {
+flushPendingSessions <- function() {
+  lapply(appsNeedingFlush$values(), function(shinysession) {
     tryCatch(
       shinysession$flushOutput(),
 

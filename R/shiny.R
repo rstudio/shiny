@@ -2129,7 +2129,10 @@ ShinyServerTimingRecorder <- R6Class("ShinyServerTimingRecorder",
   cloneable = FALSE,
   public = list(
     initialize = function() {
-      private$shiny_stdout <- get(".shiny__stdout", globalenv())
+      private$shiny_stdout <- if (exists(".shiny__stdout", globalenv()))
+        get(".shiny__stdout", globalenv())
+      else
+        NULL
       private$guid <- NULL
     },
     start = function(guid) {

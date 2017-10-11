@@ -421,6 +421,7 @@ ShinySession <- R6Class(
     invalidatedOutputValues = 'Map',
     invalidatedOutputErrors = 'Map',
     inputMessageQueue = list(), # A list of inputMessages to send when flushed
+    cycleStartActionQueue = list(), # A list of actions to perform to start a cycle
     .outputs = list(),          # Keeps track of all the output observer objects
     .outputOptions = list(),     # Options for each of the output observer objects
     progressKeys = 'character',
@@ -731,7 +732,7 @@ ShinySession <- R6Class(
           } else if (identical(format, "rds")) {
             tmpfile <- tempfile("shinytest", fileext = ".rds")
             saveRDS(values, tmpfile)
-            on.exit(unlink(tmpfile))
+            on.exit(unlink(tmpfile), add = TRUE)
 
             content <- readBin(tmpfile, "raw", n = file.info(tmpfile)$size)
             httpResponse(200, "application/octet-stream", content)
@@ -755,6 +756,15 @@ ShinySession <- R6Class(
     getSnapshotPreprocessInput = function(name) {
       fun <- private$.input$getMeta(name, "shiny.snapshot.preprocess")
       fun %OR% identity
+    },
+
+    # See cycleStartAction
+    startCycle = function() {
+      if (length(private$cycleStartActionQueue) > 0) {
+        head <- private$cycleStartActionQueue[[1L]]
+        private$cycleStartActionQueue <- private$cycleStartActionQueue[-1L]
+        head()
+      }
     }
   ),
   public = list(
@@ -1218,6 +1228,9 @@ ShinySession <- R6Class(
       }
     },
     flushOutput = function() {
+      if (private$busyCount > 0)
+        return()
+
       appsNeedingFlush$remove(self$token)
 
       if (self$isClosed())
@@ -1244,7 +1257,7 @@ ShinySession <- R6Class(
       on.exit({
         # ..stacktraceon matches with the top-level ..stacktraceoff..
         private$flushedCallbacks$invoke(..stacktraceon = TRUE)
-      })
+      }, add = TRUE)
 
       if (!hasPendingUpdates()) {
         # Normally, if there are no updates, simply return without sending
@@ -1274,6 +1287,18 @@ ShinySession <- R6Class(
         values = values,
         inputMessages = inputMessages
       )
+    },
+    # Schedule an action to execute not (necessarily) now, but when no observers
+    # that belong to this session are busy executing. This helps prevent (but
+    # does not guarantee) inputs and reactive values from changing underneath
+    # async observers as they run.
+    cycleStartAction = function(callback) {
+      private$cycleStartActionQueue <- c(private$cycleStartActionQueue, list(callback))
+      # If no observers are running in this session, we're safe to proceed.
+      # Otherwise, startCycle() will be called later, via decrementBusyCount().
+      if (private$busyCount == 0L) {
+        private$startCycle()
+      }
     },
     showProgress = function(id) {
       'Send a message to the client that recalculation of the output identified
@@ -1819,24 +1844,26 @@ ShinySession <- R6Class(
     },
     # Set the normal and client data input variables
     manageInputs = function(data) {
+      force(data)
+      self$cycleStartAction(function() {
+        private$inputReceivedCallbacks$invoke(data)
 
-      private$inputReceivedCallbacks$invoke(data)
+        data_names <- names(data)
 
-      data_names <- names(data)
+        # Separate normal input variables from client data input variables
+        clientdata_idx <- grepl("^.clientdata_", data_names)
 
-      # Separate normal input variables from client data input variables
-      clientdata_idx <- grepl("^.clientdata_", data_names)
+        # Set normal (non-clientData) input values
+        private$.input$mset(data[data_names[!clientdata_idx]])
 
-      # Set normal (non-clientData) input values
-      private$.input$mset(data[data_names[!clientdata_idx]])
+        # Strip off .clientdata_ from clientdata input names, and set values
+        input_clientdata <- data[data_names[clientdata_idx]]
+        names(input_clientdata) <- sub("^.clientdata_", "",
+          names(input_clientdata))
+        private$.clientData$mset(input_clientdata)
 
-      # Strip off .clientdata_ from clientdata input names, and set values
-      input_clientdata <- data[data_names[clientdata_idx]]
-      names(input_clientdata) <- sub("^.clientdata_", "",
-                                     names(input_clientdata))
-      private$.clientData$mset(input_clientdata)
-
-      self$manageHiddenOutputs()
+        self$manageHiddenOutputs()
+      })
     },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs
@@ -1880,6 +1907,19 @@ ShinySession <- R6Class(
       private$busyCount <- private$busyCount - 1L
       if (private$busyCount == 0L) {
         private$sendMessage(busy = "idle")
+        self$requestFlush()
+        # We defer the call to startCycle() using later(), to defend against
+        # cycles where we continually call startCycle which causes an observer
+        # to fire which calls startCycle which causes an observer to fire...
+        #
+        # It's OK for these cycles to occur, but we must return control to the
+        # event loop between iterations (or at least sometimes) in order to not
+        # make the whole Shiny app go unresponsive.
+        later::later(function() {
+          if (private$busyCount == 0L) {
+            private$startCycle()
+          }
+        })
       }
     }
   ),

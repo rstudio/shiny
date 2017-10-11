@@ -309,6 +309,10 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
             # The HTTP_GUID, if it exists, is for Shiny Server reporting purposes
             shinysession$startTiming(ws$request$HTTP_GUID)
             shinysession$requestFlush()
+
+            # Make httpuv return control to Shiny quickly, instead of waiting
+            # for the usual timeout
+            httpuv::interrupt()
           })
         })
       }
@@ -423,7 +427,12 @@ startApp <- function(appObj, port, host, quiet) {
 # Run an application that was created by \code{\link{startApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
 serviceApp <- function() {
-  later::run_now() || timerCallbacks$executeElapsed()
+  later::run_now()
+
+  flushReact()
+  flushPendingSessions()
+
+  timerCallbacks$executeElapsed()
 
   flushReact()
   flushPendingSessions()

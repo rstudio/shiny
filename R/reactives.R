@@ -1026,6 +1026,9 @@ registerDebugHook("observerFunc", environment(), label)
 
         continue <- function() {
           ctx$addPendingFlush(.priority)
+          if (!is.null(.domain)) {
+            .domain$incrementBusyCount()
+          }
         }
 
         if (.suspended == FALSE)
@@ -1035,9 +1038,22 @@ registerDebugHook("observerFunc", environment(), label)
       })
 
       ctx$onFlush(function() {
+        if (!is.null(.domain)) {
+          on.exit(.domain$decrementBusyCount(), add = TRUE)
+        }
+
         tryCatch({
-          if (!.destroyed)
-            shinyCallingHandlers(run())
+          if (!.destroyed) {
+            result <- shinyCallingHandlers(run())
+            if (!is.null(.domain)) {
+              if (promises::is.promise(result)) {
+                # If this observer is async, it's necessary to maintain the busy
+                # count until the async operation is complete
+                .domain$incrementBusyCount()
+                finally(result, .domain$decrementBusyCount)
+              }
+            }
+          }
 
         }, error = function(e) {
           printError(e)
@@ -1475,13 +1491,21 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #' }
 #' @export
 invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
+  force(session)
   ctx <- .getReactiveEnvironment()$currentContext()
   timerCallbacks$schedule(millis, function() {
-    # Quit if the session is closed
-    if (!is.null(session) && session$isClosed()) {
+    if (is.null(session)) {
+      ctx$invalidate()
       return(invisible())
     }
-    ctx$invalidate()
+
+    if (!session$isClosed()) {
+      session$cycleStartAction(function() {
+        ctx$invalidate()
+      })
+    }
+
+    invisible()
   })
   invisible()
 }

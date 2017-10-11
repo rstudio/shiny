@@ -1581,3 +1581,7 @@ Mutable <- R6Class("Mutable",
     get = function() { private$value }
   )
 )
+
+is.not.null <- function(x) {
+  !is.null(x)
+}

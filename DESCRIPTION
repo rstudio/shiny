@@ -63,6 +63,7 @@ Depends:
     R (>= 3.0.2),
     methods
 Remotes:
+    r-lib/later,
     rstudio/promises
 Imports:
     utils,
@@ -75,7 +76,7 @@ Imports:
     htmltools (>= 0.3.5),
     R6 (>= 2.0),
     sourcetools,
-    later,
+    later (>= 0.5.0.9001),
     promises,
     tools
 Suggests:

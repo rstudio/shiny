@@ -55,9 +55,6 @@ Context <- R6Class(
     addPendingFlush = function(priority) {
       "Tell the reactive environment that this context should be flushed the
         next time flushReact() called."
-      if (!is.null(.domain)) {
-        .domain$incrementBusyCount()
-      }
       .getReactiveEnvironment()$addPendingFlush(self, priority)
     },
     onFlush = function(func) {
@@ -66,12 +63,6 @@ Context <- R6Class(
     },
     executeFlushCallbacks = function() {
       "For internal use only."
-
-      on.exit({
-        if (!is.null(.domain)) {
-          .domain$decrementBusyCount()
-        }
-      }, add = TRUE)
 
       lapply(.flushCallbacks, function(flushCallback) {
         flushCallback()

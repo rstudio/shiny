@@ -3,6 +3,7 @@
 ## Error handling/debugging
 - [ ] ..stacktraceon../..stacktraceoff.. and stack traces in general
 - [ ] long stack traces
+- [ ] options(shiny.error) should work in promise handlers
 
 ## Render functions
 - [ ] Non-async render functions should have their code all execute on the current tick. Otherwise order of execution will be surprising if they have side effects and explicit priorities.

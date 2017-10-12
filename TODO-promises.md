@@ -12,6 +12,6 @@
 - [ ] invisible() doesn't seem to be working correctly with renderPrint. .visible doesn't survive promise chaining, e.g. promise(~resolve(promise(~resolve(invisible("Hi"))))) %>% then(function(x, .visible) { cat(.visible) }) will print TRUE, not FALSE.
 
 ## Flush lifecycle
-- [ ] While async operations are running in a session, hold off on any further processing of inputs and scheduled task items until all operations are complete.
-- [ ] Hold all outputs/errors until async operations are complete.
+- [x] While async operations are running in a session, hold off on any further processing of inputs and scheduled task items until all operations are complete.
+- [x] Hold all outputs/errors until async operations are complete.
 - [ ] Allow both sync and async outputs to be displayed before all outputs are done. (opt-in)

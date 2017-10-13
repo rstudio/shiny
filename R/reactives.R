@@ -1050,7 +1050,7 @@ registerDebugHook("observerFunc", environment(), label)
                 # If this observer is async, it's necessary to maintain the busy
                 # count until the async operation is complete
                 .domain$incrementBusyCount()
-                finally(result, .domain$decrementBusyCount)
+                promises::finally(result, .domain$decrementBusyCount)
               }
             }
           }

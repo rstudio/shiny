@@ -332,22 +332,21 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
 
   renderFunc <- function(shinysession, name, ...) {
     domain <- createRenderPrintPromiseDomain(width)
-    p1 <- promises::with_promise_domain(domain, {
-      p2 <- promises::promise(~resolve(TRUE))
-      p2 <- promises::then(p2, function(value) {
-        func()
-      })
-      p2 <- promises::then(p2, function(value, .visible) {
+    hybrid_chain(
+      {
+        promises::with_promise_domain(domain, func())
+      },
+      function(value, .visible) {
         if (.visible) {
           cat(file = domain$conn, paste(utils::capture.output(value, append = TRUE), collapse = "\n"))
         }
         res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
         res
-      })
-      p2
-    })
-    p1 <- promises::finally(p1, ~close(domain$conn))
-    p1
+      },
+      finally = function() {
+        close(domain$conn)
+      }
+    )
   }
 
   markRenderFunction(verbatimTextOutput, renderFunc, outputArgs = outputArgs)
@@ -380,6 +379,15 @@ createRenderPrintPromiseDomain <- function(width) {
 
         onRejected(...)
       }
+    },
+    wrapSync = function(expr) {
+      op <- options(width = width)
+      on.exit(options(op), add = TRUE)
+
+      sink(f, append = TRUE)
+      on.exit(sink(NULL), add = TRUE)
+
+      force(expr)
     },
     conn = f
   )

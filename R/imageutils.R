@@ -89,6 +89,13 @@ createGraphicsDevicePromiseDomain <- function(which = dev.cur()) {
 
         onRejected(...)
       }
+    },
+    wrapSync = function(expr) {
+      old <- dev.cur()
+      dev.set(which)
+      on.exit(dev.set(old))
+
+      force(expr)
     }
   )
 }

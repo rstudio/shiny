@@ -1582,6 +1582,97 @@ Mutable <- R6Class("Mutable",
   )
 )
 
+# More convenient way of chaining together promises than then/catch/finally,
+# without the performance impact of %...>%.
+promise_chain <- function(promise, ..., catch = NULL, finally = NULL,
+  domain = NULL, replace = FALSE) {
+
+  do <- function() {
+    p <- Reduce(function(memo, func) {
+      promises::then(memo, func)
+    }, list(...), promise)
+
+    if (!is.null(catch)) {
+      p <- promises::catch(p, catch)
+    }
+
+    if (!is.null(finally)) {
+      p <- promises::finally(p, finally)
+    }
+
+    p
+  }
+
+  if (!is.null(domain)) {
+    promises::with_promise_domain(domain, do(), replace = replace)
+  } else {
+    do()
+  }
+}
+
+# Like promise_chain, but if `expr` returns a non-promise, then `...`, `catch`,
+# and `finally` are all executed synchronously
+hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
+  domain = NULL, replace = FALSE) {
+
+  do <- function() {
+    runFinally <- TRUE
+    tryCatch(
+      {
+        result <- withVisible(force(expr))
+        if (promises::is.promising(result$value)) {
+          # Purposefully NOT including domain (nor replace), as we're already in
+          # the domain at this point
+          p <- promise_chain(setVisible(result), ..., catch = catch, finally = finally)
+          runFinally <- FALSE
+          p
+        } else {
+          result <- Reduce(function(v, func) {
+            if (".visible" %in% names(formals(func))) {
+              withVisible(func(v$value, .visible = v$visible))
+            } else {
+              withVisible(func(v$value))
+            }
+          }, list(...), result)
+
+          setVisible(result)
+        }
+      },
+      error = function(e) {
+        if (!is.null(catch))
+          catch(e)
+        else
+          stop(e)
+      },
+      finally = if (runFinally && !is.null(finally)) finally()
+    )
+  }
+
+  if (!is.null(domain)) {
+    promises::with_promise_domain(domain, do(), replace = replace)
+  } else {
+    do()
+  }
+}
+
+# Returns `value` with either `invisible()` applied or not, depending on the
+# value of `visible`.
+#
+# If the `visible` is missing, then `value` should be a list as returned from
+# `withVisible()`, and that visibility will be applied.
+setVisible <- function(value, visible) {
+  if (missing(visible)) {
+    visible <- value$visible
+    value <- value$value
+  }
+
+  if (!visible) {
+    invisible(value)
+  } else {
+    (value)
+  }
+}
+
 is.not.null <- function(x) {
   !is.null(x)
 }

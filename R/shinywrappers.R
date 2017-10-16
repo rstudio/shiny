@@ -620,27 +620,31 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     if (is.function(options)) options <- options()
     options <- checkDT9(options)
     res <- checkAsIs(options)
-    data <- func()
-    if (length(dim(data)) != 2) return() # expects a rectangular data object
-    if (is.data.frame(data)) data <- as.data.frame(data)
-    action <- shinysession$registerDataObj(name, data, dataTablesJSON)
-    colnames <- colnames(data)
-    # if escape is column names, turn names to numeric indices
-    if (is.character(escape)) {
-      escape <- stats::setNames(seq_len(ncol(data)), colnames)[escape]
-      if (any(is.na(escape)))
-        stop("Some column names in the 'escape' argument not found in data")
-    }
-    colnames[escape] <- htmlEscape(colnames[escape])
-    if (!is.logical(escape)) {
-      if (!is.numeric(escape))
-        stop("'escape' must be TRUE, FALSE, or a numeric vector, or column names")
-      escape <- paste(escape, collapse = ',')
-    }
-    list(
-      colnames = colnames, action = action, options = res$options,
-      evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,
-      callback = paste(callback, collapse = '\n'), escape = escape
+    hybrid_chain(
+      func(),
+      function(data) {
+        if (length(dim(data)) != 2) return() # expects a rectangular data object
+        if (is.data.frame(data)) data <- as.data.frame(data)
+        action <- shinysession$registerDataObj(name, data, dataTablesJSON)
+        colnames <- colnames(data)
+        # if escape is column names, turn names to numeric indices
+        if (is.character(escape)) {
+          escape <- stats::setNames(seq_len(ncol(data)), colnames)[escape]
+          if (any(is.na(escape)))
+            stop("Some column names in the 'escape' argument not found in data")
+        }
+        colnames[escape] <- htmlEscape(colnames[escape])
+        if (!is.logical(escape)) {
+          if (!is.numeric(escape))
+            stop("'escape' must be TRUE, FALSE, or a numeric vector, or column names")
+          escape <- paste(escape, collapse = ',')
+        }
+        list(
+          colnames = colnames, action = action, options = res$options,
+          evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,
+          callback = paste(callback, collapse = '\n'), escape = escape
+        )
+      }
     )
   }
 

@@ -81,14 +81,12 @@ createRenderFunction <- function(
 ) {
 
   renderFunc <- function(shinysession, name, ...) {
-    res <- func()
-    if (promises::is.promise(res)) {
-      return(promises::then(res, function(value) {
-        transform(value, shinysession, name, ...)
-      }))
-    } else {
-      return(transform(res, shinysession, name, ...))
-    }
+    hybrid_chain(
+      func(),
+      function(value, .visible) {
+        transform(setVisible(value, .visible), shinysession, name, ...)
+      }
+    )
   }
 
   if (!is.null(outputFunc))

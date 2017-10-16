@@ -97,16 +97,18 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # Don't invalidate when width/height changes.
     dims <- if (execOnResize) getDims() else isolate(getDims())
     pixelratio <- session$clientData$pixelratio %OR% 1
-    p1 <- drawPlot(outputName, session, func, dims$width, dims$height, pixelratio, res)
-    p1 <- promises::catch(p1, function(reason) {
-      # Non-isolating read. A common reason for errors in plotting is because
-      # the dimensions are too small. By taking a dependency on width/height,
-      # we can try again if the plot output element changes size.
-      getDims()
+    hybrid_chain(
+      drawPlot(outputName, session, func, dims$width, dims$height, pixelratio, res),
+      catch = function(reason) {
+        # Non-isolating read. A common reason for errors in plotting is because
+        # the dimensions are too small. By taking a dependency on width/height,
+        # we can try again if the plot output element changes size.
+        getDims()
 
-      # Propagate the error
-      stop(reason)
-    })
+        # Propagate the error
+        stop(reason)
+      }
+    )
   })
 
   # This function is the one that's returned from renderPlot(), and gets
@@ -115,13 +117,14 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     outputName <<- name
     session <<- shinysession
 
-    p1 <- drawReactive()
-    p1 <- promises::then(p1, function(result) {
-      dims <- getDims()
-      pixelratio <- session$clientData$pixelratio %OR% 1
-      resizeSavedPlot(name, shinysession, result, dims$width, dims$height, pixelratio, res)
-    })
-    p1
+    hybrid_chain(
+      drawReactive(),
+      function(result) {
+        dims <- getDims()
+        pixelratio <- session$clientData$pixelratio %OR% 1
+        resizeSavedPlot(name, shinysession, result, dims$width, dims$height, pixelratio, res)
+      }
+    )
   }
 
   # If renderPlot isn't going to adapt to the height of the div, then the
@@ -175,64 +178,69 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 
-  p1 <- promises::with_promise_domain(domain, {
-    p2 <- promises::promise(~resolve(func()))
-    p2 <- promises::then(p2, function(value, .visible) {
-      if (.visible) {
-        # A modified version of print.ggplot which returns the built ggplot object
-        # as well as the gtable grob. This overrides the ggplot::print.ggplot
-        # method, but only within the context of renderPlot. The reason this needs
-        # to be a (pseudo) S3 method is so that, if an object has a class in
-        # addition to ggplot, and there's a print method for that class, that we
-        # won't override that method. https://github.com/rstudio/shiny/issues/841
-        print.ggplot <- custom_print.ggplot
+  hybrid_chain(
+    hybrid_chain(
+      promises::with_promise_domain(domain, {
+        hybrid_chain(
+          func(),
+          function(value, .visible) {
+            if (.visible) {
+              # A modified version of print.ggplot which returns the built ggplot object
+              # as well as the gtable grob. This overrides the ggplot::print.ggplot
+              # method, but only within the context of renderPlot. The reason this needs
+              # to be a (pseudo) S3 method is so that, if an object has a class in
+              # addition to ggplot, and there's a print method for that class, that we
+              # won't override that method. https://github.com/rstudio/shiny/issues/841
+              print.ggplot <- custom_print.ggplot
 
-        # Use capture.output to squelch printing to the actual console; we
-        # are only interested in plot output
-        utils::capture.output({
-          # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps
-          # the call to plotFunc. The value needs to be printed just in case
-          # it's an object that requires printing to generate plot output,
-          # similar to ggplot2. But for base graphics, it would already have
-          # been rendered when func was called above, and the print should
-          # have no effect.
-          result <- ..stacktraceon..(print(value))
-          # TODO jcheng 2017-04-11: Verify above ..stacktraceon..
-        })
-        result
-      } else {
-        # Not necessary, but I wanted to make it explicit
-        NULL
+              # Use capture.output to squelch printing to the actual console; we
+              # are only interested in plot output
+              utils::capture.output({
+                # This ..stacktraceon.. negates the ..stacktraceoff.. that wraps
+                # the call to plotFunc. The value needs to be printed just in case
+                # it's an object that requires printing to generate plot output,
+                # similar to ggplot2. But for base graphics, it would already have
+                # been rendered when func was called above, and the print should
+                # have no effect.
+                result <- ..stacktraceon..(print(value))
+                # TODO jcheng 2017-04-11: Verify above ..stacktraceon..
+              })
+              result
+            } else {
+              # Not necessary, but I wanted to make it explicit
+              NULL
+            }
+          },
+          function(value) {
+            list(
+              plotResult = value,
+              recordedPlot = grDevices::recordPlot(),
+              coordmap = getCoordmap(value, width, height, pixelratio, res),
+              pixelratio = pixelratio,
+              res = res
+            )
+          }
+        )
+      }),
+      finally = function() {
+        grDevices::dev.off(device)
       }
-    })
-    p2 <- promises::then(p2, function(value) {
-      list(
-        plotResult = value,
-        recordedPlot = grDevices::recordPlot(),
-        coordmap = getCoordmap(value, width, height, pixelratio, res),
-        pixelratio = pixelratio,
-        res = res
-      )
-    })
-    p2
-  })
-  p1 <- promises::finally(p1, function() {
-    grDevices::dev.off(device)
-  })
-  p1 <- promises::then(p1, function(result) {
-    result$img <- dropNulls(list(
-      src = session$fileUrl(name, outfile, contentType='image/png'),
-      width = width,
-      height = height,
-      coordmap = result$coordmap,
-      # Get coordmap error message if present
-      error = attr(result$coordmap, "error", exact = TRUE)
-    ))
-    result
-  })
-  p1 <- promises::finally(p1, function() {
-    unlink(outfile)
-  })
+    ),
+    function(result) {
+      result$img <- dropNulls(list(
+        src = session$fileUrl(name, outfile, contentType='image/png'),
+        width = width,
+        height = height,
+        coordmap = result$coordmap,
+        # Get coordmap error message if present
+        error = attr(result$coordmap, "error", exact = TRUE)
+      ))
+      result
+    },
+    finally = function() {
+      unlink(outfile)
+    }
+  )
 }
 
 # A modified version of print.ggplot which returns the built ggplot object

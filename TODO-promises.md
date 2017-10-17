@@ -3,6 +3,9 @@
 ## Core API
 - [ ] Should as.promise() convert regular values to promises? Or throw?
 
+## later
+- [ ] Add support for multiple event loops
+
 ## Error handling/debugging
 - [ ] ..stacktraceon../..stacktraceoff.. and stack traces in general
 - [ ] long stack traces

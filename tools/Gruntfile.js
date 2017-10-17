@@ -77,7 +77,7 @@ module.exports = function(grunt) {
     "string-replace": {
       version: {
         files: {
-          'temp_concat/': './temp_concat/shiny.js'
+          './temp_concat/shiny.js': './temp_concat/shiny.js'
         },
         options: {
           replacements: [{

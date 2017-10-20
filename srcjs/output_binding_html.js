@@ -105,6 +105,7 @@ function renderDependency(dep) {
     });
     // avoid jQuery’s magic eval()
     scripts.forEach(function(e) {
+      e[0].async = false;
       document.head.appendChild(e[0]);
     });
   }

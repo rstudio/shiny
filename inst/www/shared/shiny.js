@@ -14,7 +14,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   var exports = window.Shiny = window.Shiny || {};
 
-  exports.version = "1.0.5.9000"; // Version number inserted by Grunt
+  exports.version = "{{ VERSION }}"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -3957,7 +3957,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var scripts = $.map(asArray(dep.script), function (scriptName) {
         return $("<script>").attr("src", href + "/" + encodeURI(scriptName));
       });
-      $head.append(scripts);
+      // avoid jQuery’s magic eval()
+      scripts.forEach(function (e) {
+        e[0].async = false;
+        document.head.appendChild(e[0]);
+      });
     }
 
     if (dep.attachment) {

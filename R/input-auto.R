@@ -29,7 +29,7 @@
 #' set.seed(1)
 #' autoInput(runif(10), "foo", "My automatic slider")
 #'
-#' # create a various types of data
+#' # create a data.frame with various types of data
 #' n <- 40
 #' d <- data.frame(
 #'   boolean=rep(c(TRUE, FALSE), times=n/2),
@@ -57,9 +57,9 @@
 #'       autoInput(d["large_num"]),
 #'       autoInput(d["small_num"]),
 #'       autoInput(d["date"]),
-#'       autoInput(d["date"], range=F),
+#'       autoInput(d["date"], range=FALSE),
 #'       autoInput(d["date_time"]),
-#'       autoInput(d["date_time"], range=F)
+#'       autoInput(d["date_time"], range=FALSE)
 #'     ),
 #'     column(
 #'       6,
@@ -67,7 +67,8 @@
 #'       p("width=100%:"), autoInput(d["int"], width="100%", inline=TRUE),
 #'       p("selected_fraction=1:"), autoInput(d["int"], selected_fraction=1),
 #'       p("selected_fraction=0:"), autoInput(d["int"], selected_fraction=0),
-#'       p("selected_fraction=0.0001; when the variable is categorical, the number of elements is  rounded up to select at least one:"),
+#'       p("selected_fraction=0.0001; when the variable is categorical,
+#'       the number of elements is  rounded up to select at least one:"),
 #'       autoInput(d["few_levels"], selected_fraction=0.0001),
 #'       p("to select nothing, set selected_fraction to exactly 0:"),
 #'       autoInput(d["few_levels"], selected_fraction=0),

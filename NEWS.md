@@ -7,6 +7,8 @@ shiny 1.0.5.9000
 
 ### New features
 
+* New automatic input widget: creates a widget based on the class and name of some input data, [#1877](https://github.com/rstudio/shiny/pull/1877)
+
 ### Minor new features and improvements
 
 * Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/master/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, [@jekriske-lilly](https://github.com/jekriske-lilly)! [#1844](https://github.com/rstudio/shiny/pull/1844))

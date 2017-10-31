@@ -109,6 +109,7 @@ Collate:
     'image-interact.R'
     'imageutils.R'
     'input-action.R'
+    'input-auto.R'
     'input-checkbox.R'
     'input-checkboxgroup.R'
     'input-date.R'

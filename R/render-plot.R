@@ -232,7 +232,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
     # renderPlot, and by the ..stacktraceon.. in plotFunc where ggplot objects
     # are printed
     outfile <- ..stacktraceoff..(
-      do.call(plotPNG, c(plotFunc, width=dims$width*pixelratio,
+      do.call("plotPNG", c(quote(plotFunc), width=dims$width*pixelratio,
         height=dims$height*pixelratio, res=res*pixelratio, args))
     )
     on.exit(unlink(outfile))

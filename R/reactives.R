@@ -1038,29 +1038,21 @@ registerDebugHook("observerFunc", environment(), label)
       })
 
       ctx$onFlush(function() {
-        if (!is.null(.domain)) {
-          on.exit(.domain$decrementBusyCount(), add = TRUE)
-        }
 
-        tryCatch({
-          if (!.destroyed) {
-            result <- shinyCallingHandlers(run())
-            if (!is.null(.domain)) {
-              if (promises::is.promise(result)) {
-                # If this observer is async, it's necessary to maintain the busy
-                # count until the async operation is complete
-                .domain$incrementBusyCount()
-                promises::finally(result, .domain$decrementBusyCount)
-              }
+        hybrid_chain(
+          {
+            if (!.destroyed) {
+              shinyCallingHandlers(run())
             }
-          }
-
-        }, error = function(e) {
-          printError(e)
-          if (!is.null(.domain)) {
-            .domain$unhandledError(e)
-          }
-        })
+          },
+          catch = function(e) {
+            printError(e)
+            if (!is.null(.domain)) {
+              .domain$unhandledError(e)
+            }
+          },
+          finally = .domain$decrementBusyCount
+        )
       })
 
       return(ctx)

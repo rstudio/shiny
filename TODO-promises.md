@@ -5,10 +5,11 @@
 
 ## later
 - [ ] Add support for multiple event loops
+- [x] Add timeout to run_now
 
 ## Error handling/debugging
 - [ ] ..stacktraceon../..stacktraceoff.. and stack traces in general
-- [ ] long stack traces
+- [x] long stack traces
 - [ ] options(shiny.error) should work in promise handlers
 
 ## Render functions

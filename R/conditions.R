@@ -127,18 +127,21 @@ captureStackTraces <- function(expr) {
   )
 }
 
-deepStack <- Stack$new()
+#' @include globals.R
+.globals$deepStack <- NULL
 
 createStackTracePromiseDomain <- function() {
   d <- promises::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
+      force(onFulfilled)
       # Subscription time
       currentStack <- formatStackTrace(sys.calls())
-      currentDeepStack <- deepStack$peek()
+      currentDeepStack <- .globals$deepStack
       function(...) {
         # Fulfill time
-        deepStack$push(c(currentDeepStack, list(currentStack)))
-        on.exit(deepStack$pop(), add = TRUE)
+        origDeepStack <- .globals$deepStack
+        .globals$deepStack <- c(currentDeepStack, list(currentStack))
+        on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
 
         withCallingHandlers(
           onFulfilled(...),
@@ -147,14 +150,15 @@ createStackTracePromiseDomain <- function() {
       }
     },
     wrapOnRejected = function(onRejected) {
-      message("wrapOnRejected")
+      force(onRejected)
       # Subscription time
       currentStack <- formatStackTrace(sys.calls())
-      currentDeepStack <- deepStack$peek()
+      currentDeepStack <- .globals$deepStack
       function(...) {
         # Fulfill time
-        deepStack$push(c(currentDeepStack, list(currentStack)))
-        on.exit(deepStack$pop(), add = TRUE)
+        origDeepStack <- .globals$deepStack
+        .globals$deepStack <- c(currentDeepStack, list(currentStack))
+        on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
 
         withCallingHandlers(
           onRejected(...),
@@ -176,8 +180,8 @@ doCaptureStack <- function(e) {
     calls <- sys.calls()
     attr(e, "stack.trace") <- calls
   }
-  if (is.null(attr(e, "deep.stack.trace", exact = TRUE)) && !is.null(deepStack$peek())) {
-    attr(e, "deep.stack.trace") <- deepStack$peek()
+  if (is.null(attr(e, "deep.stack.trace", exact = TRUE)) && !is.null(.globals$deepStack)) {
+    attr(e, "deep.stack.trace") <- .globals$deepStack
   }
   stop(e)
 }

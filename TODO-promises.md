@@ -1,5 +1,12 @@
 # Promises TODO
 
+## Documentation
+
+- [ ] Motivation -- why should I care about async? Why shouldn't I (what are the limitations)?
+- [ ] High level technical overview
+- [ ] Cookbook-style examples
+- [ ] Top-down porting of a sync app to async
+
 ## Core API
 - [ ] Should as.promise() convert regular values to promises? Or throw?
 

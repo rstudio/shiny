@@ -427,11 +427,6 @@ startApp <- function(appObj, port, host, quiet) {
 # Run an application that was created by \code{\link{startApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
 serviceApp <- function() {
-  ..stacktraceon..(later::run_now())
-
-  flushReact()
-  flushPendingSessions()
-
   timerCallbacks$executeElapsed()
 
   flushReact()

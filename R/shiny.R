@@ -1738,32 +1738,40 @@ ShinySession <- R6Class(
         if (nzchar(ext))
           ext <- paste(".", ext, sep = "")
         tmpdata <- tempfile(fileext = ext)
-        # ..stacktraceon matches with the top-level ..stacktraceoff..
-        result <- try(shinyCallingHandlers(Context$new(getDefaultReactiveDomain(), '[download]')$run(
-          function() { ..stacktraceon..(download$func(tmpdata)) }
-        )), silent = TRUE)
-        if (inherits(result, 'try-error')) {
-          unlink(tmpdata)
-          stop(attr(result, "condition", exact = TRUE))
-        }
-        if (!file.exists(tmpdata)) {
-          # If no file was created, return a 404
-          return(httpResponse(404, content = "404 Not found"))
-        }
-        return(httpResponse(
-          200,
-          download$contentType %OR% getContentType(filename),
-          # owned=TRUE means tmpdata will be deleted after response completes
-          list(file=tmpdata, owned=TRUE),
-          c(
-            'Content-Disposition' = ifelse(
-              dlmatches[3] == '',
-              'attachment; filename="' %.%
-                gsub('(["\\\\])', '\\\\\\1', filename) %.%  # yes, that many \'s
-                '"',
-              'attachment'
-            ),
-            'Cache-Control'='no-cache')))
+        return(Context$new(getDefaultReactiveDomain(), '[download]')$run(function() {
+          promises::with_promise_domain(reactivePromiseDomain(), {
+            promises::with_promise_domain(createStackTracePromiseDomain(), {
+              hybrid_chain(
+                # ..stacktraceon matches with the top-level ..stacktraceoff..
+                try(..stacktraceon..(download$func(tmpdata)), silent = TRUE),
+                function(result) {
+                  if (inherits(result, 'try-error')) {
+                    unlink(tmpdata)
+                    stop(attr(result, "condition", exact = TRUE))
+                  }
+                  if (!file.exists(tmpdata)) {
+                    # If no file was created, return a 404
+                    return(httpResponse(404, content = "404 Not found"))
+                  }
+                  return(httpResponse(
+                    200,
+                    download$contentType %OR% getContentType(filename),
+                    # owned=TRUE means tmpdata will be deleted after response completes
+                    list(file=tmpdata, owned=TRUE),
+                    c(
+                      'Content-Disposition' = ifelse(
+                        dlmatches[3] == '',
+                        'attachment; filename="' %.%
+                          gsub('(["\\\\])', '\\\\\\1', filename) %.%  # yes, that many \'s
+                          '"',
+                        'attachment'
+                      ),
+                      'Cache-Control'='no-cache')))
+                }
+              )
+            })
+          })
+        }))
       }
 
       if (matches[2] == 'dataobj') {

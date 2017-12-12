@@ -198,7 +198,22 @@ withLogErrors <- function(expr,
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   withCallingHandlers(
-    captureStackTraces(expr),
+    {
+      result <- captureStackTraces(expr)
+
+      # Handle expr being an async operation
+      if (promises::is.promise(result)) {
+        result <- promises::catch(result, function(cond) {
+          # Don't print shiny.silent.error (i.e. validation errors)
+          if (inherits(cond, "shiny.silent.error")) return()
+          if (isTRUE(getOption("show.error.messages"))) {
+            printError(cond, full = full, offset = offset)
+          }
+        })
+      }
+
+      result
+    },
     error = function(cond) {
       # Don't print shiny.silent.error (i.e. validation errors)
       if (inherits(cond, "shiny.silent.error")) return()

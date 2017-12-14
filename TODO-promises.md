@@ -45,4 +45,4 @@
 ## External packages
 - [x] DT
 - [x] htmlwidgets: Don't require async-aware version of Shiny if not using async
-- [ ] Plotly
+- [x] Plotly

@@ -27,7 +27,7 @@
 - [x] renderDataTable should support async
 - [x] Support downloadHandler
   - [ ] Support async filename?
-  - [ ] Should prevent session from continuing until download completes (ref count)
+  - [x] Should prevent session from continuing until download completes (ref count)
 
 ## Flush lifecycle
 - [x] While async operations are running in a session, hold off on any further processing of inputs and scheduled task items until all operations are complete.
@@ -40,6 +40,7 @@
 - [ ] Apps that test invisible() behavior for renderPrint, both sync and async
 - [ ] Apps that ensure all render functions execute synchronous code before tick is over
 - [ ] App that tests async downloadHandler
+- [ ] App that verifies inputs/timers don't fire for a session while it has async operations pending
 
 ## External packages
 - [x] DT

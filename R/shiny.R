@@ -1741,6 +1741,7 @@ ShinySession <- R6Class(
         return(Context$new(getDefaultReactiveDomain(), '[download]')$run(function() {
           promises::with_promise_domain(reactivePromiseDomain(), {
             promises::with_promise_domain(createStackTracePromiseDomain(), {
+              self$incrementBusyCount()
               hybrid_chain(
                 # ..stacktraceon matches with the top-level ..stacktraceoff..
                 try(..stacktraceon..(download$func(tmpdata)), silent = TRUE),
@@ -1767,6 +1768,9 @@ ShinySession <- R6Class(
                         'attachment'
                       ),
                       'Cache-Control'='no-cache')))
+                },
+                finally = function() {
+                  self$decrementBusyCount()
                 }
               )
             })

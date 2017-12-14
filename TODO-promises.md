@@ -17,6 +17,7 @@
 ## Error handling/debugging
 - [ ] ..stacktraceon../..stacktraceoff.. and stack traces in general
 - [x] long stack traces
+  - [ ] require opt-in
 - [ ] options(shiny.error) should work in promise handlers
 
 ## Render functions
@@ -41,5 +42,6 @@
 - [ ] App that tests async downloadHandler
 
 ## External packages
-- [ ] DT
+- [x] DT
+- [x] htmlwidgets: Don't require async-aware version of Shiny if not using async
 - [ ] Plotly

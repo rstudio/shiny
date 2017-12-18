@@ -135,13 +135,17 @@ createStackTracePromiseDomain <- function() {
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
       # Subscription time
-      currentStack <- formatStackTrace(sys.calls())
-      currentDeepStack <- .globals$deepStack
+      if (deepStacksEnabled()) {
+        currentStack <- formatStackTrace(sys.calls())
+        currentDeepStack <- .globals$deepStack
+      }
       function(...) {
         # Fulfill time
-        origDeepStack <- .globals$deepStack
-        .globals$deepStack <- c(currentDeepStack, list(currentStack))
-        on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
+        if (deepStacksEnabled()) {
+          origDeepStack <- .globals$deepStack
+          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
+        }
 
         withCallingHandlers(
           onFulfilled(...),
@@ -152,13 +156,17 @@ createStackTracePromiseDomain <- function() {
     wrapOnRejected = function(onRejected) {
       force(onRejected)
       # Subscription time
-      currentStack <- formatStackTrace(sys.calls())
-      currentDeepStack <- .globals$deepStack
+      if (deepStacksEnabled()) {
+        currentStack <- formatStackTrace(sys.calls())
+        currentDeepStack <- .globals$deepStack
+      }
       function(...) {
         # Fulfill time
-        origDeepStack <- .globals$deepStack
-        .globals$deepStack <- c(currentDeepStack, list(currentStack))
-        on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
+        if (deepStacksEnabled()) {
+          origDeepStack <- .globals$deepStack
+          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
+        }
 
         withCallingHandlers(
           onRejected(...),
@@ -175,13 +183,19 @@ createStackTracePromiseDomain <- function() {
   )
 }
 
+deepStacksEnabled <- function() {
+  getOption("shiny.deepstacktrace", FALSE)
+}
+
 doCaptureStack <- function(e) {
   if (is.null(attr(e, "stack.trace", exact = TRUE))) {
     calls <- sys.calls()
     attr(e, "stack.trace") <- calls
   }
-  if (is.null(attr(e, "deep.stack.trace", exact = TRUE)) && !is.null(.globals$deepStack)) {
-    attr(e, "deep.stack.trace") <- .globals$deepStack
+  if (deepStacksEnabled()) {
+    if (is.null(attr(e, "deep.stack.trace", exact = TRUE)) && !is.null(.globals$deepStack)) {
+      attr(e, "deep.stack.trace") <- .globals$deepStack
+    }
   }
   stop(e)
 }

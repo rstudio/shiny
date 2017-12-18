@@ -64,7 +64,8 @@ Depends:
     methods
 Remotes:
     r-lib/later,
-    rstudio/promises
+    rstudio/promises,
+    rstudio/httpuv@background-thread
 Imports:
     utils,
     grDevices,
@@ -78,7 +79,8 @@ Imports:
     sourcetools,
     later (>= 0.5.0.9001),
     promises (>= 0.1.0.9001),
-    tools
+    tools,
+    crayon
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

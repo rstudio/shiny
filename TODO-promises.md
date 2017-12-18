@@ -17,7 +17,7 @@
 ## Error handling/debugging
 - [ ] ..stacktraceon../..stacktraceoff.. and stack traces in general
 - [x] long stack traces
-  - [ ] require opt-in
+  - [x] require opt-in
 - [ ] options(shiny.error) should work in promise handlers
 
 ## Render functions

@@ -41,6 +41,7 @@
 - [ ] Apps that ensure all render functions execute synchronous code before tick is over
 - [ ] App that tests async downloadHandler
 - [ ] App that verifies inputs/timers don't fire for a session while it has async operations pending
+- [ ] App that verifies req(FALSE), req(FALSE, cancelOutput = TRUE), validate/need, etc. all work in async
 
 ## External packages
 - [x] DT

@@ -37,13 +37,16 @@
 ## Testing
 - [x] App that tests that all built-in render functions support async
 - [ ] Apps that test flush lifecycle, including onFlushed(once = FALSE)
-- [ ] Apps that test invisible() behavior for renderPrint, both sync and async
+- [x] Apps that test invisible() behavior for renderPrint, both sync and async
 - [ ] Apps that ensure all render functions execute synchronous code before tick is over
-- [ ] App that tests async downloadHandler
-- [ ] App that verifies inputs/timers don't fire for a session while it has async operations pending
-- [ ] App that verifies req(FALSE), req(FALSE, cancelOutput = TRUE), validate/need, etc. all work in async
+- [x] App that tests async downloadHandler
+- [x] App that verifies inputs/timers don't fire for a session while it has async operations pending
+- [x] App that verifies req(FALSE), req(FALSE, cancelOutput = TRUE), validate/need, etc. all work in async
 
 ## External packages
 - [x] DT
 - [x] htmlwidgets: Don't require async-aware version of Shiny if not using async
 - [x] Plotly
+
+## Bugs
+- [x] req(FALSE, cancelOutput = TRUE) shows grey (even without async)

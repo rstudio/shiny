@@ -9,6 +9,7 @@
 
 ## Core API
 - [ ] Should as.promise() convert regular values to promises? Or throw?
+  - [ ] If as.promise() doesn't convert regular values to promises, add promise_resolved(value) and promise_rejected(err) functions?
 
 ## later
 - [ ] Add support for multiple event loops
@@ -38,7 +39,7 @@
 - [x] App that tests that all built-in render functions support async
 - [ ] Apps that test flush lifecycle, including onFlushed(once = FALSE)
 - [x] Apps that test invisible() behavior for renderPrint, both sync and async
-- [ ] Apps that ensure all render functions execute synchronous code before tick is over
+- [x] Apps that ensure all render functions execute synchronous code before tick is over
 - [x] App that tests async downloadHandler
 - [x] App that verifies inputs/timers don't fire for a session while it has async operations pending
 - [x] App that verifies req(FALSE), req(FALSE, cancelOutput = TRUE), validate/need, etc. all work in async

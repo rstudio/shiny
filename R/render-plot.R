@@ -149,7 +149,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   outfile <- plotPNG(function() {
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width, height, pixelratio, res)
-  }, width = width, height = height, res = res)
+  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio)
   on.exit(unlink(outfile), add = TRUE)
 
   img <- list(

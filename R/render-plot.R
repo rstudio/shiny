@@ -174,7 +174,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   # 10. On error, take width and height dependency
 
   outfile <- tempfile(fileext='.png') # If startPNG throws, this could leak. Shrug.
-  device <- startPNG(outfile, width, height, res = res, ...)
+  device <- startPNG(outfile, width*pixelratio, height*pixelratio, res = res*pixelratio, ...)
   domain <- createGraphicsDevicePromiseDomain(device)
   grDevices::dev.control(displaylist = "enable")
 

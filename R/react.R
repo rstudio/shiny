@@ -9,11 +9,13 @@ Context <- R6Class(
     .invalidateCallbacks = list(),
     .flushCallbacks = list(),
     .domain = NULL,
+    .pid = NULL,
 
     initialize = function(domain, label='', type='other', prevId='') {
       id <<- .getReactiveEnvironment()$nextId()
       .label <<- label
       .domain <<- domain
+      .pid <<- Sys.getpid()
       .graphCreateContext(id, label, type, prevId, domain)
     },
     run = function(func) {
@@ -46,6 +48,11 @@ Context <- R6Class(
       "Register a function to be called when this context is invalidated.
         If this context is already invalidated, the function is called
         immediately."
+
+      if (!identical(.pid, Sys.getpid())) {
+        stop("Reactive context was created in one process and accessed from another")
+      }
+
       if (.invalidated)
         func()
       else

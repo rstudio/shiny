@@ -20,6 +20,7 @@
 - [x] long stack traces
   - [x] require opt-in
 - [ ] options(shiny.error) should work in promise handlers
+- [ ] Detect when reactives are used across process boundaries, and error
 
 ## Render functions
 - [x] Non-async render functions should have their code all execute on the current tick. Otherwise order of execution will be surprising if they have side effects and explicit priorities.

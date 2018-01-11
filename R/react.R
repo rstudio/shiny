@@ -1,3 +1,21 @@
+processId <- local({
+  # pid is not sufficient to uniquely identify a process, because
+  # distributed futures span machines which could introduce pid
+  # collisions.
+  cached <- NULL
+  function() {
+    if (is.null(cached)) {
+      cached <<- digest::digest(list(
+        Sys.info(),
+        Sys.time()
+      ))
+    }
+    # Sys.getpid() cannot be cached because forked children will
+    # then have the same processId as their parents.
+    paste(cached, Sys.getpid())
+  }
+})
+
 Context <- R6Class(
   'Context',
   portable = FALSE,
@@ -15,7 +33,7 @@ Context <- R6Class(
       id <<- .getReactiveEnvironment()$nextId()
       .label <<- label
       .domain <<- domain
-      .pid <<- Sys.getpid()
+      .pid <<- processId()
       .graphCreateContext(id, label, type, prevId, domain)
     },
     run = function(func) {
@@ -49,7 +67,7 @@ Context <- R6Class(
         If this context is already invalidated, the function is called
         immediately."
 
-      if (!identical(.pid, Sys.getpid())) {
+      if (!identical(.pid, processId())) {
         stop("Reactive context was created in one process and accessed from another")
       }
 

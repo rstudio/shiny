@@ -142,8 +142,6 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
       result$pixelratio == pixelratio && result$res == res) {
     return(result$img)
   }
-  #result$plotResult
-  #result$recordedPlot
 
   coordmap <- NULL
   outfile <- plotPNG(function() {

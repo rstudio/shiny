@@ -51,6 +51,11 @@ Context <- R6Class(
     invalidate = function() {
       "Invalidate this context. It will immediately call the callbacks
         that have been registered with onInvalidate()."
+
+      if (!identical(.pid, processId())) {
+        stop("Reactive context was created in one process and invalidated from another")
+      }
+
       if (.invalidated)
         return()
       .invalidated <<- TRUE

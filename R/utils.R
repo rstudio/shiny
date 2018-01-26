@@ -1619,24 +1619,26 @@ hybrid_chain <- function(expr, ..., catch = NULL, finally = NULL,
     runFinally <- TRUE
     tryCatch(
       {
-        result <- withVisible(force(expr))
-        if (promises::is.promising(result$value)) {
-          # Purposefully NOT including domain (nor replace), as we're already in
-          # the domain at this point
-          p <- promise_chain(setVisible(result), ..., catch = catch, finally = finally)
-          runFinally <- FALSE
-          p
-        } else {
-          result <- Reduce(function(v, func) {
-            if (".visible" %in% names(formals(func))) {
-              withVisible(func(v$value, .visible = v$visible))
-            } else {
-              withVisible(func(v$value))
-            }
-          }, list(...), result)
+        captureStackTraces({
+          result <- withVisible(force(expr))
+          if (promises::is.promising(result$value)) {
+            # Purposefully NOT including domain (nor replace), as we're already in
+            # the domain at this point
+            p <- promise_chain(setVisible(result), ..., catch = catch, finally = finally)
+            runFinally <- FALSE
+            p
+          } else {
+            result <- Reduce(function(v, func) {
+              if (".visible" %in% names(formals(func))) {
+                withVisible(func(v$value, .visible = v$visible))
+              } else {
+                withVisible(func(v$value))
+              }
+            }, list(...), result)
 
-          setVisible(result)
-        }
+            setVisible(result)
+          }
+        })
       },
       error = function(e) {
         if (!is.null(catch))

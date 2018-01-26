@@ -77,7 +77,7 @@ Imports:
     htmltools (>= 0.3.5),
     R6 (>= 2.0),
     sourcetools,
-    later (>= 0.5.0.9001),
+    later (>= 0.7.1),
     promises (>= 0.1.0.9001),
     tools,
     crayon

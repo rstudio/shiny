@@ -1672,7 +1672,3 @@ setVisible <- function(value, visible) {
     (value)
   }
 }
-
-is.not.null <- function(x) {
-  !is.null(x)
-}

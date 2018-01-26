@@ -93,7 +93,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   # return a promise). The idea is that the (cached) return value from this
   # reactive can be used for varying width/heights, as it includes the
   # displaylist, which is resolution independent.
-  drawReactive <- reactive({
+  drawReactive <- reactive(label = "plotObj", {
     # Don't invalidate when width/height changes.
     dims <- if (execOnResize) getDims() else isolate(getDims())
     pixelratio <- session$clientData$pixelratio %OR% 1

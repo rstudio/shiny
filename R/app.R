@@ -381,9 +381,10 @@ print.shiny.appobj <- function(x, ...) {
       c("port", "launch.browser", "host", "quiet",
         "display.mode", "test.mode")]
 
-  args <- c(list(x), opts)
+  # Quote x and put runApp in quotes so that there's a nicer stack trace (#1851)
+  args <- c(list(quote(x)), opts)
 
-  do.call(runApp, args)
+  do.call("runApp", args)
 }
 
 #' @rdname shinyApp

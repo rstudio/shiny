@@ -642,8 +642,34 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
   if (!server) {
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
+
+  # server side updateSelectizeInput
   value <- unname(selected)
   attr(choices, 'selected_value') <- value
+
+  # convert a single vector to a data frame so it returns {label: , value: }
+  # other objects return arbitrary JSON {x: , y: , foo: , ...}
+  choices <- if (is.atomic(choices)) {
+    # fast path
+    lab <- if(is.null(names(choices))) {
+      as.character(choices)
+    } else {
+      lab <- names(choices)
+      # replace empty names like: choices = c(a = 1, 2)
+      # int this case: names(choices) = c("a", "")
+      # with replacement below choices will be: lab = c("a", "2")
+      empty_names_indices <- lab == ""
+      lab[empty_names_indices] <- as.character(choices[empty_names_indices])
+      lab
+    }
+    # lab shold be lower-case for faster case-insensitive matching - grepl(... , fixed = TRUE)
+    lab <- tolower(lab)
+    data.frame(label = lab, value = choices, stringsAsFactors = FALSE)
+  } else {
+    # slow path
+    as.data.frame(choices, stringsAsFactors = FALSE)
+  }
+
   message <- dropNulls(list(
     label = label,
     value = value,
@@ -690,12 +716,18 @@ selectizeJSON <- function(data, req) {
       matches <- do.call(
         cbind,
         lapply(key, function(k) {
-          grepl(k, tolower(as.character(data[[v]])), fixed = TRUE)
+          if(is.character(data[[v]])) {
+            # according to updateSelectizeInput() we know that
+            # `data[[v]]` already in lower case
+            grepl(k, data[[v]], fixed = TRUE)
+          } else {
+            grepl(k, tolower(as.character(data[[v]])), fixed = TRUE)
+          }
         })
       )
       # merge column matches using OR, and match multiple keywords in one column
       # using the conjunction setting (AND or OR)
-      matches = rowSums(matches)
+      matches <- rowSums(matches)
       if(query$conju == 'and')
         idx <- idx | (matches == length(key))
       else

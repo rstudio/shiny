@@ -642,8 +642,33 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
   if (!server) {
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
+
+  # server side updateSelectizeInput
   value <- unname(selected)
   attr(choices, 'selected_value') <- value
+
+  # convert a single vector to a data frame so it returns {label: , value: }
+  # other objects return arbitrary JSON {x: , y: , foo: , ...}
+  choices <- if (is.atomic(choices)) {
+    # fast path
+    if(is.null(names(choices))) {
+      lab <- as.character(choices)
+    } else {
+      lab <- names(choices)
+      # replace empty names like: choices = c(a = 1, 2)
+      # int this case: names(choices) = c("a", "")
+      # with replacement below choices will be: lab = c("a", "2")
+      empty_names_indices <- lab == ""
+      lab[empty_names_indices] <- as.character(choices[empty_names_indices])
+    }
+    # lab shold be lower-case for faster case-insensitive matching - grepl(... , fixed = TRUE)
+    lab <- tolower(lab)
+    data.frame(label = lab, value = choices, stringsAsFactors = FALSE)
+  } else {
+    # slow path
+    as.data.frame(choices, stringsAsFactors = FALSE)
+  }
+
   message <- dropNulls(list(
     label = label,
     value = value,
@@ -656,7 +681,6 @@ selectizeJSON <- function(data, req) {
   query <- parseQueryString(req$QUERY_STRING)
   # extract the query variables, conjunction (and/or), search string, maximum options
   var <- c(safeFromJSON(query$field))
-  cjn <- if (query$conju == 'and') all else any
   # all keywords in lower-case, for case-insensitive matching
   key <- unique(strsplit(tolower(query$query), '\\s+')[[1]])
   if (identical(key, '')) key <- character(0)
@@ -664,25 +688,30 @@ selectizeJSON <- function(data, req) {
   vfd <- query$value  # the value field name
   sel <- attr(data, 'selected_value', exact = TRUE)
 
-  # convert a single vector to a data frame so it returns {label: , value: }
-  # later in JSON; other objects return arbitrary JSON {x: , y: , foo: , ...}
-  data <- if (is.atomic(data)) {
-    data.frame(label = names(choicesWithNames(data)), value = data,
-               stringsAsFactors = FALSE)
-  } else as.data.frame(data, stringsAsFactors = FALSE)
-
   # start searching for keywords in all specified columns
   idx <- logical(nrow(data))
-  if (length(key)) for (v in var) {
-    matches <- do.call(
-      cbind,
-      lapply(key, function(k) {
-        grepl(k, tolower(as.character(data[[v]])), fixed = TRUE)
-      })
-    )
-    # merge column matches using OR, and match multiple keywords in one column
-    # using the conjunction setting (AND or OR)
-    idx <- idx | apply(matches, 1, cjn)
+  if (length(key)) {
+    for (v in var) {
+      matches <- do.call(
+        cbind,
+        lapply(key, function(k) {
+          if(is.character(data[[v]])) {
+            # according to updateSelectizeInput() we know that
+            # `data[[v]]` already in lower case
+            grepl(k, data[[v]], fixed = TRUE)
+          } else {
+            grepl(k, tolower(as.character(data[[v]])), fixed = TRUE)
+          }
+        })
+      )
+      # merge column matches using OR, and match multiple keywords in one column
+      # using the conjunction setting (AND or OR)
+      matches <- rowSums(matches)
+      if(query$conju == 'and')
+        idx <- idx | (matches == length(key))
+      else
+        idx <- idx | matches
+    }
   }
   # only return the first n rows (n = maximum options in configuration)
   idx <- utils::head(if (length(key)) which(idx) else seq_along(idx), mop)

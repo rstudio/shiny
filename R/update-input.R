@@ -651,8 +651,8 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
   # other objects return arbitrary JSON {x: , y: , foo: , ...}
   choices <- if (is.atomic(choices)) {
     # fast path
-    lab <- if(is.null(names(choices))) {
-      as.character(choices)
+    if(is.null(names(choices))) {
+      lab <- as.character(choices)
     } else {
       lab <- names(choices)
       # replace empty names like: choices = c(a = 1, 2)
@@ -660,7 +660,6 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
       # with replacement below choices will be: lab = c("a", "2")
       empty_names_indices <- lab == ""
       lab[empty_names_indices] <- as.character(choices[empty_names_indices])
-      lab
     }
     # lab shold be lower-case for faster case-insensitive matching - grepl(... , fixed = TRUE)
     lab <- tolower(lab)
@@ -689,26 +688,6 @@ selectizeJSON <- function(data, req) {
   vfd <- query$value  # the value field name
   sel <- attr(data, 'selected_value', exact = TRUE)
 
-  # convert a single vector to a data frame so it returns {label: , value: }
-  # later in JSON; other objects return arbitrary JSON {x: , y: , foo: , ...}
-  data <- if (is.atomic(data)) {
-
-    if(is.null(names(data))) {
-      lab <- as.character(data)
-    } else {
-      lab <- names(data)
-      # replace empty names like: data = c(a = 1, 2)
-      # in this case: names(data) = c("a", "")
-      # with replacement below choices will be: lab = c("a", "2")
-      empty_names_indices <- lab == ""
-      lab[empty_names_indices] <- as.character(data[empty_names_indices])
-    }
-
-    data.frame(label = lab, value = data,
-               stringsAsFactors = FALSE)
-  } else {
-    as.data.frame(data, stringsAsFactors = FALSE)
-  }
   # start searching for keywords in all specified columns
   idx <- logical(nrow(data))
   if (length(key)) {

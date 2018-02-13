@@ -3,13 +3,13 @@
 ## Documentation
 
 - [x] Motivation -- why should I care about async? Why shouldn't I (what are the limitations)?
-- [ ] High level technical overview
+- [x] High level technical overview
 - [ ] Cookbook-style examples
 - [ ] Top-down porting of a sync app to async
 
 ## Core API
-- [ ] Should as.promise() convert regular values to promises? Or throw?
-  - [ ] If as.promise() doesn't convert regular values to promises, add promise_resolved(value) and promise_rejected(err) functions?
+- [x] Should as.promise() convert regular values to promises? Or throw?
+  - [x] If as.promise() doesn't convert regular values to promises, add promise_resolved(value) and promise_rejected(err) functions?
 
 ## later
 - [ ] Add support for multiple event loops
@@ -38,7 +38,7 @@
 
 ## Testing
 - [x] App that tests that all built-in render functions support async
-- [ ] Apps that test flush lifecycle, including onFlushed(once = FALSE)
+- [x] Apps that test flush lifecycle, including onFlushed(once = FALSE)
 - [x] Apps that test invisible() behavior for renderPrint, both sync and async
 - [x] Apps that ensure all render functions execute synchronous code before tick is over
 - [x] App that tests async downloadHandler

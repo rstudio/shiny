@@ -23,6 +23,7 @@ shiny 1.0.5.9000
 
 * Fixed [#1958](https://github.com/rstudio/shiny/issues/1958): Slider inputs previously displayed commas after a decimal point. ([#1960](https://github.com/rstudio/shiny/pull/1960))
 
+* Changed `runGitHub` to have a host param that defaults to the public host (https://github.com/)
 
 ### Bug fixes
 

@@ -120,6 +120,9 @@ runGist <- function(gist, destdir = NULL, ...) {
 #' @param repo Name of the repository.
 #' @param username GitHub username. If \code{repo} is of the form
 #'   \code{"username/repo"}, \code{username} will be taken from \code{repo}.
+#' @param host GitHub host. Desired GitHub host should you want to use a
+#'   a GitHub Enterprise host. Defaults to public GitHub host
+#'   \code{"https://github.com/"}.
 #' @param ref Desired git reference. Could be a commit, tag, or branch name.
 #'   Defaults to \code{"master"}.
 #' @export
@@ -133,7 +136,8 @@ runGist <- function(gist, destdir = NULL, ...) {
 #'   runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
 #' }
 runGitHub <- function(repo, username = getOption("github.user"),
-                      ref = "master", subdir = NULL, destdir = NULL, ...) {
+                      host = "https://github.com/", ref = "master",
+                      subdir = NULL, destdir = NULL, ...) {
 
   if (grepl('/', repo)) {
     res <- strsplit(repo, '/')[[1]]
@@ -142,7 +146,7 @@ runGitHub <- function(repo, username = getOption("github.user"),
     repo     <- res[2]
   }
 
-  url <- paste("https://github.com/", username, "/", repo, "/archive/",
+  url <- paste(host, username, "/", repo, "/archive/",
                ref, ".tar.gz", sep = "")
 
   runUrl(url, subdir = subdir, destdir = destdir, ...)

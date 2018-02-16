@@ -351,35 +351,38 @@ HandlerManager <- R6Class("HandlerManager",
         }
 
         response <- handler(req)
-        if (is.null(response))
-          response <- httpResponse(404, content="<h1>Not Found</h1>")
 
-        if (inherits(response, "httpResponse")) {
-          headers <- as.list(response$headers)
-          headers$'Content-Type' <- response$content_type
+        res <- hybrid_chain(response, function(response) {
+          if (is.null(response))
+            response <- httpResponse(404, content="<h1>Not Found</h1>")
 
-          response <- filter(req, response)
-          if (head_request) {
+          if (inherits(response, "httpResponse")) {
+            headers <- as.list(response$headers)
+            headers$'Content-Type' <- response$content_type
 
-            headers$`Content-Length` <- getResponseContentLength(response, deleteOwnedContent = TRUE)
+            response <- filter(req, response)
+            if (head_request) {
 
-            return(list(
-              status = response$status,
-              body = "",
-              headers = headers
-            ))
+              headers$`Content-Length` <- getResponseContentLength(response, deleteOwnedContent = TRUE)
+
+              return(list(
+                status = response$status,
+                body = "",
+                headers = headers
+              ))
+            } else {
+              return(list(
+                status = response$status,
+                body = response$content,
+                headers = headers
+              ))
+            }
+
           } else {
-            return(list(
-              status = response$status,
-              body = response$content,
-              headers = headers
-            ))
+            # Assume it's a Rook-compatible response
+            return(response)
           }
-
-        } else {
-          # Assume it's a Rook-compatible response
-          return(response)
-        }
+        })
       }
     }
   )

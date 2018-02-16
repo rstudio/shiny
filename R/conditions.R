@@ -89,6 +89,23 @@ getLocs <- function(calls) {
   }, character(1))
 }
 
+getCallCategories <- function(calls) {
+  vapply(calls, function(call) {
+    srcref <- attr(call, "srcref", exact = TRUE)
+    if (!is.null(srcref)) {
+      srcfile <- attr(srcref, "srcfile", exact = TRUE)
+      if (!is.null(srcfile)) {
+        if (!is.null(srcfile$original)) {
+          return("pkg")
+        } else {
+          return("user")
+        }
+      }
+    }
+    return("")
+  }, character(1))
+}
+
 #' @details \code{captureStackTraces} runs the given \code{expr} and if any
 #'   \emph{uncaught} errors occur, annotates them with stack trace info for use
 #'   by \code{printError} and \code{printStackTrace}. It is not necessary to use
@@ -105,15 +122,82 @@ getLocs <- function(calls) {
 #' @rdname stacktrace
 #' @export
 captureStackTraces <- function(expr) {
-  withCallingHandlers(expr,
-    error = function(e) {
-      if (is.null(attr(e, "stack.trace", exact = TRUE))) {
-        calls <- sys.calls()
-        attr(e, "stack.trace") <- calls
-        stop(e)
-      }
-    }
+  promises::with_promise_domain(createStackTracePromiseDomain(),
+    expr
   )
+}
+
+#' @include globals.R
+.globals$deepStack <- NULL
+
+createStackTracePromiseDomain <- function() {
+  d <- promises::new_promise_domain(
+    wrapOnFulfilled = function(onFulfilled) {
+      force(onFulfilled)
+      # Subscription time
+      if (deepStacksEnabled()) {
+        currentStack <- formatStackTrace(sys.calls())
+        currentDeepStack <- .globals$deepStack
+      }
+      function(...) {
+        # Fulfill time
+        if (deepStacksEnabled()) {
+          origDeepStack <- .globals$deepStack
+          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
+        }
+
+        withCallingHandlers(
+          onFulfilled(...),
+          error = doCaptureStack
+        )
+      }
+    },
+    wrapOnRejected = function(onRejected) {
+      force(onRejected)
+      # Subscription time
+      if (deepStacksEnabled()) {
+        currentStack <- formatStackTrace(sys.calls())
+        currentDeepStack <- .globals$deepStack
+      }
+      function(...) {
+        # Fulfill time
+        if (deepStacksEnabled()) {
+          origDeepStack <- .globals$deepStack
+          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
+        }
+
+        withCallingHandlers(
+          onRejected(...),
+          error = doCaptureStack
+        )
+      }
+    },
+    wrapSync = function(expr) {
+      withCallingHandlers(expr,
+        error = doCaptureStack
+      )
+    },
+    onError = doCaptureStack
+  )
+}
+
+deepStacksEnabled <- function() {
+  getOption("shiny.deepstacktrace", FALSE)
+}
+
+doCaptureStack <- function(e) {
+  if (is.null(attr(e, "stack.trace", exact = TRUE))) {
+    calls <- sys.calls()
+    attr(e, "stack.trace") <- calls
+  }
+  if (deepStacksEnabled()) {
+    if (is.null(attr(e, "deep.stack.trace", exact = TRUE)) && !is.null(.globals$deepStack)) {
+      attr(e, "deep.stack.trace") <- .globals$deepStack
+    }
+  }
+  stop(e)
 }
 
 #' @details \code{withLogErrors} captures stack traces and logs errors that
@@ -128,7 +212,22 @@ withLogErrors <- function(expr,
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   withCallingHandlers(
-    captureStackTraces(expr),
+    {
+      result <- captureStackTraces(expr)
+
+      # Handle expr being an async operation
+      if (promises::is.promise(result)) {
+        result <- promises::catch(result, function(cond) {
+          # Don't print shiny.silent.error (i.e. validation errors)
+          if (inherits(cond, "shiny.silent.error")) return()
+          if (isTRUE(getOption("show.error.messages"))) {
+            printError(cond, full = full, offset = offset)
+          }
+        })
+      }
+
+      result
+    },
     error = function(cond) {
       # Don't print shiny.silent.error (i.e. validation errors)
       if (inherits(cond, "shiny.silent.error")) return()
@@ -162,6 +261,15 @@ printError <- function(cond,
   warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s",
     getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
   printStackTrace(cond, full = full, offset = offset)
+  lapply(rev(attr(cond, "deep.stack.trace", exact = TRUE)), function(st) {
+    message(
+      paste0(
+        "From earlier call:\n",
+        paste0(st, collapse = "\n"),
+        "\n"
+      )
+    )
+  })
   invisible()
 }
 
@@ -179,7 +287,8 @@ printStackTrace <- function(cond,
         paste0(collapse = "\n",
           formatStackTrace(stackTrace, full = full, offset = offset,
             indent = "    ")
-        )
+        ),
+        "\n"
       ))
     } else {
       message("No stack trace available")
@@ -242,6 +351,10 @@ extractStackTrace <- function(calls,
     score[callnames == "..stacktraceoff.."] <- -1
     score[callnames == "..stacktraceon.."] <- 1
     toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff.."))
+
+    # doTryCatch, tryCatchOne, and tryCatchList are not informative--they're
+    # just internals for tryCatch
+    toShow <- toShow & !(callnames %in% c("doTryCatch", "tryCatchOne", "tryCatchList"))
   }
   calls <- calls[toShow]
 
@@ -253,6 +366,7 @@ extractStackTrace <- function(calls,
     num = index,
     call = getCallNames(calls),
     loc = getLocs(calls),
+    category = getCallCategories(calls),
     stringsAsFactors = FALSE
   )
 }
@@ -276,8 +390,14 @@ formatStackTrace <- function(calls, indent = "    ",
     indent,
     formatC(st$num, width = width),
     ": ",
-    st$call,
-    st$loc
+    mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
+      if (category == "pkg")
+        crayon::silver(name)
+      else if (category == "user")
+        crayon::blue$bold(name)
+      else
+        crayon::white(name)
+    })
   )
 }
 

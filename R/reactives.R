@@ -91,7 +91,7 @@ ReactiveVal <- R6Class(
     format = function(...) {
       # capture.output(print()) is necessary because format() doesn't
       # necessarily return a character vector, e.g. data.frame.
-      label <- capture.output(print(base::format(private$value, ...)))
+      label <- utils::capture.output(print(base::format(private$value, ...)))
       if (length(label) == 1) {
         paste0("reactiveVal: ", label)
       } else {
@@ -1026,6 +1026,9 @@ registerDebugHook("observerFunc", environment(), label)
 
         continue <- function() {
           ctx$addPendingFlush(.priority)
+          if (!is.null(.domain)) {
+            .domain$incrementBusyCount()
+          }
         }
 
         if (.suspended == FALSE)
@@ -1035,16 +1038,21 @@ registerDebugHook("observerFunc", environment(), label)
       })
 
       ctx$onFlush(function() {
-        tryCatch({
-          if (!.destroyed)
-            shinyCallingHandlers(run())
 
-        }, error = function(e) {
-          printError(e)
-          if (!is.null(.domain)) {
-            .domain$unhandledError(e)
-          }
-        })
+        hybrid_chain(
+          {
+            if (!.destroyed) {
+              shinyCallingHandlers(run())
+            }
+          },
+          catch = function(e) {
+            printError(e)
+            if (!is.null(.domain)) {
+              .domain$unhandledError(e)
+            }
+          },
+          finally = .domain$decrementBusyCount
+        )
       })
 
       return(ctx)
@@ -1475,13 +1483,21 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #' }
 #' @export
 invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
+  force(session)
   ctx <- .getReactiveEnvironment()$currentContext()
   timerCallbacks$schedule(millis, function() {
-    # Quit if the session is closed
-    if (!is.null(session) && session$isClosed()) {
+    if (is.null(session)) {
+      ctx$invalidate()
       return(invisible())
     }
-    ctx$invalidate()
+
+    if (!session$isClosed()) {
+      session$cycleStartAction(function() {
+        ctx$invalidate()
+      })
+    }
+
+    invisible()
   })
   invisible()
 }

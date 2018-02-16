@@ -52,6 +52,49 @@ markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
             hasExecuted = hasExecuted)
 }
 
+#' Implement render functions
+#'
+#' @param func A function without parameters, that returns user data. If the
+#'   returned value is a promise, then the render function will proceed in async
+#'   mode.
+#' @param transform A function that takes four arguments: \code{value},
+#'   \code{session}, \code{name}, and \code{...} (for future-proofing). This
+#'   function will be invoked each time a value is returned from \code{func},
+#'   and is responsible for changing the value into a JSON-ready value to be
+#'   JSON-encoded and sent to the browser.
+#' @param outputFunc The UI function that is used (or most commonly used) with
+#'   this render function. This can be used in R Markdown documents to create
+#'   complete output widgets out of just the render function.
+#' @param outputArgs A list of arguments to pass to the \code{outputFunc}.
+#'   Render functions should include \code{outputArgs = list()} in their own
+#'   parameter list, and pass through the value as this argument, to allow app
+#'   authors to customize outputs. (Currently, this is only supported for
+#'   dynamically generated UIs, such as those created by Shiny code snippets
+#'   embedded in R Markdown documents).
+#' @return An annotated render function, ready to be assigned to an
+#'   \code{output} slot.
+#'
+#' @export
+createRenderFunction <- function(
+  func, transform = function(value, session, name, ...) value,
+  outputFunc = NULL, outputArgs = NULL
+) {
+
+  renderFunc <- function(shinysession, name, ...) {
+    hybrid_chain(
+      func(),
+      function(value, .visible) {
+        transform(setVisible(value, .visible), shinysession, name, ...)
+      }
+    )
+  }
+
+  if (!is.null(outputFunc))
+    markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
+  else
+    renderFunc
+}
+
 useRenderFunction <- function(renderFunc, inline = FALSE) {
   outputFunction <- attr(renderFunc, "outputFunc")
   outputArgs <- attr(renderFunc, "outputArgs")
@@ -222,26 +265,25 @@ renderImage <- function(expr, env=parent.frame(), quoted=FALSE,
                         deleteFile=TRUE, outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
-  renderFunc <- function(shinysession, name, ...) {
-    imageinfo <- func()
-    # Should the file be deleted after being sent? If .deleteFile not set or if
-    # TRUE, then delete; otherwise don't delete.
-    if (deleteFile) {
-      on.exit(unlink(imageinfo$src))
-    }
+  createRenderFunction(func,
+    transform = function(imageinfo, session, name, ...) {
+      # Should the file be deleted after being sent? If .deleteFile not set or if
+      # TRUE, then delete; otherwise don't delete.
+      if (deleteFile) {
+        on.exit(unlink(imageinfo$src))
+      }
 
-    # If contentType not specified, autodetect based on extension
-    contentType <- imageinfo$contentType %OR% getContentType(imageinfo$src)
+      # If contentType not specified, autodetect based on extension
+      contentType <- imageinfo$contentType %OR% getContentType(imageinfo$src)
 
-    # Extra values are everything in imageinfo except 'src' and 'contentType'
-    extra_attr <- imageinfo[!names(imageinfo) %in% c('src', 'contentType')]
+      # Extra values are everything in imageinfo except 'src' and 'contentType'
+      extra_attr <- imageinfo[!names(imageinfo) %in% c('src', 'contentType')]
 
-    # Return a list with src, and other img attributes
-    c(src = shinysession$fileUrl(name, file=imageinfo$src, contentType=contentType),
-      extra_attr)
-  }
-
-  markRenderFunction(imageOutput, renderFunc, outputArgs = outputArgs)
+      # Return a list with src, and other img attributes
+      c(src = session$fileUrl(name, file=imageinfo$src, contentType=contentType),
+        extra_attr)
+    },
+    imageOutput, outputArgs)
 }
 
 
@@ -281,13 +323,72 @@ renderPrint <- function(expr, env = parent.frame(), quoted = FALSE,
                         width = getOption('width'), outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
+  # Set a promise domain that sets the console width
+  #   and captures output
+  # op <- options(width = width)
+  # on.exit(options(op), add = TRUE)
+
   renderFunc <- function(shinysession, name, ...) {
-    op <- options(width = width)
-    on.exit(options(op), add = TRUE)
-    paste(utils::capture.output(func()), collapse = "\n")
+    domain <- createRenderPrintPromiseDomain(width)
+    hybrid_chain(
+      {
+        promises::with_promise_domain(domain, func())
+      },
+      function(value, .visible) {
+        if (.visible) {
+          cat(file = domain$conn, paste(utils::capture.output(value, append = TRUE), collapse = "\n"))
+        }
+        res <- paste(readLines(domain$conn, warn = FALSE), collapse = "\n")
+        res
+      },
+      finally = function() {
+        close(domain$conn)
+      }
+    )
   }
 
   markRenderFunction(verbatimTextOutput, renderFunc, outputArgs = outputArgs)
+}
+
+createRenderPrintPromiseDomain <- function(width) {
+  f <- file()
+
+  promises::new_promise_domain(
+    wrapOnFulfilled = function(onFulfilled) {
+      force(onFulfilled)
+      function(...) {
+        op <- options(width = width)
+        on.exit(options(op), add = TRUE)
+
+        sink(f, append = TRUE)
+        on.exit(sink(NULL), add = TRUE)
+
+        onFulfilled(...)
+      }
+    },
+    wrapOnRejected = function(onRejected) {
+      force(onRejected)
+      function(...) {
+        op <- options(width = width)
+        on.exit(options(op), add = TRUE)
+
+        sink(f, append = TRUE)
+        on.exit(sink(NULL), add = TRUE)
+
+        onRejected(...)
+      }
+    },
+    wrapSync = function(expr) {
+      op <- options(width = width)
+      on.exit(options(op), add = TRUE)
+
+      sink(f, append = TRUE)
+      on.exit(sink(NULL), add = TRUE)
+
+      force(expr)
+    },
+    conn = f
+  )
 }
 
 #' Text Output
@@ -321,12 +422,13 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
                        outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
-  renderFunc <- function(shinysession, name, ...) {
-    value <- func()
-    return(paste(utils::capture.output(cat(value)), collapse="\n"))
-  }
-
-  markRenderFunction(textOutput, renderFunc, outputArgs = outputArgs)
+  createRenderFunction(
+    func,
+    function(value, session, name, ...) {
+      paste(utils::capture.output(cat(value)), collapse="\n")
+    },
+    textOutput, outputArgs
+  )
 }
 
 #' UI Output
@@ -371,15 +473,16 @@ renderUI <- function(expr, env=parent.frame(), quoted=FALSE,
                      outputArgs=list()) {
   installExprFunction(expr, "func", env, quoted)
 
-  renderFunc <- function(shinysession, name, ...) {
-    result <- func()
-    if (is.null(result) || length(result) == 0)
-      return(NULL)
+  createRenderFunction(
+    func,
+    function(result, shinysession, name, ...) {
+      if (is.null(result) || length(result) == 0)
+        return(NULL)
 
-    processDeps(result, shinysession)
-  }
-
-  markRenderFunction(uiOutput, renderFunc, outputArgs = outputArgs)
+      processDeps(result, shinysession)
+    },
+    uiOutput, outputArgs
+  )
 }
 
 #' File Downloads
@@ -517,27 +620,31 @@ renderDataTable <- function(expr, options = NULL, searchDelay = 500,
     if (is.function(options)) options <- options()
     options <- checkDT9(options)
     res <- checkAsIs(options)
-    data <- func()
-    if (length(dim(data)) != 2) return() # expects a rectangular data object
-    if (is.data.frame(data)) data <- as.data.frame(data)
-    action <- shinysession$registerDataObj(name, data, dataTablesJSON)
-    colnames <- colnames(data)
-    # if escape is column names, turn names to numeric indices
-    if (is.character(escape)) {
-      escape <- stats::setNames(seq_len(ncol(data)), colnames)[escape]
-      if (any(is.na(escape)))
-        stop("Some column names in the 'escape' argument not found in data")
-    }
-    colnames[escape] <- htmlEscape(colnames[escape])
-    if (!is.logical(escape)) {
-      if (!is.numeric(escape))
-        stop("'escape' must be TRUE, FALSE, or a numeric vector, or column names")
-      escape <- paste(escape, collapse = ',')
-    }
-    list(
-      colnames = colnames, action = action, options = res$options,
-      evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,
-      callback = paste(callback, collapse = '\n'), escape = escape
+    hybrid_chain(
+      func(),
+      function(data) {
+        if (length(dim(data)) != 2) return() # expects a rectangular data object
+        if (is.data.frame(data)) data <- as.data.frame(data)
+        action <- shinysession$registerDataObj(name, data, dataTablesJSON)
+        colnames <- colnames(data)
+        # if escape is column names, turn names to numeric indices
+        if (is.character(escape)) {
+          escape <- stats::setNames(seq_len(ncol(data)), colnames)[escape]
+          if (any(is.na(escape)))
+            stop("Some column names in the 'escape' argument not found in data")
+        }
+        colnames[escape] <- htmlEscape(colnames[escape])
+        if (!is.logical(escape)) {
+          if (!is.numeric(escape))
+            stop("'escape' must be TRUE, FALSE, or a numeric vector, or column names")
+          escape <- paste(escape, collapse = ',')
+        }
+        list(
+          colnames = colnames, action = action, options = res$options,
+          evalOptions = if (length(res$eval)) I(res$eval), searchDelay = searchDelay,
+          callback = paste(callback, collapse = '\n'), escape = escape
+        )
+      }
     )
   }
 

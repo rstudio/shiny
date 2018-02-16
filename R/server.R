@@ -1,6 +1,7 @@
 #' @include server-input-handlers.R
 
 appsByToken <- Map$new()
+appsNeedingFlush <- Map$new()
 
 # Provide a character representation of the WS that can be used
 # as a key in a Map.
@@ -305,31 +306,13 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
               },
               shinysession$dispatch(msg)
             )
-            shinysession$manageHiddenOutputs()
+            # The HTTP_GUID, if it exists, is for Shiny Server reporting purposes
+            shinysession$startTiming(ws$request$HTTP_GUID)
+            shinysession$requestFlush()
 
-            if (exists(".shiny__stdout", globalenv()) &&
-                exists("HTTP_GUID", ws$request)) {
-              # safe to assume we're in shiny-server
-              shiny_stdout <- get(".shiny__stdout", globalenv())
-
-              # eNter a flushReact
-              writeLines(paste("_n_flushReact ", get("HTTP_GUID", ws$request),
-                " @ ", sprintf("%.3f", as.numeric(Sys.time())),
-                sep=""), con=shiny_stdout)
-              flush(shiny_stdout)
-
-              flushReact()
-
-              # eXit a flushReact
-              writeLines(paste("_x_flushReact ", get("HTTP_GUID", ws$request),
-                " @ ", sprintf("%.3f", as.numeric(Sys.time())),
-                sep=""), con=shiny_stdout)
-              flush(shiny_stdout)
-            } else {
-              flushReact()
-            }
-
-            flushAllSessions()
+            # Make httpuv return control to Shiny quickly, instead of waiting
+            # for the usual timeout
+            httpuv::interrupt()
           })
         })
       }
@@ -341,6 +324,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       ws$onClose(function() {
         shinysession$wsClosed()
         appsByToken$remove(shinysession$token)
+        appsNeedingFlush$remove(shinysession$token)
       })
 
       return(TRUE)
@@ -443,21 +427,20 @@ startApp <- function(appObj, port, host, quiet) {
 # Run an application that was created by \code{\link{startApp}}. This
 # function should normally be called in a \code{while(TRUE)} loop.
 serviceApp <- function() {
-  if (timerCallbacks$executeElapsed()) {
-    for (shinysession in appsByToken$values()) {
-      shinysession$manageHiddenOutputs()
-    }
+  timerCallbacks$executeElapsed()
 
-    flushReact()
-    flushAllSessions()
-  }
+  flushReact()
+  flushPendingSessions()
 
   # If this R session is interactive, then call service() with a short timeout
   # to keep the session responsive to user input
   maxTimeout <- ifelse(interactive(), 100, 1000)
 
-  timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent()))
+  timeout <- max(1, min(maxTimeout, timerCallbacks$timeToNextEvent(), later::next_op_secs()))
   service(timeout)
+
+  flushReact()
+  flushPendingSessions()
 }
 
 .shinyServerMinVersion <- '0.3.4'
@@ -799,10 +782,6 @@ runApp <- function(appDir=getwd(),
   # reactive(), Callbacks$invoke(), and others
   ..stacktraceoff..(
     captureStackTraces({
-      # If any observers were created before runApp was called, this will make
-      # sure they run once the app starts. (Issue #1013)
-      scheduleFlush()
-
       while (!.globals$stopped) {
         serviceApp()
         Sys.sleep(0.001)

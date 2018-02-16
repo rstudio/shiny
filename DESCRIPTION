@@ -65,7 +65,7 @@ Depends:
 Remotes:
     r-lib/later,
     rstudio/promises,
-    rstudio/httpuv@background-thread
+    rstudio/httpuv
 Imports:
     utils,
     grDevices,

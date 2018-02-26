@@ -516,95 +516,6 @@ ShinySession <- R6Class(
       self$onSessionEnded(private$fileUploadContext$rmUploadDirs)
     },
 
-    createBookmarkObservers = function() {
-      # This is to be called from the initialization. It registers observers
-      # for bookmarking to work.
-
-      # Get bookmarking config
-      store <- getShinyOption("bookmarkStore", default = "disable")
-      if (store == "disable")
-        return()
-
-      # Warn if trying to enable save-to-server bookmarking on a version of SS,
-      # SSP, or Connect that doesn't support it.
-      if (store == "server" && inShinyServer() &&
-          is.null(getShinyOption("save.interface")))
-      {
-        showNotification(
-          "This app tried to enable saved-to-server bookmarking, but it is not supported by the hosting environment.",
-          duration = NULL, type = "warning", session = self
-        )
-        return()
-      }
-
-      withReactiveDomain(self, {
-        # This observer fires when the bookmark button is clicked.
-        observeEvent(self$input[["._bookmark_"]], {
-          self$doBookmark()
-        })
-
-        # If there was an error initializing the current restore context, show
-        # notification in the client.
-        observe({
-          rc <- getCurrentRestoreContext()
-          if (!is.null(rc$initErrorMessage)) {
-            showNotification(
-              paste("Error in RestoreContext initialization:", rc$initErrorMessage),
-              duration = NULL, type = "error"
-            )
-          }
-        })
-
-        # Run the onRestore function at the beginning of the flush cycle, but after
-        # the server function has been executed.
-        observe({
-          if (private$restoreCallbacks$count() > 0) {
-            tryCatch(
-              withLogErrors(
-                isolate({
-                  rc <- getCurrentRestoreContext()
-                  if (rc$active) {
-                    restoreState <- getCurrentRestoreContext()$asList()
-                    private$restoreCallbacks$invoke(restoreState)
-                  }
-                })
-              ),
-              error = function(e) {
-                showNotification(
-                  paste0("Error calling onRestore callback: ", e$message),
-                  duration = NULL, type = "error"
-                )
-              }
-            )
-          }
-        }, priority = 1000000)
-
-        # Run the onRestored function after the flush cycle completes and information
-        # is sent to the client.
-        self$onFlushed(function() {
-          if (private$restoredCallbacks$count() > 0) {
-
-            tryCatch(
-              withLogErrors(
-                isolate({
-                  rc <- getCurrentRestoreContext()
-                  if (rc$active) {
-                    restoreState <- getCurrentRestoreContext()$asList()
-                    private$restoredCallbacks$invoke(restoreState)
-                  }
-                })
-              ),
-              error = function(e) {
-                msg <- paste0("Error calling onRestored callback: ", e$message)
-                showNotification(msg, duration = NULL, type = "error")
-              }
-            )
-          }
-        })
-
-      }) # withReactiveDomain
-    },
-
     # Modules (scopes) call this to register a function that returns a vector
     # of names to exclude from bookmarking. The function should return
     # something like c("scope1-x", "scope1-y"). This doesn't use a Callback
@@ -818,7 +729,6 @@ ShinySession <- R6Class(
       private$bookmarkedCallbacks <- Callbacks$new()
       private$restoreCallbacks <- Callbacks$new()
       private$restoredCallbacks <- Callbacks$new()
-      private$createBookmarkObservers()
 
       private$testMode <- .globals$testMode
       private$enableTestSnapshot()
@@ -1250,43 +1160,45 @@ ShinySession <- R6Class(
         )
       }
 
-      # ..stacktraceon matches with the top-level ..stacktraceoff..
-      private$flushCallbacks$invoke(..stacktraceon = TRUE)
-
-      # Schedule execution of onFlushed callbacks
-      on.exit({
+      withReactiveDomain(self, {
         # ..stacktraceon matches with the top-level ..stacktraceoff..
-        private$flushedCallbacks$invoke(..stacktraceon = TRUE)
-      }, add = TRUE)
+        private$flushCallbacks$invoke(..stacktraceon = TRUE)
 
-      if (!hasPendingUpdates()) {
-        # Normally, if there are no updates, simply return without sending
-        # anything to the client. But if we are in test mode, we still want to
-        # send a message with blank `values`, so that the client knows that
-        # any changed inputs have been received by the server and processed.
-        if (isTRUE(private$testMode)) {
-          private$sendMessage( values = list() )
+        # Schedule execution of onFlushed callbacks
+        on.exit({
+          # ..stacktraceon matches with the top-level ..stacktraceoff..
+          private$flushedCallbacks$invoke(..stacktraceon = TRUE)
+        }, add = TRUE)
+
+        if (!hasPendingUpdates()) {
+          # Normally, if there are no updates, simply return without sending
+          # anything to the client. But if we are in test mode, we still want to
+          # send a message with blank `values`, so that the client knows that
+          # any changed inputs have been received by the server and processed.
+          if (isTRUE(private$testMode)) {
+            private$sendMessage( values = list() )
+          }
+          return(invisible())
         }
-        return(invisible())
-      }
 
-      private$progressKeys <- character(0)
-      values <- as.list(private$invalidatedOutputValues)
-      private$invalidatedOutputValues <- Map$new()
-      errors <- as.list(private$invalidatedOutputErrors)
-      private$invalidatedOutputErrors <- Map$new()
-      inputMessages <- private$inputMessageQueue
-      private$inputMessageQueue <- list()
+        private$progressKeys <- character(0)
+        values <- as.list(private$invalidatedOutputValues)
+        private$invalidatedOutputValues <- Map$new()
+        errors <- as.list(private$invalidatedOutputErrors)
+        private$invalidatedOutputErrors <- Map$new()
+        inputMessages <- private$inputMessageQueue
+        private$inputMessageQueue <- list()
 
-      if (isTRUE(private$testMode)) {
-        private$storeOutputValues(mergeVectors(values, errors))
-      }
+        if (isTRUE(private$testMode)) {
+          private$storeOutputValues(mergeVectors(values, errors))
+        }
 
-      private$sendMessage(
-        errors = errors,
-        values = values,
-        inputMessages = inputMessages
-      )
+        private$sendMessage(
+          errors = errors,
+          values = values,
+          inputMessages = inputMessages
+        )
+      })
     },
     # Schedule an action to execute not (necessarily) now, but when no observers
     # that belong to this session are busy executing. This helps prevent (but
@@ -1390,6 +1302,94 @@ ShinySession <- R6Class(
         })
         return(dereg)
       }
+    },
+
+    createBookmarkObservers = function() {
+      # This registers observers for bookmarking to work.
+
+      # Get bookmarking config
+      store <- getShinyOption("bookmarkStore", default = "disable")
+      if (store == "disable")
+        return()
+
+      # Warn if trying to enable save-to-server bookmarking on a version of SS,
+      # SSP, or Connect that doesn't support it.
+      if (store == "server" && inShinyServer() &&
+          is.null(getShinyOption("save.interface")))
+      {
+        showNotification(
+          "This app tried to enable saved-to-server bookmarking, but it is not supported by the hosting environment.",
+          duration = NULL, type = "warning", session = self
+        )
+        return()
+      }
+
+      withReactiveDomain(self, {
+        # This observer fires when the bookmark button is clicked.
+        observeEvent(self$input[["._bookmark_"]], {
+          self$doBookmark()
+        })
+
+        # If there was an error initializing the current restore context, show
+        # notification in the client.
+        observe({
+          rc <- getCurrentRestoreContext()
+          if (!is.null(rc$initErrorMessage)) {
+            showNotification(
+              paste("Error in RestoreContext initialization:", rc$initErrorMessage),
+              duration = NULL, type = "error"
+            )
+          }
+        })
+
+        # Run the onRestore function at the beginning of the flush cycle, but after
+        # the server function has been executed.
+        observe({
+          if (private$restoreCallbacks$count() > 0) {
+            tryCatch(
+              withLogErrors(
+                isolate({
+                  rc <- getCurrentRestoreContext()
+                  if (rc$active) {
+                    restoreState <- getCurrentRestoreContext()$asList()
+                    private$restoreCallbacks$invoke(restoreState)
+                  }
+                })
+              ),
+              error = function(e) {
+                showNotification(
+                  paste0("Error calling onRestore callback: ", e$message),
+                  duration = NULL, type = "error"
+                )
+              }
+            )
+          }
+        }, priority = 1000000)
+
+        # Run the onRestored function after the flush cycle completes and information
+        # is sent to the client.
+        self$onFlushed(function() {
+          if (private$restoredCallbacks$count() > 0) {
+
+            tryCatch(
+              withLogErrors(
+                isolate({
+                  rc <- getCurrentRestoreContext()
+                  if (rc$active) {
+                    restoreState <- getCurrentRestoreContext()$asList()
+                    private$restoredCallbacks$invoke(restoreState)
+                  }
+                })
+              ),
+              error = function(e) {
+                msg <- paste0("Error calling onRestored callback: ", e$message)
+                showNotification(msg, duration = NULL, type = "error")
+              }
+            )
+          }
+        })
+
+      }) # withReactiveDomain
     },
 
     setBookmarkExclude = function(names) {

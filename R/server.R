@@ -244,76 +244,75 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
             } else {
               # If there's bookmarked state, save it on the session object
               shinysession$restoreContext <- RestoreContext$new(msg$data$.clientdata_url_search)
+              shinysession$createBookmarkObservers()
             }
           }
 
-          withRestoreContext(shinysession$restoreContext, {
 
-            msg$data <- applyInputHandlers(msg$data)
+          msg$data <- applyInputHandlers(msg$data)
 
-            switch(
-              msg$method,
-              init = {
+          switch(
+            msg$method,
+            init = {
 
-                serverFunc <- withReactiveDomain(NULL, serverFuncSource())
-                if (!identicalFunctionBodies(serverFunc, appvars$server)) {
-                  appvars$server <- serverFunc
-                  if (!is.null(appvars$server))
-                  {
-                    # Tag this function as the Shiny server function. A debugger may use this
-                    # tag to give this function special treatment.
-                    # It's very important that it's appvars$server itself and NOT a copy that
-                    # is invoked, otherwise new breakpoints won't be picked up.
-                    attr(appvars$server, "shinyServerFunction") <- TRUE
-                    registerDebugHook("server", appvars, "Server Function")
-                  }
+              serverFunc <- withReactiveDomain(NULL, serverFuncSource())
+              if (!identicalFunctionBodies(serverFunc, appvars$server)) {
+                appvars$server <- serverFunc
+                if (!is.null(appvars$server))
+                {
+                  # Tag this function as the Shiny server function. A debugger may use this
+                  # tag to give this function special treatment.
+                  # It's very important that it's appvars$server itself and NOT a copy that
+                  # is invoked, otherwise new breakpoints won't be picked up.
+                  attr(appvars$server, "shinyServerFunction") <- TRUE
+                  registerDebugHook("server", appvars, "Server Function")
                 }
+              }
 
-                # Check for switching into/out of showcase mode
-                if (.globals$showcaseOverride &&
-                    exists(".clientdata_url_search", where = msg$data)) {
-                  mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
-                  if (!is.null(mode))
-                    shinysession$setShowcase(mode)
-                }
+              # Check for switching into/out of showcase mode
+              if (.globals$showcaseOverride &&
+                  exists(".clientdata_url_search", where = msg$data)) {
+                mode <- showcaseModeOfQuerystring(msg$data$.clientdata_url_search)
+                if (!is.null(mode))
+                  shinysession$setShowcase(mode)
+              }
 
-                shinysession$manageInputs(msg$data)
+              shinysession$manageInputs(msg$data)
 
-                # The client tells us what singletons were rendered into
-                # the initial page
-                if (!is.null(msg$data$.clientdata_singletons)) {
-                  shinysession$singletons <- strsplit(
-                    msg$data$.clientdata_singletons, ',')[[1]]
-                }
+              # The client tells us what singletons were rendered into
+              # the initial page
+              if (!is.null(msg$data$.clientdata_singletons)) {
+                shinysession$singletons <- strsplit(
+                  msg$data$.clientdata_singletons, ',')[[1]]
+              }
 
-                local({
-                  args <- argsForServerFunc(serverFunc, shinysession)
+              local({
+                args <- argsForServerFunc(serverFunc, shinysession)
 
-                  withReactiveDomain(shinysession, {
-                    do.call(
-                      # No corresponding ..stacktraceoff; the server func is pure
-                      # user code
-                      wrapFunctionLabel(appvars$server, "server",
-                        ..stacktraceon = TRUE
-                      ),
-                      args
-                    )
-                  })
+                withReactiveDomain(shinysession, {
+                  do.call(
+                    # No corresponding ..stacktraceoff; the server func is pure
+                    # user code
+                    wrapFunctionLabel(appvars$server, "server",
+                      ..stacktraceon = TRUE
+                    ),
+                    args
+                  )
                 })
-              },
-              update = {
-                shinysession$manageInputs(msg$data)
-              },
-              shinysession$dispatch(msg)
-            )
-            # The HTTP_GUID, if it exists, is for Shiny Server reporting purposes
-            shinysession$startTiming(ws$request$HTTP_GUID)
-            shinysession$requestFlush()
+              })
+            },
+            update = {
+              shinysession$manageInputs(msg$data)
+            },
+            shinysession$dispatch(msg)
+          )
+          # The HTTP_GUID, if it exists, is for Shiny Server reporting purposes
+          shinysession$startTiming(ws$request$HTTP_GUID)
+          shinysession$requestFlush()
 
-            # Make httpuv return control to Shiny quickly, instead of waiting
-            # for the usual timeout
-            httpuv::interrupt()
-          })
+          # Make httpuv return control to Shiny quickly, instead of waiting
+          # for the usual timeout
+          httpuv::interrupt()
         })
       }
       ws$onMessage(function(binary, msg) {

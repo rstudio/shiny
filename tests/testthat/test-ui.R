@@ -14,3 +14,10 @@ test_that("selectInput options are properly escaped", {
   expect_true(any(grepl("<option value=\"&#39;\">", si_str, fixed = TRUE)))
   expect_true(any(grepl("<optgroup label=\"&quot;Separators&quot;\">", si_str, fixed = TRUE)))
 })
+
+
+# For issue #1006
+test_that("sliderInput steps don't have rounding errors", {
+  # Need to use expect_identical; expect_equal is too forgiving of rounding error
+  expect_identical(findStepSize(-5.5, 4, NULL), 0.1)
+})

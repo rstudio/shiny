@@ -88,20 +88,6 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 
   value <- restoreInput(id = inputId, default = value)
 
-  # If step is NULL, use heuristic to set the step size.
-  findStepSize <- function(min, max, step) {
-    if (!is.null(step)) return(step)
-
-    range <- max - min
-    # If short range or decimals, use continuous decimal with ~100 points
-    if (range < 2 || hasDecimals(min) || hasDecimals(max)) {
-      step <- pretty(c(min, max), n = 100)
-      step[2] - step[1]
-    } else {
-      1
-    }
-  }
-
   if (inherits(min, "Date")) {
     if (!inherits(max, "Date") || !inherits(value, "Date"))
       stop("`min`, `max`, and `value must all be Date or non-Date objects")
@@ -237,6 +223,28 @@ hasDecimals <- function(value) {
   truncatedValue <- round(value)
   return (!identical(value, truncatedValue))
 }
+
+
+# If step is NULL, use heuristic to set the step size.
+findStepSize <- function(min, max, step) {
+  if (!is.null(step)) return(step)
+
+  range <- max - min
+  # If short range or decimals, use continuous decimal with ~100 points
+  if (range < 2 || hasDecimals(min) || hasDecimals(max)) {
+    # Workaround for rounding errors (#1006): the intervals between the items
+    # returned by pretty() can have rounding errors. To avoid this, we'll use
+    # pretty() to find the min, max, and number of steps, and then use those
+    # values to calculate the step size.
+    pretty_steps <- pretty(c(min, max), n = 100)
+    n_steps <- length(pretty_steps) - 1
+    (max(pretty_steps) - min(pretty_steps)) / n_steps
+
+  } else {
+    1
+  }
+}
+
 
 #' @rdname sliderInput
 #'

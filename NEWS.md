@@ -19,6 +19,8 @@ shiny 1.0.5.9000
 
 * Addressed [#1859](https://github.com/rstudio/shiny/issues/1859): Server-side selectize is now significantly faster. (Thanks to @dselivanov [#1861](https://github.com/rstudio/shiny/pull/1861))
 
+* Fixed [#1006](https://github.com/rstudio/shiny/issues/1006): Slider inputs sometimes showed too many digits. ([#1956](https://github.com/rstudio/shiny/pull/1956))
+
 ### Bug fixes
 
 * The internal `URLdecode()` function previously was a copy of `httpuv::decodeURIComponent()`, assigned at build time; now it invokes the httpuv function at run time.

@@ -29,6 +29,7 @@ shiny 1.0.5.9000
 
 ### Library updates
 
+* Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))
 
 shiny 1.0.5
 ===========

@@ -86,8 +86,6 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
-  value <- restoreInput(id = inputId, default = value)
-
   if (inherits(min, "Date")) {
     if (!inherits(max, "Date") || !inherits(value, "Date"))
       stop("`min`, `max`, and `value must all be Date or non-Date objects")
@@ -106,6 +104,21 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
 
   } else {
     dataType <- "number"
+  }
+
+  # Restore bookmarked values here, after doing the type checking, because the
+  # restored value will be a character vector instead of Date or POSIXct, and we can do
+  # the conversion to correct type next.
+  value <- restoreInput(id = inputId, default = value)
+
+  if (is.character(value)) {
+    # If we got here, the value was restored from a URL-encoded bookmark.
+    if (dataType == "date") {
+      value <- as.Date(value, format = "%Y-%m-%d")
+    } else if (dataType == "datetime") {
+      # Date-times will have a format like "2018-02-28T03:46:26Z"
+      value <- as.POSIXct(value, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+    }
   }
 
   step <- findStepSize(min, max, step)

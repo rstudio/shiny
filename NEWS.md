@@ -30,6 +30,8 @@ shiny 1.0.5.9000
 
 * Fixed [#1840](https://github.com/rstudio/shiny/issues/1840): with the release of Shiny 1.0.5, we accidently changed the relative positioning of the icon and the title text in `navbarMenu`s and `tabPanel`s. This fix reverts this behavior back (i.e. the icon should be to the left of the text and/or the downward arrow in case of `navbarMenu`s). ([#1848](https://github.com/rstudio/shiny/pull/1848))
 
+* Fixed [#1600](https://github.com/rstudio/shiny/issues/1600): URL-encoded bookmarking did not work with sliders that had dates or date-times. ([#1961](https://github.com/rstudio/shiny/pull/1961))
+
 ### Library updates
 
 * Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))

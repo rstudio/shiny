@@ -94,11 +94,13 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   # reactive can be used for varying width/heights, as it includes the
   # displaylist, which is resolution independent.
   drawReactive <- reactive(label = "plotObj", {
-    # Don't invalidate when width/height changes.
-    dims <- if (execOnResize) getDims() else isolate(getDims())
-    pixelratio <- session$clientData$pixelratio %OR% 1
     hybrid_chain(
-      drawPlot(outputName, session, func, dims$width, dims$height, pixelratio, res),
+      {
+        # If !execOnResize, don't invalidate when width/height changes.
+        dims <- if (execOnResize) getDims() else isolate(getDims())
+        pixelratio <- session$clientData$pixelratio %OR% 1
+        drawPlot(outputName, session, func, dims$width, dims$height, pixelratio, res)
+      },
       catch = function(reason) {
         # Non-isolating read. A common reason for errors in plotting is because
         # the dimensions are too small. By taking a dependency on width/height,

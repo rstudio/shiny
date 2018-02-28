@@ -21,6 +21,9 @@ shiny 1.0.5.9000
 
 * Fixed [#1006](https://github.com/rstudio/shiny/issues/1006): Slider inputs sometimes showed too many digits. ([#1956](https://github.com/rstudio/shiny/pull/1956))
 
+* Fixed [#1958](https://github.com/rstudio/shiny/issues/1958): Slider inputs previously displayed commas after a decimal point. ([#1960](https://github.com/rstudio/shiny/pull/1960))
+
+
 ### Bug fixes
 
 * The internal `URLdecode()` function previously was a copy of `httpuv::decodeURIComponent()`, assigned at build time; now it invokes the httpuv function at run time.

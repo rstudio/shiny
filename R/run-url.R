@@ -120,11 +120,11 @@ runGist <- function(gist, destdir = NULL, ...) {
 #' @param repo Name of the repository.
 #' @param username GitHub username. If \code{repo} is of the form
 #'   \code{"username/repo"}, \code{username} will be taken from \code{repo}.
+#' @param ref Desired git reference. Could be a commit, tag, or branch name.
+#'   Defaults to \code{"master"}.
 #' @param host GitHub host. Desired GitHub host should you want to use a
 #'   a GitHub Enterprise host. Defaults to public GitHub host
 #'   \code{"https://github.com/"}.
-#' @param ref Desired git reference. Could be a commit, tag, or branch name.
-#'   Defaults to \code{"master"}.
 #' @export
 #' @examples
 #' ## Only run this example in interactive R sessions
@@ -136,8 +136,8 @@ runGist <- function(gist, destdir = NULL, ...) {
 #'   runGitHub("shiny_example", "rstudio", subdir = "inst/shinyapp/")
 #' }
 runGitHub <- function(repo, username = getOption("github.user"),
-                      host = "https://github.com/", ref = "master",
-                      subdir = NULL, destdir = NULL, ...) {
+                      ref = "master", subdir = NULL, destdir = NULL,
+                      host = NULL, ...) {
 
   if (grepl('/', repo)) {
     res <- strsplit(repo, '/')[[1]]
@@ -145,6 +145,22 @@ runGitHub <- function(repo, username = getOption("github.user"),
     username <- res[1]
     repo     <- res[2]
   }
+
+  if (is.null(host)) {
+    host = "https://github.com/"
+  } else {
+
+    # ensure host ends with /
+    if (!grepl(".*/$", host)) {
+      host = paste(host, "/", sep = "")
+    }
+
+    # ensure host contains http protocol
+    if (!grepl("^https?://", host)) {
+      host = paste("https://", host, sep = "")
+    }
+  }
+
 
   url <- paste(host, username, "/", repo, "/archive/",
                ref, ".tar.gz", sep = "")

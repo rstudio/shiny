@@ -10,9 +10,8 @@ runUrl(url, filetype = NULL, subdir = NULL, destdir = NULL, ...)
 
 runGist(gist, destdir = NULL, ...)
 
-runGitHub(repo, username = getOption("github.user"),
-  host = "https://github.com/", ref = "master", subdir = NULL,
-  destdir = NULL, ...)
+runGitHub(repo, username = getOption("github.user"), ref = "master",
+  subdir = NULL, destdir = NULL, host = NULL, ...)
 }
 \arguments{
 \item{url}{URL of the application.}
@@ -41,12 +40,12 @@ all valid values.}
 \item{username}{GitHub username. If \code{repo} is of the form
 \code{"username/repo"}, \code{username} will be taken from \code{repo}.}
 
+\item{ref}{Desired git reference. Could be a commit, tag, or branch name.
+Defaults to \code{"master"}.}
+
 \item{host}{GitHub host. Desired GitHub host should you want to use a
 a GitHub Enterprise host. Defaults to public GitHub host
 \code{"https://github.com/"}.}
-
-\item{ref}{Desired git reference. Could be a commit, tag, or branch name.
-Defaults to \code{"master"}.}
 }
 \description{
 \code{runUrl()} downloads and launches a Shiny application that is hosted at

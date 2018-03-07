@@ -62,7 +62,7 @@ addResourcePath <- function(prefix, directoryPath) {
          "please use a different prefix")
   }
 
-  directoryPath <- normalizePath(directoryPath, mustWork=TRUE)
+  directoryPath <- normalizePath(directoryPath, mustWork=FALSE)
 
   existing <- .globals$resources[[prefix]]
 

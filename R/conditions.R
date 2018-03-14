@@ -136,7 +136,10 @@ createStackTracePromiseDomain <- function() {
       force(onFulfilled)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentStack <- formatStackTrace(sys.calls())
+        calls <- sys.calls()
+        parents <- sys.parents()
+        attr(calls, "parents") <- parents
+        currentStack <- formatStackTrace(calls)
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
@@ -157,7 +160,10 @@ createStackTracePromiseDomain <- function() {
       force(onRejected)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentStack <- formatStackTrace(sys.calls())
+        calls <- sys.calls()
+        parents <- sys.parents()
+        attr(calls, "parents") <- parents
+        currentStack <- formatStackTrace(calls)
         currentDeepStack <- .globals$deepStack
       }
       function(...) {

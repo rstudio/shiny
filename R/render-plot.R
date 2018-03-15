@@ -981,15 +981,13 @@ find_panel_ranges <- function(g, pixelratio, res) {
 #'
 #' Creates a read-through cache for plots. The plotting logic is provided as
 #' plotFunc, a function that can have any number/combination of arguments; the
-#' return value of plotCache is a function that should be used in the place of
-#' plotFunc. Each unique combination of inputs will be cached to disk in the
-#' location specified by cachePath.
+#' return value of \code{plotCache()} is a function that should be used in the
+#' place of plotFunc. Each unique combination of inputs will be cached to disk
+#' in the location specified by \code{cachePath}.
 #'
-#' The invalidationExpr expression will be monitored and whenever it is
+#' The \code{invalidationExpr} expression will be monitored and whenever it is
 #' invalidated, so too is the cache invalidated (the contents are erased).
 #'
-#' @param cacheId An identifier for this cache; by default, will be incorporated
-#'   into the cache directory path.
 #' @param invalidationExpr Any expression or block of code that accesses any
 #'   reactives whose invalidation should cause cache invalidation. This
 #'   typically would be an expression that indicates that the source data has
@@ -1013,12 +1011,46 @@ find_panel_ranges <- function(g, pixelratio, res) {
 #'   \code{quote()}.
 #'
 #' @export
-plotCache <- function(cacheId, invalidationExpr, width, height, res = 72,
+plotCache <- function(invalidationExpr, width, height, res = 72,
   plotFunc,
-  cachePath = file.path(tempdir(), cacheId),
+  cachePath = NULL,
   invalidation.env = parent.frame(),
-  invalidation.quoted = FALSE) {
+  invalidation.quoted = FALSE,
+  session = getDefaultReactiveDomain()
+) {
 
+  # If user didn't supply cachePath, automatically determine it.
+  if (is.null(cachePath)) {
+    if (!is.null(session)) {
+      # Case 1: scope to session
+      cacheScopePath <- file.path(tempdir(), paste0("shinysession-", session$token))
+
+    } else if (!is.null(getShinyOption("appToken"))) {
+      # Case 2: scope to app
+      cacheScopePath <- file.path(tempdir(), paste0("shinyapp-", getShinyOption("appToken")))
+
+    } else {
+      # Case 3: scope to current R process
+      cacheScopePath <- file.path(tempdir(), "shiny")
+    }
+
+    cachePath <- file.path(cacheScopePath, createUniqueId(8))
+
+    # Remove the cache directory when it's no longer needed.
+    reg.finalizer(environment(), function(e) {
+      unlink(cachePath, recursive = TRUE)
+
+      # If cacheScopePath is empty, remove it.
+      siblingPaths <- setdiff(dir(cacheScopePath, all.files = TRUE), c(".", ".."))
+      if (length(siblingPaths) == 0) {
+        file.remove(cacheScopePath)
+      }
+    })
+  }
+
+  if (dir.exists(cachePath)) {
+    unlink(cachePath, recursive = TRUE)
+  }
   dir.create(cachePath, recursive = TRUE, mode = "0700")
 
   if (!invalidation.quoted) {
@@ -1026,25 +1058,21 @@ plotCache <- function(cacheId, invalidationExpr, width, height, res = 72,
   }
 
   observeEvent(invalidationExpr, event.env = invalidation.env, event.quoted = TRUE, {
-    # TODO: robustify
     if (dir.exists(cachePath)) {
-      file.rename(cachePath, paste0(cachePath, ".gone"))
+      unlink(cachePath, recursive = TRUE)
     }
     dir.create(cachePath, recursive = TRUE, mode = "0700")
-    unlink(paste0(cachePath, ".gone"), recursive = TRUE)
   })
 
   function(...) {
+    browser()
     args <- list(...)
     key <- paste0(digest::digest(args), ".png")
     filePath <- file.path(cachePath, key)
     if (!file.exists(filePath)) {
-      message("Cache miss")
       plotPNG(function() {
         do.call("plotFunc", args)
       }, filename = filePath, width = width, height = height, res = res)
-    } else {
-      message("Cache hit")
     }
     filePath
   }

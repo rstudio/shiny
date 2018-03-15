@@ -4,14 +4,11 @@
 \alias{plotCache}
 \title{Disk-based plot cache}
 \usage{
-plotCache(cacheId, invalidationExpr, width, height, res = 72, plotFunc,
-  cachePath = file.path(tempdir(), cacheId),
-  invalidation.env = parent.frame(), invalidation.quoted = FALSE)
+plotCache(invalidationExpr, width, height, res = 72, plotFunc,
+  cachePath = NULL, invalidation.env = parent.frame(),
+  invalidation.quoted = FALSE, session = getDefaultReactiveDomain())
 }
 \arguments{
-\item{cacheId}{An identifier for this cache; by default, will be incorporated
-into the cache directory path.}
-
 \item{invalidationExpr}{Any expression or block of code that accesses any
 reactives whose invalidation should cause cache invalidation. This
 typically would be an expression that indicates that the source data has
@@ -43,11 +40,11 @@ that is stored in a variable; to do so, it must be quoted with
 \description{
 Creates a read-through cache for plots. The plotting logic is provided as
 plotFunc, a function that can have any number/combination of arguments; the
-return value of plotCache is a function that should be used in the place of
-plotFunc. Each unique combination of inputs will be cached to disk in the
-location specified by cachePath.
+return value of \code{plotCache()} is a function that should be used in the
+place of plotFunc. Each unique combination of inputs will be cached to disk
+in the location specified by \code{cachePath}.
 }
 \details{
-The invalidationExpr expression will be monitored and whenever it is
+The \code{invalidationExpr} expression will be monitored and whenever it is
 invalidated, so too is the cache invalidated (the contents are erased).
 }

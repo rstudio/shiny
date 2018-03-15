@@ -579,11 +579,15 @@ runApp <- function(appDir=getwd(),
     .globals$running <- FALSE
   }, add = TRUE)
 
-  # Enable per-app Shiny options
+  # Enable per-app Shiny options, for shinyOptions() and getShinyOption().
   oldOptionSet <- .globals$options
   on.exit({
     .globals$options <- oldOptionSet
   },add = TRUE)
+
+  # A unique identifier associated with this run of this application. It is
+  # shared across sessions.
+  shinyOptions(appToken = createUniqueId(8))
 
   # Make warnings print immediately
   # Set pool.scheduler to support pool package

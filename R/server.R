@@ -53,21 +53,23 @@ registerClient <- function(client) {
 #' @export
 addResourcePath <- function(prefix, directoryPath) {
   prefix <- prefix[1]
-  if (!grepl('^[a-z0-9\\-_][a-z0-9\\-_.]*$', prefix, ignore.case=TRUE, perl=TRUE)) {
+  if (!grepl('^[a-z0-9\\-_][a-z0-9\\-_.]*$', prefix, ignore.case = TRUE, perl = TRUE)) {
     stop("addResourcePath called with invalid prefix; please see documentation")
   }
-
   if (prefix %in% c('shared')) {
     stop("addResourcePath called with the reserved prefix '", prefix, "'; ",
          "please use a different prefix")
   }
-
-  directoryPath <- normalizePath(directoryPath, mustWork=TRUE)
-
-  existing <- .globals$resources[[prefix]]
-
-  .globals$resources[[prefix]] <- list(directoryPath=directoryPath,
-                                       func=staticHandler(directoryPath))
+  normalizedPath <- tryCatch(normalizePath(directoryPath, mustWork = TRUE),
+    error = function(e) {
+      stop("Couldn't normalize path in `addResourcePath`, with arguments: ",
+        "`prefix` = '", prefix, "'; `directoryPath` = '" , directoryPath, "'")
+    }
+  )
+  .globals$resources[[prefix]] <- list(
+    directoryPath = normalizedPath,
+    func = staticHandler(normalizedPath)
+  )
 }
 
 resourcePathHandler <- function(req) {

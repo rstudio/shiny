@@ -9,6 +9,8 @@ shiny 1.0.5.9000
 
 ### Minor new features and improvements
 
+* Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. [#1968](https://github.com/rstudio/shiny/pull/1968)
+
 * Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/master/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, [@jekriske-lilly](https://github.com/jekriske-lilly)! [#1844](https://github.com/rstudio/shiny/pull/1844))
 
 * The version of Shiny is now accessible from Javascript, with `Shiny.version`. There is also a new function for comparing version strings, `Shiny.compareVersion()`. ([#1826](https://github.com/rstudio/shiny/pull/1826), [#1830](https://github.com/rstudio/shiny/pull/1830))

@@ -60,15 +60,16 @@ addResourcePath <- function(prefix, directoryPath) {
     stop("addResourcePath called with the reserved prefix '", prefix, "'; ",
          "please use a different prefix")
   }
-  tryCatch({
-    normalizedPath <- normalizePath(directoryPath, mustWork = TRUE)
-    .globals$resources[[prefix]] <- list(
-      directoryPath = normalizedPath,
-      func = staticHandler(normalizedPath)
-    )
-  },  error = function(e) {
-    stop("Couldn't normalize path ", directoryPath)
-  })
+  normalizedPath <- tryCatch(normalizePath(directoryPath, mustWork = TRUE),
+    error = function(e) {
+      stop("Couldn't normalize path in `addResourcePath`, with arguments: ",
+        "`prefix` = '", prefix, "'; `directoryPath` = '" , directoryPath, "'")
+    }
+  )
+  .globals$resources[[prefix]] <- list(
+    directoryPath = normalizedPath,
+    func = staticHandler(normalizedPath)
+  )
 }
 
 resourcePathHandler <- function(req) {

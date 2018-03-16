@@ -980,29 +980,82 @@ find_panel_ranges <- function(g, pixelratio, res) {
 #' Disk-based plot cache
 #'
 #' Creates a read-through cache for plots. The plotting logic is provided as
-#' plotFunc, a function that can have any number/combination of arguments; the
-#' return value of \code{plotCache()} is a function that should be used in the
-#' place of plotFunc. Each unique combination of inputs will be cached to disk
-#' in the location specified by \code{cachePath}.
+#' \code{plotFunc}, a function that can have any number/combination of
+#' arguments; the return value of \code{plotCache()} is a function that should
+#' be used in the place of plotFunc. Each unique combination of inputs will be
+#' cached to disk in the location specified by \code{cacheDir}.
 #'
-#' The \code{invalidationExpr} expression will be monitored and whenever it is
-#' invalidated, so too is the cache invalidated (the contents are erased).
+#' \code{invalidationExpr} is an expression that uses reactive values like
+#' \code{input$click} and/or reactive expressions like \code{data()}. Whenever
+#' it changes value, the cache is invalidated (the contents are erased). You
+#' typically want to invalidate the cache when a plot made with the same input
+#' variables would have a different result. For example, if the plot is a
+#' scatter plot and the data set originally had 100 rows, and then changes to
+#' have 200 rows, you would want to invalidate the cache so that the plots would
+#' be redrawn display the new, larger data set. The \code{invalidationExpr}
+#' parameter works just like the \code{eventExpr} parameter of
+#' \code{\link{observeEvent}}.
+#'
+#' Another way to use \code{invalidationExpr} is to have it invalidate the cache
+#' at a fixed time interval. For example, you might want to have invalidate the
+#' cache once per hour, or once per day. See below for an example.
+#'
+#' @section Cache scoping:
+#'
+#'   There are a number of different ways you may want to scope the cache. For
+#'   example, you may want each user session to have their own plot cache, or
+#'   you may want each run of the application to have a cache (shared among
+#'   possibly multiple simultaneous user sessions), or you may want to have a
+#'   cache that persists even after the application is shut down and started
+#'   again.
+#'
+#'   The cache can be scoped automatically, based on where you call
+#'   \code{plotCache()}. If automatic scoping is used, the cache will be
+#'   automatically deleted when the scope exits. For example if it is scoped to
+#'   a session, then the cache will be deleted when the session exits.
+#'
+#' \describe{
+#'   \item{1}{To scope the cache to one session, call \code{plotCache()} inside
+#'     of the server function.}
+#'   \item{2}{To scope the cache to one run of a Shiny application (shared
+#'     among possibly multiple user sessions), call \code{plotCache()} in your
+#'     application, but outside of the server function.}
+#'   \item{3}{To scope the cache to a single R process (possibly across multiple
+#'     runs of applications), call \code{plotCache()} somewhere outside of
+#'     code that is run by \code{runApp()}. (This is an uncommon use case, but
+#'     can happen during local application development when running code in the
+#'     console.)}
+#'  }
+#'
+#'    If you want to set the scope of the cache manually, use the
+#'    \code{cacheDir} parameter. This can be useful if you want the cache to
+#'    persist across R processes or even system reboots.
+#'
+#' \describe{
+#'   \item{4}{To have the cache persist across different R processes, use
+#'     \code{cacheDir=file.path(dirname(tempdir()), "my_cache_id")}.
+#'     This will create a subdirectory in your system temp directory named
+#'     \code{my_cache_id} (where \code{my_cache_id} is replaced with a unique
+#'     name of your choosing).}
+#'   \item{5}{To have the cache persist even across system reboots, you can set
+#'     \code{cacheDir} to a location outside of the temp directory.}
+#' }
+#'
 #'
 #' @param invalidationExpr Any expression or block of code that accesses any
-#'   reactives whose invalidation should cause cache invalidation. This
-#'   typically would be an expression that indicates that the source data has
-#'   changed. Use \code{NULL} if you don't want to cause cache invalidation.
-#' @param width,height The dimensions of the plot. (Use double the user
-#'   width/height for retina/hi-dpi compatibility.)
-#' @param res The resolution of the PNG. Use 72 for normal screens, 144 for
-#'   retina/hi-dpi.
+#'   reactives whose invalidation should cause cache invalidation. Use
+#'   \code{NULL} if you don't want to cause cache invalidation.
 #' @param plotFunc Plotting logic, provided as a function that takes zero or
 #'   more arguments. Don't worry about setting up a graphics device or creating
 #'   a PNG; just write to the graphics device (you must call \code{print()} on
 #'   ggplot2 objects).
-#' @param cachePath The location on disk where the cache will be stored. By
-#'   default, uses a temp directory, which is generally cleaned up during a
-#'   normal shutdown of the R process.
+#' @param width,height The dimensions of the plot. (Use double the user
+#'   width/height for retina/hi-dpi compatibility.)
+#' @param res The resolution of the PNG. Use 72 for normal screens, 144 for
+#'   retina/hi-dpi.
+#' @param cacheDir The location on disk where the cache will be stored. If
+#'   \code{NULL} (the default), it uses a temp directory which will be cleaned up
+#'   when the cache scope exits. See the Cache Scoping section for more information.
 #' @param invalidation.env The environment where the \code{invalidationExpr} is
 #'   evaluated.
 #' @param invalidation.quoted Is \code{invalidationExpr} expression quoted? By
@@ -1011,16 +1064,16 @@ find_panel_ranges <- function(g, pixelratio, res) {
 #'   \code{quote()}.
 #'
 #' @export
-plotCache <- function(invalidationExpr, width, height, res = 72,
-  plotFunc,
-  cachePath = NULL,
+plotCache <- function(invalidationExpr, plotFunc,
+  width, height, res = 72,
+  cacheDir = NULL,
   invalidation.env = parent.frame(),
   invalidation.quoted = FALSE,
   session = getDefaultReactiveDomain()
 ) {
 
-  # If user didn't supply cachePath, automatically determine it.
-  if (is.null(cachePath)) {
+  # If user didn't supply cacheDir, automatically determine it.
+  if (is.null(cacheDir)) {
     if (!is.null(session)) {
       # Case 1: scope to session
       cacheScopePath <- file.path(tempdir(), paste0("shinysession-", session$token))
@@ -1034,11 +1087,11 @@ plotCache <- function(invalidationExpr, width, height, res = 72,
       cacheScopePath <- file.path(tempdir(), "shiny")
     }
 
-    cachePath <- file.path(cacheScopePath, createUniqueId(8))
+    cacheDir <- file.path(cacheScopePath, createUniqueId(8))
 
     # Remove the cache directory when it's no longer needed.
     reg.finalizer(environment(), function(e) {
-      unlink(cachePath, recursive = TRUE)
+      unlink(cacheDir, recursive = TRUE)
 
       # If cacheScopePath is empty, remove it.
       siblingPaths <- setdiff(dir(cacheScopePath, all.files = TRUE), c(".", ".."))
@@ -1048,31 +1101,38 @@ plotCache <- function(invalidationExpr, width, height, res = 72,
     })
   }
 
-  if (dir.exists(cachePath)) {
-    unlink(cachePath, recursive = TRUE)
+  if (!dirExists(cacheDir)) {
+    dir.create(cacheDir, recursive = TRUE, mode = "0700")
   }
-  dir.create(cachePath, recursive = TRUE, mode = "0700")
 
   if (!invalidation.quoted) {
     invalidationExpr <- substitute(invalidationExpr)
   }
 
-  observeEvent(invalidationExpr, event.env = invalidation.env, event.quoted = TRUE, {
-    if (dir.exists(cachePath)) {
-      unlink(cachePath, recursive = TRUE)
+  # Delete the cacheDir at the appropriate time. Use ignoreInit=TRUE because we don't
+  # want it to happen right in the beginning, especially when cacheDir is provided
+  # by the user and it might need to persist across R processes.
+  observeEvent(invalidationExpr, event.env = invalidation.env, event.quoted = TRUE,
+    ignoreInit = TRUE,
+    {
+      if (dirExists(cacheDir)) {
+        unlink(cacheDir, recursive = TRUE)
+      }
+      dir.create(cacheDir, recursive = TRUE, mode = "0700")
     }
-    dir.create(cachePath, recursive = TRUE, mode = "0700")
-  })
+  )
 
   function(...) {
-    browser()
     args <- list(...)
     key <- paste0(digest::digest(args), ".png")
-    filePath <- file.path(cachePath, key)
+    filePath <- file.path(cacheDir, key)
     if (!file.exists(filePath)) {
-      plotPNG(function() {
-        do.call("plotFunc", args)
-      }, filename = filePath, width = width, height = height, res = res)
+      plotPNG(
+        filename = filePath, width = width, height = height, res = res,
+        function() {
+          do.call("plotFunc", args)
+        }
+      )
     }
     filePath
   }

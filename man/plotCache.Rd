@@ -4,15 +4,19 @@
 \alias{plotCache}
 \title{Disk-based plot cache}
 \usage{
-plotCache(invalidationExpr, width, height, res = 72, plotFunc,
-  cachePath = NULL, invalidation.env = parent.frame(),
+plotCache(invalidationExpr, plotFunc, width, height, res = 72,
+  cacheDir = NULL, invalidation.env = parent.frame(),
   invalidation.quoted = FALSE, session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{invalidationExpr}{Any expression or block of code that accesses any
-reactives whose invalidation should cause cache invalidation. This
-typically would be an expression that indicates that the source data has
-changed. Use \code{NULL} if you don't want to cause cache invalidation.}
+reactives whose invalidation should cause cache invalidation. Use
+\code{NULL} if you don't want to cause cache invalidation.}
+
+\item{plotFunc}{Plotting logic, provided as a function that takes zero or
+more arguments. Don't worry about setting up a graphics device or creating
+a PNG; just write to the graphics device (you must call \code{print()} on
+ggplot2 objects).}
 
 \item{width, height}{The dimensions of the plot. (Use double the user
 width/height for retina/hi-dpi compatibility.)}
@@ -20,14 +24,9 @@ width/height for retina/hi-dpi compatibility.)}
 \item{res}{The resolution of the PNG. Use 72 for normal screens, 144 for
 retina/hi-dpi.}
 
-\item{plotFunc}{Plotting logic, provided as a function that takes zero or
-more arguments. Don't worry about setting up a graphics device or creating
-a PNG; just write to the graphics device (you must call \code{print()} on
-ggplot2 objects).}
-
-\item{cachePath}{The location on disk where the cache will be stored. By
-default, uses a temp directory, which is generally cleaned up during a
-normal shutdown of the R process.}
+\item{cacheDir}{The location on disk where the cache will be stored. If
+\code{NULL} (the default), it uses a temp directory which will be cleaned up
+when the cache scope exits. See the Cache Scoping section for more information.}
 
 \item{invalidation.env}{The environment where the \code{invalidationExpr} is
 evaluated.}
@@ -39,12 +38,67 @@ that is stored in a variable; to do so, it must be quoted with
 }
 \description{
 Creates a read-through cache for plots. The plotting logic is provided as
-plotFunc, a function that can have any number/combination of arguments; the
-return value of \code{plotCache()} is a function that should be used in the
-place of plotFunc. Each unique combination of inputs will be cached to disk
-in the location specified by \code{cachePath}.
+\code{plotFunc}, a function that can have any number/combination of
+arguments; the return value of \code{plotCache()} is a function that should
+be used in the place of plotFunc. Each unique combination of inputs will be
+cached to disk in the location specified by \code{cacheDir}.
 }
 \details{
-The \code{invalidationExpr} expression will be monitored and whenever it is
-invalidated, so too is the cache invalidated (the contents are erased).
+\code{invalidationExpr} is an expression that uses reactive values like
+\code{input$click} and/or reactive expressions like \code{data()}. Whenever
+it changes value, the cache is invalidated (the contents are erased). You
+typically want to invalidate the cache when a plot made with the same input
+variables would have a different result. For example, if the plot is a
+scatter plot and the data set originally had 100 rows, and then changes to
+have 200 rows, you would want to invalidate the cache so that the plots would
+be redrawn display the new, larger data set. The \code{invalidationExpr}
+parameter works just like the \code{eventExpr} parameter of
+\code{\link{observeEvent}}.
+
+Another way to use \code{invalidationExpr} is to have it invalidate the cache
+at a fixed time interval. For example, you might want to have invalidate the
+cache once per hour, or once per day. See below for an example.
 }
+\section{Cache scoping}{
+
+
+  There are a number of different ways you may want to scope the cache. For
+  example, you may want each user session to have their own plot cache, or
+  you may want each run of the application to have a cache (shared among
+  possibly multiple simultaneous user sessions), or you may want to have a
+  cache that persists even after the application is shut down and started
+  again.
+
+  The cache can be scoped automatically, based on where you call
+  \code{plotCache()}. If automatic scoping is used, the cache will be
+  automatically deleted when the scope exits. For example if it is scoped to
+  a session, then the cache will be deleted when the session exits.
+
+\describe{
+  \item{1}{To scope the cache to one session, call \code{plotCache()} inside
+    of the server function.}
+  \item{2}{To scope the cache to one run of a Shiny application (shared
+    among possibly multiple user sessions), call \code{plotCache()} in your
+    application, but outside of the server function.}
+  \item{3}{To scope the cache to a single R process (possibly across multiple
+    runs of applications), call \code{plotCache()} somewhere outside of
+    code that is run by \code{runApp()}. (This is an uncommon use case, but
+    can happen during local application development when running code in the
+    console.)}
+ }
+
+   If you want to set the scope of the cache manually, use the
+   \code{cacheDir} parameter. This can be useful if you want the cache to
+   persist across R processes or even system reboots.
+
+\describe{
+  \item{4}{To have the cache persist across different R processes, use
+    \code{cacheDir=file.path(dirname(tempdir()), "my_cache_id")}.
+    This will create a subdirectory in your system temp directory named
+    \code{my_cache_id} (where \code{my_cache_id} is replaced with a unique
+    name of your choosing).}
+  \item{5}{To have the cache persist even across system reboots, you can set
+    \code{cacheDir} to a location outside of the temp directory.}
+}
+}
+

@@ -1065,7 +1065,7 @@ find_panel_ranges <- function(g, pixelratio, res) {
 #'
 #' @export
 plotCache <- function(invalidationExpr, plotFunc,
-  width, height, res = 72,
+  width = 400, height = 400, res = 72,
   cacheDir = NULL,
   invalidation.env = parent.frame(),
   invalidation.quoted = FALSE,
@@ -1122,13 +1122,18 @@ plotCache <- function(invalidationExpr, plotFunc,
     }
   )
 
-  function(...) {
+  function(..., .width = width, .height = height, .pixelratio = getDefaultReactiveDomain()$clientData$pixelratio) {
+
     args <- list(...)
-    key <- paste0(digest::digest(args), ".png")
+    # TODO: What if the args include weird objects like environments or reactive expressions?
+    key <- paste0(digest::digest(c(args, width = .width, height = .height, res = res, pixelratio = .pixelratio)), ".png")
     filePath <- file.path(cacheDir, key)
     if (!file.exists(filePath)) {
       plotPNG(
-        filename = filePath, width = width, height = height, res = res,
+        filename = filePath,
+        width = .width * .pixelratio,
+        height = .height * .pixelratio,
+        res = res * .pixelratio,
         function() {
           do.call("plotFunc", args)
         }

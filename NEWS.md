@@ -7,7 +7,7 @@ shiny 1.0.5.9000
 
 ### New features
 
-* If a shiny output contains a css class of `shiny-report-size`, it's container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output-myID-height']]`/`session$clientData[['output-myID-width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980).
+* If a shiny output contains a css class of `shiny-report-size`, it's container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980).
 
 ### Minor new features and improvements
 

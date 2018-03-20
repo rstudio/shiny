@@ -7,11 +7,11 @@ shiny 1.0.5.9000
 
 ### New features
 
-* If a shiny output contains a css class of `shiny-report-size`, it's container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980).
+* If a shiny output contains a css class of `shiny-report-size`, its container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980). (Thanks, @cpsievert! [#1981](https://github.com/rstudio/shiny/pull/1981))
 
 ### Minor new features and improvements
 
-* Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. [#1968](https://github.com/rstudio/shiny/pull/1968)
+* Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. ([#1968](https://github.com/rstudio/shiny/pull/1968))
 
 * Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/master/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, [@jekriske-lilly](https://github.com/jekriske-lilly)! [#1844](https://github.com/rstudio/shiny/pull/1844))
 

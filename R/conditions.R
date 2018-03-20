@@ -131,6 +131,9 @@ captureStackTraces <- function(expr) {
 .globals$deepStack <- NULL
 
 createStackTracePromiseDomain <- function() {
+  # These are actually stateless, we wouldn't have to create a new one each time
+  # if we didn't want to. They're pretty cheap though.
+  
   d <- promises::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       force(onFulfilled)
@@ -265,7 +268,7 @@ printError <- function(cond,
     message(
       paste0(
         "From earlier call:\n",
-        paste0(formatStackTrace(st), collapse = "\n"),
+        paste0(formatStackTrace(st, full = full, offset = offset), collapse = "\n"),
         "\n"
       )
     )
@@ -350,7 +353,7 @@ extractStackTrace <- function(calls,
     score <- rep.int(0, length(callnames))
     score[callnames == "..stacktraceoff.."] <- -1
     score[callnames == "..stacktraceon.."] <- 1
-    toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff.."))
+    toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff..", "..stacktracefloor.."))
 
     # doTryCatch, tryCatchOne, and tryCatchList are not informative--they're
     # just internals for tryCatch
@@ -369,6 +372,80 @@ extractStackTrace <- function(calls,
     category = getCallCategories(calls),
     stringsAsFactors = FALSE
   )
+}
+
+stripStackTraces <- function(stackTraces, values = FALSE) {
+  score <- 1L  # >=1: show, <=0: hide
+  lapply(seq_along(stackTraces), function(i) {
+    res <- stripOneStackTrace(stackTraces[[i]], i != 1, score)
+    score <<- res$score
+    toShow <- as.logical(res$trace)
+    if (values) {
+      as.character(stackTraces[[i]][toShow])
+    } else {
+      as.logical(toShow)
+    }
+  })
+}
+
+stripOneStackTrace <- function(stackTrace, truncateFloor, startingScore) {
+  prefix <- logical(0)
+  if (truncateFloor) {
+    indexOfFloor <- tail(which(stackTrace == "..stacktracefloor.."), 1)
+    if (length(indexOfFloor)) {
+      stackTrace <- stackTrace[(indexOfFloor+1L):length(stackTrace)]
+      prefix <- rep_len(FALSE, indexOfFloor)
+    }
+  }
+  
+  if (length(stackTrace) == 0) {
+    return(list(score = startingScore, character(0)))
+  }
+  
+  score <- rep.int(0L, length(stackTrace))
+  score[stackTrace == "..stacktraceon.."] <- 1L
+  score[stackTrace == "..stacktraceoff.."] <- -1L
+  score <- startingScore + cumsum(score)
+  
+  toShow <- score > 0 & !(stackTrace %in% c("..stacktraceon..", "..stacktraceoff..", "..stacktracefloor.."))
+  
+  
+  list(score = tail(score, 1), trace = c(prefix, toShow))
+}
+
+pruneStackTraces <- function(list_of_parents) {
+  lapply(list_of_parents, pruneOneStackTrace)
+}
+
+# Given sys.parents() (which corresponds to sys.calls()), return a logical index
+# that prunes each subtree so that only the final branch remains. The result,
+# when applied to sys.calls(), is a linear list of calls without any "wrapper"
+# functions like tryCatch, try, with, hybrid_chain, etc. While these are often
+# part of the active call stack, they rarely are helpful when trying to identify
+# a broken bit of code.
+pruneOneStackTrace <- function(parents) {
+  # Detect nodes that are not the last child. This is necessary, but not
+  # sufficient; we also need to drop nodes that are the last child, but one of
+  # their ancestors is not.
+  is_dupe <- duplicated(parents, fromLast = TRUE)
+  
+  # The index of the most recently seen node that was actually kept instead of
+  # dropped.
+  current_node <- 0
+  
+  # Loop over the parent indices. Anything that is not parented by current_node
+  # (a.k.a. last-known-good node), or is a dupe, can be discarded. Anything that
+  # is kept becomes the new current_node.
+  include <- vapply(seq_along(parents), function(i) {
+    if (!is_dupe[[i]] && parents[[i]] == current_node) {
+      current_node <<- i
+      TRUE
+    } else {
+      FALSE
+    }
+  }, FUN.VALUE = logical(1))
+  
+  include
 }
 
 #' @details \code{formatStackTrace} is similar to \code{extractStackTrace}, but
@@ -452,3 +529,5 @@ conditionStackTrace <- function(cond) {
 #' @rdname stacktrace
 #' @export
 ..stacktraceoff.. <- function(expr) expr
+
+..stacktracefloor.. <- function(expr) expr

@@ -4,9 +4,10 @@
 \alias{plotCache}
 \title{Disk-based plot cache}
 \usage{
-plotCache(invalidationExpr, plotFunc, width, height, res = 72,
-  cacheDir = NULL, invalidation.env = parent.frame(),
-  invalidation.quoted = FALSE, session = getDefaultReactiveDomain())
+plotCache(invalidationExpr, plotFunc, baseWidth = 400,
+  aspectRatioRate = 1.25, growthRate = 1.25, res = 72, cacheDir = NULL,
+  invalidation.env = parent.frame(), invalidation.quoted = FALSE,
+  session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{invalidationExpr}{Any expression or block of code that accesses any
@@ -18,15 +19,21 @@ more arguments. Don't worry about setting up a graphics device or creating
 a PNG; just write to the graphics device (you must call \code{print()} on
 ggplot2 objects).}
 
-\item{width, height}{The dimensions of the plot. (Use double the user
-width/height for retina/hi-dpi compatibility.)}
+\item{baseWidth}{A base value for the width of the cached plot.}
 
-\item{res}{The resolution of the PNG. Use 72 for normal screens, 144 for
-retina/hi-dpi.}
+\item{aspectRatioRate}{A multiplier for different possible aspect ratios.}
+
+\item{growthRate}{A multiplier for different cached image sizes. For
+example, with a \code{width} of 400 and a \code{growth_rate} of 1.25, there
+will be possible cached images of widths 256, 320, 400, 500, 625, and so
+on, both smaller and larger.}
+
+\item{res}{The resolution of the PNG, in pixels per inch.}
 
 \item{cacheDir}{The location on disk where the cache will be stored. If
-\code{NULL} (the default), it uses a temp directory which will be cleaned up
-when the cache scope exits. See the Cache Scoping section for more information.}
+\code{NULL} (the default), it uses a temp directory which will be cleaned
+up when the cache scope exits. See the Cache Scoping section for more
+information.}
 
 \item{invalidation.env}{The environment where the \code{invalidationExpr} is
 evaluated.}

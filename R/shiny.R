@@ -445,6 +445,8 @@ ShinySession <- R6Class(
     testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
     outputValues = list(),           # Saved output values (for testing mode)
+    currentOutputName = NULL,        # Name of the currently-running output
+    outputInfo = list(),             # List of information for each output
     testSnapshotUrl = character(0),
 
     sendResponse = function(requestMsg, value) {
@@ -490,6 +492,16 @@ ShinySession <- R6Class(
       if (is.null(result))
         return(defaultValue)
       return(result)
+    },
+    withCurrentOutput = function(name, expr) {
+      if (!is.null(private$currentOutputName)) {
+        stop("Nested calls to withCurrentOutput() are not allowed.")
+      }
+
+      private$currentOutputName <- name
+      on.exit(private$currentOutputName <- NULL, add = TRUE)
+
+      expr
     },
     shouldSuspend = function(name) {
       # Find corresponding hidden state clientData variable, with the format
@@ -1070,7 +1082,11 @@ ShinySession <- R6Class(
           # to include the $then/$catch calls below?
           hybrid_chain(
             hybrid_chain(
-              shinyCallingHandlers(func()),
+              {
+                private$withCurrentOutput(name, {
+                  shinyCallingHandlers(func())
+                })
+              },
               catch = function(cond) {
                 if (inherits(cond, "shiny.custom.error")) {
                   if (isTRUE(getOption("show.error.messages"))) printError(cond)
@@ -1311,6 +1327,52 @@ ShinySession <- R6Class(
         })
         return(dereg)
       }
+    },
+
+    getCurrentOutputInfo = function() {
+      # TODO: How should we deal with namespacing?
+
+      name <- private$currentOutputName
+      if (is.null(private$outputInfo[[name]])) {
+        private$outputInfo[[name]] <- list(name = name)
+      }
+
+      tmp_info <- private$outputInfo[[name]]
+
+      # cd_names() returns names of all items in clientData, without taking a
+      # reactive dependency. It is a function and it's memoized, so that we do
+      # the (relatively) expensive isolate(names(...)) call only when needed,
+      # and at most one time in this function.
+      .cd_names <- NULL
+      cd_names <- function() {
+        if (is.null(.cd_names)) {
+          .cd_names <<- isolate(names(self$clientData))
+        }
+        .cd_names
+      }
+
+      # If we don't already have width for this output info, see if it's
+      # present, and if so, add it.
+      if (! ("width" %in% names(tmp_info)) ) {
+        width_name  <- paste0("output_", name, "_width")
+        if (width_name %in% cd_names()) {
+          tmp_info$width <- reactive({
+            self$clientData[[width_name]]
+          })
+        }
+      }
+
+      if (! ("height" %in% names(tmp_info)) ) {
+        height_name  <- paste0("output_", name, "_height")
+        if (height_name %in% cd_names()) {
+          tmp_info$height <- reactive({
+            self$clientData[[height_name]]
+          })
+        }
+      }
+
+      private$outputInfo[[name]] <- tmp_info
+      private$outputInfo[[name]]
     },
 
     createBookmarkObservers = function() {
@@ -2054,6 +2116,16 @@ outputOptions <- function(x, name, ...) {
   }
 
   .subset2(x, 'impl')$outputOptions(name, ...)
+}
+
+
+#' Get information about the output that is currently being executed.
+#'
+#' @param session The current Shiny session.
+#'
+#' @export
+getCurrentOutputInfo <- function(session = getDefaultReactiveDomain()) {
+  session$getCurrentOutputInfo()
 }
 
 #' Add callbacks for Shiny session events

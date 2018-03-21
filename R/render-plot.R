@@ -1042,6 +1042,7 @@ find_panel_ranges <- function(g, pixelratio, res) {
 #' }
 #'
 #'
+#'
 #' @param invalidationExpr Any expression or block of code that accesses any
 #'   reactives whose invalidation should cause cache invalidation. Use
 #'   \code{NULL} if you don't want to cause cache invalidation.
@@ -1049,13 +1050,17 @@ find_panel_ranges <- function(g, pixelratio, res) {
 #'   more arguments. Don't worry about setting up a graphics device or creating
 #'   a PNG; just write to the graphics device (you must call \code{print()} on
 #'   ggplot2 objects).
-#' @param width,height The dimensions of the plot. (Use double the user
-#'   width/height for retina/hi-dpi compatibility.)
-#' @param res The resolution of the PNG. Use 72 for normal screens, 144 for
-#'   retina/hi-dpi.
+#' @param baseWidth A base value for the width of the cached plot.
+#' @param aspectRatioRate A multiplier for different possible aspect ratios.
+#' @param growthRate A multiplier for different cached image sizes. For
+#'   example, with a \code{width} of 400 and a \code{growth_rate} of 1.25, there
+#'   will be possible cached images of widths 256, 320, 400, 500, 625, and so
+#'   on, both smaller and larger.
+#' @param res The resolution of the PNG, in pixels per inch.
 #' @param cacheDir The location on disk where the cache will be stored. If
-#'   \code{NULL} (the default), it uses a temp directory which will be cleaned up
-#'   when the cache scope exits. See the Cache Scoping section for more information.
+#'   \code{NULL} (the default), it uses a temp directory which will be cleaned
+#'   up when the cache scope exits. See the Cache Scoping section for more
+#'   information.
 #' @param invalidation.env The environment where the \code{invalidationExpr} is
 #'   evaluated.
 #' @param invalidation.quoted Is \code{invalidationExpr} expression quoted? By
@@ -1065,7 +1070,7 @@ find_panel_ranges <- function(g, pixelratio, res) {
 #'
 #' @export
 plotCache <- function(invalidationExpr, plotFunc,
-  width = 400, height = 400, res = 72,
+  baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72,
   cacheDir = NULL,
   invalidation.env = parent.frame(),
   invalidation.quoted = FALSE,
@@ -1109,6 +1114,8 @@ plotCache <- function(invalidationExpr, plotFunc,
     invalidationExpr <- substitute(invalidationExpr)
   }
 
+  possible_dims <- all_possible_dims(baseWidth, aspectRatioRate, growthRate)
+
   # Delete the cacheDir at the appropriate time. Use ignoreInit=TRUE because we don't
   # want it to happen right in the beginning, especially when cacheDir is provided
   # by the user and it might need to persist across R processes.
@@ -1122,18 +1129,33 @@ plotCache <- function(invalidationExpr, plotFunc,
     }
   )
 
-  function(..., .width = width, .height = height, .pixelratio = getDefaultReactiveDomain()$clientData$pixelratio) {
+  function(...) {
+    output_info <- getCurrentOutputInfo()
+    if (is.null(output_info)) {
+      stop("This must be run in a Shiny output.")
+    }
+    session <- getDefaultReactiveDomain()
+    if (is.null(session)) {
+      stop("This must be run from a Shiny session.")
+    }
+
+    target_width <- output_info$width()
+    target_height <- output_info$height()
+
+    dims <- find_smallest_containing_rect(target_width, target_height, possible_dims)
+
+    pixelratio <- session$clientData$pixelratio
 
     args <- list(...)
     # TODO: What if the args include weird objects like environments or reactive expressions?
-    key <- paste0(digest::digest(c(args, width = .width, height = .height, res = res, pixelratio = .pixelratio)), ".png")
+    key <- paste0(digest::digest(c(args, width = dims$width, height = dims$height, res = res, pixelratio = pixelratio)), ".png")
     filePath <- file.path(cacheDir, key)
     if (!file.exists(filePath)) {
       plotPNG(
         filename = filePath,
-        width = .width * .pixelratio,
-        height = .height * .pixelratio,
-        res = res * .pixelratio,
+        width    = dims$width  * pixelratio,
+        height   = dims$height * pixelratio,
+        res      = res    * pixelratio,
         function() {
           do.call("plotFunc", args)
         }
@@ -1141,4 +1163,40 @@ plotCache <- function(invalidationExpr, plotFunc,
     }
     filePath
   }
+}
+
+
+# Given a target rectangle with `width` and `height`, and data frame `dims` of possible
+# dimensions, with column `width` and `height, find the smallest possible width x
+# height pair from `dims` that fully contains `width` and `height.`
+find_smallest_containing_rect <- function(width, height, dims) {
+  fit_rows <- width <= dims$width  &  height <= dims$height
+
+  if (sum(fit_rows) == 0) {
+    # TODO: handle case where width x height is larger than all dims
+  }
+
+  # Drop all the rows where width x height won't fit
+  dims <- dims[fit_rows, ]
+
+  # Find the possible rectangle with the smallest area
+  dims$area <- dims$width * dims$height
+  min_row <- which.min(dims$area)
+
+  list(
+    width  = dims$width[min_row],
+    height = dims$height[min_row]
+  )
+}
+
+# Returns a data frame with all possible width-height combinations. This could
+# use some fine-tuning in the future.
+all_possible_dims <- function(base_width = 400, aspect_ratio_rate = 1.25, growth_rate = 1.25) {
+  aspect_ratios <- aspect_ratio_rate ^ (-3:3)
+  dims <- expand.grid(width = base_width * (growth_rate ^ (-6:6)), ratio = aspect_ratios)
+  dims$height <- dims$width * dims$ratio
+
+  dims$width  <- round(dims$width)
+  dims$height <- round(dims$height)
+  dims
 }

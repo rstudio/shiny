@@ -1069,7 +1069,7 @@ find_panel_ranges <- function(g, pixelratio, res) {
 #'   \code{quote()}.
 #'
 #' @export
-plotCache <- function(invalidationExpr, plotFunc,
+createCachedPlot <- function(invalidationExpr, plotFunc,
   baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72,
   cacheDir = NULL,
   invalidation.env = parent.frame(),

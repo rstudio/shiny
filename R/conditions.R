@@ -136,7 +136,10 @@ createStackTracePromiseDomain <- function() {
       force(onFulfilled)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentStack <- formatStackTrace(sys.calls())
+        calls <- sys.calls()
+        parents <- sys.parents()
+        attr(calls, "parents") <- parents
+        currentStack <- formatStackTrace(calls)
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
@@ -157,7 +160,10 @@ createStackTracePromiseDomain <- function() {
       force(onRejected)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentStack <- formatStackTrace(sys.calls())
+        calls <- sys.calls()
+        parents <- sys.parents()
+        attr(calls, "parents") <- parents
+        currentStack <- formatStackTrace(calls)
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
@@ -190,6 +196,8 @@ deepStacksEnabled <- function() {
 doCaptureStack <- function(e) {
   if (is.null(attr(e, "stack.trace", exact = TRUE))) {
     calls <- sys.calls()
+    parents <- sys.parents()
+    attr(calls, "parents") <- parents
     attr(e, "stack.trace") <- calls
   }
   if (deepStacksEnabled()) {
@@ -301,6 +309,37 @@ printStackTrace <- function(cond,
   invisible()
 }
 
+# Given sys.parents() (which corresponds to sys.calls()), return a logical index
+# that prunes each subtree so that only the final branch remains. The result,
+# when applied to sys.calls(), is a linear list of calls without any "wrapper"
+# functions like tryCatch, try, with, hybrid_chain, etc. While these are often
+# part of the active call stack, they rarely are helpful when trying to identify
+# a broken bit of code.
+prune <- function(parents) {
+  # Detect nodes that are not the last child. This is necessary, but not
+  # sufficient; we also need to drop nodes that are the last child, but one of
+  # their ancestors is not.
+  is_dupe <- duplicated(parents, fromLast = TRUE)
+
+  # The index of the most recently seen node that was actually kept instead of
+  # dropped.
+  current_node <- 0
+
+  # Loop over the parent indices. Anything that is not parented by current_node
+  # (a.k.a. last-known-good node), or is a dupe, can be discarded. Anything that
+  # is kept becomes the new current_node.
+  include <- vapply(seq_along(parents), function(i) {
+    if (!is_dupe[[i]] && parents[[i]] == current_node) {
+      current_node <<- i
+      TRUE
+    } else {
+      FALSE
+    }
+  }, FUN.VALUE = logical(1))
+
+  include
+}
+
 #' @details \code{extractStackTrace} takes a list of calls (e.g. as returned
 #'   from \code{conditionStackTrace(cond)}) and returns a data frame with one
 #'   row for each stack frame and the columns \code{num} (stack frame number),
@@ -312,6 +351,7 @@ extractStackTrace <- function(calls,
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
+  parents <- attr(calls, "parents", exact = TRUE)
   srcrefs <- getSrcRefs(calls)
   if (offset) {
     # Offset calls vs. srcrefs by 1 to make them more intuitive.
@@ -340,6 +380,7 @@ extractStackTrace <- function(calls,
     if (toRemove > 0 && toRemove < 5) {
       calls <- utils::head(calls, -toRemove)
       callnames <- utils::head(callnames, -toRemove)
+      parents <- utils::head(parents, -toRemove)
     }
 
     # This uses a ref-counting scheme. It might make sense to switch this
@@ -352,9 +393,7 @@ extractStackTrace <- function(calls,
     score[callnames == "..stacktraceon.."] <- 1
     toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff.."))
 
-    # doTryCatch, tryCatchOne, and tryCatchList are not informative--they're
-    # just internals for tryCatch
-    toShow <- toShow & !(callnames %in% c("doTryCatch", "tryCatchOne", "tryCatchList"))
+    toShow <- toShow & prune(parents)
   }
   calls <- calls[toShow]
 

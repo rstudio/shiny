@@ -140,6 +140,8 @@ createStackTracePromiseDomain <- function() {
       # Subscription time
       if (deepStacksEnabled()) {
         currentStack <- sys.calls()
+        currentParents <- sys.parents()
+        attr(currentStack, "parents") <- currentParents
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
@@ -161,6 +163,8 @@ createStackTracePromiseDomain <- function() {
       # Subscription time
       if (deepStacksEnabled()) {
         currentStack <- sys.calls()
+        currentParents <- sys.parents()
+        attr(currentStack, "parents") <- currentParents
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
@@ -193,6 +197,8 @@ deepStacksEnabled <- function() {
 doCaptureStack <- function(e) {
   if (is.null(attr(e, "stack.trace", exact = TRUE))) {
     calls <- sys.calls()
+    parents <- sys.parents()
+    attr(calls, "parents") <- parents
     attr(e, "stack.trace") <- calls
   }
   if (deepStacksEnabled()) {
@@ -260,19 +266,84 @@ withLogErrors <- function(expr,
 printError <- function(cond,
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
+  
+  should_drop <- !full
+  should_strip <- !full
+  should_prune <- !full
+  
+  stackTraceCalls <- c(
+    attr(cond, "deep.stack.trace", exact = TRUE),
+    list(attr(cond, "stack.trace", exact = TRUE))
+  )
+  
+  stackTraceParents <- lapply(stackTraceCalls, attr, which = "parents", exact = TRUE)
+  stackTraceCallNames <- lapply(stackTraceCalls, getCallNames)
+  stackTraceCalls <- lapply(stackTraceCalls, offsetSrcrefs)
+  
+  # Use dropTrivialFrames logic to remove trailing bits (.handleSimpleError, h)
+  if (should_drop) {
+    # toKeep is a list of logical vectors, of which elements (stack frames) to keep
+    toKeep <- lapply(stackTraceCallNames, dropTrivialFrames)
+    # We apply the list of logical vector indices to each data structure
+    stackTraceCalls <- mapply(stackTraceCalls, FUN = `[`, toKeep, SIMPLIFY = FALSE)
+    stackTraceCallNames <- mapply(stackTraceCallNames, FUN = `[`, toKeep, SIMPLIFY = FALSE)
+    stackTraceParents <- mapply(stackTraceParents, FUN = `[`, toKeep, SIMPLIFY = FALSE)
+  }
 
-  warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s",
-    getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
-  printStackTrace(cond, full = full, offset = offset)
-  lapply(rev(attr(cond, "deep.stack.trace", exact = TRUE)), function(st) {
-    message(
-      paste0(
-        "From earlier call:\n",
-        paste0(formatStackTrace(st, full = full, offset = offset), collapse = "\n"),
-        "\n"
-      )
-    )
+  delayedAssign("all_true", {
+    # List of logical vectors that are all TRUE, the same shape as
+    # stackTraceCallNames. Delay the evaluation so we don't create it unless
+    # we need it, but if we need it twice then we don't pay to create it twice.
+    lapply(stackTraceCallNames, function(st) {
+      rep_len(TRUE, length(st))
+    })
   })
+
+  # stripStackTraces and lapply(stackTraceParents, pruneStackTrace) return lists
+  # of logical vectors. Use mapply(FUN = `&`) to boolean-and each pair of the
+  # logical vectors.
+  toShow <- mapply(
+    if (should_strip) stripStackTraces(stackTraceCallNames) else all_true,
+    if (should_prune) lapply(stackTraceParents, pruneStackTrace) else all_true,
+    FUN = `&`,
+    SIMPLIFY = FALSE
+  )
+  
+  warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s", 
+    getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
+  
+  dfs <- mapply(1:length(stackTraceCalls), rev(stackTraceCalls), rev(stackTraceCallNames), rev(toShow), FUN = function(i, calls, nms, index) {
+    st <- data.frame(
+      num = rev(which(index)),
+      call = rev(nms[index]),
+      loc = rev(getLocs(calls[index])),
+      category = rev(getCallCategories(calls[index])),
+      stringsAsFactors = FALSE
+    )
+    
+    if (i != 1) {
+      cat("From earlier call:\n")
+    }
+    
+    width <- floor(log10(max(st$num))) + 1
+    cat(paste(collapse = "\n", paste0(
+      "  ",
+      formatC(st$num, width = width),
+      ": ",
+      mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
+        if (category == "pkg")
+          crayon::silver(name)
+        else if (category == "user")
+          crayon::blue$bold(name)
+        else
+          crayon::white(name)
+      })
+    )))
+    cat("\n")
+    
+    st
+  }, SIMPLIFY = FALSE)
+  
   invisible()
 }
 
@@ -413,17 +484,13 @@ stripOneStackTrace <- function(stackTrace, truncateFloor, startingScore) {
   list(score = tail(score, 1), trace = c(prefix, toShow))
 }
 
-pruneStackTraces <- function(list_of_parents) {
-  lapply(list_of_parents, pruneOneStackTrace)
-}
-
 # Given sys.parents() (which corresponds to sys.calls()), return a logical index
 # that prunes each subtree so that only the final branch remains. The result,
 # when applied to sys.calls(), is a linear list of calls without any "wrapper"
 # functions like tryCatch, try, with, hybrid_chain, etc. While these are often
 # part of the active call stack, they rarely are helpful when trying to identify
 # a broken bit of code.
-pruneOneStackTrace <- function(parents) {
+pruneStackTrace <- function(parents) {
   # Detect nodes that are not the last child. This is necessary, but not
   # sufficient; we also need to drop nodes that are the last child, but one of
   # their ancestors is not.
@@ -446,6 +513,34 @@ pruneOneStackTrace <- function(parents) {
   }, FUN.VALUE = logical(1))
   
   include
+}
+
+dropTrivialFrames <- function(callnames) {
+  # Remove stop(), .handleSimpleError(), and h() calls from the end of
+  # the calls--they don't add any helpful information. But only remove
+  # the last *contiguous* block of them, and then, only if they are the
+  # last thing in the calls list.
+  hideable <- callnames %in% c(".handleSimpleError", "h")
+  # What's the last that *didn't* match stop/.handleSimpleError/h?
+  lastGoodCall <- max(which(!hideable))
+  toRemove <- length(callnames) - lastGoodCall
+  
+  c(
+    rep_len(TRUE, length(callnames) - toRemove),
+    rep_len(FALSE, toRemove)
+  )
+}
+
+offsetSrcrefs <- function(calls) {
+  srcrefs <- getSrcRefs(calls)
+  
+  # Offset calls vs. srcrefs by 1 to make them more intuitive.
+  # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
+  # the definition of foo().
+  srcrefs <- c(utils::tail(srcrefs, -1), list(NULL))
+  
+  calls <- setSrcRefs(calls, srcrefs)
+  calls
 }
 
 #' @details \code{formatStackTrace} is similar to \code{extractStackTrace}, but

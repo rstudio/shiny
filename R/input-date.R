@@ -41,6 +41,8 @@
 #'   "nb", "nl-BE", "nl", "no", "pl", "pt-BR", "pt", "ro", "rs-latin", "rs",
 #'   "ru", "sk", "sl", "sq", "sr-latin", "sr", "sv", "sw", "th", "tr", "uk",
 #'   "vi", "zh-CN", and "zh-TW".
+#' @param autoclose Whether or not to close the datepicker immediately when a
+#'   date is selected.
 #'
 #' @family input elements
 #' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
@@ -76,7 +78,7 @@
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en",
-  width = NULL) {
+  width = NULL, autoclose = TRUE) {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
@@ -99,7 +101,8 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-date-start-view` = startview,
                `data-min-date` = min,
                `data-max-date` = max,
-               `data-initial-date` = value
+               `data-initial-date` = value,
+               `data-date-autoclose` = if (autoclose) "true" else "false"
     ),
     datePickerDependency
   )

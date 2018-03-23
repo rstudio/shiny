@@ -11,6 +11,8 @@ shiny 1.0.5.9000
 
 ### Minor new features and improvements
 
+* Added a new `autoclose = TRUE` parameter to `dateInput()` and `dateRangeInput()`. This closed [#1969](https://github.com/rstudio/shiny/issues/1969) which was a duplicate of much older issue, [#173](https://github.com/rstudio/shiny/issues/173). The default value is `TRUE` since that seems to be the common use case. However, this will cause existing apps with date inputs (that update to this version of Shiny) to have the datepicker be immediately closed once a date is selected. For most apps, this is actually desired behavior; if you wish to keep the datepicker open until the user clicks out of it use `autoclose = FALSE`. ([#1987](https://github.com/rstudio/shiny/pull/1987))
+
 * Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. ([#1968](https://github.com/rstudio/shiny/pull/1968))
 
 * Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/master/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, [@jekriske-lilly](https://github.com/jekriske-lilly)! [#1844](https://github.com/rstudio/shiny/pull/1844))

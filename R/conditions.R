@@ -267,6 +267,18 @@ printError <- function(cond,
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
   
+  warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s", 
+    getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
+  
+  printStackTrace(cond, full = full, offset = offset)
+}
+
+#' @rdname stacktrace
+#' @export
+printStackTrace <- function(cond,
+  full = getOption("shiny.fullstacktrace", FALSE),
+  offset = getOption("shiny.stacktraceoffset", TRUE)) {
+
   should_drop <- !full
   should_strip <- !full
   should_prune <- !full
@@ -289,7 +301,7 @@ printError <- function(cond,
     stackTraceCallNames <- mapply(stackTraceCallNames, FUN = `[`, toKeep, SIMPLIFY = FALSE)
     stackTraceParents <- mapply(stackTraceParents, FUN = `[`, toKeep, SIMPLIFY = FALSE)
   }
-
+  
   delayedAssign("all_true", {
     # List of logical vectors that are all TRUE, the same shape as
     # stackTraceCallNames. Delay the evaluation so we don't create it unless
@@ -298,7 +310,7 @@ printError <- function(cond,
       rep_len(TRUE, length(st))
     })
   })
-
+  
   # stripStackTraces and lapply(stackTraceParents, pruneStackTrace) return lists
   # of logical vectors. Use mapply(FUN = `&`) to boolean-and each pair of the
   # logical vectors.
@@ -308,9 +320,6 @@ printError <- function(cond,
     FUN = `&`,
     SIMPLIFY = FALSE
   )
-  
-  warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s", 
-    getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
   
   dfs <- mapply(1:length(stackTraceCalls), rev(stackTraceCalls), rev(stackTraceCallNames), rev(toShow), FUN = function(i, calls, nms, index) {
     st <- data.frame(
@@ -347,34 +356,6 @@ printError <- function(cond,
   invisible()
 }
 
-#' @rdname stacktrace
-#' @export
-printStackTrace <- function(cond,
-  full = getOption("shiny.fullstacktrace", FALSE),
-  offset = getOption("shiny.stacktraceoffset", TRUE)) {
-
-  stackTrace <- attr(cond, "stack.trace", exact = TRUE)
-  tryCatch(
-    if (!is.null(stackTrace)) {
-      message(paste0(
-        "Stack trace (innermost first):\n",
-        paste0(collapse = "\n",
-          formatStackTrace(stackTrace, full = full, offset = offset,
-            indent = "    ")
-        ),
-        "\n"
-      ))
-    } else {
-      message("No stack trace available")
-    },
-
-    error = function(cond) {
-      warning("Failed to write stack trace: ", cond)
-    }
-  )
-  invisible()
-}
-
 #' @details \code{extractStackTrace} takes a list of calls (e.g. as returned
 #'   from \code{conditionStackTrace(cond)}) and returns a data frame with one
 #'   row for each stack frame and the columns \code{num} (stack frame number),
@@ -385,6 +366,10 @@ printStackTrace <- function(cond,
 extractStackTrace <- function(calls,
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
+  
+  shinyDeprecated(NULL,
+    "extractStackTrace is deprecated. Please contact the Shiny team if you were using this functionality.",
+    version = "1.0.5")
 
   srcrefs <- getSrcRefs(calls)
   if (offset) {
@@ -520,7 +505,7 @@ dropTrivialFrames <- function(callnames) {
   # the calls--they don't add any helpful information. But only remove
   # the last *contiguous* block of them, and then, only if they are the
   # last thing in the calls list.
-  hideable <- callnames %in% c(".handleSimpleError", "h")
+  hideable <- callnames %in% c("stop", ".handleSimpleError", "h", "base$wrapOnFulfilled")
   # What's the last that *didn't* match stop/.handleSimpleError/h?
   lastGoodCall <- max(which(!hideable))
   toRemove <- length(callnames) - lastGoodCall
@@ -552,6 +537,10 @@ formatStackTrace <- function(calls, indent = "    ",
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
+  shinyDeprecated(NULL,
+    "extractStackTrace is deprecated. Please contact the Shiny team if you were using this functionality.",
+    version = "1.0.5")
+  
   st <- extractStackTrace(calls, full = full, offset = offset)
   if (nrow(st) == 0) {
     return(character(0))

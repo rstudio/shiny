@@ -360,7 +360,8 @@ printStackTrace <- function(cond,
 #'   from \code{conditionStackTrace(cond)}) and returns a data frame with one
 #'   row for each stack frame and the columns \code{num} (stack frame number),
 #'   \code{call} (a function name or similar), and \code{loc} (source file path
-#'   and line number, if available).
+#'   and line number, if available). It was deprecated after shiny 1.0.5 because
+#'   it doesn't support deep stack traces.
 #' @rdname stacktrace
 #' @export
 extractStackTrace <- function(calls,
@@ -529,7 +530,8 @@ offsetSrcrefs <- function(calls) {
 }
 
 #' @details \code{formatStackTrace} is similar to \code{extractStackTrace}, but
-#'   it returns a preformatted character vector instead of a data frame.
+#'   it returns a preformatted character vector instead of a data frame. It was
+#'   deprecated after shiny 1.0.5 because it doesn't support deep stack traces.
 #' @param indent A string to prefix every line of the stack trace.
 #' @rdname stacktrace
 #' @export

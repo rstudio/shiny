@@ -447,7 +447,7 @@ stripStackTraces <- function(stackTraces, values = FALSE) {
 stripOneStackTrace <- function(stackTrace, truncateFloor, startingScore) {
   prefix <- logical(0)
   if (truncateFloor) {
-    indexOfFloor <- tail(which(stackTrace == "..stacktracefloor.."), 1)
+    indexOfFloor <- utils::tail(which(stackTrace == "..stacktracefloor.."), 1)
     if (length(indexOfFloor)) {
       stackTrace <- stackTrace[(indexOfFloor+1L):length(stackTrace)]
       prefix <- rep_len(FALSE, indexOfFloor)
@@ -466,7 +466,7 @@ stripOneStackTrace <- function(stackTrace, truncateFloor, startingScore) {
   toShow <- score > 0 & !(stackTrace %in% c("..stacktraceon..", "..stacktraceoff..", "..stacktracefloor.."))
   
   
-  list(score = tail(score, 1), trace = c(prefix, toShow))
+  list(score = utils::tail(score, 1), trace = c(prefix, toShow))
 }
 
 # Given sys.parents() (which corresponds to sys.calls()), return a logical index

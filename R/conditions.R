@@ -333,21 +333,25 @@ printStackTrace <- function(cond,
     if (i != 1) {
       message("From earlier call:")
     }
-    
-    width <- floor(log10(max(st$num))) + 1
-    message(paste(collapse = "\n", paste0(
-      "  ",
-      formatC(st$num, width = width),
-      ": ",
-      mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
-        if (category == "pkg")
-          crayon::silver(name)
-        else if (category == "user")
-          crayon::blue$bold(name)
-        else
-          crayon::white(name)
-      })
-    )))
+
+    if (nrow(st) == 0) {
+      message("  [No stack trace available]")
+    } else {
+      width <- floor(log10(max(st$num))) + 1
+      message(paste(collapse = "\n", paste0(
+        "  ",
+        formatC(st$num, width = width),
+        ": ",
+        mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
+          if (category == "pkg")
+            crayon::silver(name)
+          else if (category == "user")
+            crayon::blue$bold(name)
+          else
+            crayon::white(name)
+        })
+      )))
+    }
 
     st
   }, SIMPLIFY = FALSE)

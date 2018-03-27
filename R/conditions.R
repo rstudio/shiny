@@ -136,7 +136,7 @@ createStackTracePromiseDomain <- function() {
       force(onFulfilled)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentStack <- formatStackTrace(sys.calls())
+        currentStack <- sys.calls()
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
@@ -157,7 +157,7 @@ createStackTracePromiseDomain <- function() {
       force(onRejected)
       # Subscription time
       if (deepStacksEnabled()) {
-        currentStack <- formatStackTrace(sys.calls())
+        currentStack <- sys.calls()
         currentDeepStack <- .globals$deepStack
       }
       function(...) {
@@ -265,7 +265,7 @@ printError <- function(cond,
     message(
       paste0(
         "From earlier call:\n",
-        paste0(st, collapse = "\n"),
+        paste0(formatStackTrace(st), collapse = "\n"),
         "\n"
       )
     )

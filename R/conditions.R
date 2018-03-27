@@ -290,7 +290,7 @@ printStackTrace <- function(cond,
   
   stackTraceParents <- lapply(stackTraceCalls, attr, which = "parents", exact = TRUE)
   stackTraceCallNames <- lapply(stackTraceCalls, getCallNames)
-  stackTraceCalls <- lapply(stackTraceCalls, offsetSrcrefs)
+  stackTraceCalls <- lapply(stackTraceCalls, offsetSrcrefs, offset = offset)
   
   # Use dropTrivialFrames logic to remove trailing bits (.handleSimpleError, h)
   if (should_drop) {
@@ -517,15 +517,18 @@ dropTrivialFrames <- function(callnames) {
   )
 }
 
-offsetSrcrefs <- function(calls) {
-  srcrefs <- getSrcRefs(calls)
+offsetSrcrefs <- function(calls, offset = TRUE) {
+  if (offset) {
+    srcrefs <- getSrcRefs(calls)
+
+    # Offset calls vs. srcrefs by 1 to make them more intuitive.
+    # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
+    # the definition of foo().
+    srcrefs <- c(utils::tail(srcrefs, -1), list(NULL))
+    
+    calls <- setSrcRefs(calls, srcrefs)
+  }
   
-  # Offset calls vs. srcrefs by 1 to make them more intuitive.
-  # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
-  # the definition of foo().
-  srcrefs <- c(utils::tail(srcrefs, -1), list(NULL))
-  
-  calls <- setSrcRefs(calls, srcrefs)
   calls
 }
 

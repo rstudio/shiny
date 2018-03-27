@@ -26,7 +26,7 @@ res$parents <- tail(res$parents - (length(res$parents) - 5), 5)
 
 describe("stack pruning", {
   it("passes basic example", {
-    expect_equal(pruneOneStackTrace(res$parents), c(F, F, T, T, T))
-    expect_equal(pruneStackTraces(list(res$parents)), list(c(F, F, T, T, T)))
+    expect_equal(pruneStackTrace(res$parents), c(F, F, T, T, T))
+    expect_equal(lapply(list(res$parents), pruneStackTrace), list(c(F, F, T, T, T)))
   })
 })

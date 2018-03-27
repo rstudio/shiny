@@ -331,11 +331,11 @@ printStackTrace <- function(cond,
     )
     
     if (i != 1) {
-      cat("From earlier call:\n")
+      message("From earlier call:")
     }
     
     width <- floor(log10(max(st$num))) + 1
-    cat(paste(collapse = "\n", paste0(
+    message(paste(collapse = "\n", paste0(
       "  ",
       formatC(st$num, width = width),
       ": ",
@@ -348,8 +348,7 @@ printStackTrace <- function(cond,
           crayon::white(name)
       })
     )))
-    cat("\n")
-    
+
     st
   }, SIMPLIFY = FALSE)
   
@@ -506,7 +505,7 @@ dropTrivialFrames <- function(callnames) {
   # the calls--they don't add any helpful information. But only remove
   # the last *contiguous* block of them, and then, only if they are the
   # last thing in the calls list.
-  hideable <- callnames %in% c("stop", ".handleSimpleError", "h", "base$wrapOnFulfilled")
+  hideable <- callnames %in% c(".handleSimpleError", "h", "base$wrapOnFulfilled")
   # What's the last that *didn't* match stop/.handleSimpleError/h?
   lastGoodCall <- max(which(!hideable))
   toRemove <- length(callnames) - lastGoodCall

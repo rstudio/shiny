@@ -6244,7 +6244,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     // The server needs to know the size of each image and plot output element,
     // in case it is auto-sizing
-    $('.shiny-image-output, .shiny-plot-output').each(function () {
+    $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function () {
       var id = getIdFromEl(this);
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
         initialValues['.clientdata_output_' + id + '_width'] = this.offsetWidth;
@@ -6252,7 +6252,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
     });
     function doSendImageSize() {
-      $('.shiny-image-output, .shiny-plot-output').each(function () {
+      $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function () {
         var id = getIdFromEl(this);
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput('.clientdata_output_' + id + '_width', this.offsetWidth);

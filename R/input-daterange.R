@@ -73,7 +73,8 @@
 #' @export
 dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     min = NULL, max = NULL, format = "yyyy-mm-dd", startview = "month",
-    weekstart = 0, language = "en", separator = " to ", width = NULL) {
+    weekstart = 0, language = "en", separator = " to ", width = NULL,
+    autoclose = TRUE) {
 
   # If start and end are date objects, convert to a string with yyyy-mm-dd format
   # Same for min and max
@@ -103,7 +104,8 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
           `data-date-start-view` = startview,
           `data-min-date` = min,
           `data-max-date` = max,
-          `data-initial-date` = start
+          `data-initial-date` = start,
+          `data-date-autoclose` = if (autoclose) "true" else "false"
         ),
         span(class = "input-group-addon", separator),
         tags$input(
@@ -115,7 +117,8 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
           `data-date-start-view` = startview,
           `data-min-date` = min,
           `data-max-date` = max,
-          `data-initial-date` = end
+          `data-initial-date` = end,
+          `data-date-autoclose` = if (autoclose) "true" else "false"
         )
       )
     ),

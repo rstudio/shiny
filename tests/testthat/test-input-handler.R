@@ -1,7 +1,10 @@
 context("Parse Shiny Input")
 
 test_that("A new type can be registered successfully", {
-  registerInputHandler("shiny.someType", function(){})
+  expect_error(
+    registerInputHandler("shiny.someType", function(){}),
+    NA
+  )
 })
 
 test_that("A duplicated type throws", {

@@ -1,15 +1,21 @@
-shiny 1.0.5.9000
+shiny 1.1
 ================
+
+This is a significant release for Shiny, with a major new feature that was nearly a year in the making: support for asynchronous operations! Until now, R's single-threaded nature meant that performing long-running calculations or tasks from Shiny would bring your app to a halt for other users of that process. This release of Shiny deeply integrates the [promises](https://rstudio.github.io/promises/) package to allow you to execute some tasks asynchronously, including as part of reactive expressions and outputs. See the [promises](https://rstudio.github.io/promises/) documentation to learn more.
 
 ## Full changelog
 
 ### Breaking changes
 
+* `extractStackTrace` and `formatStackTrace` are deprecated and will be removed in a future version of Shiny. As far as we can tell, nobody has been using these functions, and a refactor has made them vestigial; if you need this functionality, please file an issue.
+
 ### New features
 
-* If a shiny output contains a css class of `shiny-report-size`, its container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980). (Thanks, @cpsievert! [#1981](https://github.com/rstudio/shiny/pull/1981))
+* Support for asynchronous operations! Built-in render functions that expected a certain kind of object to be yielded from their `expr`, now generally can handle a promise for that kind of object. Reactive expressions and observers are now promise-aware as well. ([#1932](https://github.com/rstudio/shiny/pull/1932))
 
 ### Minor new features and improvements
+
+* If a shiny output contains a css class of `shiny-report-size`, its container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980). (Thanks, @cpsievert! [#1981](https://github.com/rstudio/shiny/pull/1981))
 
 * Added a new `autoclose = TRUE` parameter to `dateInput()` and `dateRangeInput()`. This closed [#1969](https://github.com/rstudio/shiny/issues/1969) which was a duplicate of much older issue, [#173](https://github.com/rstudio/shiny/issues/173). The default value is `TRUE` since that seems to be the common use case. However, this will cause existing apps with date inputs (that update to this version of Shiny) to have the datepicker be immediately closed once a date is selected. For most apps, this is actually desired behavior; if you wish to keep the datepicker open until the user clicks out of it use `autoclose = FALSE`. ([#1987](https://github.com/rstudio/shiny/pull/1987))
 
@@ -28,6 +34,10 @@ shiny 1.0.5.9000
 * Fixed [#1006](https://github.com/rstudio/shiny/issues/1006): Slider inputs sometimes showed too many digits. ([#1956](https://github.com/rstudio/shiny/pull/1956))
 
 * Fixed [#1958](https://github.com/rstudio/shiny/issues/1958): Slider inputs previously displayed commas after a decimal point. ([#1960](https://github.com/rstudio/shiny/pull/1960))
+
+* Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. [#1968](https://github.com/rstudio/shiny/pull/1968)
+
+* Stack traces have been improved, with more aggressive de-noising and support for deep stack traces (stitching together multiple stack traces that are conceptually part of the same async operation).
 
 
 ### Bug fixes

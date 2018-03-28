@@ -588,7 +588,7 @@ flexfill <- function(..., direction, flex, width = width, height = height) {
   }
 
   if (length(flex) > length(children)) {
-    flex <- flex[1:length(children)]
+    flex <- flex[seq_along(children)]
   }
 
   # The dimension along the main axis

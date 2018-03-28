@@ -321,7 +321,7 @@ printStackTrace <- function(cond,
     SIMPLIFY = FALSE
   )
   
-  dfs <- mapply(1:length(stackTraceCalls), rev(stackTraceCalls), rev(stackTraceCallNames), rev(toShow), FUN = function(i, calls, nms, index) {
+  dfs <- mapply(seq_along(stackTraceCalls), rev(stackTraceCalls), rev(stackTraceCallNames), rev(toShow), FUN = function(i, calls, nms, index) {
     st <- data.frame(
       num = rev(which(index)),
       call = rev(nms[index]),

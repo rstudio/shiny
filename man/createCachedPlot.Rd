@@ -4,20 +4,20 @@
 \alias{createCachedPlot}
 \title{Disk-based plot cache}
 \usage{
-createCachedPlot(invalidationExpr, plotFunc, baseWidth = 400,
+createCachedPlot(plotFunc, invalidationExpr, baseWidth = 400,
   aspectRatioRate = 1.25, growthRate = 1.25, res = 72, cacheDir = NULL,
   invalidation.env = parent.frame(), invalidation.quoted = FALSE,
   session = getDefaultReactiveDomain())
 }
 \arguments{
-\item{invalidationExpr}{Any expression or block of code that accesses any
-reactives whose invalidation should cause cache invalidation. Use
-\code{NULL} if you don't want to cause cache invalidation.}
-
 \item{plotFunc}{Plotting logic, provided as a function that takes zero or
 more arguments. Don't worry about setting up a graphics device or creating
 a PNG; just write to the graphics device (you must call \code{print()} on
 ggplot2 objects).}
+
+\item{invalidationExpr}{Any expression or block of code that accesses any
+reactives whose invalidation should cause cache invalidation. Use
+\code{NULL} if you don't want to cause cache invalidation.}
 
 \item{baseWidth}{A base value for the width of the cached plot.}
 

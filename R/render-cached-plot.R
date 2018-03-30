@@ -1,3 +1,24 @@
+#' @export
+renderCachedPlot <- function(plotFunc, invalidationExpr = NULL,
+  baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72
+) {
+  plotfunc_args <- as.list(formals(plotFunc))
+  calling_env <- parent.frame()
+
+  cached_plot <- createCachedPlot(plotFunc, invalidationExpr,
+    baseWidth, aspectRatioRate, growthRate, res
+  )
+
+  renderImage({
+    list(
+      src = do.call(cached_plot, plotfunc_args, envir = calling_env),
+      width = "100%"
+    )
+  }, deleteFile = FALSE)
+}
+
+
+
 #' Disk-based plot cache
 #'
 #' Creates a read-through cache for plots. The plotting logic is provided as
@@ -64,13 +85,13 @@
 #'
 #'
 #'
-#' @param invalidationExpr Any expression or block of code that accesses any
-#'   reactives whose invalidation should cause cache invalidation. Use
-#'   \code{NULL} if you don't want to cause cache invalidation.
 #' @param plotFunc Plotting logic, provided as a function that takes zero or
 #'   more arguments. Don't worry about setting up a graphics device or creating
 #'   a PNG; just write to the graphics device (you must call \code{print()} on
 #'   ggplot2 objects).
+#' @param invalidationExpr Any expression or block of code that accesses any
+#'   reactives whose invalidation should cause cache invalidation. Use
+#'   \code{NULL} if you don't want to cause cache invalidation.
 #' @param baseWidth A base value for the width of the cached plot.
 #' @param aspectRatioRate A multiplier for different possible aspect ratios.
 #' @param growthRate A multiplier for different cached image sizes. For
@@ -90,7 +111,7 @@
 #'   \code{quote()}.
 #'
 #' @export
-createCachedPlot <- function(invalidationExpr, plotFunc,
+createCachedPlot <- function(plotFunc, invalidationExpr,
   baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72,
   cacheDir = NULL,
   invalidation.env = parent.frame(),
@@ -151,6 +172,8 @@ createCachedPlot <- function(invalidationExpr, plotFunc,
   )
 
   function(...) {
+    args <- list(...)
+
     output_info <- getCurrentOutputInfo()
     if (is.null(output_info)) {
       stop("This must be run in a Shiny output.")
@@ -167,7 +190,6 @@ createCachedPlot <- function(invalidationExpr, plotFunc,
 
     pixelratio <- session$clientData$pixelratio
 
-    args <- list(...)
     # TODO: What if the args include weird objects like environments or reactive expressions?
     key <- paste0(digest::digest(c(args, width = dims$width, height = dims$height, res = res, pixelratio = pixelratio)), ".png")
     filePath <- file.path(cacheDir, key)

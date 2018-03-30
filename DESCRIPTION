@@ -142,6 +142,7 @@ Collate:
     'priorityqueue.R'
     'progress.R'
     'react.R'
+    'render-cached-plot.R'
     'render-plot.R'
     'render-table.R'
     'run-url.R'

@@ -698,7 +698,7 @@ selectizeJSON <- function(data, req) {
           if(is.character(data[[v]])) {
             # according to updateSelectizeInput() we know that
             # `data[[v]]` already in lower case
-            grepl(k, data[[v]], fixed = TRUE)
+            grepl(k, tolower(data[[v]]), fixed = TRUE)
           } else {
             grepl(k, tolower(as.character(data[[v]])), fixed = TRUE)
           }

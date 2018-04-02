@@ -692,6 +692,10 @@ selectizeJSON <- function(data, req) {
   idx <- logical(nrow(data))
   if (length(key)) {
     for (v in var) {
+      if (is.null(data[[v]])) {
+        warning(sprintf("Search field %s not in data.", v))
+        next
+      }
       matches <- do.call(
         cbind,
         lapply(key, function(k) {

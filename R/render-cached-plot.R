@@ -5,9 +5,33 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
   env = parent.frame(), quoted = FALSE, outputArgs = list()
 ) {
 
-  cacheKey <- reactive(substitute(cacheKeyExpr), env = parent.frame(), quoted = TRUE)
+  cacheKey          <- reactive(substitute(cacheKeyExpr),
+                                env = parent.frame(), quoted = TRUE)
+  cacheInvalidation <- reactive(substitute(cacheInvalidationExpr),
+                                env = parent.frame(), quoted = TRUE)
 
   cacheDir <- file.path(tempdir(), "plotcache")
+
+  dir.create(cacheDir, recursive = TRUE, mode = "0700") # This shouldn't be here
+
+  # Delete the cacheDir at the appropriate time. Use ignoreInit=TRUE because
+  # we don't want it to happen right in the beginning, especially when
+  # cacheDir is provided by the user and it might need to persist across R
+  # processes.
+  observeEvent(
+    substitute(cacheInvalidationExpr), event.env = parent.frame(), event.quoted = TRUE,
+    ignoreInit = TRUE,
+    {
+      if (dirExists(cacheDir)) {
+        unlink(cacheDir, recursive = TRUE)
+      }
+      dir.create(cacheDir, recursive = TRUE, mode = "0700")
+
+      # Cause drawReactive() to re-execute, so renderFunc doesn't use the
+      # cached value.
+      drawReactiveTrigger(drawReactiveTrigger() + 1)
+    }
+  )
 
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called

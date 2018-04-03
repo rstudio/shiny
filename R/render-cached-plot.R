@@ -1,20 +1,141 @@
 #' @export
-renderCachedPlot <- function(plotFunc, invalidationExpr = NULL,
-  baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72
+renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
+  baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72,
+  ...,
+  env = parent.frame(), quoted = FALSE, outputArgs = list()
 ) {
-  plotfunc_args <- as.list(formals(plotFunc))
-  calling_env <- parent.frame()
 
-  cached_plot <- createCachedPlot(plotFunc, invalidationExpr,
-    baseWidth, aspectRatioRate, growthRate, res
-  )
+  cacheKey <- reactive(substitute(cacheKeyExpr), env = parent.frame(), quoted = TRUE)
 
-  renderImage({
-    list(
-      src = do.call(cached_plot, plotfunc_args, envir = calling_env),
-      width = "100%"
+  cacheDir <- file.path(tempdir(), "plotcache")
+
+  # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
+  # is called
+  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
+
+  args <- list(...)
+
+  possible_dims <- all_possible_dims(baseWidth, aspectRatioRate, growthRate)
+
+  # Given the actual width/height of the image in the browser, return the
+  # smallest containing rectangle from possible_dims.
+  getDims <- function() {
+    cat("getDims()\n")
+    width  <- session$clientData[[paste0('output_', outputName, '_width')]]
+    height <- session$clientData[[paste0('output_', outputName, '_height')]]
+
+    find_smallest_containing_rect(width, height, possible_dims)
+  }
+
+  # Vars to store session and output, so that they can be accessed from
+  # the plotObj() reactive.
+  session <- NULL
+  outputName <- NULL
+
+  # This can be used to trigger drawReactive() to re-execute. This is
+  # necessary in some cases.
+  drawReactiveTrigger <- reactiveVal(0)
+
+  # Calls drawPlot, invoking the user-provided `func` (which may or may not
+  # return a promise). The idea is that the (cached) return value from this
+  # reactive can be used for varying width/heights, as it includes the
+  # displaylist, which is resolution independent.
+  drawReactive <- reactive(label = "plotObj", {
+    hybrid_chain(
+      {
+        drawReactiveTrigger()
+        cat("drawReactive()\n")
+
+        dims <- isolate(getDims())
+        pixelratio <- session$clientData$pixelratio %OR% 1
+
+        key <- digest::digest(list(cacheKey(), dims$width, dims$height, res, pixelratio))
+        resultFilePath <- file.path(cacheDir, paste0(key, ".rds"))
+
+        if (file.exists(resultFilePath)) {
+          cat("drawReactive(): cached\n")
+          # This will NOT include the displaylist.
+          readRDS(resultFilePath)
+
+        } else {
+          cat("drawReactive(): drawPlot()\n")
+          # This includes the displaylist.
+          drawPlot(outputName, session, func, dims$width, dims$height, pixelratio, res,
+                   resultfile = resultFilePath)
+        }
+      },
+      catch = function(reason) {
+        # Non-isolating read. A common reason for errors in plotting is because
+        # the dimensions are too small. By taking a dependency on width/height,
+        # we can try again if the plot output element changes size.
+        getDims()
+
+        # Propagate the error
+        stop(reason)
+      }
     )
-  }, deleteFile = FALSE)
+  })
+
+  # This function is the one that's returned from renderPlot(), and gets
+  # wrapped in an observer when the output value is assigned.
+  renderFunc <- function(shinysession, name, ...) {
+    outputName <<- name
+    session <<- shinysession
+
+    hybrid_chain(
+      drawReactive(),
+      function(result) {
+        cat("renderFunc()\n")
+        # Do take a reactive dependency on the dimensions
+        dims <- getDims()
+        pixelratio <- session$clientData$pixelratio %OR% 1
+
+        key <- digest::digest(list(cacheKey(), dims$width, dims$height, res, pixelratio))
+        resultFilePath <- file.path(cacheDir, paste0(key, ".rds"))
+
+        if (file.exists(resultFilePath)) {
+          cat("renderFunc(): cached\n")
+          cachedPlot <- readRDS(resultFilePath)
+          img <- cachedPlot$img
+
+        } else {
+          if (is.null(result$recordedPlot)) {
+            # This is an uncommon case. (1) The output from drawPlot was saved
+            # to RDS (without a recordedPlot, since that can't be properly
+            # saved). (2) drawPlot was called with another set of inputs (so
+            # it  didn't load from cache). (3) drawPlot was called, getting a
+            # cache hit and restoring the first RDS. (4) the plot is resized,
+            # so this reactive executes (and not drawPlot). In this situation,
+            # there's no recordedPlot that can be replayed, so we have to
+            # trigger drawPlot() to run again.
+            cat("renderFunc(): drawReactiveTrigger()\n")
+            drawReactiveTrigger(drawReactiveTrigger() + 1)
+            req(FALSE, cancelOutput = TRUE)
+
+          } else {
+            cat("renderFunc(): resizeSavedPlot()\n")
+            img <- resizeSavedPlot(name, shinysession, result,
+                                   dims$width, dims$height, pixelratio, res,
+                                   resultfile = resultFilePath)
+          }
+        }
+
+        # Replace exact pixel dimensions; instead tell it to fill.
+        img$width  <- "100%"
+        img$height <- NULL
+        img
+      }
+    )
+  }
+
+  # If renderPlot isn't going to adapt to the height of the div, then the
+  # div needs to adapt to the height of renderPlot. By default, plotOutput
+  # sets the height to 400px, so to make it adapt we need to override it
+  # with NULL.
+  outputFunc <- plotOutput
+  formals(outputFunc)['height'] <- list(NULL)
+
+  markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
 

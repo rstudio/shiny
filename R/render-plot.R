@@ -151,7 +151,8 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {
+resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res,
+                            resultfile = NULL, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res) {
     return(result$img)
@@ -171,9 +172,19 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
     coordmap = coordmap,
     error = attr(coordmap, "error", exact = TRUE)
   )
+
+  if (!is.null(resultfile)) {
+    result_save <- result
+    result_save$recordedPlot <- NULL
+    result_save$img <- img
+    saveRDS(result_save, resultfile)
+  }
+
+  img
 }
 
-drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
+drawPlot <- function(name, session, func, width, height, pixelratio, res,
+                     resultfile = NULL, ...) {
   #  1. Start PNG
   #  2. Enable displaylist recording
   #  3. Call user-defined func
@@ -247,6 +258,15 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
         # Get coordmap error message if present
         error = attr(result$coordmap, "error", exact = TRUE)
       ))
+
+      if (!is.null(resultfile)) {
+        # Save a copy of the result, but without the recorded plot, because it
+        # can't be saved and restored properly.
+        result_save <- result
+        result_save$recordedPlot <- NULL
+        saveRDS(result_save, resultfile)
+      }
+
       result
     },
     finally = function() {

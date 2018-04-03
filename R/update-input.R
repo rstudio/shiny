@@ -645,7 +645,6 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
 
   # server side updateSelectizeInput
   value <- unname(selected)
-  attr(choices, 'selected_value') <- value
 
   # convert a single vector to a data frame so it returns {label: , value: }
   # other objects return arbitrary JSON {x: , y: , foo: , ...}
@@ -668,6 +667,8 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     # slow path
     as.data.frame(choices, stringsAsFactors = FALSE)
   }
+
+  attr(choices, 'selected_value') <- value
 
   message <- dropNulls(list(
     label = label,
@@ -692,13 +693,17 @@ selectizeJSON <- function(data, req) {
   idx <- logical(nrow(data))
   if (length(key)) {
     for (v in var) {
+      if (is.null(data[[v]])) {
+        warning(sprintf("Search field %s not in data.", v))
+        next
+      }
       matches <- do.call(
         cbind,
         lapply(key, function(k) {
           if(is.character(data[[v]])) {
             # according to updateSelectizeInput() we know that
             # `data[[v]]` already in lower case
-            grepl(k, data[[v]], fixed = TRUE)
+            grepl(k, tolower(data[[v]]), fixed = TRUE)
           } else {
             grepl(k, tolower(as.character(data[[v]])), fixed = TRUE)
           }

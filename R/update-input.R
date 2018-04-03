@@ -645,7 +645,6 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
 
   # server side updateSelectizeInput
   value <- unname(selected)
-  attr(choices, 'selected_value') <- value
 
   # convert a single vector to a data frame so it returns {label: , value: }
   # other objects return arbitrary JSON {x: , y: , foo: , ...}
@@ -668,6 +667,8 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     # slow path
     as.data.frame(choices, stringsAsFactors = FALSE)
   }
+
+  attr(choices, 'selected_value') <- value
 
   message <- dropNulls(list(
     label = label,

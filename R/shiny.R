@@ -2196,7 +2196,9 @@ flushPendingSessions <- function() {
 #'   called from within the server function, this will default to the current
 #'   session, and the callback will be invoked when the current session ends. If
 #'   \code{onStop} is called outside a server function, then the callback will
-#'   be invoked with the application exits.
+#'   be invoked with the application exits. If \code{NULL}, it is the same as
+#'   calling \code{onStop} outside of the server function, and the callback will
+#'   be invoked when the application exits.
 #'
 #'
 #' @seealso \code{\link{onSessionEnded}()} for the same functionality, but at
@@ -2256,7 +2258,7 @@ flushPendingSessions <- function() {
 #' }
 #' @export
 onStop <- function(fun, session = getDefaultReactiveDomain()) {
-  if (is.null(getDefaultReactiveDomain())) {
+  if (is.null(session)) {
     return(.globals$onStopCallbacks$register(fun))
   } else {
     # Note: In the future if we allow scoping the onStop() callback to modules

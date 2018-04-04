@@ -42,6 +42,8 @@ evaluated.}
 default, this is FALSE. This is useful when you want to use an expression
 that is stored in a variable; to do so, it must be quoted with
 \code{quote()}.}
+
+\item{session}{A Shiny session object.}
 }
 \description{
 Creates a read-through cache for plots. The plotting logic is provided as

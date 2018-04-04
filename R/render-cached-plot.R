@@ -1,3 +1,102 @@
+#' Plot output with cached images
+#'
+#' Renders a reactive plot, with plot images cached to disk.
+#'
+#' \code{expr} is an expression that generates a plot, similar to that in
+#' \code{renderPlot}.
+#'
+#' \code{cacheKeyExpr} is an expression which, when evaluated, returns a cache
+#' key. This key is used to identify the contents of the plot. This expression
+#' is reactive, and so it will be re-evaluated when any upstream reactives
+#' are invalidated. Note that the caching logic will combine the return value
+#' of \code{cacheKeyExpr} with the width and height of the plot, as the
+#' cache key.
+#'
+#' \code{invalidationExpr} is an expression that uses reactive values like
+#' \code{input$click} and/or reactive expressions like \code{data()}. Whenever
+#' it changes value, the cache is invalidated (the contents are erased). You
+#' typically want to invalidate the cache when a plot made with the same input
+#' variables would have a different result. For example, if the plot is a
+#' scatter plot and the data set originally had 100 rows, and then changes to
+#' have 200 rows, you would want to invalidate the cache so that the plots would
+#' be redrawn display the new, larger data set. The \code{invalidationExpr}
+#' parameter works just like the \code{eventExpr} parameter of
+#' \code{\link{observeEvent}}.
+#'
+#' Another way to use \code{invalidationExpr} is to have it invalidate the cache
+#' at a fixed time interval. For example, you might want to have invalidate the
+#' cache once per hour, or once per day. See below for an example.
+#'
+#' @section Cache scoping:
+#'
+#'   There are a number of different ways you may want to scope the cache. For
+#'   example, you may want each user session to have their own plot cache, or
+#'   you may want each run of the application to have a cache (shared among
+#'   possibly multiple simultaneous user sessions), or you may want to have a
+#'   cache that persists even after the application is shut down and started
+#'   again.
+#'
+#'   To control the scope of the cache, use the \code{scope} parameter. There
+#'   are two ways of having Shiny automatically create and clean up the disk
+#'   cache.
+#'
+#' \describe{
+#'   \item{1}{To scope the cache to one session, use \code{scope="session"}.
+#'     When a new user session starts -- in other words, when a web browser
+#'     visits the Shiny application -- a new cache will be created on disk
+#'     for that session. When the session ends, the cache will be deleted.
+#'     The cache will not be shared across multiple sessions.}
+#'   \item{2}{To scope the cache to one run of a Shiny application (shared
+#'     among possibly multiple user sessions), use \code{scope="app"}. This
+#'     is the default. The cache will be shared across multiple sessions, so
+#'     there is potentially a large performance benefit if there are many users
+#'     of the application. If plots cannot be safely shared across users, this
+#'     should not be used.}
+#'  }
+#'
+#'    In some cases, you may want to manually specify the cache directory. This
+#'    can be useful if you want the cache to persist across multiple runs of an
+#'    application, or even across multiple R processes.
+#'
+#' \describe{
+#'   \item{3}{To have the cache persist across multiple runs of an R process,
+#'     use \code{scope=file.path(dirname(tempdir()), "plot1_cache")}.
+#'     This will create a subdirectory in your system temp directory named
+#'     \code{plot1_cache} (where \code{plot1_cache} is replaced with a unique
+#'     name of your choosing). When the R process exits, it will automatically
+#'     be removed.}
+#'   \item{4}{To have the cache persist even across multiple R processes, you
+#'     can set \code{cacheDir} to a location outside of the temp directory.
+#'     For example, it could be a subdirectory of the application, as in
+#'     \code{scope="plot1_cache"}}.
+#' }
+#'
+#'   Please note that if you specify a directory, that directory should only be
+#'   used to plot cache files. If it contains any other files or directories,
+#'   they could be removed when the cache is invalidated. Additionally, the
+#'   directory will not automatically be cleaned up or removed when the Shiny
+#'   application exits.
+#'
+#' @inheritParams renderPlot
+#' @param cacheKeyExpr An expression that generates a cache key. This key
+#'   should be a unique identifier for a plot.
+#' @param cacheInvalidationExpr An expression or block of code that accesses
+#'   any reactives whose invalidation should cause cache invalidation. If
+#'   \code{NULL} (the default) the cache will not invalidate.
+#' @param baseWidth A base value for the width of the cached plot.
+#' @param aspectRatioRate A multiplier for different possible aspect ratios.
+#'   For example, with a value of 1.2, the possible aspect ratios for plots
+#'   will be 1x1, 1x1.2, 1x1.44, and so on, getting wider, as well as 1.2x1,
+#'   1.44x1, and so on, getting taller.
+#' @param growthRate A multiplier for different cached image sizes. For
+#'   example, with a \code{width} of 400 and a \code{growthRate} of 1.25, there
+#'   will be possible cached images of widths 256, 320, 400, 500, 625, and so
+#'   on, both smaller and larger.
+#' @param res The resolution of the PNG, in pixels per inch.
+#' @param scope The scope of the cache. This can be \code{"app"} (the default),
+#'   \code{"session"}, or the path to a directory to store cached plots. See
+#'   the Cache Scoping section for more information.
+#'
 #' @export
 renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
   baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72,
@@ -6,7 +105,6 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
   env = parent.frame(), quoted = FALSE, outputArgs = list()
 ) {
 
-  scope <- match.arg(scope)
   cacheKey          <- reactive(substitute(cacheKeyExpr),
                                 env = parent.frame(), quoted = TRUE)
   cacheInvalidation <- reactive(substitute(cacheInvalidationExpr),
@@ -20,14 +118,21 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
         stop("outputName is NULL. cacheDir() was called too early.")
       }
 
-      appCachePath <- file.path(tempdir(), paste0("shinyapp-", getShinyOption("appToken")))
+      if (scope %in% c("app", "session")) {
+        appCachePath <- file.path(tempdir(), paste0("shinyapp-", getShinyOption("appToken")))
 
-      if (scope == "app") {
-        cacheScopePath <- appCachePath
-      } else if (scope == "session") {
-        cacheScopePath <- file.path(appCachePath, paste0("shinysession-", session$token))
+        if (scope == "app") {
+          cacheScopePath <- appCachePath
+        } else if (scope == "session") {
+          cacheScopePath <- file.path(appCachePath, paste0("shinysession-", session$token))
+        }
+
+        .cacheDir <<- file.path(cacheScopePath, paste0("output-", outputName))
+
+      } else {
+        # User has passed in a directory
+        .cacheDir <<- normalizePath2(scope)
       }
-      .cacheDir <<- file.path(cacheScopePath, paste0("output-", outputName))
     }
 
     .cacheDir
@@ -68,10 +173,8 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
     }
   }
 
-  # Delete the cacheDir at the appropriate time. Use ignoreInit=TRUE because
-  # we don't want it to happen right in the beginning, especially when
-  # cacheDir is provided by the user and it might need to persist across R
-  # processes.
+  # Clear the cacheDir at the appropriate time. Use ignoreInit=TRUE because we
+  # don't want it to happen right in the beginning.
   observeEvent(
     substitute(cacheInvalidationExpr), event.env = parent.frame(), event.quoted = TRUE,
     ignoreInit = TRUE,
@@ -309,6 +412,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
 #'   default, this is FALSE. This is useful when you want to use an expression
 #'   that is stored in a variable; to do so, it must be quoted with
 #'   \code{quote()}.
+#' @param session A Shiny session object.
 #'
 #' @export
 createCachedPlot <- function(plotFunc, invalidationExpr,

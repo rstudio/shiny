@@ -261,7 +261,11 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res,
 
       if (!is.null(resultfile)) {
         # Save a copy of the result, but without the recorded plot, because it
-        # can't be saved and restored properly.
+        # can't be saved and restored properly within the same R session. Note
+        # that this was fixed in revision 74506 (2e6c669), and should be in R
+        # 3.5.0, but we need to work on older versions. Perhaps in the future
+        # we could do a version check and change caching behavior based on
+        # that.
         result_save <- result
         result_save$recordedPlot <- NULL
         saveRDS(result_save, resultfile)

@@ -643,10 +643,6 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
 
-  # server side updateSelectizeInput
-  value <- unname(selected)
-  attr(choices, 'selected_value') <- value
-
   # convert a single vector to a data frame so it returns {label: , value: }
   # other objects return arbitrary JSON {x: , y: , foo: , ...}
   choices <- if (is.atomic(choices)) {
@@ -666,6 +662,9 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     # slow path
     as.data.frame(choices, stringsAsFactors = FALSE)
   }
+
+  value <- unname(selected)
+  attr(choices, 'selected_value') <- value
 
   message <- dropNulls(list(
     label = label,

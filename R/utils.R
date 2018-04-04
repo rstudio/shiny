@@ -269,6 +269,25 @@ dirExists <- function(paths) {
   file.exists(paths) & file.info(paths)$isdir
 }
 
+# Removes empty directory (vectorized). This is needed because file.remove()
+# on Unix will remove empty directories, but on Windows, it will not. On
+# Windows, you would need to use unlink(recursive=TRUE), which is not very
+# safe. This function does it safely on Unix and Windows.
+dirRemove <- function(path) {
+  for (p in path) {
+    if (!dirExists(p)) {
+      stop("Cannot remove non-existent directory ", p, ".")
+    }
+    if (length(dir(p, all.files = TRUE, no.. = TRUE)) != 0) {
+      stop("Cannot remove non-empty directory ", p, ".")
+    }
+    result <- unlink(p, recursive = TRUE)
+    if (result == 1) {
+      stop("Error removing directory ", p, ".")
+    }
+  }
+}
+
 # Attempt to join a path and relative path, and turn the result into a
 # (normalized) absolute path. The result will only be returned if it is an
 # existing file/directory and is a descendant of dir.

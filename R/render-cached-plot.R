@@ -1,18 +1,72 @@
 #' @export
 renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
   baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72,
+  scope = c("app", "session"),
   ...,
   env = parent.frame(), quoted = FALSE, outputArgs = list()
 ) {
 
+  scope <- match.arg(scope)
   cacheKey          <- reactive(substitute(cacheKeyExpr),
                                 env = parent.frame(), quoted = TRUE)
   cacheInvalidation <- reactive(substitute(cacheInvalidationExpr),
                                 env = parent.frame(), quoted = TRUE)
 
-  cacheDir <- file.path(tempdir(), "plotcache")
+  .cacheDir <- NULL
+  cacheDir <- function() {
+    # Memoize
+    if (is.null(.cacheDir)) {
+      if (is.null(outputName)) {
+        stop("outputName is NULL. cacheDir() was called too early.")
+      }
 
-  dir.create(cacheDir, recursive = TRUE, mode = "0700") # This shouldn't be here
+      appCachePath <- file.path(tempdir(), paste0("shinyapp-", getShinyOption("appToken")))
+
+      if (scope == "app") {
+        cacheScopePath <- appCachePath
+      } else if (scope == "session") {
+        cacheScopePath <- file.path(appCachePath, paste0("shinysession-", session$token))
+      }
+      .cacheDir <<- file.path(cacheScopePath, paste0("output-", outputName))
+    }
+
+    .cacheDir
+  }
+
+  ensureCacheDirExists <- function() {
+    if (!dirExists(cacheDir())) {
+      cat("Creating ", cacheDir(), "\n")
+      dir.create(cacheDir(), recursive = TRUE, mode = "0700")
+
+      # Set up removal of cache directory at appropriate time. The removal
+      # callback is registered here, paired with the creation of the cache
+      # dir, to ensure it's not scheduled multiple times for one directory.
+      deleteCacheDir <- function() {
+        # Just to be safe, don't try to delete the cache dir if it's already
+        # gone.
+        if (!dirExists(cacheDir())) {
+          return()
+        }
+
+        unlink(cacheDir(), recursive = TRUE)
+
+        # Recursively delete empty parent dirs, up to temp dir.
+        currentDir <- dirname(cacheDir())
+        while (currentDir != tempdir() &&
+               length(dir(currentDir, all.files = TRUE, no.. = TRUE)) == 0)
+        {
+          dirRemove(currentDir)
+          currentDir <- dirname(currentDir)
+        }
+      }
+
+      if (scope == "app") {
+        onStop(deleteCacheDir, session = NULL)
+      } else if (scope == "session") {
+        onSessionEnded(deleteCacheDir)
+      }
+    }
+  }
 
   # Delete the cacheDir at the appropriate time. Use ignoreInit=TRUE because
   # we don't want it to happen right in the beginning, especially when
@@ -22,10 +76,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
     substitute(cacheInvalidationExpr), event.env = parent.frame(), event.quoted = TRUE,
     ignoreInit = TRUE,
     {
-      if (dirExists(cacheDir)) {
-        unlink(cacheDir, recursive = TRUE)
-      }
-      dir.create(cacheDir, recursive = TRUE, mode = "0700")
+      unlink(file.path(cacheDir(), "*.rds"))
 
       # Cause drawReactive() to re-execute, so renderFunc doesn't use the
       # cached value.
@@ -73,8 +124,10 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
         dims <- isolate(getDims())
         pixelratio <- session$clientData$pixelratio %OR% 1
 
+        ensureCacheDirExists()
+
         key <- digest::digest(list(cacheKey(), dims$width, dims$height, res, pixelratio))
-        resultFilePath <- file.path(cacheDir, paste0(key, ".rds"))
+        resultFilePath <- file.path(cacheDir(), paste0(key, ".rds"))
 
         if (file.exists(resultFilePath)) {
           cat("drawReactive(): cached\n")
@@ -114,8 +167,10 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
 
+        ensureCacheDirExists()
+
         key <- digest::digest(list(cacheKey(), dims$width, dims$height, res, pixelratio))
-        resultFilePath <- file.path(cacheDir, paste0(key, ".rds"))
+        resultFilePath <- file.path(cacheDir(), paste0(key, ".rds"))
 
         if (file.exists(resultFilePath)) {
           cat("renderFunc(): cached\n")

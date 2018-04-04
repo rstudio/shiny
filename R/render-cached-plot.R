@@ -86,8 +86,8 @@
 #' @param baseWidth A base value for the width of the cached plot.
 #' @param aspectRatioRate A multiplier for different possible aspect ratios.
 #'   For example, with a value of 1.2, the possible aspect ratios for plots
-#'   will be 1x1, 1x1.2, 1x1.44, and so on, getting wider, as well as 1.2x1,
-#'   1.44x1, and so on, getting taller.
+#'   will be 1:1, 1:1.2, 1:1.44, and so on, getting wider, as well as 1.2:1,
+#'   1.44:1, and so on, getting taller.
 #' @param growthRate A multiplier for different cached image sizes. For
 #'   example, with a \code{width} of 400 and a \code{growthRate} of 1.25, there
 #'   will be possible cached images of widths 256, 320, 400, 500, 625, and so
@@ -99,8 +99,8 @@
 #'
 #' @export
 renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
-  baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72,
-  scope = c("app", "session"),
+  baseWidth = 400, aspectRatioRate = 1.2, growthRate = 1.2, res = 72,
+  scope = "app",
   ...,
   env = parent.frame(), quoted = FALSE, outputArgs = list()
 ) {
@@ -195,15 +195,9 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
 
   possible_dims <- all_possible_dims(baseWidth, aspectRatioRate, growthRate)
 
-  # Given the actual width/height of the image in the browser, return the
-  # smallest containing rectangle from possible_dims.
-  getDims <- function() {
-    cat("getDims()\n")
-    width  <- session$clientData[[paste0('output_', outputName, '_width')]]
-    height <- session$clientData[[paste0('output_', outputName, '_height')]]
-
-    find_smallest_containing_rect(width, height, possible_dims)
-  }
+  # The width and height of the plot to draw, taken from possible_dims. These
+  # values get filled by an observer below.
+  fitDims <- reactiveValues(width = NULL, height = NULL)
 
   # Vars to store session and output, so that they can be accessed from
   # the plotObj() reactive.
@@ -221,15 +215,20 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
   drawReactive <- reactive(label = "plotObj", {
     hybrid_chain(
       {
+        width  <- fitDims$width
+        height <- fitDims$height
+        # The first execution will have NULL width/height, because they haven't
+        # yet been retrieved from clientData.
+        req(width, height, cancelOutput = TRUE)
+
         drawReactiveTrigger()
         cat("drawReactive()\n")
 
-        dims <- isolate(getDims())
         pixelratio <- session$clientData$pixelratio %OR% 1
 
         ensureCacheDirExists()
 
-        key <- digest::digest(list(cacheKey(), dims$width, dims$height, res, pixelratio))
+        key <- digest::digest(list(cacheKey(), width, height, res, pixelratio))
         resultFilePath <- file.path(cacheDir(), paste0(key, ".rds"))
 
         if (file.exists(resultFilePath)) {
@@ -240,7 +239,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
         } else {
           cat("drawReactive(): drawPlot()\n")
           # This includes the displaylist.
-          drawPlot(outputName, session, func, dims$width, dims$height, pixelratio, res,
+          drawPlot(outputName, session, func, width, height, pixelratio, res,
                    resultfile = resultFilePath)
         }
       },
@@ -248,7 +247,8 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
         # Non-isolating read. A common reason for errors in plotting is because
         # the dimensions are too small. By taking a dependency on width/height,
         # we can try again if the plot output element changes size.
-        getDims()
+        fitDims$width
+        fitDims$height
 
         # Propagate the error
         stop(reason)
@@ -262,17 +262,32 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
     outputName <<- name
     session <<- shinysession
 
+    # Given the actual width/height of the image in the browser, this gets
+    # smallest containing rectangle from possible_dims, and pushes those
+    # values into `fitDims`. It's done this way so that the `fitDims` only
+    # change (and cause invalidations) when the rendered image size changes,
+    # and not every time the browser's <img> tag changes size.
+    observe({
+      width  <- session$clientData[[paste0('output_', outputName, '_width')]]
+      height <- session$clientData[[paste0('output_', outputName, '_height')]]
+
+      rect <- find_smallest_containing_rect(width, height, possible_dims)
+      fitDims$width  <- rect$width
+      fitDims$height <- rect$height
+    })
+
     hybrid_chain(
       drawReactive(),
       function(result) {
         cat("renderFunc()\n")
-        # Do take a reactive dependency on the dimensions
-        dims <- getDims()
+        # Take a reactive dependency on the fitted dimensions
+        width  <- fitDims$width
+        height <- fitDims$height
         pixelratio <- session$clientData$pixelratio %OR% 1
 
         ensureCacheDirExists()
 
-        key <- digest::digest(list(cacheKey(), dims$width, dims$height, res, pixelratio))
+        key <- digest::digest(list(cacheKey(), width, height, res, pixelratio))
         resultFilePath <- file.path(cacheDir(), paste0(key, ".rds"))
 
         if (file.exists(resultFilePath)) {
@@ -297,7 +312,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
           } else {
             cat("renderFunc(): resizeSavedPlot()\n")
             img <- resizeSavedPlot(name, shinysession, result,
-                                   dims$width, dims$height, pixelratio, res,
+                                   width, height, pixelratio, res,
                                    resultfile = resultFilePath)
           }
         }

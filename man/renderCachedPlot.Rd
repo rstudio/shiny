@@ -5,8 +5,8 @@
 \title{Plot output with cached images}
 \usage{
 renderCachedPlot(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
-  baseWidth = 400, aspectRatioRate = 1.25, growthRate = 1.25, res = 72,
-  scope = c("app", "session"), ..., env = parent.frame(), quoted = FALSE,
+  baseWidth = 400, aspectRatioRate = 1.2, growthRate = 1.2, res = 72,
+  scope = "app", ..., env = parent.frame(), quoted = FALSE,
   outputArgs = list())
 }
 \arguments{
@@ -23,8 +23,8 @@ any reactives whose invalidation should cause cache invalidation. If
 
 \item{aspectRatioRate}{A multiplier for different possible aspect ratios.
 For example, with a value of 1.2, the possible aspect ratios for plots
-will be 1x1, 1x1.2, 1x1.44, and so on, getting wider, as well as 1.2x1,
-1.44x1, and so on, getting taller.}
+will be 1:1, 1:1.2, 1:1.44, and so on, getting wider, as well as 1.2:1,
+1.44:1, and so on, getting taller.}
 
 \item{growthRate}{A multiplier for different cached image sizes. For
 example, with a \code{width} of 400 and a \code{growthRate} of 1.25, there

@@ -105,6 +105,12 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
   env = parent.frame(), quoted = FALSE, outputArgs = list()
 ) {
 
+  # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
+  # is called
+  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
+
+  args <- list(...)
+
   cacheKey          <- reactive(substitute(cacheKeyExpr),
                                 env = parent.frame(), quoted = TRUE)
   cacheInvalidation <- reactive(substitute(cacheInvalidationExpr),
@@ -186,12 +192,6 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
       drawReactiveTrigger(drawReactiveTrigger() + 1)
     }
   )
-
-  # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
-  # is called
-  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
-
-  args <- list(...)
 
   possible_dims <- all_possible_dims(baseWidth, aspectRatioRate, growthRate)
 

@@ -4,10 +4,9 @@
 \alias{renderCachedPlot}
 \title{Plot output with cached images}
 \usage{
-renderCachedPlot(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
-  baseWidth = 400, aspectRatioRate = 1.2, growthRate = 1.2, res = 72,
-  scope = "app", ..., env = parent.frame(), quoted = FALSE,
-  outputArgs = list())
+renderCachedPlot(expr, cacheKeyExpr, cacheClearExpr = NULL, baseWidth = 400,
+  aspectRatioRate = 1.2, growthRate = 1.2, res = 72, scope = "app", ...,
+  env = parent.frame(), quoted = FALSE, outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that generates a plot.}
@@ -15,9 +14,9 @@ renderCachedPlot(expr, cacheKeyExpr, cacheInvalidationExpr = NULL,
 \item{cacheKeyExpr}{An expression that generates a cache key. This key
 should be a unique identifier for a plot.}
 
-\item{cacheInvalidationExpr}{An expression or block of code that accesses
-any reactives whose invalidation should cause cache invalidation. If
-\code{NULL} (the default) the cache will not invalidate.}
+\item{cacheClearExpr}{An expression or block of code that accesses
+any reactives whose invalidation should cause the cached plots to be
+cleared. If \code{NULL} (the default) the cache will not get cleared.}
 
 \item{baseWidth}{A base value for the width of the cached plot.}
 
@@ -58,25 +57,24 @@ Renders a reactive plot, with plot images cached to disk.
 
 \code{cacheKeyExpr} is an expression which, when evaluated, returns a cache
 key. This key is used to identify the contents of the plot. This expression
-is reactive, and so it will be re-evaluated when any upstream reactives
-are invalidated. Note that the caching logic will combine the return value
-of \code{cacheKeyExpr} with the width and height of the plot, as the
-cache key.
+is reactive, and so it will be re-evaluated when any upstream reactives are
+invalidated. Note that the caching logic will combine the return value of
+\code{cacheKeyExpr} with the width and height of the plot, as the cache key.
 
-\code{invalidationExpr} is an expression that uses reactive values like
+\code{cacheClearExpr} is an expression that uses reactive values like
 \code{input$click} and/or reactive expressions like \code{data()}. Whenever
-it changes value, the cache is invalidated (the contents are erased). You
+it changes value, the cache is cleared (the contents are erased). You
 typically want to invalidate the cache when a plot made with the same input
 variables would have a different result. For example, if the plot is a
 scatter plot and the data set originally had 100 rows, and then changes to
 have 200 rows, you would want to invalidate the cache so that the plots would
-be redrawn display the new, larger data set. The \code{invalidationExpr}
+be redrawn display the new, larger data set. The \code{cacheClearExpr}
 parameter works just like the \code{eventExpr} parameter of
 \code{\link{observeEvent}}.
 
-Another way to use \code{invalidationExpr} is to have it invalidate the cache
-at a fixed time interval. For example, you might want to have invalidate the
-cache once per hour, or once per day. See below for an example.
+Another way to use \code{cacheClearExpr} is to have it clear the cache at a
+fixed time interval. For example, you might want to have clear the cache once
+per hour, or once per day. See below for an example.
 }
 \section{Cache scoping}{
 

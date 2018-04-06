@@ -3,28 +3,60 @@
 #' Renders a reactive plot, with plot images cached to disk.
 #'
 #' \code{expr} is an expression that generates a plot, similar to that in
-#' \code{renderPlot}.
+#' \code{renderPlot}. Unlike with \code{renderPlot}, this expression does not
+#' take reactive dependencies. It is re-executed only when the cache key
+#' changes.
 #'
-#' \code{cacheKeyExpr} is an expression which, when evaluated, returns a cache
-#' key. This key is used to identify the contents of the plot. This expression
-#' is reactive, and so it will be re-evaluated when any upstream reactives are
-#' invalidated. Note that the caching logic will combine the return value of
-#' \code{cacheKeyExpr} with the width and height of the plot, as the cache key.
+#' \code{cacheKeyExpr} is an expression which, when evaluated, returns an object
+#' which will be serialized and hashed using the \code{\link[digest]{digest}}
+#' function to generate a string that will be used as a cache key. This key is
+#' used to identify the contents of the plot: if the cache key is the same as a
+#' previous time, it assumes that the plot is the same and can be retrieved from
+#' the cache.
 #'
-#' \code{cacheClearExpr} is an expression that uses reactive values like
-#' \code{input$click} and/or reactive expressions like \code{data()}. Whenever
-#' it changes value, the cache is cleared (the contents are erased). You
-#' typically want to invalidate the cache when a plot made with the same input
-#' variables would have a different result. For example, if the plot is a
-#' scatter plot and the data set originally had 100 rows, and then changes to
-#' have 200 rows, you would want to invalidate the cache so that the plots would
-#' be redrawn display the new, larger data set. The \code{cacheClearExpr}
-#' parameter works just like the \code{eventExpr} parameter of
-#' \code{\link{observeEvent}}.
+#' This \code{cacheKeyExpr} is reactive, and so it will be re-evaluated when any
+#' upstream reactives are invalidated. This will also trigger re-execution of
+#' the plotting expression, \code{expr}.
 #'
-#' Another way to use \code{cacheClearExpr} is to have it clear the cache at a
-#' fixed time interval. For example, you might want to have clear the cache once
-#' per hour, or once per day. See below for an example.
+#' The key should consist of "normal" R objects, like vectors and lists. Lists
+#' should in turn contain other normal R objects. If the key contains
+#' environments, external pointers, or reference objects -- or even if it has
+#' such objects attached as attributes -- then it is possible that it will
+#' change unpredictably even when you do not expect it to. Additionally, because
+#' the entire key is serialized and hashed, if it contains a very large object
+#' -- a large data set, for example -- there may be a noticeable performance
+#' penalty.
+#'
+#' If you face these issues with the cache key, you can work around them by
+#' extracting out the important parts of the objects, and/or by converting them
+#' to normal R objects before returning them. Your expression could even
+#' serialize and hash that information in an efficient way and return a string,
+#' which will in turn be hashed (very quickly) by the
+#' \code{\link[digest]{digest}} function.
+#'
+#'
+#' \code{cacheResetEventExpr} is an expression that uses reactive values like
+#' \code{input$click} and/or reactive expressions like \code{data()}. The
+#' \code{cacheResetEventExpr} parameter works similarly to the \code{eventExpr}
+#' parameter of \code{\link{observeEvent}}: whenever the upstream reactive
+#' dependencies are invalidated, they cause this expression to re-execute, and
+#' the cache is reset -- the contents are erased. The cache should be reset when
+#' something changes so that a plot made with the same cache key as before would
+#' have a different result. This may happen when, for example, the underlying
+#' data changes. If the plot is based on a data source that changes over time,
+#' the plot at time 1 may differ from the plot at time 2, even if both plots use
+#' the same cache key.
+#'
+#' Another way to use \code{cacheResetEventExpr} is to have it clear the cache
+#' at a fixed time interval using \code{\link{invalidateLater}}. For example,
+#' you might want to have clear the cache once per hour, or once per day.
+#'
+#' Although both \code{cacheKeyExpr} and \code{cacheResetEventExpr} are reactive
+#' -- they re-execute when their upstream reactive dependencies are invalidated
+#' -- they differ in how they use the return value. For \code{cacheKeyExpr}, the
+#' returned value is used (as a key). In contrast, for
+#' \code{cacheResetEventExpr}, the return value is ignored; the invalidation of
+#' the expression is used only to signal that the cache should be reset.
 #'
 #' @section Cache scoping:
 #'
@@ -53,9 +85,9 @@
 #'     should not be used.}
 #'  }
 #'
-#'    In some cases, you may want to manually specify the cache directory. This
-#'    can be useful if you want the cache to persist across multiple runs of an
-#'    application, or even across multiple R processes.
+#'   In some cases, you may want to manually specify the cache directory. This
+#'   can be useful if you want the cache to persist across multiple runs of an
+#'   application, or even across multiple R processes.
 #'
 #' \describe{
 #'   \item{3}{To have the cache persist across multiple runs of an R process,
@@ -77,30 +109,30 @@
 #'   application exits.
 #'
 #' @inheritParams renderPlot
-#' @param cacheKeyExpr An expression that generates a cache key. This key
-#'   should be a unique identifier for a plot.
-#' @param cacheClearExpr An expression or block of code that accesses
-#'   any reactives whose invalidation should cause the cached plots to be
-#'   cleared. If \code{NULL} (the default) the cache will not get cleared.
+#' @param cacheKeyExpr An expression that returns a cache key. This key should
+#'   be a unique identifier for a plot: the assumption is that if the cache key
+#'   is the same, then the plot will be the same.
+#' @param cacheResetEventExpr An expression or block of code that accesses any
+#'   reactives whose invalidation should cause the cached plots to be cleared.
+#'   If \code{NULL} (the default) the cache will not get cleared.
 #' @param baseWidth A base value for the width of the cached plot.
-#' @param aspectRatioRate A multiplier for different possible aspect ratios.
-#'   For example, with a value of 1.2, the possible aspect ratios for plots
-#'   will be 1:1, 1:1.2, 1:1.44, and so on, getting wider, as well as 1.2:1,
-#'   1.44:1, and so on, getting taller.
-#' @param growthRate A multiplier for different cached image sizes. For
-#'   example, with a \code{width} of 400 and a \code{growthRate} of 1.25, there
-#'   will be possible cached images of widths 256, 320, 400, 500, 625, and so
-#'   on, both smaller and larger.
+#' @param aspectRatioRate A multiplier for different possible aspect ratios. For
+#'   example, with a value of 1.2, the possible aspect ratios for plots will be
+#'   1:1, 1:1.2, 1:1.44, and so on, getting wider, as well as 1.2:1, 1.44:1, and
+#'   so on, getting taller.
+#' @param growthRate A multiplier for different cached image sizes. For example,
+#'   with a \code{width} of 400 and a \code{growthRate} of 1.25, there will be
+#'   possible cached images of widths 256, 320, 400, 500, 625, and so on, both
+#'   smaller and larger.
 #' @param res The resolution of the PNG, in pixels per inch.
 #' @param scope The scope of the cache. This can be \code{"app"} (the default),
-#'   \code{"session"}, or the path to a directory to store cached plots. See
-#'   the Cache Scoping section for more information.
+#'   \code{"session"}, or the path to a directory to store cached plots. See the
+#'   Cache Scoping section for more information.
 #'
 #' @export
-renderCachedPlot <- function(expr, cacheKeyExpr, cacheClearExpr = NULL,
+renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
   baseWidth = 400, aspectRatioRate = 1.2, growthRate = 1.2, res = 72,
   scope = "app",
-  ...,
   env = parent.frame(), quoted = FALSE, outputArgs = list()
 ) {
 
@@ -111,10 +143,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheClearExpr = NULL,
   # triggered by the cache key (or width/height) changing.
   isolatedFunc <- function() isolate(func())
 
-  args <- list(...)
-
-  cacheKey   <- reactive(substitute(cacheKeyExpr),   env = parent.frame(), quoted = TRUE)
-  cacheClear <- reactive(substitute(cacheClearExpr), env = parent.frame(), quoted = TRUE)
+  cacheKey <- reactive(substitute(cacheKeyExpr), env = parent.frame(), quoted = TRUE)
 
   .cacheDir <- NULL
   cacheDir <- function() {
@@ -182,7 +211,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheClearExpr = NULL,
   # Clear the cacheDir at the appropriate time. Use ignoreInit=TRUE because we
   # don't want it to happen right in the beginning.
   observeEvent(
-    substitute(cacheClearExpr), event.env = parent.frame(), event.quoted = TRUE,
+    substitute(cacheResetEventExpr), event.env = parent.frame(), event.quoted = TRUE,
     ignoreInit = TRUE,
     {
       unlink(file.path(cacheDir(), "*.rds"))

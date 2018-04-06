@@ -107,6 +107,9 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheClearExpr = NULL,
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
   installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
+  # This is so that the expr doesn't re-execute by itself; it needs to be
+  # triggered by the cache key (or width/height) changing.
+  isolatedFunc <- function() isolate(func())
 
   args <- list(...)
 
@@ -239,7 +242,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheClearExpr = NULL,
         } else {
           cat("drawReactive(): drawPlot()\n")
           # This includes the displaylist.
-          drawPlot(outputName, session, func, width, height, pixelratio, res,
+          drawPlot(outputName, session, isolatedFunc, width, height, pixelratio, res,
                    resultfile = resultFilePath)
         }
       },

@@ -212,8 +212,11 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheClearExpr = NULL,
   drawReactive <- reactive(label = "plotObj", {
     hybrid_chain(
       {
-        width  <- fitDims$width
-        height <- fitDims$height
+        # Get width/height, but don't depend on them.
+        isolate({
+          width  <- fitDims$width
+          height <- fitDims$height
+        })
         # The first execution will have NULL width/height, because they haven't
         # yet been retrieved from clientData.
         req(width, height, cancelOutput = TRUE)

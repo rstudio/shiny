@@ -1270,12 +1270,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       evt.name = name;
       evt.value = value;
       evt.binding = binding;
-      $(binding ? binding.el : document).trigger(evt);
 
-      if (this.$values[name] === value) return undefined;
+      if (this.$values[name] === value) {
+        $(binding ? binding.el : document).trigger(evt);
+        return undefined;
+      }
 
       this.$values[name] = value;
       delete this.$errors[name];
+
+      $(binding ? binding.el : document).trigger(evt);
 
       if (!evt.isDefaultPrevented() && binding) {
         binding.onValueChange(evt.value);

@@ -331,18 +331,19 @@ var ShinyApp = function() {
   };
 
   this.receiveOutput = function(name, value) {
-    if (this.$values[name] === value)
-      return undefined;
-
-    this.$values[name] = value;
-    delete this.$errors[name];
-
     var binding = this.$bindings[name];
     var evt = jQuery.Event('shiny:value');
     evt.name = name;
     evt.value = value;
     evt.binding = binding;
     $(binding ? binding.el : document).trigger(evt);
+
+    if (this.$values[name] === value)
+      return undefined;
+
+    this.$values[name] = value;
+    delete this.$errors[name];
+
     if (!evt.isDefaultPrevented() && binding) {
       binding.onValueChange(evt.value);
     }

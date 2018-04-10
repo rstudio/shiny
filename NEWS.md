@@ -48,6 +48,8 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Fixed [#1600](https://github.com/rstudio/shiny/issues/1600): URL-encoded bookmarking did not work with sliders that had dates or date-times. ([#1961](https://github.com/rstudio/shiny/pull/1961))
 
+* Fixed [#1962](https://github.com/rstudio/shiny/issues/1962): [File dragging and dropping](https://blog.rstudio.com/2017/08/15/shiny-1-0-4/) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). ([#2005](https://github.com/rstudio/shiny/pull/2005))
+
 ### Library updates
 
 * Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))

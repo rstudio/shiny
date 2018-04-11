@@ -19,28 +19,19 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Added a new `autoclose = TRUE` parameter to `dateInput()` and `dateRangeInput()`. This closed [#1969](https://github.com/rstudio/shiny/issues/1969) which was a duplicate of much older issue, [#173](https://github.com/rstudio/shiny/issues/173). The default value is `TRUE` since that seems to be the common use case. However, this will cause existing apps with date inputs (that update to this version of Shiny) to have the datepicker be immediately closed once a date is selected. For most apps, this is actually desired behavior; if you wish to keep the datepicker open until the user clicks out of it use `autoclose = FALSE`. ([#1987](https://github.com/rstudio/shiny/pull/1987))
 
-* Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. ([#1968](https://github.com/rstudio/shiny/pull/1968))
-
-* Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/master/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, [@jekriske-lilly](https://github.com/jekriske-lilly)! [#1844](https://github.com/rstudio/shiny/pull/1844))
-
 * The version of Shiny is now accessible from Javascript, with `Shiny.version`. There is also a new function for comparing version strings, `Shiny.compareVersion()`. ([#1826](https://github.com/rstudio/shiny/pull/1826), [#1830](https://github.com/rstudio/shiny/pull/1830))
-
-* Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome.
 
 * Addressed [#1851](https://github.com/rstudio/shiny/issues/1851): Stack traces are now smaller in some places `do.call()` is used. ([#1856](https://github.com/rstudio/shiny/pull/1856))
 
+* Stack traces have been improved, with more aggressive de-noising and support for deep stack traces (stitching together multiple stack traces that are conceptually part of the same async operation).
+
 * Addressed [#1859](https://github.com/rstudio/shiny/issues/1859): Server-side selectize is now significantly faster. (Thanks to @dselivanov [#1861](https://github.com/rstudio/shiny/pull/1861))
+
+### Bug fixes
 
 * Fixed [#1006](https://github.com/rstudio/shiny/issues/1006): Slider inputs sometimes showed too many digits. ([#1956](https://github.com/rstudio/shiny/pull/1956))
 
 * Fixed [#1958](https://github.com/rstudio/shiny/issues/1958): Slider inputs previously displayed commas after a decimal point. ([#1960](https://github.com/rstudio/shiny/pull/1960))
-
-* Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. [#1968](https://github.com/rstudio/shiny/pull/1968)
-
-* Stack traces have been improved, with more aggressive de-noising and support for deep stack traces (stitching together multiple stack traces that are conceptually part of the same async operation).
-
-
-### Bug fixes
 
 * The internal `URLdecode()` function previously was a copy of `httpuv::decodeURIComponent()`, assigned at build time; now it invokes the httpuv function at run time.
 
@@ -49,6 +40,12 @@ This is a significant release for Shiny, with a major new feature that was nearl
 * Fixed [#1600](https://github.com/rstudio/shiny/issues/1600): URL-encoded bookmarking did not work with sliders that had dates or date-times. ([#1961](https://github.com/rstudio/shiny/pull/1961))
 
 * Fixed [#1962](https://github.com/rstudio/shiny/issues/1962): [File dragging and dropping](https://blog.rstudio.com/2017/08/15/shiny-1-0-4/) broke in the presence of jQuery version 3.0 as introduced by the [rhandsontable](https://jrowen.github.io/rhandsontable/) [htmlwidget](https://www.htmlwidgets.org/). ([#2005](https://github.com/rstudio/shiny/pull/2005))
+
+* Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. ([#1968](https://github.com/rstudio/shiny/pull/1968))
+
+* Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/master/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, [@jekriske-lilly](https://github.com/jekriske-lilly)! [#1844](https://github.com/rstudio/shiny/pull/1844))
+
+* Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome
 
 ### Library updates
 

@@ -1024,9 +1024,16 @@ ShinySession <- R6Class(
       # name not working unless name was eagerly evaluated. Yikes!
       force(name)
 
-      # If overwriting an output object, suspend the previous copy of it
+      # If overwriting an output object, destroy the previous copy of it
       if (!is.null(private$.outputs[[name]])) {
-        private$.outputs[[name]]$suspend()
+        private$.outputs[[name]]$destroy()
+      }
+
+      if (is.null(func)) {
+        # If func is null, give it an "empty" output function so it can go
+        # through the logic below. If we simply returned at this point, the
+        # previous output (if any) would continue to show in the client.
+        func <- missingOutput
       }
 
       if (is.function(func)) {
@@ -2216,3 +2223,5 @@ ShinyServerTimingRecorder <- R6Class("ShinyServerTimingRecorder",
     }
   )
 )
+
+missingOutput <- function(...) req(FALSE)

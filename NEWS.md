@@ -47,7 +47,7 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome
 
-* Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to xxxOutput not working inside modules.
+* Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to xxxOutput not working inside modules. ([#2010](https://github.com/rstudio/shiny/pull/2010))
 
 ### Library updates
 

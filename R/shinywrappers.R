@@ -115,6 +115,7 @@ useRenderFunction <- function(renderFunc, inline = FALSE) {
   o <- getDefaultReactiveDomain()$output
   if (!is.null(o)) {
     o[[id]] <- renderFunc
+    # If there's a namespace, we must respect it
     id <- getDefaultReactiveDomain()$ns(id)
   }
   

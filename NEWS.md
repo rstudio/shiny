@@ -47,6 +47,8 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome
 
+* Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to xxxOutput not working inside modules.
+
 ### Library updates
 
 * Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))

@@ -56,3 +56,14 @@ test_that("reactiveValues with namespace", {
   expect_equivalent(isolate(names(rv1)), c("baz", "qux-quux"))
   expect_equivalent(isolate(names(rv2)), c("quux"))
 })
+
+test_that("implicit output respects module namespace", {
+  output <- new.env(parent = emptyenv())
+  ns <- NS("test")
+  result <- withReactiveDomain(list(output = output, ns = ns),
+    as.tags(renderText("hi"))
+  )
+  # Does the automatically-generated output id include the correct namespace qualifier?
+  # (See issue #2000)
+  expect_equivalent(result$attribs$id, ns(ls(output)))
+})

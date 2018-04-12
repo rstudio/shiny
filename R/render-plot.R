@@ -99,7 +99,16 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
         pixelratio <- session$clientData$pixelratio %OR% 1
-        drawPlot(outputName, session, func, dims$width, dims$height, pixelratio, res)
+        do.call("drawPlot", c(
+          list(
+            name = outputName,
+            session = session,
+            func = func,
+            width = dims$width,
+            height = dims$height,
+            pixelratio = pixelratio,
+            res = res
+          ), args))
       },
       catch = function(reason) {
         # Non-isolating read. A common reason for errors in plotting is because
@@ -124,7 +133,10 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       function(result) {
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
-        resizeSavedPlot(name, shinysession, result, dims$width, dims$height, pixelratio, res)
+        do.call("resizeSavedPlot", c(
+          list(name, shinysession, result, dims$width, dims$height, pixelratio, res),
+          args
+        ))
       }
     )
   }
@@ -139,7 +151,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res) {
+resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res) {
     return(result$img)
@@ -149,7 +161,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   outfile <- plotPNG(function() {
     grDevices::replayPlot(result$recordedPlot)
     coordmap <<- getCoordmap(result$plotResult, width, height, pixelratio, res)
-  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio)
+  }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, ...)
   on.exit(unlink(outfile), add = TRUE)
 
   img <- list(

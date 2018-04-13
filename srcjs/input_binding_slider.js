@@ -137,6 +137,16 @@ $.extend(sliderInputBinding, textInputBinding, {
       opts.prettify = function(num) {
         return timeFormatter(timeFormat, new Date(num));
       };
+
+    } else {
+      // The default prettify function for ion.rangeSlider adds thousands
+      // separators after the decimal mark, so we have our own version here.
+      // (#1958)
+      opts.prettify = function(num) {
+        // When executed, `this` will refer to the `IonRangeSlider.options`
+        // object.
+        return formatNumber(num, this.prettify_separator);
+      };
     }
 
     $el.ionRangeSlider(opts);
@@ -153,6 +163,25 @@ $.extend(sliderInputBinding, textInputBinding, {
 inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
 
 
+// Format numbers for nicer output.
+// formatNumber(1234567.12345)           === "1,234,567.12345"
+// formatNumber(1234567.12345, ".", ",") === "1.234.567,12345"
+// formatNumber(1000, " ")               === "1 000"
+// formatNumber(20)                      === "20"
+// formatNumber(1.2345e24)               === "1.2345e+24"
+function formatNumber(num, thousand_sep = ",", decimal_sep = ".") {
+  let parts = num.toString().split(".");
+
+  // Add separators to portion before decimal mark.
+  parts[0] = parts[0].replace(/(\d{1,3}(?=(?:\d\d\d)+(?!\d)))/g, "$1" + thousand_sep);
+
+  if (parts.length === 1)
+    return parts[0];
+  else if (parts.length === 2)
+    return parts[0] + decimal_sep + parts[1];
+  else
+    return "";
+};
 
 $(document).on('click', '.slider-animate-button', function(evt) {
   evt.preventDefault();

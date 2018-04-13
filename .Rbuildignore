@@ -18,3 +18,5 @@
 ^.*\.o$
 ^appveyor\.yml$
 ^revdep$
+^TODO-promises.md$
+^manualtests$

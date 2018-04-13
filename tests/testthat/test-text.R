@@ -13,14 +13,14 @@ test_that("renderPrint and renderText behavior is correct", {
                '')
   expect_equal(isolate(renderPrint({ 1:5 })()),
                '[1] 1 2 3 4 5')
-  
+
   expect_equal(isolate(renderText({ "foo" })()),
                'foo')
   expect_equal(isolate(renderText({ invisible("foo") })()),
                'foo')
   # Capture the print output so it's not shown on console during test, and
   # also check that it is correct
-  print_out <- capture.output(ret <- isolate(renderText({ print("foo"); "bar"})()))
+  print_out <- utils::capture.output(ret <- isolate(renderText({ print("foo"); "bar"})()))
   expect_equal(ret, 'bar')
   expect_equal(print_out, '[1] "foo"')
   expect_equal(isolate(renderText({ NULL })()),
@@ -28,7 +28,7 @@ test_that("renderPrint and renderText behavior is correct", {
   expect_equal(isolate(renderText({ invisible() })()),
                '')
   expect_equal(isolate(renderText({ 1:5 })()),
-               '1 2 3 4 5')  
+               '1 2 3 4 5')
 })
 
 test_that("reactive functions save visibility state", {

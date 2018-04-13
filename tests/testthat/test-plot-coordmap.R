@@ -6,14 +6,8 @@ sortList <- function(x) {
   x[sort(names(x))]
 }
 
-# Extract the print.ggplot function from inside of renderPlot. Yuck.
-print_ggplot_expr <- Filter(function(x) {
-  is.call(x) &&
-  x[[1]] == as.name("<-") &&
-  x[[2]] == as.name("print.ggplot")
-}, body(renderPlot))[[1]]
 # This will create print.ggplot in the current environment
-eval(print_ggplot_expr)
+print.ggplot <- custom_print.ggplot
 
 
 test_that("ggplot coordmap", {

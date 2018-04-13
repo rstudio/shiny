@@ -89,6 +89,23 @@ getLocs <- function(calls) {
   }, character(1))
 }
 
+getCallCategories <- function(calls) {
+  vapply(calls, function(call) {
+    srcref <- attr(call, "srcref", exact = TRUE)
+    if (!is.null(srcref)) {
+      srcfile <- attr(srcref, "srcfile", exact = TRUE)
+      if (!is.null(srcfile)) {
+        if (!is.null(srcfile$original)) {
+          return("pkg")
+        } else {
+          return("user")
+        }
+      }
+    }
+    return("")
+  }, character(1))
+}
+
 #' @details \code{captureStackTraces} runs the given \code{expr} and if any
 #'   \emph{uncaught} errors occur, annotates them with stack trace info for use
 #'   by \code{printError} and \code{printStackTrace}. It is not necessary to use
@@ -105,15 +122,91 @@ getLocs <- function(calls) {
 #' @rdname stacktrace
 #' @export
 captureStackTraces <- function(expr) {
-  withCallingHandlers(expr,
-    error = function(e) {
-      if (is.null(attr(e, "stack.trace", exact = TRUE))) {
-        calls <- sys.calls()
-        attr(e, "stack.trace") <- calls
-        stop(e)
-      }
-    }
+  promises::with_promise_domain(createStackTracePromiseDomain(),
+    expr
   )
+}
+
+#' @include globals.R
+.globals$deepStack <- NULL
+
+createStackTracePromiseDomain <- function() {
+  # These are actually stateless, we wouldn't have to create a new one each time
+  # if we didn't want to. They're pretty cheap though.
+  
+  d <- promises::new_promise_domain(
+    wrapOnFulfilled = function(onFulfilled) {
+      force(onFulfilled)
+      # Subscription time
+      if (deepStacksEnabled()) {
+        currentStack <- sys.calls()
+        currentParents <- sys.parents()
+        attr(currentStack, "parents") <- currentParents
+        currentDeepStack <- .globals$deepStack
+      }
+      function(...) {
+        # Fulfill time
+        if (deepStacksEnabled()) {
+          origDeepStack <- .globals$deepStack
+          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
+        }
+
+        withCallingHandlers(
+          onFulfilled(...),
+          error = doCaptureStack
+        )
+      }
+    },
+    wrapOnRejected = function(onRejected) {
+      force(onRejected)
+      # Subscription time
+      if (deepStacksEnabled()) {
+        currentStack <- sys.calls()
+        currentParents <- sys.parents()
+        attr(currentStack, "parents") <- currentParents
+        currentDeepStack <- .globals$deepStack
+      }
+      function(...) {
+        # Fulfill time
+        if (deepStacksEnabled()) {
+          origDeepStack <- .globals$deepStack
+          .globals$deepStack <- c(currentDeepStack, list(currentStack))
+          on.exit(.globals$deepStack <- origDeepStack, add = TRUE)
+        }
+
+        withCallingHandlers(
+          onRejected(...),
+          error = doCaptureStack
+        )
+      }
+    },
+    wrapSync = function(expr) {
+      withCallingHandlers(expr,
+        error = doCaptureStack
+      )
+    },
+    onError = doCaptureStack
+  )
+}
+
+deepStacksEnabled <- function() {
+  getOption("shiny.deepstacktrace", FALSE)
+}
+
+doCaptureStack <- function(e) {
+  if (is.null(attr(e, "stack.trace", exact = TRUE))) {
+    calls <- sys.calls()
+    parents <- sys.parents()
+    attr(calls, "parents") <- parents
+    attr(e, "stack.trace") <- calls
+  }
+  if (deepStacksEnabled()) {
+    if (is.null(attr(e, "deep.stack.trace", exact = TRUE)) && !is.null(.globals$deepStack)) {
+      attr(e, "deep.stack.trace") <- .globals$deepStack
+    }
+  }
+  stop(e)
 }
 
 #' @details \code{withLogErrors} captures stack traces and logs errors that
@@ -128,7 +221,22 @@ withLogErrors <- function(expr,
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
   withCallingHandlers(
-    captureStackTraces(expr),
+    {
+      result <- captureStackTraces(expr)
+
+      # Handle expr being an async operation
+      if (promises::is.promise(result)) {
+        result <- promises::catch(result, function(cond) {
+          # Don't print shiny.silent.error (i.e. validation errors)
+          if (inherits(cond, "shiny.silent.error")) return()
+          if (isTRUE(getOption("show.error.messages"))) {
+            printError(cond, full = full, offset = offset)
+          }
+        })
+      }
+
+      result
+    },
     error = function(cond) {
       # Don't print shiny.silent.error (i.e. validation errors)
       if (inherits(cond, "shiny.silent.error")) return()
@@ -158,11 +266,11 @@ withLogErrors <- function(expr,
 printError <- function(cond,
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
-
-  warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s",
+  
+  warning(call. = FALSE, immediate. = TRUE, sprintf("Error in %s: %s", 
     getCallNames(list(conditionCall(cond))), conditionMessage(cond)))
+  
   printStackTrace(cond, full = full, offset = offset)
-  invisible()
 }
 
 #' @rdname stacktrace
@@ -171,24 +279,83 @@ printStackTrace <- function(cond,
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
-  stackTrace <- attr(cond, "stack.trace", exact = TRUE)
-  tryCatch(
-    if (!is.null(stackTrace)) {
-      message(paste0(
-        "Stack trace (innermost first):\n",
-        paste0(collapse = "\n",
-          formatStackTrace(stackTrace, full = full, offset = offset,
-            indent = "    ")
-        )
-      ))
-    } else {
-      message("No stack trace available")
-    },
-
-    error = function(cond) {
-      warning("Failed to write stack trace: ", cond)
-    }
+  should_drop <- !full
+  should_strip <- !full
+  should_prune <- !full
+  
+  stackTraceCalls <- c(
+    attr(cond, "deep.stack.trace", exact = TRUE),
+    list(attr(cond, "stack.trace", exact = TRUE))
   )
+  
+  stackTraceParents <- lapply(stackTraceCalls, attr, which = "parents", exact = TRUE)
+  stackTraceCallNames <- lapply(stackTraceCalls, getCallNames)
+  stackTraceCalls <- lapply(stackTraceCalls, offsetSrcrefs, offset = offset)
+  
+  # Use dropTrivialFrames logic to remove trailing bits (.handleSimpleError, h)
+  if (should_drop) {
+    # toKeep is a list of logical vectors, of which elements (stack frames) to keep
+    toKeep <- lapply(stackTraceCallNames, dropTrivialFrames)
+    # We apply the list of logical vector indices to each data structure
+    stackTraceCalls <- mapply(stackTraceCalls, FUN = `[`, toKeep, SIMPLIFY = FALSE)
+    stackTraceCallNames <- mapply(stackTraceCallNames, FUN = `[`, toKeep, SIMPLIFY = FALSE)
+    stackTraceParents <- mapply(stackTraceParents, FUN = `[`, toKeep, SIMPLIFY = FALSE)
+  }
+  
+  delayedAssign("all_true", {
+    # List of logical vectors that are all TRUE, the same shape as
+    # stackTraceCallNames. Delay the evaluation so we don't create it unless
+    # we need it, but if we need it twice then we don't pay to create it twice.
+    lapply(stackTraceCallNames, function(st) {
+      rep_len(TRUE, length(st))
+    })
+  })
+  
+  # stripStackTraces and lapply(stackTraceParents, pruneStackTrace) return lists
+  # of logical vectors. Use mapply(FUN = `&`) to boolean-and each pair of the
+  # logical vectors.
+  toShow <- mapply(
+    if (should_strip) stripStackTraces(stackTraceCallNames) else all_true,
+    if (should_prune) lapply(stackTraceParents, pruneStackTrace) else all_true,
+    FUN = `&`,
+    SIMPLIFY = FALSE
+  )
+  
+  dfs <- mapply(seq_along(stackTraceCalls), rev(stackTraceCalls), rev(stackTraceCallNames), rev(toShow), FUN = function(i, calls, nms, index) {
+    st <- data.frame(
+      num = rev(which(index)),
+      call = rev(nms[index]),
+      loc = rev(getLocs(calls[index])),
+      category = rev(getCallCategories(calls[index])),
+      stringsAsFactors = FALSE
+    )
+    
+    if (i != 1) {
+      message("From earlier call:")
+    }
+
+    if (nrow(st) == 0) {
+      message("  [No stack trace available]")
+    } else {
+      width <- floor(log10(max(st$num))) + 1
+      message(paste(collapse = "\n", paste0(
+        "  ",
+        formatC(st$num, width = width),
+        ": ",
+        mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
+          if (category == "pkg")
+            crayon::silver(name)
+          else if (category == "user")
+            crayon::blue$bold(name)
+          else
+            crayon::white(name)
+        })
+      )))
+    }
+
+    st
+  }, SIMPLIFY = FALSE)
+  
   invisible()
 }
 
@@ -196,12 +363,17 @@ printStackTrace <- function(cond,
 #'   from \code{conditionStackTrace(cond)}) and returns a data frame with one
 #'   row for each stack frame and the columns \code{num} (stack frame number),
 #'   \code{call} (a function name or similar), and \code{loc} (source file path
-#'   and line number, if available).
+#'   and line number, if available). It was deprecated after shiny 1.0.5 because
+#'   it doesn't support deep stack traces.
 #' @rdname stacktrace
 #' @export
 extractStackTrace <- function(calls,
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
+  
+  shinyDeprecated(NULL,
+    "extractStackTrace is deprecated. Please contact the Shiny team if you were using this functionality.",
+    version = "1.0.5")
 
   srcrefs <- getSrcRefs(calls)
   if (offset) {
@@ -241,7 +413,11 @@ extractStackTrace <- function(calls,
     score <- rep.int(0, length(callnames))
     score[callnames == "..stacktraceoff.."] <- -1
     score[callnames == "..stacktraceon.."] <- 1
-    toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff.."))
+    toShow <- (1 + cumsum(score)) > 0 & !(callnames %in% c("..stacktraceon..", "..stacktraceoff..", "..stacktracefloor.."))
+
+    # doTryCatch, tryCatchOne, and tryCatchList are not informative--they're
+    # just internals for tryCatch
+    toShow <- toShow & !(callnames %in% c("doTryCatch", "tryCatchOne", "tryCatchList"))
   }
   calls <- calls[toShow]
 
@@ -253,12 +429,115 @@ extractStackTrace <- function(calls,
     num = index,
     call = getCallNames(calls),
     loc = getLocs(calls),
+    category = getCallCategories(calls),
     stringsAsFactors = FALSE
   )
 }
 
+stripStackTraces <- function(stackTraces, values = FALSE) {
+  score <- 1L  # >=1: show, <=0: hide
+  lapply(seq_along(stackTraces), function(i) {
+    res <- stripOneStackTrace(stackTraces[[i]], i != 1, score)
+    score <<- res$score
+    toShow <- as.logical(res$trace)
+    if (values) {
+      as.character(stackTraces[[i]][toShow])
+    } else {
+      as.logical(toShow)
+    }
+  })
+}
+
+stripOneStackTrace <- function(stackTrace, truncateFloor, startingScore) {
+  prefix <- logical(0)
+  if (truncateFloor) {
+    indexOfFloor <- utils::tail(which(stackTrace == "..stacktracefloor.."), 1)
+    if (length(indexOfFloor)) {
+      stackTrace <- stackTrace[(indexOfFloor+1L):length(stackTrace)]
+      prefix <- rep_len(FALSE, indexOfFloor)
+    }
+  }
+  
+  if (length(stackTrace) == 0) {
+    return(list(score = startingScore, character(0)))
+  }
+  
+  score <- rep.int(0L, length(stackTrace))
+  score[stackTrace == "..stacktraceon.."] <- 1L
+  score[stackTrace == "..stacktraceoff.."] <- -1L
+  score <- startingScore + cumsum(score)
+  
+  toShow <- score > 0 & !(stackTrace %in% c("..stacktraceon..", "..stacktraceoff..", "..stacktracefloor.."))
+  
+  
+  list(score = utils::tail(score, 1), trace = c(prefix, toShow))
+}
+
+# Given sys.parents() (which corresponds to sys.calls()), return a logical index
+# that prunes each subtree so that only the final branch remains. The result,
+# when applied to sys.calls(), is a linear list of calls without any "wrapper"
+# functions like tryCatch, try, with, hybrid_chain, etc. While these are often
+# part of the active call stack, they rarely are helpful when trying to identify
+# a broken bit of code.
+pruneStackTrace <- function(parents) {
+  # Detect nodes that are not the last child. This is necessary, but not
+  # sufficient; we also need to drop nodes that are the last child, but one of
+  # their ancestors is not.
+  is_dupe <- duplicated(parents, fromLast = TRUE)
+  
+  # The index of the most recently seen node that was actually kept instead of
+  # dropped.
+  current_node <- 0
+  
+  # Loop over the parent indices. Anything that is not parented by current_node
+  # (a.k.a. last-known-good node), or is a dupe, can be discarded. Anything that
+  # is kept becomes the new current_node.
+  include <- vapply(seq_along(parents), function(i) {
+    if (!is_dupe[[i]] && parents[[i]] == current_node) {
+      current_node <<- i
+      TRUE
+    } else {
+      FALSE
+    }
+  }, FUN.VALUE = logical(1))
+  
+  include
+}
+
+dropTrivialFrames <- function(callnames) {
+  # Remove stop(), .handleSimpleError(), and h() calls from the end of
+  # the calls--they don't add any helpful information. But only remove
+  # the last *contiguous* block of them, and then, only if they are the
+  # last thing in the calls list.
+  hideable <- callnames %in% c(".handleSimpleError", "h", "base$wrapOnFulfilled")
+  # What's the last that *didn't* match stop/.handleSimpleError/h?
+  lastGoodCall <- max(which(!hideable))
+  toRemove <- length(callnames) - lastGoodCall
+  
+  c(
+    rep_len(TRUE, length(callnames) - toRemove),
+    rep_len(FALSE, toRemove)
+  )
+}
+
+offsetSrcrefs <- function(calls, offset = TRUE) {
+  if (offset) {
+    srcrefs <- getSrcRefs(calls)
+
+    # Offset calls vs. srcrefs by 1 to make them more intuitive.
+    # E.g. for "foo [bar.R:10]", line 10 of bar.R will be part of
+    # the definition of foo().
+    srcrefs <- c(utils::tail(srcrefs, -1), list(NULL))
+    
+    calls <- setSrcRefs(calls, srcrefs)
+  }
+  
+  calls
+}
+
 #' @details \code{formatStackTrace} is similar to \code{extractStackTrace}, but
-#'   it returns a preformatted character vector instead of a data frame.
+#'   it returns a preformatted character vector instead of a data frame. It was
+#'   deprecated after shiny 1.0.5 because it doesn't support deep stack traces.
 #' @param indent A string to prefix every line of the stack trace.
 #' @rdname stacktrace
 #' @export
@@ -266,6 +545,10 @@ formatStackTrace <- function(calls, indent = "    ",
   full = getOption("shiny.fullstacktrace", FALSE),
   offset = getOption("shiny.stacktraceoffset", TRUE)) {
 
+  shinyDeprecated(NULL,
+    "extractStackTrace is deprecated. Please contact the Shiny team if you were using this functionality.",
+    version = "1.0.5")
+  
   st <- extractStackTrace(calls, full = full, offset = offset)
   if (nrow(st) == 0) {
     return(character(0))
@@ -276,8 +559,14 @@ formatStackTrace <- function(calls, indent = "    ",
     indent,
     formatC(st$num, width = width),
     ": ",
-    st$call,
-    st$loc
+    mapply(paste0(st$call, st$loc), st$category, FUN = function(name, category) {
+      if (category == "pkg")
+        crayon::silver(name)
+      else if (category == "user")
+        crayon::blue$bold(name)
+      else
+        crayon::white(name)
+    })
   )
 }
 
@@ -332,3 +621,5 @@ conditionStackTrace <- function(cond) {
 #' @rdname stacktrace
 #' @export
 ..stacktraceoff.. <- function(expr) expr
+
+..stacktracefloor.. <- function(expr) expr

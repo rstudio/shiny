@@ -6,7 +6,7 @@
 \usage{
 dateInput(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-  language = "en", width = NULL)
+  language = "en", width = NULL, autoclose = TRUE)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -43,6 +43,9 @@ Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
+
+\item{autoclose}{Whether or not to close the datepicker immediately when a
+date is selected.}
 }
 \description{
 Creates a text input which, when clicked on, brings up a calendar that

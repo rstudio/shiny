@@ -1,3 +1,21 @@
+processId <- local({
+  # pid is not sufficient to uniquely identify a process, because
+  # distributed futures span machines which could introduce pid
+  # collisions.
+  cached <- NULL
+  function() {
+    if (is.null(cached)) {
+      cached <<- digest::digest(list(
+        Sys.info(),
+        Sys.time()
+      ))
+    }
+    # Sys.getpid() cannot be cached because forked children will
+    # then have the same processId as their parents.
+    paste(cached, Sys.getpid())
+  }
+})
+
 Context <- R6Class(
   'Context',
   portable = FALSE,
@@ -11,27 +29,37 @@ Context <- R6Class(
     .invalidateCallbacks = list(),
     .flushCallbacks = list(),
     .domain = NULL,
+    .pid = NULL,
 
     initialize = function(domain, label='', type='other', prevId='', rlogNodeId = NULL) {
       id <<- .getReactiveEnvironment()$nextId()
       .label <<- label
       .domain <<- domain
+      .pid <<- processId()
       .rlogNodeId <<- rlogNodeId
       .rlogType <<- type
       # .graphCreateContext(id, label, type, prevId, domain)
     },
     run = function(func) {
       "Run the provided function under this context."
-      withReactiveDomain(.domain, {
-        env <- .getReactiveEnvironment()
-        .rlogEnter(.rlogNodeId, id, .rlogType)
-        on.exit(.rlogExit(.rlogNodeId, id, .rlogType), add = TRUE)
-        env$runWith(self, func)
+
+      promises::with_promise_domain(reactivePromiseDomain(), {
+        withReactiveDomain(.domain, {
+          env <- .getReactiveEnvironment()
+          .rlogEnter(.rlogNodeId, id, .rlogType)
+          on.exit(.rlogExit(.rlogNodeId, id, .rlogType), add = TRUE)
+          env$runWith(self, func)
+        })
       })
     },
     invalidate = function() {
       "Invalidate this context. It will immediately call the callbacks
         that have been registered with onInvalidate()."
+
+      if (!identical(.pid, processId())) {
+        stop("Reactive context was created in one process and invalidated from another")
+      }
+
       if (.invalidated)
         return()
       .invalidated <<- TRUE
@@ -48,6 +76,11 @@ Context <- R6Class(
       "Register a function to be called when this context is invalidated.
         If this context is already invalidated, the function is called
         immediately."
+
+      if (!identical(.pid, processId())) {
+        stop("Reactive context was created in one process and accessed from another")
+      }
+
       if (.invalidated)
         func()
       else
@@ -57,9 +90,6 @@ Context <- R6Class(
     addPendingFlush = function(priority) {
       "Tell the reactive environment that this context should be flushed the
         next time flushReact() called."
-      if (!is.null(.domain)) {
-        .domain$incrementBusyCount()
-      }
       .getReactiveEnvironment()$addPendingFlush(self, priority)
     },
     onFlush = function(func) {
@@ -68,12 +98,6 @@ Context <- R6Class(
     },
     executeFlushCallbacks = function() {
       "For internal use only."
-
-      on.exit({
-        if (!is.null(.domain)) {
-          .domain$decrementBusyCount()
-        }
-      }, add = TRUE)
 
       lapply(.flushCallbacks, function(flushCallback) {
         flushCallback()
@@ -123,9 +147,12 @@ ReactiveEnvironment <- R6Class(
     hasPendingFlush = function() {
       return(!.pendingFlush$isEmpty())
     },
+    # Returns TRUE if anything was actually called
     flush = function() {
+      # If nothing to flush, exit early
+      if (!hasPendingFlush()) return(invisible(FALSE))
       # If already in a flush, don't start another one
-      if (.inFlush) return()
+      if (.inFlush) return(invisible(FALSE))
       .inFlush <<- TRUE
       on.exit(.inFlush <<- FALSE)
 
@@ -133,6 +160,8 @@ ReactiveEnvironment <- R6Class(
         ctx <- .pendingFlush$dequeue()
         ctx$executeFlushCallbacks()
       }
+
+      invisible(TRUE)
     }
   )
 )
@@ -146,9 +175,10 @@ ReactiveEnvironment <- R6Class(
   }
 })
 
-# Causes any pending invalidations to run.
+# Causes any pending invalidations to run. Returns TRUE if any invalidations
+# were pending (i.e. if work was actually done).
 flushReact <- function() {
-  .getReactiveEnvironment()$flush()
+  return(.getReactiveEnvironment()$flush())
 }
 
 # Retrieves the current reactive context, or errors if there is no reactive
@@ -168,3 +198,31 @@ local({
     return(dummyContext)
   }
 })
+
+wrapForContext <- function(func, ctx) {
+  force(func)
+  force(ctx)
+
+  function(...) {
+    ctx$run(function() {
+      captureStackTraces(
+        func(...)
+      )
+    })
+  }
+}
+
+reactivePromiseDomain <- function() {
+  promises::new_promise_domain(
+    wrapOnFulfilled = function(onFulfilled) {
+      force(onFulfilled)
+      ctx <- getCurrentContext()
+      wrapForContext(onFulfilled, ctx)
+    },
+    wrapOnRejected = function(onRejected) {
+      force(onRejected)
+      ctx <- getCurrentContext()
+      wrapForContext(onRejected, ctx)
+    }
+  )
+}

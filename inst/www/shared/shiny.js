@@ -4545,6 +4545,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         opts.prettify = function (num) {
           return timeFormatter(timeFormat, new Date(num));
         };
+      } else {
+        // The default prettify function for ion.rangeSlider adds thousands
+        // separators after the decimal mark, so we have our own version here.
+        // (#1958)
+        opts.prettify = function (num) {
+          // When executed, `this` will refer to the `IonRangeSlider.options`
+          // object.
+          return formatNumber(num, this.prettify_separator);
+        };
       }
 
       $el.ionRangeSlider(opts);
@@ -4556,6 +4565,24 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
   });
   inputBindings.register(sliderInputBinding, 'shiny.sliderInput');
+
+  // Format numbers for nicer output.
+  // formatNumber(1234567.12345)           === "1,234,567.12345"
+  // formatNumber(1234567.12345, ".", ",") === "1.234.567,12345"
+  // formatNumber(1000, " ")               === "1 000"
+  // formatNumber(20)                      === "20"
+  // formatNumber(1.2345e24)               === "1.2345e+24"
+  function formatNumber(num) {
+    var thousand_sep = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ",";
+    var decimal_sep = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : ".";
+
+    var parts = num.toString().split(".");
+
+    // Add separators to portion before decimal mark.
+    parts[0] = parts[0].replace(/(\d{1,3}(?=(?:\d\d\d)+(?!\d)))/g, "$1" + thousand_sep);
+
+    if (parts.length === 1) return parts[0];else if (parts.length === 2) return parts[0] + decimal_sep + parts[1];else return "";
+  };
 
   $(document).on('click', '.slider-animate-button', function (evt) {
     evt.preventDefault();
@@ -5745,7 +5772,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // Attach a dragenter handler to $el and all of its children. When the first
       // child is entered, trigger a draghoverstart event.
       $el.on("dragenter.dragHover", function (e) {
-        if (collection.size() === 0) {
+        if (collection.length === 0) {
           $el.trigger("draghoverstart" + ns, e.originalEvent);
         }
         // Every child that has fired dragenter is added to the collection.
@@ -5760,7 +5787,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         collection = collection.not(e.originalEvent.target);
         // When the collection has no elements, all of the children have been
         // removed, and produce draghoverend event.
-        if (collection.size() === 0) {
+        if (collection.length === 0) {
           $el.trigger("draghoverend" + ns, e.originalEvent);
         }
       });
@@ -6217,7 +6244,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     // The server needs to know the size of each image and plot output element,
     // in case it is auto-sizing
-    $('.shiny-image-output, .shiny-plot-output').each(function () {
+    $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function () {
       var id = getIdFromEl(this);
       if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
         initialValues['.clientdata_output_' + id + '_width'] = this.offsetWidth;
@@ -6225,7 +6252,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
     });
     function doSendImageSize() {
-      $('.shiny-image-output, .shiny-plot-output').each(function () {
+      $('.shiny-image-output, .shiny-plot-output, .shiny-report-size').each(function () {
         var id = getIdFromEl(this);
         if (this.offsetWidth !== 0 || this.offsetHeight !== 0) {
           inputs.setInput('.clientdata_output_' + id + '_width', this.offsetWidth);

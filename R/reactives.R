@@ -6,9 +6,11 @@ Dependents <- R6Class(
   portable = FALSE,
   class = FALSE,
   public = list(
+    .rlogNodeId = character(0),
     .dependents = 'Map',
 
-    initialize = function() {
+    initialize = function(rlogNodeId = NULL) {
+      .rlogNodeId <<- rlogNodeId
       .dependents <<- Map$new()
     },
     register = function(depId=NULL, depLabel=NULL) {
@@ -16,13 +18,19 @@ Dependents <- R6Class(
       if (!.dependents$containsKey(ctx$id)) {
         .dependents$set(ctx$id, ctx)
         ctx$onInvalidate(function() {
+          .rlogDependsOnRemove(ctx$.rlogNodeId, .rlogNodeId)
           .dependents$remove(ctx$id)
         })
 
-        if (!is.null(depId) && nchar(depId) > 0)
-          .graphDependsOnId(ctx$id, depId)
-        if (!is.null(depLabel))
-          .graphDependsOn(ctx$id, depLabel)
+        if (is.character(.rlogNodeId) && is.character(ctx$.rlogNodeId)) {
+          .rlogDependsOn(ctx$.rlogNodeId, .rlogNodeId)
+        } else {
+          stop("ERROR: dependents does not have node id: ", .rlogNodeId, " and ", ctx$.rlogNodeId)
+        }
+        # if (!is.null(depId) && nchar(depId) > 0)
+        #   .graphDependsOnId(ctx$id, depId)
+        # if (!is.null(depLabel))
+        #   .graphDependsOn(ctx$id, depLabel)
       }
     },
     invalidate = function() {
@@ -44,6 +52,7 @@ ReactiveVal <- R6Class(
   'ReactiveVal',
   portable = FALSE,
   private = list(
+    id = character(0),
     value = NULL,
     label = NULL,
     frozen = FALSE,
@@ -51,10 +60,12 @@ ReactiveVal <- R6Class(
   ),
   public = list(
     initialize = function(value, label = NULL) {
+      id <- .globalsIncrementLogNodeId()
+      private$id <- id
       private$value <- value
       private$label <- label
-      private$dependents <- Dependents$new()
-      .graphValueChange(private$label, value)
+      private$dependents <- Dependents$new(rlogNodeId = private$id)
+      .rlogAddNodeDef(private$id, private$label, type = "reactiveVal")
     },
     get = function() {
       private$dependents$register(depLabel = private$label)
@@ -69,7 +80,6 @@ ReactiveVal <- R6Class(
         return(invisible(FALSE))
       }
       private$value <- value
-      .graphValueChange(private$label, value)
       private$dependents$invalidate()
       invisible(TRUE)
     },
@@ -268,6 +278,7 @@ ReactiveValues <- R6Class(
   portable = FALSE,
   public = list(
     # For debug purposes
+    .id = character(0),
     .label = character(0),
     .values = 'environment',
     .metadata = 'environment',
@@ -280,15 +291,17 @@ ReactiveValues <- R6Class(
     .valuesDeps = 'Dependents',
 
     initialize = function() {
+      .id <<- .globalsIncrementLogNodeId()
       .label <<- paste('reactiveValues',
                        p_randomInt(1000, 10000),
                        sep="")
       .values <<- new.env(parent=emptyenv())
       .metadata <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
-      .namesDeps <<- Dependents$new()
-      .allValuesDeps <<- Dependents$new()
-      .valuesDeps <<- Dependents$new()
+      .namesDeps <<- Dependents$new(rlogNodeId = .id)
+      .allValuesDeps <<- Dependents$new(rlogNodeId = .id)
+      .valuesDeps <<- Dependents$new(rlogNodeId = .id)
+      .rlogAddNodeDef(.id, .label, type = "reactiveValues")
     },
 
     get = function(key) {
@@ -297,7 +310,7 @@ ReactiveValues <- R6Class(
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
       if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
-        .graphDependsOn(ctx$id, sprintf('%s$%s', .label, key))
+        .rlogDependsOnReactiveValueKey(ctx$.rlogNodeId, .id, key)
         .dependents[[dep.key]] <- ctx
         ctx$onInvalidate(function() {
           rm(list=dep.key, envir=.dependents, inherits=FALSE)
@@ -322,6 +335,7 @@ ReactiveValues <- R6Class(
         }
       }
       else {
+        .rlogReactValueNames(.id, .values)
         .namesDeps$invalidate()
       }
 
@@ -332,9 +346,8 @@ ReactiveValues <- R6Class(
 
       .values[[key]] <- value
 
-      .graphValueChange(sprintf('names(%s)', .label), ls(.values, all.names=TRUE))
-      .graphValueChange(sprintf('%s (all)', .label), as.list(.values))
-      .graphValueChange(sprintf('%s$%s', .label, key), value)
+      .rlogReactValueValues(.id, .values)
+      .rlogReactValueKey(.id, key, value)
 
       dep.keys <- objects(
         envir=.dependents,
@@ -359,8 +372,10 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
-      .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
-                      sprintf('names(%s)', .label))
+      .rlogDependsOnReactiveValueNames(
+        .getReactiveEnvironment()$currentContext()$.rlogNodeId,
+        .id
+      )
       .namesDeps$register()
       return(ls(.values, all.names=TRUE))
     },
@@ -399,8 +414,10 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
-      .graphDependsOn(.getReactiveEnvironment()$currentContext()$id,
-                      sprintf('%s (all)', .label))
+      .rlogDependsOnReactiveValueToList(
+        .getReactiveEnvironment()$currentContext()$.rlogNodeId,
+        .id
+      )
       if (all.names)
         .allValuesDeps$register()
 
@@ -410,6 +427,7 @@ ReactiveValues <- R6Class(
     },
 
     .setLabel = function(label) {
+      .rlogUpdateNodeLabel(.id, label)
       .label <<- label
     }
   )
@@ -687,6 +705,7 @@ Observable <- R6Class(
   'Observable',
   portable = FALSE,
   public = list(
+    .id = character(0),
     .origFunc = 'function',
     .func = 'function',
     .label = character(0),
@@ -717,16 +736,18 @@ Observable <- R6Class(
         funcLabel <- paste0("<reactive:", label, ">")
       }
 
+      .id <<- .globalsIncrementLogNodeId()
       .origFunc <<- func
       .func <<- wrapFunctionLabel(func, funcLabel,
         ..stacktraceon = ..stacktraceon)
       .label <<- label
       .domain <<- domain
-      .dependents <<- Dependents$new()
+      .dependents <<- Dependents$new(rlogNodeId = .id)
       .invalidated <<- TRUE
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
+      .rlogAddNodeDef(.id, .label, type = "observable")
     },
     getValue = function() {
       .dependents$register()
@@ -736,8 +757,6 @@ Observable <- R6Class(
           self$.updateValue()
         )
       }
-
-      .graphDependsOnId(getCurrentContext()$id, .mostRecentCtxId)
 
       if (.error) {
         stop(.value)
@@ -754,7 +773,7 @@ Observable <- R6Class(
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
-                         prevId = .mostRecentCtxId)
+                         prevId = .mostRecentCtxId, rlogNodeId = .id)
       .mostRecentCtxId <<- ctx$id
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
@@ -945,6 +964,7 @@ Observer <- R6Class(
   'Observer',
   portable = FALSE,
   public = list(
+    .id = character(0),
     .func = 'function',
     .label = character(0),
     .domain = 'ANY',
@@ -995,11 +1015,14 @@ registerDebugHook("observerFunc", environment(), label)
       .autoDestroyHandle <<- NULL
       setAutoDestroy(autoDestroy)
 
+      .id <<- .globalsIncrementLogNodeId()
+      .rlogAddNodeDef(.id, .label, type = "observer")
+
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
     },
     .createContext = function() {
-      ctx <- Context$new(.domain, .label, type='observer', prevId=.prevId)
+      ctx <- Context$new(.domain, .label, type='observer', prevId=.prevId, rlogNodeId = .id)
       .prevId <<- ctx$id
 
       if (!is.null(.ctx)) {
@@ -1410,6 +1433,7 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   })
   return(function() {
     ctx <- .getReactiveEnvironment()$currentContext()
+    # TODO add dependsOn and dependsOnRemove to timer. Maybe timer should supply node id
     if (!dependents$containsKey(ctx$id)) {
       dependents$set(ctx$id, ctx)
       ctx$onInvalidate(function() {
@@ -1728,7 +1752,8 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #' # input object, like input$x
 #' @export
 isolate <- function(expr) {
-  ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate')
+  curCtx <- .getReactiveEnvironment()$currentContext()
+  ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate', rlogNodeId = curCtx$.rlogNodeId)
   on.exit(ctx$invalidate())
   # Matching ..stacktraceon../..stacktraceoff.. pair
   ..stacktraceoff..(ctx$run(function() {

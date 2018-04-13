@@ -1,6 +1,15 @@
 # A scope where we can put mutable global state
 .globals <- new.env(parent = emptyenv())
 
+# used to help define truely global node id's.
+# should work accross session and in global namespace
+.globals$logNodeId <- 0L
+.globalsIncrementLogNodeId <- function() {
+  .globals$logNodeId <- .globals$logNodeId + 1L
+  as.character(.globals$logNodeId)
+}
+
+
 .onLoad <- function(libname, pkgname) {
   # R's lazy-loading package scheme causes the private seed to be cached in the
   # package itself, making our PRNG completely deterministic. This line resets

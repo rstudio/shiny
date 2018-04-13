@@ -4,24 +4,28 @@ Context <- R6Class(
   class = FALSE,
   public = list(
     id = character(0),
+    .rlogNodeId = integer(0),
+    .rlogType = "other",
     .label = character(0),      # For debug purposes
     .invalidated = FALSE,
     .invalidateCallbacks = list(),
     .flushCallbacks = list(),
     .domain = NULL,
 
-    initialize = function(domain, label='', type='other', prevId='') {
+    initialize = function(domain, label='', type='other', prevId='', rlogNodeId = NULL) {
       id <<- .getReactiveEnvironment()$nextId()
       .label <<- label
       .domain <<- domain
-      .graphCreateContext(id, label, type, prevId, domain)
+      .rlogNodeId <<- rlogNodeId
+      .rlogType <<- type
+      # .graphCreateContext(id, label, type, prevId, domain)
     },
     run = function(func) {
       "Run the provided function under this context."
       withReactiveDomain(.domain, {
         env <- .getReactiveEnvironment()
-        .graphEnterContext(id)
-        on.exit(.graphExitContext(id), add = TRUE)
+        .rlogEnter(.rlogNodeId, id, .rlogType)
+        on.exit(.rlogExit(.rlogNodeId, id, .rlogType), add = TRUE)
         env$runWith(self, func)
       })
     },
@@ -32,10 +36,11 @@ Context <- R6Class(
         return()
       .invalidated <<- TRUE
 
-      .graphInvalidate(id, .domain)
+      .rlogInvalidateStart(.rlogNodeId, id, .rlogType, .domain)
       lapply(.invalidateCallbacks, function(func) {
         func()
       })
+      .rlogInvalidateEnd(.rlogNodeId, id, .rlogType, .domain)
       .invalidateCallbacks <<- list()
       NULL
     },

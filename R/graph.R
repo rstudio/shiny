@@ -202,12 +202,12 @@ pn <- function(nodeId) {
 
 # id = ctx id
 # domain is like session
-.rlogValueChangeStart <- function(nodeId, value) {
-  .pm("valueChangeStart: ", pn(nodeId), " '",  paste(utils::capture.output(utils::str(value)), collapse='\n'), "'")
+.rlogValueChange <- function(nodeId, value) {
+  .pm("valueChange: ", pn(nodeId), " '",  paste(utils::capture.output(utils::str(value)), collapse='\n'), "'")
   .pmDepthIncrement()
   .rlogAppend(
     list(
-      action = 'valueChangeStart',
+      action = 'valueChange',
       nodeId = nodeId,
       value = paste(utils::capture.output(utils::str(value)), collapse='\n')
     )

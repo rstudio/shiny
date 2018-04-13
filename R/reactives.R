@@ -80,6 +80,7 @@ ReactiveVal <- R6Class(
         return(invisible(FALSE))
       }
       private$value <- value
+      .rlogValueChange(private$id, value)
       private$dependents$invalidate()
       invisible(TRUE)
     },

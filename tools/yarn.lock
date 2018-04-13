@@ -1030,7 +1030,7 @@ grunt-babel@^6.0.0:
   dependencies:
     babel-core "^6.0.12"
 
-grunt-cli@~1.2.0:
+grunt-cli@^1.2.0, grunt-cli@~1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/grunt-cli/-/grunt-cli-1.2.0.tgz#562b119ebb069ddb464ace2845501be97b35b6a8"
   dependencies:

@@ -1,0 +1,65 @@
+html,body,#wrapper {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+}
+
+.chart {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.axis path,.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+/* .bar {
+  fill: #33b5e5;
+} */
+
+.bar-failed {
+  fill: #CC0000;
+}
+
+.bar-running {
+  fill: #669900;
+}
+
+.bar-succeeded {
+  fill: #33b5e5;
+}
+
+.bar-killed {
+  fill: #ffbb33;
+}
+
+.bar-nodeDef { fill: rgb(91, 166, 45)}
+
+"nodeDef": "bar-nodeDef",
+.bar-valueChangeReactValueNames { fill: rgb(224, 160, 10)}
+.bar-valueChangeReactValueValues { fill: rgb(164, 224, 73)}
+.bar-valueChangeReactValueKey { fill: rgb(144, 173, 127)}
+.bar-valueChange { fill: rgb(65, 17, 173)}
+.bar-invalidate { fill: rgba(0, 0, 0, 0.78)}
+.bar-isolate { fill: rgba(255, 255, 0, 0.57)}
+.bar {fill: rgb(33, 156, 34)}
+
+/* #forkme_banner {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 10px;
+  z-index: 10;
+  padding: 10px 50px 10px 10px;
+  color: #fff;
+  background:
+    url('http://dk8996.github.io/Gantt-Chart/images/blacktocat.png')
+    #0090ff no-repeat 95% 50%;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  text-decoration: none;
+} */

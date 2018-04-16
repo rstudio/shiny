@@ -1,6 +1,8 @@
 #' @include utils.R
 NULL
 
+# TODO pass the domain around
+
 Dependents <- R6Class(
   'Dependents',
   portable = FALSE,
@@ -52,7 +54,7 @@ ReactiveVal <- R6Class(
   'ReactiveVal',
   portable = FALSE,
   private = list(
-    id = character(0),
+    reactId = character(0),
     value = NULL,
     label = NULL,
     frozen = FALSE,
@@ -60,12 +62,12 @@ ReactiveVal <- R6Class(
   ),
   public = list(
     initialize = function(value, label = NULL) {
-      id <- .globalsIncrementLogNodeId()
-      private$id <- id
+      reactId <- nextGlobalReactId()
+      private$reactId <- reactId
       private$value <- value
       private$label <- label
-      private$dependents <- Dependents$new(rlogNodeId = private$id)
-      .rlogAddNodeDef(private$id, private$label, type = "reactiveVal")
+      private$dependents <- Dependents$new(reactId = private$reactId)
+      .rlogAddNodeDef(private$reactId, private$label, type = "reactiveVal")
     },
     get = function() {
       private$dependents$register(depLabel = private$label)
@@ -80,8 +82,11 @@ ReactiveVal <- R6Class(
         return(invisible(FALSE))
       }
       private$value <- value
-      .rlogValueChange(private$id, value)
+      .rlogValueChange(private$reactId, value)
+      # .rlogInvalidateStart - TODO
+      # TODO add it for every $invalidate()
       private$dependents$invalidate()
+      # .rlogInvalidateEnd - TODO
       invisible(TRUE)
     },
     freeze = function(session = getDefaultReactiveDomain()) {
@@ -279,7 +284,7 @@ ReactiveValues <- R6Class(
   portable = FALSE,
   public = list(
     # For debug purposes
-    .id = character(0),
+    .reactId = character(0),
     .label = character(0),
     .values = 'environment',
     .metadata = 'environment',
@@ -292,17 +297,17 @@ ReactiveValues <- R6Class(
     .valuesDeps = 'Dependents',
 
     initialize = function() {
-      .id <<- .globalsIncrementLogNodeId()
+      .reactId <<- nextGlobalReactId()
       .label <<- paste('reactiveValues',
                        p_randomInt(1000, 10000),
                        sep="")
       .values <<- new.env(parent=emptyenv())
       .metadata <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
-      .namesDeps <<- Dependents$new(rlogNodeId = .id)
-      .allValuesDeps <<- Dependents$new(rlogNodeId = .id)
-      .valuesDeps <<- Dependents$new(rlogNodeId = .id)
-      .rlogAddNodeDef(.id, .label, type = "reactiveValues")
+      .namesDeps <<- Dependents$new(rlogNodeId = .reactId)
+      .allValuesDeps <<- Dependents$new(rlogNodeId = .reactId)
+      .valuesDeps <<- Dependents$new(rlogNodeId = .reactId)
+      .rlogAddNodeDef(.reactId, .label, type = "reactiveValues")
     },
 
     get = function(key) {
@@ -311,8 +316,9 @@ ReactiveValues <- R6Class(
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
       if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
-        .rlogDependsOnReactiveValueKey(ctx$.rlogNodeId, .id, key)
+        .rlogDependsOnReactiveValueKey(ctx$.reactId, .id, key)
         .dependents[[dep.key]] <- ctx
+        # TODO add dependences remove
         ctx$onInvalidate(function() {
           rm(list=dep.key, envir=.dependents, inherits=FALSE)
         })
@@ -336,7 +342,7 @@ ReactiveValues <- R6Class(
         }
       }
       else {
-        .rlogReactValueNames(.id, .values)
+        .rlogReactValueNames(.reactId, .values)
         .namesDeps$invalidate()
       }
 
@@ -347,8 +353,8 @@ ReactiveValues <- R6Class(
 
       .values[[key]] <- value
 
-      .rlogReactValueValues(.id, .values)
-      .rlogReactValueKey(.id, key, value)
+      .rlogReactValueValues(.reactId, .values)
+      .rlogReactValueKey(.reactId, key, value)
 
       dep.keys <- objects(
         envir=.dependents,
@@ -374,8 +380,8 @@ ReactiveValues <- R6Class(
 
     names = function() {
       .rlogDependsOnReactiveValueNames(
-        .getReactiveEnvironment()$currentContext()$.rlogNodeId,
-        .id
+        .getReactiveEnvironment()$currentContext()$.reactId,
+        .reactId
       )
       .namesDeps$register()
       return(ls(.values, all.names=TRUE))
@@ -416,8 +422,8 @@ ReactiveValues <- R6Class(
 
     toList = function(all.names=FALSE) {
       .rlogDependsOnReactiveValueToList(
-        .getReactiveEnvironment()$currentContext()$.rlogNodeId,
-        .id
+        .getReactiveEnvironment()$currentContext()$.reactId,
+        .reactId
       )
       if (all.names)
         .allValuesDeps$register()
@@ -428,7 +434,7 @@ ReactiveValues <- R6Class(
     },
 
     .setLabel = function(label) {
-      .rlogUpdateNodeLabel(.id, label)
+      .rlogUpdateNodeLabel(.reactId, label)
       .label <<- label
     }
   )
@@ -706,7 +712,7 @@ Observable <- R6Class(
   'Observable',
   portable = FALSE,
   public = list(
-    .id = character(0),
+    .reactId = character(0),
     .origFunc = 'function',
     .func = 'function',
     .label = character(0),
@@ -737,21 +743,23 @@ Observable <- R6Class(
         funcLabel <- paste0("<reactive:", label, ">")
       }
 
-      .id <<- .globalsIncrementLogNodeId()
+      .reactId <<- nextGlobalReactId()
       .origFunc <<- func
       .func <<- wrapFunctionLabel(func, funcLabel,
         ..stacktraceon = ..stacktraceon)
       .label <<- label
       .domain <<- domain
-      .dependents <<- Dependents$new(rlogNodeId = .id)
+      .dependents <<- Dependents$new(reactId = .reactId)
       .invalidated <<- TRUE
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
-      .rlogAddNodeDef(.id, .label, type = "observable")
+      .rlogAddNodeDef(.reactId, .label, type = "observable")
     },
     getValue = function() {
       .dependents$register()
+
+      # TODO add dependsOn
 
       if (.invalidated || .running) {
         ..stacktraceoff..(
@@ -774,7 +782,7 @@ Observable <- R6Class(
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
-                         prevId = .mostRecentCtxId, rlogNodeId = .id)
+                         prevId = .mostRecentCtxId, reactId = .reactId)
       .mostRecentCtxId <<- ctx$id
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
@@ -965,7 +973,7 @@ Observer <- R6Class(
   'Observer',
   portable = FALSE,
   public = list(
-    .id = character(0),
+    .reactId = character(0),
     .func = 'function',
     .label = character(0),
     .domain = 'ANY',
@@ -1016,14 +1024,14 @@ registerDebugHook("observerFunc", environment(), label)
       .autoDestroyHandle <<- NULL
       setAutoDestroy(autoDestroy)
 
-      .id <<- .globalsIncrementLogNodeId()
-      .rlogAddNodeDef(.id, .label, type = "observer")
+      .reactId <<- nextGlobalReactId()
+      .rlogAddNodeDef(.reactId, .label, type = "observer")
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
     },
     .createContext = function() {
-      ctx <- Context$new(.domain, .label, type='observer', prevId=.prevId, rlogNodeId = .id)
+      ctx <- Context$new(.domain, .label, type='observer', prevId=.prevId, reactId = .reactId)
       .prevId <<- ctx$id
 
       if (!is.null(.ctx)) {

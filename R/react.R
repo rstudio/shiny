@@ -22,8 +22,8 @@ Context <- R6Class(
   class = FALSE,
   public = list(
     id = character(0),
-    .rlogNodeId = integer(0),
-    .rlogType = "other",
+    .reactId = character(0),
+    .reactType = "other",
     .label = character(0),      # For debug purposes
     .invalidated = FALSE,
     .invalidateCallbacks = list(),
@@ -31,13 +31,13 @@ Context <- R6Class(
     .domain = NULL,
     .pid = NULL,
 
-    initialize = function(domain, label='', type='other', prevId='', rlogNodeId = NULL) {
+    initialize = function(domain, label='', type='other', prevId='', reactId = NULL) {
       id <<- .getReactiveEnvironment()$nextId()
       .label <<- label
       .domain <<- domain
       .pid <<- processId()
-      .rlogNodeId <<- rlogNodeId
-      .rlogType <<- type
+      .reactId <<- reactId
+      .reactType <<- type
       # .graphCreateContext(id, label, type, prevId, domain)
     },
     run = function(func) {
@@ -46,8 +46,8 @@ Context <- R6Class(
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
           env <- .getReactiveEnvironment()
-          .rlogEnter(.rlogNodeId, id, .rlogType)
-          on.exit(.rlogExit(.rlogNodeId, id, .rlogType), add = TRUE)
+          .rlogEnter(.reactId, id, .reactType)
+          on.exit(.rlogExit(.reactId, id, .reactType), add = TRUE)
           env$runWith(self, func)
         })
       })
@@ -64,11 +64,14 @@ Context <- R6Class(
         return()
       .invalidated <<- TRUE
 
-      .rlogInvalidateStart(.rlogNodeId, id, .rlogType, .domain)
+      .rlogInvalidateStart(.reactId, id, .reactType, .domain)
+      on.exit(add = TRUE, {
+        .rlogInvalidateEnd(.reactId, id, .reactType, .domain)
+      })
+
       lapply(.invalidateCallbacks, function(func) {
         func()
       })
-      .rlogInvalidateEnd(.rlogNodeId, id, .rlogType, .domain)
       .invalidateCallbacks <<- list()
       NULL
     },

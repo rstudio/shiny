@@ -1,4 +1,3 @@
-# TODO - remove dot syntax
 
 # used to help define truely global node id's.
 # should work accross session and in global namespace
@@ -11,7 +10,7 @@ nextGlobalReactId <- function() {
 
 
 writeReactLog <- function(file=stdout(), sessionToken = NULL) {
-  log <- .rlogStack$as_list()
+  log <- rlogStack$as_list()
   if (!is.null(sessionToken)) {
     log <- Filter(function(x) {
       is.null(x$session) || identical(x$session, sessionToken)
@@ -78,7 +77,7 @@ renderReactLog <- function(sessionToken = NULL, time = TRUE) {
 rlogAppend <- function(logEntry, domain = getDefaultReactiveDomain()) {
   if (isTRUE(getOption('shiny.reactlog'))) {
     sessionToken <- if (is.null(domain)) NULL else domain$token
-    .rlogStack$push(c(logEntry, list(
+    rlogStack$push(c(logEntry, list(
       session = sessionToken,
       time = as.numeric(Sys.time())
     )))
@@ -129,7 +128,7 @@ displayReactLogMessages <- function() {
     message(msg)
   }
 }
-.rlogDependsOnReactiveValueKey <- function(reactId, depOnReactId, key) {
+rlogDependsOnReactiveValueKey <- function(reactId, depOnReactId, key) {
   rLogMsg$log("dependsOnReactiveValueKey: ", pn(reactId), " ", pn(depOnReactId), " ", key)
   rlogAppend(list(
     action = "depReactiveValueKey",
@@ -138,7 +137,7 @@ displayReactLogMessages <- function() {
     key = key
   ))
 }
-.rlogDependsOnReactiveValueNames <- function(reactId, depOnReactId) {
+rlogDependsOnReactiveValueNames <- function(reactId, depOnReactId) {
   rLogMsg$log("dependsOnReactiveValueNames: ", pn(reactId), " ", pn(depOnReactId))
   rlogAppend(list(
     action = "depReactiveValueNames",
@@ -146,7 +145,7 @@ displayReactLogMessages <- function() {
     depOnReactId = depOnReactId
   ))
 }
-.rlogDependsOnReactiveValueToList <- function(reactId, depOnReactId) {
+rlogDependsOnReactiveValueToList <- function(reactId, depOnReactId) {
   rLogMsg$log("dependsOnReactiveValueToList: ", pn(reactId), " ", pn(depOnReactId))
   rlogAppend(list(
     action = "dependsOnReactiveValuetoList",
@@ -155,7 +154,7 @@ displayReactLogMessages <- function() {
   ))
 }
 
-.rlogDependsOn <- function(reactId, depOnReactId) {
+rlogDependsOn <- function(reactId, depOnReactId) {
   rLogMsg$log("dependsOn: ", pn(reactId), " on ", pn(depOnReactId))
   rlogAppend(list(
     action = "dep",
@@ -163,7 +162,7 @@ displayReactLogMessages <- function() {
     depOnReactId = depOnReactId
   ))
 }
-.rlogDependsOnRemove <- function(reactId, depOnReactId) {
+rlogDependsOnRemove <- function(reactId, depOnReactId) {
   rLogMsg$log("dependsOnRemove: ", pn(reactId), " on ", pn(depOnReactId))
   rlogAppend(list(
     action = "depOnRemove",
@@ -181,7 +180,7 @@ pn <- function(reactId) {
   )
 }
 # init a node id with a label
-.rlogAddNodeDef <- function(reactId, label, type) {
+rlogAddNodeDef <- function(reactId, label, type) {
   if (!is.null(nodeCache[[reactId]])) {
     stop("node definition for id: ", reactId, " already found!!", "Label: ", label, "Type: ", type)
   }
@@ -194,7 +193,7 @@ pn <- function(reactId) {
     type = type
   ))
 }
-.rlogUpdateNodeLabel <- function(reactId, label) {
+rlogUpdateNodeLabel <- function(reactId, label) {
   nodeCache[[reactId]]$label <<- label
   rLogMsg$log("updateNodeLabel: ", pn(reactId))
   rlogAppend(list(
@@ -204,7 +203,7 @@ pn <- function(reactId) {
   ))
 }
 
-# .rlogCreateContext <- function(id, label, type, prevId, domain) {
+# rlogCreateContext <- function(id, label, type, prevId, domain) {
 #   message("!!createContext: create graph context is deprecated!!")
 #   rlogAppend(list(
 #     action='ctx', ctxId = id, label = paste(label, collapse='\n'),
@@ -213,7 +212,7 @@ pn <- function(reactId) {
 #   ), domain = domain)
 # }
 
-.rlogEnter <- function(reactId, ctxId, type) {
+rlogEnter <- function(reactId, ctxId, type) {
   rLogMsg$log("enter: ", pn(reactId), " ", ctxId, " ", type)
   rLogMsg$depthIncrement()
   rlogAppend(list(
@@ -224,7 +223,7 @@ pn <- function(reactId) {
   ))
 }
 
-.rlogExit <- function(reactId, ctxId, type) {
+rlogExit <- function(reactId, ctxId, type) {
   rLogMsg$depthDecrement()
   rLogMsg$log("exit: ", pn(reactId), " ", ctxId, " ", type)
   rlogAppend(list(
@@ -237,7 +236,7 @@ pn <- function(reactId) {
 
 # id = ctx id
 # domain is like session
-.rlogValueChange <- function(reactId, value) {
+rlogValueChange <- function(reactId, value) {
   rLogMsg$log("valueChange: ", pn(reactId), " '",  paste(utils::capture.output(utils::str(value)), collapse='\n'), "'")
   rLogMsg$depthIncrement()
   rlogAppend(
@@ -248,7 +247,7 @@ pn <- function(reactId) {
     )
   )
 }
-.rlogValueChangeEnd <- function(reactId, value) {
+rlogValueChangeEnd <- function(reactId, value) {
   rLogMsg$depthDecrement()
   rLogMsg$log("valueChangeEnd: ", pn(reactId), " '",  paste(utils::capture.output(utils::str(value)), collapse='\n'), "'")
   rlogAppend(
@@ -259,7 +258,7 @@ pn <- function(reactId) {
     )
   )
 }
-.rlogReactValueNames <- function(reactId, values) {
+rlogReactValueNames <- function(reactId, values) {
   namesStr <- paste(utils::capture.output(utils::str(ls(values, all.names=TRUE))), collapse='\n')
   rLogMsg$log("valueChangeReactValueNames: ", pn(reactId), " ", namesStr)
   rlogAppend(list(
@@ -268,7 +267,7 @@ pn <- function(reactId) {
     value = namesStr
   ))
 }
-.rlogReactValueValues <- function(reactId, values) {
+rlogReactValueValues <- function(reactId, values) {
   valuesStr <- paste(utils::capture.output(utils::str(as.list(values))), collapse='\n')
   # pm("valueChangeReactValue: ", reactId, " ", valuesStr)
   rLogMsg$log("valueChangeReactValueValues: ", pn(reactId))
@@ -278,7 +277,7 @@ pn <- function(reactId) {
     value = valuesStr
   ))
 }
-.rlogReactValueKey <- function(reactId, key, value) {
+rlogReactValueKey <- function(reactId, key, value) {
   valueStr <- paste(utils::capture.output(utils::str(value)), collapse='\n')
   rLogMsg$log("valueChangeReactValueKey: ", pn(reactId), " ", key, " ", valueStr)
   rlogAppend(list(
@@ -290,7 +289,7 @@ pn <- function(reactId) {
 
 # id = ctx id
 # domain is like session
-.rlogInvalidateStart <- function(reactId, ctxId, type, domain) {
+rlogInvalidateStart <- function(reactId, ctxId, type, domain) {
   rLogMsg$log("invalidateStart: ", pn(reactId), " ", ctxId, " ", type)
   rLogMsg$depthIncrement()
   rlogAppend(
@@ -303,7 +302,7 @@ pn <- function(reactId) {
     domain
   )
 }
-.rlogInvalidateEnd <- function(reactId, ctxId, type, domain) {
+rlogInvalidateEnd <- function(reactId, ctxId, type, domain) {
   rLogMsg$depthDecrement()
   rLogMsg$log("invalidateEnd: ", pn(reactId), " ", ctxId, " ", type)
   rlogAppend(
@@ -318,7 +317,7 @@ pn <- function(reactId) {
 }
 
 #' @include stack.R
-.rlogStack <- Stack$new()
+rlogStack <- Stack$new()
 
 
 

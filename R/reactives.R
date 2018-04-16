@@ -8,11 +8,11 @@ Dependents <- R6Class(
   portable = FALSE,
   class = FALSE,
   public = list(
-    .rlogNodeId = character(0),
+    .reactId = character(0),
     .dependents = 'Map',
 
-    initialize = function(rlogNodeId = NULL) {
-      .rlogNodeId <<- rlogNodeId
+    initialize = function(reactId = NULL) {
+      .reactId <<- reactId
       .dependents <<- Map$new()
     },
     register = function(depId=NULL, depLabel=NULL) {
@@ -20,14 +20,15 @@ Dependents <- R6Class(
       if (!.dependents$containsKey(ctx$id)) {
         .dependents$set(ctx$id, ctx)
         ctx$onInvalidate(function() {
-          .rlogDependsOnRemove(ctx$.rlogNodeId, .rlogNodeId)
+          rlogDependsOnRemove(ctx$.reactId, .reactId)
           .dependents$remove(ctx$id)
         })
 
-        if (is.character(.rlogNodeId) && is.character(ctx$.rlogNodeId)) {
-          .rlogDependsOn(ctx$.rlogNodeId, .rlogNodeId)
+        if (is.character(.reactId) && is.character(ctx$.reactId)) {
+          rlogDependsOn(ctx$.reactId, .reactId)
         } else {
-          stop("ERROR: dependents does not have node id: ", .rlogNodeId, " and ", ctx$.rlogNodeId)
+          # TODO remove before shipping
+          stop("ERROR: dependents does not have node id: ", .reactId, " and ", ctx$.reactId)
         }
         # if (!is.null(depId) && nchar(depId) > 0)
         #   .graphDependsOnId(ctx$id, depId)
@@ -67,7 +68,7 @@ ReactiveVal <- R6Class(
       private$value <- value
       private$label <- label
       private$dependents <- Dependents$new(reactId = private$reactId)
-      .rlogAddNodeDef(private$reactId, private$label, type = "reactiveVal")
+      rlogAddNodeDef(private$reactId, private$label, type = "reactiveVal")
     },
     get = function() {
       private$dependents$register(depLabel = private$label)
@@ -82,11 +83,11 @@ ReactiveVal <- R6Class(
         return(invisible(FALSE))
       }
       private$value <- value
-      .rlogValueChange(private$reactId, value)
-      # .rlogInvalidateStart - TODO
+      rlogValueChange(private$reactId, value)
+      # rlogInvalidateStart - TODO
       # TODO add it for every $invalidate()
       private$dependents$invalidate()
-      # .rlogInvalidateEnd - TODO
+      # rlogInvalidateEnd - TODO
       invisible(TRUE)
     },
     freeze = function(session = getDefaultReactiveDomain()) {
@@ -304,10 +305,10 @@ ReactiveValues <- R6Class(
       .values <<- new.env(parent=emptyenv())
       .metadata <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
-      .namesDeps <<- Dependents$new(rlogNodeId = .reactId)
-      .allValuesDeps <<- Dependents$new(rlogNodeId = .reactId)
-      .valuesDeps <<- Dependents$new(rlogNodeId = .reactId)
-      .rlogAddNodeDef(.reactId, .label, type = "reactiveValues")
+      .namesDeps <<- Dependents$new(reactId = .reactId)
+      .allValuesDeps <<- Dependents$new(reactId = .reactId)
+      .valuesDeps <<- Dependents$new(reactId = .reactId)
+      rlogAddNodeDef(.reactId, .label, type = "reactiveValues")
     },
 
     get = function(key) {
@@ -316,7 +317,7 @@ ReactiveValues <- R6Class(
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
       if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
-        .rlogDependsOnReactiveValueKey(ctx$.reactId, .id, key)
+        rlogDependsOnReactiveValueKey(ctx$.reactId, .id, key)
         .dependents[[dep.key]] <- ctx
         # TODO add dependences remove
         ctx$onInvalidate(function() {
@@ -342,7 +343,7 @@ ReactiveValues <- R6Class(
         }
       }
       else {
-        .rlogReactValueNames(.reactId, .values)
+        rlogReactValueNames(.reactId, .values)
         .namesDeps$invalidate()
       }
 
@@ -353,8 +354,8 @@ ReactiveValues <- R6Class(
 
       .values[[key]] <- value
 
-      .rlogReactValueValues(.reactId, .values)
-      .rlogReactValueKey(.reactId, key, value)
+      rlogReactValueValues(.reactId, .values)
+      rlogReactValueKey(.reactId, key, value)
 
       dep.keys <- objects(
         envir=.dependents,
@@ -379,7 +380,7 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
-      .rlogDependsOnReactiveValueNames(
+      rlogDependsOnReactiveValueNames(
         .getReactiveEnvironment()$currentContext()$.reactId,
         .reactId
       )
@@ -421,7 +422,7 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
-      .rlogDependsOnReactiveValueToList(
+      rlogDependsOnReactiveValueToList(
         .getReactiveEnvironment()$currentContext()$.reactId,
         .reactId
       )
@@ -434,7 +435,7 @@ ReactiveValues <- R6Class(
     },
 
     .setLabel = function(label) {
-      .rlogUpdateNodeLabel(.reactId, label)
+      rlogUpdateNodeLabel(.reactId, label)
       .label <<- label
     }
   )
@@ -754,7 +755,7 @@ Observable <- R6Class(
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
-      .rlogAddNodeDef(.reactId, .label, type = "observable")
+      rlogAddNodeDef(.reactId, .label, type = "observable")
     },
     getValue = function() {
       .dependents$register()
@@ -1025,7 +1026,7 @@ registerDebugHook("observerFunc", environment(), label)
       setAutoDestroy(autoDestroy)
 
       .reactId <<- nextGlobalReactId()
-      .rlogAddNodeDef(.reactId, .label, type = "observer")
+      rlogAddNodeDef(.reactId, .label, type = "observer")
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
@@ -1778,7 +1779,7 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #' @export
 isolate <- function(expr) {
   curCtx <- .getReactiveEnvironment()$currentContext()
-  ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate', rlogNodeId = curCtx$.rlogNodeId)
+  ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate', reactId = curCtx$.reactId)
   on.exit(ctx$invalidate())
   # Matching ..stacktraceon../..stacktraceoff.. pair
   ..stacktraceoff..(ctx$run(function() {

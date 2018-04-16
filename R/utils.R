@@ -1674,3 +1674,37 @@ setVisible <- function(value, visible) {
     (value)
   }
 }
+
+createVarPromiseDomain <- function(env, name, value) {
+  force(env)
+  force(name)
+  force(value)
+  
+  promises::new_promise_domain(
+    wrapOnFulfilled = function(onFulfilled) {
+      function(...) {
+        orig <- env[[name]]
+        env[[name]] <- value
+        on.exit(env[[name]] <- orig)
+        
+        onFulfilled(...)
+      }
+    },
+    wrapOnRejected = function(onRejected) {
+      function(...) {
+        orig <- env[[name]]
+        env[[name]] <- value
+        on.exit(env[[name]] <- orig)
+        
+        onRejected(...)
+      }
+    },
+    wrapSync = function(expr) {
+      orig <- env[[name]]
+      env[[name]] <- value
+      on.exit(env[[name]] <- orig)
+
+      force(expr)
+    }
+  )
+}

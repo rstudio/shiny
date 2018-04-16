@@ -5,8 +5,8 @@
 \title{Plot output with cached images}
 \usage{
 renderCachedPlot(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
-  baseWidth = 400, aspectRatioRate = 1.2, growthRate = 1.2, res = 72,
-  scope = "app", ..., env = parent.frame(), quoted = FALSE,
+  sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
+  res = 72, scope = "app", ..., env = parent.frame(), quoted = FALSE,
   outputArgs = list())
 }
 \arguments{
@@ -20,17 +20,12 @@ is the same, then the plot will be the same.}
 reactives whose invalidation should cause the cached plots to be cleared.
 If \code{NULL} (the default) the cache will not get cleared.}
 
-\item{baseWidth}{A base value for the width of the cached plot.}
-
-\item{aspectRatioRate}{A multiplier for different possible aspect ratios. For
-example, with a value of 1.2, the possible aspect ratios for plots will be
-1:1, 1:1.2, 1:1.44, and so on, getting wider, as well as 1.2:1, 1.44:1, and
-so on, getting taller.}
-
-\item{growthRate}{A multiplier for different cached image sizes. For example,
-with a \code{width} of 400 and a \code{growthRate} of 1.25, there will be
-possible cached images of widths 256, 320, 400, 500, 625, and so on, both
-smaller and larger.}
+\item{sizePolicy}{A function that takes two arguments, \code{width} and
+\code{height}, and returns a list with \code{width} and \code{height}.
+The purpose is to round the actual pixel dimensions from the browser to
+some other dimensions, so that this will not generate and cache images of
+every possible pixel dimension. See \code{\link{sizeGrowthRatio}} for
+more information on the default sizing policy.}
 
 \item{res}{The resolution of the PNG, in pixels per inch.}
 
@@ -161,3 +156,74 @@ the expression is used only to signal that the cache should be reset.
   application exits.
 }
 
+\examples{
+## Only run examples in interactive R sessions
+if (interactive()) {
+
+# A basic example
+shinyApp(
+  fluidPage(
+    sidebarLayout(
+      sidebarPanel(
+        sliderInput("n", "Number of points", 4, 32, value = 8, step = 4)
+      ),
+      mainPanel(plotOutput("plot"))
+    )
+  ),
+  function(input, output, session) {
+    output$plot <- renderCachedPlot({
+        Sys.sleep(2)  # Add an artificial delay
+        seqn <- seq_len(input$n)
+        plot(mtcars$wt[seqn], mtcars$mpg[seqn],
+             xlim = range(mtcars$wt), ylim = range(mtcars$mpg))
+      },
+      cacheKeyExpr = { list(input$n) }
+    )
+  }
+)
+
+
+
+# An example that allows resetting the cache
+mydata <- reactiveVal(data.frame(x = rnorm(400), y = rnorm(400)))
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("n", "Number of points", 50, 400, 100, step = 50),
+      actionButton("newdata", "New data")
+    ),
+    mainPanel(
+      plotOutput("plot")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$newdata, {
+    mydata(data.frame(x = rnorm(400), y = rnorm(400)))
+  })
+
+  output$plot <- renderCachedPlot(
+    {
+      Sys.sleep(2)
+      d <- mydata()
+      seqn <- seq_len(input$n)
+      plot(d$x[seqn], d$y[seqn], xlim = range(d$x), ylim = range(d$y))
+    },
+    cacheKeyExpr = { list(input$n) },
+    cacheResetEventExpr = { mydata() },  # Reset cache when mydata() changes
+    scope = "app"
+  )
+}
+
+shinyApp(ui, server)
+
+
+}
+
+}
+\seealso{
+See \code{\link{renderPlot}} for the regular, non-cached version of
+  this function.
+}

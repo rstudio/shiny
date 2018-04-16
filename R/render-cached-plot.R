@@ -115,23 +115,91 @@
 #' @param cacheResetEventExpr An expression or block of code that accesses any
 #'   reactives whose invalidation should cause the cached plots to be cleared.
 #'   If \code{NULL} (the default) the cache will not get cleared.
-#' @param baseWidth A base value for the width of the cached plot.
-#' @param aspectRatioRate A multiplier for different possible aspect ratios. For
-#'   example, with a value of 1.2, the possible aspect ratios for plots will be
-#'   1:1, 1:1.2, 1:1.44, and so on, getting wider, as well as 1.2:1, 1.44:1, and
-#'   so on, getting taller.
-#' @param growthRate A multiplier for different cached image sizes. For example,
-#'   with a \code{width} of 400 and a \code{growthRate} of 1.25, there will be
-#'   possible cached images of widths 256, 320, 400, 500, 625, and so on, both
-#'   smaller and larger.
+#' @param sizePolicy A function that takes two arguments, \code{width} and
+#'   \code{height}, and returns a list with \code{width} and \code{height}.
+#'   The purpose is to round the actual pixel dimensions from the browser to
+#'   some other dimensions, so that this will not generate and cache images of
+#'   every possible pixel dimension. See \code{\link{sizeGrowthRatio}} for
+#'   more information on the default sizing policy.
 #' @param res The resolution of the PNG, in pixels per inch.
 #' @param scope The scope of the cache. This can be \code{"app"} (the default),
 #'   \code{"session"}, or the path to a directory to store cached plots. See the
 #'   Cache Scoping section for more information.
 #'
+#' @seealso See \code{\link{renderPlot}} for the regular, non-cached version of
+#'   this function.
+#'
+#'
+#' @examples
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' # A basic example
+#' shinyApp(
+#'   fluidPage(
+#'     sidebarLayout(
+#'       sidebarPanel(
+#'         sliderInput("n", "Number of points", 4, 32, value = 8, step = 4)
+#'       ),
+#'       mainPanel(plotOutput("plot"))
+#'     )
+#'   ),
+#'   function(input, output, session) {
+#'     output$plot <- renderCachedPlot({
+#'         Sys.sleep(2)  # Add an artificial delay
+#'         seqn <- seq_len(input$n)
+#'         plot(mtcars$wt[seqn], mtcars$mpg[seqn],
+#'              xlim = range(mtcars$wt), ylim = range(mtcars$mpg))
+#'       },
+#'       cacheKeyExpr = { list(input$n) }
+#'     )
+#'   }
+#' )
+#'
+#'
+#'
+#' # An example that allows resetting the cache
+#' mydata <- reactiveVal(data.frame(x = rnorm(400), y = rnorm(400)))
+#'
+#' ui <- fluidPage(
+#'   sidebarLayout(
+#'     sidebarPanel(
+#'       sliderInput("n", "Number of points", 50, 400, 100, step = 50),
+#'       actionButton("newdata", "New data")
+#'     ),
+#'     mainPanel(
+#'       plotOutput("plot")
+#'     )
+#'   )
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   observeEvent(input$newdata, {
+#'     mydata(data.frame(x = rnorm(400), y = rnorm(400)))
+#'   })
+#'
+#'   output$plot <- renderCachedPlot(
+#'     {
+#'       Sys.sleep(2)
+#'       d <- mydata()
+#'       seqn <- seq_len(input$n)
+#'       plot(d$x[seqn], d$y[seqn], xlim = range(d$x), ylim = range(d$y))
+#'     },
+#'     cacheKeyExpr = { list(input$n) },
+#'     cacheResetEventExpr = { mydata() },  # Reset cache when mydata() changes
+#'     scope = "app"
+#'   )
+#' }
+#'
+#' shinyApp(ui, server)
+#'
+#'
+#' }
+#'
 #' @export
 renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
-  baseWidth = 400, aspectRatioRate = 1.2, growthRate = 1.2, res = 72,
+  sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
+  res = 72,
   scope = "app",
   ...,
   env = parent.frame(), quoted = FALSE, outputArgs = list()
@@ -225,9 +293,8 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
     }
   )
 
-  possible_dims <- all_possible_dims(baseWidth, aspectRatioRate, growthRate)
 
-  # The width and height of the plot to draw, taken from possible_dims. These
+  # The width and height of the plot to draw, given from sizePolicy. These
   # values get filled by an observer below.
   fitDims <- reactiveValues(width = NULL, height = NULL)
 
@@ -309,7 +376,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
     session <<- shinysession
 
     # Given the actual width/height of the image in the browser, this gets
-    # smallest containing rectangle from possible_dims, and pushes those
+    # the width/height from sizePolicy() and pushes those
     # values into `fitDims`. It's done this way so that the `fitDims` only
     # change (and cause invalidations) when the rendered image size changes,
     # and not every time the browser's <img> tag changes size.
@@ -317,9 +384,9 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
       width  <- session$clientData[[paste0('output_', outputName, '_width')]]
       height <- session$clientData[[paste0('output_', outputName, '_height')]]
 
-      rect <- find_smallest_containing_rect(width, height, possible_dims)
-      fitDims$width  <- rect$width
-      fitDims$height <- rect$height
+      rect <- sizePolicy(c(width, height))
+      fitDims$width  <- rect[1]
+      fitDims$height <- rect[2]
     })
 
     hybrid_chain(
@@ -392,37 +459,42 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
 }
 
 
-# Given a target rectangle with `width` and `height`, and data frame `dims` of possible
-# dimensions, with column `width` and `height, find the smallest possible width x
-# height pair from `dims` that fully contains `width` and `height.`
-find_smallest_containing_rect <- function(width, height, dims) {
-  fit_rows <- width <= dims$width  &  height <= dims$height
-
-  if (sum(fit_rows) == 0) {
-    # TODO: handle case where width x height is larger than all dims
+#' Create a sizing function that grows at a given ratio
+#'
+#' Returns a function which takes a two-element vector representing an input
+#' width and height, and returns a two-element vector of width and height. The
+#' possible widths are the base width times the growthRate to any integer power.
+#' For example, with a base width of 500 and growth rate of 1.25, the possible
+#' widths include 320, 400, 500, 625, 782, and so on, both smaller and larger.
+#' Sizes are rounded up to the next pixel. Heights are computed the same way as
+#' widths.
+#'
+#' @param width,height Base width and height.
+#' @param growthRate Growth rate multiplier.
+#'
+#' @seealso This is to be used with \code{\link{renderCachedPlot}}.
+#'
+#' @examples
+#' f <- sizeGrowthRatio(500, 500, 1.25)
+#' f(c(400, 400))
+#' f(c(500, 500))
+#' f(c(530, 550))
+#' f(c(625, 700))
+#'
+#' @export
+sizeGrowthRatio <- function(width = 400, height = 400, growthRate = 1.2) {
+  round_dim_up <- function(x, base, rate) {
+    power <- ceiling(log(x / base, rate))
+    ceiling(base * rate^power)
   }
 
-  # Drop all the rows where width x height won't fit
-  dims <- dims[fit_rows, ]
-
-  # Find the possible rectangle with the smallest area
-  dims$area <- dims$width * dims$height
-  min_row <- which.min(dims$area)
-
-  list(
-    width  = dims$width[min_row],
-    height = dims$height[min_row]
-  )
-}
-
-# Returns a data frame with all possible width-height combinations. This could
-# use some fine-tuning in the future.
-all_possible_dims <- function(base_width = 400, aspect_ratio_rate = 1.25, growth_rate = 1.25) {
-  aspect_ratios <- aspect_ratio_rate ^ (-3:3)
-  dims <- expand.grid(width = base_width * (growth_rate ^ (-6:6)), ratio = aspect_ratios)
-  dims$height <- dims$width * dims$ratio
-
-  dims$width  <- round(dims$width)
-  dims$height <- round(dims$height)
-  dims
+  function(dims) {
+    if (length(dims) != 2) {
+      stop("dims must be a vector with two numbers, for width and height.")
+    }
+    c(
+      round_dim_up(dims[1], width,  growthRate),
+      round_dim_up(dims[2], height, growthRate)
+    )
+  }
 }

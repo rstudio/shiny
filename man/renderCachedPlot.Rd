@@ -6,7 +6,7 @@
 \usage{
 renderCachedPlot(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
   baseWidth = 400, aspectRatioRate = 1.2, growthRate = 1.2, res = 72,
-  scope = "app", env = parent.frame(), quoted = FALSE,
+  scope = "app", ..., env = parent.frame(), quoted = FALSE,
   outputArgs = list())
 }
 \arguments{
@@ -37,6 +37,9 @@ smaller and larger.}
 \item{scope}{The scope of the cache. This can be \code{"app"} (the default),
 \code{"session"}, or the path to a directory to store cached plots. See the
 Cache Scoping section for more information.}
+
+\item{...}{Arguments to be passed through to \code{\link[grDevices]{png}}.
+These can be used to set the width, height, background color, etc.}
 
 \item{env}{The environment in which to evaluate \code{expr}.}
 

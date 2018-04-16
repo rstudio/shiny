@@ -133,6 +133,7 @@
 renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
   baseWidth = 400, aspectRatioRate = 1.2, growthRate = 1.2, res = 72,
   scope = "app",
+  ...,
   env = parent.frame(), quoted = FALSE, outputArgs = list()
 ) {
 
@@ -142,6 +143,8 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
   # This is so that the expr doesn't re-execute by itself; it needs to be
   # triggered by the cache key (or width/height) changing.
   isolatedFunc <- function() isolate(func())
+
+  args <- list(...)
 
   cacheKey <- reactive(substitute(cacheKeyExpr), env = parent.frame(), quoted = TRUE)
 
@@ -271,8 +274,19 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
         } else {
           cat("drawReactive(): drawPlot()\n")
           # This includes the displaylist.
-          drawPlot(outputName, session, isolatedFunc, width, height, pixelratio, res,
-                   resultfile = resultFilePath)
+          do.call("drawPlot", c(
+            list(
+              name = outputName,
+              session = session,
+              func = isolatedFunc,
+              width = width,
+              height = height,
+              pixelratio = pixelratio,
+              res = res,
+              resultfile = resultFilePath
+            ),
+            args
+          ))
         }
       },
       catch = function(reason) {
@@ -343,9 +357,19 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
 
           } else {
             cat("renderFunc(): resizeSavedPlot()\n")
-            img <- resizeSavedPlot(name, shinysession, result,
-                                   width, height, pixelratio, res,
-                                   resultfile = resultFilePath)
+            img <- do.call("resizeSavedPlot", c(
+              list(
+                name,
+                shinysession,
+                result,
+                width,
+                height,
+                pixelratio,
+                res,
+                resultfile = resultFilePath
+              ),
+              args
+            ))
           }
         }
 

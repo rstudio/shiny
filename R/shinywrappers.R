@@ -111,12 +111,16 @@ useRenderFunction <- function(renderFunc, inline = FALSE) {
   }
 
   id <- createUniqueId(8, "out")
-  # Make the id the first positional argument
-  outputArgs <- c(list(id), outputArgs)
 
   o <- getDefaultReactiveDomain()$output
-  if (!is.null(o))
+  if (!is.null(o)) {
     o[[id]] <- renderFunc
+    # If there's a namespace, we must respect it
+    id <- getDefaultReactiveDomain()$ns(id)
+  }
+  
+  # Make the id the first positional argument
+  outputArgs <- c(list(id), outputArgs)
 
   if (is.logical(formals(outputFunction)[["inline"]]) && !("inline" %in% names(outputArgs))) {
     outputArgs[["inline"]] <- inline

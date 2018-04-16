@@ -1,7 +1,7 @@
 #' @include utils.R
 NULL
 
-# TODO pass the domain around
+# TODO-barret pass the domain around
 
 Dependents <- R6Class(
   'Dependents',
@@ -27,7 +27,7 @@ Dependents <- R6Class(
         if (is.character(.reactId) && is.character(ctx$.reactId)) {
           rlogDependsOn(ctx$.reactId, .reactId)
         } else {
-          # TODO remove before shipping
+          # TODO-barret remove before shipping. This should never be reached
           stop("ERROR: dependents does not have node id: ", .reactId, " and ", ctx$.reactId)
         }
         # if (!is.null(depId) && nchar(depId) > 0)
@@ -37,6 +37,9 @@ Dependents <- R6Class(
       }
     },
     invalidate = function() {
+      # ctx <- .getReactiveEnvironment()$currentContext()
+      # rlogInvalidateStart(.reactId, ctx$id, ctx$.reactType, ctx$.domain)
+      # on.exit(rlogInvalidateEnd(.reactId, ctx$id, ctx$.reactType, ctx$.domain), add = TRUE)
       lapply(
         .dependents$values(),
         function(ctx) {
@@ -68,10 +71,10 @@ ReactiveVal <- R6Class(
       private$value <- value
       private$label <- label
       private$dependents <- Dependents$new(reactId = private$reactId)
-      rlogAddNodeDef(private$reactId, private$label, type = "reactiveVal")
+      rlogReactDef(private$reactId, private$label, type = "reactiveVal")
     },
     get = function() {
-      private$dependents$register(depLabel = private$label)
+      private$dependents$register()
 
       if (private$frozen)
         reactiveStop()
@@ -84,10 +87,7 @@ ReactiveVal <- R6Class(
       }
       private$value <- value
       rlogValueChange(private$reactId, value)
-      # rlogInvalidateStart - TODO
-      # TODO add it for every $invalidate()
       private$dependents$invalidate()
-      # rlogInvalidateEnd - TODO
       invisible(TRUE)
     },
     freeze = function(session = getDefaultReactiveDomain()) {
@@ -296,6 +296,9 @@ ReactiveValues <- R6Class(
     .allValuesDeps = 'Dependents',
     # Dependents for all values
     .valuesDeps = 'Dependents',
+    # Key, asList(), or names() have been retrieved
+    .hasRetrieved = list(),
+
 
     initialize = function() {
       .reactId <<- nextGlobalReactId()
@@ -305,33 +308,62 @@ ReactiveValues <- R6Class(
       .values <<- new.env(parent=emptyenv())
       .metadata <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
-      .namesDeps <<- Dependents$new(reactId = .reactId)
-      .allValuesDeps <<- Dependents$new(reactId = .reactId)
-      .valuesDeps <<- Dependents$new(reactId = .reactId)
-      rlogAddNodeDef(.reactId, .label, type = "reactiveValues")
+      .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE, keys = list())
+      # rlogReactDef(
+      #   rlogReactivesNamesId(.reactId), rlogReactivesNamesId(.label),
+      #   type = "reactiveValuesNames")
+      # rlogValueChange(rlogReactivesNamesId(.reactId), c(), display = FALSE)
+      # rlogReactDef(
+      #   rlogReactivesAsListAllId(.reactId), rlogReactivesAsListAllId(.label),
+      #   type = "reactiveValuesAsListAll")
+      # rlogValueChange(rlogReactivesAsListAllId(.reactId), c(), display = FALSE)
+      # rlogReactDef(
+      #   rlogReactivesAsListId(.reactId), rlogReactivesAsListId(.label),
+      #   type = "reactiveValuesAsList")
+      # rlogValueChange(rlogReactivesAsListId(.reactId), c(), display = FALSE)
+      .namesDeps <<- Dependents$new(reactId = rlogReactivesNamesId(.reactId))
+      .allValuesDeps <<- Dependents$new(reactId = rlogReactivesAsListAllId(.reactId))
+      .valuesDeps <<- Dependents$new(reactId = rlogReactivesAsListId(.reactId))
     },
 
     get = function(key) {
+      if (!exists(key, envir=.values, inherits=FALSE))
+        keyValue <- NULL
+      else
+        keyValue <- .values[[key]]
+
       # Register the "downstream" reactive which is accessing this value, so
       # that we know to invalidate them when this value changes.
       ctx <- .getReactiveEnvironment()$currentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
       if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
-        rlogDependsOnReactiveValueKey(ctx$.reactId, .id, key)
+        reactKeyId <- rlogReactivesKeyId(.reactId, key)
+
+        if (!isTRUE(.hasRetrieved$keys[[key]])) {
+          rlogReactDef(
+            reactKeyId, label = rlogReactivesKeyId(.label, key),
+            type = "reactiveValuesKey"
+          )
+          .hasRetrieved$keys[[key]] <<- TRUE
+        }
+        rlogValueChange(reactKeyId, keyValue)
+        rlogDependsOn(ctx$.reactId, reactKeyId)
         .dependents[[dep.key]] <- ctx
-        # TODO add dependences remove
         ctx$onInvalidate(function() {
+          rlogDependsOnRemove(ctx$.reactid, reactKeyId)
           rm(list=dep.key, envir=.dependents, inherits=FALSE)
         })
       }
 
+      # TODO-barret ask about reactiveStop()
       if (isFrozen(key))
         reactiveStop()
 
-      if (!exists(key, envir=.values, inherits=FALSE))
-        NULL
-      else
-        .values[[key]]
+      # if (!exists(key, envir=.values, inherits=FALSE))
+      #   NULL
+      # else
+      #   .values[[key]]
+      keyValue
     },
 
     set = function(key, value) {
@@ -341,22 +373,43 @@ ReactiveValues <- R6Class(
         if (identical(.values[[key]], value)) {
           return(invisible())
         }
+
+        # key has be depended upon (can not happen if the key is being set)
+        if (isTRUE(.hasRetrieved$keys[[key]])) {
+          rlogValueChange(rlogReactivesKeyId(.reactId, key), value)
+        }
       }
       else {
-        rlogReactValueNames(.reactId, .values)
-        .namesDeps$invalidate()
+        # only invalidate if there are deps
+        if (isTRUE(.hasRetrieved$names)) {
+          rlogValueChange(
+            rlogReactivesNamesId(.reactId), ls(.values, all.names=TRUE),
+            display = FALSE)
+          .namesDeps$invalidate()
+        }
       }
 
-      if (hidden)
-        .allValuesDeps$invalidate()
-      else
-        .valuesDeps$invalidate()
+      if (hidden) {
+        if (isTRUE(.hasRetrieved$asListAll)) {
+          rlogValueChange(
+            rlogReactivesAsListAllId(.reactId), as.list(.values, all.names=TRUE),
+            display = FALSE)
+          .allValuesDeps$invalidate()
+        }
+      } else {
+        if (isTRUE(.hasRetrieved$asList)) {
+          # TODO-barret shouldn't valueDeps always get updated? as it is contained within .allValuesDeps
+          rlogValueChange(
+            rlogReactivesAsListId(.reactId), as.list(.values, all.names=FALSE),
+            display = FALSE)
+          .valuesDeps$invalidate()
+        }
+      }
 
+      # rlogValueChange(rlogReactivesKeyId(.reactId, key), value)
       .values[[key]] <- value
 
-      rlogReactValueValues(.reactId, .values)
-      rlogReactValueKey(.reactId, key, value)
-
+      # TODO-barret what is this key?
       dep.keys <- objects(
         envir=.dependents,
         pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
@@ -380,10 +433,6 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
-      rlogDependsOnReactiveValueNames(
-        .getReactiveEnvironment()$currentContext()$.reactId,
-        .reactId
-      )
       .namesDeps$register()
       return(ls(.values, all.names=TRUE))
     },
@@ -422,20 +471,32 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
-      rlogDependsOnReactiveValueToList(
-        .getReactiveEnvironment()$currentContext()$.reactId,
-        .reactId
-      )
-      if (all.names)
+      if (all.names) {
+        .hasRetrieved$asListAll <<- TRUE
         .allValuesDeps$register()
+      }
 
+      .hasRetrieved$asList <<- TRUE
       .valuesDeps$register()
 
       return(as.list(.values, all.names=all.names))
     },
 
     .setLabel = function(label) {
-      rlogUpdateNodeLabel(.reactId, label)
+      if (isTRUE(.hasRetrieved$names)) {
+        rlogUpdateNodeLabel(rlogReactivesNamesId(.reactId), rlogReactivesNamesId(label))
+      }
+      if (isTRUE(.hasRetrieved$asListAll)) {
+        rlogUpdateNodeLabel(rlogReactivesAsListAllId(.reactId), rlogReactivesAsListAllId(label))
+      }
+      if (isTRUE(.hasRetrieved$asList)) {
+        rlogUpdateNodeLabel(rlogReactivesAsListId(.reactId), rlogReactivesAsListId(label))
+      }
+      for (key in .hasRetrieved$keys) {
+        if (isTRUE(.hasRetrieved$keys[[key]])) {
+          rlogUpdateNodeLabel(rlogReactivesKeyId(.reactId, key), rlogReactivesKeyId(label, key))
+        }
+      }
       .label <<- label
     }
   )
@@ -755,12 +816,10 @@ Observable <- R6Class(
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
-      rlogAddNodeDef(.reactId, .label, type = "observable")
+      rlogReactDef(.reactId, .label, type = "observable")
     },
     getValue = function() {
       .dependents$register()
-
-      # TODO add dependsOn
 
       if (.invalidated || .running) {
         ..stacktraceoff..(
@@ -1026,7 +1085,7 @@ registerDebugHook("observerFunc", environment(), label)
       setAutoDestroy(autoDestroy)
 
       .reactId <<- nextGlobalReactId()
-      rlogAddNodeDef(.reactId, .label, type = "observer")
+      rlogReactDef(.reactId, .label, type = "observer")
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
@@ -1434,6 +1493,10 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   # callback below is fired (see #1621).
   force(session)
 
+  # Barret
+  # reactId <- nextGlobalReactId()
+  # rlogReactDef(reactId, paste0("timer(", intervalMs, ")"))
+
   dependents <- Map$new()
   timerCallbacks$schedule(intervalMs, function() {
     # Quit if the session is closed
@@ -1450,15 +1513,16 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
       })
   })
   return(function() {
+    newValue <- Sys.time()
     ctx <- .getReactiveEnvironment()$currentContext()
-    # TODO add dependsOn and dependsOnRemove to timer. Maybe timer should supply node id
+    # TODO-barret add dependsOn and dependsOnRemove to timer. Maybe timer should supply node id
     if (!dependents$containsKey(ctx$id)) {
       dependents$set(ctx$id, ctx)
       ctx$onInvalidate(function() {
         dependents$remove(ctx$id)
       })
     }
-    return(Sys.time())
+    return(newValue)
   })
 }
 

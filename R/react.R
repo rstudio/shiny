@@ -65,9 +65,7 @@ Context <- R6Class(
       .invalidated <<- TRUE
 
       rlogInvalidateStart(.reactId, id, .reactType, .domain)
-      on.exit(add = TRUE, {
-        rlogInvalidateEnd(.reactId, id, .reactType, .domain)
-      })
+      on.exit(rlogInvalidateEnd(.reactId, id, .reactType, .domain), add = TRUE)
 
       lapply(.invalidateCallbacks, function(func) {
         func()
@@ -157,7 +155,10 @@ ReactiveEnvironment <- R6Class(
       # If already in a flush, don't start another one
       if (.inFlush) return(invisible(FALSE))
       .inFlush <<- TRUE
-      on.exit(.inFlush <<- FALSE)
+      on.exit({
+        .inFlush <<- FALSE
+        rlogQueueEmpty()
+      })
 
       while (hasPendingFlush()) {
         ctx <- .pendingFlush$dequeue()

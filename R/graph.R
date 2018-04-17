@@ -178,6 +178,7 @@ rlogUpdateNodeLabel <- function(reactId, label) {
 # }
 
 rlogEnter <- function(reactId, ctxId, type) {
+  ctxId <- rlogCtxId(ctxId)
   rLogMsg$log("enter: ", rLogMsg$node(reactId), " ", ctxId, " ", type)
   rLogMsg$depthIncrement()
   rlogAppend(list(
@@ -189,6 +190,7 @@ rlogEnter <- function(reactId, ctxId, type) {
 }
 
 rlogExit <- function(reactId, ctxId, type) {
+  ctxId <- rlogCtxId(ctxId)
   rLogMsg$depthDecrement()
   rLogMsg$log("exit: ", rLogMsg$node(reactId), " ", ctxId, " ", type)
   rlogAppend(list(
@@ -245,13 +247,15 @@ rlogValueChange <- function(reactId, value, display = TRUE) {
 #   ))
 # }
 
+rlogCtxId <- function(ctxId) paste0("ctx", ctxId)
 rlogInvalidateStart <- function(reactId, ctxId, type, domain) {
+  ctxId <- rlogCtxId(ctxId)
   if (identical(type, "isolate")) {
     rlogType <- "isolateInvalidateStart"
   } else {
     rlogType <- "invalidateStart"
   }
-  rLogMsg$log(rlogType, ": ", rLogMsg$node(reactId), " ", ctxId, " ", type)
+  rLogMsg$log(rlogType, ": ", rLogMsg$node(reactId), " ", ctxId)
   rLogMsg$depthIncrement()
   rlogAppend(
     list(
@@ -263,6 +267,7 @@ rlogInvalidateStart <- function(reactId, ctxId, type, domain) {
   )
 }
 rlogInvalidateEnd <- function(reactId, ctxId, type, domain) {
+  ctxId <- rlogCtxId(ctxId)
   if (identical(type, "isolate")) {
     rlogType <- "isolateInvalidateEnd"
   } else {

@@ -762,26 +762,34 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.lastChanceCallback = [];
   };
   (function () {
-    this.setInput = function (name, value) {
-      var self = this;
-
+    this.setInput = function (name, value, opts) {
       this.pendingData[name] = value;
 
-      if (!this.timerId && !this.reentrant) {
-        this.timerId = setTimeout(function () {
-          self.reentrant = true;
-          try {
-            $.each(self.lastChanceCallback, function (i, callback) {
-              callback();
-            });
-            self.timerId = null;
-            var currentData = self.pendingData;
-            self.pendingData = {};
-            self.shinyapp.sendInput(currentData);
-          } finally {
-            self.reentrant = false;
-          }
-        }, 0);
+      if (!this.reentrant) {
+        if (opts.immediate) {
+          this.$sendNow();
+        } else if (!this.timerId) {
+          this.timerId = setTimeout(this.$sendNow.bind(this), 0);
+        }
+      }
+    };
+
+    this.$sendNow = function () {
+      if (this.reentrant) {
+        console.trace("Unexpected reentrancy in InputBatchSender!");
+      }
+
+      this.reentrant = true;
+      try {
+        this.timerId = null;
+        $.each(this.lastChanceCallback, function (i, callback) {
+          callback();
+        });
+        var currentData = this.pendingData;
+        this.pendingData = {};
+        this.shinyapp.sendInput(currentData);
+      } finally {
+        this.reentrant = false;
       }
     };
   }).call(InputBatchSender.prototype);
@@ -791,11 +799,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.lastSentValues = this.reset(initialValues);
   };
   (function () {
-    this.setInput = function (name, value) {
-      // Note that opts is not passed to setInput at this stage of the input
-      // decorator stack. If in the future this setInput keeps track of opts, it
-      // would be best not to store the `el`, because that could prevent it from
-      // being GC'd.
+    this.setInput = function (name, value, opts) {
       var _splitInputNameType = splitInputNameType(name);
 
       var inputName = _splitInputNameType.name;
@@ -803,11 +807,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       var jsonValue = JSON.stringify(value);
 
-      if (this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
+      if (!opts.immediate && this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
         return;
       }
       this.lastSentValues[inputName] = { jsonValue: jsonValue, inputType: inputType };
-      this.target.setInput(name, value);
+      this.target.setInput(name, value, opts);
     };
     this.reset = function () {
       var values = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -850,6 +854,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       evt.value = value;
       evt.binding = opts.binding;
       evt.el = opts.el;
+      evt.immediate = opts.immediate;
 
       $(document).trigger(evt);
 
@@ -859,7 +864,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         // opts aren't passed along to lower levels in the input decorator
         // stack.
-        this.target.setInput(name, evt.value);
+        this.target.setInput(name, evt.value, { immediate: opts.immediate });
       }
     };
   }).call(InputEventDecorator.prototype);

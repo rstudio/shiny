@@ -35,28 +35,19 @@
 #' \code{\link[digest]{digest}} function.
 #'
 #'
-#' \code{cacheResetEventExpr} is an expression that uses reactive values like
-#' \code{input$click} and/or reactive expressions like \code{data()}. The
-#' \code{cacheResetEventExpr} parameter works similarly to the \code{eventExpr}
-#' parameter of \code{\link{observeEvent}}: whenever the upstream reactive
-#' dependencies are invalidated, they cause this expression to re-execute, and
-#' the cache is reset -- the contents are erased. The cache should be reset when
-#' something changes so that a plot made with the same cache key as before would
-#' have a different result. This may happen when, for example, the underlying
-#' data changes. If the plot is based on a data source that changes over time,
-#' the plot at time 1 may differ from the plot at time 2, even if both plots use
-#' the same cache key.
+#' \code{cacheResetExpr} is an expression that uses reactive values like
+#' \code{input$click} and/or reactive expressions like \code{data()}. Whenever
+#' the value of \code{cacheResetExpr} changes, the the cache is reset -- the
+#' contents are erased. The cache should be reset when something changes so that
+#' a plot made with the same cache key as before would have a different result.
+#' This may happen when, for example, the underlying data changes. If the plot
+#' is based on a data source that changes over time, the plot at time 1 may
+#' differ from the plot at time 2, even if both plots use the same cache key.
 #'
-#' Another way to use \code{cacheResetEventExpr} is to have it clear the cache
-#' at a fixed time interval using \code{\link{invalidateLater}}. For example,
-#' you might want to have clear the cache once per hour, or once per day.
-#'
-#' Although both \code{cacheKeyExpr} and \code{cacheResetEventExpr} are reactive
-#' -- they re-execute when their upstream reactive dependencies are invalidated
-#' -- they differ in how they use the return value. For \code{cacheKeyExpr}, the
-#' returned value is used (as a key). In contrast, for
-#' \code{cacheResetEventExpr}, the return value is ignored; the invalidation of
-#' the expression is used only to signal that the cache should be reset.
+#' Another way to use \code{cacheResetExpr} is to have it clear the cache at a
+#' fixed time interval, by using \code{\link{invalidateLater}} and then returning
+#' an incrementing or random value each time. For example, you
+#' might want to have clear the cache once per hour, or once per day.
 #'
 #' @section Cache scoping:
 #'
@@ -112,15 +103,16 @@
 #' @param cacheKeyExpr An expression that returns a cache key. This key should
 #'   be a unique identifier for a plot: the assumption is that if the cache key
 #'   is the same, then the plot will be the same.
-#' @param cacheResetEventExpr An expression or block of code that accesses any
-#'   reactives whose invalidation should cause the cached plots to be cleared.
-#'   If \code{NULL} (the default) the cache will not get cleared.
+#' @param cacheResetExpr An expression or block of code that returns a key
+#'   which will be used to determine when the cache will be cleared. When the
+#'   key changes, the cache will be cleared. If \code{NULL} (the default) the
+#'   cache will not get cleared.
 #' @param sizePolicy A function that takes two arguments, \code{width} and
-#'   \code{height}, and returns a list with \code{width} and \code{height}.
-#'   The purpose is to round the actual pixel dimensions from the browser to
-#'   some other dimensions, so that this will not generate and cache images of
-#'   every possible pixel dimension. See \code{\link{sizeGrowthRatio}} for
-#'   more information on the default sizing policy.
+#'   \code{height}, and returns a list with \code{width} and \code{height}. The
+#'   purpose is to round the actual pixel dimensions from the browser to some
+#'   other dimensions, so that this will not generate and cache images of every
+#'   possible pixel dimension. See \code{\link{sizeGrowthRatio}} for more
+#'   information on the default sizing policy.
 #' @param res The resolution of the PNG, in pixels per inch.
 #' @param scope The scope of the cache. This can be \code{"app"} (the default),
 #'   \code{"session"}, or the path to a directory to store cached plots. See the
@@ -186,7 +178,7 @@
 #'       plot(d$x[seqn], d$y[seqn], xlim = range(d$x), ylim = range(d$y))
 #'     },
 #'     cacheKeyExpr = { list(input$n) },
-#'     cacheResetEventExpr = { mydata() },  # Reset cache when mydata() changes
+#'     cacheResetExpr = { mydata() },  # Reset cache when mydata() changes
 #'     scope = "app"
 #'   )
 #' }
@@ -197,7 +189,7 @@
 #' }
 #'
 #' @export
-renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
+renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetExpr = NULL,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
   scope = "app",
@@ -279,19 +271,36 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
     }
   }
 
-  # Clear the cacheDir at the appropriate time. Use ignoreInit=TRUE because we
-  # don't want it to happen right in the beginning.
-  observeEvent(
-    substitute(cacheResetEventExpr), event.env = parent.frame(), event.quoted = TRUE,
-    ignoreInit = TRUE,
-    {
+  # Cache reset: The cache is reset when the value of cacheResetExpr changes.
+  # It does not reset on the first run.
+  cacheResetExpr <- substitute(cacheResetExpr)
+  if (!is.null(cacheResetExpr)) {
+
+    lastCacheResetHash <- NULL
+    cacheReset <- reactive(cacheResetExpr, env = parent.frame(), quoted = TRUE)
+
+    observe({
+      cat("cacheReset observer\n")
+      hash <- digest::digest(cacheReset())
+      if (identical(hash, lastCacheResetHash)) {
+        return()
+
+      } else if (is.null(lastCacheResetHash)) {
+        # Save the hash, but don't reset the cache on the first run.
+        lastCacheResetHash <<- hash
+        return()
+      }
+
+      lastCacheResetHash <<- hash
+
+      cat("cacheReset observer: resetting cache\n")
       unlink(file.path(cacheDir(), "*.rds"))
 
       # Cause drawReactive() to re-execute, so renderFunc doesn't use the
       # cached value.
       drawReactiveTrigger(drawReactiveTrigger() + 1)
-    }
-  )
+    })
+  }
 
 
   # The width and height of the plot to draw, given from sizePolicy. These

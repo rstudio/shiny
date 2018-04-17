@@ -122,6 +122,8 @@ rlogAppend <- function(logEntry, domain = getDefaultReactiveDomain()) {
 #   ))
 # }
 
+rlogCtxId <- function(ctxId) paste0("ctx", ctxId)
+
 rlogReactivesNamesId     <- function(reactId)      paste0("names(", reactId, ")")
 rlogReactivesAsListId    <- function(reactId)      paste0("as.list(", reactId, ", all.names = TRUE)")
 rlogReactivesAsListAllId <- function(reactId)      paste0("as.list(", reactId, ")")
@@ -179,26 +181,46 @@ rlogUpdateNodeLabel <- function(reactId, label) {
 
 rlogEnter <- function(reactId, ctxId, type) {
   ctxId <- rlogCtxId(ctxId)
-  rLogMsg$log("enter: ", rLogMsg$node(reactId), " ", ctxId, " ", type)
-  rLogMsg$depthIncrement()
-  rlogAppend(list(
-    action = 'enter',
-    reactId = reactId,
-    ctxId = ctxId,
-    type = type
-  ))
+  if (identical(type, "isolate")) {
+    rLogMsg$log("isolateEnter: ", rLogMsg$node(reactId), " ", ctxId)
+    rLogMsg$depthIncrement()
+    rlogAppend(list(
+      action = 'isolateEnter',
+      reactId = reactId,
+      ctxId = ctxId
+    ))
+  } else {
+    rLogMsg$log("enter: ", rLogMsg$node(reactId), " ", ctxId, " ", type)
+    rLogMsg$depthIncrement()
+    rlogAppend(list(
+      action = 'enter',
+      reactId = reactId,
+      ctxId = ctxId,
+      type = type
+    ))
+  }
 }
 
 rlogExit <- function(reactId, ctxId, type) {
   ctxId <- rlogCtxId(ctxId)
-  rLogMsg$depthDecrement()
-  rLogMsg$log("exit: ", rLogMsg$node(reactId), " ", ctxId, " ", type)
-  rlogAppend(list(
-    action = 'exit',
-    reactId = reactId,
-    ctxId = ctxId,
-    type = type
-  ))
+  if (identical(type, "isolate")) {
+    rLogMsg$depthDecrement()
+    rLogMsg$log("isolateExit: ", rLogMsg$node(reactId), " ", ctxId)
+    rlogAppend(list(
+      action = 'isolateExit',
+      reactId = reactId,
+      ctxId = ctxId
+    ))
+  } else {
+    rLogMsg$depthDecrement()
+    rLogMsg$log("exit: ", rLogMsg$node(reactId), " ", ctxId, " ", type)
+    rlogAppend(list(
+      action = 'exit',
+      reactId = reactId,
+      ctxId = ctxId,
+      type = type
+    ))
+  }
 }
 
 # id = ctx id
@@ -247,42 +269,59 @@ rlogValueChange <- function(reactId, value, display = TRUE) {
 #   ))
 # }
 
-rlogCtxId <- function(ctxId) paste0("ctx", ctxId)
 rlogInvalidateStart <- function(reactId, ctxId, type, domain) {
   ctxId <- rlogCtxId(ctxId)
   if (identical(type, "isolate")) {
-    rlogType <- "isolateInvalidateStart"
+    rLogMsg$log("isolateInvalidateStart: ", rLogMsg$node(reactId), " ", ctxId)
+    rLogMsg$depthIncrement()
+    rlogAppend(
+      list(
+        action = "isolateInvalidateStart",
+        reactId = reactId,
+        ctxId = ctxId
+      ),
+      domain
+    )
   } else {
-    rlogType <- "invalidateStart"
+    rLogMsg$log("invalidateStart", ": ", rLogMsg$node(reactId), " ", ctxId, " ", type)
+    rLogMsg$depthIncrement()
+    rlogAppend(
+      list(
+        action = "invalidateStart",
+        reactId = reactId,
+        ctxId = ctxId,
+        type = type
+      ),
+      domain
+    )
   }
-  rLogMsg$log(rlogType, ": ", rLogMsg$node(reactId), " ", ctxId)
-  rLogMsg$depthIncrement()
-  rlogAppend(
-    list(
-      action = rlogType,
-      reactId = reactId,
-      ctxId = ctxId
-    ),
-    domain
-  )
 }
 rlogInvalidateEnd <- function(reactId, ctxId, type, domain) {
   ctxId <- rlogCtxId(ctxId)
   if (identical(type, "isolate")) {
-    rlogType <- "isolateInvalidateEnd"
+    rLogMsg$depthDecrement()
+    rLogMsg$log("isolateInvalidateEnd: ", rLogMsg$node(reactId), " ", ctxId)
+    rlogAppend(
+      list(
+        action = "isolateInvalidateEnd",
+        reactId = reactId,
+        ctxId = ctxId
+      ),
+      domain
+    )
   } else {
-    rlogType <- "invalidateEnd"
+    rLogMsg$depthDecrement()
+    rLogMsg$log("invalidateEnd: ", rLogMsg$node(reactId), " ", ctxId, " ", type)
+    rlogAppend(
+      list(
+        action = "invalidateEnd",
+        reactId = reactId,
+        ctxId = ctxId,
+        type = type
+      ),
+      domain
+    )
   }
-  rLogMsg$depthDecrement()
-  rLogMsg$log(rlogType, ": ", rLogMsg$node(reactId), " ", ctxId, " ", type)
-  rlogAppend(
-    list(
-      action = rlogType,
-      reactId = reactId,
-      ctxId = ctxId
-    ),
-    domain
-  )
 }
 
 rlogQueueEmpty <- function() {

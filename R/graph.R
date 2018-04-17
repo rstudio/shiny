@@ -304,10 +304,10 @@ MessageLogger = R6Class(
       if (!missing(depth)) self$depth <- depth
     },
     depthIncrement = function() {
-      self$depth <- self$depth + 2
+      self$depth <- self$depth + 1
     },
     depthDecrement = function() {
-      self$depth <- self$depth - 2
+      self$depth <- self$depth - 1
     },
     node = function(reactId) {
       nodeInfo <- nodeCache[[reactId]]
@@ -317,7 +317,7 @@ MessageLogger = R6Class(
     },
     log = function(...) {
       msg <- paste0(
-        paste0(rep(" ", depth), collapse = ""), " - ", paste0(..., collapse = ""),
+        paste0(rep(". ", depth), collapse = ""), " - ", paste0(..., collapse = ""),
         collapse = ""
       )
       self$messages[length(self$messages) + 1] <- msg

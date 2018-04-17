@@ -191,7 +191,7 @@ createStackTracePromiseDomain <- function() {
 }
 
 deepStacksEnabled <- function() {
-  getOption("shiny.deepstacktrace", FALSE)
+  getOption("shiny.deepstacktrace", TRUE)
 }
 
 doCaptureStack <- function(e) {

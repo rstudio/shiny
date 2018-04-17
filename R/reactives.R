@@ -781,18 +781,6 @@ Observable <- R6Class(
             # If an error occurs, we want to propagate the error, but we also
             # want to save a copy of it, so future callers of this reactive will
             # get the same error (i.e. the error is cached).
-
-            # We stripStackTrace in the next line, just in case someone
-            # downstream of us (i.e. deeper into the call stack) used
-            # captureStackTraces; otherwise the entire stack would always be the
-            # same (i.e. you'd always see the whole stack trace of the *first*
-            # time the code was run and the condition raised; there'd be no way
-            # to see the stack trace of the call site that caused the cached
-            # exception to be re-raised, and you need that information to figure
-            # out what's triggering the re-raise).
-            #
-            # We use try(stop()) as an easy way to generate a try-error object
-            # out of this condition.
             .value <<- cond
             .error <<- TRUE
             .visible <<- FALSE
@@ -969,19 +957,12 @@ Observer <- R6Class(
       if (length(formals(observerFunc)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
-registerDebugHook("observerFunc", environment(), label)
-      .func <<- function() {
-        tryCatch(
-          if (..stacktraceon)
-            ..stacktraceon..(observerFunc())
-          else
-            observerFunc(),
-          # It's OK for shiny.silent.error errors to cause an observer to stop running
-          shiny.silent.error = function(e) NULL
-          # validation = function(e) NULL,
-          # shiny.output.cancel = function(e) NULL
-        )
+      if (grepl("\\s", label, perl = TRUE)) {
+        funcLabel <- "<observer>"
+      } else {
+        funcLabel <- paste0("<observer:", label, ">")
       }
+      .func <<- wrapFunctionLabel(observerFunc, funcLabel, ..stacktraceon = ..stacktraceon)
       .label <<- label
       .domain <<- domain
       .priority <<- normalizePriority(priority)
@@ -1046,6 +1027,15 @@ registerDebugHook("observerFunc", environment(), label)
             }
           },
           catch = function(e) {
+            # It's OK for shiny.silent.error errors to cause an observer to stop running
+            # shiny.silent.error = function(e) NULL
+            # validation = function(e) NULL,
+            # shiny.output.cancel = function(e) NULL
+            
+            if (inherits(e, "shiny.silent.error")) {
+              return()
+            }
+            
             printError(e)
             if (!is.null(.domain)) {
               .domain$unhandledError(e)
@@ -1990,22 +1980,25 @@ observeEvent <- function(eventExpr, handlerExpr,
   initialized <- FALSE
 
   o <- observe({
-    e <- eventFunc()
+    hybrid_chain(
+      {eventFunc()},
+      function(value) {
+        if (ignoreInit && !initialized) {
+          initialized <<- TRUE
+          return()
+        }
+        
+        if (ignoreNULL && isNullEvent(value)) {
+          return()
+        }
 
-    if (ignoreInit && !initialized) {
-      initialized <<- TRUE
-      return()
-    }
-
-    if (ignoreNULL && isNullEvent(e)) {
-      return()
-    }
-
-    if (once) {
-      on.exit(o$destroy())
-    }
-
-    isolate(handlerFunc())
+        if (once) {
+          on.exit(o$destroy())
+        }
+        
+        isolate(handlerFunc())
+      }
+    )
   }, label = label, suspended = suspended, priority = priority, domain = domain,
   autoDestroy = TRUE, ..stacktraceon = FALSE)
 
@@ -2031,16 +2024,19 @@ eventReactive <- function(eventExpr, valueExpr,
   initialized <- FALSE
 
   invisible(reactive({
-    e <- eventFunc()
-
-    if (ignoreInit && !initialized) {
-      initialized <<- TRUE
-      req(FALSE)
-    }
-
-    req(!ignoreNULL || !isNullEvent(e))
-
-    isolate(handlerFunc())
+    hybrid_chain(
+      eventFunc(),
+      function(value) {
+        if (ignoreInit && !initialized) {
+          initialized <<- TRUE
+          req(FALSE)
+        }
+        
+        req(!ignoreNULL || !isNullEvent(value))
+        
+        isolate(handlerFunc())
+      }
+    )
   }, label = label, domain = domain, ..stacktraceon = FALSE))
 }
 

@@ -237,7 +237,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetEventExpr = NULL,
 
       } else {
         # User has passed in a directory
-        .cacheDir <<- normalizePath2(scope)
+        .cacheDir <<- absolutePath(scope)
       }
     }
 

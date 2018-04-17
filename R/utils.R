@@ -288,10 +288,11 @@ dirRemove <- function(path) {
   }
 }
 
-# Like normalizePath, this returns a canonical path. The difference is that
-# normalizePath() will not return a canonical path if it doesn't exist, but
-# this function will.
-normalizePath2 <- function(path) {
+# If the path exists, this returns a canonical path (like normalizePath). If it
+# does not exist, it returns an absolute path, relative to the current dir. The
+# difference is that a canonical path follows symlinks and doesn't have any
+# `..`, while an absolute path here is simply one that starts with `/`.
+absolutePath <- function(path) {
   norm_path <- normalizePath(path, mustWork = FALSE)
   if (path == norm_path) {
     file.path(getwd(), path)

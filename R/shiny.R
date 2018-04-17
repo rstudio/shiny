@@ -1918,6 +1918,7 @@ ShinySession <- R6Class(
     },
     incrementBusyCount = function() {
       if (private$busyCount == 0L) {
+        rlogAsyncStart(domain = NULL)
         private$sendMessage(busy = "busy")
       }
       private$busyCount <- private$busyCount + 1L
@@ -1925,6 +1926,7 @@ ShinySession <- R6Class(
     decrementBusyCount = function() {
       private$busyCount <- private$busyCount - 1L
       if (private$busyCount == 0L) {
+        rlogAsyncStop(domain = NULL)
         private$sendMessage(busy = "idle")
         self$requestFlush()
         # We defer the call to startCycle() using later(), to defend against

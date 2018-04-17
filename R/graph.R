@@ -331,6 +331,18 @@ rlogQueueEmpty <- function() {
       action = "queueEmpty"
     )
   )
+
+rlogAsyncStart <- function(domain = NULL) {
+  rLogMsg$log("asyncStart")
+  rlogAppend(domain, list(
+    action = "asyncStart"
+  ))
+}
+rlogAsyncStop <- function(domain = NULL) {
+  rLogMsg$log("asyncStop")
+  rlogAppend(domain, list(
+    action = "asyncStop"
+  ))
 }
 
 MessageLogger = R6Class(

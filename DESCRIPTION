@@ -63,8 +63,6 @@ Depends:
     R (>= 3.0.2),
     methods
 Remotes:
-    r-lib/later,
-    rstudio/promises,
     rstudio/httpuv
 Imports:
     utils,
@@ -78,7 +76,7 @@ Imports:
     R6 (>= 2.0),
     sourcetools,
     later (>= 0.7.1),
-    promises (>= 0.1.0.9001),
+    promises (>= 1.0.1),
     tools,
     crayon
 Suggests:

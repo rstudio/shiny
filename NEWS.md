@@ -15,7 +15,7 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 ### Minor new features and improvements
 
-* Addressed [#1978](https://github.com/rstudio/shiny/issues/1978): `shiny:value` is now triggered when the same input data is received from the server.  
+* Addressed [#1978](https://github.com/rstudio/shiny/issues/1978): `shiny:value` is now triggered when duplicate output data is received from the server. (Thanks, @andrewsali! [#1999](https://github.com/rstudio/shiny/pull/1999))
 
 * If a shiny output contains a css class of `shiny-report-size`, its container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980). (Thanks, @cpsievert! [#1981](https://github.com/rstudio/shiny/pull/1981))
 

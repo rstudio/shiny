@@ -15,6 +15,8 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 ### Minor new features and improvements
 
+* Addressed [#1978](https://github.com/rstudio/shiny/issues/1978): `shiny:value` is now triggered when the same input data is received from the server.  
+
 * If a shiny output contains a css class of `shiny-report-size`, its container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980). (Thanks, @cpsievert! [#1981](https://github.com/rstudio/shiny/pull/1981))
 
 * Added a new `autoclose = TRUE` parameter to `dateInput()` and `dateRangeInput()`. This closed [#1969](https://github.com/rstudio/shiny/issues/1969) which was a duplicate of much older issue, [#173](https://github.com/rstudio/shiny/issues/173). The default value is `TRUE` since that seems to be the common use case. However, this will cause existing apps with date inputs (that update to this version of Shiny) to have the datepicker be immediately closed once a date is selected. For most apps, this is actually desired behavior; if you wish to keep the datepicker open until the user clicks out of it use `autoclose = FALSE`. ([#1987](https://github.com/rstudio/shiny/pull/1987))

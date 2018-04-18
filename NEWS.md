@@ -13,6 +13,8 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Support for asynchronous operations! Built-in render functions that expected a certain kind of object to be yielded from their `expr`, now generally can handle a promise for that kind of object. Reactive expressions and observers are now promise-aware as well. ([#1932](https://github.com/rstudio/shiny/pull/1932))
 
+* Introduced two changes to the (undocumented but widely used) JavaScript function `Shiny.onInputChange(name, value)`. First, we changed the function name to `Shiny.setInputValue` (but don't worry--the old function name will continue to work). Second, until now, all calls to `Shiny.onInputChange(inputId, value)` have been "deduplicated"; that is, anytime an input is set to the same value it already has, the set is ignored. With Shiny v1.1, you can now add an options object as the third parameter: `Shiny.setInputValue("name", value, {priority: "event"})`. When the priority option is set to `"event"`, Shiny will always send the value and trigger reactivity, whether it is a duplicate or not. This closes [#928](https://github.com/rstudio/shiny/issues/928), which was the most upvoted open issue by far! Thanks, @daattali. ([#2018](https://github.com/rstudio/shiny/pull/2018))
+
 ### Minor new features and improvements
 
 * If a shiny output contains a css class of `shiny-report-size`, its container height and width are now reported in `session$clientData`. So, for an output with an id with `"myID"`, the height/width can be accessed via `session$clientData[['output_myID_height']]`/`session$clientData[['output_myID_width']]`. Addresses [#1980](https://github.com/rstudio/shiny/issues/1980). (Thanks, @cpsievert! [#1981](https://github.com/rstudio/shiny/pull/1981))

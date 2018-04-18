@@ -23,3 +23,17 @@ test_that("Scheduling works", {
   expect_false(timerCallbacks$executeElapsed())
   expect_equal(0, nrow(timerCallbacks$takeElapsed()))
 })
+
+test_that("Unscheduling works", {
+  origTimes <- timerCallbacks$.times
+  origFuncKeys <- timerCallbacks$.funcs$keys()
+  
+  taskHandle <- scheduleTask(1000, function() {
+    message("Whatever")
+  })
+  # Unregister
+  taskHandle()
+  
+  expect_identical(timerCallbacks$.times, origTimes)
+  expect_identical(timerCallbacks$.funcs$keys(), origFuncKeys)
+})

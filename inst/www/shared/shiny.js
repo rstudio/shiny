@@ -2982,7 +2982,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       return function (e) {
         if (e === null) {
-          exports.onInputChange(inputId, null);
+          exports.setInputValue(inputId, null);
           return;
         }
 
@@ -2990,7 +2990,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // If outside of plotting region
         if (!coordmap.isInPanel(offset)) {
           if (nullOutside) {
-            exports.onInputChange(inputId, null);
+            exports.setInputValue(inputId, null);
             return;
           }
           if (clip) return;
@@ -3011,8 +3011,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         coords.range = panel.range;
         coords.log = panel.log;
 
-        coords[".nonce"] = Math.random();
-        exports.onInputChange(inputId, coords);
+        exports.setInputValue(inputId, coords, { priority: "event" });
       };
     };
   };
@@ -3199,7 +3198,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       // We're in a new or reset state
       if (isNaN(coords.xmin)) {
-        exports.onInputChange(inputId, null);
+        exports.setInputValue(inputId, null);
         // Must tell other brushes to clear.
         imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
           brushId: inputId, outputId: null
@@ -3226,7 +3225,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       coords.outputId = outputId;
 
       // Send data to server
-      exports.onInputChange(inputId, coords);
+      exports.setInputValue(inputId, coords);
 
       $el.data("mostRecentBrush", true);
       imageOutputBinding.find(document).trigger("shiny-internal:brushed", coords);
@@ -3860,7 +3859,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
 
   exports.resetBrush = function (brushId) {
-    exports.onInputChange(brushId, null);
+    exports.setInputValue(brushId, null);
     imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
       brushId: brushId, outputId: null
     });

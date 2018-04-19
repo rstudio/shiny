@@ -37,3 +37,12 @@ test_that("Unscheduling works", {
   expect_identical(timerCallbacks$.times, origTimes)
   expect_identical(timerCallbacks$.funcs$keys(), origFuncKeys)
 })
+
+test_that("Vectorized unscheduling works", {
+  key1 <- timerCallbacks$schedule(1000, function() {})
+  key2 <- timerCallbacks$schedule(1000, function() {})
+  key3 <- timerCallbacks$schedule(1000, function() {})
+  
+  expect_identical(timerCallbacks$unschedule(key2), TRUE)
+  expect_identical(timerCallbacks$unschedule(c(key1, key2, key3)), c(TRUE, FALSE, TRUE))
+})

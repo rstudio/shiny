@@ -739,8 +739,9 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       mappings <- c(list(mappings), layer_mappings)
       mappings <- Reduce(x = mappings, init = list(x = NULL, y = NULL),
         function(init, m) {
-          if (is.null(init$x) && !is.null(m$x)) init$x <- m$x
-          if (is.null(init$y) && !is.null(m$y)) init$y <- m$y
+          # Can't use m$x/m$y; you get a partial match with xintercept/yintercept
+          if (is.null(init[["x"]]) && !is.null(m[["x"]])) init$x <- m[["x"]]
+          if (is.null(init[["y"]]) && !is.null(m[["y"]])) init$y <- m[["y"]]
           init
         }
       )

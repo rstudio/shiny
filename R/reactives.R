@@ -701,9 +701,12 @@ Observable <- R6Class(
     .visible = logical(0),
     .execCount = integer(0),
     .mostRecentCtxId = character(0),
-
+    .autoDestroy = logical(0),
+    .destroyed = logical(0),
+    
     initialize = function(func, label = deparse(substitute(func)),
                           domain = getDefaultReactiveDomain(),
+                          autoDestroy = TRUE,
                           ..stacktraceon = TRUE) {
       if (length(formals(func)) > 0)
         stop("Can't make a reactive expression from a function that takes one ",
@@ -728,9 +731,28 @@ Observable <- R6Class(
       .invalidated <<- TRUE
       .running <<- FALSE
       .execCount <<- 0L
-      .mostRecentCtxId <<- ""
+      .ctx <<- NULL
+      .destroyed <<- FALSE
+      
+      if (autoDestroy) {
+        onReactiveDomainEnded(domain, function() {
+          .destroyed <<- TRUE
+          if (!is.null(.ctx)) {
+            # Make sure all reactives are invalidated after all observers.
+            # If not, then invalidating the reactive will invalidate
+            # downstream observers and cause them to schedule stuff, which
+            # will then prevent us from being collected.
+            later::later(.ctx$invalidate, 0)
+            .ctx <<- NULL
+          }
+        })
+      }
     },
     getValue = function() {
+      if (.destroyed) {
+        stop("Attempt to read from a reactive expression that has already been destroyed")
+      }
+      
       .dependents$register()
 
       if (.invalidated || .running) {
@@ -756,8 +778,8 @@ Observable <- R6Class(
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
-                         prevId = .mostRecentCtxId)
-      .mostRecentCtxId <<- ctx$id
+                         prevId = .ctx$id)
+      .ctx <<- ctx
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
         .value <<- NULL # Value can be GC'd, it won't be read once invalidated
@@ -845,7 +867,7 @@ Observable <- R6Class(
 #' isolate(reactiveD())
 #' @export
 reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
-                     domain = getDefaultReactiveDomain(),
+                     domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
                      ..stacktraceon = TRUE) {
   fun <- exprToFunction(x, env, quoted)
   # Attach a label and a reference to the original user source for debugging
@@ -856,7 +878,7 @@ reactive <- function(x, env = parent.frame(), quoted = FALSE, label = NULL,
   }
   if (length(srcref) >= 2) attr(label, "srcref") <- srcref[[2]]
   attr(label, "srcfile") <- srcFileOfRef(srcref[[1]])
-  o <- Observable$new(fun, label, domain, ..stacktraceon = ..stacktraceon)
+  o <- Observable$new(fun, label, domain, autoDestroy, ..stacktraceon = ..stacktraceon)
   structure(o$getValue, observable = o, class = c("reactiveExpr", "reactive"))
 }
 

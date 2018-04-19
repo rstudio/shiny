@@ -189,26 +189,34 @@ var InputBatchSender = function(shinyapp) {
   this.lastChanceCallback = [];
 };
 (function() {
-  this.setInput = function(name, value) {
-    var self = this;
-
+  this.setInput = function(name, value, opts) {
     this.pendingData[name] = value;
 
-    if (!this.timerId && !this.reentrant) {
-      this.timerId = setTimeout(function() {
-        self.reentrant = true;
-        try {
-          $.each(self.lastChanceCallback, function(i, callback) {
-            callback();
-          });
-          self.timerId = null;
-          var currentData = self.pendingData;
-          self.pendingData = {};
-          self.shinyapp.sendInput(currentData);
-        } finally {
-          self.reentrant = false;
-        }
-      }, 0);
+    if (!this.reentrant) {
+      if (opts.priority === "event") {
+        this.$sendNow();
+      } else if (!this.timerId) {
+        this.timerId = setTimeout(this.$sendNow.bind(this), 0);
+      }
+    }
+  };
+
+  this.$sendNow = function() {
+    if (this.reentrant) {
+      console.trace("Unexpected reentrancy in InputBatchSender!");
+    }
+
+    this.reentrant = true;
+    try {
+      this.timerId = null;
+      $.each(this.lastChanceCallback, (i, callback) => {
+        callback();
+      });
+      var currentData = this.pendingData;
+      this.pendingData = {};
+      this.shinyapp.sendInput(currentData);
+    } finally {
+      this.reentrant = false;
     }
   };
 }).call(InputBatchSender.prototype);
@@ -219,21 +227,18 @@ var InputNoResendDecorator = function(target, initialValues) {
   this.lastSentValues = this.reset(initialValues);
 };
 (function() {
-  this.setInput = function(name, value) {
-    // Note that opts is not passed to setInput at this stage of the input
-    // decorator stack. If in the future this setInput keeps track of opts, it
-    // would be best not to store the `el`, because that could prevent it from
-    // being GC'd.
+  this.setInput = function(name, value, opts) {
     const { name: inputName, inputType: inputType } = splitInputNameType(name);
     const jsonValue = JSON.stringify(value);
 
-    if (this.lastSentValues[inputName] &&
+    if (opts.priority !== "event" &&
+        this.lastSentValues[inputName] &&
         this.lastSentValues[inputName].jsonValue === jsonValue &&
         this.lastSentValues[inputName].inputType === inputType) {
       return;
     }
     this.lastSentValues[inputName] = { jsonValue, inputType };
-    this.target.setInput(name, value);
+    this.target.setInput(name, value, opts);
   };
   this.reset = function(values = {}) {
     // Given an object with flat name-value format:
@@ -271,6 +276,7 @@ var InputEventDecorator = function(target) {
     evt.value     = value;
     evt.binding   = opts.binding;
     evt.el        = opts.el;
+    evt.priority    = opts.priority;
 
     $(document).trigger(evt);
 
@@ -278,9 +284,9 @@ var InputEventDecorator = function(target) {
       name = evt.name;
       if (evt.inputType !== '') name += ':' + evt.inputType;
 
-      // opts aren't passed along to lower levels in the input decorator
+      // Most opts aren't passed along to lower levels in the input decorator
       // stack.
-      this.target.setInput(name, evt.value);
+      this.target.setInput(name, evt.value, { priority: opts.priority });
     }
   };
 }).call(InputEventDecorator.prototype);
@@ -294,7 +300,7 @@ var InputRateDecorator = function(target) {
   this.setInput = function(name, value, opts) {
     this.$ensureInit(name);
 
-    if (opts.immediate)
+    if (opts.priority !== "deferred")
       this.inputRatePolicies[name].immediateCall(name, value, opts);
     else
       this.inputRatePolicies[name].normalCall(name, value, opts);
@@ -359,11 +365,25 @@ const InputValidateDecorator = function(target) {
 
 // Merge opts with defaults, and return a new object.
 function addDefaultInputOpts(opts) {
-  return $.extend({
-    immediate: false,
+
+  opts = $.extend({
+    priority: "immediate",
     binding: null,
     el: null
   }, opts);
+
+  if (opts && typeof(opts.priority) !== "undefined") {
+    switch (opts.priority) {
+      case "deferred":
+      case "immediate":
+      case "event":
+        break;
+      default:
+        throw new Error("Unexpected input value mode: '" + opts.priority + "'");
+    }
+  }
+
+  return opts;
 }
 
 

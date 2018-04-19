@@ -101,7 +101,7 @@ function initShiny() {
 
   inputs = new InputValidateDecorator(inputs);
 
-  exports.onInputChange = function(name, value, opts) {
+  exports.setInputValue = exports.onInputChange = function(name, value, opts) {
     opts = addDefaultInputOpts(opts);
     inputs.setInput(name, value, opts);
   };
@@ -116,7 +116,11 @@ function initShiny() {
       if (type)
         id = id + ":" + type;
 
-      let opts = { immediate: !allowDeferred, binding: binding, el: el };
+      let opts = {
+        priority: allowDeferred ? "deferred" : "immediate",
+        binding: binding,
+        el: el
+      };
       inputs.setInput(id, value, opts);
     }
   }

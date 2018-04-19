@@ -762,26 +762,34 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.lastChanceCallback = [];
   };
   (function () {
-    this.setInput = function (name, value) {
-      var self = this;
-
+    this.setInput = function (name, value, opts) {
       this.pendingData[name] = value;
 
-      if (!this.timerId && !this.reentrant) {
-        this.timerId = setTimeout(function () {
-          self.reentrant = true;
-          try {
-            $.each(self.lastChanceCallback, function (i, callback) {
-              callback();
-            });
-            self.timerId = null;
-            var currentData = self.pendingData;
-            self.pendingData = {};
-            self.shinyapp.sendInput(currentData);
-          } finally {
-            self.reentrant = false;
-          }
-        }, 0);
+      if (!this.reentrant) {
+        if (opts.priority === "event") {
+          this.$sendNow();
+        } else if (!this.timerId) {
+          this.timerId = setTimeout(this.$sendNow.bind(this), 0);
+        }
+      }
+    };
+
+    this.$sendNow = function () {
+      if (this.reentrant) {
+        console.trace("Unexpected reentrancy in InputBatchSender!");
+      }
+
+      this.reentrant = true;
+      try {
+        this.timerId = null;
+        $.each(this.lastChanceCallback, function (i, callback) {
+          callback();
+        });
+        var currentData = this.pendingData;
+        this.pendingData = {};
+        this.shinyapp.sendInput(currentData);
+      } finally {
+        this.reentrant = false;
       }
     };
   }).call(InputBatchSender.prototype);
@@ -791,11 +799,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.lastSentValues = this.reset(initialValues);
   };
   (function () {
-    this.setInput = function (name, value) {
-      // Note that opts is not passed to setInput at this stage of the input
-      // decorator stack. If in the future this setInput keeps track of opts, it
-      // would be best not to store the `el`, because that could prevent it from
-      // being GC'd.
+    this.setInput = function (name, value, opts) {
       var _splitInputNameType = splitInputNameType(name);
 
       var inputName = _splitInputNameType.name;
@@ -803,11 +807,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       var jsonValue = JSON.stringify(value);
 
-      if (this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
+      if (opts.priority !== "event" && this.lastSentValues[inputName] && this.lastSentValues[inputName].jsonValue === jsonValue && this.lastSentValues[inputName].inputType === inputType) {
         return;
       }
       this.lastSentValues[inputName] = { jsonValue: jsonValue, inputType: inputType };
-      this.target.setInput(name, value);
+      this.target.setInput(name, value, opts);
     };
     this.reset = function () {
       var values = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -850,6 +854,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       evt.value = value;
       evt.binding = opts.binding;
       evt.el = opts.el;
+      evt.priority = opts.priority;
 
       $(document).trigger(evt);
 
@@ -857,9 +862,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         name = evt.name;
         if (evt.inputType !== '') name += ':' + evt.inputType;
 
-        // opts aren't passed along to lower levels in the input decorator
+        // Most opts aren't passed along to lower levels in the input decorator
         // stack.
-        this.target.setInput(name, evt.value);
+        this.target.setInput(name, evt.value, { priority: opts.priority });
       }
     };
   }).call(InputEventDecorator.prototype);
@@ -872,7 +877,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.setInput = function (name, value, opts) {
       this.$ensureInit(name);
 
-      if (opts.immediate) this.inputRatePolicies[name].immediateCall(name, value, opts);else this.inputRatePolicies[name].normalCall(name, value, opts);
+      if (opts.priority !== "deferred") this.inputRatePolicies[name].immediateCall(name, value, opts);else this.inputRatePolicies[name].normalCall(name, value, opts);
     };
     this.setRatePolicy = function (name, mode, millis) {
       if (mode === 'direct') {
@@ -924,11 +929,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   // Merge opts with defaults, and return a new object.
   function addDefaultInputOpts(opts) {
-    return $.extend({
-      immediate: false,
+
+    opts = $.extend({
+      priority: "immediate",
       binding: null,
       el: null
     }, opts);
+
+    if (opts && typeof opts.priority !== "undefined") {
+      switch (opts.priority) {
+        case "deferred":
+        case "immediate":
+        case "event":
+          break;
+        default:
+          throw new Error("Unexpected input value mode: '" + opts.priority + "'");
+      }
+    }
+
+    return opts;
   }
 
   function splitInputNameType(name) {
@@ -2968,7 +2987,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       return function (e) {
         if (e === null) {
-          exports.onInputChange(inputId, null);
+          exports.setInputValue(inputId, null);
           return;
         }
 
@@ -2976,7 +2995,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // If outside of plotting region
         if (!coordmap.isInPanel(offset)) {
           if (nullOutside) {
-            exports.onInputChange(inputId, null);
+            exports.setInputValue(inputId, null);
             return;
           }
           if (clip) return;
@@ -2997,8 +3016,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         coords.range = panel.range;
         coords.log = panel.log;
 
-        coords[".nonce"] = Math.random();
-        exports.onInputChange(inputId, coords);
+        exports.setInputValue(inputId, coords, { priority: "event" });
       };
     };
   };
@@ -3185,7 +3203,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       // We're in a new or reset state
       if (isNaN(coords.xmin)) {
-        exports.onInputChange(inputId, null);
+        exports.setInputValue(inputId, null);
         // Must tell other brushes to clear.
         imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
           brushId: inputId, outputId: null
@@ -3212,7 +3230,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       coords.outputId = outputId;
 
       // Send data to server
-      exports.onInputChange(inputId, coords);
+      exports.setInputValue(inputId, coords);
 
       $el.data("mostRecentBrush", true);
       imageOutputBinding.find(document).trigger("shiny-internal:brushed", coords);
@@ -3846,7 +3864,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
 
   exports.resetBrush = function (brushId) {
-    exports.onInputChange(brushId, null);
+    exports.setInputValue(brushId, null);
     imageOutputBinding.find(document).trigger("shiny-internal:brushed", {
       brushId: brushId, outputId: null
     });
@@ -6072,7 +6090,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
     inputs = new InputValidateDecorator(inputs);
 
-    exports.onInputChange = function (name, value, opts) {
+    exports.setInputValue = exports.onInputChange = function (name, value, opts) {
       opts = addDefaultInputOpts(opts);
       inputs.setInput(name, value, opts);
     };
@@ -6086,7 +6104,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var type = binding.getType(el);
         if (type) id = id + ":" + type;
 
-        var opts = { immediate: !allowDeferred, binding: binding, el: el };
+        var opts = {
+          priority: allowDeferred ? "deferred" : "immediate",
+          binding: binding,
+          el: el
+        };
         inputs.setInput(id, value, opts);
       }
     }

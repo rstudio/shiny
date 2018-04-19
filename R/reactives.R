@@ -278,8 +278,9 @@ ReactiveValues <- R6Class(
     .allValuesDeps = 'Dependents',
     # Dependents for all values
     .valuesDeps = 'Dependents',
+    .dedupe = logical(0),
 
-    initialize = function() {
+    initialize = function(dedupe = TRUE) {
       .label <<- paste('reactiveValues',
                        p_randomInt(1000, 10000),
                        sep="")
@@ -289,6 +290,7 @@ ReactiveValues <- R6Class(
       .namesDeps <<- Dependents$new()
       .allValuesDeps <<- Dependents$new()
       .valuesDeps <<- Dependents$new()
+      .dedupe <<- dedupe
     },
 
     get = function(key) {
@@ -317,7 +319,7 @@ ReactiveValues <- R6Class(
       hidden <- substr(key, 1, 1) == "."
 
       if (exists(key, envir=.values, inherits=FALSE)) {
-        if (identical(.values[[key]], value)) {
+        if (.dedupe && identical(.values[[key]], value)) {
           return(invisible())
         }
       }

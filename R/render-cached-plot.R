@@ -103,10 +103,6 @@
 #' @param cacheKeyExpr An expression that returns a cache key. This key should
 #'   be a unique identifier for a plot: the assumption is that if the cache key
 #'   is the same, then the plot will be the same.
-#' @param cacheResetExpr An expression or block of code that returns a key
-#'   which will be used to determine when the cache will be cleared. When the
-#'   key changes, the cache will be cleared. If \code{NULL} (the default) the
-#'   cache will not get cleared.
 #' @param sizePolicy A function that takes two arguments, \code{width} and
 #'   \code{height}, and returns a list with \code{width} and \code{height}. The
 #'   purpose is to round the actual pixel dimensions from the browser to some
@@ -114,9 +110,10 @@
 #'   possible pixel dimension. See \code{\link{sizeGrowthRatio}} for more
 #'   information on the default sizing policy.
 #' @param res The resolution of the PNG, in pixels per inch.
-#' @param scope The scope of the cache. This can be \code{"app"} (the default),
-#'   \code{"session"}, or the path to a directory to store cached plots. See the
-#'   Cache Scoping section for more information.
+#' @param cache The scope of the cache, or a cache object. This can be
+#'   \code{"app"} (the default), \code{"session"}, or a cache object like
+#'   a \code{\link{DiskCache}}. See the Cache Scoping section for more
+#'   information.
 #'
 #' @seealso See \code{\link{renderPlot}} for the regular, non-cached version of
 #'   this function.
@@ -189,10 +186,10 @@
 #' }
 #'
 #' @export
-renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetExpr = NULL,
+renderCachedPlot <- function(expr, cacheKeyExpr,
   sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
   res = 72,
-  scope = "app",
+  cache = "app",
   ...,
   env = parent.frame(), quoted = FALSE, outputArgs = list()
 ) {
@@ -208,97 +205,55 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetExpr = NULL,
 
   cacheKey <- reactive(substitute(cacheKeyExpr), env = parent.frame(), quoted = TRUE)
 
-  .cacheDir <- NULL
-  cacheDir <- function() {
-    # Memoize
-    if (is.null(.cacheDir)) {
-      if (is.null(outputName)) {
-        stop("outputName is NULL. cacheDir() was called too early.")
-      }
-
-      if (scope %in% c("app", "session")) {
-        appCachePath <- file.path(tempdir(), paste0("shinyapp-", getShinyOption("appToken")))
-
-        if (scope == "app") {
-          cacheScopePath <- appCachePath
-        } else if (scope == "session") {
-          cacheScopePath <- file.path(appCachePath, paste0("shinysession-", session$token))
-        }
-
-        .cacheDir <<- file.path(cacheScopePath, paste0("output-", outputName))
-
-      } else {
-        # User has passed in a directory
-        .cacheDir <<- absolutePath(scope)
-      }
+  ensureCacheSetup <- function(outputName) {
+    # For our purposes, cache objects must support these methods.
+    isCacheObject <- function(x) {
+      # Use tryCatch in case the object does not support `$`.
+      tryCatch(
+        is.function(x$has) && is.function(x$get) && is.function(x$set),
+        error = function(e) FALSE
+      )
     }
 
-    .cacheDir
-  }
+    if (isCacheObject(cache)) {
+      # If `cache` is already a cache object, do nothing
+      return()
 
-  ensureCacheDirExists <- function() {
-    if (!dirExists(cacheDir())) {
-      cat("Creating ", cacheDir(), "\n")
-      dir.create(cacheDir(), recursive = TRUE, mode = "0700")
+    } else if (identical(cache, "app")) {
+      cacheDir <- file.path(tempdir(),
+        paste0("shinyapp-", getShinyOption("appToken"), "-", outputName)
+      )
+      cache <<- DiskCache$new(cacheDir, prune = disk_pruner(max_size = 5*1024^2), reset_on_finalize = FALSE)
 
-      # Set up removal of cache directory at appropriate time. The removal
-      # callback is registered here, paired with the creation of the cache
-      # dir, to ensure it's not scheduled multiple times for one directory.
-      deleteCacheDir <- function() {
-        # Just to be safe, don't try to delete the cache dir if it's already
-        # gone.
-        if (!dirExists(cacheDir())) {
-          return()
-        }
+    } else if (identical(cache, "session")) {
+      cacheDir <- file.path(tempdir(),
+        paste0("shinyapp-", getShinyOption("appToken"), "-", session$token, "-", outputName)
+      )
+      cache <<- DiskCache$new(cacheDir, prune = disk_pruner(max_size = 5*1024^2), reset_on_finalize = TRUE)
 
-        unlink(cacheDir(), recursive = TRUE)
-
-        # Recursively delete empty parent dirs, up to temp dir.
-        currentDir <- dirname(cacheDir())
-        while (currentDir != tempdir() &&
-               length(dir(currentDir, all.files = TRUE, no.. = TRUE)) == 0)
-        {
-          dirRemove(currentDir)
-          currentDir <- dirname(currentDir)
-        }
-      }
-
-      if (scope == "app") {
-        onStop(deleteCacheDir, session = NULL)
-      } else if (scope == "session") {
-        onSessionEnded(deleteCacheDir)
-      }
+    } else {
+      stop('`cache` must either be "app", "session", or a cache object with methods `$has`, `$get`, and `$set`.')
     }
   }
 
-  # Cache reset: The cache is reset when the value of cacheResetExpr changes.
-  # It does not reset on the first run.
-  cacheResetExpr <- substitute(cacheResetExpr)
-  if (!is.null(cacheResetExpr)) {
+  resizeObserver <- NULL
+  ensureResizeObserver <- function() {
+    if (!is.null(resizeObserver))
+      return()
 
-    lastCacheResetHash <- NULL
-    cacheReset <- reactive(cacheResetExpr, env = parent.frame(), quoted = TRUE)
+    # Given the actual width/height of the image in the browser, this gets
+    # the width/height from sizePolicy() and pushes those
+    # values into `fitDims`. It's done this way so that the `fitDims` only
+    # change (and cause invalidations) when the rendered image size changes,
+    # and not every time the browser's <img> tag changes size.
+    resizeObserver <<- observe({
+      cat("resize\n")
+      width  <- session$clientData[[paste0('output_', outputName, '_width')]]
+      height <- session$clientData[[paste0('output_', outputName, '_height')]]
 
-    observe({
-      cat("cacheReset observer\n")
-      hash <- digest::digest(cacheReset())
-      if (identical(hash, lastCacheResetHash)) {
-        return()
-
-      } else if (is.null(lastCacheResetHash)) {
-        # Save the hash, but don't reset the cache on the first run.
-        lastCacheResetHash <<- hash
-        return()
-      }
-
-      lastCacheResetHash <<- hash
-
-      cat("cacheReset observer: resetting cache\n")
-      unlink(file.path(cacheDir(), "*.rds"))
-
-      # Cause drawReactive() to re-execute, so renderFunc doesn't use the
-      # cached value.
-      drawReactiveTrigger(drawReactiveTrigger() + 1)
+      rect <- sizePolicy(c(width, height))
+      fitDims$width  <- rect[1]
+      fitDims$height <- rect[2]
     })
   }
 
@@ -337,20 +292,17 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetExpr = NULL,
 
         pixelratio <- session$clientData$pixelratio %OR% 1
 
-        ensureCacheDirExists()
+        key <- digest::digest(list(cacheKey(), width, height, res, pixelratio), "sha256")
 
-        key <- digest::digest(list(cacheKey(), width, height, res, pixelratio))
-        resultFilePath <- file.path(cacheDir(), paste0(key, ".rds"))
-
-        if (file.exists(resultFilePath)) {
+        if (cache$has(key)) {
           cat("drawReactive(): cached\n")
           # This will NOT include the displaylist.
-          readRDS(resultFilePath)
+          cache$get(key)
 
         } else {
           cat("drawReactive(): drawPlot()\n")
-          # This includes the displaylist.
-          do.call("drawPlot", c(
+          # This will include the displaylist.
+          result <- do.call("drawPlot", c(
             list(
               name = outputName,
               session = session,
@@ -358,11 +310,22 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetExpr = NULL,
               width = width,
               height = height,
               pixelratio = pixelratio,
-              res = res,
-              resultfile = resultFilePath
+              res = res
             ),
             args
           ))
+
+          # Cache a copy of the result, but without the recorded plot, because
+          # it can't be saved and restored properly within the same R session.
+          # Note that this was fixed in revision 74506 (2e6c669), and should
+          # be in R 3.5.0, but we need to work on older versions. Perhaps in
+          # the future we could do a version check and change caching behavior
+          # based on that.
+          result_copy <- result
+          result_copy$recordedPlot <- NULL
+          cache$set(key, result_copy)
+
+          result
         }
       },
       catch = function(reason) {
@@ -383,39 +346,24 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetExpr = NULL,
   renderFunc <- function(shinysession, name, ...) {
     outputName <<- name
     session <<- shinysession
-
-    # Given the actual width/height of the image in the browser, this gets
-    # the width/height from sizePolicy() and pushes those
-    # values into `fitDims`. It's done this way so that the `fitDims` only
-    # change (and cause invalidations) when the rendered image size changes,
-    # and not every time the browser's <img> tag changes size.
-    observe({
-      width  <- session$clientData[[paste0('output_', outputName, '_width')]]
-      height <- session$clientData[[paste0('output_', outputName, '_height')]]
-
-      rect <- sizePolicy(c(width, height))
-      fitDims$width  <- rect[1]
-      fitDims$height <- rect[2]
-    })
+    ensureCacheSetup(outputName)
+    ensureResizeObserver()
+    cat("renderFunc()\n")
 
     hybrid_chain(
       drawReactive(),
       function(result) {
-        cat("renderFunc()\n")
+        cat("renderFunc() chain\n")
         # Take a reactive dependency on the fitted dimensions
         width  <- fitDims$width
         height <- fitDims$height
         pixelratio <- session$clientData$pixelratio %OR% 1
 
-        ensureCacheDirExists()
+        key <- digest::digest(list(cacheKey(), width, height, res, pixelratio), "sha256")
 
-        key <- digest::digest(list(cacheKey(), width, height, res, pixelratio))
-        resultFilePath <- file.path(cacheDir(), paste0(key, ".rds"))
-
-        if (file.exists(resultFilePath)) {
+        if (cache$has(key)) {
           cat("renderFunc(): cached\n")
-          cachedPlot <- readRDS(resultFilePath)
-          img <- cachedPlot$img
+          result <- cache$get(key)
 
         } else {
           if (is.null(result$recordedPlot)) {
@@ -433,7 +381,7 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetExpr = NULL,
 
           } else {
             cat("renderFunc(): resizeSavedPlot()\n")
-            img <- do.call("resizeSavedPlot", c(
+            result <- do.call("resizeSavedPlot", c(
               list(
                 name,
                 shinysession,
@@ -441,14 +389,19 @@ renderCachedPlot <- function(expr, cacheKeyExpr, cacheResetExpr = NULL,
                 width,
                 height,
                 pixelratio,
-                res,
-                resultfile = resultFilePath
+                res
               ),
               args
             ))
+
+            # Cache the result, but without recordedPlot
+            result_copy <- result
+            result_copy$recordedPlot <- NULL
+            cache$set(key, result_copy)
           }
         }
 
+        img <- result$img
         # Replace exact pixel dimensions; instead tell it to fill.
         img$width  <- "100%"
         img$height <- NULL

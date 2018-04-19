@@ -4,10 +4,9 @@
 \alias{renderCachedPlot}
 \title{Plot output with cached images}
 \usage{
-renderCachedPlot(expr, cacheKeyExpr, cacheResetExpr = NULL,
-  sizePolicy = sizeGrowthRatio(width = 400, height = 400, growthRate = 1.2),
-  res = 72, scope = "app", ..., env = parent.frame(), quoted = FALSE,
-  outputArgs = list())
+renderCachedPlot(expr, cacheKeyExpr, sizePolicy = sizeGrowthRatio(width = 400,
+  height = 400, growthRate = 1.2), res = 72, cache = "app", ...,
+  env = parent.frame(), quoted = FALSE, outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that generates a plot.}
@@ -15,11 +14,6 @@ renderCachedPlot(expr, cacheKeyExpr, cacheResetExpr = NULL,
 \item{cacheKeyExpr}{An expression that returns a cache key. This key should
 be a unique identifier for a plot: the assumption is that if the cache key
 is the same, then the plot will be the same.}
-
-\item{cacheResetExpr}{An expression or block of code that returns a key
-which will be used to determine when the cache will be cleared. When the
-key changes, the cache will be cleared. If \code{NULL} (the default) the
-cache will not get cleared.}
 
 \item{sizePolicy}{A function that takes two arguments, \code{width} and
 \code{height}, and returns a list with \code{width} and \code{height}. The
@@ -30,9 +24,10 @@ information on the default sizing policy.}
 
 \item{res}{The resolution of the PNG, in pixels per inch.}
 
-\item{scope}{The scope of the cache. This can be \code{"app"} (the default),
-\code{"session"}, or the path to a directory to store cached plots. See the
-Cache Scoping section for more information.}
+\item{cache}{The scope of the cache, or a cache object. This can be
+\code{"app"} (the default), \code{"session"}, or a cache object like
+a \code{\link{DiskCache}}. See the Cache Scoping section for more
+information.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices]{png}}.
 These can be used to set the width, height, background color, etc.}

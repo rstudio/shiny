@@ -75,3 +75,122 @@ dependsOnFile <- function(filepath) {
   else
     .currentCacheContext$cc$addDependencyFile(filepath)
 }
+
+
+#' @export
+DiskCache <- R6Class("DiskCache",
+  public = list(
+    initialize = function(dir = tempfile("DiskCache-"),
+                          prune = function(dir) {},
+                          reset_on_finalize = TRUE)
+    {
+      if (!dirExists(dir)) {
+        message("Creating ", dir)
+        dir.create(dir, recursive = TRUE, mode = "0700")
+        private$dir_was_created <- TRUE
+      }
+      private$dir <- absolutePath(dir)
+      private$reset_on_finalize <- reset_on_finalize
+      # Save in a list to avoid problems when cloning
+      private$prune_ <- list(prune)
+    },
+
+    get = function(key) {
+      if (!self$has(key)) {
+        stop("Key not available: ", key)
+      }
+      value <- readRDS(private$key_to_filename(key))
+      self$prune()
+      value
+    },
+
+    set = function(key, value) {
+      # TODO: Make sure key is a safe string
+      self$prune()
+      saveRDS(value, file = private$key_to_filename(key))
+      invisible(self)
+    },
+
+    has = function(key) {
+      file.exists(private$key_to_filename(key))
+    },
+
+    remove = function(key) {
+      file.remove(private$key_to_filename(key))
+      invisible(self)
+    },
+
+    reset = function() {
+      file.remove(dir(private$dir, "*.rds", full.names = TRUE))
+      invisible(self)
+    },
+
+    prune = function() {
+      private$prune_[[1]](private$dir)
+      invisible(self)
+    },
+
+    finalize = function() {
+      if (private$reset_on_finalize) {
+        self$reset()
+        if (private$dir_was_created) {
+          message("Removing ", private$dir)
+          dirRemove(private$dir)
+        }
+      }
+    }
+  ),
+  private = list(
+    dir = NULL,
+    prune_ = NULL,
+    dir_was_created = FALSE,
+    reset_on_finalize = NULL,
+    key_to_filename = function(key) {
+      if (! (is.character(key) && length(key)==1) ) {
+        stop("Key must be a character vector of length 1.")
+      }
+      file.path(private$dir, paste0(key, ".rds"))
+    }
+  )
+)
+
+disk_pruner <- function(max_size = 5 * 1024^2, max_age = Inf,
+                        discard = c("oldest", "newest"),
+                        timetype = c("ctime", "atime", "mtime"))
+{
+  discard  <- match.arg(discard)
+  timetype <- match.arg(timetype)
+
+  function(path) {
+    files <- file.info(dir(path, "*.rds", full.names = TRUE))
+    files <- files[files$isdir == FALSE, ]
+    files$name <- rownames(files)
+    rownames(files) <- NULL
+
+    time <- Sys.time()
+    # Remove any files where the age exceeds max age.
+    files$timediff <- as.numeric(Sys.time() - files[[timetype]], units = "secs")
+    files$rm <- files$timediff > max_age
+    if (any(files$rm)) {
+      message("Removing ", paste(files$name[files$rm], collapse = ", "))
+    }
+    file.remove(files$name[files$rm])
+
+    # Remove rows of files that were deleted
+    files <- files[!files$rm, ]
+
+    # Sort the files by time, get a cumulative sum of size, and remove any
+    # files where the cumlative size exceeds max_size.
+    if (sum(files$size) > max_size) {
+      sort_decreasing <- (discard == "oldest")
+
+      files <- files[order(files[[timetype]], decreasing = sort_decreasing), ]
+      files$cum_size <- cumsum(files$size)
+      files$rm <- files$cum_size > max_size
+      if (any(files$rm)) {
+        message("Removing ", paste(files$name[files$rm], collapse = ", "))
+      }
+      file.remove(files$name[files$rm])
+    }
+  }
+}

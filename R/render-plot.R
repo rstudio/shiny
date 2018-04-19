@@ -133,10 +133,12 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       function(result) {
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
-        do.call("resizeSavedPlot", c(
+        result <- do.call("resizeSavedPlot", c(
           list(name, shinysession, result, dims$width, dims$height, pixelratio, res),
           args
         ))
+
+        result$img
       }
     )
   }
@@ -151,11 +153,10 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
 }
 
-resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res,
-                            resultfile = NULL, ...) {
+resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res) {
-    return(result$img)
+    return(result)
   }
 
   coordmap <- NULL
@@ -165,7 +166,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, ...)
   on.exit(unlink(outfile), add = TRUE)
 
-  img <- list(
+  result$img <- list(
     src = session$fileUrl(name, outfile, contentType = "image/png"),
     width = width,
     height = height,
@@ -173,18 +174,10 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
     error = attr(coordmap, "error", exact = TRUE)
   )
 
-  if (!is.null(resultfile)) {
-    result_save <- result
-    result_save$recordedPlot <- NULL
-    result_save$img <- img
-    saveRDS(result_save, resultfile)
-  }
-
-  img
+  result
 }
 
-drawPlot <- function(name, session, func, width, height, pixelratio, res,
-                     resultfile = NULL, ...) {
+drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
   #  1. Start PNG
   #  2. Enable displaylist recording
   #  3. Call user-defined func
@@ -258,18 +251,6 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res,
         # Get coordmap error message if present
         error = attr(result$coordmap, "error", exact = TRUE)
       ))
-
-      if (!is.null(resultfile)) {
-        # Save a copy of the result, but without the recorded plot, because it
-        # can't be saved and restored properly within the same R session. Note
-        # that this was fixed in revision 74506 (2e6c669), and should be in R
-        # 3.5.0, but we need to work on older versions. Perhaps in the future
-        # we could do a version check and change caching behavior based on
-        # that.
-        result_save <- result
-        result_save$recordedPlot <- NULL
-        saveRDS(result_save, resultfile)
-      }
 
       result
     },

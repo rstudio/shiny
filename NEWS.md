@@ -55,6 +55,8 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to xxxOutput not working inside modules. (Thanks, @GregorDeCillia! [#2010](https://github.com/rstudio/shiny/pull/2010))
 
+* Fixed [#2021](https://github.com/rstudio/shiny/issues/2021): Memory leak with reactiveTimer and invalidateLater ([#2022](https://github.com/rstudio/shiny/pull/2022))
+
 ### Library updates
 
 * Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))

@@ -1392,15 +1392,15 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   # Need to make sure that session is resolved at creation, not when the
   # callback below is fired (see #1621).
   force(session)
-
+  
   dependents <- Map$new()
-  timerCallbacks$schedule(intervalMs, function() {
+  timerHandle <- scheduleTask(intervalMs, function() {
     # Quit if the session is closed
     if (!is.null(session) && session$isClosed()) {
       return(invisible())
     }
 
-    timerCallbacks$schedule(intervalMs, sys.function())
+    timerHandle <<- scheduleTask(intervalMs, sys.function())
     lapply(
       dependents$values(),
       function(dep.ctx) {
@@ -1408,6 +1408,11 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
         NULL
       })
   })
+
+  if (!is.null(session)) {
+    session$onEnded(timerHandle)
+  }
+
   return(function() {
     ctx <- .getReactiveEnvironment()$currentContext()
     if (!dependents$containsKey(ctx$id)) {
@@ -1477,7 +1482,7 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   force(session)
   ctx <- .getReactiveEnvironment()$currentContext()
-  timerCallbacks$schedule(millis, function() {
+  timerHandle <- scheduleTask(millis, function() {
     if (is.null(session)) {
       ctx$invalidate()
       return(invisible())
@@ -1491,6 +1496,11 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
 
     invisible()
   })
+  
+  if (!is.null(session)) {
+    session$onEnded(timerHandle)
+  }
+  
   invisible()
 }
 

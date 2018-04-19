@@ -80,7 +80,8 @@ Imports:
     later (>= 0.7.1),
     promises (>= 0.1.0.9001),
     tools,
-    crayon
+    crayon,
+    rlang
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

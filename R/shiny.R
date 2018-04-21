@@ -1173,8 +1173,10 @@ ShinySession <- R6Class(
 
         # Schedule execution of onFlushed callbacks
         on.exit({
-          # ..stacktraceon matches with the top-level ..stacktraceoff..
-          private$flushedCallbacks$invoke(..stacktraceon = TRUE)
+          withReactiveDomain(self, {
+            # ..stacktraceon matches with the top-level ..stacktraceoff..
+            private$flushedCallbacks$invoke(..stacktraceon = TRUE)
+          })
         }, add = TRUE)
 
         if (!hasPendingUpdates()) {

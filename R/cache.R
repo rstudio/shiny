@@ -95,6 +95,8 @@ DiskCache <- R6Class("DiskCache",
       private$prune_ <- list(prune)
     },
 
+    # TODO: Should call has() and return some sentinal object if not present
+    # Should be atomic ot avoid race conditions.
     get = function(key) {
       if (!self$has(key)) {
         stop("Key not available: ", key)
@@ -102,6 +104,12 @@ DiskCache <- R6Class("DiskCache",
       value <- readRDS(private$key_to_filename(key))
       self$prune()
       value
+    },
+
+    mget = function(keys) {
+    },
+
+    mset = function(..., .list = NULL) {
     },
 
     set = function(key, value) {
@@ -113,6 +121,11 @@ DiskCache <- R6Class("DiskCache",
 
     has = function(key) {
       file.exists(private$key_to_filename(key))
+    },
+
+    # Return all keys in the cache
+    keys = function() {
+
     },
 
     remove = function(key) {
@@ -128,6 +141,14 @@ DiskCache <- R6Class("DiskCache",
     prune = function() {
       private$prune_[[1]](private$dir)
       invisible(self)
+    },
+
+    size = function() {
+    },
+
+    # Resets the cache and destroys the containing folder so that no
+    # one else who shares the data back end can use it anymore.
+    destroy = function() {
     },
 
     finalize = function() {
@@ -153,6 +174,13 @@ DiskCache <- R6Class("DiskCache",
     }
   )
 )
+
+# Safely hash an object. If it has any weird things in it that might change, like
+# functions or xptrs (?), throw an error.
+safe_hash <- function(x) {
+
+}
+
 
 disk_pruner <- function(max_size = 5 * 1024^2, max_age = Inf,
                         discard = c("oldest", "newest"),

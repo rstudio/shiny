@@ -220,14 +220,17 @@ renderCachedPlot <- function(expr, cacheKeyExpr,
       return()
 
     } else if (identical(cache, "app")) {
+      getShinyOption("appCacheFun")()
       cacheDir <- file.path(tempdir(),
-        paste0("shinyapp-", getShinyOption("appToken"), "-", outputName)
+        paste0("shinyapp-", getShinyOption("appToken"))
       )
       cache <<- DiskCache$new(cacheDir, prune = disk_pruner(max_size = 5*1024^2), reset_on_finalize = FALSE)
 
     } else if (identical(cache, "session")) {
+      session$getCache()
+
       cacheDir <- file.path(tempdir(),
-        paste0("shinyapp-", getShinyOption("appToken"), "-", session$token, "-", outputName)
+        paste0("shinyapp-", getShinyOption("appToken"), "-", session$token)
       )
       cache <<- DiskCache$new(cacheDir, prune = disk_pruner(max_size = 5*1024^2), reset_on_finalize = TRUE)
 

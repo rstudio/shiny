@@ -51,11 +51,11 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/master/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, @jekriske-lilly! [#1844](https://github.com/rstudio/shiny/pull/1844))
 
-* Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome
+* Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome.
 
-* Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to xxxOutput not working inside modules. (Thanks, @GregorDeCillia! [#2010](https://github.com/rstudio/shiny/pull/2010))
+* Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to `xxxOutput` not working inside modules. (Thanks, @GregorDeCillia! [#2010](https://github.com/rstudio/shiny/pull/2010))
 
-* Fixed [#2021](https://github.com/rstudio/shiny/issues/2021): Memory leak with reactiveTimer and invalidateLater ([#2022](https://github.com/rstudio/shiny/pull/2022))
+* Fixed [#2021](https://github.com/rstudio/shiny/issues/2021): Memory leak with `reactiveTimer` and `invalidateLater`. ([#2022](https://github.com/rstudio/shiny/pull/2022))
 
 ### Library updates
 

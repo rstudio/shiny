@@ -33,6 +33,10 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * [#1989](https://github.com/rstudio/shiny/issues/1989): The server side of outputs can now be removed (e.g. `output$plot <- NULL`). This is not usually necessary but it does allow some objects to be garbage collected, which might matter if you are dynamically creating and destroying many outputs. (Thanks, @mmuurr! [#2011](https://github.com/rstudio/shiny/pull/2011))
 
+* Removed the (ridiculously outdated) "experimental feature" tag from the reference documentation for `renderUI`. ([#2036](https://github.com/rstudio/shiny/pull/2036))
+
+* Addressed [#1907](https://github.com/rstudio/shiny/issues/1907): the `ignoreInit` argument was first added only to `observeEvent`. Later, we also added it to `eventReactive`, but forgot to update the documentation. Now done, thanks [@flo12392](https://github.com/flo12392)! ([#2036](https://github.com/rstudio/shiny/pull/2036))
+
 ### Bug fixes
 
 * Fixed [#1006](https://github.com/rstudio/shiny/issues/1006): Slider inputs sometimes showed too many digits. ([#1956](https://github.com/rstudio/shiny/pull/1956))

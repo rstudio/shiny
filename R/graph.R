@@ -63,23 +63,23 @@ showReactLog <- function(time = TRUE) {
 
 
 renderReactLog <- function(sessionToken = NULL, time = TRUE) {
-  templateFile <- system.file('www/reactive-graph.html', package='shiny')
-  html <- paste(readLines(templateFile, warn=FALSE), collapse='\r\n')
-  tc <- textConnection(NULL, 'w')
+  templateFile <- system.file("www/reactive-graph.html", package="shiny")
+  html <- paste(readLines(templateFile, warn=FALSE), collapse="\r\n")
+  tc <- textConnection(NULL, "w")
   on.exit(close(tc))
   writeReactLog(tc, sessionToken)
-  cat('\n', file=tc)
+  cat("\n", file=tc)
   flush(tc)
-  html <- sub('__DATA__', paste(textConnectionValue(tc), collapse='\r\n'), html, fixed=TRUE)
-  html <- sub('__TIME__', paste0('"', time, '"'), html, fixed=TRUE)
-  file <- tempfile(fileext = '.html')
+  html <- sub("__DATA__", paste(textConnectionValue(tc), collapse="\r\n"), html, fixed=TRUE)
+  html <- sub("__TIME__", paste0("\"", time, "\""), html, fixed=TRUE)
+  file <- tempfile(fileext = ".html")
   writeLines(html, file)
   return(file)
 }
 
 
 RLog <- R6Class(
-  'RLog',
+  "RLog",
   portable = FALSE,
   private = list(
     option = "shiny.reactlog",
@@ -193,7 +193,7 @@ RLog <- R6Class(
         msg$log("isolateEnter: ", msg$reactStr(reactId), " in ", ctxId)
         msg$depthIncrement()
         private$appendEntry(domain, list(
-          action = 'isolateEnter',
+          action = "isolateEnter",
           reactId = reactId,
           ctxId = ctxId
         ))
@@ -201,7 +201,7 @@ RLog <- R6Class(
         msg$log("enter: ", msg$reactStr(reactId), " in ", ctxId, " - ", type)
         msg$depthIncrement()
         private$appendEntry(domain, list(
-          action = 'enter',
+          action = "enter",
           reactId = reactId,
           ctxId = ctxId,
           type = type
@@ -214,7 +214,7 @@ RLog <- R6Class(
         msg$depthDecrement()
         msg$log("isolateExit: ", msg$reactStr(reactId), " in ", ctxId)
         private$appendEntry(domain, list(
-          action = 'isolateExit',
+          action = "isolateExit",
           reactId = reactId,
           ctxId = ctxId
         ))
@@ -222,7 +222,7 @@ RLog <- R6Class(
         msg$depthDecrement()
         msg$log("exit: ", msg$reactStr(reactId), " in ", ctxId, " - ", type)
         private$appendEntry(domain, list(
-          action = 'exit',
+          action = "exit",
           reactId = reactId,
           ctxId = ctxId,
           type = type
@@ -231,14 +231,14 @@ RLog <- R6Class(
     },
 
     valueChange = function(reactId, value, display, domain) {
-      valueStr <- paste(utils::capture.output(utils::str(value)), collapse='\n')
+      valueStr <- paste(utils::capture.output(utils::str(value)), collapse="\n")
       if (isTRUE(display)) {
         msg$log("valueChange: ", msg$reactStr(reactId), " '",  valueStr, "'")
       } else {
         msg$log("valueChange: ", msg$reactStr(reactId))
       }
       private$appendEntry(domain, list(
-        action = 'valueChange',
+        action = "valueChange",
         reactId = reactId,
         value = valueStr
       ))
@@ -339,7 +339,7 @@ RLog <- R6Class(
 )
 
 MessageLogger = R6Class(
-  'MessageLogger',
+  "MessageLogger",
   portable = FALSE,
   public = list(
     depth = 0L,

@@ -46,8 +46,8 @@ Context <- R6Class(
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
           env <- .getReactiveEnvironment()
-          rlogEnter(.reactId, id, .reactType, .domain)
-          on.exit(rlogExit(.reactId, id, .reactType, .domain), add = TRUE)
+          rLog$enter(.reactId, id, .reactType, .domain)
+          on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
           env$runWith(self, func)
         })
       })
@@ -64,8 +64,8 @@ Context <- R6Class(
         return()
       .invalidated <<- TRUE
 
-      rlogInvalidateStart(.reactId, id, .reactType, .domain)
-      on.exit(rlogInvalidateEnd(.reactId, id, .reactType, .domain), add = TRUE)
+      rLog$invalidateStart(.reactId, id, .reactType, .domain)
+      on.exit(rLog$invalidateEnd(.reactId, id, .reactType, .domain), add = TRUE)
 
       lapply(.invalidateCallbacks, function(func) {
         func()
@@ -157,7 +157,7 @@ ReactiveEnvironment <- R6Class(
       .inFlush <<- TRUE
       on.exit({
         .inFlush <<- FALSE
-        rlogQueueEmpty(domain = NULL)
+        rLog$queueEmpty(domain = NULL)
       })
 
       while (hasPendingFlush()) {

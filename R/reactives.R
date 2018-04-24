@@ -21,12 +21,12 @@ Dependents <- R6Class(
       if (!.dependents$containsKey(ctx$id)) {
         .dependents$set(ctx$id, ctx)
         ctx$onInvalidate(function() {
-          rlogDependsOnRemove(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
+          rLog$dependsOnRemove(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
           .dependents$remove(ctx$id)
         })
 
         if (is.character(.reactId) && is.character(ctx$.reactId)) {
-          rlogDependsOn(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
+          rLog$dependsOn(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
         } else {
           # TODO-barret remove before shipping. This should never be reached
           stop("ERROR: dependents does not have node id: ", .reactId, " and ", ctx$.reactId)
@@ -35,8 +35,8 @@ Dependents <- R6Class(
     },
     # at times, the context is run in a ctx$onInvalidate(...) which has no runtime context
     invalidate = function(ctx = getCurrentContext()) {
-      rlogInvalidateStart(.reactId, ctx$id, ctx$.reactType, ctx$.domain)
-      on.exit(rlogInvalidateEnd(.reactId, ctx$id, ctx$.reactType, ctx$.domain), add = TRUE)
+      rLog$invalidateStart(.reactId, ctx$id, ctx$.reactType, ctx$.domain)
+      on.exit(rLog$invalidateEnd(.reactId, ctx$id, ctx$.reactType, ctx$.domain), add = TRUE)
       lapply(
         .dependents$values(),
         function(ctx) {
@@ -68,7 +68,7 @@ ReactiveVal <- R6Class(
       private$value <- value
       private$label <- label
       private$dependents <- Dependents$new(reactId = private$reactId)
-      rlogReactDef(private$reactId, private$label, type = "reactiveVal", getDefaultReactiveDomain())
+      rLog$define(private$reactId, private$label, type = "reactiveVal", getDefaultReactiveDomain())
     },
     get = function() {
       private$dependents$register()
@@ -82,7 +82,7 @@ ReactiveVal <- R6Class(
       if (identical(private$value, value)) {
         return(invisible(FALSE))
       }
-      rlogValueChange(private$reactId, value, TRUE, getDefaultReactiveDomain())
+      rLog$valueChange(private$reactId, value, TRUE, getDefaultReactiveDomain())
       private$value <- value
       private$dependents$invalidate()
       invisible(TRUE)
@@ -306,9 +306,9 @@ ReactiveValues <- R6Class(
       .metadata <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
       .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE, keys = list())
-      .namesDeps <<- Dependents$new(reactId = rlogReactivesNamesId(.reactId))
-      .allValuesDeps <<- Dependents$new(reactId = rlogReactivesAsListAllId(.reactId))
-      .valuesDeps <<- Dependents$new(reactId = rlogReactivesAsListId(.reactId))
+      .namesDeps <<- Dependents$new(reactId = rLog$namesIdStr(.reactId))
+      .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
+      .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
     },
 
     get = function(key) {
@@ -323,20 +323,17 @@ ReactiveValues <- R6Class(
       ctx <- getCurrentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
       if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
-        reactKeyId <- rlogReactivesKeyId(.reactId, key)
+        reactKeyId <- rLog$keyIdStr(.reactId, key)
 
         if (!isTRUE(.hasRetrieved$keys[[key]])) {
-          rlogReactDef(
-            reactKeyId, label = rlogReactivesKeyId(.label, key),
-            type = "reactiveValuesKey", ctx$.domain
-          )
-          rlogValueChange(reactKeyId, keyValue, TRUE, ctx$.domain)
+          rLog$defineKey(.reactId, key, .label, ctx$.domain)
+          rLog$valueChangeKey(.reactId, key, keyValue, ctx$.domain)
           .hasRetrieved$keys[[key]] <<- TRUE
         }
-        rlogDependsOn(ctx$.reactId, reactKeyId, ctx$id, ctx$.domain)
+        rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
         .dependents[[dep.key]] <- ctx
         ctx$onInvalidate(function() {
-          rlogDependsOnRemove(ctx$.reactId, reactKeyId, ctx$id, ctx$.domain)
+          rLog$dependsOnKeyRemove(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
           rm(list=dep.key, envir=.dependents, inherits=FALSE)
         })
       }
@@ -378,41 +375,32 @@ ReactiveValues <- R6Class(
 
         # key has be depended upon (can not happen if the key is being set)
         if (isTRUE(.hasRetrieved$keys[[key]])) {
-          rlogValueChange(rlogReactivesKeyId(.reactId, key), value, TRUE, domain)
+          rLog$valueChangeKey(.reactId, key, value, domain)
         }
       }
       else {
         # only invalidate if there are deps
         if (isTRUE(.hasRetrieved$names)) {
-          rlogValueChange(
-            rlogReactivesNamesId(.reactId), ls(.values, all.names=TRUE),
-            FALSE,
-            domain)
-          .namesDeps$invalidate()
+          rLog$valueChangeNames(.reactId, .values, domain)
         }
       }
 
       if (hidden) {
         if (isTRUE(.hasRetrieved$asListAll)) {
-          rlogValueChange(
-            rlogReactivesAsListAllId(.reactId), as.list(.values, all.names=TRUE),
-            display = FALSE,
-            domain)
+          rLog$valueChangeAsListAll(.reactId, .values, domain)
           .allValuesDeps$invalidate()
         }
       } else {
         if (isTRUE(.hasRetrieved$asList)) {
           # leave as is. both object would be registered to the listening object
-          rlogValueChange(
-            rlogReactivesAsListId(.reactId), as.list(.values, all.names=FALSE),
-            FALSE,
-            domain)
+          rLog$valueChangeAsList(.reactId, .values, domain)
           .valuesDeps$invalidate()
         }
       }
 
       .values[[key]] <- value
 
+      # TODO-barret start key invalidate?
       dep.keys <- objects(
         envir=.dependents,
         pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
@@ -439,11 +427,8 @@ ReactiveValues <- R6Class(
       nameValues <- ls(.values, all.names=TRUE)
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
-        rlogReactDef(
-          rlogReactivesNamesId(.reactId), rlogReactivesNamesId(.label),
-          type = "reactiveValuesNames",
-          domain)
-        rlogValueChange(rlogReactivesNamesId(.reactId), nameValues, FALSE, domain)
+        rLog$defineNames(.reactId, .label, domain)
+        rLog$valueChangeNames(.reactId, nameValues, domain)
         .hasRetrieved$names <<- TRUE
       }
       .namesDeps$register()
@@ -488,11 +473,8 @@ ReactiveValues <- R6Class(
       if (all.names) {
         if (!isTRUE(.hasRetrieved$asListAll)) {
           domain <- getDefaultReactiveDomain()
-          rlogReactDef(
-            rlogReactivesAsListAllId(.reactId), rlogReactivesAsListAllId(.label),
-            type = "reactiveValuesAsListAll",
-            domain)
-          rlogValueChange(rlogReactivesAsListAllId(.reactId), listValue, FALSE, domain)
+          rLog$defineAsListAll(.reactId, .label, domain)
+          rLog$valueChangeAsListAll(.reactId, listValue, domain)
           .hasRetrieved$asListAll <<- TRUE
         }
         .allValuesDeps$register()
@@ -500,11 +482,8 @@ ReactiveValues <- R6Class(
 
       if (!isTRUE(hasRetrieved$asList)) {
         domain <- getDefaultReactiveDomain()
-        rlogReactDef(
-          rlogReactivesAsListId(.reactId), rlogReactivesAsListId(.label),
-          type = "reactiveValuesAsList",
-          domain)
-        rlogValueChange(rlogReactivesAsListId(.reactId), c(), FALSE, domain)
+        rLog$defineAsList(.reactId, .label, domain)
+        rLog$valueChange(.reactId, listValue, domain)
         .hasRetrieved$asList <<- TRUE
       }
       .valuesDeps$register()
@@ -514,18 +493,15 @@ ReactiveValues <- R6Class(
 
     .setLabel = function(label) {
       domain <- getDefaultReactiveDomain()
-      if (isTRUE(.hasRetrieved$names)) {
-        rlogUpdateNodeLabel(rlogReactivesNamesId(.reactId), rlogReactivesNamesId(label), domain)
-      }
-      if (isTRUE(.hasRetrieved$asListAll)) {
-        rlogUpdateNodeLabel(rlogReactivesAsListAllId(.reactId), rlogReactivesAsListAllId(label), domain)
-      }
-      if (isTRUE(.hasRetrieved$asList)) {
-        rlogUpdateNodeLabel(rlogReactivesAsListId(.reactId), rlogReactivesAsListId(label), domain)
-      }
+      if (isTRUE(.hasRetrieved$names))
+        rLog$updateReactLabelNames(.reactId, label, domain)
+      if (isTRUE(.hasRetrieved$asList))
+        rLog$updateReactLabelAsList(.reactId, label, domain)
+      if (isTRUE(.hasRetrieved$asListAll))
+        rLog$updateReactLabelAsListAll(.reactId, label, domain)
       for (key in .hasRetrieved$keys) {
         if (isTRUE(.hasRetrieved$keys[[key]])) {
-          rlogUpdateNodeLabel(rlogReactivesKeyId(.reactId, key), rlogReactivesKeyId(label, key), domain)
+          rLog$updateReactLabelKey(.reactId, key, label, domain)
         }
       }
       .label <<- label
@@ -847,7 +823,7 @@ Observable <- R6Class(
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
-      rlogReactDef(.reactId, .label, type = "observable", .domain)
+      rLog$define(.reactId, .label, type = "observable", .domain)
     },
     getValue = function() {
       .dependents$register()
@@ -1116,7 +1092,7 @@ registerDebugHook("observerFunc", environment(), label)
       setAutoDestroy(autoDestroy)
 
       .reactId <<- nextGlobalReactId()
-      rlogReactDef(.reactId, .label, type = "observer", .domain)
+      rLog$define(.reactId, .label, type = "observer", .domain)
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
@@ -1524,9 +1500,9 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   # callback below is fired (see #1621).
   force(session)
 
-  # Barret
+  # TODO-barret
   # reactId <- nextGlobalReactId()
-  # rlogReactDef(reactId, paste0("timer(", intervalMs, ")"))
+  # rLog$define(reactId, paste0("timer(", intervalMs, ")"))
 
   dependents <- Map$new()
   timerCallbacks$schedule(intervalMs, function() {

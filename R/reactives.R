@@ -91,12 +91,14 @@ ReactiveVal <- R6Class(
       if (is.null(session)) {
         stop("Can't freeze a reactiveVal without a reactive domain")
       }
+      rLog$freezeReactiveVal(private$reactId, session)
       session$onFlushed(function() {
-        self$thaw()
+        self$thaw(session)
       })
       private$frozen <- TRUE
     },
-    thaw = function() {
+    thaw = function(session = getDefaultReactiveDomain()) {
+      rLog$thawReactiveVal(private$reactId, session)
       private$frozen <- FALSE
     },
     isFrozen = function() {
@@ -457,10 +459,14 @@ ReactiveValues <- R6Class(
     # Mark a value as frozen If accessed while frozen, a shiny.silent.error will
     # be thrown.
     freeze = function(key) {
+      domain <- getDefaultReactiveDomain()
+      rLog$freezeReactiveKey(.reactId, key, domain)
       setMeta(key, "frozen", TRUE)
     },
 
     thaw = function(key) {
+      domain <- getDefaultReactiveDomain()
+      rLog$thawReactiveKey(.reactId, key, domain)
       setMeta(key, "frozen", NULL)
     },
 

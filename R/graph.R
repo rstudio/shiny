@@ -314,8 +314,27 @@ RLog <- R6Class(
       private$appendEntry(domain, list(
         action = "asyncStop"
       ))
-    }
+    },
 
+    freezeReactiveVal = function(reactId, domain) {
+      msg$log("freeze: ", msg$reactStr(reactId))
+      private$appendEntry(domain, list(
+        action = "freeze",
+        reactId = reactId
+      ))
+    },
+    freezeReactiveKey = function(reactId, key, domain)
+      freeze(keyIdStr(reactId, key), domain),
+
+    thawReactiveVal = function(reactId, domain) {
+      msg$log("thaw: ", msg$reactStr(reactId))
+      private$appendEntry(domain, list(
+        action = "thaw",
+        reactId = reactId
+      ))
+    },
+    thawReactiveKey = function(reactId, key, domain)
+      thaw(keyIdStr(reactId, key), domain)
   )
 )
 

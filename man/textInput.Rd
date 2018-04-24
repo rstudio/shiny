@@ -52,3 +52,4 @@ Other input elements: \code{\link{actionButton}},
   \code{\link{sliderInput}}, \code{\link{submitButton}},
   \code{\link{textAreaInput}}
 }
+\concept{input elements}

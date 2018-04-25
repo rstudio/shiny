@@ -1863,10 +1863,16 @@ ShinySession <- R6Class(
         }
       }
     },
-    # Set the normal and client data input variables
-    manageInputs = function(data) {
+    # Set the normal and client data input variables. Normally, managing
+    # inputs doesn't take immediate effect when there are observers that
+    # are pending execution or currently executing (including having
+    # started async operations that have yielded control, but not yet
+    # completed). The `now` argument can force this. It should generally
+    # not be used, but we're adding it to get around a show-stopping bug
+    # for Shiny v1.1 (see the call site for more details).
+    manageInputs = function(data, now = FALSE) {
       force(data)
-      self$cycleStartAction(function() {
+      doManageInputs <- function() {
         private$inputReceivedCallbacks$invoke(data)
 
         data_names <- names(data)
@@ -1884,7 +1890,12 @@ ShinySession <- R6Class(
         private$.clientData$mset(input_clientdata)
 
         self$manageHiddenOutputs()
-      })
+      }
+      if (isTRUE(now)) {
+        doManageInputs()
+      } else {
+        self$cycleStartAction(doManageInputs)
+      }
     },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs

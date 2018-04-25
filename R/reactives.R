@@ -1401,12 +1401,15 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
     }
 
     timerHandle <<- scheduleTask(intervalMs, sys.function())
-    lapply(
-      dependents$values(),
-      function(dep.ctx) {
-        dep.ctx$invalidate()
-        NULL
-      })
+
+    session$cycleStartAction(function() {
+      lapply(
+        dependents$values(),
+        function(dep.ctx) {
+          dep.ctx$invalidate()
+          NULL
+        })
+    })
   })
 
   if (!is.null(session)) {

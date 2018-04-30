@@ -538,14 +538,41 @@ $(function() {
 
   $(document.body).on("keydown", function(e) {
     if (e.which === 39 || e.which === 32) { // space, right
-      // Move one step ahead
-      window.curTick += 1
-      updateGraph()
+      if (e.altKey) {
+        // move to queue empty
+        for (var i = 0; i < getGraph.queueEmpties.length; i++) {
+          val = getGraph.queueEmpties[i];
+          if (curTick < val) {
+            window.curTick = val;
+            updateGraph();
+            return;
+          }
+        }
+      }
+      if (curTick < getGraph.maxStep) {
+        // Move one step ahead
+        window.curTick += 1
+        updateGraph()
+        return;
+      }
     }
     if (e.which === 37) { // left
-      // Move one step back
-      window.curTick -= 1
-      updateGraph()
+      if (e.altKey) {
+        // move to queue empty
+        for (var i = getGraph.queueEmpties.length - 1; i >= 0; i--) {
+          val = getGraph.queueEmpties[i];
+          if (curTick > val) {
+            window.curTick = val;
+            updateGraph();
+            return;
+          }
+        }
+      }
+      if (curTick > 1) {
+        // Move one step back
+        window.curTick -= 1
+        updateGraph()
+      }
     }
     // if (e.which === 35) { // end
     //   // Seek to end

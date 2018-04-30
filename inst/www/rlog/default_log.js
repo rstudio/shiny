@@ -1,754 +1,3135 @@
 var log = [
-  {"action": "nodeDef", "nodeId": "1", "label": "reactiveValues5035", "type": "reactiveValues", "session": null, "time": 1523385209.95492},
-  {"action": "nodeDef", "nodeId": "2", "label": "reactiveValues8155", "type": "reactiveValues", "session": null, "time": 1523385209.9559},
-  {"action": "updateNodeLabel", "nodeId": "1", "label": "input", "session": null, "time": 1523385209.9566},
-  {"action": "updateNodeLabel", "nodeId": "2", "label": "clientData", "session": null, "time": 1523385209.95696},
-  {"action": "valueChangeReactValueNames", "nodeId": "1", "value": " chr(0) ", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.96371},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 1\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 0", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.9652},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "minus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 0", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.9664},
-  {"action": "valueChangeReactValueNames", "nodeId": "1", "value": " chr \"minus\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.98021},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 0\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 0", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.98267},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "plus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 0", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.98382},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr(0) ", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.9851},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 1\n $ output_normPlot_width: int 770", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.98651},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "output_normPlot_width", "value": " int 770", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.98731},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr \"output_normPlot_width\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.98816},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 2\n $ output_normPlot_width : int 770\n $ output_normPlot_height: int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.98976},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "output_normPlot_height", "value": " int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.99054},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:2] \"output_normPlot_height\" \"output_normPlot_width\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.9914},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 3\n $ output_normPlot_width : int 770\n $ output_expPlot_width  : int 770\n $ output_normPlot_height: int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.99329},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "output_expPlot_width", "value": " int 770", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.99406},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:3] \"output_expPlot_width\" \"output_normPlot_height\" \"output_normPlot_width\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.99495},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 4\n $ output_normPlot_width : int 770\n $ output_expPlot_width  : int 770\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.99744},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "output_expPlot_height", "value": " int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.99826},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:4] \"output_expPlot_height\" \"output_expPlot_width\" \"output_normPlot_height\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385209.99921},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 5\n $ output_normPlot_width : int 770\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.00185},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "output_value_hidden", "value": " logi FALSE", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.00276},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:5] \"output_expPlot_height\" \"output_expPlot_width\" \"output_normPlot_height\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.00381},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 6\n $ output_normPlot_width : int 770\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.0078},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "output_normPlot_hidden", "value": " logi FALSE", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.00862},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:6] \"output_expPlot_height\" \"output_expPlot_width\" \"output_normPlot_height\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.00958},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 7\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.01302},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "output_expPlot_hidden", "value": " logi FALSE", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.01403},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:7] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.01522},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 8\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ pixelratio            : int 1\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.02017},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "pixelratio", "value": " int 1", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.02107},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:8] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.02221},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 9\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ pixelratio            : int 1\n $ url_protocol          : chr \"http:\"\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.02638},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "url_protocol", "value": " chr \"http:\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.02711},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:9] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.02811},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 10\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ pixelratio            : int 1\n $ url_hostname          : chr \"127.0.0.1\"\n $ url_protocol          : chr \"http:\"\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.03353},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "url_hostname", "value": " chr \"127.0.0.1\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.0344},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:10] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.03546},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 11\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ url_port              : chr \"6518\"\n $ pixelratio            : int 1\n $ url_hostname          : chr \"127.0.0.1\"\n $ url_protocol          : chr \"http:\"\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.04064},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "url_port", "value": " chr \"6518\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.0415},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:11] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.04257},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 12\n $ url_pathname          : chr \"/\"\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ url_port              : chr \"6518\"\n $ pixelratio            : int 1\n $ url_hostname          : chr \"127.0.0.1\"\n $ url_protocol          : chr \"http:\"\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.04803},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "url_pathname", "value": " chr \"/\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.04894},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:12] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.05013},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 13\n $ url_pathname          : chr \"/\"\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ url_port              : chr \"6518\"\n $ pixelratio            : int 1\n $ url_hostname          : chr \"127.0.0.1\"\n $ url_search            : chr \"\"\n $ url_protocol          : chr \"http:\"\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.05712},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "url_search", "value": " chr \"\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.05786},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:13] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.05893},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 14\n $ url_pathname          : chr \"/\"\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ url_port              : chr \"6518\"\n $ url_hash_initial      : chr \"\"\n $ pixelratio            : int 1\n $ url_hostname          : chr \"127.0.0.1\"\n $ url_search            : chr \"\"\n $ url_protocol          : chr \"http:\"\n $ output_normPlot_height: int 400\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.06803},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "url_hash_initial", "value": " chr \"\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.06877},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:14] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.06986},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 15\n $ url_pathname          : chr \"/\"\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ url_port              : chr \"6518\"\n $ url_hash_initial      : chr \"\"\n $ pixelratio            : int 1\n $ url_hostname          : chr \"127.0.0.1\"\n $ url_search            : chr \"\"\n $ url_protocol          : chr \"http:\"\n $ output_normPlot_height: int 400\n $ url_hash              : chr \"\"\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.07672},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "url_hash", "value": " chr \"\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.07768},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:15] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.07928},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 16\n $ url_pathname          : chr \"/\"\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ url_port              : chr \"6518\"\n $ url_hash_initial      : chr \"\"\n $ pixelratio            : int 1\n $ singletons            : chr \"\"\n $ url_hostname          : chr \"127.0.0.1\"\n $ url_search            : chr \"\"\n $ url_protocol          : chr \"http:\"\n $ output_normPlot_height: int 400\n $ url_hash              : chr \"\"\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.08606},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "singletons", "value": " chr \"\"", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.08681},
-  {"action": "valueChangeReactValueNames", "nodeId": "2", "value": " chr [1:16] \"output_expPlot_height\" \"output_expPlot_hidden\" \"output_expPlot_width\" ...", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.08793},
-  {"action": "valueChangeReactValueValues", "nodeId": "2", "value": "List of 17\n $ allowDataUriScheme    : logi TRUE\n $ url_pathname          : chr \"/\"\n $ output_normPlot_width : int 770\n $ output_expPlot_hidden : logi FALSE\n $ output_value_hidden   : logi FALSE\n $ output_expPlot_width  : int 770\n $ output_normPlot_hidden: logi FALSE\n $ url_port              : chr \"6518\"\n $ url_hash_initial      : chr \"\"\n $ pixelratio            : int 1\n $ singletons            : chr \"\"\n $ url_hostname          : chr \"127.0.0.1\"\n $ url_search            : chr \"\"\n $ url_protocol          : chr \"http:\"\n $ output_normPlot_height: int 400\n $ url_hash              : chr \"\"\n $ output_expPlot_height : int 400", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.09585},
-  {"action": "valueChangeReactValueKey", "nodeId": "2", "key": "allowDataUriScheme", "value": " logi TRUE", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.09689},
-  {"action": "nodeDef", "nodeId": "3", "label": "value", "type": "reactiveVal", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.1094},
-  {"action": "valueChange", "nodeId": "3", "value": " num 0", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.11079},
-  {"action": "nodeDef", "nodeId": "4", "label": "observeEvent(input$minus)", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.11463},
-  {"action": "invalidateStart", "nodeId": "4", "ctxId": "1", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.11527},
-  {"action": "invalidateEnd", "nodeId": "4", "ctxId": "1", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.11662},
-  {"action": "nodeDef", "nodeId": "5", "label": "observeEvent(input$plus)", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.11802},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "2", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.1186},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "2", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.1191},
-  {"action": "nodeDef", "nodeId": "6", "label": "output$value", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.12189},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "3", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.12268},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "3", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.12398},
-  {"action": "nodeDef", "nodeId": "7", "label": "plotObj", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.12603},
-  {"action": "nodeDef", "nodeId": "8", "label": "output$normPlot", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.15859},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "4", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.15916},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "4", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.15964},
-  {"action": "nodeDef", "nodeId": "9", "label": "plotObj", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.20928},
-  {"action": "nodeDef", "nodeId": "10", "label": "output$expPlot", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.21129},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "5", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.21185},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "5", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.21234},
-  {"action": "enter", "nodeId": "4", "ctxId": "6", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.22626},
-  {"action": "depReactiveValueKey", "nodeId": "4", "depOnNodeId": "1", "key": "minus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.22689},
-  {"action": "exit", "nodeId": "4", "ctxId": "6", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.22735},
-  {"action": "enter", "nodeId": "5", "ctxId": "7", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.22822},
-  {"action": "depReactiveValueKey", "nodeId": "5", "depOnNodeId": "1", "key": "plus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.22882},
-  {"action": "exit", "nodeId": "5", "ctxId": "7", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.22927},
-  {"action": "enter", "nodeId": "6", "ctxId": "8", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.22996},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.23156},
-  {"action": "exit", "nodeId": "6", "ctxId": "8", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.23311},
-  {"action": "enter", "nodeId": "8", "ctxId": "9", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.23392},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.23529},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.23597},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.23699},
-  {"action": "enter", "nodeId": "7", "ctxId": "10", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.23778},
-  {"action": "enter", "nodeId": "7", "ctxId": "11", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.23861},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.23937},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.24032},
-  {"action": "exit", "nodeId": "7", "ctxId": "11", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.24098},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "11", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.24164},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "11", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.24237},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.24305},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.2451},
-  {"action": "exit", "nodeId": "7", "ctxId": "10", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.28814},
-  {"action": "exit", "nodeId": "8", "ctxId": "9", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.28931},
-  {"action": "enter", "nodeId": "10", "ctxId": "12", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.2901},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29139},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29202},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29262},
-  {"action": "enter", "nodeId": "9", "ctxId": "13", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29331},
-  {"action": "enter", "nodeId": "9", "ctxId": "14", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29403},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29472},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29539},
-  {"action": "exit", "nodeId": "9", "ctxId": "14", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29599},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "14", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29659},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "14", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29723},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.29797},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.30083},
-  {"action": "exit", "nodeId": "9", "ctxId": "13", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.33558},
-  {"action": "exit", "nodeId": "10", "ctxId": "12", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385210.33674},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 0\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 1", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.79445},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "plus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 1", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.79556},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "7", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.79602},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "7", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.79719},
-  {"action": "enter", "nodeId": "5", "ctxId": "15", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.79804},
-  {"action": "depReactiveValueKey", "nodeId": "5", "depOnNodeId": "1", "key": "plus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.79859},
-  {"action": "enter", "nodeId": "5", "ctxId": "16", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.79921},
-  {"action": "dep", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.8002},
-  {"action": "valueChange", "nodeId": "3", "value": " num 1", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.80185},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "10", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.80244},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "9", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.80311},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.80458},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "9", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.8052},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.80584},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "10", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.80644},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "13", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.80705},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "12", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.8077},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.80914},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "12", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.80975},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81049},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "13", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.8116},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "16", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81231},
-  {"action": "depOnRemove", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81291},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "16", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81351},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "8", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81407},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81552},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "8", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81612},
-  {"action": "exit", "nodeId": "5", "ctxId": "16", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81836},
-  {"action": "exit", "nodeId": "5", "ctxId": "15", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81884},
-  {"action": "enter", "nodeId": "8", "ctxId": "17", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.81954},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.85873},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.8594},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.86},
-  {"action": "enter", "nodeId": "7", "ctxId": "18", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.87467},
-  {"action": "enter", "nodeId": "7", "ctxId": "19", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.89731},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.89803},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.89878},
-  {"action": "exit", "nodeId": "7", "ctxId": "19", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.89946},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "19", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.90025},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "19", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.90109},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.9018},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.90465},
-  {"action": "exit", "nodeId": "7", "ctxId": "18", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.94086},
-  {"action": "exit", "nodeId": "8", "ctxId": "17", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.94199},
-  {"action": "enter", "nodeId": "10", "ctxId": "20", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.94267},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.94416},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.94481},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.94541},
-  {"action": "enter", "nodeId": "9", "ctxId": "21", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.94634},
-  {"action": "enter", "nodeId": "9", "ctxId": "22", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.96633},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.96723},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.96812},
-  {"action": "exit", "nodeId": "9", "ctxId": "22", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.96883},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "22", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.96953},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "22", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.97057},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.97131},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385211.97367},
-  {"action": "exit", "nodeId": "9", "ctxId": "21", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.00798},
-  {"action": "exit", "nodeId": "10", "ctxId": "20", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.00914},
-  {"action": "enter", "nodeId": "6", "ctxId": "23", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.00985},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.0373},
-  {"action": "exit", "nodeId": "6", "ctxId": "23", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.03946},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 0\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 2", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.26942},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "plus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 2", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27049},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "15", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27093},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "15", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27227},
-  {"action": "enter", "nodeId": "5", "ctxId": "24", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.2731},
-  {"action": "depReactiveValueKey", "nodeId": "5", "depOnNodeId": "1", "key": "plus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27365},
-  {"action": "enter", "nodeId": "5", "ctxId": "25", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27427},
-  {"action": "dep", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27483},
-  {"action": "valueChange", "nodeId": "3", "value": " num 2", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27628},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "21", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27686},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "20", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27743},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27884},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "20", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.27943},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28001},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "21", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28064},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "23", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28118},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28252},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "23", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.2834},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "25", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28397},
-  {"action": "depOnRemove", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28453},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "25", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28515},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "18", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.2857},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "17", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28639},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28791},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "17", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28861},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28933},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "18", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.28994},
-  {"action": "exit", "nodeId": "5", "ctxId": "25", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.29198},
-  {"action": "exit", "nodeId": "5", "ctxId": "24", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.29241},
-  {"action": "enter", "nodeId": "10", "ctxId": "26", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.2931},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.30836},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.30908},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.30978},
-  {"action": "enter", "nodeId": "9", "ctxId": "27", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.31072},
-  {"action": "enter", "nodeId": "9", "ctxId": "28", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.31165},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.31241},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.31329},
-  {"action": "exit", "nodeId": "9", "ctxId": "28", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.3141},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "28", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.31492},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "28", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.31591},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.31669},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.31962},
-  {"action": "exit", "nodeId": "9", "ctxId": "27", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.36141},
-  {"action": "exit", "nodeId": "10", "ctxId": "26", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.36271},
-  {"action": "enter", "nodeId": "6", "ctxId": "29", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.36337},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.36492},
-  {"action": "exit", "nodeId": "6", "ctxId": "29", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.36646},
-  {"action": "enter", "nodeId": "8", "ctxId": "30", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.36716},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.36847},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.36912},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.36975},
-  {"action": "enter", "nodeId": "7", "ctxId": "31", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.37048},
-  {"action": "enter", "nodeId": "7", "ctxId": "32", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.37122},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.37193},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.37263},
-  {"action": "exit", "nodeId": "7", "ctxId": "32", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.37334},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "32", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.37445},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "32", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.37519},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.37588},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.37822},
-  {"action": "exit", "nodeId": "7", "ctxId": "31", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.41538},
-  {"action": "exit", "nodeId": "8", "ctxId": "30", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385212.41653},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 1\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 2", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.11339},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "minus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 1", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.11453},
-  {"action": "invalidateStart", "nodeId": "4", "ctxId": "6", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.11497},
-  {"action": "invalidateEnd", "nodeId": "4", "ctxId": "6", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.11621},
-  {"action": "enter", "nodeId": "4", "ctxId": "33", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.11703},
-  {"action": "depReactiveValueKey", "nodeId": "4", "depOnNodeId": "1", "key": "minus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.11762},
-  {"action": "enter", "nodeId": "4", "ctxId": "34", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.11842},
-  {"action": "dep", "nodeId": "4", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.11912},
-  {"action": "valueChange", "nodeId": "3", "value": " num 1", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.12073},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "27", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.12137},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "26", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.122},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.12364},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "26", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.12437},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.12513},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "27", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.12584},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "29", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.12638},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.1278},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "29", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.1284},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "31", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.12893},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "30", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.12951},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13093},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "30", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13154},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13218},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "31", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13279},
-  {"action": "invalidateStart", "nodeId": "4", "ctxId": "34", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13334},
-  {"action": "depOnRemove", "nodeId": "4", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13388},
-  {"action": "invalidateEnd", "nodeId": "4", "ctxId": "34", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13455},
-  {"action": "exit", "nodeId": "4", "ctxId": "34", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13673},
-  {"action": "exit", "nodeId": "4", "ctxId": "33", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13716},
-  {"action": "enter", "nodeId": "10", "ctxId": "35", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13781},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.13933},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14015},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14077},
-  {"action": "enter", "nodeId": "9", "ctxId": "36", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14147},
-  {"action": "enter", "nodeId": "9", "ctxId": "37", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14228},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14299},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14373},
-  {"action": "exit", "nodeId": "9", "ctxId": "37", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14447},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "37", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14519},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "37", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14596},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.14663},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.1488},
-  {"action": "exit", "nodeId": "9", "ctxId": "36", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.18701},
-  {"action": "exit", "nodeId": "10", "ctxId": "35", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.1884},
-  {"action": "enter", "nodeId": "6", "ctxId": "38", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.18911},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.1905},
-  {"action": "exit", "nodeId": "6", "ctxId": "38", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.192},
-  {"action": "enter", "nodeId": "8", "ctxId": "39", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.19278},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.1944},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.19517},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.19579},
-  {"action": "enter", "nodeId": "7", "ctxId": "40", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.1965},
-  {"action": "enter", "nodeId": "7", "ctxId": "41", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.19723},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.19792},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.19884},
-  {"action": "exit", "nodeId": "7", "ctxId": "41", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.19949},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "41", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.20012},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "41", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.20083},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.20162},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.20396},
-  {"action": "exit", "nodeId": "7", "ctxId": "40", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.23904},
-  {"action": "exit", "nodeId": "8", "ctxId": "39", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.24023},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 2\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 2", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.60833},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "minus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 2", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.60938},
-  {"action": "invalidateStart", "nodeId": "4", "ctxId": "33", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.60982},
-  {"action": "invalidateEnd", "nodeId": "4", "ctxId": "33", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61105},
-  {"action": "enter", "nodeId": "4", "ctxId": "42", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61187},
-  {"action": "depReactiveValueKey", "nodeId": "4", "depOnNodeId": "1", "key": "minus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61243},
-  {"action": "enter", "nodeId": "4", "ctxId": "43", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61312},
-  {"action": "dep", "nodeId": "4", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61376},
-  {"action": "valueChange", "nodeId": "3", "value": " num 0", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61525},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "36", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61588},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "35", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.6165},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61806},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "35", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61881},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.61949},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "36", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62016},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "38", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.6207},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62209},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "38", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62284},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "40", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62342},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "39", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62407},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62561},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "39", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62622},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62679},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "40", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62735},
-  {"action": "invalidateStart", "nodeId": "4", "ctxId": "43", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62788},
-  {"action": "depOnRemove", "nodeId": "4", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62842},
-  {"action": "invalidateEnd", "nodeId": "4", "ctxId": "43", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.62897},
-  {"action": "exit", "nodeId": "4", "ctxId": "43", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63096},
-  {"action": "exit", "nodeId": "4", "ctxId": "42", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63138},
-  {"action": "enter", "nodeId": "10", "ctxId": "44", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63203},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63346},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63416},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63483},
-  {"action": "enter", "nodeId": "9", "ctxId": "45", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63565},
-  {"action": "enter", "nodeId": "9", "ctxId": "46", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63658},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.6373},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.638},
-  {"action": "exit", "nodeId": "9", "ctxId": "46", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63874},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "46", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.63936},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "46", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.64004},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.64071},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.64333},
-  {"action": "exit", "nodeId": "9", "ctxId": "45", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.68666},
-  {"action": "exit", "nodeId": "10", "ctxId": "44", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.68803},
-  {"action": "enter", "nodeId": "6", "ctxId": "47", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.68874},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69014},
-  {"action": "exit", "nodeId": "6", "ctxId": "47", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69169},
-  {"action": "enter", "nodeId": "8", "ctxId": "48", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69246},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.6938},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69441},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69501},
-  {"action": "enter", "nodeId": "7", "ctxId": "49", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69606},
-  {"action": "enter", "nodeId": "7", "ctxId": "50", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69707},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69811},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69894},
-  {"action": "exit", "nodeId": "7", "ctxId": "50", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.69957},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "50", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.70018},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "50", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.70093},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.70167},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.70408},
-  {"action": "exit", "nodeId": "7", "ctxId": "49", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.73782},
-  {"action": "exit", "nodeId": "8", "ctxId": "48", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385213.73899},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 2\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.34886},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "plus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35009},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "24", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35063},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "24", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.3519},
-  {"action": "enter", "nodeId": "5", "ctxId": "51", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35298},
-  {"action": "depReactiveValueKey", "nodeId": "5", "depOnNodeId": "1", "key": "plus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35362},
-  {"action": "enter", "nodeId": "5", "ctxId": "52", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35426},
-  {"action": "dep", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35485},
-  {"action": "valueChange", "nodeId": "3", "value": " num 1", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35643},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "45", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35706},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "44", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35775},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35924},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "44", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.35985},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36052},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "45", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36124},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "47", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.3618},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36316},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "47", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36377},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "49", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36434},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "48", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36494},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36637},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "48", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36699},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36756},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "49", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36813},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "52", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36866},
-  {"action": "depOnRemove", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36923},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "52", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.36986},
-  {"action": "exit", "nodeId": "5", "ctxId": "52", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37195},
-  {"action": "exit", "nodeId": "5", "ctxId": "51", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37238},
-  {"action": "enter", "nodeId": "10", "ctxId": "53", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37308},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37446},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37518},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37581},
-  {"action": "enter", "nodeId": "9", "ctxId": "54", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37651},
-  {"action": "enter", "nodeId": "9", "ctxId": "55", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37724},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37792},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.3786},
-  {"action": "exit", "nodeId": "9", "ctxId": "55", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37921},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "55", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.37981},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "55", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.38047},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.38112},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.38391},
-  {"action": "exit", "nodeId": "9", "ctxId": "54", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.42085},
-  {"action": "exit", "nodeId": "10", "ctxId": "53", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.42202},
-  {"action": "enter", "nodeId": "6", "ctxId": "56", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.4227},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.42404},
-  {"action": "exit", "nodeId": "6", "ctxId": "56", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.42526},
-  {"action": "enter", "nodeId": "8", "ctxId": "57", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.42594},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.4272},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.42782},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.42849},
-  {"action": "enter", "nodeId": "7", "ctxId": "58", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.42922},
-  {"action": "enter", "nodeId": "7", "ctxId": "59", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.42996},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.43082},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.43159},
-  {"action": "exit", "nodeId": "7", "ctxId": "59", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.4323},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "59", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.4333},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "59", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.43435},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.43521},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.43792},
-  {"action": "exit", "nodeId": "7", "ctxId": "58", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.47369},
-  {"action": "exit", "nodeId": "8", "ctxId": "57", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.47481},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 2\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 4", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72167},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "plus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 4", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72274},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "51", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72319},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "51", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72431},
-  {"action": "enter", "nodeId": "5", "ctxId": "60", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72511},
-  {"action": "depReactiveValueKey", "nodeId": "5", "depOnNodeId": "1", "key": "plus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72567},
-  {"action": "enter", "nodeId": "5", "ctxId": "61", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72628},
-  {"action": "dep", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72685},
-  {"action": "valueChange", "nodeId": "3", "value": " num 2", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72826},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "54", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72883},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "53", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.72942},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73081},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "53", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73142},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73199},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "54", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73256},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "56", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73327},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73474},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "56", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73549},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "58", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73605},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "57", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73672},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73817},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "57", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73877},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73934},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "58", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.73989},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "61", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74042},
-  {"action": "depOnRemove", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74095},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "61", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.7415},
-  {"action": "exit", "nodeId": "5", "ctxId": "61", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74342},
-  {"action": "exit", "nodeId": "5", "ctxId": "60", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74382},
-  {"action": "enter", "nodeId": "10", "ctxId": "62", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74449},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74576},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74637},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74696},
-  {"action": "enter", "nodeId": "9", "ctxId": "63", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74763},
-  {"action": "enter", "nodeId": "9", "ctxId": "64", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74834},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74901},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.74968},
-  {"action": "exit", "nodeId": "9", "ctxId": "64", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.75029},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "64", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.75087},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "64", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.75151},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.75214},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.75451},
-  {"action": "exit", "nodeId": "9", "ctxId": "63", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.80389},
-  {"action": "exit", "nodeId": "10", "ctxId": "62", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.80512},
-  {"action": "enter", "nodeId": "6", "ctxId": "65", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.80582},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.8074},
-  {"action": "exit", "nodeId": "6", "ctxId": "65", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81156},
-  {"action": "enter", "nodeId": "8", "ctxId": "66", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81235},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81399},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81471},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.8154},
-  {"action": "enter", "nodeId": "7", "ctxId": "67", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81614},
-  {"action": "enter", "nodeId": "7", "ctxId": "68", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81701},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81781},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81853},
-  {"action": "exit", "nodeId": "7", "ctxId": "68", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81915},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "68", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.81974},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "68", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.82042},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.82106},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.82342},
-  {"action": "exit", "nodeId": "7", "ctxId": "67", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.85938},
-  {"action": "exit", "nodeId": "8", "ctxId": "66", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385214.86074},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 2\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 5", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.1495},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "plus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 5", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15065},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "60", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.1511},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "60", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15226},
-  {"action": "enter", "nodeId": "5", "ctxId": "69", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15325},
-  {"action": "depReactiveValueKey", "nodeId": "5", "depOnNodeId": "1", "key": "plus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15389},
-  {"action": "enter", "nodeId": "5", "ctxId": "70", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15458},
-  {"action": "dep", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15517},
-  {"action": "valueChange", "nodeId": "3", "value": " num 3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15669},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "70", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15726},
-  {"action": "depOnRemove", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15781},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "70", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15839},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "63", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.15892},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "62", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.1595},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16095},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "62", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16157},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16222},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "63", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16279},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "65", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16332},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16477},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "65", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16552},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "67", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16611},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "66", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16674},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16848},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "66", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.16912},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.1698},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "67", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17047},
-  {"action": "exit", "nodeId": "5", "ctxId": "70", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17252},
-  {"action": "exit", "nodeId": "5", "ctxId": "69", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17296},
-  {"action": "enter", "nodeId": "10", "ctxId": "71", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17366},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17511},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17577},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17638},
-  {"action": "enter", "nodeId": "9", "ctxId": "72", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.1771},
-  {"action": "enter", "nodeId": "9", "ctxId": "73", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17786},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17857},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17928},
-  {"action": "exit", "nodeId": "9", "ctxId": "73", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.17991},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "73", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.18053},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "73", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.18121},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.18187},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.18467},
-  {"action": "exit", "nodeId": "9", "ctxId": "72", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.23127},
-  {"action": "exit", "nodeId": "10", "ctxId": "71", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.23263},
-  {"action": "enter", "nodeId": "6", "ctxId": "74", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.23338},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.23492},
-  {"action": "exit", "nodeId": "6", "ctxId": "74", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.2362},
-  {"action": "enter", "nodeId": "8", "ctxId": "75", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.23688},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.23814},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.23876},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.23935},
-  {"action": "enter", "nodeId": "7", "ctxId": "76", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.24004},
-  {"action": "enter", "nodeId": "7", "ctxId": "77", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.24077},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.24146},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.24215},
-  {"action": "exit", "nodeId": "7", "ctxId": "77", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.24276},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "77", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.24336},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "77", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.24411},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.24478},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.24708},
-  {"action": "exit", "nodeId": "7", "ctxId": "76", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.29121},
-  {"action": "exit", "nodeId": "8", "ctxId": "75", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.29337},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 2\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 6", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.57698},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "plus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 6", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.57803},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "69", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.57846},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "69", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.57953},
-  {"action": "enter", "nodeId": "5", "ctxId": "78", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58033},
-  {"action": "depReactiveValueKey", "nodeId": "5", "depOnNodeId": "1", "key": "plus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58088},
-  {"action": "enter", "nodeId": "5", "ctxId": "79", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58149},
-  {"action": "dep", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58206},
-  {"action": "valueChange", "nodeId": "3", "value": " num 4", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58345},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "72", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58403},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "71", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.5846},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58599},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "71", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58663},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58726},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "72", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.5879},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "74", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58857},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.58992},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "74", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59066},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "76", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59122},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "75", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.5919},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59359},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "75", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59422},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59483},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "76", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.5954},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "79", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59593},
-  {"action": "depOnRemove", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59647},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "79", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59704},
-  {"action": "exit", "nodeId": "5", "ctxId": "79", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59905},
-  {"action": "exit", "nodeId": "5", "ctxId": "78", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.59947},
-  {"action": "enter", "nodeId": "10", "ctxId": "80", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60013},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60153},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60224},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60308},
-  {"action": "enter", "nodeId": "9", "ctxId": "81", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60403},
-  {"action": "enter", "nodeId": "9", "ctxId": "82", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60488},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60567},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60645},
-  {"action": "exit", "nodeId": "9", "ctxId": "82", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60712},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "82", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60774},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "82", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60842},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.60913},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.61148},
-  {"action": "exit", "nodeId": "9", "ctxId": "81", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.64592},
-  {"action": "exit", "nodeId": "10", "ctxId": "80", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.64712},
-  {"action": "enter", "nodeId": "6", "ctxId": "83", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.64778},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.64902},
-  {"action": "exit", "nodeId": "6", "ctxId": "83", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.65032},
-  {"action": "enter", "nodeId": "8", "ctxId": "84", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.651},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.65226},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.65289},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.65372},
-  {"action": "enter", "nodeId": "7", "ctxId": "85", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.65448},
-  {"action": "enter", "nodeId": "7", "ctxId": "86", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.65522},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.65593},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.65668},
-  {"action": "exit", "nodeId": "7", "ctxId": "86", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.65729},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "86", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.66192},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "86", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.66273},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.66341},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.66588},
-  {"action": "exit", "nodeId": "7", "ctxId": "85", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.6995},
-  {"action": "exit", "nodeId": "8", "ctxId": "84", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385215.70065},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 3\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 6", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69023},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "minus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69128},
-  {"action": "invalidateStart", "nodeId": "4", "ctxId": "42", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69172},
-  {"action": "invalidateEnd", "nodeId": "4", "ctxId": "42", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69279},
-  {"action": "enter", "nodeId": "4", "ctxId": "87", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.6936},
-  {"action": "depReactiveValueKey", "nodeId": "4", "depOnNodeId": "1", "key": "minus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69415},
-  {"action": "enter", "nodeId": "4", "ctxId": "88", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69477},
-  {"action": "dep", "nodeId": "4", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69537},
-  {"action": "valueChange", "nodeId": "3", "value": " num 3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69685},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "81", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69742},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "80", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69801},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.69943},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "80", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70003},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70063},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "81", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70128},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "83", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.7019},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70371},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "83", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70441},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "85", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70507},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "84", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70568},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70732},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "84", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70795},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70853},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "85", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70909},
-  {"action": "invalidateStart", "nodeId": "4", "ctxId": "88", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.70963},
-  {"action": "depOnRemove", "nodeId": "4", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71018},
-  {"action": "invalidateEnd", "nodeId": "4", "ctxId": "88", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71074},
-  {"action": "exit", "nodeId": "4", "ctxId": "88", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71276},
-  {"action": "exit", "nodeId": "4", "ctxId": "87", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71318},
-  {"action": "enter", "nodeId": "10", "ctxId": "89", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71389},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71527},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71612},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71712},
-  {"action": "enter", "nodeId": "9", "ctxId": "90", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71791},
-  {"action": "enter", "nodeId": "9", "ctxId": "91", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.7187},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.71944},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.72015},
-  {"action": "exit", "nodeId": "9", "ctxId": "91", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.72084},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "91", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.72149},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "91", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.72216},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.72281},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.72511},
-  {"action": "exit", "nodeId": "9", "ctxId": "90", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.75949},
-  {"action": "exit", "nodeId": "10", "ctxId": "89", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76095},
-  {"action": "enter", "nodeId": "6", "ctxId": "92", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76211},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76359},
-  {"action": "exit", "nodeId": "6", "ctxId": "92", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76493},
-  {"action": "enter", "nodeId": "8", "ctxId": "93", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76562},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76687},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76749},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76808},
-  {"action": "enter", "nodeId": "7", "ctxId": "94", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76875},
-  {"action": "enter", "nodeId": "7", "ctxId": "95", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.76946},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.77016},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.77086},
-  {"action": "exit", "nodeId": "7", "ctxId": "95", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.77155},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "95", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.77266},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "95", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.77341},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.77416},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.77644},
-  {"action": "exit", "nodeId": "7", "ctxId": "94", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.81064},
-  {"action": "exit", "nodeId": "8", "ctxId": "93", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385216.81185},
-  {"action": "valueChangeReactValueValues", "nodeId": "1", "value": "List of 2\n $ minus:Classes 'integer', 'shinyActionButtonValue'  int 3\n $ plus :Classes 'integer', 'shinyActionButtonValue'  int 7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.11822},
-  {"action": "valueChangeReactValueKey", "nodeId": "1", "key": "plus", "value": "Classes 'integer', 'shinyActionButtonValue'  int 7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.11935},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "78", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.11981},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "78", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.1211},
-  {"action": "enter", "nodeId": "5", "ctxId": "96", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.12194},
-  {"action": "depReactiveValueKey", "nodeId": "5", "depOnNodeId": "1", "key": "plus", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.12249},
-  {"action": "enter", "nodeId": "5", "ctxId": "97", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.12312},
-  {"action": "dep", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.12368},
-  {"action": "valueChange", "nodeId": "3", "value": " num 4", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.1253},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "90", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.12588},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "89", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.12647},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.12796},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "89", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.12873},
-  {"action": "depOnRemove", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.12957},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "90", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13034},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "92", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.1309},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13239},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "92", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13304},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "94", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13361},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "93", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13431},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13578},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "93", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.1364},
-  {"action": "depOnRemove", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13698},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "94", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13754},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "97", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13807},
-  {"action": "depOnRemove", "nodeId": "5", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13875},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "97", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.13944},
-  {"action": "exit", "nodeId": "5", "ctxId": "97", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14152},
-  {"action": "exit", "nodeId": "5", "ctxId": "96", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14197},
-  {"action": "enter", "nodeId": "10", "ctxId": "98", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14267},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14412},
-  {"action": "depReactiveValueKey", "nodeId": "10", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14479},
-  {"action": "dep", "nodeId": "10", "depOnNodeId": "9", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14543},
-  {"action": "enter", "nodeId": "9", "ctxId": "99", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14622},
-  {"action": "enter", "nodeId": "9", "ctxId": "100", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14696},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14766},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "output_expPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14834},
-  {"action": "exit", "nodeId": "9", "ctxId": "100", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14895},
-  {"action": "invalidateStart", "nodeId": "9", "ctxId": "100", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.14954},
-  {"action": "invalidateEnd", "nodeId": "9", "ctxId": "100", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.15019},
-  {"action": "depReactiveValueKey", "nodeId": "9", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.15084},
-  {"action": "dep", "nodeId": "9", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.15315},
-  {"action": "exit", "nodeId": "9", "ctxId": "99", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.18889},
-  {"action": "exit", "nodeId": "10", "ctxId": "98", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19009},
-  {"action": "enter", "nodeId": "6", "ctxId": "101", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19086},
-  {"action": "dep", "nodeId": "6", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19219},
-  {"action": "exit", "nodeId": "6", "ctxId": "101", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19362},
-  {"action": "enter", "nodeId": "8", "ctxId": "102", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19433},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19579},
-  {"action": "depReactiveValueKey", "nodeId": "8", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19659},
-  {"action": "dep", "nodeId": "8", "depOnNodeId": "7", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19727},
-  {"action": "enter", "nodeId": "7", "ctxId": "103", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19814},
-  {"action": "enter", "nodeId": "7", "ctxId": "104", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19895},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_width", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.19971},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "output_normPlot_height", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.20047},
-  {"action": "exit", "nodeId": "7", "ctxId": "104", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.20115},
-  {"action": "invalidateStart", "nodeId": "7", "ctxId": "104", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.20179},
-  {"action": "invalidateEnd", "nodeId": "7", "ctxId": "104", "type": "isolate", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.20259},
-  {"action": "depReactiveValueKey", "nodeId": "7", "depOnNodeId": "2", "key": "pixelratio", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.20327},
-  {"action": "dep", "nodeId": "7", "depOnNodeId": "3", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.20567},
-  {"action": "exit", "nodeId": "7", "ctxId": "103", "type": "observable", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.32478},
-  {"action": "exit", "nodeId": "8", "ctxId": "102", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385217.32616},
-  {"action": "invalidateStart", "nodeId": "4", "ctxId": "87", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.53367},
-  {"action": "invalidateEnd", "nodeId": "4", "ctxId": "87", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.53405},
-  {"action": "invalidateStart", "nodeId": "5", "ctxId": "96", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.53446},
-  {"action": "invalidateEnd", "nodeId": "5", "ctxId": "96", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.53484},
-  {"action": "invalidateStart", "nodeId": "6", "ctxId": "101", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.53521},
-  {"action": "depOnRemove", "nodeId": "6", "depOnNodeId": "3", "session": null, "time": 1523385219.53556},
-  {"action": "invalidateEnd", "nodeId": "6", "ctxId": "101", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.53591},
-  {"action": "invalidateStart", "nodeId": "8", "ctxId": "102", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.53628},
-  {"action": "depOnRemove", "nodeId": "8", "depOnNodeId": "7", "session": null, "time": 1523385219.53666},
-  {"action": "invalidateEnd", "nodeId": "8", "ctxId": "102", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.537},
-  {"action": "invalidateStart", "nodeId": "10", "ctxId": "98", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.53739},
-  {"action": "depOnRemove", "nodeId": "10", "depOnNodeId": "9", "session": null, "time": 1523385219.53776},
-  {"action": "invalidateEnd", "nodeId": "10", "ctxId": "98", "type": "observer", "session": "cc10ef73d4656b3cdd3090daafbe0f6b", "time": 1523385219.53811}
+  {
+    "action": "define",
+    "reactId": "r3",
+    "label": "plotObj",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.05693
+  },
+  {
+    "action": "define",
+    "reactId": "r4",
+    "label": "output$distPlot",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.06415
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx1",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.06546
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751757.06609
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx1",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.10485
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx2",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.11923
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx2",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.121
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx3",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.12189
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx4",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.12306
+  },
+  {
+    "action": "define",
+    "reactId": "r2$output_distPlot_width",
+    "label": "clientData$output_distPlot_width",
+    "type": "reactiveValuesKey",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.12412
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r2$output_distPlot_width",
+    "value": " int 503",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.12859
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx4",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.12989
+  },
+  {
+    "action": "define",
+    "reactId": "r2$output_distPlot_height",
+    "label": "clientData$output_distPlot_height",
+    "type": "reactiveValuesKey",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.16895
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r2$output_distPlot_height",
+    "value": " int 400",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17044
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx4",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17145
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx4",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17235
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx4",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17325
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx4",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17409
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx4",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17484
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx4",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17567
+  },
+  {
+    "action": "define",
+    "reactId": "r2$pixelratio",
+    "label": "clientData$pixelratio",
+    "type": "reactiveValuesKey",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17655
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r2$pixelratio",
+    "value": " int 1",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17773
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx3",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.17853
+  },
+  {
+    "action": "define",
+    "reactId": "r1$bins",
+    "label": "input$bins",
+    "type": "reactiveValuesKey",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.19768
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 30",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.19925
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx3",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.20029
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx3",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.26587
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx2",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.26673
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx2",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.26745
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx2",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.26823
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx2",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751757.26942
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751757.26975
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751757.27091
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.69956
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx3",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.70032
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx3",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.70078
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx2",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.70122
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751758.70239
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx2",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.72687
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx2",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.7276
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx2",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.72818
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx2",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.7287
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx2",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.72921
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx3",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.72968
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx3",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.73018
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx3",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.73069
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx3",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.73116
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx5",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.7367
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx5",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.76008
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx6",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.77036
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx7",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.77164
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx7",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.77262
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx7",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.77358
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx7",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.77445
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx7",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.77534
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx7",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.77623
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx7",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.79864
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx7",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.79963
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx6",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.80061
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx6",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.82644
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx6",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.90214
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx5",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.90298
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx5",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.90385
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx5",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.90463
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx5",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751758.91599
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751758.91636
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751758.91721
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.04906
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx6",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.04958
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx6",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx5",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05041
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751760.05142
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx5",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05227
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx5",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05274
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx5",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05316
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx5",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05359
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx5",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05399
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx6",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05436
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx6",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05474
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx6",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05531
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx6",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05575
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx8",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05675
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx8",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05805
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx9",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05881
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx10",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.05972
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx10",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.06056
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx10",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.06146
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx10",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.06223
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx10",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.06299
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx10",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.06378
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx10",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.0646
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx10",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.06537
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx9",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.06626
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx9",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.06929
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx9",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.12942
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx8",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.13032
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx8",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.13112
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx8",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.13475
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx8",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751760.13617
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751760.13652
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751760.13732
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.27819
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx9",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.27877
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx9",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.27918
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx8",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.27962
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751761.28066
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx8",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28163
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx8",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28216
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx8",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28267
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx8",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28316
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx8",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28366
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx9",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28416
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx9",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28459
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx9",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28509
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx9",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28555
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx11",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28676
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx11",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28853
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx12",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.28953
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx13",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.29079
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx13",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.29178
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx13",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.29276
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx13",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.29348
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx13",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.29432
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx13",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.29517
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx13",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.29613
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx13",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.29711
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx12",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.29803
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx12",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.30084
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx12",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.35771
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx11",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.35857
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx11",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.35936
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx11",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.36003
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx11",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751761.36126
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751761.3616
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751761.3624
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 38",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.39788
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx12",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.39832
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx12",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.39879
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx11",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.3992
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751762.4002
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx11",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40107
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx11",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40155
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx11",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40198
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx11",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40241
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx11",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40284
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx12",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40326
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx12",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40388
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx12",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.4045
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx12",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40496
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx14",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.4059
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx14",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40731
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx15",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40806
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx16",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.40919
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx16",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.41014
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx16",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.41106
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx16",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.41176
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx16",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.41266
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx16",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.41347
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx16",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.41419
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx16",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.41488
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx15",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.4156
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx15",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.4181
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx15",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.48675
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx14",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.48752
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx14",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.48827
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx14",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.48899
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx14",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751762.49006
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751762.49034
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751762.4911
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 23",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.51541
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx15",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.51589
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx15",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.51634
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx14",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.51676
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751763.51774
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx14",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.51861
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx14",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.51916
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx14",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.51961
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx14",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52004
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx14",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52047
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx15",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52084
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx15",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52137
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx15",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52184
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx15",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52227
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx17",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52318
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52455
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx18",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52533
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx19",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.5263
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx19",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52708
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx19",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52803
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx19",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52874
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx19",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.52942
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx19",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.5301
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx19",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.5309
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx19",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.5316
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx18",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.53233
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx18",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.53453
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx18",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.59091
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.59197
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.59271
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.5936
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx17",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751763.59492
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751763.5953
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751763.5962
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88219
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx18",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88276
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx18",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88326
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx17",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88379
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751764.88505
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88618
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88688
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88748
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88803
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx17",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88857
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx18",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.8893
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx18",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.88985
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx18",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.89046
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx18",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.89097
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx20",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.89209
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.89374
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx21",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.89472
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx22",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.89872
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx22",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.89983
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx22",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.90085
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx22",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.90171
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx22",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.90257
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx22",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.90343
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx22",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.90432
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx22",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.9053
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx21",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.90637
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx21",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.90858
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx21",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.96869
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.9695
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.9704
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.97121
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx20",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751764.9725
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751764.97285
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751764.97386
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 17",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.95504
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx21",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.95549
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx21",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.95588
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx20",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.95635
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751765.95762
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.95853
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.95906
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.95953
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96009
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx20",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.9606
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx21",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96105
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx21",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96149
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx21",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96199
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx21",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96246
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx23",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96371
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx23",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96539
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx24",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96635
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx25",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96757
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx25",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96856
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx25",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.96948
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx25",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.97041
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx25",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.97131
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx25",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.97238
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx25",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.97341
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx25",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.9743
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx24",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.97519
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx24",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751765.97781
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx24",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751766.03759
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx23",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751766.0385
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx23",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751766.0395
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx23",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751766.04035
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx23",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751766.04191
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751766.04229
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751766.0432
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 35",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.18899
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx24",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.18953
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx24",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19002
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx23",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19052
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751767.19166
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx23",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19273
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx23",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19332
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx23",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19392
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx23",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19449
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx23",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19501
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx24",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19549
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx24",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19617
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx24",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19673
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx24",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.19729
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx26",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.1984
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx26",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20005
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx27",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20111
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx28",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20242
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx28",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20347
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx28",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20446
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx28",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20547
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx28",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20655
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx28",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20749
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx28",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20836
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx28",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.20924
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx27",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.21014
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx27",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.21247
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx27",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.27287
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx26",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.27385
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx26",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.2747
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx26",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.27538
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx26",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751767.27679
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751767.27715
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751767.27799
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.40513
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx27",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.40565
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx27",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.40607
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx26",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.40651
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751768.4077
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx26",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.4088
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx26",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.40937
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx26",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.40992
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx26",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41044
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx26",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41095
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx27",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41142
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx27",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41202
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx27",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41253
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx27",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41299
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx29",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41407
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx29",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41565
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx30",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41662
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx31",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41782
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx31",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41878
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx31",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.41981
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx31",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.42072
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx31",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.42172
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx31",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.42275
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx31",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.42373
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx31",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.4246
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx30",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.42549
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx30",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.42815
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx30",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.48807
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx29",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.48918
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx29",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.49017
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx29",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.49111
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx29",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751768.49292
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751768.49331
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751768.49423
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 36",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.55326
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx30",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.55371
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx30",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.55411
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx29",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.55452
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751769.5579
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx29",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.57954
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx29",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58013
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx29",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58063
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx29",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58111
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx29",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58159
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx30",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58205
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx30",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58254
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx30",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58304
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx30",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58348
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx32",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.5845
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx32",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58602
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx33",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58693
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx34",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.588
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx34",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58888
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx34",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.58984
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx34",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.59068
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx34",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.59165
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx34",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.59257
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx34",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.59353
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx34",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.59469
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx33",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.59566
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx33",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.59872
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx33",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.65838
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx32",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.65926
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx32",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.66006
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx32",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.66084
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx32",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751769.66211
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751769.66244
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751769.66322
+  },
+  {
+    "action": "valueChange",
+    "reactId": "r1$bins",
+    "value": " int 20",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76059
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx33",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76123
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx33",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76191
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx32",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76247
+  },
+  {
+    "action": "asyncStart",
+    "session": null,
+    "time": 1524751770.76378
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx32",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76501
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx32",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.7656
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx32",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76618
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx32",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76674
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx32",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76729
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx33",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76788
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx33",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76841
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx33",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76894
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx33",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.76943
+  },
+  {
+    "action": "enter",
+    "reactId": "r4",
+    "ctxId": "ctx35",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.77047
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx35",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.7722
+  },
+  {
+    "action": "enter",
+    "reactId": "r3",
+    "ctxId": "ctx36",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.77345
+  },
+  {
+    "action": "isolateEnter",
+    "reactId": "r3",
+    "ctxId": "ctx37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.77466
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.77567
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.77668
+  },
+  {
+    "action": "isolateExit",
+    "reactId": "r3",
+    "ctxId": "ctx37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.77754
+  },
+  {
+    "action": "isolateInvalidateStart",
+    "reactId": "r3",
+    "ctxId": "ctx37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.77841
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.77931
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r3",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.78021
+  },
+  {
+    "action": "isolateInvalidateEnd",
+    "reactId": "r3",
+    "ctxId": "ctx37",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.78108
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx36",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.7818
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r3",
+    "depOnReactId": "r1$bins",
+    "ctxId": "ctx36",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.78478
+  },
+  {
+    "action": "exit",
+    "reactId": "r3",
+    "ctxId": "ctx36",
+    "type": "observable",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.84673
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx35",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.84767
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx35",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.84839
+  },
+  {
+    "action": "dependsOn",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx35",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.84918
+  },
+  {
+    "action": "exit",
+    "reactId": "r4",
+    "ctxId": "ctx35",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751770.85043
+  },
+  {
+    "action": "asyncStop",
+    "session": null,
+    "time": 1524751770.85077
+  },
+  {
+    "action": "queueEmpty",
+    "session": null,
+    "time": 1524751770.85179
+  },
+  {
+    "action": "invalidateStart",
+    "reactId": "r4",
+    "ctxId": "ctx35",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751774.13012
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r3",
+    "ctxId": "ctx35",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751774.13121
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_width",
+    "ctxId": "ctx35",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751774.13241
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$output_distPlot_height",
+    "ctxId": "ctx35",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751774.1332
+  },
+  {
+    "action": "dependsOnRemove",
+    "reactId": "r4",
+    "depOnReactId": "r2$pixelratio",
+    "ctxId": "ctx35",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751774.13379
+  },
+  {
+    "action": "invalidateEnd",
+    "reactId": "r4",
+    "ctxId": "ctx35",
+    "type": "observer",
+    "session": "3982eec4617783db2bbe610842eb12d1",
+    "time": 1524751774.13438
+  }
 ]

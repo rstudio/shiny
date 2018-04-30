@@ -18,9 +18,9 @@ class StatusArr {
   }
   containsStatus(status) {
     var statusObj;
-    for (var i = 0; i < statusArr.length; i++) {
-      statusObj = statusArr[i]
-      if (statusObj.action == status) {
+    var arr = this.statusArr, n = arr.length;
+    for (var i = 0; i < n; i++) {
+      if (arr[i].action == status) {
         return true;
       }
     }
@@ -90,10 +90,15 @@ class Node {
   }
   get cytoData() {
     var retData = this;
+    var classes = ["nodeValid"];
+    if (this.inEnter) classes.push("nodeEnter");
+    if (this.inInvalidate) classes.push("nodeInvalidate");
+    if (this.inIsolate) classes.push("nodeIsolate");
+    if (this.inIsolateInvalidate) classes.push("nodeIsolateInvalidate");
     return {
       group: "nodes",
-      data: retData
-      // ,
+      data: retData,
+      classes: classes.join(" ")
       // style: this.cytoStyle
     }
   }
@@ -110,12 +115,10 @@ class Edge {
     this.session = data.session || "Global";
     this.time = data.time;
     this.status = "normal";
+    this.isGhost = false;
   }
   get id() {
     return `${ this.reactId }_${ this.depOnReactId }_${this.ctxId}`.replace(/\$/g, "_");
-  }
-  get idGhost() {
-    return `${ this.reactId }_${ this.depOnReactId }`.replace(/\$/g, "_");
   }
   get source() {
     return this.depOnReactId.replace(/\$/g, "_");
@@ -129,26 +132,54 @@ class Edge {
   get depKey() {
     return `${ this.reactId } depends on ${ this.depOnReactId }`;
   }
-  get cytoDataGhost() {
+  get cytoData() {
     var retData = this;
+    var classes = [];
+
     return {
       group: "edges",
-      data: {
-        id: this.idGhost,
-        key: this.depKey,
-        source: this.source,
-        target: this.target,
-        depKey: this.depKey,
-        isGhost: true
-      }
+      data: retData,
+      // ,
+      // style: this.cytoStyle
+      classes: classes.join(" ")
     }
+  }
+}
+class GhostEdge {
+  constructor(data) {
+    if (typeof data.reactId === "undefined") throw "data.reactId not provided to new GhostEdge()";
+    if (typeof data.depOnReactId === "undefined") throw "data.depOnReactId not provided to new GhostEdge()";
+    if (typeof data.time === "undefined") throw "data.time not provided to new GhostEdge()";
+    this.reactId = data.reactId;
+    this.depOnReactId = data.depOnReactId;
+    this.session = data.session || "Global";
+    this.time = data.time;
+    this.isGhost = true;
+  }
+  get id() {
+    return `${ this.reactId }_${ this.depOnReactId }`.replace(/\$/g, "_");
+  }
+  get source() {
+    return this.depOnReactId.replace(/\$/g, "_");
+  }
+  get target() {
+    return this.reactId.replace(/\$/g, "_");
+  }
+  get key() {
+    return `${ this.reactId } depends on ${ this.depOnReactId }`;
+  }
+  get cytoStyle() {
+    return {};
+    return graphStyles.ghostEdge.default
   }
   get cytoData() {
     var retData = this;
     return {
       group: "edges",
-      data: retData
-      // ,
+      data: retData,
+      classes: [
+        "ghostEdge"
+      ].join(' ')
       // style: this.cytoStyle
     }
   }
@@ -173,13 +204,22 @@ class Graph {
   get cytoGraph() {
     var cyto = cytoscape();
     var nodes = _.values(this.nodes).map(function(node) {
-      return node.cytoData
+      return node.cytoData;
     });
     cyto.add(nodes);
+    var ghostEdgeMap = _.assign({}, this.edgesUnique);
     var edges = _.values(this.edges).map(function(edge) {
-      return edge.cytoData
+      // remove matching unique/ghost edges
+      if (_.has(ghostEdgeMap, edge.depKey)) {
+        delete ghostEdgeMap[edge.depKey];
+      }
+      return edge.cytoData;
     });
     cyto.add(edges);
+    var ghostEdges = _.values(ghostEdgeMap).map(function(edge) {
+      return edge.cytoData;
+    });
+    cyto.add(ghostEdges);
     return cyto;
   }
 
@@ -227,7 +267,7 @@ class Graph {
 
         // store unique edges to always display a transparent dependency
         if (!_.has(this.edgesUnique, edge.depKey)) {
-          this.edgesUnique[edge.depKey] = true;
+          this.edgesUnique[edge.depKey] = new GhostEdge(data);
         }
 
         if (!_.has(this.edges, edgeKey)) {
@@ -327,44 +367,30 @@ class GraphAtStep {
     // exit
     edgesLRB.left.map(function(cytoEdge) {
       var graphEdge = cytoEdge.data()
-      if (graphEdge.isGhost) {
-        if (!graph.edgesUnique[graphEdge.depKey]) {
-          // if it has never existed in the graph, remove it
-          cy.remove(cytoEdge).animate({duration: cytoDur});
-          // console.log("removing ghost edge")
-        } else {
-          // console.log("keeping ghost edge")
-        }
-      } else {
-        // if it has existed in the graph, add it
-        if (graph.edgesUnique[graphEdge.depKey]) {
-          var ghostData = graphEdge.cytoDataGhost
-          // add back a transparent edge to keep up the positioning
-          if (cy.$id(ghostData.data.id).length == 0) {
-            cy.add(ghostData);
-            cy.$id(ghostData.data.id).addClass("ghostEdge");
-            // console.log("adding ghost edge")
-          }
-        }
-        // remove the original edge
-        cy.remove(cytoEdge).animate({duration: cytoDur})
-      }
+      // remove the original edge
+      cy
+        .remove(cytoEdge)
+        .animate({duration: cytoDur});
     })
     // enter
-    edgesLRB.right.map(function(cytoEdge) {
-      var graphEdge = cytoEdge.data();
-      // remove the fake
-      var fakeEdge = cy.$id(graphEdge.cytoDataGhost.data.id)
-      // console.log("fake edge: ", fakeEdge, graphEdge.cytoDataGhost.id, graphEdge.cytoDataGhost, graphEdge)
-      if (fakeEdge.length) {
-        // console.log("enter: removing ghost: ", fakeEdge)
-        cy.remove(fakeEdge)
-      }
-      cy.add(cytoEdge).animate({duration: cytoDur})
+    edgesLRB.right.map(function(graphEdge) {
+      cy
+        .add(graphEdge)
+        .animate({
+          style: graphEdge.data().cytoStyle,
+          duration: cytoDur
+        });
     });
     // update
     edgesLRB.both.map(function(cytoEdge) {
-      cy.$id(cytoEdge.id()).data(graphEdges.$id(cytoEdge.id()).data()).animate({duration: cytoDur})
+      var graphEdgeData = graphEdges.$id(cytoEdge.id()).data()
+      cy
+        .$id(cytoEdge.id())
+        .data(graphEdgeData)
+        .animate({
+          style: graphEdgeData.cytoStyle,
+          duration: cytoDur
+        });
     });
 
     cy.endBatch();
@@ -394,30 +420,62 @@ var layoutOptions = {
   animationEasing: undefined, // easing of animation if enabled
 
 };
-var startStyle = {
-  "shape": "polygon",
-  "shape-polygon-points": "-0.5 1 0.5 1 1 0 0.5 -1 -0.5 -1" ,
-  width: 50,
-  height: 30,
-  "background-color": "yellow"
+
+var nodeShapes = {
+  start: "-1 1 0.33333333333 1 1 0 0.33333333333 -1 -1 -1",
+  middle: "-1 1 0.5 1 1 0 0.5 -1 -1 -1 -0.5 0",
+  end: "-1 1 1 1 1 -1 -1 -1 -0.33333333333 0"
 }
-var middleShape = {
-  "shape": "polygon",
-  "shape-polygon-points": "-1 1 0.5 1 1 0 0.5 -1 -1 -1 -0.5 0"
-}
-var middleStyle = {
-  "shape": "polygon",
-  "shape-polygon-points": "-1 1 0.5 1 1 0 0.5 -1 -1 -1 -0.5 0" ,
-  width: 50,
-  height: 30,
-  "background-color": "orange"
-}
-var endStyle = {
-  "shape": "polygon",
-  "shape-polygon-points": "-1 1 0.5 1 0.5 -1 -1 -1 -0.5 0" ,
-  width: 50,
-  height: 30,
-  "background-color": "red"
+var graphStyles = {
+  node: {
+    default: {
+      "label": "data(label)",
+      "text-opacity": 0.5,
+      "text-valign": "bottom",
+      "text-margin-x": "-5",
+      "text-halign": "right",
+      "background-color": "#11479e"
+    },
+    start: {
+      "shape": "polygon",
+      "shape-polygon-points": nodeShapes.start,
+      width: 50 * 0.75,
+      height: 30,
+      "background-color": "yellow"
+    },
+    middle: {
+      "shape": "polygon",
+      "shape-polygon-points": nodeShapes.middle,
+      width: 50,
+      height: 30,
+      "background-color": "orange"
+    },
+    end: {
+      "shape": "polygon",
+      "shape-polygon-points": nodeShapes.end,
+      width: 50 * 0.75,
+      height: 30,
+      "background-color": "red"
+    }
+  },
+  edge: {
+    default: {
+      "curve-style": "bezier",
+      "width": 4,
+      "target-arrow-shape": "triangle",
+      "line-color": "#9dbaea",
+      "target-arrow-color": "#9dbaea"
+    }
+  },
+  ghostEdge: {
+    default: {
+      "width": 25,
+      "mid-target-arrow-shape": "triangle",
+      "curve-style": "haystack",
+      "line-color": "#d5ce24",
+      "line-style": "dotted"
+    }
+  }
 }
 
 var styleHelper = function(selector, style) {
@@ -436,39 +494,19 @@ $(function() {
     layout: layoutOptions,
     style: [
       // order of the style definitions are how styles are applied
-      styleHelper("node", {
-        "label": "data(label)",
-        "text-opacity": 0.5,
-        "text-valign": "bottom",
-        "text-margin-x": "-5",
-        "text-halign": "right",
-        "background-color": "#11479e"
-      }),
-      styleHelper("edge", {
-        "curve-style": "bezier",
-        "width": 4,
-        "target-arrow-shape": "triangle",
-        "line-color": "#9dbaea",
-        "target-arrow-color": "#9dbaea"
-      }),
-      styleHelper(".startNode", startStyle),
-      styleHelper(".middleNode", middleStyle),
-      styleHelper(".middleNodeShape", middleShape),
-      styleHelper(".endNode", endStyle),
-      styleHelper(".ghostEdge", {
-        "width": 25,
-        "mid-target-arrow-shape": "triangle",
-        "curve-style": "haystack",
-        "line-color": "#d5ce24",
-        "line-style": "dotted"
-      })
+      styleHelper("node", graphStyles.node.default),
+      styleHelper("edge", graphStyles.edge.default),
+      styleHelper(".startNode", graphStyles.node.start),
+      styleHelper(".middleNode", graphStyles.node.middle),
+      styleHelper(".endNode", graphStyles.node.end),
+      styleHelper(".ghostEdge", graphStyles.ghostEdge.default)
     ]
   });
   window.getGraph = new GraphAtStep(log);
   window.graph = getGraph.atStep(getGraph.maxStep);
   console.log(graph);
 
-  window.curTick = 1;
+  window.curTick = 90;
   function updateTimeline() {
     $("#timeline-fill").width((curTick / log.length * 100) + "%");
   }
@@ -476,6 +514,7 @@ $(function() {
     getGraph.displayAtStep(curTick, cyto);
     updateTimeline()
   }
+  updateGraph()
   // getGraph.displayAtStep(getGraph.minStep, cyto);
   // setTimeout(function() { getGraph.displayAtStep(100, cyto); console.log("1")}, 1000)
   // setTimeout(function() { getGraph.displayAtStep(200, cyto); console.log("2") }, 2000)

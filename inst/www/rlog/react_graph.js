@@ -347,31 +347,36 @@ class GraphAtStep {
     // .removeStyle()
 
     // enter
-    nodesLRB.right.map(function(cytoNode) {
-      cy.add(cytoNode)//.animate({duration: cytoDur})
+    nodesLRB.right.map(function(graphNode) {
+      cy
+        .add(graphNode)
+        .animate({
+          style: graphNode.data().cytoStyle,
+          duration: cytoDur
+        });
     });
     // update
     nodesLRB.both.map(function(cytoNode) {
-      cy.$id(cytoNode.id()).data(graphNodes.$id(cytoNode.id()).data()).animate({duration: cytoDur})
+      var graphNodeData = graphNodes.$id(cytoNode.id()).data();
+      cy
+        .$id(cytoNode.id())
+        // update to latest data
+        .data(graphNodeData)
+        .animate({
+          style: graphNodeData.cytoStyle,
+          duration: cytoDur
+        });
     });
     // exit
     nodesLRB.left.map(function(cytoNode) {
-      cy.remove(cytoNode).animate({duration: cytoDur})
-    })
-    // cy.endBatch();
+      cy
+        .remove(cytoNode)
+        .animate({duration: cytoDur});
+    });
 
     var cyEdges = cy.edges()
     var graphEdges = graphCyto.edges();
     var edgesLRB = cyEdges.diff(graphEdges);
-    // cy.startBatch();
-    // exit
-    edgesLRB.left.map(function(cytoEdge) {
-      var graphEdge = cytoEdge.data()
-      // remove the original edge
-      cy
-        .remove(cytoEdge)
-        .animate({duration: cytoDur});
-    })
     // enter
     edgesLRB.right.map(function(graphEdge) {
       cy
@@ -392,6 +397,14 @@ class GraphAtStep {
           duration: cytoDur
         });
     });
+    // exit
+    edgesLRB.left.map(function(cytoEdge) {
+      var graphEdge = cytoEdge.data()
+      // remove the original edge
+      cy
+        .remove(cytoEdge)
+        .animate({duration: cytoDur});
+    })
 
     cy.endBatch();
 

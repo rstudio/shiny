@@ -166,7 +166,7 @@ RLog <- R6Class(
       ctxId <- ctxIdStr(ctxId)
       msg$log("dependsOn: ", msg$reactStr(reactId), " on ", msg$reactStr(depOnReactId), " in ", ctxId)
       private$appendEntry(domain, list(
-        action = "dep",
+        action = "dependsOn",
         reactId = reactId,
         depOnReactId = depOnReactId,
         ctxId = ctxId
@@ -179,9 +179,10 @@ RLog <- R6Class(
       ctxId <- ctxIdStr(ctxId)
       msg$log("dependsOnRemove: ", msg$reactStr(reactId), " on ", msg$reactStr(depOnReactId), " in ", ctxId)
       private$appendEntry(domain, list(
-        action = "depOnRemove",
+        action = "dependsOnRemove",
         reactId = reactId,
-        depOnReactId = depOnReactId
+        depOnReactId = depOnReactId,
+        ctxId = ctxId
       ))
     },
     dependsOnKeyRemove = function(reactId, depOnReactId, key, ctxId, domain)

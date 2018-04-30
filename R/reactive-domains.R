@@ -95,11 +95,7 @@ getDefaultReactiveDomain <- function() {
 #' @rdname domains
 #' @export
 withReactiveDomain <- function(domain, expr) {
-  oldValue <- .globals$domain
-  .globals$domain <- domain
-  on.exit(.globals$domain <- oldValue)
-
-  expr
+  promises::with_promise_domain(createVarPromiseDomain(.globals, "domain", domain), expr)
 }
 
 #

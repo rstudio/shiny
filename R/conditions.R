@@ -191,7 +191,7 @@ createStackTracePromiseDomain <- function() {
 }
 
 deepStacksEnabled <- function() {
-  getOption("shiny.deepstacktrace", FALSE)
+  getOption("shiny.deepstacktrace", TRUE)
 }
 
 doCaptureStack <- function(e) {
@@ -338,7 +338,7 @@ printStackTrace <- function(cond,
       message("  [No stack trace available]")
     } else {
       width <- floor(log10(max(st$num))) + 1
-      message(paste(collapse = "\n", paste0(
+      formatted <- paste0(
         "  ",
         formatC(st$num, width = width),
         ": ",
@@ -349,8 +349,10 @@ printStackTrace <- function(cond,
             crayon::blue$bold(name)
           else
             crayon::white(name)
-        })
-      )))
+        }),
+        "\n"
+      )
+      cat(file = stderr(), formatted, sep = "")
     }
 
     st

@@ -706,8 +706,8 @@ ShinySession <- R6Class(
       private$flushCallbacks <- Callbacks$new()
       private$flushedCallbacks <- Callbacks$new()
       private$inputReceivedCallbacks <- Callbacks$new()
-      private$.input      <- ReactiveValues$new()
-      private$.clientData <- ReactiveValues$new()
+      private$.input      <- ReactiveValues$new(dedupe = FALSE)
+      private$.clientData <- ReactiveValues$new(dedupe = TRUE)
       private$timingRecorder <- ShinyServerTimingRecorder$new()
       self$progressStack <- Stack$new()
       self$files <- Map$new()
@@ -1173,8 +1173,10 @@ ShinySession <- R6Class(
 
         # Schedule execution of onFlushed callbacks
         on.exit({
-          # ..stacktraceon matches with the top-level ..stacktraceoff..
-          private$flushedCallbacks$invoke(..stacktraceon = TRUE)
+          withReactiveDomain(self, {
+            # ..stacktraceon matches with the top-level ..stacktraceoff..
+            private$flushedCallbacks$invoke(..stacktraceon = TRUE)
+          })
         }, add = TRUE)
 
         if (!hasPendingUpdates()) {
@@ -1861,10 +1863,16 @@ ShinySession <- R6Class(
         }
       }
     },
-    # Set the normal and client data input variables
-    manageInputs = function(data) {
+    # Set the normal and client data input variables. Normally, managing
+    # inputs doesn't take immediate effect when there are observers that
+    # are pending execution or currently executing (including having
+    # started async operations that have yielded control, but not yet
+    # completed). The `now` argument can force this. It should generally
+    # not be used, but we're adding it to get around a show-stopping bug
+    # for Shiny v1.1 (see the call site for more details).
+    manageInputs = function(data, now = FALSE) {
       force(data)
-      self$cycleStartAction(function() {
+      doManageInputs <- function() {
         private$inputReceivedCallbacks$invoke(data)
 
         data_names <- names(data)
@@ -1882,7 +1890,12 @@ ShinySession <- R6Class(
         private$.clientData$mset(input_clientdata)
 
         self$manageHiddenOutputs()
-      })
+      }
+      if (isTRUE(now)) {
+        doManageInputs()
+      } else {
+        self$cycleStartAction(doManageInputs)
+      }
     },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs

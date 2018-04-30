@@ -70,3 +70,4 @@ Other input elements: \code{\link{actionButton}},
   \code{\link{sliderInput}}, \code{\link{submitButton}},
   \code{\link{textInput}}
 }
+\concept{input elements}

@@ -64,3 +64,4 @@ Other input elements: \code{\link{checkboxGroupInput}},
   \code{\link{sliderInput}}, \code{\link{submitButton}},
   \code{\link{textAreaInput}}, \code{\link{textInput}}
 }
+\concept{input elements}

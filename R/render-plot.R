@@ -555,9 +555,11 @@ find_panel_info_api <- function(b) {
     # ggplot object. The original uses quoted expressions; convert to
     # character.
     mapping <- layers$mapping[[1]]
-    # lapply'ing as.character results in unexpected behavior for expressions
-    # like `wt/2`; deparse handles it correctly.
-    mapping <- lapply(mapping, deparse)
+    # In ggplot2 <=2.2.1, the mappings are expressions. In later versions, they
+    # are quosures. `deparse(quo_squash(x))` will handle both cases.
+    # as.character results in unexpected behavior for expressions like `wt/2`,
+    # which is why we use deparse.
+    mapping <- lapply(mapping, function(x) deparse(rlang::quo_squash(x)))
 
     # If either x or y is not present, give it a NULL entry.
     mapping <- mergeVectors(list(x = NULL, y = NULL), mapping)
@@ -739,8 +741,9 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       mappings <- c(list(mappings), layer_mappings)
       mappings <- Reduce(x = mappings, init = list(x = NULL, y = NULL),
         function(init, m) {
-          if (is.null(init$x) && !is.null(m$x)) init$x <- m$x
-          if (is.null(init$y) && !is.null(m$y)) init$y <- m$y
+          # Can't use m$x/m$y; you get a partial match with xintercept/yintercept
+          if (is.null(init[["x"]]) && !is.null(m[["x"]])) init$x <- m[["x"]]
+          if (is.null(init[["y"]]) && !is.null(m[["y"]])) init$y <- m[["y"]]
           init
         }
       )

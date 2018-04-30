@@ -42,6 +42,17 @@ TimerCallbacks <- R6Class(
 
       return(id)
     },
+    unschedule = function(id) {
+      toRemoveIndices <- .times$id %in% id
+      toRemoveIds <- .times[toRemoveIndices, "id", drop = TRUE]
+      if (length(toRemoveIds) > 0) {
+        .times <<- .times[!toRemoveIndices,]
+        for (toRemoveId in as.character(toRemoveIds)) {
+          .funcs$remove(toRemoveId)
+        }
+      }
+      return(id %in% toRemoveIds)
+    },
     timeToNextEvent = function() {
       if (dim(.times)[1] == 0)
         return(Inf)
@@ -79,13 +90,9 @@ timerCallbacks <- TimerCallbacks$new()
 
 scheduleTask <- function(millis, callback) {
   cancelled <- FALSE
-  timerCallbacks$schedule(millis, function() {
-    if (!cancelled)
-      callback()
-  })
+  id <- timerCallbacks$schedule(millis, callback)
 
   function() {
-    cancelled <<- TRUE
-    callback <<- NULL # to allow for callback to be gc'ed
+    invisible(timerCallbacks$unschedule(id))
   }
 }

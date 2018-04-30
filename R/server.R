@@ -279,7 +279,19 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                   shinysession$setShowcase(mode)
               }
 
-              shinysession$manageInputs(msg$data)
+              # In shinysession$createBookmarkObservers() above, observers may be
+              # created, which puts the shiny session in busyCount > 0 state. That
+              # prevents the manageInputs here from taking immediate effect, by
+              # default. The manageInputs here needs to take effect though, because
+              # otherwise the bookmark observers won't find the clientData they are
+              # looking for. So use `now = TRUE` to force the changes to be
+              # immediate.
+              #
+              # FIXME: break createBookmarkObservers into two separate steps, one
+              # before and one after manageInputs, and put the observer creation
+              # in the latter. Then add an assertion that busyCount == 0L when
+              # this manageInputs is called.
+              shinysession$manageInputs(msg$data, now = TRUE)
 
               # The client tells us what singletons were rendered into
               # the initial page

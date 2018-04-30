@@ -295,11 +295,12 @@ ReactiveValues <- R6Class(
     .allValuesDeps = 'Dependents',
     # Dependents for all values
     .valuesDeps = 'Dependents',
+    .dedupe = logical(0),
     # Key, asList(), or names() have been retrieved
     .hasRetrieved = list(),
 
 
-    initialize = function() {
+    initialize = function(dedupe = TRUE) {
       .reactId <<- nextGlobalReactId()
       .label <<- paste('reactiveValues',
                        p_randomInt(1000, 10000),
@@ -311,6 +312,10 @@ ReactiveValues <- R6Class(
       .namesDeps <<- Dependents$new(reactId = rLog$namesIdStr(.reactId))
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
+      .dedupe <<- dedupe
+      .namesDeps <<- Dependents$new()
+      .allValuesDeps <<- Dependents$new()
+      .valuesDeps <<- Dependents$new()
     },
 
     get = function(key) {
@@ -371,7 +376,7 @@ ReactiveValues <- R6Class(
       hidden <- substr(key, 1, 1) == "."
 
       if (exists(key, envir=.values, inherits=FALSE)) {
-        if (identical(.values[[key]], value)) {
+        if (.dedupe && identical(.values[[key]], value)) {
           return(invisible())
         }
 
@@ -882,18 +887,6 @@ Observable <- R6Class(
             # If an error occurs, we want to propagate the error, but we also
             # want to save a copy of it, so future callers of this reactive will
             # get the same error (i.e. the error is cached).
-
-            # We stripStackTrace in the next line, just in case someone
-            # downstream of us (i.e. deeper into the call stack) used
-            # captureStackTraces; otherwise the entire stack would always be the
-            # same (i.e. you'd always see the whole stack trace of the *first*
-            # time the code was run and the condition raised; there'd be no way
-            # to see the stack trace of the call site that caused the cached
-            # exception to be re-raised, and you need that information to figure
-            # out what's triggering the re-raise).
-            #
-            # We use try(stop()) as an easy way to generate a try-error object
-            # out of this condition.
             .value <<- cond
             .error <<- TRUE
             .visible <<- FALSE
@@ -1071,19 +1064,12 @@ Observer <- R6Class(
       if (length(formals(observerFunc)) > 0)
         stop("Can't make an observer from a function that takes parameters; ",
              "only functions without parameters can be reactive.")
-registerDebugHook("observerFunc", environment(), label)
-      .func <<- function() {
-        tryCatch(
-          if (..stacktraceon)
-            ..stacktraceon..(observerFunc())
-          else
-            observerFunc(),
-          # It's OK for shiny.silent.error errors to cause an observer to stop running
-          shiny.silent.error = function(e) NULL
-          # validation = function(e) NULL,
-          # shiny.output.cancel = function(e) NULL
-        )
+      if (grepl("\\s", label, perl = TRUE)) {
+        funcLabel <- "<observer>"
+      } else {
+        funcLabel <- paste0("<observer:", label, ">")
       }
+      .func <<- wrapFunctionLabel(observerFunc, funcLabel, ..stacktraceon = ..stacktraceon)
       .label <<- label
       .domain <<- domain
       .priority <<- normalizePriority(priority)
@@ -1151,6 +1137,15 @@ registerDebugHook("observerFunc", environment(), label)
             }
           },
           catch = function(e) {
+            # It's OK for shiny.silent.error errors to cause an observer to stop running
+            # shiny.silent.error = function(e) NULL
+            # validation = function(e) NULL,
+            # shiny.output.cancel = function(e) NULL
+
+            if (inherits(e, "shiny.silent.error")) {
+              return()
+            }
+
             printError(e)
             if (!is.null(.domain)) {
               .domain$unhandledError(e)
@@ -1511,20 +1506,28 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   # rLog$define(reactId, paste0("timer(", intervalMs, ")"))
 
   dependents <- Map$new()
-  timerCallbacks$schedule(intervalMs, function() {
+  timerHandle <- scheduleTask(intervalMs, function() {
     # Quit if the session is closed
     if (!is.null(session) && session$isClosed()) {
       return(invisible())
     }
 
-    timerCallbacks$schedule(intervalMs, sys.function())
-    lapply(
-      dependents$values(),
-      function(dep.ctx) {
-        dep.ctx$invalidate()
-        NULL
-      })
+    timerHandle <<- scheduleTask(intervalMs, sys.function())
+
+    session$cycleStartAction(function() {
+      lapply(
+        dependents$values(),
+        function(dep.ctx) {
+          dep.ctx$invalidate()
+          NULL
+        })
+    })
   })
+
+  if (!is.null(session)) {
+    session$onEnded(timerHandle)
+  }
+
   return(function() {
     newValue <- Sys.time()
     ctx <- getCurrentContext()
@@ -1595,7 +1598,7 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   force(session)
   ctx <- getCurrentContext()
-  timerCallbacks$schedule(millis, function() {
+  timerHandle <- scheduleTask(millis, function() {
     if (is.null(session)) {
       ctx$invalidate()
       return(invisible())
@@ -1609,6 +1612,11 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
 
     invisible()
   })
+
+  if (!is.null(session)) {
+    session$onEnded(timerHandle)
+  }
+
   invisible()
 }
 
@@ -1927,15 +1935,20 @@ maskReactiveContext <- function(expr) {
 #' the action/calculation and just let the user re-initiate it (like a
 #' "Recalculate" button).
 #'
-#' Unlike what happens for \code{ignoreNULL}, only \code{observeEvent} takes in an
-#' \code{ignoreInit} argument. By default, \code{observeEvent} will run right when
-#' it is created (except if, at that moment, \code{eventExpr} evaluates to \code{NULL}
+#' Likewise, both \code{observeEvent} and \code{eventReactive} also take in an
+#' \code{ignoreInit} argument. By default, both of these will run right when they
+#' are created (except if, at that moment, \code{eventExpr} evaluates to \code{NULL}
 #' and \code{ignoreNULL} is \code{TRUE}). But when responding to a click of an action
 #' button, it may often be useful to set \code{ignoreInit} to \code{TRUE}. For
 #' example, if you're setting up an \code{observeEvent} for a dynamically created
 #' button, then \code{ignoreInit = TRUE} will guarantee that the action (in
 #' \code{handlerExpr}) will only be triggered when the button is actually clicked,
-#' instead of also being triggered when it is created/initialized.
+#' instead of also being triggered when it is created/initialized. Similarly,
+#' if you're setting up an \code{eventReactive} that responds to a dynamically
+#' created button used to refresh some data (then returned by that \code{eventReactive}),
+#' then you should use \code{eventReactive([...], ignoreInit = TRUE)} if you want
+#' to let the user decide if/when they want to refresh the data (since, depending
+#' on the app, this may be a computationally expensive operation).
 #'
 #' Even though \code{ignoreNULL} and \code{ignoreInit} can be used for similar
 #' purposes they are independent from one another. Here's the result of combining
@@ -1943,25 +1956,28 @@ maskReactiveContext <- function(expr) {
 #'
 #' \describe{
 #'   \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = FALSE}}{
-#'      This is the default. This combination means that \code{handlerExpr} will
-#'      run every time that \code{eventExpr} is not \code{NULL}. If, at the time
-#'      of the \code{observeEvent}'s creation, \code{handleExpr} happens to
-#'      \emph{not} be \code{NULL}, then the code runs.
+#'      This is the default. This combination means that \code{handlerExpr}/
+#'      \code{valueExpr} will run every time that \code{eventExpr} is not
+#'      \code{NULL}. If, at the time of the creation of the
+#'      \code{observeEvent}/\code{eventReactive}, \code{eventExpr} happens
+#'      to \emph{not} be \code{NULL}, then the code runs.
 #'   }
 #'   \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = FALSE}}{
-#'      This combination means that \code{handlerExpr} will run every time no
-#'      matter what.
+#'      This combination means that \code{handlerExpr}/\code{valueExpr} will
+#'      run every time no matter what.
 #'   }
 #'   \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = TRUE}}{
-#'      This combination means that \code{handlerExpr} will \emph{not} run when
-#'      the \code{observeEvent} is created (because \code{ignoreInit = TRUE}),
-#'      but it will run every other time.
+#'      This combination means that \code{handlerExpr}/\code{valueExpr} will
+#'      \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
+#'      created (because \code{ignoreInit = TRUE}), but it will run every
+#'      other time.
 #'   }
 #'   \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = TRUE}}{
-#'      This combination means that \code{handlerExpr} will \emph{not} run when
-#'      the \code{observeEvent} is created (because \code{ignoreInit = TRUE}).
-#'      After that, \code{handlerExpr} will run every time that \code{eventExpr}
-#'      is not \code{NULL}.
+#'      This combination means that \code{handlerExpr}/\code{valueExpr} will
+#'      \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
+#'      created (because  \code{ignoreInit = TRUE}). After that,
+#'      \code{handlerExpr}/\code{valueExpr} will run every time that
+#'      \code{eventExpr} is not \code{NULL}.
 #'   }
 #' }
 #'
@@ -2101,22 +2117,25 @@ observeEvent <- function(eventExpr, handlerExpr,
   initialized <- FALSE
 
   o <- observe({
-    e <- eventFunc()
+    hybrid_chain(
+      {eventFunc()},
+      function(value) {
+        if (ignoreInit && !initialized) {
+          initialized <<- TRUE
+          return()
+        }
 
-    if (ignoreInit && !initialized) {
-      initialized <<- TRUE
-      return()
-    }
+        if (ignoreNULL && isNullEvent(value)) {
+          return()
+        }
 
-    if (ignoreNULL && isNullEvent(e)) {
-      return()
-    }
+        if (once) {
+          on.exit(o$destroy())
+        }
 
-    if (once) {
-      on.exit(o$destroy())
-    }
-
-    isolate(handlerFunc())
+        isolate(handlerFunc())
+      }
+    )
   }, label = label, suspended = suspended, priority = priority, domain = domain,
   autoDestroy = TRUE, ..stacktraceon = FALSE)
 
@@ -2142,16 +2161,19 @@ eventReactive <- function(eventExpr, valueExpr,
   initialized <- FALSE
 
   invisible(reactive({
-    e <- eventFunc()
+    hybrid_chain(
+      eventFunc(),
+      function(value) {
+        if (ignoreInit && !initialized) {
+          initialized <<- TRUE
+          req(FALSE)
+        }
 
-    if (ignoreInit && !initialized) {
-      initialized <<- TRUE
-      req(FALSE)
-    }
+        req(!ignoreNULL || !isNullEvent(value))
 
-    req(!ignoreNULL || !isNullEvent(e))
-
-    isolate(handlerFunc())
+        isolate(handlerFunc())
+      }
+    )
   }, label = label, domain = domain, ..stacktraceon = FALSE))
 }
 

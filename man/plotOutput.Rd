@@ -3,7 +3,6 @@
 \name{plotOutput}
 \alias{plotOutput}
 \alias{imageOutput}
-\alias{plotOutput}
 \title{Create an plot or image output element}
 \usage{
 imageOutput(outputId, width = "100\%", height = "400px", click = NULL,

@@ -334,7 +334,7 @@ ReactiveValues <- R6Class(
 
         if (!isTRUE(.hasRetrieved$keys[[key]])) {
           rLog$defineKey(.reactId, key, .label, ctx$.domain)
-          rLog$valueChangeKey(.reactId, key, keyValue, ctx$.domain)
+          # rLog$valueChangeKey(.reactId, key, keyValue, ctx$.domain)
           .hasRetrieved$keys[[key]] <<- TRUE
         }
         rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
@@ -435,7 +435,7 @@ ReactiveValues <- R6Class(
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
         rLog$defineNames(.reactId, .label, domain)
-        rLog$valueChangeNames(.reactId, nameValues, domain)
+        # rLog$valueChangeNames(.reactId, nameValues, domain)
         .hasRetrieved$names <<- TRUE
       }
       .namesDeps$register()
@@ -485,7 +485,7 @@ ReactiveValues <- R6Class(
         if (!isTRUE(.hasRetrieved$asListAll)) {
           domain <- getDefaultReactiveDomain()
           rLog$defineAsListAll(.reactId, .label, domain)
-          rLog$valueChangeAsListAll(.reactId, listValue, domain)
+          # rLog$valueChangeAsListAll(.reactId, listValue, domain)
           .hasRetrieved$asListAll <<- TRUE
         }
         .allValuesDeps$register()
@@ -494,7 +494,7 @@ ReactiveValues <- R6Class(
       if (!isTRUE(hasRetrieved$asList)) {
         domain <- getDefaultReactiveDomain()
         rLog$defineAsList(.reactId, .label, domain)
-        rLog$valueChange(.reactId, listValue, domain)
+        # rLog$valueChangeAsList(.reactId, listValue, domain)
         .hasRetrieved$asList <<- TRUE
       }
       .valuesDeps$register()

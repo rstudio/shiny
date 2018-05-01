@@ -190,6 +190,9 @@ flushReact <- function() {
 getCurrentContext <- function() {
   .getReactiveEnvironment()$currentContext()
 }
+hasCurrentContext <- function() {
+  !is.null(.getReactiveEnvironment()$.currentContext)
+}
 
 getDummyContext <- function() {}
 local({

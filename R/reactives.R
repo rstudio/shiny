@@ -383,6 +383,21 @@ ReactiveValues <- R6Class(
         # key has be depended upon (can not happen if the key is being set)
         if (isTRUE(.hasRetrieved$keys[[key]])) {
           rLog$valueChangeKey(.reactId, key, value, domain)
+          keyReactId <- rLog$keyIdStr(.reactId, key)
+          if (hasCurrentContext()) {
+            ctx <- getCurrentContext()
+            rLog$invalidateStart(keyReactId, ctx$id, ctx$.reactType, ctx$.domain)
+            on.exit(
+              rLog$invalidateEnd(keyReactId, ctx$id, ctx$.reactType, ctx$.domain),
+              add = TRUE
+            )
+          } else {
+            rLog$invalidateStart(keyReactId, NULL, "other", domain)
+            on.exit(
+              rLog$invalidateEnd(keyReactId, NULL, "other", domain),
+              add = TRUE
+            )
+          }
         }
       }
       else {

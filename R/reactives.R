@@ -34,9 +34,12 @@ Dependents <- R6Class(
       }
     },
     # at times, the context is run in a ctx$onInvalidate(...) which has no runtime context
-    invalidate = function(ctx = getCurrentContext()) {
-      rLog$invalidateStart(.reactId, ctx$id, ctx$.reactType, ctx$.domain)
-      on.exit(rLog$invalidateEnd(.reactId, ctx$id, ctx$.reactType, ctx$.domain), add = TRUE)
+    invalidate = function(log = TRUE) {
+      if (isTRUE(log)) {
+        ctx = getCurrentContext()
+        rLog$invalidateStart(.reactId, ctx$id, ctx$.reactType, ctx$.domain)
+        on.exit(rLog$invalidateEnd(.reactId, ctx$id, ctx$.reactType, ctx$.domain), add = TRUE)
+      }
       lapply(
         .dependents$values(),
         function(ctx) {
@@ -423,7 +426,6 @@ ReactiveValues <- R6Class(
 
       .values[[key]] <- value
 
-      # TODO-barret start key invalidate?
       dep.keys <- objects(
         envir=.dependents,
         pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
@@ -881,7 +883,7 @@ Observable <- R6Class(
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
         .value <<- NULL # Value can be GC'd, it won't be read once invalidated
-        .dependents$invalidate(ctx = ctx)
+        .dependents$invalidate(log = FALSE)
       })
       .execCount <<- .execCount + 1L
 

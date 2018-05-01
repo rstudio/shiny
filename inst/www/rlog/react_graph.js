@@ -2,6 +2,55 @@
 // add state colors for nodes
 // add state colors for edges
 
+colors = {
+  // regular colors
+  regular: {
+    white: "#ffffff",
+    black: "#000000",
+
+    // http://colorbrewer2.org/#type=sequential&scheme=YlGn&n=4
+    // #2-4
+    green1: "#f7fcb9",
+    green2: "#78c679",
+    green3: "#238443",
+
+    greenLite: "#b2df8a", // green from http://colorbrewer2.org/#type=qualitative&scheme=Paired&n=8
+
+    // http://colorbrewer2.org/#type=qualitative&scheme=Set1&n=9
+    red: "#e41a1c", // valueChange
+    blue: "#377eb8", // frozen
+    green: "#4daf4a", // enter
+    purple: "#984ea3", //
+    orange: "#ff7f00", //
+    yellow: "#ffff33", //
+    brown: "#a65628", //
+    pink: "#f781bf", //
+    grey: "#999999" // invalidate
+  },
+  // filtered colors
+  lite: {
+    white: "#ffffff",
+    black: "#b2b2b2", // personal attempt
+
+    // http://colorbrewer2.org/#type=sequential&scheme=YlGn&n=9
+    // #1-3
+    green1: "#ffffe5",
+    green2: "#f7fcb9",
+    green3: "#d9f0a3",
+
+    greenLite: "#d6eec0", // personal attempt
+    // http://colorbrewer2.org/#type=qualitative&scheme=Pastel1&n=9
+    red: "#fbb4ae",
+    blue: "#b3cde3",
+    green: "#ccebc5",
+    purple: "#decbe4",
+    orange: "#fed9a6",
+    yellow: "#ffffcc",
+    brown: "#e5d8bd",
+    pink: "#fddaec",
+    grey: "#f2f2f2"
+  }
+}
 
 class StatusArr {
   constructor() {
@@ -17,7 +66,6 @@ class StatusArr {
     return _.last(this.statusArr)
   }
   containsStatus(status) {
-    var statusObj;
     var arr = this.statusArr, n = arr.length;
     for (var i = 0; i < n; i++) {
       if (arr[i].action == status) {
@@ -56,50 +104,59 @@ class Node {
     this.time = data.time;
     this.statusArr = new StatusArr(data.statusArr || []);
     this.value = data.value || null;
+    this.inValueChanged = data.inValueChanged || false;
+    this.hasInvalidated = data.hasInvalidated || false;
+    this.activeEnter = data.activeEnter || false;
   }
-  get id() {
-    return this.reactId.replace(/\$/g, "_")
-  }
-  get key() {
-    return this.reactId
-  }
+  get id() {return this.reactId.replace(/\$/g, "_")}
+  get key() {return this.reactId}
   statusAdd(obj) {
     this.statusArr.add(obj);
     return this.statusArr;
   }
-  statusPop() {
-    return this.statusArr.remove();
-  }
-  statusLast() {
-    return this.statusArr.last();
-  }
-  get inEnter() {
-    return this.statusArr.containsStatus("enter");
-  }
-  get inIsolate() {
-    return this.statusArr.containsStatus("isolateEnter");
-  }
-  get inInvalidate() {
-    return this.statusArr.containsStatus("invalidateStart");
-  }
-  get inIsolateInvalidate() {
-    return this.statusArr.containsStatus("isolateInvalidateStart");
-  }
+  statusRemove() {return this.statusArr.remove();}
+  statusLast() {return this.statusArr.last();}
+  get inEnter() {return this.statusArr.containsStatus("enter");}
+  get inIsolate() {return this.statusArr.containsStatus("isolateEnter");}
+  get inInvalidate() {return this.statusArr.containsStatus("invalidateStart");}
+  get inIsolateInvalidate() {return this.statusArr.containsStatus("isolateInvalidateStart");}
   get cytoStyle() {
-    return {}
+    var ret = {}
+    // switch(this.type) {
+    //   case "observer": ret = _.assign(ret, graphStyles.node.end); break;
+    //   case "observable": ret = _.assign(ret, graphStyles.node.middle); break;
+    //   default: ret = _.assign(ret, graphStyles.node.start)
+    // }
+    // if (this.hasInvalidated) ret = _.assign(ret, graphStyles.node.invalidate);
+    // if (this.inEnter) ret = _.assign(ret, graphStyles.node.enter);
+    // if (this.activeEnter) ret = _.assign(ret, graphStyles.node.enterActive);
+    // // if (this.inInvalidate) classes.push("nodeInvalidate");
+    // // if (this.inIsolate) classes.push("nodeIsolate");
+    // // if (this.inIsolateInvalidate) classes.push("nodeIsolateInvalidate");
+    // if (this.inValueChanged) ret = _.assign(ret, graphStyles.node.valueChanged);
+    return ret
+  }
+  get cytoClasses() {
+    var classes = []
+    switch(this.type) {
+      case "observer": classes.push("nodeEnd"); break;
+      case "observable": classes.push("nodeMiddle"); break;
+      default: classes.push("nodeStart")
+    }
+    if (this.hasInvalidated) classes.push("nodeInvalidate");
+    if (this.inEnter) classes.push("nodeEnter");
+    if (this.activeEnter) classes.push("nodeEnterActive");
+    // if (this.inInvalidate) classes.push("nodeInvalidate");
+    // if (this.inIsolate) classes.push("nodeIsolate");
+    // if (this.inIsolateInvalidate) classes.push("nodeIsolateInvalidate");
+    if (this.inValueChanged) classes.push("nodeValueChanged");
+    return classes.join(" ")
   }
   get cytoData() {
     var retData = this;
-    var classes = ["nodeValid"];
-    if (this.inEnter) classes.push("nodeEnter");
-    if (this.inInvalidate) classes.push("nodeInvalidate");
-    if (this.inIsolate) classes.push("nodeIsolate");
-    if (this.inIsolateInvalidate) classes.push("nodeIsolateInvalidate");
     return {
       group: "nodes",
-      data: retData,
-      classes: classes.join(" ")
-      // style: this.cytoStyle
+      data: retData
     }
   }
 }
@@ -132,16 +189,18 @@ class Edge {
   get depKey() {
     return `${ this.reactId } depends on ${ this.depOnReactId }`;
   }
+  get inIsolate() {
+    return this.status == "isolate";
+  }
+  get cytoClasses() {
+    if (this.inIsolate) return "edgeIsolate"
+    return ""
+  }
   get cytoData() {
     var retData = this;
-    var classes = [];
-
     return {
       group: "edges",
-      data: retData,
-      // ,
-      // style: this.cytoStyle
-      classes: classes.join(" ")
+      data: retData
     }
   }
 }
@@ -172,15 +231,14 @@ class GhostEdge {
     return {};
     return graphStyles.ghostEdge.default
   }
+  get cytoClasses() {
+    return "edgeGhost"
+  }
   get cytoData() {
     var retData = this;
     return {
       group: "edges",
-      data: retData,
-      classes: [
-        "ghostEdge"
-      ].join(' ')
-      // style: this.cytoStyle
+      data: retData
     }
   }
 }
@@ -194,6 +252,7 @@ class Graph {
     this.asyncStart = -1;
     this.asyncStop = -1;
     this.queueEmpty = -1;
+    this.activeNodeEnter = [];
   }
 
   // get nodeIds() {
@@ -203,6 +262,7 @@ class Graph {
   // }
   get cytoGraph() {
     var cyto = cytoscape();
+    var activeNodeEnterId = _.last(this.activeNodeEnter)
     var nodes = _.values(this.nodes).map(function(node) {
       return node.cytoData;
     });
@@ -237,19 +297,59 @@ class Graph {
         break;
 
       case "valueChange":
-        this.nodes[data.reactId].value = data.value;
+        var node = this.nodes[data.reactId];
+        node.value = data.value;
+        node.inValueChanged = true;
         break;
 
-      case "enter":
-      case "isolateEnter":
       case "invalidateStart":
+        var node = this.nodes[data.reactId];
+        switch (node.type) {
+          case "observer":
+          case "observable":
+            this.nodes[data.reactId].hasInvalidated = true;
+        }
+        node.statusAdd(data)
+        break;
+      case "enter":
+        var lastNodeId = _.last(this.activeNodeEnter);
+        if (lastNodeId) {
+          this.nodes[lastNodeId].activeEnter = false
+        }
+        this.activeNodeEnter.push(data.reactId);
+        var node = this.nodes[data.reactId]
+        node.activeEnter = true;
+        switch (node.type) {
+          case "observer":
+          case "observable":
+            this.nodes[data.reactId].hasInvalidated = false;
+        }
+        node.statusAdd(data)
+        break;
+      case "isolateEnter":
       case "isolateInvalidateStart":
         this.nodes[data.reactId].statusAdd(data)
         break;
+
+      case "invalidateEnd":
       case "exit":
       case "isolateExit":
-      case "invalidateEnd":
       case "isolateInvalidateEnd":
+        switch (data.action) {
+          case "exit":
+            this.nodes[_.last(this.activeNodeEnter)].activeEnter = false;
+            this.activeNodeEnter.pop();
+            var lastNodeId = _.last(this.activeNodeEnter);
+            if (lastNodeId) {
+              this.nodes[lastNodeId].activeEnter = true;
+            }
+            break;
+          case "invalidateEnd":
+            if (this.nodes[data.reactId].inValueChanged) {
+              this.nodes[data.reactId].inValueChanged = false;
+            }
+            break;
+        }
         var prevData = this.nodes[data.reactId].statusLast()
         var expectedAction = {
           "exit": "enter",
@@ -258,7 +358,7 @@ class Graph {
           "isolateInvalidateEnd": "isolateInvalidateStart"
         }[data.action]
         StatusArr.expect_prev_status(data, prevData, expectedAction)
-        this.nodes[data.reactId].statusPop()
+        this.nodes[data.reactId].statusRemove()
         break;
 
       case "dependsOn":
@@ -308,13 +408,22 @@ class GraphAtStep {
     this.asyncStarts = [];
     this.asyncStops = [];
     this.queueEmpties = [];
+    this.enterExitEmpties = [];
     this.minStep = 0;
     this.maxStep = log.length;
     var data;
+    var enterExitQueue = [];
     for (var i = 0; i < log.length; i++) {
       data = log[i];
       data.step = i;
       switch (data.action) {
+        case "enter": enterExitQueue.push(i); break;
+        case "exit":
+          enterExitQueue.pop();
+          if (enterExitQueue.length == 0) {
+            this.enterExitEmpties.push(i + 1);
+          }
+          break;
         case "asyncStart": this.asyncStarts.push(i); break;
         case "asyncStop": this.asyncStops.push(i); break;
         case "queueEmpty": this.queueEmpties.push(i); break;
@@ -343,17 +452,19 @@ class GraphAtStep {
     var graphCyto = graph.cytoGraph;
     var graphNodes = graphCyto.nodes();
     var nodesLRB = cyNodes.diff(graphNodes);
-
     // .removeStyle()
 
     // enter
     nodesLRB.right.map(function(graphNode) {
+      var graphNodeData = graphNode.data()
       cy
         .add(graphNode)
+        .classes(graphNodeData.cytoClasses)
         .animate({
-          style: graphNode.data().cytoStyle,
+          style: graphNodeData.cytoStyle,
           duration: cytoDur
         });
+      window.barret = cy.$id(graphNode.id());
     });
     // update
     nodesLRB.both.map(function(cytoNode) {
@@ -362,6 +473,10 @@ class GraphAtStep {
         .$id(cytoNode.id())
         // update to latest data
         .data(graphNodeData)
+        // .classes()
+        // todo-barret remove recalculation of classes and retrieve from somewhere...
+        .classes(graphNodeData.cytoClasses)
+        .removeStyle()
         .animate({
           style: graphNodeData.cytoStyle,
           duration: cytoDur
@@ -379,10 +494,12 @@ class GraphAtStep {
     var edgesLRB = cyEdges.diff(graphEdges);
     // enter
     edgesLRB.right.map(function(graphEdge) {
+      var graphEdgeData = graphEdge.data()
       cy
         .add(graphEdge)
+        .classes(graphEdgeData.cytoClasses)
         .animate({
-          style: graphEdge.data().cytoStyle,
+          style: graphEdgeData.cytoStyle,
           duration: cytoDur
         });
     });
@@ -391,6 +508,8 @@ class GraphAtStep {
       var graphEdgeData = graphEdges.$id(cytoEdge.id()).data()
       cy
         .$id(cytoEdge.id())
+        // .classes()
+        .classes(graphEdgeData.cytoClasses)
         .data(graphEdgeData)
         .animate({
           style: graphEdgeData.cytoStyle,
@@ -447,28 +566,62 @@ var graphStyles = {
       "text-valign": "bottom",
       "text-margin-x": "-5",
       "text-halign": "right",
-      "background-color": "#11479e"
+      "border-color": colors.regular.black,
+      "border-style": "solid",
+      "border-width": 1,
+      "background-color": colors.regular.green1
     },
     start: {
       "shape": "polygon",
       "shape-polygon-points": nodeShapes.start,
       width: 50 * 0.75,
-      height: 30,
-      "background-color": "yellow"
+      height: 30
     },
     middle: {
       "shape": "polygon",
       "shape-polygon-points": nodeShapes.middle,
       width: 50,
-      height: 30,
-      "background-color": "orange"
+      height: 30
     },
     end: {
       "shape": "polygon",
       "shape-polygon-points": nodeShapes.end,
       width: 50 * 0.75,
-      height: 30,
-      "background-color": "red"
+      height: 30
+    },
+    enter: {
+      "border-style": "solid",
+      "border-color": "black",
+      // "border-width": 2,
+      "background-color": colors.regular.green2
+    },
+    enterActive: {
+      "background-color": colors.regular.green3
+    },
+    invalidate: {
+      "border-style": "solid",
+      "border-color": "black",
+      // "border-width": 2,
+      "background-color": colors.regular.grey
+    },
+    isolate: {
+      "border-style": "dashed",
+      "border-color": "black",
+      // "border-width": 3,
+      // "border-opacity"
+    },
+    isolateInvalidate: {
+      "border-style": "dashed",
+      "border-color": "darkgrey",
+      "border-width": 3,
+      // "border-opacity"
+    },
+    valueChanged: {
+      "background-color": colors.regular.red // blood red
+      // "border-style": "dashed",
+      // "border-color": "darkgrey",
+      // "border-width": 3,
+      // "border-opacity"
     }
   },
   edge: {
@@ -476,16 +629,27 @@ var graphStyles = {
       "curve-style": "bezier",
       "width": 4,
       "target-arrow-shape": "triangle",
-      "line-color": "#9dbaea",
-      "target-arrow-color": "#9dbaea"
+      "mid-target-arrow-shape": "triangle",
+      "line-color": colors.regular.blue, //"#9dbaea",
+      "mid-target-arrow-color": colors.regular.blue,
+      "target-arrow-color": colors.regular.blue
+    },
+    isolate: {
+      "width": 4,
+      "line-color": colors.regular.blue,
+      "mid-target-arrow-color": colors.regular.blue,
+      "target-arrow-color": colors.regular.blue,
+      "line-style": "dashed"
     }
   },
   ghostEdge: {
     default: {
-      "width": 25,
+      "width": 0.5,
       "mid-target-arrow-shape": "triangle",
+      "mid-target-arrow-color": "#d0cfbc",
+      "arrow-scale": 0.25,
       "curve-style": "haystack",
-      "line-color": "#d5ce24",
+      "line-color": "#d0cfbc",
       "line-style": "dotted"
     }
   }
@@ -509,10 +673,17 @@ $(function() {
       // order of the style definitions are how styles are applied
       styleHelper("node", graphStyles.node.default),
       styleHelper("edge", graphStyles.edge.default),
-      styleHelper(".startNode", graphStyles.node.start),
-      styleHelper(".middleNode", graphStyles.node.middle),
-      styleHelper(".endNode", graphStyles.node.end),
-      styleHelper(".ghostEdge", graphStyles.ghostEdge.default)
+      styleHelper(".edgeGhost", graphStyles.ghostEdge.default),
+      styleHelper(".edgeIsolate", graphStyles.edge.isolate),
+      styleHelper(".nodeStart", graphStyles.node.start),
+      styleHelper(".nodeMiddle", graphStyles.node.middle),
+      styleHelper(".nodeEnd", graphStyles.node.end),
+      styleHelper(".nodeEnter", graphStyles.node.enter),
+      styleHelper(".nodeEnterActive", graphStyles.node.enterActive),
+      styleHelper(".nodeInvalidate", graphStyles.node.invalidate),
+      styleHelper(".nodeIsolate", graphStyles.node.isolate),
+      styleHelper(".nodeIsolateInvalidate", graphStyles.node.isolateInvalidate),
+      styleHelper(".nodeValueChanged", graphStyles.node.valueChanged)
     ]
   });
   window.getGraph = new GraphAtStep(log);
@@ -520,70 +691,154 @@ $(function() {
   console.log(graph);
 
   window.curTick = 90;
-  function updateTimeline() {
+  function updateProgressBar() {
     $("#timeline-fill").width((curTick / log.length * 100) + "%");
   }
-  updateGraph =  function() {
+  function updateLogItem() {
+    $("#instructions").text(JSON.stringify(log[curTick], null, "  "));
+  }
+  $('#timeline').on('mousedown mousemove', function(e) {
+    // Make sure left mouse button is down.
+    // Firefox is stupid; e.which is always 1 on mousemove events,
+    // even when button is not down!! So read e.originalEvent.buttons.
+    if (typeof(e.originalEvent.buttons) !== 'undefined') {
+      if (e.originalEvent.buttons !== 1)
+        return;
+    } else if (e.which !== 1) {
+      return;
+    }
+
+    var timeline = e.currentTarget;
+    var pos = e.offsetX || e.originalEvent.layerX;
+    var width = timeline.offsetWidth;
+    var targetStep = Math.max(Math.round((pos/width) * log.length), 1);
+    if (targetStep != curTick) {
+      window.curTick = targetStep;
+      updateGraph()
+    }
+    return;
+  });
+
+
+  updateGraph = function() {
     getGraph.displayAtStep(curTick, cyto);
-    updateTimeline()
+    updateProgressBar()
+    updateLogItem()
   }
   updateGraph()
-  // getGraph.displayAtStep(getGraph.minStep, cyto);
-  // setTimeout(function() { getGraph.displayAtStep(100, cyto); console.log("1")}, 1000)
-  // setTimeout(function() { getGraph.displayAtStep(200, cyto); console.log("2") }, 2000)
-  // setTimeout(function() { getGraph.displayAtStep(300, cyto); console.log("3") }, 3000)
-  // setTimeout(function() { getGraph.displayAtStep(400, cyto); console.log("4") }, 4000)
-  // setTimeout(function() { getGraph.displayAtStep(getGraph.maxStep, cyto); console.log("end") }, 5000)
 
+  updateGraph.next = function() {
+    // Move one step ahead
+    window.curTick += 1
+    updateGraph()
+  }
+  updateGraph.prev = function() {
+    // Move one step back
+    window.curTick -= 1
+    updateGraph()
+  }
+
+  updateGraph.nextEnterExitEmpty = function() {
+    // move to queue empty
+    for (var i = 0; i < getGraph.enterExitEmpties.length; i++) {
+      val = getGraph.enterExitEmpties[i];
+      if (curTick < val) {
+        window.curTick = val;
+        updateGraph();
+        return true;
+      }
+    }
+    return false;
+  }
+  updateGraph.prevEnterExitEmpty = function() {
+    // move to queue empty
+    for (var i = getGraph.enterExitEmpties.length - 1; i >= 0; i--) {
+      val = getGraph.enterExitEmpties[i];
+      if (curTick > val) {
+        window.curTick = val;
+        updateGraph();
+        return true;
+      }
+    }
+    return false;
+  }
+  updateGraph.lastEnterExitEmpty = function() {
+    window.curTick = getGraph.enterExitEmpties[getGraph.enterExitEmpties.length - 1] || 0;
+    updateGraph()
+  }
+  updateGraph.firstEnterExitEmpty = function() {
+    window.curTick = getGraph.enterExitEmpties[0] || 0;
+    updateGraph()
+  }
+
+
+
+  updateGraph.nextQueueEmpty = function() {
+    // move to queue empty
+    for (var i = 0; i < getGraph.enterExitEmpties.length; i++) {
+      val = getGraph.queueEmpties[i];
+      if (curTick < val) {
+        window.curTick = val;
+        updateGraph();
+        return true;
+      }
+    }
+    return false;
+  }
+  updateGraph.prevQueueEmpty = function() {
+    // move to queue empty
+    for (var i = getGraph.queueEmpties.length - 1; i >= 0; i--) {
+      val = getGraph.queueEmpties[i];
+      if (curTick > val) {
+        window.curTick = val;
+        updateGraph();
+        return true;
+      }
+    }
+    return false;
+  }
+  updateGraph.lastQueueEmpty = function() {
+    window.curTick = getGraph.queueEmpties[getGraph.queueEmpties.length - 1] || 0;
+    updateGraph()
+  }
+  updateGraph.firstQueueEmpty = function() {
+    window.curTick = getGraph.queueEmpties[0] || 0;
+    updateGraph()
+  }
 
   $(document.body).on("keydown", function(e) {
     if (e.which === 39 || e.which === 32) { // space, right
       if (e.altKey) {
-        // move to queue empty
-        for (var i = 0; i < getGraph.queueEmpties.length; i++) {
-          val = getGraph.queueEmpties[i];
-          if (curTick < val) {
-            window.curTick = val;
-            updateGraph();
-            return;
-          }
+        if (updateGraph.nextEnterExitEmpty()) {
+          return;
         }
       }
       if (curTick < getGraph.maxStep) {
-        // Move one step ahead
-        window.curTick += 1
-        updateGraph()
+        updateGraph.next();
         return;
       }
     }
     if (e.which === 37) { // left
       if (e.altKey) {
-        // move to queue empty
-        for (var i = getGraph.queueEmpties.length - 1; i >= 0; i--) {
-          val = getGraph.queueEmpties[i];
-          if (curTick > val) {
-            window.curTick = val;
-            updateGraph();
-            return;
-          }
+        if (updateGraph.prevEnterExitEmpty()) {
+          return;
         }
       }
       if (curTick > 1) {
-        // Move one step back
-        window.curTick -= 1
-        updateGraph()
+        updateGraph.prev()
+        return;
       }
     }
-    // if (e.which === 35) { // end
-    //   // Seek to end
-    //   while (log.length) {
-    //     doNext();
-    //   }
-    // }
-    // if (e.which === 36) { // home
-    //   // Seek to beginning
-    //   undoAll();
-    // }
+    if (e.which === 35) { // end
+      // Seek to end
+      updateGraph.lastEnterExitEmpty()
+      return;
+    }
+    if (e.which === 36) { // home
+      // Seek to beginning
+      updateGraph.firstEnterExitEmpty();
+      return;
+    }
   });
 
 

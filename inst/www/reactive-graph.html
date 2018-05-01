@@ -14,7 +14,8 @@
   }
   </style>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script> -->
+  <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.slim.min.js"></script>
 
   <script src="https://unpkg.com/lodash@4.17.10/lodash.js"></script>
   <script src="https://unpkg.com/heap@0.2.6/lib/heap.js"></script>
@@ -35,32 +36,6 @@
 </head>
 
 <body>
-  <svg>
-    <defs>
-      <marker id="triangle"
-              viewBox="0 0 10 10"
-              refX="5" refY="5"
-              markerWidth="6"
-              markerHeight="6"
-              orient="auto">
-          <path d="M 10 0 L 0 5 L 10 10 z" />
-      </marker>
-      <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="1" height="1">
-        <path stroke="black" stroke-width="0.25" fill="none"
-          d="M-1,1 l2,-2
-             M0,4 l4,-4
-             M3,5 l2,-2" />
-      </pattern>
-    </defs>
-    <!-- <g id="viz" transform="scale(4)"> -->
-    <g id="viz">
-      <g id="links"></g>
-      <g id="nodes"></g>
-    </g>
-  </svg>
-  <div id="cyto">
-  </div>
-
   <div id="instructions">
     Press right-arrow to advance
   </div>
@@ -74,10 +49,12 @@
   </div>
   <br/>
   <pre id="description"><br/></pre>
-  <div id="timeline">
+  <div id="timeline" style="z-index:1;">
     <div id="timeline-bg">
       <div id="timeline-fill"></div>
     </div>
+  </div>
+  <div id="cyto" style="z-index:0;">
   </div>
 </body>
 </html>

@@ -1,6 +1,12 @@
-// sort edges by key to keep graph stable
-// add state colors for nodes
-// add state colors for edges
+
+// TODO-barret
+// add buttons for moving around
+// add edge styles
+// update legend
+// clean up how active states are done
+// set up cloning of graph after every 250 steps
+// filtering
+
 
 colors = {
   // regular colors
@@ -10,9 +16,9 @@ colors = {
 
     // http://colorbrewer2.org/#type=sequential&scheme=YlGn&n=4
     // #2-4
-    green1: "#f7fcb9",
-    green2: "#78c679",
-    green3: "#238443",
+    green1: "#f7fcb9", // ready
+    green2: "#78c679", // enter
+    green3: "#238443", // active enter
 
     greenLite: "#b2df8a", // green from http://colorbrewer2.org/#type=qualitative&scheme=Paired&n=8
 
@@ -25,7 +31,12 @@ colors = {
     yellow: "#ffff33", //
     brown: "#a65628", //
     pink: "#f781bf", //
-    grey: "#999999" // invalidate
+    grey: "#999999", // invalidate
+
+    // http://colorbrewer2.org/#type=sequential&scheme=Greys&n=9
+    grey1: "#bdbdbd", // invalidate
+    grey2: "#969696", // active invalidate
+    grey3: "#737373" // active invalidate
   },
   // filtered colors
   lite: {
@@ -105,8 +116,9 @@ class Node {
     this.statusArr = new StatusArr(data.statusArr || []);
     this.value = data.value || null;
     this.inValueChanged = data.inValueChanged || false;
-    this.hasInvalidated = data.hasInvalidated || false;
+    this.inInvalidate = data.inInvalidate || false;
     this.activeEnter = data.activeEnter || false;
+    this.activeInvalidate = data.activeInvalidate || false;
   }
   get id() {return this.reactId.replace(/\$/g, "_")}
   get key() {return this.reactId}
@@ -118,7 +130,7 @@ class Node {
   statusLast() {return this.statusArr.last();}
   get inEnter() {return this.statusArr.containsStatus("enter");}
   get inIsolate() {return this.statusArr.containsStatus("isolateEnter");}
-  get inInvalidate() {return this.statusArr.containsStatus("invalidateStart");}
+  // get inInvalidate() {return this.statusArr.containsStatus("invalidateStart");}
   get inIsolateInvalidate() {return this.statusArr.containsStatus("isolateInvalidateStart");}
   get cytoStyle() {
     var ret = {}
@@ -136,6 +148,12 @@ class Node {
     // if (this.inValueChanged) ret = _.assign(ret, graphStyles.node.valueChanged);
     return ret
   }
+  get cytoLabel() {
+    // if (this.label.length > 30) {
+    //   return (this.label.substring(0, 27) + "aasdf")
+    // }
+    return this.label
+  }
   get cytoClasses() {
     var classes = []
     switch(this.type) {
@@ -143,11 +161,18 @@ class Node {
       case "observable": classes.push("nodeMiddle"); break;
       default: classes.push("nodeStart")
     }
-    if (this.hasInvalidated) classes.push("nodeInvalidate");
+    if (this.inInvalidate) classes.push("nodeInvalidate");
     if (this.inEnter) classes.push("nodeEnter");
     if (this.activeEnter) classes.push("nodeEnterActive");
+    if (this.type == "observer" || this.type == "observable") {
+      if (this.activeInvalidate < 0) {
+        classes.push("nodeInvalidateDone")
+      } else if (this.activeInvalidate > 0) {
+        classes.push("nodeInvalidateActive");
+      }
+    }
     // if (this.inInvalidate) classes.push("nodeInvalidate");
-    // if (this.inIsolate) classes.push("nodeIsolate");
+    if (this.inIsolate) classes.push("nodeIsolate");
     // if (this.inIsolateInvalidate) classes.push("nodeIsolateInvalidate");
     if (this.inValueChanged) classes.push("nodeValueChanged");
     return classes.join(" ")
@@ -229,7 +254,7 @@ class GhostEdge {
   }
   get cytoStyle() {
     return {};
-    return graphStyles.ghostEdge.default
+    // return graphStyles.ghostEdge.default
   }
   get cytoClasses() {
     return "edgeGhost"
@@ -253,6 +278,7 @@ class Graph {
     this.asyncStop = -1;
     this.queueEmpty = -1;
     this.activeNodeEnter = [];
+    this.activeInvalidateEnter = [];
   }
 
   // get nodeIds() {
@@ -262,7 +288,6 @@ class Graph {
   // }
   get cytoGraph() {
     var cyto = cytoscape();
-    var activeNodeEnterId = _.last(this.activeNodeEnter)
     var nodes = _.values(this.nodes).map(function(node) {
       return node.cytoData;
     });
@@ -299,15 +324,28 @@ class Graph {
       case "valueChange":
         var node = this.nodes[data.reactId];
         node.value = data.value;
-        node.inValueChanged = true;
+        node.inValueChanged = data.step;
         break;
 
       case "invalidateStart":
         var node = this.nodes[data.reactId];
+        // if (data.type == "other") {
+        //   if (node.inValueChanged) {
+        //     node.inValueChanged.pulse = false
+        //   }
+        // }
+        var lastNodeId = _.last(this.activeInvalidateEnter)
+        if (lastNodeId) {
+          this.nodes[lastNodeId].activeInvalidate = false
+        }
+        this.activeInvalidateEnter.push(data.reactId)
         switch (node.type) {
-          case "observer":
           case "observable":
-            this.nodes[data.reactId].hasInvalidated = true;
+          case "observer":
+            // console.log(node.label, data.step, data.reactId)
+            node.activeInvalidate = data.step;
+            node.inInvalidate = data.step;
+            break;
         }
         node.statusAdd(data)
         break;
@@ -322,12 +360,14 @@ class Graph {
         switch (node.type) {
           case "observer":
           case "observable":
-            this.nodes[data.reactId].hasInvalidated = false;
+            node.activeInvalidate = false;
+            node.inInvalidate = false;
         }
         node.statusAdd(data)
         break;
-      case "isolateEnter":
+
       case "isolateInvalidateStart":
+      case "isolateEnter":
         this.nodes[data.reactId].statusAdd(data)
         break;
 
@@ -335,6 +375,7 @@ class Graph {
       case "exit":
       case "isolateExit":
       case "isolateInvalidateEnd":
+        var node = this.nodes[data.reactId];
         switch (data.action) {
           case "exit":
             this.nodes[_.last(this.activeNodeEnter)].activeEnter = false;
@@ -345,12 +386,23 @@ class Graph {
             }
             break;
           case "invalidateEnd":
-            if (this.nodes[data.reactId].inValueChanged) {
-              this.nodes[data.reactId].inValueChanged = false;
+            this.nodes[_.last(this.activeInvalidateEnter)].activeInvalidate = -1;
+            this.activeInvalidateEnter.pop();
+            var lastNodeId = _.last(this.activeInvalidateEnter)
+            if (lastNodeId) {
+              this.nodes[lastNodeId].activeInvalidate = data.step;
+            }
+            if (node.inValueChanged) {
+              node.inValueChanged = false;
+            }
+            break;
+          case "isolateInvalidateEnd":
+            if (node.inValueChanged) {
+              node.inValueChanged = false;
             }
             break;
         }
-        var prevData = this.nodes[data.reactId].statusLast()
+        var prevData = node.statusLast()
         var expectedAction = {
           "exit": "enter",
           "isolateExit": "isolateEnter",
@@ -358,7 +410,7 @@ class Graph {
           "isolateInvalidateEnd": "isolateInvalidateStart"
         }[data.action]
         StatusArr.expect_prev_status(data, prevData, expectedAction)
-        this.nodes[data.reactId].statusRemove()
+        node.statusRemove()
         break;
 
       case "dependsOn":
@@ -454,6 +506,8 @@ class GraphAtStep {
     var nodesLRB = cyNodes.diff(graphNodes);
     // .removeStyle()
 
+    var onLayoutReady = [];
+
     // enter
     nodesLRB.right.map(function(graphNode) {
       var graphNodeData = graphNode.data()
@@ -468,19 +522,43 @@ class GraphAtStep {
     });
     // update
     nodesLRB.both.map(function(cytoNode) {
-      var graphNodeData = graphNodes.$id(cytoNode.id()).data();
-      cy
-        .$id(cytoNode.id())
+      var cyNode = cy.$id(cytoNode.id())
+
+      var graphNode = graphNodes.$id(cytoNode.id());
+      var graphNodeData = graphNode.data();
+      var graphClasses = graphNodeData.cytoClasses;
+      var isNewValueChanged =
+        graphNode.hasClass("nodeValueChanged") & !(cyNode.hasClass("nodeValueChanged"));
+      // console.log(graphNode.hasClass("nodeValueChanged"), !(cyNode.hasClass("nodeValueChanged")))
+
+      cyNode
         // update to latest data
         .data(graphNodeData)
         // .classes()
         // todo-barret remove recalculation of classes and retrieve from somewhere...
-        .classes(graphNodeData.cytoClasses)
+        .classes(graphClasses)
         .removeStyle()
         .animate({
           style: graphNodeData.cytoStyle,
           duration: cytoDur
         });
+      if (graphNodeData.inValueChanged && (graphNodeData.inValueChanged + 1) == k) {
+        onLayoutReady.push(function() {
+          // console.log("pulse red!")
+          cyNode
+            .flashClass("nodeStartBig", 125)
+        })
+      }
+      // console.log(k, graphNodeData.reactId, graphNodeData.label, graphNodeData.activeInvalidate)
+      if (graphNodeData.activeInvalidate != false && (graphNodeData.activeInvalidate + 1) == k) {
+        onLayoutReady.push(function() {
+          // console.log("pulse!")
+          switch(graphNodeData.type) {
+            case "observable": cyNode.flashClass("nodeMiddleBig", 125); break;
+            case "observer": cyNode.flashClass("nodeEndBig", 125); break;
+          }
+        })
+      }
     });
     // exit
     nodesLRB.left.map(function(cytoNode) {
@@ -534,7 +612,16 @@ class GraphAtStep {
       return a.data().key > b.data().key ? 1 : -1;
     });
     cy
-      .layout(_.assign({eles: sortedElements}, layoutOptions))
+      .layout(_.assign({
+        // provide elements in sorted order to make determanistic layouts
+        eles: sortedElements,
+        // run on layout ready
+        ready: function() {
+          onLayoutReady.map(function(fn) {
+            fn();
+          })
+        }
+      }, layoutOptions))
       .run();
   }
 }
@@ -558,10 +645,11 @@ var nodeShapes = {
   middle: "-1 1 0.5 1 1 0 0.5 -1 -1 -1 -0.5 0",
   end: "-1 1 1 1 1 -1 -1 -1 -0.33333333333 0"
 }
+var pulseScale = 1 + 1/16
 var graphStyles = {
   node: {
     default: {
-      "label": "data(label)",
+      "label": "data(cytoLabel)",
       "text-opacity": 0.5,
       "text-valign": "bottom",
       "text-margin-x": "-5",
@@ -569,7 +657,9 @@ var graphStyles = {
       "border-color": colors.regular.black,
       "border-style": "solid",
       "border-width": 1,
-      "background-color": colors.regular.green1
+      "background-color": colors.regular.green1,
+      "text-wrap": "ellipsis",
+      "text-max-width": "200px"
     },
     start: {
       "shape": "polygon",
@@ -577,17 +667,32 @@ var graphStyles = {
       width: 50 * 0.75,
       height: 30
     },
+    startBig: {
+      "border-width": 2,
+      width: 50 * 0.75 * pulseScale,
+      height: 30 * pulseScale
+    },
     middle: {
       "shape": "polygon",
       "shape-polygon-points": nodeShapes.middle,
       width: 50,
       height: 30
     },
+    middleBig: {
+      "border-width": 2,
+      width: 50 * pulseScale,
+      height: 30 * pulseScale
+    },
     end: {
       "shape": "polygon",
       "shape-polygon-points": nodeShapes.end,
       width: 50 * 0.75,
       height: 30
+    },
+    endBig: {
+      "border-width": 2,
+      width: 50 * 0.75 * pulseScale,
+      height: 30 * pulseScale
     },
     enter: {
       "border-style": "solid",
@@ -602,7 +707,13 @@ var graphStyles = {
       "border-style": "solid",
       "border-color": "black",
       // "border-width": 2,
-      "background-color": colors.regular.grey
+      "background-color": colors.regular.grey2
+    },
+    invalidateActive: {
+      "background-color": colors.regular.grey3
+    },
+    invalidateDone: {
+      "background-color": colors.regular.grey1
     },
     isolate: {
       "border-style": "dashed",
@@ -678,9 +789,14 @@ $(function() {
       styleHelper(".nodeStart", graphStyles.node.start),
       styleHelper(".nodeMiddle", graphStyles.node.middle),
       styleHelper(".nodeEnd", graphStyles.node.end),
+      styleHelper(".nodeStartBig", graphStyles.node.startBig),
+      styleHelper(".nodeMiddleBig", graphStyles.node.middleBig),
+      styleHelper(".nodeEndBig", graphStyles.node.endBig),
       styleHelper(".nodeEnter", graphStyles.node.enter),
       styleHelper(".nodeEnterActive", graphStyles.node.enterActive),
       styleHelper(".nodeInvalidate", graphStyles.node.invalidate),
+      styleHelper(".nodeInvalidateActive", graphStyles.node.invalidateActive),
+      styleHelper(".nodeInvalidateDone", graphStyles.node.invalidateDone),
       styleHelper(".nodeIsolate", graphStyles.node.isolate),
       styleHelper(".nodeIsolateInvalidate", graphStyles.node.isolateInvalidate),
       styleHelper(".nodeValueChanged", graphStyles.node.valueChanged)
@@ -690,7 +806,6 @@ $(function() {
   window.graph = getGraph.atStep(getGraph.maxStep);
   console.log(graph);
 
-  window.curTick = 90;
   function updateProgressBar() {
     $("#timeline-fill").width((curTick / log.length * 100) + "%");
   }
@@ -725,7 +840,6 @@ $(function() {
     updateProgressBar()
     updateLogItem()
   }
-  updateGraph()
 
   updateGraph.next = function() {
     // Move one step ahead
@@ -805,6 +919,10 @@ $(function() {
     window.curTick = getGraph.queueEmpties[0] || 0;
     updateGraph()
   }
+
+  window.curTick = 1
+  updateGraph.nextEnterExitEmpty()
+
 
   $(document.body).on("keydown", function(e) {
     if (e.which === 39 || e.which === 32) { // space, right

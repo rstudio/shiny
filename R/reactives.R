@@ -389,6 +389,7 @@ ReactiveValues <- R6Class(
         # only invalidate if there are deps
         if (isTRUE(.hasRetrieved$names)) {
           rLog$valueChangeNames(.reactId, .values, domain)
+          .namesDeps$invalidate()
         }
       }
 

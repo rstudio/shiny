@@ -1,8 +1,9 @@
 
 // TODO-barret
 // √ add buttons for moving around
-// - clean up how active states are done
-// pulse on active enter change
+// √ clean up how active states are done
+// √ pulse on active enter change
+// √ pulse on valueChange
 // add edge styles
 //   distinguish active vs running edges
 // set up cloning of graph after every 250 steps
@@ -175,12 +176,12 @@ class Node {
     this.statusArr = new StatusArr(data.statusArr || []);
     this.value = data.value || null;
 
-    this.inValueChanged = data.inValueChanged || false;
+    this.valueChangedStatus = data.valueChangedStatus || new ActiveStateStatus();
 
     // this.inInvalidate = data.inInvalidate || false;
     // this.activeInvalidate = data.activeInvalidate || false;
 
-    this.activeEnter = data.activeEnter || false;
+    this.enterStatus = data.enterStatus || new ActiveStateStatus();
 
     this.invalidateStatus = data.invalidateStatus || new ActiveStateStatus();
   }
@@ -228,8 +229,10 @@ class Node {
       case "observable": classes.push("nodeMiddle"); break;
       default: classes.push("nodeStart")
     }
+
     if (this.inEnter) classes.push("nodeEnter");
-    if (this.activeEnter) classes.push("nodeEnterActive");
+    if (this.enterStatus.isActive) classes.push("nodeEnterActive");
+
     if (this.type == "observer" || this.type == "observable") {
       if (this.invalidateStatus.isActive) classes.push("nodeInvalidateActive")
       else if (this.invalidateStatus.isOn) classes.push("nodeInvalidate")
@@ -238,7 +241,7 @@ class Node {
     // if (this.inInvalidate) classes.push("nodeInvalidate");
     if (this.inIsolate) classes.push("nodeIsolate");
     // if (this.inIsolateInvalidate) classes.push("nodeIsolateInvalidate");
-    if (this.inValueChanged) classes.push("nodeValueChanged");
+    if (this.valueChangedStatus.isOn) classes.push("nodeValueChanged");
     return classes.join(" ")
   }
   get cytoData() {
@@ -388,16 +391,11 @@ class Graph {
       case "valueChange":
         var node = this.nodes[data.reactId];
         node.value = data.value;
-        node.inValueChanged = data.step;
+        node.valueChangedStatus.setActiveAtStep(data.step);
         break;
 
       case "invalidateStart":
         var node = this.nodes[data.reactId];
-        // if (data.type == "other") {
-        //   if (node.inValueChanged) {
-        //     node.inValueChanged.pulse = false
-        //   }
-        // }
         var lastNodeId = _.last(this.activeInvalidateEnter)
         if (lastNodeId) {
           this.nodes[lastNodeId].invalidateStatus.resetActive()
@@ -414,11 +412,11 @@ class Graph {
       case "enter":
         var lastNodeId = _.last(this.activeNodeEnter);
         if (lastNodeId) {
-          this.nodes[lastNodeId].activeEnter = false
+          this.nodes[lastNodeId].enterStatus.resetActive()
         }
         this.activeNodeEnter.push(data.reactId);
         var node = this.nodes[data.reactId]
-        node.activeEnter = true;
+        node.enterStatus.setActiveAtStep(data.step);
         switch (node.type) {
           case "observer":
           case "observable":
@@ -439,11 +437,11 @@ class Graph {
         var node = this.nodes[data.reactId];
         switch (data.action) {
           case "exit":
-            this.nodes[_.last(this.activeNodeEnter)].activeEnter = false;
+            this.nodes[_.last(this.activeNodeEnter)].enterStatus.reset();
             this.activeNodeEnter.pop();
             var lastNodeId = _.last(this.activeNodeEnter);
             if (lastNodeId) {
-              this.nodes[lastNodeId].activeEnter = true;
+              this.nodes[lastNodeId].enterStatus.setActiveAtStep(data.step);
             }
             break;
           case "invalidateEnd":
@@ -457,13 +455,13 @@ class Graph {
               this.nodes[lastNodeId].invalidateStatus.setActiveAtStep(data.step);
             }
             node.invalidateStatus.toFinished()
-            if (node.inValueChanged) {
-              node.inValueChanged = false;
+            if (node.valueChangedStatus.isOn) {
+              node.valueChangedStatus.reset();
             }
             break;
           case "isolateInvalidateEnd":
-            if (node.inValueChanged) {
-              node.inValueChanged = false;
+            if (node.valueChangedStatus.isOn) {
+              node.valueChangedStatus.reset();
             }
             break;
         }
@@ -628,7 +626,7 @@ class GraphAtStep {
         //   // style: graphNodeData.cytoStyle,
         //   duration: cytoDur
         // });
-      if (graphNodeData.inValueChanged && (graphNodeData.inValueChanged + 1) == k) {
+      if (graphNodeData.valueChangedStatus.isActiveAtStep(k - 1)) {
         onLayoutReady.push(function() {
           // console.log("pulse red!")
           cyNode
@@ -636,7 +634,10 @@ class GraphAtStep {
         })
       }
       // console.log(k, graphNodeData.reactId, graphNodeData.label, graphNodeData.activeInvalidate)
-      if (graphNodeData.invalidateStatus.isActiveAtStep(k - 1)) {
+      if (
+        graphNodeData.invalidateStatus.isActiveAtStep(k - 1) ||
+        graphNodeData.enterStatus.isActiveAtStep(k - 1)
+      ) {
         onLayoutReady.push(function() {
           switch(graphNodeData.type) {
             case "observable": cyNode.flashClass("nodeMiddleBig", 125); break;

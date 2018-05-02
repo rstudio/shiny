@@ -140,6 +140,9 @@ class Node {
   get inIsolateInvalidate() {return this.statusArr.containsStatus("isolateInvalidateStart");}
   get cytoStyle() {
     var ret = {}
+    // if (this.id == "r9") {
+    //   ret["background-blacken"] = -0.75;
+    // }
     // switch(this.type) {
     //   case "observer": ret = _.assign(ret, graphStyles.node.end); break;
     //   case "observable": ret = _.assign(ret, graphStyles.node.middle); break;
@@ -528,10 +531,11 @@ class GraphAtStep {
       cy
         .add(graphNode)
         .classes(graphNodeData.cytoClasses)
-        .animate({
-          style: graphNodeData.cytoStyle,
-          duration: cytoDur
-        });
+        .style(graphNodeData.cytoStyle)
+        // .animate({
+        //   // style: ,
+        //   duration: cytoDur
+        // });
       window.barret = cy.$id(graphNode.id());
     });
     // update
@@ -552,10 +556,11 @@ class GraphAtStep {
         // todo-barret remove recalculation of classes and retrieve from somewhere...
         .classes(graphClasses)
         .removeStyle()
-        .animate({
-          style: graphNodeData.cytoStyle,
-          duration: cytoDur
-        });
+        .style(graphNodeData.cytoStyle)
+        // .animate({
+        //   // style: graphNodeData.cytoStyle,
+        //   duration: cytoDur
+        // });
       if (graphNodeData.inValueChanged && (graphNodeData.inValueChanged + 1) == k) {
         onLayoutReady.push(function() {
           // console.log("pulse red!")
@@ -577,7 +582,7 @@ class GraphAtStep {
     nodesLRB.left.map(function(cytoNode) {
       cy
         .remove(cytoNode)
-        .animate({duration: cytoDur});
+        // .animate({duration: cytoDur});
     });
 
     var cyEdges = cy.edges()
@@ -589,10 +594,12 @@ class GraphAtStep {
       cy
         .add(graphEdge)
         .classes(graphEdgeData.cytoClasses)
-        .animate({
-          style: graphEdgeData.cytoStyle,
-          duration: cytoDur
-        });
+        .removeStyle()
+        .style(graphEdgeData.cytoStyle)
+        // .animate({
+        //   style: graphEdgeData.cytoStyle,
+        //   duration: cytoDur
+        // });
     });
     // update
     edgesLRB.both.map(function(cytoEdge) {
@@ -602,10 +609,12 @@ class GraphAtStep {
         // .classes()
         .classes(graphEdgeData.cytoClasses)
         .data(graphEdgeData)
-        .animate({
-          style: graphEdgeData.cytoStyle,
-          duration: cytoDur
-        });
+        .removeStyle()
+        .style(graphEdgeData.cytoStyle)
+        // .animate({
+        //   style: graphEdgeData.cytoStyle,
+        //   duration: cytoDur
+        // });
     });
     // exit
     edgesLRB.left.map(function(cytoEdge) {

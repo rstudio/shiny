@@ -122,6 +122,11 @@ svg {
   height: auto;
   display: none;
 }
+#moveButtons {
+  position: fixed;
+  top: 20px;
+  left: 10px;
+}
 #timeline {
   position: fixed;
   top: 0;

@@ -36,8 +36,42 @@
 </head>
 
 <body>
-  <div id="instructions">
-    Press right-arrow to advance
+  <div id="moveButtons" style="z-index:1;">
+    <table>
+      <tr>
+        <td style="text-align:right;">
+<button id="startStepButton" title="Go to beginning of log
+shortcut: 'home' key">Log Start</button>
+        </td>
+        <td>
+<button id="endStepButton" title="Go to end of log
+shotcut: 'end' key">Log End</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align:right;">
+<button id="prevCycleButton" title="Go to previous computation cycle
+shortcut: alt + left arrow">Previous Cycle</button>
+        </td>
+        <td>
+<button id="nextCycleButton" title="Go to next computation cycle
+shortcut: alt + right arrow">Next Cycle</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align:right;">
+<button id="prevStepButton" title="Go to the previous step
+shortcut: left arrow">Previous Step</button>
+        </td>
+        <td>
+<button id="nextStepButton" title="Go to the next step
+shortcut: right arrow">Next Step</button>
+        </td>
+      </tr>
+    </table>
+    <div id="instructions">
+      Press right-arrow to advance
+    </div>
   </div>
   <div id="ended" style="display: none;">
     <strong>You&rsquo;ve reached the end</strong><br/>Press the Home key to start over

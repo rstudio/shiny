@@ -923,7 +923,12 @@ $(function() {
   window.curTick = 1
   updateGraph.nextEnterExitEmpty()
 
-
+  $("#startStepButton").click(updateGraph.firstEnterExitEmpty)
+  $("#endStepButton").click(updateGraph.lastEnterExitEmpty)
+  $("#prevCycleButton").click(updateGraph.prevEnterExitEmpty)
+  $("#nextCycleButton").click(updateGraph.nextEnterExitEmpty)
+  $("#prevStepButton").click(updateGraph.prev)
+  $("#nextStepButton").click(updateGraph.next)
   $(document.body).on("keydown", function(e) {
     if (e.which === 39 || e.which === 32) { // space, right
       if (e.altKey) {

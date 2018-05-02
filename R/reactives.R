@@ -316,9 +316,6 @@ ReactiveValues <- R6Class(
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
       .dedupe <<- dedupe
-      .namesDeps <<- Dependents$new()
-      .allValuesDeps <<- Dependents$new()
-      .valuesDeps <<- Dependents$new()
     },
 
     get = function(key) {
@@ -509,7 +506,7 @@ ReactiveValues <- R6Class(
         .allValuesDeps$register()
       }
 
-      if (!isTRUE(hasRetrieved$asList)) {
+      if (!isTRUE(.hasRetrieved$asList)) {
         domain <- getDefaultReactiveDomain()
         rLog$defineAsList(.reactId, .label, domain)
         # rLog$valueChangeAsList(.reactId, listValue, domain)

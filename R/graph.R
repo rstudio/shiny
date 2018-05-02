@@ -247,9 +247,9 @@ RLog <- R6Class(
     valueChangeNames = function(reactId, nameValues, domain)
       valueChange(namesIdStr(reactId), nameValues, FALSE, domain),
     valueChangeAsList = function(reactId, listValue, domain)
-      valueChange(asListIdStr(.reactId), listValue, FALSE, domain),
+      valueChange(asListIdStr(reactId), listValue, FALSE, domain),
     valueChangeAsListAll = function(reactId, listValue, domain)
-      valueChange(asListAllIdStr(.reactId), listValue, FALSE, domain),
+      valueChange(asListAllIdStr(reactId), listValue, FALSE, domain),
     valueChangeKey = function(reactId, key, value, domain)
       valueChange(keyIdStr(reactId, key), value, FALSE, domain),
 

@@ -377,6 +377,10 @@ class Graph {
 
   addEntry(data) {
 
+    if (data.reactId == "rNoCtx") {
+      return;
+    }
+
     switch (data.action) {
       // {"action": "define", "reactId": "r3", "label": "plotObj", "type": "observable", "session": "fa3c747a6121aec5baa682cc3970b811", "time": 1524581676.5841},
       case "define":

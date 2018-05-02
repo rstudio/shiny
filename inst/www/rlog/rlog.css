@@ -164,7 +164,7 @@ svg {
 .timeline-cycle, .timeline-enterexit {
   position: relative;
   float: left;
-  margin-left:-1px;
+  margin-left:-2px; /* margin and width must be equal in size, but margin is negative */
   width: 2px;
   height: 100%;
   transition: width 250ms;

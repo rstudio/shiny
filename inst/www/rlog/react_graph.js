@@ -34,9 +34,15 @@ colors = {
     grey: "#999999", // invalidate
 
     // http://colorbrewer2.org/#type=sequential&scheme=Greys&n=9
-    grey1: "#bdbdbd", // invalidate
+    grey1: "#d9d9d9", // invalidate
     grey2: "#969696", // active invalidate
     grey3: "#737373" // active invalidate
+  },
+  edges: {
+    running: "#676767",
+    isolate: "#818181",
+    active: "#818181",
+    inactive: "#ececec"
   },
   // filtered colors
   lite: {
@@ -552,7 +558,6 @@ class GraphAtStep {
       // console.log(k, graphNodeData.reactId, graphNodeData.label, graphNodeData.activeInvalidate)
       if (graphNodeData.activeInvalidate != false && (graphNodeData.activeInvalidate + 1) == k) {
         onLayoutReady.push(function() {
-          // console.log("pulse!")
           switch(graphNodeData.type) {
             case "observable": cyNode.flashClass("nodeMiddleBig", 125); break;
             case "observer": cyNode.flashClass("nodeEndBig", 125); break;
@@ -695,8 +700,6 @@ var graphStyles = {
       height: 30 * pulseScale
     },
     enter: {
-      "border-style": "solid",
-      "border-color": "black",
       // "border-width": 2,
       "background-color": colors.regular.green2
     },
@@ -704,8 +707,6 @@ var graphStyles = {
       "background-color": colors.regular.green3
     },
     invalidate: {
-      "border-style": "solid",
-      "border-color": "black",
       // "border-width": 2,
       "background-color": colors.regular.grey2
     },
@@ -717,7 +718,6 @@ var graphStyles = {
     },
     isolate: {
       "border-style": "dashed",
-      "border-color": "black",
       // "border-width": 3,
       // "border-opacity"
     },
@@ -741,15 +741,15 @@ var graphStyles = {
       "width": 4,
       "target-arrow-shape": "triangle",
       "mid-target-arrow-shape": "triangle",
-      "line-color": colors.regular.blue, //"#9dbaea",
-      "mid-target-arrow-color": colors.regular.blue,
-      "target-arrow-color": colors.regular.blue
+      "line-color": colors.edges.running, //"#9dbaea",
+      "mid-target-arrow-color": colors.edges.running,
+      "target-arrow-color": colors.edges.running
     },
     isolate: {
       "width": 4,
-      "line-color": colors.regular.blue,
-      "mid-target-arrow-color": colors.regular.blue,
-      "target-arrow-color": colors.regular.blue,
+      "line-color": colors.edges.isolate,
+      "mid-target-arrow-color": colors.edges.isolate,
+      "target-arrow-color": colors.edges.isolate,
       "line-style": "dashed"
     }
   },

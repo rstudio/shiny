@@ -806,6 +806,13 @@ $(function() {
   window.graph = getGraph.atStep(getGraph.maxStep);
   console.log(graph);
 
+  getGraph.enterExitEmpties.map(function(i) {
+    $("#timeline-bg").append(`<div class=\"timeline-enterexit\" style=\"left: ${100 * i / log.length}%;\"></div>`)
+  })
+  getGraph.queueEmpties.map(function(i) {
+    $("#timeline-bg").append(`<div class=\"timeline-cycle\" style=\"left: ${100 * i / log.length}%;\"></div>`)
+  })
+
   function updateProgressBar() {
     $("#timeline-fill").width((curTick / log.length * 100) + "%");
   }
@@ -824,8 +831,8 @@ $(function() {
     }
 
     var timeline = e.currentTarget;
-    var pos = e.offsetX || e.originalEvent.layerX;
-    var width = timeline.offsetWidth;
+    var pos = e.pageX || e.originalEvent.pageX; // pageX in pixels
+    var width = timeline.offsetWidth; // width in pixels
     var targetStep = Math.max(Math.round((pos/width) * log.length), 1);
     if (targetStep != curTick) {
       window.curTick = targetStep;

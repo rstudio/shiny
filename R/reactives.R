@@ -36,9 +36,12 @@ Dependents <- R6Class(
     # at times, the context is run in a ctx$onInvalidate(...) which has no runtime context
     invalidate = function(log = TRUE) {
       if (isTRUE(log)) {
-        ctx = getCurrentContext()
-        rLog$invalidateStart(.reactId, ctx$id, ctx$.reactType, ctx$.domain)
-        on.exit(rLog$invalidateEnd(.reactId, ctx$id, ctx$.reactType, ctx$.domain), add = TRUE)
+        # when new keys are added to input, there is no context
+        if (hasCurrentContext()) {
+          ctx <- getCurrentContext()
+          rLog$invalidateStart(.reactId, ctx$id, ctx$.reactType, ctx$.domain)
+          on.exit(rLog$invalidateEnd(.reactId, ctx$id, ctx$.reactType, ctx$.domain), add = TRUE)
+        }
       }
       lapply(
         .dependents$values(),
@@ -1877,8 +1880,12 @@ reactiveFileReader <- function(intervalMillis, session, filePath, readFunc, ...)
 #' # input object, like input$x
 #' @export
 isolate <- function(expr) {
-  curCtx <- getCurrentContext()
-  ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate', reactId = curCtx$.reactId)
+  if (hasCurrentContext()) {
+    reactId <- getCurrentContext()$.reactId
+  } else {
+    reactId <- "rNoCtx"
+  }
+  ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate', reactId = reactId)
   on.exit(ctx$invalidate())
   # Matching ..stacktraceon../..stacktraceoff.. pair
   ..stacktraceoff..(ctx$run(function() {

@@ -346,7 +346,7 @@ MessageLogger = R6Class(
     depth = 0L,
     display = TRUE,
     messages = c(),
-    reactCache = list(),
+    reactCache = list("rNoCtx" = list(label = "<UNKNOWN>", reactId = "<UNKNOWN>")),
     option = "shiny.reactlog",
 
     initialize = function(display, depth, option) {

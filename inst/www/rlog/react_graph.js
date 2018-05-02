@@ -490,10 +490,18 @@ class GraphAtStep {
   }
 
   atStep(k) {
-    var graph = new Graph(log);
-    var i;
     var kVal = Math.max(1, Math.min(k, this.log.length))
-    for (i = 0; i < kVal; i++) {
+    var i, iStart, graph;
+    // if (kVal >= this.cacheStep) {
+    //   iStart = Math.floor((kVal - 1) / this.cacheStep) * this.cacheStep;
+    //   graph = _.cloneDeep(this.graphCache[iStart])
+    //   console.log(iStart, graph)
+    //
+    // } else {
+    iStart = 0
+    graph = new Graph(log);
+    // }
+    for (i = iStart; i < kVal; i++) {
       graph.addEntry(log[i]);
     }
     return graph;

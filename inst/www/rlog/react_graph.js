@@ -1,11 +1,13 @@
 
 // TODO-barret
-// add buttons for moving around
+// √ add buttons for moving around
+// - clean up how active states are done
+// pulse on active enter change
 // add edge styles
-// update legend
-// clean up how active states are done
+//   distinguish active vs running edges
 // set up cloning of graph after every 250 steps
 // filtering
+// update legend
 
 
 colors = {
@@ -69,6 +71,57 @@ colors = {
   }
 }
 
+// pulse on being active at step k; isAtStep(k)
+// display engaged; isOn
+// display active engaged; isOn and isActive
+// display finished; isFinished
+// display none; isOff
+class ActiveStateStatus {
+  constructor() {
+    this.state = "off"; // "on", "finished", "off"
+    this.activeStep = -1;
+    // this.active = false; // currently engaged in activity
+    // this.step = false; // -1 for finished, false for not engaged, positive for engaged at step k
+  }
+  setState(state) { this.state = state; }
+  setActiveAtStep(step) { this.toOn(); this.activeStep = step; }
+  reset() {
+    this.toOff();
+    this.resetActive();
+  }
+  resetActive() {
+    this.activeStep = -1;
+  }
+  get isOn() { return this.state == "on" }
+  get isOff() { return this.state == "off" }
+  get isFinished() { return this.state == "finished" }
+  get isActive() { return this.isOn && this.activeStep > 0 }
+  isActiveAtStep(k) { return this.isActive && this.activeStep == k}
+
+  toOn() {
+    this.state = "on";
+  }
+  toFinished() {
+    this.state = "finished";
+    // this.activeStep = false;
+  }
+  toOff() {
+    this.state = "off";
+  }
+
+  // finished() {
+  //   this.setStep(-1);
+  // }
+  // get isFinished() {
+  //   return (this.step !== false) && (this.step == -1)
+  // }
+  // get isActive() {
+  //   return this.active === true;
+  // }
+  // isActiveAtStep(step) {
+  //   return (this.step !== false) && (this.step == step) &&
+  // }
+}
 class StatusArr {
   constructor() {
     this.statusArr = [];
@@ -121,10 +174,15 @@ class Node {
     this.time = data.time;
     this.statusArr = new StatusArr(data.statusArr || []);
     this.value = data.value || null;
+
     this.inValueChanged = data.inValueChanged || false;
-    this.inInvalidate = data.inInvalidate || false;
+
+    // this.inInvalidate = data.inInvalidate || false;
+    // this.activeInvalidate = data.activeInvalidate || false;
+
     this.activeEnter = data.activeEnter || false;
-    this.activeInvalidate = data.activeInvalidate || false;
+
+    this.invalidateStatus = data.invalidateStatus || new ActiveStateStatus();
   }
   get id() {return this.reactId.replace(/\$/g, "_")}
   get key() {return this.reactId}
@@ -170,15 +228,12 @@ class Node {
       case "observable": classes.push("nodeMiddle"); break;
       default: classes.push("nodeStart")
     }
-    if (this.inInvalidate) classes.push("nodeInvalidate");
     if (this.inEnter) classes.push("nodeEnter");
     if (this.activeEnter) classes.push("nodeEnterActive");
     if (this.type == "observer" || this.type == "observable") {
-      if (this.activeInvalidate < 0) {
-        classes.push("nodeInvalidateDone")
-      } else if (this.activeInvalidate > 0) {
-        classes.push("nodeInvalidateActive");
-      }
+      if (this.invalidateStatus.isActive) classes.push("nodeInvalidateActive")
+      else if (this.invalidateStatus.isOn) classes.push("nodeInvalidate")
+      else if (this.invalidateStatus.isFinished) classes.push("nodeInvalidateDone")
     }
     // if (this.inInvalidate) classes.push("nodeInvalidate");
     if (this.inIsolate) classes.push("nodeIsolate");
@@ -345,15 +400,13 @@ class Graph {
         // }
         var lastNodeId = _.last(this.activeInvalidateEnter)
         if (lastNodeId) {
-          this.nodes[lastNodeId].activeInvalidate = false
+          this.nodes[lastNodeId].invalidateStatus.resetActive()
         }
         this.activeInvalidateEnter.push(data.reactId)
         switch (node.type) {
           case "observable":
           case "observer":
-            // console.log(node.label, data.step, data.reactId)
-            node.activeInvalidate = data.step;
-            node.inInvalidate = data.step;
+            node.invalidateStatus.setActiveAtStep(data.step);
             break;
         }
         node.statusAdd(data)
@@ -369,8 +422,7 @@ class Graph {
         switch (node.type) {
           case "observer":
           case "observable":
-            node.activeInvalidate = false;
-            node.inInvalidate = false;
+            node.invalidateStatus.reset()
         }
         node.statusAdd(data)
         break;
@@ -395,12 +447,16 @@ class Graph {
             }
             break;
           case "invalidateEnd":
-            this.nodes[_.last(this.activeInvalidateEnter)].activeInvalidate = -1;
+            // turn off the previously active node
+            this.nodes[_.last(this.activeInvalidateEnter)].invalidateStatus.resetActive();
             this.activeInvalidateEnter.pop();
+            // if another invalidateStart node exists...
+            //   set the previous invalidateStart node to active
             var lastNodeId = _.last(this.activeInvalidateEnter)
             if (lastNodeId) {
-              this.nodes[lastNodeId].activeInvalidate = data.step;
+              this.nodes[lastNodeId].invalidateStatus.setActiveAtStep(data.step);
             }
+            node.invalidateStatus.toFinished()
             if (node.inValueChanged) {
               node.inValueChanged = false;
             }
@@ -472,9 +528,10 @@ class GraphAtStep {
     this.enterExitEmpties = [];
     this.minStep = 0;
     this.maxStep = log.length;
-    var data;
+
+    var data, i;
     var enterExitQueue = [];
-    for (var i = 0; i < log.length; i++) {
+    for (i = 0; i < log.length; i++) {
       data = log[i];
       data.step = i;
       switch (data.action) {
@@ -490,6 +547,16 @@ class GraphAtStep {
         case "queueEmpty": this.queueEmpties.push(i); break;
       }
     }
+
+    // this.graphCache = {};
+    // this.cacheStep = 250;
+    // var tmpGraph = new Graph(log);
+    // for (i = 0; i < log.length; i++) {
+    //   tmpGraph.addEntry(log[i])
+    //   if ((i % this.cacheStep) == 0) {
+    //     this.graphCache[i] = _.cloneDeep(tmpGraph)
+    //   }
+    // }
   }
 
   atStep(k) {
@@ -569,7 +636,7 @@ class GraphAtStep {
         })
       }
       // console.log(k, graphNodeData.reactId, graphNodeData.label, graphNodeData.activeInvalidate)
-      if (graphNodeData.activeInvalidate != false && (graphNodeData.activeInvalidate + 1) == k) {
+      if (graphNodeData.invalidateStatus.isActiveAtStep(k - 1)) {
         onLayoutReady.push(function() {
           switch(graphNodeData.type) {
             case "observable": cyNode.flashClass("nodeMiddleBig", 125); break;

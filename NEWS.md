@@ -61,6 +61,8 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Fixed [#2021](https://github.com/rstudio/shiny/issues/2021): Memory leak with `reactiveTimer` and `invalidateLater`. ([#2022](https://github.com/rstudio/shiny/pull/2022))
 
+* Fixed [#2033](https://github.com/rstudio/shiny/issues/2033): RStudio Viewer window not closed on `shiny::stopApp()`. Thanks, @vnijs! [#2047](https://github.com/rstudio/shiny/pull/2047)
+
 ### Library updates
 
 * Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))

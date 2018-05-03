@@ -601,18 +601,16 @@ class GraphAtStep {
 
   atStep(k) {
     var kVal = Math.max(1, Math.min(k, this.log.length))
-    var i, iStart, graph;
+    var i, graph;
     // if (kVal >= this.cacheStep) {
     //   iStart = Math.floor((kVal - 1) / this.cacheStep) * this.cacheStep;
     //   graph = _.cloneDeep(this.graphCache[iStart])
     //   console.log(iStart, graph)
     //
-    // } else {
-    iStart = 0
-    graph = new Graph(log);
     // }
-    for (i = iStart; i < kVal; i++) {
-      graph.addEntry(log[i]);
+    graph = new Graph(log);
+    for (i = 0; i < log.length && this.log[i].step <= k; i++) {
+      graph.addEntry(this.log[i]);
     }
     return graph;
   }

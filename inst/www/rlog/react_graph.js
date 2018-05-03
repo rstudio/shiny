@@ -521,6 +521,14 @@ class Graph {
   }
 }
 
+
+// initialize all log entries to have a step value
+(function(){
+  for (var i = 0; i < log.length; i++) {
+    log[i].step = i;
+  }
+})()
+
 class GraphAtStep {
   constructor(log) {
     this.log = log;
@@ -528,25 +536,46 @@ class GraphAtStep {
     this.asyncStops = [];
     this.queueEmpties = [];
     this.enterExitEmpties = [];
-    this.minStep = 0;
-    this.maxStep = log.length;
+    this.steps = [];
+    this.minStep = log[0].step;
+    this.maxStep = log[log.length - 1].step;
 
     var data, i;
     var enterExitQueue = [];
     for (i = 0; i < log.length; i++) {
       data = log[i];
-      data.step = i;
       switch (data.action) {
         case "enter": enterExitQueue.push(i); break;
         case "exit":
           enterExitQueue.pop();
           if (enterExitQueue.length == 0) {
-            this.enterExitEmpties.push(i + 1);
+            this.enterExitEmpties.push(data.step + 1);
           }
           break;
-        case "asyncStart": this.asyncStarts.push(i); break;
-        case "asyncStop": this.asyncStops.push(i); break;
-        case "queueEmpty": this.queueEmpties.push(i); break;
+        case "asyncStart": this.asyncStarts.push(data.step); break;
+        case "asyncStop": this.asyncStops.push(data.step); break;
+        case "queueEmpty": this.queueEmpties.push(data.step); break;
+      }
+
+      switch(data.action) {
+        case "invalidateStart":
+          if (log[i].ctxId == "other") {
+            break;
+          }
+          this.steps.push(data.step);
+          break;
+        case "invalidateEnd":
+        case "isolateInvalidateStart":
+        case "isolateInvalidateEnd":
+        // case "isolateEnter":
+        // case "isolateExit":
+        case "asyncStart":
+        case "asyncStop":
+        case "queueEmpty":
+          break;
+        default:
+          this.steps.push(data.step);
+          break;
       }
     }
 
@@ -559,6 +588,15 @@ class GraphAtStep {
     //     this.graphCache[i] = _.cloneDeep(tmpGraph)
     //   }
     // }
+  }
+
+  nextStep(k) {
+    var nextStepPos = Math.min(this.steps.length - 1, _.sortedIndex(this.steps, k) + 1);
+    return this.steps[nextStepPos]
+  }
+  prevStep(k) {
+    var prevStepPos = Math.max(_.sortedIndex(this.steps, k) - 1, 1);
+    return this.steps[prevStepPos]
   }
 
   atStep(k) {
@@ -937,21 +975,29 @@ $(function() {
     updateLogItem()
   }
 
-  updateGraph.next = function() {
-    // Move one step ahead
+  updateGraph.nextTick = function() {
     window.curTick += 1
     updateGraph()
   }
-  updateGraph.prev = function() {
-    // Move one step back
+  updateGraph.prevTick = function() {
     window.curTick -= 1
+    updateGraph()
+  }
+  updateGraph.nextStep = function() {
+    // Move one step ahead (skipping unneccessary steps)
+    window.curTick = getGraph.nextStep(curTick)
+    updateGraph()
+  }
+  updateGraph.prevStep = function() {
+    // Move one step back
+    window.curTick = getGraph.prevStep(curTick)
     updateGraph()
   }
 
   updateGraph.nextEnterExitEmpty = function() {
     // move to queue empty
     for (var i = 0; i < getGraph.enterExitEmpties.length; i++) {
-      val = getGraph.enterExitEmpties[i];
+      val = getGraph.enterExitEmpties[i] - 1;
       if (curTick < val) {
         window.curTick = val;
         updateGraph();
@@ -1023,28 +1069,57 @@ $(function() {
   $("#endStepButton").click(updateGraph.lastEnterExitEmpty)
   $("#prevCycleButton").click(updateGraph.prevEnterExitEmpty)
   $("#nextCycleButton").click(updateGraph.nextEnterExitEmpty)
-  $("#prevStepButton").click(updateGraph.prev)
-  $("#nextStepButton").click(updateGraph.next)
+  $("#prevStepButton").click(updateGraph.prevStep)
+  $("#nextStepButton").click(updateGraph.nextStep)
   $(document.body).on("keydown", function(e) {
     if (e.which === 39 || e.which === 32) { // space, right
       if (e.altKey) {
+        if (e.shiftKey) {
+          // option + shift + right
+          if (updateGraph.nextQueueEmpty()) {
+            return;
+          }
+          // if it can't go right, try a cycle
+        }
+        // option + right
+        // return false if there is no more enter/exit empty marks
         if (updateGraph.nextEnterExitEmpty()) {
           return;
         }
+        // if it cant go right, try a step
+      } else if (e.shiftKey) {
+        // shift + right
+        updateGraph.nextTick();
+        return;
       }
       if (curTick < getGraph.maxStep) {
-        updateGraph.next();
+        // right
+        updateGraph.nextStep();
         return;
       }
     }
     if (e.which === 37) { // left
       if (e.altKey) {
+        if (e.shiftKey) {
+          // option + shift + left
+          if (updateGraph.prevQueueEmpty()) {
+            return;
+          }
+          // if can't go left, try cycle
+        }
+        // option + left
         if (updateGraph.prevEnterExitEmpty()) {
           return;
         }
+        // if can't go left, try step
+      } else if (e.shiftKey) {
+        // shift + left
+        updateGraph.prevTick()
+        return;
       }
       if (curTick > 1) {
-        updateGraph.prev()
+        // left
+        updateGraph.prevStep()
         return;
       }
     }

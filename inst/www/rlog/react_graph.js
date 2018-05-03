@@ -4,6 +4,8 @@
 // √ clean up how active states are done
 // √ pulse on active enter change
 // √ pulse on valueChange
+// √ highlight tree on hover
+// keep highlight sticky on click
 // add edge styles
 //   distinguish active vs running edges
 // set up cloning of graph after every 250 steps
@@ -372,6 +374,7 @@ class Graph {
       return edge.cytoData;
     });
     cyto.add(ghostEdges);
+
     return cyto;
   }
 
@@ -878,13 +881,36 @@ var graphStyles = {
   },
   ghostEdge: {
     default: {
-      "width": 0.5,
+      "width": 1,
       "mid-target-arrow-shape": "triangle",
       "mid-target-arrow-color": "#d0cfbc",
       "arrow-scale": 0.25,
       "curve-style": "haystack",
       "line-color": "#d0cfbc",
       "line-style": "dotted"
+    }
+  },
+  focus: {
+    hoverNotFocused: {
+      "background-blacken": -0.75,
+      "border-color": colors.regular.grey1,
+      "line-color": colors.regular.grey1,
+      "mid-target-arrow-color": colors.regular.grey1,
+      "target-arrow-color": colors.regular.grey1
+    },
+    hoverNotFocusedButSticky: {
+      "background-blacken": -0.35,
+      "border-color": colors.regular.grey2,
+      "line-color": colors.regular.grey2,
+      "mid-target-arrow-color": colors.regular.grey2,
+      "target-arrow-color": colors.regular.grey2
+    },
+    stickyNotFocused: {
+      "background-blacken": -0.75,
+      "border-color": colors.regular.grey1,
+      "line-color": colors.regular.grey1,
+      "mid-target-arrow-color": colors.regular.grey1,
+      "target-arrow-color": colors.regular.grey1
     }
   }
 }
@@ -922,9 +948,71 @@ $(function() {
       styleHelper(".nodeInvalidateDone", graphStyles.node.invalidateDone),
       styleHelper(".nodeIsolate", graphStyles.node.isolate),
       styleHelper(".nodeIsolateInvalidate", graphStyles.node.isolateInvalidate),
-      styleHelper(".nodeValueChanged", graphStyles.node.valueChanged)
+      styleHelper(".nodeValueChanged", graphStyles.node.valueChanged),
+      styleHelper(".hoverNotFocused", graphStyles.focus.hoverNotFocused),
+      styleHelper(".hoverNotFocusedButSticky", graphStyles.focus.hoverNotFocusedButSticky),
+      styleHelper(".stickyNotFocused", graphStyles.focus.stickyNotFocused)
     ]
   });
+  cyto.on("mouseover", function(evt) {
+    var target = evt.target;
+    if (target == cyto) return;
+
+    // highlight all outgoer's outgoers and all incomer's incomers and self
+    var familyEles = cyto.collection();
+    if (target.isEdge()) {
+      var edge = target;
+      familyEles = familyEles
+        .add(edge)
+        .add(edge.target())
+        .add(edge.target().successors())
+        .add(edge.source())
+        .add(edge.source().predecessors());
+    } else {
+      // is node
+      var node = target;
+      familyEles = familyEles
+        .add(node)
+        .add(node.successors())
+        .add(node.predecessors());
+    }
+
+
+
+    var debounced = _.debounce(function() {
+      console.log(familyEles.id())
+      cyto.$().not(familyEles).not(".stickyFocused").addClass("hoverNotFocused");
+      cyto.$(".stickyFocused").addClass("hoverNotFocusedButSticky")
+      // cyto.$(familyEles).$(".stickyNotFocused").addClass("stickyNotFocusedTmp").removeClass("stickyNotFocused")
+      cyto.$(familyEles).removeClass("hoverNotFocused").addClass("hoverFocused");
+    }, 200)
+    debounced()
+    // if a mouseout occurs before the function is executed, cancel it
+    // works as mouseout is always called before mouseover
+    familyEles.once("mouseout", function(evtOut) {
+      debounced.cancel()
+      cyto.$().not(familyEles).removeClass("hoverNotFocused hoverNotFocusedButSticky")
+      cyto.$(familyEles).removeClass("hoverFocused")
+    })
+  });
+  // cyto.on("mouseout", function(evt) {
+  //   cyto.$().removeClass("notFocused")
+  // })
+
+  cyto.on("click", function(evt) {
+    var target = evt.target
+    if (target == cyto) {
+      // remove sticky focus class
+      cyto.$().removeClass("stickyFocused stickyNotFocused")
+      return;
+    }
+    cyto.$(".hoverFocused").addClass("stickyFocused")
+    cyto.$(".hoverNotFocused").addClass("stickyNotFocused")
+  })
+
+
+
+
   window.getGraph = new GraphAtStep(log);
   window.graph = getGraph.atStep(getGraph.maxStep);
   console.log(graph);

@@ -829,18 +829,35 @@ class GraphAtStep {
     var sortedElements = cy.$().sort(function(a, b) {
       return a.data().key > b.data().key ? 1 : -1;
     });
-    cy
-      .layout(_.assign({
-        // provide elements in sorted order to make determanistic layouts
-        eles: sortedElements,
-        // run on layout ready
-        ready: function() {
-          onLayoutReady.map(function(fn) {
-            fn();
-          })
-        }
-      }, layoutOptions))
-      .run();
+
+    // if no new edges appeared or disappeared
+    // or no nodes entered or exited
+    if (
+      edgesLRB.right.length == edgesLRB.left.length &&
+      nodesLRB.right.length == 0 &&
+      nodesLRB.left.length == 0
+    ) {
+      // do not re-render layout... just call onLayoutReady
+      onLayoutReady.map(function(fn) {
+        fn();
+      })
+    } else {
+      // calculate a new layout
+      // time expensive!!!
+      cy
+        .layout(_.assign({
+          // provide elements in sorted order to make determanistic layouts
+          eles: sortedElements,
+          // run on layout ready
+          ready: function() {
+            onLayoutReady.map(function(fn) {
+              fn();
+            })
+          }
+        }, layoutOptions))
+        .run();
+    }
+
   }
 }
 

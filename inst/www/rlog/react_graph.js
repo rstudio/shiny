@@ -845,16 +845,22 @@ class GraphAtStep {
       // calculate a new layout
       // time expensive!!!
       cy
-        .layout(_.assign({
-          // provide elements in sorted order to make determanistic layouts
-          eles: sortedElements,
-          // run on layout ready
-          ready: function() {
-            onLayoutReady.map(function(fn) {
-              fn();
-            })
-          }
-        }, layoutOptions))
+        .layout(_.assign(
+          {
+            // provide elements in sorted order to make determanistic layouts
+            eles: sortedElements,
+            // run on layout ready
+            ready: function() {
+              onLayoutReady.map(function(fn) {
+                fn();
+              })
+            }
+          },
+          layoutOptions
+          // ,
+          // TODO-barret Make animation a setting... it's expensive!
+          // {animate: true}
+        ))
         .run();
     }
 

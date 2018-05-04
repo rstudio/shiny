@@ -65,6 +65,12 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))
 
+
+## Known issues
+
+In some rare cases, interrupting an application (by pressing Ctrl-C or Esc) may result in the message `Error in execCallbacks(timeoutSecs) : c++ exception (unknown reason)`. Although this message sounds alarming, it is harmless, and will go away in a future version of the later package (more information [here](https://github.com/r-lib/later/issues/55)).
+
+
 shiny 1.0.5
 ===========
 

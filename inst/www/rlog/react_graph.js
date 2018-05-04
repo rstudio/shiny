@@ -5,7 +5,7 @@
 // √ pulse on active enter change
 // √ pulse on valueChange
 // √ highlight tree on hover
-// keep highlight sticky on click
+// √ keep highlight sticky on click
 // add edge styles
 //   distinguish active vs running edges
 // set up cloning of graph after every 250 steps
@@ -74,6 +74,21 @@ colors = {
   }
 }
 
+
+class HoverStatus {
+  constructor(state) {
+    this.sticky = false; // true / false
+    this.state = state || "focused"; // "off", "focused", "notFocused"
+  }
+  get isSticky() { return this.sticky == true }
+  toNotSticky() { this.sticky = false; }
+  toSticky() { this.sticky = true; }
+
+  get isFocused() { return this.state == "focused" }
+  toFocused() { this.state = "focused"; }
+  toNotFocused() { this.state = "notFocused"; }
+}
+
 // pulse on being active at step k; isAtStep(k)
 // display engaged; isOn
 // display active engaged; isOn and isActive
@@ -83,8 +98,6 @@ class ActiveStateStatus {
   constructor() {
     this.state = "off"; // "on", "finished", "off"
     this.activeStep = -1;
-    // this.active = false; // currently engaged in activity
-    // this.step = false; // -1 for finished, false for not engaged, positive for engaged at step k
   }
   setState(state) { this.state = state; }
   setActiveAtStep(step) { this.toOn(); this.activeStep = step; }
@@ -106,24 +119,10 @@ class ActiveStateStatus {
   }
   toFinished() {
     this.state = "finished";
-    // this.activeStep = false;
   }
   toOff() {
     this.state = "off";
   }
-
-  // finished() {
-  //   this.setStep(-1);
-  // }
-  // get isFinished() {
-  //   return (this.step !== false) && (this.step == -1)
-  // }
-  // get isActive() {
-  //   return this.active === true;
-  // }
-  // isActiveAtStep(step) {
-  //   return (this.step !== false) && (this.step == step) &&
-  // }
 }
 class StatusArr {
   constructor() {
@@ -177,6 +176,7 @@ class Node {
     this.time = data.time;
     this.statusArr = new StatusArr(data.statusArr || []);
     this.value = data.value || null;
+    this.hoverStatus = data.hoverStatus || new HoverStatus();
 
     this.valueChangedStatus = data.valueChangedStatus || new ActiveStateStatus();
 
@@ -189,6 +189,7 @@ class Node {
   }
   get id() {return this.reactId.replace(/\$/g, "_")}
   get key() {return this.reactId}
+  get hoverKey() {return this.key}
   statusAdd(obj) {
     this.statusArr.add(obj);
     return this.statusArr;
@@ -200,23 +201,7 @@ class Node {
   // get inInvalidate() {return this.statusArr.containsStatus("invalidateStart");}
   get inIsolateInvalidate() {return this.statusArr.containsStatus("isolateInvalidateStart");}
   get cytoStyle() {
-    var ret = {}
-    // if (this.id == "r9") {
-    //   ret["background-blacken"] = -0.75;
-    // }
-    // switch(this.type) {
-    //   case "observer": ret = _.assign(ret, graphStyles.node.end); break;
-    //   case "observable": ret = _.assign(ret, graphStyles.node.middle); break;
-    //   default: ret = _.assign(ret, graphStyles.node.start)
-    // }
-    // if (this.hasInvalidated) ret = _.assign(ret, graphStyles.node.invalidate);
-    // if (this.inEnter) ret = _.assign(ret, graphStyles.node.enter);
-    // if (this.activeEnter) ret = _.assign(ret, graphStyles.node.enterActive);
-    // // if (this.inInvalidate) classes.push("nodeInvalidate");
-    // // if (this.inIsolate) classes.push("nodeIsolate");
-    // // if (this.inIsolateInvalidate) classes.push("nodeIsolateInvalidate");
-    // if (this.inValueChanged) ret = _.assign(ret, graphStyles.node.valueChanged);
-    return ret
+    return {}
   }
   get cytoLabel() {
     // if (this.label.length > 30) {
@@ -244,6 +229,18 @@ class Node {
     if (this.inIsolate) classes.push("nodeIsolate");
     // if (this.inIsolateInvalidate) classes.push("nodeIsolateInvalidate");
     if (this.valueChangedStatus.isOn) classes.push("nodeValueChanged");
+
+    switch (this.hoverStatus.state) {
+      case "focused": break;
+      case "notFocused":
+        if (this.hoverStatus.sticky) {
+          classes.push("hoverNotFocusedButSticky");
+        } else {
+          classes.push("hoverNotFocused");
+        }
+        break;
+    }
+
     return classes.join(" ")
   }
   get cytoData() {
@@ -267,6 +264,7 @@ class Edge {
     this.time = data.time;
     this.status = "normal";
     this.isGhost = false;
+    this.hoverStatus = data.hoverStatus || new HoverStatus();
   }
   get id() {
     return `${ this.reactId }_${ this.depOnReactId }_${this.ctxId}`.replace(/\$/g, "_");
@@ -280,15 +278,28 @@ class Edge {
   get key() {
     return `${ this.reactId } depends on ${ this.depOnReactId } in ${this.ctxId}`;
   }
-  get depKey() {
+  get ghostKey() {
     return `${ this.reactId } depends on ${ this.depOnReactId }`;
   }
+  get hoverKey() {return this.ghostKey}
   get inIsolate() {
     return this.status == "isolate";
   }
   get cytoClasses() {
-    if (this.inIsolate) return "edgeIsolate"
-    return ""
+    var classes = [];
+    if (this.inIsolate) classes.push("edgeIsolate");
+    switch (this.hoverStatus.state) {
+      case "off": break;
+      case "focused": break;
+      case "notFocused":
+        if (this.hoverStatus.sticky) {
+          classes.push("hoverNotFocusedButSticky");
+        } else {
+          classes.push("hoverNotFocused");
+        }
+        break;
+    }
+    return classes.join(" ")
   }
   get cytoData() {
     var retData = this;
@@ -308,6 +319,7 @@ class GhostEdge {
     this.session = data.session || "Global";
     this.time = data.time;
     this.isGhost = true;
+    this.hoverStatus = data.hoverStatus || new HoverStatus();
   }
   get id() {
     return `${ this.reactId }_${ this.depOnReactId }`.replace(/\$/g, "_");
@@ -321,6 +333,7 @@ class GhostEdge {
   get key() {
     return `${ this.reactId } depends on ${ this.depOnReactId }`;
   }
+  get hoverKey() {return this.key}
   get cytoStyle() {
     return {};
     // return graphStyles.ghostEdge.default
@@ -364,8 +377,8 @@ class Graph {
     var ghostEdgeMap = _.assign({}, this.edgesUnique);
     var edges = _.values(this.edges).map(function(edge) {
       // remove matching unique/ghost edges
-      if (_.has(ghostEdgeMap, edge.depKey)) {
-        delete ghostEdgeMap[edge.depKey];
+      if (_.has(ghostEdgeMap, edge.ghostKey)) {
+        delete ghostEdgeMap[edge.ghostKey];
       }
       return edge.cytoData;
     });
@@ -488,8 +501,8 @@ class Graph {
         var edgeKey = edge.key;
 
         // store unique edges to always display a transparent dependency
-        if (!_.has(this.edgesUnique, edge.depKey)) {
-          this.edgesUnique[edge.depKey] = new GhostEdge(data);
+        if (!_.has(this.edgesUnique, edge.ghostKey)) {
+          this.edgesUnique[edge.ghostKey] = new GhostEdge(data);
         }
 
         if (!_.has(this.edges, edgeKey)) {
@@ -542,6 +555,10 @@ class GraphAtStep {
     this.steps = [];
     this.minStep = log[0].step;
     this.maxStep = log[log.length - 1].step;
+
+    // hoverInfo[key] = `HoverStatus`
+    this.hoverDefault = "focused"
+    this.hoverInfo = {} // use `hoverKey`
 
     var data, i;
     var enterExitQueue = [];
@@ -608,14 +625,86 @@ class GraphAtStep {
     // if (kVal >= this.cacheStep) {
     //   iStart = Math.floor((kVal - 1) / this.cacheStep) * this.cacheStep;
     //   graph = _.cloneDeep(this.graphCache[iStart])
-    //   console.log(iStart, graph)
-    //
     // }
     graph = new Graph(log);
     for (i = 0; i < log.length && this.log[i].step <= k; i++) {
       graph.addEntry(this.log[i]);
     }
+
+    // set hover status of items
+    var hoverInfo = this.hoverInfo;
+    var hoverDefault = this.hoverDefault;
+    var defaultHoverStatus = function(key) {
+      var ret = new HoverStatus()
+      ret.state = hoverDefault
+      hoverInfo[key] = ret
+      return ret;
+    }
+    // for nodes, edges, and ghost edges...
+    //   set the hover status or define a new one and return it
+    _.mapValues(
+      _.assign({}, graph.nodes, graph.edges, graph.edgesUnique),
+      function(data) {
+        // set the hover status or define a new one and return it
+        data.hoverStatus = hoverInfo[data.hoverKey] || defaultHoverStatus(data.hoverKey)
+      }
+    )
     return graph;
+  }
+
+  // if some sticky items, set those to focused and everything else to not focused
+  // else set all to focused
+  resetHoverInfo() {
+    var anySticky = _.some(this.hoverInfo, ["sticky", true])
+    if (anySticky) {
+      // some sticky values... bring them to focus
+      _.mapValues(this.hoverInfo, function(hoverStatus, key){
+        if (hoverStatus.isSticky) {
+          hoverStatus.toFocused();
+        } else {
+          hoverStatus.toNotFocused();
+        }
+      })
+      this.hoverDefault = "notFocused";
+    } else {
+      // no sticky values, bring everything to normal
+      _.mapValues(this.hoverInfo, function(hoverStatus, key){
+        hoverStatus.toFocused();
+      })
+      this.hoverDefault = "focused";
+    }
+    return true;
+  }
+  // set the value outright
+  updateHoverInfo(focusedDatas, notFocusedDatas) {
+    var hoverInfo = this.hoverInfo;
+    focusedDatas.map(function(data) {
+      hoverInfo[data.hoverKey].toFocused()
+    })
+    notFocusedDatas.map(function(data) {
+      hoverInfo[data.hoverKey].toNotFocused()
+    })
+  }
+
+  resetStickyInfo() {
+    var anySticky = _.some(this.hoverInfo, ["sticky", true])
+    if (anySticky) {
+      _.mapValues(this.hoverInfo, function(hoverStatus, key) {
+        hoverStatus.toNotSticky()
+        hoverStatus.toFocused()
+      })
+    }
+    this.hoverDefault = "focused";
+    return anySticky;
+  }
+  updateStickyInfo(stickyDatas, notStickyDatas) {
+    var hoverInfo = this.hoverInfo;
+    stickyDatas.map(function(data) {
+      hoverInfo[data.hoverKey].toSticky()
+    })
+    notStickyDatas.map(function(data) {
+      hoverInfo[data.hoverKey].toNotSticky()
+    })
   }
 
   displayAtStep(k, cy) {
@@ -668,7 +757,6 @@ class GraphAtStep {
       // pulse value change
       if (graphNodeData.valueChangedStatus.isActiveAtStep(k - 1)) {
         onLayoutReady.push(function() {
-          // console.log("pulse red!")
           cyNode
             .flashClass("nodeStartBig", 125)
         })
@@ -954,14 +1042,11 @@ $(function() {
       styleHelper(".stickyNotFocused", graphStyles.focus.stickyNotFocused)
     ]
   });
-  cyto.on("mouseover", function(evt) {
-    var target = evt.target;
-    if (target == cyto) return;
 
-    // highlight all outgoer's outgoers and all incomer's incomers and self
+  cytoFamilySuccPred = function(ele) {
     var familyEles = cyto.collection();
-    if (target.isEdge()) {
-      var edge = target;
+    if (ele.isEdge()) {
+      var edge = ele;
       familyEles = familyEles
         .add(edge)
         .add(edge.target())
@@ -970,44 +1055,67 @@ $(function() {
         .add(edge.source().predecessors());
     } else {
       // is node
-      var node = target;
+      var node = ele;
       familyEles = familyEles
         .add(node)
         .add(node.successors())
         .add(node.predecessors());
     }
+    return familyEles;
+  }
+  cyto.on("mouseover", function(evt) {
+    var target = evt.target;
+    if (target == cyto) return;
 
+    // highlight all outgoer's outgoers and all incomer's incomers and self
+    var familyEles = cytoFamilySuccPred(target);
 
+    elesData = function(eles) {
+      return eles.map(function(ele) {
+        return ele.data();
+      })
+    }
 
+    var hasCalled = false;
     var debounced = _.debounce(function() {
-      console.log(familyEles.id())
-      cyto.$().not(familyEles).not(".stickyFocused").addClass("hoverNotFocused");
-      cyto.$(".stickyFocused").addClass("hoverNotFocusedButSticky")
-      // cyto.$(familyEles).$(".stickyNotFocused").addClass("stickyNotFocusedTmp").removeClass("stickyNotFocused")
-      cyto.$(familyEles).removeClass("hoverNotFocused").addClass("hoverFocused");
+      hasCalled = true;
+      updateGraph.hoverInfo(
+        elesData(familyEles),
+        elesData(cyto.$().not(familyEles))
+      )
     }, 200)
     debounced()
     // if a mouseout occurs before the function is executed, cancel it
     // works as mouseout is always called before mouseover
     familyEles.once("mouseout", function(evtOut) {
       debounced.cancel()
-      cyto.$().not(familyEles).removeClass("hoverNotFocused hoverNotFocusedButSticky")
-      cyto.$(familyEles).removeClass("hoverFocused")
+      if (hasCalled) {
+        // only remove hover if hover added
+        updateGraph.resetHoverInfo()
+      }
     })
   });
-  // cyto.on("mouseout", function(evt) {
-  //   cyto.$().removeClass("notFocused")
-  // })
 
   cyto.on("click", function(evt) {
+    elesData = function(eles) {
+      return eles.map(function(ele) {
+        return ele.data();
+      })
+    }
+
     var target = evt.target
     if (target == cyto) {
       // remove sticky focus class
-      cyto.$().removeClass("stickyFocused stickyNotFocused")
+      updateGraph.resetStickyInfo()
       return;
     }
-    cyto.$(".hoverFocused").addClass("stickyFocused")
-    cyto.$(".hoverNotFocused").addClass("stickyNotFocused")
+
+    var familyEles = cytoFamilySuccPred(target);
+    updateGraph.stickyInfo(
+      elesData(familyEles),
+      elesData(cyto.$().not(familyEles))
+    )
+    return;
   })
 
 
@@ -1057,6 +1165,23 @@ $(function() {
     getGraph.displayAtStep(curTick, cyto);
     updateProgressBar()
     updateLogItem()
+  }
+
+  updateGraph.hoverInfo = function(focusedDatas, notFocusedDatas) {
+    getGraph.updateHoverInfo(focusedDatas, notFocusedDatas)
+    updateGraph()
+  }
+  updateGraph.resetHoverInfo = function() {
+    getGraph.resetHoverInfo()
+    updateGraph()
+  }
+  updateGraph.stickyInfo = function(stickyDatas, notStickyDatas) {
+    getGraph.updateStickyInfo(stickyDatas, notStickyDatas)
+    updateGraph()
+  }
+  updateGraph.resetStickyInfo = function() {
+    getGraph.resetStickyInfo()
+    updateGraph()
   }
 
   updateGraph.nextTick = function() {

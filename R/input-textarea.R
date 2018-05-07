@@ -56,6 +56,7 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
 
   div(class = "form-group shiny-input-container",
     label %AND% tags$label(label, `for` = inputId),
+    style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     tags$textarea(
       id = inputId,
       class = "form-control",

@@ -1,8 +1,6 @@
 #' @include utils.R
 NULL
 
-# TODO-barret pass the domain around
-
 Dependents <- R6Class(
   'Dependents',
   portable = FALSE,

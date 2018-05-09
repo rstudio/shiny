@@ -12,6 +12,10 @@
 // filtering
 // update legend
 
+// // Questions
+// should layout be done with full graph and only "turn on" / "turn off" the nodes/edges?
+// should filtering be done with the full layout?
+//
 
 colors = {
   // regular colors
@@ -363,11 +367,6 @@ class Graph {
     this.activeInvalidateEnter = [];
   }
 
-  // get nodeIds() {
-  //   return _.values(this.nodes).map(function(node) {
-  //     return "#" + node.id
-  //   }).join(", ")
-  // }
   get cytoGraph() {
     var cyto = cytoscape();
     var nodes = _.values(this.nodes).map(function(node) {
@@ -540,30 +539,44 @@ class Graph {
 
 // initialize all log entries to have a step value
 (function(){
-  for (var i = 0; i < log.length; i++) {
-    log[i].step = i;
+  for (var i = 0; i < window.log.length; i++) {
+    window.log[i].step = i;
   }
 })()
 
 class GraphAtStep {
   constructor(log) {
-    this.log = log;
-    this.asyncStarts = [];
-    this.asyncStops = [];
-    this.queueEmpties = [];
-    this.enterExitEmpties = [];
-    this.steps = [];
-    this.minStep = log[0].step;
-    this.maxStep = log[log.length - 1].step;
+    this.originalLog = log;
 
     // hoverInfo[key] = `HoverStatus`
     this.hoverDefault = "focused"
     this.hoverInfo = {} // use `hoverKey`
 
+    this.withLog(log);
+
+    this.finalGraph = this.atStep(log.length);
+    this.finalCyto = this.finalGraph.cytoGraph;
+
+  }
+
+  get hasFiltered() {
+    return this.originalLog.length != this.log.length;
+  }
+
+  withLog(log) {
+    this.log = log;
+    this.steps = [];
+    this.asyncStarts = [];
+    this.asyncStops = [];
+    this.queueEmpties = [];
+    this.enterExitEmpties = [];
+    this.minStep = log[0].step;
+    this.maxStep = log[log.length - 1].step;
+
     var data, i;
     var enterExitQueue = [];
-    for (i = 0; i < log.length; i++) {
-      data = log[i];
+    for (i = 0; i < this.log.length; i++) {
+      data = this.log[i];
       switch (data.action) {
         case "enter": enterExitQueue.push(i); break;
         case "exit":
@@ -579,11 +592,14 @@ class GraphAtStep {
 
       switch(data.action) {
         case "invalidateStart":
-          if (log[i].ctxId == "other") {
+          if (this.log[i].ctxId == "other") {
             break;
           }
+          // TODO-barret check if reactId is a reactive values. If so, skip, otherwise add
           this.steps.push(data.step);
           break;
+        case "define":
+          // TODO-barret only for reactive values keys
         case "invalidateEnd":
         case "isolateInvalidateStart":
         case "isolateInvalidateEnd":
@@ -626,8 +642,8 @@ class GraphAtStep {
     //   iStart = Math.floor((kVal - 1) / this.cacheStep) * this.cacheStep;
     //   graph = _.cloneDeep(this.graphCache[iStart])
     // }
-    graph = new Graph(log);
-    for (i = 0; i < log.length && this.log[i].step <= k; i++) {
+    graph = new Graph(this.log);
+    for (i = 0; i < this.log.length && this.log[i].step <= k; i++) {
       graph.addEntry(this.log[i]);
     }
 
@@ -707,6 +723,50 @@ class GraphAtStep {
     })
   }
 
+  filterLogOnDatas(datas) {
+    var keyMap = {};
+    var nodeMap = {};
+    datas.map(function(data) {
+      keyMap[data.key] = data
+      if (data instanceof Node) {
+        nodeMap[data.reactId] = data
+      }
+    });
+    var newLog = _.filter(this.originalLog, function(logEntry) {
+      switch(logEntry.action) {
+        case "dependsOn":
+        case "dependsOnRemove":
+          // check for both to and from
+          return _.has(nodeMap, logEntry.reactId) && _.has(nodeMap, logEntry.depOnReactId);
+          break;
+        case "define":
+        case "updateNodeLabel":
+        case "valueChange":
+        case "invalidateStart":
+        case "enter":
+        case "isolateInvalidateStart":
+        case "isolateEnter":
+        case "invalidateEnd":
+        case "exit":
+        case "isolateExit":
+        case "isolateInvalidateEnd":
+        case "queueEmpty":
+          // check for reactId
+          return _.has(nodeMap, logEntry.reactId);
+          break;
+        case "asyncStart":
+        case "asyncStop":
+          // always add
+          return _.has(nodeMap, logEntry.reactId);
+        default:
+          console.error("logEntry.action: ", logEntry.action, data)
+          throw data;
+      }
+    })
+    console.log("new Log: ", newLog);
+    return newLog;
+  }
+
   displayAtStep(k, cy) {
     var graph = this.atStep(k);
 
@@ -755,7 +815,7 @@ class GraphAtStep {
         // });
 
       // pulse value change
-      if (graphNodeData.valueChangedStatus.isActiveAtStep(k - 1)) {
+      if (graphNodeData.valueChangedStatus.isActiveAtStep(k)) {
         onLayoutReady.push(function() {
           cyNode
             .flashClass("nodeStartBig", 125)
@@ -763,8 +823,8 @@ class GraphAtStep {
       }
       // pulse value enter or invalidate change
       if (
-        graphNodeData.invalidateStatus.isActiveAtStep(k - 1) ||
-        graphNodeData.enterStatus.isActiveAtStep(k - 1)
+        graphNodeData.invalidateStatus.isActiveAtStep(k) ||
+        graphNodeData.enterStatus.isActiveAtStep(k)
       ) {
         onLayoutReady.push(function() {
           switch(graphNodeData.type) {
@@ -1066,23 +1126,38 @@ $(function() {
     ]
   });
 
-  cytoFamilySuccPred = function(ele) {
+  cytoFamilySuccPred = function(ele, addExtraLayer = true) {
     var familyEles = cyto.collection();
     if (ele.isEdge()) {
       var edge = ele;
+      if (false) {
+        // TODO-barret attempt at getting all nodes and edges from final graph
+        // abandon, as the edge should be stored and constantly retrieved somewhere else
+        console.log(`#${ele.source().id()} -> #${ele.target().id()}`)
+        ele = getGraph.finalCyto.$(`#${ele.source().id()} -> #${ele.target().id()}`)
+      }
       familyEles = familyEles
         .add(edge)
-        .add(edge.target())
-        .add(edge.target().successors())
-        .add(edge.source())
-        .add(edge.source().predecessors());
+        .add(ele.target())
+        .add(ele.target().successors())
+        .add(ele.source())
+        .add(ele.source().predecessors());
     } else {
       // is node
       var node = ele;
+      if (false) {
+        ele = getGraph.finalCyto.$id(ele.id())
+      }
       familyEles = familyEles
         .add(node)
-        .add(node.successors())
-        .add(node.predecessors());
+        .add(ele.successors())
+        .add(ele.predecessors());
+    }
+    if (addExtraLayer) {
+      var familyNodes = familyEles.nodes();
+      familyEles = familyEles
+        .add(familyNodes.incomers())
+        .add(familyNodes.outgoers());
     }
     return familyEles;
   }
@@ -1091,9 +1166,9 @@ $(function() {
     if (target == cyto) return;
 
     // highlight all outgoer's outgoers and all incomer's incomers and self
-    var familyEles = cytoFamilySuccPred(target);
+    var familyEles = cytoFamilySuccPred(target, false);
 
-    elesData = function(eles) {
+    var elesData = function(eles) {
       return eles.map(function(ele) {
         return ele.data();
       })
@@ -1119,21 +1194,41 @@ $(function() {
     })
   });
 
+  var cytoClickedBefore, cytoClickedTimeout;
   cyto.on("click", function(evt) {
-    elesData = function(eles) {
+    var elesData = function(eles) {
       return eles.map(function(ele) {
         return ele.data();
       })
     }
 
     var target = evt.target
+
+    // check for double click
+    // https://stackoverflow.com/a/44160927
+    if (cytoClickedTimeout && cytoClickedBefore) {
+      clearTimeout(cytoClickedTimeout)
+    }
+    if (cytoClickedBefore == target) {
+      // is actually a double click... return!
+      target.trigger("dblclick", evt)
+      cytoClickedBefore = null;
+      return;
+    } else {
+      cytoClickedTimeout = setTimeout(function(){ cytoClickedBefore = null; }, 400);
+      cytoClickedBefore = target;
+      // continue like regular click
+      console.log("click!!", evt)
+    }
+
+
     if (target == cyto) {
       // remove sticky focus class
       updateGraph.resetStickyInfo()
       return;
     }
 
-    var familyEles = cytoFamilySuccPred(target);
+    var familyEles = cytoFamilySuccPred(target, false);
     updateGraph.stickyInfo(
       elesData(familyEles),
       elesData(cyto.$().not(familyEles))
@@ -1141,25 +1236,66 @@ $(function() {
     return;
   })
 
+  cyto.on("dblclick", function(evt, originalEvt) {
+    var elesData = function(eles) {
+      return eles.map(function(ele) {
+        return ele.data();
+      })
+    }
+
+    console.log("dbl click!!");
+    // console.log("dbl click!!", evt, originalEvt);
+    var target = evt.target;
+
+    if (target == cyto) {
+      // go back to full graph
+      updateGraph.resetWithLog()
+      return;
+    }
+
+    var holdingShiftKey = originalEvt.originalEvent.shiftKey;
+    if (holdingShiftKey) {
+      console.log("extra layers!")
+      var familyEles = cytoFamilySuccPred(target, true);
+      var familyDatas = elesData(familyEles)
+
+      var directFamilyEles = cytoFamilySuccPred(target, false);
+      getGraph.updateHoverInfo(
+        elesData(directFamilyEles),
+        elesData(cyto.$().not(directFamilyEles))
+      )
+
+      updateGraph.withDatas(familyDatas)
+
+    } else {
+      var familyEles = cytoFamilySuccPred(target, false);
+      var familyDatas = elesData(familyEles)
+
+      updateGraph.withDatas(familyDatas)
+
+    }
+
+  })
 
 
 
-  window.getGraph = new GraphAtStep(log);
+
+  window.getGraph = new GraphAtStep(window.log);
   window.graph = getGraph.atStep(getGraph.maxStep);
   console.log(graph);
 
   getGraph.enterExitEmpties.map(function(i) {
-    $("#timeline-bg").append(`<div class=\"timeline-enterexit\" style=\"left: ${100 * i / log.length}%;\"></div>`)
+    $("#timeline-bg").append(`<div class=\"timeline-enterexit\" style=\"left: ${100 * i / this.log.length}%;\"></div>`)
   })
   getGraph.queueEmpties.map(function(i) {
-    $("#timeline-bg").append(`<div class=\"timeline-cycle\" style=\"left: ${100 * i / log.length}%;\"></div>`)
+    $("#timeline-bg").append(`<div class=\"timeline-cycle\" style=\"left: ${100 * i / this.log.length}%;\"></div>`)
   })
 
   function updateProgressBar() {
-    $("#timeline-fill").width((curTick / log.length * 100) + "%");
+    $("#timeline-fill").width((curTick / window.log.length * 100) + "%");
   }
   function updateLogItem() {
-    $("#instructions").text(JSON.stringify(log[curTick], null, "  "));
+    $("#instructions").text(JSON.stringify(window.log[curTick], null, "  "));
   }
   $('#timeline').on('mousedown mousemove', function(e) {
     // Make sure left mouse button is down.
@@ -1175,7 +1311,7 @@ $(function() {
     var timeline = e.currentTarget;
     var pos = e.pageX || e.originalEvent.pageX; // pageX in pixels
     var width = timeline.offsetWidth; // width in pixels
-    var targetStep = Math.max(Math.round((pos/width) * log.length), 1);
+    var targetStep = Math.max(Math.round((pos/width) * window.log.length), 1);
     if (targetStep != curTick) {
       window.curTick = targetStep;
       updateGraph()
@@ -1184,10 +1320,33 @@ $(function() {
   });
 
 
+
+
   updateGraph = function() {
     getGraph.displayAtStep(curTick, cyto);
     updateProgressBar()
     updateLogItem()
+  }
+
+  updateGraph.resetWithLog = function() {
+    updateGraph.withLog(getGraph.originalLog)
+  }
+  updateGraph.withLog = function(log) {
+    getGraph.withLog(log);
+    getGraph.resetStickyInfo()
+
+    var nextTick = getGraph.nextStep(curTick);
+
+    if (getGraph.prevStep(nextTick) != curTick) {
+      // updateGraph.prevStep();
+      updateGraph()
+    } else {
+      updateGraph()
+    }
+  }
+  updateGraph.withDatas = function(datas) {
+    var newLog = getGraph.filterLogOnDatas(datas);
+    updateGraph.withLog(newLog);
   }
 
   updateGraph.hoverInfo = function(focusedDatas, notFocusedDatas) {
@@ -1304,6 +1463,7 @@ $(function() {
   $("#prevStepButton").click(updateGraph.prevStep)
   $("#nextStepButton").click(updateGraph.nextStep)
   $(document.body).on("keydown", function(e) {
+    console.log("e: ", e)
     if (e.which === 39 || e.which === 32) { // space, right
       if (e.altKey) {
         if (e.shiftKey) {
@@ -1363,6 +1523,15 @@ $(function() {
     if (e.which === 36) { // home
       // Seek to beginning
       updateGraph.firstEnterExitEmpty();
+      return;
+    }
+
+    if (e.which == 27) { // esc
+      if (getGraph.hasFiltered) {
+        // must be in filter... so exit filter
+        getGraph.resetHoverInfo()
+        updateGraph.resetWithLog()
+      }
       return;
     }
   });

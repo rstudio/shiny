@@ -130,6 +130,12 @@ svg {
   top: 20px;
   left: 10px;
 }
+#filter {
+  position: fixed;
+  top: 20px;
+  right: 10px;
+  z-index: 1;
+}
 #timeline {
   position: fixed;
   top: 0;

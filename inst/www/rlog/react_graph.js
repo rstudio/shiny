@@ -1196,6 +1196,9 @@ $(function() {
 
   var cytoClickedBefore, cytoClickedTimeout;
   cyto.on("click", function(evt) {
+    // remove focus on search
+    $("#search").blur()
+
     var elesData = function(eles) {
       return eles.map(function(ele) {
         return ele.data();
@@ -1323,9 +1326,66 @@ $(function() {
 
 
   updateGraph = function() {
-    getGraph.displayAtStep(curTick, cyto);
+    getGraph.displayAtStep(window.curTick, window.cyto);
     updateProgressBar()
     updateLogItem()
+  }
+
+  updateGraph.withRegexString = function(regexStr) {
+
+    var searchRegex;
+    if (regexStr instanceof RegExp) {
+      searchRegex = regexStr;
+    } else {
+      // is string, not regex
+
+      // escape the string
+      // https://stackoverflow.com/a/17606289
+      var escapeRegExp = function (str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+      }
+      searchRegex = new RegExp(escapeRegExp(regexStr))
+    }
+
+    // if less than three chars...
+    if (searchRegex.source.length < 2) {
+      if (searchRegex.source.length == 0) {
+        // TODO-barret show warning of resetting
+        console.log("resetting log!")
+        updateGraph.resetWithLog()
+      } else {
+        // do nothing
+      }
+      return;
+    }
+
+    getGraph.withLog(getGraph.originalLog);
+    var cy = getGraph.atStep(window.curTick).cytoGraph;
+
+    var matchedNodes = cy.nodes().filter(function(node) {
+      return searchRegex.test(node.data().label)
+    })
+
+    if (matchedNodes.length == 0) {
+      // TODO-barret show warning of no matches
+      console.log("no matches!")
+      return;
+    }
+
+    var familyEles = cy.collection()
+      .add(matchedNodes)
+      .add(matchedNodes.successors())
+      .add(matchedNodes.predecessors());
+
+
+    var elesData = function(eles) {
+      return eles.map(function(ele) {
+        return ele.data();
+      })
+    }
+
+    updateGraph.withDatas(elesData(familyEles));
+    return;
   }
 
   updateGraph.resetWithLog = function() {
@@ -1462,8 +1522,23 @@ $(function() {
   $("#nextCycleButton").click(updateGraph.nextEnterExitEmpty)
   $("#prevStepButton").click(updateGraph.prevStep)
   $("#nextStepButton").click(updateGraph.nextStep)
+
+  $("#search").on("input", function(e) {
+    updateGraph.withRegexString(e.target.value)
+  })
   $(document.body).on("keydown", function(e) {
     console.log("e: ", e)
+    if (e.target.id && e.target.id == "search") {
+      // is in search text box
+      if (e.which == 27) {
+        $(e.target).blur()
+      } else {
+        // if (e.which == 13) { // enter
+        // }
+
+      }
+      return;
+    }
     if (e.which === 39 || e.which === 32) { // space, right
       if (e.altKey) {
         if (e.shiftKey) {
@@ -1529,11 +1604,37 @@ $(function() {
     if (e.which == 27) { // esc
       if (getGraph.hasFiltered) {
         // must be in filter... so exit filter
+        $("#search").val("");
         getGraph.resetHoverInfo()
         updateGraph.resetWithLog()
       }
       return;
     }
+    if (e.which == 38) { // arrow up
+      if (getGraph.hasFiltered) {
+
+        // must be in filter... so exit filter
+        getGraph.resetHoverInfo()
+        updateGraph.resetWithLog()
+      }
+      return;
+    }
+    if (e.which == 40) { // arrow down
+      if (getGraph.hasFiltered) {
+        // must be in filter... so exit filter
+        getGraph.resetHoverInfo()
+        updateGraph.resetWithLog()
+      }
+      return;
+    }
+    if (e.which == 83) { // s
+      _.defer(function() {
+        $("#search").focus()
+      })
+      e.stopPropagation();
+      return;
+    }
+
   });
 
 

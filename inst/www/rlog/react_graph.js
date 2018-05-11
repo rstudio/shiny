@@ -6,11 +6,13 @@
 // √ pulse on valueChange
 // √ highlight tree on hover
 // √ keep highlight sticky on click
-// add edge styles
-//   distinguish active vs running edges
-// set up cloning of graph after every 250 steps
-// filtering
-// update legend
+// X add edge styles
+// X  distinguish active vs running edges
+// X set up cloning of graph after every 250 steps
+// √ filtering
+// X update legend
+// - Re do how subsetting is done by "selecting" and item and always be interested in that item
+// enter/exit status and invalidateStart/End need to be controled by a single array status
 
 // // Questions
 // should layout be done with full graph and only "turn on" / "turn off" the nodes/edges?
@@ -53,6 +55,9 @@ colors = {
     active: "#818181",
     inactive: "#ececec"
   },
+  ghostEdges: {
+    default: "#3c3b39"
+  },
   // filtered colors
   lite: {
     white: "#ffffff",
@@ -81,17 +86,24 @@ colors = {
 
 class HoverStatus {
   constructor(state) {
-    this.sticky = false; // true / false
-    this.state = state || "focused"; // "off", "focused", "notFocused"
+    this.sticky = HoverStatus.notSticky; // true / false
+    this.state = state || HoverStatus.focused; // "focused", "notFocused"
+    this.selected = false;
   }
-  get isSticky() { return this.sticky == true }
-  toNotSticky() { this.sticky = false; }
-  toSticky() { this.sticky = true; }
+  isSticky() { return this.sticky == HoverStatus.sticky }
+  toNotSticky() { this.sticky = HoverStatus.notSticky; }
+  toSticky() { this.sticky = HoverStatus.sticky; }
 
-  get isFocused() { return this.state == "focused" }
-  toFocused() { this.state = "focused"; }
-  toNotFocused() { this.state = "notFocused"; }
+  isFocused() { return this.state == HoverStatus.focused }
+  toFocused() { this.state = HoverStatus.focused; }
+  toNotFocused() { this.state = HoverStatus.notFocused; }
 }
+HoverStatus.focused = "focused";
+HoverStatus.notFocused = "notFocused";
+HoverStatus.sticky = true;
+HoverStatus.notSticky = false;
+HoverStatus.isSelected = true;
+HoverStatus.isNotSelected = false;
 
 // pulse on being active at step k; isAtStep(k)
 // display engaged; isOn
@@ -235,15 +247,17 @@ class Node {
     if (this.valueChangedStatus.isOn) classes.push("nodeValueChanged");
 
     switch (this.hoverStatus.state) {
-      case "focused": break;
-      case "notFocused":
-        if (this.hoverStatus.sticky) {
+      case HoverStatus.focused: break;
+      case HoverStatus.notFocused:
+        // console.log("not focused!")
+        if (this.hoverStatus.isSticky()) {
           classes.push("hoverNotFocusedButSticky");
         } else {
           classes.push("hoverNotFocused");
         }
         break;
     }
+    if (this.hoverStatus.selected) classes.push("nodeSelected")
 
     return classes.join(" ")
   }
@@ -293,9 +307,8 @@ class Edge {
     var classes = [];
     if (this.inIsolate) classes.push("edgeIsolate");
     switch (this.hoverStatus.state) {
-      case "off": break;
-      case "focused": break;
-      case "notFocused":
+      case HoverStatus.focused: break;
+      case HoverStatus.notFocused:
         if (this.hoverStatus.sticky) {
           classes.push("hoverNotFocusedButSticky");
         } else {
@@ -303,6 +316,7 @@ class Edge {
         }
         break;
     }
+    if (this.hoverStatus.selected) classes.push("edgeSelected")
     return classes.join(" ")
   }
   get cytoData() {
@@ -343,7 +357,19 @@ class GhostEdge {
     // return graphStyles.ghostEdge.default
   }
   get cytoClasses() {
-    return "edgeGhost"
+    var classes = ["edgeGhost"]
+    switch (this.hoverStatus.state) {
+      case HoverStatus.focused: break;
+      case HoverStatus.notFocused:
+        if (this.hoverStatus.sticky) {
+          classes.push("edgeGhostHoverNotFocusedButSticky");
+        } else {
+          classes.push("edgeGhostHoverNotFocused");
+        }
+        break;
+    }
+    if (this.hoverStatus.selected) classes.push("edgeGhostSelected")
+    return classes.join(" ")
   }
   get cytoData() {
     var retData = this;
@@ -389,6 +415,248 @@ class Graph {
 
     return cyto;
   }
+
+  hasSomeData(data) {
+    if (data instanceof Node) {
+      return _.has(this.nodes, data.key)
+    } else if (data instanceof Edge || data instanceof GhostEdge) {
+      if (data instanceof Edge) {
+        if (_.has(this.edgesUnique, data.ghostKey)) return true;
+      } else {
+        if (_.has(this.edgesUnique, data.key)) return true;
+      }
+
+      var edgeGroup, key, edge;
+      var reactId = data.reactId;
+      var depOnReactId = data.depOnReactId;
+      for (edgeGroup in [this.edges, this.edgesUnique]) {
+        for (key in edgeGroup) {
+          edge = edgeGroup[key];
+          if (edge.reactId == reactId && edge.depOnReactId == depOnReactId) {
+            return true;
+          }
+        }
+      }
+      return false;
+
+    } else {
+      console.error(data)
+      throw "unsupported data type"
+    }
+  }
+
+  highlightSelected(data) {
+    if (data instanceof Node) {
+      if (_.has(this.nodes, data.key)) {
+        this.nodes[data.key].hoverStatus.selected = HoverStatus.isSelected;
+        return;
+      }
+    } else if (data instanceof Edge || data instanceof GhostEdge) {
+      if (data instanceof Edge) {
+        if (_.has(this.edges, data.key)) {
+          this.edges[data.key].hoverStatus.selected = HoverStatus.isSelected;
+          return;
+        }
+      }
+
+      // highlight all the edges (and ghost edges) that have the same source and target
+      var reactId = data.reactId;
+      var depOnReactId = data.depOnReactId;
+      var selectMatchingEdges = function(edge) {
+        if (edge.reactId == reactId && edge.depOnReactId == depOnReactId) {
+          edge.hoverStatus.selected = HoverStatus.isSelected;
+        }
+      }
+      _.values(this.edgesUnique).map(selectMatchingEdges)
+      _.values(this.edges).map(selectMatchingEdges)
+      return;
+    }
+    return;
+  }
+
+  reactIdFromData(data, getParentFromEdge = true) {
+    var reactId;
+    if (data instanceof Node) {
+      return data.reactId
+    } else if (Graph.isEdgeLike(data)) {
+      var node = getParentFromEdge ? this.nodes[data.depOnReactId] : this.nodes[data.reactId];
+      if (node) {
+        return node.reactId
+      } else {
+        return null
+      }
+    } else if (typeof data == "string") {
+      return data
+    } else {
+      console.error(data)
+      throw "unsupported data type. Can only 'reactId's of 'Node's, 'GhostEdge's, or 'Edge's or from a reactId"
+    }
+  }
+
+  static isEdgeLike(data) {
+    return (data instanceof Edge) || (data instanceof GhostEdge)
+  }
+
+  // return array of node 'reactId's
+  parentNodeIds(data) {
+    var reactId
+    if (Graph.isEdgeLike(data)) {
+      // return edge source
+      return [data.reactId]
+    } else {
+      var reactId = this.reactIdFromData(data, true);
+      if (!reactId) return []
+      return _.filter(_.values(this.edgesUnique), function(edge) {
+        // if the target is the reactId
+        return edge.reactId == reactId
+      }).map(function(edge) {
+        // return the source
+        return edge.depOnReactId
+      })
+    }
+  }
+  childrenNodeIds(data) {
+    if (Graph.isEdgeLike(data)) {
+      // return edge target
+      return [data.depOnReactId]
+    } else {
+      var reactId = this.reactIdFromData(data, false);
+      if (!reactId) return []
+      return _.filter(_.values(this.edgesUnique), function(edge) {
+        // if the source is the reactId
+        return edge.depOnReactId == reactId
+      }).map(function(edge) {
+        // return the target
+        return edge.reactId
+      })
+    }
+  }
+
+  ancestorNodeIds(data) {
+    var reactId = this.reactIdFromData(data, true);
+    if (!reactId) return []
+    var originalReactId = reactId;
+    var seenMap = {};
+    var reactIdArr = [reactId];
+    while (reactIdArr.length > 0) {
+      reactId = reactIdArr.pop();
+      if (!_.has(seenMap, reactId)) {
+        reactIdArr = reactIdArr.concat(this.parentNodeIds(reactId))
+        seenMap[reactId] = true;
+      }
+    }
+    delete seenMap[originalReactId]
+    return _.keys(seenMap).sort()
+  }
+  decendentNodeIds(data) {
+    var reactId = this.reactIdFromData(data, false);
+    if (!reactId) return []
+    var originalReactId = reactId;
+    var seenMap = {};
+    var reactIdArr = [reactId];
+    while (reactIdArr.length > 0) {
+      reactId = reactIdArr.pop();
+      if (!_.has(seenMap, reactId)) {
+        reactIdArr = reactIdArr.concat(this.childrenNodeIds(reactId))
+        seenMap[reactId] = true;
+      }
+    }
+    delete seenMap[originalReactId]
+    return _.keys(seenMap).sort()
+  }
+
+  // all filtering can be done with only node reactIds
+  familyTreeNodeIds(data) {
+    var ret = [];
+    if (Graph.isEdgeLike(data)) {
+      var reactId;
+      reactId = this.reactIdFromData(data, true)
+      if (reactId) ret.push(reactId)
+      reactId = this.reactIdFromData(data, false)
+      if (reactId) ret.push(reactId)
+    } else {
+      ret.push(this.reactIdFromData(data))
+    }
+    return _.union(
+      ret,
+      this.ancestorNodeIds(data),
+      this.decendentNodeIds(data)
+    );
+  }
+
+
+  hoverStatusOnNodeIds(nodeIds, hoverKey, onStatus, offStatus) {
+    var key;
+    var nodeMap = {};
+    nodeIds.map(function(nodeId) {
+      nodeMap[nodeId] = true;
+    })
+
+    var node, edge;
+    // highlight nodes
+    for (key in this.nodes) {
+      node = this.nodes[key]
+      if (_.has(nodeMap, node.reactId)) {
+        node.hoverStatus[hoverKey] = onStatus
+      } else {
+        node.hoverStatus[hoverKey] = offStatus
+      }
+    }
+    // highlight edges
+    for (key in this.edges) {
+      edge = this.edges[key]
+      if (_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId)) {
+        edge.hoverStatus[hoverKey] = onStatus
+      } else {
+        edge.hoverStatus[hoverKey] = offStatus
+      }
+    }
+    // highlight unique edges
+    for (key in this.edgesUnique) {
+      edge = this.edgesUnique[key]
+      if (_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId)) {
+        edge.hoverStatus[hoverKey] = onStatus
+      } else {
+        edge.hoverStatus[hoverKey] = offStatus
+      }
+    }
+
+    return this;
+  }
+
+  filterGraphOnNodeIds(nodeIds) {
+    var key;
+    var nodeMap = {};
+    nodeIds.map(function(nodeId) {
+      nodeMap[nodeId] = true;
+    })
+
+    var node, edge;
+    // prune nodes
+    for (key in this.nodes) {
+      node = this.nodes[key]
+      if (!_.has(nodeMap, node.reactId)) {
+        delete this.nodes[key]
+      }
+    }
+    // prune edges
+    for (key in this.edges) {
+      edge = this.edges[key]
+      if (!(_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId))) {
+        delete this.edges[key]
+      }
+    }
+    // prune unique edges
+    for (key in this.edgesUnique) {
+      edge = this.edgesUnique[key]
+      if (!(_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId))) {
+        delete this.edgesUnique[key]
+      }
+    }
+
+    return this;
+  }
+
 
   addEntry(data) {
 
@@ -549,8 +817,13 @@ class GraphAtStep {
     this.originalLog = log;
 
     // hoverInfo[key] = `HoverStatus`
-    this.hoverDefault = "focused"
-    this.hoverInfo = {} // use `hoverKey`
+    this.filterDatas = null;
+    this.hoverData = null;
+    this.stickyData = null;
+    // this.hoverDefault = "focused"
+    // this.hoverInfo = {} // use `hoverKey`
+
+    this.filterMap = {};
 
     this.withLog(log);
 
@@ -559,8 +832,14 @@ class GraphAtStep {
 
   }
 
-  get hasFiltered() {
-    return this.originalLog.length != this.log.length;
+  get hasFilterDatas() {
+    return this.filterDatas ? true : false;
+  }
+  get hasStickyData() {
+    return this.stickyData ? true : false;
+  }
+  get hasHoverData() {
+    return this.hoverData ? true : false;
   }
 
   withLog(log) {
@@ -647,87 +926,120 @@ class GraphAtStep {
       graph.addEntry(this.log[i]);
     }
 
-    // set hover status of items
-    var hoverInfo = this.hoverInfo;
-    var hoverDefault = this.hoverDefault;
-    var defaultHoverStatus = function(key) {
-      var ret = new HoverStatus()
-      ret.state = hoverDefault
-      hoverInfo[key] = ret
-      return ret;
-    }
-    // for nodes, edges, and ghost edges...
-    //   set the hover status or define a new one and return it
-    _.mapValues(
-      _.assign({}, graph.nodes, graph.edges, graph.edgesUnique),
-      function(data) {
-        // set the hover status or define a new one and return it
-        data.hoverStatus = hoverInfo[data.hoverKey] || defaultHoverStatus(data.hoverKey)
+    // if any hover...
+    if (this.hasHoverData) {
+      if (graph.hasSomeData(this.hoverData)) {
+        graph.hoverStatusOnNodeIds(
+          graph.familyTreeNodeIds(this.hoverData),
+          "state",
+          HoverStatus.focused,
+          HoverStatus.notFocused
+        )
+        graph.highlightSelected(this.hoverData)
       }
-    )
+    }
+    // if any sticky...
+    if (this.hasStickyData) {
+      if (graph.hasSomeData(this.stickyData)) {
+        var stickyTree = graph.familyTreeNodeIds(this.stickyData)
+        graph.hoverStatusOnNodeIds(
+          stickyTree,
+          "sticky",
+          HoverStatus.sticky,
+          HoverStatus.notSticky
+        )
+        graph.highlightSelected(this.stickyData)
+        if (!this.hoverData) {
+          // if sticky data no hover data... make the sticky data hover!
+          graph.hoverStatusOnNodeIds(
+            stickyTree,
+            "state",
+            HoverStatus.focused,
+            HoverStatus.notFocused
+          )
+        }
+      }
+    }
+    // if any filtering...
+    if (this.hasFilterDatas) {
+      graph.filterGraphOnNodeIds(
+        _.union(_.flatMap(this.filterDatas, function(filterData) {
+          graph.familyTreeNodeIds(filterData)
+        }))
+      )
+    }
+
     return graph;
   }
 
   // if some sticky items, set those to focused and everything else to not focused
   // else set all to focused
-  resetHoverInfo() {
-    var anySticky = _.some(this.hoverInfo, ["sticky", true])
-    if (anySticky) {
-      // some sticky values... bring them to focus
-      _.mapValues(this.hoverInfo, function(hoverStatus, key){
-        if (hoverStatus.isSticky) {
-          hoverStatus.toFocused();
-        } else {
-          hoverStatus.toNotFocused();
-        }
-      })
-      this.hoverDefault = "notFocused";
-    } else {
-      // no sticky values, bring everything to normal
-      _.mapValues(this.hoverInfo, function(hoverStatus, key){
-        hoverStatus.toFocused();
-      })
-      this.hoverDefault = "focused";
-    }
+  resetHoverData() {
+    this.hoverData = null;
+    // if (this.stickyData) {
+    //   // some sticky values... bring them to focus
+    //   _.mapValues(this.hoverInfo, function(hoverStatus, key){
+    //     if (hoverStatus.isSticky) {
+    //       hoverStatus.toFocused();
+    //     } else {
+    //       hoverStatus.toNotFocused();
+    //     }
+    //   })
+    //   this.hoverDefault = HoverStatus.notFocused;
+    // } else {
+    //   // no sticky values, bring everything to normal
+    //   _.mapValues(this.hoverInfo, function(hoverStatus, key){
+    //     hoverStatus.toFocused();
+    //   })
+    //   this.hoverDefault = "focused";
+    // }
     return true;
   }
-  // set the value outright
-  updateHoverInfo(focusedDatas, notFocusedDatas) {
-    var hoverInfo = this.hoverInfo;
-    focusedDatas.map(function(data) {
-      hoverInfo[data.hoverKey].toFocused()
-    })
-    notFocusedDatas.map(function(data) {
-      hoverInfo[data.hoverKey].toNotFocused()
-    })
-  }
 
-  resetStickyInfo() {
-    var anySticky = _.some(this.hoverInfo, ["sticky", true])
-    if (anySticky) {
-      _.mapValues(this.hoverInfo, function(hoverStatus, key) {
-        hoverStatus.toNotSticky()
-        hoverStatus.toFocused()
-      })
-    }
-    this.hoverDefault = "focused";
-    return anySticky;
-  }
-  updateStickyInfo(stickyDatas, notStickyDatas) {
-    var hoverInfo = this.hoverInfo;
-    stickyDatas.map(function(data) {
-      hoverInfo[data.hoverKey].toSticky()
-    })
-    notStickyDatas.map(function(data) {
-      hoverInfo[data.hoverKey].toNotSticky()
-    })
-  }
+  updateHoverData(data) { this.hoverData = data }
+  updateHoverDataReset() { this.hoverData = null }
+  updateStickyData(data) { this.stickyData = data }
+  updateStickyDataReset() { this.stickyData = null }
+  updateFilterDatas(dataArr) { this.filterDatas = dataArr }
+  updateFilterDatasReset() { this.filterDatas = null }
+  // // set the value outright
+  // updateHoverData(hoverData) {
+  //   this.hoverData = hoverData;
+  //   // var hoverInfo = this.hoverInfo;
+  //   // focusedDatas.map(function(data) {
+  //   //   hoverInfo[data.hoverKey].toFocused()
+  //   // })
+  //   // notFocusedDatas.map(function(data) {
+  //   //   hoverInfo[data.hoverKey].toNotFocused()
+  //   // })
+  // }
+  //
+  // resetStickyInfo() {
+  //   this.stickyData = null;
+  //   // var anySticky = _.some(this.hoverInfo, ["sticky", true])
+  //   // if (anySticky) {
+  //   //   _.mapValues(this.hoverInfo, function(hoverStatus, key) {
+  //   //     hoverStatus.toNotSticky()
+  //   //     hoverStatus.toFocused()
+  //   //   })
+  //   // }
+  //   // this.hoverDefault = "focused";
+  //   return true;
+  // }
+  // updateStickyInfo(stickyData) {
+  //   this.stickyData = stickyData;
+  //   // var hoverInfo = this.hoverInfo;
+  //   // stickyDatas.map(function(data) {
+  //   //   hoverInfo[data.hoverKey].toSticky()
+  //   // })
+  //   // notStickyDatas.map(function(data) {
+  //   //   hoverInfo[data.hoverKey].toNotSticky()
+  //   // })
+  // }
 
   filterLogOnDatas(datas) {
-    var keyMap = {};
     var nodeMap = {};
     datas.map(function(data) {
-      keyMap[data.key] = data
       if (data instanceof Node) {
         nodeMap[data.reactId] = data
       }
@@ -1054,11 +1366,19 @@ var graphStyles = {
     default: {
       "width": 1,
       "mid-target-arrow-shape": "triangle",
-      "mid-target-arrow-color": "#d0cfbc",
+      "mid-target-arrow-color": colors.ghostEdges.default,
       "arrow-scale": 0.25,
       "curve-style": "haystack",
-      "line-color": "#d0cfbc",
+      "line-color": colors.ghostEdges.default,
       "line-style": "dotted"
+    },
+    hoverNotFocusedButSticky: {
+      "line-color": colors.regular.grey2,
+      "mid-target-arrow-color": colors.regular.grey2
+    },
+    hoverNotFocused: {
+      "line-color": colors.regular.grey1,
+      "mid-target-arrow-color": colors.regular.grey1
     }
   },
   focus: {
@@ -1082,6 +1402,18 @@ var graphStyles = {
       "line-color": colors.regular.grey1,
       "mid-target-arrow-color": colors.regular.grey1,
       "target-arrow-color": colors.regular.grey1
+    }
+  },
+  selected: {
+    node: {
+      "border-width": 4
+    },
+    edge: {
+      "width": 10
+    },
+    ghostEdge: {
+      "width": 6,
+      "arrow-scale": 0.5
     }
   }
 }
@@ -1122,74 +1454,76 @@ $(function() {
       styleHelper(".nodeValueChanged", graphStyles.node.valueChanged),
       styleHelper(".hoverNotFocused", graphStyles.focus.hoverNotFocused),
       styleHelper(".hoverNotFocusedButSticky", graphStyles.focus.hoverNotFocusedButSticky),
-      styleHelper(".stickyNotFocused", graphStyles.focus.stickyNotFocused)
+      styleHelper(".edgeGhostHoverNotFocused", graphStyles.ghostEdge.hoverNotFocused),
+      styleHelper(".edgeGhostHoverNotFocusedButSticky", graphStyles.ghostEdge.hoverNotFocusedButSticky),
+      styleHelper(".stickyNotFocused", graphStyles.focus.stickyNotFocused),
+      styleHelper(".nodeSelected", graphStyles.selected.node),
+      styleHelper(".edgeSelected", graphStyles.selected.edge),
+      styleHelper(".edgeGhostSelected", graphStyles.selected.ghostEdge)
     ]
   });
 
-  cytoFamilySuccPred = function(ele, addExtraLayer = true) {
-    var familyEles = cyto.collection();
-    if (ele.isEdge()) {
-      var edge = ele;
-      if (false) {
-        // TODO-barret attempt at getting all nodes and edges from final graph
-        // abandon, as the edge should be stored and constantly retrieved somewhere else
-        console.log(`#${ele.source().id()} -> #${ele.target().id()}`)
-        ele = getGraph.finalCyto.$(`#${ele.source().id()} -> #${ele.target().id()}`)
-      }
-      familyEles = familyEles
-        .add(edge)
-        .add(ele.target())
-        .add(ele.target().successors())
-        .add(ele.source())
-        .add(ele.source().predecessors());
-    } else {
-      // is node
-      var node = ele;
-      if (false) {
-        ele = getGraph.finalCyto.$id(ele.id())
-      }
-      familyEles = familyEles
-        .add(node)
-        .add(ele.successors())
-        .add(ele.predecessors());
-    }
-    if (addExtraLayer) {
-      var familyNodes = familyEles.nodes();
-      familyEles = familyEles
-        .add(familyNodes.incomers())
-        .add(familyNodes.outgoers());
-    }
-    return familyEles;
-  }
+  // cytoFamilySuccPred = function(ele, addExtraLayer = true) {
+  //   var familyEles = cyto.collection();
+  //   if (ele.isEdge()) {
+  //     var edge = ele;
+  //     if (false) {
+  //       // TODO-barret attempt at getting all nodes and edges from final graph
+  //       // abandon, as the edge should be stored and constantly retrieved somewhere else
+  //       console.log(`#${ele.source().id()} -> #${ele.target().id()}`)
+  //       ele = getGraph.finalCyto.$(`#${ele.source().id()} -> #${ele.target().id()}`)
+  //     }
+  //     familyEles = familyEles
+  //       .add(edge)
+  //       .add(ele.target())
+  //       .add(ele.target().successors())
+  //       .add(ele.source())
+  //       .add(ele.source().predecessors());
+  //   } else {
+  //     // is node
+  //     var node = ele;
+  //     if (false) {
+  //       ele = getGraph.finalCyto.$id(ele.id())
+  //     }
+  //     familyEles = familyEles
+  //       .add(node)
+  //       .add(ele.successors())
+  //       .add(ele.predecessors());
+  //   }
+  //   if (addExtraLayer) {
+  //     var familyNodes = familyEles.nodes();
+  //     familyEles = familyEles
+  //       .add(familyNodes.incomers())
+  //       .add(familyNodes.outgoers());
+  //   }
+  //   return familyEles;
+  // }
   cyto.on("mouseover", function(evt) {
     var target = evt.target;
     if (target == cyto) return;
 
     // highlight all outgoer's outgoers and all incomer's incomers and self
-    var familyEles = cytoFamilySuccPred(target, false);
+    // var familyEles = cytoFamilySuccPred(target, false);
 
-    var elesData = function(eles) {
-      return eles.map(function(ele) {
-        return ele.data();
-      })
-    }
+    // var elesData = function(eles) {
+    //   return eles.map(function(ele) {
+    //     return ele.data();
+    //   })
+    // }
 
     var hasCalled = false;
     var debounced = _.debounce(function() {
       hasCalled = true;
-      updateGraph.hoverInfo(
-        elesData(familyEles),
-        elesData(cyto.$().not(familyEles))
-      )
+      updateGraph.hoverData(target.data())
     }, 200)
     debounced()
     // if a mouseout occurs before the function is executed, cancel it
     // works as mouseout is always called before mouseover
-    familyEles.once("mouseout", function(evtOut) {
+    target.once("mouseout", function(evtOut) {
       debounced.cancel()
       if (hasCalled) {
         // only remove hover if hover added
-        updateGraph.resetHoverInfo()
+        updateGraph.hoverDataReset()
       }
     })
   });
@@ -1199,11 +1533,11 @@ $(function() {
     // remove focus on search
     $("#search").blur()
 
-    var elesData = function(eles) {
-      return eles.map(function(ele) {
-        return ele.data();
-      })
-    }
+    // var elesData = function(eles) {
+    //   return eles.map(function(ele) {
+    //     return ele.data();
+    //   })
+    // }
 
     var target = evt.target
 
@@ -1227,24 +1561,24 @@ $(function() {
 
     if (target == cyto) {
       // remove sticky focus class
-      updateGraph.resetStickyInfo()
+      updateGraph.stickyDataReset()
       return;
     }
 
-    var familyEles = cytoFamilySuccPred(target, false);
-    updateGraph.stickyInfo(
-      elesData(familyEles),
-      elesData(cyto.$().not(familyEles))
-    )
+    // var familyEles = cytoFamilySuccPred(target, false);
+    updateGraph.stickyData(target.data());
+    //   elesData(familyEles),
+    //   elesData(cyto.$().not(familyEles))
+    // )
     return;
   })
 
   cyto.on("dblclick", function(evt, originalEvt) {
-    var elesData = function(eles) {
-      return eles.map(function(ele) {
-        return ele.data();
-      })
-    }
+    // var elesData = function(eles) {
+    //   return eles.map(function(ele) {
+    //     return ele.data();
+    //   })
+    // }
 
     console.log("dbl click!!");
     // console.log("dbl click!!", evt, originalEvt);
@@ -1252,31 +1586,32 @@ $(function() {
 
     if (target == cyto) {
       // go back to full graph
-      updateGraph.resetWithLog()
+      updateGraph.resetHoverStickyFilterData()
       return;
     }
 
     var holdingShiftKey = originalEvt.originalEvent.shiftKey;
-    if (holdingShiftKey) {
-      console.log("extra layers!")
-      var familyEles = cytoFamilySuccPred(target, true);
-      var familyDatas = elesData(familyEles)
+    // if (holdingShiftKey) {
+    //   console.log("extra layers!")
+    //   var familyEles = cytoFamilySuccPred(target, true);
+    //   var familyDatas = elesData(familyEles)
+    //
+    //   var directFamilyEles = cytoFamilySuccPred(target, false);
+    //   getGraph.updateHoverInfo(
+    //     elesData(directFamilyEles),
+    //     elesData(cyto.$().not(directFamilyEles))
+    //   )
+    //
+    //   updateGraph.withDatas(familyDatas)
+    //
+    // } else {
+      // var familyEles = cytoFamilySuccPred(target, false);
+      // var familyDatas = elesData(familyEles)
 
-      var directFamilyEles = cytoFamilySuccPred(target, false);
-      getGraph.updateHoverInfo(
-        elesData(directFamilyEles),
-        elesData(cyto.$().not(directFamilyEles))
-      )
+      updateGraph.filterDatas([target.data()])
+      // updateGraph.withDatas(familyDatas)
 
-      updateGraph.withDatas(familyDatas)
-
-    } else {
-      var familyEles = cytoFamilySuccPred(target, false);
-      var familyDatas = elesData(familyEles)
-
-      updateGraph.withDatas(familyDatas)
-
-    }
+    // }
 
   })
 
@@ -1344,17 +1679,22 @@ $(function() {
       var escapeRegExp = function (str) {
         return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
       }
-      searchRegex = new RegExp(escapeRegExp(regexStr))
+      if (regexStr.length < 2) {
+        searchRegex = new RegExp(regexStr)
+      } else {
+        searchRegex = new RegExp(escapeRegExp(regexStr))
+      }
     }
-
+    console.log(searchRegex)
     // if less than three chars...
     if (searchRegex.source.length < 2) {
       if (searchRegex.source.length == 0) {
         // TODO-barret show warning of resetting
         console.log("resetting log!")
-        updateGraph.resetWithLog()
+        updateGraph.filterDatasReset()
       } else {
         // do nothing
+        console.log("do nothing")
       }
       return;
     }
@@ -1384,45 +1724,60 @@ $(function() {
       })
     }
 
-    updateGraph.withDatas(elesData(familyEles));
+    updateGraph.filterDatas(elesData(familyEles));
     return;
   }
 
-  updateGraph.resetWithLog = function() {
-    updateGraph.withLog(getGraph.originalLog)
-  }
-  updateGraph.withLog = function(log) {
-    getGraph.withLog(log);
-    getGraph.resetStickyInfo()
+  // updateGraph.resetWithLog = function() {
+  //   updateGraph.withLog(getGraph.originalLog)
+  // }
+  // updateGraph.withLog = function(log) {
+  //   getGraph.withLog(log);
+  //   getGraph.updateStickyDataReset()
+  //
+  //   var nextTick = getGraph.nextStep(curTick);
+  //
+  //   if (getGraph.prevStep(nextTick) != curTick) {
+  //     // updateGraph.prevStep();
+  //     updateGraph()
+  //   } else {
+  //     updateGraph()
+  //   }
+  // }
 
-    var nextTick = getGraph.nextStep(curTick);
+  // updateGraph.withDatas = function(datas) {
+  //   var newLog = getGraph.filterLogOnDatas(datas);
+  //   updateGraph.withLog(newLog);
+  // }
 
-    if (getGraph.prevStep(nextTick) != curTick) {
-      // updateGraph.prevStep();
-      updateGraph()
-    } else {
-      updateGraph()
-    }
-  }
-  updateGraph.withDatas = function(datas) {
-    var newLog = getGraph.filterLogOnDatas(datas);
-    updateGraph.withLog(newLog);
-  }
-
-  updateGraph.hoverInfo = function(focusedDatas, notFocusedDatas) {
-    getGraph.updateHoverInfo(focusedDatas, notFocusedDatas)
+  updateGraph.hoverData = function(data) {
+    getGraph.updateHoverData(data)
     updateGraph()
   }
-  updateGraph.resetHoverInfo = function() {
-    getGraph.resetHoverInfo()
+  updateGraph.hoverDataReset = function() {
+    getGraph.updateHoverDataReset()
     updateGraph()
   }
-  updateGraph.stickyInfo = function(stickyDatas, notStickyDatas) {
-    getGraph.updateStickyInfo(stickyDatas, notStickyDatas)
+  updateGraph.stickyData = function(data) {
+    getGraph.updateStickyData(data)
     updateGraph()
   }
-  updateGraph.resetStickyInfo = function() {
-    getGraph.resetStickyInfo()
+  updateGraph.stickyDataReset = function() {
+    getGraph.updateStickyDataReset()
+    updateGraph()
+  }
+  updateGraph.filterDatas = function(data) {
+    getGraph.updateFilterDatas(data)
+    updateGraph()
+  }
+  updateGraph.filterDatasReset = function() {
+    getGraph.updateFilterDatasReset()
+    updateGraph()
+  }
+  updateGraph.resetHoverStickyFilterData = function() {
+    getGraph.updateHoverDataReset()
+    getGraph.updateStickyDataReset()
+    getGraph.updateFilterDatasReset()
     updateGraph()
   }
 
@@ -1514,7 +1869,9 @@ $(function() {
   }
 
   window.curTick = 1
-  updateGraph.nextEnterExitEmpty()
+  // TODO-barret should start at nextEnterExitEmpty,
+  // updateGraph.nextEnterExitEmpty()
+  updateGraph.nextQueueEmpty()
 
   $("#startStepButton").click(updateGraph.firstEnterExitEmpty)
   $("#endStepButton").click(updateGraph.lastEnterExitEmpty)
@@ -1602,28 +1959,33 @@ $(function() {
     }
 
     if (e.which == 27) { // esc
-      if (getGraph.hasFiltered) {
+
+      // remove hover
+      // remove sticky
+      // remove filter
+      if (getGraph.hasHoverData) {
+        console.log("reset hover")
+        updateGraph.hoverDataReset()
+      } else if (getGraph.hasStickyData) {
+        console.log("reset sticky")
+        updateGraph.stickyDataReset()
+      } else if (getGraph.hasFilterDatas) {
+        console.log("reset filter")
         // must be in filter... so exit filter
         $("#search").val("");
-        getGraph.resetHoverInfo()
-        updateGraph.resetWithLog()
+        updateGraph.filterDatasReset()
       }
       return;
     }
     if (e.which == 38) { // arrow up
-      if (getGraph.hasFiltered) {
-
-        // must be in filter... so exit filter
-        getGraph.resetHoverInfo()
-        updateGraph.resetWithLog()
+      if (getGraph.hasFilterDatas) {
+        console.log("add layer!")
       }
       return;
     }
     if (e.which == 40) { // arrow down
-      if (getGraph.hasFiltered) {
-        // must be in filter... so exit filter
-        getGraph.resetHoverInfo()
-        updateGraph.resetWithLog()
+      if (getGraph.hasFilterDatas) {
+        console.log("remove layer!")
       }
       return;
     }

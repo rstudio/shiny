@@ -220,9 +220,6 @@ class Node {
     return {}
   }
   get cytoLabel() {
-    // if (this.label.length > 30) {
-    //   return (this.label.substring(0, 27) + "aasdf")
-    // }
     return this.label
   }
   get cytoClasses() {
@@ -584,6 +581,25 @@ class Graph {
     );
   }
 
+  familyTreeNodeIdsForDatas(datas) {
+    var self = this;
+    return _.union(_.flatMap(datas, function(data) {
+      return self.familyTreeNodeIds(data)
+    }))
+  }
+  decendentNodeIdsForDatas(datas) {
+    var self = this;
+    return _.union(_.flatMap(datas, function(data) {
+      return self.decendentNodeIds(data)
+    }))
+  }
+  ancestorNodeIdsForDatas(datas) {
+    var self = this;
+    return _.union(_.flatMap(datas, function(data) {
+      return self.ancestorNodeIds(data)
+    }))
+  }
+
 
   hoverStatusOnNodeIds(nodeIds, hoverKey, onStatus, offStatus) {
     var key;
@@ -819,13 +835,14 @@ class GraphAtStep {
     // hoverInfo[key] = `HoverStatus`
     this.filterDatas = null;
     this.hoverData = null;
-    this.stickyData = null;
+    this.stickyDatas = null;
     // this.hoverDefault = "focused"
     // this.hoverInfo = {} // use `hoverKey`
 
     this.filterMap = {};
 
-    this.withLog(log);
+    this.log = log;
+    this.updateSteps(log);
 
     this.finalGraph = this.atStep(log.length);
     this.finalCyto = this.finalGraph.cytoGraph;
@@ -833,17 +850,16 @@ class GraphAtStep {
   }
 
   get hasFilterDatas() {
-    return this.filterDatas ? true : false;
+    return this.filterDatas ? (this.filterDatas.length > 0) : false;
   }
-  get hasStickyData() {
-    return this.stickyData ? true : false;
+  get hasStickyDatas() {
+    return this.stickyDatas ? (this.stickyDatas.length > 0) : false;
   }
   get hasHoverData() {
     return this.hoverData ? true : false;
   }
 
-  withLog(log) {
-    this.log = log;
+  updateSteps(log) {
     this.steps = [];
     this.asyncStarts = [];
     this.asyncStops = [];
@@ -854,8 +870,8 @@ class GraphAtStep {
 
     var data, i;
     var enterExitQueue = [];
-    for (i = 0; i < this.log.length; i++) {
-      data = this.log[i];
+    for (i = 0; i < log.length; i++) {
+      data = log[i];
       switch (data.action) {
         case "enter": enterExitQueue.push(i); break;
         case "exit":
@@ -871,7 +887,7 @@ class GraphAtStep {
 
       switch(data.action) {
         case "invalidateStart":
-          if (this.log[i].ctxId == "other") {
+          if (data.ctxId == "other") {
             break;
           }
           // TODO-barret check if reactId is a reactive values. If so, skip, otherwise add
@@ -906,12 +922,157 @@ class GraphAtStep {
   }
 
   nextStep(k) {
-    var nextStepPos = Math.min(this.steps.length - 1, _.sortedIndex(this.steps, k) + 1);
-    return this.steps[nextStepPos]
+
+    // if no filtering... get next step from step array
+    if (!this.hasFilterDatas) {
+      var nextStepPos = Math.min(this.steps.length - 1, _.sortedIndex(this.steps, k) + 1);
+      return this.steps[nextStepPos]
+    }
+
+    var graph = this.atStep(k);
+    var decendents = undefined, ancestors = undefined
+
+    var logEntry, i, ret;
+
+    for (i = k + 1; i < this.log.length - 1; i++) {
+      logEntry = this.log[i]
+
+      // skip if if it's not a valid step anyways...
+      if (_.sortedIndexOf(this.steps, logEntry.step) == -1) {
+        continue
+      }
+      ret = logEntry.step;
+      switch (logEntry.action) {
+        case "dependsOn":
+          // lazy eval decendents and ancestors
+          if (_.isNil(decendents) || _.isNil(ancestors)) {
+            var filterReactIds = this.filterDatas.map(function(node) {
+              return node.reactId;
+            })
+            decendents = _.union(
+              filterReactIds,
+              graph.decendentNodeIdsForDatas(this.filterDatas)
+            )
+            ancestors = _.union(
+              filterReactIds,
+              graph.ancestorNodeIdsForDatas(this.filterDatas)
+            )
+          }
+          // reactId is target (ends at ancestors)
+          if (_.indexOf(ancestors, logEntry.reactId) != -1) {
+            return ret;
+          }
+          // depOnReactId is source (starts from children)
+          if (_.indexOf(decendents, logEntry.depOnReactId) != -1) {
+            return ret;
+          }
+          break;
+        case "dependsOnRemove":
+          // check for both to and from (since it must exist beforehand)
+          if (
+            _.has(graph.nodes, logEntry.reactId) &&
+            _.has(graph.nodes, logEntry.depOnReactId)
+          ) {
+            return ret;
+          }
+          break;
+
+        case "updateNodeLabel":
+        case "valueChange":
+        case "enter":
+        case "exit":
+        case "invalidateStart":
+        case "invalidateEnd":
+        case "isolateEnter":
+        case "isolateExit":
+        case "isolateInvalidateStart":
+        case "isolateInvalidateEnd":
+          if (_.has(graph.nodes, logEntry.reactId)) {
+            return ret;
+          }
+          break;
+
+        case "define":
+          break;
+        case "asyncStart":
+        case "asyncStop":
+        case "queueEmpty":
+          break;
+        default:
+          console.error(logEntry)
+          throw "unknown logEntry action next"
+          break;
+      }
+    }
+
+    // return the max step possible
+    return this.steps[this.steps.length - 1];
   }
   prevStep(k) {
-    var prevStepPos = Math.max(_.sortedIndex(this.steps, k) - 1, 1);
-    return this.steps[prevStepPos]
+    // if no filtering... get next step from step array
+    if (!this.hasFilterDatas) {
+      var prevStepPos = Math.max(_.sortedIndex(this.steps, k) - 1, 1);
+      return this.steps[prevStepPos]
+    }
+
+    var graph = this.atStep(k);
+    var logEntry, i, ret;
+
+    for (i = k - 1; i >= 0; i--) {
+      logEntry = this.log[i]
+
+      // skip if if it's not a valid step anyways...
+      if (_.sortedIndexOf(this.steps, logEntry.step) == -1) {
+        continue
+      }
+      ret = logEntry.step;
+      switch (logEntry.action) {
+        case "dependsOn":
+        case "dependsOnRemove":
+          // check for both to and from (since it must exist beforehand)
+          if (
+            _.has(graph.nodes, logEntry.reactId) &&
+            _.has(graph.nodes, logEntry.depOnReactId)
+          ) {
+            return ret;
+          }
+          break;
+
+        case "updateNodeLabel":
+        case "valueChange":
+        case "enter":
+        case "exit":
+        case "invalidateStart":
+        case "invalidateEnd":
+        case "isolateEnter":
+        case "isolateExit":
+        case "isolateInvalidateStart":
+        case "isolateInvalidateEnd":
+          if (_.has(graph.nodes, logEntry.reactId)) {
+            return ret;
+          }
+          break;
+
+        case "define":
+          if (_.some(this.filterDatas, function(filterData) {
+            return filterData.reactId == logEntry.reactId;
+          })) {
+            // some filterdata is defined... so it must be a next step
+            return ret;
+          }
+          break;
+        case "asyncStart":
+        case "asyncStop":
+        case "queueEmpty":
+          break;
+        default:
+          console.error(logEntry)
+          throw "unknown logEntry action prev"
+          break;
+      }
+    }
+
+    return this.steps[0];
   }
 
   atStep(k) {
@@ -939,16 +1100,21 @@ class GraphAtStep {
       }
     }
     // if any sticky...
-    if (this.hasStickyData) {
-      if (graph.hasSomeData(this.stickyData)) {
-        var stickyTree = graph.familyTreeNodeIds(this.stickyData)
+    if (this.hasStickyDatas) {
+      if (_.some(this.stickyDatas.map(function(data) {
+        return graph.hasSomeData(data)
+      }))) {
+        // at least some sticky data is visible
+        var stickyTree = graph.familyTreeNodeIdsForDatas(this.stickyDatas)
         graph.hoverStatusOnNodeIds(
           stickyTree,
           "sticky",
           HoverStatus.sticky,
           HoverStatus.notSticky
         )
-        graph.highlightSelected(this.stickyData)
+        this.stickyDatas.map(function(data) {
+          graph.highlightSelected(data)
+        })
         if (!this.hoverData) {
           // if sticky data no hover data... make the sticky data hover!
           graph.hoverStatusOnNodeIds(
@@ -962,11 +1128,7 @@ class GraphAtStep {
     }
     // if any filtering...
     if (this.hasFilterDatas) {
-      graph.filterGraphOnNodeIds(
-        _.union(_.flatMap(this.filterDatas, function(filterData) {
-          graph.familyTreeNodeIds(filterData)
-        }))
-      )
+      graph.filterGraphOnNodeIds(graph.familyTreeNodeIdsForDatas(this.filterDatas))
     }
 
     return graph;
@@ -998,9 +1160,12 @@ class GraphAtStep {
 
   updateHoverData(data) { this.hoverData = data }
   updateHoverDataReset() { this.hoverData = null }
-  updateStickyData(data) { this.stickyData = data }
-  updateStickyDataReset() { this.stickyData = null }
-  updateFilterDatas(dataArr) { this.filterDatas = dataArr }
+  updateStickyDatas(dataArr) { this.stickyDatas = dataArr }
+  updateStickyDatasReset() { this.stickyDatas = null }
+  updateFilterDatas(dataArr) {
+    this.filterDatas = dataArr
+
+  }
   updateFilterDatasReset() { this.filterDatas = null }
   // // set the value outright
   // updateHoverData(hoverData) {
@@ -1062,10 +1227,52 @@ class GraphAtStep {
         case "exit":
         case "isolateExit":
         case "isolateInvalidateEnd":
-        case "queueEmpty":
           // check for reactId
           return _.has(nodeMap, logEntry.reactId);
           break;
+        case "queueEmpty":
+        case "asyncStart":
+        case "asyncStop":
+          // always add
+          return _.has(nodeMap, logEntry.reactId);
+        default:
+          console.error("logEntry.action: ", logEntry.action, data)
+          throw data;
+      }
+    })
+    console.log("new Log: ", newLog);
+    return newLog;
+  }
+
+  filterDatasLog() {
+    var nodeMap = {};
+    datas.map(function(data) {
+      if (data instanceof Node) {
+        nodeMap[data.reactId] = data
+      }
+    });
+    var newLog = _.filter(this.originalLog, function(logEntry) {
+      switch(logEntry.action) {
+        case "dependsOn":
+        case "dependsOnRemove":
+          // check for both to and from
+          return _.has(nodeMap, logEntry.reactId) && _.has(nodeMap, logEntry.depOnReactId);
+          break;
+        case "define":
+        case "updateNodeLabel":
+        case "valueChange":
+        case "invalidateStart":
+        case "enter":
+        case "isolateInvalidateStart":
+        case "isolateEnter":
+        case "invalidateEnd":
+        case "exit":
+        case "isolateExit":
+        case "isolateInvalidateEnd":
+          // check for reactId
+          return _.has(nodeMap, logEntry.reactId);
+          break;
+        case "queueEmpty":
         case "asyncStart":
         case "asyncStop":
           // always add
@@ -1561,12 +1768,12 @@ $(function() {
 
     if (target == cyto) {
       // remove sticky focus class
-      updateGraph.stickyDataReset()
+      updateGraph.stickyDatasReset()
       return;
     }
 
     // var familyEles = cytoFamilySuccPred(target, false);
-    updateGraph.stickyData(target.data());
+    updateGraph.stickyDatas([target.data()]);
     //   elesData(familyEles),
     //   elesData(cyto.$().not(familyEles))
     // )
@@ -1666,65 +1873,46 @@ $(function() {
     updateLogItem()
   }
 
-  updateGraph.withRegexString = function(regexStr) {
+  // when str length < 3 do not search
+  // when str length = 0, reset filter
+  // when str length >= 3, set filter to all elements that match
+  updateGraph.withSearchString = function(str) {
 
-    var searchRegex;
-    if (regexStr instanceof RegExp) {
-      searchRegex = regexStr;
-    } else {
-      // is string, not regex
-
-      // escape the string
-      // https://stackoverflow.com/a/17606289
-      var escapeRegExp = function (str) {
-        return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
-      }
-      if (regexStr.length < 2) {
-        searchRegex = new RegExp(regexStr)
-      } else {
-        searchRegex = new RegExp(escapeRegExp(regexStr))
-      }
-    }
-    console.log(searchRegex)
     // if less than three chars...
-    if (searchRegex.source.length < 2) {
-      if (searchRegex.source.length == 0) {
+    if (str.length < 3) {
+      if (str.length == 0) {
         // TODO-barret show warning of resetting
         console.log("resetting log!")
         updateGraph.filterDatasReset()
       } else {
-        // do nothing
         console.log("do nothing")
       }
       return;
     }
+    // escape the string
+    // https://stackoverflow.com/a/17606289
+    var escapeRegExp = function (str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+    }
+    var searchRegex = new RegExp(escapeRegExp(str))
+    console.log(searchRegex)
 
-    getGraph.withLog(getGraph.originalLog);
-    var cy = getGraph.atStep(window.curTick).cytoGraph;
-
-    var matchedNodes = cy.nodes().filter(function(node) {
-      return searchRegex.test(node.data().label)
-    })
+    var graph = getGraph.atStep(window.curTick);
+    var matchedNodes = _.filter(
+      _.values(graph.nodes),
+      function(node) {
+        return searchRegex.test(node.label)
+      }
+    )
 
     if (matchedNodes.length == 0) {
       // TODO-barret show warning of no matches
       console.log("no matches!")
+      updateGraph.filterDatasReset()
       return;
     }
 
-    var familyEles = cy.collection()
-      .add(matchedNodes)
-      .add(matchedNodes.successors())
-      .add(matchedNodes.predecessors());
-
-
-    var elesData = function(eles) {
-      return eles.map(function(ele) {
-        return ele.data();
-      })
-    }
-
-    updateGraph.filterDatas(elesData(familyEles));
+    updateGraph.filterDatas(matchedNodes);
     return;
   }
 
@@ -1758,12 +1946,12 @@ $(function() {
     getGraph.updateHoverDataReset()
     updateGraph()
   }
-  updateGraph.stickyData = function(data) {
-    getGraph.updateStickyData(data)
+  updateGraph.stickyDatas = function(data) {
+    getGraph.updateStickyDatas(data)
     updateGraph()
   }
-  updateGraph.stickyDataReset = function() {
-    getGraph.updateStickyDataReset()
+  updateGraph.stickyDatasReset = function() {
+    getGraph.updateStickyDatasReset()
     updateGraph()
   }
   updateGraph.filterDatas = function(data) {
@@ -1776,7 +1964,7 @@ $(function() {
   }
   updateGraph.resetHoverStickyFilterData = function() {
     getGraph.updateHoverDataReset()
-    getGraph.updateStickyDataReset()
+    getGraph.updateStickyDatasReset()
     getGraph.updateFilterDatasReset()
     updateGraph()
   }
@@ -1801,10 +1989,26 @@ $(function() {
   }
 
   updateGraph.nextEnterExitEmpty = function() {
+    var nextTick;
+    if (_.sortedIndexOf(getGraph.enterExitEmpties, window.curTick) != -1) {
+      // not at a cycle point
+      if (getGraph.hasFilterDatas) {
+        // if filtered, will go to previous step, then next step location
+        nextTick = getGraph.nextStep(getGraph.prevStep(window.curTick))
+      } else {
+        // if not filtered
+        nextTick = window.curTick
+      }
+    } else {
+      // at cycle point
+      // first move one step forward... then find next enter/exit empty
+      nextTick = getGraph.nextStep(window.curTick)
+    }
+    var val, i
     // move to queue empty
-    for (var i = 0; i < getGraph.enterExitEmpties.length; i++) {
+    for (i = 0; i < getGraph.enterExitEmpties.length; i++) {
       val = getGraph.enterExitEmpties[i] - 1;
-      if (curTick < val) {
+      if (nextTick <= val) {
         window.curTick = val;
         updateGraph();
         return true;
@@ -1813,10 +2017,27 @@ $(function() {
     return false;
   }
   updateGraph.prevEnterExitEmpty = function() {
+    var prevTick;
+    if (_.sortedIndexOf(getGraph.enterExitEmpties, window.curTick) != -1) {
+      // not at a cycle point
+      if (getGraph.hasFilterDatas) {
+        // if filtered, will go to next step, then prev step location
+        prevTick = getGraph.prevStep(getGraph.nextStep(window.curTick))
+      } else {
+        // if not filtered
+        prevTick = window.curTick
+      }
+    } else {
+      // at cycle point
+      // first move one step forward... then find next enter/exit empty
+      prevTick = getGraph.prevStep(window.curTick)
+      console.log("at cycle point", window.curTick, prevTick)
+    }
+    var val, i;
     // move to queue empty
-    for (var i = getGraph.enterExitEmpties.length - 1; i >= 0; i--) {
+    for (i = getGraph.enterExitEmpties.length - 1; i >= 0; i--) {
       val = getGraph.enterExitEmpties[i];
-      if (curTick > val) {
+      if (prevTick > val) {
         window.curTick = val;
         updateGraph();
         return true;
@@ -1881,7 +2102,7 @@ $(function() {
   $("#nextStepButton").click(updateGraph.nextStep)
 
   $("#search").on("input", function(e) {
-    updateGraph.withRegexString(e.target.value)
+    updateGraph.withSearchString(e.target.value)
   })
   $(document.body).on("keydown", function(e) {
     console.log("e: ", e)
@@ -1966,9 +2187,9 @@ $(function() {
       if (getGraph.hasHoverData) {
         console.log("reset hover")
         updateGraph.hoverDataReset()
-      } else if (getGraph.hasStickyData) {
+      } else if (getGraph.hasStickyDatas) {
         console.log("reset sticky")
-        updateGraph.stickyDataReset()
+        updateGraph.stickyDatasReset()
       } else if (getGraph.hasFilterDatas) {
         console.log("reset filter")
         // must be in filter... so exit filter

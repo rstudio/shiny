@@ -833,6 +833,7 @@ class GraphAtStep {
     this.originalLog = log;
 
     // hoverInfo[key] = `HoverStatus`
+    this.searchRegex = null;
     this.filterDatas = null;
     this.hoverData = null;
     this.stickyDatas = null;
@@ -849,6 +850,9 @@ class GraphAtStep {
 
   }
 
+  get hasSearchRegex() {
+    return this.searchRegex ? true : false;
+  }
   get hasFilterDatas() {
     return this.filterDatas ? (this.filterDatas.length > 0) : false;
   }
@@ -977,7 +981,15 @@ class GraphAtStep {
           }
           break;
 
+        case "define":
         case "updateNodeLabel":
+          if (this.hasSearchRegex) {
+            if (this.searchRegex.test(logEntry.label)) {
+              // if there is a search regex and the value is defined
+              return ret;
+            }
+          }
+          break;
         case "valueChange":
         case "enter":
         case "exit":
@@ -992,8 +1004,6 @@ class GraphAtStep {
           }
           break;
 
-        case "define":
-          break;
         case "asyncStart":
         case "asyncStop":
         case "queueEmpty":
@@ -1126,10 +1136,34 @@ class GraphAtStep {
         }
       }
     }
-    // if any filtering...
-    if (this.hasFilterDatas) {
-      graph.filterGraphOnNodeIds(graph.familyTreeNodeIdsForDatas(this.filterDatas))
+
+    // if any searching
+    if (this.hasSearchRegex) {
+      var searchRegex = this.searchRegex
+      var matchedNodes = _.filter(
+        _.values(graph.nodes),
+        function(node) {
+          return searchRegex.test(node.label)
+        }
+      )
+
+      if (matchedNodes.length == 0) {
+        // TODO-barret warn of no matches
+        console.log("no matches!")
+        getGraph.updateFilterDatasReset()
+      } else {
+        getGraph.updateFilterDatas(matchedNodes)
+        // filter on regex
+        graph.filterGraphOnNodeIds(graph.familyTreeNodeIdsForDatas(this.filterDatas))
+      }
+
+    } else {
+      // if any filtering...
+      if (this.hasFilterDatas) {
+        graph.filterGraphOnNodeIds(graph.familyTreeNodeIdsForDatas(this.filterDatas))
+      }
     }
+
 
     return graph;
   }
@@ -1162,11 +1196,13 @@ class GraphAtStep {
   updateHoverDataReset() { this.hoverData = null }
   updateStickyDatas(dataArr) { this.stickyDatas = dataArr }
   updateStickyDatasReset() { this.stickyDatas = null }
-  updateFilterDatas(dataArr) {
-    this.filterDatas = dataArr
-
-  }
+  updateFilterDatas(dataArr) { this.filterDatas = dataArr }
   updateFilterDatasReset() { this.filterDatas = null }
+  updateSearchRegex(regex) { this.searchRegex = regex }
+  updateSearchRegexReset() {
+    this.updateFilterDatasReset();
+    this.searchRegex = null;
+  }
   // // set the value outright
   // updateHoverData(hoverData) {
   //   this.hoverData = hoverData;
@@ -1883,8 +1919,9 @@ $(function() {
       if (str.length == 0) {
         // TODO-barret show warning of resetting
         console.log("resetting log!")
-        updateGraph.filterDatasReset()
+        updateGraph.searchRegexReset()
       } else {
+        // TODO-barret show warning of not enough characters
         console.log("do nothing")
       }
       return;
@@ -1895,24 +1932,7 @@ $(function() {
       return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
     }
     var searchRegex = new RegExp(escapeRegExp(str))
-    console.log(searchRegex)
-
-    var graph = getGraph.atStep(window.curTick);
-    var matchedNodes = _.filter(
-      _.values(graph.nodes),
-      function(node) {
-        return searchRegex.test(node.label)
-      }
-    )
-
-    if (matchedNodes.length == 0) {
-      // TODO-barret show warning of no matches
-      console.log("no matches!")
-      updateGraph.filterDatasReset()
-      return;
-    }
-
-    updateGraph.filterDatas(matchedNodes);
+    updateGraph.searchRegex(searchRegex)
     return;
   }
 
@@ -1962,10 +1982,19 @@ $(function() {
     getGraph.updateFilterDatasReset()
     updateGraph()
   }
+  updateGraph.searchRegex = function(searchRegex) {
+    getGraph.updateSearchRegex(searchRegex);
+    updateGraph()
+  }
+  updateGraph.searchRegexReset = function(searchRegex) {
+    getGraph.updateSearchRegexReset();
+    updateGraph()
+  }
   updateGraph.resetHoverStickyFilterData = function() {
     getGraph.updateHoverDataReset()
     getGraph.updateStickyDatasReset()
     getGraph.updateFilterDatasReset()
+    getGraph.updateSearchRegexReset()
     updateGraph()
   }
 
@@ -2194,7 +2223,7 @@ $(function() {
         console.log("reset filter")
         // must be in filter... so exit filter
         $("#search").val("");
-        updateGraph.filterDatasReset()
+        updateGraph.searchRegexReset()
       }
       return;
     }

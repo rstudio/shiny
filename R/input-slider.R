@@ -250,7 +250,13 @@ findStepSize <- function(min, max, step) {
     # values to calculate the step size.
     pretty_steps <- pretty(c(min, max), n = 100)
     n_steps <- length(pretty_steps) - 1
-    (max(pretty_steps) - min(pretty_steps)) / n_steps
+    
+    # Fix for #2061: Windows has low-significance digits (like 17 digits out)
+    # even at the boundaries of pretty()'s output. Use signif(digits = 10),
+    # which should be way way less significant than any data we'd want to keep.
+    # It might make sense to use signif(steps[2] - steps[1], 10) instead, but
+    # for now trying to make the minimal change.
+    signif(digits = 10, (max(pretty_steps) - min(pretty_steps)) / n_steps)
 
   } else {
     1

@@ -15,8 +15,14 @@ module.exports = {
     "no-unused-vars": [1, {"args": "none"}],
     "guard-for-in": 1,
     // "no-use-before-define": [1, {"functions": false}],
-    "semi": [1, "always"]
+    "semi": [1, "always"],
+    "no-fallthrough": 0,
+    "no-console": 0
+    // "no-console": ["error", { allow: ["warn", "error"] }]
   },
   "parserOptions": { "ecmaVersion": 6 }, // enable es6 language
-  "env": { "es6": true }, // enable es6 objects, ex: Set
+  "env": {
+    "browser": true,
+    "es6": true // enable es6 objects, ex: Set
+   },
 }

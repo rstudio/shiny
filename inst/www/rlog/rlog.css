@@ -1,5 +1,6 @@
-html, body {
-  font-family: 'Source Sans Pro', sans-serif;
+html,
+body {
+  font-family: "Source Sans Pro", sans-serif;
   font-weight: 400;
   overflow: hidden;
   height: 100%;
@@ -17,7 +18,8 @@ div {
 .buttonDirections {
   color: lightgrey;
 }
-#instructions, #ended {
+#instructions,
+#ended {
   /* position: relative; */
   font-weight: 200;
   color: #444;
@@ -43,14 +45,14 @@ svg {
 .node {
   cursor: pointer;
 }
-.node .tspanTime{
+.node .tspanTime {
   font-weight: bold;
   font-size: 87%;
   user-select: none;
   transition: fill 0.75s ease;
 }
-.node .tspanLabel{
-  font-family: 'Source Code Pro', monospace;
+.node .tspanLabel {
+  font-family: "Source Code Pro", monospace;
   font-weight: normal;
   text-anchor: start;
   fill: #999;
@@ -79,11 +81,11 @@ svg {
 .node.value path {
 }
 .node.invalidated path {
-  fill: #E0E0E0;
+  fill: #e0e0e0;
   /*fill: url(#diagonalHatch);*/
 }
 .node.running path {
-  fill: #61B97E;
+  fill: #61b97e;
 }
 .node.fixed path {
   stroke: #000;
@@ -104,17 +106,17 @@ svg {
   background-color: #white;
 }
 .color.invalidated {
-  background-color: #E0E0E0;
+  background-color: #e0e0e0;
 }
 .color.running {
-  background-color: #61B97E;
+  background-color: #61b97e;
 }
 #triangle {
-  fill: #CCC;
+  fill: #ccc;
 }
 .link {
   fill: none;
-  stroke: #CCC;
+  stroke: #ccc;
   stroke-width: 0.5px;
 }
 #description {
@@ -144,7 +146,8 @@ svg {
   height: 20px;
   transition: height 500ms;
 }
-#timeline, #timeline * {
+#timeline,
+#timeline * {
   cursor: pointer;
 }
 #timeline:hover {
@@ -159,7 +162,7 @@ svg {
   background-color: silver;
 }
 #timeline-fill {
-  background-color: #28A3F2;
+  background-color: #28a3f2;
   position: absolute;
   left: 0;
   top: 0;
@@ -167,10 +170,11 @@ svg {
   width: 0;
   transition: width 250ms;
 }
-.timeline-cycle, .timeline-enterexit {
+.timeline-cycle,
+.timeline-enterexit {
   position: relative;
   float: left;
-  margin-left:-2px; /* margin and width must be equal in size, but margin is negative */
+  margin-left: -2px; /* margin and width must be equal in size, but margin is negative */
   width: 2px;
   height: 100%;
   transition: width 250ms;
@@ -185,12 +189,6 @@ svg {
 .red_edge {
   color: red;
 }
-
-
-
-
-
-
 
 text {
   font-weight: 300;

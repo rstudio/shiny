@@ -1,3 +1,4 @@
+/* global cytoscape, _, log, __DATA__*/
 
 // TODO-barret
 // √ add buttons for moving around
@@ -18,8 +19,13 @@
 // should layout be done with full graph and only "turn on" / "turn off" the nodes/edges?
 // should filtering be done with the full layout?
 //
+// var time;
+try {
+  log = __DATA__;
+  // time = String(__TIME__).toLowerCase() === "true";
+} catch (e) {}
 
-colors = {
+var colors = {
   // regular colors
   regular: {
     white: "#ffffff",
@@ -47,16 +53,16 @@ colors = {
     // http://colorbrewer2.org/#type=sequential&scheme=Greys&n=9
     grey1: "#d9d9d9", // invalidate
     grey2: "#969696", // active invalidate
-    grey3: "#737373" // active invalidate
+    grey3: "#737373", // active invalidate
   },
   edges: {
     running: "#676767",
     isolate: "#818181",
     active: "#818181",
-    inactive: "#ececec"
+    inactive: "#ececec",
   },
   ghostEdges: {
-    default: "#3c3b39"
+    default: "#3c3b39",
   },
   // filtered colors
   lite: {
@@ -79,10 +85,9 @@ colors = {
     yellow: "#ffffcc",
     brown: "#e5d8bd",
     pink: "#fddaec",
-    grey: "#f2f2f2"
-  }
-}
-
+    grey: "#f2f2f2",
+  },
+};
 
 class HoverStatus {
   constructor(state) {
@@ -90,13 +95,25 @@ class HoverStatus {
     this.state = state || HoverStatus.focused; // "focused", "notFocused"
     this.selected = false;
   }
-  isSticky() { return this.sticky == HoverStatus.sticky }
-  toNotSticky() { this.sticky = HoverStatus.notSticky; }
-  toSticky() { this.sticky = HoverStatus.sticky; }
+  isSticky() {
+    return this.sticky === HoverStatus.sticky;
+  }
+  toNotSticky() {
+    this.sticky = HoverStatus.notSticky;
+  }
+  toSticky() {
+    this.sticky = HoverStatus.sticky;
+  }
 
-  isFocused() { return this.state == HoverStatus.focused }
-  toFocused() { this.state = HoverStatus.focused; }
-  toNotFocused() { this.state = HoverStatus.notFocused; }
+  isFocused() {
+    return this.state === HoverStatus.focused;
+  }
+  toFocused() {
+    this.state = HoverStatus.focused;
+  }
+  toNotFocused() {
+    this.state = HoverStatus.notFocused;
+  }
 }
 HoverStatus.focused = "focused";
 HoverStatus.notFocused = "notFocused";
@@ -115,8 +132,13 @@ class ActiveStateStatus {
     this.state = "off"; // "on", "finished", "off"
     this.activeStep = -1;
   }
-  setState(state) { this.state = state; }
-  setActiveAtStep(step) { this.toOn(); this.activeStep = step; }
+  setState(state) {
+    this.state = state;
+  }
+  setActiveAtStep(step) {
+    this.toOn();
+    this.activeStep = step;
+  }
   reset() {
     this.toOff();
     this.resetActive();
@@ -124,11 +146,21 @@ class ActiveStateStatus {
   resetActive() {
     this.activeStep = -1;
   }
-  get isOn() { return this.state == "on" }
-  get isOff() { return this.state == "off" }
-  get isFinished() { return this.state == "finished" }
-  get isActive() { return this.isOn && this.activeStep > 0 }
-  isActiveAtStep(k) { return this.isActive && this.activeStep == k}
+  get isOn() {
+    return this.state === "on";
+  }
+  get isOff() {
+    return this.state === "off";
+  }
+  get isFinished() {
+    return this.state === "finished";
+  }
+  get isActive() {
+    return this.isOn && this.activeStep > 0;
+  }
+  isActiveAtStep(k) {
+    return this.isActive && this.activeStep === k;
+  }
 
   toOn() {
     this.state = "on";
@@ -148,15 +180,16 @@ class StatusArr {
     return this.statusArr.push(obj);
   }
   remove() {
-    return this.statusArr.pop()
+    return this.statusArr.pop();
   }
   last() {
-    return _.last(this.statusArr)
+    return _.last(this.statusArr);
   }
   containsStatus(status) {
-    var arr = this.statusArr, n = arr.length;
+    var arr = this.statusArr,
+      n = arr.length;
     for (var i = 0; i < n; i++) {
-      if (arr[i].action == status) {
+      if (arr[i].action === status) {
         return true;
       }
     }
@@ -165,26 +198,32 @@ class StatusArr {
 
   static expect_prev_status(curStatus, prevStatus, expectedAction) {
     var on_error = function(msg) {
-      console.error("curStatus: ", curStatus)
-      console.error("prevStatus: ", prevStatus)
-      throw msg
+      console.error("curStatus: ", curStatus);
+      console.error("prevStatus: ", prevStatus);
+      throw msg;
+    };
+    if (prevStatus.action !== expectedAction) {
+      on_error(`prior node status does not have "${expectedAction}" status`);
     }
-    if (prevStatus.action != expectedAction) {
-      on_error(`prior node status does not have "${expectedAction}" status`)
+    if (prevStatus.ctxId !== curStatus.ctxId) {
+      on_error(
+        `prior node "ctxId" status does not have the same "ctxId" status`
+      );
     }
-    if (prevStatus.ctxId != curStatus.ctxId) {
-      on_error(`prior node "ctxId" status does not have the same "ctxId" status`)
-    }
-
   }
 }
 class Node {
   constructor(data) {
-    if (typeof data.reactId === "undefined") throw "data.reactId not provided in new Node";
-    if (typeof data.label === "undefined") throw "data.label not provided in new Node";
-    if (typeof data.type === "undefined") throw "data.type not provided in new Node";
-    if (typeof data.session === "undefined") throw "data.session not provided in new Node";
-    if (typeof data.time === "undefined") throw "data.time not provided in new Node";
+    if (typeof data.reactId === "undefined")
+      throw "data.reactId not provided in new Node";
+    if (typeof data.label === "undefined")
+      throw "data.label not provided in new Node";
+    if (typeof data.type === "undefined")
+      throw "data.type not provided in new Node";
+    if (typeof data.session === "undefined")
+      throw "data.session not provided in new Node";
+    if (typeof data.time === "undefined")
+      throw "data.time not provided in new Node";
     this.reactId = data.reactId;
     this.label = data.label;
     this.type = data.type;
@@ -194,7 +233,8 @@ class Node {
     this.value = data.value || null;
     this.hoverStatus = data.hoverStatus || new HoverStatus();
 
-    this.valueChangedStatus = data.valueChangedStatus || new ActiveStateStatus();
+    this.valueChangedStatus =
+      data.valueChangedStatus || new ActiveStateStatus();
 
     // this.inInvalidate = data.inInvalidate || false;
     // this.activeInvalidate = data.activeInvalidate || false;
@@ -203,40 +243,62 @@ class Node {
 
     this.invalidateStatus = data.invalidateStatus || new ActiveStateStatus();
   }
-  get id() {return this.reactId.replace(/\$/g, "_")}
-  get key() {return this.reactId}
-  get hoverKey() {return this.key}
+  get id() {
+    return this.reactId.replace(/\$/g, "_");
+  }
+  get key() {
+    return this.reactId;
+  }
+  get hoverKey() {
+    return this.key;
+  }
   statusAdd(obj) {
     this.statusArr.add(obj);
     return this.statusArr;
   }
-  statusRemove() {return this.statusArr.remove();}
-  statusLast() {return this.statusArr.last();}
-  get inEnter() {return this.statusArr.containsStatus("enter");}
-  get inIsolate() {return this.statusArr.containsStatus("isolateEnter");}
+  statusRemove() {
+    return this.statusArr.remove();
+  }
+  statusLast() {
+    return this.statusArr.last();
+  }
+  get inEnter() {
+    return this.statusArr.containsStatus("enter");
+  }
+  get inIsolate() {
+    return this.statusArr.containsStatus("isolateEnter");
+  }
   // get inInvalidate() {return this.statusArr.containsStatus("invalidateStart");}
-  get inIsolateInvalidate() {return this.statusArr.containsStatus("isolateInvalidateStart");}
+  get inIsolateInvalidate() {
+    return this.statusArr.containsStatus("isolateInvalidateStart");
+  }
   get cytoStyle() {
-    return {}
+    return {};
   }
   get cytoLabel() {
-    return this.label
+    return this.label;
   }
   get cytoClasses() {
-    var classes = []
-    switch(this.type) {
-      case "observer": classes.push("nodeEnd"); break;
-      case "observable": classes.push("nodeMiddle"); break;
-      default: classes.push("nodeStart")
+    var classes = [];
+    switch (this.type) {
+      case "observer":
+        classes.push("nodeEnd");
+        break;
+      case "observable":
+        classes.push("nodeMiddle");
+        break;
+      default:
+        classes.push("nodeStart");
     }
 
     if (this.inEnter) classes.push("nodeEnter");
     if (this.enterStatus.isActive) classes.push("nodeEnterActive");
 
-    if (this.type == "observer" || this.type == "observable") {
-      if (this.invalidateStatus.isActive) classes.push("nodeInvalidateActive")
-      else if (this.invalidateStatus.isOn) classes.push("nodeInvalidate")
-      else if (this.invalidateStatus.isFinished) classes.push("nodeInvalidateDone")
+    if (this.type === "observer" || this.type === "observable") {
+      if (this.invalidateStatus.isActive) classes.push("nodeInvalidateActive");
+      else if (this.invalidateStatus.isOn) classes.push("nodeInvalidate");
+      else if (this.invalidateStatus.isFinished)
+        classes.push("nodeInvalidateDone");
     }
     // if (this.inInvalidate) classes.push("nodeInvalidate");
     if (this.inIsolate) classes.push("nodeIsolate");
@@ -244,7 +306,8 @@ class Node {
     if (this.valueChangedStatus.isOn) classes.push("nodeValueChanged");
 
     switch (this.hoverStatus.state) {
-      case HoverStatus.focused: break;
+      case HoverStatus.focused:
+        break;
       case HoverStatus.notFocused:
         // console.log("not focused!")
         if (this.hoverStatus.isSticky()) {
@@ -254,24 +317,28 @@ class Node {
         }
         break;
     }
-    if (this.hoverStatus.selected) classes.push("nodeSelected")
+    if (this.hoverStatus.selected) classes.push("nodeSelected");
 
-    return classes.join(" ")
+    return classes.join(" ");
   }
   get cytoData() {
     var retData = this;
     return {
       group: "nodes",
-      data: retData
-    }
+      data: retData,
+    };
   }
 }
 class Edge {
   constructor(data) {
-    if (typeof data.reactId === "undefined") throw "data.reactId not provided to new Edge()";
-    if (typeof data.depOnReactId === "undefined") throw "data.depOnReactId not provided to new Edge()";
-    if (typeof data.ctxId === "undefined") throw "data.ctxId not provided to new Edge()";
-    if (typeof data.time === "undefined") throw "data.time not provided to new Edge()";
+    if (typeof data.reactId === "undefined")
+      throw "data.reactId not provided to new Edge()";
+    if (typeof data.depOnReactId === "undefined")
+      throw "data.depOnReactId not provided to new Edge()";
+    if (typeof data.ctxId === "undefined")
+      throw "data.ctxId not provided to new Edge()";
+    if (typeof data.time === "undefined")
+      throw "data.time not provided to new Edge()";
     this.reactId = data.reactId;
     this.depOnReactId = data.depOnReactId;
     this.ctxId = data.ctxId;
@@ -282,7 +349,10 @@ class Edge {
     this.hoverStatus = data.hoverStatus || new HoverStatus();
   }
   get id() {
-    return `${ this.reactId }_${ this.depOnReactId }_${this.ctxId}`.replace(/\$/g, "_");
+    return `${this.reactId}_${this.depOnReactId}_${this.ctxId}`.replace(
+      /\$/g,
+      "_"
+    );
   }
   get source() {
     return this.depOnReactId.replace(/\$/g, "_");
@@ -291,20 +361,23 @@ class Edge {
     return this.reactId.replace(/\$/g, "_");
   }
   get key() {
-    return `${ this.reactId } depends on ${ this.depOnReactId } in ${this.ctxId}`;
+    return `${this.reactId} depends on ${this.depOnReactId} in ${this.ctxId}`;
   }
   get ghostKey() {
-    return `${ this.reactId } depends on ${ this.depOnReactId }`;
+    return `${this.reactId} depends on ${this.depOnReactId}`;
   }
-  get hoverKey() {return this.ghostKey}
+  get hoverKey() {
+    return this.ghostKey;
+  }
   get inIsolate() {
-    return this.status == "isolate";
+    return this.status === "isolate";
   }
   get cytoClasses() {
     var classes = [];
     if (this.inIsolate) classes.push("edgeIsolate");
     switch (this.hoverStatus.state) {
-      case HoverStatus.focused: break;
+      case HoverStatus.focused:
+        break;
       case HoverStatus.notFocused:
         if (this.hoverStatus.sticky) {
           classes.push("hoverNotFocusedButSticky");
@@ -313,22 +386,25 @@ class Edge {
         }
         break;
     }
-    if (this.hoverStatus.selected) classes.push("edgeSelected")
-    return classes.join(" ")
+    if (this.hoverStatus.selected) classes.push("edgeSelected");
+    return classes.join(" ");
   }
   get cytoData() {
     var retData = this;
     return {
       group: "edges",
-      data: retData
-    }
+      data: retData,
+    };
   }
 }
 class GhostEdge {
   constructor(data) {
-    if (typeof data.reactId === "undefined") throw "data.reactId not provided to new GhostEdge()";
-    if (typeof data.depOnReactId === "undefined") throw "data.depOnReactId not provided to new GhostEdge()";
-    if (typeof data.time === "undefined") throw "data.time not provided to new GhostEdge()";
+    if (typeof data.reactId === "undefined")
+      throw "data.reactId not provided to new GhostEdge()";
+    if (typeof data.depOnReactId === "undefined")
+      throw "data.depOnReactId not provided to new GhostEdge()";
+    if (typeof data.time === "undefined")
+      throw "data.time not provided to new GhostEdge()";
     this.reactId = data.reactId;
     this.depOnReactId = data.depOnReactId;
     this.session = data.session || "Global";
@@ -337,7 +413,7 @@ class GhostEdge {
     this.hoverStatus = data.hoverStatus || new HoverStatus();
   }
   get id() {
-    return `${ this.reactId }_${ this.depOnReactId }`.replace(/\$/g, "_");
+    return `${this.reactId}_${this.depOnReactId}`.replace(/\$/g, "_");
   }
   get source() {
     return this.depOnReactId.replace(/\$/g, "_");
@@ -346,17 +422,20 @@ class GhostEdge {
     return this.reactId.replace(/\$/g, "_");
   }
   get key() {
-    return `${ this.reactId } depends on ${ this.depOnReactId }`;
+    return `${this.reactId} depends on ${this.depOnReactId}`;
   }
-  get hoverKey() {return this.key}
+  get hoverKey() {
+    return this.key;
+  }
   get cytoStyle() {
     return {};
     // return graphStyles.ghostEdge.default
   }
   get cytoClasses() {
-    var classes = ["edgeGhost"]
+    var classes = ["edgeGhost"];
     switch (this.hoverStatus.state) {
-      case HoverStatus.focused: break;
+      case HoverStatus.focused:
+        break;
       case HoverStatus.notFocused:
         if (this.hoverStatus.sticky) {
           classes.push("edgeGhostHoverNotFocusedButSticky");
@@ -365,15 +444,15 @@ class GhostEdge {
         }
         break;
     }
-    if (this.hoverStatus.selected) classes.push("edgeGhostSelected")
-    return classes.join(" ")
+    if (this.hoverStatus.selected) classes.push("edgeGhostSelected");
+    return classes.join(" ");
   }
   get cytoData() {
     var retData = this;
     return {
       group: "edges",
-      data: retData
-    }
+      data: retData,
+    };
   }
 }
 
@@ -415,7 +494,7 @@ class Graph {
 
   hasSomeData(data) {
     if (data instanceof Node) {
-      return _.has(this.nodes, data.key)
+      return _.has(this.nodes, data.key);
     } else if (data instanceof Edge || data instanceof GhostEdge) {
       if (data instanceof Edge) {
         if (_.has(this.edgesUnique, data.ghostKey)) return true;
@@ -423,22 +502,19 @@ class Graph {
         if (_.has(this.edgesUnique, data.key)) return true;
       }
 
-      var edgeGroup, key, edge;
       var reactId = data.reactId;
       var depOnReactId = data.depOnReactId;
-      for (edgeGroup in [this.edges, this.edgesUnique]) {
-        for (key in edgeGroup) {
-          edge = edgeGroup[key];
-          if (edge.reactId == reactId && edge.depOnReactId == depOnReactId) {
+      return _.some([this.edges, this.edgesUnique], function(edgeGroup) {
+        return _.some(_.values(edgeGroup), function(edge) {
+          if (edge.reactId === reactId && edge.depOnReactId === depOnReactId) {
             return true;
           }
-        }
-      }
-      return false;
-
+          return false;
+        });
+      });
     } else {
-      console.error(data)
-      throw "unsupported data type"
+      console.error(data);
+      throw "unsupported data type";
     }
   }
 
@@ -460,106 +536,107 @@ class Graph {
       var reactId = data.reactId;
       var depOnReactId = data.depOnReactId;
       var selectMatchingEdges = function(edge) {
-        if (edge.reactId == reactId && edge.depOnReactId == depOnReactId) {
+        if (edge.reactId === reactId && edge.depOnReactId === depOnReactId) {
           edge.hoverStatus.selected = HoverStatus.isSelected;
         }
-      }
-      _.values(this.edgesUnique).map(selectMatchingEdges)
-      _.values(this.edges).map(selectMatchingEdges)
+      };
+      _.values(this.edgesUnique).map(selectMatchingEdges);
+      _.values(this.edges).map(selectMatchingEdges);
       return;
     }
     return;
   }
 
   reactIdFromData(data, getParentFromEdge = true) {
-    var reactId;
     if (data instanceof Node) {
-      return data.reactId
+      return data.reactId;
     } else if (Graph.isEdgeLike(data)) {
-      var node = getParentFromEdge ? this.nodes[data.depOnReactId] : this.nodes[data.reactId];
+      var node = getParentFromEdge
+        ? this.nodes[data.depOnReactId]
+        : this.nodes[data.reactId];
       if (node) {
-        return node.reactId
+        return node.reactId;
       } else {
-        return null
+        return null;
       }
-    } else if (typeof data == "string") {
-      return data
+    } else if (typeof data === "string") {
+      return data;
     } else {
-      console.error(data)
-      throw "unsupported data type. Can only 'reactId's of 'Node's, 'GhostEdge's, or 'Edge's or from a reactId"
+      console.error(data);
+      throw "unsupported data type. Can only 'reactId's of 'Node's, 'GhostEdge's, or 'Edge's or from a reactId";
     }
   }
 
   static isEdgeLike(data) {
-    return (data instanceof Edge) || (data instanceof GhostEdge)
+    return data instanceof Edge || data instanceof GhostEdge;
   }
 
   // return array of node 'reactId's
   parentNodeIds(data) {
-    var reactId
+    var reactId;
     if (Graph.isEdgeLike(data)) {
       // return edge source
-      return [data.reactId]
+      return [data.reactId];
     } else {
       var reactId = this.reactIdFromData(data, true);
-      if (!reactId) return []
+      if (!reactId) return [];
       return _.filter(_.values(this.edgesUnique), function(edge) {
         // if the target is the reactId
-        return edge.reactId == reactId
+        return edge.reactId === reactId;
       }).map(function(edge) {
         // return the source
-        return edge.depOnReactId
-      })
+        return edge.depOnReactId;
+      });
     }
   }
   childrenNodeIds(data) {
     if (Graph.isEdgeLike(data)) {
       // return edge target
-      return [data.depOnReactId]
+      return [data.depOnReactId];
     } else {
       var reactId = this.reactIdFromData(data, false);
-      if (!reactId) return []
+      if (!reactId) return [];
       return _.filter(_.values(this.edgesUnique), function(edge) {
         // if the source is the reactId
-        return edge.depOnReactId == reactId
+        return edge.depOnReactId === reactId;
       }).map(function(edge) {
         // return the target
-        return edge.reactId
-      })
+        return edge.reactId;
+      });
     }
   }
 
   ancestorNodeIds(data) {
     var reactId = this.reactIdFromData(data, true);
-    if (!reactId) return []
+    if (!reactId) return [];
     var originalReactId = reactId;
     var seenMap = {};
     var reactIdArr = [reactId];
     while (reactIdArr.length > 0) {
       reactId = reactIdArr.pop();
       if (!_.has(seenMap, reactId)) {
-        reactIdArr = reactIdArr.concat(this.parentNodeIds(reactId))
+        reactIdArr = reactIdArr.concat(this.parentNodeIds(reactId));
         seenMap[reactId] = true;
       }
     }
-    delete seenMap[originalReactId]
-    return _.keys(seenMap).sort()
+    delete seenMap[originalReactId];
+    return _.keys(seenMap).sort();
   }
   decendentNodeIds(data) {
     var reactId = this.reactIdFromData(data, false);
-    if (!reactId) return []
+    if (!reactId) return [];
     var originalReactId = reactId;
     var seenMap = {};
     var reactIdArr = [reactId];
     while (reactIdArr.length > 0) {
       reactId = reactIdArr.pop();
       if (!_.has(seenMap, reactId)) {
-        reactIdArr = reactIdArr.concat(this.childrenNodeIds(reactId))
+        reactIdArr = reactIdArr.concat(this.childrenNodeIds(reactId));
         seenMap[reactId] = true;
       }
     }
-    delete seenMap[originalReactId]
-    return _.keys(seenMap).sort()
+    delete seenMap[originalReactId];
+    return _.keys(seenMap).sort();
   }
 
   // all filtering can be done with only node reactIds
@@ -567,12 +644,12 @@ class Graph {
     var ret = [];
     if (Graph.isEdgeLike(data)) {
       var reactId;
-      reactId = this.reactIdFromData(data, true)
-      if (reactId) ret.push(reactId)
-      reactId = this.reactIdFromData(data, false)
-      if (reactId) ret.push(reactId)
+      reactId = this.reactIdFromData(data, true);
+      if (reactId) ret.push(reactId);
+      reactId = this.reactIdFromData(data, false);
+      if (reactId) ret.push(reactId);
     } else {
-      ret.push(this.reactIdFromData(data))
+      ret.push(this.reactIdFromData(data));
     }
     return _.union(
       ret,
@@ -583,100 +660,98 @@ class Graph {
 
   familyTreeNodeIdsForDatas(datas) {
     var self = this;
-    return _.union(_.flatMap(datas, function(data) {
-      return self.familyTreeNodeIds(data)
-    }))
+    return _.union(
+      _.flatMap(datas, function(data) {
+        return self.familyTreeNodeIds(data);
+      })
+    );
   }
   decendentNodeIdsForDatas(datas) {
     var self = this;
-    return _.union(_.flatMap(datas, function(data) {
-      return self.decendentNodeIds(data)
-    }))
+    return _.union(
+      _.flatMap(datas, function(data) {
+        return self.decendentNodeIds(data);
+      })
+    );
   }
   ancestorNodeIdsForDatas(datas) {
     var self = this;
-    return _.union(_.flatMap(datas, function(data) {
-      return self.ancestorNodeIds(data)
-    }))
+    return _.union(
+      _.flatMap(datas, function(data) {
+        return self.ancestorNodeIds(data);
+      })
+    );
   }
 
-
   hoverStatusOnNodeIds(nodeIds, hoverKey, onStatus, offStatus) {
-    var key;
     var nodeMap = {};
     nodeIds.map(function(nodeId) {
       nodeMap[nodeId] = true;
-    })
+    });
 
-    var node, edge;
     // highlight nodes
-    for (key in this.nodes) {
-      node = this.nodes[key]
+    _.map(this.nodes, function(node) {
       if (_.has(nodeMap, node.reactId)) {
-        node.hoverStatus[hoverKey] = onStatus
+        node.hoverStatus[hoverKey] = onStatus;
       } else {
-        node.hoverStatus[hoverKey] = offStatus
+        node.hoverStatus[hoverKey] = offStatus;
       }
-    }
+    });
     // highlight edges
-    for (key in this.edges) {
-      edge = this.edges[key]
+    _.map(this.edges, function(edge) {
       if (_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId)) {
-        edge.hoverStatus[hoverKey] = onStatus
+        edge.hoverStatus[hoverKey] = onStatus;
       } else {
-        edge.hoverStatus[hoverKey] = offStatus
+        edge.hoverStatus[hoverKey] = offStatus;
       }
-    }
+    });
     // highlight unique edges
-    for (key in this.edgesUnique) {
-      edge = this.edgesUnique[key]
+    _.map(this.edgesUnique, function(edge) {
       if (_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId)) {
-        edge.hoverStatus[hoverKey] = onStatus
+        edge.hoverStatus[hoverKey] = onStatus;
       } else {
-        edge.hoverStatus[hoverKey] = offStatus
+        edge.hoverStatus[hoverKey] = offStatus;
       }
-    }
+    });
 
     return this;
   }
 
   filterGraphOnNodeIds(nodeIds) {
-    var key;
     var nodeMap = {};
     nodeIds.map(function(nodeId) {
       nodeMap[nodeId] = true;
-    })
+    });
 
-    var node, edge;
+    var self = this;
     // prune nodes
-    for (key in this.nodes) {
-      node = this.nodes[key]
+    _.map(this.nodes, function(node, key) {
       if (!_.has(nodeMap, node.reactId)) {
-        delete this.nodes[key]
+        delete self.nodes[key];
       }
-    }
+    });
     // prune edges
-    for (key in this.edges) {
-      edge = this.edges[key]
-      if (!(_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId))) {
-        delete this.edges[key]
+    _.map(this.edges, function(edge, key) {
+      if (
+        !(_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId))
+      ) {
+        delete self.edges[key];
       }
-    }
+    });
     // prune unique edges
-    for (key in this.edgesUnique) {
-      edge = this.edgesUnique[key]
-      if (!(_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId))) {
-        delete this.edgesUnique[key]
+    _.map(this.edgesUnique, function(edge, key) {
+      if (
+        !(_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId))
+      ) {
+        delete self.edgesUnique[key];
       }
-    }
+    });
 
     return this;
   }
 
-
   addEntry(data) {
-
-    if (data.reactId == "rNoCtx") {
+    if (data.reactId === "rNoCtx") {
       return;
     }
 
@@ -699,38 +774,38 @@ class Graph {
 
       case "invalidateStart":
         var node = this.nodes[data.reactId];
-        var lastNodeId = _.last(this.activeInvalidateEnter)
+        var lastNodeId = _.last(this.activeInvalidateEnter);
         if (lastNodeId) {
-          this.nodes[lastNodeId].invalidateStatus.resetActive()
+          this.nodes[lastNodeId].invalidateStatus.resetActive();
         }
-        this.activeInvalidateEnter.push(data.reactId)
+        this.activeInvalidateEnter.push(data.reactId);
         switch (node.type) {
           case "observable":
           case "observer":
             node.invalidateStatus.setActiveAtStep(data.step);
             break;
         }
-        node.statusAdd(data)
+        node.statusAdd(data);
         break;
       case "enter":
         var lastNodeId = _.last(this.activeNodeEnter);
         if (lastNodeId) {
-          this.nodes[lastNodeId].enterStatus.resetActive()
+          this.nodes[lastNodeId].enterStatus.resetActive();
         }
         this.activeNodeEnter.push(data.reactId);
-        var node = this.nodes[data.reactId]
+        var node = this.nodes[data.reactId];
         node.enterStatus.setActiveAtStep(data.step);
         switch (node.type) {
           case "observer":
           case "observable":
-            node.invalidateStatus.reset()
+            node.invalidateStatus.reset();
         }
-        node.statusAdd(data)
+        node.statusAdd(data);
         break;
 
       case "isolateInvalidateStart":
       case "isolateEnter":
-        this.nodes[data.reactId].statusAdd(data)
+        this.nodes[data.reactId].statusAdd(data);
         break;
 
       case "invalidateEnd":
@@ -749,15 +824,19 @@ class Graph {
             break;
           case "invalidateEnd":
             // turn off the previously active node
-            this.nodes[_.last(this.activeInvalidateEnter)].invalidateStatus.resetActive();
+            this.nodes[
+              _.last(this.activeInvalidateEnter)
+            ].invalidateStatus.resetActive();
             this.activeInvalidateEnter.pop();
             // if another invalidateStart node exists...
             //   set the previous invalidateStart node to active
-            var lastNodeId = _.last(this.activeInvalidateEnter)
+            var lastNodeId = _.last(this.activeInvalidateEnter);
             if (lastNodeId) {
-              this.nodes[lastNodeId].invalidateStatus.setActiveAtStep(data.step);
+              this.nodes[lastNodeId].invalidateStatus.setActiveAtStep(
+                data.step
+              );
             }
-            node.invalidateStatus.toFinished()
+            node.invalidateStatus.toFinished();
             if (node.valueChangedStatus.isOn) {
               node.valueChangedStatus.reset();
             }
@@ -768,15 +847,15 @@ class Graph {
             }
             break;
         }
-        var prevData = node.statusLast()
+        var prevData = node.statusLast();
         var expectedAction = {
-          "exit": "enter",
-          "isolateExit": "isolateEnter",
-          "invalidateEnd": "invalidateStart",
-          "isolateInvalidateEnd": "isolateInvalidateStart"
-        }[data.action]
-        StatusArr.expect_prev_status(data, prevData, expectedAction)
-        node.statusRemove()
+          exit: "enter",
+          isolateExit: "isolateEnter",
+          invalidateEnd: "invalidateStart",
+          isolateInvalidateEnd: "isolateInvalidateStart",
+        }[data.action];
+        StatusArr.expect_prev_status(data, prevData, expectedAction);
+        node.statusRemove();
         break;
 
       case "dependsOn":
@@ -794,10 +873,10 @@ class Graph {
           edge = this.edges[edgeKey];
         }
 
-        if (this.nodes[edge.reactId].statusLast().action == "isolateEnter") {
+        if (this.nodes[edge.reactId].statusLast().action === "isolateEnter") {
           edge.status = "isolate";
         } else {
-          edge.status = "normal"
+          edge.status = "normal";
         }
         break;
 
@@ -810,23 +889,22 @@ class Graph {
       case "queueEmpty":
       case "asyncStart":
       case "asyncStop":
-        this[data.action] = data.step
+        this[data.action] = data.step;
         break;
 
       default:
-        console.error("data.action: ", data.action, data)
+        console.error("data.action: ", data.action, data);
         throw data;
     }
   }
 }
 
-
 // initialize all log entries to have a step value
-(function(){
+(function() {
   for (var i = 0; i < window.log.length; i++) {
     window.log[i].step = i;
   }
-})()
+})();
 
 class GraphAtStep {
   constructor(log) {
@@ -847,17 +925,16 @@ class GraphAtStep {
 
     this.finalGraph = this.atStep(log.length);
     this.finalCyto = this.finalGraph.cytoGraph;
-
   }
 
   get hasSearchRegex() {
     return this.searchRegex ? true : false;
   }
   get hasFilterDatas() {
-    return this.filterDatas ? (this.filterDatas.length > 0) : false;
+    return this.filterDatas ? this.filterDatas.length > 0 : false;
   }
   get hasStickyDatas() {
-    return this.stickyDatas ? (this.stickyDatas.length > 0) : false;
+    return this.stickyDatas ? this.stickyDatas.length > 0 : false;
   }
   get hasHoverData() {
     return this.hoverData ? true : false;
@@ -877,28 +954,36 @@ class GraphAtStep {
     for (i = 0; i < log.length; i++) {
       data = log[i];
       switch (data.action) {
-        case "enter": enterExitQueue.push(i); break;
+        case "enter":
+          enterExitQueue.push(i);
+          break;
         case "exit":
           enterExitQueue.pop();
-          if (enterExitQueue.length == 0) {
+          if (enterExitQueue.length === 0) {
             this.enterExitEmpties.push(data.step + 1);
           }
           break;
-        case "asyncStart": this.asyncStarts.push(data.step); break;
-        case "asyncStop": this.asyncStops.push(data.step); break;
-        case "queueEmpty": this.queueEmpties.push(data.step); break;
+        case "asyncStart":
+          this.asyncStarts.push(data.step);
+          break;
+        case "asyncStop":
+          this.asyncStops.push(data.step);
+          break;
+        case "queueEmpty":
+          this.queueEmpties.push(data.step);
+          break;
       }
 
-      switch(data.action) {
+      switch (data.action) {
         case "invalidateStart":
-          if (data.ctxId == "other") {
+          if (data.ctxId === "other") {
             break;
           }
           // TODO-barret check if reactId is a reactive values. If so, skip, otherwise add
           this.steps.push(data.step);
           break;
         case "define":
-          // TODO-barret only for reactive values keys
+        // TODO-barret only for reactive values keys
         case "invalidateEnd":
         case "isolateInvalidateStart":
         case "isolateInvalidateEnd":
@@ -926,24 +1011,27 @@ class GraphAtStep {
   }
 
   nextStep(k) {
-
     // if no filtering... get next step from step array
     if (!this.hasFilterDatas) {
-      var nextStepPos = Math.min(this.steps.length - 1, _.sortedIndex(this.steps, k) + 1);
-      return this.steps[nextStepPos]
+      var nextStepPos = Math.min(
+        this.steps.length - 1,
+        _.sortedIndex(this.steps, k) + 1
+      );
+      return this.steps[nextStepPos];
     }
 
     var graph = this.atStep(k);
-    var decendents = undefined, ancestors = undefined
+    var decendents = undefined,
+      ancestors = undefined;
 
     var logEntry, i, ret;
 
     for (i = k + 1; i < this.log.length - 1; i++) {
-      logEntry = this.log[i]
+      logEntry = this.log[i];
 
       // skip if if it's not a valid step anyways...
-      if (_.sortedIndexOf(this.steps, logEntry.step) == -1) {
-        continue
+      if (_.sortedIndexOf(this.steps, logEntry.step) === -1) {
+        continue;
       }
       ret = logEntry.step;
       switch (logEntry.action) {
@@ -952,22 +1040,22 @@ class GraphAtStep {
           if (_.isNil(decendents) || _.isNil(ancestors)) {
             var filterReactIds = this.filterDatas.map(function(node) {
               return node.reactId;
-            })
+            });
             decendents = _.union(
               filterReactIds,
               graph.decendentNodeIdsForDatas(this.filterDatas)
-            )
+            );
             ancestors = _.union(
               filterReactIds,
               graph.ancestorNodeIdsForDatas(this.filterDatas)
-            )
+            );
           }
           // reactId is target (ends at ancestors)
-          if (_.indexOf(ancestors, logEntry.reactId) != -1) {
+          if (_.indexOf(ancestors, logEntry.reactId) !== -1) {
             return ret;
           }
           // depOnReactId is source (starts from children)
-          if (_.indexOf(decendents, logEntry.depOnReactId) != -1) {
+          if (_.indexOf(decendents, logEntry.depOnReactId) !== -1) {
             return ret;
           }
           break;
@@ -1009,8 +1097,8 @@ class GraphAtStep {
         case "queueEmpty":
           break;
         default:
-          console.error(logEntry)
-          throw "unknown logEntry action next"
+          console.error(logEntry);
+          throw "unknown logEntry action next";
           break;
       }
     }
@@ -1022,18 +1110,18 @@ class GraphAtStep {
     // if no filtering... get next step from step array
     if (!this.hasFilterDatas) {
       var prevStepPos = Math.max(_.sortedIndex(this.steps, k) - 1, 1);
-      return this.steps[prevStepPos]
+      return this.steps[prevStepPos];
     }
 
     var graph = this.atStep(k);
     var logEntry, i, ret;
 
     for (i = k - 1; i >= 0; i--) {
-      logEntry = this.log[i]
+      logEntry = this.log[i];
 
       // skip if if it's not a valid step anyways...
-      if (_.sortedIndexOf(this.steps, logEntry.step) == -1) {
-        continue
+      if (_.sortedIndexOf(this.steps, logEntry.step) === -1) {
+        continue;
       }
       ret = logEntry.step;
       switch (logEntry.action) {
@@ -1064,9 +1152,11 @@ class GraphAtStep {
           break;
 
         case "define":
-          if (_.some(this.filterDatas, function(filterData) {
-            return filterData.reactId == logEntry.reactId;
-          })) {
+          if (
+            _.some(this.filterDatas, function(filterData) {
+              return filterData.reactId === logEntry.reactId;
+            })
+          ) {
             // some filterdata is defined... so it must be a next step
             return ret;
           }
@@ -1076,8 +1166,8 @@ class GraphAtStep {
         case "queueEmpty":
           break;
         default:
-          console.error(logEntry)
-          throw "unknown logEntry action prev"
+          console.error(logEntry);
+          throw "unknown logEntry action prev";
           break;
       }
     }
@@ -1086,14 +1176,14 @@ class GraphAtStep {
   }
 
   atStep(k) {
-    var kVal = Math.max(1, Math.min(k, this.log.length))
+    var kVal = Math.max(1, Math.min(k, this.log.length));
     var i, graph;
     // if (kVal >= this.cacheStep) {
     //   iStart = Math.floor((kVal - 1) / this.cacheStep) * this.cacheStep;
     //   graph = _.cloneDeep(this.graphCache[iStart])
     // }
     graph = new Graph(this.log);
-    for (i = 0; i < this.log.length && this.log[i].step <= k; i++) {
+    for (i = 0; i < this.log.length && this.log[i].step <= kVal; i++) {
       graph.addEntry(this.log[i]);
     }
 
@@ -1105,26 +1195,30 @@ class GraphAtStep {
           "state",
           HoverStatus.focused,
           HoverStatus.notFocused
-        )
-        graph.highlightSelected(this.hoverData)
+        );
+        graph.highlightSelected(this.hoverData);
       }
     }
     // if any sticky...
     if (this.hasStickyDatas) {
-      if (_.some(this.stickyDatas.map(function(data) {
-        return graph.hasSomeData(data)
-      }))) {
+      if (
+        _.some(
+          this.stickyDatas.map(function(data) {
+            return graph.hasSomeData(data);
+          })
+        )
+      ) {
         // at least some sticky data is visible
-        var stickyTree = graph.familyTreeNodeIdsForDatas(this.stickyDatas)
+        var stickyTree = graph.familyTreeNodeIdsForDatas(this.stickyDatas);
         graph.hoverStatusOnNodeIds(
           stickyTree,
           "sticky",
           HoverStatus.sticky,
           HoverStatus.notSticky
-        )
+        );
         this.stickyDatas.map(function(data) {
-          graph.highlightSelected(data)
-        })
+          graph.highlightSelected(data);
+        });
         if (!this.hoverData) {
           // if sticky data no hover data... make the sticky data hover!
           graph.hoverStatusOnNodeIds(
@@ -1132,38 +1226,37 @@ class GraphAtStep {
             "state",
             HoverStatus.focused,
             HoverStatus.notFocused
-          )
+          );
         }
       }
     }
 
     // if any searching
     if (this.hasSearchRegex) {
-      var searchRegex = this.searchRegex
-      var matchedNodes = _.filter(
-        _.values(graph.nodes),
-        function(node) {
-          return searchRegex.test(node.label)
-        }
-      )
+      var searchRegex = this.searchRegex;
+      var matchedNodes = _.filter(_.values(graph.nodes), function(node) {
+        return searchRegex.test(node.label);
+      });
 
-      if (matchedNodes.length == 0) {
+      if (matchedNodes.length === 0) {
         // TODO-barret warn of no matches
-        console.log("no matches!")
-        getGraph.updateFilterDatasReset()
+        console.log("no matches!");
+        window.getGraph.updateFilterDatasReset();
       } else {
-        getGraph.updateFilterDatas(matchedNodes)
+        window.getGraph.updateFilterDatas(matchedNodes);
         // filter on regex
-        graph.filterGraphOnNodeIds(graph.familyTreeNodeIdsForDatas(this.filterDatas))
+        graph.filterGraphOnNodeIds(
+          graph.familyTreeNodeIdsForDatas(this.filterDatas)
+        );
       }
-
     } else {
       // if any filtering...
       if (this.hasFilterDatas) {
-        graph.filterGraphOnNodeIds(graph.familyTreeNodeIdsForDatas(this.filterDatas))
+        graph.filterGraphOnNodeIds(
+          graph.familyTreeNodeIdsForDatas(this.filterDatas)
+        );
       }
     }
-
 
     return graph;
   }
@@ -1192,13 +1285,27 @@ class GraphAtStep {
     return true;
   }
 
-  updateHoverData(data) { this.hoverData = data }
-  updateHoverDataReset() { this.hoverData = null }
-  updateStickyDatas(dataArr) { this.stickyDatas = dataArr }
-  updateStickyDatasReset() { this.stickyDatas = null }
-  updateFilterDatas(dataArr) { this.filterDatas = dataArr }
-  updateFilterDatasReset() { this.filterDatas = null }
-  updateSearchRegex(regex) { this.searchRegex = regex }
+  updateHoverData(data) {
+    this.hoverData = data;
+  }
+  updateHoverDataReset() {
+    this.hoverData = null;
+  }
+  updateStickyDatas(dataArr) {
+    this.stickyDatas = dataArr;
+  }
+  updateStickyDatasReset() {
+    this.stickyDatas = null;
+  }
+  updateFilterDatas(dataArr) {
+    this.filterDatas = dataArr;
+  }
+  updateFilterDatasReset() {
+    this.filterDatas = null;
+  }
+  updateSearchRegex(regex) {
+    this.searchRegex = regex;
+  }
   updateSearchRegexReset() {
     this.updateFilterDatasReset();
     this.searchRegex = null;
@@ -1242,15 +1349,18 @@ class GraphAtStep {
     var nodeMap = {};
     datas.map(function(data) {
       if (data instanceof Node) {
-        nodeMap[data.reactId] = data
+        nodeMap[data.reactId] = data;
       }
     });
     var newLog = _.filter(this.originalLog, function(logEntry) {
-      switch(logEntry.action) {
+      switch (logEntry.action) {
         case "dependsOn":
         case "dependsOnRemove":
           // check for both to and from
-          return _.has(nodeMap, logEntry.reactId) && _.has(nodeMap, logEntry.depOnReactId);
+          return (
+            _.has(nodeMap, logEntry.reactId) &&
+            _.has(nodeMap, logEntry.depOnReactId)
+          );
           break;
         case "define":
         case "updateNodeLabel":
@@ -1272,62 +1382,64 @@ class GraphAtStep {
           // always add
           return _.has(nodeMap, logEntry.reactId);
         default:
-          console.error("logEntry.action: ", logEntry.action, data)
-          throw data;
+          console.error("logEntry.action: ", logEntry.action, logEntry);
+          throw logEntry;
       }
-    })
+    });
     console.log("new Log: ", newLog);
     return newLog;
   }
 
-  filterDatasLog() {
-    var nodeMap = {};
-    datas.map(function(data) {
-      if (data instanceof Node) {
-        nodeMap[data.reactId] = data
-      }
-    });
-    var newLog = _.filter(this.originalLog, function(logEntry) {
-      switch(logEntry.action) {
-        case "dependsOn":
-        case "dependsOnRemove":
-          // check for both to and from
-          return _.has(nodeMap, logEntry.reactId) && _.has(nodeMap, logEntry.depOnReactId);
-          break;
-        case "define":
-        case "updateNodeLabel":
-        case "valueChange":
-        case "invalidateStart":
-        case "enter":
-        case "isolateInvalidateStart":
-        case "isolateEnter":
-        case "invalidateEnd":
-        case "exit":
-        case "isolateExit":
-        case "isolateInvalidateEnd":
-          // check for reactId
-          return _.has(nodeMap, logEntry.reactId);
-          break;
-        case "queueEmpty":
-        case "asyncStart":
-        case "asyncStop":
-          // always add
-          return _.has(nodeMap, logEntry.reactId);
-        default:
-          console.error("logEntry.action: ", logEntry.action, data)
-          throw data;
-      }
-    })
-    console.log("new Log: ", newLog);
-    return newLog;
-  }
+  // filterDatasLog() {
+  //   var nodeMap = {};
+  //   datas.map(function(data) {
+  //     if (data instanceof Node) {
+  //       nodeMap[data.reactId] = data;
+  //     }
+  //   });
+  //   var newLog = _.filter(this.originalLog, function(logEntry) {
+  //     switch (logEntry.action) {
+  //       case "dependsOn":
+  //       case "dependsOnRemove":
+  //         // check for both to and from
+  //         return (
+  //           _.has(nodeMap, logEntry.reactId) &&
+  //           _.has(nodeMap, logEntry.depOnReactId)
+  //         );
+  //         break;
+  //       case "define":
+  //       case "updateNodeLabel":
+  //       case "valueChange":
+  //       case "invalidateStart":
+  //       case "enter":
+  //       case "isolateInvalidateStart":
+  //       case "isolateEnter":
+  //       case "invalidateEnd":
+  //       case "exit":
+  //       case "isolateExit":
+  //       case "isolateInvalidateEnd":
+  //         // check for reactId
+  //         return _.has(nodeMap, logEntry.reactId);
+  //         break;
+  //       case "queueEmpty":
+  //       case "asyncStart":
+  //       case "asyncStop":
+  //         // always add
+  //         return _.has(nodeMap, logEntry.reactId);
+  //       default:
+  //         console.error("logEntry.action: ", logEntry.action, data);
+  //         throw data;
+  //     }
+  //   });
+  //   console.log("new Log: ", newLog);
+  //   return newLog;
+  // }
 
   displayAtStep(k, cy) {
     var graph = this.atStep(k);
 
     cy.startBatch();
 
-    var i;
     var cytoDur = 400;
     var cyNodes = cy.nodes();
     var graphCyto = graph.cytoGraph;
@@ -1339,20 +1451,20 @@ class GraphAtStep {
 
     // enter
     nodesLRB.right.map(function(graphNode) {
-      var graphNodeData = graphNode.data()
+      var graphNodeData = graphNode.data();
       cy
         .add(graphNode)
         .classes(graphNodeData.cytoClasses)
-        .style(graphNodeData.cytoStyle)
-        // .animate({
-        //   // style: ,
-        //   duration: cytoDur
-        // });
+        .style(graphNodeData.cytoStyle);
+      // .animate({
+      //   // style: ,
+      //   duration: cytoDur
+      // });
       window.barret = cy.$id(graphNode.id());
     });
     // update
     nodesLRB.both.map(function(cytoNode) {
-      var cyNode = cy.$id(cytoNode.id())
+      var cyNode = cy.$id(cytoNode.id());
 
       var graphNode = graphNodes.$id(cytoNode.id());
       var graphNodeData = graphNode.data();
@@ -1363,18 +1475,17 @@ class GraphAtStep {
         .data(graphNodeData)
         .classes(graphClasses)
         .removeStyle()
-        .style(graphNodeData.cytoStyle)
-        // .animate({
-        //   // style: graphNodeData.cytoStyle,
-        //   duration: cytoDur
-        // });
+        .style(graphNodeData.cytoStyle);
+      // .animate({
+      //   // style: graphNodeData.cytoStyle,
+      //   duration: cytoDur
+      // });
 
       // pulse value change
       if (graphNodeData.valueChangedStatus.isActiveAtStep(k)) {
         onLayoutReady.push(function() {
-          cyNode
-            .flashClass("nodeStartBig", 125)
-        })
+          cyNode.flashClass("nodeStartBig", 125);
+        });
       }
       // pulse value enter or invalidate change
       if (
@@ -1382,59 +1493,60 @@ class GraphAtStep {
         graphNodeData.enterStatus.isActiveAtStep(k)
       ) {
         onLayoutReady.push(function() {
-          switch(graphNodeData.type) {
-            case "observable": cyNode.flashClass("nodeMiddleBig", 125); break;
-            case "observer": cyNode.flashClass("nodeEndBig", 125); break;
+          switch (graphNodeData.type) {
+            case "observable":
+              cyNode.flashClass("nodeMiddleBig", 125);
+              break;
+            case "observer":
+              cyNode.flashClass("nodeEndBig", 125);
+              break;
           }
-        })
+        });
       }
     });
     // exit
     nodesLRB.left.map(function(cytoNode) {
-      cy
-        .remove(cytoNode)
-        // .animate({duration: cytoDur});
+      cy.remove(cytoNode);
+      // .animate({duration: cytoDur});
     });
 
-    var cyEdges = cy.edges()
+    var cyEdges = cy.edges();
     var graphEdges = graphCyto.edges();
     var edgesLRB = cyEdges.diff(graphEdges);
     // enter
     edgesLRB.right.map(function(graphEdge) {
-      var graphEdgeData = graphEdge.data()
+      var graphEdgeData = graphEdge.data();
       cy
         .add(graphEdge)
         .classes(graphEdgeData.cytoClasses)
         .removeStyle()
-        .style(graphEdgeData.cytoStyle)
-        // .animate({
-        //   style: graphEdgeData.cytoStyle,
-        //   duration: cytoDur
-        // });
+        .style(graphEdgeData.cytoStyle);
+      // .animate({
+      //   style: graphEdgeData.cytoStyle,
+      //   duration: cytoDur
+      // });
     });
     // update
     edgesLRB.both.map(function(cytoEdge) {
-      var graphEdgeData = graphEdges.$id(cytoEdge.id()).data()
+      var graphEdgeData = graphEdges.$id(cytoEdge.id()).data();
       cy
         .$id(cytoEdge.id())
         // .classes()
         .classes(graphEdgeData.cytoClasses)
         .data(graphEdgeData)
         .removeStyle()
-        .style(graphEdgeData.cytoStyle)
-        // .animate({
-        //   style: graphEdgeData.cytoStyle,
-        //   duration: cytoDur
-        // });
+        .style(graphEdgeData.cytoStyle);
+      // .animate({
+      //   style: graphEdgeData.cytoStyle,
+      //   duration: cytoDur
+      // });
     });
     // exit
     edgesLRB.left.map(function(cytoEdge) {
-      var graphEdge = cytoEdge.data()
+      // var graphEdge = cytoEdge.data();
       // remove the original edge
-      cy
-        .remove(cytoEdge)
-        .animate({duration: cytoDur});
-    })
+      cy.remove(cytoEdge).animate({ duration: cytoDur });
+    });
 
     cy.endBatch();
 
@@ -1448,37 +1560,38 @@ class GraphAtStep {
     // if no new edges appeared or disappeared
     // or no nodes entered or exited
     if (
-      edgesLRB.right.length == edgesLRB.left.length &&
-      nodesLRB.right.length == 0 &&
-      nodesLRB.left.length == 0
+      edgesLRB.right.length === edgesLRB.left.length &&
+      nodesLRB.right.length === 0 &&
+      nodesLRB.left.length === 0
     ) {
       // do not re-render layout... just call onLayoutReady
       onLayoutReady.map(function(fn) {
         fn();
-      })
+      });
     } else {
       // calculate a new layout
       // time expensive!!!
       cy
-        .layout(_.assign(
-          {
-            // provide elements in sorted order to make determanistic layouts
-            eles: sortedElements,
-            // run on layout ready
-            ready: function() {
-              onLayoutReady.map(function(fn) {
-                fn();
-              })
-            }
-          },
-          layoutOptions
-          // ,
-          // TODO-barret Make animation a setting... it's expensive!
-          // {animate: true}
-        ))
+        .layout(
+          _.assign(
+            {
+              // provide elements in sorted order to make determanistic layouts
+              eles: sortedElements,
+              // run on layout ready
+              ready: function() {
+                onLayoutReady.map(function(fn) {
+                  fn();
+                });
+              },
+            },
+            layoutOptions
+            // ,
+            // TODO-barret Make animation a setting... it's expensive!
+            // {animate: true}
+          )
+        )
         .run();
     }
-
   }
 }
 
@@ -1491,22 +1604,23 @@ var layoutOptions = {
   ranker: "longest-path", // Type of algorithm to assign a rank to each node in the input graph. Possible values: "network-simplex", "tight-tree" or "longest-path"
   nodeDimensionsIncludeLabels: true, // whether labels should be included in determining the space used by a node
   animate: true, // whether to transition the node positions
-  animateFilter: function( node, i ){ return true; }, // whether to animate specific nodes when animation is on; non-animated nodes immediately go to their final positions
+  animateFilter: function(node, i) {
+    return true;
+  }, // whether to animate specific nodes when animation is on; non-animated nodes immediately go to their final positions
   animationDuration: 1000, // duration of animation in ms if enabled
   animationEasing: "ease-in-out-quad", // easing of animation if enabled
-
 };
 
 var nodeShapes = {
   start: "-1 1 0.33333333333 1 1 0 0.33333333333 -1 -1 -1",
   middle: "-1 1 0.5 1 1 0 0.5 -1 -1 -1 -0.5 0",
-  end: "-1 1 1 1 1 -1 -1 -1 -0.33333333333 0"
-}
-var pulseScale = 1 + 1/16
+  end: "-1 1 1 1 1 -1 -1 -1 -0.33333333333 0",
+};
+var pulseScale = 1 + 1 / 16;
 var graphStyles = {
   node: {
     default: {
-      "label": "data(cytoLabel)",
+      label: "data(cytoLabel)",
       "text-opacity": 0.5,
       "text-valign": "bottom",
       "text-margin-x": "-5",
@@ -1516,57 +1630,57 @@ var graphStyles = {
       "border-width": 1,
       "background-color": colors.regular.green1,
       "text-wrap": "ellipsis",
-      "text-max-width": "200px"
+      "text-max-width": "200px",
     },
     start: {
-      "shape": "polygon",
+      shape: "polygon",
       "shape-polygon-points": nodeShapes.start,
       width: 50 * 0.75,
-      height: 30
+      height: 30,
     },
     startBig: {
       "border-width": 2,
       width: 50 * 0.75 * pulseScale,
-      height: 30 * pulseScale
+      height: 30 * pulseScale,
     },
     middle: {
-      "shape": "polygon",
+      shape: "polygon",
       "shape-polygon-points": nodeShapes.middle,
       width: 50,
-      height: 30
+      height: 30,
     },
     middleBig: {
       "border-width": 2,
       width: 50 * pulseScale,
-      height: 30 * pulseScale
+      height: 30 * pulseScale,
     },
     end: {
-      "shape": "polygon",
+      shape: "polygon",
       "shape-polygon-points": nodeShapes.end,
       width: 50 * 0.75,
-      height: 30
+      height: 30,
     },
     endBig: {
       "border-width": 2,
       width: 50 * 0.75 * pulseScale,
-      height: 30 * pulseScale
+      height: 30 * pulseScale,
     },
     enter: {
       // "border-width": 2,
-      "background-color": colors.regular.green2
+      "background-color": colors.regular.green2,
     },
     enterActive: {
-      "background-color": colors.regular.green3
+      "background-color": colors.regular.green3,
     },
     invalidate: {
       // "border-width": 2,
-      "background-color": colors.regular.grey2
+      "background-color": colors.regular.grey2,
     },
     invalidateActive: {
-      "background-color": colors.regular.grey3
+      "background-color": colors.regular.grey3,
     },
     invalidateDone: {
-      "background-color": colors.regular.grey1
+      "background-color": colors.regular.grey1,
     },
     isolate: {
       "border-style": "dashed",
@@ -1580,49 +1694,49 @@ var graphStyles = {
       // "border-opacity"
     },
     valueChanged: {
-      "background-color": colors.regular.red // blood red
+      "background-color": colors.regular.red, // blood red
       // "border-style": "dashed",
       // "border-color": "darkgrey",
       // "border-width": 3,
       // "border-opacity"
-    }
+    },
   },
   edge: {
     default: {
       "curve-style": "bezier",
-      "width": 4,
+      width: 4,
       "target-arrow-shape": "triangle",
       "mid-target-arrow-shape": "triangle",
       "line-color": colors.edges.running, //"#9dbaea",
       "mid-target-arrow-color": colors.edges.running,
-      "target-arrow-color": colors.edges.running
+      "target-arrow-color": colors.edges.running,
     },
     isolate: {
-      "width": 4,
+      width: 4,
       "line-color": colors.edges.isolate,
       "mid-target-arrow-color": colors.edges.isolate,
       "target-arrow-color": colors.edges.isolate,
-      "line-style": "dashed"
-    }
+      "line-style": "dashed",
+    },
   },
   ghostEdge: {
     default: {
-      "width": 1,
+      width: 1,
       "mid-target-arrow-shape": "triangle",
       "mid-target-arrow-color": colors.ghostEdges.default,
       "arrow-scale": 0.25,
       "curve-style": "haystack",
       "line-color": colors.ghostEdges.default,
-      "line-style": "dotted"
+      "line-style": "dotted",
     },
     hoverNotFocusedButSticky: {
       "line-color": colors.regular.grey2,
-      "mid-target-arrow-color": colors.regular.grey2
+      "mid-target-arrow-color": colors.regular.grey2,
     },
     hoverNotFocused: {
       "line-color": colors.regular.grey1,
-      "mid-target-arrow-color": colors.regular.grey1
-    }
+      "mid-target-arrow-color": colors.regular.grey1,
+    },
   },
   focus: {
     hoverNotFocused: {
@@ -1630,46 +1744,45 @@ var graphStyles = {
       "border-color": colors.regular.grey1,
       "line-color": colors.regular.grey1,
       "mid-target-arrow-color": colors.regular.grey1,
-      "target-arrow-color": colors.regular.grey1
+      "target-arrow-color": colors.regular.grey1,
     },
     hoverNotFocusedButSticky: {
       "background-blacken": -0.35,
       "border-color": colors.regular.grey2,
       "line-color": colors.regular.grey2,
       "mid-target-arrow-color": colors.regular.grey2,
-      "target-arrow-color": colors.regular.grey2
+      "target-arrow-color": colors.regular.grey2,
     },
     stickyNotFocused: {
       "background-blacken": -0.75,
       "border-color": colors.regular.grey1,
       "line-color": colors.regular.grey1,
       "mid-target-arrow-color": colors.regular.grey1,
-      "target-arrow-color": colors.regular.grey1
-    }
+      "target-arrow-color": colors.regular.grey1,
+    },
   },
   selected: {
     node: {
-      "border-width": 4
+      "border-width": 4,
     },
     edge: {
-      "width": 10
+      width: 10,
     },
     ghostEdge: {
-      "width": 6,
-      "arrow-scale": 0.5
-    }
-  }
-}
+      width: 6,
+      "arrow-scale": 0.5,
+    },
+  },
+};
 
 var styleHelper = function(selector, style) {
   return {
     selector: selector,
-    style: style
-  }
-}
+    style: style,
+  };
+};
 
 $(function() {
-
   window.cyto = cytoscape({
     container: $("#cyto"),
     boxSelectionEnabled: false,
@@ -1696,14 +1809,23 @@ $(function() {
       styleHelper(".nodeIsolateInvalidate", graphStyles.node.isolateInvalidate),
       styleHelper(".nodeValueChanged", graphStyles.node.valueChanged),
       styleHelper(".hoverNotFocused", graphStyles.focus.hoverNotFocused),
-      styleHelper(".hoverNotFocusedButSticky", graphStyles.focus.hoverNotFocusedButSticky),
-      styleHelper(".edgeGhostHoverNotFocused", graphStyles.ghostEdge.hoverNotFocused),
-      styleHelper(".edgeGhostHoverNotFocusedButSticky", graphStyles.ghostEdge.hoverNotFocusedButSticky),
+      styleHelper(
+        ".hoverNotFocusedButSticky",
+        graphStyles.focus.hoverNotFocusedButSticky
+      ),
+      styleHelper(
+        ".edgeGhostHoverNotFocused",
+        graphStyles.ghostEdge.hoverNotFocused
+      ),
+      styleHelper(
+        ".edgeGhostHoverNotFocusedButSticky",
+        graphStyles.ghostEdge.hoverNotFocusedButSticky
+      ),
       styleHelper(".stickyNotFocused", graphStyles.focus.stickyNotFocused),
       styleHelper(".nodeSelected", graphStyles.selected.node),
       styleHelper(".edgeSelected", graphStyles.selected.edge),
-      styleHelper(".edgeGhostSelected", graphStyles.selected.ghostEdge)
-    ]
+      styleHelper(".edgeGhostSelected", graphStyles.selected.ghostEdge),
+    ],
   });
 
   // cytoFamilySuccPred = function(ele, addExtraLayer = true) {
@@ -1741,9 +1863,9 @@ $(function() {
   //   }
   //   return familyEles;
   // }
-  cyto.on("mouseover", function(evt) {
+  window.cyto.on("mouseover", function(evt) {
     var target = evt.target;
-    if (target == cyto) return;
+    if (target === window.cyto) return;
 
     // highlight all outgoer's outgoers and all incomer's incomers and self
     // var familyEles = cytoFamilySuccPred(target, false);
@@ -1757,24 +1879,24 @@ $(function() {
     var hasCalled = false;
     var debounced = _.debounce(function() {
       hasCalled = true;
-      updateGraph.hoverData(target.data())
-    }, 200)
-    debounced()
+      updateGraph.hoverData(target.data());
+    }, 200);
+    debounced();
     // if a mouseout occurs before the function is executed, cancel it
     // works as mouseout is always called before mouseover
     target.once("mouseout", function(evtOut) {
-      debounced.cancel()
+      debounced.cancel();
       if (hasCalled) {
         // only remove hover if hover added
-        updateGraph.hoverDataReset()
+        updateGraph.hoverDataReset();
       }
-    })
+    });
   });
 
   var cytoClickedBefore, cytoClickedTimeout;
-  cyto.on("click", function(evt) {
+  window.cyto.on("click", function(evt) {
     // remove focus on search
-    $("#search").blur()
+    $("#search").blur();
 
     // var elesData = function(eles) {
     //   return eles.map(function(ele) {
@@ -1782,29 +1904,30 @@ $(function() {
     //   })
     // }
 
-    var target = evt.target
+    var target = evt.target;
 
     // check for double click
     // https://stackoverflow.com/a/44160927
     if (cytoClickedTimeout && cytoClickedBefore) {
-      clearTimeout(cytoClickedTimeout)
+      clearTimeout(cytoClickedTimeout);
     }
-    if (cytoClickedBefore == target) {
+    if (cytoClickedBefore === target) {
       // is actually a double click... return!
-      target.trigger("dblclick", evt)
+      target.trigger("dblclick", evt);
       cytoClickedBefore = null;
       return;
     } else {
-      cytoClickedTimeout = setTimeout(function(){ cytoClickedBefore = null; }, 400);
+      cytoClickedTimeout = setTimeout(function() {
+        cytoClickedBefore = null;
+      }, 400);
       cytoClickedBefore = target;
       // continue like regular click
-      console.log("click!!", evt)
+      console.log("click!!", evt);
     }
 
-
-    if (target == cyto) {
+    if (target === window.cyto) {
       // remove sticky focus class
-      updateGraph.stickyDatasReset()
+      updateGraph.stickyDatasReset();
       return;
     }
 
@@ -1814,9 +1937,9 @@ $(function() {
     //   elesData(cyto.$().not(familyEles))
     // )
     return;
-  })
+  });
 
-  cyto.on("dblclick", function(evt, originalEvt) {
+  window.cyto.on("dblclick", function(evt, originalEvt) {
     // var elesData = function(eles) {
     //   return eles.map(function(ele) {
     //     return ele.data();
@@ -1827,13 +1950,13 @@ $(function() {
     // console.log("dbl click!!", evt, originalEvt);
     var target = evt.target;
 
-    if (target == cyto) {
+    if (target === window.cyto) {
       // go back to full graph
-      updateGraph.resetHoverStickyFilterData()
+      updateGraph.resetHoverStickyFilterData();
       return;
     }
 
-    var holdingShiftKey = originalEvt.originalEvent.shiftKey;
+    // var holdingShiftKey = originalEvt.originalEvent.shiftKey;
     // if (holdingShiftKey) {
     //   console.log("extra layers!")
     //   var familyEles = cytoFamilySuccPred(target, true);
@@ -1848,43 +1971,50 @@ $(function() {
     //   updateGraph.withDatas(familyDatas)
     //
     // } else {
-      // var familyEles = cytoFamilySuccPred(target, false);
-      // var familyDatas = elesData(familyEles)
+    // var familyEles = cytoFamilySuccPred(target, false);
+    // var familyDatas = elesData(familyEles)
 
-      updateGraph.filterDatas([target.data()])
-      // updateGraph.withDatas(familyDatas)
+    updateGraph.filterDatas([target.data()]);
+    // updateGraph.withDatas(familyDatas)
 
     // }
+  });
 
-  })
-
-
-
-
-  window.getGraph = new GraphAtStep(window.log);
+  window.getGraph = new GraphAtStep(log);
+  var getGraph = window.getGraph;
   window.graph = getGraph.atStep(getGraph.maxStep);
+  var graph = window.graph;
   console.log(graph);
 
   getGraph.enterExitEmpties.map(function(i) {
-    $("#timeline-bg").append(`<div class=\"timeline-enterexit\" style=\"left: ${100 * i / this.log.length}%;\"></div>`)
-  })
+    $("#timeline-bg").append(
+      `<div class=\"timeline-enterexit\" style=\"left: ${100 *
+        i /
+        this.log.length}%;\"></div>`
+    );
+  });
   getGraph.queueEmpties.map(function(i) {
-    $("#timeline-bg").append(`<div class=\"timeline-cycle\" style=\"left: ${100 * i / this.log.length}%;\"></div>`)
-  })
+    $("#timeline-bg").append(
+      `<div class=\"timeline-cycle\" style=\"left: ${100 *
+        i /
+        this.log.length}%;\"></div>`
+    );
+  });
 
   function updateProgressBar() {
-    $("#timeline-fill").width((curTick / window.log.length * 100) + "%");
+    $("#timeline-fill").width(window.curTick / window.log.length * 100 + "%");
   }
   function updateLogItem() {
-    $("#instructions").text(JSON.stringify(window.log[curTick], null, "  "));
+    $("#instructions").text(
+      JSON.stringify(window.log[window.curTick], null, "  ")
+    );
   }
-  $('#timeline').on('mousedown mousemove', function(e) {
+  $("#timeline").on("mousedown mousemove", function(e) {
     // Make sure left mouse button is down.
     // Firefox is stupid; e.which is always 1 on mousemove events,
     // even when button is not down!! So read e.originalEvent.buttons.
-    if (typeof(e.originalEvent.buttons) !== 'undefined') {
-      if (e.originalEvent.buttons !== 1)
-        return;
+    if (typeof e.originalEvent.buttons !== "undefined") {
+      if (e.originalEvent.buttons !== 1) return;
     } else if (e.which !== 1) {
       return;
     }
@@ -1892,49 +2022,46 @@ $(function() {
     var timeline = e.currentTarget;
     var pos = e.pageX || e.originalEvent.pageX; // pageX in pixels
     var width = timeline.offsetWidth; // width in pixels
-    var targetStep = Math.max(Math.round((pos/width) * window.log.length), 1);
-    if (targetStep != curTick) {
+    var targetStep = Math.max(Math.round(pos / width * window.log.length), 1);
+    if (targetStep !== window.curTick) {
       window.curTick = targetStep;
-      updateGraph()
+      updateGraph();
     }
     return;
   });
 
-
-
-
-  updateGraph = function() {
+  window.updateGraph = function() {
     getGraph.displayAtStep(window.curTick, window.cyto);
-    updateProgressBar()
-    updateLogItem()
-  }
+    updateProgressBar();
+    updateLogItem();
+  };
+  var updateGraph = window.updateGraph;
 
   // when str length < 3 do not search
   // when str length = 0, reset filter
   // when str length >= 3, set filter to all elements that match
   updateGraph.withSearchString = function(str) {
-
     // if less than three chars...
     if (str.length < 3) {
-      if (str.length == 0) {
+      if (str.length === 0) {
         // TODO-barret show warning of resetting
-        console.log("resetting log!")
-        updateGraph.searchRegexReset()
+        console.log("resetting log!");
+        updateGraph.searchRegexReset();
       } else {
         // TODO-barret show warning of not enough characters
-        console.log("do nothing")
+        console.log("do nothing");
       }
       return;
     }
     // escape the string
     // https://stackoverflow.com/a/17606289
-    var escapeRegExp = function (str) {
+    var escapeRegExp = function(str) {
       return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
-    }
-    var searchRegex = new RegExp(escapeRegExp(str))
-    updateGraph.searchRegex(searchRegex)
+    };
+    var searchRegex = new RegExp(escapeRegExp(str));
+    updateGraph.searchRegex(searchRegex);
     return;
-  }
+  };
 
   // updateGraph.resetWithLog = function() {
   //   updateGraph.withLog(getGraph.originalLog)
@@ -1959,81 +2086,81 @@ $(function() {
   // }
 
   updateGraph.hoverData = function(data) {
-    getGraph.updateHoverData(data)
-    updateGraph()
-  }
+    getGraph.updateHoverData(data);
+    updateGraph();
+  };
   updateGraph.hoverDataReset = function() {
-    getGraph.updateHoverDataReset()
-    updateGraph()
-  }
+    getGraph.updateHoverDataReset();
+    updateGraph();
+  };
   updateGraph.stickyDatas = function(data) {
-    getGraph.updateStickyDatas(data)
-    updateGraph()
-  }
+    getGraph.updateStickyDatas(data);
+    updateGraph();
+  };
   updateGraph.stickyDatasReset = function() {
-    getGraph.updateStickyDatasReset()
-    updateGraph()
-  }
+    getGraph.updateStickyDatasReset();
+    updateGraph();
+  };
   updateGraph.filterDatas = function(data) {
-    getGraph.updateFilterDatas(data)
-    updateGraph()
-  }
+    getGraph.updateFilterDatas(data);
+    updateGraph();
+  };
   updateGraph.filterDatasReset = function() {
-    getGraph.updateFilterDatasReset()
-    updateGraph()
-  }
+    getGraph.updateFilterDatasReset();
+    updateGraph();
+  };
   updateGraph.searchRegex = function(searchRegex) {
     getGraph.updateSearchRegex(searchRegex);
-    updateGraph()
-  }
+    updateGraph();
+  };
   updateGraph.searchRegexReset = function(searchRegex) {
     getGraph.updateSearchRegexReset();
-    updateGraph()
-  }
+    updateGraph();
+  };
   updateGraph.resetHoverStickyFilterData = function() {
-    getGraph.updateHoverDataReset()
-    getGraph.updateStickyDatasReset()
-    getGraph.updateFilterDatasReset()
-    getGraph.updateSearchRegexReset()
-    updateGraph()
-  }
+    getGraph.updateHoverDataReset();
+    getGraph.updateStickyDatasReset();
+    getGraph.updateFilterDatasReset();
+    getGraph.updateSearchRegexReset();
+    updateGraph();
+  };
 
   updateGraph.nextTick = function() {
-    window.curTick += 1
-    updateGraph()
-  }
+    window.curTick += 1;
+    updateGraph();
+  };
   updateGraph.prevTick = function() {
-    window.curTick -= 1
-    updateGraph()
-  }
+    window.curTick -= 1;
+    updateGraph();
+  };
   updateGraph.nextStep = function() {
     // Move one step ahead (skipping unneccessary steps)
-    window.curTick = getGraph.nextStep(curTick)
-    updateGraph()
-  }
+    window.curTick = getGraph.nextStep(window.curTick);
+    updateGraph();
+  };
   updateGraph.prevStep = function() {
     // Move one step back
-    window.curTick = getGraph.prevStep(curTick)
-    updateGraph()
-  }
+    window.curTick = getGraph.prevStep(window.curTick);
+    updateGraph();
+  };
 
   updateGraph.nextEnterExitEmpty = function() {
     var nextTick;
-    if (_.sortedIndexOf(getGraph.enterExitEmpties, window.curTick) != -1) {
+    if (_.sortedIndexOf(getGraph.enterExitEmpties, window.curTick) !== -1) {
       // not at a cycle point
       if (getGraph.hasFilterDatas) {
         // if filtered, will go to previous step, then next step location
-        nextTick = getGraph.nextStep(getGraph.prevStep(window.curTick))
+        nextTick = getGraph.nextStep(getGraph.prevStep(window.curTick));
       } else {
         // if not filtered
-        nextTick = window.curTick
+        nextTick = window.curTick;
       }
     } else {
       // at cycle point
       // first move one step forward... then find next enter/exit empty
-      nextTick = getGraph.nextStep(window.curTick)
+      nextTick = getGraph.nextStep(window.curTick);
     }
-    var val, i
+    var val, i;
     // move to queue empty
     for (i = 0; i < getGraph.enterExitEmpties.length; i++) {
       val = getGraph.enterExitEmpties[i] - 1;
@@ -2044,23 +2171,23 @@ $(function() {
       }
     }
     return false;
-  }
+  };
   updateGraph.prevEnterExitEmpty = function() {
     var prevTick;
-    if (_.sortedIndexOf(getGraph.enterExitEmpties, window.curTick) != -1) {
+    if (_.sortedIndexOf(getGraph.enterExitEmpties, window.curTick) !== -1) {
       // not at a cycle point
       if (getGraph.hasFilterDatas) {
         // if filtered, will go to next step, then prev step location
-        prevTick = getGraph.prevStep(getGraph.nextStep(window.curTick))
+        prevTick = getGraph.prevStep(getGraph.nextStep(window.curTick));
       } else {
         // if not filtered
-        prevTick = window.curTick
+        prevTick = window.curTick;
       }
     } else {
       // at cycle point
       // first move one step forward... then find next enter/exit empty
-      prevTick = getGraph.prevStep(window.curTick)
-      console.log("at cycle point", window.curTick, prevTick)
+      prevTick = getGraph.prevStep(window.curTick);
+      console.log("at cycle point", window.curTick, prevTick);
     }
     var val, i;
     // move to queue empty
@@ -2073,80 +2200,82 @@ $(function() {
       }
     }
     return false;
-  }
+  };
   updateGraph.lastEnterExitEmpty = function() {
-    window.curTick = getGraph.enterExitEmpties[getGraph.enterExitEmpties.length - 1] || 0;
-    updateGraph()
-  }
+    window.curTick =
+      getGraph.enterExitEmpties[getGraph.enterExitEmpties.length - 1] || 0;
+    updateGraph();
+  };
   updateGraph.firstEnterExitEmpty = function() {
     window.curTick = getGraph.enterExitEmpties[0] || 0;
-    updateGraph()
-  }
-
-
+    updateGraph();
+  };
 
   updateGraph.nextQueueEmpty = function() {
+    var i, val;
     // move to queue empty
-    for (var i = 0; i < getGraph.enterExitEmpties.length; i++) {
+    for (i = 0; i < getGraph.enterExitEmpties.length; i++) {
       val = getGraph.queueEmpties[i];
-      if (curTick < val) {
+      if (window.curTick < val) {
         window.curTick = val;
         updateGraph();
         return true;
       }
     }
     return false;
-  }
+  };
   updateGraph.prevQueueEmpty = function() {
+    var i, val;
     // move to queue empty
-    for (var i = getGraph.queueEmpties.length - 1; i >= 0; i--) {
+    for (i = getGraph.queueEmpties.length - 1; i >= 0; i--) {
       val = getGraph.queueEmpties[i];
-      if (curTick > val) {
+      if (window.curTick > val) {
         window.curTick = val;
         updateGraph();
         return true;
       }
     }
     return false;
-  }
+  };
   updateGraph.lastQueueEmpty = function() {
-    window.curTick = getGraph.queueEmpties[getGraph.queueEmpties.length - 1] || 0;
-    updateGraph()
-  }
+    window.curTick =
+      getGraph.queueEmpties[getGraph.queueEmpties.length - 1] || 0;
+    updateGraph();
+  };
   updateGraph.firstQueueEmpty = function() {
     window.curTick = getGraph.queueEmpties[0] || 0;
-    updateGraph()
-  }
+    updateGraph();
+  };
 
-  window.curTick = 1
+  window.curTick = 1;
   // TODO-barret should start at nextEnterExitEmpty,
   // updateGraph.nextEnterExitEmpty()
-  updateGraph.nextQueueEmpty()
+  updateGraph.nextQueueEmpty();
 
-  $("#startStepButton").click(updateGraph.firstEnterExitEmpty)
-  $("#endStepButton").click(updateGraph.lastEnterExitEmpty)
-  $("#prevCycleButton").click(updateGraph.prevEnterExitEmpty)
-  $("#nextCycleButton").click(updateGraph.nextEnterExitEmpty)
-  $("#prevStepButton").click(updateGraph.prevStep)
-  $("#nextStepButton").click(updateGraph.nextStep)
+  $("#startStepButton").click(updateGraph.firstEnterExitEmpty);
+  $("#endStepButton").click(updateGraph.lastEnterExitEmpty);
+  $("#prevCycleButton").click(updateGraph.prevEnterExitEmpty);
+  $("#nextCycleButton").click(updateGraph.nextEnterExitEmpty);
+  $("#prevStepButton").click(updateGraph.prevStep);
+  $("#nextStepButton").click(updateGraph.nextStep);
 
   $("#search").on("input", function(e) {
-    updateGraph.withSearchString(e.target.value)
-  })
+    updateGraph.withSearchString(e.target.value);
+  });
   $(document.body).on("keydown", function(e) {
-    console.log("e: ", e)
-    if (e.target.id && e.target.id == "search") {
+    console.log("e: ", e);
+    if (e.target.id && e.target.id === "search") {
       // is in search text box
-      if (e.which == 27) {
-        $(e.target).blur()
+      if (e.which === 27) {
+        $(e.target).blur();
       } else {
         // if (e.which == 13) { // enter
         // }
-
       }
       return;
     }
-    if (e.which === 39 || e.which === 32) { // space, right
+    if (e.which === 39 || e.which === 32) {
+      // space, right
       if (e.altKey) {
         if (e.shiftKey) {
           // option + shift + right
@@ -2166,13 +2295,14 @@ $(function() {
         updateGraph.nextTick();
         return;
       }
-      if (curTick < getGraph.maxStep) {
+      if (window.curTick < getGraph.maxStep) {
         // right
         updateGraph.nextStep();
         return;
       }
     }
-    if (e.which === 37) { // left
+    if (e.which === 37) {
+      // left
       if (e.altKey) {
         if (e.shiftKey) {
           // option + shift + left
@@ -2188,66 +2318,69 @@ $(function() {
         // if can't go left, try step
       } else if (e.shiftKey) {
         // shift + left
-        updateGraph.prevTick()
+        updateGraph.prevTick();
         return;
       }
-      if (curTick > 1) {
+      if (window.curTick > 1) {
         // left
-        updateGraph.prevStep()
+        updateGraph.prevStep();
         return;
       }
     }
-    if (e.which === 35) { // end
+    if (e.which === 35) {
+      // end
       // Seek to end
-      updateGraph.lastEnterExitEmpty()
+      updateGraph.lastEnterExitEmpty();
       return;
     }
-    if (e.which === 36) { // home
+    if (e.which === 36) {
+      // home
       // Seek to beginning
       updateGraph.firstEnterExitEmpty();
       return;
     }
 
-    if (e.which == 27) { // esc
+    if (e.which === 27) {
+      // esc
 
       // remove hover
       // remove sticky
       // remove filter
       if (getGraph.hasHoverData) {
-        console.log("reset hover")
-        updateGraph.hoverDataReset()
+        console.log("reset hover");
+        updateGraph.hoverDataReset();
       } else if (getGraph.hasStickyDatas) {
-        console.log("reset sticky")
-        updateGraph.stickyDatasReset()
+        console.log("reset sticky");
+        updateGraph.stickyDatasReset();
       } else if (getGraph.hasFilterDatas) {
-        console.log("reset filter")
+        console.log("reset filter");
         // must be in filter... so exit filter
         $("#search").val("");
-        updateGraph.searchRegexReset()
+        updateGraph.searchRegexReset();
       }
       return;
     }
-    if (e.which == 38) { // arrow up
+    if (e.which === 38) {
+      // arrow up
       if (getGraph.hasFilterDatas) {
-        console.log("add layer!")
+        console.log("add layer!");
       }
       return;
     }
-    if (e.which == 40) { // arrow down
+    if (e.which === 40) {
+      // arrow down
       if (getGraph.hasFilterDatas) {
-        console.log("remove layer!")
+        console.log("remove layer!");
       }
       return;
     }
-    if (e.which == 83) { // s
+    if (e.which === 83) {
+      // s
       _.defer(function() {
-        $("#search").focus()
-      })
+        $("#search").focus();
+      });
       e.stopPropagation();
       return;
     }
-
   });
-
-
 });

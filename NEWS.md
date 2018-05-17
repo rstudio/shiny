@@ -65,6 +65,8 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))
 
+* Updated selectize.js v0.12.1 -> v0.12.4 ([#1837](https://github.com/rstudio/shiny/issues/1837))
+
 shiny 1.0.5
 ===========
 
@@ -276,7 +278,7 @@ Now there's an official way to slow down reactive values and expressions that in
 ### Minor new features and improvements
 
 * Addressed [#1486](https://github.com/rstudio/shiny/issues/1486) by adding a new argument to `observeEvent` and `eventReactive`, called `ignoreInit` (defaults to `FALSE` for backwards compatibility). When set to `TRUE`, the action (i.e. the second argument: `handlerExpr` and `valueExpr`, respectively) will not be triggered when the observer/reactive is first created/initialized. In other words, `ignoreInit = TRUE` ensures that the `observeEvent` (or `eventReactive`) is *never* run right away. For more info, see the documentation (`?observeEvent`). ([#1494](https://github.com/rstudio/shiny/pull/1494))
-    
+
 * Added a new argument to `observeEvent` called `once`. When set to `TRUE`, it results in the observer being destroyed (stop observing) after the first time that `handlerExpr` is run (i.e. `once = TRUE` guarantees that the observer only runs, at most, once). For more info, see the documentation (`?observeEvent`). ([#1494](https://github.com/rstudio/shiny/pull/1494))
 
 * Addressed [#1358](https://github.com/rstudio/shiny/issues/1358): more informative error message when calling `runApp()` inside of an app's app.R (or inside ui.R or server.R). ([#1482](https://github.com/rstudio/shiny/pull/1482))
@@ -675,7 +677,7 @@ shiny 0.12.1
 shiny 0.12.0
 ============
 
-In addition to the changes listed below (in the *Full Changelog* section), there is an infrastructure change that could affect existing Shiny apps. 
+In addition to the changes listed below (in the *Full Changelog* section), there is an infrastructure change that could affect existing Shiny apps.
 
 ### JSON serialization
 
@@ -766,13 +768,13 @@ Shiny 0.11 switches away from the Bootstrap 2 web framework to the next version,
 ### Known issues for migration
 
 *    In Bootstrap 3, images in `<img>` tags are no longer automatically scaled to the width of their container. If you use `img()` in your UI code, or `<img>` tags in your raw HTML source, it's possible that they will be too large in the new version of Shiny. To address this you can add the `img-responsive` class:
-    
+
     ```r
     img(src = "picture.png", class = "img-responsive")
     ```
-    
+
     The R code above will generate the following HTML:
-    
+
     ```html
     <img src="picture.png" class="img-responsive">
     ```

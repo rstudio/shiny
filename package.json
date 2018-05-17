@@ -10,7 +10,8 @@
   },
   "lint-staged": {
     "inst/www/rlog/src/**/*.js": [
-      "npm run reactLog-staged",
+      "eslint --fix",
+      "prettier",
       "git add"
     ]
   },

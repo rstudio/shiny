@@ -1,7 +1,9 @@
 module.exports = function(grunt) {
 
-  var instdir = '../inst/';
-  var js_srcdir = '../srcjs/'
+  var rootDir = ".";
+
+  var instdir = rootDir + '/inst/';
+  var js_srcdir = rootDir + '/srcjs/'
 
   gruntConfig = {
     pkg: pkgInfo(),
@@ -97,6 +99,22 @@ module.exports = function(grunt) {
       shiny: {
         src: './temp_concat/shiny.js',
         dest: instdir + '/www/shared/shiny.js'
+      },
+      reactLog: {
+        src: instdir + "/www/rlog/src/index.js",
+        dest: instdir + "/www/rlog/dest/reactLog.js",
+        options: {
+          sourceMap: true,
+          compact: false,
+          presets: ["flow", "es2015"],
+          plugins: [
+            ["transform-es2015-modules-umd", {
+              "globals": {
+                "es6-promise": "Promise"
+              }
+            }]
+          ]
+        }
       }
     },
 
@@ -123,7 +141,16 @@ module.exports = function(grunt) {
         ],
         globals: ["strftime"]
       },
-      shiny: ['./temp_concat/shiny.js']
+      shiny: ['./temp_concat/shiny.js'],
+      reactLog: {
+        src: [instdir + "www/rlog/src/**/*.js"],
+        options: {
+          parser: "babel-eslint",
+          extends: ["plugin:flowtype/recommended"],
+          plugins: ["flowtype"]
+        }
+      }
+
     },
 
     uglify: {
@@ -155,18 +182,29 @@ module.exports = function(grunt) {
 
     watch: {
       shiny: {
-        files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
+        files: ['<%= concat.shiny.src %>', rootDir + '/DESCRIPTION'],
         tasks: [
           'newer:concat',
-          'newer:eslint',
-          'configureBabel',
-          'newer:babel',
+          'newer:eslint:shiny',
+          'configureBabelShiny',
+          'newer:babel:shiny',
           'newer:uglify'
         ]
       },
       datepicker: {
         files: '<%= uglify.datepicker.src %>',
         tasks: ['newer:uglify:datepicker']
+      },
+      reactlog: {
+        files: [instdir + "www/rlog/react_graph.js"],
+        tasks: [
+          // "prettier:reactLog",
+          "newer:eslint:reactLog"
+        ]
+      },
+      reactlogCSS: {
+        files: [instdir + "www/rlog/*.css"],
+        tasks: ["newer:prettier:reactLogCSS"]
       }
     },
 
@@ -176,13 +214,37 @@ module.exports = function(grunt) {
           // If DESCRIPTION is updated, we'll also need to re-minify shiny.js
           // because the min.js file embeds the version number.
           if (detail.task === 'uglify' && detail.target === 'shiny') {
-            include(isNewer('../DESCRIPTION', detail.time));
+            include(isNewer(rootDir + '/DESCRIPTION', detail.time));
           } else {
             include(false);
           }
 
         }
       }
+    },
+
+    prettier: {
+      options: {
+        // Task-specific options go here.
+        tabWidth: 2, // Specify the number of spaces per indentation-level.
+        useTabs: false, // Indent lines with tabs instead of spaces
+        printWidth: 80, // Specify the line length that the printer will wrap on.
+        semi: true, // Add a semicolon at the end of every statement.
+        singleQuote: false, // Use single quotes instead of double quotes.
+        trailingComma: "es5",  // Print trailing commas wherever possible when multi-line
+        bracketSpacing: true, // Print spaces between brackets in object literals
+        arrowParens: "avoid", // Include parentheses around a sole arrow function parameter.
+      },
+      reactLogCSS: {
+        src: [instdir + "www/rlog/*.css"]
+      },
+      reactLog: {
+        // Target-specific file lists and/or options go here.
+        src: [
+          instdir + "www/rlog/src/**/*.js",
+          instdir + "www/rlog/react_graph.js"
+        ]
+      },
     }
   };
 
@@ -194,24 +256,42 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-newer');
+  grunt.loadNpmTasks('grunt-prettier');
+
 
   // Need this here so that babel reads in the source map file after it's
   // generated. Without this task, it would read in the source map when Grunt
   // runs, which is wrong, if the source map doesn't exist, or is change later.
-  grunt.task.registerTask("configureBabel", "configures babel options", function() {
+  grunt.task.registerTask("configureBabelShiny", "configures babel options", function() {
     gruntConfig.babel.options.inputSourceMap = grunt.file.readJSON('./temp_concat/shiny.js.map');
   });
 
   grunt.initConfig(gruntConfig);
 
-  grunt.registerTask('default', [
+  grunt.registerTask('shiny', [
     'newer:concat',
     'newer:string-replace',
-    'newer:eslint',
-    'configureBabel',
-    'newer:babel',
-    'newer:uglify'
+    'newer:eslint:shiny',
+    'configureBabelShiny',
+    'newer:babel:shiny',
+    'newer:uglify:shiny',
+    'newer:uglify:datepicker',
+    'newer:uglify:ionrangeslider'
   ]);
+
+  grunt.registerTask("reactLog", [
+    // "prettier:reactLog",
+    "prettier:reactLogCSS",
+    "eslint:reactLog",
+    "babel:reactLog"
+  ])
+  grunt.registerTask("reactLog-staged", [
+    "newer:prettier:reactLog",
+    "newer:prettier:reactLogCSS",
+    "newer:eslint:reactLog"
+  ])
+
+  grunt.registerTask("default", "shiny")
 
 
   // ---------------------------------------------------------------------------
@@ -233,7 +313,7 @@ module.exports = function(grunt) {
   // From the DESCRIPTION file, get the value of a key. This presently only
   // works if the value is on one line, the same line as the key.
   function descKeyValue(key) {
-    var lines = require('fs').readFileSync('../DESCRIPTION', 'utf8').split('\n');
+    var lines = require('fs').readFileSync(rootDir + '/DESCRIPTION', 'utf8').split('\n');
 
     var pattern = new RegExp('^' + key + ':');
     var txt = lines.filter(function(line) {

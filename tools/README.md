@@ -31,7 +31,7 @@ Periodically, it's good to upgrade the packages to a recent version. There's two
 1. Use `yarn upgrade` to upgrade all dependencies to their latest version based on the version range specified in the package.json file (the yarn.lock file will be recreated as well. Yarn packages use [semantic versioning](https://yarnpkg.com/en/docs/dependency-versions), i.e. each version is writen with a maximum of 3 dot-separated numbers such that: `major.minor.patch`. For example in the version `3.1.4`, 3 is the major version number, 1 is the minor version number and 4 is the patch version number. Here are the most used operators (these appear before the version number):
 
   - `~` is for upgrades that keep the minor version the same (assuming that was specified);
-  
+
   - `^` is for upgrades that keep the major version the same (more or less -- more specifically, it allow changes that do not modify the first non-zero digit in the version, either the 3 in 3.1.4 or the 4 in 0.4.2.). This is the default operator added to the package.json when you run `yarn add [package-name]`.
 
 2. Use `yarn upgrade [package]` to upgrade a single named package to the version specified by the latest tag (potentially upgrading the package across major versions).
@@ -65,19 +65,19 @@ And here is how the CLI works (same source):
 To run all default grunt tasks specified in the Gruntfile (concatenation, minification, and jshint), simply go into the `tools` directory and run:
 
 ```
-grunt
+yarn run build
 ```
 
 Sometimes grunt gets confused about whether the output files are up to date, and won't overwrite them even if the input files have changed. If this happens, run:
 
 ```
-grunt clean
+yarn run clean
 ```
 
 It's also useful to run `grunt` so that it monitors files for changes and run tasks as necessary. This is done with:
 
 ```
-grunt watch
+yarn run watch
 ```
 
 One of the tasks concatenates all the .js files in `/srcjs` together into `/inst/www/shared/shiny.js`. Another task minifies `shiny.js` to generate `shiny.min.js`. The minified file is supplied to the browser, along with a source map file, `shiny.min.js.map`, which allows a user to view the original Javascript source when using the debugging console in the browser.

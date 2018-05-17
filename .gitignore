@@ -10,3 +10,5 @@ shinyapps/
 README.html
 .*.Rnb.cached
 _ignore/
+node_modules/
+temp_concat/

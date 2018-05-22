@@ -6,7 +6,8 @@
     "clean": "grunt clean",
     "watch": "grunt watch",
     "rlog": "grunt reactLog-staged",
-    "reactLog-staged": "grunt reactLog-staged"
+    "reactLog-staged": "grunt reactLog-staged",
+    "prettier-watch": "onchange 'inst/www/rlog/src/**/*.js' -- prettier --write {{changed}}"
   },
   "lint-staged": {
     "inst/www/rlog/src/**/*.js": [
@@ -38,5 +39,8 @@
     "husky": "^0.14.3",
     "lint-staged": "^7.1.0",
     "prettier": "1.12.1"
+  },
+  "dependencies": {
+    "onchange": "^4.0.0"
   }
 }

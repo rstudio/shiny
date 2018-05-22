@@ -10,7 +10,6 @@ import layoutOptions from "../cyto/layoutOptions";
 
 // TODO-barret make filterDatas and hoverDatas sub modules of subsetDatas or something
 
-
 class GraphAtStep {
   constructor(log) {
     this.originalLog = log;
@@ -670,7 +669,6 @@ class GraphAtStep {
         fn();
       });
     } else {
-
       // TODO-barret move this method to layout
       // calculate a new layout
       // time expensive!!!
@@ -697,7 +695,5 @@ class GraphAtStep {
     }
   }
 }
-
-
 
 export default GraphAtStep;

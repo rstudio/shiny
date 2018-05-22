@@ -14,6 +14,4 @@ var layoutOptions = {
   animationEasing: "ease-in-out-quad", // easing of animation if enabled
 };
 
-
-
 export default layoutOptions;

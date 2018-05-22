@@ -1,4 +1,3 @@
-
 let classes = {
   node: "node",
   edge: "edge",
@@ -33,7 +32,6 @@ let classes = {
   nodeSelected: ".nodeSelected",
   edgeSelected: ".edgeSelected",
   edgeGhostSelected: ".edgeGhostSelected",
-
 };
 
 export default classes;

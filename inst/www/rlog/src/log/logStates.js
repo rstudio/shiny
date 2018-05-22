@@ -17,5 +17,4 @@ let states = {
   queueEmpty: "queueEmpty",
 };
 
-
 export default states;

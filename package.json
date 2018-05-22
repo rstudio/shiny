@@ -7,12 +7,12 @@
     "watch": "grunt watch",
     "rlog": "grunt reactLog-staged",
     "reactLog-staged": "grunt reactLog-staged",
-    "prettier-watch": "onchange 'inst/www/rlog/src/**/*.js' -- prettier --write {{changed}}"
+    "rlog-fix": "./tools/clean_rlog_file.sh",
+    "rlog-watch": "onchange 'inst/www/rlog/src/**/*.js' --verbose --wait -- npm run rlog-fix {{changed}} && grunt babel:reactLog"
   },
   "lint-staged": {
     "inst/www/rlog/src/**/*.js": [
-      "eslint --fix",
-      "prettier",
+      "npm run rlog-fix",
       "git add"
     ]
   },

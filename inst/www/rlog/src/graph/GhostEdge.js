@@ -1,6 +1,5 @@
 import HoverStatus from "./HoverStatus";
 
-
 class GhostEdge {
   constructor(data) {
     if (typeof data.reactId === "undefined")
@@ -59,6 +58,5 @@ class GhostEdge {
     };
   }
 }
-
 
 export default GhostEdge;

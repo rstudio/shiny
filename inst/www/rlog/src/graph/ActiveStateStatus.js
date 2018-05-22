@@ -1,8 +1,6 @@
-
 const stateOff = "off";
 const stateOn = "on";
 const stateFinished = "finished";
-
 
 // pulse on being active at step k; isAtStep(k)
 // display engaged; isOn
@@ -54,6 +52,5 @@ class ActiveStateStatus {
     this.state = stateOff;
   }
 }
-
 
 export default ActiveStateStatus;

@@ -1,6 +1,3 @@
-
-
-
 class HoverStatus {
   constructor(state) {
     this.sticky = HoverStatus.notSticky; // true / false
@@ -28,14 +25,11 @@ class HoverStatus {
   }
 }
 
-
 HoverStatus.focused = "focused";
 HoverStatus.notFocused = "notFocused";
 HoverStatus.sticky = true;
 HoverStatus.notSticky = false;
 HoverStatus.isSelected = true;
 HoverStatus.isNotSelected = false;
-
-
 
 export default HoverStatus;

@@ -1,5 +1,3 @@
-
-
 let hasWindowConsole =
   true &&
   typeof window !== "undefined" &&
@@ -13,10 +11,8 @@ if (hasWindowConsole) {
   console = {
     log: function() {},
     warn: function() {},
-    error: function() {}
+    error: function() {},
   };
 }
-
-
 
 export default console;

@@ -1,4 +1,3 @@
-
 import _ from "underscore";
 import cytoscape from "cytoscape";
 
@@ -9,8 +8,6 @@ import HoverStatus from "./HoverStatus";
 import StatusArr from "./StatusArr";
 
 import console from "../utils/console";
-
-
 
 class Graph {
   constructor(log) {
@@ -456,6 +453,5 @@ class Graph {
     }
   }
 }
-
 
 export default Graph;

@@ -1,4 +1,3 @@
-
 import cytoscape from "cytoscape";
 
 import graphStyles, { styleHelper } from "./cytoStyle";
@@ -54,5 +53,4 @@ let with_container = function(container) {
   });
 };
 
-
-export {with_container};
+export { with_container };

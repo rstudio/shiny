@@ -1,6 +1,4 @@
-
 import _ from "underscore";
-
 
 class StatusArr {
   constructor() {
@@ -42,8 +40,5 @@ class StatusArr {
     }
   }
 }
-
-
-
 
 export default StatusArr;

@@ -1,6 +1,4 @@
-
 import colors from "../style/colors";
-
 
 var styleHelper = function(selector, style) {
   return {
@@ -9,16 +7,12 @@ var styleHelper = function(selector, style) {
   };
 };
 
-
-
-
 var nodeShapes = {
   start: "-1 1 0.33333333333 1 1 0 0.33333333333 -1 -1 -1",
   middle: "-1 1 0.5 1 1 0 0.5 -1 -1 -1 -0.5 0",
   end: "-1 1 1 1 1 -1 -1 -1 -0.33333333333 0",
 };
 var pulseScale = 1 + 1 / 16;
-
 
 var graphStyles = {
   node: {
@@ -178,10 +172,6 @@ var graphStyles = {
   },
 };
 
-
-
-
-
-export {graphStyles, styleHelper as style};
+export { graphStyles, styleHelper as style };
 
 export default graphStyles;

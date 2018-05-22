@@ -5,7 +5,6 @@ import StatusArr from "./StatusArr";
 // // TODO-barret use log states everywhere
 // import logStates from "../log/logStates"
 
-
 class Node {
   constructor(data) {
     if (typeof data.reactId === "undefined")
@@ -123,6 +122,5 @@ class Node {
     };
   }
 }
-
 
 export default Node;

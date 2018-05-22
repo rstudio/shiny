@@ -13,7 +13,6 @@ import cytoscapeInit from "./cyto/cytoscapeInit";
 
 import console from "./utils/console";
 
-
 // https://ponyfoo.com/articles/es6-modules-in-depth
 // https://github.com/DrkSephy/es6-cheatsheet
 
@@ -43,9 +42,6 @@ console.log(test.hello); // eslint-disable-line no-console
 //   log = __DATA__;
 //   // time = String(__TIME__).toLowerCase() === "true";
 // } catch (e) {}
-
-
-
 
 $(function() {
   window.cyto = cytoscapeInit.with_container($("#cyto"));

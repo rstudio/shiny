@@ -1,9 +1,11 @@
-import _ from "underscore";
+import _ from "lodash";
 
 import HoverStatus from "./HoverStatus";
 import Graph from "./Graph";
 
+import rlog from "../rlog";
 import layoutOptions from "../cyto/layoutOptions";
+import console from "../utils/console";
 
 // // TODO-barret use log states
 // import logStates from "../log/logStates"
@@ -53,8 +55,8 @@ class GraphAtStep {
     this.minStep = log[0].step;
     this.maxStep = log[log.length - 1].step;
 
-    var data, i;
-    var enterExitQueue = [];
+    let data, i;
+    let enterExitQueue = [];
     for (i = 0; i < log.length; i++) {
       data = log[i];
       switch (data.action) {
@@ -117,18 +119,18 @@ class GraphAtStep {
   nextStep(k) {
     // if no filtering... get next step from step array
     if (!this.hasFilterDatas) {
-      var nextStepPos = Math.min(
+      let nextStepPos = Math.min(
         this.steps.length - 1,
         _.sortedIndex(this.steps, k) + 1
       );
       return this.steps[nextStepPos];
     }
 
-    var graph = this.atStep(k);
-    var decendents = undefined,
+    let graph = this.atStep(k);
+    let decendents = undefined,
       ancestors = undefined;
 
-    var logEntry, i, ret;
+    let logEntry, i, ret;
 
     for (i = k + 1; i < this.log.length - 1; i++) {
       logEntry = this.log[i];
@@ -142,7 +144,7 @@ class GraphAtStep {
         case "dependsOn":
           // lazy eval decendents and ancestors
           if (_.isNil(decendents) || _.isNil(ancestors)) {
-            var filterReactIds = this.filterDatas.map(function(node) {
+            let filterReactIds = this.filterDatas.map(function(node) {
               return node.reactId;
             });
             decendents = _.union(
@@ -212,12 +214,12 @@ class GraphAtStep {
   prevStep(k) {
     // if no filtering... get next step from step array
     if (!this.hasFilterDatas) {
-      var prevStepPos = Math.max(_.sortedIndex(this.steps, k) - 1, 1);
+      let prevStepPos = Math.max(_.sortedIndex(this.steps, k) - 1, 1);
       return this.steps[prevStepPos];
     }
 
-    var graph = this.atStep(k);
-    var logEntry, i, ret;
+    let graph = this.atStep(k);
+    let logEntry, i, ret;
 
     for (i = k - 1; i >= 0; i--) {
       logEntry = this.log[i];
@@ -278,8 +280,8 @@ class GraphAtStep {
   }
 
   atStep(k) {
-    var kVal = Math.max(1, Math.min(k, this.log.length));
-    var i, graph;
+    let kVal = Math.max(1, Math.min(k, this.log.length));
+    let i, graph;
     // if (kVal >= this.cacheStep) {
     //   iStart = Math.floor((kVal - 1) / this.cacheStep) * this.cacheStep;
     //   graph = _.cloneDeep(this.graphCache[iStart])
@@ -311,7 +313,7 @@ class GraphAtStep {
         )
       ) {
         // at least some sticky data is visible
-        var stickyTree = graph.familyTreeNodeIdsForDatas(this.stickyDatas);
+        let stickyTree = graph.familyTreeNodeIdsForDatas(this.stickyDatas);
         graph.hoverStatusOnNodeIds(
           stickyTree,
           "sticky",
@@ -335,17 +337,17 @@ class GraphAtStep {
 
     // if any searching
     if (this.hasSearchRegex) {
-      var searchRegex = this.searchRegex;
-      var matchedNodes = _.filter(_.values(graph.nodes), function(node) {
+      let searchRegex = this.searchRegex;
+      let matchedNodes = _.filter(_.values(graph.nodes), function(node) {
         return searchRegex.test(node.label);
       });
 
       if (matchedNodes.length === 0) {
         // TODO-barret warn of no matches
         console.log("no matches!");
-        window.getGraph.updateFilterDatasReset();
+        rlog.getGraph.updateFilterDatasReset();
       } else {
-        window.getGraph.updateFilterDatas(matchedNodes);
+        rlog.getGraph.updateFilterDatas(matchedNodes);
         // filter on regex
         graph.filterGraphOnNodeIds(
           graph.familyTreeNodeIdsForDatas(this.filterDatas)
@@ -448,13 +450,13 @@ class GraphAtStep {
   // }
 
   filterLogOnDatas(datas) {
-    var nodeMap = {};
+    let nodeMap = {};
     datas.map(function(data) {
       if (data instanceof Node) {
         nodeMap[data.reactId] = data;
       }
     });
-    var newLog = _.filter(this.originalLog, function(logEntry) {
+    let newLog = _.filter(this.originalLog, function(logEntry) {
       switch (logEntry.action) {
         case "dependsOn":
         case "dependsOnRemove":
@@ -536,22 +538,22 @@ class GraphAtStep {
   // }
 
   displayAtStep(k, cy) {
-    var graph = this.atStep(k);
+    let graph = this.atStep(k);
 
     cy.startBatch();
 
-    var cytoDur = 400;
-    var cyNodes = cy.nodes();
-    var graphCyto = graph.cytoGraph;
-    var graphNodes = graphCyto.nodes();
-    var nodesLRB = cyNodes.diff(graphNodes);
+    let cytoDur = 400;
+    let cyNodes = cy.nodes();
+    let graphCyto = graph.cytoGraph;
+    let graphNodes = graphCyto.nodes();
+    let nodesLRB = cyNodes.diff(graphNodes);
     // .removeStyle()
 
-    var onLayoutReady = [];
+    let onLayoutReady = [];
 
     // enter
     nodesLRB.right.map(function(graphNode) {
-      var graphNodeData = graphNode.data();
+      let graphNodeData = graphNode.data();
       cy
         .add(graphNode)
         .classes(graphNodeData.cytoClasses)
@@ -560,15 +562,15 @@ class GraphAtStep {
       //   // style: ,
       //   duration: cytoDur
       // });
-      window.barret = cy.$id(graphNode.id());
+      rlog.barret = cy.$id(graphNode.id());
     });
     // update
     nodesLRB.both.map(function(cytoNode) {
-      var cyNode = cy.$id(cytoNode.id());
+      let cyNode = cy.$id(cytoNode.id());
 
-      var graphNode = graphNodes.$id(cytoNode.id());
-      var graphNodeData = graphNode.data();
-      var graphClasses = graphNodeData.cytoClasses;
+      let graphNode = graphNodes.$id(cytoNode.id());
+      let graphNodeData = graphNode.data();
+      let graphClasses = graphNodeData.cytoClasses;
 
       cyNode
         // update to latest data
@@ -610,12 +612,12 @@ class GraphAtStep {
       // .animate({duration: cytoDur});
     });
 
-    var cyEdges = cy.edges();
-    var graphEdges = graphCyto.edges();
-    var edgesLRB = cyEdges.diff(graphEdges);
+    let cyEdges = cy.edges();
+    let graphEdges = graphCyto.edges();
+    let edgesLRB = cyEdges.diff(graphEdges);
     // enter
     edgesLRB.right.map(function(graphEdge) {
-      var graphEdgeData = graphEdge.data();
+      let graphEdgeData = graphEdge.data();
       cy
         .add(graphEdge)
         .classes(graphEdgeData.cytoClasses)
@@ -628,7 +630,7 @@ class GraphAtStep {
     });
     // update
     edgesLRB.both.map(function(cytoEdge) {
-      var graphEdgeData = graphEdges.$id(cytoEdge.id()).data();
+      let graphEdgeData = graphEdges.$id(cytoEdge.id()).data();
       cy
         .$id(cytoEdge.id())
         // .classes()
@@ -653,7 +655,7 @@ class GraphAtStep {
     // send in sorted elements according to the key.
     // If provided in a consistent order, layouts are consistent.
     // `eles` default to `options.eles != null ? options.eles : cy.$();`
-    var sortedElements = cy.$().sort(function(a, b) {
+    let sortedElements = cy.$().sort(function(a, b) {
       return a.data().key > b.data().key ? 1 : -1;
     });
 

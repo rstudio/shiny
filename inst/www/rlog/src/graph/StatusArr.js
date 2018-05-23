@@ -1,4 +1,6 @@
-import _ from "underscore";
+import _ from "lodash";
+
+import console from "../utils/console";
 
 class StatusArr {
   constructor() {
@@ -14,9 +16,9 @@ class StatusArr {
     return _.last(this.statusArr);
   }
   containsStatus(status) {
-    var arr = this.statusArr,
+    let arr = this.statusArr,
       n = arr.length;
-    for (var i = 0; i < n; i++) {
+    for (let i = 0; i < n; i++) {
       if (arr[i].action === status) {
         return true;
       }
@@ -25,7 +27,7 @@ class StatusArr {
   }
 
   static expect_prev_status(curStatus, prevStatus, expectedAction) {
-    var on_error = function(msg) {
+    let on_error = function(msg) {
       console.error("curStatus: ", curStatus);
       console.error("prevStatus: ", prevStatus);
       throw msg;

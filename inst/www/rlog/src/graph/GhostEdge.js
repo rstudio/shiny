@@ -35,7 +35,7 @@ class GhostEdge {
     // return graphStyles.ghostEdge.default
   }
   get cytoClasses() {
-    var classes = ["edgeGhost"];
+    let classes = ["edgeGhost"];
     switch (this.hoverStatus.state) {
       case HoverStatus.focused:
         break;
@@ -51,7 +51,7 @@ class GhostEdge {
     return classes.join(" ");
   }
   get cytoData() {
-    var retData = this;
+    let retData = this;
     return {
       group: "edges",
       data: retData,

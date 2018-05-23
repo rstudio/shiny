@@ -1,6 +1,7 @@
 // initialize all log entries to have a step value
-(function() {
-  for (var i = 0; i < window.log.length; i++) {
-    window.log[i].step = i;
-  }
-})();
+
+import _ from "lodash";
+
+_.map(window.log, function(entry, i) {
+  entry.step = i;
+});

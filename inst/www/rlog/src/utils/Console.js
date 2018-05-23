@@ -6,7 +6,7 @@ let hasWindowConsole =
 let console;
 
 if (hasWindowConsole) {
-  console = window.console.log;
+  console = window.console;
 } else {
   console = {
     log: function() {},

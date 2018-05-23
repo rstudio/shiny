@@ -1,7 +1,4 @@
-
-
-
-var colors = {
+let colors = {
   // regular colors
   regular: {
     white: "#ffffff",
@@ -63,8 +60,7 @@ var colors = {
     pink: "#fddaec",
     grey: "#f2f2f2",
   },
-}
+};
 
-
-export colors;
+export { colors };
 export default colors;

@@ -44,7 +44,7 @@ class Edge {
     return this.status === "isolate";
   }
   get cytoClasses() {
-    var classes = [];
+    let classes = [];
     if (this.inIsolate) classes.push("edgeIsolate");
     switch (this.hoverStatus.state) {
       case HoverStatus.focused:
@@ -61,7 +61,7 @@ class Edge {
     return classes.join(" ");
   }
   get cytoData() {
-    var retData = this;
+    let retData = this;
     return {
       group: "edges",
       data: retData,

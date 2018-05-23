@@ -1,6 +1,6 @@
 import cytoscape from "cytoscape";
 
-import graphStyles, { styleHelper } from "./cytoStyle";
+import graphStyles, { style } from "./cytoStyle";
 import layoutOptions from "./layoutOptions";
 
 // // TODO-barret use cytoClasses
@@ -14,41 +14,38 @@ let with_container = function(container) {
     layout: layoutOptions,
     style: [
       // order of the style definitions are how styles are applied
-      styleHelper("node", graphStyles.node.default),
-      styleHelper("edge", graphStyles.edge.default),
-      styleHelper(".edgeGhost", graphStyles.ghostEdge.default),
-      styleHelper(".edgeIsolate", graphStyles.edge.isolate),
-      styleHelper(".nodeStart", graphStyles.node.start),
-      styleHelper(".nodeMiddle", graphStyles.node.middle),
-      styleHelper(".nodeEnd", graphStyles.node.end),
-      styleHelper(".nodeStartBig", graphStyles.node.startBig),
-      styleHelper(".nodeMiddleBig", graphStyles.node.middleBig),
-      styleHelper(".nodeEndBig", graphStyles.node.endBig),
-      styleHelper(".nodeEnter", graphStyles.node.enter),
-      styleHelper(".nodeEnterActive", graphStyles.node.enterActive),
-      styleHelper(".nodeInvalidate", graphStyles.node.invalidate),
-      styleHelper(".nodeInvalidateActive", graphStyles.node.invalidateActive),
-      styleHelper(".nodeInvalidateDone", graphStyles.node.invalidateDone),
-      styleHelper(".nodeIsolate", graphStyles.node.isolate),
-      styleHelper(".nodeIsolateInvalidate", graphStyles.node.isolateInvalidate),
-      styleHelper(".nodeValueChanged", graphStyles.node.valueChanged),
-      styleHelper(".hoverNotFocused", graphStyles.focus.hoverNotFocused),
-      styleHelper(
+      style("node", graphStyles.node.default),
+      style("edge", graphStyles.edge.default),
+      style(".edgeGhost", graphStyles.ghostEdge.default),
+      style(".edgeIsolate", graphStyles.edge.isolate),
+      style(".nodeStart", graphStyles.node.start),
+      style(".nodeMiddle", graphStyles.node.middle),
+      style(".nodeEnd", graphStyles.node.end),
+      style(".nodeStartBig", graphStyles.node.startBig),
+      style(".nodeMiddleBig", graphStyles.node.middleBig),
+      style(".nodeEndBig", graphStyles.node.endBig),
+      style(".nodeEnter", graphStyles.node.enter),
+      style(".nodeEnterActive", graphStyles.node.enterActive),
+      style(".nodeInvalidate", graphStyles.node.invalidate),
+      style(".nodeInvalidateActive", graphStyles.node.invalidateActive),
+      style(".nodeInvalidateDone", graphStyles.node.invalidateDone),
+      style(".nodeIsolate", graphStyles.node.isolate),
+      style(".nodeIsolateInvalidate", graphStyles.node.isolateInvalidate),
+      style(".nodeValueChanged", graphStyles.node.valueChanged),
+      style(".hoverNotFocused", graphStyles.focus.hoverNotFocused),
+      style(
         ".hoverNotFocusedButSticky",
         graphStyles.focus.hoverNotFocusedButSticky
       ),
-      styleHelper(
-        ".edgeGhostHoverNotFocused",
-        graphStyles.ghostEdge.hoverNotFocused
-      ),
-      styleHelper(
+      style(".edgeGhostHoverNotFocused", graphStyles.ghostEdge.hoverNotFocused),
+      style(
         ".edgeGhostHoverNotFocusedButSticky",
         graphStyles.ghostEdge.hoverNotFocusedButSticky
       ),
-      styleHelper(".stickyNotFocused", graphStyles.focus.stickyNotFocused),
-      styleHelper(".nodeSelected", graphStyles.selected.node),
-      styleHelper(".edgeSelected", graphStyles.selected.edge),
-      styleHelper(".edgeGhostSelected", graphStyles.selected.ghostEdge),
+      style(".stickyNotFocused", graphStyles.focus.stickyNotFocused),
+      style(".nodeSelected", graphStyles.selected.node),
+      style(".edgeSelected", graphStyles.selected.edge),
+      style(".edgeGhostSelected", graphStyles.selected.ghostEdge),
     ],
   });
 };

@@ -1,4 +1,9 @@
-var layoutOptions = {
+import cytoscape from "cytoscape";
+import dagre from "cytoscape-dagre";
+
+cytoscape.use(dagre);
+
+let layoutOptions = {
   name: "dagre",
   rankDir: "LR", // 'TB' for top to bottom flow, 'LR' for left to right,
   rankSep: 150, // the separation between node columns

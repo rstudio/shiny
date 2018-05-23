@@ -1,4 +1,4 @@
-import _ from "underscore";
+import _ from "lodash";
 import cytoscape from "cytoscape";
 
 import Node from "./Node";
@@ -23,13 +23,13 @@ class Graph {
   }
 
   get cytoGraph() {
-    var cyto = cytoscape();
-    var nodes = _.values(this.nodes).map(function(node) {
+    let cyto = cytoscape();
+    let nodes = _.values(this.nodes).map(function(node) {
       return node.cytoData;
     });
     cyto.add(nodes);
-    var ghostEdgeMap = _.assign({}, this.edgesUnique);
-    var edges = _.values(this.edges).map(function(edge) {
+    let ghostEdgeMap = _.assign({}, this.edgesUnique);
+    let edges = _.values(this.edges).map(function(edge) {
       // remove matching unique/ghost edges
       if (_.has(ghostEdgeMap, edge.ghostKey)) {
         delete ghostEdgeMap[edge.ghostKey];
@@ -37,7 +37,7 @@ class Graph {
       return edge.cytoData;
     });
     cyto.add(edges);
-    var ghostEdges = _.values(ghostEdgeMap).map(function(edge) {
+    let ghostEdges = _.values(ghostEdgeMap).map(function(edge) {
       return edge.cytoData;
     });
     cyto.add(ghostEdges);
@@ -55,8 +55,8 @@ class Graph {
         if (_.has(this.edgesUnique, data.key)) return true;
       }
 
-      var reactId = data.reactId;
-      var depOnReactId = data.depOnReactId;
+      let reactId = data.reactId;
+      let depOnReactId = data.depOnReactId;
       return _.some([this.edges, this.edgesUnique], function(edgeGroup) {
         return _.some(_.values(edgeGroup), function(edge) {
           if (edge.reactId === reactId && edge.depOnReactId === depOnReactId) {
@@ -86,9 +86,9 @@ class Graph {
       }
 
       // highlight all the edges (and ghost edges) that have the same source and target
-      var reactId = data.reactId;
-      var depOnReactId = data.depOnReactId;
-      var selectMatchingEdges = function(edge) {
+      let reactId = data.reactId;
+      let depOnReactId = data.depOnReactId;
+      let selectMatchingEdges = function(edge) {
         if (edge.reactId === reactId && edge.depOnReactId === depOnReactId) {
           edge.hoverStatus.selected = HoverStatus.isSelected;
         }
@@ -104,7 +104,7 @@ class Graph {
     if (data instanceof Node) {
       return data.reactId;
     } else if (Graph.isEdgeLike(data)) {
-      var node = getParentFromEdge
+      let node = getParentFromEdge
         ? this.nodes[data.depOnReactId]
         : this.nodes[data.reactId];
       if (node) {
@@ -130,7 +130,7 @@ class Graph {
       // return edge source
       return [data.reactId];
     } else {
-      var reactId;
+      let reactId;
       reactId = this.reactIdFromData(data, true);
       if (!reactId) return [];
       return _.filter(_.values(this.edgesUnique), function(edge) {
@@ -147,7 +147,7 @@ class Graph {
       // return edge target
       return [data.depOnReactId];
     } else {
-      var reactId = this.reactIdFromData(data, false);
+      let reactId = this.reactIdFromData(data, false);
       if (!reactId) return [];
       return _.filter(_.values(this.edgesUnique), function(edge) {
         // if the source is the reactId
@@ -160,11 +160,11 @@ class Graph {
   }
 
   ancestorNodeIds(data) {
-    var reactId = this.reactIdFromData(data, true);
+    let reactId = this.reactIdFromData(data, true);
     if (!reactId) return [];
-    var originalReactId = reactId;
-    var seenMap = {};
-    var reactIdArr = [reactId];
+    let originalReactId = reactId;
+    let seenMap = {};
+    let reactIdArr = [reactId];
     while (reactIdArr.length > 0) {
       reactId = reactIdArr.pop();
       if (!_.has(seenMap, reactId)) {
@@ -176,11 +176,11 @@ class Graph {
     return _.keys(seenMap).sort();
   }
   decendentNodeIds(data) {
-    var reactId = this.reactIdFromData(data, false);
+    let reactId = this.reactIdFromData(data, false);
     if (!reactId) return [];
-    var originalReactId = reactId;
-    var seenMap = {};
-    var reactIdArr = [reactId];
+    let originalReactId = reactId;
+    let seenMap = {};
+    let reactIdArr = [reactId];
     while (reactIdArr.length > 0) {
       reactId = reactIdArr.pop();
       if (!_.has(seenMap, reactId)) {
@@ -194,9 +194,9 @@ class Graph {
 
   // all filtering can be done with only node reactIds
   familyTreeNodeIds(data) {
-    var ret = [];
+    let ret = [];
     if (Graph.isEdgeLike(data)) {
-      var reactId;
+      let reactId;
       reactId = this.reactIdFromData(data, true);
       if (reactId) ret.push(reactId);
       reactId = this.reactIdFromData(data, false);
@@ -212,7 +212,7 @@ class Graph {
   }
 
   familyTreeNodeIdsForDatas(datas) {
-    var self = this;
+    let self = this;
     return _.union(
       _.flatMap(datas, function(data) {
         return self.familyTreeNodeIds(data);
@@ -220,7 +220,7 @@ class Graph {
     );
   }
   decendentNodeIdsForDatas(datas) {
-    var self = this;
+    let self = this;
     return _.union(
       _.flatMap(datas, function(data) {
         return self.decendentNodeIds(data);
@@ -228,7 +228,7 @@ class Graph {
     );
   }
   ancestorNodeIdsForDatas(datas) {
-    var self = this;
+    let self = this;
     return _.union(
       _.flatMap(datas, function(data) {
         return self.ancestorNodeIds(data);
@@ -237,7 +237,7 @@ class Graph {
   }
 
   hoverStatusOnNodeIds(nodeIds, hoverKey, onStatus, offStatus) {
-    var nodeMap = {};
+    let nodeMap = {};
     nodeIds.map(function(nodeId) {
       nodeMap[nodeId] = true;
     });
@@ -271,12 +271,12 @@ class Graph {
   }
 
   filterGraphOnNodeIds(nodeIds) {
-    var nodeMap = {};
+    let nodeMap = {};
     nodeIds.map(function(nodeId) {
       nodeMap[nodeId] = true;
     });
 
-    var self = this;
+    let self = this;
     // prune nodes
     _.map(this.nodes, function(node, key) {
       if (!_.has(nodeMap, node.reactId)) {
@@ -308,7 +308,7 @@ class Graph {
       return;
     }
 
-    var node, lastNodeId, edge;
+    let node, lastNodeId, edge;
 
     switch (data.action) {
       // {"action": "define", "reactId": "r3", "label": "plotObj", "type": "observable", "session": "fa3c747a6121aec5baa682cc3970b811", "time": 1524581676.5841},
@@ -366,7 +366,7 @@ class Graph {
       case "invalidateEnd":
       case "exit":
       case "isolateExit":
-      case "isolateInvalidateEnd":
+      case "isolateInvalidateEnd": {
         node = this.nodes[data.reactId];
         switch (data.action) {
           case "exit":
@@ -402,8 +402,8 @@ class Graph {
             }
             break;
         }
-        var prevData = node.statusLast();
-        var expectedAction = {
+        let prevData = node.statusLast();
+        let expectedAction = {
           exit: "enter",
           isolateExit: "isolateEnter",
           invalidateEnd: "invalidateStart",
@@ -412,10 +412,11 @@ class Graph {
         StatusArr.expect_prev_status(data, prevData, expectedAction);
         node.statusRemove();
         break;
+      }
 
-      case "dependsOn":
+      case "dependsOn": {
         edge = new Edge(data);
-        var edgeKey = edge.key;
+        let edgeKey = edge.key;
 
         // store unique edges to always display a transparent dependency
         if (!_.has(this.edgesUnique, edge.ghostKey)) {
@@ -434,6 +435,7 @@ class Graph {
           edge.status = "normal";
         }
         break;
+      }
 
       case "dependsOnRemove":
         edge = new Edge(data);

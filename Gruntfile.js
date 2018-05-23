@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
 
-  var rootDir = ".";
+  var rootDir = __dirname;
 
   var instdir = rootDir + '/inst/';
   var js_srcdir = rootDir + '/srcjs/'
@@ -233,7 +233,67 @@ module.exports = function(grunt) {
           instdir + "www/rlog/src/**/*.js"
         ]
       },
+    },
+
+    webpack: {
+      options: {
+        mode: "development", // do not take time to shrink files;
+        devtool: "source-map", // produce a sibling source map file
+        stats: {
+          colors: true,
+          modules: true,
+          reasons: true
+        },
+        progress: true,
+        failOnError: true,
+        // externals: {
+        //   jQuery : {
+        //     root: "$" // indicates global variable
+        //   },
+        //   lodash : {
+        //     root: "_" // indicates global variable
+        //   }
+        // },
+        // optimization: {
+        //   minimize: false // uglify the code
+        // },
+
+      },
+      reactLog: {
+        entry: [instdir + "www/rlog/src/index.js"],
+        output: {
+          path: instdir + "www/rlog/dest/",
+          filename: 'reactLog.js'
+        },
+        watch: false,
+        module: {
+          rules: [
+            {
+              test: /\.js$/,
+              exclude: /node_modules/,
+              use: [
+                {
+                  loader: "babel-loader",
+                  options: {
+                    sourceMap: true,
+                    compact: false,
+                    presets: ["flow", "es2015"],
+                    plugins: [
+                      ["transform-es2015-modules-umd", {
+                        "globals": {
+                          "es6-promise": "Promise"
+                        }
+                      }]
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
     }
+
   };
 
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -245,6 +305,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-newer');
   grunt.loadNpmTasks('grunt-prettier');
+  grunt.loadNpmTasks('grunt-webpack');
 
 
   // Need this here so that babel reads in the source map file after it's
@@ -253,6 +314,11 @@ module.exports = function(grunt) {
   grunt.task.registerTask("configureBabelShiny", "configures babel options", function() {
     gruntConfig.babel.options.inputSourceMap = grunt.file.readJSON('./temp_concat/shiny.js.map');
   });
+
+  grunt.task.registerTask("webpackReactLogWatch", "sets 'watch' to true for reactLog webpack task", function() {
+    gruntConfig.webpack.reactLog.watch = true
+  });
+
 
   grunt.initConfig(gruntConfig);
 

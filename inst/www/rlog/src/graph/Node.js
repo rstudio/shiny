@@ -72,7 +72,7 @@ class Node {
     return this.label;
   }
   get cytoClasses() {
-    var classes = [];
+    let classes = [];
     switch (this.type) {
       case "observer":
         classes.push("nodeEnd");
@@ -115,7 +115,7 @@ class Node {
     return classes.join(" ");
   }
   get cytoData() {
-    var retData = this;
+    let retData = this;
     return {
       group: "nodes",
       data: retData,

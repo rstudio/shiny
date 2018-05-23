@@ -3,7 +3,7 @@ import _ from "lodash";
 
 import console from "../utils/console";
 
-import updateGraph from "../updateGraph/updateGraph";
+import * as updateGraph from "../updateGraph/updateGraph";
 import rlog from "../rlog";
 
 let onKeydown = function(e) {
@@ -128,4 +128,9 @@ let onKeydown = function(e) {
   }
 };
 
+let addKeydown = function(jqueryContainer) {
+  jqueryContainer.on("keydown", onKeydown);
+};
+
+export { addKeydown };
 export default onKeydown;

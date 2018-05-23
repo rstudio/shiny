@@ -3,7 +3,7 @@ import _ from "lodash";
 import console from "../utils/console";
 
 import rlog from "../rlog";
-import updateGraph from "../updateGraph/updateGraph";
+import * as updateGraph from "../updateGraph/updateGraph";
 
 // cytoFamilySuccPred = function(ele, addExtraLayer = true) {
 //   var familyEles = cyto.collection();
@@ -149,5 +149,5 @@ let addOnMethods = function(cyto) {
   cyto.on("dblclick", onDblClick(cyto));
 };
 
-export { onMouseOver, onClick, onDblClick };
+export { onMouseOver, onClick, onDblClick, addOnMethods };
 export default addOnMethods;

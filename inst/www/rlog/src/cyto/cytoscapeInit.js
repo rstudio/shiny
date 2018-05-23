@@ -1,13 +1,14 @@
 import cytoscape from "cytoscape";
 
+import * as cytoOn from "./cytoOn";
 import graphStyles, { style } from "./cytoStyle";
 import layoutOptions from "./layoutOptions";
 
 // // TODO-barret use cytoClasses
 // import cytoClasses from "./cytoClasses"
 
-let with_container = function(container) {
-  return cytoscape({
+let withContainer = function(container) {
+  let cyto = cytoscape({
     container: container,
     boxSelectionEnabled: false,
     autounselectify: true,
@@ -48,6 +49,11 @@ let with_container = function(container) {
       style(".edgeGhostSelected", graphStyles.selected.ghostEdge),
     ],
   });
+
+  cytoOn.addOnMethods(cyto);
+
+  return cyto;
 };
 
-export { with_container };
+export { withContainer };
+export default withContainer;

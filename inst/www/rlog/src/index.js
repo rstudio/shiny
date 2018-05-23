@@ -10,7 +10,6 @@ import * as cytoscapeInit from "./cyto/cytoscapeInit";
 
 import console from "./utils/console";
 
-import * as layoutMouse from "./layout/mouse";
 import * as layoutKeydown from "./layout/keydown";
 
 import * as updateGraph from "./updateGraph/updateGraph";
@@ -53,28 +52,11 @@ $(function() {
   window.barret = rlog;
   window.barret.updateGraph = updateGraph;
   rlog.log = log;
-  rlog.cyto = cytoscapeInit.with_container($("#cyto"));
+  rlog.cyto = cytoscapeInit.withContainer($("#cyto"));
 
   rlog.getGraph = new GraphAtStep(log);
   rlog.graph = rlog.getGraph.atStep(rlog.getGraph.maxStep);
   console.log(rlog.graph);
-
-  layoutMouse.add_mousedown($("#timeline"));
-
-  rlog.getGraph.enterExitEmpties.map(function(i) {
-    $("#timeline-bg").append(
-      `<div class="timeline-enterexit" style="left: ${100 *
-        i /
-        rlog.log.length}%;"></div>`
-    );
-  });
-  rlog.getGraph.queueEmpties.map(function(i) {
-    $("#timeline-bg").append(
-      `<div class="timeline-cycle" style="left: ${100 *
-        i /
-        rlog.log.length}%;"></div>`
-    );
-  });
 
   $("#startStepButton").click(updateGraph.firstEnterExitEmpty);
   $("#endStepButton").click(updateGraph.lastEnterExitEmpty);
@@ -83,14 +65,26 @@ $(function() {
   $("#prevStepButton").click(updateGraph.prevStep);
   $("#nextStepButton").click(updateGraph.nextStep);
 
+  progressBar.setContainers($("#timeline"), $("#timeline-fill"));
+  progressBar.addTimelineTicks(
+    $("#timeline-bg"),
+    "timeline-enterexit",
+    rlog.getGraph.enterExitEmpties,
+    rlog.log.length
+  );
+  progressBar.addTimelineTicks(
+    $("#timeline-bg"),
+    "timeline-cycle",
+    rlog.getGraph.queueEmpties,
+    rlog.log.length
+  );
   logEntry.setContainer($("#instructions"));
-  progressBar.setContainer($("#timeline-fill"));
 
   $("#search").on("input", function(e) {
     updateGraph.withSearchString(e.target.value);
   });
 
-  $(document.body).on("keydown", layoutKeydown);
+  layoutKeydown.addKeydown($(document.body));
 
   // start the graph at the first enter/exit or first empty queue
   // TODO-barret should start at nextEnterExitEmpty,

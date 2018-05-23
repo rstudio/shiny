@@ -1,5 +1,5 @@
 import console from "../utils/console";
-import updateGraph from "./atTick";
+import * as updateGraph from "./hoverStickyFilterSearch";
 
 // when str length < 3 do not search
 // when str length = 0, reset filter

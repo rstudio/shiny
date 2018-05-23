@@ -66,6 +66,7 @@ class GraphAtStep {
         case "exit":
           enterExitQueue.pop();
           if (enterExitQueue.length === 0) {
+            // add an extra step to show that it is completed
             this.enterExitEmpties.push(data.step + 1);
           }
           break;
@@ -119,10 +120,13 @@ class GraphAtStep {
   nextStep(k) {
     // if no filtering... get next step from step array
     if (!this.hasFilterDatas) {
-      let nextStepPos = Math.min(
-        this.steps.length - 1,
-        _.sortedIndex(this.steps, k) + 1
-      );
+      let nextStepPos = _.sortedIndex(this.steps, k);
+      if (_.sortedIndexOf(this.steps, k) >= 0) {
+        // go to the next step location
+        nextStepPos += 1;
+      }
+      // else, does not exist, so it is directly there
+      nextStepPos = Math.min(this.steps.length - 1, nextStepPos);
       return this.steps[nextStepPos];
     }
 

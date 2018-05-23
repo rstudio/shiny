@@ -18,9 +18,8 @@ module.exports = {
     // "no-use-before-define": [1, {"functions": false}],
     "semi": [2, "always"],
     "no-fallthrough": 0,
-    "no-console": 2,
+    "no-console": 2, // ["error", { allow: ["warn", "error"] }]
     "no-var": 2
-    // "no-console": ["error", { allow: ["warn", "error"] }]
   },
   "parserOptions": { "ecmaVersion": 6 }, // enable es6 language
   "env": {

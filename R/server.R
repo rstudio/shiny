@@ -419,7 +419,10 @@ startApp <- function(appObj, port, host, quiet) {
 
   if (is.numeric(port) || is.integer(port)) {
     if (!quiet) {
-      message('\n', 'Listening on http://', host, ':', port)
+      hostString <- host
+      if (httpuv::ipFamily(host) == 6L)
+        hostString <- paste0("[", hostString, "]")
+      message('\n', 'Listening on http://', hostString, ':', port)
     }
     return(startServer(host, port, handlerManager$createHttpuvApp()))
   } else if (is.character(port)) {
@@ -770,8 +773,17 @@ runApp <- function(appDir=getwd(),
   }, add = TRUE)
 
   if (!is.character(port)) {
-    # http://0.0.0.0/ doesn't work on QtWebKit (i.e. RStudio viewer)
-    browseHost <- if (identical(host, "0.0.0.0")) "127.0.0.1" else host
+    browseHost <- host
+    if (identical(host, "0.0.0.0")) {
+      # http://0.0.0.0/ doesn't work on QtWebKit (i.e. RStudio viewer)
+      browseHost <- "127.0.0.1"
+    } else if (identical(host, "::")) {
+      browseHost <- "::1"
+    }
+
+    if (httpuv::ipFamily(browseHost) == 6L) {
+      browseHost <- paste0("[", browseHost, "]")
+    }
 
     appUrl <- paste("http://", browseHost, ":", port, sep="")
     if (is.function(launch.browser))

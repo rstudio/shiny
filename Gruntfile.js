@@ -275,8 +275,8 @@ module.exports = function(grunt) {
               exclude: /node_modules/,
               use: [
                 {
-                  loader: "babel-loader",
-                  babelrc: true
+                  loader: "babel-loader"
+                  // babelrc: true
                   // ,
                   // options: {
                   //   sourceMap: true,

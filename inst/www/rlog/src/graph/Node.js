@@ -1,12 +1,27 @@
-import HoverStatus from "./HoverStatus";
-import ActiveStateStatus from "./ActiveStateStatus";
-import StatusArr from "./StatusArr";
+// @flow
+
+import { HoverStatus } from "./HoverStatus";
+import { ActiveStateStatus } from "./ActiveStateStatus";
+import { StatusArr } from "./StatusArr";
+import type { StatusEntry } from "./StatusArr";
 
 // // TODO-barret use log states everywhere
 // import logStates from "../log/logStates"
 
 class Node {
-  constructor(data) {
+  reactId: string;
+  label: string;
+  type: string;
+  session: string;
+  time: number;
+  statusArr: StatusArr;
+  value: ?string;
+  hoverStatus: HoverStatus;
+  valueChangedStatus: ActiveStateStatus;
+  enterStatus: ActiveStateStatus;
+  invalidateStatus: ActiveStateStatus;
+
+  constructor(data: NodeInputType) {
     if (typeof data.reactId === "undefined")
       throw "data.reactId not provided in new Node";
     if (typeof data.label === "undefined")
@@ -20,7 +35,7 @@ class Node {
     this.reactId = data.reactId;
     this.label = data.label;
     this.type = data.type;
-    this.session = data.session;
+    this.session = data.session || "Global";
     this.time = data.time;
     this.statusArr = new StatusArr(data.statusArr || []);
     this.value = data.value || null;
@@ -36,42 +51,42 @@ class Node {
 
     this.invalidateStatus = data.invalidateStatus || new ActiveStateStatus();
   }
-  get id() {
+  get id(): NodeIdType {
     return this.reactId.replace(/\$/g, "_");
   }
-  get key() {
+  get key(): NodeKeyType {
     return this.reactId;
   }
-  get hoverKey() {
+  get hoverKey(): NodeHoverKeyType {
     return this.key;
   }
-  statusAdd(obj) {
+  statusAdd(obj: StatusEntry): StatusArr {
     this.statusArr.add(obj);
     return this.statusArr;
   }
-  statusRemove() {
+  statusRemove(): StatusEntry {
     return this.statusArr.remove();
   }
-  statusLast() {
+  statusLast(): StatusEntry {
     return this.statusArr.last();
   }
-  get inEnter() {
+  get inEnter(): boolean {
     return this.statusArr.containsStatus("enter");
   }
-  get inIsolate() {
+  get inIsolate(): boolean {
     return this.statusArr.containsStatus("isolateEnter");
   }
   // get inInvalidate() {return this.statusArr.containsStatus("invalidateStart");}
-  get inIsolateInvalidate() {
+  get inIsolateInvalidate(): boolean {
     return this.statusArr.containsStatus("isolateInvalidateStart");
   }
   get cytoStyle() {
     return {};
   }
-  get cytoLabel() {
+  get cytoLabel(): string {
     return this.label;
   }
-  get cytoClasses() {
+  get cytoClasses(): string {
     let classes = [];
     switch (this.type) {
       case "observer":
@@ -99,9 +114,9 @@ class Node {
     if (this.valueChangedStatus.isOn) classes.push("nodeValueChanged");
 
     switch (this.hoverStatus.state) {
-      case HoverStatus.focused:
+      case HoverStatus.valFocused:
         break;
-      case HoverStatus.notFocused:
+      case HoverStatus.valNotFocused:
         // console.log("not focused!")
         if (this.hoverStatus.isSticky()) {
           classes.push("hoverNotFocusedButSticky");
@@ -123,4 +138,23 @@ class Node {
   }
 }
 
-export default Node;
+type NodeKeyType = string;
+type NodeHoverKeyType = string;
+type NodeIdType = string;
+
+type NodeInputType = {
+  reactId: string,
+  label: string,
+  type: string,
+  session: ?string,
+  time: number,
+  statusArr?: StatusArr,
+  value: ?string,
+  hoverStatus?: HoverStatus,
+  valueChangedStatus?: ActiveStateStatus,
+  enterStatus?: ActiveStateStatus,
+  invalidateStatus?: ActiveStateStatus,
+};
+
+export { Node };
+export type { NodeKeyType, NodeHoverKeyType, NodeIdType, NodeInputType };

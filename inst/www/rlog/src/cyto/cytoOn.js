@@ -3,7 +3,7 @@ import _ from "lodash";
 import console from "../utils/console";
 
 import rlog from "../rlog";
-import * as updateGraph from "../updateGraph/updateGraph";
+import * as updateGraph from "../updateGraph";
 
 // cytoFamilySuccPred = function(ele, addExtraLayer = true) {
 //   var familyEles = cyto.collection();

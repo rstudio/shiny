@@ -1,12 +1,14 @@
+// @flow
+
 import rlog from "../rlog";
 
-let container = null;
+let container: JQuery;
 
-let updateLogEntry = function() {
+let updateLogEntry = function(): void {
   container.text(JSON.stringify(rlog.log[rlog.curTick], null, "  "));
 };
 
-let setContainer = function(container_) {
+let setContainer = function(container_: JQuery): void {
   container = container_;
 };
 

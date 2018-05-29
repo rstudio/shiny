@@ -1,7 +1,9 @@
-import rlog from "../rlog";
-import updateGraph from "./atTick";
+// @flow
 
-let nextQueueEmpty = function() {
+import rlog from "../rlog";
+import { updateGraph } from "../updateGraph";
+
+let nextQueueEmpty = function(): boolean {
   let i, val;
   // move to queue empty
   for (i = 0; i < rlog.getGraph.enterExitEmpties.length; i++) {
@@ -13,7 +15,7 @@ let nextQueueEmpty = function() {
   }
   return false;
 };
-let prevQueueEmpty = function() {
+let prevQueueEmpty = function(): boolean {
   let i, val;
   // move to queue empty
   for (i = rlog.getGraph.queueEmpties.length - 1; i >= 0; i--) {
@@ -26,12 +28,12 @@ let prevQueueEmpty = function() {
   return false;
 };
 
-let lastQueueEmpty = function() {
+let lastQueueEmpty = function(): void {
   let nextTick =
     rlog.getGraph.queueEmpties[rlog.getGraph.queueEmpties.length - 1] || 0;
   updateGraph(nextTick);
 };
-let firstQueueEmpty = function() {
+let firstQueueEmpty = function(): void {
   let nextTick = rlog.getGraph.queueEmpties[0] || 0;
   updateGraph(nextTick);
 };

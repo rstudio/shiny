@@ -1,7 +1,20 @@
-import HoverStatus from "./HoverStatus";
+// @flow
+
+import { HoverStatus } from "./HoverStatus";
+
+import type { ReactIdType, CtxIdType } from "../log/logStates";
 
 class Edge {
-  constructor(data) {
+  reactId: ReactIdType;
+  depOnReactId: ReactIdType;
+  ctxId: CtxIdType;
+  session: string;
+  time: number;
+  status: string;
+  isGhost: boolean;
+  hoverStatus: HoverStatus;
+
+  constructor(data: EdgeInputType) {
     if (typeof data.reactId === "undefined")
       throw "data.reactId not provided to new Edge()";
     if (typeof data.depOnReactId === "undefined")
@@ -19,37 +32,37 @@ class Edge {
     this.isGhost = false;
     this.hoverStatus = data.hoverStatus || new HoverStatus();
   }
-  get id() {
+  get id(): EdgeIdType {
     return `${this.reactId}_${this.depOnReactId}_${this.ctxId}`.replace(
       /\$/g,
       "_"
     );
   }
-  get source() {
+  get source(): GraphNodeKeyType {
     return this.depOnReactId.replace(/\$/g, "_");
   }
-  get target() {
+  get target(): GraphNodeKeyType {
     return this.reactId.replace(/\$/g, "_");
   }
-  get key() {
+  get key(): EdgeKeyType {
     return `${this.reactId} depends on ${this.depOnReactId} in ${this.ctxId}`;
   }
-  get ghostKey() {
+  get ghostKey(): EdgeKeyType {
     return `${this.reactId} depends on ${this.depOnReactId}`;
   }
-  get hoverKey() {
+  get hoverKey(): EdgeHoverKeyType {
     return this.ghostKey;
   }
-  get inIsolate() {
+  get inIsolate(): boolean {
     return this.status === "isolate";
   }
-  get cytoClasses() {
+  get cytoClasses(): string {
     let classes = [];
     if (this.inIsolate) classes.push("edgeIsolate");
     switch (this.hoverStatus.state) {
-      case HoverStatus.focused:
+      case HoverStatus.valFocused:
         break;
-      case HoverStatus.notFocused:
+      case HoverStatus.valNotFocused:
         if (this.hoverStatus.sticky) {
           classes.push("hoverNotFocusedButSticky");
         } else {
@@ -69,4 +82,30 @@ class Edge {
   }
 }
 
-export default Edge;
+type EdgeKeyType = string;
+type EdgeHoverKeyType = string;
+type EdgeIdType = string;
+
+type GraphNodeKeyType = string;
+
+type EdgeInputType = EdgeLikeType & {
+  ctxId: CtxIdType,
+};
+
+type EdgeLikeType = {
+  reactId: ReactIdType,
+  depOnReactId: ReactIdType,
+  session: ?string,
+  time: number,
+  hoverStatus?: ?HoverStatus,
+};
+
+export { Edge };
+
+export type {
+  EdgeLikeType,
+  EdgeIdType,
+  EdgeKeyType,
+  EdgeHoverKeyType,
+  GraphNodeKeyType,
+};

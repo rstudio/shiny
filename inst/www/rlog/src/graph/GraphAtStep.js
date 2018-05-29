@@ -1,11 +1,23 @@
-import _ from "lodash";
+// @flow
 
-import HoverStatus from "./HoverStatus";
-import Graph from "./Graph";
+import _ from "lodash";
+import console from "../utils/console";
+
+import { HoverStatus } from "./HoverStatus";
+import { Graph } from "./Graph";
 
 import rlog from "../rlog";
 import layoutOptions from "../cyto/layoutOptions";
-import console from "../utils/console";
+
+import { Node } from "./Node";
+// import { Edge } from "./Edge";
+
+import type {
+  LogType,
+  LogEntryInvalidateStartType,
+  LogEntryDefineType,
+} from "../log/logStates";
+import type { SomeGraphData } from "./Graph";
 
 // // TODO-barret use log states
 // import logStates from "../log/logStates"
@@ -13,18 +25,36 @@ import console from "../utils/console";
 // TODO-barret make filterDatas and hoverDatas sub modules of subsetDatas or something
 
 class GraphAtStep {
-  constructor(log) {
+  log: LogType;
+  originalLog: LogType;
+  searchRegex: ?RegExp;
+  filterDatas: Array<SomeGraphData>;
+  hoverData: ?SomeGraphData;
+  stickyDatas: Array<SomeGraphData>;
+
+  finalGraph: any;
+  finalCyto: any;
+
+  steps: Array<number>;
+  asyncStarts: Array<number>;
+  asyncStops: Array<number>;
+  queueEmpties: Array<number>;
+  enterExitEmpties: Array<number>;
+  minStep: number;
+  maxStep: number;
+
+  constructor(log: LogType) {
     this.originalLog = log;
 
     // hoverInfo[key] = `HoverStatus`
     this.searchRegex = null;
-    this.filterDatas = null;
+    this.filterDatas = [];
     this.hoverData = null;
-    this.stickyDatas = null;
+    this.stickyDatas = [];
     // this.hoverDefault = "focused"
     // this.hoverInfo = {} // use `hoverKey`
 
-    this.filterMap = {};
+    // this.filterMap = {};
 
     this.log = log;
     this.updateSteps(log);
@@ -36,17 +66,17 @@ class GraphAtStep {
   get hasSearchRegex() {
     return this.searchRegex ? true : false;
   }
-  get hasFilterDatas() {
-    return this.filterDatas ? this.filterDatas.length > 0 : false;
-  }
-  get hasStickyDatas() {
-    return this.stickyDatas ? this.stickyDatas.length > 0 : false;
-  }
-  get hasHoverData() {
-    return this.hoverData ? true : false;
-  }
+  // function hasFilterDatas(): boolean %checks {
+  //   return this.filterDatas ? this.filterDatas.length > 0 : false;
+  // }
+  // get hasStickyDatas() {
+  //   return this.stickyDatas ? this.stickyDatas.length > 0 : false;
+  // }
+  // get hasHoverData() {
+  //   return this.hoverData ? true : false;
+  // }
 
-  updateSteps(log) {
+  updateSteps(log: LogType) {
     this.steps = [];
     this.asyncStarts = [];
     this.asyncStops = [];
@@ -55,11 +85,11 @@ class GraphAtStep {
     this.minStep = log[0].step;
     this.maxStep = log[log.length - 1].step;
 
-    let data, i;
+    let logItem, i, logEntry;
     let enterExitQueue = [];
     for (i = 0; i < log.length; i++) {
-      data = log[i];
-      switch (data.action) {
+      logItem = log[i];
+      switch (logItem.action) {
         case "enter":
           enterExitQueue.push(i);
           break;
@@ -67,27 +97,28 @@ class GraphAtStep {
           enterExitQueue.pop();
           if (enterExitQueue.length === 0) {
             // add an extra step to show that it is completed
-            this.enterExitEmpties.push(data.step + 1);
+            this.enterExitEmpties.push(logItem.step + 1);
           }
           break;
         case "asyncStart":
-          this.asyncStarts.push(data.step);
+          this.asyncStarts.push(logItem.step);
           break;
         case "asyncStop":
-          this.asyncStops.push(data.step);
+          this.asyncStops.push(logItem.step);
           break;
         case "queueEmpty":
-          this.queueEmpties.push(data.step);
+          this.queueEmpties.push(logItem.step);
           break;
       }
 
-      switch (data.action) {
+      switch (logItem.action) {
         case "invalidateStart":
-          if (data.ctxId === "other") {
+          logEntry = (logItem: LogEntryInvalidateStartType);
+          if (logEntry.ctxId === "other") {
             break;
           }
           // TODO-barret check if reactId is a reactive values. If so, skip, otherwise add
-          this.steps.push(data.step);
+          this.steps.push(logEntry.step);
           break;
         case "define":
         // TODO-barret only for reactive values keys
@@ -101,7 +132,7 @@ class GraphAtStep {
         case "queueEmpty":
           break;
         default:
-          this.steps.push(data.step);
+          this.steps.push(logItem.step);
           break;
       }
     }
@@ -117,9 +148,9 @@ class GraphAtStep {
     // }
   }
 
-  nextStep(k) {
+  nextStep(k: number): number {
     // if no filtering... get next step from step array
-    if (!this.hasFilterDatas) {
+    if (!hasLength(this.filterDatas)) {
       let nextStepPos = _.sortedIndex(this.steps, k);
       if (_.sortedIndexOf(this.steps, k) >= 0) {
         // go to the next step location
@@ -148,17 +179,20 @@ class GraphAtStep {
         case "dependsOn":
           // lazy eval decendents and ancestors
           if (_.isNil(decendents) || _.isNil(ancestors)) {
-            let filterReactIds = this.filterDatas.map(function(node) {
-              return node.reactId;
-            });
-            decendents = _.union(
-              filterReactIds,
-              graph.decendentNodeIdsForDatas(this.filterDatas)
-            );
-            ancestors = _.union(
-              filterReactIds,
-              graph.ancestorNodeIdsForDatas(this.filterDatas)
-            );
+            if (hasLength(this.filterDatas)) {
+              // if (this.filterDatas && this.filterDatas.length > 0) {
+              let filterReactIds = this.filterDatas.map(function(node) {
+                return node.reactId;
+              });
+              decendents = _.union(
+                filterReactIds,
+                graph.decendentNodeIdsForDatas(this.filterDatas)
+              );
+              ancestors = _.union(
+                filterReactIds,
+                graph.ancestorNodeIdsForDatas(this.filterDatas)
+              );
+            }
           }
           // reactId is target (ends at ancestors)
           if (_.indexOf(ancestors, logEntry.reactId) !== -1) {
@@ -181,7 +215,7 @@ class GraphAtStep {
 
         case "define":
         case "updateNodeLabel":
-          if (this.hasSearchRegex) {
+          if (this.searchRegex) {
             if (this.searchRegex.test(logEntry.label)) {
               // if there is a search regex and the value is defined
               return ret;
@@ -215,31 +249,31 @@ class GraphAtStep {
     // return the max step possible
     return this.steps[this.steps.length - 1];
   }
-  prevStep(k) {
+  prevStep(k: number): number {
     // if no filtering... get next step from step array
-    if (!this.hasFilterDatas) {
+    if (!hasLength(this.filterDatas)) {
       let prevStepPos = Math.max(_.sortedIndex(this.steps, k) - 1, 1);
       return this.steps[prevStepPos];
     }
 
     let graph = this.atStep(k);
-    let logEntry, i, ret;
+    let logEntry, logItem, i, ret;
 
     for (i = k - 1; i >= 0; i--) {
-      logEntry = this.log[i];
+      logItem = this.log[i];
 
       // skip if if it's not a valid step anyways...
-      if (_.sortedIndexOf(this.steps, logEntry.step) === -1) {
+      if (_.sortedIndexOf(this.steps, logItem.step) === -1) {
         continue;
       }
-      ret = logEntry.step;
-      switch (logEntry.action) {
+      ret = logItem.step;
+      switch (logItem.action) {
         case "dependsOn":
         case "dependsOnRemove":
           // check for both to and from (since it must exist beforehand)
           if (
-            _.has(graph.nodes, logEntry.reactId) &&
-            _.has(graph.nodes, logEntry.depOnReactId)
+            _.has(graph.nodes, logItem.reactId) &&
+            _.has(graph.nodes, logItem.depOnReactId)
           ) {
             return ret;
           }
@@ -255,12 +289,13 @@ class GraphAtStep {
         case "isolateExit":
         case "isolateInvalidateStart":
         case "isolateInvalidateEnd":
-          if (_.has(graph.nodes, logEntry.reactId)) {
+          if (_.has(graph.nodes, logItem.reactId)) {
             return ret;
           }
           break;
 
         case "define":
+          logEntry = (logItem: LogEntryDefineType);
           if (
             _.some(this.filterDatas, function(filterData) {
               return filterData.reactId === logEntry.reactId;
@@ -275,15 +310,15 @@ class GraphAtStep {
         case "queueEmpty":
           break;
         default:
-          console.error(logEntry);
-          throw "unknown logEntry action prev";
+          console.error(logItem);
+          throw "unknown logItem action prev";
       }
     }
 
     return this.steps[0];
   }
 
-  atStep(k) {
+  atStep(k: number): Graph {
     let kVal = Math.max(1, Math.min(k, this.log.length));
     let i, graph;
     // if (kVal >= this.cacheStep) {
@@ -296,19 +331,17 @@ class GraphAtStep {
     }
 
     // if any hover...
-    if (this.hasHoverData) {
-      if (graph.hasSomeData(this.hoverData)) {
-        graph.hoverStatusOnNodeIds(
-          graph.familyTreeNodeIds(this.hoverData),
-          "state",
-          HoverStatus.focused,
-          HoverStatus.notFocused
-        );
-        graph.highlightSelected(this.hoverData);
-      }
+    if (this.hoverData && graph.hasSomeData(this.hoverData)) {
+      graph.hoverStatusOnNodeIds(
+        graph.familyTreeNodeIds(this.hoverData),
+        "state",
+        HoverStatus.valFocused,
+        HoverStatus.valNotFocused
+      );
+      graph.highlightSelected(this.hoverData);
     }
     // if any sticky...
-    if (this.hasStickyDatas) {
+    if (hasLength(this.stickyDatas)) {
       if (
         _.some(
           this.stickyDatas.map(function(data) {
@@ -321,8 +354,8 @@ class GraphAtStep {
         graph.hoverStatusOnNodeIds(
           stickyTree,
           "sticky",
-          HoverStatus.sticky,
-          HoverStatus.notSticky
+          HoverStatus.valSticky,
+          HoverStatus.valNotSticky
         );
         this.stickyDatas.map(function(data) {
           graph.highlightSelected(data);
@@ -332,19 +365,22 @@ class GraphAtStep {
           graph.hoverStatusOnNodeIds(
             stickyTree,
             "state",
-            HoverStatus.focused,
-            HoverStatus.notFocused
+            HoverStatus.valFocused,
+            HoverStatus.valNotFocused
           );
         }
       }
     }
 
     // if any searching
-    if (this.hasSearchRegex) {
+    if (this.searchRegex) {
       let searchRegex = this.searchRegex;
-      let matchedNodes = _.filter(_.values(graph.nodes), function(node) {
-        return searchRegex.test(node.label);
-      });
+      let matchedNodes = _.filter(
+        (_.values(graph.nodes): Array<SomeGraphData>),
+        function(node: Node) {
+          return node && searchRegex.test(node.label);
+        }
+      );
 
       if (matchedNodes.length === 0) {
         // TODO-barret warn of no matches
@@ -359,7 +395,7 @@ class GraphAtStep {
       }
     } else {
       // if any filtering...
-      if (this.hasFilterDatas) {
+      if (hasLength(this.filterDatas)) {
         graph.filterGraphOnNodeIds(
           graph.familyTreeNodeIdsForDatas(this.filterDatas)
         );
@@ -393,25 +429,25 @@ class GraphAtStep {
     return true;
   }
 
-  updateHoverData(data) {
+  updateHoverData(data: SomeGraphData) {
     this.hoverData = data;
   }
   updateHoverDataReset() {
     this.hoverData = null;
   }
-  updateStickyDatas(dataArr) {
+  updateStickyDatas(dataArr: Array<SomeGraphData>) {
     this.stickyDatas = dataArr;
   }
   updateStickyDatasReset() {
-    this.stickyDatas = null;
+    this.stickyDatas = [];
   }
-  updateFilterDatas(dataArr) {
+  updateFilterDatas(dataArr: Array<SomeGraphData>) {
     this.filterDatas = dataArr;
   }
   updateFilterDatasReset() {
-    this.filterDatas = null;
+    this.filterDatas = [];
   }
-  updateSearchRegex(regex) {
+  updateSearchRegex(regex: ?RegExp) {
     this.searchRegex = regex;
   }
   updateSearchRegexReset() {
@@ -453,21 +489,21 @@ class GraphAtStep {
   //   // })
   // }
 
-  filterLogOnDatas(datas) {
+  filterLogOnDatas(datas: Array<SomeGraphData>) {
     let nodeMap = {};
     datas.map(function(data) {
       if (data instanceof Node) {
         nodeMap[data.reactId] = data;
       }
     });
-    let newLog = _.filter(this.originalLog, function(logEntry) {
-      switch (logEntry.action) {
+    let newLog = _.filter(this.originalLog, function(logItem) {
+      switch (logItem.action) {
         case "dependsOn":
         case "dependsOnRemove":
           // check for both to and from
           return (
-            _.has(nodeMap, logEntry.reactId) &&
-            _.has(nodeMap, logEntry.depOnReactId)
+            _.has(nodeMap, logItem.reactId) &&
+            _.has(nodeMap, logItem.depOnReactId)
           );
         case "define":
         case "updateNodeLabel":
@@ -481,15 +517,15 @@ class GraphAtStep {
         case "isolateExit":
         case "isolateInvalidateEnd":
           // check for reactId
-          return _.has(nodeMap, logEntry.reactId);
+          return _.has(nodeMap, logItem.reactId);
         case "queueEmpty":
         case "asyncStart":
         case "asyncStop":
           // always add
-          return _.has(nodeMap, logEntry.reactId);
+          return true;
         default:
-          console.error("logEntry.action: ", logEntry.action, logEntry);
-          throw logEntry;
+          console.error("logItem.action: ", logItem.action, logItem);
+          throw logItem;
       }
     });
     console.log("new Log: ", newLog);
@@ -541,7 +577,7 @@ class GraphAtStep {
   //   return newLog;
   // }
 
-  displayAtStep(k, cy) {
+  displayAtStep(k: number, cy: any) {
     let graph = this.atStep(k);
 
     cy.startBatch();
@@ -702,4 +738,8 @@ class GraphAtStep {
   }
 }
 
-export default GraphAtStep;
+function hasLength(x: Array<any>): boolean %checks {
+  return x && x.length > 0;
+}
+
+export { GraphAtStep, hasLength };

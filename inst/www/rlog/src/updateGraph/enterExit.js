@@ -2,7 +2,7 @@ import _ from "lodash";
 import console from "../utils/console";
 
 import rlog from "../rlog";
-import updateGraph from "./atTick";
+import { updateGraph } from "../updateGraph";
 
 let nextEnterExitEmpty = function() {
   let nextTick;
@@ -52,7 +52,7 @@ let prevEnterExitEmpty = function() {
   let val, i;
   // move to queue empty
   for (i = rlog.getGraph.enterExitEmpties.length - 1; i >= 0; i--) {
-    val = rlog.getGraph.enterExitEmpties[i];
+    val = rlog.getGraph.enterExitEmpties[i] - 1;
     if (prevTick > val) {
       updateGraph(val);
       return true;

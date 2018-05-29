@@ -1,28 +1,39 @@
-import rlog from "../rlog";
-import updateGraph from "../updateGraph/updateGraph";
+// @flow
 
-let fillContainer = null;
-let updateProgressBar = function() {
+import _ from "lodash";
+import $ from "jquery";
+
+import rlog from "../rlog";
+import { updateGraph } from "../updateGraph";
+
+let fillContainer: JQuery;
+let updateProgressBar = function(): void {
   fillContainer.width(rlog.curTick / rlog.log.length * 100 + "%");
 };
 
-let setContainers = function(fullContainer_, fillContainer_) {
+let setContainers = function(
+  fullContainer_: JQuery,
+  fillContainer_: JQuery
+): void {
   fillContainer = fillContainer_;
   fullContainer_.on("mousedown mousemove", updateFromProgressBar);
 };
 
-let updateFromProgressBar = function(e) {
+let updateFromProgressBar = function(e: BaseJQueryEventObject): void {
   // Make sure left mouse button is down.
   // Firefox is stupid; e.which is always 1 on mousemove events,
   // even when button is not down!! So read e.originalEvent.buttons.
-  if (typeof e.originalEvent.buttons !== "undefined") {
+  if (!_.has(e.originalEvent, "buttons")) {
+    // $FlowExpectError
     if (e.originalEvent.buttons !== 1) return;
-  } else if (e.which !== 1) {
+  }
+  // return if not left click
+  if (e.which !== 1) {
     return;
   }
+  let timeline = $(e.currentTarget)[0];
+  let pos = e.pageX; // pageX in pixels  // || e.originalEvent.pageX;
 
-  let timeline = e.currentTarget;
-  let pos = e.pageX || e.originalEvent.pageX; // pageX in pixels
   let width = timeline.offsetWidth; // width in pixels
   let targetStep = Math.max(Math.round(pos / width * rlog.log.length), 1);
   if (targetStep !== rlog.curTick) {
@@ -32,11 +43,11 @@ let updateFromProgressBar = function(e) {
 };
 
 let addTimelineTicks = function(
-  jqueryContainer,
-  className,
-  enterExits,
-  logLength
-) {
+  jqueryContainer: JQuery,
+  className: string,
+  enterExits: Array<number>,
+  logLength: number
+): void {
   enterExits.map(function(i) {
     jqueryContainer.append(
       `<div class="${className}" style="left: ${100 * i / logLength}%;"></div>`

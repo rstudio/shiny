@@ -1,39 +1,43 @@
-import rlog from "../rlog";
-import updateGraph from "./atTick";
+// @flow
 
-let hoverData = function(data) {
+import rlog from "../rlog";
+import { updateGraph } from "../updateGraph";
+
+import type { SomeGraphData } from "../graph/Graph";
+
+let hoverData = function(data: SomeGraphData): void {
   rlog.getGraph.updateHoverData(data);
   updateGraph();
 };
-let hoverDataReset = function() {
+let hoverDataReset = function(): void {
   rlog.getGraph.updateHoverDataReset();
   updateGraph();
 };
-let stickyDatas = function(data) {
-  rlog.getGraph.updateStickyDatas(data);
+let stickyDatas = function(datas: Array<SomeGraphData>): void {
+  rlog.getGraph.updateStickyDatas(datas);
   updateGraph();
 };
-let stickyDatasReset = function() {
+let stickyDatasReset = function(): void {
   rlog.getGraph.updateStickyDatasReset();
   updateGraph();
 };
-let filterDatas = function(data) {
-  rlog.getGraph.updateFilterDatas(data);
+let filterDatas = function(datas: Array<SomeGraphData>): void {
+  rlog.getGraph.updateFilterDatas(datas);
   updateGraph();
 };
-let filterDatasReset = function() {
+let filterDatasReset = function(): void {
   rlog.getGraph.updateFilterDatasReset();
   updateGraph();
 };
-let searchRegex = function(searchRegex) {
+let searchRegex = function(searchRegex: RegExp): void {
   rlog.getGraph.updateSearchRegex(searchRegex);
   updateGraph();
 };
-let searchRegexReset = function(searchRegex) {
+let searchRegexReset = function(): void {
   rlog.getGraph.updateSearchRegexReset();
   updateGraph();
 };
-let resetHoverStickyFilterData = function() {
+let resetHoverStickyFilterData = function(): void {
   rlog.getGraph.updateHoverDataReset();
   rlog.getGraph.updateStickyDatasReset();
   rlog.getGraph.updateFilterDatasReset();

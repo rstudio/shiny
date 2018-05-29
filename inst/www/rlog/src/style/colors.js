@@ -1,3 +1,5 @@
+// @flow
+
 let colors = {
   // regular colors
   regular: {

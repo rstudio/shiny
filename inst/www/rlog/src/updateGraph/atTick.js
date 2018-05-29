@@ -10,4 +10,4 @@ let atTick = function(nextTick = rlog.curTick) {
   logEntry.update();
 };
 
-export default atTick;
+export { atTick };

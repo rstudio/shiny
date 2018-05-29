@@ -1,17 +1,21 @@
+// @flow
+
 import $ from "jquery";
 import _ from "lodash";
 
 import console from "../utils/console";
 
-import * as updateGraph from "../updateGraph/updateGraph";
+import * as updateGraph from "../updateGraph";
+import { hasLength } from "../graph/GraphAtStep";
 import rlog from "../rlog";
 
-let onKeydown = function(e) {
+let onKeydown = function(e: JQueryInputEventObject): void {
   console.log("e: ", e);
-  if (e.target.id && e.target.id === "search") {
+  let target = $(e.target).get(0);
+  if (target.id && target.id === "search") {
     // is in search text box
     if (e.which === 27) {
-      $(e.target).blur();
+      target.blur();
     } else {
       // if (e.which == 13) { // enter
       // }
@@ -90,13 +94,13 @@ let onKeydown = function(e) {
     // remove hover
     // remove sticky
     // remove filter
-    if (rlog.getGraph.hasHoverData) {
+    if (rlog.getGraph.hoverData) {
       console.log("reset hover");
       updateGraph.hoverDataReset();
-    } else if (rlog.getGraph.hasStickyDatas) {
+    } else if (hasLength(rlog.getGraph.stickyDatas)) {
       console.log("reset sticky");
       updateGraph.stickyDatasReset();
-    } else if (rlog.getGraph.hasFilterDatas) {
+    } else if (hasLength(rlog.getGraph.filterDatas)) {
       console.log("reset filter");
       // must be in filter... so exit filter
       $("#search").val("");
@@ -106,14 +110,14 @@ let onKeydown = function(e) {
   }
   if (e.which === 38) {
     // arrow up
-    if (rlog.getGraph.hasFilterDatas) {
+    if (hasLength(rlog.getGraph.filterDatas)) {
       console.log("add layer!");
     }
     return;
   }
   if (e.which === 40) {
     // arrow down
-    if (rlog.getGraph.hasFilterDatas) {
+    if (hasLength(rlog.getGraph.filterDatas)) {
       console.log("remove layer!");
     }
     return;
@@ -128,8 +132,8 @@ let onKeydown = function(e) {
   }
 };
 
-let addKeydown = function(jqueryContainer) {
-  jqueryContainer.on("keydown", onKeydown);
+let addKeydown = function(jqueryContainer: JQuery) {
+  jqueryContainer.keydown(onKeydown);
 };
 
 export { addKeydown };

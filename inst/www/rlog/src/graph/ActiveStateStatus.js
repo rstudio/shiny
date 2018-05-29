@@ -1,6 +1,10 @@
+// @flow
+
 const stateOff = "off";
 const stateOn = "on";
 const stateFinished = "finished";
+
+type stateEnum = "off" | "on" | "finished";
 
 // pulse on being active at step k; isAtStep(k)
 // display engaged; isOn
@@ -8,14 +12,17 @@ const stateFinished = "finished";
 // display finished; isFinished
 // display none; isOff
 class ActiveStateStatus {
+  state: stateEnum;
+  activeStep: number;
+
   constructor() {
     this.state = stateOff; // "on", "finished", "off"
     this.activeStep = -1;
   }
-  setState(state) {
+  setState(state: stateEnum) {
     this.state = state;
   }
-  setActiveAtStep(step) {
+  setActiveAtStep(step: number) {
     this.toOn();
     this.activeStep = step;
   }
@@ -38,7 +45,7 @@ class ActiveStateStatus {
   get isActive() {
     return this.isOn && this.activeStep > 0;
   }
-  isActiveAtStep(k) {
+  isActiveAtStep(k: number) {
     return this.isActive && this.activeStep === k;
   }
 
@@ -53,4 +60,4 @@ class ActiveStateStatus {
   }
 }
 
-export default ActiveStateStatus;
+export { ActiveStateStatus };

@@ -1,35 +1,41 @@
+// @flow
+
 class HoverStatus {
-  constructor(state) {
-    this.sticky = HoverStatus.notSticky; // true / false
-    this.state = state || HoverStatus.focused; // "focused", "notFocused"
+  static valFocused = "focused";
+  static valNotFocused = "notFocused";
+  static valSticky = true;
+  static valNotSticky = false;
+  static valSelected = true;
+  static valNotSelected = false;
+
+  sticky: boolean; // eslint-disable-line no-undef
+  state: "focused" | "notFocused"; // eslint-disable-line no-undef
+  selected: boolean; // eslint-disable-line no-undef
+
+  constructor(state: "focused" | "notFocused" = HoverStatus.valFocused) {
+    this.sticky = HoverStatus.valNotSticky; // true / false
+    this.state = state; // "focused", "notFocused"
     this.selected = false;
   }
   isSticky() {
-    return this.sticky === HoverStatus.sticky;
+    return this.sticky === HoverStatus.valSticky;
   }
   toNotSticky() {
-    this.sticky = HoverStatus.notSticky;
+    this.sticky = HoverStatus.valNotSticky;
   }
   toSticky() {
-    this.sticky = HoverStatus.sticky;
+    this.sticky = HoverStatus.valSticky;
   }
 
   isFocused() {
-    return this.state === HoverStatus.focused;
+    return this.state === HoverStatus.valFocused;
   }
   toFocused() {
-    this.state = HoverStatus.focused;
+    this.state = HoverStatus.valFocused;
   }
   toNotFocused() {
-    this.state = HoverStatus.notFocused;
+    this.state = HoverStatus.valNotFocused;
   }
 }
 
-HoverStatus.focused = "focused";
-HoverStatus.notFocused = "notFocused";
-HoverStatus.sticky = true;
-HoverStatus.notSticky = false;
-HoverStatus.isSelected = true;
-HoverStatus.isNotSelected = false;
-
-export default HoverStatus;
+export { HoverStatus };

@@ -1,10 +1,12 @@
+// @flow
+
 import console from "../utils/console";
 import * as updateGraph from "./hoverStickyFilterSearch";
 
 // when str length < 3 do not search
 // when str length = 0, reset filter
 // when str length >= 3, set filter to all elements that match
-let withSearchString = function(str) {
+let withSearchString = function(str: string): void {
   // if less than three chars...
   if (str.length < 3) {
     if (str.length === 0) {

@@ -1,21 +1,29 @@
+// @flow
+
 import _ from "lodash";
 
 import console from "../utils/console";
 
 class StatusArr {
-  constructor() {
-    this.statusArr = [];
+  statusArr: Array<StatusEntry>;
+
+  constructor(statusArr_: StatusArr | Array<StatusEntry> = []) {
+    if (statusArr_ instanceof StatusArr) {
+      this.statusArr = _.cloneDeep(statusArr_.statusArr);
+    } else if (Array.isArray(statusArr_)) {
+      this.statusArr = statusArr_;
+    }
   }
-  add(obj) {
+  add(obj: StatusEntry) {
     return this.statusArr.push(obj);
   }
-  remove() {
+  remove(): StatusEntry {
     return this.statusArr.pop();
   }
-  last() {
+  last(): StatusEntry {
     return _.last(this.statusArr);
   }
-  containsStatus(status) {
+  containsStatus(status: string) {
     let arr = this.statusArr,
       n = arr.length;
     for (let i = 0; i < n; i++) {
@@ -26,7 +34,11 @@ class StatusArr {
     return false;
   }
 
-  static expect_prev_status(curStatus, prevStatus, expectedAction) {
+  static expect_prev_status(
+    curStatus: CurrentStatusEntry,
+    prevStatus: StatusEntry,
+    expectedAction: string
+  ) {
     let on_error = function(msg) {
       console.error("curStatus: ", curStatus);
       console.error("prevStatus: ", prevStatus);
@@ -43,4 +55,14 @@ class StatusArr {
   }
 }
 
-export default StatusArr;
+type StatusEntry = {
+  action: string,
+  ctxId: string,
+};
+type CurrentStatusEntry = {
+  action: string,
+  ctxId: string,
+};
+
+export { StatusArr };
+export type { CurrentStatusEntry, StatusEntry };

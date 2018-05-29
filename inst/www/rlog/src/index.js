@@ -12,7 +12,7 @@ import console from "./utils/console";
 
 import * as layoutKeydown from "./layout/keydown";
 
-import * as updateGraph from "./updateGraph/updateGraph";
+import * as updateGraph from "./updateGraph";
 
 import * as logEntry from "./layout/logEntry";
 import * as progressBar from "./layout/progressBar";

@@ -1,7 +1,23 @@
-import HoverStatus from "./HoverStatus";
+// @flow
+
+import type {
+  EdgeLikeType,
+  EdgeIdType,
+  EdgeHoverKeyType,
+  EdgeKeyType,
+  GraphNodeKeyType,
+} from "./Edge";
+import { HoverStatus } from "./HoverStatus";
 
 class GhostEdge {
-  constructor(data) {
+  reactId: string;
+  depOnReactId: string;
+  time: number;
+  hoverStatus: HoverStatus;
+  isGhost: boolean;
+  session: string;
+
+  constructor(data: EdgeLikeType) {
     if (typeof data.reactId === "undefined")
       throw "data.reactId not provided to new GhostEdge()";
     if (typeof data.depOnReactId === "undefined")
@@ -15,31 +31,31 @@ class GhostEdge {
     this.isGhost = true;
     this.hoverStatus = data.hoverStatus || new HoverStatus();
   }
-  get id() {
+  get id(): EdgeIdType {
     return `${this.reactId}_${this.depOnReactId}`.replace(/\$/g, "_");
   }
-  get source() {
+  get source(): GraphNodeKeyType {
     return this.depOnReactId.replace(/\$/g, "_");
   }
-  get target() {
+  get target(): GraphNodeKeyType {
     return this.reactId.replace(/\$/g, "_");
   }
-  get key() {
+  get key(): EdgeKeyType {
     return `${this.reactId} depends on ${this.depOnReactId}`;
   }
-  get hoverKey() {
+  get hoverKey(): EdgeHoverKeyType {
     return this.key;
   }
   get cytoStyle() {
     return {};
     // return graphStyles.ghostEdge.default
   }
-  get cytoClasses() {
+  get cytoClasses(): string {
     let classes = ["edgeGhost"];
     switch (this.hoverStatus.state) {
-      case HoverStatus.focused:
+      case HoverStatus.valFocused:
         break;
-      case HoverStatus.notFocused:
+      case HoverStatus.valNotFocused:
         if (this.hoverStatus.sticky) {
           classes.push("edgeGhostHoverNotFocusedButSticky");
         } else {
@@ -59,4 +75,4 @@ class GhostEdge {
   }
 }
 
-export default GhostEdge;
+export { GhostEdge };

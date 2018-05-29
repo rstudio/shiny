@@ -12,3 +12,4 @@ README.html
 _ignore/
 node_modules/
 temp_concat/
+yarn-error.log

@@ -6,17 +6,20 @@
     "clean": "grunt clean",
     "watch": "grunt watch",
     "reactLog-staged": "grunt reactLog-staged",
+    "flow-report": "flow-coverage-report -i 'inst/www/rlog/src/**/*.js' --threshold 66",
+    "flow-status": "flow status",
+    "flow-stop": "flow stop",
     "lintjs": "./tools/lintjs_file.sh",
     "rlog-fix": "./tools/clean_rlog_file.sh",
-    "rlog-fix-all": "npm run rlog-fix inst/www/rlog/src/**/*.js",
-    "rlog-lint-all": "npm run lintjs inst/www/rlog/src/**/*.js",
-    "rlog-build": "npm run rlog-lint-all && grunt webpack:reactLog",
+    "rlog-fix-all": "yarn run rlog-fix inst/www/rlog/src/**/*.js",
+    "rlog-lint-all": "yarn run lintjs inst/www/rlog/src/**/*.js",
+    "rlog-build": "yarn run rlog-lint-all && grunt webpack:reactLog",
     "rlog-build-only": "grunt webpack:reactLog",
-    "rlog-watch": "npm run rlog-lint-all && (onchange 'inst/www/rlog/src/**/*.js' --verbose --wait -- npm run lintjs {{changed}} &) && trap 'kill $(jobs -p)' EXIT && grunt webpackReactLogWatch webpack:reactLog"
+    "rlog-watch": "yarn run rlog-lint-all && (onchange 'inst/www/rlog/src/**/*.js' --verbose --wait -- yarn run lintjs {{changed}} &) && trap 'kill $(jobs -pr)' EXIT && grunt webpackReactLogWatch webpack:reactLog"
   },
   "lint-staged": {
     "inst/www/rlog/src/**/*.js": [
-      "npm run rlog-fix",
+      "yarn run rlog-fix",
       "git add"
     ]
   },
@@ -31,8 +34,12 @@
     "eslint": "^4.19.1",
     "eslint-plugin-flowtype": "^2.46.3",
     "eslint-stylish-mapped": "^1.0.0",
+    "flow": "^0.2.3",
+    "flow-bin": "0.73.0",
+    "flow-coverage-report": "^0.5.0",
+    "flow-typed": "^2.4.0",
     "grunt": "^1.0.2",
-    "grunt-babel": "^6.0.0",
+    "grunt-babel": "^7.0.0",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-concat": "^1.0.0",

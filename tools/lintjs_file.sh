@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 # should be used with `npm run lintjs FILE`
 
@@ -13,3 +13,6 @@ eslint --fix "$@"
 
 echo "prettier..."
 prettier --write "$@"
+
+echo "flow..."
+flow status

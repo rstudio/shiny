@@ -88,8 +88,8 @@ class GraphAtStep {
     this.asyncStops = [];
     this.queueEmpties = [];
     this.enterExitEmpties = [];
-    this.minStep = log[0].step;
-    this.maxStep = log[log.length - 1].step;
+    this.minStep = log.length > 0 ? log[0].step : -1;
+    this.maxStep = log.length > 0 ? log[log.length - 1].step : -1;
 
     let logItem, i;
     let enterExitQueue = [];

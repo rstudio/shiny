@@ -15,4 +15,4 @@ echo "prettier..."
 prettier --write "$@"
 
 echo "flow..."
-flow status
+# flow status

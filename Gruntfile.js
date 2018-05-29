@@ -91,29 +91,30 @@ module.exports = function(grunt) {
     },
 
     babel: {
-      options: {
-        sourceMap: true,
-        compact: false,
-        presets: ['es2015']
-      },
       shiny: {
         src: './temp_concat/shiny.js',
-        dest: instdir + '/www/shared/shiny.js'
+        dest: instdir + '/www/shared/shiny.js',
+        options: {
+          sourceMap: true,
+          compact: false,
+          presets: ['es2015']
+        },
       },
       reactLog: {
         src: instdir + "/www/rlog/src/index.js",
         dest: instdir + "/www/rlog/dest/reactLog.js",
         options: {
-          sourceMap: true,
-          compact: false,
-          presets: ["flow", "es2015"],
-          plugins: [
-            ["transform-es2015-modules-umd", {
-              "globals": {
-                "es6-promise": "Promise"
-              }
-            }]
-          ]
+          babelrc: true // use the local babelrc file for config
+          // sourceMap: true,
+          // compact: false,
+          // presets: ["flow", "es2015"],
+          // plugins: [
+          //   ["transform-es2015-modules-umd", {
+          //     // "globals": {
+          //     //   "es6-promise": "Promise"
+          //     // }
+          //   }]
+          // ]
         }
       }
     },
@@ -141,15 +142,16 @@ module.exports = function(grunt) {
         ],
         globals: ["strftime"]
       },
-      shiny: ['./temp_concat/shiny.js'],
-      reactLog: {
-        src: [instdir + "www/rlog/src/**/*.js"],
-        options: {
-          parser: "babel-eslint",
-          extends: ["plugin:flowtype/recommended"],
-          plugins: ["flowtype"]
-        }
-      }
+      shiny: ['./temp_concat/shiny.js']
+      // ,
+      // reactLog: {
+      //   src: [instdir + "www/rlog/src/**/*.js"],
+      //   options: {
+      //     parser: "babel-eslint",
+      //     extends: ["plugin:flowtype/recommended"],
+      //     plugins: ["flowtype"]
+      //   }
+      // }
 
     },
 
@@ -274,18 +276,20 @@ module.exports = function(grunt) {
               use: [
                 {
                   loader: "babel-loader",
-                  options: {
-                    sourceMap: true,
-                    compact: false,
-                    presets: ["flow", "es2015"],
-                    plugins: [
-                      ["transform-es2015-modules-umd", {
-                        "globals": {
-                          "es6-promise": "Promise"
-                        }
-                      }]
-                    ]
-                  }
+                  babelrc: true
+                  // ,
+                  // options: {
+                  //   sourceMap: true,
+                  //   compact: false,
+                  //   presets: ["flow", "es2015"],
+                  //   plugins: [
+                  //     ["transform-es2015-modules-umd", {
+                  //       "globals": {
+                  //         "es6-promise": "Promise"
+                  //       }
+                  //     }]
+                  //   ]
+                  // }
                 }
               ]
             }
@@ -333,17 +337,17 @@ module.exports = function(grunt) {
     'newer:uglify:ionrangeslider'
   ]);
 
-  grunt.registerTask("reactLog", [
-    "prettier:reactLog",
-    "prettier:reactLogCSS",
-    "eslint:reactLog",
-    "babel:reactLog"
-  ])
-  grunt.registerTask("reactLog-staged", [
-    "newer:prettier:reactLog",
-    "newer:prettier:reactLogCSS",
-    "newer:eslint:reactLog"
-  ])
+  // grunt.registerTask("reactLog", [
+  //   "prettier:reactLog",
+  //   "prettier:reactLogCSS",
+  //   "eslint:reactLog",
+  //   "babel:reactLog"
+  // ])
+  // grunt.registerTask("reactLog-staged", [
+  //   "newer:prettier:reactLog",
+  //   "newer:prettier:reactLogCSS",
+  //   "newer:eslint:reactLog"
+  // ])
 
   grunt.registerTask("default", "shiny")
 

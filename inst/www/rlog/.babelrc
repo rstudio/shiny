@@ -1,0 +1,9 @@
+{
+  "sourceMap": true,
+  "compact": false,
+  "presets": ["flow", "env"],
+  "plugins": [
+    "transform-class-properties",
+    "transform-es2015-modules-umd"
+  ]
+}

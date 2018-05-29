@@ -1,10 +1,11 @@
+// @flow
 /* global log */
 
 import $ from "jquery";
 
 import rlog from "./rlog";
 
-import GraphAtStep from "./graph/GraphAtStep";
+import { GraphAtStep } from "./graph/GraphAtStep";
 
 import * as cytoscapeInit from "./cyto/cytoscapeInit";
 
@@ -16,6 +17,8 @@ import * as updateGraph from "./updateGraph";
 
 import * as logEntry from "./layout/logEntry";
 import * as progressBar from "./layout/progressBar";
+
+import type { LogType } from "./log/logStates";
 
 import "./log/initStep";
 
@@ -50,11 +53,11 @@ import "./log/initStep";
 $(function() {
   console.log(rlog);
   window.barret = rlog;
-  window.barret.updateGraph = updateGraph;
-  rlog.log = log;
+
+  rlog.log = (window.log: LogType);
   rlog.cyto = cytoscapeInit.withContainer($("#cyto"));
 
-  rlog.getGraph = new GraphAtStep(log);
+  rlog.getGraph = new GraphAtStep(rlog.log);
   rlog.graph = rlog.getGraph.atStep(rlog.getGraph.maxStep);
   console.log(rlog.graph);
 
@@ -81,10 +84,15 @@ $(function() {
   logEntry.setContainer($("#instructions"));
 
   $("#search").on("input", function(e) {
-    updateGraph.withSearchString(e.target.value);
+    updateGraph.withSearchString($(e.target).val());
   });
 
-  layoutKeydown.addKeydown($(document.body));
+  {
+    let docBody = document.body;
+    if (docBody) {
+      layoutKeydown.addKeydown($(docBody));
+    }
+  }
 
   // start the graph at the first enter/exit or first empty queue
   // TODO-barret should start at nextEnterExitEmpty,

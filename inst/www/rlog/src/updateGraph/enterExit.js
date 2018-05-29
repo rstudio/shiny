@@ -1,14 +1,17 @@
+// @flow
+
 import _ from "lodash";
 import console from "../utils/console";
 
 import rlog from "../rlog";
 import { updateGraph } from "../updateGraph";
+import { hasLength } from "../graph/GraphAtStep";
 
 let nextEnterExitEmpty = function() {
   let nextTick;
   if (_.sortedIndexOf(rlog.getGraph.enterExitEmpties, rlog.curTick) !== -1) {
     // not at a cycle point
-    if (rlog.getGraph.hasFilterDatas) {
+    if (hasLength(rlog.getGraph.filterDatas)) {
       // if filtered, will go to previous step, then next step location
       nextTick = rlog.getGraph.nextStep(rlog.getGraph.prevStep(rlog.curTick));
     } else {
@@ -36,7 +39,7 @@ let prevEnterExitEmpty = function() {
   let prevTick;
   if (_.sortedIndexOf(rlog.getGraph.enterExitEmpties, rlog.curTick) !== -1) {
     // not at a cycle point
-    if (rlog.getGraph.hasFilterDatas) {
+    if (hasLength(rlog.getGraph.filterDatas)) {
       // if filtered, will go to next step, then prev step location
       prevTick = rlog.getGraph.prevStep(rlog.getGraph.nextStep(rlog.curTick));
     } else {

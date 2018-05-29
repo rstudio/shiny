@@ -4,6 +4,8 @@
 
 import _ from "lodash";
 
-_.map(window.log, function(entry, i: number) {
+import type { LogType } from "./logStates";
+
+_.map((window.log: LogType), function(entry, i: number) {
   entry.step = i;
 });

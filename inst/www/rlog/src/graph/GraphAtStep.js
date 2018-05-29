@@ -602,7 +602,6 @@ class GraphAtStep {
       //   // style: ,
       //   duration: cytoDur
       // });
-      rlog.barret = cy.$id(graphNode.id());
     });
     // update
     nodesLRB.both.map(function(cytoNode) {

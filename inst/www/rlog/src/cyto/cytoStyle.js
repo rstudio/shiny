@@ -1,6 +1,8 @@
+// @flow
+
 import colors from "../style/colors";
 
-let styleHelper = function(selector, style) {
+let styleHelper = function(selector: string, style: Object) {
   return {
     selector: selector,
     style: style,

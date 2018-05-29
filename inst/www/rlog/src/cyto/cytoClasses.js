@@ -1,3 +1,5 @@
+// @flow
+
 let classes = {
   node: "node",
   edge: "edge",

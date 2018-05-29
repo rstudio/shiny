@@ -39,16 +39,16 @@ class StatusArr {
     prevStatus: StatusEntry,
     expectedAction: string
   ) {
-    let on_error = function(msg) {
+    function onError(msg: string) {
       console.error("curStatus: ", curStatus);
       console.error("prevStatus: ", prevStatus);
       throw msg;
-    };
+    }
     if (prevStatus.action !== expectedAction) {
-      on_error(`prior node status does not have "${expectedAction}" status`);
+      onError(`prior node status does not have "${expectedAction}" status`);
     }
     if (prevStatus.ctxId !== curStatus.ctxId) {
-      on_error(
+      onError(
         `prior node "ctxId" status does not have the same "ctxId" status`
       );
     }

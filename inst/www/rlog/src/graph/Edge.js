@@ -56,6 +56,9 @@ class Edge {
   get inIsolate(): boolean {
     return this.status === "isolate";
   }
+  get cytoStyle(): Object {
+    return {};
+  }
   get cytoClasses(): string {
     let classes = [];
     if (this.inIsolate) classes.push("edgeIsolate");

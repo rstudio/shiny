@@ -18,6 +18,11 @@ import type {
   LogEntryDefineType,
 } from "../log/logStates";
 import type { SomeGraphData } from "./Graph";
+import type {
+  CytoscapeType,
+  CytoscapeNode,
+  CytoscapeEdge,
+} from "../cyto/cytoFlowType";
 
 // // TODO-barret use log states
 // import logStates from "../log/logStates"
@@ -85,7 +90,7 @@ class GraphAtStep {
     this.minStep = log[0].step;
     this.maxStep = log[log.length - 1].step;
 
-    let logItem, i, logEntry;
+    let logItem, i;
     let enterExitQueue = [];
     for (i = 0; i < log.length; i++) {
       logItem = log[i];
@@ -112,14 +117,15 @@ class GraphAtStep {
       }
 
       switch (logItem.action) {
-        case "invalidateStart":
-          logEntry = (logItem: LogEntryInvalidateStartType);
+        case "invalidateStart": {
+          let logEntry = (logItem: LogEntryInvalidateStartType);
           if (logEntry.ctxId === "other") {
             break;
           }
           // TODO-barret check if reactId is a reactive values. If so, skip, otherwise add
           this.steps.push(logEntry.step);
           break;
+        }
         case "define":
         // TODO-barret only for reactive values keys
         case "invalidateEnd":
@@ -577,7 +583,7 @@ class GraphAtStep {
   //   return newLog;
   // }
 
-  displayAtStep(k: number, cy: any) {
+  displayAtStep(k: number, cy: CytoscapeType) {
     let graph = this.atStep(k);
 
     cy.startBatch();
@@ -592,7 +598,7 @@ class GraphAtStep {
     let onLayoutReady = [];
 
     // enter
-    nodesLRB.right.map(function(graphNode) {
+    nodesLRB.right.map(function(graphNode: CytoscapeNode) {
       let graphNodeData = graphNode.data();
       cy
         .add(graphNode)
@@ -604,8 +610,8 @@ class GraphAtStep {
       // });
     });
     // update
-    nodesLRB.both.map(function(cytoNode) {
-      let cyNode = cy.$id(cytoNode.id());
+    nodesLRB.both.map(function(cytoNode: CytoscapeNode) {
+      let cyNode = (cy.$id(cytoNode.id()): CytoscapeNode);
 
       let graphNode = graphNodes.$id(cytoNode.id());
       let graphNodeData = graphNode.data();

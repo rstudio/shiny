@@ -1,9 +1,12 @@
+// @flow
 import $ from "jquery";
 import _ from "lodash";
 import console from "../utils/console";
 
 import rlog from "../rlog";
 import * as updateGraph from "../updateGraph";
+
+import type { CytoscapeType, CytoEvent } from "./cytoFlowType";
 
 // cytoFamilySuccPred = function(ele, addExtraLayer = true) {
 //   var familyEles = cyto.collection();
@@ -41,8 +44,8 @@ import * as updateGraph from "../updateGraph";
 //   return familyEles;
 // }
 
-let onMouseOver = function(cyto) {
-  return function(evt) {
+let onMouseOver = function(cyto: CytoscapeType) {
+  return function(evt: CytoEvent) {
     let target = evt.target;
     if (target === cyto) return;
 
@@ -67,10 +70,10 @@ let onMouseOver = function(cyto) {
   };
 };
 
-let onClick = function(cyto) {
+let onClick = function(cyto: CytoscapeType) {
   let cytoClickedBefore, cytoClickedTimeout;
 
-  return function(evt) {
+  return function(evt: CytoEvent) {
     // remove focus on search
     $("#search").blur();
 
@@ -107,8 +110,9 @@ let onClick = function(cyto) {
   };
 };
 
-let onDblClick = function(cyto) {
-  return function(evt, originalEvt) {
+let onDblClick = function(cyto: CytoscapeType) {
+  return function(evt: CytoEvent) {
+    //, originalEvt: Event) {
     console.log("dbl click!!");
     // console.log("dbl click!!", evt, originalEvt);
     let target = evt.target;
@@ -141,7 +145,7 @@ let onDblClick = function(cyto) {
   };
 };
 
-let addOnMethods = function(cyto) {
+let addOnMethods = function(cyto: CytoscapeType) {
   cyto.on("mouseover", onMouseOver(cyto));
 
   cyto.on("click", onClick(cyto));

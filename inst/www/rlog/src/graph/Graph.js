@@ -7,9 +7,11 @@ import { Node } from "./Node";
 import { Edge } from "./Edge";
 import { GhostEdge } from "./GhostEdge";
 import { HoverStatus } from "./HoverStatus";
-import { StatusArr } from "./StatusArr";
+import { StatusArr, expectPrevStatus } from "./StatusArr";
 
 import console from "../utils/console";
+
+import type { CytoscapeType, CytoData } from "../cyto/cytoFlowType";
 
 import type {
   LogType,
@@ -55,24 +57,25 @@ class Graph {
   }
 
   get cytoGraph() {
-    let getCytoDatas = function(x) {
-      return _.values(x).map(item => item.cytoData);
-    };
-    let nodes = getCytoDatas(this.nodes);
+    let nodes = mapValues(this.nodes).map(item => item.cytoData);
 
     let ghostEdgeMap = new Map(this.edgesUnique.entries());
-    let edges = _.values(this.edges).map(edge => {
+    let edges = mapValues(this.edges).map((edge: Edge) => {
       // remove matching unique/ghost edges
       if (ghostEdgeMap.has(edge.ghostKey)) {
         ghostEdgeMap.delete(edge.ghostKey);
       }
       return edge.cytoData;
     });
-    let ghostEdges = getCytoDatas(ghostEdgeMap);
+    let ghostEdges = mapValues(ghostEdgeMap).map(item => item.cytoData);
 
-    let cyto = cytoscape();
+    let cyto: CytoscapeType = cytoscape();
+
+    // $FlowExpectError
     cyto.add(nodes);
+    // $FlowExpectError
     cyto.add(edges);
+    // $FlowExpectError
     cyto.add(ghostEdges);
     return cyto;
   }
@@ -89,14 +92,18 @@ class Graph {
 
       let reactId = data.reactId;
       let depOnReactId = data.depOnReactId;
-      return _.some([this.edges, this.edgesUnique], function(edgeGroup) {
-        return _.some(_.values(edgeGroup), function(edge) {
+      let hasMatchingEdge = function(edges) {
+        return _.some(edges, function(edge) {
           if (edge.reactId === reactId && edge.depOnReactId === depOnReactId) {
             return true;
           }
           return false;
         });
-      });
+      };
+      return (
+        hasMatchingEdge(mapValues(this.edges)) ||
+        hasMatchingEdge(mapValues(this.edgesUnique))
+      );
     } else {
       console.error(data);
       throw "unsupported data type";
@@ -128,8 +135,8 @@ class Graph {
           edge.hoverStatus.selected = HoverStatus.valSelected;
         }
       };
-      _.values(this.edgesUnique).map(selectMatchingEdges);
-      _.values(this.edges).map(selectMatchingEdges);
+      mapValues(this.edgesUnique).map(selectMatchingEdges);
+      mapValues(this.edges).map(selectMatchingEdges);
       return;
     }
     return;
@@ -173,7 +180,7 @@ class Graph {
       let reactId;
       reactId = this.reactIdFromData(data, true);
       if (!reactId) return [];
-      return _.filter(_.values(this.edgesUnique), function(edge) {
+      return _.filter(mapValues(this.edgesUnique), function(edge) {
         // if the target is the reactId
         return edge.reactId === reactId;
       }).map(function(edge) {
@@ -192,7 +199,7 @@ class Graph {
     } else {
       let reactId = this.reactIdFromData(data, false);
       if (!reactId) return [];
-      return _.filter(_.values(this.edgesUnique), function(edge) {
+      return _.filter(mapValues(this.edgesUnique), function(edge) {
         // if the source is the reactId
         return edge.depOnReactId === reactId;
       }).map(function(edge) {
@@ -229,17 +236,17 @@ class Graph {
     let reactId = this.reactIdFromData(data, false);
     if (!reactId) return [];
     let originalReactId = reactId;
-    let seenMap = {};
+    let seenMap = new Set();
     let reactIdArr = [reactId];
     while (reactIdArr.length > 0) {
       reactId = reactIdArr.pop();
-      if (!_.has(seenMap, reactId)) {
+      if (!seenMap.has(reactId)) {
         reactIdArr = reactIdArr.concat(this.childrenNodeIds(reactId));
-        seenMap[reactId] = true;
+        seenMap.add(reactId);
       }
     }
-    delete seenMap[originalReactId];
-    return _.keys(seenMap).sort();
+    seenMap.delete(originalReactId);
+    return Array.from(seenMap).sort();
   }
 
   // all filtering can be done with only node reactIds
@@ -307,32 +314,35 @@ class Graph {
       | typeof HoverStatus.valNotSticky
       | typeof HoverStatus.valNotFocused
   ) {
-    let nodeMap = {};
-    nodeIds.map(function(nodeId) {
-      nodeMap[nodeId] = true;
-    });
+    let nodeSet = new Set(nodeIds);
 
     // highlight nodes
-    _.map(this.nodes, function(node) {
-      if (_.has(nodeMap, node.reactId)) {
+    mapValues(this.nodes).map(function(node) {
+      if (nodeSet.has(node.reactId)) {
+        // $FlowExpectError
         node.hoverStatus[hoverKey] = onStatus;
       } else {
+        // $FlowExpectError
         node.hoverStatus[hoverKey] = offStatus;
       }
     });
     // highlight edges
-    _.map(this.edges, function(edge) {
-      if (_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId)) {
+    mapValues(this.edges).map(function(edge) {
+      if (nodeSet.has(edge.reactId) && nodeSet.has(edge.depOnReactId)) {
+        // $FlowExpectError
         edge.hoverStatus[hoverKey] = onStatus;
       } else {
+        // $FlowExpectError
         edge.hoverStatus[hoverKey] = offStatus;
       }
     });
     // highlight unique edges
-    _.map(this.edgesUnique, function(edge) {
-      if (_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId)) {
+    mapValues(this.edgesUnique).map(function(edge) {
+      if (nodeSet.has(edge.reactId) && nodeSet.has(edge.depOnReactId)) {
+        // $FlowExpectError
         edge.hoverStatus[hoverKey] = onStatus;
       } else {
+        // $FlowExpectError
         edge.hoverStatus[hoverKey] = offStatus;
       }
     });
@@ -341,32 +351,24 @@ class Graph {
   }
 
   filterGraphOnNodeIds(nodeIds: Array<ReactIdType>) {
-    let nodeMap = {};
-    nodeIds.map(function(nodeId) {
-      nodeMap[nodeId] = true;
-    });
+    let nodeSet = new Set(nodeIds);
 
-    let self = this;
     // prune nodes
-    _.map(this.nodes, function(node, key) {
-      if (!_.has(nodeMap, node.reactId)) {
-        self.nodes.delete(key);
+    this.nodes.forEach((node, key) => {
+      if (!nodeSet.has(node.reactId)) {
+        this.nodes.delete(key);
       }
     });
     // prune edges
-    _.map(this.edges, function(edge, key) {
-      if (
-        !(_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId))
-      ) {
-        self.edges.delete(key);
+    this.edges.forEach((edge, key) => {
+      if (!(nodeSet.has(edge.reactId) && nodeSet.has(edge.depOnReactId))) {
+        this.edges.delete(key);
       }
     });
     // prune unique edges
-    _.map(this.edgesUnique, function(edge, key) {
-      if (
-        !(_.has(nodeMap, edge.reactId) && _.has(nodeMap, edge.depOnReactId))
-      ) {
-        self.edgesUnique.delete(key);
+    this.edgesUnique.forEach((edge, key) => {
+      if (!(nodeSet.has(edge.reactId) && nodeSet.has(edge.depOnReactId))) {
+        this.edgesUnique.delete(key);
       }
     });
 
@@ -385,8 +387,8 @@ class Graph {
     switch (data.action) {
       // {"action": "define", "reactId": "r3", "label": "plotObj", "type": "observable", "session": "fa3c747a6121aec5baa682cc3970b811", "time": 1524581676.5841},
       case "define": {
-        let logEntry = ((data: LogEntryDefineType): Object);
-        this.nodes.set(data.reactId, new Node(logEntry));
+        let logEntry = (data: LogEntryDefineType);
+        this.nodes.set(data.reactId, new Node((logEntry: Object)));
         break;
       }
 
@@ -407,7 +409,7 @@ class Graph {
         break;
 
       case "invalidateStart": {
-        let logEntry = ((data: LogEntryInvalidateStartType): Object);
+        let logEntry = (data: LogEntryInvalidateStartType);
         node = this.nodes.get(logEntry.reactId);
         lastNodeId = _.last(this.activeInvalidateEnter);
         if (lastNodeId) {
@@ -424,12 +426,12 @@ class Graph {
               node.invalidateStatus.setActiveAtStep(logEntry.step);
               break;
           }
-          node.statusAdd(logEntry);
+          node.statusAdd((logEntry: Object));
         }
         break;
       }
       case "enter": {
-        let logEntry = ((data: LogEntryEnterType): Object);
+        let logEntry = (data: LogEntryEnterType);
         lastNodeId = _.last(this.activeNodeEnter);
         if (lastNodeId) {
           let lastNode = this.nodes.get(lastNodeId);
@@ -446,19 +448,19 @@ class Graph {
             case "observable":
               node.invalidateStatus.reset();
           }
-          node.statusAdd(logEntry);
+          node.statusAdd((logEntry: Object));
         }
         break;
       }
 
       case "isolateInvalidateStart":
       case "isolateEnter": {
-        let logEntry = ((data:
+        let logEntry = (data:
           | LogEntryIsolateInvalidateStartType
-          | LogEntryIsolateEnterType): Object);
+          | LogEntryIsolateEnterType);
         node = this.nodes.get(logEntry.reactId);
         if (node) {
-          node.statusAdd(logEntry);
+          node.statusAdd((logEntry: Object));
         }
         break;
       }
@@ -524,12 +526,12 @@ class Graph {
             invalidateEnd: "invalidateStart",
             isolateInvalidateEnd: "isolateInvalidateStart",
           }[data.action];
-          let logEntry = ((data:
+          let logEntry = (data:
             | LogEntryExitType
             | LogEntryIsolateExitType
             | LogEntryInvalidateEndType
-            | LogEntryIsolateInvalidateEndType): Object);
-          StatusArr.expect_prev_status(logEntry, prevData, expectedAction);
+            | LogEntryIsolateInvalidateEndType);
+          expectPrevStatus((logEntry: Object), prevData, expectedAction);
           node.statusRemove();
         }
         break;
@@ -582,6 +584,13 @@ class Graph {
         throw data;
     }
   }
+}
+
+function mapValues<T>(x: Map<string, T>): Array<T> {
+  return Array.from(x.values());
+}
+function mapKeys<T>(x: Map<string, T>): Array<string> {
+  return Array.from(x.keys());
 }
 
 function isEdgeLike(data: any): boolean %checks {

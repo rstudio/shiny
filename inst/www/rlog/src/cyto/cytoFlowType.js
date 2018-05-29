@@ -5,6 +5,11 @@ import type { SomeGraphData } from "../graph/Graph";
 type CytoOnEvent = (method: string, callback: (evt: CytoEvent) => any) => void;
 // type CytoOnDblClick = (method: string, callback: (evt: CytoEvent, originalEvt: Event) => any) => void
 
+type CytoData = {
+  group: string,
+  data: SomeGraphData,
+};
+
 type CytoscapeLRB = {
   left: CytoscapeElements,
   right: CytoscapeElements,
@@ -38,10 +43,12 @@ type CytoscapeNode = {
 };
 type CytoscapeElement = CytoscapeNode | CytoscapeEdge;
 type CytoscapeElements = {
+  $: (identifier?: string) => CytoscapeElements,
+  $id: (id: string) => CytoscapeElement,
   length: number,
   data: (info?: SomeGraphData) => any,
   map: ((element: CytoscapeElement) => void) => void,
-  diff: (Array<CytoscapeElement>) => CytoscapeLRB,
+  diff: (other: CytoscapeElements) => CytoscapeLRB,
   sort: (
     (a: CytoscapeElement, b: CytoscapeElement) => number
   ) => CytoscapeElements,
@@ -74,4 +81,16 @@ type CytoEventTarget = EventTarget & {
   trigger: (string, CytoEvent) => any,
 };
 
-export type { CytoscapeType, CytoEvent, CytoscapeNode, CytoscapeEdge };
+type CytoscapeLibrary = {
+  use: (lib: any) => void,
+};
+
+export type {
+  CytoscapeType,
+  CytoEvent,
+  CytoscapeNode,
+  CytoscapeEdge,
+  CytoData,
+  CytoscapeElement,
+  CytoscapeLibrary,
+};

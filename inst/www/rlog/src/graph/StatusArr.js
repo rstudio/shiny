@@ -33,26 +33,6 @@ class StatusArr {
     }
     return false;
   }
-
-  static expect_prev_status(
-    curStatus: CurrentStatusEntry,
-    prevStatus: StatusEntry,
-    expectedAction: string
-  ) {
-    function onError(msg: string) {
-      console.error("curStatus: ", curStatus);
-      console.error("prevStatus: ", prevStatus);
-      throw msg;
-    }
-    if (prevStatus.action !== expectedAction) {
-      onError(`prior node status does not have "${expectedAction}" status`);
-    }
-    if (prevStatus.ctxId !== curStatus.ctxId) {
-      onError(
-        `prior node "ctxId" status does not have the same "ctxId" status`
-      );
-    }
-  }
 }
 
 type StatusEntry = {
@@ -64,5 +44,23 @@ type CurrentStatusEntry = {
   ctxId: string,
 };
 
-export { StatusArr };
+let expectPrevStatus = function(
+  curStatus: CurrentStatusEntry,
+  prevStatus: StatusEntry,
+  expectedAction: string
+) {
+  function onError(msg: string) {
+    console.error("curStatus: ", curStatus);
+    console.error("prevStatus: ", prevStatus);
+    throw msg;
+  }
+  if (prevStatus.action !== expectedAction) {
+    onError(`prior node status does not have "${expectedAction}" status`);
+  }
+  if (prevStatus.ctxId !== curStatus.ctxId) {
+    onError(`prior node "ctxId" status does not have the same "ctxId" status`);
+  }
+};
+
+export { StatusArr, expectPrevStatus };
 export type { CurrentStatusEntry, StatusEntry };

@@ -10,12 +10,13 @@ import rlog from "../rlog";
 import layoutOptions from "../cyto/layoutOptions";
 
 import { Node } from "./Node";
-// import { Edge } from "./Edge";
+import { Edge } from "./Edge";
 
 import type {
   LogType,
   LogEntryInvalidateStartType,
   LogEntryDefineType,
+  ReactIdType,
 } from "../log/logStates";
 import type { SomeGraphData } from "./Graph";
 import type {
@@ -496,10 +497,10 @@ class GraphAtStep {
   // }
 
   filterLogOnDatas(datas: Array<SomeGraphData>) {
-    let nodeMap = {};
+    let nodeMap: Map<ReactIdType, Node> = new Map();
     datas.map(function(data) {
       if (data instanceof Node) {
-        nodeMap[data.reactId] = data;
+        nodeMap.set(data.reactId, data);
       }
     });
     let newLog = _.filter(this.originalLog, function(logItem) {
@@ -508,8 +509,7 @@ class GraphAtStep {
         case "dependsOnRemove":
           // check for both to and from
           return (
-            _.has(nodeMap, logItem.reactId) &&
-            _.has(nodeMap, logItem.depOnReactId)
+            nodeMap.has(logItem.reactId) && nodeMap.has(logItem.depOnReactId)
           );
         case "define":
         case "updateNodeLabel":
@@ -523,7 +523,7 @@ class GraphAtStep {
         case "isolateExit":
         case "isolateInvalidateEnd":
           // check for reactId
-          return _.has(nodeMap, logItem.reactId);
+          return nodeMap.has(logItem.reactId);
         case "queueEmpty":
         case "asyncStart":
         case "asyncStop":
@@ -599,7 +599,7 @@ class GraphAtStep {
 
     // enter
     nodesLRB.right.map(function(graphNode: CytoscapeNode) {
-      let graphNodeData = graphNode.data();
+      let graphNodeData = (graphNode.data(): Node);
       cy
         .add(graphNode)
         .classes(graphNodeData.cytoClasses)
@@ -613,8 +613,8 @@ class GraphAtStep {
     nodesLRB.both.map(function(cytoNode: CytoscapeNode) {
       let cyNode = (cy.$id(cytoNode.id()): CytoscapeNode);
 
-      let graphNode = graphNodes.$id(cytoNode.id());
-      let graphNodeData = graphNode.data();
+      let graphNode = (graphNodes.$id(cytoNode.id()): CytoscapeNode);
+      let graphNodeData = (graphNode.data(): Node);
       let graphClasses = graphNodeData.cytoClasses;
 
       cyNode
@@ -661,8 +661,8 @@ class GraphAtStep {
     let graphEdges = graphCyto.edges();
     let edgesLRB = cyEdges.diff(graphEdges);
     // enter
-    edgesLRB.right.map(function(graphEdge) {
-      let graphEdgeData = graphEdge.data();
+    edgesLRB.right.map(function(graphEdge: CytoscapeEdge) {
+      let graphEdgeData = (graphEdge.data(): Edge);
       cy
         .add(graphEdge)
         .classes(graphEdgeData.cytoClasses)

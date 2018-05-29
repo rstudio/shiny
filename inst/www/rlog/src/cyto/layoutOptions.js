@@ -3,7 +3,9 @@
 import cytoscape from "cytoscape";
 import dagre from "cytoscape-dagre";
 
-cytoscape.use(dagre);
+import type { CytoscapeElement, CytoscapeLibrary } from "./cytoFlowType";
+
+(cytoscape: CytoscapeLibrary).use(dagre);
 
 let layoutOptions = {
   name: "dagre",
@@ -14,7 +16,7 @@ let layoutOptions = {
   ranker: "longest-path", // Type of algorithm to assign a rank to each node in the input graph. Possible values: "network-simplex", "tight-tree" or "longest-path"
   nodeDimensionsIncludeLabels: true, // whether labels should be included in determining the space used by a node
   animate: true, // whether to transition the node positions
-  animateFilter: function(node: any, i: number) {
+  animateFilter: function(node: CytoscapeElement, i: number) {
     return true;
   }, // whether to animate specific nodes when animation is on; non-animated nodes immediately go to their final positions
   animationDuration: 1000, // duration of animation in ms if enabled

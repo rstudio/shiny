@@ -325,7 +325,7 @@ RLog <- R6Class(
       ))
     },
     freezeReactiveKey = function(reactId, key, domain)
-      freeze(keyIdStr(reactId, key), domain),
+      freezeReactiveVal(keyIdStr(reactId, key), domain),
 
     thawReactiveVal = function(reactId, domain) {
       msg$log("thaw: ", msg$reactStr(reactId))
@@ -335,7 +335,7 @@ RLog <- R6Class(
       ))
     },
     thawReactiveKey = function(reactId, key, domain)
-      thaw(keyIdStr(reactId, key), domain)
+      thawReactiveVal(keyIdStr(reactId, key), domain)
   )
 )
 

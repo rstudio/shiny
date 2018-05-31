@@ -74,6 +74,14 @@ renderReactLog <- function(sessionToken = NULL, time = TRUE) {
   html <- sub("__TIME__", paste0("\"", time, "\""), html, fixed=TRUE)
   file <- tempfile(fileext = ".html")
   writeLines(html, file)
+
+  # copy js and style files
+  file.copy(
+    system.file("www/rlog", package="shiny"),
+    dirname(file),
+    recursive = TRUE
+  )
+
   return(file)
 }
 

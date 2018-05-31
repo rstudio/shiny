@@ -1,6 +1,6 @@
 // @flow
 
-import rlog from "../rlog";
+import { rlog } from "../rlog";
 
 import * as logEntry from "../layout/logEntry";
 import * as progressBar from "../layout/progressBar";

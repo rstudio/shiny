@@ -1,6 +1,6 @@
 // @flow
 
-import rlog from "../rlog";
+import { rlog } from "../rlog";
 import { updateGraph } from "../updateGraph";
 
 let nextQueueEmpty = function(): boolean {

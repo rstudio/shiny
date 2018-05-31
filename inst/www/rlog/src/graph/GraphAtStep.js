@@ -3,10 +3,11 @@
 import _ from "lodash";
 import console from "../utils/console";
 
+import { LogStates } from "../log/logStates";
 import { HoverStatus } from "./HoverStatus";
 import { Graph } from "./Graph";
 
-import rlog from "../rlog";
+import { rlog } from "../rlog";
 import layoutOptions from "../cyto/layoutOptions";
 
 import { Node } from "./Node";
@@ -96,29 +97,29 @@ class GraphAtStep {
     for (i = 0; i < log.length; i++) {
       logItem = log[i];
       switch (logItem.action) {
-        case "enter":
+        case LogStates.enter:
           enterExitQueue.push(i);
           break;
-        case "exit":
+        case LogStates.exit:
           enterExitQueue.pop();
           if (enterExitQueue.length === 0) {
             // add an extra step to show that it is completed
             this.enterExitEmpties.push(logItem.step + 1);
           }
           break;
-        case "asyncStart":
+        case LogStates.asyncStart:
           this.asyncStarts.push(logItem.step);
           break;
-        case "asyncStop":
+        case LogStates.asyncStop:
           this.asyncStops.push(logItem.step);
           break;
-        case "queueEmpty":
+        case LogStates.queueEmpty:
           this.queueEmpties.push(logItem.step);
           break;
       }
 
       switch (logItem.action) {
-        case "invalidateStart": {
+        case LogStates.invalidateStart: {
           let logEntry = (logItem: LogEntryInvalidateStartType);
           if (logEntry.ctxId === "other") {
             break;
@@ -127,16 +128,16 @@ class GraphAtStep {
           this.steps.push(logEntry.step);
           break;
         }
-        case "define":
+        case LogStates.define:
         // TODO-barret only for reactive values keys
-        case "invalidateEnd":
-        case "isolateInvalidateStart":
-        case "isolateInvalidateEnd":
+        case LogStates.invalidateEnd:
+        case LogStates.isolateInvalidateStart:
+        case LogStates.isolateInvalidateEnd:
         // case "isolateEnter":
         // case "isolateExit":
-        case "asyncStart":
-        case "asyncStop":
-        case "queueEmpty":
+        case LogStates.asyncStart:
+        case LogStates.asyncStop:
+        case LogStates.queueEmpty:
           break;
         default:
           this.steps.push(logItem.step);
@@ -183,7 +184,7 @@ class GraphAtStep {
       }
       ret = logEntry.step;
       switch (logEntry.action) {
-        case "dependsOn":
+        case LogStates.dependsOn:
           // lazy eval decendents and ancestors
           if (_.isNil(decendents) || _.isNil(ancestors)) {
             if (hasLength(this.filterDatas)) {
@@ -210,18 +211,18 @@ class GraphAtStep {
             return ret;
           }
           break;
-        case "dependsOnRemove":
+        case LogStates.dependsOnRemove:
           // check for both to and from (since it must exist beforehand)
           if (
-            _.has(graph.nodes, logEntry.reactId) &&
-            _.has(graph.nodes, logEntry.depOnReactId)
+            graph.nodes.has(logEntry.reactId) &&
+            graph.nodes.has(logEntry.depOnReactId)
           ) {
             return ret;
           }
           break;
 
-        case "define":
-        case "updateNodeLabel":
+        case LogStates.define:
+        case LogStates.updateNodeLabel:
           if (this.searchRegex) {
             if (this.searchRegex.test(logEntry.label)) {
               // if there is a search regex and the value is defined
@@ -229,27 +230,29 @@ class GraphAtStep {
             }
           }
           break;
-        case "valueChange":
-        case "enter":
-        case "exit":
-        case "invalidateStart":
-        case "invalidateEnd":
-        case "isolateEnter":
-        case "isolateExit":
-        case "isolateInvalidateStart":
-        case "isolateInvalidateEnd":
-          if (_.has(graph.nodes, logEntry.reactId)) {
+        case LogStates.freeze:
+        case LogStates.thaw:
+        case LogStates.valueChange:
+        case LogStates.enter:
+        case LogStates.exit:
+        case LogStates.invalidateStart:
+        case LogStates.invalidateEnd:
+        case LogStates.isolateEnter:
+        case LogStates.isolateExit:
+        case LogStates.isolateInvalidateStart:
+        case LogStates.isolateInvalidateEnd:
+          if (graph.nodes.has(logEntry.reactId)) {
             return ret;
           }
           break;
 
-        case "asyncStart":
-        case "asyncStop":
-        case "queueEmpty":
+        case LogStates.asyncStart:
+        case LogStates.asyncStop:
+        case LogStates.queueEmpty:
           break;
         default:
           console.error(logEntry);
-          throw "unknown logEntry action next";
+          throw "unknown logEntry action in 'next'";
       }
     }
 
@@ -275,33 +278,35 @@ class GraphAtStep {
       }
       ret = logItem.step;
       switch (logItem.action) {
-        case "dependsOn":
-        case "dependsOnRemove":
+        case LogStates.dependsOn:
+        case LogStates.dependsOnRemove:
           // check for both to and from (since it must exist beforehand)
           if (
-            _.has(graph.nodes, logItem.reactId) &&
-            _.has(graph.nodes, logItem.depOnReactId)
+            graph.nodes.has(logItem.reactId) &&
+            graph.nodes.has(logItem.depOnReactId)
           ) {
             return ret;
           }
           break;
 
-        case "updateNodeLabel":
-        case "valueChange":
-        case "enter":
-        case "exit":
-        case "invalidateStart":
-        case "invalidateEnd":
-        case "isolateEnter":
-        case "isolateExit":
-        case "isolateInvalidateStart":
-        case "isolateInvalidateEnd":
-          if (_.has(graph.nodes, logItem.reactId)) {
+        case LogStates.freeze:
+        case LogStates.thaw:
+        case LogStates.updateNodeLabel:
+        case LogStates.valueChange:
+        case LogStates.enter:
+        case LogStates.exit:
+        case LogStates.invalidateStart:
+        case LogStates.invalidateEnd:
+        case LogStates.isolateEnter:
+        case LogStates.isolateExit:
+        case LogStates.isolateInvalidateStart:
+        case LogStates.isolateInvalidateEnd:
+          if (graph.nodes.has(logItem.reactId)) {
             return ret;
           }
           break;
 
-        case "define":
+        case LogStates.define:
           logEntry = (logItem: LogEntryDefineType);
           if (
             _.some(this.filterDatas, function(filterData) {
@@ -312,13 +317,13 @@ class GraphAtStep {
             return ret;
           }
           break;
-        case "asyncStart":
-        case "asyncStop":
-        case "queueEmpty":
+        case LogStates.asyncStart:
+        case LogStates.asyncStop:
+        case LogStates.queueEmpty:
           break;
         default:
           console.error(logItem);
-          throw "unknown logItem action prev";
+          throw "unknown logItem action in 'prev'";
       }
     }
 
@@ -505,28 +510,30 @@ class GraphAtStep {
     });
     let newLog = _.filter(this.originalLog, function(logItem) {
       switch (logItem.action) {
-        case "dependsOn":
-        case "dependsOnRemove":
+        case LogStates.dependsOn:
+        case LogStates.dependsOnRemove:
           // check for both to and from
           return (
             nodeMap.has(logItem.reactId) && nodeMap.has(logItem.depOnReactId)
           );
-        case "define":
-        case "updateNodeLabel":
-        case "valueChange":
-        case "invalidateStart":
-        case "enter":
-        case "isolateInvalidateStart":
-        case "isolateEnter":
-        case "invalidateEnd":
-        case "exit":
-        case "isolateExit":
-        case "isolateInvalidateEnd":
+        case LogStates.freeze:
+        case LogStates.thaw:
+        case LogStates.define:
+        case LogStates.updateNodeLabel:
+        case LogStates.valueChange:
+        case LogStates.invalidateStart:
+        case LogStates.enter:
+        case LogStates.isolateInvalidateStart:
+        case LogStates.isolateEnter:
+        case LogStates.invalidateEnd:
+        case LogStates.exit:
+        case LogStates.isolateExit:
+        case LogStates.isolateInvalidateEnd:
           // check for reactId
           return nodeMap.has(logItem.reactId);
-        case "queueEmpty":
-        case "asyncStart":
-        case "asyncStop":
+        case LogStates.queueEmpty:
+        case LogStates.asyncStart:
+        case LogStates.asyncStop:
           // always add
           return true;
         default:

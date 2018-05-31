@@ -3,7 +3,7 @@
 
 import $ from "jquery";
 
-import rlog from "./rlog";
+import { rlog } from "./rlog";
 
 import { GraphAtStep } from "./graph/GraphAtStep";
 
@@ -44,11 +44,6 @@ import "./log/initStep";
 // should layout be done with full graph and only "turn on" / "turn off" the nodes/edges?
 // should filtering be done with the full layout?
 //
-// var time;
-// try {
-//   log = __DATA__;
-//   // time = String(__TIME__).toLowerCase() === "true";
-// } catch (e) {}
 
 $(function() {
   console.log(rlog);

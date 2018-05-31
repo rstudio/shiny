@@ -7,7 +7,7 @@ import console from "../utils/console";
 
 import * as updateGraph from "../updateGraph";
 import { hasLength } from "../graph/GraphAtStep";
-import rlog from "../rlog";
+import { rlog } from "../rlog";
 
 let onKeydown = function(e: JQueryInputEventObject): void {
   console.log("e: ", e);

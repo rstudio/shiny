@@ -3,7 +3,7 @@
 import _ from "lodash";
 import $ from "jquery";
 
-import rlog from "../rlog";
+import { rlog } from "../rlog";
 import { updateGraph } from "../updateGraph";
 
 let fillContainer: JQuery;

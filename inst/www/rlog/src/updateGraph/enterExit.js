@@ -3,7 +3,7 @@
 import _ from "lodash";
 import console from "../utils/console";
 
-import rlog from "../rlog";
+import { rlog } from "../rlog";
 import { updateGraph } from "../updateGraph";
 import { hasLength } from "../graph/GraphAtStep";
 

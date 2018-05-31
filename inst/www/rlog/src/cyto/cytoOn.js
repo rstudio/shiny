@@ -3,7 +3,7 @@ import $ from "jquery";
 import _ from "lodash";
 import console from "../utils/console";
 
-import rlog from "../rlog";
+import { rlog } from "../rlog";
 import * as updateGraph from "../updateGraph";
 
 import type { CytoscapeType, CytoEvent } from "./cytoFlowType";

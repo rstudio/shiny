@@ -15,6 +15,7 @@
     "rlog-lint-all": "yarn run lintjs inst/www/rlog/src/**/*.js",
     "rlog-build": "yarn run rlog-lint-all && grunt webpack:reactLog",
     "rlog-build-only": "grunt webpack:reactLog",
+    "rlog-watch-build": "yarn run rlog-lint-all && grunt webpackReactLogWatch webpack:reactLog",
     "rlog-watch": "yarn run rlog-lint-all && (onchange 'inst/www/rlog/src/**/*.js' --verbose --wait -- yarn run lintjs {{changed}} &) && trap 'kill $(jobs -pr)' EXIT && grunt webpackReactLogWatch webpack:reactLog"
   },
   "lint-staged": {

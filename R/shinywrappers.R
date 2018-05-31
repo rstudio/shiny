@@ -1,4 +1,4 @@
-globalVariables('func')
+utils::globalVariables('func')
 
 #' Mark a function as a render function
 #'

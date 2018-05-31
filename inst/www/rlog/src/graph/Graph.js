@@ -3,6 +3,7 @@
 import _ from "lodash";
 import cytoscape from "cytoscape";
 
+import { LogStates } from "../log/logStates";
 import { Node } from "./Node";
 import { Edge } from "./Edge";
 import { GhostEdge } from "./GhostEdge";
@@ -386,21 +387,21 @@ class Graph {
 
     switch (data.action) {
       // {"action": "define", "reactId": "r3", "label": "plotObj", "type": "observable", "session": "fa3c747a6121aec5baa682cc3970b811", "time": 1524581676.5841},
-      case "define": {
+      case LogStates.define: {
         let logEntry = (data: LogEntryDefineType);
         this.nodes.set(data.reactId, new Node((logEntry: Object)));
         break;
       }
 
       // {"action": "updateNodeLabel", "nodeId": "1", "label": "input", "session": null, "time": 1522955046.5537},
-      case "updateNodeLabel":
+      case LogStates.updateNodeLabel:
         node = this.nodes.get(data.reactId);
         if (node) {
           node.label = data.label;
         }
         break;
 
-      case "valueChange":
+      case LogStates.valueChange:
         node = this.nodes.get(data.reactId);
         if (node) {
           node.value = data.value;
@@ -408,7 +409,7 @@ class Graph {
         }
         break;
 
-      case "invalidateStart": {
+      case LogStates.invalidateStart: {
         let logEntry = (data: LogEntryInvalidateStartType);
         node = this.nodes.get(logEntry.reactId);
         lastNodeId = _.last(this.activeInvalidateEnter);
@@ -430,7 +431,7 @@ class Graph {
         }
         break;
       }
-      case "enter": {
+      case LogStates.enter: {
         let logEntry = (data: LogEntryEnterType);
         lastNodeId = _.last(this.activeNodeEnter);
         if (lastNodeId) {
@@ -453,8 +454,8 @@ class Graph {
         break;
       }
 
-      case "isolateInvalidateStart":
-      case "isolateEnter": {
+      case LogStates.isolateInvalidateStart:
+      case LogStates.isolateEnter: {
         let logEntry = (data:
           | LogEntryIsolateInvalidateStartType
           | LogEntryIsolateEnterType);
@@ -465,13 +466,13 @@ class Graph {
         break;
       }
 
-      case "invalidateEnd":
-      case "exit":
-      case "isolateExit":
-      case "isolateInvalidateEnd": {
+      case LogStates.invalidateEnd:
+      case LogStates.exit:
+      case LogStates.isolateExit:
+      case LogStates.isolateInvalidateEnd: {
         node = this.nodes.get(data.reactId);
         switch (data.action) {
-          case "exit": {
+          case LogStates.exit: {
             let activeEnterNode = this.nodes.get(_.last(this.activeNodeEnter));
             if (activeEnterNode) {
               activeEnterNode.enterStatus.reset();
@@ -486,7 +487,7 @@ class Graph {
             }
             break;
           }
-          case "invalidateEnd": {
+          case LogStates.invalidateEnd: {
             // turn off the previously active node
             let curActiveNode = this.nodes.get(
               _.last(this.activeInvalidateEnter)
@@ -512,7 +513,7 @@ class Graph {
             }
             break;
           }
-          case "isolateInvalidateEnd":
+          case LogStates.isolateInvalidateEnd:
             if (node && node.valueChangedStatus.isOn) {
               node.valueChangedStatus.reset();
             }
@@ -520,30 +521,41 @@ class Graph {
         }
         if (node) {
           let prevData = node.statusLast();
-          let expectedAction = {
-            exit: "enter",
-            isolateExit: "isolateEnter",
-            invalidateEnd: "invalidateStart",
-            isolateInvalidateEnd: "isolateInvalidateStart",
-          }[data.action];
-          let logEntry = (data:
-            | LogEntryExitType
-            | LogEntryIsolateExitType
-            | LogEntryInvalidateEndType
-            | LogEntryIsolateInvalidateEndType);
-          expectPrevStatus((logEntry: Object), prevData, expectedAction);
-          node.statusRemove();
+          let expectedAction;
+          switch (data.action) {
+            case LogStates.exit:
+              expectedAction = LogStates.enter;
+              break;
+            case LogStates.isolateExit:
+              expectedAction = LogStates.isolateEnter;
+              break;
+            case LogStates.invalidateEnd:
+              expectedAction = LogStates.invalidateStart;
+              break;
+            case LogStates.isolateInvalidateEnd:
+              expectedAction = LogStates.isolateInvalidateStart;
+              break;
+          }
+          if (expectedAction) {
+            let logEntry = (data:
+              | LogEntryExitType
+              | LogEntryIsolateExitType
+              | LogEntryInvalidateEndType
+              | LogEntryIsolateInvalidateEndType);
+            expectPrevStatus((logEntry: Object), prevData, expectedAction);
+            node.statusRemove();
+          }
         }
         break;
       }
 
-      case "dependsOn": {
+      case LogStates.dependsOn: {
         let logEntry = ((data: LogEntryDependsOnType): Object);
         edge = new Edge(logEntry);
         let edgeKey = edge.key;
 
         // store unique edges to always display a transparent dependency
-        if (!_.has(this.edgesUnique, edge.ghostKey)) {
+        if (!this.edgesUnique.has(edge.ghostKey)) {
           this.edgesUnique.set(edge.ghostKey, new GhostEdge(logEntry));
         }
 
@@ -555,7 +567,7 @@ class Graph {
 
         if (edge) {
           node = this.nodes.get(edge.reactId);
-          if (node && node.statusLast().action === "isolateEnter") {
+          if (node && node.statusLast().action === LogStates.isolateEnter) {
             edge.status = "isolate";
           } else {
             edge.status = "normal";
@@ -564,7 +576,7 @@ class Graph {
         break;
       }
 
-      case "dependsOnRemove": {
+      case LogStates.dependsOnRemove: {
         let logEntry = ((data: LogEntryDependsOnRemoveType): Object);
         edge = new Edge(logEntry);
         // remove the edge
@@ -572,16 +584,29 @@ class Graph {
         break;
       }
 
-      case "queueEmpty":
-      case "asyncStart":
-      case "asyncStop":
+      case LogStates.queueEmpty:
+      case LogStates.asyncStart:
+      case LogStates.asyncStop:
         // do nothing
         // this[data.action] = data.step;
         break;
 
+      case LogStates.freeze:
+        node = this.nodes.get(data.reactId);
+        if (node) {
+          node.isFrozen = true;
+        }
+        break;
+      case LogStates.thaw:
+        node = this.nodes.get(data.reactId);
+        if (node) {
+          node.isFrozen = false;
+        }
+        break;
+
       default:
         console.error("data.action: ", data.action, data);
-        throw data;
+      // throw data;
     }
   }
 }

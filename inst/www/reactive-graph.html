@@ -14,6 +14,13 @@
   }
   </style>
 
+  <script>
+    try {
+      window.__APP_DATA__ = __DATA__;
+      window.__APP_TIME__ = String(__TIME__).toLowerCase() === "true";
+    } catch (e) {}
+  </script>
+
   <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script> -->
   <!-- <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.slim.min.js"></script>
 

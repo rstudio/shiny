@@ -1,6 +1,6 @@
 // @flow
 
-let console = window.globalConsole || {
+let console = window.console || {
   log: function(...data: Array<any>): void {},
   warn: function(...data: Array<any>): void {},
   error: function(...data: Array<any>): void {},

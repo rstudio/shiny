@@ -1,3 +1,11 @@
+shiny 1.1.0.9000
+===========
+
+### Minor new features and improvements
+
+* Added namespace support when freezing reactiveValue keys. [#2080](https://github.com/rstudio/shiny/pull/2080)
+
+
 shiny 1.1.0
 ===========
 

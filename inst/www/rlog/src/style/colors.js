@@ -39,6 +39,9 @@ let colors = {
   ghostEdges: {
     default: "#3c3b39",
   },
+  frozen: {
+    default: "#2171b5",
+  },
   // filtered colors
   lite: {
     white: "#ffffff",

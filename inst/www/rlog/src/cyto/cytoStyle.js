@@ -99,6 +99,9 @@ let graphStyles = {
       // "border-width": 3,
       // "border-opacity"
     },
+    frozen: {
+      "background-color": colors.frozen.default,
+    },
   },
   edge: {
     default: {

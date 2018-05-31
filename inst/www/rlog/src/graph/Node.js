@@ -1,5 +1,6 @@
 // @flow
 
+import { LogStates } from "../log/logStates";
 import { HoverStatus } from "./HoverStatus";
 import { ActiveStateStatus } from "./ActiveStateStatus";
 import { StatusArr } from "./StatusArr";
@@ -14,6 +15,7 @@ class Node {
   type: string;
   session: string;
   time: number;
+  isFrozen: boolean;
   statusArr: StatusArr;
   value: ?string;
   hoverStatus: HoverStatus;
@@ -37,6 +39,7 @@ class Node {
     this.type = data.type;
     this.session = data.session || "Global";
     this.time = data.time;
+    this.isFrozen = data.isFrozen || false;
     this.statusArr = new StatusArr(data.statusArr || []);
     this.value = data.value || null;
     this.hoverStatus = data.hoverStatus || new HoverStatus();
@@ -71,14 +74,14 @@ class Node {
     return this.statusArr.last();
   }
   get inEnter(): boolean {
-    return this.statusArr.containsStatus("enter");
+    return this.statusArr.containsStatus(LogStates.enter);
   }
   get inIsolate(): boolean {
-    return this.statusArr.containsStatus("isolateEnter");
+    return this.statusArr.containsStatus(LogStates.isolateEnter);
   }
   // get inInvalidate() {return this.statusArr.containsStatus("invalidateStart");}
   get inIsolateInvalidate(): boolean {
-    return this.statusArr.containsStatus("isolateInvalidateStart");
+    return this.statusArr.containsStatus(LogStates.isolateInvalidateStart);
   }
   get cytoStyle() {
     return {};
@@ -127,6 +130,8 @@ class Node {
     }
     if (this.hoverStatus.selected) classes.push("nodeSelected");
 
+    if (this.isFrozen) classes.push("nodeFrozen");
+
     return classes.join(" ");
   }
   get cytoData() {
@@ -148,6 +153,7 @@ type NodeInputType = {
   type: string,
   session: ?string,
   time: number,
+  isFrozen?: boolean,
   statusArr?: StatusArr,
   value: ?string,
   hoverStatus?: HoverStatus,

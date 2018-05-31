@@ -58,6 +58,7 @@ let withContainer = function(container: JQuery) {
       style(cytoClasses.nodeSelected, graphStyles.selected.node),
       style(cytoClasses.edgeSelected, graphStyles.selected.edge),
       style(cytoClasses.edgeGhostSelected, graphStyles.selected.ghostEdge),
+      style(cytoClasses.nodeFrozen, graphStyles.node.frozen),
     ],
   });
 

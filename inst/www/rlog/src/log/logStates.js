@@ -8,6 +8,7 @@ let states = {
   dependsOnRemove: "dependsOnRemove",
   enter: "enter",
   exit: "exit",
+  freeze: "freeze",
   invalidateEnd: "invalidateEnd",
   invalidateStart: "invalidateStart",
   isolateEnter: "isolateEnter",
@@ -15,6 +16,7 @@ let states = {
   isolateInvalidateEnd: "isolateInvalidateEnd",
   isolateInvalidateStart: "isolateInvalidateStart",
   queueEmpty: "queueEmpty",
+  thaw: "thaw",
   updateNodeLabel: "updateNodeLabel",
   valueChange: "valueChange",
 };
@@ -211,7 +213,7 @@ type LogEntryAnyType =
 
 type LogType = Array<LogEntryAnyType>;
 
-export { states };
+export { states as LogStates };
 export type {
   ReactIdType,
   CtxIdType,

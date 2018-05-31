@@ -23,6 +23,8 @@ let classes = {
   nodeIsolate: ".nodeIsolate",
   nodeIsolateInvalidate: ".nodeIsolateInvalidate",
 
+  nodeFrozen: ".nodeFrozen",
+
   nodeValueChanged: ".nodeValueChanged",
 
   hoverNotFocused: ".hoverNotFocused",

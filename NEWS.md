@@ -1,3 +1,12 @@
+shiny 1.1.0.9000
+===========
+
+## Full changelog
+
+### Documentation Updates
+
+* Addresses [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. [#2081](https://github.com/rstudio/shiny/pull/2081)
+
 shiny 1.1.0
 ===========
 

@@ -7,14 +7,14 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 //---------------------------------------------------------------------
-// Source file: ../srcjs/_start.js
+// Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/_start.js
 
 (function () {
   var $ = jQuery;
 
   var exports = window.Shiny = window.Shiny || {};
 
-  exports.version = "1.1.0"; // Version number inserted by Grunt
+  exports.version = "{{ VERSION }}"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -28,7 +28,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   });
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/utils.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/utils.js
 
   function escapeHTML(str) {
     var escaped = {
@@ -478,10 +478,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       var dispatchVal = dispatch.apply(null, args);
       for (var i = 0; i < methods.length; i++) {
-        var _methods$i = _slicedToArray(methods[i], 2);
-
-        var methodVal = _methods$i[0];
-        var methodFn = _methods$i[1];
+        var _methods$i = _slicedToArray(methods[i], 2),
+            methodVal = _methods$i[0],
+            methodFn = _methods$i[1];
 
         if (test(dispatchVal, methodVal)) {
           return methodFn.apply(invoke, args);
@@ -539,7 +538,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/browser.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/browser.js
 
   var browser = function () {
 
@@ -576,7 +575,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }();
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_rate.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_rate.js
 
   var Invoker = function Invoker(target, func) {
     this.target = target;
@@ -800,10 +799,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
   (function () {
     this.setInput = function (name, value, opts) {
-      var _splitInputNameType = splitInputNameType(name);
-
-      var inputName = _splitInputNameType.name;
-      var inputType = _splitInputNameType.inputType;
+      var _splitInputNameType = splitInputNameType(name),
+          inputName = _splitInputNameType.name,
+          inputType = _splitInputNameType.inputType;
 
       var jsonValue = JSON.stringify(value);
 
@@ -825,10 +823,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       for (var inputName in values) {
         if (values.hasOwnProperty(inputName)) {
-          var _splitInputNameType2 = splitInputNameType(inputName);
-
-          var name = _splitInputNameType2.name;
-          var inputType = _splitInputNameType2.inputType;
+          var _splitInputNameType2 = splitInputNameType(inputName),
+              name = _splitInputNameType2.name,
+              inputType = _splitInputNameType2.inputType;
 
           cacheValues[name] = {
             jsonValue: JSON.stringify(values[inputName]),
@@ -959,7 +956,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/shinyapp.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/shinyapp.js
 
   var ShinyApp = function ShinyApp() {
     this.$socket = null;
@@ -2092,10 +2089,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // Returns a URL which can be queried to get values from inside the server
     // function. This is enabled with `options(shiny.testmode=TRUE)`.
     this.getTestSnapshotBaseUrl = function () {
-      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref2$fullUrl = _ref2.fullUrl;
-      var fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
+      var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref2$fullUrl = _ref2.fullUrl,
+          fullUrl = _ref2$fullUrl === undefined ? true : _ref2$fullUrl;
 
       var loc = window.location;
       var url = "";
@@ -2156,7 +2152,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/notifications.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/notifications.js
 
   exports.notifications = function () {
 
@@ -2164,22 +2160,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     var fadeDuration = 250;
 
     function show() {
-      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref3$html = _ref3.html;
-      var html = _ref3$html === undefined ? '' : _ref3$html;
-      var _ref3$action = _ref3.action;
-      var action = _ref3$action === undefined ? '' : _ref3$action;
-      var _ref3$deps = _ref3.deps;
-      var deps = _ref3$deps === undefined ? [] : _ref3$deps;
-      var _ref3$duration = _ref3.duration;
-      var duration = _ref3$duration === undefined ? 5000 : _ref3$duration;
-      var _ref3$id = _ref3.id;
-      var id = _ref3$id === undefined ? null : _ref3$id;
-      var _ref3$closeButton = _ref3.closeButton;
-      var closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton;
-      var _ref3$type = _ref3.type;
-      var type = _ref3$type === undefined ? null : _ref3$type;
+      var _ref3 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref3$html = _ref3.html,
+          html = _ref3$html === undefined ? '' : _ref3$html,
+          _ref3$action = _ref3.action,
+          action = _ref3$action === undefined ? '' : _ref3$action,
+          _ref3$deps = _ref3.deps,
+          deps = _ref3$deps === undefined ? [] : _ref3$deps,
+          _ref3$duration = _ref3.duration,
+          duration = _ref3$duration === undefined ? 5000 : _ref3$duration,
+          _ref3$id = _ref3.id,
+          id = _ref3$id === undefined ? null : _ref3$id,
+          _ref3$closeButton = _ref3.closeButton,
+          closeButton = _ref3$closeButton === undefined ? true : _ref3$closeButton,
+          _ref3$type = _ref3.type,
+          type = _ref3$type === undefined ? null : _ref3$type;
 
       if (!id) id = randomId();
 
@@ -2314,7 +2309,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }();
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/modal.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/modal.js
 
   exports.modal = {
 
@@ -2323,13 +2318,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // content is non-Bootstrap. Bootstrap modals require some special handling,
     // which is coded in here.
     show: function show() {
-      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var _ref4$html = _ref4.html;
-      var html = _ref4$html === undefined ? '' : _ref4$html;
-      var _ref4$deps = _ref4.deps;
-      var deps = _ref4$deps === undefined ? [] : _ref4$deps;
-
+      var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+          _ref4$html = _ref4.html,
+          html = _ref4$html === undefined ? '' : _ref4$html,
+          _ref4$deps = _ref4.deps,
+          deps = _ref4$deps === undefined ? [] : _ref4$deps;
 
       // If there was an existing Bootstrap modal, then there will be a modal-
       // backdrop div that was added outside of the modal wrapper, and it must be
@@ -2389,7 +2382,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/file_processor.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/file_processor.js
 
   // Generic driver class for doing chunk-wise asynchronous processing of a
   // FileList object. Subclass/clone it and override the `on*` functions to
@@ -2467,7 +2460,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }).call(FileProcessor.prototype);
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/binding_registry.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/binding_registry.js
 
   var BindingRegistry = function BindingRegistry() {
     this.bindings = [];
@@ -2505,7 +2498,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var outputBindings = exports.outputBindings = new BindingRegistry();
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/output_binding.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/output_binding.js
 
   var OutputBinding = exports.OutputBinding = function () {};
   (function () {
@@ -2554,7 +2547,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }).call(OutputBinding.prototype);
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/output_binding_text.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/output_binding_text.js
 
   var textOutputBinding = new OutputBinding();
   $.extend(textOutputBinding, {
@@ -2568,7 +2561,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   outputBindings.register(textOutputBinding, 'shiny.textOutput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/output_binding_image.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/output_binding_image.js
 
   var imageOutputBinding = new OutputBinding();
   $.extend(imageOutputBinding, {
@@ -3871,7 +3864,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/output_binding_html.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/output_binding_html.js
 
   var htmlOutputBinding = new OutputBinding();
   $.extend(htmlOutputBinding, {
@@ -4088,7 +4081,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   };
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/output_binding_downloadlink.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/output_binding_downloadlink.js
 
   var downloadLinkOutputBinding = new OutputBinding();
   $.extend(downloadLinkOutputBinding, {
@@ -4110,7 +4103,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   });
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/output_binding_datatable.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/output_binding_datatable.js
 
   var datatableOutputBinding = new OutputBinding();
   $.extend(datatableOutputBinding, {
@@ -4194,7 +4187,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   outputBindings.register(datatableOutputBinding, 'shiny.datatableOutput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/output_binding_adapter.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/output_binding_adapter.js
 
   var OutputBindingAdapter = function OutputBindingAdapter(el, binding) {
     this.el = el;
@@ -4227,7 +4220,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }).call(OutputBindingAdapter.prototype);
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding.js
 
   var InputBinding = exports.InputBinding = function () {};
 
@@ -4286,7 +4279,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }).call(InputBinding.prototype);
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_text.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_text.js
 
   var textInputBinding = new InputBinding();
   $.extend(textInputBinding, {
@@ -4339,7 +4332,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(textInputBinding, 'shiny.textInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_textarea.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_textarea.js
 
   var textareaInputBinding = {};
   $.extend(textareaInputBinding, textInputBinding, {
@@ -4350,7 +4343,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(textareaInputBinding, 'shiny.textareaInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_password.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_password.js
 
   var passwordInputBinding = {};
   $.extend(passwordInputBinding, textInputBinding, {
@@ -4364,7 +4357,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(passwordInputBinding, 'shiny.passwordInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_number.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_number.js
 
   var numberInputBinding = {};
   $.extend(numberInputBinding, textInputBinding, {
@@ -4404,7 +4397,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(numberInputBinding, 'shiny.numberInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_checkbox.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_checkbox.js
 
   var checkboxInputBinding = new InputBinding();
   $.extend(checkboxInputBinding, {
@@ -4442,7 +4435,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(checkboxInputBinding, 'shiny.checkboxInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_slider.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_slider.js
 
   // Necessary to get hidden sliders to send their updated values
   function forceIonSliderUpdate(slider) {
@@ -4696,7 +4689,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   });
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_date.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_date.js
 
   var dateInputBinding = new InputBinding();
   $.extend(dateInputBinding, {
@@ -4893,7 +4886,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(dateInputBinding, 'shiny.dateInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_daterange.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_daterange.js
 
   var dateRangeInputBinding = {};
   $.extend(dateRangeInputBinding, dateInputBinding, {
@@ -5036,7 +5029,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_select.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_select.js
 
   var selectInputBinding = new InputBinding();
   $.extend(selectInputBinding, {
@@ -5183,7 +5176,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(selectInputBinding, 'shiny.selectInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_radio.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_radio.js
 
   var radioInputBinding = new InputBinding();
   $.extend(radioInputBinding, {
@@ -5264,7 +5257,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(radioInputBinding, 'shiny.radioInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_checkboxgroup.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_checkboxgroup.js
 
   var checkboxGroupInputBinding = new InputBinding();
   $.extend(checkboxGroupInputBinding, {
@@ -5360,7 +5353,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(checkboxGroupInputBinding, 'shiny.checkboxGroupInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_actionbutton.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_actionbutton.js
 
   var actionButtonInputBinding = new InputBinding();
   $.extend(actionButtonInputBinding, {
@@ -5429,7 +5422,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   });
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_tabinput.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_tabinput.js
 
   var bootstrapTabInputBinding = new InputBinding();
   $.extend(bootstrapTabInputBinding, {
@@ -5483,7 +5476,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(bootstrapTabInputBinding, 'shiny.bootstrapTabInput');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/input_binding_fileinput.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/input_binding_fileinput.js
 
   var IE8FileUploader = function IE8FileUploader(shinyapp, id, fileEl) {
     this.shinyapp = shinyapp;
@@ -5891,71 +5884,69 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // support the FileList object though, so the user's expectation that DnD is
       // supported based on this highlighting would be incorrect.
       if (!this._isIE9()) {
-        (function () {
-          var $zone = _this._getZone(el),
-              getState = function getState() {
-            return $el.data("state");
-          },
-              setState = function setState(newState) {
-            return $el.data("state", newState);
-          },
-              transition = multimethod().dispatch(function (e) {
-            return [getState(), e.type];
-          }).when(["plain", "showZone"], function (e) {
-            $zone.removeClass(_this._overClass);
-            $zone.addClass(_this._activeClass);
-            setState("activated");
-          }).when(["activated", "hideZone"], function (e) {
-            $zone.removeClass(_this._overClass);
-            $zone.removeClass(_this._activeClass);
-            setState("plain");
-          }).when(["activated", "draghoverstart"], function (e) {
+        var $zone = this._getZone(el),
+            getState = function getState() {
+          return $el.data("state");
+        },
+            setState = function setState(newState) {
+          return $el.data("state", newState);
+        },
+            transition = multimethod().dispatch(function (e) {
+          return [getState(), e.type];
+        }).when(["plain", "showZone"], function (e) {
+          $zone.removeClass(_this._overClass);
+          $zone.addClass(_this._activeClass);
+          setState("activated");
+        }).when(["activated", "hideZone"], function (e) {
+          $zone.removeClass(_this._overClass);
+          $zone.removeClass(_this._activeClass);
+          setState("plain");
+        }).when(["activated", "draghoverstart"], function (e) {
+          $zone.addClass(_this._overClass);
+          $zone.removeClass(_this._activeClass);
+          setState("over");
+        })
+        // A "drop" event always coincides with a "draghoverend" event. Since
+        // we handle all draghoverend events the same way, by clearing our
+        // over-style and reverting to "activated" state, we only need to
+        // worry about handling the file upload itself here.
+        .when(["over", "drop"], function (e) {
+          _this._handleDrop(e, el);
+          // State change taken care of by ["over", "draghoverend"] handler.
+        }).when(["over", "draghoverend"], function (e) {
+          $zone.removeClass(_this._overClass);
+          $zone.addClass(_this._activeClass);
+          setState("activated");
+        })
+        // This next case happens when the window (like Finder) that a file is
+        // being dragged from occludes the browser window, and the dragged
+        // item first enters the page over a drop zone instead of entering
+        // through a none-zone element.
+        //
+        // The dragenter event that caused this draghoverstart to occur will
+        // bubble to the document, where it will cause a showZone event to be
+        // fired, and drop zones will activate and their states will
+        // transition to "activated".
+        //
+        // We schedule a function to be run *after* that happens, using
+        // setTimeout. The function we schedule will set the current element's
+        // state to "over", preparing us to deal with a subsequent
+        // "draghoverend".
+        .when(["plain", "draghoverstart"], function (e) {
+          window.setTimeout(function () {
             $zone.addClass(_this._overClass);
             $zone.removeClass(_this._activeClass);
             setState("over");
-          })
-          // A "drop" event always coincides with a "draghoverend" event. Since
-          // we handle all draghoverend events the same way, by clearing our
-          // over-style and reverting to "activated" state, we only need to
-          // worry about handling the file upload itself here.
-          .when(["over", "drop"], function (e) {
-            _this._handleDrop(e, el);
-            // State change taken care of by ["over", "draghoverend"] handler.
-          }).when(["over", "draghoverend"], function (e) {
-            $zone.removeClass(_this._overClass);
-            $zone.addClass(_this._activeClass);
-            setState("activated");
-          })
-          // This next case happens when the window (like Finder) that a file is
-          // being dragged from occludes the browser window, and the dragged
-          // item first enters the page over a drop zone instead of entering
-          // through a none-zone element.
-          //
-          // The dragenter event that caused this draghoverstart to occur will
-          // bubble to the document, where it will cause a showZone event to be
-          // fired, and drop zones will activate and their states will
-          // transition to "activated".
-          //
-          // We schedule a function to be run *after* that happens, using
-          // setTimeout. The function we schedule will set the current element's
-          // state to "over", preparing us to deal with a subsequent
-          // "draghoverend".
-          .when(["plain", "draghoverstart"], function (e) {
-            window.setTimeout(function () {
-              $zone.addClass(_this._overClass);
-              $zone.removeClass(_this._activeClass);
-              setState("over");
-            }, 0);
-          }).else(function (e) {
-            console.log("fileInput DnD unhandled transition", getState(), e.type, e);
-          });
+          }, 0);
+        }).else(function (e) {
+          console.log("fileInput DnD unhandled transition", getState(), e.type, e);
+        });
 
-          if ($fileInputs.length === 0) _this._enableDocumentEvents();
-          setState("plain");
-          $zone.on(_this._zoneEvents, transition);
-          $fileInputs = $fileInputs.add(el);
-          _this._enableDraghover($zone, ".zone");
-        })();
+        if ($fileInputs.length === 0) this._enableDocumentEvents();
+        setState("plain");
+        $zone.on(this._zoneEvents, transition);
+        $fileInputs = $fileInputs.add(el);
+        this._enableDraghover($zone, ".zone");
       }
 
       $el.on("change.fileInputBinding", uploadFiles);
@@ -5984,7 +5975,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   inputBindings.register(fileInputBinding, 'shiny.fileInputBinding');
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/init_shiny.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/init_shiny.js
 
   function initShiny() {
 
@@ -6497,7 +6488,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   });
 
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/reactlog.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/reactlog.js
 
   $(document).on('keydown', function (e) {
     if (e.which !== 114 || !e.ctrlKey && !e.metaKey || e.shiftKey || e.altKey) return;
@@ -6506,8 +6497,27 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     e.preventDefault();
   });
 
+  $(document).on('keydown', function (e) {
+    if (e.which !== 115 || !e.ctrlKey && !e.metaKey || e.shiftKey || e.altKey) return;
+    var url = 'reactlog/mark?w=' + window.escape(exports.shinyapp.config.workerId) + "&s=" + window.escape(exports.shinyapp.config.sessionId);
+
+    // send notification
+    $.get(url, function (result) {
+      if (result !== "marked") return;
+
+      var html = '<span id="shiny-reactlog-mark-text">Marked time point in reactlog</span>';
+
+      exports.notifications.show({
+        html: html,
+        closeButton: true
+      });
+    });
+
+    e.preventDefault();
+  });
+
   //---------------------------------------------------------------------
-  // Source file: ../srcjs/_end.js
+  // Source file: /Users/barret/odrive/AmazonCloudDrive/git/rstudio/shiny/shiny/srcjs/_end.js
 })();
 
 //# sourceMappingURL=shiny.js.map

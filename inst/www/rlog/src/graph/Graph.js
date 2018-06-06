@@ -8,11 +8,11 @@ import { Node } from "./Node";
 import { Edge } from "./Edge";
 import { GhostEdge } from "./GhostEdge";
 import { HoverStatus } from "./HoverStatus";
-import { StatusArr, expectPrevStatus } from "./StatusArr";
+import { expectPrevStatus } from "./StatusArr";
 
 import console from "../utils/console";
 
-import type { CytoscapeType, CytoData } from "../cyto/cytoFlowType";
+import type { CytoscapeType } from "../cyto/cytoFlowType";
 
 import type {
   LogType,
@@ -181,13 +181,15 @@ class Graph {
       let reactId;
       reactId = this.reactIdFromData(data, true);
       if (!reactId) return [];
-      return _.filter(mapValues(this.edgesUnique), function(edge) {
-        // if the target is the reactId
-        return edge.reactId === reactId;
-      }).map(function(edge) {
-        // return the source
-        return edge.depOnReactId;
-      });
+      return _
+        .filter(mapValues(this.edgesUnique), function(edge) {
+          // if the target is the reactId
+          return edge.reactId === reactId;
+        })
+        .map(function(edge) {
+          // return the source
+          return edge.depOnReactId;
+        });
     }
   }
   childrenNodeIds(data: SomeGraphData | ?ReactIdType): Array<ReactIdType> {
@@ -200,13 +202,15 @@ class Graph {
     } else {
       let reactId = this.reactIdFromData(data, false);
       if (!reactId) return [];
-      return _.filter(mapValues(this.edgesUnique), function(edge) {
-        // if the source is the reactId
-        return edge.depOnReactId === reactId;
-      }).map(function(edge) {
-        // return the target
-        return edge.reactId;
-      });
+      return _
+        .filter(mapValues(this.edgesUnique), function(edge) {
+          // if the source is the reactId
+          return edge.depOnReactId === reactId;
+        })
+        .map(function(edge) {
+          // return the target
+          return edge.reactId;
+        });
     }
   }
 
@@ -311,7 +315,8 @@ class Graph {
     nodeIds: Array<ReactIdType>,
     hoverKey: "state" | "sticky",
     onStatus: typeof HoverStatus.valSticky | typeof HoverStatus.valFocused,
-    offStatus: | typeof HoverStatus.valNotSticky
+    offStatus:
+      | typeof HoverStatus.valNotSticky
       | typeof HoverStatus.valNotFocused
   ) {
     let nodeSet = new Set(nodeIds);
@@ -455,7 +460,8 @@ class Graph {
 
       case LogStates.isolateInvalidateStart:
       case LogStates.isolateEnter: {
-        let logEntry = (data: | LogEntryIsolateInvalidateStartType
+        let logEntry = (data:
+          | LogEntryIsolateInvalidateStartType
           | LogEntryIsolateEnterType);
         node = this.nodes.get(logEntry.reactId);
         if (node) {
@@ -535,7 +541,8 @@ class Graph {
               break;
           }
           if (expectedAction) {
-            let logEntry = (data: | LogEntryExitType
+            let logEntry = (data:
+              | LogEntryExitType
               | LogEntryIsolateExitType
               | LogEntryInvalidateEndType
               | LogEntryIsolateInvalidateEndType);
@@ -612,9 +619,9 @@ class Graph {
 function mapValues<T>(x: Map<string, T>): Array<T> {
   return Array.from(x.values());
 }
-function mapKeys<T>(x: Map<string, T>): Array<string> {
-  return Array.from(x.keys());
-}
+// function mapKeys<T>(x: Map<string, T>): Array<string> {
+//   return Array.from(x.keys());
+// }
 
 function isEdgeLike(data: any): boolean %checks {
   return data instanceof Edge || data instanceof GhostEdge;

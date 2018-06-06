@@ -22,7 +22,7 @@ let states = {
   valueChange: "valueChange",
 };
 
-type ActionsType = $Values<typeof states>;
+// type ActionsType = $Values<typeof states>;
 
 type ReactIdType = string;
 type CtxIdType = string;

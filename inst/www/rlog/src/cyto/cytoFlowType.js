@@ -28,8 +28,8 @@ type CytoscapeEdge = {
   removeStyle: () => CytoscapeNode,
 };
 
-type SetEleData = (info: SomeGraphData) => CytoscapeElements;
-type GetEleData = () => CytoscapeElements;
+// type SetEleData = (info: SomeGraphData) => CytoscapeElements;
+// type GetEleData = () => CytoscapeElements;
 type CytoscapeNode = {
   id: () => string,
   // data: (info: SomeGraphData) => CytoscapeElements,

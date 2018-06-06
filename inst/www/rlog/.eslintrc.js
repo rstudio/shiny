@@ -8,6 +8,7 @@ module.exports = {
     "eslint:recommended"
   ],
   "rules": {
+    "flowtype/space-after-type-colon": 0, // fixed / clashes with prettier
     "comma-dangle": [2, "only-multiline"],
     "consistent-return": 1,
     "dot-location": [1, "property"],

@@ -8,7 +8,7 @@ import { updateGraph } from "../updateGraph";
 
 let fillContainer: JQuery;
 let updateProgressBar = function(): void {
-  fillContainer.width(rlog.curTick / rlog.log.length * 100 + "%");
+  fillContainer.width((rlog.curTick / rlog.log.length) * 100 + "%");
 };
 
 let setContainers = function(
@@ -35,7 +35,7 @@ let updateFromProgressBar = function(e: BaseJQueryEventObject): void {
   let pos = e.pageX; // pageX in pixels  // || e.originalEvent.pageX;
 
   let width = timeline.offsetWidth; // width in pixels
-  let targetStep = Math.max(Math.round(pos / width * rlog.log.length), 1);
+  let targetStep = Math.max(Math.round((pos / width) * rlog.log.length), 1);
   if (targetStep !== rlog.curTick) {
     updateGraph(targetStep);
   }
@@ -52,8 +52,8 @@ let addTimelineTicks = function(
   enterExits.map(function(i) {
     // add an extra step to show that it is completed
     // i = i + 1;
-    let left = 100 * i / logLength;
-    let width = 100 * 1 / logLength * 0.75;
+    let left = (100 * i) / logLength;
+    let width = ((100 * 1) / logLength) * 0.75;
     jqueryContainer.append(
       `<div class="timeline-tick ${className}" style="background-color: ${backgroundColor}; left: ${left}%; width: ${width}%; margin-left: -${width}%;"></div>`
     );

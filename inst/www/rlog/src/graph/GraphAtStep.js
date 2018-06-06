@@ -615,8 +615,7 @@ class GraphAtStep {
     // enter
     nodesLRB.right.map(function(graphNode: CytoscapeNode) {
       let graphNodeData = (graphNode.data(): Node);
-      cy
-        .add(graphNode)
+      cy.add(graphNode)
         .classes(graphNodeData.cytoClasses)
         .style(graphNodeData.cytoStyle);
       // .animate({
@@ -678,8 +677,7 @@ class GraphAtStep {
     // enter
     edgesLRB.right.map(function(graphEdge: CytoscapeEdge) {
       let graphEdgeData = (graphEdge.data(): Edge);
-      cy
-        .add(graphEdge)
+      cy.add(graphEdge)
         .classes(graphEdgeData.cytoClasses)
         .removeStyle()
         .style(graphEdgeData.cytoStyle);
@@ -691,8 +689,7 @@ class GraphAtStep {
     // update
     edgesLRB.both.map(function(cytoEdge) {
       let graphEdgeData = graphEdges.$id(cytoEdge.id()).data();
-      cy
-        .$id(cytoEdge.id())
+      cy.$id(cytoEdge.id())
         // .classes()
         .classes(graphEdgeData.cytoClasses)
         .data(graphEdgeData)
@@ -734,26 +731,24 @@ class GraphAtStep {
       // TODO-barret move this method to layout
       // calculate a new layout
       // time expensive!!!
-      cy
-        .layout(
-          _.assign(
-            {
-              // provide elements in sorted order to make determanistic layouts
-              eles: sortedElements,
-              // run on layout ready
-              ready: function() {
-                onLayoutReady.map(function(fn) {
-                  fn();
-                });
-              },
+      cy.layout(
+        _.assign(
+          {
+            // provide elements in sorted order to make determanistic layouts
+            eles: sortedElements,
+            // run on layout ready
+            ready: function() {
+              onLayoutReady.map(function(fn) {
+                fn();
+              });
             },
-            layoutOptions
-            // ,
-            // TODO-barret Make animation a setting... it's expensive!
-            // {animate: true}
-          )
+          },
+          layoutOptions
+          // ,
+          // TODO-barret Make animation a setting... it's expensive!
+          // {animate: true}
         )
-        .run();
+      ).run();
     }
   }
 }

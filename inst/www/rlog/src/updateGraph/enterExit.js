@@ -26,8 +26,8 @@ let nextEnterExitEmpty = function() {
   let val, i;
   // move to queue empty
   for (i = 0; i < rlog.getGraph.enterExitEmpties.length; i++) {
-    val = rlog.getGraph.enterExitEmpties[i] - 1;
-    if (nextTick <= val) {
+    val = rlog.getGraph.enterExitEmpties[i];
+    if (nextTick < val) {
       updateGraph(val);
       return true;
     }
@@ -55,7 +55,7 @@ let prevEnterExitEmpty = function() {
   let val, i;
   // move to queue empty
   for (i = rlog.getGraph.enterExitEmpties.length - 1; i >= 0; i--) {
-    val = rlog.getGraph.enterExitEmpties[i] - 1;
+    val = rlog.getGraph.enterExitEmpties[i];
     if (prevTick > val) {
       updateGraph(val);
       return true;

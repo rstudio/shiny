@@ -1,11 +1,13 @@
 // @flow
-/* global log */
 
 import $ from "jquery";
+import _ from "lodash";
 
 import { rlog } from "./rlog";
 
 import { GraphAtStep } from "./graph/GraphAtStep";
+
+import colors from "./style/colors";
 
 import * as cytoscapeInit from "./cyto/cytoscapeInit";
 
@@ -64,18 +66,27 @@ $(function() {
   $("#nextStepButton").click(updateGraph.nextStep);
 
   progressBar.setContainers($("#timeline"), $("#timeline-fill"));
+  let timelineBackground = $("#timeline-bg");
   progressBar.addTimelineTicks(
-    $("#timeline-bg"),
-    "timeline-enterexit",
+    timelineBackground,
+    colors.regular.green1,
     rlog.getGraph.enterExitEmpties,
     rlog.log.length
   );
   progressBar.addTimelineTicks(
-    $("#timeline-bg"),
-    "timeline-cycle",
+    timelineBackground,
+    colors.regular.red,
     rlog.getGraph.queueEmpties,
     rlog.log.length
   );
+  if (rlog.getGraph.marks.length > 0) {
+    progressBar.addTimelineTicks(
+      timelineBackground,
+      colors.regular.purpleLite,
+      rlog.getGraph.marks,
+      rlog.log.length
+    );
+  }
   logEntry.setContainer($("#instructions"));
 
   $("#search").on("input", function(e) {
@@ -89,8 +100,14 @@ $(function() {
     }
   }
 
-  // start the graph at the first enter/exit or first empty queue
-  // TODO-barret should start at nextEnterExitEmpty,
-  // updateGraph.nextEnterExitEmpty()
-  updateGraph.nextQueueEmpty();
+  if (rlog.getGraph.marks.length > 0) {
+    let lastMark = _.last(rlog.getGraph.marks);
+    // start the graph at the first enter/exit or first empty queue
+    updateGraph.atTick(lastMark);
+  } else {
+    // start the graph at the first enter/exit or first empty queue
+    // TODO-barret should start at nextEnterExitEmpty,
+    // updateGraph.nextEnterExitEmpty()
+    updateGraph.nextQueueEmpty();
+  }
 });

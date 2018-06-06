@@ -44,13 +44,18 @@ let updateFromProgressBar = function(e: BaseJQueryEventObject): void {
 
 let addTimelineTicks = function(
   jqueryContainer: JQuery,
-  className: string,
+  backgroundColor: string,
   enterExits: Array<number>,
-  logLength: number
+  logLength: number,
+  className: string = ""
 ): void {
   enterExits.map(function(i) {
+    // add an extra step to show that it is completed
+    // i = i + 1;
+    let left = 100 * i / logLength;
+    let width = 100 * 1 / logLength * 0.75;
     jqueryContainer.append(
-      `<div class="${className}" style="left: ${100 * i / logLength}%;"></div>`
+      `<div class="timeline-tick ${className}" style="background-color: ${backgroundColor}; left: ${left}%; width: ${width}%; margin-left: -${width}%;"></div>`
     );
   });
 };

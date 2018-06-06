@@ -316,7 +316,7 @@ module.exports = function(grunt) {
   // generated. Without this task, it would read in the source map when Grunt
   // runs, which is wrong, if the source map doesn't exist, or is change later.
   grunt.task.registerTask("configureBabelShiny", "configures babel options", function() {
-    gruntConfig.babel.options.inputSourceMap = grunt.file.readJSON('./temp_concat/shiny.js.map');
+    gruntConfig.babel.shiny.options.inputSourceMap = grunt.file.readJSON('./temp_concat/shiny.js.map');
   });
 
   grunt.task.registerTask("webpackReactLogWatch", "sets 'watch' to true for reactLog webpack task", function() {

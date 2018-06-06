@@ -170,24 +170,15 @@ svg {
   width: 0;
   transition: width 250ms;
 }
+.timeline-tick,
 .timeline-cycle,
-.timeline-enterexit {
+.timeline-enterexit,
+.timeline-mark {
   position: relative;
   float: left;
-  margin-left: -2px; /* margin and width must be equal in size, but margin is negative */
-  width: 2px;
+  /* margin-left: -2px; */ /* margin and width must be equal in size, but margin is negative */
+  /* width: 2px; */
   height: 100%;
-  transition: width 250ms;
-}
-.timeline-cycle {
-  background-color: #f22828;
-}
-.timeline-enterexit {
-  background-color: #f7fcb9;
-}
-
-.red_edge {
-  color: red;
 }
 
 text {

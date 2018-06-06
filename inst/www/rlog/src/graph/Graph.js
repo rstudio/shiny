@@ -311,8 +311,7 @@ class Graph {
     nodeIds: Array<ReactIdType>,
     hoverKey: "state" | "sticky",
     onStatus: typeof HoverStatus.valSticky | typeof HoverStatus.valFocused,
-    offStatus:
-      | typeof HoverStatus.valNotSticky
+    offStatus: | typeof HoverStatus.valNotSticky
       | typeof HoverStatus.valNotFocused
   ) {
     let nodeSet = new Set(nodeIds);
@@ -456,8 +455,7 @@ class Graph {
 
       case LogStates.isolateInvalidateStart:
       case LogStates.isolateEnter: {
-        let logEntry = (data:
-          | LogEntryIsolateInvalidateStartType
+        let logEntry = (data: | LogEntryIsolateInvalidateStartType
           | LogEntryIsolateEnterType);
         node = this.nodes.get(logEntry.reactId);
         if (node) {
@@ -537,8 +535,7 @@ class Graph {
               break;
           }
           if (expectedAction) {
-            let logEntry = (data:
-              | LogEntryExitType
+            let logEntry = (data: | LogEntryExitType
               | LogEntryIsolateExitType
               | LogEntryInvalidateEndType
               | LogEntryIsolateInvalidateEndType);
@@ -587,6 +584,7 @@ class Graph {
       case LogStates.queueEmpty:
       case LogStates.asyncStart:
       case LogStates.asyncStop:
+      case LogStates.mark:
         // do nothing
         // this[data.action] = data.step;
         break;

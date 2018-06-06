@@ -15,6 +15,7 @@ let states = {
   isolateExit: "isolateExit",
   isolateInvalidateEnd: "isolateInvalidateEnd",
   isolateInvalidateStart: "isolateInvalidateStart",
+  mark: "markTime",
   queueEmpty: "queueEmpty",
   thaw: "thaw",
   updateNodeLabel: "updateNodeLabel",

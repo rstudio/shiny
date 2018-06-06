@@ -47,6 +47,7 @@ class GraphAtStep {
   asyncStops: Array<number>;
   queueEmpties: Array<number>;
   enterExitEmpties: Array<number>;
+  marks: Array<number>;
   minStep: number;
   maxStep: number;
 
@@ -89,6 +90,7 @@ class GraphAtStep {
     this.asyncStops = [];
     this.queueEmpties = [];
     this.enterExitEmpties = [];
+    this.marks = [];
     this.minStep = log.length > 0 ? log[0].step : -1;
     this.maxStep = log.length > 0 ? log[log.length - 1].step : -1;
 
@@ -103,8 +105,7 @@ class GraphAtStep {
         case LogStates.exit:
           enterExitQueue.pop();
           if (enterExitQueue.length === 0) {
-            // add an extra step to show that it is completed
-            this.enterExitEmpties.push(logItem.step + 1);
+            this.enterExitEmpties.push(logItem.step);
           }
           break;
         case LogStates.asyncStart:
@@ -115,6 +116,9 @@ class GraphAtStep {
           break;
         case LogStates.queueEmpty:
           this.queueEmpties.push(logItem.step);
+          break;
+        case LogStates.mark:
+          this.marks.push(logItem.step);
           break;
       }
 
@@ -138,6 +142,7 @@ class GraphAtStep {
         case LogStates.asyncStart:
         case LogStates.asyncStop:
         case LogStates.queueEmpty:
+        case LogStates.mark:
           break;
         default:
           this.steps.push(logItem.step);
@@ -249,6 +254,7 @@ class GraphAtStep {
         case LogStates.asyncStart:
         case LogStates.asyncStop:
         case LogStates.queueEmpty:
+        case LogStates.mark:
           break;
         default:
           console.error(logEntry);
@@ -320,6 +326,7 @@ class GraphAtStep {
         case LogStates.asyncStart:
         case LogStates.asyncStop:
         case LogStates.queueEmpty:
+        case LogStates.mark:
           break;
         default:
           console.error(logItem);
@@ -534,6 +541,7 @@ class GraphAtStep {
         case LogStates.queueEmpty:
         case LogStates.asyncStart:
         case LogStates.asyncStop:
+        case LogStates.mark:
           // always add
           return true;
         default:

@@ -19,6 +19,7 @@ let colors = {
     blue: "#377eb8", // frozen
     green: "#4daf4a", // enter
     purple: "#984ea3", //
+    purpleLite: "#f191ff", //
     orange: "#ff7f00", //
     yellow: "#ffff33", //
     brown: "#a65628", //

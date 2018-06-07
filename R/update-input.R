@@ -576,7 +576,7 @@ updateRadioButtons <- function(session, inputId, label = NULL, choices = NULL,
 #' @template update-input
 #' @inheritParams selectInput
 #'
-#' @seealso \code{\link{selectInput}}
+#' @seealso \code{\link{selectInput}} \code{\link{varSelectInput}}
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -673,6 +673,43 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
   ))
   session$sendInputMessage(inputId, message)
 }
+#' @rdname updateSelectInput
+#' @inheritParams varSelectInput
+#' @export
+updateVarSelectInput <- function(session, inputId, label = NULL, data = NULL, selected = NULL) {
+  if (is.null(data)) {
+    choices <- NULL
+  } else {
+    choices <- colnames(data)
+  }
+  updateSelectInput(
+    session = session,
+    inputId = inputId,
+    label = label,
+    choices = choices,
+    selected = selected
+  )
+}
+#' @rdname updateSelectInput
+#' @export
+updateVarSelectizeInput <- function(session, inputId, label = NULL, data = NULL, selected = NULL, options = list(), server = FALSE) {
+  if (is.null(data)) {
+    choices <- NULL
+  } else {
+    choices <- colnames(data)
+  }
+  updateSelectizeInput(
+    session = session,
+    inputId = inputId,
+    label = label,
+    choices = choices,
+    selected = selected,
+    options = options,
+    server = server
+  )
+}
+
+
 
 selectizeJSON <- function(data, req) {
   query <- parseQueryString(req$QUERY_STRING)

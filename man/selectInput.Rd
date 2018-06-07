@@ -98,9 +98,9 @@ shinyApp(
 shinyApp(
   ui = fluidPage(
     selectInput("state", "Choose a state:",
-      list(`East Coast` = c("NY", "NJ", "CT"),
-           `West Coast` = c("WA", "OR", "CA"),
-           `Midwest` = c("MN", "WI", "IA"))
+      list(`East Coast` = list("NY", "NJ", "CT"),
+           `West Coast` = list("WA", "OR", "CA"),
+           `Midwest` = list("MN", "WI", "IA"))
     ),
     textOutput("result")
   ),

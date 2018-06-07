@@ -1,3 +1,12 @@
+shiny 1.1.0.9000
+===========
+
+## Full changelog
+
+### Minor new features and improvements
+
+* Addressed [#2042](https://github.com/rstudio/shiny/issues/2042): dates outside of `min`/`max` date range are now a lighter shade of grey to highlight the allowed range. [#2087](https://github.com/rstudio/shiny/pull/2087)
+
 shiny 1.1.0
 ===========
 

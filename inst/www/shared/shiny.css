@@ -382,7 +382,9 @@ pre.shiny-text-output.noplaceholder:empty {
   box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(76, 174, 76, .6);
 }
 
-.datepicker table tr td.disabled,
-.datepicker table tr td.disabled:hover {
-  color: #AAA !important;
+/* Overrides bootstrap-datepicker3.css styling for invalid date ranges.
+   See https://github.com/rstudio/shiny/issues/2042 for details. */
+.datepicker table tbody tr td.disabled,
+.datepicker table tbody tr td.disabled:hover {
+  color: #aaa;
 }

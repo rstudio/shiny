@@ -3,7 +3,7 @@
 \name{varSelectInput}
 \alias{varSelectInput}
 \alias{varSelectizeInput}
-\title{Create a select list input control from a data.frame}
+\title{Select variables from a data frame}
 \usage{
 varSelectInput(inputId, label, data, selected = NULL, multiple = FALSE,
   selectize = TRUE, width = NULL, size = NULL)
@@ -48,10 +48,17 @@ Create a select list that can be used to choose a single or multiple items
 from the column names of a data frame.
 }
 \details{
-The resulting output value will be returned as a symbol or a list of symbols
-given the \code{multiple} is \code{FALSE} or \code{TRUE} respectively. With
-\code{multiple} set to \code{FALSE}, the corresponding output should be used with \code{!!} within tidy evaluation.  With
-\code{multiple} set to \code{TRUE}, the corresponding output should be used with \code{!!!} within tidy evaluation.
+The resulting output value will be returned as:
+\itemize{
+  \item a symbol if \code{multiple = FALSE}.  The output result should be
+        used with rlang's \code{\link[rlang]{!!}}. For example,
+        \code{ggplot2::aes(!!input$variable)}.
+  \item a list of symbols if \code{multiple = TRUE}. The output result
+        should be used with rlang's \code{\link[rlang]{!!!}} to expand
+        the symbol list as individual arguments. For example,
+        \code{dplyr::select(mtcars, !!!input$vars)} which is
+        equivalent to \code{dplyr::select(mtcars, !!input$vars[[1]], !!input$vars[[2]], ..., !!input$vars[[length(input$vars)]])}.
+}
 
 By default, \code{varSelectInput()} and \code{selectizeInput()} use the
 JavaScript library \pkg{selectize.js}
@@ -74,6 +81,8 @@ The variable selectize input created from \code{varSelectizeInput()} allows
 ## Only run examples in interactive R sessions
 if (interactive()) {
 
+library(ggplot2)
+
 # single selection
 shinyApp(
   ui = fluidPage(
@@ -82,7 +91,7 @@ shinyApp(
   ),
   server = function(input, output) {
     output$data <- renderPlot({
-      ggplot2::qplot(!!input$variable, data = mtcars)
+      ggplot(mtcars, aes(!!input$variable)) + geom_histogram()
     })
   }
 )
@@ -92,13 +101,13 @@ shinyApp(
 \dontrun{
 shinyApp(
  ui = fluidPage(
-   varSelectInput("variable", "Variable:", mtcars, multiple = TRUE),
+   varSelectInput("variables", "Variable:", mtcars, multiple = TRUE),
    tableOutput("data")
  ),
  server = function(input, output) {
    output$data <- renderTable({
-      if (length(input$variable) == 0) return(mtcars)
-      mtcars \%>\% dplyr::select(!!!input$variable)
+      if (length(input$variables) == 0) return(mtcars)
+      mtcars \%>\% dplyr::select(!!!input$variables)
    }, rownames = TRUE)
  }
 )}

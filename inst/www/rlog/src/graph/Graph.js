@@ -3,6 +3,7 @@
 import _ from "lodash";
 import cytoscape from "cytoscape";
 
+import { mapValues } from "../utils/MapHelper";
 import { LogStates } from "../log/logStates";
 import { Node } from "./Node";
 import { Edge } from "./Edge";
@@ -615,13 +616,6 @@ class Graph {
     }
   }
 }
-
-function mapValues<T>(x: Map<string, T>): Array<T> {
-  return Array.from(x.values());
-}
-// function mapKeys<T>(x: Map<string, T>): Array<string> {
-//   return Array.from(x.keys());
-// }
 
 function isEdgeLike(data: any): boolean %checks {
   return data instanceof Edge || data instanceof GhostEdge;

@@ -5,6 +5,7 @@ import { HoverStatus } from "./HoverStatus";
 import { ActiveStateStatus } from "./ActiveStateStatus";
 import { StatusArr } from "./StatusArr";
 import type { StatusEntry } from "./StatusArr";
+import type { CytoData } from "../cyto/cytoFlowType";
 
 // // TODO-barret use log states everywhere
 // import logStates from "../log/logStates"
@@ -134,7 +135,7 @@ class Node {
 
     return classes.join(" ");
   }
-  get cytoData() {
+  get cytoData(): CytoData {
     let retData = this;
     return {
       group: "nodes",

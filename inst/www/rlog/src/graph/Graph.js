@@ -11,6 +11,7 @@ import { GhostEdge } from "./GhostEdge";
 import { HoverStatus } from "./HoverStatus";
 import { expectPrevStatus } from "./StatusArr";
 
+import { flatMap } from "../utils/ArrayHelper";
 import console from "../utils/console";
 
 import type { CytoscapeType } from "../cyto/cytoFlowType";
@@ -73,11 +74,8 @@ class Graph {
 
     let cyto: CytoscapeType = cytoscape();
 
-    // $FlowExpectError
     cyto.add(nodes);
-    // $FlowExpectError
     cyto.add(edges);
-    // $FlowExpectError
     cyto.add(ghostEdges);
     return cyto;
   }
@@ -278,11 +276,7 @@ class Graph {
   familyTreeNodeIdsForDatas(datas: Array<SomeGraphData>): Array<ReactIdType> {
     let self = this;
     return _.union(
-      // has an error as there is a double definition of _.flatMap.
-      // One for an Array (defined first)
-      // One for an Object (defined second, which stomps the first)
-      // $FlowExpectError
-      _.flatMap(datas, function(data: SomeGraphData) {
+      flatMap(datas, function(data) {
         return self.familyTreeNodeIds(data);
       })
     );
@@ -290,11 +284,7 @@ class Graph {
   decendentNodeIdsForDatas(datas: Array<SomeGraphData>): Array<ReactIdType> {
     let self = this;
     return _.union(
-      // has an error as there is a double definition of _.flatMap.
-      // One for an Array (defined first)
-      // One for an Object (defined second, which stomps the first)
-      // $FlowExpectError
-      _.flatMap(datas, function(data: SomeGraphData) {
+      flatMap(datas, function(data: SomeGraphData) {
         return self.decendentNodeIds(data);
       })
     );
@@ -302,11 +292,7 @@ class Graph {
   ancestorNodeIdsForDatas(datas: Array<SomeGraphData>) {
     let self = this;
     return _.union(
-      // has an error as there is a double definition of _.flatMap.
-      // One for an Array (defined first)
-      // One for an Object (defined second, which stomps the first)
-      // $FlowExpectError
-      _.flatMap(datas, function(data) {
+      flatMap(datas, function(data) {
         return self.ancestorNodeIds(data);
       })
     );
@@ -314,42 +300,53 @@ class Graph {
 
   hoverStatusOnNodeIds(
     nodeIds: Array<ReactIdType>,
-    hoverKey: "state" | "sticky",
-    onStatus: typeof HoverStatus.valSticky | typeof HoverStatus.valFocused,
-    offStatus:
-      | typeof HoverStatus.valNotSticky
-      | typeof HoverStatus.valNotFocused
+    hoverKey: "state" | "sticky"
   ) {
     let nodeSet = new Set(nodeIds);
+
+    let onFn = function(x: Node | Edge | GhostEdge) {
+      switch (hoverKey) {
+        case "state":
+          x.hoverStatus.toFocused();
+          break;
+        case "sticky":
+          x.hoverStatus.toSticky();
+          break;
+      }
+    };
+    let offFn = function(x: Node | Edge | GhostEdge) {
+      switch (hoverKey) {
+        case "state":
+          x.hoverStatus.toNotFocused();
+          break;
+        case "sticky":
+          x.hoverStatus.toNotSticky();
+          break;
+      }
+    };
 
     // highlight nodes
     mapValues(this.nodes).map(function(node) {
       if (nodeSet.has(node.reactId)) {
-        // $FlowExpectError
-        node.hoverStatus[hoverKey] = onStatus;
+        onFn(node);
       } else {
-        // $FlowExpectError
-        node.hoverStatus[hoverKey] = offStatus;
+        offFn(node);
       }
     });
     // highlight edges
     mapValues(this.edges).map(function(edge) {
       if (nodeSet.has(edge.reactId) && nodeSet.has(edge.depOnReactId)) {
-        // $FlowExpectError
-        edge.hoverStatus[hoverKey] = onStatus;
+        onFn(edge);
       } else {
-        // $FlowExpectError
-        edge.hoverStatus[hoverKey] = offStatus;
+        offFn(edge);
       }
     });
     // highlight unique edges
     mapValues(this.edgesUnique).map(function(edge) {
       if (nodeSet.has(edge.reactId) && nodeSet.has(edge.depOnReactId)) {
-        // $FlowExpectError
-        edge.hoverStatus[hoverKey] = onStatus;
+        onFn(edge);
       } else {
-        // $FlowExpectError
-        edge.hoverStatus[hoverKey] = offStatus;
+        offFn(edge);
       }
     });
 

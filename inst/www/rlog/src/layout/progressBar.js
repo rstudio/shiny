@@ -24,8 +24,9 @@ let updateFromProgressBar = function(e: BaseJQueryEventObject): void {
   // Firefox is stupid; e.which is always 1 on mousemove events,
   // even when button is not down!! So read e.originalEvent.buttons.
   if (!_.has(e.originalEvent, "buttons")) {
-    // $FlowExpectError
-    if (e.originalEvent.buttons !== 1) return;
+    // odd type casting as jquery doesn't believe this exists
+    let originalEvent = ((e.originalEvent: Object): MouseEvent);
+    if (originalEvent.buttons !== 1) return;
   }
   // return if not left click
   if (e.which !== 1) {

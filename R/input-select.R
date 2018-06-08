@@ -225,16 +225,16 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
 #' Create a select list that can be used to choose a single or multiple items
 #' from the column names of a data frame.
 #'
-#' The resulting output value will be returned as:
+#' The resulting server \code{input} value will be returned as:
 #' \itemize{
-#'   \item a symbol if \code{multiple = FALSE}.  The output result should be
+#'   \item a symbol if \code{multiple = FALSE}.  The \code{input} value should be
 #'         used with rlang's \code{\link[rlang]{!!}}. For example,
 #'         \code{ggplot2::aes(!!input$variable)}.
-#'   \item a list of symbols if \code{multiple = TRUE}. The output result
+#'   \item a list of symbols if \code{multiple = TRUE}. The \code{input} value
 #'         should be used with rlang's \code{\link[rlang]{!!!}} to expand
 #'         the symbol list as individual arguments. For example,
-#'         \code{dplyr::select(mtcars, !!!input$vars)} which is
-#'         equivalent to \code{dplyr::select(mtcars, !!input$vars[[1]], !!input$vars[[2]], ..., !!input$vars[[length(input$vars)]])}.
+#'         \code{dplyr::select(mtcars, !!!input$variabls)} which is
+#'         equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.
 #' }
 #'
 #' By default, \code{varSelectInput()} and \code{selectizeInput()} use the

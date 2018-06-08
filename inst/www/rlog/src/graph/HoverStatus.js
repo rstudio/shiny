@@ -1,6 +1,8 @@
 // @flow
 
 class HoverStatus {
+  static keyState = "state";
+  static keySticky = "sticky";
   static valFocused = "focused";
   static valNotFocused = "notFocused";
   static valSticky = true;

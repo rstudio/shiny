@@ -306,20 +306,20 @@ class Graph {
 
     let onFn = function(x: Node | Edge | GhostEdge) {
       switch (hoverKey) {
-        case "state":
+        case HoverStatus.keyState:
           x.hoverStatus.toFocused();
           break;
-        case "sticky":
+        case HoverStatus.keySticky:
           x.hoverStatus.toSticky();
           break;
       }
     };
     let offFn = function(x: Node | Edge | GhostEdge) {
       switch (hoverKey) {
-        case "state":
+        case HoverStatus.keyState:
           x.hoverStatus.toNotFocused();
           break;
-        case "sticky":
+        case HoverStatus.keySticky:
           x.hoverStatus.toNotSticky();
           break;
       }

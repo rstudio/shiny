@@ -5,10 +5,8 @@ import console from "../utils/console";
 
 import { mapValues } from "../utils/MapHelper";
 import { LogStates } from "../log/logStates";
-import { HoverStatus } from "./HoverStatus";
 import { Graph } from "./Graph";
 
-import { rlog } from "../rlog";
 import layoutOptions from "../cyto/layoutOptions";
 
 import { Node } from "./Node";
@@ -354,9 +352,7 @@ class GraphAtStep {
     if (this.hoverData && graph.hasSomeData(this.hoverData)) {
       graph.hoverStatusOnNodeIds(
         graph.familyTreeNodeIds(this.hoverData),
-        "state",
-        HoverStatus.valFocused,
-        HoverStatus.valNotFocused
+        "state"
       );
       graph.highlightSelected(this.hoverData);
     }
@@ -371,23 +367,13 @@ class GraphAtStep {
       ) {
         // at least some sticky data is visible
         let stickyTree = graph.familyTreeNodeIdsForDatas(this.stickyDatas);
-        graph.hoverStatusOnNodeIds(
-          stickyTree,
-          "sticky",
-          HoverStatus.valSticky,
-          HoverStatus.valNotSticky
-        );
+        graph.hoverStatusOnNodeIds(stickyTree, "sticky");
         this.stickyDatas.map(function(data) {
           graph.highlightSelected(data);
         });
         if (!this.hoverData) {
           // if sticky data no hover data... make the sticky data hover!
-          graph.hoverStatusOnNodeIds(
-            stickyTree,
-            "state",
-            HoverStatus.valFocused,
-            HoverStatus.valNotFocused
-          );
+          graph.hoverStatusOnNodeIds(stickyTree, "state");
         }
       }
     }
@@ -396,7 +382,8 @@ class GraphAtStep {
     if (this.searchRegex) {
       let searchRegex = this.searchRegex;
       let matchedNodes = _.filter(
-        (mapValues(graph.nodes): Array<SomeGraphData>),
+        // (mapValues(graph.nodes): ArraySomeGraphData),
+        mapValues(graph.nodes),
         function(node: Node) {
           return searchRegex.test(node.label);
         }
@@ -405,9 +392,12 @@ class GraphAtStep {
       if (matchedNodes.length === 0) {
         // TODO-barret warn of no matches
         console.log("no matches!");
-        rlog.getGraph.updateFilterDatasReset();
+        this.updateFilterDatasReset();
       } else {
-        rlog.getGraph.updateFilterDatas(matchedNodes);
+        // for some reason, an array of node does not work with an array of (node, edge, or ghostedge)
+        this.updateFilterDatas(
+          ((matchedNodes: Array<Object>): Array<SomeGraphData>)
+        );
         // filter on regex
         graph.filterGraphOnNodeIds(
           graph.familyTreeNodeIdsForDatas(this.filterDatas)

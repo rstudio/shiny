@@ -29,11 +29,12 @@
       "inst/www/rlog/src/**/*.js"
     ],
     "excludeGlob": [
-      "inst/www/rlog/src/utils/console.js",
+      "inst/www/rlog/src/utils/Console.js",
+      "inst/www/rlog/src/cyto/layoutOptions.js",
       "inst/www/rlog/src/log/initStep.js",
       "inst/www/rlog/src/rlog.js"
     ],
-    "threshold": 90,
+    "threshold": 95,
     "type": "text"
   },
   "devDependencies": {

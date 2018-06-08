@@ -3,6 +3,7 @@
 import _ from "lodash";
 import console from "../utils/console";
 
+import { mapValues } from "../utils/MapHelper";
 import { LogStates } from "../log/logStates";
 import { HoverStatus } from "./HoverStatus";
 import { Graph } from "./Graph";
@@ -395,9 +396,9 @@ class GraphAtStep {
     if (this.searchRegex) {
       let searchRegex = this.searchRegex;
       let matchedNodes = _.filter(
-        (_.values(graph.nodes): Array<SomeGraphData>),
+        (mapValues(graph.nodes): Array<SomeGraphData>),
         function(node: Node) {
-          return node && searchRegex.test(node.label);
+          return searchRegex.test(node.label);
         }
       );
 

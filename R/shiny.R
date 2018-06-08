@@ -901,9 +901,11 @@ ShinySession <- R6Class(
         # Create subdir for this scope
         if (!is.null(state$dir)) {
           scopeState$dir <- file.path(state$dir, namespace)
-          res <- dir.create(scopeState$dir)
-          if (res == FALSE) {
-            stop("Error creating subdirectory for scope ", namespace)
+          if(!dir.exists(scopeState$dir)){
+            res <- dir.create(scopeState$dir)
+            if (res == FALSE) {
+              stop("Error creating subdirectory for scope ", namespace)
+            }
           }
         }
 

@@ -66,17 +66,17 @@ let graphStyles = {
     },
     enter: {
       // "border-width": 2,
-      "background-color": colors.regular.green2,
+      "background-color": colors.regular.green,
     },
     enterActive: {
-      "background-color": colors.regular.green3,
+      "background-color": colors.regular.green,
     },
     invalidate: {
       // "border-width": 2,
       "background-color": colors.regular.grey2,
     },
     invalidateActive: {
-      "background-color": colors.regular.grey3,
+      "background-color": colors.regular.grey2,
     },
     invalidateDone: {
       "background-color": colors.regular.grey1,
@@ -93,7 +93,8 @@ let graphStyles = {
       // "border-opacity"
     },
     valueChanged: {
-      "background-color": colors.regular.red, // blood red
+      // "background-color": colors.regular.red,
+      "background-color": colors.regular.grey2,
       // "border-style": "dashed",
       // "border-color": "darkgrey",
       // "border-width": 3,

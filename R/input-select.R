@@ -307,8 +307,13 @@ varSelectInput <- function(
   )
 
   # set the select tag class to be "symbol"
-  selectAttribs <- selectInputVal$children[[2]]$children[[1]]$attribs
-  selectInputVal$children[[2]]$children[[1]]$attribs$class <- "symbol"
+  selectClass <- selectInputVal$children[[2]]$children[[1]]$attribs$class
+  if (is.null(selectClass)) {
+    newClass <- "symbol"
+  } else {
+    newClass <- paste(selectClass, "symbol", sep = " ")
+  }
+  selectInputVal$children[[2]]$children[[1]]$attribs$class <- newClass
 
   selectInputVal
 }

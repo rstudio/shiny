@@ -48,3 +48,34 @@ test_that("Nulls are not converted to NAs in parsing", {
     list(method="init", data=list(obs=500L, nullObs=NULL))
   )
 })
+
+
+test_that("characters turn into symbols", {
+  handler <- inputHandlers$get("shiny.symbol")
+  x <- "mpg"
+  expect_identical(
+    handler(x),
+    as.symbol(x)
+  )
+  expect_identical(
+    handler(NULL),
+    NULL
+  )
+})
+test_that("character vectors turn into symbol lists", {
+  handler <- inputHandlers$get("shiny.symbolList")
+  x <- list("mpg")
+  expect_identical(
+    handler(x),
+    list(as.symbol(x[[1]]))
+  )
+  x <- list("mpg", "cyl", "disp")
+  expect_identical(
+    handler(x),
+    list(as.symbol(x[[1]]), as.symbol(x[[2]]), as.symbol(x[[3]]))
+  )
+  expect_identical(
+    handler(NULL),
+    list()
+  )
+})

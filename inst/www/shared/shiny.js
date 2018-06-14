@@ -14,7 +14,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   var exports = window.Shiny = window.Shiny || {};
 
-  exports.version = "1.1.0"; // Version number inserted by Grunt
+  exports.version = "{{ VERSION }}"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -5042,6 +5042,18 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   $.extend(selectInputBinding, {
     find: function find(scope) {
       return $(scope).find('select');
+    },
+    getType: function getType(el) {
+      var $el = $(el);
+      if (!$el.hasClass("symbol")) {
+        // default character type
+        return null;
+      }
+      if ($el.attr("multiple") === "multiple") {
+        return 'shiny.symbolList';
+      } else {
+        return 'shiny.symbol';
+      }
     },
     getId: function getId(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;

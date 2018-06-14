@@ -383,13 +383,17 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
   session$sendInputMessage(inputId, message)
 }
 
-#' Change the value of a slider input on the client
+#' Update Slider Input Widget
+#'
+#' Change the value of a slider input on the client.
 #'
 #' @template update-input
 #' @param value The value to set for the input object.
 #' @param min Minimum value.
 #' @param max Maximum value.
 #' @param step Step size.
+#' @param timeFormat Date and POSIXt formatting.
+#' @param timezone The timezone offset for POSIXt objects.
 #'
 #' @seealso \code{\link{sliderInput}}
 #'
@@ -422,7 +426,7 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #' }
 #' @export
 updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
-  min = NULL, max = NULL, step = NULL)
+  min = NULL, max = NULL, step = NULL, timeFormat = NULL, timezone = NULL)
 {
   # Make sure that value, min, max all have the same type, because we need
   # special handling for dates and datetimes.
@@ -444,12 +448,24 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
     if (!is.null(value)) value <- to_ms(value)
   }
 
+  if (is.null(timeFormat)) {
+    if (type[[1]] == "date") {
+      timeFormat <- "%F"
+    } else if (type[[1]] == "datetime") {
+      timeFormat <- "%F %T"
+    }
+  }
+
+
   message <- dropNulls(list(
     label = label,
     value = formatNoSci(value),
     min = formatNoSci(min),
     max = formatNoSci(max),
-    step = formatNoSci(step)
+    step = formatNoSci(step),
+    `data-type` = type[[1]],
+    `time-format` = timeFormat,
+    timezone = timezone
   ))
   session$sendInputMessage(inputId, message)
 }

@@ -89,7 +89,7 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {
-    timeFormat <- switch(dataType, date = "%F", datetime = "%F %T")
+    timeFormat <- switch(dataType, date = "%F", datetime = "%F %T", number = NULL)
   }
 
   # Restore bookmarked values here, after doing the type checking, because the

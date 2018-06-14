@@ -431,7 +431,7 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {
-    timeFormat <- switch(dataType, date = "%F", datetime = "%F %T")
+    timeFormat <- switch(dataType, date = "%F", datetime = "%F %T", number = NULL)
   }
 
   if (dataType == "date" || dataType == "datetime") {

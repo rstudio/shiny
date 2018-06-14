@@ -1679,14 +1679,14 @@ createVarPromiseDomain <- function(env, name, value) {
   force(env)
   force(name)
   force(value)
-  
+
   promises::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       function(...) {
         orig <- env[[name]]
         env[[name]] <- value
         on.exit(env[[name]] <- orig)
-        
+
         onFulfilled(...)
       }
     },
@@ -1695,7 +1695,7 @@ createVarPromiseDomain <- function(env, name, value) {
         orig <- env[[name]]
         env[[name]] <- value
         on.exit(env[[name]] <- orig)
-        
+
         onRejected(...)
       }
     },
@@ -1707,4 +1707,17 @@ createVarPromiseDomain <- function(env, name, value) {
       force(expr)
     }
   )
+}
+
+getSliderType <- function(min, max, value) {
+  vals <- dropNulls(list(value, min, max))
+  type <- unique(lapply(vals, function(x) {
+    if      (inherits(x, "Date"))   "date"
+    else if (inherits(x, "POSIXt")) "datetime"
+    else                            "number"
+  }))
+  if (length(type) > 1) {
+    stop("Type mismatch for `min`, `max`, and `value`. Each must be Date, POSIXt, or number.")
+  }
+  type[[1]]
 }

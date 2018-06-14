@@ -428,34 +428,18 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
   min = NULL, max = NULL, step = NULL, timeFormat = NULL, timezone = NULL)
 {
-  # Make sure that value, min, max all have the same type, because we need
-  # special handling for dates and datetimes.
-  vals <- dropNulls(list(value, min, max))
+  dataType <- getSliderType(min, max, value)
 
-  type <- unique(lapply(vals, function(x) {
-    if      (inherits(x, "Date"))   "date"
-    else if (inherits(x, "POSIXt")) "datetime"
-    else                            "number"
-  }))
-  if (length(type) > 1) {
-    stop("Type mismatch for value, min, and max")
+  if (is.null(timeFormat)) {
+    timeFormat <- switch(dataType, date = "%F", datetime = "%F %T")
   }
 
-  if ((length(type) == 1) && (type == "date" || type == "datetime")) {
+  if (dataType == "date" || dataType == "datetime") {
     to_ms <- function(x) 1000 * as.numeric(as.POSIXct(x))
     if (!is.null(min))   min   <- to_ms(min)
     if (!is.null(max))   max   <- to_ms(max)
     if (!is.null(value)) value <- to_ms(value)
   }
-
-  if (is.null(timeFormat)) {
-    if (type[[1]] == "date") {
-      timeFormat <- "%F"
-    } else if (type[[1]] == "datetime") {
-      timeFormat <- "%F %T"
-    }
-  }
-
 
   message <- dropNulls(list(
     label = label,
@@ -463,7 +447,7 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
     min = formatNoSci(min),
     max = formatNoSci(max),
     step = formatNoSci(step),
-    `data-type` = type[[1]],
+    `data-type` = dataType,
     `time-format` = timeFormat,
     timezone = timezone
   ))

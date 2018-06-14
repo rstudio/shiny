@@ -9,6 +9,7 @@ import * as updateGraph from "./updateGraph";
 import type { CytoscapeType } from "./cyto/cytoFlowType";
 import type { LogType } from "./log/logStates";
 
+// TODO-barret change to individual exports
 let ret = {
   log: ([]: LogType),
   cyto: (cytoscape(): CytoscapeType),

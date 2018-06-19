@@ -91,9 +91,10 @@ $.extend(selectInputBinding, {
             selectize.refreshOptions();
             callback(res);
             if (!loaded && data.hasOwnProperty('value')) {
-              selectize.setValue(el, data.value);
-            } else {
-              selectize.addItem(res[0].value);
+              selectize.setValue(data.value);
+            } else if (settings.maxItems === 1) {
+              // only have item selected by default for single-select
+              selectize.setValue(res[0].value);
             }
             loaded = true;
           }

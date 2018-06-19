@@ -68,10 +68,9 @@ $.extend(selectInputBinding, {
       selectize = this._selectize(el);
       selectize.clearOptions();
       selectize.clearOptionGroups();
-      var thiz = this, loaded = false;
+      var loaded = false;
       selectize.settings.load = function(query, callback) {
         var settings = selectize.settings;
-        var thiz2 = this;
         $.ajax({
           url: data.url,
           data: {
@@ -87,14 +86,14 @@ $.extend(selectInputBinding, {
           },
           success: function(res) {
             $.each(res, function(index, elem) {
-              thiz2.addOptionGroup(elem['group'], { group: elem['group'] });
+              selectize.addOptionGroup(elem['group'], { group: elem['group'] });
             });
-            thiz2.refreshOptions();
+            selectize.refreshOptions();
             callback(res);
             if (!loaded && data.hasOwnProperty('value')) {
-              thiz.setValue(el, data.value);
+              selectize.setValue(el, data.value);
             } else {
-              thiz2.addItem(res[0].value);
+              selectize.addItem(res[0].value);
             }
             loaded = true;
           }
@@ -134,8 +133,8 @@ $.extend(selectInputBinding, {
       valueField: 'value',
       searchField: ['label'],
       optgroupField: 'group',
-			optgroupLabelField: 'group',
-			optgroupValueField: 'group'
+      optgroupLabelField: 'group',
+      optgroupValueField: 'group'
     }, JSON.parse(config.html()));
     // selectize created from selectInput()
     if (typeof(config.data('nonempty')) !== 'undefined') {

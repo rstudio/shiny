@@ -668,7 +668,6 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     data.frame(label = lab, value = choices, stringsAsFactors = FALSE)
   } else {
     # slow path
-
     list_names <- names(choices)
     if (is.null(list_names)) list_names <- ""
 
@@ -690,9 +689,25 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
         }
       }
 
-      data.frame(label = lab, value = as.character(choice), group = group)
+      list(
+        label = lab,
+        value = as.character(choice),
+        group = group
+      )
     }, SIMPLIFY = FALSE)
-    do.call(rbind, choice_list)
+
+
+    extract_vector <- function(x, name) {
+      vecs <- lapply(x, `[[`, name)
+      do.call(c, vecs)
+    }
+
+    data.frame(
+      label = extract_vector(choice_list, "label"),
+      value = extract_vector(choice_list, "value"),
+      group = extract_vector(choice_list, "group"),
+      stringsAsFactors = FALSE, row.names = NULL
+    )
   }
 
   value <- unname(selected)

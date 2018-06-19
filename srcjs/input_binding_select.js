@@ -91,8 +91,11 @@ $.extend(selectInputBinding, {
             });
             thiz2.refreshOptions();
             callback(res);
-            if (!loaded && data.hasOwnProperty('value'))
+            if (!loaded && data.hasOwnProperty('value')) {
               thiz.setValue(el, data.value);
+            } else {
+              thiz2.addItem(res[0].value);
+            }
             loaded = true;
           }
         });
@@ -132,7 +135,7 @@ $.extend(selectInputBinding, {
       searchField: ['label'],
       optgroupField: 'group',
 			optgroupLabelField: 'group',
-			ptgroupValueField: 'group'
+			optgroupValueField: 'group'
     }, JSON.parse(config.html()));
     // selectize created from selectInput()
     if (typeof(config.data('nonempty')) !== 'undefined') {

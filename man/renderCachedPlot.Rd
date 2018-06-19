@@ -76,20 +76,6 @@ to normal R objects before returning them. Your expression could even
 serialize and hash that information in an efficient way and return a string,
 which will in turn be hashed (very quickly) by the
 \code{\link[digest]{digest}} function.
-
-\code{cacheResetExpr} is an expression that uses reactive values like
-\code{input$click} and/or reactive expressions like \code{data()}. Whenever
-the value of \code{cacheResetExpr} changes, the the cache is reset -- the
-contents are erased. The cache should be reset when something changes so that
-a plot made with the same cache key as before would have a different result.
-This may happen when, for example, the underlying data changes. If the plot
-is based on a data source that changes over time, the plot at time 1 may
-differ from the plot at time 2, even if both plots use the same cache key.
-
-Another way to use \code{cacheResetExpr} is to have it clear the cache at a
-fixed time interval, by using \code{\link{invalidateLater}} and then returning
-an incrementing or random value each time. For example, you
-might want to have clear the cache once per hour, or once per day.
 }
 \section{Cache scoping}{
 
@@ -101,46 +87,49 @@ might want to have clear the cache once per hour, or once per day.
   cache that persists even after the application is shut down and started
   again.
 
-  To control the scope of the cache, use the \code{scope} parameter. There
+  To control the scope of the cache, use the \code{cache} parameter. There
   are two ways of having Shiny automatically create and clean up the disk
   cache.
 
 \describe{
-  \item{1}{To scope the cache to one session, use \code{scope="session"}.
+  \item{1}{To scope the cache to one session, use \code{cache="session"}.
     When a new user session starts -- in other words, when a web browser
     visits the Shiny application -- a new cache will be created on disk
     for that session. When the session ends, the cache will be deleted.
     The cache will not be shared across multiple sessions.}
   \item{2}{To scope the cache to one run of a Shiny application (shared
-    among possibly multiple user sessions), use \code{scope="app"}. This
+    among possibly multiple user sessions), use \code{cache="app"}. This
     is the default. The cache will be shared across multiple sessions, so
     there is potentially a large performance benefit if there are many users
     of the application. If plots cannot be safely shared across users, this
     should not be used.}
  }
 
-  In some cases, you may want to manually specify the cache directory. This
-  can be useful if you want the cache to persist across multiple runs of an
-  application, or even across multiple R processes.
+  If either \code{"session"} or \code{"app"} is used, the cache will be 5 MB
+  in size, and will be stored stored in a temporary directory. Note that a
+  single cache will be shared for all plots within a single application.
+
+  In some cases, you may want to have finer-grained control over the caching
+  behavior. For example, you may want to use a larger or smaller cache, or
+  you may want the cache to persist across multiple runs of an application,
+  or even across multiple R processes. To use this finer-grained control,
+  pass a \code{\link{DiskCache}} object as the \code{cache} parameter.
+
+  Here are some ways to create a cache with other behaviors:
 
 \describe{
   \item{3}{To have the cache persist across multiple runs of an R process,
-    use \code{scope=file.path(dirname(tempdir()), "plot1_cache")}.
+    use \code{cache=DiskCache$new(dirname(tempdir()), "plot1_cache")}.
     This will create a subdirectory in your system temp directory named
-    \code{plot1_cache} (where \code{plot1_cache} is replaced with a unique
-    name of your choosing). When the R process exits, it will automatically
-    be removed.}
-  \item{4}{To have the cache persist even across multiple R processes, you
-    can set \code{cacheDir} to a location outside of the temp directory.
+    \code{plot1_cache} (replace \code{plot1_cache} with a unique name of
+    your choosing). On most platforms, this directory will be removed when
+    your system reboots.}
+  \item{4}{To have the cache persist even across multiple reboots, you
+    can create the cache in a location outside of the temp directory.
     For example, it could be a subdirectory of the application, as in
-    \code{scope="plot1_cache"}}.
+    \code{cache=DiskCache$new(plot1_cache")}. You may need to manually
+    remove this directory to clear the cache.}
 }
-
-  Please note that if you specify a directory, that directory should only be
-  used to plot cache files. If it contains any other files or directories,
-  they could be removed when the cache is invalidated. Additionally, the
-  directory will not automatically be cleaned up or removed when the Shiny
-  application exits.
 }
 
 \examples{
@@ -198,9 +187,8 @@ server <- function(input, output, session) {
       seqn <- seq_len(input$n)
       plot(d$x[seqn], d$y[seqn], xlim = range(d$x), ylim = range(d$y))
     },
-    cacheKeyExpr = { list(input$n) },
-    cacheResetExpr = { mydata() },  # Reset cache when mydata() changes
-    scope = "app"
+    cacheKeyExpr = { list(input$n, mydata()) },
+    cache = "app"
   )
 }
 

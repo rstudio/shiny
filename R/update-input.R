@@ -643,10 +643,18 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
 
+  noOptGroup <- TRUE
+  for (i in 1:length(choices)) {
+    if (is.list(choices[[i]])) {
+      noOptGroup <- FALSE
+      break()
+    }
+  }
+
   # convert a single vector to a data frame so it returns {label: , value: }
-  # other objects return arbitrary JSON {x: , y: , foo: , ...}
-  choices <- if (is.atomic(choices)) {
+  choices <- if (is.atomic(choices) || noOptGroup) {
     # fast path
+    if (is.list(choices)) choices <- unlist(choices)
     if (is.null(names(choices))) {
       lab <- as.character(choices)
     } else {
@@ -660,7 +668,31 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     data.frame(label = lab, value = choices, stringsAsFactors = FALSE)
   } else {
     # slow path
-    as.data.frame(choices, stringsAsFactors = FALSE)
+
+    list_names <- names(choices)
+    if (is.null(list_names)) list_names <- ""
+
+    choice_list <- mapply(choices, list_names, FUN = function (choice, name) {
+      group <- ""
+      lab <- name
+      if (lab == "") lab <- as.character(choice)
+
+      if (is.list(choice)) {
+        group <- rep(name, length(choice))
+        choice <- unlist(choice)
+
+        if (is.null(names(choice))) {
+          lab <- as.character(choice)
+        } else {
+          lab <- names(choice)
+          empty_names_indices <- lab == ""
+          lab[empty_names_indices] <- as.character(choice[empty_names_indices])
+        }
+      }
+
+      data.frame(label = lab, value = as.character(choice), group = group)
+    }, SIMPLIFY = FALSE)
+    do.call(rbind, choice_list)
   }
 
   value <- unname(selected)

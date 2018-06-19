@@ -3,6 +3,18 @@ $.extend(selectInputBinding, {
   find: function(scope) {
     return $(scope).find('select');
   },
+  getType: function(el) {
+    var $el = $(el);
+    if (!$el.hasClass("symbol")) {
+      // default character type
+      return null;
+    }
+    if ($el.attr("multiple") === "multiple") {
+      return 'shiny.symbolList';
+    } else {
+      return 'shiny.symbol';
+    }
+  },
   getId: function(el) {
     return InputBinding.prototype.getId.call(this, el) || el.name;
   },

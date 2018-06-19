@@ -142,6 +142,7 @@ registerInputHandler("shiny.matrix", function(data, ...) {
   return(m)
 })
 
+
 registerInputHandler("shiny.number", function(val, ...){
   ifelse(is.null(val), NA, val)
 })
@@ -219,4 +220,22 @@ registerInputHandler("shiny.file", function(val, shinysession, name) {
   snapshotPreprocessInput(name, snapshotPreprocessorFileInput)
 
   val
+})
+
+
+# to be used with !!!answer
+registerInputHandler("shiny.symbolList", function(val, ...) {
+  if (is.null(val)) {
+    list()
+  } else {
+    lapply(val, as.symbol)
+  }
+})
+# to be used with !!answer
+registerInputHandler("shiny.symbol", function(val, ...) {
+  if (is.null(val) || identical(val, "")) {
+    NULL
+  } else {
+    as.symbol(val)
+  }
 })

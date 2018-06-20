@@ -41,52 +41,32 @@ For more information about upgrading or installing new packages, see the [yarn w
 ### Grunt
 Grunt is a build tool that runs on node.js (and installed using `yarn`). In Shiny, it is used for concatenating, minifying, and linting Javascript code.
 
-#### Installing Grunt and the Grunt CLI (command line interface)
-Grunt is a package listed in package.json, so if you've done the previous step, that's already installed. However, as a developer, you also need to install a sister package (called `grunt-cli`) globally:
-
-```
-# Install grunt command line tool globally
-sudo yarn global add grunt-cli
-```
-
-Here's what has happened (from the [Grunt Getting Started guide](http://gruntjs.com/getting-started)):
-
-> This will put the `grunt` command in your system path, allowing it to be run from any directory.
->
-> Note that installing `grunt-cli` does not install the Grunt task runner! The job of the Grunt CLI is simple: run the version of Grunt which has been installed next to a `Gruntfile`. This allows multiple versions of Grunt to be installed on the same machine simultaneously.
-
-And here is how the CLI works (same source):
-
-> Each time `grunt` is run, it looks for a locally installed Grunt using node's `require()` system. Because of this, you can run `grunt` from any subfolder in your project.
->
-> If a locally installed Grunt is found, the CLI loads the local installation of the Grunt library, applies the configuration from your `Gruntfile`, and executes any tasks you've requested for it to run. To really understand what is happening, [read the code](https://github.com/gruntjs/grunt-cli/blob/master/bin/grunt).
-
 ### Using Grunt
 To run all default grunt tasks specified in the Gruntfile (concatenation, minification, and jshint), simply go into the `tools` directory and run:
 
 ```
-yarn run build
+yarn build
 ```
 
 Sometimes grunt gets confused about whether the output files are up to date, and won't overwrite them even if the input files have changed. If this happens, run:
 
 ```
-yarn run clean
+yarn clean
 ```
 
 It's also useful to run `grunt` so that it monitors files for changes and run tasks as necessary. This is done with:
 
 ```
-yarn run watch
+yarn watch
 ```
 
 One of the tasks concatenates all the .js files in `/srcjs` together into `/inst/www/shared/shiny.js`. Another task minifies `shiny.js` to generate `shiny.min.js`. The minified file is supplied to the browser, along with a source map file, `shiny.min.js.map`, which allows a user to view the original Javascript source when using the debugging console in the browser.
 
-During development of Shiny's Javascript code, it's best to use `grunt watch` so that the minified file will get updated whenever you make changes the Javascript sources.
+During development of Shiny's Javascript code, it's best to use `yarn watch` so that the minified file will get updated whenever you make changes the Javascript sources.
 
 #### Auto build and browser refresh
 
-An alternative to `grunt watch` is to use `entr` to trigger `grunt` when sources change. `entr` can be installed with `brew install entr` on a Mac, or on Linux using your distribution's package manager. Using this technique, it's possible to both automatically rebuild sources and reload Chrome at the same time:
+An alternative to `yarn watch` is to use `entr` to trigger `grunt` when sources change. `entr` can be installed with `brew install entr` on a Mac, or on Linux using your distribution's package manager. Using this technique, it's possible to both automatically rebuild sources and reload Chrome at the same time:
 
 *macOS*:
 

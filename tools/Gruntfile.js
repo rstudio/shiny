@@ -1,9 +1,7 @@
 module.exports = function(grunt) {
 
-  var rootDir = __dirname;
-
-  var instdir = rootDir + '/inst/';
-  var js_srcdir = rootDir + '/srcjs/'
+  var instdir = '../inst/';
+  var js_srcdir = '../srcjs/'
 
   gruntConfig = {
     pkg: pkgInfo(),
@@ -91,31 +89,14 @@ module.exports = function(grunt) {
     },
 
     babel: {
+      options: {
+        sourceMap: true,
+        compact: false,
+        presets: ['es2015']
+      },
       shiny: {
         src: './temp_concat/shiny.js',
-        dest: instdir + '/www/shared/shiny.js',
-        options: {
-          sourceMap: true,
-          compact: false,
-          presets: ['es2015']
-        },
-      },
-      reactLog: {
-        src: instdir + "/www/rlog/src/index.js",
-        dest: instdir + "/www/rlog/dest/reactLog.js",
-        options: {
-          babelrc: true // use the local babelrc file for config
-          // sourceMap: true,
-          // compact: false,
-          // presets: ["flow", "es2015"],
-          // plugins: [
-          //   ["transform-es2015-modules-umd", {
-          //     // "globals": {
-          //     //   "es6-promise": "Promise"
-          //     // }
-          //   }]
-          // ]
-        }
+        dest: instdir + '/www/shared/shiny.js'
       }
     },
 
@@ -143,16 +124,6 @@ module.exports = function(grunt) {
         globals: ["strftime"]
       },
       shiny: ['./temp_concat/shiny.js']
-      // ,
-      // reactLog: {
-      //   src: [instdir + "www/rlog/src/**/*.js"],
-      //   options: {
-      //     parser: "babel-eslint",
-      //     extends: ["plugin:flowtype/recommended"],
-      //     plugins: ["flowtype"]
-      //   }
-      // }
-
     },
 
     uglify: {
@@ -184,7 +155,7 @@ module.exports = function(grunt) {
 
     watch: {
       shiny: {
-        files: ['<%= concat.shiny.src %>', rootDir + '/DESCRIPTION'],
+        files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
         tasks: [
           'default'
         ]
@@ -192,17 +163,6 @@ module.exports = function(grunt) {
       datepicker: {
         files: '<%= uglify.datepicker.src %>',
         tasks: ['newer:uglify:datepicker']
-      },
-      reactlog: {
-        files: [instdir + "www/rlog/react_graph.js"],
-        tasks: [
-          // "prettier:reactLog",
-          "newer:eslint:reactLog"
-        ]
-      },
-      reactlogCSS: {
-        files: [instdir + "www/rlog/*.css"],
-        tasks: ["newer:prettier:reactLogCSS"]
       }
     },
 
@@ -212,88 +172,14 @@ module.exports = function(grunt) {
           // If DESCRIPTION is updated, we'll also need to re-minify shiny.js
           // because the min.js file embeds the version number.
           if (detail.task === 'uglify' && detail.target === 'shiny') {
-            include(isNewer(rootDir + '/DESCRIPTION', detail.time));
+            include(isNewer('../DESCRIPTION', detail.time));
           } else {
             include(false);
           }
 
         }
       }
-    },
-
-    prettier: {
-      reactLogCSS: {
-        src: [instdir + "www/rlog/**/*.css"]
-      },
-      reactLog: {
-        // Target-specific file lists and/or options go here.
-        src: [
-          instdir + "www/rlog/src/**/*.js"
-        ]
-      },
-    },
-
-    webpack: {
-      options: {
-        mode: "development", // do not take time to shrink files;
-        devtool: "source-map", // produce a sibling source map file
-        stats: {
-          colors: true,
-          modules: true,
-          reasons: true
-        },
-        progress: true,
-        failOnError: true,
-        // externals: {
-        //   jQuery : {
-        //     root: "$" // indicates global variable
-        //   },
-        //   lodash : {
-        //     root: "_" // indicates global variable
-        //   }
-        // },
-        // optimization: {
-        //   minimize: false // uglify the code
-        // },
-
-      },
-      reactLog: {
-        entry: [instdir + "www/rlog/src/index.js"],
-        output: {
-          path: instdir + "www/rlog/dest/",
-          filename: 'reactLog.js'
-        },
-        watch: false,
-        module: {
-          rules: [
-            {
-              test: /\.js$/,
-              exclude: /node_modules/,
-              use: [
-                {
-                  loader: "babel-loader"
-                  // babelrc: true
-                  // ,
-                  // options: {
-                  //   sourceMap: true,
-                  //   compact: false,
-                  //   presets: ["flow", "es2015"],
-                  //   plugins: [
-                  //     ["transform-es2015-modules-umd", {
-                  //       "globals": {
-                  //         "es6-promise": "Promise"
-                  //       }
-                  //     }]
-                  //   ]
-                  // }
-                }
-              ]
-            }
-          ]
-        }
-      }
     }
-
   };
 
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -304,19 +190,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-newer');
-  grunt.loadNpmTasks('grunt-prettier');
-  grunt.loadNpmTasks('grunt-webpack');
-
 
   // Need this here so that babel reads in the source map file after it's
   // generated. Without this task, it would read in the source map when Grunt
   // runs, which is wrong, if the source map doesn't exist, or is change later.
-  grunt.task.registerTask("configureBabelShiny", "configures babel options", function() {
-    gruntConfig.babel.shiny.options.inputSourceMap = grunt.file.readJSON('./temp_concat/shiny.js.map');
-  });
-
-  grunt.task.registerTask("webpackReactLogWatch", "sets 'watch' to true for reactLog webpack task", function() {
-    gruntConfig.webpack.reactLog.watch = true
+  grunt.task.registerTask("configureBabel", "configures babel options", function() {
+    gruntConfig.babel.options.inputSourceMap = grunt.file.readJSON('./temp_concat/shiny.js.map');
   });
 
   grunt.task.registerTask(
@@ -332,29 +211,15 @@ module.exports = function(grunt) {
 
   grunt.initConfig(gruntConfig);
 
-  grunt.registerTask('shiny', [
+  grunt.registerTask('default', [
     'newer:concat',
     'newer:string-replace',
     'validateStringReplace',
     'newer:eslint',
-    'configureBabelShiny',
+    'configureBabel',
     'newer:babel',
     'newer:uglify'
   ]);
-
-  // grunt.registerTask("reactLog", [
-  //   "prettier:reactLog",
-  //   "prettier:reactLogCSS",
-  //   "eslint:reactLog",
-  //   "babel:reactLog"
-  // ])
-  // grunt.registerTask("reactLog-staged", [
-  //   "newer:prettier:reactLog",
-  //   "newer:prettier:reactLogCSS",
-  //   "newer:eslint:reactLog"
-  // ])
-
-  grunt.registerTask("default", "shiny")
 
 
   // ---------------------------------------------------------------------------
@@ -376,7 +241,7 @@ module.exports = function(grunt) {
   // From the DESCRIPTION file, get the value of a key. This presently only
   // works if the value is on one line, the same line as the key.
   function descKeyValue(key) {
-    var lines = require('fs').readFileSync(rootDir + '/DESCRIPTION', 'utf8').split('\n');
+    var lines = require('fs').readFileSync('../DESCRIPTION', 'utf8').split('\n');
 
     var pattern = new RegExp('^' + key + ':');
     var txt = lines.filter(function(line) {

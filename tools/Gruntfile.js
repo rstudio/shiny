@@ -157,11 +157,7 @@ module.exports = function(grunt) {
       shiny: {
         files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
         tasks: [
-          'newer:concat',
-          'newer:eslint',
-          'configureBabel',
-          'newer:babel',
-          'newer:uglify'
+          'default'
         ]
       },
       datepicker: {

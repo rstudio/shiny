@@ -23,6 +23,11 @@ reactLogHandler <- function(req) {
 
   } else if (identical(req$PATH_INFO, "/reactlog")){
 
+    sessionToken <- parseQueryString(req$QUERY_STRING)$s
+
+    reactlogFile <- renderReactLog(sessionToken)
+
+    # add asset path after reactlog has been calculated (makes sure package exists)
     if (!hasResourcePath("reactlogAsset")) {
       addResourcePath(
         "reactlogAsset",
@@ -30,12 +35,10 @@ reactLogHandler <- function(req) {
       )
     }
 
-    sessionToken <- parseQueryString(req$QUERY_STRING)$s
-
     return(httpResponse(
       status = 200,
       content = list(
-        file = renderReactLog(sessionToken),
+        file = reactlogFile,
         owned = TRUE
       )
     ))

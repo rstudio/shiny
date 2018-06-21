@@ -1,3 +1,35 @@
+is_installed <- function(package, version) {
+  installedVersion <- tryCatch(utils::packageVersion(package), error = function(e) NA)
+  !is.na(installedVersion) && installedVersion >= version
+}
+
+# Check that the version of an suggested package satisfies the requirements
+#
+# @param package The name of the suggested package
+# @param version The version of the package
+check_suggested <- function(package, version) {
+
+  if (!is_installed(package, version)) {
+    msg <- paste0(sQuote(package),
+      if (is.na(version)) "" else paste0(" >= ", version),
+      " must be installed for this functionality.")
+
+    if (interactive()) {
+      message(msg, "\nWould you like to install it?")
+      if (utils::menu(c("Yes", "No")) == 1) {
+        utils::install.packages(package)
+      } else {
+        stop(msg, call. = FALSE)
+      }
+    } else {
+      stop(msg, call. = FALSE)
+    }
+  }
+}
+
+
+
+
 # domain is like session
 
 
@@ -9,17 +41,6 @@ nextGlobalReactId <- function() {
   paste0("r", .globals$reactIdCounter)
 }
 
-
-
-writeReactLog <- function(file=stdout(), sessionToken = NULL) {
-  log <- rLog$logStack$as_list()
-  if (!is.null(sessionToken)) {
-    log <- Filter(function(x) {
-      is.null(x$session) || identical(x$session, sessionToken)
-    }, log)
-  }
-  cat(toJSON(log, pretty=TRUE), file=file)
-}
 
 #' Reactive Log Visualizer
 #'
@@ -58,31 +79,30 @@ writeReactLog <- function(file=stdout(), sessionToken = NULL) {
 #' time that each reactive.
 #' @export
 showReactLog <- function(time = TRUE) {
-  utils::browseURL(renderReactLog(time = as.logical(time)))
+  check_shinyreactlog()
+  shinyreactlog::showReactLog(rLog$asList(), time = time)
 }
-
-
+# function should not be called. only keeping for legacy purposes
 renderReactLog <- function(sessionToken = NULL, time = TRUE) {
-  templateFile <- system.file("www/reactive-graph.html", package="shiny")
-  html <- paste(readLines(templateFile, warn=FALSE), collapse="\r\n")
-  tc <- textConnection(NULL, "w")
-  on.exit(close(tc))
-  writeReactLog(tc, sessionToken)
-  cat("\n", file=tc)
-  flush(tc)
-  html <- sub("__DATA__", paste(textConnectionValue(tc), collapse="\r\n"), html, fixed=TRUE)
-  html <- sub("__TIME__", paste0("\"", time, "\""), html, fixed=TRUE)
-  file <- tempfile(fileext = ".html")
-  writeLines(html, file)
-
-  # copy js and style files
-  file.copy(
-    system.file("www/rlog", package="shiny"),
-    dirname(file),
-    recursive = TRUE
+  check_shinyreactlog()
+  shinyreactlog::renderReactLog(
+    rLog$asList(),
+    sessionToken = sessionToken,
+    time = time
   )
-
-  return(file)
+}
+# function should not be called. only keeping for legacy purposes
+writeReactLog <- function(file=stdout(), sessionToken = NULL) {
+  check_shinyreactlog()
+  writeReactLog <- getFromNamespace("writeReactLog", "shinyreactlog")
+  writeReactLog(
+    rLog$asList(),
+    file = file,
+    sessionToken = sessionToken
+  )
+}
+check_shinyreactlog <- function() {
+  check_suggested("shinyreactlog", "0.0.0.9000")
 }
 
 
@@ -104,6 +124,11 @@ RLog <- R6Class(
     }
   ),
   active = list(
+    asList = function() {
+      ret <- self$logStack$as_list()
+      attr(ret, "version") <- "1"
+      ret
+    },
     isLogging = function() {
       isTRUE(getOption(private$option))
     }
@@ -429,65 +454,3 @@ MessageLogger = R6Class(
 #' TODO-barret remove option set
 options("shiny.reactlog" = TRUE)
 rLog <- RLog$new("shiny.reactlog", TRUE, 0)
-
-
-#############################################################################
-#############################################################################
-#############################################################################
-#############################################################################
-
-
-
-
-.graphAppend <- function(logEntry, domain = getDefaultReactiveDomain()) {
-  if (isTRUE(getOption('shiny.reactlog'))) {
-    sessionToken <- if (is.null(domain)) NULL else domain$token
-    .graphStack$push(c(logEntry, list(
-      session = sessionToken,
-      time = as.numeric(Sys.time())
-    )))
-  }
-
-  if (!is.null(domain)) {
-    domain$reactlog(logEntry)
-  }
-}
-
-.graphDependsOn <- function(id, label) {
-  .graphAppend(list(action='dep', id=id, dependsOn=label))
-}
-
-.graphDependsOnId <- function(id, dependee) {
-  .graphAppend(list(action='depId', id=id, dependsOn=dependee))
-}
-
-.graphCreateContext <- function(id, label, type, prevId, domain) {
-  .graphAppend(list(
-    action='ctx', id=id, label=paste(label, collapse='\n'),
-    srcref=as.vector(attr(label, "srcref")), srcfile=attr(label, "srcfile"),
-    type=type, prevId=prevId
-  ), domain = domain)
-}
-
-.graphEnterContext <- function(id) {
-  .graphAppend(list(action='enter', id=id))
-}
-
-.graphExitContext <- function(id) {
-  .graphAppend(list(action='exit', id=id))
-}
-
-.graphValueChange <- function(label, value) {
-  .graphAppend(list(
-    action = 'valueChange',
-    id = label,
-    value = paste(utils::capture.output(utils::str(value)), collapse='\n')
-  ))
-}
-
-.graphInvalidate <- function(id, domain) {
-  .graphAppend(list(action='invalidate', id=id), domain)
-}
-
-#' @include stack.R
-.graphStack <- Stack$new()

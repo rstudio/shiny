@@ -195,7 +195,7 @@ renderCachedPlot <- function(expr,
 
   cacheKey <- reactive(substitute(cacheKeyExpr), env = parent.frame(), quoted = TRUE)
 
-  ensureCacheSetup <- function(outputName) {
+  ensureCacheSetup <- function() {
     # For our purposes, cache objects must support these methods.
     isCacheObject <- function(x) {
       # Use tryCatch in case the object does not support `$`.
@@ -276,7 +276,7 @@ renderCachedPlot <- function(expr,
 
         pixelratio <- session$clientData$pixelratio %OR% 1
 
-        key <- digest::digest(list(cacheKey(), width, height, res, pixelratio), "sha256")
+        key <- digest::digest(list(outputName, cacheKey(), width, height, res, pixelratio), "sha256")
 
         if (cache$has(key)) {
           cat("drawReactive(): cached\n")
@@ -330,7 +330,7 @@ renderCachedPlot <- function(expr,
   renderFunc <- function(shinysession, name, ...) {
     outputName <<- name
     session <<- shinysession
-    ensureCacheSetup(outputName)
+    ensureCacheSetup()
     ensureResizeObserver()
     cat("renderFunc()\n")
 
@@ -343,7 +343,7 @@ renderCachedPlot <- function(expr,
         height <- fitDims$height
         pixelratio <- session$clientData$pixelratio %OR% 1
 
-        key <- digest::digest(list(cacheKey(), width, height, res, pixelratio), "sha256")
+        key <- digest::digest(list(outputName, cacheKey(), width, height, res, pixelratio), "sha256")
 
         if (cache$has(key)) {
           cat("renderFunc(): cached\n")

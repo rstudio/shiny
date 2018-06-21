@@ -80,21 +80,22 @@ nextGlobalReactId <- function() {
 #' @export
 showReactLog <- function(time = TRUE) {
   check_shinyreactlog()
-  shinyreactlog::showReactLog(rLog$asList(), time = time)
+  shinyreactlog::show_reactlog(rLog$asList(), time = time)
 }
 # function should not be called. only keeping for legacy purposes
 renderReactLog <- function(sessionToken = NULL, time = TRUE) {
   check_shinyreactlog()
-  shinyreactlog::renderReactLog(
+  shinyreactlog::render_reactlog(
     rLog$asList(),
     sessionToken = sessionToken,
     time = time
   )
 }
 # function should not be called. only keeping for legacy purposes
+#' @importFrom utils getFromNamespace
 writeReactLog <- function(file=stdout(), sessionToken = NULL) {
   check_shinyreactlog()
-  writeReactLog <- getFromNamespace("writeReactLog", "shinyreactlog")
+  writeReactLog <- getFromNamespace("write_reactlog", "shinyreactlog")
   writeReactLog(
     rLog$asList(),
     file = file,
@@ -124,11 +125,6 @@ RLog <- R6Class(
     }
   ),
   active = list(
-    asList = function() {
-      ret <- self$logStack$as_list()
-      attr(ret, "version") <- "1"
-      ret
-    },
     isLogging = function() {
       isTRUE(getOption(private$option))
     }
@@ -136,6 +132,12 @@ RLog <- R6Class(
   public = list(
     msg = "MessageLogger",
     logStack = "Stack",
+
+    asList = function() {
+      ret <- self$logStack$as_list()
+      attr(ret, "version") <- "1"
+      ret
+    },
 
     ctxIdStr = function(ctxId) paste0("ctx", ctxId),
     namesIdStr     = function(reactId)      paste0("names(", reactId, ")"),
@@ -170,13 +172,13 @@ RLog <- R6Class(
       ))
     },
     defineNames = function(reactId, label, domain)
-      define(namesIdStr(reactId), namesIdStr(label), "reactiveValuesNames", domain),
+      self$define(self$namesIdStr(reactId), self$namesIdStr(label), "reactiveValuesNames", domain),
     defineAsList = function(reactId, label, domain)
-      define(asListIdStr(reactId), asListIdStr(label), "reactiveValuesAsList", domain),
+      self$define(self$asListIdStr(reactId), self$asListIdStr(label), "reactiveValuesAsList", domain),
     defineAsListAll = function(reactId, label, domain)
-      define(asListAllIdStr(reactId), asListAllIdStr(label), "reactiveValuesAsListAll", domain),
+      self$define(self$asListAllIdStr(reactId), self$asListAllIdStr(label), "reactiveValuesAsListAll", domain),
     defineKey = function(reactId, key, label, domain)
-      define(keyIdStr(reactId, key), keyIdStr(label, key), "reactiveValuesKey", domain),
+      self$define(self$keyIdStr(reactId, key), self$keyIdStr(label, key), "reactiveValuesKey", domain),
 
     updateReactLabel = function(reactId, label, domain) {
       msgObj <- msg$getReact(reactId)
@@ -192,13 +194,13 @@ RLog <- R6Class(
       ))
     },
     updateReactLabelNames = function(reactId, label, domain)
-      updateReactLabel(namesIdStr(reactId), namesIdStr(label), domain),
+      self$updateReactLabel(self$namesIdStr(reactId), self$namesIdStr(label), domain),
     updateReactLabelAsList = function(reactId, label, domain)
-      updateReactLabel(asListIdStr(reactId), asListIdStr(label), domain),
+      self$updateReactLabel(self$asListIdStr(reactId), self$asListIdStr(label), domain),
     updateReactLabelAsListAll = function(reactId, label, domain)
-      updateReactLabel(asListAllIdStr(reactId), asListAllIdStr(label), domain),
+      self$updateReactLabel(self$asListAllIdStr(reactId), self$asListAllIdStr(label), domain),
     updateReactLabelKey = function(reactId, key, label, domain)
-      updateReactLabel(keyIdStr(reactId, key), keyIdStr(label, key), domain),
+      self$updateReactLabel(self$keyIdStr(reactId, key), self$keyIdStr(label, key), domain),
 
     dependsOn = function(reactId, depOnReactId, ctxId, domain) {
       ctxId <- ctxIdStr(ctxId)
@@ -211,10 +213,10 @@ RLog <- R6Class(
       ))
     },
     dependsOnKey = function(reactId, depOnReactId, key, ctxId, domain)
-      dependsOn(reactId, keyIdStr(depOnReactId, key), ctxId, domain),
+      self$dependsOn(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain),
 
     dependsOnRemove = function(reactId, depOnReactId, ctxId, domain) {
-      ctxId <- ctxIdStr(ctxId)
+      ctxId <- self$ctxIdStr(ctxId)
       msg$log("dependsOnRemove: ", msg$reactStr(reactId), " on ", msg$reactStr(depOnReactId), " in ", ctxId)
       private$appendEntry(domain, list(
         action = "dependsOnRemove",
@@ -224,10 +226,10 @@ RLog <- R6Class(
       ))
     },
     dependsOnKeyRemove = function(reactId, depOnReactId, key, ctxId, domain)
-      dependsOnRemove(reactId, keyIdStr(depOnReactId, key), ctxId, domain),
+      self$dependsOnRemove(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain),
 
     enter = function(reactId, ctxId, type, domain) {
-      ctxId <- ctxIdStr(ctxId)
+      ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$log("isolateEnter: ", msg$reactStr(reactId), " in ", ctxId)
         msg$depthIncrement()
@@ -248,7 +250,7 @@ RLog <- R6Class(
       }
     },
     exit = function(reactId, ctxId, type, domain) {
-      ctxId <- ctxIdStr(ctxId)
+      ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$depthDecrement()
         msg$log("isolateExit: ", msg$reactStr(reactId), " in ", ctxId)
@@ -283,17 +285,17 @@ RLog <- R6Class(
       ))
     },
     valueChangeNames = function(reactId, nameValues, domain)
-      valueChange(namesIdStr(reactId), nameValues, FALSE, domain),
+      self$valueChange(self$namesIdStr(reactId), nameValues, FALSE, domain),
     valueChangeAsList = function(reactId, listValue, domain)
-      valueChange(asListIdStr(reactId), listValue, FALSE, domain),
+      self$valueChange(self$asListIdStr(reactId), listValue, FALSE, domain),
     valueChangeAsListAll = function(reactId, listValue, domain)
-      valueChange(asListAllIdStr(reactId), listValue, FALSE, domain),
+      self$valueChange(self$asListAllIdStr(reactId), listValue, FALSE, domain),
     valueChangeKey = function(reactId, key, value, domain)
-      valueChange(keyIdStr(reactId, key), value, FALSE, domain),
+      self$valueChange(self$keyIdStr(reactId, key), value, FALSE, domain),
 
 
     invalidateStart = function(reactId, ctxId, type, domain) {
-      ctxId <- ctxIdStr(ctxId)
+      ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$log("isolateInvalidateStart: ", msg$reactStr(reactId), " in ", ctxId)
         msg$depthIncrement()
@@ -314,7 +316,7 @@ RLog <- R6Class(
       }
     },
     invalidateEnd = function(reactId, ctxId, type, domain) {
-      ctxId <- ctxIdStr(ctxId)
+      ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$depthDecrement()
         msg$log("isolateInvalidateEnd: ", msg$reactStr(reactId), " in ", ctxId)
@@ -363,7 +365,7 @@ RLog <- R6Class(
       ))
     },
     freezeReactiveKey = function(reactId, key, domain)
-      freezeReactiveVal(keyIdStr(reactId, key), domain),
+      self$freezeReactiveVal(self$keyIdStr(reactId, key), domain),
 
     thawReactiveVal = function(reactId, domain) {
       msg$log("thaw: ", msg$reactStr(reactId))
@@ -372,8 +374,9 @@ RLog <- R6Class(
         reactId = reactId
       ))
     },
-    thawReactiveKey = function(reactId, key, domain)
-      thawReactiveVal(keyIdStr(reactId, key), domain),
+    thawReactiveKey = function(reactId, key, domain) {
+      self$thawReactiveVal(self$keyIdStr(reactId, key), domain)
+    },
 
     markTime = function(domain = NULL) {
       msg$log("markTime")
@@ -438,7 +441,7 @@ MessageLogger = R6Class(
     log = function(...) {
       if (self$isNotLogging) return(NULL)
       msg <- paste0(
-        paste0(rep("· ", depth), collapse = ""), "- ", paste0(..., collapse = ""),
+        paste0(rep("= ", depth), collapse = ""), "- ", paste0(..., collapse = ""),
         collapse = ""
       )
       self$messages[length(self$messages) + 1] <- msg

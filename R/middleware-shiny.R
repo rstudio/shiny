@@ -22,6 +22,14 @@ reactLogHandler <- function(req) {
     ))
 
   } else if (identical(req$PATH_INFO, "/reactlog")){
+
+    if (!hasResourcePath("reactlogAsset")) {
+      addResourcePath(
+        "reactlogAsset",
+        system.file("reactlogAsset", package = "shinyreactlog")
+      )
+    }
+
     sessionToken <- parseQueryString(req$QUERY_STRING)$s
 
     return(httpResponse(

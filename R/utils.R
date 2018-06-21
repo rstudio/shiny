@@ -293,6 +293,18 @@ dirRemove <- function(path) {
 # difference is that a canonical path follows symlinks and doesn't have any
 # `..`, while an absolute path here is simply one that starts with `/`.
 absolutePath <- function(path) {
+  if (!is.character(path) || length(path) != 1 || path == "") {
+    stop("path must be a single non-empty string.")
+  }
+  if (substr(path, 1, 1) == "/") {
+    return(path)
+  }
+  if (isWindows()) {
+    # C:/abcd or c:\abcd
+    if (grepl("^[A-Za-z]:[/\\]", path)) {
+      return(path)
+    }
+  }
   norm_path <- normalizePath(path, mustWork = FALSE)
   if (path == norm_path) {
     file.path(getwd(), path)
@@ -1711,14 +1723,14 @@ createVarPromiseDomain <- function(env, name, value) {
   force(env)
   force(name)
   force(value)
-  
+
   promises::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       function(...) {
         orig <- env[[name]]
         env[[name]] <- value
         on.exit(env[[name]] <- orig)
-        
+
         onFulfilled(...)
       }
     },
@@ -1727,7 +1739,7 @@ createVarPromiseDomain <- function(env, name, value) {
         orig <- env[[name]]
         env[[name]] <- value
         on.exit(env[[name]] <- orig)
-        
+
         onRejected(...)
       }
     },

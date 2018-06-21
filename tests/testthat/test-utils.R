@@ -191,3 +191,44 @@ test_that("Callbacks fire in predictable order", {
   cb$invoke()
   expect_equal(x, c(1, 2, 3))
 })
+
+
+test_that("absolutePath works as expected", {
+  # Relative paths that don't exist
+  expect_identical(absolutePath("foo9484"), file.path(getwd(), "foo9484"))
+  expect_identical(absolutePath("foo9484/bar"), file.path(getwd(), "foo9484/bar"))
+
+  # Absolute path that exists and does NOT have a symlink
+  expect_identical(absolutePath("/"), "/")
+  # Find a path that is not a symlink and test it.
+  # Use paste0 instead of file.path("/", ...) or dir(full.names=T) because
+  # those can result in two leading slashes.
+  paths <- paste0("/", dir("/"))
+  symlink_idx <- (Sys.readlink(paths) != "")
+  paths <- paths[!symlink_idx]
+  if (length(paths) != 0) {
+    test_path <- paths[1]
+    expect_identical(absolutePath(test_path), test_path)
+  }
+
+  # On Windows, absolute paths can start with a drive letter.
+  if (isWindows()) {
+    expect_identical(absolutePath("z:/foo9484"), "z:/foo9484")
+    expect_identical(absolutePath("c:\\foo9484"), "c:\\foo9484")
+    expect_identical(absolutePath("d:\\"), "d:\\")
+    expect_identical(absolutePath("d:/"), "d:/")
+  }
+
+  # Absolute path that doesn't exist
+  expect_identical(absolutePath("/foo9484"), "/foo9484")
+  expect_identical(absolutePath("/foo9484/bar"), "/foo9484/bar")
+
+  # Invalid input
+  expect_error(absolutePath(NULL))
+  expect_error(absolutePath(NA))
+  expect_error(absolutePath(character(0)))
+  expect_error(absolutePath(""))
+  expect_error(absolutePath(12))
+  expect_error(absolutePath(c("a", "b")))
+  expect_error(absolutePath(list("abc")))
+})

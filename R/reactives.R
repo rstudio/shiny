@@ -23,11 +23,10 @@ Dependents <- R6Class(
           .dependents$remove(ctx$id)
         })
 
+        # must wrap in if statement as ctx react id could be NULL
+        #   if options(shiny.suppressMissingContextError = TRUE)
         if (is.character(.reactId) && is.character(ctx$.reactId)) {
           rLog$dependsOn(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
-        } else {
-          # TODO-barret remove before shipping. This should never be reached
-          stop("ERROR: dependents does not have node id: ", .reactId, " and ", ctx$.reactId)
         }
       }
     },

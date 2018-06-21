@@ -67,7 +67,6 @@ $.extend(selectInputBinding, {
     if (data.hasOwnProperty('url')) {
       selectize = this._selectize(el);
       selectize.clearOptions();
-      selectize.clearOptionGroups();
       var loaded = false;
       selectize.settings.load = function(query, callback) {
         var settings = selectize.settings;
@@ -85,15 +84,17 @@ $.extend(selectInputBinding, {
             callback();
           },
           success: function(res) {
+            // res = [{label: '1', value: '1', group: '1'}, ...]
+            // success is called after options are added, but
+            // groups need to be added manually below
             $.each(res, function(index, elem) {
-              selectize.addOptionGroup(elem['group'], { group: elem['group'] });
+              selectize.addOptionGroup(elem.group, { group: elem.group });
             });
-            selectize.refreshOptions();
             callback(res);
             if (!loaded && data.hasOwnProperty('value')) {
               selectize.setValue(data.value);
             } else if (settings.maxItems === 1) {
-              // only have item selected by default for single-select
+              // first item selected by default only for single-select
               selectize.setValue(res[0].value);
             }
             loaded = true;

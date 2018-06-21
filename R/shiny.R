@@ -441,6 +441,7 @@ ShinySession <- R6Class(
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
     getBookmarkExcludeFuns = list(),
     timingRecorder = 'ShinyServerTimingRecorder',
+    cache = NULL,
 
     testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
@@ -736,6 +737,17 @@ ShinySession <- R6Class(
       self$token <- createUniqueId(16)
       private$.outputs <- list()
       private$.outputOptions <- list()
+
+      # Session-level cache
+      cacheDir <- file.path(
+        tempdir(),
+        paste0("shinyapp-", getShinyOption("appToken")),
+        paste0("session-", self$token)
+      )
+      private$cache <- DiskCache$new(cacheDir, max_size = 5*1024^2, destroy_on_finalize = FALSE)
+      # Destroy the cache when the session exits. This is more predictable
+      # than using destroy_on_finalize.
+      self$onSessionEnded(private$cache$destroy)
 
       private$bookmarkCallbacks <- Callbacks$new()
       private$bookmarkedCallbacks <- Callbacks$new()
@@ -2015,6 +2027,9 @@ ShinySession <- R6Class(
           }
         })
       }
+    },
+    getCache = function() {
+      private$cache
     }
   ),
   active = list(

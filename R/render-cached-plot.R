@@ -84,7 +84,7 @@
 #'   \item{4}{To have the cache persist even across multiple reboots, you
 #'     can create the cache in a location outside of the temp directory.
 #'     For example, it could be a subdirectory of the application, as in
-#'     \code{cache=DiskCache$new(plot1_cache")}. You may need to manually
+#'     \code{cache=DiskCache$new("plot1_cache")}. You may need to manually
 #'     remove this directory to clear the cache.}
 #' }
 #'
@@ -102,7 +102,7 @@
 #' @param res The resolution of the PNG, in pixels per inch.
 #' @param cache The scope of the cache, or a cache object. This can be
 #'   \code{"app"} (the default), \code{"session"}, or a cache object like
-#'   a \code{\link{DiskCache}}. See the Cache Scoping section for more
+#'   a \code{\link{diskCache}}. See the Cache Scoping section for more
 #'   information.
 #'
 #' @seealso See \code{\link{renderPlot}} for the regular, non-cached version of
@@ -210,18 +210,10 @@ renderCachedPlot <- function(expr,
       return()
 
     } else if (identical(cache, "app")) {
-      cacheDir <- file.path(tempdir(),
-        paste0("shinyapp-", getShinyOption("appToken"))
-      )
-      cache <<- DiskCache$new(cacheDir, max_size = 5*1024^2, reset_on_finalize = FALSE)
+      cache <<- getShinyOption("cache")
 
     } else if (identical(cache, "session")) {
-      session$getCache()
-
-      cacheDir <- file.path(tempdir(),
-        paste0("shinyapp-", getShinyOption("appToken"), "-", session$token)
-      )
-      cache <<- DiskCache$new(cacheDir, max_size = 5*1024^2, reset_on_finalize = TRUE)
+      cache <<- session$getCache()
 
     } else {
       stop('`cache` must either be "app", "session", or a cache object with methods `$has`, `$get`, and `$set`.')

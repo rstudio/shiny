@@ -78,27 +78,132 @@ dependsOnFile <- function(filepath) {
 
 
 
+#' Create a disk cache object
+#'
+#' A disk cache object is a key-value store that saves the values as files in a
+#' directory on disk. Objects can be stored and retrieved using the \code{get()}
+#' and \code{set()} methods. Objects are automatically pruned from the cache
+#' according to the parameters \code{max_size}, \code{max_age}, \code{max_n},
+#' and \code{evict}.
+#'
+#'
+#' @section Cache pruning:
+#'
+#' Cache pruning occurs each time \code{get()} and \code{set()} are called, or
+#' it can be invoked manually by calling \code{prune()}.
+#'
+#' If there are any objects that are older than \code{max_age}, they will be
+#' removed when a pruning occurs.
+#'
+#' The \code{max_size} and \code{max_n} parameters are applied to the cache as
+#' a whole, in contrast to \code{max_age}, which is applied to each object
+#' individually.
+#'
+#' If the number of objects in the cache exceeds \code{max_n}, then objects
+#' will be removed from the cache according to the eviction policy, which is
+#' set with the \code{evict} parameter. Objects will be removed so that the
+#' number of items is \code{max_n}.
+#'
+#' If the size of the objects in the cache exceeds \code{max_size}, then
+#' objects will be removed from the cache. Objects will be removed from
+#' the cache so that the total size remains under \code{max_size}. Note that
+#' the size is calculated using the size of the files, not the size of disk
+#' space used by the files -- these two values can differ because of files
+#' are stored in blocks on disk. For example, if the block size is 4096 bytes,
+#' then a file that is one byte in size will take 4096 bytes on disk.
+#'
+#'
+#' @section Eviction policies:
+#'
+#' If \code{max_n} or \code{max_size} are used, then objects can be removed
+#' from the cache according to an eviction policy. Currently, the only
+#' supported eviction policy is "fifo", which stands for first-in-first-out.
+#' With this policy, when objects are removed from the cache, the oldest items
+#' will be removed.
+#'
+#'
+#' @section Methods:
+#'
+#'  A disk cache object has the following methods:
+#'
+#'   \describe{
+#'     \item{\code{get(key)}}{
+#'       Returns the value associated with \code{key}. If the key is not in the
+#'       cache, this throws an error.
+#'     }
+#'     \item{\code{set(key, value)}}{
+#'       Stores the \code{key}-\code{value} pair in the cache.
+#'     }
+#'     \item{\code{has(key)}}{
+#'       Returns \code{TRUE} if the cache contains the key, otherwise
+#'       \code{FALSE}.
+#'     }
+#'     \item{\code{size()}}{
+#'       Returns the number of items currently in the cache.
+#'     }
+#'     \item{\code{keys()}}{
+#'       Returns a character vector of all keys currently in the cache.
+#'     }
+#'     \item{\code{reset()}}{
+#'       Clears all objects from the cache.
+#'     }
+#'     \item{\code{destroy()}}{
+#'       Clears all objects in the cache, and removes the cache directory from
+#'       disk.
+#'     }
+#'     \item{\code{prune()}}{
+#'       Prunes the cache, using the parameters specified by \code{max_size},
+#'       \code{max_age}, \code{max_n}, and \code{evict}.
+#'     }
+#'   }
+#'
+#' @param dir Directory to store files for the cache. By default, it will use
+#'   a temporary directory.
+#' @param max_age Maximum age of files in cache before they are evicted, in
+#'   seconds.
+#' @param max_size Maximum size of the cache, in bytes. If the cache exceeds
+#'   this size, cached objects will be removed according to the value of the
+#'   \code{evict}.
+#' @param max_n Maximum number of objects in the cache. If the number of objects
+#'   exceeds this value, then cached objects will be removed according to the
+#'   value of \code{evict}.
+#' @param evict The eviction policy to use to decide which objects are removed
+#'   when a cache pruning occurs. Currently, only \code{"fifo"} is supported.
+#' @param destroy_on_finalize If \code{TRUE}, then when the DiskCache object is
+#'   garbage collected, the cache directory and all objects inside of it will be
+#'   deleted from disk.
 #' @export
+diskCache <- function(dir = tempfile("DiskCache-"),
+  max_size = 5 * 1024 ^ 2,
+  max_age = Inf,
+  max_n = Inf,
+  evict = "fifo",
+  destroy_on_finalize = TRUE)
+{
+  DiskCache$new(dir, max_size, max_age, max_n, evict, destroy_on_finalize)
+}
+
+
 DiskCache <- R6Class("DiskCache",
   public = list(
     initialize = function(dir = tempfile("DiskCache-"),
-                          max_size = 5 * 1024^2,
+                          max_size = 5 * 1024 ^ 2,
                           max_age = Inf,
-                          discard = c("oldest", "newest"),
-                          timetype = c("ctime", "atime", "mtime"),
-                          reset_on_finalize = TRUE)
+                          max_n = Inf,
+                          evict = "fifo",
+                          destroy_on_finalize = TRUE)
     {
       if (!dirExists(dir)) {
         message("Creating ", dir)
         dir.create(dir, recursive = TRUE, mode = "0700")
         private$dir_was_created <- TRUE
       }
-      private$dir               <- absolutePath(dir)
-      private$max_size          <- max_size
-      private$max_age           <- max_age
-      private$discard           <- match.arg(discard)
-      private$timetype          <- match.arg(timetype)
-      private$reset_on_finalize <- reset_on_finalize
+      private$dir                 <- absolutePath(dir)
+      private$max_size            <- max_size
+      private$max_age             <- max_age
+      private$max_n               <- max_n
+      private$evict               <- match.arg(evict)
+      private$destroy_on_finalize <- destroy_on_finalize
     },
 
     # TODO:
@@ -115,29 +220,11 @@ DiskCache <- R6Class("DiskCache",
       value
     },
 
-    mget = function(keys) {
-      lapply(keys, self$get)
-    },
-
     set = function(key, value) {
       validate_key(key)
       self$prune()
       saveRDS(value, file = private$key_to_filename(key))
       invisible(self)
-    },
-
-    mset = function(..., .list = NULL) {
-      args <- c(list(...), .list)
-      if (length(args) == 0) {
-        return()
-      }
-
-      arg_names <- names(args)
-      if (is.null(arg_names) || any(!nzchar(arg_names))) {
-        stop("All items must be named")
-      }
-
-      mapply(self$set, arg_names, args)
     },
 
     has = function(key) {
@@ -168,30 +255,42 @@ DiskCache <- R6Class("DiskCache",
       files$name <- rownames(files)
       rownames(files) <- NULL
 
+      # 1. Remove any files where the age exceeds max age.
       time <- Sys.time()
-      # Remove any files where the age exceeds max age.
-      files$timediff <- as.numeric(Sys.time() - files[[private$timetype]], units = "secs")
-      files$rm <- files$timediff > private$max_age
-      if (any(files$rm)) {
-        message("Removing ", paste(files$name[files$rm], collapse = ", "))
+      timediff <- as.numeric(Sys.time() - files[["ctime"]], units = "secs")
+      rm_idx <- timediff > private$max_age
+      if (any(rm_idx)) {
+        message("max_age: Removing ", paste(files$name[rm_idx], collapse = ", "))
       }
-      file.remove(files$name[files$rm])
+      file.remove(files$name[rm_idx])
 
-      # Remove rows of files that were deleted
-      files <- files[!files$rm, ]
+      # Remove rows of files that were deleted.
+      files <- files[!rm_idx, ]
 
-      # Sort the files by time, get a cumulative sum of size, and remove any
-      # files where the cumlative size exceeds max_size.
-      if (sum(files$size) > private$max_size) {
-        sort_decreasing <- (private$discard == "oldest")
+      # Sort files by priority, according to eviction policy.
+      if (private$evict == "fifo") {
+        files <- files[order(files[["ctime"]], decreasing = TRUE), ]
+      } else {
+        stop('Unknown eviction policy "', private$evict, '"')
+      }
 
-        files <- files[order(files[[private$timetype]], decreasing = sort_decreasing), ]
-        files$cum_size <- cumsum(files$size)
-        files$rm <- files$cum_size > private$max_size
-        if (any(files$rm)) {
-          message("Removing ", paste(files$name[files$rm], collapse = ", "))
+      # 2. Remove files if there are too many.
+      if (nrow(files) > private$max_n) {
+        rm_idx <- seq_len(nrow(files)) > private$max_n
+        if (any(rm_idx)) {
+          message("max_n: Removing ", paste(files$name[rm_idx], collapse = ", "))
         }
-        file.remove(files$name[files$rm])
+        file.remove(files$name[rm_idx])
+      }
+
+      # 3. Remove files if cache is too large.
+      if (sum(files$size) > private$max_size) {
+        cum_size <- cumsum(files$size)
+        rm_idx <- cum_size > private$max_size
+        if (any(files$rm)) {
+          message("max_size: Removing ", paste(files$name[rm_idx], collapse = ", "))
+        }
+        file.remove(files$name[rm_idx])
       }
       invisible(self)
     },
@@ -200,19 +299,22 @@ DiskCache <- R6Class("DiskCache",
       length(dir(private$dir, "*.rds"))
     },
 
-    # TODO:
-    # Resets the cache and destroys the containing folder so that no
-    # one else who shares the data back end can use it anymore.
-    # destroy = function() {
-    # },
+    destroy = function() {
+      if (private$destroyed) {
+        return(invisible)
+      }
+
+      private$destroyed <- TRUE
+      self$reset()
+      if (private$dir_was_created) {
+        message("Removing ", private$dir)
+        dirRemove(private$dir)
+      }
+    },
 
     finalize = function() {
-      if (private$reset_on_finalize) {
-        self$reset()
-        if (private$dir_was_created) {
-          message("Removing ", private$dir)
-          dirRemove(private$dir)
-        }
+      if (private$destroy_on_finalize) {
+        self$destroy()
       }
     }
   ),
@@ -221,10 +323,11 @@ DiskCache <- R6Class("DiskCache",
     dir = NULL,
     max_age = NULL,
     max_size = NULL,
-    discard = NULL,
-    timetype = NULL,
+    max_n = NULL,
+    evict = NULL,
     dir_was_created = FALSE,
-    reset_on_finalize = NULL,
+    destroy_on_finalize = NULL,
+    destroyed = FALSE,
 
     key_to_filename = function(key) {
       if (! (is.character(key) && length(key)==1) ) {

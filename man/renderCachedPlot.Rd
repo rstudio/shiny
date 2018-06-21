@@ -26,7 +26,7 @@ information on the default sizing policy.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be
 \code{"app"} (the default), \code{"session"}, or a cache object like
-a \code{\link{DiskCache}}. See the Cache Scoping section for more
+a \code{\link{diskCache}}. See the Cache Scoping section for more
 information.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices]{png}}.
@@ -127,7 +127,7 @@ which will in turn be hashed (very quickly) by the
   \item{4}{To have the cache persist even across multiple reboots, you
     can create the cache in a location outside of the temp directory.
     For example, it could be a subdirectory of the application, as in
-    \code{cache=DiskCache$new(plot1_cache")}. You may need to manually
+    \code{cache=DiskCache$new("plot1_cache")}. You may need to manually
     remove this directory to clear the cache.}
 }
 }

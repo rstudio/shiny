@@ -598,6 +598,14 @@ runApp <- function(appDir=getwd(),
   )
   on.exit(options(ops), add = TRUE)
 
+  # Set up default disk cache for app. Default is 5 MB in size.
+  if (is.null(getShinyOption("cache"))) {
+    cacheDir <- file.path(tempdir(), paste0("shinyapp-", getShinyOption("appToken")))
+    cache <- DiskCache$new(cacheDir, max_size = 5*1024^2, destroy_on_finalize = FALSE)
+    on.exit(cache$destroy(), add = TRUE)
+    shinyOptions(cache = cache)
+  }
+
   appParts <- as.shiny.appobj(appDir)
 
   # The lines below set some of the app's running options, which

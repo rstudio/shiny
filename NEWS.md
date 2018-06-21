@@ -9,7 +9,7 @@ shiny 1.1.0.9000
 
 * Addressed [#2042](https://github.com/rstudio/shiny/issues/2042): dates outside of `min`/`max` date range are now a lighter shade of grey to highlight the allowed range. [#2087](https://github.com/rstudio/shiny/pull/2087)
 
-* Addressed [#2019](https://github.com/rstudio/shiny/issues/2019): `updateInputSlider` now changes the slider formatting if the input type changes.
+* Resolved [#2019](https://github.com/rstudio/shiny/issues/2019): `updateInputSlider` now changes the slider formatting if the input type changes.[#2099](https://github.com/rstudio/shiny/pull/2099)
 
 ### Documentation Updates
 

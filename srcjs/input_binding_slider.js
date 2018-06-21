@@ -123,17 +123,22 @@ $.extend(sliderInputBinding, textInputBinding, {
       }
     }
     var sliderFeatures = ['min', 'max', 'step'];
-    for (var feats of sliderFeatures) {
-      if (data.hasOwnProperty(feats)) msg[feats] = data[feats];
+    for (var i = 0; i < sliderFeatures.length; i++) {
+      var feats = sliderFeatures[i];
+      if (data.hasOwnProperty(feats)) {
+        msg[feats] = data[feats];
+      }
     }
 
     if (data.hasOwnProperty('label'))
       $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
 
     var domElements = ['data-type', 'time-format', 'timezone'];
-    for (var elm of domElements) {
-      if (data.hasOwnProperty(elm))
-        $el.data(elm, data[elm]);
+    for (var i = 0; i < domElements.length; i++) {
+      var elem = domElements[i];
+      if (data.hasOwnProperty(elem)) {
+        $el.data(elem, data[elem]);
+      }
     }
 
     var dataType = $el.data('data-type');

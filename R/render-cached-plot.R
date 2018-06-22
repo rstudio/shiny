@@ -193,7 +193,8 @@ renderCachedPlot <- function(expr,
 
   args <- list(...)
 
-  cacheKey <- reactive(substitute(cacheKeyExpr), env = parent.frame(), quoted = TRUE)
+  cacheKeyExpr <- substitute(cacheKeyExpr)
+  cacheKey <- reactive(cacheKeyExpr, env = parent.frame(), quoted = TRUE)
 
   ensureCacheSetup <- function() {
     # For our purposes, cache objects must support these methods.
@@ -264,19 +265,26 @@ renderCachedPlot <- function(expr,
       {
         # Get width/height, but don't depend on them.
         isolate({
-          width  <- fitDims$width
-          height <- fitDims$height
+          # The first execution will have NULL width/height, because they haven't
+          # yet been retrieved from clientData.
+          req(fitDims$width, fitDims$height, cancelOutput = TRUE)
         })
-        # The first execution will have NULL width/height, because they haven't
-        # yet been retrieved from clientData.
-        req(width, height, cancelOutput = TRUE)
 
         drawReactiveTrigger()
         cat("drawReactive()\n")
 
+        cacheKey()
+      },
+      function(cacheKeyResult) {
+        # Get width/height, but don't depend on them.
+        isolate({
+          width  <- fitDims$width
+          height <- fitDims$height
+        })
+
         pixelratio <- session$clientData$pixelratio %OR% 1
 
-        key <- digest::digest(list(outputName, cacheKey(), width, height, res, pixelratio), "sha256")
+        key <- digest::digest(list(outputName, cacheKeyResult, width, height, res, pixelratio), "sha256")
 
         if (cache$has(key)) {
           cat("drawReactive(): cached\n")
@@ -284,32 +292,37 @@ renderCachedPlot <- function(expr,
           cache$get(key)
 
         } else {
-          cat("drawReactive(): drawPlot()\n")
-          # This will include the displaylist.
-          result <- do.call("drawPlot", c(
-            list(
-              name = outputName,
-              session = session,
-              func = isolatedFunc,
-              width = width,
-              height = height,
-              pixelratio = pixelratio,
-              res = res
-            ),
-            args
-          ))
+          hybrid_chain(
+            {
+              cat("drawReactive(): drawPlot()\n")
+              # This will include the displaylist.
+              do.call("drawPlot", c(
+                list(
+                  name = outputName,
+                  session = session,
+                  func = isolatedFunc,
+                  width = width,
+                  height = height,
+                  pixelratio = pixelratio,
+                  res = res
+                ),
+                args
+              ))
+            },
+            function(result) {
+              # Cache a copy of the result, but without the recorded plot, because
+              # it can't be saved and restored properly within the same R session.
+              # Note that this was fixed in revision 74506 (2e6c669), and should
+              # be in R 3.5.1, but we need to work on older versions. Perhaps in
+              # the future we could do a version check and change caching behavior
+              # based on that.
+              result_copy <- result
+              result_copy$recordedPlot <- NULL
+              cache$set(key, result_copy)
 
-          # Cache a copy of the result, but without the recorded plot, because
-          # it can't be saved and restored properly within the same R session.
-          # Note that this was fixed in revision 74506 (2e6c669), and should
-          # be in R 3.5.1, but we need to work on older versions. Perhaps in
-          # the future we could do a version check and change caching behavior
-          # based on that.
-          result_copy <- result
-          result_copy$recordedPlot <- NULL
-          cache$set(key, result_copy)
-
-          result
+              result
+            }
+          )
         }
       },
       catch = function(reason) {

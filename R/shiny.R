@@ -744,7 +744,7 @@ ShinySession <- R6Class(
         paste0("shinyapp-", getShinyOption("appToken")),
         paste0("session-", self$token)
       )
-      private$cache <- DiskCache$new(cacheDir, max_size = 5*1024^2, destroy_on_finalize = FALSE)
+      private$cache <- MemoryCache$new()
       # Destroy the cache when the session exits. This is more predictable
       # than using destroy_on_finalize.
       self$onSessionEnded(private$cache$destroy)

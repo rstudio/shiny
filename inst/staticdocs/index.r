@@ -210,7 +210,9 @@ sd_section("Utility functions",
     "shinyDeprecated",
     "serverInfo",
     "shiny-options",
-    "onStop"
+    "onStop",
+    "diskCache",
+    "memoryCache"
   )
 )
 sd_section("Plot interaction",

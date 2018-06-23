@@ -499,10 +499,10 @@ ShinySession <- R6Class(
         stop("Nested calls to withCurrentOutput() are not allowed.")
       }
 
-      private$currentOutputName <- name
-      on.exit(private$currentOutputName <- NULL, add = TRUE)
-
-      expr
+      promises::with_promise_domain(
+        createVarPromiseDomain(private, "currentOutputName", name),
+        expr
+      )
     },
     shouldSuspend = function(name) {
       # Find corresponding hidden state clientData variable, with the format

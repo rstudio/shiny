@@ -24,7 +24,8 @@ exceeds this value, then cached objects will be removed according to the
 value of \code{evict}.}
 
 \item{evict}{The eviction policy to use to decide which objects are removed
-when a cache pruning occurs. Currently, only \code{"fifo"} is supported.}
+when a cache pruning occurs. Currently, \code{"lru"} and \code{"fifo"} are
+supported.}
 
 \item{destroy_on_finalize}{If \code{TRUE}, then when the DiskCache object is
 garbage collected, the cache directory and all objects inside of it will be
@@ -67,11 +68,22 @@ then a file that is one byte in size will take 4096 bytes on disk.
 \section{Eviction policies}{
 
 
-If \code{max_n} or \code{max_size} are used, then objects can be removed
-from the cache according to an eviction policy. Currently, the only
-supported eviction policy is "fifo", which stands for first-in-first-out.
-With this policy, when objects are removed from the cache, the oldest items
-will be removed.
+If \code{max_n} or \code{max_size} are used, then objects will be removed
+from the cache according to an eviction policy. The available eviction
+policies are:
+
+  \describe{
+    \item{\code{"lru"}}{
+      Least Recently Used. The least recently used objects will be removed.
+      This uses the filesystem's atime property. Some filesystems do not
+      support atime, or have a very low atime resolution. The DiskCache will
+      check for atime support, and if the filesystem does not support atime,
+      a warning will be issued and the "fifo" policy will be used instead.
+    }
+    \item{\code{"fifo"}}{
+      First-in-first-out. The oldest objects will be removed.
+    }
+  }
 }
 
 \section{Methods}{

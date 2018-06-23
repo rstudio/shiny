@@ -115,12 +115,22 @@ dependsOnFile <- function(filepath) {
 #'
 #' @section Eviction policies:
 #'
-#' If \code{max_n} or \code{max_size} are used, then objects can be removed
-#' from the cache according to an eviction policy. Currently, the only
-#' supported eviction policy is "fifo", which stands for first-in-first-out.
-#' With this policy, when objects are removed from the cache, the oldest items
-#' will be removed.
+#' If \code{max_n} or \code{max_size} are used, then objects will be removed
+#' from the cache according to an eviction policy. The available eviction
+#' policies are:
 #'
+#'   \describe{
+#'     \item{\code{"lru"}}{
+#'       Least Recently Used. The least recently used objects will be removed.
+#'       This uses the filesystem's atime property. Some filesystems do not
+#'       support atime, or have a very low atime resolution. The DiskCache will
+#'       check for atime support, and if the filesystem does not support atime,
+#'       a warning will be issued and the "fifo" policy will be used instead.
+#'     }
+#'     \item{\code{"fifo"}}{
+#'       First-in-first-out. The oldest objects will be removed.
+#'     }
+#'   }
 #'
 #' @section Methods:
 #'
@@ -168,7 +178,8 @@ dependsOnFile <- function(filepath) {
 #'   exceeds this value, then cached objects will be removed according to the
 #'   value of \code{evict}.
 #' @param evict The eviction policy to use to decide which objects are removed
-#'   when a cache pruning occurs. Currently, only \code{"fifo"} is supported.
+#'   when a cache pruning occurs. Currently, \code{"lru"} and \code{"fifo"} are
+#'   supported.
 #' @param destroy_on_finalize If \code{TRUE}, then when the DiskCache object is
 #'   garbage collected, the cache directory and all objects inside of it will be
 #'   deleted from disk.
@@ -190,7 +201,7 @@ DiskCache <- R6Class("DiskCache",
                           max_size = 5 * 1024 ^ 2,
                           max_age = Inf,
                           max_n = Inf,
-                          evict = "fifo",
+                          evict = c("lru", "fifo"),
                           destroy_on_finalize = TRUE)
     {
       if (!dirExists(dir)) {
@@ -203,6 +214,15 @@ DiskCache <- R6Class("DiskCache",
       private$max_age             <- max_age
       private$max_n               <- max_n
       private$evict               <- match.arg(evict)
+      if (private$evict == "lru" && !check_atime_support(private$dir)) {
+        # Another possibility for handling lack of atime support would be to
+        # create a file on disk that contains atimes. However, this would not
+        # be safe when multiple processes are sharing a cache.
+        warning("DiskCache: can't use eviction policy \"lru\" because filesystem for ",
+          private$dir, " does not support atime, or has low atime resolution. Using \"fifo\" instead."
+        )
+        private$evict <- "fifo"
+      }
       private$destroy_on_finalize <- destroy_on_finalize
     },
 
@@ -256,7 +276,7 @@ DiskCache <- R6Class("DiskCache",
       rownames(files) <- NULL
 
       # 1. Remove any files where the age exceeds max age.
-      timediff <- as.numeric(Sys.time() - files[["ctime"]], units = "secs")
+      timediff <- as.numeric(Sys.time() - files[["mtime"]], units = "secs")
       rm_idx <- timediff > private$max_age
       if (any(rm_idx)) {
         message("max_age: Removing ", paste(files$name[rm_idx], collapse = ", "))
@@ -267,8 +287,10 @@ DiskCache <- R6Class("DiskCache",
       files <- files[!rm_idx, ]
 
       # Sort files by priority, according to eviction policy.
-      if (private$evict == "fifo") {
-        files <- files[order(files[["ctime"]], decreasing = TRUE), ]
+      if (private$evict == "lru") {
+        files <- files[order(files[["atime"]], decreasing = TRUE), ]
+      } else if (private$evict == "fifo") {
+        files <- files[order(files[["mtime"]], decreasing = TRUE), ]
       } else {
         stop('Unknown eviction policy "', private$evict, '"')
       }
@@ -345,4 +367,30 @@ validate_key <- function(key) {
   if (grepl("[^a-z0-9]", key)) {
     stop("Invalid key: ", key, ". Only lowercase letters and numbers are allowed.")
   }
+}
+
+# Checks if a filesystem has atime support, by creating a file in a specified
+# directory, waiting 0.1 seconds, then reading the file. If the timestamp does
+# not change, then the filesystem does not support atime, or has very low atime
+# resolution. For example, FAT has an atime resolution of 1 day. If the
+# timestamp does change, then the filesystem supports atime. (Although it is
+# possible in very rare cases that the filesystem has a low atime resolution and
+# the pause just happend to cross a boundary.)
+check_atime_support <- function(dir) {
+  dir <- "."
+  temp_file <- tempfile("check-atime-support-", dir)
+
+  file.create(temp_file)
+  on.exit(unlink(temp_file), add = TRUE)
+  atime1 <- as.numeric(file.info(temp_file)[["atime"]])
+
+  Sys.sleep(0.1)
+  readBin(temp_file, "raw", 1L)
+  atime2 <- as.numeric(file.info(temp_file)[["atime"]])
+
+  if (atime1 == atime2) {
+    return(FALSE)
+  }
+
+  TRUE
 }

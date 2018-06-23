@@ -144,7 +144,7 @@ dependsOnFile <- function(filepath) {
 #'     \item{\code{set(key, value)}}{
 #'       Stores the \code{key}-\code{value} pair in the cache.
 #'     }
-#'     \item{\code{has(key)}}{
+#'     \item{\code{exists(key)}}{
 #'       Returns \code{TRUE} if the cache contains the key, otherwise
 #'       \code{FALSE}.
 #'     }
@@ -227,12 +227,12 @@ DiskCache <- R6Class("DiskCache",
     },
 
     # TODO:
-    # Should call has() and return some sentinal object if not present?
+    # Should call exists() and return some sentinal object if not present?
     # Should be atomic to avoid race conditions with other processes.
     # Reduce pruning for mset/mget
     get = function(key) {
       validate_key(key)
-      if (!self$has(key)) {
+      if (!self$exists(key)) {
         stop("Key not available: ", key)
       }
       value <- readRDS(private$key_to_filename(key))
@@ -247,7 +247,7 @@ DiskCache <- R6Class("DiskCache",
       invisible(self)
     },
 
-    has = function(key) {
+    exists = function(key) {
       validate_key(key)
       file.exists(private$key_to_filename(key))
     },
@@ -430,7 +430,7 @@ DiskCache <- R6Class("DiskCache",
 #'     \item{\code{set(key, value)}}{
 #'       Stores the \code{key}-\code{value} pair in the cache.
 #'     }
-#'     \item{\code{has(key)}}{
+#'     \item{\code{exists(key)}}{
 #'       Returns \code{TRUE} if the cache contains the key, otherwise
 #'       \code{FALSE}.
 #'     }
@@ -490,7 +490,7 @@ MemoryCache <- R6Class("MemoryCache",
 
     get = function(key) {
       validate_key(key)
-      if (!self$has(key)) {
+      if (!self$exists(key)) {
         stop("Key not available: ", key)
       }
       value <- private$cache[[key]]$value
@@ -512,7 +512,7 @@ MemoryCache <- R6Class("MemoryCache",
       invisible(self)
     },
 
-    has = function(key) {
+    exists = function(key) {
       validate_key(key)
       exists(key, envir = private$cache, inherits = FALSE)
     },
@@ -547,11 +547,11 @@ MemoryCache <- R6Class("MemoryCache",
       rm(list = info$key[rm_idx], envir = private$cache)
       info <- info[!rm_idx, ]
 
-      # Sort files by priority, according to eviction policy.
+      # Sort objects by priority, according to eviction policy.
       if (private$evict == "lru") {
-        files <- files[order(files[["atime"]], decreasing = TRUE), ]
+        info <- info[order(info[["atime"]], decreasing = TRUE), ]
       } else if (private$evict == "fifo") {
-        files <- files[order(files[["mtime"]], decreasing = TRUE), ]
+        info <- info[order(info[["mtime"]], decreasing = TRUE), ]
       } else {
         stop('Unknown eviction policy "', private$evict, '"')
       }

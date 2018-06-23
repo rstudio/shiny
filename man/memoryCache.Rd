@@ -91,7 +91,7 @@ policies are:
     \item{\code{set(key, value)}}{
       Stores the \code{key}-\code{value} pair in the cache.
     }
-    \item{\code{has(key)}}{
+    \item{\code{exists(key)}}{
       Returns \code{TRUE} if the cache contains the key, otherwise
       \code{FALSE}.
     }

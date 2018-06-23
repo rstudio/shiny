@@ -201,7 +201,7 @@ renderCachedPlot <- function(expr,
     isCacheObject <- function(x) {
       # Use tryCatch in case the object does not support `$`.
       tryCatch(
-        is.function(x$has) && is.function(x$get) && is.function(x$set),
+        is.function(x$exists) && is.function(x$get) && is.function(x$set),
         error = function(e) FALSE
       )
     }
@@ -217,7 +217,7 @@ renderCachedPlot <- function(expr,
       cache <<- session$getCache()
 
     } else {
-      stop('`cache` must either be "app", "session", or a cache object with methods `$has`, `$get`, and `$set`.')
+      stop('`cache` must either be "app", "session", or a cache object with methods `$exists`, `$get`, and `$set`.')
     }
   }
 
@@ -286,7 +286,7 @@ renderCachedPlot <- function(expr,
 
         key <- digest::digest(list(outputName, cacheKeyResult, width, height, res, pixelratio), "sha256")
 
-        if (cache$has(key)) {
+        if (cache$exists(key)) {
           cat("drawReactive(): cached\n")
           # This will NOT include the displaylist.
           cache$get(key)
@@ -358,7 +358,7 @@ renderCachedPlot <- function(expr,
 
         key <- digest::digest(list(outputName, cacheKey(), width, height, res, pixelratio), "sha256")
 
-        if (cache$has(key)) {
+        if (cache$exists(key)) {
           cat("renderFunc(): cached\n")
           result <- cache$get(key)
 

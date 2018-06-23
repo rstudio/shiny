@@ -256,7 +256,6 @@ DiskCache <- R6Class("DiskCache",
       rownames(files) <- NULL
 
       # 1. Remove any files where the age exceeds max age.
-      time <- Sys.time()
       timediff <- as.numeric(Sys.time() - files[["ctime"]], units = "secs")
       rm_idx <- timediff > private$max_age
       if (any(rm_idx)) {
@@ -287,7 +286,7 @@ DiskCache <- R6Class("DiskCache",
       if (sum(files$size) > private$max_size) {
         cum_size <- cumsum(files$size)
         rm_idx <- cum_size > private$max_size
-        if (any(files$rm)) {
+        if (any(rm_idx)) {
           message("max_size: Removing ", paste(files$name[rm_idx], collapse = ", "))
         }
         file.remove(files$name[rm_idx])
@@ -310,6 +309,10 @@ DiskCache <- R6Class("DiskCache",
         message("Removing ", private$dir)
         dirRemove(private$dir)
       }
+    },
+
+    is_destroyed = function() {
+      private$destroyed
     },
 
     finalize = function() {

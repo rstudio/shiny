@@ -171,7 +171,21 @@ DiskCache <- R6Class("DiskCache",
     set = function(key, value) {
       validate_key(key)
       self$prune()
-      saveRDS(value, file = private$key_to_filename(key))
+      file <- private$key_to_filename(key)
+      temp_file <- paste0(file, "-temp-", shiny::createUniqueId(8))
+
+      save_error <- FALSE
+      tryCatch(
+        saveRDS(value, file = temp_file),
+        error = function(e) {
+          save_error <<- TRUE
+        }
+      )
+      if (save_error) {
+        stop('Error setting value for key "', key, '".')
+      }
+
+      file.rename(temp_file, file)
       invisible(self)
     },
 

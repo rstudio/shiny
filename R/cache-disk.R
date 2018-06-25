@@ -212,6 +212,13 @@ DiskCache <- R6Class("DiskCache",
     },
 
     prune = function() {
+      # TODO: It would be good to add parameters `n` and `size`, so that the
+      # cache can be pruned to `max_n - n` and `max_size - size` before adding
+      # an object. Right now we prune after adding the object, so the cache
+      # can temporarily grow past the limits. The reason we don't do this now
+      # is because it is expensive to find the size of the serialized object
+      # before adding it.
+
       files <- file.info(dir(private$dir, "*.rds", full.names = TRUE))
       files <- files[files$isdir == FALSE, ]
       files$name <- rownames(files)

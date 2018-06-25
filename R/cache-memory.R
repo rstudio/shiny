@@ -6,6 +6,12 @@
 #' according to the parameters \code{max_size}, \code{max_age}, \code{max_n},
 #' and \code{evict}.
 #'
+#' In a \code{MemoryCache}, R objects are stored directly in the cache; they are
+#' not \emph{not} serialized before being stored in the cache. This contrasts
+#' with other cache types, like \code{\link{DiskCache}}, where objects are
+#' serialized, and the serialized object is cached. This can result in some
+#' differences of behavior. For example, as long as an object is stored in a
+#' MemoryCache, it will not be garbage collected.
 #'
 #' @section Cache pruning:
 #'

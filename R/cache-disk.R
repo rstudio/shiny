@@ -170,7 +170,6 @@ DiskCache <- R6Class("DiskCache",
 
     set = function(key, value) {
       validate_key(key)
-      self$prune()
       file <- private$key_to_filename(key)
       temp_file <- paste0(file, "-temp-", shiny::createUniqueId(8))
 
@@ -186,6 +185,7 @@ DiskCache <- R6Class("DiskCache",
       }
 
       file.rename(temp_file, file)
+      self$prune()
       invisible(self)
     },
 

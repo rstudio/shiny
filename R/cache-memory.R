@@ -133,7 +133,6 @@ MemoryCache <- R6Class("MemoryCache",
 
     set = function(key, value) {
       validate_key(key)
-      self$prune()
       time <- as.numeric(Sys.time())
       private$cache[[key]] <- list(
         key = key,
@@ -142,6 +141,7 @@ MemoryCache <- R6Class("MemoryCache",
         mtime = time,
         atime = time
       )
+      self$prune()
       invisible(self)
     },
 

@@ -4449,6 +4449,33 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     if (slider.$cache && slider.$cache.input) slider.$cache.input.trigger('change');else console.log("Couldn't force ion slider to update");
   }
 
+  function getTypePrettifyer(dataType, timeFormat, timezone) {
+    var timeFormatter;
+    var prettify;
+    if (dataType === 'date') {
+      timeFormatter = strftime.utc();
+      prettify = function prettify(num) {
+        return timeFormatter(timeFormat, new Date(num));
+      };
+    } else if (dataType === 'datetime') {
+      if (timezone) timeFormatter = strftime.timezone(timezone);else timeFormatter = strftime;
+
+      prettify = function prettify(num) {
+        return timeFormatter(timeFormat, new Date(num));
+      };
+    } else {
+      // The default prettify function for ion.rangeSlider adds thousands
+      // separators after the decimal mark, so we have our own version here.
+      // (#1958)
+      prettify = function prettify(num) {
+        // When executed, `this` will refer to the `IonRangeSlider.options`
+        // object.
+        return formatNumber(num, this.prettify_separator);
+      };
+    }
+    return prettify;
+  }
+
   var sliderInputBinding = {};
   $.extend(sliderInputBinding, textInputBinding, {
     find: function find(scope) {
@@ -4527,11 +4554,29 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           msg.from = data.value;
         }
       }
-      if (data.hasOwnProperty('min')) msg.min = data.min;
-      if (data.hasOwnProperty('max')) msg.max = data.max;
-      if (data.hasOwnProperty('step')) msg.step = data.step;
+      var sliderFeatures = ['min', 'max', 'step'];
+      for (var i = 0; i < sliderFeatures.length; i++) {
+        var feats = sliderFeatures[i];
+        if (data.hasOwnProperty(feats)) {
+          msg[feats] = data[feats];
+        }
+      }
 
       if (data.hasOwnProperty('label')) $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+
+      var domElements = ['data-type', 'time-format', 'timezone'];
+      for (var i = 0; i < domElements.length; i++) {
+        var elem = domElements[i];
+        if (data.hasOwnProperty(elem)) {
+          $el.data(elem, data[elem]);
+        }
+      }
+
+      var dataType = $el.data('data-type');
+      var timeFormat = $el.data('time-format');
+      var timezone = $el.data('timezone');
+
+      msg.prettify = getTypePrettifyer(dataType, timeFormat, timezone);
 
       $el.data('immediate', true);
       try {
@@ -4553,31 +4598,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var $el = $(el);
       var dataType = $el.data('data-type');
       var timeFormat = $el.data('time-format');
-      var timeFormatter;
+      var timezone = $el.data('timezone');
 
-      // Set up formatting functions
-      if (dataType === 'date') {
-        timeFormatter = strftime.utc();
-        opts.prettify = function (num) {
-          return timeFormatter(timeFormat, new Date(num));
-        };
-      } else if (dataType === 'datetime') {
-        var timezone = $el.data('timezone');
-        if (timezone) timeFormatter = strftime.timezone(timezone);else timeFormatter = strftime;
-
-        opts.prettify = function (num) {
-          return timeFormatter(timeFormat, new Date(num));
-        };
-      } else {
-        // The default prettify function for ion.rangeSlider adds thousands
-        // separators after the decimal mark, so we have our own version here.
-        // (#1958)
-        opts.prettify = function (num) {
-          // When executed, `this` will refer to the `IonRangeSlider.options`
-          // object.
-          return formatNumber(num, this.prettify_separator);
-        };
-      }
+      opts.prettify = getTypePrettifyer(dataType, timeFormat, timezone);
 
       $el.ionRangeSlider(opts);
     },
@@ -5106,8 +5129,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (data.hasOwnProperty('url')) {
         selectize = this._selectize(el);
         selectize.clearOptions();
-        var thiz = this,
-            loaded = false;
+        var loaded = false;
         selectize.settings.load = function (query, callback) {
           var settings = selectize.settings;
           $.ajax({
@@ -5124,8 +5146,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
               callback();
             },
             success: function success(res) {
+              // res = [{label: '1', value: '1', group: '1'}, ...]
+              // success is called after options are added, but
+              // groups need to be added manually below
+              $.each(res, function (index, elem) {
+                selectize.addOptionGroup(elem.group, { group: elem.group });
+              });
               callback(res);
-              if (!loaded && data.hasOwnProperty('value')) thiz.setValue(el, data.value);
+              if (!loaded && data.hasOwnProperty('value')) {
+                selectize.setValue(data.value);
+              } else if (settings.maxItems === 1) {
+                // first item selected by default only for single-select
+                selectize.setValue(res[0].value);
+              }
               loaded = true;
             }
           });
@@ -5161,7 +5194,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var options = $.extend({
         labelField: 'label',
         valueField: 'value',
-        searchField: ['label']
+        searchField: ['label'],
+        optgroupField: 'group',
+        optgroupLabelField: 'group',
+        optgroupValueField: 'group'
       }, JSON.parse(config.html()));
       // selectize created from selectInput()
       if (typeof config.data('nonempty') !== 'undefined') {

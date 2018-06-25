@@ -11,6 +11,8 @@ shiny 1.1.0.9000
 
 * Resolved [#1935](https://github.com/rstudio/shiny/issues/1935): correctly returns plot coordinates when using outer margins. ([#2108](https://github.com/rstudio/shiny/pull/2108))
 
+* Resolved [#2019](https://github.com/rstudio/shiny/issues/2019): `updateInputSlider` now changes the slider formatting if the input type changes.[#2099](https://github.com/rstudio/shiny/pull/2099)
+
 ### Documentation Updates
 
 * Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. [#2084](https://github.com/rstudio/shiny/pull/2084)

@@ -425,10 +425,10 @@ getPrevPlotCoordmap <- function(width, height) {
     ),
     # The bounds of the plot area, in DOM pixels
     range = list(
-      left = graphics::grconvertX(usrBounds[1], 'user', 'nfc') * width,
-      right = graphics::grconvertX(usrBounds[2], 'user', 'nfc') * width,
-      bottom = (1-graphics::grconvertY(usrBounds[3], 'user', 'nfc')) * height - 1,
-      top = (1-graphics::grconvertY(usrBounds[4], 'user', 'nfc')) * height - 1
+      left = graphics::grconvertX(usrBounds[1], 'user', 'ndc') * width,
+      right = graphics::grconvertX(usrBounds[2], 'user', 'ndc') * width,
+      bottom = (1-graphics::grconvertY(usrBounds[3], 'user', 'ndc')) * height - 1,
+      top = (1-graphics::grconvertY(usrBounds[4], 'user', 'ndc')) * height - 1
     ),
     log = list(
       x = if (graphics::par('xlog')) 10 else NULL,

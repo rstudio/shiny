@@ -9,6 +9,8 @@ shiny 1.1.0.9000
 
 * Addressed [#2042](https://github.com/rstudio/shiny/issues/2042): dates outside of `min`/`max` date range are now a lighter shade of grey to highlight the allowed range. [#2087](https://github.com/rstudio/shiny/pull/2087)
 
+* Resolved [#1933](https://github.com/rstudio/shiny/issues/1933): extended server-side selectize to lists and optgroups. ([#2102](https://github.com/rstudio/shiny/pull/2102))
+
 ### Documentation Updates
 
 * Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. [#2084](https://github.com/rstudio/shiny/pull/2084)

@@ -146,16 +146,24 @@ DiskCache <- R6Class("DiskCache",
       private$destroy_on_finalize <- destroy_on_finalize
     },
 
-    # TODO:
-    # Should call exists() and return some sentinal object if not present?
-    # Should be atomic to avoid race conditions with other processes.
-    # Reduce pruning for mset/mget
     get = function(key) {
       validate_key(key)
-      if (!self$exists(key)) {
-        stop("Key not available: ", key)
+      filename <- private$key_to_filename(key)
+
+      # Instead of calling exists() before fetching the value, just try to
+      # fetch the value. This reduces the risk of a race condition when
+      # multiple processes share a cache.
+      read_error <- FALSE
+      tryCatch(
+        value <- suppressWarnings(readRDS(filename)),
+        error = function(e) {
+          read_error <<- TRUE
+        }
+      )
+      if (read_error) {
+        stop('Error getting value for key "', key, '".')
       }
-      value <- readRDS(private$key_to_filename(key))
+
       self$prune()
       value
     },

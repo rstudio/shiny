@@ -201,7 +201,7 @@ renderCachedPlot <- function(expr,
     isCacheObject <- function(x) {
       # Use tryCatch in case the object does not support `$`.
       tryCatch(
-        is.function(x$exists) && is.function(x$get) && is.function(x$set),
+        is.function(x$get) && is.function(x$set),
         error = function(e) FALSE
       )
     }
@@ -217,7 +217,7 @@ renderCachedPlot <- function(expr,
       cache <<- session$getCache()
 
     } else {
-      stop('`cache` must either be "app", "session", or a cache object with methods `$exists`, `$get`, and `$set`.')
+      stop('`cache` must either be "app", "session", or a cache object with methods, `$get`, and `$set`.')
     }
   }
 
@@ -286,10 +286,22 @@ renderCachedPlot <- function(expr,
 
         key <- digest::digest(list(outputName, cacheKeyResult, width, height, res, pixelratio), "sha256")
 
-        if (cache$exists(key)) {
+
+        # Get the key. Instead of using exists() before get(), try to simply
+        # get() the key and catch the exception if it fails. This is to avoid
+        # possible race conditions between calls to exists() and get()
+        get_value_failed <- FALSE
+        tryCatch(
+          cached_value <- cache$get(key),
+          error = function(e) {
+            get_value_failed <<- TRUE
+          }
+        )
+
+        if (!get_value_failed) {
           cat("drawReactive(): cached\n")
           # This will NOT include the displaylist.
-          cache$get(key)
+          return(cached_value)
 
         } else {
           hybrid_chain(
@@ -358,9 +370,17 @@ renderCachedPlot <- function(expr,
 
         key <- digest::digest(list(outputName, cacheKey(), width, height, res, pixelratio), "sha256")
 
-        if (cache$exists(key)) {
-          cat("renderFunc(): cached\n")
-          result <- cache$get(key)
+        get_value_failed <- FALSE
+        tryCatch(
+          cached_value <- cache$get(key),
+          error = function(e) {
+            get_value_failed <<- TRUE
+          }
+        )
+
+        if (!get_value_failed) {
+          cat("drawReactive(): cached\n")
+          result <- cached_value
 
         } else {
           if (is.null(result$recordedPlot)) {

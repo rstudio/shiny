@@ -647,7 +647,7 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
   if (is.list(choices)) {
     # check if list is nested
     for (i in seq_along(choices)) {
-      if (is.list(choices[[i]]) || length(choices[[i]]) > 1) { # TODO: add ' || length(choices) > 1'
+      if (is.list(choices[[i]]) || length(choices[[i]]) > 1) {
         noOptGroup <- FALSE
         break()
       }
@@ -682,7 +682,7 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
       lab <- name
       if (lab == "") lab <- as.character(choice)
 
-      if (is.list(choice) || length(choice) > 1) { #TODO: add ' || length(choice) > 1'
+      if (is.list(choice) || length(choice) > 1) {
         group <- rep(name, length(choice))
         choice <- unlist(choice)
 

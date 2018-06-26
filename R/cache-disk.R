@@ -147,6 +147,7 @@ DiskCache <- R6Class("DiskCache",
     },
 
     get = function(key) {
+      self$is_destroyed(throw = TRUE)
       validate_key(key)
       filename <- private$key_to_filename(key)
 
@@ -169,6 +170,7 @@ DiskCache <- R6Class("DiskCache",
     },
 
     set = function(key, value) {
+      self$is_destroyed(throw = TRUE)
       validate_key(key)
       file <- private$key_to_filename(key)
       temp_file <- paste0(file, "-temp-", shiny::createUniqueId(8))
@@ -199,23 +201,27 @@ DiskCache <- R6Class("DiskCache",
     },
 
     exists = function(key) {
+      self$is_destroyed(throw = TRUE)
       validate_key(key)
       file.exists(private$key_to_filename(key))
     },
 
     # Return all keys in the cache
     keys = function() {
+      self$is_destroyed(throw = TRUE)
       files <- dir(private$dir, "*.rds")
       sub("\\.rds$", "", files)
     },
 
     remove = function(key) {
+      self$is_destroyed(throw = TRUE)
       validate_key(key)
       file.remove(private$key_to_filename(key))
       invisible(self)
     },
 
     reset = function() {
+      self$is_destroyed(throw = TRUE)
       file.remove(dir(private$dir, "*.rds", full.names = TRUE))
       invisible(self)
     },
@@ -227,6 +233,8 @@ DiskCache <- R6Class("DiskCache",
       # can temporarily grow past the limits. The reason we don't do this now
       # is because it is expensive to find the size of the serialized object
       # before adding it.
+
+      self$is_destroyed(throw = TRUE)
 
       files <- file.info(dir(private$dir, "*.rds", full.names = TRUE))
       files <- files[files$isdir == FALSE, ]
@@ -275,24 +283,37 @@ DiskCache <- R6Class("DiskCache",
     },
 
     size = function() {
+      self$is_destroyed(throw = TRUE)
       length(dir(private$dir, "*.rds"))
     },
 
     destroy = function() {
-      if (private$destroyed) {
+      if (self$is_destroyed()) {
         return(invisible)
       }
 
-      private$destroyed <- TRUE
       self$reset()
       if (private$dir_was_created) {
         message("Removing ", private$dir)
         dirRemove(private$dir)
       }
+      private$destroyed <- TRUE
     },
 
-    is_destroyed = function() {
-      private$destroyed
+    is_destroyed = function(throw = FALSE) {
+      if (!dirExists(private$dir)) {
+        # It's possible for another process to destroy a shared cache directory
+        private$destroyed <- TRUE
+      }
+
+      if (throw) {
+        if (private$destroyed) {
+          stop("Attempted to use cache which has been destroyed:\n  ", private$dir)
+        }
+
+      } else {
+        private$destroyed
+      }
     },
 
     finalize = function() {

@@ -209,7 +209,7 @@ DiskCache <- R6Class("DiskCache",
     # Return all keys in the cache
     keys = function() {
       self$is_destroyed(throw = TRUE)
-      files <- dir(private$dir, "*.rds")
+      files <- dir(private$dir, "\\.rds$")
       sub("\\.rds$", "", files)
     },
 
@@ -222,7 +222,7 @@ DiskCache <- R6Class("DiskCache",
 
     reset = function() {
       self$is_destroyed(throw = TRUE)
-      file.remove(dir(private$dir, "*.rds", full.names = TRUE))
+      file.remove(dir(private$dir, "\\.rds$", full.names = TRUE))
       invisible(self)
     },
 
@@ -236,7 +236,8 @@ DiskCache <- R6Class("DiskCache",
 
       self$is_destroyed(throw = TRUE)
 
-      files <- file.info(dir(private$dir, "*.rds", full.names = TRUE))
+      filenames <- dir(private$dir, "\\.rds$", full.names = TRUE)
+      files <- file.info(filenames)
       files <- files[files$isdir == FALSE, ]
       files$name <- rownames(files)
       rownames(files) <- NULL
@@ -284,7 +285,7 @@ DiskCache <- R6Class("DiskCache",
 
     size = function() {
       self$is_destroyed(throw = TRUE)
-      length(dir(private$dir, "*.rds"))
+      length(dir(private$dir, "\\.rds$"))
     },
 
     destroy = function() {

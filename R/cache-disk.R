@@ -241,6 +241,9 @@ DiskCache <- R6Class("DiskCache",
       files <- files[files$isdir == FALSE, ]
       files$name <- rownames(files)
       rownames(files) <- NULL
+      # Files could be removed between the dir() and file.info() calls. The
+      # entire row for such files will have NA values. Remove those rows.
+      files <- files[!is.na(files$size), ]
 
       # 1. Remove any files where the age exceeds max age.
       timediff <- as.numeric(Sys.time() - files[["mtime"]], units = "secs")

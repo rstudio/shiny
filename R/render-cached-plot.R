@@ -361,14 +361,36 @@ renderCachedPlot <- function(expr,
 
     hybrid_chain(
       drawReactive(),
-      function(result) {
+      function(drawReactiveResult) {
+        # Before we move on to the next step, we need the results of both
+        # drawReactive() and cacheKey(). Each of these can be a promise or
+        # not. So we use another hybrid_chain() here and collect the results
+        # before passing them along to the next step. This is sort of like
+        # doing `promise_all(a=drawReactive(), b=cacheKey())`, but a lot
+        # uglier because it needs to support both promises and non-promises.
+        hybrid_chain(
+          cacheKey(),
+          function(cacheKeyResult) {
+            list(
+              drawReactiveResult = drawReactiveResult,
+              cacheKeyResult = cacheKeyResult
+            )
+          }
+        )
+      },
+      function(results) {
         cat("renderFunc() chain\n")
+
+        # Extract from previous steps
+        drawReactiveResult <- results$drawReactiveResult
+        cacheKeyResult     <- results$cacheKeyResult
+
         # Take a reactive dependency on the fitted dimensions
         width  <- fitDims$width
         height <- fitDims$height
         pixelratio <- session$clientData$pixelratio %OR% 1
 
-        key <- digest::digest(list(outputName, cacheKey(), width, height, res, pixelratio), "sha256")
+        key <- digest::digest(list(outputName, cacheKeyResult, width, height, res, pixelratio), "sha256")
 
         get_value_failed <- FALSE
         tryCatch(
@@ -383,7 +405,7 @@ renderCachedPlot <- function(expr,
           result <- cached_value
 
         } else {
-          if (is.null(result$recordedPlot)) {
+          if (is.null(drawReactiveResult$recordedPlot)) {
             # This is an uncommon case. (1) The output from drawPlot was saved
             # to RDS (without a recordedPlot, since that can't be properly
             # saved). (2) drawPlot was called with another set of inputs (so
@@ -402,7 +424,7 @@ renderCachedPlot <- function(expr,
               list(
                 name,
                 shinysession,
-                result,
+                drawReactiveResult,
                 width,
                 height,
                 pixelratio,

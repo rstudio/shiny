@@ -86,6 +86,30 @@ policies are:
   }
 }
 
+\section{Sharing among multiple processes}{
+
+
+The directory for a DiskCache can be shared among multiple R processes. To
+do this, each R process should have a DiskCache object that uses the same
+directory. Each DiskCache will do pruning independently of the others, so if
+they have different pruning parameters, then one DiskCache may remove cached
+objects before another DiskCache would do so.
+
+When multiple processes share a cache directory, there are some potential
+race conditions. For example, if your code calls \code{exists(key)} to check
+if an object is in the cache, and then call \code{get(key)}, the object may
+be removed from the cache in between those two calls, and \code{get(key)}
+will throw an error. Instead of calling the two functions, it is better to
+simply call \code{get(key)}, and use \code{tryCatch()} to handle the error
+that is thrown if the object is not in the cache. This effectively tests for
+existence and gets the object in one operation.
+
+It is also possible for one processes to prune objects at the same time that
+another processes is trying to prune objects. If this happens, you may see
+a warning from \code{file.remove()} failing to remove a file that has
+already been deleted.
+}
+
 \section{Methods}{
 
 

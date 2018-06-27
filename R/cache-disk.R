@@ -111,8 +111,8 @@
 #'     }
 #'   }
 #'
-#' @param dir Directory to store files for the cache. By default, it will use
-#'   a temporary directory.
+#' @param dir Directory to store files for the cache. If \code{NULL} (the
+#'   default) it will create and use a temporary directory.
 #' @param max_age Maximum age of files in cache before they are evicted, in
 #'   seconds.
 #' @param max_size Maximum size of the cache, in bytes. If the cache exceeds
@@ -126,14 +126,26 @@
 #'   supported.
 #' @param destroy_on_finalize If \code{TRUE}, then when the DiskCache object is
 #'   garbage collected, the cache directory and all objects inside of it will be
-#'   deleted from disk.
+#'   deleted from disk. If \code{FALSE}, it will do nothing when finalized. If
+#'   \code{NULL} (the default), then the behavior depends on the value of
+#'   \code{dir}: If \code{destroy_on_finalize=NULL} and \code{dir=NULL}, then a
+#'   temporary directory will be created and used for the cache, and it will be
+#'   deleted when the DiskCache is finalized.  If
+#'   \code{destroy_on_finalize=NULL} and \code{dir} is \emph{not} \code{NULL},
+#'   then the directory will not be deleted when the DiskCache is finalized.
+#'   In short, when \code{destroy_on_finalize=NULL}, if the cache directory is
+#'   automatically created, it will be automatically deleted, and if the cache
+#'   directory is not automatically created, it will not be automatically
+#'   deleted.
+#'
 #' @export
-diskCache <- function(dir = tempfile("DiskCache-"),
+diskCache <- function(
+  dir = NULL,
   max_size = 5 * 1024 ^ 2,
   max_age = Inf,
   max_n = Inf,
-  evict = "fifo",
-  destroy_on_finalize = TRUE)
+  evict = c("lru", "fifo"),
+  destroy_on_finalize = NULL)
 {
   DiskCache$new(dir, max_size, max_age, max_n, evict, destroy_on_finalize)
 }
@@ -141,13 +153,20 @@ diskCache <- function(dir = tempfile("DiskCache-"),
 
 DiskCache <- R6Class("DiskCache",
   public = list(
-    initialize = function(dir = tempfile("DiskCache-"),
-                          max_size = 5 * 1024 ^ 2,
-                          max_age = Inf,
-                          max_n = Inf,
-                          evict = c("lru", "fifo"),
-                          destroy_on_finalize = TRUE)
+    initialize = function(
+      dir = NULL,
+      max_size = 5 * 1024 ^ 2,
+      max_age = Inf,
+      max_n = Inf,
+      evict = c("lru", "fifo"),
+      destroy_on_finalize = NULL)
     {
+      if (is.null(destroy_on_finalize)) {
+        destroy_on_finalize <- is.null(dir)
+      }
+      if (is.null(dir)) {
+        dir <- tempfile("DiskCache-")
+      }
       if (!dirExists(dir)) {
         message("Creating ", dir)
         dir.create(dir, recursive = TRUE, mode = "0700")
@@ -157,6 +176,7 @@ DiskCache <- R6Class("DiskCache",
       private$max_age             <- max_age
       private$max_n               <- max_n
       private$evict               <- match.arg(evict)
+      private$destroy_on_finalize <- destroy_on_finalize
       if (private$evict == "lru" && !check_atime_support(private$dir)) {
         # Another possibility for handling lack of atime support would be to
         # create a file on disk that contains atimes. However, this would not
@@ -166,7 +186,6 @@ DiskCache <- R6Class("DiskCache",
         )
         private$evict <- "fifo"
       }
-      private$destroy_on_finalize <- destroy_on_finalize
     },
 
     get = function(key) {

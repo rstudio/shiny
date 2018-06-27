@@ -4,13 +4,12 @@
 \alias{diskCache}
 \title{Create a disk cache object}
 \usage{
-diskCache(dir = tempfile("DiskCache-"), max_size = 5 * 1024^2,
-  max_age = Inf, max_n = Inf, evict = "fifo",
-  destroy_on_finalize = TRUE)
+diskCache(dir = NULL, max_size = 5 * 1024^2, max_age = Inf, max_n = Inf,
+  evict = c("lru", "fifo"), destroy_on_finalize = NULL)
 }
 \arguments{
-\item{dir}{Directory to store files for the cache. By default, it will use
-a temporary directory.}
+\item{dir}{Directory to store files for the cache. If \code{NULL} (the
+default) it will create and use a temporary directory.}
 
 \item{max_size}{Maximum size of the cache, in bytes. If the cache exceeds
 this size, cached objects will be removed according to the value of the
@@ -29,7 +28,17 @@ supported.}
 
 \item{destroy_on_finalize}{If \code{TRUE}, then when the DiskCache object is
 garbage collected, the cache directory and all objects inside of it will be
-deleted from disk.}
+deleted from disk. If \code{FALSE}, it will do nothing when finalized. If
+\code{NULL} (the default), then the behavior depends on the value of
+\code{dir}: If \code{destroy_on_finalize=NULL} and \code{dir=NULL}, then a
+temporary directory will be created and used for the cache, and it will be
+deleted when the DiskCache is finalized.  If
+\code{destroy_on_finalize=NULL} and \code{dir} is \emph{not} \code{NULL},
+then the directory will not be deleted when the DiskCache is finalized.
+In short, when \code{destroy_on_finalize=NULL}, if the cache directory is
+automatically created, it will be automatically deleted, and if the cache
+directory is not automatically created, it will not be automatically
+deleted.}
 }
 \description{
 A disk cache object is a key-value store that saves the values as files in a

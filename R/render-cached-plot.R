@@ -322,14 +322,21 @@ renderCachedPlot <- function(expr,
               ))
             },
             function(result) {
-              # Cache a copy of the result, but without the recorded plot, because
-              # it can't be saved and restored properly within the same R session.
-              # Note that this was fixed in revision 74506 (2e6c669), and should
-              # be in R 3.5.1, but we need to work on older versions. Perhaps in
-              # the future we could do a version check and change caching behavior
-              # based on that.
+              # Cache a copy of the result. In the case of the MemoryCache,
+              # the result is simply stored in memory and can be restored just
+              # fine. For other types of cache (like DiskCache) where the
+              # object must be serialized before saving, there's a catch: the
+              # recorded displaylist for the plot can't be serialized and
+              # restored properly within the same R session, so we NULL it out
+              # before saving. (The PNG can of course be saved and restored
+              # just fine.) Note that this was fixed in revision 74506
+              # (2e6c669), and should be in R 3.6, but we need it to work on
+              # older versions. Perhaps in the future we could do a version
+              # check and change caching behavior based on that.
               result_copy <- result
-              result_copy$recordedPlot <- NULL
+              if (!inherits(cache, "MemoryCache")) {
+                result_copy$recordedPlot <- NULL
+              }
               cache$set(key, result_copy)
 
               result

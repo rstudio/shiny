@@ -127,7 +127,6 @@ DiskCache <- R6Class("DiskCache",
       if (!dirExists(dir)) {
         message("Creating ", dir)
         dir.create(dir, recursive = TRUE, mode = "0700")
-        private$dir_was_created <- TRUE
       }
       private$dir                 <- absolutePath(dir)
       private$max_size            <- max_size
@@ -293,19 +292,25 @@ DiskCache <- R6Class("DiskCache",
 
     destroy = function() {
       if (self$is_destroyed()) {
-        return(invisible)
+        return(invisible(self))
       }
 
-      self$reset()
-      if (private$dir_was_created) {
-        message("Removing ", private$dir)
-        dirRemove(private$dir)
-      }
+      message("Removing ", private$dir)
+      # First create a sentinel file so that other processes sharing this
+      # cache know that the cache is to be destroyed. This is needed because
+      # the recursive unlink is not atomic: another process can add a file to
+      # the directory after unlink starts removing files but before it removes
+      # the directory, and when that happens, the directory removal will fail.
+      file.create(file.path(private$dir, "__destroyed__"))
+      unlink(private$dir, recursive = TRUE)
       private$destroyed <- TRUE
+      invisible(self)
     },
 
     is_destroyed = function(throw = FALSE) {
-      if (!dirExists(private$dir)) {
+      if (!dirExists(private$dir) ||
+          file.exists(file.path(private$dir, "__destroyed__")))
+      {
         # It's possible for another process to destroy a shared cache directory
         private$destroyed <- TRUE
       }
@@ -333,7 +338,6 @@ DiskCache <- R6Class("DiskCache",
     max_size = NULL,
     max_n = NULL,
     evict = NULL,
-    dir_was_created = FALSE,
     destroy_on_finalize = NULL,
     destroyed = FALSE,
 

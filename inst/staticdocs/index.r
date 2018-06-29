@@ -212,7 +212,8 @@ sd_section("Utility functions",
     "shiny-options",
     "onStop",
     "diskCache",
-    "memoryCache"
+    "memoryCache",
+    "key_missing"
   )
 )
 sd_section("Plot interaction",

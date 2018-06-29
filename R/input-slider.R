@@ -86,24 +86,10 @@ sliderInput <- function(inputId, label, min, max, value, step = NULL,
                     version = "0.10.2.2")
   }
 
-  if (inherits(min, "Date")) {
-    if (!inherits(max, "Date") || !inherits(value, "Date"))
-      stop("`min`, `max`, and `value must all be Date or non-Date objects")
-    dataType <- "date"
+  dataType <- getSliderType(min, max, value)
 
-    if (is.null(timeFormat))
-      timeFormat <- "%F"
-
-  } else if (inherits(min, "POSIXt")) {
-    if (!inherits(max, "POSIXt") || !inherits(value, "POSIXt"))
-      stop("`min`, `max`, and `value must all be POSIXt or non-POSIXt objects")
-    dataType <- "datetime"
-
-    if (is.null(timeFormat))
-      timeFormat <- "%F %T"
-
-  } else {
-    dataType <- "number"
+  if (is.null(timeFormat)) {
+    timeFormat <- switch(dataType, date = "%F", datetime = "%F %T", number = NULL)
   }
 
   # Restore bookmarked values here, after doing the type checking, because the
@@ -250,7 +236,7 @@ findStepSize <- function(min, max, step) {
     # values to calculate the step size.
     pretty_steps <- pretty(c(min, max), n = 100)
     n_steps <- length(pretty_steps) - 1
-    
+
     # Fix for #2061: Windows has low-significance digits (like 17 digits out)
     # even at the boundaries of pretty()'s output. Use signif(digits = 10),
     # which should be way way less significant than any data we'd want to keep.

@@ -286,19 +286,9 @@ renderCachedPlot <- function(expr,
 
         key <- digest::digest(list(outputName, cacheKeyResult, width, height, res, pixelratio), "sha256")
 
+        cached_value <- cache$get(key)
 
-        # Get the key. Instead of using exists() before get(), try to simply
-        # get() the key and catch the exception if it fails. This is to avoid
-        # possible race conditions between calls to exists() and get()
-        get_value_failed <- FALSE
-        tryCatch(
-          cached_value <- cache$get(key),
-          error = function(e) {
-            get_value_failed <<- TRUE
-          }
-        )
-
-        if (!get_value_failed) {
+        if (!is.key_missing(cached_value)) {
           cat("drawReactive(): cached\n")
           # This will NOT include the displaylist.
           return(cached_value)
@@ -399,15 +389,9 @@ renderCachedPlot <- function(expr,
 
         key <- digest::digest(list(outputName, cacheKeyResult, width, height, res, pixelratio), "sha256")
 
-        get_value_failed <- FALSE
-        tryCatch(
-          cached_value <- cache$get(key),
-          error = function(e) {
-            get_value_failed <<- TRUE
-          }
-        )
+        cached_value <- cache$get(key)
 
-        if (!get_value_failed) {
+        if (!is.key_missing(cached_value)) {
           cat("drawReactive(): cached\n")
           result <- cached_value
 

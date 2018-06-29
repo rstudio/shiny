@@ -25,6 +25,11 @@
 #'   return a different sentinel value, like \code{NULL}, or even throw an error
 #'   on a cache miss.
 #'
+#'   When the cache is created, you can supply a value for \code{missing}, which
+#'   sets the default value to be returned for missing values. It can also be
+#'   overridden when \code{get()} is called, by supplying a \code{missing}
+#'   argument, as in \code{cache$get("mykey", missing = NULL)}.
+#'
 #'   If your cache is configured so that \code{get()} returns a sentinel value
 #'   to represent a cache miss, then \code{set} will also not allow you to store
 #'   the sentinel value in the cache. It will throw an error if you attempt to
@@ -88,9 +93,11 @@
 #'  A disk cache object has the following methods:
 #'
 #'   \describe{
-#'     \item{\code{get(key)}}{
+#'     \item{\code{get(key, missing)}}{
 #'       Returns the value associated with \code{key}. If the key is not in the
-#'       cache, this throws an error.
+#'       cache, then it returns the value specified by \code{missing}. The
+#'       default value for \code{missing} when the DiskCache object is created,
+#'       but it can be overridden when \code{get()} is called.
 #'     }
 #'     \item{\code{set(key, value)}}{
 #'       Stores the \code{key}-\code{value} pair in the cache.
@@ -146,16 +153,15 @@ MemoryCache <- R6Class("MemoryCache",
       private$max_n        <- max_n
       private$evict        <- match.arg(evict)
       private$missing      <- missing
-      private$eval_missing <- is.language(missing)
     },
 
-    get = function(key) {
+    get = function(key, missing = private$missing) {
       validate_key(key)
       if (!self$exists(key)) {
-        if (private$eval_missing) {
-          return(eval(private$missing))
+        if (is.language(missing)) {
+          return(eval(missing))
         } else {
-          return(private$missing)
+          return(missing)
         }
       }
 
@@ -166,7 +172,7 @@ MemoryCache <- R6Class("MemoryCache",
 
     set = function(key, value) {
       validate_key(key)
-      if (!private$eval_missing && identical(value, private$missing)) {
+      if (!is.language(private$missing) && identical(value, private$missing)) {
         stop("Attempted to store sentinel value representing a missing key.")
       }
 
@@ -275,7 +281,6 @@ MemoryCache <- R6Class("MemoryCache",
     max_n = NULL,
     evict = NULL,
     missing = NULL,
-    eval_missing = NULL,
 
     object_info = function() {
       keys <- ls(private$cache, sorted = FALSE)

@@ -18,6 +18,11 @@
 #'   return a different sentinel value, like \code{NULL}, or even throw an error
 #'   on a cache miss.
 #'
+#'   When the cache is created, you can supply a value for \code{missing}, which
+#'   sets the default value to be returned for missing values. It can also be
+#'   overridden when \code{get()} is called, by supplying a \code{missing}
+#'   argument, as in \code{cache$get("mykey", missing = NULL)}.
+#'
 #'   If your cache is configured so that \code{get()} returns a sentinel value
 #'   to represent a cache miss, then \code{set} will also not allow you to store
 #'   the sentinel value in the cache. It will throw an error if you attempt to
@@ -106,9 +111,11 @@
 #'  A disk cache object has the following methods:
 #'
 #'   \describe{
-#'     \item{\code{get(key)}}{
+#'     \item{\code{get(key, missing)}}{
 #'       Returns the value associated with \code{key}. If the key is not in the
-#'       cache, this throws an error.
+#'       cache, then it returns the value specified by \code{missing}. The
+#'       default value for \code{missing} when the DiskCache object is created,
+#'       but it can be overridden when \code{get()} is called.
 #'     }
 #'     \item{\code{set(key, value)}}{
 #'       Stores the \code{key}-\code{value} pair in the cache.
@@ -218,10 +225,9 @@ DiskCache <- R6Class("DiskCache",
         private$evict             <- "fifo"
       }
       private$missing             <- missing
-      private$eval_missing        <- is.language(missing)
     },
 
-    get = function(key) {
+    get = function(key, missing = private$missing) {
       self$is_destroyed(throw = TRUE)
       validate_key(key)
       filename <- private$key_to_filename(key)
@@ -239,10 +245,10 @@ DiskCache <- R6Class("DiskCache",
         }
       )
       if (read_error) {
-        if (private$eval_missing) {
-          return(eval(private$missing))
+        if (is.language(missing)) {
+          return(eval(missing))
         } else {
-          return(private$missing)
+          return(missing)
         }
       }
 
@@ -253,7 +259,7 @@ DiskCache <- R6Class("DiskCache",
     set = function(key, value) {
       self$is_destroyed(throw = TRUE)
       validate_key(key)
-      if (!private$eval_missing && identical(value, private$missing)) {
+      if (!is.language(private$missing) && identical(value, private$missing)) {
         stop("Attempted to store sentinel value representing a missing key.")
       }
 
@@ -427,7 +433,6 @@ DiskCache <- R6Class("DiskCache",
     destroy_on_finalize = NULL,
     destroyed = FALSE,
     missing = NULL,
-    eval_missing = NULL,
 
     key_to_filename = function(key) {
       if (! (is.character(key) && length(key)==1) ) {

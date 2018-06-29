@@ -7,6 +7,8 @@ test_that("DiskCache: handling missing values", {
   expect_error(d$set("x", key_missing()))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
+  expect_identical(d$get("y", missing = NULL), NULL)
+  expect_error(d$get("y", missing = quote(stop("Missing key"))), "^Missing key$")
 
   d <- diskCache(missing = NULL)
   expect_true(is.null(d$get("abcd")))
@@ -14,6 +16,8 @@ test_that("DiskCache: handling missing values", {
   expect_error(d$set("x", NULL))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
+  expect_identical(d$get("y", missing = -1), -1)
+  expect_error(d$get("y", missing = quote(stop("Missing key"))), "^Missing key$")
 
   d <- diskCache(missing = quote(stop("Missing key")))
   expect_error(d$get("abcd"), "^Missing key$")
@@ -23,6 +27,8 @@ test_that("DiskCache: handling missing values", {
   expect_identical(d$get("x"), quote(stop("Missing key")))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
+  expect_identical(d$get("y", missing = NULL), NULL)
+  expect_error(d$get("y", missing = quote(stop("Missing key 1"))), "^Missing key 1$")
 })
 
 test_that("MemoryCache: handling missing values", {
@@ -32,6 +38,8 @@ test_that("MemoryCache: handling missing values", {
   expect_error(d$set("x", key_missing()))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
+  expect_identical(d$get("y", missing = NULL), NULL)
+  expect_error(d$get("y", missing = quote(stop("Missing key"))), "^Missing key$")
 
   d <- memoryCache(missing = NULL)
   expect_true(is.null(d$get("abcd")))
@@ -39,6 +47,8 @@ test_that("MemoryCache: handling missing values", {
   expect_error(d$set("x", NULL))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
+  expect_identical(d$get("y", missing = -1), -1)
+  expect_error(d$get("y", missing = quote(stop("Missing key"))), "^Missing key$")
 
   d <- memoryCache(missing = quote(stop("Missing key")))
   expect_error(d$get("abcd"), "^Missing key$")
@@ -48,4 +58,6 @@ test_that("MemoryCache: handling missing values", {
   expect_identical(d$get("x"), quote(stop("Missing key")))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
+  expect_identical(d$get("y", missing = NULL), NULL)
+  expect_error(d$get("y", missing = quote(stop("Missing key 1"))), "^Missing key 1$")
 })

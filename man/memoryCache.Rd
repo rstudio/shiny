@@ -5,7 +5,7 @@
 \title{Create a memory cache object}
 \usage{
 memoryCache(max_size = 10 * 1024^2, max_age = Inf, max_n = Inf,
-  evict = c("lru", "fifo"))
+  evict = c("lru", "fifo"), missing = key_missing())
 }
 \arguments{
 \item{max_size}{Maximum size of the cache, in bytes. If the cache exceeds
@@ -22,6 +22,11 @@ value of \code{evict}.}
 \item{evict}{The eviction policy to use to decide which objects are removed
 when a cache pruning occurs. Currently, \code{"lru"} and \code{"fifo"} are
 supported.}
+
+\item{missing}{A value to return, or a quoted expression to evaluate when
+\code{get()} is called but the key is not present in the cache. The default
+is a \code{\link{key_missing}} object. See section Missing keys for more
+information.}
 }
 \description{
 A memory cache object is a key-value store that saves the values in an
@@ -38,6 +43,33 @@ serialized, and the serialized object is cached. This can result in some
 differences of behavior. For example, as long as an object is stored in a
 MemoryCache, it will not be garbage collected.
 }
+\section{Missing keys}{
+
+
+  The \code{missing} parameter controls what happens when \code{get()} is
+  called with a key that is not in the cache (a cache miss). The default
+  behavior is to return a \code{\link{key_missing}} object. This is a
+  \emph{sentinel value} representing a missing key. You can test if the
+  returned value represents a missing key by using the
+  \code{\link{is.key_missing}} function. You can also have \code{get()}
+  return a different sentinel value, like \code{NULL}, or even throw an error
+  on a cache miss.
+
+  If your cache is configured so that \code{get()} returns a sentinel value
+  to represent a cache miss, then \code{set} will also not allow you to store
+  the sentinel value in the cache. It will throw an error if you attempt to
+  do so.
+
+  If \code{missing} is a quoted expression, then that expression will be
+  evaluated each time \code{get()} encounters missing key. If the evaluation
+  of the expression does not throw an error, then \code{get()} will return
+  the resulting value. However, it is more common for the expression to throw
+  an error. If an error is thrown, then \code{get()} will not return a value.
+  For example, you could use \code{quote(stop("Missing key"))}. If you use
+  this, the code that calls \code{get()} should be wrapped with
+  \code{\link{tryCatch}()} to gracefully handle missing keys.
+}
+
 \section{Cache pruning}{
 
 

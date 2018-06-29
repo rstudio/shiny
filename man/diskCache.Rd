@@ -4,8 +4,9 @@
 \alias{diskCache}
 \title{Create a disk cache object}
 \usage{
-diskCache(dir = NULL, max_size = 5 * 1024^2, max_age = Inf, max_n = Inf,
-  evict = c("lru", "fifo"), destroy_on_finalize = NULL)
+diskCache(dir = NULL, max_size = 10 * 1024^2, max_age = Inf,
+  max_n = Inf, evict = c("lru", "fifo"), destroy_on_finalize = NULL,
+  missing = key_missing())
 }
 \arguments{
 \item{dir}{Directory to store files for the cache. If \code{NULL} (the
@@ -34,11 +35,16 @@ deleted from disk. If \code{FALSE}, it will do nothing when finalized. If
 temporary directory will be created and used for the cache, and it will be
 deleted when the DiskCache is finalized.  If
 \code{destroy_on_finalize=NULL} and \code{dir} is \emph{not} \code{NULL},
-then the directory will not be deleted when the DiskCache is finalized.
-In short, when \code{destroy_on_finalize=NULL}, if the cache directory is
+then the directory will not be deleted when the DiskCache is finalized. In
+short, when \code{destroy_on_finalize=NULL}, if the cache directory is
 automatically created, it will be automatically deleted, and if the cache
 directory is not automatically created, it will not be automatically
 deleted.}
+
+\item{missing}{A value to return, or a quoted expression to evaluate when
+\code{get()} is called but the key is not present in the cache. The default
+is a \code{\link{key_missing}} object. See section Missing keys for more
+information.}
 }
 \description{
 A disk cache object is a key-value store that saves the values as files in a
@@ -47,31 +53,58 @@ and \code{set()} methods. Objects are automatically pruned from the cache
 according to the parameters \code{max_size}, \code{max_age}, \code{max_n},
 and \code{evict}.
 }
+\section{Missing keys}{
+
+
+  The \code{missing} parameter controls what happens when \code{get()} is
+  called with a key that is not in the cache (a cache miss). The default
+  behavior is to return a \code{\link{key_missing}} object. This is a
+  \emph{sentinel value} representing a missing key. You can test if the
+  returned value represents a missing key by using the
+  \code{\link{is.key_missing}} function. You can also have \code{get()}
+  return a different sentinel value, like \code{NULL}, or even throw an error
+  on a cache miss.
+
+  If your cache is configured so that \code{get()} returns a sentinel value
+  to represent a cache miss, then \code{set} will also not allow you to store
+  the sentinel value in the cache. It will throw an error if you attempt to
+  do so.
+
+  If \code{missing} is a quoted expression, then that expression will be
+  evaluated each time \code{get()} encounters missing key. If the evaluation
+  of the expression does not throw an error, then \code{get()} will return
+  the resulting value. However, it is more common for the expression to throw
+  an error. If an error is thrown, then \code{get()} will not return a value.
+  For example, you could use \code{quote(stop("Missing key"))}. If you use
+  this, the code that calls \code{get()} should be wrapped with
+  \code{\link{tryCatch}()} to gracefully handle missing keys.
+}
+
 \section{Cache pruning}{
 
 
-Cache pruning occurs each time \code{get()} and \code{set()} are called, or
-it can be invoked manually by calling \code{prune()}.
+  Cache pruning occurs each time \code{get()} and \code{set()} are called, or
+  it can be invoked manually by calling \code{prune()}.
 
-If there are any objects that are older than \code{max_age}, they will be
-removed when a pruning occurs.
+  If there are any objects that are older than \code{max_age}, they will be
+  removed when a pruning occurs.
 
-The \code{max_size} and \code{max_n} parameters are applied to the cache as
-a whole, in contrast to \code{max_age}, which is applied to each object
-individually.
+  The \code{max_size} and \code{max_n} parameters are applied to the cache as
+  a whole, in contrast to \code{max_age}, which is applied to each object
+  individually.
 
-If the number of objects in the cache exceeds \code{max_n}, then objects
-will be removed from the cache according to the eviction policy, which is
-set with the \code{evict} parameter. Objects will be removed so that the
-number of items is \code{max_n}.
+  If the number of objects in the cache exceeds \code{max_n}, then objects
+  will be removed from the cache according to the eviction policy, which is
+  set with the \code{evict} parameter. Objects will be removed so that the
+  number of items is \code{max_n}.
 
-If the size of the objects in the cache exceeds \code{max_size}, then
-objects will be removed from the cache. Objects will be removed from
-the cache so that the total size remains under \code{max_size}. Note that
-the size is calculated using the size of the files, not the size of disk
-space used by the files -- these two values can differ because of files
-are stored in blocks on disk. For example, if the block size is 4096 bytes,
-then a file that is one byte in size will take 4096 bytes on disk.
+  If the size of the objects in the cache exceeds \code{max_size}, then
+  objects will be removed from the cache. Objects will be removed from the
+  cache so that the total size remains under \code{max_size}. Note that the
+  size is calculated using the size of the files, not the size of disk space
+  used by the files -- these two values can differ because of files are
+  stored in blocks on disk. For example, if the block size is 4096 bytes,
+  then a file that is one byte in size will take 4096 bytes on disk.
 }
 
 \section{Eviction policies}{

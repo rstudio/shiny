@@ -340,7 +340,7 @@ renderCachedPlot <- function(expr,
     # change (and cause invalidations) when the rendered image size changes,
     # and not every time the browser's <img> tag changes size.
     resizeObserver <<- observe({
-      cat("resize\n")
+      # cat("resize\n")
       width  <- session$clientData[[paste0('output_', outputName, '_width')]]
       height <- session$clientData[[paste0('output_', outputName, '_height')]]
 
@@ -379,7 +379,7 @@ renderCachedPlot <- function(expr,
         })
 
         drawReactiveTrigger()
-        cat("drawReactive()\n")
+        # cat("drawReactive()\n")
 
         cacheKey()
       },
@@ -397,14 +397,14 @@ renderCachedPlot <- function(expr,
         cached_value <- cache$get(key)
 
         if (!is.key_missing(cached_value)) {
-          cat("drawReactive(): cached\n")
+          # cat("drawReactive(): cached\n")
           # This will NOT include the displaylist.
           return(cached_value)
 
         } else {
           hybrid_chain(
             {
-              cat("drawReactive(): drawPlot()\n")
+              # cat("drawReactive(): drawPlot()\n")
               # This will include the displaylist.
               do.call("drawPlot", c(
                 list(
@@ -462,7 +462,7 @@ renderCachedPlot <- function(expr,
     session <<- shinysession
     ensureCacheSetup()
     ensureResizeObserver()
-    cat("renderFunc()\n")
+    # cat("renderFunc()\n")
 
     hybrid_chain(
       drawReactive(),
@@ -484,7 +484,7 @@ renderCachedPlot <- function(expr,
         )
       },
       function(results) {
-        cat("renderFunc() chain\n")
+        # cat("renderFunc() chain\n")
 
         # Extract from previous steps
         drawReactiveResult <- results$drawReactiveResult
@@ -500,7 +500,7 @@ renderCachedPlot <- function(expr,
         cached_value <- cache$get(key)
 
         if (!is.key_missing(cached_value)) {
-          cat("drawReactive(): cached\n")
+          # cat("drawReactive(): cached\n")
           result <- cached_value
 
         } else {
@@ -513,12 +513,12 @@ renderCachedPlot <- function(expr,
             # so this reactive executes (and not drawPlot). In this situation,
             # there's no recordedPlot that can be replayed, so we have to
             # trigger drawPlot() to run again.
-            cat("renderFunc(): drawReactiveTrigger()\n")
+            # cat("renderFunc(): drawReactiveTrigger()\n")
             drawReactiveTrigger(drawReactiveTrigger() + 1)
             req(FALSE, cancelOutput = TRUE)
 
           } else {
-            cat("renderFunc(): resizeSavedPlot()\n")
+            # cat("renderFunc(): resizeSavedPlot()\n")
             result <- do.call("resizeSavedPlot", c(
               list(
                 name,

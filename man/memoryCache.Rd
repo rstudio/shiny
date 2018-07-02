@@ -5,7 +5,7 @@
 \title{Create a memory cache object}
 \usage{
 memoryCache(max_size = 10 * 1024^2, max_age = Inf, max_n = Inf,
-  evict = c("lru", "fifo"), missing = key_missing())
+  evict = c("lru", "fifo"), missing = key_missing(), logfile = NULL)
 }
 \arguments{
 \item{max_size}{Maximum size of the cache, in bytes. If the cache exceeds
@@ -27,6 +27,9 @@ supported.}
 \code{get()} is called but the key is not present in the cache. The default
 is a \code{\link{key_missing}} object. See section Missing keys for more
 information.}
+
+\item{logfile}{An optional filename or connection object to where logging
+information will be written. To log to the console, use \code{stdout()}.}
 }
 \description{
 A memory cache object is a key-value store that saves the values in an

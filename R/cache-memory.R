@@ -133,9 +133,10 @@ memoryCache <- function(
   max_age = Inf,
   max_n = Inf,
   evict = c("lru", "fifo"),
-  missing = key_missing())
+  missing = key_missing(),
+  logfile = NULL)
 {
-  MemoryCache$new(max_size, max_age, max_n, evict, missing)
+  MemoryCache$new(max_size, max_age, max_n, evict, missing, logfile)
 }
 
 MemoryCache <- R6Class("MemoryCache",
@@ -145,7 +146,8 @@ MemoryCache <- R6Class("MemoryCache",
       max_age = Inf,
       max_n = Inf,
       evict = c("lru", "fifo"),
-      missing = key_missing())
+      missing = key_missing(),
+      logfile = NULL)
     {
       private$cache        <- new.env(parent = emptyenv())
       private$max_size     <- max_size
@@ -153,11 +155,14 @@ MemoryCache <- R6Class("MemoryCache",
       private$max_n        <- max_n
       private$evict        <- match.arg(evict)
       private$missing      <- missing
+      private$logfile             <- logfile
     },
 
     get = function(key, missing = private$missing) {
+      private$log(paste0('get: key "', key, '"'))
       validate_key(key)
       if (!self$exists(key)) {
+        private$log(paste0('get: key "', key, '" is missing'))
         if (is.language(missing)) {
           return(eval(missing))
         } else {
@@ -165,12 +170,14 @@ MemoryCache <- R6Class("MemoryCache",
         }
       }
 
+      private$log(paste0('get: key "', key, '" found'))
       value <- private$cache[[key]]$value
       self$prune()
       value
     },
 
     set = function(key, value) {
+      private$log(paste0('set: key "', key, '"'))
       validate_key(key)
       if (!is.language(private$missing) && identical(value, private$missing)) {
         stop("Attempted to store sentinel value representing a missing key.")
@@ -198,17 +205,20 @@ MemoryCache <- R6Class("MemoryCache",
     },
 
     remove = function(key) {
+      private$log(paste0('remove: key "', key, '"'))
       validate_key(key)
       rm(list = key, envir = private$cache)
       invisible(self)
     },
 
     reset = function() {
+      private$log(paste0('reset'))
       rm(list = self$keys(), envir = private$cache)
       invisible(self)
     },
 
     prune = function() {
+      private$log(paste0('prune'))
       info <- private$object_info()
 
       # 1. Remove any objects where the age exceeds max age.
@@ -216,7 +226,7 @@ MemoryCache <- R6Class("MemoryCache",
       timediff <- time - info$mtime
       rm_idx <- timediff > private$max_age
       if (any(rm_idx)) {
-        message("max_age: Removing ", paste(info$key[rm_idx], collapse = ", "))
+        private$log(paste0("prune max_age: Removing ", paste(info$key[rm_idx], collapse = ", ")))
       }
 
       # Remove items from cache
@@ -236,7 +246,7 @@ MemoryCache <- R6Class("MemoryCache",
       if (nrow(info) > private$max_n) {
         rm_idx <- seq_len(nrow(info)) > private$max_n
         if (any(rm_idx)) {
-          message("max_n: Removing ", paste(info$key[rm_idx], collapse = ", "))
+          private$log(paste0("prune max_n: Removing ", paste(info$key[rm_idx], collapse = ", ")))
         }
         rm(list = info$key[rm_idx], envir = private$cache)
         info <- info[!rm_idx, ]
@@ -247,7 +257,7 @@ MemoryCache <- R6Class("MemoryCache",
         cum_size <- cumsum(info$size)
         rm_idx <- cum_size > private$max_size
         if (any(rm_idx)) {
-          message("max_size: Removing ", paste(info$key[rm_idx], collapse = ", "))
+          private$log(paste0("prune max_size: Removing ", paste(info$key[rm_idx], collapse = ", ")))
         }
         rm(list = info$key[rm_idx], envir = private$cache)
         info <- info[!rm_idx, ]
@@ -264,6 +274,7 @@ MemoryCache <- R6Class("MemoryCache",
       if (is.null(private$cache)) {
         return(invisible)
       }
+      private$log(paste0("destroy"))
 
       private$cache <- NULL
     },
@@ -281,6 +292,7 @@ MemoryCache <- R6Class("MemoryCache",
     max_n = NULL,
     evict = NULL,
     missing = NULL,
+    logfile = NULL,
 
     object_info = function() {
       keys <- ls(private$cache, sorted = FALSE)
@@ -291,6 +303,13 @@ MemoryCache <- R6Class("MemoryCache",
         atime = vapply(keys, function(key) private$cache[[key]]$atime, 0),
         stringsAsFactors = FALSE
       )
+    },
+
+    log = function(text) {
+      if (is.null(private$logfile)) return()
+
+      text <- paste0(format(Sys.time(), "[%Y-%m-%d %H:%M:%OS3] MemoryCache "), text)
+      writeLines(text, private$logfile)
     }
   )
 )

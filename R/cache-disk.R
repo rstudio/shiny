@@ -173,6 +173,8 @@
 #'   \code{get()} is called but the key is not present in the cache. The default
 #'   is a \code{\link{key_missing}} object. See section Missing keys for more
 #'   information.
+#' @param logfile An optional filename or connection object to where logging
+#'   information will be written. To log to the console, use \code{stdout()}.
 #'
 #' @export
 diskCache <- function(
@@ -182,9 +184,10 @@ diskCache <- function(
   max_n = Inf,
   evict = c("lru", "fifo"),
   destroy_on_finalize = NULL,
-  missing = key_missing())
+  missing = key_missing(),
+  logfile = NULL)
 {
-  DiskCache$new(dir, max_size, max_age, max_n, evict, destroy_on_finalize, missing)
+  DiskCache$new(dir, max_size, max_age, max_n, evict, destroy_on_finalize, missing, logfile)
 }
 
 
@@ -197,7 +200,8 @@ DiskCache <- R6Class("DiskCache",
       max_n = Inf,
       evict = c("lru", "fifo"),
       destroy_on_finalize = NULL,
-      missing = key_missing())
+      missing = key_missing(),
+      logfile = NULL)
     {
       if (is.null(destroy_on_finalize)) {
         destroy_on_finalize <- is.null(dir)
@@ -205,10 +209,7 @@ DiskCache <- R6Class("DiskCache",
       if (is.null(dir)) {
         dir <- tempfile("DiskCache-")
       }
-      if (!dirExists(dir)) {
-        message("Creating ", dir)
-        dir.create(dir, recursive = TRUE, mode = "0700")
-      }
+
       private$dir                 <- absolutePath(dir)
       private$max_size            <- max_size
       private$max_age             <- max_age
@@ -225,9 +226,16 @@ DiskCache <- R6Class("DiskCache",
         private$evict             <- "fifo"
       }
       private$missing             <- missing
+      private$logfile             <- logfile
+
+      if (!dirExists(dir)) {
+        private$log(paste0("initialize: Creating ", dir))
+        dir.create(dir, recursive = TRUE, mode = "0700")
+      }
     },
 
     get = function(key, missing = private$missing) {
+      private$log(paste0('get: key "', key, '"'))
       self$is_destroyed(throw = TRUE)
       validate_key(key)
       filename <- private$key_to_filename(key)
@@ -245,6 +253,7 @@ DiskCache <- R6Class("DiskCache",
         }
       )
       if (read_error) {
+        private$log(paste0('get: key "', key, '" is missing'))
         if (is.language(missing)) {
           return(eval(missing))
         } else {
@@ -252,11 +261,13 @@ DiskCache <- R6Class("DiskCache",
         }
       }
 
+      private$log(paste0('get: key "', key, '" found'))
       self$prune()
       value
     },
 
     set = function(key, value) {
+      private$log(paste0('set: key "', key, '"'))
       self$is_destroyed(throw = TRUE)
       validate_key(key)
       if (!is.language(private$missing) && identical(value, private$missing)) {
@@ -280,9 +291,11 @@ DiskCache <- R6Class("DiskCache",
         }
       )
       if (save_error) {
+        private$log(paste0('set: key "', key, '" error'))
         stop('Error setting value for key "', key, '".')
       }
       if (ref_object) {
+        private$log(paste0('set: value is a reference object'))
         warning("A reference object was cached in a serialized format. The restored object may not work as expected.")
       }
 
@@ -305,6 +318,7 @@ DiskCache <- R6Class("DiskCache",
     },
 
     remove = function(key) {
+      private$log(paste0('remove: key "', key, '"'))
       self$is_destroyed(throw = TRUE)
       validate_key(key)
       file.remove(private$key_to_filename(key))
@@ -312,6 +326,7 @@ DiskCache <- R6Class("DiskCache",
     },
 
     reset = function() {
+      private$log(paste0('reset'))
       self$is_destroyed(throw = TRUE)
       file.remove(dir(private$dir, "\\.rds$", full.names = TRUE))
       invisible(self)
@@ -325,6 +340,7 @@ DiskCache <- R6Class("DiskCache",
       # is because it is expensive to find the size of the serialized object
       # before adding it.
 
+      private$log(paste0('prune'))
       self$is_destroyed(throw = TRUE)
 
       filenames <- dir(private$dir, "\\.rds$", full.names = TRUE)
@@ -340,7 +356,7 @@ DiskCache <- R6Class("DiskCache",
       timediff <- as.numeric(Sys.time() - files[["mtime"]], units = "secs")
       rm_idx <- timediff > private$max_age
       if (any(rm_idx)) {
-        message("max_age: Removing ", paste(files$name[rm_idx], collapse = ", "))
+        private$log(paste0("prune max_age: Removing ", paste(files$name[rm_idx], collapse = ", ")))
       }
       file.remove(files$name[rm_idx])
 
@@ -360,7 +376,7 @@ DiskCache <- R6Class("DiskCache",
       if (nrow(files) > private$max_n) {
         rm_idx <- seq_len(nrow(files)) > private$max_n
         if (any(rm_idx)) {
-          message("max_n: Removing ", paste(files$name[rm_idx], collapse = ", "))
+          private$log(paste0("prune max_n: Removing ", paste(files$name[rm_idx], collapse = ", ")))
         }
         file.remove(files$name[rm_idx])
       }
@@ -370,7 +386,7 @@ DiskCache <- R6Class("DiskCache",
         cum_size <- cumsum(files$size)
         rm_idx <- cum_size > private$max_size
         if (any(rm_idx)) {
-          message("max_size: Removing ", paste(files$name[rm_idx], collapse = ", "))
+          private$log(paste0("prune max_size: Removing ", paste(files$name[rm_idx], collapse = ", ")))
         }
         file.remove(files$name[rm_idx])
       }
@@ -387,7 +403,7 @@ DiskCache <- R6Class("DiskCache",
         return(invisible(self))
       }
 
-      message("Removing ", private$dir)
+      private$log(paste0("destroy: Removing ", private$dir))
       # First create a sentinel file so that other processes sharing this
       # cache know that the cache is to be destroyed. This is needed because
       # the recursive unlink is not atomic: another process can add a file to
@@ -433,12 +449,20 @@ DiskCache <- R6Class("DiskCache",
     destroy_on_finalize = NULL,
     destroyed = FALSE,
     missing = NULL,
+    logfile = NULL,
 
     key_to_filename = function(key) {
       if (! (is.character(key) && length(key)==1) ) {
         stop("Key must be a character vector of length 1.")
       }
       file.path(private$dir, paste0(key, ".rds"))
+    },
+
+    log = function(text) {
+      if (is.null(private$logfile)) return()
+
+      text <- paste0(format(Sys.time(), "[%Y-%m-%d %H:%M:%OS3] DiskCache "), text)
+      writeLines(text, private$logfile)
     }
   )
 )

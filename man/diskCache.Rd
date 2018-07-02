@@ -6,7 +6,7 @@
 \usage{
 diskCache(dir = NULL, max_size = 10 * 1024^2, max_age = Inf,
   max_n = Inf, evict = c("lru", "fifo"), destroy_on_finalize = NULL,
-  missing = key_missing())
+  missing = key_missing(), logfile = NULL)
 }
 \arguments{
 \item{dir}{Directory to store files for the cache. If \code{NULL} (the
@@ -45,6 +45,9 @@ deleted.}
 \code{get()} is called but the key is not present in the cache. The default
 is a \code{\link{key_missing}} object. See section Missing keys for more
 information.}
+
+\item{logfile}{An optional filename or connection object to where logging
+information will be written. To log to the console, use \code{stdout()}.}
 }
 \description{
 A disk cache object is a key-value store that saves the values as files in a

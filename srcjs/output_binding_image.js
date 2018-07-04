@@ -312,16 +312,94 @@ imageutils.initCoordmap = function($el, coordmap) {
   // Add scaling functions to each panel
   imageutils.initPanelScales(coordmap);
 
-  // Firefox doesn't have offsetX/Y, so we need to use an alternate
-  // method of calculation for it. Even though other browsers do have
-  // offsetX/Y, we need to calculate relative to $el, because sometimes the
-  // mouse event can come with offset relative to other elements on the
-  // page. This happens when the event listener is bound to, say, window.
-  coordmap.mouseOffset = function(mouseEvent) {
-    var offset = $el.offset();
+
+  // Returns the ratio that an element has been scaled (for example, by CSS
+  // transforms) in the x and y directions.
+  function findScalingRatio($el) {
+    const boundingRect = $el[0].getBoundingClientRect();
     return {
-      x: mouseEvent.pageX - offset.left,
-      y: mouseEvent.pageY - offset.top
+      x: boundingRect.width  / $el.outerWidth(),
+      y: boundingRect.height / $el.outerHeight()
+    };
+  }
+
+  function findOrigin($el) {
+    const offset = $el.offset();
+    const scaling_ratio = findScalingRatio($el);
+
+    // Find the size of the padding and border, for the top and left. This is
+    // before any transforms.
+    const paddingBorder = {
+      left: parseInt($el.css("border-left")) + parseInt($el.css("padding-left")),
+      top:  parseInt($el.css("border-top"))  + parseInt($el.css("padding-top"))
+    };
+
+    // offset() returns the upper left corner of the element relative to the
+    // page, but it includes padding and border. Here we find the upper left
+    // of the element, not including padding and border.
+    return {
+      x: offset.left + scaling_ratio.x * paddingBorder.left,
+      y: offset.top  + scaling_ratio.y * paddingBorder.top
+    };
+  }
+
+  // Find the dimensions of a tag, after transforms, and without padding and
+  // border.
+  function findDims($el) {
+    // If there's any padding/border, we need to find the ratio of the actual
+    // element content compared to the element plus padding and border.
+    const content_ratio = {
+      x: $el.width()  / $el.outerWidth(),
+      y: $el.height() / $el.outerHeight()
+    };
+
+    // Get the dimensions of the element _after_ any CSS transforms. This
+    // includes the padding and border.
+    const bounding_rect = $el[0].getBoundingClientRect();
+
+    // Dimensions of the element after any CSS transforms, and without
+    // padding/border.
+    return {
+      x: content_ratio.x * bounding_rect.width,
+      y: content_ratio.y * bounding_rect.height
+    };
+  }
+
+  // Returns the x and y ratio that image content (like a PNG) is scaled to on
+  // screen. If the image data is 1000 pixels wide and is scaled to 300 pixels
+  // on screen, then this returns 0.3. (Note the 300 pixels refers to CSS
+  // pixels.)
+  function findImgPixelScalingRatio($img) {
+    const img_dims = findDims($img);
+    return {
+      x: img_dims.x / $img[0].naturalWidth,
+      y: img_dims.y / $img[0].naturalHeight
+    };
+  }
+
+  // This returns the offset of the mouse, relative to the img, but with some
+  // extra sauce. First, it returns the offset in the pixel dimensions of the
+  // image as if it were scaled to 100%. If the img content is 1000 pixels
+  // wide, but is scaled to 400 pixels on screen, and the mouse is on the far
+  // right side, then this will return x:1000. Second, if there is any padding
+  // or border around the img, it handles that. Third, if there are any
+  // scaling transforms on the image, it handles that as well.
+  coordmap.mouseOffset = function(mouseEvent) {
+    const $img = $el.find("img");
+    const img_origin = findOrigin($img);
+
+    // The offset of the mouse from the upper-left corner of the img, in
+    // pixels.
+    const offset_raw = {
+      x: mouseEvent.pageX - img_origin.x,
+      y: mouseEvent.pageY - img_origin.y
+    };
+
+    const pixel_scaling = findImgPixelScalingRatio($img);
+
+    return {
+      x: offset_raw.x / pixel_scaling.x,
+      y: offset_raw.y / pixel_scaling.y
     };
   };
 

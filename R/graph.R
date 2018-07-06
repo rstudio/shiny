@@ -87,7 +87,7 @@ renderReactLog <- function(sessionToken = NULL, time = TRUE) {
   check_shinyreactlog()
   shinyreactlog::render_reactlog(
     rLog$asList(),
-    sessionToken = sessionToken,
+    session_token = sessionToken,
     time = time
   )
 }
@@ -99,7 +99,7 @@ writeReactLog <- function(file=stdout(), sessionToken = NULL) {
   writeReactLog(
     rLog$asList(),
     file = file,
-    sessionToken = sessionToken
+    session_token = sessionToken
   )
 }
 check_shinyreactlog <- function() {

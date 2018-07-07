@@ -249,7 +249,7 @@ function mapValues(obj, f) {
   const newObj = {};
   for (let key in obj) {
     if (obj.hasOwnProperty(key))
-      newObj[key] = f(obj[key]);
+      newObj[key] = f(obj[key], key, obj);
   }
   return newObj;
 }

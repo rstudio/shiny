@@ -491,13 +491,11 @@ find_panel_info <- function(b) {
 # This is for ggplot2>2.2.1, after an API was introduced for extracting
 # information about the plot object.
 find_panel_info_api <- function(b) {
-  # Workaround for check NOTE, until ggplot2 >2.2.1 is released
-  colon_colon <- `::`
   # Given a built ggplot object, return x and y domains (data space coords) for
   # each panel.
-  layout <- colon_colon("ggplot2", "summarise_layout")(b)
-  coord  <- colon_colon("ggplot2", "summarise_coord")(b)
-  layers <- colon_colon("ggplot2", "summarise_layers")(b)
+  layout <- ggplot2::summarise_layout(b)
+  coord  <- ggplot2::summarise_coord(b)
+  layers <- ggplot2::summarise_layers(b)
 
   # Given x and y scale objects and a coord object, return a list that has
   # the bases of log transformations for x and y, or NULL if it's not a

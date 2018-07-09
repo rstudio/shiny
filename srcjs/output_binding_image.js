@@ -1060,46 +1060,14 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     if (!oldBoundsData || !oldPanel)
       return;
 
-    // Compare two objects. This checks that objects a and b have the same est
-    // of keys, and that each key has the same value. This function isn't
-    // perfect, but it's good enough for comparing variable mappings, below.
-    function isEquivalent(a, b) {
-      if (a === undefined) {
-        if (b === undefined)
-          return true;
-        else
-          return false;
-      }
-      if (a === null) {
-        if (b === null)
-          return true;
-        else
-          return false;
-      }
-
-      var aProps = Object.getOwnPropertyNames(a);
-      var bProps = Object.getOwnPropertyNames(b);
-
-      if (aProps.length !== bProps.length)
-        return false;
-
-      for (var i=0; i<aProps.length; i++) {
-        var propName = aProps[i];
-        if (a[propName] !== b[propName]) {
-          return false;
-        }
-      }
-      return true;
-    }
-
     // Find a panel that has matching vars; if none found, we can't restore.
     // The oldPanel and new panel must match on their mapping vars, and the
     // values.
     for (var i=0; i<coordmap.length; i++){
       var curPanel = coordmap[i];
 
-      if (isEquivalent(oldPanel.mapping, curPanel.mapping) &&
-          isEquivalent(oldPanel.panel_vars, curPanel.panel_vars)) {
+      if (equal(oldPanel.mapping, curPanel.mapping) &&
+          equal(oldPanel.panel_vars, curPanel.panel_vars)) {
         // We've found a matching panel
         state.panel = coordmap[i];
         break;

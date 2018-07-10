@@ -449,8 +449,4 @@ MessageLogger = R6Class(
 )
 
 #' @include stack.R
-#' TODO-barret set TRUE to FALSE before release
-#' TODO-barret remove option set
-options("shiny.reactlog" = TRUE)
-options("shiny.reactlog.console" = TRUE)
-rLog <- RLog$new("shiny.reactlog", TRUE, 0)
+rLog <- RLog$new("shiny.reactlog", FALSE, 0, "shiny.reactlog.console")

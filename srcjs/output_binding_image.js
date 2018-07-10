@@ -16,9 +16,6 @@ $.extend(imageOutputBinding, {
     var $el = $(el);
     var img;
 
-    // Remove event handlers that were added in previous renderValue()
-    $el.off('.image_output');
-
     // Get existing img element if present.
     var $img = $el.find('img');
 
@@ -104,6 +101,9 @@ $.extend(imageOutputBinding, {
     $img.off("load.shiny-image-interaction");
     $img.on("load.shiny-image-interaction", function() {
 
+      // Remove event handlers that were added in previous runs of this function.
+      $el.off('.image_output');
+
       imageutils.initCoordmap($el, opts.coordmap);
 
       // This object listens for mousedowns, and triggers mousedown2 and dblclick2
@@ -124,6 +124,8 @@ $.extend(imageOutputBinding, {
           opts.clickClip, opts.coordmap);
         $el.on('mousedown2.image_output', clickHandler.mousedown);
 
+        $el.on('resize.image_output', clickHandler.onResize);
+
         // When img is reset, do housekeeping: clear $el's mouse listener and
         // call the handler's onResetImg callback.
         $img.on('reset', clickHandler.onResetImg);
@@ -136,6 +138,7 @@ $.extend(imageOutputBinding, {
           opts.clickClip, opts.coordmap);
         $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
+        $el.on('resize.image_output', dblclickHandler.onResize);
         $img.on('reset', dblclickHandler.onResetImg);
       }
 
@@ -146,6 +149,7 @@ $.extend(imageOutputBinding, {
         $el.on('mousemove.image_output', hoverHandler.mousemove);
         $el.on('mouseout.image_output', hoverHandler.mouseout);
 
+        $el.on('resize.image_output', hoverHandler.onResize);
         $img.on('reset', hoverHandler.onResetImg);
       }
 
@@ -163,6 +167,7 @@ $.extend(imageOutputBinding, {
         $el.on('mousedown.image_output', brushHandler.mousedown);
         $el.on('mousemove.image_output', brushHandler.mousemove);
 
+        $el.on('resize.image_output', brushHandler.onResize);
         $img.on('reset', brushHandler.onResetImg);
       }
 
@@ -189,6 +194,10 @@ $.extend(imageOutputBinding, {
     }).remove();
 
     OutputBinding.prototype.clearError.call(this, el);
+  },
+
+  resize: function(el, width, height) {
+    $(el).find("img").trigger("resize");
   }
 });
 outputBindings.register(imageOutputBinding, 'shiny.imageOutput');
@@ -677,7 +686,8 @@ imageutils.createClickHandler = function(inputId, clip, coordmap) {
       if (e.which !== 1) return;
       clickInfoSender(e);
     },
-    onResetImg: function() { clickInfoSender(null); }
+    onResetImg: function() { clickInfoSender(null); },
+    onResize: null
   };
 };
 
@@ -703,7 +713,8 @@ imageutils.createHoverHandler = function(inputId, delay, delayType, clip,
   return {
     mousemove:   function(e) { hoverInfoSender.normalCall(e); },
     mouseout: mouseout,
-    onResetImg: function()  { hoverInfoSender.immediateCall(null); }
+    onResetImg: function()  { hoverInfoSender.immediateCall(null); },
+    onResize: null
   };
 };
 
@@ -973,10 +984,18 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
     }
   }
 
+  // This should be called when a resize event happens.
+  function onResize() {
+    brush.onResize();
+    // No need to call brushInfoSender.immediateCall() because all values
+    // should be unchanged.
+  }
+
   return {
-    mousedown: mousedown,
-    mousemove: mousemove,
-    onResetImg: onResetImg
+    mousedown:  mousedown,
+    mousemove:  mousemove,
+    onResetImg: onResetImg,
+    onResize:   onResize
   };
 };
 
@@ -1003,7 +1022,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     state.dragging = false;
     state.resizing = false;
 
-    // Offset of last mouse down and up events
+    // Offset of last mouse down and up events (in CSS pixels)
     state.down = { x: NaN, y: NaN };
     state.up   = { x: NaN, y: NaN };
 
@@ -1015,9 +1034,10 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
       bottom: false
     };
 
-    // Bounding rectangle of the brush, in pixel and data dimensions. We need to
-    // record data dimensions along with pixel dimensions so that when a new
-    // plot is sent, we can re-draw the brush div with the appropriate coords.
+    // Bounding rectangle of the brush, in CSS pixel and data dimensions. We
+    // need to record data dimensions along with pixel dimensions so that when
+    // a new plot is sent, we can re-draw the brush div with the appropriate
+    // coords.
     state.boundsCss = {
       xmin: NaN,
       xmax: NaN,
@@ -1034,7 +1054,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     // Panel object that the brush is in
     state.panel = null;
 
-    // The bounds at the start of a drag/resize
+    // The bounds at the start of a drag/resize (in CSS pixels)
     state.changeStartBounds = {
       xmin: NaN,
       xmax: NaN,
@@ -1083,6 +1103,21 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     $div = oldDiv;
 
     boundsData(oldBoundsData);
+    updateDiv();
+  }
+
+  // This will reposition the brush div when the image is resized, maintaining
+  // the same data coordinates. Note that the "resize" here refers to the
+  // wrapper div/img being resized; elsewhere, "resize" refers to the brush
+  // div being resized.
+  function onResize() {
+    const bounds_data = boundsData();
+    // Check to see if we have valid boundsData
+    for (let val in bounds_data) {
+      if (Number.isNaN(bounds_data[val])) return;
+    }
+
+    boundsData(bounds_data);
     updateDiv();
   }
 
@@ -1144,8 +1179,9 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   // directions, and sets bounds accordingly. If no box is passed in, just
   // return current bounds.
   function boundsCss(box_css) {
-    if (box_css === undefined)
-      return state.boundsCss;
+    if (box_css === undefined) {
+      return $.extend({}, state.boundsCss);
+    }
 
     let min_css = { x: box_css.xmin, y: box_css.ymin };
     let max_css = { x: box_css.xmax, y: box_css.ymax };
@@ -1199,7 +1235,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
   // Get or set the bounds of the brush using coordinates in the data space.
   function boundsData(box_data) {
     if (box_data === undefined) {
-      return state.boundsData;
+      return $.extend({}, state.boundsData);
     }
 
     const box_css = imgToCss(state.panel.scaleDataToImg(box_data));
@@ -1417,6 +1453,8 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     isInsideBrush: isInsideBrush,
     isInResizeArea: isInResizeArea,
     whichResizeSides: whichResizeSides,
+
+    onResize: onResize,  // A callback when the wrapper div or img is resized.
 
     boundsCss: boundsCss,
     boundsData: boundsData,

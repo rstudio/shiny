@@ -381,7 +381,7 @@ imageutils.initCoordmap = function($el, coordmap) {
 
     const result = mapValues(offset_css, (value, key) => {
       const prefix = key.substring(0, 1);
-      
+
       if (prefix === "x") {
         return offset_css[key] / pixel_scaling.x;
       } else if (prefix === "y") {
@@ -402,7 +402,7 @@ imageutils.initCoordmap = function($el, coordmap) {
 
     const result = mapValues(offset_img, (value, key) => {
       const prefix = key.substring(0, 1);
-      
+
       if (prefix === "x") {
         return offset_img[key] * pixel_scaling.x;
       } else if (prefix === "y") {

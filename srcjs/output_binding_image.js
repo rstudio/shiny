@@ -334,13 +334,14 @@ imageutils.initPanelScales = function(coordmap) {
 // 3. data: The coordinates in the data space. This is a bit more complicated
 //    than the other two, because there can be multiple panels (as in facets).
 imageutils.initCoordmap = function($el, coordmap) {
-  var el = $el[0];
+  const el = $el[0];
+  const $img = $el.find("img");
 
   // If we didn't get any panels, create a dummy one where the domain and range
   // are simply the pixel dimensions.
   // that we modify.
   if (coordmap.length === 0) {
-    var bounds = {
+    let bounds = {
       top: 0,
       left: 0,
       right: el.clientWidth - 1,
@@ -361,7 +362,6 @@ imageutils.initCoordmap = function($el, coordmap) {
   // This returns the offset of the mouse in CSS pixels relative to the img,
   // but not including the  padding or border, if present.
   coordmap.mouseOffsetCss = function(mouseEvent) {
-    const $img = $el.find("img");
     const img_origin = findOrigin($img);
 
     // The offset of the mouse from the upper-left corner of the img, in
@@ -378,7 +378,6 @@ imageutils.initCoordmap = function($el, coordmap) {
   // img content is 1000 pixels wide, but is scaled to 400 pixels on screen,
   // and the input is x:400, then this will return x:1000.
   coordmap.scaleCssToImg = function(offset_css) {
-    const $img = $el.find("img");
     const pixel_scaling = findImgToCssScalingRatio($img);
 
     const result = mapValues(offset_css, (value, key) => {
@@ -400,7 +399,6 @@ imageutils.initCoordmap = function($el, coordmap) {
   // wide, but is scaled to 400 pixels on screen, and the input is x:1000,
   // then this will return x:400.
   coordmap.scaleImgToCss = function(offset_img) {
-    const $img = $el.find("img");
     const pixel_scaling = findImgToCssScalingRatio($img);
 
     const result = mapValues(offset_img, (value, key) => {
@@ -417,6 +415,14 @@ imageutils.initCoordmap = function($el, coordmap) {
     return result;
   };
 
+  coordmap.cssToImgScalingRatio = function() {
+    const res = findImgToCssScalingRatio($img);
+    return {
+      x: 1 / res.x,
+      y: 1 / res.y
+    };
+  };
+
   // Given an offset in css pixels, return an object representing which panel
   // it's in. The `expand` argument tells it to expand the panel area by that
   // many pixels. It's possible for an offset to be within more than one
@@ -428,7 +434,6 @@ imageutils.initCoordmap = function($el, coordmap) {
     const y = offset_img.y;
 
     // Convert expand from css pixels to img pixels
-    const $img = $el.find("img");
     const imgToCssRatio = findImgToCssScalingRatio($img);
     const expand_img = {
       x: expand / imgToCssRatio.x,
@@ -516,6 +521,8 @@ imageutils.initCoordmap = function($el, coordmap) {
       const panel = coordmap.getPanelCss(offset_css);
 
       const coords = panel.scaleImgToData(coordmap.scaleCssToImg(offset_css));
+
+      coords.pixelratio = coordmap.cssToImgScalingRatio();
 
       // Add the panel (facet) variables, if present
       $.extend(coords, panel.panel_vars);
@@ -776,6 +783,8 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
     // Add the panel (facet) variables, if present
     $.extend(coords, panel.panel_vars);
 
+    coords.pixelratio = coordmap.cssToImgScalingRatio();
+
     // Add variable name mappings
     coords.mapping = panel.mapping;
 
@@ -984,11 +993,9 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
     }
   }
 
-  // This should be called when a resize event happens.
   function onResize() {
     brush.onResize();
-    // No need to call brushInfoSender.immediateCall() because all values
-    // should be unchanged.
+    brushInfoSender.immediateCall();
   }
 
   return {

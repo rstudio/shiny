@@ -1509,8 +1509,8 @@ function findOrigin($el) {
   // Find the size of the padding and border, for the top and left. This is
   // before any transforms.
   const paddingBorder = {
-    left: parseInt($el.css("border-left")) + parseInt($el.css("padding-left")),
-    top:  parseInt($el.css("border-top"))  + parseInt($el.css("padding-top"))
+    left: parseInt($el.css("border-left-width")) + parseInt($el.css("padding-left")),
+    top:  parseInt($el.css("border-top-width"))  + parseInt($el.css("padding-top"))
   };
 
   // offset() returns the upper left corner of the element relative to the

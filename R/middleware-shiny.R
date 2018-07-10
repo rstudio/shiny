@@ -2,7 +2,7 @@
 NULL
 
 reactLogHandler <- function(req) {
-  if (! rLog$isLogging) {
+  if (! rLog$isLogging()) {
     return(NULL)
   }
 

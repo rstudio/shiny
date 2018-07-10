@@ -114,7 +114,7 @@ RLog <- R6Class(
     option = "shiny.reactlog",
 
     appendEntry = function(domain, logEntry) {
-      if (self$isLogging) {
+      if (self$isLogging()) {
         sessionToken <- if (is.null(domain)) NULL else domain$token
         logStack$push(c(logEntry, list(
           session = sessionToken,
@@ -122,11 +122,6 @@ RLog <- R6Class(
         )))
       }
       if (!is.null(domain)) domain$reactlog(logEntry)
-    }
-  ),
-  active = list(
-    isLogging = function() {
-      isTRUE(getOption(private$option))
     }
   ),
   public = list(
@@ -153,9 +148,12 @@ RLog <- R6Class(
       self$msg <- MessageLogger$new(...)
     },
     displayMessages = function() {
-      for (msg in msg$messages) {
-        message(msg)
+      for (val in msg$messages) {
+        message(val)
       }
+    },
+    isLogging = function() {
+      isTRUE(getOption(private$option, FALSE))
     },
 
     define = function(reactId, label, type, domain) {
@@ -391,14 +389,6 @@ RLog <- R6Class(
 MessageLogger = R6Class(
   "MessageLogger",
   portable = FALSE,
-  active = list(
-    isLogging = function() {
-      isTRUE(getOption(option))
-    },
-    isNotLogging = function() {
-      ! isTRUE(getOption(option))
-    }
-  ),
   public = list(
     depth = 0L,
     display = TRUE,
@@ -411,35 +401,41 @@ MessageLogger = R6Class(
       if (!missing(depth)) self$depth <- depth
       if (!missing(option)) self$option <- option
     },
+    isLogging = function() {
+      isTRUE(getOption(self$option))
+    },
+    isNotLogging = function() {
+      ! isTRUE(getOption(self$option))
+    },
     depthIncrement = function() {
-      if (self$isNotLogging) return(NULL)
+      if (self$isNotLogging()) return(NULL)
       self$depth <- self$depth + 1
     },
     depthDecrement = function() {
-      if (self$isNotLogging) return(NULL)
+      if (self$isNotLogging()) return(NULL)
       self$depth <- self$depth - 1
     },
     hasReact = function(reactId) {
-      if (self$isNotLogging) return(FALSE)
-      !is.null(getReact(reactId))
+      if (self$isNotLogging()) return(FALSE)
+      !is.null(self$getReact(reactId))
     },
     getReact = function(reactId) {
-      if (self$isNotLogging) return(NULL)
-      reactCache[[reactId]]
+      if (self$isNotLogging()) return(NULL)
+      self$reactCache[[reactId]]
     },
     setReact = function(reactObj) {
-      if (self$isNotLogging) return(NULL)
+      if (self$isNotLogging()) return(NULL)
       self$reactCache[[reactObj$reactId]] <- reactObj
     },
     reactStr = function(reactId) {
-      if (self$isNotLogging) return(NULL)
-      reactInfo <- getReact(reactId)
+      if (self$isNotLogging()) return(NULL)
+      reactInfo <- self$getReact(reactId)
       paste0(
         reactInfo$reactId, ":", reactInfo$label
       )
     },
     log = function(...) {
-      if (self$isNotLogging) return(NULL)
+      if (self$isNotLogging()) return(NULL)
       msg <- paste0(
         paste0(rep("= ", depth), collapse = ""), "- ", paste0(..., collapse = ""),
         collapse = ""

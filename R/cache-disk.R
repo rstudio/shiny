@@ -7,34 +7,50 @@
 #' and \code{evict}.
 #'
 #'
-#' @section Missing keys:
+#' @section Missing Keys:
 #'
-#'   The \code{missing} parameter controls what happens when \code{get()} is
-#'   called with a key that is not in the cache (a cache miss). The default
-#'   behavior is to return a \code{\link{key_missing}} object. This is a
-#'   \emph{sentinel value} representing a missing key. You can test if the
-#'   returned value represents a missing key by using the
-#'   \code{\link{is.key_missing}} function. You can also have \code{get()}
-#'   return a different sentinel value, like \code{NULL}, or even throw an error
-#'   on a cache miss.
+#'   The \code{missing} and \code{exec_missing} parameters controls what happens
+#'   when \code{get()} is called with a key that is not in the cache (a cache
+#'   miss). The default behavior is to return a \code{\link{key_missing}}
+#'   object. This is a \emph{sentinel value} that indicates that the key was not
+#'   present in the cache. You can test if the returned value represents a
+#'   missing key by using the \code{\link{is.key_missing}} function. You can
+#'   also have \code{get()} return a different sentinel value, like \code{NULL}.
+#'   If you want to throw an error on a cache miss, you can do so by providing a
+#'   function for \code{missing} that takes one argument, the key, and also use
+#'   \code{exec_missing=TRUE}.
 #'
 #'   When the cache is created, you can supply a value for \code{missing}, which
 #'   sets the default value to be returned for missing values. It can also be
 #'   overridden when \code{get()} is called, by supplying a \code{missing}
-#'   argument, as in \code{cache$get("mykey", missing = NULL)}.
+#'   argument. For example, if you use \code{cache$get("mykey", missing =
+#'   NULL)}, it will return \code{NULL} if the key is not in the cache.
 #'
 #'   If your cache is configured so that \code{get()} returns a sentinel value
 #'   to represent a cache miss, then \code{set} will also not allow you to store
 #'   the sentinel value in the cache. It will throw an error if you attempt to
 #'   do so.
 #'
-#'   If \code{missing} is a quoted expression, then that expression will be
-#'   evaluated each time \code{get()} encounters missing key. If the evaluation
-#'   of the expression does not throw an error, then \code{get()} will return
-#'   the resulting value. However, it is more common for the expression to throw
-#'   an error. If an error is thrown, then \code{get()} will not return a value.
-#'   For example, you could use \code{quote(stop("Missing key"))}. If you use
-#'   this, the code that calls \code{get()} should be wrapped with
+#'   Instead of returning the same sentinel value each time there is cache miss,
+#'   the cache can execute a function each time \code{get()} encounters missing
+#'   key. If the function returns a value, then \code{get()} will in turn return
+#'   that value. However, a more common use is for the function to throw an
+#'   error. If an error is thrown, then \code{get()} will not return a value.
+#'
+#'   To do this, pass a one-argument function to \code{missing}, and use
+#'   \code{exec_missing=TRUE}. For example, if you want to throw an error that
+#'   prints the missing key, you could do this:
+#'
+#'   \preformatted{
+#'   diskCache(
+#'     missing = function(key) {
+#'       stop("Attempted to get missing key: ", key)
+#'     },
+#'     exec_missing = TRUE
+#'   )
+#'   }
+#'
+#'   If you use this, the code that calls \code{get()} should be wrapped with
 #'   \code{\link{tryCatch}()} to gracefully handle missing keys.
 #'
 #' @section Cache pruning:
@@ -111,11 +127,14 @@
 #'  A disk cache object has the following methods:
 #'
 #'   \describe{
-#'     \item{\code{get(key, missing)}}{
+#'     \item{\code{get(key, missing, exec_missing)}}{
 #'       Returns the value associated with \code{key}. If the key is not in the
-#'       cache, then it returns the value specified by \code{missing}. The
-#'       default value for \code{missing} when the DiskCache object is created,
-#'       but it can be overridden when \code{get()} is called.
+#'       cache, then it returns the value specified by \code{missing} or,
+#'       \code{missing} is a function and \code{exec_missing=TRUE}, then
+#'       executes \code{missing}. The function can throw an error or return the
+#'       value. If either of these parameters are specified here, then they
+#'       will override the defaults that were set when the DiskCache object was
+#'       created. See section Missing Keys for more information.
 #'     }
 #'     \item{\code{set(key, value)}}{
 #'       Stores the \code{key}-\code{value} pair in the cache.
@@ -169,10 +188,18 @@
 #'   automatically created, it will be automatically deleted, and if the cache
 #'   directory is not automatically created, it will not be automatically
 #'   deleted.
-#' @param missing A value to return, or a quoted expression to evaluate when
-#'   \code{get()} is called but the key is not present in the cache. The default
-#'   is a \code{\link{key_missing}} object. See section Missing keys for more
-#'   information.
+#' @param missing A value to return or a function to execute when
+#'   \code{get(key)} is called but the key is not present in the cache. The
+#'   default is a \code{\link{key_missing}} object. If it is a function to
+#'   execute, the function must take one argument (the key), and you must also
+#'   use \code{exec_missing = TRUE}. If it is a function, it is useful in most
+#'   cases for it to throw an error, although another option is to return a
+#'   value. If a value is returned, that value will in turn be returned by
+#'   \code{get()}. See section Missing keys for more information.
+#' @param exec_missing If \code{FALSE} (the default), then treat \code{missing}
+#'   as a value to return when \code{get()} results in a cache miss. If
+#'   \code{TRUE}, treat \code{missing} as a function to execute when
+#'   \code{get()} results in a cache miss.
 #' @param logfile An optional filename or connection object to where logging
 #'   information will be written. To log to the console, use \code{stdout()}.
 #'
@@ -185,9 +212,11 @@ diskCache <- function(
   evict = c("lru", "fifo"),
   destroy_on_finalize = NULL,
   missing = key_missing(),
+  exec_missing = FALSE,
   logfile = NULL)
 {
-  DiskCache$new(dir, max_size, max_age, max_n, evict, destroy_on_finalize, missing, logfile)
+  DiskCache$new(dir, max_size, max_age, max_n, evict, destroy_on_finalize,
+                missing, exec_missing, logfile)
 }
 
 
@@ -201,8 +230,12 @@ DiskCache <- R6Class("DiskCache",
       evict = c("lru", "fifo"),
       destroy_on_finalize = NULL,
       missing = key_missing(),
+      exec_missing = FALSE,
       logfile = NULL)
     {
+      if (exec_missing && (!is.function(missing) || length(formals(missing)) == 0)) {
+        stop("When `exec_missing` is true, `missing` must be a function that takes one argument.")
+      }
       if (is.null(destroy_on_finalize)) {
         destroy_on_finalize <- is.null(dir)
       }
@@ -226,6 +259,7 @@ DiskCache <- R6Class("DiskCache",
         private$evict             <- "fifo"
       }
       private$missing             <- missing
+      private$exec_missing        <- exec_missing
       private$logfile             <- logfile
 
       if (!dirExists(dir)) {
@@ -234,7 +268,7 @@ DiskCache <- R6Class("DiskCache",
       }
     },
 
-    get = function(key, missing = private$missing) {
+    get = function(key, missing = private$missing, exec_missing = private$exec_missing) {
       private$log(paste0('get: key "', key, '"'))
       self$is_destroyed(throw = TRUE)
       validate_key(key)
@@ -254,8 +288,12 @@ DiskCache <- R6Class("DiskCache",
       )
       if (read_error) {
         private$log(paste0('get: key "', key, '" is missing'))
-        if (is.language(missing)) {
-          return(eval(missing))
+
+        if (exec_missing) {
+          if (!is.function(missing) || length(formals(missing)) == 0) {
+            stop("When `exec_missing` is true, `missing` must be a function that takes one argument.")
+          }
+          return(missing(key))
         } else {
           return(missing)
         }
@@ -270,7 +308,7 @@ DiskCache <- R6Class("DiskCache",
       private$log(paste0('set: key "', key, '"'))
       self$is_destroyed(throw = TRUE)
       validate_key(key)
-      if (!is.language(private$missing) && identical(value, private$missing)) {
+      if (!private$exec_missing && identical(value, private$missing)) {
         stop("Attempted to store sentinel value representing a missing key.")
       }
 
@@ -449,6 +487,7 @@ DiskCache <- R6Class("DiskCache",
     destroy_on_finalize = NULL,
     destroyed = FALSE,
     missing = NULL,
+    exec_missing = FALSE,
     logfile = NULL,
 
     key_to_filename = function(key) {

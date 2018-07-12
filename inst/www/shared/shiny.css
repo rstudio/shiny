@@ -12,6 +12,11 @@ pre.shiny-text-output.noplaceholder:empty {
   height: 0;
 }
 
+.shiny-image-output img, .shiny-plot-output img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
 #shiny-disconnected-overlay {
   position: fixed;
   top: 0;

@@ -540,8 +540,9 @@ renderCachedPlot <- function(expr,
         }
 
         img <- result$img
-        # Replace exact pixel dimensions; instead tell it to fill.
-        img$width  <- "100%"
+        # Replace exact pixel dimensions; instead, the max-height and
+        # max-width will be set to 100% from CSS.
+        img$width  <- NULL
         img$height <- NULL
         img
       }

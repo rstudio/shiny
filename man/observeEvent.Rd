@@ -16,7 +16,7 @@ eventReactive(eventExpr, valueExpr, event.env = parent.frame(),
   event.quoted = FALSE, value.env = parent.frame(),
   value.quoted = FALSE, label = NULL,
   domain = getDefaultReactiveDomain(), ignoreNULL = TRUE,
-  ignoreInit = FALSE)
+  ignoreInit = FALSE, cache = NULL)
 }
 \arguments{
 \item{eventExpr}{A (quoted or unquoted) expression that represents the event;
@@ -84,6 +84,14 @@ this is the calling environment.}
 \item{value.quoted}{Is the \code{valueExpr} expression quoted? By default,
 this is \code{FALSE}. This is useful when you want to use an expression
 that is stored in a variable; to do so, it must be quoted with \code{quote()}.}
+
+\item{cache}{Extra caching to use for \code{eventReactive}. Note that the
+most recent value is always cached, but this option allows you to cache
+previous values based on the value of \code{eventExpr}. If \code{NULL} (the
+default), do not use extra caching. Other possible values are \code{"app"}
+for an application-level cache, \code{"session"} for a session-level cache,
+or a cache object with \code{$get()} and \code{$set()} methods. See
+\code{\link{renderCachedPlot}} for more information about using caching.}
 }
 \value{
 \code{observeEvent} returns an observer reference class object (see
@@ -182,6 +190,42 @@ these:
      \code{eventExpr} is not \code{NULL}.
   }
 }
+}
+
+\section{\code{eventReactive} caching}{
+
+
+  Like regular \code{\link{reactive}} expressions, the most recent value of a
+  \code{eventReactive} is always cached. (Observers are not cached because
+  they are used for their side-effects, not their values.) If a
+  \code{reactive} or \code{eventReactive} named \code{r} is called with
+  \code{r()} and then called again (without being invalidated in between),
+  then the second call will simply return the most recent value.
+
+  An \code{eventReactive} allows for caching of previous values, by using the
+  \code{cache} parameter. When this additional caching is used, a key-value
+  store is used, where the result of the \code{eventExpr} is used as the key.
+  More specifically, the result from the \code{eventExpr} is combined with
+  the  \code{eventReactive}'s \code{label} (which defaults to a string
+  representation of the \code{expr} code), and they are serialized and hashed
+  to generate the key.
+
+  When an additional cache is used, it allow for sharing cached values with
+  other sessions. If you use \code{cache="session"}, then a separate cache
+  will be used for each user session. If you use \code{cache="app"}, then the
+  cache for the \code{eventReactive} will be shared across multiple client
+  sessions accessing the same Shiny application -- because the \code{label}
+  will (by default) be the same when the \code{expr} code is the same, an
+  \code{eventReactive} in one session can share values with the corresponding
+  \code{eventReactive} in another session. Whenever they have the same result
+  for \code{eventExpr}, the value can be drawn from the cache instead of
+  being recomputed.
+
+  Other types of caching are possible, by passing a cache object with
+  \code{$get()} and \code{$set()} methods. It is possible to cache the values
+  to disk, or in an external database, and have the cache persist across
+  application restarts. See \code{\link{renderCachedPlot}} for more
+  information about caching with Shiny.
 }
 
 \examples{

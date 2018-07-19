@@ -5,8 +5,8 @@
 \title{Create a disk cache object}
 \usage{
 diskCache(dir = NULL, max_size = 10 * 1024^2, max_age = Inf,
-  max_n = Inf, evict = c("lru", "fifo"), missing = key_missing(),
-  exec_missing = FALSE, logfile = NULL)
+  max_n = Inf, evict = c("lru", "fifo"), destroy_on_finalize = FALSE,
+  missing = key_missing(), exec_missing = FALSE, logfile = NULL)
 }
 \arguments{
 \item{dir}{Directory to store files for the cache. If \code{NULL} (the
@@ -26,6 +26,11 @@ value of \code{evict}. Use \code{Inf} for no limit of number of items.}
 \item{evict}{The eviction policy to use to decide which objects are removed
 when a cache pruning occurs. Currently, \code{"lru"} and \code{"fifo"} are
 supported.}
+
+\item{destroy_on_finalize}{If \code{TRUE}, then when the DiskCache object is
+garbage collected, the cache directory and all objects inside of it will be
+deleted from disk. If \code{FALSE} (the default), it will do nothing when
+finalized.}
 
 \item{missing}{A value to return or a function to execute when
 \code{get(key)} is called but the key is not present in the cache. The

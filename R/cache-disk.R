@@ -187,17 +187,8 @@
 #'   supported.
 #' @param destroy_on_finalize If \code{TRUE}, then when the DiskCache object is
 #'   garbage collected, the cache directory and all objects inside of it will be
-#'   deleted from disk. If \code{FALSE}, it will do nothing when finalized. If
-#'   \code{NULL} (the default), then the behavior depends on the value of
-#'   \code{dir}: If \code{destroy_on_finalize=NULL} and \code{dir=NULL}, then a
-#'   temporary directory will be created and used for the cache, and it will be
-#'   deleted when the DiskCache is finalized.  If
-#'   \code{destroy_on_finalize=NULL} and \code{dir} is \emph{not} \code{NULL},
-#'   then the directory will not be deleted when the DiskCache is finalized. In
-#'   short, when \code{destroy_on_finalize=NULL}, if the cache directory is
-#'   automatically created, it will be automatically deleted, and if the cache
-#'   directory is not automatically created, it will not be automatically
-#'   deleted.
+#'   deleted from disk. If \code{FALSE} (the default), it will do nothing when
+#'   finalized.
 #' @param missing A value to return or a function to execute when
 #'   \code{get(key)} is called but the key is not present in the cache. The
 #'   default is a \code{\link{key_missing}} object. If it is a function to
@@ -220,7 +211,7 @@ diskCache <- function(
   max_age = Inf,
   max_n = Inf,
   evict = c("lru", "fifo"),
-  destroy_on_finalize = NULL,
+  destroy_on_finalize = FALSE,
   missing = key_missing(),
   exec_missing = FALSE,
   logfile = NULL)
@@ -238,16 +229,13 @@ DiskCache <- R6Class("DiskCache",
       max_age = Inf,
       max_n = Inf,
       evict = c("lru", "fifo"),
-      destroy_on_finalize = NULL,
+      destroy_on_finalize = FALSE,
       missing = key_missing(),
       exec_missing = FALSE,
       logfile = NULL)
     {
       if (exec_missing && (!is.function(missing) || length(formals(missing)) == 0)) {
         stop("When `exec_missing` is true, `missing` must be a function that takes one argument.")
-      }
-      if (is.null(destroy_on_finalize)) {
-        destroy_on_finalize <- is.null(dir)
       }
       if (is.null(dir)) {
         dir <- tempfile("DiskCache-")

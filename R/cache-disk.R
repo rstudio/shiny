@@ -55,11 +55,18 @@
 #'
 #' @section Cache pruning:
 #'
-#'   Cache pruning occurs each time \code{get()} and \code{set()} are called, or
-#'   it can be invoked manually by calling \code{prune()}.
+#'   Cache pruning occurs when \code{set()} is called, or it can be invoked
+#'   manually by calling \code{prune()}.
 #'
-#'   If there are any objects that are older than \code{max_age}, they will be
-#'   removed when a pruning occurs.
+#'   The disk cache will throttle the pruning so that it does not happen on
+#'   every call to \code{set()}, because the filesystem operations for checking
+#'   the status of files can be slow. Instead, it will prune once in every 20
+#'   calls to \code{set()}, or if at least 5 seconds have elapsed since the last
+#'   prune occurred, whichever is first. These parameters are currently not
+#'   customizable, but may be in the future.
+#'
+#'   When a pruning occurs, if there are any objects that are older than
+#'   \code{max_age}, they will be removed.
 #'
 #'   The \code{max_size} and \code{max_n} parameters are applied to the cache as
 #'   a whole, in contrast to \code{max_age}, which is applied to each object
@@ -78,6 +85,9 @@
 #'   stored in blocks on disk. For example, if the block size is 4096 bytes,
 #'   then a file that is one byte in size will take 4096 bytes on disk.
 #'
+#'   Another time that objects can be removed from the cache is when
+#'   \code{get()} is called. If the target object is older than \code{max_age},
+#'   it will be removed and the cache will report it as a missing value.
 #'
 #' @section Eviction policies:
 #'
@@ -165,13 +175,13 @@
 #' @param dir Directory to store files for the cache. If \code{NULL} (the
 #'   default) it will create and use a temporary directory.
 #' @param max_age Maximum age of files in cache before they are evicted, in
-#'   seconds.
+#'   seconds. Use \code{Inf} for no age limit.
 #' @param max_size Maximum size of the cache, in bytes. If the cache exceeds
 #'   this size, cached objects will be removed according to the value of the
-#'   \code{evict}.
+#'   \code{evict}. Use \code{Inf} for no size limit.
 #' @param max_n Maximum number of objects in the cache. If the number of objects
 #'   exceeds this value, then cached objects will be removed according to the
-#'   value of \code{evict}.
+#'   value of \code{evict}. Use \code{Inf} for no limit of number of items.
 #' @param evict The eviction policy to use to decide which objects are removed
 #'   when a cache pruning occurs. Currently, \code{"lru"} and \code{"fifo"} are
 #'   supported.
@@ -242,8 +252,16 @@ DiskCache <- R6Class("DiskCache",
       if (is.null(dir)) {
         dir <- tempfile("DiskCache-")
       }
+      if (!is.numeric(max_size)) stop("max_size must be a number. Use `Inf` for no limit.")
+      if (!is.numeric(max_age))  stop("max_age must be a number. Use `Inf` for no limit.")
+      if (!is.numeric(max_n))    stop("max_n must be a number. Use `Inf` for no limit.")
 
-      private$dir                 <- absolutePath(dir)
+      if (!dirExists(dir)) {
+        private$log(paste0("initialize: Creating ", dir))
+        dir.create(dir, recursive = TRUE)
+      }
+
+      private$dir                 <- normalizePath(dir)
       private$max_size            <- max_size
       private$max_age             <- max_age
       private$max_n               <- max_n
@@ -261,17 +279,16 @@ DiskCache <- R6Class("DiskCache",
       private$missing             <- missing
       private$exec_missing        <- exec_missing
       private$logfile             <- logfile
-
-      if (!dirExists(dir)) {
-        private$log(paste0("initialize: Creating ", dir))
-        dir.create(dir, recursive = TRUE, mode = "0700")
-      }
+      private$prune_last_time     <- as.numeric(Sys.time())
     },
 
     get = function(key, missing = private$missing, exec_missing = private$exec_missing) {
       private$log(paste0('get: key "', key, '"'))
       self$is_destroyed(throw = TRUE)
       validate_key(key)
+
+      private$maybe_prune_single(key)
+
       filename <- private$key_to_filename(key)
 
       # Instead of calling exists() before fetching the value, just try to
@@ -300,7 +317,6 @@ DiskCache <- R6Class("DiskCache",
       }
 
       private$log(paste0('get: key "', key, '" found'))
-      self$prune()
       value
     },
 
@@ -308,24 +324,27 @@ DiskCache <- R6Class("DiskCache",
       private$log(paste0('set: key "', key, '"'))
       self$is_destroyed(throw = TRUE)
       validate_key(key)
-      if (!private$exec_missing && identical(value, private$missing)) {
-        stop("Attempted to store sentinel value representing a missing key.")
-      }
 
       file <- private$key_to_filename(key)
-      temp_file <- paste0(file, "-temp-", shiny::createUniqueId(8))
+      temp_file <- paste0(file, "-temp-", createUniqueId(8))
 
       save_error <- FALSE
       ref_object <- FALSE
       tryCatch(
-        saveRDS(value, file = temp_file,
-          refhook = function(x) {
-            ref_object <<- TRUE
-            NULL
-          }
-        ),
+        {
+          saveRDS(value, file = temp_file,
+            refhook = function(x) {
+              ref_object <<- TRUE
+              NULL
+            }
+          )
+          file.rename(temp_file, file)
+        },
         error = function(e) {
           save_error <<- TRUE
+          # Unlike file.remove(), unlink() does not raise warning if file does
+          # not exist.
+          unlink(temp_file)
         }
       )
       if (save_error) {
@@ -337,8 +356,7 @@ DiskCache <- R6Class("DiskCache",
         warning("A reference object was cached in a serialized format. The restored object may not work as expected.")
       }
 
-      file.rename(temp_file, file)
-      self$prune()
+      private$prune_throttled()
       invisible(self)
     },
 
@@ -381,53 +399,66 @@ DiskCache <- R6Class("DiskCache",
       private$log(paste0('prune'))
       self$is_destroyed(throw = TRUE)
 
+      current_time <- Sys.time()
+
       filenames <- dir(private$dir, "\\.rds$", full.names = TRUE)
-      files <- file.info(filenames)
-      files <- files[files$isdir == FALSE, ]
-      files$name <- rownames(files)
-      rownames(files) <- NULL
+      info <- file.info(filenames)
+      info <- info[info$isdir == FALSE, ]
+      info$name <- rownames(info)
+      rownames(info) <- NULL
       # Files could be removed between the dir() and file.info() calls. The
       # entire row for such files will have NA values. Remove those rows.
-      files <- files[!is.na(files$size), ]
+      info <- info[!is.na(info$size), ]
 
       # 1. Remove any files where the age exceeds max age.
-      timediff <- as.numeric(Sys.time() - files[["mtime"]], units = "secs")
-      rm_idx <- timediff > private$max_age
-      if (any(rm_idx)) {
-        private$log(paste0("prune max_age: Removing ", paste(files$name[rm_idx], collapse = ", ")))
+      if (is.finite(private$max_age)) {
+        timediff <- as.numeric(current_time - info$mtime, units = "secs")
+        rm_idx <- timediff > private$max_age
+        if (any(rm_idx)) {
+          private$log(paste0("prune max_age: Removing ", paste(info$name[rm_idx], collapse = ", ")))
+          file.remove(info$name[rm_idx])
+          info <- info[!rm_idx, ]
+        }
       }
-      file.remove(files$name[rm_idx])
 
-      # Remove rows of files that were deleted.
-      files <- files[!rm_idx, ]
+      # Sort objects by priority, according to eviction policy. The sorting is
+      # done in a function which can be called multiple times but only does
+      # the work the first time.
+      info_is_sorted <- FALSE
+      ensure_info_is_sorted <- function() {
+        if (info_is_sorted) return()
 
-      # Sort files by priority, according to eviction policy.
-      if (private$evict == "lru") {
-        files <- files[order(files[["atime"]], decreasing = TRUE), ]
-      } else if (private$evict == "fifo") {
-        files <- files[order(files[["mtime"]], decreasing = TRUE), ]
-      } else {
-        stop('Unknown eviction policy "', private$evict, '"')
+        if (private$evict == "lru") {
+          info <<- info[order(info$atime, decreasing = TRUE), ]
+        } else if (private$evict == "fifo") {
+          info <<- info[order(info$mtime, decreasing = TRUE), ]
+        } else {
+          stop('Unknown eviction policy "', private$evict, '"')
+        }
+        info_is_sorted <<- TRUE
       }
 
       # 2. Remove files if there are too many.
-      if (nrow(files) > private$max_n) {
-        rm_idx <- seq_len(nrow(files)) > private$max_n
-        if (any(rm_idx)) {
-          private$log(paste0("prune max_n: Removing ", paste(files$name[rm_idx], collapse = ", ")))
-        }
-        file.remove(files$name[rm_idx])
+      if (is.finite(private$max_n) && nrow(info) > private$max_n) {
+        ensure_info_is_sorted()
+        rm_idx <- seq_len(nrow(info)) > private$max_n
+        private$log(paste0("prune max_n: Removing ", paste(info$name[rm_idx], collapse = ", ")))
+        rm_success <- file.remove(info$name[rm_idx])
+        info <- info[!rm_success, ]
       }
 
       # 3. Remove files if cache is too large.
-      if (sum(files$size) > private$max_size) {
-        cum_size <- cumsum(files$size)
+      if (is.finite(private$max_size) && sum(info$size) > private$max_size) {
+        ensure_info_is_sorted()
+        cum_size <- cumsum(info$size)
         rm_idx <- cum_size > private$max_size
-        if (any(rm_idx)) {
-          private$log(paste0("prune max_size: Removing ", paste(files$name[rm_idx], collapse = ", ")))
-        }
-        file.remove(files$name[rm_idx])
+        private$log(paste0("prune max_size: Removing ", paste(info$name[rm_idx], collapse = ", ")))
+        rm_success <- file.remove(info$name[rm_idx])
+        info <- info[!rm_success, ]
       }
+
+      private$prune_last_time <- as.numeric(current_time)
+
       invisible(self)
     },
 
@@ -490,11 +521,47 @@ DiskCache <- R6Class("DiskCache",
     exec_missing = FALSE,
     logfile = NULL,
 
+    prune_throttle_counter = 0,
+    prune_last_time = NULL,
+
     key_to_filename = function(key) {
-      if (! (is.character(key) && length(key)==1) ) {
-        stop("Key must be a character vector of length 1.")
+      validate_key(key)
+      # Additional validation. This 80-char limit is arbitrary, and is
+      # intended to avoid hitting a filename length limit on Windows.
+      if (nchar(key) > 80) {
+        stop("Invalid key: key must have fewer than 80 characters.")
       }
       file.path(private$dir, paste0(key, ".rds"))
+    },
+
+    # A wrapper for prune() that throttles it, because prune() can be
+    # expensive due to filesystem operations. This function will prune only
+    # once every 20 times it is called, or if it has been more than 5 seconds
+    # since the last time the cache was actually pruned, whichever is first.
+    # In the future, the behavior may be customizable.
+    prune_throttled = function() {
+      # Count the number of times prune() has been called.
+      private$prune_throttle_counter <- private$prune_throttle_counter + 1
+
+      if (private$prune_throttle_counter > 20 ||
+          private$prune_last_time - as.numeric(Sys.time()) > 5)
+      {
+        self$prune()
+        private$prune_throttle_counter <- 0
+      }
+    },
+
+    # Prunes a single object if it exceeds max_age. If the object does not
+    # exceed max_age, or if the object doesn't exist, do nothing.
+    maybe_prune_single = function(key) {
+      obj <- private$cache[[key]]
+      if (is.null(obj)) return()
+
+      timediff <- as.numeric(Sys.time()) - obj$mtime
+      if (timediff > private$max_age) {
+        private$log(paste0("pruning single object exceeding max_age: Removing ", key))
+        rm(list = key, envir = private$cache)
+      }
     },
 
     log = function(text) {

@@ -304,7 +304,7 @@ renderCachedPlot <- function(expr,
   cacheKeyExpr <- substitute(cacheKeyExpr)
   # The real cache key we'll use also includes width, height, res, pixelratio.
   # This is just the part supplied by the user.
-  userCacheKey <- reactive(cacheKeyExpr, env = parent.frame(), quoted = TRUE)
+  userCacheKey <- reactive(cacheKeyExpr, env = parent.frame(), quoted = TRUE, label = "userCacheKey")
 
   ensureCacheSetup <- function() {
     # For our purposes, cache objects must support these methods.

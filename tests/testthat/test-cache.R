@@ -3,8 +3,6 @@ context("Cache")
 test_that("DiskCache: handling missing values", {
   d <- diskCache()
   expect_true(is.key_missing(d$get("abcd")))
-  # Can't add value that is identical to the sentinel value
-  expect_error(d$set("x", key_missing()))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
   expect_identical(d$get("y", missing = NULL), NULL)
@@ -15,8 +13,6 @@ test_that("DiskCache: handling missing values", {
 
   d <- diskCache(missing = NULL)
   expect_true(is.null(d$get("abcd")))
-  # Can't add value that is identical to the sentinel value
-  expect_error(d$set("x", NULL))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
   expect_identical(d$get("y", missing = -1), -1)
@@ -50,8 +46,6 @@ test_that("DiskCache: handling missing values", {
 test_that("MemoryCache: handling missing values", {
   d <- memoryCache()
   expect_true(is.key_missing(d$get("abcd")))
-  # Can't add value that is identical to the sentinel value
-  expect_error(d$set("x", key_missing()))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
   expect_identical(d$get("y", missing = NULL), NULL)
@@ -62,8 +56,6 @@ test_that("MemoryCache: handling missing values", {
 
   d <- memoryCache(missing = NULL)
   expect_true(is.null(d$get("abcd")))
-  # Can't add value that is identical to the sentinel value
-  expect_error(d$set("x", NULL))
   d$set("a", 100)
   expect_identical(d$get("a"), 100)
   expect_identical(d$get("y", missing = -1), -1)

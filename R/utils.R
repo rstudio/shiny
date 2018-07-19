@@ -288,31 +288,6 @@ dirRemove <- function(path) {
   }
 }
 
-# If the path exists, this returns a canonical path (like normalizePath). If it
-# does not exist, it returns an absolute path, relative to the current dir. The
-# difference is that a canonical path follows symlinks and doesn't have any
-# `..`, while an absolute path here is simply one that starts with `/`.
-absolutePath <- function(path) {
-  if (!is.character(path) || length(path) != 1 || path == "") {
-    stop("path must be a single non-empty string.")
-  }
-  if (substr(path, 1, 1) == "/") {
-    return(path)
-  }
-  if (isWindows()) {
-    # C:/abcd or c:\abcd
-    if (grepl("^[A-Za-z]:[/\\]", path)) {
-      return(path)
-    }
-  }
-  norm_path <- normalizePath(path, mustWork = FALSE)
-  if (path == norm_path) {
-    file.path(getwd(), path)
-  } else {
-    norm_path
-  }
-}
-
 # Attempt to join a path and relative path, and turn the result into a
 # (normalized) absolute path. The result will only be returned if it is an
 # existing file/directory and is a descendant of dir.

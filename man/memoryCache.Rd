@@ -11,14 +11,14 @@ memoryCache(max_size = 10 * 1024^2, max_age = Inf, max_n = Inf,
 \arguments{
 \item{max_size}{Maximum size of the cache, in bytes. If the cache exceeds
 this size, cached objects will be removed according to the value of the
-\code{evict}.}
+\code{evict}. Use \code{Inf} for no size limit.}
 
 \item{max_age}{Maximum age of files in cache before they are evicted, in
-seconds.}
+seconds. Use \code{Inf} for no age limit.}
 
 \item{max_n}{Maximum number of objects in the cache. If the number of objects
 exceeds this value, then cached objects will be removed according to the
-value of \code{evict}.}
+value of \code{evict}. Use \code{Inf} for no limit of number of items.}
 
 \item{evict}{The eviction policy to use to decide which objects are removed
 when a cache pruning occurs. Currently, \code{"lru"} and \code{"fifo"} are
@@ -106,11 +106,11 @@ MemoryCache, it will not be garbage collected.
 \section{Cache pruning}{
 
 
-  Cache pruning occurs each time \code{get()} and \code{set()} are called, or
-  it can be invoked manually by calling \code{prune()}.
+  Cache pruning occurs when \code{set()} is called, or it can be invoked
+  manually by calling \code{prune()}.
 
-  If there are any objects that are older than \code{max_age}, they will be
-  removed when a pruning occurs.
+  When a pruning occurs, if there are any objects that are older than
+  \code{max_age}, they will be removed.
 
   The \code{max_size} and \code{max_n} parameters are applied to the cache as
   a whole, in contrast to \code{max_age}, which is applied to each object
@@ -123,11 +123,15 @@ MemoryCache, it will not be garbage collected.
 
   If the size of the objects in the cache exceeds \code{max_size}, then
   objects will be removed from the cache. Objects will be removed from the
-  cache so that the total size remains under \code{max_size}. The size is
-  calculated by calling \code{\link{object.size}} on an object. Note that if
-  two keys are associated with the same object, the size calculation will
-  count the object's size twice, even though there is only one copy in
-  memory.
+  cache so that the total size remains under \code{max_size}. Note that the
+  size is calculated using the size of the files, not the size of disk space
+  used by the files -- these two values can differ because of files are
+  stored in blocks on disk. For example, if the block size is 4096 bytes,
+  then a file that is one byte in size will take 4096 bytes on disk.
+
+  Another time that objects can be removed from the cache is when
+  \code{get()} is called. If the target object is older than \code{max_age},
+  it will be removed and the cache will report it as a missing value.
 }
 
 \section{Eviction policies}{

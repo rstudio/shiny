@@ -324,7 +324,7 @@ renderCachedPlot <- function(expr,
       cache <<- getShinyOption("cache")
 
     } else if (identical(cache, "session")) {
-      cache <<- session$getCache()
+      cache <<- session$cache
 
     } else {
       stop('`cache` must either be "app", "session", or a cache object with methods, `$get`, and `$set`.')

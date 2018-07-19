@@ -441,7 +441,6 @@ ShinySession <- R6Class(
     bookmarkExclude = character(0),  # Names of inputs to exclude from bookmarking
     getBookmarkExcludeFuns = list(),
     timingRecorder = 'ShinyServerTimingRecorder',
-    cache = NULL,
 
     testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
@@ -704,6 +703,7 @@ ShinySession <- R6Class(
     request = 'ANY',      # Websocket request object
     singletons = character(0),  # Tracks singleton HTML fragments sent to the page
     userData = 'environment',
+    cache = NULL,         # A cache object used in the session
     user = NULL,
     groups = NULL,
 
@@ -738,7 +738,7 @@ ShinySession <- R6Class(
       private$.outputs <- list()
       private$.outputOptions <- list()
 
-      private$cache <- MemoryCache$new()
+      self$cache <- MemoryCache$new()
 
       private$bookmarkCallbacks <- Callbacks$new()
       private$bookmarkedCallbacks <- Callbacks$new()
@@ -2018,9 +2018,6 @@ ShinySession <- R6Class(
           }
         })
       }
-    },
-    getCache = function() {
-      private$cache
     }
   ),
   active = list(

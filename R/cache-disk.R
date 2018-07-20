@@ -467,6 +467,9 @@ DiskCache <- R6Class("DiskCache",
       # the directory after unlink starts removing files but before it removes
       # the directory, and when that happens, the directory removal will fail.
       file.create(file.path(private$dir, "__destroyed__"))
+      # Remove all the .rds files. This will not remove the setinel file.
+      file.remove(dir(private$dir, "\\.rds$", full.names = TRUE))
+      # Next remove dir recursively, including sentinel file.
       unlink(private$dir, recursive = TRUE)
       private$destroyed <- TRUE
       invisible(self)

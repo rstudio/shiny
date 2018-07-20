@@ -331,31 +331,37 @@ renderCachedPlot <- function(expr,
     }
   }
 
+  # The width and height of the plot to draw, given from sizePolicy. These
+  # values get filled by an observer below.
+  fitDims <- reactiveValues(width = NULL, height = NULL)
+
   resizeObserver <- NULL
   ensureResizeObserver <- function() {
     if (!is.null(resizeObserver))
       return()
 
-    # Given the actual width/height of the image in the browser, this gets
-    # the width/height from sizePolicy() and pushes those
-    # values into `fitDims`. It's done this way so that the `fitDims` only
-    # change (and cause invalidations) when the rendered image size changes,
-    # and not every time the browser's <img> tag changes size.
-    resizeObserver <<- observe({
-      # cat("resize\n")
+    # Given the actual width/height of the image in the browser, this gets the
+    # width/height from sizePolicy() and pushes those values into `fitDims`.
+    # It's done this way so that the `fitDims` only change (and cause
+    # invalidations) when the rendered image size changes, and not every time
+    # the browser's <img> tag changes size.
+    doResizeCheck <- function() {
       width  <- session$clientData[[paste0('output_', outputName, '_width')]]
       height <- session$clientData[[paste0('output_', outputName, '_height')]]
+
+      if (is.null(width)) width <- 0
+      if (is.null(height)) height <- 0
 
       rect <- sizePolicy(c(width, height))
       fitDims$width  <- rect[1]
       fitDims$height <- rect[2]
-    })
+    }
+
+    # Run it once immediately, then set up the observer
+    isolate(doResizeCheck())
+
+    resizeObserver <<- observe(doResizeCheck())
   }
-
-
-  # The width and height of the plot to draw, given from sizePolicy. These
-  # values get filled by an observer below.
-  fitDims <- reactiveValues(width = NULL, height = NULL)
 
   # Vars to store session and output, so that they can be accessed from
   # the plotObj() reactive.
@@ -375,10 +381,6 @@ renderCachedPlot <- function(expr,
         isolate({
           width  <- fitDims$width
           height <- fitDims$height
-
-          # The first execution will have NULL width/height, because they haven't
-          # yet been retrieved from clientData.
-          req(width, height, cancelOutput = TRUE)
         })
 
         pixelratio <- session$clientData$pixelratio %OR% 1
@@ -438,7 +440,10 @@ renderCachedPlot <- function(expr,
           return(list(
             cacheHit = TRUE,
             key = key,
-            plotObj = plotObj
+            plotObj = plotObj,
+            width = width,
+            height = height,
+            pixelratio = pixelratio
           ))
         }
 
@@ -457,18 +462,21 @@ renderCachedPlot <- function(expr,
             list(
               cacheHit = FALSE,
               key = key,
-              plotObj = drawReactiveResult
+              plotObj = drawReactiveResult,
+              width = width,
+              height = height,
+              pixelratio = pixelratio
             )
           }
         )
       },
       function(result) {
-        width  <- fitDims$width
-        height <- fitDims$height
-        pixelratio <- session$clientData$pixelratio %OR% 1
+        width      <- result$width
+        height     <- result$height
+        pixelratio <- result$pixelratio
 
         # Three possibilities when we get here:
-        # 1. There was a cache hit. No need to set the
+        # 1. There was a cache hit. No need to set a value in the cache.
         # 2. There was a cache miss, and the plotObj is already the correct
         #    size (because drawReactive re-executed). In this case, we need
         #    to cache it.

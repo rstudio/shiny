@@ -1333,14 +1333,9 @@ ShinySession <- R6Class(
     },
 
     getCurrentOutputInfo = function() {
-      # TODO: How should we deal with namespacing?
-
       name <- private$currentOutputName
-      if (is.null(private$outputInfo[[name]])) {
-        private$outputInfo[[name]] <- list(name = name)
-      }
 
-      tmp_info <- private$outputInfo[[name]]
+      tmp_info <- private$outputInfo[[name]] %OR% list(name = name)
 
       # cd_names() returns names of all items in clientData, without taking a
       # reactive dependency. It is a function and it's memoized, so that we do

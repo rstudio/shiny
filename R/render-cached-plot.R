@@ -508,6 +508,7 @@ renderCachedPlot <- function(expr,
         img <- result$plotObj$img
         # Replace exact pixel dimensions; instead, the max-height and
         # max-width will be set to 100% from CSS.
+        img$class <- "shiny-scalable"
         img$width  <- NULL
         img$height <- NULL
 

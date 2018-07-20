@@ -6,7 +6,7 @@
 \usage{
 renderCachedPlot(expr, cacheKeyExpr, sizePolicy = sizeGrowthRatio(width = 400,
   height = 400, growthRate = 1.2), res = 72, cache = "app", ...,
-  env = parent.frame(), quoted = FALSE, outputArgs = list())
+  outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that generates a plot.}
@@ -31,11 +31,6 @@ information.}
 
 \item{...}{Arguments to be passed through to \code{\link[grDevices]{png}}.
 These can be used to set the width, height, background color, etc.}
-
-\item{env}{The environment in which to evaluate \code{expr}.}
-
-\item{quoted}{Is \code{expr} a quoted expression (with \code{quote()})? This
-is useful if you want to save an expression in a variable.}
 
 \item{outputArgs}{A list of arguments to be passed through to the implicit
 call to \code{\link{plotOutput}} when \code{renderPlot} is used in an

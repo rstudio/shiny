@@ -289,12 +289,12 @@ renderCachedPlot <- function(expr,
   res = 72,
   cache = "app",
   ...,
-  env = parent.frame(), quoted = FALSE, outputArgs = list()
+  outputArgs = list()
 ) {
 
   # This ..stacktraceon is matched by a ..stacktraceoff.. when plotFunc
   # is called
-  installExprFunction(expr, "func", env, quoted, ..stacktraceon = TRUE)
+  installExprFunction(expr, "func", parent.frame(), quoted = FALSE, ..stacktraceon = TRUE)
   # This is so that the expr doesn't re-execute by itself; it needs to be
   # triggered by the cache key (or width/height) changing.
   isolatedFunc <- function() isolate(func())

@@ -2,6 +2,8 @@
 #'
 #' A \code{key_missing} object represents a cache miss.
 #'
+#' @param x An object to test.
+#'
 #' @seealso \code{\link{diskCache}}, \code{\link{memoryCache}}.
 #'
 #' @export

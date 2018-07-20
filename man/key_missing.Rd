@@ -9,6 +9,9 @@ key_missing()
 
 is.key_missing(x)
 }
+\arguments{
+\item{x}{An object to test.}
+}
 \description{
 A \code{key_missing} object represents a cache miss.
 }

@@ -1727,3 +1727,16 @@ createVarPromiseDomain <- function(env, name, value) {
     }
   )
 }
+
+getSliderType <- function(min, max, value) {
+  vals <- dropNulls(list(value, min, max))
+  type <- unique(lapply(vals, function(x) {
+    if      (inherits(x, "Date"))   "date"
+    else if (inherits(x, "POSIXt")) "datetime"
+    else                            "number"
+  }))
+  if (length(type) > 1) {
+    stop("Type mismatch for `min`, `max`, and `value`. Each must be Date, POSIXt, or number.")
+  }
+  type[[1]]
+}

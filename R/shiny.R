@@ -976,8 +976,9 @@ ShinySession <- R6Class(
         stop("x must be a reactivevalues object")
 
       impl <- .subset2(x, 'impl')
-      impl$freeze(name)
-      self$onFlushed(function() impl$thaw(name))
+      key <- .subset2(x, 'ns')(name)
+      impl$freeze(key)
+      self$onFlushed(function() impl$thaw(key))
     },
 
     onSessionEnded = function(sessionEndedCallback) {

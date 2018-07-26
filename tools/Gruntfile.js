@@ -81,7 +81,7 @@ module.exports = function(grunt) {
         },
         options: {
           replacements: [{
-            pattern: /{{ VERSION }}/g,
+            pattern: /{{\s*VERSION\s*}}/g,
             replacement: pkgInfo().version
           }]
         }
@@ -157,11 +157,7 @@ module.exports = function(grunt) {
       shiny: {
         files: ['<%= concat.shiny.src %>', '../DESCRIPTION'],
         tasks: [
-          'newer:concat',
-          'newer:eslint',
-          'configureBabel',
-          'newer:babel',
-          'newer:uglify'
+          'default'
         ]
       },
       datepicker: {
@@ -202,11 +198,23 @@ module.exports = function(grunt) {
     gruntConfig.babel.options.inputSourceMap = grunt.file.readJSON('./temp_concat/shiny.js.map');
   });
 
+  grunt.task.registerTask(
+    "validateStringReplace",
+    "tests to make sure the version value was replaced",
+    function() {
+      var shinyContent = require('fs').readFileSync('./temp_concat/shiny.js', 'utf8');
+      if (/{{\s*VERSION\s*}}/.test(shinyContent)) {
+        grunt.fail.fatal("{{ VERSION }} was not replaced in compiled shiny.js file!")
+      }
+    }
+  );
+
   grunt.initConfig(gruntConfig);
 
   grunt.registerTask('default', [
     'newer:concat',
     'newer:string-replace',
+    'validateStringReplace',
     'newer:eslint',
     'configureBabel',
     'newer:babel',

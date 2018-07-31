@@ -509,6 +509,11 @@ renderCachedPlot <- function(expr,
           # doesn't need to serialize objects, so it could actually save a
           # display list, but for the reasons listed previously, it's
           # generally not worth it.
+          # The plotResult is not the same as the recordedPlot (it is used to
+          # retrieve coordmap information for ggplot2 objects) but it is only
+          # used in conjunction with the recordedPlot, and we'll remove it
+          # because it can be quite large.
+          result$plotObj$plotResult <- NULL
           result$plotObj$recordedPlot <- NULL
           cache$set(result$key, result$plotObj)
         }

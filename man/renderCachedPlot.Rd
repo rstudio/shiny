@@ -128,14 +128,14 @@ will not have cache key collisions.
   To use different settings for a session-scoped cache, you can call
   \code{\link{shinyOptions}()} at the top of your server function. To use
   the session-scoped cache, you must also call \code{renderCachedPlot} with
-  \code{scope="session"}. This will create a 20 MB cache for the session:
+  \code{cache="session"}. This will create a 20 MB cache for the session:
   \preformatted{
   function(input, output, session) {
     shinyOptions(cache = memoryCache(size = 20e6))
 
     output$plot <- renderCachedPlot(
       ...,
-      scope = "session"
+      cache = "session"
     )
   }
   }
@@ -296,7 +296,7 @@ server <- function(input, output, session) {
 
   output$plot <- renderCachedPlot(
     ...,
-    scope = "session"
+    cache = "session"
   )
 }
 

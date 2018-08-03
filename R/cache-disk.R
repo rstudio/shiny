@@ -98,12 +98,14 @@
 #'   \describe{
 #'     \item{\code{"lru"}}{
 #'       Least Recently Used. The least recently used objects will be removed.
-#'       This uses the filesystem's atime property. Some filesystems do not
-#'       support atime, or have a poor atime resolution. HFS+, for example has
-#'       an atime resolution of 1 second, and FAT has a resolution of 1 day.
-#'       The DiskCache will check for atime support the first 10 times that
-#'       \code{$get()} is called, and if the filesystem does not support atime
-#'       or has poor time resolution, a warning will be issued.
+#'       This uses the filesystem's mtime property. When "lru" is used, each
+#'       \code{get()} is called, it will update the files mtime. Some
+#'       filesystems have poor mtime resolution. HFS+, for example has
+#'       an mtime resolution of 1 second, and FAT has a resolution of 2 seconds.
+#'       The DiskCache will check for mtime resolution the first 10 times that
+#'       \code{get()} is called, and if the filesystem has poor time
+#'       resolution, a warning will be issued. (Note: atime is not used because
+#'       support for atime is even worse than mtime.)
 #'     }
 #'     \item{\code{"fifo"}}{
 #'       First-in-first-out. The oldest objects will be removed.
@@ -211,9 +213,9 @@
 #'   \code{get()} results in a cache miss.
 #' @param logfile An optional filename or connection object to where logging
 #'   information will be written. To log to the console, use \code{stdout()}.
-#' @param min_atime_resolution The minimum desired resolution (or granularity)
-#'   of the filesystem's atime, in seconds (default is 1). If the filesystem's
-#'   atime resolution is worse (larger), then the DiskCache will emit a
+#' @param min_mtime_resolution The minimum desired resolution (or granularity)
+#'   of the filesystem's mtime, in seconds (default is 1). If the filesystem's
+#'   mtime resolution is worse (larger), then the DiskCache will emit a
 #'   warning while it is being used. (The resolution is checked when
 #'   \code{$get()} is called.)
 #'
@@ -228,10 +230,10 @@ diskCache <- function(
   missing = key_missing(),
   exec_missing = FALSE,
   logfile = NULL,
-  min_atime_resolution = 1)
+  min_mtime_resolution = 1)
 {
   DiskCache$new(dir, max_size, max_age, max_n, evict, destroy_on_finalize,
-                missing, exec_missing, logfile, min_atime_resolution)
+                missing, exec_missing, logfile, min_mtime_resolution)
 }
 
 
@@ -247,7 +249,7 @@ DiskCache <- R6Class("DiskCache",
       missing = key_missing(),
       exec_missing = FALSE,
       logfile = NULL,
-      min_atime_resolution = 1)
+      min_mtime_resolution = 1)
     {
       if (exec_missing && (!is.function(missing) || length(formals(missing)) == 0)) {
         stop("When `exec_missing` is true, `missing` must be a function that takes one argument.")
@@ -273,10 +275,10 @@ DiskCache <- R6Class("DiskCache",
       private$missing             <- missing
       private$exec_missing        <- exec_missing
       private$logfile             <- logfile
-      private$min_atime_resolution<- min_atime_resolution
+      private$min_mtime_resolution<- min_mtime_resolution
 
       private$prune_last_time     <- as.numeric(Sys.time())
-      private$atime_next_check_time  <- as.numeric(Sys.time())
+      private$mtime_next_check_time  <- as.numeric(Sys.time())
     },
 
     get = function(key, missing = private$missing, exec_missing = private$exec_missing) {
@@ -425,13 +427,7 @@ DiskCache <- R6Class("DiskCache",
       ensure_info_is_sorted <- function() {
         if (info_is_sorted) return()
 
-        if (private$evict == "lru") {
-          info <<- info[order(info$atime, decreasing = TRUE), ]
-        } else if (private$evict == "fifo") {
-          info <<- info[order(info$mtime, decreasing = TRUE), ]
-        } else {
-          stop('Unknown eviction policy "', private$evict, '"')
-        }
+        info <<- info[order(info$mtime, decreasing = TRUE), ]
         info_is_sorted <<- TRUE
       }
 
@@ -520,69 +516,83 @@ DiskCache <- R6Class("DiskCache",
     missing = NULL,
     exec_missing = FALSE,
     logfile = NULL,
-    min_atime_resolution = NULL,
+    min_mtime_resolution = NULL,
 
     prune_throttle_counter = 0,
     prune_last_time = NULL,
 
-    atime_next_check_time = NULL,
-    atime_check_counter = 0,
-    atime_support = NULL,     # NULL means unkown; changes to TRUE or FALSE after we know.
+    mtime_next_check_time = NULL,
+    mtime_check_counter = 0,
+    mtime_support = NULL,     # NULL means unkown; changes to TRUE or FALSE after we know.
 
     # This reads in a cached object, and, if needed, checks if the filesystem
-    # has atime support.
+    # has sufficient mtime resolution. See
+    # https://gist.github.com/wch/9bc615c70219c7ac15f7b339ddd7a30d for
+    # mtime/ctime/atime tests.
     read_rds = function(filename) {
+
       if (private$evict == "lru" &&
-          is.null(private$atime_support) &&
-          as.numeric(Sys.time()) > private$atime_next_check_time)
+          is.null(private$mtime_support) &&
+          as.numeric(Sys.time()) > private$mtime_next_check_time)
       {
-        # Record some times to check for atime support
+        # Record some times to check for mtime resolution
         start <- as.numeric(Sys.time())
         value <- suppressWarnings(readRDS(filename))
-        file_atime <- as.numeric(file.info(filename)[["atime"]])
+        if (private$evict == "lru"){
+          # Updates the mtime, ctime, and atime. When examining file info, we
+          # use mtime, because it (I believe) it is supported on all
+          # platforms, and it has higher resolution than atime on some
+          # filesystems (like FAT). Note that on NTFS, this only reliably
+          # updates mtime.
+          Sys.setFileTime(filename, Sys.time())
+        }
+        file_mtime <- as.numeric(file.info(filename)[["mtime"]])
         end <- as.numeric(Sys.time())
 
         private$log(paste(
-          "Checking atimes: start, file, end:",
-          paste(sprintf("%.6f", c(start, file_atime, end)), collapse = " ")
+          "Checking mtimes: start, file, end:",
+          paste(sprintf("%.6f", c(start, file_mtime, end)), collapse = " ")
         ))
 
-        # Check that the file's atime is within the start and end times, but
-        # expanded by private$min_atime_resolution seconds on each side. If it
+        # Check that the file's mtime is within the start and end times, but
+        # expanded by private$min_mtime_resolution seconds on each side. If it
         # fails this test, we know that the filesystem has worse than the
-        # desired atime resolution. If it passes the test once, we can't be
+        # desired mtime resolution. If it passes the test once, we can't be
         # sure if the, so we'll run the test 10 times before we stop checking.
-        if (file_atime < start - private$min_atime_resolution ||
-            file_atime > end   + private$min_atime_resolution)
+        if (file_mtime < start - private$min_mtime_resolution ||
+            file_mtime > end   + private$min_mtime_resolution)
         {
-          private$atime_support <- FALSE
-          private$log("atime support is FALSE")
-          atime_difference <- max(abs(start - file_atime), abs(end - file_atime))
+          private$mtime_support <- FALSE
+          private$log("mtime support is FALSE")
+          mtime_difference <- max(abs(start - file_mtime), abs(end - file_mtime))
 
           warning("DiskCache: eviction policy \"lru\" will not work correctly because filesystem for ",
-            private$dir, " does not support atime, or has poor atime resolution.",
-            " (Desired resolution: ", private$min_atime_resolution,
-            ". Found atime error of : ", round(atime_difference, 3)
+            private$dir, " does not support mtime, or has poor mtime resolution.",
+            " (Desired resolution: ", private$min_mtime_resolution,
+            ". Found mtime error of : ", round(mtime_difference, 3)
           )
 
         } else {
           # Next check is a random time between 0s and the
-          # min_atime_resolution from now. We don't check again right away
+          # min_mtime_resolution from now. We don't check again right away
           # because that might not be useful -- if we did this and the first
           # 10 get()s happen right away, there's a good chance that if the
           # first one passes due to luck, that they'll all pass.
-          private$atime_next_check_time <- as.numeric(Sys.time()) + runif(1, max = private$min_atime_resolution)
-          private$atime_check_counter <- private$atime_check_counter + 1
+          private$mtime_next_check_time <- as.numeric(Sys.time()) + runif(1, max = private$min_mtime_resolution)
+          private$mtime_check_counter <- private$mtime_check_counter + 1
 
-          # After 10 passes, assume that atime support works
-          if (private$atime_check_counter >= 10) {
-            private$log("atime support is TRUE")
-            private$atime_support <- TRUE
+          # After 10 passes, assume that mtime support works
+          if (private$mtime_check_counter >= 10) {
+            private$log("mtime support is TRUE")
+            private$mtime_support <- TRUE
           }
         }
 
       } else {
         value <- suppressWarnings(readRDS(filename))
+        if (private$evict == "lru"){
+          Sys.setFileTime(filename, Sys.time())
+        }
       }
 
       value

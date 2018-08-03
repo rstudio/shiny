@@ -6,7 +6,8 @@
 \usage{
 diskCache(dir = NULL, max_size = 10 * 1024^2, max_age = Inf,
   max_n = Inf, evict = c("lru", "fifo"), destroy_on_finalize = FALSE,
-  missing = key_missing(), exec_missing = FALSE, logfile = NULL)
+  missing = key_missing(), exec_missing = FALSE, logfile = NULL,
+  min_mtime_resolution = 1)
 }
 \arguments{
 \item{dir}{Directory to store files for the cache. If \code{NULL} (the
@@ -48,6 +49,12 @@ as a value to return when \code{get()} results in a cache miss. If
 
 \item{logfile}{An optional filename or connection object to where logging
 information will be written. To log to the console, use \code{stdout()}.}
+
+\item{min_mtime_resolution}{The minimum desired resolution (or granularity)
+of the filesystem's mtime, in seconds (default is 1). If the filesystem's
+mtime resolution is worse (larger), then the DiskCache will emit a
+warning while it is being used. (The resolution is checked when
+\code{$get()} is called.)}
 }
 \description{
 A disk cache object is a key-value store that saves the values as files in a
@@ -152,10 +159,14 @@ policies are:
   \describe{
     \item{\code{"lru"}}{
       Least Recently Used. The least recently used objects will be removed.
-      This uses the filesystem's atime property. Some filesystems do not
-      support atime, or have a very low atime resolution. The DiskCache will
-      check for atime support, and if the filesystem does not support atime,
-      a warning will be issued and the "fifo" policy will be used instead.
+      This uses the filesystem's mtime property. When "lru" is used, each
+      \code{get()} is called, it will update the files mtime. Some
+      filesystems have poor mtime resolution. HFS+, for example has
+      an mtime resolution of 1 second, and FAT has a resolution of 2 seconds.
+      The DiskCache will check for mtime resolution the first 10 times that
+      \code{get()} is called, and if the filesystem has poor time
+      resolution, a warning will be issued. (Note: atime is not used because
+      support for atime is even worse than mtime.)
     }
     \item{\code{"fifo"}}{
       First-in-first-out. The oldest objects will be removed.
@@ -171,6 +182,12 @@ do this, each R process should have a DiskCache object that uses the same
 directory. Each DiskCache will do pruning independently of the others, so if
 they have different pruning parameters, then one DiskCache may remove cached
 objects before another DiskCache would do so.
+
+Even though it is possible for multiple processes to share a DiskCache
+directory, this should not be done on networked file systems, because of
+slow performance of networked file systems can cause problems. If you need
+a high-performance shared cache, you can use one built on a database like
+Redis, SQLite, mySQL, or similar.
 
 When multiple processes share a cache directory, there are some potential
 race conditions. For example, if your code calls \code{exists(key)} to check

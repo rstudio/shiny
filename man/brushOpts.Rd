@@ -4,9 +4,9 @@
 \alias{brushOpts}
 \title{Create an object representing brushing options}
 \usage{
-brushOpts(id = NULL, fill = "#9cf", stroke = "#036", opacity = 0.25,
-  delay = 300, delayType = c("debounce", "throttle"), clip = TRUE,
-  direction = c("xy", "x", "y"), resetOnNew = FALSE)
+brushOpts(id = NULL, fill = "#9cf", stroke = "#036",
+  opacity = 0.25, delay = 300, delayType = c("debounce", "throttle"),
+  clip = TRUE, direction = c("xy", "x", "y"), resetOnNew = FALSE)
 }
 \arguments{
 \item{id}{Input value name. For example, if the value is \code{"plot_brush"},

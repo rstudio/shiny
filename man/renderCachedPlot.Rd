@@ -4,8 +4,8 @@
 \alias{renderCachedPlot}
 \title{Plot output with cached images}
 \usage{
-renderCachedPlot(expr, cacheKeyExpr, sizePolicy = sizeGrowthRatio(width = 400,
-  height = 400, growthRate = 1.2), res = 72, cache = "app", ...,
+renderCachedPlot(expr, cacheKeyExpr, sizePolicy = sizeGrowthRatio(width =
+  400, height = 400, growthRate = 1.2), res = 72, cache = "app", ...,
   outputArgs = list())
 }
 \arguments{

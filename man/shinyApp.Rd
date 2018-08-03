@@ -13,8 +13,8 @@
 \alias{as.tags.shiny.appobj}
 \title{Create a Shiny app object}
 \usage{
-shinyApp(ui = NULL, server = NULL, onStart = NULL, options = list(),
-  uiPattern = "/", enableBookmarking = NULL)
+shinyApp(ui = NULL, server = NULL, onStart = NULL,
+  options = list(), uiPattern = "/", enableBookmarking = NULL)
 
 shinyAppDir(appDir, options = list())
 

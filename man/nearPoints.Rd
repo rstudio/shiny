@@ -5,8 +5,8 @@
 \title{Find rows of data that are near a click/hover/double-click}
 \usage{
 nearPoints(df, coordinfo, xvar = NULL, yvar = NULL, panelvar1 = NULL,
-  panelvar2 = NULL, threshold = 5, maxpoints = NULL, addDist = FALSE,
-  allRows = FALSE)
+  panelvar2 = NULL, threshold = 5, maxpoints = NULL,
+  addDist = FALSE, allRows = FALSE)
 }
 \arguments{
 \item{df}{A data frame from which to select rows.}

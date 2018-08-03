@@ -5,7 +5,8 @@
 \title{Create radio buttons}
 \usage{
 radioButtons(inputId, label, choices = NULL, selected = NULL,
-  inline = FALSE, width = NULL, choiceNames = NULL, choiceValues = NULL)
+  inline = FALSE, width = NULL, choiceNames = NULL,
+  choiceValues = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}

@@ -5,10 +5,11 @@
 \alias{animationOptions}
 \title{Slider Input Widget}
 \usage{
-sliderInput(inputId, label, min, max, value, step = NULL, round = FALSE,
-  format = NULL, locale = NULL, ticks = TRUE, animate = FALSE,
-  width = NULL, sep = ",", pre = NULL, post = NULL, timeFormat = NULL,
-  timezone = NULL, dragRange = TRUE)
+sliderInput(inputId, label, min, max, value, step = NULL,
+  round = FALSE, format = NULL, locale = NULL, ticks = TRUE,
+  animate = FALSE, width = NULL, sep = ",", pre = NULL,
+  post = NULL, timeFormat = NULL, timezone = NULL,
+  dragRange = TRUE)
 
 animationOptions(interval = 1000, loop = FALSE, playButton = NULL,
   pauseButton = NULL)

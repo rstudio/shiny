@@ -13,7 +13,9 @@ onStop(fun, session = getDefaultReactiveDomain())
 called from within the server function, this will default to the current
 session, and the callback will be invoked when the current session ends. If
 \code{onStop} is called outside a server function, then the callback will
-be invoked with the application exits.}
+be invoked with the application exits. If \code{NULL}, it is the same as
+calling \code{onStop} outside of the server function, and the callback will
+be invoked when the application exits.}
 }
 \value{
 A function which, if invoked, will cancel the callback.

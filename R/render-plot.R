@@ -133,10 +133,12 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
       function(result) {
         dims <- getDims()
         pixelratio <- session$clientData$pixelratio %OR% 1
-        do.call("resizeSavedPlot", c(
+        result <- do.call("resizeSavedPlot", c(
           list(name, shinysession, result, dims$width, dims$height, pixelratio, res),
           args
         ))
+
+        result$img
       }
     )
   }
@@ -154,7 +156,7 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
 resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {
   if (result$img$width == width && result$img$height == height &&
       result$pixelratio == pixelratio && result$res == res) {
-    return(result$img)
+    return(result)
   }
 
   coordmap <- NULL
@@ -164,13 +166,15 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, ...)
   on.exit(unlink(outfile), add = TRUE)
 
-  img <- list(
+  result$img <- list(
     src = session$fileUrl(name, outfile, contentType = "image/png"),
     width = width,
     height = height,
     coordmap = coordmap,
     error = attr(coordmap, "error", exact = TRUE)
   )
+
+  result
 }
 
 drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
@@ -247,6 +251,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
         # Get coordmap error message if present
         error = attr(result$coordmap, "error", exact = TRUE)
       ))
+
       result
     },
     finally = function() {

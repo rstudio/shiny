@@ -99,9 +99,11 @@
 #'     \item{\code{"lru"}}{
 #'       Least Recently Used. The least recently used objects will be removed.
 #'       This uses the filesystem's atime property. Some filesystems do not
-#'       support atime, or have a very low atime resolution. The DiskCache will
-#'       check for atime support, and if the filesystem does not support atime,
-#'       a warning will be issued and the "fifo" policy will be used instead.
+#'       support atime, or have a poor atime resolution. HFS+, for example has
+#'       an atime resolution of 1 second, and FAT has a resolution of 1 day.
+#'       The DiskCache will check for atime support the first 10 times that
+#'       \code{$get()} is called, and if the filesystem does not support atime
+#'       or has poor time resolution, a warning will be issued.
 #'     }
 #'     \item{\code{"fifo"}}{
 #'       First-in-first-out. The oldest objects will be removed.
@@ -116,6 +118,12 @@
 #' directory. Each DiskCache will do pruning independently of the others, so if
 #' they have different pruning parameters, then one DiskCache may remove cached
 #' objects before another DiskCache would do so.
+#'
+#' Even though it is possible for multiple processes to share a DiskCache
+#' directory, this should not be done on networked file systems, because of
+#' slow performance of networked file systems can cause problems. If you need
+#' a high-performance shared cache, you can use one built on a database like
+#' Redis, SQLite, mySQL, or similar.
 #'
 #' When multiple processes share a cache directory, there are some potential
 #' race conditions. For example, if your code calls \code{exists(key)} to check
@@ -203,6 +211,11 @@
 #'   \code{get()} results in a cache miss.
 #' @param logfile An optional filename or connection object to where logging
 #'   information will be written. To log to the console, use \code{stdout()}.
+#' @param min_atime_resolution The minimum desired resolution (or granularity)
+#'   of the filesystem's atime, in seconds (default is 1). If the filesystem's
+#'   atime resolution is worse (larger), then the DiskCache will emit a
+#'   warning while it is being used. (The resolution is checked when
+#'   \code{$get()} is called.)
 #'
 #' @export
 diskCache <- function(
@@ -214,10 +227,11 @@ diskCache <- function(
   destroy_on_finalize = FALSE,
   missing = key_missing(),
   exec_missing = FALSE,
-  logfile = NULL)
+  logfile = NULL,
+  min_atime_resolution = 1)
 {
   DiskCache$new(dir, max_size, max_age, max_n, evict, destroy_on_finalize,
-                missing, exec_missing, logfile)
+                missing, exec_missing, logfile, min_atime_resolution)
 }
 
 
@@ -232,7 +246,8 @@ DiskCache <- R6Class("DiskCache",
       destroy_on_finalize = FALSE,
       missing = key_missing(),
       exec_missing = FALSE,
-      logfile = NULL)
+      logfile = NULL,
+      min_atime_resolution = 1)
     {
       if (exec_missing && (!is.function(missing) || length(formals(missing)) == 0)) {
         stop("When `exec_missing` is true, `missing` must be a function that takes one argument.")
@@ -255,19 +270,13 @@ DiskCache <- R6Class("DiskCache",
       private$max_n               <- max_n
       private$evict               <- match.arg(evict)
       private$destroy_on_finalize <- destroy_on_finalize
-      if (private$evict == "lru" && !check_atime_support(private$dir)) {
-        # Another possibility for handling lack of atime support would be to
-        # create a file on disk that contains atimes. However, this would not
-        # be safe when multiple processes are sharing a cache.
-        warning("DiskCache: can't use eviction policy \"lru\" because filesystem for ",
-          private$dir, " does not support atime, or has low atime resolution. Using \"fifo\" instead."
-        )
-        private$evict             <- "fifo"
-      }
       private$missing             <- missing
       private$exec_missing        <- exec_missing
       private$logfile             <- logfile
+      private$min_atime_resolution<- min_atime_resolution
+
       private$prune_last_time     <- as.numeric(Sys.time())
+      private$atime_next_check_time  <- as.numeric(Sys.time())
     },
 
     get = function(key, missing = private$missing, exec_missing = private$exec_missing) {
@@ -285,7 +294,7 @@ DiskCache <- R6Class("DiskCache",
       read_error <- FALSE
       tryCatch(
         {
-          value <- suppressWarnings(readRDS(filename))
+          value <- private$read_rds(filename)
         },
         error = function(e) {
           read_error <<- TRUE
@@ -511,9 +520,73 @@ DiskCache <- R6Class("DiskCache",
     missing = NULL,
     exec_missing = FALSE,
     logfile = NULL,
+    min_atime_resolution = NULL,
 
     prune_throttle_counter = 0,
     prune_last_time = NULL,
+
+    atime_next_check_time = NULL,
+    atime_check_counter = 0,
+    atime_support = NULL,     # NULL means unkown; changes to TRUE or FALSE after we know.
+
+    # This reads in a cached object, and, if needed, checks if the filesystem
+    # has atime support.
+    read_rds = function(filename) {
+      if (private$evict == "lru" &&
+          is.null(private$atime_support) &&
+          as.numeric(Sys.time()) > private$atime_next_check_time)
+      {
+        # Record some times to check for atime support
+        start <- as.numeric(Sys.time())
+        value <- suppressWarnings(readRDS(filename))
+        file_atime <- as.numeric(file.info(filename)[["atime"]])
+        end <- as.numeric(Sys.time())
+
+        private$log(paste(
+          "Checking atimes: start, file, end:",
+          paste(sprintf("%.6f", c(start, file_atime, end)), collapse = " ")
+        ))
+
+        # Check that the file's atime is within the start and end times, but
+        # expanded by private$min_atime_resolution seconds on each side. If it
+        # fails this test, we know that the filesystem has worse than the
+        # desired atime resolution. If it passes the test once, we can't be
+        # sure if the, so we'll run the test 10 times before we stop checking.
+        if (file_atime < start - private$min_atime_resolution ||
+            file_atime > end   + private$min_atime_resolution)
+        {
+          private$atime_support <- FALSE
+          private$log("atime support is FALSE")
+          atime_difference <- max(abs(start - file_atime), abs(end - file_atime))
+
+          warning("DiskCache: eviction policy \"lru\" will not work correctly because filesystem for ",
+            private$dir, " does not support atime, or has poor atime resolution.",
+            " (Desired resolution: ", private$min_atime_resolution,
+            ". Found atime error of : ", round(atime_difference, 3)
+          )
+
+        } else {
+          # Next check is a random time between 0s and the
+          # min_atime_resolution from now. We don't check again right away
+          # because that might not be useful -- if we did this and the first
+          # 10 get()s happen right away, there's a good chance that if the
+          # first one passes due to luck, that they'll all pass.
+          private$atime_next_check_time <- as.numeric(Sys.time()) + runif(1, max = private$min_atime_resolution)
+          private$atime_check_counter <- private$atime_check_counter + 1
+
+          # After 10 passes, assume that atime support works
+          if (private$atime_check_counter >= 10) {
+            private$log("atime support is TRUE")
+            private$atime_support <- TRUE
+          }
+        }
+
+      } else {
+        value <- suppressWarnings(readRDS(filename))
+      }
+
+      value
+    },
 
     key_to_filename = function(key) {
       validate_key(key)
@@ -563,29 +636,3 @@ DiskCache <- R6Class("DiskCache",
     }
   )
 )
-
-# Checks if a filesystem has atime support, by creating a file in a specified
-# directory, waiting 0.1 seconds, then reading the file. If the timestamp does
-# not change, then the filesystem does not support atime, or has very low atime
-# resolution. For example, FAT has an atime resolution of 1 day. If the
-# timestamp does change, then the filesystem supports atime. (Although it is
-# possible in very rare cases that the filesystem has a low atime resolution and
-# the pause just happend to cross a boundary.)
-check_atime_support <- function(dir) {
-  dir <- "."
-  temp_file <- tempfile("check-atime-support-", dir)
-
-  file.create(temp_file)
-  on.exit(unlink(temp_file), add = TRUE)
-  atime1 <- as.numeric(file.info(temp_file)[["atime"]])
-
-  Sys.sleep(0.1)
-  readBin(temp_file, "raw", 1L)
-  atime2 <- as.numeric(file.info(temp_file)[["atime"]])
-
-  if (atime1 == atime2) {
-    return(FALSE)
-  }
-
-  TRUE
-}

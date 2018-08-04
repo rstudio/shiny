@@ -6,8 +6,8 @@
 \usage{
 dateInput(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-  daysofweekdisabled = NULL, language = "en", width = NULL,
-  autoclose = TRUE)
+  datesdisabled = NULL, daysofweekdisabled = NULL, language = "en",
+  width = NULL, autoclose = TRUE)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -33,8 +33,11 @@ Can be "month" (the default), "year", or "decade".}
 \item{weekstart}{Which day is the start of the week. Should be an integer
 from 0 (Sunday) to 6 (Saturday).}
 
-\item{daysofweekdisabled}{Days of the week that should be disabled. Values
-are 0 (Sunday) to 6 (Saturday).}
+\item{datesdisabled}{Which dates should be disabled. Should be a character vector
+with values in \code{"yyyy-mm-dd"} format.}
+
+\item{daysofweekdisabled}{Days of the week that should be disabled. Should be
+a integer vector with values from 0 (Sunday) to 6 (Saturday).}
 
 \item{language}{The language used for month and day names. Default is "en".
 Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
@@ -99,6 +102,10 @@ ui <- fluidPage(
 
   # Disable Mondays and Tuesdays.
   dateInput("date7", "Date:", daysofweekdisabled = c(1,2))
+  
+  # Disable specific dates.
+  dateInput("date8", "Date:", value = "2012-02-29",
+            datesdisabled = c("2012-03-01", "2012-03-02"))
 )
 
 shinyApp(ui, server = function(input, output) { })

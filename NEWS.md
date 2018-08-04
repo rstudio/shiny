@@ -5,7 +5,7 @@ shiny 1.1.0.9000
 
 ### Minor new features and improvements
 
-* Added a new `daysofweekdisabled` parameter to `dataInput()`. This resolves [#174](https://github.com/rstudio/shiny/issues/174). The default value is `NULL`, which leaves all days of the week selectable. To disable certain days, provide an integer or vector of integer with un-selectable days identified by number.
+* Added `datesdisabled` and `daysofweekdisabled` as new parameters to `dateInput()`. This resolves [#174](https://github.com/rstudio/shiny/issues/174) and exposes the underlying arguments of [Bootstrap Datepicker](http://bootstrap-datepicker.readthedocs.io/en/latest/options.html#datesdisabled). `datesdisabled` expects a character vector with values in `yyyy/mm/dd` format and `daysofweekdisabled` expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is `NULL`, which leaves all days selectable.
 
 * Support for selecting variables of a data frame with the output values to be used within tidy evaluation.  Added functions: `varSelectInput`, `varSelectizeInput`, `updateVarSelectInput`, `updateVarSelectizeInput`. ([#2091](https://github.com/rstudio/shiny/pull/2091))
 

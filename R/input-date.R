@@ -33,8 +33,10 @@
 #'   Can be "month" (the default), "year", or "decade".
 #' @param weekstart Which day is the start of the week. Should be an integer
 #'   from 0 (Sunday) to 6 (Saturday).
-#' @param daysofweekdisabled Days of the week that should be disabled. Values
-#'   are 0 (Sunday) to 6 (Saturday).
+#' @param datesdisabled Which dates should be disabled. Should be a character vector
+#'   with values in \code{"yyyy-mm-dd"} format.
+#' @param daysofweekdisabled Days of the week that should be disabled. Should be
+#'   a integer vector with values from 0 (Sunday) to 6 (Saturday).
 #' @param language The language used for month and day names. Default is "en".
 #'   Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
 #'   "de", "el", "en-AU", "en-GB", "eo", "es", "et", "eu", "fa", "fi", "fo",
@@ -75,7 +77,11 @@
 #'             startview = "decade"),
 #'
 #'   # Disable Mondays and Tuesdays.
-#'   dateInput("date7", "Date:", daysofweekdisabled = c(1,2))
+#'   dateInput("date7", "Date:", daysofweekdisabled = c(1,2)),
+#'   
+#'   # Disable specific dates.
+#'   dateInput("date8", "Date:", value = "2012-02-29",
+#'             datesdisabled = c("2012-03-01", "2012-03-02"))
 #' )
 #'
 #' shinyApp(ui, server = function(input, output) { })
@@ -83,7 +89,8 @@
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-  daysofweekdisabled = NULL, language = "en", width = NULL, autoclose = TRUE) {
+  datesdisabled = NULL, daysofweekdisabled = NULL, language = "en",
+  width = NULL, autoclose = TRUE) {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
@@ -108,8 +115,10 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-max-date` = max,
                `data-initial-date` = value,
                `data-date-autoclose` = if (autoclose) "true" else "false",
-               `data-date-days-of-week-disabled` =
+               `data-date-dates-disabled` =
                    # Ensure NULL is not sent as `{}` but as 'null'
+                   jsonlite::toJSON(datesdisabled, null = 'null'),
+               `data-date-days-of-week-disabled` =
                    jsonlite::toJSON(daysofweekdisabled, null = 'null')
     ),
     datePickerDependency

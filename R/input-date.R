@@ -33,6 +33,8 @@
 #'   Can be "month" (the default), "year", or "decade".
 #' @param weekstart Which day is the start of the week. Should be an integer
 #'   from 0 (Sunday) to 6 (Saturday).
+#' @param daysofweekdisabled Days of the week that should be disabled. Values
+#'   are 0 (Sunday) to 6 (Saturday).
 #' @param language The language used for month and day names. Default is "en".
 #'   Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
 #'   "de", "el", "en-AU", "en-GB", "eo", "es", "et", "eu", "fa", "fi", "fo",
@@ -70,15 +72,18 @@
 #'
 #'   # Start with decade view instead of default month view
 #'   dateInput("date6", "Date:",
-#'             startview = "decade")
+#'             startview = "decade"),
+#'
+#'   # Disable Mondays and Tuesdays.
+#'   dateInput("date7", "Date:", daysofweekdisabled = c(1,2))
 #' )
 #'
 #' shinyApp(ui, server = function(input, output) { })
 #' }
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
-  format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en",
-  width = NULL, autoclose = TRUE) {
+  format = "yyyy-mm-dd", startview = "month", weekstart = 0,
+  daysofweekdisabled = NULL, language = "en", width = NULL, autoclose = TRUE) {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
@@ -102,7 +107,10 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-min-date` = min,
                `data-max-date` = max,
                `data-initial-date` = value,
-               `data-date-autoclose` = if (autoclose) "true" else "false"
+               `data-date-autoclose` = if (autoclose) "true" else "false",
+               `data-date-days-of-week-disabled` =
+                   # Ensure NULL is not sent as `{}` but as 'null'
+                   jsonlite::toJSON(daysofweekdisabled, null = 'null')
     ),
     datePickerDependency
   )

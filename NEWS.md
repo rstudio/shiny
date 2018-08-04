@@ -5,6 +5,8 @@ shiny 1.1.0.9000
 
 ### Minor new features and improvements
 
+* Added a new `daysofweekdisabled` parameter to `dataInput()`. This resolves [#174](https://github.com/rstudio/shiny/issues/174). The default value is `NULL`, which leaves all days of the week selectable. To disable certain days, provide an integer or vector of integer with un-selectable days identified by number.
+
 * Support for selecting variables of a data frame with the output values to be used within tidy evaluation.  Added functions: `varSelectInput`, `varSelectizeInput`, `updateVarSelectInput`, `updateVarSelectizeInput`. ([#2091](https://github.com/rstudio/shiny/pull/2091))
 
 * Addressed [#2042](https://github.com/rstudio/shiny/issues/2042): dates outside of `min`/`max` date range are now a lighter shade of grey to highlight the allowed range. ([#2087](https://github.com/rstudio/shiny/pull/2087))

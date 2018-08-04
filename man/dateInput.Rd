@@ -6,7 +6,8 @@
 \usage{
 dateInput(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-  language = "en", width = NULL, autoclose = TRUE)
+  daysofweekdisabled = NULL, language = "en", width = NULL,
+  autoclose = TRUE)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -31,6 +32,9 @@ Can be "month" (the default), "year", or "decade".}
 
 \item{weekstart}{Which day is the start of the week. Should be an integer
 from 0 (Sunday) to 6 (Saturday).}
+
+\item{daysofweekdisabled}{Days of the week that should be disabled. Values
+are 0 (Sunday) to 6 (Saturday).}
 
 \item{language}{The language used for month and day names. Default is "en".
 Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
@@ -91,7 +95,10 @@ ui <- fluidPage(
 
   # Start with decade view instead of default month view
   dateInput("date6", "Date:",
-            startview = "decade")
+            startview = "decade"),
+
+  # Disable Mondays and Tuesdays.
+  dateInput("date7", "Date:", daysofweekdisabled = c(1,2))
 )
 
 shinyApp(ui, server = function(input, output) { })
@@ -110,4 +117,3 @@ Other input elements: \code{\link{actionButton}},
   \code{\link{textAreaInput}}, \code{\link{textInput}},
   \code{\link{varSelectInput}}
 }
-\concept{input elements}

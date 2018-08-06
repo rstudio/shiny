@@ -6,8 +6,7 @@
 \usage{
 diskCache(dir = NULL, max_size = 10 * 1024^2, max_age = Inf,
   max_n = Inf, evict = c("lru", "fifo"), destroy_on_finalize = FALSE,
-  missing = key_missing(), exec_missing = FALSE, logfile = NULL,
-  min_mtime_resolution = 1)
+  missing = key_missing(), exec_missing = FALSE, logfile = NULL)
 }
 \arguments{
 \item{dir}{Directory to store files for the cache. If \code{NULL} (the
@@ -49,12 +48,6 @@ as a value to return when \code{get()} results in a cache miss. If
 
 \item{logfile}{An optional filename or connection object to where logging
 information will be written. To log to the console, use \code{stdout()}.}
-
-\item{min_mtime_resolution}{The minimum desired resolution (or granularity)
-of the filesystem's mtime, in seconds (default is 1). If the filesystem's
-mtime resolution is worse (larger), then the DiskCache will emit a
-warning while it is being used. (The resolution is checked when
-\code{$get()} is called.)}
 }
 \description{
 A disk cache object is a key-value store that saves the values as files in a
@@ -160,18 +153,16 @@ policies are:
     \item{\code{"lru"}}{
       Least Recently Used. The least recently used objects will be removed.
       This uses the filesystem's mtime property. When "lru" is used, each
-      \code{get()} is called, it will update the files mtime. Some
-      filesystems have poor mtime resolution. HFS+, for example has
-      an mtime resolution of 1 second, and FAT has a resolution of 2 seconds.
-      The DiskCache will check for mtime resolution the first 10 times that
-      \code{get()} is called, and if the filesystem has poor time
-      resolution, a warning will be issued. (Note: atime is not used because
-      support for atime is even worse than mtime.)
+      \code{get()} is called, it will update the file's mtime.
     }
     \item{\code{"fifo"}}{
       First-in-first-out. The oldest objects will be removed.
     }
   }
+
+Both of these policies use files' mtime. Note that some filesystems (notably
+FAT) have poor mtime resolution. (atime is not used because support for
+atime is worse than mtime.)
 }
 
 \section{Sharing among multiple processes}{

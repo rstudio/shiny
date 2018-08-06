@@ -98,15 +98,17 @@
 #'   \describe{
 #'     \item{\code{"lru"}}{
 #'       Least Recently Used. The least recently used objects will be removed.
-#'       This uses the filesystem's atime property. Some filesystems do not
-#'       support atime, or have a very low atime resolution. The DiskCache will
-#'       check for atime support, and if the filesystem does not support atime,
-#'       a warning will be issued and the "fifo" policy will be used instead.
+#'       This uses the filesystem's mtime property. When "lru" is used, each
+#'       \code{get()} is called, it will update the file's mtime.
 #'     }
 #'     \item{\code{"fifo"}}{
 #'       First-in-first-out. The oldest objects will be removed.
 #'     }
 #'   }
+#'
+#' Both of these policies use files' mtime. Note that some filesystems (notably
+#' FAT) have poor mtime resolution. (atime is not used because support for
+#' atime is worse than mtime.)
 #'
 #'
 #' @section Sharing among multiple processes:
@@ -116,6 +118,12 @@
 #' directory. Each DiskCache will do pruning independently of the others, so if
 #' they have different pruning parameters, then one DiskCache may remove cached
 #' objects before another DiskCache would do so.
+#'
+#' Even though it is possible for multiple processes to share a DiskCache
+#' directory, this should not be done on networked file systems, because of
+#' slow performance of networked file systems can cause problems. If you need
+#' a high-performance shared cache, you can use one built on a database like
+#' Redis, SQLite, mySQL, or similar.
 #'
 #' When multiple processes share a cache directory, there are some potential
 #' race conditions. For example, if your code calls \code{exists(key)} to check
@@ -255,18 +263,10 @@ DiskCache <- R6Class("DiskCache",
       private$max_n               <- max_n
       private$evict               <- match.arg(evict)
       private$destroy_on_finalize <- destroy_on_finalize
-      if (private$evict == "lru" && !check_atime_support(private$dir)) {
-        # Another possibility for handling lack of atime support would be to
-        # create a file on disk that contains atimes. However, this would not
-        # be safe when multiple processes are sharing a cache.
-        warning("DiskCache: can't use eviction policy \"lru\" because filesystem for ",
-          private$dir, " does not support atime, or has low atime resolution. Using \"fifo\" instead."
-        )
-        private$evict             <- "fifo"
-      }
       private$missing             <- missing
       private$exec_missing        <- exec_missing
       private$logfile             <- logfile
+
       private$prune_last_time     <- as.numeric(Sys.time())
     },
 
@@ -286,6 +286,9 @@ DiskCache <- R6Class("DiskCache",
       tryCatch(
         {
           value <- suppressWarnings(readRDS(filename))
+          if (private$evict == "lru"){
+            Sys.setFileTime(filename, Sys.time())
+          }
         },
         error = function(e) {
           read_error <<- TRUE
@@ -409,20 +412,13 @@ DiskCache <- R6Class("DiskCache",
         }
       }
 
-      # Sort objects by priority, according to eviction policy. The sorting is
-      # done in a function which can be called multiple times but only does
-      # the work the first time.
+      # Sort objects by priority. The sorting is done in a function which can be
+      # called multiple times but only does the work the first time.
       info_is_sorted <- FALSE
       ensure_info_is_sorted <- function() {
         if (info_is_sorted) return()
 
-        if (private$evict == "lru") {
-          info <<- info[order(info$atime, decreasing = TRUE), ]
-        } else if (private$evict == "fifo") {
-          info <<- info[order(info$mtime, decreasing = TRUE), ]
-        } else {
-          stop('Unknown eviction policy "', private$evict, '"')
-        }
+        info <<- info[order(info$mtime, decreasing = TRUE), ]
         info_is_sorted <<- TRUE
       }
 
@@ -563,29 +559,3 @@ DiskCache <- R6Class("DiskCache",
     }
   )
 )
-
-# Checks if a filesystem has atime support, by creating a file in a specified
-# directory, waiting 0.1 seconds, then reading the file. If the timestamp does
-# not change, then the filesystem does not support atime, or has very low atime
-# resolution. For example, FAT has an atime resolution of 1 day. If the
-# timestamp does change, then the filesystem supports atime. (Although it is
-# possible in very rare cases that the filesystem has a low atime resolution and
-# the pause just happend to cross a boundary.)
-check_atime_support <- function(dir) {
-  dir <- "."
-  temp_file <- tempfile("check-atime-support-", dir)
-
-  file.create(temp_file)
-  on.exit(unlink(temp_file), add = TRUE)
-  atime1 <- as.numeric(file.info(temp_file)[["atime"]])
-
-  Sys.sleep(0.1)
-  readBin(temp_file, "raw", 1L)
-  atime2 <- as.numeric(file.info(temp_file)[["atime"]])
-
-  if (atime1 == atime2) {
-    return(FALSE)
-  }
-
-  TRUE
-}

@@ -152,15 +152,17 @@ policies are:
   \describe{
     \item{\code{"lru"}}{
       Least Recently Used. The least recently used objects will be removed.
-      This uses the filesystem's atime property. Some filesystems do not
-      support atime, or have a very low atime resolution. The DiskCache will
-      check for atime support, and if the filesystem does not support atime,
-      a warning will be issued and the "fifo" policy will be used instead.
+      This uses the filesystem's mtime property. When "lru" is used, each
+      \code{get()} is called, it will update the file's mtime.
     }
     \item{\code{"fifo"}}{
       First-in-first-out. The oldest objects will be removed.
     }
   }
+
+Both of these policies use files' mtime. Note that some filesystems (notably
+FAT) have poor mtime resolution. (atime is not used because support for
+atime is worse than mtime.)
 }
 
 \section{Sharing among multiple processes}{
@@ -171,6 +173,12 @@ do this, each R process should have a DiskCache object that uses the same
 directory. Each DiskCache will do pruning independently of the others, so if
 they have different pruning parameters, then one DiskCache may remove cached
 objects before another DiskCache would do so.
+
+Even though it is possible for multiple processes to share a DiskCache
+directory, this should not be done on networked file systems, because of
+slow performance of networked file systems can cause problems. If you need
+a high-performance shared cache, you can use one built on a database like
+Redis, SQLite, mySQL, or similar.
 
 When multiple processes share a cache directory, there are some potential
 race conditions. For example, if your code calls \code{exists(key)} to check

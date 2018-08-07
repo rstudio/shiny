@@ -998,8 +998,15 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
 
   if (!opts.brushResetOnNew) {
     if ($el.data("mostRecentBrush")) {
-      brush.importOldBrush();
-      brushInfoSender.immediateCall();
+      // Importing an old brush must happen after the image data has loaded
+      // and the <img> DOM element has the updated size. If importOldBrush()
+      // is called before this happens, then the css-img coordinate mappings
+      // will give the wrong result, and the brush will have the wrong
+      // position.
+      $el.find("img").one("load.shiny-image-interaction", function() {
+        brush.importOldBrush();
+        brushInfoSender.immediateCall();
+      });
     }
   }
 

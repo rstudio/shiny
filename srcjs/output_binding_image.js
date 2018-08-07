@@ -100,10 +100,9 @@ $.extend(imageOutputBinding, {
       };
     }
 
-    $img.off("load.shiny-image-interaction");
-
     // Remove event handlers that were added in previous runs of this function.
     $el.off('.image_output');
+    $img.off('.image_output');
 
     imageutils.initCoordmap($el, opts.coordmap);
 
@@ -129,7 +128,7 @@ $.extend(imageOutputBinding, {
 
       // When img is reset, do housekeeping: clear $el's mouse listener and
       // call the handler's onResetImg callback.
-      $img.on('reset', clickHandler.onResetImg);
+      $img.on('reset.image_output', clickHandler.onResetImg);
     }
 
     if (opts.dblclickId) {
@@ -140,7 +139,7 @@ $.extend(imageOutputBinding, {
       $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
       $el.on('resize.image_output', dblclickHandler.onResize);
-      $img.on('reset', dblclickHandler.onResetImg);
+      $img.on('reset.image_output', dblclickHandler.onResetImg);
     }
 
     if (opts.hoverId) {
@@ -151,7 +150,7 @@ $.extend(imageOutputBinding, {
       $el.on('mouseout.image_output', hoverHandler.mouseout);
 
       $el.on('resize.image_output', hoverHandler.onResize);
-      $img.on('reset', hoverHandler.onResetImg);
+      $img.on('reset.image_output', hoverHandler.onResetImg);
     }
 
     if (opts.brushId) {
@@ -169,7 +168,7 @@ $.extend(imageOutputBinding, {
       $el.on('mousemove.image_output', brushHandler.mousemove);
 
       $el.on('resize.image_output', brushHandler.onResize);
-      $img.on('reset', brushHandler.onResetImg);
+      $img.on('reset.image_output', brushHandler.onResetImg);
     }
 
     if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {

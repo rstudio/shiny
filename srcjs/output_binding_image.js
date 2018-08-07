@@ -1132,7 +1132,7 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     const bounds_data = boundsData();
     // Check to see if we have valid boundsData
     for (let val in bounds_data) {
-      if (Number.isNaN(bounds_data[val])) return;
+      if (isnan(bounds_data[val])) return;
     }
 
     boundsData(bounds_data);

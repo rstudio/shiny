@@ -254,6 +254,12 @@ function mapValues(obj, f) {
   return newObj;
 }
 
+// This is does the same as Number.isNaN, but that function unfortunately does
+// not exist in any version of IE.
+function isnan(x) {
+  return typeof(x) === 'number' && isNaN(x);
+}
+
 // Binary equality function used by the equal function.
 function _equal(x, y) {
   if ($.type(x) === "object" && $.type(y) === "object") {

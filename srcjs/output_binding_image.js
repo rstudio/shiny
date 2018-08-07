@@ -378,7 +378,7 @@ imageutils.initCoordmap = function($el, coordmap) {
   // img content is 1000 pixels wide, but is scaled to 400 pixels on screen,
   // and the input is x:400, then this will return x:1000.
   coordmap.scaleCssToImg = function(offset_css) {
-    const pixel_scaling = findImgToCssScalingRatio($img);
+    const pixel_scaling = coordmap.imgToCssScalingRatio();
 
     const result = mapValues(offset_css, (value, key) => {
       const prefix = key.substring(0, 1);
@@ -399,7 +399,7 @@ imageutils.initCoordmap = function($el, coordmap) {
   // wide, but is scaled to 400 pixels on screen, and the input is x:1000,
   // then this will return x:400.
   coordmap.scaleImgToCss = function(offset_img) {
-    const pixel_scaling = findImgToCssScalingRatio($img);
+    const pixel_scaling = coordmap.imgToCssScalingRatio();
 
     const result = mapValues(offset_img, (value, key) => {
       const prefix = key.substring(0, 1);
@@ -415,8 +415,12 @@ imageutils.initCoordmap = function($el, coordmap) {
     return result;
   };
 
+  coordmap.imgToCssScalingRatio = function() {
+    return findImgToCssScalingRatio($img);
+  };
+
   coordmap.cssToImgScalingRatio = function() {
-    const res = findImgToCssScalingRatio($img);
+    const res = coordmap.imgToCssScalingRatio();
     return {
       x: 1 / res.x,
       y: 1 / res.y
@@ -434,10 +438,10 @@ imageutils.initCoordmap = function($el, coordmap) {
     const y = offset_img.y;
 
     // Convert expand from css pixels to img pixels
-    const imgToCssRatio = findImgToCssScalingRatio($img);
+    const cssToImgRatio = coordmap.cssToImgScalingRatio();
     const expand_img = {
-      x: expand / imgToCssRatio.x,
-      y: expand / imgToCssRatio.y
+      x: expand * cssToImgRatio.x,
+      y: expand * cssToImgRatio.y
     };
 
     const matches = []; // Panels that match

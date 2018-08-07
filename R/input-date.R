@@ -33,10 +33,6 @@
 #'   Can be "month" (the default), "year", or "decade".
 #' @param weekstart Which day is the start of the week. Should be an integer
 #'   from 0 (Sunday) to 6 (Saturday).
-#' @param datesdisabled Which dates should be disabled. Should be a character vector
-#'   with values in \code{"yyyy-mm-dd"} format.
-#' @param daysofweekdisabled Days of the week that should be disabled. Should be
-#'   a integer vector with values from 0 (Sunday) to 6 (Saturday).
 #' @param language The language used for month and day names. Default is "en".
 #'   Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
 #'   "de", "el", "en-AU", "en-GB", "eo", "es", "et", "eu", "fa", "fi", "fo",
@@ -47,6 +43,10 @@
 #'   "vi", "zh-CN", and "zh-TW".
 #' @param autoclose Whether or not to close the datepicker immediately when a
 #'   date is selected.
+#' @param datesdisabled Which dates should be disabled. Either a Date object,
+#' or a string in \code{yyyy-mm-dd} format.
+#' @param daysofweekdisabled Days of the week that should be disabled. Should be
+#'   a integer vector with values from 0 (Sunday) to 6 (Saturday).
 #'
 #' @family input elements
 #' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
@@ -89,14 +89,17 @@
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-  datesdisabled = NULL, daysofweekdisabled = NULL, language = "en",
-  width = NULL, autoclose = TRUE) {
+  language = "en", width = NULL, autoclose = TRUE,
+  datesdisabled = NULL, daysofweekdisabled = NULL) {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
   if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
+  if (inherits(datesdisabled, "Date")) {
+      datesdisabled <- format(datesdisabled,   "%Y-%m-%d")
+  }
 
   value <- restoreInput(id = inputId, default = value)
 

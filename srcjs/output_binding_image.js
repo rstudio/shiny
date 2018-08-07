@@ -90,94 +90,94 @@ $.extend(imageOutputBinding, {
       }
     }
 
-    if (!opts.coordmap)
-      opts.coordmap = [];
+    if (!opts.coordmap) {
+      opts.coordmap = {
+        panels: [],
+        dims: {
+          height: null,
+          width: null
+        }
+      };
+    }
 
-    // When the image loads, initialize all the interaction handlers. When the
-    // value of src is set, the browser may not load the image immediately,
-    // even if it's a data URL. If we try to initialize this stuff
-    // immediately, it can cause problems because we use .naturalWidth and
-    // .naturalHeight, but they're available only after the image loads.
     $img.off("load.shiny-image-interaction");
-    $img.on("load.shiny-image-interaction", function() {
 
-      // Remove event handlers that were added in previous runs of this function.
-      $el.off('.image_output');
+    // Remove event handlers that were added in previous runs of this function.
+    $el.off('.image_output');
 
-      imageutils.initCoordmap($el, opts.coordmap);
+    imageutils.initCoordmap($el, opts.coordmap);
 
-      // This object listens for mousedowns, and triggers mousedown2 and dblclick2
-      // events as appropriate.
-      var clickInfo = imageutils.createClickInfo($el, opts.dblclickId, opts.dblclickDelay);
+    // This object listens for mousedowns, and triggers mousedown2 and dblclick2
+    // events as appropriate.
+    var clickInfo = imageutils.createClickInfo($el, opts.dblclickId, opts.dblclickDelay);
 
-      $el.on('mousedown.image_output', clickInfo.mousedown);
+    $el.on('mousedown.image_output', clickInfo.mousedown);
 
-      if (browser.isIE && browser.IEVersion === 8) {
-        $el.on('dblclick.image_output', clickInfo.dblclickIE8);
-      }
+    if (browser.isIE && browser.IEVersion === 8) {
+      $el.on('dblclick.image_output', clickInfo.dblclickIE8);
+    }
 
-      // ----------------------------------------------------------
-      // Register the various event handlers
-      // ----------------------------------------------------------
-      if (opts.clickId) {
-        var clickHandler = imageutils.createClickHandler(opts.clickId,
-          opts.clickClip, opts.coordmap);
-        $el.on('mousedown2.image_output', clickHandler.mousedown);
+    // ----------------------------------------------------------
+    // Register the various event handlers
+    // ----------------------------------------------------------
+    if (opts.clickId) {
+      var clickHandler = imageutils.createClickHandler(opts.clickId,
+        opts.clickClip, opts.coordmap);
+      $el.on('mousedown2.image_output', clickHandler.mousedown);
 
-        $el.on('resize.image_output', clickHandler.onResize);
+      $el.on('resize.image_output', clickHandler.onResize);
 
-        // When img is reset, do housekeeping: clear $el's mouse listener and
-        // call the handler's onResetImg callback.
-        $img.on('reset', clickHandler.onResetImg);
-      }
+      // When img is reset, do housekeeping: clear $el's mouse listener and
+      // call the handler's onResetImg callback.
+      $img.on('reset', clickHandler.onResetImg);
+    }
 
-      if (opts.dblclickId) {
-        // We'll use the clickHandler's mousedown function, but register it to
-        // our custom 'dblclick2' event.
-        var dblclickHandler = imageutils.createClickHandler(opts.dblclickId,
-          opts.clickClip, opts.coordmap);
-        $el.on('dblclick2.image_output', dblclickHandler.mousedown);
+    if (opts.dblclickId) {
+      // We'll use the clickHandler's mousedown function, but register it to
+      // our custom 'dblclick2' event.
+      var dblclickHandler = imageutils.createClickHandler(opts.dblclickId,
+        opts.clickClip, opts.coordmap);
+      $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
-        $el.on('resize.image_output', dblclickHandler.onResize);
-        $img.on('reset', dblclickHandler.onResetImg);
-      }
+      $el.on('resize.image_output', dblclickHandler.onResize);
+      $img.on('reset', dblclickHandler.onResetImg);
+    }
 
-      if (opts.hoverId) {
-        var hoverHandler = imageutils.createHoverHandler(opts.hoverId,
-          opts.hoverDelay, opts.hoverDelayType, opts.hoverClip,
-          opts.hoverNullOutside, opts.coordmap);
-        $el.on('mousemove.image_output', hoverHandler.mousemove);
-        $el.on('mouseout.image_output', hoverHandler.mouseout);
+    if (opts.hoverId) {
+      var hoverHandler = imageutils.createHoverHandler(opts.hoverId,
+        opts.hoverDelay, opts.hoverDelayType, opts.hoverClip,
+        opts.hoverNullOutside, opts.coordmap);
+      $el.on('mousemove.image_output', hoverHandler.mousemove);
+      $el.on('mouseout.image_output', hoverHandler.mouseout);
 
-        $el.on('resize.image_output', hoverHandler.onResize);
-        $img.on('reset', hoverHandler.onResetImg);
-      }
+      $el.on('resize.image_output', hoverHandler.onResize);
+      $img.on('reset', hoverHandler.onResetImg);
+    }
 
-      if (opts.brushId) {
-        // Make image non-draggable (Chrome, Safari)
-        $img.css('-webkit-user-drag', 'none');
-        // Firefox, IE<=10
-        $img.on('dragstart', function() { return false; });
+    if (opts.brushId) {
+      // Make image non-draggable (Chrome, Safari)
+      $img.css('-webkit-user-drag', 'none');
+      // Firefox, IE<=10
+      $img.on('dragstart', function() { return false; });
 
-        // Disable selection of image and text when dragging in IE<=10
-        $el.on('selectstart.image_output', function() { return false; });
+      // Disable selection of image and text when dragging in IE<=10
+      $el.on('selectstart.image_output', function() { return false; });
 
-        var brushHandler = imageutils.createBrushHandler(opts.brushId, $el, opts,
-          opts.coordmap, outputId);
-        $el.on('mousedown.image_output', brushHandler.mousedown);
-        $el.on('mousemove.image_output', brushHandler.mousemove);
+      var brushHandler = imageutils.createBrushHandler(opts.brushId, $el, opts,
+        opts.coordmap, outputId);
+      $el.on('mousedown.image_output', brushHandler.mousedown);
+      $el.on('mousemove.image_output', brushHandler.mousemove);
 
-        $el.on('resize.image_output', brushHandler.onResize);
-        $img.on('reset', brushHandler.onResetImg);
-      }
+      $el.on('resize.image_output', brushHandler.onResize);
+      $img.on('reset', brushHandler.onResetImg);
+    }
 
-      if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
-        $el.addClass('crosshair');
-      }
+    if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
+      $el.addClass('crosshair');
+    }
 
-      if (data.error)
-        console.log('Error on server extracting coordmap: ' + data.error);
-    });
+    if (data.error)
+      console.log('Error on server extracting coordmap: ' + data.error);
   },
 
   renderError: function(el, err) {
@@ -210,7 +210,7 @@ var imageutils = {};
 // scaleDataToImg(), and clipImg() functions to each one. The panel objects
 // use img and data coordinates only; they do not use css coordinates. The
 // domain is in data coordinates; the range is in img coordinates.
-imageutils.initPanelScales = function(coordmap) {
+imageutils.initPanelScales = function(panels) {
   // Map a value x from a domain to a range. If clip is true, clip it to the
   // range.
   function mapLinear(x, domainMin, domainMax, rangeMin, rangeMax, clip) {
@@ -307,8 +307,8 @@ imageutils.initPanelScales = function(coordmap) {
   }
 
   // Add the functions to each panel object.
-  for (var i=0; i<coordmap.length; i++) {
-    var panel = coordmap[i];
+  for (var i=0; i<panels.length; i++) {
+    var panel = panels[i];
     addScaleFuns(panel);
   }
 };
@@ -340,7 +340,7 @@ imageutils.initCoordmap = function($el, coordmap) {
   // If we didn't get any panels, create a dummy one where the domain and range
   // are simply the pixel dimensions.
   // that we modify.
-  if (coordmap.length === 0) {
+  if (coordmap.panels.length === 0) {
     let bounds = {
       top: 0,
       left: 0,
@@ -348,7 +348,7 @@ imageutils.initCoordmap = function($el, coordmap) {
       bottom: el.clientHeight - 1
     };
 
-    coordmap[0] = {
+    coordmap.panels[0] = {
       domain: bounds,
       range: bounds,
       mapping: {}
@@ -356,7 +356,7 @@ imageutils.initCoordmap = function($el, coordmap) {
   }
 
   // Add scaling functions to each panel
-  imageutils.initPanelScales(coordmap);
+  imageutils.initPanelScales(coordmap.panels);
 
 
   // This returns the offset of the mouse in CSS pixels relative to the img,
@@ -415,8 +415,15 @@ imageutils.initCoordmap = function($el, coordmap) {
     return result;
   };
 
+  // Returns the x and y ratio the image content is scaled to on screen. If
+  // the image data is 1000 pixels wide and is scaled to 300 pixels on screen,
+  // then this returns 0.3. (Note the 300 pixels refers to CSS pixels.)
   coordmap.imgToCssScalingRatio = function() {
-    return findImgToCssScalingRatio($img);
+    const img_dims = findDims($img);
+    return {
+      x: img_dims.x / coordmap.dims.width,
+      y: img_dims.y / coordmap.dims.height
+    };
   };
 
   coordmap.cssToImgScalingRatio = function() {
@@ -447,15 +454,15 @@ imageutils.initCoordmap = function($el, coordmap) {
     const matches = []; // Panels that match
     const dists = [];   // Distance of offset to each matching panel
     let b;
-    for (var i=0; i<coordmap.length; i++) {
-      b = coordmap[i].range;
+    for (var i=0; i<coordmap.panels.length; i++) {
+      b = coordmap.panels[i].range;
 
       if (x <= b.right  + expand_img.x &&
           x >= b.left   - expand_img.x &&
           y <= b.bottom + expand_img.y &&
           y >= b.top    - expand_img.y)
       {
-        matches.push(coordmap[i]);
+        matches.push(coordmap.panels[i]);
 
         // Find distance from edges for x and y
         var xdist = 0;
@@ -1094,13 +1101,13 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
     // Find a panel that has matching vars; if none found, we can't restore.
     // The oldPanel and new panel must match on their mapping vars, and the
     // values.
-    for (var i=0; i<coordmap.length; i++){
-      var curPanel = coordmap[i];
+    for (var i=0; i<coordmap.panels.length; i++){
+      var curPanel = coordmap.panels[i];
 
       if (equal(oldPanel.mapping, curPanel.mapping) &&
           equal(oldPanel.panel_vars, curPanel.panel_vars)) {
         // We've found a matching panel
-        state.panel = coordmap[i];
+        state.panel = coordmap.panels[i];
         break;
       }
     }
@@ -1552,18 +1559,5 @@ function findDims($el) {
   return {
     x: content_ratio.x * bounding_rect.width,
     y: content_ratio.y * bounding_rect.height
-  };
-}
-
-// Returns the x and y ratio that image content (like a PNG) is scaled to on
-// screen. If the image data is 1000 pixels wide and is scaled to 300 pixels
-// on screen, then this returns 0.3. (Note the 300 pixels refers to CSS
-// pixels.)
-// TODO: memoize, don't take $img as input?
-function findImgToCssScalingRatio($img) {
-  const img_dims = findDims($img);
-  return {
-    x: img_dims.x / $img[0].naturalWidth,
-    y: img_dims.y / $img[0].naturalHeight
   };
 }

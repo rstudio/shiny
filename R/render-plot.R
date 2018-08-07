@@ -400,7 +400,7 @@ custom_print.ggplot <- function(x) {
 
 getCoordmap <- function(x, width, height, res) {
   if (inherits(x, "ggplot_build_gtable")) {
-    getGgplotCoordmap(x, res)
+    getGgplotCoordmap(x, width, height, res)
   } else {
     getPrevPlotCoordmap(width, height)
   }
@@ -420,7 +420,7 @@ getPrevPlotCoordmap <- function(width, height) {
   }
 
   # Wrapped in double list because other types of plots can have multiple panels.
-  list(list(
+  panel_info <- list(list(
     # Bounds of the plot area, in data space
     domain = list(
       left = usrCoords[1],
@@ -444,27 +444,43 @@ getPrevPlotCoordmap <- function(width, height) {
     # (not an array) in JSON.
     mapping = list(x = NULL)[0]
   ))
+
+  list(
+    panels = panel_info,
+    dims = list(
+      width = width,
+      height =height
+    )
+  )
 }
 
 # Given a ggplot_build_gtable object, return a coordmap for it.
-getGgplotCoordmap <- function(p, res) {
+getGgplotCoordmap <- function(p, width, height, res) {
   if (!inherits(p, "ggplot_build_gtable"))
     return(NULL)
 
   tryCatch({
     # Get info from built ggplot object
-    info <- find_panel_info(p$build)
+    panel_info <- find_panel_info(p$build)
 
     # Get ranges from gtable - it's possible for this to return more elements than
     # info, because it calculates positions even for panels that aren't present.
     # This can happen with facet_wrap.
     ranges <- find_panel_ranges(p$gtable, res)
 
-    for (i in seq_along(info)) {
-      info[[i]]$range <- ranges[[i]]
+    for (i in seq_along(panel_info)) {
+      panel_info[[i]]$range <- ranges[[i]]
     }
 
-    return(info)
+    return(
+      list(
+        panels = panel_info,
+        dims = list(
+          width = width,
+          height = height
+        )
+      )
+    )
 
   }, error = function(e) {
     # If there was an error extracting info from the ggplot object, just return

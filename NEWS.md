@@ -1,4 +1,4 @@
-shiny 1.1.0.9000
+shiny 1.1.0.9001
 ===========
 
 ## Full changelog
@@ -8,6 +8,8 @@ shiny 1.1.0.9000
 * Support for selecting variables of a data frame with the output values to be used within tidy evaluation.  Added functions: `varSelectInput`, `varSelectizeInput`, `updateVarSelectInput`, `updateVarSelectizeInput`. ([#2091](https://github.com/rstudio/shiny/pull/2091))
 
 * Addressed [#2042](https://github.com/rstudio/shiny/issues/2042): dates outside of `min`/`max` date range are now a lighter shade of grey to highlight the allowed range. ([#2087](https://github.com/rstudio/shiny/pull/2087))
+
+* Added support for plot interaction when the plot is scaled. ([#2125](https://github.com/rstudio/shiny/pull/2125))
 
 * Fixed [#1933](https://github.com/rstudio/shiny/issues/1933): extended server-side selectize to lists and optgroups. ([#2102](https://github.com/rstudio/shiny/pull/2102))
 

@@ -129,6 +129,12 @@
 #'   create a \code{\link{memoryCache}} or \code{\link{diskCache}}, and pass it
 #'   as the \code{cache} argument of \code{renderCachedPlot}.
 #'
+#' @section Interactive plots:
+#'
+#'   \code{renderCachedPlot} can be used to create interactive plots. See
+#'   \code{\link{plotOutput}} for more information and examples.
+#'
+#'
 #' @inheritParams renderPlot
 #' @param cacheKeyExpr An expression that returns a cache key. This key should
 #'   be a unique identifier for a plot: the assumption is that if the cache key

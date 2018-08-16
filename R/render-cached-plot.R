@@ -436,7 +436,7 @@ renderCachedPlot <- function(expr,
         height <- fitDims$height
         pixelratio <- session$clientData$pixelratio %OR% 1
 
-        key <- digest::digest(list(outputName, userCacheKeyResult, width, height, res, pixelratio), "sha256")
+        key <- digest::digest(list(outputName, userCacheKeyResult, width, height, res, pixelratio), "xxhash64")
 
         plotObj <- cache$get(key)
 

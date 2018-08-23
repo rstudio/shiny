@@ -23,6 +23,8 @@ shiny 1.1.0.9001
 
 * Fixed [#2138](https://github.com/rstudio/shiny/issues/2138): Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. [#2139](https://github.com/rstudio/shiny/pull/2139)
 
+* The `knit_print` methods from htmltools are no longer imported into shiny and then exported. [#2166](https://github.com/rstudio/shiny/pull/2166)
+
 ### Documentation Updates
 
 * Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. ([#2084](https://github.com/rstudio/shiny/pull/2084))

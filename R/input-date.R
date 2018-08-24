@@ -43,6 +43,10 @@
 #'   "vi", "zh-CN", and "zh-TW".
 #' @param autoclose Whether or not to close the datepicker immediately when a
 #'   date is selected.
+#' @param datesdisabled Which dates should be disabled. Either a Date object,
+#' or a string in \code{yyyy-mm-dd} format.
+#' @param daysofweekdisabled Days of the week that should be disabled. Should be
+#'   a integer vector with values from 0 (Sunday) to 6 (Saturday).
 #'
 #' @family input elements
 #' @seealso \code{\link{dateRangeInput}}, \code{\link{updateDateInput}}
@@ -70,21 +74,32 @@
 #'
 #'   # Start with decade view instead of default month view
 #'   dateInput("date6", "Date:",
-#'             startview = "decade")
+#'             startview = "decade"),
+#'
+#'   # Disable Mondays and Tuesdays.
+#'   dateInput("date7", "Date:", daysofweekdisabled = c(1,2)),
+#'   
+#'   # Disable specific dates.
+#'   dateInput("date8", "Date:", value = "2012-02-29",
+#'             datesdisabled = c("2012-03-01", "2012-03-02"))
 #' )
 #'
 #' shinyApp(ui, server = function(input, output) { })
 #' }
 #' @export
 dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
-  format = "yyyy-mm-dd", startview = "month", weekstart = 0, language = "en",
-  width = NULL, autoclose = TRUE) {
+  format = "yyyy-mm-dd", startview = "month", weekstart = 0,
+  language = "en", width = NULL, autoclose = TRUE,
+  datesdisabled = NULL, daysofweekdisabled = NULL) {
 
   # If value is a date object, convert it to a string with yyyy-mm-dd format
   # Same for min and max
   if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
   if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
   if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
+  if (inherits(datesdisabled, "Date")) {
+      datesdisabled <- format(datesdisabled,   "%Y-%m-%d")
+  }
 
   value <- restoreInput(id = inputId, default = value)
 
@@ -102,7 +117,12 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
                `data-min-date` = min,
                `data-max-date` = max,
                `data-initial-date` = value,
-               `data-date-autoclose` = if (autoclose) "true" else "false"
+               `data-date-autoclose` = if (autoclose) "true" else "false",
+               `data-date-dates-disabled` =
+                   # Ensure NULL is not sent as `{}` but as 'null'
+                   jsonlite::toJSON(datesdisabled, null = 'null'),
+               `data-date-days-of-week-disabled` =
+                   jsonlite::toJSON(daysofweekdisabled, null = 'null')
     ),
     datePickerDependency
   )

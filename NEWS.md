@@ -23,6 +23,8 @@ shiny 1.1.0.9001
 
 * Fixed [#2138](https://github.com/rstudio/shiny/issues/2138): Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. [#2139](https://github.com/rstudio/shiny/pull/2139)
 
+* Fixed [#2093](https://github.com/rstudio/shiny/issues/2093): Make sure bookmark scope directory does not exist before trying to create it. [#2168](https://github.com/rstudio/shiny/pull/2168)
+
 ### Documentation Updates
 
 * Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. ([#2084](https://github.com/rstudio/shiny/pull/2084))

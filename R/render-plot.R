@@ -162,7 +162,7 @@ resizeSavedPlot <- function(name, session, result, width, height, pixelratio, re
   coordmap <- NULL
   outfile <- plotPNG(function() {
     grDevices::replayPlot(result$recordedPlot)
-    coordmap <<- getCoordmap(result$plotResult, width, height, pixelratio, res)
+    coordmap <<- getCoordmap(result$plotResult, width*pixelratio, height*pixelratio, res*pixelratio)
   }, width = width*pixelratio, height = height*pixelratio, res = res*pixelratio, ...)
   on.exit(unlink(outfile), add = TRUE)
 
@@ -231,7 +231,7 @@ drawPlot <- function(name, session, func, width, height, pixelratio, res, ...) {
             list(
               plotResult = value,
               recordedPlot = grDevices::recordPlot(),
-              coordmap = getCoordmap(value, width, height, pixelratio, res),
+              coordmap = getCoordmap(value, width*pixelratio, height*pixelratio, res*pixelratio),
               pixelratio = pixelratio,
               res = res
             )
@@ -284,22 +284,26 @@ custom_print.ggplot <- function(x) {
 # below. For base graphics:
 # plot(mtcars$wt, mtcars$mpg)
 # str(getPrevPlotCoordmap(400, 300))
-# List of 1
-#  $ :List of 4
-#   ..$ domain :List of 4
-#   .. ..$ left  : num 1.36
-#   .. ..$ right : num 5.58
-#   .. ..$ bottom: num 9.46
-#   .. ..$ top   : num 34.8
-#   ..$ range  :List of 4
-#   .. ..$ left  : num 50.4
-#   .. ..$ right : num 373
-#   .. ..$ bottom: num 199
-#   .. ..$ top   : num 79.6
-#   ..$ log    :List of 2
-#   .. ..$ x: NULL
-#   .. ..$ y: NULL
-#   ..$ mapping: Named list()
+# List of 2
+#  $ panels:List of 1
+#   ..$ :List of 4
+#   .. ..$ domain :List of 4
+#   .. .. ..$ left  : num 1.36
+#   .. .. ..$ right : num 5.58
+#   .. .. ..$ bottom: num 9.46
+#   .. .. ..$ top   : num 34.8
+#   .. ..$ range  :List of 4
+#   .. .. ..$ left  : num 65.6
+#   .. .. ..$ right : num 366
+#   .. .. ..$ bottom: num 238
+#   .. .. ..$ top   : num 48.2
+#   .. ..$ log    :List of 2
+#   .. .. ..$ x: NULL
+#   .. .. ..$ y: NULL
+#   .. ..$ mapping: Named list()
+#  $ dims  :List of 2
+#   ..$ width : num 400
+#   ..$ height: num 300
 #
 # For ggplot2, first you need to define the print.ggplot function from inside
 # renderPlot, then use it to print the plot:
@@ -318,29 +322,33 @@ custom_print.ggplot <- function(x) {
 # }
 #
 # p <- print(ggplot(mtcars, aes(wt, mpg)) + geom_point())
-# str(getGgplotCoordmap(p, 1, 72))
-# List of 1
-#  $ :List of 10
-#   ..$ panel     : int 1
-#   ..$ row       : int 1
-#   ..$ col       : int 1
-#   ..$ panel_vars: Named list()
-#   ..$ log       :List of 2
-#   .. ..$ x: NULL
-#   .. ..$ y: NULL
-#   ..$ domain    :List of 4
-#   .. ..$ left  : num 1.32
-#   .. ..$ right : num 5.62
-#   .. ..$ bottom: num 9.22
-#   .. ..$ top   : num 35.1
-#   ..$ mapping   :List of 2
-#   .. ..$ x: chr "wt"
-#   .. ..$ y: chr "mpg"
-#   ..$ range     :List of 4
-#   .. ..$ left  : num 40.8
-#   .. ..$ right : num 446
-#   .. ..$ bottom: num 263
-#   .. ..$ top   : num 14.4
+# str(getGgplotCoordmap(p, 400, 300, 72))
+# List of 2
+#  $ panels:List of 1
+#   ..$ :List of 8
+#   .. ..$ panel     : num 1
+#   .. ..$ row       : num 1
+#   .. ..$ col       : num 1
+#   .. ..$ panel_vars: Named list()
+#   .. ..$ log       :List of 2
+#   .. .. ..$ x: NULL
+#   .. .. ..$ y: NULL
+#   .. ..$ domain    :List of 4
+#   .. .. ..$ left  : num 1.32
+#   .. .. ..$ right : num 5.62
+#   .. .. ..$ bottom: num 9.22
+#   .. .. ..$ top   : num 35.1
+#   .. ..$ mapping   :List of 2
+#   .. .. ..$ x: chr "wt"
+#   .. .. ..$ y: chr "mpg"
+#   .. ..$ range     :List of 4
+#   .. .. ..$ left  : num 33.3
+#   .. .. ..$ right : num 355
+#   .. .. ..$ bottom: num 328
+#   .. .. ..$ top   : num 5.48
+#  $ dims  :List of 2
+#   ..$ width : num 400
+#   ..$ height: num 300
 #
 # With a faceted ggplot2 plot, the outer list contains two objects, each of
 # which represents one panel. In this example, there is one panelvar, but there
@@ -348,59 +356,63 @@ custom_print.ggplot <- function(x) {
 # mtc <- mtcars
 # mtc$am <- factor(mtc$am)
 # p <- print(ggplot(mtc, aes(wt, mpg)) + geom_point() + facet_wrap(~ am))
-# str(getGgplotCoordmap(p, 1, 72))
+# str(getGgplotCoordmap(p, 400, 300, 72))
 # List of 2
-#  $ :List of 10
-#   ..$ panel     : int 1
-#   ..$ row       : int 1
-#   ..$ col       : int 1
-#   ..$ panel_vars:List of 1
-#   .. ..$ panelvar1: Factor w/ 2 levels "0","1": 1
-#   ..$ log       :List of 2
-#   .. ..$ x: NULL
-#   .. ..$ y: NULL
-#   ..$ domain    :List of 4
-#   .. ..$ left  : num 1.32
-#   .. ..$ right : num 5.62
-#   .. ..$ bottom: num 9.22
-#   .. ..$ top   : num 35.1
-#   ..$ mapping   :List of 3
-#   .. ..$ x        : chr "wt"
-#   .. ..$ y        : chr "mpg"
-#   .. ..$ panelvar1: chr "am"
-#   ..$ range     :List of 4
-#   .. ..$ left  : num 45.6
-#   .. ..$ right : num 317
-#   .. ..$ bottom: num 251
-#   .. ..$ top   : num 35.7
-#  $ :List of 10
-#   ..$ panel     : int 2
-#   ..$ row       : int 1
-#   ..$ col       : int 2
-#   ..$ panel_vars:List of 1
-#   .. ..$ panelvar1: Factor w/ 2 levels "0","1": 2
-#   ..$ log       :List of 2
-#   .. ..$ x: NULL
-#   .. ..$ y: NULL
-#   ..$ domain    :List of 4
-#   .. ..$ left  : num 1.32
-#   .. ..$ right : num 5.62
-#   .. ..$ bottom: num 9.22
-#   .. ..$ top   : num 35.1
-#   ..$ mapping   :List of 3
-#   .. ..$ x        : chr "wt"
-#   .. ..$ y        : chr "mpg"
-#   .. ..$ panelvar1: chr "am"
-#   ..$ range     :List of 4
-#   .. ..$ left  : num 322
-#   .. ..$ right : num 594
-#   .. ..$ bottom: num 251
-#   .. ..$ top   : num 35.7
+#  $ panels:List of 2
+#   ..$ :List of 8
+#   .. ..$ panel     : num 1
+#   .. ..$ row       : int 1
+#   .. ..$ col       : int 1
+#   .. ..$ panel_vars:List of 1
+#   .. .. ..$ panelvar1: Factor w/ 2 levels "0","1": 1
+#   .. ..$ log       :List of 2
+#   .. .. ..$ x: NULL
+#   .. .. ..$ y: NULL
+#   .. ..$ domain    :List of 4
+#   .. .. ..$ left  : num 1.32
+#   .. .. ..$ right : num 5.62
+#   .. .. ..$ bottom: num 9.22
+#   .. .. ..$ top   : num 35.1
+#   .. ..$ mapping   :List of 3
+#   .. .. ..$ x        : chr "wt"
+#   .. .. ..$ y        : chr "mpg"
+#   .. .. ..$ panelvar1: chr "am"
+#   .. ..$ range     :List of 4
+#   .. .. ..$ left  : num 33.3
+#   .. .. ..$ right : num 191
+#   .. .. ..$ bottom: num 328
+#   .. .. ..$ top   : num 23.1
+#   ..$ :List of 8
+#   .. ..$ panel     : num 2
+#   .. ..$ row       : int 1
+#   .. ..$ col       : int 2
+#   .. ..$ panel_vars:List of 1
+#   .. .. ..$ panelvar1: Factor w/ 2 levels "0","1": 2
+#   .. ..$ log       :List of 2
+#   .. .. ..$ x: NULL
+#   .. .. ..$ y: NULL
+#   .. ..$ domain    :List of 4
+#   .. .. ..$ left  : num 1.32
+#   .. .. ..$ right : num 5.62
+#   .. .. ..$ bottom: num 9.22
+#   .. .. ..$ top   : num 35.1
+#   .. ..$ mapping   :List of 3
+#   .. .. ..$ x        : chr "wt"
+#   .. .. ..$ y        : chr "mpg"
+#   .. .. ..$ panelvar1: chr "am"
+#   .. ..$ range     :List of 4
+#   .. .. ..$ left  : num 197
+#   .. .. ..$ right : num 355
+#   .. .. ..$ bottom: num 328
+#   .. .. ..$ top   : num 23.1
+#  $ dims  :List of 2
+#   ..$ width : num 400
+#   ..$ height: num 300
 
 
-getCoordmap <- function(x, width, height, pixelratio, res) {
+getCoordmap <- function(x, width, height, res) {
   if (inherits(x, "ggplot_build_gtable")) {
-    getGgplotCoordmap(x, pixelratio, res)
+    getGgplotCoordmap(x, width, height, res)
   } else {
     getPrevPlotCoordmap(width, height)
   }
@@ -420,7 +432,7 @@ getPrevPlotCoordmap <- function(width, height) {
   }
 
   # Wrapped in double list because other types of plots can have multiple panels.
-  list(list(
+  panel_info <- list(list(
     # Bounds of the plot area, in data space
     domain = list(
       left = usrCoords[1],
@@ -444,27 +456,43 @@ getPrevPlotCoordmap <- function(width, height) {
     # (not an array) in JSON.
     mapping = list(x = NULL)[0]
   ))
+
+  list(
+    panels = panel_info,
+    dims = list(
+      width = width,
+      height =height
+    )
+  )
 }
 
 # Given a ggplot_build_gtable object, return a coordmap for it.
-getGgplotCoordmap <- function(p, pixelratio, res) {
+getGgplotCoordmap <- function(p, width, height, res) {
   if (!inherits(p, "ggplot_build_gtable"))
     return(NULL)
 
   tryCatch({
     # Get info from built ggplot object
-    info <- find_panel_info(p$build)
+    panel_info <- find_panel_info(p$build)
 
     # Get ranges from gtable - it's possible for this to return more elements than
     # info, because it calculates positions even for panels that aren't present.
     # This can happen with facet_wrap.
-    ranges <- find_panel_ranges(p$gtable, pixelratio, res)
+    ranges <- find_panel_ranges(p$gtable, res)
 
-    for (i in seq_along(info)) {
-      info[[i]]$range <- ranges[[i]]
+    for (i in seq_along(panel_info)) {
+      panel_info[[i]]$range <- ranges[[i]]
     }
 
-    return(info)
+    return(
+      list(
+        panels = panel_info,
+        dims = list(
+          width = width,
+          height = height
+        )
+      )
+    )
 
   }, error = function(e) {
     # If there was an error extracting info from the ggplot object, just return
@@ -491,13 +519,11 @@ find_panel_info <- function(b) {
 # This is for ggplot2>2.2.1, after an API was introduced for extracting
 # information about the plot object.
 find_panel_info_api <- function(b) {
-  # Workaround for check NOTE, until ggplot2 >2.2.1 is released
-  colon_colon <- `::`
   # Given a built ggplot object, return x and y domains (data space coords) for
   # each panel.
-  layout <- colon_colon("ggplot2", "summarise_layout")(b)
-  coord  <- colon_colon("ggplot2", "summarise_coord")(b)
-  layers <- colon_colon("ggplot2", "summarise_layers")(b)
+  layout <- ggplot2::summarise_layout(b)
+  coord  <- ggplot2::summarise_coord(b)
+  layers <- ggplot2::summarise_layers(b)
 
   # Given x and y scale objects and a coord object, return a list that has
   # the bases of log transformations for x and y, or NULL if it's not a
@@ -827,7 +853,7 @@ find_panel_info_non_api <- function(b, ggplot_format) {
 
 
 # Given a gtable object, return the x and y ranges (in pixel dimensions)
-find_panel_ranges <- function(g, pixelratio, res) {
+find_panel_ranges <- function(g, res) {
   # Given a vector of unit objects, return logical vector indicating which ones
   # are "null" units. These units use the remaining available width/height --
   # that is, the space not occupied by elements that have an absolute size.
@@ -957,26 +983,15 @@ find_panel_ranges <- function(g, pixelratio, res) {
   layout <- layout[order(layout$t, layout$l), ]
   layout$panel <- seq_len(nrow(layout))
 
-  # When using a HiDPI client on a Linux server, the pixel
-  # dimensions are doubled, so we have to divide the dimensions by
-  # `pixelratio`. When a HiDPI client is used on a Mac server (with
-  # the quartz device), the pixel dimensions _aren't_ doubled, even though
-  # the image has double size. In the latter case we don't have to scale the
-  # numbers down.
-  pix_ratio <- 1
-  if (!grepl("^quartz", names(grDevices::dev.cur()))) {
-    pix_ratio <- pixelratio
-  }
-
   # Return list of lists, where each inner list has left, right, top, bottom
   # values for a panel
   lapply(seq_len(nrow(layout)), function(i) {
     p <- layout[i, , drop = FALSE]
     list(
-      left   = x_pos[p$l - 1] / pix_ratio,
-      right  = x_pos[p$r] / pix_ratio,
-      bottom = y_pos[p$b] / pix_ratio,
-      top    = y_pos[p$t - 1] / pix_ratio
+      left   = x_pos[p$l - 1],
+      right  = x_pos[p$r],
+      bottom = y_pos[p$b],
+      top    = y_pos[p$t - 1]
     )
   })
 }

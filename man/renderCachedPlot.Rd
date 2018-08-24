@@ -169,6 +169,13 @@ will not have cache key collisions.
   as the \code{cache} argument of \code{renderCachedPlot}.
 }
 
+\section{Interactive plots}{
+
+
+  \code{renderCachedPlot} can be used to create interactive plots. See
+  \code{\link{plotOutput}} for more information and examples.
+}
+
 \examples{
 ## Only run examples in interactive R sessions
 if (interactive()) {

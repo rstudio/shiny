@@ -1,15 +1,19 @@
-shiny 1.1.0.9000
+shiny 1.1.0.9001
 ===========
 
 ## Full changelog
 
 ### Minor new features and improvements
 
+* Added `renderCachedPlot()`, which stores plots in a cache so that they can be served up almost instantly. ([#1997](https://github.com/rstudio/shiny/pull/1997))
+
 * Added `datesdisabled` and `daysofweekdisabled` as new parameters to `dateInput()`. This resolves [#174](https://github.com/rstudio/shiny/issues/174) and exposes the underlying arguments of [Bootstrap Datepicker](http://bootstrap-datepicker.readthedocs.io/en/latest/options.html#datesdisabled). `datesdisabled` expects a character vector with values in `yyyy/mm/dd` format and `daysofweekdisabled` expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is `NULL`, which leaves all days selectable.
 
 * Support for selecting variables of a data frame with the output values to be used within tidy evaluation.  Added functions: `varSelectInput`, `varSelectizeInput`, `updateVarSelectInput`, `updateVarSelectizeInput`. ([#2091](https://github.com/rstudio/shiny/pull/2091))
 
 * Addressed [#2042](https://github.com/rstudio/shiny/issues/2042): dates outside of `min`/`max` date range are now a lighter shade of grey to highlight the allowed range. ([#2087](https://github.com/rstudio/shiny/pull/2087))
+
+* Added support for plot interaction when the plot is scaled. ([#2125](https://github.com/rstudio/shiny/pull/2125))
 
 * Fixed [#1933](https://github.com/rstudio/shiny/issues/1933): extended server-side selectize to lists and optgroups. ([#2102](https://github.com/rstudio/shiny/pull/2102))
 
@@ -18,6 +22,8 @@ shiny 1.1.0.9000
 * Resolved [#2019](https://github.com/rstudio/shiny/issues/2019): `updateSliderInput` now changes the slider formatting if the input type changes. ([#2099](https://github.com/rstudio/shiny/pull/2099))
 
 * Added namespace support when freezing reactiveValue keys. [#2080](https://github.com/rstudio/shiny/pull/2080)
+
+* Fixed [#2138](https://github.com/rstudio/shiny/issues/2138): Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. [#2139](https://github.com/rstudio/shiny/pull/2139)
 
 ### Documentation Updates
 

@@ -201,6 +201,7 @@ RLog <- R6Class(
       self$updateReactLabel(self$keyIdStr(reactId, key), self$keyIdStr(label, key), domain),
 
     dependsOn = function(reactId, depOnReactId, ctxId, domain) {
+      if (is.null(reactId)) return()
       ctxId <- ctxIdStr(ctxId)
       msg$log("dependsOn: ", msg$reactStr(reactId), " on ", msg$reactStr(depOnReactId), " in ", ctxId)
       private$appendEntry(domain, list(

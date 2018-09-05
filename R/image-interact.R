@@ -86,6 +86,8 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   if (use_x) {
     if (is.null(xvar))
       stop("brushedPoints: not able to automatically infer `xvar` from brush")
+    if (!(xvar %in% names(df)))
+      stop("brushedPoints: `xvar` not in names of input")
     # Extract data values from the data frame
     x <- asNumber(df[[xvar]])
     keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
@@ -93,6 +95,8 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   if (use_y) {
     if (is.null(yvar))
       stop("brushedPoints: not able to automatically infer `yvar` from brush")
+    if (!(yvar %in% names(df)))
+      stop("brushedPoints: `yvar` not in names of input")
     y <- asNumber(df[[yvar]])
     keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
   }
@@ -244,6 +248,11 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     stop("nearPoints: not able to automatically infer `xvar` from coordinfo")
   if (is.null(yvar))
     stop("nearPoints: not able to automatically infer `yvar` from coordinfo")
+
+  if (!(xvar %in% names(df)))
+    stop("nearPoints: `xvar` not in names of input")
+  if (!(yvar %in% names(df)))
+    stop("nearPoints: `yvar` not in names of input")
 
   # Extract data values from the data frame
   x <- asNumber(df[[xvar]])

@@ -118,7 +118,7 @@ useRenderFunction <- function(renderFunc, inline = FALSE) {
     # If there's a namespace, we must respect it
     id <- getDefaultReactiveDomain()$ns(id)
   }
-  
+
   # Make the id the first positional argument
   outputArgs <- c(list(id), outputArgs)
 
@@ -451,7 +451,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   call to \code{\link{uiOutput}} when \code{renderUI} is used in an
 #'   interactive R Markdown document.
 #'
-#' @seealso \code{\link{uiOutput}} 
+#' @seealso \code{\link{uiOutput}}
 #' @export
 #' @examples
 #' ## Only run examples in interactive R sessions

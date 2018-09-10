@@ -4,8 +4,8 @@
 \alias{renderImage}
 \title{Image file output}
 \usage{
-renderImage(expr, env = parent.frame(), quoted = FALSE, deleteFile = TRUE,
-  outputArgs = list())
+renderImage(expr, env = parent.frame(), quoted = FALSE,
+  deleteFile = TRUE, outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that returns a list.}

@@ -4,8 +4,9 @@
 \alias{fileInput}
 \title{File Upload Control}
 \usage{
-fileInput(inputId, label, multiple = FALSE, accept = NULL, width = NULL,
-  buttonLabel = "Browse...", placeholder = "No file selected")
+fileInput(inputId, label, multiple = FALSE, accept = NULL,
+  width = NULL, buttonLabel = "Browse...",
+  placeholder = "No file selected")
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}

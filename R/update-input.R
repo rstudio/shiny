@@ -383,13 +383,17 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
   session$sendInputMessage(inputId, message)
 }
 
-#' Change the value of a slider input on the client
+#' Update Slider Input Widget
+#'
+#' Change the value of a slider input on the client.
 #'
 #' @template update-input
 #' @param value The value to set for the input object.
 #' @param min Minimum value.
 #' @param max Maximum value.
 #' @param step Step size.
+#' @param timeFormat Date and POSIXt formatting.
+#' @param timezone The timezone offset for POSIXt objects.
 #'
 #' @seealso \code{\link{sliderInput}}
 #'
@@ -422,22 +426,15 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 #' }
 #' @export
 updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
-  min = NULL, max = NULL, step = NULL)
+  min = NULL, max = NULL, step = NULL, timeFormat = NULL, timezone = NULL)
 {
-  # Make sure that value, min, max all have the same type, because we need
-  # special handling for dates and datetimes.
-  vals <- dropNulls(list(value, min, max))
+  dataType <- getSliderType(min, max, value)
 
-  type <- unique(lapply(vals, function(x) {
-    if      (inherits(x, "Date"))   "date"
-    else if (inherits(x, "POSIXt")) "datetime"
-    else                            "number"
-  }))
-  if (length(type) > 1) {
-    stop("Type mismatch for value, min, and max")
+  if (is.null(timeFormat)) {
+    timeFormat <- switch(dataType, date = "%F", datetime = "%F %T", number = NULL)
   }
 
-  if ((length(type) == 1) && (type == "date" || type == "datetime")) {
+  if (dataType == "date" || dataType == "datetime") {
     to_ms <- function(x) 1000 * as.numeric(as.POSIXct(x))
     if (!is.null(min))   min   <- to_ms(min)
     if (!is.null(max))   max   <- to_ms(max)
@@ -449,7 +446,10 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
     value = formatNoSci(value),
     min = formatNoSci(min),
     max = formatNoSci(max),
-    step = formatNoSci(step)
+    step = formatNoSci(step),
+    `data-type` = dataType,
+    `time-format` = timeFormat,
+    timezone = timezone
   ))
   session$sendInputMessage(inputId, message)
 }
@@ -643,10 +643,22 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
 
-  # convert a single vector to a data frame so it returns {label: , value: }
-  # other objects return arbitrary JSON {x: , y: , foo: , ...}
-  choices <- if (is.atomic(choices)) {
-    # fast path
+  noOptGroup <- TRUE
+  if (is.list(choices)) {
+    # check if list is nested
+    for (i in seq_along(choices)) {
+      if (is.list(choices[[i]]) || length(choices[[i]]) > 1) {
+        noOptGroup <- FALSE
+        break()
+      }
+    }
+  }
+  # convert choices to a data frame so it returns [{label: , value: , group: },...]
+  choices <- if (is.atomic(choices) || noOptGroup) {
+    # fast path for vectors and flat lists
+    if (is.list(choices)) {
+      choices <- unlist(choices)
+    }
     if (is.null(names(choices))) {
       lab <- as.character(choices)
     } else {
@@ -659,8 +671,52 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     }
     data.frame(label = lab, value = choices, stringsAsFactors = FALSE)
   } else {
-    # slow path
-    as.data.frame(choices, stringsAsFactors = FALSE)
+    # slow path for nested lists/optgroups
+    list_names <- names(choices)
+    if (is.null(list_names)) {
+      list_names <- rep("", length(choices))
+    }
+
+    choice_list <- mapply(choices, list_names, FUN = function (choice, name) {
+      group <- ""
+      lab <- name
+      if (lab == "") lab <- as.character(choice)
+
+      if (is.list(choice) || length(choice) > 1) {
+        group <- rep(name, length(choice))
+        choice <- unlist(choice)
+
+        if (is.null(names(choice))) {
+          lab <- as.character(choice)
+        } else {
+          lab <- names(choice)
+          # replace empty names like: choices = c(a = 1, 2)
+          # in this case: names(choices) = c("a", "")
+          # with replacement below choices will be: lab = c("a", "2")
+          empty_names_indices <- lab == ""
+          lab[empty_names_indices] <- as.character(choice[empty_names_indices])
+        }
+      }
+
+      list(
+        label = lab,
+        value = as.character(choice),
+        group = group
+      )
+    }, SIMPLIFY = FALSE)
+
+
+    extract_vector <- function(x, name) {
+      vecs <- lapply(x, `[[`, name)
+      do.call(c, vecs)
+    }
+
+    data.frame(
+      label = extract_vector(choice_list, "label"),
+      value = extract_vector(choice_list, "value"),
+      group = extract_vector(choice_list, "group"),
+      stringsAsFactors = FALSE, row.names = NULL
+    )
   }
 
   value <- unname(selected)

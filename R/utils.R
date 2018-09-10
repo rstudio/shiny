@@ -269,6 +269,25 @@ dirExists <- function(paths) {
   file.exists(paths) & file.info(paths)$isdir
 }
 
+# Removes empty directory (vectorized). This is needed because file.remove()
+# on Unix will remove empty directories, but on Windows, it will not. On
+# Windows, you would need to use unlink(recursive=TRUE), which is not very
+# safe. This function does it safely on Unix and Windows.
+dirRemove <- function(path) {
+  for (p in path) {
+    if (!dirExists(p)) {
+      stop("Cannot remove non-existent directory ", p, ".")
+    }
+    if (length(dir(p, all.files = TRUE, no.. = TRUE)) != 0) {
+      stop("Cannot remove non-empty directory ", p, ".")
+    }
+    result <- unlink(p, recursive = TRUE)
+    if (result == 1) {
+      stop("Error removing directory ", p, ".")
+    }
+  }
+}
+
 # Attempt to join a path and relative path, and turn the result into a
 # (normalized) absolute path. The result will only be returned if it is an
 # existing file/directory and is a descendant of dir.
@@ -1679,14 +1698,14 @@ createVarPromiseDomain <- function(env, name, value) {
   force(env)
   force(name)
   force(value)
-  
+
   promises::new_promise_domain(
     wrapOnFulfilled = function(onFulfilled) {
       function(...) {
         orig <- env[[name]]
         env[[name]] <- value
         on.exit(env[[name]] <- orig)
-        
+
         onFulfilled(...)
       }
     },
@@ -1695,7 +1714,7 @@ createVarPromiseDomain <- function(env, name, value) {
         orig <- env[[name]]
         env[[name]] <- value
         on.exit(env[[name]] <- orig)
-        
+
         onRejected(...)
       }
     },
@@ -1707,4 +1726,17 @@ createVarPromiseDomain <- function(env, name, value) {
       force(expr)
     }
   )
+}
+
+getSliderType <- function(min, max, value) {
+  vals <- dropNulls(list(value, min, max))
+  type <- unique(lapply(vals, function(x) {
+    if      (inherits(x, "Date"))   "date"
+    else if (inherits(x, "POSIXt")) "datetime"
+    else                            "number"
+  }))
+  if (length(type) > 1) {
+    stop("Type mismatch for `min`, `max`, and `value`. Each must be Date, POSIXt, or number.")
+  }
+  type[[1]]
 }

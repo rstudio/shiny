@@ -6,7 +6,8 @@
 \usage{
 dateInput(inputId, label, value = NULL, min = NULL, max = NULL,
   format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-  language = "en", width = NULL, autoclose = TRUE)
+  language = "en", width = NULL, autoclose = TRUE,
+  datesdisabled = NULL, daysofweekdisabled = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -46,6 +47,12 @@ see \code{\link{validateCssUnit}}.}
 
 \item{autoclose}{Whether or not to close the datepicker immediately when a
 date is selected.}
+
+\item{datesdisabled}{Which dates should be disabled. Either a Date object,
+or a string in \code{yyyy-mm-dd} format.}
+
+\item{daysofweekdisabled}{Days of the week that should be disabled. Should be
+a integer vector with values from 0 (Sunday) to 6 (Saturday).}
 }
 \description{
 Creates a text input which, when clicked on, brings up a calendar that
@@ -91,7 +98,14 @@ ui <- fluidPage(
 
   # Start with decade view instead of default month view
   dateInput("date6", "Date:",
-            startview = "decade")
+            startview = "decade"),
+
+  # Disable Mondays and Tuesdays.
+  dateInput("date7", "Date:", daysofweekdisabled = c(1,2)),
+  
+  # Disable specific dates.
+  dateInput("date8", "Date:", value = "2012-02-29",
+            datesdisabled = c("2012-03-01", "2012-03-02"))
 )
 
 shinyApp(ui, server = function(input, output) { })

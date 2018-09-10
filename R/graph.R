@@ -97,8 +97,8 @@ renderReactLog <- function(sessionToken = NULL, time = TRUE) {
   .graphAppend(list(action='enter', id=id))
 }
 
-.graphExitContext <- function(id) {
-  .graphAppend(list(action='exit', id=id))
+.graphExitContext <- function(id, domain) {
+  .graphAppend(list(action='exit', id=id), domain = domain)
 }
 
 .graphValueChange <- function(label, value) {

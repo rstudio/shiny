@@ -640,6 +640,8 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     session$sendInputMessage(inputId, list(config = as.character(cfg)))
   }
   if (!server) {
+    if (is.data.frame(choices))
+      stop("Using a data frame for choices is only allowed for server-side filtering")
     return(updateSelectInput(session, inputId, label, choices, selected))
   }
 
@@ -670,6 +672,8 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
       lab[empty_names_indices] <- as.character(choices[empty_names_indices])
     }
     data.frame(label = lab, value = choices, stringsAsFactors = FALSE)
+  } else if (is.data.frame(choices)) {
+    choices
   } else {
     # slow path for nested lists/optgroups
     list_names <- names(choices)

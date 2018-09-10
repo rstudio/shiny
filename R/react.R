@@ -44,7 +44,7 @@ Context <- R6Class(
           env <- .getReactiveEnvironment()
           .graphEnterContext(id)
           on.exit({
-            .graphExitContext(id, domain = .domain %OR% getDefaultReactiveDomain())
+            .graphExitContext(id, domain = (if (is.null(.domain)) getDefaultReactiveDomain() else .domain))
           }, add = TRUE)
           env$runWith(self, func)
         })

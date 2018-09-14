@@ -1,5 +1,45 @@
-shiny 1.1
-================
+shiny 1.1.0.9001
+===========
+
+## Full changelog
+
+### Minor new features and improvements
+
+* Added `renderCachedPlot()`, which stores plots in a cache so that they can be served up almost instantly. ([#1997](https://github.com/rstudio/shiny/pull/1997))
+
+* Address [#174](https://github.com/rstudio/shiny/issues/174): Added `datesdisabled` and `daysofweekdisabled` as new parameters to `dateInput()`. This resolves [#174](https://github.com/rstudio/shiny/issues/174) and exposes the underlying arguments of [Bootstrap Datepicker](http://bootstrap-datepicker.readthedocs.io/en/latest/options.html#datesdisabled). `datesdisabled` expects a character vector with values in `yyyy/mm/dd` format and `daysofweekdisabled` expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is `NULL`, which leaves all days selectable. Thanks, @nathancday! ([#2147](https://github.com/rstudio/shiny/pull/2147))
+
+* Support for selecting variables of a data frame with the output values to be used within tidy evaluation.  Added functions: `varSelectInput`, `varSelectizeInput`, `updateVarSelectInput`, `updateVarSelectizeInput`. ([#2091](https://github.com/rstudio/shiny/pull/2091))
+
+* Addressed [#2042](https://github.com/rstudio/shiny/issues/2042): dates outside of `min`/`max` date range are now a lighter shade of grey to highlight the allowed range. ([#2087](https://github.com/rstudio/shiny/pull/2087))
+
+* Added support for plot interaction when the plot is scaled. ([#2125](https://github.com/rstudio/shiny/pull/2125))
+
+* Fixed [#1933](https://github.com/rstudio/shiny/issues/1933): extended server-side selectize to lists and optgroups. ([#2102](https://github.com/rstudio/shiny/pull/2102))
+
+* Fixed [#1935](https://github.com/rstudio/shiny/issues/1935): correctly returns plot coordinates when using outer margins. ([#2108](https://github.com/rstudio/shiny/pull/2108))
+
+* Resolved [#2019](https://github.com/rstudio/shiny/issues/2019): `updateSliderInput` now changes the slider formatting if the input type changes. ([#2099](https://github.com/rstudio/shiny/pull/2099))
+
+* Added namespace support when freezing reactiveValue keys. [#2080](https://github.com/rstudio/shiny/pull/2080)
+
+* Fixed [#2138](https://github.com/rstudio/shiny/issues/2138): Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. [#2139](https://github.com/rstudio/shiny/pull/2139)
+
+* Fixed [#2093](https://github.com/rstudio/shiny/issues/2093): Make sure bookmark scope directory does not exist before trying to create it. [#2168](https://github.com/rstudio/shiny/pull/2168)
+
+* Upgrade selectize.js from 0.12.1 to 0.12.4 [#2028](https://github.com/rstudio/shiny/issues/2028)
+
+### Bug fixes
+
+* Fixed [#2033](https://github.com/rstudio/shiny/issues/2033): RStudio Viewer window not closed on `shiny::stopApp()`. Thanks, @vnijs! [#2047](https://github.com/rstudio/shiny/pull/2047)
+
+### Documentation Updates
+
+* Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. ([#2084](https://github.com/rstudio/shiny/pull/2084))
+
+
+shiny 1.1.0
+===========
 
 This is a significant release for Shiny, with a major new feature that was nearly a year in the making: support for asynchronous operations! Until now, R's single-threaded nature meant that performing long-running calculations or tasks from Shiny would bring your app to a halt for other users of that process. This release of Shiny deeply integrates the [promises](https://rstudio.github.io/promises/) package to allow you to execute some tasks asynchronously, including as part of reactive expressions and outputs. See the [promises](https://rstudio.github.io/promises/) documentation to learn more.
 
@@ -33,7 +73,9 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * [#1989](https://github.com/rstudio/shiny/issues/1989): The server side of outputs can now be removed (e.g. `output$plot <- NULL`). This is not usually necessary but it does allow some objects to be garbage collected, which might matter if you are dynamically creating and destroying many outputs. (Thanks, @mmuurr! [#2011](https://github.com/rstudio/shiny/pull/2011))
 
-* Upgrade selectize.js from 0.12.1 to 0.12.4
+* Removed the (ridiculously outdated) "experimental feature" tag from the reference documentation for `renderUI`. ([#2036](https://github.com/rstudio/shiny/pull/2036))
+
+* Addressed [#1907](https://github.com/rstudio/shiny/issues/1907): the `ignoreInit` argument was first added only to `observeEvent`. Later, we also added it to `eventReactive`, but forgot to update the documentation. Now done, thanks [@flo12392](https://github.com/flo12392)! ([#2036](https://github.com/rstudio/shiny/pull/2036))
 
 ### Bug fixes
 
@@ -53,15 +95,21 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/master/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, @jekriske-lilly! [#1844](https://github.com/rstudio/shiny/pull/1844))
 
-* Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome
+* Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome.
 
-* Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to xxxOutput not working inside modules. (Thanks, @GregorDeCillia! [#2010](https://github.com/rstudio/shiny/pull/2010))
+* Fixed [#2000](https://github.com/rstudio/shiny/issues/2000): Implicit calls to `xxxOutput` not working inside modules. (Thanks, @GregorDeCillia! [#2010](https://github.com/rstudio/shiny/pull/2010))
 
-* Fixed [#2021](https://github.com/rstudio/shiny/issues/2021): Memory leak with reactiveTimer and invalidateLater ([#2022](https://github.com/rstudio/shiny/pull/2022))
+* Fixed [#2021](https://github.com/rstudio/shiny/issues/2021): Memory leak with `reactiveTimer` and `invalidateLater`. ([#2022](https://github.com/rstudio/shiny/pull/2022))
 
 ### Library updates
 
 * Updated to ion.rangeSlider 2.2.0. ([#1955](https://github.com/rstudio/shiny/pull/1955))
+
+
+## Known issues
+
+In some rare cases, interrupting an application (by pressing Ctrl-C or Esc) may result in the message `Error in execCallbacks(timeoutSecs) : c++ exception (unknown reason)`. Although this message sounds alarming, it is harmless, and will go away in a future version of the later package (more information [here](https://github.com/r-lib/later/issues/55)).
+
 
 shiny 1.0.5
 ===========
@@ -274,7 +322,7 @@ Now there's an official way to slow down reactive values and expressions that in
 ### Minor new features and improvements
 
 * Addressed [#1486](https://github.com/rstudio/shiny/issues/1486) by adding a new argument to `observeEvent` and `eventReactive`, called `ignoreInit` (defaults to `FALSE` for backwards compatibility). When set to `TRUE`, the action (i.e. the second argument: `handlerExpr` and `valueExpr`, respectively) will not be triggered when the observer/reactive is first created/initialized. In other words, `ignoreInit = TRUE` ensures that the `observeEvent` (or `eventReactive`) is *never* run right away. For more info, see the documentation (`?observeEvent`). ([#1494](https://github.com/rstudio/shiny/pull/1494))
-    
+
 * Added a new argument to `observeEvent` called `once`. When set to `TRUE`, it results in the observer being destroyed (stop observing) after the first time that `handlerExpr` is run (i.e. `once = TRUE` guarantees that the observer only runs, at most, once). For more info, see the documentation (`?observeEvent`). ([#1494](https://github.com/rstudio/shiny/pull/1494))
 
 * Addressed [#1358](https://github.com/rstudio/shiny/issues/1358): more informative error message when calling `runApp()` inside of an app's app.R (or inside ui.R or server.R). ([#1482](https://github.com/rstudio/shiny/pull/1482))
@@ -673,7 +721,7 @@ shiny 0.12.1
 shiny 0.12.0
 ============
 
-In addition to the changes listed below (in the *Full Changelog* section), there is an infrastructure change that could affect existing Shiny apps. 
+In addition to the changes listed below (in the *Full Changelog* section), there is an infrastructure change that could affect existing Shiny apps.
 
 ### JSON serialization
 
@@ -764,13 +812,13 @@ Shiny 0.11 switches away from the Bootstrap 2 web framework to the next version,
 ### Known issues for migration
 
 *    In Bootstrap 3, images in `<img>` tags are no longer automatically scaled to the width of their container. If you use `img()` in your UI code, or `<img>` tags in your raw HTML source, it's possible that they will be too large in the new version of Shiny. To address this you can add the `img-responsive` class:
-    
+
     ```r
     img(src = "picture.png", class = "img-responsive")
     ```
-    
+
     The R code above will generate the following HTML:
-    
+
     ```html
     <img src="picture.png" class="img-responsive">
     ```

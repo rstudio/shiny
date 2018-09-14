@@ -4,7 +4,8 @@
 \alias{renderUI}
 \title{UI Output}
 \usage{
-renderUI(expr, env = parent.frame(), quoted = FALSE, outputArgs = list())
+renderUI(expr, env = parent.frame(), quoted = FALSE,
+  outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that returns a Shiny tag object, \code{\link{HTML}},
@@ -20,8 +21,7 @@ call to \code{\link{uiOutput}} when \code{renderUI} is used in an
 interactive R Markdown document.}
 }
 \description{
-\bold{Experimental feature.} Makes a reactive version of a function that
-generates HTML using the Shiny UI library.
+Renders reactive HTML using the Shiny UI library.
 }
 \details{
 The corresponding HTML output tag should be \code{div} and have the CSS class
@@ -48,5 +48,5 @@ shinyApp(ui, server)
 
 }
 \seealso{
-conditionalPanel
+\code{\link{uiOutput}}
 }

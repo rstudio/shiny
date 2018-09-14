@@ -445,6 +445,8 @@ ShinySession <- R6Class(
     testMode = FALSE,                # Are we running in test mode?
     testExportExprs = list(),
     outputValues = list(),           # Saved output values (for testing mode)
+    currentOutputName = NULL,        # Name of the currently-running output
+    outputInfo = list(),             # List of information for each output
     testSnapshotUrl = character(0),
 
     sendResponse = function(requestMsg, value) {
@@ -490,6 +492,16 @@ ShinySession <- R6Class(
       if (is.null(result))
         return(defaultValue)
       return(result)
+    },
+    withCurrentOutput = function(name, expr) {
+      if (!is.null(private$currentOutputName)) {
+        stop("Nested calls to withCurrentOutput() are not allowed.")
+      }
+
+      promises::with_promise_domain(
+        createVarPromiseDomain(private, "currentOutputName", name),
+        expr
+      )
     },
     shouldSuspend = function(name) {
       # Find corresponding hidden state clientData variable, with the format
@@ -691,6 +703,7 @@ ShinySession <- R6Class(
     request = 'ANY',      # Websocket request object
     singletons = character(0),  # Tracks singleton HTML fragments sent to the page
     userData = 'environment',
+    cache = NULL,         # A cache object used in the session
     user = NULL,
     groups = NULL,
 
@@ -724,6 +737,8 @@ ShinySession <- R6Class(
       self$token <- createUniqueId(16)
       private$.outputs <- list()
       private$.outputOptions <- list()
+
+      self$cache <- MemoryCache$new()
 
       private$bookmarkCallbacks <- Callbacks$new()
       private$bookmarkedCallbacks <- Callbacks$new()
@@ -901,9 +916,11 @@ ShinySession <- R6Class(
         # Create subdir for this scope
         if (!is.null(state$dir)) {
           scopeState$dir <- file.path(state$dir, namespace)
-          res <- dir.create(scopeState$dir)
-          if (res == FALSE) {
-            stop("Error creating subdirectory for scope ", namespace)
+          if (!dirExists(scopeState$dir)) {
+            res <- dir.create(scopeState$dir)
+            if (res == FALSE) {
+              stop("Error creating subdirectory for scope ", namespace)
+            }
           }
         }
 
@@ -961,8 +978,9 @@ ShinySession <- R6Class(
         stop("x must be a reactivevalues object")
 
       impl <- .subset2(x, 'impl')
-      impl$freeze(name)
-      self$onFlushed(function() impl$thaw(name))
+      key <- .subset2(x, 'ns')(name)
+      impl$freeze(key)
+      self$onFlushed(function() impl$thaw(key))
     },
 
     onSessionEnded = function(sessionEndedCallback) {
@@ -1070,7 +1088,11 @@ ShinySession <- R6Class(
           # to include the $then/$catch calls below?
           hybrid_chain(
             hybrid_chain(
-              shinyCallingHandlers(func()),
+              {
+                private$withCurrentOutput(name, {
+                  shinyCallingHandlers(func())
+                })
+              },
               catch = function(cond) {
                 if (inherits(cond, "shiny.custom.error")) {
                   if (isTRUE(getOption("show.error.messages"))) printError(cond)
@@ -1173,8 +1195,10 @@ ShinySession <- R6Class(
 
         # Schedule execution of onFlushed callbacks
         on.exit({
-          # ..stacktraceon matches with the top-level ..stacktraceoff..
-          private$flushedCallbacks$invoke(..stacktraceon = TRUE)
+          withReactiveDomain(self, {
+            # ..stacktraceon matches with the top-level ..stacktraceoff..
+            private$flushedCallbacks$invoke(..stacktraceon = TRUE)
+          })
         }, add = TRUE)
 
         if (!hasPendingUpdates()) {
@@ -1309,6 +1333,47 @@ ShinySession <- R6Class(
         })
         return(dereg)
       }
+    },
+
+    getCurrentOutputInfo = function() {
+      name <- private$currentOutputName
+
+      tmp_info <- private$outputInfo[[name]] %OR% list(name = name)
+
+      # cd_names() returns names of all items in clientData, without taking a
+      # reactive dependency. It is a function and it's memoized, so that we do
+      # the (relatively) expensive isolate(names(...)) call only when needed,
+      # and at most one time in this function.
+      .cd_names <- NULL
+      cd_names <- function() {
+        if (is.null(.cd_names)) {
+          .cd_names <<- isolate(names(self$clientData))
+        }
+        .cd_names
+      }
+
+      # If we don't already have width for this output info, see if it's
+      # present, and if so, add it.
+      if (! ("width" %in% names(tmp_info)) ) {
+        width_name  <- paste0("output_", name, "_width")
+        if (width_name %in% cd_names()) {
+          tmp_info$width <- reactive({
+            self$clientData[[width_name]]
+          })
+        }
+      }
+
+      if (! ("height" %in% names(tmp_info)) ) {
+        height_name  <- paste0("output_", name, "_height")
+        if (height_name %in% cd_names()) {
+          tmp_info$height <- reactive({
+            self$clientData[[height_name]]
+          })
+        }
+      }
+
+      private$outputInfo[[name]] <- tmp_info
+      private$outputInfo[[name]]
     },
 
     createBookmarkObservers = function() {
@@ -1861,10 +1926,16 @@ ShinySession <- R6Class(
         }
       }
     },
-    # Set the normal and client data input variables
-    manageInputs = function(data) {
+    # Set the normal and client data input variables. Normally, managing
+    # inputs doesn't take immediate effect when there are observers that
+    # are pending execution or currently executing (including having
+    # started async operations that have yielded control, but not yet
+    # completed). The `now` argument can force this. It should generally
+    # not be used, but we're adding it to get around a show-stopping bug
+    # for Shiny v1.1 (see the call site for more details).
+    manageInputs = function(data, now = FALSE) {
       force(data)
-      self$cycleStartAction(function() {
+      doManageInputs <- function() {
         private$inputReceivedCallbacks$invoke(data)
 
         data_names <- names(data)
@@ -1882,7 +1953,12 @@ ShinySession <- R6Class(
         private$.clientData$mset(input_clientdata)
 
         self$manageHiddenOutputs()
-      })
+      }
+      if (isTRUE(now)) {
+        doManageInputs()
+      } else {
+        self$cycleStartAction(doManageInputs)
+      }
     },
     outputOptions = function(name, ...) {
       # If no name supplied, return the list of options for all outputs
@@ -2043,6 +2119,16 @@ outputOptions <- function(x, name, ...) {
   .subset2(x, 'impl')$outputOptions(name, ...)
 }
 
+
+#' Get information about the output that is currently being executed.
+#'
+#' @param session The current Shiny session.
+#'
+#' @export
+getCurrentOutputInfo <- function(session = getDefaultReactiveDomain()) {
+  session$getCurrentOutputInfo()
+}
+
 #' Add callbacks for Shiny session events
 #'
 #' These functions are for registering callbacks on Shiny session events.
@@ -2111,7 +2197,9 @@ flushPendingSessions <- function() {
 #'   called from within the server function, this will default to the current
 #'   session, and the callback will be invoked when the current session ends. If
 #'   \code{onStop} is called outside a server function, then the callback will
-#'   be invoked with the application exits.
+#'   be invoked with the application exits. If \code{NULL}, it is the same as
+#'   calling \code{onStop} outside of the server function, and the callback will
+#'   be invoked when the application exits.
 #'
 #'
 #' @seealso \code{\link{onSessionEnded}()} for the same functionality, but at
@@ -2171,7 +2259,7 @@ flushPendingSessions <- function() {
 #' }
 #' @export
 onStop <- function(fun, session = getDefaultReactiveDomain()) {
-  if (is.null(getDefaultReactiveDomain())) {
+  if (is.null(session)) {
     return(.globals$onStopCallbacks$register(fun))
   } else {
     # Note: In the future if we allow scoping the onStop() callback to modules

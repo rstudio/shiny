@@ -33,7 +33,7 @@
 #' @return A select list control that can be added to a UI definition.
 #'
 #' @family input elements
-#' @seealso \code{\link{updateSelectInput}}
+#' @seealso \code{\link{updateSelectInput}} \code{\link{varSelectInput}}
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -59,9 +59,9 @@
 #' shinyApp(
 #'   ui = fluidPage(
 #'     selectInput("state", "Choose a state:",
-#'       list(`East Coast` = c("NY", "NJ", "CT"),
-#'            `West Coast` = c("WA", "OR", "CA"),
-#'            `Midwest` = c("MN", "WI", "IA"))
+#'       list(`East Coast` = list("NY", "NJ", "CT"),
+#'            `West Coast` = list("WA", "OR", "CA"),
+#'            `Midwest` = list("MN", "WI", "IA"))
 #'     ),
 #'     textOutput("result")
 #'   ),
@@ -211,4 +211,136 @@ selectizeIt <- function(inputId, select, options, nonempty = FALSE) {
   )
 
   attachDependencies(select, selectizeDep)
+}
+
+
+
+
+
+
+
+
+#' Select variables from a data frame
+#'
+#' Create a select list that can be used to choose a single or multiple items
+#' from the column names of a data frame.
+#'
+#' The resulting server \code{input} value will be returned as:
+#' \itemize{
+#'   \item a symbol if \code{multiple = FALSE}.  The \code{input} value should be
+#'         used with rlang's \code{\link[rlang]{!!}}. For example,
+#'         \code{ggplot2::aes(!!input$variable)}.
+#'   \item a list of symbols if \code{multiple = TRUE}. The \code{input} value
+#'         should be used with rlang's \code{\link[rlang]{!!!}} to expand
+#'         the symbol list as individual arguments. For example,
+#'         \code{dplyr::select(mtcars, !!!input$variabls)} which is
+#'         equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.
+#' }
+#'
+#' By default, \code{varSelectInput()} and \code{selectizeInput()} use the
+#' JavaScript library \pkg{selectize.js}
+#' (\url{https://github.com/selectize/selectize.js}) to instead of the basic
+#' select input element. To use the standard HTML select input element, use
+#' \code{selectInput()} with \code{selectize=FALSE}.
+#'
+#' @inheritParams selectInput
+#' @param data A data frame. Used to retrieve the column names as choices for a \code{\link{selectInput}}
+#' @return A variable select list control that can be added to a UI definition.
+#'
+#' @family input elements
+#' @seealso \code{\link{updateSelectInput}}
+#' @examples
+#'
+#' ## Only run examples in interactive R sessions
+#' if (interactive()) {
+#'
+#' library(ggplot2)
+#'
+#' # single selection
+#' shinyApp(
+#'   ui = fluidPage(
+#'     varSelectInput("variable", "Variable:", mtcars),
+#'     plotOutput("data")
+#'   ),
+#'   server = function(input, output) {
+#'     output$data <- renderPlot({
+#'       ggplot(mtcars, aes(!!input$variable)) + geom_histogram()
+#'     })
+#'   }
+#' )
+#'
+#'
+#' # multiple selections
+#' \dontrun{
+#' shinyApp(
+#'  ui = fluidPage(
+#'    varSelectInput("variables", "Variable:", mtcars, multiple = TRUE),
+#'    tableOutput("data")
+#'  ),
+#'  server = function(input, output) {
+#'    output$data <- renderTable({
+#'       if (length(input$variables) == 0) return(mtcars)
+#'       mtcars %>% dplyr::select(!!!input$variables)
+#'    }, rownames = TRUE)
+#'  }
+#' )}
+#'
+#' }
+#' @export
+varSelectInput <- function(
+  inputId, label, data, selected = NULL,
+  multiple = FALSE, selectize = TRUE, width = NULL,
+  size = NULL
+) {
+  # no place holders
+  choices <- colnames(data)
+
+  selectInputVal <- selectInput(
+    inputId = inputId,
+    label = label,
+    choices = choices,
+    selected = selected,
+    multiple = multiple,
+    selectize = selectize,
+    width = width,
+    size = size
+  )
+
+  # set the select tag class to be "symbol"
+  selectClass <- selectInputVal$children[[2]]$children[[1]]$attribs$class
+  if (is.null(selectClass)) {
+    newClass <- "symbol"
+  } else {
+    newClass <- paste(selectClass, "symbol", sep = " ")
+  }
+  selectInputVal$children[[2]]$children[[1]]$attribs$class <- newClass
+
+  selectInputVal
+}
+
+
+
+#' @rdname varSelectInput
+#' @param ... Arguments passed to \code{varSelectInput()}.
+#' @param options A list of options. See the documentation of \pkg{selectize.js}
+#'   for possible options (character option values inside \code{\link[base]{I}()} will
+#'   be treated as literal JavaScript code; see \code{\link{renderDataTable}()}
+#'   for details).
+#' @param width The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
+#'   see \code{\link{validateCssUnit}}.
+#' @note The variable selectize input created from \code{varSelectizeInput()} allows
+#'   deletion of the selected option even in a single select input, which will
+#'   return an empty string as its value. This is the default behavior of
+#'   \pkg{selectize.js}. However, the selectize input created from
+#'   \code{selectInput(..., selectize = TRUE)} will ignore the empty string
+#'   value when it is a single choice input and the empty string is not in the
+#'   \code{choices} argument. This is to keep compatibility with
+#'   \code{selectInput(..., selectize = FALSE)}.
+#' @export
+varSelectizeInput <- function(inputId, ..., options = NULL, width = NULL) {
+  selectizeIt(
+    inputId,
+    varSelectInput(inputId, ..., selectize = FALSE, width = width),
+    options
+  )
 }

@@ -4,8 +4,9 @@
 \alias{textAreaInput}
 \title{Create a textarea input control}
 \usage{
-textAreaInput(inputId, label, value = "", width = NULL, height = NULL,
-  cols = NULL, rows = NULL, placeholder = NULL, resize = NULL)
+textAreaInput(inputId, label, value = "", width = NULL,
+  height = NULL, cols = NULL, rows = NULL, placeholder = NULL,
+  resize = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -68,5 +69,6 @@ Other input elements: \code{\link{actionButton}},
   \code{\link{numericInput}}, \code{\link{passwordInput}},
   \code{\link{radioButtons}}, \code{\link{selectInput}},
   \code{\link{sliderInput}}, \code{\link{submitButton}},
-  \code{\link{textInput}}
+  \code{\link{textInput}}, \code{\link{varSelectInput}}
 }
+\concept{input elements}

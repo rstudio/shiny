@@ -7,13 +7,15 @@
 \usage{
 observeEvent(eventExpr, handlerExpr, event.env = parent.frame(),
   event.quoted = FALSE, handler.env = parent.frame(),
-  handler.quoted = FALSE, label = NULL, suspended = FALSE, priority = 0,
-  domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
-  ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE)
+  handler.quoted = FALSE, label = NULL, suspended = FALSE,
+  priority = 0, domain = getDefaultReactiveDomain(),
+  autoDestroy = TRUE, ignoreNULL = TRUE, ignoreInit = FALSE,
+  once = FALSE)
 
 eventReactive(eventExpr, valueExpr, event.env = parent.frame(),
-  event.quoted = FALSE, value.env = parent.frame(), value.quoted = FALSE,
-  label = NULL, domain = getDefaultReactiveDomain(), ignoreNULL = TRUE,
+  event.quoted = FALSE, value.env = parent.frame(),
+  value.quoted = FALSE, label = NULL,
+  domain = getDefaultReactiveDomain(), ignoreNULL = TRUE,
   ignoreInit = FALSE)
 }
 \arguments{
@@ -135,15 +137,20 @@ whereas \code{ignoreNULL=FALSE} is desirable if you want to initially perform
 the action/calculation and just let the user re-initiate it (like a
 "Recalculate" button).
 
-Unlike what happens for \code{ignoreNULL}, only \code{observeEvent} takes in an
-\code{ignoreInit} argument. By default, \code{observeEvent} will run right when
-it is created (except if, at that moment, \code{eventExpr} evaluates to \code{NULL}
+Likewise, both \code{observeEvent} and \code{eventReactive} also take in an
+\code{ignoreInit} argument. By default, both of these will run right when they
+are created (except if, at that moment, \code{eventExpr} evaluates to \code{NULL}
 and \code{ignoreNULL} is \code{TRUE}). But when responding to a click of an action
 button, it may often be useful to set \code{ignoreInit} to \code{TRUE}. For
 example, if you're setting up an \code{observeEvent} for a dynamically created
 button, then \code{ignoreInit = TRUE} will guarantee that the action (in
 \code{handlerExpr}) will only be triggered when the button is actually clicked,
-instead of also being triggered when it is created/initialized.
+instead of also being triggered when it is created/initialized. Similarly,
+if you're setting up an \code{eventReactive} that responds to a dynamically
+created button used to refresh some data (then returned by that \code{eventReactive}),
+then you should use \code{eventReactive([...], ignoreInit = TRUE)} if you want
+to let the user decide if/when they want to refresh the data (since, depending
+on the app, this may be a computationally expensive operation).
 
 Even though \code{ignoreNULL} and \code{ignoreInit} can be used for similar
 purposes they are independent from one another. Here's the result of combining
@@ -151,25 +158,28 @@ these:
 
 \describe{
   \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = FALSE}}{
-     This is the default. This combination means that \code{handlerExpr} will
-     run every time that \code{eventExpr} is not \code{NULL}. If, at the time
-     of the \code{observeEvent}'s creation, \code{handleExpr} happens to
-     \emph{not} be \code{NULL}, then the code runs.
+     This is the default. This combination means that \code{handlerExpr}/
+     \code{valueExpr} will run every time that \code{eventExpr} is not
+     \code{NULL}. If, at the time of the creation of the
+     \code{observeEvent}/\code{eventReactive}, \code{eventExpr} happens
+     to \emph{not} be \code{NULL}, then the code runs.
   }
   \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = FALSE}}{
-     This combination means that \code{handlerExpr} will run every time no
-     matter what.
+     This combination means that \code{handlerExpr}/\code{valueExpr} will
+     run every time no matter what.
   }
   \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = TRUE}}{
-     This combination means that \code{handlerExpr} will \emph{not} run when
-     the \code{observeEvent} is created (because \code{ignoreInit = TRUE}),
-     but it will run every other time.
+     This combination means that \code{handlerExpr}/\code{valueExpr} will
+     \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
+     created (because \code{ignoreInit = TRUE}), but it will run every
+     other time.
   }
   \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = TRUE}}{
-     This combination means that \code{handlerExpr} will \emph{not} run when
-     the \code{observeEvent} is created (because \code{ignoreInit = TRUE}).
-     After that, \code{handlerExpr} will run every time that \code{eventExpr}
-     is not \code{NULL}.
+     This combination means that \code{handlerExpr}/\code{valueExpr} will
+     \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
+     created (because  \code{ignoreInit = TRUE}). After that,
+     \code{handlerExpr}/\code{valueExpr} will run every time that
+     \code{eventExpr} is not \code{NULL}.
   }
 }
 }

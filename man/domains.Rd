@@ -5,7 +5,6 @@
 \alias{getDefaultReactiveDomain}
 \alias{withReactiveDomain}
 \alias{onReactiveDomainEnded}
-\alias{domains}
 \title{Reactive domains}
 \usage{
 getDefaultReactiveDomain()

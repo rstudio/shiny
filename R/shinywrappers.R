@@ -1,4 +1,4 @@
-globalVariables('func')
+utils::globalVariables('func')
 
 #' Mark a function as a render function
 #'
@@ -118,7 +118,7 @@ useRenderFunction <- function(renderFunc, inline = FALSE) {
     # If there's a namespace, we must respect it
     id <- getDefaultReactiveDomain()$ns(id)
   }
-  
+
   # Make the id the first positional argument
   outputArgs <- c(list(id), outputArgs)
 
@@ -437,8 +437,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 
 #' UI Output
 #'
-#' \bold{Experimental feature.} Makes a reactive version of a function that
-#' generates HTML using the Shiny UI library.
+#' Renders reactive HTML using the Shiny UI library.
 #'
 #' The corresponding HTML output tag should be \code{div} and have the CSS class
 #' name \code{shiny-html-output} (or use \code{\link{uiOutput}}).
@@ -452,7 +451,7 @@ renderText <- function(expr, env=parent.frame(), quoted=FALSE,
 #'   call to \code{\link{uiOutput}} when \code{renderUI} is used in an
 #'   interactive R Markdown document.
 #'
-#' @seealso conditionalPanel
+#' @seealso \code{\link{uiOutput}}
 #' @export
 #' @examples
 #' ## Only run examples in interactive R sessions

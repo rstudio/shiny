@@ -279,7 +279,19 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
                   shinysession$setShowcase(mode)
               }
 
-              shinysession$manageInputs(msg$data)
+              # In shinysession$createBookmarkObservers() above, observers may be
+              # created, which puts the shiny session in busyCount > 0 state. That
+              # prevents the manageInputs here from taking immediate effect, by
+              # default. The manageInputs here needs to take effect though, because
+              # otherwise the bookmark observers won't find the clientData they are
+              # looking for. So use `now = TRUE` to force the changes to be
+              # immediate.
+              #
+              # FIXME: break createBookmarkObservers into two separate steps, one
+              # before and one after manageInputs, and put the observer creation
+              # in the latter. Then add an assertion that busyCount == 0L when
+              # this manageInputs is called.
+              shinysession$manageInputs(msg$data, now = TRUE)
 
               # The client tells us what singletons were rendered into
               # the initial page
@@ -407,7 +419,10 @@ startApp <- function(appObj, port, host, quiet) {
 
   if (is.numeric(port) || is.integer(port)) {
     if (!quiet) {
-      message('\n', 'Listening on http://', host, ':', port)
+      hostString <- host
+      if (httpuv::ipFamily(host) == 6L)
+        hostString <- paste0("[", hostString, "]")
+      message('\n', 'Listening on http://', hostString, ':', port)
     }
     return(startServer(host, port, handlerManager$createHttpuvApp()))
   } else if (is.character(port)) {
@@ -564,11 +579,15 @@ runApp <- function(appDir=getwd(),
     .globals$running <- FALSE
   }, add = TRUE)
 
-  # Enable per-app Shiny options
+  # Enable per-app Shiny options, for shinyOptions() and getShinyOption().
   oldOptionSet <- .globals$options
   on.exit({
     .globals$options <- oldOptionSet
   },add = TRUE)
+
+  # A unique identifier associated with this run of this application. It is
+  # shared across sessions.
+  shinyOptions(appToken = createUniqueId(8))
 
   # Make warnings print immediately
   # Set pool.scheduler to support pool package
@@ -578,6 +597,11 @@ runApp <- function(appDir=getwd(),
     pool.scheduler = scheduleTask
   )
   on.exit(options(ops), add = TRUE)
+
+  # Set up default cache for app.
+  if (is.null(getShinyOption("cache"))) {
+    shinyOptions(cache = MemoryCache$new())
+  }
 
   appParts <- as.shiny.appobj(appDir)
 
@@ -758,8 +782,17 @@ runApp <- function(appDir=getwd(),
   }, add = TRUE)
 
   if (!is.character(port)) {
-    # http://0.0.0.0/ doesn't work on QtWebKit (i.e. RStudio viewer)
-    browseHost <- if (identical(host, "0.0.0.0")) "127.0.0.1" else host
+    browseHost <- host
+    if (identical(host, "0.0.0.0")) {
+      # http://0.0.0.0/ doesn't work on QtWebKit (i.e. RStudio viewer)
+      browseHost <- "127.0.0.1"
+    } else if (identical(host, "::")) {
+      browseHost <- "::1"
+    }
+
+    if (httpuv::ipFamily(browseHost) == 6L) {
+      browseHost <- paste0("[", browseHost, "]")
+    }
 
     appUrl <- paste("http://", browseHost, ":", port, sep="")
     if (is.function(launch.browser))

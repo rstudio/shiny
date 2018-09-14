@@ -4,7 +4,8 @@
 \alias{snapshotPreprocessInput}
 \title{Add a function for preprocessing an input before taking a test snapshot}
 \usage{
-snapshotPreprocessInput(inputId, fun, session = getDefaultReactiveDomain())
+snapshotPreprocessInput(inputId, fun,
+  session = getDefaultReactiveDomain())
 }
 \arguments{
 \item{inputId}{Name of the input value.}

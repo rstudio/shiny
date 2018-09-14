@@ -7,9 +7,10 @@
 \title{Reporting progress (functional API)}
 \usage{
 withProgress(expr, min = 0, max = 1, value = min + (max - min) * 0.1,
-  message = NULL, detail = NULL, style = getShinyOption("progress.style",
-  default = "notification"), session = getDefaultReactiveDomain(),
-  env = parent.frame(), quoted = FALSE)
+  message = NULL, detail = NULL,
+  style = getShinyOption("progress.style", default = "notification"),
+  session = getDefaultReactiveDomain(), env = parent.frame(),
+  quoted = FALSE)
 
 setProgress(value = NULL, message = NULL, detail = NULL,
   session = getDefaultReactiveDomain())

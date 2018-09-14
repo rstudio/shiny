@@ -5,8 +5,9 @@
 \title{Create date range input}
 \usage{
 dateRangeInput(inputId, label, start = NULL, end = NULL, min = NULL,
-  max = NULL, format = "yyyy-mm-dd", startview = "month", weekstart = 0,
-  language = "en", separator = " to ", width = NULL, autoclose = TRUE)
+  max = NULL, format = "yyyy-mm-dd", startview = "month",
+  weekstart = 0, language = "en", separator = " to ", width = NULL,
+  autoclose = TRUE)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -124,6 +125,6 @@ Other input elements: \code{\link{actionButton}},
   \code{\link{passwordInput}}, \code{\link{radioButtons}},
   \code{\link{selectInput}}, \code{\link{sliderInput}},
   \code{\link{submitButton}}, \code{\link{textAreaInput}},
-  \code{\link{textInput}}
+  \code{\link{textInput}}, \code{\link{varSelectInput}}
 }
 \concept{input elements}

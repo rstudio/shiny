@@ -5,13 +5,13 @@
 \alias{fixedPanel}
 \title{Panel with absolute positioning}
 \usage{
-absolutePanel(..., top = NULL, left = NULL, right = NULL, bottom = NULL,
-  width = NULL, height = NULL, draggable = FALSE, fixed = FALSE,
-  cursor = c("auto", "move", "default", "inherit"))
+absolutePanel(..., top = NULL, left = NULL, right = NULL,
+  bottom = NULL, width = NULL, height = NULL, draggable = FALSE,
+  fixed = FALSE, cursor = c("auto", "move", "default", "inherit"))
 
-fixedPanel(..., top = NULL, left = NULL, right = NULL, bottom = NULL,
-  width = NULL, height = NULL, draggable = FALSE, cursor = c("auto",
-  "move", "default", "inherit"))
+fixedPanel(..., top = NULL, left = NULL, right = NULL,
+  bottom = NULL, width = NULL, height = NULL, draggable = FALSE,
+  cursor = c("auto", "move", "default", "inherit"))
 }
 \arguments{
 \item{...}{Attributes (named arguments) or children (unnamed arguments) that

@@ -7,13 +7,15 @@
 \usage{
 observeEvent(eventExpr, handlerExpr, event.env = parent.frame(),
   event.quoted = FALSE, handler.env = parent.frame(),
-  handler.quoted = FALSE, label = NULL, suspended = FALSE, priority = 0,
-  domain = getDefaultReactiveDomain(), autoDestroy = TRUE,
-  ignoreNULL = TRUE, ignoreInit = FALSE, once = FALSE)
+  handler.quoted = FALSE, label = NULL, suspended = FALSE,
+  priority = 0, domain = getDefaultReactiveDomain(),
+  autoDestroy = TRUE, ignoreNULL = TRUE, ignoreInit = FALSE,
+  once = FALSE)
 
 eventReactive(eventExpr, valueExpr, event.env = parent.frame(),
-  event.quoted = FALSE, value.env = parent.frame(), value.quoted = FALSE,
-  label = NULL, domain = getDefaultReactiveDomain(), ignoreNULL = TRUE,
+  event.quoted = FALSE, value.env = parent.frame(),
+  value.quoted = FALSE, label = NULL,
+  domain = getDefaultReactiveDomain(), ignoreNULL = TRUE,
   ignoreInit = FALSE)
 }
 \arguments{

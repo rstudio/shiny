@@ -5,9 +5,11 @@
 \alias{throttle}
 \title{Slow down a reactive expression with debounce/throttle}
 \usage{
-debounce(r, millis, priority = 100, domain = getDefaultReactiveDomain())
+debounce(r, millis, priority = 100,
+  domain = getDefaultReactiveDomain())
 
-throttle(r, millis, priority = 100, domain = getDefaultReactiveDomain())
+throttle(r, millis, priority = 100,
+  domain = getDefaultReactiveDomain())
 }
 \arguments{
 \item{r}{A reactive expression (that invalidates too often).}

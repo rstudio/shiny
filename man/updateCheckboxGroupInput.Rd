@@ -4,9 +4,9 @@
 \alias{updateCheckboxGroupInput}
 \title{Change the value of a checkbox group input on the client}
 \usage{
-updateCheckboxGroupInput(session, inputId, label = NULL, choices = NULL,
-  selected = NULL, inline = FALSE, choiceNames = NULL,
-  choiceValues = NULL)
+updateCheckboxGroupInput(session, inputId, label = NULL,
+  choices = NULL, selected = NULL, inline = FALSE,
+  choiceNames = NULL, choiceValues = NULL)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to

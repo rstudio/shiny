@@ -4,7 +4,8 @@
 \alias{renderUI}
 \title{UI Output}
 \usage{
-renderUI(expr, env = parent.frame(), quoted = FALSE, outputArgs = list())
+renderUI(expr, env = parent.frame(), quoted = FALSE,
+  outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that returns a Shiny tag object, \code{\link{HTML}},

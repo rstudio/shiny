@@ -249,9 +249,15 @@ function mapValues(obj, f) {
   const newObj = {};
   for (let key in obj) {
     if (obj.hasOwnProperty(key))
-      newObj[key] = f(obj[key]);
+      newObj[key] = f(obj[key], key, obj);
   }
   return newObj;
+}
+
+// This is does the same as Number.isNaN, but that function unfortunately does
+// not exist in any version of IE.
+function isnan(x) {
+  return typeof(x) === 'number' && isNaN(x);
 }
 
 // Binary equality function used by the equal function.

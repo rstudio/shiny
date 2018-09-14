@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.0.5.9000
+Version: 1.1.0.9001
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -65,7 +65,7 @@ Depends:
 Imports:
     utils,
     grDevices,
-    httpuv (>= 1.4.0),
+    httpuv (>= 1.4.3.9001),
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,
@@ -89,7 +89,10 @@ Suggests:
     magrittr
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
-Collate: 
+Remotes:
+    tidyverse/ggplot2,
+    rstudio/httpuv
+Collate:
     'app.R'
     'bookmark-state-local.R'
     'stack.R'
@@ -100,7 +103,10 @@ Collate:
     'map.R'
     'utils.R'
     'bootstrap.R'
-    'cache.R'
+    'cache-context.R'
+    'cache-disk.R'
+    'cache-memory.R'
+    'cache-utils.R'
     'diagnose.R'
     'fileupload.R'
     'graph.R'
@@ -139,6 +145,7 @@ Collate:
     'priorityqueue.R'
     'progress.R'
     'react.R'
+    'render-cached-plot.R'
     'render-plot.R'
     'render-table.R'
     'run-url.R'
@@ -155,4 +162,4 @@ Collate:
     'test-export.R'
     'timer.R'
     'update-input.R'
-RoxygenNote: 6.0.1.9000
+RoxygenNote: 6.1.0

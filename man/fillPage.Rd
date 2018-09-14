@@ -4,7 +4,8 @@
 \alias{fillPage}
 \title{Create a page that fills the window}
 \usage{
-fillPage(..., padding = 0, title = NULL, bootstrap = TRUE, theme = NULL)
+fillPage(..., padding = 0, title = NULL, bootstrap = TRUE,
+  theme = NULL)
 }
 \arguments{
 \item{...}{Elements to include within the page.}

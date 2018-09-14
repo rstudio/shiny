@@ -27,6 +27,8 @@ shiny 1.1.0.9001
 
 * Fixed [#2093](https://github.com/rstudio/shiny/issues/2093): Make sure bookmark scope directory does not exist before trying to create it. [#2168](https://github.com/rstudio/shiny/pull/2168)
 
+* Upgrade selectize.js from 0.12.1 to 0.12.4 [#2028](https://github.com/rstudio/shiny/issues/2028)
+
 ### Bug fixes
 
 * Fixed [#2033](https://github.com/rstudio/shiny/issues/2033): RStudio Viewer window not closed on `shiny::stopApp()`. Thanks, @vnijs! [#2047](https://github.com/rstudio/shiny/pull/2047)

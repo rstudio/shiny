@@ -526,19 +526,21 @@ imageutils.initCoordmap = function($el, coordmap) {
         if (clip)
           return;
 
-        coords.x_px = coordmap.scaleCssToImg(offset_css).x;
-        coords.y_px = coordmap.scaleCssToImg(offset_css).y;
+        const coords_px = coordmap.scaleCssToImg(offset_css);
+        coords.x_px = coords_px.x;
+        coords.y_px = coords_px.y;
 
         exports.setInputValue(inputId, coords, {priority: "event"});
         return;
       }
       const panel = coordmap.getPanelCss(offset_css);
-      
-      coords.x = panel.scaleImgToData(coordmap.scaleCssToImg(offset_css)).x;
-      coords.y = panel.scaleImgToData(coordmap.scaleCssToImg(offset_css)).y;
 
-      coords.x_px = coordmap.scaleCssToImg(offset_css).x;
-      coords.y_px = coordmap.scaleCssToImg(offset_css).y;
+      const coords_px = coordmap.scaleCssToImg(offset_css);
+      const coords_pos = panel.scaleImgToData(coords_px);
+      coords.x = coords_pos.x;
+      coords.y = coords_pos.y;
+      coords.x_px = coords_px.x;
+      coords.y_px = coords_px.y;
 
       coords.pixelratio = coordmap.cssToImgScalingRatio();
 

@@ -3060,7 +3060,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           exports.setInputValue(inputId, null);
           return;
         }
-
+        var coords = {};
         var offset_css = coordmap.mouseOffsetCss(e);
         // If outside of plotting region
         if (!coordmap.isInPanelCss(offset_css)) {
@@ -3069,12 +3069,22 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             return;
           }
           if (clip) return;
-        }
-        if (clip && !coordmap.isInPanelCss(offset_css)) return;
 
+          var _coords_px = coordmap.scaleCssToImg(offset_css);
+          coords.x_px = _coords_px.x;
+          coords.y_px = _coords_px.y;
+
+          exports.setInputValue(inputId, coords, { priority: "event" });
+          return;
+        }
         var panel = coordmap.getPanelCss(offset_css);
 
-        var coords = panel.scaleImgToData(coordmap.scaleCssToImg(offset_css));
+        var coords_px = coordmap.scaleCssToImg(offset_css);
+        var coords_pos = panel.scaleImgToData(coords_px);
+        coords.x = coords_pos.x;
+        coords.y = coords_pos.y;
+        coords.x_px = coords_px.x;
+        coords.y_px = coords_px.y;
 
         coords.pixelratio = coordmap.cssToImgScalingRatio();
 

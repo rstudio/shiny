@@ -803,6 +803,9 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
     // Add the panel (facet) variables, if present
     $.extend(coords, panel.panel_vars);
 
+    coords.coords_css = brush.boundsCss();
+    coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
+
     coords.pixelratio = coordmap.cssToImgScalingRatio();
 
     // Add variable name mappings

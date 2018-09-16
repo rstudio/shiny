@@ -527,8 +527,8 @@ imageutils.initCoordmap = function($el, coordmap) {
           return;
 
         const coords_px = coordmap.scaleCssToImg(offset_css);
-        coords.x_px = coords_px.x;
-        coords.y_px = coords_px.y;
+        coords.coords_css = offset_css;
+        coords.coords_img = coords_px;
 
         exports.setInputValue(inputId, coords, {priority: "event"});
         return;
@@ -539,8 +539,8 @@ imageutils.initCoordmap = function($el, coordmap) {
       const coords_pos = panel.scaleImgToData(coords_px);
       coords.x = coords_pos.x;
       coords.y = coords_pos.y;
-      coords.x_px = coords_px.x;
-      coords.y_px = coords_px.y;
+      coords.coords_css = offset_css;
+      coords.coords_img = coords_px;
 
       coords.pixelratio = coordmap.cssToImgScalingRatio();
 

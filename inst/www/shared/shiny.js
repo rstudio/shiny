@@ -3071,8 +3071,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           if (clip) return;
 
           var _coords_px = coordmap.scaleCssToImg(offset_css);
-          coords.x_px = _coords_px.x;
-          coords.y_px = _coords_px.y;
+          coords.coords_css = offset_css;
+          coords.coords_img = _coords_px;
 
           exports.setInputValue(inputId, coords, { priority: "event" });
           return;
@@ -3083,8 +3083,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var coords_pos = panel.scaleImgToData(coords_px);
         coords.x = coords_pos.x;
         coords.y = coords_pos.y;
-        coords.x_px = coords_px.x;
-        coords.y_px = coords_px.y;
+        coords.coords_css = offset_css;
+        coords.coords_img = coords_px;
 
         coords.pixelratio = coordmap.cssToImgScalingRatio();
 
@@ -3335,6 +3335,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       // Add the panel (facet) variables, if present
       $.extend(coords, panel.panel_vars);
+
+      coords.coords_css = brush.boundsCss();
+      coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
 
       coords.pixelratio = coordmap.cssToImgScalingRatio();
 

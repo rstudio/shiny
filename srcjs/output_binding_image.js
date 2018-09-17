@@ -542,7 +542,7 @@ imageutils.initCoordmap = function($el, coordmap) {
       coords.coords_css = offset_css;
       coords.coords_img = coords_px;
 
-      coords.pixelratio = coordmap.cssToImgScalingRatio();
+      coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
       // Add the panel (facet) variables, if present
       $.extend(coords, panel.panel_vars);
@@ -806,7 +806,7 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
     coords.coords_css = brush.boundsCss();
     coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
 
-    coords.pixelratio = coordmap.cssToImgScalingRatio();
+    coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
     // Add variable name mappings
     coords.mapping = panel.mapping;

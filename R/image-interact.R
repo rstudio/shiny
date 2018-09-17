@@ -128,7 +128,7 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #   ..$ xmax: num 372
 #   ..$ ymin: num 140
 #   ..$ ymax: num 257
-#  $ pixelratio:List of 2
+#  $ img_css_ratio:List of 2
 #   ..$ x: num 1.25
 #   ..$ y: num 1.25
 #  $ mapping: Named list()
@@ -166,7 +166,7 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #   ..$ xmax: num 372
 #   ..$ ymin: num 140
 #   ..$ ymax: num 257
-#  $ pixelratio:List of 2
+#  $ img_css_ratio:List of 2
 #   ..$ x: num 1.25
 #   ..$ y: num 1.25
 #  $ mapping  :List of 4
@@ -283,8 +283,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 
   # Get x/y distances (in css coordinates)
   dist_css <- list(
-    x = (data_img$x - point_img$x) / coordinfo$pixelratio$x,
-    y = (data_img$y - point_img$y) / coordinfo$pixelratio$y
+    x = (data_img$x - point_img$x) / coordinfo$img_css_ratio$x,
+    y = (data_img$y - point_img$y) / coordinfo$img_css_ratio$y
   )
 
   # Distances of data points to the target point, in css pixels.
@@ -338,12 +338,9 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 #  $ coords_img:List of 2
 #   ..$ x: num 358
 #   ..$ y: int 240
-#  $ pixelratio:List of 2
+#  $ img_css_ratio:List of 2
 #   ..$ x: num 1.25
 #   ..$ y: num 1.25
-#  $ pixelratio:List of 2
-#  ..$ x: num 2
-#  ..$ y: num 2
 #  $ mapping   : Named list()
 #  $ domain    :List of 4
 #   ..$ left  : num 1.36
@@ -371,12 +368,9 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 #  $ coords_img:List of 2
 #   ..$ x: num 358
 #   ..$ y: int 240
-#  $ pixelratio:List of 2
+#  $ img_css_ratio:List of 2
 #   ..$ x: num 1.25
 #   ..$ y: num 1.25
-#  $ pixelratio:List of 2
-#  ..$ x: num 2
-#  ..$ y: num 2
 #  $ panelvar1 : int 6
 #  $ panelvar2 : int 0
 #  $ mapping   :List of 4

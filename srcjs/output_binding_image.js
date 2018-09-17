@@ -516,9 +516,9 @@ imageutils.initCoordmap = function($el, coordmap) {
         return;
       }
       const coords = {};
-      const offset_css = coordmap.mouseOffsetCss(e);
+      const coords_css = coordmap.mouseOffsetCss(e);
       // If outside of plotting region
-      if (!coordmap.isInPanelCss(offset_css)) {
+      if (!coordmap.isInPanelCss(coords_css)) {
         if (nullOutside) {
           exports.setInputValue(inputId, null);
           return;
@@ -526,21 +526,20 @@ imageutils.initCoordmap = function($el, coordmap) {
         if (clip)
           return;
 
-        const coords_px = coordmap.scaleCssToImg(offset_css);
-        coords.coords_css = offset_css;
-        coords.coords_img = coords_px;
+        coords.coords_css = coords_css;
+        coords.coords_img = coordmap.scaleCssToImg(coords_css);
 
         exports.setInputValue(inputId, coords, {priority: "event"});
         return;
       }
-      const panel = coordmap.getPanelCss(offset_css);
+      const panel = coordmap.getPanelCss(coords_css);
 
-      const coords_px = coordmap.scaleCssToImg(offset_css);
-      const coords_pos = panel.scaleImgToData(coords_px);
-      coords.x = coords_pos.x;
-      coords.y = coords_pos.y;
-      coords.coords_css = offset_css;
-      coords.coords_img = coords_px;
+      const coords_img = coordmap.scaleCssToImg(coords_css);
+      const coords_data = panel.scaleImgToData(coords_img);
+      coords.x = coords_data.x;
+      coords.y = coords_data.y;
+      coords.coords_css = coords_css;
+      coords.coords_img = coords_img;
 
       coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 

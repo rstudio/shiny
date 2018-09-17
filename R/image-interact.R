@@ -276,7 +276,7 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   y <- asNumber(df[[yvar]])
 
   # Get the coordinates of the point (in img pixel coordinates)
-  point_img <- coordinfo$coord_img
+  point_img <- coordinfo$coords_img
 
   # Get coordinates of data points (in img pixel coordinates)
   data_img <- scaleCoords(x, y, coordinfo)

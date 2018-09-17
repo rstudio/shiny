@@ -1,3 +1,9 @@
+# Helper function for getting potentially transformed variable from input
+# data.frame to nearPoints or brushPoints
+eval_var_in_data <- function(var, data, envir) {
+  eval(parse(text = var), data, envir)
+}
+
 #' Find rows of data that are selected by a brush
 #'
 #' This function returns rows from a data frame which are under a brush used
@@ -86,18 +92,15 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   if (use_x) {
     if (is.null(xvar))
       stop("brushedPoints: not able to automatically infer `xvar` from brush")
-    if (!(xvar %in% names(df)))
-      stop("brushedPoints: `xvar` not in names of input")
     # Extract data values from the data frame
-    x <- asNumber(df[[xvar]])
+    x <- asNumber(eval_var_in_data(xvar, df, envir = parent.frame()))
     keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
   }
   if (use_y) {
     if (is.null(yvar))
       stop("brushedPoints: not able to automatically infer `yvar` from brush")
-    if (!(yvar %in% names(df)))
-      stop("brushedPoints: `yvar` not in names of input")
-    y <- asNumber(df[[yvar]])
+    # Extract data values from the data frame
+    y <- asNumber(eval_var_in_data(yvar, df, envir = parent.frame()))
     keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
   }
 
@@ -249,14 +252,9 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   if (is.null(yvar))
     stop("nearPoints: not able to automatically infer `yvar` from coordinfo")
 
-  if (!(xvar %in% names(df)))
-    stop("nearPoints: `xvar` not in names of input")
-  if (!(yvar %in% names(df)))
-    stop("nearPoints: `yvar` not in names of input")
-
   # Extract data values from the data frame
-  x <- asNumber(df[[xvar]])
-  y <- asNumber(df[[yvar]])
+  x <- asNumber(eval_var_in_data(xvar, df, envir = parent.frame()))
+  y <- asNumber(eval_var_in_data(yvar, df, envir = parent.frame()))
 
   # Get the coordinates of the point (in img pixel coordinates)
   point_img <- scaleCoords(coordinfo$x, coordinfo$y, coordinfo)

@@ -13,10 +13,9 @@ brushedPoints(df, brush, xvar = NULL, yvar = NULL, panelvar1 = NULL,
 \item{brush}{The data from a brush, such as \code{input$plot_brush}.}
 
 \item{xvar, yvar}{A string with the name of the variable on the x or y axis.
-This should be the name of a column in \code{df} or a string with an
-expression that will be evaluated in the context of \code{df}. If absent,
-then this function will try to infer the variable from the brush (only works
-for ggplot2).}
+This must also be the name of a column in \code{df}. If absent, then this
+function will try to infer the variable from the brush (only works for
+ggplot2).}
 
 \item{panelvar1, panelvar2}{Each of these is a string with the name of a panel
 variable. For example, if with ggplot2, you facet on a variable called
@@ -51,7 +50,12 @@ For plots created with ggplot2, it should not be necessary to specify the
 column names; that information will already be contained in the brush,
 provided that variables are in the original data, and not computed. For
 example, with \code{ggplot(cars, aes(x=speed, y=dist)) + geom_point()}, you
-could use \code{brushedPoints(cars, input$cars_brush)}.
+could use \code{brushedPoints(cars, input$cars_brush)}. If, however, you use
+a computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) +
+geom_point()}, then it will not be able to automatically extract column names
+and filter on them. If you want to use this function to filter data, it is
+recommended that you not use computed columns; instead, modify the data
+first, and then make the plot with "raw" columns in the modified data.
 
 If a specified x or y column is a factor, then it will be coerced to an
 integer vector. If it is a character vector, then it will be coerced to a

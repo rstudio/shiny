@@ -1,9 +1,3 @@
-# Helper function for getting potentially transformed variable from input
-# data.frame to nearPoints or brushPoints
-eval_var_in_data <- function(var, data, envir) {
-  eval(parse(text = var), data, envir)
-}
-
 #' Find rows of data that are selected by a brush
 #'
 #' This function returns rows from a data frame which are under a brush used
@@ -26,7 +20,12 @@ eval_var_in_data <- function(var, data, envir) {
 #' column names; that information will already be contained in the brush,
 #' provided that variables are in the original data, and not computed. For
 #' example, with \code{ggplot(cars, aes(x=speed, y=dist)) + geom_point()}, you
-#' could use \code{brushedPoints(cars, input$cars_brush)}.
+#' could use \code{brushedPoints(cars, input$cars_brush)}. If, however, you use
+#' a computed column, like \code{ggplot(cars, aes(x=speed/2, y=dist)) +
+#' geom_point()}, then it will not be able to automatically extract column names
+#' and filter on them. If you want to use this function to filter data, it is
+#' recommended that you not use computed columns; instead, modify the data
+#' first, and then make the plot with "raw" columns in the modified data.
 #'
 #' If a specified x or y column is a factor, then it will be coerced to an
 #' integer vector. If it is a character vector, then it will be coerced to a
@@ -40,10 +39,9 @@ eval_var_in_data <- function(var, data, envir) {
 #' @param brush The data from a brush, such as \code{input$plot_brush}.
 #' @param df A data frame from which to select rows.
 #' @param xvar,yvar A string with the name of the variable on the x or y axis.
-#'   This should be the name of a column in \code{df} or a string with an
-#'   expression that will be evaluated in the context of \code{df}. If absent,
-#'   then this function will try to infer the variable from the brush (only works
-#'   for ggplot2).
+#'   This must also be the name of a column in \code{df}. If absent, then this
+#'   function will try to infer the variable from the brush (only works for
+#'   ggplot2).
 #' @param panelvar1,panelvar2 Each of these is a string with the name of a panel
 #'   variable. For example, if with ggplot2, you facet on a variable called
 #'   \code{cyl}, then you can use \code{"cyl"} here. However, specifying the
@@ -88,15 +86,18 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   if (use_x) {
     if (is.null(xvar))
       stop("brushedPoints: not able to automatically infer `xvar` from brush")
+    if (!(xvar %in% names(df)))
+      stop("brushedPoints: `xvar` not in names of input")
     # Extract data values from the data frame
-    x <- asNumber(eval_var_in_data(xvar, df, envir = parent.frame()))
+    x <- asNumber(df[[xvar]])
     keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
   }
   if (use_y) {
     if (is.null(yvar))
       stop("brushedPoints: not able to automatically infer `yvar` from brush")
-    # Extract data values from the data frame
-    y <- asNumber(eval_var_in_data(yvar, df, envir = parent.frame()))
+    if (!(yvar %in% names(df)))
+      stop("brushedPoints: `yvar` not in names of input")
+    y <- asNumber(df[[yvar]])
     keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
   }
 
@@ -248,9 +249,14 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   if (is.null(yvar))
     stop("nearPoints: not able to automatically infer `yvar` from coordinfo")
 
+  if (!(xvar %in% names(df)))
+    stop("nearPoints: `xvar` not in names of input")
+  if (!(yvar %in% names(df)))
+    stop("nearPoints: `yvar` not in names of input")
+
   # Extract data values from the data frame
-  x <- asNumber(eval_var_in_data(xvar, df, envir = parent.frame()))
-  y <- asNumber(eval_var_in_data(yvar, df, envir = parent.frame()))
+  x <- asNumber(df[[xvar]])
+  y <- asNumber(df[[yvar]])
 
   # Get the coordinates of the point (in img pixel coordinates)
   point_img <- scaleCoords(coordinfo$x, coordinfo$y, coordinfo)

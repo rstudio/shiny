@@ -381,7 +381,7 @@ imageutils.initCoordmap = function($el, coordmap) {
 
     const result = mapValues(offset_css, (value, key) => {
       const prefix = key.substring(0, 1);
-      
+
       if (prefix === "x") {
         return offset_css[key] / pixel_scaling.x;
       } else if (prefix === "y") {
@@ -402,7 +402,7 @@ imageutils.initCoordmap = function($el, coordmap) {
 
     const result = mapValues(offset_img, (value, key) => {
       const prefix = key.substring(0, 1);
-      
+
       if (prefix === "x") {
         return offset_img[key] * pixel_scaling.x;
       } else if (prefix === "y") {
@@ -515,24 +515,33 @@ imageutils.initCoordmap = function($el, coordmap) {
         exports.setInputValue(inputId, null);
         return;
       }
-
-      const offset_css = coordmap.mouseOffsetCss(e);
+      const coords = {};
+      const coords_css = coordmap.mouseOffsetCss(e);
       // If outside of plotting region
-      if (!coordmap.isInPanelCss(offset_css)) {
+      if (!coordmap.isInPanelCss(coords_css)) {
         if (nullOutside) {
           exports.setInputValue(inputId, null);
           return;
         }
         if (clip)
           return;
+
+        coords.coords_css = coords_css;
+        coords.coords_img = coordmap.scaleCssToImg(coords_css);
+
+        exports.setInputValue(inputId, coords, {priority: "event"});
+        return;
       }
-      if (clip && !coordmap.isInPanelCss(offset_css)) return;
+      const panel = coordmap.getPanelCss(coords_css);
 
-      const panel = coordmap.getPanelCss(offset_css);
+      const coords_img = coordmap.scaleCssToImg(coords_css);
+      const coords_data = panel.scaleImgToData(coords_img);
+      coords.x = coords_data.x;
+      coords.y = coords_data.y;
+      coords.coords_css = coords_css;
+      coords.coords_img = coords_img;
 
-      const coords = panel.scaleImgToData(coordmap.scaleCssToImg(offset_css));
-
-      coords.pixelratio = coordmap.cssToImgScalingRatio();
+      coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
       // Add the panel (facet) variables, if present
       $.extend(coords, panel.panel_vars);
@@ -793,7 +802,10 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
     // Add the panel (facet) variables, if present
     $.extend(coords, panel.panel_vars);
 
-    coords.pixelratio = coordmap.cssToImgScalingRatio();
+    coords.coords_css = brush.boundsCss();
+    coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
+
+    coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
     // Add variable name mappings
     coords.mapping = panel.mapping;

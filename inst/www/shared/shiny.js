@@ -3060,23 +3060,32 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           exports.setInputValue(inputId, null);
           return;
         }
-
-        var offset_css = coordmap.mouseOffsetCss(e);
+        var coords = {};
+        var coords_css = coordmap.mouseOffsetCss(e);
         // If outside of plotting region
-        if (!coordmap.isInPanelCss(offset_css)) {
+        if (!coordmap.isInPanelCss(coords_css)) {
           if (nullOutside) {
             exports.setInputValue(inputId, null);
             return;
           }
           if (clip) return;
+
+          coords.coords_css = coords_css;
+          coords.coords_img = coordmap.scaleCssToImg(coords_css);
+
+          exports.setInputValue(inputId, coords, { priority: "event" });
+          return;
         }
-        if (clip && !coordmap.isInPanelCss(offset_css)) return;
+        var panel = coordmap.getPanelCss(coords_css);
 
-        var panel = coordmap.getPanelCss(offset_css);
+        var coords_img = coordmap.scaleCssToImg(coords_css);
+        var coords_data = panel.scaleImgToData(coords_img);
+        coords.x = coords_data.x;
+        coords.y = coords_data.y;
+        coords.coords_css = coords_css;
+        coords.coords_img = coords_img;
 
-        var coords = panel.scaleImgToData(coordmap.scaleCssToImg(offset_css));
-
-        coords.pixelratio = coordmap.cssToImgScalingRatio();
+        coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
         // Add the panel (facet) variables, if present
         $.extend(coords, panel.panel_vars);
@@ -3326,7 +3335,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // Add the panel (facet) variables, if present
       $.extend(coords, panel.panel_vars);
 
-      coords.pixelratio = coordmap.cssToImgScalingRatio();
+      coords.coords_css = brush.boundsCss();
+      coords.coords_img = coordmap.scaleCssToImg(coords.coords_css);
+
+      coords.img_css_ratio = coordmap.cssToImgScalingRatio();
 
       // Add variable name mappings
       coords.mapping = panel.mapping;

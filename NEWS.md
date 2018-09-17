@@ -29,7 +29,7 @@ shiny 1.1.0.9001
 
 * Upgrade selectize.js from 0.12.1 to 0.12.4 [#2028](https://github.com/rstudio/shiny/issues/2028)
 
-* Addressed [#2079](https://github.com/rstudio/shiny/issues/2079): Added `coords_img` and `coords_css` containing x and y location information for plot brush, hover, and click events. [#2183](https://github.com/rstudio/shiny/pull/2183)
+* Addressed [#2079](https://github.com/rstudio/shiny/issues/2079): Added `coords_img`, `coords_css`, and `img_css_ratio` fields containing x and y location information for plot brush, hover, and click events. [#2183](https://github.com/rstudio/shiny/pull/2183)
 
 ### Bug fixes
 

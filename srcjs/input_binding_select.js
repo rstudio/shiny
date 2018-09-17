@@ -115,7 +115,14 @@ $.extend(selectInputBinding, {
     $(el).trigger('change');
   },
   subscribe: function(el, callback) {
+    var thiz = this;
     $(el).on('change.selectInputBinding', function(event) {
+      // https://github.com/rstudio/shiny/issues/2162
+      // Prevent spurious events that are gonna be squelched in
+      // a second anyway by the onItemRemove down below
+      if (el.nonempty && thiz.getValue(el) === "") {
+        return;
+      }
       callback();
     });
   },
@@ -140,6 +147,7 @@ $.extend(selectInputBinding, {
     }, JSON.parse(config.html()));
     // selectize created from selectInput()
     if (typeof(config.data('nonempty')) !== 'undefined') {
+      el.nonempty = true;
       options = $.extend(options, {
         onItemRemove: function(value) {
           if (this.getValue() === "")
@@ -153,6 +161,8 @@ $.extend(selectInputBinding, {
             this.setValue($("select#" + $escape(el.id)).val());
         }
       });
+    } else {
+      el.nonempty = false;
     }
     // options that should be eval()ed
     if (config.data('eval') instanceof Array)

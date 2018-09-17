@@ -5376,7 +5376,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       $(el).trigger('change');
     },
     subscribe: function subscribe(el, callback) {
+      var thiz = this;
       $(el).on('change.selectInputBinding', function (event) {
+        // https://github.com/rstudio/shiny/issues/2162
+        // Prevent spurious events that are gonna be squelched in
+        // a second anyway by the onItemRemove down below
+        if (el.nonempty && thiz.getValue(el) === "") {
+          return;
+        }
         callback();
       });
     },
@@ -5401,6 +5408,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }, JSON.parse(config.html()));
       // selectize created from selectInput()
       if (typeof config.data('nonempty') !== 'undefined') {
+        el.nonempty = true;
         options = $.extend(options, {
           onItemRemove: function onItemRemove(value) {
             if (this.getValue() === "") $("select#" + $escape(el.id)).empty().append($("<option/>", {
@@ -5412,6 +5420,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             if (this.getValue() === "") this.setValue($("select#" + $escape(el.id)).val());
           }
         });
+      } else {
+        el.nonempty = false;
       }
       // options that should be eval()ed
       if (config.data('eval') instanceof Array) $.each(config.data('eval'), function (i, x) {

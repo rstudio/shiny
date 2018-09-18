@@ -86,6 +86,8 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   if (use_x) {
     if (is.null(xvar))
       stop("brushedPoints: not able to automatically infer `xvar` from brush")
+    if (!(xvar %in% names(df)))
+      stop("brushedPoints: `xvar` ('", xvar ,"')  not in names of input")
     # Extract data values from the data frame
     x <- asNumber(df[[xvar]])
     keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
@@ -93,6 +95,8 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
   if (use_y) {
     if (is.null(yvar))
       stop("brushedPoints: not able to automatically infer `yvar` from brush")
+    if (!(yvar %in% names(df)))
+      stop("brushedPoints: `yvar` ('", yvar ,"') not in names of input")
     y <- asNumber(df[[yvar]])
     keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
   }
@@ -118,6 +122,19 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ xmax   : num 4.22
 #  $ ymin   : num 13.9
 #  $ ymax   : num 19.8
+#  $ coords_css:List of 4
+#   ..$ xmin: int 260
+#   ..$ xmax: int 298
+#   ..$ ymin: num 112
+#   ..$ ymax: num 205
+#  $ coords_img:List of 4
+#   ..$ xmin: int 325
+#   ..$ xmax: num 372
+#   ..$ ymin: num 140
+#   ..$ ymax: num 257
+#  $ img_css_ratio:List of 2
+#   ..$ x: num 1.25
+#   ..$ y: num 1.25
 #  $ mapping: Named list()
 #  $ domain :List of 4
 #   ..$ left  : num 1.36
@@ -143,6 +160,19 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
 #  $ ymax     : num 20.4
 #  $ panelvar1: int 6
 #  $ panelvar2: int 0
+#  $ coords_css:List of 4
+#   ..$ xmin: int 260
+#   ..$ xmax: int 298
+#   ..$ ymin: num 112
+#   ..$ ymax: num 205
+#  $ coords_img:List of 4
+#   ..$ xmin: int 325
+#   ..$ xmax: num 372
+#   ..$ ymin: num 140
+#   ..$ ymax: num 257
+#  $ img_css_ratio:List of 2
+#   ..$ x: num 1.25
+#   ..$ y: num 1.25
 #  $ mapping  :List of 4
 #   ..$ x        : chr "wt"
 #   ..$ y        : chr "mpg"
@@ -245,20 +275,25 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
   if (is.null(yvar))
     stop("nearPoints: not able to automatically infer `yvar` from coordinfo")
 
+  if (!(xvar %in% names(df)))
+    stop("nearPoints: `xvar` ('", xvar ,"')  not in names of input")
+  if (!(yvar %in% names(df)))
+    stop("nearPoints: `yvar` ('", yvar ,"')  not in names of input")
+
   # Extract data values from the data frame
   x <- asNumber(df[[xvar]])
   y <- asNumber(df[[yvar]])
 
   # Get the coordinates of the point (in img pixel coordinates)
-  point_img <- scaleCoords(coordinfo$x, coordinfo$y, coordinfo)
+  point_img <- coordinfo$coords_img
 
   # Get coordinates of data points (in img pixel coordinates)
   data_img <- scaleCoords(x, y, coordinfo)
 
   # Get x/y distances (in css coordinates)
   dist_css <- list(
-    x = (data_img$x - point_img$x) / coordinfo$pixelratio$x,
-    y = (data_img$y - point_img$y) / coordinfo$pixelratio$y
+    x = (data_img$x - point_img$x) / coordinfo$img_css_ratio$x,
+    y = (data_img$y - point_img$y) / coordinfo$img_css_ratio$y
   )
 
   # Distances of data points to the target point, in css pixels.
@@ -306,9 +341,15 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 # List of 7
 #  $ x         : num 4.37
 #  $ y         : num 12
-#  $ pixelratio:List of 2
-#  ..$ x: num 2
-#  ..$ y: num 2
+#  $ coords_css:List of 2
+#   ..$ x: int 286
+#   ..$ y: int 192
+#  $ coords_img:List of 2
+#   ..$ x: num 358
+#   ..$ y: int 240
+#  $ img_css_ratio:List of 2
+#   ..$ x: num 1.25
+#   ..$ y: num 1.25
 #  $ mapping   : Named list()
 #  $ domain    :List of 4
 #   ..$ left  : num 1.36
@@ -330,9 +371,15 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 # List of 9
 #  $ x         : num 3.78
 #  $ y         : num 17.1
-#  $ pixelratio:List of 2
-#  ..$ x: num 2
-#  ..$ y: num 2
+#  $ coords_css:List of 2
+#   ..$ x: int 286
+#   ..$ y: int 192
+#  $ coords_img:List of 2
+#   ..$ x: num 358
+#   ..$ y: int 240
+#  $ img_css_ratio:List of 2
+#   ..$ x: num 1.25
+#   ..$ y: num 1.25
 #  $ panelvar1 : int 6
 #  $ panelvar2 : int 0
 #  $ mapping   :List of 4

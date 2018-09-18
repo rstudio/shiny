@@ -95,8 +95,7 @@ renderReactLog <- function(sessionToken = NULL, time = TRUE) {
 #' @importFrom utils getFromNamespace
 writeReactLog <- function(file=stdout(), sessionToken = NULL) {
   check_shinyreactlog()
-  writeReactLog <- getFromNamespace("write_reactlog", "shinyreactlog")
-  writeReactLog(
+  shinyreactlog::write_reactlog(
     rLog$asList(),
     file = file,
     session_token = sessionToken

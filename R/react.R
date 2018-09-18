@@ -38,6 +38,7 @@ Context <- R6Class(
       .pid <<- processId()
       .reactId <<- reactId
       .reactType <<- type
+      rLog$createContext(id, label, type, prevId, domain)
     },
     run = function(func) {
       "Run the provided function under this context."

@@ -134,7 +134,10 @@ RLog <- R6Class(
       ret
     },
 
-    ctxIdStr = function(ctxId) paste0("ctx", ctxId),
+    ctxIdStr = function(ctxId) {
+      if (is.null(ctxId) || identical(ctxId, "")) return(NULL)
+      paste0("ctx", ctxId)
+    },
     namesIdStr     = function(reactId)      paste0("names(", reactId, ")"),
     asListIdStr    = function(reactId)      paste0("as.list(", reactId, ", all.names = TRUE)"),
     asListAllIdStr = function(reactId)      paste0("as.list(", reactId, ")"),
@@ -226,6 +229,20 @@ RLog <- R6Class(
     },
     dependsOnKeyRemove = function(reactId, depOnReactId, key, ctxId, domain)
       self$dependsOnRemove(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain),
+
+    createContext = function(ctxId, label, type, prevCtxId, domain) {
+      ctxId <- self$ctxIdStr(ctxId)
+      prevCtxId <- self$ctxIdStr(prevCtxId)
+      msg$log("createContext: ", ctxId, if (!is.null(prevCtxId)) paste0(" from ", prevCtxId), " - ", type)
+      private$appendEntry(domain, list(
+        action = "createContext",
+        ctxId = ctxId,
+        label = label,
+        type = type,
+        prevCtxId = prevCtxId,
+        srcref = as.vector(attr(label, "srcref")), srcfile=attr(label, "srcfile")
+      ))
+    },
 
     enter = function(reactId, ctxId, type, domain) {
       ctxId <- self$ctxIdStr(ctxId)

@@ -458,7 +458,7 @@ MessageLogger = R6Class(
         collapse = ""
       )
       self$messages[length(self$messages) + 1] <- msg
-      if (self$display && getOption(self$option, FALSE)) {
+      if (isTRUE(self$display) || isTRUE(getOption(self$option, FALSE))) {
         message(msg)
       }
     }

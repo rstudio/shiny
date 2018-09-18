@@ -90,7 +90,6 @@ Suggests:
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Remotes:
-    tidyverse/ggplot2,
     rstudio/httpuv
 Collate:
     'app.R'

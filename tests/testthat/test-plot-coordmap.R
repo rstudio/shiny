@@ -351,9 +351,19 @@ test_that("ggplot coordmap with various scales and coords", {
     sortList(m$panels[[1]]$log),
     sortList(list(x=10, y=2))
   )
+
   # Check domains
-  expect_equal(
-    sortList(m$panels[[1]]$domain),
-    sortList(list(left=-1, right=3, bottom=-2, top=4))
+  expect_true(
+    isTRUE(testthat::compare(
+      sortList(m$panels[[1]]$domain),
+      sortList(list(left=-1, right=3, bottom=-2, top=4))
+    )$equal) ||
+    isTRUE(testthat::compare(
+      sortList(m$panels[[1]]$domain),
+      # y transformations are being back transformed to the original coords
+      # Odd behavior caused by https://github.com/tidyverse/ggplot2/pull/2832
+      # Waiting on https://github.com/tidyverse/ggplot2/pull/2821
+      sortList(list(left=-1, right=3, bottom=0.25, top=16))
+    )$equal)
   )
 })

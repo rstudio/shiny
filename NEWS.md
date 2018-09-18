@@ -33,6 +33,8 @@ shiny 1.1.0.9001
 
 * Upgrade FontAwesome from 4.7.0 to 5.3.1 and made `icon` tags browsable [#2186](https://github.com/rstudio/shiny/issues/2186)
 
+* Fixed [#2177](https://github.com/rstudio/shiny/issues/2177): The session name is now being recorded when exiting a context.  Multiple sessions can now view their respective reactlogs. [#2180](https://github.com/rstudio/shiny/pull/2180)
+
 ### Bug fixes
 
 * Fixed [#2033](https://github.com/rstudio/shiny/issues/2033): RStudio Viewer window not closed on `shiny::stopApp()`. Thanks, @vnijs! [#2047](https://github.com/rstudio/shiny/pull/2047)

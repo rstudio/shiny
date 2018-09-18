@@ -1489,8 +1489,8 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' \code{\link{navbarPage}}.
 #'
 #' @param name Name of icon. Icons are drawn from the
-#'   \href{https://fontawesome.com/v4.7.0/}{Font Awesome} (currently icons from
-#'   the v4.7.0 set are supported) and
+#'   \href{https://fontawesome.com/}{Font Awesome} (currently icons from
+#'   the v5.3.1 set are supported) and
 #'   \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
@@ -1547,8 +1547,11 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   # font-awesome needs an additional dependency (glyphicon is in bootstrap)
   if (lib == "font-awesome") {
     htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "4.7.0", c(href="shared/font-awesome"),
-      stylesheet = "css/font-awesome.min.css"
+      "font-awesome", "5.3.1", c(href="shared/fontawesome"),
+      stylesheet = c(
+        "css/all.min.css",
+        "css/v4-shims.min.css"
+      )
     )
   }
 

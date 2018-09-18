@@ -31,6 +31,8 @@ shiny 1.1.0.9001
 
 * Addressed [#2079](https://github.com/rstudio/shiny/issues/2079): Added `coords_img`, `coords_css`, and `img_css_ratio` fields containing x and y location information for plot brush, hover, and click events. [#2183](https://github.com/rstudio/shiny/pull/2183)
 
+* Upgrade FontAwesome from 4.7.0 to 5.3.1 and made `icon` tags browsable [#2186](https://github.com/rstudio/shiny/issues/2186)
+
 * Fixed [#2177](https://github.com/rstudio/shiny/issues/2177): The session name is now being recorded when exiting a context.  Multiple sessions can now view their respective reactlogs. [#2180](https://github.com/rstudio/shiny/pull/2180)
 
 ### Bug fixes

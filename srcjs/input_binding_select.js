@@ -115,12 +115,11 @@ $.extend(selectInputBinding, {
     $(el).trigger('change');
   },
   subscribe: function(el, callback) {
-    var thiz = this;
-    $(el).on('change.selectInputBinding', function(event) {
+    $(el).on('change.selectInputBinding', event => {
       // https://github.com/rstudio/shiny/issues/2162
       // Prevent spurious events that are gonna be squelched in
       // a second anyway by the onItemRemove down below
-      if (el.nonempty && thiz.getValue(el) === "") {
+      if (el.nonempty && this.getValue(el) === "") {
         return;
       }
       callback();

@@ -5376,7 +5376,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       $(el).trigger('change');
     },
     subscribe: function subscribe(el, callback) {
+      var _this = this;
+
       $(el).on('change.selectInputBinding', function (event) {
+        // https://github.com/rstudio/shiny/issues/2162
+        // Prevent spurious events that are gonna be squelched in
+        // a second anyway by the onItemRemove down below
+        if (el.nonempty && _this.getValue(el) === "") {
+          return;
+        }
         callback();
       });
     },
@@ -5401,6 +5409,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }, JSON.parse(config.html()));
       // selectize created from selectInput()
       if (typeof config.data('nonempty') !== 'undefined') {
+        el.nonempty = true;
         options = $.extend(options, {
           onItemRemove: function onItemRemove(value) {
             if (this.getValue() === "") $("select#" + $escape(el.id)).empty().append($("<option/>", {
@@ -5412,6 +5421,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             if (this.getValue() === "") this.setValue($("select#" + $escape(el.id)).val());
           }
         });
+      } else {
+        el.nonempty = false;
       }
       // options that should be eval()ed
       if (config.data('eval') instanceof Array) $.each(config.data('eval'), function (i, x) {
@@ -6128,7 +6139,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
     },
     subscribe: function subscribe(el, callback) {
-      var _this = this;
+      var _this2 = this;
 
       var $el = $(el);
       // Here we try to set up the necessary events for Drag and Drop ("DnD") on
@@ -6140,7 +6151,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // supported based on this highlighting would be incorrect.
       if (!this._isIE9()) {
         (function () {
-          var $zone = _this._getZone(el),
+          var $zone = _this2._getZone(el),
               getState = function getState() {
             return $el.data("state");
           },
@@ -6150,16 +6161,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
               transition = multimethod().dispatch(function (e) {
             return [getState(), e.type];
           }).when(["plain", "showZone"], function (e) {
-            $zone.removeClass(_this._overClass);
-            $zone.addClass(_this._activeClass);
+            $zone.removeClass(_this2._overClass);
+            $zone.addClass(_this2._activeClass);
             setState("activated");
           }).when(["activated", "hideZone"], function (e) {
-            $zone.removeClass(_this._overClass);
-            $zone.removeClass(_this._activeClass);
+            $zone.removeClass(_this2._overClass);
+            $zone.removeClass(_this2._activeClass);
             setState("plain");
           }).when(["activated", "draghoverstart"], function (e) {
-            $zone.addClass(_this._overClass);
-            $zone.removeClass(_this._activeClass);
+            $zone.addClass(_this2._overClass);
+            $zone.removeClass(_this2._activeClass);
             setState("over");
           })
           // A "drop" event always coincides with a "draghoverend" event. Since
@@ -6167,11 +6178,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           // over-style and reverting to "activated" state, we only need to
           // worry about handling the file upload itself here.
           .when(["over", "drop"], function (e) {
-            _this._handleDrop(e, el);
+            _this2._handleDrop(e, el);
             // State change taken care of by ["over", "draghoverend"] handler.
           }).when(["over", "draghoverend"], function (e) {
-            $zone.removeClass(_this._overClass);
-            $zone.addClass(_this._activeClass);
+            $zone.removeClass(_this2._overClass);
+            $zone.addClass(_this2._activeClass);
             setState("activated");
           })
           // This next case happens when the window (like Finder) that a file is
@@ -6190,19 +6201,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           // "draghoverend".
           .when(["plain", "draghoverstart"], function (e) {
             window.setTimeout(function () {
-              $zone.addClass(_this._overClass);
-              $zone.removeClass(_this._activeClass);
+              $zone.addClass(_this2._overClass);
+              $zone.removeClass(_this2._activeClass);
               setState("over");
             }, 0);
           }).else(function (e) {
             console.log("fileInput DnD unhandled transition", getState(), e.type, e);
           });
 
-          if ($fileInputs.length === 0) _this._enableDocumentEvents();
+          if ($fileInputs.length === 0) _this2._enableDocumentEvents();
           setState("plain");
-          $zone.on(_this._zoneEvents, transition);
+          $zone.on(_this2._zoneEvents, transition);
           $fileInputs = $fileInputs.add(el);
-          _this._enableDraghover($zone, ".zone");
+          _this2._enableDraghover($zone, ".zone");
         })();
       }
 

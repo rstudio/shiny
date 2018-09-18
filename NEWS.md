@@ -37,6 +37,8 @@ shiny 1.1.0.9001
 
 * Fixed [#2033](https://github.com/rstudio/shiny/issues/2033): RStudio Viewer window not closed on `shiny::stopApp()`. Thanks, @vnijs! [#2047](https://github.com/rstudio/shiny/pull/2047)
 
+* Fixed [#2162](https://github.com/rstudio/shiny/issues/2162): `selectInput` was sending spurious duplicate values to the server when using backspace. Thanks, @sada1993! [#2187](https://github.com/rstudio/shiny/pull/2187)
+
 ### Documentation Updates
 
 * Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. ([#2084](https://github.com/rstudio/shiny/pull/2084))

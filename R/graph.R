@@ -144,10 +144,10 @@ RLog <- R6Class(
 
 
 
-    initialize = function(rlogOption = "shiny.reactlog", ...) {
+    initialize = function(rlogOption = "shiny.reactlog", msgOption = "shiny.reactlog.console") {
       private$option <- rlogOption
       self$logStack <- Stack$new()
-      self$msg <- MessageLogger$new(...)
+      self$msg <- MessageLogger$new(option = msgOption)
     },
     displayMessages = function() {
       for (val in msg$messages) {
@@ -408,13 +408,11 @@ MessageLogger = R6Class(
   portable = FALSE,
   public = list(
     depth = 0L,
-    display = TRUE,
     messages = c(),
     reactCache = list("rNoCtx" = list(label = "<UNKNOWN>", reactId = "<UNKNOWN>")),
     option = "shiny.reactlog.console",
 
-    initialize = function(display, depth, option) {
-      if (!missing(display)) self$display <- display
+    initialize = function(option = "shiny.reactlog.console", depth = 0L) {
       if (!missing(depth)) self$depth <- depth
       if (!missing(option)) self$option <- option
     },
@@ -458,7 +456,7 @@ MessageLogger = R6Class(
         collapse = ""
       )
       self$messages[length(self$messages) + 1] <- msg
-      if (isTRUE(self$display) || isTRUE(getOption(self$option, FALSE))) {
+      if (isTRUE(getOption(self$option, FALSE))) {
         message(msg)
       }
     }
@@ -466,4 +464,4 @@ MessageLogger = R6Class(
 )
 
 #' @include stack.R
-rLog <- RLog$new("shiny.reactlog", FALSE, 0, "shiny.reactlog.console")
+rLog <- RLog$new("shiny.reactlog", "shiny.reactlog.console")

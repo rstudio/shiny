@@ -654,7 +654,14 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     }
   }
   # convert choices to a data frame so it returns [{label: , value: , group: },...]
-  choices <- if (is.atomic(choices) || noOptGroup) {
+  choices <- if (is.data.frame(choices)) {
+    # jcheng 2018/09/25: I don't think we ever said data frames were OK to pass
+    # to updateSelectInput, but one of the example apps does this and at least
+    # one user noticed when we broke it.
+    # https://github.com/rstudio/shiny/issues/2172
+    # https://github.com/rstudio/shiny/issues/2192
+    as.data.frame(choices, stringsAsFactors = FALSE)
+  } else if (is.atomic(choices) || noOptGroup) {
     # fast path for vectors and flat lists
     if (is.list(choices)) {
       choices <- unlist(choices)

@@ -138,14 +138,25 @@ $.extend(selectInputBinding, {
     var $el = $(el);
     var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
     if (config.length === 0) return undefined;
+
     var options = $.extend({
       labelField: 'label',
       valueField: 'value',
-      searchField: ['label'],
-      optgroupField: 'group',
-      optgroupLabelField: 'group',
-      optgroupValueField: 'group'
+      searchField: ['label']
     }, JSON.parse(config.html()));
+
+    if (!options.optgroupField) {
+      // We set the defaults for optgroupField separately from the other
+      // defaults, because if optgroupField was explicitly provided then we
+      // don't want to default optgroupLabelField and optgroupValueField.
+      // https://github.com/rstudio/shiny/issues/2192
+      options = $.extend({
+        optgroupField: 'group',
+        optgroupLabelField: 'group',
+        optgroupValueField: 'group'
+      }, options);
+    }
+
     // selectize created from selectInput()
     if (typeof(config.data('nonempty')) !== 'undefined') {
       el.nonempty = true;

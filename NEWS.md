@@ -1,11 +1,17 @@
-shiny 1.1.0.9001
+shiny 1.2.0
 ===========
+
+This release features plot caching, an important new tool for improving performance and scalability. Using `renderCachedPlot` in place of `renderPlot` can greatly improve responsiveness for apps that show the same plot many times (for example, a dashboard or report where all users view the same data). Shiny gives you a fair amount of control in where the cache is stored and how cached plots are invalidated, so be sure to read [this article](http://shiny.rstudio.com/articles/plot-caching.html) to get the most out of this feature.
 
 ## Full changelog
 
-### Minor new features and improvements
+### New features
 
 * Added `renderCachedPlot()`, which stores plots in a cache so that they can be served up almost instantly. ([#1997](https://github.com/rstudio/shiny/pull/1997))
+
+### Minor new features and improvements
+
+* Upgrade FontAwesome from 4.7.0 to 5.3.1 and made `icon` tags browsable [#2186](https://github.com/rstudio/shiny/issues/2186).
 
 * Address [#174](https://github.com/rstudio/shiny/issues/174): Added `datesdisabled` and `daysofweekdisabled` as new parameters to `dateInput()`. This resolves [#174](https://github.com/rstudio/shiny/issues/174) and exposes the underlying arguments of [Bootstrap Datepicker](http://bootstrap-datepicker.readthedocs.io/en/latest/options.html#datesdisabled). `datesdisabled` expects a character vector with values in `yyyy/mm/dd` format and `daysofweekdisabled` expects an integer vector with day interger ids (Sunday=0, Saturday=6). The default value for both is `NULL`, which leaves all days selectable. Thanks, @nathancday! ([#2147](https://github.com/rstudio/shiny/pull/2147))
 
@@ -17,27 +23,25 @@ shiny 1.1.0.9001
 
 * Fixed [#1933](https://github.com/rstudio/shiny/issues/1933): extended server-side selectize to lists and optgroups. ([#2102](https://github.com/rstudio/shiny/pull/2102))
 
-* Fixed [#1935](https://github.com/rstudio/shiny/issues/1935): correctly returns plot coordinates when using outer margins. ([#2108](https://github.com/rstudio/shiny/pull/2108))
-
-* Resolved [#2019](https://github.com/rstudio/shiny/issues/2019): `updateSliderInput` now changes the slider formatting if the input type changes. ([#2099](https://github.com/rstudio/shiny/pull/2099))
-
 * Added namespace support when freezing reactiveValue keys. [#2080](https://github.com/rstudio/shiny/pull/2080)
-
-* Fixed [#2138](https://github.com/rstudio/shiny/issues/2138): Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. [#2139](https://github.com/rstudio/shiny/pull/2139)
-
-* Fixed [#2093](https://github.com/rstudio/shiny/issues/2093): Make sure bookmark scope directory does not exist before trying to create it. [#2168](https://github.com/rstudio/shiny/pull/2168)
 
 * Upgrade selectize.js from 0.12.1 to 0.12.4 [#2028](https://github.com/rstudio/shiny/issues/2028)
 
 * Addressed [#2079](https://github.com/rstudio/shiny/issues/2079): Added `coords_img`, `coords_css`, and `img_css_ratio` fields containing x and y location information for plot brush, hover, and click events. [#2183](https://github.com/rstudio/shiny/pull/2183)
 
-* Upgrade FontAwesome from 4.7.0 to 5.3.1 and made `icon` tags browsable [#2186](https://github.com/rstudio/shiny/issues/2186)
-
-* Fixed [#2177](https://github.com/rstudio/shiny/issues/2177): The session name is now being recorded when exiting a context.  Multiple sessions can now view their respective reactlogs. [#2180](https://github.com/rstudio/shiny/pull/2180)
-
 ### Bug fixes
 
 * Fixed [#2033](https://github.com/rstudio/shiny/issues/2033): RStudio Viewer window not closed on `shiny::stopApp()`. Thanks, @vnijs! [#2047](https://github.com/rstudio/shiny/pull/2047)
+
+* Fixed [#1935](https://github.com/rstudio/shiny/issues/1935): correctly returns plot coordinates when using outer margins. ([#2108](https://github.com/rstudio/shiny/pull/2108))
+
+* Resolved [#2019](https://github.com/rstudio/shiny/issues/2019): `updateSliderInput` now changes the slider formatting if the input type changes. ([#2099](https://github.com/rstudio/shiny/pull/2099))
+
+* Fixed [#2138](https://github.com/rstudio/shiny/issues/2138): Inputs that are part of a `renderUI` were no longer restoring correctly from bookmarked state. [#2139](https://github.com/rstudio/shiny/pull/2139)
+
+* Fixed [#2093](https://github.com/rstudio/shiny/issues/2093): Make sure bookmark scope directory does not exist before trying to create it. [#2168](https://github.com/rstudio/shiny/pull/2168)
+
+* Fixed [#2177](https://github.com/rstudio/shiny/issues/2177): The session name is now being recorded when exiting a context.  Multiple sessions can now view their respective reactlogs. [#2180](https://github.com/rstudio/shiny/pull/2180)
 
 * Fixed [#2162](https://github.com/rstudio/shiny/issues/2162): `selectInput` was sending spurious duplicate values to the server when using backspace. Thanks, @sada1993! [#2187](https://github.com/rstudio/shiny/pull/2187)
 

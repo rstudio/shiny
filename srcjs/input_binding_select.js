@@ -88,7 +88,15 @@ $.extend(selectInputBinding, {
             // success is called after options are added, but
             // groups need to be added manually below
             $.each(res, function(index, elem) {
-              selectize.addOptionGroup(elem.group, { group: elem.group });
+              // Call selectize.addOptionGroup once for each optgroup; the
+              // first argument is the group ID, the second is an object with
+              // the group's label and value. We use the current settings of
+              // the selectize object to decide the fieldnames of that obj.
+              let optgroupId = elem[settings.optgroupField || "optgroup"];
+              let optgroup = {};
+              optgroup[settings.optgroupLabelField || "label"] = optgroupId;
+              optgroup[settings.optgroupValueField || "value"] = optgroupId;
+              selectize.addOptionGroup(optgroupId, optgroup);
             });
             callback(res);
             if (!loaded) {
@@ -138,14 +146,13 @@ $.extend(selectInputBinding, {
     var $el = $(el);
     var config = $el.parent().find('script[data-for="' + $escape(el.id) + '"]');
     if (config.length === 0) return undefined;
+
     var options = $.extend({
       labelField: 'label',
       valueField: 'value',
-      searchField: ['label'],
-      optgroupField: 'group',
-      optgroupLabelField: 'group',
-      optgroupValueField: 'group'
+      searchField: ['label']
     }, JSON.parse(config.html()));
+
     // selectize created from selectInput()
     if (typeof(config.data('nonempty')) !== 'undefined') {
       el.nonempty = true;

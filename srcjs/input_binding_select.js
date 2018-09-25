@@ -91,11 +91,13 @@ $.extend(selectInputBinding, {
               selectize.addOptionGroup(elem.group, { group: elem.group });
             });
             callback(res);
-            if (!loaded && data.hasOwnProperty('value')) {
-              selectize.setValue(data.value);
-            } else if (settings.maxItems === 1) {
-              // first item selected by default only for single-select
-              selectize.setValue(res[0].value);
+            if (!loaded) {
+              if (data.hasOwnProperty('value')) {
+                selectize.setValue(data.value);
+              } else if (settings.maxItems === 1) {
+                // first item selected by default only for single-select
+                selectize.setValue(res[0].value);
+              }
             }
             loaded = true;
           }

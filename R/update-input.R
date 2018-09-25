@@ -653,7 +653,7 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
       }
     }
   }
-  # convert choices to a data frame so it returns [{label: , value: , group: },...]
+  # convert choices to a data frame so it returns [{label: , value: , optgroup: },...]
   choices <- if (is.data.frame(choices)) {
     # jcheng 2018/09/25: I don't think we ever said data frames were OK to pass
     # to updateSelectInput, but one of the example apps does this and at least
@@ -708,7 +708,9 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
       list(
         label = lab,
         value = as.character(choice),
-        group = group
+        # The name "optgroup" is because this is the default field where
+        # selectize will look for group IDs
+        optgroup = group
       )
     }, SIMPLIFY = FALSE)
 
@@ -721,7 +723,7 @@ updateSelectizeInput <- function(session, inputId, label = NULL, choices = NULL,
     data.frame(
       label = extract_vector(choice_list, "label"),
       value = extract_vector(choice_list, "value"),
-      group = extract_vector(choice_list, "group"),
+      optgroup = extract_vector(choice_list, "optgroup"),
       stringsAsFactors = FALSE, row.names = NULL
     )
   }

@@ -88,7 +88,15 @@ $.extend(selectInputBinding, {
             // success is called after options are added, but
             // groups need to be added manually below
             $.each(res, function(index, elem) {
-              selectize.addOptionGroup(elem.group, { group: elem.group });
+              // Call selectize.addOptionGroup once for each optgroup; the
+              // first argument is the group ID, the second is an object with
+              // the group's label and value. We use the current settings of
+              // the selectize object to decide the fieldnames of that obj.
+              let optgroupId = elem[settings.optgroupField || "optgroup"];
+              let optgroup = {};
+              optgroup[settings.optgroupLabelField || "label"] = optgroupId;
+              optgroup[settings.optgroupValueField || "value"] = optgroupId;
+              selectize.addOptionGroup(optgroupId, optgroup);
             });
             callback(res);
             if (!loaded) {
@@ -144,18 +152,6 @@ $.extend(selectInputBinding, {
       valueField: 'value',
       searchField: ['label']
     }, JSON.parse(config.html()));
-
-    if (!options.optgroupField) {
-      // We set the defaults for optgroupField separately from the other
-      // defaults, because if optgroupField was explicitly provided then we
-      // don't want to default optgroupLabelField and optgroupValueField.
-      // https://github.com/rstudio/shiny/issues/2192
-      options = $.extend({
-        optgroupField: 'group',
-        optgroupLabelField: 'group',
-        optgroupValueField: 'group'
-      }, options);
-    }
 
     // selectize created from selectInput()
     if (typeof(config.data('nonempty')) !== 'undefined') {

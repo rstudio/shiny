@@ -343,8 +343,8 @@ imageutils.initPanelScales = function(panels) {
 // 3. data: The coordinates in the data space. This is a bit more complicated
 //    than the other two, because there can be multiple panels (as in facets).
 imageutils.initCoordmap = function($el, coordmap) {
-  const el = $el[0];
   const $img = $el.find("img");
+  const img = $img[0];
 
   // If we didn't get any panels, create a dummy one where the domain and range
   // are simply the pixel dimensions.
@@ -353,8 +353,8 @@ imageutils.initCoordmap = function($el, coordmap) {
     let bounds = {
       top: 0,
       left: 0,
-      right: el.clientWidth - 1,
-      bottom: el.clientHeight - 1
+      right: img.clientWidth - 1,
+      bottom: img.clientHeight - 1
     };
 
     coordmap.panels[0] = {

@@ -104,79 +104,89 @@ $.extend(imageOutputBinding, {
     $el.off('.image_output');
     $img.off('.image_output');
 
-    imageutils.initCoordmap($el, opts.coordmap);
+    // When the image loads, initialize all the interaction handlers. When the
+    // value of src is set, the browser may not load the image immediately,
+    // even if it's a data URL. If we try to initialize this stuff
+    // immediately, it can cause problems because we use we need the raw image
+    // height and width
+    $img.off("load.shiny-image-interaction");
+    $img.on("load.shiny-image-interaction", function() {
 
-    // This object listens for mousedowns, and triggers mousedown2 and dblclick2
-    // events as appropriate.
-    var clickInfo = imageutils.createClickInfo($el, opts.dblclickId, opts.dblclickDelay);
+      imageutils.initCoordmap($el, opts.coordmap);
 
-    $el.on('mousedown.image_output', clickInfo.mousedown);
+      // This object listens for mousedowns, and triggers mousedown2 and dblclick2
+      // events as appropriate.
+      var clickInfo = imageutils.createClickInfo($el, opts.dblclickId, opts.dblclickDelay);
 
-    if (browser.isIE && browser.IEVersion === 8) {
-      $el.on('dblclick.image_output', clickInfo.dblclickIE8);
-    }
+      $el.on('mousedown.image_output', clickInfo.mousedown);
 
-    // ----------------------------------------------------------
-    // Register the various event handlers
-    // ----------------------------------------------------------
-    if (opts.clickId) {
-      var clickHandler = imageutils.createClickHandler(opts.clickId,
-        opts.clickClip, opts.coordmap);
-      $el.on('mousedown2.image_output', clickHandler.mousedown);
+      if (browser.isIE && browser.IEVersion === 8) {
+        $el.on('dblclick.image_output', clickInfo.dblclickIE8);
+      }
 
-      $el.on('resize.image_output', clickHandler.onResize);
+      // ----------------------------------------------------------
+      // Register the various event handlers
+      // ----------------------------------------------------------
+      if (opts.clickId) {
+        var clickHandler = imageutils.createClickHandler(opts.clickId,
+          opts.clickClip, opts.coordmap);
+        $el.on('mousedown2.image_output', clickHandler.mousedown);
 
-      // When img is reset, do housekeeping: clear $el's mouse listener and
-      // call the handler's onResetImg callback.
-      $img.on('reset.image_output', clickHandler.onResetImg);
-    }
+        $el.on('resize.image_output', clickHandler.onResize);
 
-    if (opts.dblclickId) {
-      // We'll use the clickHandler's mousedown function, but register it to
-      // our custom 'dblclick2' event.
-      var dblclickHandler = imageutils.createClickHandler(opts.dblclickId,
-        opts.clickClip, opts.coordmap);
-      $el.on('dblclick2.image_output', dblclickHandler.mousedown);
+        // When img is reset, do housekeeping: clear $el's mouse listener and
+        // call the handler's onResetImg callback.
+        $img.on('reset.image_output', clickHandler.onResetImg);
+      }
 
-      $el.on('resize.image_output', dblclickHandler.onResize);
-      $img.on('reset.image_output', dblclickHandler.onResetImg);
-    }
+      if (opts.dblclickId) {
+        // We'll use the clickHandler's mousedown function, but register it to
+        // our custom 'dblclick2' event.
+        var dblclickHandler = imageutils.createClickHandler(opts.dblclickId,
+          opts.clickClip, opts.coordmap);
+        $el.on('dblclick2.image_output', dblclickHandler.mousedown);
 
-    if (opts.hoverId) {
-      var hoverHandler = imageutils.createHoverHandler(opts.hoverId,
-        opts.hoverDelay, opts.hoverDelayType, opts.hoverClip,
-        opts.hoverNullOutside, opts.coordmap);
-      $el.on('mousemove.image_output', hoverHandler.mousemove);
-      $el.on('mouseout.image_output', hoverHandler.mouseout);
+        $el.on('resize.image_output', dblclickHandler.onResize);
+        $img.on('reset.image_output', dblclickHandler.onResetImg);
+      }
 
-      $el.on('resize.image_output', hoverHandler.onResize);
-      $img.on('reset.image_output', hoverHandler.onResetImg);
-    }
+      if (opts.hoverId) {
+        var hoverHandler = imageutils.createHoverHandler(opts.hoverId,
+          opts.hoverDelay, opts.hoverDelayType, opts.hoverClip,
+          opts.hoverNullOutside, opts.coordmap);
+        $el.on('mousemove.image_output', hoverHandler.mousemove);
+        $el.on('mouseout.image_output', hoverHandler.mouseout);
 
-    if (opts.brushId) {
-      // Make image non-draggable (Chrome, Safari)
-      $img.css('-webkit-user-drag', 'none');
-      // Firefox, IE<=10
-      $img.on('dragstart', function() { return false; });
+        $el.on('resize.image_output', hoverHandler.onResize);
+        $img.on('reset.image_output', hoverHandler.onResetImg);
+      }
 
-      // Disable selection of image and text when dragging in IE<=10
-      $el.on('selectstart.image_output', function() { return false; });
+      if (opts.brushId) {
+        // Make image non-draggable (Chrome, Safari)
+        $img.css('-webkit-user-drag', 'none');
+        // Firefox, IE<=10
+        $img.on('dragstart', function() { return false; });
 
-      var brushHandler = imageutils.createBrushHandler(opts.brushId, $el, opts,
-        opts.coordmap, outputId);
-      $el.on('mousedown.image_output', brushHandler.mousedown);
-      $el.on('mousemove.image_output', brushHandler.mousemove);
+        // Disable selection of image and text when dragging in IE<=10
+        $el.on('selectstart.image_output', function() { return false; });
 
-      $el.on('resize.image_output', brushHandler.onResize);
-      $img.on('reset.image_output', brushHandler.onResetImg);
-    }
+        var brushHandler = imageutils.createBrushHandler(opts.brushId, $el, opts,
+          opts.coordmap, outputId);
+        $el.on('mousedown.image_output', brushHandler.mousedown);
+        $el.on('mousemove.image_output', brushHandler.mousemove);
 
-    if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
-      $el.addClass('crosshair');
-    }
+        $el.on('resize.image_output', brushHandler.onResize);
+        $img.on('reset.image_output', brushHandler.onResetImg);
+      }
 
-    if (data.error)
-      console.log('Error on server extracting coordmap: ' + data.error);
+      if (opts.clickId || opts.dblclickId || opts.hoverId || opts.brushId) {
+        $el.addClass('crosshair');
+      }
+
+      if (data.error)
+        console.log('Error on server extracting coordmap: ' + data.error);
+
+    });
   },
 
   renderError: function(el, err) {

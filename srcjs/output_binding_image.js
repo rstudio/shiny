@@ -364,6 +364,10 @@ imageutils.initCoordmap = function($el, coordmap) {
     };
   }
 
+  // if no dim height and width values are found, set them to the image height and width
+  coordmap.dims.height = coordmap.dims.height || img.clientHeight;
+  coordmap.dims.width = coordmap.dims.width || img.clientWidth;
+
   // Add scaling functions to each panel
   imageutils.initPanelScales(coordmap.panels);
 

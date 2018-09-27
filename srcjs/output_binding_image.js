@@ -120,8 +120,8 @@ $.extend(imageOutputBinding, {
     // even if it's a data URL. If we try to initialize this stuff
     // immediately, it can cause problems because we use we need the raw image
     // height and width
-    $img.off("load.shiny-image-interaction");
-    $img.on("load.shiny-image-interaction", function() {
+    $img.off("load.shiny_image_interaction");
+    $img.on("load.shiny_image_interaction", function() {
 
       imageutils.initCoordmap($el, opts.coordmap);
 

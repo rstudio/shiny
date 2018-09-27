@@ -176,7 +176,7 @@ $.extend(imageOutputBinding, {
         // Make image non-draggable (Chrome, Safari)
         $img.css('-webkit-user-drag', 'none');
         // Firefox, IE<=10
-        $img.on('dragstart', function() { return false; });
+        $img.on('dragstart.image_output', function() { return false; });
 
         // Disable selection of image and text when dragging in IE<=10
         $el.on('selectstart.image_output', function() { return false; });

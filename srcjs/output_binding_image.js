@@ -120,8 +120,8 @@ $.extend(imageOutputBinding, {
     // even if it's a data URL. If we try to initialize this stuff
     // immediately, it can cause problems because we use we need the raw image
     // height and width
-    $img.off("load.shiny-image-interaction");
-    $img.on("load.shiny-image-interaction", function() {
+    $img.off("load.shiny_image_interaction");
+    $img.one("load.shiny_image_interaction", function() {
 
       imageutils.initCoordmap($el, opts.coordmap);
 
@@ -176,7 +176,7 @@ $.extend(imageOutputBinding, {
         // Make image non-draggable (Chrome, Safari)
         $img.css('-webkit-user-drag', 'none');
         // Firefox, IE<=10
-        $img.on('dragstart', function() { return false; });
+        $img.on('dragstart.image_output', function() { return false; });
 
         // Disable selection of image and text when dragging in IE<=10
         $el.on('selectstart.image_output', function() { return false; });

@@ -76,7 +76,9 @@ $.extend(imageOutputBinding, {
       if (value === null || key === 'coordmap') {
         return;
       }
-      if (key === "src" && value === img.src) {
+      // this checks only against base64 encoded src values
+      // images put here are only from renderImage and renderPlot
+      if (key === "src" && value === img.getAttribute("src")) {
         // Ensure the browser actually fires an onLoad event, which doesn't
         // happen on WebKit if the value we set on src is the same as the
         // value it already has
@@ -102,6 +104,7 @@ $.extend(imageOutputBinding, {
       opts.coordmap = {
         panels: [],
         dims: {
+          // These values be set to the naturalWidth and naturalHeight once the image has loaded
           height: null,
           width: null
         }
@@ -372,9 +375,11 @@ imageutils.initCoordmap = function($el, coordmap) {
     };
   }
 
-  // if no dim height and width values are found, set them to the image height and width
-  coordmap.dims.height = coordmap.dims.height || img.clientHeight;
-  coordmap.dims.width = coordmap.dims.width || img.clientWidth;
+  // If no dim height and width values are found, set them to the raw image height and width
+  // These values should be the same...
+  // This is only done to initialize an image output, whose height and width are unknown until the image is retrieved
+  coordmap.dims.height = coordmap.dims.height || img.naturalHeight;
+  coordmap.dims.width = coordmap.dims.width || img.naturalWidth;
 
   // Add scaling functions to each panel
   imageutils.initPanelScales(coordmap.panels);

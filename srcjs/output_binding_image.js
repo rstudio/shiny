@@ -121,7 +121,7 @@ $.extend(imageOutputBinding, {
     // immediately, it can cause problems because we use we need the raw image
     // height and width
     $img.off("load.shiny_image_interaction");
-    $img.on("load.shiny_image_interaction", function() {
+    $img.one("load.shiny_image_interaction", function() {
 
       imageutils.initCoordmap($el, opts.coordmap);
 

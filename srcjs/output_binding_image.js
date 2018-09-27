@@ -76,6 +76,14 @@ $.extend(imageOutputBinding, {
       if (value === null || key === 'coordmap') {
         return;
       }
+      if (key === "src" && value === img.src) {
+        // Ensure the browser actually fires an onLoad event, which doesn't
+        // happen on WebKit if the value we set on src is the same as the
+        // value it already has
+        // https://github.com/rstudio/shiny/issues/2197
+        // https://stackoverflow.com/questions/5024111/javascript-image-onload-doesnt-fire-in-webkit-if-loading-same-image
+        img.removeAttribute("src");
+      }
       img.setAttribute(key, value);
     });
 
@@ -1029,10 +1037,12 @@ imageutils.createBrushHandler = function(inputId, $el, opts, coordmap, outputId)
       // is called before this happens, then the css-img coordinate mappings
       // will give the wrong result, and the brush will have the wrong
       // position.
-      $el.find("img").one("load.shiny-image-interaction", function() {
-        brush.importOldBrush();
-        brushInfoSender.immediateCall();
-      });
+      //
+      // jcheng 09/26/2018: This used to happen in img.onLoad, but recently
+      // we moved to all brush initialization moving to img.onLoad so this
+      // logic can be executed inline.
+      brush.importOldBrush();
+      brushInfoSender.immediateCall();
     }
   }
 
@@ -1288,7 +1298,10 @@ imageutils.createBrush = function($el, opts, coordmap, expandPixels) {
       return $.extend({}, state.boundsData);
     }
 
-    const box_css = imgToCss(state.panel.scaleDataToImg(box_data));
+    let box_css = imgToCss(state.panel.scaleDataToImg(box_data));
+    // Round to 13 significant digits to avoid spurious changes in FP values
+    // (#2197).
+    box_css = mapValues(box_css, val => roundSignif(val, 13));
 
     // The scaling function can reverse the direction of the axes, so we need to
     // find the min and max again.

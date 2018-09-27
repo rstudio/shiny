@@ -2636,6 +2636,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         if (value === null || key === 'coordmap') {
           return;
         }
+        // this checks only against base64 encoded src values
+        // images put here are only from renderImage and renderPlot
+        if (key === "src" && value === img.getAttribute("src")) {
+          // Ensure the browser actually fires an onLoad event, which doesn't
+          // happen on WebKit if the value we set on src is the same as the
+          // value it already has
+          // https://github.com/rstudio/shiny/issues/2197
+          // https://stackoverflow.com/questions/5024111/javascript-image-onload-doesnt-fire-in-webkit-if-loading-same-image
+          img.removeAttribute("src");
+        }
         img.setAttribute(key, value);
       });
 
@@ -2654,6 +2664,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         opts.coordmap = {
           panels: [],
           dims: {
+            // These values be set to the naturalWidth and naturalHeight once the image has loaded
             height: null,
             width: null
           }
@@ -2669,8 +2680,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       // even if it's a data URL. If we try to initialize this stuff
       // immediately, it can cause problems because we use we need the raw image
       // height and width
-      $img.off("load.shiny-image-interaction");
-      $img.on("load.shiny-image-interaction", function () {
+      $img.off("load.shiny_image_interaction");
+      $img.one("load.shiny_image_interaction", function () {
 
         imageutils.initCoordmap($el, opts.coordmap);
 
@@ -2721,7 +2732,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           // Make image non-draggable (Chrome, Safari)
           $img.css('-webkit-user-drag', 'none');
           // Firefox, IE<=10
-          $img.on('dragstart', function () {
+          $img.on('dragstart.image_output', function () {
             return false;
           });
 
@@ -2910,9 +2921,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       };
     }
 
-    // if no dim height and width values are found, set them to the image height and width
-    coordmap.dims.height = coordmap.dims.height || img.clientHeight;
-    coordmap.dims.width = coordmap.dims.width || img.clientWidth;
+    // If no dim height and width values are found, set them to the raw image height and width
+    // These values should be the same...
+    // This is only done to initialize an image output, whose height and width are unknown until the image is retrieved
+    coordmap.dims.height = coordmap.dims.height || img.naturalHeight;
+    coordmap.dims.width = coordmap.dims.width || img.naturalWidth;
 
     // Add scaling functions to each panel
     imageutils.initPanelScales(coordmap.panels);
@@ -3541,10 +3554,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // is called before this happens, then the css-img coordinate mappings
         // will give the wrong result, and the brush will have the wrong
         // position.
-        $el.find("img").one("load.shiny-image-interaction", function () {
-          brush.importOldBrush();
-          brushInfoSender.immediateCall();
-        });
+        //
+        // jcheng 09/26/2018: This used to happen in img.onLoad, but recently
+        // we moved to all brush initialization moving to img.onLoad so this
+        // logic can be executed inline.
+        brush.importOldBrush();
+        brushInfoSender.immediateCall();
       }
     }
 
@@ -3786,6 +3801,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       var box_css = imgToCss(state.panel.scaleDataToImg(box_data));
+      // Round to 13 significant digits to avoid spurious changes in FP values
+      // (#2197).
+      box_css = mapValues(box_css, function (val) {
+        return roundSignif(val, 13);
+      });
 
       // The scaling function can reverse the direction of the axes, so we need to
       // find the min and max again.

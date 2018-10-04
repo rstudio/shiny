@@ -322,7 +322,7 @@ $.extend(fileInputBinding, {
 
     // Attach a dragenter handler to $el and all of its children. When the first
     // child is entered, trigger a draghoverstart event.
-    $el.on("dragenter.dragHover", e => {
+    $el.on("dragenter", e => {
       if (collection.length === 0) {
         $el.trigger("draghoverstart" + ns, e.originalEvent);
       }
@@ -332,9 +332,15 @@ $.extend(fileInputBinding, {
       collection = collection.add(e.originalEvent.target);
     });
 
-    // Attach dragleave and drop handlers to $el and its children. Whenever a
+    // If a drop happens, clear the collection and trigger a draghoverend.
+    $el.on("drop", e => {
+      collection = $();
+      $el.trigger("draghoverend" + ns, e.originalEvent);
+    });
+
+    // Attach dragleave to $el and its children. Whenever a
     // child fires either of these events, remove it from the collection.
-    $el.on("dragleave.dragHover drop.dragHover", e => {
+    $el.on("dragleave", e => {
       collection = collection.not(e.originalEvent.target);
       // When the collection has no elements, all of the children have been
       // removed, and produce draghoverend event.
@@ -402,6 +408,11 @@ $.extend(fileInputBinding, {
       // (Chrome, Safari)
       $el.val("");
       el.files = e.originalEvent.dataTransfer.files;
+      // Recent versions of Firefox (57+, or "Quantum" and beyond) don't seem to
+      // automatically trigger a change event, so we trigger one manually here.
+      // On browsers that do trigger change, this operation appears to be
+      // idempotent, as el.files doesn't change between events.
+      $el.trigger("change");
     }
   },
   _activeClass: "shiny-file-input-active",
@@ -488,7 +499,7 @@ $.extend(fileInputBinding, {
       this._enableDraghover($zone, ".zone");
     }
 
-    $el.on("change.fileInputBinding", uploadFiles);
+    $el.on("change", uploadFiles);
   },
 
   unsubscribe: function(el) {

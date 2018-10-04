@@ -6045,7 +6045,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // selector, instead of once for every child the way native
     // dragenter/dragleave do. Inspired by https://gist.github.com/meleyal/3794126
     _enableDraghover: function _enableDraghover($el) {
-      var ns = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+      var startEvent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "draghoverstart";
+      var endEvent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "draghoverend";
 
       // Create an empty jQuery collection. This is a set-like data structure that
       // jQuery normally uses to contain the results of a selection.
@@ -6053,9 +6054,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       // Attach a dragenter handler to $el and all of its children. When the first
       // child is entered, trigger a draghoverstart event.
-      $el.on("dragenter", function (e) {
+      $el.on("dragenter.dragHover", function (e) {
         if (collection.length === 0) {
-          $el.trigger("draghoverstart" + ns, e.originalEvent);
+          $el.trigger(startEvent, e.originalEvent);
         }
         // Every child that has fired dragenter is added to the collection.
         // Addition is idempotent, which accounts for elements producing dragenter
@@ -6064,19 +6065,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
 
       // If a drop happens, clear the collection and trigger a draghoverend.
-      $el.on("drop", function (e) {
+      $el.on("drop.dragHover", function (e) {
         collection = $();
-        $el.trigger("draghoverend" + ns, e.originalEvent);
+        $el.trigger(endEvent, e.originalEvent);
       });
 
       // Attach dragleave to $el and its children. Whenever a
       // child fires either of these events, remove it from the collection.
-      $el.on("dragleave", function (e) {
+      $el.on("dragleave.dragHover", function (e) {
         collection = collection.not(e.originalEvent.target);
         // When the collection has no elements, all of the children have been
         // removed, and produce draghoverend event.
         if (collection.length === 0) {
-          $el.trigger("draghoverend" + ns, e.originalEvent);
+          $el.trigger(endEvent, e.originalEvent);
         }
       });
     },
@@ -6089,10 +6090,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this._enableDraghover($doc);
       $doc.on({
         "draghoverstart.fileDrag": function draghoverstartFileDrag(e) {
-          $fileInputs.trigger("showZone.fileDrag");
+          $fileInputs.trigger("showZone");
         },
         "draghoverend.fileDrag": function draghoverendFileDrag(e) {
-          $fileInputs.trigger("hideZone.fileDrag");
+          $fileInputs.trigger("hideZone");
         },
         "dragover.fileDrag drop.fileDrag": function dragoverFileDragDropFileDrag(e) {
           e.preventDefault();
@@ -6105,7 +6106,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       $doc.off(".fileDrag");
       this._disableDraghover($doc);
     },
-    _zoneEvents: ["showZone.fileDrag", "hideZone.fileDrag", "draghoverstart.zone", "draghoverend.zone", "drop"].join(" "),
+    _zoneEvents: ["showZone", "hideZone", "draghoverstart:zone", "draghoverend:zone", "drop"].join(" "),
     _canSetFiles: function _canSetFiles(fileList) {
       var testEl = document.createElement("input");
       testEl.type = "file";
@@ -6175,23 +6176,41 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
             $zone.removeClass(_this2._overClass);
             $zone.addClass(_this2._activeClass);
             setState("activated");
-          }).when(["activated", "hideZone"], function (e) {
+          }).whenAny([
+          // If we're in the dropped-on state and we receive a draghoverend:zone
+          // event, it means that we've just handled a file drop and need to be in
+          // the plain state.
+          ["dropped-on", "draghoverend:zone"],
+          // If we're plain and receive hideZone, it means we've made ourselves
+          // plain already and are now receiving the hideZone message sent to all
+          // file inputs after a drag has stopped.
+          ["plain", "hideZone"],
+          // If we're activated and receive a hideZone, it means the drag has
+          // left the browser window and we need to be plain. This can happen
+          // when the browser is occluded by an OS window and the user drags
+          // the file from the browser back to that window.
+          ["activated", "hideZone"]], function (e) {
             $zone.removeClass(_this2._overClass);
             $zone.removeClass(_this2._activeClass);
             setState("plain");
-          }).when(["activated", "draghoverstart"], function (e) {
+          }).when(["activated", "draghoverstart:zone"], function (e) {
             $zone.addClass(_this2._overClass);
             $zone.removeClass(_this2._activeClass);
             setState("over");
           })
-          // A "drop" event always coincides with a "draghoverend" event. Since
-          // we handle all draghoverend events the same way, by clearing our
-          // over-style and reverting to "activated" state, we only need to
-          // worry about handling the file upload itself here.
+          // Here we handle the drop event, and enter the "dropped-on" state.
+          // This is necessary because draghoverend:zone can denote that either
+          // the file was dragged away *or* that it has been dropped on us, and
+          // we will need to know what happened in order to properly interpret
+          // the draghoverend:zone event that was also triggered by this drop.
           .when(["over", "drop"], function (e) {
             _this2._handleDrop(e, el);
-            // State change taken care of by ["over", "draghoverend"] handler.
-          }).when(["over", "draghoverend"], function (e) {
+            setState("dropped-on");
+          })
+          // If we're in the "over" state and we receive draghoverend:zone, it means
+          // the file has been dragged away and *not* dropped on us, since our state
+          // is not "dropped-on"
+          .when(["over", "draghoverend:zone"], function (e) {
             $zone.removeClass(_this2._overClass);
             $zone.addClass(_this2._activeClass);
             setState("activated");
@@ -6210,7 +6229,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           // setTimeout. The function we schedule will set the current element's
           // state to "over", preparing us to deal with a subsequent
           // "draghoverend".
-          .when(["plain", "draghoverstart"], function (e) {
+          .when(["plain", "draghoverstart:zone"], function (e) {
             window.setTimeout(function () {
               $zone.addClass(_this2._overClass);
               $zone.removeClass(_this2._activeClass);
@@ -6224,11 +6243,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           setState("plain");
           $zone.on(_this2._zoneEvents, transition);
           $fileInputs = $fileInputs.add(el);
-          _this2._enableDraghover($zone, ".zone");
+          _this2._enableDraghover($zone, "draghoverstart:zone", "draghoverend:zone");
         })();
       }
 
-      $el.on("change", uploadFiles);
+      $el.on("change.fileInputBinding", uploadFiles);
     },
 
     unsubscribe: function unsubscribe(el) {

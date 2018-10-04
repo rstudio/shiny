@@ -41,6 +41,8 @@ shiny 1.1.0.9001
 
 * Fixed [#2162](https://github.com/rstudio/shiny/issues/2162): `selectInput` was sending spurious duplicate values to the server when using backspace. Thanks, @sada1993! [#2187](https://github.com/rstudio/shiny/pull/2187)
 
+* Fixed [#2142](https://github.com/rstudio/shiny/issues/2142): Dropping files on `fileInput`s stopped working on recent releases of Firefox. Thanks @dmenne for reporting! [#2203](https://github.com/rstudio/shiny/pull/2203)
+
 ### Documentation Updates
 
 * Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. ([#2084](https://github.com/rstudio/shiny/pull/2084))

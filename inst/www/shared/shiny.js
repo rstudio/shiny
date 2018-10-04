@@ -6053,7 +6053,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       // Attach a dragenter handler to $el and all of its children. When the first
       // child is entered, trigger a draghoverstart event.
-      $el.on("dragenter.dragHover", function (e) {
+      $el.on("dragenter", function (e) {
         if (collection.length === 0) {
           $el.trigger("draghoverstart" + ns, e.originalEvent);
         }
@@ -6063,9 +6063,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         collection = collection.add(e.originalEvent.target);
       });
 
-      // Attach dragleave and drop handlers to $el and its children. Whenever a
+      // If a drop happens, clear the collection and trigger a draghoverend.
+      $el.on("drop", function (e) {
+        collection = $();
+        $el.trigger("draghoverend" + ns, e.originalEvent);
+      });
+
+      // Attach dragleave to $el and its children. Whenever a
       // child fires either of these events, remove it from the collection.
-      $el.on("dragleave.dragHover drop.dragHover", function (e) {
+      $el.on("dragleave", function (e) {
         collection = collection.not(e.originalEvent.target);
         // When the collection has no elements, all of the children have been
         // removed, and produce draghoverend event.
@@ -6127,6 +6133,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         // (Chrome, Safari)
         $el.val("");
         el.files = e.originalEvent.dataTransfer.files;
+        // Recent versions of Firefox (57+, or "Quantum" and beyond) don't seem to
+        // automatically trigger a change event, so we trigger one manually here.
+        // On browsers that do trigger change, this operation appears to be
+        // idempotent, as el.files doesn't change between events.
+        $el.trigger("change");
       }
     },
     _activeClass: "shiny-file-input-active",
@@ -6217,7 +6228,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         })();
       }
 
-      $el.on("change.fileInputBinding", uploadFiles);
+      $el.on("change", uploadFiles);
     },
 
     unsubscribe: function unsubscribe(el) {

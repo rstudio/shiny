@@ -5818,6 +5818,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     _zoneOf: function _zoneOf(el) {
       return $(el).closest("div.input-group");
     },
+    // This function makes it possible to attach listeners to the dragenter,
+    // dragleave, and drop events of a single element with children. It's not
+    // intuitive to do directly because outer elements fire "dragleave" events
+    // both when the drag leaves the element and when the drag enters a child. To
+    // make it easier, we maintain a count of the elements being dragged across
+    // and trigger 3 new types of event:
+    //
+    // 1. draghover:enter - When a drag enters el and any of its children.
+    // 2. draghover:leave - When the drag leaves el and all of its children.
+    // 3. draghover:drop - When an item is dropped on el or any of its children.
     _enableDraghover: function _enableDraghover(el) {
       var $el = $(el),
           childCounter = 0;

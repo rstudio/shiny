@@ -5932,7 +5932,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     subscribe: function subscribe(el, callback) {
       var _this3 = this;
 
-      var $el = $(el).on("change.fileInputBinding", uploadFiles);
+      $(el).on("change.fileInputBinding", uploadFiles);
       // Here we try to set up the necessary events for Drag and Drop ("DnD") on
       // every browser except IE9. We specifically exclude IE9 because it's one
       // browser that supports just enough of the functionality we need to be

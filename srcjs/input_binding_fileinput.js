@@ -422,7 +422,7 @@ $.extend(fileInputBinding, {
     }
   },
   subscribe: function(el, callback) {
-    let $el = $(el).on("change.fileInputBinding", uploadFiles);
+    $(el).on("change.fileInputBinding", uploadFiles);
     // Here we try to set up the necessary events for Drag and Drop ("DnD") on
     // every browser except IE9. We specifically exclude IE9 because it's one
     // browser that supports just enough of the functionality we need to be

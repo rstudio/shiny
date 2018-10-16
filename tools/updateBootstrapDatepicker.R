@@ -52,3 +52,5 @@ copy_files <- function(srcdir, destdir, filenames) {
 }
 
 copy_files(source_dir, dest_dir, filenames)
+
+message("Make sure to update the version to ", version, " in datePickerDependency!")

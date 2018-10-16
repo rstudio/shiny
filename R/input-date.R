@@ -129,7 +129,9 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
 }
 
 datePickerDependency <- htmlDependency(
-  "bootstrap-datepicker", "1.6.4", c(href = "shared/datepicker"),
+  "bootstrap-datepicker",
+  "1.8.0",
+  c(href = "shared/datepicker"),
   script = "js/bootstrap-datepicker.min.js",
   stylesheet = "css/bootstrap-datepicker3.min.css",
   # Need to enable noConflict mode. See #1346.

@@ -8,7 +8,7 @@ version <- "1.8.0"
 # The git tag for the https://github.com/uxsolutions/bootstrap-datepicker repo.
 tag <- paste0("v", version)
 
-source_file <- file.path(tempdir(), paste0("libuv-", version, ".tar.gz"))
+source_file <- file.path(tempdir(), paste0("bootstrap-datepicker-", version, ".tar.gz"))
 
 url <- paste0("https://github.com/uxsolutions/bootstrap-datepicker/archive/", tag, ".tar.gz")
 download.file(url, source_file)
@@ -26,7 +26,10 @@ locale_files <- dir(file.path(source_dir, "locales"), "\\.min\\.js$")
 locale_files <- locale_files[locale_files != "bootstrap-datepicker-en-CA.min.js"]
 
 filenames <- c(
-  "js/bootstrap-datepicker.min.js",
+  "js/bootstrap-datepicker.js",
+  # Don't copy over the min.js file, because we minify it, and in the process
+  # add in the locale files.
+  "css/bootstrap-datepicker3.css",
   "css/bootstrap-datepicker3.min.css",
   file.path("locales", locale_files)
 )
@@ -52,9 +55,11 @@ copy_files <- function(srcdir, destdir, filenames) {
 
 copy_files(source_dir, dest_dir, filenames)
 
-message("Make sure to update the version to ", version, " in datePickerDependency!")
-
 locales <- sub("bootstrap-datepicker\\.(.*)\\.min\\.js", '"\\1"', locale_files)
-message("Also update valid languages in documentation for dateInput: \n",
+
+message("Make sure to:\n",
+  "- Update the version to ", version, " in datePickerDependency.\n",
+  "- Run grunt to generate bootstrap-datepicker.min.js.\n",
+  "- Update valid languages in documentation for dateInput:\n  ",
   paste0(locales, collapse = ", ")
 )

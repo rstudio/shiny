@@ -143,7 +143,7 @@ module.exports = function(grunt) {
       datepicker: {
         src: [
           instdir + 'www/shared/datepicker/js/bootstrap-datepicker.js',
-          instdir + 'www/shared/datepicker/js/locales/bootstrap-datepicker.*.js'
+          instdir + 'www/shared/datepicker/locales/bootstrap-datepicker.*.js'
         ],
         dest: instdir + 'www/shared/datepicker/js/bootstrap-datepicker.min.js'
       },

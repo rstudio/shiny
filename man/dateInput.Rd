@@ -34,13 +34,14 @@ Can be "month" (the default), "year", or "decade".}
 from 0 (Sunday) to 6 (Saturday).}
 
 \item{language}{The language used for month and day names. Default is "en".
-Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
-"de", "el", "en-AU", "en-GB", "eo", "es", "et", "eu", "fa", "fi", "fo",
-"fr-CH", "fr", "gl", "he", "hr", "hu", "hy", "id", "is", "it-CH", "it",
-"ja", "ka", "kh", "kk", "ko", "kr", "lt", "lv", "me", "mk", "mn", "ms",
-"nb", "nl-BE", "nl", "no", "pl", "pt-BR", "pt", "ro", "rs-latin", "rs",
-"ru", "sk", "sl", "sq", "sr-latin", "sr", "sv", "sw", "th", "tr", "uk",
-"vi", "zh-CN", and "zh-TW".}
+Other valid values include "ar-tn", "ar", "az", "bg", "bn", "br", "bs",
+"ca", "cs", "cy", "da", "de", "el", "en-AU", "en-CA", "en-GB", "en-IE",
+"en-NZ", "en-ZA", "eo", "es", "et", "eu", "fa", "fi", "fo", "fr-CH", "fr",
+"gl", "he", "hi", "hr", "hu", "hy", "id", "is", "it-CH", "it", "ja", "ka",
+"kh", "kk", "km", "ko", "kr", "lt", "lv", "me", "mk", "mn", "ms", "nl-BE",
+"nl", "no", "oc", "pl", "pt-BR", "pt", "ro", "rs-latin", "rs", "ru", "si",
+"sk", "sl", "sq", "sr-latin", "sr", "sv", "sw", "ta", "tg", "th", "tk",
+"tr", "uk", "uz-cyrl", "uz-latn", "vi", "zh-CN", and "zh-TW".}
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
@@ -48,8 +49,8 @@ see \code{\link{validateCssUnit}}.}
 \item{autoclose}{Whether or not to close the datepicker immediately when a
 date is selected.}
 
-\item{datesdisabled}{Which dates should be disabled. Either a Date object,
-or a string in \code{yyyy-mm-dd} format.}
+\item{datesdisabled}{Which dates should be disabled. Either a Date object, or
+a string in \code{yyyy-mm-dd} format.}
 
 \item{daysofweekdisabled}{Days of the week that should be disabled. Should be
 a integer vector with values from 0 (Sunday) to 6 (Saturday).}
@@ -102,7 +103,7 @@ ui <- fluidPage(
 
   # Disable Mondays and Tuesdays.
   dateInput("date7", "Date:", daysofweekdisabled = c(1,2)),
-  
+
   # Disable specific dates.
   dateInput("date8", "Date:", value = "2012-02-29",
             datesdisabled = c("2012-03-01", "2012-03-02"))

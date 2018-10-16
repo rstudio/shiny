@@ -38,13 +38,14 @@ Can be "month" (the default), "year", or "decade".}
 from 0 (Sunday) to 6 (Saturday).}
 
 \item{language}{The language used for month and day names. Default is "en".
-Other valid values include "ar", "az", "bg", "bs", "ca", "cs", "cy", "da",
-"de", "el", "en-AU", "en-GB", "eo", "es", "et", "eu", "fa", "fi", "fo",
-"fr-CH", "fr", "gl", "he", "hr", "hu", "hy", "id", "is", "it-CH", "it",
-"ja", "ka", "kh", "kk", "ko", "kr", "lt", "lv", "me", "mk", "mn", "ms",
-"nb", "nl-BE", "nl", "no", "pl", "pt-BR", "pt", "ro", "rs-latin", "rs",
-"ru", "sk", "sl", "sq", "sr-latin", "sr", "sv", "sw", "th", "tr", "uk",
-"vi", "zh-CN", and "zh-TW".}
+Other valid values include "ar-tn", "ar", "az", "bg", "bn", "br", "bs",
+"ca", "cs", "cy", "da", "de", "el", "en-AU", "en-CA", "en-GB", "en-IE",
+"en-NZ", "en-ZA", "eo", "es", "et", "eu", "fa", "fi", "fo", "fr-CH", "fr",
+"gl", "he", "hi", "hr", "hu", "hy", "id", "is", "it-CH", "it", "ja", "ka",
+"kh", "kk", "km", "ko", "kr", "lt", "lv", "me", "mk", "mn", "ms", "nl-BE",
+"nl", "no", "oc", "pl", "pt-BR", "pt", "ro", "rs-latin", "rs", "ru", "si",
+"sk", "sl", "sq", "sr-latin", "sr", "sv", "sw", "ta", "tg", "th", "tk",
+"tr", "uk", "uz-cyrl", "uz-latn", "vi", "zh-CN", and "zh-TW".}
 
 \item{separator}{String to display between the start and end input boxes.}
 

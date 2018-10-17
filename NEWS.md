@@ -47,7 +47,7 @@ This release features plot caching, an important new tool for improving performa
 
 * Fixed [#2142](https://github.com/rstudio/shiny/issues/2142): Dropping files on `fileInput`s stopped working on recent releases of Firefox. Thanks @dmenne for reporting! [#2203](https://github.com/rstudio/shiny/pull/2203)
 
-* Fixed [#2204](https://github.com/rstudio/shiny/issues/2204): `updateDateInput` could set the wrong date on days where DST begins. [#2212](https://github.com/rstudio/shiny/pull/2212)
+* Fixed [#2204](https://github.com/rstudio/shiny/issues/2204): `updateDateInput` could set the wrong date on days where DST begins. (Thanks @GaGaMan1101!) [#2212](https://github.com/rstudio/shiny/pull/2212)
 
 ### Documentation Updates
 

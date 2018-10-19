@@ -392,7 +392,10 @@ startApp <- function(appObj, port, host, quiet) {
 
   httpuvApp <- handlerManager$createHttpuvApp()
   httpuvApp$staticPaths <- c(
-    shared = system.file(package="shiny", "www", "shared"),
+    appObj$staticPaths,
+    list(
+      "shared" = system.file(package = "shiny", "www", "shared")
+    ),
     .globals$resourcePaths
   )
 

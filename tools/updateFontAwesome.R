@@ -1,0 +1,135 @@
+#!/usr/bin/env Rscript
+
+# This script can be run from the command line or sourced from an R session.
+library(rprojroot)
+library(jsonlite)
+
+# =============================================================================
+# Download and unzip to temp dir
+# =============================================================================
+version <- "5.4.1"
+
+zip_file <- file.path(tempdir(), paste0("font-awesome-", version, ".zip"))
+
+url <- paste0(
+  "https://github.com/FortAwesome/Font-Awesome/releases/download/",
+  version, "/fontawesome-free-", version, "-web.zip"
+)
+download.file(url, zip_file)
+
+unzip(zip_file, exdir = tempdir())
+source_dir <- file.path(tempdir(), paste0("fontawesome-free-", version, "-web"))
+
+# =============================================================================
+# Remove old stuff
+# =============================================================================
+dest_dir <- find_package_root_file("inst", "www", "shared", "fontawesome")
+unlink(dest_dir, recursive = TRUE)
+
+# =============================================================================
+# Copy the files
+# =============================================================================
+copy_files <- function(srcdir, destdir, filenames) {
+  # Create needed directories
+  dest_subdirs <- file.path(destdir, unique(dirname(filenames)))
+  for (dest_subdir in dest_subdirs) {
+    dir.create(dest_subdir, recursive = TRUE)
+  }
+
+  res <- file.copy(
+    from = paste0(srcdir,  "/", filenames),
+    to   = paste0(destdir, "/", filenames)
+  )
+
+  if (!all(res)) {
+    message("Problem copying ", sum(!res), " files: \n  ",
+      paste0(filenames[!res], collapse = "\n  ")
+    )
+  }
+}
+
+filenames <- c(
+  "css/all.css",
+  "css/all.min.css",
+  "css/v4-shims.css",
+  "css/v4-shims.min.css",
+  file.path("webfonts", dir(file.path(source_dir, "webfonts")))
+)
+
+copy_files(source_dir, dest_dir, filenames)
+
+# =============================================================================
+# Update the fa_icons data frame in R/sysdata.rda
+# =============================================================================
+
+# In Font-Awesome 5, there are four different CSS prefix classes: "fab", "fas",
+# "far", and "fal" (which is only in the Pro version, so we won't use it here).
+# These are for "brands", "solid", "regular", and "light", respectively. Each
+# icon supports various combinations of these prefixes.
+#
+# The CSS prefix class for Font-Awesome 4 is "fa". Some of the icon names from
+# V4 do not exist in V5, like "bank". Some of them do exist in V5, but the name
+# now refers to a very different icon. This is true of "calendar". The
+# v4-shims.css file will make "fa fa-calendar" (this is V4 syntax) display one
+# icon (which is very similar to the V4 version), and "fas fa-calendar" (V5
+# syntax) display a different icon.
+#
+# In this version of Shiny, we decided to minimize visible changes for the same
+# code. That means that if someone uses icon("calendar"), they will get "fa
+# fa-calendar". In the future we may change it so that it defaults to "fas
+# fa-calendar", which will result in the V5 icon.
+
+# Find the icons that existed in version 4. These icons will have the CSS class
+# "fa".
+v4_shim_css <- readLines(find_package_root_file("inst", "www", "shared", "fontawesome", "css", "v4-shims.css"))
+v4_icons <- v4_shim_css[grepl("^\\.fa", v4_shim_css)]
+# Remove prefix ".fa.fa-" and suffix " {" or ":before {".
+v4_icons <- sub("^\\.fa\\.fa-(.*?)(:before)? \\{$", "\\1", v4_icons)
+v4_icons <- unique(v4_icons)
+
+v4_icon_df <- data.frame(
+  name = v4_icons,
+  fa = TRUE,
+  stringsAsFactors = FALSE
+)
+
+# Get info on icons in version 5.
+metadata <- fromJSON(file.path(source_dir, "metadata", "icons.json"))
+styles <- lapply(metadata, `[[`, "styles")
+label  <- vapply(metadata, `[[`, "label", FUN.VALUE = "")
+
+icon_df <- data.frame(
+  name = names(metadata),
+  fab  = vapply(styles, function(style) "brands" %in% style, TRUE),
+  fas  = vapply(styles, function(style) "solid"  %in% style, TRUE),
+  far  = vapply(styles, function(style) "regular" %in% style, TRUE),
+  label = label,
+  stringsAsFactors = FALSE
+)
+
+fa_icons <- merge(v4_icon_df, icon_df, all = TRUE)
+
+# Replace NA's with FALSE
+fa_icons$fa [is.na(fa_icons$fa)]  <- FALSE
+fa_icons$fab[is.na(fa_icons$fab)] <- FALSE
+fa_icons$fas[is.na(fa_icons$fas)] <- FALSE
+fa_icons$far[is.na(fa_icons$far)] <- FALSE
+
+fa_icons$default <-
+  ifelse(fa_icons$fa, "fa",
+    ifelse(fa_icons$fab, "fab",
+      ifelse(fa_icons$fas, "fas",
+        ifelse(fa_icons$far, "far",
+          NA_character_
+        )
+      )
+    )
+  )
+
+
+message("Writing fa_icons to R/sysdata.rda")
+# Note: if in the future we add more objects to sysdata.rda, we'll have to do
+# this differently.
+save("fa_icons", file = find_package_root_file("R", "sysdata.rda"))
+
+message('Make sure to update the version of the font-awesome htmlDependency() to "', version, '".')

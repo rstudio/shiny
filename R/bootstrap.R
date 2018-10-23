@@ -1521,24 +1521,27 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   tabPanel("Table", icon = icon("table"))
 #' )
 #' @export
-icon <- function(name, class = NULL, lib = "font-awesome") {
-  prefixes <- list(
-    "font-awesome" = "fa",
-    "glyphicon" = "glyphicon"
-  )
-  prefix <- prefixes[[lib]]
+icon <- function(name, class = NULL, lib = c("font-awesome", "glyphicon")) {
+  lib <- match.arg(lib)
+  if (lib == "glyphicon") {
+    prefix_class <- "glyphicon"
+    prefix       <- "glyphicon"
+  } else {
+    prefix_class <- find_fa_prefix(name)
+    prefix       <- "fa"
+  }
 
   # determine stylesheet
   if (is.null(prefix)) {
     stop("Unknown font library '", lib, "' specified. Must be one of ",
-         paste0('"', names(prefixes), '"', collapse = ", "))
+      '"font-awesome" or "glyphicon".')
   }
 
   # build the icon class (allow name to be null so that other functions
   # e.g. buildTabset can pass an explicit class value)
   iconClass <- ""
   if (!is.null(name))
-    iconClass <- paste0(prefix, " ", prefix, "-", name)
+    iconClass <- paste0(prefix_class, " ", prefix, "-", name)
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
 
@@ -1561,4 +1564,14 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
 # Helper funtion to extract the class from an icon
 iconClass <- function(icon) {
   if (!is.null(icon)) icon$attribs$class
+}
+
+# Returns the default Font-Awesome CSS prefix class to use for a given icon.
+find_fa_prefix <- function(name) {
+  prefix <- fa_icons$default[fa_icons$name == name]
+  if (length(prefix == 1)) {
+    return(prefix)
+  }
+
+  stop("Unknown Font-Awesome icon name: ", name)
 }

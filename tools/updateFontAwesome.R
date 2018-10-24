@@ -96,14 +96,12 @@ v4_icon_df <- data.frame(
 # Get info on icons in version 5.
 metadata <- fromJSON(file.path(source_dir, "metadata", "icons.json"))
 styles <- lapply(metadata, `[[`, "styles")
-label  <- vapply(metadata, `[[`, "label", FUN.VALUE = "")
 
 icon_df <- data.frame(
   name = names(metadata),
-  fab  = vapply(styles, function(style) "brands" %in% style, TRUE),
-  fas  = vapply(styles, function(style) "solid"  %in% style, TRUE),
+  fab  = vapply(styles, function(style) "brands"  %in% style, TRUE),
+  fas  = vapply(styles, function(style) "solid"   %in% style, TRUE),
   far  = vapply(styles, function(style) "regular" %in% style, TRUE),
-  label = label,
   stringsAsFactors = FALSE
 )
 

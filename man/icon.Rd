@@ -4,7 +4,7 @@
 \alias{icon}
 \title{Create an icon}
 \usage{
-icon(name, class = NULL, lib = "font-awesome")
+icon(name, class = NULL, lib = c("font-awesome", "glyphicon"))
 }
 \arguments{
 \item{name}{Name of icon. Icons are drawn from the
@@ -13,7 +13,7 @@ the v5.3.1 set are supported with the v4 naming convention) and
 \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
 libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 in icon names (i.e. the "fa-calendar" icon should be referred to as
-"calendar")}
+"calendar"). May also be \code{NULL}.}
 
 \item{class}{Additional classes to customize the style of the icon (see the
 \href{http://fontawesome.io/examples/}{usage examples} for details on

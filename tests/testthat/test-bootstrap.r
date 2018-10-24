@@ -52,7 +52,7 @@ test_that("Repeated names for selectInput and radioButtons choices", {
   choices <- x$children
 
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[2]]$children[[1]],
-    HTML('<i class="fa fa-calendar"></i>'))
+    HTML('<i class="fas fa-calendar"></i>'))
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$value, 'icon')
   expect_equal(choices[[2]]$children[[1]][[1]]$children[[1]]$children[[1]]$attribs$checked, 'checked')
 
@@ -264,4 +264,52 @@ test_that("Choices need not be provided, can be NULL or c()", {
   expect_identical(noChoices, allChoicesNull)
 
   expect_true(grepl(fixed = TRUE, expected, format(noChoices)))
+})
+
+test_that("icon() provides correct Font-Awesome v4 and v5 output", {
+  # A name for which there are v4 and v5 icon. Should default to v5 output, with
+  # "fas".
+  expect_identical(
+    as.character(icon("calendar")),
+    '<i class="fas fa-calendar"></i>'
+  )
+  # Use v5 explicitly
+  expect_identical(
+    as.character(icon("calendar", lib = "fa5")),
+    '<i class="fas fa-calendar"></i>'
+  )
+  # Use v4 explicitly
+  expect_identical(
+    as.character(icon("calendar", lib = "fa4")),
+    '<i class="fa fa-calendar"></i>'
+  )
+
+  # A name for which there's no v4 icon. This one is a brand, so it should be
+  # "fab".
+  expect_identical(
+    as.character(icon("angular")),
+    '<i class="fab fa-angular"></i>'
+  )
+  expect_identical(
+    as.character(icon("angular", lib = "fa5")),
+    '<i class="fab fa-angular"></i>'
+  )
+  expect_error(as.character(icon("angular", lib = "fa4")))
+
+  # A name for which there's no v5 icon.
+  expect_identical(
+    as.character(icon("arrows")),
+    '<i class="fa fa-arrows"></i>'
+  )
+  expect_error(as.character(icon("arrows", lib = "fa5")))
+  expect_identical(
+    as.character(icon("arrows", lib = "fa4")),
+    '<i class="fa fa-arrows"></i>'
+  )
+
+  # Allow NULL name - simply pass through class.
+  expect_identical(
+    as.character(icon(NULL, class = "abc xyz")),
+    '<i class=" abc xyz"></i>'
+  )
 })

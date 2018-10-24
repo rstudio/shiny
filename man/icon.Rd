@@ -15,7 +15,7 @@ along with backward compatibility for v4 icons) and
 \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
 libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 in icon names (i.e. the "fa-calendar" icon should be referred to as
-"calendar"). May also be \code{NULL}.}
+"calendar").}
 
 \item{class}{Additional classes to customize the style of the icon (see the
 \href{http://fontawesome.io/examples/}{usage examples} for details on

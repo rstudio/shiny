@@ -1495,7 +1495,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
-#'   "calendar"). May also be \code{NULL}.
+#'   "calendar").
 #' @param class Additional classes to customize the style of the icon (see the
 #'   \href{http://fontawesome.io/examples/}{usage examples} for details on
 #'   supported styles).

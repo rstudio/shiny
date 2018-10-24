@@ -1,3 +1,4 @@
+^data-raw$
 ^\.Rproj\.user$
 ^\.git$
 ^examples$

@@ -58,6 +58,12 @@ filenames <- c(
 
 copy_files(source_dir, dest_dir, filenames)
 
+# Save the icon metadata in data-raw/fontawesome/
+file.copy(
+  file.path(source_dir, "metadata", "icons.json"),
+  find_package_root_file("data-raw", "fontawesome")
+)
+
 # =============================================================================
 # Update the fa_icons data frame in R/sysdata.rda
 # =============================================================================
@@ -89,7 +95,7 @@ v4_icon_df <- data.frame(
 )
 
 # Get info on icons in version 5.
-metadata <- fromJSON(file.path(source_dir, "metadata", "icons.json"))
+metadata <- fromJSON(find_package_root_file("data-raw", "fontawesome", "icons.json"))
 styles <- lapply(metadata, `[[`, "styles")
 
 icon_df <- data.frame(
@@ -136,6 +142,16 @@ fa_icons$default_v5 <-
 
 
 fa_version <- version
+
+# Save to text for nice diffing
+message("Writing fa_icons and fa_version to data-raw")
+write.csv(
+  fa_icons,
+  file = find_package_root_file("data-raw", "fa_icons.csv"),
+  row.names = FALSE
+)
+writeLines(fa_version, find_package_root_file("data-raw", "fa_version.txt"))
+
 message("Writing fa_icons and fa_version to R/sysdata.rda")
 # Note: if in the future we add more objects to sysdata.rda, we'll have to do
 # this differently.

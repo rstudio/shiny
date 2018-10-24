@@ -73,11 +73,6 @@ copy_files(source_dir, dest_dir, filenames)
 # v4-shims.css file will make "fa fa-calendar" (this is V4 syntax) display one
 # icon (which is very similar to the V4 version), and "fas fa-calendar" (V5
 # syntax) display a different icon.
-#
-# In this version of Shiny, we decided to minimize visible changes for the same
-# code. That means that if someone uses icon("calendar"), they will get "fa
-# fa-calendar". In the future we may change it so that it defaults to "fas
-# fa-calendar", which will result in the V5 icon.
 
 # Find the icons that existed in version 4. These icons will have the CSS class
 # "fa".
@@ -113,13 +108,28 @@ fa_icons$fab[is.na(fa_icons$fab)] <- FALSE
 fa_icons$fas[is.na(fa_icons$fas)] <- FALSE
 fa_icons$far[is.na(fa_icons$far)] <- FALSE
 
+# The default behavior is to try to provide the v5 icon (for a given name) if
+# available, and if not, then provide the v4 icon.
 fa_icons$default <-
-  ifelse(fa_icons$fa, "fa",
-    ifelse(fa_icons$fab, "fab",
-      ifelse(fa_icons$fas, "fas",
-        ifelse(fa_icons$far, "far",
+  ifelse(fa_icons$fab, "fab",
+    ifelse(fa_icons$fas, "fas",
+      ifelse(fa_icons$far, "far",
+        ifelse(fa_icons$fa, "fa",
           NA_character_
         )
+      )
+    )
+  )
+
+# If the user specifies v4, then only use the v4 icon.
+fa_icons$default_v4 <- ifelse(fa_icons$fa, "fa", NA_character_)
+
+# If the user specifies v5, then only use the v5 icon.
+fa_icons$default_v5 <-
+  ifelse(fa_icons$fab, "fab",
+    ifelse(fa_icons$fas, "fas",
+      ifelse(fa_icons$far, "far",
+        NA_character_
       )
     )
   )

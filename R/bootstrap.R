@@ -1490,7 +1490,8 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'
 #' @param name Name of icon. Icons are drawn from the
 #'   \href{https://fontawesome.com/}{Font Awesome Free} (currently icons from
-#'   the v5.3.1 set are supported with the v4 naming convention) and
+#'   version \Sexpr[echo=TRUE,stage=build]{shiny:::fa_version} are supported,
+#'   along with backward compatibility for v4 icons) and
 #'   \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
@@ -1498,7 +1499,13 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' @param class Additional classes to customize the style of the icon (see the
 #'   \href{http://fontawesome.io/examples/}{usage examples} for details on
 #'   supported styles).
-#' @param lib Icon library to use ("font-awesome" or "glyphicon")
+#' @param lib Icon library to use. Can be "font-awesome" (the default), "fa5",
+#'   "fa4", or "glyphicon". If "font-awesome", that means to use the icon with
+#'   the given name from the current version of Font-Awesome
+#'   (\Sexpr[echo=TRUE,stage=build]{shiny:::fa_version}), and if it is not found
+#'   there, then use the icon from Font-Awesome 4. If "fa5", that means to use
+#'   Font-Awesome version 5 only; if "fa4", that means to use Font-Awesome
+#'   version 4 only.
 #'
 #' @return An icon element
 #'
@@ -1508,8 +1515,11 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'
 #'
 #' @examples
-#' icon("calendar")               # standard icon
+#' icon("calendar")               # Standard icon, from Font-Awesome 5
 #' icon("calendar", "fa-3x")      # 3x normal size
+#' icon("calendar", lib = "fa4")  # From Font-Awesome 4
+#' icon("battery")                # This will use the "battery" icon from FA v4,
+#'                                # because "battery" is not present in v5.
 #' icon("cog", lib = "glyphicon") # From glyphicon library
 #'
 #' # add an icon to a submit button
@@ -1521,8 +1531,22 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   tabPanel("Table", icon = icon("table"))
 #' )
 #' @export
-icon <- function(name, class = NULL, lib = c("font-awesome", "glyphicon")) {
+icon <- function(
+  name,
+  class = NULL,
+  lib = c("font-awesome", "fa4", "fa5", "glyphicon")
+) {
   lib <- match.arg(lib)
+
+  if (lib == "fa4") {
+    lib    <- "font-awesome"
+    fa_ver <- "v4"
+  } else if (lib == "fa5") {
+    lib    <- "font-awesome"
+    fa_ver <- "v5"
+  } else if (lib == "font-awesome") {
+    fa_ver <- "default"
+  }
 
   # build the icon class (allow name to be null so that other functions
   # e.g. buildTabset can pass an explicit class value)
@@ -1530,7 +1554,7 @@ icon <- function(name, class = NULL, lib = c("font-awesome", "glyphicon")) {
 
   if (!is.null(name)) {
     if (lib == "font-awesome") {
-      prefix_class <- find_fa_prefix(name)
+      prefix_class <- find_fa_prefix(name, fa_ver)
       prefix       <- "fa"
     } else{
       prefix_class <- "glyphicon"
@@ -1566,11 +1590,27 @@ iconClass <- function(icon) {
 }
 
 # Returns the default Font-Awesome CSS prefix class to use for a given icon.
-find_fa_prefix <- function(name) {
-  prefix <- fa_icons$default[fa_icons$name == name]
-  if (length(prefix == 1)) {
-    return(prefix)
+find_fa_prefix <- function(name, fa_ver = c("default", "v5", "v4")) {
+  fa_ver <- match.arg(fa_ver)
+
+  idx <- (fa_icons$name == name)
+  if (sum(idx) != 1) {
+    stop("Unknown icon name in Font-Awesome: ", name)
   }
 
-  stop("Unknown icon name in Font-Awesome ", fa_version, ": ", name)
+  if (fa_ver == "default") {
+    prefix <- fa_icons$default[idx]
+  } else if (fa_ver == "v5") {
+    prefix <- fa_icons$default_v5[idx]
+  } else if (fa_ver == "v4") {
+    prefix <- fa_icons$default_v4[idx]
+  }
+
+  if (is.na(prefix)) {
+    # Will only get here for v4 or v5; there are no NA's in the `default`
+    # column.
+    stop("Unknown icon name in Font-Awesome (", fa_ver, "): ", name)
+  }
+
+  prefix
 }

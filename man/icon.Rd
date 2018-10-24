@@ -4,12 +4,14 @@
 \alias{icon}
 \title{Create an icon}
 \usage{
-icon(name, class = NULL, lib = c("font-awesome", "glyphicon"))
+icon(name, class = NULL, lib = c("font-awesome", "fa4", "fa5",
+  "glyphicon"))
 }
 \arguments{
 \item{name}{Name of icon. Icons are drawn from the
 \href{https://fontawesome.com/}{Font Awesome Free} (currently icons from
-the v5.3.1 set are supported with the v4 naming convention) and
+version \Sexpr[echo=TRUE,stage=build]{shiny:::fa_version} are supported,
+along with backward compatibility for v4 icons) and
 \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
 libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 in icon names (i.e. the "fa-calendar" icon should be referred to as
@@ -19,7 +21,13 @@ in icon names (i.e. the "fa-calendar" icon should be referred to as
 \href{http://fontawesome.io/examples/}{usage examples} for details on
 supported styles).}
 
-\item{lib}{Icon library to use ("font-awesome" or "glyphicon")}
+\item{lib}{Icon library to use. Can be "font-awesome" (the default), "fa5",
+"fa4", or "glyphicon". If "font-awesome", that means to use the icon with
+the given name from the current version of Font-Awesome
+(\Sexpr[echo=TRUE,stage=build]{shiny:::fa_version}), and if it is not found
+there, then use the icon from Font-Awesome 4. If "fa5", that means to use
+Font-Awesome version 5 only; if "fa4", that means to use Font-Awesome
+version 4 only.}
 }
 \value{
 An icon element
@@ -30,8 +38,11 @@ of a button, or as an icon for a \code{\link{tabPanel}} within a
 \code{\link{navbarPage}}.
 }
 \examples{
-icon("calendar")               # standard icon
+icon("calendar")               # Standard icon, from Font-Awesome 5
 icon("calendar", "fa-3x")      # 3x normal size
+icon("calendar", lib = "fa4")  # From Font-Awesome 4
+icon("battery")                # This will use the "battery" icon from FA v4,
+                               # because "battery" is not present in v5.
 icon("cog", lib = "glyphicon") # From glyphicon library
 
 # add an icon to a submit button

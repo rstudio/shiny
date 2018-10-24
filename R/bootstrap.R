@@ -1494,7 +1494,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'   \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
-#'   "calendar")
+#'   "calendar"). May also be \code{NULL}.
 #' @param class Additional classes to customize the style of the icon (see the
 #'   \href{http://fontawesome.io/examples/}{usage examples} for details on
 #'   supported styles).
@@ -1523,27 +1523,26 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' @export
 icon <- function(name, class = NULL, lib = c("font-awesome", "glyphicon")) {
   lib <- match.arg(lib)
-  if (lib == "glyphicon") {
-    prefix_class <- "glyphicon"
-    prefix       <- "glyphicon"
-  } else {
-    prefix_class <- find_fa_prefix(name)
-    prefix       <- "fa"
-  }
-
-  # determine stylesheet
-  if (is.null(prefix)) {
-    stop("Unknown font library '", lib, "' specified. Must be one of ",
-      '"font-awesome" or "glyphicon".')
-  }
 
   # build the icon class (allow name to be null so that other functions
   # e.g. buildTabset can pass an explicit class value)
   iconClass <- ""
-  if (!is.null(name))
+
+  if (!is.null(name)) {
+    if (lib == "font-awesome") {
+      prefix_class <- find_fa_prefix(name)
+      prefix       <- "fa"
+    } else{
+      prefix_class <- "glyphicon"
+      prefix       <- "glyphicon"
+    }
+
     iconClass <- paste0(prefix_class, " ", prefix, "-", name)
-  if (!is.null(class))
+  }
+
+  if (!is.null(class)) {
     iconClass <- paste(iconClass, class)
+  }
 
   iconTag <- tags$i(class = iconClass)
 

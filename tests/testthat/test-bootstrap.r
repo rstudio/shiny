@@ -313,3 +313,18 @@ test_that("icon() provides correct Font-Awesome v4 and v5 output", {
     '<i class=" abc xyz"></i>'
   )
 })
+
+
+test_that("icon() provides correct output for glyphicon", {
+  # A name that's in glyphicon but not font-awesome
+  expect_identical(
+    as.character(icon("baby-formula", lib = "glyphicon")),
+    '<i class="glyphicon glyphicon-baby-formula"></i>'
+  )
+
+  # A name that's in both glyphicon and font-awesome
+  expect_identical(
+    as.character(icon("calendar", lib = "glyphicon")),
+    '<i class="glyphicon glyphicon-calendar"></i>'
+  )
+})

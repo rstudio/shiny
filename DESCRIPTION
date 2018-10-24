@@ -106,6 +106,7 @@ Collate:
     'cache-utils.R'
     'diagnose.R'
     'fileupload.R'
+    'font-awesome.R'
     'graph.R'
     'reactives.R'
     'reactive-domains.R'

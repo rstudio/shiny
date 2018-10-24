@@ -1538,10 +1538,9 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   # e.g. buildTabset can pass an explicit class value)
   iconClass <- ""
   if (!is.null(name)) {
-    if (name %in% font_awesome_brands) {
+    prefix_class <- prefix
+    if (prefix_class == "fa" && name %in% font_awesome_brands) {
       prefix_class <- "fab"
-    } else {
-      prefix_class <- "fa"
     }
     iconClass <- paste0(prefix_class, " ", prefix, "-", name)
   }

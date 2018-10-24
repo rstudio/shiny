@@ -127,9 +127,8 @@ fa_icons$default <-
   )
 
 
-message("Writing fa_icons to R/sysdata.rda")
+fa_version <- version
+message("Writing fa_icons and fa_version to R/sysdata.rda")
 # Note: if in the future we add more objects to sysdata.rda, we'll have to do
 # this differently.
-save("fa_icons", file = find_package_root_file("R", "sysdata.rda"))
-
-message('Make sure to update the version of the font-awesome htmlDependency() to "', version, '".')
+save("fa_icons", "fa_version", file = find_package_root_file("R", "sysdata.rda"))

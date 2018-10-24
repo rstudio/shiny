@@ -1549,7 +1549,7 @@ icon <- function(name, class = NULL, lib = c("font-awesome", "glyphicon")) {
   # font-awesome needs an additional dependency (glyphicon is in bootstrap)
   if (lib == "font-awesome") {
     htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "5.4.1", "www/shared/fontawesome", package = "shiny",
+      "font-awesome", fa_version, "www/shared/fontawesome", package = "shiny",
       stylesheet = c(
         "css/all.min.css",
         "css/v4-shims.min.css"
@@ -1572,5 +1572,5 @@ find_fa_prefix <- function(name) {
     return(prefix)
   }
 
-  stop("Unknown Font-Awesome icon name: ", name)
+  stop("Unknown icon name in Font-Awesome ", fa_version, ": ", name)
 }

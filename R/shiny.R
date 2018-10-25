@@ -683,11 +683,42 @@ ShinySession <- R6Class(
 
     # See cycleStartAction
     startCycle = function() {
+      # TODO: This should check for busyCount == 0L, and remove the checks from
+      # the call sites
       if (length(private$cycleStartActionQueue) > 0) {
         head <- private$cycleStartActionQueue[[1L]]
         private$cycleStartActionQueue <- private$cycleStartActionQueue[-1L]
+
+        # After we execute the current cycleStartAction (head), there may be
+        # more items left on the queue. If the current busyCount > 0, then that
+        # means an async task is running; whenever that task finishes, it will
+        # decrement the busyCount back to 0 and a startCycle will then be
+        # scheduled. But if the current busyCount is 0, it means that either
+        # busyCount was incremented and then decremented; OR that running head()
+        # never touched busyCount (one example of the latter is that an input
+        # changed that didn't actually cause any observers to be invalidated,
+        # i.e. an input that's used in the body of an observeEvent). Because of
+        # the possibility of the latter case, we need to conditionally schedule
+        # a startCycle ourselves to ensure that the remaining queue items get
+        # processed.
+        #
+        # Since we can't actually tell whether head() increment and decremented
+        # busyCount, it's possible we're calling startCycle spuriously; that's
+        # OK, it's essentially a no-op in that case.
+        on.exit({
+          if (private$busyCount == 0L && length(private$cycleStartActionQueue) > 0L) {
+            later::later(function() {
+              if (private$busyCount == 0L) {
+                private$startCycle()
+              }
+            })
+          }
+        }, add = TRUE)
+
         head()
       }
+
+      invisible()
     }
   ),
   public = list(

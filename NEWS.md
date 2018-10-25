@@ -49,6 +49,8 @@ This release features plot caching, an important new tool for improving performa
 
 * Fixed [#2204](https://github.com/rstudio/shiny/issues/2204): `updateDateInput` could set the wrong date on days where DST begins. (Thanks @GaGaMan1101!) [#2212](https://github.com/rstudio/shiny/pull/2212)
 
+* Fixed [#2225](https://github.com/rstudio/shiny/issues/2225): Input event queue can stall in apps that use async. [#2226](https://github.com/rstudio/shiny/pull/2226)
+
 ### Documentation Updates
 
 * Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. ([#2084](https://github.com/rstudio/shiny/pull/2084))

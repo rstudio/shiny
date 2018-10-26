@@ -51,6 +51,8 @@ This release features plot caching, an important new tool for improving performa
 
 * Fixed [#2225](https://github.com/rstudio/shiny/issues/2225): Input event queue can stall in apps that use async. [#2226](https://github.com/rstudio/shiny/pull/2226)
 
+* Fixed [#2228](https://github.com/rstudio/shiny/issues/2228): `reactiveTimer` fails when not owned by a session. Thanks, @P-Bettega! [#2229](https://github.com/rstudio/shiny/pull/2229)
+
 ### Documentation Updates
 
 * Addressed [#1864](https://github.com/rstudio/shiny/issues/1864) by changing `optgroup` documentation to use `list` instead of `c`. ([#2084](https://github.com/rstudio/shiny/pull/2084))

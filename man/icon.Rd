@@ -30,10 +30,6 @@ of a button, or as an icon for a \code{\link{tabPanel}} within a
 \code{\link{navbarPage}}.
 }
 \examples{
-icon("calendar")               # standard icon
-icon("calendar", "fa-3x")      # 3x normal size
-icon("cog", lib = "glyphicon") # From glyphicon library
-
 # add an icon to a submit button
 submitButton("Update View", icon = icon("refresh"))
 

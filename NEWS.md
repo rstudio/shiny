@@ -5,6 +5,10 @@ This release features plot caching, an important new tool for improving performa
 
 ## Full changelog
 
+### Breaking changes
+
+* The URL paths for FontAwesome CSS/JS/font assets have changed, due to our upgrade from FontAwesome 4 to 5. This shouldn't affect you unless you're using `www/index.html` to provide your UI and have hardcoded the old FontAwesome paths into your HTML. If that's you, consider switching to [HTML templates](https://shiny.rstudio.com/articles/templates.html), which give you the syntax of raw HTML while still taking advantage of Shiny's automatic management of web dependencies.
+
 ### New features
 
 * Added `renderCachedPlot()`, which stores plots in a cache so that they can be served up almost instantly. ([#1997](https://github.com/rstudio/shiny/pull/1997))

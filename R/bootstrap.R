@@ -1508,10 +1508,6 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'
 #'
 #' @examples
-#' icon("calendar")               # standard icon
-#' icon("calendar", "fa-3x")      # 3x normal size
-#' icon("cog", lib = "glyphicon") # From glyphicon library
-#'
 #' # add an icon to a submit button
 #' submitButton("Update View", icon = icon("refresh"))
 #'
@@ -1537,8 +1533,13 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   # build the icon class (allow name to be null so that other functions
   # e.g. buildTabset can pass an explicit class value)
   iconClass <- ""
-  if (!is.null(name))
-    iconClass <- paste0(prefix, " ", prefix, "-", name)
+  if (!is.null(name)) {
+    prefix_class <- prefix
+    if (prefix_class == "fa" && name %in% font_awesome_brands) {
+      prefix_class <- "fab"
+    }
+    iconClass <- paste0(prefix_class, " ", prefix, "-", name)
+  }
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
 

@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.1.0.9001
+Version: 1.2.0
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -106,6 +106,7 @@ Collate:
     'cache-utils.R'
     'diagnose.R'
     'fileupload.R'
+    'font-awesome.R'
     'graph.R'
     'reactives.R'
     'reactive-domains.R'

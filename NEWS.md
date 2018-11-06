@@ -1,3 +1,20 @@
+shiny 1.2.0.9000
+===========
+
+## Full changelog
+
+### Breaking changes
+
+### New features
+
+### Minor new features and improvements
+
+### Bug fixes
+
+* Fixed [#2245](https://github.com/rstudio/shiny/issues/2245): `updateSelectizeInput()` did not update labels. ([#2248](https://github.com/rstudio/shiny/pull/2248))
+
+### Documentation Updates
+
 shiny 1.2.0
 ===========
 

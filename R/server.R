@@ -398,6 +398,15 @@ startApp <- function(appObj, port, host, quiet) {
     ),
     .globals$resourcePaths
   )
+  httpuvApp$staticPathOptions <- httpuv::staticPathOptions(
+    html_charset = "utf-8",
+    validation =
+      if (!is.null(getOption("shiny.sharedSecret"))) {
+        sprintf('"Shiny-Shared-Secret" == "%s"', getOption("shiny.sharedSecret"))
+      } else {
+        NULL
+      }
+  )
 
   if (is.numeric(port) || is.integer(port)) {
     if (!quiet) {

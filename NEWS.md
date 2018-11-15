@@ -1,5 +1,5 @@
 shiny 1.2.0.9000
-===========
+================
 
 ## Full changelog
 
@@ -14,6 +14,9 @@ shiny 1.2.0.9000
 * Fixed [#2245](https://github.com/rstudio/shiny/issues/2245): `updateSelectizeInput()` did not update labels. ([#2248](https://github.com/rstudio/shiny/pull/2248))
 
 ### Documentation Updates
+
+* Fixed [#2247](https://github.com/rstudio/shiny/issues/2247): `renderCachedPlot` now supports using promises for either `expr` or `cacheKeyExpr`. (Shiny v1.2.0 supported async `expr`, but only if `cacheKeyExpr` was async as well; now you can use any combination of sync/async for `expr` and `cacheKeyExpr`.) [#2261](https://github.com/rstudio/shiny/pull/2261)
+
 
 shiny 1.2.0
 ===========

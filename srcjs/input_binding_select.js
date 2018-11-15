@@ -22,10 +22,14 @@ $.extend(selectInputBinding, {
     return $(el).val();
   },
   setValue: function(el, value) {
-    var selectize = this._selectize(el);
-    if (typeof(selectize) !== 'undefined') {
-      selectize.setValue(value);
-    } else $(el).val(value);
+    if (!this._is_selectize(el)) {
+      $(el).val(value);
+    } else {
+      let selectize = this._selectize(el);
+      if (selectize) {
+        selectize.setValue(value);
+      }
+    }
   },
   getState: function(el) {
     // Store options in an array of objects, each with with value and label
@@ -119,8 +123,15 @@ $.extend(selectInputBinding, {
       this.setValue(el, data.value);
     }
 
-    if (data.hasOwnProperty('label'))
-      $(el).parent().parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    if (data.hasOwnProperty('label')) {
+      let escaped_id = $escape(el.id);
+      if (this._is_selectize(el)) {
+        escaped_id += "-selectized";
+      }
+      $(el).parent().parent()
+        .find('label[for="' + escaped_id + '"]')
+        .text(data.label);
+    }
 
     $(el).trigger('change');
   },
@@ -140,6 +151,11 @@ $.extend(selectInputBinding, {
   },
   initialize: function(el) {
     this._selectize(el);
+  },
+  // Return true if it's a selectize input, false if it's a regular select input.
+  _is_selectize: function(el) {
+    var config = $(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+    return (config.length > 0);
   },
   _selectize: function(el, update) {
     if (!$.fn.selectize) return undefined;

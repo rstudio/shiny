@@ -12,7 +12,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   var exports = window.Shiny = window.Shiny || {};
 
-  exports.version = "1.2.0"; // Version number inserted by Grunt
+  exports.version = "1.2.0.9000"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -5095,10 +5095,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       return $(el).val();
     },
     setValue: function setValue(el, value) {
-      var selectize = this._selectize(el);
-      if (typeof selectize !== 'undefined') {
-        selectize.setValue(value);
-      } else $(el).val(value);
+      if (!this._is_selectize(el)) {
+        $(el).val(value);
+      } else {
+        var selectize = this._selectize(el);
+        if (selectize) {
+          selectize.setValue(value);
+        }
+      }
     },
     getState: function getState(el) {
       // Store options in an array of objects, each with with value and label
@@ -5191,7 +5195,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.setValue(el, data.value);
       }
 
-      if (data.hasOwnProperty('label')) $(el).parent().parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      if (data.hasOwnProperty('label')) {
+        var escaped_id = $escape(el.id);
+        if (this._is_selectize(el)) {
+          escaped_id += "-selectized";
+        }
+        $(el).parent().parent().find('label[for="' + escaped_id + '"]').text(data.label);
+      }
 
       $(el).trigger('change');
     },
@@ -5213,6 +5223,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     initialize: function initialize(el) {
       this._selectize(el);
+    },
+    // Return true if it's a selectize input, false if it's a regular select input.
+    _is_selectize: function _is_selectize(el) {
+      var config = $(el).parent().find('script[data-for="' + $escape(el.id) + '"]');
+      return config.length > 0;
     },
     _selectize: function _selectize(el, update) {
       if (!$.fn.selectize) return undefined;

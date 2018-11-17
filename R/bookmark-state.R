@@ -6,16 +6,18 @@ ShinySaveState <- R6Class("ShinySaveState",
     input = NULL,
     exclude = NULL,
     onSave = NULL, # A callback to invoke during the saving process.
+    onURLCreate = NULL, # A callback invoked when a state URL is created
 
     # These are set not in initialize(), but by external functions that modify
     # the ShinySaveState object.
     dir = NULL,
 
 
-    initialize = function(input = NULL, exclude = NULL, onSave = NULL) {
+    initialize = function(input = NULL, exclude = NULL, onSave = NULL, onURLCreate = NULL) {
       self$input   <- input
       self$exclude <- exclude
       self$onSave  <- onSave
+      self$onURLCreate <- onURLCreate
       private$values_  <- new.env(parent = emptyenv())
     }
   ),
@@ -149,7 +151,11 @@ encodeShinySaveState <- function(state) {
     )
   }
 
-  res
+  if (!is.null(state$onURLCreate)) {
+    state$onURLCreate(res)
+  } else {
+    res
+  }
 }
 
 RestoreContext <- R6Class("RestoreContext",

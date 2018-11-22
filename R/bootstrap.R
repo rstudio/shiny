@@ -1512,7 +1512,7 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' submitButton("Update View", icon = icon("refresh"))
 #'
 #' navbarPage("App Title",
-#'   tabPanel("Plot", icon = icon("bar-chart-o")),
+#'   tabPanel("Plot", icon = icon("chart-bar", class = "far")), # Use regular font style
 #'   tabPanel("Summary", icon = icon("list-alt")),
 #'   tabPanel("Table", icon = icon("table"))
 #' )
@@ -1538,9 +1538,17 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
     if (prefix_class == "fa" && name %in% font_awesome_brands) {
       prefix_class <- "fab"
     }
+    # The classes fab, fas, far and fal are special prefix classes.
+    # We detect them and "pull them to the front", replacing the default prefix class
+    # This allows e.g. icon("address-book", "far") to function properly.
+    if (!is.null(class) && grepl("\\b(fab|fas|far|fal)\\b", class)) {
+      match <- regexpr("\\b(fab|fas|far|fal)\\b", class)
+      prefix_class <- regmatches(class, match)
+      class <- trimws(paste(regmatches(class, match, invert = TRUE)[[1]], collapse = ""))
+    }
     iconClass <- paste0(prefix_class, " ", prefix, "-", name)
   }
-  if (!is.null(class))
+  if (!is.null(class) && class != "")
     iconClass <- paste(iconClass, class)
 
   iconTag <- tags$i(class = iconClass)

@@ -265,3 +265,26 @@ test_that("Choices need not be provided, can be NULL or c()", {
 
   expect_true(grepl(fixed = TRUE, expected, format(noChoices)))
 })
+
+test_that("Special icon classes are recognized", {
+  # Single class
+  expect_equal(as.character(icon("address-book", "far")),
+               "<i class=\"far fa-address-book\"></i>")
+
+  # Other classes present
+  expect_equal(as.character(icon("address-book", "far fa-2x")),
+               "<i class=\"far fa-address-book fa-2x\"></i>")
+  expect_equal(as.character(icon("address-book", "fa-2x far")),
+               "<i class=\"far fa-address-book fa-2x\"></i>")
+  expect_equal(as.character(icon("address-book", "fas fa-2x")),
+               "<i class=\"fas fa-address-book fa-2x\"></i>")
+  expect_equal(as.character(icon("address-book", "fa-2x fas")),
+               "<i class=\"fas fa-address-book fa-2x\"></i>")
+  expect_equal(as.character(icon("address-book", "fal fa-2x")),
+               "<i class=\"fal fa-address-book fa-2x\"></i>")
+  expect_equal(as.character(icon("address-book", "fa-2x fal")),
+               "<i class=\"fal fa-address-book fa-2x\"></i>")
+
+  # Brand class should automatically be added
+  expect_identical(icon("500px"), icon("500px", "fab"))
+})

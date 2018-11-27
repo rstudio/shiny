@@ -476,62 +476,64 @@ renderCachedPlot <- function(expr,
           }
         )
       },
-      function(result) {
-        width      <- result$width
-        height     <- result$height
-        pixelratio <- result$pixelratio
+      function(possiblyAsyncResult) {
+        hybrid_chain(possiblyAsyncResult, function(result) {
+          width      <- result$width
+          height     <- result$height
+          pixelratio <- result$pixelratio
 
-        # Three possibilities when we get here:
-        # 1. There was a cache hit. No need to set a value in the cache.
-        # 2. There was a cache miss, and the plotObj is already the correct
-        #    size (because drawReactive re-executed). In this case, we need
-        #    to cache it.
-        # 3. There was a cache miss, and the plotObj was not the corect size.
-        #    In this case, we need to replay the display list, and then cache
-        #    the result.
-        if (!result$cacheHit) {
-          # If the image is already the correct size, this just returns the
-          # object unchanged.
-          result$plotObj <- do.call("resizeSavedPlot", c(
-            list(
-              name,
-              shinysession,
-              result$plotObj,
-              width,
-              height,
-              pixelratio,
-              res
-            ),
-            args
-          ))
+          # Three possibilities when we get here:
+          # 1. There was a cache hit. No need to set a value in the cache.
+          # 2. There was a cache miss, and the plotObj is already the correct
+          #    size (because drawReactive re-executed). In this case, we need
+          #    to cache it.
+          # 3. There was a cache miss, and the plotObj was not the corect size.
+          #    In this case, we need to replay the display list, and then cache
+          #    the result.
+          if (!result$cacheHit) {
+            # If the image is already the correct size, this just returns the
+            # object unchanged.
+            result$plotObj <- do.call("resizeSavedPlot", c(
+              list(
+                name,
+                shinysession,
+                result$plotObj,
+                width,
+                height,
+                pixelratio,
+                res
+              ),
+              args
+            ))
 
-          # Save a cached copy of the plotObj. The recorded displaylist for
-          # the plot can't be serialized and restored properly within the same
-          # R session, so we NULL it out before saving. (The image data and
-          # other metadata be saved and restored just fine.) Displaylists can
-          # also be very large (~1.5MB for a basic ggplot), and they would not
-          # be commonly used. Note that displaylist serialization was fixed in
-          # revision 74506 (2e6c669), and should be in R 3.6. A MemoryCache
-          # doesn't need to serialize objects, so it could actually save a
-          # display list, but for the reasons listed previously, it's
-          # generally not worth it.
-          # The plotResult is not the same as the recordedPlot (it is used to
-          # retrieve coordmap information for ggplot2 objects) but it is only
-          # used in conjunction with the recordedPlot, and we'll remove it
-          # because it can be quite large.
-          result$plotObj$plotResult <- NULL
-          result$plotObj$recordedPlot <- NULL
-          cache$set(result$key, result$plotObj)
-        }
+            # Save a cached copy of the plotObj. The recorded displaylist for
+            # the plot can't be serialized and restored properly within the same
+            # R session, so we NULL it out before saving. (The image data and
+            # other metadata be saved and restored just fine.) Displaylists can
+            # also be very large (~1.5MB for a basic ggplot), and they would not
+            # be commonly used. Note that displaylist serialization was fixed in
+            # revision 74506 (2e6c669), and should be in R 3.6. A MemoryCache
+            # doesn't need to serialize objects, so it could actually save a
+            # display list, but for the reasons listed previously, it's
+            # generally not worth it.
+            # The plotResult is not the same as the recordedPlot (it is used to
+            # retrieve coordmap information for ggplot2 objects) but it is only
+            # used in conjunction with the recordedPlot, and we'll remove it
+            # because it can be quite large.
+            result$plotObj$plotResult <- NULL
+            result$plotObj$recordedPlot <- NULL
+            cache$set(result$key, result$plotObj)
+          }
 
-        img <- result$plotObj$img
-        # Replace exact pixel dimensions; instead, the max-height and
-        # max-width will be set to 100% from CSS.
-        img$class <- "shiny-scalable"
-        img$width  <- NULL
-        img$height <- NULL
+          img <- result$plotObj$img
+          # Replace exact pixel dimensions; instead, the max-height and
+          # max-width will be set to 100% from CSS.
+          img$class <- "shiny-scalable"
+          img$width  <- NULL
+          img$height <- NULL
 
-        img
+          img
+        })
       }
     )
   }

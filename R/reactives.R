@@ -1529,14 +1529,23 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 
     timerHandle <<- scheduleTask(intervalMs, sys.function())
 
-    session$cycleStartAction(function() {
+    doInvalidate <- function() {
       lapply(
         dependents$values(),
         function(dep.ctx) {
           dep.ctx$invalidate()
           NULL
         })
-    })
+    }
+
+    if (!is.null(session)) {
+      # If this timer belongs to a session, we must wait until the next cycle is
+      # ready to invalidate.
+      session$cycleStartAction(doInvalidate)
+    } else {
+      # If this timer doesn't belong to a session, we invalidate right away.
+      doInvalidate()
+    }
   })
 
   if (!is.null(session)) {

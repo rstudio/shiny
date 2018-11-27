@@ -8,8 +8,8 @@ icon(name, class = NULL, lib = "font-awesome")
 }
 \arguments{
 \item{name}{Name of icon. Icons are drawn from the
-\href{https://fontawesome.com/v4.7.0/}{Font Awesome} (currently icons from
-the v4.7.0 set are supported) and
+\href{https://fontawesome.com/}{Font Awesome Free} (currently icons from
+the v5.3.1 set are supported with the v4 naming convention) and
 \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
 libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 in icon names (i.e. the "fa-calendar" icon should be referred to as
@@ -30,10 +30,6 @@ of a button, or as an icon for a \code{\link{tabPanel}} within a
 \code{\link{navbarPage}}.
 }
 \examples{
-icon("calendar")               # standard icon
-icon("calendar", "fa-3x")      # 3x normal size
-icon("cog", lib = "glyphicon") # From glyphicon library
-
 # add an icon to a submit button
 submitButton("Update View", icon = icon("refresh"))
 

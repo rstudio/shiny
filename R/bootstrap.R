@@ -1489,8 +1489,8 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #' \code{\link{navbarPage}}.
 #'
 #' @param name Name of icon. Icons are drawn from the
-#'   \href{https://fontawesome.com/v4.7.0/}{Font Awesome} (currently icons from
-#'   the v4.7.0 set are supported) and
+#'   \href{https://fontawesome.com/}{Font Awesome Free} (currently icons from
+#'   the v5.3.1 set are supported with the v4 naming convention) and
 #'   \href{http://getbootstrap.com/components/#glyphicons}{Glyphicons}
 #'   libraries. Note that the "fa-" and "glyphicon-" prefixes should not be used
 #'   in icon names (i.e. the "fa-calendar" icon should be referred to as
@@ -1508,10 +1508,6 @@ downloadLink <- function(outputId, label="Download", class=NULL, ...) {
 #'
 #'
 #' @examples
-#' icon("calendar")               # standard icon
-#' icon("calendar", "fa-3x")      # 3x normal size
-#' icon("cog", lib = "glyphicon") # From glyphicon library
-#'
 #' # add an icon to a submit button
 #' submitButton("Update View", icon = icon("refresh"))
 #'
@@ -1537,8 +1533,13 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   # build the icon class (allow name to be null so that other functions
   # e.g. buildTabset can pass an explicit class value)
   iconClass <- ""
-  if (!is.null(name))
-    iconClass <- paste0(prefix, " ", prefix, "-", name)
+  if (!is.null(name)) {
+    prefix_class <- prefix
+    if (prefix_class == "fa" && name %in% font_awesome_brands) {
+      prefix_class <- "fab"
+    }
+    iconClass <- paste0(prefix_class, " ", prefix, "-", name)
+  }
   if (!is.null(class))
     iconClass <- paste(iconClass, class)
 
@@ -1547,12 +1548,15 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   # font-awesome needs an additional dependency (glyphicon is in bootstrap)
   if (lib == "font-awesome") {
     htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "4.7.0", c(href="shared/font-awesome"),
-      stylesheet = "css/font-awesome.min.css"
+      "font-awesome", "5.3.1", "www/shared/fontawesome", package = "shiny",
+      stylesheet = c(
+        "css/all.min.css",
+        "css/v4-shims.min.css"
+      )
     )
   }
 
-  iconTag
+  htmltools::browsable(iconTag)
 }
 
 # Helper funtion to extract the class from an icon

@@ -31,7 +31,7 @@ reactLogHandler <- function(req) {
     if (!hasResourcePath("reactlogAsset")) {
       addResourcePath(
         "reactlogAsset",
-        system.file("reactlogAsset", package = "shinyreactlog")
+        system.file("reactlogAsset", package = "reactlog")
       )
     }
 

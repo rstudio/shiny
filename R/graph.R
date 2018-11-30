@@ -79,13 +79,13 @@ nextGlobalReactId <- function() {
 #' time that each reactive.
 #' @export
 showReactLog <- function(time = TRUE) {
-  check_shinyreactlog()
-  shinyreactlog::show_reactlog(rLog$asList(), time = time)
+  check_reactlog()
+  reactlog::show_reactlog(rLog$asList(), time = time)
 }
 # function should not be called. only keeping for legacy purposes
 renderReactLog <- function(sessionToken = NULL, time = TRUE) {
-  check_shinyreactlog()
-  shinyreactlog::render_reactlog(
+  check_reactlog()
+  reactlog::render_reactlog(
     rLog$asList(),
     session_token = sessionToken,
     time = time
@@ -94,15 +94,15 @@ renderReactLog <- function(sessionToken = NULL, time = TRUE) {
 # function should not be called. only keeping for legacy purposes
 #' @importFrom utils getFromNamespace
 writeReactLog <- function(file=stdout(), sessionToken = NULL) {
-  check_shinyreactlog()
-  shinyreactlog::write_reactlog(
+  check_reactlog()
+  reactlog::write_reactlog(
     rLog$asList(),
     file = file,
     session_token = sessionToken
   )
 }
-check_shinyreactlog <- function() {
-  check_suggested("shinyreactlog", "0.0.0.9000")
+check_reactlog <- function() {
+  check_suggested("reactlog", "0.0.0.9000")
 }
 
 

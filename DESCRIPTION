@@ -162,4 +162,4 @@ Collate:
     'update-input.R'
 RoxygenNote: 6.1.0
 Remotes:
-    rstudio/httpuv@static-serving
+    rstudio/httpuv

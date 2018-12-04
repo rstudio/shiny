@@ -7,14 +7,22 @@ is_installed <- function(package, version) {
 #
 # @param package The name of the suggested package
 # @param version The version of the package
-check_suggested <- function(package, version) {
+check_suggested <- function(package, version, location) {
 
   if (!is_installed(package, version)) {
-    msg <- paste0(sQuote(package),
-      if (is.na(version)) "" else paste0(" >= ", version),
-      " must be installed for this functionality.")
+    missing_location <- missing(location)
+    msg <- paste0(
+      sQuote(package),
+      if (is.na(version)) "" else paste0("(>= ", version, ")"),
+      " must be installed for this functionality.",
+      if (!missing_location)
+        paste0(
+          "\nPlease install the missing package: \n",
+          "  source(\"https://install-github.me/", location, "\")"
+        )
+    )
 
-    if (interactive()) {
+    if (interactive() && missing_location) {
       message(msg, "\nWould you like to install it?")
       if (utils::menu(c("Yes", "No")) == 1) {
         utils::install.packages(package)
@@ -102,7 +110,7 @@ writeReactLog <- function(file=stdout(), sessionToken = NULL) {
   )
 }
 check_reactlog <- function() {
-  check_suggested("reactlog", "0.0.0.9000")
+  check_suggested("reactlog", "0.0.0.9000", "rstudio/reactlog")
 }
 
 

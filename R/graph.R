@@ -122,8 +122,8 @@ RLog <- R6Class(
     }
   ),
   public = list(
-    msg = "MessageLogger",
-    logStack = "Stack",
+    msg = "<MessageLogger>",
+    logStack = "<Stack>",
 
     asList = function() {
       ret <- self$logStack$as_list()

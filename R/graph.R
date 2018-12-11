@@ -439,11 +439,11 @@ MessageLogger = R6Class(
     },
     depthIncrement = function() {
       if (self$isNotLogging()) return(NULL)
-      self$depth <- self$depth + 1
+      self$depth <- self$depth + 1L
     },
     depthDecrement = function() {
       if (self$isNotLogging()) return(NULL)
-      self$depth <- self$depth - 1
+      self$depth <- self$depth - 1L
     },
     hasReact = function(reactId) {
       if (self$isNotLogging()) return(FALSE)

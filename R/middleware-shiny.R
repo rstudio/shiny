@@ -26,7 +26,7 @@ reactLogHandler <- function(req) {
     sessionToken <- parseQueryString(req$QUERY_STRING)$s
 
     # `renderReactLog` will check/throw if reactlog doesn't exist
-    reactlogFile <- renderReactLog(sessionToken)
+    reactlogFile <- renderReactlog(sessionToken)
 
     # add asset path after reactlog has been calculated (makes sure package exists)
     reactlog::reactlog_add_shiny_resource_paths()

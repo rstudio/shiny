@@ -91,7 +91,7 @@ showReactLog <- function(time = TRUE) {
   reactlog::show_reactlog(rLog$asList(), time = time)
 }
 # called in "/reactlog" middleware
-renderReactLog <- function(sessionToken = NULL, time = TRUE) {
+renderReactlog <- function(sessionToken = NULL, time = TRUE) {
   check_reactlog()
   reactlog::render_reactlog(
     rLog$asList(),

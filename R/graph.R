@@ -470,9 +470,7 @@ MessageLogger = R6Class(
         paste0(rep("= ", depth), collapse = ""), "- ", paste0(..., collapse = ""),
         collapse = ""
       )
-      if (isTRUE(getOption(self$option, FALSE))) {
-        message(msg)
-      }
+      message(msg)
     }
   )
 )

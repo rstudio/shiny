@@ -41,8 +41,8 @@ check_suggested <- function(package, version, location) {
 # domain is like session
 
 
-# used to help define truely global react id's.
-# should work accross session and in global namespace
+# used to help define truly global react id's.
+# should work across session and in global namespace
 .globals$reactIdCounter <- 0L
 nextGlobalReactId <- function() {
   .globals$reactIdCounter <- .globals$reactIdCounter + 1L
@@ -90,7 +90,7 @@ showReactLog <- function(time = TRUE) {
   check_reactlog()
   reactlog::show_reactlog(rLog$asList(), time = time)
 }
-# function should not be called. only keeping for legacy purposes
+# called in "/reactlog" middleware
 renderReactLog <- function(sessionToken = NULL, time = TRUE) {
   check_reactlog()
   reactlog::render_reactlog(

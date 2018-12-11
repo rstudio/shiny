@@ -72,9 +72,6 @@ addResourcePath <- function(prefix, directoryPath) {
   )
 }
 
-hasResourcePath <- function(prefix) {
-  !is.null(.globals$resources[[prefix]])
-}
 
 resourcePathHandler <- function(req) {
   if (!identical(req$REQUEST_METHOD, 'GET'))

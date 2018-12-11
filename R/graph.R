@@ -135,10 +135,18 @@ RLog <- R6Class(
       if (is.null(ctxId) || identical(ctxId, "")) return(NULL)
       paste0("ctx", ctxId)
     },
-    namesIdStr     = function(reactId)      paste0("names(", reactId, ")"),
-    asListIdStr    = function(reactId)      paste0("as.list(", reactId, ", all.names = TRUE)"),
-    asListAllIdStr = function(reactId)      paste0("as.list(", reactId, ")"),
-    keyIdStr       = function(reactId, key) paste0(reactId, "$", key),
+    namesIdStr = function(reactId) {
+      paste0("names(", reactId, ")"),
+    },
+    asListIdStr = function(reactId) {
+      paste0("as.list(", reactId, ")")
+    }
+    asListAllIdStr = function(reactId) {
+      paste0("as.list(", reactId, ", all.names = TRUE)")
+    },
+    keyIdStr = function(reactId, key) {
+      paste0(reactId, "$", key)
+    },
 
 
 
@@ -169,14 +177,18 @@ RLog <- R6Class(
         type = type
       ))
     },
-    defineNames = function(reactId, label, domain)
-      self$define(self$namesIdStr(reactId), self$namesIdStr(label), "reactiveValuesNames", domain),
-    defineAsList = function(reactId, label, domain)
-      self$define(self$asListIdStr(reactId), self$asListIdStr(label), "reactiveValuesAsList", domain),
-    defineAsListAll = function(reactId, label, domain)
-      self$define(self$asListAllIdStr(reactId), self$asListAllIdStr(label), "reactiveValuesAsListAll", domain),
-    defineKey = function(reactId, key, label, domain)
-      self$define(self$keyIdStr(reactId, key), self$keyIdStr(label, key), "reactiveValuesKey", domain),
+    defineNames = function(reactId, label, domain) {
+      self$define(self$namesIdStr(reactId), self$namesIdStr(label), "reactiveValuesNames", domain)
+    },
+    defineAsList = function(reactId, label, domain) {
+      self$define(self$asListIdStr(reactId), self$asListIdStr(label), "reactiveValuesAsList", domain)
+    },
+    defineAsListAll = function(reactId, label, domain) {
+      self$define(self$asListAllIdStr(reactId), self$asListAllIdStr(label), "reactiveValuesAsListAll", domain)
+    },
+    defineKey = function(reactId, key, label, domain) {
+      self$define(self$keyIdStr(reactId, key), self$keyIdStr(label, key), "reactiveValuesKey", domain)
+    },
 
     updateReactLabel = function(reactId, label, domain) {
       msgObj <- msg$getReact(reactId)
@@ -191,14 +203,18 @@ RLog <- R6Class(
         label = label
       ))
     },
-    updateReactLabelNames = function(reactId, label, domain)
-      self$updateReactLabel(self$namesIdStr(reactId), self$namesIdStr(label), domain),
-    updateReactLabelAsList = function(reactId, label, domain)
-      self$updateReactLabel(self$asListIdStr(reactId), self$asListIdStr(label), domain),
-    updateReactLabelAsListAll = function(reactId, label, domain)
-      self$updateReactLabel(self$asListAllIdStr(reactId), self$asListAllIdStr(label), domain),
-    updateReactLabelKey = function(reactId, key, label, domain)
-      self$updateReactLabel(self$keyIdStr(reactId, key), self$keyIdStr(label, key), domain),
+    updateReactLabelNames = function(reactId, label, domain) {
+      self$updateReactLabel(self$namesIdStr(reactId), self$namesIdStr(label), domain)
+    },
+    updateReactLabelAsList = function(reactId, label, domain) {
+      self$updateReactLabel(self$asListIdStr(reactId), self$asListIdStr(label), domain)
+    },
+    updateReactLabelAsListAll = function(reactId, label, domain) {
+      self$updateReactLabel(self$asListAllIdStr(reactId), self$asListAllIdStr(label), domain)
+    },
+    updateReactLabelKey = function(reactId, key, label, domain) {
+      self$updateReactLabel(self$keyIdStr(reactId, key), self$keyIdStr(label, key), domain)
+    },
 
     dependsOn = function(reactId, depOnReactId, ctxId, domain) {
       if (is.null(reactId)) return()
@@ -211,8 +227,9 @@ RLog <- R6Class(
         ctxId = ctxId
       ))
     },
-    dependsOnKey = function(reactId, depOnReactId, key, ctxId, domain)
-      self$dependsOn(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain),
+    dependsOnKey = function(reactId, depOnReactId, key, ctxId, domain) {
+      self$dependsOn(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain)
+    },
 
     dependsOnRemove = function(reactId, depOnReactId, ctxId, domain) {
       ctxId <- self$ctxIdStr(ctxId)
@@ -224,8 +241,9 @@ RLog <- R6Class(
         ctxId = ctxId
       ))
     },
-    dependsOnKeyRemove = function(reactId, depOnReactId, key, ctxId, domain)
-      self$dependsOnRemove(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain),
+    dependsOnKeyRemove = function(reactId, depOnReactId, key, ctxId, domain) {
+      self$dependsOnRemove(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain)
+    },
 
     createContext = function(ctxId, label, type, prevCtxId, domain) {
       ctxId <- self$ctxIdStr(ctxId)
@@ -297,14 +315,18 @@ RLog <- R6Class(
         value = valueStr
       ))
     },
-    valueChangeNames = function(reactId, nameValues, domain)
-      self$valueChange(self$namesIdStr(reactId), nameValues, FALSE, domain),
-    valueChangeAsList = function(reactId, listValue, domain)
-      self$valueChange(self$asListIdStr(reactId), listValue, FALSE, domain),
-    valueChangeAsListAll = function(reactId, listValue, domain)
-      self$valueChange(self$asListAllIdStr(reactId), listValue, FALSE, domain),
-    valueChangeKey = function(reactId, key, value, domain)
-      self$valueChange(self$keyIdStr(reactId, key), value, FALSE, domain),
+    valueChangeNames = function(reactId, nameValues, domain) {
+      self$valueChange(self$namesIdStr(reactId), nameValues, FALSE, domain)
+    },
+    valueChangeAsList = function(reactId, listValue, domain) {
+      self$valueChange(self$asListIdStr(reactId), listValue, FALSE, domain)
+    },
+    valueChangeAsListAll = function(reactId, listValue, domain) {
+      self$valueChange(self$asListAllIdStr(reactId), listValue, FALSE, domain)
+    },
+    valueChangeKey = function(reactId, key, value, domain) {
+      self$valueChange(self$keyIdStr(reactId, key), value, FALSE, domain)
+    },
 
 
     invalidateStart = function(reactId, ctxId, type, domain) {
@@ -377,8 +399,9 @@ RLog <- R6Class(
         reactId = reactId
       ))
     },
-    freezeReactiveKey = function(reactId, key, domain)
-      self$freezeReactiveVal(self$keyIdStr(reactId, key), domain),
+    freezeReactiveKey = function(reactId, key, domain) {
+      self$freezeReactiveVal(self$keyIdStr(reactId, key), domain)
+    },
 
     thawReactiveVal = function(reactId, domain) {
       msg$log("thaw: ", msg$reactStr(reactId))

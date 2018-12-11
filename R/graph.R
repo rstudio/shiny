@@ -99,16 +99,6 @@ renderReactLog <- function(sessionToken = NULL, time = TRUE) {
     time = time
   )
 }
-# function should not be called. only keeping for legacy purposes
-#' @importFrom utils getFromNamespace
-writeReactLog <- function(file=stdout(), sessionToken = NULL) {
-  check_reactlog()
-  reactlog::write_reactlog(
-    rLog$asList(),
-    file = file,
-    session_token = sessionToken
-  )
-}
 check_reactlog <- function() {
   check_suggested("reactlog", "0.0.0.9000", "rstudio/reactlog")
 }

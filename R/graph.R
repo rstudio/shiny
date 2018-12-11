@@ -155,11 +155,6 @@ RLog <- R6Class(
       self$logStack <- Stack$new()
       self$msg <- MessageLogger$new(option = msgOption)
     },
-    displayMessages = function() {
-      for (val in msg$messages) {
-        message(val)
-      }
-    },
     isLogging = function() {
       isTRUE(getOption(private$option, FALSE))
     },
@@ -429,7 +424,6 @@ MessageLogger = R6Class(
   portable = FALSE,
   public = list(
     depth = 0L,
-    messages = c(),
     reactCache = list("rNoCtx" = list(label = "<UNKNOWN>", reactId = "<UNKNOWN>")),
     option = "shiny.reactlog.console",
 
@@ -476,7 +470,6 @@ MessageLogger = R6Class(
         paste0(rep("= ", depth), collapse = ""), "- ", paste0(..., collapse = ""),
         collapse = ""
       )
-      self$messages[length(self$messages) + 1] <- msg
       if (isTRUE(getOption(self$option, FALSE))) {
         message(msg)
       }

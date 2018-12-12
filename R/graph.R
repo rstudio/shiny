@@ -367,10 +367,10 @@ RLog <- R6Class(
       }
     },
 
-    queueEmpty = function(domain = NULL) {
-      msg$log("queueEmpty")
+    idle = function(domain = NULL) {
+      msg$log("idle")
       private$appendEntry(domain, list(
-        action = "queueEmpty"
+        action = "idle"
       ))
     },
 
@@ -409,10 +409,10 @@ RLog <- R6Class(
       self$thawReactiveVal(self$keyIdStr(reactId, key), domain)
     },
 
-    markTime = function(domain = NULL) {
-      msg$log("markTime")
+    userMark = function(domain = NULL) {
+      msg$log("userMark")
       private$appendEntry(domain, list(
-        action = "markTime"
+        action = "userMark"
       ))
     }
 

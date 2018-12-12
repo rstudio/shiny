@@ -157,7 +157,7 @@ ReactiveEnvironment <- R6Class(
       .inFlush <<- TRUE
       on.exit({
         .inFlush <<- FALSE
-        rLog$queueEmpty(domain = NULL)
+        rLog$idle(domain = NULL)
       })
 
       while (hasPendingFlush()) {

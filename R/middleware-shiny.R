@@ -12,7 +12,7 @@ reactLogHandler <- function(req) {
 
     # log time
     withReactiveDomain(shinysession, {
-      rLog$markTime(getDefaultReactiveDomain())
+      rLog$userMark(getDefaultReactiveDomain())
     })
 
     return(httpResponse(

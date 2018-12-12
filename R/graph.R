@@ -136,11 +136,11 @@ RLog <- R6Class(
       paste0("ctx", ctxId)
     },
     namesIdStr = function(reactId) {
-      paste0("names(", reactId, ")"),
+      paste0("names(", reactId, ")")
     },
     asListIdStr = function(reactId) {
       paste0("as.list(", reactId, ")")
-    }
+    },
     asListAllIdStr = function(reactId) {
       paste0("as.list(", reactId, ", all.names = TRUE)")
     },

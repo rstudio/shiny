@@ -100,7 +100,25 @@ renderReactlog <- function(sessionToken = NULL, time = TRUE) {
   )
 }
 check_reactlog <- function() {
-  check_suggested("reactlog", "0.0.0.9000", "rstudio/reactlog")
+  check_suggested("reactlog", reactlog_version(), "rstudio/reactlog")
+}
+# read reactlog version from description file
+# prevents version mismatch in code and description file
+reactlog_version <- function() {
+  desc <- read.dcf(system.file("DESCRIPTION", package = "shiny", mustWork = TRUE))
+  suggests <- desc[1,"Suggests"][[1]]
+  suggests_pkgs <- strsplit(suggests, "\n")[[1]]
+
+  reactlog_info <- suggests_pkgs[grepl("reactlog", suggests_pkgs)]
+  if (length(reactlog_info) == 0) {
+    stop("reactlog can not be found in shiny DESCRIPTION file")
+  }
+
+  reactlog_info <- sub("^[^\\(]*\\(", "", reactlog_info)
+  reactlog_info <- sub("\\)[^\\)]*$", "", reactlog_info)
+  reactlog_info <- sub("^[>= ]*", "", reactlog_info)
+
+  package_version(reactlog_info)
 }
 
 

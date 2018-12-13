@@ -504,7 +504,7 @@ MessageLogger = R6Class(
 rLog <- NULL
 # To be used for initial init and within testing only
 initializeReactlog <- function() {
-  .globals$reactIdCounter <<- 0L
+  .globals$reactIdCounter <- 0L
   rLog <<- RLog$new("shiny.reactlog", "shiny.reactlog.console")
 }
 initializeReactlog()

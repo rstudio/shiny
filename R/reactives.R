@@ -359,7 +359,7 @@ ReactiveValues <- R6Class(
       #   if same, return
       #   if `key` has been read,
       #     log `update key`
-      #     #invalidate later
+      #     ## (invalidate key later in code)
       # else # if new key
       #   if `names()` have been read,
       #     log `update names()`
@@ -371,7 +371,7 @@ ReactiveValues <- R6Class(
       # else # not hidden
       #   if asList has been read,
       #     log `update asList()`
-      #     invalidate `asListAll`
+      #     invalidate `asList`
       # update value of `key`
       # invalidate all deps of `key`
 

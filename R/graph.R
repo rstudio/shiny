@@ -143,6 +143,8 @@ RLog <- R6Class(
     msg = "<MessageLogger>",
     logStack = "<Stack>",
 
+    noReactId = "rNoCtx",
+
     asList = function() {
       ret <- self$logStack$as_list()
       attr(ret, "version") <- "1"
@@ -172,6 +174,9 @@ RLog <- R6Class(
       private$option <- rlogOption
       self$logStack <- Stack$new()
       self$msg <- MessageLogger$new(option = msgOption)
+
+      self$msg$setReact(list(reactId = self$noReactId, label = "<UNKNOWN>"))
+
     },
     isLogging = function() {
       isTRUE(getOption(private$option, FALSE))

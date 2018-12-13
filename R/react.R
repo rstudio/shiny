@@ -16,6 +16,7 @@ processId <- local({
   }
 })
 
+#' @include graph.R
 Context <- R6Class(
   'Context',
   portable = FALSE,
@@ -31,7 +32,7 @@ Context <- R6Class(
     .domain = NULL,
     .pid = NULL,
 
-    initialize = function(domain, label='', type='other', prevId='', reactId = NULL) {
+    initialize = function(domain, label='', type='other', prevId='', reactId = rLog$noReactId) {
       id <<- .getReactiveEnvironment()$nextId()
       .label <<- label
       .domain <<- domain

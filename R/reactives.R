@@ -17,17 +17,19 @@ Dependents <- R6Class(
     register = function(...) {
       ctx <- getCurrentContext()
       if (!.dependents$containsKey(ctx$id)) {
-        .dependents$set(ctx$id, ctx)
-        ctx$onInvalidate(function() {
-          rLog$dependsOnRemove(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
-          .dependents$remove(ctx$id)
-        })
 
         # must wrap in if statement as ctx react id could be NULL
         #   if options(shiny.suppressMissingContextError = TRUE)
         if (is.character(.reactId) && is.character(ctx$.reactId)) {
           rLog$dependsOn(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
         }
+
+        .dependents$set(ctx$id, ctx)
+
+        ctx$onInvalidate(function() {
+          rLog$dependsOnRemove(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
+          .dependents$remove(ctx$id)
+        })
       }
     },
     # at times, the context is run in a ctx$onInvalidate(...) which has no runtime context

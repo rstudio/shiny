@@ -356,7 +356,11 @@ ReactiveValues <- R6Class(
 
     set = function(key, value) {
       # if key exists
-      #   if same, return
+      #   if it is the same value, return
+      #
+      # update value of `key`
+      #
+      # if key exists
       #   if `key` has been read,
       #     log `update key`
       #     ## (invalidate key later in code)
@@ -364,6 +368,7 @@ ReactiveValues <- R6Class(
       #   if `names()` have been read,
       #     log `update names()`
       #     invalidate `names()`
+      #
       # if hidden
       #   if asListAll has been read,
       #     log `update asList(all.names = TRUE)`
@@ -372,18 +377,26 @@ ReactiveValues <- R6Class(
       #   if asList has been read,
       #     log `update asList()`
       #     invalidate `asList`
+      #
       # update value of `key`
       # invalidate all deps of `key`
 
       domain <- getDefaultReactiveDomain()
       hidden <- substr(key, 1, 1) == "."
 
-      if (exists(key, envir=.values, inherits=FALSE)) {
+      key_exists <- exists(key, envir=.values, inherits=FALSE)
+
+      if (key_exists) {
         if (.dedupe && identical(.values[[key]], value)) {
           return(invisible())
         }
+      }
 
-        # key has be depended upon (can not happen if the key is being set)
+      # set the value for better logging
+      .values[[key]] <- value
+
+      if (key_exists) {
+        # key has been depended upon (can not happen if the key is being set)
         if (isTRUE(.hasRetrieved$keys[[key]])) {
           rLog$valueChangeKey(.reactId, key, value, domain)
           keyReactId <- rLog$keyIdStr(.reactId, key)
@@ -393,29 +406,27 @@ ReactiveValues <- R6Class(
             add = TRUE
           )
         }
-      }
-      else {
+
+      } else {
         # only invalidate if there are deps
         if (isTRUE(.hasRetrieved$names)) {
-          rLog$valueChangeNames(.reactId, .values, domain)
+          rLog$valueChangeNames(.reactId, ls(.values, all.names = TRUE), domain)
           .namesDeps$invalidate()
         }
       }
 
       if (hidden) {
         if (isTRUE(.hasRetrieved$asListAll)) {
-          rLog$valueChangeAsListAll(.reactId, .values, domain)
+          rLog$valueChangeAsListAll(.reactId, as.list(.values, all.names = TRUE), domain)
           .allValuesDeps$invalidate()
         }
       } else {
         if (isTRUE(.hasRetrieved$asList)) {
           # leave as is. both object would be registered to the listening object
-          rLog$valueChangeAsList(.reactId, .values, domain)
+          rLog$valueChangeAsList(.reactId, as.list(.values, all.names = FALSE), domain)
           .valuesDeps$invalidate()
         }
       }
-
-      .values[[key]] <- value
 
       dep.keys <- objects(
         envir=.dependents,
@@ -1488,7 +1499,7 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
   # callback below is fired (see #1621).
   force(session)
 
-  # TODO-barret
+  # TODO-barret - ## leave alone for now
   # reactId <- nextGlobalReactId()
   # rLog$define(reactId, paste0("timer(", intervalMs, ")"))
 

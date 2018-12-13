@@ -186,7 +186,7 @@ RLog <- R6Class(
       isTRUE(getOption(private$option, FALSE))
     },
 
-    define = function(reactId, label, type, domain) {
+    define = function(reactId, value, label, type, domain) {
       if (msg$hasReact(reactId)) {
         stop("react definition for id: ", reactId, " already found!!", "Label: ", label, "Type: ", type)
       }
@@ -196,20 +196,21 @@ RLog <- R6Class(
         action = "define",
         reactId = reactId,
         label = label,
-        type = type
+        type = type,
+        value = value
       ))
     },
-    defineNames = function(reactId, label, domain) {
-      self$define(self$namesIdStr(reactId), self$namesIdStr(label), "reactiveValuesNames", domain)
+    defineNames = function(reactId, value, label, domain) {
+      self$define(self$namesIdStr(reactId), value, self$namesIdStr(label), "reactiveValuesNames", domain)
     },
-    defineAsList = function(reactId, label, domain) {
-      self$define(self$asListIdStr(reactId), self$asListIdStr(label), "reactiveValuesAsList", domain)
+    defineAsList = function(reactId, value, label, domain) {
+      self$define(self$asListIdStr(reactId), value, self$asListIdStr(label), "reactiveValuesAsList", domain)
     },
-    defineAsListAll = function(reactId, label, domain) {
-      self$define(self$asListAllIdStr(reactId), self$asListAllIdStr(label), "reactiveValuesAsListAll", domain)
+    defineAsListAll = function(reactId, value, label, domain) {
+      self$define(self$asListAllIdStr(reactId), value, self$asListAllIdStr(label), "reactiveValuesAsListAll", domain)
     },
-    defineKey = function(reactId, key, label, domain) {
-      self$define(self$keyIdStr(reactId, key), self$keyIdStr(label, key), "reactiveValuesKey", domain)
+    defineKey = function(reactId, value, key, label, domain) {
+      self$define(self$keyIdStr(reactId, key), value, self$keyIdStr(label, key), "reactiveValuesKey", domain)
     },
 
     dependsOn = function(reactId, depOnReactId, ctxId, domain) {

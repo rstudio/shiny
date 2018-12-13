@@ -74,7 +74,7 @@ ReactiveVal <- R6Class(
       private$value <- value
       private$label <- label
       private$dependents <- Dependents$new(reactId = private$reactId)
-      rLog$define(private$reactId, private$label, type = "reactiveVal", getDefaultReactiveDomain())
+      rLog$define(private$reactId, value, private$label, type = "reactiveVal", getDefaultReactiveDomain())
     },
     get = function() {
       private$dependents$register()
@@ -337,8 +337,7 @@ ReactiveValues <- R6Class(
         reactKeyId <- rLog$keyIdStr(.reactId, key)
 
         if (!isTRUE(.hasRetrieved$keys[[key]])) {
-          rLog$defineKey(.reactId, key, .label, ctx$.domain)
-          # rLog$valueChangeKey(.reactId, key, keyValue, ctx$.domain)
+          rLog$defineKey(.reactId, keyValue, key, .label, ctx$.domain)
           .hasRetrieved$keys[[key]] <<- TRUE
         }
         rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
@@ -444,8 +443,7 @@ ReactiveValues <- R6Class(
       nameValues <- ls(.values, all.names=TRUE)
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
-        rLog$defineNames(.reactId, .label, domain)
-        # rLog$valueChangeNames(.reactId, nameValues, domain)
+        rLog$defineNames(.reactId, nameValues, .label, domain)
         .hasRetrieved$names <<- TRUE
       }
       .namesDeps$register()
@@ -494,8 +492,7 @@ ReactiveValues <- R6Class(
       if (all.names) {
         if (!isTRUE(.hasRetrieved$asListAll)) {
           domain <- getDefaultReactiveDomain()
-          rLog$defineAsListAll(.reactId, .label, domain)
-          # rLog$valueChangeAsListAll(.reactId, listValue, domain)
+          rLog$defineAsListAll(.reactId, listValue, .label, domain)
           .hasRetrieved$asListAll <<- TRUE
         }
         .allValuesDeps$register()
@@ -503,8 +500,8 @@ ReactiveValues <- R6Class(
 
       if (!isTRUE(.hasRetrieved$asList)) {
         domain <- getDefaultReactiveDomain()
-        rLog$defineAsList(.reactId, .label, domain)
-        # rLog$valueChangeAsList(.reactId, listValue, domain)
+        # making sure the value being recorded is with `all.names = FALSE`
+        rLog$defineAsList(.reactId, as.list(.values, all.names=FALSE), .label, domain)
         .hasRetrieved$asList <<- TRUE
       }
       .valuesDeps$register()
@@ -824,7 +821,7 @@ Observable <- R6Class(
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
-      rLog$define(.reactId, .label, type = "observable", .domain)
+      rLog$define(.reactId, .value, .label, type = "observable", .domain)
     },
     getValue = function() {
       .dependents$register()
@@ -1074,7 +1071,7 @@ Observer <- R6Class(
       setAutoDestroy(autoDestroy)
 
       .reactId <<- nextGlobalReactId()
-      rLog$define(.reactId, .label, type = "observer", .domain)
+      rLog$define(.reactId, NULL, .label, type = "observer", .domain)
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()
@@ -1599,7 +1596,7 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   force(session)
 
   ctx <- getCurrentContext()
-  rlog$invalidateLater(ctx$id, millis, session)
+  rLog$invalidateLater(ctx$id, millis, session)
 
   timerHandle <- scheduleTask(millis, function() {
     if (is.null(session)) {

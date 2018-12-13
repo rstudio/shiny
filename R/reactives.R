@@ -1595,8 +1595,12 @@ reactiveTimer <- function(intervalMs=1000, session = getDefaultReactiveDomain())
 #' }
 #' @export
 invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
+
   force(session)
+
   ctx <- getCurrentContext()
+  rlog$invalidateLater(ctx$id, millis, session)
+
   timerHandle <- scheduleTask(millis, function() {
     if (is.null(session)) {
       ctx$invalidate()

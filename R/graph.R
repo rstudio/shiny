@@ -368,6 +368,15 @@ RLog <- R6Class(
       }
     },
 
+    invalidateLater = function(runningCtx, millis, domain) {
+      msg$log("invalidateLater: ", millis, msg$ctxStr(runningCtx))
+      private$appendEntry(domain, list(
+        action = "invalidateLater",
+        ctxId = runningCtx,
+        millis = millis
+      ))
+    },
+
     idle = function(domain = NULL) {
       msg$log("idle")
       private$appendEntry(domain, list(

@@ -32,8 +32,12 @@ Context <- R6Class(
     .domain = NULL,
     .pid = NULL,
 
-    initialize = function(domain, label='', type='other', prevId='', reactId = rLog$noReactId) {
-      id <<- .getReactiveEnvironment()$nextId()
+    initialize = function(
+      domain, label='', type='other', prevId='',
+      reactId = rLog$noReactId,
+      id = .getReactiveEnvironment()$nextId() # For dummy context
+    ) {
+      id <<- id
       .label <<- label
       .domain <<- domain
       .pid <<- processId()
@@ -195,17 +199,12 @@ hasCurrentContext <- function() {
   !is.null(.getReactiveEnvironment()$.currentContext)
 }
 
-getDummyContext <- function() {}
-local({
-  dummyContext <- NULL
-  getDummyContext <<- function() {
-    if (is.null(dummyContext)) {
-      dummyContext <<- Context$new(getDefaultReactiveDomain(), '[none]',
-        type='isolate')
-    }
-    return(dummyContext)
-  }
-})
+getDummyContext <- function() {
+  Context$new(
+    getDefaultReactiveDomain(), '[none]', type = 'isolate',
+    id = "Dummy"
+  )
+}
 
 wrapForContext <- function(func, ctx) {
   force(func)

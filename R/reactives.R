@@ -1883,7 +1883,7 @@ isolate <- function(expr) {
   if (hasCurrentContext()) {
     reactId <- getCurrentContext()$.reactId
   } else {
-    reactId <- "rNoCtx"
+    reactId <- rLog$noReactId
   }
   ctx <- Context$new(getDefaultReactiveDomain(), '[isolate]', type='isolate', reactId = reactId)
   on.exit(ctx$invalidate())

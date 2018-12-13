@@ -182,7 +182,7 @@ RLog <- R6Class(
         stop("react definition for id: ", reactId, " already found!!", "Label: ", label, "Type: ", type)
       }
       msg$setReact(list(reactId = reactId, label = label))
-      msg$log("define: ", msg$reactStr(reactId), " - ", type)
+      msg$log("define:", msg$reactStr(reactId), msg$typeStr(type = type))
       private$appendEntry(domain, list(
         action = "define",
         reactId = reactId,
@@ -209,7 +209,7 @@ RLog <- R6Class(
         msgObj$label <- label
         msg$setReact(msgObj)
       }
-      msg$log("updateLabel: ", msg$reactStr(reactId))
+      msg$log("updateLabel:", msg$reactStr(reactId))
       private$appendEntry(domain, list(
         action = "updateLabel",
         reactId = reactId,
@@ -232,7 +232,7 @@ RLog <- R6Class(
     dependsOn = function(reactId, depOnReactId, ctxId, domain) {
       if (is.null(reactId)) return()
       ctxId <- ctxIdStr(ctxId)
-      msg$log("dependsOn: ", msg$reactStr(reactId), " on ", msg$reactStr(depOnReactId), " in ", ctxId)
+      msg$log("dependsOn:", msg$reactStr(reactId), " on", msg$reactStr(depOnReactId), msg$ctxStr(ctxId))
       private$appendEntry(domain, list(
         action = "dependsOn",
         reactId = reactId,
@@ -246,7 +246,7 @@ RLog <- R6Class(
 
     dependsOnRemove = function(reactId, depOnReactId, ctxId, domain) {
       ctxId <- self$ctxIdStr(ctxId)
-      msg$log("dependsOnRemove: ", msg$reactStr(reactId), " on ", msg$reactStr(depOnReactId), " in ", ctxId)
+      msg$log("dependsOnRemove:", msg$reactStr(reactId), " on", msg$reactStr(depOnReactId), msg$ctxStr(ctxId))
       private$appendEntry(domain, list(
         action = "dependsOnRemove",
         reactId = reactId,
@@ -261,7 +261,7 @@ RLog <- R6Class(
     createContext = function(ctxId, label, type, prevCtxId, domain) {
       ctxId <- self$ctxIdStr(ctxId)
       prevCtxId <- self$ctxIdStr(prevCtxId)
-      msg$log("createContext: ", ctxId, if (!is.null(prevCtxId)) paste0(" from ", prevCtxId), " - ", type)
+      msg$log("createContext:", msg$ctxPrevCtxStr(ctxId, prevCtxId, type))
       private$appendEntry(domain, list(
         action = "createContext",
         ctxId = ctxId,
@@ -275,7 +275,7 @@ RLog <- R6Class(
     enter = function(reactId, ctxId, type, domain) {
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
-        msg$log("isolateEnter: ", msg$reactStr(reactId), " in ", ctxId)
+        msg$log("isolateEnter:", msg$reactStr(reactId), msg$ctxStr(ctxId))
         msg$depthIncrement()
         private$appendEntry(domain, list(
           action = "isolateEnter",
@@ -283,7 +283,7 @@ RLog <- R6Class(
           ctxId = ctxId
         ))
       } else {
-        msg$log("enter: ", msg$reactStr(reactId), " in ", ctxId, " - ", type)
+        msg$log("enter:", msg$reactStr(reactId), msg$ctxStr(ctxId, type))
         msg$depthIncrement()
         private$appendEntry(domain, list(
           action = "enter",
@@ -297,7 +297,7 @@ RLog <- R6Class(
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$depthDecrement()
-        msg$log("isolateExit: ", msg$reactStr(reactId), " in ", ctxId)
+        msg$log("isolateExit:", msg$reactStr(reactId), msg$ctxStr(ctxId))
         private$appendEntry(domain, list(
           action = "isolateExit",
           reactId = reactId,
@@ -305,7 +305,7 @@ RLog <- R6Class(
         ))
       } else {
         msg$depthDecrement()
-        msg$log("exit: ", msg$reactStr(reactId), " in ", ctxId, " - ", type)
+        msg$log("exit:", msg$reactStr(reactId), msg$ctxStr(ctxId, type))
         private$appendEntry(domain, list(
           action = "exit",
           reactId = reactId,
@@ -318,9 +318,9 @@ RLog <- R6Class(
     valueChange = function(reactId, value, display, domain) {
       valueStr <- paste(utils::capture.output(utils::str(value)), collapse="\n")
       if (isTRUE(display)) {
-        msg$log("valueChange: ", msg$reactStr(reactId), " '",  valueStr, "'")
+        msg$log("valueChange:", msg$reactStr(reactId), " '",  valueStr, "'")
       } else {
-        msg$log("valueChange: ", msg$reactStr(reactId))
+        msg$log("valueChange:", msg$reactStr(reactId))
       }
       private$appendEntry(domain, list(
         action = "valueChange",
@@ -345,7 +345,7 @@ RLog <- R6Class(
     invalidateStart = function(reactId, ctxId, type, domain) {
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
-        msg$log("isolateInvalidateStart: ", msg$reactStr(reactId), " in ", ctxId)
+        msg$log("isolateInvalidateStart:", msg$reactStr(reactId), msg$ctxStr(ctxId))
         msg$depthIncrement()
         private$appendEntry(domain, list(
           action = "isolateInvalidateStart",
@@ -353,7 +353,7 @@ RLog <- R6Class(
           ctxId = ctxId
         ))
       } else {
-        msg$log("invalidateStart", ": ", msg$reactStr(reactId), " in ", ctxId, " - ", type)
+        msg$log("invalidateStart:", msg$reactStr(reactId), msg$ctxStr(ctxId, type))
         msg$depthIncrement()
         private$appendEntry(domain, list(
           action = "invalidateStart",
@@ -367,7 +367,7 @@ RLog <- R6Class(
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$depthDecrement()
-        msg$log("isolateInvalidateEnd: ", msg$reactStr(reactId), " in ", ctxId)
+        msg$log("isolateInvalidateEnd:", msg$reactStr(reactId), msg$ctxStr(ctxId))
         private$appendEntry(domain, list(
           action = "isolateInvalidateEnd",
           reactId = reactId,
@@ -375,7 +375,7 @@ RLog <- R6Class(
         ))
       } else {
         msg$depthDecrement()
-        msg$log("invalidateEnd: ", msg$reactStr(reactId), " in ", ctxId, " - ", type)
+        msg$log("invalidateEnd:", msg$reactStr(reactId), msg$ctxStr(ctxId, type))
         private$appendEntry(domain, list(
           action = "invalidateEnd",
           reactId = reactId,
@@ -406,7 +406,7 @@ RLog <- R6Class(
     },
 
     freezeReactiveVal = function(reactId, domain) {
-      msg$log("freeze: ", msg$reactStr(reactId))
+      msg$log("freeze:", msg$reactStr(reactId))
       private$appendEntry(domain, list(
         action = "freeze",
         reactId = reactId
@@ -417,7 +417,7 @@ RLog <- R6Class(
     },
 
     thawReactiveVal = function(reactId, domain) {
-      msg$log("thaw: ", msg$reactStr(reactId))
+      msg$log("thaw:", msg$reactStr(reactId))
       private$appendEntry(domain, list(
         action = "thaw",
         reactId = reactId
@@ -442,7 +442,7 @@ MessageLogger = R6Class(
   portable = FALSE,
   public = list(
     depth = 0L,
-    reactCache = list("rNoCtx" = list(label = "<UNKNOWN>", reactId = "<UNKNOWN>")),
+    reactCache = list(),
     option = "shiny.reactlog.console",
 
     initialize = function(option = "shiny.reactlog.console", depth = 0L) {
@@ -479,7 +479,22 @@ MessageLogger = R6Class(
       if (self$isNotLogging()) return(NULL)
       reactInfo <- self$getReact(reactId)
       paste0(
-        reactInfo$reactId, ":", reactInfo$label
+        " ", reactInfo$reactId, ":", reactInfo$label
+      )
+    },
+    typeStr = function(type = NULL) {
+      self$ctxStr(ctxId = NULL, type = type)
+    },
+    ctxStr = function(ctxId = NULL, type = NULL) {
+      if (self$isNotLogging()) return(NULL)
+      self$ctxPrevCtxStr(ctxId = ctxId, prevCtxId = NULL, type = type)
+    },
+    ctxPrevCtxStr = function(ctxId = NULL, prevCtxId = NULL, type = NULL) {
+      if (self$isNotLogging()) return(NULL)
+      paste0(
+        if (!is.null(ctxId)) paste0(" in ", ctxId),
+        if (!is.null(prevCtxId)) paste0(" from ", prevCtxId),
+        if (!is.null(type) && !identical(type, "other")) paste0(" - ", type)
       )
     },
     log = function(...) {

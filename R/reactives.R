@@ -33,12 +33,13 @@ Dependents <- R6Class(
     # at times, the context is run in a ctx$onInvalidate(...) which has no runtime context
     invalidate = function(log = TRUE) {
       if (isTRUE(log)) {
-        # when new keys are added to input, there is no context
-        if (hasCurrentContext()) {
-          ctx <- getCurrentContext()
-          rLog$invalidateStart(.reactId, ctx$id, ctx$.reactType, ctx$.domain)
-          on.exit(rLog$invalidateEnd(.reactId, ctx$id, ctx$.reactType, ctx$.domain), add = TRUE)
-        }
+
+        domain <- getDefaultReactiveDomain()
+        rLog$invalidateStart(.reactId, NULL, "other", domain)
+        on.exit(
+          rLog$invalidateEnd(.reactId, NULL, "other", domain),
+          add = TRUE
+        )
       }
       lapply(
         .dependents$values(),
@@ -384,20 +385,11 @@ ReactiveValues <- R6Class(
         if (isTRUE(.hasRetrieved$keys[[key]])) {
           rLog$valueChangeKey(.reactId, key, value, domain)
           keyReactId <- rLog$keyIdStr(.reactId, key)
-          if (hasCurrentContext()) {
-            ctx <- getCurrentContext()
-            rLog$invalidateStart(keyReactId, ctx$id, ctx$.reactType, ctx$.domain)
-            on.exit(
-              rLog$invalidateEnd(keyReactId, ctx$id, ctx$.reactType, ctx$.domain),
-              add = TRUE
-            )
-          } else {
-            rLog$invalidateStart(keyReactId, NULL, "other", domain)
-            on.exit(
-              rLog$invalidateEnd(keyReactId, NULL, "other", domain),
-              add = TRUE
-            )
-          }
+          rLog$invalidateStart(keyReactId, NULL, "other", domain)
+          on.exit(
+            rLog$invalidateEnd(keyReactId, NULL, "other", domain),
+            add = TRUE
+          )
         }
       }
       else {

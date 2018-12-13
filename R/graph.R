@@ -46,7 +46,10 @@ check_suggested <- function(package, version, location) {
 .globals$reactIdCounter <- 0L
 nextGlobalReactId <- function() {
   .globals$reactIdCounter <- .globals$reactIdCounter + 1L
-  paste0("r", .globals$reactIdCounter)
+  reactIdStr(.globals$reactIdCounter)
+}
+reactIdStr <- function(num) {
+  paste0("r", num)
 }
 
 
@@ -143,7 +146,8 @@ RLog <- R6Class(
     msg = "<MessageLogger>",
     logStack = "<Stack>",
 
-    noReactId = "rNoCtx",
+    noReactIdLabel = "NoCtxReactId",
+    noReactId = reactIdStr("NoCtxReactId"),
 
     asList = function() {
       ret <- self$logStack$as_list()
@@ -175,7 +179,7 @@ RLog <- R6Class(
       self$logStack <- Stack$new()
       self$msg <- MessageLogger$new(option = msgOption)
 
-      self$msg$setReact(list(reactId = self$noReactId, label = "<UNKNOWN>"))
+      self$msg$setReact(list(reactId = self$noReactId, label = self$noReactIdLabel))
 
     },
     isLogging = function() {
@@ -266,7 +270,7 @@ RLog <- R6Class(
     createContext = function(ctxId, label, type, prevCtxId, domain) {
       ctxId <- self$ctxIdStr(ctxId)
       prevCtxId <- self$ctxIdStr(prevCtxId)
-      msg$log("createContext:", msg$ctxPrevCtxStr(ctxId, prevCtxId, type))
+      msg$log("createContext:", msg$ctxPrevCtxStr(preCtxIdTxt = " ", ctxId, prevCtxId, type))
       private$appendEntry(domain, list(
         action = "createContext",
         ctxId = ctxId,
@@ -494,10 +498,10 @@ MessageLogger = R6Class(
       if (self$isNotLogging()) return(NULL)
       self$ctxPrevCtxStr(ctxId = ctxId, prevCtxId = NULL, type = type)
     },
-    ctxPrevCtxStr = function(ctxId = NULL, prevCtxId = NULL, type = NULL) {
+    ctxPrevCtxStr = function(ctxId = NULL, prevCtxId = NULL, type = NULL, preCtxIdTxt = " in ") {
       if (self$isNotLogging()) return(NULL)
       paste0(
-        if (!is.null(ctxId)) paste0(" in ", ctxId),
+        if (!is.null(ctxId)) paste0(preCtxIdTxt, ctxId),
         if (!is.null(prevCtxId)) paste0(" from ", prevCtxId),
         if (!is.null(type) && !identical(type, "other")) paste0(" - ", type)
       )
@@ -514,4 +518,10 @@ MessageLogger = R6Class(
 )
 
 #' @include stack.R
-rLog <- RLog$new("shiny.reactlog", "shiny.reactlog.console")
+rLog <- NULL
+# To be used for initial init and within testing only
+initializeReactlog <- function() {
+  .globals$reactIdCounter <<- 0L
+  rLog <<- RLog$new("shiny.reactlog", "shiny.reactlog.console")
+}
+initializeReactlog()

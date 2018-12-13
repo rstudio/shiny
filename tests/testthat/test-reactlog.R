@@ -16,7 +16,7 @@ withOption <- function(key, value, oldVal = NULL, expr) {
 }
 
 withLogging <- function(expr) {
-  initializeReactlog()
+  rLog$reset()
   # reset ctx counter
   reactiveEnvr <- .getReactiveEnvironment()
   reactiveEnvr$.nextId <- 0L

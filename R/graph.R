@@ -130,6 +130,7 @@ RLog <- R6Class(
   portable = FALSE,
   private = list(
     option = "shiny.reactlog",
+    msgOption = "shiny.reactlog.console",
 
     appendEntry = function(domain, logEntry) {
       if (self$isLogging()) {
@@ -176,11 +177,16 @@ RLog <- R6Class(
 
     initialize = function(rlogOption = "shiny.reactlog", msgOption = "shiny.reactlog.console") {
       private$option <- rlogOption
+      private$msgOption <- msgOption
+      self$reset()
+    },
+    reset = function() {
+      .globals$reactIdCounter <- 0L
+
       self$logStack <- Stack$new()
-      self$msg <- MessageLogger$new(option = msgOption)
 
+      self$msg <- MessageLogger$new(option = private$msgOption)
       self$msg$setReact(list(reactId = self$noReactId, label = self$noReactIdLabel))
-
     },
     isLogging = function() {
       isTRUE(getOption(private$option, FALSE))
@@ -502,10 +508,4 @@ MessageLogger = R6Class(
 )
 
 #' @include stack.R
-rLog <- NULL
-# To be used for initial init and within testing only
-initializeReactlog <- function() {
-  .globals$reactIdCounter <- 0L
-  rLog <<- RLog$new("shiny.reactlog", "shiny.reactlog.console")
-}
-initializeReactlog()
+rLog <- RLog$new("shiny.reactlog", "shiny.reactlog.console")

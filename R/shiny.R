@@ -750,8 +750,8 @@ ShinySession <- R6Class(
       private$flushCallbacks <- Callbacks$new()
       private$flushedCallbacks <- Callbacks$new()
       private$inputReceivedCallbacks <- Callbacks$new()
-      private$.input      <- ReactiveValues$new(dedupe = FALSE)
-      private$.clientData <- ReactiveValues$new(dedupe = TRUE)
+      private$.input      <- ReactiveValues$new(dedupe = FALSE, label = "input")
+      private$.clientData <- ReactiveValues$new(dedupe = TRUE, label = "clientData")
       private$timingRecorder <- ShinyServerTimingRecorder$new()
       self$progressStack <- Stack$new()
       self$files <- Map$new()
@@ -759,9 +759,7 @@ ShinySession <- R6Class(
       self$userData <- new.env(parent = emptyenv())
 
       self$input <- .createReactiveValues(private$.input, readonly=TRUE)
-      .setLabel(self$input, 'input')
       self$clientData <- .createReactiveValues(private$.clientData, readonly=TRUE)
-      .setLabel(self$clientData, 'clientData')
 
       self$output <- .createOutputWriter(self)
 

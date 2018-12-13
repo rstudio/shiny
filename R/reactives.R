@@ -306,11 +306,12 @@ ReactiveValues <- R6Class(
     .hasRetrieved = list(),
 
 
-    initialize = function(dedupe = TRUE) {
+    initialize = function(
+      dedupe = TRUE,
+      label = paste0('reactiveValues', p_randomInt(1000, 10000))
+    ) {
       .reactId <<- nextGlobalReactId()
-      .label <<- paste('reactiveValues',
-                       p_randomInt(1000, 10000),
-                       sep="")
+      .label <<- label
       .values <<- new.env(parent=emptyenv())
       .metadata <<- new.env(parent=emptyenv())
       .dependents <<- new.env(parent=emptyenv())
@@ -509,23 +510,8 @@ ReactiveValues <- R6Class(
       .valuesDeps$register()
 
       return(listValue)
-    },
-
-    .setLabel = function(label) {
-      domain <- getDefaultReactiveDomain()
-      if (isTRUE(.hasRetrieved$names))
-        rLog$updateReactLabelNames(.reactId, label, domain)
-      if (isTRUE(.hasRetrieved$asList))
-        rLog$updateReactLabelAsList(.reactId, label, domain)
-      if (isTRUE(.hasRetrieved$asListAll))
-        rLog$updateReactLabelAsListAll(.reactId, label, domain)
-      for (key in .hasRetrieved$keys) {
-        if (isTRUE(.hasRetrieved$keys[[key]])) {
-          rLog$updateReactLabelKey(.reactId, key, label, domain)
-        }
-      }
-      .label <<- label
     }
+
   )
 )
 
@@ -672,11 +658,6 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
       sep = ""))
 
   reactiveValuesToList(x, all.names)
-}
-
-# For debug purposes
-.setLabel <- function(x, label) {
-  .subset2(x, 'impl')$.setLabel(label)
 }
 
 #' Convert a reactivevalues object to a list

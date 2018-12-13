@@ -212,32 +212,6 @@ RLog <- R6Class(
       self$define(self$keyIdStr(reactId, key), self$keyIdStr(label, key), "reactiveValuesKey", domain)
     },
 
-    updateReactLabel = function(reactId, label, domain) {
-      msgObj <- msg$getReact(reactId)
-      if (!is.null(msgObj)) {
-        msgObj$label <- label
-        msg$setReact(msgObj)
-      }
-      msg$log("updateLabel:", msg$reactStr(reactId))
-      private$appendEntry(domain, list(
-        action = "updateLabel",
-        reactId = reactId,
-        label = label
-      ))
-    },
-    updateReactLabelNames = function(reactId, label, domain) {
-      self$updateReactLabel(self$namesIdStr(reactId), self$namesIdStr(label), domain)
-    },
-    updateReactLabelAsList = function(reactId, label, domain) {
-      self$updateReactLabel(self$asListIdStr(reactId), self$asListIdStr(label), domain)
-    },
-    updateReactLabelAsListAll = function(reactId, label, domain) {
-      self$updateReactLabel(self$asListAllIdStr(reactId), self$asListAllIdStr(label), domain)
-    },
-    updateReactLabelKey = function(reactId, key, label, domain) {
-      self$updateReactLabel(self$keyIdStr(reactId, key), self$keyIdStr(label, key), domain)
-    },
-
     dependsOn = function(reactId, depOnReactId, ctxId, domain) {
       if (is.null(reactId)) return()
       ctxId <- ctxIdStr(ctxId)

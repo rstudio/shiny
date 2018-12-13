@@ -57,7 +57,10 @@ test_that("message logger appears", {
     expect_silent(
       {
         values <- reactiveValues(a = 2, b = 3)
-        .setLabel(values, "values")
+        local({
+          values_obj <- .subset2(values, 'impl')
+          values_obj$.label <- "values"
+        })
       }
     )
     expect_logs(
@@ -85,7 +88,7 @@ test_that("message logger appears", {
       {
         val(4)
       },
-      "- valueChange: r1:val ' num 4'",
+      "- valueChange: r1:val",
       "- invalidateStart: r1:val",
       "= - invalidateStart: r3:reactive(val() + values$a) in ctx1 - observable",
       "= = - isolateInvalidateStart: rNoCtxReactId:NoCtxReactId in ctxDummy",
@@ -103,12 +106,6 @@ test_that("message logger appears", {
       "- invalidateStart: r2$a:values$a",
       "- invalidateEnd: r2$a:values$a"
     )
-
-    # values <- reactiveValues(a = 2, b = 3)
-    # react <- reactive(val() + values$a)
-    # react()
-    # val(4)
-    # values$a <- 5
 
   })
 

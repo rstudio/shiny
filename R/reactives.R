@@ -1607,7 +1607,7 @@ invalidateLater <- function(millis, session = getDefaultReactiveDomain()) {
   force(session)
 
   ctx <- getCurrentContext()
-  rLog$invalidateLater(ctx$id, millis, session)
+  rLog$invalidateLater(ctx$.reactId, ctx$id, millis, session)
 
   timerHandle <- scheduleTask(millis, function() {
     if (is.null(session)) {

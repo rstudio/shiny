@@ -16,7 +16,9 @@ withOption <- function(key, value, oldVal = NULL, expr) {
 }
 
 withLogging <- function(expr) {
+
   rLog$reset()
+
   # reset ctx counter
   reactiveEnvr <- .getReactiveEnvironment()
   reactiveEnvr$.nextId <- 0L
@@ -43,6 +45,23 @@ expect_logs <- function(expr, ...) {
     expected_messages
   )
 }
+
+test_that("rLog resets when options are FALSE", {
+
+  withOption("shiny.reactlog", FALSE, FALSE, {
+    withOption("shiny.reactlog.console", FALSE, FALSE, {
+      rLog$reset()
+
+      # check for dummy and no reactid information
+      expect_true(!is.null(rLog$noReactId))
+      expect_true(!is.null(rLog$dummyReactId))
+      expect_equal(rLog$msg$getReact(rLog$noReactId)$reactId, rLog$noReactId)
+      expect_equal(rLog$msg$getReact(rLog$dummyReactId)$reactId, rLog$dummyReactId)
+      expect_equal(length(rLog$msg$reactCache), 2)
+    })
+  })
+
+})
 
 test_that("message logger appears", {
 
@@ -75,7 +94,7 @@ test_that("message logger appears", {
         react()
       },
       "- createContext: ctxDummy - isolate",
-      "- dependsOn: rNoCtxReactId:NoCtxReactId on r3:reactive(val() + values$a) in ctxDummy",
+      "- dependsOn: rDummyReactId:DummyReactId on r3:reactive(val() + values$a) in ctxDummy",
       "- createContext: ctx1 - observable",
       "- enter: r3:reactive(val() + values$a) in ctx1 - observable",
       "= - dependsOn: r3:reactive(val() + values$a) on r1:val in ctx1",
@@ -91,9 +110,9 @@ test_that("message logger appears", {
       "- valueChange: r1:val",
       "- invalidateStart: r1:val",
       "= - invalidateStart: r3:reactive(val() + values$a) in ctx1 - observable",
-      "= = - isolateInvalidateStart: rNoCtxReactId:NoCtxReactId in ctxDummy",
-      "= = = - dependsOnRemove: rNoCtxReactId:NoCtxReactId on r3:reactive(val() + values$a) in ctxDummy",
-      "= = - isolateInvalidateEnd: rNoCtxReactId:NoCtxReactId in ctxDummy",
+      "= = - isolateInvalidateStart: rDummyReactId:DummyReactId in ctxDummy",
+      "= = = - dependsOnRemove: rDummyReactId:DummyReactId on r3:reactive(val() + values$a) in ctxDummy",
+      "= = - isolateInvalidateEnd: rDummyReactId:DummyReactId in ctxDummy",
       "= = - dependsOnRemove: r3:reactive(val() + values$a) on r1:val in ctx1",
       "= = - dependsOnRemove: r3:reactive(val() + values$a) on r2$a:values$a in ctx1",
       "= - invalidateEnd: r3:reactive(val() + values$a) in ctx1 - observable",

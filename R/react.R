@@ -202,7 +202,7 @@ hasCurrentContext <- function() {
 getDummyContext <- function() {
   Context$new(
     getDefaultReactiveDomain(), '[none]', type = 'isolate',
-    id = "Dummy"
+    id = "Dummy", reactId = rLog$dummyReactId
   )
 }
 

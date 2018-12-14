@@ -149,6 +149,8 @@ RLog <- R6Class(
 
     noReactIdLabel = "NoCtxReactId",
     noReactId = reactIdStr("NoCtxReactId"),
+    dummyReactIdLabel = "DummyReactId",
+    dummyReactId = reactIdStr("DummyReactId"),
 
     asList = function() {
       ret <- self$logStack$as_list()
@@ -173,20 +175,21 @@ RLog <- R6Class(
       paste0(reactId, "$", key)
     },
 
-
-
     initialize = function(rlogOption = "shiny.reactlog", msgOption = "shiny.reactlog.console") {
       private$option <- rlogOption
       private$msgOption <- msgOption
+
       self$reset()
     },
     reset = function() {
       .globals$reactIdCounter <- 0L
 
       self$logStack <- Stack$new()
-
       self$msg <- MessageLogger$new(option = private$msgOption)
-      self$msg$setReact(list(reactId = self$noReactId, label = self$noReactIdLabel))
+
+      # setup dummy and missing react information
+      self$msg$setReact(force = TRUE, list(reactId = self$noReactId, label = self$noReactIdLabel))
+      self$msg$setReact(force = TRUE, list(reactId = self$dummyReactId, label = self$dummyReactIdLabel))
     },
     isLogging = function() {
       isTRUE(getOption(private$option, FALSE))
@@ -448,6 +451,7 @@ MessageLogger = R6Class(
       if (!missing(depth)) self$depth <- depth
       if (!missing(option)) self$option <- option
     },
+
     isLogging = function() {
       isTRUE(getOption(self$option))
     },
@@ -467,16 +471,17 @@ MessageLogger = R6Class(
       !is.null(self$getReact(reactId))
     },
     getReact = function(reactId) {
-      if (self$isNotLogging()) return(NULL)
+      # ok to not check for logging as it would only retrieve from a minimal list, which is NULL
       self$reactCache[[reactId]]
     },
-    setReact = function(reactObj) {
-      if (self$isNotLogging()) return(NULL)
+    setReact = function(reactObj, force = FALSE) {
+      if (identical(force, FALSE) && self$isNotLogging()) return(NULL)
       self$reactCache[[reactObj$reactId]] <- reactObj
     },
     reactStr = function(reactId) {
       if (self$isNotLogging()) return(NULL)
       reactInfo <- self$getReact(reactId)
+      if (is.null(reactInfo)) return(" <UNKNOWN_REACTID>")
       paste0(
         " ", reactInfo$reactId, ":", reactInfo$label
       )

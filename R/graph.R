@@ -473,8 +473,8 @@ MessageLogger = R6Class(
       if (self$isNotLogging()) return(FALSE)
       !is.null(self$getReact(reactId))
     },
-    getReact = function(reactId) {
-      # ok to not check for logging as it would only retrieve from a minimal list, which is NULL
+    getReact = function(reactId, force = FALSE) {
+      if (identical(force, FALSE) && self$isNotLogging()) return(NULL)
       self$reactCache[[reactId]]
     },
     setReact = function(reactObj, force = FALSE) {

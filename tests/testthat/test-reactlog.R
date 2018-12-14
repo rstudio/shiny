@@ -55,8 +55,8 @@ test_that("rLog resets when options are FALSE", {
       # check for dummy and no reactid information
       expect_true(!is.null(rLog$noReactId))
       expect_true(!is.null(rLog$dummyReactId))
-      expect_equal(rLog$msg$getReact(rLog$noReactId)$reactId, rLog$noReactId)
-      expect_equal(rLog$msg$getReact(rLog$dummyReactId)$reactId, rLog$dummyReactId)
+      expect_equal(rLog$msg$getReact(rLog$noReactId, force = TRUE)$reactId, rLog$noReactId)
+      expect_equal(rLog$msg$getReact(rLog$dummyReactId, force = TRUE)$reactId, rLog$dummyReactId)
       expect_equal(length(rLog$msg$reactCache), 2)
     })
   })

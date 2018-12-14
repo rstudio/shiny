@@ -1082,7 +1082,7 @@ Observer <- R6Class(
       setAutoDestroy(autoDestroy)
 
       .reactId <<- nextGlobalReactId()
-      rLog$define(.reactId, NULL, .label, type = "observer", .domain)
+      rLog$defineObserver(.reactId, .label, .domain)
 
       # Defer the first running of this until flushReact is called
       .createContext()$invalidate()

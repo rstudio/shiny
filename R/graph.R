@@ -221,6 +221,9 @@ RLog <- R6Class(
     defineKey = function(reactId, value, key, label, domain) {
       self$define(self$keyIdStr(reactId, key), value, self$keyIdStr(label, key), "reactiveValuesKey", domain)
     },
+    defineObserver = function(reactId, label, domain) {
+      self$define(reactId, value = NULL, label, "observer", domain)
+    },
 
     dependsOn = function(reactId, depOnReactId, ctxId, domain) {
       if (is.null(reactId)) return()

@@ -507,7 +507,7 @@ MessageLogger = R6Class(
       reactInfo <- self$getReact(reactId)
       if (is.null(reactInfo)) return(" <UNKNOWN_REACTID>")
       paste0(
-        " ", reactInfo$reactId, ":'", self$shortenString(self$singleLine(reactInfo$label), "'")
+        " ", reactInfo$reactId, ":'", self$shortenString(self$singleLine(reactInfo$label)), "'"
       )
     },
     typeStr = function(type = NULL) {

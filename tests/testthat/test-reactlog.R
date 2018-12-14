@@ -71,7 +71,7 @@ test_that("message logger appears", {
       {
         val <- reactiveVal(1, label = "val")
       },
-      "- define: r1:val - reactiveVal"
+      "- define: r1:'val' - reactiveVal ' num 1'"
     )
     expect_silent(
       {
@@ -86,7 +86,7 @@ test_that("message logger appears", {
       {
         react <- reactive(val() + values$a)
       },
-      "- define: r3:reactive(val() + values$a) - observable"
+      "- define: r3:'reactive(val() + values$a)' - observable ' NULL'"
     )
 
     expect_logs(
@@ -94,36 +94,36 @@ test_that("message logger appears", {
         react()
       },
       "- createContext: ctxDummy - isolate",
-      "- dependsOn: rDummyReactId:DummyReactId on r3:reactive(val() + values$a) in ctxDummy",
+      "- dependsOn: rDummyReactId:'DummyReactId' on r3:'reactive(val() + values$a)' in ctxDummy",
       "- createContext: ctx1 - observable",
-      "- enter: r3:reactive(val() + values$a) in ctx1 - observable",
-      "= - dependsOn: r3:reactive(val() + values$a) on r1:val in ctx1",
-      "= - define: r2$a:values$a - reactiveValuesKey",
-      "= - dependsOn: r3:reactive(val() + values$a) on r2$a:values$a in ctx1",
-      "- exit: r3:reactive(val() + values$a) in ctx1 - observable"
+      "- enter: r3:'reactive(val() + values$a)' in ctx1 - observable",
+      "= - dependsOn: r3:'reactive(val() + values$a)' on r1:'val' in ctx1",
+      "= - define: r2$a:'values$a' - reactiveValuesKey ' num 2'",
+      "= - dependsOn: r3:'reactive(val() + values$a)' on r2$a:'values$a' in ctx1",
+      "- exit: r3:'reactive(val() + values$a)' in ctx1 - observable"
     )
 
     expect_logs(
       {
         val(4)
       },
-      "- valueChange: r1:val",
-      "- invalidateStart: r1:val",
-      "= - invalidateStart: r3:reactive(val() + values$a) in ctx1 - observable",
-      "= = - isolateInvalidateStart: rDummyReactId:DummyReactId in ctxDummy",
-      "= = = - dependsOnRemove: rDummyReactId:DummyReactId on r3:reactive(val() + values$a) in ctxDummy",
-      "= = - isolateInvalidateEnd: rDummyReactId:DummyReactId in ctxDummy",
-      "= = - dependsOnRemove: r3:reactive(val() + values$a) on r1:val in ctx1",
-      "= = - dependsOnRemove: r3:reactive(val() + values$a) on r2$a:values$a in ctx1",
-      "= - invalidateEnd: r3:reactive(val() + values$a) in ctx1 - observable",
-      "- invalidateEnd: r1:val"
+      "- valueChange: r1:'val' ' num 4'",
+      "- invalidateStart: r1:'val'",
+      "= - invalidateStart: r3:'reactive(val() + values$a)' in ctx1 - observable",
+      "= = - isolateInvalidateStart: rDummyReactId:'DummyReactId' in ctxDummy",
+      "= = = - dependsOnRemove: rDummyReactId:'DummyReactId' on r3:'reactive(val() + values$a)' in ctxDummy",
+      "= = - isolateInvalidateEnd: rDummyReactId:'DummyReactId' in ctxDummy",
+      "= = - dependsOnRemove: r3:'reactive(val() + values$a)' on r1:'val' in ctx1",
+      "= = - dependsOnRemove: r3:'reactive(val() + values$a)' on r2$a:'values$a' in ctx1",
+      "= - invalidateEnd: r3:'reactive(val() + values$a)' in ctx1 - observable",
+      "- invalidateEnd: r1:'val'"
     )
 
     expect_logs(
       {values$a <- 5},
-      "- valueChange: r2$a:values$a",
-      "- invalidateStart: r2$a:values$a",
-      "- invalidateEnd: r2$a:values$a"
+      "- valueChange: r2$a:'values$a' ' num 5'",
+      "- invalidateStart: r2$a:'values$a'",
+      "- invalidateEnd: r2$a:'values$a'"
     )
 
   })

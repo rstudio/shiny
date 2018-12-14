@@ -88,7 +88,7 @@ ReactiveVal <- R6Class(
       if (identical(private$value, value)) {
         return(invisible(FALSE))
       }
-      rLog$valueChange(private$reactId, value, FALSE, getDefaultReactiveDomain())
+      rLog$valueChange(private$reactId, value, getDefaultReactiveDomain())
       private$value <- value
       private$dependents$invalidate()
       invisible(TRUE)

@@ -175,6 +175,14 @@ RLog <- R6Class(
       paste0(reactId, "$", key)
     },
 
+    valueStr = function(value, n = 200) {
+      output <- try(silent = TRUE, {
+        utils::capture.output(utils::str(value))
+      })
+      outputTxt <- paste0(output, collapse="\n")
+      msg$shortenString(outputTxt, n = n)
+    },
+
     initialize = function(rlogOption = "shiny.reactlog", msgOption = "shiny.reactlog.console") {
       private$option <- rlogOption
       private$msgOption <- msgOption
@@ -196,17 +204,18 @@ RLog <- R6Class(
     },
 
     define = function(reactId, value, label, type, domain) {
+      valueStr <- self$valueStr(value)
       if (msg$hasReact(reactId)) {
         stop("react definition for id: ", reactId, " already found!!", "Label: ", label, "Type: ", type)
       }
       msg$setReact(list(reactId = reactId, label = label))
-      msg$log("define:", msg$reactStr(reactId), msg$typeStr(type = type))
+      msg$log("define:", msg$reactStr(reactId), msg$typeStr(type = type), msg$valueStr(valueStr))
       private$appendEntry(domain, list(
         action = "define",
         reactId = reactId,
         label = label,
         type = type,
-        value = value
+        value = valueStr
       ))
     },
     defineNames = function(reactId, value, label, domain) {
@@ -311,13 +320,9 @@ RLog <- R6Class(
       }
     },
 
-    valueChange = function(reactId, value, display, domain) {
-      valueStr <- paste(utils::capture.output(utils::str(value)), collapse="\n")
-      if (isTRUE(display)) {
-        msg$log("valueChange:", msg$reactStr(reactId), " '",  valueStr, "'")
-      } else {
-        msg$log("valueChange:", msg$reactStr(reactId))
-      }
+    valueChange = function(reactId, value, domain) {
+      valueStr <- self$valueStr(value)
+      msg$log("valueChange:", msg$reactStr(reactId), msg$valueStr(valueStr))
       private$appendEntry(domain, list(
         action = "valueChange",
         reactId = reactId,
@@ -325,16 +330,16 @@ RLog <- R6Class(
       ))
     },
     valueChangeNames = function(reactId, nameValues, domain) {
-      self$valueChange(self$namesIdStr(reactId), nameValues, FALSE, domain)
+      self$valueChange(self$namesIdStr(reactId), nameValues, domain)
     },
     valueChangeAsList = function(reactId, listValue, domain) {
-      self$valueChange(self$asListIdStr(reactId), listValue, FALSE, domain)
+      self$valueChange(self$asListIdStr(reactId), listValue, domain)
     },
     valueChangeAsListAll = function(reactId, listValue, domain) {
-      self$valueChange(self$asListAllIdStr(reactId), listValue, FALSE, domain)
+      self$valueChange(self$asListAllIdStr(reactId), listValue, domain)
     },
     valueChangeKey = function(reactId, key, value, domain) {
-      self$valueChange(self$keyIdStr(reactId, key), value, FALSE, domain)
+      self$valueChange(self$keyIdStr(reactId, key), value, domain)
     },
 
 
@@ -482,12 +487,27 @@ MessageLogger = R6Class(
       if (identical(force, FALSE) && self$isNotLogging()) return(NULL)
       self$reactCache[[reactObj$reactId]] <- reactObj
     },
+    shortenString = function(txt, n = 100) {
+      if (nchar(txt) > n) {
+        paste0(substr(txt, 1, n - 3), "...")
+      } else {
+        txt
+      }
+    },
+    singleLine = function(txt) {
+      gsub("[^\\]\\n", "\\\\n", txt)
+    },
+    valueStr = function(valueStr) {
+      paste0(
+        " '",  self$shortenString(self$singleLine(valueStr)), "'"
+      )
+    },
     reactStr = function(reactId) {
       if (self$isNotLogging()) return(NULL)
       reactInfo <- self$getReact(reactId)
       if (is.null(reactInfo)) return(" <UNKNOWN_REACTID>")
       paste0(
-        " ", reactInfo$reactId, ":", reactInfo$label
+        " ", reactInfo$reactId, ":'", self$shortenString(self$singleLine(reactInfo$label), "'")
       )
     },
     typeStr = function(type = NULL) {

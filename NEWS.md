@@ -1,4 +1,4 @@
-shiny 1.2.0.9000
+shiny 1.2.0.9001
 ================
 
 ## Full changelog
@@ -8,6 +8,8 @@ shiny 1.2.0.9000
 ### New features
 
 * Revamped Shiny's [reactlog](https://github.com/rstudio/reactlog) viewer which debugs reactivity within a shiny application.  This allows users to traverse the reactivity history of a shiny application, filter to the dependency tree of a selected reactive object, and search for matching reactive objects.  See `?showReactLog` for more details and how to enable this feature. ([#2107](https://github.com/rstudio/shiny/pull/2107))
+
+* Shiny now serves static files on a background thread. This means that things like JavaScript and CSS assets can be served without blocking or being blocked by the main R thread, and should result in significantly better performance for heavily loaded servers. ([#2280](https://github.com/rstudio/shiny/pull/2280))
 
 ### Minor new features and improvements
 

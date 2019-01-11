@@ -7,6 +7,8 @@ shiny 1.2.0.9000
 
 ### New features
 
+* Revamped Shiny's [reactlog](https://github.com/rstudio/reactlog) viewer which debugs reactivity within a shiny application.  This allows users to traverse the reactivity history of a shiny application, filter to the dependency tree of a selected reactive object, and search for matching reactive objects.  See `?showReactLog` for more details and how to enable this feature. ([#2107](https://github.com/rstudio/shiny/pull/2107))
+
 ### Minor new features and improvements
 
 ### Bug fixes

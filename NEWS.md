@@ -1,4 +1,4 @@
-shiny 1.2.0.9000
+shiny 1.2.0.9001
 ================
 
 ## Full changelog
@@ -6,6 +6,8 @@ shiny 1.2.0.9000
 ### Breaking changes
 
 ### New features
+
+* Shiny now serves static files on a background thread. This means that things like JavaScript and CSS assets can be served without blocking or being blocked by the main R thread, and should result in significantly better performance for heavily loaded servers. ([#2280](https://github.com/rstudio/shiny/pull/2280))
 
 ### Minor new features and improvements
 

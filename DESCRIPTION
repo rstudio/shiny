@@ -91,6 +91,7 @@ Suggests:
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Remotes:
+    rstudio/httpuv,
     rstudio/reactlog
 Collate:
     'app.R'
@@ -164,5 +165,3 @@ Collate:
     'timer.R'
     'update-input.R'
 RoxygenNote: 6.1.0
-Remotes:
-    rstudio/httpuv

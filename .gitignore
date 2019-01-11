@@ -9,3 +9,4 @@
 shinyapps/
 README.html
 .*.Rnb.cached
+tools/yarn-error.log

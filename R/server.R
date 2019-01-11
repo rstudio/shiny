@@ -66,7 +66,7 @@ addResourcePath <- function(prefix, directoryPath) {
   # the corresponding httpuv server object.
   if (!is.null(getShinyOption("server")))
   {
-    getShinyOption("server")$setStaticPath(.list = setNames(normalizedPath, prefix))
+    getShinyOption("server")$setStaticPath(.list = stats::setNames(normalizedPath, prefix))
   }
 
   # .globals$resourcePaths persists across runs of applications.

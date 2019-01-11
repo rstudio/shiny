@@ -16,12 +16,15 @@ processId <- local({
   }
 })
 
+#' @include graph.R
 Context <- R6Class(
   'Context',
   portable = FALSE,
   class = FALSE,
   public = list(
     id = character(0),
+    .reactId = character(0),
+    .reactType = "other",
     .label = character(0),      # For debug purposes
     .invalidated = FALSE,
     .invalidateCallbacks = list(),
@@ -29,12 +32,18 @@ Context <- R6Class(
     .domain = NULL,
     .pid = NULL,
 
-    initialize = function(domain, label='', type='other', prevId='') {
-      id <<- .getReactiveEnvironment()$nextId()
+    initialize = function(
+      domain, label='', type='other', prevId='',
+      reactId = rLog$noReactId,
+      id = .getReactiveEnvironment()$nextId() # For dummy context
+    ) {
+      id <<- id
       .label <<- label
       .domain <<- domain
       .pid <<- processId()
-      .graphCreateContext(id, label, type, prevId, domain)
+      .reactId <<- reactId
+      .reactType <<- type
+      rLog$createContext(id, label, type, prevId, domain)
     },
     run = function(func) {
       "Run the provided function under this context."
@@ -42,10 +51,8 @@ Context <- R6Class(
       promises::with_promise_domain(reactivePromiseDomain(), {
         withReactiveDomain(.domain, {
           env <- .getReactiveEnvironment()
-          .graphEnterContext(id)
-          on.exit({
-            .graphExitContext(id, domain = .domain)
-          }, add = TRUE)
+          rLog$enter(.reactId, id, .reactType, .domain)
+          on.exit(rLog$exit(.reactId, id, .reactType, .domain), add = TRUE)
           env$runWith(self, func)
         })
       })
@@ -62,7 +69,9 @@ Context <- R6Class(
         return()
       .invalidated <<- TRUE
 
-      .graphInvalidate(id, .domain)
+      rLog$invalidateStart(.reactId, id, .reactType, .domain)
+      on.exit(rLog$invalidateEnd(.reactId, id, .reactType, .domain), add = TRUE)
+
       lapply(.invalidateCallbacks, function(func) {
         func()
       })
@@ -151,7 +160,10 @@ ReactiveEnvironment <- R6Class(
       # If already in a flush, don't start another one
       if (.inFlush) return(invisible(FALSE))
       .inFlush <<- TRUE
-      on.exit(.inFlush <<- FALSE)
+      on.exit({
+        .inFlush <<- FALSE
+        rLog$idle(domain = NULL)
+      })
 
       while (hasPendingFlush()) {
         ctx <- .pendingFlush$dequeue()
@@ -183,18 +195,16 @@ flushReact <- function() {
 getCurrentContext <- function() {
   .getReactiveEnvironment()$currentContext()
 }
+hasCurrentContext <- function() {
+  !is.null(.getReactiveEnvironment()$.currentContext)
+}
 
-getDummyContext <- function() {}
-local({
-  dummyContext <- NULL
-  getDummyContext <<- function() {
-    if (is.null(dummyContext)) {
-      dummyContext <<- Context$new(getDefaultReactiveDomain(), '[none]',
-        type='isolate')
-    }
-    return(dummyContext)
-  }
-})
+getDummyContext <- function() {
+  Context$new(
+    getDefaultReactiveDomain(), '[none]', type = 'isolate',
+    id = "Dummy", reactId = rLog$dummyReactId
+  )
+}
 
 wrapForContext <- function(func, ctx) {
   force(func)

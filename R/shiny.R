@@ -576,7 +576,7 @@ ShinySession <- R6Class(
 
             # Apply preprocessor functions for inputs that have them.
             values$input <- lapply(
-              setNames(names(values$input), names(values$input)),
+              stats::setNames(names(values$input), names(values$input)),
               function(name) {
                 preprocess <- private$getSnapshotPreprocessInput(name)
                 preprocess(values$input[[name]])
@@ -604,7 +604,7 @@ ShinySession <- R6Class(
 
             # Apply snapshotPreprocess functions for outputs that have them.
             values$output <- lapply(
-              setNames(names(values$output), names(values$output)),
+              stats::setNames(names(values$output), names(values$output)),
               function(name) {
                 preprocess <- private$getSnapshotPreprocessOutput(name)
                 preprocess(values$output[[name]])
@@ -750,8 +750,8 @@ ShinySession <- R6Class(
       private$flushCallbacks <- Callbacks$new()
       private$flushedCallbacks <- Callbacks$new()
       private$inputReceivedCallbacks <- Callbacks$new()
-      private$.input      <- ReactiveValues$new(dedupe = FALSE)
-      private$.clientData <- ReactiveValues$new(dedupe = TRUE)
+      private$.input      <- ReactiveValues$new(dedupe = FALSE, label = "input")
+      private$.clientData <- ReactiveValues$new(dedupe = TRUE, label = "clientData")
       private$timingRecorder <- ShinyServerTimingRecorder$new()
       self$progressStack <- Stack$new()
       self$files <- Map$new()
@@ -759,9 +759,7 @@ ShinySession <- R6Class(
       self$userData <- new.env(parent = emptyenv())
 
       self$input <- .createReactiveValues(private$.input, readonly=TRUE)
-      .setLabel(self$input, 'input')
       self$clientData <- .createReactiveValues(private$.clientData, readonly=TRUE)
-      .setLabel(self$clientData, 'clientData')
 
       self$output <- .createOutputWriter(self)
 
@@ -2025,6 +2023,7 @@ ShinySession <- R6Class(
     },
     incrementBusyCount = function() {
       if (private$busyCount == 0L) {
+        rLog$asyncStart(domain = self)
         private$sendMessage(busy = "busy")
       }
       private$busyCount <- private$busyCount + 1L
@@ -2032,6 +2031,7 @@ ShinySession <- R6Class(
     decrementBusyCount = function() {
       private$busyCount <- private$busyCount - 1L
       if (private$busyCount == 0L) {
+        rLog$asyncStop(domain = self)
         private$sendMessage(busy = "idle")
         self$requestFlush()
         # We defer the call to startCycle() using later(), to defend against

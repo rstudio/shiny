@@ -576,7 +576,7 @@ ShinySession <- R6Class(
 
             # Apply preprocessor functions for inputs that have them.
             values$input <- lapply(
-              setNames(names(values$input), names(values$input)),
+              stats::setNames(names(values$input), names(values$input)),
               function(name) {
                 preprocess <- private$getSnapshotPreprocessInput(name)
                 preprocess(values$input[[name]])
@@ -604,7 +604,7 @@ ShinySession <- R6Class(
 
             # Apply snapshotPreprocess functions for outputs that have them.
             values$output <- lapply(
-              setNames(names(values$output), names(values$output)),
+              stats::setNames(names(values$output), names(values$output)),
               function(name) {
                 preprocess <- private$getSnapshotPreprocessOutput(name)
                 preprocess(values$output[[name]])

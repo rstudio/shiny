@@ -426,7 +426,7 @@ RestoreInputSet <- R6Class("RestoreInputSet",
     },
 
     asList = function() {
-      as.list.environment(private$values)
+      as.list.environment(private$values, all.names = TRUE)
     }
   )
 )

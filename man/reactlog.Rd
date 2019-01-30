@@ -11,7 +11,7 @@ reactlog()
 
 reactlogShow(time = TRUE)
 
-showReactLog(time = TRUE)
+showReactLog(...)
 
 reactlogReset()
 }
@@ -41,11 +41,11 @@ in the process, not just for a particular application or session.
 
 As an alternative to pressing Ctrl/Command+F3--for example, if you
 are using reactives outside of the context of a Shiny
-application--you can run the \code{showReactLog} function, which will
+application--you can run the \code{reactlogShow} function, which will
 generate the reactive log visualization as a static HTML file and
 launch it in your default browser. In this case, refreshing your
 browser will not load new activity into the report; you will need to
-call \code{showReactLog()} explicitly.
+call \code{reactlogShow()} explicitly.
 
 For security and performance reasons, do not enable
 \code{shiny.reactlog} in production environments. When the option is
@@ -59,7 +59,7 @@ of the source code of your reactive expressions and observers.
 
 \item \code{reactlogShow}: Display a full reactlog graph for all sessions.
 
-\item \code{showReactLog}: Display a full reactlog graph for all sessions. (Same \code{reactlogShow}. Legacy name.)
+\item \code{showReactLog}: This function is deprecated. You should use \code{\link{reactlogShow}}
 
 \item \code{reactlogReset}: Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
 }}

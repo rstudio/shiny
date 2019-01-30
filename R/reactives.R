@@ -140,7 +140,7 @@ ReactiveVal <- R6Class(
 #'
 #' @param value An optional initial value.
 #' @param label An optional label, for debugging purposes (see
-#'   \code{\link{reactlogShow}}). If missing, a label will be automatically
+#'   \code{\link{reactlog}}). If missing, a label will be automatically
 #'   created.
 #'
 #' @return A function. Call the function with no arguments to (reactively) read

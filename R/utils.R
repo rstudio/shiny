@@ -1050,7 +1050,7 @@ safeError <- function(error) {
 # #' @examples
 # #' ## Note: the breaking of the reactive chain that happens in the app
 # #' ## below (when input$txt = 'bad' and input$allowBad = 'FALSE') is
-# #' ## easily visualized with `showReactLog()`
+# #' ## easily visualized with `reactlogShow()`
 # #'
 # #' ## Only run examples in interactive R sessions
 # #' if (interactive()) {

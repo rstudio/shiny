@@ -86,8 +86,6 @@ reactIdStr <- function(num) {
 #' enabled, it's possible for any user of your app to see at least some
 #' of the source code of your reactive expressions and observers.
 #'
-#' @param time A boolean that specifies whether or not to display the
-#' time that each reactive.
 #' @name reactlog
 NULL
 
@@ -100,6 +98,7 @@ reactlog <- function() {
 }
 
 #' @describeIn reactlog Display a full reactlog graph for all sessions.
+#' @inheritParams reactlog::reactlog_show
 #' @export
 reactlogShow <- function(time = TRUE) {
   check_reactlog()
@@ -108,9 +107,9 @@ reactlogShow <- function(time = TRUE) {
 #' @describeIn reactlog This function is deprecated. You should use \code{\link{reactlogShow}}
 #' @export
 # legacy purposes
-showReactLog <- function(...) {
+showReactLog <- function(time = TRUE) {
   shinyDeprecated(new = "`reactlogShow`", version = "1.2.0")
-  reactlogShow(...)
+  reactlogShow(time = time)
 }
 #' @describeIn reactlog Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
 #' @export

@@ -13,6 +13,8 @@ shiny 1.2.0.9001
 
 ### Minor new features and improvements
 
+* The `Shiny-Shared-Secret` security header is now checked using constant-time comparison to prevent timing attacks (thanks @dirkschumacher!). ([#2319](https://github.com/rstudio/shiny/pull/2319))
+
 ### Bug fixes
 
 * Fixed [#2245](https://github.com/rstudio/shiny/issues/2245): `updateSelectizeInput()` did not update labels. ([#2248](https://github.com/rstudio/shiny/pull/2248))

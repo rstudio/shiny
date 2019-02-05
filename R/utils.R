@@ -1744,14 +1744,25 @@ getSliderType <- function(min, max, value) {
 # Reads the `shiny.sharedSecret` global option, and returns a function that can
 # be used to test header values for a match.
 loadSharedSecret <- function() {
-  sharedSecret <- getOption("shiny.sharedSecret")
+  normalizeToRaw <- function(value, label = "value") {
+    if (is.null(value)) {
+      raw()
+    } else if (is.character(value)) {
+      charToRaw(paste(value, collapse = "\n"))
+    } else if (is.raw(value)) {
+      value
+    } else {
+      stop("Wrong type for ", label, "; character or raw expected")
+    }
+  }
+
+  sharedSecret <- normalizeToRaw(getOption("shiny.sharedSecret"))
   if (is.null(sharedSecret)) {
     function(x) TRUE
   } else {
     # We compare the digest of the two values so that their lengths are equalized
-    sharedSecret <- digest::digest(sharedSecret, "sha256", serialize = FALSE, raw = TRUE)
     function(x) {
-      x <- digest::digest(x, "sha256", serialize = FALSE, raw = TRUE)
+      x <- normalizeToRaw(x)
       # Constant time comparison to avoid timing attacks
       constantTimeEquals(sharedSecret, x)
     }
@@ -1762,7 +1773,9 @@ loadSharedSecret <- function() {
 constantTimeEquals <- function(raw1, raw2) {
   stopifnot(is.raw(raw1))
   stopifnot(is.raw(raw2))
-  stopifnot(length(raw1) == length(raw2))
+  if (length(raw1) != length(raw2)) {
+    return(FALSE)
+  }
 
   sum(as.integer(xor(raw1, raw2))) == 0
 }

@@ -328,13 +328,13 @@ HandlerManager <- R6Class("HandlerManager",
         }
       )
     },
-    .httpServer = function(handler, sharedSecret) {
+    .httpServer = function(handler, checkSharedSecret) {
       filter <- getOption('shiny.http.response.filter')
       if (is.null(filter))
         filter <- function(req, response) response
 
       function(req) {
-        if (!sharedSecret(req$HTTP_SHINY_SHARED_SECRET)) {
+        if (!checkSharedSecret(req$HTTP_SHINY_SHARED_SECRET)) {
           return(list(status=403,
             body='<h1>403 Forbidden</h1><p>Shared secret mismatch</p>',
             headers=list('Content-Type' = 'text/html')))

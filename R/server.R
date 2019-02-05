@@ -161,7 +161,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
   # This value, if non-NULL, must be present on all HTTP and WebSocket
   # requests as the Shiny-Shared-Secret header or else access will be
   # denied (403 response for HTTP, and instant close for websocket).
-  sharedSecret <- loadSharedSecret()
+  checkSharedSecret <- loadSharedSecret()
 
   appHandlers <- list(
     http = joinHandlers(c(
@@ -170,7 +170,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       reactLogHandler
     )),
     ws = function(ws) {
-      if (!sharedSecret(ws$request$HTTP_SHINY_SHARED_SECRET)) {
+      if (!checkSharedSecret(ws$request$HTTP_SHINY_SHARED_SECRET)) {
         ws$close()
         return(TRUE)
       }

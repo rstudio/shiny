@@ -10,7 +10,7 @@ reactiveVal(value = NULL, label = NULL)
 \item{value}{An optional initial value.}
 
 \item{label}{An optional label, for debugging purposes (see
-\code{\link{showReactLog}}). If missing, a label will be automatically
+\code{\link{reactlog}}). If missing, a label will be automatically
 created.}
 }
 \value{

@@ -62,7 +62,7 @@ NULL
 #'     by setting e.g. \code{options(shiny.autoreload.interval = 2000)} (every
 #'     two seconds).}
 #'   \item{shiny.reactlog}{If \code{TRUE}, enable logging of reactive events,
-#'     which can be viewed later with the \code{\link{showReactLog}} function.
+#'     which can be viewed later with the \code{\link{reactlogShow}} function.
 #'     This incurs a substantial performance penalty and should not be used in
 #'     production.}
 #'   \item{shiny.usecairo}{This is used to disable graphical rendering by the

@@ -75,29 +75,53 @@ reactIdStr <- function(num) {
 #'
 #' As an alternative to pressing Ctrl/Command+F3--for example, if you
 #' are using reactives outside of the context of a Shiny
-#' application--you can run the \code{showReactLog} function, which will
+#' application--you can run the \code{reactlogShow} function, which will
 #' generate the reactive log visualization as a static HTML file and
 #' launch it in your default browser. In this case, refreshing your
 #' browser will not load new activity into the report; you will need to
-#' call \code{showReactLog()} explicitly.
+#' call \code{reactlogShow()} explicitly.
 #'
 #' For security and performance reasons, do not enable
 #' \code{shiny.reactlog} in production environments. When the option is
 #' enabled, it's possible for any user of your app to see at least some
 #' of the source code of your reactive expressions and observers.
 #'
-#' @param time A boolean that specifies whether or not to display the
-#' time that each reactive.
+#' @name reactlog
+NULL
+
+
+#' @describeIn reactlog Return a list of reactive information.  Can be used in conjunction with
+#'   \code{reactlog::\link[reactlog]{reactlog_show}} to later display the reactlog graph.
 #' @export
-showReactLog <- function(time = TRUE) {
-  check_reactlog()
-  reactlog::show_reactlog(rLog$asList(), time = time)
+reactlog <- function() {
+  rLog$asList()
 }
+
+#' @describeIn reactlog Display a full reactlog graph for all sessions.
+#' @inheritParams reactlog::reactlog_show
+#' @export
+reactlogShow <- function(time = TRUE) {
+  check_reactlog()
+  reactlog::reactlog_show(reactlog(), time = time)
+}
+#' @describeIn reactlog This function is deprecated. You should use \code{\link{reactlogShow}}
+#' @export
+# legacy purposes
+showReactLog <- function(time = TRUE) {
+  shinyDeprecated(new = "`reactlogShow`", version = "1.2.0")
+  reactlogShow(time = time)
+}
+#' @describeIn reactlog Resets the entire reactlog stack.  Useful for debugging and removing all prior reactive history.
+#' @export
+reactlogReset <- function() {
+  rLog$reset()
+}
+
 # called in "/reactlog" middleware
 renderReactlog <- function(sessionToken = NULL, time = TRUE) {
   check_reactlog()
-  reactlog::render_reactlog(
-    rLog$asList(),
+  reactlog::reactlog_render(
+    reactlog(),
     session_token = sessionToken,
     time = time
   )

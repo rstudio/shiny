@@ -64,6 +64,6 @@ test_that("Shared secret", {
   expect_false(checkSharedSecret("this is a secret string"))
   expect_false(checkSharedSecret("This is a secret string "))
   expect_false(checkSharedSecret(""))
-  expect_error(checkSharedSecret(NULL))
+  expect_false(checkSharedSecret(NULL))
   expect_error(checkSharedSecret(1:10))
 })

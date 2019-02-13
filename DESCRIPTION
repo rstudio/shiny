@@ -65,7 +65,7 @@ Depends:
 Imports:
     utils,
     grDevices,
-    httpuv (>= 1.4.5.9001),
+    httpuv (>= 1.4.5.9004),
     mime (>= 0.3),
     jsonlite (>= 0.9.16),
     xtable,

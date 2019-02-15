@@ -90,6 +90,12 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
     enableBookmarking(bookmarkStore)
   }
 
+  # Always handle /session URLs dynamically. This is useful just in case there
+  # is user code that adds "/" as a static path.
+  staticPaths <- list(
+    "/session" = excludeStaticPath()
+  )
+
   # Store the appDir and bookmarking-related options, so that we can read them
   # from within the app.
   shinyOptions(appDir = getwd())
@@ -97,6 +103,7 @@ shinyApp <- function(ui=NULL, server=NULL, onStart=NULL, options=list(),
 
   structure(
     list(
+      staticPaths = staticPaths,
       httpHandler = httpHandler,
       serverFuncSource = serverFuncSource,
       onStart = onStart,
@@ -169,14 +176,14 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
     uiHandlerSource()(req)
   }
 
+  # Always handle /session URLs dynamically.
+  staticPaths <- list(
+    "/session" = excludeStaticPath()
+  )
+
   wwwDir <- file.path.ci(appDir, "www")
   if (dirExists(wwwDir)) {
-    staticPaths <- list(
-      "/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE),
-      "/session" = excludeStaticPath()
-    )
-  } else {
-    staticPaths <- list()
+    staticPaths[["/"]] <- staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE)
   }
 
   fallbackWWWDir <- system.file("www-dir", package = "shiny")
@@ -319,6 +326,11 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     appObj()$serverFuncSource(...)
   }
 
+  # Always handle /session URLs dynamically.
+  staticPaths <- list(
+    "/session" = excludeStaticPath()
+  )
+
   wwwDir <- file.path.ci(appDir, "www")
   if (dirExists(wwwDir)) {
     # wwwDir is a static path served by httpuv. It does _not_ serve up
@@ -329,12 +341,7 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     #
     # The call to staticPath normalizes the path, so that if the working dir
     # later changes, it will continue to point to the right place.
-    staticPaths <- list(
-      "/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE),
-      "/session" = excludeStaticPath()
-    )
-  } else {
-    staticPaths <- list()
+    staticPaths[["/"]] <- staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE)
   }
 
   fallbackWWWDir <- system.file("www-dir", package = "shiny")

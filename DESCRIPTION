@@ -86,7 +86,7 @@ Suggests:
     markdown,
     rmarkdown,
     ggplot2,
-    reactlog (>= 0.0.0.9002),
+    reactlog (>= 0.0.0.9003),
     magrittr
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues

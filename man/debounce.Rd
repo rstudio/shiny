@@ -6,10 +6,10 @@
 \title{Slow down a reactive expression with debounce/throttle}
 \usage{
 debounce(r, millis, priority = 100,
-  domain = getDefaultReactiveDomain())
+  domain = getDefaultReactiveDomain(), short_circuit = NULL)
 
 throttle(r, millis, priority = 100,
-  domain = getDefaultReactiveDomain())
+  domain = getDefaultReactiveDomain(), short_circuit = NULL)
 }
 \arguments{
 \item{r}{A reactive expression (that invalidates too often).}
@@ -24,6 +24,10 @@ these observers. Generally, this should be higher than the priorities of
 downstream observers and outputs (which default to zero).}
 
 \item{domain}{See \link{domains}.}
+
+\item{short_circuit}{An optional reactive that will short-circuit the
+timer. Use this to implement an action button that triggers recalculation
+immediately without waiting for the timer to run out.}
 }
 \description{
 Transforms a reactive expression by preventing its invalidation signals from

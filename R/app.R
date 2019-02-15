@@ -172,7 +172,8 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   wwwDir <- file.path.ci(appDir, "www")
   if (dirExists(wwwDir)) {
     staticPaths <- list(
-      "/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE, exclude = "session")
+      "/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE),
+      "/session" = excludeStaticPath()
     )
   } else {
     staticPaths <- list()
@@ -329,7 +330,8 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
     # The call to staticPath normalizes the path, so that if the working dir
     # later changes, it will continue to point to the right place.
     staticPaths <- list(
-      "/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE, exclude = "session")
+      "/" = staticPath(wwwDir, indexhtml = FALSE, fallthrough = TRUE),
+      "/session" = excludeStaticPath()
     )
   } else {
     staticPaths <- list()

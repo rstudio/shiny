@@ -5,7 +5,7 @@
 #'
 #' By default, \code{selectInput()} and \code{selectizeInput()} use the
 #' JavaScript library \pkg{selectize.js}
-#' (\url{https://github.com/selectize/selectize.js}) to instead of the basic
+#' (\url{https://github.com/selectize/selectize.js}) instead of the basic
 #' select input element. To use the standard HTML select input element, use
 #' \code{selectInput()} with \code{selectize=FALSE}.
 #'

@@ -92,7 +92,7 @@ URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Remotes:
     rstudio/httpuv,
-    rstudio/reactlog
+    rstudio/reactlog@rc-v1.0.0
 Collate:
     'app.R'
     'bookmark-state-local.R'

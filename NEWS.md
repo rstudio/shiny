@@ -1,4 +1,4 @@
-shiny 1.2.0.9001
+shiny 1.3.0
 ================
 
 ## Full changelog

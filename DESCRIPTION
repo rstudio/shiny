@@ -1,7 +1,7 @@
 Package: shiny
 Type: Package
 Title: Web Application Framework for R
-Version: 1.2.0.9001
+Version: 1.3.0
 Authors@R: c(
     person("Winston", "Chang", role = c("aut", "cre"), email = "winston@rstudio.com"),
     person("Joe", "Cheng", role = "aut", email = "joe@rstudio.com"),
@@ -86,7 +86,7 @@ Suggests:
     markdown,
     rmarkdown,
     ggplot2,
-    reactlog (>= 0.0.0.9003),
+    reactlog (>= 1.0.0),
     magrittr
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues

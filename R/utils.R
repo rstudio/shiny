@@ -121,8 +121,8 @@ isWholeNum <- function(x, tol = .Machine$double.eps^0.5) {
 }
 
 `%AND%` <- function(x, y) {
-  if (!is.null(x) && !is.na(x))
-    if (!is.null(y) && !is.na(y))
+  if (!is.null(x) && !isTRUE(is.na(x)))
+    if (!is.null(y) && !isTRUE(is.na(y)))
       return(y)
   return(NULL)
 }

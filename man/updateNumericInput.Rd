@@ -5,7 +5,7 @@
 \title{Change the value of a number input on the client}
 \usage{
 updateNumericInput(session, inputId, label = NULL, value = NULL,
-  min = NULL, max = NULL, step = NULL)
+  min = NULL, max = NULL, step = NULL, placeholder = NULL)
 }
 \arguments{
 \item{session}{The \code{session} object passed to function given to
@@ -22,6 +22,8 @@ updateNumericInput(session, inputId, label = NULL, value = NULL,
 \item{max}{Maximum value.}
 
 \item{step}{Step size.}
+
+\item{placeholder}{The placeholder to set for the input object.}
 }
 \description{
 Change the value of a number input on the client

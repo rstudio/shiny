@@ -19,10 +19,11 @@ $.extend(numberInputBinding, textInputBinding, {
     return "shiny.number";
   },
   receiveMessage: function(el, data) {
-    if (data.hasOwnProperty('value'))  el.value = data.value;
-    if (data.hasOwnProperty('min'))    el.min   = data.min;
-    if (data.hasOwnProperty('max'))    el.max   = data.max;
-    if (data.hasOwnProperty('step'))   el.step  = data.step;
+    if (data.hasOwnProperty('value'))       el.value = data.value;
+    if (data.hasOwnProperty('min'))         el.min   = data.min;
+    if (data.hasOwnProperty('max'))         el.max   = data.max;
+    if (data.hasOwnProperty('step'))        el.step  = data.step;
+    if (data.hasOwnProperty('placeholder')) el.placeholder  = data.placeholder;
 
     if (data.hasOwnProperty('label'))
       $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
@@ -30,11 +31,12 @@ $.extend(numberInputBinding, textInputBinding, {
     $(el).trigger('change');
   },
   getState: function(el) {
-    return { label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
-             value: this.getValue(el),
-             min:   Number(el.min),
-             max:   Number(el.max),
-             step:  Number(el.step) };
+    return { label:       $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+             value:       this.getValue(el),
+             min:         Number(el.min),
+             max:         Number(el.max),
+             step:        Number(el.step),
+             placeholder: el.placeholder };
   }
 });
 inputBindings.register(numberInputBinding, 'shiny.numberInput');

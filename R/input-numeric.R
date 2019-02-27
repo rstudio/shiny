@@ -6,6 +6,9 @@
 #' @param min Minimum allowed value
 #' @param max Maximum allowed value
 #' @param step Interval to use when stepping between min and max
+#' @param placeholder A character string giving the user a hint as to what can
+#'   be entered into the control. Internet Explorer 8 and 9 do not support this
+#'   option.
 #' @return A numeric input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -26,13 +29,13 @@
 #' }
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
-  width = NULL) {
+  width = NULL, placeholder = NULL) {
 
   value <- restoreInput(id = inputId, default = value)
 
   # build input tag
   inputTag <- tags$input(id = inputId, type = "number", class="form-control",
-                         value = formatNoSci(value))
+                         value = formatNoSci(value), placeholder = placeholder)
   if (!is.na(min))
     inputTag$attribs$min = min
   if (!is.na(max))

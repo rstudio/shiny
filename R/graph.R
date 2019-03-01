@@ -512,7 +512,7 @@ MessageLogger = R6Class(
       self$reactCache[[reactObj$reactId]] <- reactObj
     },
     shortenString = function(txt, n = 250) {
-      if (is.na(txt) || is.null(txt)) {
+      if (is.null(txt) || isTRUE(is.na(txt))) {
         return("")
       }
       if (nchar(txt) > n) {

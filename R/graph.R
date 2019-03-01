@@ -237,7 +237,7 @@ RLog <- R6Class(
       private$appendEntry(domain, list(
         action = "define",
         reactId = reactId,
-        label = label,
+        label = msg$shortenString(label),
         type = type,
         value = valueStr
       ))
@@ -294,7 +294,7 @@ RLog <- R6Class(
       private$appendEntry(domain, list(
         action = "createContext",
         ctxId = ctxId,
-        label = label,
+        label = msg$shortenString(label),
         type = type,
         prevCtxId = prevCtxId,
         srcref = as.vector(attr(label, "srcref")), srcfile=attr(label, "srcfile")

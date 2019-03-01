@@ -511,7 +511,7 @@ MessageLogger = R6Class(
       if (identical(force, FALSE) && self$isNotLogging()) return(NULL)
       self$reactCache[[reactObj$reactId]] <- reactObj
     },
-    shortenString = function(txt, n = 100) {
+    shortenString = function(txt, n = 250) {
       if (nchar(txt) > n) {
         paste0(substr(txt, 1, n - 3), "...")
       } else {

@@ -512,11 +512,15 @@ MessageLogger = R6Class(
       self$reactCache[[reactObj$reactId]] <- reactObj
     },
     shortenString = function(txt, n = 250) {
-      if (nchar(txt) > n) {
-        paste0(substr(txt, 1, n - 3), "...")
-      } else {
-        txt
+      if (is.na(txt) || is.null(txt)) {
+        return("")
       }
+      if (nchar(txt) > n) {
+        return(
+          paste0(substr(txt, 1, n - 3), "...")
+        )
+      }
+      return(txt)
     },
     singleLine = function(txt) {
       gsub("[^\\]\\n", "\\\\n", txt)

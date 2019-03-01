@@ -237,7 +237,7 @@ RLog <- R6Class(
       private$appendEntry(domain, list(
         action = "define",
         reactId = reactId,
-        label = label,
+        label = msg$shortenString(label),
         type = type,
         value = valueStr
       ))
@@ -294,7 +294,7 @@ RLog <- R6Class(
       private$appendEntry(domain, list(
         action = "createContext",
         ctxId = ctxId,
-        label = label,
+        label = msg$shortenString(label),
         type = type,
         prevCtxId = prevCtxId,
         srcref = as.vector(attr(label, "srcref")), srcfile=attr(label, "srcfile")
@@ -511,12 +511,16 @@ MessageLogger = R6Class(
       if (identical(force, FALSE) && self$isNotLogging()) return(NULL)
       self$reactCache[[reactObj$reactId]] <- reactObj
     },
-    shortenString = function(txt, n = 100) {
-      if (nchar(txt) > n) {
-        paste0(substr(txt, 1, n - 3), "...")
-      } else {
-        txt
+    shortenString = function(txt, n = 250) {
+      if (is.null(txt) || isTRUE(is.na(txt))) {
+        return("")
       }
+      if (nchar(txt) > n) {
+        return(
+          paste0(substr(txt, 1, n - 3), "...")
+        )
+      }
+      return(txt)
     },
     singleLine = function(txt) {
       gsub("[^\\]\\n", "\\\\n", txt)

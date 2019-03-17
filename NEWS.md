@@ -1,3 +1,10 @@
+shiny 1.2.0.9002
+================
+
+### New features
+
+* Added functionality to short-circuit timers for debounce and throttle using a second reactive.
+
 shiny 1.2.0.9001
 ================
 

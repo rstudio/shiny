@@ -2261,6 +2261,9 @@ isNullEvent <- function(value) {
 #'   these observers. Generally, this should be higher than the priorities of
 #'   downstream observers and outputs (which default to zero).
 #' @param domain See \link{domains}.
+#' @param short_circuit An optional reactive that will short-circuit the
+#'   timer. Use this to implement an action button that triggers recalculation
+#'   immediately without waiting for the timer to run out.
 #'
 #' @examples
 #' ## Only run examples in interactive R sessions
@@ -2303,7 +2306,7 @@ isNullEvent <- function(value) {
 #' }
 #'
 #' @export
-debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain()) {
+debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain(), short_circuit = NULL) {
 
   # TODO: make a nice label for the observer(s)
 
@@ -2335,6 +2338,16 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     # The value (or possibly millis) changed. Start or reset the timer.
     v$when <- Sys.time() + millis()/1000
   }, label = "debounce tracker", domain = domain, priority = priority)
+
+  # This observer allows for a second reactive to short-circuit the timer.
+  # When it fires, it adjusts v$when to now so the timer is reset and the
+  # trigger is touched.
+  if (inherits(short_circuit, "reactive")) {
+    observe({
+      short_circuit()
+      v$when <- Sys.time()
+    }, label = "debounce short circuit", domain = domain, priority = priority)
+  }
 
   # This observer is the timer. It rests until v$when elapses, then touches
   # v$trigger.
@@ -2371,7 +2384,7 @@ debounce <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
 
 #' @rdname debounce
 #' @export
-throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain()) {
+throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomain(), short_circuit = NULL) {
 
   # TODO: make a nice label for the observer(s)
 
@@ -2402,6 +2415,14 @@ throttle <- function(r, millis, priority = 100, domain = getDefaultReactiveDomai
     # Mod by 999999999 to get predictable overflow behavior
     v$trigger <- isolate(v$trigger) %% 999999999 + 1
     v$pending <- FALSE
+  }
+
+  # This observer allows for a second reactive to short-circuit the timer.
+  # When it fires, it calls the trigger() function and starts a new blackout
+  if (inherits(short_circuit, "reactive")) {
+    observeEvent(short_circuit(), {
+      trigger()
+    }, label = "debounce short circuit", domain = domain, priority = priority)
   }
 
   # Responsible for tracking when f() changes.

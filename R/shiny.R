@@ -1204,6 +1204,8 @@ ShinySession <- R6Class(
       if (self$isClosed())
         return()
 
+      self$restoreContext$input$flushPending()
+
       # Return TRUE if there's any stuff to send to the client.
       hasPendingUpdates <- function() {
         # Even though progressKeys isn't sent to the client, we use it in this

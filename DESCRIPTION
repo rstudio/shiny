@@ -91,7 +91,6 @@ Suggests:
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Remotes:
-    rstudio/httpuv@rc-v1.5.0,
     rstudio/reactlog@rc-v1.0.0
 Collate:
     'app.R'

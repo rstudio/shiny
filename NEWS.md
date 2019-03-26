@@ -21,6 +21,8 @@ shiny 1.3.0
 
 * Fixed [#2308](https://github.com/rstudio/shiny/issues/2308): When restoring a bookmarked application, inputs with a leading `.` would not be restored. ([#2311](https://github.com/rstudio/shiny/pull/2311))
 
+* Fixed [#2305](https://github.com/rstudio/shiny/issues/2305), [#2322](https://github.com/rstudio/shiny/issues/2322), [#2351](https://github.com/rstudio/shiny/issues/2351): When an input in dynamic UI is restored from bookmarks, it would keep getting set to the same value. ([#2360](https://github.com/rstudio/shiny/pull/2360))
+
 ### Documentation Updates
 
 * Fixed [#2247](https://github.com/rstudio/shiny/issues/2247): `renderCachedPlot` now supports using promises for either `expr` or `cacheKeyExpr`. (Shiny v1.2.0 supported async `expr`, but only if `cacheKeyExpr` was async as well; now you can use any combination of sync/async for `expr` and `cacheKeyExpr`.) [#2261](https://github.com/rstudio/shiny/pull/2261)

@@ -1204,7 +1204,10 @@ ShinySession <- R6Class(
       if (self$isClosed())
         return()
 
-      self$restoreContext$input$flushPending()
+      # This is the only place in the session where the restoreContext is
+      # flushed.
+      if (!is.null(self$restoreContext))
+        self$restoreContext$flushPending()
 
       # Return TRUE if there's any stuff to send to the client.
       hasPendingUpdates <- function() {

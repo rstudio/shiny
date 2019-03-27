@@ -1078,7 +1078,7 @@ var ShinyApp = function() {
         var $container = $('.shiny-progress-container');
         if ($container.length === 0) {
           $container = $('<div class="shiny-progress-container"></div>');
-          $('body').append($container);
+          $(document.body).append($container);
         }
 
         // Add div for just this progress ID

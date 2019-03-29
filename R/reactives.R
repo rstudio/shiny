@@ -670,7 +670,7 @@ as.list.reactivevalues <- function(x, all.names=FALSE, ...) {
 
 #' Convert a reactivevalues object to a list
 #'
-#' This function does something similar to what you might \code{\link[base]{as.list}}
+#' This function does something similar to what you might expect \code{\link[base]{as.list}}
 #' to do. The difference is that the calling context will take dependencies on
 #' every object in the reactivevalues object. To avoid taking dependencies on
 #' all the objects, you can wrap the call with \code{\link{isolate}()}.

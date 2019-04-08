@@ -13,7 +13,7 @@ var IE8FileUploader = function(shinyapp, id, fileEl) {
     this.iframe.id = iframeId;
     this.iframe.name = iframeId;
     this.iframe.setAttribute('style', 'position: fixed; top: 0; left: 0; width: 0; height: 0; border: none');
-    $('body').append(this.iframe);
+    $(document.body).append(this.iframe);
     var iframeDestroy = function() {
       // Forces Shiny to flushReact, flush outputs, etc. Without this we get
       // invalidated reactives, but observers don't actually execute.

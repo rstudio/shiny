@@ -1,4 +1,4 @@
-shiny 1.2.0.9001
+shiny 1.3.0
 ================
 
 ## Full changelog
@@ -20,6 +20,10 @@ shiny 1.2.0.9001
 * Fixed [#2245](https://github.com/rstudio/shiny/issues/2245): `updateSelectizeInput()` did not update labels. ([#2248](https://github.com/rstudio/shiny/pull/2248))
 
 * Fixed [#2308](https://github.com/rstudio/shiny/issues/2308): When restoring a bookmarked application, inputs with a leading `.` would not be restored. ([#2311](https://github.com/rstudio/shiny/pull/2311))
+
+* Fixed [#2305](https://github.com/rstudio/shiny/issues/2305), [#2322](https://github.com/rstudio/shiny/issues/2322), [#2351](https://github.com/rstudio/shiny/issues/2351): When an input in dynamic UI is restored from bookmarks, it would keep getting set to the same value. ([#2360](https://github.com/rstudio/shiny/pull/2360))
+
+* Fixed [#2349](https://github.com/rstudio/shiny/issues/2349), [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These were various bugs triggered by the presence of the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot in an app. Impacted features included `dateRangeInput`, `withProgressBar`, and bookmarking ([#2359](https://github.com/rstudio/shiny/pull/2359))
 
 ### Documentation Updates
 
@@ -145,7 +149,7 @@ This is a significant release for Shiny, with a major new feature that was nearl
 
 * Improved the error handling inside the `addResourcePath()` function, to give end users more informative error messages when the `directoryPath` argument cannot be normalized. This is especially useful for `runtime: shiny_prerendered` Rmd documents, like `learnr` tutorials. ([#1968](https://github.com/rstudio/shiny/pull/1968))
 
-* Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/master/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, @jekriske-lilly! [#1844](https://github.com/rstudio/shiny/pull/1844))
+* Changed script tags in reactlog ([inst/www/reactive-graph.html](https://github.com/rstudio/shiny/blob/v1.1.0/inst/www/reactive-graph.html)) from HTTP to HTTPS in order to avoid mixed content blocking by most browsers. (Thanks, @jekriske-lilly! [#1844](https://github.com/rstudio/shiny/pull/1844))
 
 * Addressed [#1784](https://github.com/rstudio/shiny/issues/1784): `runApp()` will avoid port 6697, which is considered unsafe by Chrome.
 

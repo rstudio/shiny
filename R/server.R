@@ -70,7 +70,7 @@ addResourcePath <- function(prefix, directoryPath) {
   }
 
   # .globals$resourcePaths persists across runs of applications.
-  .globals$resourcePaths[[prefix]] <- normalizedPath
+  .globals$resourcePaths[[prefix]] <- staticPath(normalizedPath)
 }
 
 #' Define Server Functionality

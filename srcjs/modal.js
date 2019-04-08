@@ -15,7 +15,7 @@ exports.modal = {
     let $modal = $('#shiny-modal-wrapper');
     if ($modal.length === 0) {
       $modal = $('<div id="shiny-modal-wrapper"></div>');
-      $('body').append($modal);
+      $(document.body).append($modal);
 
       // If the wrapper's content is a Bootstrap modal, then when the inner
       // modal is hidden, remove the entire thing, including wrapper.

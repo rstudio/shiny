@@ -92,3 +92,27 @@ To update the version of babel-polyfill:
 * Run `yarn add --dev babel-polyfill --exact`.
 * Edit R/shinyui.R. The `renderPage` function has an `htmlDependency` for
   `babel-polyfill`. Update this to the new version number.
+
+# Updating and patching `bootstrap-datepicker`
+
+## Updating
+
+[bootstrap-datepicker](https://github.com/uxsolutions/bootstrap-datepicker) can be updated with the script `updateBootstrapDatepicker.R`.
+
+After updating, our patches to `bootstrap-datepicker` must be applied using the script `applyDatepickerPatches.R`
+
+After updating and applying patches, `yarn grunt` should be run per the instructions above in order to generate a minified JavaScript file.
+
+## Making a new patch
+
+To create a new patch:
+
+1. Make any necessary changes to files in `inst/www/shared/datepicker`
+1. **Do not commit your changes.**
+1. Instead, create a patch with a command like `git diff > tools/datepicker-patches/012-a-description.patch`. Patches are applied in alphabetic order (per `list.files`), so you should name your patch based on the last one in `tools/datepicker-patches` so that it's applied last.
+1. Add the new `.patch` file to the repo with a descriptive commit message
+1. Revert `bootstrap-datepicker` to its unpatched state by running `updateBootstrapDatepicker.R`
+1. Apply all patches, including the one you just made, by running `applyDatepickerPatches.R`
+1. Run `yarn grunt`
+1. Test your changes
+1. `git add` the new `.patch` and any resulting changes

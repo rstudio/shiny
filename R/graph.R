@@ -9,30 +9,30 @@ is_installed <- function(package, version) {
 # @param version The version of the package
 check_suggested <- function(package, version, location) {
 
-  if (!is_installed(package, version)) {
-    missing_location <- missing(location)
-    msg <- paste0(
-      sQuote(package),
-      if (is.na(version)) "" else paste0("(>= ", version, ")"),
-      " must be installed for this functionality.",
-      if (!missing_location)
-        paste0(
-          "\nPlease install the missing package: \n",
-          "  source(\"https://install-github.me/", location, "\")"
-        )
-    )
+  if (is_installed(package, version)) {
+    return()
+  }
 
-    if (interactive() && missing_location) {
-      message(msg, "\nWould you like to install it?")
-      if (utils::menu(c("Yes", "No")) == 1) {
-        utils::install.packages(package)
-      } else {
-        stop(msg, call. = FALSE)
-      }
-    } else {
-      stop(msg, call. = FALSE)
+  missing_location <- missing(location)
+  msg <- paste0(
+    sQuote(package),
+    if (is.na(version)) "" else paste0("(>= ", version, ")"),
+    " must be installed for this functionality.",
+    if (!missing_location)
+      paste0(
+        "\nPlease install the missing package: \n",
+        "  source(\"https://install-github.me/", location, "\")"
+      )
+  )
+
+  if (interactive() && missing_location) {
+    message(msg, "\nWould you like to install it?")
+    if (utils::menu(c("Yes", "No")) == 1) {
+      return(utils::install.packages(package))
     }
   }
+
+  stop(msg, call. = FALSE)
 }
 
 
@@ -127,7 +127,7 @@ renderReactlog <- function(sessionToken = NULL, time = TRUE) {
   )
 }
 check_reactlog <- function() {
-  check_suggested("reactlog", reactlog_version(), "rstudio/reactlog")
+  check_suggested("reactlog", reactlog_version())
 }
 # read reactlog version from description file
 # prevents version mismatch in code and description file

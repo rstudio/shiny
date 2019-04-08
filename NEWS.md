@@ -12,6 +12,9 @@ shiny 1.3.0.9000
 
 ### Bug fixes
 
+* Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))
+
+
 ### Documentation Updates
 
 

@@ -1,3 +1,20 @@
+shiny 1.3.0.9000
+================
+
+## Full changelog
+
+### Breaking changes
+
+### New features
+
+
+### Minor new features and improvements
+
+### Bug fixes
+
+### Documentation Updates
+
+
 shiny 1.3.0
 ================
 

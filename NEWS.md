@@ -12,6 +12,8 @@ shiny 1.3.0.9000
 
 ### Bug fixes
 
+* Reduced the reactlog calculations being done when `options(shiny.reactlog = FALSE)` (default behavior).  If reactlog is enabled, only the top level of `str` output is retrieved.  This fixes a major performance bug introduced in v1.3.0 when using complex objects within Shiny.  ([#2377](https://github.com/rstudio/shiny/pull/2377))
+
 ### Documentation Updates
 
 

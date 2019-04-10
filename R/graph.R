@@ -200,6 +200,10 @@ RLog <- R6Class(
     },
 
     valueStr = function(value, n = 200) {
+      if (!self$isLogging()) {
+        # return a placeholder string to avoid calling str
+        return("<reactlog is turned off>")
+      }
       output <- try(silent = TRUE, {
         utils::capture.output(utils::str(value))
       })

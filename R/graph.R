@@ -226,8 +226,12 @@ RLog <- R6Class(
     isLogging = function() {
       isTRUE(getOption(private$option, FALSE))
     },
+    notLogging = function() {
+      !self$isLogging()
+    },
 
     define = function(reactId, value, label, type, domain) {
+      if (self$notLogging()) return()
       valueStr <- self$valueStr(value)
       if (msg$hasReact(reactId)) {
         stop("react definition for id: ", reactId, " already found!!", "Label: ", label, "Type: ", type)
@@ -243,22 +247,28 @@ RLog <- R6Class(
       ))
     },
     defineNames = function(reactId, value, label, domain) {
+      if (self$notLogging()) return()
       self$define(self$namesIdStr(reactId), value, self$namesIdStr(label), "reactiveValuesNames", domain)
     },
     defineAsList = function(reactId, value, label, domain) {
+      if (self$notLogging()) return()
       self$define(self$asListIdStr(reactId), value, self$asListIdStr(label), "reactiveValuesAsList", domain)
     },
     defineAsListAll = function(reactId, value, label, domain) {
+      if (self$notLogging()) return()
       self$define(self$asListAllIdStr(reactId), value, self$asListAllIdStr(label), "reactiveValuesAsListAll", domain)
     },
     defineKey = function(reactId, value, key, label, domain) {
+      if (self$notLogging()) return()
       self$define(self$keyIdStr(reactId, key), value, self$keyIdStr(label, key), "reactiveValuesKey", domain)
     },
     defineObserver = function(reactId, label, domain) {
+      if (self$notLogging()) return()
       self$define(reactId, value = NULL, label, "observer", domain)
     },
 
     dependsOn = function(reactId, depOnReactId, ctxId, domain) {
+      if (self$notLogging()) return()
       if (is.null(reactId)) return()
       ctxId <- ctxIdStr(ctxId)
       msg$log("dependsOn:", msg$reactStr(reactId), " on", msg$reactStr(depOnReactId), msg$ctxStr(ctxId))
@@ -270,10 +280,12 @@ RLog <- R6Class(
       ))
     },
     dependsOnKey = function(reactId, depOnReactId, key, ctxId, domain) {
+      if (self$notLogging()) return()
       self$dependsOn(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain)
     },
 
     dependsOnRemove = function(reactId, depOnReactId, ctxId, domain) {
+      if (self$notLogging()) return()
       ctxId <- self$ctxIdStr(ctxId)
       msg$log("dependsOnRemove:", msg$reactStr(reactId), " on", msg$reactStr(depOnReactId), msg$ctxStr(ctxId))
       private$appendEntry(domain, list(
@@ -284,10 +296,12 @@ RLog <- R6Class(
       ))
     },
     dependsOnKeyRemove = function(reactId, depOnReactId, key, ctxId, domain) {
+      if (self$notLogging()) return()
       self$dependsOnRemove(reactId, self$keyIdStr(depOnReactId, key), ctxId, domain)
     },
 
     createContext = function(ctxId, label, type, prevCtxId, domain) {
+      if (self$notLogging()) return()
       ctxId <- self$ctxIdStr(ctxId)
       prevCtxId <- self$ctxIdStr(prevCtxId)
       msg$log("createContext:", msg$ctxPrevCtxStr(preCtxIdTxt = " ", ctxId, prevCtxId, type))
@@ -302,6 +316,7 @@ RLog <- R6Class(
     },
 
     enter = function(reactId, ctxId, type, domain) {
+      if (self$notLogging()) return()
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$log("isolateEnter:", msg$reactStr(reactId), msg$ctxStr(ctxId))
@@ -323,6 +338,7 @@ RLog <- R6Class(
       }
     },
     exit = function(reactId, ctxId, type, domain) {
+      if (self$notLogging()) return()
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$depthDecrement()
@@ -345,6 +361,7 @@ RLog <- R6Class(
     },
 
     valueChange = function(reactId, value, domain) {
+      if (self$notLogging()) return()
       valueStr <- self$valueStr(value)
       msg$log("valueChange:", msg$reactStr(reactId), msg$valueStr(valueStr))
       private$appendEntry(domain, list(
@@ -354,20 +371,25 @@ RLog <- R6Class(
       ))
     },
     valueChangeNames = function(reactId, nameValues, domain) {
+      if (self$notLogging()) return()
       self$valueChange(self$namesIdStr(reactId), nameValues, domain)
     },
     valueChangeAsList = function(reactId, listValue, domain) {
+      if (self$notLogging()) return()
       self$valueChange(self$asListIdStr(reactId), listValue, domain)
     },
     valueChangeAsListAll = function(reactId, listValue, domain) {
+      if (self$notLogging()) return()
       self$valueChange(self$asListAllIdStr(reactId), listValue, domain)
     },
     valueChangeKey = function(reactId, key, value, domain) {
+      if (self$notLogging()) return()
       self$valueChange(self$keyIdStr(reactId, key), value, domain)
     },
 
 
     invalidateStart = function(reactId, ctxId, type, domain) {
+      if (self$notLogging()) return()
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$log("isolateInvalidateStart:", msg$reactStr(reactId), msg$ctxStr(ctxId))
@@ -389,6 +411,7 @@ RLog <- R6Class(
       }
     },
     invalidateEnd = function(reactId, ctxId, type, domain) {
+      if (self$notLogging()) return()
       ctxId <- self$ctxIdStr(ctxId)
       if (identical(type, "isolate")) {
         msg$depthDecrement()
@@ -411,6 +434,7 @@ RLog <- R6Class(
     },
 
     invalidateLater = function(reactId, runningCtx, millis, domain) {
+      if (self$notLogging()) return()
       msg$log("invalidateLater: ", millis, "ms", msg$reactStr(reactId), msg$ctxStr(runningCtx))
       private$appendEntry(domain, list(
         action = "invalidateLater",
@@ -421,6 +445,7 @@ RLog <- R6Class(
     },
 
     idle = function(domain = NULL) {
+      if (self$notLogging()) return()
       msg$log("idle")
       private$appendEntry(domain, list(
         action = "idle"
@@ -428,12 +453,14 @@ RLog <- R6Class(
     },
 
     asyncStart = function(domain = NULL) {
+      if (self$notLogging()) return()
       msg$log("asyncStart")
       private$appendEntry(domain, list(
         action = "asyncStart"
       ))
     },
     asyncStop = function(domain = NULL) {
+      if (self$notLogging()) return()
       msg$log("asyncStop")
       private$appendEntry(domain, list(
         action = "asyncStop"
@@ -441,6 +468,7 @@ RLog <- R6Class(
     },
 
     freezeReactiveVal = function(reactId, domain) {
+      if (self$notLogging()) return()
       msg$log("freeze:", msg$reactStr(reactId))
       private$appendEntry(domain, list(
         action = "freeze",
@@ -448,10 +476,12 @@ RLog <- R6Class(
       ))
     },
     freezeReactiveKey = function(reactId, key, domain) {
+      if (self$notLogging()) return()
       self$freezeReactiveVal(self$keyIdStr(reactId, key), domain)
     },
 
     thawReactiveVal = function(reactId, domain) {
+      if (self$notLogging()) return()
       msg$log("thaw:", msg$reactStr(reactId))
       private$appendEntry(domain, list(
         action = "thaw",
@@ -459,10 +489,12 @@ RLog <- R6Class(
       ))
     },
     thawReactiveKey = function(reactId, key, domain) {
+      if (self$notLogging()) return()
       self$thawReactiveVal(self$keyIdStr(reactId, key), domain)
     },
 
     userMark = function(domain = NULL) {
+      if (self$notLogging()) return()
       msg$log("userMark")
       private$appendEntry(domain, list(
         action = "userMark"

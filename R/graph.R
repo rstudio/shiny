@@ -227,7 +227,9 @@ RLog <- R6Class(
       isTRUE(getOption(private$option, FALSE))
     },
     notLogging = function() {
-      !self$isLogging()
+      # same as !self$isLogging()
+      # do not call self$isLogging for speed purposes
+      !isTRUE(getOption(private$option, FALSE))
     },
 
     define = function(reactId, value, label, type, domain) {

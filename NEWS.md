@@ -1,12 +1,11 @@
-shiny 1.3.0.9000
-================
+shiny 1.3.1
+===========
 
 ## Full changelog
 
 ### Breaking changes
 
 ### New features
-
 
 ### Minor new features and improvements
 
@@ -18,7 +17,7 @@ shiny 1.3.0.9000
 
 
 shiny 1.3.0
-================
+===========
 
 ## Full changelog
 

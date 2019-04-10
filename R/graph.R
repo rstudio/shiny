@@ -201,7 +201,8 @@ RLog <- R6Class(
 
     valueStr = function(value, n = 200) {
       output <- try(silent = TRUE, {
-        utils::capture.output(utils::str(value))
+        # use max.level = 1 to deter against massive recursion
+        utils::capture.output(utils::str(value, max.level = 1))
       })
       outputTxt <- paste0(output, collapse="\n")
       msg$shortenString(outputTxt, n = n)

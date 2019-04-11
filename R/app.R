@@ -228,7 +228,13 @@ shinyAppDir_serverR <- function(appDir, options=list()) {
   structure(
     list(
       staticPaths = staticPaths,
-      httpHandler = joinHandlers(c(uiHandler, fallbackWWWDir)),
+      # Even though the wwwDir is handled as a static path, we need to include
+      # it here to be handled by R as well. This is because the special case
+      # of index.html: it is specifically not handled as a staticPath for
+      # reasons explained above, but if someone does want to serve up an
+      # index.html, we need to handle it, and we do it by using the
+      # staticHandler in the R code path. (#2380)
+      httpHandler = joinHandlers(c(uiHandler, wwwDir, fallbackWWWDir)),
       serverFuncSource = serverFuncSource,
       onStart = onStart,
       onStop = onStop,
@@ -355,7 +361,13 @@ shinyAppDir_appR <- function(fileName, appDir, options=list())
       # uiHandler, then falbackWWWDir (which is served up by the R
       # staticHandler function).
       staticPaths = staticPaths,
-      httpHandler = joinHandlers(c(dynHttpHandler, fallbackWWWDir)),
+      # Even though the wwwDir is handled as a static path, we need to include
+      # it here to be handled by R as well. This is because the special case
+      # of index.html: it is specifically not handled as a staticPath for
+      # reasons explained above, but if someone does want to serve up an
+      # index.html, we need to handle it, and we do it by using the
+      # staticHandler in the R code path. (#2380)
+      httpHandler = joinHandlers(c(dynHttpHandler, wwwDir, fallbackWWWDir)),
       serverFuncSource = dynServerFuncSource,
       onStart = onStart,
       onStop = onStop,

@@ -1,5 +1,5 @@
-shiny 1.3.0.9000
-================
+shiny 1.3.1.9000
+===========
 
 ## Full changelog
 
@@ -7,19 +7,27 @@ shiny 1.3.0.9000
 
 ### New features
 
-
 ### Minor new features and improvements
 
 ### Bug fixes
 
 * Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))
 
-
 ### Documentation Updates
 
 
+shiny 1.3.1
+===========
+
+## Full changelog
+
+### Bug fixes
+
+* Fixed a performance issue introduced in v1.3.0 when using large nested lists within Shiny. ([#2377](https://github.com/rstudio/shiny/pull/2377))
+
+
 shiny 1.3.0
-================
+===========
 
 ## Full changelog
 

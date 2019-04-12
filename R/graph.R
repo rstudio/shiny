@@ -200,8 +200,13 @@ RLog <- R6Class(
     },
 
     valueStr = function(value, n = 200) {
+      if (!self$isLogging()) {
+        # return a placeholder string to avoid calling str
+        return("<reactlog is turned off>")
+      }
       output <- try(silent = TRUE, {
-        utils::capture.output(utils::str(value))
+        # only capture the first level of the object
+        utils::capture.output(utils::str(value, max.level = 1))
       })
       outputTxt <- paste0(output, collapse="\n")
       msg$shortenString(outputTxt, n = n)

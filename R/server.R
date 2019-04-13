@@ -23,6 +23,7 @@ registerClient <- function(client) {
 
 
 .globals$resourcePaths <- list()
+.globals$resources <- list()
 
 .globals$showcaseDefault <- 0
 
@@ -69,8 +70,41 @@ addResourcePath <- function(prefix, directoryPath) {
     getShinyOption("server")$setStaticPath(.list = stats::setNames(normalizedPath, prefix))
   }
 
-  # .globals$resourcePaths persists across runs of applications.
+  # .globals$resourcePaths and .globals$resources persist across runs of applications.
   .globals$resourcePaths[[prefix]] <- staticPath(normalizedPath)
+  # This is necessary because resourcePaths is only for serving assets out of C++;
+  # to support subapps, we also need assets to be served out of R, because those
+  # URLs are rewritten by R code (i.e. routeHandler) before they can be matched to
+  # a resource path.
+  .globals$resources[[prefix]] <- list(
+    directoryPath = normalizedPath,
+    func = staticHandler(normalizedPath)
+  )
+}
+
+resourcePathHandler <- function(req) {
+  if (!identical(req$REQUEST_METHOD, 'GET'))
+    return(NULL)
+
+  path <- req$PATH_INFO
+
+  match <- regexpr('^/([^/]+)/', path, perl=TRUE)
+  if (match == -1)
+    return(NULL)
+  len <- attr(match, 'capture.length')
+  prefix <- substr(path, 2, 2 + len - 1)
+
+  resInfo <- .globals$resources[[prefix]]
+  if (is.null(resInfo))
+    return(NULL)
+
+  suffix <- substr(path, 2 + len, nchar(path))
+
+  subreq <- as.environment(as.list(req, all.names=TRUE))
+  subreq$PATH_INFO <- suffix
+  subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, substr(path, 1, 2 + len), sep='')
+
+  return(resInfo$func(subreq))
 }
 
 #' Define Server Functionality
@@ -167,6 +201,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
     http = joinHandlers(c(
       sessionHandler,
       httpHandlers,
+      resourcePathHandler,
       reactLogHandler
     )),
     ws = function(ws) {

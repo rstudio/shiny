@@ -82,24 +82,45 @@ addResourcePath <- function(prefix, directoryPath) {
   )
 }
 
+# This function handles any GET request with two or more path elements where the
+# first path element matches a prefix that was previously added using
+# addResourcePath().
+#
+# For example, if `addResourcePath("foo", "~/bar")` was called, then a GET
+# request for /foo/one/two.html would rewrite the PATH_INFO as /one/two.html and
+# send it to the resource path function for "foo". As of this writing, that
+# function will always be a staticHandler, which serves up a file if it exists
+# and NULL if it does not.
+#
+# Since Shiny 1.3.x, assets registered via addResourcePath should mostly be
+# served out of httpuv's native static file serving features. However, in the
+# specific case of subapps, the R code path must be used, because subapps insert
+# a giant random ID into the beginning of the URL that must be stripped off by
+# an R route handler (see addSubApp()).
 resourcePathHandler <- function(req) {
   if (!identical(req$REQUEST_METHOD, 'GET'))
     return(NULL)
 
+  # e.g. "/foo/one/two.html"
   path <- req$PATH_INFO
 
   match <- regexpr('^/([^/]+)/', path, perl=TRUE)
   if (match == -1)
     return(NULL)
   len <- attr(match, 'capture.length')
+  # e.g. "foo"
   prefix <- substr(path, 2, 2 + len - 1)
 
   resInfo <- .globals$resources[[prefix]]
   if (is.null(resInfo))
     return(NULL)
 
+  # e.g. "/one/two.html"
   suffix <- substr(path, 2 + len, nchar(path))
 
+  # Create a new request that's a clone of the current request, but adjust
+  # PATH_INFO and SCRIPT_NAME to reflect that we have already matched the first
+  # path element (e.g. "/foo"). See routeHandler() for more info.
   subreq <- as.environment(as.list(req, all.names=TRUE))
   subreq$PATH_INFO <- suffix
   subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, substr(path, 1, 2 + len), sep='')

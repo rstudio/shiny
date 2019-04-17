@@ -213,6 +213,8 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
   appvars <- new.env()
   appvars$server <- NULL
 
+  sys.www.root <- system.file('www', package='shiny')
+
   # This value, if non-NULL, must be present on all HTTP and WebSocket
   # requests as the Shiny-Shared-Secret header or else access will be
   # denied (403 response for HTTP, and instant close for websocket).
@@ -222,6 +224,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
     http = joinHandlers(c(
       sessionHandler,
       httpHandlers,
+      sys.www.root,
       resourcePathHandler,
       reactLogHandler
     )),

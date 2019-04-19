@@ -454,7 +454,10 @@ startApp <- function(appObj, port, host, quiet) {
     list(
       # Always handle /session URLs dynamically, even if / is a static path.
       "session" = excludeStaticPath(),
-      "shared" = system.file(package = "shiny", "www", "shared")
+      "shared" = staticPath(
+        system.file(package = "shiny", "www", "shared"),
+        fallthrough = TRUE
+      )
     ),
     .globals$resourcePaths
   )

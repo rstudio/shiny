@@ -1,19 +1,19 @@
-shiny 1.3.1.9000
-===========
-
-## Full changelog
-
-### Breaking changes
-
-### New features
-
-### Minor new features and improvements
+shiny 1.3.2.9000
+=======
 
 ### Bug fixes
 
 * Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))
 
-### Documentation Updates
+
+shiny 1.3.2
+===========
+
+### Bug fixes
+
+* Fixed [#2285](https://github.com/rstudio/shiny/issues/2285), [#2288](https://github.com/rstudio/shiny/issues/2288): Static CSS/JS resources in subapps in R Markdown documents did not render properly. ([#2386](https://github.com/rstudio/shiny/pull/2386))
+
+* Fixed [#2280](https://github.com/rstudio/shiny/issues/2280): Shiny applications that used a www/index.html file did not serve up the index file. ([#2382](https://github.com/rstudio/shiny/pull/2382))
 
 
 shiny 1.3.1

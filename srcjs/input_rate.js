@@ -298,6 +298,9 @@ var InputRateDecorator = function(target) {
 };
 (function() {
   this.setInput = function(name, value, opts) {
+    const input = splitInputNameType(name);
+    name = input.name;
+
     this.$ensureInit(name);
 
     if (opts.priority !== "deferred")

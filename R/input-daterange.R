@@ -76,12 +76,10 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     weekstart = 0, language = "en", separator = " to ", width = NULL,
     autoclose = TRUE) {
 
-  # If start and end are date objects, convert to a string with yyyy-mm-dd format
-  # Same for min and max
-  if (inherits(start, "Date"))  start <- format(start, "%Y-%m-%d")
-  if (inherits(end,   "Date"))  end   <- format(end,   "%Y-%m-%d")
-  if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
-  if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
+  start <- dateYMD(start)
+  end   <- dateYMD(end)
+  min   <- dateYMD(min)
+  max   <- dateYMD(max)
 
   restored <- restoreInput(id = inputId, default = list(start, end))
   start <- restored[[1]]

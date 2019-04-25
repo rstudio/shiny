@@ -205,18 +205,9 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 updateDateInput <- function(session, inputId, label = NULL, value = NULL,
                             min = NULL, max = NULL) {
 
-  # Make sure values are NULL or Date objects. This is so we can ensure that
-  # they will be formatted correctly. For example, the string "2016-08-9" is not
-  # correctly formatted, but the conversion to Date and back to string will fix
-  # it.
-  formatDate <- function(x) {
-    if (is.null(x))
-      return(NULL)
-    format(as.Date(x), "%Y-%m-%d")
-  }
-  value <- formatDate(value)
-  min   <- formatDate(min)
-  max   <- formatDate(max)
+  value <- dateYMD(value)
+  min   <- dateYMD(min)
+  max   <- dateYMD(max)
 
   message <- dropNulls(list(label=label, value=value, min=min, max=max))
   session$sendInputMessage(inputId, message)
@@ -266,12 +257,11 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 updateDateRangeInput <- function(session, inputId, label = NULL,
                                  start = NULL, end = NULL, min = NULL,
                                  max = NULL) {
-  # Make sure start and end are strings, not date objects. This is for
-  # consistency across different locales.
-  if (inherits(start, "Date"))  start <- format(start, '%Y-%m-%d')
-  if (inherits(end, "Date"))    end <- format(end, '%Y-%m-%d')
-  if (inherits(min, "Date"))    min <- format(min, '%Y-%m-%d')
-  if (inherits(max, "Date"))    max <- format(max, '%Y-%m-%d')
+
+  start <- dateYMD(start)
+  end <- dateYMD(end)
+  min <- dateYMD(min)
+  max <- dateYMD(max)
 
   message <- dropNulls(list(
     label = label,

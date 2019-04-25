@@ -1560,6 +1560,17 @@ URLencode <- function(value, reserved = FALSE) {
   if (reserved) encodeURIComponent(value) else encodeURI(value)
 }
 
+# Make user-supplied dates are either NULL or can be coerced
+# to a yyyy-mm-dd formatted string. If a date is specified, this
+# function returns a string for consistency across locales.
+# Also, `as.Date()` is used to coerce strings to date objects
+# so that strings like "2016-08-9" are expanded to "2016-08-09"
+dateYMD <- function(date = NULL) {
+  if (!length(date)) return(NULL)
+  if (length(date) > 1) warning("Expected date to be of length 1.")
+  # Calling as.Date() on a date object does nothing
+  format(as.Date(date), "%Y-%m-%d")
+}
 
 # This function takes a name and function, and it wraps that function in a new
 # function which calls the original function using the specified name. This can

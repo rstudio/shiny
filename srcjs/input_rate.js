@@ -299,32 +299,36 @@ var InputRateDecorator = function(target) {
 (function() {
   this.setInput = function(name, value, opts) {
     const input = splitInputNameType(name);
-    name = input.name;
 
-    this.$ensureInit(name);
+    this.$ensureInit(input.name);
 
     if (opts.priority !== "deferred")
-      this.inputRatePolicies[name].immediateCall(name, value, opts);
+      this.inputRatePolicies[input.name].immediateCall(name, value, opts);
     else
-      this.inputRatePolicies[name].normalCall(name, value, opts);
+      this.inputRatePolicies[input.name].normalCall(name, value, opts);
   };
   this.setRatePolicy = function(name, mode, millis) {
+    const input = splitInputNameType(name);
+
     if (mode === 'direct') {
-      this.inputRatePolicies[name] = new Invoker(this, this.$doSetInput);
+      this.inputRatePolicies[input.name] = new Invoker(this, this.$doSetInput);
     }
     else if (mode === 'debounce') {
-      this.inputRatePolicies[name] = new Debouncer(this, this.$doSetInput, millis);
+      this.inputRatePolicies[input.name] = new Debouncer(this, this.$doSetInput, millis);
     }
     else if (mode === 'throttle') {
-      this.inputRatePolicies[name] = new Throttler(this, this.$doSetInput, millis);
+      this.inputRatePolicies[input.name] = new Throttler(this, this.$doSetInput, millis);
     }
   };
   this.$ensureInit = function(name) {
-    if (!(name in this.inputRatePolicies))
-      this.setRatePolicy(name, 'direct');
+    const input = splitInputNameType(name);
+
+    if (!(input.name in this.inputRatePolicies))
+      this.setRatePolicy(input.name, 'direct');
   };
   this.$doSetInput = function(name, value, opts) {
-    this.target.setInput(name, value, opts);
+    const input = splitInputNameType(name);
+    this.target.setInput(input.name, value, opts);
   };
 }).call(InputRateDecorator.prototype);
 

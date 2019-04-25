@@ -1572,7 +1572,7 @@ dateYMD <- function(date = NULL, argName = "value") {
     error = function(e) {
       warning(
         "Couldn't coerce the `", argName,
-        "` argument to a date string with format yyy-mm-dd",
+        "` argument to a date string with format yyyy-mm-dd",
         call. = FALSE
       )
       date

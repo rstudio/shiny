@@ -1565,11 +1565,19 @@ URLencode <- function(value, reserved = FALSE) {
 # function returns a string for consistency across locales.
 # Also, `as.Date()` is used to coerce strings to date objects
 # so that strings like "2016-08-9" are expanded to "2016-08-09"
-dateYMD <- function(date = NULL) {
+dateYMD <- function(date = NULL, argName = "value") {
   if (!length(date)) return(NULL)
   if (length(date) > 1) warning("Expected date to be of length 1.")
-  # Calling as.Date() on a date object does nothing
-  format(as.Date(date), "%Y-%m-%d")
+  tryCatch(format(as.Date(date), "%Y-%m-%d"),
+    error = function(e) {
+      warning(
+        "Couldn't coerce the `", argName,
+        "` argument to a date string with format yyy-mm-dd",
+        call. = FALSE
+      )
+      date
+    }
+  )
 }
 
 # This function takes a name and function, and it wraps that function in a new

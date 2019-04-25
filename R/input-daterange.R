@@ -76,10 +76,10 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
     weekstart = 0, language = "en", separator = " to ", width = NULL,
     autoclose = TRUE) {
 
-  start <- dateYMD(start)
-  end   <- dateYMD(end)
-  min   <- dateYMD(min)
-  max   <- dateYMD(max)
+  start <- dateYMD(start, "start")
+  end   <- dateYMD(end, "end")
+  min   <- dateYMD(min, "min")
+  max   <- dateYMD(max, "max")
 
   restored <- restoreInput(id = inputId, default = list(start, end))
   start <- restored[[1]]

@@ -205,9 +205,9 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 updateDateInput <- function(session, inputId, label = NULL, value = NULL,
                             min = NULL, max = NULL) {
 
-  value <- dateYMD(value)
-  min   <- dateYMD(min)
-  max   <- dateYMD(max)
+  value <- dateYMD(value, "value")
+  min   <- dateYMD(min, "min")
+  max   <- dateYMD(max, "max")
 
   message <- dropNulls(list(label=label, value=value, min=min, max=max))
   session$sendInputMessage(inputId, message)
@@ -258,10 +258,10 @@ updateDateRangeInput <- function(session, inputId, label = NULL,
                                  start = NULL, end = NULL, min = NULL,
                                  max = NULL) {
 
-  start <- dateYMD(start)
-  end <- dateYMD(end)
-  min <- dateYMD(min)
-  max <- dateYMD(max)
+  start <- dateYMD(start, "start")
+  end <- dateYMD(end, "end")
+  min <- dateYMD(min, "min")
+  max <- dateYMD(max, "max")
 
   message <- dropNulls(list(
     label = label,

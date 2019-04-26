@@ -27,8 +27,16 @@ $.extend(textInputBinding, {
     if (data.hasOwnProperty('value'))
       this.setValue(el, data.value);
 
-    if (data.hasOwnProperty('label'))
-      $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    if (data.hasOwnProperty('label')) {
+      var label = $(el).parent().find('label[for="' + $escape(el.id) + '"]');
+      // If textInput(label=NULL), then no label tag is provided from the
+      // server, so create one if we need to.
+      if (label.length === 0) {
+        $('<label for="' + $escape(el.id) + '">' + data.label + '</label>').insertBefore(el);
+      } else {
+        label.text(data.label);
+      }
+    }
 
     if (data.hasOwnProperty('placeholder'))
       el.placeholder = data.placeholder;

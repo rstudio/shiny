@@ -12,7 +12,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
   var exports = window.Shiny = window.Shiny || {};
 
-  exports.version = "1.3.2"; // Version number inserted by Grunt
+  exports.version = "1.3.2.9000"; // Version number inserted by Grunt
 
   var origPushState = window.history.pushState;
   window.history.pushState = function () {
@@ -1771,7 +1771,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           var $container = $('.shiny-progress-container');
           if ($container.length === 0) {
             $container = $('<div class="shiny-progress-container"></div>');
-            $('body').append($container);
+            $(document.body).append($container);
           }
 
           // Add div for just this progress ID
@@ -2025,7 +2025,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       if ($panel.length > 0) return $panel;
 
-      $('body').append('<div id="shiny-notification-panel">');
+      $(document.body).append('<div id="shiny-notification-panel">');
 
       return $panel;
     }
@@ -2105,7 +2105,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var $modal = $('#shiny-modal-wrapper');
       if ($modal.length === 0) {
         $modal = $('<div id="shiny-modal-wrapper"></div>');
-        $('body').append($modal);
+        $(document.body).append($modal);
 
         // If the wrapper's content is a Bootstrap modal, then when the inner
         // modal is hidden, remove the entire thing, including wrapper.
@@ -4326,7 +4326,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     receiveMessage: function receiveMessage(el, data) {
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      if (data.hasOwnProperty('label')) $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      if (data.hasOwnProperty('label')) {
+        var label = $(el).parent().find('label[for="' + $escape(el.id) + '"]');
+        // If textInput(label=NULL), then no label tag is provided from the
+        // server, so create one if we need to.
+        if (label.length === 0) {
+          $('<label for="' + $escape(el.id) + '">' + data.label + '</label>').insertBefore(el);
+        } else {
+          label.text(data.label);
+        }
+      }
 
       if (data.hasOwnProperty('placeholder')) el.placeholder = data.placeholder;
 
@@ -5593,7 +5602,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.iframe.id = iframeId;
       this.iframe.name = iframeId;
       this.iframe.setAttribute('style', 'position: fixed; top: 0; left: 0; width: 0; height: 0; border: none');
-      $('body').append(this.iframe);
+      $(document.body).append(this.iframe);
       var iframeDestroy = function iframeDestroy() {
         // Forces Shiny to flushReact, flush outputs, etc. Without this we get
         // invalidated reactives, but observers don't actually execute.
@@ -6457,14 +6466,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     // Need to register callbacks for each Bootstrap 3 class.
     var bs3classes = ['modal', 'dropdown', 'tab', 'tooltip', 'popover', 'collapse'];
     $.each(bs3classes, function (idx, classname) {
-      $('body').on('shown.bs.' + classname + '.sendImageSize', '*', filterEventsByNamespace('bs', sendImageSize));
-      $('body').on('shown.bs.' + classname + '.sendOutputHiddenState ' + 'hidden.bs.' + classname + '.sendOutputHiddenState', '*', filterEventsByNamespace('bs', sendOutputHiddenState));
+      $(document.body).on('shown.bs.' + classname + '.sendImageSize', '*', filterEventsByNamespace('bs', sendImageSize));
+      $(document.body).on('shown.bs.' + classname + '.sendOutputHiddenState ' + 'hidden.bs.' + classname + '.sendOutputHiddenState', '*', filterEventsByNamespace('bs', sendOutputHiddenState));
     });
 
     // This is needed for Bootstrap 2 compatibility and for non-Bootstrap
     // related shown/hidden events (like conditionalPanel)
-    $('body').on('shown.sendImageSize', '*', sendImageSize);
-    $('body').on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*', sendOutputHiddenState);
+    $(document.body).on('shown.sendImageSize', '*', sendImageSize);
+    $(document.body).on('shown.sendOutputHiddenState hidden.sendOutputHiddenState', '*', sendOutputHiddenState);
 
     // Send initial pixel ratio, and update it if it changes
     initialValues['.clientdata_pixelratio'] = pixelRatio();

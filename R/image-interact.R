@@ -89,16 +89,28 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
     if (!(xvar %in% names(df)))
       stop("brushedPoints: `xvar` ('", xvar ,"')  not in names of input")
     # Extract data values from the data frame
-    x <- asNumber(df[[xvar]])
-    keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
+    if ("xmap" %in% names(brush$domain)) {
+      xmap <- brush$domain$xmap
+      xmap_ <- xmap[xmap >= brush$xmin & xmap <= brush$xmax]
+      keep_rows <- keep_rows & (df[[xvar]] %in% names(xmap_))
+    } else {
+      x <- asNumber(df[[xvar]])
+      keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
+    }
   }
   if (use_y) {
     if (is.null(yvar))
       stop("brushedPoints: not able to automatically infer `yvar` from brush")
     if (!(yvar %in% names(df)))
       stop("brushedPoints: `yvar` ('", yvar ,"') not in names of input")
-    y <- asNumber(df[[yvar]])
-    keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
+    if ("ymap" %in% names(brush$domain)) {
+      ymap <- brush$domain$ymap
+      ymap_ <- ymap[ymap >= brush$xmin & ymap <= brush$xmax]
+      keep_rows <- keep_rows & (df[[xvar]] %in% names(ymap_))
+    } else {
+      y <- asNumber(df[[yvar]])
+      keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
+    }
   }
 
   # Find which rows are matches for the panel vars (if present)

@@ -570,6 +570,9 @@ find_panel_info_api <- function(b) {
       domain$bottom <- -domain$bottom
     }
 
+    domain$xmap <- discrete_map(xscale)
+    domain$ymap <- discrete_map(yscale)
+
     domain
   }
 
@@ -688,6 +691,9 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       domain$top    <- -domain$top
       domain$bottom <- -domain$bottom
     }
+
+    domain$xmap <- discrete_map(xscale)
+    domain$ymap <- discrete_map(yscale)
 
     domain
   }
@@ -994,4 +1000,17 @@ find_panel_ranges <- function(g, res) {
       top    = y_pos[p$t - 1]
     )
   })
+}
+
+# For free discrete positional scales, the inverse
+# mapping of 1, 2, 3, etc back to the original data
+# is potentially different for each panel. For example,
+# x=1 might map to "a" in the first panel, but it might
+# map to "b" in the second panel. To help workaround this,
+# we store a mapping from the 'trained' (numeric)
+# positional coordinates back to the original data scale
+discrete_map <- function(scale) {
+  if (!scale$is_discrete()) return(NULL)
+  rng <- scale$range$range
+  setNames(seq_along(rng), rng)
 }

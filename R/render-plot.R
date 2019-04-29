@@ -570,8 +570,8 @@ find_panel_info_api <- function(b) {
       domain$bottom <- -domain$bottom
     }
 
-    domain$xmap <- discrete_map(xscale)
-    domain$ymap <- discrete_map(yscale)
+    domain$xrange <- discrete_range(xscale)
+    domain$yrange <- discrete_range(yscale)
 
     domain
   }
@@ -692,8 +692,8 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       domain$bottom <- -domain$bottom
     }
 
-    domain$xmap <- discrete_map(xscale)
-    domain$ymap <- discrete_map(yscale)
+    domain$xrange <- discrete_range(xscale)
+    domain$yrange <- discrete_range(yscale)
 
     domain
   }
@@ -1009,8 +1009,7 @@ find_panel_ranges <- function(g, res) {
 # map to "b" in the second panel. To help workaround this,
 # we store a mapping from the 'trained' (numeric)
 # positional coordinates back to the original data scale
-discrete_map <- function(scale) {
+discrete_range <- function(scale) {
   if (!scale$is_discrete()) return(NULL)
-  rng <- scale$range$range
-  setNames(seq_along(rng), rng)
+  scale$range$range
 }

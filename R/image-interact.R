@@ -89,28 +89,16 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
     if (!(xvar %in% names(df)))
       stop("brushedPoints: `xvar` ('", xvar ,"')  not in names of input")
     # Extract data values from the data frame
-    if ("xmap" %in% names(brush$domain)) {
-      xmap <- brush$domain$xmap
-      xmap_ <- xmap[xmap >= brush$xmin & xmap <= brush$xmax]
-      keep_rows <- keep_rows & (df[[xvar]] %in% names(xmap_))
-    } else {
-      x <- asNumber(df[[xvar]])
-      keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
-    }
+    x <- asNumber(df[[xvar]], brush$domain$xrange)
+    keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
   }
   if (use_y) {
     if (is.null(yvar))
       stop("brushedPoints: not able to automatically infer `yvar` from brush")
     if (!(yvar %in% names(df)))
       stop("brushedPoints: `yvar` ('", yvar ,"') not in names of input")
-    if ("ymap" %in% names(brush$domain)) {
-      ymap <- brush$domain$ymap
-      ymap_ <- ymap[ymap >= brush$xmin & ymap <= brush$xmax]
-      keep_rows <- keep_rows & (df[[xvar]] %in% names(ymap_))
-    } else {
-      y <- asNumber(df[[yvar]])
-      keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
-    }
+    y <- asNumber(df[[yvar]], brush$domain$yrange)
+    keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
   }
 
   # Find which rows are matches for the panel vars (if present)
@@ -418,7 +406,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 
 # Coerce various types of variables to numbers. This works for Date, POSIXt,
 # characters, and factors. Used because the mouse coords are numeric.
-asNumber <- function(x) {
+asNumber <- function(x, map = NULL) {
+  if (length(map)) return(match(x, map))
   if (is.character(x)) x <- as.factor(x)
   if (is.factor(x)) x <- as.integer(x)
   as.numeric(x)

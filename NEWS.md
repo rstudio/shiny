@@ -1,6 +1,10 @@
 shiny 1.3.2.9000
 =======
 
+### Improvements
+
+* An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2402](https://github.com/rstudio/shiny/pull/2402))
+
 ### Bug fixes
 
 * Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))

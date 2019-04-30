@@ -88,17 +88,14 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
       stop("brushedPoints: not able to automatically infer `xvar` from brush")
     if (!(xvar %in% names(df)))
       stop("brushedPoints: `xvar` ('", xvar ,"')  not in names of input")
-    # Extract data values from the data frame
-    x <- asNumber(df[[xvar]], brush$domain$xrange)
-    keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
+    keep_rows <- keep_rows & within_brush(df[[xvar]], brush, "x")
   }
   if (use_y) {
     if (is.null(yvar))
       stop("brushedPoints: not able to automatically infer `yvar` from brush")
     if (!(yvar %in% names(df)))
       stop("brushedPoints: `yvar` ('", yvar ,"') not in names of input")
-    y <- asNumber(df[[yvar]], brush$domain$yrange)
-    keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
+    keep_rows <- keep_rows & within_brush(df[[yvar]], brush, "y")
   }
 
   # Find which rows are matches for the panel vars (if present)
@@ -281,8 +278,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     stop("nearPoints: `yvar` ('", yvar ,"')  not in names of input")
 
   # Extract data values from the data frame
-  x <- asNumber(df[[xvar]], coordinfo$domain$xrange)
-  y <- asNumber(df[[yvar]], coordinfo$domain$yrange)
+  x <- asNumber(df[[xvar]], coordinfo$domain$discrete_mapping$x)
+  y <- asNumber(df[[yvar]], coordinfo$domain$discrete_mapping$y)
 
   # Get the coordinates of the point (in img pixel coordinates)
   point_img <- coordinfo$coords_img
@@ -402,7 +399,17 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 #   ..$ y: NULL
 #  $ .nonce    : num 0.603
 
-
+# Helper to determine if data values are within the limits of
+# an input brush
+within_brush <- function(vals, brush, var = "x") {
+  var <- match.arg(var, c("x", "y"))
+  vals <- asNumber(vals, brush$domain$discrete_mapping[[var]])
+  # At least when a discrete mapping is relevant,
+  # it's possible for the data values to not be
+  !is.na(vals) &
+    vals >= brush[[paste0(var, "min")]] &
+    vals <= brush[[paste0(var, "max")]]
+}
 
 # Coerce various types of variables to numbers. This works for Date, POSIXt,
 # characters, and factors. Used because the mouse coords are numeric.

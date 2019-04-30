@@ -570,8 +570,16 @@ find_panel_info_api <- function(b) {
       domain$bottom <- -domain$bottom
     }
 
-    domain$xrange <- discrete_range(xscale)
-    domain$yrange <- discrete_range(yscale)
+    # Remember the x/y range if it's a faceted
+    # plot with a free discrete axis. This is necessary
+    # to properly inverse map the numeric (i.e., trained)
+    # positions back to the data scale (#2410)
+    if (nrow(layout) > 1) {
+      free_x <- isTRUE(b$layout$facet$params$free$x)
+      free_y <- isTRUE(b$layout$facet$params$free$y)
+      if (free_x && xscale$is_discrete()) domain$xrange <- xscale$range$range
+      if (free_y && yscale$is_discrete()) domain$yrange <- yscale$range$range
+    }
 
     domain
   }
@@ -692,8 +700,15 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       domain$bottom <- -domain$bottom
     }
 
-    domain$xrange <- discrete_range(xscale)
-    domain$yrange <- discrete_range(yscale)
+    # Remember the x/y range if it's a faceted
+    # plot with a free discrete axis. This is necessary
+    # to properly inverse map the numeric (i.e., trained)
+    # positions back to the data scale (#2410)
+    layout <- if (ggplot_format == "new") b$layout else b$panel$layout
+    if (nrow(layout) > 1) {
+      if (xscale$is_discrete()) domain$xrange <- xscale$range$range
+      if (yscale$is_discrete()) domain$yrange <- yscale$range$range
+    }
 
     domain
   }
@@ -1000,15 +1015,4 @@ find_panel_ranges <- function(g, res) {
       top    = y_pos[p$t - 1]
     )
   })
-}
-
-# For free discrete positional scales, the inverse
-# mapping of 1, 2, 3, etc back to the original data
-# is potentially different for each panel. For example,
-# x=1 might map to "a" in the first panel, but it might
-# map to "b" in the second panel. To help workaround this,
-# we store a mapping from the 'trained' (numeric)
-# positional coordinates back to the original data scale
-discrete_range <- function(scale) {
-  if (scale$is_discrete()) scale$range$range else NULL
 }

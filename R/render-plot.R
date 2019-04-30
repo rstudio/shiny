@@ -570,16 +570,8 @@ find_panel_info_api <- function(b) {
       domain$bottom <- -domain$bottom
     }
 
-    # Remember the x/y range if it's a faceted
-    # plot with a free discrete axis. This is necessary
-    # to properly inverse map the numeric (i.e., trained)
-    # positions back to the data scale (#2410)
-    if (xscale$is_discrete()) {
-      domain$discrete_mapping$x <- (xscale$limits %OR% xscale$range$range)
-    }
-    if (yscale$is_discrete()) {
-      domain$discrete_mapping$y <- (yscale$limits %OR% yscale$range$range)
-    }
+    domain <- add_discrete_limits(domain, xscale, "x")
+    domain <- add_discrete_limits(domain, yscale, "y")
 
     domain
   }
@@ -700,16 +692,8 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       domain$bottom <- -domain$bottom
     }
 
-    # Remember the x/y range if it's a faceted
-    # plot with a free discrete axis. This is necessary
-    # to properly inverse map the numeric (i.e., trained)
-    # positions back to the data scale (#2410)
-    if (xscale$is_discrete()) {
-      domain$discrete_mapping$x <- (xscale$limits %OR% xscale$range$range)
-    }
-    if (yscale$is_discrete()) {
-      domain$discrete_mapping$y <- (yscale$limits %OR% yscale$range$range)
-    }
+    domain <- add_discrete_limits(domain, xscale, "x")
+    domain <- add_discrete_limits(domain, yscale, "y")
 
     domain
   }
@@ -1016,4 +1000,16 @@ find_panel_ranges <- function(g, res) {
       top    = y_pos[p$t - 1]
     )
   })
+}
+
+# Remember the x/y range if it's a faceted
+# plot with a free discrete axis. This is necessary
+# to properly inverse map the numeric (i.e., trained)
+# positions back to the data scale (#2410)
+add_discrete_limits <- function(domain, scale, var = "x") {
+  var <- match.arg(var, c("x", "y"))
+  if (scale$is_discrete()) {
+    domain$discrete_limits[[var]] <- scale$limits %OR% scale$range$range
+  }
+  domain
 }

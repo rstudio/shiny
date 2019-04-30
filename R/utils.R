@@ -1568,16 +1568,16 @@ URLencode <- function(value, reserved = FALSE) {
 dateYMD <- function(date = NULL, argName = "value") {
   if (!length(date)) return(NULL)
   if (length(date) > 1) warning("Expected `", argName, "` to be of length 1.")
-  tryCatch(format(as.Date(date), "%Y-%m-%d"),
+  tryCatch(date <- format(as.Date(date), "%Y-%m-%d"),
     error = function(e) {
       warning(
         "Couldn't coerce the `", argName,
         "` argument to a date string with format yyyy-mm-dd",
         call. = FALSE
       )
-      date
     }
   )
+  date
 }
 
 # This function takes a name and function, and it wraps that function in a new

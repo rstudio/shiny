@@ -297,38 +297,35 @@ var InputRateDecorator = function(target) {
   this.inputRatePolicies = {};
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    const input = splitInputNameType(name);
+  this.setInput = function(name_type, value, opts) {
+    const {name: inputName} = splitInputNameType(name_type);
 
-    this.$ensureInit(input.name);
+    this.$ensureInit(inputName);
 
     if (opts.priority !== "deferred")
-      this.inputRatePolicies[input.name].immediateCall(name, value, opts);
+      this.inputRatePolicies[inputName].immediateCall(name_type, value, opts);
     else
-      this.inputRatePolicies[input.name].normalCall(name, value, opts);
+      this.inputRatePolicies[inputName].normalCall(name_type, value, opts);
   };
-  this.setRatePolicy = function(name, mode, millis) {
-    const input = splitInputNameType(name);
+  this.setRatePolicy = function(name_type, mode, millis) {
+    const {name: inputName} = splitInputNameType(name_type);
 
     if (mode === 'direct') {
-      this.inputRatePolicies[input.name] = new Invoker(this, this.$doSetInput);
+      this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
     }
     else if (mode === 'debounce') {
-      this.inputRatePolicies[input.name] = new Debouncer(this, this.$doSetInput, millis);
+      this.inputRatePolicies[inputName] = new Debouncer(this, this.$doSetInput, millis);
     }
     else if (mode === 'throttle') {
-      this.inputRatePolicies[input.name] = new Throttler(this, this.$doSetInput, millis);
+      this.inputRatePolicies[inputName] = new Throttler(this, this.$doSetInput, millis);
     }
   };
   this.$ensureInit = function(name) {
-    const input = splitInputNameType(name);
-
-    if (!(input.name in this.inputRatePolicies))
-      this.setRatePolicy(input.name, 'direct');
+    if (!(name in this.inputRatePolicies))
+      this.setRatePolicy(name, 'direct');
   };
   this.$doSetInput = function(name, value, opts) {
-    const input = splitInputNameType(name);
-    this.target.setInput(input.name, value, opts);
+    this.target.setInput(name, value, opts);
   };
 }).call(InputRateDecorator.prototype);
 

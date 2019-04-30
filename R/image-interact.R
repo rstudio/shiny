@@ -281,8 +281,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     stop("nearPoints: `yvar` ('", yvar ,"')  not in names of input")
 
   # Extract data values from the data frame
-  x <- asNumber(df[[xvar]])
-  y <- asNumber(df[[yvar]])
+  x <- asNumber(df[[xvar]], coordinfo$domain$xrange)
+  y <- asNumber(df[[yvar]], coordinfo$domain$yrange)
 
   # Get the coordinates of the point (in img pixel coordinates)
   point_img <- coordinfo$coords_img
@@ -406,8 +406,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 
 # Coerce various types of variables to numbers. This works for Date, POSIXt,
 # characters, and factors. Used because the mouse coords are numeric.
-asNumber <- function(x, map = NULL) {
-  if (length(map)) return(match(x, map))
+asNumber <- function(x, range = NULL) {
+  if (length(range)) return(match(x, range))
   if (is.character(x)) x <- as.factor(x)
   if (is.factor(x)) x <- as.integer(x)
   as.numeric(x)

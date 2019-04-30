@@ -1010,6 +1010,5 @@ find_panel_ranges <- function(g, res) {
 # we store a mapping from the 'trained' (numeric)
 # positional coordinates back to the original data scale
 discrete_range <- function(scale) {
-  if (!scale$is_discrete()) return(NULL)
-  scale$range$range
+  if (scale$is_discrete()) scale$range$range else NULL
 }

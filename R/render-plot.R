@@ -1002,10 +1002,17 @@ find_panel_ranges <- function(g, res) {
   })
 }
 
-# Remember the x/y range if it's a faceted
-# plot with a free discrete axis. This is necessary
-# to properly inverse map the numeric (i.e., trained)
-# positions back to the data scale (#2410)
+# Remember the x/y limits of discrete axes. This info is
+# necessary to properly inverse map the numeric (i.e., trained)
+# positions back to the data scale, for example:
+# https://github.com/rstudio/shiny/pull/2410#issuecomment-487783828
+# https://github.com/rstudio/shiny/pull/2410#issuecomment-488100881
+#
+# Eventually, we may want to consider storing the entire ggplot2
+# object server-side and querying information from that object
+# as we need it...that's the only way we'll ever be able to
+# faithfully brush examples like this:
+# https://github.com/rstudio/shiny/issues/2411
 add_discrete_limits <- function(domain, scale, var = "x") {
   var <- match.arg(var, c("x", "y"))
   if (scale$is_discrete()) {

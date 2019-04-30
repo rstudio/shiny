@@ -40,7 +40,7 @@ $.extend(textInputBinding, {
       if (hasLabelTag) {
         labelTag.text(data.label);
       } else {
-        $('<label for="' + $escape(el.id) + '">' + data.label + '</label>').insertBefore(el);
+        $('<label for="' + $escape(el.id) + '"></label>').text(data.label).insertBefore(el);
       }
 
     } else {

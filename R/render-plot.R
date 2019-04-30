@@ -700,8 +700,16 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       domain$bottom <- -domain$bottom
     }
 
-    if (xscale$is_discrete()) domain$discrete_mapping$x <- xscale$limits
-    if (yscale$is_discrete()) domain$discrete_mapping$y <- yscale$limits
+    # Remember the x/y range if it's a faceted
+    # plot with a free discrete axis. This is necessary
+    # to properly inverse map the numeric (i.e., trained)
+    # positions back to the data scale (#2410)
+    if (xscale$is_discrete()) {
+      domain$discrete_mapping$x <- (xscale$limits %OR% xscale$range$range)
+    }
+    if (yscale$is_discrete()) {
+      domain$discrete_mapping$y <- (yscale$limits %OR% yscale$range$range)
+    }
 
     domain
   }

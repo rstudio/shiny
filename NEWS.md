@@ -3,7 +3,7 @@ shiny 1.3.2.9000
 
 ### Improvements
 
-* Resolved ([#2402](https://github.com/rstudio/shiny/pull/2402)): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))
+* Resolved ([#2402](https://github.com/rstudio/shiny/issues/2402)): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))
 
 ### Bug fixes
 

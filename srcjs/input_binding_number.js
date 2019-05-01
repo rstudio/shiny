@@ -24,8 +24,11 @@ $.extend(numberInputBinding, textInputBinding, {
     if (data.hasOwnProperty('max'))    el.max   = data.max;
     if (data.hasOwnProperty('step'))   el.step  = data.step;
 
-    if (data.hasOwnProperty('label'))
-      $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+
+    var escape_id = $escape(el.id);
+    var labelNode = $(el).parent().find('label[for="' + escape_id + '"]');
+    var labelHTML = "<label for='" + escape_id + "'></label>";
+    updateLabel(data.label, labelNode, labelHTML, el);
 
     $(el).trigger('change');
   },

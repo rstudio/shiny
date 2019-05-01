@@ -27,27 +27,10 @@ $.extend(textInputBinding, {
     if (data.hasOwnProperty('value'))
       this.setValue(el, data.value);
 
-
-    var labelTag = $(el).parent().find('label[for="' + $escape(el.id) + '"]');
-    var hasLabelTag = labelTag.length > 0;
-
-    // If data.label exists, then we may need to insert a label
-    // tag into the DOM. If it doesn't exist, then the label tag
-    // should be removed to be more consistent with the behavior
-    // of `textInput(label = NULL)`
-    if (data.hasOwnProperty('label')) {
-
-      if (hasLabelTag) {
-        labelTag.text(data.label);
-      } else {
-        $('<label for="' + $escape(el.id) + '"></label>').text(data.label).insertBefore(el);
-      }
-
-    } else {
-
-      if (hasLabelTag) labelTag.remove();
-
-    }
+    var escape_id = $escape(el.id);
+    var labelNode = $(el).parent().find('label[for="' + escape_id + '"]');
+    var labelTemplate = "<label for='" + escape_id + "'></label>";
+    updateLabel(data.label, labelNode, labelTemplate, el);
 
     if (data.hasOwnProperty('placeholder'))
       el.placeholder = data.placeholder;

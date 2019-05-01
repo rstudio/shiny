@@ -60,8 +60,11 @@ $.extend(dateInputBinding, {
   receiveMessage: function(el, data) {
     var $input = $(el).find('input');
 
-    if (data.hasOwnProperty('label'))
-      $(el).find('label[for="' + $escape(el.id) + '"]').text(data.label);
+
+    var escape_id = $escape(el.id);
+    var labelNode = $(el).find('label[for="' + escape_id + '"]');
+    var labelTemplate = "<label for='" + escape_id + "'></label>";
+    updateLabel(data.label, labelNode, labelTemplate, $input);
 
     if (data.hasOwnProperty('min'))
       this._setMin($input[0], data.min);

@@ -123,15 +123,14 @@ $.extend(selectInputBinding, {
       this.setValue(el, data.value);
     }
 
-    if (data.hasOwnProperty('label')) {
-      let escaped_id = $escape(el.id);
-      if (this._is_selectize(el)) {
-        escaped_id += "-selectized";
-      }
-      $(el).parent().parent()
-        .find('label[for="' + escaped_id + '"]')
-        .text(data.label);
+    let escaped_id = $escape(el.id);
+    if (this._is_selectize(el)) {
+      escaped_id += "-selectized";
     }
+    var labelNode = $(el).parent().parent()
+      .find('label[for="' + escaped_id + '"]');
+    var labelHTML = "<label for='" + escaped_id + "'></label>";
+    updateLabel(data.label, labelNode, labelHTML, el);
 
     $(el).trigger('change');
   },

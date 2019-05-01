@@ -130,8 +130,10 @@ $.extend(sliderInputBinding, textInputBinding, {
       }
     }
 
-    if (data.hasOwnProperty('label'))
-      $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    var escape_id = $escape(el.id);
+    var labelNode = $(el).parent().find('label[for="' + escape_id + '"]');
+    var labelHTML = "<label for='" + escape_id + "'></label>";
+    updateLabel(data.label, labelNode, labelHTML, el);
 
     var domElements = ['data-type', 'time-format', 'timezone'];
     for (var i = 0; i < domElements.length; i++) {

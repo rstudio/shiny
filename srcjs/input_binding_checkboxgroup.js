@@ -59,8 +59,10 @@ $.extend(checkboxGroupInputBinding, {
     if (data.hasOwnProperty('value'))
       this.setValue(el, data.value);
 
-    if (data.hasOwnProperty('label'))
-      $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    var escape_id = $escape(el.id);
+    var labelNode = $(el).find('label[for="' + escape_id + '"]');
+    var labelHTML = "<label for='" + escape_id + "'></label>";
+    updateLabel(data.label, labelNode, labelHTML, $el.find(".shiny-options-group"));
 
     $(el).trigger('change');
   },

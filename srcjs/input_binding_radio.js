@@ -41,8 +41,10 @@ $.extend(radioInputBinding, {
     if (data.hasOwnProperty('value'))
       this.setValue(el, data.value);
 
-    if (data.hasOwnProperty('label'))
-      $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    var escape_id = $escape(el.id);
+    var labelNode = $(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    var labelHTML = "<label for='" + escape_id + "'></label>";
+    updateLabel(data.label, labelNode, labelHTML, el);
 
     $(el).trigger('change');
   },

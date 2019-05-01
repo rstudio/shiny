@@ -80,8 +80,10 @@ $.extend(dateRangeInputBinding, dateInputBinding, {
     var $startinput = $inputs.eq(0);
     var $endinput   = $inputs.eq(1);
 
-    if (data.hasOwnProperty('label'))
-      $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    var escape_id = $escape(el.id);
+    var labelNode = $el.find('label[for="' + escape_id + '"]');
+    var labelHTML = "<label for='" + escape_id + "'></label>";
+    updateLabel(data.label, labelNode, labelHTML, el);
 
     if (data.hasOwnProperty('min')) {
       this._setMin($startinput[0], data.min);

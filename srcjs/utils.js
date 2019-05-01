@@ -326,3 +326,35 @@ exports.compareVersion = function(a, op, b) {
   else if (op === "<")  return (diff <   0);
   else                  throw `Unknown operator: ${op}`;
 };
+
+
+function updateLabel(labelTxt, labelNode, labelHTML, insertBeforeEl) {
+  // Only update if label was specified in the update method
+  if (typeof labelTxt === "undefined") return;
+
+  // Should the label node exist?
+  var labelEmpty = $.isArray(labelTxt) && labelTxt.length === 0;
+
+  // Does the label node already exist?
+  var labelNode = labelNode || [];
+  var labelNodeExists = labelNode.length > 0;
+
+  if (labelNodeExists) {
+
+    if (labelEmpty) {
+      labelNode.remove();
+    } else {
+      labelNode.text(labelTxt);
+    }
+
+  } else {
+
+    if (!labelEmpty) {
+      // Some labels are actually spans
+      var newLabelNode = $(labelHTML).text(labelTxt);
+      newLabelNode.insertBefore(insertBeforeEl);
+    }
+
+  }
+
+}

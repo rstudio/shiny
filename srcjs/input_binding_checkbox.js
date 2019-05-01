@@ -27,6 +27,8 @@ $.extend(checkboxInputBinding, {
     if (data.hasOwnProperty('value'))
       el.checked = data.value;
 
+    // checkboxInput()'s label works different from other
+    // input labels...the label container should always exist
     if (data.hasOwnProperty('label'))
       $(el).parent().find('span').text(data.label);
 

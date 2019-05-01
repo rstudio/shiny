@@ -321,6 +321,34 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     if (op === "==") return diff === 0;else if (op === ">=") return diff >= 0;else if (op === ">") return diff > 0;else if (op === "<=") return diff <= 0;else if (op === "<") return diff < 0;else throw "Unknown operator: " + op;
   };
 
+  function updateLabel(labelTxt, labelNode, labelHTML, insertBeforeEl) {
+    // Only update if label was specified in the update method
+    if (typeof labelTxt === "undefined") return;
+
+    // Should the label node exist?
+    var labelEmpty = $.isArray(labelTxt) && labelTxt.length === 0;
+
+    // Does the label node already exist?
+    var labelNode = labelNode || [];
+    var labelNodeExists = labelNode.length > 0;
+
+    if (labelNodeExists) {
+
+      if (labelEmpty) {
+        labelNode.remove();
+      } else {
+        labelNode.text(labelTxt);
+      }
+    } else {
+
+      if (!labelEmpty) {
+        // Some labels are actually spans
+        var newLabelNode = $(labelHTML).text(labelTxt);
+        newLabelNode.insertBefore(insertBeforeEl);
+      }
+    }
+  }
+
   //---------------------------------------------------------------------
   // Source file: ../srcjs/browser.js
 
@@ -4326,24 +4354,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     receiveMessage: function receiveMessage(el, data) {
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      var labelTag = $(el).parent().find('label[for="' + $escape(el.id) + '"]');
-      var hasLabelTag = labelTag.length > 0;
-
-      // If data.label exists, then we may need to insert a label
-      // tag into the DOM. If it doesn't exist, then the label tag
-      // should be removed to be more consistent with the behavior
-      // of `textInput(label = NULL)`
-      if (data.hasOwnProperty('label')) {
-
-        if (hasLabelTag) {
-          labelTag.text(data.label);
-        } else {
-          $('<label for="' + $escape(el.id) + '"></label>').text(data.label).insertBefore(el);
-        }
-      } else {
-
-        if (hasLabelTag) labelTag.remove();
-      }
+      var escape_id = $escape(el.id);
+      var labelNode = $(el).parent().find('label[for="' + escape_id + '"]');
+      var labelTemplate = "<label for='" + escape_id + "'></label>";
+      updateLabel(data.label, labelNode, labelTemplate, el);
 
       if (data.hasOwnProperty('placeholder')) el.placeholder = data.placeholder;
 
@@ -4416,7 +4430,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (data.hasOwnProperty('max')) el.max = data.max;
       if (data.hasOwnProperty('step')) el.step = data.step;
 
-      if (data.hasOwnProperty('label')) $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      var escape_id = $escape(el.id);
+      var labelNode = $(el).parent().find('label[for="' + escape_id + '"]');
+      var labelHTML = "<label for='" + escape_id + "'></label>";
+      updateLabel(data.label, labelNode, labelHTML, el);
 
       $(el).trigger('change');
     },
@@ -4461,6 +4478,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     receiveMessage: function receiveMessage(el, data) {
       if (data.hasOwnProperty('value')) el.checked = data.value;
 
+      // checkboxInput()'s label works different from other
+      // input labels...the label container should always exist
       if (data.hasOwnProperty('label')) $(el).parent().find('span').text(data.label);
 
       $(el).trigger('change');
@@ -4589,7 +4608,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
       }
 
-      if (data.hasOwnProperty('label')) $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      var escape_id = $escape(el.id);
+      var labelNode = $(el).parent().find('label[for="' + escape_id + '"]');
+      var labelHTML = "<label for='" + escape_id + "'></label>";
+      updateLabel(data.label, labelNode, labelHTML, el);
 
       var domElements = ['data-type', 'time-format', 'timezone'];
       for (var i = 0; i < domElements.length; i++) {
@@ -4807,7 +4829,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     receiveMessage: function receiveMessage(el, data) {
       var $input = $(el).find('input');
 
-      if (data.hasOwnProperty('label')) $(el).find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      var escape_id = $escape(el.id);
+      var labelNode = $(el).find('label[for="' + escape_id + '"]');
+      var labelTemplate = "<label for='" + escape_id + "'></label>";
+      updateLabel(data.label, labelNode, labelTemplate, $input);
 
       if (data.hasOwnProperty('min')) this._setMin($input[0], data.min);
 
@@ -5025,7 +5050,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var $startinput = $inputs.eq(0);
       var $endinput = $inputs.eq(1);
 
-      if (data.hasOwnProperty('label')) $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      var escape_id = $escape(el.id);
+      var labelNode = $el.find('label[for="' + escape_id + '"]');
+      var labelHTML = "<label for='" + escape_id + "'></label>";
+      updateLabel(data.label, labelNode, labelHTML, el);
 
       if (data.hasOwnProperty('min')) {
         this._setMin($startinput[0], data.min);
@@ -5212,13 +5240,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.setValue(el, data.value);
       }
 
-      if (data.hasOwnProperty('label')) {
-        var escaped_id = $escape(el.id);
-        if (this._is_selectize(el)) {
-          escaped_id += "-selectized";
-        }
-        $(el).parent().parent().find('label[for="' + escaped_id + '"]').text(data.label);
+      var escaped_id = $escape(el.id);
+      if (this._is_selectize(el)) {
+        escaped_id += "-selectized";
       }
+      var labelNode = $(el).parent().parent().find('label[for="' + escaped_id + '"]');
+      var labelHTML = "<label for='" + escaped_id + "'></label>";
+      updateLabel(data.label, labelNode, labelHTML, el);
 
       $(el).trigger('change');
     },
@@ -5337,7 +5365,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      if (data.hasOwnProperty('label')) $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      var escape_id = $escape(el.id);
+      var labelNode = $(el).parent().find('label[for="' + $escape(el.id) + '"]');
+      var labelHTML = "<label for='" + escape_id + "'></label>";
+      updateLabel(data.label, labelNode, labelHTML, el);
 
       $(el).trigger('change');
     },
@@ -5433,7 +5464,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      if (data.hasOwnProperty('label')) $el.find('label[for="' + $escape(el.id) + '"]').text(data.label);
+      var escape_id = $escape(el.id);
+      var labelNode = $(el).find('label[for="' + escape_id + '"]');
+      var labelHTML = "<label for='" + escape_id + "'></label>";
+      updateLabel(data.label, labelNode, labelHTML, $el.find(".shiny-options-group"));
 
       $(el).trigger('change');
     },

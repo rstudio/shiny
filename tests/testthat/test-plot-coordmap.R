@@ -368,3 +368,51 @@ test_that("ggplot coordmap with various scales and coords", {
     sortList(list(left=-1, right=3, bottom=-2, top=4))
   )
 })
+
+
+test_that("ggplot coordmap maintains discrete limits", {
+  tmpfile <- tempfile("test-shiny", fileext = ".png")
+  on.exit(rm(tmpfile))
+
+  p <- ggplot(mpg) +
+    geom_point(aes(fl, cty), alpha = 0.2) +
+    facet_wrap(~drv, scales = "free_x")
+  png(tmpfile)
+  m <- getGgplotCoordmap(print(p), 500, 400, 72)
+  dev.off()
+
+  expect_length(m$panels, 3)
+  expect_equal(
+    m$panels[[1]]$domain$discrete_limits,
+    list(x = c("d", "e", "p", "r"))
+  )
+  expect_equal(
+    m$panels[[2]]$domain$discrete_limits,
+    list(x = c("c", "d", "e", "p", "r"))
+  )
+  expect_equal(
+    m$panels[[3]]$domain$discrete_limits,
+    list(x = c("e", "p", "r"))
+  )
+
+  p2 <- ggplot(mpg) +
+    geom_point(aes(cty, fl), alpha = 0.2) +
+    facet_wrap(~drv, scales = "free_y")
+  png(tmpfile)
+  m2 <- getGgplotCoordmap(print(p2), 500, 400, 72)
+  dev.off()
+
+  expect_length(m2$panels, 3)
+  expect_equal(
+    m2$panels[[1]]$domain$discrete_limits,
+    list(y = c("d", "e", "p", "r"))
+  )
+  expect_equal(
+    m2$panels[[2]]$domain$discrete_limits,
+    list(y = c("c", "d", "e", "p", "r"))
+  )
+  expect_equal(
+    m2$panels[[3]]$domain$discrete_limits,
+    list(y = c("e", "p", "r"))
+  )
+})

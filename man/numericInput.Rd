@@ -5,7 +5,7 @@
 \title{Create a numeric input control}
 \usage{
 numericInput(inputId, label, value, min = NA, max = NA, step = NA,
-  width = NULL)
+  width = NULL, placeholder = NULL)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -22,6 +22,10 @@ numericInput(inputId, label, value, min = NA, max = NA, step = NA,
 
 \item{width}{The width of the input, e.g. \code{'400px'}, or \code{'100\%'};
 see \code{\link{validateCssUnit}}.}
+
+\item{placeholder}{A character string giving the user a hint as to what can
+be entered into the control. Internet Explorer 8 and 9 do not support this
+option.}
 }
 \value{
 A numeric input control that can be added to a UI definition.

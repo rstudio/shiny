@@ -342,6 +342,7 @@ updateNavlistPanel <- updateTabsetPanel
 #' @param min Minimum value.
 #' @param max Maximum value.
 #' @param step Step size.
+#' @param placeholder The placeholder to set for the input object.
 #'
 #' @seealso \code{\link{numericInput}}
 #'
@@ -374,11 +375,12 @@ updateNavlistPanel <- updateTabsetPanel
 #' }
 #' @export
 updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
-    min = NULL, max = NULL, step = NULL) {
+    min = NULL, max = NULL, step = NULL, placeholder = NULL) {
 
   message <- dropNulls(list(
     label = label, value = formatNoSci(value),
-    min = formatNoSci(min), max = formatNoSci(max), step = formatNoSci(step)
+    min = formatNoSci(min), max = formatNoSci(max), step = formatNoSci(step),
+    placeholder = placeholder
   ))
   session$sendInputMessage(inputId, message)
 }

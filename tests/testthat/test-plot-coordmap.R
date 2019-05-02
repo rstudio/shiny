@@ -271,9 +271,20 @@ test_that("ggplot coordmap with various data types", {
   dev.off()
 
   # Check domain
+  expectation <- list(
+    left = 1,
+    right = 3,
+    bottom = 1,
+    top = 4,
+    discrete_limits = list(
+      x = letters[1:3],
+      y = LETTERS[1:4]
+    )
+  )
+
   expect_equal(
     sortList(m$panels[[1]]$domain),
-    sortList(list(left=1, right=3, bottom=1, top=4))
+    sortList(expectation)
   )
 
   # Dates and date-times

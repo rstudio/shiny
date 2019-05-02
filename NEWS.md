@@ -3,6 +3,7 @@ shiny 1.3.2.9000
 
 ### Bug fixes
 
+* Fixed [#868](https://github.com/rstudio/shiny/issues/868): If an input is initialized with a `NULL` label, it can now be updated with a string. Moreover, if an input label is initialized with a string, it can now be removed by updating with `label=character(0)` (similar to how `choices` and `selected` can be cleared in `updateSelectInput()`). ([#2406](https://github.com/rstudio/shiny/pull/2406))
 * Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))
 
 

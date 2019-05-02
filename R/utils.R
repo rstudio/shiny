@@ -1738,7 +1738,7 @@ getSliderType <- function(min, max, value) {
   if (length(type) > 1) {
     stop("Type mismatch for `min`, `max`, and `value`. Each must be Date, POSIXt, or number.")
   }
-  type[[1]]
+  if (length(type)) type[[1]] else NULL
 }
 
 # Reads the `shiny.sharedSecret` global option, and returns a function that can

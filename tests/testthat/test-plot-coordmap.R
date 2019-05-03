@@ -374,6 +374,7 @@ test_that("ggplot coordmap maintains discrete limits", {
   tmpfile <- tempfile("test-shiny", fileext = ".png")
   on.exit(unlink(tmpfile))
 
+  # check discrete limits are correct for free x scales
   p <- ggplot(mpg) +
     geom_point(aes(fl, cty), alpha = 0.2) +
     facet_wrap(~drv, scales = "free_x")
@@ -395,6 +396,7 @@ test_that("ggplot coordmap maintains discrete limits", {
     list(x = c("e", "p", "r"))
   )
 
+  # same for free y
   p2 <- ggplot(mpg) +
     geom_point(aes(cty, fl), alpha = 0.2) +
     facet_wrap(~drv, scales = "free_y")
@@ -415,4 +417,54 @@ test_that("ggplot coordmap maintains discrete limits", {
     m2$panels[[3]]$domain$discrete_limits,
     list(y = c("e", "p", "r"))
   )
+
+  # check that specifying x limits is captured
+  p3 <- ggplot(mpg) +
+    geom_point(aes(fl, cty), alpha = 0.2) +
+    scale_x_discrete(limits = c("c", "d", "e"))
+
+  png(tmpfile)
+  m3 <- getGgplotCoordmap(suppressWarnings(print(p3)), 500, 400, 72)
+  dev.off()
+
+  expect_length(m3$panels, 1)
+  expect_equal(
+    m3$panels[[1]]$domain$discrete_limits,
+    list(x = c("c", "d", "e"))
+  )
+
+  # same for y
+  p4 <- ggplot(mpg) +
+    geom_point(aes(cty, fl), alpha = 0.2) +
+    scale_y_discrete(limits = c("e", "f"))
+
+  png(tmpfile)
+  m4 <- getGgplotCoordmap(suppressWarnings(print(p4)), 500, 400, 72)
+  dev.off()
+
+  expect_length(m4$panels, 1)
+  expect_equal(
+    m4$panels[[1]]$domain$discrete_limits,
+    list(y = c("e", "f"))
+  )
+
+  # make sure that when labels are specified, where
+  # still relaying the input data
+  p5 <- ggplot(mpg) +
+    geom_point(aes(fl, cty), alpha = 0.2) +
+    scale_x_discrete(
+      limits = c("e", "f"),
+      labels = c("foo", "bar")
+    )
+
+  png(tmpfile)
+  m5 <- getGgplotCoordmap(suppressWarnings(print(p5)), 500, 400, 72)
+  dev.off()
+
+  expect_length(m5$panels, 1)
+  expect_equal(
+    m5$panels[[1]]$domain$discrete_limits,
+    list(x = c("e", "f"))
+  )
+
 })

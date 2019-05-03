@@ -1041,8 +1041,9 @@ find_panel_ranges <- function(g, res) {
 # https://github.com/rstudio/shiny/issues/2411
 add_discrete_limits <- function(domain, scale, var = "x") {
   var <- match.arg(var, c("x", "y"))
+  if (!is.function(scale$is_discrete) || !is.function(scale$get_limits)) return(domain)
   if (scale$is_discrete()) {
-    domain$discrete_limits[[var]] <- scale$limits %OR% scale$range$range
+    domain$discrete_limits[[var]] <- scale$get_limits()
   }
   domain
 }

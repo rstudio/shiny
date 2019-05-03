@@ -36,7 +36,7 @@ $.extend(textInputBinding, {
   },
   getState: function(el) {
     return {
-      label: this._getLabelNode().text(),
+      label: this._getLabelNode(el).text(),
       value: el.value,
       placeholder: el.placeholder
     };

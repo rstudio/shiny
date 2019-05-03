@@ -4352,7 +4352,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     getState: function getState(el) {
       return {
-        label: this._getLabelNode().text(),
+        label: this._getLabelNode(el).text(),
         value: el.value,
         placeholder: el.placeholder
       };
@@ -4598,10 +4598,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
       }
 
-      var escape_id = $escape(el.id);
-      var labelNode = $(el).parent().find('label[for="' + escape_id + '"]');
-      var labelHTML = "<label for='" + escape_id + "'></label>";
-      updateLabel(data.label, labelNode, labelHTML, el);
+      updateLabel(data.label, this._getLabelNode(el));
 
       var domElements = ['data-type', 'time-format', 'timezone'];
       for (var i = 0; i < domElements.length; i++) {
@@ -4643,7 +4640,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       $el.ionRangeSlider(opts);
     },
-
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
+    },
     // Number of values; 1 for single slider, 2 for range slider
     _numValues: function _numValues(el) {
       if ($(el).data('ionRangeSlider').options.type === 'double') return 2;else return 1;

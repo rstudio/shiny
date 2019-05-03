@@ -429,7 +429,7 @@ updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
   min = NULL, max = NULL, step = NULL, timeFormat = NULL, timezone = NULL)
 {
   # If no min/max/value is provided, we won't know the
-  # type, and this will return NULL
+  # type, and this will return an empty string
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {

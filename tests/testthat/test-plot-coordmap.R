@@ -14,7 +14,7 @@ test_that("ggplot coordmap", {
   dat <- data.frame(xvar = c(0, 5), yvar = c(10, 20))
 
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   # Basic scatterplot
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
@@ -75,7 +75,7 @@ test_that("ggplot coordmap with facet_wrap", {
                     g = c("a", "b", "c"))
 
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   # facet_wrap
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
@@ -123,7 +123,7 @@ test_that("ggplot coordmap with facet_grid", {
                     g = c("a", "b", "c"))
 
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
     scale_x_continuous(expand = c(0, 0)) +
@@ -209,7 +209,7 @@ test_that("ggplot coordmap with 2D facet_grid", {
                     g = c("a", "b"), h = c("i", "j"))
 
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   p <- ggplot(dat, aes(xvar, yvar)) + geom_point() +
     scale_x_continuous(expand = c(0, 0)) +
@@ -259,7 +259,7 @@ test_that("ggplot coordmap with 2D facet_grid", {
 
 test_that("ggplot coordmap with various data types", {
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   # Factors
   dat <- expand.grid(xvar = letters[1:3], yvar = LETTERS[1:4])
@@ -313,7 +313,7 @@ test_that("ggplot coordmap with various data types", {
 
 test_that("ggplot coordmap with various scales and coords", {
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   # Reversed scales
   dat <- data.frame(xvar = c(0, 5), yvar = c(10, 20))
@@ -372,7 +372,7 @@ test_that("ggplot coordmap with various scales and coords", {
 
 test_that("ggplot coordmap maintains discrete limits", {
   tmpfile <- tempfile("test-shiny", fileext = ".png")
-  on.exit(rm(tmpfile))
+  on.exit(unlink(tmpfile))
 
   p <- ggplot(mpg) +
     geom_point(aes(fl, cty), alpha = 0.2) +

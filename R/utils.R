@@ -1749,6 +1749,7 @@ createVarPromiseDomain <- function(env, name, value) {
 
 getSliderType <- function(min, max, value) {
   vals <- dropNulls(list(value, min, max))
+  if (length(vals) == 0) return("")
   type <- unique(lapply(vals, function(x) {
     if      (inherits(x, "Date"))   "date"
     else if (inherits(x, "POSIXt")) "datetime"

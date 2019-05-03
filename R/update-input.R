@@ -418,13 +418,15 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
   min = NULL, max = NULL, step = NULL, timeFormat = NULL, timezone = NULL)
 {
+  # If no min/max/value is provided, we won't know the
+  # type, and this will return an empty string
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {
     timeFormat <- switch(dataType, date = "%F", datetime = "%F %T", number = NULL)
   }
 
-  if (dataType == "date" || dataType == "datetime") {
+  if (isTRUE(dataType %in% c("date", "datetime"))) {
     to_ms <- function(x) 1000 * as.numeric(as.POSIXct(x))
     if (!is.null(min))   min   <- to_ms(min)
     if (!is.null(max))   max   <- to_ms(max)

@@ -1730,6 +1730,7 @@ createVarPromiseDomain <- function(env, name, value) {
 
 getSliderType <- function(min, max, value) {
   vals <- dropNulls(list(value, min, max))
+  if (length(vals) == 0) return("")
   type <- unique(lapply(vals, function(x) {
     if      (inherits(x, "Date"))   "date"
     else if (inherits(x, "POSIXt")) "datetime"
@@ -1738,7 +1739,7 @@ getSliderType <- function(min, max, value) {
   if (length(type) > 1) {
     stop("Type mismatch for `min`, `max`, and `value`. Each must be Date, POSIXt, or number.")
   }
-  if (length(type)) type[[1]] else NULL
+  type[[1]]
 }
 
 # Reads the `shiny.sharedSecret` global option, and returns a function that can

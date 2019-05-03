@@ -328,33 +328,21 @@ exports.compareVersion = function(a, op, b) {
 };
 
 
-function updateLabel(labelTxt, labelNode, labelHTML, insertBeforeEl) {
+function updateLabel(labelTxt, labelNode) {
   // Only update if label was specified in the update method
   if (typeof labelTxt === "undefined") return;
+  if (labelNode.length !== 1) {
+    throw new Error("labelNode must be of length 1");
+  }
 
-  // Should the label node exist?
-  var labelEmpty = $.isArray(labelTxt) && labelTxt.length === 0;
+  // Should the label be empty?
+  var emptyLabel = $.isArray(labelTxt) && labelTxt.length === 0;
 
-  // Does the label node already exist?
-  var labelNode = labelNode || [];
-  var labelNodeExists = labelNode.length > 0;
-
-  if (labelNodeExists) {
-
-    if (labelEmpty) {
-      labelNode.remove();
-    } else {
-      labelNode.text(labelTxt);
-    }
-
+  if (emptyLabel) {
+    labelNode.addClass("shiny-label-null");
   } else {
-
-    if (!labelEmpty) {
-      // Some labels are actually spans
-      var newLabelNode = $(labelHTML).text(labelTxt);
-      newLabelNode.insertBefore(insertBeforeEl);
-    }
-
+    labelNode.text(labelTxt);
+    labelNode.removeClass("shiny-label-null");
   }
 
 }

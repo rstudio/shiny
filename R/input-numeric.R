@@ -42,7 +42,7 @@ numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
 
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
-    label %AND% tags$label(label, `for` = inputId),
+    shinyInputLabel(inputId, label),
     inputTag
   )
 }

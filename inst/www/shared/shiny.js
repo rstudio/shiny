@@ -321,31 +321,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     if (op === "==") return diff === 0;else if (op === ">=") return diff >= 0;else if (op === ">") return diff > 0;else if (op === "<=") return diff <= 0;else if (op === "<") return diff < 0;else throw "Unknown operator: " + op;
   };
 
-  function updateLabel(labelTxt, labelNode, labelHTML, insertBeforeEl) {
+  function updateLabel(labelTxt, labelNode) {
     // Only update if label was specified in the update method
     if (typeof labelTxt === "undefined") return;
+    if (labelNode.length !== 1) {
+      throw new Error("labelNode must be of length 1");
+    }
 
-    // Should the label node exist?
-    var labelEmpty = $.isArray(labelTxt) && labelTxt.length === 0;
+    // Should the label be empty?
+    var emptyLabel = $.isArray(labelTxt) && labelTxt.length === 0;
 
-    // Does the label node already exist?
-    var labelNode = labelNode || [];
-    var labelNodeExists = labelNode.length > 0;
-
-    if (labelNodeExists) {
-
-      if (labelEmpty) {
-        labelNode.remove();
-      } else {
-        labelNode.text(labelTxt);
-      }
+    if (emptyLabel) {
+      labelNode.addClass("shiny-label-null");
     } else {
-
-      if (!labelEmpty) {
-        // Some labels are actually spans
-        var newLabelNode = $(labelHTML).text(labelTxt);
-        newLabelNode.insertBefore(insertBeforeEl);
-      }
+      labelNode.text(labelTxt);
+      labelNode.removeClass("shiny-label-null");
     }
   }
 
@@ -4354,10 +4344,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     receiveMessage: function receiveMessage(el, data) {
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      var escape_id = $escape(el.id);
-      var labelNode = $(el).parent().find('label[for="' + escape_id + '"]');
-      var labelTemplate = "<label for='" + escape_id + "'></label>";
-      updateLabel(data.label, labelNode, labelTemplate, el);
+      updateLabel(data.label, this._getLabelNode(el));
 
       if (data.hasOwnProperty('placeholder')) el.placeholder = data.placeholder;
 
@@ -4365,7 +4352,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     getState: function getState(el) {
       return {
-        label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode().text(),
         value: el.value,
         placeholder: el.placeholder
       };
@@ -4375,6 +4362,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         policy: 'debounce',
         delay: 250
       };
+    },
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
     }
   });
   inputBindings.register(textInputBinding, 'shiny.textInput');
@@ -4430,19 +4420,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (data.hasOwnProperty('max')) el.max = data.max;
       if (data.hasOwnProperty('step')) el.step = data.step;
 
-      var escape_id = $escape(el.id);
-      var labelNode = $(el).parent().find('label[for="' + escape_id + '"]');
-      var labelHTML = "<label for='" + escape_id + "'></label>";
-      updateLabel(data.label, labelNode, labelHTML, el);
+      updateLabel(data.label, this._getLabelNode(el));
 
       $(el).trigger('change');
     },
     getState: function getState(el) {
-      return { label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+      return { label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         min: Number(el.min),
         max: Number(el.max),
         step: Number(el.step) };
+    },
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
     }
   });
   inputBindings.register(numberInputBinding, 'shiny.numberInput');
@@ -4815,7 +4805,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (startview === 2) startview = 'decade';else if (startview === 1) startview = 'year';else if (startview === 0) startview = 'month';
 
       return {
-        label: $el.find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         valueString: $input.val(),
         min: min,
@@ -4829,10 +4819,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     receiveMessage: function receiveMessage(el, data) {
       var $input = $(el).find('input');
 
-      var escape_id = $escape(el.id);
-      var labelNode = $(el).find('label[for="' + escape_id + '"]');
-      var labelTemplate = "<label for='" + escape_id + "'></label>";
-      updateLabel(data.label, labelNode, labelTemplate, $input);
+      updateLabel(data.label, this._getLabelNode(el));
 
       if (data.hasOwnProperty('min')) this._setMin($input[0], data.min);
 
@@ -4886,6 +4873,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if ($input.data('max-date') !== undefined) {
         this._setMax($input[0], $input.data('max-date'));
       }
+    },
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).find('label[for="' + $escape(el.id) + '"]');
     },
     // Given a format object from a date picker, return a string
     _formatToString: function _formatToString(format) {
@@ -5033,7 +5023,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (startview === 2) startview = 'decade';else if (startview === 1) startview = 'year';else if (startview === 0) startview = 'month';
 
       return {
-        label: $el.find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         valueString: [$startinput.val(), $endinput.val()],
         min: min,
@@ -5050,10 +5040,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       var $startinput = $inputs.eq(0);
       var $endinput = $inputs.eq(1);
 
-      var escape_id = $escape(el.id);
-      var labelNode = $el.find('label[for="' + escape_id + '"]');
-      var labelHTML = "<label for='" + escape_id + "'></label>";
-      updateLabel(data.label, labelNode, labelHTML, el);
+      updateLabel(data.label, this._getLabelNode(el));
 
       if (data.hasOwnProperty('min')) {
         this._setMin($startinput[0], data.min);
@@ -5109,6 +5096,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     unsubscribe: function unsubscribe(el) {
       $(el).off('.dateRangeInputBinding');
+    },
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).find('label[for="' + $escape(el.id) + '"]');
     }
   });
   inputBindings.register(dateRangeInputBinding, 'shiny.dateRangeInput');
@@ -5158,7 +5148,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       return {
-        label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode(el),
         value: this.getValue(el),
         options: options
       };
@@ -5240,13 +5230,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.setValue(el, data.value);
       }
 
-      var escaped_id = $escape(el.id);
-      if (this._is_selectize(el)) {
-        escaped_id += "-selectized";
-      }
-      var labelNode = $(el).parent().parent().find('label[for="' + escaped_id + '"]');
-      var labelHTML = "<label for='" + escaped_id + "'></label>";
-      updateLabel(data.label, labelNode, labelHTML, el);
+      updateLabel(data.label, this._getLabelNode(el));
 
       $(el).trigger('change');
     },
@@ -5268,6 +5252,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     initialize: function initialize(el) {
       this._selectize(el);
+    },
+    _getLabelNode: function _getLabelNode(el) {
+      var escaped_id = $escape(el.id);
+      if (this._is_selectize(el)) {
+        escaped_id += "-selectized";
+      }
+      return $(el).parent().parent().find('label[for="' + escaped_id + '"]');
     },
     // Return true if it's a selectize input, false if it's a regular select input.
     _is_selectize: function _is_selectize(el) {
@@ -5346,7 +5337,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       }
 
       return {
-        label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+        label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         options: options
       };
@@ -5365,10 +5356,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      var escape_id = $escape(el.id);
-      var labelNode = $(el).parent().find('label[for="' + $escape(el.id) + '"]');
-      var labelHTML = "<label for='" + escape_id + "'></label>";
-      updateLabel(data.label, labelNode, labelHTML, el);
+      updateLabel(data.label, this._getLabelNode(el));
 
       $(el).trigger('change');
     },
@@ -5379,6 +5367,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     unsubscribe: function unsubscribe(el) {
       $(el).off('.radioInputBinding');
+    },
+    // Get the DOM element that contains the top-level label
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
     },
     // Given an input DOM object, get the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.
@@ -5445,7 +5437,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           label: this._getLabel($objs[i]) };
       }
 
-      return { label: $(el).find('label[for="' + $escape(el.id) + '"]').text(),
+      return { label: this._getLabelNode(el).text(),
         value: this.getValue(el),
         options: options
       };
@@ -5464,10 +5456,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       if (data.hasOwnProperty('value')) this.setValue(el, data.value);
 
-      var escape_id = $escape(el.id);
-      var labelNode = $(el).find('label[for="' + escape_id + '"]');
-      var labelHTML = "<label for='" + escape_id + "'></label>";
-      updateLabel(data.label, labelNode, labelHTML, $el.find(".shiny-options-group"));
+      updateLabel(data.label, this._getLabelNode(el));
 
       $(el).trigger('change');
     },
@@ -5478,6 +5467,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     unsubscribe: function unsubscribe(el) {
       $(el).off('.checkboxGroupInputBinding');
+    },
+    // Get the DOM element that contains the top-level label
+    _getLabelNode: function _getLabelNode(el) {
+      return $(el).find('label[for="' + $escape(el.id) + '"]');
     },
     // Given an input DOM object, get the associated label. Handles labels
     // that wrap the input as well as labels associated with 'for' attribute.

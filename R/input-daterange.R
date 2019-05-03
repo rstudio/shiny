@@ -92,7 +92,7 @@ dateRangeInput <- function(inputId, label, start = NULL, end = NULL,
       class = "shiny-date-range-input form-group shiny-input-container",
       style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
 
-      controlLabel(inputId, label),
+      shinyInputLabel(inputId, label, control = TRUE),
       # input-daterange class is needed for dropdown behavior
       div(class = "input-daterange input-group",
         tags$input(

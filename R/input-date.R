@@ -78,7 +78,7 @@
 #'
 #'   # Disable Mondays and Tuesdays.
 #'   dateInput("date7", "Date:", daysofweekdisabled = c(1,2)),
-#'   
+#'
 #'   # Disable specific dates.
 #'   dateInput("date8", "Date:", value = "2012-02-29",
 #'             datesdisabled = c("2012-03-01", "2012-03-02"))
@@ -107,7 +107,7 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
     class = "shiny-date-input form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
 
-    controlLabel(inputId, label),
+    shinyInputLabel(inputId, label, control = TRUE),
     tags$input(type = "text",
                class = "form-control",
                `data-date-language` = language,

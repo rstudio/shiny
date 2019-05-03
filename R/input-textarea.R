@@ -55,7 +55,7 @@ textAreaInput <- function(inputId, label, value = "", width = NULL, height = NUL
   if (length(style) == 0) style <- NULL
 
   div(class = "form-group shiny-input-container",
-    label %AND% tags$label(label, `for` = inputId),
+    shinyInputLabel(inputId, label),
     tags$textarea(
       id = inputId,
       class = "form-control",

@@ -1,5 +1,13 @@
-controlLabel <- function(controlName, label) {
-  label %AND% tags$label(class = "control-label", `for` = controlName, label)
+shinyInputLabel <- function(inputId, label = NULL, control = FALSE) {
+  classes <- c(
+    if (is.null(label)) "shiny-label-null",
+    if (control) "control-label"
+  )
+  tags$label(
+    label,
+    `for` = inputId,
+    class = if (!is.null(classes)) paste(classes, collapse = " ")
+  )
 }
 
 # This function takes in either a list or vector for `choices` (and

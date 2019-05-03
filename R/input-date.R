@@ -92,14 +92,10 @@ dateInput <- function(inputId, label, value = NULL, min = NULL, max = NULL,
   language = "en", width = NULL, autoclose = TRUE,
   datesdisabled = NULL, daysofweekdisabled = NULL) {
 
-  # If value is a date object, convert it to a string with yyyy-mm-dd format
-  # Same for min and max
-  if (inherits(value, "Date"))  value <- format(value, "%Y-%m-%d")
-  if (inherits(min,   "Date"))  min   <- format(min,   "%Y-%m-%d")
-  if (inherits(max,   "Date"))  max   <- format(max,   "%Y-%m-%d")
-  if (inherits(datesdisabled, "Date")) {
-      datesdisabled <- format(datesdisabled,   "%Y-%m-%d")
-  }
+  value <- dateYMD(value, "value")
+  min <- dateYMD(min, "min")
+  max <- dateYMD(max, "max")
+  datesdisabled <- dateYMD(datesdisabled, "datesdisabled")
 
   value <- restoreInput(id = inputId, default = value)
 

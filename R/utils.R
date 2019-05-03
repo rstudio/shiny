@@ -1560,6 +1560,25 @@ URLencode <- function(value, reserved = FALSE) {
   if (reserved) encodeURIComponent(value) else encodeURI(value)
 }
 
+# Make user-supplied dates are either NULL or can be coerced
+# to a yyyy-mm-dd formatted string. If a date is specified, this
+# function returns a string for consistency across locales.
+# Also, `as.Date()` is used to coerce strings to date objects
+# so that strings like "2016-08-9" are expanded to "2016-08-09"
+dateYMD <- function(date = NULL, argName = "value") {
+  if (!length(date)) return(NULL)
+  if (length(date) > 1) warning("Expected `", argName, "` to be of length 1.")
+  tryCatch(date <- format(as.Date(date), "%Y-%m-%d"),
+    error = function(e) {
+      warning(
+        "Couldn't coerce the `", argName,
+        "` argument to a date string with format yyyy-mm-dd",
+        call. = FALSE
+      )
+    }
+  )
+  date
+}
 
 # This function takes a name and function, and it wraps that function in a new
 # function which calls the original function using the specified name. This can
@@ -1730,6 +1749,7 @@ createVarPromiseDomain <- function(env, name, value) {
 
 getSliderType <- function(min, max, value) {
   vals <- dropNulls(list(value, min, max))
+  if (length(vals) == 0) return("")
   type <- unique(lapply(vals, function(x) {
     if      (inherits(x, "Date"))   "date"
     else if (inherits(x, "POSIXt")) "datetime"

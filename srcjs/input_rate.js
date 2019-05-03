@@ -189,8 +189,8 @@ var InputBatchSender = function(shinyapp) {
   this.lastChanceCallback = [];
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    this.pendingData[name] = value;
+  this.setInput = function(name_type, value, opts) {
+    this.pendingData[name_type] = value;
 
     if (!this.reentrant) {
       if (opts.priority === "event") {
@@ -227,8 +227,8 @@ var InputNoResendDecorator = function(target, initialValues) {
   this.lastSentValues = this.reset(initialValues);
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    const { name: inputName, inputType: inputType } = splitInputNameType(name);
+  this.setInput = function(name_type, value, opts) {
+    const { name: inputName, inputType: inputType } = splitInputNameType(name_type);
     const jsonValue = JSON.stringify(value);
 
     if (opts.priority !== "event" &&
@@ -267,10 +267,10 @@ var InputEventDecorator = function(target) {
   this.target = target;
 };
 (function() {
-  this.setInput = function(name, value, opts) {
+  this.setInput = function(name_type, value, opts) {
     var evt = jQuery.Event("shiny:inputchanged");
 
-    const input = splitInputNameType(name);
+    const input = splitInputNameType(name_type);
     evt.name      = input.name;
     evt.inputType = input.inputType;
     evt.value     = value;
@@ -335,9 +335,9 @@ var InputDeferDecorator = function(target) {
   this.pendingInput = {};
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    if (/^\./.test(name))
-      this.target.setInput(name, value, opts);
+  this.setInput = function(name_type, value, opts) {
+    if (/^\./.test(name_type))
+      this.target.setInput(name_type, value, opts);
     else
       this.pendingInput[name] = { value, opts };
   };
@@ -356,13 +356,13 @@ const InputValidateDecorator = function(target) {
   this.target = target;
 };
 (function() {
-  this.setInput = function(name, value, opts) {
-    if (!name)
+  this.setInput = function(name_type, value, opts) {
+    if (!name_type)
       throw "Can't set input with empty name.";
 
     opts = addDefaultInputOpts(opts);
 
-    this.target.setInput(name, value, opts);
+    this.target.setInput(name_type, value, opts);
   };
 }).call(InputValidateDecorator.prototype);
 
@@ -391,8 +391,8 @@ function addDefaultInputOpts(opts) {
 }
 
 
-function splitInputNameType(name) {
-  const name2 = name.split(':');
+function splitInputNameType(name_type) {
+  const name2 = name_type.split(':');
   return {
     name:      name2[0],
     inputType: name2.length > 1 ? name2[1] : ''

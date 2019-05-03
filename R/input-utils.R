@@ -5,8 +5,8 @@ shinyInputLabel <- function(inputId, label = NULL, control = FALSE) {
   )
   tags$label(
     label,
-    `for` = inputId,
-    class = if (!is.null(classes)) paste(classes, collapse = " ")
+    class = if (!is.null(classes)) paste(classes, collapse = " "),
+    `for` = inputId
   )
 }
 

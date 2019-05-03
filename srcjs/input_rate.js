@@ -189,8 +189,8 @@ var InputBatchSender = function(shinyapp) {
   this.lastChanceCallback = [];
 };
 (function() {
-  this.setInput = function(name_type, value, opts) {
-    this.pendingData[name_type] = value;
+  this.setInput = function(nameType, value, opts) {
+    this.pendingData[nameType] = value;
 
     if (!this.reentrant) {
       if (opts.priority === "event") {
@@ -227,8 +227,8 @@ var InputNoResendDecorator = function(target, initialValues) {
   this.lastSentValues = this.reset(initialValues);
 };
 (function() {
-  this.setInput = function(name_type, value, opts) {
-    const { name: inputName, inputType: inputType } = splitInputNameType(name_type);
+  this.setInput = function(nameType, value, opts) {
+    const { name: inputName, inputType: inputType } = splitInputNameType(nameType);
     const jsonValue = JSON.stringify(value);
 
     if (opts.priority !== "event" &&
@@ -267,10 +267,10 @@ var InputEventDecorator = function(target) {
   this.target = target;
 };
 (function() {
-  this.setInput = function(name_type, value, opts) {
+  this.setInput = function(nameType, value, opts) {
     var evt = jQuery.Event("shiny:inputchanged");
 
-    const input = splitInputNameType(name_type);
+    const input = splitInputNameType(nameType);
     evt.name      = input.name;
     evt.inputType = input.inputType;
     evt.value     = value;
@@ -297,12 +297,14 @@ var InputRateDecorator = function(target) {
   this.inputRatePolicies = {};
 };
 (function() {
-  // Note the 'public' methods setInput() and setRatePolicy() are passed
-  // both the input name (i.e., inputId) and the input type (i.e., the
-  // result of InputBinding.getType()). However, the 'private' methods
-  // are passed just the input name (i.e., inputId).
-  this.setInput = function(name_type, value, opts) {
-    const {name: inputName} = splitInputNameType(name_type);
+  // Note that the first argument of setInput() and setRatePolicy()
+  // are passed both the input name (i.e., inputId) and type.
+  // https://github.com/rstudio/shiny/blob/67d3a/srcjs/init_shiny.js#L111-L126
+  // However, $ensureInit() and $doSetInput() are meant to be passed just
+  // the input name (i.e., inputId), which is why we distinguish between
+  // nameType and name.
+  this.setInput = function(nameType, value, opts) {
+    const {name: inputName} = splitInputNameType(nameType);
 
     this.$ensureInit(inputName);
 
@@ -311,8 +313,8 @@ var InputRateDecorator = function(target) {
     else
       this.inputRatePolicies[inputName].normalCall(inputName, value, opts);
   };
-  this.setRatePolicy = function(name_type, mode, millis) {
-    const {name: inputName} = splitInputNameType(name_type);
+  this.setRatePolicy = function(nameType, mode, millis) {
+    const {name: inputName} = splitInputNameType(nameType);
 
     if (mode === 'direct') {
       this.inputRatePolicies[inputName] = new Invoker(this, this.$doSetInput);
@@ -339,9 +341,9 @@ var InputDeferDecorator = function(target) {
   this.pendingInput = {};
 };
 (function() {
-  this.setInput = function(name_type, value, opts) {
-    if (/^\./.test(name_type))
-      this.target.setInput(name_type, value, opts);
+  this.setInput = function(nameType, value, opts) {
+    if (/^\./.test(nameType))
+      this.target.setInput(nameType, value, opts);
     else
       this.pendingInput[name] = { value, opts };
   };
@@ -360,13 +362,13 @@ const InputValidateDecorator = function(target) {
   this.target = target;
 };
 (function() {
-  this.setInput = function(name_type, value, opts) {
-    if (!name_type)
+  this.setInput = function(nameType, value, opts) {
+    if (!nameType)
       throw "Can't set input with empty name.";
 
     opts = addDefaultInputOpts(opts);
 
-    this.target.setInput(name_type, value, opts);
+    this.target.setInput(nameType, value, opts);
   };
 }).call(InputValidateDecorator.prototype);
 
@@ -395,8 +397,8 @@ function addDefaultInputOpts(opts) {
 }
 
 
-function splitInputNameType(name_type) {
-  const name2 = name_type.split(':');
+function splitInputNameType(nameType) {
+  const name2 = nameType.split(':');
   return {
     name:      name2[0],
     inputType: name2.length > 1 ? name2[1] : ''

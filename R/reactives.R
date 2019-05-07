@@ -395,24 +395,21 @@ ReactiveValues <- R6Class(
       # set the value for better logging
       .values[[key]] <- value
 
-      if (key_exists) {
-        # key has been depended upon (can not happen if the key is being set)
-        if (isTRUE(.hasRetrieved$keys[[key]])) {
-          rLog$valueChangeKey(.reactId, key, value, domain)
-          keyReactId <- rLog$keyIdStr(.reactId, key)
-          rLog$invalidateStart(keyReactId, NULL, "other", domain)
-          on.exit(
-            rLog$invalidateEnd(keyReactId, NULL, "other", domain),
-            add = TRUE
-          )
-        }
+      # key has been depended upon
+      if (isTRUE(.hasRetrieved$keys[[key]])) {
+        rLog$valueChangeKey(.reactId, key, value, domain)
+        keyReactId <- rLog$keyIdStr(.reactId, key)
+        rLog$invalidateStart(keyReactId, NULL, "other", domain)
+        on.exit(
+          rLog$invalidateEnd(keyReactId, NULL, "other", domain),
+          add = TRUE
+        )
+      }
 
-      } else {
-        # only invalidate if there are deps
-        if (isTRUE(.hasRetrieved$names)) {
-          rLog$valueChangeNames(.reactId, ls(.values, all.names = TRUE), domain)
-          .namesDeps$invalidate()
-        }
+      # only invalidate if there are deps
+      if (!key_exists && isTRUE(.hasRetrieved$names)) {
+        rLog$valueChangeNames(.reactId, ls(.values, all.names = TRUE), domain)
+        .namesDeps$invalidate()
       }
 
       if (hidden) {

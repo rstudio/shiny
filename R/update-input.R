@@ -205,18 +205,9 @@ updateActionButton <- function(session, inputId, label = NULL, icon = NULL) {
 updateDateInput <- function(session, inputId, label = NULL, value = NULL,
                             min = NULL, max = NULL) {
 
-  # Make sure values are NULL or Date objects. This is so we can ensure that
-  # they will be formatted correctly. For example, the string "2016-08-9" is not
-  # correctly formatted, but the conversion to Date and back to string will fix
-  # it.
-  formatDate <- function(x) {
-    if (is.null(x))
-      return(NULL)
-    format(as.Date(x), "%Y-%m-%d")
-  }
-  value <- formatDate(value)
-  min   <- formatDate(min)
-  max   <- formatDate(max)
+  value <- dateYMD(value, "value")
+  min   <- dateYMD(min, "min")
+  max   <- dateYMD(max, "max")
 
   message <- dropNulls(list(label=label, value=value, min=min, max=max))
   session$sendInputMessage(inputId, message)
@@ -266,12 +257,11 @@ updateDateInput <- function(session, inputId, label = NULL, value = NULL,
 updateDateRangeInput <- function(session, inputId, label = NULL,
                                  start = NULL, end = NULL, min = NULL,
                                  max = NULL) {
-  # Make sure start and end are strings, not date objects. This is for
-  # consistency across different locales.
-  if (inherits(start, "Date"))  start <- format(start, '%Y-%m-%d')
-  if (inherits(end, "Date"))    end <- format(end, '%Y-%m-%d')
-  if (inherits(min, "Date"))    min <- format(min, '%Y-%m-%d')
-  if (inherits(max, "Date"))    max <- format(max, '%Y-%m-%d')
+
+  start <- dateYMD(start, "start")
+  end <- dateYMD(end, "end")
+  min <- dateYMD(min, "min")
+  max <- dateYMD(max, "max")
 
   message <- dropNulls(list(
     label = label,
@@ -428,13 +418,15 @@ updateNumericInput <- function(session, inputId, label = NULL, value = NULL,
 updateSliderInput <- function(session, inputId, label = NULL, value = NULL,
   min = NULL, max = NULL, step = NULL, timeFormat = NULL, timezone = NULL)
 {
+  # If no min/max/value is provided, we won't know the
+  # type, and this will return an empty string
   dataType <- getSliderType(min, max, value)
 
   if (is.null(timeFormat)) {
     timeFormat <- switch(dataType, date = "%F", datetime = "%F %T", number = NULL)
   }
 
-  if (dataType == "date" || dataType == "datetime") {
+  if (isTRUE(dataType %in% c("date", "datetime"))) {
     to_ms <- function(x) 1000 * as.numeric(as.POSIXct(x))
     if (!is.null(min))   min   <- to_ms(min)
     if (!is.null(max))   max   <- to_ms(max)

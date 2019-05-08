@@ -1,11 +1,8 @@
-shinyInputLabel <- function(inputId, label = NULL, control = FALSE) {
-  classes <- c(
-    if (is.null(label)) "shiny-label-null",
-    if (control) "control-label"
-  )
+shinyInputLabel <- function(inputId, label = NULL) {
   tags$label(
     label,
-    class = if (!is.null(classes)) paste(classes, collapse = " "),
+    class = "control-label",
+    class = if (is.null(label)) "shiny-label-null",
     `for` = inputId
   )
 }

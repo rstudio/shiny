@@ -216,6 +216,10 @@ pre.shiny-text-output {
   font-size: 80%;
 }
 
+.shiny-label-null {
+  display: none;
+}
+
 .crosshair {
   cursor: crosshair;
 }

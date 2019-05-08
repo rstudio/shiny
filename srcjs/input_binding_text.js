@@ -27,8 +27,7 @@ $.extend(textInputBinding, {
     if (data.hasOwnProperty('value'))
       this.setValue(el, data.value);
 
-    if (data.hasOwnProperty('label'))
-      $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    updateLabel(data.label, this._getLabelNode(el));
 
     if (data.hasOwnProperty('placeholder'))
       el.placeholder = data.placeholder;
@@ -37,7 +36,7 @@ $.extend(textInputBinding, {
   },
   getState: function(el) {
     return {
-      label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+      label: this._getLabelNode(el).text(),
       value: el.value,
       placeholder: el.placeholder
     };
@@ -47,6 +46,9 @@ $.extend(textInputBinding, {
       policy: 'debounce',
       delay: 250
     };
+  },
+  _getLabelNode: function(el) {
+    return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
   }
 });
 inputBindings.register(textInputBinding, 'shiny.textInput');

@@ -40,7 +40,7 @@ $.extend(selectInputBinding, {
     }
 
     return {
-      label: $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+      label:    this._getLabelNode(el),
       value:    this.getValue(el),
       options:  options
     };
@@ -123,15 +123,7 @@ $.extend(selectInputBinding, {
       this.setValue(el, data.value);
     }
 
-    if (data.hasOwnProperty('label')) {
-      let escaped_id = $escape(el.id);
-      if (this._is_selectize(el)) {
-        escaped_id += "-selectized";
-      }
-      $(el).parent().parent()
-        .find('label[for="' + escaped_id + '"]')
-        .text(data.label);
-    }
+    updateLabel(data.label, this._getLabelNode(el));
 
     $(el).trigger('change');
   },
@@ -151,6 +143,13 @@ $.extend(selectInputBinding, {
   },
   initialize: function(el) {
     this._selectize(el);
+  },
+  _getLabelNode: function(el) {
+    let escaped_id = $escape(el.id);
+    if (this._is_selectize(el)) {
+      escaped_id += "-selectized";
+    }
+    return $(el).parent().parent().find('label[for="' + escaped_id + '"]');
   },
   // Return true if it's a selectize input, false if it's a regular select input.
   _is_selectize: function(el) {

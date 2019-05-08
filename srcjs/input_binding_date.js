@@ -46,7 +46,7 @@ $.extend(dateInputBinding, {
     else if (startview === 0)  startview = 'month';
 
     return {
-      label:       $el.find('label[for="' + $escape(el.id) + '"]').text(),
+      label:       this._getLabelNode(el).text(),
       value:       this.getValue(el),
       valueString: $input.val(),
       min:         min,
@@ -60,8 +60,7 @@ $.extend(dateInputBinding, {
   receiveMessage: function(el, data) {
     var $input = $(el).find('input');
 
-    if (data.hasOwnProperty('label'))
-      $(el).find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    updateLabel(data.label, this._getLabelNode(el));
 
     if (data.hasOwnProperty('min'))
       this._setMin($input[0], data.min);
@@ -118,6 +117,9 @@ $.extend(dateInputBinding, {
     if ($input.data('max-date') !== undefined) {
       this._setMax($input[0], $input.data('max-date'));
     }
+  },
+  _getLabelNode: function(el) {
+    return $(el).find('label[for="' + $escape(el.id) + '"]');
   },
   // Given a format object from a date picker, return a string
   _formatToString: function(format) {

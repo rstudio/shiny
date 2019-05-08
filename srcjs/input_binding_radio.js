@@ -21,7 +21,7 @@ $.extend(radioInputBinding, {
     }
 
     return {
-      label:    $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(),
+      label:    this._getLabelNode(el).text(),
       value:    this.getValue(el),
       options:  options
     };
@@ -41,8 +41,7 @@ $.extend(radioInputBinding, {
     if (data.hasOwnProperty('value'))
       this.setValue(el, data.value);
 
-    if (data.hasOwnProperty('label'))
-      $(el).parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    updateLabel(data.label, this._getLabelNode(el));
 
     $(el).trigger('change');
   },
@@ -53,6 +52,10 @@ $.extend(radioInputBinding, {
   },
   unsubscribe: function(el) {
     $(el).off('.radioInputBinding');
+  },
+  // Get the DOM element that contains the top-level label
+  _getLabelNode: function(el) {
+      return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
   },
   // Given an input DOM object, get the associated label. Handles labels
   // that wrap the input as well as labels associated with 'for' attribute.

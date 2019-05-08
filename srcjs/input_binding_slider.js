@@ -130,8 +130,7 @@ $.extend(sliderInputBinding, textInputBinding, {
       }
     }
 
-    if (data.hasOwnProperty('label'))
-      $el.parent().find('label[for="' + $escape(el.id) + '"]').text(data.label);
+    updateLabel(data.label, this._getLabelNode(el));
 
     var domElements = ['data-type', 'time-format', 'timezone'];
     for (var i = 0; i < domElements.length; i++) {
@@ -174,7 +173,9 @@ $.extend(sliderInputBinding, textInputBinding, {
 
     $el.ionRangeSlider(opts);
   },
-
+  _getLabelNode: function(el) {
+    return $(el).parent().find('label[for="' + $escape(el.id) + '"]');
+  },
   // Number of values; 1 for single slider, 2 for range slider
   _numValues: function(el) {
     if ($(el).data('ionRangeSlider').options.type === 'double')

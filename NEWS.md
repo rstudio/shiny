@@ -13,6 +13,8 @@ shiny 1.3.2.9000
 
 * Fixed [rstudio/reactlog#36](https://github.com/rstudio/reactlog/issues/36): Changes to reactive values not displaying accurately in reactlog. ([#2424](https://github.com/rstudio/shiny/pull/2424))
 
+* Fixed [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These bugs were reported as fixed in Shiny 1.3.0 but were not actually fixed because some JavaScript changes were accidentally not included in the release. The fix resolves issues that occur when `withProgressBar()` or bookmarking are combined with the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot.
+
 shiny 1.3.2
 ===========
 

@@ -521,8 +521,8 @@ test_that("names() and reactiveValuesToList()", {
   # Assigning names fails
   expect_error(isolate(names(v) <- c('x', 'y')))
 
-  expect_equal(isolate(reactiveValuesToList(values)), list(A=1))
-  expect_equal(isolate(reactiveValuesToList(values, all.names=TRUE)), list(A=1, .B=2))
+  expect_mapequal(isolate(reactiveValuesToList(values)), list(A=1))
+  expect_mapequal(isolate(reactiveValuesToList(values, all.names=TRUE)), list(A=1, .B=2))
 
 
   flushReact()
@@ -1137,10 +1137,10 @@ test_that("reactive domain works across async handlers", {
       ~{hasReactiveDomain <<- identical(getDefaultReactiveDomain(), obj)}
     )
   })
-  
+
   while (is.null(hasReactiveDomain) && !later::loop_empty()) {
     later::run_now()
   }
-  
+
   testthat::expect_true(hasReactiveDomain)
 })

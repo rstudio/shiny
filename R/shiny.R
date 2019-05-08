@@ -513,8 +513,7 @@ ShinySession <- R6Class(
       # in the web page; in these cases, there's no output_foo_hidden flag,
       # and hidden should be TRUE. In other words, NULL and TRUE should map to
       # TRUE, FALSE should map to FALSE.
-      hidden <- private$.clientData$.values[[paste("output_", name, "_hidden",
-                                           sep="")]]
+      hidden <- private$.clientData$.values$get(paste0("output_", name, "_hidden"))
       if (is.null(hidden)) hidden <- TRUE
 
       return(hidden && private$getOutputOption(name, 'suspendWhenHidden', TRUE))
@@ -1917,7 +1916,7 @@ ShinySession <- R6Class(
 
       fileData <- readBin(file, 'raw', n=bytes)
 
-      if (isTRUE(private$.clientData$.values$allowDataUriScheme)) {
+      if (isTRUE(private$.clientData$.values$get("allowDataUriScheme"))) {
         b64 <- rawToBase64(fileData)
         return(paste('data:', contentType, ';base64,', b64, sep=''))
       } else {

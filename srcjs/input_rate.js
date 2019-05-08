@@ -309,9 +309,9 @@ var InputRateDecorator = function(target) {
     this.$ensureInit(inputName);
 
     if (opts.priority !== "deferred")
-      this.inputRatePolicies[inputName].immediateCall(inputName, value, opts);
+      this.inputRatePolicies[inputName].immediateCall(nameType, value, opts);
     else
-      this.inputRatePolicies[inputName].normalCall(inputName, value, opts);
+      this.inputRatePolicies[inputName].normalCall(nameType, value, opts);
   };
   this.setRatePolicy = function(nameType, mode, millis) {
     const {name: inputName} = splitInputNameType(nameType);
@@ -330,8 +330,8 @@ var InputRateDecorator = function(target) {
     if (!(name in this.inputRatePolicies))
       this.setRatePolicy(name, 'direct');
   };
-  this.$doSetInput = function(name, value, opts) {
-    this.target.setInput(name, value, opts);
+  this.$doSetInput = function(nameType, value, opts) {
+    this.target.setInput(nameType, value, opts);
   };
 }).call(InputRateDecorator.prototype);
 

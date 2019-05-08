@@ -13,7 +13,10 @@ shiny 1.3.2.9000
 
 * Fixed [#2250](https://github.com/rstudio/shiny/issues/2250): `updateSliderInput()` now works with un-specified (or zero-length) `min`, `max`, and `value`. ([#2416](https://github.com/rstudio/shiny/pull/2416))
 
+* Fixed [#2396](https://github.com/rstudio/shiny/issues/2396): `selectInput("myID", ...)` resulting in an extra `myID-selectized` input (introduced in v1.2.0). [#2418](https://github.com/rstudio/shiny/pull/2418)
+
 * Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))
+
 * Fixed [rstudio/reactlog#36](https://github.com/rstudio/reactlog/issues/36): Changes to reactive values not displaying accurately in reactlog. ([#2424](https://github.com/rstudio/shiny/pull/2424))
 
 * Fixed [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These bugs were reported as fixed in Shiny 1.3.0 but were not actually fixed because some JavaScript changes were accidentally not included in the release. The fix resolves issues that occur when `withProgressBar()` or bookmarking are combined with the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot.

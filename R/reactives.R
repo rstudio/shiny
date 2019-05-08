@@ -294,7 +294,7 @@ ReactiveValues <- R6Class(
     .label = character(0),
     .values = 'environment',
     .metadata = 'environment',
-    .dependents = 'environment',
+    .dependents = 'Map',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
     # Dependents for all values, including hidden
@@ -314,7 +314,7 @@ ReactiveValues <- R6Class(
       .label <<- label
       .values <<- new.env(parent=emptyenv())
       .metadata <<- new.env(parent=emptyenv())
-      .dependents <<- new.env(parent=emptyenv())
+      .dependents <<- Map$new()
       .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE, keys = list())
       .namesDeps <<- Dependents$new(reactId = rLog$namesIdStr(.reactId))
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
@@ -333,7 +333,7 @@ ReactiveValues <- R6Class(
       # that we know to invalidate them when this value changes.
       ctx <- getCurrentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
+      if (!.dependents$containsKey(dep.key)) {
         reactKeyId <- rLog$keyIdStr(.reactId, key)
 
         if (!isTRUE(.hasRetrieved$keys[[key]])) {
@@ -341,10 +341,10 @@ ReactiveValues <- R6Class(
           .hasRetrieved$keys[[key]] <<- TRUE
         }
         rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-        .dependents[[dep.key]] <- ctx
+        .dependents$set(dep.key, ctx)
         ctx$onInvalidate(function() {
           rLog$dependsOnKeyRemove(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-          rm(list=dep.key, envir=.dependents, inherits=FALSE)
+          .dependents$remove(dep.key)
         })
       }
 
@@ -425,13 +425,10 @@ ReactiveValues <- R6Class(
         }
       }
 
-      dep.keys <- objects(
-        envir=.dependents,
-        pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
-        all.names=TRUE
-      )
+      dep.keys <- .dependents$keys()
+      dep.keys <- dep.keys[grepl(paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''), dep.keys)]
       lapply(
-        mget(dep.keys, envir=.dependents),
+        .dependents$mget(dep.keys),
         function(ctx) {
           ctx$invalidate()
           NULL

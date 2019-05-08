@@ -77,7 +77,8 @@ Imports:
     promises (>= 1.0.1),
     tools,
     crayon,
-    rlang
+    rlang,
+    fastmap
 Suggests:
     datasets,
     Cairo (>= 1.5-5),
@@ -88,6 +89,8 @@ Suggests:
     ggplot2,
     reactlog (>= 1.0.0),
     magrittr
+Remotes:
+    wch/fastmap
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

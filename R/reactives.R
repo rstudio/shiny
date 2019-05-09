@@ -293,7 +293,7 @@ ReactiveValues <- R6Class(
     .reactId = character(0),
     .label = character(0),
     .values = 'Map',
-    .metadata = 'environment',
+    .metadata = 'Map',
     .dependents = 'Map',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
@@ -313,7 +313,7 @@ ReactiveValues <- R6Class(
       .reactId <<- nextGlobalReactId()
       .label <<- label
       .values <<- Map$new()
-      .metadata <<- new.env(parent=emptyenv())
+      .metadata <<- Map$new()
       .dependents <<- Map$new()
       .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE, keys = list())
       .namesDeps <<- Dependents$new(reactId = rLog$namesIdStr(.reactId))
@@ -458,7 +458,7 @@ ReactiveValues <- R6Class(
     getMeta = function(key, metaKey) {
       # Make sure to use named (not numeric) indexing into list.
       metaKey <- as.character(metaKey)
-      .metadata[[key]][[metaKey]]
+      .metadata$get("key")[[metaKey]]
     },
 
     # Set a metadata value. Does not trigger reactivity.
@@ -466,11 +466,13 @@ ReactiveValues <- R6Class(
       # Make sure to use named (not numeric) indexing into list.
       metaKey <- as.character(metaKey)
 
-      if (!exists(key, envir = .metadata, inherits = FALSE)) {
-        .metadata[[key]] <<- list()
+      if (!.metadata$containsKey(key)) {
+        .metadata$set(key, list())
       }
 
-      .metadata[[key]][[metaKey]] <<- value
+      m <- .metadata$get(key)
+      m[[metaKey]] <- value
+      .metadata$set(key, m)
     },
 
     # Mark a value as frozen If accessed while frozen, a shiny.silent.error will

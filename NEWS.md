@@ -13,7 +13,7 @@ shiny 1.3.2.9000
 
 * Fixed [#2250](https://github.com/rstudio/shiny/issues/2250): `updateSliderInput()` now works with un-specified (or zero-length) `min`, `max`, and `value`. ([#2416](https://github.com/rstudio/shiny/pull/2416))
 
-* Fixed [#2396](https://github.com/rstudio/shiny/issues/2396): `selectInput("myID", ...)` resulting in an extra `myID-selectized` input (introduced in v1.2.0). [#2418](https://github.com/rstudio/shiny/pull/2418)
+* Fixed [#2396](https://github.com/rstudio/shiny/issues/2396): `selectInput("myID", ...)` resulting in an extra `myID-selectized` input (introduced in v1.2.0). ([#2418](https://github.com/rstudio/shiny/pull/2418))
 
 * Fixed [#2233](https://github.com/rstudio/shiny/issues/2233): `verbatimTextOutput()` produced wrapped text on Safari, but the text should not be wrapped. ([#2353](https://github.com/rstudio/shiny/pull/2353))
 

@@ -38,5 +38,3 @@ Output of `sessionInfo()`:
 ```
 
 ### Describe the problem in detail
-
-### Describe the behavior you expected

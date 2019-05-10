@@ -1014,7 +1014,8 @@ runExample <- function(example=NA,
 #' runGadget(shinyApp(ui, server))
 #' }
 #' @export
-runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
+runGadget <- function(app, server = NULL, port = getOption("shiny.port"), 
+  host = getOption("shiny.host", "127.0.0.1"),
   viewer = paneViewer(), stopOnCancel = TRUE) {
 
   if (!is.shiny.appobj(app)) {
@@ -1033,7 +1034,7 @@ runGadget <- function(app, server = NULL, port = getOption("shiny.port"),
     viewer <- utils::browseURL
   }
 
-  shiny::runApp(app, port = port, launch.browser = viewer)
+  shiny::runApp(app, port = port, host = host, launch.browser = viewer)
 }
 
 # Add custom functionality to a Shiny app object's server func

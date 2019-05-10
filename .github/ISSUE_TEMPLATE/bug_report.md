@@ -5,7 +5,13 @@ about : Report a bug in Shiny.
 
 <!--
 
-Shiny v1.3.2 is now available on CRAN. If you're currently using an older version of Shiny, we would appreciate it if you could update to Shiny v1.3.2 and confirm whether the problem still persists.
+Before you file an issue, we would appreciate it if you would upgrade to the latest version of Shiny from CRAN and confirm that the problem persists.
+
+# To install latest shiny from CRAN:
+install.packages("shiny")
+# To update all your R packages:
+update.packages(ask = FALSE, checkBuilt = TRUE)
+# Please remember to restart R after updating packages.
 
 This issue tracker is for bugs and feature requests in the Shiny package. If you're having trouble with Shiny Server or a related package, please file an issue in the appropriate repository. 
 
@@ -13,7 +19,7 @@ If you're having trouble with shinyapps.io, and you have a paid account (Starter
 
 Finally, if you are an RStudio customer and are having trouble with one of our Pro products, get in touch with our support team at support@rstudio.com.
 
-See our guide to writing good bug reports for further guidance: https://github.com/rstudio/shiny/wiki/Writing-Good-Bug-Reports
+See our guide to writing good bug reports for further guidance: https://github.com/rstudio/shiny/wiki/Writing-Good-Bug-Reports. The better your report is, the likelier we are to be able to reproduce and ultimately solve it.
 -->
 
 ### System details

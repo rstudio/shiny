@@ -239,7 +239,7 @@ MemoryCache <- R6Class("MemoryCache",
 
     exists = function(key) {
       validate_key(key)
-      private$cache$exists(key)
+      private$cache$has(key)
     },
 
     keys = function() {

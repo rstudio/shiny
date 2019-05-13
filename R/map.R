@@ -35,7 +35,7 @@ Map <- R6Class(
       map$mset(...)
     },
     remove = function(key) {
-      if (!map$exists(key))
+      if (!map$has(key))
         return(NULL)
 
       result <- map$get(key)
@@ -43,7 +43,7 @@ Map <- R6Class(
       result
     },
     containsKey = function(key) {
-      map$exists(key)
+      map$has(key)
     },
     keys = function() {
       map$keys()

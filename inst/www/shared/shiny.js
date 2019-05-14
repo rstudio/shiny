@@ -4335,7 +4335,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   var textInputBinding = new InputBinding();
   $.extend(textInputBinding, {
     find: function find(scope) {
-      return $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+      var $inputs = $(scope).find('input[type="text"], input[type="search"], input[type="url"], input[type="email"]');
+      // selectize.js 0.12.4 inserts a hidden text input with an
+      // id that ends in '-selectized'. The .not() selector below
+      // is to prevent textInputBinding from accidentally picking up
+      // this hidden element as a shiny input (#2396)
+      return $inputs.not('input[type="text"][id$="-selectized"]');
     },
     getId: function getId(el) {
       return InputBinding.prototype.getId.call(this, el) || el.name;

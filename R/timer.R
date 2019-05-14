@@ -86,8 +86,7 @@ TimerCallbacks <- R6Class(
   )
 )
 
-# Initialized in onLoad() because TimerCallbacks uses Map.
-timerCallbacks <- NULL
+timerCallbacks <- TimerCallbacks$new()
 
 scheduleTask <- function(millis, callback) {
   cancelled <- FALSE

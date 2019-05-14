@@ -1,9 +1,7 @@
 #' @include server-input-handlers.R
 
-# These Map objects are initialized in .onLoad() because Maps based on fastmap
-# can't be saved in one R session and loaded in another.
-appsByToken <- NULL
-appsNeedingFlush <- NULL
+appsByToken <- Map$new()
+appsNeedingFlush <- Map$new()
 
 # Provide a character representation of the WS that can be used
 # as a key in a Map.

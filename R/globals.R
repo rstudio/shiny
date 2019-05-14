@@ -6,12 +6,6 @@
   # package itself, making our PRNG completely deterministic. This line resets
   # the private seed during load.
   withPrivateSeed(set.seed(NULL))
-
-  appsByToken <<- Map$new()
-  appsNeedingFlush <<- Map$new()
-  timerCallbacks <<- TimerCallbacks$new()
-  initializeInputHandlers()
-  .globals$onStopCallbacks <<- Callbacks$new()
 }
 
 .onAttach <- function(libname, pkgname) {

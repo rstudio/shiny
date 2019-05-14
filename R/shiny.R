@@ -2219,8 +2219,7 @@ flushPendingSessions <- function() {
   })
 }
 
-# Initialized in .onLoad
-.globals$onStopCallbacks <- NULL
+.globals$onStopCallbacks <- Callbacks$new()
 
 #' Run code after an application or session ends
 #'

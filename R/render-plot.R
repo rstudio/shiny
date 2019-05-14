@@ -353,62 +353,88 @@ custom_print.ggplot <- function(x) {
 # With a faceted ggplot2 plot, the outer list contains two objects, each of
 # which represents one panel. In this example, there is one panelvar, but there
 # can be up to two of them.
-# mtc <- mtcars
-# mtc$am <- factor(mtc$am)
-# p <- print(ggplot(mtc, aes(wt, mpg)) + geom_point() + facet_wrap(~ am))
-# str(getGgplotCoordmap(p, 400, 300, 72))
+# p <- print(ggplot(mpg) + geom_point(aes(fl, cty), alpha = 0.2) + facet_wrap(~drv, scales = "free_x"))
+# str(getGgplotCoordmap(p, 500, 400, 72))
 # List of 2
-#  $ panels:List of 2
+#  $ panels:List of 3
 #   ..$ :List of 8
 #   .. ..$ panel     : num 1
 #   .. ..$ row       : int 1
 #   .. ..$ col       : int 1
 #   .. ..$ panel_vars:List of 1
-#   .. .. ..$ panelvar1: Factor w/ 2 levels "0","1": 1
+#   .. .. ..$ panelvar1: chr "4"
 #   .. ..$ log       :List of 2
 #   .. .. ..$ x: NULL
 #   .. .. ..$ y: NULL
-#   .. ..$ domain    :List of 4
-#   .. .. ..$ left  : num 1.32
-#   .. .. ..$ right : num 5.62
-#   .. .. ..$ bottom: num 9.22
-#   .. .. ..$ top   : num 35.1
+#   .. ..$ domain    :List of 5
+#   .. .. ..$ left           : num 0.4
+#   .. .. ..$ right          : num 4.6
+#   .. .. ..$ bottom         : num 7.7
+#   .. .. ..$ top            : num 36.3
+#   .. .. ..$ discrete_limits:List of 1
+#   .. .. .. ..$ x: chr [1:4] "d" "e" "p" "r"
 #   .. ..$ mapping   :List of 3
-#   .. .. ..$ x        : chr "wt"
-#   .. .. ..$ y        : chr "mpg"
-#   .. .. ..$ panelvar1: chr "am"
+#   .. .. ..$ x        : chr "fl"
+#   .. .. ..$ y        : chr "cty"
+#   .. .. ..$ panelvar1: chr "drv"
 #   .. ..$ range     :List of 4
 #   .. .. ..$ left  : num 33.3
-#   .. .. ..$ right : num 191
-#   .. .. ..$ bottom: num 328
+#   .. .. ..$ right : num 177
+#   .. .. ..$ bottom: num 448
 #   .. .. ..$ top   : num 23.1
 #   ..$ :List of 8
 #   .. ..$ panel     : num 2
 #   .. ..$ row       : int 1
 #   .. ..$ col       : int 2
 #   .. ..$ panel_vars:List of 1
-#   .. .. ..$ panelvar1: Factor w/ 2 levels "0","1": 2
+#   .. .. ..$ panelvar1: chr "f"
 #   .. ..$ log       :List of 2
 #   .. .. ..$ x: NULL
 #   .. .. ..$ y: NULL
-#   .. ..$ domain    :List of 4
-#   .. .. ..$ left  : num 1.32
-#   .. .. ..$ right : num 5.62
-#   .. .. ..$ bottom: num 9.22
-#   .. .. ..$ top   : num 35.1
+#   .. ..$ domain    :List of 5
+#   .. .. ..$ left           : num 0.4
+#   .. .. ..$ right          : num 5.6
+#   .. .. ..$ bottom         : num 7.7
+#   .. .. ..$ top            : num 36.3
+#   .. .. ..$ discrete_limits:List of 1
+#   .. .. .. ..$ x: chr [1:5] "c" "d" "e" "p" ...
 #   .. ..$ mapping   :List of 3
-#   .. .. ..$ x        : chr "wt"
-#   .. .. ..$ y        : chr "mpg"
-#   .. .. ..$ panelvar1: chr "am"
+#   .. .. ..$ x        : chr "fl"
+#   .. .. ..$ y        : chr "cty"
+#   .. .. ..$ panelvar1: chr "drv"
 #   .. ..$ range     :List of 4
-#   .. .. ..$ left  : num 197
-#   .. .. ..$ right : num 355
-#   .. .. ..$ bottom: num 328
+#   .. .. ..$ left  : num 182
+#   .. .. ..$ right : num 326
+#   .. .. ..$ bottom: num 448
+#   .. .. ..$ top   : num 23.1
+#   ..$ :List of 8
+#   .. ..$ panel     : num 3
+#   .. ..$ row       : int 1
+#   .. ..$ col       : int 3
+#   .. ..$ panel_vars:List of 1
+#   .. .. ..$ panelvar1: chr "r"
+#   .. ..$ log       :List of 2
+#   .. .. ..$ x: NULL
+#   .. .. ..$ y: NULL
+#   .. ..$ domain    :List of 5
+#   .. .. ..$ left           : num 0.4
+#   .. .. ..$ right          : num 3.6
+#   .. .. ..$ bottom         : num 7.7
+#   .. .. ..$ top            : num 36.3
+#   .. .. ..$ discrete_limits:List of 1
+#   .. .. .. ..$ x: chr [1:3] "e" "p" "r"
+#   .. ..$ mapping   :List of 3
+#   .. .. ..$ x        : chr "fl"
+#   .. .. ..$ y        : chr "cty"
+#   .. .. ..$ panelvar1: chr "drv"
+#   .. ..$ range     :List of 4
+#   .. .. ..$ left  : num 331
+#   .. .. ..$ right : num 475
+#   .. .. ..$ bottom: num 448
 #   .. .. ..$ top   : num 23.1
 #  $ dims  :List of 2
-#   ..$ width : num 400
-#   ..$ height: num 300
-
+#   ..$ width : num 500
+#   ..$ height: num 400
 
 getCoordmap <- function(x, width, height, res) {
   if (inherits(x, "ggplot_build_gtable")) {
@@ -570,6 +596,9 @@ find_panel_info_api <- function(b) {
       domain$bottom <- -domain$bottom
     }
 
+    domain <- add_discrete_limits(domain, xscale, "x")
+    domain <- add_discrete_limits(domain, yscale, "y")
+
     domain
   }
 
@@ -688,6 +717,9 @@ find_panel_info_non_api <- function(b, ggplot_format) {
       domain$top    <- -domain$top
       domain$bottom <- -domain$bottom
     }
+
+    domain <- add_discrete_limits(domain, xscale, "x")
+    domain <- add_discrete_limits(domain, yscale, "y")
 
     domain
   }
@@ -994,4 +1026,24 @@ find_panel_ranges <- function(g, res) {
       top    = y_pos[p$t - 1]
     )
   })
+}
+
+# Remember the x/y limits of discrete axes. This info is
+# necessary to properly inverse map the numeric (i.e., trained)
+# positions back to the data scale, for example:
+# https://github.com/rstudio/shiny/pull/2410#issuecomment-487783828
+# https://github.com/rstudio/shiny/pull/2410#issuecomment-488100881
+#
+# Eventually, we may want to consider storing the entire ggplot2
+# object server-side and querying information from that object
+# as we need it...that's the only way we'll ever be able to
+# faithfully brush examples like this:
+# https://github.com/rstudio/shiny/issues/2411
+add_discrete_limits <- function(domain, scale, var = "x") {
+  var <- match.arg(var, c("x", "y"))
+  if (!is.function(scale$is_discrete) || !is.function(scale$get_limits)) return(domain)
+  if (scale$is_discrete()) {
+    domain$discrete_limits[[var]] <- scale$get_limits()
+  }
+  domain
 }

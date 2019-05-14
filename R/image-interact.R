@@ -88,17 +88,14 @@ brushedPoints <- function(df, brush, xvar = NULL, yvar = NULL,
       stop("brushedPoints: not able to automatically infer `xvar` from brush")
     if (!(xvar %in% names(df)))
       stop("brushedPoints: `xvar` ('", xvar ,"')  not in names of input")
-    # Extract data values from the data frame
-    x <- asNumber(df[[xvar]])
-    keep_rows <- keep_rows & (x >= brush$xmin & x <= brush$xmax)
+    keep_rows <- keep_rows & within_brush(df[[xvar]], brush, "x")
   }
   if (use_y) {
     if (is.null(yvar))
       stop("brushedPoints: not able to automatically infer `yvar` from brush")
     if (!(yvar %in% names(df)))
       stop("brushedPoints: `yvar` ('", yvar ,"') not in names of input")
-    y <- asNumber(df[[yvar]])
-    keep_rows <- keep_rows & (y >= brush$ymin & y <= brush$ymax)
+    keep_rows <- keep_rows & within_brush(df[[yvar]], brush, "y")
   }
 
   # Find which rows are matches for the panel vars (if present)
@@ -281,8 +278,8 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
     stop("nearPoints: `yvar` ('", yvar ,"')  not in names of input")
 
   # Extract data values from the data frame
-  x <- asNumber(df[[xvar]])
-  y <- asNumber(df[[yvar]])
+  x <- asNumber(df[[xvar]], coordinfo$domain$discrete_limits$x)
+  y <- asNumber(df[[yvar]], coordinfo$domain$discrete_limits$y)
 
   # Get the coordinates of the point (in img pixel coordinates)
   point_img <- coordinfo$coords_img
@@ -402,11 +399,27 @@ nearPoints <- function(df, coordinfo, xvar = NULL, yvar = NULL,
 #   ..$ y: NULL
 #  $ .nonce    : num 0.603
 
-
+# Helper to determine if data values are within the limits of
+# an input brush
+within_brush <- function(vals, brush, var = "x") {
+  var <- match.arg(var, c("x", "y"))
+  vals <- asNumber(vals, brush$domain$discrete_limits[[var]])
+  # It's possible for a non-missing data values to not
+  # map to the axis limits, for example:
+  # https://github.com/rstudio/shiny/pull/2410#issuecomment-488100881
+  !is.na(vals) &
+    vals >= brush[[paste0(var, "min")]] &
+    vals <= brush[[paste0(var, "max")]]
+}
 
 # Coerce various types of variables to numbers. This works for Date, POSIXt,
 # characters, and factors. Used because the mouse coords are numeric.
-asNumber <- function(x) {
+# The `levels` argument should be used when mapping this variable to
+# a known set of discrete levels, which is needed for ggplot2 since
+# it allows you to control ordering and possible values of a discrete
+# positional scale (#2410)
+asNumber <- function(x, levels = NULL) {
+  if (length(levels)) return(match(x, levels))
   if (is.character(x)) x <- as.factor(x)
   if (is.factor(x)) x <- as.integer(x)
   as.numeric(x)

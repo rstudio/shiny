@@ -1,6 +1,10 @@
 shiny 1.3.2.9000
 =======
 
+## Changes
+
+* Resolved ([#1433](https://github.com/rstudio/shiny/issues/1433)): `plotOutput()`'s coordmap info now includes discrete axis limits for **ggplot2** plots. As a result, any **shinytest** tests that contain **ggplot2** plots with discrete axes (that were recorded before this change) will now report differences that can safely be updated. This new coordmap info was added to correctly infer what data points are within an input brush and/or near input click/hover in scenarios where a non-trivial discrete axis scale is involved (e.g., whenever `scale_[x/y]_discrete(limits = ...)` and/or free scales across multiple discrete axes are used). ([#2410](https://github.com/rstudio/shiny/pull/2410))
+
 ### Improvements
 
 * Resolved ([#2402](https://github.com/rstudio/shiny/issues/2402)): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))

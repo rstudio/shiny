@@ -90,7 +90,7 @@ Suggests:
     reactlog (>= 1.0.0),
     magrittr
 Remotes:
-    wch/fastmap
+    r-lib/fastmap
 URL: http://shiny.rstudio.com
 BugReports: https://github.com/rstudio/shiny/issues
 Collate:

@@ -94,12 +94,12 @@ test_that("ReactiveValues", {
   # Initializing with NULL value
   values <- reactiveValues(a=NULL, b=2)
   # a should exist and be NULL
-  expect_equal(isolate(names(values)), c("a", "b"))
+  expect_setequal(isolate(names(values)), c("a", "b"))
   expect_true(is.null(isolate(values$a)))
 
   # Assigning NULL should keep object (not delete it), and set value to NULL
   values$b <- NULL
-  expect_equal(isolate(names(values)), c("a", "b"))
+  expect_setequal(isolate(names(values)), c("a", "b"))
   expect_true(is.null(isolate(values$b)))
 
 
@@ -517,7 +517,7 @@ test_that("names() and reactiveValuesToList()", {
   })
 
   # names() returns all names
-  expect_equal(sort(isolate(names(values))), sort(c(".B", "A")))
+  expect_setequal(isolate(names(values)), c(".B", "A"))
   # Assigning names fails
   expect_error(isolate(names(v) <- c('x', 'y')))
 

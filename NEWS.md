@@ -25,6 +25,8 @@ shiny 1.3.2.9000
 
 * Fixed [#2329](https://github.com/rstudio/shiny/issues/2329), [#1817](https://github.com/rstudio/shiny/issues/1817): These bugs were reported as fixed in Shiny 1.3.0 but were not actually fixed because some JavaScript changes were accidentally not included in the release. The fix resolves issues that occur when `withProgressBar()` or bookmarking are combined with the [networkD3](https://christophergandrud.github.io/networkD3/) package's Sankey plot.
 
+* Fixed [#2423](https://github.com/rstudio/shiny/issues/2423): When `renderPlot()` is repeatedly called and assigned to an output value, it would leak memory. ([#2440](https://github.com/rstudio/shiny/pull/2440))
+
 shiny 1.3.2
 ===========
 

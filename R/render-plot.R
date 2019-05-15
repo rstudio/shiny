@@ -89,6 +89,13 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   session <- NULL
   outputName <- NULL
 
+  # The purpose of this cleanup trigger is to allow `drawReactive` to be GC'd
+  # when this renderPlot is no longer needed. (#2423)
+  cleanup_trigger <- reactiveVal(0)
+  cleanup <- function() {
+    cleanup_trigger(1)
+  }
+
   # Calls drawPlot, invoking the user-provided `func` (which may or may not
   # return a promise). The idea is that the (cached) return value from this
   # reactive can be used for varying width/heights, as it includes the
@@ -96,6 +103,10 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   drawReactive <- reactive(label = "plotObj", {
     hybrid_chain(
       {
+        # Take a dependency on cleanup_trigger so that this reactive can be
+        # GC'd when no longer needed.
+        cleanup_trigger()
+
         # If !execOnResize, don't invalidate when width/height changes.
         dims <- if (execOnResize) getDims() else isolate(getDims())
         pixelratio <- session$clientData$pixelratio %OR% 1
@@ -150,7 +161,9 @@ renderPlot <- function(expr, width='auto', height='auto', res=72, ...,
   outputFunc <- plotOutput
   if (!identical(height, 'auto')) formals(outputFunc)['height'] <- list(NULL)
 
-  markRenderFunction(outputFunc, renderFunc, outputArgs = outputArgs)
+  markRenderFunction(
+    outputFunc, renderFunc, outputArgs = outputArgs, cleanupFunc = cleanup
+  )
 }
 
 resizeSavedPlot <- function(name, session, result, width, height, pixelratio, res, ...) {

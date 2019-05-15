@@ -18,9 +18,13 @@ utils::globalVariables('func')
 #'   app authors to customize outputs. (Currently, this is only supported for
 #'   dynamically generated UIs, such as those created by Shiny code snippets
 #'   embedded in R Markdown documents).
+#' @param cleanupFunc An optional function that is executed when the render
+#'   function is no longer used as an output.
 #' @return The \code{renderFunc} function, with annotations.
 #' @export
-markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
+markRenderFunction <- function(
+  uiFunc, renderFunc, outputArgs = list(), cleanupFunc = NULL
+) {
   # a mutable object that keeps track of whether `useRenderFunction` has been
   # executed (this usually only happens when rendering Shiny code snippets in
   # an interactive R Markdown document); its initial value is FALSE
@@ -45,11 +49,14 @@ markRenderFunction <- function(uiFunc, renderFunc, outputArgs = list()) {
     else origRenderFunc(...)
   }
 
-  structure(renderFunc,
-            class       = c("shiny.render.function", "function"),
-            outputFunc  = uiFunc,
-            outputArgs  = outputArgs,
-            hasExecuted = hasExecuted)
+  structure(
+    renderFunc,
+    class       = c("shiny.render.function", "function"),
+    outputFunc  = uiFunc,
+    outputArgs  = outputArgs,
+    hasExecuted = hasExecuted,
+    cleanupFunc = cleanupFunc
+  )
 }
 
 #' Implement render functions

@@ -1072,9 +1072,17 @@ ShinySession <- R6Class(
       force(name)
 
       # If overwriting an output object, destroy the previous copy of it
-      if (!is.null(private$.outputs[[name]])) {
-        private$.outputs[[name]]$destroy()
+      prevOutput <- private$.outputs[[name]]
+      if (!is.null(prevOutput)) {
+        # Execute cleanup function if present.
+        cleanupFunc <- attr(prevOutput, "cleanupFunc", TRUE)
+        if (!is.null(cleanupFunc)) {
+          cleanupFunc()
+        }
+        rm(cleanupFunc)
+        prevOutput$destroy()
       }
+      rm(prevOutput)
 
       if (is.null(func)) {
         # If func is null, give it an "empty" output function so it can go
@@ -1087,6 +1095,9 @@ ShinySession <- R6Class(
         # Extract any output attributes attached to the render function. These
         # will be attached to the observer after it's created.
         outputAttrs <- attr(func, "outputAttrs", TRUE)
+        # Extract the cleanup function; it will be attached to the observer
+        # later.
+        cleanupFunc <- attr(func, "cleanupFunc", TRUE)
 
         funcFormals <- formals(func)
         # ..stacktraceon matches with the top-level ..stacktraceoff.., because
@@ -1182,6 +1193,8 @@ ShinySession <- R6Class(
         lapply(names(outputAttrs), function(name) {
           attr(obs, name) <- outputAttrs[[name]]
         })
+
+        attr(obs, "cleanupFunc") <- cleanupFunc
 
         obs$onInvalidate(function() {
           self$showProgress(name)

@@ -82,7 +82,7 @@ Imports:
 Suggests:
     datasets,
     Cairo (>= 1.5-5),
-    testthat (>= 2.2.1),
+    testthat (>= 2.1.1),
     knitr (>= 1.6),
     markdown,
     rmarkdown,

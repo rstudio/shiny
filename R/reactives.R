@@ -24,7 +24,11 @@ Dependents <- R6Class(
           rLog$dependsOn(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
         }
 
-        .dependents$set(ctx$id, ctx)
+        if (ctx$isWeak()) {
+          .dependents$set(ctx$id, fastmap::make_weakref(ctx))
+        } else {
+          .dependents$set(ctx$id, ctx)
+        }
 
         ctx$onInvalidate(function() {
           rLog$dependsOnRemove(ctx$.reactId, .reactId, ctx$id, ctx$.domain)
@@ -46,6 +50,13 @@ Dependents <- R6Class(
       lapply(
         .dependents$values(sort = TRUE),
         function(ctx) {
+          if (fastmap::is_weakref(ctx)) {
+            ctx <- fastmap::get_weakref(ctx)
+            if (is.null(ctx)) {
+              # Can get here if weakref target was GC'd
+              return()
+            }
+          }
           ctx$invalidate()
           NULL
         }
@@ -858,7 +869,8 @@ Observable <- R6Class(
     },
     .updateValue = function() {
       ctx <- Context$new(.domain, .label, type = 'observable',
-                         prevId = .mostRecentCtxId, reactId = .reactId)
+                         prevId = .mostRecentCtxId, reactId = .reactId,
+                         weak = TRUE)
       .mostRecentCtxId <<- ctx$id
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE

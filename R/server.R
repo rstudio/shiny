@@ -82,6 +82,16 @@ addResourcePath <- function(prefix, directoryPath) {
   )
 }
 
+#' @export
+addRouteHandler <- function(urlPath, handler) {
+  if (!is.function(handler)) {
+    stop("addHandlerPath handler must be a function")
+  }
+  .globals$userHandlers[[urlPath]] <- handler
+  invisible()
+}
+.globals$userHandlers <- list()
+
 # This function handles any GET request with two or more path elements where the
 # first path element matches a prefix that was previously added using
 # addResourcePath().
@@ -126,6 +136,17 @@ resourcePathHandler <- function(req) {
   subreq$SCRIPT_NAME <- paste(subreq$SCRIPT_NAME, substr(path, 1, 2 + len), sep='')
 
   return(resInfo$func(subreq))
+}
+
+userHandlersHandler <- function(req) {
+  # e.g. "/foo/one/two.html"
+  path <- req$PATH_INFO
+
+  handler <- .globals$userHandlers[[path]]
+  if (is.null(handler))
+    return(NULL)
+
+  return(..stacktraceon..(handler(req)))
 }
 
 #' Define Server Functionality
@@ -226,6 +247,7 @@ createAppHandlers <- function(httpHandlers, serverFuncSource) {
       httpHandlers,
       sys.www.root,
       resourcePathHandler,
+      userHandlersHandler,
       reactLogHandler
     )),
     ws = function(ws) {

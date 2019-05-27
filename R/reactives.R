@@ -907,7 +907,7 @@ Observable <- R6Class(
 #' marked as invalidated. In this way, invalidations ripple through the
 #' expressions that depend on each other.
 #'
-#' See the \href{http://rstudio.github.com/shiny/tutorial/}{Shiny tutorial} for
+#' See the \href{https://shiny.rstudio.com/tutorial/}{Shiny tutorial} for
 #' more information about reactive expressions.
 #'
 #' @param x For \code{reactive}, an expression (quoted or unquoted). For

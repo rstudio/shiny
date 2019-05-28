@@ -92,6 +92,9 @@ addResourcePath <- function(prefix, directoryPath) {
   # but sometimes it can lead to difficult to diagnose issues
   # (e.g. an implict dependency might set a resource path that
   # conflicts with what you, the app author, are trying to register)
+  # Note that previous versions of shiny used to warn about this case,
+  # but it was eventually removed since it caused confusion (#567).
+  # It seems a good comprimise is to throw a more information message.
   if (prefix %in% names(.globals$resourcePaths)) {
     existingPath <- .globals$resourcePaths[[prefix]]$path
     if (normalizedPath != existingPath) {

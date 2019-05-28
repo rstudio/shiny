@@ -31,7 +31,25 @@ registerClient <- function(client) {
 
 #' Resource Publishing
 #'
-#' Adds a directory of static resources to Shiny's web server, with the given
+#' Adds a directory of static resources to Shiny's web server, with the given path prefix.
+#' Primarily intended for package authors to make supporting JavaScript/CSS files available
+#' to their components.
+#'
+#' Shiny provides two ways of serving static files (i.e., resources):
+#'
+#' 1. Static files under the `www/` directory are automatically made available under a request path that begins with `/`.
+#' 2. `resourcePathAdd()` makes static files in a `directoryPath` available under a request path that begins with `prefix`.
+#'
+#' The second approach is primarily intended for package authors to make supporting
+#' JavaScript/CSS files available to their components.
+#'
+#' Resource paths make a directory
+#' Tools for managing static resources published by Shiny's web server:
+#'  * `resourcePathAdd()` adds a directory of static resources.
+#'  * `resourcePaths()` lists the currently active resource mappings.
+#'  * `resourcePathRemove()` removes a directory of static resources.
+#'
+#' Add, remove, or list directory of static resources to Shiny's web server, with the given
 #' path prefix. Primarily intended for package authors to make supporting
 #' JavaScript/CSS files available to their components.
 #'
@@ -42,13 +60,20 @@ registerClient <- function(client) {
 #' @param directoryPath The directory that contains the static resources to be
 #'   served.
 #'
+#' @rdname resourcePaths
 #' @seealso [singleton()]
 #'
 #' @examples
 #' addResourcePath('datasets', system.file('data', package='datasets'))
+#' resourcePaths()
+#' removeResourcePath('datasets')
+#' resourcePaths()
+#'
+#' # make sure all resources are removed
+#' lapply(names(resourcePaths()), removeResourcePath)
 #' @export
 addResourcePath <- function(prefix, directoryPath) {
-  prefix <- prefix[1]
+  if (length(prefix) != 1) stop("prefix must be of length 1")
   if (!grepl('^[a-z0-9\\-_][a-z0-9\\-_.]*$', prefix, ignore.case = TRUE, perl = TRUE)) {
     stop("addResourcePath called with invalid prefix; please see documentation")
   }
@@ -62,6 +87,22 @@ addResourcePath <- function(prefix, directoryPath) {
         "`prefix` = '", prefix, "'; `directoryPath` = '" , directoryPath, "'")
     }
   )
+
+  # Often times overwriting a resource path is "what you want",
+  # but sometimes it can lead to difficult to diagnose issues
+  # (e.g. an implict dependency might set a resource path that
+  # conflicts with what you, the app author, are trying to register)
+  if (prefix %in% names(.globals$resourcePaths)) {
+    existingPath <- .globals$resourcePaths[[prefix]]$path
+    if (normalizedPath != existingPath) {
+      message(
+        "The resource path '", prefix, "' used to point to ",
+        existingPath, ", but it now points to ", normalizedPath, ". ",
+        "If your app doesn't work as expected, you may want to ",
+        "choose a different prefix name."
+      )
+    }
+  }
 
   # If a shiny app is currently running, dynamically register this path with
   # the corresponding httpuv server object.
@@ -81,6 +122,32 @@ addResourcePath <- function(prefix, directoryPath) {
     func = staticHandler(normalizedPath)
   )
 }
+
+#' @rdname resourcePaths
+#' @export
+resourcePaths <- function() {
+  urls <- names(.globals$resourcePaths)
+  paths <- vapply(.globals$resourcePaths, function(x) x$path, character(1))
+  setNames(paths, urls)
+}
+
+hasResourcePath <- function(prefix) {
+  prefix %in% names(resourcePaths())
+}
+
+#' @rdname resourcePaths
+#' @export
+removeResourcePath <- function(prefix) {
+  if (length(prefix) > 1) stop("`prefix` must be of length 1.")
+  if (!hasResourcePath(prefix)) {
+    warning("Resource ", prefix, " not found.")
+  }
+  .globals$resourcePaths[[prefix]] <- NULL
+  .globals$resources[[prefix]] <- NULL
+  invisible(TRUE)
+}
+
+
 
 # This function handles any GET request with two or more path elements where the
 # first path element matches a prefix that was previously added using

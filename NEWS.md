@@ -9,6 +9,8 @@ shiny 1.3.2.9000
 
 * Resolved ([#2402](https://github.com/rstudio/shiny/issues/2402)): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))
 
+* Resolved [#2442](https://github.com/rstudio/shiny/issues/2442): The `shiny:inputchanged` JavaScript event now triggers on the related input element instead of `document`. Existing event listeners bound to `document` will still detect the event due to event bubbling. ([#2446](https://github.com/rstudio/shiny/pull/2446))
+
 ### Bug fixes
 
 * Fixed [#2387](https://github.com/rstudio/shiny/issues/2387): Updating a `sliderInput()`'s type from numeric to date no longer changes the rate policy from debounced to immediate. More generally, updating an input binding with a new type should (no longer) incorrectly alter the input rate policy. ([#2404](https://github.com/rstudio/shiny/pull/2404))

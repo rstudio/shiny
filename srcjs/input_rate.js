@@ -278,7 +278,7 @@ var InputEventDecorator = function(target) {
     evt.el        = opts.el;
     evt.priority    = opts.priority;
 
-    $(document).trigger(evt);
+    $(opts.el).trigger(evt);
 
     if (!evt.isDefaultPrevented()) {
       name = evt.name;

@@ -425,7 +425,9 @@ ReactiveValues <- R6Class(
       }
 
       dep.keys <- .dependents$keys()
-      dep.keys <- dep.keys[grepl(paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''), dep.keys)]
+      dep.keys <- grep(
+        paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''), dep.keys, value = TRUE
+      )
       lapply(
         .dependents$mget(dep.keys),
         function(ctx) {

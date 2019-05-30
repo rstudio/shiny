@@ -139,6 +139,8 @@ $.extend(imageOutputBinding, {
       // Register the various event handlers
       // ----------------------------------------------------------
       if (opts.clickId) {
+        imageutils.disableDrag($el, $img);
+
         var clickHandler = imageutils.createClickHandler(opts.clickId,
           opts.clickClip, opts.coordmap);
         $el.on('mousedown2.image_output', clickHandler.mousedown);
@@ -151,6 +153,8 @@ $.extend(imageOutputBinding, {
       }
 
       if (opts.dblclickId) {
+        imageutils.disableDrag($el, $img);
+
         // We'll use the clickHandler's mousedown function, but register it to
         // our custom 'dblclick2' event.
         var dblclickHandler = imageutils.createClickHandler(opts.dblclickId,
@@ -162,6 +166,8 @@ $.extend(imageOutputBinding, {
       }
 
       if (opts.hoverId) {
+        imageutils.disableDrag($el, $img);
+
         var hoverHandler = imageutils.createHoverHandler(opts.hoverId,
           opts.hoverDelay, opts.hoverDelayType, opts.hoverClip,
           opts.hoverNullOutside, opts.coordmap);
@@ -173,13 +179,7 @@ $.extend(imageOutputBinding, {
       }
 
       if (opts.brushId) {
-        // Make image non-draggable (Chrome, Safari)
-        $img.css('-webkit-user-drag', 'none');
-        // Firefox, IE<=10
-        $img.on('dragstart.image_output', function() { return false; });
-
-        // Disable selection of image and text when dragging in IE<=10
-        $el.on('selectstart.image_output', function() { return false; });
+        imageutils.disableDrag($el, $img);
 
         var brushHandler = imageutils.createBrushHandler(opts.brushId, $el, opts,
           opts.coordmap, outputId);
@@ -225,6 +225,19 @@ outputBindings.register(imageOutputBinding, 'shiny.imageOutput');
 
 var imageutils = {};
 
+imageutils.disableDrag = function($el, $img) {
+  // Make image non-draggable (Chrome, Safari)
+  $img.css('-webkit-user-drag', 'none');
+
+  // Firefox, IE<=10
+  // First remove existing handler so we don't keep adding handlers.
+  $img.off('dragstart.image_output');
+  $img.on('dragstart.image_output', function() { return false; });
+
+  // Disable selection of image and text when dragging in IE<=10
+  $el.off('selectstart.image_output');
+  $el.on('selectstart.image_output', function() { return false; });
+};
 
 // Modifies the panel objects in a coordmap, adding scaleImgToData(),
 // scaleDataToImg(), and clipImg() functions to each one. The panel objects

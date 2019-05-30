@@ -460,7 +460,7 @@ ReactiveValues <- R6Class(
     getMeta = function(key, metaKey) {
       # Make sure to use named (not numeric) indexing into list.
       metaKey <- as.character(metaKey)
-      .metadata$get("key")[[metaKey]]
+      .metadata$get(key)[[metaKey]]
     },
 
     # Set a metadata value. Does not trigger reactivity.

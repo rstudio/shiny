@@ -19,6 +19,16 @@ oauth_logout_button <- function(input_id) {
   actionLink(input_id, "Logout")
 }
 
+oauth_do_logout <- function(rv, session = getDefaultReactiveDomain()) {
+  xsrf_token <- shiny:::createUniqueId(16)
+  clear_cookie_xsrf$set(xsrf_token, TRUE)
+
+  session$sendCustomMessage("oauth-clear-cookie-handler", list(
+    xsrf_token = xsrf_token
+  ))
+  rv(NULL)
+}
+
 oauth_config <- function(oauth_endpoint_uri, token_endpoint_uri, app_uri,
   client_id, client_secret, scope, login_ui = oauth_login_button,
   logout_ui = oauth_logout_button) {
@@ -60,6 +70,21 @@ oauth_login <- function(input, output, session, oauth_config) {
     oauth_config$client_secret,
     session)
 
+  # Prepend the worker ID onto the state parameter. Servers like
+  # Connect and SSP use the `w` query string parameter to determine
+  # what R process needs to handle a request. But we can't add a
+  # `w` parameter to our callback URI; the only part of the path or
+  # query string we can safely influence is `state`.
+  #
+  # When this state parameter is read by our callback handler, then
+  # this worker id information will be unpacked, and the browser
+  # will redirect back to the same page but with `w` extracted from
+  # state and added as its own standalone query string param.
+  state <- paste0(
+    "_w_", shiny:::workerId(), "_",
+    state
+  )
+
   output$container <- renderUI({
     if (is.null(token())) {
       # login button
@@ -72,13 +97,7 @@ oauth_login <- function(input, output, session, oauth_config) {
   })
 
   observeEvent(input$btn_logout, {
-    xsrf_token <- shiny:::createUniqueId(16)
-    clear_cookie_xsrf$set(xsrf_token, TRUE)
-
-    session$sendCustomMessage("oauth-clear-cookie-handler", list(
-      xsrf_token = xsrf_token
-    ))
-    token(NULL)
+    oauth_do_logout(token)
   })
 
   return(token)
@@ -147,6 +166,37 @@ oauth_callback_handler <- function(req) {
       body = "Authorization failure"
     ))
   } else if (!is.null(code) && !is.null(state)) {
+
+    # See if state has worker information in it that we need to extract.
+    # If so, we need to redirect the browser with a `w=` parameter, so
+    # that server environments can ensure we end up at the right R
+    # process
+
+    if (is.null(qs_info$w)) {
+      m <- regexec("^_w_([a-fA-F0-9]*)_([a-fA-f0-9]+)$", state)
+      m <- regmatches(qs_info$state, m)[[1]]
+      if (length(m) > 0) {
+        worker_id <- m[[2]]
+        new_state <- m[[3]]
+        new_qs <- sub(
+          "([&?])state=.*?(&|$)",
+          sprintf("\\1state=%s&w=%s\\2",
+            utils::URLencode(new_state, reserved = TRUE, repeated = TRUE),
+            utils::URLencode(worker_id, reserved = TRUE, repeated = TRUE)
+          ),
+          req$QUERY_STRING
+        )
+        return(list(
+          status = 307L,
+          headers = list(
+            "Content-Type" = "text/plain",
+            "Location" = new_qs
+          ),
+          body = ""
+        ))
+      }
+    }
+
     req_info <- oauth_request_state$get(state)
     if (is.null(req_info)) {
       # TODO: Report error to user

@@ -1099,6 +1099,9 @@ ShinySession <- R6Class(
           }
         }
 
+        # Save this for getOutput purposes
+        outputAttrs$renderFunc <- func
+
         # Preserve source reference and file information when formatting the
         # label for display in the reactive graph
         srcref <- attr(label, "srcref")
@@ -1194,6 +1197,9 @@ ShinySession <- R6Class(
       else {
         stop(paste("Unexpected", class(func), "output for", name))
       }
+    },
+    getOutput = function(name) {
+      attr(private$.outputs[[name]], "renderFunc", exact = TRUE)
     },
     flushOutput = function() {
       if (private$busyCount > 0)
@@ -2094,7 +2100,11 @@ ShinySession <- R6Class(
 
 #' @export
 `$.shinyoutput` <- function(x, name) {
-  stop("Reading objects from shinyoutput object not allowed.")
+  if (getOption("shiny.allowoutputreads", FALSE)) {
+    .subset2(x, 'impl')$getOutput(name)
+  } else {
+    stop("Reading from shinyoutput object is not allowed.")
+  }
 }
 
 #' @export

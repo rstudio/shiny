@@ -292,9 +292,9 @@ ReactiveValues <- R6Class(
     # For debug purposes
     .reactId = character(0),
     .label = character(0),
-    .values = 'environment',
-    .metadata = 'environment',
-    .dependents = 'environment',
+    .values = 'Map',
+    .metadata = 'Map',
+    .dependents = 'Map',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
     # Dependents for all values, including hidden
@@ -312,9 +312,9 @@ ReactiveValues <- R6Class(
     ) {
       .reactId <<- nextGlobalReactId()
       .label <<- label
-      .values <<- new.env(parent=emptyenv())
-      .metadata <<- new.env(parent=emptyenv())
-      .dependents <<- new.env(parent=emptyenv())
+      .values <<- Map$new()
+      .metadata <<- Map$new()
+      .dependents <<- Map$new()
       .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE, keys = list())
       .namesDeps <<- Dependents$new(reactId = rLog$namesIdStr(.reactId))
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
@@ -324,16 +324,13 @@ ReactiveValues <- R6Class(
 
     get = function(key) {
       # get value right away to use for logging
-      if (!exists(key, envir=.values, inherits=FALSE))
-        keyValue <- NULL
-      else
-        keyValue <- .values[[key]]
+      keyValue <- .values$get(key)
 
       # Register the "downstream" reactive which is accessing this value, so
       # that we know to invalidate them when this value changes.
       ctx <- getCurrentContext()
       dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!exists(dep.key, envir=.dependents, inherits=FALSE)) {
+      if (!.dependents$containsKey(dep.key)) {
         reactKeyId <- rLog$keyIdStr(.reactId, key)
 
         if (!isTRUE(.hasRetrieved$keys[[key]])) {
@@ -341,10 +338,10 @@ ReactiveValues <- R6Class(
           .hasRetrieved$keys[[key]] <<- TRUE
         }
         rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-        .dependents[[dep.key]] <- ctx
+        .dependents$set(dep.key, ctx)
         ctx$onInvalidate(function() {
           rLog$dependsOnKeyRemove(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-          rm(list=dep.key, envir=.dependents, inherits=FALSE)
+          .dependents$remove(dep.key)
         })
       }
 
@@ -384,16 +381,16 @@ ReactiveValues <- R6Class(
       domain <- getDefaultReactiveDomain()
       hidden <- substr(key, 1, 1) == "."
 
-      key_exists <- exists(key, envir=.values, inherits=FALSE)
+      key_exists <- .values$containsKey(key)
 
       if (key_exists) {
-        if (.dedupe && identical(.values[[key]], value)) {
+        if (.dedupe && identical(.values$get(key), value)) {
           return(invisible())
         }
       }
 
       # set the value for better logging
-      .values[[key]] <- value
+      .values$set(key, value)
 
       # key has been depended upon
       if (isTRUE(.hasRetrieved$keys[[key]])) {
@@ -408,30 +405,31 @@ ReactiveValues <- R6Class(
 
       # only invalidate if there are deps
       if (!key_exists && isTRUE(.hasRetrieved$names)) {
-        rLog$valueChangeNames(.reactId, ls(.values, all.names = TRUE), domain)
+        rLog$valueChangeNames(.reactId, .values$keys(), domain)
         .namesDeps$invalidate()
       }
 
       if (hidden) {
         if (isTRUE(.hasRetrieved$asListAll)) {
-          rLog$valueChangeAsListAll(.reactId, as.list(.values, all.names = TRUE), domain)
+          rLog$valueChangeAsListAll(.reactId, .values$values(), domain)
           .allValuesDeps$invalidate()
         }
       } else {
         if (isTRUE(.hasRetrieved$asList)) {
+          react_vals <- .values$values()
+          react_vals <- react_vals[!grepl("^\\.", base::names(react_vals))]
           # leave as is. both object would be registered to the listening object
-          rLog$valueChangeAsList(.reactId, as.list(.values, all.names = FALSE), domain)
+          rLog$valueChangeAsList(.reactId, react_vals, domain)
           .valuesDeps$invalidate()
         }
       }
 
-      dep.keys <- objects(
-        envir=.dependents,
-        pattern=paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''),
-        all.names=TRUE
+      dep.keys <- .dependents$keys()
+      dep.keys <- grep(
+        paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''), dep.keys, value = TRUE
       )
       lapply(
-        mget(dep.keys, envir=.dependents),
+        .dependents$mget(dep.keys),
         function(ctx) {
           ctx$invalidate()
           NULL
@@ -448,7 +446,7 @@ ReactiveValues <- R6Class(
     },
 
     names = function() {
-      nameValues <- ls(.values, all.names=TRUE)
+      nameValues <- .values$keys()
       if (!isTRUE(.hasRetrieved$names)) {
         domain <- getDefaultReactiveDomain()
         rLog$defineNames(.reactId, nameValues, .label, domain)
@@ -462,7 +460,7 @@ ReactiveValues <- R6Class(
     getMeta = function(key, metaKey) {
       # Make sure to use named (not numeric) indexing into list.
       metaKey <- as.character(metaKey)
-      .metadata[[key]][[metaKey]]
+      .metadata$get(key)[[metaKey]]
     },
 
     # Set a metadata value. Does not trigger reactivity.
@@ -470,11 +468,13 @@ ReactiveValues <- R6Class(
       # Make sure to use named (not numeric) indexing into list.
       metaKey <- as.character(metaKey)
 
-      if (!exists(key, envir = .metadata, inherits = FALSE)) {
-        .metadata[[key]] <<- list()
+      if (!.metadata$containsKey(key)) {
+        .metadata$set(key, list())
       }
 
-      .metadata[[key]][[metaKey]] <<- value
+      m <- .metadata$get(key)
+      m[[metaKey]] <- value
+      .metadata$set(key, m)
     },
 
     # Mark a value as frozen If accessed while frozen, a shiny.silent.error will
@@ -496,7 +496,10 @@ ReactiveValues <- R6Class(
     },
 
     toList = function(all.names=FALSE) {
-      listValue <- as.list(.values, all.names=all.names)
+      listValue <- .values$values()
+      if (!all.names) {
+        listValue <- listValue[!grepl("^\\.", base::names(listValue))]
+      }
       if (all.names) {
         if (!isTRUE(.hasRetrieved$asListAll)) {
           domain <- getDefaultReactiveDomain()
@@ -509,7 +512,7 @@ ReactiveValues <- R6Class(
       if (!isTRUE(.hasRetrieved$asList)) {
         domain <- getDefaultReactiveDomain()
         # making sure the value being recorded is with `all.names = FALSE`
-        rLog$defineAsList(.reactId, as.list(.values, all.names=FALSE), .label, domain)
+        rLog$defineAsList(.reactId, listValue[!grepl("^\\.", base::names(listValue))], .label, domain)
         .hasRetrieved$asList <<- TRUE
       }
       .valuesDeps$register()

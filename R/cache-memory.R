@@ -179,7 +179,7 @@ MemoryCache <- R6Class("MemoryCache",
       if (!is.numeric(max_size)) stop("max_size must be a number. Use `Inf` for no limit.")
       if (!is.numeric(max_age))  stop("max_age must be a number. Use `Inf` for no limit.")
       if (!is.numeric(max_n))    stop("max_n must be a number. Use `Inf` for no limit.")
-      private$cache        <- new.env(parent = emptyenv())
+      private$cache        <- fastmap()
       private$max_size     <- max_size
       private$max_age      <- max_age
       private$max_n        <- max_n
@@ -208,7 +208,7 @@ MemoryCache <- R6Class("MemoryCache",
       }
 
       private$log(paste0('get: key "', key, '" found'))
-      value <- private$cache[[key]]$value
+      value <- private$cache$get(key)$value
       value
     },
 
@@ -226,37 +226,36 @@ MemoryCache <- R6Class("MemoryCache",
         size <- NULL
       }
 
-      private$cache[[key]] <- list(
+      private$cache$set(key, list(
         key = key,
         value = value,
         size = size,
         mtime = time,
         atime = time
-      )
+      ))
       self$prune()
       invisible(self)
     },
 
     exists = function(key) {
       validate_key(key)
-      # Faster than `exists(key, envir = private$cache, inherits = FALSE)
-      !is.null(private$cache[[key]])
+      private$cache$has(key)
     },
 
     keys = function() {
-      ls(private$cache, sorted = FALSE)  # Faster with sorted=FALSE
+      private$cache$keys()
     },
 
     remove = function(key) {
       private$log(paste0('remove: key "', key, '"'))
       validate_key(key)
-      rm(list = key, envir = private$cache)
+      private$cache$remove(key)
       invisible(self)
     },
 
     reset = function() {
       private$log(paste0('reset'))
-      rm(list = self$keys(), envir = private$cache)
+      private$cache$reset()
       invisible(self)
     },
 
@@ -271,7 +270,7 @@ MemoryCache <- R6Class("MemoryCache",
         rm_idx <- timediff > private$max_age
         if (any(rm_idx)) {
           private$log(paste0("prune max_age: Removing ", paste(info$key[rm_idx], collapse = ", ")))
-          rm(list = info$key[rm_idx], envir = private$cache)
+          private$cache$remove(info$key[rm_idx])
           info <- info[!rm_idx, ]
         }
       }
@@ -298,7 +297,7 @@ MemoryCache <- R6Class("MemoryCache",
         ensure_info_is_sorted()
         rm_idx <- seq_len(nrow(info)) > private$max_n
         private$log(paste0("prune max_n: Removing ", paste(info$key[rm_idx], collapse = ", ")))
-        rm(list = info$key[rm_idx], envir = private$cache)
+        private$cache$remove(info$key[rm_idx])
         info <- info[!rm_idx, ]
       }
 
@@ -308,7 +307,7 @@ MemoryCache <- R6Class("MemoryCache",
         cum_size <- cumsum(info$size)
         rm_idx <- cum_size > private$max_size
         private$log(paste0("prune max_size: Removing ", paste(info$key[rm_idx], collapse = ", ")))
-        rm(list = info$key[rm_idx], envir = private$cache)
+        private$cache$remove(info$key[rm_idx])
         info <- info[!rm_idx, ]
       }
 
@@ -335,23 +334,23 @@ MemoryCache <- R6Class("MemoryCache",
     maybe_prune_single = function(key) {
       if (!is.finite(private$max_age)) return()
 
-      obj <- private$cache[[key]]
+      obj <- private$cache$get(key)
       if (is.null(obj)) return()
 
       timediff <- as.numeric(Sys.time()) - obj$mtime
       if (timediff > private$max_age) {
         private$log(paste0("pruning single object exceeding max_age: Removing ", key))
-        rm(list = key, envir = private$cache)
+        private$cache$remove(key)
       }
     },
 
     object_info = function() {
-      keys <- ls(private$cache, sorted = FALSE)
+      keys <- private$cache$keys()
       data.frame(
         key   = keys,
-        size  = vapply(keys, function(key) private$cache[[key]]$size,  0),
-        mtime = vapply(keys, function(key) private$cache[[key]]$mtime, 0),
-        atime = vapply(keys, function(key) private$cache[[key]]$atime, 0),
+        size  = vapply(keys, function(key) private$cache$get(key)$size,  0),
+        mtime = vapply(keys, function(key) private$cache$get(key)$mtime, 0),
+        atime = vapply(keys, function(key) private$cache$get(key)$atime, 0),
         stringsAsFactors = FALSE
       )
     },

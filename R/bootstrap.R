@@ -1548,7 +1548,8 @@ icon <- function(name, class = NULL, lib = "font-awesome") {
   # font-awesome needs an additional dependency (glyphicon is in bootstrap)
   if (lib == "font-awesome") {
     htmlDependencies(iconTag) <- htmlDependency(
-      "font-awesome", "5.3.1", "www/shared/fontawesome", package = "shiny",
+      "font-awesome", "5.3.1",
+      src = system.file("www/shared/fontawesome", package = "shiny"),
       stylesheet = c(
         "css/all.min.css",
         "css/v4-shims.min.css"

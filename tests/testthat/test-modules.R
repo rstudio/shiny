@@ -52,9 +52,9 @@ test_that("reactiveValues with namespace", {
   # Namespaced reactive values objects only get their own names,
   # minus the namespace prefix, when names() is called.
   # Unnamespaced (root) reactive values objects get all names.
-  expect_equivalent(isolate(names(rv)), c("bar-baz", "bar-qux-quux", "baz", "foo"))
-  expect_equivalent(isolate(names(rv1)), c("baz", "qux-quux"))
-  expect_equivalent(isolate(names(rv2)), c("quux"))
+  expect_setequal(isolate(names(rv)), c("bar-baz", "bar-qux-quux", "baz", "foo"))
+  expect_setequal(isolate(names(rv1)), c("baz", "qux-quux"))
+  expect_setequal(isolate(names(rv2)), c("quux"))
 })
 
 test_that("implicit output respects module namespace", {

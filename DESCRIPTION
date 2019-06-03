@@ -78,7 +78,7 @@ Imports:
     tools,
     crayon,
     rlang,
-    fastmap
+    fastmap (>= 0.0.0.9001)
 Suggests:
     datasets,
     Cairo (>= 1.5-5),

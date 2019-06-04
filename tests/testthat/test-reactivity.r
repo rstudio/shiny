@@ -735,6 +735,46 @@ test_that("Observer priorities are respected", {
   expect_identical(results, c(30, 20, 21, 22, 10))
 })
 
+
+# The specific order that observers fire in does not necessarily need to be the
+# one below. However, it is important that they fire in an order that is
+# consistent across platforms, so that developers don't see one behavior on
+# their dev platform and another on their deployment platform. (#2466)
+test_that("Observers fire in consistent order across platforms", {
+
+  # Reset the counter for the reactive environment. Not a good thing to do in
+  # general, but necessary for this test.
+  reactive_env <- .getReactiveEnvironment()
+  reactive_env$.nextId <- 0L
+
+  v <- reactiveVal(0)
+  order <- list()
+  order[1:20] <- list(integer())
+
+  observe({
+    order[[v()]] <<- c(order[[v()]], 1L)
+    message(v(), ": observer 1")
+  })
+  observe({
+    order[[v()]] <<- c(order[[v()]], 2L)
+    message(v(), ": observer 2")
+  })
+  observe({
+    order[[v()]] <<- c(order[[v()]], 3L)
+    message(v(), ": observer 3")
+  })
+
+  for (i in 1:20) {
+    v(isolate(v()) + 1); shiny:::flushReact()
+  }
+
+  expected_order <- list()
+  expected_order[1:2] <- list(c(1L, 2L, 3L))
+  expected_order[3:20] <- list(c(2L, 3L, 1L))
+  expect_identical(order, expected_order)
+})
+
+
 test_that("installExprFunction doesn't rely on name being `expr`", {
   justExecute <- function(anExpression, envirToUse = parent.frame(), isQuoted = FALSE) {
     shiny:::installExprFunction(anExpression, "myFunc", envirToUse, quoted = isQuoted)

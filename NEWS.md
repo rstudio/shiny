@@ -13,6 +13,9 @@ shiny 1.3.2.9000
 
 * Fixed [#1393](https://github.com/rstudio/shiny/issues/1393), [#2223](https://github.com/rstudio/shiny/issues/2223): For plots with any interactions enabled, the image is no longer draggable. ([#2460](https://github.com/rstudio/shiny/pull/2460))
 
+* Partially resolved [#2423](https://github.com/rstudio/shiny/issues/2423): Reactivity in Shiny leaked some memory, because R can leak memory whenever a new symbols is interned, which happens whenever a new name/key is used in an environment. R now uses the fastmap package, which avoids this problem. ([#2429](https://github.com/rstudio/shiny/pull/2429))
+
+
 ### Bug fixes
 
 * Fixed [#2387](https://github.com/rstudio/shiny/issues/2387): Updating a `sliderInput()`'s type from numeric to date no longer changes the rate policy from debounced to immediate. More generally, updating an input binding with a new type should (no longer) incorrectly alter the input rate policy. ([#2404](https://github.com/rstudio/shiny/pull/2404))

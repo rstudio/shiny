@@ -44,7 +44,7 @@ Dependents <- R6Class(
         )
       }
       lapply(
-        .dependents$values(),
+        .dependents$values(sort = TRUE),
         function(ctx) {
           ctx$invalidate()
           NULL

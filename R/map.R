@@ -45,11 +45,11 @@ Map <- R6Class(
     containsKey = function(key) {
       map$has(key)
     },
-    keys = function() {
-      map$keys()
+    keys = function(sort = FALSE) {
+      map$keys(sort = sort)
     },
-    values = function() {
-      map$as_list()
+    values = function(sort = FALSE) {
+      map$as_list(sort = sort)
     },
     clear = function() {
       map$reset()

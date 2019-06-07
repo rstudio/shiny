@@ -349,7 +349,13 @@ ReactiveValues <- R6Class(
           .hasRetrieved$keys[[key]] <<- TRUE
         }
         rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-        .dependents$set(dep.key, ctx)
+
+        if (ctx$isWeak()) {
+          .dependents$set(dep.key, fastmap::make_weakref(ctx))
+        } else {
+          .dependents$set(dep.key, ctx)
+        }
+
         ctx$onInvalidate(function() {
           rLog$dependsOnKeyRemove(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
           .dependents$remove(dep.key)
@@ -435,13 +441,20 @@ ReactiveValues <- R6Class(
         }
       }
 
-      dep.keys <- .dependents$keys()
+      dep.keys <- .dependents$keys(sort = TRUE)
       dep.keys <- grep(
         paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''), dep.keys, value = TRUE
       )
       lapply(
         .dependents$mget(dep.keys),
         function(ctx) {
+          if (fastmap::is_weakref(ctx)) {
+            ctx <- fastmap::get_weakref(ctx)
+            if (is.null(ctx)) {
+              # Can get here if weakref target was GC'd
+              return()
+            }
+          }
           ctx$invalidate()
           NULL
         }

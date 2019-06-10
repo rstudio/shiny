@@ -305,6 +305,7 @@ ReactiveValues <- R6Class(
     .label = character(0),
     .values = 'Map',
     .metadata = 'Map',
+    # A map of Dependents objects, one for each key
     .dependents = 'Map',
     # Dependents for the list of all names, including hidden
     .namesDeps = 'Dependents',
@@ -337,30 +338,13 @@ ReactiveValues <- R6Class(
       # get value right away to use for logging
       keyValue <- .values$get(key)
 
+      if (!.dependents$containsKey(key)) {
+        .dependents$set(key, Dependents$new())
+      }
+
       # Register the "downstream" reactive which is accessing this value, so
       # that we know to invalidate them when this value changes.
-      ctx <- getCurrentContext()
-      dep.key <- paste(key, ':', ctx$id, sep='')
-      if (!.dependents$containsKey(dep.key)) {
-        reactKeyId <- rLog$keyIdStr(.reactId, key)
-
-        if (!isTRUE(.hasRetrieved$keys[[key]])) {
-          rLog$defineKey(.reactId, keyValue, key, .label, ctx$.domain)
-          .hasRetrieved$keys[[key]] <<- TRUE
-        }
-        rLog$dependsOnKey(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-
-        if (ctx$isWeak()) {
-          .dependents$set(dep.key, fastmap::make_weakref(ctx))
-        } else {
-          .dependents$set(dep.key, ctx)
-        }
-
-        ctx$onInvalidate(function() {
-          rLog$dependsOnKeyRemove(ctx$.reactId, .reactId, key, ctx$id, ctx$.domain)
-          .dependents$remove(dep.key)
-        })
-      }
+      .dependents$get(key)$register()
 
       if (isFrozen(key))
         reactiveStop()
@@ -441,24 +425,10 @@ ReactiveValues <- R6Class(
         }
       }
 
-      dep.keys <- .dependents$keys(sort = TRUE)
-      dep.keys <- grep(
-        paste('^\\Q', key, ':', '\\E', '\\d+$', sep=''), dep.keys, value = TRUE
-      )
-      lapply(
-        .dependents$mget(dep.keys),
-        function(ctx) {
-          if (fastmap::is_weakref(ctx)) {
-            ctx <- fastmap::get_weakref(ctx)
-            if (is.null(ctx)) {
-              # Can get here if weakref target was GC'd
-              return()
-            }
-          }
-          ctx$invalidate()
-          NULL
-        }
-      )
+      if (.dependents$containsKey(key)) {
+        .dependents$get(key)$invalidate()
+      }
+
       invisible()
     },
 

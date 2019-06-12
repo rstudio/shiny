@@ -1185,6 +1185,80 @@ test_that("reactive domain works across async handlers", {
   testthat::expect_true(hasReactiveDomain)
 })
 
+# For #2441, #2423
+test_that("Unreachable reactives are GC'd", {
+  v <- reactiveVal(1)
+  r <- reactive({
+    v()
+    12345
+  })
+  o <- observe({
+    r()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  # Finalizer on the Observer
+  o_finalized <- FALSE
+  reg.finalizer(o, function(e) {
+    o_finalized <<- TRUE
+  })
+
+  flushReact()
+  gc()
+  expect_false(r_finalized)
+
+  rm(r) # Remove the only (strong) reference to r
+  gc()
+  expect_true(r_finalized)
+  expect_false(o_finalized)
+
+  rm(o) # Remove the only reference to o
+  gc()
+  expect_true(o_finalized)
+
+  rm(v)
+  gc()
+
+  # Same, with reactiveValues instead of reactiveVal
+  v <- reactiveValues(x = 1)
+  r <- reactive({
+    v$x
+    12345
+  })
+  o <- observe({
+    r()
+  })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
+
+  # Finalizer on the Observer
+  o_finalized <- FALSE
+  reg.finalizer(o, function(e) {
+    o_finalized <<- TRUE
+  })
+
+  flushReact()
+  gc()
+  expect_false(r_finalized)
+
+  rm(r) # Remove the only (strong) reference to r
+  gc()
+  expect_true(r_finalized)
+  expect_false(o_finalized)
+
+  rm(o) # Remove the only reference to o
+  gc()
+  expect_true(o_finalized)
+})
+
+
 
 test_that("Reactive contexts are not GC'd too early", {
   # When a ReactiveVal or ReactiveValue has an dependency arrow pointing to a
@@ -1202,6 +1276,11 @@ test_that("Reactive contexts are not GC'd too early", {
     r()
     gc()
   })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
 
   for (i in 1:3) {
     v(isolate(v()) + 1)
@@ -1209,8 +1288,11 @@ test_that("Reactive contexts are not GC'd too early", {
   }
 
   expect_identical(execCount(r), 3L)
+  expect_false(r_finalized)
   o$destroy()
   rm(v, r, o)
+  gc()
+  expect_true(r_finalized)
 
 
   # Same, but with reactiveValues
@@ -1222,6 +1304,11 @@ test_that("Reactive contexts are not GC'd too early", {
     r()
     gc()
   })
+  # Finalizer on the reactive's underlying Observable object
+  r_finalized <- FALSE
+  reg.finalizer(attr(r, "observable"), function(e) {
+    r_finalized <<- TRUE
+  })
 
   for (i in 1:3) {
     v$x <- (isolate(v$x) + 1)
@@ -1229,4 +1316,5 @@ test_that("Reactive contexts are not GC'd too early", {
   }
 
   expect_identical(execCount(r), 3L)
+  expect_false(r_finalized)
 })

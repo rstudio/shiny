@@ -1184,3 +1184,49 @@ test_that("reactive domain works across async handlers", {
 
   testthat::expect_true(hasReactiveDomain)
 })
+
+
+test_that("Reactive contexts are not GC'd too early", {
+  # When a ReactiveVal or ReactiveValue has an dependency arrow pointing to a
+  # reactive expression (Observable object), it's implemented by having a weak
+  # reference to a reactive context. We need to make sure that the reactive
+  # context is not GC'd too early. This is done by having the Observable have a
+  # strong reference to the context.
+
+  # Check reactiveVal
+  v <- reactiveVal(1)
+  r <- reactive({
+    v()
+  })
+  o <- observe({
+    r()
+    gc()
+  })
+
+  for (i in 1:3) {
+    v(isolate(v()) + 1)
+    flushReact()
+  }
+
+  expect_identical(execCount(r), 3L)
+  o$destroy()
+  rm(v, r, o)
+
+
+  # Same, but with reactiveValues
+  v <- reactiveValues(x=1)
+  r <- reactive({
+    v$x
+  })
+  o <- observe({
+    r()
+    gc()
+  })
+
+  for (i in 1:3) {
+    v$x <- (isolate(v$x) + 1)
+    flushReact()
+  }
+
+  expect_identical(execCount(r), 3L)
+})

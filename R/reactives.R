@@ -797,6 +797,7 @@ Observable <- R6Class(
     .visible = logical(0),
     .execCount = integer(0),
     .mostRecentCtxId = character(0),
+    .ctx = 'Context',
 
     initialize = function(func, label = deparse(substitute(func)),
                           domain = getDefaultReactiveDomain(),
@@ -826,6 +827,7 @@ Observable <- R6Class(
       .running <<- FALSE
       .execCount <<- 0L
       .mostRecentCtxId <<- ""
+      .ctx <<- NULL
       rLog$define(.reactId, .value, .label, type = "observable", .domain)
     },
     getValue = function() {
@@ -855,10 +857,19 @@ Observable <- R6Class(
                          prevId = .mostRecentCtxId, reactId = .reactId,
                          weak = TRUE)
       .mostRecentCtxId <<- ctx$id
+
+      # A Dependency object will have a weak reference to the context, which
+      # doesn't prevent it from being GC'd. However, as long as this
+      # Observable object is reachable and not invalidated, we need to make
+      # sure the context isn't GC'd. To do that we need a strong reference to
+      # the context.
+      .ctx <<- ctx
+
       ctx$onInvalidate(function() {
         .invalidated <<- TRUE
         .value <<- NULL # Value can be GC'd, it won't be read once invalidated
         .dependents$invalidate(log = FALSE)
+        .ctx <<- NULL   # No longer need to prevent the context from being GC'd.
       })
       .execCount <<- .execCount + 1L
 

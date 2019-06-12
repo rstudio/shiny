@@ -10,6 +10,7 @@
 #' @param placeholder A character string giving the user a hint as to what can
 #'   be entered into the control. Internet Explorer 8 and 9 do not support this
 #'   option.
+#' @param ... Can be used to set the attribute `disabled`
 #' @return A text input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -30,14 +31,25 @@
 #' }
 #' @export
 textInput <- function(inputId, label, value = "", width = NULL,
-  placeholder = NULL) {
+  placeholder = NULL, ...) {
 
   value <- restoreInput(id = inputId, default = value)
+
+  args <- list(...)
+  if (!is.null(args[["disabled"]])) {
+    if (args[["disabled"]]) {
+      disable = TRUE
+    } else {
+      disable = NULL
+    }
+  } else {
+    disable = NULL
+  }
 
   div(class = "form-group shiny-input-container",
     style = if (!is.null(width)) paste0("width: ", validateCssUnit(width), ";"),
     shinyInputLabel(inputId, label),
     tags$input(id = inputId, type="text", class="form-control", value=value,
-      placeholder = placeholder)
+      placeholder = placeholder, disabled = disable)
   )
 }

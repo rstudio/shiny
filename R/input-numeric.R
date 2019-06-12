@@ -6,6 +6,7 @@
 #' @param min Minimum allowed value
 #' @param max Maximum allowed value
 #' @param step Interval to use when stepping between min and max
+#' @param ... Can be used to set the attribute `disabled`
 #' @return A numeric input control that can be added to a UI definition.
 #'
 #' @family input elements
@@ -26,13 +27,24 @@
 #' }
 #' @export
 numericInput <- function(inputId, label, value, min = NA, max = NA, step = NA,
-  width = NULL) {
+  width = NULL, ...) {
 
   value <- restoreInput(id = inputId, default = value)
 
+  args <- list(...)
+  if (!is.null(args[["disabled"]])) {
+    if (args[["disabled"]]) {
+      disable = TRUE
+    } else {
+      disable = NULL
+    }
+  } else {
+    disable = NULL
+  }
+
   # build input tag
   inputTag <- tags$input(id = inputId, type = "number", class="form-control",
-                         value = formatNoSci(value))
+                         value = formatNoSci(value), disabled = disable)
   if (!is.na(min))
     inputTag$attribs$min = min
   if (!is.na(max))

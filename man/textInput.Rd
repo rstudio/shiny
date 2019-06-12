@@ -5,7 +5,7 @@
 \title{Create a text input control}
 \usage{
 textInput(inputId, label, value = "", width = NULL,
-  placeholder = NULL)
+  placeholder = NULL, ...)
 }
 \arguments{
 \item{inputId}{The \code{input} slot that will be used to access the value.}
@@ -20,6 +20,8 @@ see \code{\link{validateCssUnit}}.}
 \item{placeholder}{A character string giving the user a hint as to what can
 be entered into the control. Internet Explorer 8 and 9 do not support this
 option.}
+
+\item{...}{Can be used to set the attribute `disabled`}
 }
 \value{
 A text input control that can be added to a UI definition.

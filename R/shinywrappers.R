@@ -707,13 +707,19 @@ checkDT9 <- function(options) {
 
 # Deprecated functions ------------------------------------------------------
 
+#' Deprecated reactive functions
+#' @name deprecatedReactives
+#' @keywords internal
+NULL
+
 #' Plot output (deprecated)
 #'
-#' See \code{\link{renderPlot}}.
+#' \code{reactivePlot} has been replaced by \code{\link{renderPlot}}.
 #' @param func A function.
 #' @param width Width.
 #' @param height Height.
 #' @param ... Other arguments to pass on.
+#' @rdname deprecatedReactives
 #' @export
 reactivePlot <- function(func, width='auto', height='auto', ...) {
   shinyDeprecated(new="renderPlot")
@@ -722,9 +728,8 @@ reactivePlot <- function(func, width='auto', height='auto', ...) {
 
 #' Table output (deprecated)
 #'
-#' See \code{\link{renderTable}}.
-#' @param func A function.
-#' @param ... Other arguments to pass on.
+#' \code{reactiveTable} has been replaced by \code{\link{renderTable}}.
+#' @rdname deprecatedReactives
 #' @export
 reactiveTable <- function(func, ...) {
   shinyDeprecated(new="renderTable")
@@ -733,8 +738,8 @@ reactiveTable <- function(func, ...) {
 
 #' Print output (deprecated)
 #'
-#' See \code{\link{renderPrint}}.
-#' @param func A function.
+#' \code{reactivePrint} has been replaced by \code{\link{renderPrint}}.
+#' @rdname deprecatedReactives
 #' @export
 reactivePrint <- function(func) {
   shinyDeprecated(new="renderPrint")
@@ -743,8 +748,8 @@ reactivePrint <- function(func) {
 
 #' UI output (deprecated)
 #'
-#' See \code{\link{renderUI}}.
-#' @param func A function.
+#' \code{reactiveUI} has been replaced by \code{\link{renderUI}}.
+#' @rdname deprecatedReactives
 #' @export
 reactiveUI <- function(func) {
   shinyDeprecated(new="renderUI")
@@ -753,8 +758,8 @@ reactiveUI <- function(func) {
 
 #' Text output (deprecated)
 #'
-#' See \code{\link{renderText}}.
-#' @param func A function.
+#' \code{reactiveText} has been replaced by \code{\link{renderText}}.
+#' @rdname deprecatedReactives
 #' @export
 reactiveText <- function(func) {
   shinyDeprecated(new="renderText")

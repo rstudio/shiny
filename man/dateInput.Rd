@@ -102,7 +102,7 @@ ui <- fluidPage(
 
   # Disable Mondays and Tuesdays.
   dateInput("date7", "Date:", daysofweekdisabled = c(1,2)),
-  
+
   # Disable specific dates.
   dateInput("date8", "Date:", value = "2012-02-29",
             datesdisabled = c("2012-03-01", "2012-03-02"))

@@ -175,6 +175,7 @@ resourcePathHandler <- function(req) {
 #' }
 #' }
 #' @export
+#' @keywords internal
 shinyServer <- function(func) {
   .globals$server <- list(func)
   invisible(func)

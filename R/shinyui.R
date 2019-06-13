@@ -71,6 +71,7 @@ renderPage <- function(ui, connection, showcase=0, testMode=FALSE) {
 #'
 #' @param ui A user interace definition
 #' @return The user interface definition, without modifications or side effects.
+#' @keywords internal
 #' @export
 shinyUI <- function(ui) {
   .globals$ui <- list(ui)

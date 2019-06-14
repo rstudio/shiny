@@ -416,6 +416,8 @@ createRenderPrintPromiseDomain <- function(width) {
 #' @param outputArgs A list of arguments to be passed through to the implicit
 #'   call to \code{\link{textOutput}} when \code{renderText} is used in an
 #'   interactive R Markdown document.
+#' @param sep A separator passed to \code{cat} to be appended after each
+#'   element.
 #'
 #' @seealso \code{\link{renderPrint}} for capturing the print output of a
 #'   function, rather than the returned text value.
@@ -423,13 +425,13 @@ createRenderPrintPromiseDomain <- function(width) {
 #' @example res/text-example.R
 #' @export
 renderText <- function(expr, env=parent.frame(), quoted=FALSE,
-                       outputArgs=list()) {
+                       outputArgs=list(), sep=" ") {
   installExprFunction(expr, "func", env, quoted)
 
   createRenderFunction(
     func,
     function(value, session, name, ...) {
-      paste(utils::capture.output(cat(value)), collapse="\n")
+      paste(utils::capture.output(cat(value, sep=sep)), collapse="\n")
     },
     textOutput, outputArgs
   )

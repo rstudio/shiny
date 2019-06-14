@@ -5,7 +5,7 @@
 \title{Text Output}
 \usage{
 renderText(expr, env = parent.frame(), quoted = FALSE,
-  outputArgs = list(), sep)
+  outputArgs = list(), sep = " ")
 }
 \arguments{
 \item{expr}{An expression that returns an R object that can be used as an

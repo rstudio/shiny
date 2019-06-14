@@ -146,6 +146,7 @@
 #'   possible pixel dimension. See \code{\link{sizeGrowthRatio}} for more
 #'   information on the default sizing policy.
 #' @param res The resolution of the PNG, in pixels per inch.
+#' @param alt Optional parameter to pass `alt` to the img-tag.
 #' @param cache The scope of the cache, or a cache object. This can be
 #'   \code{"app"} (the default), \code{"session"}, or a cache object like
 #'   a \code{\link{diskCache}}. See the Cache Scoping section for more

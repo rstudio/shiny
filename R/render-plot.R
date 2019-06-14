@@ -30,6 +30,7 @@
 #' @param res Resolution of resulting plot, in pixels per inch. This value is
 #'   passed to \code{\link[grDevices]{png}}. Note that this affects the resolution of PNG
 #'   rendering in R; it won't change the actual ppi of the browser.
+#' @param alt Optional parameter to pass `alt` to the img-tag.
 #' @param ... Arguments to be passed through to \code{\link[grDevices]{png}}.
 #'   These can be used to set the width, height, background color, etc.
 #' @param env The environment in which to evaluate \code{expr}.

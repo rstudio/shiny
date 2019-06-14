@@ -5,8 +5,8 @@
 \title{Plot output with cached images}
 \usage{
 renderCachedPlot(expr, cacheKeyExpr, sizePolicy = sizeGrowthRatio(width =
-  400, height = 400, growthRate = 1.2), res = 72, cache = "app", ...,
-  outputArgs = list())
+  400, height = 400, growthRate = 1.2), res = 72, alt = NULL,
+  cache = "app", ..., outputArgs = list())
 }
 \arguments{
 \item{expr}{An expression that generates a plot.}
@@ -23,6 +23,8 @@ possible pixel dimension. See \code{\link{sizeGrowthRatio}} for more
 information on the default sizing policy.}
 
 \item{res}{The resolution of the PNG, in pixels per inch.}
+
+\item{alt}{Optional parameter to pass `alt` to the img-tag.}
 
 \item{cache}{The scope of the cache, or a cache object. This can be
 \code{"app"} (the default), \code{"session"}, or a cache object like

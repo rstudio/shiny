@@ -327,7 +327,7 @@ ReactiveValues <- R6Class(
       .values <<- Map$new()
       .metadata <<- Map$new()
       .dependents <<- Map$new()
-      .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE, keys = list())
+      .hasRetrieved <<- list(names = FALSE, asListAll = FALSE, asList = FALSE)
       .namesDeps <<- Dependents$new(reactId = rLog$namesIdStr(.reactId))
       .allValuesDeps <<- Dependents$new(reactId = rLog$asListAllIdStr(.reactId))
       .valuesDeps <<- Dependents$new(reactId = rLog$asListIdStr(.reactId))
@@ -339,7 +339,12 @@ ReactiveValues <- R6Class(
       keyValue <- .values$get(key)
 
       if (!.dependents$containsKey(key)) {
-        .dependents$set(key, Dependents$new())
+        # If we got here, this is the first time someone has tried to access
+        # this key.
+        rLog$defineKey(.reactId, keyValue, key, .label, getCurrentContext()$.domain)
+
+        reactKeyId <- rLog$keyIdStr(.reactId, key)
+        .dependents$set(key, Dependents$new(reactKeyId))
       }
 
       # Register the "downstream" reactive which is accessing this value, so
@@ -394,14 +399,9 @@ ReactiveValues <- R6Class(
       .values$set(key, value)
 
       # key has been depended upon
-      if (isTRUE(.hasRetrieved$keys[[key]])) {
+      if (.dependents$containsKey(key)) {
         rLog$valueChangeKey(.reactId, key, value, domain)
-        keyReactId <- rLog$keyIdStr(.reactId, key)
-        rLog$invalidateStart(keyReactId, NULL, "other", domain)
-        on.exit(
-          rLog$invalidateEnd(keyReactId, NULL, "other", domain),
-          add = TRUE
-        )
+        .dependents$get(key)$invalidate()
       }
 
       # only invalidate if there are deps
@@ -423,10 +423,6 @@ ReactiveValues <- R6Class(
           rLog$valueChangeAsList(.reactId, react_vals, domain)
           .valuesDeps$invalidate()
         }
-      }
-
-      if (.dependents$containsKey(key)) {
-        .dependents$get(key)$invalidate()
       }
 
       invisible()

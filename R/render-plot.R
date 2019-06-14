@@ -18,6 +18,8 @@
 #' @seealso For the corresponding client-side output function, and example
 #'   usage, see \code{\link{plotOutput}}. For more details on how the plots are
 #'   generated, and how to control the output, see \code{\link{plotPNG}}.
+#'   \code{\link{renderCachedPlot}} offers a way to cache generated plots to
+#'   expedite the rendering of identical plots.
 #'
 #' @param expr An expression that generates a plot.
 #' @param width,height The width/height of the rendered plot, in pixels; or

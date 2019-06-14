@@ -7,6 +7,8 @@ shiny 1.3.2.9000
 
 ### Improvements
 
+* Resolved [#413](https://github.com/rstudio/shiny/issues/413): Disabled can be set for all or individual `radioButtons`.
+
 * Resolved [#2489](https://github.com/rstudio/shiny/issues/2489): Enables to set the attribute `disabled` for `numericInput`, `textInput`, `passwordInput` and `checkboxInput`.
 
 * Resolved [#2402](https://github.com/rstudio/shiny/issues/2402): An informative warning is now thrown for mis-specified (date) strings in `dateInput()`, `updateDateInput()`, `dateRangeInput()`, and `updateDateRangeInput()`. ([#2403](https://github.com/rstudio/shiny/pull/2403))

@@ -59,13 +59,26 @@ normalizeChoicesArgs <- function(choices, choiceNames, choiceValues,
 # 'radio')
 generateOptions <- function(inputId, selected, inline, type = 'checkbox',
                             choiceNames, choiceValues,
-                            session = getDefaultReactiveDomain()) {
+                            session = getDefaultReactiveDomain(), ...) {
+
+  args <- list(...)
+  if (!is.null(args[["disabled"]])) {
+    disable <- args[["disabled"]]
+  } else {
+    disable = rep(F, length(choiceValues))
+  }
+
   # generate a list of <input type=? [checked] />
   options <- mapply(
-    choiceValues, choiceNames,
-    FUN = function(value, name) {
+    choiceValues, choiceNames, disable,
+    FUN = function(value, name, dis) {
+      disc <- switch (as.character(dis),
+                      "TRUE" = TRUE,
+                      "FALSE" = NULL,
+                      NULL)
+
       inputTag <- tags$input(
-        type = type, name = inputId, value = value
+        type = type, name = inputId, value = value, disabled = disc
       )
       if (value %in% selected)
         inputTag$attribs$checked <- "checked"

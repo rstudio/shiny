@@ -28,10 +28,8 @@ see \code{\link{validateCssUnit}}.}
 such as \code{\link{fluidPageLayout}}.}
 
 \item{rows}{The value of the visible character rows of the input, e.g.
-\code{6}. This argument will only take effect if there is not a CSS
-\code{height} rule defined for this element; such a rule could come from
-the \code{height} argument of this function or from a containing page
-layout such as \code{\link{fluidPageLayout}}.}
+\code{6}. If the \code{height} argument is specified, \code{height} will
+take precedence in the browser's rendering.}
 
 \item{placeholder}{A character string giving the user a hint as to what can
 be entered into the control. Internet Explorer 8 and 9 do not support this

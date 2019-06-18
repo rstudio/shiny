@@ -11,10 +11,8 @@
 #'   \code{width} argument of this function or from a containing page layout
 #'   such as \code{\link{fluidPageLayout}}.
 #' @param rows The value of the visible character rows of the input, e.g.
-#'   \code{6}. This argument will only take effect if there is not a CSS
-#'   \code{height} rule defined for this element; such a rule could come from
-#'   the \code{height} argument of this function or from a containing page
-#'   layout such as \code{\link{fluidPageLayout}}.
+#'   \code{6}. If the \code{height} argument is specified, \code{height} will
+#'   take precedence in the browser's rendering.
 #' @param resize Which directions the textarea box can be resized. Can be one of
 #'   \code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}.
 #'   The default, \code{NULL}, will use the client browser's default setting for

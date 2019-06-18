@@ -28,12 +28,12 @@ updateVarSelectizeInput(session, inputId, label = NULL, data = NULL,
 \item{label}{The label to set for the input object.}
 
 \item{choices}{List of values to select from. If elements of the list are
-named, then that name rather than the value is displayed to the user.
-This can also be a named list whose elements are (either named or
-unnamed) lists or vectors. If this is the case, the outermost names
-will be used as the "optgroup" label for the elements in the respective
-sublist. This allows you to group and label similar choices. See the
-example section for a small demo of this feature.}
+named, then that name -- rather than the value -- is displayed to the user.
+It's also possible to group related inputs by providing a named list whose
+elements are (either named or unnamed) lists or vectors. In this case, the
+outermost names will be used as the group labels (leveraging the
+\code{<optgroup>} HTML tag) for the elements in the respective sublist. See
+the example section for a small demo of this feature.}
 
 \item{selected}{The initially selected value (or multiple values if
 \code{multiple = TRUE}). If not specified then defaults to the first value

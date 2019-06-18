@@ -22,12 +22,16 @@ see \code{\link{validateCssUnit}}.}
 \code{'100\%'}; see \code{\link{validateCssUnit}}.}
 
 \item{cols}{Value of the visible character columns of the input, e.g.
-\code{80}. If used with \code{width}, \code{width} will take precedence in
-the browser's rendering.}
+\code{80}. This argument will only take effect if there is not a CSS
+\code{width} rule defined for this element; such a rule could come from the
+\code{width} argument of this function or from a containing page layout
+such as \code{\link{fluidPageLayout}}.}
 
 \item{rows}{The value of the visible character rows of the input, e.g.
-\code{6}. If used with \code{height}, \code{height} will take precedence in
-the browser's rendering.}
+\code{6}. This argument will only take effect if there is not a CSS
+\code{height} rule defined for this element; such a rule could come from
+the \code{height} argument of this function or from a containing page
+layout such as \code{\link{fluidPageLayout}}.}
 
 \item{placeholder}{A character string giving the user a hint as to what can
 be entered into the control. Internet Explorer 8 and 9 do not support this

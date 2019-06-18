@@ -6,11 +6,15 @@
 #' @param height The height of the input, e.g. \code{'400px'}, or
 #'   \code{'100\%'}; see \code{\link{validateCssUnit}}.
 #' @param cols Value of the visible character columns of the input, e.g.
-#'   \code{80}. If used with \code{width}, \code{width} will take precedence in
-#'   the browser's rendering.
+#'   \code{80}. This argument will only take effect if there is not a CSS
+#'   \code{width} rule defined for this element; such a rule could come from the
+#'   \code{width} argument of this function or from a containing page layout
+#'   such as \code{\link{fluidPageLayout}}.
 #' @param rows The value of the visible character rows of the input, e.g.
-#'   \code{6}. If used with \code{height}, \code{height} will take precedence in
-#'   the browser's rendering.
+#'   \code{6}. This argument will only take effect if there is not a CSS
+#'   \code{height} rule defined for this element; such a rule could come from
+#'   the \code{height} argument of this function or from a containing page
+#'   layout such as \code{\link{fluidPageLayout}}.
 #' @param resize Which directions the textarea box can be resized. Can be one of
 #'   \code{"both"}, \code{"none"}, \code{"vertical"}, and \code{"horizontal"}.
 #'   The default, \code{NULL}, will use the client browser's default setting for

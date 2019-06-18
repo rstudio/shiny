@@ -5,7 +5,10 @@ r:
   - devel
 sudo: false
 cache: packages
-
+after_script:
+  - git reset --hard && git clean -ffdx
+  - Rscript -e "install.packages(c('devtools', 'roxygen2'))" || travis_terminate 1
+  - ./tools/checkDocsCurrent.sh || travis_terminate 1
 notifications:
   email:
     on_success: change

@@ -63,16 +63,16 @@ The date \code{format} string specifies how the date will be displayed in
 the browser. It allows the following values:
 
 \itemize{
-  \item \code{yy} Year without century (12)
-  \item \code{yyyy} Year with century (2012)
-  \item \code{mm} Month number, with leading zero (01-12)
-  \item \code{m} Month number, without leading zero (1-12)
-  \item \code{M} Abbreviated month name
-  \item \code{MM} Full month name
-  \item \code{dd} Day of month with leading zero
-  \item \code{d} Day of month without leading zero
-  \item \code{D} Abbreviated weekday name
-  \item \code{DD} Full weekday name
+\item \code{yy} Year without century (12)
+\item \code{yyyy} Year with century (2012)
+\item \code{mm} Month number, with leading zero (01-12)
+\item \code{m} Month number, without leading zero (1-12)
+\item \code{M} Abbreviated month name
+\item \code{MM} Full month name
+\item \code{dd} Day of month with leading zero
+\item \code{d} Day of month without leading zero
+\item \code{D} Abbreviated weekday name
+\item \code{DD} Full weekday name
 }
 }
 \examples{

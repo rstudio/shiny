@@ -16,12 +16,12 @@ UI object.}
 
 \item{where}{Where your UI object should go relative to the selector:
 \describe{
-  \item{\code{beforeBegin}}{Before the selector element itself}
-  \item{\code{afterBegin}}{Just inside the selector element, before its
-  first child}
-  \item{\code{beforeEnd}}{Just inside the selector element, after its
-  last child (default)}
-  \item{\code{afterEnd}}{After the selector element itself}
+\item{\code{beforeBegin}}{Before the selector element itself}
+\item{\code{afterBegin}}{Just inside the selector element, before its
+first child}
+\item{\code{beforeEnd}}{Just inside the selector element, after its
+last child (default)}
+\item{\code{afterEnd}}{After the selector element itself}
 }
 Adapted from
 \href{https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML}{here}.}

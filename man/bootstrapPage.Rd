@@ -36,7 +36,7 @@ and know how to lay out pages in Bootstrap. Most applications should use
 }
 \note{
 The \code{basicPage} function is deprecated, you should use the
-  \code{\link{fluidPage}} function instead.
+\code{\link{fluidPage}} function instead.
 }
 \seealso{
 \code{\link{fluidPage}}, \code{\link{fixedPage}}

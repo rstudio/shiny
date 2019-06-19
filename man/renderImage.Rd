@@ -113,5 +113,5 @@ shinyApp(ui, server)
 }
 \seealso{
 For more details on how the images are generated, and how to control
-  the output, see \code{\link{plotPNG}}.
+the output, see \code{\link{plotPNG}}.
 }

@@ -50,14 +50,14 @@ from the column names of a data frame.
 \details{
 The resulting server \code{input} value will be returned as:
 \itemize{
-  \item a symbol if \code{multiple = FALSE}.  The \code{input} value should be
-        used with rlang's \code{\link[rlang]{!!}}. For example,
-        \code{ggplot2::aes(!!input$variable)}.
-  \item a list of symbols if \code{multiple = TRUE}. The \code{input} value
-        should be used with rlang's \code{\link[rlang]{!!!}} to expand
-        the symbol list as individual arguments. For example,
-        \code{dplyr::select(mtcars, !!!input$variabls)} which is
-        equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.
+\item a symbol if \code{multiple = FALSE}.  The \code{input} value should be
+used with rlang's \code{\link[rlang]{!!}}. For example,
+\code{ggplot2::aes(!!input$variable)}.
+\item a list of symbols if \code{multiple = TRUE}. The \code{input} value
+should be used with rlang's \code{\link[rlang]{!!!}} to expand
+the symbol list as individual arguments. For example,
+\code{dplyr::select(mtcars, !!!input$variabls)} which is
+equivalent to \code{dplyr::select(mtcars, !!input$variabls[[1]], !!input$variabls[[2]], ..., !!input$variabls[[length(input$variabls)]])}.
 }
 
 By default, \code{varSelectInput()} and \code{selectizeInput()} use the
@@ -68,13 +68,13 @@ select input element. To use the standard HTML select input element, use
 }
 \note{
 The variable selectize input created from \code{varSelectizeInput()} allows
-  deletion of the selected option even in a single select input, which will
-  return an empty string as its value. This is the default behavior of
-  \pkg{selectize.js}. However, the selectize input created from
-  \code{selectInput(..., selectize = TRUE)} will ignore the empty string
-  value when it is a single choice input and the empty string is not in the
-  \code{choices} argument. This is to keep compatibility with
-  \code{selectInput(..., selectize = FALSE)}.
+deletion of the selected option even in a single select input, which will
+return an empty string as its value. This is the default behavior of
+\pkg{selectize.js}. However, the selectize input created from
+\code{selectInput(..., selectize = TRUE)} will ignore the empty string
+value when it is a single choice input and the empty string is not in the
+\code{choices} argument. This is to keep compatibility with
+\code{selectInput(..., selectize = FALSE)}.
 }
 \examples{
 

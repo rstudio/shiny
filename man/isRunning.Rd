@@ -8,7 +8,7 @@ isRunning()
 }
 \value{
 \code{TRUE} if a Shiny application is currently running. Otherwise,
-  \code{FALSE}.
+\code{FALSE}.
 }
 \description{
 This function tests whether a Shiny application is currently running.

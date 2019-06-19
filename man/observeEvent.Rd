@@ -87,8 +87,8 @@ that is stored in a variable; to do so, it must be quoted with \code{quote()}.}
 }
 \value{
 \code{observeEvent} returns an observer reference class object (see
-  \code{\link{observe}}). \code{eventReactive} returns a reactive expression
-  object (see \code{\link{reactive}}).
+\code{\link{observe}}). \code{eventReactive} returns a reactive expression
+object (see \code{\link{reactive}}).
 }
 \description{
 Respond to "event-like" reactive inputs, values, and expressions.
@@ -157,30 +157,30 @@ purposes they are independent from one another. Here's the result of combining
 these:
 
 \describe{
-  \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = FALSE}}{
-     This is the default. This combination means that \code{handlerExpr}/
-     \code{valueExpr} will run every time that \code{eventExpr} is not
-     \code{NULL}. If, at the time of the creation of the
-     \code{observeEvent}/\code{eventReactive}, \code{eventExpr} happens
-     to \emph{not} be \code{NULL}, then the code runs.
-  }
-  \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = FALSE}}{
-     This combination means that \code{handlerExpr}/\code{valueExpr} will
-     run every time no matter what.
-  }
-  \item{\code{ignoreNULL = FALSE} and \code{ignoreInit = TRUE}}{
-     This combination means that \code{handlerExpr}/\code{valueExpr} will
-     \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
-     created (because \code{ignoreInit = TRUE}), but it will run every
-     other time.
-  }
-  \item{\code{ignoreNULL = TRUE} and \code{ignoreInit = TRUE}}{
-     This combination means that \code{handlerExpr}/\code{valueExpr} will
-     \emph{not} run when the \code{observeEvent}/\code{eventReactive} is
-     created (because  \code{ignoreInit = TRUE}). After that,
-     \code{handlerExpr}/\code{valueExpr} will run every time that
-     \code{eventExpr} is not \code{NULL}.
-  }
+\item{\code{ignoreNULL = TRUE} and \code{ignoreInit = FALSE}}{
+This is the default. This combination means that \code{handlerExpr}/
+\code{valueExpr} will run every time that \code{eventExpr} is not
+\code{NULL}. If, at the time of the creation of the
+\code{observeEvent}/\code{eventReactive}, \code{eventExpr} happens
+to \emph{not} be \code{NULL}, then the code runs.
+}
+\item{\code{ignoreNULL = FALSE} and \code{ignoreInit = FALSE}}{
+This combination means that \code{handlerExpr}/\code{valueExpr} will
+run every time no matter what.
+}
+\item{\code{ignoreNULL = FALSE} and \code{ignoreInit = TRUE}}{
+This combination means that \code{handlerExpr}/\code{valueExpr} will
+\emph{not} run when the \code{observeEvent}/\code{eventReactive} is
+created (because \code{ignoreInit = TRUE}), but it will run every
+other time.
+}
+\item{\code{ignoreNULL = TRUE} and \code{ignoreInit = TRUE}}{
+This combination means that \code{handlerExpr}/\code{valueExpr} will
+\emph{not} run when the \code{observeEvent}/\code{eventReactive} is
+created (because  \code{ignoreInit = TRUE}). After that,
+\code{handlerExpr}/\code{valueExpr} will run every time that
+\code{eventExpr} is not \code{NULL}.
+}
 }
 }
 

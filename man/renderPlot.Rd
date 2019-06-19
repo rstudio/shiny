@@ -53,18 +53,18 @@ the CSS class name \code{shiny-plot-output}.
 \section{Interactive plots}{
 
 
-  With ggplot2 graphics, the code in \code{renderPlot} should return a ggplot
-  object; if instead the code prints the ggplot2 object with something like
-  \code{print(p)}, then the coordinates for interactive graphics will not be
-  properly scaled to the data space.
+With ggplot2 graphics, the code in \code{renderPlot} should return a ggplot
+object; if instead the code prints the ggplot2 object with something like
+\code{print(p)}, then the coordinates for interactive graphics will not be
+properly scaled to the data space.
 
-  See \code{\link{plotOutput}} for more information about interactive plots.
+See \code{\link{plotOutput}} for more information about interactive plots.
 }
 
 \seealso{
 For the corresponding client-side output function, and example
-  usage, see \code{\link{plotOutput}}. For more details on how the plots are
-  generated, and how to control the output, see \code{\link{plotPNG}}.
-  \code{\link{renderCachedPlot}} offers a way to cache generated plots to
-  expedite the rendering of identical plots.
+usage, see \code{\link{plotOutput}}. For more details on how the plots are
+generated, and how to control the output, see \code{\link{plotPNG}}.
+\code{\link{renderCachedPlot}} offers a way to cache generated plots to
+expedite the rendering of identical plots.
 }

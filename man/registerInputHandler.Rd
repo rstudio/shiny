@@ -14,12 +14,12 @@ single-element character vector.}
 parse the data delivered from the client before it is available in the
 \code{input} variable. The function will be called with the following three
 parameters:
- \enumerate{
-   \item{The value of this input as provided by the client, deserialized
-   using jsonlite.}
-   \item{The \code{shinysession} in which the input exists.}
-   \item{The name of the input.}
- }}
+\enumerate{
+\item{The value of this input as provided by the client, deserialized
+using jsonlite.}
+\item{The \code{shinysession} in which the input exists.}
+\item{The name of the input.}
+}}
 
 \item{force}{If \code{TRUE}, will overwrite any existing handler without
 warning. If \code{FALSE}, will throw an error if this class already has

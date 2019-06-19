@@ -54,12 +54,12 @@ elements in the list.
 }
 \note{
 This function only provides the server-side version of DataTables
-  (using R to process the data object on the server side). There is a
-  separate package \pkg{DT} (\url{https://github.com/rstudio/DT}) that allows
-  you to create both server-side and client-side DataTables, and supports
-  additional DataTables features. Consider using \code{DT::renderDataTable()}
-  and \code{DT::dataTableOutput()} (see
-  \url{http://rstudio.github.io/DT/shiny.html} for more information).
+(using R to process the data object on the server side). There is a
+separate package \pkg{DT} (\url{https://github.com/rstudio/DT}) that allows
+you to create both server-side and client-side DataTables, and supports
+additional DataTables features. Consider using \code{DT::renderDataTable()}
+and \code{DT::dataTableOutput()} (see
+\url{http://rstudio.github.io/DT/shiny.html} for more information).
 }
 \examples{
 ## Only run this example in interactive R sessions

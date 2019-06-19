@@ -61,24 +61,24 @@ CSS), you can use \code{style="old"} each time you call
 function.
 
 \strong{Methods}
-  \describe{
-    \item{\code{initialize(session, min = 0, max = 1)}}{
-      Creates a new progress panel (but does not display it).
-    }
-    \item{\code{set(value = NULL, message = NULL, detail = NULL)}}{
-      Updates the progress panel. When called the first time, the
-      progress panel is displayed.
-    }
-    \item{\code{inc(amount = 0.1, message = NULL, detail = NULL)}}{
-      Like \code{set}, this updates the progress panel. The difference is
-      that \code{inc} increases the progress bar by \code{amount}, instead
-      of setting it to a specific value.
-    }
-    \item{\code{close()}}{
-      Removes the progress panel. Future calls to \code{set} and
-      \code{close} will be ignored.
-    }
-  }
+\describe{
+\item{\code{initialize(session, min = 0, max = 1)}}{
+Creates a new progress panel (but does not display it).
+}
+\item{\code{set(value = NULL, message = NULL, detail = NULL)}}{
+Updates the progress panel. When called the first time, the
+progress panel is displayed.
+}
+\item{\code{inc(amount = 0.1, message = NULL, detail = NULL)}}{
+Like \code{set}, this updates the progress panel. The difference is
+that \code{inc} increases the progress bar by \code{amount}, instead
+of setting it to a specific value.
+}
+\item{\code{close()}}{
+Removes the progress panel. Future calls to \code{set} and
+\code{close} will be ignored.
+}
+}
 }
 \examples{
 ## Only run examples in interactive R sessions

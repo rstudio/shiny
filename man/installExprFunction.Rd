@@ -39,5 +39,5 @@ function named \code{func} in the current environment.
 }
 \seealso{
 Wraps \code{\link{exprToFunction}}; see that method's documentation
-  for more documentation and examples.
+for more documentation and examples.
 }

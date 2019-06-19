@@ -34,10 +34,10 @@ which navigate to a set of tabPanels displayed to the right.
 }
 \details{
 You can include headers within the \code{navlistPanel} by including
-  plain text elements in the list. Versions of Shiny before 0.11 supported
-  separators with "------", but as of 0.11, separators were no longer
-  supported. This is because version 0.11 switched to Bootstrap 3, which
-  doesn't support separators.
+plain text elements in the list. Versions of Shiny before 0.11 supported
+separators with "------", but as of 0.11, separators were no longer
+supported. This is because version 0.11 switched to Bootstrap 3, which
+doesn't support separators.
 }
 \examples{
 fluidPage(
@@ -54,5 +54,5 @@ fluidPage(
 }
 \seealso{
 \code{\link{tabPanel}}, \code{\link{updateNavlistPanel}},
-   \code{\link{insertTab}}, \code{\link{showTab}}
+\code{\link{insertTab}}, \code{\link{showTab}}
 }

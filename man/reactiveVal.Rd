@@ -15,7 +15,7 @@ created.}
 }
 \value{
 A function. Call the function with no arguments to (reactively) read
-  the value; call the function with a single argument to set the value.
+the value; call the function with a single argument to set the value.
 }
 \description{
 The \code{reactiveVal} function is used to construct a "reactive value"

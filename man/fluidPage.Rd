@@ -35,14 +35,14 @@ components in realtime to fill all available browser width.
 }
 \details{
 To create a fluid page use the \code{fluidPage} function and include
-  instances of \code{fluidRow} and \code{\link{column}} within it. As an
-  alternative to low-level row and column functions you can also use
-  higher-level layout functions like \code{\link{sidebarLayout}}.
+instances of \code{fluidRow} and \code{\link{column}} within it. As an
+alternative to low-level row and column functions you can also use
+higher-level layout functions like \code{\link{sidebarLayout}}.
 }
 \note{
 See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
-  Shiny-Application-Layout-Guide} for additional details on laying out fluid
-  pages.
+Shiny-Application-Layout-Guide} for additional details on laying out fluid
+pages.
 }
 \examples{
 ## Only run examples in interactive R sessions

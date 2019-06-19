@@ -66,13 +66,13 @@ In selectize mode, if the first element in \code{choices} has a value of
 }
 \note{
 The selectize input created from \code{selectizeInput()} allows
-  deletion of the selected option even in a single select input, which will
-  return an empty string as its value. This is the default behavior of
-  \pkg{selectize.js}. However, the selectize input created from
-  \code{selectInput(..., selectize = TRUE)} will ignore the empty string
-  value when it is a single choice input and the empty string is not in the
-  \code{choices} argument. This is to keep compatibility with
-  \code{selectInput(..., selectize = FALSE)}.
+deletion of the selected option even in a single select input, which will
+return an empty string as its value. This is the default behavior of
+\pkg{selectize.js}. However, the selectize input created from
+\code{selectInput(..., selectize = TRUE)} will ignore the empty string
+value when it is a single choice input and the empty string is not in the
+\code{choices} argument. This is to keep compatibility with
+\code{selectInput(..., selectize = FALSE)}.
 }
 \examples{
 ## Only run examples in interactive R sessions

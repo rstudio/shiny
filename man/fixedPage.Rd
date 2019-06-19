@@ -35,15 +35,15 @@ displays respectively.
 }
 \details{
 To create a fixed page use the \code{fixedPage} function and include
-  instances of \code{fixedRow} and \code{\link{column}} within it. Note that
-  unlike \code{\link{fluidPage}}, fixed pages cannot make use of higher-level
-  layout functions like \code{sidebarLayout}, rather, all layout must be done
-  with \code{fixedRow} and \code{column}.
+instances of \code{fixedRow} and \code{\link{column}} within it. Note that
+unlike \code{\link{fluidPage}}, fixed pages cannot make use of higher-level
+layout functions like \code{sidebarLayout}, rather, all layout must be done
+with \code{fixedRow} and \code{column}.
 }
 \note{
 See the \href{http://shiny.rstudio.com/articles/layout-guide.html}{
-  Shiny Application Layout Guide} for additional details on laying out fixed
-  pages.
+Shiny Application Layout Guide} for additional details on laying out fixed
+pages.
 }
 \examples{
 ## Only run examples in interactive R sessions

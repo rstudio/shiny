@@ -16,7 +16,7 @@ previous column.}
 }
 \value{
 A column that can be included within a
-  \code{\link{fluidRow}} or \code{\link{fixedRow}}.
+\code{\link{fluidRow}} or \code{\link{fixedRow}}.
 }
 \description{
 Create a column for use within a  \code{\link{fluidRow}} or

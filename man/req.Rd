@@ -73,14 +73,14 @@ To be precise, \code{req} considers a value truthy \emph{unless} it is one
 of:
 
 \itemize{
-  \item{\code{FALSE}}
-  \item{\code{NULL}}
-  \item{\code{""}}
-  \item{An empty atomic vector}
-  \item{An atomic vector that contains only missing values}
-  \item{A logical vector that contains all \code{FALSE} or missing values}
-  \item{An object of class \code{"try-error"}}
-  \item{A value that represents an unclicked \code{\link{actionButton}}}
+\item{\code{FALSE}}
+\item{\code{NULL}}
+\item{\code{""}}
+\item{An empty atomic vector}
+\item{An atomic vector that contains only missing values}
+\item{A logical vector that contains all \code{FALSE} or missing values}
+\item{An object of class \code{"try-error"}}
+\item{A value that represents an unclicked \code{\link{actionButton}}}
 }
 
 Note in particular that the value \code{0} is considered truthy, even though

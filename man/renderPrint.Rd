@@ -106,5 +106,5 @@ vecFun()
 }
 \seealso{
 \code{\link{renderText}} for displaying the value returned from a
-  function, instead of the printed output.
+function, instead of the printed output.
 }

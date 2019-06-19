@@ -102,5 +102,5 @@ vecFun()
 }
 \seealso{
 \code{\link{renderPrint}} for capturing the print output of a
-  function, rather than the returned text value.
+function, rather than the returned text value.
 }

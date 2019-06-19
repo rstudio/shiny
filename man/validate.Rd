@@ -48,14 +48,14 @@ considered a failure, then the string will be used as the error message. The
 the following:
 
 \itemize{
-  \item{\code{FALSE}}
-  \item{\code{NULL}}
-  \item{\code{""}}
-  \item{An empty atomic vector}
-  \item{An atomic vector that contains only missing values}
-  \item{A logical vector that contains all \code{FALSE} or missing values}
-  \item{An object of class \code{"try-error"}}
-  \item{A value that represents an unclicked \code{\link{actionButton}}}
+\item{\code{FALSE}}
+\item{\code{NULL}}
+\item{\code{""}}
+\item{An empty atomic vector}
+\item{An atomic vector that contains only missing values}
+\item{A logical vector that contains all \code{FALSE} or missing values}
+\item{An object of class \code{"try-error"}}
+\item{A value that represents an unclicked \code{\link{actionButton}}}
 }
 
 If any of these values happen to be valid, you can explicitly turn them to

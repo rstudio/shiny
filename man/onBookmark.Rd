@@ -25,19 +25,19 @@ These functions are for registering callbacks on Shiny session events. They
 should be called within an application's server function.
 
 \itemize{
-  \item \code{onBookmark} registers a function that will be called just
-    before Shiny bookmarks state.
-  \item \code{onBookmarked} registers a function that will be called just
-    after Shiny bookmarks state.
-  \item \code{onRestore} registers a function that will be called when a
-    session is restored, after the server function executes, but before all
-    other reactives, observers and render functions are run.
-  \item \code{onRestored} registers a function that will be called after a
-    session is restored. This is similar to \code{onRestore}, but it will be
-    called after all reactives, observers, and render functions run, and
-    after results are sent to the client browser. \code{onRestored}
-    callbacks can be useful for sending update messages to the client
-    browser.
+\item \code{onBookmark} registers a function that will be called just
+before Shiny bookmarks state.
+\item \code{onBookmarked} registers a function that will be called just
+after Shiny bookmarks state.
+\item \code{onRestore} registers a function that will be called when a
+session is restored, after the server function executes, but before all
+other reactives, observers and render functions are run.
+\item \code{onRestored} registers a function that will be called after a
+session is restored. This is similar to \code{onRestore}, but it will be
+called after all reactives, observers, and render functions run, and
+after results are sent to the client browser. \code{onRestored}
+callbacks can be useful for sending update messages to the client
+browser.
 }
 }
 \details{
@@ -71,10 +71,10 @@ then Shiny will by default display a modal dialog with the bookmark URL.
 \section{Modules}{
 
 
-  These callbacks may also be used in Shiny modules. When used this way, the
-  inputs and values will automatically be namespaced for the module, and the
-  callback functions registered for the module will only be able to see the
-  module's inputs and values.
+These callbacks may also be used in Shiny modules. When used this way, the
+inputs and values will automatically be namespaced for the module, and the
+callback functions registered for the module will only be able to see the
+module's inputs and values.
 }
 
 \examples{

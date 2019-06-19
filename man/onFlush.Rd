@@ -36,5 +36,5 @@ arguments to cancel the registration.
 }
 \seealso{
 \code{\link{onStop}()} for registering callbacks that will be
-  invoked when the application exits, or when a session ends.
+invoked when the application exits, or when a session ends.
 }

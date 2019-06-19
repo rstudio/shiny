@@ -25,7 +25,7 @@ Details.}
 }
 \value{
 A reactive expression that returns the result of \code{valueFunc},
-  and invalidates when \code{checkFunc} changes.
+and invalidates when \code{checkFunc} changes.
 }
 \description{
 Used to create a reactive data source, which works by periodically polling a

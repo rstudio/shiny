@@ -38,20 +38,20 @@ browsers can be assumed.
 }
 \details{
 If you try to use \code{fillRow} and \code{fillCol} inside of other
-  Shiny containers, such as \code{\link{sidebarLayout}},
-  \code{\link{navbarPage}}, or even \code{tags$div}, you will probably find
-  that they will not appear. This is due to \code{fillRow} and \code{fillCol}
-  defaulting to \code{height="100\%"}, which will only work inside of
-  containers that have determined their own size (rather than shrinking to
-  the size of their contents, as is usually the case in HTML).
+Shiny containers, such as \code{\link{sidebarLayout}},
+\code{\link{navbarPage}}, or even \code{tags$div}, you will probably find
+that they will not appear. This is due to \code{fillRow} and \code{fillCol}
+defaulting to \code{height="100\%"}, which will only work inside of
+containers that have determined their own size (rather than shrinking to
+the size of their contents, as is usually the case in HTML).
 
-  To avoid this problem, you have two options:
-  \itemize{
-    \item only use \code{fillRow}/\code{fillCol} inside of \code{fillPage},
-      \code{fillRow}, or \code{fillCol}
-    \item provide an explicit \code{height} argument to
-      \code{fillRow}/\code{fillCol}
-  }
+To avoid this problem, you have two options:
+\itemize{
+\item only use \code{fillRow}/\code{fillCol} inside of \code{fillPage},
+\code{fillRow}, or \code{fillCol}
+\item provide an explicit \code{height} argument to
+\code{fillRow}/\code{fillCol}
+}
 }
 \examples{
 # Only run this example in interactive R sessions.

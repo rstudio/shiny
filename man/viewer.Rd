@@ -27,7 +27,7 @@ size. If \code{"maximize"}, use the maximum available vertical space.}
 }
 \value{
 A function that takes a single \code{url} parameter, suitable for
-  passing as the \code{viewer} argument of \code{\link{runGadget}}.
+passing as the \code{viewer} argument of \code{\link{runGadget}}.
 }
 \description{
 Use these functions to control where the gadget is displayed in RStudio (or

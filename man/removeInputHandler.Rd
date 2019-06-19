@@ -11,7 +11,7 @@ removeInputHandler(type)
 }
 \value{
 The handler previously associated with this \code{type}, if one
-  existed. Otherwise, \code{NULL}.
+existed. Otherwise, \code{NULL}.
 }
 \description{
 Removes an Input Handler. Rather than using the previously specified handler

@@ -19,7 +19,7 @@ cases.}
 }
 \value{
 A single HTML dependency object that has an \code{href}-named element
-  in its \code{src}.
+in its \code{src}.
 }
 \description{
 Ensure that a file-based HTML dependency (from the htmltools package) can be

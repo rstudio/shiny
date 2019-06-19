@@ -73,7 +73,7 @@ file and either ui.R or www/index.html)}
 }
 \value{
 An object that represents the app. Printing the object or passing it
-  to \code{\link{runApp}} will run the app.
+to \code{\link{runApp}} will run the app.
 }
 \description{
 These functions create Shiny app objects from either an explicit UI/server

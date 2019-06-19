@@ -79,5 +79,5 @@ onStop(function() {
 }
 \seealso{
 \code{\link{onSessionEnded}()} for the same functionality, but at
-  the session level only.
+the session level only.
 }
